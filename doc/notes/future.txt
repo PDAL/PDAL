@@ -1,0 +1,7 @@
+===========================
+libPC Project Notes: Future
+===========================
+
+This Note is just a dumping ground for things that have yet to be discussed.
+
+* SSE?

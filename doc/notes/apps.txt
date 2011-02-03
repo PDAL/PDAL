@@ -1,0 +1,58 @@
+=========================
+libPC Project Notes: Apps
+=========================
+
+libPC will contain a number of command line applications that are built on
+top of the libPC libraries.  This Note lists those apps.
+
+This should be fleshed out to list the (major) options for each of the apps.
+
+
+pc2pc
+=====
+
+Converts from one file format to another, optionally with some (relatively
+simple) filtering or processing.
+
+
+pcinfo
+======
+
+Dumps information about a point cloud file, such as:
+
+* basic properties (extents, number of points, point format)
+
+* coordinate reference system
+
+* additional metadata
+
+* summary statistics about the points
+
+The dump should go the stdout, but options should be provided to dump to
+XML or similar, where it makes sense to do so.
+
+
+pcview
+======
+
+A simple 3D viewer for point clouds.  Strictly speaking, not a command-line
+app.  Will be a Windows-only thing (WPF + DirectX), unless someone else
+wants to do something too.
+
+
+pcindex
+=======
+
+Creates a spatial index for a point cloud.  (Could be moved into pc2pc.)
+
+
+pcmosaic
+========
+
+Merges multiple files together.  (Could be moved into pc2pc.)
+
+
+pcdemosaic
+==========
+
+Chops one file up into multiple files.  (Could be moved into pc2pc.)

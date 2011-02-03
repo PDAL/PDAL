@@ -1,0 +1,157 @@
+=========================
+libPC Project Notes: Misc
+=========================
+
+This document contains several issues worth documenting but are not, or are
+not yet, substantive enough to merit their own separate files.
+
+
+Spelling
+========
+
+The proper spelling of the project name is libPC (uppercased P and C, 
+like libLAS is spelled).
+
+
+Management
+==========
+
+We strive for consensus, but at the end of the day Howard is the benevolent
+dictator.
+
+
+libPC Package Contents
+======================
+
+libPC will, at some level, consist of the following parts:
+
+* a set of C++ libraries
+
+* a set of command line apps
+
+* a set of tests
+
+* a set of SWIG bindings
+
+* documentation
+
+
+Project Dependencies - 3rd Party Libs
+=====================================
+
+libPC will use these libraries:
+
+* GDAL - for spatial reference support (and rasterization)
+
+* Boost - for C++ library needs, such as streams or parsers
+
+* laszip - for compressed LAS support
+
+* MrSID - for LizardTech's MG4 lidar format
+
+* Oracle - ...?
+
+* *others?*
+
+Some of these libraries may be required (such as Boost); some may be 
+configurable at build time, such as laszip.
+
+
+Project Dependencies - Builds/Infrastructure
+============================================
+
+To develop and build libPC, we'll be using these tools:
+
+* Sphinx and rst2pdf - for docs
+
+* CMake - for generating makefiles
+
+* Python - for miscellaneous scripting needs
+
+* *others?*
+
+
+Testing
+=======
+
+A unit test framework will be provided, with the goal that all (nontrivial)
+classes will have unit tests.  At the very least, each new class should have
+a corresponding unit test file stubbed in, even if there aren't any tests
+yet.
+
+A test harness will also be provided to exercise each of the command line
+apps.
+
+A buildbot will eventually be set up to prevent builds from breaking and to
+keep the unit tests passing.
+
+*Performance testing is harder, but we should address this eventually too.
+mpg would like to see us put together a set of benchmark files, too.*
+
+
+Platforms
+=========
+
+We will support these platforms initially, corresponding to what the
+developers are using regularly:
+
+* Windows - VS2010 (32- and 64-bit)
+
+* Linux - *gcc x.y?*
+
+* Mac - *stuff*
+
+By virtue of CMake, other platforms may be supported such as VS 2008 or 
+Solaris, but we aren't targeting those specifically.
+
+Note we will not be supporting big-endian (BE) platforms at this time.  We
+recognize it would be good to do so, since endianness ports always seem to
+shake out twiddly little bugs, but we don't have ready access a BE
+development box.
+
+
+Source Format and Naming Conventions
+====================================
+
+To the extent possible and reasonable, we value consistency:
+
+* LF endings, not CRLF
+
+* spaces, not tabs; 2(?) char indents
+
+* upper or lower camel case?
+
+* filenames must match class name
+
+* *layout/organization of source tree?*
+
+* *use of namespaces?*
+
+
+libPC Position on (Non)conformance
+==================================
+
+libPC proudly and unabashedly supports formal standards/specifications for
+file formats.  We recognize, however, that in some cases files will not
+follow a given standard precisely, due to an unclear spec or simply out of
+carelessness.
+
+When reading files that are not formatted correctly:
+
+* libPC may try to compensate for the error.  This is typically done when as 
+  a practical matter the market needs support for well-known or pervasive,
+  but nonetheless "broken", upstream implementations.
+
+* libPC may explicitly reject such files.  This is typically done where we do 
+  not wish to continue to promote or support mistakes that should be fixed 
+  upstream.
+
+libPC will always write correctly formatted files.  In some cases, however,
+libPC may choose to offer as an option the ability to break the standard if,
+as a practical matter, doing so would significantly aid the market.  Such an
+option would never be the default behavior, however.
+
+*We should also have a guiding principle about files that are conformant but
+which lie, such as the extents in the header being wrong.  Specifically, is
+our default path to propagate the wrong info or to helpfully correct it on
+the fly?*

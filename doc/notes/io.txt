@@ -1,0 +1,20 @@
+========================
+libPC Project Notes: I/O
+========================
+
+Given the sheer volume of data being processed by libPC apps, it is very
+important we pay attention to I/O speed.
+
+Questions:
+
+* Is C's unix-style I/O generally faster/slower/same-as C++'s stream-style
+  I/O?
+
+* Are boost's streams any faster than the native compiler's streams?
+
+* Is it worth providing our own simple unix-style binary stream interface,
+  which we use internally, and then letting the choice of underlying
+  implementation be made up at the app level?  (LizardTech does this.  
+  Maybe GDAL too sometimes?)
+
+* Do we want to spend some time investigating this issue up front?
