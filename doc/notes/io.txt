@@ -9,12 +9,27 @@ Questions:
 
 * Is C's unix-style I/O generally faster/slower/same-as C++'s stream-style
   I/O?
+  
+  They should be equivalent if used "right".  Mateusz did a bunch of work 
+  on this last summer to check for comparison.  std::fstream was found to be 
+  sensitive to setting its buffer, but that was it.
 
 * Are boost's streams any faster than the native compiler's streams?
+
+No.  Boost's streams provide a consistent interface to the native compiler's 
+streams.  They also provide additional functionality like a gzip stream, etc.
 
 * Is it worth providing our own simple unix-style binary stream interface,
   which we use internally, and then letting the choice of underlying
   implementation be made up at the app level?  (LizardTech does this.  
   Maybe GDAL too sometimes?)
+  
+  I'd rather offload this to boost's iostreams if we can.  What do we 
+  get for the extra pain of adding another layer here?  Can we have the boost 
+  take on the maintenance of this layer for us?
 
 * Do we want to spend some time investigating this issue up front?
+  
+  libLAS does not use boost's streams because it didn't have the boost 
+  dependency until later in its life.  To do it again, I would assume boost 
+  was in the mix and would use boost's iostreams by default.

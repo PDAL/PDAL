@@ -21,7 +21,11 @@ Readers
 
 * MrSID/MG4
 
-* Oracle database
+* Oracle Point Cloud
+
+* BAG, Fledermaus, other bathy formats
+
+* Pointools?
 
 * Auto - creates points randomly, or as a constant pattern; used only for
   testing
@@ -40,7 +44,9 @@ Writers
 
 * MrSID/MG4
 
-* Oracle database
+* Oracle Point Cloud
+
+* BAG, Fledermaus, other bathy formats
 
 * Null - dumps output to /dev/null; used only for testing
 
@@ -59,6 +65,9 @@ Filters
 * Cache - maintains points in memory, only reaching "behind" to the previous
   stage if the point needed is not in the cache
 
+* Expression engine - "classification=3;0<=x<=100"
+
+* Transformation engine - "intensity=classification * 2; x = x*3.2808399"
 
 Other
 =====

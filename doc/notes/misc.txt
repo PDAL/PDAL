@@ -41,20 +41,24 @@ Project Dependencies - 3rd Party Libs
 
 libPC will use these libraries:
 
-* GDAL - for spatial reference support (and rasterization)
 
-* Boost - for C++ library needs, such as streams or parsers
+* Boost - for C++ library needs, such as streams or parsers (required)
 
-* laszip - for compressed LAS support
+* libxml2 - Schema description, validation, and serialization (required)
 
-* MrSID - for LizardTech's MG4 lidar format
+* GDAL - for spatial reference support (and rasterization) (optional)
 
-* Oracle - ...?
+* libLAS - for LAS (compressed if available to libLAS) support. (optional)
+
+* MrSID - for LizardTech's MG4 lidar format (optional)
+
+* Oracle - OCI (optional)
+
+* libspatialindex - Rtree support, maybe quadtree if someone implements it for libspatialindex (optional)
 
 * *others?*
 
-Some of these libraries may be required (such as Boost); some may be 
-configurable at build time, such as laszip.
+Some of these libraries may be required (such as Boost).
 
 
 Project Dependencies - Builds/Infrastructure
@@ -95,11 +99,11 @@ Platforms
 We will support these platforms initially, corresponding to what the
 developers are using regularly:
 
-* Windows - VS2010 (32- and 64-bit)
+* Windows - VS2010 (32- and 64-bit) - 2008 32-bit
 
-* Linux - *gcc x.y?*
+* Linux - gcc 4.x+
 
-* Mac - *stuff*
+* Mac - gcc 4.0.1+
 
 By virtue of CMake, other platforms may be supported such as VS 2008 or 
 Solaris, but we aren't targeting those specifically.
@@ -123,10 +127,16 @@ To the extent possible and reasonable, we value consistency:
 
 * filenames must match class name
 
-* *layout/organization of source tree?*
+* *layout/organization of source tree?* 
+    
+    public headers in ./include
+    private headers alongside source files in src/
 
-* *use of namespaces?*
+* *use of namespaces?* (copy boost)
 
+    libpc::
+    libpc::detail::
+    
 
 libPC Position on (Non)conformance
 ==================================
@@ -152,6 +162,10 @@ as a practical matter, doing so would significantly aid the market.  Such an
 option would never be the default behavior, however.
 
 *We should also have a guiding principle about files that are conformant but
-which lie, such as the extents in the header being wrong.  Specifically, is
+which lie, such as the extents in the header being wrong.  
+
+Specifically, is
 our default path to propagate the wrong info or to helpfully correct it on
 the fly?*
+    
+    Do both, but more often than not try to helpfully correct it.
