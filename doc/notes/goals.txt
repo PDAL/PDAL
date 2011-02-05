@@ -12,7 +12,7 @@ Project Goals
 
 2. It is a library which provides APIs for reading, writing, and processing
    point cloud data of various formats.  As GDAL is to 2D pixels, libPC is
-   to 3D points.
+   to xD points.
 
 3. It has high performance, yet remains flexible.  We recognize that 
    these two goals will conflict at times and will weigh the tradeoffs 

@@ -14,6 +14,10 @@ pc2pc
 Converts from one file format to another, optionally with some (relatively
 simple) filtering or processing.
 
+Input format detection should reside in the app, not in the library.  There 
+will be no equivalent meta GDALOpen-like function to do this work for you.  
+Too expensive and too easy to screw up.
+
 
 pcinfo
 ======
@@ -28,8 +32,14 @@ Dumps information about a point cloud file, such as:
 
 * summary statistics about the points
 
+* the plain text format should be reStructured text if possible to allow 
+  a user to retransform the output into whatever they want with ease
+
+* the xml format needs an XSD or XMLSchema for validation.
+
 The dump should go the stdout, but options should be provided to dump to
 XML or similar, where it makes sense to do so.
+
 
 
 pcview
@@ -40,19 +50,25 @@ app.  Will be a Windows-only thing (WPF + DirectX), unless someone else
 wants to do something too.
 
 
+
+
 pcindex
 =======
 
-Creates a spatial index for a point cloud.  (Could be moved into pc2pc.)
+Creates a serialized spatial index for a point cloud. First pass at this 
+is to repurpose liblas::Index which supports serialization.
 
 
 pcmosaic
 ========
 
-Merges multiple files together.  (Could be moved into pc2pc.)
+Merges multiple files together.
+
+Does mosaic imply something that merge doesn't?
 
 
-pcdemosaic
+pctile
 ==========
 
-Chops one file up into multiple files.  (Could be moved into pc2pc.)
+Chops one file up into multiple files.  This could be the liblas::Chipper, 
+leaf nodes of an index like an R-tree, or a simple quadtree build.
