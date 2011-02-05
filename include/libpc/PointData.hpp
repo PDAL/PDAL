@@ -37,7 +37,7 @@
 
 #include "Layout.hpp"
 
-typedef unsigned char byte;
+#define byte unsigned char
 
 // a PointData object is just an untyped array of N bytes,
 // where N is (the size of the given Layout * the number of points)
