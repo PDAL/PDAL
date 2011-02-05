@@ -1,0 +1,13 @@
+syntax: glob
+
+# rst outputs
+*.pdf
+
+# visual studio cruft
+Debug/
+ipch/
+*.vcxproj.filters
+*.vcxproj.user
+*.sdf
+*.suo
+*.opensdf

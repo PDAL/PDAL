@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "prototype", "src\prototype.vcxproj", "{893EB6C9-C6AE-4A81-A2B4-81C1E3F4D2F4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{914704EE-0C7E-4397-BC6E-8778DDB85304}"
+	ProjectSection(SolutionItems) = preProject
+		copyright.txt = copyright.txt
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{893EB6C9-C6AE-4A81-A2B4-81C1E3F4D2F4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{893EB6C9-C6AE-4A81-A2B4-81C1E3F4D2F4}.Debug|Win32.Build.0 = Debug|Win32
+		{893EB6C9-C6AE-4A81-A2B4-81C1E3F4D2F4}.Release|Win32.ActiveCfg = Release|Win32
+		{893EB6C9-C6AE-4A81-A2B4-81C1E3F4D2F4}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
