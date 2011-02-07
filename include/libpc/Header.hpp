@@ -35,14 +35,17 @@
 #ifndef INCLUDED_HEADER_HPP
 #define INCLUDED_HEADER_HPP
 
-#include "libpc/Layout.hpp"
+#include "libpc/PointLayout.hpp"
 
 class Header
 {
 public:
   Header();
-  const Layout& getConstLayout() const;
-  Layout& getLayout();
+  Header(const Header&);
+  Header& operator=(const Header&);
+
+  const PointLayout& getConstPointLayout() const;
+  PointLayout& getPointLayout();
 
   int getNumPoints() const;
   void setNumPoints(int);
@@ -50,11 +53,9 @@ public:
   void dump() const;
 
 private:
-  Layout m_layout;
+  PointLayout m_pointLayout;
   int m_numPoints;
 
-  Header(const Header&); // not implemented
-  Header& operator=(const Header&); // not implemented
 };
 
 #endif

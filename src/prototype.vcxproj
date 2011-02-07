@@ -77,13 +77,12 @@
   <ItemGroup>
     <ClCompile Include="CropFilter.cpp" />
     <ClCompile Include="Field.cpp" />
+    <ClCompile Include="Filter.cpp" />
     <ClCompile Include="Header.cpp" />
     <ClCompile Include="LasReader.cpp" />
     <ClCompile Include="LasWriter.cpp" />
-    <ClCompile Include="Layout.cpp" />
+    <ClCompile Include="PointLayout.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Point.cpp" />
-    <ClCompile Include="PointBuffer.cpp" />
     <ClCompile Include="PointData.cpp" />
     <ClCompile Include="Reader.cpp" />
     <ClCompile Include="Stage.cpp" />
@@ -92,12 +91,11 @@
   <ItemGroup>
     <ClInclude Include="..\include\libpc\CropFilter.hpp" />
     <ClInclude Include="..\include\libpc\Field.hpp" />
+    <ClInclude Include="..\include\libpc\Filter.hpp" />
     <ClInclude Include="..\include\libpc\Header.hpp" />
     <ClInclude Include="..\include\libpc\LasReader.hpp" />
     <ClInclude Include="..\include\libpc\LasWriter.hpp" />
-    <ClInclude Include="..\include\libpc\Layout.hpp" />
-    <ClInclude Include="..\include\libpc\Point.hpp" />
-    <ClInclude Include="..\include\libpc\PointBuffer.hpp" />
+    <ClInclude Include="..\include\libpc\PointLayout.hpp" />
     <ClInclude Include="..\include\libpc\PointData.hpp" />
     <ClInclude Include="..\include\libpc\Reader.hpp" />
     <ClInclude Include="..\include\libpc\Stage.hpp" />

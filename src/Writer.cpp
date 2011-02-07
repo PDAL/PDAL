@@ -38,9 +38,15 @@
 
 
 Writer::Writer(Stage& prevStage) :
-  m_prevStage(prevStage)
+  Filter(prevStage)
 {
   return;
+}
+
+
+void Writer::initialize()
+{
+  Filter::initialize();
 }
 
 
@@ -51,7 +57,7 @@ void Writer::write()
   int cnt = m_prevStage.getConstHeader().getNumPoints();
 
   const int chunk = 10;
-  PointBuffer buffer(m_prevStage.getConstHeader().getConstLayout(), chunk);
+  PointData buffer(getHeader().getConstPointLayout(), chunk);
 
   assert(cnt % chunk == 0); // ha ha
 

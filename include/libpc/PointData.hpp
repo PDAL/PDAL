@@ -35,9 +35,9 @@
 #ifndef INCLUDED_POINTDATA_HPP
 #define INCLUDED_POINTDATA_HPP
 
-#include "Layout.hpp"
+#include "PointLayout.hpp"
 
-#define byte unsigned char
+typedef unsigned char byte;
 
 // a PointData object is just an untyped array of N bytes,
 // where N is (the size of the given Layout * the number of points)
@@ -46,15 +46,23 @@
 class PointData
 {
 public:
-  PointData(const Layout&, int numPoints);
+  PointData(const PointLayout&, int numPoints);
 
   byte* getData(int pointNumber) const;
+  int getNumPoints() const;
+  const PointLayout& getLayout() const;
 
-  void setField_F32(int pointNumber, int itemIffset, float value);
+  float getField_F32(int pointNumber, int itemOffset) const;
+  double getField_F64(int pointNumber, int itemOffset) const;
+
+  void setField_F32(int pointNumber, int itemOffset, float value);
   void setField_F64(int pointNumber, int itemOffset, double value);
 
 private:
-  Layout m_layout;
+  template<class T> T getField(int pointNumber, int itemOffset) const;
+  template<class T> void setField(int pointNumber, int itemOffset, T value);
+
+  PointLayout m_layout;
   byte* m_data;
   int m_pointSize;
   int m_numPoints;

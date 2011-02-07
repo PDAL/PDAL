@@ -32,26 +32,28 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/PointBuffer.hpp"
+#ifndef INCLUDED_FILTER_HPP
+#define INCLUDED_FILTER_HPP
 
-PointBuffer::PointBuffer(const Layout& layout, int numPoints) :
-  m_pointData(NULL),
-  m_numPoints(numPoints),
-  m_layout(layout)
+#include "libpc/Stage.hpp"
+#include "libpc/header.hpp"
+
+class Filter : public Stage
 {
-  m_pointData = new PointData(m_layout, m_numPoints);
+public:
+  Filter(Stage& prevStage);
+  virtual void initialize() = 0;
 
-  return;
-}
+  // from Stage
+  virtual void readNextPoints(PointData&) = 0;
 
+protected:
+  int m_lastPointRead;
+  Stage& m_prevStage;
 
-int PointBuffer::getNumPoints() const
-{
-  return m_numPoints;
-}
+private:
+  Filter& operator=(const Filter&); // not implemented
+  Filter(const Filter&); // not implemented
+};
 
-
-PointData& PointBuffer::getPointData()
-{
-  return *m_pointData;
-}
+#endif

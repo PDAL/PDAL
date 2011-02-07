@@ -32,33 +32,21 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LAYOUT_HPP
-#define INCLUDED_LAYOUT_HPP
+#include "libpc/Filter.hpp"
 
-#include <vector>
-
-#include "libpc/Field.hpp"
-
-class Layout
+Filter::Filter(Stage& prevStage) :
+  m_prevStage(prevStage)
 {
-public:
-  Layout();
-  Layout(const Layout&);
-  Layout& operator=(const Layout & other);
+  if (!m_prevStage.isInitialized())
+    throw;
 
-  void addField(const Field& field);
-  void addFields(const std::vector<Field>& fields);
+  Header& header = getHeader();
+  header = m_prevStage.getConstHeader();
+  return;
+}
 
-  int getSizeInBytes() const;
-  int getNumFields() const;
 
-  void dump() const;
-
-  bool findField(Field::DataItem item, Field& ret) const;
-  int findFieldOffset(Field::DataItem item) const;
-
-private:
-  std::vector<Field> m_fields;
-};
-
-#endif
+void Filter::initialize()
+{
+  Stage::initialize();
+}

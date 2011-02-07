@@ -37,7 +37,7 @@
 #include <cassert>
 
 
-PointData::PointData(const Layout& layout, int numPoints) :
+PointData::PointData(const PointLayout& layout, int numPoints) :
   m_layout(layout),
   m_numPoints(numPoints),
   m_data(NULL),
@@ -56,21 +56,60 @@ byte* PointData::getData(int pointNumber) const
 }
 
 
-void PointData::setField_F32(int pointNumber, int itemOffset, float value)
+int PointData::getNumPoints() const
+{
+  return m_numPoints;
+}
+
+
+const PointLayout& PointData::getLayout() const
+{
+  return m_layout;
+}
+
+
+template <class T>
+void PointData::setField(int pointNumber, int itemOffset, T value)
 {
   int offset = (pointNumber * m_pointSize) + itemOffset;
-  assert(offset + (int)sizeof(float) <= m_pointSize * m_numPoints);
+  assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
   byte* p = m_data + offset;
 
-  *(float*)p = value;
+  *(T*)p = value;
+}
+
+
+template <class T>
+T PointData::getField(int pointNumber, int itemOffset) const
+{
+  int offset = (pointNumber * m_pointSize) + itemOffset;
+  assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
+  byte* p = m_data + offset;
+
+  return *(T*)p;
+}
+
+
+void PointData::setField_F32(int pointNumber, int itemOffset, float value)
+{
+  setField<float>(pointNumber, itemOffset, value);
 }
 
 
 void PointData::setField_F64(int pointNumber, int itemOffset, double value)
 {
-  int offset = (pointNumber * m_pointSize) + itemOffset;
-  assert(offset + (int)sizeof(double) <= m_pointSize * m_numPoints);
-  byte* p = m_data + offset;
+  setField<double>(pointNumber, itemOffset, value);
 
-  *(double*)p = value;
+}
+
+
+float PointData::getField_F32(int pointNumber, int itemOffset) const
+{
+  return getField<float>(pointNumber, itemOffset);
+}
+
+
+double PointData::getField_F64(int pointNumber, int itemOffset) const
+{
+  return getField<double>(pointNumber, itemOffset);
 }

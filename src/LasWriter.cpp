@@ -47,6 +47,12 @@ LasWriter::LasWriter(string filename, Stage& prevStage) :
 }
 
 
+void LasWriter::initialize()
+{
+  Writer::initialize();
+}
+
+
 void LasWriter::writeBegin()
 {
   cout << "writing beginning of file" << endl;
@@ -61,8 +67,17 @@ void LasWriter::writeEnd()
 }
 
 
-void LasWriter::writeBuffer(const PointBuffer& pointBuffer)
+void LasWriter::writeBuffer(const PointData& pointData)
 {
-  cout << "writing " << pointBuffer.getNumPoints() << " points..." << endl;
+  cout << "writing " << pointData.getNumPoints() << " points..." << endl;
+
+  int cnt = pointData.getNumPoints();
+  const PointLayout& layout = pointData.getLayout();
+
+  for (int i=0; i<cnt; i++)
+  {
+    cout << "X: " << pointData.getField_F32(i, layout.getFieldOffset_X()) << endl;
+  }
+
   return;
 }

@@ -35,24 +35,26 @@
 #ifndef INCLUDED_WRITER_HPP
 #define INCLUDED_WRITER_HPP
 
-#include "libpc/Stage.hpp"
-#include "libpc/Header.hpp"
+#include "libpc/Filter.hpp"
 
-class Writer
+
+// a Writer is a Filter (and so it has a previous stage and a header), but generally they do not implement their readNextPoints method
+class Writer : public Filter
 {
 public:
   Writer(Stage& prevStage);
+  virtual void initialize();
 
   void write();
 
 protected:
   virtual void writeBegin() = 0;
-  virtual void writeBuffer(const PointBuffer&) = 0;
+  virtual void writeBuffer(const PointData&) = 0;
   virtual void writeEnd() = 0;
 
-  Stage& m_prevStage;
-
 private:
+  virtual void readNextPoints(PointData&) { throw; }
+
   Writer& operator=(const Writer&); // not implemented
   Writer(const Writer&); // not implemented
 };

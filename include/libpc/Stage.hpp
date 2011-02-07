@@ -35,15 +35,19 @@
 #ifndef INCLUDED_STAGE_HPP
 #define INCLUDED_STAGE_HPP
 
-#include "libpc/PointBuffer.hpp"
+#include "libpc/PointData.hpp"
 #include "libpc/Header.hpp"
 
+
+// every stage owns its own header, they are not shared
 class Stage
 {
 public:
   Stage();
+  virtual void initialize();
+  bool isInitialized() const;
 
-  virtual void readNextPoints(PointBuffer&) = 0;
+  virtual void readNextPoints(PointData&) = 0;
 
   const Header& getConstHeader() const;
 
@@ -51,6 +55,7 @@ protected:
   Header& getHeader();
 
 private:
+  bool m_isInitialized;
   Header m_header;
 
   Stage& operator=(const Stage&); // not implemented

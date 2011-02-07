@@ -41,9 +41,9 @@ class LasReader : public Reader
 {
 public:
   LasReader(std::string file);
-  void open();
+  void initialize();
 
-  void readNextPoints(PointBuffer& buffer);
+  void readNextPoints(PointData& data);
 
 private:
   LasReader& operator=(const LasReader&); // not implemented

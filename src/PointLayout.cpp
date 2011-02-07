@@ -32,56 +32,80 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/Layout.hpp"
+#include "libpc/PointLayout.hpp"
 
 #include <iostream>
 using std::cout;
 using std::endl;
 
 
-Layout::Layout()
+PointLayout::PointLayout() :
+  m_offsetX(-1),
+  m_offsetY(-1),
+  m_offsetZ(-1)
 {
   return;
 }
 
 
-Layout::Layout(const Layout& layout)
+PointLayout::PointLayout(const PointLayout& other)
 {
-  m_fields = layout.m_fields;
+  m_fields = other.m_fields;
+  m_offsetX = other.m_offsetX;
+  m_offsetY = other.m_offsetY;
+  m_offsetZ = other.m_offsetZ;
 
   return;
 }
 
 
-Layout& Layout::operator=(const Layout & other)
+PointLayout& PointLayout::operator=(const PointLayout& other)
 {
   if (this != &other)
   {
     m_fields = other.m_fields;
+    m_offsetX = other.m_offsetX;
+    m_offsetY = other.m_offsetY;
+    m_offsetZ = other.m_offsetZ;
   }
 
   return *this;
 }
 
 
-void Layout::addField(const Field& field)
+void PointLayout::addField(const Field& field)
 {
   m_fields.push_back(field);
+
+  if (field.item() == Field::XPos)
+  {
+    m_offsetX = field.offset();
+  }
+  else  if (field.item() == Field::YPos)
+  {
+    m_offsetY = field.offset();
+  }
+  else if (field.item() == Field::ZPos)
+  {
+    m_offsetZ = field.offset();
+  }
+
+  return;
 }
 
 
-void Layout::addFields(const std::vector<Field>& fields)
+void PointLayout::addFields(const std::vector<Field>& fields)
 {
   for (size_t i=0; i<fields.size(); i++)
   {
-    m_fields.push_back(fields[i]);
+    addField(fields[i]);
   }
 }
 
 
-void Layout::dump() const
+void PointLayout::dump() const
 {
-  cout << "Layout:" << endl;
+  cout << "PointLayout:" << endl;
 
   for (size_t i=0; i<m_fields.size(); i++)
   {
@@ -90,7 +114,7 @@ void Layout::dump() const
 }
 
 
-int Layout::getSizeInBytes() const
+int PointLayout::getSizeInBytes() const
 {
   int size = 0;
 
@@ -106,13 +130,13 @@ int Layout::getSizeInBytes() const
 }
 
 
-int Layout::getNumFields() const
+int PointLayout::getNumFields() const
 {
   return m_fields.size();
 }
 
 
-bool Layout::findField(Field::DataItem item, Field& ret) const
+bool PointLayout::findField(Field::DataItem item, Field& ret) const
 {
   for (size_t i=0; i<m_fields.size(); i++)
   {
@@ -128,7 +152,7 @@ bool Layout::findField(Field::DataItem item, Field& ret) const
 }
 
 
-int Layout::findFieldOffset(Field::DataItem item) const
+int PointLayout::findFieldOffset(Field::DataItem item) const
 {
   Field ret;
   bool ok = findField(item, ret);
@@ -136,4 +160,3 @@ int Layout::findFieldOffset(Field::DataItem item) const
 
   return -1;
 }
-

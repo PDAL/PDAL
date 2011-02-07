@@ -32,12 +32,41 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/Point.hpp"
+#ifndef INCLUDED_POINTLAYOUT_HPP
+#define INCLUDED_POINTLAYOUT_HPP
 
-Point::Point(const Layout& layout) :
-  m_layout(layout)
+#include <vector>
+
+#include "libpc/Field.hpp"
+
+class PointLayout
 {
-  m_pointData = new PointData(layout, 1);
+public:
+  PointLayout();
+  PointLayout(const PointLayout&);
+  PointLayout& operator=(const PointLayout & other);
 
-  return;
-}
+  void addField(const Field& field);
+  void addFields(const std::vector<Field>& fields);
+
+  int getSizeInBytes() const;
+  int getNumFields() const;
+
+  void dump() const;
+
+  bool findField(Field::DataItem item, Field& ret) const;
+  int findFieldOffset(Field::DataItem item) const;
+
+  // some well-known field types are always available
+  int getFieldOffset_X() const { return m_offsetX; }
+  int getFieldOffset_Z() const { return m_offsetY; }
+  int getFieldOffset_Y() const { return m_offsetZ; }
+
+private:
+  std::vector<Field> m_fields;
+  int m_offsetX;
+  int m_offsetY;
+  int m_offsetZ;
+};
+
+#endif

@@ -34,15 +34,20 @@
 
 #include "libpc/LasReader.hpp"
 #include "libpc/LasWriter.hpp"
+#include "libpc/CropFilter.hpp"
 
 using std::vector;
 
 int main(int /*argc*/, char* /*argv*/[])
 {
   LasReader reader("foo.las");
-  reader.open();
+  reader.initialize();
 
-  LasWriter writer("bar.las", reader);
+  CropFilter cropper(reader, 0.0f, 1000.0f);
+  cropper.initialize();
+
+  LasWriter writer("bar.las", cropper);
+  writer.initialize();
 
   writer.write();
 

@@ -35,14 +35,20 @@
 #ifndef INCLUDED_CROPFILTER_HPP
 #define INCLUDED_CROPFILTER_HPP
 
-#include "libpc/Stage.hpp"
+#include "libpc/Filter.hpp"
 
-class CropFilter : public Stage
+class CropFilter : public Filter
 {
 public:
-  CropFilter();
+  CropFilter(Stage& prevStage, float minZ, float maxZ);
+  void initialize();
+
+  void readNextPoints(PointData&);
 
 private:
+  float m_minZ;
+  float m_maxZ;
+
   CropFilter& operator=(const CropFilter&); // not implemented
   CropFilter(const CropFilter&); // not implemented
 };

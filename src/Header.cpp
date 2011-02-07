@@ -47,15 +47,33 @@ Header::Header() :
 }
 
 
-const Layout& Header::getConstLayout() const
+Header::Header(const Header& other)
 {
-  return m_layout;
+  this->m_numPoints = other.m_numPoints;
+  this->m_pointLayout = other.m_pointLayout;
+
+  return;
+}  
+
+
+Header& Header::operator=(const Header& other)
+{
+  this->m_numPoints = other.m_numPoints;
+  this->m_pointLayout = other.m_pointLayout;
+
+  return *this;
+}
+ 
+
+const PointLayout& Header::getConstPointLayout() const
+{
+  return m_pointLayout;
 }
 
 
-Layout& Header::getLayout()
+PointLayout& Header::getPointLayout()
 {
-  return m_layout;
+  return m_pointLayout;
 }
 
 
@@ -75,5 +93,5 @@ void Header::dump() const
 {
   cout << "Header:" << endl;
   cout << "Num points: " << m_numPoints << endl;
-  m_layout.dump();
+  m_pointLayout.dump();
 }

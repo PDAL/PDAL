@@ -44,10 +44,10 @@ public:
   Reader();
 
   // opens the file (or whatever) and sets m_layout
-  virtual void open() = 0;
+  virtual void initialize();
 
   // from Stage
-  virtual void readNextPoints(PointBuffer&) = 0;
+  virtual void readNextPoints(PointData&) = 0;
 
 protected:
   int m_lastPointRead;

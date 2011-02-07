@@ -43,10 +43,11 @@ class LasWriter : public Writer
 {
 public:
   LasWriter(std::string filename, Stage& prevStage);
+  void initialize();
 
 private:
   void writeBegin();
-  void writeBuffer(const PointBuffer&);
+  void writeBuffer(const PointData&);
   void writeEnd();
 
   LasWriter& operator=(const LasWriter&); // not implemented

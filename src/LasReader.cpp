@@ -46,8 +46,10 @@ LasReader::LasReader(string file)
 }
 
 
-void LasReader::open()
+void LasReader::initialize()
 {
+  Reader::initialize();
+
   // pretend we read the header to determine the number of points and the layout
 
   vector<Field> fields;
@@ -57,7 +59,7 @@ void LasReader::open()
   fields.push_back(Field(Field::ZPos, 8, Field::F32));
   fields.push_back(Field(Field::Time, 12, Field::F64));
 
-  getHeader().getLayout().addFields(fields);
+  getHeader().getPointLayout().addFields(fields);
 
   getHeader().setNumPoints(100);
 
@@ -65,28 +67,28 @@ void LasReader::open()
 }
 
 
-void LasReader::readNextPoints(PointBuffer& buffer)
+void LasReader::readNextPoints(PointData& data)
 {
   // make up some data and put it into the buffer
 
-  int cnt = buffer.getNumPoints();
+  int cnt = data.getNumPoints();
   assert(m_lastPointRead + cnt <= getHeader().getNumPoints());
 
-  PointData& pointData = buffer.getPointData();
+  const PointLayout& layout = data.getLayout();
 
-  int offsetX = getHeader().getLayout().findFieldOffset(Field::XPos);
-  int offsetY = getHeader().getLayout().findFieldOffset(Field::YPos);
-  int offsetZ = getHeader().getLayout().findFieldOffset(Field::ZPos);
-  int offsetT = getHeader().getLayout().findFieldOffset(Field::Time);
+  int offsetX = layout.getFieldOffset_X();
+  int offsetY = layout.getFieldOffset_Y();
+  int offsetZ = layout.getFieldOffset_Z();
+  int offsetT = layout.findFieldOffset(Field::Time);
 
   float v = (float)m_lastPointRead;
 
   for (int i=0; i<cnt; i++)
   {
-    pointData.setField_F32(i, offsetX, v);
-    pointData.setField_F32(i, offsetY, v + 0.1f);
-    pointData.setField_F32(i, offsetZ, v + 0.2f);
-    pointData.setField_F64(i, offsetT, v + 0.3f);
+    data.setField_F32(i, offsetX, v);
+    data.setField_F32(i, offsetY, v + 0.1f);
+    data.setField_F32(i, offsetZ, v + 0.2f);
+    data.setField_F64(i, offsetT, v + 0.3f);
 
     ++v;
   }

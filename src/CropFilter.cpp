@@ -34,7 +34,30 @@
 
 #include "libpc/CropFilter.hpp"
 
-CropFilter::CropFilter()
+CropFilter::CropFilter(Stage& prevStage, float minZ, float maxZ) : Filter(prevStage),
+  m_minZ(minZ), m_maxZ(maxZ)
 {
+  return;
+}
+
+
+void CropFilter::initialize()
+{
+  Filter::initialize();
+  return;
+}
+
+
+void CropFilter::readNextPoints(PointData& data)
+{
+  m_prevStage.readNextPoints(data);
+
+//  PointData& pointData = buffer.getPointData();
+
+  for (int i=0; i<data.getNumPoints(); i++)
+  {
+
+  }
+
   return;
 }

@@ -39,3 +39,9 @@ Reader::Reader() :
 {
   return;
 }
+
+
+void Reader::initialize()
+{
+  Stage::initialize();
+}
