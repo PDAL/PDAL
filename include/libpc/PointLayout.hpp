@@ -49,6 +49,8 @@ public:
   void addField(const Field& field);
   void addFields(const std::vector<Field>& fields);
 
+  const Field& getField(int) const;
+
   int getSizeInBytes() const;
   int getNumFields() const;
 

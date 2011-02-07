@@ -52,11 +52,18 @@ void CropFilter::readNextPoints(PointData& data)
 {
   m_prevStage.readNextPoints(data);
 
-//  PointData& pointData = buffer.getPointData();
+  int cnt = data.getNumPoints();
+  //const PointLayout& layout = data.getLayout();
 
-  for (int i=0; i<data.getNumPoints(); i++)
+  for (int index=0; index<cnt; index++)
   {
-
+    float z = data.getZ(index);
+    if (z < 0.0)
+    {
+      // remove this point, and update the lower bound for Z
+      data.setInvalid(index);
+      getHeader().m_minZ = 0;
+    }
   }
 
   return;

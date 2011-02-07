@@ -32,22 +32,29 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LASREADER_HPP
-#define INCLUDED_LASREADER_HPP
+#ifndef INCLUDED_UTILS_HPP
+#define INCLUDED_UTILS_HPP
 
-#include "libpc/Reader.hpp"
+#include <cassert>
 
-class LasReader : public Reader
+
+class Utils
 {
 public:
-  LasReader(std::string file);
-  void initialize();
+  template<class T>
+  static T random(T min, T max)
+  {
+    double r = (double)rand();  // [0..32767]
+    double v = (double)(max - min) / (double)RAND_MAX;
+    double s = r * v; // [0..(max-min)]
+    double t = (double)min + s; // [min..max]
 
-  void readNextPoints(PointData& data);
+    assert((T)t >= min);
+    assert((T)t <= max);
 
-private:
-  LasReader& operator=(const LasReader&); // not implemented
-  LasReader(const LasReader&); // not implemented
+    return (T)t;
+  }
 };
+
 
 #endif

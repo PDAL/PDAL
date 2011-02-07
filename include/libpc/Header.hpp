@@ -44,6 +44,13 @@ public:
   Header(const Header&);
   Header& operator=(const Header&);
 
+  double m_minX;
+  double m_maxX;
+  double m_minY;
+  double m_maxY;
+  double m_minZ;
+  double m_maxZ;
+
   const PointLayout& getConstPointLayout() const;
   PointLayout& getPointLayout();
 
@@ -55,7 +62,6 @@ public:
 private:
   PointLayout m_pointLayout;
   int m_numPoints;
-
 };
 
 #endif

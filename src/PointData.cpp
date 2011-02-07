@@ -35,6 +35,10 @@
 #include "libpc/PointData.hpp"
 
 #include <cassert>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 
 PointData::PointData(const PointLayout& layout, int numPoints) :
@@ -45,14 +49,37 @@ PointData::PointData(const PointLayout& layout, int numPoints) :
 {
   m_pointSize = m_layout.getSizeInBytes();
   m_data = new byte[m_pointSize * m_numPoints];
+  
+  m_isValid.resize(m_numPoints);
 
   return;
 }
 
 
-byte* PointData::getData(int pointNumber) const
+bool 
+PointData::isValid(int index) const
 {
-  return m_data + m_pointSize * pointNumber;
+  return m_isValid[index];
+}
+
+
+void
+PointData::setValid(int index)
+{
+  m_isValid[index] = true;
+}
+
+
+void
+PointData::setInvalid(int index)
+{
+  m_isValid[index] = false;
+}
+
+
+byte* PointData::getData(int index) const
+{
+  return m_data + m_pointSize * index;
 }
 
 
@@ -69,9 +96,9 @@ const PointLayout& PointData::getLayout() const
 
 
 template <class T>
-void PointData::setField(int pointNumber, int itemOffset, T value)
+void PointData::setField(int index, int itemOffset, T value)
 {
-  int offset = (pointNumber * m_pointSize) + itemOffset;
+  int offset = (index * m_pointSize) + itemOffset;
   assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
   byte* p = m_data + offset;
 
@@ -80,9 +107,9 @@ void PointData::setField(int pointNumber, int itemOffset, T value)
 
 
 template <class T>
-T PointData::getField(int pointNumber, int itemOffset) const
+T PointData::getField(int index, int itemOffset) const
 {
-  int offset = (pointNumber * m_pointSize) + itemOffset;
+  int offset = (index * m_pointSize) + itemOffset;
   assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
   byte* p = m_data + offset;
 
@@ -90,26 +117,117 @@ T PointData::getField(int pointNumber, int itemOffset) const
 }
 
 
-void PointData::setField_F32(int pointNumber, int itemOffset, float value)
+void PointData::setField_U8(int index, int itemOffset, byte value)
 {
-  setField<float>(pointNumber, itemOffset, value);
+  setField<byte>(index, itemOffset, value);
 }
 
 
-void PointData::setField_F64(int pointNumber, int itemOffset, double value)
+void PointData::setField_F32(int index, int itemOffset, float value)
 {
-  setField<double>(pointNumber, itemOffset, value);
+  setField<float>(index, itemOffset, value);
+}
+
+
+void PointData::setField_F64(int index, int itemOffset, double value)
+{
+  setField<double>(index, itemOffset, value);
 
 }
 
 
-float PointData::getField_F32(int pointNumber, int itemOffset) const
+byte PointData::getField_U8(int index, int itemOffset) const
 {
-  return getField<float>(pointNumber, itemOffset);
+  return getField<byte>(index, itemOffset);
 }
 
 
-double PointData::getField_F64(int pointNumber, int itemOffset) const
+float PointData::getField_F32(int index, int itemOffset) const
 {
-  return getField<double>(pointNumber, itemOffset);
+  return getField<float>(index, itemOffset);
+}
+
+
+double PointData::getField_F64(int index, int itemOffset) const
+{
+  return getField<double>(index, itemOffset);
+}
+
+
+float PointData::getX(int index) const
+{
+  return getField_F32(index, m_layout.getFieldOffset_X());
+}
+
+
+float PointData::getY(int index) const
+{
+  return getField_F32(index, m_layout.getFieldOffset_Y());
+}
+
+
+float PointData::getZ(int index) const
+{
+  return getField_F32(index, m_layout.getFieldOffset_Z());
+}
+
+
+void PointData::setX(int index, float value)
+{
+  setField_F32(index, m_layout.getFieldOffset_X(), value);
+}
+
+
+void PointData::setY(int index, float value)
+{
+  setField_F32(index, m_layout.getFieldOffset_Y(), value);
+}
+
+
+void PointData::setZ(int index, float value)
+{
+  setField_F32(index, m_layout.getFieldOffset_Z(), value);
+}
+
+
+void PointData::dump() const
+{
+  for (int index=0; index<getNumPoints(); index++)
+  {
+    dump(index);
+  }
+
+  return;
+}
+
+
+void PointData::dump(int index) const
+{
+  const PointLayout& layout = getLayout();
+
+  for (int f=0; f<layout.getNumFields(); f++)
+  {
+    const Field& field = layout.getField(f);
+    
+    cout << field.getName(field.item()) << ": ";
+
+    switch (field.type())
+    {
+    case Field::U8:
+      cout << this->getField_U8(index, field.offset());
+      break;
+    case Field::F32:
+      cout << this->getField_F32(index, field.offset());
+      break;
+    case Field::F64:
+      cout << this->getField_F64(index, field.offset());
+      break;
+    default:
+      throw;
+    }
+
+    cout << endl;
+  }
+
+  return;
 }

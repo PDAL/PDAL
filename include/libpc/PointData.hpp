@@ -43,29 +43,52 @@ typedef unsigned char byte;
 // where N is (the size of the given Layout * the number of points)
 //
 // That is, a PointData represents the underlying data for one or more points.
+//
+// A PointData object has an associated Layout object.
+//
+// Many of the methods take a first parameter "index", to specify which point in the
+// collection is to be operated upon.
 class PointData
 {
 public:
   PointData(const PointLayout&, int numPoints);
 
-  byte* getData(int pointNumber) const;
+  byte* getData(int index) const;
   int getNumPoints() const;
   const PointLayout& getLayout() const;
 
-  float getField_F32(int pointNumber, int itemOffset) const;
-  double getField_F64(int pointNumber, int itemOffset) const;
+  bool isValid(int index) const;
+  void setValid(int index);
+  void setInvalid(int index);
 
-  void setField_F32(int pointNumber, int itemOffset, float value);
-  void setField_F64(int pointNumber, int itemOffset, double value);
+  byte getField_U8(int index, int itemOffset) const;
+  float getField_F32(int index, int itemOffset) const;
+  double getField_F64(int index, int itemOffset) const;
+
+  void setField_U8(int index, int itemOffset, byte value);
+  void setField_F32(int index, int itemOffset, float value);
+  void setField_F64(int index, int itemOffset, double value);
+
+  // some well-known fields
+  float getX(int index) const;
+  float getY(int index) const;
+  float getZ(int index) const;
+  void setX(int index, float value);
+  void setY(int index, float value);
+  void setZ(int index, float value);
+
+  void dump() const;
+  void dump(int index) const;
 
 private:
-  template<class T> T getField(int pointNumber, int itemOffset) const;
-  template<class T> void setField(int pointNumber, int itemOffset, T value);
+  template<class T> T getField(int index, int itemOffset) const;
+  template<class T> void setField(int index, int itemOffset, T value);
 
   PointLayout m_layout;
   byte* m_data;
   int m_pointSize;
   int m_numPoints;
+  std::vector<bool> m_isValid;
 
   PointData(const PointData&); // not implemented
   PointData& operator=(const PointData&); // not implemented

@@ -32,52 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <iostream>
-
-#include "libpc/LasWriter.hpp"
-
-using std::string;
-using std::cout;
-using std::endl;
-
-LasWriter::LasWriter(string filename, Stage& prevStage) :
-  Writer(prevStage)
-{
-  return;
-}
+#include <cstdlib>
+#include "libpc/Utils.hpp"
 
 
-void LasWriter::initialize()
-{
-  Writer::initialize();
-}
-
-
-void LasWriter::writeBegin()
-{
-  cout << "writing beginning of file" << endl;
-  return;
-}
-
-
-void LasWriter::writeEnd()
-{
-  cout << "writing end of file" << endl;
-  return;
-}
-
-
-void LasWriter::writeBuffer(const PointData& pointData)
-{
-  cout << "writing " << pointData.getNumPoints() << " points..." << endl;
-
-  int cnt = pointData.getNumPoints();
-  const PointLayout& layout = pointData.getLayout();
-
-  for (int i=0; i<cnt; i++)
-  {
-    cout << "X: " << pointData.getField_F32(i, layout.getFieldOffset_X()) << endl;
-  }
-
-  return;
-}

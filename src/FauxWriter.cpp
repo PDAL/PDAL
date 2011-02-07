@@ -32,28 +32,63 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/FauxReader.hpp"
+#include <iostream>
+
 #include "libpc/FauxWriter.hpp"
-#include "libpc/CropFilter.hpp"
-#include "libpc/ColorFilter.hpp"
 
-using std::vector;
+using std::string;
+using std::cout;
+using std::endl;
 
-int main(int /*argc*/, char* /*argv*/[])
+FauxWriter::FauxWriter(string filename, Stage& prevStage) :
+  Writer(prevStage)
 {
-  FauxReader reader("foo.las");
-  reader.initialize();
+  return;
+}
 
-  CropFilter cropper(reader, 0.0f, 1000.0f);
-  cropper.initialize();
 
-  ColorFilter colorizer(cropper);
-  colorizer.initialize();
+void FauxWriter::initialize()
+{
+  Writer::initialize();
+}
 
-  FauxWriter writer("bar.las", colorizer);
-  writer.initialize();
 
-  writer.write();
+void FauxWriter::writeBegin()
+{
+  cout << "writing beginning of file" << endl;
+  m_numPointsWritten = 0;
+  return;
+}
 
-  return 0;
+
+void FauxWriter::writeEnd()
+{
+  cout << "writing end of file (" << m_numPointsWritten << " points)" << endl;
+  return;
+}
+
+
+void FauxWriter::writeBuffer(const PointData& pointData)
+{
+  cout << "writing " << pointData.getNumPoints() << " points..." << endl;
+
+  int cnt = pointData.getNumPoints();
+  //const PointLayout& layout = pointData.getLayout();
+
+  for (int index=0; index<cnt; index++)
+  {
+    if (pointData.isValid(index))
+    {
+      cout << m_numPointsWritten << " X: " << pointData.getX(index) << endl;
+      cout << m_numPointsWritten << " Y: " << pointData.getY(index) << endl;
+      cout << m_numPointsWritten << " Z: " << pointData.getZ(index) << endl;
+      ++m_numPointsWritten;
+    }
+    else
+    {
+      cout << m_numPointsWritten << " INVALID" << endl;
+    }
+  }
+
+  return;
 }

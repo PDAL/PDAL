@@ -32,28 +32,28 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/FauxReader.hpp"
-#include "libpc/FauxWriter.hpp"
-#include "libpc/CropFilter.hpp"
-#include "libpc/ColorFilter.hpp"
+#ifndef INCLUDED_FAUXWRITER_HPP
+#define INCLUDED_FAUXWRITER_HPP
 
-using std::vector;
+#include <string>
 
-int main(int /*argc*/, char* /*argv*/[])
+#include "libpc/Writer.hpp"
+
+class FauxWriter : public Writer
 {
-  FauxReader reader("foo.las");
-  reader.initialize();
+public:
+  FauxWriter(std::string filename, Stage& prevStage);
+  void initialize();
 
-  CropFilter cropper(reader, 0.0f, 1000.0f);
-  cropper.initialize();
+private:
+  int m_numPointsWritten;
 
-  ColorFilter colorizer(cropper);
-  colorizer.initialize();
+  void writeBegin();
+  void writeBuffer(const PointData&);
+  void writeEnd();
 
-  FauxWriter writer("bar.las", colorizer);
-  writer.initialize();
+  FauxWriter& operator=(const FauxWriter&); // not implemented
+  FauxWriter(const FauxWriter&); // not implemented
+};
 
-  writer.write();
-
-  return 0;
-}
+#endif

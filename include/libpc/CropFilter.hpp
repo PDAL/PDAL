@@ -37,6 +37,8 @@
 
 #include "libpc/Filter.hpp"
 
+
+// removes any points outside of the given Z range
 class CropFilter : public Filter
 {
 public:

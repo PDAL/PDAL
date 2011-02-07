@@ -73,6 +73,12 @@ PointLayout& PointLayout::operator=(const PointLayout& other)
 }
 
 
+const Field& PointLayout::getField(int index) const
+{
+  return m_fields[index];
+}
+
+
 void PointLayout::addField(const Field& field)
 {
   m_fields.push_back(field);

@@ -34,23 +34,27 @@
 
 #include <cassert>
 
-#include "libpc/LasReader.hpp"
+#include "libpc/FauxReader.hpp"
+#include "libpc/Utils.hpp"
 
 using std::vector;
 using std::string;
 
 
-LasReader::LasReader(string file)
+FauxReader::FauxReader(string file)
 {
   return;
 }
 
 
-void LasReader::initialize()
+void FauxReader::initialize()
 {
   Reader::initialize();
 
   // pretend we read the header to determine the number of points and the layout
+
+  Header& header = getHeader();
+  PointLayout& layout = header.getPointLayout();
 
   vector<Field> fields;
 
@@ -59,15 +63,23 @@ void LasReader::initialize()
   fields.push_back(Field(Field::ZPos, 8, Field::F32));
   fields.push_back(Field(Field::Time, 12, Field::F64));
 
-  getHeader().getPointLayout().addFields(fields);
+  layout.addFields(fields);
 
-  getHeader().setNumPoints(100);
+  header.setNumPoints(30);
+
+  header.m_minX = 0.0;
+  header.m_maxX = 100.0;
+  header.m_minY = 0.0;
+  header.m_maxY = 100.0;
+
+  header.m_minZ = -100.0;
+  header.m_maxZ = 100.0;
 
   return;
 }
 
 
-void LasReader::readNextPoints(PointData& data)
+void FauxReader::readNextPoints(PointData& data)
 {
   // make up some data and put it into the buffer
 
@@ -76,19 +88,17 @@ void LasReader::readNextPoints(PointData& data)
 
   const PointLayout& layout = data.getLayout();
 
-  int offsetX = layout.getFieldOffset_X();
-  int offsetY = layout.getFieldOffset_Y();
-  int offsetZ = layout.getFieldOffset_Z();
   int offsetT = layout.findFieldOffset(Field::Time);
 
   float v = (float)m_lastPointRead;
 
-  for (int i=0; i<cnt; i++)
+  for (int index=0; index<cnt; index++)
   {
-    data.setField_F32(i, offsetX, v);
-    data.setField_F32(i, offsetY, v + 0.1f);
-    data.setField_F32(i, offsetZ, v + 0.2f);
-    data.setField_F64(i, offsetT, v + 0.3f);
+    data.setValid(index);
+    data.setX(index, Utils::random<float>(0,100));
+    data.setY(index, Utils::random<float>(0,100));
+    data.setZ(index, Utils::random<float>(-25,100));
+    data.setField_F64(index, offsetT, v * 0.1);
 
     ++v;
   }

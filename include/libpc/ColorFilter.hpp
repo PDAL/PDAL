@@ -32,26 +32,27 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LASWRITER_HPP
-#define INCLUDED_LASWRITER_HPP
+#ifndef INCLUDED_COLORFILTER_HPP
+#define INCLUDED_COLORFILTER_HPP
 
-#include <string>
+#include "libpc/Filter.hpp"
 
-#include "libpc/Writer.hpp"
 
-class LasWriter : public Writer
+// adds three new u8 fields (R,G,B) for the colourization of the Z axis
+// the color is done as a ramp from the declared Z min/max values in the header
+class ColorFilter : public Filter
 {
 public:
-  LasWriter(std::string filename, Stage& prevStage);
+  ColorFilter(Stage& prevStage);
   void initialize();
 
-private:
-  void writeBegin();
-  void writeBuffer(const PointData&);
-  void writeEnd();
+  void readNextPoints(PointData&);
 
-  LasWriter& operator=(const LasWriter&); // not implemented
-  LasWriter(const LasWriter&); // not implemented
+private:
+  void getColor(float value, byte& red, byte& green, byte& blue);
+
+  ColorFilter& operator=(const ColorFilter&); // not implemented
+  ColorFilter(const ColorFilter&); // not implemented
 };
 
 #endif
