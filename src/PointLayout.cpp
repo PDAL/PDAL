@@ -32,9 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <cassert>
+#include <iostream>
+
 #include "libpc/PointLayout.hpp"
 
-#include <iostream>
 using std::cout;
 using std::endl;
 using std::string;
@@ -101,14 +103,13 @@ bool PointLayout::operator==(const PointLayout & other) const
 }
 
 
-void PointLayout::addField(const Field& fieldParam)
+int PointLayout::addField(const Field& fieldParam)
 {
   Field myField(fieldParam);
 
   const Field::DataItem item = myField.getItem();
 
-  if (hasField(item))
-    return;
+  assert(!hasField(item));
 
   const int offset = m_numBytes;
   myField.setOffset(offset);
@@ -132,16 +133,7 @@ void PointLayout::addField(const Field& fieldParam)
     m_fieldIndex_Z = index;
   }
 
-  return;
-}
-
-
-void PointLayout::addFields(const std::vector<Field>& fields)
-{
-  for (size_t i=0; i<fields.size(); i++)
-  {
-    addField(fields[i]);
-  }
+  return index;
 }
 
 

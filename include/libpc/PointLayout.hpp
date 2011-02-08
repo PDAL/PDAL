@@ -51,8 +51,8 @@ public:
   bool operator==(const PointLayout & other) const;
   bool same(const PointLayout & other, bool ignoreActive=false) const;
 
-  void addField(const Field& field);
-  void addFields(const std::vector<Field>& fields);
+  // returns the index of the field added
+  int addField(const Field& field);
 
   const Field& getField(int fieldIndex) const { return m_fields[fieldIndex]; }
   bool isActive(int fieldIndex) const { return m_isActive[fieldIndex]; }

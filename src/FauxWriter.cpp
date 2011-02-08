@@ -73,8 +73,19 @@ void FauxWriter::writeEnd()
 
 void FauxWriter::writeBuffer(const PointData& pointData)
 {
+  const int numPoints = pointData.getNumPoints();
+  
+  int numValidPoints = 0;
+  for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
+  {
+    if (pointData.isValid(pointIndex))
+    {
+      ++numValidPoints;
+    }
+  }
+  
   cout << "FauxWriter::writeBuffer()" << endl;
-  cout << "  writing " << pointData.getNumPoints() << " points" << endl;
+  cout << "  writing " << numValidPoints << " of " << numPoints << " points" << endl;
   cout << endl;
 
   pointData.dump(" ");

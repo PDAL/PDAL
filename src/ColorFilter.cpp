@@ -43,9 +43,13 @@ ColorFilter::ColorFilter(Stage& prevStage)
   PointLayout& layout = getHeader().getLayout();
 
   // add the three u8 fields
-  layout.addField(Field(Field::Zred, Field::U8));
-  layout.addField(Field(Field::Zgreen, Field::U8));
-  layout.addField(Field(Field::Zblue, Field::U8));
+  int index;
+  index = layout.addField(Field(Field::Zred, Field::U8));
+  layout.setActive(index);
+  index = layout.addField(Field(Field::Zgreen, Field::U8));
+  layout.setActive(index);
+  index = layout.addField(Field(Field::Zblue, Field::U8));
+  layout.setActive(index);
 
   return;
 }

@@ -92,13 +92,13 @@ const PointLayout& PointData::getLayout() const
 template <class T>
 void PointData::setField(int pointIndex, int fieldIndex, T value)
 {
+  assert(m_layout.isActive(fieldIndex));
+
   int offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
   assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
   byte* p = m_data + offset;
 
   *(T*)p = value;
-
-  m_layout.setActive(fieldIndex);
 }
 
 
@@ -218,8 +218,11 @@ void PointData::dump(string indent) const
 
   for (int pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
   {
-    cout << "Point: " << pointIndex << endl;
-    dump(pointIndex, indent+"  ");
+    if (isValid(pointIndex))
+    {
+      cout << "Point: " << pointIndex << endl;
+      dump(pointIndex, indent+"  ");
+    }
   }
 
   return;

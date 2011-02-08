@@ -44,24 +44,24 @@ using std::string;
 FauxReader::FauxReader(const Bounds& bounds, int numPoints)
   : Reader()
 {
-  Header& myHeader = getHeader();
-  
-  myHeader.setNumPoints(numPoints);
-  myHeader.setBounds(bounds);
-
-  // pretend we read the header to determine the number of points and the layout
-
   Header& header = getHeader();
   PointLayout& layout = header.getLayout();
+  
+  header.setNumPoints(numPoints);
+  header.setBounds(bounds);
 
-  vector<Field> fields;
-  fields.push_back(Field(Field::XPos, Field::F32));
-  fields.push_back(Field(Field::YPos, Field::F32));
-  fields.push_back(Field(Field::ZPos, Field::F32));
-  fields.push_back(Field(Field::Time, Field::F64));
-  layout.addFields(fields);
+  int index;
+  
+  index = layout.addField(Field(Field::XPos, Field::F32));
+  layout.setActive(index);
+  index = layout.addField(Field(Field::YPos, Field::F32));
+  layout.setActive(index);
+  index = layout.addField(Field(Field::ZPos, Field::F32));
+  layout.setActive(index);
+  index = layout.addField(Field(Field::Time, Field::F64));
+  layout.setActive(index);
 
-  myHeader.dump();
+  header.dump();
 
   return;
 }

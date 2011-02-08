@@ -41,7 +41,7 @@
 
 static void test1()
 {
-#if 0
+#if 1
   // we are faking the reader, so we need to describe it here
   // the faux reader only supports fields (X,Y,Z,T)
   const Bounds bounds(0, 200, 0, 200, -100, 100);
