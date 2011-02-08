@@ -37,16 +37,7 @@
 Filter::Filter(Stage& prevStage) :
   m_prevStage(prevStage)
 {
-  if (!m_prevStage.isInitialized())
-    throw;
-
   Header& header = getHeader();
   header = m_prevStage.getConstHeader();
   return;
-}
-
-
-void Filter::initialize()
-{
-  Stage::initialize();
 }

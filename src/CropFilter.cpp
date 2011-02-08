@@ -42,25 +42,9 @@ CropFilter::CropFilter(Stage& prevStage, const Bounds& bounds)
 
   header.setBounds(bounds);
 
-  return;
-}
-
-
-void CropFilter::initialize()
-{
-  Filter::initialize();
-  return;
-}
-
-
-void CropFilter::updateLayout()
-{
-  m_prevStage.updateLayout();
   const PointLayout& layout = m_prevStage.getConstHeader().getConstPointLayout();
 
   getHeader().getPointLayout() = layout;
-
-  // crop filter doesn't add any fields
 
   return;
 }

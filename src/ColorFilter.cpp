@@ -40,20 +40,6 @@
 ColorFilter::ColorFilter(Stage& prevStage) 
   : Filter(prevStage)
 {
-  return;
-}
-
-
-void ColorFilter::initialize()
-{
-  Filter::initialize();
-  return;
-}
-
-
-void ColorFilter::updateLayout()
-{
-  m_prevStage.updateLayout();
   const PointLayout& prevLayout = m_prevStage.getConstHeader().getConstPointLayout();
 
   PointLayout myLayout(prevLayout);
@@ -64,6 +50,7 @@ void ColorFilter::updateLayout()
   myLayout.addField(Field(Field::Zblue, Field::U8));
 
   getHeader().setLayout(myLayout);
+  return;
 }
 
 

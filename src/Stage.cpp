@@ -35,21 +35,8 @@
 #include "libpc/Stage.hpp"
 
 Stage::Stage()
-  : m_isInitialized(false)
 {
   return;
-}
-
-
-void Stage::initialize()
-{
-  m_isInitialized = true;
-}
-
-
-bool Stage::isInitialized() const
-{
-  return m_isInitialized;
 }
 
 

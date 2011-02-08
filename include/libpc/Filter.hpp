@@ -42,9 +42,6 @@ class Filter : public Stage
 {
 public:
   Filter(Stage& prevStage);
-  virtual void initialize() = 0;
-
-  virtual void updateLayout() = 0;
 
   virtual void readNextPoints(PointData&) = 0;
 

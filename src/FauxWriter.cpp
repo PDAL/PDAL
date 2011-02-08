@@ -43,22 +43,11 @@ using std::endl;
 FauxWriter::FauxWriter(Stage& prevStage) :
   Writer(prevStage)
 {
-  return;
-}
-
-
-void FauxWriter::initialize()
-{
-  Writer::initialize();
-}
-
-
-void FauxWriter::updateLayout()
-{
-  m_prevStage.updateLayout();
   const PointLayout& layout = m_prevStage.getConstHeader().getConstPointLayout();
 
   getHeader().getPointLayout() = layout;
+
+  return;
 }
 
 

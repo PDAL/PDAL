@@ -43,9 +43,6 @@ class Writer : public Filter
 {
 public:
   Writer(Stage& prevStage);
-  virtual void initialize();
-
-  virtual void updateLayout() = 0;
 
   void write();
 

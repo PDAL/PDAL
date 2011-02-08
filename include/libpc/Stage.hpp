@@ -44,12 +44,8 @@ class Stage
 {
 public:
   Stage();
-  virtual void initialize();
-  bool isInitialized() const;
   
-  virtual void updateLayout() = 0;
-  
-    virtual void readNextPoints(PointData&) = 0;
+  virtual void readNextPoints(PointData&) = 0;
 
   const Header& getConstHeader() const;
 
@@ -57,7 +53,6 @@ protected:
   Header& getHeader();
 
 private:
-  bool m_isInitialized;
   Header m_header;
 
   Stage& operator=(const Stage&); // not implemented

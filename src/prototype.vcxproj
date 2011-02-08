@@ -78,7 +78,6 @@
     <ClCompile Include="Bounds.cpp" />
     <ClCompile Include="ColorFilter.cpp" />
     <ClCompile Include="CropFilter.cpp" />
-    <ClCompile Include="DemosaicFilter.cpp" />
     <ClCompile Include="FauxReader.cpp" />
     <ClCompile Include="FauxWriter.cpp" />
     <ClCompile Include="Field.cpp" />
@@ -97,7 +96,6 @@
     <ClInclude Include="..\include\libpc\Bounds.hpp" />
     <ClInclude Include="..\include\libpc\ColorFilter.hpp" />
     <ClInclude Include="..\include\libpc\CropFilter.hpp" />
-    <ClInclude Include="..\include\libpc\DemosaicFilter.hpp" />
     <ClInclude Include="..\include\libpc\FauxReader.hpp" />
     <ClInclude Include="..\include\libpc\FauxWriter.hpp" />
     <ClInclude Include="..\include\libpc\Field.hpp" />

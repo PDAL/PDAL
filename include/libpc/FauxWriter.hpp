@@ -43,9 +43,6 @@ class FauxWriter : public Writer
 {
 public:
   FauxWriter(Stage& prevStage);
-  void initialize();
-
-  void updateLayout();
 
 private:
   int m_numPointsWritten;

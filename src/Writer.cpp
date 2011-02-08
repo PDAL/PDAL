@@ -44,12 +44,6 @@ Writer::Writer(Stage& prevStage) :
 }
 
 
-void Writer::initialize()
-{
-  Filter::initialize();
-}
-
-
 void Writer::write()
 {
   writeBegin();

@@ -218,7 +218,7 @@ void PointData::dump(string indent) const
 
   for (int pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
   {
-    cout << "Point:" << endl;
+    cout << "Point: " << pointIndex << endl;
     dump(pointIndex, indent+"  ");
   }
 

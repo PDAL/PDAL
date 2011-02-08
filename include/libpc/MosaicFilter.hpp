@@ -44,9 +44,6 @@ class MosaicFilter : public Filter
 {
 public:
   MosaicFilter(Stage& prevStage, Stage& prevStage2);
-  void initialize();
-
-  void updateLayout();
 
   void readNextPoints(PointData&);
 

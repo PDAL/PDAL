@@ -44,9 +44,6 @@ class ColorFilter : public Filter
 {
 public:
   ColorFilter(Stage& prevStage);
-  void initialize();
-
-  void updateLayout();
 
   void readNextPoints(PointData&);
 

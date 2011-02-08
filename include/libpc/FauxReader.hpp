@@ -43,10 +43,6 @@ public:
   // generates N points randomly within the bounds
   FauxReader(const Bounds&, int numPoints);
 
-  void initialize();
-
-  void updateLayout();
-
   void readNextPoints(PointData& data);
 
 private:

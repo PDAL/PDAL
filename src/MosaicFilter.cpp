@@ -41,24 +41,10 @@ MosaicFilter::MosaicFilter(Stage& prevStage, Stage& prevStage2)
   : Filter(prevStage),
   m_prevStage2(prevStage2)
 {
-  return;
-}
-
-
-void MosaicFilter::initialize()
-{
-  Filter::initialize();
-  return;
-}
-
-
-void MosaicFilter::updateLayout()
-{
   Header& header =  getHeader();
   const Header& header1 =  m_prevStage.getConstHeader();
   const Header& header2 =  m_prevStage2.getConstHeader();
 
-  m_prevStage.updateLayout();
   const PointLayout& layout = header1.getConstPointLayout();
 
   header.getPointLayout() = layout;

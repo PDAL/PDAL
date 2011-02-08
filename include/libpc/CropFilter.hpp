@@ -45,9 +45,6 @@ class CropFilter : public Filter
 {
 public:
   CropFilter(Stage& prevStage, const Bounds& bounds);
-  void initialize();
-
-  void updateLayout();
 
   void readNextPoints(PointData&);
 

@@ -49,14 +49,6 @@ FauxReader::FauxReader(const Bounds& bounds, int numPoints)
   myHeader.setNumPoints(numPoints);
   myHeader.setBounds(bounds);
 
-  return;
-}
-
-
-void FauxReader::initialize()
-{
-  Reader::initialize();
-
   // pretend we read the header to determine the number of points and the layout
 
   Header& header = getHeader();
@@ -69,13 +61,8 @@ void FauxReader::initialize()
   fields.push_back(Field(Field::Time, Field::F64));
   layout.addFields(fields);
 
+
   return;
-}
-
-
-void FauxReader::updateLayout()
-{
-  // this stage has no previous stages, so the layout is by definition already correct
 }
 
 
