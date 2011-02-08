@@ -32,53 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_POINTLAYOUT_HPP
-#define INCLUDED_POINTLAYOUT_HPP
+#include "libpc/Bounds.hpp"
 
-#include <vector>
+#include <iostream>
 
-#include "libpc/Field.hpp"
+using std::cout;
 
-class PointLayout
+
+void Bounds::dump(void) const
 {
-public:
-  PointLayout();
-  PointLayout(const PointLayout&);
-  PointLayout& operator=(const PointLayout & other);
-
-  void addField(const Field& field);
-  void addFields(const std::vector<Field>& fields);
-
-  const Field& getField(int fieldIndex) const { return m_fields[fieldIndex]; }
-  bool isActive(int fieldIndex) const { return m_isActive[fieldIndex]; }
-  void setActive(int fieldIndex) { m_isActive[fieldIndex] = true; }
-  void setInactive(int fieldIndex) { m_isActive[fieldIndex] = false; }
-
-  int getSizeInBytes() const;
-  int getNumFields() const;
-
-  void dump() const;
-
-  // returns -1 if not found
-  int findFieldIndex(Field::DataItem item) const;
-  bool hasField(Field::DataItem item) const;
-  int findFieldOffset(Field::DataItem item) const;
-
-  // some well-known field types are always available
-  // is this worth it?
-  int getFieldIndex_X() const { return m_fieldIndex_X; }
-  int getFieldIndex_Y() const { return m_fieldIndex_Y; }
-  int getFieldIndex_Z() const { return m_fieldIndex_Z; }
-
-private:
-  std::vector<Field> m_fields;
-  std::vector<bool> m_isActive;
-
-  int m_numBytes;
-
-  int m_fieldIndex_X;
-  int m_fieldIndex_Y;
-  int m_fieldIndex_Z;
-};
-
-#endif
+  cout << "x(" << m_minX << "," << m_maxX << ")";
+  cout << " ";
+  cout << "y(" << m_minY << "," << m_maxY << ")";
+  cout << " ";
+  cout << "z(" << m_minZ << "," << m_maxZ << ")";
+}

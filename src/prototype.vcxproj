@@ -75,6 +75,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bounds.cpp" />
     <ClCompile Include="ColorFilter.cpp" />
     <ClCompile Include="CropFilter.cpp" />
     <ClCompile Include="FauxReader.cpp" />
@@ -91,6 +92,7 @@
     <ClCompile Include="Writer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\libpc\Bounds.hpp" />
     <ClInclude Include="..\include\libpc\ColorFilter.hpp" />
     <ClInclude Include="..\include\libpc\CropFilter.hpp" />
     <ClInclude Include="..\include\libpc\FauxReader.hpp" />

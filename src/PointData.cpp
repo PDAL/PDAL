@@ -104,12 +104,16 @@ void PointData::setField(int pointIndex, int fieldIndex, T value)
   byte* p = m_data + offset;
 
   *(T*)p = value;
+
+  m_layout.setActive(fieldIndex);
 }
 
 
 template <class T>
 T PointData::getField(int pointIndex, int fieldIndex) const
 {
+  assert(m_layout.isActive(fieldIndex));
+
   int offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
   assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
   byte* p = m_data + offset;
@@ -155,79 +159,78 @@ double PointData::getField_F64(int pointIndex, int fieldIndex) const
 }
 
 
-float PointData::getX(int index) const
+float PointData::getX(int pointIndex) const
 {
-  return getField_F32(index, m_layout.getFieldIndex_X());
+  return getField_F32(pointIndex, m_layout.getFieldIndex_X());
 }
 
 
-float PointData::getY(int index) const
+float PointData::getY(int pointIndex) const
 {
-  return getField_F32(index, m_layout.getFieldIndex_Y());
+  return getField_F32(pointIndex, m_layout.getFieldIndex_Y());
 }
 
 
-float PointData::getZ(int index) const
+float PointData::getZ(int pointIndex) const
 {
-  return getField_F32(index, m_layout.getFieldIndex_Z());
+  return getField_F32(pointIndex, m_layout.getFieldIndex_Z());
 }
 
 
-void PointData::setX(int index, float value)
+void PointData::setX(int pointIndex, float value)
 {
-  setField_F32(index, m_layout.getFieldIndex_X(), value);
+  setField_F32(pointIndex, m_layout.getFieldIndex_X(), value);
 }
 
 
-void PointData::setY(int index, float value)
+void PointData::setY(int pointIndex, float value)
 {
-  setField_F32(index, m_layout.getFieldIndex_Y(), value);
+  setField_F32(pointIndex, m_layout.getFieldIndex_Y(), value);
 }
 
 
-void PointData::setZ(int index, float value)
+void PointData::setZ(int pointIndex, float value)
 {
-  setField_F32(index, m_layout.getFieldIndex_Z(), value);
+  setField_F32(pointIndex, m_layout.getFieldIndex_Z(), value);
 }
 
 
 void PointData::dump(string indent) const
 {
-  for (int index=0; index<getNumPoints(); index++)
+  for (int pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
   {
-    dump(index, indent);
+    dump(pointIndex, indent);
   }
 
   return;
 }
 
 
-void PointData::dump(int index, string indent) const
+void PointData::dump(int pointIndex, string indent) const
 {
   const PointLayout& layout = getLayout();
 
-  for (int f=0; f<layout.getNumFields(); f++)
+  for (int fieldIndex=0; fieldIndex<layout.getNumFields(); fieldIndex++)
   {
     cout << indent;
 
-    const Field& field = layout.getField(f);
-    const int offset = field.getOffset();
+    const Field& field = layout.getField(fieldIndex);
 
     cout << field.getName(field.getItem()) << ": ";
 
       // print the value, if we are active
-    if (layout.isActive(f))
+    if (layout.isActive(fieldIndex))
     {
       switch (field.getType())
       {
       case Field::U8:
-        cout << this->getField_U8(index, offset);
+        cout << (int)(this->getField_U8(pointIndex, fieldIndex));
         break;
       case Field::F32:
-        cout << this->getField_F32(index, offset);
+        cout << this->getField_F32(pointIndex, fieldIndex);
         break;
       case Field::F64:
-        cout << this->getField_F64(index, offset);
+        cout << this->getField_F64(pointIndex, fieldIndex);
         break;
       default:
         throw;

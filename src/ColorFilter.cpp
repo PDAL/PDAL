@@ -32,7 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <cassert>
 #include "libpc/ColorFilter.hpp"
+
+
 
 ColorFilter::ColorFilter(Stage& prevStage) 
   : Filter(prevStage)
@@ -58,7 +61,7 @@ void ColorFilter::updateLayout()
   // add the three u8 fields
   myLayout.addField(Field(Field::Zred, Field::U8));
   myLayout.addField(Field(Field::Zgreen, Field::U8));
-  myLayout.addField(Field(Field::Zgreen, Field::U8));
+  myLayout.addField(Field(Field::Zblue, Field::U8));
 
   getHeader().setLayout(myLayout);
 }
@@ -68,16 +71,27 @@ void ColorFilter::readNextPoints(PointData& data)
 {
   m_prevStage.readNextPoints(data);
 
-  int cnt = data.getNumPoints();
-  //const PointLayout& layout = data.getLayout();
+  int numPoints = data.getNumPoints();
 
-  for (int index=0; index<cnt; index++)
+  const PointLayout& layout = data.getLayout();
+
+  int fieldIndexR = layout.findFieldIndex(Field::Zred);
+  assert(fieldIndexR != -1);
+  int fieldIndexG = layout.findFieldIndex(Field::Zgreen);
+  assert(fieldIndexG != -1);
+  int fieldIndexB = layout.findFieldIndex(Field::Zblue);
+  assert(fieldIndexB != -1);
+
+  for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
   {
-    float z = data.getZ(index);
+    float z = data.getZ(pointIndex);
     byte red, green, blue;
     getColor(z, red, green, blue);
 
-    // now we would store the 3 u8's in the point data...
+    // now we store the 3 u8's in the point data...
+    data.setField_U8(pointIndex, fieldIndexR, red);
+    data.setField_U8(pointIndex, fieldIndexG, green);
+    data.setField_U8(pointIndex, fieldIndexB, blue);
 
   }
 
@@ -134,7 +148,7 @@ void ColorFilter::getColor(float value, byte& red, byte& green, byte& blue)
 {
   float fred, fgreen, fblue;
 
-  SlimDX_GetColor(value, (float)getHeader().m_minZ, (float)getHeader().m_maxZ, fred, fblue, fgreen);
+  SlimDX_GetColor(value, (float)getHeader().getBounds().m_minZ, (float)getHeader().getBounds().m_maxZ, fred, fblue, fgreen);
 
   red = (byte)(fred * 255.0);
   green = (byte)(fgreen * 255.0);

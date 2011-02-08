@@ -32,53 +32,71 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_POINTLAYOUT_HPP
-#define INCLUDED_POINTLAYOUT_HPP
+#ifndef INCLUDED_BOUNDS_HPP
+#define INCLUDED_BOUNDS_HPP
 
-#include <vector>
+#include <limits>
 
-#include "libpc/Field.hpp"
-
-class PointLayout
+class Bounds
 {
 public:
-  PointLayout();
-  PointLayout(const PointLayout&);
-  PointLayout& operator=(const PointLayout & other);
+  Bounds()
+    : m_minX(-std::numeric_limits<double>::infinity()),
+    m_maxX(std::numeric_limits<double>::infinity()),
+    m_minY(-std::numeric_limits<double>::infinity()),
+    m_maxY(std::numeric_limits<double>::infinity()),
+    m_minZ(-std::numeric_limits<double>::infinity()),
+    m_maxZ(std::numeric_limits<double>::infinity())
+  {
+  }
 
-  void addField(const Field& field);
-  void addFields(const std::vector<Field>& fields);
+  Bounds(double minX, double maxX, double minY, double maxY, double minZ, double maxZ)
+    : m_minX(minX),
+    m_maxX(maxX),
+    m_minY(minY),
+    m_maxY(maxY),
+    m_minZ(minZ),
+    m_maxZ(maxZ)
+  {
+  }
 
-  const Field& getField(int fieldIndex) const { return m_fields[fieldIndex]; }
-  bool isActive(int fieldIndex) const { return m_isActive[fieldIndex]; }
-  void setActive(int fieldIndex) { m_isActive[fieldIndex] = true; }
-  void setInactive(int fieldIndex) { m_isActive[fieldIndex] = false; }
+  Bounds(const Bounds& other)
+    : m_minX(other.m_minX),
+    m_maxX(other.m_maxX),
+    m_minY(other.m_minY),
+    m_maxY(other.m_maxY),
+    m_minZ(other.m_minZ),
+    m_maxZ(other.m_maxZ)
+  {
+  }
 
-  int getSizeInBytes() const;
-  int getNumFields() const;
+  Bounds& operator=(const Bounds & other)
+  {
+    if (this != &other)
+    {
+      m_minX = other.m_minX;
+      m_maxX = other.m_maxX;
+      m_minY = other.m_minY;
+      m_maxY = other.m_maxY;
+      m_minZ = other.m_minZ;
+      m_maxZ = other.m_maxZ;
+    }
+    return *this;
+  }
+
+  bool contains(double x, double y, double z) const
+  {
+    return (x >= m_minX && x <= m_maxX && y >= m_minY && y <= m_maxY && z >= m_minZ && z <= m_maxZ);
+  }
 
   void dump() const;
 
-  // returns -1 if not found
-  int findFieldIndex(Field::DataItem item) const;
-  bool hasField(Field::DataItem item) const;
-  int findFieldOffset(Field::DataItem item) const;
-
-  // some well-known field types are always available
-  // is this worth it?
-  int getFieldIndex_X() const { return m_fieldIndex_X; }
-  int getFieldIndex_Y() const { return m_fieldIndex_Y; }
-  int getFieldIndex_Z() const { return m_fieldIndex_Z; }
-
-private:
-  std::vector<Field> m_fields;
-  std::vector<bool> m_isActive;
-
-  int m_numBytes;
-
-  int m_fieldIndex_X;
-  int m_fieldIndex_Y;
-  int m_fieldIndex_Z;
+  double m_minX;
+  double m_maxX;
+  double m_minY;
+  double m_maxY;
+  double m_minZ;
+  double m_maxZ;
 };
 
 #endif

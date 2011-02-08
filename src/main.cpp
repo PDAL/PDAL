@@ -44,7 +44,7 @@ int main(int /*argc*/, char* /*argv*/[])
   FauxReader reader("foo.las");
   reader.initialize();
 
-  CropFilter cropper(reader, 0, 100, 0, 100, 0, 100);
+  CropFilter cropper(reader, Bounds(0, 100, 0, 100, 0, 100));
   cropper.initialize();
 
   ColorFilter colorizer(cropper);

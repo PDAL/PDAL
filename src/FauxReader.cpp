@@ -67,13 +67,7 @@ void FauxReader::initialize()
 
   header.setNumPoints(30);
 
-  header.m_minX = 0.0;
-  header.m_maxX = 200.0;
-  header.m_minY = 0.0;
-  header.m_maxY = 200.0;
-
-  header.m_minZ = -100.0;
-  header.m_maxZ = 100.0;
+  header.setBounds(Bounds(0.0, 200.0, 0.0, 200.0, -100.0, 100.0));
 
   return;
 }
@@ -89,29 +83,31 @@ void FauxReader::readNextPoints(PointData& data)
 {
   // make up some data and put it into the buffer
 
-  int cnt = data.getNumPoints();
-  assert(m_lastPointRead + cnt <= getHeader().getNumPoints());
+  int numPoints = data.getNumPoints();
+  assert(m_lastPointRead + numPoints <= getHeader().getNumPoints());
 
   const PointLayout& layout = data.getLayout();
   Header& header = getHeader();
 
-  int indexT = layout.findFieldIndex(Field::Time);
-  assert(indexT != -1);
+  int fieldIndexT = layout.findFieldIndex(Field::Time);
+  assert(fieldIndexT != -1);
 
   float v = (float)m_lastPointRead;
 
-  for (int index=0; index<cnt; index++)
+  const Bounds& bounds = header.getBounds();
+
+  for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
   {
-    data.setValid(index);
-    data.setX(index, Utils::random<float>((float)header.m_minX,(float)header.m_maxX));
-    data.setY(index, Utils::random<float>((float)header.m_minY,(float)header.m_maxY));
-    data.setZ(index, Utils::random<float>((float)header.m_minZ,(float)header.m_maxZ));
-    data.setField_F64(index, indexT, v * 0.1);
+    data.setValid(pointIndex);
+    data.setX(pointIndex, (float)Utils::random(bounds.m_minX,bounds.m_maxX));
+    data.setY(pointIndex, (float)Utils::random(bounds.m_minY,bounds.m_maxY));
+    data.setZ(pointIndex, (float)Utils::random(bounds.m_minZ,bounds.m_maxZ));
+    data.setField_F64(pointIndex, fieldIndexT, v * 0.1);
 
     ++v;
   }
 
-  m_lastPointRead += cnt;
+  m_lastPointRead += numPoints;
 
   return;
 }

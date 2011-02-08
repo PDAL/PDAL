@@ -51,19 +51,34 @@ Header::Header(const Header& other)
 {
   this->m_numPoints = other.m_numPoints;
   this->m_pointLayout = other.m_pointLayout;
-
+  this->m_bounds = other.m_bounds;
   return;
 }  
 
 
 Header& Header::operator=(const Header& other)
 {
-  this->m_numPoints = other.m_numPoints;
-  this->m_pointLayout = other.m_pointLayout;
-
+  if (this != &other)
+  {
+    this->m_numPoints = other.m_numPoints;
+    this->m_pointLayout = other.m_pointLayout;
+    this->m_bounds = other.m_bounds;
+  }
   return *this;
 }
  
+
+const Bounds& Header::getBounds() const
+{
+  return m_bounds;
+}
+
+
+void Header::setBounds(const Bounds& bounds)
+{
+  m_bounds = bounds;
+}
+
 
 const PointLayout& Header::getConstPointLayout() const
 {

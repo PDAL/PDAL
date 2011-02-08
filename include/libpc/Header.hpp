@@ -36,6 +36,7 @@
 #define INCLUDED_HEADER_HPP
 
 #include "libpc/PointLayout.hpp"
+#include "libpc/Bounds.hpp"
 
 class Header
 {
@@ -44,13 +45,6 @@ public:
   Header(const Header&);
   Header& operator=(const Header&);
 
-  double m_minX;
-  double m_maxX;
-  double m_minY;
-  double m_maxY;
-  double m_minZ;
-  double m_maxZ;
-
   const PointLayout& getConstPointLayout() const;
   PointLayout& getPointLayout();
   void setLayout(const PointLayout&);
@@ -58,11 +52,15 @@ public:
   int getNumPoints() const;
   void setNumPoints(int);
 
+  const Bounds& getBounds() const;
+  void setBounds(const Bounds&);
+
   void dump() const;
 
 private:
   PointLayout m_pointLayout;
   int m_numPoints;
+  Bounds m_bounds;
 };
 
 #endif

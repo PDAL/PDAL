@@ -41,18 +41,17 @@
 class Utils
 {
 public:
-  template<class T>
-  static T random(T min, T max)
+  static double random(double min, double max)
   {
     double r = (double)rand();  // [0..32767]
-    double v = (double)(max - min) / (double)RAND_MAX;
+    double v = (max - min) / (double)RAND_MAX;
     double s = r * v; // [0..(max-min)]
-    double t = (double)min + s; // [min..max]
+    double t = min + s; // [min..max]
 
-    assert((T)t >= min);
-    assert((T)t <= max);
+    assert(t >= min);
+    assert(t <= max);
 
-    return (T)t;
+    return t;
   }
 };
 

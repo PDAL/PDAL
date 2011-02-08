@@ -34,14 +34,9 @@
 
 #include "libpc/CropFilter.hpp"
 
-CropFilter::CropFilter(Stage& prevStage, float minX, float maxX, float minY, float maxY, float minZ, float maxZ) 
+CropFilter::CropFilter(Stage& prevStage, const Bounds& bounds) 
   : Filter(prevStage),
-  m_minX(minX), 
-  m_maxX(maxX),
-  m_minY(minY), 
-  m_maxY(maxY),
-  m_minZ(minZ), 
-  m_maxZ(maxZ)
+  m_bounds(bounds)
 {
   return;
 }
@@ -72,14 +67,13 @@ void CropFilter::readNextPoints(PointData& data)
   m_prevStage.readNextPoints(data);
 
   int cnt = data.getNumPoints();
-  //const PointLayout& layout = data.getLayout();
 
   for (int index=0; index<cnt; index++)
   {
     float x = data.getX(index);
     float y = data.getY(index);
     float z = data.getZ(index);
-    if (x < m_minX || x > m_maxX || y < m_minY || y > m_maxY ||z < m_minZ || z > m_maxZ)
+    if (!m_bounds.contains(x,y,z))
     {
       // remove this point, and update the lower bound for Z
       data.setInvalid(index);
