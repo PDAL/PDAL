@@ -89,6 +89,9 @@ public:
     return (x >= m_minX && x <= m_maxX && y >= m_minY && y <= m_maxY && z >= m_minZ && z <= m_maxZ);
   }
 
+  // enlarge the bbox of 'this' to include the points of 'other'
+  void grow(const Bounds& other);
+
   void dump() const;
 
   double m_minX;

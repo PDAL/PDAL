@@ -32,26 +32,29 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FAUXREADER_HPP
-#define INCLUDED_FAUXREADER_HPP
+#ifndef INCLUDED_MOSAICFILTER_HPP
+#define INCLUDED_MOSAICFILTER_HPP
 
-#include "libpc/Reader.hpp"
+#include "libpc/Filter.hpp"
+#include "libpc/Bounds.hpp"
 
-class FauxReader : public Reader
+
+// removes any points outside of the given range
+class MosaicFilter : public Filter
 {
 public:
-  // generates N points randomly within the bounds
-  FauxReader(const Bounds&, int numPoints);
-
+  MosaicFilter(Stage& prevStage, Stage& prevStage2);
   void initialize();
 
   void updateLayout();
 
-  void readNextPoints(PointData& data);
+  void readNextPoints(PointData&);
 
 private:
-  FauxReader& operator=(const FauxReader&); // not implemented
-  FauxReader(const FauxReader&); // not implemented
+  Stage& m_prevStage2;
+
+  MosaicFilter& operator=(const MosaicFilter&); // not implemented
+  MosaicFilter(const MosaicFilter&); // not implemented
 };
 
 #endif

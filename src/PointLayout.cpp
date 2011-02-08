@@ -78,6 +78,28 @@ PointLayout& PointLayout::operator=(const PointLayout& other)
 }
 
 
+bool PointLayout::same(const PointLayout & other, bool ignoreActive) const
+{
+    if (m_numBytes != other.m_numBytes) return false;
+    if (!ignoreActive)
+    {
+      if (m_isActive != other.m_isActive) return false;
+    }
+    if (m_fields != other.m_fields) return false;
+
+    // we don't need to check m_fieldIndex_X, etc, because those fields just 
+    // replicate the data in m_fields
+
+    return true;
+}
+
+
+bool PointLayout::operator==(const PointLayout & other) const
+{
+  return same(other);
+}
+
+
 void PointLayout::addField(const Field& fieldParam)
 {
   Field myField(fieldParam);
@@ -129,14 +151,12 @@ void PointLayout::dump() const
 
   for (size_t i=0; i<m_fields.size(); i++)
   {
-    if (isActive(i))
+    m_fields[i].dump();
+    if (!isActive(i))
     {
-      m_fields[i].dump();
+      cout << "(invalid field)";
     }
-    else
-    {
-      cout << "(invalid field)" << endl;
-    }
+    cout << endl;
   }
 }
 

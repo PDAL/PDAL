@@ -40,6 +40,7 @@
 
 
 // removes any points outside of the given range
+// updates the header accordingly
 class CropFilter : public Filter
 {
 public:

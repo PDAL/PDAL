@@ -40,7 +40,7 @@ using std::string;
 using std::cout;
 using std::endl;
 
-FauxWriter::FauxWriter(string filename, Stage& prevStage) :
+FauxWriter::FauxWriter(Stage& prevStage) :
   Writer(prevStage)
 {
   return;
@@ -64,39 +64,36 @@ void FauxWriter::updateLayout()
 
 void FauxWriter::writeBegin()
 {
-  cout << "writing beginning of file" << endl;
+  cout << "FauxWriter::writeBegin()" << endl;
+  cout << endl;
+
   m_numPointsWritten = 0;
+
+  getHeader().dump();
+
   return;
 }
 
 
 void FauxWriter::writeEnd()
 {
-  cout << "writing end of file (" << m_numPointsWritten << " points)" << endl;
+  cout << "FauxWriter::writeEnd()" << endl;
+  cout << "  wrote " << m_numPointsWritten << " points" << endl;
+  cout << endl;
+
   return;
 }
 
 
 void FauxWriter::writeBuffer(const PointData& pointData)
 {
-  cout << "writing " << pointData.getNumPoints() << " points..." << endl;
+  cout << "FauxWriter::writeBuffer()" << endl;
+  cout << "  writing " << pointData.getNumPoints() << " points" << endl;
+  cout << endl;
 
-  int cnt = pointData.getNumPoints();
-  //const PointLayout& layout = pointData.getLayout();
+  pointData.dump(" ");
 
-  for (int index=0; index<cnt; index++)
-  {
-    if (pointData.isValid(index))
-    {
-      cout << "Point " << m_numPointsWritten << ": " << endl;
-      pointData.dump(index, "  ");
-      ++m_numPointsWritten;
-    }
-    else
-    {
-      cout << "(invalid point)" << endl;
-    }
-  }
+  cout << endl;
 
   return;
 }

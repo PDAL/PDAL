@@ -113,6 +113,16 @@ void Header::setNumPoints(int numPoints)
 void Header::dump() const
 {
   cout << "Header:" << endl;
+  
   cout << "Num points: " << m_numPoints << endl;
+  
+  cout << "Bounds: ";
+  m_bounds.dump();
+  cout << endl;
+
   m_pointLayout.dump();
+
+  cout << endl;
+
+  return;
 }

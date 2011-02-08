@@ -78,11 +78,13 @@
     <ClCompile Include="Bounds.cpp" />
     <ClCompile Include="ColorFilter.cpp" />
     <ClCompile Include="CropFilter.cpp" />
+    <ClCompile Include="DemosaicFilter.cpp" />
     <ClCompile Include="FauxReader.cpp" />
     <ClCompile Include="FauxWriter.cpp" />
     <ClCompile Include="Field.cpp" />
     <ClCompile Include="Filter.cpp" />
     <ClCompile Include="Header.cpp" />
+    <ClCompile Include="MosaicFilter.cpp" />
     <ClCompile Include="PointLayout.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PointData.cpp" />
@@ -95,11 +97,13 @@
     <ClInclude Include="..\include\libpc\Bounds.hpp" />
     <ClInclude Include="..\include\libpc\ColorFilter.hpp" />
     <ClInclude Include="..\include\libpc\CropFilter.hpp" />
+    <ClInclude Include="..\include\libpc\DemosaicFilter.hpp" />
     <ClInclude Include="..\include\libpc\FauxReader.hpp" />
     <ClInclude Include="..\include\libpc\FauxWriter.hpp" />
     <ClInclude Include="..\include\libpc\Field.hpp" />
     <ClInclude Include="..\include\libpc\Filter.hpp" />
     <ClInclude Include="..\include\libpc\Header.hpp" />
+    <ClInclude Include="..\include\libpc\MosaicFilter.hpp" />
     <ClInclude Include="..\include\libpc\PointLayout.hpp" />
     <ClInclude Include="..\include\libpc\PointData.hpp" />
     <ClInclude Include="..\include\libpc\Reader.hpp" />

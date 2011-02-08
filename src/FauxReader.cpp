@@ -41,8 +41,14 @@ using std::vector;
 using std::string;
 
 
-FauxReader::FauxReader(string file)
+FauxReader::FauxReader(const Bounds& bounds, int numPoints)
+  : Reader()
 {
+  Header& myHeader = getHeader();
+  
+  myHeader.setNumPoints(numPoints);
+  myHeader.setBounds(bounds);
+
   return;
 }
 
@@ -57,17 +63,11 @@ void FauxReader::initialize()
   PointLayout& layout = header.getPointLayout();
 
   vector<Field> fields;
-
   fields.push_back(Field(Field::XPos, Field::F32));
   fields.push_back(Field(Field::YPos, Field::F32));
   fields.push_back(Field(Field::ZPos, Field::F32));
   fields.push_back(Field(Field::Time, Field::F64));
-
   layout.addFields(fields);
-
-  header.setNumPoints(30);
-
-  header.setBounds(Bounds(0.0, 200.0, 0.0, 200.0, -100.0, 100.0));
 
   return;
 }
@@ -98,10 +98,16 @@ void FauxReader::readNextPoints(PointData& data)
 
   for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
   {
+    const float x = (float)Utils::random(bounds.m_minX,bounds.m_maxX);
+    const float y = (float)Utils::random(bounds.m_minY,bounds.m_maxY);
+    const float z = (float)Utils::random(bounds.m_minZ,bounds.m_maxZ);
+
     data.setValid(pointIndex);
-    data.setX(pointIndex, (float)Utils::random(bounds.m_minX,bounds.m_maxX));
-    data.setY(pointIndex, (float)Utils::random(bounds.m_minY,bounds.m_maxY));
-    data.setZ(pointIndex, (float)Utils::random(bounds.m_minZ,bounds.m_maxZ));
+
+    data.setX(pointIndex, x);
+    data.setY(pointIndex, y);
+    data.setZ(pointIndex, z);
+    
     data.setField_F64(pointIndex, fieldIndexT, v * 0.1);
 
     ++v;

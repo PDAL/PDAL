@@ -53,13 +53,12 @@ class PointData
 public:
   PointData(const PointLayout&, int numPoints);
 
-  byte* getData(int index) const;
+  byte* getData(int pointIndex) const;
   int getNumPoints() const;
   const PointLayout& getLayout() const;
 
-  bool isValid(int index) const;
-  void setValid(int index);
-  void setInvalid(int index);
+  bool isValid(int pointIndex) const;
+  void setValid(int pointIndex, bool value=true);
 
   byte getField_U8(int pointIndex, int fieldIndex) const;
   float getField_F32(int pointIndex, int fieldIndex) const;
@@ -70,12 +69,17 @@ public:
   void setField_F64(int pointIndex, int fieldIndex, double value);
 
   // some well-known fields
-  float getX(int index) const;
-  float getY(int index) const;
-  float getZ(int index) const;
-  void setX(int index, float value);
-  void setY(int index, float value);
-  void setZ(int index, float value);
+  float getX(int pointIndex) const;
+  float getY(int pointIndex) const;
+  float getZ(int pointIndex) const;
+  void setX(int pointIndex, float value);
+  void setY(int pointIndex, float value);
+  void setZ(int pointIndex, float value);
+
+  // bulk copy all the fields from the given point into this object
+  // NOTE: this is only legal if the src and dest layouts are exactly the same
+  // (later, this will be implemented properly, to handle the general cases slowly and the best case quickly)
+  void copyFieldsFast(int destPointIndex, int srcPointIndex, const PointData& srcPointData);
 
   void dump(std::string indent="") const;
   void dump(int index, std::string indent="") const;

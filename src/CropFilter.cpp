@@ -38,6 +38,10 @@ CropFilter::CropFilter(Stage& prevStage, const Bounds& bounds)
   : Filter(prevStage),
   m_bounds(bounds)
 {
+  Header& header = getHeader();
+
+  header.setBounds(bounds);
+
   return;
 }
 
@@ -66,17 +70,17 @@ void CropFilter::readNextPoints(PointData& data)
 {
   m_prevStage.readNextPoints(data);
 
-  int cnt = data.getNumPoints();
+  int numPoints = data.getNumPoints();
 
-  for (int index=0; index<cnt; index++)
+  for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
   {
-    float x = data.getX(index);
-    float y = data.getY(index);
-    float z = data.getZ(index);
+    float x = data.getX(pointIndex);
+    float y = data.getY(pointIndex);
+    float z = data.getZ(pointIndex);
     if (!m_bounds.contains(x,y,z))
     {
       // remove this point, and update the lower bound for Z
-      data.setInvalid(index);
+      data.setValid(pointIndex, false);
     }
   }
 

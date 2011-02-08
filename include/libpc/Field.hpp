@@ -77,6 +77,7 @@ public:
   Field(const Field&);
 
   Field& operator=(const Field&);
+  bool operator==(const Field& other) const;
 
   DataItem getItem() const { return m_item; }
   DataType getType() const { return m_type; }

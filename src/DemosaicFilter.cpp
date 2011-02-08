@@ -32,26 +32,44 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FAUXREADER_HPP
-#define INCLUDED_FAUXREADER_HPP
+#include "libpc/DemosaicFilter.hpp"
 
-#include "libpc/Reader.hpp"
-
-class FauxReader : public Reader
+DemosaicFilter::DemosaicFilter(Stage& prevStage)
+  : Filter(prevStage)
 {
-public:
-  // generates N points randomly within the bounds
-  FauxReader(const Bounds&, int numPoints);
+  return;
+}
 
-  void initialize();
 
-  void updateLayout();
+void DemosaicFilter::initialize()
+{
+  Filter::initialize();
+  return;
+}
 
-  void readNextPoints(PointData& data);
 
-private:
-  FauxReader& operator=(const FauxReader&); // not implemented
-  FauxReader(const FauxReader&); // not implemented
-};
+void DemosaicFilter::updateLayout()
+{
+  m_prevStage.updateLayout();
+  const PointLayout& layout = m_prevStage.getConstHeader().getConstPointLayout();
 
-#endif
+  getHeader().getPointLayout() = layout;
+
+  // crop filter doesn't add any fields
+
+  return;
+}
+
+
+void DemosaicFilter::readNextPoints(PointData& data)
+{
+  m_prevStage.readNextPoints(data);
+
+  int numPoints = data.getNumPoints();
+
+  for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
+  {
+  }
+
+  return;
+}

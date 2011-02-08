@@ -65,16 +65,9 @@ PointData::isValid(int index) const
 
 
 void
-PointData::setValid(int index)
+PointData::setValid(int index, bool value)
 {
-  m_isValid[index] = true;
-}
-
-
-void
-PointData::setInvalid(int index)
-{
-  m_isValid[index] = false;
+  m_isValid[index] = value;
 }
 
 
@@ -195,11 +188,38 @@ void PointData::setZ(int pointIndex, float value)
 }
 
 
+void PointData::copyFieldsFast(int destPointIndex, int srcPointIndex, const PointData& srcPointData)
+{
+  assert(getLayout().same(srcPointData.getLayout(), true));
+
+  byte* src = srcPointData.getData(srcPointIndex);
+  byte* dest = getData(destPointIndex);
+  int len = getLayout().getSizeInBytes();
+
+  memcpy(dest, src, len);
+
+  setValid(destPointIndex, srcPointData.isValid(srcPointIndex));
+
+  m_layout.copyActiveVector( srcPointData.getLayout().getActiveVector() );
+
+  return;
+}
+
+
 void PointData::dump(string indent) const
 {
+  int cnt = 0;
   for (int pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
   {
-    dump(pointIndex, indent);
+    if (isValid(pointIndex))
+      ++cnt;
+  }
+  cout << "Contains " << cnt << " valid points (" << m_numPoints << " total)" << endl;
+
+  for (int pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
+  {
+    cout << "Point:" << endl;
+    dump(pointIndex, indent+"  ");
   }
 
   return;

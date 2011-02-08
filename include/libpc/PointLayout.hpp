@@ -46,13 +46,17 @@ public:
   PointLayout(const PointLayout&);
   PointLayout& operator=(const PointLayout & other);
 
+  bool operator==(const PointLayout & other) const;
+  bool same(const PointLayout & other, bool ignoreActive=false) const;
+
   void addField(const Field& field);
   void addFields(const std::vector<Field>& fields);
 
   const Field& getField(int fieldIndex) const { return m_fields[fieldIndex]; }
   bool isActive(int fieldIndex) const { return m_isActive[fieldIndex]; }
-  void setActive(int fieldIndex) { m_isActive[fieldIndex] = true; }
-  void setInactive(int fieldIndex) { m_isActive[fieldIndex] = false; }
+  void setActive(int fieldIndex, bool value=true) { m_isActive[fieldIndex] = value; }
+  void copyActiveVector(const std::vector<bool>& other) { m_isActive = other; }
+  const std::vector<bool>& getActiveVector() const { return m_isActive; }
 
   int getSizeInBytes() const;
   int getNumFields() const;

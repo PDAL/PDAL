@@ -36,12 +36,18 @@
 #include "libpc/FauxWriter.hpp"
 #include "libpc/CropFilter.hpp"
 #include "libpc/ColorFilter.hpp"
+#include "libpc/MosaicFilter.hpp"
 
 using std::vector;
 
-int main(int /*argc*/, char* /*argv*/[])
+static void test1()
 {
-  FauxReader reader("foo.las");
+#if 0
+  // we are faking the reader, so we need to describe it here
+  // the faux reader only supports fields (X,Y,Z,T)
+  const Bounds bounds(0, 200, 0, 200, -100, 100);
+  const int numPoints = 30;
+  FauxReader reader(bounds, numPoints);
   reader.initialize();
 
   CropFilter cropper(reader, Bounds(0, 100, 0, 100, 0, 100));
@@ -50,12 +56,49 @@ int main(int /*argc*/, char* /*argv*/[])
   ColorFilter colorizer(cropper);
   colorizer.initialize();
 
-  FauxWriter writer("bar.las", colorizer);
+  FauxWriter writer(colorizer);
   writer.initialize();
   
   writer.updateLayout();
 
   writer.write();
+#endif
+
+  return;
+}
+
+
+static void test2()
+{
+  const int numPoints = 10;
+
+  const Bounds bounds1(0, 100, 0, 100, 0, 100);
+  FauxReader reader1(bounds1, numPoints);
+  reader1.initialize();
+
+  const Bounds bounds2(100, 200, 100, 200, 0, 100);
+  FauxReader reader2(bounds2, numPoints);
+  reader2.initialize();
+
+  MosaicFilter mosaicker(reader1, reader2);
+  mosaicker.initialize();
+
+  FauxWriter writer(mosaicker);
+  writer.initialize();
+  
+  writer.updateLayout();
+
+  writer.write();
+
+  return;
+}
+
+
+int main(int /*argc*/, char* /*argv*/[])
+{
+  test1();
+
+  test2();
 
   return 0;
 }

@@ -42,7 +42,7 @@
 class FauxWriter : public Writer
 {
 public:
-  FauxWriter(std::string filename, Stage& prevStage);
+  FauxWriter(Stage& prevStage);
   void initialize();
 
   void updateLayout();

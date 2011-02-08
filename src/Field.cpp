@@ -76,7 +76,7 @@ Field::Field(const Field& field)
 }
 
 
-Field& Field::operator=(const Field & other)
+Field& Field::operator=(const Field& other)
 {
   if (this != &other)
   {
@@ -87,6 +87,17 @@ Field& Field::operator=(const Field & other)
   }
 
   return *this;
+}
+
+
+bool Field::operator==(const Field& other) const
+{
+    if (m_item != other.m_item) return false;
+    if (m_type != other.m_type) return false;
+    if (m_offset != other.m_offset) return false;
+    if (m_index != other.m_index) return false;
+
+    return true;
 }
 
 
@@ -111,7 +122,7 @@ const vector<Field>& Field::standardFields()
 
 void Field::dump() const
 {
-  cout << "Field " << getIndex() << ": " << getName(m_item) << ", " << getName(m_type) << " at byte " << m_offset << endl;
+  cout << "Field " << getIndex() << ": " << getName(m_item) << ", " << getName(m_type) << " at byte " << m_offset;
 }
 
 

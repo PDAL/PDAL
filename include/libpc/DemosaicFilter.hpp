@@ -32,26 +32,27 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FAUXREADER_HPP
-#define INCLUDED_FAUXREADER_HPP
+#ifndef INCLUDED_DEMOSAICFILTER_HPP
+#define INCLUDED_DEMOSAICFILTER_HPP
 
-#include "libpc/Reader.hpp"
+#include "libpc/Filter.hpp"
+#include "libpc/Bounds.hpp"
 
-class FauxReader : public Reader
+
+// removes any points outside of the given range
+class DemosaicFilter : public Filter
 {
 public:
-  // generates N points randomly within the bounds
-  FauxReader(const Bounds&, int numPoints);
-
+  DemosaicFilter(Stage& prevStage);
   void initialize();
 
   void updateLayout();
 
-  void readNextPoints(PointData& data);
+  void readNextPoints(PointData&);
 
 private:
-  FauxReader& operator=(const FauxReader&); // not implemented
-  FauxReader(const FauxReader&); // not implemented
+  DemosaicFilter& operator=(const DemosaicFilter&); // not implemented
+  DemosaicFilter(const DemosaicFilter&); // not implemented
 };
 
 #endif
