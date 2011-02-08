@@ -42,14 +42,10 @@ using std::cout;
 using std::endl;
 
 
-// statics
-vector<Field>* Field::s_standardFields = NULL;
-
 Field::Field() : 
   m_item(Field::InvalidItem),
   m_type(InvalidType),
-  m_offset(-1),
-  m_index(-1)
+  m_offset(-1)
 {
   return;
 }
@@ -58,8 +54,7 @@ Field::Field() :
 Field::Field(DataItem item, DataType type) :
   m_item(item),
   m_type(type),
-  m_offset(-1),
-  m_index(-1)
+  m_offset(-1)
 {
   return;
 }
@@ -68,8 +63,7 @@ Field::Field(DataItem item, DataType type) :
 Field::Field(const Field& field)
   : m_item(field.m_item),
   m_type(field.m_type),
-  m_offset(field.m_offset),
-  m_index(field.m_index)
+  m_offset(field.m_offset)
 {
 
   return;
@@ -83,7 +77,6 @@ Field& Field::operator=(const Field& other)
     m_item = other.m_item;
     m_type = other.m_type;
     m_offset = other.m_offset;
-    m_index = other.m_index;
   }
 
   return *this;
@@ -95,34 +88,14 @@ bool Field::operator==(const Field& other) const
     if (m_item != other.m_item) return false;
     if (m_type != other.m_type) return false;
     if (m_offset != other.m_offset) return false;
-    if (m_index != other.m_index) return false;
 
     return true;
 }
 
 
-const vector<Field>& Field::standardFields()
-{
-  // BUG: not threadsafe
-  if (s_standardFields == NULL)
-  {
-    Field x(XPos, F32);
-    Field y(YPos, F32);
-    Field z(ZPos, F32);
-
-    s_standardFields = new vector<Field>();
-    s_standardFields->push_back(x);
-    s_standardFields->push_back(y);
-    s_standardFields->push_back(z);
-  }
-
-  return *s_standardFields;
-}
-
-
 void Field::dump() const
 {
-  cout << "Field " << getIndex() << ": " << getName(m_item) << ", " << getName(m_type) << " at byte " << m_offset;
+  cout << "Field: " << getName(m_item) << ", type " << getName(m_type) << ", offset " << m_offset;
 }
 
 

@@ -37,6 +37,7 @@
 #include <iostream>
 using std::cout;
 using std::endl;
+using std::string;
 
 
 PointLayout::PointLayout()
@@ -117,7 +118,6 @@ void PointLayout::addField(const Field& fieldParam)
   m_isActive.push_back(false);
 
   const int index = m_fields.size() - 1;
-  myField.setIndex(index);
 
   if (item == Field::XPos)
   {
@@ -141,22 +141,6 @@ void PointLayout::addFields(const std::vector<Field>& fields)
   for (size_t i=0; i<fields.size(); i++)
   {
     addField(fields[i]);
-  }
-}
-
-
-void PointLayout::dump() const
-{
-  cout << "PointLayout:" << endl;
-
-  for (size_t i=0; i<m_fields.size(); i++)
-  {
-    m_fields[i].dump();
-    if (!isActive(i))
-    {
-      cout << "(invalid field)";
-    }
-    cout << endl;
   }
 }
 
@@ -210,4 +194,21 @@ int PointLayout::findFieldOffset(Field::DataItem item) const
     return -1;
 
   return m_fields[index].getOffset();
+}
+
+
+void PointLayout::dump(string indent) const
+{
+  cout << indent << "PointLayout:" << endl;
+
+  for (size_t i=0; i<m_fields.size(); i++)
+  {
+    cout << indent << indent;
+    m_fields[i].dump();
+    if (!isActive(i))
+    {
+      cout << " [inactive]";
+    }
+    cout << endl;
+  }
 }

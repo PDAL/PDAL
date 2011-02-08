@@ -80,13 +80,13 @@ void Header::setBounds(const Bounds& bounds)
 }
 
 
-const PointLayout& Header::getConstPointLayout() const
+const PointLayout& Header::getLayout() const
 {
   return m_pointLayout;
 }
 
 
-PointLayout& Header::getPointLayout()
+PointLayout& Header::getLayout()
 {
   return m_pointLayout;
 }
@@ -114,13 +114,13 @@ void Header::dump() const
 {
   cout << "Header:" << endl;
   
-  cout << "Num points: " << m_numPoints << endl;
+  cout << "  Num points: " << m_numPoints << endl;
   
-  cout << "Bounds: ";
+  cout << "  Bounds: ";
   m_bounds.dump();
   cout << endl;
 
-  m_pointLayout.dump();
+  m_pointLayout.dump("  ");
 
   cout << endl;
 

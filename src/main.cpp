@@ -41,7 +41,7 @@
 
 static void test1()
 {
-#if 1
+#if 0
   // we are faking the reader, so we need to describe it here
   // the faux reader only supports fields (X,Y,Z,T)
   const Bounds bounds(0, 200, 0, 200, -100, 100);
@@ -65,7 +65,6 @@ static void test2()
 {
 #if 1
   const int numPoints = 10;
-
   const Bounds bounds1(0, 100, 0, 100, 0, 100);
   FauxReader reader1(bounds1, numPoints);
 

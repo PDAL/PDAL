@@ -39,12 +39,7 @@ CropFilter::CropFilter(Stage& prevStage, const Bounds& bounds)
   m_bounds(bounds)
 {
   Header& header = getHeader();
-
   header.setBounds(bounds);
-
-  const PointLayout& layout = m_prevStage.getConstHeader().getConstPointLayout();
-
-  getHeader().getPointLayout() = layout;
 
   return;
 }

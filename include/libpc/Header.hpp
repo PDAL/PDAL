@@ -45,8 +45,8 @@ public:
   Header(const Header&);
   Header& operator=(const Header&);
 
-  const PointLayout& getConstPointLayout() const;
-  PointLayout& getPointLayout();
+  const PointLayout& getLayout() const;
+  PointLayout& getLayout();
   void setLayout(const PointLayout&);
 
   int getNumPoints() const;

@@ -85,23 +85,14 @@ public:
   int getOffset() const { return m_offset; }
   void setOffset(int offset) { m_offset = offset; }
 
-  int getIndex() const { return m_index; }
-  void setIndex(int index) { m_index = index; }
-
   int getNumBytes() const;
-
-  static const std::vector<Field>& standardFields();
 
   void dump() const;
 
 private:
   DataItem m_item;
   DataType m_type;
-
   int m_offset;// byte offset within a point buffer
-  int m_index; // 0..n-1, where n is number of fields in layout
-
-  static std::vector<Field>* s_standardFields;
 };
 
 #endif

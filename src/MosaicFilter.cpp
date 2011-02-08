@@ -41,20 +41,22 @@ MosaicFilter::MosaicFilter(Stage& prevStage, Stage& prevStage2)
   : Filter(prevStage),
   m_prevStage2(prevStage2)
 {
-  Header& header =  getHeader();
-  const Header& header1 =  m_prevStage.getConstHeader();
-  const Header& header2 =  m_prevStage2.getConstHeader();
+  const Header& prevHeader1 =  m_prevStage.getHeader();
+  const Header& prevHeader2 =  m_prevStage2.getHeader();
 
-  const PointLayout& layout = header1.getConstPointLayout();
+  {
+    const PointLayout& prevLayout1 = prevHeader1.getLayout();
+    const PointLayout& prevLayout2 = prevHeader2.getLayout();
+    assert(prevLayout1==prevLayout2);
+  }
 
-  header.getPointLayout() = layout;
+  Header& thisHeader = getHeader();
 
-  // BUG: update header bounds to include both stages
-  Bounds bigbox(header1.getBounds());
-  bigbox.grow(header2.getBounds());
-  header.setBounds(bigbox);
+  Bounds bigbox(prevHeader1.getBounds());
+  bigbox.grow(prevHeader2.getBounds());
+  thisHeader.setBounds(bigbox);
 
-  header.setNumPoints(header1.getNumPoints() + header2.getNumPoints());
+  thisHeader.setNumPoints(prevHeader1.getNumPoints() + prevHeader2.getNumPoints());
 
   return;
 }

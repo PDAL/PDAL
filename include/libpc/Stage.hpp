@@ -47,10 +47,10 @@ public:
   
   virtual void readNextPoints(PointData&) = 0;
 
-  const Header& getConstHeader() const;
+  const Header& getHeader() const;
+  Header& getHeader();
 
 protected:
-  Header& getHeader();
 
 private:
   Header m_header;

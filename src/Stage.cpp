@@ -40,7 +40,7 @@ Stage::Stage()
 }
 
 
-const Header& Stage::getConstHeader() const
+const Header& Stage::getHeader() const
 {
   return m_header;
 }

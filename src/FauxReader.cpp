@@ -52,7 +52,7 @@ FauxReader::FauxReader(const Bounds& bounds, int numPoints)
   // pretend we read the header to determine the number of points and the layout
 
   Header& header = getHeader();
-  PointLayout& layout = header.getPointLayout();
+  PointLayout& layout = header.getLayout();
 
   vector<Field> fields;
   fields.push_back(Field(Field::XPos, Field::F32));
@@ -61,6 +61,7 @@ FauxReader::FauxReader(const Bounds& bounds, int numPoints)
   fields.push_back(Field(Field::Time, Field::F64));
   layout.addFields(fields);
 
+  myHeader.dump();
 
   return;
 }

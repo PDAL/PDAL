@@ -40,16 +40,13 @@
 ColorFilter::ColorFilter(Stage& prevStage) 
   : Filter(prevStage)
 {
-  const PointLayout& prevLayout = m_prevStage.getConstHeader().getConstPointLayout();
-
-  PointLayout myLayout(prevLayout);
+  PointLayout& layout = getHeader().getLayout();
 
   // add the three u8 fields
-  myLayout.addField(Field(Field::Zred, Field::U8));
-  myLayout.addField(Field(Field::Zgreen, Field::U8));
-  myLayout.addField(Field(Field::Zblue, Field::U8));
+  layout.addField(Field(Field::Zred, Field::U8));
+  layout.addField(Field(Field::Zgreen, Field::U8));
+  layout.addField(Field(Field::Zblue, Field::U8));
 
-  getHeader().setLayout(myLayout);
   return;
 }
 

@@ -40,13 +40,10 @@ using std::string;
 using std::cout;
 using std::endl;
 
+
 FauxWriter::FauxWriter(Stage& prevStage) :
   Writer(prevStage)
 {
-  const PointLayout& layout = m_prevStage.getConstHeader().getConstPointLayout();
-
-  getHeader().getPointLayout() = layout;
-
   return;
 }
 

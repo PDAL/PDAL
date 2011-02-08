@@ -48,10 +48,10 @@ void Writer::write()
 {
   writeBegin();
 
-  int cnt = m_prevStage.getConstHeader().getNumPoints();
+  int cnt = m_prevStage.getHeader().getNumPoints();
 
   const int chunk = 10;
-  PointData buffer(getHeader().getConstPointLayout(), chunk);
+  PointData buffer(getHeader().getLayout(), chunk);
 
   assert(cnt % chunk == 0); // ha ha
 

@@ -36,8 +36,10 @@
 #define INCLUDED_POINTLAYOUT_HPP
 
 #include <vector>
+#include <string>
 
 #include "libpc/Field.hpp"
+
 
 class PointLayout
 {
@@ -61,7 +63,7 @@ public:
   int getSizeInBytes() const;
   int getNumFields() const;
 
-  void dump() const;
+  void dump(std::string indent="") const;
 
   // returns -1 if not found
   int findFieldIndex(Field::DataItem item) const;
