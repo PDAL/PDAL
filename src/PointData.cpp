@@ -51,7 +51,12 @@ PointData::PointData(const PointLayout& layout, int numPoints) :
   m_pointSize = m_layout.getSizeInBytes();
   m_data = new byte[m_pointSize * m_numPoints];
   
+  // the points will all be set to invalid here
   m_isValid.resize(m_numPoints);
+
+  // override what the passed in layout told us: this is an empty buffer, so no fields should
+  // be marked as being used yet
+  m_layout.markAllFieldsInactive();
 
   return;
 }
@@ -92,7 +97,7 @@ const PointLayout& PointData::getLayout() const
 template <class T>
 void PointData::setField(int pointIndex, int fieldIndex, T value)
 {
-  assert(m_layout.isActive(fieldIndex));
+  m_layout.getField(fieldIndex).setActive();
 
   int offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
   assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
@@ -105,7 +110,7 @@ void PointData::setField(int pointIndex, int fieldIndex, T value)
 template <class T>
 T PointData::getField(int pointIndex, int fieldIndex) const
 {
-  assert(m_layout.isActive(fieldIndex));
+  assert(m_layout.getField(fieldIndex).isActive());
 
   int offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
   assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
@@ -190,7 +195,7 @@ void PointData::setZ(int pointIndex, float value)
 
 void PointData::copyFieldsFast(int destPointIndex, int srcPointIndex, const PointData& srcPointData)
 {
-  assert(getLayout().same(srcPointData.getLayout(), true));
+  assert(getLayout() == srcPointData.getLayout());
 
   byte* src = srcPointData.getData(srcPointIndex);
   byte* dest = getData(destPointIndex);
@@ -199,8 +204,6 @@ void PointData::copyFieldsFast(int destPointIndex, int srcPointIndex, const Poin
   memcpy(dest, src, len);
 
   setValid(destPointIndex, srcPointData.isValid(srcPointIndex));
-
-  m_layout.copyActiveVector( srcPointData.getLayout().getActiveVector() );
 
   return;
 }
@@ -242,7 +245,7 @@ void PointData::dump(int pointIndex, string indent) const
     cout << field.getName(field.getItem()) << ": ";
 
       // print the value, if we are active
-    if (layout.isActive(fieldIndex))
+    if (layout.getField(fieldIndex).isActive())
     {
       switch (field.getType())
       {

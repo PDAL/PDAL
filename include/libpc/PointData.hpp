@@ -51,24 +51,35 @@ typedef unsigned char byte;
 class PointData
 {
 public:
+  // note that when we make a PointData object all the fields are initialized to inactive,
+  // regardless of what the passed-in layout says -- this is because the field object 
+  // represents the state within the owning object, which in this case is a completely
+  // empty buffer (similarly, all the points in the buffer are marked "invalid")
   PointData(const PointLayout&, int numPoints);
 
-  byte* getData(int pointIndex) const;
+  // number of points in this buffer
   int getNumPoints() const;
+
+  // layout (number and kinds of fields) for a point in this buffer
   const PointLayout& getLayout() const;
 
+  // "valid" means the data for the point can be used; if invalid, the point should
+  // be ignored or skipped.  (This is done for efficiency; we don't want to have to
+  // modify the buffer's size just to "delete" a point.)
   bool isValid(int pointIndex) const;
   void setValid(int pointIndex, bool value=true);
 
+  // accessors to a particular field of a particular point in this buffer
   byte getField_U8(int pointIndex, int fieldIndex) const;
   float getField_F32(int pointIndex, int fieldIndex) const;
   double getField_F64(int pointIndex, int fieldIndex) const;
 
+  // accessors to a particular field of a particular point in this buffer
   void setField_U8(int pointIndex, int fieldIndex, byte value);
   void setField_F32(int pointIndex, int fieldIndex, float value);
   void setField_F64(int pointIndex, int fieldIndex, double value);
 
-  // some well-known fields
+  // handy functions to get at some some well-known fields
   float getX(int pointIndex) const;
   float getY(int pointIndex) const;
   float getZ(int pointIndex) const;
@@ -85,14 +96,17 @@ public:
   void dump(int index, std::string indent="") const;
 
 private:
-  template<class T> T getField(int index, int itemOffset) const;
-  template<class T> void setField(int index, int itemOffset, T value);
+  // access to the raw memory
+  byte* getData(int pointIndex) const;
+
+  template<class T> T getField(int fieldIndex, int itemOffset) const;
+  template<class T> void setField(int fieldIndex, int itemOffset, T value);
 
   PointLayout m_layout;
   byte* m_data;
   int m_pointSize;
   int m_numPoints;
-  std::vector<bool> m_isValid;
+  std::vector<bool> m_isValid; // one bool for each point
 
   PointData(const PointData&); // not implemented
   PointData& operator=(const PointData&); // not implemented

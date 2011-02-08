@@ -45,25 +45,28 @@ using std::endl;
 Field::Field() : 
   m_item(Field::InvalidItem),
   m_type(InvalidType),
-  m_offset(-1)
+  m_offset(-1),
+  m_isActive(false)
 {
   return;
 }
 
 
-Field::Field(DataItem item, DataType type) :
+Field::Field(DataItem item, DataType type, bool isActive) :
   m_item(item),
   m_type(type),
-  m_offset(-1)
+  m_offset(-1),
+  m_isActive(isActive)
 {
   return;
 }
 
 
-Field::Field(const Field& field)
-  : m_item(field.m_item),
-  m_type(field.m_type),
-  m_offset(field.m_offset)
+Field::Field(const Field& other)
+  : m_item(other.m_item),
+  m_type(other.m_type),
+  m_offset(other.m_offset),
+  m_isActive(other.m_isActive)
 {
 
   return;
@@ -77,6 +80,7 @@ Field& Field::operator=(const Field& other)
     m_item = other.m_item;
     m_type = other.m_type;
     m_offset = other.m_offset;
+    m_isActive = other.m_isActive;
   }
 
   return *this;
@@ -88,6 +92,7 @@ bool Field::operator==(const Field& other) const
     if (m_item != other.m_item) return false;
     if (m_type != other.m_type) return false;
     if (m_offset != other.m_offset) return false;
+    if (m_isActive != other.m_isActive) return false;
 
     return true;
 }
@@ -96,6 +101,11 @@ bool Field::operator==(const Field& other) const
 void Field::dump() const
 {
   cout << "Field: " << getName(m_item) << ", type " << getName(m_type) << ", offset " << m_offset;
+  if (!m_isActive) 
+  {
+    cout << " [inactive]";
+  }
+  return;
 }
 
 

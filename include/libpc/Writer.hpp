@@ -38,7 +38,8 @@
 #include "libpc/Filter.hpp"
 
 
-// a Writer is a Filter (and so it has a previous stage and a header), but generally they do not implement their readNextPoints method
+// a Writer is a Filter, because it has a previous stage and a header
+// however, Writers generally do not implement the readNextPoints method
 class Writer : public Filter
 {
 public:
@@ -47,11 +48,17 @@ public:
   void write();
 
 protected:
+  // this is called once before the loop with the writeBuffer calls
   virtual void writeBegin() = 0;
+
+  // called repeatedly, until out of data
   virtual void writeBuffer(const PointData&) = 0;
+
+  // called once, after the writeBuffer calls
   virtual void writeEnd() = 0;
 
 private:
+  // not generally used in Writer objects
   virtual void readNextPoints(PointData&) { throw; }
 
   Writer& operator=(const Writer&); // not implemented

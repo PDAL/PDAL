@@ -46,21 +46,21 @@ class PointLayout
 public:
   PointLayout();
   PointLayout(const PointLayout&);
-  PointLayout& operator=(const PointLayout & other);
+  PointLayout& operator=(const PointLayout& other);
 
-  bool operator==(const PointLayout & other) const;
-  bool same(const PointLayout & other, bool ignoreActive=false) const;
+  bool operator==(const PointLayout& other) const;
 
-  // returns the index of the field added
+  // adds a field to the end of the layout, and returns the index of the field added
   int addField(const Field& field);
 
+  // returns a given field
   const Field& getField(int fieldIndex) const { return m_fields[fieldIndex]; }
-  bool isActive(int fieldIndex) const { return m_isActive[fieldIndex]; }
-  void setActive(int fieldIndex, bool value=true) { m_isActive[fieldIndex] = value; }
-  void copyActiveVector(const std::vector<bool>& other) { m_isActive = other; }
-  const std::vector<bool>& getActiveVector() const { return m_isActive; }
+  Field& getField(int fieldIndex) { return m_fields[fieldIndex]; }
 
+  // total num bytes for all fields in the point
   int getSizeInBytes() const;
+
+  // number of fields in the point
   int getNumFields() const;
 
   void dump(std::string indent="") const;
@@ -68,20 +68,21 @@ public:
   // returns -1 if not found
   int findFieldIndex(Field::DataItem item) const;
   bool hasField(Field::DataItem item) const;
-  int findFieldOffset(Field::DataItem item) const;
 
   // some well-known field types are always available
-  // is this worth it?
+  // (is this worth it?)
   int getFieldIndex_X() const { return m_fieldIndex_X; }
   int getFieldIndex_Y() const { return m_fieldIndex_Y; }
   int getFieldIndex_Z() const { return m_fieldIndex_Z; }
 
+  void markAllFieldsInactive();
+
 private:
-  std::vector<Field> m_fields;
-  std::vector<bool> m_isActive;
+  std::vector<Field> m_fields; // each of the fields
 
-  int m_numBytes;
+  int m_numBytes; // num bytes required to store all fields
 
+  // local cache of handy values
   int m_fieldIndex_X;
   int m_fieldIndex_Y;
   int m_fieldIndex_Z;
