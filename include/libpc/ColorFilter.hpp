@@ -46,6 +46,8 @@ public:
   ColorFilter(Stage& prevStage);
   void initialize();
 
+  void updateLayout();
+
   void readNextPoints(PointData&);
 
 private:

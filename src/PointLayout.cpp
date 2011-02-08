@@ -39,10 +39,11 @@ using std::cout;
 using std::endl;
 
 
-PointLayout::PointLayout() :
-  m_offsetX(-1),
-  m_offsetY(-1),
-  m_offsetZ(-1)
+PointLayout::PointLayout()
+  : m_numBytes(0),
+  m_fieldIndex_X(-1),
+  m_fieldIndex_Y(-1),
+  m_fieldIndex_Z(-1)
 {
   return;
 }
@@ -50,10 +51,12 @@ PointLayout::PointLayout() :
 
 PointLayout::PointLayout(const PointLayout& other)
 {
+  m_numBytes = other.m_numBytes;
   m_fields = other.m_fields;
-  m_offsetX = other.m_offsetX;
-  m_offsetY = other.m_offsetY;
-  m_offsetZ = other.m_offsetZ;
+  m_isActive = other.m_isActive;
+  m_fieldIndex_X = other.m_fieldIndex_X;
+  m_fieldIndex_Y = other.m_fieldIndex_Y;
+  m_fieldIndex_Z = other.m_fieldIndex_Z;
 
   return;
 }
@@ -63,37 +66,48 @@ PointLayout& PointLayout::operator=(const PointLayout& other)
 {
   if (this != &other)
   {
+    m_numBytes = other.m_numBytes;
     m_fields = other.m_fields;
-    m_offsetX = other.m_offsetX;
-    m_offsetY = other.m_offsetY;
-    m_offsetZ = other.m_offsetZ;
+    m_isActive = other.m_isActive;
+    m_fieldIndex_X = other.m_fieldIndex_X;
+    m_fieldIndex_Y = other.m_fieldIndex_Y;
+    m_fieldIndex_Z = other.m_fieldIndex_Z;
   }
 
   return *this;
 }
 
 
-const Field& PointLayout::getField(int index) const
+void PointLayout::addField(const Field& fieldParam)
 {
-  return m_fields[index];
-}
+  Field myField(fieldParam);
 
+  const Field::DataItem item = myField.getItem();
 
-void PointLayout::addField(const Field& field)
-{
-  m_fields.push_back(field);
+  if (hasField(item))
+    return;
 
-  if (field.item() == Field::XPos)
+  const int offset = m_numBytes;
+  myField.setOffset(offset);
+  m_numBytes += myField.getNumBytes();
+
+  m_fields.push_back(myField);
+  m_isActive.push_back(false);
+
+  const int index = m_fields.size() - 1;
+  myField.setIndex(index);
+
+  if (item == Field::XPos)
   {
-    m_offsetX = field.offset();
+    m_fieldIndex_X = index;
   }
-  else  if (field.item() == Field::YPos)
+  else if (item == Field::YPos)
   {
-    m_offsetY = field.offset();
+    m_fieldIndex_Y = index;
   }
-  else if (field.item() == Field::ZPos)
+  else if (item == Field::ZPos)
   {
-    m_offsetZ = field.offset();
+    m_fieldIndex_Z = index;
   }
 
   return;
@@ -115,24 +129,21 @@ void PointLayout::dump() const
 
   for (size_t i=0; i<m_fields.size(); i++)
   {
-    m_fields[i].dump();
+    if (isActive(i))
+    {
+      m_fields[i].dump();
+    }
+    else
+    {
+      cout << "(invalid field)" << endl;
+    }
   }
 }
 
 
 int PointLayout::getSizeInBytes() const
 {
-  int size = 0;
-
-  for (size_t i=0; i<m_fields.size(); i++)
-  {
-    const Field& f = m_fields[i];
-
-    int pos = f.offset() + Field::getSize(f.type());
-    if (pos > size) size = pos;
-  }
-
-  return size;
+  return m_numBytes;
 }
 
 
@@ -142,14 +153,28 @@ int PointLayout::getNumFields() const
 }
 
 
-bool PointLayout::findField(Field::DataItem item, Field& ret) const
+int PointLayout::findFieldIndex(Field::DataItem item) const
 {
-  for (size_t i=0; i<m_fields.size(); i++)
+  for (size_t index=0; index<m_fields.size(); index++)
   {
-    const Field& f = m_fields[i];
-    if (f.item() == item) 
+    const Field& field = m_fields[index];
+    if (field.getItem() == item) 
     {
-      ret = f;
+      return index;
+    }
+  }
+
+  return -1;
+}
+
+
+bool PointLayout::hasField(Field::DataItem item) const
+{
+  for (size_t index=0; index<m_fields.size(); index++)
+  {
+    const Field& field = m_fields[index];
+    if (field.getItem() == item) 
+    {
       return true;
     }
   }
@@ -160,9 +185,9 @@ bool PointLayout::findField(Field::DataItem item, Field& ret) const
 
 int PointLayout::findFieldOffset(Field::DataItem item) const
 {
-  Field ret;
-  bool ok = findField(item, ret);
-  if (ok) return ret.offset();
+  int index = findFieldIndex(item);
+  if (index == -1)
+    return -1;
 
-  return -1;
+  return m_fields[index].getOffset();
 }

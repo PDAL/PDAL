@@ -34,8 +34,14 @@
 
 #include "libpc/CropFilter.hpp"
 
-CropFilter::CropFilter(Stage& prevStage, float minZ, float maxZ) : Filter(prevStage),
-  m_minZ(minZ), m_maxZ(maxZ)
+CropFilter::CropFilter(Stage& prevStage, float minX, float maxX, float minY, float maxY, float minZ, float maxZ) 
+  : Filter(prevStage),
+  m_minX(minX), 
+  m_maxX(maxX),
+  m_minY(minY), 
+  m_maxY(maxY),
+  m_minZ(minZ), 
+  m_maxZ(maxZ)
 {
   return;
 }
@@ -44,6 +50,19 @@ CropFilter::CropFilter(Stage& prevStage, float minZ, float maxZ) : Filter(prevSt
 void CropFilter::initialize()
 {
   Filter::initialize();
+  return;
+}
+
+
+void CropFilter::updateLayout()
+{
+  m_prevStage.updateLayout();
+  const PointLayout& layout = m_prevStage.getConstHeader().getConstPointLayout();
+
+  getHeader().getPointLayout() = layout;
+
+  // crop filter doesn't add any fields
+
   return;
 }
 
@@ -57,12 +76,13 @@ void CropFilter::readNextPoints(PointData& data)
 
   for (int index=0; index<cnt; index++)
   {
+    float x = data.getX(index);
+    float y = data.getY(index);
     float z = data.getZ(index);
-    if (z < 0.0)
+    if (x < m_minX || x > m_maxX || y < m_minY || y > m_maxY ||z < m_minZ || z > m_maxZ)
     {
       // remove this point, and update the lower bound for Z
       data.setInvalid(index);
-      getHeader().m_minZ = 0;
     }
   }
 

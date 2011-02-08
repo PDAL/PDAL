@@ -53,6 +53,7 @@ public:
 
   const PointLayout& getConstPointLayout() const;
   PointLayout& getPointLayout();
+  void setLayout(const PointLayout&);
 
   int getNumPoints() const;
   void setNumPoints(int);

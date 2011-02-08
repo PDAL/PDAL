@@ -44,7 +44,7 @@ int main(int /*argc*/, char* /*argv*/[])
   FauxReader reader("foo.las");
   reader.initialize();
 
-  CropFilter cropper(reader, 0.0f, 1000.0f);
+  CropFilter cropper(reader, 0, 100, 0, 100, 0, 100);
   cropper.initialize();
 
   ColorFilter colorizer(cropper);
@@ -52,6 +52,8 @@ int main(int /*argc*/, char* /*argv*/[])
 
   FauxWriter writer("bar.las", colorizer);
   writer.initialize();
+  
+  writer.updateLayout();
 
   writer.write();
 

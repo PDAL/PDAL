@@ -43,6 +43,8 @@ public:
   FauxReader(std::string file);
   void initialize();
 
+  void updateLayout();
+
   void readNextPoints(PointData& data);
 
 private:

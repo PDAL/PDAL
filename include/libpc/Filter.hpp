@@ -44,7 +44,8 @@ public:
   Filter(Stage& prevStage);
   virtual void initialize() = 0;
 
-  // from Stage
+  virtual void updateLayout() = 0;
+
   virtual void readNextPoints(PointData&) = 0;
 
 protected:

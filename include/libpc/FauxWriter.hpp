@@ -45,6 +45,8 @@ public:
   FauxWriter(std::string filename, Stage& prevStage);
   void initialize();
 
+  void updateLayout();
+
 private:
   int m_numPointsWritten;
 

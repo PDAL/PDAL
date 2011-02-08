@@ -53,6 +53,15 @@ void FauxWriter::initialize()
 }
 
 
+void FauxWriter::updateLayout()
+{
+  m_prevStage.updateLayout();
+  const PointLayout& layout = m_prevStage.getConstHeader().getConstPointLayout();
+
+  getHeader().getPointLayout() = layout;
+}
+
+
 void FauxWriter::writeBegin()
 {
   cout << "writing beginning of file" << endl;
@@ -79,14 +88,13 @@ void FauxWriter::writeBuffer(const PointData& pointData)
   {
     if (pointData.isValid(index))
     {
-      cout << m_numPointsWritten << " X: " << pointData.getX(index) << endl;
-      cout << m_numPointsWritten << " Y: " << pointData.getY(index) << endl;
-      cout << m_numPointsWritten << " Z: " << pointData.getZ(index) << endl;
+      cout << "Point " << m_numPointsWritten << ": " << endl;
+      pointData.dump(index, "  ");
       ++m_numPointsWritten;
     }
     else
     {
-      cout << m_numPointsWritten << " INVALID" << endl;
+      cout << "(invalid point)" << endl;
     }
   }
 

@@ -46,7 +46,8 @@ public:
   // opens the file (or whatever) and sets m_layout
   virtual void initialize();
 
-  // from Stage
+  virtual void updateLayout() = 0;
+
   virtual void readNextPoints(PointData&) = 0;
 
 protected:

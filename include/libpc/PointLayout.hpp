@@ -49,26 +49,36 @@ public:
   void addField(const Field& field);
   void addFields(const std::vector<Field>& fields);
 
-  const Field& getField(int) const;
+  const Field& getField(int index) const { return m_fields[index]; }
+  bool isActive(int index) const { return m_isActive[index]; }
+  void setActive(int index) { m_isActive[index] = true; }
+  void setInactive(int index) { m_isActive[index] = false; }
 
   int getSizeInBytes() const;
   int getNumFields() const;
 
   void dump() const;
 
-  bool findField(Field::DataItem item, Field& ret) const;
+  // returns -1 if not found
+  int findFieldIndex(Field::DataItem item) const;
+  bool hasField(Field::DataItem item) const;
   int findFieldOffset(Field::DataItem item) const;
 
   // some well-known field types are always available
-  int getFieldOffset_X() const { return m_offsetX; }
-  int getFieldOffset_Z() const { return m_offsetY; }
-  int getFieldOffset_Y() const { return m_offsetZ; }
+  // is this worth it?
+  int getFieldIndex_X() const { return m_fieldIndex_X; }
+  int getFieldIndex_Y() const { return m_fieldIndex_Y; }
+  int getFieldIndex_Z() const { return m_fieldIndex_Z; }
 
 private:
   std::vector<Field> m_fields;
-  int m_offsetX;
-  int m_offsetY;
-  int m_offsetZ;
+  std::vector<bool> m_isActive;
+
+  int m_numBytes;
+
+  int m_fieldIndex_X;
+  int m_fieldIndex_Y;
+  int m_fieldIndex_Z;
 };
 
 #endif

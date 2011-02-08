@@ -47,27 +47,30 @@ vector<Field>* Field::s_standardFields = NULL;
 
 Field::Field() : 
   m_item(Field::InvalidItem),
+  m_type(InvalidType),
   m_offset(-1),
-  m_type(InvalidType)
+  m_index(-1)
 {
   return;
 }
 
 
-Field::Field(DataItem item, int offset, DataType type) :
+Field::Field(DataItem item, DataType type) :
   m_item(item),
-  m_offset(offset),
-  m_type(type)
+  m_type(type),
+  m_offset(-1),
+  m_index(-1)
 {
   return;
 }
 
 
 Field::Field(const Field& field)
+  : m_item(field.m_item),
+  m_type(field.m_type),
+  m_offset(field.m_offset),
+  m_index(field.m_index)
 {
-  m_item = field.m_item;
-  m_offset = field.m_offset;
-  m_type = field.m_type;
 
   return;
 }
@@ -78,8 +81,9 @@ Field& Field::operator=(const Field & other)
   if (this != &other)
   {
     m_item = other.m_item;
-    m_offset = other.m_offset;
     m_type = other.m_type;
+    m_offset = other.m_offset;
+    m_index = other.m_index;
   }
 
   return *this;
@@ -91,9 +95,9 @@ const vector<Field>& Field::standardFields()
   // BUG: not threadsafe
   if (s_standardFields == NULL)
   {
-    Field x(XPos, 0, F32);
-    Field y(YPos, 4, F32);
-    Field z(ZPos, 8, F32);
+    Field x(XPos, F32);
+    Field y(YPos, F32);
+    Field z(ZPos, F32);
 
     s_standardFields = new vector<Field>();
     s_standardFields->push_back(x);
@@ -107,7 +111,13 @@ const vector<Field>& Field::standardFields()
 
 void Field::dump() const
 {
-  cout << "Field " << getName(m_item) << ": " << getName(m_type) << " at " << m_offset << endl;
+  cout << "Field " << getIndex() << ": " << getName(m_item) << ", " << getName(m_type) << " at byte " << m_offset << endl;
+}
+
+
+int Field::getNumBytes() const
+{
+  return getSize(getType());
 }
 
 
@@ -119,8 +129,11 @@ string Field::getName(DataItem item)
   case YPos: return "YPos";
   case ZPos: return "ZPos";
   case Time: return "Time";
+  case Zred: return "Zred";
+  case Zgreen: return "Zgreen";
+  case Zblue: return "Zblue";
   }
-  return "UNKNOWN";
+  throw;
 }
 
 
@@ -139,7 +152,7 @@ string Field::getName(DataType dt)
   case F32: return "F32";
   case F64: return "F64";
   }
-  return "UNKNOWN";
+  throw;
 }
 
 

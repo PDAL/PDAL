@@ -46,8 +46,10 @@ public:
   Stage();
   virtual void initialize();
   bool isInitialized() const;
-
-  virtual void readNextPoints(PointData&) = 0;
+  
+  virtual void updateLayout() = 0;
+  
+    virtual void readNextPoints(PointData&) = 0;
 
   const Header& getConstHeader() const;
 

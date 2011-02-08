@@ -61,13 +61,13 @@ public:
   void setValid(int index);
   void setInvalid(int index);
 
-  byte getField_U8(int index, int itemOffset) const;
-  float getField_F32(int index, int itemOffset) const;
-  double getField_F64(int index, int itemOffset) const;
+  byte getField_U8(int pointIndex, int fieldIndex) const;
+  float getField_F32(int pointIndex, int fieldIndex) const;
+  double getField_F64(int pointIndex, int fieldIndex) const;
 
-  void setField_U8(int index, int itemOffset, byte value);
-  void setField_F32(int index, int itemOffset, float value);
-  void setField_F64(int index, int itemOffset, double value);
+  void setField_U8(int pointIndex, int fieldIndex, byte value);
+  void setField_F32(int pointIndex, int fieldIndex, float value);
+  void setField_F64(int pointIndex, int fieldIndex, double value);
 
   // some well-known fields
   float getX(int index) const;
@@ -77,8 +77,8 @@ public:
   void setY(int index, float value);
   void setZ(int index, float value);
 
-  void dump() const;
-  void dump(int index) const;
+  void dump(std::string indent="") const;
+  void dump(int index, std::string indent="") const;
 
 private:
   template<class T> T getField(int index, int itemOffset) const;

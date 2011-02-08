@@ -48,6 +48,9 @@ public:
     YPos,
     ZPos,
     Time,
+    Zred,
+    Zgreen,
+    Zblue
   };
   static std::string getName(DataItem);
 
@@ -70,14 +73,21 @@ public:
 
 public:
   Field();
-  Field(DataItem item, int offset, DataType type);
+  Field(DataItem item, DataType type);
   Field(const Field&);
 
   Field& operator=(const Field&);
 
-  DataItem item() const { return m_item; }
-  int offset() const { return m_offset; }
-  DataType type() const { return m_type; }
+  DataItem getItem() const { return m_item; }
+  DataType getType() const { return m_type; }
+
+  int getOffset() const { return m_offset; }
+  void setOffset(int offset) { m_offset = offset; }
+
+  int getIndex() const { return m_index; }
+  void setIndex(int index) { m_index = index; }
+
+  int getNumBytes() const;
 
   static const std::vector<Field>& standardFields();
 
@@ -85,8 +95,10 @@ public:
 
 private:
   DataItem m_item;
-  int m_offset;
   DataType m_type;
+
+  int m_offset;// byte offset within a point buffer
+  int m_index; // 0..n-1, where n is number of fields in layout
 
   static std::vector<Field>* s_standardFields;
 };

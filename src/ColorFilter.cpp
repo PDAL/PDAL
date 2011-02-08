@@ -48,44 +48,37 @@ void ColorFilter::initialize()
 }
 
 
-void ColorFilter::readNextPoints(PointData& currData)
+void ColorFilter::updateLayout()
 {
-  // This filter changes the layout: it adds three u8 fields
-  // Therefore, we get the data from the prev stage using the prev stage's layout,
-  // and then copy the contents into the layout for this stage (which was
-  // passed in to us).
-
-  const int chunk = currData.getNumPoints();
-  int cnt = currData.getNumPoints();
-
-  //const PointLayout& currLayout = getConstHeader().getConstPointLayout();
+  m_prevStage.updateLayout();
   const PointLayout& prevLayout = m_prevStage.getConstHeader().getConstPointLayout();
 
-  PointData prevData(prevLayout, chunk);
-  m_prevStage.readNextPoints(prevData);
+  PointLayout myLayout(prevLayout);
+
+  // add the three u8 fields
+  myLayout.addField(Field(Field::Zred, Field::U8));
+  myLayout.addField(Field(Field::Zgreen, Field::U8));
+  myLayout.addField(Field(Field::Zgreen, Field::U8));
+
+  getHeader().setLayout(myLayout);
+}
+
+
+void ColorFilter::readNextPoints(PointData& data)
+{
+  m_prevStage.readNextPoints(data);
+
+  int cnt = data.getNumPoints();
+  //const PointLayout& layout = data.getLayout();
 
   for (int index=0; index<cnt; index++)
   {
-    if (prevData.isValid(index))
-    {
-      currData.setX(index, prevData.getX(index));
-      currData.setY(index, prevData.getY(index));
-      currData.setZ(index, prevData.getZ(index));
-      currData.setField_F64(index, Field::Time, prevData.getField_F64(index, Field::Time));
-      currData.setValid(index);
-    }
-  }
+    float z = data.getZ(index);
+    byte red, green, blue;
+    getColor(z, red, green, blue);
 
-  for (int index=0; index<cnt; index++)
-  {
-    if (currData.isValid(index))
-    {
-      float z = currData.getZ(index);
-      byte red, green, blue;
-      getColor(z, red, green, blue);
-      
-      // now we would store th 3 u8's in the point data...
-    }
+    // now we would store the 3 u8's in the point data...
+
   }
 
   return;

@@ -38,16 +38,22 @@
 #include "libpc/Filter.hpp"
 
 
-// removes any points outside of the given Z range
+// removes any points outside of the given range
 class CropFilter : public Filter
 {
 public:
-  CropFilter(Stage& prevStage, float minZ, float maxZ);
+  CropFilter(Stage& prevStage, float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
   void initialize();
+
+  void updateLayout();
 
   void readNextPoints(PointData&);
 
 private:
+  float m_minX;
+  float m_maxX;
+  float m_minY;
+  float m_maxY;
   float m_minZ;
   float m_maxZ;
 

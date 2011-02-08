@@ -77,6 +77,12 @@ PointLayout& Header::getPointLayout()
 }
 
 
+void Header::setLayout(const PointLayout& layout)
+{
+  m_pointLayout = layout;
+}
+
+
 int Header::getNumPoints() const
 {
   return m_numPoints;
