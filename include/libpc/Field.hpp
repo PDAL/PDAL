@@ -73,7 +73,7 @@ public:
 
 public:
   Field();
-  Field(DataItem item, DataType type, bool isActive=false);
+  Field(DataItem item, DataType type);
   Field(const Field&);
 
   Field& operator=(const Field&);
@@ -89,10 +89,6 @@ public:
   int getOffset() const { return m_offset; }
   void setOffset(int offset) { m_offset = offset; }
 
-  // is the field "currently" in use?
-  bool isActive() const { return m_isActive; }
-  void setActive(bool value=true) { m_isActive = value; }
-
   // number of bytes needed for the datatype
   int getNumBytes() const;
 
@@ -102,7 +98,6 @@ private:
   DataItem m_item;
   DataType m_type;
   int m_offset; // byte offset within a point buffer
-  bool m_isActive;
 };
 
 #endif

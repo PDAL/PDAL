@@ -91,16 +91,6 @@ bool PointLayout::operator==(const PointLayout & other) const
 }
 
 
-void PointLayout::markAllFieldsInactive()
-{
-  for (size_t index=0; index<m_fields.size(); index++)
-  {
-    Field& field = m_fields[index];
-    field.setActive(false);
-  }
-}
-
-
 int PointLayout::addField(const Field& fieldParam)
 {
   Field myField(fieldParam);

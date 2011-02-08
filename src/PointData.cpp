@@ -54,10 +54,6 @@ PointData::PointData(const PointLayout& layout, int numPoints) :
   // the points will all be set to invalid here
   m_isValid.resize(m_numPoints);
 
-  // override what the passed in layout told us: this is an empty buffer, so no fields should
-  // be marked as being used yet
-  m_layout.markAllFieldsInactive();
-
   return;
 }
 
@@ -97,8 +93,6 @@ const PointLayout& PointData::getLayout() const
 template <class T>
 void PointData::setField(int pointIndex, int fieldIndex, T value)
 {
-  m_layout.getField(fieldIndex).setActive();
-
   int offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
   assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
   byte* p = m_data + offset;
@@ -110,8 +104,6 @@ void PointData::setField(int pointIndex, int fieldIndex, T value)
 template <class T>
 T PointData::getField(int pointIndex, int fieldIndex) const
 {
-  assert(m_layout.getField(fieldIndex).isActive());
-
   int offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
   assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
   byte* p = m_data + offset;
@@ -244,29 +236,21 @@ void PointData::dump(int pointIndex, string indent) const
 
     cout << field.getName(field.getItem()) << ": ";
 
-      // print the value, if we are active
-    if (layout.getField(fieldIndex).isActive())
+    switch (field.getType())
     {
-      switch (field.getType())
-      {
-      case Field::U8:
-        cout << (int)(this->getField_U8(pointIndex, fieldIndex));
-        break;
-      case Field::F32:
-        cout << this->getField_F32(pointIndex, fieldIndex);
-        break;
-      case Field::F64:
-        cout << this->getField_F64(pointIndex, fieldIndex);
-        break;
-      default:
-        throw;
-      }
+    case Field::U8:
+      cout << (int)(this->getField_U8(pointIndex, fieldIndex));
+      break;
+    case Field::F32:
+      cout << this->getField_F32(pointIndex, fieldIndex);
+      break;
+    case Field::F64:
+      cout << this->getField_F64(pointIndex, fieldIndex);
+      break;
+    default:
+      throw;
     }
-    else
-    {
-      cout << "-";
-    }
-
+    
     cout << endl;
   }
 

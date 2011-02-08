@@ -44,9 +44,9 @@ ColorFilter::ColorFilter(Stage& prevStage)
 
   // add the three u8 fields
   int index;
-  index = layout.addField(Field(Field::Zred, Field::U8, true));
-  index = layout.addField(Field(Field::Zgreen, Field::U8, true));
-  index = layout.addField(Field(Field::Zblue, Field::U8, true));
+  index = layout.addField(Field(Field::Zred, Field::U8));
+  index = layout.addField(Field(Field::Zgreen, Field::U8));
+  index = layout.addField(Field(Field::Zblue, Field::U8));
 
   return;
 }

@@ -75,8 +75,6 @@ public:
   int getFieldIndex_Y() const { return m_fieldIndex_Y; }
   int getFieldIndex_Z() const { return m_fieldIndex_Z; }
 
-  void markAllFieldsInactive();
-
 private:
   std::vector<Field> m_fields; // each of the fields
 
