@@ -1,0 +1,12 @@
+The libPC team acknowledges and thanks the following people and companies for
+their contributions to this project. The open source community appreciates
+their efforts.
+
+
+Howard Butler
+  Hobu, Inc.
+  hobu.inc at gmail.com
+
+Michael P. Gerlek
+  Flaxen Geo Consulting
+  mpg at flaxen.com
