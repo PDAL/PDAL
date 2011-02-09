@@ -45,6 +45,10 @@ class Stage
 public:
   Stage();
   
+  // The layout of the PointData buffer we are given here might
+  // not match our own header's layout.  That's okay, though: all
+  // that matters is that the buffer we are given has the fields
+  // we need to write into.
   virtual void readNextPoints(PointData&) = 0;
 
   const Header& getHeader() const;

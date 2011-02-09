@@ -38,12 +38,11 @@
 #include "libpc/Stage.hpp"
 #include "libpc/header.hpp"
 
+
 class Reader : public Stage
 {
 public:
   Reader();
-
-  virtual void readNextPoints(PointData&) = 0;
 
 protected:
   int m_lastPointRead;

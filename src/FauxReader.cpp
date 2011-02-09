@@ -50,12 +50,10 @@ FauxReader::FauxReader(const Bounds& bounds, int numPoints)
   header.setNumPoints(numPoints);
   header.setBounds(bounds);
 
-  int index;
-  
-  index = layout.addField(Field(Field::XPos, Field::F32));
-  index = layout.addField(Field(Field::YPos, Field::F32));
-  index = layout.addField(Field(Field::ZPos, Field::F32));
-  index = layout.addField(Field(Field::Time, Field::F64));
+  layout.addField(Field(Field::XPos, Field::F32));
+  layout.addField(Field(Field::YPos, Field::F32));
+  layout.addField(Field(Field::ZPos, Field::F32));
+  layout.addField(Field(Field::Time, Field::F64));
 
   header.dump();
 
