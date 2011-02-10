@@ -9,10 +9,12 @@
  * See LICENSE.txt in this source distribution for more information.
  **************************************************************************/
 
-#include <stdio.h>
+#include <libpc/Bounds.hpp>
+
 int main(int, char* [])
 {
-  printf("Hi\n");
+  Bounds bounds(0,1,2,3,4,5);
+  bounds.dump();
   return 0;
 }
 #if 0

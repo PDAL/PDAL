@@ -20,6 +20,7 @@ endif()
 set(LIBPC_HEADERS_DIR ../include/libpc)
 
 set(LIBPC_HPP
+  ${LIBPC_HEADERS_DIR}/export.hpp
   ${LIBPC_HEADERS_DIR}/Bounds.hpp
   ${LIBPC_HEADERS_DIR}/ColorFilter.hpp
   ${LIBPC_HEADERS_DIR}/CropFilter.hpp

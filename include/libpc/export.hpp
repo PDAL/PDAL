@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2010, Howard Butler
 *
 * All rights reserved.
 * 
@@ -32,75 +32,29 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_BOUNDS_HPP
-#define INCLUDED_BOUNDS_HPP
+#ifndef PCEXPORT_HPP_INCLUDED
+#define PCEXPORT_HPP_INCLUDED
 
-#include <limits>
-#include "export.hpp"
-
-class PC_DLL Bounds
-{
-public:
-  Bounds()
-    : m_minX(-std::numeric_limits<double>::infinity()),
-    m_maxX(std::numeric_limits<double>::infinity()),
-    m_minY(-std::numeric_limits<double>::infinity()),
-    m_maxY(std::numeric_limits<double>::infinity()),
-    m_minZ(-std::numeric_limits<double>::infinity()),
-    m_maxZ(std::numeric_limits<double>::infinity())
-  {
-  }
-
-  Bounds(double minX, double maxX, double minY, double maxY, double minZ, double maxZ)
-    : m_minX(minX),
-    m_maxX(maxX),
-    m_minY(minY),
-    m_maxY(maxY),
-    m_minZ(minZ),
-    m_maxZ(maxZ)
-  {
-  }
-
-  Bounds(const Bounds& other)
-    : m_minX(other.m_minX),
-    m_maxX(other.m_maxX),
-    m_minY(other.m_minY),
-    m_maxY(other.m_maxY),
-    m_minZ(other.m_minZ),
-    m_maxZ(other.m_maxZ)
-  {
-  }
-
-  Bounds& operator=(const Bounds & other)
-  {
-    if (this != &other)
-    {
-      m_minX = other.m_minX;
-      m_maxX = other.m_maxX;
-      m_minY = other.m_minY;
-      m_maxY = other.m_maxY;
-      m_minZ = other.m_minZ;
-      m_maxZ = other.m_maxZ;
-    }
-    return *this;
-  }
-
-  bool contains(double x, double y, double z) const
-  {
-    return (x >= m_minX && x <= m_maxX && y >= m_minY && y <= m_maxY && z >= m_minZ && z <= m_maxZ);
-  }
-
-  // enlarge the bbox of 'this' to include the points of 'other'
-  void grow(const Bounds& other);
-
-  void dump() const;
-
-  double m_minX;
-  double m_maxX;
-  double m_minY;
-  double m_maxY;
-  double m_minZ;
-  double m_maxZ;
-};
-
+#ifndef PC_DLL
+#if defined(_MSC_VER) && !defined(PC_DISABLE_DLL)
+#if defined(PC_DLL_EXPORT)
+#   define PC_DLL   __declspec(dllexport)
+#elif defined(PC_DLL_IMPORT)
+#   define PC_DLL   __declspec(dllimport)
+#else
+#   define PC_DLL
 #endif
+#else
+#  if defined(USE_GCC_VISIBILITY_FLAG)
+#    define PC_DLL     __attribute__ ((visibility("default")))
+#  else
+#    define PC_DLL
+#  endif
+#endif
+#endif
+
+#ifdef _MSC_VER
+//#pragma warning(disable:4251 4275)
+#endif // _MSC_VER
+
+#endif // LIBPC_HPP_INCLUDED
