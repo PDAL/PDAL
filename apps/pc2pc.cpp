@@ -1,3 +1,5 @@
+int main(int, char* []){return 0;}
+#if 0
 /***************************************************************************
  *
  * Project: libLAS -- C/C++ read/write library for LAS LIDAR data
@@ -376,3 +378,4 @@ int main(int argc, char* argv[])
 }
 
 //las2las -i lt_srs_rt.las  -o foo.las -c 1,2 -b 2483590,366208,2484000,366612
+#endif

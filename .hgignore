@@ -3,11 +3,22 @@ syntax: glob
 # rst outputs
 *.pdf
 
+# cmake stuff
+CMakeCache.txt
+CMakeFiles/
+CPackConfig.cmake
+CPackSourceConfig.cmake
+cmake_install.cmake
+CTestTestfile.cmake
+
 # visual studio cruft
 Debug/
 ipch/
+*.sln
+*.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
+*.vcproj.*.user
 *.sdf
 *.suo
 *.opensdf

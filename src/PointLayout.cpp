@@ -105,7 +105,7 @@ int PointLayout::addField(const Field& fieldParam)
 
   m_fields.push_back(myField);
 
-  const int index = m_fields.size() - 1;
+  const int index = (int)m_fields.size() - 1; // BUG: fix cast
 
   if (item == Field::XPos)
   {
@@ -132,7 +132,7 @@ int PointLayout::getSizeInBytes() const
 
 int PointLayout::getNumFields() const
 {
-  return m_fields.size();
+  return (int)m_fields.size(); // BUG: fix cast
 }
 
 
@@ -143,7 +143,7 @@ int PointLayout::findFieldIndex(Field::DataItem item) const
     const Field& field = m_fields[index];
     if (field.getItem() == item) 
     {
-      return index;
+      return (int)index; // BUG: fix cast
     }
   }
 

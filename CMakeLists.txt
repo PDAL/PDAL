@@ -1,66 +1,48 @@
 ###############################################################################
-# Main CMake configuration file for libLAS
+# Main CMake configuration file for libPC
 #
 # Author: Mateusz Loskot <mateusz@loskot.net>
 #
 #
 ###############################################################################
-# libLAS general settings
-project(libLAS)
+# libPC general settings
+project(libPC)
 
 
-SET(LIBLAS_VERSION_MAJOR "1")
-SET(LIBLAS_VERSION_MINOR "6")
-SET(LIBLAS_VERSION_PATCH "0")
-set(VERSION "${LIBLAS_VERSION_MAJOR}.${LIBLAS_VERSION_MINOR}.${LIBLAS_VERSION_PATCH}")
-SET(LIBLAS_LIB_SOVERSION "2.0.0")
-SET(LIBLAS_C_LIB_SOVERSION "2.0.0")
+SET(LIBPC_VERSION_MAJOR "0")
+SET(LIBPC_VERSION_MINOR "1")
+SET(LIBPC_VERSION_PATCH "0")
+set(VERSION "${LIBPC_VERSION_MAJOR}.${LIBPC_VERSION_MINOR}.${LIBPC_VERSION_PATCH}")
+SET(LIBPC_LIB_SOVERSION "0.1.0")
+SET(LIBPC_C_LIB_SOVERSION "0.1.0")
 SET(OSGEO4W_UPSTREAM_RELEASE "1")
 
 if(WIN32)
   # Name of C++ library
-  set(LIBLAS_LIB_NAME liblas)
+  set(LIBPC_LIB_NAME libpc)
 
-  # Name of C library
-  set(LIBLAS_C_LIB_NAME liblas_c)
-  
-  # Name of Chipper library
-  set(LASCHIP_LIB_NAME liblas_chipper )  
-  
-  # Name of Kernel libray
-  set(LASKERNEL_LIB_NAME liblas_kernel )
-  
 else()
   # Name of C++ library
-  set(LIBLAS_LIB_NAME las)
-  
-  # Name of C library
-  set(LIBLAS_C_LIB_NAME las_c)
-
-  # Name of Chipper library
-  set(LASCHIP_LIB_NAME las_chipper )  
-
-  # Name of Kernel libray
-  set(LASKERNEL_LIB_NAME las_kernel )
+  set(LIBPC_LIB_NAME las)
 endif()
 
 # Name of test suite runner
-set(LIBLAS_UNIT_TEST liblas_test)
+set(LIBPC_UNIT_TEST libpc_test)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
 # Choose package components
-set(WITH_UTILITIES TRUE CACHE BOOL "Choose if libLAS utilities should be built")
-set(WITH_TESTS TRUE CACHE BOOL "Choose if libLAS unit tests should be built")
+set(WITH_UTILITIES TRUE CACHE BOOL "Choose if libPC utilities should be built")
+set(WITH_TESTS TRUE CACHE BOOL "Choose if libPC unit tests should be built")
 
 # Choose to use pkg-config or not
 set(WITH_PKGCONFIG FALSE CACHE BOOL
-  "Choose whether a pkgconfig file (libLAS.pc) should be installed")
+  "Choose whether a pkgconfig file (libPC.pc) should be installed")
 
-set(WITH_ENDIANAWARE FALSE CACHE BOOL "Choose whether or not libLAS should do runtime endianness switching.  Note that this can slow things down considerably if enabled by default")
+set(WITH_ENDIANAWARE FALSE CACHE BOOL "Choose whether or not libPC should do runtime endianness switching.  Note that this can slow things down considerably if enabled by default")
 
-# Enable CTest and submissions to libLAS dashboard at CDash
-# http://my.cdash.org/index.php?project=libLAS
+# Enable CTest and submissions to libPC dashboard at CDash
+# http://my.cdash.org/index.php?project=libPC
 set(ENABLE_CTEST FALSE CACHE BOOL
   "Enable CTest to support submissions of results to CDash at http://cdash.org")
 
@@ -74,7 +56,7 @@ set(CMAKE_COLOR_MAKEFILE ON)
 mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # Path to additional CMake modules
-set(CMAKE_MODULE_PATH ${libLAS_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${libPC_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
 ###############################################################################
 # General build settings
@@ -86,23 +68,21 @@ if(NOT MSVC_IDE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING 
     "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
   endif()
-    message(STATUS "Setting libLAS build type - ${CMAKE_BUILD_TYPE}")
+    message(STATUS "Setting libPC build type - ${CMAKE_BUILD_TYPE}")
 endif()
 
 # TODO: Still testing the output paths --mloskot
-set(LIBLAS_BUILD_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE})
+set(LIBPC_BUILD_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE})
 
 # Output directory in which to build RUNTIME target files.
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${LIBLAS_BUILD_OUTPUT_DIRECTORY})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${LIBPC_BUILD_OUTPUT_DIRECTORY})
 
 # Output directory in which to build LIBRARY target files
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIBLAS_BUILD_OUTPUT_DIRECTORY})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIBPC_BUILD_OUTPUT_DIRECTORY})
 
 # Output directory in which to build ARCHIVE target files.
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LIBLAS_BUILD_OUTPUT_DIRECTORY}) 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LIBPC_BUILD_OUTPUT_DIRECTORY}) 
 
-file(READ "doc/index.txt" README )
-file(WRITE "README.txt" "${README}")
 
 ###############################################################################
 # Platform and compiler specific settings
@@ -139,18 +119,18 @@ else()
 
   # Recommended C++ compilation flags
   # -Weffc++
-  set(LIBLAS_COMMON_CXX_FLAGS
+  set(LIBPC_COMMON_CXX_FLAGS
 	"-pedantic -ansi -Wall -Wpointer-arith -Wcast-align -Wcast-qual -Wfloat-equal -Wredundant-decls -Wno-long-long")
 
   if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LIBLAS_COMMON_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LIBPC_COMMON_CXX_FLAGS}")
     if (CMAKE_COMPILER_IS_GNUCXX)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
     endif()
 
   elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR "${CMAKE_CXX_COMPILER}" MATCHES "clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LIBLAS_COMMON_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LIBPC_COMMON_CXX_FLAGS}")
   endif()
 endif(WIN32)
 
@@ -313,7 +293,7 @@ if(WITH_LASZIP)
 endif()
 
 if(WITH_ENDIANAWARE)
-    add_definitions(-DLIBLAS_ENDIAN_AWARE=1)
+    add_definitions(-DLIBPC_ENDIAN_AWARE=1)
 endif()
 ###############################################################################
 # Installation settings
@@ -332,36 +312,36 @@ else()
   # Common locatoins for Unix and Mac OS X
   set(DEFAULT_BIN_SUBDIR bin)
   set(DEFAULT_LIB_SUBDIR lib)
-  set(DEFAULT_DATA_SUBDIR share/liblas)
+  set(DEFAULT_DATA_SUBDIR share/libpc)
   set(DEFAULT_INCLUDE_SUBDIR include)
 endif()
 
-# Locations are changeable by user to customize layout of libLAS installation
+# Locations are changeable by user to customize layout of libPC installation
 # (default values are platform-specific)
-set(LIBLAS_BIN_SUBDIR ${DEFAULT_BIN_SUBDIR} CACHE STRING
+set(LIBPC_BIN_SUBDIR ${DEFAULT_BIN_SUBDIR} CACHE STRING
   "Subdirectory where executables will be installed")
-set(LIBLAS_LIB_SUBDIR ${DEFAULT_LIB_SUBDIR} CACHE STRING
+set(LIBPC_LIB_SUBDIR ${DEFAULT_LIB_SUBDIR} CACHE STRING
   "Subdirectory where libraries will be installed")
-set(LIBLAS_INCLUDE_SUBDIR ${DEFAULT_INCLUDE_SUBDIR} CACHE STRING
+set(LIBPC_INCLUDE_SUBDIR ${DEFAULT_INCLUDE_SUBDIR} CACHE STRING
   "Subdirectory where header files will be installed")
-set(LIBLAS_DATA_SUBDIR ${DEFAULT_DATA_SUBDIR} CACHE STRING
+set(LIBPC_DATA_SUBDIR ${DEFAULT_DATA_SUBDIR} CACHE STRING
   "Subdirectory where data will be installed")
 
 # Mark *_SUBDIR variables as advanced and dedicated to use by power-users only.
-mark_as_advanced(LIBLAS_BIN_SUBDIR
-  LIBLAS_LIB_SUBDIR LIBLAS_INCLUDE_SUBDIR LIBLAS_DATA_SUBDIR)
+mark_as_advanced(LIBPC_BIN_SUBDIR
+  LIBPC_LIB_SUBDIR LIBPC_INCLUDE_SUBDIR LIBPC_DATA_SUBDIR)
 
 # Full paths for the installation
-set(LIBLAS_BIN_DIR ${LIBLAS_BIN_SUBDIR})
-set(LIBLAS_LIB_DIR ${LIBLAS_LIB_SUBDIR})
-set(LIBLAS_INCLUDE_DIR ${LIBLAS_INCLUDE_SUBDIR})
-set(LIBLAS_DATA_DIR ${LIBLAS_DATA_SUBDIR})
+set(LIBPC_BIN_DIR ${LIBPC_BIN_SUBDIR})
+set(LIBPC_LIB_DIR ${LIBPC_LIB_SUBDIR})
+set(LIBPC_INCLUDE_DIR ${LIBPC_INCLUDE_SUBDIR})
+set(LIBPC_DATA_DIR ${LIBPC_DATA_SUBDIR})
 
 ###############################################################################
 # Installation commands
 
 install(FILES AUTHORS COPYING INSTALL LICENSE.txt README.txt
-  DESTINATION ${LIBLAS_DATA_DIR}/doc)
+  DESTINATION ${LIBPC_DATA_DIR}/doc)
 
 ###############################################################################
 # Processing of project directories
@@ -369,12 +349,12 @@ install(FILES AUTHORS COPYING INSTALL LICENSE.txt README.txt
 add_subdirectory(src)
 
 if(WITH_UTILITIES)
-  message(STATUS "Enable libLAS utilities to build - done")
+  message(STATUS "Enable libPC utilities to build - done")
   add_subdirectory(apps)
 endif()
 
 if(WITH_TESTS)
-  message(STATUS "Enable libLAS unit tests to build - done")
+  message(STATUS "Enable libPC unit tests to build - done")
   enable_testing()
 
 
@@ -383,7 +363,7 @@ if(WITH_TESTS)
       "Enable CTest to support submissions of results to CDash at http://cdash.org")
     cmake_minimum_required(VERSION 2.8.0)
     # Dashboard has been prepared for experiments
-    # http://my.cdash.org/index.php?project=libLAS
+    # http://my.cdash.org/index.php?project=libPC
     include(CTest)
     message(STATUS
       "Enable CTest to support submissions of results to CDash at http://cdash.org - done")
@@ -393,16 +373,16 @@ if(WITH_TESTS)
 else()
   if(ENABLE_CTEST)
     message(WARNING
-      "CTest support requested but WITH_TESTS option not specified to build of libLAS unit tests")
+      "CTest support requested but WITH_TESTS option not specified to build of libPC unit tests")
   endif()
 endif()
 
 
 
 # Version information
-SET(CPACK_PACKAGE_VERSION_MAJOR ${LIBLAS_VERSION_MAJOR})
-SET(CPACK_PACKAGE_VERSION_MINOR ${LIBLAS_VERSION_MINOR})
-SET(CPACK_PACKAGE_VERSION_PATCH ${LIBLAS_VERSION_MINOR})
+SET(CPACK_PACKAGE_VERSION_MAJOR ${LIBPC_VERSION_MAJOR})
+SET(CPACK_PACKAGE_VERSION_MINOR ${LIBPC_VERSION_MINOR})
+SET(CPACK_PACKAGE_VERSION_PATCH ${LIBPC_VERSION_MINOR})
 
 SET(CPACK_SOURCE_GENERATOR "TGZ;ZIP;TBZ2")
 SET(CPACK_CMAKE_GENERATOR "Unix Makefiles")
@@ -427,8 +407,8 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "CPackConfig.cmake")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "schemas")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "hobu-config.bat")
 
-list(APPEND CPACK_SOURCE_IGNORE_FILES "liblas-osgeo4w-init.bat")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "liblas-osgeo4w-start.bat.tmpl")
+list(APPEND CPACK_SOURCE_IGNORE_FILES "libpc-osgeo4w-init.bat")
+list(APPEND CPACK_SOURCE_IGNORE_FILES "libpc-osgeo4w-start.bat.tmpl")
 include(CPack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
