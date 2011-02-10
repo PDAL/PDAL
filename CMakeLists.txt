@@ -23,7 +23,7 @@ if(WIN32)
 
 else()
   # Name of C++ library
-  set(LIBPC_LIB_NAME las)
+  set(LIBPC_LIB_NAME pc)
 endif()
 
 # Name of test suite runner
@@ -120,7 +120,7 @@ else()
   # Recommended C++ compilation flags
   # -Weffc++
   set(LIBPC_COMMON_CXX_FLAGS
-	"-pedantic -ansi -Wall -Wpointer-arith -Wcast-align -Wcast-qual -Wfloat-equal -Wredundant-decls -Wno-long-long")
+    "-pedantic -ansi -Wall -Wpointer-arith -Wcast-align -Wcast-qual -Wfloat-equal -Wredundant-decls -Wno-long-long")
 
   if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 
@@ -173,7 +173,7 @@ mark_as_advanced(CLEAR Boost_LIBRARY_DIRS)
 link_directories(${Boost_LIBRARY_DIRS}) 
 
 
-	
+    
 # libxml2 support - optional, default=ON
 set(WITH_LIBXML2 FALSE CACHE BOOL "Choose if libxml2 support should be built ")
 
