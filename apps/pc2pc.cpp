@@ -1,5 +1,3 @@
-int main(int, char* []){return 0;}
-#if 0
 /***************************************************************************
  *
  * Project: libLAS -- C/C++ read/write library for LAS LIDAR data
@@ -10,6 +8,14 @@ int main(int, char* []){return 0;}
  *
  * See LICENSE.txt in this source distribution for more information.
  **************************************************************************/
+
+#include <stdio.h>
+int main(int, char* [])
+{
+  printf("Hi\n");
+  return 0;
+}
+#if 0
 
 #include <liblas/liblas.hpp>
 #include "laskernel.hpp"
