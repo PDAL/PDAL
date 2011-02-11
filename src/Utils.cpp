@@ -32,7 +32,75 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cstdlib>
+#include <cassert>
+
+// boost
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/stream.hpp>
+
 #include "libpc/Utils.hpp"
 
 
+namespace libpc
+{
+
+double Utils::random(double minimum, double maximum)
+{
+    double r = (double)rand();  // [0..32767]
+    double v = (maximum - minimum) / (double)RAND_MAX;
+    double s = r * v; // [0..(max-min)]
+    double t = minimum + s; // [min..max]
+
+    assert(t >= minimum);
+    assert(t <= maximum);
+
+    return t;
+}
+
+
+std::istream* Utils::Open(std::string const& filename, std::ios::openmode mode)
+{
+    namespace io = boost::iostreams;
+    io::stream<io::file_source>* ifs = new io::stream<io::file_source>();
+    ifs->open(filename.c_str(), mode);
+    if (ifs->is_open() == false) return NULL;
+    return ifs;
+}
+
+
+std::ostream* Utils::Create(std::string const& filename, std::ios::openmode mode)
+{
+    namespace io = boost::iostreams;
+    io::stream<io::file_sink>* ofs = new io::stream<io::file_sink>();
+    ofs->open(filename.c_str(), mode);
+    if (ofs->is_open() == false) return NULL;
+    return ofs;
+}
+
+
+void Utils::Cleanup(std::ostream* ofs)
+{
+    // An ofstream is closeable and deletable, but
+    // an ostream like &std::cout isn't.
+    if (!ofs) return;
+    if (static_cast<std::ofstream&>(*ofs))
+    {
+        static_cast<std::ofstream&>(*ofs).close();
+        delete ofs;
+    }
+}
+
+
+void Utils::Cleanup(std::istream* ifs)
+{
+    // An ifstream is closeable and deletable, but
+    // an istream like &std::cin isn't.
+    if (!ifs) return;
+    if (static_cast<std::ifstream&>(*ifs))
+    {
+        static_cast<std::ifstream&>(*ifs).close();
+        delete ifs;
+    }
+}
+
+} // namespace libpc

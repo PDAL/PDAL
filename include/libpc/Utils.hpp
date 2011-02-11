@@ -35,8 +35,9 @@
 #ifndef INCLUDED_UTILS_HPP
 #define INCLUDED_UTILS_HPP
 
-#include <cassert>
-#include <limits>
+#include <iosfwd>
+#include <string>
+
 #include "libpc/export.hpp"
 
 namespace libpc
@@ -45,18 +46,7 @@ namespace libpc
 class LIBPC_DLL Utils
 {
 public:
-    static double random(double min, double max)
-    {
-        double r = (double)rand();  // [0..32767]
-        double v = (max - min) / (double)RAND_MAX;
-        double s = r * v; // [0..(max-min)]
-        double t = min + s; // [min..max]
-
-        assert(t >= min);
-        assert(t <= max);
-
-        return t;
-    }
+    static double random(double minimum, double maximum);
 
     template<class T>
     static bool compare_distance(const T& actual, const T& expected)
@@ -71,6 +61,11 @@ public:
         return true;
     }
 
+    static std::istream* Open(std::string const& filename, std::ios::openmode mode=std::ios::in | std::ios::binary);
+    static std::ostream* Create(std::string const& filename, std::ios::openmode mode=std::ios::in | std::ios::binary);
+
+    static void Cleanup(std::ostream* ofs);
+    static void Cleanup(std::istream* ifs);
 };
 
 } // namespace libpc
