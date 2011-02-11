@@ -37,6 +37,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/PointLayout.hpp
   ${LIBPC_HEADERS_DIR}/Range.hpp
   ${LIBPC_HEADERS_DIR}/Reader.hpp
+  ${LIBPC_HEADERS_DIR}/Schema.hpp
   ${LIBPC_HEADERS_DIR}/Stage.hpp
   ${LIBPC_HEADERS_DIR}/Utils.hpp
   ${LIBPC_HEADERS_DIR}/Writer.hpp)
@@ -55,6 +56,7 @@ set(LIBPC_CPP
   PointData.cpp
   PointLayout.cpp
   Reader.cpp
+  Schema.cpp
   Stage.cpp
   Utils.cpp
   Writer.cpp)

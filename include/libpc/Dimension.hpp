@@ -298,7 +298,6 @@ private:
 };
 
 
-
 LIBPC_DLL std::ostream& operator<<(std::ostream& os, libpc::Dimension const& d);
 
 

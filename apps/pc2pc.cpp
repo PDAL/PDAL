@@ -15,6 +15,7 @@
 #include "libpc/version.hpp"
 #include "libpc/Bounds.hpp"
 #include "libpc/Dimension.hpp"
+#include "libpc/Schema.hpp"
 
 using namespace libpc;
 
@@ -40,6 +41,11 @@ int main(int, char* [])
     {
         Dimension dim("foo", 8);
         std::cout << dim << std::endl;
+    }
+
+    {
+        Schema schema(ePointFormat0);
+        std::cout << schema;
     }
 
     return 0;
