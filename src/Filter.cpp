@@ -34,7 +34,8 @@
 
 #include "libpc/Filter.hpp"
 
-using namespace libpc;
+namespace libpc
+{
 
 
 Filter::Filter(Stage& prevStage) :
@@ -44,3 +45,6 @@ Filter::Filter(Stage& prevStage) :
     header = m_prevStage.getHeader();
     return;
 }
+
+
+} // namespace libpc

@@ -39,7 +39,8 @@
 using std::cout;
 using std::endl;
 
-using namespace libpc;
+namespace libpc
+{
 
 
 Header::Header() :
@@ -128,3 +129,6 @@ void Header::dump() const
 
     return;
 }
+
+
+} // namespace libpc

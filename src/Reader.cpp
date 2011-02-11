@@ -34,7 +34,8 @@
 
 #include "libpc/Reader.hpp"
 
-using namespace libpc;
+namespace libpc
+{
 
 
 Reader::Reader() :
@@ -42,3 +43,5 @@ Reader::Reader() :
 {
     return;
 }
+
+} // namespace libpc

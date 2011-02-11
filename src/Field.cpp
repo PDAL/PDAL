@@ -41,7 +41,8 @@ using std::string;
 using std::cout;
 using std::endl;
 
-using namespace libpc;
+namespace libpc
+{
 
 
 Field::Field() :
@@ -185,4 +186,7 @@ int Field::getSize(DataType dt)
         return 8;
     }
     return 0; // BUG: notreached
+}
+
+
 }

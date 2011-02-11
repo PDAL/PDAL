@@ -40,7 +40,8 @@ using std::string;
 using std::cout;
 using std::endl;
 
-using namespace libpc;
+namespace libpc
+{
 
 FauxWriter::FauxWriter(Stage& prevStage) :
     Writer(prevStage)
@@ -95,3 +96,6 @@ void FauxWriter::writeBuffer(const PointData& pointData)
 
     return;
 }
+
+
+} // namespace libpc

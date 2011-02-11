@@ -35,7 +35,8 @@
 #include <cassert>
 #include "libpc/ColorFilter.hpp"
 
-using namespace libpc;
+namespace libpc
+{
 
 ColorFilter::ColorFilter(Stage& prevStage)
     : Filter(prevStage)
@@ -141,3 +142,5 @@ void ColorFilter::getColor(float value, byte& red, byte& green, byte& blue)
 
     return;
 }
+
+} // namespace libpc

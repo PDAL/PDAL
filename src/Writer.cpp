@@ -36,7 +36,8 @@
 
 #include "libpc/Writer.hpp"
 
-using namespace libpc;
+namespace libpc
+{
 
 
 Writer::Writer(Stage& prevStage) :
@@ -67,3 +68,5 @@ void Writer::write()
 
     return;
 }
+
+} // namespace libpc

@@ -45,7 +45,9 @@
 #include <iostream>
 
 using namespace boost;
-using namespace libpc;
+
+namespace libpc
+{
 
 
 Dimension::Dimension(std::string const& name, std::size_t size_in_bits) :
@@ -161,3 +163,4 @@ property_tree::ptree Dimension::GetPTree() const
     return dim;
 }
 
+} // namespace libpc

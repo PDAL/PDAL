@@ -40,7 +40,8 @@
 using std::vector;
 using std::string;
 
-using namespace libpc;
+namespace libpc
+{
 
 FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints)
     : Reader()
@@ -106,3 +107,6 @@ void FauxReader::readNextPoints(PointData& data)
 
     return;
 }
+
+
+} // namespace libpc

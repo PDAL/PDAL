@@ -41,7 +41,8 @@ using std::cout;
 using std::endl;
 using std::string;
 
-using namespace libpc;
+namespace libpc
+{
 
 
 PointLayout::PointLayout()
@@ -179,3 +180,5 @@ void PointLayout::dump(string indent) const
         cout << endl;
     }
 }
+
+} // namespace libpc

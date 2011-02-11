@@ -35,7 +35,8 @@
 #include <cassert>
 #include "libpc/MosaicFilter.hpp"
 
-using namespace libpc;
+namespace libpc
+{
 
 // BUG: will generalize to more than 2 inputs
 MosaicFilter::MosaicFilter(Stage& prevStage, Stage& prevStage2)
@@ -112,3 +113,6 @@ void MosaicFilter::readNextPoints(PointData& destData)
 
     return;
 }
+
+
+} // namespace libpc

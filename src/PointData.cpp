@@ -41,7 +41,8 @@ using std::cout;
 using std::endl;
 using std::string;
 
-using namespace libpc;
+namespace libpc
+{
 
 
 PointData::PointData(const PointLayout& layout, int numPoints) :
@@ -258,3 +259,6 @@ void PointData::dump(int pointIndex, string indent) const
 
     return;
 }
+
+
+} // namespace libpc

@@ -34,7 +34,8 @@
 
 #include "libpc/Stage.hpp"
 
-using namespace libpc;
+namespace libpc
+{
 
 
 Stage::Stage()
@@ -53,3 +54,6 @@ Header& Stage::getHeader()
 {
     return m_header;
 }
+
+
+} // namespace libpc
