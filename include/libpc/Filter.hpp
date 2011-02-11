@@ -35,10 +35,14 @@
 #ifndef INCLUDED_FILTER_HPP
 #define INCLUDED_FILTER_HPP
 
+#include "libpc/export.hpp"
 #include "libpc/Stage.hpp"
-#include "libpc/header.hpp"
+#include "libpc/Header.hpp"
 
-class Filter : public Stage
+namespace libpc
+{
+
+class LIBPC_DLL Filter : public Stage
 {
 public:
   Filter(Stage& prevStage);
@@ -53,5 +57,7 @@ private:
   Filter& operator=(const Filter&); // not implemented
   Filter(const Filter&); // not implemented
 };
+
+};  // namespace libpc
 
 #endif

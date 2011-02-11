@@ -40,8 +40,9 @@
 using std::vector;
 using std::string;
 
+using namespace libpc;
 
-FauxReader::FauxReader(const Bounds& bounds, int numPoints)
+FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints)
   : Reader()
 {
   Header& header = getHeader();
@@ -76,13 +77,19 @@ void FauxReader::readNextPoints(PointData& data)
 
   float v = (float)m_lastPointRead;
 
-  const Bounds& bounds = header.getBounds();
+  const Bounds<double>& bounds = header.getBounds();
+  const double minX = bounds.dims()[0].minimum;
+  const double maxX = bounds.dims()[0].maximum;
+  const double minY = bounds.dims()[1].minimum;
+  const double maxY = bounds.dims()[1].maximum;
+  const double minZ = bounds.dims()[2].minimum;
+  const double maxZ = bounds.dims()[2].maximum;
 
   for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
   {
-    const float x = (float)Utils::random(bounds.m_minX,bounds.m_maxX);
-    const float y = (float)Utils::random(bounds.m_minY,bounds.m_maxY);
-    const float z = (float)Utils::random(bounds.m_minZ,bounds.m_maxZ);
+    const float x = (float)Utils::random(minX, maxX);
+    const float y = (float)Utils::random(minY, maxY);
+    const float z = (float)Utils::random(minZ, maxZ);
 
     data.setValid(pointIndex);
 

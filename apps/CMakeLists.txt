@@ -43,7 +43,7 @@ endif()
 # Configure build targets
 
 if(WIN32)
-    add_definitions("-DPC_DLL_EXPORT=1")
+    add_definitions("-DLIBPC_DLL_EXPORT=1")
 endif()
 
 

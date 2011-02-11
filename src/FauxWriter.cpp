@@ -40,6 +40,7 @@ using std::string;
 using std::cout;
 using std::endl;
 
+using namespace libpc;
 
 FauxWriter::FauxWriter(Stage& prevStage) :
   Writer(prevStage)

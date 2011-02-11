@@ -35,14 +35,19 @@
 #ifndef INCLUDED_COLORFILTER_HPP
 #define INCLUDED_COLORFILTER_HPP
 
+#include "libpc/export.hpp"
 #include "libpc/Filter.hpp"
 
+namespace libpc
+{
 
 // adds three new u8 fields (R,G,B) for the colourization of the Z axis
 // the color is done as a ramp from the declared Z min/max values in the header
-class ColorFilter : public Filter
+class LIBPC_DLL ColorFilter : public Filter
 {
 public:
+  typedef unsigned char byte; // BUG
+
   ColorFilter(Stage& prevStage);
 
   void readNextPoints(PointData&);
@@ -53,5 +58,7 @@ private:
   ColorFilter& operator=(const ColorFilter&); // not implemented
   ColorFilter(const ColorFilter&); // not implemented
 };
+
+}; // namespace libpc
 
 #endif

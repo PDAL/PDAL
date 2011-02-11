@@ -20,6 +20,7 @@ endif()
 set(LIBPC_HEADERS_DIR ../include/libpc)
 
 set(LIBPC_HPP
+  ${LIBPC_HEADERS_DIR}/export.hpp
   ${LIBPC_HEADERS_DIR}/Bounds.hpp
   ${LIBPC_HEADERS_DIR}/ColorFilter.hpp
   ${LIBPC_HEADERS_DIR}/CropFilter.hpp
@@ -31,6 +32,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/MosaicFilter.hpp
   ${LIBPC_HEADERS_DIR}/PointData.hpp  
   ${LIBPC_HEADERS_DIR}/PointLayout.hpp
+  ${LIBPC_HEADERS_DIR}/Range.hpp
   ${LIBPC_HEADERS_DIR}/Reader.hpp
   ${LIBPC_HEADERS_DIR}/Stage.hpp
   ${LIBPC_HEADERS_DIR}/Utils.hpp
@@ -87,7 +89,7 @@ set(LIBPC_SOURCES
 #endif()
 
 if(WIN32)
-    add_definitions("-DPC_DLL_EXPORT=1")
+    add_definitions("-DLIBPC_DLL_EXPORT=1")
 if (NOT WITH_STATIC_LASZIP)
     add_definitions("-DLASZIP_DLL_IMPORT=1")
 endif()

@@ -37,10 +37,12 @@
 
 #include "libpc/Filter.hpp"
 
+namespace libpc
+{
 
 // a Writer is a Filter, because it has a previous stage and a header
 // however, Writers generally do not implement the readNextPoints method
-class Writer : public Filter
+class LIBPC_DLL Writer : public Filter
 {
 public:
   Writer(Stage& prevStage);
@@ -64,5 +66,7 @@ private:
   Writer& operator=(const Writer&); // not implemented
   Writer(const Writer&); // not implemented
 };
+
+}; // namespace libpc
 
 #endif

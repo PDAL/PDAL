@@ -38,9 +38,11 @@
 #include "libpc/PointData.hpp"
 #include "libpc/Header.hpp"
 
+namespace libpc
+{
 
 // every stage owns its own header, they are not shared
-class Stage
+class LIBPC_DLL Stage
 {
 public:
   Stage();
@@ -62,5 +64,7 @@ private:
   Stage& operator=(const Stage&); // not implemented
   Stage(const Stage&); // not implemented
 };
+
+}; // namespace libpc
 
 #endif

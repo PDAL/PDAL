@@ -35,7 +35,7 @@
 #include <cassert>
 #include "libpc/ColorFilter.hpp"
 
-
+using namespace libpc;
 
 ColorFilter::ColorFilter(Stage& prevStage) 
   : Filter(prevStage)
@@ -132,7 +132,8 @@ void ColorFilter::getColor(float value, byte& red, byte& green, byte& blue)
 {
   float fred, fgreen, fblue;
 
-  SlimDX_GetColor(value, (float)getHeader().getBounds().m_minZ, (float)getHeader().getBounds().m_maxZ, fred, fblue, fgreen);
+  const Range<double>& zrange = getHeader().getBounds().dims()[2];
+  SlimDX_GetColor(value, (float)zrange.minimum, (float)zrange.maximum, fred, fblue, fgreen);
 
   red = (byte)(fred * 255.0);
   green = (byte)(fgreen * 255.0);

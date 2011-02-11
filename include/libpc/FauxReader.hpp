@@ -37,11 +37,14 @@
 
 #include "libpc/Reader.hpp"
 
-class FauxReader : public Reader
+namespace libpc
+{
+
+class LIBPC_DLL FauxReader : public Reader
 {
 public:
   // generates N points randomly within the bounds
-  FauxReader(const Bounds&, int numPoints);
+  FauxReader(const Bounds<double>&, int numPoints);
 
   void readNextPoints(PointData& data);
 
@@ -49,5 +52,7 @@ private:
   FauxReader& operator=(const FauxReader&); // not implemented
   FauxReader(const FauxReader&); // not implemented
 };
+
+}; // namespace libpc
 
 #endif

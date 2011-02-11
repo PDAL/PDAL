@@ -36,6 +36,7 @@
 #define INCLUDED_UTILS_HPP
 
 #include <cassert>
+#include <limits>
 
 
 class Utils
@@ -53,6 +54,20 @@ public:
 
     return t;
   }
+
+  template<class T>
+  static bool compare_distance(const T& actual, const T& expected)
+  { 
+    const T epsilon = std::numeric_limits<T>::epsilon();  
+    const T diff = actual - expected; 
+
+    if ( !((diff <= epsilon) && (diff >= -epsilon )) ) 
+    { 
+        return false; 
+    } 
+    return true;
+  }
+
 };
 
 

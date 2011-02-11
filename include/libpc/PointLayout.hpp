@@ -38,10 +38,13 @@
 #include <vector>
 #include <string>
 
+#include "libpc/export.hpp"
 #include "libpc/Field.hpp"
 
+namespace libpc
+{
 
-class PointLayout
+class LIBPC_DLL PointLayout
 {
 public:
   PointLayout();
@@ -85,5 +88,7 @@ private:
   int m_fieldIndex_Y;
   int m_fieldIndex_Z;
 };
+
+}; // namespace libpc
 
 #endif

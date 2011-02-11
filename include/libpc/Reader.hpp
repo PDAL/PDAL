@@ -38,8 +38,10 @@
 #include "libpc/Stage.hpp"
 #include "libpc/header.hpp"
 
+namespace libpc
+{
 
-class Reader : public Stage
+class LIBPC_DLL Reader : public Stage
 {
 public:
   Reader();
@@ -52,5 +54,7 @@ private:
   Reader& operator=(const Reader&); // not implemented
   Reader(const Reader&); // not implemented
 };
+
+}; // namespace libpc
 
 #endif

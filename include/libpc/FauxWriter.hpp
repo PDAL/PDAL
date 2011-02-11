@@ -39,7 +39,10 @@
 
 #include "libpc/Writer.hpp"
 
-class FauxWriter : public Writer
+namespace libpc
+{
+
+class LIBPC_DLL FauxWriter : public Writer
 {
 public:
   FauxWriter(Stage& prevStage);
@@ -54,5 +57,7 @@ private:
   FauxWriter& operator=(const FauxWriter&); // not implemented
   FauxWriter(const FauxWriter&); // not implemented
 };
+
+}; // namespace libpc
 
 #endif

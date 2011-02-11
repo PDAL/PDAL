@@ -35,9 +35,11 @@
 #ifndef INCLUDED_POINTDATA_HPP
 #define INCLUDED_POINTDATA_HPP
 
-#include "PointLayout.hpp"
+#include "libpc/export.hpp"
+#include "libpc/PointLayout.hpp"
 
-typedef unsigned char byte;
+namespace libpc
+{
 
 // a PointData object is just an untyped array of N bytes,
 // where N is (the size of the given Layout * the number of points)
@@ -48,9 +50,11 @@ typedef unsigned char byte;
 //
 // Many of the methods take a first parameter "index", to specify which point in the
 // collection is to be operated upon.
-class PointData
+class LIBPC_DLL PointData
 {
 public:
+    typedef unsigned char byte; // BUG
+
   // note that when we make a PointData object all the fields are initialized to inactive,
   // regardless of what the passed-in layout says -- this is because the field object 
   // represents the state within the owning object, which in this case is a completely
@@ -112,5 +116,6 @@ private:
   PointData& operator=(const PointData&); // not implemented
 };
 
+}; // namespace libpc
 
 #endif

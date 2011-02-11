@@ -35,24 +35,29 @@
 #ifndef INCLUDED_CROPFILTER_HPP
 #define INCLUDED_CROPFILTER_HPP
 
+#include "libpc/export.hpp"
 #include "libpc/Filter.hpp"
 #include "libpc/Bounds.hpp"
 
+namespace libpc
+{
 
 // removes any points outside of the given range
 // updates the header accordingly
-class CropFilter : public Filter
+class LIBPC_DLL CropFilter : public Filter
 {
 public:
-  CropFilter(Stage& prevStage, const Bounds& bounds);
+  CropFilter(Stage& prevStage, const Bounds<double>& bounds);
 
   void readNextPoints(PointData&);
 
 private:
-  Bounds m_bounds;
+  Bounds<double> m_bounds;
 
   CropFilter& operator=(const CropFilter&); // not implemented
   CropFilter(const CropFilter&); // not implemented
 };
+
+}; // namespace libpc
 
 #endif

@@ -35,10 +35,14 @@
 #ifndef INCLUDED_HEADER_HPP
 #define INCLUDED_HEADER_HPP
 
+#include "libpc/export.hpp"
 #include "libpc/PointLayout.hpp"
 #include "libpc/Bounds.hpp"
 
-class Header
+namespace libpc
+{
+
+class LIBPC_DLL Header
 {
 public:
   Header();
@@ -52,15 +56,17 @@ public:
   int getNumPoints() const;
   void setNumPoints(int);
 
-  const Bounds& getBounds() const;
-  void setBounds(const Bounds&);
+  const Bounds<double>& getBounds() const;
+  void setBounds(const Bounds<double>&);
 
   void dump() const;
 
 private:
   PointLayout m_pointLayout;
   int m_numPoints;
-  Bounds m_bounds;
+  Bounds<double> m_bounds;
 };
+
+}; // namespace libpc
 
 #endif

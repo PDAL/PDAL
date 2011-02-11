@@ -38,7 +38,10 @@
 #include <vector>
 #include <string>
 
-class Field
+namespace libpc
+{
+
+class LIBPC_DLL Field
 {
 public:
   enum DataItem
@@ -99,5 +102,7 @@ private:
   DataType m_type;
   int m_offset; // byte offset within a point buffer
 };
+
+}; // namespace libpc
 
 #endif

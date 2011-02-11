@@ -31,39 +31,3 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
 * OF SUCH DAMAGE.
 ****************************************************************************/
-
-#include "libpc/Bounds.hpp"
-
-#include <iostream>
-
-using std::cout;
-
-
-#define mymin(a,b) ((a)<(b)?(a):(b))
-#define mymax(a,b) ((a)>=(b)?(a):(b))
-
-void Bounds::grow(const Bounds& b)
-{
-  Bounds& a = *this;
-
-  a.m_minX = mymin(a.m_minX, b.m_minX);
-  a.m_maxX = mymax(a.m_maxX, b.m_maxX);
-
-  a.m_minY = mymin(a.m_minY, b.m_minY);
-  a.m_maxY = mymax(a.m_maxY, b.m_maxY);
-
-  a.m_minZ = mymin(a.m_minZ, b.m_minZ);
-  a.m_maxZ = mymax(a.m_maxZ, b.m_maxZ);
-
-  return;
-}
-
-
-void Bounds::dump(void) const
-{
-  cout << "x(" << m_minX << "," << m_maxX << ")";
-  cout << " ";
-  cout << "y(" << m_minY << "," << m_maxY << ")";
-  cout << " ";
-  cout << "z(" << m_minZ << "," << m_maxZ << ")";
-}
