@@ -52,7 +52,7 @@ PointData::PointData(const PointLayout& layout, int numPoints) :
     m_pointSize(0)
 {
     m_pointSize = m_layout.getSizeInBytes();
-    m_data = new byte[m_pointSize * m_numPoints];
+    m_data = new boost::uint8_t[m_pointSize * m_numPoints];
 
     // the points will all be set to invalid here
     m_isValid.resize(m_numPoints);
@@ -75,7 +75,7 @@ PointData::setValid(int index, bool value)
 }
 
 
-PointData::byte* PointData::getData(int index) const
+boost::uint8_t* PointData::getData(int index) const
 {
     return m_data + m_pointSize * index;
 }
@@ -98,7 +98,7 @@ void PointData::setField(int pointIndex, int fieldIndex, T value)
 {
     int offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
     assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
-    byte* p = m_data + offset;
+    boost::uint8_t* p = m_data + offset;
 
     *(T*)p = value;
 }
@@ -109,15 +109,15 @@ T PointData::getField(int pointIndex, int fieldIndex) const
 {
     int offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
     assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
-    byte* p = m_data + offset;
+    boost::uint8_t* p = m_data + offset;
 
     return *(T*)p;
 }
 
 
-void PointData::setField_U8(int pointIndex, int fieldIndex, byte value)
+void PointData::setField_U8(int pointIndex, int fieldIndex, boost::uint8_t value)
 {
-    setField<byte>(pointIndex, fieldIndex, value);
+    setField<boost::uint8_t>(pointIndex, fieldIndex, value);
 }
 
 
@@ -134,9 +134,9 @@ void PointData::setField_F64(int pointIndex, int fieldIndex, double value)
 }
 
 
-PointData::byte PointData::getField_U8(int pointIndex, int fieldIndex) const
+boost::uint8_t PointData::getField_U8(int pointIndex, int fieldIndex) const
 {
-    return getField<byte>(pointIndex, fieldIndex);
+    return getField<boost::uint8_t>(pointIndex, fieldIndex);
 }
 
 
@@ -192,8 +192,8 @@ void PointData::copyFieldsFast(int destPointIndex, int srcPointIndex, const Poin
 {
     assert(getLayout() == srcPointData.getLayout());
 
-    byte* src = srcPointData.getData(srcPointIndex);
-    byte* dest = getData(destPointIndex);
+    boost::uint8_t* src = srcPointData.getData(srcPointIndex);
+    boost::uint8_t* dest = getData(destPointIndex);
     int len = getLayout().getSizeInBytes();
 
     memcpy(dest, src, len);
