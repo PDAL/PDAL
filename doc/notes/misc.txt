@@ -129,13 +129,15 @@ To the extent possible and reasonable, we value consistency:
 
 * *layout/organization of source tree?* 
     
-    public headers in ./include
-    private headers alongside source files in src/
+    - public headers in ./include
+    
+    - private headers alongside source files in src/
 
 * *use of namespaces?* (copy boost)
 
-    libpc::
-    libpc::detail::
+    - libpc\::
+    
+    - libpc::detail\::
     
 
 libPC Position on (Non)conformance
@@ -161,8 +163,8 @@ libPC may choose to offer as an option the ability to break the standard if,
 as a practical matter, doing so would significantly aid the market.  Such an
 option would never be the default behavior, however.
 
-*We should also have a guiding principle about files that are conformant but
-which lie, such as the extents in the header being wrong.  
+* We should also have a guiding principle about files that are conformant but
+  which lie, such as the extents in the header being wrong.  
 
 Specifically, is
 our default path to propagate the wrong info or to helpfully correct it on
