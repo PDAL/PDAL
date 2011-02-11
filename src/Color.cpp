@@ -98,4 +98,65 @@ void Color::throw_invalid_color_component() const
     throw std::invalid_argument("Color component value too large.  Each must be less than 65536");
 }
 
+
+// static function to impute a color from within a range
+void Color::interpolateColor(double value, double minValue, double maxValue, double& red, double& green, double& blue)
+{
+    // initialize to white
+    red = 1.0;
+    green = 1.0;
+    blue = 1.0;
+
+    if (value < minValue)
+    {
+        value = minValue;
+    }
+
+    if (value > maxValue)
+    {
+        value = maxValue;
+    }
+
+    double dv = maxValue - minValue;
+
+    if (value < (minValue + (0.25 * dv)))
+    {
+        red = 0;
+        green = 4 * (value - minValue) / dv;
+    }
+    else if (value < (minValue + (0.5 * dv)))
+    {
+        red = 0;
+        blue = 1 + (4 * (minValue + (0.25 * dv) - value) / dv);
+    }
+    else if (value < (minValue + (0.75 * dv)))
+    {
+        red = 4 * (value - minValue - (0.5 * dv)) / dv;
+        blue = 0;
+    }
+    else
+    {
+        green = 1 + (4 * (minValue + (0.75 * dv) - value) / dv);
+        blue = 0;
+    }
+
+    return;
+}
+
+
+// taken from SlimDXControl
+void Color::interpolateColor(double value, double minValue, double maxValue)
+{
+    double fred, fgreen, fblue;
+    interpolateColor(value, minValue, maxValue, fred, fblue, fgreen);
+
+    const double vmax = (std::numeric_limits<boost::uint16_t>::max());
+    SetRed((value_type)(fred * vmax));
+    SetGreen((value_type)(fgreen * vmax));
+    SetBlue((value_type)(fblue * vmax));
+
+    return;
+}
+
+
 } // namespace liblas

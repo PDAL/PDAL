@@ -35,6 +35,8 @@
 #ifndef INCLUDED_COLORFILTER_HPP
 #define INCLUDED_COLORFILTER_HPP
 
+#include <boost/cstdint.hpp>
+
 #include "libpc/export.hpp"
 #include "libpc/Filter.hpp"
 
@@ -46,14 +48,12 @@ namespace libpc
 class LIBPC_DLL ColorFilter : public Filter
 {
 public:
-    typedef unsigned char byte; // BUG
-
     ColorFilter(Stage& prevStage);
 
     void readNextPoints(PointData&);
 
 private:
-    void getColor(float value, byte& red, byte& green, byte& blue);
+    void getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue);
 
     ColorFilter& operator=(const ColorFilter&); // not implemented
     ColorFilter(const ColorFilter&); // not implemented

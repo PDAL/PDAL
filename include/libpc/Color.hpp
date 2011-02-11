@@ -131,6 +131,9 @@ public:
         return m_color[index];
     }
 
+    static void interpolateColor(double value, double minValue, double maxValue, double& red, double& green, double& blue);
+    void interpolateColor(double value, double minValue, double maxValue);
+
 private:
     typedef boost::array<value_type, 3> base_type;
     base_type m_color;

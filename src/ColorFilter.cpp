@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <cassert>
+#include "libpc/Color.hpp"
 #include "libpc/ColorFilter.hpp"
 
 namespace libpc
@@ -70,7 +71,7 @@ void ColorFilter::readNextPoints(PointData& data)
     for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         float z = data.getZ(pointIndex);
-        byte red, green, blue;
+        boost::uint8_t red, green, blue;
         getColor(z, red, green, blue);
 
         // now we store the 3 u8's in the point data...
@@ -83,62 +84,17 @@ void ColorFilter::readNextPoints(PointData& data)
     return;
 }
 
-
-static void SlimDX_GetColor(float value, float minValue, float maxValue, float& red, float& green, float& blue)
+void ColorFilter::getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue)
 {
-    // initialize to white
-    red = 1.0;
-    green = 1.0;
-    blue = 1.0;
-
-    if (value < minValue)
-    {
-        value = minValue;
-    }
-
-    if (value > maxValue)
-    {
-        value = maxValue;
-    }
-
-    float dv = maxValue - minValue;
-
-    if (value < (minValue + (0.25 * dv)))
-    {
-        red = 0;
-        green = 4 * (value - minValue) / dv;
-    }
-    else if (value < (minValue + (0.5 * dv)))
-    {
-        red = 0;
-        blue = 1 + (4 * (minValue + (0.25f * dv) - value) / dv);
-    }
-    else if (value < (minValue + (0.75 * dv)))
-    {
-        red = 4 * (value - minValue - (0.5f * dv)) / dv;
-        blue = 0;
-    }
-    else
-    {
-        green = 1 + (4 * (minValue + (0.75f * dv) - value) / dv);
-        blue = 0;
-    }
-
-    return;
-}
-
-
-// taken from SlimDXControl
-void ColorFilter::getColor(float value, byte& red, byte& green, byte& blue)
-{
-    float fred, fgreen, fblue;
+    double fred, fgreen, fblue;
 
     const Range<double>& zrange = getHeader().getBounds().dims()[2];
-    SlimDX_GetColor(value, (float)zrange.minimum(), (float)zrange.maximum(), fred, fblue, fgreen);
+    Color::interpolateColor(value, zrange.minimum(), zrange.maximum(), fred, fblue, fgreen);
 
-    red = (byte)(fred * 255.0);
-    green = (byte)(fgreen * 255.0);
-    blue = (byte)(fblue * 255.0);
+    const double vmax = (std::numeric_limits<boost::uint8_t>::max());
+    red = (boost::uint8_t)(fred * vmax);
+    green = (boost::uint8_t)(fgreen * vmax);
+    blue = (boost::uint8_t)(fblue * vmax);
 
     return;
 }
