@@ -1,0 +1,13 @@
+# usage (for a single file):
+#  AStyle.exe --options=astylerc include/libpc/Bounds.hpp
+#
+# usage (for directories):
+#  AStyle.exe --options=astylerc --recursive "include/*.hpp" "src/*.cpp"
+
+--style=ansi
+
+--indent=spaces=4
+
+--convert-tabs
+
+--lineend=linux
