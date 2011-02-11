@@ -24,6 +24,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/export.hpp
   ${LIBPC_HEADERS_DIR}/version.hpp
   ${LIBPC_HEADERS_DIR}/Bounds.hpp
+  ${LIBPC_HEADERS_DIR}/Color.hpp
   ${LIBPC_HEADERS_DIR}/ColorFilter.hpp
   ${LIBPC_HEADERS_DIR}/CropFilter.hpp
   ${LIBPC_HEADERS_DIR}/Dimension.hpp
@@ -45,6 +46,7 @@ set(LIBPC_HPP
 set(LIBPC_CPP
   version.cpp
   Bounds.cpp
+  Color.cpp
   ColorFilter.cpp
   Dimension.cpp
   FauxReader.cpp

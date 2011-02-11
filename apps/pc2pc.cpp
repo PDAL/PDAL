@@ -14,6 +14,7 @@
 #include "libpc/version.hpp"
 #include "libpc/version.hpp"
 #include "libpc/Bounds.hpp"
+#include "libpc/Color.hpp"
 #include "libpc/Dimension.hpp"
 #include "libpc/Schema.hpp"
 
@@ -47,6 +48,8 @@ int main(int, char* [])
         Schema schema(ePointFormat0);
         std::cout << schema;
     }
+
+    Color c;
 
     return 0;
 }
