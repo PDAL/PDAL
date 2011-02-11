@@ -20,7 +20,9 @@ endif()
 set(LIBPC_HEADERS_DIR ../include/libpc)
 
 set(LIBPC_HPP
+  ${LIBPC_HEADERS_DIR}/exceptions.hpp
   ${LIBPC_HEADERS_DIR}/export.hpp
+  ${LIBPC_HEADERS_DIR}/version.hpp
   ${LIBPC_HEADERS_DIR}/Bounds.hpp
   ${LIBPC_HEADERS_DIR}/ColorFilter.hpp
   ${LIBPC_HEADERS_DIR}/CropFilter.hpp
@@ -39,6 +41,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Writer.hpp)
 
 set(LIBPC_CPP
+  version.cpp
   Bounds.cpp
   ColorFilter.cpp
   FauxReader.cpp
