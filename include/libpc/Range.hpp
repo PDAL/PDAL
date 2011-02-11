@@ -42,19 +42,20 @@ namespace libpc
 template <typename T>
 class LIBPC_DLL Range
 {
-public:
-    T minimum;
-    T maximum;
+private:
+    T m_minimum;
+    T m_maximum;
 
+public:
     typedef T value_type;
 
-    Range(T mmin=(std::numeric_limits<T>::max)(), T mmax=(std::numeric_limits<T>::min)())
-        : minimum(mmin), maximum(mmax) {}
-
+    Range(T minimum=(std::numeric_limits<T>::max)(), T maximum=(std::numeric_limits<T>::min)())
+        : m_minimum(minimum)
+        , m_maximum(maximum) {}
 
     Range(Range const& other)
-        : minimum(other.minimum)
-        , maximum(other.maximum)
+        : m_minimum(other.m_minimum)
+        , m_maximum(other.m_maximum)
     {
     }
 
@@ -62,8 +63,8 @@ public:
     {
         if (&rhs != this)
         {
-            minimum = rhs.minimum;
-            maximum = rhs.maximum;
+            m_minimum = rhs.m_minimum;
+            m_maximum = rhs.m_maximum;
         }
         return *this;
     }
@@ -78,10 +79,30 @@ public:
         return !(equal(rhs));
     }
 
+    T minimum() const
+    {
+        return m_minimum;
+    }
+
+    void setMinimum(T value)
+    {
+        m_minimum = value;
+    }
+
+    T maximum() const
+    {
+        return m_maximum;
+    }
+
+    void setMaximum(T value)
+    {
+        m_maximum = value;
+    }
+
     bool equal(Range const& other) const
     {
-        if (!(Utils::compare_distance(minimum, other.minimum))
-                || !(Utils::compare_distance(maximum, other.maximum)))
+        if (!Utils::compare_distance(m_minimum, other.m_minimum) ||
+            !Utils::compare_distance(m_maximum, other.m_maximum))
         {
             return false;
         }
@@ -91,63 +112,63 @@ public:
 
     bool overlaps(Range const& r) const
     {
-        return minimum <= r.maximum && maximum >= r.minimum;
+        return m_minimum <= r.m_maximum && m_maximum >= r.m_minimum;
     }
 
     bool contains(Range const& r) const
     {
-        return minimum <= r.minimum && r.maximum <= maximum;
+        return m_minimum <= r.m_minimum && r.m_maximum <= m_maximum;
     }
 
     bool contains(T v) const
     {
-        return minimum <= v && v <= maximum;
+        return m_minimum <= v && v <= m_maximum;
     }
 
     bool empty(void) const
     {
-        return Utils::compare_distance(minimum, (std::numeric_limits<T>::max)()) && Utils::compare_distance(maximum, (std::numeric_limits<T>::min)());
+        return Utils::compare_distance(m_minimum, (std::numeric_limits<T>::max)()) && 
+               Utils::compare_distance(m_maximum, (std::numeric_limits<T>::min)());
     }
 
     void shift(T v)
     {
-        minimum += v;
-        maximum += v;
+        m_minimum += v;
+        m_maximum += v;
     }
 
     void scale(T v)
     {
-        minimum *= v;
-        maximum *= v;
+        m_minimum *= v;
+        m_maximum *= v;
     }
 
     void clip(Range const& r)
     {
-        if (r.minimum > minimum)
-            minimum = r.minimum;
-        if (r.maximum < maximum)
-            maximum = r.maximum;
+        if (r.m_minimum > m_minimum)
+            m_minimum = r.m_minimum;
+        if (r.m_maximum < m_maximum)
+            m_maximum = r.m_maximum;
     }
 
     void grow(T v)
     {
-        if (v < minimum)
-            minimum = v;
-        if (v > maximum)
-            maximum = v;
+        if (v < m_minimum)
+            m_minimum = v;
+        if (v > m_maximum)
+            m_maximum = v;
     }
 
     void grow(Range const& r)
     {
-        grow(r.minimum);
-        grow(r.maximum);
+        grow(r.m_minimum);
+        grow(r.m_maximum);
     }
 
     T length() const
     {
-        return maximum - minimum;
+        return m_maximum - m_minimum;
     }
 };
 
 } // namespace libpc
-

@@ -78,12 +78,12 @@ void FauxReader::readNextPoints(PointData& data)
     float v = (float)m_lastPointRead;
 
     const Bounds<double>& bounds = header.getBounds();
-    const double minX = bounds.dims()[0].minimum;
-    const double maxX = bounds.dims()[0].maximum;
-    const double minY = bounds.dims()[1].minimum;
-    const double maxY = bounds.dims()[1].maximum;
-    const double minZ = bounds.dims()[2].minimum;
-    const double maxZ = bounds.dims()[2].maximum;
+    const double minX = bounds.dims()[0].minimum();
+    const double maxX = bounds.dims()[0].maximum();
+    const double minY = bounds.dims()[1].minimum();
+    const double maxY = bounds.dims()[1].maximum();
+    const double minZ = bounds.dims()[2].minimum();
+    const double maxZ = bounds.dims()[2].maximum();
 
     for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
