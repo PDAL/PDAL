@@ -67,6 +67,6 @@ private:
   Writer(const Writer&); // not implemented
 };
 
-}; // namespace libpc
+} // namespace libpc
 
 #endif

@@ -53,6 +53,6 @@ private:
   FauxReader(const FauxReader&); // not implemented
 };
 
-}; // namespace libpc
+} // namespace libpc
 
 #endif

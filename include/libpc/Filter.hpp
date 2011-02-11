@@ -58,6 +58,6 @@ private:
   Filter(const Filter&); // not implemented
 };
 
-};  // namespace libpc
+}  // namespace libpc
 
 #endif

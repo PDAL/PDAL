@@ -59,6 +59,6 @@ private:
   ColorFilter(const ColorFilter&); // not implemented
 };
 
-}; // namespace libpc
+} // namespace libpc
 
 #endif

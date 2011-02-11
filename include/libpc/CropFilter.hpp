@@ -58,6 +58,6 @@ private:
   CropFilter(const CropFilter&); // not implemented
 };
 
-}; // namespace libpc
+} // namespace libpc
 
 #endif

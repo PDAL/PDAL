@@ -58,6 +58,6 @@ private:
   FauxWriter(const FauxWriter&); // not implemented
 };
 
-}; // namespace libpc
+} // namespace libpc
 
 #endif

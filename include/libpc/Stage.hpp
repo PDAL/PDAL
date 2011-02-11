@@ -65,6 +65,6 @@ private:
   Stage(const Stage&); // not implemented
 };
 
-}; // namespace libpc
+} // namespace libpc
 
 #endif

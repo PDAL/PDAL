@@ -46,6 +46,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <stdexcept>
 
 #include "libpc/export.hpp"
 #include "libpc/Range.hpp"

@@ -116,6 +116,6 @@ private:
   PointData& operator=(const PointData&); // not implemented
 };
 
-}; // namespace libpc
+} // namespace libpc
 
 #endif

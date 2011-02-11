@@ -89,6 +89,6 @@ private:
   int m_fieldIndex_Z;
 };
 
-}; // namespace libpc
+} // namespace libpc
 
 #endif

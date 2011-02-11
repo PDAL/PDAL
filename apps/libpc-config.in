@@ -1,0 +1,63 @@
+#!/bin/sh
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+
+
+usage()
+{
+	cat <<EOF
+Usage: liblas-config [OPTIONS]
+Options:
+	[--libs]
+	[--cflags]
+	[--cxxflags]
+	[--defines]
+	[--includes]
+	[--version]
+EOF
+	exit $1
+}
+
+if test $# -eq 0; then
+	usage 1 1>&2
+fi
+
+case $1 in 
+  --libs) 
+    echo $LIBS
+    ;;
+
+  --prefix)
+    echo ${prefix}
+     ;;
+
+  --ldflags)
+    echo -L${libdir}
+    ;;
+
+  --defines)
+    echo @LIBLPC_CONFIG_DEFINITIONS@
+    ;;
+
+  --includes)
+    echo ${INCLUDES}
+    ;;
+
+  --cflags)
+    echo @CMAKE_C_FLAGS@
+    ;;
+
+  --cxxflags)
+    echo @CMAKE_CXX_FLAGS@
+    ;;
+    
+  --version)
+    echo @VERSION@
+    ;;
+
+  *)
+    usage 1 1>&2
+    ;;
+
+esac

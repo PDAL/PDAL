@@ -57,6 +57,6 @@ private:
   MosaicFilter(const MosaicFilter&); // not implemented
 };
 
-}; // namespace libpc
+} // namespace libpc
 
 #endif

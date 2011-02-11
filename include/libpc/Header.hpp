@@ -67,6 +67,6 @@ private:
   Bounds<double> m_bounds;
 };
 
-}; // namespace libpc
+} // namespace libpc
 
 #endif

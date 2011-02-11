@@ -55,6 +55,6 @@ private:
   Reader(const Reader&); // not implemented
 };
 
-}; // namespace libpc
+} // namespace libpc
 
 #endif

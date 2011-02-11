@@ -104,6 +104,6 @@ private:
   int m_offset; // byte offset within a point buffer
 };
 
-}; // namespace libpc
+} // namespace libpc
 
 #endif

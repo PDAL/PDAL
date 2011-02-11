@@ -149,5 +149,5 @@ public:
     }
 };
 
-}; // namespace libpc
+} // namespace libpc
 
