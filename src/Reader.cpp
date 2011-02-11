@@ -34,6 +34,9 @@
 
 #include "libpc/Reader.hpp"
 
+using namespace libpc;
+
+
 Reader::Reader() :
   m_lastPointRead(0)
 {

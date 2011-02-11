@@ -1,8 +1,8 @@
 @echo off
 
 set G="Visual Studio 10 Win64"
-set LIBPC=c:\dev\libpc
-set LASZIP=c:\dev\laszip
+set LIBPC=d:\dev\libpc
+set LASZIP=d:\dev\laszip
 set OSGEO4W=C:\OSGeo4W
 set OSGEO4W_GDAL=C:\OSGeo4W\apps\gdal-17
 set BOOST="C:\Utils\boost_1_45_0"

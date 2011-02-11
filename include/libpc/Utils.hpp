@@ -37,9 +37,12 @@
 
 #include <cassert>
 #include <limits>
+#include "libpc/export.hpp"
 
+namespace libpc
+{
 
-class Utils
+class LIBPC_DLL Utils
 {
 public:
   static double random(double min, double max)
@@ -70,5 +73,6 @@ public:
 
 };
 
+}; // namespace libpc
 
 #endif

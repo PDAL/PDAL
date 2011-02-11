@@ -42,22 +42,21 @@
 
 #include "libpc/export.hpp"
 #include "libpc/Range.hpp"
+#include "libpc/Utils.hpp"
 
 namespace libpc
 {
 
 template <typename T>
-class Bounds
+class LIBPC_DLL Bounds
 {
 public:
+  typedef T value_type;
+  typedef typename std::vector< Range<T> >::size_type size_type;
+  typedef typename std::vector< Range<T> > RangeVec;
 
-	typedef T value_type;
-    typedef typename std::vector< Range<T> >::size_type size_type;
-    
-    typedef typename std::vector< Range<T> > RangeVec;
 private:
-
-    RangeVec ranges;
+  RangeVec ranges;
     
 public:
 
@@ -288,13 +287,14 @@ bool overlaps(Bounds const& other) const
 /// Does this Bounds contain other?
 bool contains(Bounds const& other) const
 {
-    for (size_type i = 0; i < dimension(); i++) {
-        if ( ranges[i].contains(other.ranges[i]) )
-            return true;
-        else // As soon as it is not contains, we're false
-            return false;
-    }
-    return true;
+  // BUG: this loop only executes once, what is intended semantics?
+  for (size_type i = 0; i < dimension(); i++) {
+    if ( ranges[i].contains(other.ranges[i]) )
+      return true;
+    else // As soon as it is not contains, we're false
+      return false;
+  }
+  return true;
 }
 
 /////// Does this Bounds this point other?
@@ -415,8 +415,8 @@ void verify()
         if ((min)(d) > (max)(d) )
         {
             // Check that we're not infinity either way
-            if ( (compare_distance((min)(d), (std::numeric_limits<T>::max)()) ||
-                  compare_distance((max)(d), -(std::numeric_limits<T>::max)()) ))
+            if ( (Utils::compare_distance((min)(d), (std::numeric_limits<T>::max)()) ||
+                  Utils::compare_distance((max)(d), -(std::numeric_limits<T>::max)()) ))
             {
                 std::ostringstream msg; 
                 msg << "liblas::Bounds::verify: Minimum point at dimension " << d
@@ -427,7 +427,7 @@ void verify()
     }
 }
 
-friend std::ostream& operator<<(std::ostream& ostr, const Bounds<T>& bounds);
+//friend std::ostream& operator<<(std::ostream& ostr, const Bounds<T>& bounds);
 
 ////Bounds<T> project(liblas::SpatialReference const& in_ref, liblas::SpatialReference const& out_ref)
 ////{
@@ -447,9 +447,9 @@ friend std::ostream& operator<<(std::ostream& ostr, const Bounds<T>& bounds);
 template<class T>
 std::ostream& operator<<(std::ostream& ostr, const Bounds<T>& bounds)
 {
-  for (std::size_type d = 0; d < dimension(); ++d)
+  for (size_t d = 0; d < bounds.dimension(); ++d)
   {
-      const Range<T>& r = bounds.ranges[d];
+      const Range<T>& r = bounds.dims()[d];
     ostr << "(" <<  r.minimum << "," << r.maximum << ")";
   }
   return ostr;

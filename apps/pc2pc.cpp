@@ -9,11 +9,17 @@
  * See LICENSE.txt in this source distribution for more information.
  **************************************************************************/
 
-#include <libpc/Bounds.hpp>
+#include <iostream>
+#include "libpc/Bounds.hpp"
+
+using namespace libpc;
+
+
+
 int main(int, char* [])
 {
-  Bounds bounds(1,2,3,4,5,6);
-  bounds.dump();
+  Bounds<double> bounds(1,2,3,4,5,6);
+  std::cout << bounds;
   return 0;
 }
 #if 0

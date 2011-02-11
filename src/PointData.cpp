@@ -41,6 +41,8 @@ using std::cout;
 using std::endl;
 using std::string;
 
+using namespace libpc;
+
 
 PointData::PointData(const PointLayout& layout, int numPoints) :
   m_layout(layout),
@@ -72,7 +74,7 @@ PointData::setValid(int index, bool value)
 }
 
 
-byte* PointData::getData(int index) const
+PointData::byte* PointData::getData(int index) const
 {
   return m_data + m_pointSize * index;
 }
@@ -131,7 +133,7 @@ void PointData::setField_F64(int pointIndex, int fieldIndex, double value)
 }
 
 
-byte PointData::getField_U8(int pointIndex, int fieldIndex) const
+PointData::byte PointData::getField_U8(int pointIndex, int fieldIndex) const
 {
   return getField<byte>(pointIndex, fieldIndex);
 }

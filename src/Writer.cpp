@@ -36,6 +36,8 @@
 
 #include "libpc/Writer.hpp"
 
+using namespace libpc;
+
 
 Writer::Writer(Stage& prevStage) :
   Filter(prevStage)

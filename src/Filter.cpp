@@ -34,6 +34,9 @@
 
 #include "libpc/Filter.hpp"
 
+using namespace libpc;
+
+
 Filter::Filter(Stage& prevStage) :
   m_prevStage(prevStage)
 {

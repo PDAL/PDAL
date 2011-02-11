@@ -40,13 +40,13 @@ namespace libpc
 {
 
 template <typename T>
-class Range
+class LIBPC_DLL Range
 {
 public:
     T minimum;
     T maximum;
 
-	typedef T value_type;
+  typedef T value_type;
 
     Range(T mmin=(std::numeric_limits<T>::max)(), T mmax=(std::numeric_limits<T>::min)())
         : minimum(mmin), maximum(mmax) {}
@@ -106,7 +106,7 @@ public:
     
     bool empty(void) const 
     {
-  return Utils::compare_distance(minimum, (std::numeric_limits<T>::max)()) && compare_distance(maximum, (std::numeric_limits<T>::min)());
+      return Utils::compare_distance(minimum, (std::numeric_limits<T>::max)()) && Utils::compare_distance(maximum, (std::numeric_limits<T>::min)());
     }
     
     void shift(T v) 

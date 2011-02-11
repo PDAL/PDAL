@@ -41,6 +41,8 @@ using std::string;
 using std::cout;
 using std::endl;
 
+using namespace libpc;
+
 
 Field::Field() : 
   m_item(Field::InvalidItem),

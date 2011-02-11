@@ -39,6 +39,8 @@
 using std::cout;
 using std::endl;
 
+using namespace libpc;
+
 
 Header::Header() :
   m_numPoints(0)
@@ -68,13 +70,13 @@ Header& Header::operator=(const Header& other)
 }
  
 
-const Bounds& Header::getBounds() const
+const Bounds<double>& Header::getBounds() const
 {
   return m_bounds;
 }
 
 
-void Header::setBounds(const Bounds& bounds)
+void Header::setBounds(const Bounds<double>& bounds)
 {
   m_bounds = bounds;
 }
@@ -117,7 +119,7 @@ void Header::dump() const
   cout << "  Num points: " << m_numPoints << endl;
   
   cout << "  Bounds: ";
-  m_bounds.dump();
+  cout << m_bounds;
   cout << endl;
 
   m_pointLayout.dump("  ");

@@ -34,6 +34,9 @@
 
 #include "libpc/Stage.hpp"
 
+using namespace libpc;
+
+
 Stage::Stage()
 {
   return;

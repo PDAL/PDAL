@@ -35,6 +35,7 @@
 #include <cassert>
 #include "libpc/MosaicFilter.hpp"
 
+using namespace libpc;
 
 // BUG: will generalize to more than 2 inputs
 MosaicFilter::MosaicFilter(Stage& prevStage, Stage& prevStage2)
@@ -52,7 +53,7 @@ MosaicFilter::MosaicFilter(Stage& prevStage, Stage& prevStage2)
 
   Header& thisHeader = getHeader();
 
-  Bounds bigbox(prevHeader1.getBounds());
+  Bounds<double> bigbox(prevHeader1.getBounds());
   bigbox.grow(prevHeader2.getBounds());
   thisHeader.setBounds(bigbox);
 

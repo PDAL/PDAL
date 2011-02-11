@@ -37,6 +37,7 @@
 
 #include <vector>
 #include <string>
+#include "libpc/export.hpp"
 
 namespace libpc
 {

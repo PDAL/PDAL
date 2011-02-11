@@ -39,8 +39,11 @@
 #include "libpc/Bounds.hpp"
 
 
+namespace libpc
+{
+
 // removes any points outside of the given range
-class MosaicFilter : public Filter
+class LIBPC_DLL MosaicFilter : public Filter
 {
 public:
   MosaicFilter(Stage& prevStage, Stage& prevStage2);
@@ -53,5 +56,7 @@ private:
   MosaicFilter& operator=(const MosaicFilter&); // not implemented
   MosaicFilter(const MosaicFilter&); // not implemented
 };
+
+}; // namespace libpc
 
 #endif

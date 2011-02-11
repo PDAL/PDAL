@@ -41,6 +41,8 @@ using std::cout;
 using std::endl;
 using std::string;
 
+using namespace libpc;
+
 
 PointLayout::PointLayout()
   : m_numBytes(0),
