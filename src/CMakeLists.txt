@@ -26,6 +26,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Bounds.hpp
   ${LIBPC_HEADERS_DIR}/ColorFilter.hpp
   ${LIBPC_HEADERS_DIR}/CropFilter.hpp
+  ${LIBPC_HEADERS_DIR}/Dimension.hpp
   ${LIBPC_HEADERS_DIR}/FauxReader.hpp 
   ${LIBPC_HEADERS_DIR}/FauxWriter.hpp
   ${LIBPC_HEADERS_DIR}/Field.hpp
@@ -44,6 +45,7 @@ set(LIBPC_CPP
   version.cpp
   Bounds.cpp
   ColorFilter.cpp
+  Dimension.cpp
   FauxReader.cpp
   FauxWriter.cpp
   Field.cpp

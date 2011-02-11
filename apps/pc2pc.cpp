@@ -14,26 +14,35 @@
 #include "libpc/version.hpp"
 #include "libpc/version.hpp"
 #include "libpc/Bounds.hpp"
+#include "libpc/Dimension.hpp"
 
 using namespace libpc;
 
 
-
 int main(int, char* [])
 {
-  Bounds<double> bounds(1,2,3,4,5,6);
-  std::cout << bounds << std::endl;
+    {
+        Bounds<double> bounds(1,2,3,4,5,6);
+        std::cout << bounds << std::endl;
+    }
 
-  int major = LIBPC_VERSION_MAJOR;
-  int minor = LIBPC_VERSION_MINOR;
-  int patch = LIBPC_VERSION_PATCH;
-  int version = LIBPC_VERSION;
-  std::string verstring = LIBPC_VERSION_STRING;
-  std::cout << major << " " << minor << " " << patch << " (" << version << ")" << std::endl;
-  
-  std::cout << " string: " << GetVersion() << std::endl;
+    {
+        int major = LIBPC_VERSION_MAJOR;
+        int minor = LIBPC_VERSION_MINOR;
+        int patch = LIBPC_VERSION_PATCH;
+        int version = LIBPC_VERSION;
+        std::string verstring = LIBPC_VERSION_STRING;
+        std::cout << major << " " << minor << " " << patch << " (" << version << ")" << std::endl;
 
-  return 0;
+        std::cout << " string: " << GetVersion() << std::endl;
+    }
+
+    {
+        Dimension dim("foo", 8);
+        std::cout << dim << std::endl;
+    }
+
+    return 0;
 }
 #if 0
 
