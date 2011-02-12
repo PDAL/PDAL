@@ -1,30 +1,27 @@
-==========================
-libPC Project Notes: Goals
-==========================
-
-
+=============
 Project Goals
 =============
 
-1. From a market perspective, libPC is "version 2" of libLAS.  The actual 
+1. libPC is a library which provides APIs for reading, writing, and 
+   processing point cloud data of various formats.  Additionally, some 
+   command line tools are provided.  As GDAL is to 2D pixels, libPC is to 
+   multidimensional points.
+    
+2. From a market perspective, libPC is "version 2" of libLAS.  The actual 
    code base will be different, however, and the APIs will not be
    compatible.
 
-2. It is a library which provides APIs for reading, writing, and processing
-   point cloud data of various formats.  As GDAL is to 2D pixels, libPC is
-   to xD points.
-
-3. It has high performance, yet remains flexible.  We recognize that 
-   these two goals will conflict at times and will weigh the tradeoffs 
-   pragmatically.
+3. The libPC implementation has high performance, yet the API remains 
+   flexible.  We recognize that these two goals will conflict at times and 
+   will weigh the tradeoffs pragmatically.
   
-4. The library will be in C++, but will support SWIG bindings for Python and
-   C#.  We will avoid things that will make SWIG's life difficult, such as
-   multiple inheritance.
-   
-5. The overall architecture will be a pipeline of connected stages, each
-   stage being a data source (reader) or filter or writer.
+4. The architecture of a libPC-based workflow will be a pipeline of 
+   connected stages, each stage being either a data source (such as a file
+   reader), a filter (such as a point thinner), or data sink (such as a
+   file writer).
 
-6. The project will be released under a BSD license.
+5. The libPC library will be in C++, but will also include a C API and will
+   have SWIG bindings for languages like Python and C#. libPC will support 
+   multiple platforms, specifically Windows, Linux, and Mac.
 
-7. *others?*
+6. libPC is open source and is released under a BSD license.

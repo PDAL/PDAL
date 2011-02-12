@@ -7,14 +7,10 @@ satisfy.  We are speaking here about libPC at the API level, and not the
 command line apps that come with it (although in many cases the apps will
 directly address these use cases).
 
-In the first section, we list the use cases themselves.  We'll keep the 
-cases explicitly numbered, so we can refer back to them from elsewhere.
+Note we have the cases explicitly numbered, so we can refer back to them 
+from elsewhere.
 
-In the second section, we posit what the implementations of some of the 
-cases might look like.
-
-Wlog, we note that in many cases these use cases are composable (such as 1a
-and 3a).
+Many of these cases these use cases are composable (such as 1a and 3a).
 
 This list is intended to be representative of workflows we want to target, 
 but is by no means intended to be an exhaustive list.
@@ -85,6 +81,7 @@ The Use Cases
       the elevation height Z
 
 8. 3D visualization
+
    a. basic, static display of a point cloud
 
    b. same as (a), but with colorization of Z, simple filtering, etc
@@ -101,7 +98,3 @@ The Use Cases
 
    b. same as (9a), but as an in-place operation  *this is a tricky one,
       if we want to do it, because it doesn't fit the pipeline model*
-      
-
-Sample Implementations
-======================

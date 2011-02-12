@@ -11,7 +11,8 @@ points still to be decided.
 Better yet, these notes can serve as fodder for eventual public
 documentation for libPC developers and users.
 
-Notes files will be RST text files and will live in hg.
+Notes files will be RST text files and will live in the hg repo under 
+doc/notes.
 
 Editorial comments, and points yet to be resolved, are noted in the text
 *like this*.

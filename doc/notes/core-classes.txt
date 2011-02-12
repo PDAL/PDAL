@@ -1,0 +1,15 @@
+============
+Core Classes
+============
+
+This Notes describes the core classes used by libPC.
+
+* Range
+
+* Dimension
+
+* ...
+
+[tbd]
+
+

@@ -1,0 +1,29 @@
+=======
+Testing
+=======
+
+
+Unit Tests
+==========
+
+A unit test framework will be provided, with the goal that all (nontrivial)
+classes will have unit tests.  At the very least, each new class should have
+a corresponding unit test file stubbed in, even if there aren't any tests
+yet.
+
+A test harness will also be provided to exercise each of the command line
+apps.
+
+
+Other Tests
+===========
+
+We should also eventually have:
+
+* Large-file testing, to make sure we don't break when over the 2GB or 
+  4GB limit.
+  
+* Performance testing.  (mpg would like to see us put together a set of 
+  benchmark files, too.)
+  
+* Memory usage testing, to make sure we don't leak.

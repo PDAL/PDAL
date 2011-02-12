@@ -1,6 +1,6 @@
-=========================
-libPC Project Notes: Misc
-=========================
+====
+Misc
+====
 
 This document contains several issues worth documenting but are not, or are
 not yet, substantive enough to merit their own separate files.
@@ -75,22 +75,11 @@ To develop and build libPC, we'll be using these tools:
 * *others?*
 
 
-Testing
-=======
-
-A unit test framework will be provided, with the goal that all (nontrivial)
-classes will have unit tests.  At the very least, each new class should have
-a corresponding unit test file stubbed in, even if there aren't any tests
-yet.
-
-A test harness will also be provided to exercise each of the command line
-apps.
+Buildbot
+========
 
 A buildbot will eventually be set up to prevent builds from breaking and to
 keep the unit tests passing.
-
-*Performance testing is harder, but we should address this eventually too.
-mpg would like to see us put together a set of benchmark files, too.*
 
 
 Platforms
@@ -113,32 +102,6 @@ recognize it would be good to do so, since endianness ports always seem to
 shake out twiddly little bugs, but we don't have ready access a BE
 development box.
 
-
-Source Format and Naming Conventions
-====================================
-
-To the extent possible and reasonable, we value consistency:
-
-* LF endings, not CRLF
-
-* spaces, not tabs; 2(?) char indents
-
-* upper or lower camel case?
-
-* filenames must match class name
-
-* *layout/organization of source tree?* 
-    
-    - public headers in ./include
-    
-    - private headers alongside source files in src/
-
-* *use of namespaces?* (copy boost)
-
-    - libpc\::
-    
-    - libpc::detail\::
-    
 
 libPC Position on (Non)conformance
 ==================================
