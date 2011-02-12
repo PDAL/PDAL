@@ -48,7 +48,9 @@ class LIBPC_DLL MosaicFilter : public Filter
 public:
     MosaicFilter(Stage& prevStage, Stage& prevStage2);
 
-    void readNextPoints(PointData&);
+    void readPoints(PointData&);
+
+    // BUG: what does seetToPoint() do for a mosaic filter?
 
 private:
     Stage& m_prevStage2;

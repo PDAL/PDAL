@@ -38,10 +38,33 @@ namespace libpc
 {
 
 
-Reader::Reader() :
-    m_lastPointRead(0)
+Reader::Reader()
+    : m_currentPointIndex(0)
+    , m_numPointsRead(0)
 {
     return;
 }
+
+
+void Reader::seekToPoint(boost::uint64_t& pointNum)
+{
+    reset();
+
+    boost::uint32_t chunk = (boost::uint32_t)pointNum; // BUG: this needs to be done in blocks if pointNum is large
+
+    PointData pointData(getHeader().getLayout(), chunk);
+    readPoints(pointData);
+
+    // just drop the points on the floor and return
+    return;
+}
+
+
+void Reader::reset()
+{
+    m_currentPointIndex = 0;
+    m_numPointsRead = 0;
+}
+
 
 } // namespace libpc

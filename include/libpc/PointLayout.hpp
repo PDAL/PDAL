@@ -38,6 +38,8 @@
 #include <vector>
 #include <string>
 
+#include <boost/cstdint.hpp>
+
 #include "libpc/export.hpp"
 #include "libpc/Field.hpp"
 
@@ -54,54 +56,34 @@ public:
     bool operator==(const PointLayout& other) const;
 
     // adds a field to the end of the layout, and returns the index of the field added
-    int addField(const Field& field);
+    std::size_t addField(const Field& field);
 
     // returns a given field
-    const Field& getField(int fieldIndex) const
+    const Field& getField(std::size_t fieldIndex) const
     {
         return m_fields[fieldIndex];
     }
-    Field& getField(int fieldIndex)
+    Field& getField(std::size_t fieldIndex)
     {
         return m_fields[fieldIndex];
     }
 
     // total num bytes for all fields in the point
-    int getSizeInBytes() const;
+    std::size_t getSizeInBytes() const;
 
     // number of fields in the point
-    int getNumFields() const;
+    std::size_t getNumFields() const;
 
     void dump(std::string indent="") const;
 
-    // returns -1 if not found
-    int findFieldIndex(Field::DataItem item) const;
+    // returns false if not found, otherwise sets index
+    bool findFieldIndex(Field::DataItem item, std::size_t& index) const;
     bool hasField(Field::DataItem item) const;
-
-    // some well-known field types are always available
-    // (is this worth it?)
-    int getFieldIndex_X() const
-    {
-        return m_fieldIndex_X;
-    }
-    int getFieldIndex_Y() const
-    {
-        return m_fieldIndex_Y;
-    }
-    int getFieldIndex_Z() const
-    {
-        return m_fieldIndex_Z;
-    }
 
 private:
     std::vector<Field> m_fields; // each of the fields
 
-    int m_numBytes; // num bytes required to store all fields
-
-    // local cache of handy values
-    int m_fieldIndex_X;
-    int m_fieldIndex_Y;
-    int m_fieldIndex_Z;
+    std::size_t m_numBytes; // num bytes required to store all fields
 };
 
 } // namespace libpc

@@ -47,8 +47,6 @@
 #include <boost/array.hpp>
 #include <boost/cstdint.hpp>
 
-// std
-//#include <cstdlib> // std::size_t
 
 namespace libpc
 {

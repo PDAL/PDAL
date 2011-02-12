@@ -53,24 +53,32 @@ ColorFilter::ColorFilter(Stage& prevStage)
 }
 
 
-void ColorFilter::readNextPoints(PointData& data)
+void ColorFilter::readPoints(PointData& data)
 {
-    m_prevStage.readNextPoints(data);
+    m_prevStage.readPoints(data);
 
     int numPoints = data.getNumPoints();
 
     const PointLayout& layout = data.getLayout();
 
-    int fieldIndexR = layout.findFieldIndex(Field::Zred);
-    assert(fieldIndexR != -1);
-    int fieldIndexG = layout.findFieldIndex(Field::Zgreen);
-    assert(fieldIndexG != -1);
-    int fieldIndexB = layout.findFieldIndex(Field::Zblue);
-    assert(fieldIndexB != -1);
+    std::size_t fieldIndexR;
+    std::size_t fieldIndexG;
+    std::size_t fieldIndexB;
+    std::size_t offsetZ;
+    bool ok;
+
+    ok = layout.findFieldIndex(Field::Zred, fieldIndexR);
+    assert(ok);
+    ok = layout.findFieldIndex(Field::Zgreen, fieldIndexG);
+    assert(ok);
+    ok = layout.findFieldIndex(Field::Zblue, fieldIndexB);
+    assert(ok);
+    ok = layout.findFieldIndex(Field::ZPos, offsetZ);
+    assert(ok);
 
     for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        float z = data.getZ(pointIndex);
+        float z = data.getField_F32(pointIndex, offsetZ);
         boost::uint8_t red, green, blue;
         getColor(z, red, green, blue);
 

@@ -63,20 +63,21 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints)
 }
 
 
-void FauxReader::readNextPoints(PointData& data)
+void FauxReader::readPoints(PointData& data)
 {
     // make up some data and put it into the buffer
 
     int numPoints = data.getNumPoints();
-    assert(m_lastPointRead + numPoints <= getHeader().getNumPoints());
+    assert(m_currentPointIndex + numPoints <= getHeader().getNumPoints());
 
     const PointLayout& layout = data.getLayout();
     Header& header = getHeader();
 
-    int fieldIndexT = layout.findFieldIndex(Field::Time);
-    assert(fieldIndexT != -1);
+    std::size_t fieldIndexT;
+    bool ok = layout.findFieldIndex(Field::Time, fieldIndexT);
+    assert(ok);
 
-    float v = (float)m_lastPointRead;
+    float v = (float)m_currentPointIndex;
 
     const Bounds<double>& bounds = header.getBounds();
     const double minX = bounds.dims()[0].minimum();
@@ -94,16 +95,28 @@ void FauxReader::readNextPoints(PointData& data)
 
         data.setValid(pointIndex);
 
-        data.setX(pointIndex, x);
-        data.setY(pointIndex, y);
-        data.setZ(pointIndex, z);
+        std::size_t offsetX;
+        std::size_t offsetY;
+        std::size_t offsetZ;
+        bool ok;
+        
+        ok = layout.findFieldIndex(Field::XPos, offsetX);
+        assert(ok);
+        ok = layout.findFieldIndex(Field::YPos, offsetY);
+        assert(ok);
+        ok = layout.findFieldIndex(Field::ZPos, offsetZ);
+        assert(ok);
+
+        data.setField_F32(pointIndex, offsetX, x);
+        data.setField_F32(pointIndex, offsetY, y);
+        data.setField_F32(pointIndex, offsetZ, z);
 
         data.setField_F64(pointIndex, fieldIndexT, v * 0.1);
 
         ++v;
     }
 
-    m_lastPointRead += numPoints;
+    m_currentPointIndex += numPoints;
 
     return;
 }

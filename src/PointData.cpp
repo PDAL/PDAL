@@ -45,7 +45,7 @@ namespace libpc
 {
 
 
-PointData::PointData(const PointLayout& layout, int numPoints) :
+PointData::PointData(const PointLayout& layout, boost::uint32_t numPoints) :
     m_layout(layout),
     m_numPoints(numPoints),
     m_data(NULL),
@@ -62,26 +62,26 @@ PointData::PointData(const PointLayout& layout, int numPoints) :
 
 
 bool
-PointData::isValid(int index) const
+PointData::isValid(std::size_t index) const
 {
     return m_isValid[index];
 }
 
 
 void
-PointData::setValid(int index, bool value)
+PointData::setValid(std::size_t index, bool value)
 {
     m_isValid[index] = value;
 }
 
 
-boost::uint8_t* PointData::getData(int index) const
+boost::uint8_t* PointData::getData(std::size_t index) const
 {
     return m_data + m_pointSize * index;
 }
 
 
-int PointData::getNumPoints() const
+boost::uint32_t PointData::getNumPoints() const
 {
     return m_numPoints;
 }
@@ -94,10 +94,10 @@ const PointLayout& PointData::getLayout() const
 
 
 template <class T>
-void PointData::setField(int pointIndex, int fieldIndex, T value)
+void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value)
 {
-    int offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
-    assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
+    std::size_t offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
+    assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
     boost::uint8_t* p = m_data + offset;
 
     *(T*)p = value;
@@ -105,96 +105,60 @@ void PointData::setField(int pointIndex, int fieldIndex, T value)
 
 
 template <class T>
-T PointData::getField(int pointIndex, int fieldIndex) const
+T PointData::getField(std::size_t pointIndex, std::size_t fieldIndex) const
 {
-    int offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
-    assert(offset + (int)sizeof(T) <= m_pointSize * m_numPoints);
+    std::size_t offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
+    assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
     boost::uint8_t* p = m_data + offset;
 
     return *(T*)p;
 }
 
 
-void PointData::setField_U8(int pointIndex, int fieldIndex, boost::uint8_t value)
+void PointData::setField_U8(std::size_t pointIndex, std::size_t fieldIndex, boost::uint8_t value)
 {
     setField<boost::uint8_t>(pointIndex, fieldIndex, value);
 }
 
 
-void PointData::setField_F32(int pointIndex, int fieldIndex, float value)
+void PointData::setField_F32(std::size_t pointIndex, std::size_t fieldIndex, float value)
 {
     setField<float>(pointIndex, fieldIndex, value);
 }
 
 
-void PointData::setField_F64(int pointIndex, int fieldIndex, double value)
+void PointData::setField_F64(std::size_t pointIndex, std::size_t fieldIndex, double value)
 {
     setField<double>(pointIndex, fieldIndex, value);
 
 }
 
 
-boost::uint8_t PointData::getField_U8(int pointIndex, int fieldIndex) const
+boost::uint8_t PointData::getField_U8(std::size_t pointIndex, std::size_t fieldIndex) const
 {
     return getField<boost::uint8_t>(pointIndex, fieldIndex);
 }
 
 
-float PointData::getField_F32(int pointIndex, int fieldIndex) const
+float PointData::getField_F32(std::size_t pointIndex, std::size_t fieldIndex) const
 {
     return getField<float>(pointIndex, fieldIndex);
 }
 
 
-double PointData::getField_F64(int pointIndex, int fieldIndex) const
+double PointData::getField_F64(std::size_t pointIndex, std::size_t fieldIndex) const
 {
     return getField<double>(pointIndex, fieldIndex);
 }
 
 
-float PointData::getX(int pointIndex) const
-{
-    return getField_F32(pointIndex, m_layout.getFieldIndex_X());
-}
-
-
-float PointData::getY(int pointIndex) const
-{
-    return getField_F32(pointIndex, m_layout.getFieldIndex_Y());
-}
-
-
-float PointData::getZ(int pointIndex) const
-{
-    return getField_F32(pointIndex, m_layout.getFieldIndex_Z());
-}
-
-
-void PointData::setX(int pointIndex, float value)
-{
-    setField_F32(pointIndex, m_layout.getFieldIndex_X(), value);
-}
-
-
-void PointData::setY(int pointIndex, float value)
-{
-    setField_F32(pointIndex, m_layout.getFieldIndex_Y(), value);
-}
-
-
-void PointData::setZ(int pointIndex, float value)
-{
-    setField_F32(pointIndex, m_layout.getFieldIndex_Z(), value);
-}
-
-
-void PointData::copyFieldsFast(int destPointIndex, int srcPointIndex, const PointData& srcPointData)
+void PointData::copyFieldsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData)
 {
     assert(getLayout() == srcPointData.getLayout());
 
     boost::uint8_t* src = srcPointData.getData(srcPointIndex);
     boost::uint8_t* dest = getData(destPointIndex);
-    int len = getLayout().getSizeInBytes();
+    std::size_t len = getLayout().getSizeInBytes();
 
     memcpy(dest, src, len);
 
@@ -207,14 +171,14 @@ void PointData::copyFieldsFast(int destPointIndex, int srcPointIndex, const Poin
 void PointData::dump(string indent) const
 {
     int cnt = 0;
-    for (int pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
+    for (boost::uint32_t pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
     {
         if (isValid(pointIndex))
             ++cnt;
     }
     cout << "Contains " << cnt << " valid points (" << m_numPoints << " total)" << endl;
 
-    for (int pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
+    for (boost::uint32_t pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
     {
         if (isValid(pointIndex))
         {
@@ -227,11 +191,11 @@ void PointData::dump(string indent) const
 }
 
 
-void PointData::dump(int pointIndex, string indent) const
+void PointData::dump(std::size_t pointIndex, string indent) const
 {
     const PointLayout& layout = getLayout();
 
-    for (int fieldIndex=0; fieldIndex<layout.getNumFields(); fieldIndex++)
+    for (boost::uint32_t fieldIndex=0; fieldIndex<layout.getNumFields(); fieldIndex++)
     {
         cout << indent;
 

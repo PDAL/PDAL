@@ -35,6 +35,8 @@
 #ifndef INCLUDED_HEADER_HPP
 #define INCLUDED_HEADER_HPP
 
+#include <boost/cstdint.hpp>
+
 #include "libpc/export.hpp"
 #include "libpc/PointLayout.hpp"
 #include "libpc/Bounds.hpp"
@@ -53,8 +55,8 @@ public:
     PointLayout& getLayout();
     void setLayout(const PointLayout&);
 
-    int getNumPoints() const;
-    void setNumPoints(int);
+    boost::uint64_t getNumPoints() const;
+    void setNumPoints(boost::uint64_t);
 
     const Bounds<double>& getBounds() const;
     void setBounds(const Bounds<double>&);
@@ -63,7 +65,7 @@ public:
 
 private:
     PointLayout m_pointLayout;
-    int m_numPoints;
+    boost::uint64_t m_numPoints;
     Bounds<double> m_bounds;
 };
 

@@ -51,7 +51,8 @@ namespace libpc
 // A PointData object has an associated Layout object.
 //
 // Many of the methods take a first parameter "index", to specify which point in the
-// collection is to be operated upon.
+// collection is to be operated upon.  The point index is a uint32; you can't read
+// more than 4 billion points at a time.
 class LIBPC_DLL PointData
 {
 public:
@@ -59,10 +60,10 @@ public:
     // regardless of what the passed-in layout says -- this is because the field object
     // represents the state within the owning object, which in this case is a completely
     // empty buffer (similarly, all the points in the buffer are marked "invalid")
-    PointData(const PointLayout&, int numPoints);
+    PointData(const PointLayout&, boost::uint32_t numPoints);
 
     // number of points in this buffer
-    int getNumPoints() const;
+    boost::uint32_t getNumPoints() const;
 
     // layout (number and kinds of fields) for a point in this buffer
     const PointLayout& getLayout() const;
@@ -70,46 +71,38 @@ public:
     // "valid" means the data for the point can be used; if invalid, the point should
     // be ignored or skipped.  (This is done for efficiency; we don't want to have to
     // modify the buffer's size just to "delete" a point.)
-    bool isValid(int pointIndex) const;
-    void setValid(int pointIndex, bool value=true);
+    bool isValid(std::size_t pointIndex) const;
+    void setValid(std::size_t pointIndex, bool value=true);
 
     // accessors to a particular field of a particular point in this buffer
-    boost::uint8_t getField_U8(int pointIndex, int fieldIndex) const;
-    float getField_F32(int pointIndex, int fieldIndex) const;
-    double getField_F64(int pointIndex, int fieldIndex) const;
+    boost::uint8_t getField_U8(std::size_t pointIndex, std::size_t fieldIndex) const;
+    float getField_F32(std::size_t pointIndex, std::size_t fieldIndex) const;
+    double getField_F64(std::size_t pointIndex, std::size_t fieldIndex) const;
 
     // accessors to a particular field of a particular point in this buffer
-    void setField_U8(int pointIndex, int fieldIndex, boost::uint8_t value);
-    void setField_F32(int pointIndex, int fieldIndex, float value);
-    void setField_F64(int pointIndex, int fieldIndex, double value);
-
-    // handy functions to get at some some well-known fields
-    float getX(int pointIndex) const;
-    float getY(int pointIndex) const;
-    float getZ(int pointIndex) const;
-    void setX(int pointIndex, float value);
-    void setY(int pointIndex, float value);
-    void setZ(int pointIndex, float value);
+    void setField_U8(std::size_t pointIndex, std::size_t fieldIndex, boost::uint8_t value);
+    void setField_F32(std::size_t pointIndex, std::size_t fieldIndex, float value);
+    void setField_F64(std::size_t pointIndex, std::size_t fieldIndex, double value);
 
     // bulk copy all the fields from the given point into this object
     // NOTE: this is only legal if the src and dest layouts are exactly the same
     // (later, this will be implemented properly, to handle the general cases slowly and the best case quickly)
-    void copyFieldsFast(int destPointIndex, int srcPointIndex, const PointData& srcPointData);
+    void copyFieldsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData);
 
     void dump(std::string indent="") const;
-    void dump(int index, std::string indent="") const;
+    void dump(std::size_t pointIndex, std::string indent="") const;
 
 private:
     // access to the raw memory
-    boost::uint8_t* getData(int pointIndex) const;
+    boost::uint8_t* getData(std::size_t pointIndex) const;
 
-    template<class T> T getField(int fieldIndex, int itemOffset) const;
-    template<class T> void setField(int fieldIndex, int itemOffset, T value);
+    template<class T> T getField(std::size_t fieldIndex, std::size_t itemOffset) const;
+    template<class T> void setField(std::size_t fieldIndex, std::size_t itemOffset, T value);
 
     PointLayout m_layout;
     boost::uint8_t* m_data;
-    int m_pointSize;
-    int m_numPoints;
+    std::size_t m_pointSize;
+    boost::uint32_t m_numPoints;
     std::vector<bool> m_isValid; // one bool for each point
 
     PointData(const PointData&); // not implemented

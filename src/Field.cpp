@@ -35,6 +35,7 @@
 #include "libpc/Field.hpp"
 
 #include <iostream>
+#include <limits>
 
 using std::vector;
 using std::string;
@@ -48,7 +49,7 @@ namespace libpc
 Field::Field() :
     m_item(Field::InvalidItem),
     m_type(InvalidType),
-    m_offset(-1)
+    m_offset(std::numeric_limits<std::size_t>::max())
 {
     return;
 }
@@ -57,7 +58,7 @@ Field::Field() :
 Field::Field(DataItem item, DataType type) :
     m_item(item),
     m_type(type),
-    m_offset(-1)
+    m_offset(std::numeric_limits<std::size_t>::max())
 {
     return;
 }
@@ -102,7 +103,7 @@ void Field::dump() const
 }
 
 
-int Field::getNumBytes() const
+std::size_t Field::getNumBytes() const
 {
     return getSize(getType());
 }
@@ -160,7 +161,7 @@ string Field::getName(DataType dt)
 }
 
 
-int Field::getSize(DataType dt)
+std::size_t Field::getSize(DataType dt)
 {
     switch (dt)
     {
@@ -185,7 +186,7 @@ int Field::getSize(DataType dt)
     case F64:
         return 8;
     }
-    return 0; // BUG: notreached
+    return std::numeric_limits<std::size_t>::max();
 }
 
 

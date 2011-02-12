@@ -46,7 +46,10 @@ public:
     // generates N points randomly within the bounds
     FauxReader(const Bounds<double>&, int numPoints);
 
-    void readNextPoints(PointData& data);
+    void readPoints(PointData& data);
+
+    // does nothing
+    void seekToPoint(boost::uint64_t&) { }
 
 private:
     FauxReader& operator=(const FauxReader&); // not implemented

@@ -51,16 +51,16 @@ void Writer::write()
 {
     writeBegin();
 
-    int cnt = m_prevStage.getHeader().getNumPoints();
+    boost::uint64_t cnt = m_prevStage.getHeader().getNumPoints();
 
-    const int chunk = 10;
+    const boost::uint32_t chunk = 10;
     PointData buffer(getHeader().getLayout(), chunk);
 
     assert(cnt % chunk == 0); // ha ha
 
-    for (int i=0; i<cnt; i+=chunk)
+    for (boost::uint64_t i=0; i<cnt; i+=chunk)
     {
-        m_prevStage.readNextPoints(buffer);
+        m_prevStage.readPoints(buffer);
         this->writeBuffer(buffer);
     }
 

@@ -64,7 +64,7 @@ MosaicFilter::MosaicFilter(Stage& prevStage, Stage& prevStage2)
 }
 
 
-void MosaicFilter::readNextPoints(PointData& destData)
+void MosaicFilter::readPoints(PointData& destData)
 {
     int numPoints = destData.getNumPoints();
 
@@ -76,9 +76,9 @@ void MosaicFilter::readNextPoints(PointData& destData)
     PointData srcData1(destData.getLayout(), numPoints / 2);
     PointData srcData2(destData.getLayout(), numPoints / 2);
 
-    m_prevStage.readNextPoints(srcData1);
+    m_prevStage.readPoints(srcData1);
 
-    m_prevStage2.readNextPoints(srcData2);
+    m_prevStage2.readPoints(srcData2);
 
     int destPointIndex = 0;
 

@@ -73,7 +73,7 @@ public:
         F64
     };
     static std::string getName(DataType);
-    static int getSize(DataType);
+    static std::size_t getSize(DataType);
 
 public:
     Field();
@@ -96,24 +96,24 @@ public:
     }
 
     // what byte the field starts at, within the raw bytes of the point
-    int getOffset() const
+    std::size_t getOffset() const
     {
         return m_offset;
     }
-    void setOffset(int offset)
+    void setOffset(std::size_t offset)
     {
         m_offset = offset;
     }
 
     // number of bytes needed for the datatype
-    int getNumBytes() const;
+    std::size_t getNumBytes() const;
 
     void dump() const;
 
 private:
     DataItem m_item;
     DataType m_type;
-    int m_offset; // byte offset within a point buffer
+    std::size_t m_offset; // byte offset within a point buffer
 };
 
 } // namespace libpc

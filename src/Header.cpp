@@ -101,13 +101,13 @@ void Header::setLayout(const PointLayout& layout)
 }
 
 
-int Header::getNumPoints() const
+boost::uint64_t Header::getNumPoints() const
 {
     return m_numPoints;
 }
 
 
-void Header::setNumPoints(int numPoints)
+void Header::setNumPoints(boost::uint64_t numPoints)
 {
     m_numPoints = numPoints;
 }

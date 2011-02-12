@@ -46,10 +46,7 @@ namespace libpc
 
 
 PointLayout::PointLayout()
-    : m_numBytes(0),
-      m_fieldIndex_X(-1),
-      m_fieldIndex_Y(-1),
-      m_fieldIndex_Z(-1)
+    : m_numBytes(0)
 {
     return;
 }
@@ -59,10 +56,6 @@ PointLayout::PointLayout(const PointLayout& other)
 {
     m_numBytes = other.m_numBytes;
     m_fields = other.m_fields;
-    m_fieldIndex_X = other.m_fieldIndex_X;
-    m_fieldIndex_Y = other.m_fieldIndex_Y;
-    m_fieldIndex_Z = other.m_fieldIndex_Z;
-
     return;
 }
 
@@ -73,9 +66,6 @@ PointLayout& PointLayout::operator=(const PointLayout& other)
     {
         m_numBytes = other.m_numBytes;
         m_fields = other.m_fields;
-        m_fieldIndex_X = other.m_fieldIndex_X;
-        m_fieldIndex_Y = other.m_fieldIndex_Y;
-        m_fieldIndex_Z = other.m_fieldIndex_Z;
     }
 
     return *this;
@@ -94,7 +84,7 @@ bool PointLayout::operator==(const PointLayout & other) const
 }
 
 
-int PointLayout::addField(const Field& fieldParam)
+std::size_t PointLayout::addField(const Field& fieldParam)
 {
     Field myField(fieldParam);
 
@@ -102,55 +92,43 @@ int PointLayout::addField(const Field& fieldParam)
 
     assert(!hasField(item));
 
-    const int offset = m_numBytes;
+    const std::size_t offset = m_numBytes;
     myField.setOffset(offset);
     m_numBytes += myField.getNumBytes();
 
     m_fields.push_back(myField);
 
-    const int index = (int)m_fields.size() - 1; // BUG: fix cast
-
-    if (item == Field::XPos)
-    {
-        m_fieldIndex_X = index;
-    }
-    else if (item == Field::YPos)
-    {
-        m_fieldIndex_Y = index;
-    }
-    else if (item == Field::ZPos)
-    {
-        m_fieldIndex_Z = index;
-    }
+    const std::size_t index = (boost::uint32_t)m_fields.size() - 1;
 
     return index;
 }
 
 
-int PointLayout::getSizeInBytes() const
+std::size_t PointLayout::getSizeInBytes() const
 {
     return m_numBytes;
 }
 
 
-int PointLayout::getNumFields() const
+std::size_t PointLayout::getNumFields() const
 {
-    return (int)m_fields.size(); // BUG: fix cast
+    return m_fields.size();
 }
 
 
-int PointLayout::findFieldIndex(Field::DataItem item) const
+bool PointLayout::findFieldIndex(Field::DataItem item, std::size_t& ret) const
 {
     for (size_t index=0; index<m_fields.size(); index++)
     {
         const Field& field = m_fields[index];
         if (field.getItem() == item)
         {
-            return (int)index; // BUG: fix cast
+            ret = index;
+            return true;
         }
     }
 
-    return -1;
+    return false;
 }
 
 
