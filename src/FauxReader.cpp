@@ -67,7 +67,7 @@ void FauxReader::readPoints(PointData& data)
 {
     // make up some data and put it into the buffer
 
-    int numPoints = data.getNumPoints();
+    boost::uint32_t numPoints = data.getNumPoints();
     assert(m_currentPointIndex + numPoints <= getHeader().getNumPoints());
 
     const PointLayout& layout = data.getLayout();
@@ -87,7 +87,7 @@ void FauxReader::readPoints(PointData& data)
     const double minZ = bounds.dims()[2].minimum();
     const double maxZ = bounds.dims()[2].maximum();
 
-    for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
+    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         const float x = (float)Utils::random(minX, maxX);
         const float y = (float)Utils::random(minY, maxY);
@@ -117,6 +117,8 @@ void FauxReader::readPoints(PointData& data)
     }
 
     m_currentPointIndex += numPoints;
+
+    m_numPointsRead += numPoints;
 
     return;
 }
