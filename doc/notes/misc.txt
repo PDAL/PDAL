@@ -97,11 +97,6 @@ developers are using regularly:
 By virtue of CMake, other platforms may be supported such as VS 2008 or 
 Solaris, but we aren't targeting those specifically.
 
-Note we will not be supporting big-endian (BE) platforms at this time.  We
-recognize it would be good to do so, since endianness ports always seem to
-shake out twiddly little bugs, but we don't have ready access a BE
-development box.
-
 
 libPC Position on (Non)conformance
 ==================================
@@ -126,11 +121,7 @@ libPC may choose to offer as an option the ability to break the standard if,
 as a practical matter, doing so would significantly aid the market.  Such an
 option would never be the default behavior, however.
 
-* We should also have a guiding principle about files that are conformant but
-  which lie, such as the extents in the header being wrong.  
-
-Specifically, is
-our default path to propagate the wrong info or to helpfully correct it on
-the fly?*
-    
-    Do both, but more often than not try to helpfully correct it.
+For files that are conformant but which lie, such as the extents in the
+header being wrong, we will generally offer both the ability to propagate 
+the "wrong" information and the ability to helpfully correct it on the fly;
+the latter is generally our default position.

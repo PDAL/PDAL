@@ -1,35 +1,61 @@
-========================
-libPC Project Notes: I/O
-========================
+===
+I/O
+===
 
 Given the sheer volume of data being processed by libPC apps, it is very
 important we pay attention to I/O speed.
 
-Questions:
+In some quarters, there are yet some questions as to whether C-style I/O
+(FILE*) or C++-style I/O (streams) is more efficient.  The answer, however,
+is most likely to be very dependent on the platform being used, how the 
+specific APIs are used, and the actual I/O patterns or traces.
 
-* Is C's unix-style I/O generally faster/slower/same-as C++'s stream-style
-  I/O?
+
+Guidelines
+==========
+
+Unless strong (empirical, quantitative) evidence can be presented for a
+specific workflow, libPC will follow these guidelines.
+
+* C++-stlye streams should be used instead of C-style FILE* calls.
+
+* Streams should be instantiated using Boost's I/O library, not the native
+  std\:: library.
   
-  They should be equivalent if used "right".  Mateusz did a bunch of work 
-  on this last summer to check for comparison.  std::fstream was found to be 
-  sensitive to setting its buffer, but that was it.
+* Implementations should accept as inputs std\:: base classes, and use
+  std\:: library calls.  That is, the ctor for a class like LasReader should
+  accept a std\::istream& stream instead of a std\::string file name or a
+  FILE* handle.  **[not sure why I feel this way - thoughts?]**
 
-* Are boost's streams any faster than the native compiler's streams?
+* Implementations should use std\:: library calls as opposed to methods
+  which require Boost-specific stream classes.  (Given the previous
+  guideline, this guideline would seem to have to be followed anyway.)
 
-No.  Boost's streams provide a consistent interface to the native compiler's 
-streams.  They also provide additional functionality like a gzip stream, etc.
+* The libPC API provides helper functions for opening and closing file
+  streams.  Applications should prefer to use those over writing their own.
 
-* Is it worth providing our own simple unix-style binary stream interface,
-  which we use internally, and then letting the choice of underlying
-  implementation be made up at the app level?  (LizardTech does this.  
-  Maybe GDAL too sometimes?)
-  
-  I'd rather offload this to boost's iostreams if we can.  What do we 
-  get for the extra pain of adding another layer here?  Can we have the boost 
-  take on the maintenance of this layer for us?
+* Objects should provide an operator<< method for debugging purposes.
 
-* Do we want to spend some time investigating this issue up front?
-  
-  libLAS does not use boost's streams because it didn't have the boost 
-  dependency until later in its life.  To do it again, I would assume boost 
-  was in the mix and would use boost's iostreams by default.
+* Formatted (text, non-binary) I/O is (typically) not performance sensitive.
+  For consistency, however, C++ stream I/O should be used here too; do not
+  use printf/scanf.
+
+
+Endianness
+==========
+
+libPC will not be supporting big-endian (BE) platforms at this time.  We
+recognize it would be good to do so, since endianness ports always seem to
+shake out twiddly little bugs, but we don't have ready access a BE
+development box.
+
+Where you are writing endian-sensitive code, you should comment it loudly
+so future maintainers will know where to go to add BE support.
+
+
+Best Practices
+==============
+
+**[we should provide some sample code showing examples of good I/O styles,
+e.g. which APIs to use.  mpg even thinks this might turn into a facade
+class which exposes the basics people should use and nothing more]**

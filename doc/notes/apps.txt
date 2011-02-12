@@ -8,15 +8,26 @@ top of the libPC libraries.  This Note lists those apps.
 This should be fleshed out to list the (major) options for each of the apps.
 
 
+App Commonality
+===============
+
+The following notes apply to all apps:
+
+* The apps should have a common support/utilities library for processing
+  command line arguments, showing version information, etc.
+  
+* Input format detection should reside in the app, not in the library.
+  There will be no equivalent meta GDALOpen-like function to do this work
+  for you, as it is too expensive and too easy to screw up.
+
+
+
 pc2pc
 =====
 
 Converts from one file format to another, optionally with some (relatively
 simple) filtering or processing.
 
-Input format detection should reside in the app, not in the library.  There 
-will be no equivalent meta GDALOpen-like function to do this work for you.  
-Too expensive and too easy to screw up.
 
 
 pcinfo
@@ -51,7 +62,6 @@ wants to do something too.
 
 
 
-
 pcindex
 =======
 
@@ -59,16 +69,16 @@ Creates a serialized spatial index for a point cloud. First pass at this
 is to repurpose liblas::Index which supports serialization.
 
 
-pcmosaic
-========
 
-Merges multiple files together.
+pcmerge
+=======
 
-Does mosaic imply something that merge doesn't?
+Merges multiple files together.  (This is also known as mosacking.)
+
 
 
 pctile
-==========
+======
 
 Chops one file up into multiple files.  This could be the liblas::Chipper, 
 leaf nodes of an index like an R-tree, or a simple quadtree build.

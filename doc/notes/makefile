@@ -4,6 +4,7 @@ PDFS = \
     c-api.pdf \
     coding-conventions.pdf \
     core-classes.pdf \
+    docs.pdf \
     future.pdf \
     goals.pdf \
     intro.pdf \

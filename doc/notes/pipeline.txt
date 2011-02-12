@@ -137,3 +137,15 @@ read random points" or "I can return either F32 or F64 data" or "I only
 understand XYZ data and will ignore anything else".  How does this idea play
 into the more general question of how much smarts go into the pipeline
 construction process?
+
+
+Notes
+=====
+
+* three kinds of filtering operations that the point buffer must support:
+
+  - add or remove a point
+  
+  - add or remove a field
+  
+  - modify the value in a field
