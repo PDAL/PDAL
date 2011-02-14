@@ -41,7 +41,7 @@
 
 namespace libpc
 {
-
+#if 0
 class LIBPC_DLL Field
 {
 public:
@@ -115,7 +115,7 @@ private:
     DataType m_type;
     std::size_t m_offset; // byte offset within a point buffer
 };
-
+#endif
 } // namespace libpc
 
 #endif

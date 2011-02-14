@@ -96,7 +96,7 @@ const PointLayout& PointData::getLayout() const
 template <class T>
 void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value)
 {
-    std::size_t offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
+    std::size_t offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
     boost::uint8_t* p = m_data + offset;
 
@@ -107,7 +107,7 @@ void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value
 template <class T>
 T PointData::getField(std::size_t pointIndex, std::size_t fieldIndex) const
 {
-    std::size_t offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getOffset();
+    std::size_t offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
     boost::uint8_t* p = m_data + offset;
 
@@ -199,19 +199,19 @@ void PointData::dump(std::size_t pointIndex, string indent) const
     {
         cout << indent;
 
-        const Field& field = layout.getField(fieldIndex);
+        const Dimension& field = layout.getField(fieldIndex);
 
-        cout << field.getName(field.getItem()) << ": ";
+        cout << field.getName() << " (" << field.getDataTypeName(field.getDataType()) << ") : ";
 
-        switch (field.getType())
+        switch (field.getDataType())
         {
-        case Field::U8:
+        case Dimension::uint8_t:
             cout << (int)(this->getField_U8(pointIndex, fieldIndex));
             break;
-        case Field::F32:
+        case Dimension::float_t:
             cout << this->getField_F32(pointIndex, fieldIndex);
             break;
-        case Field::F64:
+        case Dimension::double_t:
             cout << this->getField_F64(pointIndex, fieldIndex);
             break;
         default:

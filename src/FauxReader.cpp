@@ -52,10 +52,10 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints)
     header.setNumPoints(numPoints);
     header.setBounds(bounds);
 
-    layout.addField(Field(Field::XPos, Field::F32));
-    layout.addField(Field(Field::YPos, Field::F32));
-    layout.addField(Field(Field::ZPos, Field::F32));
-    layout.addField(Field(Field::Time, Field::F64));
+    layout.addField(Dimension("XPos", Dimension::float_t));
+    layout.addField(Dimension("YPos", Dimension::float_t));
+    layout.addField(Dimension("ZPos", Dimension::float_t));
+    layout.addField(Dimension("Time", Dimension::double_t));
 
     header.dump();
 
@@ -74,7 +74,7 @@ void FauxReader::readPoints(PointData& data)
     Header& header = getHeader();
 
     std::size_t fieldIndexT;
-    bool ok = layout.findFieldIndex(Field::Time, fieldIndexT);
+    bool ok = layout.findFieldIndex("Time", fieldIndexT);
     assert(ok);
 
     float v = (float)m_currentPointIndex;
@@ -100,11 +100,11 @@ void FauxReader::readPoints(PointData& data)
         std::size_t offsetZ;
         bool ok;
         
-        ok = layout.findFieldIndex(Field::XPos, offsetX);
+        ok = layout.findFieldIndex("XPos", offsetX);
         assert(ok);
-        ok = layout.findFieldIndex(Field::YPos, offsetY);
+        ok = layout.findFieldIndex("YPos", offsetY);
         assert(ok);
-        ok = layout.findFieldIndex(Field::ZPos, offsetZ);
+        ok = layout.findFieldIndex("ZPos", offsetZ);
         assert(ok);
 
         data.setField_F32(pointIndex, offsetX, x);

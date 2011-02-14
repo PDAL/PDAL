@@ -45,9 +45,9 @@ ColorFilter::ColorFilter(Stage& prevStage)
     PointLayout& layout = getHeader().getLayout();
 
     // add the three u8 fields
-    layout.addField(Field(Field::Zred, Field::U8));
-    layout.addField(Field(Field::Zgreen, Field::U8));
-    layout.addField(Field(Field::Zblue, Field::U8));
+    layout.addField(Dimension("Zred", Dimension::uint8_t));
+    layout.addField(Dimension("Zgreen", Dimension::uint8_t));
+    layout.addField(Dimension("Zblue", Dimension::uint8_t));
 
     return;
 }
@@ -67,13 +67,13 @@ void ColorFilter::readPoints(PointData& data)
     std::size_t offsetZ;
     bool ok;
 
-    ok = layout.findFieldIndex(Field::Zred, fieldIndexR);
+    ok = layout.findFieldIndex("Zred", fieldIndexR);
     assert(ok);
-    ok = layout.findFieldIndex(Field::Zgreen, fieldIndexG);
+    ok = layout.findFieldIndex("Zgreen", fieldIndexG);
     assert(ok);
-    ok = layout.findFieldIndex(Field::Zblue, fieldIndexB);
+    ok = layout.findFieldIndex("Zblue", fieldIndexB);
     assert(ok);
-    ok = layout.findFieldIndex(Field::ZPos, offsetZ);
+    ok = layout.findFieldIndex("ZPos", offsetZ);
     assert(ok);
 
     for (int pointIndex=0; pointIndex<numPoints; pointIndex++)

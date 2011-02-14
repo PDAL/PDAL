@@ -41,7 +41,7 @@
 #include <boost/cstdint.hpp>
 
 #include "libpc/export.hpp"
-#include "libpc/Field.hpp"
+#include "libpc/Dimension.hpp"
 
 namespace libpc
 {
@@ -55,15 +55,15 @@ public:
 
     bool operator==(const PointLayout& other) const;
 
-    // adds a field to the end of the layout, and returns the index of the field added
-    std::size_t addField(const Field& field);
+    // adds a field to the end of the layout
+    void addField(const Dimension& field);
 
     // returns a given field
-    const Field& getField(std::size_t fieldIndex) const
+    const Dimension& getField(std::size_t fieldIndex) const
     {
         return m_fields[fieldIndex];
     }
-    Field& getField(std::size_t fieldIndex)
+    Dimension& getField(std::size_t fieldIndex)
     {
         return m_fields[fieldIndex];
     }
@@ -77,11 +77,11 @@ public:
     void dump(std::string indent="") const;
 
     // returns false if not found, otherwise sets index
-    bool findFieldIndex(Field::DataItem item, std::size_t& index) const;
-    bool hasField(Field::DataItem item) const;
+    bool findFieldIndex(std::string item, std::size_t& index) const;
+    bool hasField(std::string item) const;
 
 private:
-    std::vector<Field> m_fields; // each of the fields
+    std::vector<Dimension> m_fields; // each of the fields
 
     std::size_t m_numBytes; // num bytes required to store all fields
 };

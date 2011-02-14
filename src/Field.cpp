@@ -45,7 +45,7 @@ using std::endl;
 namespace libpc
 {
 
-
+#if 0
 Field::Field() :
     m_item(Field::InvalidItem),
     m_type(InvalidType),
@@ -189,5 +189,5 @@ std::size_t Field::getSize(DataType dt)
     return std::numeric_limits<std::size_t>::max();
 }
 
-
+#endif
 }

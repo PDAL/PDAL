@@ -56,140 +56,130 @@ namespace libpc
 {
 
 
-/// Dimension definition
+/// A Dimension consists of a name, a datatype, and (for the bitfield datatype), the number
+/// of bits the dimension requires.
+///
+/// When a dimension is added to a Schema, it also gets two more properties: the position (index)
+/// of this dimension in the schema's list of dimensions, and the byte offset where the dimension
+/// is stored in the PointBuffer's raw bytes
 class LIBPC_DLL Dimension
 {
 public:
-    Dimension(std::string const& name, std::size_t size_in_bits);
+    enum DataType
+    {
+        int8_t,
+        uint8_t,
+        int16_t,
+        uint16_t,
+        int32_t,
+        uint32_t,
+        int64_t,
+        uint64_t,
+        float_t,       // 32 bits
+        double_t,      // 64 bits
+        bits_t,        // a bitfield of a given size (no integral representation is assumed)
+    };
+
+public:
+    // size_in_bits is only meaningful if type==bits_t
+    Dimension(std::string const& name, DataType type, std::size_t size_in_bits=0);
     Dimension& operator=(Dimension const& rhs);
     Dimension(Dimension const& other);
 
+    bool operator==(const Dimension& other) const;
+
     virtual ~Dimension() {}
 
-    inline std::string const& GetName() const
+    inline std::string const& getName() const
     {
         return m_name;
     }
 
-    /// bits, total logical size of point record, including any custom
-    /// dimensions
-    inline std::size_t GetBitSize() const
+    DataType getDataType() const
     {
-        return m_bit_size;
+        return m_dataType;
+    }
+
+    static std::string getDataTypeName(DataType);
+    static DataType getDataTypeFromString(const std::string&);
+    static std::size_t getDataTypeSize(DataType);
+    static bool getDataTypeIsNumeric(DataType);
+    static bool getDataTypeIsSigned(DataType);
+    static bool getDataTypeIsInteger(DataType);
+
+    /// bits, total logical size of point record
+    inline std::size_t getBitSize() const
+    {
+        return m_bitSize;
     }
 
     /// bytes, physical/serialisation size of record
-    std::size_t GetByteSize() const;
+    // for bitfields, this will be rounded up to the next largest byte
+    std::size_t getByteSize() const
+    {
+       return m_byteSize;
+    }
 
     /// The byte location to start reading/writing
     /// point data from in a composited schema.  liblas::Schema
     /// will set these values for you when liblas::Dimension are
     /// added to the liblas::Schema.
-    inline std::size_t GetByteOffset() const
+    inline std::size_t getByteOffset() const
     {
-        return m_byte_offset;
+        return m_byteOffset;
     }
 
-    inline void SetByteOffset(std::size_t v)
+    inline void setByteOffset(std::size_t v)
     {
-        m_byte_offset = v;
+        m_byteOffset = v;
     }
 
-    /// The bit location within the byte to start reading data.  liblas::Schema
-    /// will set these values for you when liblas::Dimension are
-    /// added to the liblas::Schema.  This value will be 0 for dimensions
-    /// that are composed of entire bytes.
-    inline std::size_t GetBitOffset() const
-    {
-        return m_bit_offset;
-    }
-
-    inline void SetBitOffset(std::size_t v)
-    {
-        m_bit_offset = v;
-    }
-
-    /// Is this dimension required by PointFormatName
-    inline bool IsRequired() const
-    {
-        return m_required;
-    }
-    inline void IsRequired(bool v)
-    {
-        m_required = v;
-    }
-
-    /// Is this dimension being used.  A dimension with
-    /// IsActive false may exist as a placeholder in PointFormatName-specified
-    /// dimensions, but have their IsActive flag set to false.  In this
-    /// case, those values may be disregarded.
-    inline bool IsActive() const
-    {
-        return m_active;
-    }
-    inline void IsActive(bool v)
-    {
-        m_active = v;
-    }
-
-    inline std::string GetDescription() const
+    inline std::string getDescription() const
     {
         return m_description;
     }
-    inline void SetDescription(std::string const& v)
+    inline void setDescription(std::string const& v)
     {
         m_description = v;
     }
 
     /// Is this dimension a numeric dimension.  Dimensions with IsNumeric == false
-    /// are considered generic bit/byte fields/
-    inline bool IsNumeric() const
+    /// are considered generic bit/byte fields
+    inline bool isNumeric() const
     {
-        return m_numeric ;
-    }
-    inline void IsNumeric(bool v)
-    {
-        m_numeric = v;
+        return getDataTypeIsNumeric(m_dataType);
     }
 
     /// Does this dimension have a sign?  Only applicable to dimensions with
     /// IsNumeric == true.
-    inline bool IsSigned() const
+    inline bool isSigned() const
     {
-        return m_signed;
-    }
-    inline void IsSigned(bool v)
-    {
-        m_signed = v;
+        return getDataTypeIsSigned(m_dataType);
     }
 
     /// Does this dimension interpret to an integer?  Only applicable to dimensions
     /// with IsNumeric == true.
-    inline bool IsInteger() const
+    inline bool isInteger() const
     {
-        return m_integer;
-    }
-    inline void IsInteger(bool v)
-    {
-        m_integer = v;
+        return getDataTypeIsInteger(m_dataType);
     }
 
     /// The minimum value of this dimension as a double
-    inline double GetMinimum() const
+    inline double getMinimum() const
     {
         return m_min;
     }
-    inline void SetMinimum(double min)
+    inline void setMinimum(double min)
     {
         m_min = min;
     }
 
     /// The maximum value of this dimension as a double
-    inline double GetMaximum() const
+    inline double getMaximum() const
     {
         return m_max;
     }
-    inline void SetMaximum(double max)
+    inline void setMaximum(double max)
     {
         m_max = max;
     }
@@ -197,105 +187,68 @@ public:
     /// The index position of the index.  In a standard ePointFormat0
     /// data record, the X dimension would have a position of 0, while
     /// the Y dimension would have a position of 1, for example.
-    inline boost::uint32_t GetPosition() const
+    inline std::size_t getPosition() const
     {
         return m_position;
     }
-    inline void SetPosition(boost::uint32_t v)
+
+    inline void setPosition(std::size_t v)
     {
         m_position = v;
     }
 
     /// The scaling value for this dimension as a double.  This should
     /// be positive or negative powers of ten.
-    inline double GetScale() const
+    inline double getNumericScale() const
     {
-        return m_scale;
+        return m_numericScale;
     }
-    inline void SetScale(double v)
+    inline void setNumericScale(double v)
     {
-        m_scale = v;
+        m_numericScale = v;
     }
 
     /// The offset value for this dimension.  Usually zero, but it
     /// can be set to any value in combination with the scale to
     /// allow for more expressive ranges.
-    inline double GetOffset() const
+    /// (this is not called just "Offset" anymore, since that term also
+    /// means "what bit/byte position a field is located at")
+    inline double getNumericOffset() const
     {
-        return m_offset;
+        return m_numericOffset;
     }
-    inline void SetOffset(double v)
+    inline void setNumericOffset(double v)
     {
-        m_offset = v;
+        m_numericOffset = v;
     }
 
-    /// If true, this dimension uses scale/offset values
-    inline bool IsFinitePrecision() const
+    /// If true, this dimension uses the numeric scale/offset values
+    inline bool isFinitePrecision() const
     {
         return m_precise;
     }
-    inline void IsFinitePrecision(bool v)
+    inline void isFinitePrecision(bool v)
     {
         m_precise = v;
-    }
-
-    inline bool operator < (Dimension const& dim) const
-    {
-        return m_position < dim.m_position;
-    }
-    inline bool operator > (Dimension const& dim) const
-    {
-        return m_position > dim.m_position;
     }
 
     boost::property_tree::ptree GetPTree() const;
 
 private:
+    DataType m_dataType;
     std::string m_name;
-    std::size_t m_bit_size;
-    bool m_required;
-    bool m_active;
+    std::size_t m_bitSize;
+    std::size_t m_byteSize;
+    std::size_t m_byteOffset;
     std::string m_description;
     double m_min;
     double m_max;
-    bool m_numeric;
-    bool m_signed;
-    bool m_integer;
-    boost::uint32_t m_position;
-    double m_scale;
+    std::size_t m_position;
     bool m_precise;
-    double m_offset;
-    std::size_t m_byte_offset;
-    std::size_t m_bit_offset;
+    double m_numericScale;
+    double m_numericOffset;
 };
 
-
-struct SetRequired
-{
-    SetRequired(bool req) : req_(req) {}
-
-    void operator()(Dimension& e)
-    {
-        e.IsRequired(req_);
-    }
-
-private:
-    bool req_;
-};
-
-
-struct SetActive
-{
-    SetActive(bool req) : req_(req) {}
-
-    void operator()(Dimension& e)
-    {
-        e.IsActive(req_);
-    }
-
-private:
-    bool req_;
-};
 
 
 LIBPC_DLL std::ostream& operator<<(std::ostream& os, libpc::Dimension const& d);

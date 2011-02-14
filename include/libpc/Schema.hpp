@@ -44,12 +44,9 @@
 
 // std
 #include <vector>
+#include <list>
 
 // boost
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/mem_fun.hpp>
-#include <boost/multi_index/random_access_index.hpp>
 
 #include "libpc/export.hpp"
 #include "libpc/Dimension.hpp"
@@ -57,129 +54,79 @@
 
 namespace libpc
 {
-typedef std::vector<Dimension> DimensionArray;
-
-struct name{};
-struct position{};
-struct index{};
-
-
-typedef boost::multi_index::multi_index_container<
-    Dimension,
-    boost::multi_index::indexed_by<
-    // sort by Dimension::operator<
-    boost::multi_index::ordered_unique<boost::multi_index::tag<position>, boost::multi_index::identity<Dimension> >,
-
-    // Random access
-    boost::multi_index::random_access<boost::multi_index::tag<index> >,
-    // sort by less<string> on GetName
-    boost::multi_index::hashed_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::GetName> >
-    >
-> IndexMap;
-
-typedef IndexMap::index<name>::type index_by_name;
-typedef IndexMap::index<position>::type index_by_position;
-typedef IndexMap::index<index>::type index_by_index;
-
-
-// BUG: move elsewhere, this is only here temporarily
-/// Versions of point record format.
-enum PointFormatName
-{
-    ePointFormat0 = 0,  ///< Point Data Format \e 0
-    ePointFormat1 = 1,  ///< Point Data Format \e 1
-    ePointFormat2 = 2,  ///< Point Data Format \e 2
-    ePointFormat3 = 3,  ///< Point Data Format \e 3
-    ePointFormat4 = 4,  ///< Point Data Format \e 3
-    ePointFormat5 = 5,  ///< Point Data Format \e 3
-    ePointFormatUnknown = -99 ///< Point Data Format is unknown
-};
-
 
 
 /// Schema definition
 class LIBPC_DLL Schema
 {
 public:
-    // Schema();
-    Schema(PointFormatName data_format_id);
-////    Schema(std::vector<VariableRecord> const& vlrs);
+    typedef std::list<Dimension> Dimensions;
+    typedef std::list<Dimension>::iterator DimensionsIter;
+    typedef std::list<Dimension>::const_iterator DimensionsCIter;
+
+public:
+    Schema();
     Schema& operator=(Schema const& rhs);
     Schema(Schema const& other);
-
+     
     ~Schema() {}
 
-    /// Fetch byte size
-    std::size_t GetByteSize() const;
+    /// Fetch total byte size -- sum of all dimensions
+    std::size_t getByteSize() const;
 
-    std::size_t GetBitSize() const;
-    void CalculateSizes();
+    void calculateSizes();
 
-    /// Get the base size (only accounting for Time, Color, etc )
-    std::size_t GetBaseByteSize() const;
+    void addDimension(Dimension const& dim);
 
-    PointFormatName GetDataFormatId() const
+    std::vector<std::string> getDimensionNames() const;
+    const std::list<Dimension> getDimensions() const
     {
-        return m_data_format_id;
-    }
-    void SetDataFormatId(PointFormatName const& value);
-
-    void AddDimension(Dimension const& dim);
-    boost::optional< Dimension const& > GetDimension(std::string const& n) const;
-    boost::optional< Dimension const& > GetDimension(index_by_index::size_type t) const;
-
-    // DimensionPtr GetDimension(std::size_t index) const;
-    void RemoveDimension(Dimension const& dim);
-
-    void SetDimension(Dimension const& dim);
-
-    std::vector<std::string> GetDimensionNames() const;
-    IndexMap const& GetDimensions() const
-    {
-        return m_index;
-    }
-    boost::property_tree::ptree GetPTree() const;
-
-    boost::uint16_t GetSchemaVersion() const
-    {
-        return m_schemaversion;
-    }
-    void SetSchemaVersion(boost::uint16_t v)
-    {
-        m_schemaversion = v;
+        return m_dimensions;
     }
 
-    bool IsCustom() const;
-////    VariableRecord GetVLR() const;
+    boost::property_tree::ptree getPTree() const;
 
 protected:
-
-    PointFormatName m_data_format_id;
-    boost::uint32_t m_nextpos;
-    std::size_t m_bit_size;
-    std::size_t m_base_bit_size;
-    boost::uint16_t m_schemaversion;
+    std::list<Dimension> m_dimensions;
+    std::size_t m_byteSize;
 
 private:
+};
 
-    IndexMap m_index;
 
+LIBPC_DLL std::ostream& operator<<(std::ostream& os, Schema const&);
+
+
+// BUG: move elsewhere, this is only here temporarily
+class LIBPC_DLL LasSchema : public Schema
+{
+public:
+    /// Versions of point record format.
+    enum PointFormatName
+    {
+        ePointFormat0 = 0,  ///< Point Data Format \e 0
+        ePointFormat1 = 1,  ///< Point Data Format \e 1    
+        ePointFormat2 = 2,  ///< Point Data Format \e 2
+        ePointFormat3 = 3,  ///< Point Data Format \e 3
+        ePointFormat4 = 4,  ///< Point Data Format \e 3
+        ePointFormat5 = 5,  ///< Point Data Format \e 3
+        ePointFormatUnknown = -99 ///< Point Data Format is unknown
+    };
+
+public:
+    LasSchema(PointFormatName data_format_id);
+    LasSchema::LasSchema(LasSchema const& other);
+    LasSchema& LasSchema::operator=(LasSchema const& rhs);
+
+private:
     void add_record0_dimensions();
     void add_time();
     void add_color();
     void update_required_dimensions(PointFormatName data_format_id);
-////    bool IsSchemaVLR(VariableRecord const& vlr);
-////    boost::property_tree::ptree LoadPTree(VariableRecord const& v);
-    IndexMap LoadDimensions(boost::property_tree::ptree tree);
 
+    PointFormatName m_data_format_id;
 };
 
-bool inline sort_dimensions(Dimension i, Dimension j)
-{
-    return i < j;
-}
-
-LIBPC_DLL std::ostream& operator<<(std::ostream& os, Schema const&);
 
 
 } // namespace liblas

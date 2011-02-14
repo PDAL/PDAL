@@ -84,23 +84,23 @@ bool PointLayout::operator==(const PointLayout & other) const
 }
 
 
-std::size_t PointLayout::addField(const Field& fieldParam)
+void PointLayout::addField(const Dimension& fieldParam)
 {
-    Field myField(fieldParam);
+    Dimension myField(fieldParam);
 
-    const Field::DataItem item = myField.getItem();
+    const std::string item = myField.getName();
 
     assert(!hasField(item));
 
+    myField.setPosition(m_fields.size());
+
     const std::size_t offset = m_numBytes;
-    myField.setOffset(offset);
-    m_numBytes += myField.getNumBytes();
+    myField.setByteOffset(offset);
+    m_numBytes += myField.getByteSize();
 
     m_fields.push_back(myField);
 
-    const std::size_t index = (boost::uint32_t)m_fields.size() - 1;
-
-    return index;
+    return;
 }
 
 
@@ -116,12 +116,12 @@ std::size_t PointLayout::getNumFields() const
 }
 
 
-bool PointLayout::findFieldIndex(Field::DataItem item, std::size_t& ret) const
+bool PointLayout::findFieldIndex(std::string item, std::size_t& ret) const
 {
     for (size_t index=0; index<m_fields.size(); index++)
     {
-        const Field& field = m_fields[index];
-        if (field.getItem() == item)
+        const Dimension& field = m_fields[index];
+        if (field.getName() == item)
         {
             ret = index;
             return true;
@@ -132,12 +132,12 @@ bool PointLayout::findFieldIndex(Field::DataItem item, std::size_t& ret) const
 }
 
 
-bool PointLayout::hasField(Field::DataItem item) const
+bool PointLayout::hasField(std::string item) const
 {
     for (size_t index=0; index<m_fields.size(); index++)
     {
-        const Field& field = m_fields[index];
-        if (field.getItem() == item)
+        const Dimension& field = m_fields[index];
+        if (field.getName() == item)
         {
             return true;
         }
@@ -154,7 +154,7 @@ void PointLayout::dump(string indent) const
     for (size_t i=0; i<m_fields.size(); i++)
     {
         cout << indent << indent;
-        m_fields[i].dump();
+        cout << m_fields[i];
         cout << endl;
     }
 }

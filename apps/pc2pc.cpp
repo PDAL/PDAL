@@ -40,12 +40,12 @@ int main(int, char* [])
     }
 
     {
-        Dimension dim("foo", 8);
+        Dimension dim("foo", Dimension::uint8_t);
         std::cout << dim << std::endl;
     }
 
     {
-        Schema schema(ePointFormat0);
+        LasSchema schema(LasSchema::ePointFormat0);
         std::cout << schema;
     }
 
