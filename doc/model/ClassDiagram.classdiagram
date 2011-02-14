@@ -1,0 +1,215 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<logicalClassDesignerModel xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/Kernel" xmlns:dm2="http://schemas.microsoft.com/dsltools/Component" xmlns:dm3="http://schemas.microsoft.com/dsltools/Activity" xmlns:dm4="http://schemas.microsoft.com/dsltools/Interaction" xmlns:dm5="http://schemas.microsoft.com/dsltools/UseCase" xmlns:dm6="http://schemas.microsoft.com/dsltools/UmlModelLibrary" xmlns:dm7="http://schemas.microsoft.com/dsltools/UmlDiagrams" xmlns:dm8="http://schemas.microsoft.com/dsltools/ModelStore" dslVersion="1.0.0.0" Id="eb26af8a-7bbd-4c48-9ba1-292548e51a84" name="UMLClassDiagram1" linkedPackageId="067e713d-554c-44ef-950f-fb1c75eef8cb" xmlns="http://schemas.microsoft.com/dsltools/LogicalClassDesigner">
+  <profileInstances>
+    <packageHasProfileInstances Id="085a8183-12b5-4430-a392-8aff3145b517">
+      <profileInstance Id="bdd6b97c-9e21-4f78-82b1-41e6ff22c3f0" name="StandardProfileL2">
+        <elementDefinition Id="e34d544e-0fea-4ed6-ac5e-1b74119ac791" />
+      </profileInstance>
+      <elementDefinition Id="0caec977-1f8c-4ba3-a7db-8cc9ad9cc73b" />
+    </packageHasProfileInstances>
+    <packageHasProfileInstances Id="8b8f3073-c5a2-4ead-9edf-e74fe1f9ba9e">
+      <profileInstance Id="4cf4ee8d-0823-45a2-89f3-9e0dfe021bac" name="StandardProfileL3">
+        <elementDefinition Id="532ea607-fb19-44b8-8502-3351b05452be" />
+      </profileInstance>
+      <elementDefinition Id="29349502-908c-4fda-9054-c48619c59ed0" />
+    </packageHasProfileInstances>
+  </profileInstances>
+  <packagedElements>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="b39116fd-4887-4646-9b2e-414a39abd0e8" name="Stage" isAbstract="true" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="e0901c18-bb28-40f7-bbf0-9a38911ac56c" />
+        <targetEnds>
+          <association Id="84c3dd9c-62f1-4589-99aa-1408662a0cbe" isDerived="false" sourceEndRoleName="Stage" targetEndRoleName="Header" isLeaf="false" isAbstract="false">
+            <classMoniker Id="cbe66294-b8bb-446c-8e5c-6b47919be2ca" LastKnownName="Header" />
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd Id="5cc2c3d2-6506-40e1-84f5-9426d4edd2af" name="Stage" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="Composite" isComposite="false" isNavigableOwned="false">
+                  <elementDefinition Id="b45cab91-f4ff-40d3-bbef-bc4491a4d796" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd Id="bf6211f4-046a-4215-a4e6-5fe8718b1fa5" name="Header" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="true">
+                  <elementDefinition Id="ca181fa8-b67b-4192-9b3e-0a803aea7b28" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+            <elementDefinition Id="bce7d1a1-1656-4970-9f1c-cb76945ed660" />
+          </association>
+        </targetEnds>
+        <ownedAttributesInternal>
+          <property Id="f7cc05d5-94c9-4839-9ee4-9789c2e4b283" name="Header" isLeaf="false" isStatic="false" isReadOnly="false" isUnique="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false">
+            <elementDefinition Id="772d6d34-6867-482d-8a0b-4f00c3f5cf47" />
+          </property>
+        </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation Id="837086df-fb6e-4253-89ab-c14ba2d84178" name="Read" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="ebc7c48a-f4ff-42c8-80ee-9126e6fdf155" />
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="b1ae6518-17c6-456c-bef8-209182f0b6cd" name="Reader" isAbstract="true" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="7295aeda-e047-4549-812a-02d96f809f4d" />
+        <generalsInternal>
+          <generalization Id="5a6929bd-d31e-4aad-96b0-4d99774dfe04" isSubstitutable="false">
+            <classMoniker Id="b39116fd-4887-4646-9b2e-414a39abd0e8" LastKnownName="Stage" />
+            <elementDefinition Id="25354f3a-bf47-42a1-9280-e80ce42da066" />
+          </generalization>
+        </generalsInternal>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="56f2c9cb-357b-47ff-8b58-08395724c9ae" name="Filter" isAbstract="true" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="9dcaace1-7d2a-4ba0-9ac1-2040ba5279ba" />
+        <generalsInternal>
+          <generalization Id="287d4ff6-0a48-43fc-9c00-fb18a44246af" isSubstitutable="false">
+            <classMoniker Id="b39116fd-4887-4646-9b2e-414a39abd0e8" LastKnownName="Stage" />
+            <elementDefinition Id="114c1d59-dfdc-4f14-9088-3274227d16d7" />
+          </generalization>
+        </generalsInternal>
+        <ownedAttributesInternal>
+          <property Id="4fa8e0a1-ce48-4f06-b0b0-69f93656c96d" name="PrevStage" isLeaf="false" isStatic="false" isReadOnly="false" isUnique="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false">
+            <elementDefinition Id="4103c7c0-1ba6-436e-98ee-042eede3fced" />
+          </property>
+        </ownedAttributesInternal>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="958a032a-f100-419a-ba56-2904c554eb4b" name="Layout" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="02f36a52-3796-44fb-b639-92db2bcc683f" />
+        <targetEnds>
+          <association Id="09f811cc-72df-4271-9009-a0c37889c2c8" isDerived="false" sourceEndRoleName="Layout" targetEndRoleName="Field" isLeaf="false" isAbstract="false">
+            <classMoniker Id="3835dccc-8ddb-4479-b330-b8470b8955a1" LastKnownName="Field" />
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd Id="78eb80e1-8994-4910-8403-b6bef70131e5" name="Layout" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="Composite" isComposite="false" isNavigableOwned="false">
+                  <elementDefinition Id="a10b0629-a883-4a80-b47b-1aa7690847f1" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd Id="24297905-ce99-49c4-b6fa-399a519ff952" name="Field" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="true">
+                  <elementDefinition Id="fc758936-b66c-4fa1-84f0-7a7153d411f2" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+            <elementDefinition Id="17434e16-4b52-4a32-b937-d1e5be5f609d" />
+          </association>
+        </targetEnds>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="cbe66294-b8bb-446c-8e5c-6b47919be2ca" name="Header" isAbstract="true" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="5967b23e-e89c-4c7c-b237-47bf88476788" />
+        <targetEnds>
+          <association Id="12bfbc75-83d3-4d7d-9742-6750c9d8062c" isDerived="false" sourceEndRoleName="Header" targetEndRoleName="Layout" isLeaf="false" isAbstract="false">
+            <classMoniker Id="958a032a-f100-419a-ba56-2904c554eb4b" LastKnownName="Layout" />
+            <relationshipOwnedElementsInternal>
+              <associationHasOwnedEnds>
+                <memberEnd Id="a4885d2e-624d-4324-bf99-0cd32dd88d8a" name="Header" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="Composite" isComposite="false" isNavigableOwned="false">
+                  <elementDefinition Id="78b6b20e-c63c-4319-8728-47f632f9c36c" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+              <associationHasOwnedEnds>
+                <memberEnd Id="cd647bc4-325c-4dcf-9344-b4c8d8a85da7" name="Layout" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="true">
+                  <elementDefinition Id="14a679d7-6c47-4465-b32b-952d81435a7b" />
+                </memberEnd>
+              </associationHasOwnedEnds>
+            </relationshipOwnedElementsInternal>
+            <elementDefinition Id="7981a9d6-d349-41c2-a5bb-706396781e8b" />
+          </association>
+        </targetEnds>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="737366db-14a0-4027-9cdc-ea79f502fb53" name="Writer" isAbstract="true" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="0cf151fc-2995-408d-bd9b-3345b1342c62" />
+        <generalsInternal>
+          <generalization Id="87792d4b-cd81-45ea-aa31-7b515d6d5fc2" isSubstitutable="false">
+            <classMoniker Id="56f2c9cb-357b-47ff-8b58-08395724c9ae" LastKnownName="Filter" />
+            <elementDefinition Id="bea55c84-cb2c-46a1-ae6b-67f22da0bcfc" />
+          </generalization>
+        </generalsInternal>
+        <ownedOperationsInternal>
+          <operation Id="946487cb-cfff-45e4-9cfb-45fc4560a156" name="Write" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="a310c6e3-ae19-409e-abcd-6a59895b4d95" />
+          </operation>
+        </ownedOperationsInternal>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="6feb89d6-9a7a-4792-93cf-46b4a46f83aa" name="FauxReader" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="b91207dc-3bf3-44b2-8afd-467fd6735090" />
+        <generalsInternal>
+          <generalization Id="4147fcec-de75-4870-a095-ea56f5009d5b" isSubstitutable="false">
+            <classMoniker Id="b1ae6518-17c6-456c-bef8-209182f0b6cd" LastKnownName="Reader" />
+            <elementDefinition Id="f9b4ecaf-e77c-4aa8-82c1-ec9f0fedf047" />
+          </generalization>
+        </generalsInternal>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="82128622-8dcd-41f4-850a-e544cbc2f840" name="FauxWriter" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="bddc49dc-0fb9-4af8-a4c4-b7cdb19fe8fb" />
+        <generalsInternal>
+          <generalization Id="5986451e-710b-4af5-8a17-7ad796cd9795" isSubstitutable="false">
+            <classMoniker Id="737366db-14a0-4027-9cdc-ea79f502fb53" LastKnownName="Writer" />
+            <elementDefinition Id="5fe82738-77b6-45be-94b7-26a22ddfdaef" />
+          </generalization>
+        </generalsInternal>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="faa8ea71-da50-419a-a39f-ac311bdfe6af" name="LasReader" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="414a71c3-9370-4a40-97a7-1ac88e6f7976" />
+        <generalsInternal>
+          <generalization Id="8b54dcf7-a127-49ef-bcf9-30baf948a5c4" isSubstitutable="false">
+            <classMoniker Id="b1ae6518-17c6-456c-bef8-209182f0b6cd" LastKnownName="Reader" />
+            <elementDefinition Id="3e1f6d7e-b4fd-4773-836f-1558600a0fe5" />
+          </generalization>
+        </generalsInternal>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="f6775d5a-8f57-472c-8339-275f5b48f96e" name="LasWriter" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="6530b27b-0cb3-4551-9814-86a5063e89e9" />
+        <generalsInternal>
+          <generalization Id="d764a9c8-f0f8-4479-b6b7-cb543209e53a" isSubstitutable="false">
+            <classMoniker Id="737366db-14a0-4027-9cdc-ea79f502fb53" LastKnownName="Writer" />
+            <elementDefinition Id="e180fa01-a20f-4faf-ac10-92eb7e6db9d4" />
+          </generalization>
+        </generalsInternal>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="3835dccc-8ddb-4479-b330-b8470b8955a1" name="Field" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="70fadd63-5609-4dcc-8dd0-dc513397eefb" />
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="aaf42d17-7ff2-4ae8-90f3-f947d1039ced" name="ColorFilter" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="ae718fa7-91e0-49c5-b047-a0e55bbeb9b6" />
+        <generalsInternal>
+          <generalization Id="c352810a-db80-446a-9ffe-4285a4345769" isSubstitutable="false">
+            <classMoniker Id="56f2c9cb-357b-47ff-8b58-08395724c9ae" LastKnownName="Filter" />
+            <elementDefinition Id="158aa060-c33c-48a7-ba83-f20a4ecab586" />
+          </generalization>
+        </generalsInternal>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <class Id="cce3a424-8950-4bf7-a801-284cff692073" name="MosaicFilter" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="cfb22025-a806-47ad-9cdb-9a80f50796be" />
+        <generalsInternal>
+          <generalization Id="e503ddce-3b9d-4139-92fe-ebbbd7e44056" isSubstitutable="false">
+            <classMoniker Id="56f2c9cb-357b-47ff-8b58-08395724c9ae" LastKnownName="Filter" />
+            <elementDefinition Id="6bd2682e-6df0-4499-bd9a-cdfcea2638bb" />
+          </generalization>
+        </generalsInternal>
+      </class>
+    </logicalClassDesignerModelHasTypes>
+  </packagedElements>
+  <package Id="067e713d-554c-44ef-950f-fb1c75eef8cb" name="ModelingProject1">
+    <elementDefinition Id="f9974413-0dab-4314-8d1d-a4fd9cbbf855" />
+  </package>
+</logicalClassDesignerModel>
