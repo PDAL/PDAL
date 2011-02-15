@@ -38,7 +38,7 @@
 #include <boost/cstdint.hpp>
 
 #include "libpc/export.hpp"
-#include "libpc/PointLayout.hpp"
+#include "libpc/Schema.hpp"
 #include "libpc/Bounds.hpp"
 
 namespace libpc
@@ -51,9 +51,9 @@ public:
     Header(const Header&);
     Header& operator=(const Header&);
 
-    const PointLayout& getLayout() const;
-    PointLayout& getLayout();
-    void setLayout(const PointLayout&);
+    const Schema& getLayout() const;
+    Schema& getLayout();
+    void setLayout(const Schema&);
 
     boost::uint64_t getNumPoints() const;
     void setNumPoints(boost::uint64_t);
@@ -64,7 +64,7 @@ public:
     void dump() const;
 
 private:
-    PointLayout m_pointLayout;
+    Schema m_pointLayout;
     boost::uint64_t m_numPoints;
     Bounds<double> m_bounds;
 };

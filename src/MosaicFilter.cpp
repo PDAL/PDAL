@@ -47,8 +47,8 @@ MosaicFilter::MosaicFilter(Stage& prevStage, Stage& prevStage2)
     const Header& prevHeader2 =  m_prevStage2.getHeader();
 
     {
-        const PointLayout& prevLayout1 = prevHeader1.getLayout();
-        const PointLayout& prevLayout2 = prevHeader2.getLayout();
+        const Schema& prevLayout1 = prevHeader1.getLayout();
+        const Schema& prevLayout2 = prevHeader2.getLayout();
         assert(prevLayout1==prevLayout2);
     }
 

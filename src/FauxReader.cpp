@@ -47,15 +47,15 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints)
     : Reader()
 {
     Header& header = getHeader();
-    PointLayout& layout = header.getLayout();
+    Schema& layout = header.getLayout();
 
     header.setNumPoints(numPoints);
     header.setBounds(bounds);
 
-    layout.addField(Dimension("XPos", Dimension::float_t));
-    layout.addField(Dimension("YPos", Dimension::float_t));
-    layout.addField(Dimension("ZPos", Dimension::float_t));
-    layout.addField(Dimension("Time", Dimension::double_t));
+    layout.addDimension(Dimension("XPos", Dimension::float_t));
+    layout.addDimension(Dimension("YPos", Dimension::float_t));
+    layout.addDimension(Dimension("ZPos", Dimension::float_t));
+    layout.addDimension(Dimension("Time", Dimension::double_t));
 
     header.dump();
 
@@ -70,11 +70,11 @@ void FauxReader::readPoints(PointData& data)
     boost::uint32_t numPoints = data.getNumPoints();
     assert(m_currentPointIndex + numPoints <= getHeader().getNumPoints());
 
-    const PointLayout& layout = data.getLayout();
+    const Schema& layout = data.getLayout();
     Header& header = getHeader();
 
     std::size_t fieldIndexT;
-    bool ok = layout.findFieldIndex("Time", fieldIndexT);
+    bool ok = layout.findDimensionIndex("Time", fieldIndexT);
     assert(ok);
 
     float v = (float)m_currentPointIndex;
@@ -87,6 +87,17 @@ void FauxReader::readPoints(PointData& data)
     const double minZ = bounds.dims()[2].minimum();
     const double maxZ = bounds.dims()[2].maximum();
 
+    std::size_t offsetX;
+    std::size_t offsetY;
+    std::size_t offsetZ;
+
+    ok = layout.findDimensionIndex("XPos", offsetX);
+    assert(ok);
+    ok = layout.findDimensionIndex("YPos", offsetY);
+    assert(ok);
+    ok = layout.findDimensionIndex("ZPos", offsetZ);
+    assert(ok);
+
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         const float x = (float)Utils::random(minX, maxX);
@@ -94,18 +105,6 @@ void FauxReader::readPoints(PointData& data)
         const float z = (float)Utils::random(minZ, maxZ);
 
         data.setValid(pointIndex);
-
-        std::size_t offsetX;
-        std::size_t offsetY;
-        std::size_t offsetZ;
-        bool ok;
-        
-        ok = layout.findFieldIndex("XPos", offsetX);
-        assert(ok);
-        ok = layout.findFieldIndex("YPos", offsetY);
-        assert(ok);
-        ok = layout.findFieldIndex("ZPos", offsetZ);
-        assert(ok);
 
         data.setField_F32(pointIndex, offsetX, x);
         data.setField_F32(pointIndex, offsetY, y);

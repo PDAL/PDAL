@@ -38,7 +38,7 @@
 #include <boost/cstdint.hpp>
 
 #include "libpc/export.hpp"
-#include "libpc/PointLayout.hpp"
+#include "libpc/Schema.hpp"
 
 namespace libpc
 {
@@ -60,13 +60,13 @@ public:
     // regardless of what the passed-in layout says -- this is because the field object
     // represents the state within the owning object, which in this case is a completely
     // empty buffer (similarly, all the points in the buffer are marked "invalid")
-    PointData(const PointLayout&, boost::uint32_t numPoints);
+    PointData(const Schema&, boost::uint32_t numPoints);
 
     // number of points in this buffer
     boost::uint32_t getNumPoints() const;
 
     // layout (number and kinds of fields) for a point in this buffer
-    const PointLayout& getLayout() const;
+    const Schema& getLayout() const;
 
     // "valid" means the data for the point can be used; if invalid, the point should
     // be ignored or skipped.  (This is done for efficiency; we don't want to have to
@@ -99,7 +99,7 @@ private:
     template<class T> T getField(std::size_t fieldIndex, std::size_t itemOffset) const;
     template<class T> void setField(std::size_t fieldIndex, std::size_t itemOffset, T value);
 
-    PointLayout m_layout;
+    Schema m_layout;
     boost::uint8_t* m_data;
     std::size_t m_pointSize;
     boost::uint32_t m_numPoints;

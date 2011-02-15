@@ -80,6 +80,18 @@ Schema& Schema::operator=(Schema const& rhs)
 }
 
 
+bool Schema::operator==(const Schema& other) const
+{
+    if (m_byteSize == other.m_byteSize &&
+        m_dimensions == other.m_dimensions)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
 property_tree::ptree Schema::getPTree() const
 {
     using property_tree::ptree;
@@ -147,6 +159,33 @@ std::vector<std::string> Schema::getDimensionNames() const
     return output;
 }
 
+
+bool Schema::findDimensionIndex(const std::string& name, std::size_t& found) const
+{
+    found = 0;
+    for (DimensionsCIter iter = m_dimensions.cbegin(); iter != m_dimensions.cend(); ++iter)
+    {
+        if (iter->getName() == name)
+        {
+            return true;
+        }
+        ++found;
+    }
+    return false;
+}
+
+
+bool Schema::hasDimension(const std::string& name) const
+{
+    for (DimensionsCIter iter = m_dimensions.cbegin(); iter != m_dimensions.cend(); ++iter)
+    {
+        if (iter->getName() == name)
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
 
 std::ostream& operator<<(std::ostream& os, Schema const& schema)

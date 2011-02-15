@@ -42,12 +42,12 @@ namespace libpc
 ColorFilter::ColorFilter(Stage& prevStage)
     : Filter(prevStage)
 {
-    PointLayout& layout = getHeader().getLayout();
+    Schema& layout = getHeader().getLayout();
 
     // add the three u8 fields
-    layout.addField(Dimension("Zred", Dimension::uint8_t));
-    layout.addField(Dimension("Zgreen", Dimension::uint8_t));
-    layout.addField(Dimension("Zblue", Dimension::uint8_t));
+    layout.addDimension(Dimension("Zred", Dimension::uint8_t));
+    layout.addDimension(Dimension("Zgreen", Dimension::uint8_t));
+    layout.addDimension(Dimension("Zblue", Dimension::uint8_t));
 
     return;
 }
@@ -59,7 +59,7 @@ void ColorFilter::readPoints(PointData& data)
 
     int numPoints = data.getNumPoints();
 
-    const PointLayout& layout = data.getLayout();
+    const Schema& layout = data.getLayout();
 
     std::size_t fieldIndexR;
     std::size_t fieldIndexG;
@@ -67,13 +67,13 @@ void ColorFilter::readPoints(PointData& data)
     std::size_t offsetZ;
     bool ok;
 
-    ok = layout.findFieldIndex("Zred", fieldIndexR);
+    ok = layout.findDimensionIndex("Zred", fieldIndexR);
     assert(ok);
-    ok = layout.findFieldIndex("Zgreen", fieldIndexG);
+    ok = layout.findDimensionIndex("Zgreen", fieldIndexG);
     assert(ok);
-    ok = layout.findFieldIndex("Zblue", fieldIndexB);
+    ok = layout.findDimensionIndex("Zblue", fieldIndexB);
     assert(ok);
-    ok = layout.findFieldIndex("ZPos", offsetZ);
+    ok = layout.findDimensionIndex("ZPos", offsetZ);
     assert(ok);
 
     for (int pointIndex=0; pointIndex<numPoints; pointIndex++)

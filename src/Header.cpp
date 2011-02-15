@@ -83,19 +83,19 @@ void Header::setBounds(const Bounds<double>& bounds)
 }
 
 
-const PointLayout& Header::getLayout() const
+const Schema& Header::getLayout() const
 {
     return m_pointLayout;
 }
 
 
-PointLayout& Header::getLayout()
+Schema& Header::getLayout()
 {
     return m_pointLayout;
 }
 
 
-void Header::setLayout(const PointLayout& layout)
+void Header::setLayout(const Schema& layout)
 {
     m_pointLayout = layout;
 }
@@ -123,7 +123,7 @@ void Header::dump() const
     cout << m_bounds;
     cout << endl;
 
-    m_pointLayout.dump("  ");
+    cout << m_pointLayout;
 
     cout << endl;
 

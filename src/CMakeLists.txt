@@ -30,12 +30,10 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Dimension.hpp
   ${LIBPC_HEADERS_DIR}/FauxReader.hpp 
   ${LIBPC_HEADERS_DIR}/FauxWriter.hpp
-  ${LIBPC_HEADERS_DIR}/Field.hpp
   ${LIBPC_HEADERS_DIR}/Filter.hpp
   ${LIBPC_HEADERS_DIR}/Header.hpp
   ${LIBPC_HEADERS_DIR}/MosaicFilter.hpp
   ${LIBPC_HEADERS_DIR}/PointData.hpp  
-  ${LIBPC_HEADERS_DIR}/PointLayout.hpp
   ${LIBPC_HEADERS_DIR}/Range.hpp
   ${LIBPC_HEADERS_DIR}/Reader.hpp
   ${LIBPC_HEADERS_DIR}/Schema.hpp
@@ -52,12 +50,10 @@ set(LIBPC_CPP
   Dimension.cpp
   FauxReader.cpp
   FauxWriter.cpp
-  Field.cpp
   Filter.cpp
   Header.cpp
   MosaicFilter.cpp
   PointData.cpp
-  PointLayout.cpp
   Reader.cpp
   Schema.cpp
   Signaller.cpp

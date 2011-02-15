@@ -45,13 +45,13 @@ namespace libpc
 {
 
 
-PointData::PointData(const PointLayout& layout, boost::uint32_t numPoints) :
+PointData::PointData(const Schema& layout, boost::uint32_t numPoints) :
     m_layout(layout),
     m_numPoints(numPoints),
     m_data(NULL),
     m_pointSize(0)
 {
-    m_pointSize = m_layout.getSizeInBytes();
+    m_pointSize = m_layout.getByteSize();
     m_data = new boost::uint8_t[m_pointSize * m_numPoints];
 
     // the points will all be set to invalid here
@@ -87,7 +87,7 @@ boost::uint32_t PointData::getNumPoints() const
 }
 
 
-const PointLayout& PointData::getLayout() const
+const Schema& PointData::getLayout() const
 {
     return m_layout;
 }
@@ -96,7 +96,7 @@ const PointLayout& PointData::getLayout() const
 template <class T>
 void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value)
 {
-    std::size_t offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getByteOffset();
+    std::size_t offset = (pointIndex * m_pointSize) + m_layout.getDimension(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
     boost::uint8_t* p = m_data + offset;
 
@@ -107,7 +107,7 @@ void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value
 template <class T>
 T PointData::getField(std::size_t pointIndex, std::size_t fieldIndex) const
 {
-    std::size_t offset = (pointIndex * m_pointSize) + m_layout.getField(fieldIndex).getByteOffset();
+    std::size_t offset = (pointIndex * m_pointSize) + m_layout.getDimension(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
     boost::uint8_t* p = m_data + offset;
 
@@ -158,7 +158,7 @@ void PointData::copyFieldsFast(std::size_t destPointIndex, std::size_t srcPointI
 
     boost::uint8_t* src = srcPointData.getData(srcPointIndex);
     boost::uint8_t* dest = getData(destPointIndex);
-    std::size_t len = getLayout().getSizeInBytes();
+    std::size_t len = getLayout().getByteSize();
 
     memcpy(dest, src, len);
 
@@ -193,13 +193,15 @@ void PointData::dump(string indent) const
 
 void PointData::dump(std::size_t pointIndex, string indent) const
 {
-    const PointLayout& layout = getLayout();
+    const Schema& layout = getLayout();
+    const Schema::Dimensions& dims = layout.getDimensions();
 
-    for (boost::uint32_t fieldIndex=0; fieldIndex<layout.getNumFields(); fieldIndex++)
+    for (Schema::DimensionsCIter citer=dims.cbegin(); citer != dims.cend(); ++citer)
     {
         cout << indent;
 
-        const Dimension& field = layout.getField(fieldIndex);
+        const Dimension& field = *citer;
+        std::size_t fieldIndex = citer->getPosition();
 
         cout << field.getName() << " (" << field.getDataTypeName(field.getDataType()) << ") : ";
 

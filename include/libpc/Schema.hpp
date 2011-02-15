@@ -60,9 +60,9 @@ namespace libpc
 class LIBPC_DLL Schema
 {
 public:
-    typedef std::list<Dimension> Dimensions;
-    typedef std::list<Dimension>::iterator DimensionsIter;
-    typedef std::list<Dimension>::const_iterator DimensionsCIter;
+    typedef std::vector<Dimension> Dimensions;
+    typedef std::vector<Dimension>::iterator DimensionsIter;
+    typedef std::vector<Dimension>::const_iterator DimensionsCIter;
 
 public:
     Schema();
@@ -70,6 +70,8 @@ public:
     Schema(Schema const& other);
      
     ~Schema() {}
+
+    bool operator==(const Schema& other) const;
 
     /// Fetch total byte size -- sum of all dimensions
     std::size_t getByteSize() const;
@@ -79,15 +81,30 @@ public:
     void addDimension(Dimension const& dim);
 
     std::vector<std::string> getDimensionNames() const;
-    const std::list<Dimension> getDimensions() const
+
+    const Dimension& getDimension(std::size_t index) const
+    {
+        return m_dimensions[index];
+    }
+
+    Dimension& getDimension(std::size_t index)
+    {
+        return m_dimensions[index];
+    }
+
+    const Dimensions& getDimensions() const
     {
         return m_dimensions;
     }
 
+    // returns true if found and sets index, otherwise returns false
+    bool findDimensionIndex(const std::string& name, std::size_t& found) const;
+    bool hasDimension(const std::string& name) const;
+
     boost::property_tree::ptree getPTree() const;
 
 protected:
-    std::list<Dimension> m_dimensions;
+    std::vector<Dimension> m_dimensions;
     std::size_t m_byteSize;
 
 private:
