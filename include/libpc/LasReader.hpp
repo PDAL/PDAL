@@ -35,7 +35,10 @@
 #ifndef INCLUDED_LASREADER_HPP
 #define INCLUDED_LASREADER_HPP
 
+#include <iostream>
+
 #include "libpc/Reader.hpp"
+#include "libpc/LasHeader.hpp"
 
 namespace libpc
 {
@@ -43,7 +46,9 @@ namespace libpc
 class LIBPC_DLL LasReader : public Reader
 {
 public:
-    LasReader();
+    LasReader(std::istream&);
+
+    virtual void readPoints(PointData&);
 
     // default is to reset() and then read N points manually
     // override this if you can
@@ -52,7 +57,12 @@ public:
     // default just resets the point index
     virtual void reset();
 
+    const LasHeader& getLasHeader() const;
+
 protected:
+    LasHeader& getLasHeader();
+
+    std::istream& m_istream;
 
 private:
     LasReader& operator=(const LasReader&); // not implemented

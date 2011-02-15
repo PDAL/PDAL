@@ -23,6 +23,8 @@
 #include "libpc/MosaicFilter.hpp"
 #include "libpc/FauxReader.hpp"
 #include "libpc/FauxWriter.hpp"
+#include "libpc/LasReader.hpp"
+#include "libpc/LasHeader.hpp"
 
 using namespace libpc;
 
@@ -65,8 +67,25 @@ static void test2()
 }
 
 
+
+static void test3()
+{
+  std::istream* ifs = Utils::Open("test/data/1.2-with-color.las");
+
+  LasReader reader(*ifs);
+
+  const LasHeader& header = ((const LasReader&)reader).getLasHeader();
+
+  std::cout << header;
+
+  return;
+}
+
+
 int main(int, char* [])
 {
+    test3();
+
     {
         Bounds<double> bounds(1,2,3,4,5,6);
         std::cout << bounds << std::endl;

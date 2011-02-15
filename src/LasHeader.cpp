@@ -736,8 +736,10 @@ void LasHeader::read(std::istream& ifs)
     double x2 = 0;
     double y2 = 0;
     double z2 = 0;
-    std::string buf;
-    std::string fsig;
+
+    // BUG: these two were std::string, but the read_n() failed until I made them char[]
+    char buff[32];
+    char fsig[4];
 
     ifs.seekg(0);
 
@@ -769,12 +771,12 @@ void LasHeader::read(std::istream& ifs)
     SetVersionMinor(n1);
 
     // 10. System ID
-    Utils::read_n(buf, ifs, 32);
-    SetSystemId(buf);
+    Utils::read_n(buff, ifs, 32);
+    SetSystemId(buff);
 
     // 11. Generating Software ID
-    Utils::read_n(buf, ifs, 32);
-    SetSoftwareId(buf);
+    Utils::read_n(buff, ifs, 32);
+    SetSoftwareId(buff);
 
     // 12. File Creation Day of Year
     Utils::read_n(n2, ifs, sizeof(n2));
@@ -841,26 +843,38 @@ void LasHeader::read(std::istream& ifs)
     if (n1 == LasSchema::ePointFormat0)
     {
         SetDataFormatId(LasSchema::ePointFormat0);
+        LasSchema lasSchema(LasSchema::ePointFormat0);
+        setLasSchema(lasSchema);
     } 
     else if (n1 == LasSchema::ePointFormat1)
     {
         SetDataFormatId(LasSchema::ePointFormat1);
+        LasSchema lasSchema(LasSchema::ePointFormat1);
+        setLasSchema(lasSchema);
     }
     else if (n1 == LasSchema::ePointFormat2)
     {
         SetDataFormatId(LasSchema::ePointFormat2);
+        LasSchema lasSchema(LasSchema::ePointFormat2);
+        setLasSchema(lasSchema);
     }
     else if (n1 == LasSchema::ePointFormat3)
     {
         SetDataFormatId(LasSchema::ePointFormat3);
+        LasSchema lasSchema(LasSchema::ePointFormat3);
+        setLasSchema(lasSchema);
     }
     else if (n1 == LasSchema::ePointFormat4)
     {
         SetDataFormatId(LasSchema::ePointFormat4);
+        LasSchema lasSchema(LasSchema::ePointFormat4);
+        setLasSchema(lasSchema);
     }
     else if (n1 == LasSchema::ePointFormat5)
     {
         SetDataFormatId(LasSchema::ePointFormat5);
+        LasSchema lasSchema(LasSchema::ePointFormat5);
+        setLasSchema(lasSchema);
     }
     else
     {

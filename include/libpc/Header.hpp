@@ -52,6 +52,8 @@ class LIBPC_DLL Header
 public:
     Header();
     Header(const Header&);
+    virtual ~Header();
+
     Header& operator=(const Header&);
 
     const Schema& getSchema() const;
@@ -79,7 +81,7 @@ private:
 };
 
 
-std::ostream& operator<<(std::ostream& ostr, const Header&);
+LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const Header&);
 
 
 } // namespace libpc

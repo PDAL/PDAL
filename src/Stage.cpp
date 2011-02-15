@@ -56,4 +56,10 @@ Header& Stage::getHeader()
 }
 
 
+void Stage::setHeader(Header& header)
+{
+    m_header = header;
+}
+
+
 } // namespace libpc

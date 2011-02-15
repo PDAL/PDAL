@@ -72,6 +72,7 @@ public:
     Header& getHeader();
 
 protected:
+    void setHeader(Header&);
 
 private:
     Header m_header;

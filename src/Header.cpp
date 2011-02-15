@@ -59,6 +59,12 @@ Header::Header(const Header& other)
 }
 
 
+Header::~Header()
+{
+    return;
+}
+
+
 Header& Header::operator=(const Header& other)
 {
     if (this != &other)

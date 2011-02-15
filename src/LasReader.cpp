@@ -38,10 +38,28 @@ namespace libpc
 {
 
 
-LasReader::LasReader()
+LasReader::LasReader(std::istream& istream)
     : Reader()
+    , m_istream(istream)
 {
+    LasHeader header;
+    header.read(istream);
+
+    setHeader(header);
+
     return;
+}
+
+
+const LasHeader& LasReader::getLasHeader() const
+{
+    return (const LasHeader&)getHeader();
+}
+
+
+LasHeader& LasReader::getLasHeader()
+{
+    return (LasHeader&)getHeader();
 }
 
 
@@ -65,5 +83,10 @@ void LasReader::reset()
     m_numPointsRead = 0;
 }
 
+
+void LasReader::readPoints(PointData& pointData)
+{
+    return;
+}
 
 } // namespace libpc

@@ -75,7 +75,8 @@ public:
         if (!src)
             throw std::runtime_error("detail::liblas::read_n<T> input stream is not readable");
 
-        src.read(Utils::as_buffer(dest), num);
+        char* p = Utils::as_buffer(dest);
+        src.read(p, num);
 
         // BUG: Fix little-endian
         //LIBLAS_SWAP_BYTES_N(dest, num);
@@ -89,11 +90,11 @@ public:
         return static_cast<char*>(static_cast<void*>(&data));
     }
 
-    template<typename T>
-    static inline char* as_buffer(T* data)
-    {
-        return static_cast<char*>(static_cast<void*>(data));
-    }
+    ////template<typename T>
+    ////static inline char* as_buffer(T* data)
+    ////{
+    ////    return static_cast<char*>(static_cast<void*>(data));
+    ////}
 
     template <typename C, typename T>
     static inline void check_stream_state(std::basic_ios<C, T>& srtm)

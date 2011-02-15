@@ -203,9 +203,9 @@ std::ostream& operator<<(std::ostream& os, Schema const& schema)
 
     ptree::const_iterator i;
 
-    ptree dims = tree.get_child("LASSchema.dimensions");
+    //ptree dims = tree.get_child("LASSchema.dimensions");
     ///////////os << "  Point Format ID:             " << tree.get<std::string>("LASSchema.formatid") << std::endl;
-    os << "  Number of dimensions:        " << dims.size() << std::endl;
+    os << "  Number of dimensions:        " << schema.getDimensions().size() << std::endl;
     os << "  Size in bytes:               " << schema.getByteSize() << std::endl;
 
     os << std::endl;

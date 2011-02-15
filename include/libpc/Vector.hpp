@@ -140,7 +140,7 @@ public:
         m_data.resize(3);
         m_data[0] = t0;
         m_data[1] = t1;
-        m_data[3] = t2;
+        m_data[2] = t2;
     }
 
     void set(std::vector<T> v)
