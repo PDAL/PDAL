@@ -61,6 +61,7 @@ public:
 
 protected:
     LasHeader& getLasHeader();
+    void setLasHeader(const LasHeader&);
 
     std::istream& m_istream;
 

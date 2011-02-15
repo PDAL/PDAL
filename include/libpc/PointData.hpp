@@ -107,7 +107,7 @@ private:
 };
 
 
-std::ostream& operator<<(std::ostream& ostr, const PointData&);
+LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const PointData&);
 
 
 } // namespace libpc

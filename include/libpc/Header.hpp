@@ -54,7 +54,7 @@ public:
     Header(const Header&);
     virtual ~Header();
 
-    Header& operator=(const Header&);
+    virtual Header& operator=(const Header&);
 
     const Schema& getSchema() const;
     Schema& getSchema();

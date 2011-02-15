@@ -438,7 +438,8 @@ std::ostream& operator<<(std::ostream& ostr, const Bounds<T>& bounds)
     for (size_t d = 0; d < bounds.size(); ++d)
     {
         const Range<T>& r = bounds.dims()[d];
-        ostr << "(" <<  r.minimum() << "," << r.maximum() << ")";
+        ostr << "[" <<  r.minimum() << ", " << r.maximum() << "]";
+        if (d!=bounds.size()-1) ostr << ", ";
     }
     return ostr;
 }

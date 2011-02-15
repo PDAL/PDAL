@@ -42,10 +42,10 @@ LasReader::LasReader(std::istream& istream)
     : Reader()
     , m_istream(istream)
 {
-    LasHeader header;
-    header.read(istream);
+    LasHeader* lasHeader = new LasHeader;
+    lasHeader->read(istream);
 
-    setHeader(header);
+    setHeader(lasHeader);
 
     return;
 }
@@ -86,6 +86,9 @@ void LasReader::reset()
 
 void LasReader::readPoints(PointData& pointData)
 {
+
+    //Utils::read_n(m_point->GetData().front(), m_ifs, m_record_size);
+
     return;
 }
 

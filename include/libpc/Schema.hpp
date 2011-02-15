@@ -66,12 +66,12 @@ public:
 
 public:
     Schema();
-    Schema& operator=(Schema const& rhs);
     Schema(Schema const& other);
-     
     ~Schema() {}
 
-    bool operator==(const Schema& other) const;
+    virtual Schema& operator=(Schema const& rhs);
+
+    virtual bool operator==(const Schema& other) const;
 
     /// Fetch total byte size -- sum of all dimensions
     std::size_t getByteSize() const;

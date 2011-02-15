@@ -48,16 +48,18 @@ namespace libpc
 FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints)
     : Reader()
 {
-    Header& header = getHeader();
-    Schema& schema = header.getSchema();
+    Header* header = new Header;
+    Schema& schema = header->getSchema();
 
-    header.setNumPoints(numPoints);
-    header.setBounds(bounds);
+    header->setNumPoints(numPoints);
+    header->setBounds(bounds);
 
     schema.addDimension(Dimension("XPos", Dimension::float_t));
     schema.addDimension(Dimension("YPos", Dimension::float_t));
     schema.addDimension(Dimension("ZPos", Dimension::float_t));
     schema.addDimension(Dimension("Time", Dimension::double_t));
+
+    setHeader(header);
 
     cout << header;
 

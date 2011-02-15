@@ -65,6 +65,8 @@ public:
     /// LAS 1.2 Specification, point data format set to 0.
     /// Other fields filled with 0.
     LasHeader();
+    LasHeader& operator=(const LasHeader&);
+    LasHeader(const LasHeader&);
 
     /// Official signature of ASPRS LAS file format, always \b "LASF".
     static char const* const FileSignature;
@@ -366,14 +368,7 @@ private:
     RecordsByReturnArray m_pointRecordsByReturn;
     PointScales m_scales;
     PointOffsets m_offsets;
-//    Bounds<double> m_extent;
-//    std::vector<VariableRecord> m_vlrs;
-//    SpatialReference m_srs;
-//    Schema m_schema;
     bool m_isCompressed;
-
-    LasHeader& operator=(const LasHeader&); // not implemented
-    LasHeader(const LasHeader&); // not implemented
 };
 
 LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const LasHeader&);

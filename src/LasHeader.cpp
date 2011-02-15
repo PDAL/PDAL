@@ -63,6 +63,58 @@ LasHeader::LasHeader()
 }
 
 
+LasHeader::LasHeader(const LasHeader& rhs)
+    : Header(rhs)
+    , m_sourceId(rhs.m_sourceId)
+    , m_reserved(rhs.m_reserved)
+    , m_projectGuid(rhs.m_projectGuid)
+    , m_versionMajor(rhs.m_versionMajor)
+    , m_versionMinor(rhs.m_versionMinor)
+    , m_createDOY(rhs.m_createDOY)
+    , m_createYear(rhs.m_createYear)
+    , m_headerSize(rhs.m_headerSize)
+    , m_dataOffset(rhs.m_dataOffset)
+    , m_recordsCount(rhs.m_recordsCount)
+    , m_pointRecordsCount(rhs.m_pointRecordsCount)
+    , m_pointRecordsByReturn(rhs.m_pointRecordsByReturn)
+    , m_scales(rhs.m_scales)
+    , m_offsets(rhs.m_offsets)
+    , m_isCompressed(rhs.m_isCompressed)
+{
+    memcpy(m_signature, rhs.m_signature, eFileSignatureSize);
+    memcpy(m_systemId, rhs.m_systemId, eSystemIdSize);
+    memcpy(m_softwareId, rhs.m_softwareId, eSoftwareIdSize);
+}
+
+
+LasHeader& LasHeader::operator=(const LasHeader& rhs)
+{
+//    *(Header*)this = (const Header&)rhs;
+
+    //memcpy(m_signature, rhs.m_signature, eFileSignatureSize);
+    //m_sourceId = rhs.m_sourceId;
+    //m_reserved = rhs.m_reserved;
+    //m_projectGuid = rhs.m_projectGuid;
+    //m_versionMajor = rhs.m_versionMajor;
+    //m_versionMinor = rhs.m_versionMinor;
+    //memcpy(m_systemId, rhs.m_systemId, eSystemIdSize);
+    //memcpy(m_softwareId, rhs.m_softwareId, eSoftwareIdSize);
+    //m_createDOY = rhs.m_createDOY;
+    //m_createYear = rhs.m_createYear;
+    //m_headerSize = rhs.m_headerSize;
+    //m_dataOffset = rhs.m_dataOffset;
+    //m_recordsCount = rhs.m_recordsCount;
+    m_pointRecordsCount = rhs.m_pointRecordsCount;
+    m_pointRecordsByReturn.resize(7);
+    m_pointRecordsByReturn = rhs.m_pointRecordsByReturn;
+    m_scales = rhs.m_scales;
+    m_offsets = rhs.m_offsets;
+    m_isCompressed = rhs.m_isCompressed;
+
+    return *this;
+}
+
+
 const LasSchema& LasHeader::getLasSchema() const
 {
     return (const LasSchema&)this->getSchema();
@@ -300,6 +352,7 @@ uint32_t LasHeader::GetPointRecordsCount() const
 void LasHeader::SetPointRecordsCount(uint32_t v)
 {
     m_pointRecordsCount = v;
+    this->setNumPoints(v);
 }
 
 LasHeader::RecordsByReturnArray const& LasHeader::GetPointRecordsByReturnCount() const
@@ -1152,12 +1205,17 @@ std::ostream& operator<<(std::ostream& ostr, const LasHeader& header)
 {
     ostr << (const Header&)header;
 
+    ostr << "  LasHeader" << std::endl;
+    ostr << "    Header size: " << header.GetHeaderSize() << std::endl;
+    ostr << "    Point records count: " << header.GetPointRecordsCount() << std::endl;
+
     return ostr;
 }
 
 
 void LasHeader::write(std::ostream&) const
 {
+    throw;
     return;
 }
 

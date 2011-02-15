@@ -50,6 +50,7 @@ class LIBPC_DLL Stage
 {
 public:
     Stage();
+    virtual ~Stage();
 
     // This reads a set of points at the current position in the file.
     //
@@ -72,10 +73,10 @@ public:
     Header& getHeader();
 
 protected:
-    void setHeader(Header&);
+    void setHeader(Header*); // stage takes ownership
 
 private:
-    Header m_header;
+    Header* m_header;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented

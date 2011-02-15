@@ -39,25 +39,36 @@ namespace libpc
 
 
 Stage::Stage()
+    : m_header(NULL)
 {
+    return;
+}
+
+
+Stage::~Stage()
+{
+    delete m_header;
     return;
 }
 
 
 const Header& Stage::getHeader() const
 {
-    return m_header;
+    assert(m_header);
+    return *m_header;
 }
 
 
 Header& Stage::getHeader()
 {
-    return m_header;
+    assert(m_header);
+    return *m_header;
 }
 
 
-void Stage::setHeader(Header& header)
+void Stage::setHeader(Header* header)
 {
+    delete m_header;
     m_header = header;
 }
 

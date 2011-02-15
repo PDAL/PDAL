@@ -74,9 +74,14 @@ static void test3()
 
   LasReader reader(*ifs);
 
-  const LasHeader& header = ((const LasReader&)reader).getLasHeader();
+  const Header& header = reader.getHeader();
 
-  std::cout << header;
+  std::cout << (const LasHeader&)header;
+
+  PointData pointData(header.getSchema(), header.getNumPoints());
+  reader.readPoints(pointData);
+
+  std::cout << pointData;
 
   return;
 }

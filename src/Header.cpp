@@ -146,21 +146,17 @@ Metadata::Array& Header::getMetadata()
 
 std::ostream& operator<<(std::ostream& ostr, const Header& header)
 {
-    ostr << "Header:" << endl;
-
     ostr << "  Num points: " << header.getNumPoints() << endl;
 
-    ostr << "  Bounds: ";
-    ostr << header.getBounds();
-    ostr << endl;
+    ostr << "  Bounds:" << endl;
+    ostr << "    " << header.getBounds() << endl;
 
-    ostr << "  Schema: ";
-    ostr << header.getSchema();
-    ostr << endl;
+    ostr << "  Schema: " << endl;
+    ostr << "    Num dims: " << header.getSchema().getDimensions().size() << endl;
+    ostr << "    Size in bytes: " << header.getSchema().getByteSize() << endl;
 
-    ostr << "  Spatial Reference: ";
-    ostr << header.getSpatialReference();
-    ostr << endl;
+    ostr << "  Spatial Reference:" << endl;
+    ostr << "    WKT: " << header.getSpatialReference().getWKT() << endl;
 
     return ostr;
 }

@@ -41,8 +41,9 @@ namespace libpc
 Filter::Filter(Stage& prevStage) :
     m_prevStage(prevStage)
 {
-    Header& header = getHeader();
-    header = m_prevStage.getHeader();
+    const Header& prevHeader = m_prevStage.getHeader();
+    Header* header = new Header(prevHeader);
+    setHeader(header);
     return;
 }
 
