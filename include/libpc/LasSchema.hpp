@@ -116,6 +116,7 @@ private:
     PointFormatName m_data_format_id;
 };
 
+LIBPC_DLL std::ostream& operator<<(std::ostream& os, LasSchema const&);
 
 
 } // namespace liblas

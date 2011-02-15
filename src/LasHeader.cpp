@@ -1148,6 +1148,14 @@ void LasHeader::Validate(std::istream& ifs)
 }
 
 
+std::ostream& operator<<(std::ostream& ostr, const LasHeader& header)
+{
+    ostr << (const Header&)header;
+
+    return ostr;
+}
+
+
 void LasHeader::write(std::ostream&) const
 {
     return;

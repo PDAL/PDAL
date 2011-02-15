@@ -283,4 +283,16 @@ void LasSchema::update_required_dimensions(PointFormatName data_format_id)
 }
 
 
+std::ostream& operator<<(std::ostream& os, LasSchema const& schema)
+{
+    os << (const Schema&)schema;
+
+    os << schema.getDataFormatId();
+
+    os << std::endl;
+
+    return os;
+}
+
+
 } // namespace libpc

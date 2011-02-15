@@ -376,6 +376,7 @@ private:
     LasHeader(const LasHeader&); // not implemented
 };
 
+LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const LasHeader&);
 
 } // namespace libpc
 
