@@ -32,54 +32,46 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_HEADER_HPP
-#define INCLUDED_HEADER_HPP
+#ifndef INCLUDED_METADATA_HPP
+#define INCLUDED_METADATA_HPP
 
-#include <iostream>
+#include <vector>
 #include <boost/cstdint.hpp>
 
-#include "libpc/export.hpp"
-#include "libpc/Schema.hpp"
-#include "libpc/Bounds.hpp"
-#include "libpc/SpatialReference.hpp"
-#include "libpc/Metadata.hpp"
+#include "libpc/Utils.hpp"
 
 namespace libpc
 {
 
-class LIBPC_DLL Header
+// this needs work, but the idea is this will be something that specific file formats
+// could derive from
+class LIBPC_DLL Metadata
 {
 public:
-    Header();
-    Header(const Header&);
-    Header& operator=(const Header&);
+    typedef std::vector<Metadata> Array;
 
-    const Schema& getLayout() const;
-    Schema& getLayout();
-    void setLayout(const Schema&);
+public:
+    // makes a local copy of the buffer
+    Metadata(const boost::uint8_t* bytes, std::size_t len);
 
-    boost::uint64_t getNumPoints() const;
-    void setNumPoints(boost::uint64_t);
+    Metadata(const Metadata&);
 
-    const Bounds<double>& getBounds() const;
-    void setBounds(const Bounds<double>&);
+    virtual ~Metadata();
 
-    const SpatialReference& getSpatialReference() const;
-    void setSpatialReference(const SpatialReference&);
+    Metadata& operator=(Metadata const& rhs);
 
-    const Metadata::Array& getMetadata() const;
-    Metadata::Array& getMetadata();
+    bool operator==(Metadata const& rhs) const;
+
+    const boost::uint8_t* getBytes() const;
+    std::size_t getLength() const;
 
 private:
-    Schema m_pointLayout;
-    boost::uint64_t m_numPoints;
-    Bounds<double> m_bounds;
-    SpatialReference m_spatialReference;
-    Metadata::Array m_metadataArray;
+    boost::uint8_t* m_bytes;
+    std::size_t m_length;
 };
 
 
-std::ostream& operator<<(std::ostream& ostr, const Header&);
+std::ostream& operator<<(std::ostream& ostr, const Metadata& srs);
 
 
 } // namespace libpc

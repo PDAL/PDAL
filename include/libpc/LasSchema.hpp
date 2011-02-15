@@ -39,8 +39,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef LIBPC_SCHEMA_HPP_INCLUDED
-#define LIBPC_SCHEMA_HPP_INCLUDED
+#ifndef LIBPC_LASSCHEMA_HPP_INCLUDED
+#define LIBPC_LASSCHEMA_HPP_INCLUDED
 
 // std
 #include <vector>
@@ -48,71 +48,42 @@
 
 // boost
 
-#include "libpc/export.hpp"
-#include "libpc/Dimension.hpp"
+#include "libpc/Schema.hpp"
 
 
 namespace libpc
 {
 
 
-/// Schema definition
-class LIBPC_DLL Schema
+class LIBPC_DLL LasSchema : public Schema
 {
 public:
-    typedef std::vector<Dimension> Dimensions;
-    typedef std::vector<Dimension>::iterator DimensionsIter;
-    typedef std::vector<Dimension>::const_iterator DimensionsCIter;
+    /// Versions of point record format.
+    enum PointFormatName
+    {
+        ePointFormat0 = 0,  ///< Point Data Format \e 0
+        ePointFormat1 = 1,  ///< Point Data Format \e 1    
+        ePointFormat2 = 2,  ///< Point Data Format \e 2
+        ePointFormat3 = 3,  ///< Point Data Format \e 3
+        ePointFormat4 = 4,  ///< Point Data Format \e 3
+        ePointFormat5 = 5,  ///< Point Data Format \e 3
+        ePointFormatUnknown = -99 ///< Point Data Format is unknown
+    };
 
 public:
-    Schema();
-    Schema& operator=(Schema const& rhs);
-    Schema(Schema const& other);
-     
-    ~Schema() {}
-
-    bool operator==(const Schema& other) const;
-
-    /// Fetch total byte size -- sum of all dimensions
-    std::size_t getByteSize() const;
-
-    void calculateSizes();
-
-    void addDimension(Dimension const& dim);
-
-    std::vector<std::string> getDimensionNames() const;
-
-    const Dimension& getDimension(std::size_t index) const
-    {
-        return m_dimensions[index];
-    }
-
-    Dimension& getDimension(std::size_t index)
-    {
-        return m_dimensions[index];
-    }
-
-    const Dimensions& getDimensions() const
-    {
-        return m_dimensions;
-    }
-
-    // returns true if found and sets index, otherwise returns false
-    // BUG: this is deadly slow, need to use old assoc array or fixed enum for field names
-    bool findDimensionIndex(const std::string& name, std::size_t& index) const; 
-    bool hasDimension(const std::string& name) const;
-
-    boost::property_tree::ptree getPTree() const;
-
-protected:
-    std::vector<Dimension> m_dimensions;
-    std::size_t m_byteSize;
+    LasSchema(PointFormatName data_format_id);
+    LasSchema::LasSchema(LasSchema const& other);
+    LasSchema& LasSchema::operator=(LasSchema const& rhs);
 
 private:
+    void add_record0_dimensions();
+    void add_time();
+    void add_color();
+    void update_required_dimensions(PointFormatName data_format_id);
+
+    PointFormatName m_data_format_id;
 };
 
-
-LIBPC_DLL std::ostream& operator<<(std::ostream& os, Schema const&);
 
 
 } // namespace liblas

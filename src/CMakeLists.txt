@@ -32,6 +32,8 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/FauxWriter.hpp
   ${LIBPC_HEADERS_DIR}/Filter.hpp
   ${LIBPC_HEADERS_DIR}/Header.hpp
+  ${LIBPC_HEADERS_DIR}/LasSchema.hpp
+  ${LIBPC_HEADERS_DIR}/Metadata.hpp
   ${LIBPC_HEADERS_DIR}/MosaicFilter.hpp
   ${LIBPC_HEADERS_DIR}/Vector.hpp  
   ${LIBPC_HEADERS_DIR}/PointData.hpp  
@@ -39,6 +41,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Reader.hpp
   ${LIBPC_HEADERS_DIR}/Schema.hpp
   ${LIBPC_HEADERS_DIR}/Signaller.hpp
+  ${LIBPC_HEADERS_DIR}/SpatialReference.hpp
   ${LIBPC_HEADERS_DIR}/Stage.hpp
   ${LIBPC_HEADERS_DIR}/Utils.hpp
   ${LIBPC_HEADERS_DIR}/Writer.hpp)
@@ -53,13 +56,16 @@ set(LIBPC_CPP
   FauxReader.cpp
   FauxWriter.cpp
   Filter.cpp
+  LasSchema.cpp
   Header.cpp
+  Metadata.cpp
   MosaicFilter.cpp
   Vector.cpp  
   PointData.cpp
   Reader.cpp
   Schema.cpp
   Signaller.cpp
+  SpatialReference.cpp
   Stage.cpp
   Utils.cpp
   Writer.cpp)

@@ -32,56 +32,86 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_HEADER_HPP
-#define INCLUDED_HEADER_HPP
-
-#include <iostream>
-#include <boost/cstdint.hpp>
-
-#include "libpc/export.hpp"
-#include "libpc/Schema.hpp"
-#include "libpc/Bounds.hpp"
-#include "libpc/SpatialReference.hpp"
 #include "libpc/Metadata.hpp"
 
 namespace libpc
 {
 
-class LIBPC_DLL Header
+
+Metadata::Metadata(const boost::uint8_t* bytes, std::size_t length)
+    : m_bytes(NULL)
+    , m_length(length)
 {
-public:
-    Header();
-    Header(const Header&);
-    Header& operator=(const Header&);
-
-    const Schema& getLayout() const;
-    Schema& getLayout();
-    void setLayout(const Schema&);
-
-    boost::uint64_t getNumPoints() const;
-    void setNumPoints(boost::uint64_t);
-
-    const Bounds<double>& getBounds() const;
-    void setBounds(const Bounds<double>&);
-
-    const SpatialReference& getSpatialReference() const;
-    void setSpatialReference(const SpatialReference&);
-
-    const Metadata::Array& getMetadata() const;
-    Metadata::Array& getMetadata();
-
-private:
-    Schema m_pointLayout;
-    boost::uint64_t m_numPoints;
-    Bounds<double> m_bounds;
-    SpatialReference m_spatialReference;
-    Metadata::Array m_metadataArray;
-};
+    m_bytes = new boost::uint8_t[m_length];
+    memcpy(m_bytes, bytes, m_length);
+    return;
+}
 
 
-std::ostream& operator<<(std::ostream& ostr, const Header&);
+Metadata::Metadata(const Metadata& other)
+    : m_bytes(NULL)
+    , m_length(other.m_length)
+{
+    m_bytes = new boost::uint8_t[m_length];
+    memcpy(m_bytes, other.m_bytes, m_length);
+    return;
+}
+
+
+Metadata::~Metadata()
+{
+    delete[] m_bytes;
+    m_bytes = NULL;
+    m_length = 0;
+}
+
+
+Metadata& Metadata::operator=(Metadata const& rhs)
+{
+    if (&rhs != this)
+    {
+        m_length = rhs.m_length;
+        m_bytes = new boost::uint8_t[m_length];
+        memcpy(m_bytes, rhs.m_bytes, m_length);
+    }
+    return *this;
+}
+
+
+bool Metadata::operator==(Metadata const& rhs) const
+{
+    if (m_length == rhs.m_length)
+    {
+        for (std::size_t i=0; i<m_length; i++)
+        {
+            if (m_bytes[i] != rhs.m_bytes[i]) return false;
+        }
+        return true;
+    }
+
+    return false;
+}
+
+
+const boost::uint8_t* Metadata::getBytes() const
+{
+    return m_bytes;
+}
+
+
+std::size_t Metadata::getLength() const
+{
+    return m_length;
+}
+
+
+std::ostream& operator<<(std::ostream& ostr, const Metadata& metadata)
+{
+    ostr << "Metadata: ";
+    ostr << "  len=" << metadata.getLength();
+    ostr << std::endl;
+    return ostr;
+}
 
 
 } // namespace libpc
-
-#endif

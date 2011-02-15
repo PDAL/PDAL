@@ -57,7 +57,7 @@ void FauxWriter::writeBegin()
 
     m_numPointsWritten = 0;
 
-    getHeader().dump();
+    cout << getHeader();
 
     return;
 }
@@ -90,7 +90,7 @@ void FauxWriter::writeBuffer(const PointData& pointData)
     cout << "  writing " << numValidPoints << " of " << numPoints << " points" << endl;
     cout << endl;
 
-    pointData.dump(" ");
+    cout << pointData;
 
     cout << endl;
 

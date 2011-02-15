@@ -32,54 +32,36 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_HEADER_HPP
-#define INCLUDED_HEADER_HPP
+#ifndef INCLUDED_SPATIALREFERENCE_HPP
+#define INCLUDED_SPATIALREFERENCE_HPP
 
-#include <iostream>
-#include <boost/cstdint.hpp>
+#include <string>
 
-#include "libpc/export.hpp"
-#include "libpc/Schema.hpp"
-#include "libpc/Bounds.hpp"
-#include "libpc/SpatialReference.hpp"
-#include "libpc/Metadata.hpp"
+#include "libpc/Utils.hpp"
 
 namespace libpc
 {
 
-class LIBPC_DLL Header
+class LIBPC_DLL SpatialReference
 {
 public:
-    Header();
-    Header(const Header&);
-    Header& operator=(const Header&);
+    SpatialReference();
+    SpatialReference(std::string wkt);
+    SpatialReference(const SpatialReference&);
 
-    const Schema& getLayout() const;
-    Schema& getLayout();
-    void setLayout(const Schema&);
+    SpatialReference& operator=(SpatialReference const& rhs);
 
-    boost::uint64_t getNumPoints() const;
-    void setNumPoints(boost::uint64_t);
+    bool operator==(SpatialReference const& rhs) const;
 
-    const Bounds<double>& getBounds() const;
-    void setBounds(const Bounds<double>&);
-
-    const SpatialReference& getSpatialReference() const;
-    void setSpatialReference(const SpatialReference&);
-
-    const Metadata::Array& getMetadata() const;
-    Metadata::Array& getMetadata();
+    const std::string& getWKT() const;
 
 private:
-    Schema m_pointLayout;
-    boost::uint64_t m_numPoints;
-    Bounds<double> m_bounds;
-    SpatialReference m_spatialReference;
-    Metadata::Array m_metadataArray;
+    // for now, we'll just fake it
+    std::string m_wkt;
 };
 
 
-std::ostream& operator<<(std::ostream& ostr, const Header&);
+std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs);
 
 
 } // namespace libpc

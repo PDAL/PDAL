@@ -33,12 +33,14 @@
 ****************************************************************************/
 
 #include <cassert>
+#include <iostream>
 
 #include "libpc/FauxReader.hpp"
 #include "libpc/Utils.hpp"
 
 using std::vector;
 using std::string;
+using std::cout;
 
 namespace libpc
 {
@@ -57,7 +59,7 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints)
     layout.addDimension(Dimension("ZPos", Dimension::float_t));
     layout.addDimension(Dimension("Time", Dimension::double_t));
 
-    header.dump();
+    cout << header;
 
     return;
 }

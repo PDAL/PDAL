@@ -36,7 +36,6 @@
 
 #include <iostream>
 
-using std::cout;
 using std::endl;
 
 namespace libpc
@@ -55,6 +54,7 @@ Header::Header(const Header& other)
     this->m_numPoints = other.m_numPoints;
     this->m_pointLayout = other.m_pointLayout;
     this->m_bounds = other.m_bounds;
+    this->m_spatialReference = other.m_spatialReference;
     return;
 }
 
@@ -66,6 +66,7 @@ Header& Header::operator=(const Header& other)
         this->m_numPoints = other.m_numPoints;
         this->m_pointLayout = other.m_pointLayout;
         this->m_bounds = other.m_bounds;
+        this->m_spatialReference = other.m_spatialReference;
     }
     return *this;
 }
@@ -113,21 +114,49 @@ void Header::setNumPoints(boost::uint64_t numPoints)
 }
 
 
-void Header::dump() const
+const SpatialReference& Header::getSpatialReference() const
 {
-    cout << "Header:" << endl;
+    return m_spatialReference;
+}
 
-    cout << "  Num points: " << m_numPoints << endl;
 
-    cout << "  Bounds: ";
-    cout << m_bounds;
-    cout << endl;
+void Header::setSpatialReference(const SpatialReference& spatialReference)
+{
+    m_spatialReference = spatialReference;
+}
 
-    cout << m_pointLayout;
 
-    cout << endl;
+const Metadata::Array& Header::getMetadata() const
+{
+    return m_metadataArray;
+}
 
-    return;
+
+Metadata::Array& Header::getMetadata()
+{
+    return m_metadataArray;
+}
+
+
+std::ostream& operator<<(std::ostream& ostr, const Header& header)
+{
+    ostr << "Header:" << endl;
+
+    ostr << "  Num points: " << header.getNumPoints() << endl;
+
+    ostr << "  Bounds: ";
+    ostr << header.getBounds();
+    ostr << endl;
+
+    ostr << "  Layout: ";
+    ostr << header.getLayout();
+    ostr << endl;
+
+    ostr << "  Spatial Reference: ";
+    ostr << header.getSpatialReference();
+    ostr << endl;
+
+    return ostr;
 }
 
 

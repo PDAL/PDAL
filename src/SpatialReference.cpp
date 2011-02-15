@@ -32,56 +32,67 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_HEADER_HPP
-#define INCLUDED_HEADER_HPP
-
-#include <iostream>
-#include <boost/cstdint.hpp>
-
-#include "libpc/export.hpp"
-#include "libpc/Schema.hpp"
-#include "libpc/Bounds.hpp"
 #include "libpc/SpatialReference.hpp"
-#include "libpc/Metadata.hpp"
 
 namespace libpc
 {
 
-class LIBPC_DLL Header
+
+SpatialReference::SpatialReference()
+    : m_wkt("NONE")
 {
-public:
-    Header();
-    Header(const Header&);
-    Header& operator=(const Header&);
-
-    const Schema& getLayout() const;
-    Schema& getLayout();
-    void setLayout(const Schema&);
-
-    boost::uint64_t getNumPoints() const;
-    void setNumPoints(boost::uint64_t);
-
-    const Bounds<double>& getBounds() const;
-    void setBounds(const Bounds<double>&);
-
-    const SpatialReference& getSpatialReference() const;
-    void setSpatialReference(const SpatialReference&);
-
-    const Metadata::Array& getMetadata() const;
-    Metadata::Array& getMetadata();
-
-private:
-    Schema m_pointLayout;
-    boost::uint64_t m_numPoints;
-    Bounds<double> m_bounds;
-    SpatialReference m_spatialReference;
-    Metadata::Array m_metadataArray;
-};
+    return;
+}
 
 
-std::ostream& operator<<(std::ostream& ostr, const Header&);
+SpatialReference::SpatialReference(std::string wkt)
+    : m_wkt(wkt)
+{
+    return;
+}
+
+
+SpatialReference::SpatialReference(const SpatialReference& other)
+    : m_wkt(other.m_wkt)
+{
+    return;
+}
+
+
+SpatialReference& SpatialReference::operator=(SpatialReference const& rhs)
+{
+    if (&rhs != this)
+    {
+        m_wkt = rhs.m_wkt;
+    }
+    return *this;
+}
+
+
+bool SpatialReference::operator==(SpatialReference const& rhs) const
+{
+    if (m_wkt == rhs.m_wkt)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+const std::string& SpatialReference::getWKT() const
+{
+    return m_wkt;
+}
+
+
+std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
+{
+    ostr << "SRS: ";
+    ostr << srs.getWKT();
+    ostr << std::endl;
+    return ostr;
+}
 
 
 } // namespace libpc
-
-#endif

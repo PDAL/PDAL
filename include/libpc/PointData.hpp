@@ -89,9 +89,6 @@ public:
     // (later, this will be implemented properly, to handle the general cases slowly and the best case quickly)
     void copyFieldsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData);
 
-    void dump(std::string indent="") const;
-    void dump(std::size_t pointIndex, std::string indent="") const;
-
 private:
     // access to the raw memory
     boost::uint8_t* getData(std::size_t pointIndex) const;
@@ -108,6 +105,10 @@ private:
     PointData(const PointData&); // not implemented
     PointData& operator=(const PointData&); // not implemented
 };
+
+
+std::ostream& operator<<(std::ostream& ostr, const PointData&);
+
 
 } // namespace libpc
 

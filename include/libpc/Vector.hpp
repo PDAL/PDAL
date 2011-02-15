@@ -152,6 +152,22 @@ public:
     }
 };
 
+
+template<class T>
+std::ostream& operator<<(std::ostream& ostr, const Vector<T>& vector)
+{
+    ostr << "(";
+    for (size_t d = 0; d < vector.size(); ++d)
+    {
+        ostr << vector.vN(i);
+        if (i<vector.size()-1)
+            ostr << ",";
+    }
+    ostr << ")";
+    return ostr;
+}
+
+
 } // namespace libpc
 
 #endif

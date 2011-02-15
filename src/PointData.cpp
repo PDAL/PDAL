@@ -37,7 +37,6 @@
 #include <cassert>
 #include <iostream>
 
-using std::cout;
 using std::endl;
 using std::string;
 
@@ -168,62 +167,53 @@ void PointData::copyFieldsFast(std::size_t destPointIndex, std::size_t srcPointI
 }
 
 
-void PointData::dump(string indent) const
+std::ostream& operator<<(std::ostream& ostr, const PointData& pointData)
 {
+    const Schema& layout = pointData.getLayout();
+    const Schema::Dimensions& dims = layout.getDimensions();
+    const std::size_t numPoints = pointData.getNumPoints();
+
     int cnt = 0;
-    for (boost::uint32_t pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
+    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        if (isValid(pointIndex))
+        if (pointData.isValid(pointIndex))
             ++cnt;
     }
-    cout << "Contains " << cnt << " valid points (" << m_numPoints << " total)" << endl;
+    ostr << "Contains " << cnt << " valid points (" << pointData.getNumPoints() << " total)" << endl;
 
-    for (boost::uint32_t pointIndex=0; pointIndex<getNumPoints(); pointIndex++)
+    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        if (isValid(pointIndex))
+        if (!pointData.isValid(pointIndex)) continue;
+        
+        ostr << "Point: " << pointIndex << endl;
+
+        for (Schema::DimensionsCIter citer=dims.cbegin(); citer != dims.cend(); ++citer)
         {
-            cout << "Point: " << pointIndex << endl;
-            dump(pointIndex, indent+"  ");
+            const Dimension& field = *citer;
+            std::size_t fieldIndex = citer->getPosition();
+
+            ostr << field.getName() << " (" << field.getDataTypeName(field.getDataType()) << ") : ";
+
+            switch (field.getDataType())
+            {
+            case Dimension::uint8_t:
+                ostr << (int)(pointData.getField_U8(pointIndex, fieldIndex));
+                break;
+            case Dimension::float_t:
+                ostr << pointData.getField_F32(pointIndex, fieldIndex);
+                break;
+            case Dimension::double_t:
+                ostr << pointData.getField_F64(pointIndex, fieldIndex);
+                break;
+            default:
+                throw;
+            }
+
+            ostr << endl;
         }
     }
 
-    return;
-}
-
-
-void PointData::dump(std::size_t pointIndex, string indent) const
-{
-    const Schema& layout = getLayout();
-    const Schema::Dimensions& dims = layout.getDimensions();
-
-    for (Schema::DimensionsCIter citer=dims.cbegin(); citer != dims.cend(); ++citer)
-    {
-        cout << indent;
-
-        const Dimension& field = *citer;
-        std::size_t fieldIndex = citer->getPosition();
-
-        cout << field.getName() << " (" << field.getDataTypeName(field.getDataType()) << ") : ";
-
-        switch (field.getDataType())
-        {
-        case Dimension::uint8_t:
-            cout << (int)(this->getField_U8(pointIndex, fieldIndex));
-            break;
-        case Dimension::float_t:
-            cout << this->getField_F32(pointIndex, fieldIndex);
-            break;
-        case Dimension::double_t:
-            cout << this->getField_F64(pointIndex, fieldIndex);
-            break;
-        default:
-            throw;
-        }
-
-        cout << endl;
-    }
-
-    return;
+    return ostr;
 }
 
 

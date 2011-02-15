@@ -17,6 +17,7 @@
 #include "libpc/Color.hpp"
 #include "libpc/Dimension.hpp"
 #include "libpc/Schema.hpp"
+#include "libpc/LasSchema.hpp"
 #include "libpc/CropFilter.hpp"
 #include "libpc/ColorFilter.hpp"
 #include "libpc/MosaicFilter.hpp"
