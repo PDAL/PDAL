@@ -17,8 +17,51 @@
 #include "libpc/Color.hpp"
 #include "libpc/Dimension.hpp"
 #include "libpc/Schema.hpp"
+#include "libpc/CropFilter.hpp"
+#include "libpc/ColorFilter.hpp"
+#include "libpc/MosaicFilter.hpp"
+#include "libpc/FauxReader.hpp"
+#include "libpc/FauxWriter.hpp"
 
 using namespace libpc;
+
+static void test1()
+{
+  // we are faking the reader, so we need to describe it here
+  // the faux reader only supports fields (X,Y,Z,T)
+  const Bounds<double> bounds(0, 0, -100, 200, 200, 100);
+  const int numPoints = 30;
+  FauxReader reader(bounds, numPoints);
+
+  CropFilter cropper(reader, Bounds<double>(0, 0, 0, 100, 100, 100));
+
+  ColorFilter colorizer(cropper);
+
+  FauxWriter writer(colorizer);
+  
+  writer.write();
+
+  return;
+}
+
+
+static void test2()
+{
+  const int numPoints = 10;
+  const Bounds<double> bounds1(0, 0, 0, 100, 100, 100);
+  FauxReader reader1(bounds1, numPoints);
+
+  const Bounds<double> bounds2(100, 100, 100, 200, 200, 100);
+  FauxReader reader2(bounds2, numPoints);
+
+  MosaicFilter mosaicker(reader1, reader2);
+
+  FauxWriter writer(mosaicker);
+  
+  writer.write();
+  
+  return;
+}
 
 
 int main(int, char* [])
@@ -50,6 +93,10 @@ int main(int, char* [])
     }
 
     Color c;
+
+    test1();
+
+    test2();
 
     return 0;
 }

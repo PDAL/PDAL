@@ -32,146 +32,123 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_RANGE_HPP
-#define INCLUDED_RANGE_HPP
+#ifndef INCLUDED_VECTOR_HPP
+#define INCLUDED_VECTOR_HPP
 
 #include <limits>
 
 #include "libpc/Utils.hpp"
-#include "libpc/Vector.hpp"
 
 namespace libpc
 {
 
 template <typename T>
-class LIBPC_DLL Range
+class LIBPC_DLL Vector
 {
 private:
-    T m_minimum;
-    T m_maximum;
+    std::vector<T> m_data;
 
 public:
     typedef T value_type;
 
-    Range(T minimum=(std::numeric_limits<T>::max)(), T maximum=(std::numeric_limits<T>::min)())
-        : m_minimum(minimum)
-        , m_maximum(maximum) {}
-
-    Range(Range const& other)
-        : m_minimum(other.m_minimum)
-        , m_maximum(other.m_maximum)
+    Vector(T v0)
     {
+        m_data.push_back(v0);
     }
 
-    Range& operator=(Range<T> const& rhs)
+    Vector(T v0, T v1)
+    {
+        m_data.push_back(v0);
+        m_data.push_back(v1);
+    }
+
+    Vector(T v0, T v1, T v2)
+    {
+        m_data.push_back(v0);
+        m_data.push_back(v1);
+        m_data.push_back(v2);
+    }
+
+    Vector(std::vector<T> v)
+    {
+        m_data = v;
+    }
+
+    Vector& operator=(Vector<T> const& rhs)
     {
         if (&rhs != this)
         {
-            m_minimum = rhs.m_minimum;
-            m_maximum = rhs.m_maximum;
+            m_data = rhs.m_data;
         }
         return *this;
     }
 
-    bool operator==(Range<T> const& rhs) const
+    bool operator==(Vector<T> const& rhs) const
     {
         return equal(rhs);
     }
 
-    bool operator!=(Range const& rhs) const
+    bool operator!=(Vector const& rhs) const
     {
         return !(equal(rhs));
     }
 
-    T minimum() const
+    T v0() const
     {
-        return m_minimum;
+        assert(m_data.size() >= 1);
+        return m_data[0];
     }
 
-    void setMinimum(T value)
+    T v1() const
     {
-        m_minimum = value;
+        assert(m_data.size() >= 2);
+        return m_data[1];
     }
 
-    T maximum() const
+    T v2() const
     {
-        return m_maximum;
+        assert(m_data.size() >= 3);
+        return m_data[2];
     }
 
-    void setMaximum(T value)
+    T vN(std::size_t n) const
     {
-        m_maximum = value;
+        assert(m_data.size() >= n);
+        return m_data[n];
     }
 
-    bool equal(Range const& other) const
+    bool equal(Vector const& other) const
     {
-        if (!Utils::compare_distance(m_minimum, other.m_minimum) ||
-            !Utils::compare_distance(m_maximum, other.m_maximum))
+        for (std::size_t i=0; i<m_data.size(); i++)
         {
-            return false;
+            if (!Utils::compare_distance(m_data[i], other.m_data[i]))
+            {
+                return false;
+            }
         }
 
         return true;
     }
 
-    bool overlaps(Range const& r) const
-    {
-        return m_minimum <= r.m_maximum && m_maximum >= r.m_minimum;
-    }
-
-    bool contains(Range const& r) const
-    {
-        return m_minimum <= r.m_minimum && r.m_maximum <= m_maximum;
-    }
-
-    bool contains(T v) const
-    {
-        return m_minimum <= v && v <= m_maximum;
-    }
-
-    bool empty(void) const
-    {
-        return Utils::compare_distance(m_minimum, (std::numeric_limits<T>::max)()) && 
-               Utils::compare_distance(m_maximum, (std::numeric_limits<T>::min)());
-    }
-
     void shift(T v)
     {
-        m_minimum += v;
-        m_maximum += v;
+        for (std::size_t i=0; i<m_data.size(); i++)
+        {
+            m_data[i] += v;
+        }
     }
 
     void scale(T v)
     {
-        m_minimum *= v;
-        m_maximum *= v;
+        for (std::size_t i=0; i<m_data.size(); i++)
+        {
+            m_data[i] *= v;
+        }
     }
 
-    void clip(Range const& r)
+    std::size_t size() const
     {
-        if (r.m_minimum > m_minimum)
-            m_minimum = r.m_minimum;
-        if (r.m_maximum < m_maximum)
-            m_maximum = r.m_maximum;
-    }
-
-    void grow(T v)
-    {
-        if (v < m_minimum)
-            m_minimum = v;
-        if (v > m_maximum)
-            m_maximum = v;
-    }
-
-    void grow(Range const& r)
-    {
-        grow(r.m_minimum);
-        grow(r.m_maximum);
-    }
-
-    T length() const
-    {
-        return m_maximum - m_minimum;
+        return m_data.size();
     }
 };
 

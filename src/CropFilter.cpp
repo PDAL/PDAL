@@ -34,7 +34,11 @@
 
 #include "libpc/CropFilter.hpp"
 
-CropFilter::CropFilter(Stage& prevStage, const Bounds& bounds)
+namespace libpc
+{
+
+
+CropFilter::CropFilter(Stage& prevStage, Bounds<double> const& bounds)
     : Filter(prevStage),
       m_bounds(bounds)
 {
@@ -45,18 +49,34 @@ CropFilter::CropFilter(Stage& prevStage, const Bounds& bounds)
 }
 
 
-void CropFilter::readNextPoints(PointData& data)
+void CropFilter::readPoints(PointData& data)
 {
-    m_prevStage.readNextPoints(data);
+    m_prevStage.readPoints(data);
 
     int numPoints = data.getNumPoints();
 
+    const Schema& layout = data.getLayout();
+
+    std::size_t fieldX;
+    std::size_t fieldY;
+    std::size_t fieldZ;
+    bool ok;
+
+    ok = layout.findDimensionIndex("XPos", fieldX);
+    assert(ok);
+    ok = layout.findDimensionIndex("XPos", fieldY);
+    assert(ok);
+    ok = layout.findDimensionIndex("XPos", fieldZ);
+    assert(ok);
+
+
     for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        float x = data.getX(pointIndex);
-        float y = data.getY(pointIndex);
-        float z = data.getZ(pointIndex);
-        if (!m_bounds.contains(x,y,z))
+        float x = data.getField_F32(pointIndex, fieldX);
+        float y = data.getField_F32(pointIndex, fieldY);
+        float z = data.getField_F32(pointIndex, fieldZ);
+        Vector<double> point(x,y,z);
+        if (!m_bounds.contains(point))
         {
             // remove this point, and update the lower bound for Z
             data.setValid(pointIndex, false);
@@ -64,4 +84,6 @@ void CropFilter::readNextPoints(PointData& data)
     }
 
     return;
+}
+
 }

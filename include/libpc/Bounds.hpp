@@ -42,6 +42,7 @@
 #ifndef INCLUDED_BOUNDS_HPP
 #define INCLUDED_BOUNDS_HPP
 
+#include <cassert>
 #include <vector>
 #include <iostream>
 #include <sstream>
@@ -49,6 +50,7 @@
 #include <stdexcept>
 
 #include "libpc/export.hpp"
+#include "libpc/Vector.hpp"
 #include "libpc/Range.hpp"
 #include "libpc/Utils.hpp"
 
@@ -126,22 +128,22 @@ public:
 
     }
 
-    ////Bounds( const Point& min, const Point& max)
-    ////{
-    ////    m_ranges.resize(3);
-    ////
-    ////    m_ranges[0].minimum = min.GetX();
-    ////    m_ranges[1].minimum = min.GetY();
-    ////    m_ranges[2].minimum = min.GetZ();
-    ////
-    ////    m_ranges[0].maximum = max.GetX();
-    ////    m_ranges[1].maximum = max.GetY();
-    ////    m_ranges[2].maximum = max.GetZ();
-    ////
-    ////#ifdef DEBUG
-    ////    verify();
-    ////#endif
-    ////}
+    Bounds(const Vector<T>& minimum, const Vector<T>& maximum)
+    {
+        assert(minimum.size() == maximum.size());
+
+        m_ranges.resize(minimum.size());
+    
+        for (std::size_t i=0; i<minimum.size(); i++)
+        {
+            m_ranges[i].setMinimum(minimum.vN(i));
+            m_ranges[i].setMaximum(maximum.vN(i));
+        }    
+
+    #ifdef DEBUG
+        verify();
+    #endif
+    }
 
     T minimum(std::size_t const& index) const
     {
@@ -187,36 +189,29 @@ public:
         m_ranges[index].setMaximum(v);
     }
 
-    ////liblas::Point (min)() {
-    ////    liblas::Point p;
-    ////    try
-    ////    {
-    ////        p.SetCoordinates(m_ranges[0].minimum, m_ranges[1].minimum, m_ranges[2].minimum);
-    ////    }
-    ////    catch (std::runtime_error const& e)
-    ////    {
-    ////        ::boost::ignore_unused_variable_warning(e);
-    ////        p.SetCoordinates(m_ranges[0].minimum, m_ranges[1].minimum, 0);
-    ////
-    ////    }
-    ////
-    ////    return p;
-    ////}
-    ////
-    ////liblas::Point (max)() {
-    ////    liblas::Point p;
-    ////    try
-    ////    {
-    ////        p.SetCoordinates(m_ranges[0].maximum, m_ranges[1].maximum, m_ranges[2].maximum);
-    ////    }
-    ////    catch (std::runtime_error const& e)
-    ////    {
-    ////        ::boost::ignore_unused_variable_warning(e);
-    ////        p.SetCoordinates(m_ranges[0].maximum, m_ranges[1].maximum, 0);
-    ////
-    ////    }
-    ////    return p;
-    ////}
+    Vector<T> getMinimum() 
+    {
+        std::vector<T> vec;
+    
+        for (std::size_t i=0; i<m_ranges.size(); i++)
+        {
+            vec.push_back(m_ranges[i].minimum());
+        }
+    
+        return Vector<T>(vec);
+    }
+
+    Vector<T> getMaximum() 
+    {
+        std::vector<T> vec;
+    
+        for (std::size_t i=0; i<m_ranges.size(); i++)
+        {
+            vec.push_back(m_ranges[i].maximum());
+        }
+    
+        return Vector<T>(vec);
+    }
 
     inline bool operator==(Bounds<T> const& rhs) const
     {
@@ -290,8 +285,23 @@ public:
         return intersects(other);
     }
 
+    /// Does this Bounds contain a point?
+    bool contains(Vector<T> point) const
+    {
+        if (point.size() != size())
+            return false;
+
+        for (size_type i = 0; i < size(); i++)
+        {
+            // As soon as it is not contains, we're false
+            if (! m_ranges[i].contains(point.vN(i)) )
+                return false;
+        }
+        return true;
+    }
+
     /// Does this Bounds contain other?
-    bool contains(Bounds const& other) const
+    bool contains(Bounds<T> const& other) const
     {
         for (size_type i = 0; i < size(); i++)
         {
@@ -301,37 +311,6 @@ public:
         }
         return true;
     }
-
-    /////// Does this Bounds this point other?
-    ////bool contains(Point const& point) const
-    ////{
-    ////    // std::cout << m_ranges[0].length() << std::endl;
-    ////    // std::cout << "x contain: " << m_ranges[0].contains(point.GetX())
-    ////    //           << " r.x.min: " << m_ranges[0].min
-    ////    //           << " r.x.max: " << m_ranges[0].max
-    ////    //           << " p.x: " << point.GetX() << std::endl;
-    ////    // std::cout << "y contain: " << m_ranges[1].contains(point.GetY())
-    ////    //           << " r.y.min: " << m_ranges[1].min
-    ////    //           << " r.y.max: " << m_ranges[1].max
-    ////    //           << " p.y: " << point.GetY() << std::endl;
-    ////    // std::cout << "z contain: " << m_ranges[2].contains(point.GetZ())
-    ////    //           << " r.z.min: " << m_ranges[2].min
-    ////    //           << " r.z.max: " << m_ranges[2].max
-    ////    //           << " p.z: " << point.GetZ() << std::endl;
-    ////    if (!m_ranges[0].contains(point.GetX()))
-    ////        return false;
-    ////    if (!m_ranges[1].contains(point.GetY()))
-    ////        return false;
-    ////
-    ////    // If our z bounds has no length, we'll say it's contained anyway.
-    ////    if (!m_ranges[2].contains(point.GetZ()))
-    ////    {
-    ////        if (detail::compare_distance(m_ranges[2].length(), 0.0))
-    ////            return true;
-    ////        return false;
-    ////    }
-    ////    return true;
-    ////}
 
     /// Shift each dimension by a vector of detlas
     void shift(std::vector<T> deltas)
@@ -392,12 +371,14 @@ public:
     }
 
     /// Expand the liblas::Bounds to include this point
-    ////void grow(Point const& p)
-    ////{
-    ////    m_ranges[0].grow(p.GetX());
-    ////    m_ranges[1].grow(p.GetY());
-    ////    m_ranges[2].grow(p.GetZ());
-    ////}
+    void grow(Vector<T> const& point)
+    {
+        assert(point.size() == size());
+        for (size_type i = 0; i < size(); ++i)
+        {
+            m_ranges[i].grow(point.vN(i));
+        }
+    }
 
     T volume() const
     {

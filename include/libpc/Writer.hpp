@@ -61,7 +61,7 @@ protected:
 
 private:
     // not generally used in Writer objects
-    virtual void readNextPoints(PointData&)
+    virtual void readPoints(PointData&)
     {
         throw;
     }

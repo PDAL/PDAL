@@ -33,6 +33,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Filter.hpp
   ${LIBPC_HEADERS_DIR}/Header.hpp
   ${LIBPC_HEADERS_DIR}/MosaicFilter.hpp
+  ${LIBPC_HEADERS_DIR}/Vector.hpp  
   ${LIBPC_HEADERS_DIR}/PointData.hpp  
   ${LIBPC_HEADERS_DIR}/Range.hpp
   ${LIBPC_HEADERS_DIR}/Reader.hpp
@@ -47,12 +48,14 @@ set(LIBPC_CPP
   Bounds.cpp
   Color.cpp
   ColorFilter.cpp
+  CropFilter.cpp
   Dimension.cpp
   FauxReader.cpp
   FauxWriter.cpp
   Filter.cpp
   Header.cpp
   MosaicFilter.cpp
+  Vector.cpp  
   PointData.cpp
   Reader.cpp
   Schema.cpp

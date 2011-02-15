@@ -31,33 +31,3 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-
-#ifndef INCLUDED_CROPFILTER_HPP
-#define INCLUDED_CROPFILTER_HPP
-
-#include "libpc/export.hpp"
-#include "libpc/Filter.hpp"
-#include "libpc/Bounds.hpp"
-
-namespace libpc
-{
-
-// removes any points outside of the given range
-// updates the header accordingly
-class LIBPC_DLL CropFilter : public Filter
-{
-public:
-    CropFilter(Stage& prevStage, Bounds<double> const& bounds);
-
-    void readPoints(PointData&);
-
-private:
-    Bounds<double> m_bounds;
-
-    CropFilter& operator=(const CropFilter&); // not implemented
-    CropFilter(const CropFilter&); // not implemented
-};
-
-} // namespace libpc
-
-#endif
