@@ -55,18 +55,18 @@ void CropFilter::readPoints(PointData& data)
 
     int numPoints = data.getNumPoints();
 
-    const Schema& layout = data.getLayout();
+    const Schema& schema = data.getSchema();
 
     std::size_t fieldX;
     std::size_t fieldY;
     std::size_t fieldZ;
     bool ok;
 
-    ok = layout.findDimensionIndex("XPos", fieldX);
+    ok = schema.findDimensionIndex("XPos", fieldX);
     assert(ok);
-    ok = layout.findDimensionIndex("XPos", fieldY);
+    ok = schema.findDimensionIndex("XPos", fieldY);
     assert(ok);
-    ok = layout.findDimensionIndex("XPos", fieldZ);
+    ok = schema.findDimensionIndex("XPos", fieldZ);
     assert(ok);
 
 

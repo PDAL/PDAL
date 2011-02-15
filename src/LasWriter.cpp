@@ -32,54 +32,34 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_STAGE_HPP
-#define INCLUDED_STAGE_HPP
+#include <cassert>
 
-// boost
-#include <boost/cstdint.hpp>
+#include "libpc/LasWriter.hpp"
 
-#include "libpc/PointData.hpp"
-#include "libpc/Header.hpp"
-
-    
 namespace libpc
 {
 
-// every stage owns its own header, they are not shared
-class LIBPC_DLL Stage
+
+LasWriter::LasWriter(Stage& prevStage) :
+    Writer(prevStage)
 {
-public:
-    Stage();
+    return;
+}
 
-    // This reads a set of points at the current position in the file.
-    //
-    // The schema of the PointData buffer we are given here might
-    // not match our own header's schema.  That's okay, though: all
-    // that matters is that the buffer we are given has the fields
-    // we need to write into.
-    virtual void readPoints(PointData&) = 0;
 
-    // advance (or retreat) to the Nth point in the file (absolute, 
-    // not relative).  In some cases, this might be a very slow, painful
-    // function to call.
-    virtual void seekToPoint(boost::uint64_t& pointNum) = 0;
+void LasWriter::writeBegin()
+{
+}
 
-    // resets the object's state such that it is positioned to the beginning
-    // of the file, as if no reads had yet been done
-    virtual void reset() = 0;
 
-    const Header& getHeader() const;
-    Header& getHeader();
+void LasWriter::writeEnd()
+{
+}
 
-protected:
 
-private:
-    Header m_header;
-
-    Stage& operator=(const Stage&); // not implemented
-    Stage(const Stage&); // not implemented
-};
+void LasWriter::writeBuffer(const PointData&)
+{
+    return;
+}
 
 } // namespace libpc
-
-#endif

@@ -44,13 +44,13 @@ namespace libpc
 {
 
 
-PointData::PointData(const Schema& layout, boost::uint32_t numPoints) :
-    m_layout(layout),
+PointData::PointData(const Schema& schema, boost::uint32_t numPoints) :
+    m_schema(schema),
     m_numPoints(numPoints),
     m_data(NULL),
     m_pointSize(0)
 {
-    m_pointSize = m_layout.getByteSize();
+    m_pointSize = m_schema.getByteSize();
     m_data = new boost::uint8_t[m_pointSize * m_numPoints];
 
     // the points will all be set to invalid here
@@ -86,16 +86,16 @@ boost::uint32_t PointData::getNumPoints() const
 }
 
 
-const Schema& PointData::getLayout() const
+const Schema& PointData::getSchema() const
 {
-    return m_layout;
+    return m_schema;
 }
 
 
 template <class T>
 void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value)
 {
-    std::size_t offset = (pointIndex * m_pointSize) + m_layout.getDimension(fieldIndex).getByteOffset();
+    std::size_t offset = (pointIndex * m_pointSize) + m_schema.getDimension(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
     boost::uint8_t* p = m_data + offset;
 
@@ -106,7 +106,7 @@ void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value
 template <class T>
 T PointData::getField(std::size_t pointIndex, std::size_t fieldIndex) const
 {
-    std::size_t offset = (pointIndex * m_pointSize) + m_layout.getDimension(fieldIndex).getByteOffset();
+    std::size_t offset = (pointIndex * m_pointSize) + m_schema.getDimension(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
     boost::uint8_t* p = m_data + offset;
 
@@ -153,11 +153,11 @@ double PointData::getField_F64(std::size_t pointIndex, std::size_t fieldIndex) c
 
 void PointData::copyFieldsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData)
 {
-    assert(getLayout() == srcPointData.getLayout());
+    assert(getSchema() == srcPointData.getSchema());
 
     boost::uint8_t* src = srcPointData.getData(srcPointIndex);
     boost::uint8_t* dest = getData(destPointIndex);
-    std::size_t len = getLayout().getByteSize();
+    std::size_t len = getSchema().getByteSize();
 
     memcpy(dest, src, len);
 
@@ -169,8 +169,8 @@ void PointData::copyFieldsFast(std::size_t destPointIndex, std::size_t srcPointI
 
 std::ostream& operator<<(std::ostream& ostr, const PointData& pointData)
 {
-    const Schema& layout = pointData.getLayout();
-    const Schema::Dimensions& dims = layout.getDimensions();
+    const Schema& schema = pointData.getSchema();
+    const Schema::Dimensions& dims = schema.getDimensions();
     const std::size_t numPoints = pointData.getNumPoints();
 
     int cnt = 0;

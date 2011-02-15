@@ -76,6 +76,18 @@ LasSchema& LasSchema::operator=(LasSchema const& rhs)
 }
 
 
+LasSchema::PointFormatName LasSchema::getDataFormatId() const
+{
+    return m_data_format_id;
+}
+
+
+void LasSchema::setDataFormatId(PointFormatName id)
+{
+    m_data_format_id = id;
+}
+
+
 void LasSchema::add_record0_dimensions()
 {
     std::ostringstream text;

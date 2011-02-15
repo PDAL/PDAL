@@ -54,9 +54,9 @@ public:
     Header(const Header&);
     Header& operator=(const Header&);
 
-    const Schema& getLayout() const;
-    Schema& getLayout();
-    void setLayout(const Schema&);
+    const Schema& getSchema() const;
+    Schema& getSchema();
+    void setSchema(const Schema&);
 
     boost::uint64_t getNumPoints() const;
     void setNumPoints(boost::uint64_t);
@@ -71,7 +71,7 @@ public:
     Metadata::Array& getMetadata();
 
 private:
-    Schema m_pointLayout;
+    Schema m_schema;
     boost::uint64_t m_numPoints;
     Bounds<double> m_bounds;
     SpatialReference m_spatialReference;

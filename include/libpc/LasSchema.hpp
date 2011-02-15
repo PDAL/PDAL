@@ -70,10 +70,42 @@ public:
         ePointFormatUnknown = -99 ///< Point Data Format is unknown
     };
 
+    /// Number of bytes of point record storage in particular format.
+    enum PointSize
+    {
+        ePointSize0 = 20, ///< Size of point record in data format \e 0
+        ePointSize1 = 28, ///< Size of point record in data format \e 1
+        ePointSize2 = 26, ///< Size of point record in data format \e 2
+        ePointSize3 = 34  ///< Size of point record in data format \e 3
+    };
+
+    /// Version numbers of the ASPRS LAS Specification.
+    /// Numerical representation of versions is calculated according to 
+    /// following formula: <em>major * 100000 + minor</em>
+    enum LASVersion
+    {
+        eLASVersion10 = 1 * 100000 + 0, ///< LAS Format 1.0
+        eLASVersion11 = 1 * 100000 + 1, ///< LAS Format 1.1
+        eLASVersion12 = 1 * 100000 + 2, ///< LAS Format 1.2
+        eLASVersion20 = 2 * 100000 + 0  ///< LAS Format 2.0
+    };
+
+    /// Range of allowed ASPRS LAS file format versions.
+    enum FormatVersion
+    {
+        eVersionMajorMin = 1, ///< Minimum of major component
+        eVersionMajorMax = 1, ///< Maximum of major component
+        eVersionMinorMin = 0, ///< Minimum of minor component
+        eVersionMinorMax = 3  ///< Maximum of minor component
+    };
+
 public:
     LasSchema(PointFormatName data_format_id);
     LasSchema::LasSchema(LasSchema const& other);
     LasSchema& LasSchema::operator=(LasSchema const& rhs);
+
+    PointFormatName getDataFormatId() const;
+    void setDataFormatId(PointFormatName);
 
 private:
     void add_record0_dimensions();

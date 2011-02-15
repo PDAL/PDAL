@@ -54,7 +54,7 @@ void Writer::write()
     boost::uint64_t cnt = m_prevStage.getHeader().getNumPoints();
 
     const boost::uint32_t chunk = 10;
-    PointData buffer(getHeader().getLayout(), chunk);
+    PointData buffer(getHeader().getSchema(), chunk);
 
     assert(cnt % chunk == 0); // ha ha
 

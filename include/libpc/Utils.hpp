@@ -38,6 +38,8 @@
 #include <iosfwd>
 #include <string>
 
+#include <boost/concept_check.hpp>
+
 #include "libpc/export.hpp"
 
 namespace libpc
@@ -66,6 +68,50 @@ public:
 
     static void Cleanup(std::ostream* ofs);
     static void Cleanup(std::istream* ifs);
+
+    template <typename T>
+    static inline void read_n(T& dest, std::istream& src, std::streamsize const& num)
+    {
+        if (!src)
+            throw std::runtime_error("detail::liblas::read_n<T> input stream is not readable");
+
+        src.read(Utils::as_buffer(dest), num);
+
+        // BUG: Fix little-endian
+        //LIBLAS_SWAP_BYTES_N(dest, num);
+
+        check_stream_state(src);
+    }
+
+    template<typename T>
+    static inline char* as_buffer(T& data)
+    {
+        return static_cast<char*>(static_cast<void*>(&data));
+    }
+
+    template<typename T>
+    static inline char* as_buffer(T* data)
+    {
+        return static_cast<char*>(static_cast<void*>(data));
+    }
+
+    template <typename C, typename T>
+    static inline void check_stream_state(std::basic_ios<C, T>& srtm)
+    {
+        // NOTE: Detailed stream check disabled in optimized
+        //       builds to increase performance.
+#if defined(DEBUG) || defined(_DEBUG)
+        // Test stream state bits
+        if (srtm.eof()) 
+            throw std::out_of_range("end of file encountered");
+        else if (srtm.fail())
+            throw std::runtime_error("non-fatal I/O error occured");
+        else if (srtm.bad())
+            throw std::runtime_error("fatal I/O error occured");
+#else
+        boost::ignore_unused_variable_warning(srtm);
+#endif
+    }
 };
 
 } // namespace libpc

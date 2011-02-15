@@ -136,8 +136,8 @@ public:
     
         for (std::size_t i=0; i<minimum.size(); i++)
         {
-            m_ranges[i].setMinimum(minimum.vN(i));
-            m_ranges[i].setMaximum(maximum.vN(i));
+            m_ranges[i].setMinimum(minimum.getn(i));
+            m_ranges[i].setMaximum(maximum.getn(i));
         }    
 
     #ifdef DEBUG
@@ -294,7 +294,7 @@ public:
         for (size_type i = 0; i < size(); i++)
         {
             // As soon as it is not contains, we're false
-            if (! m_ranges[i].contains(point.vN(i)) )
+            if (! m_ranges[i].contains(point.getn(i)) )
                 return false;
         }
         return true;
@@ -376,7 +376,7 @@ public:
         assert(point.size() == size());
         for (size_type i = 0; i < size(); ++i)
         {
-            m_ranges[i].grow(point.vN(i));
+            m_ranges[i].grow(point.getn(i));
         }
     }
 

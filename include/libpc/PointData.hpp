@@ -44,11 +44,11 @@ namespace libpc
 {
 
 // a PointData object is just an untyped array of N bytes,
-// where N is (the size of the given Layout * the number of points)
+// where N is (the size of the given Schema * the number of points)
 //
 // That is, a PointData represents the underlying data for one or more points.
 //
-// A PointData object has an associated Layout object.
+// A PointData object has an associated Schema object.
 //
 // Many of the methods take a first parameter "index", to specify which point in the
 // collection is to be operated upon.  The point index is a uint32; you can't read
@@ -57,7 +57,7 @@ class LIBPC_DLL PointData
 {
 public:
     // note that when we make a PointData object all the fields are initialized to inactive,
-    // regardless of what the passed-in layout says -- this is because the field object
+    // regardless of what the passed-in schema says -- this is because the field object
     // represents the state within the owning object, which in this case is a completely
     // empty buffer (similarly, all the points in the buffer are marked "invalid")
     PointData(const Schema&, boost::uint32_t numPoints);
@@ -65,8 +65,8 @@ public:
     // number of points in this buffer
     boost::uint32_t getNumPoints() const;
 
-    // layout (number and kinds of fields) for a point in this buffer
-    const Schema& getLayout() const;
+    // schema (number and kinds of fields) for a point in this buffer
+    const Schema& getSchema() const;
 
     // "valid" means the data for the point can be used; if invalid, the point should
     // be ignored or skipped.  (This is done for efficiency; we don't want to have to
@@ -85,7 +85,7 @@ public:
     void setField_F64(std::size_t pointIndex, std::size_t fieldIndex, double value);
 
     // bulk copy all the fields from the given point into this object
-    // NOTE: this is only legal if the src and dest layouts are exactly the same
+    // NOTE: this is only legal if the src and dest schemas are exactly the same
     // (later, this will be implemented properly, to handle the general cases slowly and the best case quickly)
     void copyFieldsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData);
 
@@ -96,7 +96,7 @@ private:
     template<class T> T getField(std::size_t fieldIndex, std::size_t itemOffset) const;
     template<class T> void setField(std::size_t fieldIndex, std::size_t itemOffset, T value);
 
-    Schema m_layout;
+    Schema m_schema;
     boost::uint8_t* m_data;
     std::size_t m_pointSize;
     boost::uint32_t m_numPoints;

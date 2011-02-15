@@ -49,15 +49,15 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints)
     : Reader()
 {
     Header& header = getHeader();
-    Schema& layout = header.getLayout();
+    Schema& schema = header.getSchema();
 
     header.setNumPoints(numPoints);
     header.setBounds(bounds);
 
-    layout.addDimension(Dimension("XPos", Dimension::float_t));
-    layout.addDimension(Dimension("YPos", Dimension::float_t));
-    layout.addDimension(Dimension("ZPos", Dimension::float_t));
-    layout.addDimension(Dimension("Time", Dimension::double_t));
+    schema.addDimension(Dimension("XPos", Dimension::float_t));
+    schema.addDimension(Dimension("YPos", Dimension::float_t));
+    schema.addDimension(Dimension("ZPos", Dimension::float_t));
+    schema.addDimension(Dimension("Time", Dimension::double_t));
 
     cout << header;
 
@@ -72,11 +72,11 @@ void FauxReader::readPoints(PointData& data)
     boost::uint32_t numPoints = data.getNumPoints();
     assert(m_currentPointIndex + numPoints <= getHeader().getNumPoints());
 
-    const Schema& layout = data.getLayout();
+    const Schema& schema = data.getSchema();
     Header& header = getHeader();
 
     std::size_t fieldIndexT;
-    bool ok = layout.findDimensionIndex("Time", fieldIndexT);
+    bool ok = schema.findDimensionIndex("Time", fieldIndexT);
     assert(ok);
 
     float v = (float)m_currentPointIndex;
@@ -93,11 +93,11 @@ void FauxReader::readPoints(PointData& data)
     std::size_t offsetY;
     std::size_t offsetZ;
 
-    ok = layout.findDimensionIndex("XPos", offsetX);
+    ok = schema.findDimensionIndex("XPos", offsetX);
     assert(ok);
-    ok = layout.findDimensionIndex("YPos", offsetY);
+    ok = schema.findDimensionIndex("YPos", offsetY);
     assert(ok);
-    ok = layout.findDimensionIndex("ZPos", offsetZ);
+    ok = schema.findDimensionIndex("ZPos", offsetZ);
     assert(ok);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)

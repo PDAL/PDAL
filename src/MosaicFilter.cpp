@@ -47,9 +47,9 @@ MosaicFilter::MosaicFilter(Stage& prevStage, Stage& prevStage2)
     const Header& prevHeader2 =  m_prevStage2.getHeader();
 
     {
-        const Schema& prevLayout1 = prevHeader1.getLayout();
-        const Schema& prevLayout2 = prevHeader2.getLayout();
-        assert(prevLayout1==prevLayout2);
+        const Schema& prevSchema1 = prevHeader1.getSchema();
+        const Schema& prevSchema2 = prevHeader2.getSchema();
+        assert(prevSchema1==prevSchema2);
     }
 
     Header& thisHeader = getHeader();
@@ -73,8 +73,8 @@ void MosaicFilter::readPoints(PointData& destData)
 
     assert(numPoints % 2 == 0); // yeah right
 
-    PointData srcData1(destData.getLayout(), numPoints / 2);
-    PointData srcData2(destData.getLayout(), numPoints / 2);
+    PointData srcData1(destData.getSchema(), numPoints / 2);
+    PointData srcData2(destData.getSchema(), numPoints / 2);
 
     m_prevStage.readPoints(srcData1);
 

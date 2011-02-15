@@ -32,7 +32,11 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/FauxWriter.hpp
   ${LIBPC_HEADERS_DIR}/Filter.hpp
   ${LIBPC_HEADERS_DIR}/Header.hpp
+  ${LIBPC_HEADERS_DIR}/Header.hpp
+  ${LIBPC_HEADERS_DIR}/LasHeader.hpp
+  ${LIBPC_HEADERS_DIR}/LasReader.hpp
   ${LIBPC_HEADERS_DIR}/LasSchema.hpp
+  ${LIBPC_HEADERS_DIR}/LasWriter.hpp
   ${LIBPC_HEADERS_DIR}/Metadata.hpp
   ${LIBPC_HEADERS_DIR}/MosaicFilter.hpp
   ${LIBPC_HEADERS_DIR}/Vector.hpp  
@@ -56,8 +60,11 @@ set(LIBPC_CPP
   FauxReader.cpp
   FauxWriter.cpp
   Filter.cpp
-  LasSchema.cpp
   Header.cpp
+  LasHeader.cpp
+  LasReader.cpp
+  LasSchema.cpp
+  LasWriter.cpp
   Metadata.cpp
   MosaicFilter.cpp
   Vector.cpp  

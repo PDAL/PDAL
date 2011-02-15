@@ -52,7 +52,7 @@ void Reader::seekToPoint(boost::uint64_t& pointNum)
 
     boost::uint32_t chunk = (boost::uint32_t)pointNum; // BUG: this needs to be done in blocks if pointNum is large
 
-    PointData pointData(getHeader().getLayout(), chunk);
+    PointData pointData(getHeader().getSchema(), chunk);
     readPoints(pointData);
 
     // just drop the points on the floor and return

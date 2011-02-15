@@ -51,6 +51,11 @@ private:
 public:
     typedef T value_type;
 
+    Vector()
+    {
+        return;
+    }
+
     Vector(T v0)
     {
         m_data.push_back(v0);
@@ -93,28 +98,55 @@ public:
         return !(equal(rhs));
     }
 
-    T v0() const
+    T get0() const
     {
         assert(m_data.size() >= 1);
         return m_data[0];
     }
 
-    T v1() const
+    T get1() const
     {
         assert(m_data.size() >= 2);
         return m_data[1];
     }
 
-    T v2() const
+    T get2() const
     {
         assert(m_data.size() >= 3);
         return m_data[2];
     }
 
-    T vN(std::size_t n) const
+    T getn(std::size_t n) const
     {
         assert(m_data.size() >= n);
         return m_data[n];
+    }
+
+    void set(T t)
+    {
+        m_data.resize(1);
+        m_data[0] = t;
+    }
+
+    void set(T t0, T t1)
+    {
+        m_data.resize(2);
+        m_data[0] = t0;
+        m_data[1] = t1;
+    }
+
+    void set(T t0, T t1, T t2)
+    {
+        m_data.resize(3);
+        m_data[0] = t0;
+        m_data[1] = t1;
+        m_data[3] = t2;
+    }
+
+    void set(std::vector<T> v)
+    {
+        m_data.resize(v.size());
+        m_data = v;
     }
 
     bool equal(Vector const& other) const

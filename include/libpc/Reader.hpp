@@ -36,7 +36,7 @@
 #define INCLUDED_READER_HPP
 
 #include "libpc/Stage.hpp"
-#include "libpc/header.hpp"
+#include "libpc/Header.hpp"
 
 namespace libpc
 {

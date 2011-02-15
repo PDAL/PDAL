@@ -52,7 +52,7 @@ Header::Header() :
 Header::Header(const Header& other)
 {
     this->m_numPoints = other.m_numPoints;
-    this->m_pointLayout = other.m_pointLayout;
+    this->m_schema = other.m_schema;
     this->m_bounds = other.m_bounds;
     this->m_spatialReference = other.m_spatialReference;
     return;
@@ -64,7 +64,7 @@ Header& Header::operator=(const Header& other)
     if (this != &other)
     {
         this->m_numPoints = other.m_numPoints;
-        this->m_pointLayout = other.m_pointLayout;
+        this->m_schema = other.m_schema;
         this->m_bounds = other.m_bounds;
         this->m_spatialReference = other.m_spatialReference;
     }
@@ -84,21 +84,21 @@ void Header::setBounds(const Bounds<double>& bounds)
 }
 
 
-const Schema& Header::getLayout() const
+const Schema& Header::getSchema() const
 {
-    return m_pointLayout;
+    return m_schema;
 }
 
 
-Schema& Header::getLayout()
+Schema& Header::getSchema()
 {
-    return m_pointLayout;
+    return m_schema;
 }
 
 
-void Header::setLayout(const Schema& layout)
+void Header::setSchema(const Schema& schema)
 {
-    m_pointLayout = layout;
+    m_schema = schema;
 }
 
 
@@ -148,8 +148,8 @@ std::ostream& operator<<(std::ostream& ostr, const Header& header)
     ostr << header.getBounds();
     ostr << endl;
 
-    ostr << "  Layout: ";
-    ostr << header.getLayout();
+    ostr << "  Schema: ";
+    ostr << header.getSchema();
     ostr << endl;
 
     ostr << "  Spatial Reference: ";
