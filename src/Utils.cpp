@@ -80,12 +80,14 @@ std::ostream* Utils::Create(std::string const& filename, std::ios::openmode mode
 
 void Utils::Cleanup(std::ostream* ofs)
 {
+    namespace io = boost::iostreams;
+
     // An ofstream is closeable and deletable, but
     // an ostream like &std::cout isn't.
     if (!ofs) return;
-    if (static_cast<std::ofstream&>(*ofs))
+    if (static_cast<io::stream<io::file_sink>&>(*ofs))
     {
-        static_cast<std::ofstream&>(*ofs).close();
+        static_cast<io::stream<io::file_sink>&>(*ofs).close();
         delete ofs;
     }
 }
@@ -93,12 +95,14 @@ void Utils::Cleanup(std::ostream* ofs)
 
 void Utils::Cleanup(std::istream* ifs)
 {
+    namespace io = boost::iostreams;
+
     // An ifstream is closeable and deletable, but
     // an istream like &std::cin isn't.
     if (!ifs) return;
-    if (static_cast<std::ifstream&>(*ifs))
+    if (static_cast<io::stream<io::file_source>&>(*ifs))
     {
-        static_cast<std::ifstream&>(*ifs).close();
+        static_cast<io::stream<io::file_source>&>(*ifs).close();
         delete ifs;
     }
 }
