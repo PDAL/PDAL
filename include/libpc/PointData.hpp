@@ -75,14 +75,8 @@ public:
     void setValid(std::size_t pointIndex, bool value=true);
 
     // accessors to a particular field of a particular point in this buffer
-    boost::uint8_t getField_U8(std::size_t pointIndex, std::size_t fieldIndex) const;
-    float getField_F32(std::size_t pointIndex, std::size_t fieldIndex) const;
-    double getField_F64(std::size_t pointIndex, std::size_t fieldIndex) const;
-
-    // accessors to a particular field of a particular point in this buffer
-    void setField_U8(std::size_t pointIndex, std::size_t fieldIndex, boost::uint8_t value);
-    void setField_F32(std::size_t pointIndex, std::size_t fieldIndex, float value);
-    void setField_F64(std::size_t pointIndex, std::size_t fieldIndex, double value);
+    template<class T> T getField(std::size_t fieldIndex, std::size_t itemOffset) const;
+    template<class T> void setField(std::size_t fieldIndex, std::size_t itemOffset, T value);
 
     // bulk copy all the fields from the given point into this object
     // NOTE: this is only legal if the src and dest schemas are exactly the same
@@ -93,9 +87,6 @@ private:
     // access to the raw memory
     boost::uint8_t* getData(std::size_t pointIndex) const;
 
-    template<class T> T getField(std::size_t fieldIndex, std::size_t itemOffset) const;
-    template<class T> void setField(std::size_t fieldIndex, std::size_t itemOffset, T value);
-
     Schema m_schema;
     boost::uint8_t* m_data;
     std::size_t m_pointSize;
@@ -105,6 +96,28 @@ private:
     PointData(const PointData&); // not implemented
     PointData& operator=(const PointData&); // not implemented
 };
+
+
+template <class T>
+void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value)
+{
+    std::size_t offset = (pointIndex * m_pointSize) + m_schema.getDimension(fieldIndex).getByteOffset();
+    assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
+    boost::uint8_t* p = m_data + offset;
+
+    *(T*)p = value;
+}
+
+
+template <class T>
+T PointData::getField(std::size_t pointIndex, std::size_t fieldIndex) const
+{
+    std::size_t offset = (pointIndex * m_pointSize) + m_schema.getDimension(fieldIndex).getByteOffset();
+    assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
+    boost::uint8_t* p = m_data + offset;
+
+    return *(T*)p;
+}
 
 
 LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const PointData&);

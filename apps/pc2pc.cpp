@@ -17,7 +17,6 @@
 #include "libpc/Color.hpp"
 #include "libpc/Dimension.hpp"
 #include "libpc/Schema.hpp"
-#include "libpc/LasSchema.hpp"
 #include "libpc/CropFilter.hpp"
 #include "libpc/ColorFilter.hpp"
 #include "libpc/MosaicFilter.hpp"
@@ -78,10 +77,21 @@ static void test3()
 
   std::cout << (const LasHeader&)header;
 
-  PointData pointData(header.getSchema(), header.getNumPoints());
+  boost::uint32_t numPoints = (boost::uint32_t)header.getNumPoints();
+  PointData pointData(header.getSchema(), numPoints);
   reader.readPoints(pointData);
 
-  std::cout << pointData;
+//  std::cout << pointData;
+
+  std::ostream* ofs = Utils::Create("temp.las");
+
+  ((LasHeader&)header).write(*ofs);
+
+  ofs->flush();
+  delete ofs;
+
+//  Utils::Cleanup(ifs);
+//  Utils::Cleanup(ofs);
 
   return;
 }
@@ -110,11 +120,6 @@ int main(int, char* [])
     {
         Dimension dim("foo", Dimension::uint8_t);
         std::cout << dim << std::endl;
-    }
-
-    {
-        LasSchema schema(LasSchema::ePointFormat0);
-        std::cout << schema;
     }
 
     Color c;

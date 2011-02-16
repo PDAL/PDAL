@@ -54,8 +54,6 @@ public:
     Header(const Header&);
     virtual ~Header();
 
-    virtual Header& operator=(const Header&);
-
     const Schema& getSchema() const;
     Schema& getSchema();
     void setSchema(const Schema&);
@@ -78,6 +76,8 @@ private:
     Bounds<double> m_bounds;
     SpatialReference m_spatialReference;
     Metadata::Array m_metadataArray;
+
+    Header& operator=(const Header&); // nope
 };
 
 

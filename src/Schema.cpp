@@ -179,6 +179,19 @@ bool Schema::findDimensionIndex(const std::string& name, std::size_t& index) con
 }
 
 
+std::size_t Schema::getDimensionIndex(const std::string& name) const
+{
+    for (DimensionsCIter iter = m_dimensions.cbegin(); iter != m_dimensions.cend(); ++iter)
+    {
+        if (iter->getName() == name)
+        {
+            return iter->getPosition();
+        }
+    }
+    throw;
+}
+
+
 bool Schema::hasDimension(const std::string& name) const
 {
     for (DimensionsCIter iter = m_dimensions.cbegin(); iter != m_dimensions.cend(); ++iter)

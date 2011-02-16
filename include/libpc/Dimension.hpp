@@ -76,13 +76,11 @@ public:
         int64_t,
         uint64_t,
         float_t,       // 32 bits
-        double_t,      // 64 bits
-        bits_t,        // a bitfield of a given size (no integral representation is assumed)
+        double_t      // 64 bits
     };
 
 public:
-    // size_in_bits is only meaningful if type==bits_t
-    Dimension(std::string const& name, DataType type, std::size_t size_in_bits=0);
+    Dimension(std::string const& name, DataType type);
     Dimension& operator=(Dimension const& rhs);
     Dimension(Dimension const& other);
 
@@ -106,12 +104,6 @@ public:
     static bool getDataTypeIsNumeric(DataType);
     static bool getDataTypeIsSigned(DataType);
     static bool getDataTypeIsInteger(DataType);
-
-    /// bits, total logical size of point record
-    inline std::size_t getBitSize() const
-    {
-        return m_bitSize;
-    }
 
     /// bytes, physical/serialisation size of record
     // for bitfields, this will be rounded up to the next largest byte
@@ -237,7 +229,6 @@ public:
 private:
     DataType m_dataType;
     std::string m_name;
-    std::size_t m_bitSize;
     std::size_t m_byteSize;
     std::size_t m_byteOffset;
     std::string m_description;

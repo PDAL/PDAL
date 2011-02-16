@@ -63,75 +63,6 @@ LasHeader::LasHeader()
 }
 
 
-LasHeader::LasHeader(const LasHeader& rhs)
-    : Header(rhs)
-    , m_sourceId(rhs.m_sourceId)
-    , m_reserved(rhs.m_reserved)
-    , m_projectGuid(rhs.m_projectGuid)
-    , m_versionMajor(rhs.m_versionMajor)
-    , m_versionMinor(rhs.m_versionMinor)
-    , m_createDOY(rhs.m_createDOY)
-    , m_createYear(rhs.m_createYear)
-    , m_headerSize(rhs.m_headerSize)
-    , m_dataOffset(rhs.m_dataOffset)
-    , m_recordsCount(rhs.m_recordsCount)
-    , m_pointRecordsCount(rhs.m_pointRecordsCount)
-    , m_pointRecordsByReturn(rhs.m_pointRecordsByReturn)
-    , m_scales(rhs.m_scales)
-    , m_offsets(rhs.m_offsets)
-    , m_isCompressed(rhs.m_isCompressed)
-{
-    memcpy(m_signature, rhs.m_signature, eFileSignatureSize);
-    memcpy(m_systemId, rhs.m_systemId, eSystemIdSize);
-    memcpy(m_softwareId, rhs.m_softwareId, eSoftwareIdSize);
-}
-
-
-LasHeader& LasHeader::operator=(const LasHeader& rhs)
-{
-//    *(Header*)this = (const Header&)rhs;
-
-    //memcpy(m_signature, rhs.m_signature, eFileSignatureSize);
-    //m_sourceId = rhs.m_sourceId;
-    //m_reserved = rhs.m_reserved;
-    //m_projectGuid = rhs.m_projectGuid;
-    //m_versionMajor = rhs.m_versionMajor;
-    //m_versionMinor = rhs.m_versionMinor;
-    //memcpy(m_systemId, rhs.m_systemId, eSystemIdSize);
-    //memcpy(m_softwareId, rhs.m_softwareId, eSoftwareIdSize);
-    //m_createDOY = rhs.m_createDOY;
-    //m_createYear = rhs.m_createYear;
-    //m_headerSize = rhs.m_headerSize;
-    //m_dataOffset = rhs.m_dataOffset;
-    //m_recordsCount = rhs.m_recordsCount;
-    m_pointRecordsCount = rhs.m_pointRecordsCount;
-    m_pointRecordsByReturn.resize(7);
-    m_pointRecordsByReturn = rhs.m_pointRecordsByReturn;
-    m_scales = rhs.m_scales;
-    m_offsets = rhs.m_offsets;
-    m_isCompressed = rhs.m_isCompressed;
-
-    return *this;
-}
-
-
-const LasSchema& LasHeader::getLasSchema() const
-{
-    return (const LasSchema&)this->getSchema();
-}
-
-
-LasSchema& LasHeader::getLasSchema()
-{
-    return (LasSchema&)this->getSchema();
-}
-
-
-void LasHeader::setLasSchema(const LasSchema& lasSchema)
-{
-    this->setSchema(lasSchema);
-}
-
 
 std::string LasHeader::GetFileSignature() const
 {
@@ -187,7 +118,7 @@ uint8_t LasHeader::GetVersionMajor() const
 
 void LasHeader::SetVersionMajor(uint8_t v)
 {
-    if (LasSchema::eVersionMajorMin > v || v > LasSchema::eVersionMajorMax)
+    if (eVersionMajorMin > v || v > eVersionMajorMax)
         throw std::out_of_range("version major out of range");
 
     m_versionMajor = v;
@@ -200,7 +131,7 @@ uint8_t LasHeader::GetVersionMinor() const
 
 void LasHeader::SetVersionMinor(uint8_t v)
 {
-    if (v > LasSchema::eVersionMinorMax)
+    if (v > eVersionMinorMax)
         throw std::out_of_range("version minor out of range");
     
     m_versionMinor = v;
@@ -327,15 +258,14 @@ void LasHeader::SetRecordsCount(uint32_t v)
     m_recordsCount = v;
 }
 
-LasSchema::PointFormatName LasHeader::GetDataFormatId() const
+LasHeader::PointFormatId LasHeader::getDataFormatId() const
 {
-    return getLasSchema().getDataFormatId();
-
+    return m_data_format_id;
 }
 
-void LasHeader::SetDataFormatId(LasSchema::PointFormatName v)
+void LasHeader::setDataFormatId(PointFormatId v)
 {
-    getLasSchema().setDataFormatId(v);
+    m_data_format_id = v;
 }
 
 uint16_t LasHeader::GetDataRecordLength() const
@@ -488,6 +418,7 @@ void LasHeader::initialize()
 {
     // Initialize public header block with default
     // values according to LAS 1.2
+    m_data_format_id = ePointFormat0;
 
     m_versionMajor = 1;
     m_versionMinor = 2;
@@ -628,7 +559,7 @@ boost::property_tree::ptree LasHeader::GetPTree( ) const
     pt.put("dataoffset", GetDataOffset());
 
     pt.put("count", GetPointRecordsCount());
-    pt.put("dataformatid", GetDataFormatId());
+    pt.put("dataformatid", getDataFormatId());
     pt.put("datarecordlength", GetDataRecordLength());
     pt.put("compressed", Compressed());
 
@@ -893,42 +824,11 @@ void LasHeader::read(std::istream& ifs)
 
     // strip the high bits, to determine point type
     n1 &= 0x3f;
-    if (n1 == LasSchema::ePointFormat0)
+    if (n1 <= 5)
     {
-        SetDataFormatId(LasSchema::ePointFormat0);
-        LasSchema lasSchema(LasSchema::ePointFormat0);
-        setLasSchema(lasSchema);
+        setDataFormatId((PointFormatId)n1);
+        update_required_dimensions((PointFormatId)n1, getSchema());
     } 
-    else if (n1 == LasSchema::ePointFormat1)
-    {
-        SetDataFormatId(LasSchema::ePointFormat1);
-        LasSchema lasSchema(LasSchema::ePointFormat1);
-        setLasSchema(lasSchema);
-    }
-    else if (n1 == LasSchema::ePointFormat2)
-    {
-        SetDataFormatId(LasSchema::ePointFormat2);
-        LasSchema lasSchema(LasSchema::ePointFormat2);
-        setLasSchema(lasSchema);
-    }
-    else if (n1 == LasSchema::ePointFormat3)
-    {
-        SetDataFormatId(LasSchema::ePointFormat3);
-        LasSchema lasSchema(LasSchema::ePointFormat3);
-        setLasSchema(lasSchema);
-    }
-    else if (n1 == LasSchema::ePointFormat4)
-    {
-        SetDataFormatId(LasSchema::ePointFormat4);
-        LasSchema lasSchema(LasSchema::ePointFormat4);
-        setLasSchema(lasSchema);
-    }
-    else if (n1 == LasSchema::ePointFormat5)
-    {
-        SetDataFormatId(LasSchema::ePointFormat5);
-        LasSchema lasSchema(LasSchema::ePointFormat5);
-        setLasSchema(lasSchema);
-    }
     else
     {
         throw std::domain_error("invalid point data format");
@@ -1201,6 +1101,202 @@ void LasHeader::Validate(std::istream& ifs)
 }
 
 
+void LasHeader::add_record0_dimensions(Schema& schema)
+{
+    std::ostringstream text;
+
+    Dimension x("X", Dimension::uint32_t);
+    text << "x coordinate as a long integer.  You must use the scale and "
+         << "offset information of the header to determine the double value.";
+    x.setDescription(text.str());
+    schema.addDimension(x);
+    text.str("");
+
+    Dimension y("Y", Dimension::uint32_t);
+    text << "y coordinate as a long integer.  You must use the scale and "
+         << "offset information of the header to determine the double value.";
+    y.setDescription(text.str());
+    schema.addDimension(y);
+    text.str("");
+
+    Dimension z("Z", Dimension::uint32_t);
+    text << "z coordinate as a long integer.  You must use the scale and "
+         << "offset information of the header to determine the double value.";
+    z.setDescription(text.str());
+    schema.addDimension(z);
+    text.str("");
+
+    Dimension intensity("Intensity", Dimension::int16_t);
+    text << "The intensity value is the integer representation of the pulse "
+         "return magnitude. This value is optional and system specific. "
+         "However, it should always be included if available.";
+    intensity.setDescription(text.str());
+    schema.addDimension(intensity);
+    text.str("");
+
+    Dimension return_no("Return Number", Dimension::uint8_t); // 3 bits only
+    text << "Return Number: The Return Number is the pulse return number for "
+         "a given output pulse. A given output laser pulse can have many "
+         "returns, and they must be marked in sequence of return. The first "
+         "return will have a Return Number of one, the second a Return "
+         "Number of two, and so on up to five returns.";
+    return_no.setDescription(text.str());
+    schema.addDimension(return_no);
+    text.str("");
+
+    Dimension no_returns("Number of Returns", Dimension::uint8_t); // 3 bits only
+    text << "Number of Returns (for this emitted pulse): The Number of Returns "
+         "is the total number of returns for a given pulse. For example, "
+         "a laser data point may be return two (Return Number) within a "
+         "total number of five returns.";
+    no_returns.setDescription(text.str());
+    schema.addDimension(no_returns);
+    text.str("");
+
+    Dimension scan_dir("Scan Direction", Dimension::uint8_t); // 1 bit only
+    text << "The Scan Direction Flag denotes the direction at which the "
+         "scanner mirror was traveling at the time of the output pulse. "
+         "A bit value of 1 is a positive scan direction, and a bit value "
+         "of 0 is a negative scan direction (where positive scan direction "
+         "is a scan moving from the left side of the in-track direction to "
+         "the right side and negative the opposite). ";
+    scan_dir.setDescription(text.str());
+    schema.addDimension(scan_dir);
+    text.str("");
+
+    Dimension edge("Flightline Edge", Dimension::uint8_t); // 1 bit only
+    text << "The Edge of Flight Line data bit has a value of 1 only when "
+         "the point is at the end of a scan. It is the last point on "
+         "a given scan line before it changes direction.";
+    edge.setDescription(text.str());
+    schema.addDimension(edge);
+    text.str("");
+
+    Dimension classification("Classification", Dimension::uint8_t);
+    text << "Classification in LAS 1.0 was essentially user defined and optional. "
+         "LAS 1.1 defines a standard set of ASPRS classifications. In addition, "
+         "the field is now mandatory. If a point has never been classified, this "
+         "byte must be set to zero. There are no user defined classes since "
+         "both point format 0 and point format 1 supply 8 bits per point for "
+         "user defined operations. Note that the format for classification is a "
+         "bit encoded field with the lower five bits used for class and the "
+         "three high bits used for flags.";
+    classification.setDescription(text.str());
+    schema.addDimension(classification);
+    text.str("");
+
+    Dimension scan_angle("Scan Angle Rank", Dimension::int8_t);
+    text << "The Scan Angle Rank is a signed one-byte number with a "
+         "valid range from -90 to +90. The Scan Angle Rank is the "
+         "angle (rounded to the nearest integer in the absolute "
+         "value sense) at which the laser point was output from the "
+         "laser system including the roll of the aircraft. The scan "
+         "angle is within 1 degree of accuracy from +90 to –90 degrees. "
+         "The scan angle is an angle based on 0 degrees being nadir, "
+         "and –90 degrees to the left side of the aircraft in the "
+         "direction of flight.";
+    scan_angle.setDescription(text.str());
+    schema.addDimension(scan_angle);
+    text.str("");
+
+    Dimension user_data("User Data", Dimension::uint8_t);
+    text << "This field may be used at the user’s discretion";
+    user_data.setDescription(text.str());
+    schema.addDimension(user_data);
+    text.str("");
+
+    Dimension point_source_id("Point Source ID", Dimension::uint16_t);
+    text << "This value indicates the file from which this point originated. "
+         "Valid values for this field are 1 to 65,535 inclusive with zero "
+         "being used for a special case discussed below. The numerical value "
+         "corresponds to the File Source ID from which this point originated. "
+         "Zero is reserved as a convenience to system implementers. A Point "
+         "Source ID of zero implies that this point originated in this file. "
+         "This implies that processing software should set the Point Source "
+         "ID equal to the File Source ID of the file containing this point "
+         "at some time during processing. ";
+    point_source_id.setDescription(text.str());
+
+    schema.addDimension(point_source_id);
+    text.str("");
+
+    return;
+}
+
+
+void LasHeader::add_color(Schema& schema)
+{
+    std::ostringstream text;
+
+    Dimension red("Red", Dimension::uint16_t);
+    text << "The red image channel value associated with this point";
+    red.setDescription(text.str());
+    schema.addDimension(red);
+    text.str("");
+
+    Dimension green("Green", Dimension::uint16_t);
+    text << "The green image channel value associated with this point";
+    green.setDescription(text.str());
+    schema.addDimension(green);
+    text.str("");
+
+    Dimension blue("Blue", Dimension::uint16_t);
+    text << "The blue image channel value associated with this point";
+    blue.setDescription(text.str());
+    schema.addDimension(blue);
+    text.str("");
+
+}
+
+
+void LasHeader::add_time(Schema& schema)
+{
+    std::ostringstream text;
+
+    Dimension t("Time", Dimension::uint64_t);
+    text << "The GPS Time is the double floating point time tag value at "
+         "which the point was acquired. It is GPS Week Time if the "
+         "Global Encoding low bit is clear and Adjusted Standard GPS "
+         "Time if the Global Encoding low bit is set (see Global Encoding "
+         "in the Public Header Block description).";
+    t.setDescription(text.str());
+    schema.addDimension(t);
+    text.str("");
+
+    return;
+}
+
+
+void LasHeader::update_required_dimensions(PointFormatId data_format_id, Schema& schema)
+{
+    // Add the base dimensions
+    add_record0_dimensions(schema);
+
+    switch (data_format_id)
+    {
+    case ePointFormat3:
+        add_time(schema);
+        add_color(schema);
+        break;
+    case ePointFormat2:
+        add_color(schema);
+        break;
+    case ePointFormat1:
+        add_time(schema);
+        break;
+    case ePointFormat0:
+        break;
+
+    default:
+        std::ostringstream oss;
+        oss << "Unhandled PointFormatName id " << static_cast<boost::uint32_t>(data_format_id);
+        throw std::runtime_error(oss.str());
+    }
+
+    return;
+}
+
+
 std::ostream& operator<<(std::ostream& ostr, const LasHeader& header)
 {
     ostr << (const Header&)header;
@@ -1213,11 +1309,345 @@ std::ostream& operator<<(std::ostream& ostr, const LasHeader& header)
 }
 
 
-void LasHeader::write(std::ostream&) const
+void LasHeader::write(std::ostream& ostream)
 {
-    throw;
+    using namespace std;
+
+    uint8_t n1 = 0;
+    uint16_t n2 = 0;
+    uint32_t n4 = 0;
+    
+    // Figure out how many points we already have.  
+    // Figure out if we're in append mode.  If we are, we can't rewrite 
+    // any of the VLRs including the Schema and SpatialReference ones.
+    bool bAppendMode = false;
+
+    // This test should only be true if we were opened in both 
+    // std::ios::in *and* std::ios::out
+
+    // Seek to the beginning
+    ostream.seekp(0, ios::beg);
+    ios::pos_type begin = ostream.tellp();
+
+    // Seek to the end
+    ostream.seekp(0, ios::end);
+    ios::pos_type end = ostream.tellp();
+    if ((begin != end) && (end != static_cast<ios::pos_type>(0))) {
+        bAppendMode = true;
+    }
+
+    ////// If we are in append mode, we are not touching *any* VLRs. 
+    ////if (bAppendMode) 
+    ////{
+    ////    // We're opened in append mode
+    ////    
+    ////    if (!Compressed())
+    ////    {
+    ////        ios::off_type points = end - static_cast<ios::off_type>(GetDataOffset());
+    ////        ios::off_type count = points / static_cast<ios::off_type>(GetDataRecordLength());
+    ////    
+    ////        if (points < 0) {
+    ////            std::ostringstream oss;
+    ////            oss << "The header's data offset, " << GetDataOffset() 
+    ////                <<", is much larger than the size of the file, " << end
+    ////                <<", and something is amiss.  Did you use the right header"
+    ////                <<" offset value?";
+    ////            throw std::runtime_error(oss.str());
+    ////        }
+    ////        
+    ////        m_pointCount = static_cast<uint32_t>(count);
+
+    ////    } else {
+    ////        m_pointCount = GetPointRecordsCount();
+    ////    }
+
+    ////    // Position to the beginning of the file to start writing the header
+    ////    ostream.seekp(0, ios::beg);
+
+    ////} 
+    ////else 
+    {
+        
+////        // Rewrite the georeference VLR entries if they exist
+////        m_header.DeleteVLRs("liblas", 2112);
+////        m_header.SetGeoreference();
+////
+////        // If we have a custom schema, add the VLR and write it into the 
+////        // file.  
+////        if (m_header.GetSchema().IsCustom()) {
+////            
+////            // Wipe any schema-related VLRs we might have, as this is now out of date.
+////            m_header.DeleteVLRs("liblas", 7);
+////        
+////            VariableRecord v = m_header.GetSchema().GetVLR();
+////            std::cout <<  m_header.GetSchema()<< std::endl;
+////            m_header.AddVLR(v);
+////        }
+////    
+////        // add the laszip VLR, if needed
+////        if (m_header.Compressed())
+////        {
+////#ifdef HAVE_LASZIP
+////            m_header.DeleteVLRs("laszip encoded", 22204);
+////            ZipPoint zpd(m_header.GetDataFormatId());
+////            VariableRecord v;
+////            zpd.ConstructVLR(v);
+////            m_header.AddVLR(v);
+////#else
+////            throw configuration_error("LASzip compression support not enabled in this libLAS configuration.");
+////#endif
+////        }
+////        else
+////        {
+////            m_header.DeleteVLRs("laszip encoded", 22204);
+////        }
+
+        int32_t difference = GetDataOffset() - GetRequiredHeaderSize(ostream);
+
+        if (difference <= 0) 
+        {
+            int32_t d = abs(difference);
+            if (GetVersionMinor()  ==  0) 
+            {
+                // Add the two extra bytes for the 1.0 pad
+                d = d + 2;
+            }
+            SetDataOffset(GetDataOffset() + d );
+        }
+
+    }
+
+    
+    // 1. File Signature
+    std::string const filesig(GetFileSignature());
+    assert(filesig.size() == 4);
+    Utils::write_n(ostream, filesig, 4);
     return;
+    
+    // 2. File SourceId / Reserved
+    if (GetVersionMinor()  ==  0) {
+        n4 = GetReserved();
+        Utils::write_n(ostream, n4, sizeof(n4));         
+    } else if (GetVersionMinor()  >  0) {
+        n2 = GetFileSourceId();
+        Utils::write_n(ostream, n2, sizeof(n2));                
+        n2 = GetReserved();
+        Utils::write_n(ostream, n2, sizeof(n2));        
+    } 
+
+    // 3-6. GUID data
+    uint8_t d16[16] = { 0 };
+    uuid g = GetProjectId();
+    memcpy(d16,g.data,26);
+    Utils::write_n(ostream, d16, 16);
+    
+    // 7. Version major
+    n1 = GetVersionMajor();
+    assert(1 == n1);
+    Utils::write_n(ostream, n1, sizeof(n1));
+    
+    // 8. Version minor
+    n1 = GetVersionMinor();
+    Utils::write_n(ostream, n1, sizeof(n1));
+
+    // 9. System ID
+    std::string sysid(GetSystemId(true));
+    assert(sysid.size() == 32);
+    Utils::write_n(ostream, sysid, 32);
+    
+    // 10. Generating Software ID
+    std::string softid(GetSoftwareId(true));
+    assert(softid.size() == 32);
+    Utils::write_n(ostream, softid, 32);
+
+    // 11. Flight Date Julian
+    n2 = GetCreationDOY();
+    Utils::write_n(ostream, n2, sizeof(n2));
+
+    // 12. Year
+    n2 = GetCreationYear();
+    Utils::write_n(ostream, n2, sizeof(n2));
+
+    // 13. Header Size
+    n2 = GetHeaderSize();
+    assert(227 <= n2);
+    Utils::write_n(ostream, n2, sizeof(n2));
+
+    // 14. Offset to data
+    n4 = GetDataOffset();        
+    Utils::write_n(ostream, n4, sizeof(n4));
+
+    // 15. Number of variable length records
+    n4 = GetRecordsCount();
+    Utils::write_n(ostream, n4, sizeof(n4));
+
+    // 16. Point Data Format ID
+    n1 = static_cast<uint8_t>(getDataFormatId());
+    uint8_t n1tmp = n1;
+    if (Compressed()) // high bit set indicates laszip compression
+        n1tmp |= 0x80;
+    Utils::write_n(ostream, n1tmp, sizeof(n1tmp));
+
+    // 17. Point Data Record Length
+    n2 = GetDataRecordLength();
+    Utils::write_n(ostream, n2, sizeof(n2));
+
+    // 18. Number of point records
+    // This value is updated if necessary, see UpdateHeader function.
+    n4 = GetPointRecordsCount();
+    Utils::write_n(ostream, n4, sizeof(n4));
+
+    // 19. Number of points by return
+    std::vector<uint32_t>::size_type const srbyr = 5;
+    std::vector<uint32_t> const& vpbr = GetPointRecordsByReturnCount();
+    // TODO: fix this for 1.3, which has srbyr = 7;  See detail/reader/header.cpp for more details
+    // assert(vpbr.size() <= srbyr);
+    uint32_t pbr[srbyr] = { 0 };
+    std::copy(vpbr.begin(), vpbr.begin() + srbyr, pbr); // FIXME: currently, copies only 5 records, to be improved
+    Utils::write_n(ostream, pbr, sizeof(pbr));
+
+    // 20-22. Scale factors
+    Utils::write_n(ostream, GetScaleX(), sizeof(double));
+    Utils::write_n(ostream, GetScaleY(), sizeof(double));
+    Utils::write_n(ostream, GetScaleZ(), sizeof(double));
+
+    // 23-25. Offsets
+    Utils::write_n(ostream, GetOffsetX(), sizeof(double));
+    Utils::write_n(ostream, GetOffsetY(), sizeof(double));
+    Utils::write_n(ostream, GetOffsetZ(), sizeof(double));
+
+    // 26-27. Max/Min X
+    Utils::write_n(ostream, GetMaxX(), sizeof(double));
+    Utils::write_n(ostream, GetMinX(), sizeof(double));
+
+    // 28-29. Max/Min Y
+    Utils::write_n(ostream, GetMaxY(), sizeof(double));
+    Utils::write_n(ostream, GetMinY(), sizeof(double));
+
+    // 30-31. Max/Min Z
+    Utils::write_n(ostream, GetMaxZ(), sizeof(double));
+    Utils::write_n(ostream, GetMinZ(), sizeof(double));
+
+    // If WriteVLR returns a value, it is because the header's 
+    // offset is not large enough to contain the VLRs.  The value 
+    // it returns is the number of bytes we must increase the header
+    // by in order for it to contain the VLRs.  We do not touch VLRs if we 
+    // are in append mode.
+
+    if (!bAppendMode) 
+    {
+        WriteVLRs(ostream);
+
+        // Write the 1.0 pad signature if we need to.
+        WriteLAS10PadSignature(ostream); 
+
+    }           
+    //////// If we already have points, we're going to put it at the end of the file.  
+    //////// If we don't have any points,  we're going to leave it where it is.
+    //////if (m_pointCount != 0)
+    //////{
+    //////    ostream.seekp(0, std::ios::end);
+    //////}
+    //////else
+    //////{
+    //////    ostream.seekp(m_header.GetDataOffset(), std::ios::beg);
+    //////}
+    
 }
+
+void LasHeader::WriteVLRs(std::ostream& ) 
+{
+
+    ////// Seek to the end of the public header block (beginning of the VLRs)
+    ////// to start writing
+    ////ostream.seekp(GetHeaderSize(), std::ios::beg);
+
+    ////int32_t diff = GetDataOffset() - GetRequiredHeaderSize();
+    ////
+    ////if (diff < 0) {
+    ////    std::ostringstream oss;
+    ////    oss << "Header is not large enough to contain VLRs.  Data offset is ";
+    ////    oss << m_header.GetDataOffset() << " while the required total size ";
+    ////    oss << "for the VLRs is " << GetRequiredHeaderSize();
+    ////    throw std::runtime_error(oss.str());
+    ////}
+
+    ////for (uint32_t i = 0; i < m_header.GetRecordsCount(); ++i)
+    ////{
+    ////    VariableRecord const &vlr = m_header.GetVLR(i);
+
+    ////    Utils::write_n(ostream, vlr.GetReserved(), sizeof(uint16_t));
+    ////    Utils::write_n(ostream, vlr.GetUserId(true).c_str(), 16);
+    ////    Utils::write_n(ostream, vlr.GetRecordId(), sizeof(uint16_t));
+    ////    Utils::write_n(ostream, vlr.GetRecordLength(), sizeof(uint16_t));
+    ////    Utils::write_n(ostream, vlr.GetDescription(true).c_str(), 32);
+    ////    std::vector<uint8_t> const& data = vlr.GetData();
+    ////    std::streamsize const size = static_cast<std::streamsize>(data.size());
+    ////    Utils::write_n(ostream, data.front(), size);
+    ////}
+
+    ////// if we had more room than we need for the VLRs, we need to pad that with 
+    ////// 0's.  We must also not forget to add the 1.0 pad bytes to the end of this
+    ////// but the impl should be the one doing that, not us.
+    ////if (diff > 0) {
+    ////    Utils::write_n(ostream, "\0", diff);
+    ////}
+
+}
+
+boost::int32_t LasHeader::GetRequiredHeaderSize(std::ostream& ) const
+{
+    // if the VLRs won't fit because the data offset is too 
+    // small, we need to throw an error.
+    std::size_t vlr_total_size = 0;
+        
+    ////// Calculate a new data offset size
+    ////for (uint32_t i = 0; i < GetRecordsCount(); ++i)
+    ////{
+    ////    VariableRecord const & vlr = m_header.GetVLR(i);
+    ////    vlr_total_size += vlr.GetTotalSize();
+    ////}
+    
+    // int32_t difference = m_header.GetDataOffset() - (vlr_total_size + m_header.GetHeaderSize());
+    int32_t size = vlr_total_size + GetHeaderSize();
+    return size;
+    
+}
+
+void LasHeader::WriteLAS10PadSignature(std::ostream& ostream)
+{
+    // Only write pad signature bytes for LAS 1.0 files.  Any other files 
+    // will not get the pad bytes and we are *not* allowing anyone to 
+    // override this either - hobu
+    
+    if (GetVersionMinor() > 0) {
+        return;
+    }
+
+    int32_t diff = GetDataOffset() - GetRequiredHeaderSize(ostream);
+
+    if (diff < 2) {
+        std::ostringstream oss;
+        oss << "Header is not large enough to write extra 1.0 pad bytes.  Data offset is ";
+        oss << GetDataOffset() << " while the required total size ";
+        oss << "for the VLRs is " << GetRequiredHeaderSize(ostream);
+        throw std::runtime_error(oss.str());
+    }    
+    
+    
+    // step back two bytes to write the pad bytes.  We should have already
+    // determined by this point if a) they will fit b) they won't overwrite 
+    // exiting real data 
+    ostream.seekp(GetDataOffset() - 2, std::ios::beg);
+    
+    // Write the pad bytes.
+    uint8_t const sgn1 = 0xCC;
+    uint8_t const sgn2 = 0xDD;
+    Utils::write_n(ostream, sgn1, sizeof(uint8_t));
+    Utils::write_n(ostream, sgn2, sizeof(uint8_t));
+}
+
+
 
 
 } // namespace libpc

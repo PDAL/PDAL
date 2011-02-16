@@ -50,7 +50,6 @@
 #include <boost/uuid/uuid.hpp>
 
 #include "libpc/Header.hpp"
-#include "libpc/LasSchema.hpp"
 
 namespace libpc
 {
@@ -60,13 +59,52 @@ class LIBPC_DLL LasHeader : public Header
 public:
     typedef boost::uuids::uuid uuid;
 
+    /// Versions of point record format.
+    enum PointFormatId
+    {
+        ePointFormat0 = 0,  ///< Point Data Format \e 0
+        ePointFormat1 = 1,  ///< Point Data Format \e 1    
+        ePointFormat2 = 2,  ///< Point Data Format \e 2
+        ePointFormat3 = 3,  ///< Point Data Format \e 3
+        ePointFormat4 = 4,  ///< Point Data Format \e 3
+        ePointFormat5 = 5,  ///< Point Data Format \e 3
+        ePointFormatUnknown = -99 ///< Point Data Format is unknown
+    };
+
+    /// Number of bytes of point record storage in particular format.
+    enum PointSize
+    {
+        ePointSize0 = 20, ///< Size of point record in data format \e 0
+        ePointSize1 = 28, ///< Size of point record in data format \e 1
+        ePointSize2 = 26, ///< Size of point record in data format \e 2
+        ePointSize3 = 34  ///< Size of point record in data format \e 3
+    };
+
+    /// Version numbers of the ASPRS LAS Specification.
+    /// Numerical representation of versions is calculated according to 
+    /// following formula: <em>major * 100000 + minor</em>
+    enum LASVersion
+    {
+        eLASVersion10 = 1 * 100000 + 0, ///< LAS Format 1.0
+        eLASVersion11 = 1 * 100000 + 1, ///< LAS Format 1.1
+        eLASVersion12 = 1 * 100000 + 2, ///< LAS Format 1.2
+        eLASVersion20 = 2 * 100000 + 0  ///< LAS Format 2.0
+    };
+
+    /// Range of allowed ASPRS LAS file format versions.
+    enum FormatVersion
+    {
+        eVersionMajorMin = 1, ///< Minimum of major component
+        eVersionMajorMax = 1, ///< Maximum of major component
+        eVersionMinorMin = 0, ///< Minimum of minor component
+        eVersionMinorMax = 3  ///< Maximum of minor component
+    };
+
 public:
     /// The default constructed header is configured according to the ASPRS
     /// LAS 1.2 Specification, point data format set to 0.
     /// Other fields filled with 0.
     LasHeader();
-    LasHeader& operator=(const LasHeader&);
-    LasHeader(const LasHeader&);
 
     /// Official signature of ASPRS LAS file format, always \b "LASF".
     static char const* const FileSignature;
@@ -206,10 +244,10 @@ public:
     void SetRecordsCount(boost::uint32_t v);
     
     /// Get identifier of point data (record) format.
-    LasSchema::PointFormatName GetDataFormatId() const;
+    PointFormatId getDataFormatId() const;
 
     /// Set identifier of point data (record) format.
-    void SetDataFormatId(LasSchema::PointFormatName v);
+    void setDataFormatId(PointFormatId v);
 
     /// The length in bytes of each point.  All points in the file are 
     /// considered to be fixed in size, and the PointFormatName is used 
@@ -317,7 +355,7 @@ public:
     
 
     void read(std::istream&);
-    void write(std::ostream&) const;
+    void write(std::ostream&);
 
 private:
     typedef Vector<double> PointScales;
@@ -344,9 +382,14 @@ private:
     void ReadVLRs(std::istream& ifs);
     void Validate(std::istream& ifs);
 
-    const LasSchema& getLasSchema() const;
-    LasSchema& getLasSchema();
-    void setLasSchema(const LasSchema&);
+    static void update_required_dimensions(PointFormatId data_format_id, Schema&);
+    static void add_record0_dimensions(Schema& schema);
+    static void add_time(Schema& schema);
+    static void add_color(Schema& schema);
+    
+    void WriteLAS10PadSignature(std::ostream& ostream);
+    boost::int32_t GetRequiredHeaderSize(std::ostream& ostream) const;
+    void WriteVLRs(std::ostream& ostream);
 
     //
     // Private data members
@@ -369,6 +412,11 @@ private:
     PointScales m_scales;
     PointOffsets m_offsets;
     bool m_isCompressed;
+
+    PointFormatId m_data_format_id;
+
+    LasHeader& operator=(const LasHeader&); // nope
+    LasHeader(const LasHeader&); // nope
 };
 
 LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const LasHeader&);

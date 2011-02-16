@@ -65,19 +65,6 @@ Header::~Header()
 }
 
 
-Header& Header::operator=(const Header& other)
-{
-    if (this != &other)
-    {
-        this->m_numPoints = other.m_numPoints;
-        this->m_schema = other.m_schema;
-        this->m_bounds = other.m_bounds;
-        this->m_spatialReference = other.m_spatialReference;
-    }
-    return *this;
-}
-
-
 const Bounds<double>& Header::getBounds() const
 {
     return m_bounds;

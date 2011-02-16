@@ -78,15 +78,14 @@ void ColorFilter::readPoints(PointData& data)
 
     for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        float z = data.getField_F32(pointIndex, offsetZ);
+        float z = data.getField<float>(pointIndex, offsetZ);
         boost::uint8_t red, green, blue;
         getColor(z, red, green, blue);
 
         // now we store the 3 u8's in the point data...
-        data.setField_U8(pointIndex, fieldIndexR, red);
-        data.setField_U8(pointIndex, fieldIndexG, green);
-        data.setField_U8(pointIndex, fieldIndexB, blue);
-
+        data.setField<boost::uint8_t>(pointIndex, fieldIndexR, red);
+        data.setField<boost::uint8_t>(pointIndex, fieldIndexG, green);
+        data.setField<boost::uint8_t>(pointIndex, fieldIndexB, blue);
     }
 
     return;

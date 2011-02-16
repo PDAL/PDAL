@@ -75,7 +75,7 @@ public:
         if (!src)
             throw std::runtime_error("detail::liblas::read_n<T> input stream is not readable");
 
-        char* p = Utils::as_buffer(dest);
+        char* p = as_buffer(dest);
         src.read(p, num);
 
         // BUG: Fix little-endian
@@ -84,17 +84,44 @@ public:
         check_stream_state(src);
     }
 
+    template <typename T>
+    static inline void write_n(std::ostream& dest, T const& src, std::streamsize const& num)
+    {
+        if (!dest)
+            throw std::runtime_error("detail::liblas::write_n<T>: output stream is not writable");
+
+        // BUG: Fix little-endian
+        T& tmp = const_cast<T&>(src);
+        //LIBLAS_SWAP_BYTES_N(tmp, num);
+
+        dest.write(as_bytes(tmp), num);
+        check_stream_state(dest);
+    }
+
     template<typename T>
     static inline char* as_buffer(T& data)
     {
         return static_cast<char*>(static_cast<void*>(&data));
     }
 
-    ////template<typename T>
-    ////static inline char* as_buffer(T* data)
-    ////{
-    ////    return static_cast<char*>(static_cast<void*>(data));
-    ////}
+    template<typename T>
+    static inline char* as_buffer(T* data)
+    {
+        return static_cast<char*>(static_cast<void*>(data));
+    }
+
+    template<typename T>
+    static inline char const* as_bytes(T const& data)
+    {
+        return static_cast<char const*>(static_cast<void const*>(&data));
+    }
+
+    template<typename T>
+    static inline char const* as_bytes(T const* data)
+    {
+        return static_cast<char const*>(static_cast<void const*>(data));
+    }
+
 
     template <typename C, typename T>
     static inline void check_stream_state(std::basic_ios<C, T>& srtm)

@@ -102,6 +102,9 @@ public:
     bool findDimensionIndex(const std::string& name, std::size_t& index) const; 
     bool hasDimension(const std::string& name) const;
 
+    // this version throws if the index not found
+    std::size_t getDimensionIndex(const std::string& name) const; 
+
     boost::property_tree::ptree getPTree() const;
 
 protected:

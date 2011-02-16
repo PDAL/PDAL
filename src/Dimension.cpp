@@ -50,32 +50,17 @@ namespace libpc
 {
 
 
-Dimension::Dimension(std::string const& name, DataType dataType, std::size_t size_in_bits)
+Dimension::Dimension(std::string const& name, DataType dataType)
     : m_dataType(dataType)
     , m_name(name)
     , m_description(std::string(""))
     , m_min(0)
     , m_max(0)
     , m_position(0)
-    , m_bitSize(size_in_bits)
     , m_byteSize(0)
     , m_byteOffset(0)
 {
-    if (m_dataType == bits_t)
-    {
-        assert(size_in_bits > 0);
-        m_byteSize = (size_in_bits % 8 == 0) ? (size_in_bits/8) : (size_in_bits/8 + 1);
-    }
-    else
-    {
-        assert(size_in_bits == 0);
-        m_byteSize = getDataTypeSize(m_dataType);
-    }
-
-    //if (0 == size_in_bits)
-    //{
-    //    throw std::runtime_error("The bit size of the dimension is 0, the dimension is invalid.");
-    //}
+    m_byteSize = getDataTypeSize(m_dataType);
 }
 
 /// copy constructor
@@ -86,7 +71,6 @@ Dimension::Dimension(Dimension const& other)
     , m_min(other.m_min)
     , m_max(other.m_max)
     , m_position(other.m_position)
-    , m_bitSize(other.m_bitSize)
     , m_byteSize(other.m_byteSize)
     , m_byteOffset(other.m_byteOffset)
 {
@@ -105,7 +89,6 @@ Dimension& Dimension::operator=(Dimension const& rhs)
         m_position = rhs.m_position;
         m_byteSize = rhs.m_byteSize;
         m_byteOffset = rhs.m_byteOffset;
-        m_bitSize = rhs.m_bitSize;
     }
 
     return *this;
@@ -126,7 +109,6 @@ bool Dimension::operator==(const Dimension& other) const
         assert(m_numericOffset == other.m_numericOffset);
         assert(m_byteSize == other.m_byteSize);
         assert(m_byteOffset == other.m_byteOffset);
-        assert(m_bitSize == other.m_bitSize);
         return true;
     }
 
@@ -145,7 +127,6 @@ property_tree::ptree Dimension::GetPTree() const
     dim.put("position", getPosition());
     dim.put("byteoffset", getByteOffset());
     dim.put("bytesize", getByteSize());
-    dim.put("bitsize", getBitSize());
 
     if (isNumeric())
     {
@@ -210,8 +191,6 @@ std::string Dimension::getDataTypeName(DataType type)
         return "float_t";
     case double_t:
         return "double_t";
-    case bits_t:
-        return "bits_t";
     }
     throw;
 }
@@ -241,9 +220,6 @@ std::size_t Dimension::getDataTypeSize(DataType type)
         return 4;
     case double_t:
         return 8;
-   case bits_t:
-        throw;
-        //return 0;
     }
     throw;
 }
@@ -265,8 +241,6 @@ bool Dimension::getDataTypeIsNumeric(DataType type)
     case float_t:
     case double_t:
         return true;
-    case bits_t:
-        return false;
     }
     throw;
 }
@@ -289,8 +263,6 @@ bool Dimension::getDataTypeIsSigned(DataType type)
     case float_t:
     case double_t:
         return true;
-    case bits_t:
-        return false;
     }
     throw;
 }
@@ -313,8 +285,6 @@ bool Dimension::getDataTypeIsInteger(DataType type)
     case float_t:
     case double_t:
         return false;
-    case bits_t:
-        return false;
     }
     throw;
 }
@@ -332,7 +302,6 @@ Dimension::DataType Dimension::getDataTypeFromString(const std::string& s)
     if (s == "uint64_t") return uint64_t;
     if (s == "float_t") return float_t;
     if (s == "double_t") return double_t;
-    if (s == "bits_t") return bits_t;
     throw;
 }
 

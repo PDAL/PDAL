@@ -92,65 +92,6 @@ const Schema& PointData::getSchema() const
 }
 
 
-template <class T>
-void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value)
-{
-    std::size_t offset = (pointIndex * m_pointSize) + m_schema.getDimension(fieldIndex).getByteOffset();
-    assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
-    boost::uint8_t* p = m_data + offset;
-
-    *(T*)p = value;
-}
-
-
-template <class T>
-T PointData::getField(std::size_t pointIndex, std::size_t fieldIndex) const
-{
-    std::size_t offset = (pointIndex * m_pointSize) + m_schema.getDimension(fieldIndex).getByteOffset();
-    assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
-    boost::uint8_t* p = m_data + offset;
-
-    return *(T*)p;
-}
-
-
-void PointData::setField_U8(std::size_t pointIndex, std::size_t fieldIndex, boost::uint8_t value)
-{
-    setField<boost::uint8_t>(pointIndex, fieldIndex, value);
-}
-
-
-void PointData::setField_F32(std::size_t pointIndex, std::size_t fieldIndex, float value)
-{
-    setField<float>(pointIndex, fieldIndex, value);
-}
-
-
-void PointData::setField_F64(std::size_t pointIndex, std::size_t fieldIndex, double value)
-{
-    setField<double>(pointIndex, fieldIndex, value);
-
-}
-
-
-boost::uint8_t PointData::getField_U8(std::size_t pointIndex, std::size_t fieldIndex) const
-{
-    return getField<boost::uint8_t>(pointIndex, fieldIndex);
-}
-
-
-float PointData::getField_F32(std::size_t pointIndex, std::size_t fieldIndex) const
-{
-    return getField<float>(pointIndex, fieldIndex);
-}
-
-
-double PointData::getField_F64(std::size_t pointIndex, std::size_t fieldIndex) const
-{
-    return getField<double>(pointIndex, fieldIndex);
-}
-
-
 void PointData::copyFieldsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData)
 {
     assert(getSchema() == srcPointData.getSchema());
@@ -196,14 +137,35 @@ std::ostream& operator<<(std::ostream& ostr, const PointData& pointData)
 
             switch (field.getDataType())
             {
+            case Dimension::int8_t:
+                ostr << (int)(pointData.getField<boost::int8_t>(pointIndex, fieldIndex));
+                break;
             case Dimension::uint8_t:
-                ostr << (int)(pointData.getField_U8(pointIndex, fieldIndex));
+                ostr << (int)(pointData.getField<boost::uint8_t>(pointIndex, fieldIndex));
+                break;
+            case Dimension::int16_t:
+                ostr << pointData.getField<boost::int16_t>(pointIndex, fieldIndex);
+                break;
+            case Dimension::uint16_t:
+                ostr << pointData.getField<boost::uint16_t>(pointIndex, fieldIndex);
+                break;
+            case Dimension::int32_t:
+                ostr << pointData.getField<boost::int32_t>(pointIndex, fieldIndex);
+                break;
+            case Dimension::uint32_t:
+                ostr << pointData.getField<boost::uint32_t>(pointIndex, fieldIndex);
+                break;
+            case Dimension::int64_t:
+                ostr << pointData.getField<boost::int64_t>(pointIndex, fieldIndex);
+                break;
+            case Dimension::uint64_t:
+                ostr << pointData.getField<boost::uint64_t>(pointIndex, fieldIndex);
                 break;
             case Dimension::float_t:
-                ostr << pointData.getField_F32(pointIndex, fieldIndex);
+                ostr << pointData.getField<float>(pointIndex, fieldIndex);
                 break;
             case Dimension::double_t:
-                ostr << pointData.getField_F64(pointIndex, fieldIndex);
+                ostr << pointData.getField<double>(pointIndex, fieldIndex);
                 break;
             default:
                 throw;

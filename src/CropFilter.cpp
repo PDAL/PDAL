@@ -72,9 +72,9 @@ void CropFilter::readPoints(PointData& data)
 
     for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        float x = data.getField_F32(pointIndex, fieldX);
-        float y = data.getField_F32(pointIndex, fieldY);
-        float z = data.getField_F32(pointIndex, fieldZ);
+        float x = data.getField<float>(pointIndex, fieldX);
+        float y = data.getField<float>(pointIndex, fieldY);
+        float z = data.getField<float>(pointIndex, fieldZ);
         Vector<double> point(x,y,z);
         if (!m_bounds.contains(point))
         {

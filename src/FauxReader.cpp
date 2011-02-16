@@ -110,11 +110,11 @@ void FauxReader::readPoints(PointData& data)
 
         data.setValid(pointIndex);
 
-        data.setField_F32(pointIndex, offsetX, x);
-        data.setField_F32(pointIndex, offsetY, y);
-        data.setField_F32(pointIndex, offsetZ, z);
+        data.setField<float>(pointIndex, offsetX, x);
+        data.setField<float>(pointIndex, offsetY, y);
+        data.setField<float>(pointIndex, offsetZ, z);
 
-        data.setField_F64(pointIndex, fieldIndexT, v * 0.1);
+        data.setField<double>(pointIndex, fieldIndexT, v * 0.1);
 
         ++v;
     }

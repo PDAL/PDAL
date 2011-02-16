@@ -35,7 +35,6 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Header.hpp
   ${LIBPC_HEADERS_DIR}/LasHeader.hpp
   ${LIBPC_HEADERS_DIR}/LasReader.hpp
-  ${LIBPC_HEADERS_DIR}/LasSchema.hpp
   ${LIBPC_HEADERS_DIR}/LasWriter.hpp
   ${LIBPC_HEADERS_DIR}/Metadata.hpp
   ${LIBPC_HEADERS_DIR}/MosaicFilter.hpp
@@ -63,7 +62,6 @@ set(LIBPC_CPP
   Header.cpp
   LasHeader.cpp
   LasReader.cpp
-  LasSchema.cpp
   LasWriter.cpp
   Metadata.cpp
   MosaicFilter.cpp
