@@ -94,7 +94,8 @@ public:
         T& tmp = const_cast<T&>(src);
         //LIBLAS_SWAP_BYTES_N(tmp, num);
 
-        dest.write(as_bytes(tmp), num);
+        char const* p = as_bytes(tmp);
+        dest.write(p, num);
         check_stream_state(dest);
     }
 
