@@ -57,8 +57,6 @@ namespace libpc
 class LIBPC_DLL LasHeader : public Header
 {
 public:
-    typedef boost::uuids::uuid uuid;
-
     /// Versions of point record format.
     enum PointFormatId
     {
@@ -155,10 +153,10 @@ public:
 
     /// Get project identifier.
     /// \return Global Unique Identifier as an instance of liblas::guid class.
-    uuid GetProjectId() const;
+    boost::uuids::uuid GetProjectId() const;
 
     /// Set project identifier.
-    void SetProjectId(uuid const& v);
+    void SetProjectId(boost::uuids::uuid const& v);
 
     /// Get major component of version of LAS format.
     /// \return Always 1 is returned as the only valid value.
@@ -352,11 +350,10 @@ public:
     //void to_rst(std::ostream& os) const;
     //void to_xml(std::ostream& os) const;
     //void to_json(std::ostream& os) const;
+
+    // used by LasHeaderReader
+    static void update_required_dimensions(PointFormatId data_format_id, Schema&);
     
-
-    void read(std::istream&);
-    void write(std::ostream&);
-
 private:
     typedef Vector<double> PointScales;
     typedef Vector<double> PointOffsets;
@@ -378,26 +375,17 @@ private:
     // TODO (low-priority): replace static-size char arrays
     // with std::string and return const-reference to string object.
     
-    bool HasLAS10PadSignature(std::istream& ifs);
-    void ReadVLRs(std::istream& ifs);
-    void Validate(std::istream& ifs);
-
-    static void update_required_dimensions(PointFormatId data_format_id, Schema&);
     static void add_record0_dimensions(Schema& schema);
     static void add_time(Schema& schema);
     static void add_color(Schema& schema);
     
-    void WriteLAS10PadSignature(std::ostream& ostream);
-    boost::int32_t GetRequiredHeaderSize(std::ostream& ostream) const;
-    void WriteVLRs(std::ostream& ostream);
-
     //
     // Private data members
     //
     char m_signature[eFileSignatureSize]; // TODO: replace with boost::array --mloskot
     boost::uint16_t m_sourceId;
     boost::uint16_t m_reserved;
-    uuid m_projectGuid;
+    boost::uuids::uuid m_projectGuid;
     boost::uint8_t m_versionMajor;
     boost::uint8_t m_versionMinor;
     char m_systemId[eSystemIdSize]; // TODO: replace with boost::array --mloskot

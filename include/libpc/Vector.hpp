@@ -100,19 +100,19 @@ public:
 
     T get0() const
     {
-        assert(m_data.size() >= 1);
+        assert(m_data.size() >= 0);
         return m_data[0];
     }
 
     T get1() const
     {
-        assert(m_data.size() >= 2);
+        assert(m_data.size() >= 1);
         return m_data[1];
     }
 
     T get2() const
     {
-        assert(m_data.size() >= 3);
+        assert(m_data.size() >= 2);
         return m_data[2];
     }
 

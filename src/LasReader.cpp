@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "libpc/LasReader.hpp"
+#include "libpc/LasHeaderReader.hpp"
 
 namespace libpc
 {
@@ -43,9 +44,11 @@ LasReader::LasReader(std::istream& istream)
     , m_istream(istream)
 {
     LasHeader* lasHeader = new LasHeader;
-    lasHeader->read(istream);
-
     setHeader(lasHeader);
+    
+    LasHeaderReader lasHeaderReader(*lasHeader, istream);
+    lasHeaderReader.read();
+
 
     return;
 }

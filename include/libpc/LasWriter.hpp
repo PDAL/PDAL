@@ -43,9 +43,9 @@ namespace libpc
 class LIBPC_DLL LasWriter : public Writer
 {
 public:
-    LasWriter(Stage& prevStage);
+    LasWriter(Stage& prevStage, std::ostream&);
 
-    void write();
+    //void write();
 
 protected:
     // this is called once before the loop with the writeBuffer calls
@@ -63,6 +63,8 @@ private:
     {
         throw;
     }
+
+    std::ostream& m_ostream;
 
     LasWriter& operator=(const LasWriter&); // not implemented
     LasWriter(const LasWriter&); // not implemented

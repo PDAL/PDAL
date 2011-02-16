@@ -34,6 +34,8 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Header.hpp
   ${LIBPC_HEADERS_DIR}/Header.hpp
   ${LIBPC_HEADERS_DIR}/LasHeader.hpp
+  ${LIBPC_HEADERS_DIR}/LasHeaderReader.hpp
+  ${LIBPC_HEADERS_DIR}/LasHeaderWriter.hpp
   ${LIBPC_HEADERS_DIR}/LasReader.hpp
   ${LIBPC_HEADERS_DIR}/LasWriter.hpp
   ${LIBPC_HEADERS_DIR}/Metadata.hpp
@@ -61,6 +63,8 @@ set(LIBPC_CPP
   Filter.cpp
   Header.cpp
   LasHeader.cpp
+  LasHeaderReader.cpp
+  LasHeaderWriter.cpp
   LasReader.cpp
   LasWriter.cpp
   Metadata.cpp

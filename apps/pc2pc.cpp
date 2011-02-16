@@ -24,6 +24,7 @@
 #include "libpc/FauxWriter.hpp"
 #include "libpc/LasReader.hpp"
 #include "libpc/LasHeader.hpp"
+#include "libpc/LasWriter.hpp"
 
 using namespace libpc;
 
@@ -77,21 +78,20 @@ static void test3()
 
   std::cout << (const LasHeader&)header;
 
-  boost::uint32_t numPoints = (boost::uint32_t)header.getNumPoints();
-  PointData pointData(header.getSchema(), numPoints);
-  reader.readPoints(pointData);
+  //boost::uint32_t numPoints = (boost::uint32_t)header.getNumPoints();
+  //PointData pointData(header.getSchema(), numPoints);
+  //reader.readPoints(pointData);
 
 //  std::cout << pointData;
 
   std::ostream* ofs = Utils::Create("temp.las");
 
-  ((LasHeader&)header).write(*ofs);
+  LasWriter lasWriter(reader, *ofs);
+  lasWriter.write();
 
-  ofs->flush();
-  delete ofs;
+  Utils::Cleanup(ofs);
 
-//  Utils::Cleanup(ifs);
-//  Utils::Cleanup(ofs);
+  Utils::Cleanup(ifs);
 
   return;
 }
