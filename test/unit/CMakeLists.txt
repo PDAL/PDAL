@@ -8,8 +8,9 @@
 SET(LIBPC_UNIT_TEST libpc_test)
 
 SET(LIBPC_UNIT_TEST_SRC
-    zipreader_test.cpp
-    libpc_test_suite.cpp)
+    Suite1.cpp
+    Suite2.cpp
+    main.cpp)
 
 INCLUDE_DIRECTORIES(
     .
