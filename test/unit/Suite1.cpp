@@ -6,6 +6,8 @@ BOOST_AUTO_TEST_SUITE(Suite1)
 
 BOOST_AUTO_TEST_CASE(Suite_1_Test_1)
 {
+    BOOST_TEST_MESSAGE("(hello from Suite_1_Test_1)");
+
     BOOST_CHECK(true);
 }
 
