@@ -85,10 +85,11 @@ void Utils::Cleanup(std::ostream* ofs)
     // An ofstream is closeable and deletable, but
     // an ostream like &std::cout isn't.
     if (!ofs) return;
-    if (static_cast<io::stream<io::file_sink>&>(*ofs))
+    io::stream<io::file_sink>* sink = dynamic_cast<io::stream<io::file_sink>*>(ofs);
+    if (sink)
     {
-        static_cast<io::stream<io::file_sink>&>(*ofs).close();
-        delete ofs;
+        sink->close();
+        delete sink;
     }
 }
 
@@ -100,10 +101,11 @@ void Utils::Cleanup(std::istream* ifs)
     // An ifstream is closeable and deletable, but
     // an istream like &std::cin isn't.
     if (!ifs) return;
-    if (static_cast<io::stream<io::file_source>&>(*ifs))
+    io::stream<io::file_source>* source = dynamic_cast<io::stream<io::file_source>*>(ifs);
+    if (source)
     {
-        static_cast<io::stream<io::file_source>&>(*ifs).close();
-        delete ifs;
+        source->close();
+        delete source;
     }
 }
 
