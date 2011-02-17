@@ -78,12 +78,6 @@ static void test3()
 
   std::cout << (const LasHeader&)header;
 
-  //boost::uint32_t numPoints = (boost::uint32_t)header.getNumPoints();
-  //PointData pointData(header.getSchema(), numPoints);
-  //reader.readPoints(pointData);
-
-//  std::cout << pointData;
-
   std::ostream* ofs = Utils::Create("temp.las");
 
   LasWriter lasWriter(reader, *ofs);

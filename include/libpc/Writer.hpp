@@ -51,7 +51,7 @@ public:
 
 protected:
     // this is called once before the loop with the writeBuffer calls
-    virtual void writeBegin() = 0;
+    virtual void writeBegin(std::size_t totalNumPoints) = 0;
 
     // called repeatedly, until out of data
     virtual void writeBuffer(const PointData&) = 0;

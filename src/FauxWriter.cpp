@@ -50,7 +50,7 @@ FauxWriter::FauxWriter(Stage& prevStage) :
 }
 
 
-void FauxWriter::writeBegin()
+void FauxWriter::writeBegin(std::size_t totalNumPoints)
 {
     cout << "FauxWriter::writeBegin()" << endl;
     cout << endl;

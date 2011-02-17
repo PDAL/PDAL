@@ -49,9 +49,9 @@ Writer::Writer(Stage& prevStage) :
 
 void Writer::write()
 {
-    writeBegin();
-
     boost::uint64_t numPoints = m_prevStage.getHeader().getNumPoints();
+
+    writeBegin(numPoints);
 
     const boost::uint32_t chunkSize = 100;
 
@@ -60,7 +60,7 @@ void Writer::write()
 
     if (numChunks > 0)
     {
-        PointData buffer(getHeader().getSchema(), chunkSize);
+        PointData buffer(m_prevStage.getHeader().getSchema(), chunkSize);
         for (boost::uint64_t i=0; i<numChunks; i++)
         {
             m_prevStage.readPoints(buffer);
@@ -71,7 +71,7 @@ void Writer::write()
     if (remainder > 0)
     {
         if (remainder != (boost::uint32_t)remainder) throw;
-        PointData buffer(getHeader().getSchema(), (boost::uint32_t)remainder);
+        PointData buffer(m_prevStage.getHeader().getSchema(), (boost::uint32_t)remainder);
 
         m_prevStage.readPoints(buffer);
         this->writeBuffer(buffer);

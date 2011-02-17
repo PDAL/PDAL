@@ -50,7 +50,7 @@ public:
 private:
     int m_numPointsWritten;
 
-    void writeBegin();
+    void writeBegin(std::size_t totalNumPoints);
     void writeBuffer(const PointData&);
     void writeEnd();
 

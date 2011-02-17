@@ -48,20 +48,21 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
     LasHeader* lasHeader = new LasHeader;
     setHeader(lasHeader);
 
-    // need to set properties of the header here, based on this->getHeader() and on the user's preferences
-    const Header& baseHeader = getHeader();
-    lasHeader->setBounds( baseHeader.getBounds() );
-    lasHeader->SetOffset(0,0,0);
-    lasHeader->SetScale(1,1,1);
-
     return;
 }
 
 
-void LasWriter::writeBegin()
+void LasWriter::writeBegin(std::size_t totalNumPoints)
 {
     Header& baseHeader = getHeader();
     LasHeader& lasHeader = (LasHeader&)baseHeader;
+
+    // need to set properties of the header here, based on this->getHeader() and on the user's preferences
+    lasHeader.setBounds( baseHeader.getBounds() );
+    lasHeader.SetOffset(0,0,0);
+    lasHeader.SetScale(1,1,1);
+    
+    lasHeader.SetPointRecordsCount(totalNumPoints);
 
     LasHeaderWriter lasHeaderWriter(lasHeader, m_ostream);
     lasHeaderWriter.write();
