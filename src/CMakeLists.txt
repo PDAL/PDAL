@@ -22,7 +22,7 @@ set(LIBPC_HEADERS_DIR ../include/libpc)
 set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/exceptions.hpp
   ${LIBPC_HEADERS_DIR}/export.hpp
-  ${LIBPC_HEADERS_DIR}/version.hpp
+  ${LIBPC_HEADERS_DIR}/libpc_config.hpp
   ${LIBPC_HEADERS_DIR}/Bounds.hpp
   ${LIBPC_HEADERS_DIR}/Color.hpp
   ${LIBPC_HEADERS_DIR}/ColorFilter.hpp
@@ -52,7 +52,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Writer.hpp)
 
 set(LIBPC_CPP
-  version.cpp
+  libpc_config.cpp
   Bounds.cpp
   Color.cpp
   ColorFilter.cpp
@@ -86,14 +86,6 @@ source_group("Source Files" FILES ${LIBPC_CPP})
 if(GDAL_FOUND)
     source_group("Source Files\\gdal" FILES ${LIBPC_GDAL_CPP})
 endif()
-
-# Diable Visual C++ language extensions when building libPC library
-# Need this enabled for boost to work -- hobu
-#if (WIN32)
-#  if (MSVC)
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Za")
-#  endif()
-#endif()
 
 # Standard include directory of libPC library
 include_directories(../include)

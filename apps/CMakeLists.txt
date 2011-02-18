@@ -1,17 +1,20 @@
-###############################################################################
 #
-# apps/CMakeLists.txt controls building of libPC utilities 
+# ./apps CMake configuration file for libPC utilties
 #
-# Copyright (c) 2009 Mateusz Loskot <mateusz@loskot.net>
-#
-###############################################################################
+# (based originally on the libLAS files copyright Mateusz Loskot)
+
+
+#------------------------------------------------------------------------------
+# includes
+#------------------------------------------------------------------------------
 
 include_directories(
     .
     ../include)
 
-###############################################################################
+#------------------------------------------------------------------------------
 # Collect programs to build
+#------------------------------------------------------------------------------
 
 set(PC2PC pc2pc)
 set(PCINFO pcinfo)
@@ -23,29 +26,16 @@ if (NOT CMAKE_BUILD_TYPE )
 endif()
 
 set(LIBPC_UTILITIES
-    ${PCINFO} ${PC2PC} )
+    ${PCINFO} ${PC2PC})
 
-# TODO: Experimental and requires testing --mloskot
-# Generate user-specific settings for Visual Studio project
-set(VCPROJ_USER_REMOTE_MACHINE_DEBUG ${MACHINE_NAME})
-set(VCPROJ_USER_ENVIRONMENT_DEBUG "${ENVIRONMENT_PATH}")
 
-if(MSVC)
-    foreach(utility ${LIBPC_UTILITIES})
-        set(USER_FILE ${utility}.vcproj.$ENV{USERDOMAIN}.$ENV{USERNAME}.user)
-        set(OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/${USER_FILE})
-        message(STATUS "Generating ${CMAKE_GENERATOR} user-specific settings in ${USER_FILE}")
-        configure_file(${CMAKE_SOURCE_DIR}/cmake/libPC.vcproj.user.template ${OUTPUT_PATH} @ONLY)
-    endforeach()
-endif()
-
-###############################################################################
+#------------------------------------------------------------------------------
 # Configure build targets
+#------------------------------------------------------------------------------
 
 if(WIN32)
     add_definitions("-DLIBPC_DLL_EXPORT=1")
 endif()
-
 
 set(APPS_CPP_DEPENDENCIES
     ${LIBPC_LIB_NAME}
@@ -53,7 +43,7 @@ set(APPS_CPP_DEPENDENCIES
     ${GEOTIFF_LIBRARY}
     ${GDAL_LIBRARY}
     ${SPATIALINDEX_LIBRARY}
-	${LASZIP_LIBRARY}
+    ${LASZIP_LIBRARY}
     ${Boost_LIBRARIES})
 
 link_directories(${Boost_LIBRARY_DIRS})
@@ -70,14 +60,14 @@ if(PC2PC)
 endif()
 
 
-###############################################################################
+#------------------------------------------------------------------------------
 # Targets installation
+#------------------------------------------------------------------------------
 
 install(TARGETS ${LIBPC_UTILITIES}
     RUNTIME DESTINATION ${LIBPC_BIN_DIR}
     LIBRARY DESTINATION ${LIBPC_LIB_DIR}
     ARCHIVE DESTINATION ${LIBPC_LIB_DIR})
-
 
 if(UNIX)
 

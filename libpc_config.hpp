@@ -2,13 +2,11 @@
  * $Id$
  *
  * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS version related functions.
+ * Purpose:  Version information
  * Author:   Mateusz Loskot, mateusz@loskot.net
- *           Frank Warmerdam, warmerdam@pobox.com
  *
  ******************************************************************************
- * Copyright (c) 2008, Mateusz Loskot
- * Copyright (c) 2010, Frank Warmerdam
+ * Copyright (c) 2010, Mateusz Loskot
  *
  * All rights reserved.
  *
@@ -41,92 +39,22 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <sstream>
-#include <libpc/version.hpp>
+#ifndef LIBPC_VERSION_HPP_INCLUDED
+#define LIBPC_VERSION_HPP_INCLUDED
 
-#ifdef HAVE_LIBGEOTIFF
-#include <geotiff.h>
-#endif
+#include <string>
+#include "libpc/export.hpp"
 
-#ifdef HAVE_GDAL
-#include <gdal.h>
-#endif
-
-#ifdef HAVE_LASZIP
-#include <laszip/laszip.hpp>
-#endif
 
 namespace libpc
 {
 
-/// Check if GDAL support has been built in to libPC
-bool IsGDALEnabled()
-{
-#ifdef HAVE_GDAL
-    return true;
-#else
-    return false;
-#endif
-}
+bool LIBPC_DLL IsGDALEnabled(void);
+bool LIBPC_DLL IsLibGeoTIFFEnabled(void);
+bool LIBPC_DLL IsLasZipEnabled(void);
+std::string LIBPC_DLL GetFullVersion(void);
+std::string LIBPC_DLL GetVersion(void);
 
-/// Check if GeoTIFF support has been built in to libPC
-bool IsLibGeoTIFFEnabled()
-{
-#ifdef HAVE_LIBGEOTIFF
-    return true;
-#else
-    return false;
-#endif
-}
+} // namespace liblas
 
-/// Check if LasZip compression support has been built in to libPC
-bool IsLasZipEnabled()
-{
-#ifdef HAVE_LASZIP
-    return true;
-#else
-    return false;
-#endif
-}
-
-/// Tell the user a bit about libPC's compilation
-std::string  GetFullVersion(void)
-{
-    std::ostringstream os;
-
-#ifdef HAVE_LIBGEOTIFF
-    os << " GeoTIFF "
-       << (LIBGEOTIFF_VERSION / 1000) << '.'
-       << (LIBGEOTIFF_VERSION / 100 % 10) << '.'
-       << (LIBGEOTIFF_VERSION % 100 / 10);
-#endif
-
-#ifdef HAVE_GDAL
-    os << " GDAL " << GDALVersionInfo("RELEASE_NAME");
-#endif
-
-#ifdef HAVE_LASZIP
-    os << " LASzip "
-       << LASZIP_VERSION_MAJOR << "."
-       << LASZIP_VERSION_MINOR << "."
-       << LASZIP_VERSION_REVISION;
-#endif
-
-    std::string info(os.str());
-    os.str("");
-    os << "libPC " << LIBPC_VERSION_STRING;
-    if (!info.empty())
-    {
-        os << " with" << info;
-    }
-
-    return os.str();
-}
-
-/// Tell the user our dotted release name.
-std::string GetVersion()
-{
-    return std::string(LIBPC_VERSION_STRING);
-}
-
-} // namespace libpc
+#endif // LIBPC_VERSION_HPP_INCLUDED

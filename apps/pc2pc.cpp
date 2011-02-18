@@ -11,8 +11,7 @@
 
 #include <iostream>
 #include "libpc/exceptions.hpp"
-#include "libpc/version.hpp"
-#include "libpc/version.hpp"
+#include "libpc/libpc_config.hpp"
 #include "libpc/Bounds.hpp"
 #include "libpc/Color.hpp"
 #include "libpc/Dimension.hpp"
@@ -101,14 +100,17 @@ int main(int, char* [])
     }
 
     {
-        int major = LIBPC_VERSION_MAJOR;
-        int minor = LIBPC_VERSION_MINOR;
-        int patch = LIBPC_VERSION_PATCH;
-        int version = LIBPC_VERSION;
-        std::string verstring = LIBPC_VERSION_STRING;
-        std::cout << major << " " << minor << " " << patch << " (" << version << ")" << std::endl;
+        const int major = getVersionMajor();
+        const int minor = getVersionMinor();
+        const int patch = getVersionPatch();
+        const int verInt = getVersionInteger();
+        std::cout << "Version: " << major << " " << minor << " " << patch << " (" << verInt << ")" << std::endl;
 
-        std::cout << " string: " << GetVersion() << std::endl;
+        const std::string verString = getVersionString();
+        std::cout << " string: " << verString << std::endl;
+
+        const std::string fullString = getFullVersion();
+        std::cout << "Full version string: " << fullString << std::endl;
     }
 
     {

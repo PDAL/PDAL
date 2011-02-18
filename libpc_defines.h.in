@@ -1,0 +1,36 @@
+/* 
+ * libpc_defines.h.in is used by cmake to generate libpc_defines.h
+ *
+ * Do not edit libpc_defines.h!
+ *
+ * Note this is a C-style header.  Do not use C++ syntax.
+ */
+
+/*
+ * version settings
+ */
+#define LIBPC_VERSION_MAJOR @LIBPC_VERSION_MAJOR@
+#define LIBPC_VERSION_MINOR @LIBPC_VERSION_MINOR@
+#define LIBPC_VERSION_PATCH @LIBPC_VERSION_PATCH@
+
+#define LIBPC_VERSION_STRING "@LIBPC_VERSION_STRING@"
+
+/* (note this will look yucky until we get to major>=1) */
+#define LIBPC_VERSION_INTEGER ((LIBPC_VERSION_MAJOR*100*100)+(LIBPC_VERSION_MINOR*100)+LIBPC_VERSION_PATCH)
+
+
+/*
+ * availability of 3rd-party libraries
+ */
+#cmakedefine LIBPC_HAVE_LASZIP
+#cmakedefine LIBPC_HAVE_ORSACE
+#cmakedefine LIBPC_HAVE_GDAL
+#cmakedefine LIBPC_HAVE_LIBXML2
+#cmakedefine LIBPC_HAVE_LIBGEOTIFF
+
+
+/*
+ * platform/build settings
+ */
+#cmakedefine LIBPC_ENDIAN_AWARE
+#define LIBPC_BUILD_TYPE "@LIBPC_BUILD_TYPE@"

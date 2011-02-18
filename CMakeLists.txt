@@ -1,54 +1,14 @@
-###############################################################################
-# Main CMake configuration file for libPC
 #
-# Author: Mateusz Loskot <mateusz@loskot.net>
+# top-level CMake configuration file for libPC
 #
-#
-###############################################################################
-# libPC general settings
+# (based originally on the libLAS files copyright Mateusz Loskot)
+
+cmake_minimum_required(VERSION 2.6.0)
 project(libPC)
 
-
-SET(LIBPC_VERSION_MAJOR "0")
-SET(LIBPC_VERSION_MINOR "1")
-SET(LIBPC_VERSION_PATCH "0")
-set(VERSION "${LIBPC_VERSION_MAJOR}.${LIBPC_VERSION_MINOR}.${LIBPC_VERSION_PATCH}")
-SET(LIBPC_LIB_SOVERSION "0.1.0")
-SET(LIBPC_C_LIB_SOVERSION "0.1.0")
-SET(OSGEO4W_UPSTREAM_RELEASE "1")
-
-if(WIN32)
-  # Name of C++ library
-  set(LIBPC_LIB_NAME libpc)
-
-else()
-  # Name of C++ library
-  set(LIBPC_LIB_NAME pc)
-endif()
-
-# Name of test suite runner
-set(LIBPC_UNIT_TEST libpc_test)
-
-set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
-
-# Choose package components
-set(WITH_UTILITIES TRUE CACHE BOOL "Choose if libPC utilities should be built")
-set(WITH_TESTS TRUE CACHE BOOL "Choose if libPC unit tests should be built")
-
-# Choose to use pkg-config or not
-set(WITH_PKGCONFIG FALSE CACHE BOOL
-  "Choose whether a pkgconfig file (libPC.pc) should be installed")
-
-set(WITH_ENDIANAWARE FALSE CACHE BOOL "Choose whether or not libPC should do runtime endianness switching.  Note that this can slow things down considerably if enabled by default")
-
-# Enable CTest and submissions to libPC dashboard at CDash
-# http://my.cdash.org/index.php?project=libPC
-set(ENABLE_CTEST FALSE CACHE BOOL
-  "Enable CTest to support submissions of results to CDash at http://cdash.org")
-
-###############################################################################
-# CMake settings
-cmake_minimum_required(VERSION 2.6.0)
+#------------------------------------------------------------------------------
+# internal cmake settings
+#------------------------------------------------------------------------------
 
 set(CMAKE_COLOR_MAKEFILE ON)
 
@@ -56,23 +16,86 @@ set(CMAKE_COLOR_MAKEFILE ON)
 mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # Path to additional CMake modules
-set(CMAKE_MODULE_PATH ${libPC_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
-###############################################################################
+
+#------------------------------------------------------------------------------
+# libPC general settings
+#------------------------------------------------------------------------------
+
+
+
+# the next three lines are the ONLY place in the entire libpc system where
+# the version info is hard-coded
+SET(LIBPC_VERSION_MAJOR "0")
+SET(LIBPC_VERSION_MINOR "1")
+SET(LIBPC_VERSION_PATCH "0")
+
+set(LIBPC_VERSION_STRING "${LIBPC_VERSION_MAJOR}.${LIBPC_VERSION_MINOR}.${LIBPC_VERSION_PATCH}")
+SET(LIBPC_LIB_SOVERSION ${LIBPC_VERSION_MAJOR})
+SET(LIBPC_C_LIB_SOVERSION ${LIBPC_VERSION_MAJOR})
+
+
+# Name of C++ library
+if(WIN32)
+  set(LIBPC_LIB_NAME libpc)
+else()
+  set(LIBPC_LIB_NAME pc)
+endif()
+
+set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
+
+
+
+#------------------------------------------------------------------------------
+# misc user options
+#------------------------------------------------------------------------------
+
+# Choose package components
+set(WITH_APPS TRUE CACHE BOOL "Choose if libPC utilities should be built")
+set(WITH_TESTS TRUE CACHE BOOL "Choose if libPC unit tests should be built")
+
+# Choose to use pkg-config or not
+set(WITH_PKGCONFIG FALSE CACHE BOOL
+  "Choose whether a pkgconfig file (libPC.pc) should be installed")
+
+set(WITH_ENDIANAWARE FALSE CACHE BOOL "Choose whether or not libPC should do runtime endianness switching.  Note that this can slow things down considerably if enabled by default")
+if (WITH_ENDIANAWARE)
+    set(LIBPC_ENDIAN_AWARE 1)
+endif()
+
+
+#------------------------------------------------------------------------------
+# test harness settings
+#------------------------------------------------------------------------------
+
+# Name of test suite runner
+set(LIBPC_UNIT_TEST libpc_test)
+
+# Enable CTest and submissions to libPC dashboard at CDash
+# http://my.cdash.org/index.php?project=libPC
+set(ENABLE_CTEST FALSE CACHE BOOL
+  "Enable CTest to support submissions of results to CDash at http://cdash.org")
+
+
+
+#------------------------------------------------------------------------------
 # General build settings
+#------------------------------------------------------------------------------
 
-# Default to debug mode until final 1.6.0 release 
+# note we default to debug mode
 if(NOT MSVC_IDE)
   if(NOT CMAKE_BUILD_TYPE)
-
   set(CMAKE_BUILD_TYPE Debug CACHE STRING 
     "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
   endif()
-    message(STATUS "Setting libPC build type - ${CMAKE_BUILD_TYPE}")
+  message(STATUS "Setting libPC build type - ${CMAKE_BUILD_TYPE}")
 endif()
 
+set(LIBPC_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+
 # TODO: Still testing the output paths --mloskot
-set(LIBPC_BUILD_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE})
+set(LIBPC_BUILD_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 # Output directory in which to build RUNTIME target files.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${LIBPC_BUILD_OUTPUT_DIRECTORY})
@@ -84,8 +107,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIBPC_BUILD_OUTPUT_DIRECTORY})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LIBPC_BUILD_OUTPUT_DIRECTORY}) 
 
 
-###############################################################################
+#------------------------------------------------------------------------------
 # Platform and compiler specific settings
+#------------------------------------------------------------------------------
 
 if(WIN32)
   if (MSVC)
@@ -102,20 +126,13 @@ if(WIN32)
     else()
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
     endif()
-
-    # Generate dot-user file with user-specific settings for
-    # Visual Studio project
-    set(MSVC_ENVIRONMENT_PATH "" CACHE STRING
-      "Custom PATH for Environment property in Visual Studio for project")
-    mark_as_advanced(MSVC_ENVIRONMENT_PATH)
-    set(VCPROJ_USER_ENVIRONMENT_PATH_DEBUG "${ENVIRONMENT_PATH}")
-    mark_as_advanced(VCPROJ_USER_ENVIRONMENT_PATH_DEBUG)
-
   endif()
   
   set(CMAKE_INCLUDE_PATH c:/osgeo4w/include;$ENV{CMAKE_INCLUDE_PATH})
   set(CMAKE_LIBRARY_PATH c:/osgeo4w/lib;$ENV{CMAKE_LIBRARY_PATH})
+
 else()
+  # not WIN32
 
   # Recommended C++ compilation flags
   # -Weffc++
@@ -143,11 +160,11 @@ else()
   set(SO_EXT so)
 endif(APPLE)
 
-###############################################################################
-# Search for dependencies
 
-# Boost C++ Libraries support - required
-message(STATUS "Searching for Boost 1.38+ - done")
+
+#------------------------------------------------------------------------------
+# settings for Boost dependencies
+#------------------------------------------------------------------------------
 
 # Default to using static, multithreaded libraries for 
 # linking under MSVC.  This is because we show users how to 
@@ -160,8 +177,8 @@ if(WIN32)
   endif(MSVC)
 endif(WIN32)
 
-# NOTE: Add iostreams to COMPONENTS list to enable bigfile_boost_iostreams_test
-find_package(Boost 1.38 COMPONENTS program_options thread REQUIRED)
+# BUG: are there other Boost components we're using?
+find_package(Boost 1.45 COMPONENTS program_options thread iostreams unit_test_framework REQUIRED)
 
 if(Boost_FOUND AND Boost_PROGRAM_OPTIONS_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
@@ -173,47 +190,20 @@ mark_as_advanced(CLEAR Boost_LIBRARY_DIRS)
 link_directories(${Boost_LIBRARY_DIRS}) 
 
 
-    
-# libxml2 support - optional, default=ON
-set(WITH_LIBXML2 FALSE CACHE BOOL "Choose if libxml2 support should be built ")
 
-if(WITH_LIBXML2)
-    find_package(LibXml2)
-    mark_as_advanced(CLEAR LIBXML2_INCLUDE_DIR)
-    mark_as_advanced(CLEAR LIBXML2_LIBRARIES)
-    if(LIBXML2_FOUND)
-        include_directories(${LIBXML2_INCLUDE_DIR})
-        add_definitions(-DHAVE_LIBXML2=1)
-    endif()
-endif()
-
+#------------------------------------------------------------------------------
+# settings for GDAL & related dependencies
+#------------------------------------------------------------------------------
+   
 # GDAL/OGR support - optional, default=OFF
 set(WITH_GDAL FALSE CACHE BOOL "Choose if GDAL support should be built")
 
 if(WITH_GDAL)
-
   find_package(GDAL 1.6.0)
-
-  # if(GDAL_FOUND)
-  #   # Confirm required API is available
-  #   include(CheckFunctionExists) 
-  #   set(CMAKE_REQUIRED_LIBRARIES ${GDAL_LIBRARY})
-  #   check_function_exists(OSRSetEquirectangular2 HAVE_OSRSETEQUIRECTANGULAR2)
-  #   
-  #   if(NOT HAVE_OSRSETEQUIRECTANGULAR2)
-  #     # Reset to NOT found for GDAL/OGR
-  #     set(GDAL_FOUND)
-  #     message(FATAL_ERROR
-  #       "Unable to find OSRSetEquirectangular2 within GDAL library at ${GDAL_INCLUDE_DIR} ${GDAL_LIBRARY}")
-  #   else()
-      include_directories(${GDAL_INCLUDE_DIR})
-      add_definitions(-DHAVE_GDAL=1)
-  #   endif()
-  # endif()
-
+  set(LIBPC_HAVE_GDAL 1)
+  include_directories(${GDAL_INCLUDE_DIR})
   mark_as_advanced(CLEAR GDAL_INCLUDE_DIR) 
   mark_as_advanced(CLEAR GDAL_LIBRARY) 
-
 endif()
 
 # GeoTIFF support - optional, default=OFF
@@ -221,26 +211,15 @@ set(WITH_GEOTIFF FALSE CACHE BOOL "Choose if GeoTIFF support should be built")
 
 if(WITH_GEOTIFF)
   find_package(GeoTIFF 1.2.5)
-
   if(GEOTIFF_FOUND)
-    
-    # Confirm required API is available
     include(CheckFunctionExists) 
     set(CMAKE_REQUIRED_LIBRARIES ${GEOTIFF_LIBRARY})
-    #       check_function_exists(ST_Create HAVE_ST_CREATE)
-    
-    #        if(NOT HAVE_ST_CREATE)
-    #            set(GEOTIFF_FOUND) # Reset to NOT found for GeoTIFF
-    #            message(FATAL_ERROR "GeoTIFF support requires libgeotiff 1.2.5 or newer.")
-    #        else()
     include_directories(${GEOTIFF_INCLUDE_DIR})
-    add_definitions(-DHAVE_LIBGEOTIFF=1)
-    #        endif()
+    set(LIBPC_HAVE_LIBGEOTIFF 1)
   endif()
 
   # Determine libTIFF availability, required
   if (GEOTIFF_FOUND)
-
     mark_as_advanced(CLEAR TIFF_INCLUDE_DIR) 
     mark_as_advanced(CLEAR TIFF_LIBRARY) 
     if (WIN32)
@@ -262,6 +241,23 @@ endif()
 
 
 
+#------------------------------------------------------------------------------
+# settings for other 3rd party dependencies
+#------------------------------------------------------------------------------
+
+# libxml2 support - optional, default=ON
+set(WITH_LIBXML2 FALSE CACHE BOOL "Choose if libxml2 support should be built ")
+
+if(WITH_LIBXML2)
+    find_package(LibXml2)
+    mark_as_advanced(CLEAR LIBXML2_INCLUDE_DIR)
+    mark_as_advanced(CLEAR LIBXML2_LIBRARIES)
+    if(LIBXML2_FOUND)
+        include_directories(${LIBXML2_INCLUDE_DIR})
+        set(LIBPC_HAVE_LIBXML2 1)
+    endif()
+endif()
+
 # Oracle support - optional, default=OFF
 set(WITH_ORACLE FALSE CACHE BOOL "Choose if Oracle support should be built")
 
@@ -270,7 +266,7 @@ if(WITH_ORACLE)
 
   if(ORACLE_FOUND)
     include_directories(${ORACLE_INCLUDE_DIR})
-    add_definitions(-DHAVE_ORACLE=1)
+        set(LIBPC_HAVE_ORACLE 1)
   endif()
 endif()
 
@@ -280,23 +276,23 @@ set(WITH_STATIC_LASZIP FALSE CACHE BOOL "Choose of LASzip should be statically l
 mark_as_advanced(WITH_STATIC_LASZIP)
 
 if(WITH_LASZIP)
-  find_package(LASzip 1.0.0)
-
-  if(LASZIP_FOUND)    
-    set(CMAKE_REQUIRED_LIBRARIES ${LASZIP_LIBRARY})
-    include_directories(${LASZIP_INCLUDE_DIR})
-    add_definitions(-DHAVE_LASZIP=1)
-    mark_as_advanced(CLEAR LASZIP_INCLUDE_DIR) 
-    mark_as_advanced(CLEAR LASZIP_LIBRARY) 
-    mark_as_advanced(CLEAR LASZIP_VERSION) 
-  endif()
+    find_package(LASzip 1.0.1)
+    if(LASZIP_FOUND)    
+        set(CMAKE_REQUIRED_LIBRARIES ${LASZIP_LIBRARY})
+        include_directories(${LASZIP_INCLUDE_DIR})
+        mark_as_advanced(CLEAR LASZIP_INCLUDE_DIR) 
+        mark_as_advanced(CLEAR LASZIP_LIBRARY) 
+        mark_as_advanced(CLEAR LASZIP_VERSION) 
+        set(LIBPC_HAVE_LASZIP 1)
+    endif()
 endif()
 
-if(WITH_ENDIANAWARE)
-    add_definitions(-DLIBPC_ENDIAN_AWARE=1)
-endif()
-###############################################################################
-# Installation settings
+
+
+
+#------------------------------------------------------------------------------
+# installation path settings
+#------------------------------------------------------------------------------
 
 if(WIN32)
   set(DEFAULT_LIB_SUBDIR lib)
@@ -337,26 +333,28 @@ set(LIBPC_LIB_DIR ${LIBPC_LIB_SUBDIR})
 set(LIBPC_INCLUDE_DIR ${LIBPC_INCLUDE_SUBDIR})
 set(LIBPC_DATA_DIR ${LIBPC_DATA_SUBDIR})
 
-###############################################################################
-# Installation commands
+
+
+#------------------------------------------------------------------------------
+# installation commands
+#------------------------------------------------------------------------------
 
 install(FILES AUTHORS COPYING INSTALL LICENSE.txt README.txt
   DESTINATION ${LIBPC_DATA_DIR}/doc)
 
-###############################################################################
-# Processing of project directories
+
+
+#------------------------------------------------------------------------------
+# subdirectory controls
+#------------------------------------------------------------------------------
 
 add_subdirectory(src)
 
-if(WITH_UTILITIES)
-  message(STATUS "Enable libPC utilities to build - done")
-  add_subdirectory(apps)
-endif()
+add_subdirectory(apps)
 
 if(WITH_TESTS)
   message(STATUS "Enable libPC unit tests to build - done")
   enable_testing()
-
 
   if(ENABLE_CTEST)
     message(STATUS
@@ -379,15 +377,16 @@ endif()
 
 
 
-# Version information
+#------------------------------------------------------------------------------
+# CPACK controls
+#------------------------------------------------------------------------------
+
 SET(CPACK_PACKAGE_VERSION_MAJOR ${LIBPC_VERSION_MAJOR})
 SET(CPACK_PACKAGE_VERSION_MINOR ${LIBPC_VERSION_MINOR})
 SET(CPACK_PACKAGE_VERSION_PATCH ${LIBPC_VERSION_MINOR})
 
 SET(CPACK_SOURCE_GENERATOR "TGZ;ZIP;TBZ2")
 SET(CPACK_CMAKE_GENERATOR "Unix Makefiles")
-
-
 
 set(CPACK_SOURCE_PACKAGE_FILE_NAME
   "${CMAKE_PROJECT_NAME}-${VERSION}")
@@ -409,10 +408,16 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "hobu-config.bat")
 
 list(APPEND CPACK_SOURCE_IGNORE_FILES "libpc-osgeo4w-init.bat")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "libpc-osgeo4w-start.bat.tmpl")
+
 include(CPack)
 
-add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+#add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
-#if (WIN32)
-#    include(BuildOSGeo4W)
-#endif(WIN32)
+
+#------------------------------------------------------------------------------
+# finally, generate the libpc_config.h header
+#------------------------------------------------------------------------------
+
+configure_file(
+  "${PROJECT_SOURCE_DIR}/libpc_defines.h.in"
+  "${PROJECT_SOURCE_DIR}/include/libpc/libpc_defines.h")

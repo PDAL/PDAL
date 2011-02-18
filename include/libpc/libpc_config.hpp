@@ -2,11 +2,13 @@
  * $Id$
  *
  * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  Version information
+ * Purpose:  LAS version related functions.
  * Author:   Mateusz Loskot, mateusz@loskot.net
+ *           Frank Warmerdam, warmerdam@pobox.com
  *
  ******************************************************************************
- * Copyright (c) 2010, Mateusz Loskot
+ * Copyright (c) 2008, Mateusz Loskot
+ * Copyright (c) 2010, Frank Warmerdam
  *
  * All rights reserved.
  *
@@ -39,49 +41,20 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef LIBPC_VERSION_HPP_INCLUDED
-#define LIBPC_VERSION_HPP_INCLUDED
-
 #include <string>
 #include "libpc/export.hpp"
-
-// Caution, this is the only libPC header that is guarenteed to change with
-// every libPC release; including this header will cause a recompile every
-// time a new libPC version is released.
-
-
-// When changing the version numbers of libPC, you should ONLY modify the following
-// three macros:
-#define LIBPC_VERSION_MAJOR 0
-#define LIBPC_VERSION_MINOR 1
-#define LIBPC_VERSION_PATCH 0
-
-
-// we use a nine digit code of the form "xxxyyyzzz" for the version,
-//   where xxx=major, yyy=minor, and zzz=patch
-
-#define LIBPC_VERSION ((LIBPC_VERSION_MAJOR * 1000 * 1000) + (LIBPC_VERSION_MINOR * 1000) + LIBPC_VERSION_PATCH)
-
-
-// LIBLAS_LIB_VERSION must be defined to be the same as LIBLAS_VERSION
-// but as a *string* in the form "x_y_z" where x is the major version
-// number, y is the minor version number, and z is the patch level.
-
-#define LIBPC_XSTRINGIFY(str) #str
-#define LIBPC_STRINGIFY(str) LIBPC_XSTRINGIFY(str)
-
-#define LIBPC_VERSION_STRING LIBPC_STRINGIFY(LIBPC_VERSION_MAJOR) ## "_" LIBPC_STRINGIFY(LIBPC_VERSION_MINOR) ## "_" ##  LIBPC_STRINGIFY(LIBPC_VERSION_PATCH)
-
 
 namespace libpc
 {
 
-bool LIBPC_DLL IsGDALEnabled(void);
-bool LIBPC_DLL IsLibGeoTIFFEnabled(void);
-bool LIBPC_DLL IsLasZipEnabled(void);
-std::string LIBPC_DLL GetFullVersion(void);
-std::string LIBPC_DLL GetVersion(void);
+LIBPC_DLL bool isGDALEnabled();
+LIBPC_DLL bool isLibGeoTIFFEnabled();
+LIBPC_DLL bool isLasZipEnabled();
+LIBPC_DLL std::string getFullVersion();
+LIBPC_DLL std::string getVersionString();
+LIBPC_DLL int getVersionInteger();
+LIBPC_DLL int getVersionMajor();
+LIBPC_DLL int getVersionMinor();
+LIBPC_DLL int getVersionPatch();
 
-} // namespace liblas
-
-#endif // LIBPC_VERSION_HPP_INCLUDED
+} // namespace libpc
