@@ -79,6 +79,11 @@ public:
         m_data = v;
     }
 
+    Vector(Vector<T> const& rhs)
+    {
+        m_data = rhs.m_data;
+    }
+
     Vector& operator=(Vector<T> const& rhs)
     {
         if (&rhs != this)
@@ -98,49 +103,14 @@ public:
         return !(equal(rhs));
     }
 
-    T get0() const
+    const T& operator[](const std::size_t index) const
     {
-        assert(m_data.size() >= 0);
-        return m_data[0];
+      return m_data[index];
     }
 
-    T get1() const
+    T& operator[](const std::size_t index)
     {
-        assert(m_data.size() >= 1);
-        return m_data[1];
-    }
-
-    T get2() const
-    {
-        assert(m_data.size() >= 2);
-        return m_data[2];
-    }
-
-    T getn(std::size_t n) const
-    {
-        assert(m_data.size() >= n);
-        return m_data[n];
-    }
-
-    void set(T t)
-    {
-        m_data.resize(1);
-        m_data[0] = t;
-    }
-
-    void set(T t0, T t1)
-    {
-        m_data.resize(2);
-        m_data[0] = t0;
-        m_data[1] = t1;
-    }
-
-    void set(T t0, T t1, T t2)
-    {
-        m_data.resize(3);
-        m_data[0] = t0;
-        m_data[1] = t1;
-        m_data[2] = t2;
+      return m_data[index];
     }
 
     void set(std::vector<T> v)
@@ -151,6 +121,9 @@ public:
 
     bool equal(Vector const& other) const
     {
+        if (this->size() != other.size())
+          return false;
+
         for (std::size_t i=0; i<m_data.size(); i++)
         {
             if (!Utils::compare_distance(m_data[i], other.m_data[i]))

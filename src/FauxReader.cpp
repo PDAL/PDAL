@@ -84,12 +84,13 @@ void FauxReader::readPoints(PointData& data)
     float v = (float)m_currentPointIndex;
 
     const Bounds<double>& bounds = header.getBounds();
-    const double minX = bounds.dims()[0].minimum();
-    const double maxX = bounds.dims()[0].maximum();
-    const double minY = bounds.dims()[1].minimum();
-    const double maxY = bounds.dims()[1].maximum();
-    const double minZ = bounds.dims()[2].minimum();
-    const double maxZ = bounds.dims()[2].maximum();
+    const std::vector<Range<double>>& dims = bounds.dimensions();
+    const double minX = dims[0].getMinimum();
+    const double maxX = dims[0].getMaximum();
+    const double minY = dims[1].getMinimum();
+    const double maxY = dims[1].getMaximum();
+    const double minZ = dims[2].getMinimum();
+    const double maxZ = dims[2].getMaximum();
 
     std::size_t offsetX;
     std::size_t offsetY;

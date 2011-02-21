@@ -8,11 +8,16 @@
 
 /* actually no code in here, this is just the main file */
 
+// Testing macros:
+//   BOOST_TEST_MESSAGE("...")
+//   BOOST_CHECK(bool)
+
+
 //
 // you can run the unit tests as "bin/../libpc_test" with these interesting options:
 //
 //     --log_format=X (-f X)     # where X is xml|hrf
-
+//
 //     --log_level=X (-l X)      # where X is error|message|all|...    (default is error)
 //
 //     --log_sink=X (-k X)       # where X is filename

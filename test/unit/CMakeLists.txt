@@ -8,8 +8,9 @@
 SET(LIBPC_UNIT_TEST libpc_test)
 
 SET(LIBPC_UNIT_TEST_SRC
-    Suite1.cpp
-    Suite2.cpp
+	BoundsTest.cpp
+	RangeTest.cpp
+	VectorTest.cpp
     main.cpp)
 
 INCLUDE_DIRECTORIES(
@@ -21,6 +22,10 @@ INCLUDE_DIRECTORIES(
 ADD_EXECUTABLE(${LIBPC_UNIT_TEST} ${LIBPC_UNIT_TEST_SRC} )
 
 set_target_properties(${LIBPC_UNIT_TEST} PROPERTIES COMPILE_DEFINITIONS LIBPC_DLL_IMPORT)
+
+if(WIN32)
+    add_definitions("-DLIBPC_DLL_EXPORT=1")
+endif()
 
 TARGET_LINK_LIBRARIES(${LIBPC_UNIT_TEST} 
     ${LIBPC_LIB_NAME}

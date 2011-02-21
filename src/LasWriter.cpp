@@ -62,7 +62,9 @@ void LasWriter::writeBegin(std::size_t totalNumPoints)
     lasHeader.SetOffset(0,0,0);
     lasHeader.SetScale(1,1,1);
     
-    lasHeader.SetPointRecordsCount(totalNumPoints);
+    boost::uint32_t cnt = static_cast<boost::uint32_t>(totalNumPoints);
+    assert(cnt==totalNumPoints);
+    lasHeader.SetPointRecordsCount(cnt);
 
     LasHeaderWriter lasHeaderWriter(lasHeader, m_ostream);
     lasHeaderWriter.write();

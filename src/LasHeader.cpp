@@ -301,41 +301,41 @@ void LasHeader::SetPointRecordsByReturnCount(std::size_t index, uint32_t v)
 
 double LasHeader::GetScaleX() const
 {
-    return m_scales.get0();
+    return m_scales[0];
 }
 
 double LasHeader::GetScaleY() const
 {
-    return m_scales.get1();
+    return m_scales[1];
 }
 
 double LasHeader::GetScaleZ() const
 {
-    return m_scales.get2();
+    return m_scales[2];
 }
 
 void LasHeader::SetScale(double x, double y, double z)
 {
 
     double const minscale = 0.01;
-    m_scales.set( (Utils::compare_distance(0.0, x)) ? minscale : x,
-                  (Utils::compare_distance(0.0, y)) ? minscale : y,
-                  (Utils::compare_distance(0.0, z)) ? minscale : z );
+    m_scales[0] = Utils::compare_distance(0.0, x) ? minscale : x;
+    m_scales[0] = Utils::compare_distance(0.0, y) ? minscale : y;
+    m_scales[0] = Utils::compare_distance(0.0, z) ? minscale : z;
 }
 
 double LasHeader::GetOffsetX() const
 {
-    return m_offsets.get0();
+    return m_offsets[0];
 }
 
 double LasHeader::GetOffsetY() const
 {
-    return m_offsets.get1();
+    return m_offsets[1];
 }
 
 double LasHeader::GetOffsetZ() const
 {
-    return m_offsets.get2();
+    return m_offsets[2];
 }
 
 void LasHeader::SetOffset(double x, double y, double z)

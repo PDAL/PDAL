@@ -53,9 +53,17 @@ private:
 public:
     typedef T value_type;
 
-    Range(T minimum=(std::numeric_limits<T>::max)(), T maximum=(std::numeric_limits<T>::min)())
+    Range()
+        : m_minimum(std::numeric_limits<T>::max())
+        , m_maximum(std::numeric_limits<T>::min()) 
+    {
+    }
+
+    Range(T minimum, T maximum)
         : m_minimum(minimum)
-        , m_maximum(maximum) {}
+        , m_maximum(maximum) 
+    {
+    }
 
     Range(Range const& other)
         : m_minimum(other.m_minimum)
@@ -83,7 +91,7 @@ public:
         return !(equal(rhs));
     }
 
-    T minimum() const
+    T getMinimum() const
     {
         return m_minimum;
     }
@@ -93,7 +101,7 @@ public:
         m_minimum = value;
     }
 
-    T maximum() const
+    T getMaximum() const
     {
         return m_maximum;
     }
@@ -167,6 +175,12 @@ public:
     {
         grow(r.m_minimum);
         grow(r.m_maximum);
+    }
+
+    void grow(T lo, T hi)
+    {
+        grow(lo);
+        grow(hi);
     }
 
     T length() const

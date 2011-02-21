@@ -60,13 +60,11 @@ namespace libpc
 template <typename T>
 class LIBPC_DLL Bounds
 {
-public:
-    typedef T value_type;
-    typedef typename std::vector< Range<T> >::size_type size_type;
-    typedef typename std::vector< Range<T> > RangeVec;
+private:
+    typedef typename std::vector< Range<T> > RangeVector;
 
 private:
-    RangeVec m_ranges;
+    RangeVector m_ranges;
 
 public:
     Bounds<T>()
@@ -79,7 +77,7 @@ public:
     {
     }
 
-    Bounds(RangeVec const& ranges)
+    Bounds(RangeVector const& ranges)
         :
         m_ranges(ranges)
     {
@@ -102,9 +100,7 @@ public:
         m_ranges[1].setMaximum(maxy);
         m_ranges[2].setMaximum(maxz);
 
-#ifdef DEBUG
-        verify();
-#endif
+        assert(verify());
 
     }
 
@@ -122,10 +118,7 @@ public:
         m_ranges[0].setMaximum(maxx);
         m_ranges[1].setMaximum(maxy);
 
-#ifdef DEBUG
-        verify();
-#endif
-
+        assert(verify());
     }
 
     Bounds(const Vector<T>& minimum, const Vector<T>& maximum)
@@ -136,16 +129,14 @@ public:
     
         for (std::size_t i=0; i<minimum.size(); i++)
         {
-            m_ranges[i].setMinimum(minimum.getn(i));
-            m_ranges[i].setMaximum(maximum.getn(i));
+            m_ranges[i].setMinimum(minimum[i]);
+            m_ranges[i].setMaximum(maximum[i]);
         }    
 
-    #ifdef DEBUG
-        verify();
-    #endif
+        assert(verify());
     }
 
-    T minimum(std::size_t const& index) const
+    T getMinimum(std::size_t const& index) const
     {
         if (m_ranges.size() <= index)
         {
@@ -155,7 +146,7 @@ public:
             // throw std::runtime_error(msg.str());
             return 0;
         }
-        return m_ranges[index].minimum();
+        return m_ranges[index].getMinimum();
     }
 
     void setMinimum(std::size_t const& index, T v)
@@ -167,7 +158,7 @@ public:
         m_ranges[index].setMinimum(v);
     }
 
-    T maximum(std::size_t const& index) const
+    T getMaximum(std::size_t const& index) const
     {
         if (m_ranges.size() <= index)
         {
@@ -177,7 +168,7 @@ public:
             // throw std::runtime_error(msg.str());
             return 0;
         }
-        return m_ranges[index].maximum();
+        return m_ranges[index].getMaximum();
     }
 
     void setMaximum(std::size_t const& index, T v)
@@ -195,7 +186,7 @@ public:
     
         for (std::size_t i=0; i<m_ranges.size(); i++)
         {
-            vec.push_back(m_ranges[i].minimum());
+            vec.push_back(m_ranges[i].getMinimum());
         }
     
         return Vector<T>(vec);
@@ -207,7 +198,7 @@ public:
     
         for (std::size_t i=0; i<m_ranges.size(); i++)
         {
-            vec.push_back(m_ranges[i].maximum());
+            vec.push_back(m_ranges[i].getMaximum());
         }
     
         return Vector<T>(vec);
@@ -234,30 +225,30 @@ public:
     }
 
     /// The vector of Range<T> for the Bounds
-    RangeVec const& dims () const
+    RangeVector const& dimensions() const
     {
         return m_ranges;
     }
 
     /// The number of dimensions of the Bounds
-    size_type size() const
+    std::size_t size() const
     {
         return m_ranges.size();
     }
 
-    /// Resize the dimensionality of the Bounds to d
-    void resize(size_type d)
-    {
-        if (m_ranges.size() < d)
-        {
-            m_ranges.resize(d);
-        }
-    }
+    ///// Resize the dimensionality of the Bounds to d
+    //void resize(size_type d)
+    //{
+    //    if (m_ranges.size() < d)
+    //    {
+    //        m_ranges.resize(d);
+    //    }
+    //}
 
     /// Is this Bounds equal to other?
     bool equal(Bounds<T> const& other) const
     {
-        for (size_type i = 0; i < size(); i++)
+        for (std::size_t i = 0; i < size(); i++)
         {
             if ( m_ranges[i] != other.m_ranges[i] )
                 return false;
@@ -265,11 +256,11 @@ public:
         return true;
     }
 
-/// Does this Bounds intersect other?
+    /// Does this Bounds intersect other?
     bool intersects(Bounds const& other) const
     {
 
-        for (size_type i = 0; i < size(); i++)
+        for (std::size_t i = 0; i < size(); i++)
         {
             if ( m_ranges[i].overlaps(other.m_ranges[i]) )
                 return true;
@@ -291,10 +282,10 @@ public:
         if (point.size() != size())
             return false;
 
-        for (size_type i = 0; i < size(); i++)
+        for (std::size_t i = 0; i < size(); i++)
         {
             // As soon as it is not contains, we're false
-            if (! m_ranges[i].contains(point.getn(i)) )
+            if (! m_ranges[i].contains(point[i]) )
                 return false;
         }
         return true;
@@ -303,7 +294,7 @@ public:
     /// Does this Bounds contain other?
     bool contains(Bounds<T> const& other) const
     {
-        for (size_type i = 0; i < size(); i++)
+        for (std::size_t i = 0; i < size(); i++)
         {
             // As soon as it is not contains, we're false
             if (! m_ranges[i].contains(other.m_ranges[i]) )
@@ -315,9 +306,7 @@ public:
     /// Shift each dimension by a vector of detlas
     void shift(std::vector<T> deltas)
     {
-        typedef typename std::vector< T >::size_type size_type;
-
-        size_type i;
+        std::size_t i;
         if( size() <= deltas.size())
         {
             std::ostringstream msg;
@@ -334,9 +323,7 @@ public:
     /// Scale each dimension by a vector of deltas
     void scale(std::vector<T> deltas)
     {
-        typedef typename std::vector< T >::size_type size_type;
-
-        size_type i;
+        std::size_t i;
         if( size() <= deltas.size())
         {
             std::ostringstream msg;
@@ -353,8 +340,8 @@ public:
     /// Clip this Bounds to the extent of r
     void clip(Bounds const& r)
     {
-        RangeVec ds = r.dims();
-        for (size_type i = 0; i < size(); ++i)
+        RangeVector ds = r.dimensions();
+        for (std::size_t i = 0; i < size(); ++i)
         {
             m_ranges[i].clip(ds[i]);
         }
@@ -363,8 +350,8 @@ public:
     /// Grow to the union of two liblas::Bounds
     void grow(Bounds const& r)
     {
-        RangeVec ds = r.dims();
-        for (size_type i = 0; i < size(); ++i)
+        RangeVector ds = r.dimensions();
+        for (std::size_t i = 0; i < size(); ++i)
         {
             m_ranges[i].grow(ds[i]);
         }
@@ -374,16 +361,16 @@ public:
     void grow(Vector<T> const& point)
     {
         assert(point.size() == size());
-        for (size_type i = 0; i < size(); ++i)
+        for (std::size_t i = 0; i < size(); ++i)
         {
-            m_ranges[i].grow(point.getn(i));
+            m_ranges[i].grow(point[i]);
         }
     }
 
     T volume() const
     {
         T output = T();
-        for (size_type i = 0; i < size(); i++)
+        for (std::size_t i = 0; i < size(); i++)
         {
             output = output * m_ranges[i].length();
         }
@@ -393,23 +380,30 @@ public:
 
     bool empty() const
     {
-        for (size_type i = 0; i < size(); i++)
+        if (size()==0)
+        {
+          return true;
+        }
+
+        for (std::size_t i = 0; i < size(); i++)
         {
             if (m_ranges[i].empty())
+            {
                 return true;
+            }
         }
         return false;
     }
 
-    void verify()
+    bool verify()
     {
-        for (size_type d = 0; d < size(); ++d)
+        for (std::size_t d = 0; d < size(); ++d)
         {
-            if (minimum(d) > maximum(d) )
+            if (getMinimum(d) > getMaximum(d) )
             {
                 // Check that we're not infinity either way
-                if (Utils::compare_distance(minimum(d), std::numeric_limits<T>::max()) ||
-                    Utils::compare_distance(maximum(d), -std::numeric_limits<T>::max()))
+                if (Utils::compare_distance(getMinimum(d), std::numeric_limits<T>::max()) ||
+                    Utils::compare_distance(getMaximum(d), -std::numeric_limits<T>::max()))
                 {
                     std::ostringstream msg;
                     msg << "liblas::Bounds::verify: Minimum point at dimension " << d
@@ -418,6 +412,7 @@ public:
                 }
             }
         }
+        return true;
     }
 
     ////Bounds<T> project(liblas::SpatialReference const& in_ref, liblas::SpatialReference const& out_ref)
@@ -435,10 +430,10 @@ public:
 template<class T>
 std::ostream& operator<<(std::ostream& ostr, const Bounds<T>& bounds)
 {
-    for (size_t d = 0; d < bounds.size(); ++d)
+    for (std::size_t d = 0; d < bounds.size(); ++d)
     {
-        const Range<T>& r = bounds.dims()[d];
-        ostr << "[" <<  r.minimum() << ", " << r.maximum() << "]";
+        const Range<T>& r = bounds.dimensions()[d];
+        ostr << "[" <<  r.getMinimum() << ", " << r.getMaximum() << "]";
         if (d!=bounds.size()-1) ostr << ", ";
     }
     return ostr;
