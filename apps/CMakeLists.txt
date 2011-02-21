@@ -19,11 +19,6 @@ include_directories(
 set(PC2PC pc2pc)
 set(PCINFO pcinfo)
 
-# Set the build type to release if it is not explicitly set by the user and 
-# isn't in the cache yet
-if (NOT CMAKE_BUILD_TYPE )
-  set(CMAKE_BUILD_TYPE "Release")
-endif()
 
 set(LIBPC_UTILITIES
     ${PCINFO} ${PC2PC})
