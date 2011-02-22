@@ -54,10 +54,10 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints)
     header->setNumPoints(numPoints);
     header->setBounds(bounds);
 
-    schema.addDimension(Dimension("XPos", Dimension::float_t));
-    schema.addDimension(Dimension("YPos", Dimension::float_t));
-    schema.addDimension(Dimension("ZPos", Dimension::float_t));
-    schema.addDimension(Dimension("Time", Dimension::double_t));
+    schema.addDimension(Dimension("XPos", Dimension::Float));
+    schema.addDimension(Dimension("YPos", Dimension::Float));
+    schema.addDimension(Dimension("ZPos", Dimension::Float));
+    schema.addDimension(Dimension("Time", Dimension::Double));
 
     setHeader(header);
 

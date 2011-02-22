@@ -137,34 +137,34 @@ std::ostream& operator<<(std::ostream& ostr, const PointData& pointData)
 
             switch (field.getDataType())
             {
-            case Dimension::int8_t:
+            case Dimension::Int8:
                 ostr << (int)(pointData.getField<boost::int8_t>(pointIndex, fieldIndex));
                 break;
-            case Dimension::uint8_t:
+            case Dimension::Uint8:
                 ostr << (int)(pointData.getField<boost::uint8_t>(pointIndex, fieldIndex));
                 break;
-            case Dimension::int16_t:
+            case Dimension::Int16:
                 ostr << pointData.getField<boost::int16_t>(pointIndex, fieldIndex);
                 break;
-            case Dimension::uint16_t:
+            case Dimension::Uint16:
                 ostr << pointData.getField<boost::uint16_t>(pointIndex, fieldIndex);
                 break;
-            case Dimension::int32_t:
+            case Dimension::Int32:
                 ostr << pointData.getField<boost::int32_t>(pointIndex, fieldIndex);
                 break;
-            case Dimension::uint32_t:
+            case Dimension::Uint32:
                 ostr << pointData.getField<boost::uint32_t>(pointIndex, fieldIndex);
                 break;
-            case Dimension::int64_t:
+            case Dimension::Int64:
                 ostr << pointData.getField<boost::int64_t>(pointIndex, fieldIndex);
                 break;
-            case Dimension::uint64_t:
+            case Dimension::Uint64:
                 ostr << pointData.getField<boost::uint64_t>(pointIndex, fieldIndex);
                 break;
-            case Dimension::float_t:
+            case Dimension::Float:
                 ostr << pointData.getField<float>(pointIndex, fieldIndex);
                 break;
-            case Dimension::double_t:
+            case Dimension::Double:
                 ostr << pointData.getField<double>(pointIndex, fieldIndex);
                 break;
             default:

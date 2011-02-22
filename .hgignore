@@ -1,5 +1,7 @@
 syntax: glob
 
+libpc_defines.h
+
 # rst outputs
 *.pdf
 

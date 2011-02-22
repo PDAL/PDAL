@@ -715,28 +715,28 @@ void LasHeader::add_record0_dimensions(Schema& schema)
 {
     std::ostringstream text;
 
-    Dimension x("X", Dimension::uint32_t);
+    Dimension x("X", Dimension::Uint32);
     text << "x coordinate as a long integer.  You must use the scale and "
          << "offset information of the header to determine the double value.";
     x.setDescription(text.str());
     schema.addDimension(x);
     text.str("");
 
-    Dimension y("Y", Dimension::uint32_t);
+    Dimension y("Y", Dimension::Uint32);
     text << "y coordinate as a long integer.  You must use the scale and "
          << "offset information of the header to determine the double value.";
     y.setDescription(text.str());
     schema.addDimension(y);
     text.str("");
 
-    Dimension z("Z", Dimension::uint32_t);
+    Dimension z("Z", Dimension::Uint32);
     text << "z coordinate as a long integer.  You must use the scale and "
          << "offset information of the header to determine the double value.";
     z.setDescription(text.str());
     schema.addDimension(z);
     text.str("");
 
-    Dimension intensity("Intensity", Dimension::int16_t);
+    Dimension intensity("Intensity", Dimension::Int16);
     text << "The intensity value is the integer representation of the pulse "
          "return magnitude. This value is optional and system specific. "
          "However, it should always be included if available.";
@@ -744,7 +744,7 @@ void LasHeader::add_record0_dimensions(Schema& schema)
     schema.addDimension(intensity);
     text.str("");
 
-    Dimension return_no("Return Number", Dimension::uint8_t); // 3 bits only
+    Dimension return_no("Return Number", Dimension::Uint8); // 3 bits only
     text << "Return Number: The Return Number is the pulse return number for "
          "a given output pulse. A given output laser pulse can have many "
          "returns, and they must be marked in sequence of return. The first "
@@ -754,7 +754,7 @@ void LasHeader::add_record0_dimensions(Schema& schema)
     schema.addDimension(return_no);
     text.str("");
 
-    Dimension no_returns("Number of Returns", Dimension::uint8_t); // 3 bits only
+    Dimension no_returns("Number of Returns", Dimension::Uint8); // 3 bits only
     text << "Number of Returns (for this emitted pulse): The Number of Returns "
          "is the total number of returns for a given pulse. For example, "
          "a laser data point may be return two (Return Number) within a "
@@ -763,7 +763,7 @@ void LasHeader::add_record0_dimensions(Schema& schema)
     schema.addDimension(no_returns);
     text.str("");
 
-    Dimension scan_dir("Scan Direction", Dimension::uint8_t); // 1 bit only
+    Dimension scan_dir("Scan Direction", Dimension::Uint8); // 1 bit only
     text << "The Scan Direction Flag denotes the direction at which the "
          "scanner mirror was traveling at the time of the output pulse. "
          "A bit value of 1 is a positive scan direction, and a bit value "
@@ -774,7 +774,7 @@ void LasHeader::add_record0_dimensions(Schema& schema)
     schema.addDimension(scan_dir);
     text.str("");
 
-    Dimension edge("Flightline Edge", Dimension::uint8_t); // 1 bit only
+    Dimension edge("Flightline Edge", Dimension::Uint8); // 1 bit only
     text << "The Edge of Flight Line data bit has a value of 1 only when "
          "the point is at the end of a scan. It is the last point on "
          "a given scan line before it changes direction.";
@@ -782,7 +782,7 @@ void LasHeader::add_record0_dimensions(Schema& schema)
     schema.addDimension(edge);
     text.str("");
 
-    Dimension classification("Classification", Dimension::uint8_t);
+    Dimension classification("Classification", Dimension::Uint8);
     text << "Classification in LAS 1.0 was essentially user defined and optional. "
          "LAS 1.1 defines a standard set of ASPRS classifications. In addition, "
          "the field is now mandatory. If a point has never been classified, this "
@@ -795,7 +795,7 @@ void LasHeader::add_record0_dimensions(Schema& schema)
     schema.addDimension(classification);
     text.str("");
 
-    Dimension scan_angle("Scan Angle Rank", Dimension::int8_t);
+    Dimension scan_angle("Scan Angle Rank", Dimension::Int8);
     text << "The Scan Angle Rank is a signed one-byte number with a "
          "valid range from -90 to +90. The Scan Angle Rank is the "
          "angle (rounded to the nearest integer in the absolute "
@@ -809,13 +809,13 @@ void LasHeader::add_record0_dimensions(Schema& schema)
     schema.addDimension(scan_angle);
     text.str("");
 
-    Dimension user_data("User Data", Dimension::uint8_t);
+    Dimension user_data("User Data", Dimension::Uint8);
     text << "This field may be used at the user’s discretion";
     user_data.setDescription(text.str());
     schema.addDimension(user_data);
     text.str("");
 
-    Dimension point_source_id("Point Source ID", Dimension::uint16_t);
+    Dimension point_source_id("Point Source ID", Dimension::Uint16);
     text << "This value indicates the file from which this point originated. "
          "Valid values for this field are 1 to 65,535 inclusive with zero "
          "being used for a special case discussed below. The numerical value "
@@ -838,19 +838,19 @@ void LasHeader::add_color(Schema& schema)
 {
     std::ostringstream text;
 
-    Dimension red("Red", Dimension::uint16_t);
+    Dimension red("Red", Dimension::Uint16);
     text << "The red image channel value associated with this point";
     red.setDescription(text.str());
     schema.addDimension(red);
     text.str("");
 
-    Dimension green("Green", Dimension::uint16_t);
+    Dimension green("Green", Dimension::Uint16);
     text << "The green image channel value associated with this point";
     green.setDescription(text.str());
     schema.addDimension(green);
     text.str("");
 
-    Dimension blue("Blue", Dimension::uint16_t);
+    Dimension blue("Blue", Dimension::Uint16);
     text << "The blue image channel value associated with this point";
     blue.setDescription(text.str());
     schema.addDimension(blue);
@@ -863,7 +863,7 @@ void LasHeader::add_time(Schema& schema)
 {
     std::ostringstream text;
 
-    Dimension t("Time", Dimension::uint64_t);
+    Dimension t("Time", Dimension::Uint64);
     text << "The GPS Time is the double floating point time tag value at "
          "which the point was acquired. It is GPS Week Time if the "
          "Global Encoding low bit is clear and Adjusted Standard GPS "

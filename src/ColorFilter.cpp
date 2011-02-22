@@ -45,9 +45,9 @@ ColorFilter::ColorFilter(Stage& prevStage)
     Schema& schema = getHeader().getSchema();
 
     // add the three u8 fields
-    schema.addDimension(Dimension("Zred", Dimension::uint8_t));
-    schema.addDimension(Dimension("Zgreen", Dimension::uint8_t));
-    schema.addDimension(Dimension("Zblue", Dimension::uint8_t));
+    schema.addDimension(Dimension("Zred", Dimension::Uint8));
+    schema.addDimension(Dimension("Zgreen", Dimension::Uint8));
+    schema.addDimension(Dimension("Zblue", Dimension::Uint8));
 
     return;
 }

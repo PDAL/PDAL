@@ -116,6 +116,11 @@ bool Dimension::operator==(const Dimension& other) const
 }
 
 
+bool Dimension::operator!=(const Dimension& other) const
+{
+  return !(*this==other);
+}
+
 
 property_tree::ptree Dimension::GetPTree() const
 {
@@ -171,26 +176,26 @@ std::string Dimension::getDataTypeName(DataType type)
 {
     switch (type)
     {
-    case int8_t:
-        return "int8_t";
-    case uint8_t:
-        return "uint8_t";
-    case int16_t:
-        return "int16_t";
-    case uint16_t:
-        return "uint16_t";
-    case int32_t:
-        return "int32_t";
-    case uint32_t:
-        return "uint32_t";
-    case int64_t:
-        return "int64_t";
-    case uint64_t:
-        return "uint64_t";
-    case float_t:
-        return "float_t";
-    case double_t:
-        return "double_t";
+    case Int8:
+        return "Int8";
+    case Uint8:
+        return "Uint8";
+    case Int16:
+        return "Int16";
+    case Uint16:
+        return "Uint16";
+    case Int32:
+        return "Int32";
+    case Uint32:
+        return "Uint32";
+    case Int64:
+        return "Int64";
+    case Uint64:
+        return "Uint64";
+    case Float:
+        return "Float";
+    case Double:
+        return "Double";
     }
     throw;
 }
@@ -200,25 +205,25 @@ std::size_t Dimension::getDataTypeSize(DataType type)
 {
     switch (type)
     {
-   case int8_t:
+    case Int8:
         return 1;
-    case uint8_t:
+    case Uint8:
         return 1;
-    case int16_t:
+    case Int16:
         return 2;
-    case uint16_t:
+    case Uint16:
         return 2;
-    case int32_t:
+    case Int32:
         return 4;
-    case uint32_t:
+    case Uint32:
         return 4;
-    case int64_t:
+    case Int64:
         return 8;
-    case uint64_t:
+    case Uint64:
         return 8;
-    case float_t:
+    case Float:
         return 4;
-    case double_t:
+    case Double:
         return 8;
     }
     throw;
@@ -229,17 +234,17 @@ bool Dimension::getDataTypeIsNumeric(DataType type)
 {
     switch (type)
     {
-    case int8_t:
-    case uint8_t:
-    case int16_t:
-    case uint16_t:
-    case int32_t:
-    case uint32_t:
-    case int64_t:
-    case uint64_t:
+    case Int8:
+    case Uint8:
+    case Int16:
+    case Uint16:
+    case Int32:
+    case Uint32:
+    case Int64:
+    case Uint64:
         return true;
-    case float_t:
-    case double_t:
+    case Float:
+    case Double:
         return true;
     }
     throw;
@@ -250,18 +255,18 @@ bool Dimension::getDataTypeIsSigned(DataType type)
 {
     switch (type)
     {
-    case uint8_t:
-    case uint16_t:
-    case uint32_t:
-    case uint64_t:
+    case Uint8:
+    case Uint16:
+    case Uint32:
+    case Uint64:
         return false;
-    case int8_t:
-    case int16_t:
-    case int32_t:
-    case int64_t:
+    case Int8:
+    case Int16:
+    case Int32:
+    case Int64:
         return true;
-    case float_t:
-    case double_t:
+    case Float:
+    case Double:
         return true;
     }
     throw;
@@ -272,18 +277,18 @@ bool Dimension::getDataTypeIsInteger(DataType type)
 {
     switch (type)
     {
-    case uint8_t:
-    case uint16_t:
-    case uint32_t:
-    case uint64_t:
+    case Uint8:
+    case Uint16:
+    case Uint32:
+    case Uint64:
         return true;
-    case int8_t:
-    case int16_t:
-    case int32_t:
-    case int64_t:
+    case Int8:
+    case Int16:
+    case Int32:
+    case Int64:
         return true;
-    case float_t:
-    case double_t:
+    case Float:
+    case Double:
         return false;
     }
     throw;
@@ -292,16 +297,16 @@ bool Dimension::getDataTypeIsInteger(DataType type)
 
 Dimension::DataType Dimension::getDataTypeFromString(const std::string& s)
 {
-    if (s == "int8_t") return int8_t;
-    if (s == "uint8_t") return uint8_t;
-    if (s == "int16_t") return int16_t;
-    if (s == "uint16_t") return uint16_t;
-    if (s == "int32_t") return int32_t;
-    if (s == "uint32_t") return uint32_t;
-    if (s == "int64_t") return int64_t;
-    if (s == "uint64_t") return uint64_t;
-    if (s == "float_t") return float_t;
-    if (s == "double_t") return double_t;
+    if (s == "Int8") return Int8;
+    if (s == "Uint8") return Uint8;
+    if (s == "Int16") return Int16;
+    if (s == "Uint16") return Uint16;
+    if (s == "Int32") return Int32;
+    if (s == "Uint32") return Uint32;
+    if (s == "Int64") return Int64;
+    if (s == "Uint64") return Uint64;
+    if (s == "Float") return Float;
+    if (s == "Double") return Double;
     throw;
 }
 

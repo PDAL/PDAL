@@ -66,16 +66,16 @@ class LIBPC_DLL Dimension
 public:
     enum DataType
     {
-        int8_t,
-        uint8_t,
-        int16_t,
-        uint16_t,
-        int32_t,
-        uint32_t,
-        int64_t,
-        uint64_t,
-        float_t,       // 32 bits
-        double_t      // 64 bits
+        Int8,
+        Uint8,
+        Int16,
+        Uint16,
+        Int32,
+        Uint32,
+        Int64,
+        Uint64,
+        Float,       // 32 bits
+        Double       // 64 bits
     };
 
 public:
@@ -84,6 +84,7 @@ public:
     Dimension(Dimension const& other);
 
     bool operator==(const Dimension& other) const;
+    bool operator!=(const Dimension& other) const;
 
     virtual ~Dimension() {}
 

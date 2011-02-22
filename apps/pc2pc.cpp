@@ -114,7 +114,7 @@ int main(int, char* [])
     }
 
     {
-        Dimension dim("foo", Dimension::uint8_t);
+        Dimension dim("foo", Dimension::Uint8);
         std::cout << dim << std::endl;
     }
 
