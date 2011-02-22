@@ -87,15 +87,6 @@ void LasReader::reset()
 }
 
 
-template<class T>
-static inline T read_field(boost::uint8_t*& p)
-{
-    T tmp = *(T*)p;
-    p += sizeof(T);
-    return tmp;
-}
-
-
 void LasReader::readPoints(PointData& pointData)
 {
     const LasHeader& lasHeader = getLasHeader();
@@ -141,19 +132,19 @@ void LasReader::readPoints(PointData& pointData)
 
             boost::uint8_t* p = buf;
 
-            const boost::uint32_t x = read_field<boost::uint32_t>(p);
-            const boost::uint32_t y = read_field<boost::uint32_t>(p);
-            const boost::uint32_t z = read_field<boost::uint32_t>(p);
-            const boost::uint16_t intensity = read_field<boost::uint16_t>(p);
-            const boost::uint8_t flags = read_field<boost::uint8_t>(p);
-            const boost::uint8_t classification = read_field<boost::uint8_t>(p);
-            const boost::int8_t scanAngleRank = read_field<boost::int8_t>(p);
-            const boost::uint8_t user = read_field<boost::uint8_t>(p);
-            const boost::uint16_t pointSourceId = read_field<boost::uint16_t>(p);
-            const double gpsTime = read_field<double>(p);
-            const boost::uint16_t red = read_field<boost::uint16_t>(p);
-            const boost::uint16_t green = read_field<boost::uint16_t>(p);
-            const boost::uint16_t blue = read_field<boost::uint16_t>(p);
+            const boost::uint32_t x = Utils::read_field<boost::uint32_t>(p);
+            const boost::uint32_t y = Utils::read_field<boost::uint32_t>(p);
+            const boost::uint32_t z = Utils::read_field<boost::uint32_t>(p);
+            const boost::uint16_t intensity = Utils::read_field<boost::uint16_t>(p);
+            const boost::uint8_t flags = Utils::read_field<boost::uint8_t>(p);
+            const boost::uint8_t classification = Utils::read_field<boost::uint8_t>(p);
+            const boost::int8_t scanAngleRank = Utils::read_field<boost::int8_t>(p);
+            const boost::uint8_t user = Utils::read_field<boost::uint8_t>(p);
+            const boost::uint16_t pointSourceId = Utils::read_field<boost::uint16_t>(p);
+            const double gpsTime = Utils::read_field<double>(p);
+            const boost::uint16_t red = Utils::read_field<boost::uint16_t>(p);
+            const boost::uint16_t green = Utils::read_field<boost::uint16_t>(p);
+            const boost::uint16_t blue = Utils::read_field<boost::uint16_t>(p);
 
             const boost::uint8_t returnNum = flags & 0x03;
             const boost::uint8_t numReturns = (flags >> 3) & 0x03;

@@ -1,5 +1,7 @@
 #define BOOST_TEST_DYN_LINK
 
+#include <sstream>
+
 #include <boost/test/unit_test.hpp>
 
 #include "libpc/Vector.hpp"
@@ -88,6 +90,15 @@ BOOST_AUTO_TEST_CASE(test_math)
     BOOST_CHECK(v[2]==26);
 }
 
-// BUG: check operator<<
+BOOST_AUTO_TEST_CASE(test_dump)
+{
+    Vector<int> v(1,2,3);
+  
+    std::ostringstream s;
+    s << v;
+
+    BOOST_CHECK(s.str() == "(1, 2, 3)");
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()

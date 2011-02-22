@@ -39,6 +39,7 @@
 #include <string>
 
 #include <boost/concept_check.hpp>
+#include <boost/cstdint.hpp>
 
 #include "libpc/export.hpp"
 
@@ -48,6 +49,7 @@ namespace libpc
 class LIBPC_DLL Utils
 {
 public:
+    static void Utils::random_seed(unsigned int seed);
     static double random(double minimum, double maximum);
 
     template<class T>
@@ -63,11 +65,35 @@ public:
         return true;
     }
 
-    static std::istream* Open(std::string const& filename, std::ios::openmode mode=std::ios::in | std::ios::binary);
-    static std::ostream* Create(std::string const& filename, std::ios::openmode mode=std::ios::in | std::ios::binary);
+    // open existing file for reading
+    static std::istream* openFile(std::string const& filename, bool asBinary=true);
 
-    static void Cleanup(std::ostream* ofs);
-    static void Cleanup(std::istream* ifs);
+    // open new file for writing
+    static std::ostream* createFile(std::string const& filename, bool asBinary=true);
+
+    static void closeFile(std::ostream* ofs);
+    static void closeFile(std::istream* ifs);
+
+    static bool deleteFile(const std::string& filename);
+    static void renameFile(const std::string& dest, const std::string& src);
+    static bool fileExists(const std::string& filename);
+    static boost::uintmax_t fileSize(const std::string& filename);
+
+    template<class T>
+    static inline void write_field(boost::uint8_t*& dest, T v)
+    {
+        *(T*)dest = v;
+        dest += sizeof(T);
+        return;
+    }
+    
+    template<class T>
+    static inline T read_field(boost::uint8_t*& src)
+    {
+        T tmp = *(T*)src;
+        src += sizeof(T);
+        return tmp;
+    }
 
     template <typename T>
     static inline void read_n(T& dest, std::istream& src, std::streamsize const& num)
@@ -81,7 +107,7 @@ public:
         // BUG: Fix little-endian
         //LIBLAS_SWAP_BYTES_N(dest, num);
 
-        check_stream_state(src);
+        assert(check_stream_state(src));
     }
 
     template <typename T>
@@ -96,9 +122,10 @@ public:
 
         char const* p = as_bytes(tmp);
         dest.write(p, num);
-        check_stream_state(dest);
+        assert(check_stream_state(dest));
     }
 
+private:
     template<typename T>
     static inline char* as_buffer(T& data)
     {
@@ -125,11 +152,8 @@ public:
 
 
     template <typename C, typename T>
-    static inline void check_stream_state(std::basic_ios<C, T>& srtm)
+    static inline bool check_stream_state(std::basic_ios<C, T>& srtm)
     {
-        // NOTE: Detailed stream check disabled in optimized
-        //       builds to increase performance.
-#if defined(DEBUG) || defined(_DEBUG)
         // Test stream state bits
         if (srtm.eof()) 
             throw std::out_of_range("end of file encountered");
@@ -137,9 +161,7 @@ public:
             throw std::runtime_error("non-fatal I/O error occured");
         else if (srtm.bad())
             throw std::runtime_error("fatal I/O error occured");
-#else
-        boost::ignore_unused_variable_warning(srtm);
-#endif
+        return true;
     }
 };
 

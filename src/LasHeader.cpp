@@ -345,44 +345,46 @@ void LasHeader::SetOffset(double x, double y, double z)
 
 double LasHeader::GetMaxX() const
 {
-    return getBounds().maximum(0);
+    return getBounds().getMaximum(0);
 }
 
 double LasHeader::GetMinX() const
 {
-    return getBounds().minimum(0);
+    return getBounds().getMinimum(0);
 }
 
 double LasHeader::GetMaxY() const
 {
-    return getBounds().maximum(1);
+    return getBounds().getMaximum(1);
 }
 
 double LasHeader::GetMinY() const
 {
-    return getBounds().minimum(1);
+    return getBounds().getMinimum(1);
 }
 
 double LasHeader::GetMaxZ() const
 {
-    return getBounds().maximum(2);
+    return getBounds().getMaximum(2);
 }
 
 double LasHeader::GetMinZ() const
 {
-    return getBounds().minimum(2);
+    return getBounds().getMinimum(2);
 }
 
 void LasHeader::SetMax(double x, double y, double z)
 {
     // m_extent = Bounds(m_extent.min(0), m_extent.min(1), m_extent.max(0), m_extent.max(1), m_extent.min(2), m_extent.max(2));
     // Bounds(minx, miny, minz, maxx, maxy, maxz)
-    setBounds( Bounds<double>(getBounds().minimum(0), getBounds().minimum(1), getBounds().minimum(2), x, y, z) );
+    const Bounds<double>& bounds = getBounds();
+    setBounds( Bounds<double>(bounds.getMinimum(0), bounds.getMinimum(1), bounds.getMinimum(2), x, y, z) );
 }
 
 void LasHeader::SetMin(double x, double y, double z)
 {
-    setBounds( Bounds<double>(x, y, z, getBounds().maximum(0), getBounds().maximum(1), getBounds().maximum(2)) );
+    const Bounds<double>& bounds = getBounds();
+    setBounds( Bounds<double>(x, y, z, bounds.getMaximum(0), bounds.getMaximum(1), bounds.getMaximum(2)) );
 }
 
 //void Header::AddVLR(VariableRecord const& v) 

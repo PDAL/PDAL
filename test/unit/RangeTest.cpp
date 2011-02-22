@@ -156,6 +156,15 @@ BOOST_AUTO_TEST_CASE(test_ranges)
     BOOST_CHECK(r1.getMaximum() == 122);
 }
 
-// BUG: check operator<<
+BOOST_AUTO_TEST_CASE(test_dump)
+{
+    Range<int> r(10,20);
+  
+    std::ostringstream s;
+    s << r;
+
+    BOOST_CHECK(s.str() == "[10 .. 20]");
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -162,11 +162,11 @@ template<class T>
 std::ostream& operator<<(std::ostream& ostr, const Vector<T>& vector)
 {
     ostr << "(";
-    for (size_t d = 0; d < vector.size(); ++d)
+    for (std::size_t i = 0; i < vector.size(); ++i)
     {
-        ostr << vector.vN(i);
+        ostr << vector[i];
         if (i<vector.size()-1)
-            ostr << ",";
+            ostr << ", ";
     }
     ostr << ")";
     return ostr;

@@ -79,15 +79,6 @@ void LasWriter::writeEnd()
 }
 
 
-template<class T>
-static inline void write_field(T v, boost::uint8_t*& p)
-{
-    *(T*)p = v;
-    p += sizeof(T);
-    return;
-}
-
-
 void LasWriter::writeBuffer(const PointData& pointData)
 {
     Header& baseHeader = getHeader();
@@ -155,19 +146,19 @@ void LasWriter::writeBuffer(const PointData& pointData)
             const boost::uint16_t blue = pointData.getField<boost::uint16_t>(pointIndex, fieldIndexBlue);
 
 
-            write_field<boost::uint32_t>(x, p);
-            write_field<boost::uint32_t>(y, p);
-            write_field<boost::uint32_t>(z, p);
-            write_field<boost::uint16_t>(intensity, p);
-            write_field<boost::uint8_t>(bits, p);
-            write_field<boost::uint8_t>(classification, p);
-            write_field<boost::int8_t>(scanAngleRank, p);
-            write_field<boost::uint8_t>(user, p);
-            write_field<boost::uint16_t>(pointSourceId, p);
-            write_field<double>(gpsTime, p);
-            write_field<boost::uint16_t>(red, p);
-            write_field<boost::uint16_t>(green, p);
-            write_field<boost::uint16_t>(blue, p);
+            Utils::write_field<boost::uint32_t>(p, x);
+            Utils::write_field<boost::uint32_t>(p, y);
+            Utils::write_field<boost::uint32_t>(p, z);
+            Utils::write_field<boost::uint16_t>(p, intensity);
+            Utils::write_field<boost::uint8_t>(p, bits);
+            Utils::write_field<boost::uint8_t>(p, classification);
+            Utils::write_field<boost::int8_t>(p, scanAngleRank);
+            Utils::write_field<boost::uint8_t>(p, user);
+            Utils::write_field<boost::uint16_t>(p, pointSourceId);
+            Utils::write_field<double>(p, gpsTime);
+            Utils::write_field<boost::uint16_t>(p, red);
+            Utils::write_field<boost::uint16_t>(p, green);
+            Utils::write_field<boost::uint16_t>(p, blue);
 
             Utils::write_n(m_ostream, buf, LasHeader::ePointSize3);
         }

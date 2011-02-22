@@ -236,29 +236,30 @@ public:
         return m_ranges.size();
     }
 
-    ///// Resize the dimensionality of the Bounds to d
-    //void resize(size_type d)
-    //{
-    //    if (m_ranges.size() < d)
-    //    {
-    //        m_ranges.resize(d);
-    //    }
-    //}
-
     /// Is this Bounds equal to other?
     bool equal(Bounds<T> const& other) const
     {
+        if (size() != other.size())
+        {
+          return false;
+        }
         for (std::size_t i = 0; i < size(); i++)
         {
-            if ( m_ranges[i] != other.m_ranges[i] )
+            if (m_ranges[i] != other.m_ranges[i])
+            {
                 return false;
+            }
         }
         return true;
     }
 
-    /// Does this Bounds intersect other?
-    bool intersects(Bounds const& other) const
+    /// Synonym for intersects for now
+    bool overlaps(Bounds const& other) const
     {
+        if (other.size() != size())
+        {
+            return false;
+        }
 
         for (std::size_t i = 0; i < size(); i++)
         {
@@ -267,13 +268,6 @@ public:
         }
 
         return false;
-
-    }
-
-    /// Synonym for intersects for now
-    bool overlaps(Bounds const& other) const
-    {
-        return intersects(other);
     }
 
     /// Does this Bounds contain a point?
@@ -303,11 +297,11 @@ public:
         return true;
     }
 
-    /// Shift each dimension by a vector of detlas
+    /// Shift each dimension by a vector of deltas
     void shift(std::vector<T> deltas)
     {
         std::size_t i;
-        if( size() <= deltas.size())
+        if( size() != deltas.size())
         {
             std::ostringstream msg;
             msg << "liblas::Bounds::shift: Delta vector size, " << deltas.size()
@@ -324,7 +318,7 @@ public:
     void scale(std::vector<T> deltas)
     {
         std::size_t i;
-        if( size() <= deltas.size())
+        if( size() != deltas.size())
         {
             std::ostringstream msg;
             msg << "liblas::Bounds::scale: Delta vector size, " << deltas.size()
@@ -369,7 +363,7 @@ public:
 
     T volume() const
     {
-        T output = T();
+        T output = T(1);
         for (std::size_t i = 0; i < size(); i++)
         {
             output = output * m_ranges[i].length();
@@ -430,12 +424,14 @@ public:
 template<class T>
 std::ostream& operator<<(std::ostream& ostr, const Bounds<T>& bounds)
 {
+    ostr << "(";
     for (std::size_t d = 0; d < bounds.size(); ++d)
     {
         const Range<T>& r = bounds.dimensions()[d];
-        ostr << "[" <<  r.getMinimum() << ", " << r.getMaximum() << "]";
+        ostr << r;
         if (d!=bounds.size()-1) ostr << ", ";
     }
+    ostr << ")";
     return ostr;
 }
 

@@ -69,7 +69,7 @@ static void test2()
 
 static void test3()
 {
-  std::istream* ifs = Utils::Open("test/data/1.2-with-color.las");
+  std::istream* ifs = Utils::openFile("test/data/1.2-with-color.las");
 
   LasReader reader(*ifs);
 
@@ -77,14 +77,14 @@ static void test3()
 
   std::cout << (const LasHeader&)header;
 
-  std::ostream* ofs = Utils::Create("temp.las");
+  std::ostream* ofs = Utils::createFile("temp.las");
 
   LasWriter lasWriter(reader, *ofs);
   lasWriter.write();
 
-  Utils::Cleanup(ofs);
+  Utils::closeFile(ofs);
 
-  Utils::Cleanup(ifs);
+  Utils::closeFile(ifs);
 
   return;
 }

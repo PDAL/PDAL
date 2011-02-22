@@ -37,12 +37,20 @@
 // boost
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <boost/filesystem.hpp>
 
 #include "libpc/Utils.hpp"
 
 
 namespace libpc
 {
+
+
+void Utils::random_seed(unsigned int seed)
+{
+    srand(seed);
+}
+
 
 double Utils::random(double minimum, double maximum)
 {
@@ -58,8 +66,12 @@ double Utils::random(double minimum, double maximum)
 }
 
 
-std::istream* Utils::Open(std::string const& filename, std::ios::openmode mode)
+std::istream* Utils::openFile(std::string const& filename, bool asBinary)
 {
+    std::ios::openmode mode = mode=std::ios::out;
+    if (asBinary)
+      mode |= mode=std::ios::binary;
+
     namespace io = boost::iostreams;
     io::stream<io::file_source>* ifs = new io::stream<io::file_source>();
     ifs->open(filename.c_str(), mode);
@@ -68,8 +80,12 @@ std::istream* Utils::Open(std::string const& filename, std::ios::openmode mode)
 }
 
 
-std::ostream* Utils::Create(std::string const& filename, std::ios::openmode mode)
+std::ostream* Utils::createFile(std::string const& filename, bool asBinary)
 {
+    std::ios::openmode mode = mode=std::ios::in;
+    if (asBinary)
+      mode |= mode=std::ios::binary;
+
     namespace io = boost::iostreams;
     io::stream<io::file_sink>* ofs = new io::stream<io::file_sink>();
     ofs->open(filename.c_str(), mode);
@@ -78,7 +94,7 @@ std::ostream* Utils::Create(std::string const& filename, std::ios::openmode mode
 }
 
 
-void Utils::Cleanup(std::ostream* ofs)
+void Utils::closeFile(std::ostream* ofs)
 {
     namespace io = boost::iostreams;
 
@@ -94,7 +110,7 @@ void Utils::Cleanup(std::ostream* ofs)
 }
 
 
-void Utils::Cleanup(std::istream* ifs)
+void Utils::closeFile(std::istream* ifs)
 {
     namespace io = boost::iostreams;
 
@@ -107,6 +123,30 @@ void Utils::Cleanup(std::istream* ifs)
         source->close();
         delete source;
     }
+}
+
+
+bool Utils::deleteFile(const std::string& file)
+{
+  return boost::filesystem::remove(file);
+}
+
+
+void Utils::renameFile(const std::string& dest, const std::string& src)
+{
+  boost::filesystem::rename(src, dest);
+}
+
+
+bool Utils::fileExists(const std::string& file)
+{
+  return boost::filesystem::exists(file);
+}
+
+
+boost::uintmax_t Utils::fileSize(const std::string& file)
+{
+  return boost::filesystem::file_size(file);
 }
 
 } // namespace libpc

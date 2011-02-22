@@ -88,9 +88,108 @@ BOOST_AUTO_TEST_CASE(test_accessor)
 
 BOOST_AUTO_TEST_CASE(test_math)
 {
-  // BUG: check intersects, overlaps, contains, shift, scale, clip, grow, volume
+    Bounds<int> r(1,2,3,9,8,7);
+    BOOST_CHECK(r.volume() ==8*6*4);
+
+    std::vector<int> shiftVec;
+    shiftVec.push_back(10);
+    shiftVec.push_back(11);
+    shiftVec.push_back(12);
+    r.shift(shiftVec);
+
+    Bounds<int> r2(11, 13, 15, 19, 19, 19);
+    BOOST_CHECK(r == r2);
+
+    std::vector<int> scaleVec;
+    scaleVec.push_back(2);
+    scaleVec.push_back(3);
+    scaleVec.push_back(4);
+    r2.scale(scaleVec);
+
+    Bounds<int> r3(22, 39, 60, 38, 57, 76);
+    BOOST_CHECK(r2 == r3);
+    BOOST_CHECK(r2.volume() == 16 * 18 * 16);
 }
 
-// BUG: check operator<<
+BOOST_AUTO_TEST_CASE(test_clip)
+{
+    Bounds<int> r1(0,0,10,10);
+    Bounds<int> r2(1,1,11,11);
+    r1.clip(r2);
+
+    Bounds<int> r3(1,1,10,10);
+    BOOST_CHECK(r1==r3);
+
+    Bounds<int> r4(2,4,6,8);
+    r1.clip(r4);
+    
+    BOOST_CHECK(r1==r4);
+
+    Bounds<int> r5(20,40,60,80);
+    r1.clip(r5);
+ 
+    // BUG: seems wrong -- need to better define semantics of clip, etc
+    Bounds<int> r6(20,40,6,8);
+    BOOST_CHECK(r1==r6);
+}
+
+BOOST_AUTO_TEST_CASE(test_intersect)
+{
+    Bounds<int> r1(0,0,10,10);
+    Bounds<int> r2(1,1,11,11);
+    Bounds<int> r3(100,100,101,101);
+    Bounds<int> r4(2,4,6,8);
+    
+    BOOST_CHECK(r1.overlaps(r1));
+    
+    BOOST_CHECK(r1.overlaps(r2));
+    BOOST_CHECK(r2.overlaps(r1));
+    
+    BOOST_CHECK(!r1.overlaps(r3));
+    BOOST_CHECK(!r3.overlaps(r1));
+
+    BOOST_CHECK(r1.contains(r1));
+    BOOST_CHECK(!r1.contains(r2));
+    BOOST_CHECK(r1.contains(r4));
+
+    Vector<int> v1(5,6);
+    Vector<int> v2(5,60);
+    BOOST_CHECK(r1.contains(v1));
+    BOOST_CHECK(!r1.contains(v2));
+}
+
+
+BOOST_AUTO_TEST_CASE(test_grow)
+{
+    Bounds<int> r1(50,51,100,101);
+    Bounds<int> r2(0,1,10,201);
+
+    r1.grow(r2);
+  
+    Bounds<int> r3(0,1,100,201);
+    BOOST_CHECK(r1 == r3);
+
+
+    Bounds<int> r4(0,1,10,11);
+    Vector<int> ptLo(-1,-2);
+    Vector<int> ptHi(20,201);
+    r4.grow(ptLo);
+    r4.grow(ptHi);
+    Bounds<int> r5(-1,-2,20,201);
+    BOOST_CHECK(r4 == r5);
+
+    return;
+}
+
+BOOST_AUTO_TEST_CASE(test_dump)
+{
+    Bounds<int> r(1,2,3,7,8,9);
+  
+    std::ostringstream s;
+    s << r;
+
+    BOOST_CHECK(s.str() == "([1 .. 7], [2 .. 8], [3 .. 9])");
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -151,9 +151,9 @@ void Color::interpolateColor(double value, double minValue, double maxValue)
     interpolateColor(value, minValue, maxValue, fred, fblue, fgreen);
 
     const double vmax = (std::numeric_limits<boost::uint16_t>::max());
-    SetRed((value_type)(fred * vmax));
-    SetGreen((value_type)(fgreen * vmax));
-    SetBlue((value_type)(fblue * vmax));
+    setRed((value_type)(fred * vmax));
+    setGreen((value_type)(fgreen * vmax));
+    setBlue((value_type)(fblue * vmax));
 
     return;
 }

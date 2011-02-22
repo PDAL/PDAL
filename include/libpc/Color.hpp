@@ -78,37 +78,37 @@ public:
     Color& operator=(Color const& rhs);
 
     /// Fetch value of the red image channel
-    value_type GetRed() const
+    value_type getRed() const
     {
         return m_color[0];
     }
 
     /// Set value of the red image channel
-    void SetRed(value_type const& value)
+    void setRed(value_type const& value)
     {
         m_color[0] = value;
     }
 
     /// Fetch value of the green image channel
-    value_type GetGreen() const
+    value_type getGreen() const
     {
         return m_color[1];
     }
 
     /// Set value of the red image channel
-    void SetGreen(value_type const& value)
+    void setGreen(value_type const& value)
     {
         m_color[1] = value;
     }
 
     /// Fetch value of the blue image channel
-    value_type GetBlue() const
+    value_type getBlue() const
     {
         return m_color[2];
     }
 
     /// Set value of the blue image channel
-    void SetBlue(value_type const& value)
+    void setBlue(value_type const& value)
     {
         m_color[2] = value;
     }
