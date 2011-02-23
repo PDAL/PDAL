@@ -73,8 +73,8 @@ void MosaicFilter::readPoints(PointData& destData)
 
     assert(numPoints % 2 == 0); // yeah right
 
-    PointData srcData1(destData.getSchema(), numPoints / 2);
-    PointData srcData2(destData.getSchema(), numPoints / 2);
+    PointData srcData1(destData.getSchemaLayout(), numPoints / 2);
+    PointData srcData2(destData.getSchemaLayout(), numPoints / 2);
 
     m_prevStage.readPoints(srcData1);
 
@@ -86,7 +86,7 @@ void MosaicFilter::readPoints(PointData& destData)
     {
         if (srcData1.isValid(srcPointIndex))
         {
-            destData.copyFieldsFast(destPointIndex, srcPointIndex, srcData1);
+            destData.copyPointFast(destPointIndex, srcPointIndex, srcData1);
             destData.setValid(destPointIndex, true);
         }
         else
@@ -99,7 +99,7 @@ void MosaicFilter::readPoints(PointData& destData)
     {
         if (srcData2.isValid(srcPointIndex))
         {
-            destData.copyFieldsFast(destPointIndex, srcPointIndex, srcData2);
+            destData.copyPointFast(destPointIndex, srcPointIndex, srcData2);
             destData.setValid(destPointIndex, true);
         }
         else

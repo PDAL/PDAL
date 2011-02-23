@@ -60,13 +60,14 @@ public:
     // regardless of what the passed-in schema says -- this is because the field object
     // represents the state within the owning object, which in this case is a completely
     // empty buffer (similarly, all the points in the buffer are marked "invalid")
-    PointData(const Schema&, boost::uint32_t numPoints);
+    PointData(const SchemaLayout&, boost::uint32_t numPoints);
+    ~PointData();
 
     // number of points in this buffer
     boost::uint32_t getNumPoints() const;
 
     // schema (number and kinds of fields) for a point in this buffer
-    const Schema& getSchema() const;
+    const SchemaLayout& getSchemaLayout() const;
 
     // "valid" means the data for the point can be used; if invalid, the point should
     // be ignored or skipped.  (This is done for efficiency; we don't want to have to
@@ -75,19 +76,22 @@ public:
     void setValid(std::size_t pointIndex, bool value=true);
 
     // accessors to a particular field of a particular point in this buffer
-    template<class T> T getField(std::size_t fieldIndex, std::size_t itemOffset) const;
-    template<class T> void setField(std::size_t fieldIndex, std::size_t itemOffset, T value);
+    template<class T> T getField(std::size_t pointIndex, std::size_t fieldIndex) const;
+    template<class T> void setField(std::size_t pointIndex, std::size_t fieldIndex, T value);
 
     // bulk copy all the fields from the given point into this object
     // NOTE: this is only legal if the src and dest schemas are exactly the same
     // (later, this will be implemented properly, to handle the general cases slowly and the best case quickly)
-    void copyFieldsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData);
+    void copyPointFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData);
+    
+    // same as above, but copies N points
+    void copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData, std::size_t numPoints);
 
 private:
     // access to the raw memory
     boost::uint8_t* getData(std::size_t pointIndex) const;
 
-    Schema m_schema;
+    SchemaLayout m_schemaLayout;
     boost::uint8_t* m_data;
     std::size_t m_pointSize;
     boost::uint32_t m_numPoints;
@@ -101,7 +105,7 @@ private:
 template <class T>
 void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value)
 {
-    std::size_t offset = (pointIndex * m_pointSize) + m_schema.getDimension(fieldIndex).getByteOffset();
+    std::size_t offset = (pointIndex * m_pointSize) + m_schemaLayout.getDimensionLayout(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
     boost::uint8_t* p = m_data + offset;
 
@@ -112,7 +116,7 @@ void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value
 template <class T>
 T PointData::getField(std::size_t pointIndex, std::size_t fieldIndex) const
 {
-    std::size_t offset = (pointIndex * m_pointSize) + m_schema.getDimension(fieldIndex).getByteOffset();
+    std::size_t offset = (pointIndex * m_pointSize) + m_schemaLayout.getDimensionLayout(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
     boost::uint8_t* p = m_data + offset;
 

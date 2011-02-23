@@ -11,7 +11,9 @@ SET(LIBPC_UNIT_TEST_SRC
 	BoundsTest.cpp
 	ColorTest.cpp
 	DimensionTest.cpp
+	PointDataTest.cpp
 	RangeTest.cpp
+	SchemaTest.cpp
 	UtilsTest.cpp
 	VectorTest.cpp
     main.cpp)

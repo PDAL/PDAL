@@ -271,7 +271,8 @@ void LasHeader::setDataFormatId(PointFormatId v)
 uint16_t LasHeader::GetDataRecordLength() const
 {
     // No matter what the schema says, this must be a short in size.
-    return static_cast<boost::uint16_t>(getSchema().getByteSize());
+  throw;
+    //return static_cast<boost::uint16_t>(getSchema().getByteSize());
 }
 
 uint32_t LasHeader::GetPointRecordsCount() const

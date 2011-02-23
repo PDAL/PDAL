@@ -84,7 +84,8 @@ void LasWriter::writeBuffer(const PointData& pointData)
     Header& baseHeader = getHeader();
     LasHeader& lasHeader = (LasHeader&)baseHeader;
 
-    const Schema& schema = pointData.getSchema();
+    const SchemaLayout& schemaLayout = pointData.getSchemaLayout();
+    const Schema& schema = schemaLayout.getSchema();
     LasHeader::PointFormatId pointFormat = lasHeader.getDataFormatId();
 
     const std::size_t fieldIndexX = schema.getDimensionIndex("X");

@@ -55,7 +55,8 @@ void CropFilter::readPoints(PointData& data)
 
     int numPoints = data.getNumPoints();
 
-    const Schema& schema = data.getSchema();
+    const SchemaLayout& schemaLayout = data.getSchemaLayout();
+    const Schema& schema = schemaLayout.getSchema();
 
     std::size_t fieldX;
     std::size_t fieldY;

@@ -44,19 +44,25 @@ namespace libpc
 {
 
 
-PointData::PointData(const Schema& schema, boost::uint32_t numPoints) :
-    m_schema(schema),
+PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t numPoints) :
+    m_schemaLayout(schemaLayout),
     m_numPoints(numPoints),
     m_data(NULL),
     m_pointSize(0)
 {
-    m_pointSize = m_schema.getByteSize();
+    m_pointSize = m_schemaLayout.getByteSize();
     m_data = new boost::uint8_t[m_pointSize * m_numPoints];
-
+    
     // the points will all be set to invalid here
     m_isValid.resize(m_numPoints);
 
     return;
+}
+
+
+PointData::~PointData()
+{
+  delete[] m_data;
 }
 
 
@@ -86,19 +92,19 @@ boost::uint32_t PointData::getNumPoints() const
 }
 
 
-const Schema& PointData::getSchema() const
+const SchemaLayout& PointData::getSchemaLayout() const
 {
-    return m_schema;
+    return m_schemaLayout;
 }
 
 
-void PointData::copyFieldsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData)
+void PointData::copyPointFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData)
 {
-    assert(getSchema() == srcPointData.getSchema());
+    assert(getSchemaLayout() == srcPointData.getSchemaLayout());
 
     boost::uint8_t* src = srcPointData.getData(srcPointIndex);
     boost::uint8_t* dest = getData(destPointIndex);
-    std::size_t len = getSchema().getByteSize();
+    std::size_t len = getSchemaLayout().getByteSize();
 
     memcpy(dest, src, len);
 
@@ -108,10 +114,29 @@ void PointData::copyFieldsFast(std::size_t destPointIndex, std::size_t srcPointI
 }
 
 
+void PointData::copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData, std::size_t numPoints)
+{
+    assert(getSchemaLayout() == srcPointData.getSchemaLayout());
+
+    boost::uint8_t* src = srcPointData.getData(srcPointIndex);
+    boost::uint8_t* dest = getData(destPointIndex);
+    std::size_t len = getSchemaLayout().getByteSize();
+
+    memcpy(dest, src, len * numPoints);
+
+    for (std::size_t i=0; i<numPoints; i++)
+    {
+      setValid(destPointIndex+i, srcPointData.isValid(srcPointIndex+i));
+    }
+
+    return;
+}
+
+
 std::ostream& operator<<(std::ostream& ostr, const PointData& pointData)
 {
-    const Schema& schema = pointData.getSchema();
-    const Schema::Dimensions& dims = schema.getDimensions();
+    const SchemaLayout& schemaLayout = pointData.getSchemaLayout();
+    const std::vector<DimensionLayout>& dimensionLayouts = schemaLayout.getDimensionLayouts();
     const std::size_t numPoints = pointData.getNumPoints();
 
     int cnt = 0;
@@ -128,14 +153,15 @@ std::ostream& operator<<(std::ostream& ostr, const PointData& pointData)
         
         ostr << "Point: " << pointIndex << endl;
 
-        for (Schema::DimensionsCIter citer=dims.cbegin(); citer != dims.cend(); ++citer)
+        for (SchemaLayout::DimensionLayoutsCIter citer=dimensionLayouts.cbegin(); citer != dimensionLayouts.cend(); ++citer)
         {
-            const Dimension& field = *citer;
-            std::size_t fieldIndex = citer->getPosition();
+            const DimensionLayout& dimensionLayout = *citer;
+            const Dimension& dimension = dimensionLayout.getDimension();
+            std::size_t fieldIndex = dimensionLayout.getPosition();
 
-            ostr << field.getName() << " (" << field.getDataTypeName(field.getDataType()) << ") : ";
+            ostr << dimension.getName() << " (" << dimension.getDataTypeName(dimension.getDataType()) << ") : ";
 
-            switch (field.getDataType())
+            switch (dimension.getDataType())
             {
             case Dimension::Int8:
                 ostr << (int)(pointData.getField<boost::int8_t>(pointIndex, fieldIndex));

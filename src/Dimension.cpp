@@ -53,26 +53,28 @@ namespace libpc
 Dimension::Dimension(std::string const& name, DataType dataType)
     : m_dataType(dataType)
     , m_name(name)
+    , m_byteSize(0)
     , m_description(std::string(""))
     , m_min(0)
     , m_max(0)
-    , m_position(0)
-    , m_byteSize(0)
-    , m_byteOffset(0)
+    , m_precise(false)
+    , m_numericScale(0)
+    , m_numericOffset(0)
 {
     m_byteSize = getDataTypeSize(m_dataType);
 }
 
 /// copy constructor
 Dimension::Dimension(Dimension const& other) 
-    : m_name(other.m_name)
-    , m_dataType(other.m_dataType)
+    : m_dataType(other.m_dataType)
+    , m_name(other.m_name)
+    , m_byteSize(other.m_byteSize)
     , m_description(other.m_description)
     , m_min(other.m_min)
     , m_max(other.m_max)
-    , m_position(other.m_position)
-    , m_byteSize(other.m_byteSize)
-    , m_byteOffset(other.m_byteOffset)
+    , m_precise(false)
+    , m_numericScale(0)
+    , m_numericOffset(0)
 {
 }
 
@@ -81,14 +83,15 @@ Dimension& Dimension::operator=(Dimension const& rhs)
 {
     if (&rhs != this)
     {
-        m_name = rhs.m_name;
         m_dataType = rhs.m_dataType;
+        m_name = rhs.m_name;
+        m_byteSize = rhs.m_byteSize;
         m_description = rhs.m_description;
         m_min = rhs.m_min;
         m_max = rhs.m_max;
-        m_position = rhs.m_position;
-        m_byteSize = rhs.m_byteSize;
-        m_byteOffset = rhs.m_byteOffset;
+        m_precise = rhs.m_precise;
+        m_numericScale = rhs.m_numericScale;
+        m_numericOffset = rhs.m_numericOffset;
     }
 
     return *this;
@@ -97,18 +100,16 @@ Dimension& Dimension::operator=(Dimension const& rhs)
 
 bool Dimension::operator==(const Dimension& other) const
 {
-    if (m_name == other.m_name)
+    if (m_dataType == other.m_dataType &&
+        m_name == other.m_name &&
+        m_byteSize == other.m_byteSize &&
+        m_description == other.m_description &&
+        m_min == other.m_min &&
+        m_max == other.m_max &&
+        m_precise == other.m_precise &&
+        m_numericScale == other.m_numericScale &&
+        m_numericOffset == other.m_numericOffset)
     {
-        assert(m_dataType == other.m_dataType);
-        assert(m_description == other.m_description);
-        assert(m_min == other.m_min);
-        assert(m_max == other.m_max);
-        assert(m_position == other.m_position);
-        assert(m_precise == other.m_precise);
-        assert(m_numericScale == other.m_numericScale);
-        assert(m_numericOffset == other.m_numericOffset);
-        assert(m_byteSize == other.m_byteSize);
-        assert(m_byteOffset == other.m_byteOffset);
         return true;
     }
 
@@ -129,8 +130,6 @@ property_tree::ptree Dimension::GetPTree() const
     dim.put("name", getName());
     dim.put("datatype", getDataTypeName(getDataType()));
     dim.put("description", getDescription());
-    dim.put("position", getPosition());
-    dim.put("byteoffset", getByteOffset());
     dim.put("bytesize", getByteSize());
 
     if (isNumeric())
@@ -308,6 +307,83 @@ Dimension::DataType Dimension::getDataTypeFromString(const std::string& s)
     if (s == "Float") return Float;
     if (s == "Double") return Double;
     throw;
+}
+
+
+
+
+
+DimensionLayout::DimensionLayout(const Dimension& dimension)
+    : m_dimension(dimension)
+    , m_position(0)
+    , m_byteOffset(0)
+{
+}
+
+/// copy constructor
+DimensionLayout::DimensionLayout(DimensionLayout const& other) 
+    : m_dimension(other.m_dimension)
+    , m_position(other.m_position)
+    , m_byteOffset(other.m_byteOffset)
+{
+}
+
+/// assignment operator
+DimensionLayout& DimensionLayout::operator=(DimensionLayout const& rhs)
+{
+    if (&rhs != this)
+    {
+        m_dimension = rhs.m_dimension;
+        m_position = rhs.m_position;
+        m_byteOffset = rhs.m_byteOffset;
+    }
+
+    return *this;
+}
+
+
+bool DimensionLayout::operator==(const DimensionLayout& other) const
+{
+    if (m_dimension == other.m_dimension)
+    {
+        assert(m_position == other.m_position);
+        assert(m_byteOffset == other.m_byteOffset);
+        return true;
+    }
+
+    return false;
+}
+
+
+bool DimensionLayout::operator!=(const DimensionLayout& other) const
+{
+  return !(*this==other);
+}
+
+
+std::ostream& operator<<(std::ostream& os, libpc::DimensionLayout const&)
+{
+    ////using boost::property_tree::ptree;
+    ////ptree tree = d.GetPTree();
+
+    ////std::string const name = tree.get<std::string>("name");
+
+    ////std::ostringstream quoted_name;
+    ////quoted_name << "'" << name << "'";
+    ////std::ostringstream pad;
+    ////std::string const& cur = quoted_name.str();
+    ////std::string::size_type size = cur.size();
+    ////std::string::size_type pad_size = 30 - size;
+
+    ////for (std::string::size_type i=0; i != pad_size; i++ )
+    ////{
+    ////    pad << " ";
+    ////}
+    ////os << quoted_name.str() << pad.str() <<" -- "<< " size: " << tree.get<boost::uint32_t>("bytesize");
+    ////os << " offset: " << tree.get<boost::uint32_t>("byteoffset");
+    ////os << std::endl;
+
+    return os;
 }
 
 } // namespace libpc

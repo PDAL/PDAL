@@ -59,7 +59,8 @@ void ColorFilter::readPoints(PointData& data)
 
     int numPoints = data.getNumPoints();
 
-    const Schema& schema = data.getSchema();
+    const SchemaLayout& schemaLayout = data.getSchemaLayout();
+    const Schema& schema = schemaLayout.getSchema();
 
     std::size_t fieldIndexR;
     std::size_t fieldIndexG;

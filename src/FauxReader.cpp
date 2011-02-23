@@ -74,7 +74,8 @@ void FauxReader::readPoints(PointData& data)
     boost::uint32_t numPoints = data.getNumPoints();
     assert(m_currentPointIndex + numPoints <= getHeader().getNumPoints());
 
-    const Schema& schema = data.getSchema();
+    const SchemaLayout& schemaLayout = data.getSchemaLayout();
+    const Schema& schema = schemaLayout.getSchema();
     Header& header = getHeader();
 
     std::size_t fieldIndexT;

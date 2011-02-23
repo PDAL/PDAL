@@ -53,7 +53,6 @@ namespace libpc
 
 
 Schema::Schema()
-    : m_byteSize(0)
 {
     return;
 }
@@ -62,7 +61,6 @@ Schema::Schema()
 /// copy constructor
 Schema::Schema(Schema const& other) 
     : m_dimensions(other.m_dimensions)
-    , m_byteSize(other.m_byteSize)
 {
 }
 
@@ -73,7 +71,6 @@ Schema& Schema::operator=(Schema const& rhs)
     if (&rhs != this)
     {
         m_dimensions = rhs.m_dimensions;
-        m_byteSize = rhs.m_byteSize;
     }
 
     return *this;
@@ -82,13 +79,18 @@ Schema& Schema::operator=(Schema const& rhs)
 
 bool Schema::operator==(const Schema& other) const
 {
-    if (m_byteSize == other.m_byteSize &&
-        m_dimensions == other.m_dimensions)
+    if (m_dimensions == other.m_dimensions)
     {
         return true;
     }
 
     return false;
+}
+
+
+bool Schema::operator!=(const Schema& other) const
+{
+  return !(*this==other);
 }
 
 
@@ -106,46 +108,11 @@ property_tree::ptree Schema::getPTree() const
 }
 
 
-void Schema::calculateSizes()
-{
-    // to make life easy, for now we are going to assume that each Dimension 
-    // is byte-aligned and occupies an integral number of bytes
-
-    std::size_t offset = 0;
-
-    int i=0;
-    for (DimensionsIter iter = m_dimensions.begin(); iter != m_dimensions.end(); ++iter)
-    {
-        Dimension& t = *iter;
-
-        t.setByteOffset(offset);
-
-        offset += t.getByteSize();
-
-        t.setPosition(i);
-        ++i;
-    }
-
-    m_byteSize = offset;
-
-    return;
-}
-
-
-std::size_t Schema::getByteSize() const
-{
-    return m_byteSize;
-}
-
-
 void Schema::addDimension(Dimension const& dim)
 {
     // BUG: assert not already added
 
     m_dimensions.push_back(dim);
-
-    // Update all of our sizes
-    calculateSizes();
 
     return;
 }
@@ -166,11 +133,11 @@ std::vector<std::string> Schema::getDimensionNames() const
 
 bool Schema::findDimensionIndex(const std::string& name, std::size_t& index) const
 {
+    index = 0;
     for (DimensionsCIter iter = m_dimensions.cbegin(); iter != m_dimensions.cend(); ++iter)
     {
         if (iter->getName() == name)
         {
-            index = iter->getPosition();
             return true;
         }
         ++index;
@@ -181,12 +148,15 @@ bool Schema::findDimensionIndex(const std::string& name, std::size_t& index) con
 
 std::size_t Schema::getDimensionIndex(const std::string& name) const
 {
+    std::size_t index = 0;
+
     for (DimensionsCIter iter = m_dimensions.cbegin(); iter != m_dimensions.cend(); ++iter)
     {
         if (iter->getName() == name)
         {
-            return iter->getPosition();
+            return index;
         }
+        ++index;
     }
     throw;
 }
@@ -219,7 +189,7 @@ std::ostream& operator<<(std::ostream& os, Schema const& schema)
     //ptree dims = tree.get_child("LASSchema.dimensions");
     ///////////os << "  Point Format ID:             " << tree.get<std::string>("LASSchema.formatid") << std::endl;
     os << "  Number of dimensions:        " << schema.getDimensions().size() << std::endl;
-    os << "  Size in bytes:               " << schema.getByteSize() << std::endl;
+//    os << "  Size in bytes:               " << schema.getByteSize() << std::endl;
 
     os << std::endl;
     os << "  Dimensions" << std::endl;
@@ -240,5 +210,132 @@ std::ostream& operator<<(std::ostream& os, Schema const& schema)
     return os;
 }
 
+
+
+
+SchemaLayout::SchemaLayout(const Schema& schema)
+    : m_byteSize(0)
+    , m_schema(schema)
+{
+    calculateSizes();
+    return;
+}
+
+
+/// copy constructor
+SchemaLayout::SchemaLayout(SchemaLayout const& other) 
+    : m_dimensionLayouts(other.m_dimensionLayouts)
+    , m_byteSize(other.m_byteSize)
+    , m_schema(other.m_schema)
+{
+}
+
+
+// assignment constructor
+SchemaLayout& SchemaLayout::operator=(SchemaLayout const& rhs)
+{
+    if (&rhs != this)
+    {
+        m_dimensionLayouts = rhs.m_dimensionLayouts;
+        m_byteSize = rhs.m_byteSize;
+        m_schema = rhs.m_schema;
+    }
+
+    return *this;
+}
+
+
+bool SchemaLayout::operator==(const SchemaLayout& other) const
+{
+    if (m_byteSize == other.m_byteSize &&
+        m_dimensionLayouts == other.m_dimensionLayouts &&
+        m_schema == other.m_schema)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+bool SchemaLayout::operator!=(const SchemaLayout& other) const
+{
+  return !(*this==other);
+}
+
+
+void SchemaLayout::calculateSizes()
+{
+    // to make life easy, for now we are going to assume that each Dimension 
+    // is byte-aligned and occupies an integral number of bytes
+
+    std::size_t offset = 0;
+
+    Schema::Dimensions dims = m_schema.getDimensions();
+
+    m_dimensionLayouts.clear();
+
+    int i=0;
+    for (Schema::DimensionsCIter iter = dims.begin(); iter != dims.end(); ++iter)
+    {
+        const Dimension& dim = *iter;
+
+        DimensionLayout layout(dim); 
+        layout.setByteOffset(offset);
+
+        offset += dim.getByteSize();
+
+        layout.setPosition(i);
+        ++i;
+
+        m_dimensionLayouts.push_back(layout);
+    }
+
+    m_byteSize = offset;
+
+    return;
+}
+
+
+std::size_t SchemaLayout::getByteSize() const
+{
+    return m_byteSize;
+}
+
+
+std::ostream& operator<<(std::ostream& os, SchemaLayout const&)
+{
+    ////using property_tree::ptree;
+    ////ptree tree = schema.getPTree();
+
+    ////os << "---------------------------------------------------------" << std::endl;
+    ////os << "  Schema Summary" << std::endl;
+    ////os << "---------------------------------------------------------" << std::endl;
+
+    ////ptree::const_iterator i;
+
+    //////ptree dims = tree.get_child("LASSchema.dimensions");
+    ///////////////os << "  Point Format ID:             " << tree.get<std::string>("LASSchema.formatid") << std::endl;
+    ////os << "  Number of dimensions:        " << schema.getDimensions().size() << std::endl;
+    ////os << "  Size in bytes:               " << schema.getByteSize() << std::endl;
+
+    ////os << std::endl;
+    ////os << "  Dimensions" << std::endl;
+    ////os << "---------------------------------------------------------" << std::endl;
+
+    ////os << "  ";
+
+    ////const Schema::Dimensions& dimensions = schema.getDimensions();
+    ////for (Schema::DimensionsCIter iter = dimensions.cbegin(); iter != dimensions.cend(); ++iter)
+    ////{
+    ////    os << *iter;
+    ////    os << "  ";
+    ////}
+
+
+    ////os << std::endl;
+
+    return os;
+}
 
 } // namespace libpc

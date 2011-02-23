@@ -140,7 +140,7 @@ std::ostream& operator<<(std::ostream& ostr, const Header& header)
 
     ostr << "  Schema: " << endl;
     ostr << "    Num dims: " << header.getSchema().getDimensions().size() << endl;
-    ostr << "    Size in bytes: " << header.getSchema().getByteSize() << endl;
+//    ostr << "    Size in bytes: " << header.getSchema().getByteSize() << endl;
 
     ostr << "  Spatial Reference:" << endl;
     ostr << "    WKT: " << header.getSpatialReference().getWKT() << endl;

@@ -86,8 +86,6 @@ public:
     bool operator==(const Dimension& other) const;
     bool operator!=(const Dimension& other) const;
 
-    virtual ~Dimension() {}
-
     inline std::string const& getName() const
     {
         return m_name;
@@ -110,20 +108,6 @@ public:
     std::size_t getByteSize() const
     {
        return m_byteSize;
-    }
-
-    /// The byte location to start reading/writing
-    /// point data from in a composited schema.  liblas::Schema
-    /// will set these values for you when liblas::Dimension are
-    /// added to the liblas::Schema.
-    inline std::size_t getByteOffset() const
-    {
-        return m_byteOffset;
-    }
-
-    inline void setByteOffset(std::size_t v)
-    {
-        m_byteOffset = v;
     }
 
     inline std::string getDescription() const
@@ -176,19 +160,6 @@ public:
         m_max = max;
     }
 
-    /// The index position of the index.  In a standard ePointFormat0
-    /// data record, the X dimension would have a position of 0, while
-    /// the Y dimension would have a position of 1, for example.
-    inline std::size_t getPosition() const
-    {
-        return m_position;
-    }
-
-    inline void setPosition(std::size_t v)
-    {
-        m_position = v;
-    }
-
     /// The scaling value for this dimension as a double.  This should
     /// be positive or negative powers of ten.
     inline double getNumericScale() const
@@ -230,16 +201,62 @@ private:
     DataType m_dataType;
     std::string m_name;
     std::size_t m_byteSize;
-    std::size_t m_byteOffset;
     std::string m_description;
     double m_min;
     double m_max;
-    std::size_t m_position;
     bool m_precise;
     double m_numericScale;
     double m_numericOffset;
 };
 
+
+class LIBPC_DLL DimensionLayout
+{
+public:
+    DimensionLayout(const Dimension&);
+    DimensionLayout& operator=(DimensionLayout const& rhs);
+    DimensionLayout(DimensionLayout const& other);
+
+    bool operator==(const DimensionLayout& other) const;
+    bool operator!=(const DimensionLayout& other) const;
+
+    const Dimension& getDimension() const
+    {
+        return m_dimension;
+    }
+
+    /// The byte location to start reading/writing
+    /// point data from in a composited schema.  liblas::Schema
+    /// will set these values for you when liblas::Dimension are
+    /// added to the liblas::Schema.
+    inline std::size_t getByteOffset() const
+    {
+        return m_byteOffset;
+    }
+
+    inline void setByteOffset(std::size_t v)
+    {
+        m_byteOffset = v;
+    }
+
+    /// The index position of the index.  In a standard ePointFormat0
+    /// data record, the X dimension would have a position of 0, while
+    /// the Y dimension would have a position of 1, for example.
+    inline std::size_t getPosition() const
+    {
+        return m_position;
+    }
+
+    inline void setPosition(std::size_t v)
+    {
+        m_position = v;
+    }
+
+private:
+    Dimension m_dimension;
+    std::size_t m_byteOffset;
+    std::size_t m_position;
+};
 
 
 LIBPC_DLL std::ostream& operator<<(std::ostream& os, libpc::Dimension const& d);

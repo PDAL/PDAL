@@ -67,16 +67,11 @@ public:
 public:
     Schema();
     Schema(Schema const& other);
-    ~Schema() {}
 
-    virtual Schema& operator=(Schema const& rhs);
+    Schema& operator=(Schema const& rhs);
 
-    virtual bool operator==(const Schema& other) const;
-
-    /// Fetch total byte size -- sum of all dimensions
-    std::size_t getByteSize() const;
-
-    void calculateSizes();
+    bool operator==(const Schema& other) const;
+    bool operator!=(const Schema& other) const;
 
     void addDimension(Dimension const& dim);
 
@@ -107,15 +102,60 @@ public:
 
     boost::property_tree::ptree getPTree() const;
 
-protected:
+private:
     std::vector<Dimension> m_dimensions;
-    std::size_t m_byteSize;
+};
+
+
+class LIBPC_DLL SchemaLayout
+{
+public:
+    typedef std::vector<DimensionLayout> DimensionLayouts;
+    typedef std::vector<DimensionLayout>::iterator DimensionLayoutsIter;
+    typedef std::vector<DimensionLayout>::const_iterator DimensionLayoutsCIter;
+
+    SchemaLayout(const Schema&);
+    SchemaLayout(SchemaLayout const& other);
+
+    SchemaLayout& operator=(SchemaLayout const& rhs);
+
+    bool operator==(const SchemaLayout& other) const;
+    bool operator!=(const SchemaLayout& other) const;
+
+    const Schema& getSchema() const 
+    {
+      return m_schema;
+    }
+
+    /// Fetch total byte size -- sum of all dimensions
+    std::size_t getByteSize() const;
+
+    void calculateSizes();
+
+    const DimensionLayout& getDimensionLayout(std::size_t index) const
+    {
+        return m_dimensionLayouts[index];
+    }
+
+    DimensionLayout& getDimensionLayout(std::size_t index)
+    {
+        return m_dimensionLayouts[index];
+    }
+
+    const std::vector<DimensionLayout>& getDimensionLayouts() const
+    {
+        return m_dimensionLayouts;
+    }
 
 private:
+    Schema m_schema;
+    std::vector<DimensionLayout> m_dimensionLayouts;
+    std::size_t m_byteSize;
 };
 
 
 LIBPC_DLL std::ostream& operator<<(std::ostream& os, Schema const&);
+LIBPC_DLL std::ostream& operator<<(std::ostream& os, SchemaLayout const&);
 
 
 } // namespace liblas
