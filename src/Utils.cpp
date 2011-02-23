@@ -39,6 +39,7 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/filesystem.hpp>
 
+#include "libpc/exceptions.hpp"
 #include "libpc/Utils.hpp"
 
 
@@ -68,6 +69,9 @@ double Utils::random(double minimum, double maximum)
 
 std::istream* Utils::openFile(std::string const& filename, bool asBinary)
 {
+    if (!Utils::fileExists(filename))
+        throw libpc_error("File not found: " + filename);
+
     std::ios::openmode mode = mode=std::ios::out;
     if (asBinary)
       mode |= mode=std::ios::binary;
