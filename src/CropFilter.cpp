@@ -63,11 +63,11 @@ void CropFilter::readPoints(PointData& data)
     std::size_t fieldZ;
     bool ok;
 
-    ok = schema.findDimensionIndex("XPos", fieldX);
+    ok = schema.findDimensionIndex(Dimension::Field_X, fieldX);
     assert(ok);
-    ok = schema.findDimensionIndex("XPos", fieldY);
+    ok = schema.findDimensionIndex(Dimension::Field_Y, fieldY);
     assert(ok);
-    ok = schema.findDimensionIndex("XPos", fieldZ);
+    ok = schema.findDimensionIndex(Dimension::Field_Z, fieldZ);
     assert(ok);
 
 

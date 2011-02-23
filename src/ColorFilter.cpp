@@ -45,9 +45,9 @@ ColorFilter::ColorFilter(Stage& prevStage)
     Schema& schema = getHeader().getSchema();
 
     // add the three u8 fields
-    schema.addDimension(Dimension("Zred", Dimension::Uint8));
-    schema.addDimension(Dimension("Zgreen", Dimension::Uint8));
-    schema.addDimension(Dimension("Zblue", Dimension::Uint8));
+    schema.addDimension(Dimension(Dimension::Field_Red, Dimension::Uint8));
+    schema.addDimension(Dimension(Dimension::Field_Green, Dimension::Uint8));
+    schema.addDimension(Dimension(Dimension::Field_Blue, Dimension::Uint8));
 
     return;
 }
@@ -68,13 +68,13 @@ void ColorFilter::readPoints(PointData& data)
     std::size_t offsetZ;
     bool ok;
 
-    ok = schema.findDimensionIndex("Zred", fieldIndexR);
+    ok = schema.findDimensionIndex(Dimension::Field_Red, fieldIndexR);
     assert(ok);
-    ok = schema.findDimensionIndex("Zgreen", fieldIndexG);
+    ok = schema.findDimensionIndex(Dimension::Field_Green, fieldIndexG);
     assert(ok);
-    ok = schema.findDimensionIndex("Zblue", fieldIndexB);
+    ok = schema.findDimensionIndex(Dimension::Field_Blue, fieldIndexB);
     assert(ok);
-    ok = schema.findDimensionIndex("ZPos", offsetZ);
+    ok = schema.findDimensionIndex(Dimension::Field_Z, offsetZ);
     assert(ok);
 
     for (int pointIndex=0; pointIndex<numPoints; pointIndex++)

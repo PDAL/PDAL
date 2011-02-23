@@ -54,6 +54,10 @@ namespace libpc
 
 Schema::Schema()
 {
+    for (int i=0; i<Dimension::Field_LAST; i++)
+    {
+        m_indexTable[i] = -1;
+    }
     return;
 }
 
@@ -62,6 +66,10 @@ Schema::Schema()
 Schema::Schema(Schema const& other) 
     : m_dimensions(other.m_dimensions)
 {
+    for (int i=0; i<Dimension::Field_LAST; i++)
+    {
+        m_indexTable[i] = other.m_indexTable[i];
+    }
 }
 
 
@@ -71,6 +79,10 @@ Schema& Schema::operator=(Schema const& rhs)
     if (&rhs != this)
     {
         m_dimensions = rhs.m_dimensions;
+        for (int i=0; i<Dimension::Field_LAST; i++)
+        {
+            m_indexTable[i] = rhs.m_indexTable[i];
+        }
     }
 
     return *this;
@@ -81,6 +93,10 @@ bool Schema::operator==(const Schema& other) const
 {
     if (m_dimensions == other.m_dimensions)
     {
+        for (int i=0; i<Dimension::Field_LAST; i++)
+        {
+            if (m_indexTable[i] != other.m_indexTable[i]) return false;
+        }
         return true;
     }
 
@@ -112,66 +128,47 @@ void Schema::addDimension(Dimension const& dim)
 {
     // BUG: assert not already added
 
+    std::size_t index = m_dimensions.size();
+
     m_dimensions.push_back(dim);
+
+    const Dimension::Field field = dim.getField();
+    assert(m_indexTable[field] == -1);
+    m_indexTable[field] = (int)index;
 
     return;
 }
 
 
-std::vector<std::string> Schema::getDimensionNames() const
+bool Schema::findDimensionIndex(Dimension::Field field, std::size_t& index) const
 {
-    std::vector<std::string> output;
-
-    for (DimensionsCIter iter = m_dimensions.cbegin(); iter != m_dimensions.cend(); ++iter)
+    if (m_indexTable[field] == -1) 
     {
-        output.push_back(iter->getName());
+        return false;
     }
 
-    return output;
+    index = m_indexTable[field];
+    return true;
 }
 
 
-bool Schema::findDimensionIndex(const std::string& name, std::size_t& index) const
-{
-    index = 0;
-    for (DimensionsCIter iter = m_dimensions.cbegin(); iter != m_dimensions.cend(); ++iter)
-    {
-        if (iter->getName() == name)
-        {
-            return true;
-        }
-        ++index;
-    }
-    return false;
-}
-
-
-std::size_t Schema::getDimensionIndex(const std::string& name) const
+std::size_t Schema::getDimensionIndex(Dimension::Field field) const
 {
     std::size_t index = 0;
-
-    for (DimensionsCIter iter = m_dimensions.cbegin(); iter != m_dimensions.cend(); ++iter)
+    
+    if (!findDimensionIndex(field, index))
     {
-        if (iter->getName() == name)
-        {
-            return index;
-        }
-        ++index;
+        throw; // BUG
     }
-    throw;
+
+    return index;
 }
 
 
-bool Schema::hasDimension(const std::string& name) const
+bool Schema::hasDimension(Dimension::Field field) const
 {
-    for (DimensionsCIter iter = m_dimensions.cbegin(); iter != m_dimensions.cend(); ++iter)
-    {
-        if (iter->getName() == name)
-        {
-            return true;
-        }
-    }
-    return false;
+    std::size_t notused = 0;
+    return findDimensionIndex(field, notused);
 }
 
 

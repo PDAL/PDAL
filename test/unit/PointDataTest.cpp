@@ -11,8 +11,8 @@ BOOST_AUTO_TEST_SUITE(PointDataTest)
 
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
-    Dimension d1("X", Dimension::Uint32);
-    Dimension d2("Y", Dimension::Uint32);
+    Dimension d1(Dimension::Field_X, Dimension::Uint32);
+    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
     Schema schema;
     schema.addDimension(d1);
     schema.addDimension(d2);
@@ -29,9 +29,9 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 
 static PointData* makeTestBuffer()
 {
-    Dimension d1("X", Dimension::Uint8);
-    Dimension d2("Y", Dimension::Int32);
-    Dimension d3("Z", Dimension::Double);
+    Dimension d1(Dimension::Field_X, Dimension::Uint8);
+    Dimension d2(Dimension::Field_Y, Dimension::Int32);
+    Dimension d3(Dimension::Field_Z, Dimension::Double);
     Schema schema;
     schema.addDimension(d1);
     schema.addDimension(d2);

@@ -75,8 +75,6 @@ public:
 
     void addDimension(Dimension const& dim);
 
-    std::vector<std::string> getDimensionNames() const;
-
     const Dimension& getDimension(std::size_t index) const
     {
         return m_dimensions[index];
@@ -94,16 +92,19 @@ public:
 
     // returns true if found and sets index, otherwise returns false
     // BUG: this is deadly slow, need to use old assoc array or fixed enum for field names
-    bool findDimensionIndex(const std::string& name, std::size_t& index) const; 
-    bool hasDimension(const std::string& name) const;
+    bool findDimensionIndex(Dimension::Field field, std::size_t& index) const; 
+    bool hasDimension(Dimension::Field field) const;
 
     // this version throws if the index not found
-    std::size_t getDimensionIndex(const std::string& name) const; 
+    std::size_t getDimensionIndex(Dimension::Field field) const; 
 
     boost::property_tree::ptree getPTree() const;
 
 private:
     std::vector<Dimension> m_dimensions;
+
+    // BUG: use boost::array?
+    int m_indexTable[Dimension::Field_LAST]; // mapping from field name to index position, or -1 if field not present
 };
 
 

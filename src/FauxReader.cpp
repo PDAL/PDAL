@@ -54,10 +54,10 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints)
     header->setNumPoints(numPoints);
     header->setBounds(bounds);
 
-    schema.addDimension(Dimension("XPos", Dimension::Float));
-    schema.addDimension(Dimension("YPos", Dimension::Float));
-    schema.addDimension(Dimension("ZPos", Dimension::Float));
-    schema.addDimension(Dimension("Time", Dimension::Double));
+    schema.addDimension(Dimension(Dimension::Field_X, Dimension::Float));
+    schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Float));
+    schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Float));
+    schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Double));
 
     setHeader(header);
 
@@ -79,7 +79,7 @@ void FauxReader::readPoints(PointData& data)
     Header& header = getHeader();
 
     std::size_t fieldIndexT;
-    bool ok = schema.findDimensionIndex("Time", fieldIndexT);
+    bool ok = schema.findDimensionIndex(Dimension::Field_Time, fieldIndexT);
     assert(ok);
 
     float v = (float)m_currentPointIndex;
@@ -97,11 +97,11 @@ void FauxReader::readPoints(PointData& data)
     std::size_t offsetY;
     std::size_t offsetZ;
 
-    ok = schema.findDimensionIndex("XPos", offsetX);
+    ok = schema.findDimensionIndex(Dimension::Field_X, offsetX);
     assert(ok);
-    ok = schema.findDimensionIndex("YPos", offsetY);
+    ok = schema.findDimensionIndex(Dimension::Field_Y, offsetY);
     assert(ok);
-    ok = schema.findDimensionIndex("ZPos", offsetZ);
+    ok = schema.findDimensionIndex(Dimension::Field_Z, offsetZ);
     assert(ok);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)

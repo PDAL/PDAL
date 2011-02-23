@@ -39,6 +39,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include "libpc/exceptions.hpp"
 #include "libpc/Dimension.hpp"
 #include "libpc/Utils.hpp"
 
@@ -49,10 +50,13 @@ using namespace boost;
 namespace libpc
 {
 
+std::string Dimension::s_fieldNames[Field_LAST];
+bool Dimension::s_fieldNamesValid = false;
 
-Dimension::Dimension(std::string const& name, DataType dataType)
+
+Dimension::Dimension(Field field, DataType dataType)
     : m_dataType(dataType)
-    , m_name(name)
+    , m_field(field)
     , m_byteSize(0)
     , m_description(std::string(""))
     , m_min(0)
@@ -67,7 +71,7 @@ Dimension::Dimension(std::string const& name, DataType dataType)
 /// copy constructor
 Dimension::Dimension(Dimension const& other) 
     : m_dataType(other.m_dataType)
-    , m_name(other.m_name)
+    , m_field(other.m_field)
     , m_byteSize(other.m_byteSize)
     , m_description(other.m_description)
     , m_min(other.m_min)
@@ -84,7 +88,7 @@ Dimension& Dimension::operator=(Dimension const& rhs)
     if (&rhs != this)
     {
         m_dataType = rhs.m_dataType;
-        m_name = rhs.m_name;
+        m_field = rhs.m_field;
         m_byteSize = rhs.m_byteSize;
         m_description = rhs.m_description;
         m_min = rhs.m_min;
@@ -101,7 +105,7 @@ Dimension& Dimension::operator=(Dimension const& rhs)
 bool Dimension::operator==(const Dimension& other) const
 {
     if (m_dataType == other.m_dataType &&
-        m_name == other.m_name &&
+        m_field == other.m_field &&
         m_byteSize == other.m_byteSize &&
         m_description == other.m_description &&
         m_min == other.m_min &&
@@ -127,7 +131,7 @@ property_tree::ptree Dimension::GetPTree() const
 {
     using property_tree::ptree;
     ptree dim;
-    dim.put("name", getName());
+    dim.put("name", getFieldName());
     dim.put("datatype", getDataTypeName(getDataType()));
     dim.put("description", getDescription());
     dim.put("bytesize", getByteSize());
@@ -165,7 +169,7 @@ std::ostream& operator<<(std::ostream& os, libpc::Dimension const& d)
         pad << " ";
     }
     os << quoted_name.str() << pad.str() <<" -- "<< " size: " << tree.get<boost::uint32_t>("bytesize");
-    os << " offset: " << tree.get<boost::uint32_t>("byteoffset");
+    //os << " offset: " << tree.get<boost::uint32_t>("byteoffset");
     os << std::endl;
 
     return os;
@@ -310,7 +314,59 @@ Dimension::DataType Dimension::getDataTypeFromString(const std::string& s)
 }
 
 
+std::string const& Dimension::getFieldName() const
+{
+    return getFieldName(m_field);
+}
 
+
+std::string const& Dimension::getFieldName(Field field)
+{
+    if (!s_fieldNamesValid)
+        initFieldNames();
+
+    if (field > Field_LAST)
+        throw libpc_error("invalid field value (too large)");
+
+    const std::string& s =  s_fieldNames[field];
+    if (s.empty())
+    {
+        throw libpc_error("Field name not set for built-in field value");
+    }        
+
+    return s;
+}
+
+
+void Dimension::initFieldNames()
+{
+    // BUG: not threadsafe
+    s_fieldNames[Field_INVALID] = "invalid";
+    s_fieldNames[Field_X] = "X";
+    s_fieldNames[Field_Y] = "Y";
+    s_fieldNames[Field_Z] = "Z";
+    s_fieldNames[Field_Red] = "Red";
+    s_fieldNames[Field_Green] = "Green";
+    s_fieldNames[Field_Blue] = "Blue";
+    s_fieldNames[Field_Time] = "Blue";
+    s_fieldNames[Field_ReturnNumber] = "ReturnNumber";
+    s_fieldNames[Field_NumberOfReturns] = "NumberOfReturns";
+    s_fieldNames[Field_ScanDirection] = "ScanDirection";
+    s_fieldNames[Field_FlightLineEdge] = "FlightLineEdge";
+    s_fieldNames[Field_Classification] = "Classification";
+    s_fieldNames[Field_ScanAngleRank] = "ScanAngleRank";
+    s_fieldNames[Field_UserData] = "UserData";
+    s_fieldNames[Field_PointSourceId] = "PointSourceId";
+
+    for (int i=Dimension::Field_User1; i<Dimension::Field_LAST; i++)
+    {
+        std::ostringstream ostr;
+        ostr << "Unnamed field " << i;
+        s_fieldNames[i] = ostr.str();
+    }
+
+    s_fieldNamesValid = true;
+}
 
 
 DimensionLayout::DimensionLayout(const Dimension& dimension)
@@ -385,5 +441,7 @@ std::ostream& operator<<(std::ostream& os, libpc::DimensionLayout const&)
 
     return os;
 }
+
+
 
 } // namespace libpc

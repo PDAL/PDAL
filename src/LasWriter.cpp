@@ -88,26 +88,26 @@ void LasWriter::writeBuffer(const PointData& pointData)
     const Schema& schema = schemaLayout.getSchema();
     LasHeader::PointFormatId pointFormat = lasHeader.getDataFormatId();
 
-    const std::size_t fieldIndexX = schema.getDimensionIndex("X");
-    const std::size_t fieldIndexY = schema.getDimensionIndex("Y");
-    const std::size_t fieldIndexZ = schema.getDimensionIndex("Z");
-    const std::size_t fieldIndexIntensity = schema.getDimensionIndex("Intensity");
-    const std::size_t fieldIndexReturnNum = schema.getDimensionIndex("Return Number");
-    const std::size_t fieldIndexNumReturns = schema.getDimensionIndex("Number of Returns");
-    const std::size_t fieldIndexScanDir = schema.getDimensionIndex("Scan Direction");
-    const std::size_t fieldIndexFlight = schema.getDimensionIndex("Flightline Edge");
-    const std::size_t fieldIndexClassification = schema.getDimensionIndex("Classification");
-    const std::size_t fieldIndexScanAngle = schema.getDimensionIndex("Scan Angle Rank");
-    const std::size_t fieldIndexUserData = schema.getDimensionIndex("User Data");
-    const std::size_t fieldIndexPointSource = schema.getDimensionIndex("Point Source ID");
-    const std::size_t fieldIndexTime = schema.getDimensionIndex("Time");
-    const std::size_t fieldIndexRed = schema.getDimensionIndex("Red");
-    const std::size_t fieldIndexGreen = schema.getDimensionIndex("Green");
-    const std::size_t fieldIndexBlue = schema.getDimensionIndex("Blue");
+    const std::size_t fieldIndexX = schema.getDimensionIndex(Dimension::Field_X);
+    const std::size_t fieldIndexY = schema.getDimensionIndex(Dimension::Field_Y);
+    const std::size_t fieldIndexZ = schema.getDimensionIndex(Dimension::Field_Z);
+    const std::size_t fieldIndexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity);
+    const std::size_t fieldIndexReturnNum = schema.getDimensionIndex(Dimension::Field_ReturnNumber);
+    const std::size_t fieldIndexNumReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns);
+    const std::size_t fieldIndexScanDir = schema.getDimensionIndex(Dimension::Field_ScanDirection);
+    const std::size_t fieldIndexFlight = schema.getDimensionIndex(Dimension::Field_FlightLineEdge);
+    const std::size_t fieldIndexClassification = schema.getDimensionIndex(Dimension::Field_Classification);
+    const std::size_t fieldIndexScanAngle = schema.getDimensionIndex(Dimension::Field_ScanAngleRank);
+    const std::size_t fieldIndexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
+    const std::size_t fieldIndexPointSource = schema.getDimensionIndex(Dimension::Field_PointSourceId);
+    const std::size_t fieldIndexTime = schema.getDimensionIndex(Dimension::Field_Time);
+    const std::size_t fieldIndexRed = schema.getDimensionIndex(Dimension::Field_Red);
+    const std::size_t fieldIndexGreen = schema.getDimensionIndex(Dimension::Field_Green);
+    const std::size_t fieldIndexBlue = schema.getDimensionIndex(Dimension::Field_Blue);
 
     for (boost::uint32_t pointIndex=0; pointIndex<pointData.getNumPoints(); pointIndex++)
     {
-        boost::uint8_t buf[100];
+        boost::uint8_t buf[100]; // BUG: fixed size
 
         if (pointFormat == LasHeader::ePointFormat0)
         {

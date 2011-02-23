@@ -159,7 +159,7 @@ std::ostream& operator<<(std::ostream& ostr, const PointData& pointData)
             const Dimension& dimension = dimensionLayout.getDimension();
             std::size_t fieldIndex = dimensionLayout.getPosition();
 
-            ostr << dimension.getName() << " (" << dimension.getDataTypeName(dimension.getDataType()) << ") : ";
+            ostr << dimension.getFieldName() << " (" << dimension.getDataTypeName(dimension.getDataType()) << ") : ";
 
             switch (dimension.getDataType())
             {

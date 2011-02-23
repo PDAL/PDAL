@@ -11,8 +11,8 @@ BOOST_AUTO_TEST_SUITE(SchemaTest)
 
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
-    Dimension d1("X", Dimension::Uint32);
-    Dimension d2("Y", Dimension::Uint32);
+    Dimension d1(Dimension::Field_X, Dimension::Uint32);
+    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
 
     Schema s1;
     s1.addDimension(d1);
@@ -36,13 +36,20 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 
 BOOST_AUTO_TEST_CASE(test_layout)
 {
-    Dimension d1("X", Dimension::Uint32);
-    Dimension d2("Y", Dimension::Uint32);
+    Dimension d1(Dimension::Field_X, Dimension::Uint32);
+    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
+
     Schema s1;
     s1.addDimension(d1);
     s1.addDimension(d2);
+    BOOST_CHECK(s1.getDimensionIndex(Dimension::Field_X) == 0);
+    BOOST_CHECK(s1.getDimensionIndex(Dimension::Field_Y) == 1);
+    
     Schema s2;
     s2.addDimension(d1);
+    BOOST_CHECK(s2.hasDimension(Dimension::Field_X) == true);
+    BOOST_CHECK(s2.getDimensionIndex(Dimension::Field_X) == 0);
+    BOOST_CHECK(s2.hasDimension(Dimension::Field_Y) == false);
 
     SchemaLayout l1(s1);
     SchemaLayout l2(l1);
@@ -58,12 +65,11 @@ BOOST_AUTO_TEST_CASE(test_layout)
     BOOST_CHECK(l4!=l1);
 }
 
-// BUG: add tests for field/index lookup
 
 BOOST_AUTO_TEST_CASE(test_layout_size)
 {
-    Dimension d1("X", Dimension::Uint32);
-    Dimension d2("Y", Dimension::Uint32);
+    Dimension d1(Dimension::Field_X, Dimension::Uint32);
+    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
     Schema s1;
     s1.addDimension(d1);
     s1.addDimension(d2);

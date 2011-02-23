@@ -64,6 +64,43 @@ namespace libpc
 class LIBPC_DLL Dimension
 {
 public:
+    enum Field
+    {
+        Field_INVALID = 0,
+        Field_X,
+        Field_Y,
+        Field_Z,
+        Field_Red,
+        Field_Green,
+        Field_Blue,
+        Field_Time,
+        Field_Intensity,
+        Field_ReturnNumber,
+        Field_NumberOfReturns,
+        Field_ScanDirection,
+        Field_FlightLineEdge,
+        Field_Classification,
+        Field_ScanAngleRank,
+        Field_UserData,
+        Field_PointSourceId,
+        // ...
+
+        // add more here (but be sure and call setFieldName()!)
+        Field_User1 = 512,
+        Field_User2,
+        Field_User3,
+        Field_User4,
+        Field_User5,
+        Field_User6,
+        Field_User7,
+        Field_User8,
+        Field_User9,
+        // ...
+        // feel free to use your own int here
+
+        Field_LAST = 1023
+    };
+
     enum DataType
     {
         Int8,
@@ -79,16 +116,18 @@ public:
     };
 
 public:
-    Dimension(std::string const& name, DataType type);
+    Dimension(Field field, DataType type);
     Dimension& operator=(Dimension const& rhs);
     Dimension(Dimension const& other);
 
     bool operator==(const Dimension& other) const;
     bool operator!=(const Dimension& other) const;
 
-    inline std::string const& getName() const
+    std::string const& getFieldName() const;
+
+    Field getField() const
     {
-        return m_name;
+        return m_field;
     }
 
     DataType getDataType() const
@@ -102,6 +141,7 @@ public:
     static bool getDataTypeIsNumeric(DataType);
     static bool getDataTypeIsSigned(DataType);
     static bool getDataTypeIsInteger(DataType);
+    static std::string const& getFieldName(Field);
 
     /// bytes, physical/serialisation size of record
     // for bitfields, this will be rounded up to the next largest byte
@@ -199,7 +239,7 @@ public:
 
 private:
     DataType m_dataType;
-    std::string m_name;
+    Field m_field;
     std::size_t m_byteSize;
     std::string m_description;
     double m_min;
@@ -207,6 +247,10 @@ private:
     bool m_precise;
     double m_numericScale;
     double m_numericOffset;
+
+    static void initFieldNames();
+    static bool s_fieldNamesValid;
+    static std::string s_fieldNames[Field_LAST];
 };
 
 
