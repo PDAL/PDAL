@@ -15,6 +15,8 @@ SET(LIBPC_UNIT_TEST_SRC
 	DimensionTest.cpp
 	FauxReaderTest.cpp
 	FauxWriterTest.cpp
+	LiblasReaderTest.cpp
+	LiblasWriterTest.cpp
 	PointDataTest.cpp
 	RangeTest.cpp
 	SchemaTest.cpp
