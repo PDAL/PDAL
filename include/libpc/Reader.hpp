@@ -53,6 +53,8 @@ public:
     // default just resets the point index
     virtual void reset();
 
+    bool atEnd() const;
+
 protected:
     boost::uint64_t m_currentPointIndex;
     boost::uint64_t m_numPointsRead;

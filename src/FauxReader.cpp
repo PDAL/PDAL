@@ -45,8 +45,9 @@ using std::cout;
 namespace libpc
 {
 
-FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints)
+FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode)
     : Reader()
+    , m_mode(mode)
 {
     Header* header = new Header;
     Schema& schema = header->getSchema();
@@ -57,32 +58,24 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints)
     schema.addDimension(Dimension(Dimension::Field_X, Dimension::Float));
     schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Float));
     schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Float));
-    schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Double));
+    schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Uint64));
 
     setHeader(header);
-
-    cout << header;
 
     return;
 }
 
 
-void FauxReader::readPoints(PointData& data)
+boost::uint32_t FauxReader::readPoints(PointData& data)
 {
     // make up some data and put it into the buffer
 
-    boost::uint32_t numPoints = data.getNumPoints();
+    const boost::uint32_t numPoints = data.getNumPoints();
     assert(m_currentPointIndex + numPoints <= getHeader().getNumPoints());
 
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
     Header& header = getHeader();
-
-    std::size_t fieldIndexT;
-    bool ok = schema.findDimensionIndex(Dimension::Field_Time, fieldIndexT);
-    assert(ok);
-
-    float v = (float)m_currentPointIndex;
 
     const Bounds<double>& bounds = header.getBounds();
     const std::vector<Range<double>>& dims = bounds.dimensions();
@@ -93,39 +86,51 @@ void FauxReader::readPoints(PointData& data)
     const double minZ = dims[2].getMinimum();
     const double maxZ = dims[2].getMaximum();
 
-    std::size_t offsetX;
-    std::size_t offsetY;
-    std::size_t offsetZ;
+    const std::size_t offsetT = schema.getDimensionIndex(Dimension::Field_Time);
+    const std::size_t offsetX = schema.getDimensionIndex(Dimension::Field_X);
+    const std::size_t offsetY = schema.getDimensionIndex(Dimension::Field_Y);
+    const std::size_t offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
 
-    ok = schema.findDimensionIndex(Dimension::Field_X, offsetX);
-    assert(ok);
-    ok = schema.findDimensionIndex(Dimension::Field_Y, offsetY);
-    assert(ok);
-    ok = schema.findDimensionIndex(Dimension::Field_Z, offsetZ);
-    assert(ok);
+    boost::uint64_t time = m_currentPointIndex;
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        const float x = (float)Utils::random(minX, maxX);
-        const float y = (float)Utils::random(minY, maxY);
-        const float z = (float)Utils::random(minZ, maxZ);
+        float x;
+        float y;
+        float z;
+        if (m_mode == Random)
+        {
+            x = (float)Utils::random(minX, maxX);
+            y = (float)Utils::random(minY, maxY);
+            z = (float)Utils::random(minZ, maxZ);
+        }
+        else
+        {
+            x = (float)minX;
+            y = (float)minY;
+            z = (float)minZ;
+        }
 
         data.setValid(pointIndex);
 
         data.setField<float>(pointIndex, offsetX, x);
         data.setField<float>(pointIndex, offsetY, y);
         data.setField<float>(pointIndex, offsetZ, z);
+        data.setField<boost::uint64_t>(pointIndex, offsetT, time);
 
-        data.setField<double>(pointIndex, fieldIndexT, v * 0.1);
-
-        ++v;
+        ++time;
     }
 
     m_currentPointIndex += numPoints;
-
     m_numPointsRead += numPoints;
 
-    return;
+    return numPoints;
+}
+
+
+void FauxReader::seekToPoint(boost::uint64_t& pointNumber)
+{
+    m_currentPointIndex = pointNumber;
 }
 
 

@@ -49,21 +49,15 @@ public:
 
 protected:
     // this is called once before the loop with the writeBuffer calls
-    virtual void writeBegin(std::size_t totalNumPoints);
+    virtual void writeBegin();
 
     // called repeatedly, until out of data
-    virtual void writeBuffer(const PointData&);
+    virtual boost::uint32_t writeBuffer(const PointData&);
 
     // called once, after the writeBuffer calls
     virtual void writeEnd();
 
 private:
-    // not generally used in Writer objects
-    virtual void readPoints(PointData&)
-    {
-        throw;
-    }
-
     std::ostream& m_ostream;
 
     LasWriter& operator=(const LasWriter&); // not implemented

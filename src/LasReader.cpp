@@ -87,8 +87,10 @@ void LasReader::reset()
 }
 
 
-void LasReader::readPoints(PointData& pointData)
+boost::uint32_t LasReader::readPoints(PointData& pointData)
 {
+    boost::uint32_t numPoints = pointData.getNumPoints();
+
     const LasHeader& lasHeader = getLasHeader();
     const SchemaLayout& schemaLayout = pointData.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
@@ -111,7 +113,7 @@ void LasReader::readPoints(PointData& pointData)
     const std::size_t fieldIndexGreen = schema.getDimensionIndex(Dimension::Field_Green);
     const std::size_t fieldIndexBlue = schema.getDimensionIndex(Dimension::Field_Blue);
 
-    for (boost::uint32_t pointIndex=0; pointIndex<pointData.getNumPoints(); pointIndex++)
+    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         boost::uint8_t buf[34];
 
@@ -177,7 +179,7 @@ void LasReader::readPoints(PointData& pointData)
         }
     }
 
-    return;
+    return numPoints;
 }
 
 } // namespace libpc

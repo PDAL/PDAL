@@ -33,7 +33,7 @@ static void test1()
   // the faux reader only supports fields (X,Y,Z,T)
   const Bounds<double> bounds(0, 0, -100, 200, 200, 100);
   const int numPoints = 30;
-  FauxReader reader(bounds, numPoints);
+  FauxReader reader(bounds, numPoints, FauxReader::Random);
 
   CropFilter cropper(reader, Bounds<double>(0, 0, 0, 100, 100, 100));
 
@@ -41,7 +41,7 @@ static void test1()
 
   FauxWriter writer(colorizer);
   
-  writer.write();
+  writer.write(30);
 
   return;
 }
@@ -51,16 +51,16 @@ static void test2()
 {
   const int numPoints = 10;
   const Bounds<double> bounds1(0, 0, 0, 100, 100, 100);
-  FauxReader reader1(bounds1, numPoints);
+  FauxReader reader1(bounds1, numPoints, FauxReader::Random);
 
   const Bounds<double> bounds2(100, 100, 100, 200, 200, 100);
-  FauxReader reader2(bounds2, numPoints);
+  FauxReader reader2(bounds2, numPoints, FauxReader::Random);
 
   MosaicFilter mosaicker(reader1, reader2);
 
   FauxWriter writer(mosaicker);
   
-  writer.write();
+  writer.write(20);
   
   return;
 }
@@ -80,7 +80,7 @@ static void test3()
   std::ostream* ofs = Utils::createFile("temp.las");
 
   LasWriter lasWriter(reader, *ofs);
-  lasWriter.write();
+  lasWriter.write( header.getNumPoints() );
 
   Utils::closeFile(ofs);
 

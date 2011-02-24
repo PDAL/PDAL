@@ -34,53 +34,77 @@
 
 #include <cassert>
 
+#include "libpc/exceptions.hpp"
 #include "libpc/Writer.hpp"
 
 namespace libpc
 {
 
+const boost::uint32_t Writer::s_defaultChunkSize = 100; // BUG
 
-Writer::Writer(Stage& prevStage) :
-    Filter(prevStage)
+
+Writer::Writer(Stage& prevStage)
+    : Filter(prevStage)
+    , m_actualNumPointsWritten(0)
+    , m_targetNumPointsToWrite(0)
+    , m_chunkSize(s_defaultChunkSize)
 {
     return;
 }
 
 
-void Writer::write()
+void Writer::setChunkSize(boost::uint32_t chunkSize)
 {
-    boost::uint64_t numPoints = m_prevStage.getHeader().getNumPoints();
+    m_chunkSize = chunkSize;
+}
 
-    writeBegin(numPoints);
 
-    const boost::uint32_t chunkSize = 100;
+boost::uint32_t Writer::getChunkSize() const
+{
+    return m_chunkSize;
+}
 
-    boost::uint64_t numChunks = numPoints / chunkSize;
-    boost::uint64_t remainder = numPoints - (numChunks * chunkSize);
 
-    if (numChunks > 0)
+boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
+{
+    m_targetNumPointsToWrite = targetNumPointsToWrite;
+    m_actualNumPointsWritten = 0;
+
+    writeBegin();
+
+    while (m_actualNumPointsWritten < m_targetNumPointsToWrite)
     {
-        PointData buffer(m_prevStage.getHeader().getSchema(), chunkSize);
-        for (boost::uint64_t i=0; i<numChunks; i++)
+        boost::uint64_t numRemainingPointsToRead = m_targetNumPointsToWrite - m_actualNumPointsWritten;
+        boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(std::min<boost::uint64_t>(numRemainingPointsToRead, m_chunkSize));
+
+        PointData buffer(m_prevStage.getHeader().getSchema(), numPointsToReadThisChunk);
+
+        boost::uint32_t numPointsReadThisChunk = m_prevStage.readPoints(buffer);
+        assert(numPointsReadThisChunk <= numPointsToReadThisChunk);
+
+        boost::uint32_t numPointsWrittenThisChunk = writeBuffer(buffer);
+        assert(numPointsWrittenThisChunk == numPointsReadThisChunk);
+
+        m_actualNumPointsWritten += numPointsWrittenThisChunk;
+
+        if (m_prevStage.atEnd())
         {
-            m_prevStage.readPoints(buffer);
-            this->writeBuffer(buffer);
+            break;
         }
     }
 
-    if (remainder > 0)
-    {
-        if (remainder != (boost::uint32_t)remainder) throw;
-        PointData buffer(m_prevStage.getHeader().getSchema(), (boost::uint32_t)remainder);
-
-        m_prevStage.readPoints(buffer);
-        this->writeBuffer(buffer);
-    }
-
-
     writeEnd();
 
-    return;
+    assert(m_actualNumPointsWritten <= m_targetNumPointsToWrite);
+
+    return m_actualNumPointsWritten;
 }
+
+
+boost::uint32_t Writer::readPoints(PointData&)
+{
+    throw libpc_error("readPoints not supported for Writer objects");
+}
+
 
 } // namespace libpc

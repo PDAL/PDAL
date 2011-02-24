@@ -85,7 +85,7 @@ public:
         Field_PointSourceId,
         // ...
 
-        // add more here (but be sure and call setFieldName()!)
+        // add more here
         Field_User1 = 512,
         Field_User2,
         Field_User3,

@@ -59,4 +59,11 @@ void Filter::reset()
     m_prevStage.reset();
 }
 
+
+bool Filter::atEnd() const
+{
+    return m_prevStage.atEnd();
+}
+
+
 } // namespace libpc

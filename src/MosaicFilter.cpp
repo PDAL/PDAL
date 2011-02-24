@@ -64,10 +64,13 @@ MosaicFilter::MosaicFilter(Stage& prevStage, Stage& prevStage2)
 }
 
 
-void MosaicFilter::readPoints(PointData& destData)
+boost::uint32_t MosaicFilter::readPoints(PointData& destData)
 {
-    int numPoints = destData.getNumPoints();
+    boost::uint32_t numPoints = destData.getNumPoints();
 
+    // BUG: this doesn't account for isValid()
+
+    // BUG:
     // We're given a buffer of size N to fill, but we have two sources
     // feeding us -- so we do a read of N/2 points from each one
 
@@ -82,7 +85,7 @@ void MosaicFilter::readPoints(PointData& destData)
 
     int destPointIndex = 0;
 
-    for (int srcPointIndex=0; srcPointIndex<numPoints/2; srcPointIndex++)
+    for (boost::uint32_t srcPointIndex=0; srcPointIndex<numPoints/2; srcPointIndex++)
     {
         if (srcData1.isValid(srcPointIndex))
         {
@@ -95,7 +98,7 @@ void MosaicFilter::readPoints(PointData& destData)
         }
         destPointIndex++;
     }
-    for (int srcPointIndex=0; srcPointIndex<numPoints/2; srcPointIndex++)
+    for (boost::uint32_t srcPointIndex=0; srcPointIndex<numPoints/2; srcPointIndex++)
     {
         if (srcData2.isValid(srcPointIndex))
         {
@@ -111,7 +114,7 @@ void MosaicFilter::readPoints(PointData& destData)
 
     // BUG: when we're done, we will have gotten only half the data from our sources...!
 
-    return;
+    return numPoints;
 }
 
 

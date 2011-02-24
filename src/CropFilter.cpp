@@ -49,11 +49,11 @@ CropFilter::CropFilter(Stage& prevStage, Bounds<double> const& bounds)
 }
 
 
-void CropFilter::readPoints(PointData& data)
+boost::uint32_t CropFilter::readPoints(PointData& data)
 {
     m_prevStage.readPoints(data);
 
-    int numPoints = data.getNumPoints();
+    boost::uint32_t numPoints = data.getNumPoints();
 
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
@@ -70,21 +70,27 @@ void CropFilter::readPoints(PointData& data)
     ok = schema.findDimensionIndex(Dimension::Field_Z, fieldZ);
     assert(ok);
 
+    boost::uint32_t numValidPoints = 0;
 
-    for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
+    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        float x = data.getField<float>(pointIndex, fieldX);
-        float y = data.getField<float>(pointIndex, fieldY);
-        float z = data.getField<float>(pointIndex, fieldZ);
-        Vector<double> point(x,y,z);
-        if (!m_bounds.contains(point))
+        if (data.isValid(pointIndex))
         {
-            // remove this point, and update the lower bound for Z
-            data.setValid(pointIndex, false);
+            float x = data.getField<float>(pointIndex, fieldX);
+            float y = data.getField<float>(pointIndex, fieldY);
+            float z = data.getField<float>(pointIndex, fieldZ);
+            Vector<double> point(x,y,z);
+            if (!m_bounds.contains(point))
+            {
+                // remove this point, and update the lower bound for Z
+                data.setValid(pointIndex, false);
+            }
+
+            ++numValidPoints;
         }
     }
 
-    return;
+    return numValidPoints;
 }
 
 }

@@ -50,14 +50,10 @@ FauxWriter::FauxWriter(Stage& prevStage) :
 }
 
 
-void FauxWriter::writeBegin(std::size_t /*totalNumPoints*/)
+void FauxWriter::writeBegin()
 {
-    cout << "FauxWriter::writeBegin()" << endl;
-    cout << endl;
-
-    m_numPointsWritten = 0;
-
-    cout << getHeader();
+    m_minimumX = m_minimumY = m_minimumZ = std::numeric_limits<float>::max();
+    m_maximumX = m_maximumY = m_maximumZ = std::numeric_limits<float>::min();
 
     return;
 }
@@ -66,35 +62,51 @@ void FauxWriter::writeBegin(std::size_t /*totalNumPoints*/)
 void FauxWriter::writeEnd()
 {
     cout << "FauxWriter::writeEnd()" << endl;
-    cout << "  wrote " << m_numPointsWritten << " points" << endl;
+    cout << "  wrote " << m_actualNumPointsWritten << " points" << endl;
+
+    cout << "  min X: " << m_minimumX << endl;
+    cout << "  min Y: " << m_minimumY << endl;
+    cout << "  min Z: " << m_minimumZ << endl;
+    cout << "  max X: " << m_maximumX << endl;
+    cout << "  max Y: " << m_maximumY << endl;
+    cout << "  max Z: " << m_maximumZ << endl;
+    
     cout << endl;
 
     return;
 }
 
 
-void FauxWriter::writeBuffer(const PointData& pointData)
+boost::uint32_t FauxWriter::writeBuffer(const PointData& pointData)
 {
-    const int numPoints = pointData.getNumPoints();
+    const boost::uint32_t numPoints = pointData.getNumPoints();
 
-    int numValidPoints = 0;
-    for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
+    const Schema& schema = pointData.getSchemaLayout().getSchema();
+    const std::size_t fieldIndexX = schema.getDimensionIndex(Dimension::Field_X);
+    const std::size_t fieldIndexY = schema.getDimensionIndex(Dimension::Field_Y);
+    const std::size_t fieldIndexZ = schema.getDimensionIndex(Dimension::Field_Z);
+
+    boost::uint32_t numValidPoints = 0;
+    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         if (pointData.isValid(pointIndex))
         {
             ++numValidPoints;
+
+            float x = pointData.getField<float>(pointIndex, fieldIndexX);
+            float y = pointData.getField<float>(pointIndex, fieldIndexY);
+            float z = pointData.getField<float>(pointIndex, fieldIndexZ);
+
+            m_minimumX = std::min(m_minimumX, x);
+            m_minimumY = std::min(m_minimumY, y);
+            m_minimumZ = std::min(m_minimumZ, z);
+            m_maximumX = std::max(m_maximumX, x);
+            m_maximumY = std::max(m_maximumY, y);
+            m_maximumZ = std::max(m_maximumZ, z);
         }
     }
 
-    cout << "FauxWriter::writeBuffer()" << endl;
-    cout << "  writing " << numValidPoints << " of " << numPoints << " points" << endl;
-    cout << endl;
-
-    cout << pointData;
-
-    cout << endl;
-
-    return;
+    return numValidPoints;
 }
 
 

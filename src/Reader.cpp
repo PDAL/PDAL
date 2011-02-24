@@ -67,4 +67,10 @@ void Reader::reset()
 }
 
 
+bool Reader::atEnd() const
+{
+    return (m_currentPointIndex >= getHeader().getNumPoints());
+}
+
+
 } // namespace libpc

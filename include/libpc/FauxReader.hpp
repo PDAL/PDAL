@@ -40,18 +40,37 @@
 namespace libpc
 {
 
+// The FauxReader doesn't read from disk, but instead just makes up data for its
+// points.  The reader is constructed with a given bounding box and a given 
+// number of points.
+//
+// This reader knows about 4 fields (Dimensions):
+//    X,Y,Z - floats
+//    Time  - uint64
+//
+// It supports two modes: "random" generates points that are randomly
+// distributed within the given bounding box, and "constant" generates its
+// points to always be at the minimum of the bounding box.
+//
 class LIBPC_DLL FauxReader : public Reader
 {
 public:
-    // generates N points randomly within the bounds
-    FauxReader(const Bounds<double>&, int numPoints);
+    enum Mode
+    {
+        Constant,
+        Random
+    };
 
-    void readPoints(PointData& data);
+public:
+    FauxReader(const Bounds<double>&, int numPoints, Mode mode);
 
-    // does nothing
-    void seekToPoint(boost::uint64_t&) { }
+    boost::uint32_t readPoints(PointData& data);
+
+    void seekToPoint(boost::uint64_t&);
 
 private:
+    Mode m_mode;
+
     FauxReader& operator=(const FauxReader&); // not implemented
     FauxReader(const FauxReader&); // not implemented
 };

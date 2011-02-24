@@ -53,11 +53,11 @@ ColorFilter::ColorFilter(Stage& prevStage)
 }
 
 
-void ColorFilter::readPoints(PointData& data)
+boost::uint32_t ColorFilter::readPoints(PointData& data)
 {
     m_prevStage.readPoints(data);
 
-    int numPoints = data.getNumPoints();
+    boost::uint32_t numPoints = data.getNumPoints();
 
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
@@ -77,19 +77,26 @@ void ColorFilter::readPoints(PointData& data)
     ok = schema.findDimensionIndex(Dimension::Field_Z, offsetZ);
     assert(ok);
 
-    for (int pointIndex=0; pointIndex<numPoints; pointIndex++)
-    {
-        float z = data.getField<float>(pointIndex, offsetZ);
-        boost::uint8_t red, green, blue;
-        getColor(z, red, green, blue);
+    boost::uint32_t numValidPoints = 0;
 
-        // now we store the 3 u8's in the point data...
-        data.setField<boost::uint8_t>(pointIndex, fieldIndexR, red);
-        data.setField<boost::uint8_t>(pointIndex, fieldIndexG, green);
-        data.setField<boost::uint8_t>(pointIndex, fieldIndexB, blue);
+    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
+    {
+        if (data.isValid(pointIndex))
+        {
+            float z = data.getField<float>(pointIndex, offsetZ);
+            boost::uint8_t red, green, blue;
+            getColor(z, red, green, blue);
+
+            // now we store the 3 u8's in the point data...
+            data.setField<boost::uint8_t>(pointIndex, fieldIndexR, red);
+            data.setField<boost::uint8_t>(pointIndex, fieldIndexG, green);
+            data.setField<boost::uint8_t>(pointIndex, fieldIndexB, blue);
+
+            ++numValidPoints;
+        }
     }
 
-    return;
+    return numValidPoints;
 }
 
 void ColorFilter::getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue)

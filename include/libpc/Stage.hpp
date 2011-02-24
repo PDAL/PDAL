@@ -58,7 +58,9 @@ public:
     // not match our own header's schema.  That's okay, though: all
     // that matters is that the buffer we are given has the fields
     // we need to write into.
-    virtual void readPoints(PointData&) = 0;
+    //
+    // Returns the number of valid points read.
+    virtual boost::uint32_t readPoints(PointData&) = 0;
 
     // advance (or retreat) to the Nth point in the file (absolute, 
     // not relative).  In some cases, this might be a very slow, painful
@@ -68,6 +70,9 @@ public:
     // resets the object's state such that it is positioned to the beginning
     // of the file, as if no reads had yet been done
     virtual void reset() = 0;
+
+    // returns true after we've read all the points available to this stage
+    virtual bool atEnd() const = 0;
 
     const Header& getHeader() const;
     Header& getHeader();

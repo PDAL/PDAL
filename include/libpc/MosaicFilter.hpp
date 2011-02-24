@@ -48,7 +48,7 @@ class LIBPC_DLL MosaicFilter : public Filter
 public:
     MosaicFilter(Stage& prevStage, Stage& prevStage2);
 
-    void readPoints(PointData&);
+    boost::uint32_t readPoints(PointData&);
 
     // BUG: what does seetToPoint() do for a mosaic filter?
 

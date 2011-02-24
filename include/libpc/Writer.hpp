@@ -47,24 +47,35 @@ class LIBPC_DLL Writer : public Filter
 public:
     Writer(Stage& prevStage);
 
-    void write();
+    // size of the PointData buffer to use
+    void setChunkSize(boost::uint32_t);
+    boost::uint32_t getChunkSize() const;
+
+    // Read the  given number of points (or less, if the reader runs out first), 
+    // and then write them out to wherever.  Returns total number of points
+    // actually written.
+    boost::uint64_t write(std::size_t targetNumPointsToWrite);
 
 protected:
     // this is called once before the loop with the writeBuffer calls
-    virtual void writeBegin(std::size_t totalNumPoints) = 0;
+    virtual void writeBegin() = 0;
 
     // called repeatedly, until out of data
-    virtual void writeBuffer(const PointData&) = 0;
+    virtual boost::uint32_t writeBuffer(const PointData&) = 0;
 
     // called once, after the writeBuffer calls
     virtual void writeEnd() = 0;
 
-private:
     // not generally used in Writer objects
-    virtual void readPoints(PointData&)
-    {
-        throw;
-    }
+    virtual boost::uint32_t readPoints(PointData&);
+
+    // these two are valid for use after writeBegin has been called
+    std::size_t m_actualNumPointsWritten;
+    std::size_t m_targetNumPointsToWrite;
+
+private:
+    boost::uint32_t m_chunkSize;
+    static const boost::uint32_t s_defaultChunkSize;
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented

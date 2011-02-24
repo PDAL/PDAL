@@ -42,16 +42,27 @@
 namespace libpc
 {
 
+//
+// The FauxWriter doesn't actually write to disk -- instead, it just
+// dumps to stdout some summary stats about the data it is given.
+//
+// This writer knows only about three dimensions: X,Y,Z (as floats).
+//
 class LIBPC_DLL FauxWriter : public Writer
 {
 public:
     FauxWriter(Stage& prevStage);
 
 private:
-    int m_numPointsWritten;
+    float m_minimumX;
+    float m_minimumY;
+    float m_minimumZ;
+    float m_maximumX;
+    float m_maximumY;
+    float m_maximumZ;
 
-    void writeBegin(std::size_t totalNumPoints);
-    void writeBuffer(const PointData&);
+    void writeBegin();
+    boost::uint32_t writeBuffer(const PointData&);
     void writeEnd();
 
     FauxWriter& operator=(const FauxWriter&); // not implemented

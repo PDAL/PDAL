@@ -49,7 +49,7 @@ class LIBPC_DLL CropFilter : public Filter
 public:
     CropFilter(Stage& prevStage, Bounds<double> const& bounds);
 
-    void readPoints(PointData&);
+    boost::uint32_t readPoints(PointData&);
 
 private:
     Bounds<double> m_bounds;

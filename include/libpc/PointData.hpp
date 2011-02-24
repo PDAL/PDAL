@@ -66,6 +66,10 @@ public:
     // number of points in this buffer
     boost::uint32_t getNumPoints() const;
 
+    // number of points in this buffer that have legit data; initially will be zero,
+    // and after a read() call it will be in the range 0 to getNumPoints()-1
+    boost::uint32_t getNumValidPoints();
+
     // schema (number and kinds of fields) for a point in this buffer
     const SchemaLayout& getSchemaLayout() const;
 

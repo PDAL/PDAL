@@ -52,7 +52,7 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
 }
 
 
-void LasWriter::writeBegin(std::size_t totalNumPoints)
+void LasWriter::writeBegin()
 {
     Header& baseHeader = getHeader();
     LasHeader& lasHeader = (LasHeader&)baseHeader;
@@ -62,8 +62,7 @@ void LasWriter::writeBegin(std::size_t totalNumPoints)
     lasHeader.SetOffset(0,0,0);
     lasHeader.SetScale(1,1,1);
     
-    boost::uint32_t cnt = static_cast<boost::uint32_t>(totalNumPoints);
-    assert(cnt==totalNumPoints);
+    boost::uint32_t cnt = static_cast<boost::uint32_t>(m_targetNumPointsToWrite);
     lasHeader.SetPointRecordsCount(cnt);
 
     LasHeaderWriter lasHeaderWriter(lasHeader, m_ostream);
@@ -79,7 +78,7 @@ void LasWriter::writeEnd()
 }
 
 
-void LasWriter::writeBuffer(const PointData& pointData)
+boost::uint32_t LasWriter::writeBuffer(const PointData& pointData)
 {
     Header& baseHeader = getHeader();
     LasHeader& lasHeader = (LasHeader&)baseHeader;
@@ -105,8 +104,12 @@ void LasWriter::writeBuffer(const PointData& pointData)
     const std::size_t fieldIndexGreen = schema.getDimensionIndex(Dimension::Field_Green);
     const std::size_t fieldIndexBlue = schema.getDimensionIndex(Dimension::Field_Blue);
 
+    boost::uint32_t numValidPoints = 0;
+
     for (boost::uint32_t pointIndex=0; pointIndex<pointData.getNumPoints(); pointIndex++)
     {
+        if (pointData.isValid(pointIndex) == false) continue;
+
         boost::uint8_t buf[100]; // BUG: fixed size
 
         if (pointFormat == LasHeader::ePointFormat0)
@@ -167,13 +170,14 @@ void LasWriter::writeBuffer(const PointData& pointData)
         {
             throw;
         }
-    }
 
+        ++numValidPoints;
+    }
 
     //std::vector<boost::uint8_t> const& data = point.GetData();    
     //detail::write_n(m_ofs, data.front(), m_header->GetDataRecordLength());
 
-    return;
+    return numValidPoints;
 }
 
 } // namespace libpc

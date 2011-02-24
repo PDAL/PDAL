@@ -50,7 +50,7 @@ class LIBPC_DLL ColorFilter : public Filter
 public:
     ColorFilter(Stage& prevStage);
 
-    void readPoints(PointData&);
+    boost::uint32_t readPoints(PointData&);
 
 private:
     void getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue);
