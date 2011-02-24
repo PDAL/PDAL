@@ -85,8 +85,11 @@ boost::uint32_t CropFilter::readPoints(PointData& data)
                 // remove this point, and update the lower bound for Z
                 data.setValid(pointIndex, false);
             }
-
-            ++numValidPoints;
+            else
+            {
+                data.setValid(pointIndex, true);
+                ++numValidPoints;
+            }
         }
     }
 
