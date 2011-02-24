@@ -54,6 +54,7 @@ void FauxWriter::writeBegin()
 {
     m_minimumX = m_minimumY = m_minimumZ = std::numeric_limits<float>::max();
     m_maximumX = m_maximumY = m_maximumZ = std::numeric_limits<float>::min();
+    m_averageX = m_averageY = m_averageZ = 0;
 
     return;
 }
@@ -61,17 +62,21 @@ void FauxWriter::writeBegin()
 
 void FauxWriter::writeEnd()
 {
-    cout << "FauxWriter::writeEnd()" << endl;
-    cout << "  wrote " << m_actualNumPointsWritten << " points" << endl;
+    m_averageX /= (float)m_actualNumPointsWritten;
+    m_averageY /= (float)m_actualNumPointsWritten;
+    m_averageZ /= (float)m_actualNumPointsWritten;
 
-    cout << "  min X: " << m_minimumX << endl;
-    cout << "  min Y: " << m_minimumY << endl;
-    cout << "  min Z: " << m_minimumZ << endl;
-    cout << "  max X: " << m_maximumX << endl;
-    cout << "  max Y: " << m_maximumY << endl;
-    cout << "  max Z: " << m_maximumZ << endl;
-    
-    cout << endl;
+    //cout << "FauxWriter::writeEnd()" << endl;
+    //cout << "  wrote " << m_actualNumPointsWritten << " points" << endl;
+
+    //cout << "  min X: " << m_minimumX << endl;
+    //cout << "  min Y: " << m_minimumY << endl;
+    //cout << "  min Z: " << m_minimumZ << endl;
+    //cout << "  max X: " << m_maximumX << endl;
+    //cout << "  max Y: " << m_maximumY << endl;
+    //cout << "  max Z: " << m_maximumZ << endl;
+    //
+    //cout << endl;
 
     return;
 }
@@ -103,6 +108,10 @@ boost::uint32_t FauxWriter::writeBuffer(const PointData& pointData)
             m_maximumX = std::max(m_maximumX, x);
             m_maximumY = std::max(m_maximumY, y);
             m_maximumZ = std::max(m_maximumZ, z);
+
+            m_averageX += x;
+            m_averageY += y;
+            m_averageZ += z;
         }
     }
 

@@ -60,6 +60,9 @@ public:
     float getMaxX() const { return m_maximumX; }
     float getMaxY() const { return m_maximumY; }
     float getMaxZ() const { return m_maximumZ; }
+    float getAvgX() const { return m_averageX; }
+    float getAvgY() const { return m_averageY; }
+    float getAvgZ() const { return m_averageZ; }
 
 private:
     float m_minimumX;
@@ -68,6 +71,9 @@ private:
     float m_maximumX;
     float m_maximumY;
     float m_maximumZ;
+    float m_averageX;
+    float m_averageY;
+    float m_averageZ;
 
     void writeBegin();
     boost::uint32_t writeBuffer(const PointData&);

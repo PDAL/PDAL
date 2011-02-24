@@ -50,7 +50,8 @@ namespace libpc
 //
 // It supports two modes: "random" generates points that are randomly
 // distributed within the given bounding box, and "constant" generates its
-// points to always be at the minimum of the bounding box.
+// points to always be at the minimum of the bounding box.  The Time field
+// is always set to the point number.
 //
 class LIBPC_DLL FauxReader : public Reader
 {
