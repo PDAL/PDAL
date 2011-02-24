@@ -46,16 +46,22 @@ BOOST_AUTO_TEST_CASE(test_3rdparty_libs)
 
 BOOST_AUTO_TEST_CASE(test_version)
 {
-    // just verify it is a string, don't worry about the contents
+    // just verify these functions can be called, don't worry about the values
     
     std::string version = GetVersionString();
+    BOOST_CHECK(!version.empty());
     std::string fullVersion = GetFullVersionString();
+    BOOST_CHECK(!fullVersion.empty());
 
     int major = GetVersionMajor();
+    BOOST_CHECK(major >= 0);
     int minor = GetVersionMinor();
+    BOOST_CHECK(minor >= 0);
     int patch = GetVersionPatch();
+    BOOST_CHECK(patch >= 0);
 
-    int x = GetVersionInteger();
+    int bignum = GetVersionInteger();
+    BOOST_CHECK(bignum > 0);
 
     return;
 }
