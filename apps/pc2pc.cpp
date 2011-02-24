@@ -24,6 +24,7 @@
 #include "libpc/LasReader.hpp"
 #include "libpc/LasHeader.hpp"
 #include "libpc/LasWriter.hpp"
+#include "libpc/LiblasReader.hpp"
 
 using namespace libpc;
 
@@ -123,6 +124,9 @@ int main(int, char* [])
     test1();
 
     test2();
+
+    std::istream* ifs = Utils::openFile("test/data/1.2-with-color.las");
+    LiblasReader r(*ifs);
 
     return 0;
 }

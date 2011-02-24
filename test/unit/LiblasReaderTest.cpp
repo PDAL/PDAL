@@ -11,9 +11,11 @@ BOOST_AUTO_TEST_SUITE(LiblasReaderTest)
 
 BOOST_AUTO_TEST_CASE(test_1)
 {
-    //std::istream* ifs = Utils::openFile("test/data/1.2-with-color.las");
-    //
-    //LiblasReader reader(*ifs);
+    std::istream* ifs = Utils::openFile("test/data/1.2-with-color.las");
+    
+    LiblasReader reader(*ifs);
+
+    Utils::closeFile(ifs);
 
     return;
 }

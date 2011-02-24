@@ -15,12 +15,14 @@ BOOST_AUTO_TEST_CASE(test_1)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    //Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    //FauxReader reader(bounds, 1000, FauxReader::Constant);
+    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    FauxReader reader(bounds, 1000, FauxReader::Constant);
 
-    //std::ostream* ofs = Utils::createFile("temp.las");
+    std::ostream* ofs = Utils::createFile("temp.las");
 
-    //LiblasWriter writer(reader, *ofs);
+    LiblasWriter writer(reader, *ofs);
+
+    Utils::closeFile(ofs);
 
     Utils::deleteFile("temp.las");
 

@@ -32,13 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+
 #include "libpc/LiblasReader.hpp"
+
+#include <liblas/factory.hpp>
+
 #include "libpc/LiblasHeader.hpp"
 
 namespace libpc
 {
-
-
 LiblasReader::LiblasReader(std::istream& istream)
     : Reader()
     , m_istream(istream)
@@ -46,6 +48,9 @@ LiblasReader::LiblasReader(std::istream& istream)
     LiblasHeader* liblasHeader = new LiblasHeader;
     setHeader(liblasHeader);
     
+    liblas::ReaderFactory f;
+    liblas::Reader reader = f.CreateWithStream(m_istream);
+
     return;
 }
 
