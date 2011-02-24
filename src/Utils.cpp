@@ -74,7 +74,7 @@ std::istream* Utils::openFile(std::string const& filename, bool asBinary)
 
     std::ios::openmode mode = std::ios::out;
     if (asBinary)
-      mode = mode |= std::ios::binary;
+      mode |= std::ios::binary;
 
     namespace io = boost::iostreams;
     io::stream<io::file_source>* ifs = new io::stream<io::file_source>();
@@ -88,7 +88,7 @@ std::ostream* Utils::createFile(std::string const& filename, bool asBinary)
 {
     std::ios::openmode mode = std::ios::in;
     if (asBinary)
-      mode = mode |= std::ios::binary;
+      mode  |= std::ios::binary;
 
     namespace io = boost::iostreams;
     io::stream<io::file_sink>* ofs = new io::stream<io::file_sink>();
