@@ -39,8 +39,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef LIBLAS_DIMENSION_HPP_INCLUDED
-#define LIBLAS_DIMENSION_HPP_INCLUDED
+#ifndef LIBPC_DIMENSION_HPP_INCLUDED
+#define LIBPC_DIMENSION_HPP_INCLUDED
 
 #include <string>
 
@@ -308,4 +308,4 @@ LIBPC_DLL std::ostream& operator<<(std::ostream& os, libpc::Dimension const& d);
 
 } // namespace libpc
 
-#endif // LIBLAS_DIMENSION_HPP_INCLUDED
+#endif // LIBPC_DIMENSION_HPP_INCLUDED
