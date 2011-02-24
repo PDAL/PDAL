@@ -115,7 +115,7 @@ property_tree::ptree Schema::getPTree() const
     using property_tree::ptree;
     ptree pt;
 
-    for (DimensionsCIter iter = m_dimensions.cbegin(); iter != m_dimensions.cend(); ++iter)
+    for (DimensionsCIter iter = m_dimensions.begin(); iter != m_dimensions.end(); ++iter)
     {
         pt.add_child("LASSchema.dimensions.dimension", (*iter).GetPTree());
     }
@@ -195,7 +195,7 @@ std::ostream& operator<<(std::ostream& os, Schema const& schema)
     os << "  ";
 
     const Schema::Dimensions& dimensions = schema.getDimensions();
-    for (Schema::DimensionsCIter iter = dimensions.cbegin(); iter != dimensions.cend(); ++iter)
+    for (Schema::DimensionsCIter iter = dimensions.begin(); iter != dimensions.end(); ++iter)
     {
         os << *iter;
         os << "  ";
@@ -211,8 +211,9 @@ std::ostream& operator<<(std::ostream& os, Schema const& schema)
 
 
 SchemaLayout::SchemaLayout(const Schema& schema)
-    : m_byteSize(0)
-    , m_schema(schema)
+    : 
+    m_schema(schema)
+    , m_byteSize(0)
 {
     calculateSizes();
     return;
@@ -221,9 +222,10 @@ SchemaLayout::SchemaLayout(const Schema& schema)
 
 /// copy constructor
 SchemaLayout::SchemaLayout(SchemaLayout const& other) 
-    : m_dimensionLayouts(other.m_dimensionLayouts)
+    : 
+    m_schema(other.m_schema)
+    , m_dimensionLayouts(other.m_dimensionLayouts)
     , m_byteSize(other.m_byteSize)
-    , m_schema(other.m_schema)
 {
 }
 

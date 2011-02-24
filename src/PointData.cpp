@@ -46,9 +46,9 @@ namespace libpc
 
 PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t numPoints) :
     m_schemaLayout(schemaLayout),
-    m_numPoints(numPoints),
     m_data(NULL),
-    m_pointSize(0)
+    m_pointSize(0),
+    m_numPoints(numPoints)
 {
     m_pointSize = m_schemaLayout.getByteSize();
     m_data = new boost::uint8_t[m_pointSize * m_numPoints];
@@ -153,7 +153,7 @@ std::ostream& operator<<(std::ostream& ostr, const PointData& pointData)
         
         ostr << "Point: " << pointIndex << endl;
 
-        for (SchemaLayout::DimensionLayoutsCIter citer=dimensionLayouts.cbegin(); citer != dimensionLayouts.cend(); ++citer)
+        for (SchemaLayout::DimensionLayoutsCIter citer=dimensionLayouts.begin(); citer != dimensionLayouts.end(); ++citer)
         {
             const DimensionLayout& dimensionLayout = *citer;
             const Dimension& dimension = dimensionLayout.getDimension();

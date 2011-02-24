@@ -65,7 +65,7 @@ boost::uint32_t Writer::getChunkSize() const
 }
 
 
-boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
+boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
 {
     m_targetNumPointsToWrite = targetNumPointsToWrite;
     m_actualNumPointsWritten = 0;

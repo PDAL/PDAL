@@ -78,7 +78,7 @@ boost::uint32_t FauxReader::readPoints(PointData& data)
     Header& header = getHeader();
 
     const Bounds<double>& bounds = header.getBounds();
-    const std::vector<Range<double>>& dims = bounds.dimensions();
+    const std::vector< Range<double> >& dims = bounds.dimensions();
     const double minX = dims[0].getMinimum();
     const double maxX = dims[0].getMaximum();
     const double minY = dims[1].getMinimum();

@@ -37,6 +37,8 @@
 
 #include <iosfwd>
 #include <string>
+#include <stdexcept>
+#include <cassert>
 
 #include <boost/concept_check.hpp>
 #include <boost/cstdint.hpp>
@@ -49,7 +51,7 @@ namespace libpc
 class LIBPC_DLL Utils
 {
 public:
-    static void Utils::random_seed(unsigned int seed);
+    static void random_seed(unsigned int seed);
     static double random(double minimum, double maximum);
 
     // compares two values to within the datatype's epsilon
