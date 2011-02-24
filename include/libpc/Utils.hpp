@@ -61,6 +61,7 @@ public:
     }
 
     // compares two values to within a given tolerance
+    // BUG: need to disallow T to be an unsigned type
     template<class T>
     static bool compare_approx(const T& actual, const T& expected, const T& tolerance)
     {
