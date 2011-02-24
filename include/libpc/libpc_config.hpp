@@ -47,14 +47,16 @@
 namespace libpc
 {
 
-LIBPC_DLL bool isGDALEnabled();
-LIBPC_DLL bool isLibGeoTIFFEnabled();
-LIBPC_DLL bool isLasZipEnabled();
-LIBPC_DLL std::string getFullVersion();
-LIBPC_DLL std::string getVersionString();
-LIBPC_DLL int getVersionInteger();
-LIBPC_DLL int getVersionMajor();
-LIBPC_DLL int getVersionMinor();
-LIBPC_DLL int getVersionPatch();
+LIBPC_DLL bool IsLibLASEnabled();
+LIBPC_DLL bool IsGDALEnabled();
+LIBPC_DLL bool IsLibGeoTIFFEnabled();
+LIBPC_DLL bool IsLasZipEnabled();
+
+LIBPC_DLL std::string GetFullVersionString();
+LIBPC_DLL std::string GetVersionString();
+LIBPC_DLL int GetVersionInteger();
+LIBPC_DLL int GetVersionMajor();
+LIBPC_DLL int GetVersionMinor();
+LIBPC_DLL int GetVersionPatch();
 
 } // namespace libpc

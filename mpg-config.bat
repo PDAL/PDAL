@@ -2,12 +2,13 @@
 
 set COMPILER="Visual Studio 10 Win64"
 
-set LIBPC_DIR=c:\dev\libpc
+set LIBPC_DIR=d:\dev\libpc
 
-set LASZIP_DIR=c:\dev\laszip
+set LIBLAS_DIR=d:\dev\liblas
+set LASZIP_DIR=d:\dev\laszip
 set OSGEO4W_DIR=C:\OSGeo4W
 set OSGEO4W_GDAL=C:\OSGeo4W\apps\gdal-17
-set BOOST_DIR="C:\dev\boost_1_45_0"
+set BOOST_DIR="C:\Utils\boost_1_45_0"
 set ORACLE_HOME=%OSGEO4W_DIR%
 
 set BUILD_TYPE=Release
@@ -19,6 +20,7 @@ cmake -G %COMPILER% ^
     -DWITH_GEOTIFF=OFF ^
     -DWITH_ORACLE=OFF ^
     -DWITH_LASZIP=ON ^
+    -DWITH_LIBLAS=ON ^
     -DGDAL_INCLUDE_DIR=%OSGEO4W_GDAL%\include ^
     -DGDAL_LIBRARY=%OSGEO4W_GDAL%\lib\gdal_i.lib ^
     -DTIFF_INCLUDE_DIR=%OSGEO4W_DIR%\include ^
@@ -29,6 +31,8 @@ cmake -G %COMPILER% ^
     -DORACLE_OCI_LIBRARY=%ORACLE_HOME%\lib\oci.lib ^
     -DLASZIP_INCLUDE_DIR=%LASZIP_DIR%\include ^
     -DLASZIP_LIBRARY=%LASZIP_DIR%\bin\Debug\Debug\laszip.lib ^
+    -DLIBLAS_INCLUDE_DIR=%LIBLAS_DIR%\include ^
+    -DLIBLAS_LIBRARY=%LIBLAS_DIR%\bin\Debug\Debug\liblas.lib ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
     %LIBPC_DIR%

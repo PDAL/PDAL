@@ -46,6 +46,10 @@
 #include <sstream>
 #include "libpc/libpc_defines.h"
 
+#ifdef LIBPC_HAVE_LIBLAS
+#include <liblas/version.hpp>
+#endif
+
 #ifdef LIBPC_HAVE_LIBGEOTIFF
 #include <geotiff.h>
 #endif
@@ -61,8 +65,18 @@
 namespace libpc
 {
 
+/// Check if libLAS support has been built in to libPC
+bool IsLibLASEnabled()
+{
+#ifdef LIBPC_HAVE_LIBLAS
+    return true;
+#else
+    return false;
+#endif
+}
+
 /// Check if GDAL support has been built in to libPC
-bool isGDALEnabled()
+bool IsGDALEnabled()
 {
 #ifdef LIBPC_HAVE_GDAL
     return true;
@@ -72,7 +86,7 @@ bool isGDALEnabled()
 }
 
 /// Check if GeoTIFF support has been built in to libPC
-bool isLibGeoTIFFEnabled()
+bool IsLibGeoTIFFEnabled()
 {
 #ifdef LIBPC_HAVE_LIBGEOTIFF
     return true;
@@ -82,7 +96,7 @@ bool isLibGeoTIFFEnabled()
 }
 
 /// Check if LasZip compression support has been built in to libPC
-bool isLasZipEnabled()
+bool IsLasZipEnabled()
 {
 #ifdef LIBPC_HAVE_LASZIP
     return true;
@@ -92,36 +106,43 @@ bool isLasZipEnabled()
 }
 
 
-int getVersionMajor()
+int GetVersionMajor()
 {
     return LIBPC_VERSION_MAJOR;
 }
 
-int getVersionMinor()
+int GetVersionMinor()
 {
     return LIBPC_VERSION_MINOR;
 }
 
-int getVersionPatch()
+int GetVersionPatch()
 {
     return LIBPC_VERSION_PATCH;
 }
 
-std::string getVersionString()
+std::string GetVersionString()
 {
     return std::string(LIBPC_VERSION_STRING);
 }
 
-int getVersionInteger()
+int GetVersionInteger()
 {
     return LIBPC_VERSION_INTEGER;
 }
 
 
 /// Tell the user a bit about libPC's compilation
-std::string getFullVersion()
+std::string GetFullVersionString()
 {
     std::ostringstream os;
+
+#ifdef LIBPC_HAVE_LIBLAS
+    os << " libLAS "
+       << (LIBLAS_VERSION / 100000) << '.'
+       << (LIBLAS_VERSION / 100 % 1000) << '.'
+       << (LIBLAS_VERSION % 100);
+#endif
 
 #ifdef LIBPC_HAVE_LIBGEOTIFF
     os << " GeoTIFF "

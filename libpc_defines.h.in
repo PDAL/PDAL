@@ -22,6 +22,7 @@
 /*
  * availability of 3rd-party libraries
  */
+#cmakedefine LIBPC_HAVE_LIBLAS
 #cmakedefine LIBPC_HAVE_LASZIP
 #cmakedefine LIBPC_HAVE_ORSACE
 #cmakedefine LIBPC_HAVE_GDAL

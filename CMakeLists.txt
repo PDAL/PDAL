@@ -272,7 +272,7 @@ endif()
 
 # LASZIP support - optional, default=OFF
 set(WITH_LASZIP FALSE CACHE BOOL "Choose if LASzip support should be built")
-set(WITH_STATIC_LASZIP FALSE CACHE BOOL "Choose of LASzip should be statically linked")
+set(WITH_STATIC_LASZIP FALSE CACHE BOOL "Choose if LASzip should be statically linked")
 mark_as_advanced(WITH_STATIC_LASZIP)
 
 if(WITH_LASZIP)
@@ -287,6 +287,22 @@ if(WITH_LASZIP)
     endif()
 endif()
 
+# LIBLAS support - optional, default=OFF
+set(WITH_LIBLAS FALSE CACHE BOOL "Choose if libLAS support should be built")
+set(WITH_STATIC_LIBLAS FALSE CACHE BOOL "Choose if libLAS should be statically linked")
+mark_as_advanced(WITH_STATIC_LIBLAS)
+
+if(WITH_LIBLAS)
+    find_package(LibLAS 1.6.0)
+    if(LIBLAS_FOUND)
+        set(CMAKE_REQUIRED_LIBRARIES ${LIBLAS_LIBRARY})
+        include_directories(${LIBLAS_INCLUDE_DIR})
+        mark_as_advanced(CLEAR LIBLAS_INCLUDE_DIR) 
+        mark_as_advanced(CLEAR LIBLAS_LIBRARY) 
+        mark_as_advanced(CLEAR LIBLAS_VERSION) 
+        set(LIBPC_HAVE_LIBLAS 1)
+    endif()
+endif()
 
 
 

@@ -100,16 +100,16 @@ int main(int, char* [])
     }
 
     {
-        const int major = getVersionMajor();
-        const int minor = getVersionMinor();
-        const int patch = getVersionPatch();
-        const int verInt = getVersionInteger();
+        const int major = GetVersionMajor();
+        const int minor = GetVersionMinor();
+        const int patch = GetVersionPatch();
+        const int verInt = GetVersionInteger();
         std::cout << "Version: " << major << " " << minor << " " << patch << " (" << verInt << ")" << std::endl;
 
-        const std::string verString = getVersionString();
+        const std::string verString = GetVersionString();
         std::cout << " string: " << verString << std::endl;
 
-        const std::string fullString = getFullVersion();
+        const std::string fullString = GetFullVersionString();
         std::cout << "Full version string: " << fullString << std::endl;
     }
 
