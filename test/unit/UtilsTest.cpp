@@ -38,18 +38,34 @@ BOOST_AUTO_TEST_CASE(test_random)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_eps)
+BOOST_AUTO_TEST_CASE(test_comparators)
 {
     bool ok;
     
-    ok = Utils::compare_distance<float>(1.000001f, 1.0f);
-    BOOST_CHECK(!ok);
+    {
+        ok = Utils::compare_distance<float>(1.000001f, 1.0f);
+        BOOST_CHECK(!ok);
 
-    ok = Utils::compare_distance<float>(1.0000001f, 1.0f);
-    BOOST_CHECK(ok);
+        ok = Utils::compare_distance<float>(1.0000001f, 1.0f);
+        BOOST_CHECK(ok);
 
-    ok = Utils::compare_distance<float>(1.00000001f, 1.0f);
-    BOOST_CHECK(ok);
+        ok = Utils::compare_distance<float>(1.00000001f, 1.0f);
+        BOOST_CHECK(ok);
+    }
+
+    {
+        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.0001);
+        BOOST_CHECK(!ok);
+
+        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.001);
+        BOOST_CHECK(!ok);
+
+        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.01);
+        BOOST_CHECK(ok);
+
+        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.1);
+        BOOST_CHECK(ok);
+    }
 }
 
 

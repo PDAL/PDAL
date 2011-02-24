@@ -52,13 +52,21 @@ public:
     static void Utils::random_seed(unsigned int seed);
     static double random(double minimum, double maximum);
 
+    // compares two values to within the datatype's epsilon
     template<class T>
     static bool compare_distance(const T& actual, const T& expected)
     {
         const T epsilon = std::numeric_limits<T>::epsilon();
+        return compare_approx<T>(actual, expected, epsilon);
+    }
+
+    // compares two values to within a given tolerance
+    template<class T>
+    static bool compare_approx(const T& actual, const T& expected, const T& tolerance)
+    {
         const T diff = actual - expected;
 
-        if ( !((diff <= epsilon) && (diff >= -epsilon )) )
+        if ( !((diff <= tolerance) && (diff >= -tolerance )) )
         {
             return false;
         }
