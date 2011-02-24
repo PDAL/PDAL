@@ -44,7 +44,7 @@ namespace libpc
 
 //
 // The FauxWriter doesn't actually write to disk -- instead, it just
-// dumps to stdout some summary stats about the data it is given.
+// record some summary stats about the data it is given.
 //
 // This writer knows only about three dimensions: X,Y,Z (as floats).
 //
@@ -52,6 +52,14 @@ class LIBPC_DLL FauxWriter : public Writer
 {
 public:
     FauxWriter(Stage& prevStage);
+
+    // retrieve the summary info
+    float getMinX() const { return m_minimumX; }
+    float getMinY() const { return m_minimumY; }
+    float getMinZ() const { return m_minimumZ; }
+    float getMaxX() const { return m_maximumX; }
+    float getMaxY() const { return m_maximumY; }
+    float getMaxZ() const { return m_maximumZ; }
 
 private:
     float m_minimumX;

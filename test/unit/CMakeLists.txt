@@ -10,7 +10,10 @@ SET(LIBPC_UNIT_TEST libpc_test)
 SET(LIBPC_UNIT_TEST_SRC
 	BoundsTest.cpp
 	ColorTest.cpp
+	CropFilterTest.cpp
 	DimensionTest.cpp
+	FauxReaderTest.cpp
+	FauxWriterTest.cpp
 	PointDataTest.cpp
 	RangeTest.cpp
 	SchemaTest.cpp
