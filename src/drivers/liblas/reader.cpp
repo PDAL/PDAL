@@ -33,12 +33,12 @@
 ****************************************************************************/
 
 
-#include "libpc/LiblasReader.hpp"
+#include "reader.hpp"
 
 #include <liblas/factory.hpp>
 #include <liblas/bounds.hpp>
 
-#include "libpc/LiblasHeader.hpp"
+#include "header.hpp"
 
 namespace libpc
 {

@@ -32,41 +32,55 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
+#ifndef INCLUDED_LIBLASREADER_HPP
+#define INCLUDED_LIBLASREADER_HPP
 
-#include "libpc/LiblasWriter.hpp"
-#include "libpc/LiblasHeader.hpp"
+#include "libpc/Reader.hpp"
+
+#include <iostream>
+
+#include "header.hpp"
+
+// fwd decls
+namespace liblas
+{
+    class Reader;
+}
+
 
 namespace libpc
 {
 
-
-LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
-    : Writer(prevStage)
-    , m_ostream(ostream)
+class LIBPC_DLL LiblasReader : public Reader
 {
-    LiblasHeader* liblasHeader = new LiblasHeader;
-    setHeader(liblasHeader);
+public:
+    LiblasReader(std::istream&);
+    ~LiblasReader();
 
-    return;
-}
+    virtual boost::uint32_t readPoints(PointData&);
+
+    // default is to reset() and then read N points manually
+    // override this if you can
+    virtual void seekToPoint(boost::uint64_t pointNum);
+
+    // default just resets the point index
+    virtual void reset();
+
+    const LiblasHeader& getLiblasHeader() const;
+
+private:
+    LiblasHeader& getLiblasHeader();
+    void setLiblasHeader(const LiblasHeader&);
+
+    std::istream& m_istream;
+
+    liblas::Reader *m_reader;
 
 
-void LiblasWriter::writeBegin()
-{
-    return;
-}
-
-
-void LiblasWriter::writeEnd()
-{
-    return;
-}
-
-
-boost::uint32_t LiblasWriter::writeBuffer(const PointData&)
-{
-    return 0;
-}
+    LiblasReader& operator=(const LiblasReader&); // not implemented
+    LiblasReader(const LiblasReader&); // not implemented
+};
 
 } // namespace libpc
+
+#endif

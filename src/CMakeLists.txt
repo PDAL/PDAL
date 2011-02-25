@@ -38,9 +38,6 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/LasHeaderWriter.hpp
   ${LIBPC_HEADERS_DIR}/LasReader.hpp
   ${LIBPC_HEADERS_DIR}/LasWriter.hpp
-  ${LIBPC_HEADERS_DIR}/LiblasHeader.hpp
-  ${LIBPC_HEADERS_DIR}/LiblasReader.hpp
-  ${LIBPC_HEADERS_DIR}/LiblasWriter.hpp
   ${LIBPC_HEADERS_DIR}/Metadata.hpp
   ${LIBPC_HEADERS_DIR}/MosaicFilter.hpp
   ${LIBPC_HEADERS_DIR}/Vector.hpp  
@@ -54,8 +51,13 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Utils.hpp
   ${LIBPC_HEADERS_DIR}/Writer.hpp)
 
+set (LIBPC_SOURCES "libpc_config.cpp" CACHE INTERNAL "sources to compile")
+
+add_subdirectory(drivers)
+
+
 set(LIBPC_CPP
-  libpc_config.cpp
+    ${LIBPC_SOURCES}
   Bounds.cpp
   Color.cpp
   ColorFilter.cpp
@@ -70,9 +72,6 @@ set(LIBPC_CPP
   LasHeaderWriter.cpp
   LasReader.cpp
   LasWriter.cpp
-  LiblasHeader.cpp
-  LiblasReader.cpp
-  LiblasWriter.cpp
   Metadata.cpp
   MosaicFilter.cpp
   Vector.cpp  
@@ -84,6 +83,8 @@ set(LIBPC_CPP
   Stage.cpp
   Utils.cpp
   Writer.cpp)
+
+message("sources" ${LIBPC_CPP})
 
 # Group source files for IDE source explorers (e.g. Visual Studio)
 source_group("CMake Files" FILES CMakeLists.txt)

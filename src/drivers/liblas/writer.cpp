@@ -32,35 +32,41 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/LiblasHeader.hpp"
+#include <cassert>
 
-#include <boost/concept_check.hpp>
-#include <boost/uuid/uuid_io.hpp>
+#include "writer.hpp"
+#include "header.hpp"
 
 namespace libpc
 {
-    
 
-LiblasHeader::LiblasHeader()
-    : Header()
+
+LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
+    : Writer(prevStage)
+    , m_ostream(ostream)
+{
+    LiblasHeader* liblasHeader = new LiblasHeader;
+    setHeader(liblasHeader);
+
+    return;
+}
+
+
+void LiblasWriter::writeBegin()
 {
     return;
 }
 
 
-
-std::ostream& operator<<(std::ostream& ostr, const LiblasHeader& header)
+void LiblasWriter::writeEnd()
 {
-    ostr << (const Header&)header;
-
-    ostr << "  LiblasHeader" << std::endl;
-
-    return ostr;
+    return;
 }
 
 
-
-
-
+boost::uint32_t LiblasWriter::writeBuffer(const PointData&)
+{
+    return 0;
+}
 
 } // namespace libpc

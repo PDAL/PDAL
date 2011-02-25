@@ -32,55 +32,35 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LIBLASREADER_HPP
-#define INCLUDED_LIBLASREADER_HPP
+#include "header.hpp"
 
-#include "libpc/Reader.hpp"
-
-#include <iostream>
-
-#include "libpc/LiblasHeader.hpp"
-
-// fwd decls
-namespace liblas
-{
-    class Reader;
-}
-
+#include <boost/concept_check.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 namespace libpc
 {
+    
 
-class LIBPC_DLL LiblasReader : public Reader
+LiblasHeader::LiblasHeader()
+    : Header()
 {
-public:
-    LiblasReader(std::istream&);
-    ~LiblasReader();
-
-    virtual boost::uint32_t readPoints(PointData&);
-
-    // default is to reset() and then read N points manually
-    // override this if you can
-    virtual void seekToPoint(boost::uint64_t pointNum);
-
-    // default just resets the point index
-    virtual void reset();
-
-    const LiblasHeader& getLiblasHeader() const;
-
-private:
-    LiblasHeader& getLiblasHeader();
-    void setLiblasHeader(const LiblasHeader&);
-
-    std::istream& m_istream;
-
-    liblas::Reader *m_reader;
+    return;
+}
 
 
-    LiblasReader& operator=(const LiblasReader&); // not implemented
-    LiblasReader(const LiblasReader&); // not implemented
-};
+
+std::ostream& operator<<(std::ostream& ostr, const LiblasHeader& header)
+{
+    ostr << (const Header&)header;
+
+    ostr << "  LiblasHeader" << std::endl;
+
+    return ostr;
+}
+
+
+
+
+
 
 } // namespace libpc
-
-#endif
