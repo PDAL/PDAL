@@ -66,7 +66,7 @@ LasHeader& LasReader::getLasHeader()
 }
 
 
-void LasReader::seekToPoint(boost::uint64_t& pointNum)
+void LasReader::seekToPoint(boost::uint64_t pointNum)
 {
     reset();
 

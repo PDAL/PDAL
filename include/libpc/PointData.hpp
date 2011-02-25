@@ -71,13 +71,28 @@ public:
     boost::uint32_t getNumValidPoints();
 
     // schema (number and kinds of fields) for a point in this buffer
-    const SchemaLayout& getSchemaLayout() const;
+    const SchemaLayout& getSchemaLayout() const
+    {
+        return m_schemaLayout;
+    }
+
+    // convenience function
+    const Schema& getSchema() const
+    {
+        return m_schemaLayout.getSchema();
+    }
 
     // "valid" means the data for the point can be used; if invalid, the point should
     // be ignored or skipped.  (This is done for efficiency; we don't want to have to
     // modify the buffer's size just to "delete" a point.)
     bool isValid(std::size_t pointIndex) const;
     void setValid(std::size_t pointIndex, bool value=true);
+
+    // convenience function
+    std::size_t getDimensionIndex(Dimension::Field field) const
+    {
+        return getSchema().getDimensionIndex(field);
+    }
 
     // accessors to a particular field of a particular point in this buffer
     template<class T> T getField(std::size_t pointIndex, std::size_t fieldIndex) const;

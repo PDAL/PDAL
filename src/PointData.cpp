@@ -92,12 +92,6 @@ boost::uint32_t PointData::getNumPoints() const
 }
 
 
-const SchemaLayout& PointData::getSchemaLayout() const
-{
-    return m_schemaLayout;
-}
-
-
 void PointData::copyPointFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData)
 {
     assert(getSchemaLayout() == srcPointData.getSchemaLayout());

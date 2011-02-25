@@ -35,10 +35,18 @@
 #ifndef INCLUDED_LIBLASREADER_HPP
 #define INCLUDED_LIBLASREADER_HPP
 
+#include "libpc/Reader.hpp"
+
 #include <iostream>
 
-#include "libpc/Reader.hpp"
 #include "libpc/LiblasHeader.hpp"
+
+// fwd decls
+namespace liblas
+{
+    class Reader;
+}
+
 
 namespace libpc
 {
@@ -47,25 +55,28 @@ class LIBPC_DLL LiblasReader : public Reader
 {
 public:
     LiblasReader(std::istream&);
+    ~LiblasReader();
 
     virtual boost::uint32_t readPoints(PointData&);
 
     // default is to reset() and then read N points manually
     // override this if you can
-    virtual void seekToPoint(boost::uint64_t& pointNum);
+    virtual void seekToPoint(boost::uint64_t pointNum);
 
     // default just resets the point index
     virtual void reset();
 
     const LiblasHeader& getLiblasHeader() const;
 
-protected:
+private:
     LiblasHeader& getLiblasHeader();
     void setLiblasHeader(const LiblasHeader&);
 
     std::istream& m_istream;
 
-private:
+    liblas::Reader *m_reader;
+
+
     LiblasReader& operator=(const LiblasReader&); // not implemented
     LiblasReader(const LiblasReader&); // not implemented
 };

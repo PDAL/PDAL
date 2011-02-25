@@ -36,6 +36,7 @@
 #include "libpc/LiblasReader.hpp"
 
 #include <liblas/factory.hpp>
+#include <liblas/bounds.hpp>
 
 #include "libpc/LiblasHeader.hpp"
 
@@ -45,13 +46,32 @@ LiblasReader::LiblasReader(std::istream& istream)
     : Reader()
     , m_istream(istream)
 {
-    LiblasHeader* liblasHeader = new LiblasHeader;
-    setHeader(liblasHeader);
-    
     liblas::ReaderFactory f;
-    liblas::Reader reader = f.CreateWithStream(m_istream);
+    liblas::Reader rr = f.CreateWithStream(m_istream);
+    m_reader = new liblas::Reader(rr);
+
+    const liblas::Header& extHeader = m_reader->GetHeader();
+    
+    LiblasHeader* myHeader = new LiblasHeader;
+    setHeader(myHeader);
+
+    myHeader->setNumPoints( extHeader.GetPointRecordsCount() );
+
+    const liblas::Bounds<double>& extBounds = extHeader.GetExtent();
+    const Bounds<double> bounds(extBounds.minx(), extBounds.miny(), extBounds.minz(), extBounds.maxx(), extBounds.maxy(), extBounds.maxz());
+    myHeader->setBounds(bounds);
+
+    Schema& schema = myHeader->getSchema();
+    schema.addDimension(Dimension(Dimension::Field_X, Dimension::Double));
+    schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Double));
+    schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Double));
 
     return;
+}
+
+LiblasReader::~LiblasReader()
+{
+    delete m_reader;
 }
 
 
@@ -67,20 +87,44 @@ LiblasHeader& LiblasReader::getLiblasHeader()
 }
 
 
-void LiblasReader::seekToPoint(boost::uint64_t&)
+void LiblasReader::seekToPoint(boost::uint64_t n)
 {
+    m_reader->Seek(n);
     return;
 }
 
 
 void LiblasReader::reset()
 {
+    m_reader->Reset();
 }
 
 
-boost::uint32_t LiblasReader::readPoints(PointData&)
+boost::uint32_t LiblasReader::readPoints(PointData& pointData)
 {
-    return 0;
+    boost::uint32_t numPoints = pointData.getNumPoints();
+    boost::uint32_t i = 0;
+
+    const std::size_t indexX = pointData.getDimensionIndex(Dimension::Field_X);
+    const std::size_t indexY = pointData.getDimensionIndex(Dimension::Field_Y);
+    const std::size_t indexZ = pointData.getDimensionIndex(Dimension::Field_Z);
+
+    for (i=0; i<numPoints; i++)
+    {
+        bool ok = m_reader->ReadNextPoint();
+        assert(ok);
+        const liblas::Point& pt = m_reader->GetPoint();
+
+        double x = pt.GetX();
+        double y = pt.GetY();
+        double z = pt.GetZ();
+
+        pointData.setField(i, indexX, x);
+        pointData.setField(i, indexY, y);
+        pointData.setField(i, indexZ, z);
+    }
+
+    return numPoints;
 }
 
 } // namespace libpc

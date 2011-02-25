@@ -48,7 +48,7 @@ public:
 
     // default is to reset() and then read N points manually
     // override this if you can
-    virtual void seekToPoint(boost::uint64_t& pointNum);
+    virtual void seekToPoint(boost::uint64_t pointNum);
 
     // default just resets the point index
     virtual void reset();

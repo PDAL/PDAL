@@ -128,7 +128,7 @@ boost::uint32_t FauxReader::readPoints(PointData& data)
 }
 
 
-void FauxReader::seekToPoint(boost::uint64_t& pointNumber)
+void FauxReader::seekToPoint(boost::uint64_t pointNumber)
 {
     m_currentPointIndex = pointNumber;
 }

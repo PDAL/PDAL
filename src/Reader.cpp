@@ -46,7 +46,7 @@ Reader::Reader()
 }
 
 
-void Reader::seekToPoint(boost::uint64_t& pointNum)
+void Reader::seekToPoint(boost::uint64_t pointNum)
 {
     reset();
 

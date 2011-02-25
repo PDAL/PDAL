@@ -65,7 +65,7 @@ public:
     // advance (or retreat) to the Nth point in the file (absolute, 
     // not relative).  In some cases, this might be a very slow, painful
     // function to call.
-    virtual void seekToPoint(boost::uint64_t& pointNum) = 0;
+    virtual void seekToPoint(boost::uint64_t pointNum) = 0;
 
     // resets the object's state such that it is positioned to the beginning
     // of the file, as if no reads had yet been done

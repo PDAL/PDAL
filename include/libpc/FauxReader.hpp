@@ -67,7 +67,7 @@ public:
 
     boost::uint32_t readPoints(PointData& data);
 
-    void seekToPoint(boost::uint64_t&);
+    void seekToPoint(boost::uint64_t);
 
 private:
     Mode m_mode;

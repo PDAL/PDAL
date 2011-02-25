@@ -51,7 +51,7 @@ public:
 
     // advance (or retreat) to the Nth point in the file (absolute, 
     // default behaviour for filters is just to call seek on the previous stage
-    virtual void seekToPoint(boost::uint64_t& pointNum);
+    virtual void seekToPoint(boost::uint64_t pointNum);
 
     // reset the filter
     // default behaviour for filters is just to call reset on the previous stage
