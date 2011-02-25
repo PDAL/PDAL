@@ -1,4 +1,6 @@
+#ifdef _MSC_VER
 #define BOOST_TEST_DYN_LINK
+#endif
 
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
@@ -13,7 +15,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 {
     Color c0;
     Color c1(1,2,3);
-    boost::array<boost::uint16_t,3> a = {1,2,3};
+    boost::array<boost::uint16_t,3> a = {{1,2,3}};
     Color c2(a);
     Color c3(c2);
     Color c4 = c3;

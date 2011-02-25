@@ -1,4 +1,6 @@
+#ifdef _MSC_VER
 #define BOOST_TEST_DYN_LINK
+#endif
 
 #include <boost/test/unit_test.hpp>
 
@@ -48,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_ctor2)
 
     Range<int> v1(1,3);
     Range<int> v2(2,4);
-    std::vector<Range<int>> rv;
+    std::vector< Range<int> > rv;
     rv.push_back(v1);
     rv.push_back(v2);
     Bounds<int> b3(rv);
