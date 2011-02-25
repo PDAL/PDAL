@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(test_crop)
     boost::uint64_t numWritten = writer.write(1000);
 
     // 1000 * 1/8 = 125, plus or minus 10%
-    BOOST_CHECK(Utils::compare_approx<double>(numWritten, 125, 12.5));
+    BOOST_CHECK(Utils::compare_approx<double>(static_cast<double>(numWritten), 125, 12.5));
 
     // test all the values to +/- 10%
     BOOST_CHECK(Utils::compare_approx<float>(writer.getMinX(), 0.0, 5.0));
