@@ -56,16 +56,16 @@ BOOST_AUTO_TEST_CASE(test_comparators)
     }
 
     {
-        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.0001);
+        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.0001f);
         BOOST_CHECK(!ok);
 
-        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.001);
+        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.001f);
         BOOST_CHECK(!ok);
 
-        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.01);
+        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.01f);
         BOOST_CHECK(ok);
 
-        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.1);
+        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.1f);
         BOOST_CHECK(ok);
     }
 }
