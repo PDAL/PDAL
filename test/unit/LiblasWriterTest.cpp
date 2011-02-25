@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(test_1)
 
     Utils::closeFile(ofs);
 
-    BOOST_CHECK(compare_files("temp.las", "test/data/simple.las"));
+    BOOST_CHECK(compare_files("temp.las", "../../test/data/simple.las"));
 
     Utils::deleteFile("temp.las");
 
