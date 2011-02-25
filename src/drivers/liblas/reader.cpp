@@ -45,10 +45,11 @@ namespace libpc
 LiblasReader::LiblasReader(std::istream& istream)
     : Reader()
     , m_istream(istream)
+    , m_reader(NULL)
 {
     liblas::ReaderFactory f;
-    liblas::Reader rr = f.CreateWithStream(m_istream);
-    m_reader = new liblas::Reader(rr);
+    liblas::Reader reader = f.CreateWithStream(m_istream);
+    m_reader = new liblas::Reader(reader);
 
     const liblas::Header& extHeader = m_reader->GetHeader();
     
@@ -68,6 +69,7 @@ LiblasReader::LiblasReader(std::istream& istream)
 
     return;
 }
+
 
 LiblasReader::~LiblasReader()
 {

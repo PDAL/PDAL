@@ -22,6 +22,8 @@ SET(LIBPC_UNIT_TEST_SRC
 	SchemaTest.cpp
 	UtilsTest.cpp
 	VectorTest.cpp
+    support.cpp
+    support.hpp
     main.cpp)
 
 INCLUDE_DIRECTORIES(

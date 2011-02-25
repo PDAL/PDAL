@@ -84,7 +84,6 @@ set(LIBPC_CPP
   Utils.cpp
   Writer.cpp)
 
-message("sources" ${LIBPC_CPP})
 
 # Group source files for IDE source explorers (e.g. Visual Studio)
 source_group("CMake Files" FILES CMakeLists.txt)
