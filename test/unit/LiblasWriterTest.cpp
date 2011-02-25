@@ -6,6 +6,8 @@
 #include "libpc/FauxReader.hpp"
 #include "libpc/LiblasWriter.hpp"
 
+#include "support.hpp"
+
 using namespace libpc;
 
 BOOST_AUTO_TEST_SUITE(LiblasWriterTest)
@@ -20,9 +22,15 @@ BOOST_AUTO_TEST_CASE(test_1)
 
     std::ostream* ofs = Utils::createFile("temp.las");
 
-    LiblasWriter writer(reader, *ofs);
+    {
+        // need to scope the writer, so that's it dtor can use the stream
+        LiblasWriter writer(reader, *ofs);
+        writer.write(10);
+    }
 
     Utils::closeFile(ofs);
+
+    BOOST_CHECK(compare_files("temp.las", "test/data/simple.las"));
 
     Utils::deleteFile("temp.las");
 

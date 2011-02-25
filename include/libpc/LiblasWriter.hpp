@@ -37,6 +37,12 @@
 
 #include "libpc/Writer.hpp"
 
+namespace liblas
+{
+    class Writer;
+}
+
+
 namespace libpc
 {
 
@@ -45,7 +51,7 @@ class LIBPC_DLL LiblasWriter : public Writer
 public:
     LiblasWriter(Stage& prevStage, std::ostream&);
 
-    //void write();
+    ~LiblasWriter();
 
 protected:
     // this is called once before the loop with the writeBuffer calls
@@ -59,6 +65,7 @@ protected:
 
 private:
     std::ostream& m_ostream;
+    liblas::Writer* m_writer;
 
     LiblasWriter& operator=(const LiblasWriter&); // not implemented
     LiblasWriter(const LiblasWriter&); // not implemented
