@@ -1,4 +1,6 @@
+#ifdef _MSC_VER
 #define BOOST_TEST_DYN_LINK
+#endif
 
 #include "support.hpp"
 
