@@ -38,6 +38,9 @@ set_target_properties(${LIBPC_UNIT_TEST} PROPERTIES COMPILE_DEFINITIONS LIBPC_DL
 
 if(WIN32)
     add_definitions("-DLIBPC_DLL_EXPORT=1")
+  if (MSVC)
+    add_definitions("-DBOOST_TEST_DYN_LINK")
+  endif()
 endif()
 
 TARGET_LINK_LIBRARIES(${LIBPC_UNIT_TEST} 
