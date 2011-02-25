@@ -371,16 +371,16 @@ void Dimension::initFieldNames()
 
 DimensionLayout::DimensionLayout(const Dimension& dimension)
     : m_dimension(dimension)
-    , m_position(0)
     , m_byteOffset(0)
+    , m_position(0)
 {
 }
 
 /// copy constructor
 DimensionLayout::DimensionLayout(DimensionLayout const& other) 
     : m_dimension(other.m_dimension)
-    , m_position(other.m_position)
     , m_byteOffset(other.m_byteOffset)
+    , m_position(other.m_position)
 {
 }
 
