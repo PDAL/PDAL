@@ -10,6 +10,12 @@
  **************************************************************************/
 
 #include <iostream>
+
+#include <boost/program_options.hpp>
+//#include <boost/program_options/option.hpp>
+//#include <boost/program_options/options_description.hpp>
+//#include <boost/program_options/cmdline.hpp>
+
 #include "libpc/exceptions.hpp"
 #include "libpc/libpc_config.hpp"
 #include "libpc/Bounds.hpp"
@@ -26,7 +32,48 @@
 #include "libpc/LasWriter.hpp"
 #include "libpc/LiblasReader.hpp"
 
+#include "Application.hpp"
+
 using namespace libpc;
+
+
+
+
+class MyApplication : public Application
+{
+public:
+    MyApplication(int argc, char* argv[]);
+    int execute();
+    void addOptions();
+};
+
+
+MyApplication::MyApplication(int argc, char* argv[])
+    : Application(argc, argv, "myapp")
+{
+}
+
+
+void MyApplication::addOptions()
+{
+}
+
+int MyApplication::execute()
+{
+    return 0;
+}
+
+int main(int argc, char* argv[])
+{
+    MyApplication app(argc, argv);
+    return app.run();
+}
+
+
+
+
+
+
 
 static void test1()
 {
@@ -91,7 +138,7 @@ static void test3()
 }
 
 
-int main(int, char* [])
+int xmain(int, char* [])
 {
     test3();
 

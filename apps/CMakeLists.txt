@@ -46,12 +46,12 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 # Build pcinfo
 if(PCINFO)
-    add_executable(${PCINFO} pcinfo.cpp)
+    add_executable(${PCINFO} pcinfo.cpp Application.cpp Application.hpp)
     target_link_libraries(${PCINFO} ${APPS_CPP_DEPENDENCIES} )
 endif()
 
 if(PC2PC)
-    add_executable(${PC2PC} pc2pc.cpp)
+    add_executable(${PC2PC} pc2pc.cpp Application.cpp Application.hpp)
     target_link_libraries(${PC2PC} ${APPS_CPP_DEPENDENCIES} )
 endif()
 
