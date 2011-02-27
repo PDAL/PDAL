@@ -52,8 +52,10 @@ LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
     liblas::Header extHeader;
     extHeader.SetCompressed(false);
 
-    m_writer = new liblas::Writer(m_ostream, extHeader);
+    extHeader.SetCreationDOY(55);
+    extHeader.SetCreationYear(2011);
 
+    m_writer = new liblas::Writer(m_ostream, extHeader);
 
     // make our own header
     LiblasHeader* myHeader = new LiblasHeader;
