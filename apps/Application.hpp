@@ -37,6 +37,7 @@
 
 #include <iosfwd>
 
+
 #ifdef _MSC_VER
 #  pragma warning(push)
 #  pragma warning(disable: 4512)  // assignment operator could not be generated
@@ -47,6 +48,13 @@
 #endif
 
 
+//
+// The pplication base class gives us these common options:
+//    --help / -h
+//    --verbose / -v
+//    --version
+//    --timer
+//
 class Application
 {
 public:

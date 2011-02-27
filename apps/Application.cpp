@@ -34,12 +34,13 @@
 
 #include <iostream>
 
-#include "Application.hpp"
+#include <boost/timer.hpp>
 
 #include "libpc/libpc_config.hpp"
 
-using namespace libpc;
+#include "Application.hpp"
 
+using namespace libpc;
 namespace po = boost::program_options;
 
 
@@ -76,7 +77,18 @@ int Application::run()
         return 0;
     }
 
-    return 0;
+    boost::timer timer;
+    
+    // call derived function
+    int status = execute();
+
+    if (hasOption("timer"))
+    {
+        const double t = timer.elapsed();
+        std::cout << "Elapsed time: " << t << " seconds" << std::endl;
+    }
+
+    return status;
 }
 
 
@@ -132,6 +144,7 @@ void Application::addBasicOptionSet()
         ("help,h", "produce help message")
         ("verbose,v", po::value<bool>(&m_isVerbose)->zero_tokens(), "Verbose message output")
         ("version", "Show version info")
+        ("timer", "Show execution time")
         ;
 
     addOptionSet(basic_options);
