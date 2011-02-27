@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/LiblasHeader.hpp"
+#include "header.hpp"
 
 #include <boost/concept_check.hpp>
 #include <boost/uuid/uuid_io.hpp>

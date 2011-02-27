@@ -26,7 +26,7 @@
 #include "libpc/LasReader.hpp"
 #include "libpc/LasHeader.hpp"
 #include "libpc/LasWriter.hpp"
-#include "libpc/LiblasReader.hpp"
+// #include "libpc/LiblasReader.hpp"
 
 #include "Application.hpp"
 
@@ -168,7 +168,7 @@ int xmain(int, char* [])
     test2();
 
     std::istream* ifs = Utils::openFile("test/data/1.2-with-color.las");
-    LiblasReader r(*ifs);
+    // LiblasReader r(*ifs);
 
     return 0;
 }
