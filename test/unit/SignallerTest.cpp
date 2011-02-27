@@ -1,12 +1,4 @@
 /******************************************************************************
- * $Id$
- *
- * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS bounds class
- * Author:   Howard Butler, hobu.inc@gmail.com
- *
- ******************************************************************************
-/******************************************************************************
 * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
@@ -40,43 +32,92 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_SIGNALLER_HPP
-#define INCLUDED_SIGNALLER_HPP
+#include <boost/test/unit_test.hpp>
 
-#include "libpc/export.hpp"
+#include "libpc/Signaller.hpp"
 
-namespace libpc
-{
+using namespace libpc;
 
-// This is the abstract base class used for out-of-band interactions 
-// between the executing pipeline and the main app: reporting 
-// percent-complete, and requesting the pipeline to be interrupted.
-//
-// Apps should override these two functions as they desire.
-//
-class LIBPC_DLL Signaller
+BOOST_AUTO_TEST_SUITE(SignallerTest)
+
+
+class MySignaller : public Signaller
 {
 public:
-    Signaller() {}
-    virtual ~Signaller() {}
+    MySignaller()
+        : m_perc(0)
+        , m_stop(false)
+    {
+    }
 
-    // This is called by the pipeline at various times,
-    // passing in a value in range [0..1].  It could
-    // be called often, so the implementation should be fast.
-    virtual void setPercentComplete(double value) = 0;
+    // override
+    void setPercentComplete(double value)
+    {
+        m_perc = (int)(value * 100);
+    }
 
-    // This is called by the pipeline at various times;
-    // a return value of true means the pipeline should
-    // abandon its work and do an orderly shutdown as
-    // soon as possible.  It could be called often, so 
-    // the implementation should be fast.
-    virtual bool isInterruptRequested() const = 0;
+    // override
+    bool isInterruptRequested() const
+    {
+        return m_stop;
+    }
 
-private:
-    Signaller& operator=(const Signaller&); // not implemented
-    Signaller(const Signaller&); // not implemented
+    int m_perc;
+    bool m_stop;
 };
 
+
+class Worker
+{
+public:
+    Worker(Signaller& sig)
+      : m_sig(sig)
+      , m_ticks(0)
+    {
+    }
+
+    bool tick()
+    {
+        if (m_sig.isInterruptRequested())
+            return false;
+
+        ++m_ticks;
+        m_sig.setPercentComplete((double)m_ticks / 100.0);
+        return true;
+    }
+
+private:
+    Signaller& m_sig;
+    int m_ticks;
+
+    Worker& operator=(const Worker&); // not implemented
+};
+
+
+BOOST_AUTO_TEST_CASE(test_ctor)
+{
+    MySignaller sig;
+
+    Worker worker(sig);
+    bool ok;
+
+    ok = worker.tick();
+    BOOST_CHECK(ok);
+    BOOST_CHECK(sig.m_perc == 1);
+    worker.tick();
+    BOOST_CHECK(ok);
+    BOOST_CHECK(sig.m_perc == 2);
+    worker.tick();
+    BOOST_CHECK(ok);
+    BOOST_CHECK(sig.m_perc == 3);
+
+    sig.m_stop = true;
+
+    worker.tick();
+    BOOST_CHECK(!ok);
+    BOOST_CHECK(sig.m_perc == 3);
+
+    return;
 }
 
-#endif
+BOOST_AUTO_TEST_SUITE_END()

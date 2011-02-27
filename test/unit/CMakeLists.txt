@@ -20,6 +20,7 @@ SET(LIBPC_UNIT_TEST_SRC
 	PointDataTest.cpp
 	RangeTest.cpp
 	SchemaTest.cpp
+	SignallerTest.cpp
 	UtilsTest.cpp
 	VectorTest.cpp
     support.cpp
