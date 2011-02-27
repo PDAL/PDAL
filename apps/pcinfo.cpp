@@ -9,18 +9,44 @@
  * See LICENSE.txt in this source distribution for more information.
  **************************************************************************/
 
+
 #include <iostream>
-#include "libpc/Bounds.hpp"
 
-using namespace libpc;
+#include "Application.hpp"
 
 
-int main(int, char* [])
+class Application_pcinfo : public Application
 {
-  Bounds<double> bounds(0,1,2,3,4,5);
-  std::cout << bounds;
-  return 0;
+public:
+    Application_pcinfo(int argc, char* argv[]);
+    int execute();
+private:
+    void addOptions();
+};
+
+
+Application_pcinfo::Application_pcinfo(int argc, char* argv[])
+    : Application(argc, argv, "pcinfo")
+{
 }
+
+
+void Application_pcinfo::addOptions()
+{
+}
+
+int Application_pcinfo::execute()
+{
+    return 0;
+}
+
+int main(int argc, char* argv[])
+{
+    Application_pcinfo app(argc, argv);
+    return app.run();
+}
+
+
 #if 0
 
 #include <liblas/liblas.hpp>

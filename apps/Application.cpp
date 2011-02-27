@@ -109,9 +109,9 @@ void Application::outputHelp(std::ostream& oss)
         oss << *options;
     }
 
-    oss <<"\nFor more information, see the full documentation for las2las at:\n";
+    oss <<"\nFor more information, see the full documentation for libPC at:\n";
     
-    oss << " http://liblas.org/utilities/las2las.html\n";
+    oss << " http://libpc.org/\n";
     oss << "----------------------------------------------------------\n";
 }
 
@@ -126,15 +126,15 @@ void Application::outputVersion(std::ostream& oss)
 
 void Application::addBasicOptionSet()
 {
-    po::options_description* file_options = new po::options_description("las2las options");
+    po::options_description* basic_options = new po::options_description("basic options");
 
-    file_options->add_options()
+    basic_options->add_options()
         ("help,h", "produce help message")
         ("verbose,v", po::value<bool>(&m_isVerbose)->zero_tokens(), "Verbose message output")
         ("version", "Show version info")
         ;
 
-    addOptionSet(file_options);
+    addOptionSet(basic_options);
 
     return;
 }

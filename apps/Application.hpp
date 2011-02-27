@@ -32,9 +32,19 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#ifndef INCLUDED_APPLICATION_HPP
+#define INCLUDED_APPLICATION_HPP
+
 #include <iosfwd>
 
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable: 4512)  // assignment operator could not be generated
+#endif
 #include <boost/program_options.hpp>
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
 
 
 class Application
@@ -74,3 +84,4 @@ private:
     Application(const Application&); // not implemented
 };
 
+#endif

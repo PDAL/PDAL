@@ -9,12 +9,8 @@
  * See LICENSE.txt in this source distribution for more information.
  **************************************************************************/
 
-#include <iostream>
 
-#include <boost/program_options.hpp>
-//#include <boost/program_options/option.hpp>
-//#include <boost/program_options/options_description.hpp>
-//#include <boost/program_options/cmdline.hpp>
+#include <iostream>
 
 #include "libpc/exceptions.hpp"
 #include "libpc/libpc_config.hpp"
@@ -37,35 +33,34 @@
 using namespace libpc;
 
 
-
-
-class MyApplication : public Application
+class Application_pc2pc : public Application
 {
 public:
-    MyApplication(int argc, char* argv[]);
+    Application_pc2pc(int argc, char* argv[]);
     int execute();
+private:
     void addOptions();
 };
 
 
-MyApplication::MyApplication(int argc, char* argv[])
-    : Application(argc, argv, "myapp")
+Application_pc2pc::Application_pc2pc(int argc, char* argv[])
+    : Application(argc, argv, "pc2pc")
 {
 }
 
 
-void MyApplication::addOptions()
+void Application_pc2pc::addOptions()
 {
 }
 
-int MyApplication::execute()
+int Application_pc2pc::execute()
 {
     return 0;
 }
 
 int main(int argc, char* argv[])
 {
-    MyApplication app(argc, argv);
+    Application_pc2pc app(argc, argv);
     return app.run();
 }
 
