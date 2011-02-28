@@ -64,6 +64,7 @@ public:
 
 public:
     FauxReader(const Bounds<double>&, int numPoints, Mode mode);
+    FauxReader(const Bounds<double>&, int numPoints, Mode mode, const std::vector<Dimension>& dimensions);
 
     boost::uint32_t readPoints(PointData& data);
 

@@ -52,13 +52,34 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode)
     Header* header = new Header;
     Schema& schema = header->getSchema();
 
-    header->setNumPoints(numPoints);
-    header->setBounds(bounds);
-
     schema.addDimension(Dimension(Dimension::Field_X, Dimension::Float));
     schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Float));
     schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Float));
     schema.addDimension(Dimension(Dimension::Field_GpsTime, Dimension::Uint64));
+
+    header->setNumPoints(numPoints);
+    header->setBounds(bounds);
+
+    setHeader(header);
+
+    return;
+}
+
+FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
+    : Reader()
+    , m_mode(mode)
+{
+    Header* header = new Header;
+
+    Schema& schema = header->getSchema();
+    if (dimensions.size() == 0)
+    {
+        throw; // BUG
+    }
+    schema.addDimensions(dimensions);
+
+    header->setNumPoints(numPoints);
+    header->setBounds(bounds);
 
     setHeader(header);
 

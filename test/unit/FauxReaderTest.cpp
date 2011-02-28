@@ -112,4 +112,25 @@ BOOST_AUTO_TEST_CASE(test_random)
     return;
 }
 
+
+BOOST_AUTO_TEST_CASE(test_custom_fields)
+{
+    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+
+    Dimension dimY(Dimension::Field_Y, Dimension::Uint8);
+    Dimension dimX(Dimension::Field_X, Dimension::Uint8);
+    std::vector<Dimension> dims;
+    dims.push_back(dimY);
+    dims.push_back(dimX);
+
+    FauxReader reader(bounds, 1000, FauxReader::Random, dims);
+
+    const Schema& schema = reader.getHeader().getSchema();
+    BOOST_CHECK(schema.getDimensions().size() == 2);
+    BOOST_CHECK(schema.getDimension(0).getField() == Dimension::Field_Y);
+    BOOST_CHECK(schema.getDimension(1).getField() == Dimension::Field_X);
+
+    return;
+}
+
 BOOST_AUTO_TEST_SUITE_END()
