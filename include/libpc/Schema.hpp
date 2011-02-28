@@ -74,6 +74,7 @@ public:
     bool operator!=(const Schema& other) const;
 
     void addDimension(Dimension const& dim);
+    void addDimensions(const std::vector<Dimension>& dims);
 
     const Dimension& getDimension(std::size_t index) const
     {

@@ -124,10 +124,20 @@ property_tree::ptree Schema::getPTree() const
 }
 
 
+void Schema::addDimensions(const std::vector<Dimension>& dims)
+{
+    for (DimensionsCIter iter = dims.begin(); iter != dims.end(); ++iter)
+    {
+        const Dimension& dim = *iter;
+        addDimension(dim);
+    }
+
+    return;
+}
+
+
 void Schema::addDimension(Dimension const& dim)
 {
-    // BUG: assert not already added
-
     std::size_t index = m_dimensions.size();
 
     m_dimensions.push_back(dim);
