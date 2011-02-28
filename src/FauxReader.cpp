@@ -78,7 +78,6 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode, c
         throw; // BUG
     }
     schema.addDimensions(dimensions);
-    throw not_yet_implemented("need to add ability to read from arbitrary fields");
 
     header->setNumPoints(numPoints);
     header->setBounds(bounds);
@@ -91,6 +90,9 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode, c
 
 boost::uint32_t FauxReader::readPoints(PointData& data)
 {
+    if (data.getSchemaLayout().getSchema().getDimensions().size() != 4)
+        throw not_yet_implemented("need to add ability to read from arbitrary fields");
+
     // make up some data and put it into the buffer
 
     const boost::uint32_t numPoints = data.getNumPoints();
