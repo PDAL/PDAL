@@ -39,6 +39,8 @@
 #include "header.hpp"
 #include <liblas/Writer.hpp>
 
+#include <libpc/exceptions.hpp>
+
 
 namespace libpc
 {
@@ -47,19 +49,17 @@ namespace libpc
 LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
     : Writer(prevStage)
     , m_ostream(ostream)
-    , m_writer(NULL)
+    , m_externalWriter(NULL)
 {
-    liblas::Header extHeader;
-    extHeader.SetCompressed(false);
+    m_externalHeader = new liblas::Header;
+    m_externalHeader->SetCompressed(false);
 
-    extHeader.SetCreationDOY(55);
-    extHeader.SetCreationYear(2011);
-
-    m_writer = new liblas::Writer(m_ostream, extHeader);
+    setFormatVersion(1,2);
+    setPointFormat(0);
 
     // make our own header
-    LiblasHeader* myHeader = new LiblasHeader;
-    setHeader(myHeader);
+    LiblasHeader* internalHeader = new LiblasHeader;
+    setHeader(internalHeader);
 
     //myHeader->setNumPoints( extHeader.GetPointRecordsCount() );
 
@@ -67,29 +67,49 @@ LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
     //const Bounds<double> bounds(extBounds.minx(), extBounds.miny(), extBounds.minz(), extBounds.maxx(), extBounds.maxy(), extBounds.maxz());
     //myHeader->setBounds(bounds);
 
-    //Schema& schema = myHeader->getSchema();
-    //schema.addDimension(Dimension(Dimension::Field_X, Dimension::Double));
-    //schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Double));
-    //schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Double));
-
     return;
 }
 
 
 LiblasWriter::~LiblasWriter()
 {
-    delete m_writer;
+    delete m_externalHeader;
+    return;
+}
+
+
+void LiblasWriter::setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion)
+{
+    m_externalHeader->SetVersionMajor(majorVersion);
+    m_externalHeader->SetVersionMinor(minorVersion);
+}
+
+
+void LiblasWriter::setPointFormat(boost::int8_t pointFormat)
+{
+    m_externalHeader->SetDataFormatId((liblas::PointFormatName)pointFormat);
+}
+
+
+void LiblasWriter::setDate(boost::uint16_t dayOfYear, boost::uint16_t year)
+{
+    m_externalHeader->SetCreationDOY(dayOfYear);
+    m_externalHeader->SetCreationYear(year);
 }
 
 
 void LiblasWriter::writeBegin()
 {
+    m_externalHeader->SetPointRecordsCount(99);
+    m_externalWriter = new liblas::Writer(m_ostream, *m_externalHeader);
     return;
 }
 
 
 void LiblasWriter::writeEnd()
 {
+    delete m_externalWriter;
+    m_externalWriter = NULL;
     return;
 }
 
@@ -99,25 +119,111 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
     boost::uint32_t numPoints = pointData.getNumPoints();
     boost::uint32_t i = 0;
 
+    bool hasTimeData = false;
+    bool hasColorData = false;
+    bool hasWaveData = false;
+
+    const liblas::PointFormatName pointFormat = m_externalHeader->GetDataFormatId();
+    switch (pointFormat)
+    {
+    case liblas::ePointFormat0:
+        break;
+    case liblas::ePointFormat1:
+        hasTimeData = true;
+        break;
+    case liblas::ePointFormat2:
+        hasColorData = true;
+        break;
+    case liblas::ePointFormat3:
+        hasTimeData = true;
+        hasColorData = true;
+        break;
+    case liblas::ePointFormat4:
+        hasTimeData = true;
+        hasWaveData = true;
+        break;
+    case liblas::ePointFormat5:
+        hasColorData = true;
+        hasTimeData = true;
+        hasWaveData = true;
+        break;
+    }
+
+    if (hasWaveData)
+    {
+        throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
+    }
+
     const std::size_t indexX = pointData.getDimensionIndex(Dimension::Field_X);
     const std::size_t indexY = pointData.getDimensionIndex(Dimension::Field_Y);
     const std::size_t indexZ = pointData.getDimensionIndex(Dimension::Field_Z);
-    const std::size_t indexT = pointData.getDimensionIndex(Dimension::Field_GpsTime);
+    
+    const std::size_t indexIntensity = pointData.getDimensionIndex(Dimension::Field_Intensity);
+    const std::size_t indexReturnNumber = pointData.getDimensionIndex(Dimension::Field_ReturnNumber);
+    const std::size_t indexNumberOfReturns = pointData.getDimensionIndex(Dimension::Field_NumberOfReturns);
+    const std::size_t indexScanDirectionFlag = pointData.getDimensionIndex(Dimension::Field_ScanDirectionFlag);
+    const std::size_t indexEdgeOfFlightLine = pointData.getDimensionIndex(Dimension::Field_EdgeOfFlightLine);
+    const std::size_t indexClassification = pointData.getDimensionIndex(Dimension::Field_Classification);
+    const std::size_t indexScanAngleRank = pointData.getDimensionIndex(Dimension::Field_ScanAngleRank);
+    const std::size_t indexUserData = pointData.getDimensionIndex(Dimension::Field_UserData);
+    const std::size_t indexPointSourceId = pointData.getDimensionIndex(Dimension::Field_PointSourceId);
+    
+    const std::size_t indexGpsTime = (hasTimeData ? pointData.getDimensionIndex(Dimension::Field_GpsTime) : 0);
+
+    const std::size_t indexRed = (hasColorData ? pointData.getDimensionIndex(Dimension::Field_Red) : 0);
+    const std::size_t indexGreen = (hasColorData ? pointData.getDimensionIndex(Dimension::Field_Green) : 0);
+    const std::size_t indexBlue = (hasColorData ? pointData.getDimensionIndex(Dimension::Field_Blue) : 0);
+
+    //const std::size_t indexWavePacketDescriptorIndex = (hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WavePacketDescriptorIndex) : 0);
+    //const std::size_t indexWaveformDataOffset = (hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WaveformDataOffset) : 0);
+    //const std::size_t indexReturnPointWaveformLocation = (hasWaveData ? pointData.getDimensionIndex(Dimension::Field_ReturnPointWaveformLocation) : 0);
+    //const std::size_t indexWaveformXt = (hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WaveformXt) : 0);
+    //const std::size_t indexWaveformYt = (hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WaveformYt) : 0);
+    //const std::size_t indexWaveformZt = (hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WaveformZt) : 0);
 
     liblas::Point pt;
 
     for (i=0; i<numPoints; i++)
     {
-        const double x = pointData.getField<float>(i, indexX);
-        const double y = pointData.getField<float>(i, indexY);
-        const double z = pointData.getField<float>(i, indexZ);
-        const boost::uint64_t t = pointData.getField<boost::uint64_t>(i, indexT);
+        const boost::int32_t x = pointData.getField<boost::int32_t>(i, indexX);
+        const boost::int32_t y = pointData.getField<boost::int32_t>(i, indexY);
+        const boost::int32_t z = pointData.getField<boost::int32_t>(i, indexZ);
+        pt.SetRawX(x);
+        pt.SetRawY(y);
+        pt.SetRawZ(z);
 
-        pt.SetCoordinates(x,y,z);
-        pt.SetTime((double)t);
+        const boost::uint16_t intensity = pointData.getField<boost::uint16_t>(i, indexIntensity);
+        const boost::int8_t returnNumber = pointData.getField<boost::int8_t>(i, indexReturnNumber);
+        const boost::int8_t numberOfReturns = pointData.getField<boost::int8_t>(i, indexNumberOfReturns);
+        const boost::int8_t scanDirFlag = pointData.getField<boost::int8_t>(i, indexScanDirectionFlag);
+        const boost::int8_t edgeOfFlightLine = pointData.getField<boost::int8_t>(i, indexEdgeOfFlightLine);
+        const boost::uint8_t classification = pointData.getField<boost::uint8_t>(i, indexClassification);
+        const boost::uint8_t scanAngleRank = pointData.getField<boost::uint8_t>(i, indexScanAngleRank);
+        const boost::uint8_t userData = pointData.getField<boost::uint8_t>(i, indexUserData);
+        const boost::uint16_t pointSourceId = pointData.getField<boost::uint16_t>(i, indexPointSourceId);
 
-        bool ok = m_writer->WritePoint(pt);
-        assert(ok);
+        if (hasTimeData)
+        {
+            const double gpsTime = pointData.getField<double>(i, indexGpsTime);
+            pt.SetTime(gpsTime);
+        }
+
+        if (hasColorData)
+        {
+            const boost::uint16_t red = pointData.getField<boost::uint16_t>(i, indexRed);
+            const boost::uint16_t green = pointData.getField<boost::uint16_t>(i, indexGreen);
+            const boost::uint16_t blue = pointData.getField<boost::uint16_t>(i, indexBlue);
+            liblas::Color color(red, green, blue);
+            pt.SetColor(color);
+        }
+
+        if (hasWaveData)
+        {
+            assert(false);
+        }
+
+        bool ok = m_externalWriter->WritePoint(pt);
+        assert(ok); // BUG
     }
 
     return numPoints;

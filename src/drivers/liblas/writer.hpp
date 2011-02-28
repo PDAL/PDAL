@@ -40,18 +40,23 @@
 namespace liblas
 {
     class Writer;
+    class Header;
 }
 
 
 namespace libpc
 {
 
+// we default to LAS 1.2, point format 0
 class LIBPC_DLL LiblasWriter : public Writer
 {
 public:
     LiblasWriter(Stage& prevStage, std::ostream&);
-
     ~LiblasWriter();
+    
+    void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
+    void setPointFormat(boost::int8_t pointFormat);
+    void setDate(boost::uint16_t dayOfYear, boost::uint16_t year);
 
 protected:
     // this is called once before the loop with the writeBuffer calls
@@ -65,7 +70,8 @@ protected:
 
 private:
     std::ostream& m_ostream;
-    liblas::Writer* m_writer;
+    liblas::Writer* m_externalWriter;
+    liblas::Header* m_externalHeader;
 
     LiblasWriter& operator=(const LiblasWriter&); // not implemented
     LiblasWriter(const LiblasWriter&); // not implemented

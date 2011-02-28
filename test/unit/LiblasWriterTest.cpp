@@ -37,6 +37,7 @@
 
 #include "libpc/FauxReader.hpp"
 #include "libpc/../../src/drivers/liblas/writer.hpp"
+#include "libpc/../../src/drivers/liblas/reader.hpp"
 
 #include "support.hpp"
 
@@ -49,22 +50,33 @@ BOOST_AUTO_TEST_CASE(test_1)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    FauxReader reader(bounds, 1000, FauxReader::Constant);
-
+    std::istream* ifs = Utils::openFile("../../test/data/1.2-with-color.las");
+    LiblasReader reader(*ifs);
+    
     std::ostream* ofs = Utils::createFile("temp.las");
 
     {
+        const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
+
         // need to scope the writer, so that's it dtor can use the stream
         LiblasWriter writer(reader, *ofs);
-        writer.write(10);
+
+        writer.setDate(0, 0);
+        writer.setPointFormat(3);
+
+        writer.write(numPoints);
     }
 
     Utils::closeFile(ofs);
+    Utils::closeFile(ifs);
 
-    BOOST_CHECK(compare_files("temp.las", "../../test/data/simple.las"));
+    bool filesSame = compare_files("temp.las", "../../test/data/simple.las");
+    BOOST_CHECK(filesSame);
 
-    Utils::deleteFile("temp.las");
+    if (filesSame)
+    {
+        Utils::deleteFile("temp.las");
+    }
 
     return;
 }
