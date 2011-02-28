@@ -70,19 +70,25 @@ public:
         Field_X,
         Field_Y,
         Field_Z,
-        Field_Red,
-        Field_Green,
-        Field_Blue,
-        Field_Time,
         Field_Intensity,
         Field_ReturnNumber,
         Field_NumberOfReturns,
-        Field_ScanDirection,
-        Field_FlightLineEdge,
+        Field_ScanDirectionFlag,
+        Field_EdgeOfFlightLine,
         Field_Classification,
         Field_ScanAngleRank,
         Field_UserData,
         Field_PointSourceId,
+        Field_GpsTime,
+        Field_Red,
+        Field_Green,
+        Field_Blue,
+        Field_WavePacketDescriptorIndex,
+        Field_WaveformDataOffset,
+        Field_ReturnPointWaveformLocation,
+        Field_WaveformXt,
+        Field_WaveformYt,
+        Field_WaveformZt,
         // ...
 
         // add more here
@@ -223,6 +229,12 @@ public:
     inline void setNumericOffset(double v)
     {
         m_numericOffset = v;
+    }
+
+    template<class T>
+    double getNumericValue(T x) const
+    {
+        return (double)x * m_numericScale + m_numericOffset;
     }
 
     /// If true, this dimension uses the numeric scale/offset values

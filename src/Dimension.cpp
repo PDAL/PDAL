@@ -59,11 +59,11 @@ Dimension::Dimension(Field field, DataType dataType)
     , m_field(field)
     , m_byteSize(0)
     , m_description(std::string(""))
-    , m_min(0)
-    , m_max(0)
+    , m_min(0.0)
+    , m_max(0.0)
     , m_precise(false)
-    , m_numericScale(0)
-    , m_numericOffset(0)
+    , m_numericScale(0.0)
+    , m_numericOffset(0.0)
 {
     m_byteSize = getDataTypeSize(m_dataType);
 }
@@ -76,9 +76,9 @@ Dimension::Dimension(Dimension const& other)
     , m_description(other.m_description)
     , m_min(other.m_min)
     , m_max(other.m_max)
-    , m_precise(false)
-    , m_numericScale(0)
-    , m_numericOffset(0)
+    , m_precise(other.m_precise)
+    , m_numericScale(other.m_numericScale)
+    , m_numericOffset(other.m_numericOffset)
 {
 }
 
@@ -340,30 +340,37 @@ std::string const& Dimension::getFieldName(Field field)
 
 void Dimension::initFieldNames()
 {
-    // BUG: not threadsafe
-    s_fieldNames[Field_INVALID] = "invalid";
-    s_fieldNames[Field_X] = "X";
-    s_fieldNames[Field_Y] = "Y";
-    s_fieldNames[Field_Z] = "Z";
-    s_fieldNames[Field_Red] = "Red";
-    s_fieldNames[Field_Green] = "Green";
-    s_fieldNames[Field_Blue] = "Blue";
-    s_fieldNames[Field_Time] = "Blue";
-    s_fieldNames[Field_ReturnNumber] = "ReturnNumber";
-    s_fieldNames[Field_NumberOfReturns] = "NumberOfReturns";
-    s_fieldNames[Field_ScanDirection] = "ScanDirection";
-    s_fieldNames[Field_FlightLineEdge] = "FlightLineEdge";
-    s_fieldNames[Field_Classification] = "Classification";
-    s_fieldNames[Field_ScanAngleRank] = "ScanAngleRank";
-    s_fieldNames[Field_UserData] = "UserData";
-    s_fieldNames[Field_PointSourceId] = "PointSourceId";
-
-    for (int i=Dimension::Field_User1; i<Dimension::Field_LAST; i++)
+    for (int i=0; i<Dimension::Field_LAST; i++)
     {
         std::ostringstream ostr;
         ostr << "Unnamed field " << i;
         s_fieldNames[i] = ostr.str();
     }
+
+    // BUG: not threadsafe
+    s_fieldNames[Field_INVALID] = "invalid";
+    s_fieldNames[Field_X] = "X";
+    s_fieldNames[Field_Y] = "Y";
+    s_fieldNames[Field_Z] = "Z";
+    s_fieldNames[Field_Intensity] = "Intensity";
+    s_fieldNames[Field_ReturnNumber] = "ReturnNumber";
+    s_fieldNames[Field_NumberOfReturns] = "NumberOfReturns";
+    s_fieldNames[Field_ScanDirectionFlag] = "ScanDirectionFlag";
+    s_fieldNames[Field_EdgeOfFlightLine] = "EdgeOfFlightLine";
+    s_fieldNames[Field_Classification] = "Classification";
+    s_fieldNames[Field_ScanAngleRank] = "ScanAngleRank";
+    s_fieldNames[Field_UserData] = "UserData";
+    s_fieldNames[Field_PointSourceId] = "PointSourceId";
+    s_fieldNames[Field_GpsTime] = "GpsTime";
+    s_fieldNames[Field_Red] = "Red";
+    s_fieldNames[Field_Green] = "Green";
+    s_fieldNames[Field_Blue] = "Blue";
+    s_fieldNames[Field_WavePacketDescriptorIndex] = "WavePacketDescriptorIndex";
+    s_fieldNames[Field_WaveformDataOffset] = "WaveformDataOffset";
+    s_fieldNames[Field_ReturnPointWaveformLocation] = "ReturnPointWaveformLocation";
+    s_fieldNames[Field_WaveformXt] = "WaveformXt";
+    s_fieldNames[Field_WaveformYt] = "WaveformYt";
+    s_fieldNames[Field_WaveformZt] = "WaveformZt";
 
     s_fieldNamesValid = true;
 }

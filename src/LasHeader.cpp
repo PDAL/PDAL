@@ -766,7 +766,7 @@ void LasHeader::add_record0_dimensions(Schema& schema)
     schema.addDimension(no_returns);
     text.str("");
 
-    Dimension scan_dir(Dimension::Field_ScanDirection, Dimension::Uint8); // 1 bit only
+    Dimension scan_dir(Dimension::Field_ScanDirectionFlag, Dimension::Uint8); // 1 bit only
     text << "The Scan Direction Flag denotes the direction at which the "
          "scanner mirror was traveling at the time of the output pulse. "
          "A bit value of 1 is a positive scan direction, and a bit value "
@@ -777,7 +777,7 @@ void LasHeader::add_record0_dimensions(Schema& schema)
     schema.addDimension(scan_dir);
     text.str("");
 
-    Dimension edge(Dimension::Field_FlightLineEdge, Dimension::Uint8); // 1 bit only
+    Dimension edge(Dimension::Field_EdgeOfFlightLine, Dimension::Uint8); // 1 bit only
     text << "The Edge of Flight Line data bit has a value of 1 only when "
          "the point is at the end of a scan. It is the last point on "
          "a given scan line before it changes direction.";
@@ -866,7 +866,7 @@ void LasHeader::add_time(Schema& schema)
 {
     std::ostringstream text;
 
-    Dimension t(Dimension::Field_Time, Dimension::Uint64);
+    Dimension t(Dimension::Field_GpsTime, Dimension::Uint64);
     text << "The GPS Time is the double floating point time tag value at "
          "which the point was acquired. It is GPS Week Time if the "
          "Global Encoding low bit is clear and Adjusted Standard GPS "

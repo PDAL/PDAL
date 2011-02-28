@@ -45,6 +45,7 @@
 namespace liblas
 {
     class Reader;
+    enum PointFormatName;
 }
 
 
@@ -71,11 +72,28 @@ public:
 private:
     LiblasHeader& getLiblasHeader();
     void setLiblasHeader(const LiblasHeader&);
+    void processExternalHeader();
+    void registerFields();
 
     std::istream& m_istream;
 
-    liblas::Reader *m_reader;
+    liblas::Reader *m_externalReader;
 
+    // LAS header properties of interest to us
+    boost::uint8_t m_versionMajor;
+    boost::uint8_t m_versionMinor;
+    double m_scaleX;
+    double m_scaleY;
+    double m_scaleZ;
+    double m_offsetX;
+    double m_offsetY;
+    double m_offsetZ;
+    bool m_isCompressed;
+    
+    liblas::PointFormatName m_pointFormat;
+    bool m_hasTimeData;
+    bool m_hasColorData;
+    bool m_hasWaveData;
 
     LiblasReader& operator=(const LiblasReader&); // not implemented
     LiblasReader(const LiblasReader&); // not implemented

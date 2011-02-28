@@ -102,7 +102,7 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
     const std::size_t indexX = pointData.getDimensionIndex(Dimension::Field_X);
     const std::size_t indexY = pointData.getDimensionIndex(Dimension::Field_Y);
     const std::size_t indexZ = pointData.getDimensionIndex(Dimension::Field_Z);
-    const std::size_t indexT = pointData.getDimensionIndex(Dimension::Field_Time);
+    const std::size_t indexT = pointData.getDimensionIndex(Dimension::Field_GpsTime);
 
     liblas::Point pt;
 

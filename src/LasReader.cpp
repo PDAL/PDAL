@@ -102,13 +102,13 @@ boost::uint32_t LasReader::readPoints(PointData& pointData)
     const std::size_t fieldIndexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity);
     const std::size_t fieldIndexReturnNum = schema.getDimensionIndex(Dimension::Field_ReturnNumber);
     const std::size_t fieldIndexNumReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns);
-    const std::size_t fieldIndexScanDir = schema.getDimensionIndex(Dimension::Field_ScanDirection);
-    const std::size_t fieldIndexFlight = schema.getDimensionIndex(Dimension::Field_FlightLineEdge);
+    const std::size_t fieldIndexScanDir = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag);
+    const std::size_t fieldIndexFlight = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine);
     const std::size_t fieldIndexClassification = schema.getDimensionIndex(Dimension::Field_Classification);
     const std::size_t fieldIndexScanAngle = schema.getDimensionIndex(Dimension::Field_ScanAngleRank);
     const std::size_t fieldIndexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
     const std::size_t fieldIndexPointSource = schema.getDimensionIndex(Dimension::Field_PointSourceId);
-    const std::size_t fieldIndexTime = schema.getDimensionIndex(Dimension::Field_Time);
+    const std::size_t fieldIndexTime = schema.getDimensionIndex(Dimension::Field_GpsTime);
     const std::size_t fieldIndexRed = schema.getDimensionIndex(Dimension::Field_Red);
     const std::size_t fieldIndexGreen = schema.getDimensionIndex(Dimension::Field_Green);
     const std::size_t fieldIndexBlue = schema.getDimensionIndex(Dimension::Field_Blue);
