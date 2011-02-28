@@ -104,16 +104,16 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     ok = worker.tick();
     BOOST_CHECK(ok);
     BOOST_CHECK(sig.m_perc == 1);
-    worker.tick();
+    ok = worker.tick();
     BOOST_CHECK(ok);
     BOOST_CHECK(sig.m_perc == 2);
-    worker.tick();
+    ok = worker.tick();
     BOOST_CHECK(ok);
     BOOST_CHECK(sig.m_perc == 3);
 
     sig.m_stop = true;
 
-    worker.tick();
+    ok = worker.tick();
     BOOST_CHECK(!ok);
     BOOST_CHECK(sig.m_perc == 3);
 
