@@ -37,6 +37,7 @@
 
 #include "libpc/FauxReader.hpp"
 #include "libpc/Utils.hpp"
+#include "libpc/exceptions.hpp"
 
 using std::vector;
 using std::string;
@@ -77,6 +78,7 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode, c
         throw; // BUG
     }
     schema.addDimensions(dimensions);
+    throw not_yet_implemented("need to add ability to read from arbitrary fields");
 
     header->setNumPoints(numPoints);
     header->setBounds(bounds);
