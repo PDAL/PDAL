@@ -64,6 +64,9 @@ public:
     // up to 32 chars (default is "libPC x.y.z")
     void setGeneratingSoftware(const std::string& softwareId);
 
+    // default false
+    void setCompressed(bool);
+
 protected:
     // this is called once before the loop with the writeBuffer calls
     virtual void writeBegin();

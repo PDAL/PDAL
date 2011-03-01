@@ -81,6 +81,8 @@ void LiblasWriter::setupExternalHeader()
     setFormatVersion(1,2);
     setPointFormat(0);
 
+    setCompressed(false);
+
     setSystemIdentifier("libPC");
     setGeneratingSoftware(GetVersionString());
 
@@ -94,6 +96,12 @@ void LiblasWriter::setupExternalHeader()
     m_externalHeader->SetOffset(dimX.getNumericOffset(), dimY.getNumericOffset(), dimZ.getNumericOffset());
 
     return;
+}
+
+
+void LiblasWriter::setCompressed(bool v)
+{
+    m_externalHeader->SetCompressed(v);
 }
 
 

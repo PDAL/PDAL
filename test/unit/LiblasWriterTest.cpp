@@ -45,7 +45,7 @@ using namespace libpc;
 
 BOOST_AUTO_TEST_SUITE(LiblasWriterTest)
 
-BOOST_AUTO_TEST_CASE(test_1)
+BOOST_AUTO_TEST_CASE(test_simple_las)
 {
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
@@ -61,6 +61,7 @@ BOOST_AUTO_TEST_CASE(test_1)
         // need to scope the writer, so that's it dtor can use the stream
         LiblasWriter writer(reader, *ofs);
 
+        writer.setCompressed(false);
         writer.setDate(0, 0);
         writer.setPointFormat(3);
         writer.setSystemIdentifier("");
@@ -78,6 +79,45 @@ BOOST_AUTO_TEST_CASE(test_1)
     if (filesSame)
     {
         Utils::deleteFile("temp.las");
+    }
+
+    return;
+}
+
+BOOST_AUTO_TEST_CASE(test_test_simple_laz)
+{
+    // remove file from earlier run, if needed
+    Utils::deleteFile("temp.las");
+
+    std::istream* ifs = Utils::openFile("../../test/data/1.2-with-color.las");
+    LiblasReader reader(*ifs);
+    
+    std::ostream* ofs = Utils::createFile("temp.laz");
+
+    {
+        const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
+
+        // need to scope the writer, so that's it dtor can use the stream
+        LiblasWriter writer(reader, *ofs);
+
+        writer.setCompressed(true);
+        writer.setDate(0, 0);
+        writer.setPointFormat(3);
+        writer.setSystemIdentifier("");
+        writer.setGeneratingSoftware("TerraScan");
+
+        writer.write(numPoints);
+    }
+
+    Utils::closeFile(ofs);
+    Utils::closeFile(ifs);
+
+    bool filesSame = compare_files("temp.laz", "../../test/data/simple.laz");
+    BOOST_CHECK(filesSame);
+
+    if (filesSame)
+    {
+        Utils::deleteFile("temp.laz");
     }
 
     return;
