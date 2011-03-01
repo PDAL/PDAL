@@ -156,9 +156,6 @@ void LiblasWriter::writeEnd()
 
 boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
 {
-    boost::uint32_t numPoints = pointData.getNumPoints();
-    boost::uint32_t i = 0;
-
     bool hasTimeData = false;
     bool hasColorData = false;
     bool hasWaveData = false;
@@ -225,7 +222,8 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
 
     liblas::Point pt;
 
-    for (i=0; i<numPoints; i++)
+    boost::uint32_t numPoints = pointData.getNumPoints();
+    for (boost::uint32_t i=0; i<numPoints; i++)
     {
         const boost::int32_t x = pointData.getField<boost::int32_t>(i, indexX);
         const boost::int32_t y = pointData.getField<boost::int32_t>(i, indexY);

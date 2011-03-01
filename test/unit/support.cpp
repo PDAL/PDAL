@@ -43,8 +43,10 @@
 
 bool compare_files(const std::string& file1, const std::string& file2)
 {
-    uintmax_t len1 = libpc::Utils::fileSize(file1);
-    uintmax_t len2 = libpc::Utils::fileSize(file1);
+    uintmax_t len1x = libpc::Utils::fileSize(file1);
+    uintmax_t len2x = libpc::Utils::fileSize(file1);
+    size_t len1 = (size_t)len1x; // BUG
+    size_t len2 = (size_t)len2x;
 
     if (len1 != len2)
     {

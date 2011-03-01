@@ -214,7 +214,9 @@ LiblasHeader& LiblasReader::getLiblasHeader()
 
 void LiblasReader::seekToPoint(boost::uint64_t n)
 {
-    m_externalReader->Seek(n);
+    size_t nn = (size_t)n;
+    if (n != nn) throw; // BUG
+    m_externalReader->Seek(nn);
     return;
 }
 
