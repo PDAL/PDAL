@@ -132,6 +132,8 @@ void LiblasReader::processExternalHeader()
         m_hasTimeData = true;
         m_hasWaveData = true;
         break;
+    case liblas::ePointFormatUnknown:
+        throw not_yet_implemented("Unknown point format encountered");
     }
 
     if (m_hasWaveData)

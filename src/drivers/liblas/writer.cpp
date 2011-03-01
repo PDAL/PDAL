@@ -187,6 +187,8 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
         hasTimeData = true;
         hasWaveData = true;
         break;
+    case liblas::ePointFormatUnknown:
+        throw not_yet_implemented("Unknown point format encountered");
     }
 
     if (hasWaveData)
