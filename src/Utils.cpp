@@ -35,7 +35,15 @@
 #include <cassert>
 
 // boost
+
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable: 4702)  // unreachable code
+#endif
 #include <boost/iostreams/device/file.hpp>
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
 #include <boost/iostreams/stream.hpp>
 #include <boost/filesystem.hpp>
 
