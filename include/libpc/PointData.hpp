@@ -116,7 +116,7 @@ private:
 
 
 template <class T>
-void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value)
+inline void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value)
 {
     std::size_t offset = (pointIndex * m_pointSize) + m_schemaLayout.getDimensionLayout(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
@@ -127,7 +127,7 @@ void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value
 
 
 template <class T>
-T PointData::getField(std::size_t pointIndex, std::size_t fieldIndex) const
+inline T PointData::getField(std::size_t pointIndex, std::size_t fieldIndex) const
 {
     std::size_t offset = (pointIndex * m_pointSize) + m_schemaLayout.getDimensionLayout(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
