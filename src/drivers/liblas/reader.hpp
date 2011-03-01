@@ -41,11 +41,13 @@
 
 #include "header.hpp"
 
+#include <liblas/version.hpp>
+
 // fwd decls
 namespace liblas
 {
     class Reader;
-    enum PointFormatName;
+    // enum PointFormatName;
 }
 
 
