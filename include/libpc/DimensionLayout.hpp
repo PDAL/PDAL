@@ -2,7 +2,7 @@
  * $Id$
  *
  * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS Schema implementation for C++ libLAS
+ * Purpose:  LAS Dimension implementation for C++ libLAS
  * Author:   Howard Butler, hobu.inc@gmail.com
  *
  ******************************************************************************
@@ -39,85 +39,68 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef LIBPC_SCHEMA_HPP_INCLUDED
-#define LIBPC_SCHEMA_HPP_INCLUDED
+#ifndef LIBPC_DIMENSIONLAYOUT_HPP_INCLUDED
+#define LIBPC_DIMENSIONLAYOUT_HPP_INCLUDED
 
-// std
-#include <vector>
-#include <list>
-
-// boost
-
-#include "libpc/export.hpp"
-#include "libpc/Dimension.hpp"
+#include <libpc/Dimension.hpp>
 
 
 namespace libpc
 {
 
 
-/// Schema definition
-class LIBPC_DLL Schema
+class LIBPC_DLL DimensionLayout
 {
 public:
-    typedef std::vector<Dimension> Dimensions;
-    typedef std::vector<Dimension>::iterator DimensionsIter;
-    typedef std::vector<Dimension>::const_iterator DimensionsCIter;
+    DimensionLayout(const Dimension&);
+    DimensionLayout& operator=(DimensionLayout const& rhs);
+    DimensionLayout(DimensionLayout const& other);
 
-public:
-    Schema();
-    Schema(Schema const& other);
+    bool operator==(const DimensionLayout& other) const;
+    bool operator!=(const DimensionLayout& other) const;
 
-    Schema& operator=(Schema const& rhs);
-
-    bool operator==(const Schema& other) const;
-    bool operator!=(const Schema& other) const;
-
-    void addDimension(Dimension const& dim);
-    void addDimensions(const std::vector<Dimension>& dims);
-
-    const Dimension& getDimension(std::size_t index) const
+    const Dimension& getDimension() const
     {
-        return m_dimensions[index];
+        return m_dimension;
     }
 
-    Dimension& getDimension(std::size_t index)
+    /// The byte location to start reading/writing
+    /// point data from in a composited schema.  liblas::Schema
+    /// will set these values for you when liblas::Dimension are
+    /// added to the liblas::Schema.
+    inline std::size_t getByteOffset() const
     {
-        return m_dimensions[index];
+        return m_byteOffset;
     }
 
-    const Dimensions& getDimensions() const
+    inline void setByteOffset(std::size_t v)
     {
-        return m_dimensions;
+        m_byteOffset = v;
     }
 
-    bool hasDimension(Dimension::Field field) const
+    /// The index position of the index.  In a standard ePointFormat0
+    /// data record, the X dimension would have a position of 0, while
+    /// the Y dimension would have a position of 1, for example.
+    inline std::size_t getPosition() const
     {
-        int index = m_indexTable[field];
-        return index != -1;
+        return m_position;
     }
 
-    // returns -1 if the index not found
-    int getDimensionIndex(Dimension::Field field) const
+    inline void setPosition(std::size_t v)
     {
-        int index = m_indexTable[field];
-        assert(index != -1);
-        return index;
+        m_position = v;
     }
-    
-    boost::property_tree::ptree getPTree() const;
 
 private:
-    std::vector<Dimension> m_dimensions;
-
-    // BUG: use boost::array?
-    int m_indexTable[Dimension::Field_LAST]; // mapping from field name to index position, or -1 if field not present
+    Dimension m_dimension;
+    std::size_t m_byteOffset;
+    std::size_t m_position;
 };
 
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& os, Schema const&);
+LIBPC_DLL std::ostream& operator<<(std::ostream& os, libpc::DimensionLayout const& d);
 
 
-} // namespace liblas
+} // namespace libpc
 
-#endif // LIBPC_SCHEMA_HPP_INCLUDED
+#endif // LIBPC_DIMENSIONLAYOUT_HPP_INCLUDED

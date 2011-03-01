@@ -2,7 +2,7 @@
  * $Id$
  *
  * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS Schema implementation for C++ libLAS
+ * Purpose:  LAS Dimension implementation for C++ libLAS
  * Author:   Howard Butler, hobu.inc@gmail.com
  *
  ******************************************************************************
@@ -39,85 +39,90 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef LIBPC_SCHEMA_HPP_INCLUDED
-#define LIBPC_SCHEMA_HPP_INCLUDED
+#include "libpc/DimensionLayout.hpp"
+#include "libpc/exceptions.hpp"
+#include "libpc/Utils.hpp"
 
-// std
-#include <vector>
-#include <list>
+#include <iostream>
 
-// boost
-
-#include "libpc/export.hpp"
-#include "libpc/Dimension.hpp"
-
+using namespace boost;
 
 namespace libpc
 {
 
 
-/// Schema definition
-class LIBPC_DLL Schema
+DimensionLayout::DimensionLayout(const Dimension& dimension)
+    : m_dimension(dimension)
+    , m_byteOffset(0)
+    , m_position(0)
 {
-public:
-    typedef std::vector<Dimension> Dimensions;
-    typedef std::vector<Dimension>::iterator DimensionsIter;
-    typedef std::vector<Dimension>::const_iterator DimensionsCIter;
+}
 
-public:
-    Schema();
-    Schema(Schema const& other);
+/// copy constructor
+DimensionLayout::DimensionLayout(DimensionLayout const& other) 
+    : m_dimension(other.m_dimension)
+    , m_byteOffset(other.m_byteOffset)
+    , m_position(other.m_position)
+{
+}
 
-    Schema& operator=(Schema const& rhs);
-
-    bool operator==(const Schema& other) const;
-    bool operator!=(const Schema& other) const;
-
-    void addDimension(Dimension const& dim);
-    void addDimensions(const std::vector<Dimension>& dims);
-
-    const Dimension& getDimension(std::size_t index) const
+/// assignment operator
+DimensionLayout& DimensionLayout::operator=(DimensionLayout const& rhs)
+{
+    if (&rhs != this)
     {
-        return m_dimensions[index];
+        m_dimension = rhs.m_dimension;
+        m_position = rhs.m_position;
+        m_byteOffset = rhs.m_byteOffset;
     }
 
-    Dimension& getDimension(std::size_t index)
+    return *this;
+}
+
+
+bool DimensionLayout::operator==(const DimensionLayout& other) const
+{
+    if (m_dimension == other.m_dimension)
     {
-        return m_dimensions[index];
+        assert(m_position == other.m_position);
+        assert(m_byteOffset == other.m_byteOffset);
+        return true;
     }
 
-    const Dimensions& getDimensions() const
-    {
-        return m_dimensions;
-    }
-
-    bool hasDimension(Dimension::Field field) const
-    {
-        int index = m_indexTable[field];
-        return index != -1;
-    }
-
-    // returns -1 if the index not found
-    int getDimensionIndex(Dimension::Field field) const
-    {
-        int index = m_indexTable[field];
-        assert(index != -1);
-        return index;
-    }
-    
-    boost::property_tree::ptree getPTree() const;
-
-private:
-    std::vector<Dimension> m_dimensions;
-
-    // BUG: use boost::array?
-    int m_indexTable[Dimension::Field_LAST]; // mapping from field name to index position, or -1 if field not present
-};
+    return false;
+}
 
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& os, Schema const&);
+bool DimensionLayout::operator!=(const DimensionLayout& other) const
+{
+  return !(*this==other);
+}
 
 
-} // namespace liblas
+std::ostream& operator<<(std::ostream& os, libpc::DimensionLayout const&)
+{
+    ////using boost::property_tree::ptree;
+    ////ptree tree = d.GetPTree();
 
-#endif // LIBPC_SCHEMA_HPP_INCLUDED
+    ////std::string const name = tree.get<std::string>("name");
+
+    ////std::ostringstream quoted_name;
+    ////quoted_name << "'" << name << "'";
+    ////std::ostringstream pad;
+    ////std::string const& cur = quoted_name.str();
+    ////std::string::size_type size = cur.size();
+    ////std::string::size_type pad_size = 30 - size;
+
+    ////for (std::string::size_type i=0; i != pad_size; i++ )
+    ////{
+    ////    pad << " ";
+    ////}
+    ////os << quoted_name.str() << pad.str() <<" -- "<< " size: " << tree.get<boost::uint32_t>("bytesize");
+    ////os << " offset: " << tree.get<boost::uint32_t>("byteoffset");
+    ////os << std::endl;
+
+    return os;
+}
+
+
+} // namespace libpc

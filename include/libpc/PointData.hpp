@@ -38,7 +38,7 @@
 #include <boost/cstdint.hpp>
 
 #include "libpc/export.hpp"
-#include "libpc/Schema.hpp"
+#include "libpc/SchemaLayout.hpp"
 
 namespace libpc
 {

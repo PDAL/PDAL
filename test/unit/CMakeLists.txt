@@ -13,6 +13,7 @@ SET(LIBPC_UNIT_TEST_SRC
 	ConfigTest.cpp
 	CropFilterTest.cpp
 	DimensionTest.cpp
+	DimensionLayoutTest.cpp
 	FauxReaderTest.cpp
 	FauxWriterTest.cpp
 	LiblasReaderTest.cpp
@@ -20,6 +21,7 @@ SET(LIBPC_UNIT_TEST_SRC
 	PointDataTest.cpp
 	RangeTest.cpp
 	SchemaTest.cpp
+	SchemaLayoutTest.cpp
 	SignallerTest.cpp
 	UtilsTest.cpp
 	VectorTest.cpp

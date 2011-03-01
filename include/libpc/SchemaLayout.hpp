@@ -39,85 +39,67 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef LIBPC_SCHEMA_HPP_INCLUDED
-#define LIBPC_SCHEMA_HPP_INCLUDED
+#ifndef LIBPC_SCHEMALAYOUT_HPP_INCLUDED
+#define LIBPC_SCHEMALAYOUT_HPP_INCLUDED
 
-// std
-#include <vector>
-#include <list>
-
-// boost
-
-#include "libpc/export.hpp"
-#include "libpc/Dimension.hpp"
+#include "libpc/Schema.hpp"
+#include "libpc/DimensionLayout.hpp"
 
 
 namespace libpc
 {
 
 
-/// Schema definition
-class LIBPC_DLL Schema
+class LIBPC_DLL SchemaLayout
 {
 public:
-    typedef std::vector<Dimension> Dimensions;
-    typedef std::vector<Dimension>::iterator DimensionsIter;
-    typedef std::vector<Dimension>::const_iterator DimensionsCIter;
+    typedef std::vector<DimensionLayout> DimensionLayouts;
+    typedef std::vector<DimensionLayout>::iterator DimensionLayoutsIter;
+    typedef std::vector<DimensionLayout>::const_iterator DimensionLayoutsCIter;
 
-public:
-    Schema();
-    Schema(Schema const& other);
+    SchemaLayout(const Schema&);
+    SchemaLayout(SchemaLayout const& other);
 
-    Schema& operator=(Schema const& rhs);
+    SchemaLayout& operator=(SchemaLayout const& rhs);
 
-    bool operator==(const Schema& other) const;
-    bool operator!=(const Schema& other) const;
+    bool operator==(const SchemaLayout& other) const;
+    bool operator!=(const SchemaLayout& other) const;
 
-    void addDimension(Dimension const& dim);
-    void addDimensions(const std::vector<Dimension>& dims);
-
-    const Dimension& getDimension(std::size_t index) const
+    const Schema& getSchema() const 
     {
-        return m_dimensions[index];
+      return m_schema;
     }
 
-    Dimension& getDimension(std::size_t index)
+    /// Fetch total byte size -- sum of all dimensions
+    std::size_t getByteSize() const;
+
+    void calculateSizes();
+
+    const DimensionLayout& getDimensionLayout(std::size_t index) const
     {
-        return m_dimensions[index];
+        return m_dimensionLayouts[index];
     }
 
-    const Dimensions& getDimensions() const
+    DimensionLayout& getDimensionLayout(std::size_t index)
     {
-        return m_dimensions;
+        return m_dimensionLayouts[index];
     }
 
-    bool hasDimension(Dimension::Field field) const
+    const std::vector<DimensionLayout>& getDimensionLayouts() const
     {
-        int index = m_indexTable[field];
-        return index != -1;
+        return m_dimensionLayouts;
     }
-
-    // returns -1 if the index not found
-    int getDimensionIndex(Dimension::Field field) const
-    {
-        int index = m_indexTable[field];
-        assert(index != -1);
-        return index;
-    }
-    
-    boost::property_tree::ptree getPTree() const;
 
 private:
-    std::vector<Dimension> m_dimensions;
-
-    // BUG: use boost::array?
-    int m_indexTable[Dimension::Field_LAST]; // mapping from field name to index position, or -1 if field not present
+    Schema m_schema;
+    std::vector<DimensionLayout> m_dimensionLayouts;
+    std::size_t m_byteSize;
 };
 
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& os, Schema const&);
+LIBPC_DLL std::ostream& operator<<(std::ostream& os, SchemaLayout const&);
 
 
 } // namespace liblas
 
-#endif // LIBPC_SCHEMA_HPP_INCLUDED
+#endif // LIBPC_SCHEMALAYOUT_HPP_INCLUDED

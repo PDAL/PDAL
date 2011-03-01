@@ -68,26 +68,5 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK(d4 != d1);
 }
 
-// BUG: more Dimension tests needed
-
-BOOST_AUTO_TEST_CASE(test_layout)
-{
-    Dimension d1(Dimension::Field_X, Dimension::Uint32);
-    DimensionLayout l1(d1);
-
-    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
-    DimensionLayout l2(d2);
-
-    DimensionLayout l3(l1);
-    DimensionLayout l4 = l1;
-
-    BOOST_CHECK(l1==l1);
-    BOOST_CHECK(l1!=l2);
-    BOOST_CHECK(l2!=l1);
-    BOOST_CHECK(l1==l3);
-    BOOST_CHECK(l3==l1);
-    BOOST_CHECK(l1==l4);
-    BOOST_CHECK(l4==l1);
-}
 
 BOOST_AUTO_TEST_SUITE_END()

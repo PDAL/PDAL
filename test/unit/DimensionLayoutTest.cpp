@@ -35,35 +35,30 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include "libpc/Schema.hpp"
+#include "libpc/DimensionLayout.hpp"
 
 using namespace libpc;
 
-BOOST_AUTO_TEST_SUITE(SchemaTest)
+BOOST_AUTO_TEST_SUITE(DimensionLayoutTest)
 
-BOOST_AUTO_TEST_CASE(test_ctor)
+BOOST_AUTO_TEST_CASE(test1)
 {
     Dimension d1(Dimension::Field_X, Dimension::Uint32);
+    DimensionLayout l1(d1);
+
     Dimension d2(Dimension::Field_Y, Dimension::Uint32);
+    DimensionLayout l2(d2);
 
-    Schema s1;
-    s1.addDimension(d1);
-    s1.addDimension(d2);
+    DimensionLayout l3(l1);
+    DimensionLayout l4 = l1;
 
-    Schema s2(s1);
-    Schema s3 = s1;
-
-    BOOST_CHECK(s1==s1);
-    BOOST_CHECK(s1==s2);
-    BOOST_CHECK(s2==s1);
-    BOOST_CHECK(s1==s3);
-    BOOST_CHECK(s3==s1);
-
-    Schema s4;
-    s4.addDimension(d1);
-    BOOST_CHECK(s1!=s4);
-    BOOST_CHECK(s4!=s1);
+    BOOST_CHECK(l1==l1);
+    BOOST_CHECK(l1!=l2);
+    BOOST_CHECK(l2!=l1);
+    BOOST_CHECK(l1==l3);
+    BOOST_CHECK(l3==l1);
+    BOOST_CHECK(l1==l4);
+    BOOST_CHECK(l4==l1);
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

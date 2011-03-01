@@ -28,6 +28,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/ColorFilter.hpp
   ${LIBPC_HEADERS_DIR}/CropFilter.hpp
   ${LIBPC_HEADERS_DIR}/Dimension.hpp
+  ${LIBPC_HEADERS_DIR}/DimensionLayout.hpp
   ${LIBPC_HEADERS_DIR}/FauxReader.hpp 
   ${LIBPC_HEADERS_DIR}/FauxWriter.hpp
   ${LIBPC_HEADERS_DIR}/Filter.hpp
@@ -45,6 +46,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Range.hpp
   ${LIBPC_HEADERS_DIR}/Reader.hpp
   ${LIBPC_HEADERS_DIR}/Schema.hpp
+  ${LIBPC_HEADERS_DIR}/SchemaLayout.hpp
   ${LIBPC_HEADERS_DIR}/Signaller.hpp
   ${LIBPC_HEADERS_DIR}/SpatialReference.hpp
   ${LIBPC_HEADERS_DIR}/Stage.hpp
@@ -64,6 +66,7 @@ set(LIBPC_CPP
   ColorFilter.cpp
   CropFilter.cpp
   Dimension.cpp
+  DimensionLayout.cpp
   FauxReader.cpp
   FauxWriter.cpp
   Filter.cpp
@@ -79,6 +82,7 @@ set(LIBPC_CPP
   PointData.cpp
   Reader.cpp
   Schema.cpp
+  SchemaLayout.cpp
   Signaller.cpp
   SpatialReference.cpp
   Stage.cpp
