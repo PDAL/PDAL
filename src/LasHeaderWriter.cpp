@@ -183,7 +183,7 @@ void LasHeaderWriter::write()
     // 3-6. GUID data
     uint8_t d16[16] = { 0 };
     boost::uuids::uuid g = m_header.GetProjectId();
-    memcpy(d16,g.data,26);
+    memcpy(d16,g.data,16);
     Utils::write_n(m_ostream, d16, 16);
     
     // 7. Version major
