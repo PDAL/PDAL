@@ -71,7 +71,7 @@ LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
 
 LiblasWriter::~LiblasWriter()
 {
-    //delete m_externalHeader;
+    delete m_externalHeader;
     return;
 }
 
@@ -222,9 +222,7 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
     //const int indexWaveformYt = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformYt) : 0);
     //const int indexWaveformZt = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformZt) : 0);
 
-    liblas::HeaderPtr *headerptr = new liblas::HeaderPtr(m_externalHeader);
-    liblas::Point *ppt = new liblas::Point(*headerptr);
-    liblas::Point & pt = *ppt;
+    liblas::Point pt;
 
     boost::uint32_t numPoints = pointData.getNumPoints();
     for (boost::uint32_t i=0; i<numPoints; i++)
