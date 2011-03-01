@@ -10,3 +10,8 @@
 
 add_subdirectory(liblas)
 add_subdirectory(las)
+
+if(ORACLE_FOUND AND GDAL_FOUND)
+    add_subdirectory(oci)
+endif()
+
