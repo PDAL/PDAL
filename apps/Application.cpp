@@ -88,9 +88,25 @@ int Application::run()
     boost::timer timer;
     
     // call derived function
-    int status = execute();
+    int status = 0;
+    
+    try
+    {
+        status = execute();
+    }
+    catch (std::exception e)
+    {
+        const std::string s(e.what());
+        runtimeError("Caught exception: " + s);
+        status = 1;
+    }
+    catch (...)
+    {
+        runtimeError("Caught unknown exception");
+        status = 1;
+    }
 
-    if (hasOption("timer"))
+    if (status == 0 && hasOption("timer"))
     {
         const double t = timer.elapsed();
         std::cout << "Elapsed time: " << t << " seconds" << std::endl;
