@@ -16,6 +16,8 @@ Testing/
 
 # visual studio cruft
 Debug/
+Release/
+RelWithDebInfo/
 ipch/
 *.sln
 *.vcxproj
