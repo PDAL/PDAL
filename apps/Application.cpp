@@ -64,16 +64,24 @@ int Application::run()
     // parse the command line
     parseOptions();
 
+    // do any user-level sanity checking
+    bool happy = validateOptions();
+    if (!happy)
+    {
+        outputHelp();
+        return 1;
+    }
+
     // handle the well-known options
     if (hasOption("version")) 
     {
-        outputVersion(std::cout);
+        outputVersion();
         return 0;
     }
     
     if (hasOption("help")) 
     {
-        outputHelp(std::cout);
+        outputHelp();
         return 0;
     }
 
@@ -89,6 +97,20 @@ int Application::run()
     }
 
     return status;
+}
+
+
+void Application::usageError(const std::string& err)
+{
+    std::cout << "Usage error: " << err << std::endl;
+    std::cout << std::endl;
+}
+
+
+void Application::runtimeError(const std::string& err)
+{
+    std::cout << "Error: " << err << std::endl;
+    std::cout << std::endl;
 }
 
 
@@ -110,29 +132,33 @@ void Application::addOptionSet(po::options_description* options)
 }
 
 
-void Application::outputHelp(std::ostream& oss)
+void Application::outputHelp()
 {
-    outputVersion(oss);
+    outputVersion();
 
     std::vector<po::options_description*>::const_iterator iter;
     for (iter = m_options.begin(); iter != m_options.end(); ++iter)
     {
         const po::options_description* options = *iter;
-        oss << *options;
+        std::cout << *options;
     }
 
-    oss <<"\nFor more information, see the full documentation for libPC at:\n";
+    std::cout <<"\nFor more information, see the full documentation for libPC at:\n";
     
-    oss << " http://libpc.org/\n";
-    oss << "----------------------------------------------------------\n";
+    std::cout << "  http://libpc.org/\n";
+    std::cout << "--------------------------------------------------------------------\n";
+    std::cout << std::endl;
+
+    return;
 }
 
 
-void Application::outputVersion(std::ostream& oss)
+void Application::outputVersion()
 {
-    oss << "--------------------------------------------------------------------\n";
-    oss << "    pc2pc (" << libpc::GetFullVersionString() << ")\n";
-    oss << "--------------------------------------------------------------------\n";
+    std::cout << "--------------------------------------------------------------------\n";
+    std::cout << "pc2pc (" << libpc::GetFullVersionString() << ")\n";
+    std::cout << "--------------------------------------------------------------------\n";
+    std::cout << std::endl;
 }
 
 

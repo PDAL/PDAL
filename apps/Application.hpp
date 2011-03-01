@@ -65,6 +65,10 @@ protected:
     // implement this, with calls to addOptionSet()
     virtual void addOptions() = 0;
 
+    // implement this, to do sanity checking of cmd line
+    // return false if the user gave us bad options
+    virtual bool validateOptions() { return true; }
+
     // implement this, to do your actual work
     virtual int execute() = 0;
 
@@ -73,11 +77,13 @@ protected:
     void addOptionSet(boost::program_options::options_description* options);
     bool isVerbose() const;
     bool hasOption(const std::string& name);
+    void usageError(const std::string&);
+    void runtimeError(const std::string&);
 
 private:
     void parseOptions();
-    void outputHelp(std::ostream& oss);
-    void outputVersion(std::ostream& oss);
+    void outputHelp();
+    void outputVersion();
     void addBasicOptionSet();
 
     bool m_isVerbose;

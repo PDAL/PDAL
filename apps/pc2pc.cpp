@@ -12,25 +12,29 @@
 
 #include <iostream>
 
-#include "libpc/exceptions.hpp"
-#include "libpc/libpc_config.hpp"
-#include "libpc/Bounds.hpp"
-#include "libpc/Color.hpp"
-#include "libpc/Dimension.hpp"
-#include "libpc/Schema.hpp"
-#include "libpc/CropFilter.hpp"
-#include "libpc/ColorFilter.hpp"
-#include "libpc/MosaicFilter.hpp"
-#include "libpc/FauxReader.hpp"
-#include "libpc/FauxWriter.hpp"
-#include "libpc/LasReader.hpp"
-#include "libpc/LasHeader.hpp"
-#include "libpc/LasWriter.hpp"
-// #include "libpc/LiblasReader.hpp"
+//#include "libpc/exceptions.hpp"
+//#include "libpc/libpc_config.hpp"
+//#include "libpc/Bounds.hpp"
+//#include "libpc/Color.hpp"
+//#include "libpc/Dimension.hpp"
+//#include "libpc/Schema.hpp"
+//#include "libpc/CropFilter.hpp"
+//#include "libpc/ColorFilter.hpp"
+//#include "libpc/MosaicFilter.hpp"
+//#include "libpc/FauxReader.hpp"
+//#include "libpc/FauxWriter.hpp"
+//#include "libpc/LasReader.hpp"
+//#include "libpc/LasHeader.hpp"
+//#include "libpc/LasWriter.hpp"
+
+#include "libpc/../../src/drivers/liblas/writer.hpp"
+#include "libpc/../../src/drivers/liblas/reader.hpp"
+
 
 #include "Application.hpp"
 
 using namespace libpc;
+namespace po = boost::program_options;
 
 
 class Application_pc2pc : public Application
@@ -38,8 +42,13 @@ class Application_pc2pc : public Application
 public:
     Application_pc2pc(int argc, char* argv[]);
     int execute();
+
 private:
     void addOptions();
+    bool validateOptions();
+
+    std::string m_inputFile;
+    std::string m_outputFile;
 };
 
 
@@ -49,12 +58,62 @@ Application_pc2pc::Application_pc2pc(int argc, char* argv[])
 }
 
 
+bool Application_pc2pc::validateOptions()
+{
+    if (!hasOption("input"))
+    {
+        usageError("--input/-i required");
+        return false;
+    }
+
+    if (!hasOption("output"))
+    {
+        usageError("--output/-o required");
+        return false;
+    }
+
+    return true;
+}
+
+
 void Application_pc2pc::addOptions()
 {
+    po::options_description* file_options = new po::options_description("file options");
+
+    file_options->add_options()
+        ("input,i", po::value<std::string>(&m_inputFile), "input file name")
+        ("output,o", po::value<std::string>(&m_outputFile), "output file name")
+        ;
+
+    addOptionSet(file_options);
 }
 
 int Application_pc2pc::execute()
 {
+    if (!Utils::fileExists(m_inputFile))
+    {
+        runtimeError("file not found: " + m_inputFile);
+        return 1;
+    }
+
+    std::istream* ifs = Utils::openFile(m_inputFile);
+    LiblasReader reader(*ifs);
+    
+    std::ostream* ofs = Utils::createFile(m_outputFile);
+    {
+        const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
+
+        // need to scope the writer, so that's it dtor can use the stream
+        LiblasWriter writer(reader, *ofs);
+
+        //BUG: handle laz writer.setCompressed(false);
+
+        writer.write(numPoints);
+    }
+
+    Utils::closeFile(ofs);
+    Utils::closeFile(ifs);
+
     return 0;
 }
 
@@ -68,7 +127,7 @@ int main(int argc, char* argv[])
 
 
 
-
+#if 0
 
 static void test1()
 {
@@ -172,6 +231,9 @@ int xmain(int, char* [])
 
     return 0;
 }
+
+#endif
+
 #if 0
 
 #include <liblas/liblas.hpp>
