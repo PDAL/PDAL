@@ -64,14 +64,6 @@ int Application::run()
     // parse the command line
     parseOptions();
 
-    // do any user-level sanity checking
-    bool happy = validateOptions();
-    if (!happy)
-    {
-        outputHelp();
-        return 1;
-    }
-
     // handle the well-known options
     if (hasOption("version")) 
     {
@@ -83,6 +75,14 @@ int Application::run()
     {
         outputHelp();
         return 0;
+    }
+
+    // do any user-level sanity checking
+    bool happy = validateOptions();
+    if (!happy)
+    {
+        outputHelp();
+        return 1;
     }
 
     boost::timer timer;
@@ -141,6 +141,7 @@ void Application::outputHelp()
     {
         const po::options_description* options = *iter;
         std::cout << *options;
+        std::cout << std::endl;
     }
 
     std::cout <<"\nFor more information, see the full documentation for libPC at:\n";
