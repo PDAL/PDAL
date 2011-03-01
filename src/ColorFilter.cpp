@@ -62,20 +62,10 @@ boost::uint32_t ColorFilter::readPoints(PointData& data)
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
 
-    std::size_t fieldIndexR;
-    std::size_t fieldIndexG;
-    std::size_t fieldIndexB;
-    std::size_t offsetZ;
-    bool ok;
-
-    ok = schema.findDimensionIndex(Dimension::Field_Red, fieldIndexR);
-    assert(ok);
-    ok = schema.findDimensionIndex(Dimension::Field_Green, fieldIndexG);
-    assert(ok);
-    ok = schema.findDimensionIndex(Dimension::Field_Blue, fieldIndexB);
-    assert(ok);
-    ok = schema.findDimensionIndex(Dimension::Field_Z, offsetZ);
-    assert(ok);
+    int fieldIndexR = schema.getDimensionIndex(Dimension::Field_Red);
+    int fieldIndexG = schema.getDimensionIndex(Dimension::Field_Green);
+    int fieldIndexB = schema.getDimensionIndex(Dimension::Field_Blue);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
 
     boost::uint32_t numValidPoints = 0;
 

@@ -91,14 +91,20 @@ public:
         return m_dimensions;
     }
 
-    // returns true if found and sets index, otherwise returns false
-    // BUG: this is deadly slow, need to use old assoc array or fixed enum for field names
-    bool findDimensionIndex(Dimension::Field field, std::size_t& index) const; 
-    bool hasDimension(Dimension::Field field) const;
+    bool hasDimension(Dimension::Field field) const
+    {
+        int index = m_indexTable[field];
+        return index != -1;
+    }
 
-    // this version throws if the index not found
-    std::size_t getDimensionIndex(Dimension::Field field) const; 
-
+    // returns -1 if the index not found
+    int getDimensionIndex(Dimension::Field field) const
+    {
+        int index = m_indexTable[field];
+        assert(index != -1);
+        return index;
+    }
+    
     boost::property_tree::ptree getPTree() const;
 
 private:

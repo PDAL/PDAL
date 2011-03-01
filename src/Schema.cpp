@@ -150,38 +150,6 @@ void Schema::addDimension(Dimension const& dim)
 }
 
 
-bool Schema::findDimensionIndex(Dimension::Field field, std::size_t& index) const
-{
-    if (m_indexTable[field] == -1) 
-    {
-        return false;
-    }
-
-    index = m_indexTable[field];
-    return true;
-}
-
-
-std::size_t Schema::getDimensionIndex(Dimension::Field field) const
-{
-    std::size_t index = 0;
-    
-    if (!findDimensionIndex(field, index))
-    {
-        throw; // BUG
-    }
-
-    return index;
-}
-
-
-bool Schema::hasDimension(Dimension::Field field) const
-{
-    std::size_t notused = 0;
-    return findDimensionIndex(field, notused);
-}
-
-
 std::ostream& operator<<(std::ostream& os, Schema const& schema)
 {
     using property_tree::ptree;

@@ -88,12 +88,6 @@ public:
     bool isValid(std::size_t pointIndex) const;
     void setValid(std::size_t pointIndex, bool value=true);
 
-    // convenience function
-    std::size_t getDimensionIndex(Dimension::Field field) const
-    {
-        return getSchema().getDimensionIndex(field);
-    }
-
     // accessors to a particular field of a particular point in this buffer
     template<class T> T getField(std::size_t pointIndex, std::size_t fieldIndex) const;
     template<class T> void setField(std::size_t pointIndex, std::size_t fieldIndex, T value);

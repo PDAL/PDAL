@@ -71,7 +71,7 @@ LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
 
 LiblasWriter::~LiblasWriter()
 {
-    delete m_externalHeader;
+    //delete m_externalHeader;
     return;
 }
 
@@ -193,34 +193,38 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
         throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
     }
 
-    const std::size_t indexX = pointData.getDimensionIndex(Dimension::Field_X);
-    const std::size_t indexY = pointData.getDimensionIndex(Dimension::Field_Y);
-    const std::size_t indexZ = pointData.getDimensionIndex(Dimension::Field_Z);
+    const Schema& schema = pointData.getSchema();
+
+    const int indexX = schema.getDimensionIndex(Dimension::Field_X);
+    const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
+    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z);
     
-    const std::size_t indexIntensity = pointData.getDimensionIndex(Dimension::Field_Intensity);
-    const std::size_t indexReturnNumber = pointData.getDimensionIndex(Dimension::Field_ReturnNumber);
-    const std::size_t indexNumberOfReturns = pointData.getDimensionIndex(Dimension::Field_NumberOfReturns);
-    const std::size_t indexScanDirectionFlag = pointData.getDimensionIndex(Dimension::Field_ScanDirectionFlag);
-    const std::size_t indexEdgeOfFlightLine = pointData.getDimensionIndex(Dimension::Field_EdgeOfFlightLine);
-    const std::size_t indexClassification = pointData.getDimensionIndex(Dimension::Field_Classification);
-    const std::size_t indexScanAngleRank = pointData.getDimensionIndex(Dimension::Field_ScanAngleRank);
-    const std::size_t indexUserData = pointData.getDimensionIndex(Dimension::Field_UserData);
-    const std::size_t indexPointSourceId = pointData.getDimensionIndex(Dimension::Field_PointSourceId);
+    const int indexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity);
+    const int indexReturnNumber = schema.getDimensionIndex(Dimension::Field_ReturnNumber);
+    const int indexNumberOfReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns);
+    const int indexScanDirectionFlag = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag);
+    const int indexEdgeOfFlightLine = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine);
+    const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification);
+    const int indexScanAngleRank = schema.getDimensionIndex(Dimension::Field_ScanAngleRank);
+    const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
+    const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId);
     
-    const std::size_t indexGpsTime = (hasTimeData ? pointData.getDimensionIndex(Dimension::Field_GpsTime) : 0);
+    const int indexGpsTime = (hasTimeData ? schema.getDimensionIndex(Dimension::Field_GpsTime) : 0);
 
-    const std::size_t indexRed = (hasColorData ? pointData.getDimensionIndex(Dimension::Field_Red) : 0);
-    const std::size_t indexGreen = (hasColorData ? pointData.getDimensionIndex(Dimension::Field_Green) : 0);
-    const std::size_t indexBlue = (hasColorData ? pointData.getDimensionIndex(Dimension::Field_Blue) : 0);
+    const int indexRed = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
+    const int indexGreen = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
+    const int indexBlue = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Blue) : 0);
 
-    //const std::size_t indexWavePacketDescriptorIndex = (hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WavePacketDescriptorIndex) : 0);
-    //const std::size_t indexWaveformDataOffset = (hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WaveformDataOffset) : 0);
-    //const std::size_t indexReturnPointWaveformLocation = (hasWaveData ? pointData.getDimensionIndex(Dimension::Field_ReturnPointWaveformLocation) : 0);
-    //const std::size_t indexWaveformXt = (hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WaveformXt) : 0);
-    //const std::size_t indexWaveformYt = (hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WaveformYt) : 0);
-    //const std::size_t indexWaveformZt = (hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WaveformZt) : 0);
+    //const int indexWavePacketDescriptorIndex = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_WavePacketDescriptorIndex) : 0);
+    //const int indexWaveformDataOffset = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformDataOffset) : 0);
+    //const int indexReturnPointWaveformLocation = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_ReturnPointWaveformLocation) : 0);
+    //const int indexWaveformXt = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformXt) : 0);
+    //const int indexWaveformYt = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformYt) : 0);
+    //const int indexWaveformZt = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformZt) : 0);
 
-    liblas::Point pt;
+    liblas::HeaderPtr *headerptr = new liblas::HeaderPtr(m_externalHeader);
+    liblas::Point *ppt = new liblas::Point(*headerptr);
+    liblas::Point & pt = *ppt;
 
     boost::uint32_t numPoints = pointData.getNumPoints();
     for (boost::uint32_t i=0; i<numPoints; i++)

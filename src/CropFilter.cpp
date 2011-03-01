@@ -58,17 +58,9 @@ boost::uint32_t CropFilter::readPoints(PointData& data)
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
 
-    std::size_t fieldX;
-    std::size_t fieldY;
-    std::size_t fieldZ;
-    bool ok;
-
-    ok = schema.findDimensionIndex(Dimension::Field_X, fieldX);
-    assert(ok);
-    ok = schema.findDimensionIndex(Dimension::Field_Y, fieldY);
-    assert(ok);
-    ok = schema.findDimensionIndex(Dimension::Field_Z, fieldZ);
-    assert(ok);
+    int fieldX = schema.getDimensionIndex(Dimension::Field_X);
+    int fieldY = schema.getDimensionIndex(Dimension::Field_Y);
+    int fieldZ = schema.getDimensionIndex(Dimension::Field_Z);
 
     boost::uint32_t numValidPoints = 0;
 

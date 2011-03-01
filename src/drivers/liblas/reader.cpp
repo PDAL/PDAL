@@ -232,32 +232,34 @@ boost::uint32_t LiblasReader::readPoints(PointData& pointData)
     boost::uint32_t numPoints = pointData.getNumPoints();
     boost::uint32_t i = 0;
 
-    const std::size_t indexX = pointData.getDimensionIndex(Dimension::Field_X);
-    const std::size_t indexY = pointData.getDimensionIndex(Dimension::Field_Y);
-    const std::size_t indexZ = pointData.getDimensionIndex(Dimension::Field_Z);
-    
-    const std::size_t indexIntensity = pointData.getDimensionIndex(Dimension::Field_Intensity);
-    const std::size_t indexReturnNumber = pointData.getDimensionIndex(Dimension::Field_ReturnNumber);
-    const std::size_t indexNumberOfReturns = pointData.getDimensionIndex(Dimension::Field_NumberOfReturns);
-    const std::size_t indexScanDirectionFlag = pointData.getDimensionIndex(Dimension::Field_ScanDirectionFlag);
-    const std::size_t indexEdgeOfFlightLine = pointData.getDimensionIndex(Dimension::Field_EdgeOfFlightLine);
-    const std::size_t indexClassification = pointData.getDimensionIndex(Dimension::Field_Classification);
-    const std::size_t indexScanAngleRank = pointData.getDimensionIndex(Dimension::Field_ScanAngleRank);
-    const std::size_t indexUserData = pointData.getDimensionIndex(Dimension::Field_UserData);
-    const std::size_t indexPointSourceId = pointData.getDimensionIndex(Dimension::Field_PointSourceId);
-    
-    const std::size_t indexGpsTime = (m_hasTimeData ? pointData.getDimensionIndex(Dimension::Field_GpsTime) : 0);
+    const Schema& schema = pointData.getSchema();
 
-    const std::size_t indexRed = (m_hasColorData ? pointData.getDimensionIndex(Dimension::Field_Red) : 0);
-    const std::size_t indexGreen = (m_hasColorData ? pointData.getDimensionIndex(Dimension::Field_Green) : 0);
-    const std::size_t indexBlue = (m_hasColorData ? pointData.getDimensionIndex(Dimension::Field_Blue) : 0);
+    const int indexX = schema.getDimensionIndex(Dimension::Field_X);
+    const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
+    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z);
+    
+    const int indexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity);
+    const int indexReturnNumber = schema.getDimensionIndex(Dimension::Field_ReturnNumber);
+    const int indexNumberOfReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns);
+    const int indexScanDirectionFlag = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag);
+    const int indexEdgeOfFlightLine = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine);
+    const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification);
+    const int indexScanAngleRank = schema.getDimensionIndex(Dimension::Field_ScanAngleRank);
+    const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
+    const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId);
+    
+    const int indexGpsTime = (m_hasTimeData ? schema.getDimensionIndex(Dimension::Field_GpsTime) : 0);
 
-    //const std::size_t indexWavePacketDescriptorIndex = (m_hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WavePacketDescriptorIndex) : 0);
-    //const std::size_t indexWaveformDataOffset = (m_hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WaveformDataOffset) : 0);
-    //const std::size_t indexReturnPointWaveformLocation = (m_hasWaveData ? pointData.getDimensionIndex(Dimension::Field_ReturnPointWaveformLocation) : 0);
-    //const std::size_t indexWaveformXt = (m_hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WaveformXt) : 0);
-    //const std::size_t indexWaveformYt = (m_hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WaveformYt) : 0);
-    //const std::size_t indexWaveformZt = (m_hasWaveData ? pointData.getDimensionIndex(Dimension::Field_WaveformZt) : 0);
+    const int indexRed = (m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
+    const int indexGreen = (m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
+    const int indexBlue = (m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Blue) : 0);
+
+    //const int indexWavePacketDescriptorIndex = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WavePacketDescriptorIndex) : 0);
+    //const int indexWaveformDataOffset = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformDataOffset) : 0);
+    //const int indexReturnPointWaveformLocation = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_ReturnPointWaveformLocation) : 0);
+    //const int indexWaveformXt = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformXt) : 0);
+    //const int indexWaveformYt = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformYt) : 0);
+    //const t indexWaveformZt = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformZt) : 0);
 
     for (i=0; i<numPoints; i++)
     {

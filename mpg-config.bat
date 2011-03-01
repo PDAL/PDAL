@@ -1,7 +1,7 @@
 @echo off
 
 set COMPILER="Visual Studio 10 Win64"
-set COMPILER="Visual Studio 10"
+REM set COMPILER="Visual Studio 10"
 
 set LIBPC_DIR=d:\dev\libpc
 
@@ -9,7 +9,7 @@ set LIBLAS_DIR=d:\dev\liblas
 set LASZIP_DIR=d:\dev\laszip
 set OSGEO4W_DIR=C:\OSGeo4W
 set OSGEO4W_GDAL=C:\OSGeo4W\apps\gdal-17
-set BOOST_DIR="C:\Utils\boost_1_45_0-win32"
+set BOOST_DIR="C:\Utils\boost_1_45_0-win64"
 set ORACLE_HOME=%OSGEO4W_DIR%
 
 set BUILD_TYPE=Release
