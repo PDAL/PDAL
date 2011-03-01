@@ -110,7 +110,7 @@ int Application_pc2pc::execute()
 
         size_t np = (size_t)numPoints;
         assert(numPoints == np); // BUG
-        writer.write(numPoints);
+        writer.write(np);
     }
 
     Utils::closeFile(ofs);

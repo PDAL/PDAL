@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
 
         size_t np = (size_t)numPoints;
         assert(numPoints == np); // BUG
-        writer.write(numPoints);
+        writer.write(np);
     }
 
     Utils::closeFile(ofs);
