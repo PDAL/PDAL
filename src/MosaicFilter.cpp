@@ -60,6 +60,13 @@ MosaicFilter::MosaicFilter(Stage& prevStage, Stage& prevStage2)
 }
 
 
+const std::string& MosaicFilter::getName() const
+{
+    static std::string name("Mosaic Filter");
+    return name;
+}
+
+
 boost::uint32_t MosaicFilter::readPoints(PointData& destData)
 {
     boost::uint32_t numPoints = destData.getNumPoints();

@@ -53,6 +53,7 @@ BOOST_AUTO_TEST_CASE(test_crop)
     FauxReader reader(srcBounds, 1000, FauxReader::Random);
 
     CropFilter filter(reader, dstBounds);
+    BOOST_CHECK(filter.getName() == "Crop Filter");
 
     FauxWriter writer(filter);
 

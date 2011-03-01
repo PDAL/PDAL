@@ -49,6 +49,13 @@ CropFilter::CropFilter(Stage& prevStage, Bounds<double> const& bounds)
 }
 
 
+const std::string& CropFilter::getName() const
+{
+    static std::string name("Crop Filter");
+    return name;
+}
+
+
 boost::uint32_t CropFilter::readPoints(PointData& data)
 {
     m_prevStage.readPoints(data);

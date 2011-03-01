@@ -50,6 +50,8 @@ class LIBPC_DLL ColorFilter : public Filter
 public:
     ColorFilter(Stage& prevStage);
 
+    const std::string& getName() const;
+
     boost::uint32_t readPoints(PointData&);
 
 private:

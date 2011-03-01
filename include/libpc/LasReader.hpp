@@ -48,6 +48,8 @@ class LIBPC_DLL LasReader : public Reader
 public:
     LasReader(std::istream&);
 
+    const std::string& getName() const;
+
     virtual boost::uint32_t readPoints(PointData&);
 
     // default is to reset() and then read N points manually

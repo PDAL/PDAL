@@ -53,6 +53,13 @@ ColorFilter::ColorFilter(Stage& prevStage)
 }
 
 
+const std::string& ColorFilter::getName() const
+{
+    static std::string name("Color Filter");
+    return name;
+}
+
+
 boost::uint32_t ColorFilter::readPoints(PointData& data)
 {
     m_prevStage.readPoints(data);

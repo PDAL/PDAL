@@ -88,6 +88,13 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode, c
 }
 
 
+const std::string& FauxReader::getName() const
+{
+    static std::string name("Faux Reader");
+    return name;
+}
+
+
 boost::uint32_t FauxReader::readPoints(PointData& data)
 {
     if (data.getSchemaLayout().getSchema().getDimensions().size() != 4)

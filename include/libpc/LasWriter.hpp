@@ -45,7 +45,7 @@ class LIBPC_DLL LasWriter : public Writer
 public:
     LasWriter(Stage& prevStage, std::ostream&);
 
-    //void write();
+    const std::string& getName() const;
 
 protected:
     // this is called once before the loop with the writeBuffer calls

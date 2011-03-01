@@ -52,6 +52,13 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
 }
 
 
+const std::string& LasWriter::getName() const
+{
+    static std::string name("Liblas Writer");
+    return name;
+}
+
+
 void LasWriter::writeBegin()
 {
     Header& baseHeader = getHeader();

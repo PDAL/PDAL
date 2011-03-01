@@ -47,6 +47,8 @@ class LIBPC_DLL MosaicFilter : public Filter
 {
 public:
     MosaicFilter(Stage& prevStage, Stage& prevStage2);
+    
+    const std::string& getName() const;
 
     boost::uint32_t readPoints(PointData&);
 

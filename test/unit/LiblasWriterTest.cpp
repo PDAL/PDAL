@@ -60,6 +60,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
 
         // need to scope the writer, so that's it dtor can use the stream
         LiblasWriter writer(reader, *ofs);
+        BOOST_CHECK(writer.getName() == "Liblas Writer");
 
         writer.setCompressed(false);
         writer.setDate(0, 0);

@@ -53,6 +53,8 @@ class LIBPC_DLL LiblasWriter : public Writer
 public:
     LiblasWriter(Stage& prevStage, std::ostream&);
     ~LiblasWriter();
+
+    const std::string& getName() const;
     
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
     void setPointFormat(boost::int8_t pointFormat);

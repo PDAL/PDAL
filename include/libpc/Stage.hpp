@@ -52,6 +52,11 @@ public:
     Stage();
     virtual ~Stage();
 
+    // Implement this in your concrete classes to return a constant string
+    // as the name of the stage.  Use upper camel case, with spaces between
+    // words.  The last word should be "Reader", "Writer", or "Filter".
+    virtual const std::string& getName() const = 0;
+
     // This reads a set of points at the current position in the file.
     //
     // The schema of the PointData buffer we are given here might

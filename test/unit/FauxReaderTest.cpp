@@ -45,6 +45,7 @@ BOOST_AUTO_TEST_CASE(test_constant)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     FauxReader reader(bounds, 1000, FauxReader::Constant);
+    BOOST_CHECK(reader.getName() == "Faux Reader");
 
     const Schema& schema = reader.getHeader().getSchema();
     SchemaLayout layout(schema);

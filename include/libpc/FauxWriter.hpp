@@ -53,6 +53,8 @@ class LIBPC_DLL FauxWriter : public Writer
 public:
     FauxWriter(Stage& prevStage);
 
+    const std::string& getName() const;
+
     // retrieve the summary info
     float getMinX() const { return m_minimumX; }
     float getMinY() const { return m_minimumY; }

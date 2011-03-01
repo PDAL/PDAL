@@ -48,6 +48,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     FauxReader reader(bounds, 1000, FauxReader::Constant);
 
     FauxWriter writer(reader);
+    BOOST_CHECK(writer.getName() == "Faux Writer");
 
     boost::uint64_t numWritten = writer.write(750);
 

@@ -50,6 +50,13 @@ FauxWriter::FauxWriter(Stage& prevStage) :
 }
 
 
+const std::string& FauxWriter::getName() const
+{
+    static std::string name("Faux Writer");
+    return name;
+}
+
+
 void FauxWriter::writeBegin()
 {
     m_minimumX = m_minimumY = m_minimumZ = std::numeric_limits<float>::max();

@@ -54,6 +54,13 @@ LasReader::LasReader(std::istream& istream)
 }
 
 
+const std::string& LasReader::getName() const
+{
+    static std::string name("Las Reader");
+    return name;
+}
+
+
 const LasHeader& LasReader::getLasHeader() const
 {
     return (const LasHeader&)getHeader();

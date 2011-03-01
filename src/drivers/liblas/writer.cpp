@@ -76,6 +76,13 @@ LiblasWriter::~LiblasWriter()
 }
 
 
+const std::string& LiblasWriter::getName() const
+{
+    static std::string name("Liblas Writer");
+    return name;
+}
+
+
 void LiblasWriter::setupExternalHeader()
 {
     setFormatVersion(1,2);

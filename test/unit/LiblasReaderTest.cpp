@@ -70,6 +70,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     std::istream* ifs = Utils::openFile("../../test/data/1.2-with-color.las");
     
     LiblasReader reader(*ifs);
+    BOOST_CHECK(reader.getName() == "Liblas Reader");
 
     const Schema& schema = reader.getHeader().getSchema();
     SchemaLayout layout(schema);

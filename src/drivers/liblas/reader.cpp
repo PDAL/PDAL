@@ -83,6 +83,13 @@ LiblasReader::~LiblasReader()
 }
 
 
+const std::string& LiblasReader::getName() const
+{
+    static std::string name("Liblas Reader");
+    return name;
+}
+
+
 void LiblasReader::processExternalHeader()
 {
     const liblas::Header& externalHeader = m_externalReader->GetHeader();
