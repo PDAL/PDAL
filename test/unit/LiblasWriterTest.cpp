@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     return;
 }
 
-BOOST_AUTO_TEST_CASE(test_test_simple_laz)
+BOOST_AUTO_TEST_CASE(test_simple_laz)
 {
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
