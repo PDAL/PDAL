@@ -86,7 +86,7 @@ const std::string& LiblasWriter::getName() const
 void LiblasWriter::setupExternalHeader()
 {
     setFormatVersion(1,2);
-    setPointFormat(0);
+    setPointFormat(3);
 
     setCompressed(false);
 

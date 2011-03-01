@@ -73,6 +73,8 @@ public:
 
     const LiblasHeader& getLiblasHeader() const;
 
+    boost::int8_t getPointFormatNumber() const;
+
 private:
     LiblasHeader& getLiblasHeader();
     void setLiblasHeader(const LiblasHeader&);

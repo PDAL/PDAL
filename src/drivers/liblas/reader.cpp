@@ -90,6 +90,11 @@ const std::string& LiblasReader::getName() const
 }
 
 
+boost::int8_t LiblasReader::getPointFormatNumber() const
+{
+    return (boost::uint8_t)m_pointFormat;
+}
+
 void LiblasReader::processExternalHeader()
 {
     const liblas::Header& externalHeader = m_externalReader->GetHeader();
