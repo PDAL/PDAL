@@ -40,7 +40,7 @@
 namespace libpc
 {
 
-const boost::uint32_t Writer::s_defaultChunkSize = 1024;
+const boost::uint32_t Writer::s_defaultChunkSize = 1024 * 32;
 
 
 Writer::Writer(Stage& prevStage)
