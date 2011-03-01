@@ -52,6 +52,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Writer.hpp)
 
 set (LIBPC_SOURCES "libpc_config.cpp" CACHE INTERNAL "sources to compile")
+set (APPS_CPP_DEPENDENCIES "${LIBPC_LIB_NAME}" CACHE INTERNAL "libraries to link")
 
 add_subdirectory(drivers)
 
@@ -120,7 +121,7 @@ endif()
 
 add_library(${LIBPC_LIB_NAME} SHARED ${LIBPC_SOURCES})
 
-target_link_libraries(${LIBPC_LIB_NAME}
+target_link_libraries(${APPS_CPP_DEPENDENCIES}
   ${LIBPC_LIB_NAME}
   ${LIBLAS_LIBRARY}
   ${TIFF_LIBRARY}
