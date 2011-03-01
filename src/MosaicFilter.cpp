@@ -46,11 +46,7 @@ MosaicFilter::MosaicFilter(Stage& prevStage, Stage& prevStage2)
     const Header& prevHeader1 =  m_prevStage.getHeader();
     const Header& prevHeader2 =  m_prevStage2.getHeader();
 
-    {
-        const Schema& prevSchema1 = prevHeader1.getSchema();
-        const Schema& prevSchema2 = prevHeader2.getSchema();
-        assert(prevSchema1==prevSchema2);
-    }
+    assert(prevHeader1.getSchema() == prevHeader2.getSchema());
 
     Header& thisHeader = getHeader();
 
