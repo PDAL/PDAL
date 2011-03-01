@@ -40,6 +40,7 @@
 #include <liblas/Writer.hpp>
 
 #include <libpc/exceptions.hpp>
+#include <libpc/libpc_config.hpp>
 
 
 namespace libpc
@@ -54,14 +55,11 @@ LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
     m_externalHeader = new liblas::Header;
     m_externalHeader->SetCompressed(false);
 
-    setFormatVersion(1,2);
-    setPointFormat(0);
+    setupExternalHeader();
 
     // make our own header
     LiblasHeader* internalHeader = new LiblasHeader;
     setHeader(internalHeader);
-
-    //myHeader->setNumPoints( extHeader.GetPointRecordsCount() );
 
     //const liblas::Bounds<double>& extBounds = extHeader.GetExtent();
     //const Bounds<double> bounds(extBounds.minx(), extBounds.miny(), extBounds.minz(), extBounds.maxx(), extBounds.maxy(), extBounds.maxz());
@@ -74,6 +72,27 @@ LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
 LiblasWriter::~LiblasWriter()
 {
     delete m_externalHeader;
+    return;
+}
+
+
+void LiblasWriter::setupExternalHeader()
+{
+    setFormatVersion(1,2);
+    setPointFormat(0);
+
+    setSystemIdentifier("libPC");
+    setGeneratingSoftware(GetVersionString());
+
+    std::size_t indexX = getHeader().getSchema().getDimensionIndex(Dimension::Field_X);
+    std::size_t indexY = getHeader().getSchema().getDimensionIndex(Dimension::Field_Y);
+    std::size_t indexZ = getHeader().getSchema().getDimensionIndex(Dimension::Field_Z);
+    const Dimension& dimX = getHeader().getSchema().getDimension(indexX);
+    const Dimension& dimY = getHeader().getSchema().getDimension(indexY);
+    const Dimension& dimZ = getHeader().getSchema().getDimension(indexZ);
+    m_externalHeader->SetScale(dimX.getNumericScale(), dimY.getNumericScale(), dimZ.getNumericScale());
+    m_externalHeader->SetOffset(dimX.getNumericOffset(), dimY.getNumericOffset(), dimZ.getNumericOffset());
+
     return;
 }
 
@@ -98,9 +117,22 @@ void LiblasWriter::setDate(boost::uint16_t dayOfYear, boost::uint16_t year)
 }
 
 
+void LiblasWriter::setSystemIdentifier(const std::string& systemId) 
+{
+    m_externalHeader->SetSystemId(systemId);
+}
+
+
+void LiblasWriter::setGeneratingSoftware(const std::string& softwareId)
+{
+    m_externalHeader->SetSoftwareId(softwareId);
+}
+
+
 void LiblasWriter::writeBegin()
 {
-    m_externalHeader->SetPointRecordsCount(99);
+    m_externalHeader->SetPointRecordsCount(99); // BUG
+
     m_externalWriter = new liblas::Writer(m_ostream, *m_externalHeader);
     return;
 }
@@ -201,6 +233,15 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
         const boost::uint8_t scanAngleRank = pointData.getField<boost::uint8_t>(i, indexScanAngleRank);
         const boost::uint8_t userData = pointData.getField<boost::uint8_t>(i, indexUserData);
         const boost::uint16_t pointSourceId = pointData.getField<boost::uint16_t>(i, indexPointSourceId);
+        pt.SetIntensity(intensity);
+        pt.SetReturnNumber(returnNumber);
+        pt.SetNumberOfReturns(numberOfReturns);
+        pt.SetScanDirection(scanDirFlag);
+        pt.SetFlightLineEdge(edgeOfFlightLine);
+        pt.SetClassification(classification);
+        pt.SetScanAngleRank(scanAngleRank);
+        pt.SetUserData(userData);
+        pt.SetPointSourceID(pointSourceId);
 
         if (hasTimeData)
         {

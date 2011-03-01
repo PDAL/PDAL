@@ -57,6 +57,12 @@ public:
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
     void setPointFormat(boost::int8_t pointFormat);
     void setDate(boost::uint16_t dayOfYear, boost::uint16_t year);
+    
+    // up to 32 chars (default is "libPC")
+    void setSystemIdentifier(const std::string& systemId); 
+    
+    // up to 32 chars (default is "libPC x.y.z")
+    void setGeneratingSoftware(const std::string& softwareId);
 
 protected:
     // this is called once before the loop with the writeBuffer calls
@@ -69,6 +75,8 @@ protected:
     virtual void writeEnd();
 
 private:
+    void setupExternalHeader();
+
     std::ostream& m_ostream;
     liblas::Writer* m_externalWriter;
     liblas::Header* m_externalHeader;

@@ -63,6 +63,8 @@ BOOST_AUTO_TEST_CASE(test_1)
 
         writer.setDate(0, 0);
         writer.setPointFormat(3);
+        writer.setSystemIdentifier("");
+        writer.setGeneratingSoftware("TerraScan");
 
         writer.write(numPoints);
     }
