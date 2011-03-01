@@ -238,7 +238,7 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
         const boost::int8_t scanDirFlag = pointData.getField<boost::int8_t>(i, indexScanDirectionFlag);
         const boost::int8_t edgeOfFlightLine = pointData.getField<boost::int8_t>(i, indexEdgeOfFlightLine);
         const boost::uint8_t classification = pointData.getField<boost::uint8_t>(i, indexClassification);
-        const boost::uint8_t scanAngleRank = pointData.getField<boost::uint8_t>(i, indexScanAngleRank);
+        const boost::int8_t scanAngleRank = pointData.getField<boost::int8_t>(i, indexScanAngleRank);
         const boost::uint8_t userData = pointData.getField<boost::uint8_t>(i, indexUserData);
         const boost::uint16_t pointSourceId = pointData.getField<boost::uint16_t>(i, indexPointSourceId);
         pt.SetIntensity(intensity);

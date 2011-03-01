@@ -162,14 +162,14 @@ void LiblasReader::registerFields()
     schema.addDimension(yDim);
     schema.addDimension(zDim);
 
-    schema.addDimension(Dimension(Dimension::Field_Intensity, Dimension::Int16));
+    schema.addDimension(Dimension(Dimension::Field_Intensity, Dimension::Uint16));
     schema.addDimension(Dimension(Dimension::Field_ReturnNumber, Dimension::Int8));
     schema.addDimension(Dimension(Dimension::Field_NumberOfReturns, Dimension::Int8));
     schema.addDimension(Dimension(Dimension::Field_ScanDirectionFlag, Dimension::Int8));
     schema.addDimension(Dimension(Dimension::Field_EdgeOfFlightLine, Dimension::Int8));
     schema.addDimension(Dimension(Dimension::Field_Classification, Dimension::Uint8));
     schema.addDimension(Dimension(Dimension::Field_ScanAngleRank, Dimension::Int8));
-    schema.addDimension(Dimension(Dimension::Field_UserData, Dimension::Int8));
+    schema.addDimension(Dimension(Dimension::Field_UserData, Dimension::Uint8));
     schema.addDimension(Dimension(Dimension::Field_PointSourceId, Dimension::Uint16));
 
     if (m_hasTimeData)
