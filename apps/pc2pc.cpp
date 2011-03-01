@@ -108,6 +108,8 @@ int Application_pc2pc::execute()
 
         //BUG: handle laz writer.setCompressed(false);
 
+        writer.setPointFormat( reader.getPointFormatNumber() );
+
         size_t np = (size_t)numPoints;
         assert(numPoints == np); // BUG
         writer.write(np);
