@@ -34,6 +34,7 @@
 
 #include "libpc/LasReader.hpp"
 #include "libpc/LasHeaderReader.hpp"
+#include "libpc/exceptions.hpp"
 
 namespace libpc
 {
@@ -48,7 +49,6 @@ LasReader::LasReader(std::istream& istream)
     
     LasHeaderReader lasHeaderReader(*lasHeader, istream);
     lasHeaderReader.read();
-
 
     return;
 }
@@ -103,22 +103,55 @@ boost::uint32_t LasReader::readPoints(PointData& pointData)
     const Schema& schema = schemaLayout.getSchema();
     LasHeader::PointFormatId pointFormat = lasHeader.getDataFormatId();
 
-    const std::size_t fieldIndexX = schema.getDimensionIndex(Dimension::Field_X);
-    const std::size_t fieldIndexY = schema.getDimensionIndex(Dimension::Field_Y);
-    const std::size_t fieldIndexZ = schema.getDimensionIndex(Dimension::Field_Z);
-    const std::size_t fieldIndexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity);
-    const std::size_t fieldIndexReturnNum = schema.getDimensionIndex(Dimension::Field_ReturnNumber);
-    const std::size_t fieldIndexNumReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns);
-    const std::size_t fieldIndexScanDir = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag);
-    const std::size_t fieldIndexFlight = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine);
-    const std::size_t fieldIndexClassification = schema.getDimensionIndex(Dimension::Field_Classification);
-    const std::size_t fieldIndexScanAngle = schema.getDimensionIndex(Dimension::Field_ScanAngleRank);
-    const std::size_t fieldIndexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
-    const std::size_t fieldIndexPointSource = schema.getDimensionIndex(Dimension::Field_PointSourceId);
-    const std::size_t fieldIndexTime = schema.getDimensionIndex(Dimension::Field_GpsTime);
-    const std::size_t fieldIndexRed = schema.getDimensionIndex(Dimension::Field_Red);
-    const std::size_t fieldIndexGreen = schema.getDimensionIndex(Dimension::Field_Green);
-    const std::size_t fieldIndexBlue = schema.getDimensionIndex(Dimension::Field_Blue);
+    bool hasTimeData = false;
+    bool hasColorData = false;
+    bool hasWaveData = false;
+    switch (pointFormat)
+    {
+    case LasHeader::ePointFormat0:
+        break;
+    case LasHeader::ePointFormat1:
+        hasTimeData = true;
+        break;
+    case LasHeader::ePointFormat2:
+        hasColorData = true;
+        break;
+    case LasHeader::ePointFormat3:
+        hasTimeData = true;
+        hasColorData = true;
+        break;
+    case LasHeader::ePointFormat4:
+        hasTimeData = true;
+        hasWaveData = true;
+        break;
+    case LasHeader::ePointFormat5:
+        hasColorData = true;
+        hasTimeData = true;
+        hasWaveData = true;
+        break;
+    case LasHeader::ePointFormatUnknown:
+        throw not_yet_implemented("Unknown point format encountered");
+    }
+
+    const int fieldIndexX = schema.getDimensionIndex(Dimension::Field_X);
+    const int fieldIndexY = schema.getDimensionIndex(Dimension::Field_Y);
+    const int fieldIndexZ = schema.getDimensionIndex(Dimension::Field_Z);
+    
+    const int fieldIndexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity);
+    const int fieldIndexReturnNum = schema.getDimensionIndex(Dimension::Field_ReturnNumber);
+    const int fieldIndexNumReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns);
+    const int fieldIndexScanDir = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag);
+    const int fieldIndexFlight = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine);
+    const int fieldIndexClassification = schema.getDimensionIndex(Dimension::Field_Classification);
+    const int fieldIndexScanAngle = schema.getDimensionIndex(Dimension::Field_ScanAngleRank);
+    const int fieldIndexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
+    const int fieldIndexPointSource = schema.getDimensionIndex(Dimension::Field_PointSourceId);
+
+    const int fieldIndexTime = (hasTimeData ? schema.getDimensionIndex(Dimension::Field_GpsTime) : 0);
+
+    const int fieldIndexRed = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
+    const int fieldIndexGreen = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
+    const int fieldIndexBlue = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Blue) : 0);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
@@ -127,13 +160,47 @@ boost::uint32_t LasReader::readPoints(PointData& pointData)
         if (pointFormat == LasHeader::ePointFormat0)
         {
             Utils::read_n(buf, m_istream, LasHeader::ePointSize0);
+
+            boost::uint8_t* p = buf;
+
+            const boost::uint32_t x = Utils::read_field<boost::uint32_t>(p);
+            const boost::uint32_t y = Utils::read_field<boost::uint32_t>(p);
+            const boost::uint32_t z = Utils::read_field<boost::uint32_t>(p);
+            const boost::uint16_t intensity = Utils::read_field<boost::uint16_t>(p);
+            const boost::uint8_t flags = Utils::read_field<boost::uint8_t>(p);
+            const boost::uint8_t classification = Utils::read_field<boost::uint8_t>(p);
+            const boost::int8_t scanAngleRank = Utils::read_field<boost::int8_t>(p);
+            const boost::uint8_t user = Utils::read_field<boost::uint8_t>(p);
+            const boost::uint16_t pointSourceId = Utils::read_field<boost::uint16_t>(p);
+
+            const boost::uint8_t returnNum = flags & 0x03;
+            const boost::uint8_t numReturns = (flags >> 3) & 0x03;
+            const boost::uint8_t scanDirFlag = (flags >> 6) & 0x01;
+            const boost::uint8_t flight = (flags >> 7) & 0x01;
+
+            pointData.setField<boost::uint32_t>(pointIndex, fieldIndexX, x);
+            pointData.setField<boost::uint32_t>(pointIndex, fieldIndexY, y);
+            pointData.setField<boost::uint32_t>(pointIndex, fieldIndexZ, z);
+            pointData.setField<boost::uint16_t>(pointIndex, fieldIndexIntensity, intensity);
+            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexReturnNum, returnNum);
+            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexNumReturns, numReturns);
+            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexScanDir, scanDirFlag);
+            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexFlight, flight);
+            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexClassification, classification);
+            pointData.setField<boost::int8_t>(pointIndex, fieldIndexScanAngle, scanAngleRank);
+            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexUserData, user);
+            pointData.setField<boost::uint16_t>(pointIndex, fieldIndexPointSource, pointSourceId);
+
+            pointData.setValid(pointIndex);
         }
         else if (pointFormat == LasHeader::ePointFormat1)
         {
+            throw;
             Utils::read_n(buf, m_istream, LasHeader::ePointSize1);
         }
         else if (pointFormat == LasHeader::ePointFormat2)
         {
+            throw;
             Utils::read_n(buf, m_istream, LasHeader::ePointSize2);
         }
         else if (pointFormat == LasHeader::ePointFormat3)
