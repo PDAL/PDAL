@@ -36,6 +36,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <numeric>
 
 using std::endl;
 using std::string;
@@ -48,13 +49,14 @@ PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t numPoints
     m_schemaLayout(schemaLayout),
     m_data(NULL),
     m_pointSize(0),
-    m_numPoints(numPoints)
+    m_numPoints(numPoints),
+    m_isValid(numPoints)
 {
     m_pointSize = m_schemaLayout.getByteSize();
     m_data = new boost::uint8_t[m_pointSize * m_numPoints];
     
     // the points will all be set to invalid here
-    m_isValid.resize(m_numPoints);
+    m_isValid.assign(0, m_isValid.size());
 
     return;
 }
@@ -62,21 +64,36 @@ PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t numPoints
 
 PointData::~PointData()
 {
-  delete[] m_data;
+    if (m_data)
+        delete[] m_data;
 }
 
 
 bool
 PointData::isValid(std::size_t index) const
 {
-    return m_isValid[index];
+    return static_cast<bool>(m_isValid[index]);
 }
 
+bool PointData::allValid() const
+{
+    // Assuming each byte is set to 1 for true and 0 for false,
+    // if the sum of all of the bytes in the mask == the size 
+    // of the mask, all the data are valid.  This hopefully is faster 
+    // than walking all of the points individually and doing an 
+    // if test
+    
+    boost::uint32_t sum = std::accumulate(m_isValid.begin(), m_isValid.end(), 0);
+    if (sum == m_isValid.size())
+        return true;
+    
+    return false;
+}
 
 void
 PointData::setValid(std::size_t index, bool value)
 {
-    m_isValid[index] = value;
+    m_isValid[index] = static_cast<bool>(value);
 }
 
 
@@ -102,6 +119,7 @@ void PointData::copyPointFast(std::size_t destPointIndex, std::size_t srcPointIn
 
     memcpy(dest, src, len);
 
+        
     setValid(destPointIndex, srcPointData.isValid(srcPointIndex));
 
     return;
@@ -118,10 +136,19 @@ void PointData::copyPointsFast(std::size_t destPointIndex, std::size_t srcPointI
 
     memcpy(dest, src, len * numPoints);
 
-    for (std::size_t i=0; i<numPoints; i++)
+    if (srcPointData.allValid())
     {
-      setValid(destPointIndex+i, srcPointData.isValid(srcPointIndex+i));
+        m_isValid.assign(1, m_isValid.size());
     }
+    else 
+    {
+        for (valid_mask_type::size_type i=0; i<numPoints; i++)
+        {
+          setValid(destPointIndex+i, srcPointData.isValid(srcPointIndex+i));
+        }
+        
+    }
+
 
     return;
 }
