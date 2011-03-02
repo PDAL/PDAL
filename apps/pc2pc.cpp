@@ -23,9 +23,9 @@
 //#include "libpc/MosaicFilter.hpp"
 //#include "libpc/FauxReader.hpp"
 //#include "libpc/FauxWriter.hpp"
-//#include "libpc/LasReader.hpp"
+#include "libpc/LasReader.hpp"
 //#include "libpc/LasHeader.hpp"
-//#include "libpc/LasWriter.hpp"
+#include "libpc/LasWriter.hpp"
 
 #include "libpc/../../src/drivers/liblas/writer.hpp"
 #include "libpc/../../src/drivers/liblas/reader.hpp"
@@ -83,6 +83,7 @@ void Application_pc2pc::addOptions()
     file_options->add_options()
         ("input,i", po::value<std::string>(&m_inputFile), "input file name")
         ("output,o", po::value<std::string>(&m_outputFile), "output file name")
+        ("native", "use native LAS classes (not liblas)")
         ;
 
     addOptionSet(file_options);
@@ -97,13 +98,30 @@ int Application_pc2pc::execute()
     }
 
     std::istream* ifs = Utils::openFile(m_inputFile);
-    LiblasReader reader(*ifs);
-    
     std::ostream* ofs = Utils::createFile(m_outputFile);
+
+    if (hasOption("native"))
     {
+        LasReader reader(*ifs);
+    
         const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
 
-        // need to scope the writer, so that's it dtor can use the stream
+        LasWriter writer(reader, *ofs);
+
+        //BUG: handle laz writer.setCompressed(false);
+
+        //writer.setPointFormat( reader.getPointFormatNumber() );
+
+        size_t np = (size_t)numPoints;
+        assert(numPoints == np); // BUG
+        writer.write(np);
+    }
+    else
+    {
+        LiblasReader reader(*ifs);
+    
+        const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
+
         LiblasWriter writer(reader, *ofs);
 
         //BUG: handle laz writer.setCompressed(false);
