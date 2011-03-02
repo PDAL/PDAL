@@ -48,11 +48,10 @@ namespace libpc
 PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t numPoints) :
     m_schemaLayout(schemaLayout),
     m_data(NULL),
-    m_pointSize(0),
+    m_pointSize(m_schemaLayout.getByteSize()),
     m_numPoints(numPoints),
     m_isValid(numPoints)
 {
-    m_pointSize = m_schemaLayout.getByteSize();
     m_data = new boost::uint8_t[m_pointSize * m_numPoints];
     
     // the points will all be set to invalid here
@@ -77,17 +76,14 @@ PointData::isValid(std::size_t index) const
 
 bool PointData::allValid() const
 {
-    // Assuming each byte is set to 1 for true and 0 for false,
-    // if the sum of all of the bytes in the mask == the size 
-    // of the mask, all the data are valid.  This hopefully is faster 
-    // than walking all of the points individually and doing an 
-    // if test
+    valid_mask_type::size_type i = 0;
+    while(i < m_isValid.size())
+    {
+        if (m_isValid[i] != 1) return false;
+        i++;
+    }
+    return true;
     
-    boost::uint32_t sum = std::accumulate(m_isValid.begin(), m_isValid.end(), 0);
-    if (sum == m_isValid.size())
-        return true;
-    
-    return false;
 }
 
 void
