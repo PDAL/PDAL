@@ -38,7 +38,6 @@
 #include <iostream>
 #include <numeric>
 
-using std::endl;
 using std::string;
 
 namespace libpc
@@ -152,6 +151,8 @@ void PointData::copyPointsFast(std::size_t destPointIndex, std::size_t srcPointI
 
 std::ostream& operator<<(std::ostream& ostr, const PointData& pointData)
 {
+    using std::endl;
+
     const SchemaLayout& schemaLayout = pointData.getSchemaLayout();
     const std::vector<DimensionLayout>& dimensionLayouts = schemaLayout.getDimensionLayouts();
     const std::size_t numPoints = pointData.getNumPoints();
