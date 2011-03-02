@@ -9,6 +9,10 @@
 
 set (SOURCES 
   oci_wrapper.cpp
+  block.cpp
+  header.cpp
+  writer.cpp
+  
   )
 
 SET(APPS_CPP_DEPENDENCIES "${APPS_CPP_DEPENDENCIES};${ORACLE_LIBRARY}" CACHE INTERNAL "source files for foo")
