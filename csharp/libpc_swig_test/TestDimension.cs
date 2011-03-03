@@ -20,7 +20,7 @@ namespace libpc_swig_test
          string s = Dimension.getDataTypeName(Dimension.DataType.Double);
          Assert(s == "Double");
 
-         Dimension d = new Dimension("x", Dimension.DataType.Float);
+         Dimension d = new Dimension(Dimension.Field.Field_Blue, Dimension.DataType.Float);
 
          return;
       }
