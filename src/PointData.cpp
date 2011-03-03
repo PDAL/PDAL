@@ -54,7 +54,7 @@ PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t numPoints
     m_data = new boost::uint8_t[m_pointSize * m_numPoints];
     
     // the points will all be set to invalid here
-    m_isValid.assign(0, m_isValid.size());
+    m_isValid.assign(m_isValid.size(), 0);
 
     return;
 }
