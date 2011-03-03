@@ -61,17 +61,17 @@ namespace std {
 // fix up some missing types
 namespace std
 {
-	typedef unsigned int size_t;
+    typedef unsigned int size_t;
 };
 
 namespace boost
 {
-	typedef unsigned char uint8_t;
-	typedef signed char int8_t;
-	typedef unsigned short uint16_t;
-	typedef signed short int16_t;
-	typedef unsigned int uint32_t;
-	typedef signed int int32_t;
+    typedef unsigned char uint8_t;
+    typedef signed char int8_t;
+    typedef unsigned short uint16_t;
+    typedef signed short int16_t;
+    typedef unsigned int uint32_t;
+    typedef signed int int32_t;
 };
 
 // BUG: how do I do a rename such that "SWIGTYPE_p_std__istream" can
@@ -83,6 +83,49 @@ namespace libpc
 class Dimension
 {
 public:
+   enum Field
+    {
+        Field_INVALID = 0,
+        Field_X,
+        Field_Y,
+        Field_Z,
+        Field_Intensity,
+        Field_ReturnNumber,
+        Field_NumberOfReturns,
+        Field_ScanDirectionFlag,
+        Field_EdgeOfFlightLine,
+        Field_Classification,
+        Field_ScanAngleRank,
+        Field_UserData,
+        Field_PointSourceId,
+        Field_GpsTime,
+        Field_Red,
+        Field_Green,
+        Field_Blue,
+        Field_WavePacketDescriptorIndex,
+        Field_WaveformDataOffset,
+        Field_ReturnPointWaveformLocation,
+        Field_WaveformXt,
+        Field_WaveformYt,
+        Field_WaveformZt,
+        // ...
+
+        // add more here
+        Field_User1 = 512,
+        Field_User2,
+        Field_User3,
+        Field_User4,
+        Field_User5,
+        Field_User6,
+        Field_User7,
+        Field_User8,
+        Field_User9,
+        // ...
+        // feel free to use your own int here
+
+        Field_LAST = 1023
+    };
+
     enum DataType
     {
         Int8,
@@ -98,31 +141,8 @@ public:
     };
 
 public:
-    Dimension(std::string const& name, DataType type);
-    inline std::string const& getName() const;
-    DataType getDataType() const;
+    Dimension(Field field, DataType type);
     static std::string getDataTypeName(DataType);
-    static DataType getDataTypeFromString(const std::string&);
-    static std::size_t getDataTypeSize(DataType);
-    static bool getDataTypeIsNumeric(DataType);
-    static bool getDataTypeIsSigned(DataType);
-    static bool getDataTypeIsInteger(DataType);
-    std::size_t getByteSize() const;
-    inline std::string getDescription() const;
-    inline void setDescription(std::string const& v);
-    inline bool isNumeric() const;
-    inline bool isSigned() const;
-    inline bool isInteger() const;
-    inline double getMinimum() const;
-    inline void setMinimum(double min);
-    inline double getMaximum() const;
-    inline void setMaximum(double max);
-    inline double getNumericScale() const;
-    inline void setNumericScale(double v);
-    inline double getNumericOffset() const;
-    inline void setNumericOffset(double v);
-    inline bool isFinitePrecision() const;
-    inline void isFinitePrecision(bool v);
 };
 
 
