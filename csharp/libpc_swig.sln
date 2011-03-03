@@ -18,6 +18,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libpc_swig_test", "libpc_sw
 		{D8860CDB-E45E-4CD4-B63C-EC08D7C21E13} = {D8860CDB-E45E-4CD4-B63C-EC08D7C21E13}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCView", "PCView\PCView.csproj", "{3F8E83B7-4FD7-4B2B-8A06-6102F1CC0D58}"
+	ProjectSection(ProjectDependencies) = postProject
+		{616B6A25-ECBF-4FCC-B0B2-DF8C26112753} = {616B6A25-ECBF-4FCC-B0B2-DF8C26112753}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -50,6 +55,14 @@ Global
 		{3F5B745F-81E8-41A6-BA7B-E997B8A46396}.Release|x64.Build.0 = Release|x64
 		{3F5B745F-81E8-41A6-BA7B-E997B8A46396}.Release|x86.ActiveCfg = Release|x86
 		{3F5B745F-81E8-41A6-BA7B-E997B8A46396}.Release|x86.Build.0 = Release|x86
+		{3F8E83B7-4FD7-4B2B-8A06-6102F1CC0D58}.Debug|x64.ActiveCfg = Debug|x64
+		{3F8E83B7-4FD7-4B2B-8A06-6102F1CC0D58}.Debug|x64.Build.0 = Debug|x64
+		{3F8E83B7-4FD7-4B2B-8A06-6102F1CC0D58}.Debug|x86.ActiveCfg = Debug|x86
+		{3F8E83B7-4FD7-4B2B-8A06-6102F1CC0D58}.Debug|x86.Build.0 = Debug|x86
+		{3F8E83B7-4FD7-4B2B-8A06-6102F1CC0D58}.Release|x64.ActiveCfg = Release|x64
+		{3F8E83B7-4FD7-4B2B-8A06-6102F1CC0D58}.Release|x64.Build.0 = Release|x64
+		{3F8E83B7-4FD7-4B2B-8A06-6102F1CC0D58}.Release|x86.ActiveCfg = Release|x86
+		{3F8E83B7-4FD7-4B2B-8A06-6102F1CC0D58}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
