@@ -62,6 +62,7 @@ add_subdirectory(drivers)
 set(LIBPC_CPP
     ${LIBPC_SOURCES}
   Bounds.cpp
+  chipper.cpp
   Color.cpp
   ColorFilter.cpp
   CropFilter.cpp

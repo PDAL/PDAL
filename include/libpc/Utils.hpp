@@ -39,6 +39,7 @@
 #include <string>
 #include <stdexcept>
 #include <cassert>
+#include <cmath>
 
 #include <boost/concept_check.hpp>
 #include <boost/cstdint.hpp>
@@ -134,6 +135,11 @@ public:
         char const* p = as_bytes(tmp);
         dest.write(p, num);
         assert(check_stream_state(dest));
+    }
+    
+    // From http://stackoverflow.com/questions/485525/round-for-float-in-c
+    static inline double sround(double r) {
+        return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
     }
 
 private:
