@@ -21,16 +21,20 @@
   <ItemGroup>
     <CustomBuild Include="libpc.i">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">swig.exe -c++ -csharp -outdir ../libpc_swig_cs -namespace Libpc -o libpc_wrap.cpp "%(FullPath)"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">swig.exe -c++ -csharp -outdir ../libpc_swig_cs -namespace Libpc -o libpc_wrap.cpp "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">del ..\libpc_swig_cs\*.cs
+swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../libpc_swig_cs -namespace Libpc -o libpc_wrap.cpp "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">del ..\libpc_swig_cs\*.cs
+swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../libpc_swig_cs -namespace Libpc -o libpc_wrap.cpp "%(FullPath)"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </AdditionalInputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">swig.exe -c++ -csharp -outdir ../libpc_swig_cs -namespace Libpc -o libpc_wrap.cpp "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">del ..\libpc_swig_cs\*.cs
+swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../libpc_swig_cs -namespace Libpc -o libpc_wrap.cpp "%(FullPath)"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </AdditionalInputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">swig.exe -c++ -csharp -outdir ../libpc_swig_cs -namespace Libpc -o libpc_wrap.cpp "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">del ..\libpc_swig_cs\*.cs
+swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../libpc_swig_cs -namespace Libpc -o libpc_wrap.cpp "%(FullPath)"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename)_wrap.cpp;%(Outputs)</Outputs>
