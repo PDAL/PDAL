@@ -41,13 +41,10 @@
 
 #include "header.hpp"
 
-#include <liblas/version.hpp>
-
 // fwd decls
 namespace liblas
 {
     class Reader;
-    // enum PointFormatName;
 }
 
 
@@ -93,7 +90,7 @@ private:
     double m_offsetZ;
     bool m_isCompressed;
     
-    liblas::PointFormatName m_pointFormat;
+    boost::int8_t m_pointFormatNumber; // should be an enum
     bool m_hasTimeData;
     bool m_hasColorData;
     bool m_hasWaveData;

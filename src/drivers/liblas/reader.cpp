@@ -56,7 +56,7 @@ LiblasReader::LiblasReader(std::istream& istream)
     , m_offsetY(0.0)
     , m_offsetZ(0.0)
     , m_isCompressed(false)
-    , m_pointFormat(liblas::ePointFormatUnknown)
+    , m_pointFormatNumber(-1)
     , m_hasTimeData(false)
     , m_hasColorData(false)
     , m_hasWaveData(false)
@@ -92,7 +92,7 @@ const std::string& LiblasReader::getName() const
 
 boost::int8_t LiblasReader::getPointFormatNumber() const
 {
-    return (boost::uint8_t)m_pointFormat;
+    return m_pointFormatNumber;
 }
 
 void LiblasReader::processExternalHeader()
@@ -118,33 +118,33 @@ void LiblasReader::processExternalHeader()
 
     m_isCompressed = externalHeader.Compressed();
 
-    m_pointFormat = externalHeader.GetDataFormatId();
+    m_pointFormatNumber = (boost::int8_t)externalHeader.GetDataFormatId();
 
     m_hasTimeData = m_hasColorData = m_hasWaveData = false;
-    switch (m_pointFormat)
+    switch (m_pointFormatNumber)
     {
-    case liblas::ePointFormat0:
+    case 0:
         break;
-    case liblas::ePointFormat1:
+    case 1:
         m_hasTimeData = true;
         break;
-    case liblas::ePointFormat2:
+    case 2:
         m_hasColorData = true;
         break;
-    case liblas::ePointFormat3:
+    case 3:
         m_hasTimeData = true;
         m_hasColorData = true;
         break;
-    case liblas::ePointFormat4:
+    case 4:
         m_hasTimeData = true;
         m_hasWaveData = true;
         break;
-    case liblas::ePointFormat5:
+    case 5:
         m_hasColorData = true;
         m_hasTimeData = true;
         m_hasWaveData = true;
         break;
-    case liblas::ePointFormatUnknown:
+    default:
         throw not_yet_implemented("Unknown point format encountered");
     }
 
