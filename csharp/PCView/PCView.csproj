@@ -106,8 +106,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="MouseRenderEngine.cs" />
-    <Page Include="Mouse.xaml">
+    <Compile Include="PointCloudRenderEngine.cs" />
+    <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -115,8 +115,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Mouse.xaml.cs">
-      <DependentUpon>Mouse.xaml</DependentUpon>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -126,7 +126,7 @@
     </Compile>
     <None Include="app.config" />
     <AppDesigner Include="Properties\" />
-    <None Include="Mouse.fx">
+    <None Include="pipeline.fx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

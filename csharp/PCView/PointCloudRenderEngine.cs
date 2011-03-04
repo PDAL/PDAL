@@ -40,22 +40,30 @@ namespace Flaxen.SlimDXControlLib.MouseExample
     using SlimDX.Direct3D10;
     using SlimDX.DXGI;
     using Buffer = SlimDX.Direct3D10.Buffer;
+    using System.Collections.Generic;
 
     /// <summary>
     /// This is an example rendering engine which demonstrates some basic mouse actions such as
     /// camera movement and mouse coordinate conversion.  Code is provided to demonstrate explicit
     /// handling of the world/view/perspective transforms.
     /// </summary>
-    public class MouseRenderEngine : SimpleRenderEngine
+    public class PointCloudRenderEngine : SimpleRenderEngine
     {
         private bool m_perspective = true;
+
         private DataStream m_sampleStream;
         private InputLayout m_sampleLayout;
         private Buffer m_sampleVertices;
-        private Effect m_sampleEffect;
+        
+        private DataStream m_boxStream;
+        private InputLayout m_boxLayout;
+        private Buffer m_boxVertices;
+
+        private Effect m_effect;
 
         private int m_pointSize = 32;  // 4*4 + 4*4
-        private Vector4[] m_points;
+        private Vector4[] m_samplePoints;
+        private Vector4[] m_boxPoints;
 
         private Matrix m_projectionTransform;
         private Matrix m_worldTransform;
@@ -66,12 +74,104 @@ namespace Flaxen.SlimDXControlLib.MouseExample
         /// Initializes a new instance of the MouseRenderEngine class.
         /// </summary>
         /// <param name="points">an array of points to be displayed</param>
-        public MouseRenderEngine(Vector4[] points)
+        public PointCloudRenderEngine()
         {
             CameraPosition = new Vector3(0.1f, 0.1f, -9.1f);
             TargetPosition = new Vector3(0, 0, 0);
+        }
 
-            m_points = points;
+
+        private Vector4[] CreateBox(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax)
+        {
+            float f = 0.3f;
+            Vector4 red = new Vector4(f, 0, 0, 1);
+            Vector4 green= new Vector4(0, f, 0, 1);
+            Vector4 blue  = new Vector4(0, 0, f, 1);
+
+            List<Vector4> points = new List<Vector4>();
+
+            // front square
+            {
+                points.Add(new Vector4(xmin, ymin, zmin, 1));
+                points.Add(red);
+
+                points.Add(new Vector4(xmax, ymin, zmin, 1));
+                points.Add(red);
+
+                points.Add(new Vector4(xmax, ymin, zmin, 1));
+                points.Add(green);
+
+                points.Add(new Vector4(xmax, ymax, zmin, 1));
+                points.Add(green);
+
+                points.Add(new Vector4(xmax, ymax, zmin, 1));
+                points.Add(red);
+
+                points.Add(new Vector4(xmin, ymax, zmin, 1));
+                points.Add(red);
+
+                points.Add(new Vector4(xmin, ymax, zmin, 1));
+                points.Add(green);
+
+                points.Add(new Vector4(xmin, ymin, zmin, 1));
+                points.Add(green);
+            }
+
+            // back square
+            {
+                points.Add(new Vector4(xmin, ymin, zmax, 1));
+                points.Add(red);
+
+                points.Add(new Vector4(xmax, ymin, zmax, 1));
+                points.Add(red);
+
+                points.Add(new Vector4(xmax, ymin, zmax, 1));
+                points.Add(green);
+
+                points.Add(new Vector4(xmax, ymax, zmax, 1));
+                points.Add(green);
+
+                points.Add(new Vector4(xmax, ymax, zmax, 1));
+                points.Add(red);
+
+                points.Add(new Vector4(xmin, ymax, zmax, 1));
+                points.Add(red);
+
+                points.Add(new Vector4(xmin, ymax, zmax, 1));
+                points.Add(green);
+
+                points.Add(new Vector4(xmin, ymin, zmax, 1));
+                points.Add(green);
+            }
+
+            // z-connectors
+            {
+                points.Add(new Vector4(xmin, ymin, zmin, 1));
+                points.Add(blue);
+
+                points.Add(new Vector4(xmin, ymin, zmax, 1));
+                points.Add(blue);
+
+                points.Add(new Vector4(xmin, ymax, zmin, 1));
+                points.Add(blue);
+
+                points.Add(new Vector4(xmin, ymax, zmax, 1));
+                points.Add(blue);
+
+                points.Add(new Vector4(xmax, ymin, zmin, 1));
+                points.Add(blue);
+
+                points.Add(new Vector4(xmax, ymin, zmax, 1));
+                points.Add(blue);
+
+                points.Add(new Vector4(xmax, ymax, zmin, 1));
+                points.Add(blue);
+
+                points.Add(new Vector4(xmax, ymax, zmax, 1));
+                points.Add(blue);
+            }
+
+            return points.ToArray();
         }
 
         /// <summary>
@@ -84,13 +184,6 @@ namespace Flaxen.SlimDXControlLib.MouseExample
         /// </summary>
         public Vector3 TargetPosition { get; set; }
 
-        private int NumPoints
-        {
-            get
-            {
-                return m_points.Length;
-            }
-        }
 
         /// <summary>
         /// Implements the logic to render the points.  Called by the SlimDXControl object.
@@ -104,20 +197,39 @@ namespace Flaxen.SlimDXControlLib.MouseExample
 
             Device.ClearRenderTargetView(SampleRenderView, new SlimDX.Color4(1.0f, 0.0f, 0.0f, 0.0f));
 
-            Device.InputAssembler.SetInputLayout(m_sampleLayout);
-            Device.InputAssembler.SetPrimitiveTopology(PrimitiveTopology.PointList);
-            Device.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(m_sampleVertices, m_pointSize, 0));
-
-            EffectTechnique technique = m_sampleEffect.GetTechniqueByIndex(0);
-            EffectPass pass = technique.GetPassByIndex(0);
-
             // we may have changed our camera or target positions, so rerun the transforms
             SetTransforms();
 
-            for (int i = 0; i < technique.Description.PassCount; ++i)
             {
-                pass.Apply();
-                Device.Draw(NumPoints, 0);
+                Device.InputAssembler.SetInputLayout(m_sampleLayout);
+                Device.InputAssembler.SetPrimitiveTopology(PrimitiveTopology.PointList);
+                Device.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(m_sampleVertices, m_pointSize, 0));
+
+                EffectTechnique technique = m_effect.GetTechniqueByIndex(0);
+                EffectPass pass = technique.GetPassByIndex(0);
+
+                for (int i = 0; i < technique.Description.PassCount; ++i)
+                {
+                    pass.Apply();
+                    Device.Draw(m_samplePoints.Length, 0);
+                }
+            }
+
+            Device.Flush();
+
+            {
+                Device.InputAssembler.SetInputLayout(m_boxLayout);
+                Device.InputAssembler.SetPrimitiveTopology(PrimitiveTopology.LineList);
+                Device.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(m_boxVertices, m_pointSize, 0));
+
+                EffectTechnique technique = m_effect.GetTechniqueByIndex(0);
+                EffectPass pass = technique.GetPassByIndex(0);
+
+                for (int i = 0; i < technique.Description.PassCount; ++i)
+                {
+                    pass.Apply();
+                    Device.Draw(m_boxPoints.Length, 0);
+                }
             }
 
             Device.Flush();
@@ -178,7 +290,7 @@ namespace Flaxen.SlimDXControlLib.MouseExample
 
             try
             {
-                m_sampleEffect = Effect.FromFile(Device, "Mouse.fx", "fx_4_0", ShaderFlags.None, EffectFlags.None, null, null);
+                m_effect = Effect.FromFile(Device, "pipeline.fx", "fx_4_0", ShaderFlags.None, EffectFlags.None, null, null);
             }
             catch (SlimDX.CompilationException)
             {
@@ -186,7 +298,45 @@ namespace Flaxen.SlimDXControlLib.MouseExample
                 throw;
             }
 
-            EffectTechnique technique = m_sampleEffect.GetTechniqueByIndex(0);
+            Device.Flush();
+
+            return;
+        }
+
+        public void SetPoints(Vector4[] points)
+        {
+            m_samplePoints = points;
+
+            float xmin = m_samplePoints[0].X;
+            float xmax = m_samplePoints[0].X;
+            float ymin = m_samplePoints[0].Y;
+            float ymax = m_samplePoints[0].Y;
+            float zmin = m_samplePoints[0].Z;
+            float zmax = m_samplePoints[0].Z;
+
+            for (int i=2; i<m_samplePoints.Length; i+=2)
+            {
+                xmin = Math.Min(xmin, m_samplePoints[i].X);
+                xmax = Math.Max(xmax, m_samplePoints[i].X);
+                ymin = Math.Min(ymin, m_samplePoints[i].Y);
+                ymax = Math.Max(ymax, m_samplePoints[i].Y);
+                zmin = Math.Min(zmin, m_samplePoints[i].Z);
+                zmax = Math.Max(zmax, m_samplePoints[i].Z);
+            }
+
+            m_boxPoints = CreateBox(xmin, xmax, ymin, ymax, zmin, zmax);
+
+            SetupSamples();
+            SetupBox();
+
+            Device.Flush();
+
+            return;
+        }
+
+        private void SetupSamples()
+        {
+            EffectTechnique technique = m_effect.GetTechniqueByIndex(0);
             EffectPass pass = technique.GetPassByIndex(0);
 
             InputElement[] inputElements = new[] 
@@ -196,9 +346,9 @@ namespace Flaxen.SlimDXControlLib.MouseExample
                 };
             m_sampleLayout = new InputLayout(Device, pass.Description.Signature, inputElements);
 
-            m_sampleStream = new DataStream(NumPoints * m_pointSize, true, true);
+            m_sampleStream = new DataStream(m_samplePoints.Length * m_pointSize, true, true);
 
-            m_sampleStream.WriteRange(m_points);
+            m_sampleStream.WriteRange(m_samplePoints);
             m_sampleStream.Position = 0;
 
             BufferDescription bufferDesc = new BufferDescription()
@@ -206,13 +356,38 @@ namespace Flaxen.SlimDXControlLib.MouseExample
                 BindFlags = BindFlags.VertexBuffer,
                 CpuAccessFlags = CpuAccessFlags.None,
                 OptionFlags = ResourceOptionFlags.None,
-                SizeInBytes = NumPoints * m_pointSize,
+                SizeInBytes = m_samplePoints.Length * m_pointSize,
                 Usage = ResourceUsage.Default
             };
             m_sampleVertices = new Buffer(Device, m_sampleStream, bufferDesc);
-            Device.Flush();
+        }
 
-            return;
+        private void SetupBox()
+        {
+            EffectTechnique technique = m_effect.GetTechniqueByIndex(0);
+            EffectPass pass = technique.GetPassByIndex(0);
+
+            InputElement[] inputElements = new[] 
+                {
+                    new InputElement("POSITION", 0, Format.R32G32B32A32_Float, 0, 0),
+                    new InputElement("COLOR", 0, Format.R32G32B32A32_Float, 16, 0) 
+                };
+            m_boxLayout = new InputLayout(Device, pass.Description.Signature, inputElements);
+
+            m_boxStream = new DataStream(m_boxPoints.Length * m_pointSize, true, true);
+
+            m_boxStream.WriteRange(m_boxPoints);
+            m_boxStream.Position = 0;
+
+            BufferDescription bufferDesc = new BufferDescription()
+            {
+                BindFlags = BindFlags.VertexBuffer,
+                CpuAccessFlags = CpuAccessFlags.None,
+                OptionFlags = ResourceOptionFlags.None,
+                SizeInBytes = m_boxPoints.Length * m_pointSize,
+                Usage = ResourceUsage.Default
+            };
+            m_boxVertices = new Buffer(Device, m_boxStream, bufferDesc);
         }
 
         /// <summary>
@@ -220,28 +395,50 @@ namespace Flaxen.SlimDXControlLib.MouseExample
         /// </summary>
         protected override void DisposeManaged()
         {
-            if (m_sampleVertices != null)
             {
-                m_sampleVertices.Dispose();
-                m_sampleVertices = null;
+                if (m_sampleVertices != null)
+                {
+                    m_sampleVertices.Dispose();
+                    m_sampleVertices = null;
+                }
+
+                if (m_sampleLayout != null)
+                {
+                    m_sampleLayout.Dispose();
+                    m_sampleLayout = null;
+                }
+
+                if (m_sampleStream != null)
+                {
+                    m_sampleStream.Dispose();
+                    m_sampleStream = null;
+                }
             }
 
-            if (m_sampleLayout != null)
             {
-                m_sampleLayout.Dispose();
-                m_sampleLayout = null;
+                if (m_boxVertices != null)
+                {
+                    m_boxVertices.Dispose();
+                    m_boxVertices = null;
+                }
+
+                if (m_boxLayout != null)
+                {
+                    m_boxLayout.Dispose();
+                    m_boxLayout = null;
+                }
+
+                if (m_boxStream != null)
+                {
+                    m_boxStream.Dispose();
+                    m_boxStream = null;
+                }
             }
 
-            if (m_sampleEffect != null)
+            if (m_effect != null)
             {
-                m_sampleEffect.Dispose();
-                m_sampleEffect = null;
-            }
-
-            if (m_sampleStream != null)
-            {
-                m_sampleStream.Dispose();
-                m_sampleStream = null;
+                m_effect.Dispose();
+                m_effect = null;
             }
 
             if (SharedTexture != null)
@@ -287,7 +484,7 @@ namespace Flaxen.SlimDXControlLib.MouseExample
 
             // compute the summary transform, and push it into the gpu
             SlimDX.Matrix wvp = m_worldTransform * view * m_projectionTransform;
-            EffectMatrixVariable wvpTransform = m_sampleEffect.GetVariableByName("gWVP").AsMatrix();
+            EffectMatrixVariable wvpTransform = m_effect.GetVariableByName("gWVP").AsMatrix();
             wvpTransform.SetMatrix(wvp);
 
             return;

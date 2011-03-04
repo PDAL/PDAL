@@ -44,9 +44,9 @@ namespace Flaxen.SlimDXControlLib.MouseExample
     /// <summary>
     /// Implements the MouseExample test.
     /// </summary>
-    public partial class Mouse : Window, INotifyPropertyChanged
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        private MouseRenderEngine m_renderEngine;
+        private PointCloudRenderEngine m_renderEngine;
         private Point m_downPoint;
         private bool m_isMoving = false;
         private string m_positionString;
@@ -54,12 +54,11 @@ namespace Flaxen.SlimDXControlLib.MouseExample
         /// <summary>
         /// Initializes a new instance of the Mouse class.
         /// </summary>
-        public Mouse()
+        public MainWindow()
         {
             InitializeComponent();
 
-            Vector4[] points = CreateAxes();
-            m_renderEngine = new MouseRenderEngine(points);
+            m_renderEngine = new PointCloudRenderEngine();
             x_contentControl.RegisterRenderer(m_renderEngine);
 
             this.MouseMove += new MouseEventHandler(Mouse_MouseMove);
@@ -70,6 +69,9 @@ namespace Flaxen.SlimDXControlLib.MouseExample
             PositionString = string.Empty;
 
             this.DataContext = this;
+
+            Vector4[] points = CreateData();
+            m_renderEngine.SetPoints(points);
 
             return;
         }
@@ -153,7 +155,7 @@ namespace Flaxen.SlimDXControlLib.MouseExample
         }
         #endregion
 
-        private Vector4[] CreateAxes()
+        private Vector4[] CreateData()
         {
             Vector4 red = new Vector4(1, 0, 0, 1);
             Vector4 green = new Vector4(0, 1, 0, 1);
@@ -161,30 +163,19 @@ namespace Flaxen.SlimDXControlLib.MouseExample
 
             List<Vector4> points = new List<Vector4>();
 
-            // points on a line 0..100
-            for (int p = 0; p < 100; p++)
+            System.Random rand = new System.Random();
+
+            for (int p = 0; p < 1000; p++)
             {
-                points.Add(new Vector4(p, 0, 0, 1));
-                points.Add(red);
+                float x = (float)rand.NextDouble() * 100;
+                float y = (float)rand.NextDouble() * 10 + 45;
+                float z = (float)rand.NextDouble() * 100;
+                points.Add(new Vector4(x, y, z, 1));
 
-                points.Add(new Vector4(0, p, 0, 1));
-                points.Add(green);
-
-                points.Add(new Vector4(0, 0, p, 1));
-                points.Add(blue);
-            }
-
-            // points on mark at end of line
-            for (int p = 0; p < 10; p++)
-            {
-                points.Add(new Vector4(100, p, 0, 1));
-                points.Add(red);
-
-                points.Add(new Vector4(p, 100, 0, 1));
-                points.Add(green);
-
-                points.Add(new Vector4(p, 0, 100, 1));
-                points.Add(blue);
+                float r = (float)rand.NextDouble();
+                float g = (float)rand.NextDouble();
+                float b = (float)rand.NextDouble();
+                points.Add(new Vector4(r, g, b, 1));
             }
 
             return points.ToArray();
