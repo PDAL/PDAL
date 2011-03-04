@@ -251,11 +251,43 @@ public:
 
 public:
     Dimension(Field field, DataType type);
+
+    std::string const& getFieldName() const;
+    Field getField() const;
+    DataType getDataType() const;
     static std::string getDataTypeName(DataType);
+    static DataType getDataTypeFromString(const std::string&);
+    static std::size_t getDataTypeSize(DataType);
+    static bool getDataTypeIsNumeric(DataType);
+    static bool getDataTypeIsSigned(DataType);
+    static bool getDataTypeIsInteger(DataType);
+    static std::string const& getFieldName(Field);
+    std::size_t getByteSize() const;
+    inline std::string getDescription() const;
+    inline void setDescription(std::string const& v);
+    inline bool isNumeric() const;
+    inline bool isSigned() const;
+    inline bool isInteger() const;
+    inline double getMinimum() const;
+    inline void setMinimum(double min);
+    inline double getMaximum() const;
+    inline void setMaximum(double max);
+    inline double getNumericScale() const;
+    inline void setNumericScale(double v);
+    inline double getNumericOffset() const;
+    inline void setNumericOffset(double v);
+
+    template<class T>
+    double getNumericValue(T x) const;
+
+    inline bool isFinitePrecision() const;
+    inline void isFinitePrecision(bool v);
 };
 
-//%rename(Dimension_vector) std::vector<Dimension>;
-//%template(Dimension_vector) std::vector<Dimension>;
+%extend Dimension
+{
+    %template(getNumericValueInt32) getNumericValue<boost::int32_t>;
+};
 
 
 class DimensionLayout
@@ -305,6 +337,11 @@ public:
     void copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData, std::size_t numPoints);
 };
 
+%extend PointData
+{
+    %template(getFieldUint32) getField<boost::uint32_t>;
+    %template(getFieldInt32) getField<boost::int32_t>;
+};
 
 
 
