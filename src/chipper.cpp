@@ -128,7 +128,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     for (boost::uint32_t i = 0; i < chunks; i++)
     {
         PointData buffer(schema, m_threshold);
-        m_stage.readPoints(buffer);
+        m_stage.read(buffer);
  
         for (boost::uint32_t j = 0; j < m_threshold; j++)
         {

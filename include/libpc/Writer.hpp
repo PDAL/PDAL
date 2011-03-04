@@ -67,7 +67,7 @@ protected:
     virtual void writeEnd() = 0;
 
     // not generally used in Writer objects
-    virtual boost::uint32_t readPoints(PointData&);
+    virtual boost::uint32_t readBuffer(PointData&);
 
     // these two are valid for use after writeBegin has been called
     std::size_t m_actualNumPointsWritten;

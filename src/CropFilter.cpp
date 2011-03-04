@@ -56,9 +56,9 @@ const std::string& CropFilter::getName() const
 }
 
 
-boost::uint32_t CropFilter::readPoints(PointData& data)
+boost::uint32_t CropFilter::readBuffer(PointData& data)
 {
-    m_prevStage.readPoints(data);
+    m_prevStage.read(data);
 
     boost::uint32_t numPoints = data.getNumPoints();
 

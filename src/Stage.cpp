@@ -73,4 +73,30 @@ void Stage::setHeader(Header* header)
 }
 
 
+boost::uint32_t Stage::read(PointData& data)
+{
+    boost::uint32_t numPointsToRead = data.getNumPoints();
+    readBegin(numPointsToRead);
+
+    // BUG: need to turn this into a set of chunked reads
+    boost::uint32_t numPointsRead = readBuffer(data);
+
+    readEnd(numPointsRead);
+
+    return numPointsRead;
+}
+
+
+boost::uint64_t Stage::getNumPoints() const
+{
+    return getHeader().getNumPoints();
+}
+
+
+bool Stage::atEnd() const
+{
+    return getCurrentPointIndex() >= getNumPoints();
+}
+
+
 } // namespace libpc

@@ -34,27 +34,44 @@
 
 #include <cassert>
 #include "libpc/MosaicFilter.hpp"
+#include "libpc/exceptions.hpp"
 
 namespace libpc
 {
 
-// BUG: will generalize to more than 2 inputs
-MosaicFilter::MosaicFilter(Stage& prevStage, Stage& prevStage2)
-    : Filter(prevStage),
-      m_prevStage2(prevStage2)
-{
-    const Header& prevHeader1 =  m_prevStage.getHeader();
-    const Header& prevHeader2 =  m_prevStage2.getHeader();
 
-    assert(prevHeader1.getSchema() == prevHeader2.getSchema());
+MosaicFilter::MosaicFilter(Stage& prevStage, std::vector<Stage*> prevStages)
+    : Filter(prevStage)
+{
+    m_prevStages.push_back(&prevStage);
+
+    const Header& prevHeader =  m_prevStage.getHeader();
+
+    boost::uint64_t totalPoints = 0;
+
+    Bounds<double> bigbox(prevHeader.getBounds());
+
+    for (size_t i=0; i<prevStages.size(); i++)
+    {
+        Stage* stage = prevStages[i];
+        if (stage==NULL)
+        {
+            throw libpc_error("bad stage passed to MosaicFilter");
+        }
+        const Header& header = stage->getHeader();
+        if (prevHeader.getSchema() != header.getSchema())
+        {
+            throw libpc_error("impedance mismatch in MosaicFilter");
+        }
+
+        bigbox.grow(header.getBounds());
+        totalPoints += header.getNumPoints();
+        m_prevStages.push_back(stage);
+    }
 
     Header& thisHeader = getHeader();
-
-    Bounds<double> bigbox(prevHeader1.getBounds());
-    bigbox.grow(prevHeader2.getBounds());
     thisHeader.setBounds(bigbox);
-
-    thisHeader.setNumPoints(prevHeader1.getNumPoints() + prevHeader2.getNumPoints());
+    thisHeader.setNumPoints(totalPoints);
 
     return;
 }
@@ -67,57 +84,65 @@ const std::string& MosaicFilter::getName() const
 }
 
 
-boost::uint32_t MosaicFilter::readPoints(PointData& destData)
+boost::uint32_t MosaicFilter::readBuffer(PointData& destData)
 {
-    boost::uint32_t numPoints = destData.getNumPoints();
+    // BUG: We know that the two prev stage schemas are compatible, 
+    // but we can't be sure the have the same bitfield layouts as 
+    // the buffer we've been given.  We could handle it manually if 
+    // they differ, but that would be a pain for now.  (This affects
+    // all filters, I guess.)
 
     // BUG: this doesn't account for isValid()
 
-    // BUG:
-    // We're given a buffer of size N to fill, but we have two sources
-    // feeding us -- so we do a read of N/2 points from each one
+    boost::uint32_t totalNumPointsToRead = destData.getNumPoints();
+    boost::uint32_t totalNumPointsRead = 0;
 
-    assert(numPoints % 2 == 0); // yeah right
-
-    PointData srcData1(destData.getSchemaLayout(), numPoints / 2);
-    PointData srcData2(destData.getSchemaLayout(), numPoints / 2);
-
-    m_prevStage.readPoints(srcData1);
-
-    m_prevStage2.readPoints(srcData2);
+    boost::uint64_t currentPointIndex = getCurrentPointIndex();
 
     int destPointIndex = 0;
+    boost::uint64_t stageStartIndex = 0;
 
-    for (boost::uint32_t srcPointIndex=0; srcPointIndex<numPoints/2; srcPointIndex++)
+    // for each stage, we read as many points as we can
+    for (size_t i=0; i<m_prevStages.size(); i++)
     {
-        if (srcData1.isValid(srcPointIndex))
+        Stage& stage = *(m_prevStages[i]);
+
+        const boost::uint64_t stageStopIndex = stageStartIndex + stage.getNumPoints();
+
+        if (currentPointIndex < stageStopIndex)
         {
-            destData.copyPointFast(destPointIndex, srcPointIndex, srcData1);
-            destData.setValid(destPointIndex, true);
+            // we need to read some points from this stage
+
+            boost::uint32_t pointsAvail = (boost::uint32_t)(stageStopIndex - currentPointIndex);
+            boost::uint32_t pointsToGet = std::min(pointsAvail, totalNumPointsToRead);
+
+            PointData srcData(destData.getSchemaLayout(), pointsToGet);
+            boost::uint32_t pointsGotten = stage.read(srcData);
+
+            for (boost::uint32_t idx=0; idx<pointsGotten; idx++)
+            {
+                if (srcData.isValid(idx))
+                {
+                    destData.copyPointFast(destPointIndex, idx, srcData);
+                    destData.setValid(destPointIndex, true);
+                }
+                else
+                {
+                    destData.setValid(destPointIndex, false);
+                }
+                destPointIndex++;
+            }
+
+            totalNumPointsRead += pointsGotten;
+            currentPointIndex += pointsGotten;
         }
-        else
-        {
-            destData.setValid(destPointIndex, false);
-        }
-        destPointIndex++;
-    }
-    for (boost::uint32_t srcPointIndex=0; srcPointIndex<numPoints/2; srcPointIndex++)
-    {
-        if (srcData2.isValid(srcPointIndex))
-        {
-            destData.copyPointFast(destPointIndex, srcPointIndex, srcData2);
-            destData.setValid(destPointIndex, true);
-        }
-        else
-        {
-            destData.setValid(destPointIndex, false);
-        }
-        destPointIndex++;
+
+        stageStartIndex += stage.getNumPoints();
+
+        if (totalNumPointsRead == totalNumPointsToRead) break;
     }
 
-    // BUG: when we're done, we will have gotten only half the data from our sources...!
-
-    return numPoints;
+    return totalNumPointsRead;
 }
 
 

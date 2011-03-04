@@ -62,20 +62,17 @@ public:
 
     const std::string& getName() const;
 
-    virtual boost::uint32_t readPoints(PointData&);
-
     // default is to reset() and then read N points manually
     // override this if you can
     virtual void seekToPoint(boost::uint64_t pointNum);
-
-    // default just resets the point index
-    virtual void reset();
 
     const LiblasHeader& getLiblasHeader() const;
 
     boost::int8_t getPointFormatNumber() const;
 
 private:
+    virtual boost::uint32_t readBuffer(PointData&);
+
     LiblasHeader& getLiblasHeader();
     void setLiblasHeader(const LiblasHeader&);
     void processExternalHeader();

@@ -60,9 +60,9 @@ const std::string& ColorFilter::getName() const
 }
 
 
-boost::uint32_t ColorFilter::readPoints(PointData& data)
+boost::uint32_t ColorFilter::readBuffer(PointData& data)
 {
-    m_prevStage.readPoints(data);
+    m_prevStage.read(data);
 
     boost::uint32_t numPoints = data.getNumPoints();
 

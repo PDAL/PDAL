@@ -46,20 +46,21 @@ class LIBPC_DLL Reader : public Stage
 public:
     Reader();
 
+    virtual void readBegin(boost::uint32_t numPointsToRead);
+
+    virtual void readEnd(boost::uint32_t numPointsRead);
+
     // default is to reset() and then read N points manually
     // override this if you can
     virtual void seekToPoint(boost::uint64_t pointNum);
 
-    // default just resets the point index
-    virtual void reset();
-
-    bool atEnd() const;
+    virtual boost::uint64_t getCurrentPointIndex() const;
 
 protected:
-    boost::uint64_t m_currentPointIndex;
-    boost::uint64_t m_numPointsRead;
+    void setCurrentPointIndex(boost::uint64_t);
 
 private:
+    boost::uint64_t m_currentPointIndex;
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented

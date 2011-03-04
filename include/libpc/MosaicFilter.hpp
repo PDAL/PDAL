@@ -46,16 +46,16 @@ namespace libpc
 class LIBPC_DLL MosaicFilter : public Filter
 {
 public:
-    MosaicFilter(Stage& prevStage, Stage& prevStage2);
+    MosaicFilter(Stage& prevStage, std::vector<Stage*> prevStages);
     
     const std::string& getName() const;
-
-    boost::uint32_t readPoints(PointData&);
 
     // BUG: what does seetToPoint() do for a mosaic filter?
 
 private:
-    Stage& m_prevStage2;
+    boost::uint32_t readBuffer(PointData&);
+
+    std::vector<Stage*> m_prevStages;
 
     MosaicFilter& operator=(const MosaicFilter&); // not implemented
     MosaicFilter(const MosaicFilter&); // not implemented

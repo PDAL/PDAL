@@ -68,11 +68,11 @@ public:
 
     const std::string& getName() const;
 
-    boost::uint32_t readPoints(PointData& data);
-
     void seekToPoint(boost::uint64_t);
 
 private:
+    boost::uint32_t readBuffer(PointData& data);
+
     Mode m_mode;
 
     FauxReader& operator=(const FauxReader&); // not implemented

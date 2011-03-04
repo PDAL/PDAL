@@ -47,21 +47,20 @@ class LIBPC_DLL Filter : public Stage
 public:
     Filter(Stage& prevStage);
 
-    virtual boost::uint32_t readPoints(PointData&) = 0;
+    // default behaviour for filters is just to call readBegin() on the previous stage
+    virtual void readBegin(boost::uint32_t numPointsToRead);
+
+    // default behaviour for filters is just to call readEnd() on the previous stage
+    virtual void readEnd(boost::uint32_t numPointsRead);
 
     // advance (or retreat) to the Nth point in the file (absolute, 
     // default behaviour for filters is just to call seek on the previous stage
     virtual void seekToPoint(boost::uint64_t pointNum);
 
-    // reset the filter
-    // default behaviour for filters is just to call reset on the previous stage
-    virtual void reset();
-
-    // default behaviour for filters is just to call reset on the previous stage
-    virtual bool atEnd() const;
+    // default behaviour for filters is just to call the previous stage
+    virtual boost::uint64_t getCurrentPointIndex() const;
 
 protected:
-    int m_lastPointRead;
     Stage& m_prevStage;
 
 private:

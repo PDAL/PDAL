@@ -95,7 +95,7 @@ const std::string& FauxReader::getName() const
 }
 
 
-boost::uint32_t FauxReader::readPoints(PointData& data)
+boost::uint32_t FauxReader::readBuffer(PointData& data)
 {
     if (data.getSchemaLayout().getSchema().getDimensions().size() != 4)
         throw not_yet_implemented("need to add ability to read from arbitrary fields");
@@ -103,7 +103,7 @@ boost::uint32_t FauxReader::readPoints(PointData& data)
     // make up some data and put it into the buffer
 
     const boost::uint32_t numPoints = data.getNumPoints();
-    assert(m_currentPointIndex + numPoints <= getHeader().getNumPoints());
+    assert(getCurrentPointIndex() + numPoints <= getHeader().getNumPoints());
 
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
@@ -118,12 +118,12 @@ boost::uint32_t FauxReader::readPoints(PointData& data)
     const double minZ = dims[2].getMinimum();
     const double maxZ = dims[2].getMaximum();
 
-    const std::size_t offsetT = schema.getDimensionIndex(Dimension::Field_GpsTime);
-    const std::size_t offsetX = schema.getDimensionIndex(Dimension::Field_X);
-    const std::size_t offsetY = schema.getDimensionIndex(Dimension::Field_Y);
-    const std::size_t offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
+    const int offsetT = schema.getDimensionIndex(Dimension::Field_GpsTime);
+    const int offsetX = schema.getDimensionIndex(Dimension::Field_X);
+    const int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
+    const int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
 
-    boost::uint64_t time = m_currentPointIndex;
+    boost::uint64_t time = getCurrentPointIndex();
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
@@ -153,16 +153,13 @@ boost::uint32_t FauxReader::readPoints(PointData& data)
         ++time;
     }
 
-    m_currentPointIndex += numPoints;
-    m_numPointsRead += numPoints;
-
     return numPoints;
 }
 
 
 void FauxReader::seekToPoint(boost::uint64_t pointNumber)
 {
-    m_currentPointIndex = pointNumber;
+    setCurrentPointIndex(pointNumber);
 }
 
 

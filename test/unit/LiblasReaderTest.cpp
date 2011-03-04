@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     PointData data(layout, 3);
     
     {
-        boost::uint32_t numRead = reader.readPoints(data);
+        boost::uint32_t numRead = reader.read(data);
         BOOST_CHECK(numRead == 3);
 
         checkPointXYZ(data, 0, schema, 637012.240000, 849028.310000, 431.660000);
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     // Can we seek it? Yes, we can!
     reader.seekToPoint(100);
     {
-        boost::uint32_t numRead = reader.readPoints(data);
+        boost::uint32_t numRead = reader.read(data);
         BOOST_CHECK(numRead == 3);
 
         checkPointXYZ(data, 0, schema, 636661.060000, 849854.130000, 424.900000);
@@ -97,10 +97,10 @@ BOOST_AUTO_TEST_CASE(test_1)
         checkPointXYZ(data, 2, schema, 636554.630000, 850040.030000, 499.110000);
     }
 
-    // Can we reset it? Yes, we can!
-    reader.reset();
+    // Can we seek to beginning? Yes, we can!
+    reader.seekToPoint(0);
     {
-        boost::uint32_t numRead = reader.readPoints(data);
+        boost::uint32_t numRead = reader.read(data);
         BOOST_CHECK(numRead == 3);
 
         checkPointXYZ(data, 0, schema, 637012.240000, 849028.310000, 431.660000);

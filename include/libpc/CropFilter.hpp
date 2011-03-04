@@ -51,9 +51,9 @@ public:
 
     const std::string& getName() const;
 
-    boost::uint32_t readPoints(PointData&);
-
 private:
+    boost::uint32_t readBuffer(PointData&);
+
     Bounds<double> m_bounds;
 
     CropFilter& operator=(const CropFilter&); // not implemented

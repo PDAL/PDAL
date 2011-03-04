@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_constant)
 
     PointData data(layout, 750);
     
-    boost::uint32_t numRead = reader.readPoints(data);
+    boost::uint32_t numRead = reader.read(data);
 
     BOOST_CHECK(numRead == 750);
 
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 
     PointData data(layout, 750);
     
-    boost::uint32_t numRead = reader.readPoints(data);
+    boost::uint32_t numRead = reader.read(data);
 
     BOOST_CHECK(numRead == 750);
 

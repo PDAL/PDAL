@@ -18,6 +18,7 @@ SET(LIBPC_UNIT_TEST_SRC
 	FauxWriterTest.cpp
 	LiblasReaderTest.cpp
 	LiblasWriterTest.cpp
+	MosaicFilterTest.cpp
 	PointDataTest.cpp
 	RangeTest.cpp
 	SchemaTest.cpp

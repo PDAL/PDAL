@@ -40,7 +40,6 @@ namespace libpc
 
 Reader::Reader()
     : m_currentPointIndex(0)
-    , m_numPointsRead(0)
 {
     return;
 }
@@ -48,28 +47,47 @@ Reader::Reader()
 
 void Reader::seekToPoint(boost::uint64_t pointNum)
 {
-    reset();
+    if (pointNum == getCurrentPointIndex())
+    {
+        return;
+    }
 
-    boost::uint32_t chunk = (boost::uint32_t)pointNum; // BUG: this needs to be done in blocks if pointNum is large
+    setCurrentPointIndex(0);
+    
+    // we read the points only to get to the right place -- we
+    // will just drop the points on the floor and return
+    boost::uint32_t pointNumX = (boost::uint32_t)pointNum; // BUG
+    assert(pointNumX == pointNum);
+    PointData pointData(getHeader().getSchema(), pointNumX);
+    read(pointData);
 
-    PointData pointData(getHeader().getSchema(), chunk);
-    readPoints(pointData);
-
-    // just drop the points on the floor and return
     return;
 }
 
 
-void Reader::reset()
+void Reader::setCurrentPointIndex(boost::uint64_t index)
 {
-    m_currentPointIndex = 0;
-    m_numPointsRead = 0;
+    m_currentPointIndex = index;
 }
 
 
-bool Reader::atEnd() const
+boost::uint64_t Reader::getCurrentPointIndex() const
 {
-    return (m_currentPointIndex >= getHeader().getNumPoints());
+    return m_currentPointIndex;
+}
+
+
+void Reader::readBegin(boost::uint32_t /*numPointsToRead*/)
+{
+    return;
+}
+
+
+void Reader::readEnd(boost::uint32_t numPointsRead)
+{
+    setCurrentPointIndex(getCurrentPointIndex() + numPointsRead);
+
+    return;
 }
 
 

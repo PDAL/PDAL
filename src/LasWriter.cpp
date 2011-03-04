@@ -189,12 +189,12 @@ boost::uint32_t LasWriter::writeBuffer(const PointData& pointData)
         else if (pointFormat == LasHeader::ePointFormat1)
         {
             throw;
-            Utils::write_n(m_ostream, buf, LasHeader::ePointSize1);
+            //Utils::write_n(m_ostream, buf, LasHeader::ePointSize1);
         }
         else if (pointFormat == LasHeader::ePointFormat2)
         {
             throw;
-            Utils::write_n(m_ostream, buf, LasHeader::ePointSize2);
+            //Utils::write_n(m_ostream, buf, LasHeader::ePointSize2);
         }
         else if (pointFormat == LasHeader::ePointFormat3)
         {

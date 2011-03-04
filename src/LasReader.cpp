@@ -75,26 +75,20 @@ LasHeader& LasReader::getLasHeader()
 
 void LasReader::seekToPoint(boost::uint64_t pointNum)
 {
-    reset();
+    setCurrentPointIndex(0);
 
     boost::uint32_t chunk = (boost::uint32_t)pointNum; // BUG: this needs to be done in blocks if pointNum is large
 
+    // BUG: we can move the stream a constant amount
     PointData pointData(getHeader().getSchema(), chunk);
-    readPoints(pointData);
+    read(pointData);
 
     // just drop the points on the floor and return
     return;
 }
 
 
-void LasReader::reset()
-{
-    m_currentPointIndex = 0;
-    m_numPointsRead = 0;
-}
-
-
-boost::uint32_t LasReader::readPoints(PointData& pointData)
+boost::uint32_t LasReader::readBuffer(PointData& pointData)
 {
     boost::uint32_t numPoints = pointData.getNumPoints();
 

@@ -54,15 +54,23 @@ void Filter::seekToPoint(boost::uint64_t pointNum)
 }
 
 
-void Filter::reset()
+void Filter::readBegin(boost::uint32_t numPointsToRead)
 {
-    m_prevStage.reset();
+    m_prevStage.readBegin(numPointsToRead);
+    return;
 }
 
 
-bool Filter::atEnd() const
+void Filter::readEnd(boost::uint32_t numPointsRead)
 {
-    return m_prevStage.atEnd();
+    m_prevStage.readEnd(numPointsRead);
+    return;
+}
+
+
+boost::uint64_t Filter::getCurrentPointIndex() const
+{
+    return m_prevStage.getCurrentPointIndex();
 }
 
 

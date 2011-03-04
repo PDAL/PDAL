@@ -79,7 +79,7 @@ boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
 
         PointData buffer(m_prevStage.getHeader().getSchema(), numPointsToReadThisChunk);
 
-        boost::uint32_t numPointsReadThisChunk = m_prevStage.readPoints(buffer);
+        boost::uint32_t numPointsReadThisChunk = m_prevStage.read(buffer);
         assert(numPointsReadThisChunk <= numPointsToReadThisChunk);
 
         boost::uint32_t numPointsWrittenThisChunk = writeBuffer(buffer);
@@ -101,9 +101,9 @@ boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
 }
 
 
-boost::uint32_t Writer::readPoints(PointData&)
+boost::uint32_t Writer::readBuffer(PointData&)
 {
-    throw libpc_error("readPoints not supported for Writer objects");
+    throw libpc_error("readBuffer not supported for Writer objects");
 }
 
 
