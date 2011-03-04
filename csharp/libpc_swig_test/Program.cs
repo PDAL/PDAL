@@ -48,6 +48,8 @@ namespace libpc_swig_test
       static int Main(string[] args)
       {
          TestDimension a = new TestDimension();
+         
+         TestLiblasReader r = new TestLiblasReader();
 
          return 0;
       }

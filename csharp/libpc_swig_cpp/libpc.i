@@ -43,6 +43,11 @@
 %{
 #include "libpc/libpc_config.hpp"
 #include "libpc/Dimension.hpp"
+#include "libpc/Header.hpp"
+#include "libpc/Schema.hpp"
+#include "libpc/Reader.hpp"
+#include "libpc/../../src/drivers/liblas/reader.hpp"
+#include "libpc/../../src/drivers/liblas/header.hpp"
 %}
 
 %include "typemaps.i"
@@ -72,6 +77,8 @@ namespace boost
     typedef signed short int16_t;
     typedef unsigned int uint32_t;
     typedef signed int int32_t;
+    typedef unsigned long long uint64_t;
+    typedef signed long long int64_t;
 };
 
 // BUG: how do I do a rename such that "SWIGTYPE_p_std__istream" can
@@ -144,6 +151,65 @@ public:
     Dimension(Field field, DataType type);
     static std::string getDataTypeName(DataType);
 };
+
+
+
+class LiblasReader
+{
+public:
+    LiblasReader(std::istream&);
+    const libpc::LiblasHeader& getLiblasHeader() const;
+    boost::int8_t getPointFormatNumber() const;
+};
+
+
+class Stage
+{
+public:
+    Stage();
+    virtual const std::string& getName() const = 0;
+    boost::uint32_t read(PointData&);
+    virtual void readBegin(boost::uint32_t numPointsToRead) = 0;
+    virtual boost::uint32_t readBuffer(PointData&) = 0;
+    virtual void readEnd(boost::uint32_t numPointsRead) = 0;
+    virtual void seekToPoint(boost::uint64_t pointNum) = 0;
+    virtual boost::uint64_t getCurrentPointIndex() const = 0;
+    boost::uint64_t getNumPoints() const;
+    bool atEnd() const;
+    const Header& getHeader() const;
+};
+
+
+class Reader : public Stage
+{
+public:
+    Reader();
+
+    virtual void readBegin(boost::uint32_t numPointsToRead);
+
+    virtual void readEnd(boost::uint32_t numPointsRead);
+
+    virtual void seekToPoint(boost::uint64_t pointNum);
+
+    virtual boost::uint64_t getCurrentPointIndex() const;
+};
+
+
+class LiblasHeader : public Reader
+{
+public:
+    LiblasHeader();
+};
+
+
+
+class Utils
+{
+public:
+    static std::istream* openFile(std::string const& filename, bool asBinary=true);
+    static void closeFile(std::istream* ifs);
+};
+
 
 
 

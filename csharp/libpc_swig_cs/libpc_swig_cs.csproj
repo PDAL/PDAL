@@ -88,9 +88,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dimension.cs" />
+    <Compile Include="LiblasHeader.cs" />
+    <Compile Include="LiblasReader.cs" />
     <Compile Include="libpc_swig_cpp.cs" />
     <Compile Include="libpc_swig_cppPINVOKE.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reader.cs" />
+    <Compile Include="Stage.cs" />
+    <Compile Include="SWIGTYPE_p_Header.cs" />
+    <Compile Include="SWIGTYPE_p_PointData.cs" />
+    <Compile Include="SWIGTYPE_p_std__istream.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="VectorU32.cs" />
     <Compile Include="VectorU8.cs" />
   </ItemGroup>
