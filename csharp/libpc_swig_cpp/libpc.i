@@ -70,9 +70,12 @@
 
 // C# support for std::vector<T>
 %include "std_vector.i"
-namespace std {
-   %template(VectorU8) vector<unsigned char>;
-   %template(VectorU32) vector<unsigned int>;
+namespace std
+{
+   %template(std_vector_u8) vector<unsigned char>;
+   %template(std_vector_double) vector<double>;
+   %template(std_vector_Dimension) vector<libpc::Dimension>;
+   %template(std_vector_Range_double) vector<libpc::Range<double> >;
 };
  
 
@@ -124,10 +127,38 @@ public:
     T length() const;
 };
 
+%rename(Range_double) Range<double>;
+%template(Range_double) Range<double>;
+
+
+template <typename T>
+class Vector
+{
+public:
+    typedef T value_type;
+
+    Vector();
+    Vector(T v0);
+    Vector(T v0, T v1);
+    Vector(T v0, T v1, T v2);
+    Vector(std::vector<T> v);
+    T get(std::size_t index);
+    void set(std::size_t index, T v);
+    void set(std::vector<T> v);
+    bool equal(Vector const& other) const;
+    std::size_t size() const;
+};
+
+%rename(Vector_double) Vector<double>;
+%template(Vector_double) Vector<double>;
+
+
 template <typename T>
 class Bounds
 {
 public:
+    typedef typename std::vector< Range<T> > RangeVector;
+
     Bounds( T minx,
             T miny,
             T minz,
@@ -154,6 +185,8 @@ public:
     bool empty() const;
 };
 
+%rename(Bounds_double) Bounds<double>;
+%template(Bounds_double) Bounds<double>;
 
 
 class Dimension
@@ -221,11 +254,14 @@ public:
     static std::string getDataTypeName(DataType);
 };
 
+//%rename(Dimension_vector) std::vector<Dimension>;
+//%template(Dimension_vector) std::vector<Dimension>;
+
 
 class DimensionLayout
 {
 public:
-    DimensionLayout(const Dimension&);
+    DimensionLayout(const libpc::Dimension&);
     const Dimension& getDimension() const;
     inline std::size_t getByteOffset() const;
     inline void setByteOffset(std::size_t v);
@@ -236,14 +272,9 @@ public:
 class Schema
 {
 public:
-    typedef std::vector<Dimension> Dimensions;
-    typedef std::vector<Dimension>::iterator DimensionsIter;
-    typedef std::vector<Dimension>::const_iterator DimensionsCIter;
-
-public:
     Schema();
     const Dimension& getDimension(std::size_t index) const;
-    const Dimensions& getDimensions() const;
+    const std::vector<Dimension>& getDimensions() const;
     bool hasDimension(Dimension::Field field) const;
     int getDimensionIndex(Dimension::Field field) const;
 };
@@ -251,10 +282,6 @@ public:
 class SchemaLayout
 {
 public:
-    typedef std::vector<DimensionLayout> DimensionLayouts;
-    typedef std::vector<DimensionLayout>::iterator DimensionLayoutsIter;
-    typedef std::vector<DimensionLayout>::const_iterator DimensionLayoutsCIter;
-
     SchemaLayout(const Schema&);
     const Schema& getSchema() const;
     std::size_t getByteSize() const;
