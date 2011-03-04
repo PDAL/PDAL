@@ -60,7 +60,7 @@ namespace libpc
 template <typename T>
 class LIBPC_DLL Bounds
 {
-private:
+public:
     typedef typename std::vector< Range<T> > RangeVector;
 
 private:
