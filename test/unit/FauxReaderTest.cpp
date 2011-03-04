@@ -56,10 +56,10 @@ BOOST_AUTO_TEST_CASE(test_constant)
 
     BOOST_CHECK(numRead == 750);
 
-    std::size_t offsetX = schema.getDimensionIndex(Dimension::Field_X);
-    std::size_t offsetY = schema.getDimensionIndex(Dimension::Field_Y);
-    std::size_t offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
-    std::size_t offsetT = schema.getDimensionIndex(Dimension::Field_GpsTime);
+    int offsetX = schema.getDimensionIndex(Dimension::Field_X);
+    int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
+    int offsetT = schema.getDimensionIndex(Dimension::Field_GpsTime);
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
@@ -92,10 +92,10 @@ BOOST_AUTO_TEST_CASE(test_random)
 
     BOOST_CHECK(numRead == 750);
 
-    std::size_t offsetX = schema.getDimensionIndex(Dimension::Field_X);
-    std::size_t offsetY = schema.getDimensionIndex(Dimension::Field_Y);
-    std::size_t offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
-    std::size_t offsetT = schema.getDimensionIndex(Dimension::Field_GpsTime);
+    int offsetX = schema.getDimensionIndex(Dimension::Field_X);
+    int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
+    int offsetT = schema.getDimensionIndex(Dimension::Field_GpsTime);
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {

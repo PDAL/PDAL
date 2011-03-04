@@ -93,9 +93,9 @@ void LiblasWriter::setupExternalHeader()
     setSystemIdentifier("libPC");
     setGeneratingSoftware(GetVersionString());
 
-    std::size_t indexX = getHeader().getSchema().getDimensionIndex(Dimension::Field_X);
-    std::size_t indexY = getHeader().getSchema().getDimensionIndex(Dimension::Field_Y);
-    std::size_t indexZ = getHeader().getSchema().getDimensionIndex(Dimension::Field_Z);
+    int indexX = getHeader().getSchema().getDimensionIndex(Dimension::Field_X);
+    int indexY = getHeader().getSchema().getDimensionIndex(Dimension::Field_Y);
+    int indexZ = getHeader().getSchema().getDimensionIndex(Dimension::Field_Z);
     const Dimension& dimX = getHeader().getSchema().getDimension(indexX);
     const Dimension& dimY = getHeader().getSchema().getDimension(indexY);
     const Dimension& dimZ = getHeader().getSchema().getDimension(indexZ);

@@ -48,9 +48,9 @@ BOOST_AUTO_TEST_SUITE(LiblasReaderTest)
 static void checkPointXYZ(const PointData& data, size_t index, const Schema& schema, 
                           double xref, double yref, double zref)
 {
-    std::size_t offsetX = schema.getDimensionIndex(Dimension::Field_X);
-    std::size_t offsetY = schema.getDimensionIndex(Dimension::Field_Y);
-    std::size_t offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
+    int offsetX = schema.getDimensionIndex(Dimension::Field_X);
+    int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
 
     boost::int32_t x0raw = data.getField<boost::int32_t>(index, offsetX);
     boost::int32_t y0raw = data.getField<boost::int32_t>(index, offsetY);

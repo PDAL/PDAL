@@ -94,9 +94,9 @@ boost::uint32_t FauxWriter::writeBuffer(const PointData& pointData)
     const boost::uint32_t numPoints = pointData.getNumPoints();
 
     const Schema& schema = pointData.getSchemaLayout().getSchema();
-    const std::size_t fieldIndexX = schema.getDimensionIndex(Dimension::Field_X);
-    const std::size_t fieldIndexY = schema.getDimensionIndex(Dimension::Field_Y);
-    const std::size_t fieldIndexZ = schema.getDimensionIndex(Dimension::Field_Z);
+    const int fieldIndexX = schema.getDimensionIndex(Dimension::Field_X);
+    const int fieldIndexY = schema.getDimensionIndex(Dimension::Field_Y);
+    const int fieldIndexZ = schema.getDimensionIndex(Dimension::Field_Z);
 
     boost::uint32_t numValidPoints = 0;
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
