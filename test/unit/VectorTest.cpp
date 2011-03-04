@@ -103,6 +103,9 @@ BOOST_AUTO_TEST_CASE(test_accessor)
     BOOST_CHECK(v[0]==11);
     BOOST_CHECK(v[1]==22);
     BOOST_CHECK(v[2]==33);
+
+    v.set(1, 123);
+    BOOST_CHECK(v.get(1)==123);
 }
 
 BOOST_AUTO_TEST_CASE(test_math)

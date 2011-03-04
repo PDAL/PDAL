@@ -113,6 +113,16 @@ public:
       return m_data[index];
     }
 
+    T get(std::size_t index)
+    {
+        return m_data[index];
+    }
+
+    void set(std::size_t index, T v)
+    {
+        m_data[index] = v;
+    }
+
     void set(std::vector<T> v)
     {
         m_data.resize(v.size());
