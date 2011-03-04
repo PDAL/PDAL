@@ -109,8 +109,8 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     yvec.reserve(count);
     spare.resize(count);
     
-    boost::uint32_t chunks = count/m_threshold;
-    count = 0;
+    // boost::uint32_t chunks = count/m_threshold;
+
 
 
     const int indexX = schema.getDimensionIndex(Dimension::Field_X);
@@ -124,12 +124,22 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     
     double xoffset = dimX.getNumericOffset();
     double yoffset = dimY.getNumericOffset();
+
+    std::size_t num_points_loaded = 0;
+    std::size_t num_points_to_load = count;
     
-    for (boost::uint32_t i = 0; i < chunks; i++)
+    boost::uint32_t counter = 0;
+    while (num_points_loaded < num_points_to_load)
     {
-        PointData buffer(schema, m_threshold);
-        m_stage.read(buffer);
- 
+        boost::uint64_t num_remaining = num_points_to_load - num_points_loaded;
+        boost::uint32_t num_to_read = static_cast<boost::uint32_t>(std::min<boost::uint64_t>(num_remaining, m_threshold));
+
+        PointData buffer(schema, num_to_read);
+
+        boost::uint32_t num_read =  m_stage.read(buffer);
+        
+        assert(num_read <= num_to_read);
+
         for (boost::uint32_t j = 0; j < m_threshold; j++)
         {
             // (v * m_header->GetScaleX()) + m_header->GetOffsetX();
@@ -137,15 +147,22 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
             const double y = (buffer.getField<boost::int32_t>(j, indexY) * yscale) + yoffset;
             // const double z = (buffer.getField<boost::int32_t>(j, indexZ) * zscale) + zoffset;
             ref.m_pos = x;
-            ref.m_ptindex = j;
+            ref.m_ptindex = counter;
             xvec.push_back(ref);
             
             ref.m_pos = y;
             yvec.push_back(ref);
-            
+            counter++;
         }
-        
-    } 
+
+        num_points_loaded += num_read;
+    
+
+        if (m_stage.atEnd())
+        {
+            break;
+        }
+    }
     
     // while (m_reader->ReadNextPoint()) {
     //     const liblas::Point& pt = m_reader->GetPoint();
