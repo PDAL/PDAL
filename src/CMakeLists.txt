@@ -24,6 +24,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/export.hpp
   ${LIBPC_HEADERS_DIR}/libpc_config.hpp
   ${LIBPC_HEADERS_DIR}/Bounds.hpp
+  ${LIBPC_HEADERS_DIR}/CacheFilter.hpp
   ${LIBPC_HEADERS_DIR}/Color.hpp
   ${LIBPC_HEADERS_DIR}/ColorFilter.hpp
   ${LIBPC_HEADERS_DIR}/CropFilter.hpp
@@ -63,6 +64,7 @@ set(LIBPC_CPP
     ${LIBPC_SOURCES}
   Bounds.cpp
   chipper.cpp
+  CacheFilter.cpp
   Color.cpp
   ColorFilter.cpp
   CropFilter.cpp
