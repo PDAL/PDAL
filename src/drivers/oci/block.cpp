@@ -38,8 +38,8 @@
 namespace libpc { namespace driver { namespace oci {
 
 
-Block::Block(const PointData& data)
-    : m_data(data)
+Block::Block(chipper::Block const& block)
+    : m_block(block)
 {
 }
 

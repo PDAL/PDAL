@@ -35,17 +35,17 @@
 #ifndef INCLUDED_OCIWRITER_HPP
 #define INCLUDED_OCIWRITER_HPP
 
-#include "libpc/Writer.hpp"
-
+#include <libpc/Writer.hpp>
+#include <libpc/chipper.hpp>
+#include "block.hpp"
 
 namespace libpc
 {
 
-// we default to LAS 1.2, point format 0
 class LIBPC_DLL OCIWriter : public Writer
 {
 public:
-    OCIWriter(Stage& prevStage);
+    OCIWriter(Stage& prevStage, boost::uint32_t block_size);
     ~OCIWriter();
 
     const std::string& getName() const;
@@ -65,6 +65,9 @@ private:
 
     OCIWriter& operator=(const OCIWriter&); // not implemented
     OCIWriter(const OCIWriter&); // not implemented
+    
+    Stage& m_stage;
+    boost::uint32_t m_block_size;
 };
 
 } // namespace libpc

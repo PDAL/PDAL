@@ -37,24 +37,21 @@
 
 
 #include "libpc/PointData.hpp"
+#include "libpc/Bounds.hpp"
+#include "libpc/chipper.hpp"
 
 namespace libpc { namespace driver { namespace oci {
     
 class LIBPC_DLL Block
 {
 public:
-    Block( const PointData& data);
-    
-    
-    bool is3D() const { return m_3d; }
+    Block( chipper::Block const& block);
     
 private:
     Block& operator=(const Block&); // nope
     Block(const Block&); // nope
     
-    PointData const& m_data;
-    
-    bool m_3d;
+    chipper::Block const&  m_block;
     
 };
 
