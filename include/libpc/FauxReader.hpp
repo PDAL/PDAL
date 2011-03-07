@@ -35,7 +35,7 @@
 #ifndef INCLUDED_FAUXREADER_HPP
 #define INCLUDED_FAUXREADER_HPP
 
-#include "libpc/Reader.hpp"
+#include "libpc/Producer.hpp"
 
 namespace libpc
 {
@@ -53,7 +53,7 @@ namespace libpc
 // points to always be at the minimum of the bounding box.  The Time field
 // is always set to the point number.
 //
-class LIBPC_DLL FauxReader : public Reader
+class LIBPC_DLL FauxReader : public Producer
 {
 public:
     enum Mode

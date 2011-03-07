@@ -37,13 +37,13 @@
 
 #include <iostream>
 
-#include "libpc/Reader.hpp"
+#include "libpc/Producer.hpp"
 #include "libpc/LasHeader.hpp"
 
 namespace libpc
 {
 
-class LIBPC_DLL LasReader : public Reader
+class LIBPC_DLL LasReader : public Producer
 {
 public:
     LasReader(std::istream&);

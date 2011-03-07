@@ -32,40 +32,63 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_READER_HPP
-#define INCLUDED_READER_HPP
-
-#include "libpc/Stage.hpp"
-#include "libpc/Header.hpp"
+#include "libpc/Producer.hpp"
 
 namespace libpc
 {
 
-class LIBPC_DLL Reader : public Stage
+
+Producer::Producer()
+    : m_currentPointIndex(0)
 {
-public:
-    Reader();
+    return;
+}
 
-    virtual void readBegin(boost::uint32_t numPointsToRead);
 
-    virtual void readEnd(boost::uint32_t numPointsRead);
+void Producer::seekToPoint(boost::uint64_t pointNum)
+{
+    if (pointNum == getCurrentPointIndex())
+    {
+        return;
+    }
 
-    // default is to reset() and then read N points manually
-    // override this if you can
-    virtual void seekToPoint(boost::uint64_t pointNum);
+    setCurrentPointIndex(0);
+    
+    // we read the points only to get to the right place -- we
+    // will just drop the points on the floor and return
+    boost::uint32_t pointNumX = (boost::uint32_t)pointNum; // BUG
+    assert(pointNumX == pointNum);
+    PointData pointData(getHeader().getSchema(), pointNumX);
+    read(pointData);
 
-    virtual boost::uint64_t getCurrentPointIndex() const;
+    return;
+}
 
-protected:
-    void setCurrentPointIndex(boost::uint64_t);
 
-private:
-    boost::uint64_t m_currentPointIndex;
+void Producer::setCurrentPointIndex(boost::uint64_t index)
+{
+    m_currentPointIndex = index;
+}
 
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
-};
+
+boost::uint64_t Producer::getCurrentPointIndex() const
+{
+    return m_currentPointIndex;
+}
+
+
+void Producer::readBegin(boost::uint32_t /*numPointsToRead*/)
+{
+    return;
+}
+
+
+void Producer::readEnd(boost::uint32_t numPointsRead)
+{
+    setCurrentPointIndex(getCurrentPointIndex() + numPointsRead);
+
+    return;
+}
+
 
 } // namespace libpc
-
-#endif

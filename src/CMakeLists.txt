@@ -44,7 +44,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Vector.hpp  
   ${LIBPC_HEADERS_DIR}/PointData.hpp  
   ${LIBPC_HEADERS_DIR}/Range.hpp
-  ${LIBPC_HEADERS_DIR}/Reader.hpp
+  ${LIBPC_HEADERS_DIR}/Producer.hpp
   ${LIBPC_HEADERS_DIR}/Schema.hpp
   ${LIBPC_HEADERS_DIR}/SchemaLayout.hpp
   ${LIBPC_HEADERS_DIR}/Signaller.hpp
@@ -81,7 +81,7 @@ set(LIBPC_CPP
   MosaicFilter.cpp
   Vector.cpp  
   PointData.cpp
-  Reader.cpp
+  Producer.cpp
   Schema.cpp
   SchemaLayout.cpp
   Signaller.cpp

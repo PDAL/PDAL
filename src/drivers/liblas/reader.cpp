@@ -44,7 +44,7 @@
 namespace libpc
 {
 LiblasReader::LiblasReader(std::istream& istream)
-    : Reader()
+    : Producer()
     , m_istream(istream)
     , m_externalReader(NULL)
     , m_versionMajor(0)
