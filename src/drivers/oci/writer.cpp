@@ -51,8 +51,8 @@ OCIWriter::OCIWriter(Stage& prevStage, boost::uint32_t block_size)
     : Writer(prevStage), m_stage(prevStage), m_block_size(block_size)
 {
 
-    chipper::Chipper(m_stage, m_block_size );
-    chipper.Chip();
+    chipper::Chipper c(m_stage, m_block_size );
+    c.Chip();
     
     return;
 }
