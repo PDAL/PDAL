@@ -44,7 +44,7 @@ namespace libpc
 {
 
 FauxWriter::FauxWriter(Stage& prevStage) :
-    Writer(prevStage)
+    Consumer(prevStage)
 {
     return;
 }

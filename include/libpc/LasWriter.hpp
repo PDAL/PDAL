@@ -35,12 +35,12 @@
 #ifndef INCLUDED_LASWRITER_HPP
 #define INCLUDED_LASWRITER_HPP
 
-#include "libpc/Writer.hpp"
+#include "libpc/Consumer.hpp"
 
 namespace libpc
 {
 
-class LIBPC_DLL LasWriter : public Writer
+class LIBPC_DLL LasWriter : public Consumer
 {
 public:
     LasWriter(Stage& prevStage, std::ostream&);

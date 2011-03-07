@@ -35,14 +35,14 @@
 #ifndef INCLUDED_OCIWRITER_HPP
 #define INCLUDED_OCIWRITER_HPP
 
-#include <libpc/Writer.hpp>
+#include <libpc/Consumer.hpp>
 #include <libpc/chipper.hpp>
 #include "block.hpp"
 
 namespace libpc
 {
 
-class LIBPC_DLL OCIWriter : public Writer
+class LIBPC_DLL OCIWriter : public Consumer
 {
 public:
     OCIWriter(Stage& prevStage, boost::uint32_t block_size);

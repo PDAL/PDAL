@@ -43,7 +43,7 @@ namespace libpc
 
 
 LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
-    : Writer(prevStage)
+    : Consumer(prevStage)
     , m_ostream(ostream)
 {
     LasHeader* lasHeader = new LasHeader;

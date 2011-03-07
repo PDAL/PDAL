@@ -35,15 +35,15 @@
 #include <cassert>
 
 #include "libpc/exceptions.hpp"
-#include "libpc/Writer.hpp"
+#include "libpc/Consumer.hpp"
 
 namespace libpc
 {
 
-const boost::uint32_t Writer::s_defaultChunkSize = 1024 * 32;
+const boost::uint32_t Consumer::s_defaultChunkSize = 1024 * 32;
 
 
-Writer::Writer(Stage& prevStage)
+Consumer::Consumer(Stage& prevStage)
     : Filter(prevStage)
     , m_actualNumPointsWritten(0)
     , m_targetNumPointsToWrite(0)
@@ -53,19 +53,19 @@ Writer::Writer(Stage& prevStage)
 }
 
 
-void Writer::setChunkSize(boost::uint32_t chunkSize)
+void Consumer::setChunkSize(boost::uint32_t chunkSize)
 {
     m_chunkSize = chunkSize;
 }
 
 
-boost::uint32_t Writer::getChunkSize() const
+boost::uint32_t Consumer::getChunkSize() const
 {
     return m_chunkSize;
 }
 
 
-boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
+boost::uint64_t Consumer::write(std::size_t targetNumPointsToWrite)
 {
     m_targetNumPointsToWrite = targetNumPointsToWrite;
     m_actualNumPointsWritten = 0;
@@ -101,7 +101,7 @@ boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
 }
 
 
-boost::uint32_t Writer::readBuffer(PointData&)
+boost::uint32_t Consumer::readBuffer(PointData&)
 {
     throw libpc_error("readBuffer not supported for Writer objects");
 }

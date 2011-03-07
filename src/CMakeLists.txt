@@ -51,7 +51,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/SpatialReference.hpp
   ${LIBPC_HEADERS_DIR}/Stage.hpp
   ${LIBPC_HEADERS_DIR}/Utils.hpp
-  ${LIBPC_HEADERS_DIR}/Writer.hpp)
+  ${LIBPC_HEADERS_DIR}/Consumer.hpp)
 
 set (LIBPC_SOURCES "libpc_config.cpp" CACHE INTERNAL "sources to compile")
 set (APPS_CPP_DEPENDENCIES "${LIBPC_LIB_NAME}" CACHE INTERNAL "libraries to link")
@@ -88,7 +88,7 @@ set(LIBPC_CPP
   SpatialReference.cpp
   Stage.cpp
   Utils.cpp
-  Writer.cpp)
+  Consumer.cpp)
 
 
 # Group source files for IDE source explorers (e.g. Visual Studio)

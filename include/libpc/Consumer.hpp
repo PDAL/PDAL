@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_WRITER_HPP
-#define INCLUDED_WRITER_HPP
+#ifndef INCLUDED_CONSUMER_HPP
+#define INCLUDED_CONSUMER_HPP
 
 #include "libpc/Filter.hpp"
 
@@ -41,11 +41,11 @@ namespace libpc
 {
 
 // a Writer is a Filter, because it has a previous stage and a header
-// however, Writers generally do not implement the readNextPoints method
-class LIBPC_DLL Writer : public Filter
+// however, Consumer generally do not implement the readNextPoints method
+class LIBPC_DLL Consumer : public Filter
 {
 public:
-    Writer(Stage& prevStage);
+    Consumer(Stage& prevStage);
 
     // size of the PointData buffer to use
     void setChunkSize(boost::uint32_t);
@@ -77,8 +77,8 @@ private:
     boost::uint32_t m_chunkSize;
     static const boost::uint32_t s_defaultChunkSize;
 
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
+    Consumer& operator=(const Consumer&); // not implemented
+    Consumer(const Consumer&); // not implemented
 };
 
 } // namespace libpc

@@ -48,7 +48,7 @@ namespace libpc
 
 
 LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
-    : Writer(prevStage)
+    : Consumer(prevStage)
     , m_ostream(ostream)
     , m_externalWriter(NULL)
 {
