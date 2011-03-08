@@ -57,7 +57,7 @@
 #include "libpc/Header.hpp"
 #include "libpc/Stage.hpp"
 #include "libpc/Filter.hpp"
-#include "libpc/Reader.hpp"
+#include "libpc/Producer.hpp"
 
 #include "libpc/../../src/drivers/liblas/header.hpp"
 #include "libpc/../../src/drivers/liblas/reader.hpp"
@@ -373,7 +373,7 @@ public:
 };
 
 
-class Reader : public Stage
+class Producer : public Stage
 {
 public:
     Reader(int);
@@ -394,7 +394,7 @@ public:
 
 
 %feature("notabstract") LiblasReader;
-class LiblasReader : public Reader
+class LiblasReader : public Producer
 {
 public:
     LiblasReader(std::istream&);

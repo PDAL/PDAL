@@ -101,9 +101,9 @@
     <Compile Include="libpc_swig_cppPINVOKE.cs" />
     <Compile Include="ostream.cs" />
     <Compile Include="PointData.cs" />
+    <Compile Include="Producer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Range_double.cs" />
-    <Compile Include="Reader.cs" />
     <Compile Include="Schema.cs" />
     <Compile Include="SchemaLayout.cs" />
     <Compile Include="Stage.cs" />
