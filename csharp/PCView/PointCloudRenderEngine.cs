@@ -76,12 +76,11 @@ namespace Flaxen.SlimDXControlLib.MouseExample
         /// <param name="points">an array of points to be displayed</param>
         public PointCloudRenderEngine()
         {
-            CameraPosition = new Vector3(0.1f, 0.1f, -9.1f);
-            TargetPosition = new Vector3(0, 0, 0);
+            Rotation = Matrix.Identity;
         }
 
 
-        private Vector4[] CreateBox(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax)
+        private Vector4[] CreateBox(float xmin, float ymin, float zmin, float xmax, float ymax, float zmax)
         {
             float f = 0.3f;
             Vector4 red = new Vector4(f, 0, 0, 1);
@@ -184,6 +183,7 @@ namespace Flaxen.SlimDXControlLib.MouseExample
         /// </summary>
         public Vector3 TargetPosition { get; set; }
 
+        public Matrix Rotation { get; set; }
 
         /// <summary>
         /// Implements the logic to render the points.  Called by the SlimDXControl object.
@@ -303,28 +303,11 @@ namespace Flaxen.SlimDXControlLib.MouseExample
             return;
         }
 
-        public void SetPoints(Vector4[] points)
+        public void SetPoints(Vector4[] points, float minx, float miny, float minz, float maxx, float maxy, float maxz)
         {
             m_samplePoints = points;
 
-            float xmin = m_samplePoints[0].X;
-            float xmax = m_samplePoints[0].X;
-            float ymin = m_samplePoints[0].Y;
-            float ymax = m_samplePoints[0].Y;
-            float zmin = m_samplePoints[0].Z;
-            float zmax = m_samplePoints[0].Z;
-
-            for (int i=2; i<m_samplePoints.Length; i+=2)
-            {
-                xmin = Math.Min(xmin, m_samplePoints[i].X);
-                xmax = Math.Max(xmax, m_samplePoints[i].X);
-                ymin = Math.Min(ymin, m_samplePoints[i].Y);
-                ymax = Math.Max(ymax, m_samplePoints[i].Y);
-                zmin = Math.Min(zmin, m_samplePoints[i].Z);
-                zmax = Math.Max(zmax, m_samplePoints[i].Z);
-            }
-
-            m_boxPoints = CreateBox(xmin, xmax, ymin, ymax, zmin, zmax);
+            m_boxPoints = CreateBox(minx, miny, minz, maxx, maxy, maxz);
 
             SetupSamples();
             SetupBox();
@@ -461,6 +444,8 @@ namespace Flaxen.SlimDXControlLib.MouseExample
             // in our case, from the range [0..100] to [0..1]
             m_worldTransform = Matrix.Scaling(0.01f, 0.01f, 0.01f);
 
+            m_worldTransform = Rotation * m_worldTransform;
+
             // view transform: from world coordinates to view (camera, eye) coordinates
             // the "up" direction is the Y axis
             m_worldUp = new Vector3(0, 1, 0);
@@ -471,7 +456,7 @@ namespace Flaxen.SlimDXControlLib.MouseExample
             float zfar = 10.0f; // in view space
             if (m_perspective)
             {
-                float fovY = (float)(Math.PI * 0.25); // radians, 45 deg
+                float fovY = DegreesToRadians(60);
                 float aspect = 1.0f;
                 m_projectionTransform = Matrix.PerspectiveFovLH(fovY, aspect, znear, zfar);
             }
@@ -488,6 +473,11 @@ namespace Flaxen.SlimDXControlLib.MouseExample
             wvpTransform.SetMatrix(wvp);
 
             return;
+        }
+
+        static float DegreesToRadians(float degrees)
+        {
+            return degrees * (float)(Math.PI / 180);
         }
     }
 }

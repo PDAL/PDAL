@@ -286,7 +286,7 @@ public:
 
 %extend Dimension
 {
-    %template(getNumericValueInt32) getNumericValue<boost::int32_t>;
+    %template(getNumericValue_Int32) getNumericValue<boost::int32_t>;
 };
 
 
@@ -339,8 +339,16 @@ public:
 
 %extend PointData
 {
-    %template(getFieldUint32) getField<boost::uint32_t>;
-    %template(getFieldInt32) getField<boost::int32_t>;
+    %template(getField_Int8) getField<boost::int8_t>;
+    %template(getField_UInt8) getField<boost::uint8_t>;
+    %template(getField_Int16) getField<boost::int16_t>;
+    %template(getField_UInt16) getField<boost::uint16_t>;
+    %template(getField_Int32) getField<boost::int32_t>;
+    %template(getField_UInt32) getField<boost::uint32_t>;
+    %template(getField_Int64) getField<boost::int64_t>;
+    %template(getField_UInt64) getField<boost::uint64_t>;
+    %template(getField_Float) getField<float>;
+    %template(getField_Double) getField<double>;
 };
 
 

@@ -36,12 +36,12 @@ namespace libpc_swig_test
                 uint offsetZ = (uint)schema.getDimensionIndex(Dimension.Field.Field_Z);
 
                 uint index = 0;
-                Int32 x0raw = data.getFieldInt32(index, offsetX);
-                Int32 y0raw = data.getFieldInt32(index, offsetY);
-                Int32 z0raw = data.getFieldInt32(index, offsetZ);
-                double x0 = schema.getDimension(offsetX).getNumericValueInt32(x0raw);
-                double y0 = schema.getDimension(offsetY).getNumericValueInt32(y0raw);
-                double z0 = schema.getDimension(offsetZ).getNumericValueInt32(z0raw);
+                Int32 x0raw = data.getField_Int32(index, offsetX);
+                Int32 y0raw = data.getField_Int32(index, offsetY);
+                Int32 z0raw = data.getField_Int32(index, offsetZ);
+                double x0 = schema.getDimension(offsetX).getNumericValue_Int32(x0raw);
+                double y0 = schema.getDimension(offsetY).getNumericValue_Int32(y0raw);
+                double z0 = schema.getDimension(offsetZ).getNumericValue_Int32(z0raw);
 
                 Debug.Assert(x0 == 637012.240000);
                 Debug.Assert(y0 == 849028.310000);
