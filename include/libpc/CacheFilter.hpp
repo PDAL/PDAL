@@ -40,7 +40,11 @@
 namespace libpc
 {
 
-// this is just a very simple MRU filter -- future versions will be smarter
+// This is just a very simple MRU filter -- future versions will be smarter.
+// This cache has the following constraints:
+//   - only one block is cached
+//   - read chunk sizes are assumed to be just 1 point
+// If more than one point is read, the cache is skipped.
 class LIBPC_DLL CacheFilter : public Filter
 {
 public:

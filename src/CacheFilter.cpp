@@ -90,30 +90,32 @@ boost::uint64_t CacheFilter::getNumPointsRead() const
 
 boost::uint32_t CacheFilter::readBuffer(PointData& data)
 {
+    if (data.getNumPoints() != 1)
+    {
+        m_currentPointIndex += data.getNumPoints();
+        return m_prevStage.read(data);
+    }
+
     m_numPointsRequested += data.getNumPoints();
 
     boost::uint64_t pointToRead = getCurrentPointIndex();
 
     // do we meet the cache-checking criteria?
-    if (data.getNumPoints() == 1 && m_storedPointData != NULL)
+    if (m_storedPointData != NULL)
     {
         // do we have the point we want in the cache?
         if (pointToRead >= m_storedPointIndex && 
             pointToRead < m_storedPointIndex + m_storedPointData->getNumPoints())
         {
-            // the cache has the data we want
-
+            // the cache has the data we want, copy out the point we want
             boost::uint32_t index = (boost::uint32_t)(pointToRead - m_storedPointIndex);
-
             data.copyPointFast(0, index, *m_storedPointData);
-
             m_currentPointIndex += 1;
-
             return 1;
         }
     }
 
-    // not cached, so read a full block and replace cache with it
+    // not cached, so read a full block and replace cache with that new block
 
     delete m_storedPointData;
 
