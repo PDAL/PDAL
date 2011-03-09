@@ -53,7 +53,7 @@ namespace libpc { namespace driver { namespace oci {
 
 Options::Options()
 {
-    m_tree.put("3d", false);
+    m_tree.put("is3d", false);
     m_tree.put("solid", false);
     m_tree.put("overwrite", false);
     m_tree.put("debug", false);
@@ -69,12 +69,13 @@ Options::Options()
     m_tree.put("base_table_name", std::string("hobu"));
     m_tree.put("cloud_column_name", std::string("cloud"));
     m_tree.put("header_blob_column_name", std::string("header"));
-    m_tree.put("header_blob_column_name", std::string("header"));
     m_tree.put("base_table_aux_columns", std::string(""));
     m_tree.put("base_table_aux_values", std::string(""));
     m_tree.put("pre_block_sql", std::string(""));
     m_tree.put("pre_sql", std::string(""));
-    m_tree.put("post_block_sql", libpc::Bounds<double>());
+    m_tree.put("post_block_sql", std::string(""));
+    m_tree.put("base_table_bounds", libpc::Bounds<double>());
+
 }    
 
 bool Options::IsDebug() const
@@ -219,7 +220,7 @@ void Writer::CreateBlockIndex()
     std::ostringstream oss;
     std::string block_table_name = m_options.GetPTree().get<std::string>("block_table_name");
     
-    bool is3d = m_options.GetPTree().get<bool>("3d");
+    bool is3d = m_options.GetPTree().get<bool>("is3d");
     oss << "CREATE INDEX "<< block_table_name << "_cloud_idx on "
         << block_table_name << "(blk_extent) INDEXTYPE IS MDSYS.SPATIAL_INDEX";
     
@@ -288,6 +289,7 @@ bool Writer::IsGeographic(boost::int32_t srid)
 {
     typedef boost::shared_ptr<long> shared_long;
     typedef boost::shared_ptr<char> shared_char;
+    
     std::ostringstream oss;
     // char* kind = (char* ) malloc (OWNAME * sizeof(char));
     shared_char kind = boost::shared_ptr<char>(new char[OWNAME]);
@@ -311,20 +313,12 @@ bool Writer::IsGeographic(boost::int32_t srid)
     }  
     
     if (compare_no_case(kind.get(), "GEOGRAPHIC2D",12) == 0) {
-        // delete statement;
-        // free(kind);
-        // free(p_srid);
         return true;
     }
     if (compare_no_case(kind.get(), "GEOGRAPHIC3D",12) == 0) {
-        // delete statement;
-        // free(kind);
-        // free(p_srid);
         return true;
     }
 
-    // free(kind);
-    // free(p_srid);
 
     return false;
     
@@ -375,6 +369,202 @@ void Writer::RunFileSQL(std::string const& filename)
         std::cout << "running "<< filename << " ..." <<std::endl;
 
     run(oss);
+    
+}
+
+long Writer::GetGType()
+{
+    boost::property_tree::ptree  tree = m_options.GetPTree();    
+    bool bUse3d = tree.get<bool>("is3d");
+    bool bUseSolidGeometry = tree.get<bool>("solid");
+    long gtype = 0;
+    if (bUse3d) {
+        if (bUseSolidGeometry == true) {
+            gtype = 3008;
+
+        } else {
+            gtype = 3003;
+        }
+    } else {
+        if (bUseSolidGeometry == true) {
+            gtype = 2008;
+        } else {
+            gtype = 2003;
+        }
+    }
+    
+    return gtype;   
+}
+
+
+std::string Writer::CreatePCElemInfo()
+{
+    boost::property_tree::ptree  tree = m_options.GetPTree();    
+    bool bUse3d = tree.get<bool>("is3d");
+    bool bUseSolidGeometry = tree.get<bool>("solid");
+    
+    std::ostringstream s_eleminfo;
+    if (bUse3d) {
+        if (bUseSolidGeometry == true) {
+            // s_gtype << "3008";
+            s_eleminfo << "(1,1007,3)";
+
+        } else {
+            // s_gtype << "3003";
+            s_eleminfo  << "(1,1003,3)";
+
+        }
+    } else {
+        if (bUseSolidGeometry == true) {
+            // s_gtype << "2008";
+            s_eleminfo << "(1,1007,3)";
+
+        } else {
+            // s_gtype << "2003";
+            s_eleminfo  << "(1,1003,3)";
+
+        }
+    }
+    
+    return s_eleminfo.str();
+      
+}
+
+long Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
+{
+
+
+    
+    boost::property_tree::ptree  tree = m_options.GetPTree();
+    
+    std::string block_table_name = to_upper(tree.get<std::string>("block_table_name"));
+    std::string base_table_name = to_upper(tree.get<std::string>("base_table_name"));
+    std::string cloud_column_name = to_upper(tree.get<std::string>("cloud_column_name"));
+    std::string base_table_aux_columns = to_upper(tree.get<std::string>("base_table_aux_columns"));
+    std::string base_table_aux_values = to_upper(tree.get<std::string>("base_table_aux_values"));
+    std::string header_blob_column_name = to_upper(tree.get<std::string>("header_blob_column_name"));
+    boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
+    boost::uint32_t precision = tree.get<boost::uint32_t>("precision");
+    boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
+    boost::uint32_t dimensions = tree.get<boost::uint32_t>("dimensions");
+    bool bUse3d = tree.get<bool>("is3d");
+    
+    std::ostringstream oss;
+
+
+    oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    oss.precision(precision);
+
+    std::ostringstream columns;
+    std::ostringstream values;
+    
+    if (!base_table_aux_columns.empty() ) {
+        columns << cloud_column_name << "," << base_table_aux_columns;
+    
+        values << "pc," << base_table_aux_values;
+    } else {
+        columns << cloud_column_name;
+        values << "pc";
+    }
+    
+    if (!header_blob_column_name.empty()){
+        columns << "," << header_blob_column_name;
+        values <<", :2";
+    }
+
+
+    std::ostringstream s_srid;
+    std::ostringstream s_gtype;
+    std::ostringstream s_eleminfo;
+    std::ostringstream s_geom;
+
+
+    // IsGeographic(srid);
+
+    if (srid == 0)
+    {
+        s_srid << "NULL";
+    }
+    else
+    {
+        s_srid << srid;
+    }
+
+    long gtype = GetGType();
+    s_gtype << gtype;
+    
+    std::string eleminfo = CreatePCElemInfo();
+
+    libpc::Bounds<double> e = m_bounds;
+
+    s_geom << "           mdsys.sdo_geometry("<<s_gtype.str() <<", "<<s_srid.str()<<", null,\n"
+"              mdsys.sdo_elem_info_array"<< s_eleminfo.str() <<",\n"
+"              mdsys.sdo_ordinate_array(\n";
+
+    s_geom << e.getMinimum(0) << "," << e.getMinimum(1) << ",";
+
+    if (bUse3d) {
+        s_geom << e.getMinimum(2) << ",";
+    }
+    
+    s_geom << e.getMaximum(0) << "," << e.getMaximum(1);
+
+    if (bUse3d) {
+        s_geom << "," << e.getMaximum(2);
+    }
+
+    s_geom << "))";
+
+    
+    
+oss << "declare\n"
+"  pc_id NUMBER := :1;\n"
+"  pc sdo_pc;\n"
+
+"begin\n"
+"  -- Initialize the Point Cloud object.\n"
+"  pc := sdo_pc_pkg.init( \n"
+"          '"<< base_table_name<<"', -- Table that has the SDO_POINT_CLOUD column defined\n"
+"          '"<< cloud_column_name<<"',   -- Column name of the SDO_POINT_CLOUD object\n"
+"          '"<< block_table_name <<"', -- Table to store blocks of the point cloud\n"
+"           'blk_capacity="<< capacity <<"', -- max # of points per block\n"
+<< s_geom.str() <<
+",  -- Extent\n"
+"     0.5, -- Tolerance for point cloud\n"
+"           "<<dimensions<<", -- Total number of dimensions\n"
+"           null);\n"
+"  :1 := pc.pc_id;\n"
+
+"  -- Insert the Point Cloud object  into the \"base\" table.\n"
+"  insert into " << base_table_name << " ( ID, "<< columns.str() <<
+        ") values ( pc.pc_id, " << values.str() << ");\n"
+
+"  "
+"end;\n";
+
+
+    int pc_id = 0;
+    long output = 0;
+    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+
+    statement->Bind(&pc_id);
+    if (header_data->size() != 0) {
+        OCILobLocator** locator =(OCILobLocator**) VSIMalloc( sizeof(OCILobLocator*) * 1 );
+        statement->Define( locator, 1 ); 
+
+        statement->Bind((char*)&(header_data[0]),(long)header_data->size());
+    
+    }
+    try {
+        statement->Execute();
+    } catch (std::runtime_error const& e) {
+        std::ostringstream oss;
+        oss << "Failed at creating Point Cloud entry into " << base_table_name << " table. Does the table exist? "  << e.what();
+        throw std::runtime_error(oss.str());
+    }
+    output = pc_id;
+
+    return output;
     
 }
 void Writer::writeBegin()

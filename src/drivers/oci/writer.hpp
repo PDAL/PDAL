@@ -92,7 +92,8 @@ public:
     const std::string& getName() const;
 
     void run(std::ostringstream const& command);
-
+    inline void setBounds(libpc::Bounds<double> bounds) {m_bounds = bounds; }
+    inline libpc::Bounds<double>  getBounds() const { return m_bounds; }
 protected:
     // this is called once before the loop with the writeBuffer calls
     virtual void writeBegin();
@@ -114,6 +115,9 @@ private:
     void WipeBlockTable();
     void CreateBlockIndex();
     void CreateBlockTable();
+    long CreatePCEntry(std::vector<boost::uint8_t> const* header_data);
+    long GetGType();
+    std::string CreatePCElemInfo();
     bool BlockTableExists();
     void RunFileSQL(std::string const& filename);
     bool IsGeographic(boost::int32_t srid);
