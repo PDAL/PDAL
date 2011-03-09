@@ -14,6 +14,7 @@ SET(LIBPC_UNIT_TEST_SRC
 	ColorTest.cpp
 	ConfigTest.cpp
 	CropFilterTest.cpp
+	DecimationFilterTest.cpp
 	DimensionTest.cpp
 	DimensionLayoutTest.cpp
 	FauxReaderTest.cpp

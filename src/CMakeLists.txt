@@ -28,6 +28,7 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Color.hpp
   ${LIBPC_HEADERS_DIR}/ColorFilter.hpp
   ${LIBPC_HEADERS_DIR}/CropFilter.hpp
+  ${LIBPC_HEADERS_DIR}/DecimationFilter.hpp
   ${LIBPC_HEADERS_DIR}/Dimension.hpp
   ${LIBPC_HEADERS_DIR}/DimensionLayout.hpp
   ${LIBPC_HEADERS_DIR}/FauxReader.hpp 
@@ -68,6 +69,7 @@ set(LIBPC_CPP
   Color.cpp
   ColorFilter.cpp
   CropFilter.cpp
+  DecimationFilter.cpp
   Dimension.cpp
   DimensionLayout.cpp
   FauxReader.cpp
