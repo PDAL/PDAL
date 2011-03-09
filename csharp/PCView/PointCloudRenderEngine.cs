@@ -76,7 +76,10 @@ namespace Flaxen.SlimDXControlLib.MouseExample
         /// <param name="points">an array of points to be displayed</param>
         public PointCloudRenderEngine()
         {
-            Rotation = Matrix.Identity;
+            RotationMatrix = Matrix.Identity;
+
+            ScaleVector = new Vector3(1, 1, 1);
+            TranslationVector = new Vector3(0, 0, 0);
         }
 
 
@@ -183,7 +186,9 @@ namespace Flaxen.SlimDXControlLib.MouseExample
         /// </summary>
         public Vector3 TargetPosition { get; set; }
 
-        public Matrix Rotation { get; set; }
+        public Matrix RotationMatrix { get; set; }
+        public Vector3 ScaleVector { get; set; }
+        public Vector3 TranslationVector { get; set; }
 
         /// <summary>
         /// Implements the logic to render the points.  Called by the SlimDXControl object.
@@ -440,11 +445,9 @@ namespace Flaxen.SlimDXControlLib.MouseExample
         /// </summary>
         private void SetTransforms()
         {
-            // world transfrom: from local coordinates to world coordinates
-            // in our case, from the range [0..100] to [0..1]
-            m_worldTransform = Matrix.Scaling(0.01f, 0.01f, 0.01f);
-
-            m_worldTransform = Rotation * m_worldTransform;
+            // world transform: from local coordinates (geo space) to world coordinates (in [0..1] space)
+            // this involves a scaling and translation, and also a rotation if we are using the trackball
+            m_worldTransform = Matrix.Translation(TranslationVector) * Matrix.Scaling(ScaleVector) * RotationMatrix;
 
             // view transform: from world coordinates to view (camera, eye) coordinates
             // the "up" direction is the Y axis
@@ -456,7 +459,7 @@ namespace Flaxen.SlimDXControlLib.MouseExample
             float zfar = 10.0f; // in view space
             if (m_perspective)
             {
-                float fovY = DegreesToRadians(60);
+                float fovY = DegreesToRadians(45);
                 float aspect = 1.0f;
                 m_projectionTransform = Matrix.PerspectiveFovLH(fovY, aspect, znear, zfar);
             }

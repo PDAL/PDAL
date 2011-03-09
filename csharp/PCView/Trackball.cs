@@ -11,16 +11,16 @@ namespace Flaxen.SlimDXControlLib.MouseExample
     {
         private float m_windowWidth;
         private float m_windowHeight;
+        private Matrix m_previousRotation;
 
-        public Point Previous;
-        public Matrix Rotation;
+        public Point PreviousPoint;
 
         public Trackball(float windowWidth, float windowHeight)
         {
             m_windowWidth = windowWidth;
             m_windowHeight = windowHeight;
-            Previous = new Point(0, 0);
-            Rotation = Matrix.Identity;
+            PreviousPoint = new Point(0, 0);
+            m_previousRotation = Matrix.Identity;
         }
 
         public Vector3 ProjectTo3D(Point point)
@@ -47,7 +47,7 @@ namespace Flaxen.SlimDXControlLib.MouseExample
 
         public Matrix Update(Point point)
         {
-            Vector3 v1 = ProjectTo3D(Previous);
+            Vector3 v1 = ProjectTo3D(PreviousPoint);
             v1.Normalize();
 
             Vector3 v2 = ProjectTo3D(point);
@@ -58,14 +58,14 @@ namespace Flaxen.SlimDXControlLib.MouseExample
 
             float theta = AngleBetween(v1, v2);
 
-            Matrix r = Matrix.RotationAxis(axis, theta);
+            Matrix rotation = Matrix.RotationAxis(axis, theta);
 
-            r = r * Rotation;
-            Rotation = r;
+            rotation = rotation * m_previousRotation;
+            m_previousRotation = rotation;
 
-            Previous = point;
+            PreviousPoint = point;
 
-            return r;
+            return rotation;
         }
 
         private static float AngleBetween(Vector3 v1, Vector3 v2)
@@ -75,5 +75,6 @@ namespace Flaxen.SlimDXControlLib.MouseExample
             float dot = Vector3.Dot(v1, v2);
             return (float)Math.Acos(dot);
         }
+
     }
 }

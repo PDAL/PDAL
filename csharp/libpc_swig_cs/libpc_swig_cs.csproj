@@ -88,8 +88,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bounds_double.cs" />
+    <Compile Include="DecimationFilter.cs" />
     <Compile Include="Dimension.cs" />
     <Compile Include="DimensionLayout.cs" />
+    <Compile Include="Filter.cs" />
     <Compile Include="Header.cs" />
     <Compile Include="ios.cs" />
     <Compile Include="iostream.cs" />

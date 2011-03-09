@@ -49,7 +49,7 @@ namespace Flaxen.SlimDXControlLib.MouseExample
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private PointCloudRenderEngine m_renderEngine;
-        private Point m_downPoint2D;
+        private Point m_downPoint;
         private bool m_isMoving = false;
         private string m_positionString;
         private Trackball m_trackball;
@@ -75,18 +75,23 @@ namespace Flaxen.SlimDXControlLib.MouseExample
 
             float minx, miny, minz, maxx, maxy, maxz;
 
-            //Vector4[] points = CreateFileData(out minx, out miny, out minz, out maxx, out maxy, out maxz);
-            Vector4[] points = CreateRandomData(out minx, out miny, out minz, out maxx, out maxy, out maxz);
-            
+            Vector4[] points = CreateFileData(out minx, out miny, out minz, out maxx, out maxy, out maxz);
+            //Vector4[] points = CreateRandomData(out minx, out miny, out minz, out maxx, out maxy, out maxz);
+
+            float rangeX = maxx - minx;
+            float rangeY = maxy - miny;
+            float rangeZ = maxz - minz;
+            float largestRange = Math.Max(rangeX, Math.Max(rangeY, rangeZ));
+            m_renderEngine.TranslationVector = new Vector3(-minx, -miny, -minz);
+            m_renderEngine.ScaleVector = new Vector3(1 / largestRange, 1 / largestRange, 1 / largestRange);
+
             m_renderEngine.SetPoints(points, minx, miny, minz, maxx, maxy, maxz);
 
-            m_renderEngine.CameraPosition = new Vector3(minx, miny, minz);
-            m_renderEngine.TargetPosition = new Vector3(maxx, maxy, maxz);
+            m_trackball = null;
 
-            m_trackball = new Trackball(450, 450);
-
-            m_renderEngine.CameraPosition = new Vector3(0.5f, 0.5f, -5.1f);
-            m_renderEngine.TargetPosition = new Vector3(0, 0, 0);
+            // world coords
+            m_renderEngine.CameraPosition = new Vector3(0.5f, 0.5f, -10.0f);
+            m_renderEngine.TargetPosition = new Vector3(0.5f, 0.5f, 0.5f);
 
             return;
         }
@@ -114,33 +119,50 @@ namespace Flaxen.SlimDXControlLib.MouseExample
         #region mouse handlers
         private void Mouse_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            Point point = e.GetPosition(x_contentControl);
+
+            if (m_trackball == null)
+            {
+                m_trackball = new Trackball((float)x_contentControl.ActualWidth, (float)x_contentControl.ActualHeight);
+            }
+
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                m_downPoint2D = e.GetPosition(x_contentControl);
-                m_trackball.Previous = m_downPoint2D;
+                m_downPoint = point;
+                m_trackball.PreviousPoint = m_downPoint;
+                m_isMoving = true;
+            }
+            if (e.RightButton == MouseButtonState.Pressed)
+            {
+                m_downPoint = point;
                 m_isMoving = true;
             }
         }
 
         private void Mouse_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            m_downPoint2D = e.GetPosition(x_contentControl);
-            m_trackball.Previous = m_downPoint2D;
-            m_isMoving = false;
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                m_isMoving = false;
+            }
+            if (e.RightButton == MouseButtonState.Pressed)
+            {
+                m_isMoving = false;
+            }
         }
 
         private void Mouse_MouseMove(object sender, MouseEventArgs e)
         {
-            {
-                Point mouse = e.GetPosition(x_contentControl);
+            Point point = e.GetPosition(x_contentControl);
 
-                Vector3 world = m_renderEngine.ConvertToWorldCoordinates(mouse, (float)x_contentControl.ActualWidth, (float)x_contentControl.ActualHeight);
+            {
+                Vector3 world = m_renderEngine.ConvertToWorldCoordinates(point, (float)x_contentControl.ActualWidth, (float)x_contentControl.ActualHeight);
 
                 PositionString = string.Format(
                     CultureInfo.InvariantCulture,
                     "[{0},{1}]  X={2}  Y={3}  Z={4}",
-                    mouse.X,
-                    mouse.Y,
+                    point.X,
+                    point.Y,
                     world.X.ToString("F1", CultureInfo.InvariantCulture),
                     world.Y.ToString("F1", CultureInfo.InvariantCulture),
                     world.Z.ToString("F1", CultureInfo.InvariantCulture));
@@ -150,10 +172,25 @@ namespace Flaxen.SlimDXControlLib.MouseExample
             {
                 if (m_isMoving)
                 {
-                    Point currPoint2D = e.GetPosition(x_contentControl);
-                    Matrix rotation = m_trackball.Update(currPoint2D);
-
-                    m_renderEngine.Rotation = rotation;
+                    Matrix rotation = m_trackball.Update(point);
+                    m_renderEngine.RotationMatrix = rotation;
+                }
+            }
+            if (e.RightButton == MouseButtonState.Pressed)
+            {
+                if (m_isMoving)
+                {
+                    float x = (float)(m_downPoint.X - point.X);
+                    float y = -(float)(m_downPoint.Y - point.Y);
+                    Vector3 vc = m_renderEngine.CameraPosition;
+                    Vector3 vt = m_renderEngine.TargetPosition;
+                    vc.X += x / 100;
+                    vc.Y += y / 100;
+                    vt.X += x / 100;
+                    vt.Y += y / 100;
+                    m_renderEngine.CameraPosition = vc;
+                    m_renderEngine.TargetPosition = vt;
+                    m_downPoint = point;
                 }
             }
 
@@ -162,16 +199,27 @@ namespace Flaxen.SlimDXControlLib.MouseExample
 
         private void Mouse_MouseWheel(object sender, MouseWheelEventArgs e)
         {
+            ////float s = (float)e.Delta / 100;
+            ////if (s < 0) s = 1 / -s;
+
+            ////m_renderEngine.Scale *= Matrix.Scaling(s,s,s);
+            //m_renderEngine.Scale = m_trackball.Scale(e.Delta);
+
             Vector3 camera = m_renderEngine.CameraPosition;
-            camera.Z += e.Delta / 100.0f;
-            camera.Z += e.Delta / 100.0f;
+            camera.Z += e.Delta / (120.0f * 1);
+            if (camera.Z >= m_renderEngine.TargetPosition.Z) return;
             m_renderEngine.CameraPosition = camera;
+            return;
         }
         #endregion
 
+        private DecimationFilter m_filter = null; // BUG: swig scoping issue
+        private LiblasReader m_reader = null;
+
         private Vector4[] CreateFileData(out float minx, out float miny, out float minz, out float maxx, out float maxy, out float maxz)
         {
-            string file = "../../test/data/1.2-with-color.las";
+            //string file = "../../test/data/1.2-with-color.las";
+            string file = "../../test/data/hobu.las";
 
             Vector4 red = new Vector4(1, 0, 0, 1);
             Vector4 green = new Vector4(0, 1, 0, 1);
@@ -180,9 +228,20 @@ namespace Flaxen.SlimDXControlLib.MouseExample
             List<Vector4> points = new List<Vector4>();
 
             istream istr = Utils.openFile(file);
-            LiblasReader reader = new LiblasReader(istr);
+            m_reader = new LiblasReader(istr);
 
-            Header header = reader.getHeader();
+            Stage stage = m_reader;
+            {
+                int np = (int)m_reader.getNumPoints();
+                if (np > 100000)
+                {
+                    int step = np / 100000;
+                    m_filter = new DecimationFilter(m_reader, step);
+                    stage = m_filter;
+                }
+            }
+
+            Header header = stage.getHeader();
             Bounds_double bounds = header.getBounds();
             minx = (float)bounds.getMinimum(0);
             miny = (float)bounds.getMinimum(1);
@@ -191,22 +250,23 @@ namespace Flaxen.SlimDXControlLib.MouseExample
             maxy = (float)bounds.getMaximum(1);
             maxz = (float)bounds.getMaximum(2);
 
-            minx -= 635619.9f;
-            miny -= 848899.7f;
-            minz -= 406.59f;
-            maxx -= 635619.9f;
-            maxy -= 848899.7f;
-            maxz -= 406.59f;
+            // 1.2-with-color
+            //minx 635619.9f
+            //miny 848899.7f
+            //minz 406.59f
+            //maxx 638982.563
+            //maxy 853535.438
+            //maxz 586.38
 
+            ulong numPoints = stage.getNumPoints();
+            //numPoints = Math.Min(numPoints, 100000);
 
-            ulong numPoints = reader.getNumPoints();
-
-            Schema schema = reader.getHeader().getSchema();
+            Schema schema = stage.getHeader().getSchema();
             SchemaLayout layout = new SchemaLayout(schema);
 
-            PointData data = new PointData(layout, 1000);
+            PointData data = new PointData(layout,(uint)numPoints);
 
-            uint numRead = reader.read(data);
+            uint numRead = stage.read(data);
 
             uint offsetX = (uint)schema.getDimensionIndex(Dimension.Field.Field_X);
             uint offsetY = (uint)schema.getDimensionIndex(Dimension.Field.Field_Y);
@@ -224,21 +284,33 @@ namespace Flaxen.SlimDXControlLib.MouseExample
                 float y = (float)schema.getDimension(offsetY).getNumericValue_Int32(yraw);
                 float z = (float)schema.getDimension(offsetZ).getNumericValue_Int32(zraw);
 
+                if (index == 0)
+                {
+                    minx = maxx = x;
+                    miny = maxy = y;
+                    minz = maxz = z;
+                }
+                else
+                {
+                    minx = Math.Min(x, minx);
+                    miny = Math.Min(y, miny);
+                    minz = Math.Min(z, minz);
+                    maxx = Math.Max(x, maxx);
+                    maxy = Math.Max(y, maxy);
+                    maxz = Math.Max(z, maxz);
+                }
+
                 UInt16 r = data.getField_UInt16(index, offsetX);
                 UInt16 g = data.getField_UInt16(index, offsetY);
                 UInt16 b = data.getField_UInt16(index, offsetZ);
-
-                x -= 635619.9f;
-                y -= 848899.7f;
-                z -= 406.59f;
 
                 points.Add(new Vector4(x, y, z, 1));
 
                 float rf = (float)r / 65535.0f;
                 float gf = (float)g / 65535.0f;
                 float bf = (float)b / 65535.0f;
-                //points.Add(new Vector4(rf, gf, bf, 1));
-                points.Add(blue);
+                points.Add(new Vector4(rf, gf, bf, 1));
+                //points.Add(blue);
             }
 
             Utils.closeFile(istr);

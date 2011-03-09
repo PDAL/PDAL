@@ -59,6 +59,8 @@
 #include "libpc/Filter.hpp"
 #include "libpc/Producer.hpp"
 
+#include "libpc/DecimationFilter.hpp"
+
 #include "libpc/../../src/drivers/liblas/header.hpp"
 #include "libpc/../../src/drivers/liblas/reader.hpp"
 %}
@@ -394,6 +396,19 @@ public:
     virtual boost::uint64_t getCurrentPointIndex() const;
 };
 
+class Filter : public Stage
+{
+public:
+    Reader(int);
+    virtual void readBegin(boost::uint32_t numPointsToRead);
+
+    virtual void readEnd(boost::uint32_t numPointsRead);
+
+    virtual void seekToPoint(boost::uint64_t pointNum);
+
+    virtual boost::uint64_t getCurrentPointIndex() const;
+};
+
 
 class LiblasHeader : public Header
 {
@@ -409,6 +424,14 @@ public:
     ~LiblasReader();
     const libpc::LiblasHeader& getLiblasHeader() const;
     boost::int8_t getPointFormatNumber() const;
+};
+
+%feature("notabstract") DecimationFilter;
+class DecimationFilter : public Filter
+{
+public:
+    DecimationFilter(Stage&, int);
+    ~LiblasReader();
 };
 
 class Utils
