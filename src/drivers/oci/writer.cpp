@@ -34,6 +34,8 @@
 
 
 #include <cassert>
+#include <sstream>
+#include <cctype> // toupper
 
 #include "writer.hpp"
 #include "header.hpp"
@@ -42,29 +44,98 @@
 #include <libpc/exceptions.hpp>
 #include <libpc/libpc_config.hpp>
 
+#include <cstdlib>
+#include <iostream>
 
-namespace libpc
+#include <boost/make_shared.hpp>
+
+namespace libpc { namespace driver { namespace oci {
+
+Options::Options()
+{
+    m_tree.put("3d", false);
+    m_tree.put("solid", false);
+    m_tree.put("overwrite", false);
+    m_tree.put("debug", false);
+    m_tree.put("verbose", false);
+    m_tree.put("srid", 4269);
+    m_tree.put("capacity", 8000);
+    m_tree.put("precision", 8);
+    m_tree.put("pcid", -1);
+    m_tree.put("connection", std::string(""));
+    m_tree.put("block_table_name", std::string("output"));
+    m_tree.put("block_table_partition_column", std::string(""));
+    m_tree.put("block_table_partition_value", std::string(""));
+    m_tree.put("base_table_name", std::string("hobu"));
+    m_tree.put("cloud_column_name", std::string("cloud"));
+    m_tree.put("header_blob_column_name", std::string("header"));
+    m_tree.put("header_blob_column_name", std::string("header"));
+    m_tree.put("base_table_aux_columns", std::string(""));
+    m_tree.put("base_table_aux_values", std::string(""));
+    m_tree.put("pre_block_sql", std::string(""));
+    m_tree.put("pre_sql", std::string(""));
+    m_tree.put("post_block_sql", libpc::Bounds<double>());
+}    
+
+bool Options::IsDebug() const
+{
+    bool debug = false;
+    try
+    {
+        debug = m_tree.get<bool>("debug");
+    }
+    catch (liblas::property_tree::ptree_bad_path const& e) {
+      ::boost::ignore_unused_variable_warning(e);
+      
+    }
+    return debug;
+}
+
+Writer::Writer(Stage& prevStage, Options& options)
+    : Consumer(prevStage)
+    , m_stage(prevStage)
+    , m_chipper(m_stage, options.GetPTree().get<boost::uint32_t>("capacity") )
+    , m_options(options)
+    , m_verbose(false)
 {
 
-
-OCIWriter::OCIWriter(Stage& prevStage, boost::uint32_t block_size)
-    : Consumer(prevStage), m_stage(prevStage), m_block_size(block_size)
-{
-
-    chipper::Chipper c(m_stage, m_block_size );
-    c.Chip();
     
     return;
 }
 
+Connection Writer::Connect()
+{
+    std::string connection = m_options.GetPTree().get<std::string>("connection");
+    if (connection.empty())
+        throw libpc_error("Oracle connection string empty! Unable to connect");
 
-OCIWriter::~OCIWriter()
+    
+    std::string::size_type slash_pos = connection.find("/",0);
+    std::string username = connection.substr(0,slash_pos);
+    std::string::size_type at_pos = connection.find("@",slash_pos);
+
+    std::string password = connection.substr(slash_pos+1, at_pos-slash_pos-1);
+    std::string instance = connection.substr(at_pos+1);
+    
+    Connection con = boost::make_shared<OWConnection>(username.c_str(),password.c_str(),instance.c_str());
+    
+    if (con->Succeeded())
+        if (m_verbose)
+            std::cout << "Oracle connection succeeded" << std::endl;
+    else
+        throw libpc_error("Oracle connection failed");
+        
+    return con;
+    
+}
+
+Writer::~Writer()
 {
     return;
 }
 
 
-const std::string& OCIWriter::getName() const
+const std::string& Writer::getName() const
 {
     static std::string name("OCI Writer");
     return name;
@@ -75,21 +146,270 @@ const std::string& OCIWriter::getName() const
 
 
 
-void OCIWriter::writeBegin()
+void Writer::run(std::ostringstream const& command)
+{
+    Statement statement = Statement(m_connection->CreateStatement(command.str().c_str()));
+    
+    // Because of OCIGDALErrorHandler, this is going to throw if there is a 
+    // problem.  When it does, the statement should go out of scope and 
+    // be destroyed without leaking.
+    statement->Execute();
+}
+
+void Writer::WipeBlockTable()
+{
+    std::ostringstream oss;
+    
+    std::string block_table_name = m_options.GetPTree().get<std::string>("block_table_name");
+    std::string base_table_name = m_options.GetPTree().get<std::string>("base_table_name");
+    std::string cloud_column_name = m_options.GetPTree().get<std::string>("cloud_column_name");
+    
+    oss << "DELETE FROM " << block_table_name;
+    try {
+        run(oss);    
+    } catch (libpc_error const&) 
+    {
+        // if we failed, let's try dropping the spatial index for the block_table_name
+        oss.str("");
+        if (m_options.IsDebug()) 
+            std::cout << "Dropping index " << block_table_name 
+                      << "_cloud_idx for block_table_name" 
+                      << std::endl;
+        oss << "DROP INDEX " << block_table_name << "_cloud_idx" ;
+        run(oss);
+        oss.str("");
+        
+        oss << "DELETE FROM " << block_table_name;
+        run(oss);
+        oss.str("");
+    }
+    
+    oss.str("");
+
+    // These need to be uppercase to satisfy the PLSQL function
+    cloud_column_name = to_upper(cloud_column_name);
+    base_table_name = to_upper(base_table_name);
+    
+    oss << "declare\n"
+           "begin \n"
+           "  mdsys.sdo_pc_pkg.drop_dependencies('" 
+           << base_table_name <<
+           "', '" 
+           << cloud_column_name <<
+           "'); end;";
+    run(oss);
+    oss.str("");
+    
+    oss << "DROP TABLE" << block_table_name;
+    run(oss);
+    oss.str("");
+
+    // Oracle upper cases the table name when inserting it in the 
+    // USER_SDO_GEOM_METADATA.  We'll use std::transform to do it. 
+    // See http://forums.devx.com/showthread.php?t=83058 for the 
+    // technique
+    
+    block_table_name = to_upper(block_table_name);
+    oss << "DELETE FROM USER_SDO_GEOM_METADATA WHERE TABLE_NAME='" << block_table_name << "'" ;
+    run(oss);
+}
+
+void Writer::CreateBlockIndex()
+{
+    std::ostringstream oss;
+    std::string block_table_name = m_options.GetPTree().get<std::string>("block_table_name");
+    
+    bool is3d = m_options.GetPTree().get<bool>("3d");
+    oss << "CREATE INDEX "<< block_table_name << "_cloud_idx on "
+        << block_table_name << "(blk_extent) INDEXTYPE IS MDSYS.SPATIAL_INDEX";
+    
+    if (is3d)
+    {
+        oss <<" PARAMETERS('sdo_indx_dims=3')";
+    }
+    
+    run(oss);
+    oss.str("");
+
+    oss << "CREATE INDEX " << block_table_name <<"_objectid_idx on " 
+        << block_table_name << "(OBJ_ID,BLK_ID) COMPRESS 2" ;
+    run(oss);
+    oss.str("");
+
+    
+}
+
+bool Writer::BlockTableExists()
+{
+
+    std::ostringstream oss;
+    std::string block_table_name = m_options.GetPTree().get<std::string>("block_table_name");
+    
+    char szTable[OWNAME]= "";
+    oss << "select table_name from user_tables where table_name like upper('%%"<< block_table_name <<"%%') ";
+
+
+    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+    
+    // Because of OCIGDALErrorHandler, this is going to throw if there is a 
+    // problem.  When it does, the statement should go out of scope and 
+    // be destroyed without leaking.
+    statement->Execute();
+    
+    statement->Define(szTable);
+    
+    try {
+        statement->Execute();
+    } catch (libpc_error const& ) {
+        // Assume for now that an error returned here is OCI_NODATA, which means 
+        // the table doesn't exist.  If this really isn't the case, we're going 
+        // to get more legit message further down the line.
+        return false;
+    }  
+    
+    return true;
+    
+}
+
+void Writer::CreateBlockTable()
+{
+    std::ostringstream oss;
+    std::string block_table_name = m_options.GetPTree().get<std::string>("block_table_name");
+    
+    oss << "CREATE TABLE " << block_table_name << " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
+    
+    run(oss);
+    m_connection->Commit();
+    
+}
+
+bool Writer::IsGeographic(boost::int32_t srid)
+
+{
+    typedef boost::shared_ptr<long> shared_long;
+    typedef boost::shared_ptr<char> shared_char;
+    std::ostringstream oss;
+    // char* kind = (char* ) malloc (OWNAME * sizeof(char));
+    shared_char kind = boost::shared_ptr<char>(new char[OWNAME]);
+    oss << "SELECT COORD_REF_SYS_KIND from MDSYS.SDO_COORD_REF_SYSTEM WHERE SRID = :1";
+    
+    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+
+    shared_long p_srid = boost::shared_ptr<long>(new long);
+    *p_srid = srid;
+    // p_srid[0] = srid;
+    
+    statement->Bind(p_srid.get());
+    statement->Define(kind.get());    
+    
+    try {
+        statement->Execute();
+    } catch (libpc_error const& e) {
+        std::ostringstream oss;
+        oss << "Failed to fetch geographicness of srid " << srid << std::endl << e.what() << std::endl;
+        throw std::runtime_error(oss.str());
+    }  
+    
+    if (compare_no_case(kind.get(), "GEOGRAPHIC2D",12) == 0) {
+        // delete statement;
+        // free(kind);
+        // free(p_srid);
+        return true;
+    }
+    if (compare_no_case(kind.get(), "GEOGRAPHIC3D",12) == 0) {
+        // delete statement;
+        // free(kind);
+        // free(p_srid);
+        return true;
+    }
+
+    // free(kind);
+    // free(p_srid);
+
+    return false;
+    
+}
+
+std::string Writer::LoadSQLData(std::string const& filename)
+{
+    if (!Utils::fileExists(filename))
+    {
+        std::ostringstream oss;
+        oss << filename << " does not exist";
+        throw libpc_error(oss.str());
+    }
+
+    std::istream::pos_type size;    
+    std::istream* input = Utils::openFile(filename);
+    input->seekg(std::ios::end);
+    
+    char* data;
+    if (input->good()){
+        size = input->tellg();
+        data = new char [static_cast<boost::uint32_t>(size)];
+        input->seekg (0, std::ios::beg);
+        input->read (data, size);
+        // infile->close();
+
+        std::string output = std::string(data, (std::size_t) size);
+        delete[] data;
+        Utils::closeFile(input);
+        return output;
+    } 
+    else 
+    {   
+        Utils::closeFile(input);
+        return std::string("");
+    }    
+    
+}
+
+void Writer::RunFileSQL(std::string const& filename)
+{
+    std::ostringstream oss;
+    std::string sql = m_options.GetPTree().get<std::string>(filename);
+    
+    oss << sql;
+
+    if (m_options.IsDebug())
+        std::cout << "running "<< filename << " ..." <<std::endl;
+
+    run(oss);
+    
+}
+void Writer::writeBegin()
+{
+    
+    m_chipper.Chip();
+
+    // cumulate a global bounds for the dataset
+    for ( boost::uint32_t i = 0; i < m_chipper.GetBlockCount(); ++i )
+    {
+        const chipper::Block& b = m_chipper.GetBlock(i);
+        m_bounds.grow(b.GetBounds());        
+    }
+
+    // Set up debugging info
+    Debug();
+    
+    m_connection = Connect();
+    
+    RunFileSQL("pre_sql");
+    if (!BlockTableExists())
+        CreateBlockTable();
+    
+    return;
+}
+
+
+void Writer::writeEnd()
 {
 
     return;
 }
 
 
-void OCIWriter::writeEnd()
-{
-
-    return;
-}
-
-
-boost::uint32_t OCIWriter::writeBuffer(const PointData& pointData)
+boost::uint32_t Writer::writeBuffer(const PointData& pointData)
 {
     // bool hasTimeData = false;
     // bool hasColorData = false;
@@ -216,4 +536,65 @@ boost::uint32_t OCIWriter::writeBuffer(const PointData& pointData)
     return 0;
 }
 
-} // namespace libpc
+void Writer::Debug()
+{
+    bool debug = m_options.IsDebug();
+    
+
+    const char* gdal_debug = getenv("CPL_DEBUG");
+    if (gdal_debug == 0)
+    {
+        char d[20] = "CPL_DEBUG=ON";
+        putenv(d);
+    }
+    
+    if (debug)
+    {
+        m_verbose = true;
+    }
+
+    CPLPopErrorHandler();
+    if (debug)
+        CPLPushErrorHandler(OCIGDALDebugErrorHandler);
+    else
+        CPLPushErrorHandler(OCIGDALErrorHandler);
+}
+
+void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
+{
+    std::ostringstream oss;
+    
+    if (eErrClass == CE_Failure || eErrClass == CE_Fatal) {
+        oss <<"GDAL Failure number=" << err_no << ": " << msg;
+        throw libpc_error(oss.str());
+    } else if (eErrClass == CE_Debug) {
+        std::cout <<"GDAL Debug: " << msg << std::endl;
+    } else {
+        return;
+    }
+}
+
+void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
+{
+    std::ostringstream oss;
+    
+    if (eErrClass == CE_Failure || eErrClass == CE_Fatal) {
+        oss <<"GDAL Failure number=" << err_no << ": " << msg;
+        throw libpc_error(oss.str());
+    } else {
+        return;
+    }
+}
+
+std::string to_upper(const std::string& input)
+{
+    std::string inp = std::string(input);
+    std::string output = std::string(input);
+    
+    std::transform(inp.begin(), inp.end(), output.begin(), static_cast < int(*)(int) > (toupper));
+    
+    return output;
+}
+
+}}} // namespace libpc::driver::oci
+

@@ -37,19 +37,62 @@
 
 #include <libpc/Consumer.hpp>
 #include <libpc/chipper.hpp>
+
 #include "block.hpp"
+#include "oci_wrapper.h"
 
-namespace libpc
+#include <vector>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/shared_ptr.hpp>
+
+#include <cpl_port.h>
+
+namespace libpc { namespace driver { namespace oci {
+
+#ifdef _WIN32
+#define compare_no_case(a,b,n)  _strnicmp( (a), (b), (n) )
+#else
+#define compare_no_case(a,b,n)  strncasecmp( (a), (b), (n) )
+#endif
+
+
+class Options;
+
+typedef boost::shared_ptr<OWConnection> Connection ;
+typedef boost::shared_ptr<OWStatement> Statement ;
+
+void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
+void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
+std::string to_upper(std::string const& input);
+
+class LIBPC_DLL Options
 {
 
-class LIBPC_DLL OCIWriter : public Consumer
-{
+private:
+    boost::property_tree::ptree m_tree;
+
 public:
-    OCIWriter(Stage& prevStage, boost::uint32_t block_size);
-    ~OCIWriter();
 
-    const std::string& getName() const;
+    Options();
+    bool IsDebug() const;
+    boost::property_tree::ptree GetPTree() const {return m_tree; }
+
+};
+
+
+
+class LIBPC_DLL Writer : public Consumer
+{
+    typedef std::vector<libpc::driver::oci::Block> Blocks;
     
+public:
+    Writer(Stage& prevStage, Options& options);
+    ~Writer();
+    
+    const std::string& getName() const;
+
+    void run(std::ostringstream const& command);
+
 protected:
     // this is called once before the loop with the writeBuffer calls
     virtual void writeBegin();
@@ -63,13 +106,30 @@ protected:
 private:
 
 
-    OCIWriter& operator=(const OCIWriter&); // not implemented
-    OCIWriter(const OCIWriter&); // not implemented
+    Writer& operator=(const Writer&); // not implemented
+    Writer(const Writer&); // not implemented
+    // 
+    Connection Connect();
+    void Debug();
+    void WipeBlockTable();
+    void CreateBlockIndex();
+    void CreateBlockTable();
+    bool BlockTableExists();
+    void RunFileSQL(std::string const& filename);
+    bool IsGeographic(boost::int32_t srid);
+    std::string LoadSQLData(std::string const& filename);
     
     Stage& m_stage;
-    boost::uint32_t m_block_size;
+    chipper::Chipper m_chipper;
+    
+    Options& m_options;
+    Blocks m_blocks;
+    libpc::Bounds<double> m_bounds; // Bounds of the entire point cloud
+    Connection m_connection;
+    bool m_verbose;
 };
 
-} // namespace libpc
+}}} // namespace libpc::driver::oci
+
 
 #endif // INCLUDED_OCIWRITER_HPP

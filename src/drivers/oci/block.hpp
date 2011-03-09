@@ -46,10 +46,12 @@ class LIBPC_DLL Block
 {
 public:
     Block( chipper::Block const& block);
-    
+
+    Block(Block const& other) : m_block(other.m_block) {};
+        
 private:
     Block& operator=(const Block&); // nope
-    Block(const Block&); // nope
+
     
     chipper::Block const&  m_block;
     
