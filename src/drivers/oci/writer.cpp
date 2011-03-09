@@ -92,6 +92,20 @@ bool Options::IsDebug() const
     return debug;
 }
 
+bool Options::Is3d() const
+{
+    bool is3d = false;
+    try
+    {
+        is3d = m_tree.get<bool>("is3d");
+    }
+    catch (liblas::property_tree::ptree_bad_path const& e) {
+      ::boost::ignore_unused_variable_warning(e);
+      
+    }
+    return is3d;
+}
+
 Writer::Writer(Stage& prevStage, Options& options)
     : Consumer(prevStage)
     , m_stage(prevStage)
@@ -220,7 +234,7 @@ void Writer::CreateBlockIndex()
     std::ostringstream oss;
     std::string block_table_name = m_options.GetPTree().get<std::string>("block_table_name");
     
-    bool is3d = m_options.GetPTree().get<bool>("is3d");
+    bool is3d = m_options.Is3d();
     oss << "CREATE INDEX "<< block_table_name << "_cloud_idx on "
         << block_table_name << "(blk_extent) INDEXTYPE IS MDSYS.SPATIAL_INDEX";
     
@@ -237,6 +251,64 @@ void Writer::CreateBlockIndex()
     run(oss);
     oss.str("");
 
+    
+}
+
+void Writer::CreateSDOEntry()
+{
+    boost::property_tree::ptree  tree = m_options.GetPTree();    
+    std::string block_table_name = tree.get<std::string>("block_table_name");
+
+    boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
+    boost::uint32_t precision = tree.get<boost::uint32_t>("precision");
+    
+    bool bUse3d = m_options.Is3d();
+    
+
+    std::ostringstream oss;
+
+    std::ostringstream oss_geom;
+    
+    oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    oss.precision(precision);
+
+    std::ostringstream s_srid;
+    
+
+    if (srid == 0) {
+        s_srid << "NULL";
+        // bUse3d = true;
+    }
+    else {
+        s_srid << srid;
+    }
+
+    double tolerance = 0.05;
+    libpc::Bounds<double> e = m_bounds;
+
+    if (IsGeographic(srid)) {
+        e.setMinimum(0,-180.0); e.setMaximum(0,180.0);
+        e.setMinimum(1,-90.0); e.setMaximum(1,90.0);
+        e.setMinimum(2,0.0); e.setMaximum(2,20000.0);
+
+        tolerance = 0.000000005;
+    }
+
+ 
+    oss <<  "INSERT INTO user_sdo_geom_metadata VALUES ('" << block_table_name <<
+        "','blk_extent', MDSYS.SDO_DIM_ARRAY(";
+    
+    oss << "MDSYS.SDO_DIM_ELEMENT('X', " << e.getMinimum(0) << "," << e.getMaximum(0) <<"," << tolerance << "),"
+           "MDSYS.SDO_DIM_ELEMENT('Y', " << e.getMinimum(1) << "," << e.getMaximum(1) <<"," << tolerance << ")";
+           
+    if (bUse3d) {
+        oss << ",";
+        oss <<"MDSYS.SDO_DIM_ELEMENT('Z', "<< e.getMinimum(2) << "," << e.getMaximum(2) << "," << tolerance << ")";
+    }
+    oss << ")," << s_srid.str() << ")";
+    
+    run(oss);
+    oss.str("");
     
 }
 
@@ -576,7 +648,8 @@ void Writer::writeBegin()
     for ( boost::uint32_t i = 0; i < m_chipper.GetBlockCount(); ++i )
     {
         const chipper::Block& b = m_chipper.GetBlock(i);
-        m_bounds.grow(b.GetBounds());        
+        if (m_bounds.empty()) // If the user already set the bounds for this writer, we're using that
+            m_bounds.grow(b.GetBounds());        
     }
 
     // Set up debugging info

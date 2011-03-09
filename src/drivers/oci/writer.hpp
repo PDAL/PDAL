@@ -75,6 +75,7 @@ public:
 
     Options();
     bool IsDebug() const;
+    bool Is3d() const;
     boost::property_tree::ptree GetPTree() const {return m_tree; }
 
 };
@@ -115,6 +116,7 @@ private:
     void WipeBlockTable();
     void CreateBlockIndex();
     void CreateBlockTable();
+    void CreateSDOEntry();
     long CreatePCEntry(std::vector<boost::uint8_t> const* header_data);
     long GetGType();
     std::string CreatePCElemInfo();
