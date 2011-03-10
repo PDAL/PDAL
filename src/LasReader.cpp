@@ -190,12 +190,12 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData)
         else if (pointFormat == LasHeader::ePointFormat1)
         {
             throw;
-            Utils::read_n(buf, m_istream, LasHeader::ePointSize1);
+            //Utils::read_n(buf, m_istream, LasHeader::ePointSize1);
         }
         else if (pointFormat == LasHeader::ePointFormat2)
         {
             throw;
-            Utils::read_n(buf, m_istream, LasHeader::ePointSize2);
+            //Utils::read_n(buf, m_istream, LasHeader::ePointSize2);
         }
         else if (pointFormat == LasHeader::ePointFormat3)
         {
