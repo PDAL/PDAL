@@ -75,6 +75,7 @@ protected:
 protected:
     Application(int argc, char* argv[], const std::string& appName);
     void addOptionSet(boost::program_options::options_description* options);
+    void addPositionalOption(const char* name, int max_count);
     bool isVerbose() const;
     bool hasOption(const std::string& name);
     void usageError(const std::string&);
@@ -92,6 +93,7 @@ private:
     const std::string m_appName;
 
     std::vector<boost::program_options::options_description*> m_options;
+    boost::program_options::positional_options_description m_positionalOptions;
     boost::program_options::variables_map m_variablesMap;
 
     Application& operator=(const Application&); // not implemented

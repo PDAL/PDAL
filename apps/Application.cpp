@@ -144,7 +144,14 @@ bool Application::isVerbose() const
 
 void Application::addOptionSet(po::options_description* options)
 {
+    if (!options) return;
     m_options.push_back(options);
+}
+
+
+void Application::addPositionalOption(const char* name, int max_count)
+{
+    m_positionalOptions.add(name, max_count);
 }
 
 
@@ -200,19 +207,16 @@ void Application::parseOptions()
 {
     po::options_description options;
 
-    std::vector<po::options_description*>::iterator iter;
-    for (iter = m_options.begin(); iter != m_options.end(); ++iter)
+    std::vector<po::options_description*>::iterator iter1;
+    for (iter1 = m_options.begin(); iter1 != m_options.end(); ++iter1)
     {
-        po::options_description* sub_options = *iter;
+        po::options_description* sub_options = *iter1;
         options.add(*sub_options);
     }
 
-    //po::positional_options_description p;
-    //p.add("input", 1);
-    //p.add("output", 1);
-
     po::store(po::command_line_parser(m_argc, m_argv).
-        options(options)/*.positional(p)*/.run(), m_variablesMap);
+        options(options).positional(m_positionalOptions).run(), 
+        m_variablesMap);
 
     po::notify(m_variablesMap);
 
