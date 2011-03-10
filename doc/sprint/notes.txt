@@ -64,3 +64,5 @@
 * update Notes to match realities
 
 * discuss funding opportunities
+
+* in-place writer ability, breaks model

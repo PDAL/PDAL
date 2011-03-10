@@ -70,7 +70,7 @@ PointData::~PointData()
 bool
 PointData::isValid(std::size_t index) const
 {
-    return static_cast<bool>(m_isValid[index]);
+    return (m_isValid[index] != 0);
 }
 
 bool PointData::allValid() const
@@ -133,7 +133,7 @@ void PointData::copyPointsFast(std::size_t destPointIndex, std::size_t srcPointI
 
     if (srcPointData.allValid())
     {
-        m_isValid.assign(1, m_isValid.size());
+        m_isValid.assign(m_isValid.size(), 1);
     }
     else 
     {
