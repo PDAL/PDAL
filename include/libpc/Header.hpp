@@ -70,6 +70,8 @@ public:
     const Metadata::Array& getMetadata() const;
     Metadata::Array& getMetadata();
 
+    void dump() const;
+
 private:
     Schema m_schema;
     boost::uint64_t m_numPoints;
