@@ -355,7 +355,7 @@ set(LIBPC_DATA_DIR ${LIBPC_DATA_SUBDIR})
 # installation commands
 #------------------------------------------------------------------------------
 
-install(FILES AUTHORS COPYING INSTALL LICENSE.txt README.txt
+install(FILES AUTHORS.txt LICENSE.txt
   DESTINATION ${LIBPC_DATA_DIR}/doc)
 
 
