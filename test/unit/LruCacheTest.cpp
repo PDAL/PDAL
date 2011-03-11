@@ -92,4 +92,92 @@ BOOST_AUTO_TEST_CASE(test1)
     return;
 }
 
+
+class MyItem
+{
+public:
+    MyItem(int index, double data) : m_index(index), m_data(data) {}
+    MyItem(const MyItem& other)
+    {
+        m_index = other.m_index;
+        m_data = other.m_data;
+    }
+
+    MyItem& operator=(MyItem const& rhs)
+    {
+        if (&rhs != this)
+        {
+            m_index = rhs.m_index;
+            m_data = rhs.m_data;
+        }
+        return *this;
+    }
+
+    bool operator==(const MyItem& other) const
+    {
+        if (m_index == other.m_index) return true;
+        return false;
+    }
+
+    int m_index;
+    double m_data;
+};
+
+// Dummy function we want to cache 
+int cache_func(MyItem* item)
+{ 
+    ++count_evaluations; 
+    return item->m_index;
+}
+
+BOOST_AUTO_TEST_CASE(test2)
+{
+    MyItem* item1 = new MyItem(1,11);
+    MyItem* item11 = new MyItem(1,11);
+    MyItem* item2 = new MyItem(2,22);
+    MyItem* item3 = new MyItem(3,33);
+    MyItem* item33 = new MyItem(3,33);
+
+    count_evaluations = 0;
+
+    LruCache<MyItem*,int> lru(cache_func,2);
+
+    // bunch of insertions/lookups
+    lru(item1);
+    lru(item1);
+    lru(item2);
+    lru(item2);
+    lru(item1);
+    lru(item1);
+    lru(item3);
+    lru(item3);
+    lru(item1);
+     
+    BOOST_CHECK(count_evaluations == 3);
+
+    { 
+        std::vector<MyItem*> actual; 
+        lru.get_keys(std::back_inserter(actual)); 
+        BOOST_CHECK(actual.size() == 2); 
+        BOOST_CHECK(actual[0]->m_index == 1); 
+        BOOST_CHECK(actual[1]->m_index == 3); 
+    }
+
+    lru(item33);
+    lru(item11);
+     
+    BOOST_CHECK(count_evaluations == 5);
+
+    { 
+        std::vector<MyItem*> actual; 
+        lru.get_keys(std::back_inserter(actual)); 
+        BOOST_CHECK(actual.size() == 2); 
+        BOOST_CHECK(actual[0]->m_index == 1); 
+        BOOST_CHECK(actual[1]->m_index == 3); 
+    }
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
