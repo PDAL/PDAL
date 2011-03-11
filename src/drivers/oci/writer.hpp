@@ -47,6 +47,10 @@
 
 #include <cpl_port.h>
 
+void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
+void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
+
+
 namespace libpc { namespace driver { namespace oci {
 
 #ifdef _WIN32
@@ -61,8 +65,6 @@ class Options;
 typedef boost::shared_ptr<OWConnection> Connection ;
 typedef boost::shared_ptr<OWStatement> Statement ;
 
-void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
-void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
 std::string to_upper(std::string const& input);
 
 class LIBPC_DLL Options
@@ -76,7 +78,7 @@ public:
     Options();
     bool IsDebug() const;
     bool Is3d() const;
-    boost::property_tree::ptree GetPTree() const {return m_tree; }
+    boost::property_tree::ptree& GetPTree() {return m_tree; }
 
 };
 

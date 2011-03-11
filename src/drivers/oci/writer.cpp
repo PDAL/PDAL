@@ -277,7 +277,6 @@ void Writer::CreateSDOEntry()
 
     if (srid == 0) {
         s_srid << "NULL";
-        // bUse3d = true;
     }
     else {
         s_srid << srid;
@@ -287,6 +286,7 @@ void Writer::CreateSDOEntry()
     libpc::Bounds<double> e = m_bounds;
 
     if (IsGeographic(srid)) {
+        // FIXME: This should be overrideable
         e.setMinimum(0,-180.0); e.setMaximum(0,180.0);
         e.setMinimum(1,-90.0); e.setMaximum(1,90.0);
         e.setMinimum(2,0.0); e.setMaximum(2,20000.0);
@@ -327,9 +327,10 @@ bool Writer::BlockTableExists()
     // Because of OCIGDALErrorHandler, this is going to throw if there is a 
     // problem.  When it does, the statement should go out of scope and 
     // be destroyed without leaking.
+    statement->Define(szTable);
+
     statement->Execute();
     
-    statement->Define(szTable);
     
     try {
         statement->Execute();
@@ -434,8 +435,18 @@ void Writer::RunFileSQL(std::string const& filename)
 {
     std::ostringstream oss;
     std::string sql = m_options.GetPTree().get<std::string>(filename);
-    
-    oss << sql;
+        
+    if (!sql.size()) return;
+
+    if (!Utils::fileExists(sql))
+    {
+        oss << sql;
+    } else {
+        oss << LoadSQLData(sql);  // Our "sql" is really the filename in the ptree
+    }
+
+
+   
 
     if (m_options.IsDebug())
         std::cout << "running "<< filename << " ..." <<std::endl;
@@ -648,6 +659,8 @@ void Writer::writeBegin()
     for ( boost::uint32_t i = 0; i < m_chipper.GetBlockCount(); ++i )
     {
         const chipper::Block& b = m_chipper.GetBlock(i);
+        
+        // FIXME: This only gets called once!
         if (m_bounds.empty()) // If the user already set the bounds for this writer, we're using that
             m_bounds.grow(b.GetBounds());        
     }
@@ -804,12 +817,6 @@ void Writer::Debug()
     bool debug = m_options.IsDebug();
     
 
-    const char* gdal_debug = getenv("CPL_DEBUG");
-    if (gdal_debug == 0)
-    {
-        char d[20] = "CPL_DEBUG=ON";
-        putenv(d);
-    }
     
     if (debug)
     {
@@ -817,37 +824,30 @@ void Writer::Debug()
     }
 
     CPLPopErrorHandler();
+
     if (debug)
+    {
+        const char* gdal_debug = getenv("CPL_DEBUG");
+        if (gdal_debug == 0)
+        {
+            // FIXME: this leaks
+            const std::string* d = new std::string("CPL_DEBUG=ON");
+            putenv(const_cast<char*>(d->c_str()));
+        }
+        
+        const char* gdal_debug2 = getenv("CPL_DEBUG");
+        std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
         CPLPushErrorHandler(OCIGDALDebugErrorHandler);
-    else
-        CPLPushErrorHandler(OCIGDALErrorHandler);
-}
-
-void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
-{
-    std::ostringstream oss;
-    
-    if (eErrClass == CE_Failure || eErrClass == CE_Fatal) {
-        oss <<"GDAL Failure number=" << err_no << ": " << msg;
-        throw libpc_error(oss.str());
-    } else if (eErrClass == CE_Debug) {
-        std::cout <<"GDAL Debug: " << msg << std::endl;
-    } else {
-        return;
+        
+    }
+    else 
+    {
+        CPLPushErrorHandler(OCIGDALErrorHandler);        
     }
 }
 
-void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
-{
-    std::ostringstream oss;
-    
-    if (eErrClass == CE_Failure || eErrClass == CE_Fatal) {
-        oss <<"GDAL Failure number=" << err_no << ": " << msg;
-        throw libpc_error(oss.str());
-    } else {
-        return;
-    }
-}
+
+
 
 std::string to_upper(const std::string& input)
 {
@@ -861,3 +861,28 @@ std::string to_upper(const std::string& input)
 
 }}} // namespace libpc::driver::oci
 
+void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
+{
+    std::ostringstream oss;
+    
+    if (eErrClass == CE_Failure || eErrClass == CE_Fatal) {
+        oss <<"GDAL Failure number=" << err_no << ": " << msg;
+        throw libpc::libpc_error(oss.str());
+    } else {
+        return;
+    }
+}
+
+void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
+{
+    std::ostringstream oss;
+    
+    if (eErrClass == CE_Failure || eErrClass == CE_Fatal) {
+        oss <<"GDAL Failure number=" << err_no << ": " << msg;
+        throw libpc::libpc_error(oss.str());
+    } else if (eErrClass == CE_Debug) {
+        std::cout <<"GDAL Debug: " << msg << std::endl;
+    } else {
+        return;
+    }
+}
