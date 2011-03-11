@@ -36,12 +36,10 @@
 namespace libpc
 {
 
-// Class providing fixed-size (by number of records)
-// LRU-replacement cache of a function with signature
-// V f(K)
+class PointData;
 
 
-template <typename K,typename V> class LruCache
+class LruCache
 {
 public:
 
@@ -50,44 +48,60 @@ public:
     // Bimap with key access on left view, key access
     // history on right view, and associated value.
     typedef boost::bimaps::bimap<
-    boost::bimaps::set_of<K>,
+    boost::bimaps::set_of<boost::uint32_t>,
           boost::bimaps::list_of<dummy_type>,
-          boost::bimaps::with_info<V>
+          boost::bimaps::with_info<PointData*>
           > cache_type;
 
     // Constuctor specifies the cached function and
     // the maximum number of records to be stored.
-    LruCache(
-        const boost::function<V(const K&)>& f,
-        size_t c
-    )
-        :_fn(f)
-        ,_capacity(c)
+    LruCache(size_t c)
+        :_capacity(c)
     {
         assert(_capacity!=0);
     }
 
-    // Obtain value of the cached function for k
-    V operator()(const K& k)
+    ~LruCache()
     {
+        for (cache_type::left_iterator it =_cache.left.begin(); it != _cache.left.end(); ++it)
+        {
+           PointData* data = it->info;
+           delete data;
+        }
+        return;
+    }
 
+    PointData* lookup(boost::uint32_t k)
+    {
         // Attempt to find existing record
-        const typename cache_type::left_iterator it
-        =_cache.left.find(k);
+        const cache_type::left_iterator it =_cache.left.find(k);
 
         if (it==_cache.left.end())
         {
-
             // We don't have it:
-            // Evaluate function and create new record
-            const V v=_fn(k);
-            insert(k,v);
-            return v;
-
+            return NULL;
         }
         else
         {
+            // We do have it:
+            return it->info;
+        }
+    }
 
+    // Obtain value of the cached function for k
+    PointData* insert(boost::uint32_t k, PointData* v)
+    {
+        // Attempt to find existing record
+        const cache_type::left_iterator it =_cache.left.find(k);
+
+        if (it==_cache.left.end())
+        {
+            // We don't have it: insert it
+            insertx(k,v);
+            return v;
+        }
+        else
+        {
             // We do have it:
             // Update the access record view.
             _cache.right.relocate(
@@ -116,9 +130,8 @@ public:
 
 private:
 
-    void insert(const K& k,const V& v)
+    void insertx(boost::uint32_t k, PointData* v)
     {
-
         assert(_cache.size()<=_capacity);
 
         // If necessary, make space
@@ -130,13 +143,12 @@ private:
 
         // Create a new record from the key, a dummy and the value
         _cache.insert(
-            typename cache_type::value_type(
+            cache_type::value_type(
                 k,0,v
             )
         );
     }
 
-    const boost::function<V(const K&)> _fn;
     const size_t _capacity;
     cache_type _cache;
 

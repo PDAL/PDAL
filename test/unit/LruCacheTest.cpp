@@ -19,6 +19,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "libpc/PointData.hpp"
 #include "libpc/LruCache.hpp"
 
 using namespace libpc;
@@ -38,143 +39,75 @@ BOOST_AUTO_TEST_SUITE(LruCacheTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
-    count_evaluations=0; 
- 
-    LruCache<std::string,std::string> lru(fn,5); 
- 
-    // Some initial accesses to prime state 
-    BOOST_CHECK_EQUAL(lru("first"),"tsrif"); 
-    BOOST_CHECK_EQUAL(lru("second"),"dnoces"); 
-    BOOST_CHECK_EQUAL(lru("third"),"driht"); 
-    BOOST_CHECK_EQUAL(lru("fourth"),"htruof"); 
-    BOOST_CHECK_EQUAL(lru("fifth"),"htfif"); 
-    BOOST_CHECK_EQUAL(count_evaluations,5); 
-    BOOST_CHECK_EQUAL(lru("sixth"),"htxis"); 
-    BOOST_CHECK_EQUAL(count_evaluations,6); 
+    Schema schema;
+    Dimension d1(Dimension::Field_X, Dimension::Uint32);
+    schema.addDimension(d1);
+    SchemaLayout layout(schema);
 
-    // This should be retrieved from cache 
-    BOOST_CHECK_EQUAL(lru("second"),"dnoces"); 
-    BOOST_CHECK_EQUAL(count_evaluations,6); 
+    PointData* item0 = new PointData(layout, 10);
+    PointData* item00 = new PointData(layout, 10);
+    PointData* item1 = new PointData(layout, 10);
+    PointData* item11 = new PointData(layout, 10);
+    PointData* item2 = new PointData(layout, 10);
+    PointData* item22 = new PointData(layout, 10);
 
-    // This will have been evicted 
-    BOOST_CHECK_EQUAL(lru("first"),"tsrif"); 
-    BOOST_CHECK_EQUAL(count_evaluations,7); 
- 
-    // Cache contents by access time 
-    // (most recent to least recent) 
-    // should now be: 
-    // first,second,sixth,fifth,fourth 
-    { 
-        std::vector<std::string> expected; 
-        expected.push_back("first"); 
-        expected.push_back("second"); 
-        expected.push_back("sixth"); 
-        expected.push_back("fifth"); 
-        expected.push_back("fourth"); 
-        std::vector<std::string> actual; 
-        lru.get_keys(std::back_inserter(actual)); 
-        BOOST_CHECK(actual==expected); 
-    } 
-
-    // So check fourth is retrieved 
-    BOOST_CHECK_EQUAL(lru("fourth"),"htruof"); 
-    BOOST_CHECK_EQUAL(count_evaluations,7); 
-
-    // That will have moved up "fourth" to the head 
-    // so this will evict fifth 
-    BOOST_CHECK_EQUAL(lru("seventh"),"htneves"); 
-    BOOST_CHECK_EQUAL(count_evaluations,8); 
-
-    // Check fifth was evicted as expected 
-    BOOST_CHECK_EQUAL(lru("fifth"),"htfif"); 
-    BOOST_CHECK_EQUAL(count_evaluations,9);     
-    
-    return;
-}
-
-
-class MyItem
-{
-public:
-    MyItem(int index, double data) : m_index(index), m_data(data) {}
-    MyItem(const MyItem& other)
+    // write the data into the buffer
+    for (int i=0; i<10; i++)
     {
-        m_index = other.m_index;
-        m_data = other.m_data;
+      item0->setField(i, 0, i);
+      item00->setField(i, 0, i);
+      item1->setField(i, 0, i+10);
+      item11->setField(i, 0, i+10);
+      item2->setField(i, 0, i+20);
+      item22->setField(i, 0, i+20);
     }
 
-    MyItem& operator=(MyItem const& rhs)
-    {
-        if (&rhs != this)
-        {
-            m_index = rhs.m_index;
-            m_data = rhs.m_data;
-        }
-        return *this;
-    }
-
-    bool operator==(const MyItem& other) const
-    {
-        if (m_index == other.m_index) return true;
-        return false;
-    }
-
-    int m_index;
-    double m_data;
-};
-
-// Dummy function we want to cache 
-int cache_func(MyItem* item)
-{ 
-    ++count_evaluations; 
-    return item->m_index;
-}
-
-BOOST_AUTO_TEST_CASE(test2)
-{
-    MyItem* item1 = new MyItem(1,11);
-    MyItem* item11 = new MyItem(1,11);
-    MyItem* item2 = new MyItem(2,22);
-    MyItem* item3 = new MyItem(3,33);
-    MyItem* item33 = new MyItem(3,33);
-
-    count_evaluations = 0;
-
-    LruCache<MyItem*,int> lru(cache_func,2);
+    LruCache lru(2);
 
     // bunch of insertions/lookups
-    lru(item1);
-    lru(item1);
-    lru(item2);
-    lru(item2);
-    lru(item1);
-    lru(item1);
-    lru(item3);
-    lru(item3);
-    lru(item1);
-     
-    BOOST_CHECK(count_evaluations == 3);
+    lru.insert(0,item0);
+    lru.insert(0,item0);
+    lru.insert(10,item1);
+    lru.insert(10,item1);
+    lru.insert(10,item0);
+    lru.insert(0,item0);
+    lru.insert(20,item2);
+    lru.insert(20,item2);
+    lru.insert(0,item0);
 
+    BOOST_CHECK(lru.lookup(0) == item0);
+    BOOST_CHECK(lru.lookup(10) == NULL);
+    BOOST_CHECK(lru.lookup(20) == item2);
+     
     { 
-        std::vector<MyItem*> actual; 
+        std::vector<boost::uint32_t> actual; 
         lru.get_keys(std::back_inserter(actual)); 
         BOOST_CHECK(actual.size() == 2); 
-        BOOST_CHECK(actual[0]->m_index == 1); 
-        BOOST_CHECK(actual[1]->m_index == 3); 
+        BOOST_CHECK(actual[0] == 0);
+        BOOST_CHECK(actual[1] == 20);
     }
 
-    lru(item33);
-    lru(item11);
+    lru.insert(0,item00);
+    lru.insert(20,item22);
      
-    BOOST_CHECK(count_evaluations == 5);
-
     { 
-        std::vector<MyItem*> actual; 
+        std::vector<boost::uint32_t> actual; 
         lru.get_keys(std::back_inserter(actual)); 
         BOOST_CHECK(actual.size() == 2); 
-        BOOST_CHECK(actual[0]->m_index == 1); 
-        BOOST_CHECK(actual[1]->m_index == 3); 
+        BOOST_CHECK(actual[0] == 20);
+        BOOST_CHECK(actual[1] == 0);
     }
+
+    BOOST_CHECK(lru.lookup(0) == item0);
+    BOOST_CHECK(lru.lookup(10) == NULL);
+    BOOST_CHECK(lru.lookup(20) == item2);
+
+    //delete item0;
+    delete item00;
+    delete item1;
+    delete item11;
+    //delete item2;
+    delete item22;
 
     return;
 }
