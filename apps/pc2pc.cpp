@@ -33,7 +33,6 @@
 
 #include "libpc/../../src/drivers/oci/writer.hpp"
 
-
 #include "Application.hpp"
 
 using namespace libpc;
@@ -120,10 +119,12 @@ int Application_pc2pc::execute()
         assert(numPoints == np); // BUG
         writer.write(np);
     }
+
+
     else if (hasOption("oracle"))
     {
         LasReader reader(*ifs);
-    
+        std::cout << "running oracle test" << std::endl;
         const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
         
         libpc::driver::oci::Options options;
@@ -145,8 +146,9 @@ int Application_pc2pc::execute()
 
         size_t np = (size_t)numPoints;
         assert(numPoints == np); // BUG
-        writer.write(np);
+         writer.write(np);
     }    
+
     else
     {
         LiblasReader reader(*ifs);
