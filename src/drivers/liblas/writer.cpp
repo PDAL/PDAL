@@ -216,7 +216,7 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
     const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
     const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId);
     
-    const int indexGpsTime = (hasTimeData ? schema.getDimensionIndex(Dimension::Field_GpsTime) : 0);
+    const int indexTime = (hasTimeData ? schema.getDimensionIndex(Dimension::Field_Time) : 0);
 
     const int indexRed = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
     const int indexGreen = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
@@ -262,8 +262,8 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
 
         if (hasTimeData)
         {
-            const double gpsTime = pointData.getField<double>(i, indexGpsTime);
-            pt.SetTime(gpsTime);
+            const double time = pointData.getField<double>(i, indexTime);
+            pt.SetTime(time);
         }
 
         if (hasColorData)

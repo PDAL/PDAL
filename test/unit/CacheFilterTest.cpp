@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
     const Schema& schema = reader.getHeader().getSchema();
     SchemaLayout layout(schema);
-    const int offsetT = schema.getDimensionIndex(Dimension::Field_GpsTime);
+    const int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
 
     PointData dataBig(layout, 1024);
     PointData dataSmall(layout, 1);

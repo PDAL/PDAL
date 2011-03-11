@@ -139,7 +139,7 @@ boost::uint32_t LasWriter::writeBuffer(const PointData& pointData)
     const int fieldIndexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
     const int fieldIndexPointSource = schema.getDimensionIndex(Dimension::Field_PointSourceId);
     
-    const int fieldIndexTime = (hasTimeData ? schema.getDimensionIndex(Dimension::Field_GpsTime) : 0);
+    const int fieldIndexTime = (hasTimeData ? schema.getDimensionIndex(Dimension::Field_Time) : 0);
     
     const int fieldIndexRed = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
     const int fieldIndexGreen = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
@@ -216,7 +216,7 @@ boost::uint32_t LasWriter::writeBuffer(const PointData& pointData)
             const boost::int8_t scanAngleRank = pointData.getField<boost::int8_t>(pointIndex, fieldIndexScanAngle);
             const boost::uint8_t user = pointData.getField<boost::uint8_t>(pointIndex, fieldIndexUserData);
             const boost::uint16_t pointSourceId = pointData.getField<boost::uint16_t>(pointIndex, fieldIndexPointSource);
-            const double gpsTime = pointData.getField<double>(pointIndex, fieldIndexTime);
+            const double time = pointData.getField<double>(pointIndex, fieldIndexTime);
             const boost::uint16_t red = pointData.getField<boost::uint16_t>(pointIndex, fieldIndexRed);
             const boost::uint16_t green = pointData.getField<boost::uint16_t>(pointIndex, fieldIndexGreen);
             const boost::uint16_t blue = pointData.getField<boost::uint16_t>(pointIndex, fieldIndexBlue);
@@ -230,7 +230,7 @@ boost::uint32_t LasWriter::writeBuffer(const PointData& pointData)
             Utils::write_field<boost::int8_t>(p, scanAngleRank);
             Utils::write_field<boost::uint8_t>(p, user);
             Utils::write_field<boost::uint16_t>(p, pointSourceId);
-            Utils::write_field<double>(p, gpsTime);
+            Utils::write_field<double>(p, time);
             Utils::write_field<boost::uint16_t>(p, red);
             Utils::write_field<boost::uint16_t>(p, green);
             Utils::write_field<boost::uint16_t>(p, blue);

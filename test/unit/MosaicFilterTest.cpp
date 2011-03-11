@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
     BOOST_CHECK(numRead == 300);
 
-    const int offsetT = schema.getDimensionIndex(Dimension::Field_GpsTime);
+    const int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
     const int offsetX = schema.getDimensionIndex(Dimension::Field_X);
     const int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
     const int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);

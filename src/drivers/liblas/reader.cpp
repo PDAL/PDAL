@@ -188,7 +188,7 @@ void LiblasReader::registerFields()
 
     if (m_hasTimeData)
     {
-        schema.addDimension(Dimension(Dimension::Field_GpsTime, Dimension::Double));
+        schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Double));
     }
 
     if (m_hasColorData)
@@ -254,7 +254,7 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
     const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
     const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId);
     
-    const int indexGpsTime = (m_hasTimeData ? schema.getDimensionIndex(Dimension::Field_GpsTime) : 0);
+    const int indexTime = (m_hasTimeData ? schema.getDimensionIndex(Dimension::Field_Time) : 0);
 
     const int indexRed = (m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
     const int indexGreen = (m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
@@ -307,9 +307,9 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
 
         if (m_hasTimeData)
         {
-            const double gpsTime = pt.GetTime();
+            const double time = pt.GetTime();
             
-            pointData.setField(i, indexGpsTime, gpsTime);
+            pointData.setField(i, indexTime, time);
         }
 
         if (m_hasColorData)

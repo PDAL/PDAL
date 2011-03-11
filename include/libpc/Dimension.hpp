@@ -79,7 +79,7 @@ public:
         Field_ScanAngleRank,
         Field_UserData,
         Field_PointSourceId,
-        Field_GpsTime,
+        Field_Time,
         Field_Red,
         Field_Green,
         Field_Blue,
