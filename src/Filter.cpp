@@ -56,14 +56,14 @@ void Filter::seekToPoint(boost::uint64_t pointNum)
 
 void Filter::readBegin(boost::uint32_t numPointsToRead)
 {
-    m_prevStage.readBegin(numPointsToRead);
+    //m_prevStage.readBegin(numPointsToRead);
     return;
 }
 
 
 void Filter::readEnd(boost::uint32_t numPointsRead)
 {
-    m_prevStage.readEnd(numPointsRead);
+    //m_prevStage.readEnd(numPointsRead);
     return;
 }
 

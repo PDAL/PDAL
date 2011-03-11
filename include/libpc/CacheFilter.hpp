@@ -40,6 +40,8 @@
 namespace libpc
 {
 
+class PointDataCache;
+
 // This is just a very simple MRU filter -- future versions will be smarter.
 // This cache has the following constraints:
 //   - only one block is cached
@@ -73,6 +75,8 @@ private:
     PointData* m_storedPointData;
     boost::uint64_t m_numPointsRequested;
     boost::uint64_t m_numPointsRead;
+
+    PointDataCache* m_cache;
 
     CacheFilter& operator=(const CacheFilter&); // not implemented
     CacheFilter(const CacheFilter&); // not implemented

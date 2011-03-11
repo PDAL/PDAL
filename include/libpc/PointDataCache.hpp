@@ -35,10 +35,11 @@
 #  pragma warning(pop)
 #endif
 
+#include "libpc/PointData.hpp"
+
+
 namespace libpc
 {
-
-class PointData;
 
 
 class PointDataCache
@@ -50,7 +51,7 @@ public:
     // Bimap with key access on left view, key access
     // history on right view, and associated value.
     typedef boost::bimaps::bimap<
-    boost::bimaps::set_of<boost::uint32_t>,
+    boost::bimaps::set_of<boost::uint64_t>,
           boost::bimaps::list_of<dummy_type>,
           boost::bimaps::with_info<PointData*>
           > cache_type;
@@ -73,7 +74,7 @@ public:
         return;
     }
 
-    PointData* lookup(boost::uint32_t k)
+    PointData* lookup(boost::uint64_t k)
     {
         // Attempt to find existing record
         const cache_type::left_iterator it =_cache.left.find(k);
@@ -85,13 +86,20 @@ public:
         }
         else
         {
-            // We do have it:
+
+            // We do have it: update the access record view and return it
+            _cache.right.relocate(
+                _cache.right.end(),
+                _cache.project_right(it)
+                );
+
             return it->info;
         }
     }
 
-    // Obtain value of the cached function for k
-    PointData* insert(boost::uint32_t k, PointData* v)
+    // When something is inserted into the cache, the cache
+    // takes ownership (deletion responsibility) for it.
+    PointData* insert(boost::uint64_t k, PointData* v)
     {
         // Attempt to find existing record
         const cache_type::left_iterator it =_cache.left.find(k);
@@ -104,13 +112,13 @@ public:
         }
         else
         {
-            // We do have it:
-            // Update the access record view.
+            // We do have it: update the access record view and return it
+            // note we don't support "replacing" the value (i.e. if v != it->info)
             _cache.right.relocate(
                 _cache.right.end(),
                 _cache.project_right(it)
             );
-
+              assert(it->info == v);
             return it->info;
         }
     }
@@ -130,9 +138,11 @@ public:
         }
     }
 
+    void foo();
+
 private:
 
-    void insertx(boost::uint32_t k, PointData* v)
+    void insertx(boost::uint64_t k, PointData* v)
     {
         assert(_cache.size()<=_capacity);
 
@@ -140,6 +150,11 @@ private:
         if (_cache.size()==_capacity)
         {
             // by purging the least-recently-used element
+
+            cache_type::right_iterator iter =_cache.right.begin();
+            PointData *old = iter->info;
+            delete old;
+
             _cache.right.erase(_cache.right.begin());
         }
 

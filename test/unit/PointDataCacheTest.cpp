@@ -24,18 +24,8 @@
 
 using namespace libpc;
 
-static size_t count_evaluations=0; 
- 
-// Dummy function we want to cache 
-std::string fn(const std::string& s) 
-{ 
-  ++count_evaluations; 
-  std::string r; 
-  std::copy(s.rbegin(),s.rend(),std::back_inserter(r)); 
-  return r; 
-} 
 
-BOOST_AUTO_TEST_SUITE(LruCacheTest)
+BOOST_AUTO_TEST_SUITE(PointDataCacheTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
@@ -45,69 +35,48 @@ BOOST_AUTO_TEST_CASE(test1)
     SchemaLayout layout(schema);
 
     PointData* item0 = new PointData(layout, 10);
-    PointData* item00 = new PointData(layout, 10);
     PointData* item1 = new PointData(layout, 10);
-    PointData* item11 = new PointData(layout, 10);
     PointData* item2 = new PointData(layout, 10);
-    PointData* item22 = new PointData(layout, 10);
+    //PointData* item3 = new PointData(layout, 10);
+    PointData* item4 = new PointData(layout, 10);
+    //PointData* item5 = new PointData(layout, 10);
 
     // write the data into the buffer
     for (int i=0; i<10; i++)
     {
       item0->setField(i, 0, i);
-      item00->setField(i, 0, i);
       item1->setField(i, 0, i+10);
-      item11->setField(i, 0, i+10);
       item2->setField(i, 0, i+20);
-      item22->setField(i, 0, i+20);
+      //item3->setField(i, 0, i+30);
+      item4->setField(i, 0, i+40);
+      //item5->setField(i, 0, i+50);
     }
 
     PointDataCache lru(2);
 
     // bunch of insertions/lookups
-    lru.insert(0,item0);
-    lru.insert(0,item0);
-    lru.insert(10,item1);
-    lru.insert(10,item1);
-    lru.insert(10,item0);
-    lru.insert(0,item0);
-    lru.insert(20,item2);
-    lru.insert(20,item2);
-    lru.insert(0,item0);
+    lru.insert(0, item0);
+    lru.insert(10, item1);
+    lru.insert(20, item2);
 
-    BOOST_CHECK(lru.lookup(0) == item0);
-    BOOST_CHECK(lru.lookup(10) == NULL);
+    BOOST_CHECK(lru.lookup(0) == NULL);
+    BOOST_CHECK(lru.lookup(10) == item1);
     BOOST_CHECK(lru.lookup(20) == item2);
      
     { 
-        std::vector<boost::uint32_t> actual; 
-        lru.get_keys(std::back_inserter(actual)); 
-        BOOST_CHECK(actual.size() == 2); 
-        BOOST_CHECK(actual[0] == 0);
-        BOOST_CHECK(actual[1] == 20);
-    }
-
-    lru.insert(0,item00);
-    lru.insert(20,item22);
-     
-    { 
-        std::vector<boost::uint32_t> actual; 
+        std::vector<boost::uint64_t> actual; 
         lru.get_keys(std::back_inserter(actual)); 
         BOOST_CHECK(actual.size() == 2); 
         BOOST_CHECK(actual[0] == 20);
-        BOOST_CHECK(actual[1] == 0);
+        BOOST_CHECK(actual[1] == 10);
     }
 
-    BOOST_CHECK(lru.lookup(0) == item0);
+    lru.insert(40,item4);
+     
+    BOOST_CHECK(lru.lookup(0) == NULL);
     BOOST_CHECK(lru.lookup(10) == NULL);
     BOOST_CHECK(lru.lookup(20) == item2);
-
-    //delete item0;
-    delete item00;
-    delete item1;
-    delete item11;
-    //delete item2;
-    delete item22;
+    BOOST_CHECK(lru.lookup(40) == item4);
 
     return;
 }
