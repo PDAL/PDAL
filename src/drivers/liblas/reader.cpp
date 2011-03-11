@@ -270,7 +270,11 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
     for (i=0; i<numPoints; i++)
     {
         bool ok = m_externalReader->ReadNextPoint();
-        assert(ok); // BUG: add error check
+        if (!ok)
+        {
+            throw libpc_error("liblas reader failed to retrieve point");
+        }
+
         const liblas::Point& pt = m_externalReader->GetPoint();
 
         const boost::int32_t x = pt.GetRawX();
