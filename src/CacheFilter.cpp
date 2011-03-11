@@ -92,8 +92,9 @@ boost::uint32_t CacheFilter::readBuffer(PointData& data)
 {
     if (data.getNumPoints() != 1)
     {
-        m_currentPointIndex += data.getNumPoints();
-        return m_prevStage.read(data);
+        const boost::uint32_t numRead = m_prevStage.read(data);
+        m_currentPointIndex += numRead;
+        return numRead;
     }
 
     m_numPointsRequested += data.getNumPoints();
