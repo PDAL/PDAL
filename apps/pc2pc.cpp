@@ -122,12 +122,13 @@ int Application_pc2pc::execute()
         writer.write(np);
     }
 
+#ifdef HAVE_ORACLE
 
     else if (hasOption("oracle"))
     {
 #ifdef HAVE_ORACLE
         LasReader reader(*ifs);
-        std::cout << "running oracle test" << std::endl;
+    
         const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
         
         libpc::driver::oci::Options options;
@@ -149,12 +150,12 @@ int Application_pc2pc::execute()
 
         size_t np = (size_t)numPoints;
         assert(numPoints == np); // BUG
-         writer.write(np);
+        writer.write(np);
 #else
         throw configuration_error("libPC not compiled with Oracle support");
 #endif
     }    
-
+#endif
     else
     {
         LiblasReader reader(*ifs);
