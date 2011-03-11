@@ -685,10 +685,85 @@ void Writer::writeEnd()
     return;
 }
 
+bool Writer::FillOraclePointData(PointData const& buffer, std::vector<boost::uint8_t>& point_data)
+{
+
+
+    libpc::Schema const& schema = buffer.getSchema();
+
+    bool hasTimeData = schema.hasDimension(Dimension::Field_GpsTime);
+    
+    boost::uint64_t count = buffer.getNumPoints();
+
+    const int indexX = schema.getDimensionIndex(Dimension::Field_X);
+    const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
+    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z);
+    const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification);
+    const int indexTime = schema.getDimensionIndex(Dimension::Field_GpsTime);
+    
+    Dimension const& dimX = schema.getDimension(indexX);
+    Dimension const& dimY = schema.getDimension(indexY);
+    Dimension const& dimZ = schema.getDimension(indexZ);
+
+    double xscale = dimX.getNumericScale();
+    double yscale = dimY.getNumericScale();
+    double zscale = dimY.getNumericScale();
+        
+    double xoffset = dimX.getNumericOffset();
+    double yoffset = dimY.getNumericOffset();
+    double zoffset = dimZ.getNumericOffset();
+    
+    boost::uint32_t counter = 0;
+    while (counter < count)
+    {
+
+        const double x = (buffer.getField<boost::int32_t>(counter, indexX) * xscale) + xoffset;
+        const double y = (buffer.getField<boost::int32_t>(counter, indexY) * yscale) + yoffset;
+        const double z = (buffer.getField<boost::int32_t>(counter, indexZ) * zscale) + zoffset;
+        
+        double t = 0.0;
+        if (hasTimeData)
+            t = buffer.getField<double>(counter, indexTime);
+            
+        counter++;
+    }
+    
+    return true;
+}
+
 
 boost::uint32_t Writer::writeBuffer(const PointData& pointData)
 {
     boost::uint32_t numPoints = pointData.getNumPoints();
+
+    libpc::Header const& header = m_stage.getHeader();
+    libpc::Schema const& schema = header.getSchema();
+
+    PointData buffer(schema, 1);
+
+    
+    for ( boost::uint32_t i = 0; i < m_chipper.GetBlockCount(); ++i )
+    {
+        const chipper::Block& b = m_chipper.GetBlock(i);
+        
+        PointData block(schema, m_options.GetPTree().get<boost::uint32_t>("capacity"));
+        std::vector<boost::uint32_t> ids = b.GetIDs();
+        
+        std::vector<boost::uint32_t>::const_iterator it;
+        
+        boost::uint32_t count = 0;
+        for (it = ids.begin(); it != ids.end(); it++)
+        {
+            m_stage.seekToPoint(*it);
+            m_stage.read(buffer);
+            
+            block.copyPointsFast(static_cast<std::size_t>(count), static_cast<std::size_t>(0), buffer, 1); // put single point onto our block
+
+            count++;
+
+        }
+        
+    }
     // bool hasTimeData = false;
     // bool hasColorData = false;
     // bool hasWaveData = false;

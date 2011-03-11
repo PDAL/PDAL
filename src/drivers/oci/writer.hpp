@@ -127,6 +127,8 @@ private:
     bool IsGeographic(boost::int32_t srid);
     std::string LoadSQLData(std::string const& filename);
     
+    bool FillOraclePointData(PointData const& buffer, std::vector<boost::uint8_t>& point_data);
+    
     Stage& m_stage;
     chipper::Chipper m_chipper;
     
