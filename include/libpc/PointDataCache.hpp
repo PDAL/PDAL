@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2010, Tim Day <timday@timday.com>
+ * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,11 +15,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// This code is from http://www.bottlenose.demon.co.uk/article/lru.htm.  It is
-// under a Internet Systems Consortium (ISC) license (an OSI-approved BSD-alike license).
+// This PointData-specific code derived from the templated code at
+// http://www.bottlenose.demon.co.uk/article/lru.htm.  It is under an
+// Internet Systems Consortium (ISC) license (an OSI-approved BSD-alike license).
 
-#ifndef INCLUDED_LIBPC_LRUCACHE_HPP
-#define INCLUDED_LIBPC_LRUCACHE_HPP
+#ifndef INCLUDED_LIBPC_POINTDATACACHE_HPP
+#define INCLUDED_LIBPC_POINTDATACACHE_HPP
 
 
 #ifdef _MSC_VER
@@ -39,7 +41,7 @@ namespace libpc
 class PointData;
 
 
-class LruCache
+class PointDataCache
 {
 public:
 
@@ -55,13 +57,13 @@ public:
 
     // Constuctor specifies the cached function and
     // the maximum number of records to be stored.
-    LruCache(size_t c)
+    PointDataCache(size_t c)
         :_capacity(c)
     {
         assert(_capacity!=0);
     }
 
-    ~LruCache()
+    ~PointDataCache()
     {
         for (cache_type::left_iterator it =_cache.left.begin(); it != _cache.left.end(); ++it)
         {
@@ -152,8 +154,8 @@ private:
     const size_t _capacity;
     cache_type _cache;
 
-    LruCache& operator=(const LruCache&); // not implemented
-    LruCache(const LruCache&); // not implemented
+    PointDataCache& operator=(const PointDataCache&); // not implemented
+    PointDataCache(const PointDataCache&); // not implemented
 };
 
 

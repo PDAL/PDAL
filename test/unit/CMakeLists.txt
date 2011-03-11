@@ -21,9 +21,9 @@ SET(LIBPC_UNIT_TEST_SRC
 	FauxWriterTest.cpp
 	LiblasReaderTest.cpp
 	LiblasWriterTest.cpp
-	LruCacheTest.cpp
 	MosaicFilterTest.cpp
 	PointDataTest.cpp
+	PointDataCacheTest.cpp
 	RangeTest.cpp
 	SchemaTest.cpp
 	SchemaLayoutTest.cpp

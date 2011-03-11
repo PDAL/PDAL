@@ -20,7 +20,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "libpc/PointData.hpp"
-#include "libpc/LruCache.hpp"
+#include "libpc/PointDataCache.hpp"
 
 using namespace libpc;
 
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test1)
       item22->setField(i, 0, i+20);
     }
 
-    LruCache lru(2);
+    PointDataCache lru(2);
 
     // bunch of insertions/lookups
     lru.insert(0,item0);
