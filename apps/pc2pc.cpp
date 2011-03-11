@@ -127,7 +127,7 @@ int Application_pc2pc::execute()
     else if (hasOption("oracle"))
     {
 #ifdef HAVE_ORACLE
-        LasReader reader(*ifs);
+        LiblasReader reader(*ifs);
     
         const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
         

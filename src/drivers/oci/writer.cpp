@@ -674,6 +674,7 @@ void Writer::writeBegin()
     if (!BlockTableExists())
         CreateBlockTable();
     
+    m_stage.seekToPoint(0);
     return;
 }
 
@@ -687,6 +688,7 @@ void Writer::writeEnd()
 
 boost::uint32_t Writer::writeBuffer(const PointData& pointData)
 {
+    boost::uint32_t numPoints = pointData.getNumPoints();
     // bool hasTimeData = false;
     // bool hasColorData = false;
     // bool hasWaveData = false;
@@ -809,7 +811,7 @@ boost::uint32_t Writer::writeBuffer(const PointData& pointData)
     // }
     // 
     // return numPoints;
-    return 0;
+    return numPoints;
 }
 
 void Writer::Debug()
