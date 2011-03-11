@@ -60,6 +60,10 @@ public:
     // the maximum number of records to be stored.
     PointDataCache(size_t c)
         :_capacity(c)
+        , m_numCacheLookupMisses(0)
+        , m_numCacheLookupHits(0)
+        , m_numCacheInsertMisses(0)
+        , m_numCacheInsertHits(0)
     {
         assert(_capacity!=0);
     }
@@ -82,17 +86,17 @@ public:
         if (it==_cache.left.end())
         {
             // We don't have it:
+            ++m_numCacheLookupMisses;
             return NULL;
         }
         else
         {
-
             // We do have it: update the access record view and return it
             _cache.right.relocate(
                 _cache.right.end(),
                 _cache.project_right(it)
                 );
-
+            ++m_numCacheLookupHits;
             return it->info;
         }
     }
@@ -108,6 +112,7 @@ public:
         {
             // We don't have it: insert it
             insertx(k,v);
+            ++m_numCacheInsertMisses;
             return v;
         }
         else
@@ -118,7 +123,8 @@ public:
                 _cache.right.end(),
                 _cache.project_right(it)
             );
-              assert(it->info == v);
+            assert(it->info == v);
+            ++m_numCacheInsertHits;
             return it->info;
         }
     }
@@ -138,7 +144,16 @@ public:
         }
     }
 
-    void foo();
+    void getCacheStats(boost::uint64_t& numCacheLookupMisses,
+                       boost::uint64_t& numCacheLookupHits,
+                       boost::uint64_t& numCacheInsertMisses,
+                       boost::uint64_t& numCacheInsertHits) const
+    {
+        numCacheLookupMisses = m_numCacheLookupMisses;
+        numCacheLookupHits = m_numCacheLookupHits;
+        numCacheInsertMisses = m_numCacheInsertMisses;
+        numCacheInsertHits = m_numCacheInsertHits;
+    }
 
 private:
 
@@ -168,6 +183,11 @@ private:
 
     const size_t _capacity;
     cache_type _cache;
+
+    boost::uint64_t m_numCacheLookupMisses;
+    boost::uint64_t m_numCacheLookupHits;
+    boost::uint64_t m_numCacheInsertMisses;
+    boost::uint64_t m_numCacheInsertHits;
 
     PointDataCache& operator=(const PointDataCache&); // not implemented
     PointDataCache(const PointDataCache&); // not implemented

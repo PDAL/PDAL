@@ -54,14 +54,13 @@ BOOST_AUTO_TEST_CASE(test1)
 
     PointDataCache lru(2);
 
-    // bunch of insertions/lookups
-    lru.insert(0, item0);
-    lru.insert(10, item1);
-    lru.insert(20, item2);
+    lru.insert(0, item0);         // insert miss
+    lru.insert(10, item1);        // insert miss
+    lru.insert(20, item2);        // insert miss
 
-    BOOST_CHECK(lru.lookup(0) == NULL);
-    BOOST_CHECK(lru.lookup(10) == item1);
-    BOOST_CHECK(lru.lookup(20) == item2);
+    BOOST_CHECK(lru.lookup(0) == NULL);      // lookup miss
+    BOOST_CHECK(lru.lookup(10) == item1);    // lookup hit
+    BOOST_CHECK(lru.lookup(20) == item2);    // lookup hit
      
     { 
         std::vector<boost::uint64_t> actual; 
@@ -71,12 +70,20 @@ BOOST_AUTO_TEST_CASE(test1)
         BOOST_CHECK(actual[1] == 10);
     }
 
-    lru.insert(40,item4);
+    lru.insert(40,item4);        // insert miss
      
-    BOOST_CHECK(lru.lookup(0) == NULL);
-    BOOST_CHECK(lru.lookup(10) == NULL);
-    BOOST_CHECK(lru.lookup(20) == item2);
-    BOOST_CHECK(lru.lookup(40) == item4);
+    BOOST_CHECK(lru.lookup(0) == NULL);    // lookup miss
+    BOOST_CHECK(lru.lookup(10) == NULL);   // lookup miss
+    BOOST_CHECK(lru.lookup(20) == item2);  // lookup hit
+    BOOST_CHECK(lru.lookup(40) == item4);  // lookup hit
+    BOOST_CHECK(lru.lookup(40) == item4);  // lookup hit
+
+    boost::uint64_t lookupHits, lookupMisses, insertHits, insertMisses;
+    lru.getCacheStats(lookupMisses, lookupHits, insertMisses, insertHits);
+    BOOST_CHECK(lookupMisses == 3);
+    BOOST_CHECK(lookupHits == 5);
+    BOOST_CHECK(insertMisses == 4);
+    BOOST_CHECK(insertHits == 0);
 
     return;
 }
