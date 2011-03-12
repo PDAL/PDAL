@@ -40,6 +40,7 @@ namespace libpc
 
 Stage::Stage()
     : m_header(NULL)
+    , m_currentPointIndex(0)
 {
     return;
 }
@@ -49,6 +50,23 @@ Stage::~Stage()
 {
     delete m_header;
     return;
+}
+
+
+void Stage::setCurrentPointIndex(boost::uint64_t currentPointIndex)
+{
+    m_currentPointIndex = currentPointIndex;
+}
+
+
+boost::uint64_t Stage::getCurrentPointIndex() const
+{
+    return m_currentPointIndex;
+}
+
+void Stage::incrementCurrentPointIndex(boost::uint64_t delta)
+{
+    m_currentPointIndex += delta;
 }
 
 
@@ -75,14 +93,7 @@ void Stage::setHeader(Header* header)
 
 boost::uint32_t Stage::read(PointData& data)
 {
-    boost::uint32_t numPointsToRead = data.getNumPoints();
-    readBegin(numPointsToRead);
-
-    // BUG: need to turn this into a set of chunked reads
-    boost::uint32_t numPointsRead = readBuffer(data);
-
-    readEnd(numPointsRead);
-
+    const boost::uint32_t numPointsRead = readBuffer(data);
     return numPointsRead;
 }
 

@@ -56,9 +56,6 @@ public:
     const std::string& getName() const;
 
     // override
-    boost::uint64_t getCurrentPointIndex() const;
-
-    // override
     void seekToPoint(boost::uint64_t index);
 
     // clear cache (but leave cache params unchanged)
@@ -81,9 +78,6 @@ public:
 private:
     boost::uint32_t readBuffer(PointData&);
 
-    boost::uint64_t m_currentPointIndex;
-    boost::uint64_t m_storedPointIndex;
-    PointData* m_storedPointData;
     boost::uint64_t m_numPointsRequested;
     boost::uint64_t m_numPointsRead;
 

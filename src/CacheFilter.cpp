@@ -43,9 +43,6 @@ namespace libpc
 // cache block size is measured in Points, not bytes
 CacheFilter::CacheFilter(Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
     : Filter(prevStage)
-    , m_currentPointIndex(0)
-    , m_storedPointIndex(0)
-    , m_storedPointData(NULL)
     , m_numPointsRequested(0)
     , m_numPointsRead(0)
     , m_cache(NULL)
@@ -59,8 +56,6 @@ CacheFilter::CacheFilter(Stage& prevStage, boost::uint32_t maxCacheBlocks, boost
 
 CacheFilter::~CacheFilter()
 {
-    delete m_storedPointData;
-
     delete m_cache;
 }
 
@@ -99,15 +94,9 @@ void CacheFilter::resetCache()
 }
 
 
-boost::uint64_t CacheFilter::getCurrentPointIndex() const
-{
-    return m_currentPointIndex;
-}
-
-
 void CacheFilter::seekToPoint(boost::uint64_t index)
 {
-    m_currentPointIndex = index;
+    setCurrentPointIndex(index);
     m_prevStage.seekToPoint(index);
 }
 
@@ -126,6 +115,8 @@ boost::uint64_t CacheFilter::getNumPointsRead() const
 
 boost::uint32_t CacheFilter::readBuffer(PointData& data)
 {
+    const boost::uint64_t currentPointIndex = getCurrentPointIndex();
+
     // for now, we only read from the cache if they are asking for one point
     // (this avoids the problem of an N-point request needing more than one
     // cached block to satisfy it)
@@ -137,15 +128,15 @@ boost::uint32_t CacheFilter::readBuffer(PointData& data)
         // and the block we got is properly aligned and not already cached,
         // then let's cache it!
         if (data.getNumPoints() == m_cacheBlockSize && numRead == m_cacheBlockSize && 
-            (m_currentPointIndex % m_cacheBlockSize == 0) &&
-            m_cache->lookup(m_currentPointIndex) == NULL)
+            (currentPointIndex % m_cacheBlockSize == 0) &&
+            m_cache->lookup(currentPointIndex) == NULL)
         {
             PointData* block = new PointData(data.getSchemaLayout(), m_cacheBlockSize);
             block->copyPointsFast(0, 0, data, m_cacheBlockSize);
-            m_cache->insert(m_currentPointIndex, block);
+            m_cache->insert(currentPointIndex, block);
         }
 
-        m_currentPointIndex += numRead;
+        incrementCurrentPointIndex(numRead);
 
         m_numPointsRead += data.getNumPoints();
         m_numPointsRequested += data.getNumPoints();
@@ -154,18 +145,18 @@ boost::uint32_t CacheFilter::readBuffer(PointData& data)
     }
 
     // they asked for just one point -- first, check Mister Cache
-    boost::uint64_t blockNum = m_currentPointIndex / m_cacheBlockSize;
+    const boost::uint64_t blockNum = currentPointIndex / m_cacheBlockSize;
     PointData* block = m_cache->lookup(blockNum);
     if (block != NULL)
     {
         // A hit! A palpable hit!
-        data.copyPointFast(0,  m_currentPointIndex % m_cacheBlockSize, *block);
+        data.copyPointFast(0,  currentPointIndex % m_cacheBlockSize, *block);
         
         m_numPointsRead += 0;
         m_numPointsRequested += 1;
-        m_currentPointIndex += 1;
+        incrementCurrentPointIndex(1);
 
-        m_prevStage.seekToPoint(m_currentPointIndex);
+        m_prevStage.seekToPoint(getCurrentPointIndex());
         return 1;
     }
 
@@ -173,7 +164,7 @@ boost::uint32_t CacheFilter::readBuffer(PointData& data)
     const boost::uint32_t numRead = m_prevStage.read(data);
     m_numPointsRead += numRead;
     m_numPointsRequested += numRead;
-    m_currentPointIndex += numRead;
+    incrementCurrentPointIndex(numRead);
 
     return numRead;
 }

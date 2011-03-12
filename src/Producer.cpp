@@ -39,7 +39,6 @@ namespace libpc
 
 
 Producer::Producer()
-    : m_currentPointIndex(0)
 {
     return;
 }
@@ -60,32 +59,6 @@ void Producer::seekToPoint(boost::uint64_t pointNum)
     assert(pointNumX == pointNum);
     PointData pointData(getHeader().getSchema(), pointNumX);
     read(pointData);
-
-    return;
-}
-
-
-void Producer::setCurrentPointIndex(boost::uint64_t index)
-{
-    m_currentPointIndex = index;
-}
-
-
-boost::uint64_t Producer::getCurrentPointIndex() const
-{
-    return m_currentPointIndex;
-}
-
-
-void Producer::readBegin(boost::uint32_t /*numPointsToRead*/)
-{
-    return;
-}
-
-
-void Producer::readEnd(boost::uint32_t numPointsRead)
-{
-    setCurrentPointIndex(getCurrentPointIndex() + numPointsRead);
 
     return;
 }

@@ -46,22 +46,11 @@ class LIBPC_DLL Producer : public Stage
 public:
     Producer();
 
-    virtual void readBegin(boost::uint32_t numPointsToRead);
-
-    virtual void readEnd(boost::uint32_t numPointsRead);
-
-    // default is to reset() and then read N points manually
+    // default is to read N points manually
     // override this if you can
     virtual void seekToPoint(boost::uint64_t pointNum);
 
-    virtual boost::uint64_t getCurrentPointIndex() const;
-
-protected:
-    void setCurrentPointIndex(boost::uint64_t);
-
 private:
-    boost::uint64_t m_currentPointIndex;
-
     Producer& operator=(const Producer&); // not implemented
     Producer(const Producer&); // not implemented
 };

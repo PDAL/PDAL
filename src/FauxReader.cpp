@@ -153,6 +153,8 @@ boost::uint32_t FauxReader::readBuffer(PointData& data)
         ++time;
     }
 
+    incrementCurrentPointIndex(numPoints);
+
     return numPoints;
 }
 
