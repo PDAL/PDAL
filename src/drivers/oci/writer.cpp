@@ -691,7 +691,7 @@ bool Writer::FillOraclePointData(PointData const& buffer, std::vector<boost::uin
 
     libpc::Schema const& schema = buffer.getSchema();
 
-    bool hasTimeData = schema.hasDimension(Dimension::Field_GpsTime);
+    bool hasTimeData = schema.hasDimension(Dimension::Field_Time);
     
     boost::uint64_t count = buffer.getNumPoints();
 
@@ -699,7 +699,7 @@ bool Writer::FillOraclePointData(PointData const& buffer, std::vector<boost::uin
     const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
     const int indexZ = schema.getDimensionIndex(Dimension::Field_Z);
     const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification);
-    const int indexTime = schema.getDimensionIndex(Dimension::Field_GpsTime);
+    const int indexTime = schema.getDimensionIndex(Dimension::Field_Time);
     
     Dimension const& dimX = schema.getDimension(indexX);
     Dimension const& dimY = schema.getDimension(indexY);
@@ -722,9 +722,10 @@ bool Writer::FillOraclePointData(PointData const& buffer, std::vector<boost::uin
         const double z = (buffer.getField<boost::int32_t>(counter, indexZ) * zscale) + zoffset;
         
         double t = 0.0;
-        if (hasTimeData)
+        if (indexTime != -1)
             t = buffer.getField<double>(counter, indexTime);
-            
+        
+        
         counter++;
     }
     
