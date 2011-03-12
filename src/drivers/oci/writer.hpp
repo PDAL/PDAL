@@ -78,6 +78,7 @@ public:
     Options();
     bool IsDebug() const;
     bool Is3d() const;
+    bool IsSolid() const;
     boost::property_tree::ptree& GetPTree() {return m_tree; }
 
 };
@@ -119,7 +120,7 @@ private:
     void CreateBlockIndex();
     void CreateBlockTable();
     void CreateSDOEntry();
-    long CreatePCEntry(std::vector<boost::uint8_t> const* header_data);
+    void CreatePCEntry(std::vector<boost::uint8_t> const* header_data);
     long GetGType();
     std::string CreatePCElemInfo();
     bool BlockTableExists();
@@ -127,8 +128,20 @@ private:
     bool IsGeographic(boost::int32_t srid);
     std::string LoadSQLData(std::string const& filename);
     
-    bool FillOraclePointData(PointData const& buffer, std::vector<boost::uint8_t>& point_data);
-    
+    bool FillOraclePointData(PointData const& buffer, 
+                             std::vector<boost::uint8_t>& point_data, 
+                             chipper::Block const& block,
+                             boost::uint32_t block_id);
+    bool WriteBlock(PointData const& buffer, 
+                             std::vector<boost::uint8_t>& point_data, 
+                             chipper::Block const& block,
+                             boost::uint32_t block_id);
+
+    void SetOrdinates(Statement statement,
+                      OCIArray* ordinates, 
+                      libpc::Bounds<double> const& extent);
+    void SetElements(Statement statement,
+                     OCIArray* elem_info);
     Stage& m_stage;
     chipper::Chipper m_chipper;
     
