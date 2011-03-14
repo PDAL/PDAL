@@ -11,6 +11,7 @@ set (SOURCES
   oci_wrapper.cpp
   common.cpp
   header.cpp
+  reader.cpp
   writer.cpp
   
   )
