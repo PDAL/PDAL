@@ -37,9 +37,11 @@
 
 #include <libpc/export.hpp>
 #include <libpc/Bounds.hpp>
+#include <libpc/exceptions.hpp>
 
 #include "oci_wrapper.h"
 
+#include <boost/shared_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include <cpl_port.h>
@@ -51,6 +53,10 @@ void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const ch
 
 
 namespace libpc { namespace driver { namespace oci {
+
+typedef boost::shared_ptr<OWConnection> Connection ;
+typedef boost::shared_ptr<OWStatement> Statement ;
+
 
 
 #ifdef _WIN32
@@ -73,6 +79,8 @@ public:
     boost::property_tree::ptree& GetPTree() {return m_tree; }
 
 };
+
+std::string to_upper(std::string const& input);
 
 
 
