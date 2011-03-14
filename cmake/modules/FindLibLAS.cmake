@@ -18,7 +18,7 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 ###############################################################################
-MESSAGE(STATUS "Searching for libPC ${LibPC_FIND_VERSION}+ library")
+MESSAGE(STATUS "Searching for LibLAS ${LibLAS_FIND_VERSION}+ library")
 
 IF(LIBLAS_INCLUDE_DIR)
   # Already in cache, be silent
@@ -29,10 +29,10 @@ IF(WIN32)
   SET(OSGEO4W_IMPORT_LIBRARY liblas)
   IF(DEFINED ENV{OSGEO4W_ROOT})
     SET(OSGEO4W_ROOT_DIR $ENV{OSGEO4W_ROOT})
-    MESSAGE(STATUS "Trying OSGeo4W using environment variable OSGEO4W_ROOT=$ENV{OSGEO4W_ROOT}")
+    #MESSAGE(STATUS " FindLibLAS: trying OSGeo4W using environment variable OSGEO4W_ROOT=$ENV{OSGEO4W_ROOT}")
   ELSE()
     SET(OSGEO4W_ROOT_DIR c:/OSGeo4W)
-    MESSAGE(STATUS "Trying OSGeo4W using default location OSGEO4W_ROOT=${OSGEO4W_ROOT_DIR}")
+    #MESSAGE(STATUS " FindLibLAS: trying OSGeo4W using default location OSGEO4W_ROOT=${OSGEO4W_ROOT_DIR}")
   ENDIF()
 ENDIF()
 
@@ -75,13 +75,13 @@ IF(LIBLAS_INCLUDE_DIR)
     #message(FATAL_ERROR "${LIBLAS_VERSION_MAJOR}.${LIBLAS_VERSION_MINOR}.${LIBLAS_VERSION_PATCH}")
 
     if(NOT ${LIBLAS_VERSION_MAJOR} MATCHES "[0-9]+")
-      message(FATAL_ERROR "libPC version parsing failed for LIBLAS_VERSION_MAJOR!")
+      message(FATAL_ERROR "libLAS version parsing failed for LIBLAS_VERSION_MAJOR!")
     endif()
     if(NOT ${LIBLAS_VERSION_MINOR} MATCHES "[0-9]+")
-      message(FATAL_ERROR "libPC version parsing failed for LIBLAS_VERSION_MINOR!")
+      message(FATAL_ERROR "libLAS version parsing failed for LIBLAS_VERSION_MINOR!")
     endif()
     if(NOT ${LIBLAS_VERSION_PATCH} MATCHES "[0-9]+")
-      message(FATAL_ERROR "libPC version parsing failed for LIBLAS_VERSION_PATCH!")
+      message(FATAL_ERROR "libLAS version parsing failed for LIBLAS_VERSION_PATCH!")
     endif()
 
 
@@ -90,9 +90,9 @@ IF(LIBLAS_INCLUDE_DIR)
 
     IF (LIBLAS_VERSION VERSION_EQUAL LibLAS_FIND_VERSION OR
         LIBLAS_VERSION VERSION_GREATER LibLAS_FIND_VERSION)
-      MESSAGE(STATUS "Found libPC version: ${LIBLAS_VERSION}")
+      MESSAGE(STATUS "Found libLAS version: ${LIBLAS_VERSION}")
     ELSE()
-      MESSAGE(FATAL_ERROR "libPC version check failed. Version ${LIBLAS_VERSION} was found, at least version ${LibLAS_FIND_VERSION} is required")
+      MESSAGE(FATAL_ERROR "libLS version check failed. Version ${LIBLAS_VERSION} was found, at least version ${LibLAS_FIND_VERSION} is required")
     ENDIF()
   ELSE()
     MESSAGE(FATAL_ERROR "Failed to open ${LIBLAS_VERSION_H} file")
