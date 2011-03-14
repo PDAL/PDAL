@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_constant)
     int offsetX = schema.getDimensionIndex(Dimension::Field_X);
     int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
     int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
-    int offsetT = schema.getDimensionIndex(Dimension::Field_GpsTime);
+    int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_random)
     int offsetX = schema.getDimensionIndex(Dimension::Field_X);
     int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
     int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
-    int offsetT = schema.getDimensionIndex(Dimension::Field_GpsTime);
+    int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {

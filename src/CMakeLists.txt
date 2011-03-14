@@ -41,11 +41,11 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/LasHeaderWriter.hpp
   ${LIBPC_HEADERS_DIR}/LasReader.hpp
   ${LIBPC_HEADERS_DIR}/LasWriter.hpp
-  ${LIBPC_HEADERS_DIR}/LruCache.hpp
   ${LIBPC_HEADERS_DIR}/Metadata.hpp
   ${LIBPC_HEADERS_DIR}/MosaicFilter.hpp
   ${LIBPC_HEADERS_DIR}/Vector.hpp  
   ${LIBPC_HEADERS_DIR}/PointData.hpp  
+  ${LIBPC_HEADERS_DIR}/PointDataCache.hpp  
   ${LIBPC_HEADERS_DIR}/Range.hpp
   ${LIBPC_HEADERS_DIR}/Producer.hpp
   ${LIBPC_HEADERS_DIR}/Schema.hpp
@@ -86,6 +86,7 @@ set(LIBPC_CPP
   MosaicFilter.cpp
   Vector.cpp  
   PointData.cpp
+  PointDataCache.cpp
   Producer.cpp
   Schema.cpp
   SchemaLayout.cpp

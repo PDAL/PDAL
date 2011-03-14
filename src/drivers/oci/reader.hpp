@@ -46,9 +46,12 @@ namespace libpc { namespace driver { namespace oci {
 
 
 
+
+
+
 class LIBPC_DLL Reader : public Producer
 {
-    
+
 public:
     Reader(Options& options);
     ~Reader();

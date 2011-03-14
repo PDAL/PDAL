@@ -56,9 +56,9 @@ Reader::Reader(Options& options)
     : Producer()
     , m_options(options)
 {
-    
-    return;
-}
+
+}    
+
 
 const std::string& Reader::getName() const
 {
@@ -68,9 +68,9 @@ const std::string& Reader::getName() const
 
 Reader::~Reader()
 {
+
     return;
 }
-
 
 
 }}} // namespace libpc::driver::oci

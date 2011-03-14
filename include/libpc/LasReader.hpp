@@ -57,7 +57,7 @@ public:
     const LasHeader& getLasHeader() const;
 
 protected:
-    virtual boost::uint32_t readBuffer(PointData&);
+    boost::uint32_t readBuffer(PointData&);
 
     LasHeader& getLasHeader();
     void setLasHeader(const LasHeader&);

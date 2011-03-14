@@ -40,6 +40,8 @@
 namespace libpc
 {
 
+class PointDataCache;
+
 // This is just a very simple MRU filter -- future versions will be smarter.
 // This cache has the following constraints:
 //   - only one block is cached
@@ -48,10 +50,19 @@ namespace libpc
 class LIBPC_DLL CacheFilter : public Filter
 {
 public:
-    CacheFilter(Stage& prevStage);
+    CacheFilter(Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
     ~CacheFilter();
 
     const std::string& getName() const;
+
+    // override
+    void seekToPoint(boost::uint64_t index);
+
+    // clear cache (but leave cache params unchanged)
+    void resetCache();
+
+    // clear cache, and change cache params too
+    void resetCache(boost::uint32_t numBlocks, boost::uint32_t blockSize);
 
     // number of points requested from this filter via read()
     boost::uint64_t getNumPointsRequested() const;
@@ -59,20 +70,20 @@ public:
     // num points this filter read from the previous stage
     boost::uint64_t getNumPointsRead() const;
 
-    // override
-    boost::uint64_t getCurrentPointIndex() const;
-
-    // override
-    void seekToPoint(boost::uint64_t index);
+    void getCacheStats(boost::uint64_t& numCacheLookupMisses,
+                       boost::uint64_t& numCacheLookupHits,
+                       boost::uint64_t& numCacheInsertMisses,
+                       boost::uint64_t& numCacheInsertHits) const;
 
 private:
     boost::uint32_t readBuffer(PointData&);
 
-    boost::uint64_t m_currentPointIndex;
-    boost::uint64_t m_storedPointIndex;
-    PointData* m_storedPointData;
     boost::uint64_t m_numPointsRequested;
     boost::uint64_t m_numPointsRead;
+
+    PointDataCache* m_cache;
+    boost::uint32_t m_maxCacheBlocks;
+    boost::uint32_t m_cacheBlockSize;
 
     CacheFilter& operator=(const CacheFilter&); // not implemented
     CacheFilter(const CacheFilter&); // not implemented

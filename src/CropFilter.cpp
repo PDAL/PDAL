@@ -58,9 +58,7 @@ const std::string& CropFilter::getName() const
 
 boost::uint32_t CropFilter::readBuffer(PointData& data)
 {
-    m_prevStage.read(data);
-
-    boost::uint32_t numPoints = data.getNumPoints();
+    boost::uint32_t numPoints = m_prevStage.read(data);
 
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
@@ -91,6 +89,8 @@ boost::uint32_t CropFilter::readBuffer(PointData& data)
             }
         }
     }
+
+    incrementCurrentPointIndex(numPoints);
 
     return numValidPoints;
 }

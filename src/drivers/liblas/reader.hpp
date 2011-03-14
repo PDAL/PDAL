@@ -59,9 +59,7 @@ public:
 
     const std::string& getName() const;
 
-    // default is to reset() and then read N points manually
-    // override this if you can
-    virtual void seekToPoint(boost::uint64_t pointNum);
+    void seekToPoint(boost::uint64_t pointNum);
 
     const LiblasHeader& getLiblasHeader() const;
 

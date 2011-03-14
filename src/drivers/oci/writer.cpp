@@ -92,6 +92,8 @@ Connection Writer::Connect()
 
 Writer::~Writer()
 {
+    m_connection->Commit();
+
     return;
 }
 
@@ -459,12 +461,9 @@ std::string Writer::CreatePCElemInfo()
       
 }
 
-long Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
+void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
 {
-
-
-    
-    boost::property_tree::ptree  tree = m_options.GetPTree();
+    boost::property_tree::ptree&  tree = m_options.GetPTree();
     
     std::string block_table_name = to_upper(tree.get<std::string>("block_table_name"));
     std::string base_table_name = to_upper(tree.get<std::string>("base_table_name"));
@@ -593,7 +592,7 @@ oss << "declare\n"
     }
     output = pc_id;
 
-    return output;
+    tree.put("cloud_id", pc_id);
     
 }
 void Writer::writeBegin()
@@ -620,6 +619,7 @@ void Writer::writeBegin()
     if (!BlockTableExists())
         CreateBlockTable();
     
+    m_stage.seekToPoint(0);
     return;
 }
 
@@ -630,9 +630,336 @@ void Writer::writeEnd()
     return;
 }
 
+bool Writer::FillOraclePointData(PointData const& buffer, 
+                                 std::vector<boost::uint8_t>& point_data,
+                                 chipper::Block const& block,
+                                 boost::uint32_t block_id)
+{
+
+
+    libpc::Schema const& schema = buffer.getSchema();
+    std::vector<boost::uint32_t> ids = block.GetIDs();
+
+    bool hasTimeData = schema.hasDimension(Dimension::Field_Time);
+    
+    boost::uint64_t count = buffer.getNumPoints();
+
+    point_data.clear(); // wipe whatever was there    
+    boost::uint32_t oracle_record_size = 8+8+8+8+8+4+4;
+    // point_data.resize(count*oracle_record_size);
+    
+    // assert(count*oracle_record_size == point_data.size());
+
+    const int indexX = schema.getDimensionIndex(Dimension::Field_X);
+    const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
+    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z);
+    const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification);
+    const int indexTime = schema.getDimensionIndex(Dimension::Field_Time);
+    
+    Dimension const& dimX = schema.getDimension(indexX);
+    Dimension const& dimY = schema.getDimension(indexY);
+    Dimension const& dimZ = schema.getDimension(indexZ);
+
+    double xscale = dimX.getNumericScale();
+    double yscale = dimY.getNumericScale();
+    double zscale = dimY.getNumericScale();
+        
+    double xoffset = dimX.getNumericOffset();
+    double yoffset = dimY.getNumericOffset();
+    double zoffset = dimZ.getNumericOffset();
+    
+    boost::uint32_t counter = 0;
+    std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    std::cout.precision(6);
+
+    while (counter < count)
+    {
+
+        double x = (buffer.getField<boost::int32_t>(counter, indexX) * xscale) + xoffset;
+        double y = (buffer.getField<boost::int32_t>(counter, indexY) * yscale) + yoffset;
+        double z = (buffer.getField<boost::int32_t>(counter, indexZ) * zscale) + zoffset;
+        boost::uint8_t classification = buffer.getField<boost::uint8_t>(counter, indexClassification);
+        double c = static_cast<double>(classification);
+        boost::uint32_t id = ids[counter];
+        std::cout << x <<" "<< y  <<" "<< z << " "<< id << " " << c <<std::endl;
+        
+        double t = 0.0;
+        if (hasTimeData)
+            t = buffer.getField<double>(counter, indexTime);
+
+        boost::uint8_t* x_b =  reinterpret_cast<boost::uint8_t*>(&x);
+        boost::uint8_t* y_b =  reinterpret_cast<boost::uint8_t*>(&y);
+        boost::uint8_t* z_b =  reinterpret_cast<boost::uint8_t*>(&z);
+        boost::uint8_t* t_b =  reinterpret_cast<boost::uint8_t*>(&t);
+        boost::uint8_t* c_b =  reinterpret_cast<boost::uint8_t*>(&c);
+
+        // big-endian
+        for (int i = sizeof(double) - 1; i >= 0; i--) {
+            point_data.push_back(x_b[i]);
+        }
+
+        for (int i = sizeof(double) - 1; i >= 0; i--) {
+            point_data.push_back(y_b[i]);
+        }   
+
+        for (int i = sizeof(double) - 1; i >= 0; i--) {
+            point_data.push_back(z_b[i]);
+        }
+
+    
+        for (int i = sizeof(double) - 1; i >= 0; i--) {
+            point_data.push_back(t_b[i]);
+        }
+
+        // Classification is only a single byte, but 
+        // we need to store it in an 8 byte big-endian 
+        // double to satisfy OPC
+        for (int i = sizeof(double) - 1; i >= 0; i--) {
+            point_data.push_back(c_b[i]);
+        }
+
+        boost::uint8_t* id_b = reinterpret_cast<boost::uint8_t*>(&id);
+        boost::uint8_t* block_b = reinterpret_cast<boost::uint8_t*>(&block_id);
+        
+        // 4-byte big-endian integer for the BLK_ID value
+        for (int i =  sizeof(boost::uint32_t) - 1; i >= 0; i--) {
+            point_data.push_back(block_b[i]);
+        }
+        
+        // 4-byte big-endian integer for the PT_ID value
+        for (int i =  sizeof(boost::uint32_t) - 1; i >= 0; i--) {
+            point_data.push_back(id_b[i]);
+        }
+
+        counter++;
+    }
+
+    assert(count*oracle_record_size == point_data.size());
+    
+    return true;
+}
+
+void Writer::SetElements(   Statement statement,
+                            OCIArray* elem_info)
+{
+    
+
+    statement->AddElement(elem_info, 1);
+    bool bUseSolidGeometry = m_options.IsSolid();
+    if (bUseSolidGeometry == true) {
+        //"(1,1007,3)";
+        statement->AddElement(elem_info, 1007);
+    } else {
+        //"(1,1003,3)";
+        statement->AddElement(elem_info, 1003);
+    }
+
+    statement->AddElement(elem_info, 3);
+ 
+}
+
+void Writer::SetOrdinates(Statement statement,
+                          OCIArray* ordinates, 
+                          libpc::Bounds<double> const& extent)
+{
+    
+    statement->AddElement(ordinates, extent.getMinimum(0));
+    statement->AddElement(ordinates, extent.getMaximum(1));
+    if (extent.dimensions().size() > 2)
+        statement->AddElement(ordinates, extent.getMinimum(2));
+    
+    statement->AddElement(ordinates, extent.getMaximum(0));
+    statement->AddElement(ordinates, extent.getMaximum(1));
+    if (extent.dimensions().size() > 2)
+        statement->AddElement(ordinates, extent.getMaximum(2));
+        
+
+}
+
+bool Writer::WriteBlock(PointData const& buffer, 
+                                 std::vector<boost::uint8_t>& point_data,
+                                 chipper::Block const& block,
+                                 boost::uint32_t block_id)
+{
+
+    boost::property_tree::ptree&  tree = m_options.GetPTree();
+    
+    std::string block_table_name = to_upper(tree.get<std::string>("block_table_name"));
+    std::string block_table_partition_column = to_upper(tree.get<std::string>("block_table_partition_column"));
+    boost::int32_t block_table_partition_value = tree.get<boost::uint32_t>("block_table_partition_value");
+    boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
+
+    bool bUsePartition = block_table_partition_column.size() != 0;
+    
+    std::vector<boost::uint32_t> ids = block.GetIDs();
+
+    
+
+    std::ostringstream oss;
+    std::ostringstream partition;
+    
+    if (bUsePartition)
+    {
+        partition << "," << block_table_partition_column;
+    }
+
+
+
+    // EnableTracing(connection);
+    
+    long gtype = GetGType();
+
+    
+    oss << "INSERT INTO "<< block_table_name << 
+            "(OBJ_ID, BLK_ID, NUM_POINTS, POINTS,   "
+            "PCBLK_MIN_RES, BLK_EXTENT, PCBLK_MAX_RES, NUM_UNSORTED_POINTS, PT_SORT_DIM";
+    if (bUsePartition)
+        oss << partition.str();
+    oss << ") "
+            "VALUES ( :1, :2, :3, :4, 1, mdsys.sdo_geometry(:5, :6, null,:7, :8)" 
+            ", 1, 0, 1";
+    if (bUsePartition)
+        oss << ", :9";
+            
+    oss <<")";
+          
+    // TODO: If gotdata == false below, this memory probably leaks --mloskot
+    OCILobLocator** locator =(OCILobLocator**) VSIMalloc( sizeof(OCILobLocator*) * 1 );
+
+    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+    
+
+    long pc_id = tree.get<boost::int32_t>("cloud_id");
+    long* p_pc_id = (long*) malloc( 1 * sizeof(long));
+    p_pc_id[0] = pc_id;
+
+    long* p_result_id = (long*) malloc( 1 * sizeof(long));
+    p_result_id[0] = (long)block_id;
+    
+    long* p_num_points = (long*) malloc (1 * sizeof(long));
+    p_num_points[0] = (long)ids.size();
+    
+    
+    // :1
+    statement->Bind( p_pc_id );
+    
+    // :2
+    statement->Bind( p_result_id );
+
+    // :3
+    statement->Bind( p_num_points );
+       
+    // :4
+    statement->Define( locator, 1 ); 
+
+        
+    // std::vector<liblas::uint8_t> data;
+    // bool gotdata = GetResultData(result, reader, data, 3);
+    // if (! gotdata) throw std::runtime_error("unable to fetch point data byte array");
+
+    statement->Bind((char*)&(point_data[0]),(long)point_data.size());
+
+    // :5
+    long* p_gtype = (long*) malloc (1 * sizeof(long));
+    p_gtype[0] = gtype;
+
+    statement->Bind(p_gtype);
+    
+    // :6
+    long* p_srid  = 0;
+    
+    
+    if (srid != 0) {
+        p_srid = (long*) malloc (1 * sizeof(long));
+        p_srid[0] = srid;
+    }
+    statement->Bind(p_srid);
+    
+    // :7
+    OCIArray* sdo_elem_info=0;
+    m_connection->CreateType(&sdo_elem_info, m_connection->GetElemInfoType());
+    SetElements(statement, sdo_elem_info);    
+    statement->Bind(&sdo_elem_info, m_connection->GetElemInfoType());
+    
+    // :8
+    OCIArray* sdo_ordinates=0;
+    m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
+    
+     // x0, x1, y0, y1, z0, z1, bUse3d
+    SetOrdinates(statement, sdo_ordinates, block.GetBounds());
+    statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
+    
+    // :9
+    long* p_partition_d = 0;
+    if (bUsePartition) {
+        p_partition_d = (long*) malloc (1 * sizeof(long));
+        p_partition_d[0] = block_table_partition_value;
+        statement->Bind(p_partition_d);        
+    }
+    
+    try {
+        statement->Execute();
+    } catch (std::runtime_error const& e) {
+        std::ostringstream oss;
+        oss << "Failed to insert block # into '" << block_table_name << "' table. Does the table exist? "  << std::endl << e.what() << std::endl;
+        throw std::runtime_error(oss.str());
+    }
+    
+    oss.str("");
+    
+
+    OWStatement::Free(locator, 1);
+
+    if (p_pc_id != 0) free(p_pc_id);
+    if (p_result_id != 0) free(p_result_id);
+    if (p_num_points != 0) free(p_num_points);
+    if (p_gtype != 0) free(p_gtype);
+    if (p_srid != 0) free(p_srid);    
+    if (p_partition_d != 0) free(p_partition_d);
+    
+    m_connection->DestroyType(&sdo_elem_info);
+    m_connection->DestroyType(&sdo_ordinates);
+    
+
+
+    
+    return true;
+}
 
 boost::uint32_t Writer::writeBuffer(const PointData& pointData)
 {
+    boost::uint32_t numPoints = pointData.getNumPoints();
+
+    libpc::Header const& header = m_stage.getHeader();
+    libpc::Schema const& schema = header.getSchema();
+
+    PointData buffer(schema, 1);
+
+    
+    for ( boost::uint32_t i = 0; i < m_chipper.GetBlockCount(); ++i )
+    {
+        const chipper::Block& b = m_chipper.GetBlock(i);
+        
+        // FIXME: This should be std::min(capacity, block_id.size()) (I think)
+        PointData block(schema, m_options.GetPTree().get<boost::uint32_t>("capacity"));
+        std::vector<boost::uint32_t> ids = b.GetIDs();
+        
+        std::vector<boost::uint32_t>::const_iterator it;
+        std::vector<boost::uint8_t> oracle_buffer;
+        boost::uint32_t count = 0;
+        for (it = ids.begin(); it != ids.end(); it++)
+        {
+            m_stage.seekToPoint(*it);
+            m_stage.read(buffer);
+            
+            block.copyPointsFast(static_cast<std::size_t>(count), static_cast<std::size_t>(0), buffer, 1); // put single point onto our block
+
+            count++;
+
+        }
+        FillOraclePointData(block, oracle_buffer, b, i);
+        WriteBlock(block, oracle_buffer, b, i);
+    }
     // bool hasTimeData = false;
     // bool hasColorData = false;
     // bool hasWaveData = false;
@@ -755,7 +1082,7 @@ boost::uint32_t Writer::writeBuffer(const PointData& pointData)
     // }
     // 
     // return numPoints;
-    return 0;
+    return numPoints;
 }
 
 void Writer::Debug()

@@ -76,6 +76,7 @@ public:
     Options();
     bool IsDebug() const;
     bool Is3d() const;
+    bool IsSolid() const;
     boost::property_tree::ptree& GetPTree() {return m_tree; }
 
 };

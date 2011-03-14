@@ -65,29 +65,10 @@ public:
     // we need to write into.
     //
     // This is NOT virtual.  Derived classes should override the 
-    // readBegin/readBuffer/readEnd functions below, not this one.
+    // readBuffer function below, not this one.
     //
     // Returns the number of valid points read.
     boost::uint32_t read(PointData&);
-
-    // Implement this to do any setup work you need to do before the 
-    // sequence of calls the readBuffer starts up.
-    //
-    // Do not call this yourself -- use the read() call above.
-    virtual void readBegin(boost::uint32_t numPointsToRead) = 0;
-
-    // Implement this to do the actual work to fill in a buffer of points.
-    //
-    // Do not call this yourself -- use the read() call above
-    //
-    // This is called after readBegin() is called.  It may be called 
-    // multiple times for one read() call.
-    virtual boost::uint32_t readBuffer(PointData&) = 0;
-
-    // This is called once, after the readBuffer() calls are done.
-    // 
-    // Do not call this yourself -- use the read() call above.
-    virtual void readEnd(boost::uint32_t numPointsRead) = 0;
 
     // advance (or retreat) to the Nth point in the file (absolute, 
     // not relative).  In some cases, this might be a very slow, painful
@@ -97,7 +78,7 @@ public:
     // Returns the current point number.  The first point is 0.
     // If this number if > getNumPoints(), then no more points
     // may be read (and atEnd() should be true).
-    virtual boost::uint64_t getCurrentPointIndex() const = 0;
+    boost::uint64_t getCurrentPointIndex() const;
 
     // returns the number of points this stage has available
     // (actually a convenience function that gets it from the header)
@@ -111,10 +92,23 @@ public:
     Header& getHeader();
 
 protected:
+    // Implement this to do the actual work to fill in a buffer of points.
+    virtual boost::uint32_t readBuffer(PointData&) = 0;
+
+    // Each concrete stage is repsonsible for managing its own current
+    // point index when a read or seek occurs.  Call this function to set
+    // the value.
+    void setCurrentPointIndex(boost::uint64_t delta);
+
+    // this is easier than saying setCurrentPointIndex(getCurrentPointIndex()+n)
+    void incrementCurrentPointIndex(boost::uint64_t currentPointDelta);
+
     void setHeader(Header*); // stage takes ownership
 
 private:
     Header* m_header;
+    
+    boost::uint64_t m_currentPointIndex;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented

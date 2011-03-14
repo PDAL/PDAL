@@ -48,11 +48,11 @@ Options::Options()
     m_tree.put("srid", 4269);
     m_tree.put("capacity", 8000);
     m_tree.put("precision", 8);
-    m_tree.put("pcid", -1);
+    m_tree.put("cloud_id", -1);
     m_tree.put("connection", std::string(""));
     m_tree.put("block_table_name", std::string("output"));
     m_tree.put("block_table_partition_column", std::string(""));
-    m_tree.put("block_table_partition_value", std::string(""));
+    m_tree.put("block_table_partition_value", boost::int32_t(0));
     m_tree.put("base_table_name", std::string("hobu"));
     m_tree.put("cloud_column_name", std::string("cloud"));
     m_tree.put("header_blob_column_name", std::string("header"));
@@ -93,7 +93,19 @@ bool Options::Is3d() const
     return is3d;
 }
 
+bool Options::IsSolid() const
+{
+    bool IsSolid = false;
+    try
+    {
+        IsSolid = m_tree.get<bool>("solid");
+    }
+    catch (boost::property_tree::ptree_bad_path const& e) {
+      ::boost::ignore_unused_variable_warning(e);
 
+    }
+    return IsSolid;
+}
 
 
 std::string to_upper(const std::string& input)

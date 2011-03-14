@@ -141,7 +141,7 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData)
     const int fieldIndexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
     const int fieldIndexPointSource = schema.getDimensionIndex(Dimension::Field_PointSourceId);
 
-    const int fieldIndexTime = (hasTimeData ? schema.getDimensionIndex(Dimension::Field_GpsTime) : 0);
+    const int fieldIndexTime = (hasTimeData ? schema.getDimensionIndex(Dimension::Field_Time) : 0);
 
     const int fieldIndexRed = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
     const int fieldIndexGreen = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
@@ -212,7 +212,7 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData)
             const boost::int8_t scanAngleRank = Utils::read_field<boost::int8_t>(p);
             const boost::uint8_t user = Utils::read_field<boost::uint8_t>(p);
             const boost::uint16_t pointSourceId = Utils::read_field<boost::uint16_t>(p);
-            const double gpsTime = Utils::read_field<double>(p);
+            const double time = Utils::read_field<double>(p);
             const boost::uint16_t red = Utils::read_field<boost::uint16_t>(p);
             const boost::uint16_t green = Utils::read_field<boost::uint16_t>(p);
             const boost::uint16_t blue = Utils::read_field<boost::uint16_t>(p);
@@ -234,7 +234,7 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData)
             pointData.setField<boost::int8_t>(pointIndex, fieldIndexScanAngle, scanAngleRank);
             pointData.setField<boost::uint8_t>(pointIndex, fieldIndexUserData, user);
             pointData.setField<boost::uint16_t>(pointIndex, fieldIndexPointSource, pointSourceId);
-            pointData.setField<double>(pointIndex, fieldIndexTime, gpsTime);
+            pointData.setField<double>(pointIndex, fieldIndexTime, time);
             pointData.setField<boost::uint16_t>(pointIndex, fieldIndexRed, red);
             pointData.setField<boost::uint16_t>(pointIndex, fieldIndexGreen, green);
             pointData.setField<boost::uint16_t>(pointIndex, fieldIndexBlue, blue);

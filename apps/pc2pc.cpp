@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-//#include "libpc/exceptions.hpp"
+#include "libpc/exceptions.hpp"
 //#include "libpc/libpc_config.hpp"
 //#include "libpc/Bounds.hpp"
 //#include "libpc/Color.hpp"
@@ -31,7 +31,9 @@
 #include "libpc/../../src/drivers/liblas/writer.hpp"
 #include "libpc/../../src/drivers/liblas/reader.hpp"
 
+#ifdef HAVE_ORACLE
 #include "libpc/../../src/drivers/oci/writer.hpp"
+#endif
 
 #include "Application.hpp"
 
@@ -120,11 +122,13 @@ int Application_pc2pc::execute()
         writer.write(np);
     }
 
+#ifdef HAVE_ORACLE
 
     else if (hasOption("oracle"))
     {
-        LasReader reader(*ifs);
-        std::cout << "running oracle test" << std::endl;
+#ifdef HAVE_ORACLE
+        LiblasReader reader(*ifs);
+    
         const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
         
         libpc::driver::oci::Options options;
@@ -135,7 +139,7 @@ int Application_pc2pc::execute()
         tree.put("debug", true);
         tree.put("verbose", true);
         
-        CacheFilter cache(reader);
+        CacheFilter cache(reader, 1, 1024);
         
         libpc::driver::oci::Writer writer(cache, options);
         
@@ -146,9 +150,12 @@ int Application_pc2pc::execute()
 
         size_t np = (size_t)numPoints;
         assert(numPoints == np); // BUG
-         writer.write(np);
+        writer.write(np);
+#else
+        throw configuration_error("libPC not compiled with Oracle support");
+#endif
     }    
-
+#endif
     else
     {
         LiblasReader reader(*ifs);

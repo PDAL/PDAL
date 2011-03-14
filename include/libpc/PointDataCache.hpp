@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2010, Tim Day <timday@timday.com>
+ * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,11 +15,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// This code is from http://www.bottlenose.demon.co.uk/article/lru.htm.  It is
-// under a Internet Systems Consortium (ISC) license (an OSI-approved BSD-alike license).
+// This PointData-specific code derived from the templated code at
+// http://www.bottlenose.demon.co.uk/article/lru.htm.  It is under an
+// Internet Systems Consortium (ISC) license (an OSI-approved BSD-alike license).
 
-#ifndef INCLUDED_LIBPC_LRUCACHE_HPP
-#define INCLUDED_LIBPC_LRUCACHE_HPP
+#ifndef INCLUDED_LIBPC_POINTDATACACHE_HPP
+#define INCLUDED_LIBPC_POINTDATACACHE_HPP
 
 
 #ifdef _MSC_VER
@@ -33,13 +35,14 @@
 #  pragma warning(pop)
 #endif
 
+#include "libpc/PointData.hpp"
+
+
 namespace libpc
 {
 
-class PointData;
 
-
-class LruCache
+class PointDataCache
 {
 public:
 
@@ -48,20 +51,24 @@ public:
     // Bimap with key access on left view, key access
     // history on right view, and associated value.
     typedef boost::bimaps::bimap<
-    boost::bimaps::set_of<boost::uint32_t>,
+    boost::bimaps::set_of<boost::uint64_t>,
           boost::bimaps::list_of<dummy_type>,
           boost::bimaps::with_info<PointData*>
           > cache_type;
 
     // Constuctor specifies the cached function and
     // the maximum number of records to be stored.
-    LruCache(size_t c)
+    PointDataCache(size_t c)
         :_capacity(c)
+        , m_numCacheLookupMisses(0)
+        , m_numCacheLookupHits(0)
+        , m_numCacheInsertMisses(0)
+        , m_numCacheInsertHits(0)
     {
         assert(_capacity!=0);
     }
 
-    ~LruCache()
+    ~PointDataCache()
     {
         for (cache_type::left_iterator it =_cache.left.begin(); it != _cache.left.end(); ++it)
         {
@@ -71,7 +78,7 @@ public:
         return;
     }
 
-    PointData* lookup(boost::uint32_t k)
+    PointData* lookup(boost::uint64_t k)
     {
         // Attempt to find existing record
         const cache_type::left_iterator it =_cache.left.find(k);
@@ -79,17 +86,24 @@ public:
         if (it==_cache.left.end())
         {
             // We don't have it:
+            ++m_numCacheLookupMisses;
             return NULL;
         }
         else
         {
-            // We do have it:
+            // We do have it: update the access record view and return it
+            _cache.right.relocate(
+                _cache.right.end(),
+                _cache.project_right(it)
+                );
+            ++m_numCacheLookupHits;
             return it->info;
         }
     }
 
-    // Obtain value of the cached function for k
-    PointData* insert(boost::uint32_t k, PointData* v)
+    // When something is inserted into the cache, the cache
+    // takes ownership (deletion responsibility) for it.
+    PointData* insert(boost::uint64_t k, PointData* v)
     {
         // Attempt to find existing record
         const cache_type::left_iterator it =_cache.left.find(k);
@@ -98,17 +112,19 @@ public:
         {
             // We don't have it: insert it
             insertx(k,v);
+            ++m_numCacheInsertMisses;
             return v;
         }
         else
         {
-            // We do have it:
-            // Update the access record view.
+            // We do have it: update the access record view and return it
+            // note we don't support "replacing" the value (i.e. if v != it->info)
             _cache.right.relocate(
                 _cache.right.end(),
                 _cache.project_right(it)
             );
-
+            assert(it->info == v);
+            ++m_numCacheInsertHits;
             return it->info;
         }
     }
@@ -128,9 +144,20 @@ public:
         }
     }
 
+    void getCacheStats(boost::uint64_t& numCacheLookupMisses,
+                       boost::uint64_t& numCacheLookupHits,
+                       boost::uint64_t& numCacheInsertMisses,
+                       boost::uint64_t& numCacheInsertHits) const
+    {
+        numCacheLookupMisses = m_numCacheLookupMisses;
+        numCacheLookupHits = m_numCacheLookupHits;
+        numCacheInsertMisses = m_numCacheInsertMisses;
+        numCacheInsertHits = m_numCacheInsertHits;
+    }
+
 private:
 
-    void insertx(boost::uint32_t k, PointData* v)
+    void insertx(boost::uint64_t k, PointData* v)
     {
         assert(_cache.size()<=_capacity);
 
@@ -138,6 +165,11 @@ private:
         if (_cache.size()==_capacity)
         {
             // by purging the least-recently-used element
+
+            cache_type::right_iterator iter =_cache.right.begin();
+            PointData *old = iter->info;
+            delete old;
+
             _cache.right.erase(_cache.right.begin());
         }
 
@@ -152,8 +184,13 @@ private:
     const size_t _capacity;
     cache_type _cache;
 
-    LruCache& operator=(const LruCache&); // not implemented
-    LruCache(const LruCache&); // not implemented
+    boost::uint64_t m_numCacheLookupMisses;
+    boost::uint64_t m_numCacheLookupHits;
+    boost::uint64_t m_numCacheInsertMisses;
+    boost::uint64_t m_numCacheInsertHits;
+
+    PointDataCache& operator=(const PointDataCache&); // not implemented
+    PointDataCache(const PointDataCache&); // not implemented
 };
 
 

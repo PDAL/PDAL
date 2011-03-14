@@ -866,7 +866,7 @@ void LasHeader::add_time(Schema& schema)
 {
     std::ostringstream text;
 
-    Dimension t(Dimension::Field_GpsTime, Dimension::Uint64);
+    Dimension t(Dimension::Field_Time, Dimension::Uint64);
     text << "The GPS Time is the double floating point time tag value at "
          "which the point was acquired. It is GPS Week Time if the "
          "Global Encoding low bit is clear and Adjusted Standard GPS "
