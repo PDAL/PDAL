@@ -797,29 +797,3 @@ void Writer::Debug()
 
 
 }}} // namespace libpc::driver::oci
-
-void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
-{
-    std::ostringstream oss;
-    
-    if (eErrClass == CE_Failure || eErrClass == CE_Fatal) {
-        oss <<"GDAL Failure number=" << err_no << ": " << msg;
-        throw libpc::libpc_error(oss.str());
-    } else {
-        return;
-    }
-}
-
-void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
-{
-    std::ostringstream oss;
-    
-    if (eErrClass == CE_Failure || eErrClass == CE_Fatal) {
-        oss <<"GDAL Failure number=" << err_no << ": " << msg;
-        throw libpc::libpc_error(oss.str());
-    } else if (eErrClass == CE_Debug) {
-        std::cout <<"GDAL Debug: " << msg << std::endl;
-    } else {
-        return;
-    }
-}
