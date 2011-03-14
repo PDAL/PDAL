@@ -245,6 +245,24 @@ endif()
 # settings for other 3rd party dependencies
 #------------------------------------------------------------------------------
 
+# swig support
+if (WIN32)
+  set(WITH_SWIG_CSHARP TRUE CACHE BOOL "Choose if you want to make C# bindings via Swig")
+else()
+  set(WITH_SWIG_CSHARP FALSE CACHE BOOL "Choose if you want to make C# bindings via Swig")
+endif()
+
+if(WITH_SWIG_CSHARP)
+    find_package(swig 2.0.1)
+    if(SWIG_FOUND)
+        add_subdirectory(csharp)
+        set(LIBPC_HAVE_SWIG_CSHARP 1)
+		message(STATUS "Found Swig version ${SWIG_VERSION}")
+	else()
+		message(FATAL_ERROR "Swig not found (required for C# bindings)")
+    endif()
+endif()
+
 # libxml2 support - optional, default=ON
 set(WITH_LIBXML2 FALSE CACHE BOOL "Choose if libxml2 support should be built ")
 
