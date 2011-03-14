@@ -42,17 +42,8 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
-
 
 namespace libpc { namespace driver { namespace oci {
-
-
-typedef boost::shared_ptr<OWConnection> Connection ;
-typedef boost::shared_ptr<OWStatement> Statement ;
-
-std::string to_upper(std::string const& input);
 
 
 
