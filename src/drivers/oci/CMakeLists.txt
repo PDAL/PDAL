@@ -9,8 +9,9 @@
 
 set (SOURCES 
   oci_wrapper.cpp
-  block.cpp
+  common.cpp
   header.cpp
+  reader.cpp
   writer.cpp
   
   )

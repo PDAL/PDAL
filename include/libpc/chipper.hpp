@@ -130,6 +130,9 @@ private:
     RefList m_xvec;
     RefList m_yvec;
     RefList m_spare;
+
+    Chipper& operator=(const Chipper&); // not implemented
+    Chipper(const Chipper&); // not implemented
 };
 
 } // namespace chipper

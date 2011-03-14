@@ -32,22 +32,43 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "block.hpp"
+#ifndef INCLUDED_LIBPC_DRIVER_OCI_READER_HPP
+#define INCLUDED_LIBPC_DRIVER_OCI_READER_HPP
+
+#include <libpc/Producer.hpp>
+
+#include "common.hpp"
 
 
 namespace libpc { namespace driver { namespace oci {
 
 
-Block::Block(chipper::Block const& block)
-    : m_block(block)
+
+
+
+
+
+
+class LIBPC_DLL Reader : public Producer
 {
-}
 
+public:
+    Reader(Options& options);
+    ~Reader();
+    
+    const std::string& getName() const;
 
+private:
 
+    Reader& operator=(const Reader&); // not implemented
+    Reader(const Reader&); // not implemented
+    // 
+    
 
-
-
-
+    Options& m_options;
+};
 
 }}} // namespace libpc::driver::oci
+
+
+#endif // INCLUDED_LIBPC_DRIVER_OCI_READER_HPP

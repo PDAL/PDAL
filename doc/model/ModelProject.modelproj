@@ -17,12 +17,19 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\ArchitectureTools\Microsoft.VisualStudio.TeamArchitect.ModelingProject.targets" />
   <ItemGroup>
-    <Content Include="ClassDiagram.classdiagram">
+    <Content Include="Stage.classdiagram">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="ClassDiagram.classdiagram.layout">
+    <Content Include="Stage.classdiagram.layout">
       <SubType>Content</SubType>
-      <DependentUpon>ClassDiagram.classdiagram</DependentUpon>
+      <DependentUpon>Stage.classdiagram</DependentUpon>
+    </Content>
+    <Content Include="PointData.classdiagram">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="PointData.classdiagram.layout">
+      <SubType>Content</SubType>
+      <DependentUpon>PointData.classdiagram</DependentUpon>
     </Content>
     <Folder Include="ModelDefinition\" />
     <Content Include="ModelDefinition\ModelProject.uml">

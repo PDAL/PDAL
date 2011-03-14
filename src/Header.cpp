@@ -131,6 +131,12 @@ Metadata::Array& Header::getMetadata()
 }
 
 
+void Header::dump() const
+{
+    std::cout << *this;
+}
+
+
 std::ostream& operator<<(std::ostream& ostr, const Header& header)
 {
     ostr << "  Num points: " << header.getNumPoints() << endl;

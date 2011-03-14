@@ -32,34 +32,45 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVER_OCI_BLOCK_HPP
-#define INCLUDED_DRIVER_OCI_BLOCK_HPP
+
+#include <cassert>
+#include <sstream>
 
 
-#include "libpc/PointData.hpp"
-#include "libpc/Bounds.hpp"
-#include "libpc/chipper.hpp"
+#include "reader.hpp"
+#include "header.hpp"
+#include <liblas/Writer.hpp>
+
+#include <libpc/exceptions.hpp>
+#include <libpc/libpc_config.hpp>
+
+#include <cstdlib>
+#include <iostream>
+
+#include <boost/make_shared.hpp>
 
 namespace libpc { namespace driver { namespace oci {
-    
-class LIBPC_DLL Block
+
+
+Reader::Reader(Options& options)
+    : Producer()
+    , m_options(options)
 {
-public:
-    Block( chipper::Block const& block);
 
-    Block(Block const& other) : m_block(other.m_block) {};
-        
-private:
-    Block& operator=(const Block&); // nope
+}    
 
-    
-    chipper::Block const&  m_block;
-    
-};
+
+const std::string& Reader::getName() const
+{
+    static std::string name("OCI Reader");
+    return name;
+}
+
+Reader::~Reader()
+{
+
+    return;
+}
 
 
 }}} // namespace libpc::driver::oci
-
-LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const libpc::driver::oci::Block&);
-
-#endif

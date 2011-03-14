@@ -56,7 +56,7 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode)
     schema.addDimension(Dimension(Dimension::Field_X, Dimension::Float));
     schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Float));
     schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Float));
-    schema.addDimension(Dimension(Dimension::Field_GpsTime, Dimension::Uint64));
+    schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Uint64));
 
     header->setNumPoints(numPoints);
     header->setBounds(bounds);
@@ -118,7 +118,7 @@ boost::uint32_t FauxReader::readBuffer(PointData& data)
     const double minZ = dims[2].getMinimum();
     const double maxZ = dims[2].getMaximum();
 
-    const int offsetT = schema.getDimensionIndex(Dimension::Field_GpsTime);
+    const int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
     const int offsetX = schema.getDimensionIndex(Dimension::Field_X);
     const int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
     const int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
@@ -152,6 +152,8 @@ boost::uint32_t FauxReader::readBuffer(PointData& data)
 
         ++time;
     }
+
+    incrementCurrentPointIndex(numPoints);
 
     return numPoints;
 }

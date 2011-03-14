@@ -23,6 +23,7 @@ SET(LIBPC_UNIT_TEST_SRC
 	LiblasWriterTest.cpp
 	MosaicFilterTest.cpp
 	PointDataTest.cpp
+	PointDataCacheTest.cpp
 	RangeTest.cpp
 	SchemaTest.cpp
 	SchemaLayoutTest.cpp

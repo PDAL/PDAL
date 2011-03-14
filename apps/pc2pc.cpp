@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-//#include "libpc/exceptions.hpp"
+#include "libpc/exceptions.hpp"
 //#include "libpc/libpc_config.hpp"
 //#include "libpc/Bounds.hpp"
 //#include "libpc/Color.hpp"
@@ -26,10 +26,14 @@
 #include "libpc/LasReader.hpp"
 //#include "libpc/LasHeader.hpp"
 #include "libpc/LasWriter.hpp"
+#include "libpc/CacheFilter.hpp"
 
 #include "libpc/../../src/drivers/liblas/writer.hpp"
 #include "libpc/../../src/drivers/liblas/reader.hpp"
 
+#ifdef HAVE_ORACLE
+#include "libpc/../../src/drivers/oci/writer.hpp"
+#endif
 
 #include "Application.hpp"
 
@@ -84,6 +88,7 @@ void Application_pc2pc::addOptions()
         ("input,i", po::value<std::string>(&m_inputFile), "input file name")
         ("output,o", po::value<std::string>(&m_outputFile), "output file name")
         ("native", "use native LAS classes (not liblas)")
+        ("oracle", "oracle test")
         ;
 
     addOptionSet(file_options);
@@ -116,6 +121,41 @@ int Application_pc2pc::execute()
         assert(numPoints == np); // BUG
         writer.write(np);
     }
+
+#ifdef HAVE_ORACLE
+
+    else if (hasOption("oracle"))
+    {
+#ifdef HAVE_ORACLE
+        LiblasReader reader(*ifs);
+    
+        const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
+        
+        libpc::driver::oci::Options options;
+        boost::property_tree::ptree& tree = options.GetPTree();
+        
+        tree.put("capacity", 15);
+        tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
+        tree.put("debug", true);
+        tree.put("verbose", true);
+        
+        CacheFilter cache(reader, 1, 1024);
+        
+        libpc::driver::oci::Writer writer(cache, options);
+        
+        
+        //BUG: handle laz writer.setCompressed(false);
+
+        //writer.setPointFormat( reader.getPointFormatNumber() );
+
+        size_t np = (size_t)numPoints;
+        assert(numPoints == np); // BUG
+        writer.write(np);
+#else
+        throw configuration_error("libPC not compiled with Oracle support");
+#endif
+    }    
+#endif
     else
     {
         LiblasReader reader(*ifs);

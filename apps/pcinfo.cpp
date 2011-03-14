@@ -10,10 +10,15 @@
  **************************************************************************/
 
 
+#include "libpc/LasReader.hpp"
+#include "libpc/../../src/drivers/liblas/reader.hpp"
+
 #include <iostream>
 
 #include "Application.hpp"
 
+using namespace libpc;
+namespace po = boost::program_options;
 
 class Application_pcinfo : public Application
 {
@@ -22,6 +27,9 @@ public:
     int execute();
 private:
     void addOptions();
+    bool validateOptions();
+
+    std::string m_inputFile;
 };
 
 
@@ -31,12 +39,63 @@ Application_pcinfo::Application_pcinfo(int argc, char* argv[])
 }
 
 
+bool Application_pcinfo::validateOptions()
+{
+    if (!hasOption("input"))
+    {
+        usageError("input file name required");
+        return false;
+    }
+
+    return true;
+}
+
+
 void Application_pcinfo::addOptions()
 {
+    po::options_description* file_options = new po::options_description("file options");
+
+    file_options->add_options()
+        ("input,i", po::value<std::string>(&m_inputFile), "input file name")
+        ("native", "use native LAS classes (not liblas)")
+        ;
+
+    addOptionSet(file_options);
+
+    addPositionalOption("input", 1);
+
+    return;
 }
+
 
 int Application_pcinfo::execute()
 {
+    if (!Utils::fileExists(m_inputFile))
+    {
+        runtimeError("file not found: " + m_inputFile);
+        return 1;
+    }
+
+    std::istream* ifs = Utils::openFile(m_inputFile);
+
+    libpc::Producer* reader = NULL;
+    if (hasOption("native"))
+    {
+        reader = new LasReader(*ifs);
+    }
+    else
+    {
+        reader = new LiblasReader(*ifs);
+    }
+
+    boost::uint64_t numPoints = reader->getNumPoints();
+
+    delete reader;
+
+    Utils::closeFile(ifs);
+
+    std::cout << numPoints << " points\n";
+
     return 0;
 }
 

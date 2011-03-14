@@ -47,50 +47,41 @@ BOOST_AUTO_TEST_CASE(test1)
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
     FauxReader reader(srcBounds, 10000, FauxReader::Constant);
 
-    CacheFilter cache(reader);
+    CacheFilter cache(reader, 2, 1024);
     BOOST_CHECK(cache.getName() == "Cache Filter");
 
     const Schema& schema = reader.getHeader().getSchema();
     SchemaLayout layout(schema);
-    const int offsetT = schema.getDimensionIndex(Dimension::Field_GpsTime);
+    const int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
 
-    PointData data(layout, 1);
+    PointData dataBig(layout, 1024);
+    PointData dataSmall(layout, 1);
     
     BOOST_CHECK(cache.getCurrentPointIndex() == 0);
     BOOST_CHECK(cache.getNumPointsRequested() == 0);
     BOOST_CHECK(cache.getNumPointsRead() == 0);
 
-    cache.read(data);
-    BOOST_CHECK(data.getField<boost::uint64_t>(0, offsetT) == 0);
-    BOOST_CHECK(cache.getCurrentPointIndex() == 1);
-    BOOST_CHECK(cache.getNumPointsRequested() == 1);
-    BOOST_CHECK(cache.getNumPointsRead() == 1024);
-
-    cache.read(data);
-    BOOST_CHECK(data.getField<boost::uint64_t>(0, offsetT) == 1);
-    BOOST_CHECK(cache.getCurrentPointIndex() == 2);
-    BOOST_CHECK(cache.getNumPointsRequested() == 2);
-    BOOST_CHECK(cache.getNumPointsRead() == 1024);
-
-    cache.seekToPoint(1023);
-    cache.read(data);
-    BOOST_CHECK(data.getField<boost::uint64_t>(0, offsetT) == 1023);
+    cache.read(dataBig);
+    BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 0);
     BOOST_CHECK(cache.getCurrentPointIndex() == 1024);
-    BOOST_CHECK(cache.getNumPointsRequested() == 3);
+    BOOST_CHECK(cache.getNumPointsRequested() == 1024);
     BOOST_CHECK(cache.getNumPointsRead() == 1024);
+    BOOST_CHECK(reader.getCurrentPointIndex() == 1024);
 
-    cache.read(data);
-    BOOST_CHECK(data.getField<boost::uint64_t>(0, offsetT) == 1024);
-    BOOST_CHECK(cache.getCurrentPointIndex() == 1025);
-    BOOST_CHECK(cache.getNumPointsRequested() == 4);
-    BOOST_CHECK(cache.getNumPointsRead() == 1024*2);
+    cache.read(dataBig);
+    BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 1024);
+    BOOST_CHECK(cache.getCurrentPointIndex() == 2048);
+    BOOST_CHECK(cache.getNumPointsRequested() == 2048);
+    BOOST_CHECK(cache.getNumPointsRead() == 2048);
+    BOOST_CHECK(reader.getCurrentPointIndex() == 2048);
 
-    cache.seekToPoint(5000);
-    cache.read(data);
-    BOOST_CHECK(data.getField<boost::uint64_t>(0, offsetT) == 5000);
-    BOOST_CHECK(cache.getCurrentPointIndex() == 5001);
-    BOOST_CHECK(cache.getNumPointsRequested() == 5);
-    BOOST_CHECK(cache.getNumPointsRead() == 1024*3);
+    cache.seekToPoint(42);
+    cache.read(dataSmall);
+    BOOST_CHECK(dataSmall.getField<boost::uint64_t>(0, offsetT) == 42);
+    BOOST_CHECK(cache.getCurrentPointIndex() == 43);
+    BOOST_CHECK(cache.getNumPointsRequested() == 2048+1);
+    BOOST_CHECK(cache.getNumPointsRead() == 2048);
+    BOOST_CHECK(reader.getCurrentPointIndex() == 43);
 
     return;
 }

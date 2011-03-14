@@ -73,8 +73,6 @@ public:
     /// Fetch total byte size -- sum of all dimensions
     std::size_t getByteSize() const;
 
-    void calculateSizes();
-
     const DimensionLayout& getDimensionLayout(std::size_t index) const
     {
         return m_dimensionLayouts[index];
@@ -91,6 +89,8 @@ public:
     }
 
 private:
+    void calculateSizes();
+
     Schema m_schema;
     std::vector<DimensionLayout> m_dimensionLayouts;
     std::size_t m_byteSize;

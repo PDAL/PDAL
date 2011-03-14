@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test)
 
     BOOST_CHECK(numRead == 3);
 
-    int offsetT = schema.getDimensionIndex(Dimension::Field_GpsTime);
+    int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
 
     boost::uint64_t t0 = data.getField<boost::uint64_t>(0, offsetT);
     boost::uint64_t t1 = data.getField<boost::uint64_t>(1, offsetT);

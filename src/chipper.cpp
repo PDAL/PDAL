@@ -142,6 +142,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
 
         for (boost::uint32_t j = 0; j < m_threshold; j++)
         {
+            if (j == num_to_read) break; // we're outta here
             // (v * m_header->GetScaleX()) + m_header->GetOffsetX();
             const double x = (buffer.getField<boost::int32_t>(j, indexX) * xscale) + xoffset;
             const double y = (buffer.getField<boost::int32_t>(j, indexY) * yscale) + yoffset;
@@ -153,6 +154,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
             ref.m_pos = y;
             yvec.push_back(ref);
             counter++;
+
         }
 
         num_points_loaded += num_read;

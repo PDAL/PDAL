@@ -284,7 +284,7 @@ if(WITH_ORACLE)
 
   if(ORACLE_FOUND)
     include_directories(${ORACLE_INCLUDE_DIR})
-        set(LIBPC_HAVE_ORACLE 1)
+    add_definitions(-DHAVE_ORACLE=1)
   endif()
 endif()
 
@@ -373,7 +373,7 @@ set(LIBPC_DATA_DIR ${LIBPC_DATA_SUBDIR})
 # installation commands
 #------------------------------------------------------------------------------
 
-install(FILES AUTHORS COPYING INSTALL LICENSE.txt README.txt
+install(FILES AUTHORS.txt LICENSE.txt
   DESTINATION ${LIBPC_DATA_DIR}/doc)
 
 

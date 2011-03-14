@@ -90,21 +90,21 @@ int Application::run()
     // call derived function
     int status = 0;
     
-    try
-    {
+    // try
+    // {
         status = execute();
-    }
-    catch (std::exception e)
-    {
-        const std::string s(e.what());
-        runtimeError("Caught exception: " + s);
-        status = 1;
-    }
-    catch (...)
-    {
-        runtimeError("Caught unknown exception");
-        status = 1;
-    }
+    // }
+    // catch (std::exception e)
+    // {
+    //     const std::string s(e.what());
+    //     runtimeError("Caught exception: " + s);
+    //     status = 1;
+    // }
+    // catch (...)
+    // {
+    //     runtimeError("Caught unknown exception");
+    //     status = 1;
+    // }
 
     if (status == 0 && hasOption("timer"))
     {
@@ -144,7 +144,14 @@ bool Application::isVerbose() const
 
 void Application::addOptionSet(po::options_description* options)
 {
+    if (!options) return;
     m_options.push_back(options);
+}
+
+
+void Application::addPositionalOption(const char* name, int max_count)
+{
+    m_positionalOptions.add(name, max_count);
 }
 
 
@@ -200,19 +207,16 @@ void Application::parseOptions()
 {
     po::options_description options;
 
-    std::vector<po::options_description*>::iterator iter;
-    for (iter = m_options.begin(); iter != m_options.end(); ++iter)
+    std::vector<po::options_description*>::iterator iter1;
+    for (iter1 = m_options.begin(); iter1 != m_options.end(); ++iter1)
     {
-        po::options_description* sub_options = *iter;
+        po::options_description* sub_options = *iter1;
         options.add(*sub_options);
     }
 
-    //po::positional_options_description p;
-    //p.add("input", 1);
-    //p.add("output", 1);
-
     po::store(po::command_line_parser(m_argc, m_argv).
-        options(options)/*.positional(p)*/.run(), m_variablesMap);
+        options(options).positional(m_positionalOptions).run(), 
+        m_variablesMap);
 
     po::notify(m_variablesMap);
 

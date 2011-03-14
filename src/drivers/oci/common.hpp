@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -32,43 +32,61 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LASREADER_HPP
-#define INCLUDED_LASREADER_HPP
+#ifndef INCLUDED_DRIVER_OCI_COMMON_HPP
+#define INCLUDED_DRIVER_OCI_COMMON_HPP
 
-#include <iostream>
+#include <libpc/export.hpp>
+#include <libpc/Bounds.hpp>
+#include <libpc/exceptions.hpp>
 
-#include "libpc/Producer.hpp"
-#include "libpc/LasHeader.hpp"
+#include "oci_wrapper.h"
 
-namespace libpc
+#include <boost/shared_ptr.hpp>
+#include <boost/property_tree/ptree.hpp>
+
+#include <cpl_port.h>
+
+
+
+void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
+void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
+
+
+namespace libpc { namespace driver { namespace oci {
+
+typedef boost::shared_ptr<OWConnection> Connection ;
+typedef boost::shared_ptr<OWStatement> Statement ;
+
+
+
+#ifdef _WIN32
+#define compare_no_case(a,b,n)  _strnicmp( (a), (b), (n) )
+#else
+#define compare_no_case(a,b,n)  strncasecmp( (a), (b), (n) )
+#endif
+
+class LIBPC_DLL Options
 {
-
-class LIBPC_DLL LasReader : public Producer
-{
-public:
-    LasReader(std::istream&);
-
-    const std::string& getName() const;
-
-    // default is to reset() and then read N points manually
-    // override this if you can
-    virtual void seekToPoint(boost::uint64_t pointNum);
-
-    const LasHeader& getLasHeader() const;
-
-protected:
-    boost::uint32_t readBuffer(PointData&);
-
-    LasHeader& getLasHeader();
-    void setLasHeader(const LasHeader&);
-
-    std::istream& m_istream;
 
 private:
-    LasReader& operator=(const LasReader&); // not implemented
-    LasReader(const LasReader&); // not implemented
+    boost::property_tree::ptree m_tree;
+
+public:
+
+    Options();
+    bool IsDebug() const;
+    bool Is3d() const;
+    bool IsSolid() const;
+    boost::property_tree::ptree& GetPTree() {return m_tree; }
+
 };
 
-} // namespace libpc
+std::string to_upper(std::string const& input);
+
+
+
+
+}}} // namespace libpc::driver::oci
+
 
 #endif

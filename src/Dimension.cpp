@@ -361,7 +361,7 @@ void Dimension::initFieldNames()
     s_fieldNames[Field_ScanAngleRank] = "ScanAngleRank";
     s_fieldNames[Field_UserData] = "UserData";
     s_fieldNames[Field_PointSourceId] = "PointSourceId";
-    s_fieldNames[Field_GpsTime] = "GpsTime";
+    s_fieldNames[Field_Time] = "Time";
     s_fieldNames[Field_Red] = "Red";
     s_fieldNames[Field_Green] = "Green";
     s_fieldNames[Field_Blue] = "Blue";

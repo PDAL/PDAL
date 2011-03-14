@@ -1,0 +1,68 @@
+* website
+
+* documentation format for headers
+
+* unit tests for CL apps
+
+* pcinfo tool - basic support
+
+* file names to match class names (reader.hpp, etc)
+
+* CL mssgs to stdout or stderr?  usage/help/error
+
+* platform macros -- LIBPC_OS_WIN32, etc
+
+* libpc.hpp -- general/universal header file
+
+* dump routines -- every class needs oper<<, dump()
+
+* build swig bindings from CMake
+
+* complete the renaming of driver/filters, into subdirs; and fix IDE 
+  project file also
+  
+* typedef boost::uint32_t uint32_t ?
+
+* isolate strings for error messages (anywhere else?)
+
+* implement Signaller support in Stage
+
+* the "Capabilities" issue
+
+* the PointData templating issue
+
+* the sequential-or-random-reads issue
+
+* the Stage class hierarchy naming / Writer issue
+
+* remove isValid?
+
+* do we need Header class?
+
+* does Boost give math class support for Range, Vector, Bounds?
+
+* bitfields in Dimensions?
+
+* stand up libpc.org / Sphinx
+
+* Trac instance for libPC
+
+* MG4/Lidar driver support, inc. CMake detection
+
+* Text driver
+
+* BAG driver
+
+* octtree for libpc::Stage
+
+* finish native las and liblas drivers
+
+* implement metadata/VLR support
+
+* implement spatial referencing support
+
+* update Notes to match realities
+
+* discuss funding opportunities
+
+* in-place writer ability, breaks model
