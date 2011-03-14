@@ -38,55 +38,26 @@
 #include <libpc/Consumer.hpp>
 #include <libpc/chipper.hpp>
 
-#include "block.hpp"
-#include "oci_wrapper.h"
+#include "common.hpp"
 
 #include <vector>
-#include <boost/property_tree/ptree.hpp>
+
 #include <boost/shared_ptr.hpp>
 
-#include <cpl_port.h>
-
-void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
-void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
 
 
 namespace libpc { namespace driver { namespace oci {
 
-#ifdef _WIN32
-#define compare_no_case(a,b,n)  _strnicmp( (a), (b), (n) )
-#else
-#define compare_no_case(a,b,n)  strncasecmp( (a), (b), (n) )
-#endif
-
-
-class Options;
 
 typedef boost::shared_ptr<OWConnection> Connection ;
 typedef boost::shared_ptr<OWStatement> Statement ;
 
 std::string to_upper(std::string const& input);
 
-class LIBPC_DLL Options
-{
-
-private:
-    boost::property_tree::ptree m_tree;
-
-public:
-
-    Options();
-    bool IsDebug() const;
-    bool Is3d() const;
-    boost::property_tree::ptree& GetPTree() {return m_tree; }
-
-};
-
 
 
 class LIBPC_DLL Writer : public Consumer
 {
-    typedef std::vector<libpc::driver::oci::Block> Blocks;
     
 public:
     Writer(Stage& prevStage, Options& options);
@@ -131,7 +102,6 @@ private:
     chipper::Chipper m_chipper;
     
     Options& m_options;
-    Blocks m_blocks;
     libpc::Bounds<double> m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
     bool m_verbose;

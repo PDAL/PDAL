@@ -35,7 +35,7 @@
 
 #include <cassert>
 #include <sstream>
-#include <cctype> // toupper
+
 
 #include "writer.hpp"
 #include "header.hpp"
@@ -51,60 +51,6 @@
 
 namespace libpc { namespace driver { namespace oci {
 
-Options::Options()
-{
-    m_tree.put("is3d", false);
-    m_tree.put("solid", false);
-    m_tree.put("overwrite", false);
-    m_tree.put("debug", false);
-    m_tree.put("verbose", false);
-    m_tree.put("srid", 4269);
-    m_tree.put("capacity", 8000);
-    m_tree.put("precision", 8);
-    m_tree.put("pcid", -1);
-    m_tree.put("connection", std::string(""));
-    m_tree.put("block_table_name", std::string("output"));
-    m_tree.put("block_table_partition_column", std::string(""));
-    m_tree.put("block_table_partition_value", std::string(""));
-    m_tree.put("base_table_name", std::string("hobu"));
-    m_tree.put("cloud_column_name", std::string("cloud"));
-    m_tree.put("header_blob_column_name", std::string("header"));
-    m_tree.put("base_table_aux_columns", std::string(""));
-    m_tree.put("base_table_aux_values", std::string(""));
-    m_tree.put("pre_block_sql", std::string(""));
-    m_tree.put("pre_sql", std::string(""));
-    m_tree.put("post_block_sql", std::string(""));
-    m_tree.put("base_table_bounds", libpc::Bounds<double>());
-
-}    
-
-bool Options::IsDebug() const
-{
-    bool debug = false;
-    try
-    {
-        debug = m_tree.get<bool>("debug");
-    }
-    catch (liblas::property_tree::ptree_bad_path const& e) {
-      ::boost::ignore_unused_variable_warning(e);
-      
-    }
-    return debug;
-}
-
-bool Options::Is3d() const
-{
-    bool is3d = false;
-    try
-    {
-        is3d = m_tree.get<bool>("is3d");
-    }
-    catch (liblas::property_tree::ptree_bad_path const& e) {
-      ::boost::ignore_unused_variable_warning(e);
-      
-    }
-    return is3d;
-}
 
 Writer::Writer(Stage& prevStage, Options& options)
     : Consumer(prevStage)
@@ -849,15 +795,6 @@ void Writer::Debug()
 
 
 
-std::string to_upper(const std::string& input)
-{
-    std::string inp = std::string(input);
-    std::string output = std::string(input);
-    
-    std::transform(inp.begin(), inp.end(), output.begin(), static_cast < int(*)(int) > (toupper));
-    
-    return output;
-}
 
 }}} // namespace libpc::driver::oci
 

@@ -32,34 +32,52 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVER_OCI_BLOCK_HPP
-#define INCLUDED_DRIVER_OCI_BLOCK_HPP
+#ifndef INCLUDED_DRIVER_OCI_COMMON_HPP
+#define INCLUDED_DRIVER_OCI_COMMON_HPP
+
+#include <libpc/export.hpp>
+#include <libpc/Bounds.hpp>
+
+#include "oci_wrapper.h"
+
+#include <boost/property_tree/ptree.hpp>
+
+#include <cpl_port.h>
 
 
-#include "libpc/PointData.hpp"
-#include "libpc/Bounds.hpp"
-#include "libpc/chipper.hpp"
+
+void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
+void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
+
 
 namespace libpc { namespace driver { namespace oci {
-    
-class LIBPC_DLL Block
+
+
+#ifdef _WIN32
+#define compare_no_case(a,b,n)  _strnicmp( (a), (b), (n) )
+#else
+#define compare_no_case(a,b,n)  strncasecmp( (a), (b), (n) )
+#endif
+
+class LIBPC_DLL Options
 {
-public:
-    Block( chipper::Block const& block);
 
-    Block(Block const& other) : m_block(other.m_block) {};
-        
 private:
-    Block& operator=(const Block&); // nope
+    boost::property_tree::ptree m_tree;
 
-    
-    chipper::Block const&  m_block;
-    
+public:
+
+    Options();
+    bool IsDebug() const;
+    bool Is3d() const;
+    boost::property_tree::ptree& GetPTree() {return m_tree; }
+
 };
+
+
 
 
 }}} // namespace libpc::driver::oci
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const libpc::driver::oci::Block&);
 
 #endif
