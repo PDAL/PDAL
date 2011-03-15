@@ -32,3 +32,5 @@ ipch/
 # generated swig files
 csharp/libpc_swig_cs/*.cs
 csharp/libpc_swig_cpp/libpc_wrap.cpp
+
+Makefile
