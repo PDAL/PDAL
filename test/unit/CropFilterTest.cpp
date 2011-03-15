@@ -35,8 +35,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/FauxReader.hpp>
-#include <libpc/FauxWriter.hpp>
+#include <libpc/drivers/faux/Reader.hpp>
+#include <libpc/drivers/faux/Writer.hpp>
 #include <libpc/CropFilter.hpp>
 
 using namespace libpc;

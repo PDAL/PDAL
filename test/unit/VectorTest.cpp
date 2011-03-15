@@ -36,7 +36,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "libpc/Vector.hpp"
+#include <libpc/Vector.hpp>
 
 using namespace libpc;
 

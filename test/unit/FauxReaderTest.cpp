@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include "libpc/FauxReader.hpp"
+#include <libpc/drivers/faux/Reader.hpp>
 
 using namespace libpc;
 

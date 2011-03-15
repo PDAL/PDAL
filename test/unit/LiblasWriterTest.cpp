@@ -35,9 +35,9 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include "libpc/FauxReader.hpp"
-#include "libpc/../../src/drivers/liblas/writer.hpp"
-#include "libpc/../../src/drivers/liblas/reader.hpp"
+#include <libpc/FauxReader.hpp>
+#include <libpc/drivers/liblas/writer.hpp>
+#include <libpc/drivers/liblas/reader.hpp>
 
 #include "support.hpp"
 
