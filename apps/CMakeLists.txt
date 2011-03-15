@@ -85,8 +85,6 @@ if(UNIX)
     #  if(WITH_GDAL)
     #    set(PKGCFG_INC_DIR "${PKGCFG_INC_DIR} ${GDAL_INCLUDE_DIR}")
     #  endif()
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libpc.pc.in
-      ${CMAKE_CURRENT_BINARY_DIR}/libpc.pc @ONLY)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libpc.pc
       DESTINATION ${LIBPC_LIB_DIR}/pkgconfig
       PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
