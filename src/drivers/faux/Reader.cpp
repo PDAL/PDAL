@@ -35,7 +35,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "libpc/FauxReader.hpp"
+#include "libpc/drivers/faux/Reader.hpp"
 #include "libpc/Utils.hpp"
 #include "libpc/exceptions.hpp"
 

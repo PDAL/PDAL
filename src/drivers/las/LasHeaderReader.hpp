@@ -40,32 +40,34 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef INCLUDED_LASHEADERWRITER_HPP
-#define INCLUDED_LASHEADERWRITER_HPP
+#ifndef INCLUDED_LASHEADERREADER_HPP
+#define INCLUDED_LASHEADERREADER_HPP
 
 #include <iostream>
 
-#include "libpc/LasHeader.hpp"
+#include <libpc/drivers/las/Header.hpp>
+
 
 namespace libpc
 {
 
-class LIBPC_DLL LasHeaderWriter
+class LIBPC_DLL LasHeaderReader
 {
 public:
-    LasHeaderWriter(LasHeader& header, std::ostream&);
-    void write();
+    LasHeaderReader(LasHeader& header, std::istream& istream);
+
+    void read();
 
 private:
-    void WriteLAS10PadSignature();
-    std::size_t GetRequiredHeaderSize() const;
-    void WriteVLRs();
+    LasHeader& m_header;
+    std::istream& m_istream;
 
-    LasHeader& m_header; // BUG: I want this to be const
-    std::ostream& m_ostream;
+    bool HasLAS10PadSignature();
+    void ReadVLRs();
+    void Validate();
 
-    LasHeaderWriter& operator=(const LasHeaderWriter&); // nope
-    LasHeaderWriter(const LasHeaderWriter&); // nope
+    LasHeaderReader& operator=(const LasHeaderReader&); // nope
+    LasHeaderReader(const LasHeaderReader&); // nope
 };
 
 

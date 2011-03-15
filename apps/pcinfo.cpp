@@ -10,8 +10,8 @@
  **************************************************************************/
 
 
-#include "libpc/LasReader.hpp"
-#include "libpc/../../src/drivers/liblas/reader.hpp"
+#include "libpc/drivers/las/Reader.hpp"
+#include "libpc/drivers/liblas/reader.hpp"
 
 #include <iostream>
 

@@ -23,16 +23,16 @@
 //#include "libpc/MosaicFilter.hpp"
 //#include "libpc/FauxReader.hpp"
 //#include "libpc/FauxWriter.hpp"
-#include "libpc/LasReader.hpp"
+#include "libpc/drivers/las/Reader.hpp"
 //#include "libpc/LasHeader.hpp"
-#include "libpc/LasWriter.hpp"
+#include "libpc/drivers/las/Writer.hpp"
 #include "libpc/CacheFilter.hpp"
 
-#include "libpc/../../src/drivers/liblas/writer.hpp"
-#include "libpc/../../src/drivers/liblas/reader.hpp"
+#include "libpc/drivers/liblas/writer.hpp"
+#include "libpc/drivers/liblas/reader.hpp"
 
 #ifdef HAVE_ORACLE
-#include "libpc/../../src/drivers/oci/writer.hpp"
+#include "libpc/drivers/oci/writer.hpp"
 #endif
 
 #include "Application.hpp"

@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/LasReader.hpp"
-#include "libpc/LasHeaderReader.hpp"
+#include "libpc/drivers/las/Reader.hpp"
+#include "LasHeaderReader.hpp"
 #include "libpc/exceptions.hpp"
 
 namespace libpc

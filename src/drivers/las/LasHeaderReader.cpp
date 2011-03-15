@@ -40,7 +40,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "libpc/LasHeaderReader.hpp"
+#include "LasHeaderReader.hpp"
 
 #include <boost/concept_check.hpp>
 #include <boost/uuid/uuid_io.hpp>

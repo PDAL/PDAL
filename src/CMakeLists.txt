@@ -31,16 +31,8 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/DecimationFilter.hpp
   ${LIBPC_HEADERS_DIR}/Dimension.hpp
   ${LIBPC_HEADERS_DIR}/DimensionLayout.hpp
-  ${LIBPC_HEADERS_DIR}/FauxReader.hpp 
-  ${LIBPC_HEADERS_DIR}/FauxWriter.hpp
   ${LIBPC_HEADERS_DIR}/Filter.hpp
   ${LIBPC_HEADERS_DIR}/Header.hpp
-  ${LIBPC_HEADERS_DIR}/Header.hpp
-  ${LIBPC_HEADERS_DIR}/LasHeader.hpp
-  ${LIBPC_HEADERS_DIR}/LasHeaderReader.hpp
-  ${LIBPC_HEADERS_DIR}/LasHeaderWriter.hpp
-  ${LIBPC_HEADERS_DIR}/LasReader.hpp
-  ${LIBPC_HEADERS_DIR}/LasWriter.hpp
   ${LIBPC_HEADERS_DIR}/Metadata.hpp
   ${LIBPC_HEADERS_DIR}/MosaicFilter.hpp
   ${LIBPC_HEADERS_DIR}/Vector.hpp  
@@ -54,16 +46,50 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/SpatialReference.hpp
   ${LIBPC_HEADERS_DIR}/Stage.hpp
   ${LIBPC_HEADERS_DIR}/Utils.hpp
-  ${LIBPC_HEADERS_DIR}/Consumer.hpp)
+  ${LIBPC_HEADERS_DIR}/Consumer.hpp
+  )
+
+set(LIBPC_DRIVERS_FAUX_HPP
+  ${LIBPC_HEADERS_DIR}/drivers/faux/Writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/faux/Reader.hpp
+)
+
+set(LIBPC_DRIVERS_LAS_HPP
+ ${LIBPC_HEADERS_DIR}/drivers/las/Header.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/las/Writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/las/Reader.hpp
+)
+
+set(LIBPC_DRIVERS_LIBLAS_HPP
+  ${LIBPC_HEADERS_DIR}/drivers/liblas/writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/liblas/reader.hpp
+)
+
+set(LIBPC_DRIVERS_OCI_HPP
+  ${LIBPC_HEADERS_DIR}/drivers/oci/writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/oci/reader.hpp
+)
+
+FOREACH(file ${LIBPC_DRIVERS_FAUX_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+FOREACH(file ${LIBPC_DRIVERS_LAS_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+FOREACH(file ${LIBPC_DRIVERS_LIBLAS_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+FOREACH(file ${LIBPC_DRIVERS_OCI_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
 
 set (LIBPC_SOURCES "libpc_config.cpp" CACHE INTERNAL "sources to compile")
 set (APPS_CPP_DEPENDENCIES "${LIBPC_LIB_NAME}" CACHE INTERNAL "libraries to link")
 
 add_subdirectory(drivers)
 
-
 set(LIBPC_CPP
-    ${LIBPC_SOURCES}
+  ${LIBPC_SOURCES}
   Bounds.cpp
   chipper.cpp
   CacheFilter.cpp
@@ -73,15 +99,8 @@ set(LIBPC_CPP
   DecimationFilter.cpp
   Dimension.cpp
   DimensionLayout.cpp
-  FauxReader.cpp
-  FauxWriter.cpp
   Filter.cpp
   Header.cpp
-  LasHeader.cpp
-  LasHeaderReader.cpp
-  LasHeaderWriter.cpp
-  LasReader.cpp
-  LasWriter.cpp
   Metadata.cpp
   MosaicFilter.cpp
   Vector.cpp  

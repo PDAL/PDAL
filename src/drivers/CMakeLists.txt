@@ -7,9 +7,9 @@
 ###############################################################################
 
 
-
-add_subdirectory(liblas)
+add_subdirectory(faux)
 add_subdirectory(las)
+add_subdirectory(liblas)
 
 if(ORACLE_FOUND AND GDAL_FOUND)
     add_subdirectory(oci)

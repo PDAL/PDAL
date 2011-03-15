@@ -39,7 +39,7 @@
 
 #include <iostream>
 
-#include "header.hpp"
+#include "libpc/drivers/liblas/header.hpp"
 
 // fwd decls
 namespace liblas

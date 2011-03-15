@@ -38,7 +38,7 @@
 #include <iostream>
 
 #include "libpc/Producer.hpp"
-#include "libpc/LasHeader.hpp"
+#include "libpc/drivers/las/Header.hpp"
 
 namespace libpc
 {
