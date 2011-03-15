@@ -32,47 +32,40 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
-#include <libpc/Color.hpp>
-#include <libpc/ColorFilter.hpp>
+#include <libpc/filters/CropFilter.hpp>
 
 namespace libpc
 {
 
-ColorFilter::ColorFilter(Stage& prevStage)
-    : Filter(prevStage)
-{
-    Schema& schema = getHeader().getSchema();
 
-    // add the three u8 fields
-    schema.addDimension(Dimension(Dimension::Field_Red, Dimension::Uint8));
-    schema.addDimension(Dimension(Dimension::Field_Green, Dimension::Uint8));
-    schema.addDimension(Dimension(Dimension::Field_Blue, Dimension::Uint8));
+CropFilter::CropFilter(Stage& prevStage, Bounds<double> const& bounds)
+    : Filter(prevStage),
+      m_bounds(bounds)
+{
+    Header& header = getHeader();
+    header.setBounds(bounds);
 
     return;
 }
 
 
-const std::string& ColorFilter::getName() const
+const std::string& CropFilter::getName() const
 {
-    static std::string name("Color Filter");
+    static std::string name("Crop Filter");
     return name;
 }
 
 
-boost::uint32_t ColorFilter::readBuffer(PointData& data)
+boost::uint32_t CropFilter::readBuffer(PointData& data)
 {
-    m_prevStage.read(data);
-
-    boost::uint32_t numPoints = data.getNumPoints();
+    boost::uint32_t numPoints = m_prevStage.read(data);
 
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
 
-    int fieldIndexR = schema.getDimensionIndex(Dimension::Field_Red);
-    int fieldIndexG = schema.getDimensionIndex(Dimension::Field_Green);
-    int fieldIndexB = schema.getDimensionIndex(Dimension::Field_Blue);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
+    int fieldX = schema.getDimensionIndex(Dimension::Field_X);
+    int fieldY = schema.getDimensionIndex(Dimension::Field_Y);
+    int fieldZ = schema.getDimensionIndex(Dimension::Field_Z);
 
     boost::uint32_t numValidPoints = 0;
 
@@ -80,35 +73,26 @@ boost::uint32_t ColorFilter::readBuffer(PointData& data)
     {
         if (data.isValid(pointIndex))
         {
-            float z = data.getField<float>(pointIndex, offsetZ);
-            boost::uint8_t red, green, blue;
-            getColor(z, red, green, blue);
-
-            // now we store the 3 u8's in the point data...
-            data.setField<boost::uint8_t>(pointIndex, fieldIndexR, red);
-            data.setField<boost::uint8_t>(pointIndex, fieldIndexG, green);
-            data.setField<boost::uint8_t>(pointIndex, fieldIndexB, blue);
-
-            ++numValidPoints;
+            float x = data.getField<float>(pointIndex, fieldX);
+            float y = data.getField<float>(pointIndex, fieldY);
+            float z = data.getField<float>(pointIndex, fieldZ);
+            Vector<double> point(x,y,z);
+            if (!m_bounds.contains(point))
+            {
+                // remove this point, and update the lower bound for Z
+                data.setValid(pointIndex, false);
+            }
+            else
+            {
+                data.setValid(pointIndex, true);
+                ++numValidPoints;
+            }
         }
     }
+
+    incrementCurrentPointIndex(numPoints);
 
     return numValidPoints;
 }
 
-void ColorFilter::getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue)
-{
-    double fred, fgreen, fblue;
-
-    const Range<double>& zrange = getHeader().getBounds().dimensions()[2];
-    Color::interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(), fred, fblue, fgreen);
-
-    const double vmax = (std::numeric_limits<boost::uint8_t>::max());
-    red = (boost::uint8_t)(fred * vmax);
-    green = (boost::uint8_t)(fgreen * vmax);
-    blue = (boost::uint8_t)(fblue * vmax);
-
-    return;
 }
-
-} // namespace libpc

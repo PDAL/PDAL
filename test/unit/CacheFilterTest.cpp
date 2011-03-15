@@ -36,7 +36,7 @@
 #include <boost/cstdint.hpp>
 
 #include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/CacheFilter.hpp>
+#include <libpc/filters/CacheFilter.hpp>
 
 using namespace libpc;
 

@@ -37,7 +37,7 @@
 
 #include <libpc/drivers/faux/Reader.hpp>
 #include <libpc/drivers/faux/Writer.hpp>
-#include <libpc/DecimationFilter.hpp>
+#include <libpc/filters/DecimationFilter.hpp>
 
 using namespace libpc;
 

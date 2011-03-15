@@ -26,7 +26,7 @@
 #include <libpc/drivers/las/Reader.hpp>
 //#include <libpc/LasHeader.hpp>
 #include <libpc/drivers/las/Writer.hpp>
-#include <libpc/CacheFilter.hpp>
+#include <libpc/filters/CacheFilter.hpp>
 
 #include <libpc/drivers/liblas/writer.hpp>
 #include <libpc/drivers/liblas/reader.hpp>
