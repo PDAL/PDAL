@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/SpatialReference.hpp"
+#include <libpc/SpatialReference.hpp>
 
 namespace libpc
 {

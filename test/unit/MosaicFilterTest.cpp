@@ -35,8 +35,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include "libpc/FauxReader.hpp"
-#include "libpc/MosaicFilter.hpp"
+#include <libpc/drivers/faux/Reader.hpp>
+#include <libpc/filters/MosaicFilter.hpp>
 
 using namespace libpc;
 

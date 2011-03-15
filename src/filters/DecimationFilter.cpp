@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/DecimationFilter.hpp>
+#include <libpc/filters/DecimationFilter.hpp>
 
 namespace libpc
 {

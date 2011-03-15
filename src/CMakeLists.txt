@@ -24,17 +24,12 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/export.hpp
   ${LIBPC_HEADERS_DIR}/libpc_config.hpp
   ${LIBPC_HEADERS_DIR}/Bounds.hpp
-  ${LIBPC_HEADERS_DIR}/CacheFilter.hpp
   ${LIBPC_HEADERS_DIR}/Color.hpp
-  ${LIBPC_HEADERS_DIR}/ColorFilter.hpp
-  ${LIBPC_HEADERS_DIR}/CropFilter.hpp
-  ${LIBPC_HEADERS_DIR}/DecimationFilter.hpp
   ${LIBPC_HEADERS_DIR}/Dimension.hpp
   ${LIBPC_HEADERS_DIR}/DimensionLayout.hpp
   ${LIBPC_HEADERS_DIR}/Filter.hpp
   ${LIBPC_HEADERS_DIR}/Header.hpp
   ${LIBPC_HEADERS_DIR}/Metadata.hpp
-  ${LIBPC_HEADERS_DIR}/MosaicFilter.hpp
   ${LIBPC_HEADERS_DIR}/Vector.hpp  
   ${LIBPC_HEADERS_DIR}/PointData.hpp  
   ${LIBPC_HEADERS_DIR}/PointDataCache.hpp  
@@ -53,33 +48,43 @@ set(LIBPC_DRIVERS_FAUX_HPP
   ${LIBPC_HEADERS_DIR}/drivers/faux/Writer.hpp
   ${LIBPC_HEADERS_DIR}/drivers/faux/Reader.hpp
 )
+FOREACH(file ${LIBPC_DRIVERS_FAUX_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
 
 set(LIBPC_DRIVERS_LAS_HPP
  ${LIBPC_HEADERS_DIR}/drivers/las/Header.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Writer.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Reader.hpp
 )
+FOREACH(file ${LIBPC_DRIVERS_LAS_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
 
 set(LIBPC_DRIVERS_LIBLAS_HPP
   ${LIBPC_HEADERS_DIR}/drivers/liblas/writer.hpp
   ${LIBPC_HEADERS_DIR}/drivers/liblas/reader.hpp
 )
+FOREACH(file ${LIBPC_DRIVERS_LIBLAS_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
 
 set(LIBPC_DRIVERS_OCI_HPP
   ${LIBPC_HEADERS_DIR}/drivers/oci/writer.hpp
   ${LIBPC_HEADERS_DIR}/drivers/oci/reader.hpp
 )
-
-FOREACH(file ${LIBPC_DRIVERS_FAUX_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
-FOREACH(file ${LIBPC_DRIVERS_LAS_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
-FOREACH(file ${LIBPC_DRIVERS_LIBLAS_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
 FOREACH(file ${LIBPC_DRIVERS_OCI_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+set(LIBPC_FILTERS_HPP
+  ${LIBPC_HEADERS_DIR}/filters/CacheFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/ColorFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/CropFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/DecimationFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/MosaicFilter.hpp
+)
+FOREACH(file ${LIBPC_FILTERS_HPP})
         SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
@@ -87,22 +92,18 @@ set (LIBPC_SOURCES "libpc_config.cpp" CACHE INTERNAL "sources to compile")
 set (APPS_CPP_DEPENDENCIES "${LIBPC_LIB_NAME}" CACHE INTERNAL "libraries to link")
 
 add_subdirectory(drivers)
+add_subdirectory(filters)
 
 set(LIBPC_CPP
   ${LIBPC_SOURCES}
   Bounds.cpp
   Chipper.cpp
-  CacheFilter.cpp
   Color.cpp
-  ColorFilter.cpp
-  CropFilter.cpp
-  DecimationFilter.cpp
   Dimension.cpp
   DimensionLayout.cpp
   Filter.cpp
   Header.cpp
   Metadata.cpp
-  MosaicFilter.cpp
   Vector.cpp  
   PointData.cpp
   PointDataCache.cpp

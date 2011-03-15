@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/CacheFilter.hpp>
+#include <libpc/filters/CacheFilter.hpp>
 
 #include <libpc/PointDataCache.hpp>
 

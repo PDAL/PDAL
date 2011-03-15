@@ -19,8 +19,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "libpc/PointData.hpp"
-#include "libpc/PointDataCache.hpp"
+#include <libpc/PointData.hpp>
+#include <libpc/PointDataCache.hpp>
 
 using namespace libpc;
 

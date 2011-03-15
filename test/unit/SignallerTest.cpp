@@ -34,7 +34,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "libpc/Signaller.hpp"
+#include <libpc/Signaller.hpp>
 
 using namespace libpc;
 

@@ -36,7 +36,7 @@
 
 #include <boost/timer.hpp>
 
-#include "libpc/libpc_config.hpp"
+#include <libpc/libpc_config.hpp>
 
 #include "Application.hpp"
 

@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include "libpc/../../src/drivers/liblas/reader.hpp"
+#include <libpc/drivers/liblas/reader.hpp>
 
 using namespace libpc;
 
