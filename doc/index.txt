@@ -1,0 +1,37 @@
+.. libPC documentation master file, created by
+   sphinx-quickstart on Tue Mar 15 15:22:19 2011.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to libPC's documentation!
+=================================
+
+Contents:
+
+.. toctree::
+   :maxdepth: 2
+   
+   notes/apps
+   notes/bindings
+   notes/c-api
+   notes/coding-conventions
+   notes/core-classes
+   notes/docs
+   notes/goals
+   notes/future
+   notes/intro
+   notes/io
+   notes/misc
+   notes/pipeline
+   notes/stages
+   notes/testing
+   notes/use-cases
+   sprint/notes
+  
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
