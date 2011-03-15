@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/Header.hpp"
+#include <libpc/Header.hpp>
 
 #include <iostream>
 

@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 #include <string>
-#include "libpc/export.hpp"
+#include <libpc/export.hpp>
 
 namespace libpc
 {

@@ -33,8 +33,8 @@
 ****************************************************************************/
 
 #include <cassert>
-#include "libpc/Color.hpp"
-#include "libpc/ColorFilter.hpp"
+#include <libpc/Color.hpp>
+#include <libpc/ColorFilter.hpp>
 
 namespace libpc
 {

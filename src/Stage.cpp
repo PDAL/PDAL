@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/Stage.hpp"
+#include <libpc/Stage.hpp>
 
 namespace libpc
 {

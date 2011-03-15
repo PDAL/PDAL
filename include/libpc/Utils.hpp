@@ -44,7 +44,7 @@
 #include <boost/concept_check.hpp>
 #include <boost/cstdint.hpp>
 
-#include "libpc/export.hpp"
+#include <libpc/export.hpp>
 
 namespace libpc
 {

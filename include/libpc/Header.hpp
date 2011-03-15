@@ -38,11 +38,11 @@
 #include <iostream>
 #include <boost/cstdint.hpp>
 
-#include "libpc/export.hpp"
-#include "libpc/Schema.hpp"
-#include "libpc/Bounds.hpp"
-#include "libpc/SpatialReference.hpp"
-#include "libpc/Metadata.hpp"
+#include <libpc/export.hpp>
+#include <libpc/Schema.hpp>
+#include <libpc/Bounds.hpp>
+#include <libpc/SpatialReference.hpp>
+#include <libpc/Metadata.hpp>
 
 namespace libpc
 {

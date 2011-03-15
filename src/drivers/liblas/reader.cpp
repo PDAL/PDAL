@@ -33,13 +33,13 @@
 ****************************************************************************/
 
 
-#include "libpc/drivers/liblas/reader.hpp"
+#include <libpc/drivers/liblas/reader.hpp>
 
 #include <liblas/factory.hpp>
 #include <liblas/bounds.hpp>
 
 #include <libpc/exceptions.hpp>
-#include "libpc/drivers/liblas/header.hpp"
+#include <libpc/drivers/liblas/header.hpp>
 
 namespace libpc
 {

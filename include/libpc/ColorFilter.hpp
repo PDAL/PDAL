@@ -37,8 +37,8 @@
 
 #include <boost/cstdint.hpp>
 
-#include "libpc/export.hpp"
-#include "libpc/Filter.hpp"
+#include <libpc/export.hpp>
+#include <libpc/Filter.hpp>
 
 namespace libpc
 {

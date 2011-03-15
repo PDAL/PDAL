@@ -35,7 +35,7 @@
 #ifndef INCLUDED_LASWRITER_HPP
 #define INCLUDED_LASWRITER_HPP
 
-#include "libpc/Consumer.hpp"
+#include <libpc/Consumer.hpp>
 
 namespace libpc
 {

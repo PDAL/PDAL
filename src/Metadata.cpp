@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/Metadata.hpp"
+#include <libpc/Metadata.hpp>
 
 namespace libpc
 {

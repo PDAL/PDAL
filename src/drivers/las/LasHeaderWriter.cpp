@@ -40,7 +40,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "libpc/LasHeaderWriter.hpp"
+#include <libpc/LasHeaderWriter.hpp>
 
 namespace libpc
 {

@@ -35,8 +35,8 @@
 #ifndef INCLUDED_MOSAICFILTER_HPP
 #define INCLUDED_MOSAICFILTER_HPP
 
-#include "libpc/Filter.hpp"
-#include "libpc/Bounds.hpp"
+#include <libpc/Filter.hpp>
+#include <libpc/Bounds.hpp>
 
 
 namespace libpc

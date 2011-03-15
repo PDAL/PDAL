@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/PointData.hpp"
+#include <libpc/PointData.hpp>
 
 #include <cassert>
 #include <iostream>

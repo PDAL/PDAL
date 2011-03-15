@@ -35,9 +35,9 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include "libpc/FauxReader.hpp"
-#include "libpc/FauxWriter.hpp"
-#include "libpc/DecimationFilter.hpp"
+#include <libpc/FauxReader.hpp>
+#include <libpc/FauxWriter.hpp>
+#include <libpc/DecimationFilter.hpp>
 
 using namespace libpc;
 

@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/CropFilter.hpp"
+#include <libpc/CropFilter.hpp>
 
 namespace libpc
 {

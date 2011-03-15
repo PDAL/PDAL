@@ -35,7 +35,7 @@
 #ifndef INCLUDED_FAUXREADER_HPP
 #define INCLUDED_FAUXREADER_HPP
 
-#include "libpc/Producer.hpp"
+#include <libpc/Producer.hpp>
 
 namespace libpc
 {

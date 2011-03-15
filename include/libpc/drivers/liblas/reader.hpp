@@ -35,11 +35,11 @@
 #ifndef INCLUDED_LIBLASREADER_HPP
 #define INCLUDED_LIBLASREADER_HPP
 
-#include "libpc/Producer.hpp"
+#include <libpc/Producer.hpp>
 
 #include <iostream>
 
-#include "libpc/drivers/liblas/header.hpp"
+#include <libpc/drivers/liblas/header.hpp>
 
 // fwd decls
 namespace liblas

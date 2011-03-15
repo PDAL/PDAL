@@ -41,10 +41,10 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "libpc/libpc_config.hpp"
+#include <libpc/libpc_config.hpp>
 
 #include <sstream>
-#include "libpc/libpc_defines.h"
+#include <libpc/libpc_defines.h>
 
 #ifdef LIBPC_HAVE_LIBLAS
 #include <liblas/version.hpp>

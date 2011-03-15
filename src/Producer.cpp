@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/Producer.hpp"
+#include <libpc/Producer.hpp>
 
 namespace libpc
 {

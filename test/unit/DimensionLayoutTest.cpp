@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include "libpc/DimensionLayout.hpp"
+#include <libpc/DimensionLayout.hpp>
 
 using namespace libpc;
 

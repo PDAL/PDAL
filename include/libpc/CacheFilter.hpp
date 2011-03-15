@@ -35,7 +35,7 @@
 #ifndef INCLUDED_CACHEFILTER_HPP
 #define INCLUDED_CACHEFILTER_HPP
 
-#include "libpc/Filter.hpp"
+#include <libpc/Filter.hpp>
 
 namespace libpc
 {

@@ -32,9 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/CacheFilter.hpp"
+#include <libpc/CacheFilter.hpp>
 
-#include "libpc/PointDataCache.hpp"
+#include <libpc/PointDataCache.hpp>
 
 namespace libpc
 {

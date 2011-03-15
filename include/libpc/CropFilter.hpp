@@ -35,9 +35,9 @@
 #ifndef INCLUDED_CROPFILTER_HPP
 #define INCLUDED_CROPFILTER_HPP
 
-#include "libpc/export.hpp"
-#include "libpc/Filter.hpp"
-#include "libpc/Bounds.hpp"
+#include <libpc/export.hpp>
+#include <libpc/Filter.hpp>
+#include <libpc/Bounds.hpp>
 
 namespace libpc
 {

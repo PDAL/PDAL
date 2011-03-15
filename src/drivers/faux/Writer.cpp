@@ -34,7 +34,7 @@
 
 #include <iostream>
 
-#include "libpc/drivers/faux/Writer.hpp"
+#include <libpc/drivers/faux/Writer.hpp>
 
 using std::string;
 using std::cout;

@@ -43,7 +43,7 @@
 #ifndef INCLUDED_SIGNALLER_HPP
 #define INCLUDED_SIGNALLER_HPP
 
-#include "libpc/export.hpp"
+#include <libpc/export.hpp>
 
 namespace libpc
 {

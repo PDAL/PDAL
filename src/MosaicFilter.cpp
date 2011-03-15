@@ -33,8 +33,8 @@
 ****************************************************************************/
 
 #include <cassert>
-#include "libpc/MosaicFilter.hpp"
-#include "libpc/exceptions.hpp"
+#include <libpc/MosaicFilter.hpp>
+#include <libpc/exceptions.hpp>
 
 namespace libpc
 {

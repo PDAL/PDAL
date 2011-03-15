@@ -35,8 +35,8 @@
 #ifndef INCLUDED_PRODUCER_HPP
 #define INCLUDED_PRODUCER_HPP
 
-#include "libpc/Stage.hpp"
-#include "libpc/Header.hpp"
+#include <libpc/Stage.hpp>
+#include <libpc/Header.hpp>
 
 namespace libpc
 {

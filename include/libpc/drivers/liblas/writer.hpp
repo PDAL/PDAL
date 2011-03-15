@@ -35,7 +35,7 @@
 #ifndef INCLUDED_LIBLASWRITER_HPP
 #define INCLUDED_LIBLASWRITER_HPP
 
-#include "libpc/Consumer.hpp"
+#include <libpc/Consumer.hpp>
 
 namespace liblas
 {

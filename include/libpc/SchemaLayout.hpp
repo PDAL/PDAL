@@ -42,8 +42,8 @@
 #ifndef LIBPC_SCHEMALAYOUT_HPP_INCLUDED
 #define LIBPC_SCHEMALAYOUT_HPP_INCLUDED
 
-#include "libpc/Schema.hpp"
-#include "libpc/DimensionLayout.hpp"
+#include <libpc/Schema.hpp>
+#include <libpc/DimensionLayout.hpp>
 
 
 namespace libpc

@@ -38,8 +38,8 @@
 // boost
 #include <boost/cstdint.hpp>
 
-#include "libpc/PointData.hpp"
-#include "libpc/Header.hpp"
+#include <libpc/PointData.hpp>
+#include <libpc/Header.hpp>
 
     
 namespace libpc

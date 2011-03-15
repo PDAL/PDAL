@@ -34,9 +34,9 @@
 
 #include <cassert>
 
-#include "libpc/drivers/las/Writer.hpp"
+#include <libpc/drivers/las/Writer.hpp>
 #include "LasHeaderWriter.hpp"
-#include "libpc/exceptions.hpp"
+#include <libpc/exceptions.hpp>
 
 namespace libpc
 {

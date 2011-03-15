@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "libpc/Filter.hpp"
+#include <libpc/Filter.hpp>
 
 namespace libpc
 {

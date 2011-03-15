@@ -34,7 +34,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "libpc/Bounds.hpp"
+#include <libpc/Bounds.hpp>
 
 using namespace libpc;
 

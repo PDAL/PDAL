@@ -35,8 +35,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include "libpc/FauxReader.hpp"
-#include "libpc/CacheFilter.hpp"
+#include <libpc/FauxReader.hpp>
+#include <libpc/CacheFilter.hpp>
 
 using namespace libpc;
 

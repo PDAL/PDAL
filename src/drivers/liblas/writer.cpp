@@ -35,8 +35,8 @@
 
 #include <cassert>
 
-#include "libpc/drivers/liblas/writer.hpp"
-#include "libpc/drivers/liblas/header.hpp"
+#include <libpc/drivers/liblas/writer.hpp>
+#include <libpc/drivers/liblas/header.hpp>
 #include <liblas/Writer.hpp>
 
 #include <libpc/exceptions.hpp>

@@ -35,8 +35,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include "libpc/libpc_defines.h"
-#include "libpc/libpc_config.hpp"
+#include <libpc/libpc_defines.h>
+#include <libpc/libpc_config.hpp>
 
 using namespace libpc;
 

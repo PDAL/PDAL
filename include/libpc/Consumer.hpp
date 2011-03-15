@@ -35,7 +35,7 @@
 #ifndef INCLUDED_CONSUMER_HPP
 #define INCLUDED_CONSUMER_HPP
 
-#include "libpc/Filter.hpp"
+#include <libpc/Filter.hpp>
 
 namespace libpc
 {

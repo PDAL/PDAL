@@ -35,7 +35,7 @@
 #  pragma warning(pop)
 #endif
 
-#include "libpc/PointData.hpp"
+#include <libpc/PointData.hpp>
 
 
 namespace libpc

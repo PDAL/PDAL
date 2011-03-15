@@ -37,7 +37,7 @@
 
 #include <string>
 
-#include "libpc/Consumer.hpp"
+#include <libpc/Consumer.hpp>
 
 namespace libpc
 {

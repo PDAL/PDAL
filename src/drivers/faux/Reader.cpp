@@ -35,9 +35,9 @@
 #include <cassert>
 #include <iostream>
 
-#include "libpc/drivers/faux/Reader.hpp"
-#include "libpc/Utils.hpp"
-#include "libpc/exceptions.hpp"
+#include <libpc/drivers/faux/Reader.hpp>
+#include <libpc/Utils.hpp>
+#include <libpc/exceptions.hpp>
 
 using std::vector;
 using std::string;

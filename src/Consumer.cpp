@@ -34,8 +34,8 @@
 
 #include <cassert>
 
-#include "libpc/exceptions.hpp"
-#include "libpc/Consumer.hpp"
+#include <libpc/exceptions.hpp>
+#include <libpc/Consumer.hpp>
 
 namespace libpc
 {
