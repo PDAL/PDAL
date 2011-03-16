@@ -138,7 +138,7 @@ boost::uint32_t CacheFilter::readBuffer(PointData& data)
         incrementCurrentPointIndex(numRead);
 
         m_numPointsRead += data.getNumPoints();
-        m_numPointsRequested += data.getNumPoints();
+        m_numPointsRequested += data.getCapacity();
 
         return numRead;
     }

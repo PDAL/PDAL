@@ -101,7 +101,7 @@ boost::uint32_t Reader::readBuffer(PointData& data)
 
     // make up some data and put it into the buffer
 
-    const boost::uint32_t numPoints = data.getNumPoints();
+    const boost::uint32_t numPoints = data.getCapacity();
     assert(getCurrentPointIndex() + numPoints <= getHeader().getNumPoints());
 
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
@@ -123,7 +123,9 @@ boost::uint32_t Reader::readBuffer(PointData& data)
     const int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
 
     boost::uint64_t time = getCurrentPointIndex();
-
+    
+    boost::uint32_t& cnt = data.getNumPointsRef();
+    cnt = 0;
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         double x;
@@ -148,11 +150,13 @@ boost::uint32_t Reader::readBuffer(PointData& data)
         data.setField<boost::uint64_t>(pointIndex, offsetT, time);
 
         ++time;
+        ++cnt;
+        assert(cnt <= data.getCapacity());
     }
-
+    
     incrementCurrentPointIndex(numPoints);
 
-    return numPoints;
+    return cnt;
 }
 
 

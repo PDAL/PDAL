@@ -69,11 +69,13 @@ public:
     // number of points in this buffer
     boost::uint32_t getNumPoints() const;
     
-    inline void setNumPoints(boost::uint32_t v) { m_numPoints = v; } 
+    inline void setNumPoints(boost::uint32_t v) { assert(v <= m_capacity);m_numPoints = v; } 
 
+    inline boost::uint32_t& getNumPointsRef() {assert(m_numPoints <= m_capacity);return m_numPoints; }
+    
     // number of points in this buffer that have legit data; initially will be zero,
     // and after a read() call it will be in the range 0 to getNumPoints()-1
-    boost::uint32_t getCapacity();
+    inline boost::uint32_t getCapacity() { return m_capacity; }
 
     // schema (number and kinds of fields) for a point in this buffer
     const SchemaLayout& getSchemaLayout() const
@@ -119,7 +121,7 @@ template <class T>
 inline void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value)
 {
     std::size_t offset = (pointIndex * m_pointSize) + m_schemaLayout.getDimensionLayout(fieldIndex).getByteOffset();
-    assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
+    assert(offset + sizeof(T) <= m_pointSize * m_capacity);
     boost::uint8_t* p = m_data + offset;
 
     *(T*)p = value;
@@ -130,7 +132,7 @@ template <class T>
 inline T PointData::getField(std::size_t pointIndex, std::size_t fieldIndex) const
 {
     std::size_t offset = (pointIndex * m_pointSize) + m_schemaLayout.getDimensionLayout(fieldIndex).getByteOffset();
-    assert(offset + sizeof(T) <= m_pointSize * m_numPoints);
+    assert(offset + sizeof(T) <= m_pointSize * m_capacity);
     boost::uint8_t* p = m_data + offset;
 
     return *(T*)p;
