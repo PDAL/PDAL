@@ -36,8 +36,7 @@
 #include <libpc/filters/MosaicFilter.hpp>
 #include <libpc/exceptions.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace filters {
 
 
 MosaicFilter::MosaicFilter(Stage& prevStage, std::vector<Stage*> prevStages)
@@ -146,4 +145,4 @@ boost::uint32_t MosaicFilter::readBuffer(PointData& destData)
 }
 
 
-} // namespace libpc
+} } // namespaces

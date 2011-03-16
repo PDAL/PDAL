@@ -39,8 +39,8 @@
 #include <libpc/Filter.hpp>
 #include <libpc/Bounds.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace filters {
+
 
 // we keep only 1 out of every step points; if step=100, we get 1% of the file
 class LIBPC_DLL DecimationFilter : public Filter
@@ -59,6 +59,6 @@ private:
     DecimationFilter(const DecimationFilter&); // not implemented
 };
 
-} // namespace libpc
+} } // namespaces
 
 #endif

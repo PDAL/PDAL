@@ -39,8 +39,7 @@
 #include <libpc/Filter.hpp>
 #include <libpc/Bounds.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace filters {
 
 // removes any points outside of the given range
 // updates the header accordingly
@@ -60,6 +59,6 @@ private:
     CropFilter(const CropFilter&); // not implemented
 };
 
-} // namespace libpc
+} } // namespaces
 
 #endif

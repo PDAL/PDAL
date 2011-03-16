@@ -39,8 +39,7 @@
 #include <libpc/Bounds.hpp>
 
 
-namespace libpc
-{
+namespace libpc { namespace filters {
 
 // removes any points outside of the given range
 class LIBPC_DLL MosaicFilter : public Filter
@@ -61,6 +60,6 @@ private:
     MosaicFilter(const MosaicFilter&); // not implemented
 };
 
-} // namespace libpc
+} } // namespaces
 
 #endif

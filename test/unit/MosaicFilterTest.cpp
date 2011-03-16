@@ -39,6 +39,7 @@
 #include <libpc/filters/MosaicFilter.hpp>
 
 using namespace libpc;
+using namespace libpc::filters;
 
 BOOST_AUTO_TEST_SUITE(MosaicFilterTest)
 

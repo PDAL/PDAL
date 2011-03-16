@@ -36,8 +36,7 @@
 #include <libpc/Color.hpp>
 #include <libpc/filters/ColorFilter.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace filters {
 
 ColorFilter::ColorFilter(Stage& prevStage)
     : Filter(prevStage)
@@ -111,4 +110,4 @@ void ColorFilter::getColor(float value, boost::uint8_t& red, boost::uint8_t& gre
     return;
 }
 
-} // namespace libpc
+} } // namespaces

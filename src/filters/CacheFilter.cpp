@@ -36,8 +36,7 @@
 
 #include <libpc/PointDataCache.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace filters {
 
 
 // cache block size is measured in Points, not bytes
@@ -169,4 +168,4 @@ boost::uint32_t CacheFilter::readBuffer(PointData& data)
     return numRead;
 }
 
-}
+} } // namespaces

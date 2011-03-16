@@ -37,10 +37,12 @@
 
 #include <libpc/Filter.hpp>
 
-namespace libpc
-{
+namespace libpc {
 
 class PointDataCache;
+    
+namespace filters {
+
 
 // This is just a very simple MRU filter -- future versions will be smarter.
 // This cache has the following constraints:
@@ -89,6 +91,6 @@ private:
     CacheFilter(const CacheFilter&); // not implemented
 };
 
-} // namespace libpc
+} } // namespaces
 
 #endif

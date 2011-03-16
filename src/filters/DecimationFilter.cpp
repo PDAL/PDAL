@@ -34,8 +34,7 @@
 
 #include <libpc/filters/DecimationFilter.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace filters {
 
 
 DecimationFilter::DecimationFilter(Stage& prevStage, int step)
@@ -76,4 +75,4 @@ boost::uint32_t DecimationFilter::readBuffer(PointData& dstData)
     return dstIndex;
 }
 
-}
+} } // namespaces

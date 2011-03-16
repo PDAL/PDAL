@@ -34,8 +34,7 @@
 
 #include <libpc/filters/CropFilter.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace filters {
 
 
 CropFilter::CropFilter(Stage& prevStage, Bounds<double> const& bounds)
@@ -95,4 +94,4 @@ boost::uint32_t CropFilter::readBuffer(PointData& data)
     return numValidPoints;
 }
 
-}
+} } // namespaces

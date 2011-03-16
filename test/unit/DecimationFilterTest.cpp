@@ -40,6 +40,7 @@
 #include <libpc/filters/DecimationFilter.hpp>
 
 using namespace libpc;
+using namespace libpc::filters;
 
 BOOST_AUTO_TEST_SUITE(DecimationFilterTest)
 

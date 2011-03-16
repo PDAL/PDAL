@@ -40,8 +40,7 @@
 #include <libpc/export.hpp>
 #include <libpc/Filter.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace filters {
 
 // adds three new u8 fields (R,G,B) for the colourization of the Z axis
 // the color is done as a ramp from the declared Z min/max values in the header
@@ -61,6 +60,6 @@ private:
     ColorFilter(const ColorFilter&); // not implemented
 };
 
-} // namespace libpc
+} } // namespaces
 
 #endif

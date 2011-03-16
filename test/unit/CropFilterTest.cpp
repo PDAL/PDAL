@@ -40,6 +40,7 @@
 #include <libpc/filters/CropFilter.hpp>
 
 using namespace libpc;
+using namespace libpc::filters;
 
 BOOST_AUTO_TEST_SUITE(CropFilterTest)
 
