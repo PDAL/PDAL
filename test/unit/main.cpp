@@ -77,7 +77,7 @@ libpc_init_unit_test_suite( int, char* [] )
         g_data_path = argv[1];
     else
         g_data_path = "../test/data";
-    if (g_data_path[g_data_path.size()] != '/')
+    if (g_data_path[g_data_path.size()-1] != '/')
         g_data_path += "/";
     
 #ifdef BOOST_TEST_ALTERNATIVE_INIT_API

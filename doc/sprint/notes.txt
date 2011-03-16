@@ -12,20 +12,13 @@ Montreal Sprint Notes
 
 * pcinfo tool - basic support
 
-* file names to match class names (reader.hpp, etc)
-
 * CL mssgs to stdout or stderr?  usage/help/error
 
 * platform macros -- LIBPC_OS_WIN32, etc
 
-* libpc.hpp -- general/universal header file
-
 * dump routines -- every class needs oper<<, dump()
 
 * build swig bindings from CMake
-
-* complete the renaming of driver/filters, into subdirs; and fix IDE 
-  project file also
   
 * typedef boost::uint32_t uint32_t ?
 
@@ -39,19 +32,11 @@ Montreal Sprint Notes
 
 * the sequential-or-random-reads issue
 
-* the Stage class hierarchy naming / Writer issue
-
-* remove isValid?
-
 * do we need Header class?
 
 * does Boost give math class support for Range, Vector, Bounds?
 
 * bitfields in Dimensions?
-
-* stand up libpc.org / Sphinx
-
-* Trac instance for libPC
 
 * MG4/Lidar driver support, inc. CMake detection
 
