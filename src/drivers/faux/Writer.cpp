@@ -58,8 +58,8 @@ const std::string& Writer::getName() const
 
 void Writer::writeBegin()
 {
-    m_minimumX = m_minimumY = m_minimumZ = std::numeric_limits<float>::max();
-    m_maximumX = m_maximumY = m_maximumZ = std::numeric_limits<float>::min();
+    m_minimumX = m_minimumY = m_minimumZ = std::numeric_limits<double>::max();
+    m_maximumX = m_maximumY = m_maximumZ = std::numeric_limits<double>::min();
     m_averageX = m_averageY = m_averageZ = 0;
 
     return;
@@ -68,9 +68,9 @@ void Writer::writeBegin()
 
 void Writer::writeEnd()
 {
-    m_averageX /= (float)m_actualNumPointsWritten;
-    m_averageY /= (float)m_actualNumPointsWritten;
-    m_averageZ /= (float)m_actualNumPointsWritten;
+    m_averageX /= (double)m_actualNumPointsWritten;
+    m_averageY /= (double)m_actualNumPointsWritten;
+    m_averageZ /= (double)m_actualNumPointsWritten;
 
     //cout << "FauxWriter::writeEnd()" << endl;
     //cout << "  wrote " << m_actualNumPointsWritten << " points" << endl;
@@ -104,9 +104,9 @@ boost::uint32_t Writer::writeBuffer(const PointData& pointData)
         {
             ++numValidPoints;
 
-            float x = pointData.getField<float>(pointIndex, fieldIndexX);
-            float y = pointData.getField<float>(pointIndex, fieldIndexY);
-            float z = pointData.getField<float>(pointIndex, fieldIndexZ);
+            double x = pointData.getField<double>(pointIndex, fieldIndexX);
+            double y = pointData.getField<double>(pointIndex, fieldIndexY);
+            double z = pointData.getField<double>(pointIndex, fieldIndexZ);
 
             m_minimumX = std::min(m_minimumX, x);
             m_minimumY = std::min(m_minimumY, y);

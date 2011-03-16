@@ -45,7 +45,7 @@ namespace libpc { namespace drivers { namespace faux {
 // The FauxWriter doesn't actually write to disk -- instead, it just
 // record some summary stats about the data it is given.
 //
-// This writer knows only about three dimensions: X,Y,Z (as floats).
+// This writer knows only about three dimensions: X,Y,Z (as doubles).
 //
 class LIBPC_DLL Writer : public libpc::Writer
 {
@@ -55,26 +55,26 @@ public:
     const std::string& getName() const;
 
     // retrieve the summary info
-    float getMinX() const { return m_minimumX; }
-    float getMinY() const { return m_minimumY; }
-    float getMinZ() const { return m_minimumZ; }
-    float getMaxX() const { return m_maximumX; }
-    float getMaxY() const { return m_maximumY; }
-    float getMaxZ() const { return m_maximumZ; }
-    float getAvgX() const { return m_averageX; }
-    float getAvgY() const { return m_averageY; }
-    float getAvgZ() const { return m_averageZ; }
+    double getMinX() const { return m_minimumX; }
+    double getMinY() const { return m_minimumY; }
+    double getMinZ() const { return m_minimumZ; }
+    double getMaxX() const { return m_maximumX; }
+    double getMaxY() const { return m_maximumY; }
+    double getMaxZ() const { return m_maximumZ; }
+    double getAvgX() const { return m_averageX; }
+    double getAvgY() const { return m_averageY; }
+    double getAvgZ() const { return m_averageZ; }
 
 private:
-    float m_minimumX;
-    float m_minimumY;
-    float m_minimumZ;
-    float m_maximumX;
-    float m_maximumY;
-    float m_maximumZ;
-    float m_averageX;
-    float m_averageY;
-    float m_averageZ;
+    double m_minimumX;
+    double m_minimumY;
+    double m_minimumZ;
+    double m_maximumX;
+    double m_maximumY;
+    double m_maximumZ;
+    double m_averageX;
+    double m_averageY;
+    double m_averageZ;
 
     void writeBegin();
     boost::uint32_t writeBuffer(const PointData&);

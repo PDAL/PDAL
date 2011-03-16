@@ -54,15 +54,18 @@ BOOST_AUTO_TEST_CASE(test_1)
 
     BOOST_CHECK(numWritten == 750);
 
-    BOOST_CHECK(writer.getMinX() == 1.0);
-    BOOST_CHECK(writer.getMinY() == 2.0);
-    BOOST_CHECK(writer.getMinZ() == 3.0);
-    BOOST_CHECK(writer.getMaxX() == 1.0);
-    BOOST_CHECK(writer.getMaxY() == 2.0);
-    BOOST_CHECK(writer.getMaxZ() == 3.0);
-    BOOST_CHECK(writer.getAvgX() == 1.0);
-    BOOST_CHECK(writer.getAvgY() == 2.0);
-    BOOST_CHECK(writer.getAvgZ() == 3.0);
+    BOOST_CHECK(Utils::compare_approx(writer.getMinX(), 1.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getMinY(), 2.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getMinZ(), 3.0, (std::numeric_limits<double>::min)()) == true);
+
+    BOOST_CHECK(Utils::compare_approx(writer.getMaxX(), 1.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getMaxY(), 2.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getMaxZ(), 3.0, (std::numeric_limits<double>::min)()) == true);
+
+    BOOST_CHECK(Utils::compare_approx(writer.getAvgX(), 1.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getAvgY(), 2.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getAvgZ(), 3.0, (std::numeric_limits<double>::min)()) == true);
+
 
     return;
 }
