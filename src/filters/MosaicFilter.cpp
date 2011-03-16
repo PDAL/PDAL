@@ -83,6 +83,12 @@ const std::string& MosaicFilter::getName() const
 }
 
 
+void MosaicFilter::seekToPoint(boost::uint64_t pointNum)
+{
+    m_prevStage.seekToPoint(pointNum);
+}
+
+
 boost::uint32_t MosaicFilter::readBuffer(PointData& destData)
 {
     // BUG: We know that the two prev stage schemas are compatible, 

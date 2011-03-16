@@ -32,29 +32,54 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTER_HPP
-#define INCLUDED_FILTER_HPP
-
-#include <libpc/export.hpp>
-#include <libpc/Stage.hpp>
-#include <libpc/Header.hpp>
+#include <libpc/Iterator.hpp>
 
 namespace libpc
 {
 
-class LIBPC_DLL Filter : public Stage
+
+Iterator::Iterator(const Stage& stage)
+    : m_stage(stage)
+    , m_currentPointIndex(0)
 {
-public:
-    Filter(Stage& prevStage);
+    return;
+}
 
-protected:
-    Stage& m_prevStage;
 
-private:
-    Filter& operator=(const Filter&); // not implemented
-    Filter(const Filter&); // not implemented
-};
+const Stage& Iterator::getStage() const
+{
+    return m_stage;
+}
 
-}  // namespace libpc
 
-#endif
+void Iterator::setCurrentPointIndex(boost::uint64_t currentPointIndex)
+{
+    m_currentPointIndex = currentPointIndex;
+}
+
+
+boost::uint64_t Iterator::getCurrentPointIndex() const
+{
+    return m_currentPointIndex;
+}
+
+void Iterator::incrementCurrentPointIndex(boost::uint64_t delta)
+{
+    m_currentPointIndex += delta;
+}
+
+
+boost::uint32_t Iterator::read(PointData& data)
+{
+    const boost::uint32_t numPointsRead = readBuffer(data);
+    return numPointsRead;
+}
+
+
+bool Iterator::atEnd() const
+{
+    return getCurrentPointIndex() >= getStage().getNumPoints();
+}
+
+
+} // namespace libpc

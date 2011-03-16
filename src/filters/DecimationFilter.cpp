@@ -55,6 +55,12 @@ const std::string& DecimationFilter::getName() const
 }
 
 
+void DecimationFilter::seekToPoint(boost::uint64_t pointNum)
+{
+    m_prevStage.seekToPoint(pointNum);
+}
+
+
 boost::uint32_t DecimationFilter::readBuffer(PointData& dstData)
 {
     // naive implementation: read a buffer N times larger, then pull out what we need

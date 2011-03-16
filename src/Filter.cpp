@@ -48,10 +48,4 @@ Filter::Filter(Stage& prevStage) :
 }
 
 
-void Filter::seekToPoint(boost::uint64_t pointNum)
-{
-    m_prevStage.seekToPoint(pointNum);
-}
-
-
 } // namespace libpc
