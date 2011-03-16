@@ -49,6 +49,12 @@ if(WIN32)
   if (MSVC)
     add_definitions("-DBOOST_TEST_DYN_LINK")
   endif()
+else()
+    if(Boost_PROGRAM_OPTIONS_LIBRARY MATCHES "\\.a$")
+        # pass, we can compile static
+    else()
+        add_definitions("-DBOOST_TEST_DYN_LINK")
+    endif()
 endif()
 
 TARGET_LINK_LIBRARIES(${LIBPC_UNIT_TEST} 
