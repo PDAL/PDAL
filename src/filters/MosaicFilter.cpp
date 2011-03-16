@@ -120,15 +120,7 @@ boost::uint32_t MosaicFilter::readBuffer(PointData& destData)
 
             for (boost::uint32_t idx=0; idx<pointsGotten; idx++)
             {
-                if (srcData.isValid(idx))
-                {
-                    destData.copyPointFast(destPointIndex, idx, srcData);
-                    destData.setValid(destPointIndex, true);
-                }
-                else
-                {
-                    destData.setValid(destPointIndex, false);
-                }
+                destData.copyPointFast(destPointIndex, idx, srcData);
                 destPointIndex++;
             }
 

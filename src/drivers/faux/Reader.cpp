@@ -142,8 +142,6 @@ boost::uint32_t Reader::readBuffer(PointData& data)
             z = (double)minZ;
         }
 
-        data.setValid(pointIndex);
-
         data.setField<double>(pointIndex, offsetX, x);
         data.setField<double>(pointIndex, offsetY, y);
         data.setField<double>(pointIndex, offsetZ, z);

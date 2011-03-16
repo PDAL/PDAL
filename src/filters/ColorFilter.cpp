@@ -73,26 +73,20 @@ boost::uint32_t ColorFilter::readBuffer(PointData& data)
     int fieldIndexB = schema.getDimensionIndex(Dimension::Field_Blue);
     int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
 
-    boost::uint32_t numValidPoints = 0;
-
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        if (data.isValid(pointIndex))
-        {
-            float z = data.getField<float>(pointIndex, offsetZ);
-            boost::uint8_t red, green, blue;
-            getColor(z, red, green, blue);
+        float z = data.getField<float>(pointIndex, offsetZ);
+        boost::uint8_t red, green, blue;
+        getColor(z, red, green, blue);
 
-            // now we store the 3 u8's in the point data...
-            data.setField<boost::uint8_t>(pointIndex, fieldIndexR, red);
-            data.setField<boost::uint8_t>(pointIndex, fieldIndexG, green);
-            data.setField<boost::uint8_t>(pointIndex, fieldIndexB, blue);
+        // now we store the 3 u8's in the point data...
+        data.setField<boost::uint8_t>(pointIndex, fieldIndexR, red);
+        data.setField<boost::uint8_t>(pointIndex, fieldIndexG, green);
+        data.setField<boost::uint8_t>(pointIndex, fieldIndexB, blue);
 
-            ++numValidPoints;
-        }
     }
 
-    return numValidPoints;
+    return numPoints;
 }
 
 void ColorFilter::getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue)

@@ -185,7 +185,6 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData)
             pointData.setField<boost::uint8_t>(pointIndex, fieldIndexUserData, user);
             pointData.setField<boost::uint16_t>(pointIndex, fieldIndexPointSource, pointSourceId);
 
-            pointData.setValid(pointIndex);
         }
         else if (pointFormat == LasHeader::ePointFormat1)
         {
@@ -239,7 +238,6 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData)
             pointData.setField<boost::uint16_t>(pointIndex, fieldIndexGreen, green);
             pointData.setField<boost::uint16_t>(pointIndex, fieldIndexBlue, blue);
 
-            pointData.setValid(pointIndex);
         }
         else
         {
