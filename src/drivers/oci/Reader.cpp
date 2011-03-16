@@ -37,7 +37,7 @@
 #include <sstream>
 
 
-#include "reader.hpp"
+#include <libpc/drivers/oci/Reader.hpp>
 #include "header.hpp"
 #include <liblas/Writer.hpp>
 
