@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_field_read_write)
     double y = Utils::read_field<double>(p);
 
     BOOST_CHECK(x==one);
-    BOOST_CHECK(y==two);
+    BOOST_CHECK(Utils::compare_approx(y, two, (double) 0.00001) == true);
     
     return;
 }
