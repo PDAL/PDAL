@@ -33,6 +33,11 @@
 ****************************************************************************/
 
 #include <string>
+
+#ifndef BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE Main
+#endif
+
 #include <boost/test/unit_test.hpp>
 #include <boost/test/utils/assign_op.hpp>
 
@@ -82,7 +87,7 @@ libpc_init_unit_test_suite( int, char* [] )
 #endif
 }
 
-#if defined(BOOST_TEST_DYN_LINK)
+#if defined(BOOST_TEST_DYN_LINK) 
 
 int
 main( int argc, char* argv[] )
