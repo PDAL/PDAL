@@ -68,10 +68,10 @@ BOOST_AUTO_TEST_CASE(test_constant)
         float z = data.getField<float>(i, offsetZ);
         boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-        BOOST_CHECK(x == 1.0);
-        BOOST_CHECK(y == 2.0);
-        BOOST_CHECK(z == 3.0);
-        BOOST_CHECK(t == i);
+        BOOST_CHECK( Utils::compare_approx( (double)x, 1.0, (std::numeric_limits<double>::min)()) == true);
+        BOOST_CHECK(Utils::compare_approx( (double)y, 2.0, (std::numeric_limits<double>::min)()) == true);
+        BOOST_CHECK(Utils::compare_approx( (double)z, 3.0, (std::numeric_limits<double>::min)()) == true);
+        BOOST_CHECK(Utils::compare_approx( (double)t, (double) i, (std::numeric_limits<double>::min)()) == true);
     }
 
     return;
