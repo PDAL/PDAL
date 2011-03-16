@@ -76,28 +76,28 @@ BOOST_AUTO_TEST_CASE(test1)
 
     for (boost::uint32_t i=0; i<300; i++)
     {
-        float x = data.getField<float>(i, offsetX);
-        float y = data.getField<float>(i, offsetY);
-        float z = data.getField<float>(i, offsetZ);
+        double x = data.getField<double>(i, offsetX);
+        double y = data.getField<double>(i, offsetY);
+        double z = data.getField<double>(i, offsetZ);
         boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
         if (i<100)
         {
-            BOOST_CHECK(x == 0.0);
-            BOOST_CHECK(y == 0.0);
-            BOOST_CHECK(z == 0.0);
+            BOOST_CHECK(Utils::compare_approx(x, 0.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx(y, 0.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx(z, 0.0, (std::numeric_limits<double>::min)()) == true);
         }
         else if (i<200)
         {
-            BOOST_CHECK(x == 100.0);
-            BOOST_CHECK(y == 100.0);
-            BOOST_CHECK(z == 100.0);
+            BOOST_CHECK(Utils::compare_approx(x, 100.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx(y, 100.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx(z, 100.0, (std::numeric_limits<double>::min)()) == true);
         }
         else
         {
-            BOOST_CHECK(x == 200.0);
-            BOOST_CHECK(y == 200.0);
-            BOOST_CHECK(z == 200.0);
+            BOOST_CHECK(Utils::compare_approx(x, 200.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx(y, 200.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx(z, 200.0, (std::numeric_limits<double>::min)()) == true);
         }
         BOOST_CHECK(t == i % 100);
     }
