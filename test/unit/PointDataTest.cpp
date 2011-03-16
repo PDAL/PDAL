@@ -36,6 +36,7 @@
 #include <boost/cstdint.hpp>
 
 #include <libpc/PointData.hpp>
+#include <libpc/Utils.hpp>
 
 using namespace libpc;
 
@@ -106,7 +107,9 @@ static void verifyTestBuffer(const PointData& data)
 
       BOOST_CHECK(x == i+1);
       BOOST_CHECK(y == i*10);
-      BOOST_CHECK(z == i*100);
+
+      BOOST_CHECK(Utils::compare_approx(z, static_cast<double>(i)*100.0, (std::numeric_limits<double>::min)()) == true);
+
     }
 }
 
@@ -135,6 +138,9 @@ BOOST_AUTO_TEST_CASE(test_copy)
       const double z = d2.getField<double>(0, 2);
 
       int ii = 10;
+
+      BOOST_CHECK(Utils::compare_approx(z, ii+100.0, (std::numeric_limits<double>::min)()) == true);
+
       BOOST_CHECK(x == ii+1);
       BOOST_CHECK(y == ii*10);
       BOOST_CHECK(z == ii*100);
