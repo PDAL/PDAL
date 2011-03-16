@@ -45,10 +45,10 @@ namespace po = boost::program_options;
 
 
 Application::Application(int argc, char* argv[], const std::string& appName)
-    : m_argc(argc)
+    : m_isVerbose(false)
+    , m_argc(argc)
     , m_argv(argv)
     , m_appName(appName)
-    , m_isVerbose(false)
 {
     return;
 }
