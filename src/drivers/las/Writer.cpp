@@ -43,12 +43,9 @@ namespace libpc
 
 
 LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
-    : Consumer(prevStage)
+    : Writer(prevStage)
     , m_ostream(ostream)
 {
-    LasHeader* lasHeader = new LasHeader;
-    setHeader(lasHeader);
-
     return;
 }
 
@@ -62,18 +59,15 @@ const std::string& LasWriter::getName() const
 
 void LasWriter::writeBegin()
 {
-    Header& baseHeader = getHeader();
-    LasHeader& lasHeader = (LasHeader&)baseHeader;
-
-    // need to set properties of the header here, based on this->getHeader() and on the user's preferences
-    lasHeader.setBounds( baseHeader.getBounds() );
-    lasHeader.SetOffset(0,0,0);
-    lasHeader.SetScale(1,1,1);
+    // need to set properties of the header here, based on prev->getHeader() and on the user's preferences
+    m_lasHeader.setBounds( getPrevStage().getHeader().getBounds() );
+    m_lasHeader.SetOffset(0,0,0);
+    m_lasHeader.SetScale(1,1,1);
     
     boost::uint32_t cnt = static_cast<boost::uint32_t>(m_targetNumPointsToWrite);
-    lasHeader.SetPointRecordsCount(cnt);
+    m_lasHeader.SetPointRecordsCount(cnt);
 
-    LasHeaderWriter lasHeaderWriter(lasHeader, m_ostream);
+    LasHeaderWriter lasHeaderWriter(m_lasHeader, m_ostream);
     lasHeaderWriter.write();
 
     return;
@@ -88,12 +82,11 @@ void LasWriter::writeEnd()
 
 boost::uint32_t LasWriter::writeBuffer(const PointData& pointData)
 {
-    Header& baseHeader = getHeader();
-    LasHeader& lasHeader = (LasHeader&)baseHeader;
+    Header& baseHeader = getPrevStage().getHeader();
 
     const SchemaLayout& schemaLayout = pointData.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
-    LasHeader::PointFormatId pointFormat = lasHeader.getDataFormatId();
+    LasHeader::PointFormatId pointFormat = m_lasHeader.getDataFormatId();
 
     bool hasTimeData = false;
     bool hasColorData = false;

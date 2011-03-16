@@ -34,14 +34,14 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/PointData.hpp  
   ${LIBPC_HEADERS_DIR}/PointDataCache.hpp  
   ${LIBPC_HEADERS_DIR}/Range.hpp
-  ${LIBPC_HEADERS_DIR}/Producer.hpp
+  ${LIBPC_HEADERS_DIR}/Reader.hpp
   ${LIBPC_HEADERS_DIR}/Schema.hpp
   ${LIBPC_HEADERS_DIR}/SchemaLayout.hpp
   ${LIBPC_HEADERS_DIR}/Signaller.hpp
   ${LIBPC_HEADERS_DIR}/SpatialReference.hpp
   ${LIBPC_HEADERS_DIR}/Stage.hpp
   ${LIBPC_HEADERS_DIR}/Utils.hpp
-  ${LIBPC_HEADERS_DIR}/Consumer.hpp
+  ${LIBPC_HEADERS_DIR}/Writer.hpp
   )
 
 set(LIBPC_DRIVERS_FAUX_HPP
@@ -107,14 +107,14 @@ set(LIBPC_CPP
   Vector.cpp  
   PointData.cpp
   PointDataCache.cpp
-  Producer.cpp
+  Reader.cpp
   Schema.cpp
   SchemaLayout.cpp
   Signaller.cpp
   SpatialReference.cpp
   Stage.cpp
   Utils.cpp
-  Consumer.cpp)
+  Writer.cpp)
 
 
 # Group source files for IDE source explorers (e.g. Visual Studio)

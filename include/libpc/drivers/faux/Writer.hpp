@@ -37,7 +37,7 @@
 
 #include <string>
 
-#include <libpc/Consumer.hpp>
+#include <libpc/Writer.hpp>
 
 namespace libpc
 {
@@ -48,7 +48,7 @@ namespace libpc
 //
 // This writer knows only about three dimensions: X,Y,Z (as floats).
 //
-class LIBPC_DLL FauxWriter : public Consumer
+class LIBPC_DLL FauxWriter : public Writer
 {
 public:
     FauxWriter(Stage& prevStage);

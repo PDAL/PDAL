@@ -32,36 +32,58 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/Producer.hpp>
+#ifndef INCLUDED_WRITER_HPP
+#define INCLUDED_WRITER_HPP
+
+#include <libpc/Filter.hpp>
 
 namespace libpc
 {
 
-
-Producer::Producer()
+class LIBPC_DLL Writer
 {
-    return;
-}
+public:
+    Writer(Stage& prevStage);
 
+    // Implement this in your concrete classes to return a constant string
+    // as the name of the stage.  Use upper camel case, with spaces between
+    // words.  The last word should generally be "Writer".
+    virtual const std::string& getName() const = 0;
 
-void Producer::seekToPoint(boost::uint64_t pointNum)
-{
-    if (pointNum == getCurrentPointIndex())
-    {
-        return;
-    }
+    // size of the PointData buffer to use
+    void setChunkSize(boost::uint32_t);
+    boost::uint32_t getChunkSize() const;
 
-    setCurrentPointIndex(0);
-    
-    // we read the points only to get to the right place -- we
-    // will just drop the points on the floor and return
-    boost::uint32_t pointNumX = (boost::uint32_t)pointNum; // BUG
-    assert(pointNumX == pointNum);
-    PointData pointData(getHeader().getSchema(), pointNumX);
-    read(pointData);
+    // Read the  given number of points (or less, if the reader runs out first), 
+    // and then write them out to wherever.  Returns total number of points
+    // actually written.
+    boost::uint64_t write(std::size_t targetNumPointsToWrite);
 
-    return;
-}
+protected:
+    // this is called once before the loop with the writeBuffer calls
+    virtual void writeBegin() = 0;
 
+    // called repeatedly, until out of data
+    virtual boost::uint32_t writeBuffer(const PointData&) = 0;
+
+    // called once, after the writeBuffer calls
+    virtual void writeEnd() = 0;
+
+    Stage& getPrevStage();
+
+    // these two are valid for use after writeBegin has been called
+    std::size_t m_actualNumPointsWritten;
+    std::size_t m_targetNumPointsToWrite;
+
+private:
+    Stage& m_prevStage;
+    boost::uint32_t m_chunkSize;
+    static const boost::uint32_t s_defaultChunkSize;
+
+    Writer& operator=(const Writer&); // not implemented
+    Writer(const Writer&); // not implemented
+};
 
 } // namespace libpc
+
+#endif

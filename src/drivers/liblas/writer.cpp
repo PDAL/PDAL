@@ -48,7 +48,7 @@ namespace libpc
 
 
 LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
-    : Consumer(prevStage)
+    : Writer(prevStage)
     , m_ostream(ostream)
     , m_externalWriter(NULL)
 {
@@ -56,14 +56,6 @@ LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
     m_externalHeader->SetCompressed(false);
 
     setupExternalHeader();
-
-    // make our own header
-    LiblasHeader* internalHeader = new LiblasHeader;
-    setHeader(internalHeader);
-
-    //const liblas::Bounds<double>& extBounds = extHeader.GetExtent();
-    //const Bounds<double> bounds(extBounds.minx(), extBounds.miny(), extBounds.minz(), extBounds.maxx(), extBounds.maxy(), extBounds.maxz());
-    //myHeader->setBounds(bounds);
 
     return;
 }
@@ -93,12 +85,14 @@ void LiblasWriter::setupExternalHeader()
     setSystemIdentifier("libPC");
     setGeneratingSoftware(GetVersionString());
 
-    int indexX = getHeader().getSchema().getDimensionIndex(Dimension::Field_X);
-    int indexY = getHeader().getSchema().getDimensionIndex(Dimension::Field_Y);
-    int indexZ = getHeader().getSchema().getDimensionIndex(Dimension::Field_Z);
-    const Dimension& dimX = getHeader().getSchema().getDimension(indexX);
-    const Dimension& dimY = getHeader().getSchema().getDimension(indexY);
-    const Dimension& dimZ = getHeader().getSchema().getDimension(indexZ);
+    const Schema& schema = getPrevStage().getHeader().getSchema();
+
+    int indexX = schema.getDimensionIndex(Dimension::Field_X);
+    int indexY = schema.getDimensionIndex(Dimension::Field_Y);
+    int indexZ = schema.getDimensionIndex(Dimension::Field_Z);
+    const Dimension& dimX = schema.getDimension(indexX);
+    const Dimension& dimY = schema.getDimension(indexY);
+    const Dimension& dimZ = schema.getDimension(indexZ);
     m_externalHeader->SetScale(dimX.getNumericScale(), dimY.getNumericScale(), dimZ.getNumericScale());
     m_externalHeader->SetOffset(dimX.getNumericOffset(), dimY.getNumericOffset(), dimZ.getNumericOffset());
 

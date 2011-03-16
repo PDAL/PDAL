@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PRODUCER_HPP
-#define INCLUDED_PRODUCER_HPP
+#ifndef INCLUDED_READER_HPP
+#define INCLUDED_READER_HPP
 
 #include <libpc/Stage.hpp>
 #include <libpc/Header.hpp>
@@ -41,18 +41,18 @@
 namespace libpc
 {
 
-class LIBPC_DLL Producer : public Stage
+class LIBPC_DLL Reader : public Stage
 {
 public:
-    Producer();
+    Reader();
 
     // default is to read N points manually
     // override this if you can
     virtual void seekToPoint(boost::uint64_t pointNum);
 
 private:
-    Producer& operator=(const Producer&); // not implemented
-    Producer(const Producer&); // not implemented
+    Reader& operator=(const Reader&); // not implemented
+    Reader(const Reader&); // not implemented
 };
 
 } // namespace libpc

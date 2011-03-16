@@ -35,7 +35,7 @@
 #ifndef INCLUDED_OCIWRITER_HPP
 #define INCLUDED_OCIWRITER_HPP
 
-#include <libpc/Consumer.hpp>
+#include <libpc/Writer.hpp>
 #include <libpc/chipper.hpp>
 
 #include "common.hpp"
@@ -49,7 +49,7 @@ namespace libpc { namespace driver { namespace oci {
 
 
 
-class LIBPC_DLL Writer : public Consumer
+class LIBPC_DLL Writer : public Writer
 {
     
 public:

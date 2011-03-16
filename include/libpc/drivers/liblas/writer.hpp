@@ -35,7 +35,7 @@
 #ifndef INCLUDED_LIBLASWRITER_HPP
 #define INCLUDED_LIBLASWRITER_HPP
 
-#include <libpc/Consumer.hpp>
+#include <libpc/Writer.hpp>
 
 namespace liblas
 {
@@ -48,7 +48,7 @@ namespace libpc
 {
 
 // we default to LAS 1.2, point format 0
-class LIBPC_DLL LiblasWriter : public Consumer
+class LIBPC_DLL LiblasWriter : public Writer
 {
 public:
     LiblasWriter(Stage& prevStage, std::ostream&);

@@ -35,12 +35,13 @@
 #ifndef INCLUDED_LASWRITER_HPP
 #define INCLUDED_LASWRITER_HPP
 
-#include <libpc/Consumer.hpp>
+#include <libpc/Writer.hpp>
+#include <libpc/drivers/las/Header.hpp>
 
 namespace libpc
 {
 
-class LIBPC_DLL LasWriter : public Consumer
+class LIBPC_DLL LasWriter : public Writer
 {
 public:
     LasWriter(Stage& prevStage, std::ostream&);
@@ -59,6 +60,7 @@ protected:
 
 private:
     std::ostream& m_ostream;
+    LasHeader m_lasHeader;
 
     LasWriter& operator=(const LasWriter&); // not implemented
     LasWriter(const LasWriter&); // not implemented

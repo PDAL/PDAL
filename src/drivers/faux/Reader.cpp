@@ -47,7 +47,7 @@ namespace libpc
 {
 
 FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode)
-    : Producer()
+    : Reader()
     , m_mode(mode)
 {
     Header* header = new Header;
@@ -67,7 +67,7 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode)
 }
 
 FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : Producer()
+    : Reader()
     , m_mode(mode)
 {
     Header* header = new Header;

@@ -32,55 +32,36 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_CONSUMER_HPP
-#define INCLUDED_CONSUMER_HPP
-
-#include <libpc/Filter.hpp>
+#include <libpc/Reader.hpp>
 
 namespace libpc
 {
 
-// a Writer is a Filter, because it has a previous stage and a header
-// however, Consumer generally do not implement the readNextPoints method
-class LIBPC_DLL Consumer : public Filter
+
+Reader::Reader()
 {
-public:
-    Consumer(Stage& prevStage);
+    return;
+}
 
-    // size of the PointData buffer to use
-    void setChunkSize(boost::uint32_t);
-    boost::uint32_t getChunkSize() const;
 
-    // Read the  given number of points (or less, if the reader runs out first), 
-    // and then write them out to wherever.  Returns total number of points
-    // actually written.
-    boost::uint64_t write(std::size_t targetNumPointsToWrite);
+void Reader::seekToPoint(boost::uint64_t pointNum)
+{
+    if (pointNum == getCurrentPointIndex())
+    {
+        return;
+    }
 
-protected:
-    // this is called once before the loop with the writeBuffer calls
-    virtual void writeBegin() = 0;
+    setCurrentPointIndex(0);
+    
+    // we read the points only to get to the right place -- we
+    // will just drop the points on the floor and return
+    boost::uint32_t pointNumX = (boost::uint32_t)pointNum; // BUG
+    assert(pointNumX == pointNum);
+    PointData pointData(getHeader().getSchema(), pointNumX);
+    read(pointData);
 
-    // called repeatedly, until out of data
-    virtual boost::uint32_t writeBuffer(const PointData&) = 0;
+    return;
+}
 
-    // called once, after the writeBuffer calls
-    virtual void writeEnd() = 0;
-
-    // not generally used in Writer objects
-    virtual boost::uint32_t readBuffer(PointData&);
-
-    // these two are valid for use after writeBegin has been called
-    std::size_t m_actualNumPointsWritten;
-    std::size_t m_targetNumPointsToWrite;
-
-private:
-    boost::uint32_t m_chunkSize;
-    static const boost::uint32_t s_defaultChunkSize;
-
-    Consumer& operator=(const Consumer&); // not implemented
-    Consumer(const Consumer&); // not implemented
-};
 
 } // namespace libpc
-
-#endif

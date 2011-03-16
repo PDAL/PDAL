@@ -35,7 +35,7 @@
 #ifndef INCLUDED_LIBLASREADER_HPP
 #define INCLUDED_LIBLASREADER_HPP
 
-#include <libpc/Producer.hpp>
+#include <libpc/Reader.hpp>
 
 #include <iostream>
 
@@ -51,7 +51,7 @@ namespace liblas
 namespace libpc
 {
 
-class LIBPC_DLL LiblasReader : public Producer
+class LIBPC_DLL LiblasReader : public Reader
 {
 public:
     LiblasReader(std::istream&);

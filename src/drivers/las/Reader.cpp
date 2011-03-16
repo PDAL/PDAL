@@ -41,7 +41,7 @@ namespace libpc
 
 
 LasReader::LasReader(std::istream& istream)
-    : Producer()
+    : Reader()
     , m_istream(istream)
 {
     LasHeader* lasHeader = new LasHeader;
