@@ -37,7 +37,7 @@
 #include <sstream>
 
 
-#include "writer.hpp"
+#include <libpc/drivers/oci/Writer.hpp>
 #include "header.hpp"
 #include <liblas/Writer.hpp>
 

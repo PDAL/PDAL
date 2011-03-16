@@ -14,12 +14,24 @@ if(GDAL_FOUND)
     tifvsi.cpp)
 endif()
 
+
 ###############################################################################
 # Source files specification
+#
+# Naming format:
+#   LIBPC_CPP - all the .cpp files
+#   LIBPC_HPP - all the .hpp files
+#   LIBPC_<dirname>_CPP - all the .cpp files for the given subdir/namespace
+#   ...
 
 set(LIBPC_HEADERS_DIR ../include/libpc)
+set(LIBPC_HPP "")
+set(LIBPC_CPP "")
 
-set(LIBPC_HPP
+#
+# base
+#
+set(LIBPC_BASE_HPP
   ${LIBPC_HEADERS_DIR}/exceptions.hpp
   ${LIBPC_HEADERS_DIR}/export.hpp
   ${LIBPC_HEADERS_DIR}/libpc_config.hpp
@@ -42,60 +54,9 @@ set(LIBPC_HPP
   ${LIBPC_HEADERS_DIR}/Stage.hpp
   ${LIBPC_HEADERS_DIR}/Utils.hpp
   ${LIBPC_HEADERS_DIR}/Writer.hpp
-  )
-
-set(LIBPC_DRIVERS_FAUX_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/faux/Writer.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/faux/Reader.hpp
 )
-FOREACH(file ${LIBPC_DRIVERS_FAUX_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
 
-set(LIBPC_DRIVERS_LAS_HPP
- ${LIBPC_HEADERS_DIR}/drivers/las/Header.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/las/Writer.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/las/Reader.hpp
-)
-FOREACH(file ${LIBPC_DRIVERS_LAS_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
-
-set(LIBPC_DRIVERS_LIBLAS_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/liblas/Writer.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/liblas/Reader.hpp
-)
-FOREACH(file ${LIBPC_DRIVERS_LIBLAS_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
-
-set(LIBPC_DRIVERS_OCI_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/oci/Writer.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/oci/Reader.hpp
-)
-FOREACH(file ${LIBPC_DRIVERS_OCI_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
-
-set(LIBPC_FILTERS_HPP
-  ${LIBPC_HEADERS_DIR}/filters/CacheFilter.hpp
-  ${LIBPC_HEADERS_DIR}/filters/ColorFilter.hpp
-  ${LIBPC_HEADERS_DIR}/filters/CropFilter.hpp
-  ${LIBPC_HEADERS_DIR}/filters/DecimationFilter.hpp
-  ${LIBPC_HEADERS_DIR}/filters/MosaicFilter.hpp
-)
-FOREACH(file ${LIBPC_FILTERS_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
-
-set (LIBPC_SOURCES "libpc_config.cpp" CACHE INTERNAL "sources to compile")
-set (APPS_CPP_DEPENDENCIES "${LIBPC_LIB_NAME}" CACHE INTERNAL "libraries to link")
-
-add_subdirectory(drivers)
-add_subdirectory(filters)
-
-set(LIBPC_CPP
-  ${LIBPC_SOURCES}
+set(LIBPC_BASE_CPP
   Bounds.cpp
   Chipper.cpp
   Color.cpp
@@ -114,19 +75,185 @@ set(LIBPC_CPP
   SpatialReference.cpp
   Stage.cpp
   Utils.cpp
-  Writer.cpp)
+  Writer.cpp
+)
 
+FOREACH(file ${LIBPC_BASE_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
 
+FOREACH(file ${LIBPC_BASE_CPP})
+        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+#
+# drivers/faux
+#
+set(LIBPC_DRIVERS_FAUX_HPP
+  ${LIBPC_HEADERS_DIR}/drivers/faux/Writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/faux/Reader.hpp
+)
+
+set (LIBPC_DRIVERS_FAUX_CPP
+  ./drivers/faux/Reader.cpp
+  ./drivers/faux/Writer.cpp 
+)
+
+FOREACH(file ${LIBPC_DRIVERS_FAUX_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+FOREACH(file ${LIBPC_DRIVERS_FAUX_CPP})
+        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+#
+# drivers/las
+#
+
+set (LIBPC_DRIVERS_LAS_HPP
+  ${LIBPC_HEADERS_DIR}/drivers/las/Header.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/las/Writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/las/Reader.hpp
+  ./drivers/las/LasHeaderReader.hpp
+  ./drivers/las/LasHeaderWriter.hpp
+)
+ 
+set (LIBPC_DRIVERS_LAS_CPP
+  ./drivers/las/LasHeaderReader.cpp
+  ./drivers/las/LasHeaderWriter.cpp
+  ./drivers/las/Header.cpp
+  ./drivers/las/Reader.cpp
+  ./drivers/las/Writer.cpp
+)
+  
+FOREACH(file ${LIBPC_DRIVERS_LAS_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+FOREACH(file ${LIBPC_DRIVERS_LAS_CPP})
+        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+#
+# drivers/liblas
+#
+
+set (LIBPC_DRIVERS_LIBLAS_HPP
+  ${LIBPC_HEADERS_DIR}/drivers/liblas/Writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/liblas/Reader.hpp
+)
+
+set (LIBPC_DRIVERS_LIBLAS_CPP 
+  ./drivers/liblas/header.cpp
+  ./drivers/liblas/Reader.cpp
+  ./drivers/liblas/Writer.cpp
+)
+
+FOREACH(file ${LIBPC_DRIVERS_LIBLAS_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+FOREACH(file ${LIBPC_DRIVERS_LIBLAS_CPP})
+        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+#
+# drivers/oci
+#
+if (WITH_ORACLE)
+set(LIBPC_DRIVERS_OCI_HPP
+  ${LIBPC_HEADERS_DIR}/drivers/oci/Writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/oci/Reader.hpp
+)
+
+set (LIBPC_DRIVERS_OCI_CPP 
+  ./drivers/oci/oci_wrapper.cpp
+  ./drivers/oci/common.cpp
+  ./drivers/oci/header.cpp
+  ./drivers/oci/Reader.cpp
+  ./drivers/oci/Writer.cpp
+)
+   
+FOREACH(file ${LIBPC_DRIVERS_OCI_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+FOREACH(file ${LIBPC_DRIVERS_OCI_CPP})
+        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+endif()
+
+#
+# filters
+#
+
+set(LIBPC_FILTERS_HPP
+  ${LIBPC_HEADERS_DIR}/filters/CacheFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/ColorFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/CropFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/DecimationFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/MosaicFilter.hpp
+)
+
+set (LIBPC_FILTERS_HPP 
+  ./filters/CacheFilter.cpp
+  ./filters/ColorFilter.cpp
+  ./filters/CropFilter.cpp
+  ./filters/DecimationFilter.cpp
+  ./filters/MosaicFilter.cpp
+)
+
+FOREACH(file ${LIBPC_FILTERS_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+FOREACH(file ${LIBPC_FILTERS_CPP})
+        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+#
+# misc
+#
+
+set (LIBPC_MISC_CPP "libpc_config.cpp" CACHE INTERNAL "sources to compile")
+FOREACH(file ${LIBPC_MISC_CPP})
+        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+#
 # Group source files for IDE source explorers (e.g. Visual Studio)
+#
+
 source_group("CMake Files" FILES CMakeLists.txt)
-source_group("Header Files" FILES ${LIBPC_HPP})
-source_group("Source Files" FILES ${LIBPC_CPP})
+
+source_group("Header Files" FILES ${LIBPC_BASE_HPP})
+source_group("Header Files\\drivers\\faux" FILES ${LIBPC_DRIVERS_FAUX_HPP})
+source_group("Header Files\\drivers\\las" FILES ${LIBPC_DRIVERS_LAS_HPP})
+source_group("Header Files\\drivers\\liblas" FILES ${LIBPC_DRIVERS_LIBLAS_HPP})
+source_group("Header Files\\drivers\\oci" FILES ${LIBPC_DRIVERS_OCI_HPP})
+source_group("Header Files\\filters" FILES ${LIBPC_FILTERS_HPP})
+
+source_group("Source Files" FILES ${LIBPC_BASE_CPP})
+source_group("Source Files\\misc" FILES ${LIBPC_MISC_CPP})
+source_group("Source Files\\filter" FILES ${LIBPC_FILTERS_CPP})
+source_group("Source Files\\drivers\\faux" FILES ${LIBPC_DRIVERS_FAUX_CPP})
+source_group("Source Files\\drivers\\las" FILES ${LIBPC_DRIVERS_LAS_CPP})
+source_group("Source Files\\drivers\\liblas" FILES ${LIBPC_DRIVERS_LIBLAS_CPP})
+source_group("Source Files\\drivers\\oci" FILES ${LIBPC_DRIVERS_OCI_CPP})
+
+#
+# rest of stuff
+#
+
 if(GDAL_FOUND)
     source_group("Source Files\\gdal" FILES ${LIBPC_GDAL_CPP})
 endif()
 
 # Standard include directory of libPC library
 include_directories(../include)
+
+set (APPS_CPP_DEPENDENCIES "${LIBPC_LIB_NAME}" CACHE INTERNAL "libraries to link")
 
 ###############################################################################
 # Targets settings
