@@ -8,8 +8,8 @@
   
 set (LIBLAS_SOURCES 
   header.cpp
-  reader.cpp
-  writer.cpp)
+  Reader.cpp
+  Writer.cpp)
   
 FOREACH(file ${LIBLAS_SOURCES})
         SET(LIBPC_SOURCES "${LIBPC_SOURCES};${CMAKE_CURRENT_SOURCE_DIR}/${file}" CACHE INTERNAL "source files for foo")

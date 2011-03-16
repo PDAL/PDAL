@@ -11,8 +11,8 @@ set (OCI_SOURCES
   oci_wrapper.cpp
   common.cpp
   header.cpp
-  reader.cpp
-  writer.cpp
+  Reader.cpp
+  Writer.cpp
   )
 
 SET(APPS_CPP_DEPENDENCIES "${APPS_CPP_DEPENDENCIES};${ORACLE_LIBRARY}" CACHE INTERNAL "source files for foo")
