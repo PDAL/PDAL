@@ -107,11 +107,11 @@ int Application_pc2pc::execute()
 
     if (hasOption("native"))
     {
-        LasReader reader(*ifs);
+        libpc::drivers::las::LasReader reader(*ifs);
     
         const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
 
-        LasWriter writer(reader, *ofs);
+        libpc::drivers::las::LasWriter writer(reader, *ofs);
 
         //BUG: handle laz writer.setCompressed(false);
 
@@ -158,11 +158,11 @@ int Application_pc2pc::execute()
 #endif
     else
     {
-        LiblasReader reader(*ifs);
+        libpc::drivers::liblas::LiblasReader reader(*ifs);
     
         const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
 
-        LiblasWriter writer(reader, *ofs);
+        libpc::drivers::liblas::LiblasWriter writer(reader, *ofs);
 
         //BUG: handle laz writer.setCompressed(false);
 

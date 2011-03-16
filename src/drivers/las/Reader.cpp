@@ -36,8 +36,8 @@
 #include "LasHeaderReader.hpp"
 #include <libpc/exceptions.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace las {
+
 
 
 LasReader::LasReader(std::istream& istream)
@@ -250,4 +250,4 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData)
     return numPoints;
 }
 
-} // namespace libpc
+} } } // namespaces

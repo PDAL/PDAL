@@ -48,8 +48,8 @@
 #include <libpc/drivers/las/Header.hpp>
 
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace las {
+
 
 class LIBPC_DLL LasHeaderReader
 {
@@ -71,6 +71,6 @@ private:
 };
 
 
-} // namespace libpc
+} } } // namespaces
 
 #endif

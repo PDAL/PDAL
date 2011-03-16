@@ -37,12 +37,11 @@
 #include <boost/concept_check.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace liblas {
     
 
 LiblasHeader::LiblasHeader()
-    : Header()
+    : libpc::Header()
 {
     return;
 }
@@ -59,8 +58,4 @@ std::ostream& operator<<(std::ostream& ostr, const LiblasHeader& header)
 }
 
 
-
-
-
-
-} // namespace libpc
+} } } // namespaces

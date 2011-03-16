@@ -38,8 +38,8 @@
 #include "LasHeaderWriter.hpp"
 #include <libpc/exceptions.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace las {
+
 
 
 LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
@@ -242,4 +242,4 @@ boost::uint32_t LasWriter::writeBuffer(const PointData& pointData)
     return numValidPoints;
 }
 
-} // namespace libpc
+} } } // namespaces

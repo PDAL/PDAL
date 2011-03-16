@@ -41,8 +41,8 @@
 #include <libpc/exceptions.hpp>
 #include <libpc/drivers/liblas/header.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace liblas {
+
 LiblasReader::LiblasReader(std::istream& istream)
     : Reader()
     , m_istream(istream)
@@ -61,9 +61,9 @@ LiblasReader::LiblasReader(std::istream& istream)
     , m_hasColorData(false)
     , m_hasWaveData(false)
 {
-    liblas::ReaderFactory f;
-    liblas::Reader reader = f.CreateWithStream(m_istream);
-    m_externalReader = new liblas::Reader(reader);
+    ::liblas::ReaderFactory f;
+    ::liblas::Reader reader = f.CreateWithStream(m_istream);
+    m_externalReader = new ::liblas::Reader(reader);
 
     LiblasHeader* myHeader = new LiblasHeader;
     setHeader(myHeader);
@@ -97,12 +97,12 @@ boost::int8_t LiblasReader::getPointFormatNumber() const
 
 void LiblasReader::processExternalHeader()
 {
-    const liblas::Header& externalHeader = m_externalReader->GetHeader();
+    const ::liblas::Header& externalHeader = m_externalReader->GetHeader();
     LiblasHeader& internalHeader = getLiblasHeader();
 
     internalHeader.setNumPoints( externalHeader.GetPointRecordsCount() );
 
-    const liblas::Bounds<double>& externalBounds = externalHeader.GetExtent();
+    const ::liblas::Bounds<double>& externalBounds = externalHeader.GetExtent();
     const Bounds<double> internalBounds(externalBounds.minx(), externalBounds.miny(), externalBounds.minz(), externalBounds.maxx(), externalBounds.maxy(), externalBounds.maxz());
     internalHeader.setBounds(internalBounds);
 
@@ -158,7 +158,7 @@ void LiblasReader::processExternalHeader()
 
 void LiblasReader::registerFields()
 {
-    const liblas::Header& externalHeader = m_externalReader->GetHeader();
+    const ::liblas::Header& externalHeader = m_externalReader->GetHeader();
     LiblasHeader& internalHeader = getLiblasHeader();
     Schema& schema = internalHeader.getSchema();
 
@@ -275,7 +275,7 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
             throw libpc_error("liblas reader failed to retrieve point");
         }
 
-        const liblas::Point& pt = m_externalReader->GetPoint();
+        const ::liblas::Point& pt = m_externalReader->GetPoint();
 
         const boost::int32_t x = pt.GetRawX();
         const boost::int32_t y = pt.GetRawY();
@@ -314,7 +314,7 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
 
         if (m_hasColorData)
         {
-            const liblas::Color color = pt.GetColor();
+            const ::liblas::Color color = pt.GetColor();
             const boost::uint16_t red = color.GetRed();
             const boost::uint16_t green = color.GetGreen();
             const boost::uint16_t blue = color.GetBlue();
@@ -334,4 +334,4 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
     return numPoints;
 }
 
-} // namespace libpc
+} } } // namespaces

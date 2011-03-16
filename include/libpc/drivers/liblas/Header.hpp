@@ -43,8 +43,8 @@
 
 #include "libpc/Header.hpp"
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace liblas {
+
 
 class LIBPC_DLL LiblasHeader : public Header
 {
@@ -58,6 +58,6 @@ private:
 
 LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const LiblasHeader&);
 
-} // namespace libpc
+} } } // namespaces
 
 #endif

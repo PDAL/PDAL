@@ -51,8 +51,8 @@
 
 #include <libpc/Header.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace las {
+
 
 class LIBPC_DLL LasHeader : public Header
 {
@@ -409,6 +409,6 @@ private:
 
 LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const LasHeader&);
 
-} // namespace libpc
+} } } // namespace
 
 #endif

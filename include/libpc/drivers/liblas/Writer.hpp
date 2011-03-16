@@ -44,8 +44,7 @@ namespace liblas
 }
 
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace liblas {
 
 // we default to LAS 1.2, point format 0
 class LIBPC_DLL LiblasWriter : public Writer
@@ -83,13 +82,13 @@ private:
     void setupExternalHeader();
 
     std::ostream& m_ostream;
-    liblas::Writer* m_externalWriter;
-    liblas::Header* m_externalHeader;
+    ::liblas::Writer* m_externalWriter;
+    ::liblas::Header* m_externalHeader;
 
     LiblasWriter& operator=(const LiblasWriter&); // not implemented
     LiblasWriter(const LiblasWriter&); // not implemented
 };
 
-} // namespace libpc
+} } } // namespaces
 
 #endif

@@ -47,9 +47,8 @@ namespace liblas
     class Reader;
 }
 
+namespace libpc { namespace drivers { namespace liblas {
 
-namespace libpc
-{
 
 class LIBPC_DLL LiblasReader : public Reader
 {
@@ -75,7 +74,7 @@ private:
 
     std::istream& m_istream;
 
-    liblas::Reader *m_externalReader;
+    ::liblas::Reader *m_externalReader;
 
     // LAS header properties of interest to us
     boost::uint8_t m_versionMajor;
@@ -97,6 +96,6 @@ private:
     LiblasReader(const LiblasReader&); // not implemented
 };
 
-} // namespace libpc
+} } } // namespaces
 
 #endif

@@ -42,6 +42,8 @@
 #include "support.hpp"
 
 using namespace libpc;
+using namespace libpc::drivers::liblas;
+
 
 BOOST_AUTO_TEST_SUITE(LiblasWriterTest)
 

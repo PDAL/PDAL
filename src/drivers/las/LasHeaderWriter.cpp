@@ -42,9 +42,8 @@
 
 #include "LasHeaderWriter.hpp"
 
-namespace libpc
-{
-    
+namespace libpc { namespace drivers { namespace las {
+
 
 LasHeaderWriter::LasHeaderWriter(LasHeader& header, std::ostream& ostream)
     : m_header(header)
@@ -393,6 +392,4 @@ void LasHeaderWriter::WriteLAS10PadSignature()
 }
 
 
-
-
-} // namespace libpc
+} } } // namespaces
