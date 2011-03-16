@@ -41,6 +41,7 @@ set(LIBPC_BASE_HPP
   ${LIBPC_HEADERS_DIR}/DimensionLayout.hpp
   ${LIBPC_HEADERS_DIR}/Filter.hpp
   ${LIBPC_HEADERS_DIR}/Header.hpp
+  ${LIBPC_HEADERS_DIR}/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/Metadata.hpp
   ${LIBPC_HEADERS_DIR}/Vector.hpp  
   ${LIBPC_HEADERS_DIR}/PointData.hpp  
