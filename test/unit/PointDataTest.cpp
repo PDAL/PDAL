@@ -139,11 +139,10 @@ BOOST_AUTO_TEST_CASE(test_copy)
 
       int ii = 10;
 
-      BOOST_CHECK(Utils::compare_approx(z, ii+100.0, (std::numeric_limits<double>::min)()) == true);
 
       BOOST_CHECK(x == ii+1);
       BOOST_CHECK(y == ii*10);
-      BOOST_CHECK(z == ii*100);
+      BOOST_CHECK(Utils::compare_approx(z, ii*100.0, (std::numeric_limits<double>::min)()) == true);
     }
     for (int i=1; i<18; i++)
     {
@@ -154,7 +153,7 @@ BOOST_AUTO_TEST_CASE(test_copy)
       int ii = i-1;
       BOOST_CHECK(x == ii+1);
       BOOST_CHECK(y == ii*10);
-      BOOST_CHECK(z == ii*100);
+      BOOST_CHECK(Utils::compare_approx(z, ii*100.0, (std::numeric_limits<double>::min)()) == true);
     }
     {
       const boost::uint8_t x = d2.getField<boost::uint8_t>(18, 0);
@@ -164,7 +163,7 @@ BOOST_AUTO_TEST_CASE(test_copy)
       int ii = 11;
       BOOST_CHECK(x == ii+1);
       BOOST_CHECK(y == ii*10);
-      BOOST_CHECK(z == ii*100);
+      BOOST_CHECK(Utils::compare_approx(z, ii+100.0, (std::numeric_limits<double>::min)()) == true);
     }
 
     delete data;

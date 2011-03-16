@@ -52,9 +52,9 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
     Header* header = new Header;
     Schema& schema = header->getSchema();
 
-    schema.addDimension(Dimension(Dimension::Field_X, Dimension::Float));
-    schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Float));
-    schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Float));
+    schema.addDimension(Dimension(Dimension::Field_X, Dimension::Double));
+    schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Double));
+    schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Double));
     schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Uint64));
 
     header->setNumPoints(numPoints);
@@ -126,27 +126,27 @@ boost::uint32_t Reader::readBuffer(PointData& data)
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        float x;
-        float y;
-        float z;
+        double x;
+        double y;
+        double z;
         if (m_mode == Random)
         {
-            x = (float)Utils::random(minX, maxX);
-            y = (float)Utils::random(minY, maxY);
-            z = (float)Utils::random(minZ, maxZ);
+            x = (double)Utils::random(minX, maxX);
+            y = (double)Utils::random(minY, maxY);
+            z = (double)Utils::random(minZ, maxZ);
         }
         else
         {
-            x = (float)minX;
-            y = (float)minY;
-            z = (float)minZ;
+            x = (double)minX;
+            y = (double)minY;
+            z = (double)minZ;
         }
 
         data.setValid(pointIndex);
 
-        data.setField<float>(pointIndex, offsetX, x);
-        data.setField<float>(pointIndex, offsetY, y);
-        data.setField<float>(pointIndex, offsetZ, z);
+        data.setField<double>(pointIndex, offsetX, x);
+        data.setField<double>(pointIndex, offsetY, y);
+        data.setField<double>(pointIndex, offsetZ, z);
         data.setField<boost::uint64_t>(pointIndex, offsetT, time);
 
         ++time;

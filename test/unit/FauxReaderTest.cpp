@@ -63,9 +63,9 @@ BOOST_AUTO_TEST_CASE(test_constant)
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
-        float x = data.getField<float>(i, offsetX);
-        float y = data.getField<float>(i, offsetY);
-        float z = data.getField<float>(i, offsetZ);
+        double x = data.getField<double>(i, offsetX);
+        double y = data.getField<double>(i, offsetY);
+        double z = data.getField<double>(i, offsetZ);
         boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
         BOOST_CHECK( Utils::compare_approx( (double)x, 1.0, (std::numeric_limits<double>::min)()) == true);
@@ -99,9 +99,9 @@ BOOST_AUTO_TEST_CASE(test_random)
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
-        float x = data.getField<float>(i, offsetX);
-        float y = data.getField<float>(i, offsetY);
-        float z = data.getField<float>(i, offsetZ);
+        double x = data.getField<double>(i, offsetX);
+        double y = data.getField<double>(i, offsetY);
+        double z = data.getField<double>(i, offsetZ);
         boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
         BOOST_CHECK(x >= 1.0 && x <= 101.0);
