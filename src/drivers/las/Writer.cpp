@@ -82,8 +82,6 @@ void LasWriter::writeEnd()
 
 boost::uint32_t LasWriter::writeBuffer(const PointData& pointData)
 {
-    Header& baseHeader = getPrevStage().getHeader();
-
     const SchemaLayout& schemaLayout = pointData.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
     LasHeader::PointFormatId pointFormat = m_lasHeader.getDataFormatId();
