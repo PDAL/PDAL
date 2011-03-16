@@ -32,28 +32,59 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#define BOOST_TEST_MODULE Main
+#include <string>
 #include <boost/test/unit_test.hpp>
+#include <boost/test/utils/assign_op.hpp>
 
-
-/* actually no code in here, this is just the main file */
+std::string g_data_path;
 
 // Testing macros:
 //   BOOST_TEST_MESSAGE("...")
 //   BOOST_CHECK(bool)
 
-
 //
-// you can run the unit tests as "bin/../libpc_test" with these interesting options:
+// You can run the unit tests with these interesting options:
 //
-//     --log_format=X (-f X)     # where X is xml|hrf
-//
-//     --log_level=X (-l X)      # where X is error|message|all|...    (default is error)
-//
-//     --log_sink=X (-k X)       # where X is filename
+//     --log_format=X (-f X)   # X = xml|hrf
+//     --log_level=X (-l X)    # X = error|message|all|... (default=error)
+//     --log_sink=X (-k X)     # X = filename
 //     
 //     --report_format=X (-o X)
 //     --report_level=X (-r X)
 //     --report_sink=X (-e X)
 //
-//     --detect_memory_leaks=X    # where X is 0|1  (default is 1)
+//     --detect_memory_leaks=X # X = 0|1  (default=1)
+//
+//     <path>                  # path to data (default=../test/data)
+
+#ifdef BOOST_TEST_ALTERNATIVE_INIT_API
+bool
+libpc_init_unit_test()
+#else
+::boost::unit_test::test_suite*
+libpc_init_unit_test_suite( int, char* [] )
+#endif
+{
+    ::boost::unit_test::assign_op( ::boost::unit_test::framework::master_test_suite().p_name.value, "Main", 0 );
+    int argc = ::boost::unit_test::framework::master_test_suite().argc;
+    char **argv = ::boost::unit_test::framework::master_test_suite().argv;
+    if (argc > 1)
+        g_data_path = argv[1];
+    else
+        g_data_path = "../test/data";
+    if (g_data_path[g_data_path.size()] != '/')
+        g_data_path += "/";
+    
+#ifdef BOOST_TEST_ALTERNATIVE_INIT_API
+    return true;
+#else
+    return 0;
+#endif
+}
+
+int
+main( int argc, char* argv[] )
+{
+    return ::boost::unit_test::unit_test_main( &libpc_init_unit_test, argc, argv );
+}
+
