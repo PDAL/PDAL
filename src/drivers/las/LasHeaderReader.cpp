@@ -45,8 +45,7 @@
 #include <boost/concept_check.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace las {
     
 
 LasHeaderReader::LasHeaderReader(LasHeader& header, std::istream& istream)
@@ -451,4 +450,4 @@ void LasHeaderReader::Validate()
 
 
 
-} // namespace libpc
+} } } // namespaces

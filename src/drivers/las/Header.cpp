@@ -45,8 +45,8 @@
 #include <boost/concept_check.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace las {
+
     
 // BUG: should be std::string
 char const* const LasHeader::FileSignature = "LASF";
@@ -923,7 +923,4 @@ std::ostream& operator<<(std::ostream& ostr, const LasHeader& header)
 
 
 
-
-
-
-} // namespace libpc
+} } } // namespaces

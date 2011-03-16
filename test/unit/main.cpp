@@ -82,9 +82,12 @@ libpc_init_unit_test_suite( int, char* [] )
 #endif
 }
 
+#if defined(BOOST_TEST_DYN_LINK) && defined(BOOST_TEST_MAIN) && !defined(BOOST_TEST_NO_MAIN)
+
 int
 main( int argc, char* argv[] )
 {
     return ::boost::unit_test::unit_test_main( &libpc_init_unit_test, argc, argv );
 }
 
+#endif // BOOST_TEST_DYN_LINK && BOOST_TEST_MAIN && !BOOST_TEST_NO_MAIN

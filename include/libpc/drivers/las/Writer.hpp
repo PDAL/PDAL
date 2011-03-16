@@ -38,8 +38,8 @@
 #include <libpc/Writer.hpp>
 #include <libpc/drivers/las/Header.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace las {
+
 
 class LIBPC_DLL LasWriter : public Writer
 {
@@ -66,6 +66,6 @@ private:
     LasWriter(const LasWriter&); // not implemented
 };
 
-} // namespace libpc
+} } } // namespaces
 
 #endif

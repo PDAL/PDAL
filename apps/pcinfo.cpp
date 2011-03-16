@@ -81,11 +81,11 @@ int Application_pcinfo::execute()
     libpc::Reader* reader = NULL;
     if (hasOption("native"))
     {
-        reader = new LasReader(*ifs);
+        reader = new libpc::drivers::las::LasReader(*ifs);
     }
     else
     {
-        reader = new LiblasReader(*ifs);
+        reader = new libpc::drivers::liblas::LiblasReader(*ifs);
     }
 
     boost::uint64_t numPoints = reader->getNumPoints();

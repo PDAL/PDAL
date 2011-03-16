@@ -40,8 +40,8 @@
 #include <libpc/Reader.hpp>
 #include <libpc/drivers/las/Header.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace las {
+
 
 class LIBPC_DLL LasReader : public Reader
 {
@@ -69,6 +69,6 @@ private:
     LasReader(const LasReader&); // not implemented
 };
 
-} // namespace libpc
+} } } // namespaces
 
 #endif

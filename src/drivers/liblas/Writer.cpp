@@ -43,8 +43,8 @@
 #include <libpc/libpc_config.hpp>
 
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace liblas {
+
 
 
 LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
@@ -52,7 +52,7 @@ LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
     , m_ostream(ostream)
     , m_externalWriter(NULL)
 {
-    m_externalHeader = new liblas::Header;
+    m_externalHeader = new ::liblas::Header;
     m_externalHeader->SetCompressed(false);
 
     setupExternalHeader();
@@ -115,7 +115,7 @@ void LiblasWriter::setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t 
 
 void LiblasWriter::setPointFormat(boost::int8_t pointFormat)
 {
-    m_externalHeader->SetDataFormatId((liblas::PointFormatName)pointFormat);
+    m_externalHeader->SetDataFormatId((::liblas::PointFormatName)pointFormat);
 }
 
 
@@ -142,7 +142,7 @@ void LiblasWriter::writeBegin()
 {
     m_externalHeader->SetPointRecordsCount(99); // BUG
 
-    m_externalWriter = new liblas::Writer(m_ostream, *m_externalHeader);
+    m_externalWriter = new ::liblas::Writer(m_ostream, *m_externalHeader);
     return;
 }
 
@@ -161,31 +161,31 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
     bool hasColorData = false;
     bool hasWaveData = false;
 
-    const liblas::PointFormatName pointFormat = m_externalHeader->GetDataFormatId();
+    const ::liblas::PointFormatName pointFormat = m_externalHeader->GetDataFormatId();
     switch (pointFormat)
     {
-    case liblas::ePointFormat0:
+    case ::liblas::ePointFormat0:
         break;
-    case liblas::ePointFormat1:
+    case ::liblas::ePointFormat1:
         hasTimeData = true;
         break;
-    case liblas::ePointFormat2:
+    case ::liblas::ePointFormat2:
         hasColorData = true;
         break;
-    case liblas::ePointFormat3:
+    case ::liblas::ePointFormat3:
         hasTimeData = true;
         hasColorData = true;
         break;
-    case liblas::ePointFormat4:
+    case ::liblas::ePointFormat4:
         hasTimeData = true;
         hasWaveData = true;
         break;
-    case liblas::ePointFormat5:
+    case ::liblas::ePointFormat5:
         hasColorData = true;
         hasTimeData = true;
         hasWaveData = true;
         break;
-    case liblas::ePointFormatUnknown:
+    case ::liblas::ePointFormatUnknown:
         throw not_yet_implemented("Unknown point format encountered");
     }
 
@@ -223,7 +223,7 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
     //const int indexWaveformYt = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformYt) : 0);
     //const int indexWaveformZt = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformZt) : 0);
 
-    liblas::Point pt;
+    ::liblas::Point pt;
 
     boost::uint32_t numPoints = pointData.getNumPoints();
     for (boost::uint32_t i=0; i<numPoints; i++)
@@ -265,7 +265,7 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
             const boost::uint16_t red = pointData.getField<boost::uint16_t>(i, indexRed);
             const boost::uint16_t green = pointData.getField<boost::uint16_t>(i, indexGreen);
             const boost::uint16_t blue = pointData.getField<boost::uint16_t>(i, indexBlue);
-            liblas::Color color(red, green, blue);
+            ::liblas::Color color(red, green, blue);
             pt.SetColor(color);
         }
 
@@ -281,4 +281,4 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
     return numPoints;
 }
 
-} // namespace libpc
+} } } // namespaces

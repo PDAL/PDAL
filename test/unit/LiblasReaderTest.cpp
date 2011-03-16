@@ -38,6 +38,8 @@
 #include <libpc/drivers/liblas/reader.hpp>
 
 using namespace libpc;
+using namespace libpc::drivers::liblas;
+
 
 extern std::string g_data_path;
 
