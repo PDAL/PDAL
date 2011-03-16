@@ -142,7 +142,6 @@ boost::uint32_t LasWriter::writeBuffer(const PointData& pointData)
 
     for (boost::uint32_t pointIndex=0; pointIndex<pointData.getNumPoints(); pointIndex++)
     {
-        if (pointData.isValid(pointIndex) == false) continue;
 
         if (pointFormat == LasHeader::ePointFormat0)
         {

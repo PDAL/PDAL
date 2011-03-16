@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_crop)
     libpc::drivers::faux::Writer writer(filter);
 
     boost::uint64_t numWritten = writer.write(1000);
-
+    std::cout << "numWritten: " << numWritten << std::endl;
     // 1000 * 1/8 = 125, plus or minus 10%
     BOOST_CHECK(Utils::compare_approx<double>(static_cast<double>(numWritten), 125, 12.5));
 

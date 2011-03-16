@@ -72,32 +72,27 @@ boost::uint32_t CropFilter::readBuffer(PointData& data)
     int fieldY = schema.getDimensionIndex(Dimension::Field_Y);
     int fieldZ = schema.getDimensionIndex(Dimension::Field_Z);
 
-    boost::uint32_t numValidPoints = 0;
+    // FIXME: Reconstruct a PointData
+    // for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
+    // {
+    //     float x = data.getField<float>(pointIndex, fieldX);
+    //     float y = data.getField<float>(pointIndex, fieldY);
+    //     float z = data.getField<float>(pointIndex, fieldZ);
+    //     Vector<double> point(x,y,z);
+    //     if (!m_bounds.contains(point))
+    //     {
+    //         // remove this point, and update the lower bound for Z
+    //         data.setValid(pointIndex, false);
+    //     }
+    //     else
+    //     {
+    //         data.setValid(pointIndex, true);
+    //     }
+    // }
+    // 
+    // incrementCurrentPointIndex(numPoints);
 
-    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
-    {
-        if (data.isValid(pointIndex))
-        {
-            float x = data.getField<float>(pointIndex, fieldX);
-            float y = data.getField<float>(pointIndex, fieldY);
-            float z = data.getField<float>(pointIndex, fieldZ);
-            Vector<double> point(x,y,z);
-            if (!m_bounds.contains(point))
-            {
-                // remove this point, and update the lower bound for Z
-                data.setValid(pointIndex, false);
-            }
-            else
-            {
-                data.setValid(pointIndex, true);
-                ++numValidPoints;
-            }
-        }
-    }
-
-    incrementCurrentPointIndex(numPoints);
-
-    return numValidPoints;
+    return numPoints;
 }
 
 } } // namespaces

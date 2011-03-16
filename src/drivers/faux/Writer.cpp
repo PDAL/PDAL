@@ -97,31 +97,26 @@ boost::uint32_t Writer::writeBuffer(const PointData& pointData)
     const int fieldIndexY = schema.getDimensionIndex(Dimension::Field_Y);
     const int fieldIndexZ = schema.getDimensionIndex(Dimension::Field_Z);
 
-    boost::uint32_t numValidPoints = 0;
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        if (pointData.isValid(pointIndex))
-        {
-            ++numValidPoints;
 
-            double x = pointData.getField<double>(pointIndex, fieldIndexX);
-            double y = pointData.getField<double>(pointIndex, fieldIndexY);
-            double z = pointData.getField<double>(pointIndex, fieldIndexZ);
+        double x = pointData.getField<double>(pointIndex, fieldIndexX);
+        double y = pointData.getField<double>(pointIndex, fieldIndexY);
+        double z = pointData.getField<double>(pointIndex, fieldIndexZ);
 
-            m_minimumX = std::min(m_minimumX, x);
-            m_minimumY = std::min(m_minimumY, y);
-            m_minimumZ = std::min(m_minimumZ, z);
-            m_maximumX = std::max(m_maximumX, x);
-            m_maximumY = std::max(m_maximumY, y);
-            m_maximumZ = std::max(m_maximumZ, z);
+        m_minimumX = std::min(m_minimumX, x);
+        m_minimumY = std::min(m_minimumY, y);
+        m_minimumZ = std::min(m_minimumZ, z);
+        m_maximumX = std::max(m_maximumX, x);
+        m_maximumY = std::max(m_maximumY, y);
+        m_maximumZ = std::max(m_maximumZ, z);
 
-            m_averageX += x;
-            m_averageY += y;
-            m_averageZ += z;
-        }
+        m_averageX += x;
+        m_averageY += y;
+        m_averageZ += z;
     }
 
-    return numValidPoints;
+    return numPoints;
 }
 
 

@@ -58,21 +58,22 @@ class LIBPC_DLL PointData
 {
     
 public:
-    typedef std::vector<boost::uint8_t> valid_mask_type;
     
     // note that when we make a PointData object all the fields are initialized to inactive,
     // regardless of what the passed-in schema says -- this is because the field object
     // represents the state within the owning object, which in this case is a completely
     // empty buffer (similarly, all the points in the buffer are marked "invalid")
-    PointData(const SchemaLayout&, boost::uint32_t numPoints);
+    PointData(const SchemaLayout&, boost::uint32_t capacity);
     ~PointData();
 
     // number of points in this buffer
     boost::uint32_t getNumPoints() const;
+    
+    inline void setNumPoints(boost::uint32_t v) { m_numPoints = v; } 
 
     // number of points in this buffer that have legit data; initially will be zero,
     // and after a read() call it will be in the range 0 to getNumPoints()-1
-    boost::uint32_t getNumValidPoints();
+    boost::uint32_t getCapacity();
 
     // schema (number and kinds of fields) for a point in this buffer
     const SchemaLayout& getSchemaLayout() const
@@ -86,13 +87,6 @@ public:
         return m_schemaLayout.getSchema();
     }
 
-    // "valid" means the data for the point can be used; if invalid, the point should
-    // be ignored or skipped.  (This is done for efficiency; we don't want to have to
-    // modify the buffer's size just to "delete" a point.)
-    bool isValid(valid_mask_type::size_type pointIndex) const;
-    bool allValid() const;
-    void setValid(valid_mask_type::size_type  pointIndex, bool value=true);
-    
 
     // accessors to a particular field of a particular point in this buffer
     template<class T> T getField(std::size_t pointIndex, std::size_t fieldIndex) const;
@@ -114,8 +108,7 @@ private:
     boost::uint8_t* m_data;
     std::size_t m_pointSize;
     boost::uint32_t m_numPoints;
-    
-    valid_mask_type m_isValid; // one byte for each point
+    boost::uint32_t m_capacity;    
 
     PointData(const PointData&); // not implemented
     PointData& operator=(const PointData&); // not implemented
