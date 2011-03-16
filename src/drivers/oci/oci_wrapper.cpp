@@ -28,7 +28,8 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#include "oci_wrapper.h"
+#include <libpc/drivers/oci/oci_wrapper.h>
+
 
 static const OW_CellDepth ahOW_CellDepth[] = {
     {"8BIT_U",          GDT_Byte},

@@ -38,8 +38,9 @@
 
 
 #include <libpc/drivers/oci/Reader.hpp>
-#include "header.hpp"
-#include <liblas/Writer.hpp>
+#include <libpc/drivers/oci/Header.hpp>
+#include <libpc/drivers/oci/Common.hpp>
+
 
 #include <libpc/exceptions.hpp>
 #include <libpc/libpc_config.hpp>
@@ -53,7 +54,7 @@ namespace libpc { namespace driver { namespace oci {
 
 
 Reader::Reader(Options& options)
-    : Producer()
+    : libpc::Reader()
     , m_options(options)
 {
 

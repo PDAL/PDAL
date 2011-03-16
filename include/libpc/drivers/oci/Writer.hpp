@@ -38,7 +38,7 @@
 #include <libpc/Writer.hpp>
 #include <libpc/chipper.hpp>
 
-#include "common.hpp"
+#include "Common.hpp"
 
 #include <vector>
 
@@ -49,7 +49,7 @@ namespace libpc { namespace driver { namespace oci {
 
 
 
-class LIBPC_DLL Writer : public Writer
+class LIBPC_DLL Writer 
 {
     
 public:

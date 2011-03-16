@@ -32,7 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "common.hpp"
+
+#include <libpc/drivers/oci/Common.hpp>
+
 #include <cctype> // toupper
 
 namespace libpc { namespace driver { namespace oci {

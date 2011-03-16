@@ -38,8 +38,7 @@
 
 
 #include <libpc/drivers/oci/Writer.hpp>
-#include "header.hpp"
-#include <liblas/Writer.hpp>
+#include <libpc/drivers/oci/Header.hpp>
 
 #include <libpc/exceptions.hpp>
 #include <libpc/libpc_config.hpp>
@@ -53,8 +52,7 @@ namespace libpc { namespace driver { namespace oci {
 
 
 Writer::Writer(Stage& prevStage, Options& options)
-    : Consumer(prevStage)
-    , m_stage(prevStage)
+    : m_stage(prevStage)
     , m_chipper(m_stage, options.GetPTree().get<boost::uint32_t>("capacity") )
     , m_options(options)
     , m_verbose(false)
