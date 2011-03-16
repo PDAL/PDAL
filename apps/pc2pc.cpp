@@ -139,7 +139,7 @@ int Application_pc2pc::execute()
         tree.put("debug", true);
         tree.put("verbose", true);
         
-        CacheFilter cache(reader, 1, 1024);
+        libpc::filters::CacheFilter cache(reader, 1, 1024);
         
         libpc::driver::oci::Writer writer(cache, options);
         
