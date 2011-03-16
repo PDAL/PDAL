@@ -41,6 +41,8 @@
 
 #include "support.hpp"
 
+#include <limits>
+
 using namespace libpc;
 
 BOOST_AUTO_TEST_SUITE(ChipperTest)
@@ -72,10 +74,10 @@ BOOST_AUTO_TEST_CASE(test_construction)
         libpc::Range<double> x = ranges[0];
         libpc::Range<double> y = ranges[1];
         
-        BOOST_CHECK(Utils::compare_approx(x.getMinimum(), (double)635674, (double) 1) == true);
-        BOOST_CHECK(Utils::compare_approx(x.getMaximum(), (double)635994, (double) 1) == true);
-        BOOST_CHECK(Utils::compare_approx(y.getMinimum(), (double)848992, (double) 1) == true);
-        BOOST_CHECK(Utils::compare_approx(y.getMaximum(), (double)849427, (double) 1) == true);
+        BOOST_CHECK(Utils::compare_approx(x.getMinimum(), (double)635674, (std::numeric_limits<double>::min)()) == true);
+        BOOST_CHECK(Utils::compare_approx(x.getMaximum(), (double)635994, (std::numeric_limits<double>::min)()) == true);
+        BOOST_CHECK(Utils::compare_approx(y.getMinimum(), (double)848992, (std::numeric_limits<double>::min)()) == true);
+        BOOST_CHECK(Utils::compare_approx(y.getMaximum(), (double)849427, (std::numeric_limits<double>::min)()) == true);
 
         std::vector<boost::uint32_t> ids = chipper.GetBlock(70).GetIDs();
 

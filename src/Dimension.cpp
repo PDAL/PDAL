@@ -44,6 +44,7 @@
 #include <libpc/Utils.hpp>
 
 #include <iostream>
+#include <limits>
 
 using namespace boost;
 
@@ -108,11 +109,14 @@ bool Dimension::operator==(const Dimension& other) const
         m_field == other.m_field &&
         m_byteSize == other.m_byteSize &&
         m_description == other.m_description &&
-        m_min == other.m_min &&
-        m_max == other.m_max &&
+        Utils::compare_approx(m_min, other.m_min, (std::numeric_limits<double>::min)()) &&
+        Utils::compare_approx(m_max, other.m_max, (std::numeric_limits<double>::min)()) &&
         m_precise == other.m_precise &&
-        m_numericScale == other.m_numericScale &&
-        m_numericOffset == other.m_numericOffset)
+
+        Utils::compare_approx(m_numericScale, other.m_numericScale, (std::numeric_limits<double>::min)()) &&
+        Utils::compare_approx(m_numericOffset, other.m_numericOffset, (std::numeric_limits<double>::min)()) 
+        
+        )
     {
         return true;
     }
