@@ -38,9 +38,47 @@ namespace libpc
 {
 
 
-Iterator::Iterator()
+Iterator::Iterator(const Stage& stage)
+    : m_stage(stage)
+    , m_currentPointIndex(0)
 {
     return;
+}
+
+
+const Stage& Iterator::getStage() const
+{
+    return m_stage;
+}
+
+
+void Iterator::setCurrentPointIndex(boost::uint64_t currentPointIndex)
+{
+    m_currentPointIndex = currentPointIndex;
+}
+
+
+boost::uint64_t Iterator::getCurrentPointIndex() const
+{
+    return m_currentPointIndex;
+}
+
+void Iterator::incrementCurrentPointIndex(boost::uint64_t delta)
+{
+    m_currentPointIndex += delta;
+}
+
+
+boost::uint32_t Iterator::read(PointData& data)
+{
+    const boost::uint32_t numPointsRead = readBuffer(data);
+    return numPointsRead;
+}
+
+
+bool Iterator::atEnd() const
+{
+    return getCurrentPointIndex() >= getStage().getNumPoints();
 }
 
 
