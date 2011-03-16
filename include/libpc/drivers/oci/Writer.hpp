@@ -49,7 +49,7 @@ namespace libpc { namespace driver { namespace oci {
 
 
 
-class LIBPC_DLL Writer 
+class LIBPC_DLL Writer : public libpc::Writer
 {
     
 public:

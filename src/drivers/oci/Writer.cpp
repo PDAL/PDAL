@@ -52,7 +52,8 @@ namespace libpc { namespace driver { namespace oci {
 
 
 Writer::Writer(Stage& prevStage, Options& options)
-    : m_stage(prevStage)
+    : libpc::Writer(prevStage)
+    , m_stage(prevStage)
     , m_chipper(m_stage, options.GetPTree().get<boost::uint32_t>("capacity") )
     , m_options(options)
     , m_verbose(false)
