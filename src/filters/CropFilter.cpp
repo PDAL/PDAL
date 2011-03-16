@@ -55,6 +55,12 @@ const std::string& CropFilter::getName() const
 }
 
 
+void CropFilter::seekToPoint(boost::uint64_t pointNum)
+{
+    m_prevStage.seekToPoint(pointNum);
+}
+
+
 boost::uint32_t CropFilter::readBuffer(PointData& data)
 {
     boost::uint32_t numPoints = m_prevStage.read(data);

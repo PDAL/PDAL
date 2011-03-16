@@ -44,24 +44,5 @@ Reader::Reader()
 }
 
 
-void Reader::seekToPoint(boost::uint64_t pointNum)
-{
-    if (pointNum == getCurrentPointIndex())
-    {
-        return;
-    }
-
-    setCurrentPointIndex(0);
-    
-    // we read the points only to get to the right place -- we
-    // will just drop the points on the floor and return
-    boost::uint32_t pointNumX = (boost::uint32_t)pointNum; // BUG
-    assert(pointNumX == pointNum);
-    PointData pointData(getHeader().getSchema(), pointNumX);
-    read(pointData);
-
-    return;
-}
-
 
 } // namespace libpc

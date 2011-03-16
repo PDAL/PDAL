@@ -63,15 +63,15 @@ BOOST_AUTO_TEST_CASE(test_crop)
     BOOST_CHECK(Utils::compare_approx<double>(static_cast<double>(numWritten), 125, 12.5));
 
     // test all the values to +/- 10%
-    BOOST_CHECK(Utils::compare_approx<float>(writer.getMinX(), 0.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<float>(writer.getMinY(), 0.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<float>(writer.getMinZ(), 0.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<float>(writer.getMaxX(), 50.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<float>(writer.getMaxY(), 50.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<float>(writer.getMaxZ(), 50.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<float>(writer.getAvgX(), 25.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<float>(writer.getAvgY(), 25.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<float>(writer.getAvgZ(), 25.0, 5.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getMinX(), 0.0, 5.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getMinY(), 0.0, 5.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getMinZ(), 0.0, 5.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getMaxX(), 50.0, 5.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getMaxY(), 50.0, 5.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getMaxZ(), 50.0, 5.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getAvgX(), 25.0, 5.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getAvgY(), 25.0, 5.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getAvgZ(), 25.0, 5.0));
 
     return;
 }

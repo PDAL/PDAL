@@ -41,7 +41,6 @@ set(LIBPC_BASE_HPP
   ${LIBPC_HEADERS_DIR}/DimensionLayout.hpp
   ${LIBPC_HEADERS_DIR}/Filter.hpp
   ${LIBPC_HEADERS_DIR}/Header.hpp
-  ${LIBPC_HEADERS_DIR}/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/Metadata.hpp
   ${LIBPC_HEADERS_DIR}/Vector.hpp  
   ${LIBPC_HEADERS_DIR}/PointData.hpp  
@@ -199,7 +198,7 @@ set(LIBPC_FILTERS_HPP
   ${LIBPC_HEADERS_DIR}/filters/MosaicFilter.hpp
 )
 
-set (LIBPC_FILTERS_HPP 
+set (LIBPC_FILTERS_CPP 
   ./filters/CacheFilter.cpp
   ./filters/ColorFilter.cpp
   ./filters/CropFilter.cpp
