@@ -65,6 +65,7 @@ set(LIBPC_BASE_CPP
   DimensionLayout.cpp
   Filter.cpp
   Header.cpp
+  Iterator.cpp
   Metadata.cpp
   Vector.cpp  
   PointData.cpp

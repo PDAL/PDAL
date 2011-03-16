@@ -40,7 +40,17 @@
 namespace libpc
 {
 
+class LIBPC_DLL Iterator
+{
+public:
+    Iterator();
 
+protected:
+
+private:
+    Iterator& operator=(const Iterator&); // not implemented
+    Iterator(const Iterator&); // not implemented
+};
 
 } // namespace libpc
 

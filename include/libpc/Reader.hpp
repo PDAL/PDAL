@@ -46,10 +46,6 @@ class LIBPC_DLL Reader : public Stage
 public:
     Reader();
 
-    // default is to read N points manually
-    // override this if you can
-    virtual void seekToPoint(boost::uint64_t pointNum);
-
 private:
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented

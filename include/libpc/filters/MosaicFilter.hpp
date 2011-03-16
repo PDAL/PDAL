@@ -49,7 +49,7 @@ public:
     
     const std::string& getName() const;
 
-    // BUG: what does seetToPoint() do for a mosaic filter?
+    void seekToPoint(boost::uint64_t pointNum);
 
 private:
     boost::uint32_t readBuffer(PointData&);
