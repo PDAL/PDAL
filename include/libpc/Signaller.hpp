@@ -1,12 +1,4 @@
 /******************************************************************************
- * $Id$
- *
- * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS bounds class
- * Author:   Howard Butler, hobu.inc@gmail.com
- *
- ******************************************************************************
-/******************************************************************************
 * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
