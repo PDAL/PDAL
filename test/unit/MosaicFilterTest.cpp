@@ -39,8 +39,6 @@
 #include <libpc/filters/MosaicFilter.hpp>
 
 using namespace libpc;
-using namespace libpc::filters;
-using namespace libpc::drivers::faux;
 
 BOOST_AUTO_TEST_SUITE(MosaicFilterTest)
 
@@ -59,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test1)
     vec.push_back(&reader2);
     vec.push_back(&reader3);
 
-    MosaicFilter mosaic(reader1, vec);
+    libpc::filters::MosaicFilter mosaic(reader1, vec);
     BOOST_CHECK(mosaic.getName() == "Mosaic Filter");
 
     const Schema& schema = mosaic.getHeader().getSchema();

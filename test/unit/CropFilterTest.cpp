@@ -40,8 +40,6 @@
 #include <libpc/filters/CropFilter.hpp>
 
 using namespace libpc;
-using namespace libpc::filters;
-using namespace libpc::drivers::faux;
 
 BOOST_AUTO_TEST_SUITE(CropFilterTest)
 
@@ -54,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_crop)
     
     libpc::drivers::faux::Reader reader(srcBounds, 1000, libpc::drivers::faux::Reader::Random);
 
-    CropFilter filter(reader, dstBounds);
+    libpc::filters::CropFilter filter(reader, dstBounds);
     BOOST_CHECK(filter.getName() == "Crop Filter");
 
     libpc::drivers::faux::Writer writer(filter);

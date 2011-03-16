@@ -39,7 +39,6 @@
 #include <libpc/drivers/faux/Writer.hpp>
 
 using namespace libpc;
-using namespace libpc::drivers::faux;
 
 BOOST_AUTO_TEST_SUITE(FauxWriterTest)
 

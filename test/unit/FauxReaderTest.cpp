@@ -38,7 +38,6 @@
 #include <libpc/drivers/faux/Reader.hpp>
 
 using namespace libpc;
-using namespace libpc::drivers::faux;
 
 BOOST_AUTO_TEST_SUITE(FauxReaderTest)
 

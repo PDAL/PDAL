@@ -40,8 +40,6 @@
 #include <libpc/filters/DecimationFilter.hpp>
 
 using namespace libpc;
-using namespace libpc::filters;
-using namespace libpc::drivers::faux;
 
 BOOST_AUTO_TEST_SUITE(DecimationFilterTest)
 
@@ -51,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test)
 
     libpc::drivers::faux::Reader reader(srcBounds, 1000, libpc::drivers::faux::Reader::Random);
 
-    DecimationFilter filter(reader, 10);
+    libpc::filters::DecimationFilter filter(reader, 10);
     BOOST_CHECK(filter.getName() == "Decimation Filter");
 
     const Schema& schema = filter.getHeader().getSchema();
