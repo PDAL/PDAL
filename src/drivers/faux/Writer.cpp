@@ -40,24 +40,23 @@ using std::string;
 using std::cout;
 using std::endl;
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace faux {
 
-FauxWriter::FauxWriter(Stage& prevStage) :
-    Writer(prevStage)
+Writer::Writer(Stage& prevStage) :
+    libpc::Writer(prevStage)
 {
     return;
 }
 
 
-const std::string& FauxWriter::getName() const
+const std::string& Writer::getName() const
 {
     static std::string name("Faux Writer");
     return name;
 }
 
 
-void FauxWriter::writeBegin()
+void Writer::writeBegin()
 {
     m_minimumX = m_minimumY = m_minimumZ = std::numeric_limits<float>::max();
     m_maximumX = m_maximumY = m_maximumZ = std::numeric_limits<float>::min();
@@ -67,7 +66,7 @@ void FauxWriter::writeBegin()
 }
 
 
-void FauxWriter::writeEnd()
+void Writer::writeEnd()
 {
     m_averageX /= (float)m_actualNumPointsWritten;
     m_averageY /= (float)m_actualNumPointsWritten;
@@ -89,7 +88,7 @@ void FauxWriter::writeEnd()
 }
 
 
-boost::uint32_t FauxWriter::writeBuffer(const PointData& pointData)
+boost::uint32_t Writer::writeBuffer(const PointData& pointData)
 {
     const boost::uint32_t numPoints = pointData.getNumPoints();
 
@@ -126,4 +125,4 @@ boost::uint32_t FauxWriter::writeBuffer(const PointData& pointData)
 }
 
 
-} // namespace libpc
+} } } // namespaces

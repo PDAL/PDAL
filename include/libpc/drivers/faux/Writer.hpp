@@ -32,15 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FAUXWRITER_HPP
-#define INCLUDED_FAUXWRITER_HPP
+#ifndef INCLUDED_DRIVERS_FAUX_WRITER_HPP
+#define INCLUDED_DRIVERS_FAUX_WRITER_HPP
 
 #include <string>
 
 #include <libpc/Writer.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace faux {
 
 //
 // The FauxWriter doesn't actually write to disk -- instead, it just
@@ -48,10 +47,10 @@ namespace libpc
 //
 // This writer knows only about three dimensions: X,Y,Z (as floats).
 //
-class LIBPC_DLL FauxWriter : public Writer
+class LIBPC_DLL Writer : public libpc::Writer
 {
 public:
-    FauxWriter(Stage& prevStage);
+    Writer(Stage& prevStage);
 
     const std::string& getName() const;
 
@@ -81,10 +80,10 @@ private:
     boost::uint32_t writeBuffer(const PointData&);
     void writeEnd();
 
-    FauxWriter& operator=(const FauxWriter&); // not implemented
-    FauxWriter(const FauxWriter&); // not implemented
+    Writer& operator=(const Writer&); // not implemented
+    Writer(const Writer&); // not implemented
 };
 
-} // namespace libpc
+} } } // namespaces
 
 #endif

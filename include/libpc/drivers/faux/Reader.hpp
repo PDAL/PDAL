@@ -32,13 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FAUXREADER_HPP
-#define INCLUDED_FAUXREADER_HPP
+#ifndef INCLUDED_DRIVERS_FAUX_READER_HPP
+#define INCLUDED_DRIVERS_FAUX_READER_HPP
 
 #include <libpc/Reader.hpp>
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace faux {
 
 // The FauxReader doesn't read from disk, but instead just makes up data for its
 // points.  The reader is constructed with a given bounding box and a given 
@@ -53,7 +52,7 @@ namespace libpc
 // points to always be at the minimum of the bounding box.  The Time field
 // is always set to the point number.
 //
-class LIBPC_DLL FauxReader : public Reader
+class LIBPC_DLL Reader : public libpc::Reader
 {
 public:
     enum Mode
@@ -63,8 +62,8 @@ public:
     };
 
 public:
-    FauxReader(const Bounds<double>&, int numPoints, Mode mode);
-    FauxReader(const Bounds<double>&, int numPoints, Mode mode, const std::vector<Dimension>& dimensions);
+    Reader(const Bounds<double>&, int numPoints, Mode mode);
+    Reader(const Bounds<double>&, int numPoints, Mode mode, const std::vector<Dimension>& dimensions);
 
     const std::string& getName() const;
 
@@ -75,10 +74,10 @@ private:
 
     Mode m_mode;
 
-    FauxReader& operator=(const FauxReader&); // not implemented
-    FauxReader(const FauxReader&); // not implemented
+    Reader& operator=(const Reader&); // not implemented
+    Reader(const Reader&); // not implemented
 };
 
-} // namespace libpc
+} } } // namespaces
 
 #endif

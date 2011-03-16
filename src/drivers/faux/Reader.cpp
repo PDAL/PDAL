@@ -43,11 +43,10 @@ using std::vector;
 using std::string;
 using std::cout;
 
-namespace libpc
-{
+namespace libpc { namespace drivers { namespace faux {
 
-FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode)
-    : Reader()
+Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
+    : libpc::Reader()
     , m_mode(mode)
 {
     Header* header = new Header;
@@ -66,8 +65,8 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode)
     return;
 }
 
-FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : Reader()
+Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
+    : libpc::Reader()
     , m_mode(mode)
 {
     Header* header = new Header;
@@ -88,14 +87,14 @@ FauxReader::FauxReader(const Bounds<double>& bounds, int numPoints, Mode mode, c
 }
 
 
-const std::string& FauxReader::getName() const
+const std::string& Reader::getName() const
 {
     static std::string name("Faux Reader");
     return name;
 }
 
 
-boost::uint32_t FauxReader::readBuffer(PointData& data)
+boost::uint32_t Reader::readBuffer(PointData& data)
 {
     if (data.getSchemaLayout().getSchema().getDimensions().size() != 4)
         throw not_yet_implemented("need to add ability to read from arbitrary fields");
@@ -159,10 +158,10 @@ boost::uint32_t FauxReader::readBuffer(PointData& data)
 }
 
 
-void FauxReader::seekToPoint(boost::uint64_t pointNumber)
+void Reader::seekToPoint(boost::uint64_t pointNumber)
 {
     setCurrentPointIndex(pointNumber);
 }
 
 
-} // namespace libpc
+} } } // namespaces

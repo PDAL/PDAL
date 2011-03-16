@@ -40,13 +40,14 @@
 
 using namespace libpc;
 using namespace libpc::filters;
+using namespace libpc::drivers::faux;
 
 BOOST_AUTO_TEST_SUITE(CacheFilterTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
-    FauxReader reader(srcBounds, 10000, FauxReader::Constant);
+    libpc::drivers::faux::Reader reader(srcBounds, 10000, libpc::drivers::faux::Reader::Constant);
 
     CacheFilter cache(reader, 2, 1024);
     BOOST_CHECK(cache.getName() == "Cache Filter");

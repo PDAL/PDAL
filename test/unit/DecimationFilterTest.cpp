@@ -41,6 +41,7 @@
 
 using namespace libpc;
 using namespace libpc::filters;
+using namespace libpc::drivers::faux;
 
 BOOST_AUTO_TEST_SUITE(DecimationFilterTest)
 
@@ -48,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
 
-    FauxReader reader(srcBounds, 1000, FauxReader::Random);
+    libpc::drivers::faux::Reader reader(srcBounds, 1000, libpc::drivers::faux::Reader::Random);
 
     DecimationFilter filter(reader, 10);
     BOOST_CHECK(filter.getName() == "Decimation Filter");

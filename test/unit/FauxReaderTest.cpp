@@ -38,13 +38,14 @@
 #include <libpc/drivers/faux/Reader.hpp>
 
 using namespace libpc;
+using namespace libpc::drivers::faux;
 
 BOOST_AUTO_TEST_SUITE(FauxReaderTest)
 
 BOOST_AUTO_TEST_CASE(test_constant)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    FauxReader reader(bounds, 1000, FauxReader::Constant);
+    libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Constant);
     BOOST_CHECK(reader.getName() == "Faux Reader");
 
     const Schema& schema = reader.getHeader().getSchema();
@@ -81,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_constant)
 BOOST_AUTO_TEST_CASE(test_random)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    FauxReader reader(bounds, 1000, FauxReader::Random);
+    libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Random);
 
     const Schema& schema = reader.getHeader().getSchema();
     SchemaLayout layout(schema);
@@ -124,7 +125,7 @@ BOOST_AUTO_TEST_CASE(test_custom_fields)
     dims.push_back(dimY);
     dims.push_back(dimX);
 
-    FauxReader reader(bounds, 1000, FauxReader::Random, dims);
+    libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Random, dims);
 
     const Schema& schema = reader.getHeader().getSchema();
     BOOST_CHECK(schema.getDimensions().size() == 2);

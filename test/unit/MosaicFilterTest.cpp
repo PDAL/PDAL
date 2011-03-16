@@ -40,19 +40,20 @@
 
 using namespace libpc;
 using namespace libpc::filters;
+using namespace libpc::drivers::faux;
 
 BOOST_AUTO_TEST_SUITE(MosaicFilterTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
     Bounds<double> bounds1(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
-    FauxReader reader1(bounds1, 100, FauxReader::Constant);
+    libpc::drivers::faux::Reader reader1(bounds1, 100, libpc::drivers::faux::Reader::Constant);
 
     Bounds<double> bounds2(100.0, 100.0, 100.0, 200.0, 200.0, 200.0);
-    FauxReader reader2(bounds2, 100, FauxReader::Constant);
+    libpc::drivers::faux::Reader reader2(bounds2, 100, libpc::drivers::faux::Reader::Constant);
 
     Bounds<double> bounds3(200.0, 200.0, 200.0, 300.0, 300.0, 300.0);
-    FauxReader reader3(bounds3, 100, FauxReader::Constant);
+    libpc::drivers::faux::Reader reader3(bounds3, 100, libpc::drivers::faux::Reader::Constant);
 
     std::vector<Stage*> vec;
     vec.push_back(&reader2);

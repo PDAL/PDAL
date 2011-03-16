@@ -39,15 +39,16 @@
 #include <libpc/drivers/faux/Writer.hpp>
 
 using namespace libpc;
+using namespace libpc::drivers::faux;
 
 BOOST_AUTO_TEST_SUITE(FauxWriterTest)
 
 BOOST_AUTO_TEST_CASE(test_1)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    FauxReader reader(bounds, 1000, FauxReader::Constant);
+    libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Constant);
 
-    FauxWriter writer(reader);
+    libpc::drivers::faux::Writer writer(reader);
     BOOST_CHECK(writer.getName() == "Faux Writer");
 
     boost::uint64_t numWritten = writer.write(750);
@@ -70,9 +71,9 @@ BOOST_AUTO_TEST_CASE(test_1)
 BOOST_AUTO_TEST_CASE(test_2)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    FauxReader reader(bounds, 1000, FauxReader::Random);
+    libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Random);
 
-    FauxWriter writer(reader);
+    libpc::drivers::faux::Writer writer(reader);
 
     boost::uint64_t numWritten = writer.write(750);
 

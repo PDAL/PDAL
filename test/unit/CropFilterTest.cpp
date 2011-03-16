@@ -41,6 +41,7 @@
 
 using namespace libpc;
 using namespace libpc::filters;
+using namespace libpc::drivers::faux;
 
 BOOST_AUTO_TEST_SUITE(CropFilterTest)
 
@@ -48,15 +49,15 @@ BOOST_AUTO_TEST_CASE(test_crop)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
 
-    // crop tjhe window to 1/8th the size
+    // crop the window to 1/8th the size
     Bounds<double> dstBounds(0.0, 0.0, 0.0, 50.0, 50.0, 50.0);
     
-    FauxReader reader(srcBounds, 1000, FauxReader::Random);
+    libpc::drivers::faux::Reader reader(srcBounds, 1000, libpc::drivers::faux::Reader::Random);
 
     CropFilter filter(reader, dstBounds);
     BOOST_CHECK(filter.getName() == "Crop Filter");
 
-    FauxWriter writer(filter);
+    libpc::drivers::faux::Writer writer(filter);
 
     boost::uint64_t numWritten = writer.write(1000);
 
