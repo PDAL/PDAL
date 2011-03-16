@@ -41,6 +41,8 @@ using namespace libpc;
 using namespace libpc::drivers::liblas;
 
 
+extern std::string g_data_path;
+
 BOOST_AUTO_TEST_SUITE(LiblasReaderTest)
 
 
@@ -69,7 +71,7 @@ static void checkPointXYZ(const PointData& data, size_t index, const Schema& sch
 
 BOOST_AUTO_TEST_CASE(test_1)
 {
-    std::istream* ifs = Utils::openFile("../../test/data/1.2-with-color.las");
+    std::istream* ifs = Utils::openFile(g_data_path + "1.2-with-color.las");
     
     LiblasReader reader(*ifs);
     BOOST_CHECK(reader.getName() == "Liblas Reader");
