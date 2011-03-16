@@ -199,7 +199,7 @@ set(LIBPC_FILTERS_HPP
   ${LIBPC_HEADERS_DIR}/filters/MosaicFilter.hpp
 )
 
-set (LIBPC_FILTERS_HPP 
+set (LIBPC_FILTERS_CPP 
   ./filters/CacheFilter.cpp
   ./filters/ColorFilter.cpp
   ./filters/CropFilter.cpp
