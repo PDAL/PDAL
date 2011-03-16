@@ -62,16 +62,16 @@ FOREACH(file ${LIBPC_DRIVERS_LAS_HPP})
 ENDFOREACH(file)
 
 set(LIBPC_DRIVERS_LIBLAS_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/liblas/writer.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/liblas/reader.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/liblas/Writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/liblas/Reader.hpp
 )
 FOREACH(file ${LIBPC_DRIVERS_LIBLAS_HPP})
         SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
 set(LIBPC_DRIVERS_OCI_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/oci/writer.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/oci/reader.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/oci/Writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/oci/Reader.hpp
 )
 FOREACH(file ${LIBPC_DRIVERS_OCI_HPP})
         SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
