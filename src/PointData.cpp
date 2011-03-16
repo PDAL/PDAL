@@ -44,13 +44,14 @@ namespace libpc
 {
 
 
-PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t numPoints) :
+PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t capacity) :
     m_schemaLayout(schemaLayout),
     m_data(NULL),
     m_pointSize(m_schemaLayout.getByteSize()),
-    m_numPoints(numPoints)
+    m_numPoints(0),
+    m_capacity(capacity)
 {
-    m_data = new boost::uint8_t[m_pointSize * m_numPoints];
+    m_data = new boost::uint8_t[m_pointSize * m_capacity];
 
     return;
 }
@@ -84,6 +85,7 @@ void PointData::copyPointFast(std::size_t destPointIndex, std::size_t srcPointIn
     std::size_t len = getSchemaLayout().getByteSize();
 
     memcpy(dest, src, len);
+    m_numPoints++;
 
     return;
 }
@@ -98,7 +100,8 @@ void PointData::copyPointsFast(std::size_t destPointIndex, std::size_t srcPointI
     std::size_t len = getSchemaLayout().getByteSize();
 
     memcpy(dest, src, len * numPoints);
-
+    
+    m_numPoints = m_numPoints + numPoints;
     return;
 }
 

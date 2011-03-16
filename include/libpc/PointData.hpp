@@ -63,15 +63,17 @@ public:
     // regardless of what the passed-in schema says -- this is because the field object
     // represents the state within the owning object, which in this case is a completely
     // empty buffer (similarly, all the points in the buffer are marked "invalid")
-    PointData(const SchemaLayout&, boost::uint32_t numPoints);
+    PointData(const SchemaLayout&, boost::uint32_t capacity);
     ~PointData();
 
     // number of points in this buffer
     boost::uint32_t getNumPoints() const;
+    
+    inline void setNumPoints(boost::uint32_t v) { m_numPoints = v; } 
 
     // number of points in this buffer that have legit data; initially will be zero,
     // and after a read() call it will be in the range 0 to getNumPoints()-1
-    boost::uint32_t getNumValidPoints();
+    boost::uint32_t getCapacity();
 
     // schema (number and kinds of fields) for a point in this buffer
     const SchemaLayout& getSchemaLayout() const
@@ -106,6 +108,7 @@ private:
     boost::uint8_t* m_data;
     std::size_t m_pointSize;
     boost::uint32_t m_numPoints;
+    boost::uint32_t m_capacity;    
 
     PointData(const PointData&); // not implemented
     PointData& operator=(const PointData&); // not implemented
