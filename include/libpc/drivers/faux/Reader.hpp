@@ -35,7 +35,7 @@
 #ifndef INCLUDED_DRIVERS_FAUX_READER_HPP
 #define INCLUDED_DRIVERS_FAUX_READER_HPP
 
-#include <libpc/Reader.hpp>
+#include <libpc/Stage.hpp>
 
 namespace libpc { namespace drivers { namespace faux {
 
@@ -52,7 +52,7 @@ namespace libpc { namespace drivers { namespace faux {
 // points to always be at the minimum of the bounding box.  The Time field
 // is always set to the point number.
 //
-class LIBPC_DLL Reader : public libpc::Reader
+class LIBPC_DLL Reader : public libpc::Stage
 {
 public:
     enum Mode
@@ -68,6 +68,8 @@ public:
     const std::string& getName() const;
 
     void seekToPoint(boost::uint64_t);
+
+    Iterator* createIterator(const Bounds<double>& bounds);
 
 private:
     boost::uint32_t readBuffer(PointData&, const Bounds<double>& bounds);

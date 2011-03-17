@@ -44,7 +44,7 @@
 namespace libpc { namespace drivers { namespace liblas {
 
 LiblasReader::LiblasReader(std::istream& istream)
-    : Reader()
+    : Stage()
     , m_istream(istream)
     , m_externalReader(NULL)
     , m_versionMajor(0)
@@ -233,7 +233,7 @@ void LiblasReader::seekToPoint(boost::uint64_t n)
 }
 
 
-boost::uint32_t LiblasReader::readBuffer(PointData& pointData, const Bounds<double>& bounds)
+boost::uint32_t LiblasReader::readBuffer(PointData& pointData, const Bounds<double>&)
 {
     boost::uint32_t numPoints = pointData.getCapacity();
     boost::uint32_t i = 0;
@@ -334,5 +334,12 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData, const Bounds<doub
 
     return numPoints;
 }
+
+
+Iterator* LiblasReader::createIterator(const Bounds<double>&)
+{
+    throw not_yet_implemented("iterator");
+}
+
 
 } } } // namespaces

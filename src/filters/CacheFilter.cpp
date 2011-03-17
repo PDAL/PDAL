@@ -35,6 +35,7 @@
 #include <libpc/filters/CacheFilter.hpp>
 
 #include <libpc/PointDataCache.hpp>
+#include <libpc/exceptions.hpp>
 
 namespace libpc { namespace filters {
 
@@ -167,5 +168,12 @@ boost::uint32_t CacheFilter::readBuffer(PointData& data, const Bounds<double>& b
 
     return numRead;
 }
+
+
+Iterator* CacheFilter::createIterator(const Bounds<double>&)
+{
+    throw not_yet_implemented("iterator");
+}
+
 
 } } // namespaces

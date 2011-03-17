@@ -51,6 +51,8 @@ public:
 
     void seekToPoint(boost::uint64_t pointNum);
 
+    Iterator* createIterator(const Bounds<double>& bounds);
+
 private:
     boost::uint32_t readBuffer(PointData& data, const Bounds<double>& bounds);
 

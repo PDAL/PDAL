@@ -35,7 +35,7 @@
 #ifndef INCLUDED_LIBLASREADER_HPP
 #define INCLUDED_LIBLASREADER_HPP
 
-#include <libpc/Reader.hpp>
+#include <libpc/Stage.hpp>
 
 #include <iostream>
 
@@ -50,7 +50,7 @@ namespace liblas
 namespace libpc { namespace drivers { namespace liblas {
 
 
-class LIBPC_DLL LiblasReader : public Reader
+class LIBPC_DLL LiblasReader : public Stage
 {
 public:
     LiblasReader(std::istream&);
@@ -63,6 +63,8 @@ public:
     const LiblasHeader& getLiblasHeader() const;
 
     boost::int8_t getPointFormatNumber() const;
+
+    Iterator* createIterator(const Bounds<double>& bounds);
 
 private:
     virtual boost::uint32_t readBuffer(PointData& data, const Bounds<double>& bounds);

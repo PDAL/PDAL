@@ -77,6 +77,8 @@ public:
                        boost::uint64_t& numCacheInsertMisses,
                        boost::uint64_t& numCacheInsertHits) const;
 
+    Iterator* createIterator(const Bounds<double>& bounds);
+
 private:
     boost::uint32_t readBuffer(PointData& data, const Bounds<double>& bounds);
 

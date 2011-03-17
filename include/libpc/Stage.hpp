@@ -45,6 +45,8 @@
 namespace libpc
 {
 
+class Iterator;
+
 // every stage owns its own header, they are not shared
 class LIBPC_DLL Stage
 {
@@ -75,11 +77,6 @@ public:
     // function to call.
     virtual void seekToPoint(boost::uint64_t pointNum) = 0;
 
-    // Returns the current point number.  The first point is 0.
-    // If this number if > getNumPoints(), then no more points
-    // may be read (and atEnd() should be true).
-    boost::uint64_t getCurrentPointIndex() const;
-
     // returns the number of points this stage has available
     // (actually a convenience function that gets it from the header)
     boost::uint64_t getNumPoints() const;
@@ -90,6 +87,8 @@ public:
 
     const Header& getHeader() const;
     Header& getHeader();
+
+    virtual Iterator* createIterator(const Bounds<double>& bounds) = 0;
 
 protected:
     // Implement this to do the actual work to fill in a buffer of points.
@@ -104,6 +103,11 @@ protected:
     void incrementCurrentPointIndex(boost::uint64_t currentPointDelta);
 
     void setHeader(Header*); // stage takes ownership
+
+        // Returns the current point number.  The first point is 0.
+    // If this number if > getNumPoints(), then no more points
+    // may be read (and atEnd() should be true).
+    boost::uint64_t getCurrentPointIndex() const;
 
 private:
     Header* m_header;

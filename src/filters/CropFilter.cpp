@@ -33,13 +33,14 @@
 ****************************************************************************/
 
 #include <libpc/filters/CropFilter.hpp>
+#include <libpc/exceptions.hpp>
 
 namespace libpc { namespace filters {
 
 
 CropFilter::CropFilter(Stage& prevStage, Bounds<double> const& bounds)
-    : Filter(prevStage),
-      m_bounds(bounds)
+    : Filter(prevStage)
+    , m_bounds(bounds)
 {
     Header& header = getHeader();
     header.setBounds(bounds);
@@ -100,5 +101,12 @@ boost::uint32_t CropFilter::readBuffer(PointData& data, const Bounds<double>& bo
 
     return data.getNumPoints();
 }
+
+
+Iterator* CropFilter::createIterator(const Bounds<double>& bounds)
+{
+    throw not_yet_implemented("iterator");
+}
+
 
 } } // namespaces

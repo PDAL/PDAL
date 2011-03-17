@@ -43,6 +43,12 @@ MosaicFilter::MosaicFilter(Stage& prevStage, std::vector<Stage*> prevStages)
     : Filter(prevStage)
 {
     m_prevStages.push_back(&prevStage);
+    for (size_t i=0; i<prevStages.size(); i++)
+    {
+        if (prevStages[i] == NULL)
+            throw libpc_error("null stage passed to mosaic filter");
+        m_prevStages.push_back(prevStages[i]);
+    }
 
     const Header& prevHeader =  m_prevStage.getHeader();
 
@@ -85,7 +91,7 @@ const std::string& MosaicFilter::getName() const
 
 void MosaicFilter::seekToPoint(boost::uint64_t pointNum)
 {
-    m_prevStage.seekToPoint(pointNum);
+    m_prevStages[0]->seekToPoint(pointNum);
 }
 
 
@@ -141,6 +147,12 @@ boost::uint32_t MosaicFilter::readBuffer(PointData& destData, const Bounds<doubl
     }
 
     return totalNumPointsRead;
+}
+
+
+Iterator* MosaicFilter::createIterator(const Bounds<double>&)
+{
+    throw not_yet_implemented("iterator");
 }
 
 
