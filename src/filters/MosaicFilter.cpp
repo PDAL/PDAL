@@ -41,15 +41,14 @@ namespace libpc { namespace filters {
 
 MosaicFilter::MosaicFilter(Stage& prevStage, std::vector<Stage*> prevStages)
     : Filter(prevStage)
-    , m_prevStages(prevStages)
 {
-    for (size_t i=0; i<m_prevStages.size(); i++)
+    m_prevStages.push_back(&prevStage);
+    for (size_t i=0; i<prevStages.size(); i++)
     {
-        if (m_prevStages[i] == NULL)
+        if (prevStages[i] == NULL)
             throw libpc_error("null stage passed to mosaic filter");
+        m_prevStages.push_back(prevStages[i]);
     }
-
-    m_prevStages.push_back(&m_prevStage);
 
     const Header& prevHeader =  m_prevStage.getHeader();
 
@@ -151,7 +150,7 @@ boost::uint32_t MosaicFilter::readBuffer(PointData& destData, const Bounds<doubl
 }
 
 
-Iterator* MosaicFilter::createIterator(const Bounds<double>& bounds)
+Iterator* MosaicFilter::createIterator(const Bounds<double>&)
 {
     throw not_yet_implemented("iterator");
 }
