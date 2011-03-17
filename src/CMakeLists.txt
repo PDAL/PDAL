@@ -42,12 +42,12 @@ set(LIBPC_BASE_HPP
   ${LIBPC_HEADERS_DIR}/DimensionLayout.hpp
   ${LIBPC_HEADERS_DIR}/Filter.hpp
   ${LIBPC_HEADERS_DIR}/Header.hpp
+  ${LIBPC_HEADERS_DIR}/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/Metadata.hpp
   ${LIBPC_HEADERS_DIR}/Vector.hpp  
   ${LIBPC_HEADERS_DIR}/PointData.hpp  
   ${LIBPC_HEADERS_DIR}/PointDataCache.hpp  
   ${LIBPC_HEADERS_DIR}/Range.hpp
-  ${LIBPC_HEADERS_DIR}/Reader.hpp
   ${LIBPC_HEADERS_DIR}/Schema.hpp
   ${LIBPC_HEADERS_DIR}/SchemaLayout.hpp
   ${LIBPC_HEADERS_DIR}/Signaller.hpp
@@ -65,11 +65,11 @@ set(LIBPC_BASE_CPP
   DimensionLayout.cpp
   Filter.cpp
   Header.cpp
+  Iterator.cpp
   Metadata.cpp
   Vector.cpp  
   PointData.cpp
   PointDataCache.cpp
-  Reader.cpp
   Schema.cpp
   SchemaLayout.cpp
   Signaller.cpp

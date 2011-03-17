@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <libpc/filters/DecimationFilter.hpp>
+#include <libpc/exceptions.hpp>
 
 namespace libpc { namespace filters {
 
@@ -81,5 +82,12 @@ boost::uint32_t DecimationFilter::readBuffer(PointData& dstData, const Bounds<do
 
     return dstIndex;
 }
+
+
+Iterator* DecimationFilter::createIterator(const Bounds<double>& bounds)
+{
+    throw not_yet_implemented("iterator");
+}
+
 
 } } // namespaces

@@ -35,7 +35,7 @@
 #ifndef INCLUDED_WRITER_HPP
 #define INCLUDED_WRITER_HPP
 
-#include <libpc/Filter.hpp>
+#include <libpc/Stage.hpp>
 
 namespace libpc
 {

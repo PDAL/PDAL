@@ -41,7 +41,7 @@ namespace libpc { namespace drivers { namespace las {
 
 
 LasReader::LasReader(std::istream& istream)
-    : Reader()
+    : Stage()
     , m_istream(istream)
 {
     LasHeader* lasHeader = new LasHeader;
@@ -89,7 +89,7 @@ void LasReader::seekToPoint(boost::uint64_t pointNum)
 }
 
 
-boost::uint32_t LasReader::readBuffer(PointData& pointData, const Bounds<double>& bounds)
+boost::uint32_t LasReader::readBuffer(PointData& pointData, const Bounds<double>&)
 {
     boost::uint32_t numPoints = pointData.getNumPoints();
 
@@ -248,5 +248,13 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData, const Bounds<double>
 
     return numPoints;
 }
+
+
+Iterator* LasReader::createIterator(const Bounds<double>&)
+{
+    throw not_yet_implemented("iterator");
+    return NULL;
+}
+
 
 } } } // namespaces

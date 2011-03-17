@@ -46,7 +46,7 @@ using std::cout;
 namespace libpc { namespace drivers { namespace faux {
 
 Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
-    : libpc::Reader()
+    : libpc::Stage()
     , m_mode(mode)
 {
     Header* header = new Header;
@@ -66,7 +66,7 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
 }
 
 Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : libpc::Reader()
+    : libpc::Stage()
     , m_mode(mode)
 {
     Header* header = new Header;
@@ -163,6 +163,12 @@ boost::uint32_t Reader::readBuffer(PointData& data, const Bounds<double>& userBo
 void Reader::seekToPoint(boost::uint64_t pointNumber)
 {
     setCurrentPointIndex(pointNumber);
+}
+
+
+Iterator* Reader::createIterator(const Bounds<double>& bounds)
+{
+    throw not_yet_implemented("iterator");
 }
 
 

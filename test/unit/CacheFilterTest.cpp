@@ -59,31 +59,28 @@ BOOST_AUTO_TEST_CASE(test1)
     
     const Bounds<double>& maxBounds = Bounds<double>::getDefaultSpatialExtent();
 
-    BOOST_CHECK(cache.getCurrentPointIndex() == 0);
+    //BOOST_CHECK(cache.getCurrentPointIndex() == 0);
     BOOST_CHECK(cache.getNumPointsRequested() == 0);
     BOOST_CHECK(cache.getNumPointsRead() == 0);
 
     cache.read(dataBig, maxBounds);
     BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 0);
-    BOOST_CHECK(cache.getCurrentPointIndex() == 1024);
+    //BOOST_CHECK(cache.getCurrentPointIndex() == 1024);
     BOOST_CHECK(cache.getNumPointsRequested() == 1024);
     BOOST_CHECK(cache.getNumPointsRead() == 1024);
-    BOOST_CHECK(reader.getCurrentPointIndex() == 1024);
 
     cache.read(dataBig, maxBounds);
     BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 1024);
-    BOOST_CHECK(cache.getCurrentPointIndex() == 2048);
+   // BOOST_CHECK(cache.getCurrentPointIndex() == 2048);
     BOOST_CHECK(cache.getNumPointsRequested() == 2048);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
-    BOOST_CHECK(reader.getCurrentPointIndex() == 2048);
 
     cache.seekToPoint(42);
     cache.read(dataSmall, maxBounds);
     BOOST_CHECK(dataSmall.getField<boost::uint64_t>(0, offsetT) == 42);
-    BOOST_CHECK(cache.getCurrentPointIndex() == 43);
+    //BOOST_CHECK(cache.getCurrentPointIndex() == 43);
     BOOST_CHECK(cache.getNumPointsRequested() == 2048+1);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
-    BOOST_CHECK(reader.getCurrentPointIndex() == 43);
 
     return;
 }

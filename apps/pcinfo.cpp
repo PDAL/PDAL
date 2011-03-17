@@ -78,7 +78,7 @@ int Application_pcinfo::execute()
 
     std::istream* ifs = Utils::openFile(m_inputFile);
 
-    libpc::Reader* reader = NULL;
+    libpc::Stage* reader = NULL;
     if (hasOption("native"))
     {
         reader = new libpc::drivers::las::LasReader(*ifs);

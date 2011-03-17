@@ -133,4 +133,11 @@ void ColorFilter::getColor(float value, boost::uint8_t& red, boost::uint8_t& gre
     return;
 }
 
+
+Iterator* ColorFilter::createIterator(const Bounds<double>&)
+{
+    throw not_yet_implemented("iterator");
+}
+
+
 } } // namespaces

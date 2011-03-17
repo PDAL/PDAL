@@ -36,6 +36,7 @@
 #define INCLUDED_ITERATOR_HPP
 
 #include <libpc/Stage.hpp>
+#include <libpc/Bounds.hpp>
 
 namespace libpc
 {
@@ -43,7 +44,7 @@ namespace libpc
 class LIBPC_DLL Iterator
 {
 public:
-    Iterator(const Stage& stage);
+    Iterator(const Stage& stage, const Bounds<double>& bounds);
 
     const Stage& getStage() const;
 
@@ -65,16 +66,16 @@ public:
     // function to call.
     virtual void seekToPoint(boost::uint64_t pointNum) = 0;
 
-    // Returns the current point number.  The first point is 0.
-    // If this number if > getNumPoints(), then no more points
-    // may be read (and atEnd() should be true).
-    boost::uint64_t getCurrentPointIndex() const;
-
     // returns true after we've read all the points available to this stage
     // (actually a convenience function that compares getCurrentPointIndex and getNumPoints)
     bool atEnd() const;
 
 protected:
+    // Returns the current point number.  The first point is 0.
+    // If this number if > getNumPoints(), then no more points
+    // may be read (and atEnd() should be true).
+    boost::uint64_t getCurrentPointIndex() const;
+
     // Implement this to do the actual work to fill in a buffer of points.
     virtual boost::uint32_t readBuffer(PointData&) = 0;
 
@@ -89,6 +90,7 @@ protected:
 private:
     const Stage& m_stage;
     boost::uint64_t m_currentPointIndex;
+    const Bounds<double> m_bounds;
 
     Iterator& operator=(const Iterator&); // not implemented
     Iterator(const Iterator&); // not implemented

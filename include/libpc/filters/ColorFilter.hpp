@@ -51,6 +51,8 @@ public:
 
     const std::string& getName() const;
 
+    Iterator* createIterator(const Bounds<double>& bounds);
+
 private:
     boost::uint32_t readBuffer(PointData& data, const Bounds<double>& bounds);
     void checkImpedance();

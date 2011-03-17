@@ -37,13 +37,13 @@
 
 #include <iostream>
 
-#include <libpc/Reader.hpp>
+#include <libpc/Stage.hpp>
 #include <libpc/drivers/las/Header.hpp>
 
 namespace libpc { namespace drivers { namespace las {
 
 
-class LIBPC_DLL LasReader : public Reader
+class LIBPC_DLL LasReader : public Stage
 {
 public:
     LasReader(std::istream&);
@@ -55,6 +55,8 @@ public:
     virtual void seekToPoint(boost::uint64_t pointNum);
 
     const LasHeader& getLasHeader() const;
+
+    Iterator* createIterator(const Bounds<double>& bounds);
 
 protected:
     boost::uint32_t readBuffer(PointData& data, const Bounds<double>& bounds);
