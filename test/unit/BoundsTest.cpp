@@ -224,4 +224,21 @@ BOOST_AUTO_TEST_CASE(test_dump)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(test_static)
+{
+    Bounds<boost::uint8_t> t = Bounds<boost::uint8_t>::getDefaultSpatialExtent();
+    
+    std::vector<boost::uint8_t> minv;
+    minv.push_back(0);
+    minv.push_back(0);
+    minv.push_back(0);
+    std::vector<boost::uint8_t> maxv;
+    maxv.push_back(255);
+    maxv.push_back(255);
+    maxv.push_back(255);
+
+    BOOST_CHECK(t.getMinimum() == minv);
+    BOOST_CHECK(t.getMaximum() == maxv);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
