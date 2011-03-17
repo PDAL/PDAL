@@ -85,7 +85,7 @@ void PointData::copyPointFast(std::size_t destPointIndex, std::size_t srcPointIn
     std::size_t len = getSchemaLayout().getByteSize();
 
     memcpy(dest, src, len);
-    m_numPoints++;
+
     assert(m_numPoints <= m_capacity);
 
     return;
@@ -102,8 +102,6 @@ void PointData::copyPointsFast(std::size_t destPointIndex, std::size_t srcPointI
 
     memcpy(dest, src, len * numPoints);
     
-    // FIXME: This needs to be smarter
-    m_numPoints = m_numPoints + numPoints;
     assert(m_numPoints <= m_capacity);
 
     return;
