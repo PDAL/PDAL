@@ -35,18 +35,19 @@
 #ifndef INCLUDED_ITERATOR_HPP
 #define INCLUDED_ITERATOR_HPP
 
-#include <libpc/Stage.hpp>
 #include <libpc/Bounds.hpp>
 
 namespace libpc
 {
+class Stage;
+class PointData;
 
 class LIBPC_DLL Iterator
 {
 public:
-    Iterator(const Stage& stage, const Bounds<double>& bounds);
+    Iterator(Stage& stage, const Bounds<double>& bounds);
 
-    const Stage& getStage() const;
+    Stage& getStage();
 
     // This reads a set of points at the current position in the file.
     //
@@ -68,7 +69,7 @@ public:
 
     // returns true after we've read all the points available to this stage
     // (actually a convenience function that compares getCurrentPointIndex and getNumPoints)
-    bool atEnd() const;
+    bool atEnd();
 
 protected:
     // Returns the current point number.  The first point is 0.
@@ -88,13 +89,14 @@ protected:
     void incrementCurrentPointIndex(boost::uint64_t currentPointDelta);
 
 private:
-    const Stage& m_stage;
+    Stage& m_stage;
     boost::uint64_t m_currentPointIndex;
     const Bounds<double> m_bounds;
 
     Iterator& operator=(const Iterator&); // not implemented
     Iterator(const Iterator&); // not implemented
 };
+
 
 } // namespace libpc
 

@@ -32,25 +32,21 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <libpc/FilterIterator.hpp>
 #include <libpc/Filter.hpp>
 
 namespace libpc
 {
 
 
-Filter::Filter(Stage& prevStage) :
-    m_prevStage(prevStage)
+FilterIterator::FilterIterator(Filter& filter, const Bounds<double>& bounds)
+    : Iterator(filter, bounds)
+    , m_stageAsFilter(static_cast<Filter&>(filter))
+    , m_prevIterator(NULL)
 {
-    const Header& prevHeader = m_prevStage.getHeader();
-    Header* header = new Header(prevHeader);
-    setHeader(header);
+    m_prevIterator = m_stageAsFilter.getPrevStage().createIterator(bounds);
+
     return;
-}
-
-
-Stage& Filter::getPrevStage() const
-{
-    return m_prevStage;
 }
 
 

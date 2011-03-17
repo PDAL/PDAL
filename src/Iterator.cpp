@@ -33,12 +33,14 @@
 ****************************************************************************/
 
 #include <libpc/Iterator.hpp>
+#include <libpc/Stage.hpp>
+#include <libpc/Filter.hpp>
 
 namespace libpc
 {
 
 
-Iterator::Iterator(const Stage& stage, const Bounds<double>& bounds)
+Iterator::Iterator(Stage& stage, const Bounds<double>& bounds)
     : m_stage(stage)
     , m_currentPointIndex(0)
     , m_bounds(bounds)
@@ -47,7 +49,7 @@ Iterator::Iterator(const Stage& stage, const Bounds<double>& bounds)
 }
 
 
-const Stage& Iterator::getStage() const
+Stage& Iterator::getStage()
 {
     return m_stage;
 }
@@ -77,7 +79,7 @@ boost::uint32_t Iterator::read(PointData& data)
 }
 
 
-bool Iterator::atEnd() const
+bool Iterator::atEnd()
 {
     return getCurrentPointIndex() >= getStage().getNumPoints();
 }

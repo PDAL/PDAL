@@ -47,6 +47,8 @@ class LIBPC_DLL Filter : public Stage
 public:
     Filter(Stage& prevStage);
 
+    Stage& getPrevStage() const;
+
 protected:
     Stage& m_prevStage;
 
