@@ -99,7 +99,7 @@ boost::uint32_t MosaicFilter::readBuffer(PointData& destData)
 
     // BUG: this doesn't account for isValid()
 
-    boost::uint32_t totalNumPointsToRead = destData.getNumPoints();
+    boost::uint32_t totalNumPointsToRead = destData.getCapacity();
     boost::uint32_t totalNumPointsRead = 0;
 
     boost::uint64_t currentPointIndex = getCurrentPointIndex();
@@ -128,6 +128,7 @@ boost::uint32_t MosaicFilter::readBuffer(PointData& destData)
             {
                 destData.copyPointFast(destPointIndex, idx, srcData);
                 destPointIndex++;
+                destData.setNumPoints(idx+1);
             }
 
             totalNumPointsRead += pointsGotten;
