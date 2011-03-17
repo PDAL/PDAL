@@ -949,7 +949,9 @@ boost::uint32_t Writer::writeBuffer(const PointData& pointData)
         for (it = ids.begin(); it != ids.end(); it++)
         {
             m_stage.seekToPoint(*it);
-            m_stage.read(buffer);
+            
+            // FIXME: Use a user bounds here instead of reading everything
+            m_stage.read(buffer, libpc::Bounds<double>());
             
             block.copyPointsFast(static_cast<std::size_t>(count), static_cast<std::size_t>(0), buffer, 1); // put single point onto our block
 
