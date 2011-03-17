@@ -54,7 +54,7 @@ namespace libpc { namespace driver { namespace oci {
 
 
 Reader::Reader(Options& options)
-    : libpc::Reader()
+    : libpc::Stage()
     , m_options(options)
 {
 
