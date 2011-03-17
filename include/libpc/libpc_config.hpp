@@ -41,6 +41,9 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#ifndef INCLUDED_LIBPC_CONFIG_HPP
+#define INCLUDED_LIBPC_CONFIG_HPP
+
 #include <string>
 #include <libpc/export.hpp>
 
@@ -60,3 +63,5 @@ LIBPC_DLL int GetVersionMinor();
 LIBPC_DLL int GetVersionPatch();
 
 } // namespace libpc
+
+#endif
