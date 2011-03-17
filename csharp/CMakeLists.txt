@@ -1,1 +1,1 @@
-
+add_subdirectory(libpc_swig_cpp)
