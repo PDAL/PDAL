@@ -87,3 +87,16 @@ bool compare_files(const std::string& file1, const std::string& file2)
 
     return true;
 }
+
+std::string TestConfig::g_data_path = "../test/data";
+
+TestConfig::TestConfig()
+{
+    int argc = ::boost::unit_test::framework::master_test_suite().argc;
+    char **argv = ::boost::unit_test::framework::master_test_suite().argv;
+    if (argc > 1)
+        g_data_path = argv[1];
+    if (g_data_path[g_data_path.size() - 1] != '/')
+        g_data_path += "/";
+}
+

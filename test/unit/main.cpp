@@ -32,16 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <string>
-
-#ifndef BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE Main
-#endif
-
 #include <boost/test/unit_test.hpp>
-#include <boost/test/utils/assign_op.hpp>
+#include "support.hpp"
 
-std::string g_data_path;
+BOOST_GLOBAL_FIXTURE(TestConfig)
 
 // Testing macros:
 //   BOOST_TEST_MESSAGE("...")
@@ -62,37 +57,3 @@ std::string g_data_path;
 //
 //     <path>                  # path to data (default=../test/data)
 
-#ifdef BOOST_TEST_ALTERNATIVE_INIT_API
-bool
-libpc_init_unit_test()
-#else
-::boost::unit_test::test_suite*
-libpc_init_unit_test_suite( int, char* [] )
-#endif
-{
-    ::boost::unit_test::assign_op( ::boost::unit_test::framework::master_test_suite().p_name.value, "Main", 0 );
-    int argc = ::boost::unit_test::framework::master_test_suite().argc;
-    char **argv = ::boost::unit_test::framework::master_test_suite().argv;
-    if (argc > 1)
-        g_data_path = argv[1];
-    else
-        g_data_path = "../test/data";
-    if (g_data_path[g_data_path.size()-1] != '/')
-        g_data_path += "/";
-    
-#ifdef BOOST_TEST_ALTERNATIVE_INIT_API
-    return true;
-#else
-    return 0;
-#endif
-}
-
-#if defined(BOOST_TEST_DYN_LINK) 
-
-int
-main( int argc, char* argv[] )
-{
-    return ::boost::unit_test::unit_test_main( &libpc_init_unit_test, argc, argv );
-}
-
-#endif // BOOST_TEST_DYN_LINK
