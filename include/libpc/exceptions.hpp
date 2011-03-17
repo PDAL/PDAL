@@ -73,7 +73,7 @@ public:
     /// Flags are composed with composed with Point::DataMemberFlag.
     /// Testing flags example: bool timeValid = e.who() & Point::eTime;
     unsigned int who() const
-    {
+   {
         return m_who;
     }
 
@@ -101,6 +101,15 @@ public:
     {}
 };
 
+// for when a stage doesn't get the schema it expects
+class impedance_invalid : public libpc_error
+{
+public:
+
+    impedance_invalid(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
 
 // use this for attempts to use a feature not compiled in, e.g. laszip or gdal
 class configuration_error : public libpc_error

@@ -53,7 +53,7 @@ public:
 
 private:
     boost::uint32_t readBuffer(PointData&);
-
+    void checkImpedance();
     void getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue);
 
     ColorFilter& operator=(const ColorFilter&); // not implemented

@@ -35,43 +35,19 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/Schema.hpp>
+#include <libpc/drivers/faux/Reader.hpp>
+#include <libpc/drivers/faux/Writer.hpp>
+#include <libpc/filters/ColorFilter.hpp>
 
 using namespace libpc;
 
-BOOST_AUTO_TEST_SUITE(SchemaTest)
+BOOST_AUTO_TEST_SUITE(ColorFilter)
 
-BOOST_AUTO_TEST_CASE(test_ctor)
+BOOST_AUTO_TEST_CASE(test1)
 {
-    Dimension d1(Dimension::Field_X, Dimension::Uint32);
-    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
+    // BUG: tbd
 
-    Schema s1;
-    s1.addDimension(d1);
-    s1.addDimension(d2);
-
-    Schema s2(s1);
-    Schema s3 = s1;
-
-    BOOST_CHECK(s1==s1);
-    BOOST_CHECK(s1==s2);
-    BOOST_CHECK(s2==s1);
-    BOOST_CHECK(s1==s3);
-    BOOST_CHECK(s3==s1);
-
-    Schema s4;
-    s4.addDimension(d1);
-    BOOST_CHECK(s1!=s4);
-    BOOST_CHECK(s4!=s1);
-
-    BOOST_CHECK(s1.hasDimension(Dimension::Field_X));
-    BOOST_CHECK(s1.hasDimension(Dimension::Field_X, Dimension::Uint32));
-    BOOST_CHECK(!s1.hasDimension(Dimension::Field_X, Dimension::Uint16));
-    Dimension dx32(Dimension::Field_X, Dimension::Uint32);
-    Dimension dx16(Dimension::Field_X, Dimension::Uint16);
-    BOOST_CHECK(s1.hasDimension(dx32));
-    BOOST_CHECK(!s1.hasDimension(dx16));
+    return;
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

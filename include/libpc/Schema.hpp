@@ -97,7 +97,21 @@ public:
         return index != -1;
     }
 
-    // returns -1 if the index not found
+    bool hasDimension(Dimension::Field field, Dimension::DataType datatype) const
+    {
+        int index = m_indexTable[field];
+        if (index == -1) return false;
+        const Dimension& dim = m_dimensions[index];
+        if (dim.getDataType() != datatype) return false;
+        return true;
+    }
+
+    bool hasDimension(const Dimension& dim) const
+    {
+        return hasDimension(dim.getField(), dim.getDataType());
+    }
+
+    // assumes the index does, in fact, exist
     int getDimensionIndex(Dimension::Field field) const
     {
         int index = m_indexTable[field];
