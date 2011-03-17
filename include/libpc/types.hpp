@@ -32,12 +32,24 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LIBPC_HPP
-#define INCLUDED_LIBPC_HPP
+#ifndef INCLUDED_TYPES_HPP
+#define INCLUDED_TYPES_HPP
 
 #include <libpc/export.hpp>
 #include <libpc/libpc_defines.h>
 #include <libpc/libpc_config.hpp>
-#include <libpc/types.hpp>
+
+namespace libpc {
+
+
+enum PointCountType
+{
+    PointCount_Fixed,       // getNumPoints will return a good, nonzero value
+    PointCount_Infinite,    // getNumPoints will return 0; the stage has an unknown, and likely infinite, count
+    PointCount_Unknown      // getNumPoints will return 0; the stage has an unknown, but constant, count
+};
+
+
+} // namespace
 
 #endif

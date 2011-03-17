@@ -36,6 +36,7 @@ set(LIBPC_BASE_HPP
   ${LIBPC_HEADERS_DIR}/export.hpp
   ${LIBPC_HEADERS_DIR}/libpc.hpp
   ${LIBPC_HEADERS_DIR}/libpc_config.hpp
+  ${LIBPC_HEADERS_DIR}/types.hpp
   ${LIBPC_HEADERS_DIR}/Bounds.hpp
   ${LIBPC_HEADERS_DIR}/Color.hpp
   ${LIBPC_HEADERS_DIR}/Dimension.hpp

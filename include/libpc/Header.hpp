@@ -38,7 +38,7 @@
 #include <iostream>
 #include <boost/cstdint.hpp>
 
-#include <libpc/export.hpp>
+#include <libpc/libpc.hpp>
 #include <libpc/Schema.hpp>
 #include <libpc/Bounds.hpp>
 #include <libpc/SpatialReference.hpp>
@@ -61,6 +61,9 @@ public:
     boost::uint64_t getNumPoints() const;
     void setNumPoints(boost::uint64_t);
 
+    PointCountType getPointCountType() const;
+    void setPointCountType(PointCountType);
+
     const Bounds<double>& getBounds() const;
     void setBounds(const Bounds<double>&);
 
@@ -75,6 +78,7 @@ public:
 private:
     Schema m_schema;
     boost::uint64_t m_numPoints;
+    PointCountType m_pointCountType;
     Bounds<double> m_bounds;
     SpatialReference m_spatialReference;
     Metadata::Array m_metadataArray;

@@ -42,8 +42,9 @@ namespace libpc
 {
 
 
-Header::Header() :
-    m_numPoints(0)
+Header::Header()
+    : m_numPoints(0)
+    , m_pointCountType(PointCount_Fixed)
 {
     return;
 }
@@ -52,6 +53,7 @@ Header::Header() :
 Header::Header(const Header& other)
 {
     this->m_numPoints = other.m_numPoints;
+    this->m_pointCountType = other.m_pointCountType;
     this->m_schema = other.m_schema;
     this->m_bounds = other.m_bounds;
     this->m_spatialReference = other.m_spatialReference;
@@ -104,6 +106,18 @@ boost::uint64_t Header::getNumPoints() const
 void Header::setNumPoints(boost::uint64_t numPoints)
 {
     m_numPoints = numPoints;
+}
+
+
+PointCountType Header::getPointCountType() const
+{
+    return m_pointCountType;
+}
+
+
+void Header::setPointCountType(PointCountType pointCountType)
+{
+    m_pointCountType = pointCountType;
 }
 
 
