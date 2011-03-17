@@ -83,7 +83,7 @@ static PointData* makeTestBuffer()
 
     BOOST_CHECK(data->getCapacity() == capacity);
     // write the data into the buffer
-    for (int i=0; i<data->getCapacity(); i++)
+    for (boost::uint32_t i=0; i<data->getCapacity(); i++)
     {
       const boost::uint8_t x = static_cast<boost::uint8_t>(i)+1;
       const boost::int32_t y = i*10;
