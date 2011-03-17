@@ -256,7 +256,6 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData, const Bounds<double>
 Iterator* LasReader::createIterator(const Bounds<double>&)
 {
     throw not_yet_implemented("iterator");
-    return NULL;
 }
 
 
