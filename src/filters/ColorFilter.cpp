@@ -111,6 +111,7 @@ boost::uint32_t ColorFilter::readBuffer(PointData& data)
         data.setField<boost::uint8_t>(pointIndex, fieldIndexR, red);
         data.setField<boost::uint8_t>(pointIndex, fieldIndexG, green);
         data.setField<boost::uint8_t>(pointIndex, fieldIndexB, blue);
+        data.setNumPoints(pointIndex+1);
 
     }
 
