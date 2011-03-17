@@ -41,7 +41,6 @@
 #include <libpc/drivers/oci/Header.hpp>
 
 #include <libpc/exceptions.hpp>
-#include <libpc/libpc_config.hpp>
 
 #include <cstdlib>
 #include <iostream>
@@ -951,7 +950,7 @@ boost::uint32_t Writer::writeBuffer(const PointData& pointData)
             m_stage.seekToPoint(*it);
             
             // FIXME: Use a user bounds here instead of reading everything  
-            m_stage.read(buffer, libpc::Bounds<double>());
+            m_stage.read(buffer);
             
             block.copyPointsFast(static_cast<std::size_t>(count), static_cast<std::size_t>(0), buffer, 1); // put single point onto our block
 

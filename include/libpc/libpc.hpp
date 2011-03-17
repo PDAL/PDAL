@@ -37,7 +37,7 @@
 
 #include <libpc/export.hpp>
 #include <libpc/libpc_defines.h>
-#include <libpc/libpc_config.hpp>
+// #include <libpc/libpc_config.hpp>
 #include <libpc/types.hpp>
 
 #endif

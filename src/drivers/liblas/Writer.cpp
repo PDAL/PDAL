@@ -40,7 +40,6 @@
 #include <liblas/Writer.hpp>
 
 #include <libpc/exceptions.hpp>
-#include <libpc/libpc_config.hpp>
 
 
 namespace libpc { namespace drivers { namespace liblas {
