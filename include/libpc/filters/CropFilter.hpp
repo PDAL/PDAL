@@ -55,7 +55,7 @@ public:
     Iterator* createIterator(const Bounds<double>& bounds);
 
 private:
-    boost::uint32_t readBuffer(PointData& data, const Bounds<double>& bounds);
+    boost::uint32_t readBuffer(PointData& data);
 
     Bounds<double> m_bounds;
 

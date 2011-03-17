@@ -59,7 +59,7 @@ public:
     Iterator* createIterator(const Bounds<double>& bounds);
 
 protected:
-    boost::uint32_t readBuffer(PointData& data, const Bounds<double>& bounds);
+    boost::uint32_t readBuffer(PointData& data);
 
     LasHeader& getLasHeader();
     void setLasHeader(const LasHeader&);

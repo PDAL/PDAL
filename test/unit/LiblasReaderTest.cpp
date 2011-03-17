@@ -79,10 +79,9 @@ BOOST_AUTO_TEST_CASE(test_1)
     SchemaLayout layout(schema);
 
     PointData data(layout, 3);
-    const Bounds<double>& maxBounds = Bounds<double>::getDefaultSpatialExtent();
     
     {
-        boost::uint32_t numRead = reader.read(data, maxBounds);
+        boost::uint32_t numRead = reader.read(data);
         BOOST_CHECK(numRead == 3);
 
         checkPointXYZ(data, 0, schema, 637012.240000, 849028.310000, 431.660000);
@@ -93,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     // Can we seek it? Yes, we can!
     reader.seekToPoint(100);
     {
-        boost::uint32_t numRead = reader.read(data, maxBounds);
+        boost::uint32_t numRead = reader.read(data);
         BOOST_CHECK(numRead == 3);
 
         checkPointXYZ(data, 0, schema, 636661.060000, 849854.130000, 424.900000);
@@ -104,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     // Can we seek to beginning? Yes, we can!
     reader.seekToPoint(0);
     {
-        boost::uint32_t numRead = reader.read(data, maxBounds);
+        boost::uint32_t numRead = reader.read(data);
         BOOST_CHECK(numRead == 3);
 
         checkPointXYZ(data, 0, schema, 637012.240000, 849028.310000, 431.660000);

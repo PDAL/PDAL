@@ -233,7 +233,7 @@ void LiblasReader::seekToPoint(boost::uint64_t n)
 }
 
 
-boost::uint32_t LiblasReader::readBuffer(PointData& pointData, const Bounds<double>&)
+boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
 {
     boost::uint32_t numPoints = pointData.getCapacity();
     boost::uint32_t i = 0;

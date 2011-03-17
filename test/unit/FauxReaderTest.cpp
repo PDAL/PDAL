@@ -52,9 +52,7 @@ BOOST_AUTO_TEST_CASE(test_constant)
 
     PointData data(layout, 750);
     
-    const Bounds<double>& maxBounds = Bounds<double>::getDefaultSpatialExtent();
-
-    boost::uint32_t numRead = reader.read(data, maxBounds);
+    boost::uint32_t numRead = reader.read(data);
 
     BOOST_CHECK(numRead == 750);
 
@@ -90,9 +88,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 
     PointData data(layout, 750);
     
-    const Bounds<double>& maxBounds = Bounds<double>::getDefaultSpatialExtent();
-
-    boost::uint32_t numRead = reader.read(data, maxBounds);
+    boost::uint32_t numRead = reader.read(data);
 
     BOOST_CHECK(numRead == 750);
 

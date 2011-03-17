@@ -73,8 +73,6 @@ boost::uint32_t Writer::getChunkSize() const
 
 boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
 {
-    const Bounds<double>& maxBounds = Bounds<double>::getDefaultSpatialExtent();
-
     m_targetNumPointsToWrite = targetNumPointsToWrite;
     m_actualNumPointsWritten = 0;
 
@@ -87,7 +85,7 @@ boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
 
         PointData buffer(m_prevStage.getHeader().getSchema(), numPointsToReadThisChunk);
 
-        boost::uint32_t numPointsReadThisChunk = m_prevStage.read(buffer, maxBounds);
+        boost::uint32_t numPointsReadThisChunk = m_prevStage.read(buffer);
         assert(numPointsReadThisChunk <= numPointsToReadThisChunk);
 
         boost::uint32_t numPointsWrittenThisChunk = writeBuffer(buffer);

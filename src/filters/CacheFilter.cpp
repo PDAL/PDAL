@@ -113,7 +113,7 @@ boost::uint64_t CacheFilter::getNumPointsRead() const
 }
 
 
-boost::uint32_t CacheFilter::readBuffer(PointData& data, const Bounds<double>& bounds)
+boost::uint32_t CacheFilter::readBuffer(PointData& data)
 {
     const boost::uint64_t currentPointIndex = getCurrentPointIndex();
 
@@ -122,7 +122,7 @@ boost::uint32_t CacheFilter::readBuffer(PointData& data, const Bounds<double>& b
     // cached block to satisfy it)
     if (data.getCapacity() != 1)
     {
-        const boost::uint32_t numRead = m_prevStage.read(data, bounds);
+        const boost::uint32_t numRead = m_prevStage.read(data);
 
         // if they asked for a full block and we got a full block,
         // and the block we got is properly aligned and not already cached,
@@ -161,7 +161,7 @@ boost::uint32_t CacheFilter::readBuffer(PointData& data, const Bounds<double>& b
     }
 
     // Not in the cache, so do a normal read :-(
-    const boost::uint32_t numRead = m_prevStage.read(data, bounds);
+    const boost::uint32_t numRead = m_prevStage.read(data);
     m_numPointsRead += numRead;
     m_numPointsRequested += numRead;
     incrementCurrentPointIndex(numRead);
