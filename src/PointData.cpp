@@ -44,12 +44,13 @@ namespace libpc
 {
 
 
-PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t capacity) :
-    m_schemaLayout(schemaLayout),
-    m_data(NULL),
-    m_pointSize(m_schemaLayout.getByteSize()),
-    m_numPoints(0),
-    m_capacity(capacity)
+PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t capacity)
+    : m_schemaLayout(schemaLayout)
+    , m_data(NULL)
+    , m_pointSize(m_schemaLayout.getByteSize())
+    , m_numPoints(0)
+    , m_capacity(capacity)
+    , m_bounds(Bounds<double>::getDefaultSpatialExtent())
 {
     m_data = new boost::uint8_t[m_pointSize * m_capacity];
 
@@ -61,6 +62,18 @@ PointData::~PointData()
 {
     if (m_data)
         delete[] m_data;
+}
+
+
+const Bounds<double>& PointData::getSpatialBounds() const
+{
+    return m_bounds;
+}
+
+
+void PointData::setSpatialBounds(const Bounds<double>& bounds)
+{
+    m_bounds = bounds;
 }
 
 

@@ -38,6 +38,7 @@
 #include <boost/cstdint.hpp>
 
 #include <libpc/export.hpp>
+#include <libpc/Bounds.hpp>
 #include <libpc/SchemaLayout.hpp>
 
 namespace libpc
@@ -66,6 +67,9 @@ public:
     PointData(const SchemaLayout&, boost::uint32_t capacity);
     ~PointData();
 
+    const Bounds<double>& getSpatialBounds() const;
+    void setSpatialBounds(const Bounds<double>& bounds);
+
     // number of points in this buffer
     boost::uint32_t getNumPoints() const;
     
@@ -89,7 +93,6 @@ public:
         return m_schemaLayout.getSchema();
     }
 
-
     // accessors to a particular field of a particular point in this buffer
     template<class T> T getField(std::size_t pointIndex, std::size_t fieldIndex) const;
     template<class T> void setField(std::size_t pointIndex, std::size_t fieldIndex, T value);
@@ -111,6 +114,7 @@ private:
     std::size_t m_pointSize;
     boost::uint32_t m_numPoints;
     boost::uint32_t m_capacity;    
+    Bounds<double> m_bounds;
 
     PointData(const PointData&); // not implemented
     PointData& operator=(const PointData&); // not implemented
