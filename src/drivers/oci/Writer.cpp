@@ -41,7 +41,6 @@
 #include <libpc/drivers/oci/Header.hpp>
 
 #include <libpc/exceptions.hpp>
-#include <libpc/libpc_config.hpp>
 
 #include <cstdlib>
 #include <iostream>
