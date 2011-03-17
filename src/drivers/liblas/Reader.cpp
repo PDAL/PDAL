@@ -235,7 +235,7 @@ void LiblasReader::seekToPoint(boost::uint64_t n)
 
 boost::uint32_t LiblasReader::readBuffer(PointData& pointData, const Bounds<double>& bounds)
 {
-    boost::uint32_t numPoints = pointData.getNumPoints();
+    boost::uint32_t numPoints = pointData.getCapacity();
     boost::uint32_t i = 0;
 
     const Schema& schema = pointData.getSchema();
@@ -323,7 +323,8 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData, const Bounds<doub
             pointData.setField(i, indexGreen, green);
             pointData.setField(i, indexBlue, blue);
         }
-
+        
+        pointData.setNumPoints(i+1);
         if (m_hasWaveData)
         {
             throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
