@@ -54,7 +54,7 @@ public:
     Iterator* createIterator(const Bounds<double>& bounds);
 
 private:
-    boost::uint32_t readBuffer(PointData& data, const Bounds<double>& bounds);
+    boost::uint32_t readBuffer(PointData& data);
     void checkImpedance();
     void getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue);
 

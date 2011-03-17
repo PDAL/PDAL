@@ -94,7 +94,7 @@ const std::string& Reader::getName() const
 }
 
 
-boost::uint32_t Reader::readBuffer(PointData& data, const Bounds<double>& userBounds)
+boost::uint32_t Reader::readBuffer(PointData& data)
 {
     if (data.getSchemaLayout().getSchema().getDimensions().size() != 4)
         throw not_yet_implemented("need to add ability to read from arbitrary fields");
@@ -166,7 +166,7 @@ void Reader::seekToPoint(boost::uint64_t pointNumber)
 }
 
 
-Iterator* Reader::createIterator(const Bounds<double>& bounds)
+Iterator* Reader::createIterator(const Bounds<double>&)
 {
     throw not_yet_implemented("iterator");
 }

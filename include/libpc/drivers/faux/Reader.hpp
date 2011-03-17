@@ -72,7 +72,7 @@ public:
     Iterator* createIterator(const Bounds<double>& bounds);
 
 private:
-    boost::uint32_t readBuffer(PointData&, const Bounds<double>& bounds);
+    boost::uint32_t readBuffer(PointData&);
 
     Mode m_mode;
 

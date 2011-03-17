@@ -91,9 +91,9 @@ void Stage::setHeader(Header* header)
 }
 
 
-boost::uint32_t Stage::read(PointData& data, const Bounds<double>& bounds)
+boost::uint32_t Stage::read(PointData& data)
 {
-    const boost::uint32_t numPointsRead = readBuffer(data, bounds);
+    const boost::uint32_t numPointsRead = readBuffer(data);
     return numPointsRead;
 }
 

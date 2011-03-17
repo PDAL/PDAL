@@ -95,7 +95,7 @@ void MosaicFilter::seekToPoint(boost::uint64_t pointNum)
 }
 
 
-boost::uint32_t MosaicFilter::readBuffer(PointData& destData, const Bounds<double>& bounds)
+boost::uint32_t MosaicFilter::readBuffer(PointData& destData)
 {
     // BUG: We know that the two prev stage schemas are compatible, 
     // but we can't be sure the have the same bitfield layouts as 
@@ -128,7 +128,7 @@ boost::uint32_t MosaicFilter::readBuffer(PointData& destData, const Bounds<doubl
             boost::uint32_t pointsToGet = std::min(pointsAvail, totalNumPointsToRead);
 
             PointData srcData(destData.getSchemaLayout(), pointsToGet);
-            boost::uint32_t pointsGotten = stage.read(srcData, bounds);
+            boost::uint32_t pointsGotten = stage.read(srcData);
 
             for (boost::uint32_t idx=0; idx<pointsGotten; idx++)
             {

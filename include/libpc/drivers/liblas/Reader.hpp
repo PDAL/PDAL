@@ -67,7 +67,7 @@ public:
     Iterator* createIterator(const Bounds<double>& bounds);
 
 private:
-    virtual boost::uint32_t readBuffer(PointData& data, const Bounds<double>& bounds);
+    virtual boost::uint32_t readBuffer(PointData& data);
 
     LiblasHeader& getLiblasHeader();
     void setLiblasHeader(const LiblasHeader&);
