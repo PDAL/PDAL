@@ -66,7 +66,8 @@ boost::uint32_t CropFilter::readBuffer(PointData& data, const Bounds<double>& bo
 {
     PointData srcData(data.getSchemaLayout(), data.getCapacity());
     boost::uint32_t numSrcPointsRead = m_prevStage.read(srcData, bounds);
-
+    
+    if (numSrcPointsRead == 0) return 0;
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
 
