@@ -79,7 +79,7 @@ public:
     
     // number of points in this buffer that have legit data; initially will be zero,
     // and after a read() call it will be in the range 0 to getNumPoints()-1
-    inline boost::uint32_t getCapacity() { return m_capacity; }
+    inline boost::uint32_t getCapacity() const { return m_capacity; }
 
     // schema (number and kinds of fields) for a point in this buffer
     const SchemaLayout& getSchemaLayout() const
