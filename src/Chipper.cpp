@@ -79,6 +79,16 @@ be stored.
 
 namespace libpc { namespace chipper {
 
+Block::Block(Schema const& schema, boost::uint32_t capacity)
+ : PointData(schema, capacity)
+{
+    
+}
+Block::Block(Block const& block)
+ : PointData(block.getSchema(), block.getCapacity())
+{
+    
+}
 vector<boost::uint32_t> Block::GetIDs() const
 {
     vector<boost::uint32_t> ids;

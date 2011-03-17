@@ -2,6 +2,7 @@
 #define LIBLAS_CHIPPER_H
 
 #include <libpc/Stage.hpp>
+#include <libpc/PointData.hpp>
 #include <libpc/Bounds.hpp>
 #include <libpc/export.hpp>
 #include <libpc/Dimension.hpp>
@@ -11,6 +12,8 @@
 namespace libpc
 {
 
+class Schema;
+    
 namespace chipper
 {
 
@@ -67,7 +70,7 @@ public:
 
 class LIBPC_DLL Chipper;
 
-class LIBPC_DLL Block
+class LIBPC_DLL Block : libpc::PointData
 {
     friend class Chipper;
 
@@ -82,6 +85,8 @@ private:
     // double m_ymax;
 
 public:
+    Block(Schema const& schema, boost::uint32_t capacity);
+    Block(Block const& block);
     std::vector<boost::uint32_t> GetIDs() const; 
     libpc::Bounds<double> const& GetBounds() const {return m_bounds;} 
     void SetBounds(libpc::Bounds<double> const& bounds) {m_bounds = bounds;}
