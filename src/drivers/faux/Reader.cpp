@@ -94,7 +94,7 @@ const std::string& Reader::getName() const
 }
 
 
-boost::uint32_t Reader::readBuffer(PointData& data)
+boost::uint32_t Reader::readBuffer(PointData& data, const Bounds<double>& bounds)
 {
     if (data.getSchemaLayout().getSchema().getDimensions().size() != 4)
         throw not_yet_implemented("need to add ability to read from arbitrary fields");
@@ -108,7 +108,6 @@ boost::uint32_t Reader::readBuffer(PointData& data)
     const Schema& schema = schemaLayout.getSchema();
     Header& header = getHeader();
 
-    const Bounds<double>& bounds = header.getBounds();
     const std::vector< Range<double> >& dims = bounds.dimensions();
     const double minX = dims[0].getMinimum();
     const double maxX = dims[0].getMaximum();

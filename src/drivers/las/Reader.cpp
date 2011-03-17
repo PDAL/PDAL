@@ -81,14 +81,15 @@ void LasReader::seekToPoint(boost::uint64_t pointNum)
 
     // BUG: we can move the stream a constant amount
     PointData pointData(getHeader().getSchema(), chunk);
-    read(pointData);
+    const Bounds<double>& maxBounds = Bounds<double>::getDefaultSpatialExtent();
+    read(pointData, maxBounds);
 
     // just drop the points on the floor and return
     return;
 }
 
 
-boost::uint32_t LasReader::readBuffer(PointData& pointData)
+boost::uint32_t LasReader::readBuffer(PointData& pointData, const Bounds<double>& bounds)
 {
     boost::uint32_t numPoints = pointData.getNumPoints();
 

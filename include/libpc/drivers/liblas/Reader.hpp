@@ -65,7 +65,7 @@ public:
     boost::int8_t getPointFormatNumber() const;
 
 private:
-    virtual boost::uint32_t readBuffer(PointData&);
+    virtual boost::uint32_t readBuffer(PointData& data, const Bounds<double>& bounds);
 
     LiblasHeader& getLiblasHeader();
     void setLiblasHeader(const LiblasHeader&);

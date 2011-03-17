@@ -52,7 +52,7 @@ public:
     void seekToPoint(boost::uint64_t pointNum);
 
 private:
-    boost::uint32_t readBuffer(PointData&);
+    boost::uint32_t readBuffer(PointData& data, const Bounds<double>& bounds);
 
     std::vector<Stage*> m_prevStages;
 

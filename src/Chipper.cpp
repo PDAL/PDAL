@@ -136,7 +136,8 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
 
         PointData buffer(schema, num_to_read);
 
-        boost::uint32_t num_read =  m_stage.read(buffer);
+        const Bounds<double>& bounds = Bounds<double>::getDefaultSpatialExtent();
+        boost::uint32_t num_read =  m_stage.read(buffer, bounds);
         
         assert(num_read <= num_to_read);
 

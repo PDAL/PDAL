@@ -70,7 +70,7 @@ public:
     void seekToPoint(boost::uint64_t);
 
 private:
-    boost::uint32_t readBuffer(PointData&);
+    boost::uint32_t readBuffer(PointData&, const Bounds<double>& bounds);
 
     Mode m_mode;
 

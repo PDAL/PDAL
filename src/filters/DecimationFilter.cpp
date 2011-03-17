@@ -61,11 +61,11 @@ void DecimationFilter::seekToPoint(boost::uint64_t pointNum)
 }
 
 
-boost::uint32_t DecimationFilter::readBuffer(PointData& dstData)
+boost::uint32_t DecimationFilter::readBuffer(PointData& dstData, const Bounds<double>& bounds)
 {
     // naive implementation: read a buffer N times larger, then pull out what we need
     PointData srcData(dstData.getSchemaLayout(), dstData.getNumPoints() * m_step);
-    boost::uint32_t numSrcPointsRead = m_prevStage.read(srcData);
+    boost::uint32_t numSrcPointsRead = m_prevStage.read(srcData, bounds);
 
     boost::uint32_t numPoints = dstData.getNumPoints();
     

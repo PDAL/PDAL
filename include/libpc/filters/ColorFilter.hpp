@@ -52,7 +52,7 @@ public:
     const std::string& getName() const;
 
 private:
-    boost::uint32_t readBuffer(PointData&);
+    boost::uint32_t readBuffer(PointData& data, const Bounds<double>& bounds);
     void checkImpedance();
     void getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue);
 

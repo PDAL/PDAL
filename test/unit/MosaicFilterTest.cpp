@@ -65,7 +65,9 @@ BOOST_AUTO_TEST_CASE(test1)
 
     PointData data(layout, 300);
     
-    boost::uint32_t numRead = mosaic.read(data);
+    const Bounds<double>& maxBounds = Bounds<double>::getDefaultSpatialExtent();
+
+    boost::uint32_t numRead = mosaic.read(data, maxBounds);
 
     BOOST_CHECK(numRead == 300);
 

@@ -68,7 +68,7 @@ public:
     // readBuffer function below, not this one.
     //
     // Returns the number of valid points read.
-    boost::uint32_t read(PointData&);
+    boost::uint32_t read(PointData&, const Bounds<double>& bounds);
 
     // advance (or retreat) to the Nth point in the file (absolute, 
     // not relative).  In some cases, this might be a very slow, painful
@@ -93,7 +93,7 @@ public:
 
 protected:
     // Implement this to do the actual work to fill in a buffer of points.
-    virtual boost::uint32_t readBuffer(PointData&) = 0;
+    virtual boost::uint32_t readBuffer(PointData& pointData, const Bounds<double>& bounds) = 0;
 
     // Each concrete stage is repsonsible for managing its own current
     // point index when a read or seek occurs.  Call this function to set

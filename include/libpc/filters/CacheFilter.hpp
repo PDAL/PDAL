@@ -78,7 +78,7 @@ public:
                        boost::uint64_t& numCacheInsertHits) const;
 
 private:
-    boost::uint32_t readBuffer(PointData&);
+    boost::uint32_t readBuffer(PointData& data, const Bounds<double>& bounds);
 
     boost::uint64_t m_numPointsRequested;
     boost::uint64_t m_numPointsRead;
