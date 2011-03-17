@@ -88,7 +88,7 @@ bool compare_files(const std::string& file1, const std::string& file2)
     return true;
 }
 
-std::string TestConfig::g_data_path = "../test/data";
+std::string TestConfig::g_data_path = "../../test/data";
 
 TestConfig::TestConfig()
 {
