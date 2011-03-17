@@ -91,7 +91,7 @@ void LasReader::seekToPoint(boost::uint64_t pointNum)
 
 boost::uint32_t LasReader::readBuffer(PointData& pointData, const Bounds<double>&)
 {
-    boost::uint32_t numPoints = pointData.getNumPoints();
+    boost::uint32_t numPoints = pointData.getCapacity();
 
     const LasHeader& lasHeader = getLasHeader();
     const SchemaLayout& schemaLayout = pointData.getSchemaLayout();
@@ -238,12 +238,15 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData, const Bounds<double>
             pointData.setField<boost::uint16_t>(pointIndex, fieldIndexRed, red);
             pointData.setField<boost::uint16_t>(pointIndex, fieldIndexGreen, green);
             pointData.setField<boost::uint16_t>(pointIndex, fieldIndexBlue, blue);
-
+            
         }
+        
         else
         {
             throw;
         }
+        pointData.setNumPoints(pointIndex+1);
+        
     }
 
     return numPoints;
