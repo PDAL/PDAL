@@ -35,7 +35,7 @@
 #ifndef INCLUDED_LIBPC_DRIVER_OCI_READER_HPP
 #define INCLUDED_LIBPC_DRIVER_OCI_READER_HPP
 
-#include <libpc/Reader.hpp>
+#include <libpc/Stage.hpp>
 
 #include "common.hpp"
 
@@ -49,7 +49,7 @@ namespace libpc { namespace driver { namespace oci {
 
 
 
-class LIBPC_DLL Reader : public libpc::Reader
+class LIBPC_DLL Reader : public libpc::Stage
 {
 
 public:
