@@ -12,22 +12,22 @@ SET(LIBPC_UNIT_TEST_SRC
     CacheFilterTest.cpp
 	ChipperTest.cpp
 	ColorTest.cpp
-	ConfigTest.cpp
 	ColorFilterTest.cpp
+	ConfigTest.cpp
 	CropFilterTest.cpp
 	DecimationFilterTest.cpp
-	DimensionTest.cpp
 	DimensionLayoutTest.cpp
+	DimensionTest.cpp
 	FauxReaderTest.cpp
 	FauxWriterTest.cpp
 	LiblasReaderTest.cpp
 	LiblasWriterTest.cpp
 	MosaicFilterTest.cpp
-	PointDataTest.cpp
 	PointDataCacheTest.cpp
+	PointDataTest.cpp
 	RangeTest.cpp
-	SchemaTest.cpp
 	SchemaLayoutTest.cpp
+	SchemaTest.cpp
 	SignallerTest.cpp
 	UtilsTest.cpp
 	VectorTest.cpp
