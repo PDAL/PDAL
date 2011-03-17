@@ -45,8 +45,6 @@ using namespace libpc;
 using namespace libpc::drivers::liblas;
 
 
-extern std::string g_data_path;
-
 BOOST_AUTO_TEST_SUITE(LiblasWriterTest)
 
 BOOST_AUTO_TEST_CASE(test_simple_las)
@@ -54,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    std::istream* ifs = Utils::openFile(g_data_path + "1.2-with-color.las");
+    std::istream* ifs = Utils::openFile(TestConfig::g_data_path + "1.2-with-color.las");
     LiblasReader reader(*ifs);
     
     std::ostream* ofs = Utils::createFile("temp.las");
@@ -80,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     Utils::closeFile(ofs);
     Utils::closeFile(ifs);
 
-    bool filesSame = compare_files("temp.las", g_data_path + "simple.las");
+    bool filesSame = compare_files("temp.las", TestConfig::g_data_path + "simple.las");
     BOOST_CHECK(filesSame);
 
     if (filesSame)
@@ -96,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    std::istream* ifs = Utils::openFile(g_data_path + "1.2-with-color.las");
+    std::istream* ifs = Utils::openFile(TestConfig::g_data_path + "1.2-with-color.las");
     LiblasReader reader(*ifs);
     
     std::ostream* ofs = Utils::createFile("temp.laz");
@@ -121,7 +119,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     Utils::closeFile(ofs);
     Utils::closeFile(ifs);
 
-    bool filesSame = compare_files("temp.laz", g_data_path + "simple.laz");
+    bool filesSame = compare_files("temp.laz", TestConfig::g_data_path + "simple.laz");
     BOOST_CHECK(filesSame);
 
     if (filesSame)

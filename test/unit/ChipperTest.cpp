@@ -44,14 +44,12 @@
 using namespace libpc;
 using namespace libpc::drivers::liblas;
 
-extern std::string g_data_path;
-
 BOOST_AUTO_TEST_SUITE(ChipperTest)
 
 BOOST_AUTO_TEST_CASE(test_construction)
 {
 
-    std::istream* ifs = Utils::openFile(g_data_path + "1.2-with-color.las");
+    std::istream* ifs = Utils::openFile(TestConfig::g_data_path + "1.2-with-color.las");
     LiblasReader reader(*ifs);
     
 
