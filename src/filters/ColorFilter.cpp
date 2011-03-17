@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <cassert>
+#include <libpc/exceptions.hpp>
 #include <libpc/Color.hpp>
 #include <libpc/filters/ColorFilter.hpp>
 
@@ -41,12 +42,39 @@ namespace libpc { namespace filters {
 ColorFilter::ColorFilter(Stage& prevStage)
     : Filter(prevStage)
 {
+    checkImpedance();
+
+    return;
+}
+
+
+void ColorFilter::checkImpedance()
+{
     Schema& schema = getHeader().getSchema();
 
-    // add the three u8 fields
-    schema.addDimension(Dimension(Dimension::Field_Red, Dimension::Uint8));
-    schema.addDimension(Dimension(Dimension::Field_Green, Dimension::Uint8));
-    schema.addDimension(Dimension(Dimension::Field_Blue, Dimension::Uint8));
+    Dimension dimZ(Dimension::Field_Z, Dimension::Uint8);
+    if (schema.hasDimension(dimZ) == false)
+    {
+        throw impedance_invalid("color filter does not have Z/uint8 field");
+    }
+
+    Dimension dimRed(Dimension::Field_Red, Dimension::Uint8);     
+    Dimension dimGreen(Dimension::Field_Green, Dimension::Uint8);
+    Dimension dimBlue(Dimension::Field_Blue, Dimension::Uint8);
+
+    // are there already u8 fields for color?
+    if (!schema.hasDimension(dimRed))
+    {
+        schema.addDimension(dimRed);
+    }
+    if (!schema.hasDimension(dimGreen))
+    {
+        schema.addDimension(dimGreen);
+    }
+    if (!schema.hasDimension(dimBlue))
+    {
+        schema.addDimension(dimBlue);
+    }
 
     return;
 }

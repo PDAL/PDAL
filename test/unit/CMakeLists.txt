@@ -13,6 +13,7 @@ SET(LIBPC_UNIT_TEST_SRC
 	ChipperTest.cpp
 	ColorTest.cpp
 	ConfigTest.cpp
+	ColorFilterTest.cpp
 	CropFilterTest.cpp
 	DecimationFilterTest.cpp
 	DimensionTest.cpp
