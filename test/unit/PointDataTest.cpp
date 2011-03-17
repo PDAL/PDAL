@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 
     PointData data(layout, 10);
 
-    BOOST_CHECK(data.getNumPoints() == 10);
+    BOOST_CHECK(data.getCapacity() == 10);
     BOOST_CHECK(data.getSchemaLayout() == layout);
 
     return;
@@ -78,10 +78,12 @@ static PointData* makeTestBuffer()
     std::size_t offZ = layout.getDimensionLayout(2).getByteOffset();
     BOOST_CHECK(offZ==5);
 
-    PointData* data = new PointData(layout, 17);
+    boost::uint32_t capacity = 17;
+    PointData* data = new PointData(layout, capacity);
 
+    BOOST_CHECK(data->getCapacity() == capacity);
     // write the data into the buffer
-    for (int i=0; i<17; i++)
+    for (int i=0; i<data->getCapacity(); i++)
     {
       const boost::uint8_t x = static_cast<boost::uint8_t>(i)+1;
       const boost::int32_t y = i*10;
@@ -90,8 +92,11 @@ static PointData* makeTestBuffer()
       data->setField(i, 0, x);
       data->setField(i, 1, y);
       data->setField(i, 2, z);
-    }
+      data->setNumPoints(i+1);
 
+    }
+    BOOST_CHECK(data->getCapacity() ==17);
+    BOOST_CHECK(data->getNumPoints() ==17);
     return data;
 }
 
@@ -163,7 +168,7 @@ BOOST_AUTO_TEST_CASE(test_copy)
       int ii = 11;
       BOOST_CHECK(x == ii+1);
       BOOST_CHECK(y == ii*10);
-      BOOST_CHECK(Utils::compare_approx(z, ii+100.0, (std::numeric_limits<double>::min)()) == true);
+      BOOST_CHECK(Utils::compare_approx(z, ii*100.0, (std::numeric_limits<double>::min)()) == true);
     }
 
     delete data;

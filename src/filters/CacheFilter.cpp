@@ -119,14 +119,14 @@ boost::uint32_t CacheFilter::readBuffer(PointData& data, const Bounds<double>& b
     // for now, we only read from the cache if they are asking for one point
     // (this avoids the problem of an N-point request needing more than one
     // cached block to satisfy it)
-    if (data.getNumPoints() != 1)
+    if (data.getCapacity() != 1)
     {
         const boost::uint32_t numRead = m_prevStage.read(data, bounds);
 
         // if they asked for a full block and we got a full block,
         // and the block we got is properly aligned and not already cached,
         // then let's cache it!
-        if (data.getNumPoints() == m_cacheBlockSize && numRead == m_cacheBlockSize && 
+        if (data.getCapacity() == m_cacheBlockSize && numRead == m_cacheBlockSize && 
             (currentPointIndex % m_cacheBlockSize == 0) &&
             m_cache->lookup(currentPointIndex) == NULL)
         {
@@ -137,7 +137,7 @@ boost::uint32_t CacheFilter::readBuffer(PointData& data, const Bounds<double>& b
 
         incrementCurrentPointIndex(numRead);
 
-        m_numPointsRead += data.getNumPoints();
+        m_numPointsRead += numRead;
         m_numPointsRequested += data.getCapacity();
 
         return numRead;
