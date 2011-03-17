@@ -63,7 +63,10 @@ void CropFilter::seekToPoint(boost::uint64_t pointNum)
 
 boost::uint32_t CropFilter::readBuffer(PointData& data)
 {
-    boost::uint32_t numPoints = m_prevStage.read(data);
+
+    PointData srcData(data.getSchemaLayout(), data.getCapacity());
+    boost::uint32_t numSrcPointsRead = m_prevStage.read(srcData);
+
 
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
@@ -72,27 +75,32 @@ boost::uint32_t CropFilter::readBuffer(PointData& data)
     int fieldY = schema.getDimensionIndex(Dimension::Field_Y);
     int fieldZ = schema.getDimensionIndex(Dimension::Field_Z);
 
-    // FIXME: Reconstruct a PointData
-    // for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
-    // {
-    //     float x = data.getField<float>(pointIndex, fieldX);
-    //     float y = data.getField<float>(pointIndex, fieldY);
-    //     float z = data.getField<float>(pointIndex, fieldZ);
-    //     Vector<double> point(x,y,z);
-    //     if (!m_bounds.contains(point))
-    //     {
-    //         // remove this point, and update the lower bound for Z
-    //         data.setValid(pointIndex, false);
-    //     }
-    //     else
-    //     {
-    //         data.setValid(pointIndex, true);
-    //     }
-    // }
-    // 
-    // incrementCurrentPointIndex(numPoints);
 
-    return numPoints;
+    boost::uint32_t numPoints = data.getCapacity();
+    
+    boost::uint32_t srcIndex = 0;
+    boost::uint32_t dstIndex = 0;
+    for (srcIndex=0; srcIndex<numPoints; srcIndex++)
+    {
+    
+        double x = srcData.getField<double>(srcIndex, fieldX);
+        double y = srcData.getField<double>(srcIndex, fieldY);
+        double z = srcData.getField<double>(srcIndex, fieldZ);
+        Vector<double> point(x,y,z);
+        
+        if (m_bounds.contains(point))
+        {
+            data.copyPointFast(dstIndex, srcIndex, srcData);
+            data.setNumPoints(dstIndex+1);
+            dstIndex += 1;
+            
+        }
+    }
+    
+    
+    incrementCurrentPointIndex(numPoints);
+
+    return data.getNumPoints();
 }
 
 } } // namespaces
