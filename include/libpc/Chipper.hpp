@@ -1,7 +1,6 @@
 #ifndef LIBLAS_CHIPPER_H
 #define LIBLAS_CHIPPER_H
 
-#include <libpc/Stage.hpp>
 #include <libpc/PointData.hpp>
 #include <libpc/Bounds.hpp>
 #include <libpc/export.hpp>
@@ -13,6 +12,8 @@ namespace libpc
 {
 
 class Schema;
+class Stage;
+class CacheFilter;
     
 namespace chipper
 {

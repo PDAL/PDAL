@@ -38,7 +38,10 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/chipper.hpp>
+#include <libpc/Chipper.hpp>
+#include <libpc/Header.hpp>
+#include <libpc/Stage.hpp>
+#include <libpc/filters/CacheFilter.hpp>
 #include <libpc/Utils.hpp>
 // boost
 #include <boost/cstdint.hpp>
