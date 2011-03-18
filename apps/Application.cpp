@@ -180,7 +180,7 @@ void Application::outputHelp()
 void Application::outputVersion()
 {
     std::cout << "--------------------------------------------------------------------\n";
-    std::cout << "pc2pc (" << libpc::GetFullVersionString() << ")\n";
+    std::cout << m_appName << " (" << libpc::GetFullVersionString() << ")\n";
     std::cout << "--------------------------------------------------------------------\n";
     std::cout << std::endl;
 }
