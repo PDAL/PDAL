@@ -108,9 +108,10 @@ public:
     // same as above, but copies N points
     void copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData, std::size_t numPoints);
 
-private:
     // access to the raw memory
     boost::uint8_t* getData(std::size_t pointIndex) const;
+
+private:
 
     SchemaLayout m_schemaLayout;
     boost::uint8_t* m_data;
