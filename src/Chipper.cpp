@@ -84,8 +84,12 @@ Block::Block(Schema const& schema, boost::uint32_t capacity)
 {
     
 }
-Block::Block(Block const& block)
- : PointData(block.getSchema(), block.getCapacity())
+Block::Block(Block const& other)
+ : PointData(other)
+ , m_list_p(other.m_list_p)
+ , m_left(other.m_left)
+ , m_right(other.m_right)
+ , m_bounds(other.m_bounds)
 {
     
 }
