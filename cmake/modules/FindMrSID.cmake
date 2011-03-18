@@ -29,17 +29,15 @@ if(NOT MRSID_FIND_QUIETLY)
   message(STATUS "Searching for MrSID LiDAR library ${MrSID_FIND_VERSION}+")
 endif()
 
-if(NOT DEFINED ENV{MRSID_HOME})
-  message(FATAL_ERROR "Missing environment variable MRSID_HOME with location of MrSID LiDAR sdk")
+if(NOT MRSID_ROOT)
+  message(FATAL_ERROR "Missing variable MRSID_ROOT with location of MrSID LiDAR sdk")
 endif()
-
-set(MRSID_HOME $ENV{MRSID_HOME})
 
 find_path(MRSID_INCLUDE_DIR
           lidar/Base.h
           PATHS
-            ${MRSID_HOME}/include
-            ${MRSID_HOME}/Lidar_DSDK/include
+            ${MRSID_ROOT}/include
+            ${MRSID_ROOT}/Lidar_DSDK/include
           NO_DEFAULT_PATH)
 
 find_library(MRSID_LIBRARY
