@@ -11,7 +11,8 @@
 
 
 #include <libpc/drivers/las/Reader.hpp>
-#include <libpc/drivers/liblas/reader.hpp>
+#include <libpc/drivers/liblas/Reader.hpp>
+#include <libpc/drivers/mrsid/Reader.hpp>
 
 #include <iostream>
 
@@ -79,20 +80,35 @@ int Application_pcinfo::execute()
     std::istream* ifs = Utils::openFile(m_inputFile);
 
     libpc::Stage* reader = NULL;
-    if (hasOption("native"))
+    size_t ext = m_inputFile.find_last_of('.');
+    if (ext != std::string::npos)
     {
-        reader = new libpc::drivers::las::LasReader(*ifs);
+        ext++;
+        if (!m_inputFile.substr(ext).compare("las") ||
+            !m_inputFile.substr(ext).compare("laz"))
+        {
+            if (hasOption("native"))
+                reader = new libpc::drivers::las::LasReader(*ifs);
+            else
+                reader = new libpc::drivers::liblas::LiblasReader(*ifs);
+        }
+        else if (!m_inputFile.substr(ext).compare("sid"))
+        {
+            reader = new libpc::drivers::mrsid::Reader(m_inputFile.c_str());
+        }
     }
     else
     {
-        reader = new libpc::drivers::liblas::LiblasReader(*ifs);
+        std::cerr << "Cannot determine file type of " << m_inputFile
+                  << "." << std::endl;
+        return 1;
     }
 
     boost::uint64_t numPoints = reader->getNumPoints();
 
     delete reader;
-
-    Utils::closeFile(ifs);
+    if (ifs)
+        Utils::closeFile(ifs);
 
     std::cout << numPoints << " points\n";
 
