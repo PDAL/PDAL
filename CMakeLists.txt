@@ -342,6 +342,7 @@ if(WITH_MRSID)
     if(MRSID_FOUND)
         set(CMAKE_REQUIRED_LIBRARIES ${MRSID_LIBRARY})
         include_directories(${MRSID_INCLUDE_DIR})
+        add_definitions(-DHAVE_MRSID=1)
     endif()
 endif()
 
