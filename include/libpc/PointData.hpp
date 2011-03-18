@@ -65,6 +65,9 @@ public:
     // represents the state within the owning object, which in this case is a completely
     // empty buffer (similarly, all the points in the buffer are marked "invalid")
     PointData(const SchemaLayout&, boost::uint32_t capacity);
+    PointData(const PointData&); 
+    PointData& operator=(const PointData&); 
+
     ~PointData();
 
     const Bounds<double>& getSpatialBounds() const;
@@ -116,8 +119,6 @@ private:
     boost::uint32_t m_capacity;    
     Bounds<double> m_bounds;
 
-    PointData(const PointData&); // not implemented
-    PointData& operator=(const PointData&); // not implemented
 };
 
 

@@ -57,6 +57,33 @@ PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t capacity)
     return;
 }
 
+PointData::PointData(PointData const& other) 
+    : m_schemaLayout(other.getSchemaLayout())
+    , m_data(0)
+    , m_pointSize(m_schemaLayout.getByteSize())
+    , m_numPoints(other.m_numPoints)
+    , m_capacity(other.m_capacity)
+    , m_bounds(other.m_bounds)
+{
+    m_data = new boost::uint8_t[m_pointSize * m_capacity];
+    
+    memcpy(m_data, other.m_data, m_pointSize*m_capacity);
+
+}
+
+PointData& PointData::operator=(PointData const& rhs)
+{
+    if (&rhs != this)
+    {
+        m_schemaLayout = rhs.getSchemaLayout();
+        m_data = new boost::uint8_t[m_schemaLayout.getByteSize() * rhs.getCapacity()];
+        m_pointSize = m_schemaLayout.getByteSize();
+        m_numPoints = rhs.getNumPoints();
+        m_capacity = rhs.getCapacity();
+        m_bounds = rhs.getSpatialBounds();
+    }
+    return *this;
+}
 
 PointData::~PointData()
 {
