@@ -36,6 +36,7 @@
 #define INCLUDED_CACHEFILTER_HPP
 
 #include <libpc/Filter.hpp>
+#include <libpc/FilterIterator.hpp>
 
 namespace libpc {
 
@@ -43,6 +44,7 @@ class PointDataCache;
     
 namespace filters {
 
+class CacheFilterIterator;
 
 // This is just a very simple MRU filter -- future versions will be smarter.
 // This cache has the following constraints:
@@ -51,6 +53,8 @@ namespace filters {
 // If more than one point is read, the cache is skipped.
 class LIBPC_DLL CacheFilter : public Filter
 {
+    friend CacheFilterIterator;
+
 public:
     CacheFilter(Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
     ~CacheFilter();
@@ -77,7 +81,7 @@ public:
                        boost::uint64_t& numCacheInsertMisses,
                        boost::uint64_t& numCacheInsertHits) const;
 
-    Iterator* createIterator(const Bounds<double>& bounds);
+    Iterator* createIterator();
 
 private:
     boost::uint32_t readBuffer(PointData& data);
@@ -92,6 +96,21 @@ private:
     CacheFilter& operator=(const CacheFilter&); // not implemented
     CacheFilter(const CacheFilter&); // not implemented
 };
+
+
+class CacheFilterIterator : public libpc::FilterIterator
+{
+public:
+    CacheFilterIterator(CacheFilter& filter);
+
+    void seekToPoint(boost::uint64_t);
+
+private:
+    boost::uint32_t readBuffer(PointData&);
+
+    CacheFilter& m_stageAsDerived;
+};
+
 
 } } // namespaces
 

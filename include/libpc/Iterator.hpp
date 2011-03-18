@@ -45,7 +45,7 @@ class PointData;
 class LIBPC_DLL Iterator
 {
 public:
-    Iterator(Stage& stage, const Bounds<double>& bounds);
+    Iterator(Stage& stage);
 
     Stage& getStage();
 
@@ -91,7 +91,6 @@ protected:
 private:
     Stage& m_stage;
     boost::uint64_t m_currentPointIndex;
-    const Bounds<double> m_bounds;
 
     Iterator& operator=(const Iterator&); // not implemented
     Iterator(const Iterator&); // not implemented

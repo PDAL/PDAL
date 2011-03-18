@@ -45,14 +45,16 @@ BOOST_AUTO_TEST_CASE(test_constant)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Constant);
+
     BOOST_CHECK(reader.getName() == "Faux Reader");
 
     const Schema& schema = reader.getHeader().getSchema();
     SchemaLayout layout(schema);
 
     PointData data(layout, 750);
-    
-    boost::uint32_t numRead = reader.read(data);
+ 
+    Iterator* iter = reader.createIterator();
+    boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 750);
 
@@ -71,8 +73,10 @@ BOOST_AUTO_TEST_CASE(test_constant)
         BOOST_CHECK(Utils::compare_approx<double>(x, 1.0, (std::numeric_limits<double>::min)()) == true);
         BOOST_CHECK(Utils::compare_approx<double>(y, 2.0, (std::numeric_limits<double>::min)()) == true);
         BOOST_CHECK(Utils::compare_approx<double>(z, 3.0, (std::numeric_limits<double>::min)()) == true);
-        BOOST_CHECK(Utils::compare_approx<double>(t, (double) i, (std::numeric_limits<double>::min)()) == true);
+        BOOST_CHECK(t==i);
     }
+
+    delete iter;
 
     return;
 }

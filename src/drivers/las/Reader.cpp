@@ -252,9 +252,29 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData)
 }
 
 
-Iterator* LasReader::createIterator(const Bounds<double>&)
+libpc::Iterator* LasReader::createIterator()
 {
-    throw not_yet_implemented("iterator");
+    return new Iterator(*this);
+}
+
+
+Iterator::Iterator(LasReader& reader)
+    : libpc::Iterator(reader)
+    , m_stageAsDerived(reader)
+{
+    return;
+}
+
+
+boost::uint32_t Iterator::readBuffer(PointData& data)
+{
+    return m_stageAsDerived.readBuffer(data);
+}
+
+
+void Iterator::seekToPoint(boost::uint64_t index)
+{
+    m_stageAsDerived.seekToPoint(index);
 }
 
 

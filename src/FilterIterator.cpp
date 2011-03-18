@@ -39,12 +39,12 @@ namespace libpc
 {
 
 
-FilterIterator::FilterIterator(Filter& filter, const Bounds<double>& bounds)
-    : Iterator(filter, bounds)
+FilterIterator::FilterIterator(Filter& filter)
+    : Iterator(filter)
     , m_stageAsFilter(static_cast<Filter&>(filter))
     , m_prevIterator(NULL)
 {
-    m_prevIterator = m_stageAsFilter.getPrevStage().createIterator(bounds);
+    m_prevIterator = m_stageAsFilter.getPrevStage().createIterator();
 
     return;
 }

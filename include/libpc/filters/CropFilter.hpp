@@ -37,14 +37,19 @@
 
 #include <libpc/export.hpp>
 #include <libpc/Filter.hpp>
+#include <libpc/FilterIterator.hpp>
 #include <libpc/Bounds.hpp>
 
 namespace libpc { namespace filters {
+
+class CropFilterIterator;
 
 // removes any points outside of the given range
 // updates the header accordingly
 class LIBPC_DLL CropFilter : public Filter
 {
+    friend CropFilterIterator;
+
 public:
     CropFilter(Stage& prevStage, Bounds<double> const& bounds);
 
@@ -52,7 +57,7 @@ public:
 
     void seekToPoint(boost::uint64_t pointNum);
 
-    Iterator* createIterator(const Bounds<double>& bounds);
+    Iterator* createIterator();
 
 private:
     boost::uint32_t readBuffer(PointData& data);
@@ -62,6 +67,21 @@ private:
     CropFilter& operator=(const CropFilter&); // not implemented
     CropFilter(const CropFilter&); // not implemented
 };
+
+
+class CropFilterIterator : public libpc::FilterIterator
+{
+public:
+    CropFilterIterator(CropFilter& filter);
+
+    void seekToPoint(boost::uint64_t);
+
+private:
+    boost::uint32_t readBuffer(PointData&);
+
+    CropFilter& m_stageAsDerived;
+};
+
 
 } } // namespaces
 

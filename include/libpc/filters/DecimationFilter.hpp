@@ -37,14 +37,18 @@
 
 #include <libpc/export.hpp>
 #include <libpc/Filter.hpp>
+#include <libpc/FilterIterator.hpp>
 #include <libpc/Bounds.hpp>
 
 namespace libpc { namespace filters {
 
+class DecimationFilterIterator;
 
 // we keep only 1 out of every step points; if step=100, we get 1% of the file
 class LIBPC_DLL DecimationFilter : public Filter
 {
+    friend DecimationFilterIterator;
+
 public:
     DecimationFilter(Stage& prevStage, int step);
 
@@ -52,7 +56,7 @@ public:
 
     void seekToPoint(boost::uint64_t pointNum);
 
-    Iterator* createIterator(const Bounds<double>& bounds);
+    Iterator* createIterator();
 
 private:
     boost::uint32_t readBuffer(PointData& data);
@@ -62,6 +66,21 @@ private:
     DecimationFilter& operator=(const DecimationFilter&); // not implemented
     DecimationFilter(const DecimationFilter&); // not implemented
 };
+
+
+class DecimationFilterIterator : public libpc::FilterIterator
+{
+public:
+    DecimationFilterIterator(DecimationFilter& filter);
+
+    void seekToPoint(boost::uint64_t);
+
+private:
+    boost::uint32_t readBuffer(PointData&);
+
+    DecimationFilter& m_stageAsDerived;
+};
+
 
 } } // namespaces
 

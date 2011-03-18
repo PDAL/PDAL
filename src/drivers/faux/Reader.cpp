@@ -38,6 +38,7 @@
 #include <libpc/drivers/faux/Reader.hpp>
 #include <libpc/Utils.hpp>
 #include <libpc/exceptions.hpp>
+#include <libpc/Iterator.hpp>
 
 using std::vector;
 using std::string;
@@ -166,9 +167,29 @@ void Reader::seekToPoint(boost::uint64_t pointNumber)
 }
 
 
-Iterator* Reader::createIterator(const Bounds<double>&)
+libpc::Iterator* Reader::createIterator()
 {
-    throw not_yet_implemented("iterator");
+    return new Iterator(*this);
+}
+
+
+Iterator::Iterator(Reader& reader)
+    : libpc::Iterator(reader)
+    , m_stageAsDerived(reader)
+{
+    return;
+}
+
+
+boost::uint32_t Iterator::readBuffer(PointData& data)
+{
+    return m_stageAsDerived.readBuffer(data);
+}
+
+
+void Iterator::seekToPoint(boost::uint64_t index)
+{
+    m_stageAsDerived.seekToPoint(index);
 }
 
 

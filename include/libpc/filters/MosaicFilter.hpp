@@ -36,14 +36,19 @@
 #define INCLUDED_MOSAICFILTER_HPP
 
 #include <libpc/Filter.hpp>
+#include <libpc/FilterIterator.hpp>
 #include <libpc/Bounds.hpp>
 
 
 namespace libpc { namespace filters {
 
+class MosaicFilterIterator;
+
 // removes any points outside of the given range
 class LIBPC_DLL MosaicFilter : public Filter
 {
+    friend MosaicFilterIterator;
+
 public:
     MosaicFilter(Stage& prevStage, std::vector<Stage*> prevStages);
     
@@ -51,7 +56,7 @@ public:
 
     void seekToPoint(boost::uint64_t pointNum);
 
-    Iterator* createIterator(const Bounds<double>& bounds);
+    Iterator* createIterator();
 
 private:
     boost::uint32_t readBuffer(PointData& data);
@@ -61,6 +66,21 @@ private:
     MosaicFilter& operator=(const MosaicFilter&); // not implemented
     MosaicFilter(const MosaicFilter&); // not implemented
 };
+
+
+class MosaicFilterIterator : public libpc::FilterIterator
+{
+public:
+    MosaicFilterIterator(MosaicFilter& filter);
+
+    void seekToPoint(boost::uint64_t);
+
+private:
+    boost::uint32_t readBuffer(PointData&);
+
+    MosaicFilter& m_stageAsDerived;
+};
+
 
 } } // namespaces
 

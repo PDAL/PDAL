@@ -38,13 +38,17 @@
 #include <iostream>
 
 #include <libpc/Stage.hpp>
+#include <libpc/Iterator.hpp>
 #include <libpc/drivers/las/Header.hpp>
 
 namespace libpc { namespace drivers { namespace las {
 
+class Iterator;
 
 class LIBPC_DLL LasReader : public Stage
 {
+    friend Iterator;
+
 public:
     LasReader(std::istream&);
 
@@ -56,7 +60,7 @@ public:
 
     const LasHeader& getLasHeader() const;
 
-    Iterator* createIterator(const Bounds<double>& bounds);
+    libpc::Iterator* createIterator();
 
 protected:
     boost::uint32_t readBuffer(PointData& data);
@@ -70,6 +74,21 @@ private:
     LasReader& operator=(const LasReader&); // not implemented
     LasReader(const LasReader&); // not implemented
 };
+
+
+class Iterator : public libpc::Iterator
+{
+public:
+    Iterator(LasReader& reader);
+
+    void seekToPoint(boost::uint64_t);
+
+private:
+    boost::uint32_t readBuffer(PointData&);
+
+    LasReader& m_stageAsDerived;
+};
+
 
 } } } // namespaces
 

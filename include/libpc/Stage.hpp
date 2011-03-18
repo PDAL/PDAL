@@ -88,7 +88,7 @@ public:
     const Header& getHeader() const;
     Header& getHeader();
 
-    virtual Iterator* createIterator(const Bounds<double>& bounds) = 0;
+    virtual Iterator* createIterator() = 0;
 
 protected:
     // Implement this to do the actual work to fill in a buffer of points.

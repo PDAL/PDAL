@@ -150,9 +150,29 @@ boost::uint32_t MosaicFilter::readBuffer(PointData& destData)
 }
 
 
-Iterator* MosaicFilter::createIterator(const Bounds<double>&)
+libpc::Iterator* MosaicFilter::createIterator()
 {
-    throw not_yet_implemented("iterator");
+    return new MosaicFilterIterator(*this);
+}
+
+
+MosaicFilterIterator::MosaicFilterIterator(MosaicFilter& filter)
+    : libpc::FilterIterator(filter)
+    , m_stageAsDerived(filter)
+{
+    return;
+}
+
+
+boost::uint32_t MosaicFilterIterator::readBuffer(PointData& data)
+{
+    return m_stageAsDerived.readBuffer(data);
+}
+
+
+void MosaicFilterIterator::seekToPoint(boost::uint64_t index)
+{
+    m_stageAsDerived.seekToPoint(index);
 }
 
 

@@ -36,6 +36,7 @@
 #define INCLUDED_LIBLASREADER_HPP
 
 #include <libpc/Stage.hpp>
+#include <libpc/Iterator.hpp>
 
 #include <iostream>
 
@@ -49,9 +50,12 @@ namespace liblas
 
 namespace libpc { namespace drivers { namespace liblas {
 
+class Iterator;
 
 class LIBPC_DLL LiblasReader : public Stage
 {
+    friend Iterator;
+
 public:
     LiblasReader(std::istream&);
     ~LiblasReader();
@@ -64,7 +68,7 @@ public:
 
     boost::int8_t getPointFormatNumber() const;
 
-    Iterator* createIterator(const Bounds<double>& bounds);
+    libpc::Iterator* createIterator();
 
 private:
     virtual boost::uint32_t readBuffer(PointData& data);
@@ -96,6 +100,20 @@ private:
 
     LiblasReader& operator=(const LiblasReader&); // not implemented
     LiblasReader(const LiblasReader&); // not implemented
+};
+
+
+class Iterator : public libpc::Iterator
+{
+public:
+    Iterator(LiblasReader& reader);
+
+    void seekToPoint(boost::uint64_t);
+
+private:
+    boost::uint32_t readBuffer(PointData&);
+
+    LiblasReader& m_stageAsDerived;
 };
 
 } } } // namespaces

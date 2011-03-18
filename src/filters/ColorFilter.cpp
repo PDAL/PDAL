@@ -134,10 +134,29 @@ void ColorFilter::getColor(float value, boost::uint8_t& red, boost::uint8_t& gre
 }
 
 
-Iterator* ColorFilter::createIterator(const Bounds<double>&)
+libpc::Iterator* ColorFilter::createIterator()
 {
-    throw not_yet_implemented("iterator");
+    return new ColorFilterIterator(*this);
 }
 
+
+ColorFilterIterator::ColorFilterIterator(ColorFilter& filter)
+    : libpc::FilterIterator(filter)
+    , m_stageAsDerived(filter)
+{
+    return;
+}
+
+
+boost::uint32_t ColorFilterIterator::readBuffer(PointData& data)
+{
+    return m_stageAsDerived.readBuffer(data);
+}
+
+
+void ColorFilterIterator::seekToPoint(boost::uint64_t index)
+{
+    m_stageAsDerived.seekToPoint(index);
+}
 
 } } // namespaces

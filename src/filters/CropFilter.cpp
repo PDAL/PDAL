@@ -105,9 +105,30 @@ boost::uint32_t CropFilter::readBuffer(PointData& data)
 }
 
 
-Iterator* CropFilter::createIterator(const Bounds<double>&)
+libpc::Iterator* CropFilter::createIterator()
 {
-    throw not_yet_implemented("iterator");
+    return new CropFilterIterator(*this);
+}
+
+
+
+CropFilterIterator::CropFilterIterator(CropFilter& filter)
+    : libpc::FilterIterator(filter)
+    , m_stageAsDerived(filter)
+{
+    return;
+}
+
+
+boost::uint32_t CropFilterIterator::readBuffer(PointData& data)
+{
+    return m_stageAsDerived.readBuffer(data);
+}
+
+
+void CropFilterIterator::seekToPoint(boost::uint64_t index)
+{
+    m_stageAsDerived.seekToPoint(index);
 }
 
 

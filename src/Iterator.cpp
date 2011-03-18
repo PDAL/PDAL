@@ -40,10 +40,9 @@ namespace libpc
 {
 
 
-Iterator::Iterator(Stage& stage, const Bounds<double>& bounds)
+Iterator::Iterator(Stage& stage)
     : m_stage(stage)
     , m_currentPointIndex(0)
-    , m_bounds(bounds)
 {
     return;
 }

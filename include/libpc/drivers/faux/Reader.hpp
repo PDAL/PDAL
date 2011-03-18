@@ -36,8 +36,11 @@
 #define INCLUDED_DRIVERS_FAUX_READER_HPP
 
 #include <libpc/Stage.hpp>
+#include <libpc/Iterator.hpp>
 
 namespace libpc { namespace drivers { namespace faux {
+
+class Iterator;
 
 // The FauxReader doesn't read from disk, but instead just makes up data for its
 // points.  The reader is constructed with a given bounding box and a given 
@@ -54,6 +57,8 @@ namespace libpc { namespace drivers { namespace faux {
 //
 class LIBPC_DLL Reader : public libpc::Stage
 {
+    friend Iterator;
+
 public:
     enum Mode
     {
@@ -69,7 +74,7 @@ public:
 
     void seekToPoint(boost::uint64_t);
 
-    Iterator* createIterator(const Bounds<double>& bounds);
+    libpc::Iterator* createIterator();
 
 private:
     boost::uint32_t readBuffer(PointData&);
@@ -79,6 +84,21 @@ private:
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 };
+
+
+class Iterator : public libpc::Iterator
+{
+public:
+    Iterator(Reader& reader);
+
+    void seekToPoint(boost::uint64_t);
+
+private:
+    boost::uint32_t readBuffer(PointData&);
+
+    Reader& m_stageAsDerived;
+};
+
 
 } } } // namespaces
 

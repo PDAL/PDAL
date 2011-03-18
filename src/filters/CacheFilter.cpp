@@ -170,10 +170,29 @@ boost::uint32_t CacheFilter::readBuffer(PointData& data)
 }
 
 
-Iterator* CacheFilter::createIterator(const Bounds<double>&)
+libpc::Iterator* CacheFilter::createIterator()
 {
-    throw not_yet_implemented("iterator");
+    return new CacheFilterIterator(*this);
 }
 
+
+CacheFilterIterator::CacheFilterIterator(CacheFilter& filter)
+    : libpc::FilterIterator(filter)
+    , m_stageAsDerived(filter)
+{
+    return;
+}
+
+
+boost::uint32_t CacheFilterIterator::readBuffer(PointData& data)
+{
+    return m_stageAsDerived.readBuffer(data);
+}
+
+
+void CacheFilterIterator::seekToPoint(boost::uint64_t index)
+{
+    m_stageAsDerived.seekToPoint(index);
+}
 
 } } // namespaces

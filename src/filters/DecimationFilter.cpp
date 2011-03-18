@@ -84,9 +84,30 @@ boost::uint32_t DecimationFilter::readBuffer(PointData& dstData)
 }
 
 
-Iterator* DecimationFilter::createIterator(const Bounds<double>&)
+libpc::Iterator* DecimationFilter::createIterator()
 {
-    throw not_yet_implemented("iterator");
+    return new DecimationFilterIterator(*this);
+}
+
+
+
+DecimationFilterIterator::DecimationFilterIterator(DecimationFilter& filter)
+    : libpc::FilterIterator(filter)
+    , m_stageAsDerived(filter)
+{
+    return;
+}
+
+
+boost::uint32_t DecimationFilterIterator::readBuffer(PointData& data)
+{
+    return m_stageAsDerived.readBuffer(data);
+}
+
+
+void DecimationFilterIterator::seekToPoint(boost::uint64_t index)
+{
+    m_stageAsDerived.seekToPoint(index);
 }
 
 

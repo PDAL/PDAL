@@ -336,9 +336,29 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
 }
 
 
-Iterator* LiblasReader::createIterator(const Bounds<double>&)
+libpc::Iterator* LiblasReader::createIterator()
 {
     throw not_yet_implemented("iterator");
+}
+
+
+Iterator::Iterator(LiblasReader& reader)
+    : libpc::Iterator(reader)
+    , m_stageAsDerived(reader)
+{
+    return;
+}
+
+
+boost::uint32_t Iterator::readBuffer(PointData& data)
+{
+    return m_stageAsDerived.readBuffer(data);
+}
+
+
+void Iterator::seekToPoint(boost::uint64_t index)
+{
+    m_stageAsDerived.seekToPoint(index);
 }
 
 

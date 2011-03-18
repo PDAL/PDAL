@@ -39,19 +39,24 @@
 
 #include <libpc/export.hpp>
 #include <libpc/Filter.hpp>
+#include <libpc/FilterIterator.hpp>
 
 namespace libpc { namespace filters {
+
+class ColorFilterIterator;
 
 // adds three new u8 fields (R,G,B) for the colourization of the Z axis
 // the color is done as a ramp from the declared Z min/max values in the header
 class LIBPC_DLL ColorFilter : public Filter
 {
+    friend ColorFilterIterator;
+
 public:
     ColorFilter(Stage& prevStage);
 
     const std::string& getName() const;
 
-    Iterator* createIterator(const Bounds<double>& bounds);
+    Iterator* createIterator();
 
 private:
     boost::uint32_t readBuffer(PointData& data);
@@ -61,6 +66,21 @@ private:
     ColorFilter& operator=(const ColorFilter&); // not implemented
     ColorFilter(const ColorFilter&); // not implemented
 };
+
+
+class ColorFilterIterator : public libpc::FilterIterator
+{
+public:
+    ColorFilterIterator(ColorFilter& filter);
+
+    void seekToPoint(boost::uint64_t);
+
+private:
+    boost::uint32_t readBuffer(PointData&);
+
+    ColorFilter& m_stageAsDerived;
+};
+
 
 } } // namespaces
 

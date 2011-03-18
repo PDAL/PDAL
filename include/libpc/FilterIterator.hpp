@@ -44,7 +44,7 @@ class Filter;
 class FilterIterator : public Iterator
 {
 public:
-    FilterIterator(Filter&, const Bounds<double>& bounds);
+    FilterIterator(Filter&);
 
 private:
     Filter& m_stageAsFilter;
