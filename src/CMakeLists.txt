@@ -191,6 +191,27 @@ ENDFOREACH(file)
 endif()
 
 #
+# drivers/mrsid
+#
+if (MRSID_FOUND)
+set(LIBPC_DRIVERS_MRSID_HPP
+  ${LIBPC_HEADERS_DIR}/drivers/mrsid/Reader.hpp
+)
+
+set (LIBPC_DRIVERS_MRSID_CPP 
+  ./drivers/mrsid/Reader.cpp
+)
+   
+FOREACH(file ${LIBPC_DRIVERS_MRSID_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for drivers/mrsid")
+ENDFOREACH(file)
+
+FOREACH(file ${LIBPC_DRIVERS_MRSID_CPP})
+        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for drivers/mrsid")
+ENDFOREACH(file)
+endif()
+
+#
 # filters
 #
 
@@ -290,6 +311,7 @@ target_link_libraries(${APPS_CPP_DEPENDENCIES}
   ${LIBLAS_LIBRARY}
   ${TIFF_LIBRARY}
   ${ORACLE_LIBRARY}
+  ${MRSID_LIBRARY}
   ${GEOTIFF_LIBRARY}
   ${GDAL_LIBRARY}
   ${LASZIP_LIBRARY}

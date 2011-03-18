@@ -332,6 +332,17 @@ if (NOT LIBLAS_FOUND)
     "libPC currently requires a working libLAS installation 1.6.0 or greater")
 endif()
 
+# MrSID/LiDAR support - optiona, default=OFF
+set(WITH_MRSID FALSE CACHE BOOL "Choose if MrSID/LiDAR support should be built")
+
+if(WITH_MRSID)
+    find_package(MrSID)
+    if(MRSID_FOUND)
+        set(CMAKE_REQUIRED_LIBRARIES ${MRSID_LIBRARY})
+        include_directories(${MRSID_INCLUDE_DIR})
+    endif()
+endif()
+
 
 #------------------------------------------------------------------------------
 # installation path settings
