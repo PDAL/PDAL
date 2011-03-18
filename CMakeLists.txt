@@ -317,7 +317,8 @@ set(WITH_LIBLAS FALSE CACHE BOOL "Choose if libLAS support should be built")
 set(WITH_STATIC_LIBLAS FALSE CACHE BOOL "Choose if libLAS should be statically linked")
 mark_as_advanced(WITH_STATIC_LIBLAS)
 
-find_package(LibLAS 1.6.0)
+if(WITH_LIBLAS)
+    find_package(LibLAS 1.6.0)
     if(LIBLAS_FOUND)
         set(CMAKE_REQUIRED_LIBRARIES ${LIBLAS_LIBRARY})
         include_directories(${LIBLAS_INCLUDE_DIR})
@@ -326,6 +327,7 @@ find_package(LibLAS 1.6.0)
         mark_as_advanced(CLEAR LIBLAS_VERSION) 
         set(LIBPC_HAVE_LIBLAS 1)
     endif()
+endif()
 
 if (NOT LIBLAS_FOUND)
   message(FATAL_ERROR
