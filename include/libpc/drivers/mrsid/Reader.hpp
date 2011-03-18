@@ -58,6 +58,8 @@ public:
 
     const std::string& getName() const;
 
+    void seekToPoint(boost::uint64_t pointNum);
+    Iterator* createIterator(const Bounds<double>& bounds);
 protected:
     boost::uint32_t readBuffer(PointData&);
 

@@ -67,8 +67,12 @@ Reader::Reader(const char * filepath)
     Schema& schema = header->getSchema();
 
     header->setNumPoints(m_reader->getNumPoints());
-    Bounds<double> bounds(m_reader->getBounds().x.min, m_reader->getBounds().y.min, m_reader->getBounds().z.min,
-                          m_reader->getBounds().x.max, m_reader->getBounds().y.max, m_reader->getBounds().z.max);
+    Bounds<double> bounds(m_reader->getBounds().x.min,
+                          m_reader->getBounds().y.min,
+                          m_reader->getBounds().z.min,
+                          m_reader->getBounds().x.max,
+                          m_reader->getBounds().y.max,
+                          m_reader->getBounds().z.max);
 
     header->setBounds(bounds);
 
@@ -89,7 +93,7 @@ FieldEnumOf(const char * fieldname)
         return Dimension::Field_X;
     if (!strcmp(CHANNEL_NAME_Y, fieldname))
         return Dimension::Field_Y;
-    if (!strcmp(CHANNEL_NAME_Y, fieldname))
+    if (!strcmp(CHANNEL_NAME_Z, fieldname))
         return Dimension::Field_Z;
     if (!strcmp(CHANNEL_NAME_Intensity, fieldname))
         return Dimension::Field_Intensity;
@@ -125,6 +129,7 @@ FieldEnumOf(const char * fieldname)
     // Field_WaveformYt
     // Field_WaveformZt
     // ...
+    return Dimension::Field_X;
 }
 
 libpc::Dimension::DataType
@@ -169,6 +174,15 @@ boost::uint32_t Reader::readBuffer(PointData& pointData)
     return 0;
 }
 
+void Reader::seekToPoint(boost::uint64_t)
+{
+    return;
+}
+
+libpc::Iterator *Reader::createIterator(const libpc::Bounds<double>&)
+{
+    return NULL;
+}
 
 }
 }
