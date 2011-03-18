@@ -27,13 +27,49 @@ enum Direction
 
 class LIBPC_DLL PtRef
 {
+    
 public:
+    PtRef() :m_data(0) {};
+
+    // PtRef(PointData const& data) : m_data(0), m_pointSize(data.getSchemaLayout().getByteSize()) {};
     double m_pos;
     boost::uint32_t m_ptindex;
     boost::uint32_t m_oindex;
+    boost::uint8_t* m_data;
+    boost::uint32_t m_pointSize;
 
     bool operator < (const PtRef& pt) const
         { return m_pos < pt.m_pos; }
+
+    PtRef(const PtRef& other) : 
+        m_pos(other.m_pos), 
+        m_ptindex(other.m_ptindex), 
+        m_oindex(other.m_oindex),
+        m_data(other.m_data) 
+        { 
+            if (other.m_data)
+            {
+                m_data = new boost::uint8_t[m_pointSize * 1]; 
+                memcpy(m_data, other.m_data, m_pointSize*1);
+            }
+        }
+
+    PtRef& operator=(const PtRef& rhs)
+    {
+        if (&rhs != this)
+        {
+            m_pos = rhs.m_pos;
+            m_ptindex = rhs.m_ptindex;
+            m_oindex = rhs.m_oindex;
+            if (rhs.m_data)
+            {
+                m_data = new boost::uint8_t [m_pointSize * 1];
+                memcpy(m_data, rhs.m_data, m_pointSize*1);            
+            }
+        }
+        return *this;
+    }
+    // ~PtRef() { if (m_data) delete m_data; }
 };
 
 struct LIBPC_DLL RefList
