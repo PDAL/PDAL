@@ -370,7 +370,7 @@ void Chipper::FinalSplit(RefList& wide, RefList& narrow,
 void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widemax,
     RefList& narrow, boost::uint32_t narrowmin, boost::uint32_t narrowmax )
 {
-    Block b;
+    Block b(m_stage.getHeader().getSchema(), m_threshold);
 
     b.m_list_p = &wide;
     if (wide.m_dir == DIR_X) { 
