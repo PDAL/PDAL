@@ -70,20 +70,6 @@ private:
 };
 
 
-class Iterator : public libpc::Iterator
-{
-public:
-    Iterator(LasReader& reader);
-
-    void seekToPoint(boost::uint64_t);
-
-private:
-    boost::uint32_t readBuffer(PointData&);
-
-    LasReader& m_stageAsDerived;
-};
-
-
 } } } // namespaces
 
 #endif

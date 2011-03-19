@@ -32,80 +32,40 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
-#include <iostream>
+#ifndef INCLUDED_LIBLASREADERITERATOR_HPP
+#define INCLUDED_LIBLASREADERITERATOR_HPP
 
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/faux/Iterator.hpp>
-#include <libpc/Utils.hpp>
-#include <libpc/exceptions.hpp>
+#include <libpc/Stage.hpp>
 #include <libpc/Iterator.hpp>
 
-using std::vector;
-using std::string;
-using std::cout;
+#include <iostream>
 
-namespace libpc { namespace drivers { namespace faux {
+#include <libpc/drivers/liblas/header.hpp>
 
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
-    : libpc::Stage()
-    , m_mode(mode)
+// fwd decls
+namespace liblas
 {
-    Header* header = new Header;
-    Schema& schema = header->getSchema();
-
-    schema.addDimension(Dimension(Dimension::Field_X, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Uint64));
-
-    header->setNumPoints(numPoints);
-    header->setBounds(bounds);
-
-    setHeader(header);
-
-    return;
+    class Reader;
 }
 
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : libpc::Stage()
-    , m_mode(mode)
+namespace libpc { namespace drivers { namespace liblas {
+
+class LiblasReader;
+
+
+class Iterator : public libpc::Iterator
 {
-    Header* header = new Header;
+public:
+    Iterator(LiblasReader& reader);
 
-    Schema& schema = header->getSchema();
-    if (dimensions.size() == 0)
-    {
-        throw; // BUG
-    }
-    schema.addDimensions(dimensions);
+    void seekToPoint(boost::uint64_t);
 
-    header->setNumPoints(numPoints);
-    header->setBounds(bounds);
+private:
+    boost::uint32_t readBuffer(PointData&);
 
-    setHeader(header);
-
-    return;
-}
-
-
-const std::string& Reader::getName() const
-{
-    static std::string name("Faux Reader");
-    return name;
-}
-
-
-Reader::Mode Reader::getMode() const
-{
-    return m_mode;
-}
-
-
-libpc::Iterator* Reader::createIterator()
-{
-    return new Iterator(*this);
-}
-
+    LiblasReader& m_stageAsDerived;
+};
 
 } } } // namespaces
+
+#endif

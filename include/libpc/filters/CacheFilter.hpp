@@ -93,20 +93,6 @@ private:
 };
 
 
-class CacheFilterIterator : public libpc::FilterIterator
-{
-public:
-    CacheFilterIterator(CacheFilter& filter);
-
-    void seekToPoint(boost::uint64_t);
-
-private:
-    boost::uint32_t readBuffer(PointData&);
-
-    CacheFilter& m_stageAsDerived;
-};
-
-
 } } // namespaces
 
 #endif

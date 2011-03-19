@@ -34,6 +34,7 @@
 
 
 #include <libpc/drivers/liblas/reader.hpp>
+#include <libpc/drivers/liblas/Iterator.hpp>
 
 #include <liblas/factory.hpp>
 #include <liblas/bounds.hpp>
@@ -229,131 +230,6 @@ libpc::Iterator* LiblasReader::createIterator()
 {
     return new Iterator(*this);
 }
-
-
-Iterator::Iterator(LiblasReader& reader)
-    : libpc::Iterator(reader)
-    , m_stageAsDerived(reader)
-{
-    return;
-}
-
-
-void Iterator::seekToPoint(boost::uint64_t n)
-{
-    LiblasReader& reader = m_stageAsDerived;
-
-    size_t nn = (size_t)n;
-    if (n != nn) throw; // BUG
-    reader.m_externalReader->Seek(nn);
-    return;
-}
-
-
-boost::uint32_t Iterator::readBuffer(PointData& pointData)
-{
-    LiblasReader& reader = m_stageAsDerived;
-
-    boost::uint32_t numPoints = pointData.getCapacity();
-    boost::uint32_t i = 0;
-
-    const Schema& schema = pointData.getSchema();
-
-    const int indexX = schema.getDimensionIndex(Dimension::Field_X);
-    const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
-    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z);
-    
-    const int indexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity);
-    const int indexReturnNumber = schema.getDimensionIndex(Dimension::Field_ReturnNumber);
-    const int indexNumberOfReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns);
-    const int indexScanDirectionFlag = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag);
-    const int indexEdgeOfFlightLine = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine);
-    const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification);
-    const int indexScanAngleRank = schema.getDimensionIndex(Dimension::Field_ScanAngleRank);
-    const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
-    const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId);
-    
-    const int indexTime = (reader.m_hasTimeData ? schema.getDimensionIndex(Dimension::Field_Time) : 0);
-
-    const int indexRed = (reader.m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
-    const int indexGreen = (reader.m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
-    const int indexBlue = (reader.m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Blue) : 0);
-
-    //const int indexWavePacketDescriptorIndex = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WavePacketDescriptorIndex) : 0);
-    //const int indexWaveformDataOffset = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformDataOffset) : 0);
-    //const int indexReturnPointWaveformLocation = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_ReturnPointWaveformLocation) : 0);
-    //const int indexWaveformXt = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformXt) : 0);
-    //const int indexWaveformYt = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformYt) : 0);
-    //const t indexWaveformZt = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformZt) : 0);
-
-    for (i=0; i<numPoints; i++)
-    {
-        bool ok = reader.m_externalReader->ReadNextPoint();
-        if (!ok)
-        {
-            throw libpc_error("liblas reader failed to retrieve point");
-        }
-
-        const ::liblas::Point& pt = reader.m_externalReader->GetPoint();
-
-        const boost::int32_t x = pt.GetRawX();
-        const boost::int32_t y = pt.GetRawY();
-        const boost::int32_t z = pt.GetRawZ();
-
-        const boost::uint16_t intensity = pt.GetIntensity();
-        const boost::int8_t returnNumber = (boost::int8_t)pt.GetReturnNumber();
-        const boost::int8_t numberOfReturns = (boost::int8_t)pt.GetNumberOfReturns();
-        const boost::int8_t scanDirFlag = (boost::int8_t)pt.GetScanDirection();
-        const boost::int8_t edgeOfFlightLine = (boost::int8_t)pt.GetFlightLineEdge();
-        const boost::uint8_t classification = pt.GetClassification().GetClass();
-        const boost::int8_t scanAngleRank = pt.GetScanAngleRank();
-        const boost::uint8_t userData = pt.GetUserData();
-        const boost::uint16_t pointSourceId = pt.GetPointSourceID();
-        
-        pointData.setField(i, indexX, x);
-        pointData.setField(i, indexY, y);
-        pointData.setField(i, indexZ, z);
-
-        pointData.setField(i, indexIntensity, intensity);
-        pointData.setField(i, indexReturnNumber, returnNumber);
-        pointData.setField(i, indexNumberOfReturns, numberOfReturns);
-        pointData.setField(i, indexScanDirectionFlag, scanDirFlag);
-        pointData.setField(i, indexEdgeOfFlightLine, edgeOfFlightLine);
-        pointData.setField(i, indexClassification, classification);
-        pointData.setField(i, indexScanAngleRank, scanAngleRank);
-        pointData.setField(i, indexUserData, userData);
-        pointData.setField(i, indexPointSourceId, pointSourceId);
-
-        if (reader.m_hasTimeData)
-        {
-            const double time = pt.GetTime();
-            
-            pointData.setField(i, indexTime, time);
-        }
-
-        if (reader.m_hasColorData)
-        {
-            const ::liblas::Color color = pt.GetColor();
-            const boost::uint16_t red = color.GetRed();
-            const boost::uint16_t green = color.GetGreen();
-            const boost::uint16_t blue = color.GetBlue();
-
-            pointData.setField(i, indexRed, red);
-            pointData.setField(i, indexGreen, green);
-            pointData.setField(i, indexBlue, blue);
-        }
-        
-        pointData.setNumPoints(i+1);
-        if (reader.m_hasWaveData)
-        {
-            throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
-        }
-        
-    }
-
-    return numPoints;
-}
-
 
 
 } } } // namespaces

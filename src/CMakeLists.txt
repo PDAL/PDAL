@@ -94,11 +94,13 @@ ENDFOREACH(file)
 # drivers/faux
 #
 set(LIBPC_DRIVERS_FAUX_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/faux/Writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/faux/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/drivers/faux/Reader.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/faux/Writer.hpp
 )
 
 set (LIBPC_DRIVERS_FAUX_CPP
+  ./drivers/faux/Iterator.cpp
   ./drivers/faux/Reader.cpp
   ./drivers/faux/Writer.cpp 
 )
@@ -117,8 +119,9 @@ ENDFOREACH(file)
 
 set (LIBPC_DRIVERS_LAS_HPP
   ${LIBPC_HEADERS_DIR}/drivers/las/Header.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/las/Writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/las/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Reader.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/las/Writer.hpp
   ./drivers/las/LasHeaderReader.hpp
   ./drivers/las/LasHeaderWriter.hpp
 )
@@ -127,6 +130,7 @@ set (LIBPC_DRIVERS_LAS_CPP
   ./drivers/las/LasHeaderReader.cpp
   ./drivers/las/LasHeaderWriter.cpp
   ./drivers/las/Header.cpp
+  ./drivers/las/Iterator.cpp
   ./drivers/las/Reader.cpp
   ./drivers/las/Writer.cpp
 )
@@ -144,12 +148,15 @@ ENDFOREACH(file)
 #
 
 set (LIBPC_DRIVERS_LIBLAS_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/liblas/Writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/liblas/Header.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/liblas/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/drivers/liblas/Reader.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/liblas/Writer.hpp
 )
 
 set (LIBPC_DRIVERS_LIBLAS_CPP 
-  ./drivers/liblas/header.cpp
+  ./drivers/liblas/Header.cpp
+  ./drivers/liblas/Iterator.cpp
   ./drivers/liblas/Reader.cpp
   ./drivers/liblas/Writer.cpp
 )
@@ -217,18 +224,28 @@ endif()
 
 set(LIBPC_FILTERS_HPP
   ${LIBPC_HEADERS_DIR}/filters/CacheFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/CacheFilterIterator.hpp
   ${LIBPC_HEADERS_DIR}/filters/ColorFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/ColorFilterIterator.hpp
   ${LIBPC_HEADERS_DIR}/filters/CropFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/CropFilterIterator.hpp
   ${LIBPC_HEADERS_DIR}/filters/DecimationFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/DecimationFilterIterator.hpp
   ${LIBPC_HEADERS_DIR}/filters/MosaicFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/MosaicFilterIterator.hpp
 )
 
 set (LIBPC_FILTERS_CPP 
   ./filters/CacheFilter.cpp
+  ./filters/CacheFilterIterator.cpp
   ./filters/ColorFilter.cpp
+  ./filters/ColorFilterIterator.cpp
   ./filters/CropFilter.cpp
+  ./filters/CropFilterIterator.cpp
   ./filters/DecimationFilter.cpp
+  ./filters/DecimationFilterIterator.cpp
   ./filters/MosaicFilter.cpp
+  ./filters/MosaicFilterIterator.cpp
 )
 
 FOREACH(file ${LIBPC_FILTERS_HPP})

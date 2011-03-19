@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <libpc/filters/DecimationFilter.hpp>
+#include <libpc/filters/DecimationFilterIterator.hpp>
 #include <libpc/exceptions.hpp>
 
 namespace libpc { namespace filters {
@@ -67,48 +68,6 @@ libpc::Iterator* DecimationFilter::createIterator()
 {
     return new DecimationFilterIterator(*this);
 }
-
-
-
-DecimationFilterIterator::DecimationFilterIterator(DecimationFilter& filter)
-    : libpc::FilterIterator(filter)
-    , m_stageAsDerived(filter)
-{
-    return;
-}
-
-
-void DecimationFilterIterator::seekToPoint(boost::uint64_t pointNum)
-{
-    getPrevIterator().seekToPoint(pointNum);
-}
-
-
-boost::uint32_t DecimationFilterIterator::readBuffer(PointData& dstData)
-{
-    DecimationFilter& filter = m_stageAsDerived;
-
-    const boost::uint32_t step = filter.getStep();
-
-    // naive implementation: read a buffer N times larger, then pull out what we need
-    PointData srcData(dstData.getSchemaLayout(), dstData.getCapacity() * step);
-    boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
-
-    boost::uint32_t numPoints = dstData.getCapacity();
-    
-    boost::uint32_t srcIndex = 0;
-    boost::uint32_t dstIndex = 0;
-    for (dstIndex=0; dstIndex<numPoints; dstIndex++)
-    {
-        dstData.copyPointFast(dstIndex, srcIndex, srcData);
-        dstData.setNumPoints(dstIndex+1);
-        srcIndex += step;
-        if (srcIndex > numSrcPointsRead) break;
-    }
-
-    return dstIndex;
-}
-
 
 
 } } // namespaces

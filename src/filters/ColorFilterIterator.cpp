@@ -33,79 +33,60 @@
 ****************************************************************************/
 
 #include <cassert>
-#include <iostream>
-
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/faux/Iterator.hpp>
-#include <libpc/Utils.hpp>
 #include <libpc/exceptions.hpp>
-#include <libpc/Iterator.hpp>
+#include <libpc/Color.hpp>
+#include <libpc/filters/ColorFilterIterator.hpp>
+#include <libpc/filters/ColorFilter.hpp>
 
-using std::vector;
-using std::string;
-using std::cout;
+namespace libpc { namespace filters {
 
-namespace libpc { namespace drivers { namespace faux {
 
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
-    : libpc::Stage()
-    , m_mode(mode)
+ColorFilterIterator::ColorFilterIterator(ColorFilter& filter)
+    : libpc::FilterIterator(filter)
+    , m_stageAsDerived(filter)
 {
-    Header* header = new Header;
-    Schema& schema = header->getSchema();
-
-    schema.addDimension(Dimension(Dimension::Field_X, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Uint64));
-
-    header->setNumPoints(numPoints);
-    header->setBounds(bounds);
-
-    setHeader(header);
-
     return;
 }
 
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : libpc::Stage()
-    , m_mode(mode)
-{
-    Header* header = new Header;
 
-    Schema& schema = header->getSchema();
-    if (dimensions.size() == 0)
+boost::uint32_t ColorFilterIterator::readBuffer(PointData& data)
+{
+    ColorFilter& filter = m_stageAsDerived;
+
+    getPrevIterator().read(data);
+
+    boost::uint32_t numPoints = data.getNumPoints();
+
+    const SchemaLayout& schemaLayout = data.getSchemaLayout();
+    const Schema& schema = schemaLayout.getSchema();
+
+    int fieldIndexR = schema.getDimensionIndex(Dimension::Field_Red);
+    int fieldIndexG = schema.getDimensionIndex(Dimension::Field_Green);
+    int fieldIndexB = schema.getDimensionIndex(Dimension::Field_Blue);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
+
+    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        throw; // BUG
+        float z = data.getField<float>(pointIndex, offsetZ);
+        boost::uint8_t red, green, blue;
+        filter.getColor(z, red, green, blue);
+
+        // now we store the 3 u8's in the point data...
+        data.setField<boost::uint8_t>(pointIndex, fieldIndexR, red);
+        data.setField<boost::uint8_t>(pointIndex, fieldIndexG, green);
+        data.setField<boost::uint8_t>(pointIndex, fieldIndexB, blue);
+        data.setNumPoints(pointIndex+1);
+
     }
-    schema.addDimensions(dimensions);
 
-    header->setNumPoints(numPoints);
-    header->setBounds(bounds);
-
-    setHeader(header);
-
-    return;
+    return numPoints;
 }
 
 
-const std::string& Reader::getName() const
+void ColorFilterIterator::seekToPoint(boost::uint64_t index)
 {
-    static std::string name("Faux Reader");
-    return name;
+    setCurrentPointIndex(index);
+    getPrevIterator().seekToPoint(index);
 }
 
-
-Reader::Mode Reader::getMode() const
-{
-    return m_mode;
-}
-
-
-libpc::Iterator* Reader::createIterator()
-{
-    return new Iterator(*this);
-}
-
-
-} } } // namespaces
+} } // namespaces

@@ -32,80 +32,71 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
-#include <iostream>
-
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/faux/Iterator.hpp>
-#include <libpc/Utils.hpp>
+#include <libpc/filters/CropFilterIterator.hpp>
+#include <libpc/filters/CropFilter.hpp>
 #include <libpc/exceptions.hpp>
-#include <libpc/Iterator.hpp>
 
-using std::vector;
-using std::string;
-using std::cout;
+namespace libpc { namespace filters {
 
-namespace libpc { namespace drivers { namespace faux {
 
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
-    : libpc::Stage()
-    , m_mode(mode)
+CropFilterIterator::CropFilterIterator(CropFilter& filter)
+    : libpc::FilterIterator(filter)
+    , m_stageAsDerived(filter)
 {
-    Header* header = new Header;
-    Schema& schema = header->getSchema();
-
-    schema.addDimension(Dimension(Dimension::Field_X, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Uint64));
-
-    header->setNumPoints(numPoints);
-    header->setBounds(bounds);
-
-    setHeader(header);
-
     return;
 }
 
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : libpc::Stage()
-    , m_mode(mode)
-{
-    Header* header = new Header;
 
-    Schema& schema = header->getSchema();
-    if (dimensions.size() == 0)
+void CropFilterIterator::seekToPoint(boost::uint64_t pointNum)
+{
+    getPrevIterator().seekToPoint(pointNum);
+}
+
+
+boost::uint32_t CropFilterIterator::readBuffer(PointData& data)
+{
+    CropFilter& filter = m_stageAsDerived;
+
+    PointData srcData(data.getSchemaLayout(), data.getCapacity());
+
+    boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+    if (numSrcPointsRead == 0) return 0;
+
+    const SchemaLayout& schemaLayout = data.getSchemaLayout();
+    const Schema& schema = schemaLayout.getSchema();
+
+    int fieldX = schema.getDimensionIndex(Dimension::Field_X);
+    int fieldY = schema.getDimensionIndex(Dimension::Field_Y);
+    int fieldZ = schema.getDimensionIndex(Dimension::Field_Z);
+
+    boost::uint32_t numPoints = data.getCapacity();
+    
+    const Bounds<double>& bounds = filter.getBounds();
+
+    boost::uint32_t srcIndex = 0;
+    boost::uint32_t dstIndex = 0;
+    for (srcIndex=0; srcIndex<numPoints; srcIndex++)
     {
-        throw; // BUG
+    
+        double x = srcData.getField<double>(srcIndex, fieldX);
+        double y = srcData.getField<double>(srcIndex, fieldY);
+        double z = srcData.getField<double>(srcIndex, fieldZ);
+        Vector<double> point(x,y,z);
+        
+        if (bounds.contains(point))
+        {
+            data.copyPointFast(dstIndex, srcIndex, srcData);
+            data.setNumPoints(dstIndex+1);
+            dstIndex += 1;
+            
+        }
     }
-    schema.addDimensions(dimensions);
+    
+    
+    incrementCurrentPointIndex(numPoints);
 
-    header->setNumPoints(numPoints);
-    header->setBounds(bounds);
-
-    setHeader(header);
-
-    return;
+    return data.getNumPoints();
 }
 
 
-const std::string& Reader::getName() const
-{
-    static std::string name("Faux Reader");
-    return name;
-}
-
-
-Reader::Mode Reader::getMode() const
-{
-    return m_mode;
-}
-
-
-libpc::Iterator* Reader::createIterator()
-{
-    return new Iterator(*this);
-}
-
-
-} } } // namespaces
+} } // namespaces

@@ -68,24 +68,6 @@ private:
 };
 
 
-class MosaicFilterIterator : public libpc::Iterator
-{
-public:
-    MosaicFilterIterator(MosaicFilter& filter);
-
-    const std::vector<Iterator*>& getPrevIterators() const;
-
-    void seekToPoint(boost::uint64_t);
-
-private:
-    boost::uint32_t readBuffer(PointData&);
-
-    MosaicFilter& m_stageAsDerived;
-    std::vector<Iterator*> m_prevIterators;
-
-};
-
-
 } } // namespaces
 
 #endif

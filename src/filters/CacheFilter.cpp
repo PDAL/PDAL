@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <libpc/filters/CacheFilter.hpp>
+#include <libpc/filters/CacheFilterIterator.hpp>
 
 #include <libpc/PointDataCache.hpp>
 #include <libpc/exceptions.hpp>
@@ -111,78 +112,5 @@ libpc::Iterator* CacheFilter::createIterator()
     return new CacheFilterIterator(*this);
 }
 
-
-CacheFilterIterator::CacheFilterIterator(CacheFilter& filter)
-    : libpc::FilterIterator(filter)
-    , m_stageAsDerived(filter)
-{
-    return;
-}
-
-
-void CacheFilterIterator::seekToPoint(boost::uint64_t index)
-{
-    setCurrentPointIndex(index);
-    getPrevIterator().seekToPoint(index);
-}
-
-
-boost::uint32_t CacheFilterIterator::readBuffer(PointData& data)
-{
-    CacheFilter& filter = m_stageAsDerived;
-
-    const boost::uint64_t currentPointIndex = getCurrentPointIndex();
-
-    // for now, we only read from the cache if they are asking for one point
-    // (this avoids the problem of an N-point request needing more than one
-    // cached block to satisfy it)
-    if (data.getCapacity() != 1)
-    {
-        const boost::uint32_t numRead = getPrevIterator().read(data);
-
-        // if they asked for a full block and we got a full block,
-        // and the block we got is properly aligned and not already cached,
-        // then let's cache it!
-        if (data.getCapacity() == filter.m_cacheBlockSize && numRead == filter.m_cacheBlockSize && 
-            (currentPointIndex % filter.m_cacheBlockSize == 0) &&
-            filter.m_cache->lookup(currentPointIndex) == NULL)
-        {
-            PointData* block = new PointData(data.getSchemaLayout(), filter.m_cacheBlockSize);
-            block->copyPointsFast(0, 0, data, filter.m_cacheBlockSize);
-            filter.m_cache->insert(currentPointIndex, block);
-        }
-
-        incrementCurrentPointIndex(numRead);
-
-        filter.m_numPointsRead += numRead;
-        filter.m_numPointsRequested += data.getCapacity();
-
-        return numRead;
-    }
-
-    // they asked for just one point -- first, check Mister Cache
-    const boost::uint64_t blockNum = currentPointIndex / filter.m_cacheBlockSize;
-    PointData* block = filter.m_cache->lookup(blockNum);
-    if (block != NULL)
-    {
-        // A hit! A palpable hit!
-        data.copyPointFast(0,  currentPointIndex % filter.m_cacheBlockSize, *block);
-        
-        filter.m_numPointsRead += 0;
-        filter.m_numPointsRequested += 1;
-        incrementCurrentPointIndex(1);
-
-        getPrevIterator().seekToPoint(getCurrentPointIndex());
-        return 1;
-    }
-
-    // Not in the cache, so do a normal read :-(
-    const boost::uint32_t numRead = getPrevIterator().read(data);
-    filter.m_numPointsRead += numRead;
-    filter.m_numPointsRequested += numRead;
-    incrementCurrentPointIndex(numRead);
-
-    return numRead;
-}
 
 } } // namespaces

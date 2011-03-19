@@ -32,80 +32,52 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
-#include <iostream>
-
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/faux/Iterator.hpp>
-#include <libpc/Utils.hpp>
+#include <libpc/filters/DecimationFilterIterator.hpp>
+#include <libpc/filters/DecimationFilter.hpp>
 #include <libpc/exceptions.hpp>
-#include <libpc/Iterator.hpp>
 
-using std::vector;
-using std::string;
-using std::cout;
+namespace libpc { namespace filters {
 
-namespace libpc { namespace drivers { namespace faux {
 
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
-    : libpc::Stage()
-    , m_mode(mode)
+DecimationFilterIterator::DecimationFilterIterator(DecimationFilter& filter)
+    : libpc::FilterIterator(filter)
+    , m_stageAsDerived(filter)
 {
-    Header* header = new Header;
-    Schema& schema = header->getSchema();
-
-    schema.addDimension(Dimension(Dimension::Field_X, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Uint64));
-
-    header->setNumPoints(numPoints);
-    header->setBounds(bounds);
-
-    setHeader(header);
-
     return;
 }
 
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : libpc::Stage()
-    , m_mode(mode)
-{
-    Header* header = new Header;
 
-    Schema& schema = header->getSchema();
-    if (dimensions.size() == 0)
+void DecimationFilterIterator::seekToPoint(boost::uint64_t pointNum)
+{
+    getPrevIterator().seekToPoint(pointNum);
+}
+
+
+boost::uint32_t DecimationFilterIterator::readBuffer(PointData& dstData)
+{
+    DecimationFilter& filter = m_stageAsDerived;
+
+    const boost::uint32_t step = filter.getStep();
+
+    // naive implementation: read a buffer N times larger, then pull out what we need
+    PointData srcData(dstData.getSchemaLayout(), dstData.getCapacity() * step);
+    boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+
+    boost::uint32_t numPoints = dstData.getCapacity();
+    
+    boost::uint32_t srcIndex = 0;
+    boost::uint32_t dstIndex = 0;
+    for (dstIndex=0; dstIndex<numPoints; dstIndex++)
     {
-        throw; // BUG
+        dstData.copyPointFast(dstIndex, srcIndex, srcData);
+        dstData.setNumPoints(dstIndex+1);
+        srcIndex += step;
+        if (srcIndex > numSrcPointsRead) break;
     }
-    schema.addDimensions(dimensions);
 
-    header->setNumPoints(numPoints);
-    header->setBounds(bounds);
-
-    setHeader(header);
-
-    return;
+    return dstIndex;
 }
 
 
-const std::string& Reader::getName() const
-{
-    static std::string name("Faux Reader");
-    return name;
-}
 
-
-Reader::Mode Reader::getMode() const
-{
-    return m_mode;
-}
-
-
-libpc::Iterator* Reader::createIterator()
-{
-    return new Iterator(*this);
-}
-
-
-} } } // namespaces
+} } // namespaces

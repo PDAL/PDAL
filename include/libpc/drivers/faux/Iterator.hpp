@@ -32,80 +32,31 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
-#include <iostream>
+#ifndef INCLUDED_DRIVERS_FAUX_READER_ITERATOR_HPP
+#define INCLUDED_DRIVERS_FAUX_READER_ITERATOR_HPP
 
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/faux/Iterator.hpp>
-#include <libpc/Utils.hpp>
-#include <libpc/exceptions.hpp>
+#include <libpc/Stage.hpp>
 #include <libpc/Iterator.hpp>
-
-using std::vector;
-using std::string;
-using std::cout;
 
 namespace libpc { namespace drivers { namespace faux {
 
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
-    : libpc::Stage()
-    , m_mode(mode)
+class Reader;
+
+
+class Iterator : public libpc::Iterator
 {
-    Header* header = new Header;
-    Schema& schema = header->getSchema();
+public:
+    Iterator(Reader& reader);
 
-    schema.addDimension(Dimension(Dimension::Field_X, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Uint64));
+    void seekToPoint(boost::uint64_t);
 
-    header->setNumPoints(numPoints);
-    header->setBounds(bounds);
+private:
+    boost::uint32_t readBuffer(PointData&);
 
-    setHeader(header);
-
-    return;
-}
-
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : libpc::Stage()
-    , m_mode(mode)
-{
-    Header* header = new Header;
-
-    Schema& schema = header->getSchema();
-    if (dimensions.size() == 0)
-    {
-        throw; // BUG
-    }
-    schema.addDimensions(dimensions);
-
-    header->setNumPoints(numPoints);
-    header->setBounds(bounds);
-
-    setHeader(header);
-
-    return;
-}
-
-
-const std::string& Reader::getName() const
-{
-    static std::string name("Faux Reader");
-    return name;
-}
-
-
-Reader::Mode Reader::getMode() const
-{
-    return m_mode;
-}
-
-
-libpc::Iterator* Reader::createIterator()
-{
-    return new Iterator(*this);
-}
+    Reader& m_stageAsDerived;
+};
 
 
 } } } // namespaces
+
+#endif

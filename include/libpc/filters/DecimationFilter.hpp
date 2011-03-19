@@ -64,20 +64,6 @@ private:
 };
 
 
-class DecimationFilterIterator : public libpc::FilterIterator
-{
-public:
-    DecimationFilterIterator(DecimationFilter& filter);
-
-    void seekToPoint(boost::uint64_t);
-
-private:
-    boost::uint32_t readBuffer(PointData&);
-
-    DecimationFilter& m_stageAsDerived;
-};
-
-
 } } // namespaces
 
 #endif

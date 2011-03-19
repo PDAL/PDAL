@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <libpc/filters/CropFilter.hpp>
+#include <libpc/filters/CropFilterIterator.hpp>
 #include <libpc/exceptions.hpp>
 
 namespace libpc { namespace filters {
@@ -66,67 +67,6 @@ const Bounds<double>& CropFilter::getBounds() const
 libpc::Iterator* CropFilter::createIterator()
 {
     return new CropFilterIterator(*this);
-}
-
-
-
-CropFilterIterator::CropFilterIterator(CropFilter& filter)
-    : libpc::FilterIterator(filter)
-    , m_stageAsDerived(filter)
-{
-    return;
-}
-
-
-void CropFilterIterator::seekToPoint(boost::uint64_t pointNum)
-{
-    getPrevIterator().seekToPoint(pointNum);
-}
-
-
-boost::uint32_t CropFilterIterator::readBuffer(PointData& data)
-{
-    CropFilter& filter = m_stageAsDerived;
-
-    PointData srcData(data.getSchemaLayout(), data.getCapacity());
-
-    boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
-    if (numSrcPointsRead == 0) return 0;
-
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
-
-    int fieldX = schema.getDimensionIndex(Dimension::Field_X);
-    int fieldY = schema.getDimensionIndex(Dimension::Field_Y);
-    int fieldZ = schema.getDimensionIndex(Dimension::Field_Z);
-
-    boost::uint32_t numPoints = data.getCapacity();
-    
-    const Bounds<double>& bounds = filter.getBounds();
-
-    boost::uint32_t srcIndex = 0;
-    boost::uint32_t dstIndex = 0;
-    for (srcIndex=0; srcIndex<numPoints; srcIndex++)
-    {
-    
-        double x = srcData.getField<double>(srcIndex, fieldX);
-        double y = srcData.getField<double>(srcIndex, fieldY);
-        double z = srcData.getField<double>(srcIndex, fieldZ);
-        Vector<double> point(x,y,z);
-        
-        if (bounds.contains(point))
-        {
-            data.copyPointFast(dstIndex, srcIndex, srcData);
-            data.setNumPoints(dstIndex+1);
-            dstIndex += 1;
-            
-        }
-    }
-    
-    
-    incrementCurrentPointIndex(numPoints);
-
-    return data.getNumPoints();
 }
 
 

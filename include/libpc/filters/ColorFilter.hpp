@@ -66,20 +66,6 @@ private:
 };
 
 
-class ColorFilterIterator : public libpc::FilterIterator
-{
-public:
-    ColorFilterIterator(ColorFilter& filter);
-
-    void seekToPoint(boost::uint64_t);
-
-private:
-    boost::uint32_t readBuffer(PointData&);
-
-    ColorFilter& m_stageAsDerived;
-};
-
-
 } } // namespaces
 
 #endif

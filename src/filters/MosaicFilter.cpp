@@ -34,6 +34,7 @@
 
 #include <cassert>
 #include <libpc/filters/MosaicFilter.hpp>
+#include <libpc/filters/MosaicFilterIterator.hpp>
 #include <libpc/exceptions.hpp>
 
 namespace libpc { namespace filters {
@@ -110,89 +111,6 @@ const std::vector<Stage*>& MosaicFilter::getPrevStages() const
 libpc::Iterator* MosaicFilter::createIterator()
 {
     return new MosaicFilterIterator(*this);
-}
-
-
-MosaicFilterIterator::MosaicFilterIterator(MosaicFilter& filter)
-    : libpc::Iterator(filter)
-    , m_stageAsDerived(filter)
-{
-    for (size_t i=0; i<filter.getPrevStages().size(); ++i)
-    {
-        Stage* stage = filter.getPrevStages()[i];
-        m_prevIterators.push_back(stage->createIterator());
-    }
-
-    return;
-}
-
-
-const std::vector<Iterator*>& MosaicFilterIterator::getPrevIterators() const
-{
-    return m_prevIterators;
-}
-
-
-void MosaicFilterIterator::seekToPoint(boost::uint64_t pointNum)
-{
-    // BUG: this is clearly not correct, we need to keep track of which tile we're on
-    m_prevIterators[0]->seekToPoint(pointNum);
-}
-
-
-boost::uint32_t MosaicFilterIterator::readBuffer(PointData& destData)
-{
-    // BUG: We know that the two prev stage schemas are compatible, 
-    // but we can't be sure the have the same bitfield layouts as 
-    // the buffer we've been given.  We could handle it manually if 
-    // they differ, but that would be a pain for now.  (This affects
-    // all filters, I guess.)
-
-    // BUG: this doesn't account for isValid()
-
-    boost::uint32_t totalNumPointsToRead = destData.getCapacity();
-    boost::uint32_t totalNumPointsRead = 0;
-
-    boost::uint64_t currentPointIndex = getCurrentPointIndex();
-
-    int destPointIndex = 0;
-    boost::uint64_t stageStartIndex = 0;
-
-    // for each stage, we read as many points as we can
-    for (size_t i=0; i<getPrevIterators().size(); i++)
-    {
-        Iterator* iterator = getPrevIterators()[i];
-        Stage& stage = iterator->getStage();
-
-        const boost::uint64_t stageStopIndex = stageStartIndex + stage.getNumPoints();
-
-        if (currentPointIndex < stageStopIndex)
-        {
-            // we need to read some points from this stage
-
-            boost::uint32_t pointsAvail = (boost::uint32_t)(stageStopIndex - currentPointIndex);
-            boost::uint32_t pointsToGet = std::min(pointsAvail, totalNumPointsToRead);
-
-            PointData srcData(destData.getSchemaLayout(), pointsToGet);
-            boost::uint32_t pointsGotten = iterator->read(srcData);
-
-            for (boost::uint32_t idx=0; idx<pointsGotten; idx++)
-            {
-                destData.copyPointFast(destPointIndex, idx, srcData);
-                destPointIndex++;
-                destData.setNumPoints(idx+1);
-            }
-
-            totalNumPointsRead += pointsGotten;
-            currentPointIndex += pointsGotten;
-        }
-
-        stageStartIndex += stage.getNumPoints();
-
-        if (totalNumPointsRead == totalNumPointsToRead) break;
-    }
-
-    return totalNumPointsRead;
 }
 
 
