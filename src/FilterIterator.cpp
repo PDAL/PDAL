@@ -50,4 +50,10 @@ FilterIterator::FilterIterator(Filter& filter)
 }
 
 
+Iterator& FilterIterator::getPrevIterator()
+{
+    return *m_prevIterator;
+}
+
+
 } // namespace libpc

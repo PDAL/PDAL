@@ -224,17 +224,36 @@ LiblasHeader& LiblasReader::getLiblasHeader()
 }
 
 
-void LiblasReader::seekToPoint(boost::uint64_t n)
+
+libpc::Iterator* LiblasReader::createIterator()
 {
-    size_t nn = (size_t)n;
-    if (n != nn) throw; // BUG
-    m_externalReader->Seek(nn);
+    return new Iterator(*this);
+}
+
+
+Iterator::Iterator(LiblasReader& reader)
+    : libpc::Iterator(reader)
+    , m_stageAsDerived(reader)
+{
     return;
 }
 
 
-boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
+void Iterator::seekToPoint(boost::uint64_t n)
 {
+    LiblasReader& reader = m_stageAsDerived;
+
+    size_t nn = (size_t)n;
+    if (n != nn) throw; // BUG
+    reader.m_externalReader->Seek(nn);
+    return;
+}
+
+
+boost::uint32_t Iterator::readBuffer(PointData& pointData)
+{
+    LiblasReader& reader = m_stageAsDerived;
+
     boost::uint32_t numPoints = pointData.getCapacity();
     boost::uint32_t i = 0;
 
@@ -254,11 +273,11 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
     const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
     const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId);
     
-    const int indexTime = (m_hasTimeData ? schema.getDimensionIndex(Dimension::Field_Time) : 0);
+    const int indexTime = (reader.m_hasTimeData ? schema.getDimensionIndex(Dimension::Field_Time) : 0);
 
-    const int indexRed = (m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
-    const int indexGreen = (m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
-    const int indexBlue = (m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Blue) : 0);
+    const int indexRed = (reader.m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
+    const int indexGreen = (reader.m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
+    const int indexBlue = (reader.m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Blue) : 0);
 
     //const int indexWavePacketDescriptorIndex = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WavePacketDescriptorIndex) : 0);
     //const int indexWaveformDataOffset = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformDataOffset) : 0);
@@ -269,13 +288,13 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
 
     for (i=0; i<numPoints; i++)
     {
-        bool ok = m_externalReader->ReadNextPoint();
+        bool ok = reader.m_externalReader->ReadNextPoint();
         if (!ok)
         {
             throw libpc_error("liblas reader failed to retrieve point");
         }
 
-        const ::liblas::Point& pt = m_externalReader->GetPoint();
+        const ::liblas::Point& pt = reader.m_externalReader->GetPoint();
 
         const boost::int32_t x = pt.GetRawX();
         const boost::int32_t y = pt.GetRawY();
@@ -305,14 +324,14 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
         pointData.setField(i, indexUserData, userData);
         pointData.setField(i, indexPointSourceId, pointSourceId);
 
-        if (m_hasTimeData)
+        if (reader.m_hasTimeData)
         {
             const double time = pt.GetTime();
             
             pointData.setField(i, indexTime, time);
         }
 
-        if (m_hasColorData)
+        if (reader.m_hasColorData)
         {
             const ::liblas::Color color = pt.GetColor();
             const boost::uint16_t red = color.GetRed();
@@ -325,7 +344,7 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
         }
         
         pointData.setNumPoints(i+1);
-        if (m_hasWaveData)
+        if (reader.m_hasWaveData)
         {
             throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
         }
@@ -335,31 +354,6 @@ boost::uint32_t LiblasReader::readBuffer(PointData& pointData)
     return numPoints;
 }
 
-
-libpc::Iterator* LiblasReader::createIterator()
-{
-    throw not_yet_implemented("iterator");
-}
-
-
-Iterator::Iterator(LiblasReader& reader)
-    : libpc::Iterator(reader)
-    , m_stageAsDerived(reader)
-{
-    return;
-}
-
-
-boost::uint32_t Iterator::readBuffer(PointData& data)
-{
-    return m_stageAsDerived.readBuffer(data);
-}
-
-
-void Iterator::seekToPoint(boost::uint64_t index)
-{
-    m_stageAsDerived.seekToPoint(index);
-}
 
 
 } } } // namespaces

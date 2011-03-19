@@ -62,8 +62,6 @@ public:
 
     const std::string& getName() const;
 
-    void seekToPoint(boost::uint64_t pointNum);
-
     const LiblasHeader& getLiblasHeader() const;
 
     boost::int8_t getPointFormatNumber() const;
@@ -71,8 +69,6 @@ public:
     libpc::Iterator* createIterator();
 
 private:
-    virtual boost::uint32_t readBuffer(PointData& data);
-
     LiblasHeader& getLiblasHeader();
     void setLiblasHeader(const LiblasHeader&);
     void processExternalHeader();

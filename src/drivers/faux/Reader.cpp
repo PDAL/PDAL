@@ -95,19 +95,47 @@ const std::string& Reader::getName() const
 }
 
 
-boost::uint32_t Reader::readBuffer(PointData& data)
+Reader::Mode Reader::getMode() const
 {
+    return m_mode;
+}
+
+
+libpc::Iterator* Reader::createIterator()
+{
+    return new Iterator(*this);
+}
+
+
+Iterator::Iterator(Reader& reader)
+    : libpc::Iterator(reader)
+    , m_stageAsDerived(reader)
+{
+    return;
+}
+
+
+void Iterator::seekToPoint(boost::uint64_t index)
+{
+     setCurrentPointIndex(index);
+}
+
+
+boost::uint32_t Iterator::readBuffer(PointData& data)
+{
+    Reader& reader = m_stageAsDerived;
+
     if (data.getSchemaLayout().getSchema().getDimensions().size() != 4)
         throw not_yet_implemented("need to add ability to read from arbitrary fields");
 
     // make up some data and put it into the buffer
 
-    const boost::uint32_t numPoints = data.getCapacity();
-    assert(getCurrentPointIndex() + numPoints <= getHeader().getNumPoints());
-
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
-    Header& header = getHeader();
+    Header& header = reader.getHeader();
+
+    const boost::uint32_t numPoints = data.getCapacity();
+    assert(getCurrentPointIndex() + numPoints <= header.getNumPoints());
 
     const Bounds<double>& bounds = header.getBounds(); 
     const std::vector< Range<double> >& dims = bounds.dimensions();
@@ -125,6 +153,8 @@ boost::uint32_t Reader::readBuffer(PointData& data)
 
     boost::uint64_t time = getCurrentPointIndex();
     
+    const Reader::Mode mode = reader.getMode();
+
     boost::uint32_t& cnt = data.getNumPointsRef();
     cnt = 0;
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
@@ -132,7 +162,7 @@ boost::uint32_t Reader::readBuffer(PointData& data)
         double x;
         double y;
         double z;
-        if (m_mode == Random)
+        if (mode == Reader::Random)
         {
             x = (double)Utils::random(minX, maxX);
             y = (double)Utils::random(minY, maxY);
@@ -159,38 +189,5 @@ boost::uint32_t Reader::readBuffer(PointData& data)
 
     return cnt;
 }
-
-
-void Reader::seekToPoint(boost::uint64_t pointNumber)
-{
-    setCurrentPointIndex(pointNumber);
-}
-
-
-libpc::Iterator* Reader::createIterator()
-{
-    return new Iterator(*this);
-}
-
-
-Iterator::Iterator(Reader& reader)
-    : libpc::Iterator(reader)
-    , m_stageAsDerived(reader)
-{
-    return;
-}
-
-
-boost::uint32_t Iterator::readBuffer(PointData& data)
-{
-    return m_stageAsDerived.readBuffer(data);
-}
-
-
-void Iterator::seekToPoint(boost::uint64_t index)
-{
-    m_stageAsDerived.seekToPoint(index);
-}
-
 
 } } } // namespaces

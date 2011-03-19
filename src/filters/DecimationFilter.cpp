@@ -38,7 +38,7 @@
 namespace libpc { namespace filters {
 
 
-DecimationFilter::DecimationFilter(Stage& prevStage, int step)
+DecimationFilter::DecimationFilter(Stage& prevStage, boost::uint32_t step)
     : Filter(prevStage)
     , m_step(step)
 {
@@ -56,32 +56,11 @@ const std::string& DecimationFilter::getName() const
 }
 
 
-void DecimationFilter::seekToPoint(boost::uint64_t pointNum)
+boost::uint32_t DecimationFilter::getStep() const
 {
-    m_prevStage.seekToPoint(pointNum);
+    return m_step;
 }
 
-
-boost::uint32_t DecimationFilter::readBuffer(PointData& dstData)
-{
-    // naive implementation: read a buffer N times larger, then pull out what we need
-    PointData srcData(dstData.getSchemaLayout(), dstData.getCapacity() * m_step);
-    boost::uint32_t numSrcPointsRead = m_prevStage.read(srcData);
-
-    boost::uint32_t numPoints = dstData.getCapacity();
-    
-    boost::uint32_t srcIndex = 0;
-    boost::uint32_t dstIndex = 0;
-    for (dstIndex=0; dstIndex<numPoints; dstIndex++)
-    {
-        dstData.copyPointFast(dstIndex, srcIndex, srcData);
-        dstData.setNumPoints(dstIndex+1);
-        srcIndex += m_step;
-        if (srcIndex > numSrcPointsRead) break;
-    }
-
-    return dstIndex;
-}
 
 
 libpc::Iterator* DecimationFilter::createIterator()
@@ -99,16 +78,37 @@ DecimationFilterIterator::DecimationFilterIterator(DecimationFilter& filter)
 }
 
 
-boost::uint32_t DecimationFilterIterator::readBuffer(PointData& data)
+void DecimationFilterIterator::seekToPoint(boost::uint64_t pointNum)
 {
-    return m_stageAsDerived.readBuffer(data);
+    getPrevIterator().seekToPoint(pointNum);
 }
 
 
-void DecimationFilterIterator::seekToPoint(boost::uint64_t index)
+boost::uint32_t DecimationFilterIterator::readBuffer(PointData& dstData)
 {
-    m_stageAsDerived.seekToPoint(index);
+    DecimationFilter& filter = m_stageAsDerived;
+
+    const boost::uint32_t step = filter.getStep();
+
+    // naive implementation: read a buffer N times larger, then pull out what we need
+    PointData srcData(dstData.getSchemaLayout(), dstData.getCapacity() * step);
+    boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+
+    boost::uint32_t numPoints = dstData.getCapacity();
+    
+    boost::uint32_t srcIndex = 0;
+    boost::uint32_t dstIndex = 0;
+    for (dstIndex=0; dstIndex<numPoints; dstIndex++)
+    {
+        dstData.copyPointFast(dstIndex, srcIndex, srcData);
+        dstData.setNumPoints(dstIndex+1);
+        srcIndex += step;
+        if (srcIndex > numSrcPointsRead) break;
+    }
+
+    return dstIndex;
 }
+
 
 
 } } // namespaces

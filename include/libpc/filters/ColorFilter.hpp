@@ -49,19 +49,17 @@ class ColorFilterIterator;
 // the color is done as a ramp from the declared Z min/max values in the header
 class LIBPC_DLL ColorFilter : public Filter
 {
-    friend ColorFilterIterator;
-
 public:
     ColorFilter(Stage& prevStage);
 
     const std::string& getName() const;
 
+    void getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;
+
     Iterator* createIterator();
 
 private:
-    boost::uint32_t readBuffer(PointData& data);
     void checkImpedance();
-    void getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue);
 
     ColorFilter& operator=(const ColorFilter&); // not implemented
     ColorFilter(const ColorFilter&); // not implemented

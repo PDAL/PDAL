@@ -47,21 +47,17 @@ class DecimationFilterIterator;
 // we keep only 1 out of every step points; if step=100, we get 1% of the file
 class LIBPC_DLL DecimationFilter : public Filter
 {
-    friend DecimationFilterIterator;
-
 public:
-    DecimationFilter(Stage& prevStage, int step);
+    DecimationFilter(Stage& prevStage, boost::uint32_t step);
 
     const std::string& getName() const;
 
-    void seekToPoint(boost::uint64_t pointNum);
-
     Iterator* createIterator();
 
-private:
-    boost::uint32_t readBuffer(PointData& data);
+    boost::uint32_t getStep() const;
 
-    int m_step;
+private:
+    boost::uint32_t m_step;
 
     DecimationFilter& operator=(const DecimationFilter&); // not implemented
     DecimationFilter(const DecimationFilter&); // not implemented

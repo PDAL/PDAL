@@ -91,8 +91,9 @@ BOOST_AUTO_TEST_CASE(test_random)
     SchemaLayout layout(schema);
 
     PointData data(layout, 750);
-    
-    boost::uint32_t numRead = reader.read(data);
+
+    Iterator* iter = reader.createIterator();
+    boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 750);
 
@@ -113,6 +114,8 @@ BOOST_AUTO_TEST_CASE(test_random)
         BOOST_CHECK(z >= 3.0 && z <= 103.0);
         BOOST_CHECK(t == i);
     }
+
+    delete iter;
 
     return;
 }

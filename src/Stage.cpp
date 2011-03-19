@@ -40,7 +40,6 @@ namespace libpc
 
 Stage::Stage()
     : m_header(NULL)
-    , m_currentPointIndex(0)
 {
     return;
 }
@@ -50,23 +49,6 @@ Stage::~Stage()
 {
     delete m_header;
     return;
-}
-
-
-void Stage::setCurrentPointIndex(boost::uint64_t currentPointIndex)
-{
-    m_currentPointIndex = currentPointIndex;
-}
-
-
-boost::uint64_t Stage::getCurrentPointIndex() const
-{
-    return m_currentPointIndex;
-}
-
-void Stage::incrementCurrentPointIndex(boost::uint64_t delta)
-{
-    m_currentPointIndex += delta;
 }
 
 
@@ -91,22 +73,9 @@ void Stage::setHeader(Header* header)
 }
 
 
-boost::uint32_t Stage::read(PointData& data)
-{
-    const boost::uint32_t numPointsRead = readBuffer(data);
-    return numPointsRead;
-}
-
-
 boost::uint64_t Stage::getNumPoints() const
 {
     return getHeader().getNumPoints();
-}
-
-
-bool Stage::atEnd() const
-{
-    return getCurrentPointIndex() >= getNumPoints();
 }
 
 

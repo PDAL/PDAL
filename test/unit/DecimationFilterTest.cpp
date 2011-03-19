@@ -56,8 +56,9 @@ BOOST_AUTO_TEST_CASE(test)
     SchemaLayout layout(schema);
 
     PointData data(layout, 3);
-    
-    boost::uint32_t numRead = filter.read(data);
+
+    Iterator* iter = filter.createIterator();
+    boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 3);
 
@@ -70,6 +71,8 @@ BOOST_AUTO_TEST_CASE(test)
     BOOST_CHECK(t0 == 0);
     BOOST_CHECK(t1 == 10);
     BOOST_CHECK(t2 == 20);
+
+    delete iter;
 
     return;
 }

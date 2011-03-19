@@ -56,53 +56,11 @@ const std::string& CropFilter::getName() const
 }
 
 
-void CropFilter::seekToPoint(boost::uint64_t pointNum)
+const Bounds<double>& CropFilter::getBounds() const
 {
-    m_prevStage.seekToPoint(pointNum);
+    return m_bounds;
 }
 
-
-boost::uint32_t CropFilter::readBuffer(PointData& data)
-{
-    PointData srcData(data.getSchemaLayout(), data.getCapacity());
-
-    boost::uint32_t numSrcPointsRead = m_prevStage.read(srcData);
-    if (numSrcPointsRead == 0) return 0;
-
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
-
-    int fieldX = schema.getDimensionIndex(Dimension::Field_X);
-    int fieldY = schema.getDimensionIndex(Dimension::Field_Y);
-    int fieldZ = schema.getDimensionIndex(Dimension::Field_Z);
-
-
-    boost::uint32_t numPoints = data.getCapacity();
-    
-    boost::uint32_t srcIndex = 0;
-    boost::uint32_t dstIndex = 0;
-    for (srcIndex=0; srcIndex<numPoints; srcIndex++)
-    {
-    
-        double x = srcData.getField<double>(srcIndex, fieldX);
-        double y = srcData.getField<double>(srcIndex, fieldY);
-        double z = srcData.getField<double>(srcIndex, fieldZ);
-        Vector<double> point(x,y,z);
-        
-        if (m_bounds.contains(point))
-        {
-            data.copyPointFast(dstIndex, srcIndex, srcData);
-            data.setNumPoints(dstIndex+1);
-            dstIndex += 1;
-            
-        }
-    }
-    
-    
-    incrementCurrentPointIndex(numPoints);
-
-    return data.getNumPoints();
-}
 
 
 libpc::Iterator* CropFilter::createIterator()
@@ -120,15 +78,55 @@ CropFilterIterator::CropFilterIterator(CropFilter& filter)
 }
 
 
-boost::uint32_t CropFilterIterator::readBuffer(PointData& data)
+void CropFilterIterator::seekToPoint(boost::uint64_t pointNum)
 {
-    return m_stageAsDerived.readBuffer(data);
+    getPrevIterator().seekToPoint(pointNum);
 }
 
 
-void CropFilterIterator::seekToPoint(boost::uint64_t index)
+boost::uint32_t CropFilterIterator::readBuffer(PointData& data)
 {
-    m_stageAsDerived.seekToPoint(index);
+    CropFilter& filter = m_stageAsDerived;
+
+    PointData srcData(data.getSchemaLayout(), data.getCapacity());
+
+    boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+    if (numSrcPointsRead == 0) return 0;
+
+    const SchemaLayout& schemaLayout = data.getSchemaLayout();
+    const Schema& schema = schemaLayout.getSchema();
+
+    int fieldX = schema.getDimensionIndex(Dimension::Field_X);
+    int fieldY = schema.getDimensionIndex(Dimension::Field_Y);
+    int fieldZ = schema.getDimensionIndex(Dimension::Field_Z);
+
+    boost::uint32_t numPoints = data.getCapacity();
+    
+    const Bounds<double>& bounds = filter.getBounds();
+
+    boost::uint32_t srcIndex = 0;
+    boost::uint32_t dstIndex = 0;
+    for (srcIndex=0; srcIndex<numPoints; srcIndex++)
+    {
+    
+        double x = srcData.getField<double>(srcIndex, fieldX);
+        double y = srcData.getField<double>(srcIndex, fieldY);
+        double z = srcData.getField<double>(srcIndex, fieldZ);
+        Vector<double> point(x,y,z);
+        
+        if (bounds.contains(point))
+        {
+            data.copyPointFast(dstIndex, srcIndex, srcData);
+            data.setNumPoints(dstIndex+1);
+            dstIndex += 1;
+            
+        }
+    }
+    
+    
+    incrementCurrentPointIndex(numPoints);
+
+    return data.getNumPoints();
 }
 
 

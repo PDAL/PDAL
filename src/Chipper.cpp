@@ -45,6 +45,7 @@
 #include <libpc/Utils.hpp>
 // boost
 #include <boost/cstdint.hpp>
+#include <boost/scoped_ptr.hpp>
 // std
 #include <cmath>
 
@@ -132,7 +133,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     
     // boost::uint32_t chunks = count/m_threshold;
 
-
+    boost::scoped_ptr<Iterator> iter(m_stage.createIterator());
 
     const int indexX = schema.getDimensionIndex(Dimension::Field_X);
     const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
@@ -157,7 +158,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
 
         PointData buffer(schema, num_to_read);
 
-        boost::uint32_t num_read =  m_stage.read(buffer);
+        boost::uint32_t num_read = iter->read(buffer);
         
         if (num_read == 0) break;
         assert(num_read <= num_to_read);
@@ -188,7 +189,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
         num_points_loaded += num_read;
     
 
-        if (m_stage.atEnd())
+        if (iter->atEnd())
         {
             break;
         }

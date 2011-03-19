@@ -46,6 +46,9 @@ class FilterIterator : public Iterator
 public:
     FilterIterator(Filter&);
 
+protected:
+    Iterator& getPrevIterator();
+
 private:
     Filter& m_stageAsFilter;
     Iterator* m_prevIterator;

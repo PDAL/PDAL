@@ -34,8 +34,11 @@
 
 #include <cassert>
 
+#include <boost/scoped_ptr.hpp>
+
 #include <libpc/exceptions.hpp>
 #include <libpc/Writer.hpp>
+#include <libpc/Iterator.hpp>
 
 namespace libpc
 {
@@ -76,6 +79,8 @@ boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
     m_targetNumPointsToWrite = targetNumPointsToWrite;
     m_actualNumPointsWritten = 0;
 
+    boost::scoped_ptr<Iterator> iter(m_prevStage.createIterator());
+
     writeBegin();
 
     while (m_actualNumPointsWritten < m_targetNumPointsToWrite)
@@ -85,7 +90,8 @@ boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
 
         PointData buffer(m_prevStage.getHeader().getSchema(), numPointsToReadThisChunk);
 
-        boost::uint32_t numPointsReadThisChunk = m_prevStage.read(buffer);
+
+        boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
         assert(numPointsReadThisChunk <= numPointsToReadThisChunk);
 
         boost::uint32_t numPointsWrittenThisChunk = writeBuffer(buffer);
@@ -93,7 +99,7 @@ boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
 
         m_actualNumPointsWritten += numPointsWrittenThisChunk;
 
-        if (m_prevStage.atEnd())
+        if (iter->atEnd())
         {
             break;
         }

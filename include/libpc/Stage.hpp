@@ -59,31 +59,9 @@ public:
     // words.  The last word should generally be "Reader" or "Filter".
     virtual const std::string& getName() const = 0;
 
-    // This reads a set of points at the current position in the file.
-    //
-    // The schema of the PointData buffer we are given here might
-    // not match our own header's schema.  That's okay, though: all
-    // that matters is that the buffer we are given has the fields
-    // we need to write into.
-    //
-    // This is NOT virtual.  Derived classes should override the 
-    // readBuffer function below, not this one.
-    //
-    // Returns the number of valid points read.
-    boost::uint32_t read(PointData&);
-
-    // advance (or retreat) to the Nth point in the file (absolute, 
-    // not relative).  In some cases, this might be a very slow, painful
-    // function to call.
-    virtual void seekToPoint(boost::uint64_t pointNum) = 0;
-
     // returns the number of points this stage has available
     // (actually a convenience function that gets it from the header)
     boost::uint64_t getNumPoints() const;
-
-    // returns true after we've read all the points available to this stage
-    // (actually a convenience function that compares getCurrentPointIndex and getNumPoints)
-    bool atEnd() const;
 
     const Header& getHeader() const;
     Header& getHeader();
@@ -91,28 +69,10 @@ public:
     virtual Iterator* createIterator() = 0;
 
 protected:
-    // Implement this to do the actual work to fill in a buffer of points.
-    virtual boost::uint32_t readBuffer(PointData& pointData) = 0;
-
-    // Each concrete stage is repsonsible for managing its own current
-    // point index when a read or seek occurs.  Call this function to set
-    // the value.
-    void setCurrentPointIndex(boost::uint64_t delta);
-
-    // this is easier than saying setCurrentPointIndex(getCurrentPointIndex()+n)
-    void incrementCurrentPointIndex(boost::uint64_t currentPointDelta);
-
     void setHeader(Header*); // stage takes ownership
-
-        // Returns the current point number.  The first point is 0.
-    // If this number if > getNumPoints(), then no more points
-    // may be read (and atEnd() should be true).
-    boost::uint64_t getCurrentPointIndex() const;
 
 private:
     Header* m_header;
-    
-    boost::uint64_t m_currentPointIndex;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented

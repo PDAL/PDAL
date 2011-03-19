@@ -61,9 +61,6 @@ public:
 
     const std::string& getName() const;
 
-    // override
-    void seekToPoint(boost::uint64_t index);
-
     // clear cache (but leave cache params unchanged)
     void resetCache();
 
@@ -84,8 +81,6 @@ public:
     Iterator* createIterator();
 
 private:
-    boost::uint32_t readBuffer(PointData& data);
-
     boost::uint64_t m_numPointsRequested;
     boost::uint64_t m_numPointsRead;
 

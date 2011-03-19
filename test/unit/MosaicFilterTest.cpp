@@ -54,18 +54,20 @@ BOOST_AUTO_TEST_CASE(test1)
     libpc::drivers::faux::Reader reader3(bounds3, 100, libpc::drivers::faux::Reader::Constant);
 
     std::vector<Stage*> vec;
+    vec.push_back(&reader1);
     vec.push_back(&reader2);
     vec.push_back(&reader3);
 
-    libpc::filters::MosaicFilter mosaic(reader1, vec);
+    libpc::filters::MosaicFilter mosaic(vec);
     BOOST_CHECK(mosaic.getName() == "Mosaic Filter");
 
     const Schema& schema = mosaic.getHeader().getSchema();
     SchemaLayout layout(schema);
 
     PointData data(layout, 300);
-    
-    boost::uint32_t numRead = mosaic.read(data);
+
+    Iterator* iter = mosaic.createIterator();
+    boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 300);
 
@@ -101,6 +103,8 @@ BOOST_AUTO_TEST_CASE(test1)
         }
         BOOST_CHECK(t == i % 100);
     }
+
+    delete iter;
 
     return;
 }

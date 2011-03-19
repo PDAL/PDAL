@@ -39,18 +39,30 @@
 namespace libpc { namespace filters {
 
 
-MosaicFilter::MosaicFilter(Stage& prevStage, std::vector<Stage*> prevStages)
-    : Filter(prevStage)
+MosaicFilter::MosaicFilter(std::vector<Stage*> prevStages)
+    : Stage()
 {
-    m_prevStages.push_back(&prevStage);
+    if (prevStages.size() == 0)
+    {
+        throw libpc_error("empty stage list passed to mosaic filter");
+    }
+
     for (size_t i=0; i<prevStages.size(); i++)
     {
         if (prevStages[i] == NULL)
+        {
             throw libpc_error("null stage passed to mosaic filter");
+        }
         m_prevStages.push_back(prevStages[i]);
     }
 
-    const Header& prevHeader =  m_prevStage.getHeader();
+    {
+        const Header& prevHeader = m_prevStages[0]->getHeader();
+        Header* header = new Header(prevHeader);
+        setHeader(header);
+    }
+
+    const Header& prevHeader =  m_prevStages[0]->getHeader();
 
     boost::uint64_t totalPoints = 0;
 
@@ -89,13 +101,46 @@ const std::string& MosaicFilter::getName() const
 }
 
 
-void MosaicFilter::seekToPoint(boost::uint64_t pointNum)
+const std::vector<Stage*>& MosaicFilter::getPrevStages() const
 {
-    m_prevStages[0]->seekToPoint(pointNum);
+    return m_prevStages;
 }
 
 
-boost::uint32_t MosaicFilter::readBuffer(PointData& destData)
+libpc::Iterator* MosaicFilter::createIterator()
+{
+    return new MosaicFilterIterator(*this);
+}
+
+
+MosaicFilterIterator::MosaicFilterIterator(MosaicFilter& filter)
+    : libpc::Iterator(filter)
+    , m_stageAsDerived(filter)
+{
+    for (size_t i=0; i<filter.getPrevStages().size(); ++i)
+    {
+        Stage* stage = filter.getPrevStages()[i];
+        m_prevIterators.push_back(stage->createIterator());
+    }
+
+    return;
+}
+
+
+const std::vector<Iterator*>& MosaicFilterIterator::getPrevIterators() const
+{
+    return m_prevIterators;
+}
+
+
+void MosaicFilterIterator::seekToPoint(boost::uint64_t pointNum)
+{
+    // BUG: this is clearly not correct, we need to keep track of which tile we're on
+    m_prevIterators[0]->seekToPoint(pointNum);
+}
+
+
+boost::uint32_t MosaicFilterIterator::readBuffer(PointData& destData)
 {
     // BUG: We know that the two prev stage schemas are compatible, 
     // but we can't be sure the have the same bitfield layouts as 
@@ -114,9 +159,10 @@ boost::uint32_t MosaicFilter::readBuffer(PointData& destData)
     boost::uint64_t stageStartIndex = 0;
 
     // for each stage, we read as many points as we can
-    for (size_t i=0; i<m_prevStages.size(); i++)
+    for (size_t i=0; i<getPrevIterators().size(); i++)
     {
-        Stage& stage = *(m_prevStages[i]);
+        Iterator* iterator = getPrevIterators()[i];
+        Stage& stage = iterator->getStage();
 
         const boost::uint64_t stageStopIndex = stageStartIndex + stage.getNumPoints();
 
@@ -128,7 +174,7 @@ boost::uint32_t MosaicFilter::readBuffer(PointData& destData)
             boost::uint32_t pointsToGet = std::min(pointsAvail, totalNumPointsToRead);
 
             PointData srcData(destData.getSchemaLayout(), pointsToGet);
-            boost::uint32_t pointsGotten = stage.read(srcData);
+            boost::uint32_t pointsGotten = iterator->read(srcData);
 
             for (boost::uint32_t idx=0; idx<pointsGotten; idx++)
             {
@@ -147,32 +193,6 @@ boost::uint32_t MosaicFilter::readBuffer(PointData& destData)
     }
 
     return totalNumPointsRead;
-}
-
-
-libpc::Iterator* MosaicFilter::createIterator()
-{
-    return new MosaicFilterIterator(*this);
-}
-
-
-MosaicFilterIterator::MosaicFilterIterator(MosaicFilter& filter)
-    : libpc::FilterIterator(filter)
-    , m_stageAsDerived(filter)
-{
-    return;
-}
-
-
-boost::uint32_t MosaicFilterIterator::readBuffer(PointData& data)
-{
-    return m_stageAsDerived.readBuffer(data);
-}
-
-
-void MosaicFilterIterator::seekToPoint(boost::uint64_t index)
-{
-    m_stageAsDerived.seekToPoint(index);
 }
 
 

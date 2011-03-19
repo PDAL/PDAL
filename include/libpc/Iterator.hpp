@@ -81,7 +81,7 @@ protected:
     virtual boost::uint32_t readBuffer(PointData&) = 0;
 
     // Each concrete stage is repsonsible for managing its own current
-    // point index when a read or seek occurs.  Call this function to set
+    // point index when a read or seek occurs.  Call this function t o set
     // the value.
     void setCurrentPointIndex(boost::uint64_t delta);
 

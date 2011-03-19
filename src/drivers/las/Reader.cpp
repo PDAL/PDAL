@@ -73,26 +73,46 @@ LasHeader& LasReader::getLasHeader()
 }
 
 
-void LasReader::seekToPoint(boost::uint64_t pointNum)
+
+libpc::Iterator* LasReader::createIterator()
 {
+    return new Iterator(*this);
+}
+
+
+Iterator::Iterator(LasReader& reader)
+    : libpc::Iterator(reader)
+    , m_stageAsDerived(reader)
+{
+    return;
+}
+
+
+void Iterator::seekToPoint(boost::uint64_t pointNum)
+{
+    LasReader& reader = m_stageAsDerived;
+    const Header& header = reader.getHeader();
+
     setCurrentPointIndex(0);
 
     boost::uint32_t chunk = (boost::uint32_t)pointNum; // BUG: this needs to be done in blocks if pointNum is large
 
     // BUG: we can move the stream a constant amount
-    PointData pointData(getHeader().getSchema(), chunk);
-    read(pointData);
-
+    PointData pointData(header.getSchema(), chunk);
+    readBuffer(pointData);
     // just drop the points on the floor and return
+    
     return;
 }
 
 
-boost::uint32_t LasReader::readBuffer(PointData& pointData)
+boost::uint32_t Iterator::readBuffer(PointData& pointData)
 {
+    LasReader& reader = m_stageAsDerived;
+
     boost::uint32_t numPoints = pointData.getCapacity();
 
-    const LasHeader& lasHeader = getLasHeader();
+    const LasHeader& lasHeader = reader.getLasHeader();
     const SchemaLayout& schemaLayout = pointData.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
     LasHeader::PointFormatId pointFormat = lasHeader.getDataFormatId();
@@ -153,7 +173,7 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData)
 
         if (pointFormat == LasHeader::ePointFormat0)
         {
-            Utils::read_n(buf, m_istream, LasHeader::ePointSize0);
+            Utils::read_n(buf, reader.m_istream, LasHeader::ePointSize0);
 
             boost::uint8_t* p = buf;
 
@@ -198,7 +218,7 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData)
         }
         else if (pointFormat == LasHeader::ePointFormat3)
         {
-            Utils::read_n(buf, m_istream, LasHeader::ePointSize3);
+            Utils::read_n(buf, reader.m_istream, LasHeader::ePointSize3);
 
             boost::uint8_t* p = buf;
 
@@ -249,32 +269,6 @@ boost::uint32_t LasReader::readBuffer(PointData& pointData)
     }
 
     return numPoints;
-}
-
-
-libpc::Iterator* LasReader::createIterator()
-{
-    return new Iterator(*this);
-}
-
-
-Iterator::Iterator(LasReader& reader)
-    : libpc::Iterator(reader)
-    , m_stageAsDerived(reader)
-{
-    return;
-}
-
-
-boost::uint32_t Iterator::readBuffer(PointData& data)
-{
-    return m_stageAsDerived.readBuffer(data);
-}
-
-
-void Iterator::seekToPoint(boost::uint64_t index)
-{
-    m_stageAsDerived.seekToPoint(index);
 }
 
 

@@ -48,20 +48,16 @@ class CropFilterIterator;
 // updates the header accordingly
 class LIBPC_DLL CropFilter : public Filter
 {
-    friend CropFilterIterator;
-
 public:
     CropFilter(Stage& prevStage, Bounds<double> const& bounds);
 
     const std::string& getName() const;
 
-    void seekToPoint(boost::uint64_t pointNum);
-
     Iterator* createIterator();
 
-private:
-    boost::uint32_t readBuffer(PointData& data);
+    const Bounds<double>& getBounds() const;
 
+private:
     Bounds<double> m_bounds;
 
     CropFilter& operator=(const CropFilter&); // not implemented

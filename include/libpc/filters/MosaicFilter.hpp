@@ -44,23 +44,23 @@ namespace libpc { namespace filters {
 
 class MosaicFilterIterator;
 
-// removes any points outside of the given range
-class LIBPC_DLL MosaicFilter : public Filter
+// this doesn't derive from Stage since it takes more than one stage as input
+class LIBPC_DLL MosaicFilter : public Stage
 {
     friend MosaicFilterIterator;
 
 public:
-    MosaicFilter(Stage& prevStage, std::vector<Stage*> prevStages);
+    // entries may not be null
+    // vector.size() must be > 0
+    MosaicFilter(std::vector<Stage*> prevStages);
     
     const std::string& getName() const;
 
-    void seekToPoint(boost::uint64_t pointNum);
+    const std::vector<Stage*>& getPrevStages() const;
 
     Iterator* createIterator();
 
 private:
-    boost::uint32_t readBuffer(PointData& data);
-
     std::vector<Stage*> m_prevStages;
 
     MosaicFilter& operator=(const MosaicFilter&); // not implemented
@@ -68,10 +68,12 @@ private:
 };
 
 
-class MosaicFilterIterator : public libpc::FilterIterator
+class MosaicFilterIterator : public libpc::Iterator
 {
 public:
     MosaicFilterIterator(MosaicFilter& filter);
+
+    const std::vector<Iterator*>& getPrevIterators() const;
 
     void seekToPoint(boost::uint64_t);
 
@@ -79,6 +81,8 @@ private:
     boost::uint32_t readBuffer(PointData&);
 
     MosaicFilter& m_stageAsDerived;
+    std::vector<Iterator*> m_prevIterators;
+
 };
 
 

@@ -57,8 +57,6 @@ class Iterator;
 //
 class LIBPC_DLL Reader : public libpc::Stage
 {
-    friend Iterator;
-
 public:
     enum Mode
     {
@@ -72,13 +70,11 @@ public:
 
     const std::string& getName() const;
 
-    void seekToPoint(boost::uint64_t);
+    Mode getMode() const;
 
     libpc::Iterator* createIterator();
 
 private:
-    boost::uint32_t readBuffer(PointData&);
-
     Mode m_mode;
 
     Reader& operator=(const Reader&); // not implemented
