@@ -56,7 +56,7 @@ class LIBPC_DLL CacheFilter : public Filter
     friend CacheFilterIterator;
 
 public:
-    CacheFilter(Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
+    CacheFilter(const Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
     ~CacheFilter();
 
     const std::string& getName() const;
@@ -78,7 +78,7 @@ public:
                        boost::uint64_t& numCacheInsertMisses,
                        boost::uint64_t& numCacheInsertHits) const;
 
-    Iterator* createIterator();
+    Iterator* createIterator() const;
 
 private:
     boost::uint64_t m_numPointsRequested;

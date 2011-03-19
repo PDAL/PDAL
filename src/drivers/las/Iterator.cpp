@@ -40,7 +40,7 @@
 namespace libpc { namespace drivers { namespace las {
 
 
-Iterator::Iterator(LasReader& reader)
+Iterator::Iterator(const LasReader& reader)
     : libpc::Iterator(reader)
     , m_stageAsDerived(reader)
 {
@@ -50,7 +50,7 @@ Iterator::Iterator(LasReader& reader)
 
 void Iterator::seekToPoint(boost::uint64_t pointNum)
 {
-    LasReader& reader = m_stageAsDerived;
+    const LasReader& reader = m_stageAsDerived;
     const Header& header = reader.getHeader();
 
     setCurrentPointIndex(0);
@@ -68,7 +68,7 @@ void Iterator::seekToPoint(boost::uint64_t pointNum)
 
 boost::uint32_t Iterator::readBuffer(PointData& pointData)
 {
-    LasReader& reader = m_stageAsDerived;
+    LasReader& reader = const_cast<LasReader&>(m_stageAsDerived);       // BUG BUG BUG
 
     boost::uint32_t numPoints = pointData.getCapacity();
 

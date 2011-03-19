@@ -52,16 +52,16 @@ class LIBPC_DLL MosaicFilter : public Stage
 public:
     // entries may not be null
     // vector.size() must be > 0
-    MosaicFilter(std::vector<Stage*> prevStages);
+    MosaicFilter(std::vector<const Stage*> prevStages);
     
     const std::string& getName() const;
 
-    const std::vector<Stage*>& getPrevStages() const;
+    const std::vector<const Stage*>& getPrevStages() const;
 
-    Iterator* createIterator();
+    Iterator* createIterator() const;
 
 private:
-    std::vector<Stage*> m_prevStages;
+    std::vector<const Stage*> m_prevStages;
 
     MosaicFilter& operator=(const MosaicFilter&); // not implemented
     MosaicFilter(const MosaicFilter&); // not implemented

@@ -44,13 +44,13 @@ class Filter;
 class FilterIterator : public Iterator
 {
 public:
-    FilterIterator(Filter&);
+    FilterIterator(const Filter&);
 
 protected:
     Iterator& getPrevIterator();
 
 private:
-    Filter& m_stageAsFilter;
+    const Filter& m_stageAsFilter;
     Iterator* m_prevIterator;
 };
 

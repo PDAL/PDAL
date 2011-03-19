@@ -39,9 +39,9 @@ namespace libpc
 {
 
 
-FilterIterator::FilterIterator(Filter& filter)
+FilterIterator::FilterIterator(const Filter& filter)
     : Iterator(filter)
-    , m_stageAsFilter(static_cast<Filter&>(filter))
+    , m_stageAsFilter(static_cast<const Filter&>(filter))
     , m_prevIterator(NULL)
 {
     m_prevIterator = m_stageAsFilter.getPrevStage().createIterator();

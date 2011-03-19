@@ -66,7 +66,7 @@ public:
 
     boost::int8_t getPointFormatNumber() const;
 
-    libpc::Iterator* createIterator();
+    libpc::Iterator* createIterator() const;
 
 private:
     LiblasHeader& getLiblasHeader();

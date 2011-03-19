@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test1)
     Bounds<double> bounds3(200.0, 200.0, 200.0, 300.0, 300.0, 300.0);
     libpc::drivers::faux::Reader reader3(bounds3, 100, libpc::drivers::faux::Reader::Constant);
 
-    std::vector<Stage*> vec;
+    std::vector<const Stage*> vec;
     vec.push_back(&reader1);
     vec.push_back(&reader2);
     vec.push_back(&reader3);

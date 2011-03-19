@@ -48,11 +48,11 @@ class DecimationFilterIterator;
 class LIBPC_DLL DecimationFilter : public Filter
 {
 public:
-    DecimationFilter(Stage& prevStage, boost::uint32_t step);
+    DecimationFilter(const Stage& prevStage, boost::uint32_t step);
 
     const std::string& getName() const;
 
-    Iterator* createIterator();
+    Iterator* createIterator() const;
 
     boost::uint32_t getStep() const;
 

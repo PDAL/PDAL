@@ -49,11 +49,11 @@ class CropFilterIterator;
 class LIBPC_DLL CropFilter : public Filter
 {
 public:
-    CropFilter(Stage& prevStage, Bounds<double> const& bounds);
+    CropFilter(const Stage& prevStage, Bounds<double> const& bounds);
 
     const std::string& getName() const;
 
-    Iterator* createIterator();
+    Iterator* createIterator() const;
 
     const Bounds<double>& getBounds() const;
 

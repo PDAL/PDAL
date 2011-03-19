@@ -47,7 +47,7 @@ using std::cout;
 
 namespace libpc { namespace drivers { namespace faux {
 
-Iterator::Iterator(Reader& reader)
+Iterator::Iterator(const Reader& reader)
     : libpc::Iterator(reader)
     , m_stageAsDerived(reader)
 {
@@ -63,7 +63,7 @@ void Iterator::seekToPoint(boost::uint64_t index)
 
 boost::uint32_t Iterator::readBuffer(PointData& data)
 {
-    Reader& reader = m_stageAsDerived;
+    Reader& reader = const_cast<Reader&>(m_stageAsDerived);       // BUG BUG BUG
 
     if (data.getSchemaLayout().getSchema().getDimensions().size() != 4)
         throw not_yet_implemented("need to add ability to read from arbitrary fields");

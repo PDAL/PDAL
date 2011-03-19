@@ -49,14 +49,14 @@ class CacheFilter;
 class CacheFilterIterator : public libpc::FilterIterator
 {
 public:
-    CacheFilterIterator(CacheFilter& filter);
+    CacheFilterIterator(const CacheFilter& filter);
 
     void seekToPoint(boost::uint64_t);
 
 private:
     boost::uint32_t readBuffer(PointData&);
 
-    CacheFilter& m_stageAsDerived;
+    const CacheFilter& m_stageAsDerived;
 };
 
 

@@ -47,7 +47,7 @@ class MosaicFilter;
 class MosaicFilterIterator : public libpc::Iterator
 {
 public:
-    MosaicFilterIterator(MosaicFilter& filter);
+    MosaicFilterIterator(const MosaicFilter& filter);
 
     const std::vector<Iterator*>& getPrevIterators() const;
 
@@ -56,7 +56,7 @@ public:
 private:
     boost::uint32_t readBuffer(PointData&);
 
-    MosaicFilter& m_stageAsDerived;
+    const MosaicFilter& m_stageAsDerived;
     std::vector<Iterator*> m_prevIterators;
 
 };

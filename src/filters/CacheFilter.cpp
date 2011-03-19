@@ -42,7 +42,7 @@ namespace libpc { namespace filters {
 
 
 // cache block size is measured in Points, not bytes
-CacheFilter::CacheFilter(Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
+CacheFilter::CacheFilter(const Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
     : Filter(prevStage)
     , m_numPointsRequested(0)
     , m_numPointsRead(0)
@@ -107,7 +107,7 @@ boost::uint64_t CacheFilter::getNumPointsRead() const
 }
 
 
-libpc::Iterator* CacheFilter::createIterator()
+libpc::Iterator* CacheFilter::createIterator() const
 {
     return new CacheFilterIterator(*this);
 }

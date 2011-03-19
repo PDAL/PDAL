@@ -40,13 +40,13 @@
 namespace libpc { namespace filters {
 
 
-MosaicFilterIterator::MosaicFilterIterator(MosaicFilter& filter)
+MosaicFilterIterator::MosaicFilterIterator(const MosaicFilter& filter)
     : libpc::Iterator(filter)
     , m_stageAsDerived(filter)
 {
     for (size_t i=0; i<filter.getPrevStages().size(); ++i)
     {
-        Stage* stage = filter.getPrevStages()[i];
+        const Stage* stage = filter.getPrevStages()[i];
         m_prevIterators.push_back(stage->createIterator());
     }
 
@@ -89,7 +89,7 @@ boost::uint32_t MosaicFilterIterator::readBuffer(PointData& destData)
     for (size_t i=0; i<getPrevIterators().size(); i++)
     {
         Iterator* iterator = getPrevIterators()[i];
-        Stage& stage = iterator->getStage();
+        Stage& stage = const_cast<Stage&>(iterator->getStage());       // BUG BUG BUG
 
         const boost::uint64_t stageStopIndex = stageStartIndex + stage.getNumPoints();
 

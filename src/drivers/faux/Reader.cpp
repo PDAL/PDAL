@@ -102,7 +102,7 @@ Reader::Mode Reader::getMode() const
 }
 
 
-libpc::Iterator* Reader::createIterator()
+libpc::Iterator* Reader::createIterator() const
 {
     return new Iterator(*this);
 }

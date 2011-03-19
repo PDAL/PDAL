@@ -45,12 +45,12 @@ namespace libpc
 class LIBPC_DLL Filter : public Stage
 {
 public:
-    Filter(Stage& prevStage);
+    Filter(const Stage& prevStage);
 
-    Stage& getPrevStage() const;
+    const Stage& getPrevStage() const;
 
 protected:
-    Stage& m_prevStage;
+    const Stage& m_prevStage;
 
 private:
     Filter& operator=(const Filter&); // not implemented

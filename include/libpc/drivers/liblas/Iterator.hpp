@@ -56,14 +56,14 @@ class LiblasReader;
 class Iterator : public libpc::Iterator
 {
 public:
-    Iterator(LiblasReader& reader);
+    Iterator(const LiblasReader& reader);
 
     void seekToPoint(boost::uint64_t);
 
 private:
     boost::uint32_t readBuffer(PointData&);
 
-    LiblasReader& m_stageAsDerived;
+    const LiblasReader& m_stageAsDerived;
 };
 
 } } } // namespaces

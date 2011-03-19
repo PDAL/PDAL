@@ -72,7 +72,7 @@ public:
 
     Mode getMode() const;
 
-    libpc::Iterator* createIterator();
+    libpc::Iterator* createIterator() const;
 
 private:
     Mode m_mode;

@@ -47,14 +47,14 @@ class CropFilter;
 class CropFilterIterator : public libpc::FilterIterator
 {
 public:
-    CropFilterIterator(CropFilter& filter);
+    CropFilterIterator(const CropFilter& filter);
 
     void seekToPoint(boost::uint64_t);
 
 private:
     boost::uint32_t readBuffer(PointData&);
 
-    CropFilter& m_stageAsDerived;
+    const CropFilter& m_stageAsDerived;
 };
 
 

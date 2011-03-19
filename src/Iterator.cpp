@@ -40,7 +40,7 @@ namespace libpc
 {
 
 
-Iterator::Iterator(Stage& stage)
+Iterator::Iterator(const Stage& stage)
     : m_stage(stage)
     , m_currentPointIndex(0)
 {
@@ -48,7 +48,7 @@ Iterator::Iterator(Stage& stage)
 }
 
 
-Stage& Iterator::getStage()
+const Stage& Iterator::getStage() const
 {
     return m_stage;
 }

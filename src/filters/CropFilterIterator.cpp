@@ -39,7 +39,7 @@
 namespace libpc { namespace filters {
 
 
-CropFilterIterator::CropFilterIterator(CropFilter& filter)
+CropFilterIterator::CropFilterIterator(const CropFilter& filter)
     : libpc::FilterIterator(filter)
     , m_stageAsDerived(filter)
 {
@@ -55,7 +55,7 @@ void CropFilterIterator::seekToPoint(boost::uint64_t pointNum)
 
 boost::uint32_t CropFilterIterator::readBuffer(PointData& data)
 {
-    CropFilter& filter = m_stageAsDerived;
+    CropFilter& filter = const_cast<CropFilter&>(m_stageAsDerived);       // BUG BUG BUG
 
     PointData srcData(data.getSchemaLayout(), data.getCapacity());
 

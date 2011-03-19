@@ -40,7 +40,7 @@
 namespace libpc { namespace filters {
 
 
-MosaicFilter::MosaicFilter(std::vector<Stage*> prevStages)
+MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
     : Stage()
 {
     if (prevStages.size() == 0)
@@ -71,7 +71,7 @@ MosaicFilter::MosaicFilter(std::vector<Stage*> prevStages)
 
     for (size_t i=0; i<prevStages.size(); i++)
     {
-        Stage* stage = prevStages[i];
+        const Stage* stage = prevStages[i];
         if (stage==NULL)
         {
             throw libpc_error("bad stage passed to MosaicFilter");
@@ -102,13 +102,13 @@ const std::string& MosaicFilter::getName() const
 }
 
 
-const std::vector<Stage*>& MosaicFilter::getPrevStages() const
+const std::vector<const Stage*>& MosaicFilter::getPrevStages() const
 {
     return m_prevStages;
 }
 
 
-libpc::Iterator* MosaicFilter::createIterator()
+libpc::Iterator* MosaicFilter::createIterator() const
 {
     return new MosaicFilterIterator(*this);
 }

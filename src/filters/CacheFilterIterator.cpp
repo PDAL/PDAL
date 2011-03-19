@@ -41,7 +41,7 @@
 namespace libpc { namespace filters {
 
 
-CacheFilterIterator::CacheFilterIterator(CacheFilter& filter)
+CacheFilterIterator::CacheFilterIterator(const CacheFilter& filter)
     : libpc::FilterIterator(filter)
     , m_stageAsDerived(filter)
 {
@@ -58,7 +58,7 @@ void CacheFilterIterator::seekToPoint(boost::uint64_t index)
 
 boost::uint32_t CacheFilterIterator::readBuffer(PointData& data)
 {
-    CacheFilter& filter = m_stageAsDerived;
+    CacheFilter& filter = const_cast<CacheFilter&>(m_stageAsDerived);       // BUG BUG BUG
 
     const boost::uint64_t currentPointIndex = getCurrentPointIndex();
 

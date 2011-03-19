@@ -39,7 +39,7 @@
 namespace libpc { namespace filters {
 
 
-DecimationFilterIterator::DecimationFilterIterator(DecimationFilter& filter)
+DecimationFilterIterator::DecimationFilterIterator(const DecimationFilter& filter)
     : libpc::FilterIterator(filter)
     , m_stageAsDerived(filter)
 {
@@ -55,7 +55,7 @@ void DecimationFilterIterator::seekToPoint(boost::uint64_t pointNum)
 
 boost::uint32_t DecimationFilterIterator::readBuffer(PointData& dstData)
 {
-    DecimationFilter& filter = m_stageAsDerived;
+    DecimationFilter& filter = const_cast<DecimationFilter&>(m_stageAsDerived);       // BUG BUG BUG
 
     const boost::uint32_t step = filter.getStep();
 

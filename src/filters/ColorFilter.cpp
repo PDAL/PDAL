@@ -40,7 +40,7 @@
 
 namespace libpc { namespace filters {
 
-ColorFilter::ColorFilter(Stage& prevStage)
+ColorFilter::ColorFilter(const Stage& prevStage)
     : Filter(prevStage)
 {
     checkImpedance();
@@ -104,7 +104,7 @@ void ColorFilter::getColor(float value, boost::uint8_t& red, boost::uint8_t& gre
 }
 
 
-libpc::Iterator* ColorFilter::createIterator()
+libpc::Iterator* ColorFilter::createIterator() const
 {
     return new ColorFilterIterator(*this);
 }

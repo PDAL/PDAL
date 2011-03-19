@@ -66,7 +66,7 @@ public:
     const Header& getHeader() const;
     Header& getHeader();
 
-    virtual Iterator* createIterator() = 0;
+    virtual Iterator* createIterator() const = 0;
 
 protected:
     void setHeader(Header*); // stage takes ownership

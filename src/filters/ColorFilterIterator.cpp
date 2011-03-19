@@ -41,7 +41,7 @@
 namespace libpc { namespace filters {
 
 
-ColorFilterIterator::ColorFilterIterator(ColorFilter& filter)
+ColorFilterIterator::ColorFilterIterator(const ColorFilter& filter)
     : libpc::FilterIterator(filter)
     , m_stageAsDerived(filter)
 {
@@ -51,7 +51,7 @@ ColorFilterIterator::ColorFilterIterator(ColorFilter& filter)
 
 boost::uint32_t ColorFilterIterator::readBuffer(PointData& data)
 {
-    ColorFilter& filter = m_stageAsDerived;
+    ColorFilter& filter = const_cast<ColorFilter&>(m_stageAsDerived);       // BUG BUG BUG
 
     getPrevIterator().read(data);
 

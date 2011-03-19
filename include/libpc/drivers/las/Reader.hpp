@@ -56,7 +56,7 @@ public:
 
     const LasHeader& getLasHeader() const;
 
-    libpc::Iterator* createIterator();
+    libpc::Iterator* createIterator() const;
 
 protected:
     LasHeader& getLasHeader();

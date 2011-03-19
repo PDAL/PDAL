@@ -39,7 +39,7 @@
 namespace libpc { namespace filters {
 
 
-DecimationFilter::DecimationFilter(Stage& prevStage, boost::uint32_t step)
+DecimationFilter::DecimationFilter(const Stage& prevStage, boost::uint32_t step)
     : Filter(prevStage)
     , m_step(step)
 {
@@ -64,7 +64,7 @@ boost::uint32_t DecimationFilter::getStep() const
 
 
 
-libpc::Iterator* DecimationFilter::createIterator()
+libpc::Iterator* DecimationFilter::createIterator() const
 {
     return new DecimationFilterIterator(*this);
 }

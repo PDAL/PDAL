@@ -39,7 +39,7 @@
 namespace libpc { namespace filters {
 
 
-CropFilter::CropFilter(Stage& prevStage, Bounds<double> const& bounds)
+CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
     : Filter(prevStage)
     , m_bounds(bounds)
 {
@@ -64,7 +64,7 @@ const Bounds<double>& CropFilter::getBounds() const
 
 
 
-libpc::Iterator* CropFilter::createIterator()
+libpc::Iterator* CropFilter::createIterator() const
 {
     return new CropFilterIterator(*this);
 }

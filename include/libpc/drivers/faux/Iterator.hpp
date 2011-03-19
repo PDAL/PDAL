@@ -46,14 +46,14 @@ class Reader;
 class Iterator : public libpc::Iterator
 {
 public:
-    Iterator(Reader& reader);
+    Iterator(const Reader& reader);
 
     void seekToPoint(boost::uint64_t);
 
 private:
     boost::uint32_t readBuffer(PointData&);
 
-    Reader& m_stageAsDerived;
+    const Reader& m_stageAsDerived;
 };
 
 

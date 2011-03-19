@@ -50,13 +50,13 @@ class ColorFilterIterator;
 class LIBPC_DLL ColorFilter : public Filter
 {
 public:
-    ColorFilter(Stage& prevStage);
+    ColorFilter(const Stage& prevStage);
 
     const std::string& getName() const;
 
     void getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;
 
-    Iterator* createIterator();
+    Iterator* createIterator() const;
 
 private:
     void checkImpedance();

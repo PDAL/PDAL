@@ -45,9 +45,9 @@ class PointData;
 class LIBPC_DLL Iterator
 {
 public:
-    Iterator(Stage& stage);
+    Iterator(const Stage& stage);
 
-    Stage& getStage();
+    const Stage& getStage() const;
 
     // This reads a set of points at the current position in the file.
     //
@@ -89,7 +89,7 @@ protected:
     void incrementCurrentPointIndex(boost::uint64_t currentPointDelta);
 
 private:
-    Stage& m_stage;
+    const Stage& m_stage;
     boost::uint64_t m_currentPointIndex;
 
     Iterator& operator=(const Iterator&); // not implemented

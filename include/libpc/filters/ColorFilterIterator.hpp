@@ -48,14 +48,14 @@ class ColorFilter;
 class ColorFilterIterator : public libpc::FilterIterator
 {
 public:
-    ColorFilterIterator(ColorFilter& filter);
+    ColorFilterIterator(const ColorFilter& filter);
 
     void seekToPoint(boost::uint64_t);
 
 private:
     boost::uint32_t readBuffer(PointData&);
 
-    ColorFilter& m_stageAsDerived;
+    const ColorFilter& m_stageAsDerived;
 };
 
 

@@ -48,14 +48,14 @@ class LasReader;
 class Iterator : public libpc::Iterator
 {
 public:
-    Iterator(LasReader& reader);
+    Iterator(const LasReader& reader);
 
     void seekToPoint(boost::uint64_t);
 
 private:
     boost::uint32_t readBuffer(PointData&);
 
-    LasReader& m_stageAsDerived;
+    const LasReader& m_stageAsDerived;
 };
 
 
