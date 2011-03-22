@@ -47,7 +47,7 @@ class MosaicFilterIterator;
 // this doesn't derive from Stage since it takes more than one stage as input
 class LIBPC_DLL MosaicFilter : public Stage
 {
-    friend MosaicFilterIterator;
+    friend class MosaicFilterIterator;
 
 public:
     // entries may not be null

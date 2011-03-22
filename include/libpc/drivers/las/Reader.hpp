@@ -47,7 +47,7 @@ class Iterator;
 
 class LIBPC_DLL LasReader : public Stage
 {
-    friend Iterator;
+    friend class Iterator;
 
 public:
     LasReader(std::istream&);

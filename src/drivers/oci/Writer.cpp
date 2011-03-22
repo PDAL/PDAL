@@ -617,7 +617,7 @@ void Writer::writeBegin()
     if (!BlockTableExists())
         CreateBlockTable();
     
-    m_stage.seekToPoint(0);
+    // m_stage.seekToPoint(0);
     return;
 }
 
@@ -947,10 +947,10 @@ boost::uint32_t Writer::writeBuffer(const PointData& pointData)
         boost::uint32_t count = 0;
         for (it = ids.begin(); it != ids.end(); it++)
         {
-            m_stage.seekToPoint(*it);
+            // m_stage.seekToPoint(*it);
             
             // FIXME: Use a user bounds here instead of reading everything  
-            m_stage.read(buffer);
+            // m_stage.read(buffer);
             
             block.copyPointsFast(static_cast<std::size_t>(count), static_cast<std::size_t>(0), buffer, 1); // put single point onto our block
 

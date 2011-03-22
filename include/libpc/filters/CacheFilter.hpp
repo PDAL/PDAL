@@ -53,7 +53,7 @@ class CacheFilterIterator;
 // If more than one point is read, the cache is skipped.
 class LIBPC_DLL CacheFilter : public Filter
 {
-    friend CacheFilterIterator;
+    friend class CacheFilterIterator;
 
 public:
     CacheFilter(const Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
