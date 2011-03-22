@@ -41,7 +41,7 @@
 
 using namespace libpc;
 
-BOOST_AUTO_TEST_SUITE(ColorFilter)
+BOOST_AUTO_TEST_SUITE(ColorFilterTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
