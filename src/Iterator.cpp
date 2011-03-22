@@ -48,6 +48,12 @@ Iterator::Iterator(const Stage& stage)
 }
 
 
+Iterator::~Iterator()
+{
+    return;
+}
+
+
 const Stage& Iterator::getStage() const
 {
     return m_stage;

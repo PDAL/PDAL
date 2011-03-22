@@ -45,6 +45,7 @@ class FilterIterator : public Iterator
 {
 public:
     FilterIterator(const Filter&);
+    virtual ~FilterIterator();
 
 protected:
     Iterator& getPrevIterator();

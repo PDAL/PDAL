@@ -50,6 +50,12 @@ FilterIterator::FilterIterator(const Filter& filter)
 }
 
 
+FilterIterator::~FilterIterator()
+{
+    delete m_prevIterator;
+}
+
+
 Iterator& FilterIterator::getPrevIterator()
 {
     return *m_prevIterator;

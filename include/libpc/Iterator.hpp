@@ -46,6 +46,7 @@ class LIBPC_DLL Iterator
 {
 public:
     Iterator(const Stage& stage);
+    virtual ~Iterator();
 
     const Stage& getStage() const;
 
