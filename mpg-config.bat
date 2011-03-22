@@ -3,13 +3,13 @@
 set COMPILER="Visual Studio 10 Win64"
 set COMPILER="Visual Studio 10"
 
-set LIBPC_DIR=c:\dev\libpc
+set LIBPC_DIR=d:\dev\libpc
 
-set LIBLAS_DIR=c:\dev\liblas
-set LASZIP_DIR=c:\dev\laszip
+set LIBLAS_DIR=d:\dev\liblas
+set LASZIP_DIR=d:\dev\laszip
 set OSGEO4W_DIR=C:\OSGeo4W
 set OSGEO4W_GDAL=C:\OSGeo4W\apps\gdal-17
-set BOOST_DIR="C:\Utils\boost_pro_1_44_win32"
+set BOOST_DIR="C:\Utils\boost_1_45_0-win32"
 set ORACLE_HOME=%OSGEO4W_DIR%
 
 set BUILD_TYPE=Release
@@ -17,9 +17,9 @@ set BUILD_TYPE=Debug
 
 cmake -G %COMPILER% ^
     -DBOOST_INCLUDEDIR=%BOOST_DIR% ^
-    -DWITH_GDAL=OFF ^
-    -DWITH_GEOTIFF=OFF ^
-    -DWITH_ORACLE=OFF ^
+    -DWITH_GDAL=ON ^
+    -DWITH_GEOTIFF=ON ^
+    -DWITH_ORACLE=ON ^
     -DWITH_LASZIP=ON ^
     -DWITH_LIBLAS=ON ^
     -DGDAL_INCLUDE_DIR=%OSGEO4W_GDAL%\include ^
@@ -38,4 +38,4 @@ cmake -G %COMPILER% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
     %LIBPC_DIR%
 
-set LIBPC_SWIG_BOOST_HOME=C:\Utils\boost_1_44_win32
+set LIBPC_SWIG_BOOST_HOME=C:\Utils\boost_1_45_0-win32
