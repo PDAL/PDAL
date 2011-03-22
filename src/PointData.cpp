@@ -46,20 +46,19 @@ namespace libpc
 
 PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t capacity)
     : m_schemaLayout(schemaLayout)
-    , m_data(NULL)
+    , m_data(new boost::uint8_t[m_schemaLayout.getByteSize() * capacity])
     , m_pointSize(m_schemaLayout.getByteSize())
     , m_numPoints(0)
     , m_capacity(capacity)
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
 {
-    m_data = new boost::uint8_t[m_pointSize * m_capacity];
 
     return;
 }
 
 PointData::PointData(PointData const& other) 
     : m_schemaLayout(other.getSchemaLayout())
-    , m_data(0)
+    , m_data(new boost::uint8_t[m_schemaLayout.getByteSize() * other.m_capacity])
     , m_pointSize(m_schemaLayout.getByteSize())
     , m_numPoints(other.m_numPoints)
     , m_capacity(other.m_capacity)
@@ -67,8 +66,7 @@ PointData::PointData(PointData const& other)
 {
     if (other.m_data)
     {
-        m_data = new boost::uint8_t[m_pointSize * m_capacity];
-        memcpy(m_data, other.m_data, m_pointSize*m_capacity);
+        memcpy(m_data.get(), other.m_data.get(), m_pointSize*m_capacity);
     }
 
 }
@@ -78,13 +76,12 @@ PointData& PointData::operator=(PointData const& rhs)
     if (&rhs != this)
     {
         m_schemaLayout = rhs.getSchemaLayout();
-        m_data = new boost::uint8_t[m_schemaLayout.getByteSize() * rhs.getCapacity()];
-        memcpy(m_data, rhs.m_data, m_pointSize*m_capacity);
-        
         m_pointSize = m_schemaLayout.getByteSize();
         m_numPoints = rhs.getNumPoints();
         m_capacity = rhs.getCapacity();
         m_bounds = rhs.getSpatialBounds();
+        memcpy(m_data.get(), rhs.m_data.get(), m_pointSize*m_capacity);
+        
         
     }
     return *this;
@@ -92,8 +89,6 @@ PointData& PointData::operator=(PointData const& rhs)
 
 PointData::~PointData()
 {
-    if (m_data)
-        delete[] m_data;
 }
 
 
@@ -111,7 +106,7 @@ void PointData::setSpatialBounds(const Bounds<double>& bounds)
 
 boost::uint8_t* PointData::getData(std::size_t index) const
 {
-    return m_data + m_pointSize * index;
+    return m_data.get() + m_pointSize * index;
 }
 
 

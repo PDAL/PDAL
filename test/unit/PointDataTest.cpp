@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 }
 
 
-static PointData* makeTestBuffer()
+PointData* makeTestBuffer()
 {
     Dimension d1(Dimension::Field_X, Dimension::Uint8);
     Dimension d2(Dimension::Field_Y, Dimension::Int32);
@@ -171,6 +171,24 @@ BOOST_AUTO_TEST_CASE(test_copy)
       BOOST_CHECK(Utils::compare_approx(z, ii*100.0, (std::numeric_limits<double>::min)()) == true);
     }
 
+    delete data;
+}
+
+BOOST_AUTO_TEST_CASE(test_copy_constructor)
+{
+    PointData* data = makeTestBuffer();
+    
+    PointData d2(*data);
+    verifyTestBuffer(d2);
+    delete data;
+}
+
+BOOST_AUTO_TEST_CASE(test_assignment_constructor)
+{
+    PointData* data = makeTestBuffer();
+    
+    PointData d2 = *data;
+    verifyTestBuffer(d2);
     delete data;
 }
 

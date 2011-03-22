@@ -36,6 +36,7 @@
 #define INCLUDED_POINTDATA_HPP
 
 #include <boost/cstdint.hpp>
+#include <boost/scoped_array.hpp>
 
 #include <libpc/export.hpp>
 #include <libpc/Bounds.hpp>
@@ -114,7 +115,7 @@ public:
 private:
 
     SchemaLayout m_schemaLayout;
-    boost::uint8_t* m_data;
+    boost::scoped_array<boost::uint8_t> m_data;
     std::size_t m_pointSize;
     boost::uint32_t m_numPoints;
     boost::uint32_t m_capacity;    
@@ -128,7 +129,7 @@ inline void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, 
 {
     std::size_t offset = (pointIndex * m_pointSize) + m_schemaLayout.getDimensionLayout(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_capacity);
-    boost::uint8_t* p = m_data + offset;
+    boost::uint8_t* p = m_data.get() + offset;
 
     *(T*)p = value;
 }
@@ -139,7 +140,7 @@ inline T PointData::getField(std::size_t pointIndex, std::size_t fieldIndex) con
 {
     std::size_t offset = (pointIndex * m_pointSize) + m_schemaLayout.getDimensionLayout(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_capacity);
-    boost::uint8_t* p = m_data + offset;
+    boost::uint8_t* p = m_data.get() + offset;
 
     return *(T*)p;
 }
