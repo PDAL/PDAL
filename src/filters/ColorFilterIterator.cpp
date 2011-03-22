@@ -43,7 +43,7 @@ namespace libpc { namespace filters {
 
 ColorFilterIterator::ColorFilterIterator(const ColorFilter& filter)
     : libpc::FilterIterator(filter)
-    , m_stageAsDerived(filter)
+    , m_colorFilter(filter)
 {
     return;
 }
@@ -51,35 +51,11 @@ ColorFilterIterator::ColorFilterIterator(const ColorFilter& filter)
 
 boost::uint32_t ColorFilterIterator::readBuffer(PointBuffer& data)
 {
-    ColorFilter& filter = const_cast<ColorFilter&>(m_stageAsDerived);       // BUG BUG BUG
-
     getPrevIterator().read(data);
 
-    boost::uint32_t numPoints = data.getNumPoints();
+    boost::uint32_t  numRead = m_colorFilter.processBuffer(data);
 
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
-
-    int fieldIndexR = schema.getDimensionIndex(Dimension::Field_Red);
-    int fieldIndexG = schema.getDimensionIndex(Dimension::Field_Green);
-    int fieldIndexB = schema.getDimensionIndex(Dimension::Field_Blue);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
-
-    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
-    {
-        float z = data.getField<float>(pointIndex, offsetZ);
-        boost::uint8_t red, green, blue;
-        filter.getColor(z, red, green, blue);
-
-        // now we store the 3 u8's in the point data...
-        data.setField<boost::uint8_t>(pointIndex, fieldIndexR, red);
-        data.setField<boost::uint8_t>(pointIndex, fieldIndexG, green);
-        data.setField<boost::uint8_t>(pointIndex, fieldIndexB, blue);
-        data.setNumPoints(pointIndex+1);
-
-    }
-
-    return numPoints;
+    return numRead;
 }
 
 

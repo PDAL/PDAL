@@ -55,7 +55,7 @@ public:
 private:
     boost::uint32_t readBuffer(PointBuffer&);
 
-    const ColorFilter& m_stageAsDerived;
+    const ColorFilter& m_colorFilter;
 };
 
 
