@@ -39,7 +39,7 @@
 
 using namespace libpc;
 
-BOOST_AUTO_TEST_SUITE(SchemaTest)
+BOOST_AUTO_TEST_SUITE(SchemaLayoutTest)
 
 BOOST_AUTO_TEST_CASE(test_layout)
 {
