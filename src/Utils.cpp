@@ -161,4 +161,21 @@ boost::uintmax_t Utils::fileSize(const std::string& file)
   return boost::filesystem::file_size(file);
 }
 
+
+char* Utils::getenv(const char* env)
+{
+    return ::getenv(env);
+}
+
+
+int Utils::putenv(const char* env)
+{
+#ifdef WIN32
+    return ::_putenv(env);
+#else
+    return ::putenv(env);
+#endif
+}
+
+
 } // namespace libpc

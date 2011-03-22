@@ -41,6 +41,7 @@
 #include <libpc/drivers/oci/Header.hpp>
 
 #include <libpc/exceptions.hpp>
+#include <libpc/Utils.hpp>
 
 #include <cstdlib>
 #include <iostream>
@@ -1100,12 +1101,10 @@ void Writer::Debug()
 
     if (debug)
     {
-        const char* gdal_debug = getenv("CPL_DEBUG");
+        const char* gdal_debug = Utils::getenv("CPL_DEBUG");
         if (gdal_debug == 0)
         {
-            // FIXME: this leaks
-            const std::string* d = new std::string("CPL_DEBUG=ON");
-            putenv(const_cast<char*>(d->c_str()));
+            Utils::putenv("CPL_DEBUG=ON");
         }
         
         const char* gdal_debug2 = getenv("CPL_DEBUG");

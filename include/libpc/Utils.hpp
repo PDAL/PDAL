@@ -142,6 +142,9 @@ public:
         return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
     }
 
+    static char* getenv(const char* env);
+    static int putenv(const char* env);
+
 private:
     template<typename T>
     static inline char* as_buffer(T& data)
