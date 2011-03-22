@@ -12,8 +12,7 @@
 
 #include <libpc/drivers/las/Reader.hpp>
 #include <libpc/drivers/liblas/Reader.hpp>
-
-#ifdef HAVE_MRISD
+#ifdef HAVE_MRSID
 #include <libpc/drivers/mrsid/Reader.hpp>
 #endif
 

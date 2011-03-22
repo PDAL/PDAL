@@ -122,8 +122,6 @@ int Application_pc2pc::execute()
         writer.write(np);
     }
 
-#ifdef HAVE_ORACLE
-
     else if (hasOption("oracle"))
     {
 #ifdef HAVE_ORACLE
@@ -155,7 +153,6 @@ int Application_pc2pc::execute()
         throw configuration_error("libPC not compiled with Oracle support");
 #endif
     }    
-#endif
     else
     {
         libpc::drivers::liblas::LiblasReader reader(*ifs);
