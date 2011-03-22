@@ -112,6 +112,9 @@ public:
     // access to the raw memory
     boost::uint8_t* getData(std::size_t pointIndex) const;
 
+    // access to the raw memory
+    void getData(boost::uint8_t** data, std::size_t* array_size) const;
+
 private:
 
     SchemaLayout m_schemaLayout;
