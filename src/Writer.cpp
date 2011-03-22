@@ -88,7 +88,7 @@ boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
         boost::uint64_t numRemainingPointsToRead = m_targetNumPointsToWrite - m_actualNumPointsWritten;
         boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(std::min<boost::uint64_t>(numRemainingPointsToRead, m_chunkSize));
 
-        PointData buffer(m_prevStage.getHeader().getSchema(), numPointsToReadThisChunk);
+        PointBuffer buffer(m_prevStage.getHeader().getSchema(), numPointsToReadThisChunk);
 
 
         boost::uint32_t numPointsReadThisChunk = iter->read(buffer);

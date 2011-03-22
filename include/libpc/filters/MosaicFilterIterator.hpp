@@ -54,7 +54,7 @@ public:
     void seekToPoint(boost::uint64_t);
 
 private:
-    boost::uint32_t readBuffer(PointData&);
+    boost::uint32_t readBuffer(PointBuffer&);
 
     const MosaicFilter& m_stageAsDerived;
     std::vector<Iterator*> m_prevIterators;

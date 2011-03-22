@@ -40,7 +40,7 @@
 
 namespace libpc {
 
-class PointDataCache;
+class PointBufferCache;
     
 namespace filters {
 
@@ -84,7 +84,7 @@ private:
     boost::uint64_t m_numPointsRequested;
     boost::uint64_t m_numPointsRead;
 
-    PointDataCache* m_cache;
+    PointBufferCache* m_cache;
     boost::uint32_t m_maxCacheBlocks;
     boost::uint32_t m_cacheBlockSize;
 

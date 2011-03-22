@@ -15,12 +15,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// This PointData-specific code derived from the templated code at
+// This PointBuffer-specific code derived from the templated code at
 // http://www.bottlenose.demon.co.uk/article/lru.htm.  It is under an
 // Internet Systems Consortium (ISC) license (an OSI-approved BSD-alike license).
 
-#ifndef INCLUDED_LIBPC_POINTDATACACHE_HPP
-#define INCLUDED_LIBPC_POINTDATACACHE_HPP
+#ifndef INCLUDED_LIBPC_PointBufferCACHE_HPP
+#define INCLUDED_LIBPC_PointBufferCACHE_HPP
 
 
 #ifdef _MSC_VER
@@ -35,14 +35,14 @@
 #  pragma warning(pop)
 #endif
 
-#include <libpc/PointData.hpp>
+#include <libpc/PointBuffer.hpp>
 
 
 namespace libpc
 {
 
 
-class PointDataCache
+class PointBufferCache
 {
 public:
 
@@ -53,12 +53,12 @@ public:
     typedef boost::bimaps::bimap<
     boost::bimaps::set_of<boost::uint64_t>,
           boost::bimaps::list_of<dummy_type>,
-          boost::bimaps::with_info<PointData*>
+          boost::bimaps::with_info<PointBuffer*>
           > cache_type;
 
     // Constuctor specifies the cached function and
     // the maximum number of records to be stored.
-    PointDataCache(size_t c)
+    PointBufferCache(size_t c)
         :_capacity(c)
         , m_numCacheLookupMisses(0)
         , m_numCacheLookupHits(0)
@@ -68,17 +68,17 @@ public:
         assert(_capacity!=0);
     }
 
-    ~PointDataCache()
+    ~PointBufferCache()
     {
         for (cache_type::left_iterator it =_cache.left.begin(); it != _cache.left.end(); ++it)
         {
-           PointData* data = it->info;
+           PointBuffer* data = it->info;
            delete data;
         }
         return;
     }
 
-    PointData* lookup(boost::uint64_t k)
+    PointBuffer* lookup(boost::uint64_t k)
     {
         // Attempt to find existing record
         const cache_type::left_iterator it =_cache.left.find(k);
@@ -103,7 +103,7 @@ public:
 
     // When something is inserted into the cache, the cache
     // takes ownership (deletion responsibility) for it.
-    PointData* insert(boost::uint64_t k, PointData* v)
+    PointBuffer* insert(boost::uint64_t k, PointBuffer* v)
     {
         // Attempt to find existing record
         const cache_type::left_iterator it =_cache.left.find(k);
@@ -157,7 +157,7 @@ public:
 
 private:
 
-    void insertx(boost::uint64_t k, PointData* v)
+    void insertx(boost::uint64_t k, PointBuffer* v)
     {
         assert(_cache.size()<=_capacity);
 
@@ -167,7 +167,7 @@ private:
             // by purging the least-recently-used element
 
             cache_type::right_iterator iter =_cache.right.begin();
-            PointData *old = iter->info;
+            PointBuffer *old = iter->info;
             delete old;
 
             _cache.right.erase(_cache.right.begin());
@@ -189,8 +189,8 @@ private:
     boost::uint64_t m_numCacheInsertMisses;
     boost::uint64_t m_numCacheInsertHits;
 
-    PointDataCache& operator=(const PointDataCache&); // not implemented
-    PointDataCache(const PointDataCache&); // not implemented
+    PointBufferCache& operator=(const PointBufferCache&); // not implemented
+    PointBufferCache(const PointBufferCache&); // not implemented
 };
 
 

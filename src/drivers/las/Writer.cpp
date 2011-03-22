@@ -80,9 +80,9 @@ void LasWriter::writeEnd()
 }
 
 
-boost::uint32_t LasWriter::writeBuffer(const PointData& pointData)
+boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
 {
-    const SchemaLayout& schemaLayout = pointData.getSchemaLayout();
+    const SchemaLayout& schemaLayout = PointBuffer.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
     LasHeader::PointFormatId pointFormat = m_lasHeader.getDataFormatId();
 
@@ -140,29 +140,29 @@ boost::uint32_t LasWriter::writeBuffer(const PointData& pointData)
 
     boost::uint8_t buf[1024]; // BUG: fixed size
 
-    for (boost::uint32_t pointIndex=0; pointIndex<pointData.getNumPoints(); pointIndex++)
+    for (boost::uint32_t pointIndex=0; pointIndex<PointBuffer.getNumPoints(); pointIndex++)
     {
 
         if (pointFormat == LasHeader::ePointFormat0)
         {
             boost::uint8_t* p = buf;
 
-            const boost::uint32_t x = pointData.getField<boost::uint32_t>(pointIndex, fieldIndexX);
-            const boost::uint32_t y = pointData.getField<boost::uint32_t>(pointIndex, fieldIndexY);
-            const boost::uint32_t z = pointData.getField<boost::uint32_t>(pointIndex, fieldIndexZ);
-            const boost::uint16_t intensity = pointData.getField<boost::uint16_t>(pointIndex, fieldIndexIntensity);
+            const boost::uint32_t x = PointBuffer.getField<boost::uint32_t>(pointIndex, fieldIndexX);
+            const boost::uint32_t y = PointBuffer.getField<boost::uint32_t>(pointIndex, fieldIndexY);
+            const boost::uint32_t z = PointBuffer.getField<boost::uint32_t>(pointIndex, fieldIndexZ);
+            const boost::uint16_t intensity = PointBuffer.getField<boost::uint16_t>(pointIndex, fieldIndexIntensity);
             
-            const boost::uint8_t returnNum = pointData.getField<boost::uint8_t>(pointIndex, fieldIndexReturnNum);
-            const boost::uint8_t numReturns = pointData.getField<boost::uint8_t>(pointIndex, fieldIndexNumReturns);
-            const boost::uint8_t scanDirFlag = pointData.getField<boost::uint8_t>(pointIndex, fieldIndexScanDir);
-            const boost::uint8_t flight = pointData.getField<boost::uint8_t>(pointIndex, fieldIndexFlight);
+            const boost::uint8_t returnNum = PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndexReturnNum);
+            const boost::uint8_t numReturns = PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndexNumReturns);
+            const boost::uint8_t scanDirFlag = PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndexScanDir);
+            const boost::uint8_t flight = PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndexFlight);
 
             const boost::uint8_t bits = returnNum & (numReturns<<3) & (scanDirFlag << 6) && (flight << 7);
 
-            const boost::uint8_t classification = pointData.getField<boost::uint8_t>(pointIndex, fieldIndexClassification);
-            const boost::int8_t scanAngleRank = pointData.getField<boost::int8_t>(pointIndex, fieldIndexScanAngle);
-            const boost::uint8_t user = pointData.getField<boost::uint8_t>(pointIndex, fieldIndexUserData);
-            const boost::uint16_t pointSourceId = pointData.getField<boost::uint16_t>(pointIndex, fieldIndexPointSource);
+            const boost::uint8_t classification = PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndexClassification);
+            const boost::int8_t scanAngleRank = PointBuffer.getField<boost::int8_t>(pointIndex, fieldIndexScanAngle);
+            const boost::uint8_t user = PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndexUserData);
+            const boost::uint16_t pointSourceId = PointBuffer.getField<boost::uint16_t>(pointIndex, fieldIndexPointSource);
 
             Utils::write_field<boost::uint32_t>(p, x);
             Utils::write_field<boost::uint32_t>(p, y);
@@ -190,26 +190,26 @@ boost::uint32_t LasWriter::writeBuffer(const PointData& pointData)
         {
             boost::uint8_t* p = buf;
 
-            const boost::uint32_t x = pointData.getField<boost::uint32_t>(pointIndex, fieldIndexX);
-            const boost::uint32_t y = pointData.getField<boost::uint32_t>(pointIndex, fieldIndexY);
-            const boost::uint32_t z = pointData.getField<boost::uint32_t>(pointIndex, fieldIndexZ);
-            const boost::uint16_t intensity = pointData.getField<boost::uint16_t>(pointIndex, fieldIndexIntensity);
+            const boost::uint32_t x = PointBuffer.getField<boost::uint32_t>(pointIndex, fieldIndexX);
+            const boost::uint32_t y = PointBuffer.getField<boost::uint32_t>(pointIndex, fieldIndexY);
+            const boost::uint32_t z = PointBuffer.getField<boost::uint32_t>(pointIndex, fieldIndexZ);
+            const boost::uint16_t intensity = PointBuffer.getField<boost::uint16_t>(pointIndex, fieldIndexIntensity);
             
-            const boost::uint8_t returnNum = pointData.getField<boost::uint8_t>(pointIndex, fieldIndexReturnNum);
-            const boost::uint8_t numReturns = pointData.getField<boost::uint8_t>(pointIndex, fieldIndexNumReturns);
-            const boost::uint8_t scanDirFlag = pointData.getField<boost::uint8_t>(pointIndex, fieldIndexScanDir);
-            const boost::uint8_t flight = pointData.getField<boost::uint8_t>(pointIndex, fieldIndexFlight);
+            const boost::uint8_t returnNum = PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndexReturnNum);
+            const boost::uint8_t numReturns = PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndexNumReturns);
+            const boost::uint8_t scanDirFlag = PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndexScanDir);
+            const boost::uint8_t flight = PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndexFlight);
 
             const boost::uint8_t bits = returnNum & (numReturns<<3) & (scanDirFlag << 6) && (flight << 7);
 
-            const boost::uint8_t classification = pointData.getField<boost::uint8_t>(pointIndex, fieldIndexClassification);
-            const boost::int8_t scanAngleRank = pointData.getField<boost::int8_t>(pointIndex, fieldIndexScanAngle);
-            const boost::uint8_t user = pointData.getField<boost::uint8_t>(pointIndex, fieldIndexUserData);
-            const boost::uint16_t pointSourceId = pointData.getField<boost::uint16_t>(pointIndex, fieldIndexPointSource);
-            const double time = pointData.getField<double>(pointIndex, fieldIndexTime);
-            const boost::uint16_t red = pointData.getField<boost::uint16_t>(pointIndex, fieldIndexRed);
-            const boost::uint16_t green = pointData.getField<boost::uint16_t>(pointIndex, fieldIndexGreen);
-            const boost::uint16_t blue = pointData.getField<boost::uint16_t>(pointIndex, fieldIndexBlue);
+            const boost::uint8_t classification = PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndexClassification);
+            const boost::int8_t scanAngleRank = PointBuffer.getField<boost::int8_t>(pointIndex, fieldIndexScanAngle);
+            const boost::uint8_t user = PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndexUserData);
+            const boost::uint16_t pointSourceId = PointBuffer.getField<boost::uint16_t>(pointIndex, fieldIndexPointSource);
+            const double time = PointBuffer.getField<double>(pointIndex, fieldIndexTime);
+            const boost::uint16_t red = PointBuffer.getField<boost::uint16_t>(pointIndex, fieldIndexRed);
+            const boost::uint16_t green = PointBuffer.getField<boost::uint16_t>(pointIndex, fieldIndexGreen);
+            const boost::uint16_t blue = PointBuffer.getField<boost::uint16_t>(pointIndex, fieldIndexBlue);
 
             Utils::write_field<boost::uint32_t>(p, x);
             Utils::write_field<boost::uint32_t>(p, y);

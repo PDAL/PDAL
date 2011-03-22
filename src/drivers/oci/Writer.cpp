@@ -628,7 +628,7 @@ void Writer::writeEnd()
     return;
 }
 
-bool Writer::FillOraclePointData(PointData const& buffer, 
+bool Writer::FillOraclePointBuffer(PointBuffer const& buffer, 
                                  std::vector<boost::uint8_t>& point_data,
                                  chipper::Block const& block,
                                  boost::uint32_t block_id)
@@ -774,7 +774,7 @@ void Writer::SetOrdinates(Statement statement,
 
 }
 
-bool Writer::WriteBlock(PointData const& buffer, 
+bool Writer::WriteBlock(PointBuffer const& buffer, 
                                  std::vector<boost::uint8_t>& point_data,
                                  chipper::Block const& block,
                                  boost::uint32_t block_id)
@@ -924,14 +924,14 @@ bool Writer::WriteBlock(PointData const& buffer,
     return true;
 }
 
-boost::uint32_t Writer::writeBuffer(const PointData& pointData)
+boost::uint32_t Writer::writeBuffer(const PointBuffer& PointBuffer)
 {
-    boost::uint32_t numPoints = pointData.getNumPoints();
+    boost::uint32_t numPoints = PointBuffer.getNumPoints();
 
     libpc::Header const& header = m_stage.getHeader();
     libpc::Schema const& schema = header.getSchema();
 
-    PointData buffer(schema, 1);
+    libpc::PointBuffer buffer(schema, 1);
 
     
     for ( boost::uint32_t i = 0; i < m_chipper.GetBlockCount(); ++i )
@@ -939,7 +939,7 @@ boost::uint32_t Writer::writeBuffer(const PointData& pointData)
         const chipper::Block& b = m_chipper.GetBlock(i);
         
         // FIXME: This should be std::min(capacity, block_id.size()) (I think)
-        PointData block(schema, m_options.GetPTree().get<boost::uint32_t>("capacity"));
+        libpc::PointBuffer block(schema, m_options.GetPTree().get<boost::uint32_t>("capacity"));
         std::vector<boost::uint32_t> ids = b.GetIDs();
         
         std::vector<boost::uint32_t>::const_iterator it;
@@ -957,7 +957,7 @@ boost::uint32_t Writer::writeBuffer(const PointData& pointData)
             count++;
 
         }
-        FillOraclePointData(block, oracle_buffer, b, i);
+        FillOraclePointBuffer(block, oracle_buffer, b, i);
         WriteBlock(block, oracle_buffer, b, i);
     }
     // bool hasTimeData = false;
@@ -997,7 +997,7 @@ boost::uint32_t Writer::writeBuffer(const PointData& pointData)
     //     throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
     // }
     // 
-    // const Schema& schema = pointData.getSchema();
+    // const Schema& schema = PointBuffer.getSchema();
     // 
     // const int indexX = schema.getDimensionIndex(Dimension::Field_X);
     // const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
@@ -1028,25 +1028,25 @@ boost::uint32_t Writer::writeBuffer(const PointData& pointData)
     // 
     // liblas::Point pt;
     // 
-    // boost::uint32_t numPoints = pointData.getNumPoints();
+    // boost::uint32_t numPoints = PointBuffer.getNumPoints();
     // for (boost::uint32_t i=0; i<numPoints; i++)
     // {
-    //     const boost::int32_t x = pointData.getField<boost::int32_t>(i, indexX);
-    //     const boost::int32_t y = pointData.getField<boost::int32_t>(i, indexY);
-    //     const boost::int32_t z = pointData.getField<boost::int32_t>(i, indexZ);
+    //     const boost::int32_t x = PointBuffer.getField<boost::int32_t>(i, indexX);
+    //     const boost::int32_t y = PointBuffer.getField<boost::int32_t>(i, indexY);
+    //     const boost::int32_t z = PointBuffer.getField<boost::int32_t>(i, indexZ);
     //     pt.SetRawX(x);
     //     pt.SetRawY(y);
     //     pt.SetRawZ(z);
     // 
-    //     const boost::uint16_t intensity = pointData.getField<boost::uint16_t>(i, indexIntensity);
-    //     const boost::int8_t returnNumber = pointData.getField<boost::int8_t>(i, indexReturnNumber);
-    //     const boost::int8_t numberOfReturns = pointData.getField<boost::int8_t>(i, indexNumberOfReturns);
-    //     const boost::int8_t scanDirFlag = pointData.getField<boost::int8_t>(i, indexScanDirectionFlag);
-    //     const boost::int8_t edgeOfFlightLine = pointData.getField<boost::int8_t>(i, indexEdgeOfFlightLine);
-    //     const boost::uint8_t classification = pointData.getField<boost::uint8_t>(i, indexClassification);
-    //     const boost::int8_t scanAngleRank = pointData.getField<boost::int8_t>(i, indexScanAngleRank);
-    //     const boost::uint8_t userData = pointData.getField<boost::uint8_t>(i, indexUserData);
-    //     const boost::uint16_t pointSourceId = pointData.getField<boost::uint16_t>(i, indexPointSourceId);
+    //     const boost::uint16_t intensity = PointBuffer.getField<boost::uint16_t>(i, indexIntensity);
+    //     const boost::int8_t returnNumber = PointBuffer.getField<boost::int8_t>(i, indexReturnNumber);
+    //     const boost::int8_t numberOfReturns = PointBuffer.getField<boost::int8_t>(i, indexNumberOfReturns);
+    //     const boost::int8_t scanDirFlag = PointBuffer.getField<boost::int8_t>(i, indexScanDirectionFlag);
+    //     const boost::int8_t edgeOfFlightLine = PointBuffer.getField<boost::int8_t>(i, indexEdgeOfFlightLine);
+    //     const boost::uint8_t classification = PointBuffer.getField<boost::uint8_t>(i, indexClassification);
+    //     const boost::int8_t scanAngleRank = PointBuffer.getField<boost::int8_t>(i, indexScanAngleRank);
+    //     const boost::uint8_t userData = PointBuffer.getField<boost::uint8_t>(i, indexUserData);
+    //     const boost::uint16_t pointSourceId = PointBuffer.getField<boost::uint16_t>(i, indexPointSourceId);
     //     pt.SetIntensity(intensity);
     //     pt.SetReturnNumber(returnNumber);
     //     pt.SetNumberOfReturns(numberOfReturns);
@@ -1059,15 +1059,15 @@ boost::uint32_t Writer::writeBuffer(const PointData& pointData)
     // 
     //     if (hasTimeData)
     //     {
-    //         const double gpsTime = pointData.getField<double>(i, indexGpsTime);
+    //         const double gpsTime = PointBuffer.getField<double>(i, indexGpsTime);
     //         pt.SetTime(gpsTime);
     //     }
     // 
     //     if (hasColorData)
     //     {
-    //         const boost::uint16_t red = pointData.getField<boost::uint16_t>(i, indexRed);
-    //         const boost::uint16_t green = pointData.getField<boost::uint16_t>(i, indexGreen);
-    //         const boost::uint16_t blue = pointData.getField<boost::uint16_t>(i, indexBlue);
+    //         const boost::uint16_t red = PointBuffer.getField<boost::uint16_t>(i, indexRed);
+    //         const boost::uint16_t green = PointBuffer.getField<boost::uint16_t>(i, indexGreen);
+    //         const boost::uint16_t blue = PointBuffer.getField<boost::uint16_t>(i, indexBlue);
     //         liblas::Color color(red, green, blue);
     //         pt.SetColor(color);
     //     }

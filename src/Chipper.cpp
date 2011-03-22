@@ -84,12 +84,12 @@ be stored.
 namespace libpc { namespace chipper {
 
 Block::Block(Schema const& schema, boost::uint32_t capacity)
- : PointData(schema, capacity)
+ : PointBuffer(schema, capacity)
 {
     
 }
 Block::Block(Block const& other)
- : PointData(other)
+ : PointBuffer(other)
  , m_list_p(other.m_list_p)
  , m_left(other.m_left)
  , m_right(other.m_right)
@@ -156,7 +156,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
         boost::uint64_t num_remaining = num_points_to_load - num_points_loaded;
         boost::uint32_t num_to_read = static_cast<boost::uint32_t>(std::min<boost::uint64_t>(num_remaining, m_threshold));
 
-        PointData buffer(schema, num_to_read);
+        PointBuffer buffer(schema, num_to_read);
 
         boost::uint32_t num_read = iter->read(buffer);
         
@@ -165,7 +165,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
 
         for (boost::uint32_t j = 0; j < m_threshold; j++)
         {
-            // PointData data(schema, 1);            
+            // PointBuffer data(schema, 1);            
             // data.copyPointFast(j, 0, buffer);
             boost::uint8_t* raw_data = new boost::uint8_t[ref.m_pointSize*1];
             boost::uint8_t* src_data = buffer.getData(j);

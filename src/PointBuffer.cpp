@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/PointData.hpp>
+#include <libpc/PointBuffer.hpp>
 
 #include <cassert>
 #include <iostream>
@@ -44,7 +44,7 @@ namespace libpc
 {
 
 
-PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t capacity)
+PointBuffer::PointBuffer(const SchemaLayout& schemaLayout, boost::uint32_t capacity)
     : m_schemaLayout(schemaLayout)
     , m_data(new boost::uint8_t[m_schemaLayout.getByteSize() * capacity])
     , m_pointSize(m_schemaLayout.getByteSize())
@@ -56,7 +56,7 @@ PointData::PointData(const SchemaLayout& schemaLayout, boost::uint32_t capacity)
     return;
 }
 
-PointData::PointData(PointData const& other) 
+PointBuffer::PointBuffer(PointBuffer const& other) 
     : m_schemaLayout(other.getSchemaLayout())
     , m_data(new boost::uint8_t[m_schemaLayout.getByteSize() * other.m_capacity])
     , m_pointSize(m_schemaLayout.getByteSize())
@@ -71,7 +71,7 @@ PointData::PointData(PointData const& other)
 
 }
 
-PointData& PointData::operator=(PointData const& rhs)
+PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
 {
     if (&rhs != this)
     {
@@ -87,40 +87,40 @@ PointData& PointData::operator=(PointData const& rhs)
     return *this;
 }
 
-PointData::~PointData()
+PointBuffer::~PointBuffer()
 {
 }
 
 
-const Bounds<double>& PointData::getSpatialBounds() const
+const Bounds<double>& PointBuffer::getSpatialBounds() const
 {
     return m_bounds;
 }
 
 
-void PointData::setSpatialBounds(const Bounds<double>& bounds)
+void PointBuffer::setSpatialBounds(const Bounds<double>& bounds)
 {
     m_bounds = bounds;
 }
 
 
-boost::uint8_t* PointData::getData(std::size_t index) const
+boost::uint8_t* PointBuffer::getData(std::size_t index) const
 {
     return m_data.get() + m_pointSize * index;
 }
 
 
-boost::uint32_t PointData::getNumPoints() const
+boost::uint32_t PointBuffer::getNumPoints() const
 {
     return m_numPoints;
 }
 
 
-void PointData::copyPointFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData)
+void PointBuffer::copyPointFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer)
 {
-    assert(getSchemaLayout() == srcPointData.getSchemaLayout());
+    assert(getSchemaLayout() == srcPointBuffer.getSchemaLayout());
 
-    boost::uint8_t* src = srcPointData.getData(srcPointIndex);
+    boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
     boost::uint8_t* dest = getData(destPointIndex);
     std::size_t len = getSchemaLayout().getByteSize();
 
@@ -132,11 +132,11 @@ void PointData::copyPointFast(std::size_t destPointIndex, std::size_t srcPointIn
 }
 
 
-void PointData::copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData, std::size_t numPoints)
+void PointBuffer::copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer, std::size_t numPoints)
 {
-    assert(getSchemaLayout() == srcPointData.getSchemaLayout());
+    assert(getSchemaLayout() == srcPointBuffer.getSchemaLayout());
 
-    boost::uint8_t* src = srcPointData.getData(srcPointIndex);
+    boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
     boost::uint8_t* dest = getData(destPointIndex);
     std::size_t len = getSchemaLayout().getByteSize();
 
@@ -148,13 +148,13 @@ void PointData::copyPointsFast(std::size_t destPointIndex, std::size_t srcPointI
 }
 
 
-std::ostream& operator<<(std::ostream& ostr, const PointData& pointData)
+std::ostream& operator<<(std::ostream& ostr, const PointBuffer& PointBuffer)
 {
     using std::endl;
 
-    const SchemaLayout& schemaLayout = pointData.getSchemaLayout();
+    const SchemaLayout& schemaLayout = PointBuffer.getSchemaLayout();
     const std::vector<DimensionLayout>& dimensionLayouts = schemaLayout.getDimensionLayouts();
-    const std::size_t numPoints = pointData.getNumPoints();
+    const std::size_t numPoints = PointBuffer.getNumPoints();
 
     int cnt = 0;
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
@@ -162,7 +162,7 @@ std::ostream& operator<<(std::ostream& ostr, const PointData& pointData)
 
         ++cnt;
     }
-    ostr << "Contains " << cnt << "  points (" << pointData.getNumPoints() << " total)" << endl;
+    ostr << "Contains " << cnt << "  points (" << PointBuffer.getNumPoints() << " total)" << endl;
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
@@ -181,34 +181,34 @@ std::ostream& operator<<(std::ostream& ostr, const PointData& pointData)
             switch (dimension.getDataType())
             {
             case Dimension::Int8:
-                ostr << (int)(pointData.getField<boost::int8_t>(pointIndex, fieldIndex));
+                ostr << (int)(PointBuffer.getField<boost::int8_t>(pointIndex, fieldIndex));
                 break;
             case Dimension::Uint8:
-                ostr << (int)(pointData.getField<boost::uint8_t>(pointIndex, fieldIndex));
+                ostr << (int)(PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndex));
                 break;
             case Dimension::Int16:
-                ostr << pointData.getField<boost::int16_t>(pointIndex, fieldIndex);
+                ostr << PointBuffer.getField<boost::int16_t>(pointIndex, fieldIndex);
                 break;
             case Dimension::Uint16:
-                ostr << pointData.getField<boost::uint16_t>(pointIndex, fieldIndex);
+                ostr << PointBuffer.getField<boost::uint16_t>(pointIndex, fieldIndex);
                 break;
             case Dimension::Int32:
-                ostr << pointData.getField<boost::int32_t>(pointIndex, fieldIndex);
+                ostr << PointBuffer.getField<boost::int32_t>(pointIndex, fieldIndex);
                 break;
             case Dimension::Uint32:
-                ostr << pointData.getField<boost::uint32_t>(pointIndex, fieldIndex);
+                ostr << PointBuffer.getField<boost::uint32_t>(pointIndex, fieldIndex);
                 break;
             case Dimension::Int64:
-                ostr << pointData.getField<boost::int64_t>(pointIndex, fieldIndex);
+                ostr << PointBuffer.getField<boost::int64_t>(pointIndex, fieldIndex);
                 break;
             case Dimension::Uint64:
-                ostr << pointData.getField<boost::uint64_t>(pointIndex, fieldIndex);
+                ostr << PointBuffer.getField<boost::uint64_t>(pointIndex, fieldIndex);
                 break;
             case Dimension::Float:
-                ostr << pointData.getField<float>(pointIndex, fieldIndex);
+                ostr << PointBuffer.getField<float>(pointIndex, fieldIndex);
                 break;
             case Dimension::Double:
-                ostr << pointData.getField<double>(pointIndex, fieldIndex);
+                ostr << PointBuffer.getField<double>(pointIndex, fieldIndex);
                 break;
             default:
                 throw;

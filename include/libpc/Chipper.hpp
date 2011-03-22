@@ -1,7 +1,7 @@
 #ifndef LIBLAS_CHIPPER_H
 #define LIBLAS_CHIPPER_H
 
-#include <libpc/PointData.hpp>
+#include <libpc/PointBuffer.hpp>
 #include <libpc/Bounds.hpp>
 #include <libpc/export.hpp>
 #include <libpc/Dimension.hpp>
@@ -31,7 +31,7 @@ class LIBPC_DLL PtRef
 public:
     PtRef() :m_data(0) {};
 
-    // PtRef(PointData const& data) : m_data(0), m_pointSize(data.getSchemaLayout().getByteSize()) {};
+    // PtRef(PointBuffer const& data) : m_data(0), m_pointSize(data.getSchemaLayout().getByteSize()) {};
     double m_pos;
     boost::uint32_t m_ptindex;
     boost::uint32_t m_oindex;
@@ -107,7 +107,7 @@ public:
 
 class LIBPC_DLL Chipper;
 
-class LIBPC_DLL Block : libpc::PointData
+class LIBPC_DLL Block : libpc::PointBuffer
 {
     friend class Chipper;
 

@@ -154,7 +154,7 @@ void LiblasWriter::writeEnd()
 }
 
 
-boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
+boost::uint32_t LiblasWriter::writeBuffer(const PointBuffer& PointBuffer)
 {
     bool hasTimeData = false;
     bool hasColorData = false;
@@ -193,7 +193,7 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
         throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
     }
 
-    const Schema& schema = pointData.getSchema();
+    const Schema& schema = PointBuffer.getSchema();
 
     const int indexX = schema.getDimensionIndex(Dimension::Field_X);
     const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
@@ -224,25 +224,25 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
 
     ::liblas::Point pt;
 
-    boost::uint32_t numPoints = pointData.getNumPoints();
+    boost::uint32_t numPoints = PointBuffer.getNumPoints();
     for (boost::uint32_t i=0; i<numPoints; i++)
     {
-        const boost::int32_t x = pointData.getField<boost::int32_t>(i, indexX);
-        const boost::int32_t y = pointData.getField<boost::int32_t>(i, indexY);
-        const boost::int32_t z = pointData.getField<boost::int32_t>(i, indexZ);
+        const boost::int32_t x = PointBuffer.getField<boost::int32_t>(i, indexX);
+        const boost::int32_t y = PointBuffer.getField<boost::int32_t>(i, indexY);
+        const boost::int32_t z = PointBuffer.getField<boost::int32_t>(i, indexZ);
         pt.SetRawX(x);
         pt.SetRawY(y);
         pt.SetRawZ(z);
 
-        const boost::uint16_t intensity = pointData.getField<boost::uint16_t>(i, indexIntensity);
-        const boost::int8_t returnNumber = pointData.getField<boost::int8_t>(i, indexReturnNumber);
-        const boost::int8_t numberOfReturns = pointData.getField<boost::int8_t>(i, indexNumberOfReturns);
-        const boost::int8_t scanDirFlag = pointData.getField<boost::int8_t>(i, indexScanDirectionFlag);
-        const boost::int8_t edgeOfFlightLine = pointData.getField<boost::int8_t>(i, indexEdgeOfFlightLine);
-        const boost::uint8_t classification = pointData.getField<boost::uint8_t>(i, indexClassification);
-        const boost::int8_t scanAngleRank = pointData.getField<boost::int8_t>(i, indexScanAngleRank);
-        const boost::uint8_t userData = pointData.getField<boost::uint8_t>(i, indexUserData);
-        const boost::uint16_t pointSourceId = pointData.getField<boost::uint16_t>(i, indexPointSourceId);
+        const boost::uint16_t intensity = PointBuffer.getField<boost::uint16_t>(i, indexIntensity);
+        const boost::int8_t returnNumber = PointBuffer.getField<boost::int8_t>(i, indexReturnNumber);
+        const boost::int8_t numberOfReturns = PointBuffer.getField<boost::int8_t>(i, indexNumberOfReturns);
+        const boost::int8_t scanDirFlag = PointBuffer.getField<boost::int8_t>(i, indexScanDirectionFlag);
+        const boost::int8_t edgeOfFlightLine = PointBuffer.getField<boost::int8_t>(i, indexEdgeOfFlightLine);
+        const boost::uint8_t classification = PointBuffer.getField<boost::uint8_t>(i, indexClassification);
+        const boost::int8_t scanAngleRank = PointBuffer.getField<boost::int8_t>(i, indexScanAngleRank);
+        const boost::uint8_t userData = PointBuffer.getField<boost::uint8_t>(i, indexUserData);
+        const boost::uint16_t pointSourceId = PointBuffer.getField<boost::uint16_t>(i, indexPointSourceId);
         pt.SetIntensity(intensity);
         pt.SetReturnNumber(returnNumber);
         pt.SetNumberOfReturns(numberOfReturns);
@@ -255,15 +255,15 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointData& pointData)
 
         if (hasTimeData)
         {
-            const double time = pointData.getField<double>(i, indexTime);
+            const double time = PointBuffer.getField<double>(i, indexTime);
             pt.SetTime(time);
         }
 
         if (hasColorData)
         {
-            const boost::uint16_t red = pointData.getField<boost::uint16_t>(i, indexRed);
-            const boost::uint16_t green = pointData.getField<boost::uint16_t>(i, indexGreen);
-            const boost::uint16_t blue = pointData.getField<boost::uint16_t>(i, indexBlue);
+            const boost::uint16_t red = PointBuffer.getField<boost::uint16_t>(i, indexRed);
+            const boost::uint16_t green = PointBuffer.getField<boost::uint16_t>(i, indexGreen);
+            const boost::uint16_t blue = PointBuffer.getField<boost::uint16_t>(i, indexBlue);
             ::liblas::Color color(red, green, blue);
             pt.SetColor(color);
         }

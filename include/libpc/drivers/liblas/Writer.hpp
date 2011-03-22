@@ -73,7 +73,7 @@ protected:
     virtual void writeBegin();
 
     // called repeatedly, until out of data
-    virtual boost::uint32_t writeBuffer(const PointData&);
+    virtual boost::uint32_t writeBuffer(const PointBuffer&);
 
     // called once, after the writeBuffer calls
     virtual void writeEnd();

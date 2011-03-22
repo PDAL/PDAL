@@ -49,7 +49,7 @@ ColorFilterIterator::ColorFilterIterator(const ColorFilter& filter)
 }
 
 
-boost::uint32_t ColorFilterIterator::readBuffer(PointData& data)
+boost::uint32_t ColorFilterIterator::readBuffer(PointBuffer& data)
 {
     ColorFilter& filter = const_cast<ColorFilter&>(m_stageAsDerived);       // BUG BUG BUG
 

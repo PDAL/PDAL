@@ -64,14 +64,14 @@ void Iterator::seekToPoint(boost::uint64_t n)
 }
 
 
-boost::uint32_t Iterator::readBuffer(PointData& pointData)
+boost::uint32_t Iterator::readBuffer(PointBuffer& PointBuffer)
 {
     LiblasReader& reader = const_cast<LiblasReader&>(m_stageAsDerived);     // BUG BUG BUG
 
-    boost::uint32_t numPoints = pointData.getCapacity();
+    boost::uint32_t numPoints = PointBuffer.getCapacity();
     boost::uint32_t i = 0;
 
-    const Schema& schema = pointData.getSchema();
+    const Schema& schema = PointBuffer.getSchema();
 
     const int indexX = schema.getDimensionIndex(Dimension::Field_X);
     const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
@@ -124,25 +124,25 @@ boost::uint32_t Iterator::readBuffer(PointData& pointData)
         const boost::uint8_t userData = pt.GetUserData();
         const boost::uint16_t pointSourceId = pt.GetPointSourceID();
         
-        pointData.setField(i, indexX, x);
-        pointData.setField(i, indexY, y);
-        pointData.setField(i, indexZ, z);
+        PointBuffer.setField(i, indexX, x);
+        PointBuffer.setField(i, indexY, y);
+        PointBuffer.setField(i, indexZ, z);
 
-        pointData.setField(i, indexIntensity, intensity);
-        pointData.setField(i, indexReturnNumber, returnNumber);
-        pointData.setField(i, indexNumberOfReturns, numberOfReturns);
-        pointData.setField(i, indexScanDirectionFlag, scanDirFlag);
-        pointData.setField(i, indexEdgeOfFlightLine, edgeOfFlightLine);
-        pointData.setField(i, indexClassification, classification);
-        pointData.setField(i, indexScanAngleRank, scanAngleRank);
-        pointData.setField(i, indexUserData, userData);
-        pointData.setField(i, indexPointSourceId, pointSourceId);
+        PointBuffer.setField(i, indexIntensity, intensity);
+        PointBuffer.setField(i, indexReturnNumber, returnNumber);
+        PointBuffer.setField(i, indexNumberOfReturns, numberOfReturns);
+        PointBuffer.setField(i, indexScanDirectionFlag, scanDirFlag);
+        PointBuffer.setField(i, indexEdgeOfFlightLine, edgeOfFlightLine);
+        PointBuffer.setField(i, indexClassification, classification);
+        PointBuffer.setField(i, indexScanAngleRank, scanAngleRank);
+        PointBuffer.setField(i, indexUserData, userData);
+        PointBuffer.setField(i, indexPointSourceId, pointSourceId);
 
         if (reader.m_hasTimeData)
         {
             const double time = pt.GetTime();
             
-            pointData.setField(i, indexTime, time);
+            PointBuffer.setField(i, indexTime, time);
         }
 
         if (reader.m_hasColorData)
@@ -152,12 +152,12 @@ boost::uint32_t Iterator::readBuffer(PointData& pointData)
             const boost::uint16_t green = color.GetGreen();
             const boost::uint16_t blue = color.GetBlue();
 
-            pointData.setField(i, indexRed, red);
-            pointData.setField(i, indexGreen, green);
-            pointData.setField(i, indexBlue, blue);
+            PointBuffer.setField(i, indexRed, red);
+            PointBuffer.setField(i, indexGreen, green);
+            PointBuffer.setField(i, indexBlue, blue);
         }
         
-        pointData.setNumPoints(i+1);
+        PointBuffer.setNumPoints(i+1);
         if (reader.m_hasWaveData)
         {
             throw not_yet_implemented("Waveform data (types 4 and 5) not supported");

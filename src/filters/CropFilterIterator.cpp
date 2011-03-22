@@ -49,15 +49,15 @@ CropFilterIterator::CropFilterIterator(const CropFilter& filter)
 
 void CropFilterIterator::seekToPoint(boost::uint64_t pointNum)
 {
-    getPrevIterator().seekToPoint(pointNum);
+    // getPrevIterator().seekToPoint(pointNum);
 }
 
 
-boost::uint32_t CropFilterIterator::readBuffer(PointData& data)
+boost::uint32_t CropFilterIterator::readBuffer(PointBuffer& data)
 {
     CropFilter& filter = const_cast<CropFilter&>(m_stageAsDerived);       // BUG BUG BUG
 
-    PointData srcData(data.getSchemaLayout(), data.getCapacity());
+    PointBuffer srcData(data.getSchemaLayout(), data.getCapacity());
 
     boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
     if (numSrcPointsRead == 0) return 0;

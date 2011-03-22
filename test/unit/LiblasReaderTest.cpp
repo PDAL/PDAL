@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_SUITE(LiblasReaderTest)
 #define Compare(x,y)    BOOST_CHECK(Utils::compare_approx((x),(y),0.001));
 
 
-static void checkPointXYZ(const PointData& data, size_t index, const Schema& schema, 
+static void checkPointXYZ(const PointBuffer& data, size_t index, const Schema& schema, 
                           double xref, double yref, double zref)
 {
     int offsetX = schema.getDimensionIndex(Dimension::Field_X);
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     const Schema& schema = reader.getHeader().getSchema();
     SchemaLayout layout(schema);
 
-    PointData data(layout, 3);
+    PointBuffer data(layout, 3);
     
     libpc::Iterator* iter = reader.createIterator();
 

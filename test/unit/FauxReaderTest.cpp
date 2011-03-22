@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(test_constant)
     const Schema& schema = reader.getHeader().getSchema();
     SchemaLayout layout(schema);
 
-    PointData data(layout, 750);
+    PointBuffer data(layout, 750);
  
     Iterator* iter = reader.createIterator();
     boost::uint32_t numRead = iter->read(data);
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_random)
     const Schema& schema = reader.getHeader().getSchema();
     SchemaLayout layout(schema);
 
-    PointData data(layout, 750);
+    PointBuffer data(layout, 750);
 
     Iterator* iter = reader.createIterator();
     boost::uint32_t numRead = iter->read(data);

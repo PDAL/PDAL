@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_POINTDATA_HPP
-#define INCLUDED_POINTDATA_HPP
+#ifndef INCLUDED_PointBuffer_HPP
+#define INCLUDED_PointBuffer_HPP
 
 #include <boost/cstdint.hpp>
 #include <boost/scoped_array.hpp>
@@ -45,31 +45,31 @@
 namespace libpc
 {
 
-// a PointData object is just an untyped array of N bytes,
+// a PointBuffer object is just an untyped array of N bytes,
 // where N is (the size of the given Schema * the number of points)
 //
-// That is, a PointData represents the underlying data for one or more points.
+// That is, a PointBuffer represents the underlying data for one or more points.
 //
-// A PointData object has an associated Schema object.
+// A PointBuffer object has an associated Schema object.
 //
 // Many of the methods take a first parameter "index", to specify which point in the
 // collection is to be operated upon.  The point index is a uint32; you can't read
 // more than 4 billion points at a time.
-class LIBPC_DLL PointData
+class LIBPC_DLL PointBuffer
 
 {
     
 public:
     
-    // note that when we make a PointData object all the fields are initialized to inactive,
+    // note that when we make a PointBuffer object all the fields are initialized to inactive,
     // regardless of what the passed-in schema says -- this is because the field object
     // represents the state within the owning object, which in this case is a completely
     // empty buffer (similarly, all the points in the buffer are marked "invalid")
-    PointData(const SchemaLayout&, boost::uint32_t capacity);
-    PointData(const PointData&); 
-    PointData& operator=(const PointData&); 
+    PointBuffer(const SchemaLayout&, boost::uint32_t capacity);
+    PointBuffer(const PointBuffer&); 
+    PointBuffer& operator=(const PointBuffer&); 
 
-    ~PointData();
+    ~PointBuffer();
 
     const Bounds<double>& getSpatialBounds() const;
     void setSpatialBounds(const Bounds<double>& bounds);
@@ -104,10 +104,10 @@ public:
     // bulk copy all the fields from the given point into this object
     // NOTE: this is only legal if the src and dest schemas are exactly the same
     // (later, this will be implemented properly, to handle the general cases slowly and the best case quickly)
-    void copyPointFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData);
+    void copyPointFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer);
     
     // same as above, but copies N points
-    void copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData, std::size_t numPoints);
+    void copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer, std::size_t numPoints);
 
     // access to the raw memory
     boost::uint8_t* getData(std::size_t pointIndex) const;
@@ -125,7 +125,7 @@ private:
 
 
 template <class T>
-inline void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, T value)
+inline void PointBuffer::setField(std::size_t pointIndex, std::size_t fieldIndex, T value)
 {
     std::size_t offset = (pointIndex * m_pointSize) + m_schemaLayout.getDimensionLayout(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_capacity);
@@ -136,7 +136,7 @@ inline void PointData::setField(std::size_t pointIndex, std::size_t fieldIndex, 
 
 
 template <class T>
-inline T PointData::getField(std::size_t pointIndex, std::size_t fieldIndex) const
+inline T PointBuffer::getField(std::size_t pointIndex, std::size_t fieldIndex) const
 {
     std::size_t offset = (pointIndex * m_pointSize) + m_schemaLayout.getDimensionLayout(fieldIndex).getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_capacity);
@@ -146,7 +146,7 @@ inline T PointData::getField(std::size_t pointIndex, std::size_t fieldIndex) con
 }
 
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const PointData&);
+LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);
 
 
 } // namespace libpc

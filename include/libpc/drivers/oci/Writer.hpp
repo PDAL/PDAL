@@ -66,7 +66,7 @@ protected:
     virtual void writeBegin();
 
     // called repeatedly, until out of data
-    virtual boost::uint32_t writeBuffer(const PointData&);
+    virtual boost::uint32_t writeBuffer(const PointBuffer&);
 
     // called once, after the writeBuffer calls
     virtual void writeEnd();
@@ -91,11 +91,11 @@ private:
     bool IsGeographic(boost::int32_t srid);
     std::string LoadSQLData(std::string const& filename);
     
-    bool FillOraclePointData(PointData const& buffer, 
+    bool FillOraclePointBuffer(PointBuffer const& buffer, 
                              std::vector<boost::uint8_t>& point_data, 
                              chipper::Block const& block,
                              boost::uint32_t block_id);
-    bool WriteBlock(PointData const& buffer, 
+    bool WriteBlock(PointBuffer const& buffer, 
                              std::vector<boost::uint8_t>& point_data, 
                              chipper::Block const& block,
                              boost::uint32_t block_id);

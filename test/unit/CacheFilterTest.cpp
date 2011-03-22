@@ -54,8 +54,8 @@ BOOST_AUTO_TEST_CASE(test1)
     SchemaLayout layout(schema);
     const int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
 
-    PointData dataBig(layout, 1024);
-    PointData dataSmall(layout, 1);
+    PointBuffer dataBig(layout, 1024);
+    PointBuffer dataSmall(layout, 1);
 
     Iterator* iter = cache.createIterator();
 

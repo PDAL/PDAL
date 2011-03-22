@@ -88,11 +88,11 @@ void Writer::writeEnd()
 }
 
 
-boost::uint32_t Writer::writeBuffer(const PointData& pointData)
+boost::uint32_t Writer::writeBuffer(const PointBuffer& PointBuffer)
 {
-    const boost::uint32_t numPoints = pointData.getNumPoints();
+    const boost::uint32_t numPoints = PointBuffer.getNumPoints();
 
-    const Schema& schema = pointData.getSchemaLayout().getSchema();
+    const Schema& schema = PointBuffer.getSchemaLayout().getSchema();
     const int fieldIndexX = schema.getDimensionIndex(Dimension::Field_X);
     const int fieldIndexY = schema.getDimensionIndex(Dimension::Field_Y);
     const int fieldIndexZ = schema.getDimensionIndex(Dimension::Field_Z);
@@ -100,9 +100,9 @@ boost::uint32_t Writer::writeBuffer(const PointData& pointData)
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
 
-        double x = pointData.getField<double>(pointIndex, fieldIndexX);
-        double y = pointData.getField<double>(pointIndex, fieldIndexY);
-        double z = pointData.getField<double>(pointIndex, fieldIndexZ);
+        double x = PointBuffer.getField<double>(pointIndex, fieldIndexX);
+        double y = PointBuffer.getField<double>(pointIndex, fieldIndexY);
+        double z = PointBuffer.getField<double>(pointIndex, fieldIndexZ);
 
         m_minimumX = std::min(m_minimumX, x);
         m_minimumY = std::min(m_minimumY, y);

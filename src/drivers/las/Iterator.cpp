@@ -58,22 +58,22 @@ void Iterator::seekToPoint(boost::uint64_t pointNum)
     boost::uint32_t chunk = (boost::uint32_t)pointNum; // BUG: this needs to be done in blocks if pointNum is large
 
     // BUG: we can move the stream a constant amount
-    PointData pointData(header.getSchema(), chunk);
-    readBuffer(pointData);
+    PointBuffer PointBuffer(header.getSchema(), chunk);
+    readBuffer(PointBuffer);
     // just drop the points on the floor and return
     
     return;
 }
 
 
-boost::uint32_t Iterator::readBuffer(PointData& pointData)
+boost::uint32_t Iterator::readBuffer(PointBuffer& PointBuffer)
 {
     LasReader& reader = const_cast<LasReader&>(m_stageAsDerived);       // BUG BUG BUG
 
-    boost::uint32_t numPoints = pointData.getCapacity();
+    boost::uint32_t numPoints = PointBuffer.getCapacity();
 
     const LasHeader& lasHeader = reader.getLasHeader();
-    const SchemaLayout& schemaLayout = pointData.getSchemaLayout();
+    const SchemaLayout& schemaLayout = PointBuffer.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
     LasHeader::PointFormatId pointFormat = lasHeader.getDataFormatId();
 
@@ -152,18 +152,18 @@ boost::uint32_t Iterator::readBuffer(PointData& pointData)
             const boost::uint8_t scanDirFlag = (flags >> 6) & 0x01;
             const boost::uint8_t flight = (flags >> 7) & 0x01;
 
-            pointData.setField<boost::uint32_t>(pointIndex, fieldIndexX, x);
-            pointData.setField<boost::uint32_t>(pointIndex, fieldIndexY, y);
-            pointData.setField<boost::uint32_t>(pointIndex, fieldIndexZ, z);
-            pointData.setField<boost::uint16_t>(pointIndex, fieldIndexIntensity, intensity);
-            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexReturnNum, returnNum);
-            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexNumReturns, numReturns);
-            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexScanDir, scanDirFlag);
-            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexFlight, flight);
-            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexClassification, classification);
-            pointData.setField<boost::int8_t>(pointIndex, fieldIndexScanAngle, scanAngleRank);
-            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexUserData, user);
-            pointData.setField<boost::uint16_t>(pointIndex, fieldIndexPointSource, pointSourceId);
+            PointBuffer.setField<boost::uint32_t>(pointIndex, fieldIndexX, x);
+            PointBuffer.setField<boost::uint32_t>(pointIndex, fieldIndexY, y);
+            PointBuffer.setField<boost::uint32_t>(pointIndex, fieldIndexZ, z);
+            PointBuffer.setField<boost::uint16_t>(pointIndex, fieldIndexIntensity, intensity);
+            PointBuffer.setField<boost::uint8_t>(pointIndex, fieldIndexReturnNum, returnNum);
+            PointBuffer.setField<boost::uint8_t>(pointIndex, fieldIndexNumReturns, numReturns);
+            PointBuffer.setField<boost::uint8_t>(pointIndex, fieldIndexScanDir, scanDirFlag);
+            PointBuffer.setField<boost::uint8_t>(pointIndex, fieldIndexFlight, flight);
+            PointBuffer.setField<boost::uint8_t>(pointIndex, fieldIndexClassification, classification);
+            PointBuffer.setField<boost::int8_t>(pointIndex, fieldIndexScanAngle, scanAngleRank);
+            PointBuffer.setField<boost::uint8_t>(pointIndex, fieldIndexUserData, user);
+            PointBuffer.setField<boost::uint16_t>(pointIndex, fieldIndexPointSource, pointSourceId);
 
         }
         else if (pointFormat == LasHeader::ePointFormat1)
@@ -201,22 +201,22 @@ boost::uint32_t Iterator::readBuffer(PointData& pointData)
             const boost::uint8_t scanDirFlag = (flags >> 6) & 0x01;
             const boost::uint8_t flight = (flags >> 7) & 0x01;
 
-            pointData.setField<boost::uint32_t>(pointIndex, fieldIndexX, x);
-            pointData.setField<boost::uint32_t>(pointIndex, fieldIndexY, y);
-            pointData.setField<boost::uint32_t>(pointIndex, fieldIndexZ, z);
-            pointData.setField<boost::uint16_t>(pointIndex, fieldIndexIntensity, intensity);
-            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexReturnNum, returnNum);
-            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexNumReturns, numReturns);
-            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexScanDir, scanDirFlag);
-            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexFlight, flight);
-            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexClassification, classification);
-            pointData.setField<boost::int8_t>(pointIndex, fieldIndexScanAngle, scanAngleRank);
-            pointData.setField<boost::uint8_t>(pointIndex, fieldIndexUserData, user);
-            pointData.setField<boost::uint16_t>(pointIndex, fieldIndexPointSource, pointSourceId);
-            pointData.setField<double>(pointIndex, fieldIndexTime, time);
-            pointData.setField<boost::uint16_t>(pointIndex, fieldIndexRed, red);
-            pointData.setField<boost::uint16_t>(pointIndex, fieldIndexGreen, green);
-            pointData.setField<boost::uint16_t>(pointIndex, fieldIndexBlue, blue);
+            PointBuffer.setField<boost::uint32_t>(pointIndex, fieldIndexX, x);
+            PointBuffer.setField<boost::uint32_t>(pointIndex, fieldIndexY, y);
+            PointBuffer.setField<boost::uint32_t>(pointIndex, fieldIndexZ, z);
+            PointBuffer.setField<boost::uint16_t>(pointIndex, fieldIndexIntensity, intensity);
+            PointBuffer.setField<boost::uint8_t>(pointIndex, fieldIndexReturnNum, returnNum);
+            PointBuffer.setField<boost::uint8_t>(pointIndex, fieldIndexNumReturns, numReturns);
+            PointBuffer.setField<boost::uint8_t>(pointIndex, fieldIndexScanDir, scanDirFlag);
+            PointBuffer.setField<boost::uint8_t>(pointIndex, fieldIndexFlight, flight);
+            PointBuffer.setField<boost::uint8_t>(pointIndex, fieldIndexClassification, classification);
+            PointBuffer.setField<boost::int8_t>(pointIndex, fieldIndexScanAngle, scanAngleRank);
+            PointBuffer.setField<boost::uint8_t>(pointIndex, fieldIndexUserData, user);
+            PointBuffer.setField<boost::uint16_t>(pointIndex, fieldIndexPointSource, pointSourceId);
+            PointBuffer.setField<double>(pointIndex, fieldIndexTime, time);
+            PointBuffer.setField<boost::uint16_t>(pointIndex, fieldIndexRed, red);
+            PointBuffer.setField<boost::uint16_t>(pointIndex, fieldIndexGreen, green);
+            PointBuffer.setField<boost::uint16_t>(pointIndex, fieldIndexBlue, blue);
             
         }
         
@@ -224,7 +224,7 @@ boost::uint32_t Iterator::readBuffer(PointData& pointData)
         {
             throw;
         }
-        pointData.setNumPoints(pointIndex+1);
+        PointBuffer.setNumPoints(pointIndex+1);
         
     }
 

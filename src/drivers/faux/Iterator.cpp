@@ -61,7 +61,7 @@ void Iterator::seekToPoint(boost::uint64_t index)
 }
 
 
-boost::uint32_t Iterator::readBuffer(PointData& data)
+boost::uint32_t Iterator::readBuffer(PointBuffer& data)
 {
     Reader& reader = const_cast<Reader&>(m_stageAsDerived);       // BUG BUG BUG
 

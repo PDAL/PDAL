@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test)
     const Schema& schema = filter.getHeader().getSchema();
     SchemaLayout layout(schema);
 
-    PointData data(layout, 3);
+    PointBuffer data(layout, 3);
 
     Iterator* iter = filter.createIterator();
     boost::uint32_t numRead = iter->read(data);

@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test1)
     const Schema& schema = mosaic.getHeader().getSchema();
     SchemaLayout layout(schema);
 
-    PointData data(layout, 300);
+    PointBuffer data(layout, 300);
 
     Iterator* iter = mosaic.createIterator();
     boost::uint32_t numRead = iter->read(data);

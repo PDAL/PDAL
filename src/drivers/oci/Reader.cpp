@@ -87,8 +87,8 @@ void Reader::seekToPoint(boost::uint64_t pointNum)
     ////// will just drop the points on the floor and return
     ////boost::uint32_t pointNumX = (boost::uint32_t)pointNum; // BUG
     ////assert(pointNumX == pointNum);
-    ////PointData pointData(getHeader().getSchema(), pointNumX);
-    ////read(pointData);
+    ////PointBuffer PointBuffer(getHeader().getSchema(), pointNumX);
+    ////read(PointBuffer);
 
     ////return;
 }

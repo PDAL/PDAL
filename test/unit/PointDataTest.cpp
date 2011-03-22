@@ -35,12 +35,12 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/PointData.hpp>
+#include <libpc/PointBuffer.hpp>
 #include <libpc/Utils.hpp>
 
 using namespace libpc;
 
-BOOST_AUTO_TEST_SUITE(PointDataTest)
+BOOST_AUTO_TEST_SUITE(PointBufferTest)
 
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     schema.addDimension(d2);
     SchemaLayout layout(schema);
 
-    PointData data(layout, 10);
+    PointBuffer data(layout, 10);
 
     BOOST_CHECK(data.getCapacity() == 10);
     BOOST_CHECK(data.getSchemaLayout() == layout);
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 }
 
 
-PointData* makeTestBuffer()
+PointBuffer* makeTestBuffer()
 {
     Dimension d1(Dimension::Field_X, Dimension::Uint8);
     Dimension d2(Dimension::Field_Y, Dimension::Int32);
@@ -79,7 +79,7 @@ PointData* makeTestBuffer()
     BOOST_CHECK(offZ==5);
 
     boost::uint32_t capacity = 17;
-    PointData* data = new PointData(layout, capacity);
+    PointBuffer* data = new PointBuffer(layout, capacity);
 
     BOOST_CHECK(data->getCapacity() == capacity);
     // write the data into the buffer
@@ -101,7 +101,7 @@ PointData* makeTestBuffer()
 }
 
 
-static void verifyTestBuffer(const PointData& data)
+static void verifyTestBuffer(const PointBuffer& data)
 {
     // read the data back out
     for (int i=0; i<17; i++)
@@ -120,7 +120,7 @@ static void verifyTestBuffer(const PointData& data)
 
 BOOST_AUTO_TEST_CASE(test_get_set)
 {
-    PointData* data = makeTestBuffer();
+    PointBuffer* data = makeTestBuffer();
     verifyTestBuffer(*data);
     delete data;
 }
@@ -128,9 +128,9 @@ BOOST_AUTO_TEST_CASE(test_get_set)
 
 BOOST_AUTO_TEST_CASE(test_copy)
 {
-    PointData* data = makeTestBuffer();
+    PointBuffer* data = makeTestBuffer();
    
-    PointData d2(data->getSchemaLayout(), 19);
+    PointBuffer d2(data->getSchemaLayout(), 19);
 
     d2.copyPointFast(0, 10, *data);
     d2.copyPointFast(18, 11, *data);
@@ -176,18 +176,18 @@ BOOST_AUTO_TEST_CASE(test_copy)
 
 BOOST_AUTO_TEST_CASE(test_copy_constructor)
 {
-    PointData* data = makeTestBuffer();
+    PointBuffer* data = makeTestBuffer();
     
-    PointData d2(*data);
+    PointBuffer d2(*data);
     verifyTestBuffer(d2);
     delete data;
 }
 
 BOOST_AUTO_TEST_CASE(test_assignment_constructor)
 {
-    PointData* data = makeTestBuffer();
+    PointBuffer* data = makeTestBuffer();
     
-    PointData d2 = *data;
+    PointBuffer d2 = *data;
     verifyTestBuffer(d2);
     delete data;
 }

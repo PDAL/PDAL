@@ -40,7 +40,7 @@
 
 namespace libpc {
 
-class PointDataCache;
+class PointBufferCache;
     
 namespace filters {
 
@@ -54,7 +54,7 @@ public:
     void seekToPoint(boost::uint64_t);
 
 private:
-    boost::uint32_t readBuffer(PointData&);
+    boost::uint32_t readBuffer(PointBuffer&);
 
     const CacheFilter& m_stageAsDerived;
 };

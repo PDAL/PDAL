@@ -71,7 +71,7 @@ void Iterator::incrementCurrentPointIndex(boost::uint64_t delta)
 }
 
 
-boost::uint32_t Iterator::read(PointData& data)
+boost::uint32_t Iterator::read(PointBuffer& data)
 {
     const boost::uint32_t numPointsRead = readBuffer(data);
     return numPointsRead;

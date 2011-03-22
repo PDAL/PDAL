@@ -50,7 +50,7 @@ public:
     // words.  The last word should generally be "Writer".
     virtual const std::string& getName() const = 0;
 
-    // size of the PointData buffer to use
+    // size of the PointBuffer buffer to use
     void setChunkSize(boost::uint32_t);
     boost::uint32_t getChunkSize() const;
 
@@ -64,7 +64,7 @@ protected:
     virtual void writeBegin() = 0;
 
     // called repeatedly, until out of data
-    virtual boost::uint32_t writeBuffer(const PointData&) = 0;
+    virtual boost::uint32_t writeBuffer(const PointBuffer&) = 0;
 
     // called once, after the writeBuffer calls
     virtual void writeEnd() = 0;

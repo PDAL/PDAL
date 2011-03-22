@@ -19,13 +19,13 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <libpc/PointData.hpp>
-#include <libpc/PointDataCache.hpp>
+#include <libpc/PointBuffer.hpp>
+#include <libpc/PointBufferCache.hpp>
 
 using namespace libpc;
 
 
-BOOST_AUTO_TEST_SUITE(PointDataCacheTest)
+BOOST_AUTO_TEST_SUITE(PointBufferCacheTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
@@ -34,12 +34,12 @@ BOOST_AUTO_TEST_CASE(test1)
     schema.addDimension(d1);
     SchemaLayout layout(schema);
 
-    PointData* item0 = new PointData(layout, 10);
-    PointData* item1 = new PointData(layout, 10);
-    PointData* item2 = new PointData(layout, 10);
-    //PointData* item3 = new PointData(layout, 10);
-    PointData* item4 = new PointData(layout, 10);
-    //PointData* item5 = new PointData(layout, 10);
+    PointBuffer* item0 = new PointBuffer(layout, 10);
+    PointBuffer* item1 = new PointBuffer(layout, 10);
+    PointBuffer* item2 = new PointBuffer(layout, 10);
+    //PointBuffer* item3 = new PointBuffer(layout, 10);
+    PointBuffer* item4 = new PointBuffer(layout, 10);
+    //PointBuffer* item5 = new PointBuffer(layout, 10);
 
     // write the data into the buffer
     for (int i=0; i<10; i++)
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test1)
       //item5->setField(i, 0, i+50);
     }
 
-    PointDataCache lru(2);
+    PointBufferCache lru(2);
 
     lru.insert(0, item0);         // insert miss
     lru.insert(10, item1);        // insert miss

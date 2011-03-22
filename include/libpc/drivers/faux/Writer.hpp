@@ -77,7 +77,7 @@ private:
     double m_averageZ;
 
     void writeBegin();
-    boost::uint32_t writeBuffer(const PointData&);
+    boost::uint32_t writeBuffer(const PointBuffer&);
     void writeEnd();
 
     Writer& operator=(const Writer&); // not implemented

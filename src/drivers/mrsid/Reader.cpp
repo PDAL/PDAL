@@ -169,7 +169,7 @@ const std::string& Reader::getName() const
     return name;
 }
 
-boost::uint32_t Reader::readBuffer(PointData& pointData)
+boost::uint32_t Reader::readBuffer(PointBuffer& PointBuffer)
 {
     return 0;
 }

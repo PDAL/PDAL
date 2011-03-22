@@ -35,7 +35,7 @@
 #include <libpc/filters/CacheFilter.hpp>
 #include <libpc/filters/CacheFilterIterator.hpp>
 
-#include <libpc/PointDataCache.hpp>
+#include <libpc/PointBufferCache.hpp>
 #include <libpc/exceptions.hpp>
 
 namespace libpc { namespace filters {
@@ -56,7 +56,7 @@ void CacheFilterIterator::seekToPoint(boost::uint64_t index)
 }
 
 
-boost::uint32_t CacheFilterIterator::readBuffer(PointData& data)
+boost::uint32_t CacheFilterIterator::readBuffer(PointBuffer& data)
 {
     CacheFilter& filter = const_cast<CacheFilter&>(m_stageAsDerived);       // BUG BUG BUG
 
@@ -76,7 +76,7 @@ boost::uint32_t CacheFilterIterator::readBuffer(PointData& data)
             (currentPointIndex % filter.m_cacheBlockSize == 0) &&
             filter.m_cache->lookup(currentPointIndex) == NULL)
         {
-            PointData* block = new PointData(data.getSchemaLayout(), filter.m_cacheBlockSize);
+            PointBuffer* block = new PointBuffer(data.getSchemaLayout(), filter.m_cacheBlockSize);
             block->copyPointsFast(0, 0, data, filter.m_cacheBlockSize);
             filter.m_cache->insert(currentPointIndex, block);
         }
@@ -91,7 +91,7 @@ boost::uint32_t CacheFilterIterator::readBuffer(PointData& data)
 
     // they asked for just one point -- first, check Mister Cache
     const boost::uint64_t blockNum = currentPointIndex / filter.m_cacheBlockSize;
-    PointData* block = filter.m_cache->lookup(blockNum);
+    PointBuffer* block = filter.m_cache->lookup(blockNum);
     if (block != NULL)
     {
         // A hit! A palpable hit!

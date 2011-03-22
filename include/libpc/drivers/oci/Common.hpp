@@ -38,6 +38,7 @@
 #include <libpc/export.hpp>
 #include <libpc/Bounds.hpp>
 #include <libpc/exceptions.hpp>
+#include <libpc/PointBuffer.hpp>
 
 #include "oci_wrapper.h"
 

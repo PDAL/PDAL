@@ -40,7 +40,7 @@
 namespace libpc
 {
 class Stage;
-class PointData;
+class PointBuffer;
 
 class LIBPC_DLL Iterator
 {
@@ -51,7 +51,7 @@ public:
 
     // This reads a set of points at the current position in the file.
     //
-    // The schema of the PointData buffer we are given here might
+    // The schema of the PointBuffer buffer we are given here might
     // not match our own header's schema.  That's okay, though: all
     // that matters is that the buffer we are given has the fields
     // we need to write into.
@@ -60,7 +60,7 @@ public:
     // readBuffer function below, not this one.
     //
     // Returns the number of valid points read.
-    boost::uint32_t read(PointData&);
+    boost::uint32_t read(PointBuffer&);
 
     // advance (or retreat) to the Nth point in the file (absolute, 
     // not relative).  In some cases, this might be a very slow, painful
@@ -78,7 +78,7 @@ protected:
     boost::uint64_t getCurrentPointIndex() const;
 
     // Implement this to do the actual work to fill in a buffer of points.
-    virtual boost::uint32_t readBuffer(PointData&) = 0;
+    virtual boost::uint32_t readBuffer(PointBuffer&) = 0;
 
     // Each concrete stage is repsonsible for managing its own current
     // point index when a read or seek occurs.  Call this function t o set

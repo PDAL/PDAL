@@ -35,7 +35,7 @@
 #include <libpc/filters/CacheFilter.hpp>
 #include <libpc/filters/CacheFilterIterator.hpp>
 
-#include <libpc/PointDataCache.hpp>
+#include <libpc/PointBufferCache.hpp>
 #include <libpc/exceptions.hpp>
 
 namespace libpc { namespace filters {
@@ -91,7 +91,7 @@ void CacheFilter::resetCache(boost::uint32_t maxCacheBlocks, boost::uint32_t cac
 void CacheFilter::resetCache()
 {
     delete m_cache;
-    m_cache = new PointDataCache(m_maxCacheBlocks);
+    m_cache = new PointBufferCache(m_maxCacheBlocks);
 }
 
 
