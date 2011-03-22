@@ -54,6 +54,16 @@ MosaicFilterIterator::MosaicFilterIterator(const MosaicFilter& filter)
 }
 
 
+MosaicFilterIterator::~MosaicFilterIterator()
+{
+    for (size_t i=0; i<m_prevIterators.size(); ++i)
+    {
+        Iterator* iter = m_prevIterators[i];
+        delete iter;
+    }
+}
+
+
 const std::vector<Iterator*>& MosaicFilterIterator::getPrevIterators() const
 {
     return m_prevIterators;

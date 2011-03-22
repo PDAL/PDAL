@@ -48,6 +48,7 @@ class MosaicFilterIterator : public libpc::Iterator
 {
 public:
     MosaicFilterIterator(const MosaicFilter& filter);
+    ~MosaicFilterIterator();
 
     const std::vector<Iterator*>& getPrevIterators() const;
 
