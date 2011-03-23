@@ -79,6 +79,24 @@ BOOST_AUTO_TEST_CASE(test_construction)
 
         BOOST_CHECK(ids.size() == 15);
         BOOST_CHECK(ids[14] == 1050 );
+
+        PointBuffer buffer = chipper.GetBlock(20).GetPointBuffer(libpc::SchemaLayout(reader.getHeader().getSchema()));
+        
+        // Check X's of first three points in block 20
+        BOOST_CHECK(buffer.getField<boost::int32_t>(0, 0) == 63567405);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(1, 0) == 63568054);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(2, 0) == 63569865);
+
+        // Check Y's of first three points in block 20
+        BOOST_CHECK(buffer.getField<boost::int32_t>(0, 1) == 84901732);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(1, 1) == 84936266);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(2, 1) == 84941588);
+
+        // Check Z's of first three points in block 20
+        BOOST_CHECK(buffer.getField<boost::int32_t>(0, 2) == 42802);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(1, 2) == 42156);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(2, 2) == 42392);
+
     }
 
     return;

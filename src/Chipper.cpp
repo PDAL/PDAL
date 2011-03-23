@@ -106,6 +106,23 @@ vector<boost::uint32_t> Block::GetIDs() const
     return ids;
 }
 
+PointBuffer Block::GetPointBuffer(SchemaLayout const& layout) const
+{
+    PointBuffer buffer(layout, m_list_p->size());
+    
+    for (boost::uint32_t i = 0; i < m_list_p->size(); ++i)
+    {
+        boost::uint8_t* data = (*m_list_p)[i].m_data;
+        buffer.setData(data, i);
+    }
+    
+    return buffer;
+    // for (boost::uint32_t i = m_left; i <= m_right; ++i)
+    //     ids.push_back((*m_list_p)[i].m_ptindex);
+    // return ids;
+}
+
+
 void Chipper::Chip()
 {
     Load(m_xvec, m_yvec, m_spare);
@@ -121,17 +138,23 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
    
     libpc::Header const& header = m_stage.getHeader();
     libpc::Schema const& schema = header.getSchema();
-
+    libpc::SchemaLayout const& layout = SchemaLayout(schema);
+    
 
     PtRef ref;
 
     boost::uint64_t count = header.getNumPoints();
+    
+    if (count == 0) 
+    {
+        if (header.getPointCountType() == libpc::PointCount_Unknown)
+            throw libpc::indeterminate_count_error("The chipper requires a complete point count");
+    }
     xvec.reserve(count);
     yvec.reserve(count);
     spare.resize(count);
-    
-    // boost::uint32_t chunks = count/m_threshold;
 
+    
     boost::scoped_ptr<Iterator> iter(m_stage.createIterator());
 
     const int indexX = schema.getDimensionIndex(Dimension::Field_X);
@@ -164,8 +187,13 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
 
         for (boost::uint32_t j = 0; j < m_threshold; j++)
         {
-            PointBuffer data(buffer.getSchemaLayout(), 1);            
-            data.copyPointFast(0, j, buffer);
+            if (layout.getByteSize() > 40) {
+                throw libpc_error("Chipper PtRef size not large enough to hold point data");
+            }
+            
+            memcpy (ref.m_data, buffer.getData(j), layout.getByteSize());
+            // PointBuffer data(buffer.getSchemaLayout(), 1);            
+            // data.copyPointFast(0, j, buffer);
             
             if (j == num_to_read) break; // we're outta here
 
