@@ -14,3 +14,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+
+
+// All the functions are in the header, because if they are put in here then
+// VS2010 freaks out about absurdly long mangled symbol names.
