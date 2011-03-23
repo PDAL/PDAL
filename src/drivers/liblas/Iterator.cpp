@@ -48,7 +48,16 @@ namespace libpc { namespace drivers { namespace liblas {
 Iterator::Iterator(const LiblasReader& reader)
     : libpc::Iterator(reader)
     , m_reader(reader)
+    , m_istream(NULL)
 {
+    m_istream = Utils::openFile(m_reader.getFileName());
+    return;
+}
+
+
+Iterator::~Iterator()
+{
+    Utils::closeFile(m_istream);
     return;
 }
 

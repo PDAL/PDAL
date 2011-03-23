@@ -70,9 +70,7 @@ static void checkPointXYZ(const PointBuffer& data, size_t index, const Schema& s
 
 BOOST_AUTO_TEST_CASE(test_1)
 {
-    std::istream* ifs = Utils::openFile(TestConfig::g_data_path + "1.2-with-color.las");
-    
-    LiblasReader reader(*ifs);
+    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
     BOOST_CHECK(reader.getName() == "Liblas Reader");
 
     const Schema& schema = reader.getHeader().getSchema();
@@ -114,8 +112,6 @@ BOOST_AUTO_TEST_CASE(test_1)
     ////}
     
     delete iter;
-
-    Utils::closeFile(ifs);
 
     return;
 }

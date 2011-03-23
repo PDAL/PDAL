@@ -41,15 +41,19 @@ namespace libpc { namespace drivers { namespace las {
 
 
 
-LasReader::LasReader(std::istream& istream)
+LasReader::LasReader(const std::string& filename)
     : Stage()
-    , m_istream(istream)
+    , m_filename(filename)
 {
     LasHeader* lasHeader = new LasHeader;
     setHeader(lasHeader);
     
-    LasHeaderReader lasHeaderReader(*lasHeader, istream);
+    std::istream* str = Utils::openFile(m_filename);
+
+    LasHeaderReader lasHeaderReader(*lasHeader, *str);
     lasHeaderReader.read();
+
+    Utils::closeFile(str);
 
     return;
 }
@@ -59,6 +63,12 @@ const std::string& LasReader::getName() const
 {
     static std::string name("Las Reader");
     return name;
+}
+
+
+const std::string& LasReader::getFileName() const
+{
+    return m_filename;
 }
 
 
@@ -145,7 +155,7 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
 
         if (pointFormat == LasHeader::ePointFormat0)
         {
-            Utils::read_n(buf, m_istream, LasHeader::ePointSize0);
+            Utils::read_n(buf, stream, LasHeader::ePointSize0);
 
             boost::uint8_t* p = buf;
 

@@ -44,9 +44,10 @@
 
 namespace libpc { namespace drivers { namespace liblas {
 
-LiblasReader::LiblasReader(std::istream& istream)
+LiblasReader::LiblasReader(const std::string& filename)
     : Stage()
-    , m_istream(istream)
+    , m_filename(filename)
+    , m_istream(NULL)
     , m_externalReader(NULL)
     , m_versionMajor(0)
     , m_versionMinor(0)
@@ -62,8 +63,10 @@ LiblasReader::LiblasReader(std::istream& istream)
     , m_hasColorData(false)
     , m_hasWaveData(false)
 {
+    m_istream = Utils::openFile(m_filename);
+
     ::liblas::ReaderFactory f;
-    ::liblas::Reader reader = f.CreateWithStream(m_istream);
+    ::liblas::Reader reader = f.CreateWithStream(*m_istream);
     m_externalReader = new ::liblas::Reader(reader);
 
     LiblasHeader* myHeader = new LiblasHeader;
@@ -81,6 +84,8 @@ LiblasReader::~LiblasReader()
 {
     // BUG: this might be a smart pointer, so delete might not be needed
     delete m_externalReader;
+
+    Utils::closeFile(m_istream);
 }
 
 
@@ -88,6 +93,13 @@ const std::string& LiblasReader::getName() const
 {
     static std::string name("Liblas Reader");
     return name;
+}
+
+
+
+const std::string& LiblasReader::getFileName() const
+{
+    return m_filename;
 }
 
 

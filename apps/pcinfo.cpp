@@ -79,8 +79,6 @@ int Application_pcinfo::execute()
         return 1;
     }
 
-    std::istream* ifs = Utils::openFile(m_inputFile);
-
     libpc::Stage* reader = NULL;
     size_t ext = m_inputFile.find_last_of('.');
     if (ext != std::string::npos)
@@ -90,9 +88,13 @@ int Application_pcinfo::execute()
             !m_inputFile.substr(ext).compare("laz"))
         {
             if (hasOption("native"))
-                reader = new libpc::drivers::las::LasReader(*ifs);
+            {
+                reader = new libpc::drivers::las::LasReader(m_inputFile);
+            }
             else
-                reader = new libpc::drivers::liblas::LiblasReader(*ifs);
+            {
+                reader = new libpc::drivers::liblas::LiblasReader(m_inputFile);
+            }
         }
 #ifdef HAVE_MRSID
         else if (!m_inputFile.substr(ext).compare("sid"))
@@ -111,8 +113,6 @@ int Application_pcinfo::execute()
     boost::uint64_t numPoints = reader->getNumPoints();
 
     delete reader;
-    if (ifs)
-        Utils::closeFile(ifs);
 
     std::cout << numPoints << " points\n";
 

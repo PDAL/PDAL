@@ -43,7 +43,16 @@ namespace libpc { namespace drivers { namespace las {
 Iterator::Iterator(const LasReader& reader)
     : libpc::Iterator(reader)
     , m_reader(reader)
+    , m_istream(NULL)
 {
+    m_istream = Utils::openFile(m_reader.getFileName());
+    return;
+}
+
+
+Iterator::~Iterator()
+{
+    Utils::closeFile(m_istream);
     return;
 }
 
@@ -72,7 +81,7 @@ bool Iterator::atEndImpl() const
 
 boost::uint32_t Iterator::readImpl(PointBuffer& data)
 {
-    return m_reader.processBuffer(data, m_reader.m_istream);
+    return m_reader.processBuffer(data, *m_istream);
 }
 
 

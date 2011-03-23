@@ -48,10 +48,7 @@ BOOST_AUTO_TEST_SUITE(ChipperTest)
 
 BOOST_AUTO_TEST_CASE(test_construction)
 {
-
-    std::istream* ifs = Utils::openFile(TestConfig::g_data_path + "1.2-with-color.las");
-    LiblasReader reader(*ifs);
-    
+    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
 
     {
         const boost::uint64_t num_points = reader.getHeader().getNumPoints();
@@ -82,12 +79,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
 
         BOOST_CHECK(ids.size() == 15);
         BOOST_CHECK(ids[14] == 1050 );
-
     }
-
-
-    Utils::closeFile(ifs);
-
 
     return;
 }

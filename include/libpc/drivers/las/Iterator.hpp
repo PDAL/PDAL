@@ -49,6 +49,7 @@ class Iterator : public libpc::Iterator
 {
 public:
     Iterator(const LasReader& reader);
+    ~Iterator();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
@@ -56,6 +57,7 @@ private:
     bool atEndImpl() const;
 
     const LasReader& m_reader;
+    std::istream* m_istream;
 };
 
 

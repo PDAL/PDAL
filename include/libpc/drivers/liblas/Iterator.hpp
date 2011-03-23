@@ -57,6 +57,7 @@ class Iterator : public libpc::Iterator
 {
 public:
     Iterator(const LiblasReader& reader);
+    ~Iterator();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
@@ -64,6 +65,7 @@ private:
     bool atEndImpl() const;
 
     const LiblasReader& m_reader;
+    std::istream* m_istream;
 };
 
 } } } // namespaces

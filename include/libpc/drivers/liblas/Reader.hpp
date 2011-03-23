@@ -57,10 +57,12 @@ class LIBPC_DLL LiblasReader : public Stage
     friend class Iterator;
 
 public:
-    LiblasReader(std::istream&);
+    LiblasReader(const std::string& filename);
     ~LiblasReader();
 
     const std::string& getName() const;
+
+    const std::string& getFileName() const;
 
     const LiblasHeader& getLiblasHeader() const;
 
@@ -74,7 +76,8 @@ private:
     void processExternalHeader();
     void registerFields();
 
-    std::istream& m_istream;
+    std::string m_filename;
+    std::istream* m_istream;
 
     ::liblas::Reader *m_externalReader;
 

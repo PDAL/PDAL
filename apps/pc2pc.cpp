@@ -102,12 +102,11 @@ int Application_pc2pc::execute()
         return 1;
     }
 
-    std::istream* ifs = Utils::openFile(m_inputFile);
     std::ostream* ofs = Utils::createFile(m_outputFile);
 
     if (hasOption("native"))
     {
-        libpc::drivers::las::LasReader reader(*ifs);
+        libpc::drivers::las::LasReader reader(m_inputFile);
     
         const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
 
@@ -125,7 +124,7 @@ int Application_pc2pc::execute()
     else if (hasOption("oracle"))
     {
 #ifdef HAVE_ORACLE
-        libpc::drivers::liblas::LiblasReader reader(*ifs);
+        libpc::drivers::liblas::LiblasReader reader(m_inputFile);
     
         const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
         
@@ -155,7 +154,7 @@ int Application_pc2pc::execute()
     }    
     else
     {
-        libpc::drivers::liblas::LiblasReader reader(*ifs);
+        libpc::drivers::liblas::LiblasReader reader(m_inputFile);
     
         const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
 
@@ -171,7 +170,6 @@ int Application_pc2pc::execute()
     }
 
     Utils::closeFile(ofs);
-    Utils::closeFile(ifs);
 
     return 0;
 }
