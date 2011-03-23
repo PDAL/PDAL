@@ -173,7 +173,7 @@ int Utils::putenv(const char* env)
 #ifdef WIN32
     return ::_putenv(env);
 #else
-    return ::putenv(env);
+    return ::putenv(const_cast<char*>(env));
 #endif
 }
 
