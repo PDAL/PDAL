@@ -43,12 +43,8 @@
 
 namespace libpc { namespace drivers { namespace las {
 
-class Iterator;
-
 class LIBPC_DLL LasReader : public Stage
 {
-    friend class Iterator;
-
 public:
     LasReader(std::istream&);
 
@@ -58,11 +54,14 @@ public:
 
     libpc::Iterator* createIterator() const;
 
+    // this is called by the stage's iterator
+    boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream) const;
+
+    std::istream& m_istream; // BUG BUG BUG
+
 protected:
     LasHeader& getLasHeader();
     void setLasHeader(const LasHeader&);
-
-    std::istream& m_istream;
 
 private:
     LasReader& operator=(const LasReader&); // not implemented
