@@ -123,13 +123,11 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     libpc::Schema const& schema = header.getSchema();
     libpc::SchemaLayout const& layout = SchemaLayout(schema);
     
-    PtRef ref;
-    ref.m_pointSize = layout.getByteSize();
     
     boost::uint64_t count = header.getNumPoints();
     xvec.reserve(count);
     yvec.reserve(count);
-    spare.resize(count);
+    spare.reserve(count);
     
     // boost::uint32_t chunks = count/m_threshold;
 
@@ -165,13 +163,12 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
 
         for (boost::uint32_t j = 0; j < m_threshold; j++)
         {
-            // PointBuffer data(schema, 1);            
-            // data.copyPointFast(j, 0, buffer);
-            boost::uint8_t* raw_data = new boost::uint8_t[ref.m_pointSize*1];
-            boost::uint8_t* src_data = buffer.getData(j);
-            memcpy(raw_data, src_data, ref.m_pointSize*1);
-
+            PointBuffer data(buffer.getSchemaLayout(), 1);            
+            data.copyPointFast(0, j, buffer);
+            PtRef ref(data);
+            
             if (j == num_to_read) break; // we're outta here
+
             // (v * m_header->GetScaleX()) + m_header->GetOffsetX();
             const double x = (buffer.getField<boost::int32_t>(j, indexX) * xscale) + xoffset;
             const double y = (buffer.getField<boost::int32_t>(j, indexY) * yscale) + yoffset;
