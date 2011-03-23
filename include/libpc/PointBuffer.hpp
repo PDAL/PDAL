@@ -113,6 +113,9 @@ public:
     // access to the raw memory
     boost::uint8_t* getData(std::size_t pointIndex) const;
 
+    // copy in raw data
+    void setData(boost::uint8_t* data, std::size_t pointIndex);
+
     // access to the raw memory
     void getData(boost::uint8_t** data, std::size_t* array_size) const;
 

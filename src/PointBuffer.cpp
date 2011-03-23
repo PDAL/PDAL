@@ -114,6 +114,11 @@ boost::uint8_t* PointBuffer::getData(std::size_t index) const
     return m_data.get() + m_pointSize * index;
 }
 
+void PointBuffer::setData(boost::uint8_t* data, std::size_t index)
+{
+    memcpy(m_data.get() + m_pointSize * index, data, getSchemaLayout().getByteSize());
+}
+
 
 boost::uint32_t PointBuffer::getNumPoints() const
 {
@@ -122,7 +127,7 @@ boost::uint32_t PointBuffer::getNumPoints() const
 
 void PointBuffer::getData(boost::uint8_t** data, std::size_t* array_size) const
 {
-    *array_size = sizeof(uint8_t) * m_pointSize * m_numPoints;
+    *array_size = getSchemaLayout().getByteSize();
     *data = (uint8_t*) malloc (*array_size);
     memcpy(*data, m_data.get(), *array_size);
 }
