@@ -42,7 +42,7 @@ namespace libpc { namespace filters {
 
 MosaicFilterIterator::MosaicFilterIterator(const MosaicFilter& filter)
     : libpc::Iterator(filter)
-    , m_stageAsDerived(filter)
+    , m_filter(filter)
 {
     for (size_t i=0; i<filter.getPrevStages().size(); ++i)
     {

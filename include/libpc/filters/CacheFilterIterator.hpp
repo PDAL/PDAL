@@ -56,7 +56,7 @@ private:
     boost::uint32_t readImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const CacheFilter& m_stageAsDerived;
+    const CacheFilter& m_filter;
 };
 
 

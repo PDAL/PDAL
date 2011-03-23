@@ -57,7 +57,7 @@ private:
 
     const std::vector<Iterator*>& getPrevIterators() const;
 
-    const MosaicFilter& m_stageAsDerived;
+    const MosaicFilter& m_filter;
     std::vector<Iterator*> m_prevIterators;
 };
 

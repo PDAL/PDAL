@@ -55,7 +55,7 @@ private:
     boost::uint32_t readImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const LasReader& m_stageAsDerived;
+    const LasReader& m_reader;
 };
 
 

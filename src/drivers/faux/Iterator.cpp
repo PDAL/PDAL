@@ -49,7 +49,7 @@ namespace libpc { namespace drivers { namespace faux {
 
 Iterator::Iterator(const Reader& reader)
     : libpc::Iterator(reader)
-    , m_stageAsDerived(reader)
+    , m_reader(reader)
 {
     return;
 }
@@ -72,7 +72,7 @@ bool Iterator::atEndImpl() const
 
 boost::uint32_t Iterator::readImpl(PointBuffer& data)
 {
-    Reader& reader = const_cast<Reader&>(m_stageAsDerived);       // BUG BUG BUG
+    Reader& reader = const_cast<Reader&>(m_reader);       // BUG BUG BUG
 
     if (data.getSchemaLayout().getSchema().getDimensions().size() != 4)
         throw not_yet_implemented("need to add ability to read from arbitrary fields");

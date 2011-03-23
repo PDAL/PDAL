@@ -41,7 +41,7 @@ namespace libpc { namespace filters {
 
 DecimationFilterIterator::DecimationFilterIterator(const DecimationFilter& filter)
     : libpc::FilterIterator(filter)
-    , m_stageAsDerived(filter)
+    , m_filter(filter)
 {
     return;
 }
@@ -100,7 +100,7 @@ boost::uint32_t DecimationFilterIterator::readImpl(PointBuffer& dstData)
 
         // copy points from src (prev stage) into dst (our stage), 
         // based on the CropFilter's rules (i.e. its bounds)
-        const boost::uint32_t numPointsAdded = m_stageAsDerived.processBuffer(dstData, srcData, srcStartIndex);
+        const boost::uint32_t numPointsAdded = m_filter.processBuffer(dstData, srcData, srcStartIndex);
 
         numPointsNeeded -= numPointsAdded;
     }

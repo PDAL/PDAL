@@ -54,7 +54,7 @@ private:
     boost::uint32_t readImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const DecimationFilter& m_stageAsDerived;
+    const DecimationFilter& m_filter;
 };
 
 

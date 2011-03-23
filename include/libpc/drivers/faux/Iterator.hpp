@@ -53,7 +53,7 @@ private:
     boost::uint32_t readImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const Reader& m_stageAsDerived;
+    const Reader& m_reader;
 };
 
 

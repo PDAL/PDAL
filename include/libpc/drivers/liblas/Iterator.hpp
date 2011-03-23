@@ -63,7 +63,7 @@ private:
     boost::uint32_t readImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const LiblasReader& m_stageAsDerived;
+    const LiblasReader& m_reader;
 };
 
 } } } // namespaces
