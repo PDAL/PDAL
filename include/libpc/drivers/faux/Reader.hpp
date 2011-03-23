@@ -40,8 +40,6 @@
 
 namespace libpc { namespace drivers { namespace faux {
 
-class Iterator;
-
 // The FauxReader doesn't read from disk, but instead just makes up data for its
 // points.  The reader is constructed with a given bounding box and a given 
 // number of points.
@@ -74,7 +72,11 @@ public:
 
     libpc::Iterator* createIterator() const;
 
+    // this is called by the stage's iterator
+    boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;
+
 private:
+
     Mode m_mode;
 
     Reader& operator=(const Reader&); // not implemented

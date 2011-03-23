@@ -110,4 +110,75 @@ libpc::Iterator* Reader::createIterator() const
 }
 
 
+boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) const
+{
+    const SchemaLayout& schemaLayout = data.getSchemaLayout();
+    const Schema& schema = schemaLayout.getSchema();
+    const Header& header = getHeader();
+
+    if (schema.getDimensions().size() != 4)
+        throw not_yet_implemented("need to add ability to read from arbitrary fields");
+
+    // make up some data and put it into the buffer
+
+    // how many are they asking for?
+    boost::uint64_t numPointsWanted = data.getCapacity();
+
+    // we can only give them as many as we have left
+    boost::uint64_t numPointsAvailable = header.getNumPoints() - index;
+    if (numPointsAvailable < numPointsWanted)
+        numPointsWanted = numPointsAvailable;
+
+    const Bounds<double>& bounds = header.getBounds(); 
+    const std::vector< Range<double> >& dims = bounds.dimensions();
+    const double minX = dims[0].getMinimum();
+    const double maxX = dims[0].getMaximum();
+    const double minY = dims[1].getMinimum();
+    const double maxY = dims[1].getMaximum();
+    const double minZ = dims[2].getMinimum();
+    const double maxZ = dims[2].getMaximum();
+
+    const int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
+    const int offsetX = schema.getDimensionIndex(Dimension::Field_X);
+    const int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
+    const int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
+
+    boost::uint64_t time = index;
+    
+    const Reader::Mode mode = getMode();
+
+    boost::uint32_t& cnt = data.getNumPointsRef();
+    cnt = 0;
+    for (boost::uint32_t pointIndex=0; pointIndex<numPointsWanted; pointIndex++)
+    {
+        double x;
+        double y;
+        double z;
+        if (mode == Reader::Random)
+        {
+            x = (double)Utils::random(minX, maxX);
+            y = (double)Utils::random(minY, maxY);
+            z = (double)Utils::random(minZ, maxZ);
+        }
+        else
+        {
+            x = (double)minX;
+            y = (double)minY;
+            z = (double)minZ;
+        }
+
+        data.setField<double>(pointIndex, offsetX, x);
+        data.setField<double>(pointIndex, offsetY, y);
+        data.setField<double>(pointIndex, offsetZ, z);
+        data.setField<boost::uint64_t>(pointIndex, offsetT, time);
+
+        ++time;
+        ++cnt;
+        assert(cnt <= data.getCapacity());
+    }
+    
+    return cnt;
+}
+
+
 } } } // namespaces
