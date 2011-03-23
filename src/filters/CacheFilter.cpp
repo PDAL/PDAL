@@ -68,6 +68,33 @@ const std::string& CacheFilter::getName() const
 }
 
 
+boost::uint32_t CacheFilter::getCacheBlockSize() const
+{
+    return m_cacheBlockSize;
+}
+
+
+void CacheFilter::addToCache(boost::uint64_t pointIndex, const PointBuffer& data) const
+{
+    PointBuffer* block = new PointBuffer(data.getSchemaLayout(), m_cacheBlockSize);
+    block->copyPointsFast(0, 0, data, m_cacheBlockSize);
+    
+    m_cache->insert(pointIndex, block);
+
+    return;
+}
+
+
+const PointBuffer* CacheFilter::lookupInCache(boost::uint64_t pointIndex) const
+{
+    const boost::uint64_t blockNum = pointIndex / m_cacheBlockSize;
+
+    const PointBuffer* block = m_cache->lookup(blockNum);
+
+    return block;
+}
+
+
 void CacheFilter::getCacheStats(boost::uint64_t& numCacheLookupMisses,
                                 boost::uint64_t& numCacheLookupHits,
                                 boost::uint64_t& numCacheInsertMisses,
@@ -104,6 +131,13 @@ boost::uint64_t CacheFilter::getNumPointsRequested() const
 boost::uint64_t CacheFilter::getNumPointsRead() const
 {
     return m_numPointsRead;
+}
+
+
+void CacheFilter::updateStats(boost::uint64_t numRead, boost::uint64_t numRequested) const
+{
+    m_numPointsRead += numRead;
+    m_numPointsRequested += numRequested;
 }
 
 

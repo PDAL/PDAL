@@ -44,8 +44,6 @@ class PointBufferCache;
     
 namespace filters {
 
-class CacheFilterIterator;
-
 // This is just a very simple MRU filter -- future versions will be smarter.
 // This cache has the following constraints:
 //   - only one block is cached
@@ -53,13 +51,18 @@ class CacheFilterIterator;
 // If more than one point is read, the cache is skipped.
 class LIBPC_DLL CacheFilter : public Filter
 {
-    friend class CacheFilterIterator;
-
 public:
     CacheFilter(const Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
     ~CacheFilter();
 
     const std::string& getName() const;
+
+    boost::uint32_t getCacheBlockSize() const;
+
+    // this is const only because the m_cache itself is mutable
+    void addToCache(boost::uint64_t pointIndex, const PointBuffer& data) const;
+
+    const PointBuffer* lookupInCache(boost::uint64_t pointIndex) const;
 
     // clear cache (but leave cache params unchanged)
     void resetCache();
@@ -73,6 +76,8 @@ public:
     // num points this filter read from the previous stage
     boost::uint64_t getNumPointsRead() const;
 
+    void updateStats(boost::uint64_t numRead, boost::uint64_t numRequested) const;
+
     void getCacheStats(boost::uint64_t& numCacheLookupMisses,
                        boost::uint64_t& numCacheLookupHits,
                        boost::uint64_t& numCacheInsertMisses,
@@ -81,10 +86,15 @@ public:
     Iterator* createIterator() const;
 
 private:
-    boost::uint64_t m_numPointsRequested;
-    boost::uint64_t m_numPointsRead;
+    // these are mutable to allow const-ness for updating stats
+    // BUG: need to make thread-safe
+    mutable boost::uint64_t m_numPointsRequested;
+    mutable boost::uint64_t m_numPointsRead;
 
-    PointBufferCache* m_cache;
+    // these is mutable to allow const-ness for updating stats
+    // BUG: need to make thread-safe
+    mutable PointBufferCache* m_cache;
+
     boost::uint32_t m_maxCacheBlocks;
     boost::uint32_t m_cacheBlockSize;
 
