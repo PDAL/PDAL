@@ -60,7 +60,7 @@ void DecimationFilterIterator::skip(boost::uint64_t count)
 
         count -= numRead;
 
-        incrementCurrentPointIndex(numRead);
+        incrementIndex(numRead);
     }
 
     return;
@@ -89,7 +89,7 @@ boost::uint32_t DecimationFilterIterator::read(PointBuffer& dstData)
         PointBuffer srcData(dstData.getSchemaLayout(), numPointsNeeded);
 
         // read from prev stage
-        const boost::uint64_t srcStartIndex = getPrevIterator().getCurrentPointIndex();
+        const boost::uint64_t srcStartIndex = getPrevIterator().getIndex();
         const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
         assert(numSrcPointsRead == srcData.getNumPoints());
         assert(numSrcPointsRead <= numPointsNeeded);
@@ -100,7 +100,7 @@ boost::uint32_t DecimationFilterIterator::read(PointBuffer& dstData)
         // copy points from src (prev stage) into dst (our stage), 
         // based on the CropFilter's rules (i.e. its bounds)
         const boost::uint32_t numPointsAdded = m_stageAsDerived.processBuffer(dstData, srcData, srcStartIndex);
-        incrementCurrentPointIndex(numPointsAdded);
+        incrementIndex(numPointsAdded);
 
         numPointsNeeded -= numPointsAdded;
     }

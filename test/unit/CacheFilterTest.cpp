@@ -59,19 +59,19 @@ BOOST_AUTO_TEST_CASE(test1)
 
     Iterator* iter1 = cache.createIterator();
 
-    //BOOST_CHECK(cache.getCurrentPointIndex() == 0);
+    //BOOST_CHECK(cache.getIndex() == 0);
     BOOST_CHECK(cache.getNumPointsRequested() == 0);
     BOOST_CHECK(cache.getNumPointsRead() == 0);
 
     iter1->read(dataBig);
     BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 0);
-    //BOOST_CHECK(cache.getCurrentPointIndex() == 1024);
+    //BOOST_CHECK(cache.getIndex() == 1024);
     BOOST_CHECK(cache.getNumPointsRequested() == 1024);
     BOOST_CHECK(cache.getNumPointsRead() == 1024);
 
     iter1->read(dataBig);
     BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 1024);
-   // BOOST_CHECK(cache.getCurrentPointIndex() == 2048);
+   // BOOST_CHECK(cache.getIndex() == 2048);
     BOOST_CHECK(cache.getNumPointsRequested() == 2048);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
 
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(test1)
     iter2->skip(42);
     iter2->read(dataSmall);
     BOOST_CHECK(dataSmall.getField<boost::uint64_t>(0, offsetT) == 42);
-    //BOOST_CHECK(cache.getCurrentPointIndex() == 43);
+    //BOOST_CHECK(cache.getIndex() == 43);
     BOOST_CHECK(cache.getNumPointsRequested() == 2048+1);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
 

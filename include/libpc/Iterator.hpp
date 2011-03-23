@@ -77,7 +77,7 @@ public:
     // All stages have the notion of a current point number, even for stages
     // that are not really "oredered", in that the index just starts at zero 
     // and increments by N every time another N points are read
-    boost::uint64_t getCurrentPointIndex() const;
+    boost::uint64_t getIndex() const;
 
     // used to control intermediate buffering needed by some stages
     void setChunkSize(boost::uint32_t size);
@@ -85,11 +85,11 @@ public:
 
 protected:
     // advance the index by N, e.g. for use by skip()
-    void incrementCurrentPointIndex(boost::uint64_t count);
+    void incrementIndex(boost::uint64_t count);
 
 private:
     const Stage& m_stage;
-    boost::uint64_t m_currentPointIndex;
+    boost::uint64_t m_index;
     boost::uint32_t m_chunkSize;
 
     Iterator& operator=(const Iterator&); // not implemented

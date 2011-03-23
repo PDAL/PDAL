@@ -53,7 +53,7 @@ void Iterator::skip(boost::uint64_t pointNum)
     const LasReader& reader = m_stageAsDerived;
     const Header& header = reader.getHeader();
 
-    incrementCurrentPointIndex(pointNum);
+    incrementIndex(pointNum);
 
     boost::uint32_t chunk = (boost::uint32_t)pointNum; // BUG: this needs to be done in blocks if pointNum is large
 
@@ -68,7 +68,7 @@ void Iterator::skip(boost::uint64_t pointNum)
 
 bool Iterator::atEnd() const
 {
-    return getCurrentPointIndex() >= getStage().getNumPoints();
+    return getIndex() >= getStage().getNumPoints();
 }
 
 
@@ -234,7 +234,7 @@ boost::uint32_t Iterator::read(PointBuffer& PointBuffer)
         
     }
 
-    incrementCurrentPointIndex(numPoints);
+    incrementIndex(numPoints);
 
     return numPoints;
 }

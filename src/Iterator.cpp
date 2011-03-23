@@ -44,7 +44,7 @@ static boost::uint32_t s_defaultChunkSize = 1024;
 
 Iterator::Iterator(const Stage& stage)
     : m_stage(stage)
-    , m_currentPointIndex(0)
+    , m_index(0)
     , m_chunkSize(s_defaultChunkSize)
 {
     return;
@@ -63,14 +63,14 @@ const Stage& Iterator::getStage() const
 }
 
 
-boost::uint64_t Iterator::getCurrentPointIndex() const
+boost::uint64_t Iterator::getIndex() const
 {
-    return m_currentPointIndex;
+    return m_index;
 }
 
-void Iterator::incrementCurrentPointIndex(boost::uint64_t delta)
+void Iterator::incrementIndex(boost::uint64_t delta)
 {
-    m_currentPointIndex += delta;
+    m_index += delta;
 }
 
 
@@ -94,7 +94,7 @@ boost::uint32_t Iterator::getChunkSize() const
 //    switch (type)
 //    {
 //    case PointCount_Fixed:
-//        return (getCurrentPointIndex() >= numPoints);
+//        return (getIndex() >= numPoints);
 //
 //    case PointCount_Infinite:
 //        return false;

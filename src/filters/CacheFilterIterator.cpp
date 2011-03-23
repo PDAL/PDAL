@@ -51,7 +51,7 @@ CacheFilterIterator::CacheFilterIterator(const CacheFilter& filter)
 
 void CacheFilterIterator::skip(boost::uint64_t count)
 {
-    incrementCurrentPointIndex(count);
+    incrementIndex(count);
     getPrevIterator().skip(count);
 }
 
@@ -66,7 +66,7 @@ boost::uint32_t CacheFilterIterator::read(PointBuffer& data)
 {
     CacheFilter& filter = const_cast<CacheFilter&>(m_stageAsDerived);       // BUG BUG BUG
 
-    const boost::uint64_t currentPointIndex = getCurrentPointIndex();
+    const boost::uint64_t currentPointIndex = getIndex();
 
     // for now, we only read from the cache if they are asking for one point
     // (this avoids the problem of an N-point request needing more than one
@@ -87,7 +87,7 @@ boost::uint32_t CacheFilterIterator::read(PointBuffer& data)
             filter.m_cache->insert(currentPointIndex, block);
         }
 
-        incrementCurrentPointIndex(numRead);
+        incrementIndex(numRead);
 
         filter.m_numPointsRead += numRead;
         filter.m_numPointsRequested += data.getCapacity();
@@ -105,7 +105,7 @@ boost::uint32_t CacheFilterIterator::read(PointBuffer& data)
         
         filter.m_numPointsRead += 0;
         filter.m_numPointsRequested += 1;
-        incrementCurrentPointIndex(1);
+        incrementIndex(1);
 
         getPrevIterator().skip(1);
         return 1;
@@ -115,7 +115,7 @@ boost::uint32_t CacheFilterIterator::read(PointBuffer& data)
     const boost::uint32_t numRead = getPrevIterator().read(data);
     filter.m_numPointsRead += numRead;
     filter.m_numPointsRequested += numRead;
-    incrementCurrentPointIndex(numRead);
+    incrementIndex(numRead);
 
     return numRead;
 }

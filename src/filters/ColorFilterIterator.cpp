@@ -61,7 +61,7 @@ boost::uint32_t ColorFilterIterator::read(PointBuffer& data)
 
 void ColorFilterIterator::skip(boost::uint64_t count)
 {
-    incrementCurrentPointIndex(count);
+    incrementIndex(count);
     getPrevIterator().skip(count);
 }
 

@@ -97,7 +97,7 @@ boost::uint32_t MosaicFilterIterator::read(PointBuffer& destData)
     boost::uint32_t totalNumPointsToRead = destData.getCapacity();
     boost::uint32_t totalNumPointsRead = 0;
 
-    boost::uint64_t currentPointIndex = getCurrentPointIndex();
+    boost::uint64_t currentPointIndex = getIndex();
 
     int destPointIndex = 0;
     boost::uint64_t stageStartIndex = 0;

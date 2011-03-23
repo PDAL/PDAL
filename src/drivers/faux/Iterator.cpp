@@ -57,14 +57,14 @@ Iterator::Iterator(const Reader& reader)
 
 void Iterator::skip(boost::uint64_t count)
 {
-     incrementCurrentPointIndex(count);
+     incrementIndex(count);
 }
 
 
 bool Iterator::atEnd() const
 {
     const boost::uint64_t numPoints = getStage().getHeader().getNumPoints();
-    const boost::uint64_t currPoint = getCurrentPointIndex();
+    const boost::uint64_t currPoint = getIndex();
 
     return currPoint >= numPoints;
 }
@@ -87,7 +87,7 @@ boost::uint32_t Iterator::read(PointBuffer& data)
     boost::uint64_t numPointsWanted = data.getCapacity();
 
     // we can only give them as many as we have left
-    boost::uint64_t numPointsAvailable = header.getNumPoints() - getCurrentPointIndex();
+    boost::uint64_t numPointsAvailable = header.getNumPoints() - getIndex();
     if (numPointsAvailable < numPointsWanted)
         numPointsWanted = numPointsAvailable;
 
@@ -105,7 +105,7 @@ boost::uint32_t Iterator::read(PointBuffer& data)
     const int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
     const int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
 
-    boost::uint64_t time = getCurrentPointIndex();
+    boost::uint64_t time = getIndex();
     
     const Reader::Mode mode = reader.getMode();
 
@@ -139,7 +139,7 @@ boost::uint32_t Iterator::read(PointBuffer& data)
         assert(cnt <= data.getCapacity());
     }
     
-    incrementCurrentPointIndex(numPointsWanted);
+    incrementIndex(numPointsWanted);
 
     return cnt;
 }

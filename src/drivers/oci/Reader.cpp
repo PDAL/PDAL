@@ -76,7 +76,7 @@ void Reader::seekToPoint(boost::uint64_t pointNum)
 {
     throw not_yet_implemented("oci seekToPoint");
 
-    ////if (pointNum == getCurrentPointIndex())
+    ////if (pointNum == getIndex())
     ////{
     ////    return;
     ////}
