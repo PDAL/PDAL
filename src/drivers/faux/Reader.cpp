@@ -110,6 +110,11 @@ libpc::SequentialIterator* Reader::createSequentialIterator() const
 }
 
 
+libpc::RandomIterator* Reader::createRandomIterator() const
+{
+    return new RandomIterator(*this);
+}
+
 boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) const
 {
     const SchemaLayout& schemaLayout = data.getSchemaLayout();

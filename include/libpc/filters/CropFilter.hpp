@@ -53,7 +53,10 @@ public:
 
     const std::string& getName() const;
 
-    SequentialIterator* createSequentialIterator() const;
+    bool supportsSequentialIterator() const { return true; }
+    bool supportsRandomIterator() const { return false; }
+    libpc::SequentialIterator* createSequentialIterator() const;
+    libpc::RandomIterator* createRandomIterator() const { return NULL; }
 
     // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
     // if we're calling this routine multiple times with the same buffer

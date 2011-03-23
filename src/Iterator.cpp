@@ -41,11 +41,59 @@ namespace libpc
 
 static boost::uint32_t s_defaultChunkSize = 1024;
 
+Iterator::Iterator(const Stage& stage)
+    : m_index(0)
+    , m_stage(stage)
+    , m_chunkSize(s_defaultChunkSize)
+{
+    return;
+}
+
+
+Iterator::~Iterator()
+{
+    return;
+}
+
+
+const Stage& Iterator::getStage() const
+{
+    return m_stage;
+}
+
+
+boost::uint64_t Iterator::getIndex() const
+{
+    return m_index;
+}
+
+
+void Iterator::setChunkSize(boost::uint32_t size)
+{
+    m_chunkSize = size;
+}
+
+
+boost::uint32_t Iterator::getChunkSize() const
+{
+    return m_chunkSize;
+}
+
+
+boost::uint32_t Iterator::read(PointBuffer& data)
+{
+    const boost::uint32_t numRead = readImpl(data);
+
+    m_index += numRead;
+
+    return numRead;
+}
+
+
+
 
 SequentialIterator::SequentialIterator(const Stage& stage)
-    : m_stage(stage)
-    , m_index(0)
-    , m_chunkSize(s_defaultChunkSize)
+    : Iterator(stage)
 {
     return;
 }
@@ -54,40 +102,6 @@ SequentialIterator::SequentialIterator(const Stage& stage)
 SequentialIterator::~SequentialIterator()
 {
     return;
-}
-
-
-const Stage& SequentialIterator::getStage() const
-{
-    return m_stage;
-}
-
-
-boost::uint64_t SequentialIterator::getIndex() const
-{
-    return m_index;
-}
-
-
-void SequentialIterator::setChunkSize(boost::uint32_t size)
-{
-    m_chunkSize = size;
-}
-
-
-boost::uint32_t SequentialIterator::getChunkSize() const
-{
-    return m_chunkSize;
-}
-
-
-boost::uint32_t SequentialIterator::read(PointBuffer& data)
-{
-    const boost::uint32_t numRead = readImpl(data);
-
-    m_index += numRead;
-
-    return numRead;
 }
 
 
@@ -104,6 +118,30 @@ boost::uint64_t SequentialIterator::skip(boost::uint64_t count)
 bool SequentialIterator::atEnd() const
 {
     return atEndImpl();
+}
+
+
+
+RandomIterator::RandomIterator(const Stage& stage)
+    : Iterator(stage)
+{
+    return;
+}
+
+
+RandomIterator::~RandomIterator()
+{
+    return;
+}
+
+
+boost::uint64_t RandomIterator::seek(boost::uint64_t position)
+{
+    const boost::uint64_t newPos = seekImpl(position);
+
+    m_index = newPos;
+
+    return newPos;
 }
 
 

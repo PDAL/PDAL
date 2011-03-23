@@ -85,4 +85,34 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 }
 
 
+
+RandomIterator::RandomIterator(const LasReader& reader)
+    : libpc::RandomIterator(reader)
+    , m_reader(reader)
+    , m_istream(NULL)
+{
+    m_istream = Utils::openFile(m_reader.getFileName());
+    return;
+}
+
+
+RandomIterator::~RandomIterator()
+{
+    Utils::closeFile(m_istream);
+    return;
+}
+
+
+boost::uint64_t RandomIterator::seekImpl(boost::uint64_t)
+{
+    throw not_yet_implemented("LasReader seeking not supported yet");
+}
+
+
+boost::uint32_t RandomIterator::readImpl(PointBuffer& data)
+{
+    return m_reader.processBuffer(data, *m_istream);
+}
+
+
 } } } // namespaces

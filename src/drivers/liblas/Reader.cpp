@@ -244,4 +244,9 @@ libpc::SequentialIterator* LiblasReader::createSequentialIterator() const
 }
 
 
+libpc::RandomIterator* LiblasReader::createRandomIterator() const
+{
+    return new RandomIterator(*this);
+}
+
 } } } // namespaces

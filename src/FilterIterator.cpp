@@ -68,4 +68,34 @@ const SequentialIterator& FilterSequentialIterator::getPrevIterator() const
 }
 
 
+
+FilterRandomIterator::FilterRandomIterator(const Filter& filter)
+    : RandomIterator(filter)
+    , m_stageAsFilter(static_cast<const Filter&>(filter))
+    , m_prevIterator(NULL)
+{
+    m_prevIterator = m_stageAsFilter.getPrevStage().createRandomIterator();
+
+    return;
+}
+
+
+FilterRandomIterator::~FilterRandomIterator()
+{
+    delete m_prevIterator;
+}
+
+
+RandomIterator& FilterRandomIterator::getPrevIterator()
+{
+    return *m_prevIterator;
+}
+
+
+const RandomIterator& FilterRandomIterator::getPrevIterator() const
+{
+    return *m_prevIterator;
+}
+
+
 } // namespace libpc

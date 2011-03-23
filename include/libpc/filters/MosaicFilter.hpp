@@ -55,7 +55,10 @@ public:
 
     const std::vector<const Stage*>& getPrevStages() const;
 
-    SequentialIterator* createSequentialIterator() const;
+    bool supportsSequentialIterator() const { return true; }
+    bool supportsRandomIterator() const { return false; }  // BUG: could be true
+    libpc::SequentialIterator* createSequentialIterator() const;
+    libpc::RandomIterator* createRandomIterator() const { return NULL; }
 
 private:
     std::vector<const Stage*> m_prevStages;

@@ -52,7 +52,10 @@ public:
 
     const std::string& getName() const;
 
-    SequentialIterator* createSequentialIterator() const;
+    bool supportsSequentialIterator() const { return true; }
+    bool supportsRandomIterator() const { return false; }
+    libpc::SequentialIterator* createSequentialIterator() const;
+    libpc::RandomIterator* createRandomIterator() const { return NULL; }
 
     boost::uint32_t getStep() const;
 

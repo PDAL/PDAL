@@ -75,4 +75,25 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
     return m_reader.processBuffer(data, getIndex());
 }
 
+
+
+RandomIterator::RandomIterator(const Reader& reader)
+    : libpc::RandomIterator(reader)
+    , m_reader(reader)
+{
+    return;
+}
+
+
+boost::uint64_t RandomIterator::seekImpl(boost::uint64_t count)
+{
+     return count;
+}
+
+
+boost::uint32_t RandomIterator::readImpl(PointBuffer& data)
+{
+    return m_reader.processBuffer(data, getIndex());
+}
+
 } } } // namespaces

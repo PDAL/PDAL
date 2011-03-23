@@ -46,6 +46,7 @@ namespace libpc
 {
 
 class SequentialIterator;
+class RandomIterator;
 
 // every stage owns its own header, they are not shared
 class LIBPC_DLL Stage
@@ -66,7 +67,10 @@ public:
     const Header& getHeader() const;
     Header& getHeader();
 
+    virtual bool supportsSequentialIterator() const = 0;
+    virtual bool supportsRandomIterator() const = 0;
     virtual SequentialIterator* createSequentialIterator() const = 0;
+    virtual RandomIterator* createRandomIterator() const = 0;
 
 protected:
     void setHeader(Header*); // stage takes ownership

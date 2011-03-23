@@ -61,6 +61,20 @@ private:
 };
 
 
+class RandomIterator : public libpc::RandomIterator
+{
+public:
+    RandomIterator(const LasReader& reader);
+    ~RandomIterator();
+
+private:
+    boost::uint64_t seekImpl(boost::uint64_t);
+    boost::uint32_t readImpl(PointBuffer&);
+
+    const LasReader& m_reader;
+    std::istream* m_istream;
+};
+
 } } } // namespaces
 
 #endif

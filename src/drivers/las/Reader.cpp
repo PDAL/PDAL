@@ -90,6 +90,12 @@ libpc::SequentialIterator* LasReader::createSequentialIterator() const
 }
 
 
+libpc::RandomIterator* LasReader::createRandomIterator() const
+{
+    return new RandomIterator(*this);
+}
+
+
 boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream) const
 {
     boost::uint32_t numPoints = data.getCapacity();

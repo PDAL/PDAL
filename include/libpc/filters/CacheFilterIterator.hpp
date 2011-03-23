@@ -60,6 +60,18 @@ private:
 };
 
 
+class CacheFilterRandomIterator : public libpc::FilterRandomIterator
+{
+public:
+    CacheFilterRandomIterator(const CacheFilter& filter);
+
+private:
+    boost::uint64_t seekImpl(boost::uint64_t);
+    boost::uint32_t readImpl(PointBuffer&);
+
+    const CacheFilter& m_filter;
+};
+
 } } // namespaces
 
 #endif

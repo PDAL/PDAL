@@ -41,7 +41,7 @@ using namespace libpc;
 
 BOOST_AUTO_TEST_SUITE(FauxReaderTest)
 
-BOOST_AUTO_TEST_CASE(test_constant)
+BOOST_AUTO_TEST_CASE(test_constant_sequential)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Constant);
@@ -74,6 +74,107 @@ BOOST_AUTO_TEST_CASE(test_constant)
         BOOST_CHECK(Utils::compare_approx<double>(y, 2.0, (std::numeric_limits<double>::min)()) == true);
         BOOST_CHECK(Utils::compare_approx<double>(z, 3.0, (std::numeric_limits<double>::min)()) == true);
         BOOST_CHECK(t==i);
+    }
+
+    delete iter;
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_constant_random)
+{
+    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Constant);
+
+    BOOST_CHECK(reader.getName() == "Faux Reader");
+
+    const Schema& schema = reader.getHeader().getSchema();
+    SchemaLayout layout(schema);
+
+    PointBuffer data(layout, 10);
+
+    int offsetX = schema.getDimensionIndex(Dimension::Field_X);
+    int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
+    int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
+
+    RandomIterator* iter = reader.createRandomIterator();
+
+    boost::uint32_t numRead = iter->read(data);
+    BOOST_CHECK(numRead == 10);
+
+    {
+        for (boost::uint32_t i=0; i<numRead; i++)
+        {
+            double x = data.getField<double>(i, offsetX);
+            double y = data.getField<double>(i, offsetY);
+            double z = data.getField<double>(i, offsetZ);
+            boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+
+            BOOST_CHECK(Utils::compare_approx<double>(x, 1.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx<double>(y, 2.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx<double>(z, 3.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(t==i);
+        }
+    }
+
+    numRead = iter->read(data);
+    BOOST_CHECK(numRead == 10);
+
+    {
+        for (boost::uint32_t i=0; i<numRead; i++)
+        {
+            double x = data.getField<double>(i, offsetX);
+            double y = data.getField<double>(i, offsetY);
+            double z = data.getField<double>(i, offsetZ);
+            boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+
+            BOOST_CHECK(Utils::compare_approx<double>(x, 1.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx<double>(y, 2.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx<double>(z, 3.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(t==i+10);
+        }
+    }
+
+    boost::uint64_t newPos = iter->seek(99);
+    BOOST_CHECK(newPos == 99);
+    numRead = iter->read(data);
+    BOOST_CHECK(numRead == 10);
+
+    {
+        for (boost::uint32_t i=0; i<numRead; i++)
+        {
+            double x = data.getField<double>(i, offsetX);
+            double y = data.getField<double>(i, offsetY);
+            double z = data.getField<double>(i, offsetZ);
+            boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+
+            BOOST_CHECK(Utils::compare_approx<double>(x, 1.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx<double>(y, 2.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx<double>(z, 3.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(t==i+99);
+        }
+    }
+
+    newPos = iter->seek(7);
+    BOOST_CHECK(newPos == 7);
+    numRead = iter->read(data);
+    BOOST_CHECK(numRead == 10);
+
+    {
+        for (boost::uint32_t i=0; i<numRead; i++)
+        {
+            double x = data.getField<double>(i, offsetX);
+            double y = data.getField<double>(i, offsetY);
+            double z = data.getField<double>(i, offsetZ);
+            boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+
+            BOOST_CHECK(Utils::compare_approx<double>(x, 1.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx<double>(y, 2.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(Utils::compare_approx<double>(z, 3.0, (std::numeric_limits<double>::min)()) == true);
+            BOOST_CHECK(t==i+7);
+        }
     }
 
     delete iter;

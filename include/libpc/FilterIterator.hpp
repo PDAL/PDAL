@@ -62,6 +62,25 @@ private:
 };
 
 
+class FilterRandomIterator : public RandomIterator
+{
+public:
+    FilterRandomIterator(const Filter&);
+    virtual ~FilterRandomIterator();
+
+protected:
+    // from RandomIterator
+    virtual boost::uint32_t readImpl(PointBuffer&) = 0;
+    virtual boost::uint64_t seekImpl(boost::uint64_t pointNum) = 0;
+
+    RandomIterator& getPrevIterator();
+    const RandomIterator& getPrevIterator() const;
+
+private:
+    const Filter& m_stageAsFilter;
+    RandomIterator* m_prevIterator;
+};
+
 } // namespace libpc
 
 #endif

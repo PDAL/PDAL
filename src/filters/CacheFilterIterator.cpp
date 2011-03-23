@@ -110,4 +110,69 @@ boost::uint32_t CacheFilterSequentialIterator::readImpl(PointBuffer& data)
     return numRead;
 }
 
+
+
+CacheFilterRandomIterator::CacheFilterRandomIterator(const CacheFilter& filter)
+    : libpc::FilterRandomIterator(filter)
+    , m_filter(filter)
+{
+    return;
+}
+
+
+boost::uint64_t CacheFilterRandomIterator::seekImpl(boost::uint64_t count)
+{
+    return getPrevIterator().seek(count);
+}
+
+
+// BUG: this duplicates the code above
+boost::uint32_t CacheFilterRandomIterator::readImpl(PointBuffer& data)
+{
+    const boost::uint32_t cacheBlockSize = m_filter.getCacheBlockSize();
+
+    const boost::uint64_t currentPointIndex = getIndex();
+
+    // for now, we only read from the cache if they are asking for one point
+    // (this avoids the problem of an N-point request needing more than one
+    // cached block to satisfy it)
+    if (data.getCapacity() != 1)
+    {
+        const boost::uint32_t numRead = getPrevIterator().read(data);
+
+        // if they asked for a full block and we got a full block,
+        // and the block we got is properly aligned and not already cached,
+        // then let's cache it!
+        const bool isCacheable = (data.getCapacity() == cacheBlockSize) && 
+                                 (numRead == cacheBlockSize) && 
+                                 (currentPointIndex % cacheBlockSize == 0);
+        if (isCacheable && (m_filter.lookupInCache(currentPointIndex) == NULL))
+        {
+            m_filter.addToCache(currentPointIndex, data);
+        }
+
+        m_filter.updateStats(numRead, data.getCapacity());
+
+        return numRead;
+    }
+
+    // they asked for just one point -- first, check Mister Cache
+    const PointBuffer* block = m_filter.lookupInCache(currentPointIndex);
+    if (block != NULL)
+    {
+        // A hit! A palpable hit!
+        data.copyPointFast(0,  currentPointIndex % cacheBlockSize, *block);
+        
+        m_filter.updateStats(0, 1);
+
+        return 1;
+    }
+
+    // Not in the cache, so do a normal read :-(
+    const boost::uint32_t numRead = getPrevIterator().read(data);
+    m_filter.updateStats(numRead, numRead);
+
+    return numRead;
+}
+
 } } // namespaces

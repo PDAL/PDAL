@@ -54,7 +54,10 @@ public:
 
     const LasHeader& getLasHeader() const;
 
+    bool supportsSequentialIterator() const { return true; }
+    bool supportsRandomIterator() const { return true; }
     libpc::SequentialIterator* createSequentialIterator() const;
+    libpc::RandomIterator* createRandomIterator() const;
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream) const;

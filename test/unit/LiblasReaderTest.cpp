@@ -68,7 +68,7 @@ static void checkPointXYZ(const PointBuffer& data, size_t index, const Schema& s
 }
 
 
-BOOST_AUTO_TEST_CASE(test_1)
+BOOST_AUTO_TEST_CASE(test_sequential)
 {
     LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
     BOOST_CHECK(reader.getName() == "Liblas Reader");
@@ -110,6 +110,55 @@ BOOST_AUTO_TEST_CASE(test_1)
     ////    checkPointXYZ(data, 1, schema, 636896.330000, 849087.700000, 446.390000);
     ////    checkPointXYZ(data, 2, schema, 636784.740000, 849106.660000, 426.710000);
     ////}
+    
+    delete iter;
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_random)
+{
+    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
+    BOOST_CHECK(reader.getName() == "Liblas Reader");
+
+    const Schema& schema = reader.getHeader().getSchema();
+    SchemaLayout layout(schema);
+
+    PointBuffer data(layout, 3);
+    
+    libpc::RandomIterator* iter = reader.createRandomIterator();
+
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        checkPointXYZ(data, 0, schema, 637012.240000, 849028.310000, 431.660000);
+        checkPointXYZ(data, 1, schema, 636896.330000, 849087.700000, 446.390000);
+        checkPointXYZ(data, 2, schema, 636784.740000, 849106.660000, 426.710000);
+    }
+
+    // Can we seek it? Yes, we can!
+    iter->seek(100);
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        checkPointXYZ(data, 0, schema, 636661.060000, 849854.130000, 424.900000);
+        checkPointXYZ(data, 1, schema, 636568.180000, 850179.490000, 441.800000);
+        checkPointXYZ(data, 2, schema, 636554.630000, 850040.030000, 499.110000);
+    }
+
+    // Can we seek to beginning? Yes, we can!
+    iter->seek(0);
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        checkPointXYZ(data, 0, schema, 637012.240000, 849028.310000, 431.660000);
+        checkPointXYZ(data, 1, schema, 636896.330000, 849087.700000, 446.390000);
+        checkPointXYZ(data, 2, schema, 636784.740000, 849106.660000, 426.710000);
+    }
     
     delete iter;
 

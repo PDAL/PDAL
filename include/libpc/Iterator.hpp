@@ -42,11 +42,11 @@ namespace libpc
 class Stage;
 class PointBuffer;
 
-class LIBPC_DLL SequentialIterator
+class LIBPC_DLL Iterator
 {
 public:
-    SequentialIterator(const Stage& stage);
-    virtual ~SequentialIterator();
+    Iterator(const Stage& stage);
+    virtual ~Iterator();
 
     const Stage& getStage() const;
 
@@ -59,19 +59,6 @@ public:
     //
     // Returns the number of valid points read.
     boost::uint32_t read(PointBuffer&);
-
-    // advance N points ahead in the file
-    //
-    // In some cases, this might be a very slow, painful function to call because
-    // it might entail physically reading the N points (and dropping the data on the
-    // floor)
-    //
-    // Returns the number actually skipped (which might be less than count, if the
-    // end of the stage was reached first).
-    boost::uint64_t skip(boost::uint64_t count);
-
-    // returns true after we've read all the points available to this stage
-    bool atEnd() const;
 
     // Returns the current point number.  The first point is 0.
     // If this number if > getNumPoints(), then no more points
@@ -88,16 +75,65 @@ public:
 
 protected:
     virtual boost::uint32_t readImpl(PointBuffer&) = 0;
-    virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
-    virtual bool atEndImpl() const = 0;
+
+    boost::uint64_t m_index;
 
 private:
     const Stage& m_stage;
-    boost::uint64_t m_index;
     boost::uint32_t m_chunkSize;
 
-    SequentialIterator& operator=(const SequentialIterator&); // not implemented
-    SequentialIterator(const SequentialIterator&); // not implemented
+    Iterator& operator=(const Iterator&); // not implemented
+    Iterator(const Iterator&); // not implemented
+};
+
+
+class LIBPC_DLL SequentialIterator : public Iterator
+{
+public:
+    SequentialIterator(const Stage& stage);
+    virtual ~SequentialIterator();
+
+    // advance N points ahead in the file
+    //
+    // In some cases, this might be a very slow, painful function to call because
+    // it might entail physically reading the N points (and dropping the data on the
+    // floor)
+    //
+    // Returns the number actually skipped (which might be less than count, if the
+    // end of the stage was reached first).
+    boost::uint64_t skip(boost::uint64_t count);
+
+    // returns true after we've read all the points available to this stage
+    bool atEnd() const;
+
+protected:
+    // from Iterator
+    virtual boost::uint32_t readImpl(PointBuffer&) = 0;
+
+    virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
+    virtual bool atEndImpl() const = 0;
+};
+
+
+class LIBPC_DLL RandomIterator : public Iterator
+{
+public:
+    RandomIterator(const Stage& stage);
+    virtual ~RandomIterator();
+
+    // seek to point N (an absolute value)
+    //
+    // In some cases, this might be a very slow, painful function to call because
+    // it might entail physically reading the N points (and dropping the data on the
+    // floor)
+    //
+    // Returns the number actually seeked to (which might be less than asked for, if the
+    // end of the stage was reached first).
+    boost::uint64_t seek(boost::uint64_t position);
+
+protected:
+    // from Iterator
+    virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
 };
 
 

@@ -56,7 +56,10 @@ public:
 
     void getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;
 
-    SequentialIterator* createSequentialIterator() const;
+    bool supportsSequentialIterator() const { return true; }
+    bool supportsRandomIterator() const { return false; }
+    libpc::SequentialIterator* createSequentialIterator() const;
+    libpc::RandomIterator* createRandomIterator() const { return NULL; }
 
     void processBuffer(PointBuffer& data) const;
 

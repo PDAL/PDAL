@@ -83,7 +83,10 @@ public:
                        boost::uint64_t& numCacheInsertMisses,
                        boost::uint64_t& numCacheInsertHits) const;
 
-    SequentialIterator* createSequentialIterator() const;
+    bool supportsSequentialIterator() const { return true; }
+    bool supportsRandomIterator() const { return true; }
+    libpc::SequentialIterator* createSequentialIterator() const;
+    libpc::RandomIterator* createRandomIterator() const;
 
 private:
     // these are mutable to allow const-ness for updating stats

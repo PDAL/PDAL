@@ -147,4 +147,10 @@ libpc::SequentialIterator* CacheFilter::createSequentialIterator() const
 }
 
 
+libpc::RandomIterator* CacheFilter::createRandomIterator() const
+{
+    return new CacheFilterRandomIterator(*this);
+}
+
+
 } } // namespaces
