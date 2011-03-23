@@ -58,11 +58,11 @@ class Iterator : public libpc::Iterator
 public:
     Iterator(const LiblasReader& reader);
 
-    void skip(boost::uint64_t);
-    boost::uint32_t read(PointBuffer&);
-    bool atEnd() const;
-
 private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readImpl(PointBuffer&);
+    bool atEndImpl() const;
+
     const LiblasReader& m_stageAsDerived;
 };
 

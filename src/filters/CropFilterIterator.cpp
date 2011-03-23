@@ -49,8 +49,10 @@ CropFilterIterator::CropFilterIterator(const CropFilter& filter)
 }
 
 
-void CropFilterIterator::skip(boost::uint64_t count)
+boost::uint64_t CropFilterIterator::skipImpl(boost::uint64_t count)
 {
+    boost::uint64_t totalNumRead = 0;
+
     while (count > 0)
     {
         const boost::uint32_t thisCount = (boost::uint32_t)std::min<boost::uint64_t>(getChunkSize(), count);
@@ -62,14 +64,14 @@ void CropFilterIterator::skip(boost::uint64_t count)
 
         count -= numRead;
 
-        incrementIndex(numRead);
+        totalNumRead += numRead;
     }
 
-    return;
+    return totalNumRead;
 }
 
 
-boost::uint32_t CropFilterIterator::read(PointBuffer& dstData)
+boost::uint32_t CropFilterIterator::readImpl(PointBuffer& dstData)
 {
     // The client has asked us for dstData.getCapacity() points.
     // We will read from our previous stage until we get that amount (or
@@ -94,7 +96,6 @@ boost::uint32_t CropFilterIterator::read(PointBuffer& dstData)
         // copy points from src (prev stage) into dst (our stage), 
         // based on the CropFilter's rules (i.e. its bounds)
         const boost::uint32_t numPointsProcessed = m_cropFilter.processBuffer(dstData, srcData);
-        incrementIndex(numPointsProcessed);
 
         numPointsNeeded -= numPointsProcessed;
     }
@@ -105,7 +106,7 @@ boost::uint32_t CropFilterIterator::read(PointBuffer& dstData)
 }
 
 
-bool CropFilterIterator::atEnd() const
+bool CropFilterIterator::atEndImpl() const
 {
     // we don't have a fixed point point --
     // we are at the end only when our source is at the end

@@ -50,11 +50,11 @@ class ColorFilterIterator : public libpc::FilterIterator
 public:
     ColorFilterIterator(const ColorFilter& filter);
 
-    void skip(boost::uint64_t);
-    boost::uint32_t read(PointBuffer&);
-    bool atEnd() const;
-
 private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readImpl(PointBuffer&);
+    bool atEndImpl() const;
+
     const ColorFilter& m_colorFilter;
 };
 

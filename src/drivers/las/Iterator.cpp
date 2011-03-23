@@ -48,31 +48,29 @@ Iterator::Iterator(const LasReader& reader)
 }
 
 
-void Iterator::skip(boost::uint64_t pointNum)
+boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
 {
     const LasReader& reader = m_stageAsDerived;
     const Header& header = reader.getHeader();
 
-    incrementIndex(pointNum);
-
-    boost::uint32_t chunk = (boost::uint32_t)pointNum; // BUG: this needs to be done in blocks if pointNum is large
+    boost::uint32_t chunk = (boost::uint32_t)count; // BUG: this needs to be done in blocks if pointNum is large
 
     // BUG: we can move the stream a constant amount
     PointBuffer PointBuffer(header.getSchema(), chunk);
     read(PointBuffer);
     // just drop the points on the floor and return
     
-    return;
+    return count;
 }
 
 
-bool Iterator::atEnd() const
+bool Iterator::atEndImpl() const
 {
     return getIndex() >= getStage().getNumPoints();
 }
 
 
-boost::uint32_t Iterator::read(PointBuffer& PointBuffer)
+boost::uint32_t Iterator::readImpl(PointBuffer& PointBuffer)
 {
     LasReader& reader = const_cast<LasReader&>(m_stageAsDerived);       // BUG BUG BUG
 
@@ -233,8 +231,6 @@ boost::uint32_t Iterator::read(PointBuffer& PointBuffer)
         PointBuffer.setNumPoints(pointIndex+1);
         
     }
-
-    incrementIndex(numPoints);
 
     return numPoints;
 }

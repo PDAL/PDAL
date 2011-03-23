@@ -47,12 +47,12 @@ public:
     FilterIterator(const Filter&);
     virtual ~FilterIterator();
 
-    // from Iterator
-    virtual boost::uint32_t read(PointBuffer&) = 0;
-    virtual void skip(boost::uint64_t pointNum) = 0;
-    virtual bool atEnd() const = 0;
-
 protected:
+    // from Iterator
+    virtual boost::uint32_t readImpl(PointBuffer&) = 0;
+    virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
+    virtual bool atEndImpl() const = 0;
+
     Iterator& getPrevIterator();
     const Iterator& getPrevIterator() const;
 

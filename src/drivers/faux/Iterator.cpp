@@ -55,13 +55,13 @@ Iterator::Iterator(const Reader& reader)
 }
 
 
-void Iterator::skip(boost::uint64_t count)
+boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
 {
-     incrementIndex(count);
+     return count;
 }
 
 
-bool Iterator::atEnd() const
+bool Iterator::atEndImpl() const
 {
     const boost::uint64_t numPoints = getStage().getHeader().getNumPoints();
     const boost::uint64_t currPoint = getIndex();
@@ -70,7 +70,7 @@ bool Iterator::atEnd() const
 }
 
 
-boost::uint32_t Iterator::read(PointBuffer& data)
+boost::uint32_t Iterator::readImpl(PointBuffer& data)
 {
     Reader& reader = const_cast<Reader&>(m_stageAsDerived);       // BUG BUG BUG
 
@@ -139,8 +139,6 @@ boost::uint32_t Iterator::read(PointBuffer& data)
         assert(cnt <= data.getCapacity());
     }
     
-    incrementIndex(numPointsWanted);
-
     return cnt;
 }
 

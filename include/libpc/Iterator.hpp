@@ -58,17 +58,20 @@ public:
     // we need to write into.
     //
     // Returns the number of valid points read.
-    virtual boost::uint32_t read(PointBuffer&) = 0;
+    boost::uint32_t read(PointBuffer&);
 
     // advance N points ahead in the file
     //
     // In some cases, this might be a very slow, painful function to call because
     // it might entail physically reading the N points (and dropping the data on the
     // floor)
-    virtual void skip(boost::uint64_t pointNum) = 0;
+    //
+    // Returns the number actually skipped (which might be less than count, if the
+    // end of the stage was reached first).
+    boost::uint64_t skip(boost::uint64_t count);
 
     // returns true after we've read all the points available to this stage
-    virtual bool atEnd() const = 0;
+    bool atEnd() const;
 
     // Returns the current point number.  The first point is 0.
     // If this number if > getNumPoints(), then no more points
@@ -84,8 +87,9 @@ public:
     boost::uint32_t getChunkSize() const;
 
 protected:
-    // advance the index by N, e.g. for use by skip()
-    void incrementIndex(boost::uint64_t count);
+    virtual boost::uint32_t readImpl(PointBuffer&) = 0;
+    virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
+    virtual bool atEndImpl() const = 0;
 
 private:
     const Stage& m_stage;

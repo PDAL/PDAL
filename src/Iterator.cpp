@@ -68,11 +68,6 @@ boost::uint64_t Iterator::getIndex() const
     return m_index;
 }
 
-void Iterator::incrementIndex(boost::uint64_t delta)
-{
-    m_index += delta;
-}
-
 
 void Iterator::setChunkSize(boost::uint32_t size)
 {
@@ -83,6 +78,32 @@ void Iterator::setChunkSize(boost::uint32_t size)
 boost::uint32_t Iterator::getChunkSize() const
 {
     return m_chunkSize;
+}
+
+
+boost::uint32_t Iterator::read(PointBuffer& data)
+{
+    const boost::uint32_t numRead = readImpl(data);
+
+    m_index += numRead;
+
+    return numRead;
+}
+
+
+boost::uint64_t Iterator::skip(boost::uint64_t count)
+{
+    const boost::uint64_t numSkipped = skipImpl(count);
+
+    m_index += numSkipped;
+
+    return numSkipped;
+}
+
+
+bool Iterator::atEnd() const
+{
+    return atEndImpl();
 }
 
 

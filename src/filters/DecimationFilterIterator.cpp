@@ -47,8 +47,10 @@ DecimationFilterIterator::DecimationFilterIterator(const DecimationFilter& filte
 }
 
 
-void DecimationFilterIterator::skip(boost::uint64_t count)
+boost::uint64_t DecimationFilterIterator::skipImpl(boost::uint64_t count)
 {
+    boost::uint64_t totalNumRead = 0;
+
     while (count > 0)
     {
         const boost::uint32_t thisCount = (boost::uint32_t)std::min<boost::uint64_t>(getChunkSize(), count);
@@ -59,22 +61,21 @@ void DecimationFilterIterator::skip(boost::uint64_t count)
         if (numRead == 0) break; // end of file
 
         count -= numRead;
-
-        incrementIndex(numRead);
+        totalNumRead += numRead;
     }
 
-    return;
+    return totalNumRead;
 }
 
 
-bool DecimationFilterIterator::atEnd() const
+bool DecimationFilterIterator::atEndImpl() const
 {
     const Iterator& iter = getPrevIterator();
     return iter.atEnd();
 }
 
 
-boost::uint32_t DecimationFilterIterator::read(PointBuffer& dstData)
+boost::uint32_t DecimationFilterIterator::readImpl(PointBuffer& dstData)
 {
     // The client has asked us for dstData.getCapacity() points.
     // We will read from our previous stage until we get that amount (or
@@ -100,7 +101,6 @@ boost::uint32_t DecimationFilterIterator::read(PointBuffer& dstData)
         // copy points from src (prev stage) into dst (our stage), 
         // based on the CropFilter's rules (i.e. its bounds)
         const boost::uint32_t numPointsAdded = m_stageAsDerived.processBuffer(dstData, srcData, srcStartIndex);
-        incrementIndex(numPointsAdded);
 
         numPointsNeeded -= numPointsAdded;
     }

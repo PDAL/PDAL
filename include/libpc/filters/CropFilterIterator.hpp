@@ -49,11 +49,10 @@ class CropFilterIterator : public libpc::FilterIterator
 public:
     CropFilterIterator(const CropFilter& filter);
 
-    void skip(boost::uint64_t);
-    boost::uint32_t read(PointBuffer&);
-    bool atEnd() const;
-
 private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readImpl(PointBuffer&);
+    bool atEndImpl() const;
 
     const CropFilter& m_cropFilter;
 };

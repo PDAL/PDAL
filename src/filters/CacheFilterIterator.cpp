@@ -49,20 +49,20 @@ CacheFilterIterator::CacheFilterIterator(const CacheFilter& filter)
 }
 
 
-void CacheFilterIterator::skip(boost::uint64_t count)
+boost::uint64_t CacheFilterIterator::skipImpl(boost::uint64_t count)
 {
-    incrementIndex(count);
     getPrevIterator().skip(count);
+    return count;
 }
 
 
-bool CacheFilterIterator::atEnd() const
+bool CacheFilterIterator::atEndImpl() const
 {
     return getPrevIterator().atEnd();
 }
 
 
-boost::uint32_t CacheFilterIterator::read(PointBuffer& data)
+boost::uint32_t CacheFilterIterator::readImpl(PointBuffer& data)
 {
     CacheFilter& filter = const_cast<CacheFilter&>(m_stageAsDerived);       // BUG BUG BUG
 
@@ -87,8 +87,6 @@ boost::uint32_t CacheFilterIterator::read(PointBuffer& data)
             filter.m_cache->insert(currentPointIndex, block);
         }
 
-        incrementIndex(numRead);
-
         filter.m_numPointsRead += numRead;
         filter.m_numPointsRequested += data.getCapacity();
 
@@ -105,7 +103,6 @@ boost::uint32_t CacheFilterIterator::read(PointBuffer& data)
         
         filter.m_numPointsRead += 0;
         filter.m_numPointsRequested += 1;
-        incrementIndex(1);
 
         getPrevIterator().skip(1);
         return 1;
@@ -115,7 +112,6 @@ boost::uint32_t CacheFilterIterator::read(PointBuffer& data)
     const boost::uint32_t numRead = getPrevIterator().read(data);
     filter.m_numPointsRead += numRead;
     filter.m_numPointsRequested += numRead;
-    incrementIndex(numRead);
 
     return numRead;
 }

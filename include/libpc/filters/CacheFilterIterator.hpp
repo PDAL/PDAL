@@ -51,11 +51,11 @@ class CacheFilterIterator : public libpc::FilterIterator
 public:
     CacheFilterIterator(const CacheFilter& filter);
 
-    void skip(boost::uint64_t);
-    boost::uint32_t read(PointBuffer&);
-    bool atEnd() const;
-
 private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readImpl(PointBuffer&);
+    bool atEndImpl() const;
+
     const CacheFilter& m_stageAsDerived;
 };
 
