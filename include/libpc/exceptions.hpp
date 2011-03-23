@@ -120,6 +120,15 @@ public:
     {}
 };
 
+// use this for situations where indeterminate point counts prevent some 
+// operation from happening
+class indeterminate_count_error : public libpc_error
+{
+public:
+    indeterminate_count_error(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
 
 // use this for code still under development
 class not_yet_implemented : public libpc_error
