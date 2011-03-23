@@ -81,7 +81,8 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
         m_numPoints = rhs.getNumPoints();
         m_capacity = rhs.getCapacity();
         m_bounds = rhs.getSpatialBounds();
-        boost::scoped_array<boost::uint8_t> m_data( new boost::uint8_t[ m_pointSize*m_capacity ] );
+        boost::scoped_array<boost::uint8_t> data( new boost::uint8_t[ m_pointSize*m_capacity ] );
+        m_data.swap(data);
         
         if (rhs.m_data.get())
             memcpy(m_data.get(), rhs.m_data.get(), m_pointSize*m_capacity);
