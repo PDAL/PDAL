@@ -47,8 +47,14 @@ public:
     FilterIterator(const Filter&);
     virtual ~FilterIterator();
 
+    // from Iterator
+    virtual boost::uint32_t read(PointBuffer&) = 0;
+    virtual void skip(boost::uint64_t pointNum) = 0;
+    virtual bool atEnd() const = 0;
+
 protected:
     Iterator& getPrevIterator();
+    const Iterator& getPrevIterator() const;
 
 private:
     const Filter& m_stageAsFilter;

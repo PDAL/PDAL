@@ -57,32 +57,35 @@ BOOST_AUTO_TEST_CASE(test1)
     PointBuffer dataBig(layout, 1024);
     PointBuffer dataSmall(layout, 1);
 
-    Iterator* iter = cache.createIterator();
+    Iterator* iter1 = cache.createIterator();
 
     //BOOST_CHECK(cache.getCurrentPointIndex() == 0);
     BOOST_CHECK(cache.getNumPointsRequested() == 0);
     BOOST_CHECK(cache.getNumPointsRead() == 0);
 
-    iter->read(dataBig);
+    iter1->read(dataBig);
     BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 0);
     //BOOST_CHECK(cache.getCurrentPointIndex() == 1024);
     BOOST_CHECK(cache.getNumPointsRequested() == 1024);
     BOOST_CHECK(cache.getNumPointsRead() == 1024);
 
-    iter->read(dataBig);
+    iter1->read(dataBig);
     BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 1024);
    // BOOST_CHECK(cache.getCurrentPointIndex() == 2048);
     BOOST_CHECK(cache.getNumPointsRequested() == 2048);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
 
-    iter->seekToPoint(42);
-    iter->read(dataSmall);
+    Iterator* iter2 = cache.createIterator();
+
+    iter2->skip(42);
+    iter2->read(dataSmall);
     BOOST_CHECK(dataSmall.getField<boost::uint64_t>(0, offsetT) == 42);
     //BOOST_CHECK(cache.getCurrentPointIndex() == 43);
     BOOST_CHECK(cache.getNumPointsRequested() == 2048+1);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
 
-    delete iter;
+    delete iter1;
+    delete iter2;
 
     return;
 }

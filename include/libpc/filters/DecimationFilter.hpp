@@ -56,6 +56,8 @@ public:
 
     boost::uint32_t getStep() const;
 
+    void processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const;
+
 private:
     boost::uint32_t m_step;
 

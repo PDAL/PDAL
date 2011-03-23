@@ -70,14 +70,21 @@ const std::vector<Iterator*>& MosaicFilterIterator::getPrevIterators() const
 }
 
 
-void MosaicFilterIterator::seekToPoint(boost::uint64_t pointNum)
+void MosaicFilterIterator::skip(boost::uint64_t count)
 {
     // BUG: this is clearly not correct, we need to keep track of which tile we're on
-    m_prevIterators[0]->seekToPoint(pointNum);
+    m_prevIterators[0]->skip(count);
 }
 
 
-boost::uint32_t MosaicFilterIterator::readBuffer(PointBuffer& destData)
+bool MosaicFilterIterator::atEnd() const
+{
+    // BUG: this is clearly not correct, we need to keep track of which tile we're on
+    return m_prevIterators[0]->atEnd();
+}
+
+
+boost::uint32_t MosaicFilterIterator::read(PointBuffer& destData)
 {
     // BUG: We know that the two prev stage schemas are compatible, 
     // but we can't be sure the have the same bitfield layouts as 

@@ -49,7 +49,7 @@ ColorFilterIterator::ColorFilterIterator(const ColorFilter& filter)
 }
 
 
-boost::uint32_t ColorFilterIterator::readBuffer(PointBuffer& data)
+boost::uint32_t ColorFilterIterator::read(PointBuffer& data)
 {
     getPrevIterator().read(data);
 
@@ -59,10 +59,16 @@ boost::uint32_t ColorFilterIterator::readBuffer(PointBuffer& data)
 }
 
 
-void ColorFilterIterator::seekToPoint(boost::uint64_t index)
+void ColorFilterIterator::skip(boost::uint64_t count)
 {
-    setCurrentPointIndex(index);
-    getPrevIterator().seekToPoint(index);
+    incrementCurrentPointIndex(count);
+    getPrevIterator().skip(count);
+}
+
+
+bool ColorFilterIterator::atEnd() const
+{
+    return getPrevIterator().atEnd();
 }
 
 } } // namespaces

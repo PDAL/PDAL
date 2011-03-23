@@ -49,14 +49,20 @@ CacheFilterIterator::CacheFilterIterator(const CacheFilter& filter)
 }
 
 
-void CacheFilterIterator::seekToPoint(boost::uint64_t index)
+void CacheFilterIterator::skip(boost::uint64_t index)
 {
     setCurrentPointIndex(index);
-    getPrevIterator().seekToPoint(index);
+    getPrevIterator().skip(index);
 }
 
 
-boost::uint32_t CacheFilterIterator::readBuffer(PointBuffer& data)
+bool CacheFilterIterator::atEnd() const
+{
+    return getPrevIterator().atEnd();
+}
+
+
+boost::uint32_t CacheFilterIterator::read(PointBuffer& data)
 {
     CacheFilter& filter = const_cast<CacheFilter&>(m_stageAsDerived);       // BUG BUG BUG
 
@@ -101,7 +107,7 @@ boost::uint32_t CacheFilterIterator::readBuffer(PointBuffer& data)
         filter.m_numPointsRequested += 1;
         incrementCurrentPointIndex(1);
 
-        getPrevIterator().seekToPoint(getCurrentPointIndex());
+        getPrevIterator().skip(1);
         return 1;
     }
 

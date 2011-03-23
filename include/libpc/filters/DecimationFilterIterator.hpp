@@ -49,11 +49,11 @@ class DecimationFilterIterator : public libpc::FilterIterator
 public:
     DecimationFilterIterator(const DecimationFilter& filter);
 
-    void seekToPoint(boost::uint64_t);
+    void skip(boost::uint64_t);
+    boost::uint32_t read(PointBuffer&);
+    bool atEnd() const;
 
 private:
-    boost::uint32_t readBuffer(PointBuffer&);
-
     const DecimationFilter& m_stageAsDerived;
 };
 

@@ -37,7 +37,6 @@
 namespace libpc
 {
 
-
 Stage::Stage()
     : m_header(NULL)
 {

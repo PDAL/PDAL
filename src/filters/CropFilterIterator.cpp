@@ -36,66 +36,79 @@
 #include <libpc/filters/CropFilter.hpp>
 #include <libpc/exceptions.hpp>
 
+#include <algorithm>
+
 namespace libpc { namespace filters {
 
 
 CropFilterIterator::CropFilterIterator(const CropFilter& filter)
     : libpc::FilterIterator(filter)
-    , m_stageAsDerived(filter)
+    , m_cropFilter(filter)
 {
     return;
 }
 
 
-void CropFilterIterator::seekToPoint(boost::uint64_t pointNum)
+void CropFilterIterator::skip(boost::uint64_t count)
 {
-    // getPrevIterator().seekToPoint(pointNum);
+    while (count > 0)
+    {
+        const boost::uint32_t thisCount = (boost::uint32_t)std::min<boost::uint64_t>(getChunkSize(), count);
+
+        PointBuffer junk(getStage().getHeader().getSchema(), thisCount);
+        
+        const boost::uint32_t numRead = read(junk);
+        if (numRead == 0) break; // end of file
+
+        count -= numRead;
+    }
+
+    return;
 }
 
 
-boost::uint32_t CropFilterIterator::readBuffer(PointBuffer& data)
+boost::uint32_t CropFilterIterator::read(PointBuffer& dstData)
 {
-    CropFilter& filter = const_cast<CropFilter&>(m_stageAsDerived);       // BUG BUG BUG
+    // The client has asked us for dstData.getCapacity() points.
+    // We will read from our previous stage until we get that amount (or
+    // until the previous stage runs out of points).
 
-    PointBuffer srcData(data.getSchemaLayout(), data.getCapacity());
+    boost::uint32_t numPointsNeeded = dstData.getCapacity();
+    assert(dstData.getNumPoints() == 0);
 
-    boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
-    if (numSrcPointsRead == 0) return 0;
-
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
-
-    int fieldX = schema.getDimensionIndex(Dimension::Field_X);
-    int fieldY = schema.getDimensionIndex(Dimension::Field_Y);
-    int fieldZ = schema.getDimensionIndex(Dimension::Field_Z);
-
-    boost::uint32_t numPoints = data.getCapacity();
-    
-    const Bounds<double>& bounds = filter.getBounds();
-
-    boost::uint32_t srcIndex = 0;
-    boost::uint32_t dstIndex = 0;
-    for (srcIndex=0; srcIndex<numPoints; srcIndex++)
+    while (numPointsNeeded > 0)
     {
-    
-        double x = srcData.getField<double>(srcIndex, fieldX);
-        double y = srcData.getField<double>(srcIndex, fieldY);
-        double z = srcData.getField<double>(srcIndex, fieldZ);
-        Vector<double> point(x,y,z);
-        
-        if (bounds.contains(point))
-        {
-            data.copyPointFast(dstIndex, srcIndex, srcData);
-            data.setNumPoints(dstIndex+1);
-            dstIndex += 1;
-            
-        }
-    }
-    
-    
-    incrementCurrentPointIndex(numPoints);
+        // set up buffer to be filled by prev stage
+        PointBuffer srcData(dstData.getSchemaLayout(), numPointsNeeded);
 
-    return data.getNumPoints();
+        // read from prev stage
+        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+        assert(numSrcPointsRead == srcData.getNumPoints());
+        assert(numSrcPointsRead <= numPointsNeeded);
+
+        // we got no data, and there is no more to get -- exit the loop
+        if (numSrcPointsRead == 0) break;
+
+        // copy points from src (prev stage) into dst (our stage), 
+        // based on the CropFilter's rules (i.e. its bounds)
+        m_cropFilter.processBuffer(dstData, srcData);
+
+        numPointsNeeded = dstData.getCapacity() - dstData.getNumPoints();
+    }
+
+    const boost::uint32_t numPointsAchieved = dstData.getNumPoints();
+    incrementCurrentPointIndex(numPointsAchieved);
+
+    return numPointsAchieved;
+}
+
+
+bool CropFilterIterator::atEnd() const
+{
+    // we don't have a fixed point point --
+    // we are at the end only when our source is at the end
+    const Iterator& iter = getPrevIterator();
+    return iter.atEnd();
 }
 
 

@@ -60,6 +60,8 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
     schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Uint64));
 
     header->setNumPoints(numPoints);
+    header->setPointCountType(PointCount_Fixed);
+
     header->setBounds(bounds);
 
     setHeader(header);

@@ -46,6 +46,9 @@ CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
     Header& header = getHeader();
     header.setBounds(bounds);
 
+    header.setNumPoints(0);
+    header.setPointCountType(PointCount_Unknown);
+
     return;
 }
 
@@ -62,6 +65,43 @@ const Bounds<double>& CropFilter::getBounds() const
     return m_bounds;
 }
 
+
+// append all points from src buffer to end of dst buffer, based on the our bounds
+void CropFilter::processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const
+{
+    const SchemaLayout& schemaLayout = dstData.getSchemaLayout();
+    const Schema& schema = schemaLayout.getSchema();
+
+    int fieldX = schema.getDimensionIndex(Dimension::Field_X);
+    int fieldY = schema.getDimensionIndex(Dimension::Field_Y);
+    int fieldZ = schema.getDimensionIndex(Dimension::Field_Z);
+
+    const Bounds<double>& bounds = this->getBounds();
+
+    boost::uint32_t numSrcPoints = srcData.getNumPoints();
+    boost::uint32_t dstIndex = dstData.getNumPoints();
+
+    for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
+    {
+    
+        double x = srcData.getField<double>(srcIndex, fieldX);
+        double y = srcData.getField<double>(srcIndex, fieldY);
+        double z = srcData.getField<double>(srcIndex, fieldZ);
+        Vector<double> point(x,y,z);
+        
+        if (bounds.contains(point))
+        {
+            dstData.copyPointFast(dstIndex, srcIndex, srcData);
+            dstData.setNumPoints(dstIndex+1);
+            ++dstIndex;
+            
+        }
+    }
+    
+    assert(dstIndex <= dstData.getCapacity());
+
+    return;
+}
 
 
 libpc::Iterator* CropFilter::createIterator() const

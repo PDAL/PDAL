@@ -74,15 +74,16 @@ public:
     const Bounds<double>& getSpatialBounds() const;
     void setSpatialBounds(const Bounds<double>& bounds);
 
-    // number of points in this buffer
+    // This is the number of points in this buffer that actually have valid data.  This number
+    // will be less than or equal to the getCapacity() value.
     boost::uint32_t getNumPoints() const;
     
     inline void setNumPoints(boost::uint32_t v) { assert(v <= m_capacity);m_numPoints = v; } 
 
     inline boost::uint32_t& getNumPointsRef() {assert(m_numPoints <= m_capacity);return m_numPoints; }
     
-    // number of points in this buffer that have legit data; initially will be zero,
-    // and after a read() call it will be in the range 0 to getNumPoints()-1
+    // This is the number of points that this buffer is allocated to be able to store.
+    // This is a fixed constant, set at ctor time by the person constructing the buffer.
     inline boost::uint32_t getCapacity() const { return m_capacity; }
 
     // schema (number and kinds of fields) for a point in this buffer

@@ -44,9 +44,8 @@ namespace libpc {
 
 enum PointCountType
 {
-    PointCount_Fixed,       // getNumPoints will return a good, nonzero value
-    PointCount_Infinite,    // getNumPoints will return 0; the stage has an unknown, and likely infinite, count
-    PointCount_Unknown      // getNumPoints will return 0; the stage has an unknown, but constant, count
+    PointCount_Fixed,       // getNumPoints will return value (which might be zero, though)
+    PointCount_Unknown      // the stage has an unknown count, and getNumPoints will return 0
 };
 
 

@@ -55,13 +55,22 @@ Iterator::Iterator(const Reader& reader)
 }
 
 
-void Iterator::seekToPoint(boost::uint64_t index)
+void Iterator::skip(boost::uint64_t index)
 {
      setCurrentPointIndex(index);
 }
 
 
-boost::uint32_t Iterator::readBuffer(PointBuffer& data)
+bool Iterator::atEnd() const
+{
+    const boost::uint64_t numPoints = getStage().getHeader().getNumPoints();
+    const boost::uint64_t currPoint = getCurrentPointIndex();
+
+    return currPoint >= numPoints;
+}
+
+
+boost::uint32_t Iterator::read(PointBuffer& data)
 {
     Reader& reader = const_cast<Reader&>(m_stageAsDerived);       // BUG BUG BUG
 
@@ -74,8 +83,13 @@ boost::uint32_t Iterator::readBuffer(PointBuffer& data)
     const Schema& schema = schemaLayout.getSchema();
     Header& header = reader.getHeader();
 
-    const boost::uint32_t numPoints = data.getCapacity();
-    assert(getCurrentPointIndex() + numPoints <= header.getNumPoints());
+    // how many are they asking for?
+    boost::uint64_t numPointsWanted = data.getCapacity();
+
+    // we can only give them as many as we have left
+    boost::uint64_t numPointsAvailable = header.getNumPoints() - getCurrentPointIndex();
+    if (numPointsAvailable < numPointsWanted)
+        numPointsWanted = numPointsAvailable;
 
     const Bounds<double>& bounds = header.getBounds(); 
     const std::vector< Range<double> >& dims = bounds.dimensions();
@@ -97,7 +111,7 @@ boost::uint32_t Iterator::readBuffer(PointBuffer& data)
 
     boost::uint32_t& cnt = data.getNumPointsRef();
     cnt = 0;
-    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
+    for (boost::uint32_t pointIndex=0; pointIndex<numPointsWanted; pointIndex++)
     {
         double x;
         double y;
@@ -125,7 +139,7 @@ boost::uint32_t Iterator::readBuffer(PointBuffer& data)
         assert(cnt <= data.getCapacity());
     }
     
-    incrementCurrentPointIndex(numPoints);
+    incrementCurrentPointIndex(numPointsWanted);
 
     return cnt;
 }

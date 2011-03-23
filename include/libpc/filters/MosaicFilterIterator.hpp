@@ -50,16 +50,15 @@ public:
     MosaicFilterIterator(const MosaicFilter& filter);
     ~MosaicFilterIterator();
 
-    const std::vector<Iterator*>& getPrevIterators() const;
-
-    void seekToPoint(boost::uint64_t);
+    void skip(boost::uint64_t);
+    boost::uint32_t read(PointBuffer&);
+    bool atEnd() const;
 
 private:
-    boost::uint32_t readBuffer(PointBuffer&);
+    const std::vector<Iterator*>& getPrevIterators() const;
 
     const MosaicFilter& m_stageAsDerived;
     std::vector<Iterator*> m_prevIterators;
-
 };
 
 

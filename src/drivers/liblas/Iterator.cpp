@@ -53,18 +53,29 @@ Iterator::Iterator(const LiblasReader& reader)
 }
 
 
-void Iterator::seekToPoint(boost::uint64_t n)
+void Iterator::skip(boost::uint64_t n)
 {
     LiblasReader& reader = const_cast<LiblasReader&>(m_stageAsDerived); // BUG BUG BUG
 
-    size_t nn = (size_t)n;
-    if (n != nn) throw; // BUG
+    boost::uint64_t pos = getCurrentPointIndex() + n;
+
+    size_t nn = (size_t)pos;
     reader.m_externalReader->Seek(nn);
+
+    setCurrentPointIndex(nn);
+
     return;
 }
 
 
-boost::uint32_t Iterator::readBuffer(PointBuffer& PointBuffer)
+
+bool Iterator::atEnd() const
+{
+    return getCurrentPointIndex() >= getStage().getNumPoints();
+}
+
+
+boost::uint32_t Iterator::read(PointBuffer& PointBuffer)
 {
     LiblasReader& reader = const_cast<LiblasReader&>(m_stageAsDerived);     // BUG BUG BUG
 
@@ -164,6 +175,8 @@ boost::uint32_t Iterator::readBuffer(PointBuffer& PointBuffer)
         }
         
     }
+
+    incrementCurrentPointIndex(numPoints);
 
     return numPoints;
 }

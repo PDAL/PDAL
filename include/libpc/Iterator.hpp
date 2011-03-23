@@ -57,29 +57,30 @@ public:
     // that matters is that the buffer we are given has the fields
     // we need to write into.
     //
-    // This is NOT virtual.  Derived classes should override the 
-    // readBuffer function below, not this one.
-    //
     // Returns the number of valid points read.
-    boost::uint32_t read(PointBuffer&);
+    virtual boost::uint32_t read(PointBuffer&) = 0;
 
-    // advance (or retreat) to the Nth point in the file (absolute, 
-    // not relative).  In some cases, this might be a very slow, painful
-    // function to call.
-    virtual void seekToPoint(boost::uint64_t pointNum) = 0;
+    // advance N points ahead in the file
+    //
+    // In some cases, this might be a very slow, painful function to call because
+    // it might entail physically reading the N points (and dropping the data on the
+    // floor)
+    virtual void skip(boost::uint64_t pointNum) = 0;
 
     // returns true after we've read all the points available to this stage
-    // (actually a convenience function that compares getCurrentPointIndex and getNumPoints)
-    bool atEnd();
+    virtual bool atEnd() const = 0;
+
+    void setChunkSize(boost::uint32_t size);
+    boost::uint32_t getChunkSize() const;
 
 protected:
     // Returns the current point number.  The first point is 0.
     // If this number if > getNumPoints(), then no more points
     // may be read (and atEnd() should be true).
+    //
+    // For some stages, where the point count is unknown, this might
+    // return 0.
     boost::uint64_t getCurrentPointIndex() const;
-
-    // Implement this to do the actual work to fill in a buffer of points.
-    virtual boost::uint32_t readBuffer(PointBuffer&) = 0;
 
     // Each concrete stage is repsonsible for managing its own current
     // point index when a read or seek occurs.  Call this function t o set
@@ -92,6 +93,7 @@ protected:
 private:
     const Stage& m_stage;
     boost::uint64_t m_currentPointIndex;
+    boost::uint32_t m_chunkSize;
 
     Iterator& operator=(const Iterator&); // not implemented
     Iterator(const Iterator&); // not implemented

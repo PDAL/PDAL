@@ -62,4 +62,10 @@ Iterator& FilterIterator::getPrevIterator()
 }
 
 
+const Iterator& FilterIterator::getPrevIterator() const
+{
+    return *m_prevIterator;
+}
+
+
 } // namespace libpc

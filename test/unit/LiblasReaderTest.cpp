@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     }
 
     // Can we seek it? Yes, we can!
-    iter->seekToPoint(100);
+    iter->skip(97);
     {
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
@@ -102,16 +102,16 @@ BOOST_AUTO_TEST_CASE(test_1)
         checkPointXYZ(data, 2, schema, 636554.630000, 850040.030000, 499.110000);
     }
 
-    // Can we seek to beginning? Yes, we can!
-    iter->seekToPoint(0);
-    {
-        boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK(numRead == 3);
+    ////// Can we seek to beginning? Yes, we can!
+    ////iter->seekToPoint(0);
+    ////{
+    ////    boost::uint32_t numRead = iter->read(data);
+    ////    BOOST_CHECK(numRead == 3);
 
-        checkPointXYZ(data, 0, schema, 637012.240000, 849028.310000, 431.660000);
-        checkPointXYZ(data, 1, schema, 636896.330000, 849087.700000, 446.390000);
-        checkPointXYZ(data, 2, schema, 636784.740000, 849106.660000, 426.710000);
-    }
+    ////    checkPointXYZ(data, 0, schema, 637012.240000, 849028.310000, 431.660000);
+    ////    checkPointXYZ(data, 1, schema, 636896.330000, 849087.700000, 446.390000);
+    ////    checkPointXYZ(data, 2, schema, 636784.740000, 849106.660000, 426.710000);
+    ////}
     
     delete iter;
 

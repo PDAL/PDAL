@@ -54,6 +54,7 @@ public:
     const std::string& getName() const;
 
     Iterator* createIterator() const;
+    void processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const;
 
     const Bounds<double>& getBounds() const;
 

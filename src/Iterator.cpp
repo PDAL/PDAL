@@ -39,10 +39,13 @@
 namespace libpc
 {
 
+static boost::uint32_t s_defaultChunkSize = 1024;
+
 
 Iterator::Iterator(const Stage& stage)
     : m_stage(stage)
     , m_currentPointIndex(0)
+    , m_chunkSize(s_defaultChunkSize)
 {
     return;
 }
@@ -77,17 +80,37 @@ void Iterator::incrementCurrentPointIndex(boost::uint64_t delta)
 }
 
 
-boost::uint32_t Iterator::read(PointBuffer& data)
+void Iterator::setChunkSize(boost::uint32_t size)
 {
-    const boost::uint32_t numPointsRead = readBuffer(data);
-    return numPointsRead;
+    m_chunkSize = size;
 }
 
 
-bool Iterator::atEnd()
+boost::uint32_t Iterator::getChunkSize() const
 {
-    return getCurrentPointIndex() >= getStage().getNumPoints();
+    return m_chunkSize;
 }
+
+
+//bool Iterator::atEnd()
+//{
+//    const PointCountType type = getStage().getHeader().getPointCountType();
+//    const boost::uint64_t numPoints = getStage().getHeader().getNumPoints();
+//
+//    switch (type)
+//    {
+//    case PointCount_Fixed:
+//        return (getCurrentPointIndex() >= numPoints);
+//
+//    case PointCount_Infinite:
+//        return false;
+//
+//    case PointCount_Unknown:// derived classes might be able to override this one
+//        return false;
+//    }
+//
+//    throw libpc_error("bad point count type");
+//}
 
 
 } // namespace libpc
