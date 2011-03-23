@@ -88,7 +88,7 @@ const std::string& ColorFilter::getName() const
 }
 
 
-boost::uint32_t ColorFilter::processBuffer(PointBuffer& data) const
+void ColorFilter::processBuffer(PointBuffer& data) const
 {
     boost::uint32_t numPoints = data.getNumPoints();
 
@@ -114,7 +114,7 @@ boost::uint32_t ColorFilter::processBuffer(PointBuffer& data) const
 
     }
 
-    return numPoints;
+    return;
 }
 
 

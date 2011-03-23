@@ -55,9 +55,9 @@ Iterator::Iterator(const Reader& reader)
 }
 
 
-void Iterator::skip(boost::uint64_t index)
+void Iterator::skip(boost::uint64_t count)
 {
-     setCurrentPointIndex(index);
+     incrementCurrentPointIndex(count);
 }
 
 

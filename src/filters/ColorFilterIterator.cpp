@@ -51,9 +51,9 @@ ColorFilterIterator::ColorFilterIterator(const ColorFilter& filter)
 
 boost::uint32_t ColorFilterIterator::read(PointBuffer& data)
 {
-    getPrevIterator().read(data);
+    const boost::uint32_t numRead = getPrevIterator().read(data);
 
-    boost::uint32_t  numRead = m_colorFilter.processBuffer(data);
+    m_colorFilter.processBuffer(data);
 
     return numRead;
 }

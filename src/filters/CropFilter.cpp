@@ -67,7 +67,7 @@ const Bounds<double>& CropFilter::getBounds() const
 
 
 // append all points from src buffer to end of dst buffer, based on the our bounds
-void CropFilter::processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const
+boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const
 {
     const SchemaLayout& schemaLayout = dstData.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
@@ -80,6 +80,8 @@ void CropFilter::processBuffer(PointBuffer& dstData, const PointBuffer& srcData)
 
     boost::uint32_t numSrcPoints = srcData.getNumPoints();
     boost::uint32_t dstIndex = dstData.getNumPoints();
+
+    boost::uint32_t numPointsAdded = 0;
 
     for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
     {
@@ -94,13 +96,13 @@ void CropFilter::processBuffer(PointBuffer& dstData, const PointBuffer& srcData)
             dstData.copyPointFast(dstIndex, srcIndex, srcData);
             dstData.setNumPoints(dstIndex+1);
             ++dstIndex;
-            
+            ++numPointsAdded;
         }
     }
     
     assert(dstIndex <= dstData.getCapacity());
 
-    return;
+    return numPointsAdded;
 }
 
 

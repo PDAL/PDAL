@@ -54,7 +54,10 @@ public:
     const std::string& getName() const;
 
     Iterator* createIterator() const;
-    void processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const;
+
+    // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
+    // if we're calling this routine multiple times with the same buffer
+    boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const;
 
     const Bounds<double>& getBounds() const;
 

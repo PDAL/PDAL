@@ -70,25 +70,22 @@ public:
     // returns true after we've read all the points available to this stage
     virtual bool atEnd() const = 0;
 
-    void setChunkSize(boost::uint32_t size);
-    boost::uint32_t getChunkSize() const;
-
-protected:
     // Returns the current point number.  The first point is 0.
     // If this number if > getNumPoints(), then no more points
     // may be read (and atEnd() should be true).
     //
-    // For some stages, where the point count is unknown, this might
-    // return 0.
+    // All stages have the notion of a current point number, even for stages
+    // that are not really "oredered", in that the index just starts at zero 
+    // and increments by N every time another N points are read
     boost::uint64_t getCurrentPointIndex() const;
 
-    // Each concrete stage is repsonsible for managing its own current
-    // point index when a read or seek occurs.  Call this function t o set
-    // the value.
-    void setCurrentPointIndex(boost::uint64_t delta);
+    // used to control intermediate buffering needed by some stages
+    void setChunkSize(boost::uint32_t size);
+    boost::uint32_t getChunkSize() const;
 
-    // this is easier than saying setCurrentPointIndex(getCurrentPointIndex()+n)
-    void incrementCurrentPointIndex(boost::uint64_t currentPointDelta);
+protected:
+    // advance the index by N, e.g. for use by skip()
+    void incrementCurrentPointIndex(boost::uint64_t count);
 
 private:
     const Stage& m_stage;

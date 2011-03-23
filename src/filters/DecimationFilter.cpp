@@ -63,27 +63,27 @@ boost::uint32_t DecimationFilter::getStep() const
 }
 
 
-void DecimationFilter::processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const
+boost::uint32_t DecimationFilter::processBuffer(PointBuffer& dstData, const PointBuffer& srcData, boost::uint64_t srcStartIndex) const
 {
-    const SchemaLayout& schemaLayout = dstData.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
-
     const boost::uint32_t numSrcPoints = srcData.getNumPoints();
     boost::uint32_t dstIndex = dstData.getNumPoints();
 
+    boost::uint32_t numPointsAdded = 0;
+
     for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
     {
-        if (srcIndex % m_step == 0)
+        if ((srcStartIndex+srcIndex) % m_step == 0)
         {
             dstData.copyPointFast(dstIndex, srcIndex, srcData);
             dstData.setNumPoints(dstIndex+1);
             ++dstIndex;
+            ++numPointsAdded;
         }
     }
     
     assert(dstIndex <= dstData.getCapacity());
 
-    return;
+    return numPointsAdded;
 }
 
 

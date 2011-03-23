@@ -63,12 +63,6 @@ const Stage& Iterator::getStage() const
 }
 
 
-void Iterator::setCurrentPointIndex(boost::uint64_t currentPointIndex)
-{
-    m_currentPointIndex = currentPointIndex;
-}
-
-
 boost::uint64_t Iterator::getCurrentPointIndex() const
 {
     return m_currentPointIndex;

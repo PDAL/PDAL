@@ -61,6 +61,8 @@ void CropFilterIterator::skip(boost::uint64_t count)
         if (numRead == 0) break; // end of file
 
         count -= numRead;
+
+        incrementCurrentPointIndex(numRead);
     }
 
     return;
@@ -91,13 +93,13 @@ boost::uint32_t CropFilterIterator::read(PointBuffer& dstData)
 
         // copy points from src (prev stage) into dst (our stage), 
         // based on the CropFilter's rules (i.e. its bounds)
-        m_cropFilter.processBuffer(dstData, srcData);
+        const boost::uint32_t numPointsProcessed = m_cropFilter.processBuffer(dstData, srcData);
+        incrementCurrentPointIndex(numPointsProcessed);
 
-        numPointsNeeded = dstData.getCapacity() - dstData.getNumPoints();
+        numPointsNeeded -= numPointsProcessed;
     }
 
     const boost::uint32_t numPointsAchieved = dstData.getNumPoints();
-    incrementCurrentPointIndex(numPointsAchieved);
 
     return numPointsAchieved;
 }

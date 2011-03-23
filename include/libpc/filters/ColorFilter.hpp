@@ -57,7 +57,8 @@ public:
     void getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;
 
     Iterator* createIterator() const;
-    boost::uint32_t processBuffer(PointBuffer& data) const;
+
+    void processBuffer(PointBuffer& data) const;
 
 private:
     void checkImpedance();

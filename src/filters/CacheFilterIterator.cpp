@@ -49,10 +49,10 @@ CacheFilterIterator::CacheFilterIterator(const CacheFilter& filter)
 }
 
 
-void CacheFilterIterator::skip(boost::uint64_t index)
+void CacheFilterIterator::skip(boost::uint64_t count)
 {
-    setCurrentPointIndex(index);
-    getPrevIterator().skip(index);
+    incrementCurrentPointIndex(count);
+    getPrevIterator().skip(count);
 }
 
 
