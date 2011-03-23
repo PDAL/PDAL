@@ -38,14 +38,10 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/Chipper.hpp>
-#include <libpc/Header.hpp>
-#include <libpc/Stage.hpp>
-#include <libpc/filters/CacheFilter.hpp>
+#include <libpc/chipper.hpp>
 #include <libpc/Utils.hpp>
 // boost
 #include <boost/cstdint.hpp>
-#include <boost/scoped_ptr.hpp>
 // std
 #include <cmath>
 
@@ -83,20 +79,6 @@ be stored.
 
 namespace libpc { namespace chipper {
 
-Block::Block(Schema const& schema, boost::uint32_t capacity)
- : PointBuffer(schema, capacity)
-{
-    
-}
-Block::Block(Block const& other)
- : PointBuffer(other)
- , m_list_p(other.m_list_p)
- , m_left(other.m_left)
- , m_right(other.m_right)
- , m_bounds(other.m_bounds)
-{
-    
-}
 vector<boost::uint32_t> Block::GetIDs() const
 {
     vector<boost::uint32_t> ids;
@@ -105,23 +87,6 @@ vector<boost::uint32_t> Block::GetIDs() const
         ids.push_back((*m_list_p)[i].m_ptindex);
     return ids;
 }
-
-PointBuffer Block::GetPointBuffer(SchemaLayout const& layout) const
-{
-    PointBuffer buffer(layout, m_list_p->size());
-    
-    for (boost::uint32_t i = 0; i < m_list_p->size(); ++i)
-    {
-        boost::uint8_t* data = (*m_list_p)[i].m_data;
-        buffer.setData(data, i);
-    }
-    
-    return buffer;
-    // for (boost::uint32_t i = m_left; i <= m_right; ++i)
-    //     ids.push_back((*m_list_p)[i].m_ptindex);
-    // return ids;
-}
-
 
 void Chipper::Chip()
 {
@@ -132,30 +97,21 @@ void Chipper::Chip()
 
 void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
 {
-
+    PtRef ref;
     boost::uint32_t idx;
     vector<PtRef>::iterator it;
    
     libpc::Header const& header = m_stage.getHeader();
     libpc::Schema const& schema = header.getSchema();
-    libpc::SchemaLayout const& layout = SchemaLayout(schema);
     
-
-    PtRef ref;
-
     boost::uint64_t count = header.getNumPoints();
-    
-    if (count == 0) 
-    {
-        if (header.getPointCountType() == libpc::PointCount_Unknown)
-            throw libpc::indeterminate_count_error("The chipper requires a complete point count");
-    }
     xvec.reserve(count);
     yvec.reserve(count);
     spare.resize(count);
-
     
-    boost::scoped_ptr<Iterator> iter(m_stage.createIterator());
+    // boost::uint32_t chunks = count/m_threshold;
+
+
 
     const int indexX = schema.getDimensionIndex(Dimension::Field_X);
     const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
@@ -172,6 +128,8 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     std::size_t num_points_loaded = 0;
     std::size_t num_points_to_load = count;
     
+    boost::scoped_ptr<Iterator> iter(m_stage.createIterator());
+    
     boost::uint32_t counter = 0;
     while (num_points_loaded < num_points_to_load)
     {
@@ -179,23 +137,15 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
         boost::uint32_t num_to_read = static_cast<boost::uint32_t>(std::min<boost::uint64_t>(num_remaining, m_threshold));
 
         PointBuffer buffer(schema, num_to_read);
-
-        boost::uint32_t num_read = iter->read(buffer);
         
-        if (num_read == 0) break;
+        
+        
+        boost::uint32_t num_read =  iter->read(buffer);
+        
         assert(num_read <= num_to_read);
 
-        for (boost::uint32_t j = 0; j < m_threshold; j++)
+        for (boost::uint32_t j = 0; j < num_read; j++)
         {
-            if (layout.getByteSize() > 40) {
-                throw libpc_error("Chipper PtRef size not large enough to hold point data");
-            }
-            
-            memcpy (ref.m_data, buffer.getData(j), layout.getByteSize());
-            // PointBuffer data(buffer.getSchemaLayout(), 1);            
-            // data.copyPointFast(0, j, buffer);
-            
-            if (j == num_to_read) break; // we're outta here
 
             // (v * m_header->GetScaleX()) + m_header->GetOffsetX();
             const double x = (buffer.getField<boost::int32_t>(j, indexX) * xscale) + xoffset;
@@ -413,7 +363,7 @@ void Chipper::FinalSplit(RefList& wide, RefList& narrow,
 void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widemax,
     RefList& narrow, boost::uint32_t narrowmin, boost::uint32_t narrowmax )
 {
-    Block b(m_stage.getHeader().getSchema(), m_threshold);
+    Block b;
 
     b.m_list_p = &wide;
     if (wide.m_dir == DIR_X) { 

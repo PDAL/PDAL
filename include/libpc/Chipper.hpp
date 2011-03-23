@@ -1,21 +1,19 @@
 #ifndef LIBLAS_CHIPPER_H
 #define LIBLAS_CHIPPER_H
 
-#include <libpc/PointBuffer.hpp>
+#include <libpc/Stage.hpp>
 #include <libpc/Bounds.hpp>
 #include <libpc/export.hpp>
 #include <libpc/Dimension.hpp>
-#include <libpc/exceptions.hpp>
+#include <libpc/Iterator.hpp>
+
+#include <boost/scoped_ptr.hpp>
 
 #include <vector>
 
 namespace libpc
 {
 
-class Schema;
-class Stage;
-class CacheFilter;
-    
 namespace chipper
 {
 
@@ -28,17 +26,13 @@ enum Direction
 
 class LIBPC_DLL PtRef
 {
-    
 public:
     double m_pos;
     boost::uint32_t m_ptindex;
     boost::uint32_t m_oindex;
-    boost::uint32_t m_pointSize;
-    boost::uint8_t m_data[40];
 
     bool operator < (const PtRef& pt) const
         { return m_pos < pt.m_pos; }
-
 };
 
 struct LIBPC_DLL RefList
@@ -76,7 +70,7 @@ public:
 
 class LIBPC_DLL Chipper;
 
-class LIBPC_DLL Block : libpc::PointBuffer
+class LIBPC_DLL Block
 {
     friend class Chipper;
 
@@ -91,13 +85,9 @@ private:
     // double m_ymax;
 
 public:
-    Block(Schema const& schema, boost::uint32_t capacity);
-    Block(Block const& block);
     std::vector<boost::uint32_t> GetIDs() const; 
     libpc::Bounds<double> const& GetBounds() const {return m_bounds;} 
     void SetBounds(libpc::Bounds<double> const& bounds) {m_bounds = bounds;}
-    PointBuffer GetPointBuffer(libpc::SchemaLayout const& layout) const;
-    
     // double GetXmin() const
     //     { return m_xmin; }
     // double GetYmin() const
@@ -113,7 +103,7 @@ class LIBPC_DLL Chipper
 public:
     Chipper(Stage& prevStage, boost::uint32_t max_partition_size) :
         m_stage(prevStage), m_threshold(max_partition_size),
-        m_xvec(DIR_X), m_yvec(DIR_Y), m_spare(DIR_NONE), m_cache(0)
+        m_xvec(DIR_X), m_yvec(DIR_Y), m_spare(DIR_NONE)
     {}
 
     void Chip();
@@ -143,7 +133,6 @@ private:
     RefList m_xvec;
     RefList m_yvec;
     RefList m_spare;
-    CacheFilter* m_cache;
 
     Chipper& operator=(const Chipper&); // not implemented
     Chipper(const Chipper&); // not implemented
