@@ -121,13 +121,14 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
    
     libpc::Header const& header = m_stage.getHeader();
     libpc::Schema const& schema = header.getSchema();
-    libpc::SchemaLayout const& layout = SchemaLayout(schema);
-    
-    
+
+
+    PtRef ref;
+
     boost::uint64_t count = header.getNumPoints();
     xvec.reserve(count);
     yvec.reserve(count);
-    spare.reserve(count);
+    spare.resize(count);
     
     // boost::uint32_t chunks = count/m_threshold;
 
@@ -165,7 +166,6 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
         {
             PointBuffer data(buffer.getSchemaLayout(), 1);            
             data.copyPointFast(0, j, buffer);
-            PtRef ref(data);
             
             if (j == num_to_read) break; // we're outta here
 

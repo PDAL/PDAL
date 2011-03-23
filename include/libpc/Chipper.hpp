@@ -29,37 +29,14 @@ class LIBPC_DLL PtRef
 {
     
 public:
-    PtRef(PointBuffer& buffer) :m_data(buffer) {};
-
-    // PtRef(PointBuffer const& data) : m_data(0), m_pointSize(data.getSchemaLayout().getByteSize()) {};
     double m_pos;
     boost::uint32_t m_ptindex;
     boost::uint32_t m_oindex;
-    PointBuffer m_data;
     boost::uint32_t m_pointSize;
 
     bool operator < (const PtRef& pt) const
         { return m_pos < pt.m_pos; }
 
-    PtRef(const PtRef& other) : 
-        m_pos(other.m_pos), 
-        m_ptindex(other.m_ptindex), 
-        m_oindex(other.m_oindex),
-        m_data(other.m_data) 
-    {}
-
-    PtRef& operator=(const PtRef& rhs)
-    {
-        if (&rhs != this)
-        {
-            m_pos = rhs.m_pos;
-            m_ptindex = rhs.m_ptindex;
-            m_oindex = rhs.m_oindex;
-            m_data = rhs.m_data;
-        }
-        return *this;
-    }
-    // ~PtRef() { if (m_data) delete m_data; }
 };
 
 struct LIBPC_DLL RefList
@@ -74,8 +51,8 @@ public:
         { return m_vec.size(); }
     void reserve(std::vector<PtRef>::size_type n)
         { m_vec.reserve(n); }
-    // void resize(std::vector<PtRef>::size_type n)
-    //     { m_vec.resize(n); }
+    void resize(std::vector<PtRef>::size_type n)
+        { m_vec.resize(n); }
     void push_back(const PtRef& ref)
         { m_vec.push_back(ref); }
     std::vector<PtRef>::iterator begin()
