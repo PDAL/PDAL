@@ -42,11 +42,11 @@ namespace libpc
 class Stage;
 class PointBuffer;
 
-class LIBPC_DLL Iterator
+class LIBPC_DLL SequentialIterator
 {
 public:
-    Iterator(const Stage& stage);
-    virtual ~Iterator();
+    SequentialIterator(const Stage& stage);
+    virtual ~SequentialIterator();
 
     const Stage& getStage() const;
 
@@ -96,8 +96,8 @@ private:
     boost::uint64_t m_index;
     boost::uint32_t m_chunkSize;
 
-    Iterator& operator=(const Iterator&); // not implemented
-    Iterator(const Iterator&); // not implemented
+    SequentialIterator& operator=(const SequentialIterator&); // not implemented
+    SequentialIterator(const SequentialIterator&); // not implemented
 };
 
 

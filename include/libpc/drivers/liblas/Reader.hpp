@@ -50,11 +50,11 @@ namespace liblas
 
 namespace libpc { namespace drivers { namespace liblas {
 
-class Iterator;
+class SequentialIterator;
 
 class LIBPC_DLL LiblasReader : public Stage
 {
-    friend class Iterator;
+    friend class SequentialIterator;
 
 public:
     LiblasReader(const std::string& filename);
@@ -68,7 +68,7 @@ public:
 
     boost::int8_t getPointFormatNumber() const;
 
-    libpc::Iterator* createIterator() const;
+    libpc::SequentialIterator* createSequentialIterator() const;
 
 private:
     LiblasHeader& getLiblasHeader();

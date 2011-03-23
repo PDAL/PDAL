@@ -70,7 +70,7 @@ public:
 
     Mode getMode() const;
 
-    libpc::Iterator* createIterator() const;
+    libpc::SequentialIterator* createSequentialIterator() const;
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;

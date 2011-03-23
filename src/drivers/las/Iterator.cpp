@@ -40,8 +40,8 @@
 namespace libpc { namespace drivers { namespace las {
 
 
-Iterator::Iterator(const LasReader& reader)
-    : libpc::Iterator(reader)
+SequentialIterator::SequentialIterator(const LasReader& reader)
+    : libpc::SequentialIterator(reader)
     , m_reader(reader)
     , m_istream(NULL)
 {
@@ -50,14 +50,14 @@ Iterator::Iterator(const LasReader& reader)
 }
 
 
-Iterator::~Iterator()
+SequentialIterator::~SequentialIterator()
 {
     Utils::closeFile(m_istream);
     return;
 }
 
 
-boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
+boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 {
     const LasReader& reader = m_reader;
     const Header& header = reader.getHeader();
@@ -73,13 +73,13 @@ boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
 }
 
 
-bool Iterator::atEndImpl() const
+bool SequentialIterator::atEndImpl() const
 {
     return getIndex() >= getStage().getNumPoints();
 }
 
 
-boost::uint32_t Iterator::readImpl(PointBuffer& data)
+boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 {
     return m_reader.processBuffer(data, *m_istream);
 }

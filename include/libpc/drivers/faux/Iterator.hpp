@@ -43,10 +43,10 @@ namespace libpc { namespace drivers { namespace faux {
 class Reader;
 
 
-class Iterator : public libpc::Iterator
+class SequentialIterator : public libpc::SequentialIterator
 {
 public:
-    Iterator(const Reader& reader);
+    SequentialIterator(const Reader& reader);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

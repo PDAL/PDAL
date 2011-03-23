@@ -40,37 +40,37 @@
 namespace libpc { namespace filters {
 
 
-MosaicFilterIterator::MosaicFilterIterator(const MosaicFilter& filter)
-    : libpc::Iterator(filter)
+MosaicFilterSequentialIterator::MosaicFilterSequentialIterator(const MosaicFilter& filter)
+    : libpc::SequentialIterator(filter)
     , m_filter(filter)
 {
     for (size_t i=0; i<filter.getPrevStages().size(); ++i)
     {
         const Stage* stage = filter.getPrevStages()[i];
-        m_prevIterators.push_back(stage->createIterator());
+        m_prevIterators.push_back(stage->createSequentialIterator());
     }
 
     return;
 }
 
 
-MosaicFilterIterator::~MosaicFilterIterator()
+MosaicFilterSequentialIterator::~MosaicFilterSequentialIterator()
 {
     for (size_t i=0; i<m_prevIterators.size(); ++i)
     {
-        Iterator* iter = m_prevIterators[i];
+        SequentialIterator* iter = m_prevIterators[i];
         delete iter;
     }
 }
 
 
-const std::vector<Iterator*>& MosaicFilterIterator::getPrevIterators() const
+const std::vector<SequentialIterator*>& MosaicFilterSequentialIterator::getPrevIterators() const
 {
     return m_prevIterators;
 }
 
 
-boost::uint64_t MosaicFilterIterator::skipImpl(boost::uint64_t count)
+boost::uint64_t MosaicFilterSequentialIterator::skipImpl(boost::uint64_t count)
 {
     // BUG: this is clearly not correct, we need to keep track of which tile we're on
     m_prevIterators[0]->skip(count);
@@ -78,14 +78,14 @@ boost::uint64_t MosaicFilterIterator::skipImpl(boost::uint64_t count)
 }
 
 
-bool MosaicFilterIterator::atEndImpl() const
+bool MosaicFilterSequentialIterator::atEndImpl() const
 {
     // BUG: this is clearly not correct, we need to keep track of which tile we're on
     return m_prevIterators[0]->atEnd();
 }
 
 
-boost::uint32_t MosaicFilterIterator::readImpl(PointBuffer& destData)
+boost::uint32_t MosaicFilterSequentialIterator::readImpl(PointBuffer& destData)
 {
     // BUG: We know that the two prev stage schemas are compatible, 
     // but we can't be sure the have the same bitfield layouts as 
@@ -106,7 +106,7 @@ boost::uint32_t MosaicFilterIterator::readImpl(PointBuffer& destData)
     // for each stage, we read as many points as we can
     for (size_t i=0; i<getPrevIterators().size(); i++)
     {
-        Iterator* iterator = getPrevIterators()[i];
+        SequentialIterator* iterator = getPrevIterators()[i];
         const Stage& stage = iterator->getStage();
 
         const boost::uint64_t stageStopIndex = stageStartIndex + stage.getNumPoints();

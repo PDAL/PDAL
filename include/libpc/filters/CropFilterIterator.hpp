@@ -44,10 +44,10 @@ namespace libpc { namespace filters {
 
 class CropFilter;
 
-class CropFilterIterator : public libpc::FilterIterator
+class CropFilterSequentialIterator : public libpc::FilterSequentialIterator
 {
 public:
-    CropFilterIterator(const CropFilter& filter);
+    CropFilterSequentialIterator(const CropFilter& filter);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

@@ -87,9 +87,9 @@ boost::uint32_t DecimationFilter::processBuffer(PointBuffer& dstData, const Poin
 }
 
 
-libpc::Iterator* DecimationFilter::createIterator() const
+libpc::SequentialIterator* DecimationFilter::createSequentialIterator() const
 {
-    return new DecimationFilterIterator(*this);
+    return new DecimationFilterSequentialIterator(*this);
 }
 
 

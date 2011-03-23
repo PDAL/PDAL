@@ -41,24 +41,24 @@ namespace libpc
 {
 class Filter;
 
-class FilterIterator : public Iterator
+class FilterSequentialIterator : public SequentialIterator
 {
 public:
-    FilterIterator(const Filter&);
-    virtual ~FilterIterator();
+    FilterSequentialIterator(const Filter&);
+    virtual ~FilterSequentialIterator();
 
 protected:
-    // from Iterator
+    // from SequentialIterator
     virtual boost::uint32_t readImpl(PointBuffer&) = 0;
     virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
     virtual bool atEndImpl() const = 0;
 
-    Iterator& getPrevIterator();
-    const Iterator& getPrevIterator() const;
+    SequentialIterator& getPrevIterator();
+    const SequentialIterator& getPrevIterator() const;
 
 private:
     const Filter& m_stageAsFilter;
-    Iterator* m_prevIterator;
+    SequentialIterator* m_prevIterator;
 };
 
 

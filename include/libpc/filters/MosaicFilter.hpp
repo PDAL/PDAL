@@ -55,7 +55,7 @@ public:
 
     const std::vector<const Stage*>& getPrevStages() const;
 
-    Iterator* createIterator() const;
+    SequentialIterator* createSequentialIterator() const;
 
 private:
     std::vector<const Stage*> m_prevStages;

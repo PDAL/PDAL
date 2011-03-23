@@ -46,10 +46,10 @@ namespace filters {
 
 class CacheFilter;
 
-class CacheFilterIterator : public libpc::FilterIterator
+class CacheFilterSequentialIterator : public libpc::FilterSequentialIterator
 {
 public:
-    CacheFilterIterator(const CacheFilter& filter);
+    CacheFilterSequentialIterator(const CacheFilter& filter);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

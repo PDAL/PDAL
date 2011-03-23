@@ -39,15 +39,15 @@
 namespace libpc { namespace filters {
 
 
-DecimationFilterIterator::DecimationFilterIterator(const DecimationFilter& filter)
-    : libpc::FilterIterator(filter)
+DecimationFilterSequentialIterator::DecimationFilterSequentialIterator(const DecimationFilter& filter)
+    : libpc::FilterSequentialIterator(filter)
     , m_filter(filter)
 {
     return;
 }
 
 
-boost::uint64_t DecimationFilterIterator::skipImpl(boost::uint64_t count)
+boost::uint64_t DecimationFilterSequentialIterator::skipImpl(boost::uint64_t count)
 {
     boost::uint64_t totalNumRead = 0;
 
@@ -68,14 +68,14 @@ boost::uint64_t DecimationFilterIterator::skipImpl(boost::uint64_t count)
 }
 
 
-bool DecimationFilterIterator::atEndImpl() const
+bool DecimationFilterSequentialIterator::atEndImpl() const
 {
-    const Iterator& iter = getPrevIterator();
+    const SequentialIterator& iter = getPrevIterator();
     return iter.atEnd();
 }
 
 
-boost::uint32_t DecimationFilterIterator::readImpl(PointBuffer& dstData)
+boost::uint32_t DecimationFilterSequentialIterator::readImpl(PointBuffer& dstData)
 {
     // The client has asked us for dstData.getCapacity() points.
     // We will read from our previous stage until we get that amount (or

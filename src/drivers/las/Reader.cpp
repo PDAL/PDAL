@@ -84,9 +84,9 @@ LasHeader& LasReader::getLasHeader()
 }
 
 
-libpc::Iterator* LasReader::createIterator() const
+libpc::SequentialIterator* LasReader::createSequentialIterator() const
 {
-    return new Iterator(*this);
+    return new SequentialIterator(*this);
 }
 
 

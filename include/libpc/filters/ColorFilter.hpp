@@ -43,7 +43,7 @@
 
 namespace libpc { namespace filters {
 
-class ColorFilterIterator;
+class ColorFilterSequentialIterator;
 
 // adds three new u8 fields (R,G,B) for the colourization of the Z axis
 // the color is done as a ramp from the declared Z min/max values in the header
@@ -56,7 +56,7 @@ public:
 
     void getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;
 
-    Iterator* createIterator() const;
+    SequentialIterator* createSequentialIterator() const;
 
     void processBuffer(PointBuffer& data) const;
 

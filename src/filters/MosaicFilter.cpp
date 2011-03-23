@@ -108,9 +108,9 @@ const std::vector<const Stage*>& MosaicFilter::getPrevStages() const
 }
 
 
-libpc::Iterator* MosaicFilter::createIterator() const
+libpc::SequentialIterator* MosaicFilter::createSequentialIterator() const
 {
-    return new MosaicFilterIterator(*this);
+    return new MosaicFilterSequentialIterator(*this);
 }
 
 

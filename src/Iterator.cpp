@@ -42,7 +42,7 @@ namespace libpc
 static boost::uint32_t s_defaultChunkSize = 1024;
 
 
-Iterator::Iterator(const Stage& stage)
+SequentialIterator::SequentialIterator(const Stage& stage)
     : m_stage(stage)
     , m_index(0)
     , m_chunkSize(s_defaultChunkSize)
@@ -51,37 +51,37 @@ Iterator::Iterator(const Stage& stage)
 }
 
 
-Iterator::~Iterator()
+SequentialIterator::~SequentialIterator()
 {
     return;
 }
 
 
-const Stage& Iterator::getStage() const
+const Stage& SequentialIterator::getStage() const
 {
     return m_stage;
 }
 
 
-boost::uint64_t Iterator::getIndex() const
+boost::uint64_t SequentialIterator::getIndex() const
 {
     return m_index;
 }
 
 
-void Iterator::setChunkSize(boost::uint32_t size)
+void SequentialIterator::setChunkSize(boost::uint32_t size)
 {
     m_chunkSize = size;
 }
 
 
-boost::uint32_t Iterator::getChunkSize() const
+boost::uint32_t SequentialIterator::getChunkSize() const
 {
     return m_chunkSize;
 }
 
 
-boost::uint32_t Iterator::read(PointBuffer& data)
+boost::uint32_t SequentialIterator::read(PointBuffer& data)
 {
     const boost::uint32_t numRead = readImpl(data);
 
@@ -91,7 +91,7 @@ boost::uint32_t Iterator::read(PointBuffer& data)
 }
 
 
-boost::uint64_t Iterator::skip(boost::uint64_t count)
+boost::uint64_t SequentialIterator::skip(boost::uint64_t count)
 {
     const boost::uint64_t numSkipped = skipImpl(count);
 
@@ -101,31 +101,10 @@ boost::uint64_t Iterator::skip(boost::uint64_t count)
 }
 
 
-bool Iterator::atEnd() const
+bool SequentialIterator::atEnd() const
 {
     return atEndImpl();
 }
-
-
-//bool Iterator::atEnd()
-//{
-//    const PointCountType type = getStage().getHeader().getPointCountType();
-//    const boost::uint64_t numPoints = getStage().getHeader().getNumPoints();
-//
-//    switch (type)
-//    {
-//    case PointCount_Fixed:
-//        return (getIndex() >= numPoints);
-//
-//    case PointCount_Infinite:
-//        return false;
-//
-//    case PointCount_Unknown:// derived classes might be able to override this one
-//        return false;
-//    }
-//
-//    throw libpc_error("bad point count type");
-//}
 
 
 } // namespace libpc

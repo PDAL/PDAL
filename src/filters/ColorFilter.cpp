@@ -134,9 +134,9 @@ void ColorFilter::getColor(float value, boost::uint8_t& red, boost::uint8_t& gre
 }
 
 
-libpc::Iterator* ColorFilter::createIterator() const
+libpc::SequentialIterator* ColorFilter::createSequentialIterator() const
 {
-    return new ColorFilterIterator(*this);
+    return new ColorFilterSequentialIterator(*this);
 }
 
 

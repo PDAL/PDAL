@@ -42,7 +42,7 @@
 
 namespace libpc { namespace filters {
 
-class CropFilterIterator;
+class CropFilterSequentialIterator;
 
 // removes any points outside of the given range
 // updates the header accordingly
@@ -53,7 +53,7 @@ public:
 
     const std::string& getName() const;
 
-    Iterator* createIterator() const;
+    SequentialIterator* createSequentialIterator() const;
 
     // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
     // if we're calling this routine multiple times with the same buffer

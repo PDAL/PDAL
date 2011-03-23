@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_constant)
 
     PointBuffer data(layout, 750);
  
-    Iterator* iter = reader.createIterator();
+    SequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 750);
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 
     PointBuffer data(layout, 750);
 
-    Iterator* iter = reader.createIterator();
+    SequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 750);

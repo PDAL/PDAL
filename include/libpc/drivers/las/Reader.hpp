@@ -54,7 +54,7 @@ public:
 
     const LasHeader& getLasHeader() const;
 
-    libpc::Iterator* createIterator() const;
+    libpc::SequentialIterator* createSequentialIterator() const;
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream) const;

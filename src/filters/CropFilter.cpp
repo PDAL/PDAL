@@ -106,9 +106,9 @@ boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffe
 }
 
 
-libpc::Iterator* CropFilter::createIterator() const
+libpc::SequentialIterator* CropFilter::createSequentialIterator() const
 {
-    return new CropFilterIterator(*this);
+    return new CropFilterSequentialIterator(*this);
 }
 
 

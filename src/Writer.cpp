@@ -79,7 +79,7 @@ boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
     m_targetNumPointsToWrite = targetNumPointsToWrite;
     m_actualNumPointsWritten = 0;
 
-    boost::scoped_ptr<Iterator> iter(m_prevStage.createIterator());
+    boost::scoped_ptr<SequentialIterator> iter(m_prevStage.createSequentialIterator());
 
     writeBegin();
 

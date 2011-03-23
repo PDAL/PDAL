@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
     PointBuffer data(layout, 300);
 
-    Iterator* iter = mosaic.createIterator();
+    SequentialIterator* iter = mosaic.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 300);

@@ -141,9 +141,9 @@ void CacheFilter::updateStats(boost::uint64_t numRead, boost::uint64_t numReques
 }
 
 
-libpc::Iterator* CacheFilter::createIterator() const
+libpc::SequentialIterator* CacheFilter::createSequentialIterator() const
 {
-    return new CacheFilterIterator(*this);
+    return new CacheFilterSequentialIterator(*this);
 }
 
 

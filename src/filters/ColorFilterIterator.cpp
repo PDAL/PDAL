@@ -41,15 +41,15 @@
 namespace libpc { namespace filters {
 
 
-ColorFilterIterator::ColorFilterIterator(const ColorFilter& filter)
-    : libpc::FilterIterator(filter)
+ColorFilterSequentialIterator::ColorFilterSequentialIterator(const ColorFilter& filter)
+    : libpc::FilterSequentialIterator(filter)
     , m_colorFilter(filter)
 {
     return;
 }
 
 
-boost::uint32_t ColorFilterIterator::readImpl(PointBuffer& data)
+boost::uint32_t ColorFilterSequentialIterator::readImpl(PointBuffer& data)
 {
     const boost::uint32_t numRead = getPrevIterator().read(data);
 
@@ -59,14 +59,14 @@ boost::uint32_t ColorFilterIterator::readImpl(PointBuffer& data)
 }
 
 
-boost::uint64_t ColorFilterIterator::skipImpl(boost::uint64_t count)
+boost::uint64_t ColorFilterSequentialIterator::skipImpl(boost::uint64_t count)
 {
     getPrevIterator().skip(count);
     return count;
 }
 
 
-bool ColorFilterIterator::atEndImpl() const
+bool ColorFilterSequentialIterator::atEndImpl() const
 {
     return getPrevIterator().atEnd();
 }

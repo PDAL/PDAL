@@ -41,15 +41,15 @@
 namespace libpc { namespace filters {
 
 
-CropFilterIterator::CropFilterIterator(const CropFilter& filter)
-    : libpc::FilterIterator(filter)
+CropFilterSequentialIterator::CropFilterSequentialIterator(const CropFilter& filter)
+    : libpc::FilterSequentialIterator(filter)
     , m_cropFilter(filter)
 {
     return;
 }
 
 
-boost::uint64_t CropFilterIterator::skipImpl(boost::uint64_t count)
+boost::uint64_t CropFilterSequentialIterator::skipImpl(boost::uint64_t count)
 {
     boost::uint64_t totalNumRead = 0;
 
@@ -71,7 +71,7 @@ boost::uint64_t CropFilterIterator::skipImpl(boost::uint64_t count)
 }
 
 
-boost::uint32_t CropFilterIterator::readImpl(PointBuffer& dstData)
+boost::uint32_t CropFilterSequentialIterator::readImpl(PointBuffer& dstData)
 {
     // The client has asked us for dstData.getCapacity() points.
     // We will read from our previous stage until we get that amount (or
@@ -106,11 +106,11 @@ boost::uint32_t CropFilterIterator::readImpl(PointBuffer& dstData)
 }
 
 
-bool CropFilterIterator::atEndImpl() const
+bool CropFilterSequentialIterator::atEndImpl() const
 {
     // we don't have a fixed point point --
     // we are at the end only when our source is at the end
-    const Iterator& iter = getPrevIterator();
+    const SequentialIterator& iter = getPrevIterator();
     return iter.atEnd();
 }
 

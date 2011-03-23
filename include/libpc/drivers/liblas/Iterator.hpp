@@ -53,11 +53,11 @@ namespace libpc { namespace drivers { namespace liblas {
 class LiblasReader;
 
 
-class Iterator : public libpc::Iterator
+class SequentialIterator : public libpc::SequentialIterator
 {
 public:
-    Iterator(const LiblasReader& reader);
-    ~Iterator();
+    SequentialIterator(const LiblasReader& reader);
+    ~SequentialIterator();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

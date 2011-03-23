@@ -45,11 +45,11 @@ namespace libpc { namespace drivers { namespace las {
 
 class LasReader;
 
-class Iterator : public libpc::Iterator
+class SequentialIterator : public libpc::SequentialIterator
 {
 public:
-    Iterator(const LasReader& reader);
-    ~Iterator();
+    SequentialIterator(const LasReader& reader);
+    ~SequentialIterator();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

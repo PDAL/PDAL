@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test)
 
     PointBuffer data(layout, 3);
 
-    Iterator* iter = filter.createIterator();
+    SequentialIterator* iter = filter.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 3);

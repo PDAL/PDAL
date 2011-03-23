@@ -128,7 +128,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     std::size_t num_points_loaded = 0;
     std::size_t num_points_to_load = count;
     
-    boost::scoped_ptr<Iterator> iter(m_stage.createIterator());
+    boost::scoped_ptr<SequentialIterator> iter(m_stage.createSequentialIterator());
     
     boost::uint32_t counter = 0;
     while (num_points_loaded < num_points_to_load)

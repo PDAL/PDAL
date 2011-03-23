@@ -39,30 +39,30 @@ namespace libpc
 {
 
 
-FilterIterator::FilterIterator(const Filter& filter)
-    : Iterator(filter)
+FilterSequentialIterator::FilterSequentialIterator(const Filter& filter)
+    : SequentialIterator(filter)
     , m_stageAsFilter(static_cast<const Filter&>(filter))
     , m_prevIterator(NULL)
 {
-    m_prevIterator = m_stageAsFilter.getPrevStage().createIterator();
+    m_prevIterator = m_stageAsFilter.getPrevStage().createSequentialIterator();
 
     return;
 }
 
 
-FilterIterator::~FilterIterator()
+FilterSequentialIterator::~FilterSequentialIterator()
 {
     delete m_prevIterator;
 }
 
 
-Iterator& FilterIterator::getPrevIterator()
+SequentialIterator& FilterSequentialIterator::getPrevIterator()
 {
     return *m_prevIterator;
 }
 
 
-const Iterator& FilterIterator::getPrevIterator() const
+const SequentialIterator& FilterSequentialIterator::getPrevIterator() const
 {
     return *m_prevIterator;
 }

@@ -44,10 +44,10 @@ namespace libpc { namespace filters {
 
 class DecimationFilter;
 
-class DecimationFilterIterator : public libpc::FilterIterator
+class DecimationFilterSequentialIterator : public libpc::FilterSequentialIterator
 {
 public:
-    DecimationFilterIterator(const DecimationFilter& filter);
+    DecimationFilterSequentialIterator(const DecimationFilter& filter);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

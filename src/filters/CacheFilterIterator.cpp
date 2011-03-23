@@ -41,28 +41,28 @@
 namespace libpc { namespace filters {
 
 
-CacheFilterIterator::CacheFilterIterator(const CacheFilter& filter)
-    : libpc::FilterIterator(filter)
+CacheFilterSequentialIterator::CacheFilterSequentialIterator(const CacheFilter& filter)
+    : libpc::FilterSequentialIterator(filter)
     , m_filter(filter)
 {
     return;
 }
 
 
-boost::uint64_t CacheFilterIterator::skipImpl(boost::uint64_t count)
+boost::uint64_t CacheFilterSequentialIterator::skipImpl(boost::uint64_t count)
 {
     getPrevIterator().skip(count);
     return count;
 }
 
 
-bool CacheFilterIterator::atEndImpl() const
+bool CacheFilterSequentialIterator::atEndImpl() const
 {
     return getPrevIterator().atEnd();
 }
 
 
-boost::uint32_t CacheFilterIterator::readImpl(PointBuffer& data)
+boost::uint32_t CacheFilterSequentialIterator::readImpl(PointBuffer& data)
 {
     const boost::uint32_t cacheBlockSize = m_filter.getCacheBlockSize();
 

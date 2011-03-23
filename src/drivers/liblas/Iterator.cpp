@@ -45,8 +45,8 @@
 namespace libpc { namespace drivers { namespace liblas {
 
 
-Iterator::Iterator(const LiblasReader& reader)
-    : libpc::Iterator(reader)
+SequentialIterator::SequentialIterator(const LiblasReader& reader)
+    : libpc::SequentialIterator(reader)
     , m_reader(reader)
     , m_istream(NULL)
 {
@@ -55,14 +55,14 @@ Iterator::Iterator(const LiblasReader& reader)
 }
 
 
-Iterator::~Iterator()
+SequentialIterator::~SequentialIterator()
 {
     Utils::closeFile(m_istream);
     return;
 }
 
 
-boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
+boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 {
     LiblasReader& reader = const_cast<LiblasReader&>(m_reader); // BUG BUG BUG
 
@@ -76,13 +76,13 @@ boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
 
 
 
-bool Iterator::atEndImpl() const
+bool SequentialIterator::atEndImpl() const
 {
     return getIndex() >= getStage().getNumPoints();
 }
 
 
-boost::uint32_t Iterator::readImpl(PointBuffer& PointBuffer)
+boost::uint32_t SequentialIterator::readImpl(PointBuffer& PointBuffer)
 {
     LiblasReader& reader = const_cast<LiblasReader&>(m_reader);     // BUG BUG BUG
 

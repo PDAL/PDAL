@@ -104,9 +104,9 @@ Reader::Mode Reader::getMode() const
 }
 
 
-libpc::Iterator* Reader::createIterator() const
+libpc::SequentialIterator* Reader::createSequentialIterator() const
 {
-    return new Iterator(*this);
+    return new SequentialIterator(*this);
 }
 
 

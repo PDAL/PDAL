@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test1)
     PointBuffer dataBig(layout, 1024);
     PointBuffer dataSmall(layout, 1);
 
-    Iterator* iter1 = cache.createIterator();
+    SequentialIterator* iter1 = cache.createSequentialIterator();
 
     //BOOST_CHECK(cache.getIndex() == 0);
     BOOST_CHECK(cache.getNumPointsRequested() == 0);
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(test1)
     BOOST_CHECK(cache.getNumPointsRequested() == 2048);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
 
-    Iterator* iter2 = cache.createIterator();
+    SequentialIterator* iter2 = cache.createSequentialIterator();
 
     iter2->skip(42);
     iter2->read(dataSmall);

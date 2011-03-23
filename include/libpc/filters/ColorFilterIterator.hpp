@@ -45,10 +45,10 @@ namespace libpc { namespace filters {
 
 class ColorFilter;
 
-class ColorFilterIterator : public libpc::FilterIterator
+class ColorFilterSequentialIterator : public libpc::FilterSequentialIterator
 {
 public:
-    ColorFilterIterator(const ColorFilter& filter);
+    ColorFilterSequentialIterator(const ColorFilter& filter);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

@@ -42,7 +42,7 @@
 
 namespace libpc { namespace filters {
 
-class DecimationFilterIterator;
+class DecimationFilterSequentialIterator;
 
 // we keep only 1 out of every step points; if step=100, we get 1% of the file
 class LIBPC_DLL DecimationFilter : public Filter
@@ -52,7 +52,7 @@ public:
 
     const std::string& getName() const;
 
-    Iterator* createIterator() const;
+    SequentialIterator* createSequentialIterator() const;
 
     boost::uint32_t getStep() const;
 

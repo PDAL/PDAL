@@ -238,9 +238,9 @@ LiblasHeader& LiblasReader::getLiblasHeader()
 
 
 
-libpc::Iterator* LiblasReader::createIterator() const
+libpc::SequentialIterator* LiblasReader::createSequentialIterator() const
 {
-    return new Iterator(*this);
+    return new SequentialIterator(*this);
 }
 
 

@@ -44,21 +44,21 @@ namespace libpc { namespace filters {
 
 class MosaicFilter;
 
-class MosaicFilterIterator : public libpc::Iterator
+class MosaicFilterSequentialIterator : public libpc::SequentialIterator
 {
 public:
-    MosaicFilterIterator(const MosaicFilter& filter);
-    ~MosaicFilterIterator();
+    MosaicFilterSequentialIterator(const MosaicFilter& filter);
+    ~MosaicFilterSequentialIterator();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const std::vector<Iterator*>& getPrevIterators() const;
+    const std::vector<SequentialIterator*>& getPrevIterators() const;
 
     const MosaicFilter& m_filter;
-    std::vector<Iterator*> m_prevIterators;
+    std::vector<SequentialIterator*> m_prevIterators;
 };
 
 

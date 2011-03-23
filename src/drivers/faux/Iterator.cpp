@@ -47,21 +47,21 @@ using std::cout;
 
 namespace libpc { namespace drivers { namespace faux {
 
-Iterator::Iterator(const Reader& reader)
-    : libpc::Iterator(reader)
+SequentialIterator::SequentialIterator(const Reader& reader)
+    : libpc::SequentialIterator(reader)
     , m_reader(reader)
 {
     return;
 }
 
 
-boost::uint64_t Iterator::skipImpl(boost::uint64_t count)
+boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 {
      return count;
 }
 
 
-bool Iterator::atEndImpl() const
+bool SequentialIterator::atEndImpl() const
 {
     const boost::uint64_t numPoints = getStage().getHeader().getNumPoints();
     const boost::uint64_t currPoint = getIndex();
@@ -70,7 +70,7 @@ bool Iterator::atEndImpl() const
 }
 
 
-boost::uint32_t Iterator::readImpl(PointBuffer& data)
+boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 {
     return m_reader.processBuffer(data, getIndex());
 }
