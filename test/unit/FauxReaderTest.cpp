@@ -221,8 +221,53 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
+{
+    Bounds<double> bounds(0,0,0,4,4,4);
+    libpc::drivers::faux::Reader reader(bounds, 2, libpc::drivers::faux::Reader::Ramp);
 
-BOOST_AUTO_TEST_CASE(test_ramp_mode)
+    const Schema& schema = reader.getHeader().getSchema();
+    SchemaLayout layout(schema);
+
+    PointBuffer data(layout, 2);
+
+    SequentialIterator* iter = reader.createSequentialIterator();
+    boost::uint32_t numRead = iter->read(data);
+
+    BOOST_CHECK(numRead == 2);
+
+    const int offsetX = schema.getDimensionIndex(Dimension::Field_X);
+    const int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
+    const int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
+    const int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
+
+    const double x0 = data.getField<double>(0, offsetX);
+    const double y0 = data.getField<double>(0, offsetY);
+    const double z0 = data.getField<double>(0, offsetZ);
+    const boost::uint64_t t0 = data.getField<boost::uint64_t>(0, offsetT);
+
+    const double x1 = data.getField<double>(1, offsetX);
+    const double y1 = data.getField<double>(1, offsetY);
+    const double z1 = data.getField<double>(1, offsetZ);
+    const boost::uint64_t t1 = data.getField<boost::uint64_t>(1, offsetT);
+
+    BOOST_CHECK(Utils::compare_approx<double>(x0, 0, 0.000001));
+    BOOST_CHECK(Utils::compare_approx<double>(y0, 0, 0.000001));
+    BOOST_CHECK(Utils::compare_approx<double>(z0, 0, 0.000001));
+    BOOST_CHECK(t0 == 0);
+
+    BOOST_CHECK(Utils::compare_approx<double>(x1, 4, 0.000001));
+    BOOST_CHECK(Utils::compare_approx<double>(y1, 4, 0.000001));
+    BOOST_CHECK(Utils::compare_approx<double>(z1, 4, 0.000001));
+    BOOST_CHECK(t1 == 1);
+
+    delete iter;
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
     libpc::drivers::faux::Reader reader(bounds, 750, libpc::drivers::faux::Reader::Ramp);
@@ -242,9 +287,9 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode)
     int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
     int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
 
-    double delX = (101.0 - 1.0) / 750.0;
-    double delY = (152.0 - 2.0) / 750.0;
-    double delZ = (203.0 - 3.0) / 750.0;
+    double delX = (101.0 - 1.0) / (750.0 - 1.0);
+    double delY = (152.0 - 2.0) / (750.0 - 1.0);
+    double delZ = (203.0 - 3.0) / (750.0 - 1.0);
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {

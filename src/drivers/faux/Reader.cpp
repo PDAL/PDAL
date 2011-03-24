@@ -143,9 +143,10 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     const double minZ = dims[2].getMinimum();
     const double maxZ = dims[2].getMaximum();
     
-    const double delX = (maxX - minX) / header.getNumPoints();
-    const double delY = (maxY - minY) / header.getNumPoints();
-    const double delZ = (maxZ - minZ) / header.getNumPoints();
+    const double numDeltas = (double)header.getNumPoints() - 1.0;
+    const double delX = (maxX - minX) / numDeltas;
+    const double delY = (maxY - minY) / numDeltas;
+    const double delZ = (maxZ - minZ) / numDeltas;
 
     const int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
     const int offsetX = schema.getDimensionIndex(Dimension::Field_X);
