@@ -45,12 +45,12 @@ BOOST_AUTO_TEST_SUITE(CropFilterTest)
 
 BOOST_AUTO_TEST_CASE(test_crop)
 {
-    Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
+    Bounds<double> srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
 
-    // crop the window to 1/8th the size
-    Bounds<double> dstBounds(0.0, 0.0, 0.0, 50.0, 50.0, 50.0);
+    // crop the window to 1/3rd the size in each dimension
+    Bounds<double> dstBounds(3.33333, 33.33333, 333.33333, 6.66666, 66.66666, 666.66666);
     
-    libpc::drivers::faux::Reader reader(srcBounds, 1000, libpc::drivers::faux::Reader::Random);
+    libpc::drivers::faux::Reader reader(srcBounds, 1000, libpc::drivers::faux::Reader::Ramp);
 
     libpc::filters::CropFilter filter(reader, dstBounds);
     BOOST_CHECK(filter.getName() == "Crop Filter");
@@ -59,19 +59,32 @@ BOOST_AUTO_TEST_CASE(test_crop)
 
     boost::uint64_t numWritten = writer.write(1000);
 
-    // 1000 * 1/8 = 125, plus or minus 10%
-    BOOST_CHECK(Utils::compare_approx<double>(static_cast<double>(numWritten), 125, 12.5));
+    // 1000 * 1/3 = 333, plus or minus a bit for rounding
+    BOOST_CHECK(Utils::compare_approx<double>(static_cast<double>(numWritten), 333, 6));
 
-    // test all the values to +/- 10%
-    BOOST_CHECK(Utils::compare_approx<double>(writer.getMinX(), 0.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer.getMinY(), 0.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer.getMinZ(), 0.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer.getMaxX(), 50.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer.getMaxY(), 50.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer.getMaxZ(), 50.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer.getAvgX(), 25.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer.getAvgY(), 25.0, 5.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer.getAvgZ(), 25.0, 5.0));
+    const double minX = writer.getMinX();
+    const double minY = writer.getMinY();
+    const double minZ = writer.getMinZ();
+    const double maxX = writer.getMaxX();
+    const double maxY = writer.getMaxY();
+    const double maxZ = writer.getMaxZ();
+    const double avgX = writer.getAvgX();
+    const double avgY = writer.getAvgY();
+    const double avgZ = writer.getAvgZ();
+
+    const double delX = 10.0 / 999.0;
+    const double delY = 100.0 / 999.0;
+    const double delZ = 1000.0 / 999.0;
+
+    BOOST_CHECK(Utils::compare_approx<double>(minX, 3.33333, delX));
+    BOOST_CHECK(Utils::compare_approx<double>(minY, 33.33333, delY));
+    BOOST_CHECK(Utils::compare_approx<double>(minZ, 333.33333, delZ));
+    BOOST_CHECK(Utils::compare_approx<double>(maxX, 6.66666, delX));
+    BOOST_CHECK(Utils::compare_approx<double>(maxY, 66.66666, delY));
+    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 666.66666, delZ));
+    BOOST_CHECK(Utils::compare_approx<double>(avgX, 5.00000, delX));
+    BOOST_CHECK(Utils::compare_approx<double>(avgY, 50.00000, delY));
+    BOOST_CHECK(Utils::compare_approx<double>(avgZ, 500.00000, delZ));
 
     return;
 }
