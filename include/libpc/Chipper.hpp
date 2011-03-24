@@ -2,10 +2,11 @@
 #define LIBLAS_CHIPPER_H
 
 #include <libpc/Stage.hpp>
+#include <libpc/Filter.hpp>
 #include <libpc/Bounds.hpp>
 #include <libpc/export.hpp>
-#include <libpc/Dimension.hpp>
 #include <libpc/Iterator.hpp>
+#include <libpc/FilterIterator.hpp>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -88,6 +89,7 @@ public:
     std::vector<boost::uint32_t> GetIDs() const; 
     libpc::Bounds<double> const& GetBounds() const {return m_bounds;} 
     void SetBounds(libpc::Bounds<double> const& bounds) {m_bounds = bounds;}
+    PointBuffer GetBuffer( Stage& stage) const;    
     // double GetXmin() const
     //     { return m_xmin; }
     // double GetYmin() const
@@ -98,12 +100,12 @@ public:
     //     { return m_ymax; }
 };
 
-class LIBPC_DLL Chipper
+class LIBPC_DLL Chipper : public libpc::Filter
 {
 public:
     Chipper(Stage& prevStage, boost::uint32_t max_partition_size) :
-        m_stage(prevStage), m_threshold(max_partition_size),
-        m_xvec(DIR_X), m_yvec(DIR_Y), m_spare(DIR_NONE)
+        libpc::Filter(prevStage), m_stage(prevStage), m_threshold(max_partition_size),
+        m_xvec(DIR_X), m_yvec(DIR_Y), m_spare(DIR_NONE) 
     {}
 
     void Chip();
@@ -111,6 +113,13 @@ public:
         { return m_blocks.size(); }
     const Block& GetBlock(std::vector<Block>::size_type i)
         { return m_blocks[i]; }
+
+    const std::string& getName() const ;
+
+    bool supportsSequentialIterator() const { return true; }
+    bool supportsRandomIterator() const { return false; }
+    libpc::SequentialIterator* createSequentialIterator() const;
+    libpc::RandomIterator* createRandomIterator() const;
 
 private:
     void Load(RefList& xvec, RefList& yvec, RefList& spare);
@@ -124,7 +133,9 @@ private:
         boost::uint32_t pleft, boost::uint32_t pcenter);
     void Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widemax,
         RefList& narrow, boost::uint32_t narrowmin, boost::uint32_t narrowmax );
-
+    
+    void ConstructBuffers();
+    
     // Reader *m_reader;
     Stage& m_stage;
     boost::uint32_t m_threshold;
