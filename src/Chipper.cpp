@@ -40,6 +40,8 @@
 
 #include <libpc/chipper.hpp>
 #include <libpc/Utils.hpp>
+#include <libpc/ChipperIterator.hpp>
+#include <libpc/exceptions.hpp>
 // boost
 #include <boost/cstdint.hpp>
 // std
@@ -88,12 +90,71 @@ vector<boost::uint32_t> Block::GetIDs() const
     return ids;
 }
 
+PointBuffer Block::GetBuffer( Stage& stage) const
+{
+
+    libpc::Header const& header = stage.getHeader();
+    libpc::Schema const& schema = header.getSchema();
+        
+    boost::int32_t size = m_right - m_left + 1;
+    if (size < 0)
+        throw libpc_error("m_right - m_left + 1 was less than 0 in Block::GetBuffer()!");
+        
+    PointBuffer buffer(schema, size);
+
+    if (!stage.supportsRandomIterator())
+        throw libpc_error("Chipper GetBuffer is unable to read data source randomly!");
+            
+    boost::scoped_ptr<RandomIterator> iter(stage.createRandomIterator());
+
+    std::vector<boost::uint32_t> ids = GetIDs();
+    libpc::PointBuffer one_point(schema, 1);
+
+    std::vector<boost::uint32_t>::const_iterator it;
+    boost::uint32_t count = 0;
+    for (it = ids.begin(); it != ids.end(); it++)
+    {
+        iter->seek(*it);
+        iter->read(one_point);
+        // m_stage.seekToPoint(*it);
+        
+        // FIXME: Use a user bounds here instead of reading everything  
+        // m_stage.read(buffer);
+        
+        buffer.copyPointsFast(static_cast<std::size_t>(count), static_cast<std::size_t>(0), one_point, 1); 
+        // 
+        // // put single point onto our block
+        count++;
+    }
+    
+    return buffer;
+}
+
 void Chipper::Chip()
 {
     Load(m_xvec, m_yvec, m_spare);
     Partition(m_xvec.size());
     DecideSplit(m_xvec, m_yvec, m_spare, 0, m_partitions.size() - 1);
 }
+
+const std::string& Chipper::getName() const
+{
+    static std::string name("Chipper");
+    return name;
+}
+
+libpc::SequentialIterator* Chipper::createSequentialIterator() const
+{
+    return new filters::ChipperSequentialIterator(*this);
+}
+
+
+libpc::RandomIterator* Chipper::createRandomIterator() const
+{
+    return 0;
+}
+
+
 
 void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
 {
