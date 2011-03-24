@@ -166,4 +166,52 @@ BOOST_AUTO_TEST_CASE(test_random)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_reset)
+{
+    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
+    BOOST_CHECK(reader.getName() == "Liblas Reader");
+
+    const Schema& schema = reader.getHeader().getSchema();
+    SchemaLayout layout(schema);
+
+    BOOST_CHECK(reader.getNumPoints() == 1065);
+    PointBuffer data(layout, 1065);
+    
+
+    {
+        libpc::SequentialIterator* iter = reader.createSequentialIterator();
+        BOOST_CHECK(iter->getIndex() == 0);
+
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 1065);
+        BOOST_CHECK(iter->getIndex() == 1065);
+
+        checkPointXYZ(data, 0, schema, 637012.240000, 849028.310000, 431.660000);
+        checkPointXYZ(data, 1, schema, 636896.330000, 849087.700000, 446.390000);
+        checkPointXYZ(data, 2, schema, 636784.740000, 849106.660000, 426.710000);
+
+        delete iter;
+    }
+
+    {
+        libpc::RandomIterator* iter = reader.createRandomIterator();
+        BOOST_CHECK(iter->getIndex() == 0);
+
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 1065);
+        BOOST_CHECK(iter->getIndex() == 1065);
+
+        checkPointXYZ(data, 0, schema, 637012.240000, 849028.310000, 431.660000);
+        checkPointXYZ(data, 1, schema, 636896.330000, 849087.700000, 446.390000);
+        checkPointXYZ(data, 2, schema, 636784.740000, 849106.660000, 426.710000);
+
+        delete iter;
+    }
+
+   
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

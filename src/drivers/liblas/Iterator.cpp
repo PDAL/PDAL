@@ -51,6 +51,7 @@ SequentialIterator::SequentialIterator(const LiblasReader& reader)
     , m_istream(NULL)
 {
     m_istream = Utils::openFile(m_reader.getFileName());
+    m_reader.m_externalReader->Reset();
     return;
 }
 
@@ -194,6 +195,7 @@ RandomIterator::RandomIterator(const LiblasReader& reader)
     , m_istream(NULL)
 {
     m_istream = Utils::openFile(m_reader.getFileName());
+    m_reader.m_externalReader->Reset();
     return;
 }
 
