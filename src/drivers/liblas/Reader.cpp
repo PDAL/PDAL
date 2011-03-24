@@ -47,8 +47,6 @@ namespace libpc { namespace drivers { namespace liblas {
 LiblasReader::LiblasReader(const std::string& filename)
     : Stage()
     , m_filename(filename)
-    , m_istream(NULL)
-    , m_externalReader(NULL)
     , m_versionMajor(0)
     , m_versionMinor(0)
     , m_scaleX(0.0)
@@ -63,18 +61,21 @@ LiblasReader::LiblasReader(const std::string& filename)
     , m_hasColorData(false)
     , m_hasWaveData(false)
 {
-    m_istream = Utils::openFile(m_filename);
+    std::istream* str = Utils::openFile(m_filename);
 
-    ::liblas::ReaderFactory f;
-    ::liblas::Reader reader = f.CreateWithStream(*m_istream);
-    m_externalReader = new ::liblas::Reader(reader);
+    {
+        ::liblas::ReaderFactory f;
+        ::liblas::Reader reader = f.CreateWithStream(*str);
 
-    LiblasHeader* myHeader = new LiblasHeader;
-    setHeader(myHeader);
+        LiblasHeader* myHeader = new LiblasHeader;
+        setHeader(myHeader);
 
-    processExternalHeader();
+        processExternalHeader(reader);
 
-    registerFields();
+        registerFields(reader);
+    }
+
+    Utils::closeFile(str);
 
     return;
 }
@@ -82,10 +83,7 @@ LiblasReader::LiblasReader(const std::string& filename)
 
 LiblasReader::~LiblasReader()
 {
-    // BUG: this might be a smart pointer, so delete might not be needed
-    delete m_externalReader;
-
-    Utils::closeFile(m_istream);
+    return;
 }
 
 
@@ -103,14 +101,32 @@ const std::string& LiblasReader::getFileName() const
 }
 
 
+bool LiblasReader::hasTimeData() const
+{
+    return m_hasTimeData;
+}
+
+
+bool LiblasReader::hasColorData() const
+{
+    return m_hasColorData;
+}
+
+
+bool LiblasReader::hasWaveData() const
+{
+    return m_hasWaveData;
+}
+
+
 boost::int8_t LiblasReader::getPointFormatNumber() const
 {
     return m_pointFormatNumber;
 }
 
-void LiblasReader::processExternalHeader()
+void LiblasReader::processExternalHeader(::liblas::Reader& externalReader)
 {
-    const ::liblas::Header& externalHeader = m_externalReader->GetHeader();
+    const ::liblas::Header& externalHeader = externalReader.GetHeader();
     LiblasHeader& internalHeader = getLiblasHeader();
 
     internalHeader.setNumPoints( externalHeader.GetPointRecordsCount() );
@@ -169,9 +185,9 @@ void LiblasReader::processExternalHeader()
     return;
 }
 
-void LiblasReader::registerFields()
+void LiblasReader::registerFields(::liblas::Reader& externalReader)
 {
-    const ::liblas::Header& externalHeader = m_externalReader->GetHeader();
+    const ::liblas::Header& externalHeader = externalReader.GetHeader();
     LiblasHeader& internalHeader = getLiblasHeader();
     Schema& schema = internalHeader.getSchema();
 

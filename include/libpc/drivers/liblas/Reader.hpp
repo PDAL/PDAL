@@ -50,14 +50,9 @@ namespace liblas
 
 namespace libpc { namespace drivers { namespace liblas {
 
-class SequentialIterator;
-class RandomIterator;
 
 class LIBPC_DLL LiblasReader : public Stage
 {
-    friend class SequentialIterator;
-    friend class RandomIterator;
-
 public:
     LiblasReader(const std::string& filename);
     ~LiblasReader();
@@ -69,6 +64,10 @@ public:
     const LiblasHeader& getLiblasHeader() const;
 
     boost::int8_t getPointFormatNumber() const;
+    
+    bool hasTimeData() const;
+    bool hasColorData() const;
+    bool hasWaveData() const;
 
     bool supportsSequentialIterator() const { return true; }
     bool supportsRandomIterator() const { return true; }
@@ -78,13 +77,10 @@ public:
 private:
     LiblasHeader& getLiblasHeader();
     void setLiblasHeader(const LiblasHeader&);
-    void processExternalHeader();
-    void registerFields();
+    void processExternalHeader(::liblas::Reader& externalReader);
+    void registerFields(::liblas::Reader& externalReader);
 
     std::string m_filename;
-    std::istream* m_istream;
-
-    ::liblas::Reader *m_externalReader;
 
     // LAS header properties of interest to us
     boost::uint8_t m_versionMajor;
