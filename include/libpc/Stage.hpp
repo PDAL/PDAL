@@ -67,10 +67,10 @@ public:
     const Header& getHeader() const;
     Header& getHeader();
 
-    virtual bool supportsSequentialIterator() const = 0;
-    virtual bool supportsRandomIterator() const = 0;
-    virtual SequentialIterator* createSequentialIterator() const = 0;
-    virtual RandomIterator* createRandomIterator() const = 0;
+    virtual bool supportsSequentialIterator() const { return false; }
+    virtual bool supportsRandomIterator() const { return false; }
+    virtual SequentialIterator* createSequentialIterator() const { return NULL; }
+    virtual RandomIterator* createRandomIterator() const  { return NULL; }
 
 protected:
     void setHeader(Header*); // stage takes ownership
