@@ -35,11 +35,13 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/drivers/liblas/reader.hpp>
+#include <libpc/drivers/liblas/Reader.hpp>
+#include <libpc/filters/CacheFilter.hpp>
 #include "support.hpp"
 
 using namespace libpc;
 using namespace libpc::drivers::liblas;
+using namespace libpc::filters;
 
 
 BOOST_AUTO_TEST_SUITE(LiblasReaderTest)
@@ -176,7 +178,6 @@ BOOST_AUTO_TEST_CASE(test_reset)
 
     BOOST_CHECK(reader.getNumPoints() == 1065);
     PointBuffer data(layout, 1065);
-    
 
     {
         libpc::SequentialIterator* iter = reader.createSequentialIterator();
@@ -208,10 +209,94 @@ BOOST_AUTO_TEST_CASE(test_reset)
         delete iter;
     }
 
-   
-
     return;
 }
 
+BOOST_AUTO_TEST_CASE(test_reset_with_cache)
+{
+    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
+    BOOST_CHECK(reader.getName() == "Liblas Reader");
+
+    BOOST_CHECK(reader.getNumPoints() == 1065);
+    BOOST_CHECK(355 * 3 == 1065);
+
+    CacheFilter cache(reader, 1, 355);
+    BOOST_CHECK(cache.getNumPoints() == 1065);
+
+    const Schema& schema = cache.getHeader().getSchema();
+    SchemaLayout layout(schema);
+
+    PointBuffer data(layout, 355);
+
+    boost::uint32_t numRead;
+
+    {
+        libpc::SequentialIterator* iter = cache.createSequentialIterator();
+        BOOST_CHECK(iter->getIndex() == 0);
+
+        numRead = iter->read(data);
+        BOOST_CHECK(numRead == 355);
+        BOOST_CHECK(iter->getIndex() == 355);
+
+        checkPointXYZ(data, 0, schema, 637012.240000, 849028.310000, 431.660000);
+        checkPointXYZ(data, 1, schema, 636896.330000, 849087.700000, 446.390000);
+        checkPointXYZ(data, 2, schema, 636784.740000, 849106.660000, 426.710000);
+
+        numRead = iter->read(data);
+        BOOST_CHECK(numRead == 355);
+        BOOST_CHECK(iter->getIndex() == 710);
+
+        numRead = iter->read(data);
+        BOOST_CHECK(numRead == 355);
+        BOOST_CHECK(iter->getIndex() == 1065);
+
+        delete iter;
+    }
+
+    {
+        libpc::RandomIterator* iter = cache.createRandomIterator();
+        BOOST_CHECK(iter->getIndex() == 0);
+
+        // read the middle third
+        iter->seek(355);
+        BOOST_CHECK(iter->getIndex() == 355);
+        numRead = iter->read(data);
+        BOOST_CHECK(numRead == 355);
+        BOOST_CHECK(iter->getIndex() == 710);
+
+        // read the first third
+        iter->seek(0);
+        BOOST_CHECK(iter->getIndex() == 0);
+        numRead = iter->read(data);
+        BOOST_CHECK(numRead == 355);
+        BOOST_CHECK(iter->getIndex() == 355);
+
+        checkPointXYZ(data, 0, schema, 637012.240000, 849028.310000, 431.660000);
+        checkPointXYZ(data, 1, schema, 636896.330000, 849087.700000, 446.390000);
+        checkPointXYZ(data, 2, schema, 636784.740000, 849106.660000, 426.710000);
+
+        // read the first third again
+        iter->seek(0);
+        BOOST_CHECK(iter->getIndex() == 0);
+        numRead = iter->read(data);
+        BOOST_CHECK(numRead == 355);
+        BOOST_CHECK(iter->getIndex() == 355);
+
+        checkPointXYZ(data, 0, schema, 637012.240000, 849028.310000, 431.660000);
+        checkPointXYZ(data, 1, schema, 636896.330000, 849087.700000, 446.390000);
+        checkPointXYZ(data, 2, schema, 636784.740000, 849106.660000, 426.710000);
+
+        // read the last third
+        iter->seek(710);
+        BOOST_CHECK(iter->getIndex() == 710);
+        numRead = iter->read(data);
+        BOOST_CHECK(numRead == 355);
+        BOOST_CHECK(iter->getIndex() == 1065);
+
+        delete iter;
+    }
+
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()
