@@ -142,6 +142,10 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     const double maxY = dims[1].getMaximum();
     const double minZ = dims[2].getMinimum();
     const double maxZ = dims[2].getMaximum();
+    
+    const double delX = (maxX - minX) / header.getNumPoints();
+    const double delY = (maxY - minY) / header.getNumPoints();
+    const double delZ = (maxZ - minZ) / header.getNumPoints();
 
     const int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
     const int offsetX = schema.getDimensionIndex(Dimension::Field_X);
@@ -159,17 +163,26 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
         double x;
         double y;
         double z;
-        if (mode == Reader::Random)
+        switch (mode)
         {
-            x = (double)Utils::random(minX, maxX);
-            y = (double)Utils::random(minY, maxY);
-            z = (double)Utils::random(minZ, maxZ);
-        }
-        else
-        {
-            x = (double)minX;
-            y = (double)minY;
-            z = (double)minZ;
+        case Reader::Random:
+            x = Utils::random(minX, maxX);
+            y = Utils::random(minY, maxY);
+            z = Utils::random(minZ, maxZ);
+            break;
+        case Reader::Constant:
+            x = minX;
+            y = minY;
+            z = minZ;
+            break;
+        case Reader::Ramp:
+            x = minX + delX * pointIndex;
+            y = minY + delY * pointIndex;
+            z = minZ + delZ * pointIndex;
+            break;
+        default:
+            throw libpc_error("invalid mode in FauxReader");
+            break;
         }
 
         data.setField<double>(pointIndex, offsetX, x);

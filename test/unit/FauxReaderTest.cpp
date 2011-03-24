@@ -41,7 +41,7 @@ using namespace libpc;
 
 BOOST_AUTO_TEST_SUITE(FauxReaderTest)
 
-BOOST_AUTO_TEST_CASE(test_constant_sequential)
+BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Constant);
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_constant_sequential)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_constant_random)
+BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Constant);
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(test_constant_random)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_random)
+BOOST_AUTO_TEST_CASE(test_random_mode)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Random);
@@ -213,6 +213,49 @@ BOOST_AUTO_TEST_CASE(test_random)
         BOOST_CHECK(x >= 1.0 && x <= 101.0);
         BOOST_CHECK(y >= 2.0 && y <= 102.0);
         BOOST_CHECK(z >= 3.0 && z <= 103.0);
+        BOOST_CHECK(t == i);
+    }
+
+    delete iter;
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_ramp_mode)
+{
+    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
+    libpc::drivers::faux::Reader reader(bounds, 750, libpc::drivers::faux::Reader::Ramp);
+
+    const Schema& schema = reader.getHeader().getSchema();
+    SchemaLayout layout(schema);
+
+    PointBuffer data(layout, 750);
+
+    SequentialIterator* iter = reader.createSequentialIterator();
+    boost::uint32_t numRead = iter->read(data);
+
+    BOOST_CHECK(numRead == 750);
+
+    int offsetX = schema.getDimensionIndex(Dimension::Field_X);
+    int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
+    int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
+
+    double delX = (101.0 - 1.0) / 750.0;
+    double delY = (152.0 - 2.0) / 750.0;
+    double delZ = (203.0 - 3.0) / 750.0;
+
+    for (boost::uint32_t i=0; i<numRead; i++)
+    {
+        double x = data.getField<double>(i, offsetX);
+        double y = data.getField<double>(i, offsetY);
+        double z = data.getField<double>(i, offsetZ);
+        boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+
+        BOOST_CHECK(Utils::compare_approx<double>(x, 1.0 + delX*i, 0.0001));
+        BOOST_CHECK(Utils::compare_approx<double>(y, 2.0 + delY*i, 0.0001));
+        BOOST_CHECK(Utils::compare_approx<double>(z, 3.0 + delZ*i, 0.0001));
         BOOST_CHECK(t == i);
     }
 

@@ -48,10 +48,11 @@ namespace libpc { namespace drivers { namespace faux {
 //    X,Y,Z - floats
 //    Time  - uint64
 //
-// It supports two modes: "random" generates points that are randomly
-// distributed within the given bounding box, and "constant" generates its
-// points to always be at the minimum of the bounding box.  The Time field
-// is always set to the point number.
+// It supports a few modes: 
+//   - "random" generates points that are randomly distributed within the given bounding box
+//   - "constant" generates its points to always be at the minimum of the bounding box
+//   - "ramp" generates its points as a linear ramp from the minimum of the bbox to the maximum
+// In all these modes, however, the Time field is always set to the point number.
 //
 class LIBPC_DLL Reader : public libpc::Stage
 {
@@ -59,7 +60,8 @@ public:
     enum Mode
     {
         Constant,
-        Random
+        Random,
+        Ramp
     };
 
 public:
