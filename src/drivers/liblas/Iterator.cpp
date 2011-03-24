@@ -45,32 +45,74 @@
 namespace libpc { namespace drivers { namespace liblas {
 
 
-SequentialIterator::SequentialIterator(const LiblasReader& reader)
-    : libpc::SequentialIterator(reader)
-    , m_reader(reader)
+//---------------------------------------------------------------------------
+//
+// LiblasIteratorBase
+//
+//---------------------------------------------------------------------------
+
+
+LiblasIteratorBase::LiblasIteratorBase(const LiblasReader& reader)
+    : m_reader(reader)
+    , m_filename(reader.getFileName())
     , m_istream(NULL)
+    , m_externalReader(NULL)
 {
-    m_istream = Utils::openFile(m_reader.getFileName());
-    m_reader.m_externalReader->Reset();
+    m_istream = Utils::openFile(m_filename);
+
+    ::liblas::ReaderFactory f;
+    ::liblas::Reader extReader = f.CreateWithStream(*m_istream);
+    m_externalReader = new ::liblas::Reader(extReader);
+
+    return;
+}
+
+
+LiblasIteratorBase::~LiblasIteratorBase()
+{
+    delete m_externalReader;
+    Utils::closeFile(m_istream);
+}
+
+
+::liblas::Reader& LiblasIteratorBase::getExternalReader() const
+{
+    return *m_externalReader;
+}
+
+
+const LiblasReader& LiblasIteratorBase::getReader() const
+{
+    return m_reader;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// SequentialIterator
+//
+//---------------------------------------------------------------------------
+
+SequentialIterator::SequentialIterator(const LiblasReader& reader)
+    : LiblasIteratorBase(reader)
+    , libpc::SequentialIterator(reader)
+{
     return;
 }
 
 
 SequentialIterator::~SequentialIterator()
 {
-    Utils::closeFile(m_istream);
     return;
 }
 
 
 boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 {
-    LiblasReader& reader = const_cast<LiblasReader&>(m_reader); // BUG BUG BUG
-
     boost::uint64_t newPos = getIndex() + count;
 
     size_t newPosX = (size_t)newPos;
-    reader.m_externalReader->Seek(newPosX);
+    getExternalReader().Seek(newPosX);
 
     return count;
 }
@@ -85,8 +127,6 @@ bool SequentialIterator::atEndImpl() const
 
 boost::uint32_t SequentialIterator::readImpl(PointBuffer& PointBuffer)
 {
-    LiblasReader& reader = const_cast<LiblasReader&>(m_reader);     // BUG BUG BUG
-
     boost::uint32_t numPoints = PointBuffer.getCapacity();
     boost::uint32_t i = 0;
 
@@ -106,11 +146,11 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& PointBuffer)
     const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
     const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId);
     
-    const int indexTime = (reader.m_hasTimeData ? schema.getDimensionIndex(Dimension::Field_Time) : 0);
+    const int indexTime = (getReader().hasTimeData() ? schema.getDimensionIndex(Dimension::Field_Time) : 0);
 
-    const int indexRed = (reader.m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
-    const int indexGreen = (reader.m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
-    const int indexBlue = (reader.m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Blue) : 0);
+    const int indexRed = (getReader().hasColorData() ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
+    const int indexGreen = (getReader().hasColorData() ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
+    const int indexBlue = (getReader().hasColorData() ? schema.getDimensionIndex(Dimension::Field_Blue) : 0);
 
     //const int indexWavePacketDescriptorIndex = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WavePacketDescriptorIndex) : 0);
     //const int indexWaveformDataOffset = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformDataOffset) : 0);
@@ -121,13 +161,13 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& PointBuffer)
 
     for (i=0; i<numPoints; i++)
     {
-        bool ok = reader.m_externalReader->ReadNextPoint();
+        bool ok = getExternalReader().ReadNextPoint();
         if (!ok)
         {
             throw libpc_error("liblas reader failed to retrieve point");
         }
 
-        const ::liblas::Point& pt = reader.m_externalReader->GetPoint();
+        const ::liblas::Point& pt = getExternalReader().GetPoint();
 
         const boost::int32_t x = pt.GetRawX();
         const boost::int32_t y = pt.GetRawY();
@@ -157,14 +197,14 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& PointBuffer)
         PointBuffer.setField(i, indexUserData, userData);
         PointBuffer.setField(i, indexPointSourceId, pointSourceId);
 
-        if (reader.m_hasTimeData)
+        if (getReader().hasTimeData())
         {
             const double time = pt.GetTime();
             
             PointBuffer.setField(i, indexTime, time);
         }
 
-        if (reader.m_hasColorData)
+        if (getReader().hasColorData())
         {
             const ::liblas::Color color = pt.GetColor();
             const boost::uint16_t red = color.GetRed();
@@ -177,7 +217,7 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& PointBuffer)
         }
         
         PointBuffer.setNumPoints(i+1);
-        if (reader.m_hasWaveData)
+        if (getReader().hasWaveData())
         {
             throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
         }
@@ -188,31 +228,30 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& PointBuffer)
 }
 
 
+//---------------------------------------------------------------------------
+//
+// RandomIterator
+//
+//---------------------------------------------------------------------------
 
 RandomIterator::RandomIterator(const LiblasReader& reader)
-    : libpc::RandomIterator(reader)
-    , m_reader(reader)
-    , m_istream(NULL)
+    : LiblasIteratorBase(reader)
+    , libpc::RandomIterator(reader)
 {
-    m_istream = Utils::openFile(m_reader.getFileName());
-    m_reader.m_externalReader->Reset();
     return;
 }
 
 
 RandomIterator::~RandomIterator()
 {
-    Utils::closeFile(m_istream);
     return;
 }
 
 
 boost::uint64_t RandomIterator::seekImpl(boost::uint64_t pos)
 {
-    LiblasReader& reader = const_cast<LiblasReader&>(m_reader); // BUG BUG BUG
-    
     size_t posx = (size_t)pos; // BUG
-    reader.m_externalReader->Seek(posx);
+    getExternalReader().Seek(posx);
 
     return pos;
 }
@@ -221,8 +260,6 @@ boost::uint64_t RandomIterator::seekImpl(boost::uint64_t pos)
 // BUG: this duplicates the code above
 boost::uint32_t RandomIterator::readImpl(PointBuffer& PointBuffer)
 {
-    LiblasReader& reader = const_cast<LiblasReader&>(m_reader);     // BUG BUG BUG
-
     boost::uint32_t numPoints = PointBuffer.getCapacity();
     boost::uint32_t i = 0;
 
@@ -242,11 +279,11 @@ boost::uint32_t RandomIterator::readImpl(PointBuffer& PointBuffer)
     const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
     const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId);
     
-    const int indexTime = (reader.m_hasTimeData ? schema.getDimensionIndex(Dimension::Field_Time) : 0);
+    const int indexTime = (getReader().hasTimeData() ? schema.getDimensionIndex(Dimension::Field_Time) : 0);
 
-    const int indexRed = (reader.m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
-    const int indexGreen = (reader.m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
-    const int indexBlue = (reader.m_hasColorData ? schema.getDimensionIndex(Dimension::Field_Blue) : 0);
+    const int indexRed = (getReader().hasColorData() ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
+    const int indexGreen = (getReader().hasColorData() ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
+    const int indexBlue = (getReader().hasColorData() ? schema.getDimensionIndex(Dimension::Field_Blue) : 0);
 
     //const int indexWavePacketDescriptorIndex = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WavePacketDescriptorIndex) : 0);
     //const int indexWaveformDataOffset = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformDataOffset) : 0);
@@ -257,13 +294,13 @@ boost::uint32_t RandomIterator::readImpl(PointBuffer& PointBuffer)
 
     for (i=0; i<numPoints; i++)
     {
-        bool ok = reader.m_externalReader->ReadNextPoint();
+        bool ok = getExternalReader().ReadNextPoint();
         if (!ok)
         {
             throw libpc_error("liblas reader failed to retrieve point");
         }
 
-        const ::liblas::Point& pt = reader.m_externalReader->GetPoint();
+        const ::liblas::Point& pt = getExternalReader().GetPoint();
 
         const boost::int32_t x = pt.GetRawX();
         const boost::int32_t y = pt.GetRawY();
@@ -293,14 +330,14 @@ boost::uint32_t RandomIterator::readImpl(PointBuffer& PointBuffer)
         PointBuffer.setField(i, indexUserData, userData);
         PointBuffer.setField(i, indexPointSourceId, pointSourceId);
 
-        if (reader.m_hasTimeData)
+        if (getReader().hasTimeData())
         {
             const double time = pt.GetTime();
             
             PointBuffer.setField(i, indexTime, time);
         }
 
-        if (reader.m_hasColorData)
+        if (getReader().hasColorData())
         {
             const ::liblas::Color color = pt.GetColor();
             const boost::uint16_t red = color.GetRed();
@@ -313,7 +350,7 @@ boost::uint32_t RandomIterator::readImpl(PointBuffer& PointBuffer)
         }
         
         PointBuffer.setNumPoints(i+1);
-        if (reader.m_hasWaveData)
+        if (getReader().hasWaveData())
         {
             throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
         }

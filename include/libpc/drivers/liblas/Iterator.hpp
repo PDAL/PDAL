@@ -53,7 +53,28 @@ namespace libpc { namespace drivers { namespace liblas {
 class LiblasReader;
 
 
-class SequentialIterator : public libpc::SequentialIterator
+class LiblasIteratorBase
+{
+public:
+    LiblasIteratorBase(const LiblasReader& reader);
+    ~LiblasIteratorBase();
+
+protected:
+    ::liblas::Reader& getExternalReader() const;
+    const LiblasReader& getReader() const;
+
+private:
+    const LiblasReader& m_reader;
+    std::string m_filename;
+    std::istream* m_istream;
+    ::liblas::Reader* m_externalReader;
+    
+    LiblasIteratorBase& operator=(const LiblasIteratorBase&); // not implemented
+    LiblasIteratorBase(const LiblasIteratorBase&); // not implemented};
+};
+
+
+class SequentialIterator : public LiblasIteratorBase, public libpc::SequentialIterator
 {
 public:
     SequentialIterator(const LiblasReader& reader);
@@ -63,12 +84,10 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readImpl(PointBuffer&);
     bool atEndImpl() const;
-
-    const LiblasReader& m_reader;
-    std::istream* m_istream;
 };
 
-class RandomIterator : public libpc::RandomIterator
+
+class RandomIterator : public LiblasIteratorBase, public libpc::RandomIterator
 {
 public:
     RandomIterator(const LiblasReader& reader);
@@ -77,10 +96,8 @@ public:
 private:
     boost::uint64_t seekImpl(boost::uint64_t);
     boost::uint32_t readImpl(PointBuffer&);
-
-    const LiblasReader& m_reader;
-    std::istream* m_istream;
 };
+
 
 } } } // namespaces
 
