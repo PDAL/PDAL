@@ -41,10 +41,10 @@ namespace libpc
 
 FilterSequentialIterator::FilterSequentialIterator(const Filter& filter)
     : SequentialIterator(filter)
-    , m_stageAsFilter(static_cast<const Filter&>(filter))
+    , m_filter(filter)
     , m_prevIterator(NULL)
 {
-    m_prevIterator = m_stageAsFilter.getPrevStage().createSequentialIterator();
+    m_prevIterator = m_filter.getPrevStage().createSequentialIterator();
 
     return;
 }
@@ -71,10 +71,10 @@ const SequentialIterator& FilterSequentialIterator::getPrevIterator() const
 
 FilterRandomIterator::FilterRandomIterator(const Filter& filter)
     : RandomIterator(filter)
-    , m_stageAsFilter(static_cast<const Filter&>(filter))
+    , m_filter(filter)
     , m_prevIterator(NULL)
 {
-    m_prevIterator = m_stageAsFilter.getPrevStage().createRandomIterator();
+    m_prevIterator = m_filter.getPrevStage().createRandomIterator();
 
     return;
 }

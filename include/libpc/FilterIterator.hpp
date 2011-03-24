@@ -57,7 +57,7 @@ protected:
     const SequentialIterator& getPrevIterator() const;
 
 private:
-    const Filter& m_stageAsFilter;
+    const Filter& m_filter;
     SequentialIterator* m_prevIterator;
 };
 
@@ -77,7 +77,7 @@ protected:
     const RandomIterator& getPrevIterator() const;
 
 private:
-    const Filter& m_stageAsFilter;
+    const Filter& m_filter;
     RandomIterator* m_prevIterator;
 };
 
