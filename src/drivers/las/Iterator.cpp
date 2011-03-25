@@ -62,17 +62,7 @@ SequentialIterator::~SequentialIterator()
 
 boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 {
-    const LasReader& reader = m_reader;
-    const Header& header = reader.getHeader();
-
-    boost::uint32_t chunk = (boost::uint32_t)count; // BUG: this needs to be done in blocks if pointNum is large
-
-    // BUG: we can move the stream a constant amount
-    PointBuffer PointBuffer(header.getSchema(), chunk);
-    read(PointBuffer);
-    // just drop the points on the floor and return
-    
-    return count;
+    return naiveSkipImpl(count);
 }
 
 
