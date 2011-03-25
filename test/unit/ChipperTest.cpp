@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
         const boost::uint64_t num_points = reader.getHeader().getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        libpc::chipper::Chipper chipper(reader, 15);
+        libpc::filters::Chipper chipper(reader, 15);
 
         chipper.Chip();
         boost::uint32_t num_blocks = chipper.GetBlockCount();

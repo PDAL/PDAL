@@ -55,8 +55,15 @@ namespace libpc
 
 class Stage;
 
-namespace chipper
+namespace filters
+
 {
+
+
+
+class LIBPC_DLL Chipper;
+
+namespace chipper {
 
 enum Direction
 {
@@ -109,11 +116,11 @@ public:
     }
 };
 
-class LIBPC_DLL Chipper;
 
+ 
 class LIBPC_DLL Block
 {
-    friend class Chipper;
+    friend class libpc::filters::Chipper;
 
 private:
     RefList *m_list_p;
@@ -140,28 +147,28 @@ public:
     //     { return m_ymax; }
 };
 
+} // namespace chipper 
+
 class LIBPC_DLL Chipper : public libpc::Filter
 {
 public:
     Chipper(Stage& prevStage, boost::uint32_t max_partition_size) :
         libpc::Filter(prevStage), m_stage(prevStage), m_threshold(max_partition_size),
-        m_xvec(DIR_X), m_yvec(DIR_Y), m_spare(DIR_NONE) 
+        m_xvec(chipper::DIR_X), m_yvec(chipper::DIR_Y), m_spare(chipper::DIR_NONE) 
     {}
 
     void Chip();
-    std::vector<Block>::size_type GetBlockCount()
+    std::vector<chipper::Block>::size_type GetBlockCount()
         { return m_blocks.size(); }
-    const Block& GetBlock(std::vector<Block>::size_type i)
+    const chipper::Block& GetBlock(std::vector<chipper::Block>::size_type i)
         { return m_blocks[i]; }
 
     const std::string& getName() const ;
 
-    inline boost::uint8_t getIteratorSupport () const
+    bool supportsIterator (StageIteratorType t) 
     {   
-        // FIXME: make this represent what this reader actually supports!
-        boost::uint8_t mask(0); 
-        mask |= StageIterator_Block; 
-        return mask;
+        if (t == StageIterator_Block ) return true;
+        return false;
     }
 
     bool supportsSequentialIterator() const { return true; }
@@ -170,34 +177,32 @@ public:
     libpc::RandomIterator* createRandomIterator() const;
 
 private:
-    void Load(RefList& xvec, RefList& yvec, RefList& spare);
+    void Load(chipper::RefList& xvec, chipper::RefList& yvec, chipper::RefList& spare);
     void Partition(boost::uint32_t size);
-    void Split(RefList& xvec, RefList& yvec, RefList& spare);
-    void DecideSplit(RefList& v1, RefList& v2, RefList& spare,
+    void Split(chipper::RefList& xvec, chipper::RefList& yvec, chipper::RefList& spare);
+    void DecideSplit(chipper::RefList& v1, chipper::RefList& v2, chipper::RefList& spare,
         boost::uint32_t left, boost::uint32_t right);
-    void Split(RefList& wide, RefList& narrow, RefList& spare,
+    void Split(chipper::RefList& wide, chipper::RefList& narrow,chipper::RefList& spare,
         boost::uint32_t left, boost::uint32_t right);
-    void FinalSplit(RefList& wide, RefList& narrow,
+    void FinalSplit(chipper::RefList& wide, chipper::RefList& narrow,
         boost::uint32_t pleft, boost::uint32_t pcenter);
-    void Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widemax,
-        RefList& narrow, boost::uint32_t narrowmin, boost::uint32_t narrowmax );
+    void Emit(chipper::RefList& wide, boost::uint32_t widemin, boost::uint32_t widemax,
+        chipper::RefList& narrow, boost::uint32_t narrowmin, boost::uint32_t narrowmax );
     
-    void ConstructBuffers();
-    
-    // Reader *m_reader;
+
     Stage& m_stage;
     boost::uint32_t m_threshold;
-    std::vector<Block> m_blocks;
+    std::vector<chipper::Block> m_blocks;
     std::vector<boost::uint32_t> m_partitions;
-    RefList m_xvec;
-    RefList m_yvec;
-    RefList m_spare;
+    chipper::RefList m_xvec;
+    chipper::RefList m_yvec;
+    chipper::RefList m_spare;
 
     Chipper& operator=(const Chipper&); // not implemented
     Chipper(const Chipper&); // not implemented
 };
 
-} // namespace chipper
+} // namespace filters
 
 } // namespace liblas
 

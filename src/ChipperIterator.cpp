@@ -39,7 +39,7 @@
 namespace libpc { namespace filters {
 
 
-ChipperSequentialIterator::ChipperSequentialIterator(const chipper::Chipper& chipper)
+ChipperSequentialIterator::ChipperSequentialIterator(const Chipper& chipper)
     : libpc::FilterSequentialIterator(chipper)
     , m_chipper(chipper)
 {

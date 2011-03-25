@@ -47,6 +47,7 @@
 #include <boost/scoped_ptr.hpp>
 
 using namespace std;
+using namespace libpc::filters::chipper;
 
 /**
 The objective is to split the region into non-overlapping blocks, each
@@ -78,7 +79,7 @@ from the narrow array so that the approriate extrema of the block can
 be stored.
 **/
 
-namespace libpc { namespace chipper {
+namespace libpc { namespace filters {
 
 vector<boost::uint32_t> Block::GetIDs() const
 {
