@@ -38,6 +38,7 @@
 #include <libpc/libpc.hpp>
 
 #include <string>
+#include <ostream>
 
 namespace libpc
 {

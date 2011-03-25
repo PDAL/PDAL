@@ -44,6 +44,7 @@
 #define LIBPC_EXCEPTION_HPP_INCLUDED
 
 #include <libpc/libpc.hpp>
+#include <stdexcept>
 
 namespace libpc
 {

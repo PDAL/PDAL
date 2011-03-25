@@ -38,6 +38,7 @@
 #include <libpc/libpc.hpp>
 
 #include <libpc/Iterator.hpp>
+#include <iosfwd>
 
 
 namespace libpc { namespace drivers { namespace las {

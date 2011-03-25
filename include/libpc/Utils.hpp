@@ -39,6 +39,10 @@
 
 #include <string>
 #include <cassert>
+#include <stdexcept>
+#include <cmath>
+#include <ostream>
+#include <istream>
 
 namespace libpc
 {

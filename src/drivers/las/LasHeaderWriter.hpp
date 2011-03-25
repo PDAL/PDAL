@@ -44,6 +44,7 @@
 #define INCLUDED_DRIVERS_LAS_LASHEADERWRITER_HPP
 
 #include <libpc/libpc.hpp>
+#include <iosfwd>
 
 namespace libpc { namespace drivers { namespace las {
 
