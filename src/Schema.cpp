@@ -40,13 +40,6 @@
  ****************************************************************************/
 
 #include <libpc/Schema.hpp>
-#include <libpc/Utils.hpp>
-
-// boost
-#include <boost/concept_check.hpp>
-#include <boost/foreach.hpp>
-
-using namespace boost;
 
 namespace libpc
 {
@@ -110,9 +103,9 @@ bool Schema::operator!=(const Schema& other) const
 }
 
 
-property_tree::ptree Schema::getPTree() const
+boost::property_tree::ptree Schema::getPTree() const
 {
-    using property_tree::ptree;
+    using boost::property_tree::ptree;
     ptree pt;
 
     for (DimensionsCIter iter = m_dimensions.begin(); iter != m_dimensions.end(); ++iter)
@@ -152,7 +145,7 @@ void Schema::addDimension(Dimension const& dim)
 
 std::ostream& operator<<(std::ostream& os, Schema const& schema)
 {
-    using property_tree::ptree;
+    using boost::property_tree::ptree;
     ptree tree = schema.getPTree();
 
     os << "---------------------------------------------------------" << std::endl;

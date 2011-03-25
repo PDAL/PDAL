@@ -33,8 +33,6 @@
 ****************************************************************************/
 
 #include <libpc/Iterator.hpp>
-#include <libpc/Stage.hpp>
-#include <libpc/Filter.hpp>
 
 namespace libpc
 {

@@ -40,6 +40,11 @@
 #include <libpc/Stage.hpp>
 
 
+namespace libpc
+{
+    class PointBuffer;
+}
+
 namespace libpc { namespace drivers { namespace las {
 
 class LasHeader;

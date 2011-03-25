@@ -34,12 +34,6 @@
 
 #include <libpc/PointBuffer.hpp>
 
-#include <cassert>
-#include <iostream>
-#include <numeric>
-
-using std::string;
-
 namespace libpc
 {
 

@@ -35,12 +35,16 @@
 #ifndef INCLUDED_CHIPPERITERATOR_HPP
 #define INCLUDED_CHIPPERITERATOR_HPP
 
-#include <libpc/Filter.hpp>
+#include <libpc/libpc.hpp>
+
 #include <libpc/FilterIterator.hpp>
 
 namespace libpc {
 
-class chipper::Chipper;
+namespace chipper
+{
+    class Chipper;
+}
     
 namespace filters {
 

@@ -42,13 +42,9 @@
 #ifndef LIBPC_DIMENSION_HPP_INCLUDED
 #define LIBPC_DIMENSION_HPP_INCLUDED
 
-#include <string>
+#include <libpc/libpc.hpp>
 
-// boost
 #include <boost/property_tree/ptree.hpp>
-#include <boost/cstdint.hpp>
-
-#include <libpc/export.hpp>
 
 
 namespace libpc

@@ -34,6 +34,8 @@
 
 #include <libpc/Metadata.hpp>
 
+#include <sstream>
+
 namespace libpc
 {
 

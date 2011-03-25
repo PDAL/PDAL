@@ -36,6 +36,9 @@
 
 #include <libpc/drivers/las/Reader.hpp>
 #include <libpc/exceptions.hpp>
+#include <libpc/Utils.hpp>
+#include <libpc/Header.hpp>
+#include <libpc/PointBuffer.hpp>
 
 namespace libpc { namespace drivers { namespace las {
 

@@ -32,20 +32,20 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_OCIWRITER_HPP
-#define INCLUDED_OCIWRITER_HPP
+#ifndef INCLUDED_LIBPC_DRIVER_OCI_WRITER_HPP
+#define INCLUDED_LIBPC_DRIVER_OCI_WRITER_HPP
+
+#include <libpc/libpc.hpp>
 
 #include <libpc/Writer.hpp>
+#include <libpc/Bounds.hpp>
 #include <libpc/chipper.hpp>
 
 #include "Common.hpp"
 
-#include <vector>
-
-
 namespace libpc { namespace driver { namespace oci {
 
-
+class Options;
 
 
 

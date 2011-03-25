@@ -35,10 +35,9 @@
 #ifndef INCLUDED_METADATA_HPP
 #define INCLUDED_METADATA_HPP
 
-#include <vector>
-#include <boost/cstdint.hpp>
+#include <libpc/libpc.hpp>
 
-#include <libpc/Utils.hpp>
+#include <vector>
 
 namespace libpc
 {

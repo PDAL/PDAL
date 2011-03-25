@@ -35,10 +35,7 @@
 #ifndef INCLUDED_DRIVER_OCI_COMMON_HPP
 #define INCLUDED_DRIVER_OCI_COMMON_HPP
 
-#include <libpc/export.hpp>
-#include <libpc/Bounds.hpp>
-#include <libpc/exceptions.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <libpc/libpc.hpp>
 
 #include "oci_wrapper.h"
 

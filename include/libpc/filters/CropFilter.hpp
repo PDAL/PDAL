@@ -39,7 +39,12 @@
 //#include <libpc/export.hpp>
 #include <libpc/Filter.hpp>
 //#include <libpc/FilterIterator.hpp>
-//#include <libpc/Bounds.hpp>
+#include <libpc/Bounds.hpp>
+
+namespace libpc
+{
+    class PointBuffer;
+}
 
 namespace libpc { namespace filters {
 

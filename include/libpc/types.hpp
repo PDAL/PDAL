@@ -35,9 +35,7 @@
 #ifndef INCLUDED_TYPES_HPP
 #define INCLUDED_TYPES_HPP
 
-#include <libpc/export.hpp>
-#include <libpc/libpc_defines.h>
-#include <libpc/libpc_config.hpp>
+#include <libpc/libpc.hpp>
 
 namespace libpc {
 

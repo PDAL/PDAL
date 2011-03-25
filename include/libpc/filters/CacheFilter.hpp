@@ -43,6 +43,7 @@
 namespace libpc {
 
 class PointBufferCache;
+class PointBuffer;
     
 namespace filters {
 

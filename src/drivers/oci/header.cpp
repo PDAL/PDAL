@@ -32,10 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/oci/Header.hpp>
+#include <libpc/drivers/oci/header.hpp>
 
-#include <boost/concept_check.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
 namespace libpc { namespace driver { namespace oci {
 

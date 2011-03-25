@@ -32,9 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
+#include <libpc/Utils.hpp>
 
-// boost
+#include <cassert>
 
 #ifdef _MSC_VER
 #  pragma warning(push)
@@ -48,7 +48,6 @@
 #include <boost/filesystem.hpp>
 
 #include <libpc/exceptions.hpp>
-#include <libpc/Utils.hpp>
 
 
 namespace libpc

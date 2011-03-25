@@ -37,6 +37,8 @@
 #include <liblas/factory.hpp>
 
 #include <libpc/exceptions.hpp>
+#include <libpc/PointBuffer.hpp>
+#include <libpc/Utils.hpp>
 #include <libpc/drivers/liblas/Reader.hpp>
 
 namespace libpc { namespace drivers { namespace liblas {

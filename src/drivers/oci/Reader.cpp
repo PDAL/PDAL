@@ -33,21 +33,10 @@
 ****************************************************************************/
 
 
-#include <cassert>
-#include <sstream>
-
-
 #include <libpc/drivers/oci/Reader.hpp>
-#include <libpc/drivers/oci/Header.hpp>
-#include <libpc/drivers/oci/Common.hpp>
-
 
 #include <libpc/exceptions.hpp>
 
-#include <cstdlib>
-#include <iostream>
-
-#include <boost/make_shared.hpp>
 
 namespace libpc { namespace driver { namespace oci {
 

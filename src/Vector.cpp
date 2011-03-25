@@ -31,3 +31,7 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
+#include <libpc/Vector.hpp>
+
+// (no code here, everything is in the header)

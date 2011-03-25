@@ -42,6 +42,11 @@
 #include <libpc/Filter.hpp>
 //#include <libpc/FilterIterator.hpp>
 
+namespace libpc
+{
+    class PointBuffer;
+}
+
 namespace libpc { namespace filters {
 
 class ColorFilterSequentialIterator;

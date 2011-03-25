@@ -35,7 +35,7 @@
 #ifndef INCLUDED_ITERATOR_HPP
 #define INCLUDED_ITERATOR_HPP
 
-#include <libpc/Bounds.hpp>
+#include <libpc/libpc.hpp>
 
 namespace libpc
 {

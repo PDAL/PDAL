@@ -38,7 +38,14 @@
 #include <libpc/libpc.hpp>
 
 #include <libpc/Stage.hpp>
+#include <libpc/Bounds.hpp>
+#include <libpc/Dimension.hpp>
 
+
+namespace libpc
+{
+    class PointBuffer;
+}
 
 namespace libpc { namespace drivers { namespace faux {
 

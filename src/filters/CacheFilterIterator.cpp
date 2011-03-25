@@ -35,6 +35,7 @@
 #include <libpc/filters/CacheFilterIterator.hpp>
 
 #include <libpc/filters/CacheFilter.hpp>
+#include <libpc/PointBuffer.hpp>
 
 namespace libpc { namespace filters {
 

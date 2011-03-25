@@ -41,6 +41,10 @@
 //#include <libpc/FilterIterator.hpp>
 //#include <libpc/Bounds.hpp>
 
+namespace libpc { 
+    class PointBuffer;
+}
+
 namespace libpc { namespace filters {
 
 class DecimationFilterSequentialIterator;

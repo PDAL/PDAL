@@ -35,6 +35,8 @@
 #ifndef INCLUDED_FILTERITERATOR_HPP
 #define INCLUDED_FILTERITERATOR_HPP
 
+#include <libpc/libpc.hpp>
+
 #include <libpc/Iterator.hpp>
 
 namespace libpc

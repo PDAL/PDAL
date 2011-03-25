@@ -38,6 +38,7 @@
 #include <libpc/drivers/las/Iterator.hpp>
 #include "LasHeaderReader.hpp"
 #include <libpc/exceptions.hpp>
+#include <libpc/PointBuffer.hpp>
 
 namespace libpc { namespace drivers { namespace las {
 

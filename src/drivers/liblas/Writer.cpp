@@ -38,6 +38,11 @@
 #include <liblas/Writer.hpp>
 
 #include <libpc/exceptions.hpp>
+#include <libpc/libpc_config.hpp>
+#include <libpc/Schema.hpp>
+#include <libpc/Stage.hpp>
+#include <libpc/PointBuffer.hpp>
+#include <libpc/Header.hpp>
 
 
 namespace libpc { namespace drivers { namespace liblas {

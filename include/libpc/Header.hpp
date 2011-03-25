@@ -35,10 +35,8 @@
 #ifndef INCLUDED_HEADER_HPP
 #define INCLUDED_HEADER_HPP
 
-#include <iostream>
-#include <boost/cstdint.hpp>
-
 #include <libpc/libpc.hpp>
+
 #include <libpc/Schema.hpp>
 #include <libpc/Bounds.hpp>
 #include <libpc/SpatialReference.hpp>

@@ -45,6 +45,7 @@
 #include <libpc/Utils.hpp>
 #include <libpc/drivers/las/Header.hpp>
 
+#include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
 namespace libpc { namespace drivers { namespace las {
     

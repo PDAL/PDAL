@@ -37,6 +37,8 @@
 
 #include <libpc/libpc.hpp>
 
+#include <vector>
+
 #include <libpc/Filter.hpp>
 //#include <libpc/FilterIterator.hpp>
 //#include <libpc/Bounds.hpp>

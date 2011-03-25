@@ -34,4 +34,5 @@
 
 
 #include <libpc/Bounds.hpp>
-#include <math.h>
+
+// (no code here, everything is in the header)

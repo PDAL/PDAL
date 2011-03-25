@@ -34,6 +34,7 @@
 
 #include <libpc/filters/MosaicFilterIterator.hpp>
 
+#include <libpc/PointBuffer.hpp>
 #include <libpc/filters/MosaicFilter.hpp>
 
 namespace libpc { namespace filters {

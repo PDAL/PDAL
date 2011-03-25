@@ -34,9 +34,8 @@
 
 #include <libpc/drivers/faux/Writer.hpp>
 
-using std::string;
-using std::cout;
-using std::endl;
+#include <libpc/PointBuffer.hpp>
+
 
 namespace libpc { namespace drivers { namespace faux {
 

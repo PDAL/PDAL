@@ -39,14 +39,10 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/exceptions.hpp>
 #include <libpc/Dimension.hpp>
+
+#include <libpc/exceptions.hpp>
 #include <libpc/Utils.hpp>
-
-#include <iostream>
-#include <limits>
-
-using namespace boost;
 
 namespace libpc
 {
@@ -131,9 +127,9 @@ bool Dimension::operator!=(const Dimension& other) const
 }
 
 
-property_tree::ptree Dimension::GetPTree() const
+boost::property_tree::ptree Dimension::GetPTree() const
 {
-    using property_tree::ptree;
+    using boost::property_tree::ptree;
     ptree dim;
     dim.put("name", getFieldName());
     dim.put("datatype", getDataTypeName(getDataType()));

@@ -36,6 +36,9 @@
 
 #include "LasHeaderWriter.hpp"
 #include <libpc/exceptions.hpp>
+#include <libpc/Stage.hpp>
+#include <libpc/SchemaLayout.hpp>
+#include <libpc/PointBuffer.hpp>
 
 namespace libpc { namespace drivers { namespace las {
 

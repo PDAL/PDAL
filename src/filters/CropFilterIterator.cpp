@@ -35,6 +35,8 @@
 #include <libpc/filters/CropFilterIterator.hpp>
 
 #include <libpc/filters/CropFilter.hpp>
+#include <libpc/PointBuffer.hpp>
+#include <libpc/Header.hpp>
 
 namespace libpc { namespace filters {
 

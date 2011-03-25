@@ -34,11 +34,9 @@
 
 #include <libpc/drivers/faux/Iterator.hpp>
 
+#include <libpc/Header.hpp>
 #include <libpc/drivers/faux/Reader.hpp>
 
-using std::vector;
-using std::string;
-using std::cout;
 
 namespace libpc { namespace drivers { namespace faux {
 

@@ -40,7 +40,7 @@
 //#include <libpc/Stage.hpp>
 #include <libpc/Iterator.hpp>
 
-//#include <iostream>
+#include <string>
 
 //#include <libpc/drivers/liblas/Header.hpp>
 

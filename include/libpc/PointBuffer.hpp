@@ -32,13 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PointBuffer_HPP
-#define INCLUDED_PointBuffer_HPP
+#ifndef INCLUDED_POINTBUFFER_HPP
+#define INCLUDED_POINTBUFFER_HPP
 
-#include <boost/cstdint.hpp>
+#include <libpc/libpc.hpp>
+
 #include <boost/scoped_array.hpp>
 
-#include <libpc/export.hpp>
 #include <libpc/Bounds.hpp>
 #include <libpc/SchemaLayout.hpp>
 

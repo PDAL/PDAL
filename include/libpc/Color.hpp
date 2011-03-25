@@ -41,11 +41,9 @@
 #ifndef LIBPC_COLOR_HPP_INCLUDED
 #define LIBPC_COLOR_HPP_INCLUDED
 
-#include <libpc/export.hpp>
+#include <libpc/libpc.hpp>
 
-// boost
 #include <boost/array.hpp>
-#include <boost/cstdint.hpp>
 
 
 namespace libpc
