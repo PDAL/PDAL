@@ -151,5 +151,13 @@ libpc::RandomIterator* CacheFilter::createRandomIterator() const
     return new CacheFilterRandomIterator(*this);
 }
 
+libpc::Iterator* CacheFilter::createIterator(StageIteratorType t) const
+{
+    if (t == StageIterator_Sequential)
+        return new CacheFilterSequentialIterator(*this);
+    if (t == StageIterator_Random)
+        return new CacheFilterRandomIterator(*this);
+    return 0;
+}
 
 } } // namespaces

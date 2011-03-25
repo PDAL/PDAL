@@ -70,6 +70,8 @@ public:
         return mask;
     }
 
+    // libpc::Iterator* createIterator(StageIteratorType t) const;
+    
 private:
 
     Reader& operator=(const Reader&); // not implemented

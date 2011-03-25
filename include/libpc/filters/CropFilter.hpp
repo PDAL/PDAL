@@ -38,7 +38,7 @@
 #include <libpc/libpc.hpp>
 //#include <libpc/export.hpp>
 #include <libpc/Filter.hpp>
-//#include <libpc/FilterIterator.hpp>
+#include <libpc/FilterIterator.hpp>
 #include <libpc/Bounds.hpp>
 
 namespace libpc
@@ -69,6 +69,9 @@ public:
 
     bool supportsSequentialIterator() const { return true; }
     bool supportsRandomIterator() const { return false; }
+    
+    libpc::Iterator* createIterator(StageIteratorType type) const;
+    
     libpc::SequentialIterator* createSequentialIterator() const;
     libpc::RandomIterator* createRandomIterator() const { return NULL; }
 

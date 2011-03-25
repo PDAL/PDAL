@@ -44,6 +44,7 @@ namespace libpc
 {
 
 class Header;
+class Iterator;
 class SequentialIterator;
 class RandomIterator;
 
@@ -67,6 +68,9 @@ public:
     Header& getHeader();
 
     virtual boost::uint8_t getIteratorSupport () const { return 0; }
+    
+    virtual libpc::Iterator* createIterator(StageIteratorType type) const { return NULL; }
+    
     virtual bool supportsSequentialIterator() const { return false; }
     virtual bool supportsRandomIterator() const { return false; }
     virtual SequentialIterator* createSequentialIterator() const { return NULL; }
