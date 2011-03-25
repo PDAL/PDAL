@@ -38,13 +38,12 @@
 namespace libpc { namespace filters {
 
 
-// ChipperBlockIterator::ChipperBlockIterator(Chipper const& filter)
-//     : libpc::FilterBlockIterator(filter)
-//     , m_chipper(filter)
-// {
-//     return;
-// }
-
+ChipperBlockIterator::ChipperBlockIterator(Chipper const& filter)
+    : libpc::FilterBlockIterator(filter)
+    , m_chipper(filter)
+{
+    return;
+}
 
 // boost::uint64_t ChipperSequentialIterator::skipImpl(boost::uint64_t count)
 // {

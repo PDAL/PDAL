@@ -36,15 +36,12 @@
 #define INCLUDED_FILTERS_COLORFILTERITERATOR_HPP
 
 #include <libpc/libpc.hpp>
-//#include <boost/cstdint.hpp>
 
-//#include <libpc/export.hpp>
-//#include <libpc/Filter.hpp>
+#include <libpc/filters/ColorFilter.hpp>
 #include <libpc/FilterIterator.hpp>
 
 namespace libpc { namespace filters {
 
-class ColorFilter;
 
 class ColorFilterSequentialIterator : public libpc::FilterSequentialIterator
 {

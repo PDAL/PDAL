@@ -47,6 +47,7 @@ class Header;
 class Iterator;
 class SequentialIterator;
 class RandomIterator;
+class BlockIterator;
 
 // every stage owns its own header, they are not shared
 class LIBPC_DLL Stage
@@ -73,6 +74,7 @@ public:
     virtual bool supportsRandomIterator() const { return false; }
     virtual SequentialIterator* createSequentialIterator() const { return NULL; }
     virtual RandomIterator* createRandomIterator() const  { return NULL; }
+    virtual BlockIterator* createBlockIterator() const  { return NULL; }
 
 protected:
     void setHeader(Header*); // stage takes ownership

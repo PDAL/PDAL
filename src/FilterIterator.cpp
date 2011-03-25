@@ -97,5 +97,33 @@ const RandomIterator& FilterRandomIterator::getPrevIterator() const
     return *m_prevIterator;
 }
 
+FilterBlockIterator::FilterBlockIterator(const Filter& filter)
+    : BlockIterator(filter)
+    , m_filter(filter)
+    , m_prevIterator(NULL)
+{
+    m_prevIterator = m_filter.getPrevStage().createBlockIterator();
+
+    return;
+}
+
+
+FilterBlockIterator::~FilterBlockIterator()
+{
+    delete m_prevIterator;
+}
+
+
+BlockIterator& FilterBlockIterator::getPrevIterator()
+{
+    return *m_prevIterator;
+}
+
+
+const BlockIterator& FilterBlockIterator::getPrevIterator() const
+{
+    return *m_prevIterator;
+}
+
 
 } // namespace libpc

@@ -190,4 +190,24 @@ boost::uint64_t RandomIterator::seek(boost::uint64_t position)
 }
 
 
+//---------------------------------------------------------------------------
+//
+// BlockIterator
+//
+//---------------------------------------------------------------------------
+
+BlockIterator::BlockIterator(const Stage& stage)
+    : Iterator(stage)
+{
+    return;
+}
+
+
+BlockIterator::~BlockIterator()
+{
+    return;
+}
+
+
+
 } // namespace libpc
