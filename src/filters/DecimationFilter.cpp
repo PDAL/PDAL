@@ -94,14 +94,4 @@ libpc::SequentialIterator* DecimationFilter::createSequentialIterator() const
     return new DecimationFilterSequentialIterator(*this);
 }
 
-libpc::Iterator* DecimationFilter::createIterator(StageIteratorType t) const
-{
-    if (t == StageIterator_Sequential)
-        return new DecimationFilterSequentialIterator(*this);
-    
-    return 0;
-}
-
-
-
 } } // namespaces

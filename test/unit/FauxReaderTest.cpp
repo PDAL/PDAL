@@ -362,10 +362,9 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
 
     PointBuffer data(layout, 750);
     
-    boost::uint8_t iterators = reader.getIteratorSupport();
     
-    BOOST_CHECK_EQUAL((iterators & StageIterator_Sequential) != 0, true);
-    BOOST_CHECK_EQUAL((iterators & StageIterator_Random) != 0, true);
+    BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
+    BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);
 
     return;
 }

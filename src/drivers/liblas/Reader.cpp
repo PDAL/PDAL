@@ -263,13 +263,5 @@ libpc::RandomIterator* LiblasReader::createRandomIterator() const
     return new RandomIterator(*this);
 }
 
-libpc::Iterator* LiblasReader::createIterator(StageIteratorType t) const
-{
-    if (t == StageIterator_Sequential)
-        return new SequentialIterator(*this);
-    if (t == StageIterator_Random)
-        return new RandomIterator(*this);
-    return 0;
-}
 
 } } } // namespaces

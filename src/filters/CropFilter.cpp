@@ -114,13 +114,5 @@ libpc::SequentialIterator* CropFilter::createSequentialIterator() const
     return new CropFilterSequentialIterator(*this);
 }
 
-libpc::Iterator* CropFilter::createIterator(StageIteratorType t) const
-{
-    if (t == StageIterator_Sequential)
-        return new CropFilterSequentialIterator(*this);
-    
-    return 0;
-}
-
 
 } } // namespaces

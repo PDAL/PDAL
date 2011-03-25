@@ -67,9 +67,7 @@ public:
     const Header& getHeader() const;
     Header& getHeader();
 
-    virtual boost::uint8_t getIteratorSupport () const { return 0; }
-    
-    virtual libpc::Iterator* createIterator(StageIteratorType) const { return NULL; }
+    virtual bool supportsIterator (StageIteratorType) const { return false; }
     
     virtual bool supportsSequentialIterator() const { return false; }
     virtual bool supportsRandomIterator() const { return false; }
