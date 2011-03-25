@@ -38,10 +38,10 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/Chipper.hpp>
+#include <libpc/filters/Chipper.hpp>
 
 #include <libpc/Header.hpp>
-#include <libpc/ChipperIterator.hpp>
+#include <libpc/filters/ChipperIterator.hpp>
 #include <libpc/exceptions.hpp>
 
 #include <boost/scoped_ptr.hpp>
@@ -145,7 +145,7 @@ const std::string& Chipper::getName() const
 
 libpc::SequentialIterator* Chipper::createSequentialIterator() const
 {
-    return new filters::ChipperSequentialIterator(*this);
+    return 0;
 }
 
 

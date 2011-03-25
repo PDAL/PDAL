@@ -39,7 +39,7 @@
 
 #include <libpc/Writer.hpp>
 #include <libpc/Bounds.hpp>
-#include <libpc/chipper.hpp>
+#include <libpc/filters/Chipper.hpp>
 
 #include "Common.hpp"
 

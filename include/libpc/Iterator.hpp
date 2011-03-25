@@ -149,6 +149,9 @@ public:
     BlockIterator(const Stage& stage);
     virtual ~BlockIterator();
 
+protected:
+    // from Iterator
+    virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
 
 };
 

@@ -83,6 +83,25 @@ private:
     RandomIterator* m_prevIterator;
 };
 
+class FilterBlockIterator : public BlockIterator
+{
+public:
+    FilterBlockIterator(const Filter&);
+    virtual ~FilterBlockIterator();
+
+protected:
+    // from RandomIterator
+    virtual boost::uint32_t readImpl(PointBuffer&) = 0;
+    virtual boost::uint64_t seekImpl(boost::uint64_t pointNum) = 0;
+
+    BlockIterator& getPrevIterator();
+    const BlockIterator& getPrevIterator() const;
+
+private:
+    const Filter& m_filter;
+    BlockIterator* m_prevIterator;
+};
+
 } // namespace libpc
 
 #endif
