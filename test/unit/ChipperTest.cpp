@@ -71,10 +71,10 @@ BOOST_AUTO_TEST_CASE(test_construction)
         libpc::Range<double> x = ranges[0];
         libpc::Range<double> y = ranges[1];
         
-        BOOST_CHECK_CLOSE_FRACTION (x.getMinimum(), 635674.0, 0.05);
-        BOOST_CHECK_CLOSE_FRACTION (x.getMaximum(), 635994.0, 0.05);
-        BOOST_CHECK_CLOSE_FRACTION (y.getMinimum(), 848992.0, 0.05);
-        BOOST_CHECK_CLOSE_FRACTION (y.getMaximum(), 849427.0, 0.05);
+        BOOST_CHECK_CLOSE (x.getMinimum(), 635674.0, 0.05);
+        BOOST_CHECK_CLOSE (x.getMaximum(), 635994.0, 0.05);
+        BOOST_CHECK_CLOSE (y.getMinimum(), 848992.0, 0.05);
+        BOOST_CHECK_CLOSE (y.getMaximum(), 849427.0, 0.05);
 
         std::vector<boost::uint32_t> ids = chipper.GetBlock(70).GetIDs();
 
