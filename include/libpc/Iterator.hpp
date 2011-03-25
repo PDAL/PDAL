@@ -136,6 +136,14 @@ protected:
     virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
 };
 
+class LIBPC_DLL BlockIterator : public Iterator
+{
+public:
+    BlockIterator(const Stage& stage);
+    virtual ~BlockIterator();
+
+
+};
 
 } // namespace libpc
 
