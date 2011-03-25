@@ -70,9 +70,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
 
-        size_t np = (size_t)numPoints;
-        assert(numPoints == np); // BUG
-        writer.write(np);
+        writer.write(numPoints);
     }
 
     Utils::closeFile(ofs);
@@ -109,9 +107,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
 
-        size_t np = (size_t)numPoints;
-        assert(numPoints == np); // BUG
-        writer.write(np);
+        writer.write(numPoints);
     }
 
     Utils::closeFile(ofs);

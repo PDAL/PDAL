@@ -116,9 +116,7 @@ int Application_pc2pc::execute()
 
         //writer.setPointFormat( reader.getPointFormatNumber() );
 
-        size_t np = (size_t)numPoints;
-        assert(numPoints == np); // BUG
-        writer.write(np);
+        writer.write(numPoints);
     }
 
     else if (hasOption("oracle"))
@@ -145,9 +143,7 @@ int Application_pc2pc::execute()
 
         //writer.setPointFormat( reader.getPointFormatNumber() );
 
-        size_t np = (size_t)numPoints;
-        assert(numPoints == np); // BUG
-        writer.write(np);
+        writer.write(numPoints);
 #else
         throw configuration_error("libPC not compiled with Oracle support");
 #endif
@@ -164,9 +160,7 @@ int Application_pc2pc::execute()
 
         writer.setPointFormat( reader.getPointFormatNumber() );
 
-        size_t np = (size_t)numPoints;
-        assert(numPoints == np); // BUG
-        writer.write(np);
+        writer.write(numPoints);
     }
 
     Utils::closeFile(ofs);
