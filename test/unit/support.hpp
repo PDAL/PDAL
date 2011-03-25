@@ -48,4 +48,10 @@ struct TestConfig {
     static std::string g_data_path;
 };
 
+
+// for comparing to floating point values, use
+//   BOOST_CHECK_CLOSE(a,b,perc)
+// where perc is a percentage value in the range [0..100] (typically)
+
+
 #endif
