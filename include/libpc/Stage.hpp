@@ -69,7 +69,7 @@ public:
 
     virtual boost::uint8_t getIteratorSupport () const { return 0; }
     
-    virtual libpc::Iterator* createIterator(StageIteratorType type) const { return NULL; }
+    virtual libpc::Iterator* createIterator(StageIteratorType) const { return NULL; }
     
     virtual bool supportsSequentialIterator() const { return false; }
     virtual bool supportsRandomIterator() const { return false; }
