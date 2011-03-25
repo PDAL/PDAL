@@ -61,7 +61,7 @@ private:
     std::size_t GetRequiredHeaderSize() const;
     void WriteVLRs();
 
-    LasHeader& m_header; // BUG: I want this to be const
+    LasHeader& m_header; // note this is not const
     std::ostream& m_ostream;
 
     LasHeaderWriter& operator=(const LasHeaderWriter&); // nope
