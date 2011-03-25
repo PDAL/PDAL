@@ -46,6 +46,13 @@ enum PointCountType
     PointCount_Unknown      // the stage has an unknown count, and getNumPoints will return 0
 };
 
+enum StageIteratorType
+{
+    StageIterator_Sequential = (1u << 0),
+    StageIterator_Random = (1u << 1),
+    StageIterator_Block = (1u << 2),
+    StageIterator_Unknown = (1u << 8)
+};
 
 } // namespace
 

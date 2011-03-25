@@ -60,6 +60,16 @@ public:
  
     void seekToPoint(boost::uint64_t pointNum);
 
+    boost::uint8_t getIteratorSupport () const
+    {   
+        // FIXME: make this represent what this reader actually supports!
+        boost::uint8_t mask(0); 
+        mask |= StageIterator_Sequential;  
+        mask |= StageIterator_Random; 
+        mask |= StageIterator_Block; 
+        return mask;
+    }
+
 private:
 
     Reader& operator=(const Reader&); // not implemented

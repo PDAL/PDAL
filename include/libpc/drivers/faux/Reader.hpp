@@ -41,7 +41,6 @@
 #include <libpc/Bounds.hpp>
 #include <libpc/Dimension.hpp>
 
-
 namespace libpc
 {
     class PointBuffer;
@@ -81,7 +80,15 @@ public:
     const std::string& getName() const;
 
     Mode getMode() const;
-
+    
+    boost::uint8_t getIteratorSupport () 
+    {   
+        boost::uint8_t mask(0); 
+        mask |= StageIterator_Sequential;  
+        mask |= StageIterator_Random; 
+        return mask;
+    }
+    
     bool supportsSequentialIterator() const { return true; }
     bool supportsRandomIterator() const { return true; }
     libpc::SequentialIterator* createSequentialIterator() const;

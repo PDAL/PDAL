@@ -62,6 +62,14 @@ public:
 
     void getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;
 
+    inline boost::uint8_t getIteratorSupport () const
+    {   
+        boost::uint8_t mask(0); 
+        mask |= StageIterator_Sequential;  
+        return mask;
+    }
+    
+
     bool supportsSequentialIterator() const { return true; }
     bool supportsRandomIterator() const { return false; }
     libpc::SequentialIterator* createSequentialIterator() const;

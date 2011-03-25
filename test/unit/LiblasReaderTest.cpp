@@ -431,4 +431,16 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(test_iterator_checks)
+{
+    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
+
+    boost::uint8_t iterators = reader.getIteratorSupport();
+    
+    BOOST_CHECK_EQUAL(iterators & StageIterator_Sequential != 0, true);
+    BOOST_CHECK_EQUAL(iterators & StageIterator_Random != 0, true);
+
+    return;
+}
+
 BOOST_AUTO_TEST_SUITE_END()

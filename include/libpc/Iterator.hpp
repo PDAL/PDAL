@@ -42,6 +42,8 @@ namespace libpc
 class Stage;
 class PointBuffer;
 
+
+
 class LIBPC_DLL Iterator
 {
 public:
