@@ -111,15 +111,6 @@ libpc::RandomIterator* Reader::createRandomIterator() const
     return new RandomIterator(*this);
 }
 
-libpc::Iterator* Reader::createIterator(StageIteratorType t) const
-{
-    if (t == StageIterator_Sequential)
-        return new SequentialIterator(*this);
-    if (t == StageIterator_Random)
-        return new RandomIterator(*this);
-    return 0;
-}
-
 
 boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) const
 {

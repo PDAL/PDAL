@@ -115,13 +115,4 @@ libpc::SequentialIterator* MosaicFilter::createSequentialIterator() const
     return new MosaicFilterSequentialIterator(*this);
 }
 
-libpc::Iterator* MosaicFilter::createIterator(StageIteratorType t) const
-{
-    if (t == StageIterator_Sequential)
-        return new MosaicFilterSequentialIterator(*this);
-    
-    return 0;
-}
-
-
 } } // namespaces

@@ -98,14 +98,6 @@ libpc::RandomIterator* LasReader::createRandomIterator() const
     return new RandomIterator(*this);
 }
 
-libpc::Iterator* LasReader::createIterator(StageIteratorType t) const
-{
-    if (t == StageIterator_Sequential)
-        return new SequentialIterator(*this);
-    if (t == StageIterator_Random)
-        return new RandomIterator(*this);
-    return 0;
-}
 
 boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream) const
 {

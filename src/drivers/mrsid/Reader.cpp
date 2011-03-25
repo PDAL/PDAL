@@ -179,11 +179,6 @@ void Reader::seekToPoint(boost::uint64_t)
     return;
 }
 
-libpc::Iterator *Reader::createIterator(const libpc::Bounds<double>&)
-{
-    return NULL;
-}
-
 }
 }
 } // namespaces

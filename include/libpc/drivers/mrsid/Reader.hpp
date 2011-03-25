@@ -59,17 +59,15 @@ public:
     const std::string& getName() const;
 
     void seekToPoint(boost::uint64_t pointNum);
-    Iterator* createIterator(const Bounds<double>& bounds);
 
-    boost::uint8_t getIteratorSupport () const
+    bool supportsIterator (StageIteratorType t) 
     {   
-        // FIXME: make this represent what this reader actually supports!
-        boost::uint8_t mask(0); 
-        mask |= StageIterator_Sequential;  
-        mask |= StageIterator_Random; 
-        mask |= StageIterator_Block; 
-        return mask;
+        if (t == StageIterator_Sequential ) return true;
+        if (t == StageIterator_Random ) return true;
+        if (t == StageIterator_Block ) return true;
+        return false;
     }
+
     
 protected:
     boost::uint32_t readBuffer(PointBuffer&);
