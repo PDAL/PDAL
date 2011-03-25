@@ -38,14 +38,13 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/chipper.hpp>
-#include <libpc/Utils.hpp>
+#include <libpc/Chipper.hpp>
+
+#include <libpc/Header.hpp>
 #include <libpc/ChipperIterator.hpp>
 #include <libpc/exceptions.hpp>
-// boost
-#include <boost/cstdint.hpp>
-// std
-#include <cmath>
+
+#include <boost/scoped_ptr.hpp>
 
 using namespace std;
 

@@ -35,7 +35,9 @@
 #ifndef INCLUDED_VECTOR_HPP
 #define INCLUDED_VECTOR_HPP
 
-#include <limits>
+#include <libpc/libpc.hpp>
+
+#include <vector>
 
 #include <libpc/Utils.hpp>
 

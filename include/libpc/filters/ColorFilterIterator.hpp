@@ -32,13 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_COLORFILTERITERATOR_HPP
-#define INCLUDED_COLORFILTERITERATOR_HPP
+#ifndef INCLUDED_FILTERS_COLORFILTERITERATOR_HPP
+#define INCLUDED_FILTERS_COLORFILTERITERATOR_HPP
 
-#include <boost/cstdint.hpp>
+#include <libpc/libpc.hpp>
+//#include <boost/cstdint.hpp>
 
-#include <libpc/export.hpp>
-#include <libpc/Filter.hpp>
+//#include <libpc/export.hpp>
+//#include <libpc/Filter.hpp>
 #include <libpc/FilterIterator.hpp>
 
 namespace libpc { namespace filters {

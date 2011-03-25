@@ -32,15 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_CACHEFILTER_HPP
-#define INCLUDED_CACHEFILTER_HPP
+#ifndef INCLUDED_FILTER_CACHEFILTER_HPP
+#define INCLUDED_FILTER_CACHEFILTER_HPP
+
+#include <libpc/libpc.hpp>
 
 #include <libpc/Filter.hpp>
-#include <libpc/FilterIterator.hpp>
+//#include <libpc/FilterIterator.hpp>
 
 namespace libpc {
 
 class PointBufferCache;
+class PointBuffer;
     
 namespace filters {
 

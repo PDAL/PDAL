@@ -35,10 +35,15 @@
 #ifndef INCLUDED_WRITER_HPP
 #define INCLUDED_WRITER_HPP
 
-#include <libpc/Stage.hpp>
+#include <libpc/libpc.hpp>
+
+#include <string>
 
 namespace libpc
 {
+
+class Stage;
+class PointBuffer;
 
 class LIBPC_DLL Writer
 {

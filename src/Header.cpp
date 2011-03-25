@@ -36,8 +36,6 @@
 
 #include <iostream>
 
-using std::endl;
-
 namespace libpc
 {
 
@@ -153,17 +151,17 @@ void Header::dump() const
 
 std::ostream& operator<<(std::ostream& ostr, const Header& header)
 {
-    ostr << "  Num points: " << header.getNumPoints() << endl;
+    ostr << "  Num points: " << header.getNumPoints() << std::endl;
 
-    ostr << "  Bounds:" << endl;
-    ostr << "    " << header.getBounds() << endl;
+    ostr << "  Bounds:" << std::endl;
+    ostr << "    " << header.getBounds() << std::endl;
 
-    ostr << "  Schema: " << endl;
-    ostr << "    Num dims: " << header.getSchema().getDimensions().size() << endl;
-//    ostr << "    Size in bytes: " << header.getSchema().getByteSize() << endl;
+    ostr << "  Schema: " << std::endl;
+    ostr << "    Num dims: " << header.getSchema().getDimensions().size() << std::endl;
+//    ostr << "    Size in bytes: " << header.getSchema().getByteSize() << std::endl;
 
-    ostr << "  Spatial Reference:" << endl;
-    ostr << "    WKT: " << header.getSpatialReference().getWKT() << endl;
+    ostr << "  Spatial Reference:" << std::endl;
+    ostr << "    WKT: " << header.getSpatialReference().getWKT() << std::endl;
 
     return ostr;
 }

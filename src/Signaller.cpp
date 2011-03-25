@@ -32,5 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <libpc/Signaller.hpp>
 
 // (no implementation code)

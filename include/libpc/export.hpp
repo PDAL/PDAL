@@ -55,7 +55,6 @@
 
 #ifdef _MSC_VER
 #pragma warning(disable:4251)// [templated class] needs to have dll-interface...
-//#pragma warning(disable:4275)
 #endif // _MSC_VER
 
 #endif // LIBPC_HPP_INCLUDED

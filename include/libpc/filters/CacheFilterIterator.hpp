@@ -32,10 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_CACHEFILTERITERATOR_HPP
-#define INCLUDED_CACHEFILTERITERATOR_HPP
+#ifndef INCLUDED_FILTER_CACHEFILTERITERATOR_HPP
+#define INCLUDED_FILTER_CACHEFILTERITERATOR_HPP
 
-#include <libpc/Filter.hpp>
+#include <libpc/libpc.hpp>
+//#include <libpc/Filter.hpp>
 #include <libpc/FilterIterator.hpp>
 
 namespace libpc {

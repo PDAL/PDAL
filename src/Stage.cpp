@@ -34,6 +34,8 @@
 
 #include <libpc/Stage.hpp>
 
+#include <libpc/Header.hpp>
+
 namespace libpc
 {
 

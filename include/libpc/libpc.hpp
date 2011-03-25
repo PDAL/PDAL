@@ -35,9 +35,14 @@
 #ifndef INCLUDED_LIBPC_HPP
 #define INCLUDED_LIBPC_HPP
 
+// This file is for all the things that basically everybody has to include.
+
 #include <libpc/export.hpp>
 #include <libpc/libpc_defines.h>
 // #include <libpc/libpc_config.hpp>
 #include <libpc/types.hpp>
+
+// we use explicitly-sized types everywhere, so include this here
+#include <boost/cstdint.hpp>
 
 #endif

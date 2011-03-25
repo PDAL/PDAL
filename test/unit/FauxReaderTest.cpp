@@ -35,7 +35,11 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
+#include <libpc/Header.hpp>
+#include <libpc/PointBuffer.hpp>
+#include <libpc/SchemaLayout.hpp>
 #include <libpc/drivers/faux/Reader.hpp>
+#include <libpc/drivers/faux/Iterator.hpp>
 
 using namespace libpc;
 

@@ -32,13 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
-
+#include <libpc/Writer.hpp>
+//
 #include <boost/scoped_ptr.hpp>
 
-#include <libpc/exceptions.hpp>
-#include <libpc/Writer.hpp>
 #include <libpc/Iterator.hpp>
+#include <libpc/Stage.hpp>
+#include <libpc/Header.hpp>
+#include <libpc/PointBuffer.hpp>
 
 namespace libpc
 {

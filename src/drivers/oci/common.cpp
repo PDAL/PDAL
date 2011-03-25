@@ -35,7 +35,12 @@
 
 #include <libpc/drivers/oci/Common.hpp>
 
-#include <cctype> // toupper
+#include <iostream>
+
+#include <boost/concept_check.hpp> // ignore_unused_variable_warning
+
+#include <libpc/Bounds.hpp>
+#include <libpc/exceptions.hpp>
 
 namespace libpc { namespace driver { namespace oci {
 

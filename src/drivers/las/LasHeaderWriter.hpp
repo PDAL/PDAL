@@ -40,15 +40,14 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef INCLUDED_LASHEADERWRITER_HPP
-#define INCLUDED_LASHEADERWRITER_HPP
+#ifndef INCLUDED_DRIVERS_LAS_LASHEADERWRITER_HPP
+#define INCLUDED_DRIVERS_LAS_LASHEADERWRITER_HPP
 
-#include <iostream>
-
-#include "libpc/drivers/las/Header.hpp"
+#include <libpc/libpc.hpp>
 
 namespace libpc { namespace drivers { namespace las {
 
+class LasHeader;
 
 class LIBPC_DLL LasHeaderWriter
 {

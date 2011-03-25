@@ -19,8 +19,10 @@
 // http://www.bottlenose.demon.co.uk/article/lru.htm.  It is under an
 // Internet Systems Consortium (ISC) license (an OSI-approved BSD-alike license).
 
-#ifndef INCLUDED_LIBPC_PointBufferCACHE_HPP
-#define INCLUDED_LIBPC_PointBufferCACHE_HPP
+#ifndef INCLUDED_LIBPC_POINTBUFFERCACHE_HPP
+#define INCLUDED_LIBPC_POINTBUFFERCACHE_HPP
+
+#include <libpc/libpc.hpp>
 
 
 #ifdef _MSC_VER
@@ -29,8 +31,8 @@
 #endif
 #include <boost/bimap.hpp>
 #include <boost/bimap/list_of.hpp>
-#include <boost/bimap/set_of.hpp>
-#include <boost/function.hpp>
+//#include <boost/bimap/set_of.hpp>
+//#include <boost/function.hpp>
 #ifdef _MSC_VER
 #  pragma warning(pop)
 #endif

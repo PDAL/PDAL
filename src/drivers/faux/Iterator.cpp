@@ -32,18 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
-#include <iostream>
-
 #include <libpc/drivers/faux/Iterator.hpp>
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/Utils.hpp>
-#include <libpc/exceptions.hpp>
-#include <libpc/Iterator.hpp>
 
-using std::vector;
-using std::string;
-using std::cout;
+#include <libpc/Header.hpp>
+#include <libpc/drivers/faux/Reader.hpp>
+
 
 namespace libpc { namespace drivers { namespace faux {
 

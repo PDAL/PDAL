@@ -40,12 +40,6 @@
  ****************************************************************************/
 
 #include <libpc/DimensionLayout.hpp>
-#include <libpc/exceptions.hpp>
-#include <libpc/Utils.hpp>
-
-#include <iostream>
-
-using namespace boost;
 
 namespace libpc
 {

@@ -40,13 +40,6 @@
  ****************************************************************************/
 
 #include <libpc/SchemaLayout.hpp>
-#include <libpc/Utils.hpp>
-
-// boost
-#include <boost/concept_check.hpp>
-#include <boost/foreach.hpp>
-
-using namespace boost;
 
 namespace libpc
 {

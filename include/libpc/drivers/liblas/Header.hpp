@@ -32,16 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LIBLASHEADER_HPP
-#define INCLUDED_LIBLASHEADER_HPP
+#ifndef INCLUDED_DRIVERS_LIBLAS_HEADER_HPP
+#define INCLUDED_DRIVERS_LIBLAS_HEADER_HPP
 
-#include <iostream>
-#include <string>
+#include <libpc/libpc.hpp>
 
-#include <boost/cstdint.hpp>
-#include <boost/uuid/uuid.hpp>
+//#include <iostream>
+//#include <string>
+//
+//#include <boost/cstdint.hpp>
+//#include <boost/uuid/uuid.hpp>
 
-#include "libpc/Header.hpp"
+#include <libpc/Header.hpp>
 
 namespace libpc { namespace drivers { namespace liblas {
 

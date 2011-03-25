@@ -32,14 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <libpc/drivers/liblas/Writer.hpp>
 
-#include <cassert>
-
-#include <libpc/drivers/liblas/writer.hpp>
-#include <libpc/drivers/liblas/header.hpp>
+#include <liblas/header.hpp>
 #include <liblas/Writer.hpp>
 
 #include <libpc/exceptions.hpp>
+#include <libpc/libpc_config.hpp>
+#include <libpc/Schema.hpp>
+#include <libpc/Stage.hpp>
+#include <libpc/PointBuffer.hpp>
+#include <libpc/Header.hpp>
 
 
 namespace libpc { namespace drivers { namespace liblas {

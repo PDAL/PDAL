@@ -35,16 +35,15 @@
 #ifndef INCLUDED_STAGE_HPP
 #define INCLUDED_STAGE_HPP
 
-// boost
-#include <boost/cstdint.hpp>
+#include <libpc/libpc.hpp>
 
-#include <libpc/PointBuffer.hpp>
-#include <libpc/Header.hpp>
+#include <string>
 
     
 namespace libpc
 {
 
+class Header;
 class SequentialIterator;
 class RandomIterator;
 

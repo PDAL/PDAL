@@ -42,18 +42,14 @@
 #ifndef INCLUDED_BOUNDS_HPP
 #define INCLUDED_BOUNDS_HPP
 
+#include <libpc/libpc.hpp>
+
 #include <cassert>
 #include <vector>
-#include <iostream>
 #include <sstream>
-#include <string>
-#include <stdexcept>
-#include <math.h>
 
-#include <libpc/export.hpp>
 #include <libpc/Vector.hpp>
 #include <libpc/Range.hpp>
-#include <libpc/Utils.hpp>
 
 namespace libpc
 {

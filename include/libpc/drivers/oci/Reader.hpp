@@ -35,15 +35,15 @@
 #ifndef INCLUDED_LIBPC_DRIVER_OCI_READER_HPP
 #define INCLUDED_LIBPC_DRIVER_OCI_READER_HPP
 
-#include <libpc/Stage.hpp>
+#include <libpc/libpc.hpp>
 
-#include "common.hpp"
+#include <libpc/Stage.hpp>
 
 
 namespace libpc { namespace driver { namespace oci {
 
 
-
+class Options;
 
 
 

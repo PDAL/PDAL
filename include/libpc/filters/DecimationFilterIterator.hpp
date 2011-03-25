@@ -32,13 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DECIMATIONFILTERITERATOR_HPP
-#define INCLUDED_DECIMATIONFILTERITERATOR_HPP
+#ifndef INCLUDED_FILTERS_DECIMATIONFILTERITERATOR_HPP
+#define INCLUDED_FILTERS_DECIMATIONFILTERITERATOR_HPP
 
-#include <libpc/export.hpp>
-#include <libpc/Filter.hpp>
+#include <libpc/libpc.hpp>
+//#include <libpc/export.hpp>
+//#include <libpc/Filter.hpp>
 #include <libpc/FilterIterator.hpp>
-#include <libpc/Bounds.hpp>
+//#include <libpc/Bounds.hpp>
 
 namespace libpc { namespace filters {
 

@@ -32,16 +32,22 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LASREADER_HPP
-#define INCLUDED_LASREADER_HPP
+#ifndef INCLUDED_DRIVERS_LAS_READER_HPP
+#define INCLUDED_DRIVERS_LAS_READER_HPP
 
-#include <iostream>
+#include <libpc/libpc.hpp>
 
 #include <libpc/Stage.hpp>
-#include <libpc/Iterator.hpp>
-#include <libpc/drivers/las/Header.hpp>
+
+
+namespace libpc
+{
+    class PointBuffer;
+}
 
 namespace libpc { namespace drivers { namespace las {
+
+class LasHeader;
 
 class LIBPC_DLL LasReader : public Stage
 {

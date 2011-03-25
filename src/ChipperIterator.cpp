@@ -32,10 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/Chipper.hpp>
 #include <libpc/ChipperIterator.hpp>
+#include <libpc/Chipper.hpp>
 
-#include <libpc/exceptions.hpp>
 
 namespace libpc { namespace filters {
 

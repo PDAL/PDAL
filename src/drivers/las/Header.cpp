@@ -42,7 +42,6 @@
 
 #include <libpc/drivers/las/Header.hpp>
 
-#include <boost/concept_check.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
 namespace libpc { namespace drivers { namespace las {

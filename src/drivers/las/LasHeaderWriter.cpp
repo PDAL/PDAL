@@ -42,6 +42,9 @@
 
 #include "LasHeaderWriter.hpp"
 
+#include <libpc/drivers/las/Header.hpp>
+
+
 namespace libpc { namespace drivers { namespace las {
 
 

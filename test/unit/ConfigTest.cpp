@@ -36,6 +36,7 @@
 #include <boost/cstdint.hpp>
 
 #include <libpc/libpc.hpp>
+#include <libpc/libpc_config.hpp>
 
 using namespace libpc;
 

@@ -40,16 +40,15 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef INCLUDED_LASHEADER_HPP
-#define INCLUDED_LASHEADER_HPP
+#ifndef INCLUDED_DRIVERS_LAS_HEADER_HPP
+#define INCLUDED_DRIVERS_LAS_HEADER_HPP
 
-#include <iostream>
-#include <string>
+#include <libpc/libpc.hpp>
 
-#include <boost/cstdint.hpp>
 #include <boost/uuid/uuid.hpp>
 
 #include <libpc/Header.hpp>
+
 
 namespace libpc { namespace drivers { namespace las {
 

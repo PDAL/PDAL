@@ -41,12 +41,6 @@
 
 #include <libpc/Color.hpp>
 
-// boost
-//#include <boost/cstdint.hpp>
-// std
-//#include <stdexcept>
-//#include <limits>
-
 namespace libpc
 {
 

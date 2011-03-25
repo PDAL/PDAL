@@ -33,20 +33,14 @@
 ****************************************************************************/
 
 
-#include <cassert>
-#include <sstream>
-
-
 #include <libpc/drivers/oci/Writer.hpp>
-#include <libpc/drivers/oci/Header.hpp>
 
-#include <libpc/exceptions.hpp>
-#include <libpc/Utils.hpp>
-
-#include <cstdlib>
 #include <iostream>
 
 #include <boost/make_shared.hpp>
+
+#include <libpc/exceptions.hpp>
+
 
 namespace libpc { namespace driver { namespace oci {
 

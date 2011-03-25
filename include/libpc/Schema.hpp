@@ -42,13 +42,10 @@
 #ifndef LIBPC_SCHEMA_HPP_INCLUDED
 #define LIBPC_SCHEMA_HPP_INCLUDED
 
-// std
+#include <libpc/libpc.hpp>
+
 #include <vector>
-#include <list>
 
-// boost
-
-#include <libpc/export.hpp>
 #include <libpc/Dimension.hpp>
 
 

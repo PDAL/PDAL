@@ -35,9 +35,9 @@
 #ifndef INCLUDED_SPATIALREFERENCE_HPP
 #define INCLUDED_SPATIALREFERENCE_HPP
 
-#include <string>
+#include <libpc/libpc.hpp>
 
-#include <libpc/Utils.hpp>
+#include <string>
 
 namespace libpc
 {

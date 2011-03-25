@@ -35,9 +35,9 @@
 #ifndef INCLUDED_FILTER_HPP
 #define INCLUDED_FILTER_HPP
 
-#include <libpc/export.hpp>
+#include <libpc/libpc.hpp>
+
 #include <libpc/Stage.hpp>
-#include <libpc/Header.hpp>
 
 namespace libpc
 {

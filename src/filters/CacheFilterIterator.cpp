@@ -32,11 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/CacheFilter.hpp>
 #include <libpc/filters/CacheFilterIterator.hpp>
 
-#include <libpc/PointBufferCache.hpp>
-#include <libpc/exceptions.hpp>
+#include <libpc/filters/CacheFilter.hpp>
+#include <libpc/PointBuffer.hpp>
 
 namespace libpc { namespace filters {
 

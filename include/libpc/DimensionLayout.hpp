@@ -42,6 +42,8 @@
 #ifndef LIBPC_DIMENSIONLAYOUT_HPP_INCLUDED
 #define LIBPC_DIMENSIONLAYOUT_HPP_INCLUDED
 
+#include <libpc/libpc.hpp>
+
 #include <libpc/Dimension.hpp>
 
 

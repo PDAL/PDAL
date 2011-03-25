@@ -35,16 +35,10 @@
 #ifndef INCLUDED_UTILS_HPP
 #define INCLUDED_UTILS_HPP
 
-#include <iosfwd>
+#include <libpc/libpc.hpp>
+
 #include <string>
-#include <stdexcept>
 #include <cassert>
-#include <cmath>
-
-#include <boost/concept_check.hpp>
-#include <boost/cstdint.hpp>
-
-#include <libpc/export.hpp>
 
 namespace libpc
 {

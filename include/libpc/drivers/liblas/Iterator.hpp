@@ -32,15 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LIBLASREADERITERATOR_HPP
-#define INCLUDED_LIBLASREADERITERATOR_HPP
+#ifndef INCLUDED_DRIVERS_LIBLAS_ITERATOR_HPP
+#define INCLUDED_DRIVERS_LIBLAS_ITERATOR_HPP
 
-#include <libpc/Stage.hpp>
+#include <libpc/libpc.hpp>
+
+//#include <libpc/Stage.hpp>
 #include <libpc/Iterator.hpp>
 
-#include <iostream>
+#include <string>
 
-#include <libpc/drivers/liblas/header.hpp>
+//#include <libpc/drivers/liblas/Header.hpp>
 
 // fwd decls
 namespace liblas

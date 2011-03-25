@@ -35,6 +35,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
+#include <libpc/Iterator.hpp>
+#include <libpc/PointBuffer.hpp>
+#include <libpc/SchemaLayout.hpp>
+#include <libpc/Header.hpp>
 #include <libpc/drivers/faux/Reader.hpp>
 #include <libpc/filters/MosaicFilter.hpp>
 

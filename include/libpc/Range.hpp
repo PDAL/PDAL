@@ -35,10 +35,10 @@
 #ifndef INCLUDED_RANGE_HPP
 #define INCLUDED_RANGE_HPP
 
-#include <limits>
+#include <libpc/libpc.hpp>
 
 #include <libpc/Utils.hpp>
-#include <libpc/Vector.hpp>
+
 namespace libpc
 {
 

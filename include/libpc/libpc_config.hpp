@@ -44,8 +44,9 @@
 #ifndef INCLUDED_LIBPC_CONFIG_HPP
 #define INCLUDED_LIBPC_CONFIG_HPP
 
+#include <libpc/libpc.hpp>
+
 #include <string>
-#include <libpc/export.hpp>
 
 namespace libpc
 {
