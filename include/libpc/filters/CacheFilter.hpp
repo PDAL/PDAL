@@ -47,11 +47,14 @@ class PointBuffer;
     
 namespace filters {
 
-// This is just a very simple MRU filter -- future versions will be smarter.
-// This cache has the following constraints:
-//   - only one block is cached
-//   - read chunk sizes are assumed to be just 1 point
-// If more than one point is read, the cache is skipped.
+//
+// This is just a very simple MRU cache filter. It has the following constraints:
+//   - up to 'numBlocks' will be cached
+//   - we cache blocks of points, of size 'blockSize'
+//   - we only cache full blocks
+//   - we only cache on 'blockSize' boundaries
+//   - we only look into the cache if 1 point is being requested
+//
 class LIBPC_DLL CacheFilter : public Filter
 {
 public:
