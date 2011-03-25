@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Constant);
 
-    BOOST_CHECK(reader.getName() == "Faux Reader");
+    BOOST_CHECK_EQUAL(reader.getName(), "Faux Reader");
 
     const Schema& schema = reader.getHeader().getSchema();
     SchemaLayout layout(schema);
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
     SequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
-    BOOST_CHECK(numRead == 750);
+    BOOST_CHECK_EQUAL(numRead, 750);
 
     int offsetX = schema.getDimensionIndex(Dimension::Field_X);
     int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
@@ -74,10 +74,10 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
         double z = data.getField<double>(i, offsetZ);
         boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-        BOOST_CHECK(Utils::compare_approx<double>(x, 1.0, (std::numeric_limits<double>::min)()) == true);
-        BOOST_CHECK(Utils::compare_approx<double>(y, 2.0, (std::numeric_limits<double>::min)()) == true);
-        BOOST_CHECK(Utils::compare_approx<double>(z, 3.0, (std::numeric_limits<double>::min)()) == true);
-        BOOST_CHECK(t==i);
+        BOOST_CHECK_CLOSE(x, 2.0, (std::numeric_limits<double>::min)());
+        BOOST_CHECK_CLOSE(y, 2.0, (std::numeric_limits<double>::min)());
+        BOOST_CHECK_CLOSE(z, 3.0, (std::numeric_limits<double>::min)());
+        BOOST_CHECK_EQUAL(t, i);
     }
 
     delete iter;
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Constant);
 
-    BOOST_CHECK(reader.getName() == "Faux Reader");
+    BOOST_CHECK_EQUAL(reader.getName(), "Faux Reader");
 
     const Schema& schema = reader.getHeader().getSchema();
     SchemaLayout layout(schema);
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     RandomIterator* iter = reader.createRandomIterator();
 
     boost::uint32_t numRead = iter->read(data);
-    BOOST_CHECK(numRead == 10);
+    BOOST_CHECK_EQUAL(numRead, 10);
 
     {
         for (boost::uint32_t i=0; i<numRead; i++)
@@ -116,15 +116,15 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
             double z = data.getField<double>(i, offsetZ);
             boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-            BOOST_CHECK(Utils::compare_approx<double>(x, 1.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx<double>(y, 2.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx<double>(z, 3.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(t==i);
+            BOOST_CHECK_CLOSE(x, 1.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_CLOSE(y, 2.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_CLOSE(z, 3.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_EQUAL(t, i);
         }
     }
 
     numRead = iter->read(data);
-    BOOST_CHECK(numRead == 10);
+    BOOST_CHECK_EQUAL(numRead, 10);
 
     {
         for (boost::uint32_t i=0; i<numRead; i++)
@@ -134,17 +134,17 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
             double z = data.getField<double>(i, offsetZ);
             boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-            BOOST_CHECK(Utils::compare_approx<double>(x, 1.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx<double>(y, 2.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx<double>(z, 3.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(t==i+10);
+            BOOST_CHECK_CLOSE(x, 1.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_CLOSE(y, 2.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_CLOSE(z, 3.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_EQUAL(t, i+10);
         }
     }
 
     boost::uint64_t newPos = iter->seek(99);
-    BOOST_CHECK(newPos == 99);
+    BOOST_CHECK_EQUAL(newPos, 99);
     numRead = iter->read(data);
-    BOOST_CHECK(numRead == 10);
+    BOOST_CHECK_EQUAL(numRead, 10);
 
     {
         for (boost::uint32_t i=0; i<numRead; i++)
@@ -154,17 +154,18 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
             double z = data.getField<double>(i, offsetZ);
             boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-            BOOST_CHECK(Utils::compare_approx<double>(x, 1.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx<double>(y, 2.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx<double>(z, 3.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(t==i+99);
+            BOOST_CHECK_CLOSE(x, 1.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_CLOSE(y, 2.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_CLOSE(z, 3.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_EQUAL(t, i+99);
+
         }
     }
 
     newPos = iter->seek(7);
-    BOOST_CHECK(newPos == 7);
+    BOOST_CHECK_EQUAL(newPos, 7);
     numRead = iter->read(data);
-    BOOST_CHECK(numRead == 10);
+    BOOST_CHECK_EQUAL(numRead, 10);
 
     {
         for (boost::uint32_t i=0; i<numRead; i++)
@@ -174,10 +175,11 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
             double z = data.getField<double>(i, offsetZ);
             boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-            BOOST_CHECK(Utils::compare_approx<double>(x, 1.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx<double>(y, 2.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(Utils::compare_approx<double>(z, 3.0, (std::numeric_limits<double>::min)()) == true);
-            BOOST_CHECK(t==i+7);
+            BOOST_CHECK_CLOSE(x, 1.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_CLOSE(y, 2.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_CLOSE(z, 3.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_EQUAL(t, i+7);
+
         }
     }
 
@@ -200,7 +202,7 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
     SequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
-    BOOST_CHECK(numRead == 750);
+    BOOST_CHECK_EQUAL(numRead, 750);
 
     int offsetX = schema.getDimensionIndex(Dimension::Field_X);
     int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
@@ -213,11 +215,21 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
         double y = data.getField<double>(i, offsetY);
         double z = data.getField<double>(i, offsetZ);
         boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
-
-        BOOST_CHECK(x >= 1.0 && x <= 101.0);
-        BOOST_CHECK(y >= 2.0 && y <= 102.0);
-        BOOST_CHECK(z >= 3.0 && z <= 103.0);
-        BOOST_CHECK(t == i);
+        
+        BOOST_CHECK_GE(x, 1.0);
+        BOOST_CHECK_LE(x, 101.0);
+        
+        BOOST_CHECK_GE(y, 2.0);
+        BOOST_CHECK_LE(y, 102.0);
+        
+        BOOST_CHECK_GE(z, 3.0);
+        BOOST_CHECK_LE(z, 103.0);
+        
+        BOOST_CHECK_EQUAL(t, i);
+        // BOOST_CHECK(x >= 1.0 && x <= 101.0);
+        // BOOST_CHECK(y >= 2.0 && y <= 102.0);
+        // BOOST_CHECK(z >= 3.0 && z <= 103.0);
+        // BOOST_CHECK(t == i);
     }
 
     delete iter;
@@ -238,7 +250,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     SequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
-    BOOST_CHECK(numRead == 2);
+    BOOST_CHECK_EQUAL(numRead, 2);
 
     const int offsetX = schema.getDimensionIndex(Dimension::Field_X);
     const int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
@@ -255,15 +267,16 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     const double z1 = data.getField<double>(1, offsetZ);
     const boost::uint64_t t1 = data.getField<boost::uint64_t>(1, offsetT);
 
-    BOOST_CHECK(Utils::compare_approx<double>(x0, 0, 0.000001));
-    BOOST_CHECK(Utils::compare_approx<double>(y0, 0, 0.000001));
-    BOOST_CHECK(Utils::compare_approx<double>(z0, 0, 0.000001));
-    BOOST_CHECK(t0 == 0);
+    BOOST_CHECK_CLOSE(x0, 0.0, (std::numeric_limits<double>::min)());
+    BOOST_CHECK_CLOSE(y0, 0.0, (std::numeric_limits<double>::min)());
+    BOOST_CHECK_CLOSE(z0, 0.0, (std::numeric_limits<double>::min)());
+    BOOST_CHECK_EQUAL(t0, 0);
 
-    BOOST_CHECK(Utils::compare_approx<double>(x1, 4, 0.000001));
-    BOOST_CHECK(Utils::compare_approx<double>(y1, 4, 0.000001));
-    BOOST_CHECK(Utils::compare_approx<double>(z1, 4, 0.000001));
-    BOOST_CHECK(t1 == 1);
+    BOOST_CHECK_CLOSE(x1, 4.0, (std::numeric_limits<double>::min)());
+    BOOST_CHECK_CLOSE(y1, 4.0, (std::numeric_limits<double>::min)());
+    BOOST_CHECK_CLOSE(z1, 4.0, (std::numeric_limits<double>::min)());
+    BOOST_CHECK_EQUAL(t1, 1);
+
 
     delete iter;
 
@@ -284,7 +297,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
     SequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
-    BOOST_CHECK(numRead == 750);
+    BOOST_CHECK_EQUAL(numRead,750);
 
     int offsetX = schema.getDimensionIndex(Dimension::Field_X);
     int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
@@ -302,10 +315,11 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
         double z = data.getField<double>(i, offsetZ);
         boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-        BOOST_CHECK(Utils::compare_approx<double>(x, 1.0 + delX*i, 0.0001));
-        BOOST_CHECK(Utils::compare_approx<double>(y, 2.0 + delY*i, 0.0001));
-        BOOST_CHECK(Utils::compare_approx<double>(z, 3.0 + delZ*i, 0.0001));
-        BOOST_CHECK(t == i);
+        BOOST_CHECK_CLOSE(x, 1.0 + delX*i, (std::numeric_limits<double>::min)());
+        BOOST_CHECK_CLOSE(y, 2.0 + delY*i, (std::numeric_limits<double>::min)());
+        BOOST_CHECK_CLOSE(z, 3.0 + delZ*i, (std::numeric_limits<double>::min)());
+        BOOST_CHECK_EQUAL(t, i);
+
     }
 
     delete iter;
@@ -327,9 +341,9 @@ BOOST_AUTO_TEST_CASE(test_custom_fields)
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Random, dims);
 
     const Schema& schema = reader.getHeader().getSchema();
-    BOOST_CHECK(schema.getDimensions().size() == 2);
-    BOOST_CHECK(schema.getDimension(0).getField() == Dimension::Field_Y);
-    BOOST_CHECK(schema.getDimension(1).getField() == Dimension::Field_X);
+    BOOST_CHECK_EQUAL(schema.getDimensions().size(), 2);
+    BOOST_CHECK_EQUAL(schema.getDimension(0).getField(), Dimension::Field_Y);
+    BOOST_CHECK_EQUAL(schema.getDimension(1).getField(), Dimension::Field_X);
 
     return;
 }
