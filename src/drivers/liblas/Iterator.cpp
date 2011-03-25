@@ -263,12 +263,22 @@ RandomIterator::~RandomIterator()
 }
 
 
-boost::uint64_t RandomIterator::seekImpl(boost::uint64_t pos)
+boost::uint64_t RandomIterator::seekImpl(boost::uint64_t newPos64)
 {
-    size_t posx = (size_t)pos; // BUG
-    getExternalReader().Seek(posx);
+    // The liblas reader's seek() call only supports size_t, so we might
+    // not be able to satisfy this request...
 
-    return pos;
+    if (newPos64 > std::numeric_limits<size_t>::max())
+    {
+        throw libpc_error("cannot support seek offsets greater than 32-bits");
+    }
+
+    // safe cast, since we just handled the overflow case
+    size_t newPos = static_cast<size_t>(newPos64);
+
+    getExternalReader().Seek(newPos);
+
+    return newPos;
 }
 
 
