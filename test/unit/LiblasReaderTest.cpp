@@ -437,8 +437,8 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
 
     boost::uint8_t iterators = reader.getIteratorSupport();
     
-    BOOST_CHECK_EQUAL(iterators & StageIterator_Sequential != 0, true);
-    BOOST_CHECK_EQUAL(iterators & StageIterator_Random != 0, true);
+    BOOST_CHECK_EQUAL((iterators & StageIterator_Sequential) != 0, true);
+    BOOST_CHECK_EQUAL((iterators & StageIterator_Random) != 0, true);
 
     return;
 }

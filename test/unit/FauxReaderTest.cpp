@@ -76,9 +76,9 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
         double z = data.getField<double>(i, offsetZ);
         boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-        BOOST_CHECK_CLOSE(x, 1.0, (std::numeric_limits<double>::min)());
-        BOOST_CHECK_CLOSE(y, 2.0, (std::numeric_limits<double>::min)());
-        BOOST_CHECK_CLOSE(z, 3.0, (std::numeric_limits<double>::min)());
+        BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
+        BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
+        BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
         BOOST_CHECK_EQUAL(t, i);
     }
 
@@ -118,9 +118,9 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
             double z = data.getField<double>(i, offsetZ);
             boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-            BOOST_CHECK_CLOSE(x, 1.0, (std::numeric_limits<double>::min)());
-            BOOST_CHECK_CLOSE(y, 2.0, (std::numeric_limits<double>::min)());
-            BOOST_CHECK_CLOSE(z, 3.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
+            BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
+            BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
             BOOST_CHECK_EQUAL(t, i);
         }
     }
@@ -136,9 +136,9 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
             double z = data.getField<double>(i, offsetZ);
             boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-            BOOST_CHECK_CLOSE(x, 1.0, (std::numeric_limits<double>::min)());
-            BOOST_CHECK_CLOSE(y, 2.0, (std::numeric_limits<double>::min)());
-            BOOST_CHECK_CLOSE(z, 3.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
+            BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
+            BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
             BOOST_CHECK_EQUAL(t, i+10);
         }
     }
@@ -156,9 +156,9 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
             double z = data.getField<double>(i, offsetZ);
             boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-            BOOST_CHECK_CLOSE(x, 1.0, (std::numeric_limits<double>::min)());
-            BOOST_CHECK_CLOSE(y, 2.0, (std::numeric_limits<double>::min)());
-            BOOST_CHECK_CLOSE(z, 3.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
+            BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
+            BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
             BOOST_CHECK_EQUAL(t, i+99);
 
         }
@@ -177,9 +177,9 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
             double z = data.getField<double>(i, offsetZ);
             boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-            BOOST_CHECK_CLOSE(x, 1.0, (std::numeric_limits<double>::min)());
-            BOOST_CHECK_CLOSE(y, 2.0, (std::numeric_limits<double>::min)());
-            BOOST_CHECK_CLOSE(z, 3.0, (std::numeric_limits<double>::min)());
+            BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
+            BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
+            BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
             BOOST_CHECK_EQUAL(t, i+7);
 
         }
@@ -269,14 +269,14 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     const double z1 = data.getField<double>(1, offsetZ);
     const boost::uint64_t t1 = data.getField<boost::uint64_t>(1, offsetT);
 
-    BOOST_CHECK_CLOSE(x0, 0.0, (std::numeric_limits<double>::min)());
-    BOOST_CHECK_CLOSE(y0, 0.0, (std::numeric_limits<double>::min)());
-    BOOST_CHECK_CLOSE(z0, 0.0, (std::numeric_limits<double>::min)());
+    BOOST_CHECK_CLOSE(x0, 0.0, 0.00001);
+    BOOST_CHECK_CLOSE(y0, 0.0, 0.00001);
+    BOOST_CHECK_CLOSE(z0, 0.0, 0.00001);
     BOOST_CHECK_EQUAL(t0, 0);
 
-    BOOST_CHECK_CLOSE(x1, 4.0, (std::numeric_limits<double>::min)());
-    BOOST_CHECK_CLOSE(y1, 4.0, (std::numeric_limits<double>::min)());
-    BOOST_CHECK_CLOSE(z1, 4.0, (std::numeric_limits<double>::min)());
+    BOOST_CHECK_CLOSE(x1, 4.0, 0.00001);
+    BOOST_CHECK_CLOSE(y1, 4.0, 0.00001);
+    BOOST_CHECK_CLOSE(z1, 4.0, 0.00001);
     BOOST_CHECK_EQUAL(t1, 1);
 
 
@@ -317,9 +317,9 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
         double z = data.getField<double>(i, offsetZ);
         boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-        BOOST_CHECK_CLOSE(x, 1.0 + delX*i, (std::numeric_limits<double>::min)());
-        BOOST_CHECK_CLOSE(y, 2.0 + delY*i, (std::numeric_limits<double>::min)());
-        BOOST_CHECK_CLOSE(z, 3.0 + delZ*i, (std::numeric_limits<double>::min)());
+        BOOST_CHECK_CLOSE(x, 1.0 + delX*i, 0.00001);
+        BOOST_CHECK_CLOSE(y, 2.0 + delY*i, 0.00001);
+        BOOST_CHECK_CLOSE(z, 3.0 + delZ*i, 0.00001);
         BOOST_CHECK_EQUAL(t, i);
 
     }
@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
     libpc::drivers::faux::Reader reader(bounds, 750, libpc::drivers::faux::Reader::Ramp);
-
+    
     const Schema& schema = reader.getHeader().getSchema();
     SchemaLayout layout(schema);
 
@@ -364,8 +364,8 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
     
     boost::uint8_t iterators = reader.getIteratorSupport();
     
-    BOOST_CHECK_EQUAL(iterators & StageIterator_Sequential != 0, true);
-    BOOST_CHECK_EQUAL(iterators & StageIterator_Random != 0, true);
+    BOOST_CHECK_EQUAL((iterators & StageIterator_Sequential) != 0, true);
+    BOOST_CHECK_EQUAL((iterators & StageIterator_Random) != 0, true);
 
     return;
 }
