@@ -78,6 +78,11 @@ public:
 protected:
     virtual boost::uint32_t readImpl(PointBuffer&) = 0;
 
+    // This is provided as a sample implementation that some stages could use
+    // to implement their own skip or seek functions. It uses the read() call 
+    // to advance "count" points forward, so it is not at all optimal.
+    boost::uint64_t naiveSkipImpl(boost::uint64_t count);
+
     boost::uint64_t m_index;
 
 private:

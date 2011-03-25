@@ -34,10 +34,23 @@
 
 #include <libpc/Iterator.hpp>
 
+#include <algorithm> // for std::min/max
+
+#include <libpc/Stage.hpp>
+#include <libpc/Header.hpp>
+#include <libpc/PointBuffer.hpp>
+
 namespace libpc
 {
 
 static boost::uint32_t s_defaultChunkSize = 1024;
+
+
+//---------------------------------------------------------------------------
+//
+// Iterator
+//
+//---------------------------------------------------------------------------
 
 Iterator::Iterator(const Stage& stage)
     : m_index(0)
@@ -88,7 +101,36 @@ boost::uint32_t Iterator::read(PointBuffer& data)
 }
 
 
+boost::uint64_t Iterator::naiveSkipImpl(boost::uint64_t count)
+{
+    boost::uint64_t totalNumRead = 0;
 
+    // read (and discard) all the next 'count' points
+    // in case count is really big, we do this in blocks of size 'chunk'
+    while (count > 0)
+    {
+        const boost::uint64_t thisCount64 = std::min<boost::uint64_t>(getChunkSize(), count);
+        // getChunkSize is a uint32, so this cast is safe
+        const boost::uint32_t thisCount = static_cast<boost::uint32_t>(thisCount64);
+
+        PointBuffer junk(getStage().getHeader().getSchema(), thisCount);
+        
+        const boost::uint32_t numRead = read(junk);
+        if (numRead == 0) break; // end of file or something
+
+        count -= numRead;
+        totalNumRead += numRead;
+    }
+
+    return totalNumRead;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// SequentialIterator
+//
+//---------------------------------------------------------------------------
 
 SequentialIterator::SequentialIterator(const Stage& stage)
     : Iterator(stage)
@@ -119,6 +161,11 @@ bool SequentialIterator::atEnd() const
 }
 
 
+//---------------------------------------------------------------------------
+//
+// RandomIterator
+//
+//---------------------------------------------------------------------------
 
 RandomIterator::RandomIterator(const Stage& stage)
     : Iterator(stage)

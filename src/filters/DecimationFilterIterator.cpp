@@ -51,22 +51,7 @@ DecimationFilterSequentialIterator::DecimationFilterSequentialIterator(const Dec
 
 boost::uint64_t DecimationFilterSequentialIterator::skipImpl(boost::uint64_t count)
 {
-    boost::uint64_t totalNumRead = 0;
-
-    while (count > 0)
-    {
-        const boost::uint32_t thisCount = (boost::uint32_t)std::min<boost::uint64_t>(getChunkSize(), count);
-
-        PointBuffer junk(getStage().getHeader().getSchema(), thisCount);
-        
-        const boost::uint32_t numRead = read(junk);
-        if (numRead == 0) break; // end of file
-
-        count -= numRead;
-        totalNumRead += numRead;
-    }
-
-    return totalNumRead;
+    return naiveSkipImpl(count);
 }
 
 
