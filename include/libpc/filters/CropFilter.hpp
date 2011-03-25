@@ -59,6 +59,14 @@ public:
 
     const std::string& getName() const;
 
+    inline boost::uint8_t getIteratorSupport () 
+    {   
+        boost::uint8_t mask(0); 
+        mask |= StageIterator_Sequential;  
+        return mask;
+    }
+    
+
     bool supportsSequentialIterator() const { return true; }
     bool supportsRandomIterator() const { return false; }
     libpc::SequentialIterator* createSequentialIterator() const;

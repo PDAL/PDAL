@@ -59,6 +59,13 @@ public:
 
     const std::vector<const Stage*>& getPrevStages() const;
 
+    inline boost::uint8_t getIteratorSupport () const
+    {   
+        boost::uint8_t mask(0); 
+        mask |= StageIterator_Sequential;  
+        return mask;
+    }
+    
     bool supportsSequentialIterator() const { return true; }
     bool supportsRandomIterator() const { return false; }  // BUG: could be true
     libpc::SequentialIterator* createSequentialIterator() const;

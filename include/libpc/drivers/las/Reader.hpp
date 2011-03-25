@@ -60,6 +60,14 @@ public:
 
     const LasHeader& getLasHeader() const;
 
+    boost::uint8_t getIteratorSupport () const
+    {   
+        boost::uint8_t mask(0); 
+        mask |= StageIterator_Sequential;  
+        mask |= StageIterator_Random; 
+        return mask;
+    }
+
     bool supportsSequentialIterator() const { return true; }
     bool supportsRandomIterator() const { return true; }
     libpc::SequentialIterator* createSequentialIterator() const;

@@ -156,6 +156,14 @@ public:
 
     const std::string& getName() const ;
 
+    inline boost::uint8_t getIteratorSupport () const
+    {   
+        // FIXME: make this represent what this reader actually supports!
+        boost::uint8_t mask(0); 
+        mask |= StageIterator_Block; 
+        return mask;
+    }
+
     bool supportsSequentialIterator() const { return true; }
     bool supportsRandomIterator() const { return false; }
     libpc::SequentialIterator* createSequentialIterator() const;
