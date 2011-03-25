@@ -32,10 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
+#include <libpc/filters/ColorFilter.hpp>
+
 #include <libpc/exceptions.hpp>
 #include <libpc/Color.hpp>
-#include <libpc/filters/ColorFilter.hpp>
 #include <libpc/filters/ColorFilterIterator.hpp>
 
 namespace libpc { namespace filters {

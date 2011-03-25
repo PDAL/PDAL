@@ -33,8 +33,8 @@
 ****************************************************************************/
 
 #include <libpc/filters/DecimationFilterIterator.hpp>
+
 #include <libpc/filters/DecimationFilter.hpp>
-#include <libpc/exceptions.hpp>
 
 namespace libpc { namespace filters {
 

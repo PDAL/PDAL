@@ -35,6 +35,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
+#include <libpc/Iterator.hpp>
 #include <libpc/drivers/faux/Reader.hpp>
 #include <libpc/drivers/faux/Writer.hpp>
 #include <libpc/filters/DecimationFilter.hpp>

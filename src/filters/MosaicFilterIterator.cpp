@@ -32,10 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
 #include <libpc/filters/MosaicFilterIterator.hpp>
+
 #include <libpc/filters/MosaicFilter.hpp>
-#include <libpc/exceptions.hpp>
 
 namespace libpc { namespace filters {
 

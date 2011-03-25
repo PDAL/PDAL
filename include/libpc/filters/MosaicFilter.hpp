@@ -32,12 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_MOSAICFILTER_HPP
-#define INCLUDED_MOSAICFILTER_HPP
+#ifndef INCLUDED_FILTERS_MOSAICFILTER_HPP
+#define INCLUDED_FILTERS_MOSAICFILTER_HPP
+
+#include <libpc/libpc.hpp>
 
 #include <libpc/Filter.hpp>
-#include <libpc/FilterIterator.hpp>
-#include <libpc/Bounds.hpp>
+//#include <libpc/FilterIterator.hpp>
+//#include <libpc/Bounds.hpp>
 
 
 namespace libpc { namespace filters {

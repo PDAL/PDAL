@@ -33,10 +33,8 @@
 ****************************************************************************/
 
 #include <libpc/filters/CropFilterIterator.hpp>
-#include <libpc/filters/CropFilter.hpp>
-#include <libpc/exceptions.hpp>
 
-#include <algorithm>
+#include <libpc/filters/CropFilter.hpp>
 
 namespace libpc { namespace filters {
 

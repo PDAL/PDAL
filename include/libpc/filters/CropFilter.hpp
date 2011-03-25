@@ -32,13 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_CROPFILTER_HPP
-#define INCLUDED_CROPFILTER_HPP
+#ifndef INCLUDED_FILTERS_CROPFILTER_HPP
+#define INCLUDED_FILTERS_CROPFILTER_HPP
 
-#include <libpc/export.hpp>
+#include <libpc/libpc.hpp>
+//#include <libpc/export.hpp>
 #include <libpc/Filter.hpp>
-#include <libpc/FilterIterator.hpp>
-#include <libpc/Bounds.hpp>
+//#include <libpc/FilterIterator.hpp>
+//#include <libpc/Bounds.hpp>
 
 namespace libpc { namespace filters {
 
