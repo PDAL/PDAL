@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
     SequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
-    BOOST_CHECK_EQUAL(numRead, 750);
+    BOOST_CHECK_EQUAL(numRead, 750u);
 
     int offsetX = schema.getDimensionIndex(Dimension::Field_X);
     int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     RandomIterator* iter = reader.createRandomIterator();
 
     boost::uint32_t numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 10);
+    BOOST_CHECK_EQUAL(numRead, 10u);
 
     {
         for (boost::uint32_t i=0; i<numRead; i++)
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     }
 
     numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 10);
+    BOOST_CHECK_EQUAL(numRead, 10u);
 
     {
         for (boost::uint32_t i=0; i<numRead; i++)
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     boost::uint64_t newPos = iter->seek(99);
     BOOST_CHECK_EQUAL(newPos, 99);
     numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 10);
+    BOOST_CHECK_EQUAL(numRead, 10u);
 
     {
         for (boost::uint32_t i=0; i<numRead; i++)
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     newPos = iter->seek(7);
     BOOST_CHECK_EQUAL(newPos, 7);
     numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 10);
+    BOOST_CHECK_EQUAL(numRead, 10u);
 
     {
         for (boost::uint32_t i=0; i<numRead; i++)
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
     SequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
-    BOOST_CHECK_EQUAL(numRead, 750);
+    BOOST_CHECK_EQUAL(numRead, 750u);
 
     int offsetX = schema.getDimensionIndex(Dimension::Field_X);
     int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     SequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
-    BOOST_CHECK_EQUAL(numRead, 2);
+    BOOST_CHECK_EQUAL(numRead, 2u);
 
     const int offsetX = schema.getDimensionIndex(Dimension::Field_X);
     const int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
     SequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
-    BOOST_CHECK_EQUAL(numRead,750);
+    BOOST_CHECK_EQUAL(numRead,750u);
 
     int offsetX = schema.getDimensionIndex(Dimension::Field_X);
     int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
@@ -343,7 +343,7 @@ BOOST_AUTO_TEST_CASE(test_custom_fields)
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Random, dims);
 
     const Schema& schema = reader.getHeader().getSchema();
-    BOOST_CHECK_EQUAL(schema.getDimensions().size(), 2);
+    BOOST_CHECK_EQUAL(schema.getDimensions().size(), 2u);
     BOOST_CHECK_EQUAL(schema.getDimension(0).getField(), Dimension::Field_Y);
     BOOST_CHECK_EQUAL(schema.getDimension(1).getField(), Dimension::Field_X);
 
