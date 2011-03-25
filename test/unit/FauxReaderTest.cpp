@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
         double z = data.getField<double>(i, offsetZ);
         boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
 
-        BOOST_CHECK_CLOSE(x, 2.0, (std::numeric_limits<double>::min)());
+        BOOST_CHECK_CLOSE(x, 1.0, (std::numeric_limits<double>::min)());
         BOOST_CHECK_CLOSE(y, 2.0, (std::numeric_limits<double>::min)());
         BOOST_CHECK_CLOSE(z, 3.0, (std::numeric_limits<double>::min)());
         BOOST_CHECK_EQUAL(t, i);
