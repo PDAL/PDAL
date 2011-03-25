@@ -62,13 +62,14 @@ public:
     }
 
     // compares two values to within a given tolerance
-    // BUG: need to disallow T to be an unsigned type
+    // the value |tolerance| is compared to |actual - expected|
     template<class T>
     static bool compare_approx(const T& actual, const T& expected, const T& tolerance)
     {
-        const T diff = actual - expected;
+        const double diff = std::abs((double)actual - (double)expected);
+        const double delta = std::abs((double)tolerance);
 
-        if ( !((diff <= tolerance) && (diff >= -tolerance )) )
+        if (diff > delta)
         {
             return false;
         }

@@ -98,6 +98,17 @@ BOOST_AUTO_TEST_CASE(test_comparators)
         ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.1f);
         BOOST_CHECK(ok);
     }
+
+    {
+        ok = Utils::compare_approx<unsigned int>(10, 12, 2);
+        BOOST_CHECK(ok);
+
+        ok = Utils::compare_approx<unsigned int>(10, 12, 3);
+        BOOST_CHECK(ok);
+
+        ok = Utils::compare_approx<unsigned int>(10, 12, 1);
+        BOOST_CHECK(!ok);
+    }
 }
 
 
