@@ -62,7 +62,7 @@ public:
     // Read the  given number of points (or less, if the reader runs out first), 
     // and then write them out to wherever.  Returns total number of points
     // actually written.
-    boost::uint64_t write(std::size_t targetNumPointsToWrite);
+    boost::uint64_t write(boost::uint64_t targetNumPointsToWrite);
 
 protected:
     // this is called once before the loop with the writeBuffer calls
@@ -77,8 +77,8 @@ protected:
     Stage& getPrevStage();
 
     // these two are valid for use after writeBegin has been called
-    std::size_t m_actualNumPointsWritten;
-    std::size_t m_targetNumPointsToWrite;
+    boost::uint64_t m_actualNumPointsWritten;
+    boost::uint64_t m_targetNumPointsToWrite;
 
 private:
     Stage& m_prevStage;

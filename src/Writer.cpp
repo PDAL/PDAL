@@ -75,7 +75,7 @@ boost::uint32_t Writer::getChunkSize() const
 }
 
 
-boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
+boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 {
     m_targetNumPointsToWrite = targetNumPointsToWrite;
     m_actualNumPointsWritten = 0;
@@ -84,18 +84,22 @@ boost::uint64_t Writer::write(std::size_t targetNumPointsToWrite)
 
     writeBegin();
 
+    // in case targetNumPointsToWrite is really big, we will process just one chunk at a time
+
     while (m_actualNumPointsWritten < m_targetNumPointsToWrite)
     {
-        boost::uint64_t numRemainingPointsToRead = m_targetNumPointsToWrite - m_actualNumPointsWritten;
-        boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(std::min<boost::uint64_t>(numRemainingPointsToRead, m_chunkSize));
+        const boost::uint64_t numRemainingPointsToRead = m_targetNumPointsToWrite - m_actualNumPointsWritten;
+        
+        const boost::uint64_t numPointsToReadThisChunk64 = std::min<boost::uint64_t>(numRemainingPointsToRead, m_chunkSize);
+        // this case is safe because m_chunkSize is a uint32
+        const boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(numPointsToReadThisChunk64);
 
         PointBuffer buffer(m_prevStage.getHeader().getSchema(), numPointsToReadThisChunk);
 
-
-        boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
+        const boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
         assert(numPointsReadThisChunk <= numPointsToReadThisChunk);
 
-        boost::uint32_t numPointsWrittenThisChunk = writeBuffer(buffer);
+        const boost::uint32_t numPointsWrittenThisChunk = writeBuffer(buffer);
         assert(numPointsWrittenThisChunk == numPointsReadThisChunk);
 
         m_actualNumPointsWritten += numPointsWrittenThisChunk;
