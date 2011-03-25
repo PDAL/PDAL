@@ -40,7 +40,6 @@
 
 #include <libpc/filters/Chipper.hpp>
 
-#include <libpc/Header.hpp>
 #include <libpc/filters/ChipperIterator.hpp>
 #include <libpc/exceptions.hpp>
 

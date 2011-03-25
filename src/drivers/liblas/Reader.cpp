@@ -38,7 +38,6 @@
 
 #include <libpc/exceptions.hpp>
 #include <libpc/drivers/liblas/Iterator.hpp>
-#include <libpc/drivers/liblas/Header.hpp>
 
 namespace libpc { namespace drivers { namespace liblas {
 

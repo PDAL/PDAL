@@ -36,7 +36,6 @@
 
 #include <libpc/exceptions.hpp>
 #include <libpc/Bounds.hpp>
-#include <libpc/Header.hpp>
 #include <libpc/filters/MosaicFilterIterator.hpp>
 
 namespace libpc { namespace filters {

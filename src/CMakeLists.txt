@@ -40,7 +40,6 @@ set(LIBPC_BASE_HPP
   ${LIBPC_HEADERS_DIR}/DimensionLayout.hpp
   ${LIBPC_HEADERS_DIR}/Filter.hpp
   ${LIBPC_HEADERS_DIR}/FilterIterator.hpp
-  ${LIBPC_HEADERS_DIR}/Header.hpp
   ${LIBPC_HEADERS_DIR}/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/Metadata.hpp
   ${LIBPC_HEADERS_DIR}/Vector.hpp  
@@ -63,7 +62,6 @@ set(LIBPC_BASE_CPP
   DimensionLayout.cpp
   Filter.cpp
   FilterIterator.cpp
-  Header.cpp
   Iterator.cpp
   Metadata.cpp
   Vector.cpp  
@@ -144,14 +142,12 @@ ENDFOREACH(file)
 #
 
 set (LIBPC_DRIVERS_LIBLAS_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/liblas/Header.hpp
   ${LIBPC_HEADERS_DIR}/drivers/liblas/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/drivers/liblas/Reader.hpp
   ${LIBPC_HEADERS_DIR}/drivers/liblas/Writer.hpp
 )
 
 set (LIBPC_DRIVERS_LIBLAS_CPP 
-  ./drivers/liblas/Header.cpp
   ./drivers/liblas/Iterator.cpp
   ./drivers/liblas/Reader.cpp
   ./drivers/liblas/Writer.cpp
@@ -179,7 +175,6 @@ set(LIBPC_DRIVERS_OCI_HPP
 set (LIBPC_DRIVERS_OCI_CPP 
   ./drivers/oci/oci_wrapper.cpp
   ./drivers/oci/common.cpp
-  ./drivers/oci/header.cpp
   ./drivers/oci/Reader.cpp
   ./drivers/oci/Writer.cpp
 )

@@ -36,7 +36,6 @@
 #include <boost/cstdint.hpp>
 
 #include <libpc/Iterator.hpp>
-#include <libpc/Header.hpp>
 #include <libpc/Schema.hpp>
 #include <libpc/PointBuffer.hpp>
 #include <libpc/SchemaLayout.hpp>

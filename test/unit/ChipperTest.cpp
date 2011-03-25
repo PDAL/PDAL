@@ -35,7 +35,6 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/Header.hpp>
 #include <libpc/filters/Chipper.hpp>
 #include <libpc/drivers/liblas/Writer.hpp>
 #include <libpc/drivers/liblas/Reader.hpp>

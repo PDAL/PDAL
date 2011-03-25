@@ -34,8 +34,6 @@
 
 #include <libpc/Filter.hpp>
 
-#include <libpc/Header.hpp>
-
 namespace libpc
 {
 

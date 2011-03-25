@@ -36,7 +36,6 @@
 
 #include <libpc/drivers/faux/Iterator.hpp>
 #include <libpc/exceptions.hpp>
-#include <libpc/Header.hpp>
 #include <libpc/SchemaLayout.hpp>
 #include <libpc/PointBuffer.hpp>
 

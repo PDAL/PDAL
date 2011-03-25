@@ -42,7 +42,6 @@
 #include <libpc/Schema.hpp>
 #include <libpc/Stage.hpp>
 #include <libpc/PointBuffer.hpp>
-#include <libpc/Header.hpp>
 
 
 namespace libpc { namespace drivers { namespace liblas {

@@ -36,7 +36,6 @@
 
 #include <libpc/Dimension.hpp>
 #include <libpc/Schema.hpp>
-#include <libpc/Header.hpp>
 #include <libpc/exceptions.hpp>
 #include <libpc/Color.hpp>
 #include <libpc/PointBuffer.hpp>

@@ -37,7 +37,6 @@
 #include <algorithm> // for std::min/max
 
 #include <libpc/Stage.hpp>
-#include <libpc/Header.hpp>
 #include <libpc/PointBuffer.hpp>
 
 namespace libpc

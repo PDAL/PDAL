@@ -34,7 +34,6 @@
 
 #include <libpc/drivers/faux/Iterator.hpp>
 
-#include <libpc/Header.hpp>
 #include <libpc/drivers/faux/Reader.hpp>
 
 
