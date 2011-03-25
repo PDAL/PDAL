@@ -39,6 +39,8 @@
 
 #include <vector>
 
+#include <libpc/Utils.hpp>
+
 namespace libpc
 {
 

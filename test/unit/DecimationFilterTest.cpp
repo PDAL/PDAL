@@ -36,6 +36,10 @@
 #include <boost/cstdint.hpp>
 
 #include <libpc/Iterator.hpp>
+#include <libpc/Header.hpp>
+#include <libpc/Schema.hpp>
+#include <libpc/PointBuffer.hpp>
+#include <libpc/SchemaLayout.hpp>
 #include <libpc/drivers/faux/Reader.hpp>
 #include <libpc/drivers/faux/Writer.hpp>
 #include <libpc/filters/DecimationFilter.hpp>

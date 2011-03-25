@@ -35,9 +35,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
+#include <libpc/Header.hpp>
 #include <libpc/chipper.hpp>
-#include <libpc/drivers/liblas/writer.hpp>
-#include <libpc/drivers/liblas/reader.hpp>
+#include <libpc/drivers/liblas/Writer.hpp>
+#include <libpc/drivers/liblas/Reader.hpp>
 
 #include "support.hpp"
 
