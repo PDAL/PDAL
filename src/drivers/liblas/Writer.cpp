@@ -32,11 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <libpc/drivers/liblas/Writer.hpp>
 
-#include <cassert>
-
-#include <libpc/drivers/liblas/writer.hpp>
-#include <libpc/drivers/liblas/header.hpp>
+#include <liblas/header.hpp>
 #include <liblas/Writer.hpp>
 
 #include <libpc/exceptions.hpp>

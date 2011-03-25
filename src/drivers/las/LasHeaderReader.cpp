@@ -42,8 +42,9 @@
 
 #include "LasHeaderReader.hpp"
 
-#include <boost/concept_check.hpp>
-#include <boost/uuid/uuid_io.hpp>
+#include <libpc/Utils.hpp>
+#include <libpc/drivers/las/Header.hpp>
+
 
 namespace libpc { namespace drivers { namespace las {
     
@@ -59,9 +60,9 @@ LasHeaderReader::LasHeaderReader(LasHeader& header, std::istream& istream)
 void LasHeaderReader::read()
 {
     // Helper variables
-    uint8_t n1 = 0;
-    uint16_t n2 = 0;
-    uint32_t n4 = 0;
+    boost::uint8_t n1 = 0;
+    boost::uint16_t n2 = 0;
+    boost::uint32_t n4 = 0;
     double x1 = 0;
     double y1 = 0;
     double z1 = 0;

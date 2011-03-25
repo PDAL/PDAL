@@ -32,8 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LIBLASWRITER_HPP
-#define INCLUDED_LIBLASWRITER_HPP
+#ifndef INCLUDED_DRIVERS_LIBLAS_LIBLASWRITER_HPP
+#define INCLUDED_DRIVERS_LIBLAS_LIBLASWRITER_HPP
+
+#include <libpc/libpc.hpp>
 
 #include <libpc/Writer.hpp>
 

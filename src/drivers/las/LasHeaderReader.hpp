@@ -40,16 +40,16 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef INCLUDED_LASHEADERREADER_HPP
-#define INCLUDED_LASHEADERREADER_HPP
+#ifndef INCLUDED_DRIVERS_LAS_LASHEADERREADER_HPP
+#define INCLUDED_DRIVERS_LAS_LASHEADERREADER_HPP
 
-#include <iostream>
+#include <libpc/libpc.hpp>
 
-#include <libpc/drivers/las/Header.hpp>
-
+#include <iosfwd>
 
 namespace libpc { namespace drivers { namespace las {
 
+class LasHeader;
 
 class LIBPC_DLL LasHeaderReader
 {

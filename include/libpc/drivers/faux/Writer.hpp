@@ -35,11 +35,13 @@
 #ifndef INCLUDED_DRIVERS_FAUX_WRITER_HPP
 #define INCLUDED_DRIVERS_FAUX_WRITER_HPP
 
-#include <string>
+#include <libpc/libpc.hpp>
 
 #include <libpc/Writer.hpp>
 
+
 namespace libpc { namespace drivers { namespace faux {
+
 
 //
 // The FauxWriter doesn't actually write to disk -- instead, it just
@@ -84,6 +86,8 @@ private:
     Writer(const Writer&); // not implemented
 };
 
+
 } } } // namespaces
+
 
 #endif

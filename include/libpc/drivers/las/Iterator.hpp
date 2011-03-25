@@ -32,14 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LASREADERITERATOR_HPP
-#define INCLUDED_LASREADERITERATOR_HPP
+#ifndef INCLUDED_DRIVERS_LAS_ITERATOR_HPP
+#define INCLUDED_DRIVERS_LAS_ITERATOR_HPP
 
-#include <iostream>
+#include <libpc/libpc.hpp>
 
-#include <libpc/Stage.hpp>
 #include <libpc/Iterator.hpp>
-#include <libpc/drivers/las/Header.hpp>
+
 
 namespace libpc { namespace drivers { namespace las {
 

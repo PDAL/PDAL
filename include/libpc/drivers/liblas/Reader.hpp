@@ -32,15 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LIBLASREADER_HPP
-#define INCLUDED_LIBLASREADER_HPP
+#ifndef INCLUDED_DRIVERS_LIBLAS_LIBLASREADER_HPP
+#define INCLUDED_DRIVERS_LIBLAS_LIBLASREADER_HPP
+
+#include <libpc/libpc.hpp>
 
 #include <libpc/Stage.hpp>
-#include <libpc/Iterator.hpp>
+//#include <libpc/Iterator.hpp>
 
-#include <iostream>
+//#include <iostream>
 
-#include <libpc/drivers/liblas/header.hpp>
+//#include <libpc/drivers/liblas/Header.hpp>
 
 // fwd decls
 namespace liblas
@@ -50,6 +52,7 @@ namespace liblas
 
 namespace libpc { namespace drivers { namespace liblas {
 
+class LiblasHeader;
 
 class LIBPC_DLL LiblasReader : public Stage
 {

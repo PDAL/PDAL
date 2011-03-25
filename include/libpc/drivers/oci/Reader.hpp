@@ -37,7 +37,7 @@
 
 #include <libpc/Stage.hpp>
 
-#include "common.hpp"
+#include "Common.hpp"
 
 
 namespace libpc { namespace driver { namespace oci {

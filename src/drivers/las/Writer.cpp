@@ -32,9 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
-
 #include <libpc/drivers/las/Writer.hpp>
+
 #include "LasHeaderWriter.hpp"
 #include <libpc/exceptions.hpp>
 

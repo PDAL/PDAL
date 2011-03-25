@@ -32,8 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LASWRITER_HPP
-#define INCLUDED_LASWRITER_HPP
+#ifndef INCLUDED_DRIVERS_LAS_WRITER_HPP
+#define INCLUDED_DRIVERS_LAS_WRITER_HPP
+
+#include <libpc/libpc.hpp>
 
 #include <libpc/Writer.hpp>
 #include <libpc/drivers/las/Header.hpp>

@@ -35,10 +35,13 @@
 #ifndef INCLUDED_DRIVERS_FAUX_READER_HPP
 #define INCLUDED_DRIVERS_FAUX_READER_HPP
 
+#include <libpc/libpc.hpp>
+
 #include <libpc/Stage.hpp>
-#include <libpc/Iterator.hpp>
+
 
 namespace libpc { namespace drivers { namespace faux {
+
 
 // The FauxReader doesn't read from disk, but instead just makes up data for its
 // points.  The reader is constructed with a given bounding box and a given 
@@ -90,5 +93,6 @@ private:
 
 
 } } } // namespaces
+
 
 #endif

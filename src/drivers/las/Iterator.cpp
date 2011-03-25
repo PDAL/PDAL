@@ -33,8 +33,8 @@
 ****************************************************************************/
 
 #include <libpc/drivers/las/Iterator.hpp>
+
 #include <libpc/drivers/las/Reader.hpp>
-#include "LasHeaderReader.hpp"
 #include <libpc/exceptions.hpp>
 
 namespace libpc { namespace drivers { namespace las {

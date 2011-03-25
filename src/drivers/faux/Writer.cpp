@@ -32,8 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <iostream>
-
 #include <libpc/drivers/faux/Writer.hpp>
 
 using std::string;

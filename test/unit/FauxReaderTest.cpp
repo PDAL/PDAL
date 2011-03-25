@@ -36,6 +36,7 @@
 #include <boost/cstdint.hpp>
 
 #include <libpc/drivers/faux/Reader.hpp>
+#include <libpc/drivers/faux/Iterator.hpp>
 
 using namespace libpc;
 

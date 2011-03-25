@@ -32,15 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-
-#include <libpc/drivers/liblas/reader.hpp>
-#include <libpc/drivers/liblas/Iterator.hpp>
+#include <libpc/drivers/liblas/Reader.hpp>
 
 #include <liblas/factory.hpp>
-#include <liblas/bounds.hpp>
 
 #include <libpc/exceptions.hpp>
-#include <libpc/drivers/liblas/header.hpp>
+#include <libpc/drivers/liblas/Iterator.hpp>
+#include <libpc/drivers/liblas/Header.hpp>
 
 namespace libpc { namespace drivers { namespace liblas {
 

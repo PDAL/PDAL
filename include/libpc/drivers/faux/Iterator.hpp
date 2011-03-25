@@ -35,10 +35,13 @@
 #ifndef INCLUDED_DRIVERS_FAUX_READER_ITERATOR_HPP
 #define INCLUDED_DRIVERS_FAUX_READER_ITERATOR_HPP
 
-#include <libpc/Stage.hpp>
+#include <libpc/libpc.hpp>
+
 #include <libpc/Iterator.hpp>
 
+
 namespace libpc { namespace drivers { namespace faux {
+
 
 class Reader;
 
@@ -69,6 +72,8 @@ private:
     const Reader& m_reader;
 };
 
+
 } } } // namespaces
+
 
 #endif
