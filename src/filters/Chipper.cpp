@@ -38,15 +38,16 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/Chipper.hpp>
+#include <libpc/filters/Chipper.hpp>
 
 #include <libpc/Header.hpp>
-#include <libpc/ChipperIterator.hpp>
+#include <libpc/filters/ChipperIterator.hpp>
 #include <libpc/exceptions.hpp>
 
 #include <boost/scoped_ptr.hpp>
 
 using namespace std;
+using namespace libpc::filters::chipper;
 
 /**
 The objective is to split the region into non-overlapping blocks, each
@@ -78,7 +79,7 @@ from the narrow array so that the approriate extrema of the block can
 be stored.
 **/
 
-namespace libpc { namespace chipper {
+namespace libpc { namespace filters {
 
 vector<boost::uint32_t> Block::GetIDs() const
 {
@@ -144,7 +145,7 @@ const std::string& Chipper::getName() const
 
 libpc::SequentialIterator* Chipper::createSequentialIterator() const
 {
-    return new filters::ChipperSequentialIterator(*this);
+    return 0;
 }
 
 

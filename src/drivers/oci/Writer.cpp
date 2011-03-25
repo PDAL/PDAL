@@ -596,7 +596,7 @@ void Writer::writeBegin()
     // cumulate a global bounds for the dataset
     for ( boost::uint32_t i = 0; i < m_chipper.GetBlockCount(); ++i )
     {
-        const chipper::Block& b = m_chipper.GetBlock(i);
+        const filters::chipper::Block& b = m_chipper.GetBlock(i);
         
         // FIXME: This only gets called once!
         if (m_bounds.empty()) // If the user already set the bounds for this writer, we're using that
@@ -625,7 +625,7 @@ void Writer::writeEnd()
 
 bool Writer::FillOraclePointBuffer(PointBuffer const& buffer, 
                                  std::vector<boost::uint8_t>& point_data,
-                                 chipper::Block const& block,
+                                 filters::chipper::Block const& block,
                                  boost::uint32_t block_id)
 {
 
@@ -771,7 +771,7 @@ void Writer::SetOrdinates(Statement statement,
 
 bool Writer::WriteBlock(PointBuffer const& buffer, 
                                  std::vector<boost::uint8_t>& point_data,
-                                 chipper::Block const& block,
+                                 filters::chipper::Block const& block,
                                  boost::uint32_t block_id)
 {
 
@@ -926,7 +926,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
     
     for ( boost::uint32_t i = 0; i < m_chipper.GetBlockCount(); ++i )
     {
-        const chipper::Block& b = m_chipper.GetBlock(i);
+        const filters::chipper::Block& b = m_chipper.GetBlock(i);
         PointBuffer block = b.GetBuffer(m_stage);
         std::vector<boost::uint8_t> oracle_buffer;
         

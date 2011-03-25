@@ -41,26 +41,24 @@
 
 namespace libpc {
 
-namespace chipper
-{
-    class Chipper;
-}
-    
+
 namespace filters {
 
+class Chipper;
 
-class ChipperSequentialIterator : public libpc::FilterSequentialIterator
-{
-public:
-    ChipperSequentialIterator(const chipper::Chipper& chipper);
 
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    const chipper::Chipper& m_chipper;
-};
+// class ChipperBlockIterator : public libpc::FilterBlockIterator
+// {
+// public:
+//     ChipperBlockIterator(const Chipper& filter);
+// 
+// private:
+//     boost::uint64_t skipImpl(boost::uint64_t);
+//     boost::uint32_t readImpl(PointBuffer&);
+//     bool atEndImpl() const;
+// 
+//     const Chipper& m_chipper;
+// };
 
 
 } } // namespaces

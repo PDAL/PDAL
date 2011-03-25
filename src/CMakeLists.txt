@@ -36,8 +36,6 @@ set(LIBPC_BASE_HPP
   ${LIBPC_HEADERS_DIR}/types.hpp
   ${LIBPC_HEADERS_DIR}/Bounds.hpp
   ${LIBPC_HEADERS_DIR}/Color.hpp
-  ${LIBPC_HEADERS_DIR}/Chipper.hpp
-  ${LIBPC_HEADERS_DIR}/ChipperIterator.hpp
   ${LIBPC_HEADERS_DIR}/Dimension.hpp
   ${LIBPC_HEADERS_DIR}/DimensionLayout.hpp
   ${LIBPC_HEADERS_DIR}/Filter.hpp
@@ -60,8 +58,6 @@ set(LIBPC_BASE_HPP
 
 set(LIBPC_BASE_CPP
   Bounds.cpp
-  Chipper.cpp
-  ChipperIterator.cpp
   Color.cpp
   Dimension.cpp
   DimensionLayout.cpp
@@ -225,6 +221,8 @@ endif()
 set(LIBPC_FILTERS_HPP
   ${LIBPC_HEADERS_DIR}/filters/CacheFilter.hpp
   ${LIBPC_HEADERS_DIR}/filters/CacheFilterIterator.hpp
+  ${LIBPC_HEADERS_DIR}/filters/Chipper.hpp
+  ${LIBPC_HEADERS_DIR}/filters/ChipperIterator.hpp
   ${LIBPC_HEADERS_DIR}/filters/ColorFilter.hpp
   ${LIBPC_HEADERS_DIR}/filters/ColorFilterIterator.hpp
   ${LIBPC_HEADERS_DIR}/filters/CropFilter.hpp
@@ -238,6 +236,8 @@ set(LIBPC_FILTERS_HPP
 set (LIBPC_FILTERS_CPP 
   ./filters/CacheFilter.cpp
   ./filters/CacheFilterIterator.cpp
+  ./filters/Chipper.cpp
+  ./filters/ChipperIterator.cpp
   ./filters/ColorFilter.cpp
   ./filters/ColorFilterIterator.cpp
   ./filters/CropFilter.cpp

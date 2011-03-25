@@ -39,7 +39,7 @@
 
 #include <libpc/Writer.hpp>
 #include <libpc/Bounds.hpp>
-#include <libpc/chipper.hpp>
+#include <libpc/filters/Chipper.hpp>
 
 #include "Common.hpp"
 
@@ -93,11 +93,11 @@ private:
     
     bool FillOraclePointBuffer(PointBuffer const& buffer, 
                              std::vector<boost::uint8_t>& point_data, 
-                             chipper::Block const& block,
+                             filters::chipper::Block const& block,
                              boost::uint32_t block_id);
     bool WriteBlock(PointBuffer const& buffer, 
                              std::vector<boost::uint8_t>& point_data, 
-                             chipper::Block const& block,
+                             filters::chipper::Block const& block,
                              boost::uint32_t block_id);
 
     void SetOrdinates(Statement statement,
@@ -106,7 +106,7 @@ private:
     void SetElements(Statement statement,
                      OCIArray* elem_info);
     Stage& m_stage;
-    chipper::Chipper m_chipper;
+    filters::Chipper m_chipper;
     
     Options& m_options;
     libpc::Bounds<double> m_bounds; // Bounds of the entire point cloud
