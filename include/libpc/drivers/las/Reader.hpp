@@ -68,6 +68,8 @@ public:
         return mask;
     }
 
+    libpc::Iterator* createIterator(StageIteratorType t) const;
+    
     bool supportsSequentialIterator() const { return true; }
     bool supportsRandomIterator() const { return true; }
     libpc::SequentialIterator* createSequentialIterator() const;

@@ -143,5 +143,12 @@ libpc::SequentialIterator* ColorFilter::createSequentialIterator() const
     return new ColorFilterSequentialIterator(*this);
 }
 
+libpc::Iterator* ColorFilter::createIterator(StageIteratorType t) const
+{
+    if (t == StageIterator_Sequential)
+        return new ColorFilterSequentialIterator(*this);
+    
+    return 0;
+}
 
 } } // namespaces
