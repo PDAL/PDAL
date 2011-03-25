@@ -717,21 +717,21 @@ void LasHeader::add_record0_dimensions(Schema& schema)
 {
     std::ostringstream text;
 
-    Dimension x(Dimension::Field_X, Dimension::Uint32);
+    Dimension x(Dimension::Field_X, Dimension::Int32);
     text << "x coordinate as a long integer.  You must use the scale and "
          << "offset information of the header to determine the double value.";
     x.setDescription(text.str());
     schema.addDimension(x);
     text.str("");
 
-    Dimension y(Dimension::Field_Y, Dimension::Uint32);
+    Dimension y(Dimension::Field_Y, Dimension::Int32);
     text << "y coordinate as a long integer.  You must use the scale and "
          << "offset information of the header to determine the double value.";
     y.setDescription(text.str());
     schema.addDimension(y);
     text.str("");
 
-    Dimension z(Dimension::Field_Z, Dimension::Uint32);
+    Dimension z(Dimension::Field_Z, Dimension::Int32);
     text << "z coordinate as a long integer.  You must use the scale and "
          << "offset information of the header to determine the double value.";
     z.setDescription(text.str());
@@ -865,7 +865,7 @@ void LasHeader::add_time(Schema& schema)
 {
     std::ostringstream text;
 
-    Dimension t(Dimension::Field_Time, Dimension::Uint64);
+    Dimension t(Dimension::Field_Time, Dimension::Double);
     text << "The GPS Time is the double floating point time tag value at "
          "which the point was acquired. It is GPS Week Time if the "
          "Global Encoding low bit is clear and Adjusted Standard GPS "

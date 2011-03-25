@@ -118,25 +118,25 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
         throw not_yet_implemented("Unknown point format encountered");
     }
 
-    const int fieldIndexX = schema.getDimensionIndex(Dimension::Field_X);
-    const int fieldIndexY = schema.getDimensionIndex(Dimension::Field_Y);
-    const int fieldIndexZ = schema.getDimensionIndex(Dimension::Field_Z);
+    const int fieldIndexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    const int fieldIndexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+    const int fieldIndexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
     
-    const int fieldIndexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity);
-    const int fieldIndexReturnNum = schema.getDimensionIndex(Dimension::Field_ReturnNumber);
-    const int fieldIndexNumReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns);
-    const int fieldIndexScanDir = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag);
-    const int fieldIndexFlight = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine);
-    const int fieldIndexClassification = schema.getDimensionIndex(Dimension::Field_Classification);
-    const int fieldIndexScanAngle = schema.getDimensionIndex(Dimension::Field_ScanAngleRank);
-    const int fieldIndexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
-    const int fieldIndexPointSource = schema.getDimensionIndex(Dimension::Field_PointSourceId);
+    const int fieldIndexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity, Dimension::Int16);
+    const int fieldIndexReturnNum = schema.getDimensionIndex(Dimension::Field_ReturnNumber, Dimension::Uint8);
+    const int fieldIndexNumReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns, Dimension::Uint8);
+    const int fieldIndexScanDir = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag, Dimension::Uint8);
+    const int fieldIndexFlight = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine, Dimension::Uint8);
+    const int fieldIndexClassification = schema.getDimensionIndex(Dimension::Field_Classification, Dimension::Uint8);
+    const int fieldIndexScanAngle = schema.getDimensionIndex(Dimension::Field_ScanAngleRank, Dimension::Int8);
+    const int fieldIndexUserData = schema.getDimensionIndex(Dimension::Field_UserData, Dimension::Uint8);
+    const int fieldIndexPointSource = schema.getDimensionIndex(Dimension::Field_PointSourceId, Dimension::Uint16);
     
-    const int fieldIndexTime = (hasTimeData ? schema.getDimensionIndex(Dimension::Field_Time) : 0);
+    const int fieldIndexTime = (hasTimeData ? schema.getDimensionIndex(Dimension::Field_Time, Dimension::Double) : 0);
     
-    const int fieldIndexRed = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
-    const int fieldIndexGreen = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
-    const int fieldIndexBlue = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Blue) : 0);
+    const int fieldIndexRed = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Red, Dimension::Uint16) : 0);
+    const int fieldIndexGreen = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint16) : 0);
+    const int fieldIndexBlue = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Blue, Dimension::Uint16) : 0);
 
     boost::uint32_t numValidPoints = 0;
 

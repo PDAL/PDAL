@@ -75,9 +75,9 @@ boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffe
     const SchemaLayout& schemaLayout = dstData.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
 
-    int fieldX = schema.getDimensionIndex(Dimension::Field_X);
-    int fieldY = schema.getDimensionIndex(Dimension::Field_Y);
-    int fieldZ = schema.getDimensionIndex(Dimension::Field_Z);
+    int fieldX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
+    int fieldY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
+    int fieldZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
 
     const Bounds<double>& bounds = this->getBounds();
 

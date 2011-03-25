@@ -58,9 +58,9 @@ static void check_pN(const PointBuffer& data, const Schema& schema,
                      size_t index, 
                      double xref, double yref, double zref)
 {
-    int offsetX = schema.getDimensionIndex(Dimension::Field_X);
-    int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
+    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
 
     boost::int32_t x0raw = data.getField<boost::int32_t>(index, offsetX);
     boost::int32_t y0raw = data.getField<boost::int32_t>(index, offsetY);

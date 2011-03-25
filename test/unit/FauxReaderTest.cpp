@@ -64,10 +64,10 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    int offsetX = schema.getDimensionIndex(Dimension::Field_X);
-    int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
-    int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
+    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
+    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
@@ -100,10 +100,10 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
 
     PointBuffer data(layout, 10);
 
-    int offsetX = schema.getDimensionIndex(Dimension::Field_X);
-    int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
-    int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
+    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
+    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
 
     RandomIterator* iter = reader.createRandomIterator();
 
@@ -206,10 +206,10 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    int offsetX = schema.getDimensionIndex(Dimension::Field_X);
-    int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
-    int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
+    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
+    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
@@ -254,10 +254,10 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
 
     BOOST_CHECK_EQUAL(numRead, 2u);
 
-    const int offsetX = schema.getDimensionIndex(Dimension::Field_X);
-    const int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
-    const int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
-    const int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
+    const int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
+    const int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
+    const int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+    const int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
 
     const double x0 = data.getField<double>(0, offsetX);
     const double y0 = data.getField<double>(0, offsetY);
@@ -301,10 +301,10 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
 
     BOOST_CHECK_EQUAL(numRead,750u);
 
-    int offsetX = schema.getDimensionIndex(Dimension::Field_X);
-    int offsetY = schema.getDimensionIndex(Dimension::Field_Y);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z);
-    int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
+    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
+    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
 
     double delX = (101.0 - 1.0) / (750.0 - 1.0);
     double delY = (152.0 - 2.0) / (750.0 - 1.0);

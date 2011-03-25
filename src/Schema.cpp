@@ -41,6 +41,10 @@
 
 #include <libpc/Schema.hpp>
 
+#include <iostream>
+
+#include <libpc/exceptions.hpp>
+
 namespace libpc
 {
 
@@ -140,6 +144,68 @@ void Schema::addDimension(Dimension const& dim)
     m_indexTable[field] = (int)index;
 
     return;
+}
+
+
+const Dimension& Schema::getDimension(std::size_t index) const
+{
+    return m_dimensions[index];
+}
+
+
+const Schema::Dimensions& Schema::getDimensions() const
+{
+    return m_dimensions;
+}
+
+
+int Schema::getDimensionIndex(Dimension::Field field, Dimension::DataType datatype) const
+{
+    const int index = m_indexTable[field];
+    
+    assert(index != -1);
+    if (index == -1)
+    {
+        throw libpc_error("Requested dimension field not present");
+    }
+    
+    const Dimension& dim = m_dimensions[index];
+    
+    assert(dim.getDataType() == datatype);
+    if (dim.getDataType() != datatype)
+    {
+        throw libpc_error("Requested dimension field present, but with different datatype");
+    }
+    
+    return index;
+}
+
+
+int Schema::getDimensionIndex(const Dimension& dim) const
+{
+    return getDimensionIndex(dim.getField(), dim.getDataType());
+}
+
+
+bool Schema::hasDimension(Dimension::Field field, Dimension::DataType datatype) const
+{
+    const int index = m_indexTable[field];
+    if (index == -1) return false;
+    const Dimension& dim = m_dimensions[index];
+    if (dim.getDataType() != datatype) return false;
+    return true;
+}
+
+
+bool Schema::hasDimension(const Dimension& dim) const
+{
+    return hasDimension(dim.getField(), dim.getDataType());
+}
+
+
+void Schema::dump() const
+{
+    std::cout << *this;
 }
 
 

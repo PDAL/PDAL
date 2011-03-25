@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
     const Schema& schema = reader.getHeader().getSchema();
     SchemaLayout layout(schema);
-    const int offsetT = schema.getDimensionIndex(Dimension::Field_Time);
+    const int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
 
     PointBuffer dataBig(layout, 1024);
     PointBuffer dataSmall(layout, 1);

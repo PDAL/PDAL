@@ -73,56 +73,30 @@ public:
     void addDimension(Dimension const& dim);
     void addDimensions(const std::vector<Dimension>& dims);
 
-    const Dimension& getDimension(std::size_t index) const
-    {
-        return m_dimensions[index];
-    }
+    const Dimension& getDimension(std::size_t index) const;
+    const Dimensions& getDimensions() const;
 
-    Dimension& getDimension(std::size_t index)
-    {
-        return m_dimensions[index];
-    }
+    // returns the index of the field
+    //
+    // This function assumes the field is present and valid.  If not, it will throw.
+    // (This behaviour is okay because looking up the diemsnion index is not expected 
+    // to be on the critical path anywhere.)
+    int getDimensionIndex(Dimension::Field field, Dimension::DataType datatype) const;
+    int getDimensionIndex(const Dimension& dim) const;
 
-    const Dimensions& getDimensions() const
-    {
-        return m_dimensions;
-    }
+    bool hasDimension(Dimension::Field field, Dimension::DataType datatype) const;
+    bool hasDimension(const Dimension& dim) const;
 
-    bool hasDimension(Dimension::Field field) const
-    {
-        int index = m_indexTable[field];
-        return index != -1;
-    }
-
-    bool hasDimension(Dimension::Field field, Dimension::DataType datatype) const
-    {
-        int index = m_indexTable[field];
-        if (index == -1) return false;
-        const Dimension& dim = m_dimensions[index];
-        if (dim.getDataType() != datatype) return false;
-        return true;
-    }
-
-    bool hasDimension(const Dimension& dim) const
-    {
-        return hasDimension(dim.getField(), dim.getDataType());
-    }
-
-    // assumes the index does, in fact, exist
-    int getDimensionIndex(Dimension::Field field) const
-    {
-        int index = m_indexTable[field];
-        assert(index != -1);
-        return index;
-    }
-    
     boost::property_tree::ptree getPTree() const;
+
+    void dump() const;
 
 private:
     std::vector<Dimension> m_dimensions;
 
-    // BUG: use boost::array?
-    int m_indexTable[Dimension::Field_LAST]; // mapping from field name to index position, or -1 if field not present
+    // this is a mapping from field name to index position in the
+    // m_dimensions array (or -1 if field not present)
+    int m_indexTable[Dimension::Field_LAST];
 };
 
 

@@ -89,9 +89,9 @@ void LiblasWriter::setupExternalHeader()
 
     const Schema& schema = getPrevStage().getHeader().getSchema();
 
-    int indexX = schema.getDimensionIndex(Dimension::Field_X);
-    int indexY = schema.getDimensionIndex(Dimension::Field_Y);
-    int indexZ = schema.getDimensionIndex(Dimension::Field_Z);
+    int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+    int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
     const Dimension& dimX = schema.getDimension(indexX);
     const Dimension& dimY = schema.getDimension(indexY);
     const Dimension& dimZ = schema.getDimension(indexZ);
@@ -198,25 +198,25 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointBuffer& PointBuffer)
 
     const Schema& schema = PointBuffer.getSchema();
 
-    const int indexX = schema.getDimensionIndex(Dimension::Field_X);
-    const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
-    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z);
+    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
     
-    const int indexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity);
-    const int indexReturnNumber = schema.getDimensionIndex(Dimension::Field_ReturnNumber);
-    const int indexNumberOfReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns);
-    const int indexScanDirectionFlag = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag);
-    const int indexEdgeOfFlightLine = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine);
-    const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification);
-    const int indexScanAngleRank = schema.getDimensionIndex(Dimension::Field_ScanAngleRank);
-    const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData);
-    const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId);
+    const int indexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity, Dimension::Uint16);
+    const int indexReturnNumber = schema.getDimensionIndex(Dimension::Field_ReturnNumber, Dimension::Uint8);
+    const int indexNumberOfReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns, Dimension::Uint8);
+    const int indexScanDirectionFlag = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag, Dimension::Uint8);
+    const int indexEdgeOfFlightLine = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine, Dimension::Uint8);
+    const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification, Dimension::Uint8);
+    const int indexScanAngleRank = schema.getDimensionIndex(Dimension::Field_ScanAngleRank, Dimension::Int8);
+    const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData, Dimension::Uint8);
+    const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId, Dimension::Uint16);
     
-    const int indexTime = (hasTimeData ? schema.getDimensionIndex(Dimension::Field_Time) : 0);
+    const int indexTime = (hasTimeData ? schema.getDimensionIndex(Dimension::Field_Time, Dimension::Double) : 0);
 
-    const int indexRed = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Red) : 0);
-    const int indexGreen = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Green) : 0);
-    const int indexBlue = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Blue) : 0);
+    const int indexRed = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Red, Dimension::Uint16) : 0);
+    const int indexGreen = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint16) : 0);
+    const int indexBlue = (hasColorData ? schema.getDimensionIndex(Dimension::Field_Blue, Dimension::Uint16) : 0);
 
     //const int indexWavePacketDescriptorIndex = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_WavePacketDescriptorIndex) : 0);
     //const int indexWaveformDataOffset = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformDataOffset) : 0);

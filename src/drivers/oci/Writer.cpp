@@ -633,7 +633,7 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
     libpc::Schema const& schema = buffer.getSchema();
     std::vector<boost::uint32_t> ids = block.GetIDs();
 
-    bool hasTimeData = schema.hasDimension(Dimension::Field_Time);
+    bool hasTimeData = schema.hasDimension(Dimension::Field_Time, Dimension::Uint64);
     
     boost::uint64_t count = buffer.getNumPoints();
 
@@ -643,11 +643,11 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
     
     // assert(count*oracle_record_size == point_data.size());
 
-    const int indexX = schema.getDimensionIndex(Dimension::Field_X);
-    const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
-    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z);
-    const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification);
-    const int indexTime = schema.getDimensionIndex(Dimension::Field_Time);
+    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+    const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification, Dimension::Uint8);
+    const int indexTime = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Double);
     
     Dimension const& dimX = schema.getDimension(indexX);
     Dimension const& dimY = schema.getDimension(indexY);

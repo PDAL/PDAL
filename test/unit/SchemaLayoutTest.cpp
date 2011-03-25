@@ -49,14 +49,17 @@ BOOST_AUTO_TEST_CASE(test_layout)
     Schema s1;
     s1.addDimension(d1);
     s1.addDimension(d2);
-    BOOST_CHECK(s1.getDimensionIndex(Dimension::Field_X) == 0);
-    BOOST_CHECK(s1.getDimensionIndex(Dimension::Field_Y) == 1);
-    
+    BOOST_CHECK(s1.getDimensionIndex(Dimension::Field_X, Dimension::Uint32) == 0);
+    BOOST_CHECK(s1.getDimensionIndex(Dimension::Field_Y, Dimension::Uint32) == 1);
+
+    BOOST_CHECK(s1.hasDimension(Dimension::Field_X, Dimension::Uint8) == false);
+    BOOST_CHECK(s1.hasDimension(Dimension::Field_Y, Dimension::Uint8) == false);
+
     Schema s2;
     s2.addDimension(d1);
-    BOOST_CHECK(s2.hasDimension(Dimension::Field_X) == true);
-    BOOST_CHECK(s2.getDimensionIndex(Dimension::Field_X) == 0);
-    BOOST_CHECK(s2.hasDimension(Dimension::Field_Y) == false);
+    BOOST_CHECK(s2.hasDimension(Dimension::Field_X, Dimension::Uint32) == true);
+    BOOST_CHECK(s2.getDimensionIndex(Dimension::Field_X, Dimension::Uint32) == 0);
+    BOOST_CHECK(s2.hasDimension(Dimension::Field_Y, Dimension::Uint32) == false);
 
     SchemaLayout l1(s1);
     SchemaLayout l2(l1);

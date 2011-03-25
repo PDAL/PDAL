@@ -174,8 +174,8 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
 
 
 
-    const int indexX = schema.getDimensionIndex(Dimension::Field_X);
-    const int indexY = schema.getDimensionIndex(Dimension::Field_Y);
+    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
 
     Dimension const& dimX = schema.getDimension(indexX);
     Dimension const& dimY = schema.getDimension(indexY);

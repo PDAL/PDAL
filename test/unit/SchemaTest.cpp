@@ -64,7 +64,6 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK(s1!=s4);
     BOOST_CHECK(s4!=s1);
 
-    BOOST_CHECK(s1.hasDimension(Dimension::Field_X));
     BOOST_CHECK(s1.hasDimension(Dimension::Field_X, Dimension::Uint32));
     BOOST_CHECK(!s1.hasDimension(Dimension::Field_X, Dimension::Uint16));
     Dimension dx32(Dimension::Field_X, Dimension::Uint32);
