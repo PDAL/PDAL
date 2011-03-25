@@ -87,7 +87,7 @@ void LiblasWriter::setupExternalHeader()
     setSystemIdentifier("libPC");
     setGeneratingSoftware(GetVersionString());
 
-    const Schema& schema = getPrevStage().getHeader().getSchema();
+    const Schema& schema = getPrevStage().getSchema();
 
     int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
     int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);

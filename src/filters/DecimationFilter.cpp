@@ -45,8 +45,7 @@ DecimationFilter::DecimationFilter(const Stage& prevStage, boost::uint32_t step)
     : Filter(prevStage)
     , m_step(step)
 {
-    Header& header = getHeader();
-    header.setNumPoints( header.getNumPoints() / step );
+    this->setNumPoints( this->getNumPoints() / step );
 
     return;
 }

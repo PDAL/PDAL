@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
     LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
     BOOST_CHECK(reader.getName() == "Liblas Reader");
 
-    const Schema& schema = reader.getHeader().getSchema();
+    const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 3);
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_random)
     LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
     BOOST_CHECK(reader.getName() == "Liblas Reader");
 
-    const Schema& schema = reader.getHeader().getSchema();
+    const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 3);
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
     LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
     BOOST_CHECK(reader.getName() == "Liblas Reader");
 
-    const Schema& schema = reader.getHeader().getSchema();
+    const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
     BOOST_CHECK(reader.getNumPoints() == 1065);
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     CacheFilter cache(reader, 1, 355);
     BOOST_CHECK(cache.getNumPoints() == 1065);
 
-    const Schema& schema = cache.getHeader().getSchema();
+    const Schema& schema = cache.getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 355);
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
     BOOST_CHECK(reader.getNumPoints() == 1065);
     BOOST_CHECK(355 * 3 == 1065);
 
-    const Schema& schema = reader.getHeader().getSchema();
+    const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 355);

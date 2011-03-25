@@ -43,9 +43,10 @@ namespace libpc
 Filter::Filter(const Stage& prevStage) :
     m_prevStage(prevStage)
 {
-    const Header& prevHeader = m_prevStage.getHeader();
-    Header* header = new Header(prevHeader);
-    setHeader(header);
+    // by default, we set our core properties to be the same as those 
+    // of the previous stage
+    this->setCoreProperties(m_prevStage);
+
     return;
 }
 

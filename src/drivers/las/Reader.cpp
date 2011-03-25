@@ -48,13 +48,13 @@ LasReader::LasReader(const std::string& filename)
     : Stage()
     , m_filename(filename)
 {
-    LasHeader* lasHeader = new LasHeader;
-    setHeader(lasHeader);
-    
     std::istream* str = Utils::openFile(m_filename);
 
-    LasHeaderReader lasHeaderReader(*lasHeader, *str);
-    lasHeaderReader.read();
+    LasHeaderReader lasHeaderReader(m_lasHeader, *str);
+    lasHeaderReader.read( getSchemaRef() );
+
+    this->setBounds(m_lasHeader.getBounds());
+    this->setNumPoints(m_lasHeader.GetPointRecordsCount());
 
     Utils::closeFile(str);
 
@@ -72,18 +72,6 @@ const std::string& LasReader::getName() const
 const std::string& LasReader::getFileName() const
 {
     return m_filename;
-}
-
-
-const LasHeader& LasReader::getLasHeader() const
-{
-    return (const LasHeader&)getHeader();
-}
-
-
-LasHeader& LasReader::getLasHeader()
-{
-    return (LasHeader&)getHeader();
 }
 
 

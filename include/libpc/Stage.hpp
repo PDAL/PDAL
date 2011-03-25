@@ -39,11 +39,14 @@
 
 #include <string>
 
-    
+#include <libpc/Schema.hpp>
+#include <libpc/Bounds.hpp>
+#include <libpc/SpatialReference.hpp>
+#include <libpc/Metadata.hpp>
+
 namespace libpc
 {
 
-class Header;
 class Iterator;
 class SequentialIterator;
 class RandomIterator;
@@ -61,30 +64,50 @@ public:
     // words.  The last word should generally be "Reader" or "Filter".
     virtual const std::string& getName() const = 0;
 
-    // returns the number of points this stage has available
-    // (actually a convenience function that gets it from the header)
+    // core properties of all stages
+    const Schema& getSchema() const;
     boost::uint64_t getNumPoints() const;
-
-    const Header& getHeader() const;
-    Header& getHeader();
+    PointCountType getPointCountType() const;
+    const Bounds<double>& getBounds() const;
+    const SpatialReference& getSpatialReference() const;
+    const Metadata::Array& getMetadata() const;
 
     virtual bool supportsIterator (StageIteratorType) const { return false; }
-    
     virtual bool supportsSequentialIterator() const { return false; }
     virtual bool supportsRandomIterator() const { return false; }
     virtual SequentialIterator* createSequentialIterator() const { return NULL; }
     virtual RandomIterator* createRandomIterator() const  { return NULL; }
     virtual BlockIterator* createBlockIterator() const  { return NULL; }
 
+    void dump() const;
+
 protected:
-    void setHeader(Header*); // stage takes ownership
+    // setters for the core properties
+    Schema& getSchemaRef();
+    void setSchema(const Schema&);
+    void setNumPoints(boost::uint64_t);
+    void setPointCountType(PointCountType);
+    void setBounds(const Bounds<double>&);
+    void setSpatialReference(const SpatialReference&);
+    Metadata::Array& getMetadata();
+
+    // convenience function, for doing a "copy ctor" on all the core props
+    // (used by the Filter stage, for example)
+    void setCoreProperties(const Stage&);
 
 private:
-    Header* m_header;
+    Schema m_schema;
+    boost::uint64_t m_numPoints;
+    PointCountType m_pointCountType;
+    Bounds<double> m_bounds;
+    SpatialReference m_spatialReference;
+    Metadata::Array m_metadataArray;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented
 };
+
+LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);
 
 } // namespace libpc
 

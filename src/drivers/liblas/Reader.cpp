@@ -62,15 +62,12 @@ LiblasReader::LiblasReader(const std::string& filename)
     std::istream* str = Utils::openFile(m_filename);
 
     {
-        ::liblas::ReaderFactory f;
-        ::liblas::Reader reader = f.CreateWithStream(*str);
+        ::liblas::ReaderFactory factory;
+        ::liblas::Reader externalReader = factory.CreateWithStream(*str);
 
-        LiblasHeader* myHeader = new LiblasHeader;
-        setHeader(myHeader);
+        processExternalHeader(externalReader);
 
-        processExternalHeader(reader);
-
-        registerFields(reader);
+        registerFields(externalReader);
     }
 
     Utils::closeFile(str);
@@ -125,13 +122,12 @@ boost::int8_t LiblasReader::getPointFormatNumber() const
 void LiblasReader::processExternalHeader(::liblas::Reader& externalReader)
 {
     const ::liblas::Header& externalHeader = externalReader.GetHeader();
-    LiblasHeader& internalHeader = getLiblasHeader();
 
-    internalHeader.setNumPoints( externalHeader.GetPointRecordsCount() );
+    this->setNumPoints( externalHeader.GetPointRecordsCount() );
 
     const ::liblas::Bounds<double>& externalBounds = externalHeader.GetExtent();
     const Bounds<double> internalBounds(externalBounds.minx(), externalBounds.miny(), externalBounds.minz(), externalBounds.maxx(), externalBounds.maxy(), externalBounds.maxz());
-    internalHeader.setBounds(internalBounds);
+    this->setBounds(internalBounds);
 
     m_versionMajor = externalHeader.GetVersionMajor();
     m_versionMinor = externalHeader.GetVersionMinor();
@@ -186,8 +182,7 @@ void LiblasReader::processExternalHeader(::liblas::Reader& externalReader)
 void LiblasReader::registerFields(::liblas::Reader& externalReader)
 {
     const ::liblas::Header& externalHeader = externalReader.GetHeader();
-    LiblasHeader& internalHeader = getLiblasHeader();
-    Schema& schema = internalHeader.getSchema();
+    Schema& schema = getSchemaRef();
 
     Dimension xDim(Dimension::Field_X, Dimension::Int32);
     Dimension yDim(Dimension::Field_Y, Dimension::Int32);
@@ -237,19 +232,6 @@ void LiblasReader::registerFields(::liblas::Reader& externalReader)
     
     return;
 }
-
-
-const LiblasHeader& LiblasReader::getLiblasHeader() const
-{
-    return (const LiblasHeader&)getHeader();
-}
-
-
-LiblasHeader& LiblasReader::getLiblasHeader()
-{
-    return (LiblasHeader&)getHeader();
-}
-
 
 
 libpc::SequentialIterator* LiblasReader::createSequentialIterator() const

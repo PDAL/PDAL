@@ -59,17 +59,15 @@ MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
         m_prevStages.push_back(prevStages[i]);
     }
 
-    {
-        const Header& prevHeader = m_prevStages[0]->getHeader();
-        Header* header = new Header(prevHeader);
-        setHeader(header);
-    }
+    const Stage& prevStage = *m_prevStages[0];
 
-    const Header& prevHeader =  m_prevStages[0]->getHeader();
+    {
+        setCoreProperties(prevStage);  // BUG: clearly insufficient
+    }
 
     boost::uint64_t totalPoints = 0;
 
-    Bounds<double> bigbox(prevHeader.getBounds());
+    Bounds<double> bigbox(prevStage.getBounds());
 
     for (size_t i=0; i<prevStages.size(); i++)
     {
@@ -78,20 +76,18 @@ MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
         {
             throw libpc_error("bad stage passed to MosaicFilter");
         }
-        const Header& header = stage->getHeader();
-        if (prevHeader.getSchema() != header.getSchema())
+        if (prevStage.getSchema() != this->getSchema())
         {
             throw libpc_error("impedance mismatch in MosaicFilter");
         }
 
-        bigbox.grow(header.getBounds());
-        totalPoints += header.getNumPoints();
+        bigbox.grow(this->getBounds());
+        totalPoints += this->getNumPoints();
         m_prevStages.push_back(stage);
     }
 
-    Header& thisHeader = getHeader();
-    thisHeader.setBounds(bigbox);
-    thisHeader.setNumPoints(totalPoints);
+    setBounds(bigbox);
+    setNumPoints(totalPoints);
 
     return;
 }

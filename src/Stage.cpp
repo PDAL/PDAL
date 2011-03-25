@@ -34,13 +34,14 @@
 
 #include <libpc/Stage.hpp>
 
-#include <libpc/Header.hpp>
+#include <iostream>
 
 namespace libpc
 {
 
 Stage::Stage()
-    : m_header(NULL)
+    : m_numPoints(0)
+    , m_pointCountType(PointCount_Fixed)
 {
     return;
 }
@@ -48,35 +49,121 @@ Stage::Stage()
 
 Stage::~Stage()
 {
-    delete m_header;
     return;
 }
 
-
-const Header& Stage::getHeader() const
+const Bounds<double>& Stage::getBounds() const
 {
-    assert(m_header);
-    return *m_header;
+    return m_bounds;
 }
 
 
-Header& Stage::getHeader()
+void Stage::setBounds(const Bounds<double>& bounds)
 {
-    assert(m_header);
-    return *m_header;
+    m_bounds = bounds;
 }
 
 
-void Stage::setHeader(Header* header)
+const Schema& Stage::getSchema() const
 {
-    delete m_header;
-    m_header = header;
+    return m_schema;
+}
+
+
+Schema& Stage::getSchemaRef()
+{
+    return m_schema;
+}
+
+
+void Stage::setSchema(const Schema& schema)
+{
+    m_schema = schema;
 }
 
 
 boost::uint64_t Stage::getNumPoints() const
 {
-    return getHeader().getNumPoints();
+    return m_numPoints;
+}
+
+
+void Stage::setNumPoints(boost::uint64_t numPoints)
+{
+    m_numPoints = numPoints;
+}
+
+
+PointCountType Stage::getPointCountType() const
+{
+    return m_pointCountType;
+}
+
+
+void Stage::setPointCountType(PointCountType pointCountType)
+{
+    m_pointCountType = pointCountType;
+}
+
+
+const SpatialReference& Stage::getSpatialReference() const
+{
+    return m_spatialReference;
+}
+
+
+void Stage::setSpatialReference(const SpatialReference& spatialReference)
+{
+    m_spatialReference = spatialReference;
+}
+
+
+const Metadata::Array& Stage::getMetadata() const
+{
+    return m_metadataArray;
+}
+
+
+Metadata::Array& Stage::getMetadata()
+{
+    return m_metadataArray;
+}
+
+
+void Stage::setCoreProperties(const Stage& stage)
+{
+    this->setSchema(stage.getSchema());
+    this->setNumPoints(stage.getNumPoints());
+    this->setPointCountType(stage.getPointCountType());
+    this->setBounds(stage.getBounds());
+    this->setSpatialReference(stage.getSpatialReference());
+    this->getMetadata() = stage.getMetadata();
+
+    return;
+}
+
+
+void Stage::dump() const
+{
+    std::cout << *this;
+}
+
+
+std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
+{
+    ostr << "  Num points: " << stage.getNumPoints() << std::endl;
+
+    ostr << "  Bounds:" << std::endl;
+    ostr << "    " << stage.getBounds() << std::endl;
+
+    ostr << "  Schema: " << std::endl;
+    ostr << "    Num dims: " << stage.getSchema().getDimensions().size() << std::endl;
+//    ostr << "    Size in bytes: " << header.getSchema().getByteSize() << std::endl;
+
+    ostr << "  Spatial Reference:" << std::endl;
+    ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;
+
+    return ostr;
 }
 
 

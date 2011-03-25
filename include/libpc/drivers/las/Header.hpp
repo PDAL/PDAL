@@ -45,15 +45,20 @@
 
 #include <libpc/libpc.hpp>
 
-#include <boost/uuid/uuid.hpp>
+#include <vector>
 
-#include <libpc/Header.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/property_tree/ptree.hpp>
+
+#include <libpc/Schema.hpp>
+#include <libpc/Vector.hpp>
+#include <libpc/Bounds.hpp>
 
 
 namespace libpc { namespace drivers { namespace las {
 
 
-class LIBPC_DLL LasHeader : public Header
+class LIBPC_DLL LasHeader
 {
 public:
     /// Versions of point record format.
@@ -101,6 +106,7 @@ public:
     /// The default constructed header is configured according to the ASPRS
     /// LAS 1.2 Specification, point data format set to 0.
     /// Other fields filled with 0.
+
     LasHeader();
 
     /// Official signature of ASPRS LAS file format, always \b "LASF".
@@ -318,6 +324,9 @@ public:
     /// Set minimum values of extent of X, Y and Z coordinates.
     void SetMin(double x, double y, double z);
 
+    const Bounds<double>& getBounds() const { return m_bounds; }
+    void setBounds(const Bounds<double>& bounds) { m_bounds = bounds; }
+
     ///// Adds a variable length record to the header
     //void AddVLR(VariableRecord const& v);
     //
@@ -401,6 +410,8 @@ private:
     bool m_isCompressed;
 
     PointFormatId m_data_format_id;
+
+    Bounds<double> m_bounds;
 
     LasHeader& operator=(const LasHeader&); // nope
     LasHeader(const LasHeader&); // nope

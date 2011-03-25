@@ -47,6 +47,10 @@
 
 #include <iosfwd>
 
+namespace libpc {
+    class Schema;
+}
+
 namespace libpc { namespace drivers { namespace las {
 
 class LasHeader;
@@ -56,7 +60,7 @@ class LIBPC_DLL LasHeaderReader
 public:
     LasHeaderReader(LasHeader& header, std::istream& istream);
 
-    void read();
+    void read(Schema&);
 
 private:
     LasHeader& m_header;

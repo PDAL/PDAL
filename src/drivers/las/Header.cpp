@@ -44,6 +44,8 @@
 
 #include <boost/uuid/uuid_io.hpp>
 
+#include <libpc/Stage.hpp>
+
 namespace libpc { namespace drivers { namespace las {
 
     
@@ -53,8 +55,7 @@ char const* const LasHeader::SystemIdentifier = "libLAS";
 char const* const LasHeader::SoftwareIdentifier = "libLAS 1.6.0";
 
 LasHeader::LasHeader()
-    : Header()
-    , m_scales(0.0,0.0,0.0)
+    : m_scales(0.0,0.0,0.0)
 {
     // BUG: set default here -- m_schema(LasSchema::ePointFormat3)
     initialize();
@@ -284,7 +285,6 @@ uint32_t LasHeader::GetPointRecordsCount() const
 void LasHeader::SetPointRecordsCount(uint32_t v)
 {
     m_pointRecordsCount = v;
-    this->setNumPoints(v);
 }
 
 LasHeader::RecordsByReturnArray const& LasHeader::GetPointRecordsByReturnCount() const
@@ -347,46 +347,46 @@ void LasHeader::SetOffset(double x, double y, double z)
 
 double LasHeader::GetMaxX() const
 {
-    return getBounds().getMaximum(0);
+    return m_bounds.getMaximum(0);
 }
 
 double LasHeader::GetMinX() const
 {
-    return getBounds().getMinimum(0);
+    return m_bounds.getMinimum(0);
 }
 
 double LasHeader::GetMaxY() const
 {
-    return getBounds().getMaximum(1);
+    return m_bounds.getMaximum(1);
 }
 
 double LasHeader::GetMinY() const
 {
-    return getBounds().getMinimum(1);
+    return m_bounds.getMinimum(1);
 }
 
 double LasHeader::GetMaxZ() const
 {
-    return getBounds().getMaximum(2);
+    return m_bounds.getMaximum(2);
 }
 
 double LasHeader::GetMinZ() const
 {
-    return getBounds().getMinimum(2);
+    return m_bounds.getMinimum(2);
 }
 
 void LasHeader::SetMax(double x, double y, double z)
 {
     // m_extent = Bounds(m_extent.min(0), m_extent.min(1), m_extent.max(0), m_extent.max(1), m_extent.min(2), m_extent.max(2));
     // Bounds(minx, miny, minz, maxx, maxy, maxz)
-    const Bounds<double>& bounds = getBounds();
-    setBounds( Bounds<double>(bounds.getMinimum(0), bounds.getMinimum(1), bounds.getMinimum(2), x, y, z) );
+    Bounds<double> temp(m_bounds.getMinimum(0), m_bounds.getMinimum(1), m_bounds.getMinimum(2), x, y, z);
+    m_bounds = temp;
 }
 
 void LasHeader::SetMin(double x, double y, double z)
 {
-    const Bounds<double>& bounds = getBounds();
-    setBounds( Bounds<double>(x, y, z, bounds.getMaximum(0), bounds.getMaximum(1), bounds.getMaximum(2)) );
+    Bounds<double> temp(x, y, z, m_bounds.getMaximum(0), m_bounds.getMaximum(1), m_bounds.getMaximum(2));
+    m_bounds = temp;
 }
 
 //void Header::AddVLR(VariableRecord const& v) 
@@ -911,8 +911,6 @@ void LasHeader::update_required_dimensions(PointFormatId data_format_id, Schema&
 
 std::ostream& operator<<(std::ostream& ostr, const LasHeader& header)
 {
-    ostr << (const Header&)header;
-
     ostr << "  LasHeader" << std::endl;
     ostr << "    Header size: " << header.GetHeaderSize() << std::endl;
     ostr << "    Point records count: " << header.GetPointRecordsCount() << std::endl;

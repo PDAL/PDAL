@@ -113,7 +113,7 @@ boost::uint64_t Iterator::naiveSkipImpl(boost::uint64_t count)
         // getChunkSize is a uint32, so this cast is safe
         const boost::uint32_t thisCount = static_cast<boost::uint32_t>(thisCount64);
 
-        PointBuffer junk(getStage().getHeader().getSchema(), thisCount);
+        PointBuffer junk(getStage().getSchema(), thisCount);
         
         const boost::uint32_t numRead = read(junk);
         if (numRead == 0) break; // end of file or something

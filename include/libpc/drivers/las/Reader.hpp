@@ -38,6 +38,7 @@
 #include <libpc/libpc.hpp>
 
 #include <libpc/Stage.hpp>
+#include <libpc/drivers/las/Header.hpp>
 
 
 namespace libpc
@@ -58,8 +59,6 @@ public:
 
     const std::string& getFileName() const;
 
-    const LasHeader& getLasHeader() const;
-
     bool supportsIterator (StageIteratorType t) 
     {   
         if (t == StageIterator_Sequential ) return true;
@@ -76,12 +75,14 @@ public:
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream) const;
 
+    const LasHeader& getLasHeader() const { return m_lasHeader; }
+
 protected:
-    LasHeader& getLasHeader();
-    void setLasHeader(const LasHeader&);
+    LasHeader& getLasHeaderRef() { return m_lasHeader; }
 
 private:
     const std::string m_filename;
+    LasHeader m_lasHeader;
 
     LasReader& operator=(const LasReader&); // not implemented
     LasReader(const LasReader&); // not implemented

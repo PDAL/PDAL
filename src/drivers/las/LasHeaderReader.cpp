@@ -58,7 +58,7 @@ LasHeaderReader::LasHeaderReader(LasHeader& header, std::istream& istream)
 }
 
 
-void LasHeaderReader::read()
+void LasHeaderReader::read(Schema& schema)
 {
     // Helper variables
     boost::uint8_t n1 = 0;
@@ -177,7 +177,7 @@ void LasHeaderReader::read()
     if (n1 <= 5)
     {
         m_header.setDataFormatId((LasHeader::PointFormatId)n1);
-        m_header.update_required_dimensions((LasHeader::PointFormatId)n1, m_header.getSchema());
+        m_header.update_required_dimensions((LasHeader::PointFormatId)n1, schema);
     } 
     else
     {

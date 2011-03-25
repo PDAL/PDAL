@@ -62,7 +62,7 @@ const std::string& LasWriter::getName() const
 void LasWriter::writeBegin()
 {
     // need to set properties of the header here, based on prev->getHeader() and on the user's preferences
-    m_lasHeader.setBounds( getPrevStage().getHeader().getBounds() );
+    m_lasHeader.setBounds( getPrevStage().getBounds() );
     m_lasHeader.SetOffset(0,0,0);
     m_lasHeader.SetScale(1,1,1);
     

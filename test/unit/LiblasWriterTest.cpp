@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     std::ostream* ofs = Utils::createFile("temp.las");
 
     {
-        const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
+        const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
         LiblasWriter writer(reader, *ofs);
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     std::ostream* ofs = Utils::createFile("temp.laz");
 
     {
-        const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
+        const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
         LiblasWriter writer(reader, *ofs);

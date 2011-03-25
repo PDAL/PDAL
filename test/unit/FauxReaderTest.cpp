@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 
     BOOST_CHECK_EQUAL(reader.getName(), "Faux Reader");
 
-    const Schema& schema = reader.getHeader().getSchema();
+    const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 750);
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
 
     BOOST_CHECK_EQUAL(reader.getName(), "Faux Reader");
 
-    const Schema& schema = reader.getHeader().getSchema();
+    const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 10);
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Random);
 
-    const Schema& schema = reader.getHeader().getSchema();
+    const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 750);
@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     Bounds<double> bounds(0,0,0,4,4,4);
     libpc::drivers::faux::Reader reader(bounds, 2, libpc::drivers::faux::Reader::Ramp);
 
-    const Schema& schema = reader.getHeader().getSchema();
+    const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 2);
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
     libpc::drivers::faux::Reader reader(bounds, 750, libpc::drivers::faux::Reader::Ramp);
 
-    const Schema& schema = reader.getHeader().getSchema();
+    const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 750);
@@ -342,7 +342,7 @@ BOOST_AUTO_TEST_CASE(test_custom_fields)
 
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Random, dims);
 
-    const Schema& schema = reader.getHeader().getSchema();
+    const Schema& schema = reader.getSchema();
     BOOST_CHECK_EQUAL(schema.getDimensions().size(), 2u);
     BOOST_CHECK_EQUAL(schema.getDimension(0).getField(), Dimension::Field_Y);
     BOOST_CHECK_EQUAL(schema.getDimension(1).getField(), Dimension::Field_X);
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
     libpc::drivers::faux::Reader reader(bounds, 750, libpc::drivers::faux::Reader::Ramp);
     
-    const Schema& schema = reader.getHeader().getSchema();
+    const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 750);

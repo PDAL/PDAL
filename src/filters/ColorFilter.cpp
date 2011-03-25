@@ -55,7 +55,7 @@ ColorFilter::ColorFilter(const Stage& prevStage)
 
 void ColorFilter::checkImpedance()
 {
-    Schema& schema = getHeader().getSchema();
+    Schema& schema = getSchemaRef();
 
     Dimension dimZ(Dimension::Field_Z, Dimension::Uint8);
     if (schema.hasDimension(dimZ) == false)
@@ -126,7 +126,7 @@ void ColorFilter::getColor(float value, boost::uint8_t& red, boost::uint8_t& gre
 {
     double fred, fgreen, fblue;
 
-    const Range<double>& zrange = getHeader().getBounds().dimensions()[2];
+    const Range<double>& zrange = getBounds().dimensions()[2];
     Color::interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(), fred, fblue, fgreen);
 
     const double vmax = (std::numeric_limits<boost::uint8_t>::max());

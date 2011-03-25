@@ -56,7 +56,7 @@ boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 
 bool SequentialIterator::atEndImpl() const
 {
-    const boost::uint64_t numPoints = getStage().getHeader().getNumPoints();
+    const boost::uint64_t numPoints = getStage().getNumPoints();
     const boost::uint64_t currPoint = getIndex();
 
     return currPoint >= numPoints;

@@ -46,11 +46,10 @@ CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
     : Filter(prevStage)
     , m_bounds(bounds)
 {
-    Header& header = getHeader();
-    header.setBounds(bounds);
+    this->setBounds(bounds);
 
-    header.setNumPoints(0);
-    header.setPointCountType(PointCount_Unknown);
+    this->setNumPoints(0);
+    this->setPointCountType(PointCount_Unknown);
 
     return;
 }

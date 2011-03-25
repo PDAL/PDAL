@@ -108,7 +108,7 @@ int Application_pc2pc::execute()
     {
         libpc::drivers::las::LasReader reader(m_inputFile);
     
-        const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
+        const boost::uint64_t numPoints = reader.getNumPoints();
 
         libpc::drivers::las::LasWriter writer(reader, *ofs);
 
@@ -124,7 +124,7 @@ int Application_pc2pc::execute()
 #ifdef LIBPC_HAVE_ORACLE
         libpc::drivers::liblas::LiblasReader reader(m_inputFile);
     
-        const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
+        const boost::uint64_t numPoints = reader.getNumPoints();
         
         libpc::driver::oci::Options options;
         boost::property_tree::ptree& tree = options.GetPTree();
@@ -152,7 +152,7 @@ int Application_pc2pc::execute()
     {
         libpc::drivers::liblas::LiblasReader reader(m_inputFile);
     
-        const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
+        const boost::uint64_t numPoints = reader.getNumPoints();
 
         libpc::drivers::liblas::LiblasWriter writer(reader, *ofs);
 

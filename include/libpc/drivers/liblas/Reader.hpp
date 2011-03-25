@@ -64,8 +64,6 @@ public:
 
     const std::string& getFileName() const;
 
-    const LiblasHeader& getLiblasHeader() const;
-
     boost::int8_t getPointFormatNumber() const;
     
     bool hasTimeData() const;
@@ -86,8 +84,6 @@ public:
     libpc::RandomIterator* createRandomIterator() const;
 
 private:
-    LiblasHeader& getLiblasHeader();
-    void setLiblasHeader(const LiblasHeader&);
     void processExternalHeader(::liblas::Reader& externalReader);
     void registerFields(::liblas::Reader& externalReader);
 

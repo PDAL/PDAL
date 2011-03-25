@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test1)
     libpc::filters::CacheFilter cache(reader, 2, 1024);
     BOOST_CHECK(cache.getName() == "Cache Filter");
 
-    const Schema& schema = reader.getHeader().getSchema();
+    const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
     const int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
 

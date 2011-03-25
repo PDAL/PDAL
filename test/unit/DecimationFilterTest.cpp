@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test)
     libpc::filters::DecimationFilter filter(reader, 10);
     BOOST_CHECK(filter.getName() == "Decimation Filter");
 
-    const Schema& schema = filter.getHeader().getSchema();
+    const Schema& schema = filter.getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 3);

@@ -47,20 +47,17 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
     : libpc::Stage()
     , m_mode(mode)
 {
-    Header* header = new Header;
-    Schema& schema = header->getSchema();
+    Schema& schema = getSchemaRef();
 
     schema.addDimension(Dimension(Dimension::Field_X, Dimension::Double));
     schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Double));
     schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Double));
     schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Uint64));
 
-    header->setNumPoints(numPoints);
-    header->setPointCountType(PointCount_Fixed);
+    setNumPoints(numPoints);
+    setPointCountType(PointCount_Fixed);
 
-    header->setBounds(bounds);
-
-    setHeader(header);
+    setBounds(bounds);
 
     return;
 }
@@ -69,19 +66,15 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std
     : libpc::Stage()
     , m_mode(mode)
 {
-    Header* header = new Header;
-
-    Schema& schema = header->getSchema();
+    Schema& schema = getSchemaRef();
     if (dimensions.size() == 0)
     {
         throw; // BUG
     }
     schema.addDimensions(dimensions);
 
-    header->setNumPoints(numPoints);
-    header->setBounds(bounds);
-
-    setHeader(header);
+    setNumPoints(numPoints);
+    setBounds(bounds);
 
     return;
 }
@@ -116,7 +109,6 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
 {
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
-    const Header& header = getHeader();
 
     if (schema.getDimensions().size() != 4)
         throw not_yet_implemented("need to add ability to read from arbitrary fields");
@@ -127,11 +119,11 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     boost::uint64_t numPointsWanted = data.getCapacity();
 
     // we can only give them as many as we have left
-    boost::uint64_t numPointsAvailable = header.getNumPoints() - index;
+    boost::uint64_t numPointsAvailable = getNumPoints() - index;
     if (numPointsAvailable < numPointsWanted)
         numPointsWanted = numPointsAvailable;
 
-    const Bounds<double>& bounds = header.getBounds(); 
+    const Bounds<double>& bounds = getBounds(); 
     const std::vector< Range<double> >& dims = bounds.dimensions();
     const double minX = dims[0].getMinimum();
     const double maxX = dims[0].getMaximum();
@@ -140,7 +132,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     const double minZ = dims[2].getMinimum();
     const double maxZ = dims[2].getMaximum();
     
-    const double numDeltas = (double)header.getNumPoints() - 1.0;
+    const double numDeltas = (double)getNumPoints() - 1.0;
     const double delX = (maxX - minX) / numDeltas;
     const double delY = (maxY - minY) / numDeltas;
     const double delZ = (maxZ - minZ) / numDeltas;

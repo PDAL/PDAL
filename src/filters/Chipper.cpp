@@ -92,9 +92,7 @@ vector<boost::uint32_t> Block::GetIDs() const
 
 PointBuffer Block::GetBuffer( Stage& stage) const
 {
-
-    libpc::Header const& header = stage.getHeader();
-    libpc::Schema const& schema = header.getSchema();
+    libpc::Schema const& schema = stage.getSchema();
         
     boost::int32_t size = m_right - m_left + 1;
     if (size < 0)
@@ -162,10 +160,9 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     boost::uint32_t idx;
     vector<PtRef>::iterator it;
    
-    libpc::Header const& header = m_stage.getHeader();
-    libpc::Schema const& schema = header.getSchema();
+    libpc::Schema const& schema = m_stage.getSchema();
     
-    boost::uint64_t count = header.getNumPoints();
+    boost::uint64_t count = m_stage.getNumPoints();
     xvec.reserve(count);
     yvec.reserve(count);
     spare.resize(count);

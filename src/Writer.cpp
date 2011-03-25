@@ -94,7 +94,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
         // this case is safe because m_chunkSize is a uint32
         const boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(numPointsToReadThisChunk64);
 
-        PointBuffer buffer(m_prevStage.getHeader().getSchema(), numPointsToReadThisChunk);
+        PointBuffer buffer(m_prevStage.getSchema(), numPointsToReadThisChunk);
 
         const boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
         assert(numPointsReadThisChunk <= numPointsToReadThisChunk);
