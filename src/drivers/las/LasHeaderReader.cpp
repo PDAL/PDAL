@@ -378,7 +378,7 @@ void LasHeaderReader::ReadVLRs()
         boost::ignore_unused_variable_warning(e);
     }
 
-#ifdef HAVE_LASZIP
+#ifdef LIBPC_HAVE_LASZIP
     if (Compressed())
     {
          ZipPoint zpd(GetDataFormatId());

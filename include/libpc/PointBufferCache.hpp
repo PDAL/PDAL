@@ -25,7 +25,7 @@
 #include <libpc/libpc.hpp>
 
 
-#ifdef _MSC_VER
+#ifdef LIBPC_COMPILER_MSVC
 #  pragma warning(push)
 #  pragma warning(disable: 4512)  // assignment operator could not be generated
 #endif
@@ -33,7 +33,7 @@
 #include <boost/bimap/list_of.hpp>
 //#include <boost/bimap/set_of.hpp>
 //#include <boost/function.hpp>
-#ifdef _MSC_VER
+#ifdef LIBPC_COMPILER_MSVC
 #  pragma warning(pop)
 #endif
 

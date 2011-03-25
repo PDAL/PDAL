@@ -35,8 +35,10 @@
 #ifndef EXPORT_HPP_INCLUDED
 #define EXPORT_HPP_INCLUDED
 
+#include <libpc/libpc_defines.h>
+
 #ifndef LIBPC_DLL
-#if defined(_MSC_VER) && !defined(LIBPC_DISABLE_DLL)
+#if defined(LIBPC_COMPILER_MSVC) && !defined(LIBPC_DISABLE_DLL)
 #if defined(LIBPC_DLL_EXPORT)
 #   define LIBPC_DLL   __declspec(dllexport)
 #elif defined(LIBPC_DLL_IMPORT)
@@ -53,8 +55,8 @@
 #endif
 #endif
 
-#ifdef _MSC_VER
+#ifdef LIBPC_COMPILER_MSVC
 #pragma warning(disable:4251)// [templated class] needs to have dll-interface...
-#endif // _MSC_VER
+#endif
 
 #endif // LIBPC_HPP_INCLUDED

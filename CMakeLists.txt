@@ -118,6 +118,15 @@ if(WIN32)
       add_definitions(-D_CRT_SECURE_NO_WARNINGS)
       add_definitions(-D_CRT_NONSTDC_NO_WARNING)
       add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+
+      set(LIBPC_COMPILER_MSVC 1)
+      if (MSVC10)
+        set(LIBPC_COMPILER_VC10 1)
+      elseif (MSVC9)
+        set(LIBPC_COMPILER_VC9 1)
+      elseif (MSVC8)
+        set(LIBPC_COMPILER_VC8 1)
+      endif()
     endif()
     
     if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
@@ -130,6 +139,8 @@ if(WIN32)
   
   set(CMAKE_INCLUDE_PATH c:/osgeo4w/include;$ENV{CMAKE_INCLUDE_PATH})
   set(CMAKE_LIBRARY_PATH c:/osgeo4w/lib;$ENV{CMAKE_LIBRARY_PATH})
+
+  set(LIBPC_OS_WIN32 1)
 
 else()
   # not WIN32
@@ -145,9 +156,12 @@ else()
     if (CMAKE_COMPILER_IS_GNUCXX)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
     endif()
-
+    
+    set(LIBPC_COMPILER_GCC 1)
+    
   elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR "${CMAKE_CXX_COMPILER}" MATCHES "clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LIBPC_COMMON_CXX_FLAGS}")
+    set(LIBPC_COMPILER_CLANG 1)
   endif()
 endif(WIN32)
 
@@ -292,6 +306,7 @@ if(WITH_ORACLE)
   if(ORACLE_FOUND)
     include_directories(${ORACLE_INCLUDE_DIR})
     add_definitions(-DHAVE_ORACLE=1)
+    set(LIBPC_HAVE_ORACLE 1)
   endif()
 endif()
 
@@ -343,6 +358,7 @@ if(WITH_MRSID)
         set(CMAKE_REQUIRED_LIBRARIES ${MRSID_LIBRARY})
         include_directories(${MRSID_INCLUDE_DIR})
         add_definitions(-DHAVE_MRSID=1)
+        set(LIBPC_HAVE_MRSID 1)
     endif()
 endif()
 

@@ -33,9 +33,6 @@ set(LIBPC_CPP "")
 #
 set(LIBPC_BASE_HPP
   ${LIBPC_HEADERS_DIR}/exceptions.hpp
-  ${LIBPC_HEADERS_DIR}/export.hpp
-  ${LIBPC_HEADERS_DIR}/libpc.hpp
-  ${LIBPC_HEADERS_DIR}/libpc_config.hpp
   ${LIBPC_HEADERS_DIR}/types.hpp
   ${LIBPC_HEADERS_DIR}/Bounds.hpp
   ${LIBPC_HEADERS_DIR}/Color.hpp
@@ -260,11 +257,25 @@ FOREACH(file ${LIBPC_FILTERS_CPP})
 ENDFOREACH(file)
 
 #
-# misc
+# config
 #
 
-set (LIBPC_MISC_CPP "libpc_config.cpp" CACHE INTERNAL "sources to compile")
-FOREACH(file ${LIBPC_MISC_CPP})
+set(LIBPC_CONFIG_HPP
+  ${LIBPC_HEADERS_DIR}/export.hpp
+  ${LIBPC_HEADERS_DIR}/libpc.hpp
+  ${LIBPC_HEADERS_DIR}/libpc_config.hpp
+  ${LIBPC_HEADERS_DIR}/libpc_defines.h
+)
+
+set (LIBPC_CONFIG_CPP 
+  ./libpc_config.cpp
+)
+
+FOREACH(file ${LIBPC_CONFIG_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+FOREACH(file ${LIBPC_CONFIG_CPP})
         SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
@@ -275,6 +286,7 @@ ENDFOREACH(file)
 source_group("CMake Files" FILES CMakeLists.txt)
 
 source_group("Header Files" FILES ${LIBPC_BASE_HPP})
+source_group("Header Files\\config" FILES ${LIBPC_CONFIG_HPP})
 source_group("Header Files\\drivers\\faux" FILES ${LIBPC_DRIVERS_FAUX_HPP})
 source_group("Header Files\\drivers\\las" FILES ${LIBPC_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\liblas" FILES ${LIBPC_DRIVERS_LIBLAS_HPP})
@@ -282,7 +294,7 @@ source_group("Header Files\\drivers\\oci" FILES ${LIBPC_DRIVERS_OCI_HPP})
 source_group("Header Files\\filters" FILES ${LIBPC_FILTERS_HPP})
 
 source_group("Source Files" FILES ${LIBPC_BASE_CPP})
-source_group("Source Files\\misc" FILES ${LIBPC_MISC_CPP})
+source_group("Source Files\\config" FILES ${LIBPC_CONFIG_CPP})
 source_group("Source Files\\filter" FILES ${LIBPC_FILTERS_CPP})
 source_group("Source Files\\drivers\\faux" FILES ${LIBPC_DRIVERS_FAUX_CPP})
 source_group("Source Files\\drivers\\las" FILES ${LIBPC_DRIVERS_LAS_CPP})

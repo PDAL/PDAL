@@ -443,7 +443,7 @@ std::ostream& operator<<(std::ostream& ostr, const Bounds<T>& bounds)
 } // namespace libpc
 
 // Needed for C++ DLL exports
-#ifdef _MSC_VER
+#ifdef LIBPC_COMPILER_MSVC
 template class LIBPC_DLL libpc::Range<double>;
 template class LIBPC_DLL libpc::Bounds<double>;
 #endif

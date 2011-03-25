@@ -36,12 +36,12 @@
 
 #include <cassert>
 
-#ifdef _MSC_VER
+#ifdef LIBPC_COMPILER_MSVC
 #  pragma warning(push)
 #  pragma warning(disable: 4702)  // unreachable code
 #endif
 #include <boost/iostreams/device/file.hpp>
-#ifdef _MSC_VER
+#ifdef LIBPC_COMPILER_MSVC
 #  pragma warning(pop)
 #endif
 #include <boost/iostreams/stream.hpp>
@@ -169,7 +169,7 @@ char* Utils::getenv(const char* env)
 
 int Utils::putenv(const char* env)
 {
-#ifdef WIN32
+#ifdef LIBPC_COMPILER_MSVC
     return ::_putenv(env);
 #else
     return ::putenv(const_cast<char*>(env));

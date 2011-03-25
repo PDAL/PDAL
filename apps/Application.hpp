@@ -38,12 +38,12 @@
 #include <iosfwd>
 
 
-#ifdef _MSC_VER
+#ifdef LIBPC_COMPILER_MSVC
 #  pragma warning(push)
 #  pragma warning(disable: 4512)  // assignment operator could not be generated
 #endif
 #include <boost/program_options.hpp>
-#ifdef _MSC_VER
+#ifdef LIBPC_COMPILER_MSVC
 #  pragma warning(pop)
 #endif
 

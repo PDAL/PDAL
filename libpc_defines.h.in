@@ -24,14 +24,34 @@
  */
 #cmakedefine LIBPC_HAVE_LIBLAS
 #cmakedefine LIBPC_HAVE_LASZIP
-#cmakedefine LIBPC_HAVE_ORSACE
+#cmakedefine LIBPC_HAVE_ORACLE
 #cmakedefine LIBPC_HAVE_GDAL
 #cmakedefine LIBPC_HAVE_LIBXML2
 #cmakedefine LIBPC_HAVE_LIBGEOTIFF
+#cmakedefine LIBPC_HAVE_MRSID
 
 
 /*
- * platform/build settings
+ * platform endianness
  */
 #cmakedefine LIBPC_ENDIAN_AWARE
+
+/*
+ * Debug or Release build?
+ */
 #define LIBPC_BUILD_TYPE "@LIBPC_BUILD_TYPE@"
+
+/*
+ * platform OS
+ */
+#cmakedefine LIBPC_PLATFORM_WIN32
+
+/*
+ * platform compiler 
+ */
+#cmakedefine LIBPC_COMPILER_MSVC
+#cmakedefine LIBPC_COMPILER_VC10
+#cmakedefine LIBPC_COMPILER_VC9
+#cmakedefine LIBPC_COMPILER_VC8
+#cmakedefine LIBPC_COMPILER_GCC
+#cmakedefine LIBPC_COMPILER_CLANG

@@ -13,7 +13,7 @@
 #include <libpc/drivers/las/Reader.hpp>
 #include <libpc/drivers/liblas/Reader.hpp>
 #include <libpc/Utils.hpp>
-#ifdef HAVE_MRSID
+#ifdef LIBPC_HAVE_MRSID
 #include <libpc/drivers/mrsid/Reader.hpp>
 #endif
 
@@ -97,7 +97,7 @@ int Application_pcinfo::execute()
                 reader = new libpc::drivers::liblas::LiblasReader(m_inputFile);
             }
         }
-#ifdef HAVE_MRSID
+#ifdef LIBPC_HAVE_MRSID
         else if (!m_inputFile.substr(ext).compare("sid"))
         {
             reader = new libpc::drivers::mrsid::Reader(m_inputFile.c_str());

@@ -31,7 +31,7 @@
 #include <libpc/drivers/liblas/writer.hpp>
 #include <libpc/drivers/liblas/reader.hpp>
 
-#ifdef HAVE_ORACLE
+#ifdef LIBPC_HAVE_ORACLE
 #include <libpc/drivers/oci/writer.hpp>
 #endif
 
@@ -123,7 +123,7 @@ int Application_pc2pc::execute()
 
     else if (hasOption("oracle"))
     {
-#ifdef HAVE_ORACLE
+#ifdef LIBPC_HAVE_ORACLE
         libpc::drivers::liblas::LiblasReader reader(m_inputFile);
     
         const boost::uint64_t numPoints = reader.getHeader().getNumPoints();
