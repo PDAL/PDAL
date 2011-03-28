@@ -41,7 +41,7 @@
 #include <libpc/exceptions.hpp>
 
 
-namespace libpc { namespace driver { namespace oci {
+namespace libpc { namespace drivers { namespace oci {
 
 
 Writer::Writer(Stage& prevStage, Options& options)

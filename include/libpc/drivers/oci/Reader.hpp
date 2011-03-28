@@ -41,10 +41,10 @@
 #include <libpc/drivers/oci/Common.hpp>
 
 
-namespace libpc { namespace driver { namespace oci {
+
+namespace libpc { namespace drivers { namespace oci {
 
 
-class Options;
 
 
 
@@ -59,14 +59,14 @@ public:
     
     const std::string& getName() const;
  
-    void seekToPoint(boost::uint64_t pointNum);
-
     bool supportsIterator (StageIteratorType t) 
     {   
         if (t == StageIterator_Sequential ) return true;
         return false;
     }
-    
+
+    libpc::SequentialIterator* createSequentialIterator() const;
+
 private:
 
     Reader& operator=(const Reader&); // not implemented

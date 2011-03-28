@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -32,71 +32,53 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/oci/Reader.hpp>
-#include <libpc/drivers/oci/Iterator.hpp>
+#ifndef INCLUDED_DRIVERS_OCI_ITERATOR_HPP
+#define INCLUDED_DRIVERS_OCI_ITERATOR_HPP
 
-#include <libpc/exceptions.hpp>
+#include <libpc/libpc.hpp>
 
-#include <iostream>
+#include <libpc/Iterator.hpp>
+
+#include <string>
 
 namespace libpc { namespace drivers { namespace oci {
 
+class Reader;
 
-Reader::Reader(Options& options)
-    : libpc::Stage()
-    , m_options(options)
-    , m_verbose(false)
+
+class IteratorBase
 {
+public:
+    IteratorBase(const Reader& reader);
+    ~IteratorBase();
 
+protected:
+    const Reader& getReader() const;
     
-}    
+    boost::uint32_t readBuffer(PointBuffer& data);
 
-void Reader::Debug()
+private:
+    const Reader& m_reader;
+    
+    IteratorBase& operator=(const IteratorBase&); // not implemented
+    IteratorBase(const IteratorBase&); // not implemented};
+};
+
+
+class SequentialIterator : public IteratorBase, public libpc::SequentialIterator
 {
-    bool debug = m_options.IsDebug();
+public:
+    SequentialIterator(const Reader& reader);
+    ~SequentialIterator();
 
-    if (debug)
-    {
-        m_verbose = true;
-    }
-
-    CPLPopErrorHandler();
-
-    if (debug)
-    {
-        const char* gdal_debug = Utils::getenv("CPL_DEBUG");
-        if (gdal_debug == 0)
-        {
-            Utils::putenv("CPL_DEBUG=ON");
-        }
-        
-        const char* gdal_debug2 = getenv("CPL_DEBUG");
-        std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
-        CPLPushErrorHandler(OCIGDALDebugErrorHandler);
-        
-    }
-    else 
-    {
-        CPLPushErrorHandler(OCIGDALErrorHandler);        
-    }
-}
-
-const std::string& Reader::getName() const
-{
-    static std::string name("OCI Reader");
-    return name;
-}
-
-Reader::~Reader()
-{
-
-    return;
-}
-
-libpc::SequentialIterator* Reader::createSequentialIterator() const
-{
-    return new libpc::drivers::oci::SequentialIterator(*this);
-}
+private:
+    boost::uint64_t skipImpl(boost::uint64_t count);
+    boost::uint32_t readImpl(PointBuffer& data);
+    bool atEndImpl() const;
+};
 
 
-}}} // namespace libpc::driver::oci
+
+} } } // namespaces
+
+#endif

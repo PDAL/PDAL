@@ -43,7 +43,7 @@
 
 #include "Common.hpp"
 
-namespace libpc { namespace driver { namespace oci {
+namespace libpc { namespace drivers { namespace oci {
 
 class Options;
 

@@ -50,7 +50,7 @@ void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *m
 void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
 
 
-namespace libpc { namespace driver { namespace oci {
+namespace libpc { namespace drivers { namespace oci {
 
 typedef boost::shared_ptr<OWConnection> Connection ;
 typedef boost::shared_ptr<OWStatement> Statement ;

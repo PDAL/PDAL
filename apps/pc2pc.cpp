@@ -126,7 +126,7 @@ int Application_pc2pc::execute()
     
         const boost::uint64_t numPoints = reader.getNumPoints();
         
-        libpc::driver::oci::Options options;
+        libpc::drivers::oci::Options options;
         boost::property_tree::ptree& tree = options.GetPTree();
         
         tree.put("capacity", 12);
@@ -136,7 +136,7 @@ int Application_pc2pc::execute()
         
         libpc::filters::CacheFilter cache(reader, 1, 1024);
         libpc::filters::Chipper chipper(cache, 12);
-        libpc::driver::oci::Writer writer(chipper, options);
+        libpc::drivers::oci::Writer writer(chipper, options);
 
         writer.write(numPoints);
 #else

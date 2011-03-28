@@ -43,7 +43,7 @@
 #include <libpc/Bounds.hpp>
 #include <libpc/exceptions.hpp>
 
-namespace libpc { namespace driver { namespace oci {
+namespace libpc { namespace drivers { namespace oci {
 
 
 Options::Options()

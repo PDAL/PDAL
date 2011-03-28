@@ -168,6 +168,7 @@ if (WITH_ORACLE)
 set(LIBPC_DRIVERS_OCI_HPP
   ${LIBPC_HEADERS_DIR}/drivers/oci/Writer.hpp
   ${LIBPC_HEADERS_DIR}/drivers/oci/Reader.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/oci/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/drivers/oci/oci_wrapper.h
   ${LIBPC_HEADERS_DIR}/drivers/oci/Common.hpp
 )
@@ -176,6 +177,7 @@ set (LIBPC_DRIVERS_OCI_CPP
   ./drivers/oci/oci_wrapper.cpp
   ./drivers/oci/common.cpp
   ./drivers/oci/Reader.cpp
+  ./drivers/oci/Iterator.cpp
   ./drivers/oci/Writer.cpp
 )
    
