@@ -44,16 +44,19 @@
 namespace libpc { namespace drivers { namespace oci {
 
 
-//---------------------------------------------------------------------------
-//
-// LiblasIteratorBase
-//
-//---------------------------------------------------------------------------
-
 
 IteratorBase::IteratorBase(const Reader& reader)
     : m_reader(reader)
 {
+    oci::Options& options = m_reader.getOptions();
+    
+    Connection conn = m_reader.getConnection();
+    
+    std::string sql = options.GetPTree().get<std::string>("sql");
+    
+    m_statement = Statement(conn->CreateStatement(sql.c_str()));
+    
+    
     return;
 }
 
@@ -73,6 +76,8 @@ const Reader& IteratorBase::getReader() const
 boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
 {
     boost::uint32_t numPoints = data.getCapacity();
+    
+    
     // boost::uint32_t i = 0;
     // 
     // const Schema& schema = data.getSchema();

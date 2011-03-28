@@ -66,7 +66,9 @@ public:
     }
 
     libpc::SequentialIterator* createSequentialIterator() const;
-
+    Connection getConnection () const { return m_connection;}
+    Options& getOptions() const { return m_options; }
+    
 private:
 
     Reader& operator=(const Reader&); // not implemented

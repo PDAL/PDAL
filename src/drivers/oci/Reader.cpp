@@ -48,6 +48,9 @@ Reader::Reader(Options& options)
     , m_verbose(false)
 {
 
+    Debug();
+    
+    m_connection = Connect(m_options);
     
 }    
 

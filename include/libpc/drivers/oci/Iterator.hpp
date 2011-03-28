@@ -39,12 +39,13 @@
 
 #include <libpc/Iterator.hpp>
 
+#include <libpc/drivers/oci/Common.hpp>
+
 #include <string>
 
 namespace libpc { namespace drivers { namespace oci {
 
 class Reader;
-
 
 class IteratorBase
 {
@@ -59,6 +60,7 @@ protected:
 
 private:
     const Reader& m_reader;
+    Statement m_statement;
     
     IteratorBase& operator=(const IteratorBase&); // not implemented
     IteratorBase(const IteratorBase&); // not implemented};

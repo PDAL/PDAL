@@ -32,7 +32,8 @@
 #include <libpc/drivers/liblas/reader.hpp>
 
 #ifdef LIBPC_HAVE_ORACLE
-#include <libpc/drivers/oci/writer.hpp>
+#include <libpc/drivers/oci/Writer.hpp>
+#include <libpc/drivers/oci/Reader.hpp>
 #endif
 
 #include "Application.hpp"
@@ -142,7 +143,31 @@ int Application_pc2pc::execute()
 #else
         throw configuration_error("libPC not compiled with Oracle support");
 #endif
-    }    
+    }
+        else if (hasOption("oracle-reader"))
+        {
+    #ifdef LIBPC_HAVE_ORACLE
+            libpc::drivers::oci::Options options;
+            boost::property_tree::ptree& tree = options.GetPTree();
+            tree.put("capacity", 12);
+            tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
+            tree.put("debug", true);
+            tree.put("verbose", true);
+
+            libpc::drivers::oci::Reader reader(options);
+
+            const boost::uint64_t numPoints = reader.getNumPoints();
+
+
+
+            libpc::drivers::liblas::LiblasWriter writer(reader, *ofs);
+            writer.setPointFormat( 3);
+            writer.write(numPoints);
+    #else
+            throw configuration_error("libPC not compiled with Oracle support");
+    #endif
+        }
+
     else
     {
         libpc::drivers::liblas::LiblasReader reader(m_inputFile);
