@@ -38,6 +38,7 @@
 #include <iostream>
 
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
+#include <boost/make_shared.hpp>
 
 #include <libpc/Bounds.hpp>
 #include <libpc/exceptions.hpp>
@@ -126,6 +127,48 @@ std::string to_upper(const std::string& input)
 }
 
 
+Connection Connect(Options const& options)
+{
+    std::string connection;
+    try {
+        connection = options.GetPTree().get<std::string>("connection");
+        
+    } catch (boost::property_tree::ptree_bad_path const& ) 
+    {
+        throw libpc_error("'connection' string for oracle not set in options");
+    }
+
+    bool verbose = false;
+    try {
+        verbose = options.GetPTree().get<bool>("verbose");
+        
+    } catch (boost::property_tree::ptree_bad_path const& ) 
+    {
+        throw libpc_error("'verbose' bool for oracle not set in options");
+    }
+    
+    if (connection.empty())
+        throw libpc_error("Oracle connection string empty! Unable to connect");
+
+    
+    std::string::size_type slash_pos = connection.find("/",0);
+    std::string username = connection.substr(0,slash_pos);
+    std::string::size_type at_pos = connection.find("@",slash_pos);
+
+    std::string password = connection.substr(slash_pos+1, at_pos-slash_pos-1);
+    std::string instance = connection.substr(at_pos+1);
+    
+    Connection con = boost::make_shared<OWConnection>(username.c_str(),password.c_str(),instance.c_str());
+    
+    if (con->Succeeded())
+        if (verbose)
+            std::cout << "Oracle connection succeeded" << std::endl;
+    else
+        throw libpc_error("Oracle connection failed");
+        
+    return con;
+    
+}
 
 
 }}} // namespace libpc::driver::oci

@@ -77,7 +77,7 @@ private:
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
     // 
-    Connection Connect();
+
     void Debug();
     void WipeBlockTable();
     void CreateBlockIndex();

@@ -57,6 +57,7 @@ typedef boost::shared_ptr<OWStatement> Statement ;
 
 
 
+
 #ifdef LIBPC_COMPILER_MSVC
 #define compare_no_case(a,b,n)  _strnicmp( (a), (b), (n) )
 #else
@@ -76,8 +77,10 @@ public:
     bool Is3d() const;
     bool IsSolid() const;
     boost::property_tree::ptree& GetPTree() {return m_tree; }
-
+    boost::property_tree::ptree const& GetPTree() const {return m_tree; }
 };
+
+Connection Connect(Options const& options);
 
 std::string to_upper(std::string const& input);
 

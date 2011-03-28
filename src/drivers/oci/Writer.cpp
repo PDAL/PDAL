@@ -37,7 +37,6 @@
 
 #include <iostream>
 
-#include <boost/make_shared.hpp>
 
 #include <libpc/exceptions.hpp>
 
@@ -57,31 +56,7 @@ Writer::Writer(Stage& prevStage, Options& options)
     return;
 }
 
-Connection Writer::Connect()
-{
-    std::string connection = m_options.GetPTree().get<std::string>("connection");
-    if (connection.empty())
-        throw libpc_error("Oracle connection string empty! Unable to connect");
 
-    
-    std::string::size_type slash_pos = connection.find("/",0);
-    std::string username = connection.substr(0,slash_pos);
-    std::string::size_type at_pos = connection.find("@",slash_pos);
-
-    std::string password = connection.substr(slash_pos+1, at_pos-slash_pos-1);
-    std::string instance = connection.substr(at_pos+1);
-    
-    Connection con = boost::make_shared<OWConnection>(username.c_str(),password.c_str(),instance.c_str());
-    
-    if (con->Succeeded())
-        if (m_verbose)
-            std::cout << "Oracle connection succeeded" << std::endl;
-    else
-        throw libpc_error("Oracle connection failed");
-        
-    return con;
-    
-}
 
 Writer::~Writer()
 {
@@ -606,7 +581,7 @@ void Writer::writeBegin()
     // Set up debugging info
     Debug();
     
-    m_connection = Connect();
+    m_connection = Connect(m_options);
     
     RunFileSQL("pre_sql");
     if (!BlockTableExists())
