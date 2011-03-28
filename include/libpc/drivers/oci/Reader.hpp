@@ -38,6 +38,7 @@
 #include <libpc/libpc.hpp>
 
 #include <libpc/Stage.hpp>
+#include <libpc/drivers/oci/Common.hpp>
 
 
 namespace libpc { namespace driver { namespace oci {
@@ -72,8 +73,11 @@ private:
     Reader(const Reader&); // not implemented
     // 
     
+    void Debug();
 
     Options& m_options;
+    Connection m_connection;
+    bool m_verbose;
 };
 
 }}} // namespace libpc::driver::oci

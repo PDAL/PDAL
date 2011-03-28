@@ -66,6 +66,8 @@ Options::Options()
     m_tree.put("header_blob_column_name", std::string("header"));
     m_tree.put("base_table_aux_columns", std::string(""));
     m_tree.put("base_table_aux_values", std::string(""));
+    m_tree.put("base_table_boundary_column", std::string(""));
+    m_tree.put("base_table_boundary_wkt", std::string(""));
     m_tree.put("pre_block_sql", std::string(""));
     m_tree.put("pre_sql", std::string(""));
     m_tree.put("post_block_sql", std::string(""));

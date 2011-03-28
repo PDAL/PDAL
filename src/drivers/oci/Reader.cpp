@@ -37,6 +37,7 @@
 
 #include <libpc/exceptions.hpp>
 
+#include <iostream>
 
 namespace libpc { namespace driver { namespace oci {
 
@@ -44,10 +45,41 @@ namespace libpc { namespace driver { namespace oci {
 Reader::Reader(Options& options)
     : libpc::Stage()
     , m_options(options)
+    , m_verbose(false)
 {
 
+    
 }    
 
+void Reader::Debug()
+{
+    bool debug = m_options.IsDebug();
+
+    if (debug)
+    {
+        m_verbose = true;
+    }
+
+    CPLPopErrorHandler();
+
+    if (debug)
+    {
+        const char* gdal_debug = Utils::getenv("CPL_DEBUG");
+        if (gdal_debug == 0)
+        {
+            Utils::putenv("CPL_DEBUG=ON");
+        }
+        
+        const char* gdal_debug2 = getenv("CPL_DEBUG");
+        std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
+        CPLPushErrorHandler(OCIGDALDebugErrorHandler);
+        
+    }
+    else 
+    {
+        CPLPushErrorHandler(OCIGDALErrorHandler);        
+    }
+}
 
 const std::string& Reader::getName() const
 {

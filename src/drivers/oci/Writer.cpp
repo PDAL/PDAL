@@ -47,7 +47,6 @@ namespace libpc { namespace driver { namespace oci {
 Writer::Writer(Stage& prevStage, Options& options)
     : libpc::Writer(prevStage)
     , m_stage(prevStage)
-    // , m_chipper(m_stage, options.GetPTree().get<boost::uint32_t>("capacity") )
     , m_options(options)
     , m_verbose(false)
 {
@@ -439,6 +438,9 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     std::string base_table_aux_columns = to_upper(tree.get<std::string>("base_table_aux_columns"));
     std::string base_table_aux_values = to_upper(tree.get<std::string>("base_table_aux_values"));
     std::string header_blob_column_name = to_upper(tree.get<std::string>("header_blob_column_name"));
+    std::string base_table_boundary_column = to_upper(tree.get<std::string>("base_table_boundary_column"));
+    std::string base_table_boundary_wkt = to_upper(tree.get<std::string>("base_table_boundary_wkt"));
+    
     boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
     boost::uint32_t precision = tree.get<boost::uint32_t>("precision");
     boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
