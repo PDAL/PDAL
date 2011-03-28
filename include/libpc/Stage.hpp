@@ -73,8 +73,7 @@ public:
     const Metadata::Array& getMetadata() const;
 
     virtual bool supportsIterator (StageIteratorType) const { return false; }
-    virtual bool supportsSequentialIterator() const { return false; }
-    virtual bool supportsRandomIterator() const { return false; }
+
     virtual SequentialIterator* createSequentialIterator() const { return NULL; }
     virtual RandomIterator* createRandomIterator() const  { return NULL; }
     virtual BlockIterator* createBlockIterator() const  { return NULL; }

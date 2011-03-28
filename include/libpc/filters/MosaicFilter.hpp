@@ -62,12 +62,11 @@ public:
     bool supportsIterator (StageIteratorType t) 
     {   
         if (t == StageIterator_Sequential ) return true;
+        if (t == StageIterator_Random) return false; // BUG: could be true
 
         return false;
     }
     
-    bool supportsSequentialIterator() const { return true; }
-    bool supportsRandomIterator() const { return false; }  // BUG: could be true
     libpc::SequentialIterator* createSequentialIterator() const;
     libpc::RandomIterator* createRandomIterator() const { return NULL; }
 

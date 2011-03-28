@@ -69,8 +69,6 @@ public:
         return false;
     }
 
-    bool supportsSequentialIterator() const { return true; }
-    bool supportsRandomIterator() const { return false; }
     libpc::SequentialIterator* createSequentialIterator() const;
     libpc::RandomIterator* createRandomIterator() const { return NULL; }
 

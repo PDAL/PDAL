@@ -63,8 +63,6 @@ public:
     bool supportsIterator (StageIteratorType t) 
     {   
         if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random ) return true;
-        if (t == StageIterator_Block ) return true;
         return false;
     }
     

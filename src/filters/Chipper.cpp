@@ -101,7 +101,7 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t 
     if (size < 0)
         throw libpc_error("m_right - m_left + 1 was less than 0 in Block::GetBuffer()!");
 
-    if (!stage.supportsRandomIterator())
+    if (!stage.supportsIterator(StageIterator_Random))
         throw libpc_error("Chipper GetBuffer is unable to read data source randomly!");
             
     boost::scoped_ptr<RandomIterator> iter(stage.createRandomIterator());
