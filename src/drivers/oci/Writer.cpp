@@ -48,7 +48,7 @@ namespace libpc { namespace driver { namespace oci {
 Writer::Writer(Stage& prevStage, Options& options)
     : libpc::Writer(prevStage)
     , m_stage(prevStage)
-    , m_chipper(m_stage, options.GetPTree().get<boost::uint32_t>("capacity") )
+    // , m_chipper(m_stage, options.GetPTree().get<boost::uint32_t>("capacity") )
     , m_options(options)
     , m_verbose(false)
 {
@@ -591,17 +591,17 @@ oss << "declare\n"
 void Writer::writeBegin()
 {
     
-    m_chipper.Chip();
-
-    // cumulate a global bounds for the dataset
-    for ( boost::uint32_t i = 0; i < m_chipper.GetBlockCount(); ++i )
-    {
-        const filters::chipper::Block& b = m_chipper.GetBlock(i);
-        
-        // FIXME: This only gets called once!
-        if (m_bounds.empty()) // If the user already set the bounds for this writer, we're using that
-            m_bounds.grow(b.GetBounds());        
-    }
+    // m_chipper.Chip();
+    // 
+    // // cumulate a global bounds for the dataset
+    // for ( boost::uint32_t i = 0; i < m_chipper.GetBlockCount(); ++i )
+    // {
+    //     const filters::chipper::Block& b = m_chipper.GetBlock(i);
+    //     
+    //     // FIXME: This only gets called once!
+    //     if (m_bounds.empty()) // If the user already set the bounds for this writer, we're using that
+    //         m_bounds.grow(b.GetBounds());        
+    // }
 
     // Set up debugging info
     Debug();
@@ -612,7 +612,6 @@ void Writer::writeBegin()
     if (!BlockTableExists())
         CreateBlockTable();
     
-    // m_stage.seekToPoint(0);
     return;
 }
 
@@ -624,14 +623,13 @@ void Writer::writeEnd()
 }
 
 bool Writer::FillOraclePointBuffer(PointBuffer const& buffer, 
-                                 std::vector<boost::uint8_t>& point_data,
-                                 filters::chipper::Block const& block,
-                                 boost::uint32_t block_id)
+                                 std::vector<boost::uint8_t>& point_data
+)
 {
 
 
     libpc::Schema const& schema = buffer.getSchema();
-    std::vector<boost::uint32_t> ids = block.GetIDs();
+    // std::vector<boost::uint32_t> ids = block.GetIDs();
 
     bool hasTimeData = schema.hasDimension(Dimension::Field_Time, Dimension::Uint64);
     
@@ -649,6 +647,10 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
     const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification, Dimension::Uint8);
     const int indexTime = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Double);
     
+    // "Global" ids from the chipper are also available here.
+    // const int indexId = schema.getDimensionIndex(Dimension::Field_User1, Dimension::Int32);
+    const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
+    
     Dimension const& dimX = schema.getDimension(indexX);
     Dimension const& dimY = schema.getDimension(indexY);
     Dimension const& dimZ = schema.getDimension(indexZ);
@@ -662,8 +664,8 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
     double zoffset = dimZ.getNumericOffset();
     
     boost::uint32_t counter = 0;
-    std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    std::cout.precision(6);
+    // std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    // std::cout.precision(6);
 
     while (counter < count)
     {
@@ -673,8 +675,10 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
         double z = (buffer.getField<boost::int32_t>(counter, indexZ) * zscale) + zoffset;
         boost::uint8_t classification = buffer.getField<boost::uint8_t>(counter, indexClassification);
         double c = static_cast<double>(classification);
-        boost::uint32_t id = ids[counter];
-        std::cout << x <<" "<< y  <<" "<< z << " "<< id << " " << c <<std::endl;
+        // boost::uint32_t id = buffer.getField<boost::uint32_t>(counter, indexId);
+        boost::uint32_t block_id = buffer.getField<boost::uint32_t>(counter, indexBlockId);
+        // boost::uint32_t id = ids[counter];
+        // std::cout << x <<" "<< y  <<" "<< z << " "<< id << " " << block_id <<" " << c <<std::endl;
         
         double t = 0.0;
         if (hasTimeData)
@@ -711,8 +715,8 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
             point_data.push_back(c_b[i]);
         }
 
-        boost::uint8_t* id_b = reinterpret_cast<boost::uint8_t*>(&id);
-        boost::uint8_t* block_b = reinterpret_cast<boost::uint8_t*>(&block_id);
+        boost::uint8_t* id_b = reinterpret_cast<boost::uint8_t*>(&counter); 
+        boost::uint8_t* block_b = reinterpret_cast<boost::uint8_t*>(&block_id); 
         
         // 4-byte big-endian integer for the BLK_ID value
         for (int i =  sizeof(boost::uint32_t) - 1; i >= 0; i--) {
@@ -770,9 +774,7 @@ void Writer::SetOrdinates(Statement statement,
 }
 
 bool Writer::WriteBlock(PointBuffer const& buffer, 
-                                 std::vector<boost::uint8_t>& point_data,
-                                 filters::chipper::Block const& block,
-                                 boost::uint32_t block_id)
+                                 std::vector<boost::uint8_t>& point_data)
 {
 
     boost::property_tree::ptree&  tree = m_options.GetPTree();
@@ -784,10 +786,13 @@ bool Writer::WriteBlock(PointBuffer const& buffer,
 
     bool bUsePartition = block_table_partition_column.size() != 0;
     
-    std::vector<boost::uint32_t> ids = block.GetIDs();
-
+    // std::vector<boost::uint32_t> ids = block.GetIDs();
     
-
+    // Pluck the block id out of the first point in the buffer
+    libpc::Schema const& schema = buffer.getSchema();
+    const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
+    long block_id  = buffer.getField<boost::int32_t>(0, indexBlockId);
+    
     std::ostringstream oss;
     std::ostringstream partition;
     
@@ -830,7 +835,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer,
     p_result_id[0] = (long)block_id;
     
     long* p_num_points = (long*) malloc (1 * sizeof(long));
-    p_num_points[0] = (long)ids.size();
+    p_num_points[0] = (long)buffer.getNumPoints();
     
     
     // :1
@@ -879,7 +884,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer,
     m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
     
      // x0, x1, y0, y1, z0, z1, bUse3d
-    SetOrdinates(statement, sdo_ordinates, block.GetBounds());
+    SetOrdinates(statement, sdo_ordinates, buffer.getSpatialBounds());
     statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
     
     // :9
@@ -922,37 +927,10 @@ bool Writer::WriteBlock(PointBuffer const& buffer,
 boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 {
     boost::uint32_t numPoints = buffer.getNumPoints();
+    std::vector<boost::uint8_t> oracle_buffer;
 
-    
-    for ( boost::uint32_t i = 0; i < m_chipper.GetBlockCount(); ++i )
-    {
-        const filters::chipper::Block& b = m_chipper.GetBlock(i);
-        PointBuffer block = b.GetBuffer(m_stage);
-        std::vector<boost::uint8_t> oracle_buffer;
-        
-        // // FIXME: This should be std::min(capacity, block_id.size()) (I think)
-        // libpc::PointBuffer block(schema, m_options.GetPTree().get<boost::uint32_t>("capacity"));
-        // std::vector<boost::uint32_t> ids = b.GetIDs();
-        // 
-        // std::vector<boost::uint32_t>::const_iterator it;
-        // boost::uint32_t count = 0;
-        // for (it = ids.begin(); it != ids.end(); it++)
-        // {
-        //     iter->seek(*it);
-        //     iter->read(buffer);
-        //     // m_stage.seekToPoint(*it);
-        //     
-        //     // FIXME: Use a user bounds here instead of reading everything  
-        //     // m_stage.read(buffer);
-        //     
-        //     block.copyPointsFast(static_cast<std::size_t>(count), static_cast<std::size_t>(0), buffer, 1); // put single point onto our block
-        // 
-        //     count++;
-        // 
-        // }
-        FillOraclePointBuffer(block, oracle_buffer, b, i);
-        WriteBlock(block, oracle_buffer, b, i);
-    }
+    FillOraclePointBuffer(buffer, oracle_buffer);
+    WriteBlock(buffer, oracle_buffer);
 
     return numPoints;
 }

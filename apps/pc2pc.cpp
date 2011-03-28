@@ -18,7 +18,7 @@
 //#include <libpc/Color.hpp>
 //#include <libpc/Dimension.hpp>
 //#include <libpc/Schema.hpp>
-//#include <libpc/CropFilter.hpp>
+#include <libpc/filters/Chipper.hpp>
 //#include <libpc/ColorFilter.hpp>
 //#include <libpc/MosaicFilter.hpp>
 //#include <libpc/FauxReader.hpp>
@@ -129,19 +129,14 @@ int Application_pc2pc::execute()
         libpc::driver::oci::Options options;
         boost::property_tree::ptree& tree = options.GetPTree();
         
-        tree.put("capacity", 15);
+        tree.put("capacity", 12);
         tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
         tree.put("debug", true);
         tree.put("verbose", true);
         
         libpc::filters::CacheFilter cache(reader, 1, 1024);
-        
-        libpc::driver::oci::Writer writer(cache, options);
-        
-        
-        //BUG: handle laz writer.setCompressed(false);
-
-        //writer.setPointFormat( reader.getPointFormatNumber() );
+        libpc::filters::Chipper chipper(cache, 12);
+        libpc::driver::oci::Writer writer(chipper, options);
 
         writer.write(numPoints);
 #else

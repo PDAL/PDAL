@@ -136,7 +136,7 @@ public:
     std::vector<boost::uint32_t> GetIDs() const; 
     libpc::Bounds<double> const& GetBounds() const {return m_bounds;} 
     void SetBounds(libpc::Bounds<double> const& bounds) {m_bounds = bounds;}
-    PointBuffer GetBuffer( Stage& stage) const;    
+    void GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t block_id) const;    
     // double GetXmin() const
     //     { return m_xmin; }
     // double GetYmin() const
@@ -153,21 +153,23 @@ class LIBPC_DLL Chipper : public libpc::Filter
 {
 public:
     Chipper(Stage& prevStage, boost::uint32_t max_partition_size) :
-        libpc::Filter(prevStage), m_stage(prevStage), m_threshold(max_partition_size),
+        libpc::Filter(prevStage), m_threshold(max_partition_size),
         m_xvec(chipper::DIR_X), m_yvec(chipper::DIR_Y), m_spare(chipper::DIR_NONE) 
-    {}
+    {
+        checkImpedance();
+    }
 
     void Chip();
-    std::vector<chipper::Block>::size_type GetBlockCount()
+    std::vector<chipper::Block>::size_type GetBlockCount() const
         { return m_blocks.size(); }
-    const chipper::Block& GetBlock(std::vector<chipper::Block>::size_type i)
+    const chipper::Block& GetBlock(std::vector<chipper::Block>::size_type i) const
         { return m_blocks[i]; }
 
     const std::string& getName() const ;
 
     bool supportsIterator (StageIteratorType t) 
     {   
-        if (t == StageIterator_Block ) return true;
+        if (t == StageIterator_Sequential ) return true;
         return false;
     }
 
@@ -188,9 +190,9 @@ private:
         boost::uint32_t pleft, boost::uint32_t pcenter);
     void Emit(chipper::RefList& wide, boost::uint32_t widemin, boost::uint32_t widemax,
         chipper::RefList& narrow, boost::uint32_t narrowmin, boost::uint32_t narrowmax );
-    
 
-    Stage& m_stage;
+    void checkImpedance();
+
     boost::uint32_t m_threshold;
     std::vector<chipper::Block> m_blocks;
     std::vector<boost::uint32_t> m_partitions;

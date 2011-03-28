@@ -92,13 +92,9 @@ private:
     std::string LoadSQLData(std::string const& filename);
     
     bool FillOraclePointBuffer(PointBuffer const& buffer, 
-                             std::vector<boost::uint8_t>& point_data, 
-                             filters::chipper::Block const& block,
-                             boost::uint32_t block_id);
+                             std::vector<boost::uint8_t>& point_data);
     bool WriteBlock(PointBuffer const& buffer, 
-                             std::vector<boost::uint8_t>& point_data, 
-                             filters::chipper::Block const& block,
-                             boost::uint32_t block_id);
+                             std::vector<boost::uint8_t>& point_data);
 
     void SetOrdinates(Statement statement,
                       OCIArray* ordinates, 
@@ -106,7 +102,7 @@ private:
     void SetElements(Statement statement,
                      OCIArray* elem_info);
     Stage& m_stage;
-    filters::Chipper m_chipper;
+    // filters::Chipper m_chipper;
     
     Options& m_options;
     libpc::Bounds<double> m_bounds; // Bounds of the entire point cloud

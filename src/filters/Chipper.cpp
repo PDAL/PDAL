@@ -45,6 +45,8 @@
 
 #include <boost/scoped_ptr.hpp>
 
+#include <iostream>
+
 using namespace std;
 using namespace libpc::filters::chipper;
 
@@ -89,15 +91,15 @@ vector<boost::uint32_t> Block::GetIDs() const
     return ids;
 }
 
-PointBuffer Block::GetBuffer( Stage& stage) const
+void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t block_id) const
 {
-    libpc::Schema const& schema = stage.getSchema();
+    libpc::Schema const& schema = buffer.getSchema();
+
+    
         
     boost::int32_t size = m_right - m_left + 1;
     if (size < 0)
         throw libpc_error("m_right - m_left + 1 was less than 0 in Block::GetBuffer()!");
-        
-    PointBuffer buffer(schema, size);
 
     if (!stage.supportsRandomIterator())
         throw libpc_error("Chipper GetBuffer is unable to read data source randomly!");
@@ -109,23 +111,27 @@ PointBuffer Block::GetBuffer( Stage& stage) const
 
     std::vector<boost::uint32_t>::const_iterator it;
     boost::uint32_t count = 0;
+    
+    const int indexId = schema.getDimensionIndex(Dimension::Field_User1, Dimension::Int32);
+    const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
+    
     for (it = ids.begin(); it != ids.end(); it++)
     {
         iter->seek(*it);
         iter->read(one_point);
-        // m_stage.seekToPoint(*it);
+
+        one_point.setField(0, indexId, *it);
+        one_point.setField(0, indexBlockId, block_id);
         
-        // FIXME: Use a user bounds here instead of reading everything  
-        // m_stage.read(buffer);
-        
+        // put single point onto our block
         buffer.copyPointsFast(static_cast<std::size_t>(count), static_cast<std::size_t>(0), one_point, 1); 
-        // 
-        // // put single point onto our block
+        buffer.setNumPoints(count + 1);
+
         count++;
     }
     
-    return buffer;
 }
+
 
 void Chipper::Chip()
 {
@@ -134,34 +140,15 @@ void Chipper::Chip()
     DecideSplit(m_xvec, m_yvec, m_spare, 0, m_partitions.size() - 1);
 }
 
-const std::string& Chipper::getName() const
-{
-    static std::string name("Chipper");
-    return name;
-}
-
-libpc::SequentialIterator* Chipper::createSequentialIterator() const
-{
-    return 0;
-}
-
-
-libpc::RandomIterator* Chipper::createRandomIterator() const
-{
-    return 0;
-}
-
-
-
 void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
 {
     PtRef ref;
     boost::uint32_t idx;
     vector<PtRef>::iterator it;
    
-    libpc::Schema const& schema = m_stage.getSchema();
+    libpc::Schema const& schema = m_prevStage.getSchema();
     
-    boost::uint64_t count = m_stage.getNumPoints();
+    boost::uint64_t count = m_prevStage.getNumPoints();
     xvec.reserve(count);
     yvec.reserve(count);
     spare.resize(count);
@@ -185,7 +172,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     std::size_t num_points_loaded = 0;
     std::size_t num_points_to_load = count;
     
-    boost::scoped_ptr<SequentialIterator> iter(m_stage.createSequentialIterator());
+    boost::scoped_ptr<SequentialIterator> iter(m_prevStage.createSequentialIterator());
     
     boost::uint32_t counter = 0;
     while (num_points_loaded < num_points_to_load)
@@ -447,5 +434,45 @@ void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widem
     b.m_right = widemax;
     m_blocks.push_back(b);
 }
+
+const std::string& Chipper::getName() const
+{
+    static std::string name("Chipper");
+    return name;
+}
+
+
+
+libpc::RandomIterator* Chipper::createRandomIterator() const
+{
+    return 0;
+}
+
+libpc::SequentialIterator* Chipper::createSequentialIterator() const
+{
+    return new ChipperSequentialIterator(*this);
+}
+
+void Chipper::checkImpedance()
+{
+    Schema& schema = getSchemaRef();
+
+    
+    Dimension pointID(Dimension::Field_User1, Dimension::Int32);
+    Dimension blockID(Dimension::Field_User2, Dimension::Int32);
+
+    if (!schema.hasDimension(pointID))
+    {
+        schema.addDimension(pointID);
+    }
+    if (!schema.hasDimension(blockID))
+    {
+        schema.addDimension(blockID);
+    }
+    
+    // std::cout << schema << std::endl;
+    return;
+}
+
 
 }} // namespace liblas::chipper

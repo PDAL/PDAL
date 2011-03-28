@@ -80,8 +80,10 @@ BOOST_AUTO_TEST_CASE(test_construction)
 
         BOOST_CHECK(ids.size() == 15);
         BOOST_CHECK(ids[14] == 1050 );
-
-        PointBuffer buffer = chipper.GetBlock(20).GetBuffer(reader);
+        
+        libpc::Schema const& schema = reader.getSchema();
+        PointBuffer buffer(schema, 15);
+        chipper.GetBlock(20).GetBuffer(reader, buffer, 70);
 
         // 
         // std::cout << buffer.getField<boost::int32_t>(0, 0) << std::endl;

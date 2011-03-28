@@ -32,13 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/Writer.hpp>
 //
 #include <boost/scoped_ptr.hpp>
 
+#include <libpc/Writer.hpp>
 #include <libpc/Iterator.hpp>
 #include <libpc/Stage.hpp>
 #include <libpc/PointBuffer.hpp>
+#include <libpc/exceptions.hpp>
 
 namespace libpc
 {
@@ -80,6 +81,8 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
     m_actualNumPointsWritten = 0;
 
     boost::scoped_ptr<SequentialIterator> iter(m_prevStage.createSequentialIterator());
+    
+    if (!iter) throw libpc_error("Unable to obtain iterator from previous stage!");
 
     writeBegin();
 

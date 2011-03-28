@@ -38,12 +38,63 @@
 namespace libpc { namespace filters {
 
 
-ChipperBlockIterator::ChipperBlockIterator(Chipper const& filter)
-    : libpc::FilterBlockIterator(filter)
+ChipperSequentialIterator::ChipperSequentialIterator(Chipper const& filter)
+    : libpc::FilterSequentialIterator(filter)
     , m_chipper(filter)
+    , m_currentBlockId(0)
+    , m_currentPointCount(0)
 {
+    const_cast<Chipper&>(m_chipper).Chip();
     return;
 }
+
+boost::uint64_t ChipperSequentialIterator::skipImpl(boost::uint64_t count)
+{
+    return naiveSkipImpl(count);
+}
+
+
+boost::uint32_t ChipperSequentialIterator::readImpl(PointBuffer& buffer)
+{
+    // The client has asked us for dstData.getCapacity() points.
+    // We will read from our previous stage until we get that amount (or
+    // until the previous stage runs out of points).
+
+
+    assert(buffer.getNumPoints() == 0);
+
+    
+    if (m_currentBlockId == m_chipper.GetBlockCount())
+        return 0; // we're done.
+
+    filters::chipper::Block const& block = m_chipper.GetBlock(m_currentBlockId);
+    std::size_t numPointsThisBlock = block.GetIDs().size();
+    m_currentPointCount = m_currentPointCount + numPointsThisBlock;
+    
+    if (buffer.getCapacity() < numPointsThisBlock)
+    {
+        // FIXME: Expand the buffer?
+        throw libpc_error("Buffer not large enough to hold block!");
+    }
+    block.GetBuffer(m_chipper.getPrevStage(), buffer, m_currentBlockId);
+    
+    // FIXME: Set the PointBuffer's Bounds
+    
+    buffer.setSpatialBounds(block.GetBounds());
+    m_currentBlockId++;
+    return numPointsThisBlock;
+
+}
+
+
+bool ChipperSequentialIterator::atEndImpl() const
+{
+    // we don't have a fixed point point --
+    // we are at the end only when our source is at the end
+    const SequentialIterator& iter = getPrevIterator();
+    return iter.atEnd();
+}
+
 
 // boost::uint64_t ChipperSequentialIterator::skipImpl(boost::uint64_t count)
 // {

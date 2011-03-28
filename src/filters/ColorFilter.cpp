@@ -128,7 +128,7 @@ void ColorFilter::getColor(float value, boost::uint8_t& red, boost::uint8_t& gre
     const Range<double>& zrange = getBounds().dimensions()[2];
     Color::interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(), fred, fblue, fgreen);
 
-    const double vmax = (std::numeric_limits<boost::uint8_t>::max());
+    const double vmax = (std::numeric_limits<boost::uint8_t>::max)();
     red = (boost::uint8_t)(fred * vmax);
     green = (boost::uint8_t)(fgreen * vmax);
     blue = (boost::uint8_t)(fblue * vmax);

@@ -39,6 +39,8 @@
 
 #include <libpc/FilterIterator.hpp>
 #include <libpc/filters/Chipper.hpp>
+#include <libpc/exceptions.hpp>
+
 namespace libpc {
 
 
@@ -46,17 +48,20 @@ namespace filters {
 
 
 
-class ChipperBlockIterator : public libpc::FilterBlockIterator
+class ChipperSequentialIterator : public libpc::FilterSequentialIterator
 {
 public:
-    ChipperBlockIterator(const Chipper& filter);
+    ChipperSequentialIterator(Chipper const& filter);
 
 private:
-    // boost::uint64_t skipImpl(boost::uint64_t);
-    // boost::uint32_t readImpl(PointBuffer&);
-    // bool atEndImpl() const;
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readImpl(PointBuffer&);
+    bool atEndImpl() const;
 
-    const Chipper& m_chipper;
+    Chipper const& m_chipper;
+    std::size_t m_currentBlockId;
+    boost::uint64_t m_currentPointCount;
+    
 };
 
 
