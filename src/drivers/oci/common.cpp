@@ -71,6 +71,7 @@ Options::Options()
     m_tree.put("pre_block_sql", std::string(""));
     m_tree.put("pre_sql", std::string(""));
     m_tree.put("post_block_sql", std::string(""));
+    m_tree.put("select_sql", std::string(""));
     m_tree.put("base_table_bounds", libpc::Bounds<double>());
 
 }    

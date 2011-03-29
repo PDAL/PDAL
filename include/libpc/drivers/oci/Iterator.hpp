@@ -60,7 +60,6 @@ protected:
 
 private:
     const Reader& m_reader;
-    Statement m_statement;
     
     IteratorBase& operator=(const IteratorBase&); // not implemented
     IteratorBase(const IteratorBase&); // not implemented};

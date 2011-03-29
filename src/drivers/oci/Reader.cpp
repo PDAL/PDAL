@@ -51,7 +51,16 @@ Reader::Reader(Options& options)
     Debug();
     
     m_connection = Connect(m_options);
+
     
+    
+    std::string sql = options.GetPTree().get<std::string>("select_sql");
+    
+    if (sql.size() == 0 )
+        throw libpc_error("'select_sql' statement is empty. No data can be read from libpc::drivers::oci::Reader");
+    
+    m_statement = Statement(m_connection->CreateStatement(sql.c_str()));
+        
 }    
 
 void Reader::Debug()
@@ -82,6 +91,60 @@ void Reader::Debug()
     {
         CPLPushErrorHandler(OCIGDALErrorHandler);        
     }
+}
+
+void Reader::registerFields()
+{
+    Schema& schema = getSchemaRef();
+
+    Dimension xDim(Dimension::Field_X, Dimension::Int32);
+    Dimension yDim(Dimension::Field_Y, Dimension::Int32);
+    Dimension zDim(Dimension::Field_Z, Dimension::Int32);
+
+    // xDim.setNumericScale(externalHeader.GetScaleX());
+    //   yDim.setNumericScale(externalHeader.GetScaleY());
+    //   zDim.setNumericScale(externalHeader.GetScaleZ());
+    //   xDim.setNumericOffset(externalHeader.GetOffsetX());
+    //   yDim.setNumericOffset(externalHeader.GetOffsetY());
+    //   zDim.setNumericOffset(externalHeader.GetOffsetZ());
+    // 
+    //   schema.addDimension(xDim);
+    //   schema.addDimension(yDim);
+    //   schema.addDimension(zDim);
+    // 
+    //   schema.addDimension(Dimension(Dimension::Field_Intensity, Dimension::Uint16));
+    //   schema.addDimension(Dimension(Dimension::Field_ReturnNumber, Dimension::Uint8));
+    //   schema.addDimension(Dimension(Dimension::Field_NumberOfReturns, Dimension::Uint8));
+    //   schema.addDimension(Dimension(Dimension::Field_ScanDirectionFlag, Dimension::Uint8));
+    //   schema.addDimension(Dimension(Dimension::Field_EdgeOfFlightLine, Dimension::Uint8));
+    //   schema.addDimension(Dimension(Dimension::Field_Classification, Dimension::Uint8));
+    //   schema.addDimension(Dimension(Dimension::Field_ScanAngleRank, Dimension::Int8));
+    //   schema.addDimension(Dimension(Dimension::Field_UserData, Dimension::Uint8));
+    //   schema.addDimension(Dimension(Dimension::Field_PointSourceId, Dimension::Uint16));
+    // 
+    //   if (m_hasTimeData)
+    //   {
+    //       schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Double));
+    //   }
+    // 
+    //   if (m_hasColorData)
+    //   {
+    //       schema.addDimension(Dimension(Dimension::Field_Red, Dimension::Uint16));
+    //       schema.addDimension(Dimension(Dimension::Field_Green, Dimension::Uint16));
+    //       schema.addDimension(Dimension(Dimension::Field_Blue, Dimension::Uint16));
+    //   }
+    // 
+    //   //if (m_hasWaveData)
+    //   //{
+    //   //    schema.addDimension(Dimension(Dimension::Field_WavePacketDescriptorIndex, Dimension::Uint8));
+    //   //    schema.addDimension(Dimension(Dimension::Field_WaveformDataOffset, Dimension::Uint64));
+    //   //    schema.addDimension(Dimension(Dimension::Field_ReturnPointWaveformLocation, Dimension::Uint32));
+    //   //    schema.addDimension(Dimension(Dimension::Field_WaveformXt, Dimension::Float));
+    //   //    schema.addDimension(Dimension(Dimension::Field_WaveformYt, Dimension::Float));
+    //   //    schema.addDimension(Dimension(Dimension::Field_WaveformZt, Dimension::Float));
+    //   //}
+    //   
+    //   return;
 }
 
 const std::string& Reader::getName() const

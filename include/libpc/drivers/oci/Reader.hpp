@@ -44,12 +44,6 @@
 
 namespace libpc { namespace drivers { namespace oci {
 
-
-
-
-
-
-
 class LIBPC_DLL Reader : public libpc::Stage
 {
 
@@ -76,9 +70,11 @@ private:
     // 
     
     void Debug();
+    void registerFields();
 
     Options& m_options;
     Connection m_connection;
+    Statement m_statement;
     bool m_verbose;
 };
 

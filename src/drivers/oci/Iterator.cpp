@@ -43,19 +43,10 @@
 
 namespace libpc { namespace drivers { namespace oci {
 
-
-
 IteratorBase::IteratorBase(const Reader& reader)
     : m_reader(reader)
 {
     oci::Options& options = m_reader.getOptions();
-    
-    Connection conn = m_reader.getConnection();
-    
-    std::string sql = options.GetPTree().get<std::string>("sql");
-    
-    m_statement = Statement(conn->CreateStatement(sql.c_str()));
-    
     
     return;
 }

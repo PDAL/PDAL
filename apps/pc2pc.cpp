@@ -90,6 +90,7 @@ void Application_pc2pc::addOptions()
         ("output,o", po::value<std::string>(&m_outputFile), "output file name")
         ("native", "use native LAS classes (not liblas)")
         ("oracle", "oracle test")
+        ("oracle-reader", "oracle test")
         ;
 
     addOptionSet(file_options);
@@ -153,6 +154,7 @@ int Application_pc2pc::execute()
             tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
             tree.put("debug", true);
             tree.put("verbose", true);
+            tree.put("select_sql", "select * from output");
 
             libpc::drivers::oci::Reader reader(options);
 
