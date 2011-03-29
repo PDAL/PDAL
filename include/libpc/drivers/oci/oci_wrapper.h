@@ -382,7 +382,7 @@ public:
     void                Define( long* pnData );
     void                Define( double* pnData );
     void                Define( char* pszData, int nSize = OWNAME );
-    void                Define( OCILobLocator** pphLocator);
+    void                Define( OCILobLocator** pphLocator );
     void                Define( OCIArray** pphData );
     void                Define( sdo_georaster** pphData );
     void                Define( sdo_geometry** pphData );
@@ -400,6 +400,7 @@ public:
     unsigned long       ReadBlob( OCILobLocator* phLocator,
                             void* pBuffer, int nSize );
     char*               ReadCLob( OCILobLocator* phLocator );
+    void                WriteCLob( OCILobLocator** pphLocator, char* pszData );
     bool                WriteBlob( OCILobLocator* phLocator,
                             void* pBuffer, int nSize );
     int                 GetElement( OCIArray** ppoData,
@@ -410,8 +411,6 @@ public:
                             int nValue );
     void                AddElement( OCIArray* ppoData,
                             double dfValue );
-    OWConnection*       GetConnection() {return poConnection;}
-
 };
 
 #endif /* ifndef _ORCL_WRAP_H_INCLUDED */

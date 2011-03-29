@@ -28,8 +28,7 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#include <libpc/drivers/oci/oci_wrapper.h>
-
+#include "oci_wrapper.h"
 
 static const OW_CellDepth ahOW_CellDepth[] = {
     {"8BIT_U",          GDT_Byte},
@@ -149,7 +148,7 @@ OWConnection::OWConnection( const char* pszUserIn,
     }
 
     if( CheckError( OCIAttrSet((dvoid *) hSession, (ub4) OCI_HTYPE_SESSION,
-        (dvoid *) pszUserId, (ub4) strlen((const char *) pszUserId),
+        (dvoid *) pszUserId, (ub4) strlen( pszUserId),
         (ub4) OCI_ATTR_USERNAME, hError), hError ) )
     {
         return;
@@ -227,9 +226,13 @@ OWConnection::OWConnection( const char* pszUserIn,
     hNumArrayTDO    = DescribeType( SDO_NUMBER_ARRAY );
     hGeometryTDO    = DescribeType( SDO_GEOMETRY );
     hGeoRasterTDO   = DescribeType( SDO_GEORASTER );
-    hPCTDO          = DescribeType( SDO_PC );
     hElemArrayTDO   = DescribeType( SDO_ELEM_INFO_ARRAY);
     hOrdnArrayTDO   = DescribeType( SDO_ORDINATE_ARRAY);
+
+    if( nVersion > 10 )
+    {
+        hPCTDO      = DescribeType( SDO_PC );
+    }
 }
 
 OWConnection::~OWConnection()
@@ -253,13 +256,6 @@ OWConnection::~OWConnection()
 
     if( hSession )
         OCIHandleFree((dvoid *) hSession, (ub4) OCI_HTYPE_SESSION);
-    
-    if (pszUser)
-        CPLFree(pszUser);
-    if (pszPassword)
-        CPLFree(pszPassword);
-    if (pszServer)
-        CPLFree(pszServer);
 }
 
 OCIType* OWConnection::DescribeType( const char *pszTypeName )
@@ -566,7 +562,7 @@ OWStatement::OWStatement( OWConnection* pConnect, const char* pszStatement )
 
     if( nStmtType != OCI_STMT_SELECT )
     {
-        nStmtMode = OCI_DEFAULT;// OCI_COMMIT_ON_SUCCESS; //?? Transaction ??//
+        nStmtMode = OCI_DEFAULT;
     }
 
     CPLDebug("PL/SQL","\n%s\n", pszStatement);
@@ -753,6 +749,29 @@ void OWStatement::Bind( sdo_geometry** pphData )
 
 }
 
+void OWStatement::Bind( OCILobLocator** pphLocator )
+{
+    OCIBind* hBind = NULL;
+
+    nNextBnd++;
+
+    CheckError( OCIBindByPos(
+        hStmt,
+        &hBind,
+        hError,
+        (ub4) nNextBnd,
+        (dvoid*) pphLocator,
+        (sb4) -1,
+        (ub2) SQLT_CLOB,
+        (void*) NULL,
+        (ub2*) NULL,
+        (ub2*) NULL,
+        (ub4) NULL,
+        (ub4) NULL,
+        (ub4) OCI_DEFAULT ),
+        hError );
+}
+
 void OWStatement::Bind( OCIArray** pphData, OCIType* type )
 {
     OCIBind* hBind = NULL;
@@ -915,6 +934,49 @@ void OWStatement::Define( OCILobLocator** pphLocator )
         (ub2*) NULL,
         (ub4) OCI_DEFAULT ),
         hError );
+}
+
+void OWStatement::WriteCLob( OCILobLocator** pphLocator, char* pszData )
+{
+    nNextCol++;
+
+    CheckError( OCIDescriptorAlloc(
+        poConnection->hEnv,
+        (void**) pphLocator,
+        OCI_DTYPE_LOB,
+        (size_t) 0,
+        (dvoid **) 0),
+        hError );
+
+    CheckError( OCILobCreateTemporary( 
+        poConnection->hSvcCtx,
+        poConnection->hError,
+        (OCILobLocator*) *pphLocator,
+        (ub4) OCI_DEFAULT,
+        (ub1) OCI_DEFAULT,
+        (ub1) OCI_TEMP_CLOB,
+        false,
+        OCI_DURATION_SESSION ),
+        hError );
+
+    ub4 nAmont = (ub4) strlen(pszData);
+
+    CheckError( OCILobWrite(
+        poConnection->hSvcCtx,
+        hError,
+        *pphLocator,
+        (ub4*) &nAmont,
+        (ub4) 1,
+        (dvoid*) pszData,
+        (ub4) strlen(pszData),
+        (ub1) OCI_ONE_PIECE,
+        (dvoid*) NULL,
+        NULL,
+        (ub2) 0,
+        (ub1) SQLCS_IMPLICIT ),
+        hError );
+
+    CPLDebug("GEOR","Clob = %d = %d", nAmont, static_cast<int>(strlen(pszData)));
 }
 
 void OWStatement::Define( OCIArray** pphData )
@@ -1305,20 +1367,9 @@ char* OWStatement::ReadCLob( OCILobLocator* phLocator )
         return NULL;
     }
 
-    nAmont *= this->poConnection->nCharSize;
+    pszBuffer[nAmont] = '\0';
 
-    if( nAmont == nSize )
-    {
-        pszBuffer[nAmont] = '\0';
-    }
-    else
-    {
-        CPLFree( pszBuffer );
-
-        return NULL;
-    }
-
-    return pszBuffer;
+	return pszBuffer;
 }
 
 void OWStatement::BindName( const char* pszName, int* pnData )
@@ -1750,7 +1801,7 @@ bool CheckError( sword nStatus, OCIError* hError )
         }
 
         CPLError( CE_Failure, CPLE_AppDefined, "%.*s",
-            (ub4) sizeof(szMsg), szMsg );
+            static_cast<int>(sizeof(szMsg)), szMsg );
         break;
 
     default:
@@ -1766,7 +1817,7 @@ bool CheckError( sword nStatus, OCIError* hError )
                 (ub4) sizeof(szMsg), OCI_HTYPE_ERROR);
 
             CPLError( CE_Failure, CPLE_AppDefined, "%.*s",
-               (ub4) sizeof(szMsg), szMsg );
+                static_cast<int>(sizeof(szMsg)), szMsg );
             break;
 
     }
