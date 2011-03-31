@@ -30,6 +30,8 @@
 
 #include <libpc/drivers/oci/oci_wrapper.h>
 
+#include <iostream>
+
 static const OW_CellDepth ahOW_CellDepth[] = {
     {"8BIT_U",          GDT_Byte},
     {"16BIT_U",         GDT_UInt16},
@@ -232,6 +234,7 @@ OWConnection::OWConnection( const char* pszUserIn,
     if( nVersion > 10 )
     {
         hPCTDO      = DescribeType( SDO_PC );
+        hPC_BLK_TDO = DescribeType( SDO_PC_BLK );
     }
 }
 
@@ -318,6 +321,29 @@ void OWConnection::CreateType( sdo_geometry** pphData )
 }
 
 void OWConnection::DestroyType( sdo_geometry** pphData )
+{
+    CheckError( OCIObjectFree(
+        hEnv,
+        hError,
+        (dvoid*) *pphData,
+        (ub2) 0), NULL );
+}
+
+void OWConnection::CreateType( sdo_pc** pphData )
+{
+    CheckError( OCIObjectNew(
+        hEnv,
+        hError,
+        hSvcCtx,
+        OCI_TYPECODE_OBJECT,
+        hPCTDO,
+        (dvoid *) 0,
+        OCI_DURATION_CALL,
+        TRUE,
+        (dvoid **) pphData), hError );
+}
+
+void OWConnection::DestroyType( sdo_pc** pphData )
 {
     CheckError( OCIObjectFree(
         hEnv,
@@ -623,6 +649,164 @@ bool OWStatement::Fetch( int nRows )
     return true;
 }
 
+
+bool OWStatement::GetNextField(
+                                 int nIndex,
+                                 char* pszName,
+                                 int* pnType,
+                                 int* pnSize,
+                                 int* pnPrecision,
+                                 signed short* pnScale ,
+                                 char* pszTypeName)
+{
+    OCIParam* hParmDesc = NULL;
+
+    sword nStatus = 0;
+
+    nStatus = OCIParamGet(
+        hStmt,
+        (ub4) OCI_HTYPE_STMT,
+        hError,
+        (dvoid**) &hParmDesc,   //Warning
+        (ub4) nIndex + 1 );
+
+    if( nStatus != OCI_SUCCESS )
+    {
+        return false;
+    }
+
+    char* pszFieldName = NULL;
+    ub4 nNameLength = 0;
+
+    CheckError( OCIAttrGet(
+        hParmDesc,
+        (ub4) OCI_DTYPE_PARAM,
+        (dvoid*) &pszFieldName,
+        (ub4*) &nNameLength,
+        (ub4) OCI_ATTR_NAME,
+        hError ), hError );
+
+    ub2 nOCIType = 0;
+
+    CheckError( OCIAttrGet(
+        hParmDesc,
+        (ub4) OCI_DTYPE_PARAM,
+        (dvoid*) &nOCIType,
+        (ub4*) NULL,
+        (ub4) OCI_ATTR_DATA_TYPE,
+        hError ), hError );
+
+    ub2 nOCILen = 0;
+
+    CheckError( OCIAttrGet(
+        hParmDesc,
+        (ub4) OCI_DTYPE_PARAM,
+        (dvoid*) &nOCILen,
+        (ub4*) NULL,
+        (ub4) OCI_ATTR_DATA_SIZE,
+        hError ), hError );
+
+    unsigned short nOCIPrecision = 0;
+    sb1 nOCIScale = 0;
+
+    if( nOCIType == SQLT_NUM )
+    {
+        CheckError( OCIAttrGet(
+            hParmDesc,
+            (ub4) OCI_DTYPE_PARAM,
+            (dvoid*) &nOCIPrecision,
+            (ub4*) 0,
+            (ub4) OCI_ATTR_PRECISION,
+            hError ), hError );
+
+        CheckError( OCIAttrGet(
+            hParmDesc,
+            (ub4) OCI_DTYPE_PARAM,
+            (dvoid*) &nOCIScale,
+            (ub4*) 0,
+            (ub4) OCI_ATTR_SCALE,
+            hError ), hError );
+
+        if( nOCIPrecision > 255 ) // Lesson learned from ogrocisession.cpp
+        {
+            nOCIPrecision = nOCIPrecision / 256;
+        }
+    }
+
+    if (nOCIType == SQLT_NTY)
+    {
+        OCIRef* type_ref;
+
+        OCIParam* typeParam = NULL;
+    
+        CheckError( OCIAttrGet(
+            hParmDesc,
+            (ub4) OCI_DTYPE_PARAM,
+            (dvoid*) &type_ref,
+            (ub4*) NULL,
+            (ub4) OCI_ATTR_REF_TDO,
+            hError ), hError );
+
+        CheckError( OCIDescribeAny(
+            poConnection->hSvcCtx,
+            hError,
+            (dvoid*) type_ref,
+            0,
+            (ub1) OCI_OTYPE_REF,
+            (ub1) OCI_DEFAULT,
+            (ub1) OCI_PTYPE_TYPE,
+            poConnection->hDescribe ), hError );
+
+        CheckError( OCIAttrGet(
+            poConnection->hDescribe,
+            (ub4) OCI_HTYPE_DESCRIBE,
+            (dvoid*) &typeParam,
+            (ub4*) 0,
+            (ub4) OCI_ATTR_PARAM,
+            hError ), hError );
+        
+        text* pszFieldTypeName = NULL;
+        ub4 nFieldTypeNameSize = 0;
+                
+        CheckError( OCIAttrGet(
+            typeParam,
+            (ub4) OCI_DTYPE_PARAM,
+            (dvoid*) &pszFieldTypeName,
+            (ub4*) &nFieldTypeNameSize,
+            (ub4) OCI_ATTR_SCHEMA_NAME,
+            hError ), hError );
+
+        // Get Type's name and set it to pszFieldTypeName
+        CheckError( OCIAttrGet(
+            typeParam,
+            (ub4) OCI_DTYPE_PARAM,
+            (dvoid*) &pszFieldTypeName,
+            (ub4*) &nFieldTypeNameSize,
+            (ub4) OCI_ATTR_NAME,
+            hError ), hError );
+
+        nFieldTypeNameSize = MIN(nFieldTypeNameSize, OWNAME);
+        strncpy( pszTypeName, (char*)pszFieldTypeName, nFieldTypeNameSize);
+        pszTypeName[nFieldTypeNameSize] = '\0';
+
+    }
+      
+    nNameLength = MIN( nNameLength, OWNAME );
+
+
+    strncpy( pszName, pszFieldName, nNameLength);
+    pszName[nNameLength] = '\0';
+
+
+    *pnType      = (int) nOCIType;
+    *pnSize      = (int) nOCILen;
+    *pnPrecision = (int) nOCIPrecision;
+    *pnScale     = (signed short) nOCIScale;
+
+    return true;
+
+}
+
 void OWStatement::Bind( int* pnData )
 {
     OCIBind* hBind = NULL;
@@ -741,9 +925,43 @@ void OWStatement::Bind( sdo_geometry** pphData )
         hBind,
         hError,
         poConnection->hGeometryTDO,
-	(dvoid**) pphData,
+        (dvoid**) pphData,
         (ub4*) 0,
-	(dvoid**) 0,
+        (dvoid**) 0,
+        (ub4*) 0),
+        hError );
+
+}
+
+void OWStatement::Bind( sdo_pc_blk** pphData )
+{
+    OCIBind* hBind = NULL;
+
+    nNextBnd++;
+
+    CheckError( OCIBindByPos(
+        hStmt,
+        &hBind,
+        hError,
+        (ub4) nNextBnd,
+        (dvoid*) NULL,
+        (sb4) 0,
+        (ub2) SQLT_NTY,
+        (void*) NULL,
+        (ub2*) NULL,
+        (ub2*) NULL,
+        (ub4) 0,
+        (ub4) 0,
+        (ub4) OCI_DEFAULT ),
+        hError );
+
+    CheckError( OCIBindObject(
+        hBind,
+        hError,
+        poConnection->hPC_BLK_TDO,
+        (dvoid**) pphData,
+        (ub4*) 0,
+        (dvoid**) 0,
         (ub4*) 0),
         hError );
 
@@ -1059,6 +1277,34 @@ void OWStatement::Define( sdo_geometry** pphData )
         (dvoid**) NULL,
         (ub4*) NULL ), hError );
 }
+
+void OWStatement::Define( sdo_pc_blk** pphData )
+{
+    OCIDefine* hDefine = NULL;
+
+    nNextCol++;
+
+    CheckError( OCIDefineByPos( hStmt,
+        &hDefine,
+        hError,
+        (ub4) nNextCol,
+        (dvoid*) NULL,
+        (sb4) 0,
+        (ub2) SQLT_NTY,
+        (void*) NULL,
+        (ub2*) NULL,
+        (ub2*) NULL,
+        (ub4) OCI_DEFAULT ), hError );
+
+    CheckError( OCIDefineObject( hDefine,
+        hError,
+        poConnection->hPC_BLK_TDO,
+        (dvoid**) pphData,
+        (ub4*) NULL,
+        (dvoid**) NULL,
+        (ub4*) NULL ), hError );
+}
+
 
 void OWStatement::Define( sdo_pc** pphData )
 {

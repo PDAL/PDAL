@@ -86,6 +86,7 @@ const char*         OWReplaceString( const char* pszBaseString,
 #define SDO_GEOMETRY                TYPE_OWNER".SDO_GEOMETRY"
 #define SDO_GEORASTER               TYPE_OWNER".SDO_GEORASTER"
 #define SDO_PC                      TYPE_OWNER".SDO_PC"
+#define SDO_PC_BLK                  TYPE_OWNER".SDO_PC_BLK"
 #define SDO_NUMBER_ARRAY            TYPE_OWNER".SDO_NUMBER_ARRAY"
 #define SDO_ORDINATE_ARRAY          TYPE_OWNER".SDO_ORDINATE_ARRAY"
 #define SDO_ELEM_INFO_ARRAY         TYPE_OWNER".SDO_ELEM_INFO_ARRAY"
@@ -250,6 +251,35 @@ struct sdo_pc_ind
 };
 typedef struct sdo_pc_ind SDO_PC_ind;
 
+struct sdo_pc_blk
+{
+    OCINumber           obj_id;
+    OCINumber           blk_id;
+    SDO_GEOMETRY_TYPE   blk_extent;
+    SDO_ORGSCL_TYPE     blk_domain;
+    OCINumber           pcblk_min_res;
+    OCINumber           pcblk_max_res;
+    OCINumber           num_points;
+    OCINumber           num_unsorted_points;
+    OCINumber           pt_sort_dim;
+    void*               points;
+};
+typedef struct sdo_pc_blk SDO_PC_BLK_TYPE;
+
+struct sdo_pc_blk_type_ind
+{
+    OCIInd              _atomic;
+    OCIInd              obj_id;
+    OCIInd              blk_id;
+    sdo_geometry_ind    blk_extent;
+    sdo_orgscl_type_ind blk_domain;
+    OCIInd              pcblk_min_res;
+    OCIInd              pcblk_max_res;
+    OCIInd              num_points;
+    OCIInd              num_unsorted_points;
+    OCIInd              pt_sort_dim;
+};
+typedef struct sdo_pc_blk_type_ind SDO_PC_BLK_TYPE_ind;
 /***************************************************************************/
 /*                            Oracle class wrappers                        */
 /***************************************************************************/
@@ -295,6 +325,8 @@ private:
     OCIType*            hGeometryTDO;
     OCIType*            hGeoRasterTDO;
     OCIType*            hPCTDO;
+    OCIType*            hPC_BLK_TDO;
+
     OCIType*            hElemArrayTDO;
     OCIType*            hOrdnArrayTDO;
 
@@ -313,6 +345,8 @@ public:
 
     void                CreateType( sdo_geometry** pphData );
     void                DestroyType( sdo_geometry** pphData );
+    void                CreateType( sdo_pc** pphData );
+    void                DestroyType( sdo_pc** pphData );
     void                CreateType( OCIArray** phData , OCIType* type);
     void                DestroyType( OCIArray** phData );
     OCIType*            DescribeType( const char *pszTypeName );
@@ -329,6 +363,7 @@ public:
     OCIType*            GetGeoRasterType() { return hGeoRasterTDO; }
     OCIType*            GetElemInfoType() {return hElemArrayTDO; }
     OCIType*            GetOrdinateType() {return hOrdnArrayTDO; }
+    OCIType*            GetPCType() {return hPCTDO; }
 
     bool                Commit(); // OCITransCommit()
     bool                StartTransaction(); //  //OCITransStart()
@@ -366,6 +401,16 @@ public:
     bool                Fetch( int nRows = 1 );
     unsigned int        nFetchCount;
 
+    bool                GetNextField(
+                            int nIndex,
+                            char* pszName,
+                            int* pnType,
+                            int* pnSize,
+                            int* pnPrecision,
+                            signed short* pnScale,
+                            char* pszTypeName);
+
+
     int                 GetInteger( OCINumber* ppoData );
     double              GetDouble( OCINumber* ppoData );
     char*               GetString( OCIString* ppoData );
@@ -375,6 +420,7 @@ public:
     void                Bind( double* pnData );
     void                Bind( char* pData, long nData );
     void                Bind( sdo_geometry** pphData );
+    void                Bind( sdo_pc_blk** pphData );
     void                Bind( OCILobLocator** pphLocator );
     void                Bind( OCIArray** pphData, OCIType* type );
     void                Bind( char* pszData, int nSize = OWNAME );
@@ -387,6 +433,7 @@ public:
     void                Define( sdo_georaster** pphData );
     void                Define( sdo_geometry** pphData );
     void                Define( sdo_pc** pphData );
+    void                Define( sdo_pc_blk** pphData );
     void                Define( OCILobLocator** pphLocator, long nIterations );
     void                BindName( const char* pszName, int* pnData );
     void                BindName( const char* pszName, double* pnData );

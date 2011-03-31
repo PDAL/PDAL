@@ -71,6 +71,7 @@ private:
     
     void Debug();
     void registerFields();
+    void fetchPCFields();
 
     Options& m_options;
     Connection m_connection;

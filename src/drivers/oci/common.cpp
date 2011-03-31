@@ -73,7 +73,19 @@ Options::Options()
     m_tree.put("post_block_sql", std::string(""));
     m_tree.put("select_sql", std::string(""));
     m_tree.put("base_table_bounds", libpc::Bounds<double>());
+    
+    boost::property_tree::ptree scales;
+    scales.put("x", double(0.01));
+    scales.put("y", double(0.01));
+    scales.put("z", double(0.01));
 
+    boost::property_tree::ptree offsets;
+    offsets.put("x", double(0.0));
+    offsets.put("y", double(0.0));
+    offsets.put("z", double(0.0));
+    
+    m_tree.add_child("scale", scales);
+    m_tree.add_child("offset", offsets);
 }    
 
 bool Options::IsDebug() const

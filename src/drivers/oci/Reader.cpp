@@ -38,6 +38,8 @@
 #include <libpc/exceptions.hpp>
 
 #include <iostream>
+#include <sstream>
+#include <map>
 
 namespace libpc { namespace drivers { namespace oci {
 
@@ -60,9 +62,165 @@ Reader::Reader(Options& options)
         throw libpc_error("'select_sql' statement is empty. No data can be read from libpc::drivers::oci::Reader");
     
     m_statement = Statement(m_connection->CreateStatement(sql.c_str()));
-        
+    
+    registerFields();
+    
+    m_statement->Execute(0);
+
+    fetchPCFields();
+    
+    // int foo;
+    // int block_id;
+    // 
+    // m_statement->Define(&foo);
+    // m_statement->Define(&block_id);
+    
+    sdo_pc_blk* block;
+    sdo_pc* pc;
+
+    m_connection->CreateType(&pc);
+
+
+    m_statement->Define(&pc);
+    
+
+    while(m_statement->Fetch() )
+    {
+        std::cout << " Block: " << m_statement->GetInteger(&(pc->pc_id)) << std::endl;
+    }
+
+    
 }    
 
+void Reader::fetchPCFields()
+{
+
+
+    int   iCol = 0;
+    char  szFieldName[OWNAME];
+    int   hType = 0;
+    int   nSize = 0;
+    int   nPrecision = 0;
+    signed short nScale = 0;
+    char szTypeName[OWNAME];
+    
+    bool isPCObject = false;
+    bool isBlockTable = false;
+    
+    
+    const int columns_size = 10;
+    std::string block_columns[columns_size];
+    block_columns[0] = "OBJ_ID";
+    block_columns[1] = "BLK_ID";
+    block_columns[2] = "BLK_EXTENT";
+    block_columns[3] = "BLK_DOMAIN";
+    block_columns[4] = "PCBLK_MIN_RES";
+    block_columns[5] = "PCBLK_MAX_RES";
+    block_columns[6] = "NUM_POINTS";
+    block_columns[7] = "NUM_UNSORTED_POINTS";
+    block_columns[8] = "PT_SORT_DIM";
+    block_columns[9] = "POINTS";
+    
+    std::map<std::string, bool> columns_map;
+
+    for(int i = 0; i < columns_size; ++i)
+    {
+        columns_map.insert(std::pair<std::string, bool>(block_columns[i], false));
+    }
+    
+    while( m_statement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName) )
+    {
+        std::string name = to_upper(std::string(szFieldName));
+        
+        std::map<std::string, bool>::iterator it = columns_map.find(name);
+        if (it != columns_map.end())
+        {
+            // std::cout << "setting columns to true for " << it->first << std::endl;
+            (*it).second = true;
+            
+        }
+
+        switch( hType )
+        {
+            case SQLT_FLT:
+                std::cout << "Field " << szFieldName << " is SQL_FLT" << std::endl;
+                break;
+            case SQLT_NUM:
+                if( nPrecision == 0 )
+                {
+                    std::cout << "Field " << szFieldName << " is SQLT_NUM with precision 0" << std::endl;
+                }
+                else
+                {
+                    std::cout << "Field " << szFieldName << " is SQLT_NUM with precision " << nPrecision << std::endl;
+
+                }
+                break;
+            
+            case SQLT_BLOB:
+                std::cout << "Field " << szFieldName << " is SQLT_BLOB" << std::endl;
+                break;
+                
+            case SQLT_NTY:
+                if (compare_no_case(szTypeName, "SDO_PC", 6) == 0)
+                    isPCObject = true;
+                std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
+                break;
+                
+            case SQLT_AFC:
+            case SQLT_CHR:
+                std::cout << "Field " << szFieldName << " is SQLT_CHR" << std::endl;
+                break;
+                
+
+
+            case SQLT_DAT:
+            case SQLT_DATE:
+            case SQLT_TIMESTAMP:
+            case SQLT_TIMESTAMP_TZ:
+            case SQLT_TIMESTAMP_LTZ:
+            case SQLT_TIME:
+            case SQLT_TIME_TZ:
+                std::cout << "Field " << szFieldName << " is some kind of time type" << std::endl;
+
+                break;
+            default:
+                std::ostringstream oss;
+                oss << "Field " << szFieldName << " with type " << hType << " is not handled by fetchPCFields";
+                throw libpc_error(oss.str());
+        }
+
+        iCol++;
+    }
+
+    // Assume we're a block table until we say we aren't.  Loop through all of 
+    // the required columns that make up a block table and if we find one that 
+    // wasn't marked in the loop above, we're not a block table.
+    isBlockTable = true;
+    std::map<std::string, bool>::iterator it = columns_map.begin();
+    while (it != columns_map.end())
+    {   
+        if (it->second == false) 
+        {
+            isBlockTable = false; 
+            break;
+        }
+        ++it;
+    }
+    
+    
+    if (!isBlockTable && !isPCObject) 
+    {
+        std::ostringstream oss;
+        std::string sql = m_options.GetPTree().get<std::string>("select_sql");
+        oss << "Select statement '" << sql << "' does not fetch an SDO_PC object" 
+              " or one that is equivalent to SDO_PC_BLK_TYPE";
+        throw libpc_error(oss.str());
+    }
+
+    if (isBlockTable == true) std::cout << "We're a block table!!" << std::endl;
+    if (isPCObject == true) std::cout << "We're a PC object!!" << std::endl;
+}
 void Reader::Debug()
 {
     bool debug = m_options.IsDebug();
@@ -100,51 +258,32 @@ void Reader::registerFields()
     Dimension xDim(Dimension::Field_X, Dimension::Int32);
     Dimension yDim(Dimension::Field_Y, Dimension::Int32);
     Dimension zDim(Dimension::Field_Z, Dimension::Int32);
+    
+    boost::property_tree::ptree tree = m_options.GetPTree();
+    double scalex = tree.get<double>("scale.x");
+    double scaley = tree.get<double>("scale.y");
+    double scalez = tree.get<double>("scale.z");
 
-    // xDim.setNumericScale(externalHeader.GetScaleX());
-    //   yDim.setNumericScale(externalHeader.GetScaleY());
-    //   zDim.setNumericScale(externalHeader.GetScaleZ());
-    //   xDim.setNumericOffset(externalHeader.GetOffsetX());
-    //   yDim.setNumericOffset(externalHeader.GetOffsetY());
-    //   zDim.setNumericOffset(externalHeader.GetOffsetZ());
-    // 
-    //   schema.addDimension(xDim);
-    //   schema.addDimension(yDim);
-    //   schema.addDimension(zDim);
-    // 
-    //   schema.addDimension(Dimension(Dimension::Field_Intensity, Dimension::Uint16));
-    //   schema.addDimension(Dimension(Dimension::Field_ReturnNumber, Dimension::Uint8));
-    //   schema.addDimension(Dimension(Dimension::Field_NumberOfReturns, Dimension::Uint8));
-    //   schema.addDimension(Dimension(Dimension::Field_ScanDirectionFlag, Dimension::Uint8));
-    //   schema.addDimension(Dimension(Dimension::Field_EdgeOfFlightLine, Dimension::Uint8));
-    //   schema.addDimension(Dimension(Dimension::Field_Classification, Dimension::Uint8));
-    //   schema.addDimension(Dimension(Dimension::Field_ScanAngleRank, Dimension::Int8));
-    //   schema.addDimension(Dimension(Dimension::Field_UserData, Dimension::Uint8));
-    //   schema.addDimension(Dimension(Dimension::Field_PointSourceId, Dimension::Uint16));
-    // 
-    //   if (m_hasTimeData)
-    //   {
-    //       schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Double));
-    //   }
-    // 
-    //   if (m_hasColorData)
-    //   {
-    //       schema.addDimension(Dimension(Dimension::Field_Red, Dimension::Uint16));
-    //       schema.addDimension(Dimension(Dimension::Field_Green, Dimension::Uint16));
-    //       schema.addDimension(Dimension(Dimension::Field_Blue, Dimension::Uint16));
-    //   }
-    // 
-    //   //if (m_hasWaveData)
-    //   //{
-    //   //    schema.addDimension(Dimension(Dimension::Field_WavePacketDescriptorIndex, Dimension::Uint8));
-    //   //    schema.addDimension(Dimension(Dimension::Field_WaveformDataOffset, Dimension::Uint64));
-    //   //    schema.addDimension(Dimension(Dimension::Field_ReturnPointWaveformLocation, Dimension::Uint32));
-    //   //    schema.addDimension(Dimension(Dimension::Field_WaveformXt, Dimension::Float));
-    //   //    schema.addDimension(Dimension(Dimension::Field_WaveformYt, Dimension::Float));
-    //   //    schema.addDimension(Dimension(Dimension::Field_WaveformZt, Dimension::Float));
-    //   //}
-    //   
-    //   return;
+    double offsetx = tree.get<double>("offset.x");
+    double offsety = tree.get<double>("offset.y");
+    double offsetz = tree.get<double>("offset.z");
+        
+    xDim.setNumericScale(scalex);
+    yDim.setNumericScale(scaley);
+    zDim.setNumericScale(scalez);
+    xDim.setNumericOffset(offsetx);
+    yDim.setNumericOffset(offsety);
+    zDim.setNumericOffset(offsetz);
+
+    schema.addDimension(xDim);
+    schema.addDimension(yDim);
+    schema.addDimension(zDim);
+
+    schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Double));
+    schema.addDimension(Dimension(Dimension::Field_Classification, Dimension::Uint8));
+
+    
+    return;
 }
 
 const std::string& Reader::getName() const
