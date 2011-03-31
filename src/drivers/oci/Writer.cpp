@@ -464,11 +464,21 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
         columns << cloud_column_name;
         values << "pc";
     }
-    
+
+    int nPos = 1; // Bind column position    
     if (!header_blob_column_name.empty()){
         columns << "," << header_blob_column_name;
-        values <<", :2";
+        values <<", :" << nPos++;
     }
+
+    if (!base_table_boundary_column.empty()){
+        columns << "," << base_table_boundary_column;
+        nPos++;
+        values <<", SDO_GEOMETRY(:"<<nPos;
+        nPos++;
+        values <<", :"<<nPos<<")";
+    }
+    
 
 
     std::ostringstream s_srid;
@@ -546,13 +556,23 @@ oss << "declare\n"
     Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
 
     statement->Bind(&pc_id);
-    if (header_data->size() != 0) {
+    if (header_data->size() != 0) 
+    {
         OCILobLocator** locator =(OCILobLocator**) VSIMalloc( sizeof(OCILobLocator*) * 1 );
         statement->Define( locator, 1 ); 
-
         statement->Bind((char*)&(header_data[0]),(long)header_data->size());
-    
     }
+
+    char* wkt = (char*) malloc(base_table_boundary_wkt.size() * sizeof(char));
+    strncpy(wkt, base_table_boundary_wkt.c_str(), base_table_boundary_wkt.size());
+    if (!base_table_boundary_column.empty())
+    {
+        OCILobLocator** locator =(OCILobLocator**) VSIMalloc( sizeof(OCILobLocator*) * 1 );
+        statement->DefineClob( locator, 1 ); 
+        statement->BindClob(wkt,(long)base_table_boundary_wkt.size());
+        statement->Bind((long int*)&srid);
+    }
+
     try {
         statement->Execute();
     } catch (std::runtime_error const& e) {
@@ -561,7 +581,8 @@ oss << "declare\n"
         throw std::runtime_error(oss.str());
     }
     output = pc_id;
-
+    
+    free(wkt);
     tree.put("cloud_id", pc_id);
     
 }

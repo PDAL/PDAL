@@ -419,6 +419,7 @@ public:
     void                Bind( long* pnData );
     void                Bind( double* pnData );
     void                Bind( char* pData, long nData );
+    void                BindClob( char* pData, long nData );    
     void                Bind( sdo_geometry** pphData );
     void                Bind( sdo_pc_blk** pphData );
     void                Bind( OCILobLocator** pphLocator );
@@ -435,6 +436,7 @@ public:
     void                Define( sdo_pc** pphData );
     void                Define( sdo_pc_blk** pphData );
     void                Define( OCILobLocator** pphLocator, long nIterations );
+    void                DefineClob( OCILobLocator** pphLocator, long nIterations );
     void                BindName( const char* pszName, int* pnData );
     void                BindName( const char* pszName, double* pnData );
     void                BindName( const char* pszName, char* pszData,
