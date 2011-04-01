@@ -79,7 +79,20 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 {
     m_targetNumPointsToWrite = targetNumPointsToWrite;
     m_actualNumPointsWritten = 0;
-
+    
+    PointCountType count_type = m_prevStage.getPointCountType();
+    
+    // passing in a 0 for the number of points means "write to the end"
+    // but we need to have an end to actually do that.  This code isn't 
+    // currently sufficient to go on writing forever.
+    if (targetNumPointsToWrite == 0)
+    {
+        if (count_type == PointCount_Unknown)
+        {
+            throw libpc_error("Unable to write points with an unknowable point count");
+        }
+    }
+    
     boost::scoped_ptr<SequentialIterator> iter(m_prevStage.createSequentialIterator());
     
     if (!iter) throw libpc_error("Unable to obtain iterator from previous stage!");
@@ -87,30 +100,38 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
     writeBegin();
 
     // in case targetNumPointsToWrite is really big, we will process just one chunk at a time
-
-    while (m_actualNumPointsWritten < m_targetNumPointsToWrite)
+    
+    if (targetNumPointsToWrite == 0)
     {
-        const boost::uint64_t numRemainingPointsToRead = m_targetNumPointsToWrite - m_actualNumPointsWritten;
         
-        const boost::uint64_t numPointsToReadThisChunk64 = std::min<boost::uint64_t>(numRemainingPointsToRead, m_chunkSize);
-        // this case is safe because m_chunkSize is a uint32
-        const boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(numPointsToReadThisChunk64);
+    } else 
+    {
 
-        PointBuffer buffer(m_prevStage.getSchema(), numPointsToReadThisChunk);
-
-        const boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
-        assert(numPointsReadThisChunk <= numPointsToReadThisChunk);
-
-        const boost::uint32_t numPointsWrittenThisChunk = writeBuffer(buffer);
-        assert(numPointsWrittenThisChunk == numPointsReadThisChunk);
-
-        m_actualNumPointsWritten += numPointsWrittenThisChunk;
-
-        if (iter->atEnd())
+        while (m_actualNumPointsWritten < m_targetNumPointsToWrite)
         {
-            break;
+            const boost::uint64_t numRemainingPointsToRead = m_targetNumPointsToWrite - m_actualNumPointsWritten;
+        
+            const boost::uint64_t numPointsToReadThisChunk64 = std::min<boost::uint64_t>(numRemainingPointsToRead, m_chunkSize);
+            // this case is safe because m_chunkSize is a uint32
+            const boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(numPointsToReadThisChunk64);
+
+            PointBuffer buffer(m_prevStage.getSchema(), numPointsToReadThisChunk);
+
+            const boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
+            assert(numPointsReadThisChunk <= numPointsToReadThisChunk);
+
+            const boost::uint32_t numPointsWrittenThisChunk = writeBuffer(buffer);
+            assert(numPointsWrittenThisChunk == numPointsReadThisChunk);
+
+            m_actualNumPointsWritten += numPointsWrittenThisChunk;
+
+            if (iter->atEnd())
+            {
+                break;
+            }
         }
     }
+
 
     writeEnd();
 
