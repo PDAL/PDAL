@@ -451,6 +451,8 @@ public:
                             int nCount );
     unsigned long       ReadBlob( OCILobLocator* phLocator,
                             void* pBuffer, int nSize );
+    bool                ReadBlob( OCILobLocator* phLocator,
+                            void* pBuffer, int nSize, int* nAmountRead );
     char*               ReadCLob( OCILobLocator* phLocator );
     void                WriteCLob( OCILobLocator** pphLocator, char* pszData );
     bool                WriteBlob( OCILobLocator* phLocator,

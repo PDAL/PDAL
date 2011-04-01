@@ -1645,6 +1645,36 @@ unsigned long OWStatement::ReadBlob( OCILobLocator* phLocator,
     return nAmont;
 }
 
+bool OWStatement::ReadBlob( OCILobLocator* phLocator,
+                                     void* pBuffer,
+                                     int nSize,
+                                     int* nAmountRead )
+{
+
+    sword status = OCILobRead(
+        poConnection->hSvcCtx,
+        hError,
+        phLocator,
+        (ub4*) nAmountRead,
+        (ub4) 1,
+        (dvoid*) pBuffer,
+        (ub4) nSize,
+        (dvoid *) 0,
+        (OCICallbackLobRead) 0,
+        (ub2) 0,
+        (ub1) SQLCS_IMPLICIT);
+    
+    if (status == OCI_NEED_DATA) 
+    {
+        return false;
+    }
+    
+    if (CheckError(status, hError)) return true;
+    
+    return true;
+}
+
+
 bool OWStatement::WriteBlob( OCILobLocator* phLocator,
                              void* pBuffer,
                              int nSize )
