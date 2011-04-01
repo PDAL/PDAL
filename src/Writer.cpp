@@ -103,7 +103,15 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
     
     if (targetNumPointsToWrite == 0)
     {
-        
+        PointBuffer buffer(m_prevStage.getSchema(), m_chunkSize);
+        boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
+        boost::uint32_t numPointsWrittenThisChunk = 0;
+        while (numPointsReadThisChunk != 0)
+        {
+            numPointsWrittenThisChunk = writeBuffer(buffer);
+            m_actualNumPointsWritten += numPointsWrittenThisChunk;
+            numPointsReadThisChunk = iter->read(buffer);
+        }
     } else 
     {
 
