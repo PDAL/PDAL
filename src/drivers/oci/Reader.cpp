@@ -56,7 +56,7 @@ Reader::Reader(Options& options)
     
     registerFields();
     
-    setNumPoints(1000);
+    // setNumPoints(1000);
 }    
 
 bool Reader::isVerbose() const
