@@ -154,8 +154,8 @@ int Application_pc2pc::execute()
             tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
             tree.put("debug", true);
             tree.put("verbose", true);
-            // tree.put("select_sql", "select * from output");
-            tree.put("select_sql", "select cloud from hobu where id = 5");
+            tree.put("select_sql", "select * from output");
+            // tree.put("select_sql", "select cloud from hobu where id = 5");
 
             libpc::drivers::oci::Reader reader(options);
 
@@ -164,7 +164,7 @@ int Application_pc2pc::execute()
 
 
             libpc::drivers::liblas::LiblasWriter writer(reader, *ofs);
-            writer.setPointFormat( 3);
+            // writer.setPointFormat( 3);
             writer.write(numPoints);
     #else
             throw configuration_error("libPC not compiled with Oracle support");

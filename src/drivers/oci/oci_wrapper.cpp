@@ -352,6 +352,30 @@ void OWConnection::DestroyType( sdo_pc** pphData )
         (ub2) 0), NULL );
 }
 
+void OWConnection::CreateType( sdo_orgscl_type** pphData )
+{
+    CheckError( OCIObjectNew(
+        hEnv,
+        hError,
+        hSvcCtx,
+        OCI_TYPECODE_OBJECT,
+        hPCTDO,
+        (dvoid *) 0,
+        OCI_DURATION_CALL,
+        TRUE,
+        (dvoid **) pphData), hError );
+}
+
+void OWConnection::DestroyType( sdo_orgscl_type** pphData )
+{
+    CheckError( OCIObjectFree(
+        hEnv,
+        hError,
+        (dvoid*) *pphData,
+        (ub2) 0), NULL );
+}
+
+
 void OWConnection::CreateType( OCIArray** phData, OCIType* otype)
 {
     CheckError( OCIObjectNew(   hEnv,
@@ -1385,6 +1409,33 @@ void OWStatement::Define( sdo_pc** pphData )
         (ub4*) NULL ), hError );
 }
 
+
+void OWStatement::Define( sdo_orgscl_type** pphData )
+{
+    OCIDefine* hDefine = NULL;
+
+    nNextCol++;
+
+    CheckError( OCIDefineByPos( hStmt,
+        &hDefine,
+        hError,
+        (ub4) nNextCol,
+        (dvoid*) NULL,
+        (sb4) 0,
+        (ub2) SQLT_NTY,
+        (void*) NULL,
+        (ub2*) NULL,
+        (ub2*) NULL,
+        (ub4) OCI_DEFAULT ), hError );
+
+    CheckError( OCIDefineObject( hDefine,
+        hError,
+        poConnection->hPCTDO,
+        (dvoid**) pphData,
+        (ub4*) NULL,
+        (dvoid**) NULL,
+        (ub4*) NULL ), hError );
+}
 void OWStatement::Define( OCILobLocator** pphLocator, long nIterations )
 {
     OCIDefine* hDefine = NULL;

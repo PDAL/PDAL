@@ -347,6 +347,8 @@ public:
     void                DestroyType( sdo_geometry** pphData );
     void                CreateType( sdo_pc** pphData );
     void                DestroyType( sdo_pc** pphData );
+    void                CreateType( sdo_orgscl_type** pphData );
+    void                DestroyType( sdo_orgscl_type** pphData );
     void                CreateType( OCIArray** phData , OCIType* type);
     void                DestroyType( OCIArray** phData );
     OCIType*            DescribeType( const char *pszTypeName );
@@ -434,6 +436,7 @@ public:
     void                Define( sdo_georaster** pphData );
     void                Define( sdo_geometry** pphData );
     void                Define( sdo_pc** pphData );
+    void                Define( sdo_orgscl_type** pphData );
     void                Define( sdo_pc_blk** pphData );
     void                Define( OCILobLocator** pphLocator, long nIterations );
     void                DefineClob( OCILobLocator** pphLocator, long nIterations );

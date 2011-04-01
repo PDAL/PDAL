@@ -58,11 +58,14 @@ protected:
     
     boost::uint32_t readBuffer(PointBuffer& data);
 
+    bool m_at_end;
+
 private:
     const Reader& m_reader;
     
     IteratorBase& operator=(const IteratorBase&); // not implemented
     IteratorBase(const IteratorBase&); // not implemented};
+
 };
 
 

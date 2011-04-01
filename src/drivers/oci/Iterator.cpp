@@ -44,7 +44,8 @@
 namespace libpc { namespace drivers { namespace oci {
 
 IteratorBase::IteratorBase(const Reader& reader)
-    : m_reader(reader)
+    : m_at_end(false)
+    , m_reader(reader)
 {
     oci::Options& options = m_reader.getOptions();
     
@@ -68,7 +69,15 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
 {
     boost::uint32_t numPoints = data.getCapacity();
     
+    bool read = m_reader.fetchNext();
+    Block* block = m_reader.getBlock();
     
+    if (!read)
+    {
+        m_at_end = true;
+        return 0;
+    }
+        std::cout << "fetched" << std::endl;
     // boost::uint32_t i = 0;
     // 
     // const Schema& schema = data.getSchema();
@@ -213,7 +222,7 @@ boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 
 bool SequentialIterator::atEndImpl() const
 {
-    return true; 
+    return m_at_end; 
     // return getIndex() >= getStage().getNumPoints();
 }
 

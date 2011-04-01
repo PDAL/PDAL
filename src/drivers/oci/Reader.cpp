@@ -48,13 +48,13 @@ Reader::Reader(Options& options)
     : libpc::Stage()
     , m_options(options)
     , m_verbose(false)
+    , m_qtype(QUERY_UNKNOWN)
 {
 
     Debug();
     
     m_connection = Connect(m_options);
 
-    
     
     std::string sql = options.GetPTree().get<std::string>("select_sql");
     
@@ -67,32 +67,138 @@ Reader::Reader(Options& options)
     
     m_statement->Execute(0);
 
-    fetchPCFields();
+    m_qtype = describeQueryType();
     
     // int foo;
     // int block_id;
     // 
     // m_statement->Define(&foo);
     // m_statement->Define(&block_id);
-    
-    sdo_pc_blk* block;
-    sdo_pc* pc;
 
-    m_connection->CreateType(&pc);
-
-
-    m_statement->Define(&pc);
+    m_connection->CreateType(&m_pc);
     
 
-    while(m_statement->Fetch() )
+    if (m_qtype == QUERY_SDO_PC)
     {
-        std::cout << " Block: " << m_statement->GetInteger(&(pc->pc_id)) << std::endl;
+        m_statement->Define(&m_pc);
+        // Unpack SDO_PC object to get at block 
+        // table, select that stuff, and unpack the blocks
+    } 
+    else if (m_qtype == QUERY_BLK_TABLE)
+    {
+        doBlockTableDefine();
     }
+
+    setNumPoints(1000);
+
+    m_points.resize(200000);
+
 
     
 }    
 
-void Reader::fetchPCFields()
+bool Reader::fetchNext() const
+{
+    bool bDidRead = m_statement->Fetch();
+    if (!bDidRead) return false;
+    
+    std::cout << "This block has " << m_block_table->num_points << " points" << std::endl;
+    
+    boost::uint32_t nAmountRead = m_statement->ReadBlob( m_locator,
+                                                         (void*)&(m_points[0]),
+                                                         m_points.size() );
+    std::cout << "nAmountRead: " << nAmountRead << std::endl;
+    
+    return bDidRead;
+}
+
+void Reader::doBlockTableDefine()
+{
+
+    int   iCol = 0;
+    char  szFieldName[OWNAME];
+    int   hType = 0;
+    int   nSize = 0;
+    int   nPrecision = 0;
+    signed short nScale = 0;
+    char szTypeName[OWNAME];
+
+    m_block_table = new Block;
+
+    // block_columns[0] = "OBJ_ID";
+    // block_columns[1] = "BLK_ID";
+    // block_columns[2] = "BLK_EXTENT";
+    // block_columns[3] = "BLK_DOMAIN";
+    // block_columns[4] = "PCBLK_MIN_RES";
+    // block_columns[5] = "PCBLK_MAX_RES";
+    // block_columns[6] = "NUM_POINTS";
+    // block_columns[7] = "NUM_UNSORTED_POINTS";
+    // block_columns[8] = "PT_SORT_DIM";
+    // block_columns[9] = "POINTS";
+    
+    m_connection->CreateType(&(m_block_table->blk_extent));
+    m_connection->CreateType(&(m_block_table->blk_domain));
+    
+    while( m_statement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName) )
+    {
+        std::string name = to_upper(std::string(szFieldName));
+
+        if (compare_no_case(szFieldName, "OBJ_ID", 6) == 0)
+        {
+            m_statement->Define(&(m_block_table->obj_id));
+        }
+
+        if (compare_no_case(szFieldName, "BLK_ID", 6) == 0)
+        {
+            m_statement->Define(&(m_block_table->blk_id));
+        }
+
+        if (compare_no_case(szFieldName, "BLK_EXTENT", 10) == 0)
+        {
+            m_statement->Define(&(m_block_table->blk_extent));
+        }
+
+        if (compare_no_case(szFieldName, "BLK_DOMAIN", 10) == 0)
+        {
+            m_statement->Define(&(m_block_table->blk_domain));
+        }
+        
+        if (compare_no_case(szFieldName, "PCBLK_MIN_RES", 13) == 0)
+        {
+            m_statement->Define(&(m_block_table->pcblk_min_res));
+        }
+
+        if (compare_no_case(szFieldName, "PCBLK_MAX_RES", 13) == 0)
+        {
+            m_statement->Define(&(m_block_table->pcblk_max_res));
+        }
+
+        if (compare_no_case(szFieldName, "NUM_POINTS", 10) == 0)
+        {
+            m_statement->Define(&(m_block_table->num_points));
+        }
+
+        if (compare_no_case(szFieldName, "NUM_UNSORTED_POINTS", 19) == 0)
+        {
+            m_statement->Define(&(m_block_table->num_unsorted_points));
+        }
+
+        if (compare_no_case(szFieldName, "PT_SORT_DIM", 11) == 0)
+        {
+            m_statement->Define(&(m_block_table->pt_sort_dim));
+        }
+
+        if (compare_no_case(szFieldName, "POINTS", 6) == 0)
+        {
+            std::cout << "Defined POINTS as BLOB" << std::endl;
+            m_statement->Define( &m_locator ); 
+        }
+        iCol++;
+    }    
+}
+
+
+Reader::QueryType Reader::describeQueryType()
 {
 
 
@@ -105,7 +211,8 @@ void Reader::fetchPCFields()
     char szTypeName[OWNAME];
     
     bool isPCObject = false;
-    bool isBlockTable = false;
+    bool isBlockTableQuery = false;
+    bool isBlockTableType = false;
     
     
     const int columns_size = 10;
@@ -164,6 +271,8 @@ void Reader::fetchPCFields()
             case SQLT_NTY:
                 if (compare_no_case(szTypeName, "SDO_PC", 6) == 0)
                     isPCObject = true;
+                if (compare_no_case(szTypeName, "SDO_PC_BLK_TYPE", 6) == 0)
+                    isBlockTableType = true;
                 std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
                 break;
                 
@@ -196,20 +305,24 @@ void Reader::fetchPCFields()
     // Assume we're a block table until we say we aren't.  Loop through all of 
     // the required columns that make up a block table and if we find one that 
     // wasn't marked in the loop above, we're not a block table.
-    isBlockTable = true;
+    isBlockTableQuery = true;
     std::map<std::string, bool>::iterator it = columns_map.begin();
     while (it != columns_map.end())
     {   
         if (it->second == false) 
         {
-            isBlockTable = false; 
+            isBlockTableQuery = false; 
             break;
         }
         ++it;
     }
     
+    // If we have all of the block table columns + some extras, we aren't a block table for now
+    if (iCol != 11 && isBlockTableQuery) {
+        isBlockTableQuery = false;
+    }
     
-    if (!isBlockTable && !isPCObject) 
+    if (!isBlockTableQuery && !isPCObject) 
     {
         std::ostringstream oss;
         std::string sql = m_options.GetPTree().get<std::string>("select_sql");
@@ -218,8 +331,16 @@ void Reader::fetchPCFields()
         throw libpc_error(oss.str());
     }
 
-    if (isBlockTable == true) std::cout << "We're a block table!!" << std::endl;
-    if (isPCObject == true) std::cout << "We're a PC object!!" << std::endl;
+    if (isBlockTableQuery) 
+        return QUERY_BLK_TABLE;
+    
+    if (isPCObject)
+        return QUERY_SDO_PC;
+    
+    if (isBlockTableType)
+        return QUERY_SDO_PC_BLK;
+    
+    return QUERY_UNKNOWN;
 }
 void Reader::Debug()
 {
@@ -295,6 +416,7 @@ const std::string& Reader::getName() const
 Reader::~Reader()
 {
 
+    m_connection->DestroyType(&m_pc);
     return;
 }
 
