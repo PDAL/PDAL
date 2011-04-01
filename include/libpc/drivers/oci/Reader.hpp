@@ -125,6 +125,7 @@ private:
     Block* m_block_table;
     OCILobLocator* m_locator;
     std::vector<boost::uint8_t> m_points;
+    boost::uint32_t m_blob_read_byte_size;
 
 };
 

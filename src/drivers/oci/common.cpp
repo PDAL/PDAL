@@ -73,6 +73,7 @@ Options::Options()
     m_tree.put("post_block_sql", std::string(""));
     m_tree.put("select_sql", std::string(""));
     m_tree.put("base_table_bounds", libpc::Bounds<double>());
+    m_tree.put("blob_read_byte_size", boost::uint32_t(2000));
     
     boost::property_tree::ptree scales;
     scales.put("x", double(0.01));

@@ -1648,7 +1648,7 @@ unsigned long OWStatement::ReadBlob( OCILobLocator* phLocator,
 bool OWStatement::ReadBlob( OCILobLocator* phLocator,
                                      void* pBuffer,
                                      int nSize,
-                                     int* nAmountRead )
+                                     unsigned int* nAmountRead )
 {
 
     sword status = OCILobRead(
@@ -1674,6 +1674,21 @@ bool OWStatement::ReadBlob( OCILobLocator* phLocator,
     return true;
 }
 
+unsigned long OWStatement::GetBlobLength( OCILobLocator* phLocator)
+{
+    ub4 nLength      = (ub4) 0;
+
+    if( CheckError( OCILobGetLength(
+        poConnection->hSvcCtx,
+        hError,
+        phLocator,
+        (ub4*) &nLength), hError ) )
+    {
+        return 0;
+    }
+
+    return nLength;
+}
 
 bool OWStatement::WriteBlob( OCILobLocator* phLocator,
                              void* pBuffer,

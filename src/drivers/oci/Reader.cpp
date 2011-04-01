@@ -65,6 +65,8 @@ Reader::Reader(Options& options)
     
     registerFields();
     
+    
+    
     m_statement->Execute(0);
 
     m_qtype = describeQueryType();
@@ -91,7 +93,6 @@ Reader::Reader(Options& options)
 
     setNumPoints(1000);
 
-    m_points.resize(200000);
 
 
     
@@ -104,9 +105,21 @@ bool Reader::fetchNext() const
     
     std::cout << "This block has " << m_block_table->num_points << " points" << std::endl;
     
-    boost::uint32_t nAmountRead = m_statement->ReadBlob( m_locator,
-                                                         (void*)&(m_points[0]),
-                                                         m_points.size() );
+    boost::uint32_t nAmountRead;
+    
+    std::vector<boost::uint8_t> chunk;// = iterator.getChunk();
+
+    boost::uint32_t blob_length = m_statement->GetBlobLength(m_locator);
+    
+    if (chunk.size() < blob_length)
+    {
+        chunk.resize(blob_length);
+    }
+    bool read_all_data = m_statement->ReadBlob( m_locator,
+                                     (void*)(&chunk[0]),
+                                     chunk.size(), 
+                                     &nAmountRead);
+    if (!read_all_data) throw libpc_error("Did not read all blob data!");
     std::cout << "nAmountRead: " << nAmountRead << std::endl;
     
     return bDidRead;

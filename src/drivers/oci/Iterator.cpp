@@ -46,6 +46,7 @@ namespace libpc { namespace drivers { namespace oci {
 IteratorBase::IteratorBase(const Reader& reader)
     : m_at_end(false)
     , m_reader(reader)
+
 {
     oci::Options& options = m_reader.getOptions();
     
