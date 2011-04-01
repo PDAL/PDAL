@@ -163,15 +163,16 @@ int Schema::getDimensionIndex(Dimension::Field field, Dimension::DataType dataty
 {
     const int index = m_indexTable[field];
     
-    assert(index != -1);
+    // assert(index != -1);
     if (index == -1)
     {
-        throw libpc_error("Requested dimension field not present");
+        return -1;
+        // throw libpc_error("Requested dimension field not present");
     }
     
     const Dimension& dim = m_dimensions[index];
     
-    assert(dim.getDataType() == datatype);
+    // assert(dim.getDataType() == datatype);
     if (dim.getDataType() != datatype)
     {
         throw libpc_error("Requested dimension field present, but with different datatype");
