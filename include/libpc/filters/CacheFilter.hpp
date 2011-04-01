@@ -89,7 +89,7 @@ public:
                        boost::uint64_t& numCacheInsertMisses,
                        boost::uint64_t& numCacheInsertHits) const;
 
-    bool supportsIterator (StageIteratorType t) 
+    bool supportsIterator (StageIteratorType t) const
     {   
         if (t == StageIterator_Sequential ) return true;
         if (t == StageIterator_Random ) return true;

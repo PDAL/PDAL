@@ -62,7 +62,7 @@ public:
 
     void getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;
 
-    bool supportsIterator (StageIteratorType t) 
+    bool supportsIterator (StageIteratorType t) const
     {   
         if (t == StageIterator_Sequential ) return true;
 

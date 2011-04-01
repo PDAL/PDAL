@@ -72,7 +72,7 @@ public:
     const SpatialReference& getSpatialReference() const;
     const Metadata::Array& getMetadata() const;
 
-    virtual bool supportsIterator (StageIteratorType) const { return false; }
+    virtual bool supportsIterator (StageIteratorType) const = 0;
 
     virtual SequentialIterator* createSequentialIterator() const { return NULL; }
     virtual RandomIterator* createRandomIterator() const  { return NULL; }

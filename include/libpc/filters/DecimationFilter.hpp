@@ -57,7 +57,7 @@ public:
 
     const std::string& getName() const;
 
-    bool supportsIterator (StageIteratorType t) 
+    bool supportsIterator (StageIteratorType t) const
     {   
         if (t == StageIterator_Sequential ) return true;
 

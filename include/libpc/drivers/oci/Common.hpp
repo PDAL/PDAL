@@ -64,6 +64,37 @@ typedef boost::shared_ptr<OWStatement> Statement ;
 #define compare_no_case(a,b,n)  strncasecmp( (a), (b), (n) )
 #endif
 
+enum QueryType
+{
+    QUERY_SDO_PC,
+    QUERY_SDO_PC_BLK,
+    QUERY_BLK_TABLE,
+    QUERY_UNKNOWN
+};
+
+class Block
+{
+    
+public:
+    
+    Block() {};
+    
+    boost::int32_t           obj_id;
+    boost::int32_t           blk_id;
+    sdo_geometry*   blk_extent;
+    sdo_orgscl_type* blk_domain;
+
+    double           pcblk_min_res;
+    double           pcblk_max_res;
+    boost::int32_t           num_points;
+    boost::int32_t           num_unsorted_points;
+    boost::int32_t           pt_sort_dim;
+
+
+private:
+    boost::uint32_t m_capacity;
+};
+
 class LIBPC_DLL Options
 {
 

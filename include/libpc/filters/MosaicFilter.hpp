@@ -59,7 +59,7 @@ public:
 
     const std::vector<const Stage*>& getPrevStages() const;
 
-    bool supportsIterator (StageIteratorType t) 
+    bool supportsIterator (StageIteratorType t) const
     {   
         if (t == StageIterator_Sequential ) return true;
         if (t == StageIterator_Random) return false; // BUG: could be true

@@ -40,12 +40,12 @@
 #include <libpc/Iterator.hpp>
 
 #include <libpc/drivers/oci/Common.hpp>
+#include <libpc/drivers/oci/Reader.hpp>
 
 #include <string>
 
 namespace libpc { namespace drivers { namespace oci {
 
-class Reader;
 
 class IteratorBase
 {
@@ -58,13 +58,25 @@ protected:
     
     boost::uint32_t readBuffer(PointBuffer& data);
 
+    Statement m_statement;
     bool m_at_end;
+    QueryType m_querytype;
+    Block* m_block;
+    OCILobLocator* m_locator;
+
+    sdo_pc* m_pc;
+    sdo_pc_blk* m_block_table_type;
+    std::vector<boost::uint8_t> m_points;
+    boost::uint32_t m_blob_read_byte_size;    
 
 private:
     const Reader& m_reader;
     
     IteratorBase& operator=(const IteratorBase&); // not implemented
-    IteratorBase(const IteratorBase&); // not implemented};
+    IteratorBase(const IteratorBase&); // not implemented;
+    
+    void doBlockTableDefine();
+    QueryType describeQueryType() const;
 
 };
 
