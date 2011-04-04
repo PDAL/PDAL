@@ -70,6 +70,10 @@ IteratorBase::IteratorBase(const Reader& reader)
     else if (m_querytype == QUERY_BLK_TABLE)
     {
         doBlockTableDefine();
+        reader.getConnection()->CreateType(&(m_block->blk_extent));
+        reader.getConnection()->CreateType(&(m_block->blk_extent->sdo_ordinates), reader.getConnection()->GetOrdinateType());
+        reader.getConnection()->CreateType(&(m_block->blk_extent->sdo_elem_info), reader.getConnection()->GetElemInfoType());
+
     }
     
     // setNumPoints(1000);
@@ -119,8 +123,29 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     if (!read_all_data) throw libpc_error("Did not read all blob data!");
     std::cout << "nAmountRead: " << nAmountRead << std::endl;
 
+    double x, y, z;
+    
+    boost::int32_t elem1, elem2, elem3;
+    m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 0, &elem1);
+    m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 1, &elem2);
+    m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 2, &elem3);
 
+    boost::int32_t gtype, srid;
+    gtype= m_statement->GetInteger(&(m_block->blk_extent->sdo_gtype));
+    srid =m_statement->GetInteger(&(m_block->blk_extent->sdo_srid));
 
+    std::cout << "gtype: " << gtype << std::endl;
+    std::cout << "srid: " << srid << std::endl;
+    
+    std::cout << "elem1, elem2, elem3 " << elem1 << " " << elem2 << " " << elem3 << std::endl;
+    
+    std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    std::cout.precision(6);
+    m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 0, &x);
+    m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 1, &y);
+    m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 2, &z);
+
+    std::cout << "x, y, z " << x << " " << y << " " << z << std::endl;
     
     // bool read = m_reader.fetchNext();
     // Block* block = m_reader.getBlock();
