@@ -461,7 +461,7 @@ QueryType IteratorBase::describeQueryType() const
     }
     
     // If we have all of the block table columns + some extras, we aren't a block table for now
-    if (iCol != 11 && isBlockTableQuery) {
+    if (iCol != 10 && isBlockTableQuery) {
         isBlockTableQuery = false;
     }
     
