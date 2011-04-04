@@ -242,10 +242,7 @@ bool Writer::BlockTableExists()
     // Because of OCIGDALErrorHandler, this is going to throw if there is a 
     // problem.  When it does, the statement should go out of scope and 
     // be destroyed without leaking.
-    statement->Define(szTable);
-
-    statement->Execute();
-    
+    statement->Define(szTable);    
     
     try {
         statement->Execute();
