@@ -139,6 +139,9 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     
     std::cout << "elem1, elem2, elem3 " << elem1 << " " << elem2 << " " << elem3 << std::endl;
     
+    std::cout << "elem_info size " << m_statement->GetArrayLength(&(m_block->blk_extent->sdo_elem_info)) << std::endl;
+    std::cout << "sdo_ordinates size " << m_statement->GetArrayLength(&(m_block->blk_extent->sdo_ordinates)) << std::endl;
+
     std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
     std::cout.precision(6);
     m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 0, &x);

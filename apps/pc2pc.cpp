@@ -131,7 +131,7 @@ int Application_pc2pc::execute()
         libpc::drivers::oci::Options options;
         boost::property_tree::ptree& tree = options.GetPTree();
         
-        boost::uint32_t capacity = 10000;
+        boost::uint32_t capacity = 12;
         tree.put("capacity", capacity);
         tree.put("connection", "lidar/lidar@192.168.56.101/orcl");
         // tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");

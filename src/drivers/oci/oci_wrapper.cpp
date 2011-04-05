@@ -1516,6 +1516,20 @@ void OWStatement::Free( OCILobLocator** pphLocator, int nCount )
     }
 }
 
+signed long int OWStatement::GetArrayLength( OCIArray** ppoData)
+{
+    sb4            length;
+
+    if( CheckError( OCICollSize(
+        poConnection->hEnv,
+        hError,
+        (OCIColl*) *ppoData,
+        (sb4*) &length), hError ) ) 
+    {
+        return 0;
+    }
+    return length;
+}
 int OWStatement::GetElement( OCIArray** ppoData, int nIndex, int* pnResult )
 {
     boolean        exists;

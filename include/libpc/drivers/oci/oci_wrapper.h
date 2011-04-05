@@ -455,6 +455,7 @@ public:
                             void* pBuffer, int nSize, unsigned int* nAmountRead );
     char*               ReadCLob( OCILobLocator* phLocator );
     unsigned long       GetBlobLength(OCILobLocator* phLocator);
+    signed long         GetArrayLength( OCIArray** ppoData);
     void                WriteCLob( OCILobLocator** pphLocator, char* pszData );
     bool                WriteBlob( OCILobLocator* phLocator,
                             void* pBuffer, int nSize );
