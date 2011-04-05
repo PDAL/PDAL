@@ -362,6 +362,15 @@ if(WITH_MRSID)
     endif()
 endif()
 
+if(WITH_FREEGLUT)
+  find_package(FreeGLUT)
+  if(FREEGLUT_FOUND)
+    include_directories(${FREEGLUT_INCLUDE_DIR})
+    add_definitions(-DHAVE_FREEGLUT=1)
+    set(LIBPC_HAVE_FREEGLUT 1)
+    message(STATUS "Found FreeGLUT")
+  endif()
+endif()
 
 #------------------------------------------------------------------------------
 # installation path settings
