@@ -12,6 +12,9 @@ set OSGEO4W_GDAL=C:\OSGeo4W\apps\gdal-17
 set BOOST_DIR="C:\Utils\boost_1_45_0-win32"
 set ORACLE_HOME=%OSGEO4W_DIR%
 
+set FREEGLUT_DIR=d:\dev\freeglut-2.6.0-3.mp
+set GLUT_DIR=d:\dev\freeglut-2.6.0-3.mp
+
 set BUILD_TYPE=Release
 set BUILD_TYPE=Debug
 
@@ -22,6 +25,11 @@ cmake -G %COMPILER% ^
     -DWITH_ORACLE=ON ^
     -DWITH_LASZIP=ON ^
     -DWITH_LIBLAS=ON ^
+    -DWITH_FREEGLUT=ON ^
+    -DFREEGLUT_LIBRARY=%FREEGLUT_DIR%\lib\freeglut.lib ^
+    -DFREEGLUT_INCLUDE_DIR=%FREEGLUT_DIR%\include ^
+    -DGLUT_LIBRARY=%FREEGLUT_DIR%\lib ^
+    -DGLUT_INCLUDE_DIR=%FREEGLUT_DIR%\include ^
     -DGDAL_INCLUDE_DIR=%OSGEO4W_GDAL%\include ^
     -DGDAL_LIBRARY=%OSGEO4W_GDAL%\lib\gdal_i.lib ^
     -DTIFF_INCLUDE_DIR=%OSGEO4W_DIR%\include ^

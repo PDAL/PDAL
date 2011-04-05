@@ -4,6 +4,11 @@
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
 
+if(FREEGLUT_FOUND)
+  subdirs(pcview)
+ endif()
+
+
 #------------------------------------------------------------------------------
 # includes
 #------------------------------------------------------------------------------
@@ -21,7 +26,7 @@ set(PCINFO pcinfo)
 
 
 set(LIBPC_UTILITIES
-    ${PCINFO} ${PC2PC})
+    ${PCINFO} ${PC2PC} ${PCVIEW})
 
 
 #------------------------------------------------------------------------------
