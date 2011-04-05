@@ -131,13 +131,15 @@ int Application_pc2pc::execute()
         libpc::drivers::oci::Options options;
         boost::property_tree::ptree& tree = options.GetPTree();
         
-        tree.put("capacity", 12);
-        tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
+        boost::uint32_t capacity = 10000;
+        tree.put("capacity", capacity);
+        tree.put("connection", "lidar/lidar@192.168.56.101/orcl");
+        // tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
         tree.put("debug", true);
         tree.put("verbose", true);
         
         libpc::filters::CacheFilter cache(reader, 1, 1024);
-        libpc::filters::Chipper chipper(cache, 12);
+        libpc::filters::Chipper chipper(cache, capacity);
         libpc::drivers::oci::Writer writer(chipper, options);
 
         writer.write(numPoints);
@@ -151,7 +153,8 @@ int Application_pc2pc::execute()
             libpc::drivers::oci::Options options;
             boost::property_tree::ptree& tree = options.GetPTree();
             tree.put("capacity", 12);
-            tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
+            tree.put("connection", "lidar/lidar@192.168.56.101/orcl");
+            // tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
             tree.put("debug", true);
             tree.put("verbose", true);
             tree.put("select_sql", "select * from output");
