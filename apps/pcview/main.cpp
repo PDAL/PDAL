@@ -36,10 +36,19 @@
 #include "Engine.hpp"
 #include "Controller.hpp"
 
+#include <libpc/filters/DecimationFilter.hpp>
+#include <libpc/drivers/liblas/Reader.hpp>
+#include <libpc/drivers/liblas/Iterator.hpp>
+#include <libpc/PointBuffer.hpp>
+#include <libpc/Schema.hpp>
+#include <libpc/SchemaLayout.hpp>
+#include <libpc/Bounds.hpp>
+#include <libpc/Dimension.hpp>
 
 using namespace std;
 
-float myrand_gaussian() // returns [0..1]
+
+static float myrand_gaussian() // returns [0..1]
 {
     int cnt = 5;
     float x = 0.0;
@@ -53,18 +62,18 @@ float myrand_gaussian() // returns [0..1]
     return x;
 }
 
-float myrand_normal() // returns [0..1]
+
+static float myrand_normal() // returns [0..1]
 {
     float r = (float)rand() / (float)RAND_MAX;
     return r;
 }
 
-int main(int argc, char** argv)
-{
-    Controller controller;
 
+static void readFakeFile(Controller& controller)
+{
     const int numPoints = 10000;
-    float points[numPoints * 3];
+    static float points[numPoints * 3];
 
     const float minx = 100.0;
     const float maxx = 200.0;
@@ -89,6 +98,84 @@ int main(int argc, char** argv)
 
     controller.setPoints(points, numPoints);
     controller.setBounds(minx, miny, minz, maxx, maxy, maxz);
+
+    return;
+}
+
+
+static void readFile(Controller& controller, const string& file)
+{
+    libpc::Stage* reader = new libpc::drivers::liblas::LiblasReader(file);
+    libpc::Stage* stage = reader;
+    
+    libpc::Stage* decimator = NULL;
+    if (reader->getNumPoints() > 50000)
+    {
+        boost::uint32_t factor = (boost::uint32_t)reader->getNumPoints() / 50000;
+        decimator = new libpc::filters::DecimationFilter(*reader, factor);
+        stage = decimator;
+    }
+
+    boost::uint32_t numPoints = (boost::uint32_t)stage->getNumPoints();
+    printf("reading of %d points started\n", numPoints);
+
+    const libpc::Schema& schema = stage->getSchema();
+    const libpc::SchemaLayout schemaLayout(schema);
+    libpc::PointBuffer buffer(schemaLayout, numPoints);
+
+    libpc::SequentialIterator* iter = stage->createSequentialIterator();
+    boost::uint32_t numRead = iter->read(buffer);
+    assert(numPoints==numRead);
+
+    const int offsetX = schema.getDimensionIndex(libpc::Dimension::Field_X, libpc::Dimension::Int32);
+    const int offsetY = schema.getDimensionIndex(libpc::Dimension::Field_Y, libpc::Dimension::Int32);
+    const int offsetZ = schema.getDimensionIndex(libpc::Dimension::Field_Z, libpc::Dimension::Int32);
+
+    float* points = new float[numRead * 3];
+
+    int cnt=0;
+    for (boost::uint32_t i=0; i<numRead; i++)
+    {
+        const boost::int32_t xraw = buffer.getField<boost::int32_t>(i, offsetX);
+        const boost::int32_t yraw = buffer.getField<boost::int32_t>(i, offsetY);
+        const boost::int32_t zraw = buffer.getField<boost::int32_t>(i, offsetZ);
+
+        const double x = schema.getDimension(offsetX).getNumericValue<boost::int32_t>(xraw);
+        const double y = schema.getDimension(offsetY).getNumericValue<boost::int32_t>(yraw);
+        const double z = schema.getDimension(offsetZ).getNumericValue<boost::int32_t>(zraw);
+
+        points[cnt++] = (float)x;
+        points[cnt++] = (float)y;
+        points[cnt++] = (float)z;
+    }
+
+    const libpc::Bounds<double>& bounds = stage->getBounds();
+
+    controller.setPoints(points, numRead);
+    controller.setBounds((float)bounds.getMinimum(0), (float)bounds.getMinimum(1), (float)bounds.getMinimum(2), 
+                         (float)bounds.getMaximum(0), (float)bounds.getMaximum(1), (float)bounds.getMaximum(2));
+
+    delete decimator;
+    delete reader;
+
+    printf("reading of %d points done\n", numRead);
+
+    return;
+}
+
+
+int main(int argc, char** argv)
+{
+    Controller controller;
+
+    if (argc==1)
+    {
+        readFakeFile(controller);
+    }
+    else
+    {
+        readFile(controller, argv[1]);
+    }
 
     controller.setWindowSize(500,500);
     controller.setWindowPosition(100,100);
