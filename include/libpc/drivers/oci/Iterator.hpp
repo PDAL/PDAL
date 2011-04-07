@@ -62,7 +62,7 @@ protected:
     Statement m_statement;
     bool m_at_end;
     QueryType m_querytype;
-    Block* m_block;
+    boost::scoped_ptr<Block> m_block;
     OCILobLocator* m_locator;
 
     sdo_pc* m_pc;

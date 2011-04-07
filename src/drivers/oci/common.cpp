@@ -145,10 +145,13 @@ Block::Block(Connection connection)
 
 Block::~Block()
 {
-    m_connection->DestroyType(&blk_extent->sdo_ordinates);
-    m_connection->DestroyType(&blk_extent->sdo_elem_info);
-    m_connection->DestroyType(&blk_extent);
     m_connection->DestroyType(&blk_domain);
+    m_connection->DestroyType(&blk_extent->sdo_elem_info);
+    m_connection->DestroyType(&blk_extent->sdo_ordinates);
+    
+    // FIXME: For some reason having the dtor destroy this
+    // causes a segfault
+    // m_connection->DestroyType(&blk_extent);
 }
 std::string to_upper(const std::string& input)
 {

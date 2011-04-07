@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <libpc/drivers/oci/Iterator.hpp>
+#include <libpc/Utils.hpp>
 
 #include <liblas/factory.hpp>
 
@@ -43,19 +44,20 @@
 
 #include <sstream>
 #include <map>
+#include <algorithm>
 
 
 namespace libpc { namespace drivers { namespace oci {
 
 IteratorBase::IteratorBase(const Reader& reader)
     : m_at_end(false)
-    , m_block(0)
+    , m_block(new Block(reader.getConnection()))
     , m_reader(reader)
 
 {
     // oci::Options& options = m_reader.getOptions();
 
-    m_reader.getConnection()->CreateType(&m_pc);
+    // m_reader.getConnection()->CreateType(&m_pc);
     
     m_statement = Statement(m_reader.getConnection()->CreateStatement(m_reader.getQuery().c_str()));
     
@@ -90,7 +92,86 @@ const Reader& IteratorBase::getReader() const
 
 boost::uint32_t IteratorBase::unpackOracleData(PointBuffer& data)
 {
+    boost::uint32_t capacity = data.getCapacity();
+    boost::uint32_t numPoints = data.getNumPoints();
     
+    boost::uint32_t space = capacity - numPoints;
+    boost::uint32_t point_position = numPoints;
+    
+    if (m_block->num_points < 0)
+    {
+        std::ostringstream oss;
+        oss << "This oracle block has a num_points that is negative (" << m_block->num_points <<")!";
+        throw libpc_error(oss.str());
+    }
+    
+    if (space < static_cast<boost::uint32_t>(m_block->num_points))
+    {
+        std::ostringstream oss;
+        oss << "Not enough space to store this block!  The capacity left in the buffer is ";
+        oss << capacity << ", the Oracle block has " << m_block->num_points << " points ";
+        throw libpc_error(oss.str());
+    }
+
+    std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    std::cout.precision(2);
+
+    const Schema& schema = data.getSchema();
+    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+    const int indexTime = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Double);
+    const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification, Dimension::Uint8);
+
+    const Dimension& dimX = schema.getDimension(indexX);
+    const Dimension& dimY = schema.getDimension(indexY);
+    const Dimension& dimZ = schema.getDimension(indexZ);
+    
+    double scalex = dimX.getNumericScale();
+    double scaley = dimY.getNumericScale();
+    double scalez = dimZ.getNumericScale();
+    
+    double offsetx = dimX.getNumericOffset();
+    double offsety = dimY.getNumericOffset();
+    double offsetz = dimZ.getNumericOffset();
+     
+    FiveDimensionOCI* d;
+    for (boost::uint32_t i = 0; i < static_cast<boost::uint32_t>(m_block->num_points); i++)
+    {
+        boost::uint32_t byte_position = i*sizeof(FiveDimensionOCI);
+        
+        d = (FiveDimensionOCI*)(&(*m_block->chunk)[byte_position]);
+        SWAP_BE_TO_LE(d->x);
+        SWAP_BE_TO_LE(d->y);
+        SWAP_BE_TO_LE(d->z);
+        SWAP_BE_TO_LE(d->t);
+        SWAP_BE_TO_LE(d->c);
+        SWAP_BE_TO_LE(d->blk_id);
+        SWAP_BE_TO_LE(d->pc_id);
+        
+        
+        
+        // std::cout << "sizeof(FiveDimensionOCI): " << sizeof(FiveDimensionOCI) <<  " position: " << position << " i: " << i 
+        //           << " x: " << d->x << " y: " << d->y << " z: " << d->z << std::endl;
+
+
+        boost::int32_t x = static_cast<boost::int32_t>(
+                         Utils::sround((d->x - offsetx) / scalex));
+        boost::int32_t y = static_cast<boost::int32_t>(
+                         Utils::sround((d->y - offsety) / scaley));
+        boost::int32_t z = static_cast<boost::int32_t>(
+                         Utils::sround((d->z - offsetz) / scalez));
+        data.setField(point_position, indexX, x);
+        data.setField(point_position, indexY, y);
+        data.setField(point_position, indexZ, z);
+        
+        data.setField(point_position, indexTime, d->t);
+        data.setField(point_position, indexClassification, static_cast<boost::uint8_t>(d->c));
+        
+        point_position++;
+        data.setNumPoints(point_position);
+    
+    }
     return 0;
 }
 
@@ -122,7 +203,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
         bDidRead = true;
         std::cout << "we already had points in our cache, using those" << std::endl;
 
-
+        unpackOracleData(data);
     }
 
 
@@ -146,7 +227,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
             break;
         }
 
-        boost::uint32_t nAmountRead;
+        boost::uint32_t nAmountRead = 0;
     
     
         boost::uint32_t blob_length = m_statement->GetBlobLength(m_locator);
@@ -156,20 +237,18 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
         {
             m_block->chunk->resize(blob_length);
         }
-        // std::vector<boost::uint8_t> chunk;
-        // if (chunk.size() < blob_length)
-        // {
-        //     chunk.resize(blob_length);
-        // }
+
+
         std::cout << " m_block->chunk->size() : " << m_block->chunk->size()<< std::endl;
         
         bool read_all_data = m_statement->ReadBlob( m_locator,
                                          (void*)(&(*m_block->chunk)[0]),
-                                         m_block->chunk->size(), 
+                                         m_block->chunk->size() , 
                                          &nAmountRead);
         if (!read_all_data) throw libpc_error("Did not read all blob data!");
         std::cout << "nAmountRead: " << nAmountRead << " m_block->chunk->size() : " << m_block->chunk->size()<< std::endl;
-
+        
+        unpackOracleData(data);
         bDidRead = m_statement->Fetch();
         if (!bDidRead)
         {
@@ -338,10 +417,7 @@ void IteratorBase::doBlockTableDefine()
     signed short nScale = 0;
     char szTypeName[OWNAME];
     
-    if (!m_block)
-        m_block = new Block(m_reader.getConnection());
 
-    m_block->num_points = 0;
 
 
 

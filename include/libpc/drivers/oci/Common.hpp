@@ -38,6 +38,7 @@
 #include <libpc/libpc.hpp>
 
 #include "oci_wrapper.h"
+#include "Endian.hpp"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -65,6 +66,18 @@ typedef boost::shared_ptr<OWStatement> Statement ;
 #else
 #define compare_no_case(a,b,n)  strncasecmp( (a), (b), (n) )
 #endif
+
+struct FiveDimensionOCI
+{
+    double x;
+    double y;
+    double z;
+    double t;
+    double c;
+    uint32_t blk_id;
+    uint32_t pc_id;
+};
+
 
 enum QueryType
 {
