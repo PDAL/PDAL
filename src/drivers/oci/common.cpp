@@ -132,6 +132,24 @@ bool Options::IsSolid() const
 }
 
 
+Block::Block(Connection connection)
+    : num_points(0)
+    , chunk(new std::vector<boost::uint8_t>)
+    , m_connection(connection)
+{
+    m_connection->CreateType(&blk_extent);
+    m_connection->CreateType(&blk_extent->sdo_ordinates, m_connection->GetOrdinateType());
+    m_connection->CreateType(&blk_extent->sdo_elem_info, m_connection->GetElemInfoType());
+    m_connection->CreateType(&blk_domain);
+}
+
+Block::~Block()
+{
+    m_connection->DestroyType(&blk_extent->sdo_ordinates);
+    m_connection->DestroyType(&blk_extent->sdo_elem_info);
+    m_connection->DestroyType(&blk_extent);
+    m_connection->DestroyType(&blk_domain);
+}
 std::string to_upper(const std::string& input)
 {
     std::string inp = std::string(input);

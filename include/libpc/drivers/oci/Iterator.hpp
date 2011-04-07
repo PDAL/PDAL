@@ -57,6 +57,7 @@ protected:
     const Reader& getReader() const;
     
     boost::uint32_t readBuffer(PointBuffer& data);
+    boost::uint32_t unpackOracleData(PointBuffer& data);
 
     Statement m_statement;
     bool m_at_end;
@@ -66,8 +67,7 @@ protected:
 
     sdo_pc* m_pc;
     sdo_pc_blk* m_block_table_type;
-    std::vector<boost::uint8_t> m_points;
-    boost::uint32_t m_blob_read_byte_size;    
+    std::vector<boost::uint8_t>::size_type m_points;
 
 private:
     const Reader& m_reader;

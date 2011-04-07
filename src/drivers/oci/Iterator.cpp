@@ -49,6 +49,7 @@ namespace libpc { namespace drivers { namespace oci {
 
 IteratorBase::IteratorBase(const Reader& reader)
     : m_at_end(false)
+    , m_block(0)
     , m_reader(reader)
 
 {
@@ -70,14 +71,8 @@ IteratorBase::IteratorBase(const Reader& reader)
     else if (m_querytype == QUERY_BLK_TABLE)
     {
         doBlockTableDefine();
-        reader.getConnection()->CreateType(&(m_block->blk_extent));
-        reader.getConnection()->CreateType(&(m_block->blk_extent->sdo_ordinates), reader.getConnection()->GetOrdinateType());
-        reader.getConnection()->CreateType(&(m_block->blk_extent->sdo_elem_info), reader.getConnection()->GetElemInfoType());
-
     }
-    
-    // setNumPoints(1000);
-    
+
     return;
 }
 
@@ -93,35 +88,98 @@ const Reader& IteratorBase::getReader() const
     return m_reader;
 }
 
+boost::uint32_t IteratorBase::unpackOracleData(PointBuffer& data)
+{
+    
+    return 0;
+}
 
 boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
 {
-    boost::uint32_t numPoints = data.getCapacity();
+    boost::uint32_t requestedNumPoints = data.getCapacity();
+    boost::uint32_t numPointsRead = 0;
+    bool bDidRead = false;
 
-    bool bDidRead = m_statement->Fetch();
-    if (!bDidRead)
+    std::cout << " Existing block has " << m_block->num_points << " points" << std::endl;
+    
+    if (!m_block->num_points) 
     {
-        m_at_end = true;
-        return 0;
-    }
-    std::cout << "This block has " << m_block->num_points << " points" << std::endl;
+        // We still have a block of data from the last readBuffer call
+        // that was partially read. 
+        std::cout << "reading because we have no points" << std::endl;
+        bDidRead = m_statement->Fetch();
+        if (!bDidRead)
+        {
+            m_at_end = true;
+            return 0;
+        }
     
-    boost::uint32_t nAmountRead;
-    
-    std::vector<boost::uint8_t> chunk;// = iterator.getChunk();
-    
-    boost::uint32_t blob_length = m_statement->GetBlobLength(m_locator);
-    
-    if (chunk.size() < blob_length)
+    } else 
     {
-        chunk.resize(blob_length);
+        // Our read was already "done" last readBuffer call, but if we're done,
+        // we're done
+        if (m_at_end) return 0;
+        bDidRead = true;
+        std::cout << "we already had points in our cache, using those" << std::endl;
+
+
     }
-    bool read_all_data = m_statement->ReadBlob( m_locator,
-                                     (void*)(&chunk[0]),
-                                     chunk.size(), 
-                                     &nAmountRead);
-    if (!read_all_data) throw libpc_error("Did not read all blob data!");
-    std::cout << "nAmountRead: " << nAmountRead << std::endl;
+
+
+
+    
+    while (bDidRead)
+    {
+
+        std::cout << "This block has " << m_block->num_points << " points" << std::endl;
+
+        numPointsRead = numPointsRead + m_block->num_points;
+        if (numPointsRead > requestedNumPoints)
+        {
+            // We're done.  We still have more data, but the 
+            // user is going to have to request another buffer.
+            // We're not going to fill the buffer up to *exactly* 
+            // the number of points the user requested.  
+            // If the buffer's capacity isn't large enough to hold 
+            // an oracle block, they're just not going to get anything 
+            // back right now (FIXME)
+            break;
+        }
+
+        boost::uint32_t nAmountRead;
+    
+    
+        boost::uint32_t blob_length = m_statement->GetBlobLength(m_locator);
+        std::cout << "blob_length: " << blob_length << std::endl;
+    
+        if (m_block->chunk->size() < blob_length)
+        {
+            m_block->chunk->resize(blob_length);
+        }
+        // std::vector<boost::uint8_t> chunk;
+        // if (chunk.size() < blob_length)
+        // {
+        //     chunk.resize(blob_length);
+        // }
+        std::cout << " m_block->chunk->size() : " << m_block->chunk->size()<< std::endl;
+        
+        bool read_all_data = m_statement->ReadBlob( m_locator,
+                                         (void*)(&(*m_block->chunk)[0]),
+                                         m_block->chunk->size(), 
+                                         &nAmountRead);
+        if (!read_all_data) throw libpc_error("Did not read all blob data!");
+        std::cout << "nAmountRead: " << nAmountRead << " m_block->chunk->size() : " << m_block->chunk->size()<< std::endl;
+
+        bDidRead = m_statement->Fetch();
+        if (!bDidRead)
+        {
+            m_at_end = true;
+            return numPointsRead;
+        }
+    }    
+    
+
+
 
     double x, y, z;
     
@@ -134,7 +192,17 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     gtype= m_statement->GetInteger(&(m_block->blk_extent->sdo_gtype));
     srid =m_statement->GetInteger(&(m_block->blk_extent->sdo_srid));
 
+    gtype = 2304;
     std::cout << "gtype: " << gtype << std::endl;
+    
+    // See http://download.oracle.com/docs/cd/B28359_01/appdev.111/b28400/sdo_objrelschema.htm#g1013735
+
+    boost::uint32_t dimension = gtype / 1000;
+    boost::uint32_t geom_type = gtype % 100;
+    boost::uint32_t referencing= ((gtype % 1000) / 100);
+    std::cout << "dimension: " << dimension << " geometry type: " << geom_type << " referencing " << referencing << std::endl;
+    
+
     std::cout << "srid: " << srid << std::endl;
     
     std::cout << "elem1, elem2, elem3 " << elem1 << " " << elem2 << " " << elem3 << std::endl;
@@ -255,7 +323,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     //     
     // }
 
-    return numPoints;
+    return numPointsRead;
 }
 
 
@@ -269,8 +337,14 @@ void IteratorBase::doBlockTableDefine()
     int   nPrecision = 0;
     signed short nScale = 0;
     char szTypeName[OWNAME];
+    
+    if (!m_block)
+        m_block = new Block(m_reader.getConnection());
 
-    m_block = new Block;
+    m_block->num_points = 0;
+
+
+
 
     // block_columns[0] = "OBJ_ID";
     // block_columns[1] = "BLK_ID";
@@ -283,8 +357,7 @@ void IteratorBase::doBlockTableDefine()
     // block_columns[8] = "PT_SORT_DIM";
     // block_columns[9] = "POINTS";
     
-    m_reader.getConnection()->CreateType(&(m_block->blk_extent));
-    m_reader.getConnection()->CreateType(&(m_block->blk_domain));
+
     
     while( m_statement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName) )
     {

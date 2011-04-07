@@ -40,6 +40,8 @@
 #include "oci_wrapper.h"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
+
 #include <boost/property_tree/ptree.hpp>
 
 #include <cpl_port.h>
@@ -77,7 +79,8 @@ class Block
     
 public:
     
-    Block() {};
+    Block(Connection connection);
+    ~Block() ;
     
     boost::int32_t           obj_id;
     boost::int32_t           blk_id;
@@ -89,6 +92,8 @@ public:
     boost::int32_t           num_points;
     boost::int32_t           num_unsorted_points;
     boost::int32_t           pt_sort_dim;
+    boost::scoped_ptr<std::vector<uint8_t> > chunk;
+    Connection              m_connection;
 
 
 private:
