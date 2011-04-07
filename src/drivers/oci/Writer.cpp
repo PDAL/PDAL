@@ -49,6 +49,7 @@ Writer::Writer(Stage& prevStage, Options& options)
     , m_stage(prevStage)
     , m_options(options)
     , m_verbose(false)
+    , m_doCreateIndex(false)
 {
 
     
@@ -130,7 +131,7 @@ void Writer::WipeBlockTable()
     run(oss);
     oss.str("");
     
-    oss << "DROP TABLE" << block_table_name;
+    oss << "DROP TABLE " << block_table_name;
     run(oss);
     oss.str("");
 
@@ -479,8 +480,6 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
 
 
     std::ostringstream s_srid;
-    std::ostringstream s_gtype;
-    std::ostringstream s_eleminfo;
     std::ostringstream s_geom;
 
 
@@ -496,14 +495,13 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     }
 
     long gtype = GetGType();
-    s_gtype << gtype;
     
     std::string eleminfo = CreatePCElemInfo();
 
     libpc::Bounds<double> e = m_bounds;
 
-    s_geom << "           mdsys.sdo_geometry("<<s_gtype.str() <<", "<<s_srid.str()<<", null,\n"
-"              mdsys.sdo_elem_info_array"<< s_eleminfo.str() <<",\n"
+    s_geom << "           mdsys.sdo_geometry("<< gtype <<", "<<s_srid.str()<<", null,\n"
+"              mdsys.sdo_elem_info_array"<< eleminfo <<",\n"
 "              mdsys.sdo_ordinate_array(\n";
 
     s_geom << e.getMinimum(0) << "," << e.getMinimum(1) << ",";
@@ -553,12 +551,12 @@ oss << "declare\n"
     Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
 
     statement->Bind(&pc_id);
-    if (header_data->size() != 0) 
-    {
-        OCILobLocator** locator =(OCILobLocator**) VSIMalloc( sizeof(OCILobLocator*) * 1 );
-        statement->Define( locator, 1 ); 
-        statement->Bind((char*)&(header_data[0]),(long)header_data->size());
-    }
+    // if (header_data->size() != 0) 
+    // {
+    //     OCILobLocator** locator =(OCILobLocator**) VSIMalloc( sizeof(OCILobLocator*) * 1 );
+    //     statement->Define( locator, 1 ); 
+    //     statement->Bind((char*)&(header_data[0]),(long)header_data->size());
+    // }
 
     char* wkt = (char*) malloc(base_table_boundary_wkt.size() * sizeof(char));
     strncpy(wkt, base_table_boundary_wkt.c_str(), base_table_boundary_wkt.size());
@@ -603,9 +601,16 @@ void Writer::writeBegin()
     
     m_connection = Connect(m_options);
     
+    if (m_options.GetPTree().get<bool>("overwrite"))
+        WipeBlockTable();
     RunFileSQL("pre_sql");
     if (!BlockTableExists())
+    {
+        m_doCreateIndex = true;
         CreateBlockTable();
+    }
+        
+    CreatePCEntry(0);
     
     return;
 }
@@ -614,6 +619,11 @@ void Writer::writeBegin()
 void Writer::writeEnd()
 {
 
+    if (m_doCreateIndex)
+    {
+        CreateSDOEntry();
+        CreateBlockIndex();
+    }
     return;
 }
 

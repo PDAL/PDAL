@@ -108,6 +108,7 @@ private:
     libpc::Bounds<double> m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
     bool m_verbose;
+    bool m_doCreateIndex;
 };
 
 }}} // namespace libpc::driver::oci

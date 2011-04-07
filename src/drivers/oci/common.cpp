@@ -57,13 +57,14 @@ Options::Options()
     m_tree.put("capacity", 8000);
     m_tree.put("precision", 8);
     m_tree.put("cloud_id", -1);
+    m_tree.put("dimensions", 5);
     m_tree.put("connection", std::string(""));
     m_tree.put("block_table_name", std::string("output"));
     m_tree.put("block_table_partition_column", std::string(""));
     m_tree.put("block_table_partition_value", boost::int32_t(0));
     m_tree.put("base_table_name", std::string("hobu"));
     m_tree.put("cloud_column_name", std::string("cloud"));
-    m_tree.put("header_blob_column_name", std::string("header"));
+    m_tree.put("header_blob_column_name", std::string(""));
     m_tree.put("base_table_aux_columns", std::string(""));
     m_tree.put("base_table_aux_values", std::string(""));
     m_tree.put("base_table_boundary_column", std::string(""));
