@@ -143,7 +143,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 
     writeEnd();
 
-    assert(m_actualNumPointsWritten <= m_targetNumPointsToWrite);
+    // assert(m_actualNumPointsWritten <= m_targetNumPointsToWrite);
 
     return m_actualNumPointsWritten;
 }
