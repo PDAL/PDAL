@@ -602,7 +602,13 @@ void Writer::writeBegin()
     m_connection = Connect(m_options);
     
     if (m_options.GetPTree().get<bool>("overwrite"))
-        WipeBlockTable();
+    {
+        if (BlockTableExists())
+        {
+            WipeBlockTable();
+        }
+    }
+    
     RunFileSQL("pre_sql");
     if (!BlockTableExists())
     {
