@@ -41,6 +41,7 @@
 #include <libpc/PointBuffer.hpp>
 #include <libpc/Utils.hpp>
 #include <libpc/drivers/oci/Reader.hpp>
+#include <libpc/Vector.hpp>
 
 #include <sstream>
 #include <map>
@@ -108,8 +109,8 @@ boost::uint32_t IteratorBase::unpackOracleData(PointBuffer& data)
     if (space < static_cast<boost::uint32_t>(m_block->num_points))
     {
         std::ostringstream oss;
-        oss << "Not enough space to store this block!  The capacity left in the buffer is ";
-        oss << capacity << ", the Oracle block has " << m_block->num_points << " points ";
+        oss << "Not enough space to store this block!  The space left in the buffer is ";
+        oss << space << ", the Oracle block has " << m_block->num_points << " points ";
         throw libpc_error(oss.str());
     }
 
@@ -149,12 +150,6 @@ boost::uint32_t IteratorBase::unpackOracleData(PointBuffer& data)
         SWAP_BE_TO_LE(d->blk_id);
         SWAP_BE_TO_LE(d->pc_id);
         
-        
-        
-        // std::cout << "sizeof(FiveDimensionOCI): " << sizeof(FiveDimensionOCI) <<  " position: " << position << " i: " << i 
-        //           << " x: " << d->x << " y: " << d->y << " z: " << d->z << std::endl;
-
-
         boost::int32_t x = static_cast<boost::int32_t>(
                          Utils::sround((d->x - offsetx) / scalex));
         boost::int32_t y = static_cast<boost::int32_t>(
@@ -177,17 +172,20 @@ boost::uint32_t IteratorBase::unpackOracleData(PointBuffer& data)
 
 boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
 {
-    boost::uint32_t requestedNumPoints = data.getCapacity();
     boost::uint32_t numPointsRead = 0;
+
+    data.setNumPoints(0);
+    
     bool bDidRead = false;
 
-    std::cout << " Existing block has " << m_block->num_points << " points" << std::endl;
+    // if (getReader().isVerbose())
+    //     std::cout << " Existing block has " << m_block->num_points << " points" << std::endl;
     
     if (!m_block->num_points) 
     {
         // We still have a block of data from the last readBuffer call
         // that was partially read. 
-        std::cout << "reading because we have no points" << std::endl;
+        // std::cout << "reading because we have no points" << std::endl;
         bDidRead = m_statement->Fetch();
         if (!bDidRead)
         {
@@ -201,21 +199,15 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
         // we're done
         if (m_at_end) return 0;
         bDidRead = true;
-        std::cout << "we already had points in our cache, using those" << std::endl;
 
         unpackOracleData(data);
     }
-
-
-
     
     while (bDidRead)
     {
 
-        std::cout << "This block has " << m_block->num_points << " points" << std::endl;
-
         numPointsRead = numPointsRead + m_block->num_points;
-        if (numPointsRead > requestedNumPoints)
+        if (numPointsRead > (data.getCapacity() - data.getNumPoints()))
         {
             // We're done.  We still have more data, but the 
             // user is going to have to request another buffer.
@@ -231,23 +223,18 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     
     
         boost::uint32_t blob_length = m_statement->GetBlobLength(m_locator);
-        std::cout << "blob_length: " << blob_length << std::endl;
     
         if (m_block->chunk->size() < blob_length)
         {
             m_block->chunk->resize(blob_length);
         }
-
-
-        std::cout << " m_block->chunk->size() : " << m_block->chunk->size()<< std::endl;
         
         bool read_all_data = m_statement->ReadBlob( m_locator,
                                          (void*)(&(*m_block->chunk)[0]),
                                          m_block->chunk->size() , 
                                          &nAmountRead);
         if (!read_all_data) throw libpc_error("Did not read all blob data!");
-        std::cout << "nAmountRead: " << nAmountRead << " m_block->chunk->size() : " << m_block->chunk->size()<< std::endl;
-        
+
         unpackOracleData(data);
         bDidRead = m_statement->Fetch();
         if (!bDidRead)
@@ -260,147 +247,56 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
 
 
 
-    double x, y, z;
-    
-    boost::int32_t elem1, elem2, elem3;
-    m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 0, &elem1);
-    m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 1, &elem2);
-    m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 2, &elem3);
+    // double x, y, z;
+    // 
+    // boost::int32_t elem1, elem2, elem3;
+    // m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 0, &elem1);
+    // m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 1, &elem2);
+    // m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 2, &elem3);
+    // 
+    // boost::int32_t gtype, srid;
+    // gtype= m_statement->GetInteger(&(m_block->blk_extent->sdo_gtype));
+    // srid =m_statement->GetInteger(&(m_block->blk_extent->sdo_srid));
 
-    boost::int32_t gtype, srid;
-    gtype= m_statement->GetInteger(&(m_block->blk_extent->sdo_gtype));
-    srid =m_statement->GetInteger(&(m_block->blk_extent->sdo_srid));
-
-    gtype = 2304;
-    std::cout << "gtype: " << gtype << std::endl;
     
     // See http://download.oracle.com/docs/cd/B28359_01/appdev.111/b28400/sdo_objrelschema.htm#g1013735
 
-    boost::uint32_t dimension = gtype / 1000;
-    boost::uint32_t geom_type = gtype % 100;
-    boost::uint32_t referencing= ((gtype % 1000) / 100);
-    std::cout << "dimension: " << dimension << " geometry type: " << geom_type << " referencing " << referencing << std::endl;
+    // boost::uint32_t dimension = gtype / 1000;
+    // boost::uint32_t geom_type = gtype % 100;
+    // boost::uint32_t referencing= ((gtype % 1000) / 100);
+    // std::cout << "dimension: " << dimension << " geometry type: " << geom_type << " referencing " << referencing << std::endl;
     
+    libpc::Vector<double> mins;
+    libpc::Vector<double> maxs;
+    
+    boost::int32_t bounds_length = m_statement->GetArrayLength(&(m_block->blk_extent->sdo_ordinates));
+    
+    for (boost::int32_t i = 0; i < bounds_length; i = i + 2)
+    {
+        double v;
+        m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), i, &v);
+        mins.add(v);
+        m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), i+1, &v);
+        maxs.add(v);
+    }
+    
+    libpc::Bounds<double> block_bounds(mins, maxs);
+    
+    data.setSpatialBounds(block_bounds);
+    
+    // std::cout << "srid: " << srid << std::endl;
+    
+    // std::cout << "elem1, elem2, elem3 " << elem1 << " " << elem2 << " " << elem3 << std::endl;
+    
+    // std::cout << "elem_info size " << m_statement->GetArrayLength(&(m_block->blk_extent->sdo_elem_info)) << std::endl;
+    // std::cout << "sdo_ordinates size " << m_statement->GetArrayLength(&(m_block->blk_extent->sdo_ordinates)) << std::endl;
 
-    std::cout << "srid: " << srid << std::endl;
-    
-    std::cout << "elem1, elem2, elem3 " << elem1 << " " << elem2 << " " << elem3 << std::endl;
-    
-    std::cout << "elem_info size " << m_statement->GetArrayLength(&(m_block->blk_extent->sdo_elem_info)) << std::endl;
-    std::cout << "sdo_ordinates size " << m_statement->GetArrayLength(&(m_block->blk_extent->sdo_ordinates)) << std::endl;
+    // m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 0, &x);
+    // m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 1, &y);
+    // m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 2, &z);
 
-    std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    std::cout.precision(6);
-    m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 0, &x);
-    m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 1, &y);
-    m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 2, &z);
+    // std::cout << "x, y, z " << x << " " << y << " " << z << std::endl;
 
-    std::cout << "x, y, z " << x << " " << y << " " << z << std::endl;
-    
-    // bool read = m_reader.fetchNext();
-    // Block* block = m_reader.getBlock();
-    // 
-    // if (!read)
-    // {
-    //     m_at_end = true;
-    //     return 0;
-    // }
-        std::cout << "fetched" << std::endl;
-    // boost::uint32_t i = 0;
-    // 
-    // const Schema& schema = data.getSchema();
-    // 
-    // const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-    // const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-    // const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
-    // 
-    // const int indexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity, Dimension::Uint16);
-    // const int indexReturnNumber = schema.getDimensionIndex(Dimension::Field_ReturnNumber, Dimension::Uint8);
-    // const int indexNumberOfReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns, Dimension::Uint8);
-    // const int indexScanDirectionFlag = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag, Dimension::Uint8);
-    // const int indexEdgeOfFlightLine = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine, Dimension::Uint8);
-    // const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification, Dimension::Uint8);
-    // const int indexScanAngleRank = schema.getDimensionIndex(Dimension::Field_ScanAngleRank, Dimension::Int8);
-    // const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData, Dimension::Uint8);
-    // const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId, Dimension::Uint16);
-    // 
-    // const int indexTime = (getReader().hasTimeData() ? schema.getDimensionIndex(Dimension::Field_Time, Dimension::Double) : 0);
-    // 
-    // const int indexRed = (getReader().hasColorData() ? schema.getDimensionIndex(Dimension::Field_Red, Dimension::Uint16) : 0);
-    // const int indexGreen = (getReader().hasColorData() ? schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint16) : 0);
-    // const int indexBlue = (getReader().hasColorData() ? schema.getDimensionIndex(Dimension::Field_Blue, Dimension::Uint16) : 0);
-    // 
-    // //const int indexWavePacketDescriptorIndex = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WavePacketDescriptorIndex) : 0);
-    // //const int indexWaveformDataOffset = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformDataOffset) : 0);
-    // //const int indexReturnPointWaveformLocation = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_ReturnPointWaveformLocation) : 0);
-    // //const int indexWaveformXt = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformXt) : 0);
-    // //const int indexWaveformYt = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformYt) : 0);
-    // //const t indexWaveformZt = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformZt) : 0);
-    // 
-    // for (i=0; i<numPoints; i++)
-    // {
-    //     bool ok = getExternalReader().ReadNextPoint();
-    //     if (!ok)
-    //     {
-    //         throw libpc_error("liblas reader failed to retrieve point");
-    //     }
-    // 
-    //     const ::liblas::Point& pt = getExternalReader().GetPoint();
-    // 
-    //     const boost::int32_t x = pt.GetRawX();
-    //     const boost::int32_t y = pt.GetRawY();
-    //     const boost::int32_t z = pt.GetRawZ();
-    // 
-    //     const boost::uint16_t intensity = pt.GetIntensity();
-    //     const boost::int8_t returnNumber = (boost::int8_t)pt.GetReturnNumber();
-    //     const boost::int8_t numberOfReturns = (boost::int8_t)pt.GetNumberOfReturns();
-    //     const boost::int8_t scanDirFlag = (boost::int8_t)pt.GetScanDirection();
-    //     const boost::int8_t edgeOfFlightLine = (boost::int8_t)pt.GetFlightLineEdge();
-    //     const boost::uint8_t classification = pt.GetClassification().GetClass();
-    //     const boost::int8_t scanAngleRank = pt.GetScanAngleRank();
-    //     const boost::uint8_t userData = pt.GetUserData();
-    //     const boost::uint16_t pointSourceId = pt.GetPointSourceID();
-    //     
-    //     data.setField(i, indexX, x);
-    //     data.setField(i, indexY, y);
-    //     data.setField(i, indexZ, z);
-    // 
-    //     data.setField(i, indexIntensity, intensity);
-    //     data.setField(i, indexReturnNumber, returnNumber);
-    //     data.setField(i, indexNumberOfReturns, numberOfReturns);
-    //     data.setField(i, indexScanDirectionFlag, scanDirFlag);
-    //     data.setField(i, indexEdgeOfFlightLine, edgeOfFlightLine);
-    //     data.setField(i, indexClassification, classification);
-    //     data.setField(i, indexScanAngleRank, scanAngleRank);
-    //     data.setField(i, indexUserData, userData);
-    //     data.setField(i, indexPointSourceId, pointSourceId);
-    // 
-    //     if (getReader().hasTimeData())
-    //     {
-    //         const double time = pt.GetTime();
-    //         
-    //         data.setField(i, indexTime, time);
-    //     }
-    // 
-    //     if (getReader().hasColorData())
-    //     {
-    //         const ::liblas::Color color = pt.GetColor();
-    //         const boost::uint16_t red = color.GetRed();
-    //         const boost::uint16_t green = color.GetGreen();
-    //         const boost::uint16_t blue = color.GetBlue();
-    // 
-    //         data.setField(i, indexRed, red);
-    //         data.setField(i, indexGreen, green);
-    //         data.setField(i, indexBlue, blue);
-    //     }
-    //     
-    //     data.setNumPoints(i+1);
-    //     if (getReader().hasWaveData())
-    //     {
-    //         throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
-    //     }
-    //     
-    // }
 
     return numPointsRead;
 }
