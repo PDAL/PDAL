@@ -53,7 +53,7 @@ LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
     , m_ostream(ostream)
     , m_externalWriter(NULL)
 {
-    m_externalHeader = new ::liblas::Header;
+    m_externalHeader = ::liblas::HeaderPtr(new ::liblas::Header);
     m_externalHeader->SetCompressed(false);
 
     setupExternalHeader();
@@ -64,7 +64,6 @@ LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
 
 LiblasWriter::~LiblasWriter()
 {
-    delete m_externalHeader;
     return;
 }
 
@@ -141,8 +140,6 @@ void LiblasWriter::setGeneratingSoftware(const std::string& softwareId)
 
 void LiblasWriter::writeBegin()
 {
-    m_externalHeader->SetPointRecordsCount(99); // BUG
-
     m_externalWriter = new ::liblas::Writer(m_ostream, *m_externalHeader);
     return;
 }
@@ -224,7 +221,7 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointBuffer& PointBuffer)
     //const int indexWaveformYt = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformYt) : 0);
     //const int indexWaveformZt = (hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformZt) : 0);
 
-    ::liblas::Point pt;
+    ::liblas::Point pt(m_externalHeader);
 
     boost::uint32_t numPoints = PointBuffer.getNumPoints();
     for (boost::uint32_t i=0; i<numPoints; i++)

@@ -39,11 +39,8 @@
 
 #include <libpc/Writer.hpp>
 
-namespace liblas
-{
-    class Writer;
-    class Header;
-}
+#include <liblas/liblas.hpp>
+
 
 
 namespace libpc { namespace drivers { namespace liblas {
@@ -85,7 +82,7 @@ private:
 
     std::ostream& m_ostream;
     ::liblas::Writer* m_externalWriter;
-    ::liblas::Header* m_externalHeader;
+    ::liblas::HeaderPtr m_externalHeader;
 
     LiblasWriter& operator=(const LiblasWriter&); // not implemented
     LiblasWriter(const LiblasWriter&); // not implemented
