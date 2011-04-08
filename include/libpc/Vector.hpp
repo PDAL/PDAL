@@ -52,7 +52,8 @@ private:
 
 public:
     typedef T value_type;
-
+    typedef typename std::vector< T >::size_type size_type;
+    
     Vector()
     {
         return;
@@ -131,6 +132,11 @@ public:
         m_data = v;
     }
 
+    void add(T v)
+    {
+        m_data.push_back(v);
+    }
+    
     bool equal(Vector const& other) const
     {
         if (this->size() != other.size())
@@ -163,7 +169,7 @@ public:
         }
     }
 
-    std::size_t size() const
+    size_type size() const
     {
         return m_data.size();
     }
