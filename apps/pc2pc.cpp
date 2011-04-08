@@ -54,6 +54,9 @@ private:
 
     std::string m_inputFile;
     std::string m_outputFile;
+    std::string m_OracleReadSQL;
+    std::string m_OracleWriteSQL;
+    
 };
 
 
@@ -89,8 +92,8 @@ void Application_pc2pc::addOptions()
         ("input,i", po::value<std::string>(&m_inputFile), "input file name")
         ("output,o", po::value<std::string>(&m_outputFile), "output file name")
         ("native", "use native LAS classes (not liblas)")
-        ("oracle", "oracle test")
-        ("oracle-reader", "oracle test")
+        ("oracle-writer", "write data into oracle (must edit source to make this work right now)")
+        ("oracle-reader", po::value<std::string>(&m_OracleReadSQL), "SQL to select a block table")
         ;
 
     addOptionSet(file_options);
@@ -121,7 +124,7 @@ int Application_pc2pc::execute()
         writer.write(numPoints);
     }
 
-    else if (hasOption("oracle"))
+    else if (hasOption("oracle-writer"))
     {
 #ifdef LIBPC_HAVE_ORACLE
         libpc::drivers::liblas::LiblasReader reader(m_inputFile);
@@ -131,13 +134,16 @@ int Application_pc2pc::execute()
         libpc::drivers::oci::Options options;
         boost::property_tree::ptree& tree = options.GetPTree();
         
-        boost::uint32_t capacity = 1000;
+        boost::uint32_t capacity = 10000;
         tree.put("capacity", capacity);
         tree.put("overwrite", true);
-        tree.put("connection", "lidar/lidar@192.168.56.101/orcl");
+        tree.put("connection", "lidar/lidar@oracle.hobu.biz/orcl");
         // tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
         tree.put("debug", true);
         tree.put("verbose", true);
+        tree.put("scale.x", 0.0000001);
+        tree.put("scale.y", 0.0000001);
+        tree.put("scale.z", 0.001);
         
         libpc::filters::CacheFilter cache(reader, 1, 1024);
         libpc::filters::Chipper chipper(cache, capacity);
@@ -154,13 +160,21 @@ int Application_pc2pc::execute()
             libpc::drivers::oci::Options options;
             boost::property_tree::ptree& tree = options.GetPTree();
             tree.put("capacity", 12);
-            tree.put("connection", "lidar/lidar@192.168.56.101/orcl");
+            tree.put("connection", "lidar/lidar@oracle.hobu.biz/orcl");
             // tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
             tree.put("debug", true);
             tree.put("verbose", true);
+        tree.put("scale.x", 0.0000001);
+        tree.put("scale.y", 0.0000001);
+        tree.put("scale.z", 0.001);
             // tree.put("select_sql", "select * from output");
             // tree.put("select_sql", "select cloud from hobu where id = 5");
-            tree.put("select_sql", "select cloud from hobu where id = 1");
+            // tree.put("select_sql", "select cloud from hobu where id = 1");
+            
+            if (m_OracleReadSQL.size() == 0) {
+                throw libpc_error("Select statement to read OCI data is empty!");
+            }
+            tree.put("select_sql", m_OracleReadSQL);
 
             libpc::drivers::oci::Reader reader(options);
 
