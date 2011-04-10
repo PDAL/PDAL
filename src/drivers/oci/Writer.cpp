@@ -463,10 +463,10 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
         values << "pc";
     }
 
-    int nPos = 1; // Bind column position    
+    int nPos = 2; // Bind column position    
     if (!header_blob_column_name.empty()){
         columns << "," << header_blob_column_name;
-        values <<", :" << nPos++;
+        values <<", :" << nPos;
     }
 
     if (!base_table_boundary_column.empty()){
