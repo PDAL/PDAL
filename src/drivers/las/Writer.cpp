@@ -40,6 +40,8 @@
 #include <libpc/SchemaLayout.hpp>
 #include <libpc/PointBuffer.hpp>
 
+#include <iostream>
+
 namespace libpc { namespace drivers { namespace las {
 
 
@@ -78,8 +80,10 @@ void LasWriter::writeBegin()
     m_lasHeader.SetOffset(dimX.getNumericOffset(), dimY.getNumericOffset(), dimZ.getNumericOffset());
 
 
+    std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    std::cout.precision(2);
 
-    
+    std::cout << "scale: " << dimX.getNumericScale() << dimY.getNumericScale() << dimZ.getNumericScale() << std::endl;
     boost::uint32_t cnt = static_cast<boost::uint32_t>(m_targetNumPointsToWrite);
     m_lasHeader.SetPointRecordsCount(cnt);
 
