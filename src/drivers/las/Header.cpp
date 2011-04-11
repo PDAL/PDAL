@@ -55,7 +55,6 @@ char const* const LasHeader::SystemIdentifier = "libLAS";
 char const* const LasHeader::SoftwareIdentifier = "libLAS 1.6.0";
 
 LasHeader::LasHeader()
-    : m_scales(0.0,0.0,0.0)
 {
     // BUG: set default here -- m_schema(LasSchema::ePointFormat3)
     initialize();
