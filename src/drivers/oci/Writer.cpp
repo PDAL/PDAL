@@ -562,10 +562,12 @@ oss << "declare\n"
     strncpy(wkt, base_table_boundary_wkt.c_str(), base_table_boundary_wkt.size());
     if (!base_table_boundary_column.empty())
     {
-        OCILobLocator** locator =(OCILobLocator**) VSIMalloc( sizeof(OCILobLocator*) * 1 );
-        statement->DefineClob( locator, 1 ); 
-        statement->BindClob(wkt,(long)base_table_boundary_wkt.size());
+
+        OCILobLocator* locator ; 
+        statement->WriteCLob( &locator, wkt ); 
+        statement->Bind(&locator);
         statement->Bind((long int*)&srid);
+
     }
 
     try {
