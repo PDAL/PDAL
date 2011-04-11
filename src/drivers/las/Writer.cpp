@@ -64,8 +64,21 @@ void LasWriter::writeBegin()
 {
     // need to set properties of the header here, based on prev->getHeader() and on the user's preferences
     m_lasHeader.setBounds( getPrevStage().getBounds() );
-    m_lasHeader.SetOffset(0,0,0);
-    m_lasHeader.SetScale(1,1,1);
+
+    const Schema& schema = getPrevStage().getSchema();
+
+    int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+    int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+    const Dimension& dimX = schema.getDimension(indexX);
+    const Dimension& dimY = schema.getDimension(indexY);
+    const Dimension& dimZ = schema.getDimension(indexZ);
+
+    m_lasHeader.SetScale(dimX.getNumericScale(), dimY.getNumericScale(), dimZ.getNumericScale());
+    m_lasHeader.SetOffset(dimX.getNumericOffset(), dimY.getNumericOffset(), dimZ.getNumericOffset());
+
+
+
     
     boost::uint32_t cnt = static_cast<boost::uint32_t>(m_targetNumPointsToWrite);
     m_lasHeader.SetPointRecordsCount(cnt);
