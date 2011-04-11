@@ -28,8 +28,8 @@
 #include <libpc/drivers/las/Writer.hpp>
 #include <libpc/filters/CacheFilter.hpp>
 
-#include <libpc/drivers/liblas/writer.hpp>
-#include <libpc/drivers/liblas/reader.hpp>
+#include <libpc/drivers/liblas/Writer.hpp>
+#include <libpc/drivers/liblas/Reader.hpp>
 
 #ifdef LIBPC_HAVE_ORACLE
 #include <libpc/drivers/oci/Writer.hpp>
