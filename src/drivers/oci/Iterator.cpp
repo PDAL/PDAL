@@ -205,9 +205,8 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     
     while (bDidRead)
     {
-
-        numPointsRead = numPointsRead + m_block->num_points;
-        if (numPointsRead > (data.getCapacity() - data.getNumPoints()))
+        boost::uint32_t numReadThisBlock = m_block->num_points;
+        if (numPointsRead + numReadThisBlock > (data.getCapacity() - data.getNumPoints()))
         {
             // We're done.  We still have more data, but the 
             // user is going to have to request another buffer.
@@ -219,6 +218,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
             break;
         }
 
+        numPointsRead = numPointsRead + numReadThisBlock;
         boost::uint32_t nAmountRead = 0;
     
     
