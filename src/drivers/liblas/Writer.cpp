@@ -35,7 +35,7 @@
 #include <libpc/drivers/liblas/Writer.hpp>
 
 #include <liblas/header.hpp>
-#include <liblas/Writer.hpp>
+#include <liblas/writer.hpp>
 
 #include <libpc/exceptions.hpp>
 #include <libpc/libpc_config.hpp>
