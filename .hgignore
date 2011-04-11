@@ -36,3 +36,4 @@ csharp/libpc_swig_cpp/libpc_wrap.cpp
 
 Makefile
 doc/build
+bin/
