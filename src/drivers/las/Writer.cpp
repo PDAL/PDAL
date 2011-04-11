@@ -47,6 +47,7 @@ namespace libpc { namespace drivers { namespace las {
 LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
     : Writer(prevStage)
     , m_ostream(ostream)
+    , m_numPointsWritten(0)
 {
     return;
 }
@@ -78,6 +79,11 @@ void LasWriter::writeBegin()
 
 void LasWriter::writeEnd()
 {
+    m_lasHeader.SetPointRecordsCount(m_numPointsWritten);
+
+    LasHeaderWriter lasHeaderWriter(m_lasHeader, m_ostream);
+    lasHeaderWriter.write();
+        
     return;
 }
 
@@ -239,7 +245,8 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
 
     //std::vector<boost::uint8_t> const& data = point.GetData();    
     //detail::write_n(m_ofs, data.front(), m_header->GetDataRecordLength());
-
+    
+    m_numPointsWritten = m_numPointsWritten+numValidPoints;
     return numValidPoints;
 }
 

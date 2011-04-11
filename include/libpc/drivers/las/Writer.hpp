@@ -63,6 +63,7 @@ protected:
 private:
     std::ostream& m_ostream;
     LasHeader m_lasHeader;
+    boost::uint32_t m_numPointsWritten;
 
     LasWriter& operator=(const LasWriter&); // not implemented
     LasWriter(const LasWriter&); // not implemented
