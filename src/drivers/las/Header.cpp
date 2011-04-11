@@ -321,8 +321,8 @@ void LasHeader::SetScale(double x, double y, double z)
 
     double const minscale = 0.01;
     m_scales[0] = Utils::compare_distance(0.0, x) ? minscale : x;
-    m_scales[0] = Utils::compare_distance(0.0, y) ? minscale : y;
-    m_scales[0] = Utils::compare_distance(0.0, z) ? minscale : z;
+    m_scales[1] = Utils::compare_distance(0.0, y) ? minscale : y;
+    m_scales[2] = Utils::compare_distance(0.0, z) ? minscale : z;
 }
 
 double LasHeader::GetOffsetX() const
