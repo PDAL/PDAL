@@ -81,8 +81,10 @@ void LasWriter::writeEnd()
 {
     m_lasHeader.SetPointRecordsCount(m_numPointsWritten);
 
+    std::streamsize const dataPos = 107; 
+    m_ostream.seekp(dataPos, std::ios::beg);
     LasHeaderWriter lasHeaderWriter(m_lasHeader, m_ostream);
-    lasHeaderWriter.write();
+    Utils::write_n(m_ostream, m_numPointsWritten, sizeof(m_numPointsWritten));
         
     return;
 }
