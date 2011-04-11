@@ -36,8 +36,8 @@
 #include <boost/cstdint.hpp>
 
 #include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/liblas/writer.hpp>
-#include <libpc/drivers/liblas/reader.hpp>
+#include <libpc/drivers/liblas/Writer.hpp>
+#include <libpc/drivers/liblas/Reader.hpp>
 
 #include "support.hpp"
 
