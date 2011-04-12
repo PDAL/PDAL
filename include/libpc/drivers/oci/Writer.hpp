@@ -61,6 +61,8 @@ public:
     void run(std::ostringstream const& command);
     inline void setBounds(libpc::Bounds<double> bounds) {m_bounds = bounds; }
     inline libpc::Bounds<double>  getBounds() const { return m_bounds; }
+    
+    inline Connection getConnection() const { return m_connection;}
 protected:
     // this is called once before the loop with the writeBuffer calls
     virtual void writeBegin();
