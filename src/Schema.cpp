@@ -175,7 +175,7 @@ int Schema::getDimensionIndex(Dimension::Field field, Dimension::DataType dataty
     // assert(dim.getDataType() == datatype);
     if (dim.getDataType() != datatype)
     {
-        throw libpc_error("Requested dimension field present, but with different datatype");
+        throw dimension_not_found("Requested dimension field present, but with different datatype");
     }
     
     return index;
