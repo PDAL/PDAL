@@ -178,13 +178,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     
     bool bDidRead = false;
 
-    // if (getReader().isVerbose())
-    //     std::cout << " Existing block has " << m_block->num_points << " points" << std::endl;
-    
-    // should have 37427853
-    // we have 49898796
-    
-    // capacity is 5000  num blocks = 7488
+
     if (!m_block->num_points) 
     {
         // We still have a block of data from the last readBuffer call
@@ -204,7 +198,6 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
         if (m_at_end) return 0;
         bDidRead = true;
 
-        unpackOracleData(data);
     }
     
     while (bDidRead)
