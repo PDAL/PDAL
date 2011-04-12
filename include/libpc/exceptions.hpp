@@ -130,6 +130,16 @@ public:
     {}
 };
 
+class dimension_not_found : public libpc_error
+{
+public:
+
+    dimension_not_found(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
+
+
 // use this for code still under development
 class not_yet_implemented : public libpc_error
 {
