@@ -43,7 +43,7 @@
 #define LIBPC_DIMENSION_HPP_INCLUDED
 
 #include <libpc/libpc.hpp>
-
+#include <libpc/Utils.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 
@@ -103,6 +103,8 @@ public:
         Field_LAST = 1023
     };
 
+    // Do not explicitly specify these enum values because they 
+    // are (probably wrongly) used to iterate through for Schema::getX, Schema::getY, Schema::getZ
     enum DataType
     {
         Int8,
@@ -114,7 +116,8 @@ public:
         Int64,
         Uint64,
         Float,       // 32 bits
-        Double       // 64 bits
+        Double,       // 64 bits
+        Undefined
     };
 
 public:
@@ -228,11 +231,19 @@ public:
     }
 
     template<class T>
-    double getNumericValue(T x) const
+    double applyScaling(T v) const
     {
-        return (double)x * m_numericScale + m_numericOffset;
+        return (double)v * m_numericScale + m_numericOffset;
     }
 
+    template<class T>
+    T removeScaling(double v) const
+    {
+        T output = static_cast<T>(Utils::sround((v - m_numericOffset)/ m_numericScale));
+        return output;
+    }
+
+    
     /// If true, this dimension uses the numeric scale/offset values
     inline bool isFinitePrecision() const
     {

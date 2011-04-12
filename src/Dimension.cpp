@@ -199,6 +199,8 @@ std::string Dimension::getDataTypeName(DataType type)
         return "Float";
     case Double:
         return "Double";
+    case Undefined:
+        return "Undefined";
     }
     throw;
 }
@@ -228,6 +230,8 @@ std::size_t Dimension::getDataTypeSize(DataType type)
         return 4;
     case Double:
         return 8;
+    case Undefined:
+        throw;
     }
     throw;
 }
@@ -249,6 +253,8 @@ bool Dimension::getDataTypeIsNumeric(DataType type)
     case Float:
     case Double:
         return true;
+    case Undefined:
+        throw;
     }
     throw;
 }
@@ -271,6 +277,9 @@ bool Dimension::getDataTypeIsSigned(DataType type)
     case Float:
     case Double:
         return true;
+    case Undefined:
+        throw;
+        
     }
     throw;
 }
@@ -293,6 +302,9 @@ bool Dimension::getDataTypeIsInteger(DataType type)
     case Float:
     case Double:
         return false;
+    case Undefined:
+        throw;
+
     }
     throw;
 }
