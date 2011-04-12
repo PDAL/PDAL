@@ -61,7 +61,7 @@ boost::uint32_t ChipperSequentialIterator::readImpl(PointBuffer& buffer)
     // until the previous stage runs out of points).
 
 
-    assert(buffer.getNumPoints() == 0);
+    buffer.setNumPoints(0);
 
     
     if (m_currentBlockId == m_chipper.GetBlockCount())
