@@ -64,9 +64,9 @@ static void check_pN(const PointBuffer& data, const Schema& schema,
     boost::int32_t x0raw = data.getField<boost::int32_t>(index, offsetX);
     boost::int32_t y0raw = data.getField<boost::int32_t>(index, offsetY);
     boost::int32_t z0raw = data.getField<boost::int32_t>(index, offsetZ);
-    double x0 = schema.getDimension(offsetX).getNumericValue<boost::int32_t>(x0raw);
-    double y0 = schema.getDimension(offsetY).getNumericValue<boost::int32_t>(y0raw);
-    double z0 = schema.getDimension(offsetZ).getNumericValue<boost::int32_t>(z0raw);
+    double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x0raw);
+    double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y0raw);
+    double z0 = schema.getDimension(offsetZ).applyScaling<boost::int32_t>(z0raw);
     
     Compare(x0, xref);
     Compare(y0, yref);
