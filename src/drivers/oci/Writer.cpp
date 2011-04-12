@@ -52,6 +52,9 @@ Writer::Writer(Stage& prevStage, Options& options)
     , m_doCreateIndex(false)
 {
 
+    Debug();
+    
+    m_connection = Connect(m_options);
     
     return;
 }
@@ -599,9 +602,7 @@ void Writer::writeBegin()
     // }
 
     // Set up debugging info
-    Debug();
-    
-    m_connection = Connect(m_options);
+
     
     if (m_options.GetPTree().get<bool>("overwrite"))
     {
