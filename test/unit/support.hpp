@@ -46,6 +46,7 @@ extern bool compare_files(const std::string& file1, const std::string& file2);
 struct TestConfig {
     TestConfig();
     static std::string g_data_path;
+    static std::string g_oracle_connection;
 };
 
 

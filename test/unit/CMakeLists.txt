@@ -8,32 +8,42 @@
 SET(LIBPC_UNIT_TEST libpc_test)
 
 SET(LIBPC_UNIT_TEST_SRC
-	BoundsTest.cpp
+    BoundsTest.cpp
     CacheFilterTest.cpp
-	ChipperTest.cpp
-	ColorTest.cpp
-	ColorFilterTest.cpp
-	ConfigTest.cpp
-	CropFilterTest.cpp
-	DecimationFilterTest.cpp
-	DimensionLayoutTest.cpp
-	DimensionTest.cpp
-	FauxReaderTest.cpp
-	FauxWriterTest.cpp
-	LiblasReaderTest.cpp
-	LiblasWriterTest.cpp
-	MosaicFilterTest.cpp
-	PointBufferCacheTest.cpp
-	PointBufferTest.cpp
-	RangeTest.cpp
-	SchemaLayoutTest.cpp
-	SchemaTest.cpp
-	SignallerTest.cpp
-	UtilsTest.cpp
-	VectorTest.cpp
+    ChipperTest.cpp
+    ColorTest.cpp
+    ColorFilterTest.cpp
+    ConfigTest.cpp
+    CropFilterTest.cpp
+    DecimationFilterTest.cpp
+    DimensionLayoutTest.cpp
+    DimensionTest.cpp
+    FauxReaderTest.cpp
+    FauxWriterTest.cpp
+    LiblasReaderTest.cpp
+    LiblasWriterTest.cpp
+    MosaicFilterTest.cpp
+    PointBufferCacheTest.cpp
+    PointBufferTest.cpp
+    RangeTest.cpp
+    SchemaLayoutTest.cpp
+    SchemaTest.cpp
+    SignallerTest.cpp
+    UtilsTest.cpp
+    VectorTest.cpp
     support.cpp
     support.hpp
     main.cpp)
+
+if (WITH_ORACLE)
+    set(LIBPC_OCI_TEST_CPP OCITest.cpp)
+
+    FOREACH(file ${LIBPC_OCI_TEST_CPP})
+            SET(LIBPC_UNIT_TEST_SRC "${LIBPC_UNIT_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
+    ENDFOREACH(file)
+    
+endif (WITH_ORACLE)
+
 
 INCLUDE_DIRECTORIES(
     .
