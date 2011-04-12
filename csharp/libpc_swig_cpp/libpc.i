@@ -280,7 +280,7 @@ public:
     inline void setNumericOffset(double v);
 
     template<class T>
-    double getNumericValue(T x) const;
+    double applyScaling(T x) const;
 
     inline bool isFinitePrecision() const;
     inline void isFinitePrecision(bool v);
@@ -288,7 +288,7 @@ public:
 
 %extend Dimension
 {
-    %template(getNumericValue_Int32) getNumericValue<boost::int32_t>;
+    %template(getNumericValue_Int32) applyScaling<boost::int32_t>;
 };
 
 
