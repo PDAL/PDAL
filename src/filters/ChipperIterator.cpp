@@ -60,12 +60,11 @@ boost::uint32_t ChipperSequentialIterator::readImpl(PointBuffer& buffer)
     // We will read from our previous stage until we get that amount (or
     // until the previous stage runs out of points).
 
-
-    buffer.setNumPoints(0);
-
-    
     if (m_currentBlockId == m_chipper.GetBlockCount())
         return 0; // we're done.
+
+
+    buffer.setNumPoints(0);
 
     filters::chipper::Block const& block = m_chipper.GetBlock(m_currentBlockId);
     std::size_t numPointsThisBlock = block.GetIDs().size();
