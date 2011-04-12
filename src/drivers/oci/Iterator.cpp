@@ -181,6 +181,10 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     // if (getReader().isVerbose())
     //     std::cout << " Existing block has " << m_block->num_points << " points" << std::endl;
     
+    // should have 37427853
+    // we have 49898796
+    
+    // capacity is 5000  num blocks = 7488
     if (!m_block->num_points) 
     {
         // We still have a block of data from the last readBuffer call
@@ -206,7 +210,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     while (bDidRead)
     {
         boost::uint32_t numReadThisBlock = m_block->num_points;
-        if (numPointsRead + numReadThisBlock > (data.getCapacity() - data.getNumPoints()))
+        if ((numPointsRead + numReadThisBlock) > (data.getCapacity() - data.getNumPoints()))
         {
             // We're done.  We still have more data, but the 
             // user is going to have to request another buffer.
