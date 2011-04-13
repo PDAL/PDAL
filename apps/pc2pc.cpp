@@ -182,7 +182,7 @@ int Application_pc2pc::execute()
 
 
 
-            libpc::drivers::liblas::LiblasWriter writer(reader, *ofs);
+            libpc::drivers::las::LasWriter writer(reader, *ofs);
             // writer.setPointFormat( 3);
             writer.write(numPoints);
     #else
