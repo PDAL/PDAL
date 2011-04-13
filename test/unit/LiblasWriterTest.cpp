@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
 
         writer.setCompressed(false);
         writer.setDate(0, 0);
-        writer.setPointFormat(3);
+        writer.setPointFormat(::libpc::drivers::las::PointFormat3);
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
 
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
 
         writer.setCompressed(true);
         writer.setDate(0, 0);
-        writer.setPointFormat(3);
+        writer.setPointFormat(::libpc::drivers::las::PointFormat3);
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
 

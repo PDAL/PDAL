@@ -200,7 +200,7 @@ int Application_pc2pc::execute()
 
         //BUG: handle laz writer.setCompressed(false);
 
-        writer.setPointFormat( reader.getPointFormatNumber() );
+        writer.setPointFormat( reader.getPointFormat() );
 
         writer.write(numPoints);
     }

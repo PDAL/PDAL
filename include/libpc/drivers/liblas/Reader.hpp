@@ -38,11 +38,8 @@
 #include <libpc/libpc.hpp>
 
 #include <libpc/Stage.hpp>
-//#include <libpc/Iterator.hpp>
 
-//#include <iostream>
-
-//#include <libpc/drivers/liblas/Header.hpp>
+#include <libpc/drivers/las/Support.hpp>
 
 // fwd decls
 namespace liblas
@@ -64,12 +61,8 @@ public:
 
     const std::string& getFileName() const;
 
-    boost::int8_t getPointFormatNumber() const;
+    ::libpc::drivers::las::PointFormat getPointFormat() const;
     
-    bool hasTimeData() const;
-    bool hasColorData() const;
-    bool hasWaveData() const;
-
     bool supportsIterator (StageIteratorType t) const
     {   
         if (t == StageIterator_Sequential ) return true;
@@ -98,10 +91,7 @@ private:
     double m_offsetZ;
     bool m_isCompressed;
     
-    boost::int8_t m_pointFormatNumber; // should be an enum
-    bool m_hasTimeData;
-    bool m_hasColorData;
-    bool m_hasWaveData;
+    ::libpc::drivers::las::PointFormat m_pointFormat;
 
     LiblasReader& operator=(const LiblasReader&); // not implemented
     LiblasReader(const LiblasReader&); // not implemented

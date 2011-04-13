@@ -112,20 +112,22 @@ ENDFOREACH(file)
 #
 
 set (LIBPC_DRIVERS_LAS_HPP
+  ./drivers/las/LasHeaderReader.hpp
+  ./drivers/las/LasHeaderWriter.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Header.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Reader.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/las/Support.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Writer.hpp
-  ./drivers/las/LasHeaderReader.hpp
-  ./drivers/las/LasHeaderWriter.hpp
 )
  
 set (LIBPC_DRIVERS_LAS_CPP
-  ./drivers/las/LasHeaderReader.cpp
-  ./drivers/las/LasHeaderWriter.cpp
   ./drivers/las/Header.cpp
   ./drivers/las/Iterator.cpp
+  ./drivers/las/LasHeaderReader.cpp
+  ./drivers/las/LasHeaderWriter.cpp
   ./drivers/las/Reader.cpp
+  ./drivers/las/Support.cpp
   ./drivers/las/Writer.cpp
 )
   

@@ -32,63 +32,78 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LIBLAS_LIBLASWRITER_HPP
-#define INCLUDED_DRIVERS_LIBLAS_LIBLASWRITER_HPP
+#ifndef INCLUDED_DRIVERS_LAS_SUPPORT_HPP
+#define INCLUDED_DRIVERS_LAS_SUPPORT_HPP
 
 #include <libpc/libpc.hpp>
 
-#include <libpc/Writer.hpp>
-#include <libpc/drivers/las/Support.hpp>
+#include <libpc/Schema.hpp>
 
-#include <liblas/liblas.hpp>
+namespace libpc { namespace drivers { namespace las {
 
-
-
-namespace libpc { namespace drivers { namespace liblas {
-
-// we default to LAS 1.2, point format 0
-class LIBPC_DLL LiblasWriter : public Writer
+enum PointFormat
 {
-public:
-    LiblasWriter(Stage& prevStage, std::ostream&);
-    ~LiblasWriter();
-
-    const std::string& getName() const;
-    
-    void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
-    void setPointFormat(::libpc::drivers::las::PointFormat);
-    void setDate(boost::uint16_t dayOfYear, boost::uint16_t year);
-    
-    // up to 32 chars (default is "libPC")
-    void setSystemIdentifier(const std::string& systemId); 
-    
-    // up to 32 chars (default is "libPC x.y.z")
-    void setGeneratingSoftware(const std::string& softwareId);
-
-    // default false
-    void setCompressed(bool);
-
-protected:
-    // this is called once before the loop with the writeBuffer calls
-    virtual void writeBegin();
-
-    // called repeatedly, until out of data
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
-
-    // called once, after the writeBuffer calls
-    virtual void writeEnd();
-
-private:
-    void setupExternalHeader();
-
-    std::ostream& m_ostream;
-    ::liblas::Writer* m_externalWriter;
-    ::liblas::HeaderPtr m_externalHeader;
-
-    LiblasWriter& operator=(const LiblasWriter&); // not implemented
-    LiblasWriter(const LiblasWriter&); // not implemented
+    PointFormat0 = 0,         // base
+    PointFormat1 = 1,         // base + time
+    PointFormat2 = 2,         // base + color
+    PointFormat3 = 3,         // base + time + color
+    PointFormat4 = 4,         // base + time + wave
+    PointFormat5 = 5,         // base + time + color + wave  (NOT SUPPORTED)
+    PointFormatUnknown = 99
 };
 
-} } } // namespaces
+
+/// Number of bytes of point record storage in particular format.
+enum PointSize
+{
+    PointSize0 = 20, ///< Size of point record in data format \e 0
+    PointSize1 = 28, ///< Size of point record in data format \e 1
+    PointSize2 = 26, ///< Size of point record in data format \e 2
+    PointSize3 = 34  ///< Size of point record in data format \e 3
+    // other formats not supported
+};
+
+
+// this struct is used as a means to hold all the las field dimension indexes from a schema
+class PointIndexes
+{
+public:
+    PointIndexes(const Schema& schema, PointFormat format);
+    int X;
+    int Y;
+    int Z;
+    
+    int Intensity;
+    int ReturnNumber;
+    int NumberOfReturns;
+    int ScanDirectionFlag;
+    int EdgeOfFlightLine;
+    int Classification;
+    int ScanAngleRank;
+    int UserData;
+    int PointSourceId;
+    
+    int Time;
+    
+    int Red;
+    int Green;
+    int Blue;
+};
+
+
+class LIBPC_DLL Support
+{
+public:
+    static void registerFields(Schema& schema, PointFormat pointFormat);
+    static void setScaling(Schema& schema, double scaleX, double scaleY, double scaleZ, double offsetX, double offsetY, double offsetZ);
+
+    static bool hasTime(PointFormat);
+    static bool hasColor(PointFormat);
+    static bool hasWave(PointFormat);
+    static boost::uint16_t getPointDataSize(PointFormat pointFormat);
+};
+
+
+} } } // namespace
 
 #endif

@@ -53,10 +53,7 @@ LiblasReader::LiblasReader(const std::string& filename)
     , m_offsetY(0.0)
     , m_offsetZ(0.0)
     , m_isCompressed(false)
-    , m_pointFormatNumber(-1)
-    , m_hasTimeData(false)
-    , m_hasColorData(false)
-    , m_hasWaveData(false)
+    , m_pointFormat(::libpc::drivers::las::PointFormatUnknown)
 {
     std::istream* str = Utils::openFile(m_filename);
 
@@ -95,27 +92,9 @@ const std::string& LiblasReader::getFileName() const
 }
 
 
-bool LiblasReader::hasTimeData() const
+::libpc::drivers::las::PointFormat LiblasReader::getPointFormat() const
 {
-    return m_hasTimeData;
-}
-
-
-bool LiblasReader::hasColorData() const
-{
-    return m_hasColorData;
-}
-
-
-bool LiblasReader::hasWaveData() const
-{
-    return m_hasWaveData;
-}
-
-
-boost::int8_t LiblasReader::getPointFormatNumber() const
-{
-    return m_pointFormatNumber;
+    return m_pointFormat;
 }
 
 void LiblasReader::processExternalHeader(::liblas::Reader& externalReader)
@@ -140,37 +119,9 @@ void LiblasReader::processExternalHeader(::liblas::Reader& externalReader)
 
     m_isCompressed = externalHeader.Compressed();
 
-    m_pointFormatNumber = (boost::int8_t)externalHeader.GetDataFormatId();
+    m_pointFormat = (::libpc::drivers::las::PointFormat)externalHeader.GetDataFormatId();
 
-    m_hasTimeData = m_hasColorData = m_hasWaveData = false;
-    switch (m_pointFormatNumber)
-    {
-    case 0:
-        break;
-    case 1:
-        m_hasTimeData = true;
-        break;
-    case 2:
-        m_hasColorData = true;
-        break;
-    case 3:
-        m_hasTimeData = true;
-        m_hasColorData = true;
-        break;
-    case 4:
-        m_hasTimeData = true;
-        m_hasWaveData = true;
-        break;
-    case 5:
-        m_hasColorData = true;
-        m_hasTimeData = true;
-        m_hasWaveData = true;
-        break;
-    default:
-        throw not_yet_implemented("Unknown point format encountered");
-    }
-
-    if (m_hasWaveData)
+    if (::libpc::drivers::las::Support::hasWave(m_pointFormat))
     {
         throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
     }
@@ -183,52 +134,16 @@ void LiblasReader::registerFields(::liblas::Reader& externalReader)
     const ::liblas::Header& externalHeader = externalReader.GetHeader();
     Schema& schema = getSchemaRef();
 
-    Dimension xDim(Dimension::Field_X, Dimension::Int32);
-    Dimension yDim(Dimension::Field_Y, Dimension::Int32);
-    Dimension zDim(Dimension::Field_Z, Dimension::Int32);
-    xDim.setNumericScale(externalHeader.GetScaleX());
-    yDim.setNumericScale(externalHeader.GetScaleY());
-    zDim.setNumericScale(externalHeader.GetScaleZ());
-    xDim.setNumericOffset(externalHeader.GetOffsetX());
-    yDim.setNumericOffset(externalHeader.GetOffsetY());
-    zDim.setNumericOffset(externalHeader.GetOffsetZ());
+    ::libpc::drivers::las::Support::registerFields(schema, getPointFormat());
 
-    schema.addDimension(xDim);
-    schema.addDimension(yDim);
-    schema.addDimension(zDim);
+    ::libpc::drivers::las::Support::setScaling(schema, 
+        externalHeader.GetScaleX(),
+        externalHeader.GetScaleY(),
+        externalHeader.GetScaleZ(),
+        externalHeader.GetOffsetX(),
+        externalHeader.GetOffsetY(),
+        externalHeader.GetOffsetZ());
 
-    schema.addDimension(Dimension(Dimension::Field_Intensity, Dimension::Uint16));
-    schema.addDimension(Dimension(Dimension::Field_ReturnNumber, Dimension::Uint8));
-    schema.addDimension(Dimension(Dimension::Field_NumberOfReturns, Dimension::Uint8));
-    schema.addDimension(Dimension(Dimension::Field_ScanDirectionFlag, Dimension::Uint8));
-    schema.addDimension(Dimension(Dimension::Field_EdgeOfFlightLine, Dimension::Uint8));
-    schema.addDimension(Dimension(Dimension::Field_Classification, Dimension::Uint8));
-    schema.addDimension(Dimension(Dimension::Field_ScanAngleRank, Dimension::Int8));
-    schema.addDimension(Dimension(Dimension::Field_UserData, Dimension::Uint8));
-    schema.addDimension(Dimension(Dimension::Field_PointSourceId, Dimension::Uint16));
-
-    if (m_hasTimeData)
-    {
-        schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Double));
-    }
-
-    if (m_hasColorData)
-    {
-        schema.addDimension(Dimension(Dimension::Field_Red, Dimension::Uint16));
-        schema.addDimension(Dimension(Dimension::Field_Green, Dimension::Uint16));
-        schema.addDimension(Dimension(Dimension::Field_Blue, Dimension::Uint16));
-    }
-
-    //if (m_hasWaveData)
-    //{
-    //    schema.addDimension(Dimension(Dimension::Field_WavePacketDescriptorIndex, Dimension::Uint8));
-    //    schema.addDimension(Dimension(Dimension::Field_WaveformDataOffset, Dimension::Uint64));
-    //    schema.addDimension(Dimension(Dimension::Field_ReturnPointWaveformLocation, Dimension::Uint32));
-    //    schema.addDimension(Dimension(Dimension::Field_WaveformXt, Dimension::Float));
-    //    schema.addDimension(Dimension(Dimension::Field_WaveformYt, Dimension::Float));
-    //    schema.addDimension(Dimension(Dimension::Field_WaveformZt, Dimension::Float));
-    //}
-    
     return;
 }
 
