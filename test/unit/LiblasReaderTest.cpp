@@ -73,6 +73,30 @@ static void check_pN(const PointBuffer& data, const Schema& schema,
     Compare(z0, zref);
 }
 
+static void check_pN(const PointBuffer& data, const Schema& schema, 
+                     size_t index, 
+                     double xref, double yref, double zref,
+                     double tref,
+                     boost::uint16_t rref, boost::uint16_t gref, boost::uint16_t bref)
+{
+    check_pN(data, schema, index, xref, yref, zref);
+
+    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Double);
+    double t0 = data.getField<double>(index, offsetT);
+    Compare(t0, tref);
+
+    int offsetR = schema.getDimensionIndex(Dimension::Field_Red, Dimension::Uint16);
+    int offsetG = schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint16);
+    int offsetB = schema.getDimensionIndex(Dimension::Field_Blue, Dimension::Uint16);
+    boost::uint16_t r0 = data.getField<boost::uint16_t>(index, offsetR);
+    boost::uint16_t g0 = data.getField<boost::uint16_t>(index, offsetG);
+    boost::uint16_t b0 = data.getField<boost::uint16_t>(index, offsetB);
+    BOOST_CHECK(r0 == rref);
+    BOOST_CHECK(g0 == gref);
+    BOOST_CHECK(b0 == bref);
+}
+
+
 static void check_p0_p1_p2(const PointBuffer& data, const Schema& schema)
 {
     check_pN(data, schema, 0, 637012.240000, 849028.310000, 431.660000);
@@ -439,5 +463,48 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
 
     return;
 }
+
+static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
+                              double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
+{
+    LiblasReader reader(TestConfig::g_data_path + file);
+
+    BOOST_CHECK(reader.getPointFormat() == pointFormat);
+    BOOST_CHECK(reader.getVersionMajor() == majorVersion);
+    BOOST_CHECK(reader.getVersionMinor() == minorVersion);
+
+    const Schema& schema = reader.getSchema();
+    SchemaLayout layout(schema);
+
+    PointBuffer data(layout, 1);
+    
+    libpc::SequentialIterator* iter = reader.createSequentialIterator();
+
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 1);
+
+        check_pN(data, schema, 0, xref, yref, zref, tref, rref, gref, bref);
+    }
+
+    delete iter;
+}
+
+BOOST_AUTO_TEST_CASE(test_different_formats)
+{
+    test_a_format("1.0_0.las", 1, 0, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
+    test_a_format("1.0_1.las", 1, 0, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
+    
+    test_a_format("1.1_0.las", 1, 1, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
+    test_a_format("1.1_1.las", 1, 1, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
+
+    test_a_format("1.2_0.las", 1, 2, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
+    test_a_format("1.2_1.las", 1, 2, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
+    test_a_format("1.2_2.las", 1, 2, 2, 470692.440000, 4602888.900000, 16.000000, 0, 255, 12, 234);
+    test_a_format("1.2_3.las", 1, 2, 3, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 255, 12, 234);
+
+    return;
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
