@@ -98,16 +98,16 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
 
     const PointIndexes indexes(schema, pointFormat);
 
+    boost::uint8_t buf[100]; // set to something larger than the largest point format requires
+
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        boost::uint8_t buf[34];
+        Utils::read_n(buf, stream, Support::getPointDataSize(pointFormat));
 
-        if (pointFormat == PointFormat0)
+        boost::uint8_t* p = buf;
+
+        // always read the base fields
         {
-            Utils::read_n(buf, stream, Support::getPointDataSize(pointFormat));
-
-            boost::uint8_t* p = buf;
-
             const boost::int32_t x = Utils::read_field<boost::int32_t>(p);
             const boost::int32_t y = Utils::read_field<boost::int32_t>(p);
             const boost::int32_t z = Utils::read_field<boost::int32_t>(p);
@@ -135,65 +135,23 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
             data.setField<boost::int8_t>(pointIndex, indexes.ScanAngleRank, scanAngleRank);
             data.setField<boost::uint8_t>(pointIndex, indexes.UserData, user);
             data.setField<boost::uint16_t>(pointIndex, indexes.PointSourceId, pointSourceId);
-
         }
-        else if (pointFormat == PointFormat1)
-        {
-            throw;
-            //Utils::read_n(buf, m_istream, LasHeader::ePointSize1);
-        }
-        else if (pointFormat == PointFormat2)
-        {
-            throw;
-            //Utils::read_n(buf, m_istream, LasHeader::ePointSize2);
-        }
-        else if (pointFormat == PointFormat3)
-        {
-            Utils::read_n(buf, stream, PointSize3);
 
-            boost::uint8_t* p = buf;
-
-            const boost::uint32_t x = Utils::read_field<boost::uint32_t>(p);
-            const boost::uint32_t y = Utils::read_field<boost::uint32_t>(p);
-            const boost::uint32_t z = Utils::read_field<boost::uint32_t>(p);
-            const boost::uint16_t intensity = Utils::read_field<boost::uint16_t>(p);
-            const boost::uint8_t flags = Utils::read_field<boost::uint8_t>(p);
-            const boost::uint8_t classification = Utils::read_field<boost::uint8_t>(p);
-            const boost::int8_t scanAngleRank = Utils::read_field<boost::int8_t>(p);
-            const boost::uint8_t user = Utils::read_field<boost::uint8_t>(p);
-            const boost::uint16_t pointSourceId = Utils::read_field<boost::uint16_t>(p);
+        if (Support::hasTime(pointFormat))
+        {
             const double time = Utils::read_field<double>(p);
+            data.setField<double>(pointIndex, indexes.Time, time);
+        }
+
+        if (Support::hasColor(pointFormat))
+        {
             const boost::uint16_t red = Utils::read_field<boost::uint16_t>(p);
             const boost::uint16_t green = Utils::read_field<boost::uint16_t>(p);
             const boost::uint16_t blue = Utils::read_field<boost::uint16_t>(p);
 
-            const boost::uint8_t returnNum = flags & 0x03;
-            const boost::uint8_t numReturns = (flags >> 3) & 0x03;
-            const boost::uint8_t scanDirFlag = (flags >> 6) & 0x01;
-            const boost::uint8_t flight = (flags >> 7) & 0x01;
-
-            data.setField<boost::uint32_t>(pointIndex, indexes.X, x);
-            data.setField<boost::uint32_t>(pointIndex, indexes.Y, y);
-            data.setField<boost::uint32_t>(pointIndex, indexes.Z, z);
-            data.setField<boost::uint16_t>(pointIndex, indexes.Intensity, intensity);
-            data.setField<boost::uint8_t>(pointIndex, indexes.ReturnNumber, returnNum);
-            data.setField<boost::uint8_t>(pointIndex, indexes.NumberOfReturns, numReturns);
-            data.setField<boost::uint8_t>(pointIndex, indexes.ScanDirectionFlag, scanDirFlag);
-            data.setField<boost::uint8_t>(pointIndex, indexes.EdgeOfFlightLine, flight);
-            data.setField<boost::uint8_t>(pointIndex, indexes.Classification, classification);
-            data.setField<boost::int8_t>(pointIndex, indexes.ScanAngleRank, scanAngleRank);
-            data.setField<boost::uint8_t>(pointIndex, indexes.UserData, user);
-            data.setField<boost::uint16_t>(pointIndex, indexes.PointSourceId, pointSourceId);
-            data.setField<double>(pointIndex, indexes.Time, time);
             data.setField<boost::uint16_t>(pointIndex, indexes.Red, red);
             data.setField<boost::uint16_t>(pointIndex, indexes.Green, green);
-            data.setField<boost::uint16_t>(pointIndex, indexes.Blue, blue);
-            
-        }
-        
-        else
-        {
-            throw;
+            data.setField<boost::uint16_t>(pointIndex, indexes.Blue, blue);       
         }
         
         data.setNumPoints(pointIndex+1);

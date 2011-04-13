@@ -41,7 +41,9 @@
 #include <libpc/drivers/las/Support.hpp>
 
 #include <liblas/liblas.hpp>
+#include <liblas/guid.hpp>
 
+#include <boost/uuid/uuid.hpp>
 
 
 namespace libpc { namespace drivers { namespace liblas {
@@ -59,6 +61,8 @@ public:
     void setPointFormat(::libpc::drivers::las::PointFormat);
     void setDate(boost::uint16_t dayOfYear, boost::uint16_t year);
     
+    void setProjectId(const boost::uuids::uuid&);
+
     // up to 32 chars (default is "libPC")
     void setSystemIdentifier(const std::string& systemId); 
     

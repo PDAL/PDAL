@@ -63,6 +63,9 @@ public:
 
     ::libpc::drivers::las::PointFormat getPointFormat() const;
     
+    boost::uint8_t getVersionMajor() const;
+    boost::uint8_t getVersionMinor() const;
+
     bool supportsIterator (StageIteratorType t) const
     {   
         if (t == StageIterator_Sequential ) return true;

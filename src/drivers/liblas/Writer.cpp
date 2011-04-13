@@ -34,6 +34,8 @@
 
 #include <libpc/drivers/liblas/Writer.hpp>
 
+#include <boost/uuid/uuid_io.hpp>
+
 #include <liblas/header.hpp>
 #include <liblas/writer.hpp>
 
@@ -125,6 +127,14 @@ void LiblasWriter::setDate(boost::uint16_t dayOfYear, boost::uint16_t year)
 {
     m_externalHeader->SetCreationDOY(dayOfYear);
     m_externalHeader->SetCreationYear(year);
+}
+
+
+void LiblasWriter::setProjectId(const boost::uuids::uuid& uuid)
+{
+    std::string s = to_string(uuid);
+    ::liblas::guid g(s);
+    m_externalHeader->SetProjectId(g);
 }
 
 

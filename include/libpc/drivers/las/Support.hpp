@@ -53,17 +53,6 @@ enum PointFormat
 };
 
 
-/// Number of bytes of point record storage in particular format.
-enum PointSize
-{
-    PointSize0 = 20, ///< Size of point record in data format \e 0
-    PointSize1 = 28, ///< Size of point record in data format \e 1
-    PointSize2 = 26, ///< Size of point record in data format \e 2
-    PointSize3 = 34  ///< Size of point record in data format \e 3
-    // other formats not supported
-};
-
-
 // this struct is used as a means to hold all the las field dimension indexes from a schema
 class PointIndexes
 {

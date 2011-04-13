@@ -97,6 +97,19 @@ const std::string& LiblasReader::getFileName() const
     return m_pointFormat;
 }
 
+
+boost::uint8_t LiblasReader::getVersionMajor() const
+{
+    return m_versionMajor;
+}
+
+
+boost::uint8_t LiblasReader::getVersionMinor() const
+{
+    return m_versionMinor;
+}
+
+
 void LiblasReader::processExternalHeader(::liblas::Reader& externalReader)
 {
     const ::liblas::Header& externalHeader = externalReader.GetHeader();
