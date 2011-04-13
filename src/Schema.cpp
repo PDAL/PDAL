@@ -153,6 +153,12 @@ const Dimension& Schema::getDimension(std::size_t index) const
 }
 
 
+Dimension& Schema::getDimension(std::size_t index)
+{
+    return m_dimensions[index];
+}
+
+
 const Schema::Dimensions& Schema::getDimensions() const
 {
     return m_dimensions;
