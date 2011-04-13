@@ -48,6 +48,7 @@
 #include <libpc/drivers/faux/Reader.hpp>
 #include <libpc/drivers/faux/Writer.hpp>
 
+#include <libpc/drivers/liblas/Writer.hpp>
 
 #include "support.hpp"
 
@@ -134,9 +135,14 @@ BOOST_AUTO_TEST_CASE(test_reader)
 
     libpc::drivers::oci::Reader reader(options);
     const boost::uint64_t numPoints = reader.getNumPoints();
-
-    libpc::drivers::faux::Writer writer(reader);
+    
+    BOOST_CHECK_EQUAL(numPoints, 14);
+    std::ostream* ofs = Utils::createFile("temp.las");
+    
+    libpc::drivers::liblas::LiblasWriter writer(reader, *ofs);
     writer.write(0);
+    
+    Utils::closeFile(ofs);
 
     
 }
