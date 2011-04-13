@@ -140,9 +140,9 @@ static void readFile(Controller& controller, const string& file)
         const boost::int32_t yraw = buffer.getField<boost::int32_t>(i, offsetY);
         const boost::int32_t zraw = buffer.getField<boost::int32_t>(i, offsetZ);
 
-        const double x = schema.getDimension(offsetX).getNumericValue<boost::int32_t>(xraw);
-        const double y = schema.getDimension(offsetY).getNumericValue<boost::int32_t>(yraw);
-        const double z = schema.getDimension(offsetZ).getNumericValue<boost::int32_t>(zraw);
+        const double x = schema.getDimension(offsetX).applyScaling(xraw);
+        const double y = schema.getDimension(offsetY).applyScaling(yraw);
+        const double z = schema.getDimension(offsetZ).applyScaling(zraw);
 
         points[cnt++] = (float)x;
         points[cnt++] = (float)y;
