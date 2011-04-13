@@ -67,7 +67,7 @@ IteratorBase::IteratorBase(const Reader& reader)
 
     if (m_querytype == QUERY_SDO_PC)
     {
-        m_statement->Define(&m_pc);
+        // m_statement->Define(&m_pc);
         // Unpack SDO_PC object to get at block 
         // table, select that stuff, and unpack the blocks
     } 
