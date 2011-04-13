@@ -65,9 +65,6 @@ protected:
     boost::scoped_ptr<Block> m_block;
     OCILobLocator* m_locator;
 
-    sdo_pc* m_pc;
-    sdo_pc_blk* m_block_table_type;
-    std::vector<boost::uint8_t>::size_type m_points;
 
 private:
     const Reader& m_reader;

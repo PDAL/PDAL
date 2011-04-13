@@ -66,7 +66,7 @@ public:
 
     // core properties of all stages
     const Schema& getSchema() const;
-    boost::uint64_t getNumPoints() const;
+    virtual boost::uint64_t getNumPoints() const;
     PointCountType getPointCountType() const;
     const Bounds<double>& getBounds() const;
     const SpatialReference& getSpatialReference() const;

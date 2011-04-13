@@ -48,12 +48,18 @@
 #include <libpc/drivers/faux/Reader.hpp>
 #include <libpc/drivers/faux/Writer.hpp>
 
+#include <libpc/drivers/liblas/Writer.hpp>
 
 #include "support.hpp"
 
 using namespace libpc;
 
 using namespace libpc::drivers::oci;
+
+bool ShouldRunTest()
+{
+    return TestConfig::g_oracle_connection.size() > 0;
+}
 
 Options GetOptions()
 {
@@ -87,6 +93,8 @@ BOOST_AUTO_TEST_SUITE(OCITest)
 
 BOOST_AUTO_TEST_CASE(initialize)
 {
+    if (!ShouldRunTest()) return;
+    
     Options options = GetOptions();
     
     Connection connection = Connect(options);
@@ -103,6 +111,8 @@ BOOST_AUTO_TEST_CASE(initialize)
 
 BOOST_AUTO_TEST_CASE(test_writer)
 {
+    if (!ShouldRunTest()) return;
+
     Options options = GetOptions();
     libpc::drivers::liblas::LiblasReader reader(TestConfig::g_data_path +  "1.2-with-color.las");
 
@@ -119,20 +129,28 @@ BOOST_AUTO_TEST_CASE(test_writer)
 
 BOOST_AUTO_TEST_CASE(test_reader)
 {
-    Options options = GetOptions();
+    if (!ShouldRunTest()) return;
 
+    Options options = GetOptions();
 
     libpc::drivers::oci::Reader reader(options);
     const boost::uint64_t numPoints = reader.getNumPoints();
-
-    libpc::drivers::faux::Writer writer(reader);
+    
+    BOOST_CHECK_EQUAL(numPoints, 14);
+    std::ostream* ofs = Utils::createFile("temp.las");
+    
+    libpc::drivers::liblas::LiblasWriter writer(reader, *ofs);
     writer.write(0);
+    
+    Utils::closeFile(ofs);
 
     
 }
 
 BOOST_AUTO_TEST_CASE(clean_up)
 {
+    if (!ShouldRunTest()) return;
+    
     libpc::drivers::oci::Options options = GetOptions();
     
     Connection connection = Connect(options);

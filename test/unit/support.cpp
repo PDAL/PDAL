@@ -89,7 +89,7 @@ bool compare_files(const std::string& file1, const std::string& file2)
 }
 
 std::string TestConfig::g_data_path = "../../test/data";
-std::string TestConfig::g_oracle_connection = "lidar/lidar@oracle.hobu.biz/orcl";
+std::string TestConfig::g_oracle_connection = "";
 TestConfig::TestConfig()
 {
     int argc = ::boost::unit_test::framework::master_test_suite().argc;
