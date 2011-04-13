@@ -328,7 +328,7 @@ if(WITH_LASZIP)
 endif()
 
 # LIBLAS support - optional, default=OFF
-set(WITH_LIBLAS FALSE CACHE BOOL "Choose if libLAS support should be built")
+set(WITH_LIBLAS TRUE CACHE BOOL "Choose if libLAS support should be built")
 set(WITH_STATIC_LIBLAS FALSE CACHE BOOL "Choose if libLAS should be statically linked")
 mark_as_advanced(WITH_STATIC_LIBLAS)
 
