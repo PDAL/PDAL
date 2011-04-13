@@ -129,7 +129,7 @@ public:
     boost::property_tree::ptree const& GetPTree() const {return m_tree; }
 };
 
-Connection Connect(Options const& options);
+LIBPC_DLL Connection Connect(Options const& options);
 
 std::string to_upper(std::string const& input);
 

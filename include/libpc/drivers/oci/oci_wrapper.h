@@ -31,6 +31,8 @@
 #ifndef _OCI_WRAPPER_H_INCLUDED
 #define _OCI_WRAPPER_H_INCLUDED
 
+#include <libpc/export.hpp>
+
 // GDAL supporting types
 
 #include "gdal.h"
@@ -291,7 +293,7 @@ class OWStatement;
 //  OWConnection
 //  ---------------------------------------------------------------------------
 
-class OWConnection
+class LIBPC_DLL OWConnection
 {
     friend class OWStatement;
 
@@ -377,7 +379,7 @@ public:
 /*                           OWStatement                                   */
 /***************************************************************************/
 
-class OWStatement
+class LIBPC_DLL OWStatement
 {
 
 public:
