@@ -36,6 +36,7 @@
 #define INCLUDED_DRIVER_OCI_COMMON_HPP
 
 #include <libpc/libpc.hpp>
+#include <libpc/exceptions.hpp>
 
 #include "oci_wrapper.h"
 #include "Endian.hpp"
@@ -59,6 +60,14 @@ typedef boost::shared_ptr<OWConnection> Connection ;
 typedef boost::shared_ptr<OWStatement> Statement ;
 
 
+// use this for code still under development
+class connection_failed : public libpc_error
+{
+public:
+    connection_failed(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
 
 
 #ifdef LIBPC_COMPILER_MSVC

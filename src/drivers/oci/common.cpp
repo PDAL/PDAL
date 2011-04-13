@@ -199,10 +199,12 @@ Connection Connect(Options const& options)
     Connection con = boost::make_shared<OWConnection>(username.c_str(),password.c_str(),instance.c_str());
     
     if (con->Succeeded())
+    {
         if (verbose)
-            std::cout << "Oracle connection succeeded" << std::endl;
+            std::cout << "Oracle connection succeeded" << std::endl;        
+    }
     else
-        throw libpc_error("Oracle connection failed");
+        throw connection_failed("Oracle connection failed");
         
     return con;
     
