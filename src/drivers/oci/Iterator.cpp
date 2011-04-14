@@ -182,11 +182,16 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
         // We still have a block of data from the last readBuffer call
         // that was partially read. 
         // std::cout << "reading because we have no points" << std::endl;
-        bDidRead = m_statement->Fetch();
+        bDidRead = m_statement->Fetch();        
         if (!bDidRead)
         {
             m_at_end = true;
             return 0;
+        }
+        
+        if (m_block->num_points > data.getCapacity())
+        {
+            throw buffer_too_small("The PointBuffer is too small to contain this block.");
         }
     
     } else 
@@ -201,7 +206,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     while (bDidRead)
     {
         boost::uint32_t numReadThisBlock = m_block->num_points;
-        if ((numReadThisBlock) > (data.getCapacity() - data.getNumPoints()))
+        if (numReadThisBlock > (data.getCapacity() - data.getNumPoints()))
         {
             // We're done.  We still have more data, but the 
             // user is going to have to request another buffer.

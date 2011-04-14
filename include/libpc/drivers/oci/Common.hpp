@@ -69,6 +69,15 @@ public:
     {}
 };
 
+// use this for code still under development
+class buffer_too_small : public libpc_error
+{
+public:
+    buffer_too_small(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
+
 
 #ifdef LIBPC_COMPILER_MSVC
 #define compare_no_case(a,b,n)  _strnicmp( (a), (b), (n) )
