@@ -53,7 +53,7 @@
 #include <libpc/Schema.hpp>
 #include <libpc/Vector.hpp>
 #include <libpc/Bounds.hpp>
-
+#include <libpc/drivers/las/Support.hpp>
 
 namespace libpc { namespace drivers { namespace las {
 
@@ -61,27 +61,6 @@ namespace libpc { namespace drivers { namespace las {
 class LIBPC_DLL LasHeader
 {
 public:
-    /// Versions of point record format.
-    enum PointFormatId
-    {
-        ePointFormat0 = 0,  ///< Point Data Format \e 0
-        ePointFormat1 = 1,  ///< Point Data Format \e 1    
-        ePointFormat2 = 2,  ///< Point Data Format \e 2
-        ePointFormat3 = 3,  ///< Point Data Format \e 3
-        ePointFormat4 = 4,  ///< Point Data Format \e 3
-        ePointFormat5 = 5,  ///< Point Data Format \e 3
-        ePointFormatUnknown = -99 ///< Point Data Format is unknown
-    };
-
-    /// Number of bytes of point record storage in particular format.
-    enum PointSize
-    {
-        ePointSize0 = 20, ///< Size of point record in data format \e 0
-        ePointSize1 = 28, ///< Size of point record in data format \e 1
-        ePointSize2 = 26, ///< Size of point record in data format \e 2
-        ePointSize3 = 34  ///< Size of point record in data format \e 3
-    };
-
     /// Version numbers of the ASPRS LAS Specification.
     /// Numerical representation of versions is calculated according to 
     /// following formula: <em>major * 100000 + minor</em>
@@ -247,10 +226,10 @@ public:
     void SetRecordsCount(boost::uint32_t v);
     
     /// Get identifier of point data (record) format.
-    PointFormatId getDataFormatId() const;
+    libpc::drivers::las::PointFormat getPointFormat() const;
 
     /// Set identifier of point data (record) format.
-    void setDataFormatId(PointFormatId v);
+    void setPointFormat(libpc::drivers::las::PointFormat v);
 
     /// The length in bytes of each point.  All points in the file are 
     /// considered to be fixed in size, and the PointFormatName is used 
@@ -359,9 +338,6 @@ public:
     //void to_xml(std::ostream& os) const;
     //void to_json(std::ostream& os) const;
 
-    // used by LasHeaderReader
-    static void update_required_dimensions(PointFormatId data_format_id, Schema&);
-    
 private:
     typedef Vector<double> PointScales;
     typedef Vector<double> PointOffsets;
@@ -383,9 +359,6 @@ private:
     // TODO (low-priority): replace static-size char arrays
     // with std::string and return const-reference to string object.
     
-    static void add_record0_dimensions(Schema& schema);
-    static void add_time(Schema& schema);
-    static void add_color(Schema& schema);
     
     //
     // Private data members
@@ -409,7 +382,7 @@ private:
     PointOffsets m_offsets;
     bool m_isCompressed;
 
-    PointFormatId m_data_format_id;
+    PointFormat m_pointFormat;
 
     Bounds<double> m_bounds;
 

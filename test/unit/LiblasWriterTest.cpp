@@ -34,6 +34,8 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <libpc/drivers/faux/Reader.hpp>
 #include <libpc/drivers/liblas/Writer.hpp>
@@ -65,7 +67,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
 
         writer.setCompressed(false);
         writer.setDate(0, 0);
-        writer.setPointFormat(3);
+        writer.setPointFormat(::libpc::drivers::las::PointFormat3);
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
 
@@ -102,7 +104,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
 
         writer.setCompressed(true);
         writer.setDate(0, 0);
-        writer.setPointFormat(3);
+        writer.setPointFormat(::libpc::drivers::las::PointFormat3);
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
 
@@ -122,4 +124,62 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     return;
 }
 
+
+static void test_a_format(const std::string& refFile, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat)
+{
+    // remove file from earlier run, if needed
+    Utils::deleteFile("temp.las");
+
+    LiblasReader reader(TestConfig::g_data_path + "1.2_3.las");
+    
+    std::ostream* ofs = Utils::createFile("temp.las");
+
+    {
+        const boost::uint64_t numPoints = reader.getNumPoints();
+
+        // need to scope the writer, so that's it dtor can use the stream
+        LiblasWriter writer(reader, *ofs);
+        BOOST_CHECK(writer.getName() == "Liblas Writer");
+
+        writer.setCompressed(false);
+        writer.setDate(78, 2008);
+        writer.setPointFormat((::libpc::drivers::las::PointFormat)pointFormat);
+        writer.setFormatVersion(majorVersion, minorVersion);
+        writer.setSystemIdentifier("libLAS");
+        writer.setGeneratingSoftware("libLAS 1.2");
+        
+        boost::uuids::uuid u = boost::lexical_cast<boost::uuids::uuid>("8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
+        writer.setProjectId(u);
+
+        writer.write(numPoints);
+    }
+
+    Utils::closeFile(ofs);
+
+    bool filesSame = compare_files("temp.las", TestConfig::g_data_path + refFile);
+    //////////////BOOST_CHECK(filesSame);
+
+    //////////////if (filesSame)
+    {
+        Utils::deleteFile("temp.las");
+    }
+
+    return;
+}
+
+BOOST_AUTO_TEST_CASE(test_different_formats)
+{
+    test_a_format("1.0_0.las", 1, 0, 0);
+    test_a_format("1.0_1.las", 1, 0, 1);
+    
+    test_a_format("1.1_0.las", 1, 1, 0);
+    test_a_format("1.1_1.las", 1, 1, 1);
+
+    test_a_format("1.2_0.las", 1, 2, 0);
+    test_a_format("1.2_1.las", 1, 2, 1);
+    test_a_format("1.2_2.las", 1, 2, 2);
+    test_a_format("1.2_3.las", 1, 2, 3);
+
+    return;
+}
 BOOST_AUTO_TEST_SUITE_END()

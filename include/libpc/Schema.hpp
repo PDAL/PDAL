@@ -74,6 +74,7 @@ public:
     void addDimensions(const std::vector<Dimension>& dims);
 
     const Dimension& getDimension(std::size_t index) const;
+    Dimension& getDimension(std::size_t index);
     const Dimensions& getDimensions() const;
 
     // returns the index of the field

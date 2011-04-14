@@ -176,8 +176,9 @@ void LasHeaderReader::read(Schema& schema)
     n1 &= 0x3f;
     if (n1 <= 5)
     {
-        m_header.setDataFormatId((LasHeader::PointFormatId)n1);
-        m_header.update_required_dimensions((LasHeader::PointFormatId)n1, schema);
+        const libpc::drivers::las::PointFormat format = (libpc::drivers::las::PointFormat)n1;
+        m_header.setPointFormat(format);
+        libpc::drivers::las::Support::registerFields(schema, format);
     } 
     else
     {

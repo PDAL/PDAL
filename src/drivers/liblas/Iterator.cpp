@@ -40,6 +40,7 @@
 #include <libpc/PointBuffer.hpp>
 #include <libpc/Utils.hpp>
 #include <libpc/drivers/liblas/Reader.hpp>
+#include <libpc/drivers/las/Support.hpp>
 
 namespace libpc { namespace drivers { namespace liblas {
 
@@ -93,32 +94,8 @@ boost::uint32_t LiblasIteratorBase::readBuffer(PointBuffer& data)
 
     const Schema& schema = data.getSchema();
 
-    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
-    
-    const int indexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity, Dimension::Uint16);
-    const int indexReturnNumber = schema.getDimensionIndex(Dimension::Field_ReturnNumber, Dimension::Uint8);
-    const int indexNumberOfReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns, Dimension::Uint8);
-    const int indexScanDirectionFlag = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag, Dimension::Uint8);
-    const int indexEdgeOfFlightLine = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine, Dimension::Uint8);
-    const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification, Dimension::Uint8);
-    const int indexScanAngleRank = schema.getDimensionIndex(Dimension::Field_ScanAngleRank, Dimension::Int8);
-    const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData, Dimension::Uint8);
-    const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId, Dimension::Uint16);
-    
-    const int indexTime = (getReader().hasTimeData() ? schema.getDimensionIndex(Dimension::Field_Time, Dimension::Double) : 0);
-
-    const int indexRed = (getReader().hasColorData() ? schema.getDimensionIndex(Dimension::Field_Red, Dimension::Uint16) : 0);
-    const int indexGreen = (getReader().hasColorData() ? schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint16) : 0);
-    const int indexBlue = (getReader().hasColorData() ? schema.getDimensionIndex(Dimension::Field_Blue, Dimension::Uint16) : 0);
-
-    //const int indexWavePacketDescriptorIndex = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WavePacketDescriptorIndex) : 0);
-    //const int indexWaveformDataOffset = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformDataOffset) : 0);
-    //const int indexReturnPointWaveformLocation = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_ReturnPointWaveformLocation) : 0);
-    //const int indexWaveformXt = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformXt) : 0);
-    //const int indexWaveformYt = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformYt) : 0);
-    //const t indexWaveformZt = (m_hasWaveData ? schema.getDimensionIndex(Dimension::Field_WaveformZt) : 0);
+    ::libpc::drivers::las::PointFormat pointFormat = m_reader.getPointFormat();
+    ::libpc::drivers::las::PointIndexes indexes(schema, pointFormat);
 
     for (i=0; i<numPoints; i++)
     {
@@ -144,41 +121,41 @@ boost::uint32_t LiblasIteratorBase::readBuffer(PointBuffer& data)
         const boost::uint8_t userData = pt.GetUserData();
         const boost::uint16_t pointSourceId = pt.GetPointSourceID();
         
-        data.setField(i, indexX, x);
-        data.setField(i, indexY, y);
-        data.setField(i, indexZ, z);
+        data.setField(i, indexes.X, x);
+        data.setField(i, indexes.Y, y);
+        data.setField(i, indexes.Z, z);
 
-        data.setField(i, indexIntensity, intensity);
-        data.setField(i, indexReturnNumber, returnNumber);
-        data.setField(i, indexNumberOfReturns, numberOfReturns);
-        data.setField(i, indexScanDirectionFlag, scanDirFlag);
-        data.setField(i, indexEdgeOfFlightLine, edgeOfFlightLine);
-        data.setField(i, indexClassification, classification);
-        data.setField(i, indexScanAngleRank, scanAngleRank);
-        data.setField(i, indexUserData, userData);
-        data.setField(i, indexPointSourceId, pointSourceId);
+        data.setField(i, indexes.Intensity, intensity);
+        data.setField(i, indexes.ReturnNumber, returnNumber);
+        data.setField(i, indexes.NumberOfReturns, numberOfReturns);
+        data.setField(i, indexes.ScanDirectionFlag, scanDirFlag);
+        data.setField(i, indexes.EdgeOfFlightLine, edgeOfFlightLine);
+        data.setField(i, indexes.Classification, classification);
+        data.setField(i, indexes.ScanAngleRank, scanAngleRank);
+        data.setField(i, indexes.UserData, userData);
+        data.setField(i, indexes.PointSourceId, pointSourceId);
 
-        if (getReader().hasTimeData())
+        if (libpc::drivers::las::Support::hasTime(pointFormat))
         {
             const double time = pt.GetTime();
             
-            data.setField(i, indexTime, time);
+            data.setField(i, indexes.Time, time);
         }
 
-        if (getReader().hasColorData())
+        if (libpc::drivers::las::Support::hasColor(pointFormat))
         {
             const ::liblas::Color color = pt.GetColor();
             const boost::uint16_t red = color.GetRed();
             const boost::uint16_t green = color.GetGreen();
             const boost::uint16_t blue = color.GetBlue();
 
-            data.setField(i, indexRed, red);
-            data.setField(i, indexGreen, green);
-            data.setField(i, indexBlue, blue);
+            data.setField(i, indexes.Red, red);
+            data.setField(i, indexes.Green, green);
+            data.setField(i, indexes.Blue, blue);
         }
         
         data.setNumPoints(i+1);
-        if (getReader().hasWaveData())
+        if (libpc::drivers::las::Support::hasWave(pointFormat))
         {
             throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
         }

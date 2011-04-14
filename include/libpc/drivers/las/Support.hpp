@@ -32,75 +32,67 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LIBLAS_LIBLASREADER_HPP
-#define INCLUDED_DRIVERS_LIBLAS_LIBLASREADER_HPP
+#ifndef INCLUDED_DRIVERS_LAS_SUPPORT_HPP
+#define INCLUDED_DRIVERS_LAS_SUPPORT_HPP
 
 #include <libpc/libpc.hpp>
 
-#include <libpc/Stage.hpp>
+#include <libpc/Schema.hpp>
 
-#include <libpc/drivers/las/Support.hpp>
+namespace libpc { namespace drivers { namespace las {
 
-// fwd decls
-namespace liblas
+enum PointFormat
 {
-    class Reader;
-}
-
-namespace libpc { namespace drivers { namespace liblas {
-
-class LiblasHeader;
-
-class LIBPC_DLL LiblasReader : public Stage
-{
-public:
-    LiblasReader(const std::string& filename);
-    ~LiblasReader();
-
-    const std::string& getName() const;
-
-    const std::string& getFileName() const;
-
-    ::libpc::drivers::las::PointFormat getPointFormat() const;
-    
-    boost::uint8_t getVersionMajor() const;
-    boost::uint8_t getVersionMinor() const;
-
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random ) return true;
-        
-        return false;
-    }
-
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const;
-
-private:
-    void processExternalHeader(::liblas::Reader& externalReader);
-    void registerFields(::liblas::Reader& externalReader);
-
-    std::string m_filename;
-
-    // LAS header properties of interest to us
-    boost::uint8_t m_versionMajor;
-    boost::uint8_t m_versionMinor;
-    double m_scaleX;
-    double m_scaleY;
-    double m_scaleZ;
-    double m_offsetX;
-    double m_offsetY;
-    double m_offsetZ;
-    bool m_isCompressed;
-    
-    ::libpc::drivers::las::PointFormat m_pointFormat;
-
-    LiblasReader& operator=(const LiblasReader&); // not implemented
-    LiblasReader(const LiblasReader&); // not implemented
+    PointFormat0 = 0,         // base
+    PointFormat1 = 1,         // base + time
+    PointFormat2 = 2,         // base + color
+    PointFormat3 = 3,         // base + time + color
+    PointFormat4 = 4,         // base + time + wave
+    PointFormat5 = 5,         // base + time + color + wave  (NOT SUPPORTED)
+    PointFormatUnknown = 99
 };
 
 
-} } } // namespaces
+// this struct is used as a means to hold all the las field dimension indexes from a schema
+class PointIndexes
+{
+public:
+    PointIndexes(const Schema& schema, PointFormat format);
+    int X;
+    int Y;
+    int Z;
+    
+    int Intensity;
+    int ReturnNumber;
+    int NumberOfReturns;
+    int ScanDirectionFlag;
+    int EdgeOfFlightLine;
+    int Classification;
+    int ScanAngleRank;
+    int UserData;
+    int PointSourceId;
+    
+    int Time;
+    
+    int Red;
+    int Green;
+    int Blue;
+};
+
+
+class LIBPC_DLL Support
+{
+public:
+    static void registerFields(Schema& schema, PointFormat pointFormat);
+    static void setScaling(Schema& schema, double scaleX, double scaleY, double scaleZ, double offsetX, double offsetY, double offsetZ);
+
+    static bool hasTime(PointFormat);
+    static bool hasColor(PointFormat);
+    static bool hasWave(PointFormat);
+    static boost::uint16_t getPointDataSize(PointFormat pointFormat);
+};
+
+
+} } } // namespace
 
 #endif
