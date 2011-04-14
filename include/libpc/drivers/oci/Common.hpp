@@ -115,12 +115,15 @@ public:
     boost::int32_t           num_unsorted_points;
     boost::int32_t           pt_sort_dim;
     boost::scoped_ptr<std::vector<uint8_t> > chunk;
+    OCILobLocator           *locator;
     Connection              m_connection;
 
 
 private:
     boost::uint32_t m_capacity;
 };
+
+typedef boost::shared_ptr<Block> BlockPtr;
 
 class LIBPC_DLL Options
 {

@@ -38,6 +38,7 @@
 #include <libpc/exceptions.hpp>
 
 #include <iostream>
+#include <map>
 
 namespace libpc { namespace drivers { namespace oci {
 
@@ -45,14 +46,24 @@ namespace libpc { namespace drivers { namespace oci {
 Reader::Reader(Options& options)
     : libpc::Stage()
     , m_options(options)
+    , m_querytype(QUERY_UNKNOWN)
 {
 
     Debug();
     
     m_connection = Connect(m_options);
 
+
     if (getQuery().size() == 0 )
         throw libpc_error("'select_sql' statement is empty. No data can be read from libpc::drivers::oci::Reader");
+
+    m_statement = Statement(m_connection->CreateStatement(getQuery().c_str()));
+    
+    m_statement->Execute(0);
+
+    m_querytype = describeQueryType();
+    
+    m_block = defineBlock();
     
     registerFields();
     
@@ -141,6 +152,199 @@ Reader::~Reader()
     // m_connection->DestroyType(&m_pc);
     return;
 }
+
+
+QueryType Reader::describeQueryType() const
+{
+
+
+    int   iCol = 0;
+    char  szFieldName[OWNAME];
+    int   hType = 0;
+    int   nSize = 0;
+    int   nPrecision = 0;
+    signed short nScale = 0;
+    char szTypeName[OWNAME];
+    
+    bool isPCObject = false;
+    bool isBlockTableQuery = false;
+    bool isBlockTableType = false;
+    
+    
+    const int columns_size = 10;
+    std::string block_columns[columns_size];
+    block_columns[0] = "OBJ_ID";
+    block_columns[1] = "BLK_ID";
+    block_columns[2] = "BLK_EXTENT";
+    block_columns[3] = "BLK_DOMAIN";
+    block_columns[4] = "PCBLK_MIN_RES";
+    block_columns[5] = "PCBLK_MAX_RES";
+    block_columns[6] = "NUM_POINTS";
+    block_columns[7] = "NUM_UNSORTED_POINTS";
+    block_columns[8] = "PT_SORT_DIM";
+    block_columns[9] = "POINTS";
+    
+    std::map<std::string, bool> columns_map;
+
+    for(int i = 0; i < columns_size; ++i)
+    {
+        columns_map.insert(std::pair<std::string, bool>(block_columns[i], false));
+    }
+    
+    while( m_statement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName) )
+    {
+        std::string name = to_upper(std::string(szFieldName));
+        
+        std::map<std::string, bool>::iterator it = columns_map.find(name);
+        if (it != columns_map.end())
+        {
+            // std::cout << "setting columns to true for " << it->first << std::endl;
+            (*it).second = true;
+            
+        }
+
+        if ( hType == SQLT_NTY)
+        {
+                
+                if (compare_no_case(szTypeName, "SDO_PC", 6) == 0)
+                    isPCObject = true;
+                if (compare_no_case(szTypeName, "SDO_PC_BLK_TYPE", 6) == 0)
+                    isBlockTableType = true;
+                std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
+        }
+
+        iCol++;
+    }
+
+    // Assume we're a block table until we say we aren't.  Loop through all of 
+    // the required columns that make up a block table and if we find one that 
+    // wasn't marked in the loop above, we're not a block table.
+    isBlockTableQuery = true;
+    std::map<std::string, bool>::iterator it = columns_map.begin();
+    while (it != columns_map.end())
+    {   
+        if (it->second == false) 
+        {
+            isBlockTableQuery = false; 
+            break;
+        }
+        ++it;
+    }
+    
+    // If we have all of the block table columns + some extras, we aren't a block table for now
+    if (iCol != 10 && isBlockTableQuery) {
+        isBlockTableQuery = false;
+    }
+    
+    if (!isBlockTableQuery && !isPCObject) 
+    {
+        std::ostringstream oss;
+        oss << "Select statement '" << getQuery() << "' does not fetch an SDO_PC object" 
+              " or one that is equivalent to SDO_PC_BLK_TYPE";
+        throw libpc_error(oss.str());
+    }
+
+    if (isBlockTableQuery) 
+        return QUERY_BLK_TABLE;
+    
+    if (isPCObject)
+        return QUERY_SDO_PC;
+    
+    if (isBlockTableType)
+        return QUERY_SDO_PC_BLK;
+    
+    return QUERY_UNKNOWN;
+}
+
+BlockPtr Reader::defineBlock() const
+{
+
+    int   iCol = 0;
+    char  szFieldName[OWNAME];
+    int   hType = 0;
+    int   nSize = 0;
+    int   nPrecision = 0;
+    signed short nScale = 0;
+    char szTypeName[OWNAME];
+    
+    BlockPtr block = BlockPtr(new Block(m_connection));
+
+
+
+
+    // block_columns[0] = "OBJ_ID";
+    // block_columns[1] = "BLK_ID";
+    // block_columns[2] = "BLK_EXTENT";
+    // block_columns[3] = "BLK_DOMAIN";
+    // block_columns[4] = "PCBLK_MIN_RES";
+    // block_columns[5] = "PCBLK_MAX_RES";
+    // block_columns[6] = "NUM_POINTS";
+    // block_columns[7] = "NUM_UNSORTED_POINTS";
+    // block_columns[8] = "PT_SORT_DIM";
+    // block_columns[9] = "POINTS";
+    
+
+    
+    while( m_statement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName) )
+    {
+        std::string name = to_upper(std::string(szFieldName));
+
+        if (compare_no_case(szFieldName, "OBJ_ID", 6) == 0)
+        {
+            m_statement->Define(&(block->obj_id));
+        }
+
+        if (compare_no_case(szFieldName, "BLK_ID", 6) == 0)
+        {
+            m_statement->Define(&(block->blk_id));
+        }
+
+        if (compare_no_case(szFieldName, "BLK_EXTENT", 10) == 0)
+        {
+            m_statement->Define(&(block->blk_extent));
+        }
+
+        if (compare_no_case(szFieldName, "BLK_DOMAIN", 10) == 0)
+        {
+            m_statement->Define(&(block->blk_domain));
+        }
+        
+        if (compare_no_case(szFieldName, "PCBLK_MIN_RES", 13) == 0)
+        {
+            m_statement->Define(&(block->pcblk_min_res));
+        }
+
+        if (compare_no_case(szFieldName, "PCBLK_MAX_RES", 13) == 0)
+        {
+            m_statement->Define(&(block->pcblk_max_res));
+        }
+
+        if (compare_no_case(szFieldName, "NUM_POINTS", 10) == 0)
+        {
+            m_statement->Define(&(block->num_points));
+        }
+
+        if (compare_no_case(szFieldName, "NUM_UNSORTED_POINTS", 19) == 0)
+        {
+            m_statement->Define(&(block->num_unsorted_points));
+        }
+
+        if (compare_no_case(szFieldName, "PT_SORT_DIM", 11) == 0)
+        {
+            m_statement->Define(&(block->pt_sort_dim));
+        }
+
+        if (compare_no_case(szFieldName, "POINTS", 6) == 0)
+        {
+            std::cout << "Defined POINTS as BLOB" << std::endl;
+            m_statement->Define( &(block->locator) ); 
+        }
+        iCol++;
+    }
+    
+    return block;
+}
+
 
 libpc::SequentialIterator* Reader::createSequentialIterator() const
 {

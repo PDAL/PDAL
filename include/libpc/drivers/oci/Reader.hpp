@@ -67,8 +67,11 @@ public:
     boost::uint64_t getNumPoints() { return 0; }
     
     libpc::SequentialIterator* createSequentialIterator() const;
+    
     Connection getConnection () const { return m_connection;}
+    Statement getStatement () const { return m_statement;}
     Options& getOptions() const { return m_options; }
+    BlockPtr getBlock() const { return m_block; }
     std::string getQuery() const;
     bool isVerbose() const;
 
@@ -81,10 +84,14 @@ private:
     void Debug();
     void registerFields();
     void fetchPCFields();
-    // void doBlockTableDefine();
+    QueryType describeQueryType() const;    
+    BlockPtr defineBlock() const;
 
     Options& m_options;
     Connection m_connection;
+    Statement m_statement;
+    QueryType m_querytype;
+    BlockPtr m_block;
 
 
 };
