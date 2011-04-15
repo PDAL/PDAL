@@ -117,6 +117,7 @@ set (LIBPC_DRIVERS_LAS_HPP
   ${LIBPC_HEADERS_DIR}/drivers/las/Header.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Reader.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/las/SummaryData.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Support.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Writer.hpp
 )
@@ -127,6 +128,7 @@ set (LIBPC_DRIVERS_LAS_CPP
   ./drivers/las/LasHeaderReader.cpp
   ./drivers/las/LasHeaderWriter.cpp
   ./drivers/las/Reader.cpp
+  ./drivers/las/SummaryData.cpp
   ./drivers/las/Support.cpp
   ./drivers/las/Writer.cpp
 )

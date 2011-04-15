@@ -39,6 +39,7 @@
 
 #include <libpc/Writer.hpp>
 #include <libpc/drivers/las/Support.hpp>
+#include <libpc/drivers/las/SummaryData.hpp>
 
 #include <liblas/liblas.hpp>
 #include <liblas/guid.hpp>
@@ -88,6 +89,8 @@ private:
     std::ostream& m_ostream;
     ::liblas::Writer* m_externalWriter;
     ::liblas::HeaderPtr m_externalHeader;
+
+    ::libpc::drivers::las::SummaryData m_summaryData;
 
     LiblasWriter& operator=(const LiblasWriter&); // not implemented
     LiblasWriter(const LiblasWriter&); // not implemented

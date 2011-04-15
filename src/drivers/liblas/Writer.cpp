@@ -153,6 +153,9 @@ void LiblasWriter::setGeneratingSoftware(const std::string& softwareId)
 void LiblasWriter::writeBegin()
 {
     m_externalWriter = new ::liblas::Writer(m_ostream, *m_externalHeader);
+
+    m_summaryData.reset();
+
     return;
 }
 
@@ -161,6 +164,12 @@ void LiblasWriter::writeEnd()
 {
     delete m_externalWriter;
     m_externalWriter = NULL;
+
+    //std::cout << m_summaryData;
+
+    m_ostream.seekp(0);
+    ::libpc::drivers::las::Support::rewriteHeader(m_ostream, m_summaryData);
+
     return;
 }
 
@@ -226,6 +235,12 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointBuffer& PointBuffer)
 
         bool ok = m_externalWriter->WritePoint(pt);
         assert(ok); // BUG
+
+        const double xValue = schema.getDimension(indexes.X).applyScaling<boost::int32_t>(x);
+        const double yValue = schema.getDimension(indexes.Y).applyScaling<boost::int32_t>(y);
+        const double zValue = schema.getDimension(indexes.Z).applyScaling<boost::int32_t>(z);
+
+        m_summaryData.addPoint(xValue, yValue, zValue, returnNumber);
     }
 
     return numPoints;

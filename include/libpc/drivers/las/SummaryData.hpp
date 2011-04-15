@@ -32,76 +32,56 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_SUPPORT_HPP
-#define INCLUDED_DRIVERS_LAS_SUPPORT_HPP
+#ifndef INCLUDED_DRIVERS_LAS_SUMMARYDATA_HPP
+#define INCLUDED_DRIVERS_LAS_SUMMARYDATA_HPP
 
 #include <libpc/libpc.hpp>
 
-#include <libpc/Schema.hpp>
+namespace libpc {
+namespace drivers {
+namespace las {
 
-#include <iostream>
-
-namespace libpc { namespace drivers { namespace las {
-    
-class SummaryData;
-
-
-enum PointFormat
-{
-    PointFormat0 = 0,         // base
-    PointFormat1 = 1,         // base + time
-    PointFormat2 = 2,         // base + color
-    PointFormat3 = 3,         // base + time + color
-    PointFormat4 = 4,         // base + time + wave
-    PointFormat5 = 5,         // base + time + color + wave  (NOT SUPPORTED)
-    PointFormatUnknown = 99
-};
-
-
-// this struct is used as a means to hold all the las field dimension indexes from a schema
-class PointIndexes
+class LIBPC_DLL SummaryData
 {
 public:
-    PointIndexes(const Schema& schema, PointFormat format);
-    int X;
-    int Y;
-    int Z;
-    
-    int Intensity;
-    int ReturnNumber;
-    int NumberOfReturns;
-    int ScanDirectionFlag;
-    int EdgeOfFlightLine;
-    int Classification;
-    int ScanAngleRank;
-    int UserData;
-    int PointSourceId;
-    
-    int Time;
-    
-    int Red;
-    int Green;
-    int Blue;
+    SummaryData();
+    ~SummaryData();
+
+    void reset();
+
+    // note that returnNumber is in the range [1..5]
+    void addPoint(double x, double y, double z, int returnNumber);
+
+    boost::uint32_t getTotalNumPoints() const;
+
+    void getBounds(double& minX, double& minY, double& minZ, double& maxX, double& maxY, double& maxZ) const;
+
+    // note that returnNumber is in the range [1..5]
+    boost::uint32_t getReturnCount(int returnNumber) const;
+
+    void dump(std::ostream&) const;
+
+    static const int s_maxNumReturns = 5;
+
+private:
+    bool m_isFirst;
+    double m_minX;
+    double m_minY;
+    double m_minZ;
+    double m_maxX;
+    double m_maxY;
+    double m_maxZ;
+    boost::uint32_t m_returnCounts[s_maxNumReturns];
+    boost::uint32_t m_totalNumPoints;
+
+    SummaryData& operator=(const SummaryData&); // not implemented
+    SummaryData(const SummaryData&); // not implemented
 };
 
 
-class LIBPC_DLL Support
-{
-public:
-    static void registerFields(Schema& schema, PointFormat pointFormat);
-    static void setScaling(Schema& schema, double scaleX, double scaleY, double scaleZ, double offsetX, double offsetY, double offsetZ);
-
-    static bool hasTime(PointFormat);
-    static bool hasColor(PointFormat);
-    static bool hasWave(PointFormat);
-    static boost::uint16_t getPointDataSize(PointFormat pointFormat);
-
-    // assumes the stream position is pointing to the first byte of the header
-    // this function updates the header's min/max xyz fields, and the point return counts fields
-    static void rewriteHeader(std::ostream& stream, const SummaryData& data);
-};
+LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const SummaryData&);
 
 
-} } } // namespace
+} } } // namespaces
 
 #endif

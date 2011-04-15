@@ -156,10 +156,10 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
 
     Utils::closeFile(ofs);
 
-    bool filesSame = compare_files("temp.las", TestConfig::g_data_path + refFile);
-    //////////////BOOST_CHECK(filesSame);
+    //bool filesSame = compare_files("temp.las", TestConfig::g_data_path + refFile);
+    //BOOST_CHECK(filesSame);
 
-    //////////////if (filesSame)
+    //if (filesSame)
     {
         Utils::deleteFile("temp.las");
     }
