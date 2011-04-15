@@ -63,7 +63,19 @@ Reader::Reader(Options& options)
 
     m_querytype = describeQueryType();
     
-    m_block = defineBlock();
+    if (m_querytype == QUERY_SDO_PC_BLK)
+        m_block = defineBlock();
+    else if (m_querytype == QUERY_SDO_PC)
+    {
+        m_cloud = defineCloud();
+        throw libpc_error("not yet implemented");
+    }
+    
+    else 
+        throw libpc_error("SQL statement does not define a SDO_PC or CLIP_CP block");
+
+
+
     
     registerFields();
     
@@ -345,6 +357,22 @@ BlockPtr Reader::defineBlock() const
     return block;
 }
 
+CloudPtr Reader::defineCloud() 
+{
+
+    
+    CloudPtr cloud = CloudPtr(new Cloud(m_connection));
+
+    m_connection->CreateType(&m_pc);
+
+    m_statement->Define(&(m_pc));
+    
+    bool bDidRead = m_statement->Fetch(); 
+    
+    std::cout << "block_table_name: " << m_statement->GetString(m_pc->blk_table);
+    
+    return cloud;
+}
 
 libpc::SequentialIterator* Reader::createSequentialIterator() const
 {
