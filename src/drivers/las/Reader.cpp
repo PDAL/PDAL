@@ -93,6 +93,12 @@ boost::uint8_t LasReader::getVersionMinor() const
 }
 
 
+boost::uint64_t LasReader::getPointDataOffset() const
+{
+    return m_lasHeader.GetDataOffset();
+}
+
+
 libpc::SequentialIterator* LasReader::createSequentialIterator() const
 {
     return new SequentialIterator(*this);
@@ -136,8 +142,8 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
             const boost::uint8_t user = Utils::read_field<boost::uint8_t>(p);
             const boost::uint16_t pointSourceId = Utils::read_field<boost::uint16_t>(p);
 
-            const boost::uint8_t returnNum = flags & 0x03;
-            const boost::uint8_t numReturns = (flags >> 3) & 0x03;
+            const boost::uint8_t returnNum = flags & 0x07;
+            const boost::uint8_t numReturns = (flags >> 3) & 0x07;
             const boost::uint8_t scanDirFlag = (flags >> 6) & 0x01;
             const boost::uint8_t flight = (flags >> 7) & 0x01;
 

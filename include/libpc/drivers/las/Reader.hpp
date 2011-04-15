@@ -73,13 +73,14 @@ public:
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream) const;
 
-    const LasHeader& getLasHeader() const { return m_lasHeader; }
-
     PointFormat getPointFormat() const;
     boost::uint8_t getVersionMajor() const;
     boost::uint8_t getVersionMinor() const;
 
+    boost::uint64_t getPointDataOffset() const;
+
 protected:
+    const LasHeader& getLasHeader() const { return m_lasHeader; }
     LasHeader& getLasHeaderRef() { return m_lasHeader; }
 
 private:

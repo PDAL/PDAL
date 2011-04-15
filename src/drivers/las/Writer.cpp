@@ -58,7 +58,7 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
 
 const std::string& LasWriter::getName() const
 {
-    static std::string name("Liblas Writer");
+    static std::string name("Las Writer");
     return name;
 }
 
@@ -183,7 +183,7 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
         const boost::uint8_t scanDirectionFlag = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.ScanDirectionFlag);
         const boost::uint8_t edgeOfFlightLinet = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.EdgeOfFlightLine);
 
-        const boost::uint8_t bits = returnNumber & (numberOfReturns<<3) & (scanDirectionFlag << 6) && (edgeOfFlightLinet << 7);
+        const boost::uint8_t bits = returnNumber | (numberOfReturns<<3) | (scanDirectionFlag << 6) | (edgeOfFlightLinet << 7);
 
         const boost::uint8_t classification = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.Classification);
         const boost::int8_t scanAngleRank = PointBuffer.getField<boost::int8_t>(pointIndex, indexes.ScanAngleRank);

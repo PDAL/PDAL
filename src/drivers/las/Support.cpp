@@ -305,7 +305,7 @@ void Support::rewriteHeader(std::ostream& stream, const SummaryData& data)
 
     Utils::write_field<boost::uint32_t>(p, data.getTotalNumPoints());
 
-    for (int i=0; i<SummaryData::s_maxNumReturns; i++)
+    for (int i=1; i<=SummaryData::s_maxNumReturns; i++)
     {
         Utils::write_field<boost::uint32_t>(p, data.getReturnCount(i));
     }

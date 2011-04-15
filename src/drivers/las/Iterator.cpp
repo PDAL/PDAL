@@ -34,6 +34,8 @@
 
 #include <libpc/drivers/las/Iterator.hpp>
 
+#include <iostream>
+
 #include <libpc/drivers/las/Reader.hpp>
 #include <libpc/exceptions.hpp>
 #include <libpc/Utils.hpp>
@@ -48,6 +50,7 @@ SequentialIterator::SequentialIterator(const LasReader& reader)
     , m_istream(NULL)
 {
     m_istream = Utils::openFile(m_reader.getFileName());
+    m_istream->seekg(m_reader.getPointDataOffset());
     return;
 }
 
@@ -61,7 +64,9 @@ SequentialIterator::~SequentialIterator()
 
 boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 {
-    return naiveSkipImpl(count);
+    boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+    m_istream->seekg(delta * count, std::ios::cur);
+    return count;
 }
 
 
@@ -84,6 +89,7 @@ RandomIterator::RandomIterator(const LasReader& reader)
     , m_istream(NULL)
 {
     m_istream = Utils::openFile(m_reader.getFileName());
+    m_istream->seekg(m_reader.getPointDataOffset());
     return;
 }
 
@@ -95,9 +101,11 @@ RandomIterator::~RandomIterator()
 }
 
 
-boost::uint64_t RandomIterator::seekImpl(boost::uint64_t)
+boost::uint64_t RandomIterator::seekImpl(boost::uint64_t count)
 {
-    throw not_yet_implemented("LasReader seeking not supported yet");
+    boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+    m_istream->seekg(m_reader.getPointDataOffset() + delta * count);
+    return count;
 }
 
 
