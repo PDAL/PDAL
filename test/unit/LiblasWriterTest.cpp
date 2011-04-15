@@ -41,7 +41,7 @@
 #include <libpc/drivers/liblas/Writer.hpp>
 #include <libpc/drivers/liblas/Reader.hpp>
 
-#include "support.hpp"
+#include "Support.hpp"
 
 using namespace libpc;
 using namespace libpc::drivers::liblas;
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
     
     std::ostream* ofs = Utils::createFile("temp.las");
 
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
 
     Utils::closeFile(ofs);
 
-    bool filesSame = compare_files("temp.las", TestConfig::g_data_path + "simple.las");
+    bool filesSame = Support::compare_files("temp.las", Support::datapath("simple.las"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
     
     std::ostream* ofs = Utils::createFile("temp.laz");
 
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
 
     Utils::closeFile(ofs);
 
-    bool filesSame = compare_files("temp.laz", TestConfig::g_data_path + "simple.laz");
+    bool filesSame = Support::compare_files("temp.laz", Support::datapath("simple.laz"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
@@ -130,7 +130,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    LiblasReader reader(TestConfig::g_data_path + "1.2_3.las");
+    LiblasReader reader(Support::datapath("1.2_3.las"));
     
     std::ostream* ofs = Utils::createFile("temp.las");
 

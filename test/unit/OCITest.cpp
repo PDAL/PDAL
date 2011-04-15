@@ -50,11 +50,13 @@
 
 #include <libpc/drivers/liblas/Writer.hpp>
 
-#include "support.hpp"
+#include "Support.hpp"
+#include "TestConfig.hpp"
 
 using namespace libpc;
 
 using namespace libpc::drivers::oci;
+
 
 bool ShouldRunTest()
 {
@@ -114,7 +116,7 @@ BOOST_AUTO_TEST_CASE(test_writer)
     if (!ShouldRunTest()) return;
 
     Options options = GetOptions();
-    libpc::drivers::liblas::LiblasReader reader(TestConfig::g_data_path +  "1.2-with-color.las");
+    libpc::drivers::liblas::LiblasReader reader(Support::datapath("1.2-with-color.las"));
 
     boost::uint32_t capacity = GetOptions().GetPTree().get<boost::uint32_t>("capacity");
     libpc::filters::CacheFilter cache(reader, 1, 1024);

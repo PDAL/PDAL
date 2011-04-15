@@ -29,10 +29,12 @@ SET(LIBPC_UNIT_TEST_SRC
     SchemaLayoutTest.cpp
     SchemaTest.cpp
     SignallerTest.cpp
+    Support.cpp
+    Support.hpp
+    TestConfig.cpp
+    TestConfig.hpp
     UtilsTest.cpp
     VectorTest.cpp
-    support.cpp
-    support.hpp
     main.cpp)
 
 if (WITH_ORACLE)

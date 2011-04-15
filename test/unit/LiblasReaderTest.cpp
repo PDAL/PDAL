@@ -40,7 +40,7 @@
 #include <libpc/SchemaLayout.hpp>
 #include <libpc/drivers/liblas/Reader.hpp>
 #include <libpc/filters/CacheFilter.hpp>
-#include "support.hpp"
+#include "Support.hpp"
 
 using namespace libpc;
 using namespace libpc::drivers::liblas;
@@ -50,88 +50,9 @@ using namespace libpc::filters;
 BOOST_AUTO_TEST_SUITE(LiblasReaderTest)
 
 
-#define Compare(x,y)    BOOST_CHECK(Utils::compare_approx((x),(y),0.001));
-
-
-static void check_pN(const PointBuffer& data, const Schema& schema, 
-                     size_t index, 
-                     double xref, double yref, double zref)
-{
-    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
-
-    boost::int32_t x0raw = data.getField<boost::int32_t>(index, offsetX);
-    boost::int32_t y0raw = data.getField<boost::int32_t>(index, offsetY);
-    boost::int32_t z0raw = data.getField<boost::int32_t>(index, offsetZ);
-    double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x0raw);
-    double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y0raw);
-    double z0 = schema.getDimension(offsetZ).applyScaling<boost::int32_t>(z0raw);
-    
-    Compare(x0, xref);
-    Compare(y0, yref);
-    Compare(z0, zref);
-}
-
-static void check_pN(const PointBuffer& data, const Schema& schema, 
-                     size_t index, 
-                     double xref, double yref, double zref,
-                     double tref,
-                     boost::uint16_t rref, boost::uint16_t gref, boost::uint16_t bref)
-{
-    check_pN(data, schema, index, xref, yref, zref);
-
-    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Double);
-    double t0 = data.getField<double>(index, offsetT);
-    Compare(t0, tref);
-
-    int offsetR = schema.getDimensionIndex(Dimension::Field_Red, Dimension::Uint16);
-    int offsetG = schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint16);
-    int offsetB = schema.getDimensionIndex(Dimension::Field_Blue, Dimension::Uint16);
-    boost::uint16_t r0 = data.getField<boost::uint16_t>(index, offsetR);
-    boost::uint16_t g0 = data.getField<boost::uint16_t>(index, offsetG);
-    boost::uint16_t b0 = data.getField<boost::uint16_t>(index, offsetB);
-    BOOST_CHECK(r0 == rref);
-    BOOST_CHECK(g0 == gref);
-    BOOST_CHECK(b0 == bref);
-}
-
-
-static void check_p0_p1_p2(const PointBuffer& data, const Schema& schema)
-{
-    check_pN(data, schema, 0, 637012.240000, 849028.310000, 431.660000);
-    check_pN(data, schema, 1, 636896.330000, 849087.700000, 446.390000);
-    check_pN(data, schema, 2, 636784.740000, 849106.660000, 426.710000);
-}
-
-
-static void check_p100_p101_p102(const PointBuffer& data, const Schema& schema)
-{
-    check_pN(data, schema, 0, 636661.060000, 849854.130000, 424.900000);
-    check_pN(data, schema, 1, 636568.180000, 850179.490000, 441.800000);
-    check_pN(data, schema, 2, 636554.630000, 850040.030000, 499.110000);
-}
-
-
-static void check_p355_p356_p357(const PointBuffer& data, const Schema& schema)
-{
-    check_pN(data, schema, 0, 636462.600000, 850566.110000, 432.610000);
-    check_pN(data, schema, 1, 636356.140000, 850530.480000, 432.680000);
-    check_pN(data, schema, 2, 636227.530000, 850592.060000, 428.670000);
-}
-
-
-static void check_p710_p711_p712(const PointBuffer& data, const Schema& schema)
-{
-    check_pN(data, schema, 0, 638720.670000, 850926.640000, 417.320000);
-    check_pN(data, schema, 1, 638672.380000, 851081.660000, 420.670000);
-    check_pN(data, schema, 2, 638598.880000, 851445.370000, 422.150000);
-}
-
-
 BOOST_AUTO_TEST_CASE(test_sequential)
 {
-    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getName() == "Liblas Reader");
 
     const Schema& schema = reader.getSchema();
@@ -145,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data, schema);
     }
 
     // Can we seek it? Yes, we can!
@@ -154,7 +75,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        check_p100_p101_p102(data, schema);
+        Support::check_p100_p101_p102(data, schema);
     }
 
     delete iter;
@@ -165,7 +86,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 
 BOOST_AUTO_TEST_CASE(test_random)
 {
-    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getName() == "Liblas Reader");
 
     const Schema& schema = reader.getSchema();
@@ -179,7 +100,7 @@ BOOST_AUTO_TEST_CASE(test_random)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data, schema);
     }
 
     // Can we seek it? Yes, we can!
@@ -188,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_random)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        check_p100_p101_p102(data, schema);
+        Support::check_p100_p101_p102(data, schema);
     }
 
     // Can we seek to beginning? Yes, we can!
@@ -197,7 +118,7 @@ BOOST_AUTO_TEST_CASE(test_random)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data, schema);
     }
     
     delete iter;
@@ -208,7 +129,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 
 BOOST_AUTO_TEST_CASE(test_two_iters)
 {
-    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getName() == "Liblas Reader");
 
     const Schema& schema = reader.getSchema();
@@ -225,7 +146,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
         BOOST_CHECK(numRead == 1065);
         BOOST_CHECK(iter->getIndex() == 1065);
 
-        check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data, schema);
 
         delete iter;
     }
@@ -238,7 +159,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
         BOOST_CHECK(numRead == 1065);
         BOOST_CHECK(iter->getIndex() == 1065);
         
-        check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data, schema);
 
         delete iter;
     }
@@ -249,7 +170,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
 
 BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 {
-    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getName() == "Liblas Reader");
 
     BOOST_CHECK(reader.getNumPoints() == 1065);
@@ -273,19 +194,19 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 355);
 
-        check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data, schema);
 
         numRead = iter->read(data);
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 710);
 
-        check_p355_p356_p357(data, schema);
+        Support::check_p355_p356_p357(data, schema);
 
         numRead = iter->read(data);
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 1065);
 
-        check_p710_p711_p712(data, schema);
+        Support::check_p710_p711_p712(data, schema);
 
         delete iter;
     }
@@ -301,7 +222,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 710);
 
-        check_p355_p356_p357(data, schema);
+        Support::check_p355_p356_p357(data, schema);
 
         // read the first third
         iter->seek(0);
@@ -310,7 +231,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 355);
 
-        check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data, schema);
 
         // read the first third again
         iter->seek(0);
@@ -319,7 +240,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 355);
 
-        check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data, schema);
 
         // read the last third
         iter->seek(710);
@@ -328,7 +249,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 1065);
 
-        check_p710_p711_p712(data, schema);
+        Support::check_p710_p711_p712(data, schema);
 
         delete iter;
     }
@@ -339,7 +260,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 
 BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 {
-    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getName() == "Liblas Reader");
 
     BOOST_CHECK(reader.getNumPoints() == 1065);
@@ -369,7 +290,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterS1->getIndex() == 355);
 
-        check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data, schema);
     }
 
     {
@@ -379,7 +300,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterS2->getIndex() == 710);
 
-        check_p355_p356_p357(data, schema);
+        Support::check_p355_p356_p357(data, schema);
     }
 
     {
@@ -388,7 +309,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterR1->getIndex() == 710);
 
-        check_p355_p356_p357(data, schema);
+        Support::check_p355_p356_p357(data, schema);
     }
 
     {
@@ -397,7 +318,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterR2->getIndex() == 355);
 
-        check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data, schema);
     }
 
     {
@@ -406,7 +327,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterS1->getIndex() == 1065);
 
-        check_p710_p711_p712(data, schema);
+        Support::check_p710_p711_p712(data, schema);
     }
 
     {
@@ -416,7 +337,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterS2->getIndex() == 1065);
 
-        check_p710_p711_p712(data, schema);
+        Support::check_p710_p711_p712(data, schema);
     }
 
     {
@@ -425,7 +346,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterR1->getIndex() == 710);
 
-        check_p355_p356_p357(data, schema);
+        Support::check_p355_p356_p357(data, schema);
     }
 
     {
@@ -434,7 +355,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterR2->getIndex() == 1065);
 
-        check_p710_p711_p712(data, schema);
+        Support::check_p710_p711_p712(data, schema);
     }
 
     {
@@ -443,7 +364,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterR1->getIndex() == 355);
 
-        check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data, schema);
     }
 
     delete iterS1;
@@ -456,7 +377,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 
 BOOST_AUTO_TEST_CASE(test_iterator_checks)
 {
-    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
 
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);
@@ -467,7 +388,7 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
 static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
                               double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
 {
-    LiblasReader reader(TestConfig::g_data_path + file);
+    LiblasReader reader(Support::datapath(file));
 
     BOOST_CHECK(reader.getPointFormat() == pointFormat);
     BOOST_CHECK(reader.getVersionMajor() == majorVersion);
@@ -484,7 +405,7 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
 
-        check_pN(data, schema, 0, xref, yref, zref, tref, rref, gref, bref);
+        Support::check_pN(data, schema, 0, xref, yref, zref, tref, rref, gref, bref);
     }
 
     delete iter;
