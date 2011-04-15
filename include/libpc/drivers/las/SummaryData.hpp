@@ -49,14 +49,14 @@ public:
 
     void reset();
 
-    // note that returnNumber is in the range [1..5]
+    // note that returnNumber is in the range [0..4]
     void addPoint(double x, double y, double z, int returnNumber);
 
     boost::uint32_t getTotalNumPoints() const;
 
     void getBounds(double& minX, double& minY, double& minZ, double& maxX, double& maxY, double& maxZ) const;
 
-    // note that returnNumber is in the range [1..5]
+    // note that returnNumber is in the range [0..4]
     boost::uint32_t getReturnCount(int returnNumber) const;
 
     void dump(std::ostream&) const;

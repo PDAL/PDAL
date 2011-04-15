@@ -20,6 +20,8 @@ SET(LIBPC_UNITTEST_TEST_SRC
     DimensionTest.cpp
     FauxReaderTest.cpp
     FauxWriterTest.cpp
+    LasReaderTest.cpp
+    LasWriterTest.cpp
     LiblasReaderTest.cpp
     LiblasWriterTest.cpp
     MosaicFilterTest.cpp

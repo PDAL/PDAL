@@ -50,6 +50,7 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
     : Writer(prevStage)
     , m_ostream(ostream)
     , m_numPointsWritten(0)
+    , m_isCompressed(false)
 {
     return;
 }
@@ -59,6 +60,50 @@ const std::string& LasWriter::getName() const
 {
     static std::string name("Liblas Writer");
     return name;
+}
+
+
+void LasWriter::setCompressed(bool v)
+{
+    m_lasHeader.SetCompressed(v);
+}
+
+
+void LasWriter::setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion)
+{
+    m_lasHeader.SetVersionMajor(majorVersion);
+    m_lasHeader.SetVersionMinor(minorVersion);
+}
+
+
+void LasWriter::setPointFormat(PointFormat pointFormat)
+{
+    m_lasHeader.setPointFormat(pointFormat);
+}
+
+
+void LasWriter::setDate(boost::uint16_t dayOfYear, boost::uint16_t year)
+{
+    m_lasHeader.SetCreationDOY(dayOfYear);
+    m_lasHeader.SetCreationYear(year);
+}
+
+
+void LasWriter::setProjectId(const boost::uuids::uuid& id)
+{
+    m_lasHeader.SetProjectId(id);
+}
+
+
+void LasWriter::setSystemIdentifier(const std::string& systemId) 
+{
+    m_lasHeader.SetSystemId(systemId);
+}
+
+
+void LasWriter::setGeneratingSoftware(const std::string& softwareId)
+{
+    m_lasHeader.SetSoftwareId(softwareId);
 }
 
 
@@ -79,7 +124,6 @@ void LasWriter::writeBegin()
     m_lasHeader.SetScale(dimX.getNumericScale(), dimY.getNumericScale(), dimZ.getNumericScale());
     m_lasHeader.SetOffset(dimX.getNumericOffset(), dimY.getNumericOffset(), dimZ.getNumericOffset());
 
-
     std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
     std::cout.precision(8);
 
@@ -90,6 +134,8 @@ void LasWriter::writeBegin()
     LasHeaderWriter lasHeaderWriter(m_lasHeader, m_ostream);
     lasHeaderWriter.write();
 
+    m_summaryData.reset();
+
     return;
 }
 
@@ -98,11 +144,14 @@ void LasWriter::writeEnd()
 {
     m_lasHeader.SetPointRecordsCount(m_numPointsWritten);
 
-    std::streamsize const dataPos = 107; 
-    m_ostream.seekp(dataPos, std::ios::beg);
-    LasHeaderWriter lasHeaderWriter(m_lasHeader, m_ostream);
-    Utils::write_n(m_ostream, m_numPointsWritten, sizeof(m_numPointsWritten));
+    //std::streamsize const dataPos = 107; 
+    //m_ostream.seekp(dataPos, std::ios::beg);
+    //LasHeaderWriter lasHeaderWriter(m_lasHeader, m_ostream);
+    //Utils::write_n(m_ostream, m_numPointsWritten, sizeof(m_numPointsWritten));
         
+    m_ostream.seekp(0);
+    Support::rewriteHeader(m_ostream, m_summaryData);
+
     return;
 }
 
@@ -124,34 +173,32 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
         boost::uint8_t* p = buf;
 
         // we always write the base fields
-        {
-            const boost::uint32_t x = PointBuffer.getField<boost::uint32_t>(pointIndex, indexes.X);
-            const boost::uint32_t y = PointBuffer.getField<boost::uint32_t>(pointIndex, indexes.Y);
-            const boost::uint32_t z = PointBuffer.getField<boost::uint32_t>(pointIndex, indexes.Z);
-            const boost::uint16_t intensity = PointBuffer.getField<boost::uint16_t>(pointIndex, indexes.Intensity);
+        const boost::uint32_t x = PointBuffer.getField<boost::uint32_t>(pointIndex, indexes.X);
+        const boost::uint32_t y = PointBuffer.getField<boost::uint32_t>(pointIndex, indexes.Y);
+        const boost::uint32_t z = PointBuffer.getField<boost::uint32_t>(pointIndex, indexes.Z);
+        const boost::uint16_t intensity = PointBuffer.getField<boost::uint16_t>(pointIndex, indexes.Intensity);
             
-            const boost::uint8_t returnNum = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.ReturnNumber);
-            const boost::uint8_t numReturns = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.NumberOfReturns);
-            const boost::uint8_t scanDirFlag = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.ScanDirectionFlag);
-            const boost::uint8_t flight = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.EdgeOfFlightLine);
+        const boost::uint8_t returnNumber = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.ReturnNumber);
+        const boost::uint8_t numberOfReturns = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.NumberOfReturns);
+        const boost::uint8_t scanDirectionFlag = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.ScanDirectionFlag);
+        const boost::uint8_t edgeOfFlightLinet = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.EdgeOfFlightLine);
 
-            const boost::uint8_t bits = returnNum & (numReturns<<3) & (scanDirFlag << 6) && (flight << 7);
+        const boost::uint8_t bits = returnNumber & (numberOfReturns<<3) & (scanDirectionFlag << 6) && (edgeOfFlightLinet << 7);
 
-            const boost::uint8_t classification = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.Classification);
-            const boost::int8_t scanAngleRank = PointBuffer.getField<boost::int8_t>(pointIndex, indexes.ScanAngleRank);
-            const boost::uint8_t user = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.UserData);
-            const boost::uint16_t pointSourceId = PointBuffer.getField<boost::uint16_t>(pointIndex, indexes.PointSourceId);
+        const boost::uint8_t classification = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.Classification);
+        const boost::int8_t scanAngleRank = PointBuffer.getField<boost::int8_t>(pointIndex, indexes.ScanAngleRank);
+        const boost::uint8_t userData = PointBuffer.getField<boost::uint8_t>(pointIndex, indexes.UserData);
+        const boost::uint16_t pointSourceId = PointBuffer.getField<boost::uint16_t>(pointIndex, indexes.PointSourceId);
 
-            Utils::write_field<boost::uint32_t>(p, x);
-            Utils::write_field<boost::uint32_t>(p, y);
-            Utils::write_field<boost::uint32_t>(p, z);
-            Utils::write_field<boost::uint16_t>(p, intensity);
-            Utils::write_field<boost::uint8_t>(p, bits);
-            Utils::write_field<boost::uint8_t>(p, classification);
-            Utils::write_field<boost::int8_t>(p, scanAngleRank);
-            Utils::write_field<boost::uint8_t>(p, user);
-            Utils::write_field<boost::uint16_t>(p, pointSourceId);
-        }
+        Utils::write_field<boost::uint32_t>(p, x);
+        Utils::write_field<boost::uint32_t>(p, y);
+        Utils::write_field<boost::uint32_t>(p, z);
+        Utils::write_field<boost::uint16_t>(p, intensity);
+        Utils::write_field<boost::uint8_t>(p, bits);
+        Utils::write_field<boost::uint8_t>(p, classification);
+        Utils::write_field<boost::int8_t>(p, scanAngleRank);
+        Utils::write_field<boost::uint8_t>(p, userData);
+        Utils::write_field<boost::uint16_t>(p, pointSourceId);
 
         if (Support::hasTime(pointFormat))
         {
@@ -174,6 +221,11 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
         Utils::write_n(m_ostream, buf, Support::getPointDataSize(pointFormat));
 
         ++numValidPoints;
+
+        const double xValue = schema.getDimension(indexes.X).applyScaling<boost::int32_t>(x);
+        const double yValue = schema.getDimension(indexes.Y).applyScaling<boost::int32_t>(y);
+        const double zValue = schema.getDimension(indexes.Z).applyScaling<boost::int32_t>(z);
+        m_summaryData.addPoint(xValue, yValue, zValue, returnNumber);
     }
 
     m_numPointsWritten = m_numPointsWritten+numValidPoints;

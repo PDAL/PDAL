@@ -240,7 +240,7 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointBuffer& PointBuffer)
         const double yValue = schema.getDimension(indexes.Y).applyScaling<boost::int32_t>(y);
         const double zValue = schema.getDimension(indexes.Z).applyScaling<boost::int32_t>(z);
 
-        m_summaryData.addPoint(xValue, yValue, zValue, returnNumber);
+        m_summaryData.addPoint(xValue, yValue, zValue, returnNumber-1);
     }
 
     return numPoints;

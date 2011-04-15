@@ -39,6 +39,7 @@
 
 #include <libpc/Writer.hpp>
 #include <libpc/drivers/las/Header.hpp>
+#include <libpc/drivers/las/SummaryData.hpp>
 
 namespace libpc { namespace drivers { namespace las {
 
@@ -49,6 +50,21 @@ public:
     LasWriter(Stage& prevStage, std::ostream&);
 
     const std::string& getName() const;
+
+    void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
+    void setPointFormat(PointFormat);
+    void setDate(boost::uint16_t dayOfYear, boost::uint16_t year);
+    
+    void setProjectId(const boost::uuids::uuid&);
+
+    // up to 32 chars (default is "libPC")
+    void setSystemIdentifier(const std::string& systemId); 
+    
+    // up to 32 chars (default is "libPC x.y.z")
+    void setGeneratingSoftware(const std::string& softwareId);
+
+    // default false
+    void setCompressed(bool);
 
 protected:
     // this is called once before the loop with the writeBuffer calls
@@ -64,6 +80,8 @@ private:
     std::ostream& m_ostream;
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
+    bool m_isCompressed;
+    SummaryData m_summaryData;
 
     LasWriter& operator=(const LasWriter&); // not implemented
     LasWriter(const LasWriter&); // not implemented

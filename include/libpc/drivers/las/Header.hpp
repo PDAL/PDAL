@@ -226,10 +226,10 @@ public:
     void SetRecordsCount(boost::uint32_t v);
     
     /// Get identifier of point data (record) format.
-    libpc::drivers::las::PointFormat getPointFormat() const;
+    PointFormat getPointFormat() const;
 
     /// Set identifier of point data (record) format.
-    void setPointFormat(libpc::drivers::las::PointFormat v);
+    void setPointFormat(PointFormat v);
 
     /// The length in bytes of each point.  All points in the file are 
     /// considered to be fixed in size, and the PointFormatName is used 

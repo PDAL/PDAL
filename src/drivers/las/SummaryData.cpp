@@ -85,7 +85,7 @@ void SummaryData::reset()
 
 void SummaryData::addPoint(double x, double y, double z, int returnNumber)
 {
-    if (returnNumber <= 0 || returnNumber > s_maxNumReturns)
+    if (returnNumber < 0 || returnNumber >= s_maxNumReturns)
         throw invalid_point_data("point returnNumber is out of range", 0);
 
     if (m_isFirst)
@@ -108,7 +108,7 @@ void SummaryData::addPoint(double x, double y, double z, int returnNumber)
         m_maxZ = std::max(m_maxZ, z);
     }
 
-    ++m_returnCounts[returnNumber-1];
+    ++m_returnCounts[returnNumber];
 
     ++m_totalNumPoints;
 
@@ -135,10 +135,10 @@ void SummaryData::getBounds(double& minX, double& minY, double& minZ, double& ma
 
 boost::uint32_t SummaryData::getReturnCount(int returnNumber) const
 {
-    if (returnNumber <= 0 || returnNumber > s_maxNumReturns)
+    if (returnNumber < 0 || returnNumber >= s_maxNumReturns)
         throw invalid_point_data("point returnNumber is out of range", 0);
 
-    return m_returnCounts[returnNumber - 1];
+    return m_returnCounts[returnNumber];
 }
 
 

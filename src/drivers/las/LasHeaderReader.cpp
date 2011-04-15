@@ -212,16 +212,20 @@ void LasHeaderReader::read(Schema& schema)
     }  
 
     // 21-23. Scale factors
-    Utils::read_n(x1, m_istream, sizeof(x1));
-    Utils::read_n(y1, m_istream, sizeof(y1));
-    Utils::read_n(z1, m_istream, sizeof(z1));
-    m_header.SetScale(x1, y1, z1);
+    double xScale, yScale, zScale;
+    Utils::read_n(xScale, m_istream, sizeof(xScale));
+    Utils::read_n(yScale, m_istream, sizeof(yScale));
+    Utils::read_n(zScale, m_istream, sizeof(zScale));
+    m_header.SetScale(xScale, yScale, zScale);
 
     // 24-26. Offsets
-    Utils::read_n(x1, m_istream, sizeof(x1));
-    Utils::read_n(y1, m_istream, sizeof(y1));
-    Utils::read_n(z1, m_istream, sizeof(z1));
-    m_header.SetOffset(x1, y1, z1);
+    double xOffset, yOffset, zOffset;
+    Utils::read_n(xOffset, m_istream, sizeof(xOffset));
+    Utils::read_n(yOffset, m_istream, sizeof(yOffset));
+    Utils::read_n(zOffset, m_istream, sizeof(zOffset));
+    m_header.SetOffset(xOffset, yOffset, zOffset);
+
+    Support::setScaling(schema, xScale, yScale, zScale, xOffset, yOffset, zOffset);
 
     // 27-28. Max/Min X
     Utils::read_n(x1, m_istream, sizeof(x1));

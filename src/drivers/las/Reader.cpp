@@ -75,6 +75,24 @@ const std::string& LasReader::getFileName() const
 }
 
 
+PointFormat LasReader::getPointFormat() const
+{
+    return m_lasHeader.getPointFormat();
+}
+
+
+boost::uint8_t LasReader::getVersionMajor() const
+{
+    return m_lasHeader.GetVersionMajor();
+}
+
+
+boost::uint8_t LasReader::getVersionMinor() const
+{
+    return m_lasHeader.GetVersionMinor();
+}
+
+
 libpc::SequentialIterator* LasReader::createSequentialIterator() const
 {
     return new SequentialIterator(*this);

@@ -75,6 +75,10 @@ public:
 
     const LasHeader& getLasHeader() const { return m_lasHeader; }
 
+    PointFormat getPointFormat() const;
+    boost::uint8_t getVersionMajor() const;
+    boost::uint8_t getVersionMinor() const;
+
 protected:
     LasHeader& getLasHeaderRef() { return m_lasHeader; }
 
