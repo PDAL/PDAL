@@ -68,7 +68,7 @@ void OCISchemaGenericErrorHandler
     
     std::ostringstream oss;
     
-    oss << "XML error: '" << error <<"' ";
+    oss << "Generic error: '" << error <<"' ";
     throw schema_error(oss.str());
     
 }
@@ -87,10 +87,8 @@ Schema::Schema(std::string xml, std::string xmlschema)
 
     // No network access
     // http://xmlsoft.org/html/libxml-parser.html#xmlParserOption
-    m_doc = xmlReadMemory(&(xml[0]), xml.size(), "noname.xml", NULL, XML_PARSE_NONET);
-    if (m_doc == NULL) {
-        throw schema_error("Failed to parse document");
-    }
+    m_doc = xmlReadMemory(xml.c_str(), xml.size(), "noname.xml", NULL, XML_PARSE_NONET);
+
     
     
     return;
