@@ -39,7 +39,7 @@
 #include <libpc/drivers/liblas/Writer.hpp>
 #include <libpc/drivers/liblas/Reader.hpp>
 
-#include "support.hpp"
+#include "Support.hpp"
 
 using namespace libpc;
 using namespace libpc::drivers::liblas;
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_SUITE(ChipperTest)
 
 BOOST_AUTO_TEST_CASE(test_construction)
 {
-    LiblasReader reader(TestConfig::g_data_path + "1.2-with-color.las");
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
 
     {
         const boost::uint64_t num_points = reader.getNumPoints();

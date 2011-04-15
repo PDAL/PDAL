@@ -32,75 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "support.hpp"
+#ifndef UNITTEST_TESTCONFIG_INCLUDED
+#define UNITTEST_TESTCONFIG_INCLUDED
 
-#include <iostream>
+#include <string>
 
-#include <boost/test/unit_test.hpp>
-
-#include <libpc/Utils.hpp>
-
-
-bool compare_files(const std::string& file1, const std::string& file2)
+struct TestConfig 
 {
-    uintmax_t len1x = libpc::Utils::fileSize(file1);
-    uintmax_t len2x = libpc::Utils::fileSize(file2);
-    size_t len1 = (size_t)len1x; // BUG
-    size_t len2 = (size_t)len2x;
+    TestConfig();
+    static std::string g_data_path;
+    static std::string g_oracle_connection;
+};
 
-    if (len1 != len2)
-    {
-        return false;
-    }
 
-    std::istream* str1 = libpc::Utils::openFile(file1);
-    std::istream* str2 = libpc::Utils::openFile(file2);
-    BOOST_CHECK(str1);
-    BOOST_CHECK(str2);
-
-    char* buf1 = new char[len1];
-    char* buf2 = new char[len2];
-
-    str1->read(buf1,len1);
-    str2->read(buf2,len2);
-
-    libpc::Utils::closeFile(str1);
-    libpc::Utils::closeFile(str2);
-
-    char* p = buf1;
-    char* q = buf2;
-
-    for (uintmax_t i=0; i<len1; i++)
-    {
-        if (*p != *q) 
-        {
-            delete[] buf1;
-            delete[] buf2;
-            return false;
-        }
-        ++p;
-        ++q;
-    }
-
-    delete[] buf1;
-    delete[] buf2;
-
-    return true;
-}
-
-std::string TestConfig::g_data_path = "../../test/data";
-std::string TestConfig::g_oracle_connection = "";
-TestConfig::TestConfig()
-{
-    int argc = ::boost::unit_test::framework::master_test_suite().argc;
-    char **argv = ::boost::unit_test::framework::master_test_suite().argv;
-    if (argc > 1)
-    {
-        g_data_path = argv[1];
-        if (argc > 2)
-            g_oracle_connection = argv[2];        
-    }
-    if (g_data_path[g_data_path.size() - 1] != '/')
-        g_data_path += "/";
-}
-
+#endif

@@ -32,33 +32,49 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#define BOOST_TEST_MODULE Main
-#include <boost/test/unit_test.hpp>
+#ifndef UNITTEST_SUPPORT_INCLUDED
+#define UNITTEST_SUPPORT_INCLUDED
 
-#include "TestConfig.hpp"
+// support functions for unit testing
 
-BOOST_GLOBAL_FIXTURE(TestConfig)
+#include <boost/cstdint.hpp>
 
-// Testing macros:
-//   BOOST_TEST_MESSAGE("...")
-//   BOOST_CHECK(bool)
+namespace libpc
+{
+    class PointBuffer;
+    class Schema;
+}
 
-// for comparing to floating point values, use
-//   BOOST_CHECK_CLOSE(a,b,perc)
-// where perc is a percentage value in the range [0..100] (typically)
+#include <boost/cstdint.hpp>
+#include <string>
 
-//
-// You can run the unit tests with these interesting options:
-//
-//     --log_format=X (-f X)   # X = xml|hrf
-//     --log_level=X (-l X)    # X = error|message|all|... (default=error)
-//     --log_sink=X (-k X)     # X = filename
-//     
-//     --report_format=X (-o X)
-//     --report_level=X (-r X)
-//     --report_sink=X (-e X)
-//
-//     --detect_memory_leaks=X # X = 0|1  (default=1)
-//
-//     <path>                  # path to data (default=../test/data)
+class Support
+{
+public:
+    static std::string datapath(const std::string&);
 
+    // verify if two files are the same
+    static bool compare_files(const std::string& file1, const std::string& file2);
+
+    // validate a point's XYZ values
+    static void check_pN(const libpc::PointBuffer& data, const libpc::Schema& schema, 
+                         std::size_t index, 
+                         double xref, double yref, double zref);
+                       
+    // validate a point's XYZ, Time, and Color values
+    static void check_pN(const libpc::PointBuffer& data, const libpc::Schema& schema, 
+                         std::size_t index, 
+                         double xref, double yref, double zref,
+                         double tref,
+                         boost::uint16_t rref, boost::uint16_t gref, boost::uint16_t bref);
+
+    // these are for the 1.2-with-color image
+    static void check_p0_p1_p2(const libpc::PointBuffer& data, const libpc::Schema& schema);
+    static void check_p100_p101_p102(const libpc::PointBuffer& data, const libpc::Schema& schema);
+    static void check_p355_p356_p357(const libpc::PointBuffer& data, const libpc::Schema& schema);
+    static void check_p710_p711_p712(const libpc::PointBuffer& data, const libpc::Schema& schema);
+
+};
+
+
+#endif

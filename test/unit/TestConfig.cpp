@@ -32,27 +32,23 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef UNITTEST_SUPPORT_INCLUDED
-#define UNITTEST_SUPPORT_INCLUDED
+#include "TestConfig.hpp"
 
-// support functions for unit testing
+#include <boost/test/unit_test.hpp>
 
-#include <boost/cstdint.hpp>
-#include <string>
+std::string TestConfig::g_data_path = "../../test/data";
+std::string TestConfig::g_oracle_connection = "";
 
-// verify if two files are the same
-extern bool compare_files(const std::string& file1, const std::string& file2);
-
-struct TestConfig {
-    TestConfig();
-    static std::string g_data_path;
-    static std::string g_oracle_connection;
-};
-
-
-// for comparing to floating point values, use
-//   BOOST_CHECK_CLOSE(a,b,perc)
-// where perc is a percentage value in the range [0..100] (typically)
-
-
-#endif
+TestConfig::TestConfig()
+{
+    int argc = ::boost::unit_test::framework::master_test_suite().argc;
+    char **argv = ::boost::unit_test::framework::master_test_suite().argv;
+    if (argc > 1)
+    {
+        g_data_path = argv[1];
+        if (argc > 2)
+            g_oracle_connection = argv[2];        
+    }
+    if (g_data_path[g_data_path.size() - 1] != '/')
+        g_data_path += "/";
+}
