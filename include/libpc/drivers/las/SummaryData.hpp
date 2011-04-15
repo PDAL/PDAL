@@ -36,7 +36,7 @@
 #define INCLUDED_DRIVERS_LAS_SUMMARYDATA_HPP
 
 #include <libpc/libpc.hpp>
-
+#include <ostream>
 namespace libpc {
 namespace drivers {
 namespace las {

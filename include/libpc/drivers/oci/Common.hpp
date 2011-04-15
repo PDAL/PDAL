@@ -105,6 +105,30 @@ enum QueryType
     QUERY_UNKNOWN
 };
 
+
+class Cloud
+{
+public:
+    Cloud(Connection connection);
+    ~Cloud();
+    
+    OCIString* base_table;
+    OCIString* base_column;
+    OCINumber pc_id;
+    OCIString* blk_table;
+    OCIString* ptn_params;
+    sdo_geometry* pc_geometry;
+    OCINumber pc_tol;
+    OCINumber pc_tot_dimensions;
+    sdo_orgscl_type* pc_domain;
+    OCIString* pc_val_attr_tables;
+    boost::scoped_ptr<std::vector<uint8_t> > schema;
+    OCILobLocator           *locator;
+    Connection              m_connection;
+        
+};
+typedef boost::shared_ptr<Cloud> CloudPtr;
+
 class Block
 {
     

@@ -86,12 +86,15 @@ private:
     void fetchPCFields();
     QueryType describeQueryType() const;    
     BlockPtr defineBlock() const;
+    CloudPtr defineCloud();
 
     Options& m_options;
     Connection m_connection;
     Statement m_statement;
     QueryType m_querytype;
     BlockPtr m_block;
+    CloudPtr m_cloud;
+    sdo_pc* m_pc;
 
 
 };
