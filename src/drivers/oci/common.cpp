@@ -154,6 +154,26 @@ Block::~Block()
     // causes a segfault
     // m_connection->DestroyType(&blk_extent);
 }
+
+Cloud::Cloud(Connection connection)
+    : schema(new std::vector<boost::uint8_t>)
+    , m_connection(connection)
+{
+    m_connection->CreateType(&pc_geometry);
+    m_connection->CreateType(&pc_geometry->sdo_ordinates, m_connection->GetOrdinateType());
+    m_connection->CreateType(&pc_geometry->sdo_elem_info, m_connection->GetElemInfoType());
+    m_connection->CreateType(&pc_domain);
+}
+
+Cloud::~Cloud()
+{
+
+    // FIXME: For some reason having the dtor destroy this
+    // causes a segfault
+    // m_connection->DestroyType(&blk_extent);
+}
+
+
 std::string to_upper(const std::string& input)
 {
     std::string inp = std::string(input);

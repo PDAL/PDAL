@@ -60,7 +60,7 @@ typedef boost::shared_ptr<OWConnection> Connection ;
 typedef boost::shared_ptr<OWStatement> Statement ;
 
 
-// use this for code still under development
+
 class connection_failed : public libpc_error
 {
 public:
@@ -69,11 +69,18 @@ public:
     {}
 };
 
-// use this for code still under development
 class buffer_too_small : public libpc_error
 {
 public:
     buffer_too_small(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
+
+class schema_error : public libpc_error
+{
+public:
+    schema_error(std::string const& msg)
         : libpc_error(msg)
     {}
 };

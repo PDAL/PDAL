@@ -41,19 +41,26 @@
 #include <libpc/drivers/oci/Reader.hpp>
 
 #include <string>
+#include <stdarg.h>
 
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
 
-
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#include <libxml/xinclude.h>
+#include <libxml/xmlIO.h>
 
 namespace libpc { namespace drivers { namespace oci {
 
 
+void OCISchemaGenericErrorHandler (void * ctx, const char* message, ...);
+void OCISchemaStructuredErrorHandler (void * userData, xmlErrorPtr error);
+
 class Schema
 {
 public:
-    Schema();
+    Schema(std::string xml, std::string xmlschema);
     ~Schema();
 
 
@@ -61,6 +68,9 @@ private:
     
     Schema& operator=(const Schema&); // not implemented
     Schema(const Schema&); // not implemented;
+    
+    xmlDocPtr m_doc;
+    xmlDocPtr m_schema;
     
 
 };

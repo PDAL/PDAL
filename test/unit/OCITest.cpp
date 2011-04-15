@@ -39,6 +39,7 @@
 #include <libpc/drivers/oci/Reader.hpp>
 #include <libpc/drivers/oci/Writer.hpp>
 #include <libpc/drivers/oci/Common.hpp>
+#include <libpc/drivers/oci/Schema.hpp>
 
 #include <libpc/drivers/liblas/Reader.hpp>
 
@@ -49,6 +50,8 @@
 #include <libpc/drivers/faux/Writer.hpp>
 
 #include <libpc/drivers/liblas/Writer.hpp>
+#include <libpc/Iterator.hpp>
+#include <libpc/Utils.hpp>
 
 #include "Support.hpp"
 #include "TestConfig.hpp"
@@ -78,8 +81,37 @@ Options GetOptions()
     tree.put("scale.z", 0.001);
     tree.put("block_table_name", "LIBPC_TEST_BLOCKS");
     tree.put("base_table_name", "LIBPC_TEST_BASE");
-    tree.put("select_sql", "SELECT * FROM LIBPC_TEST_BLOCKS");
+    tree.put("select_sql", "SELECT CLOUD FROM LIBPC_TEST_BASE where ID=1");
     return options;
+}
+
+std::string ReadXML(std::string filename)
+{
+
+    std::istream* infile = Utils::openFile(filename, true);
+    std::ifstream::pos_type size;
+    // char* data;
+    std::vector<char> data;
+    if (infile->good()){
+        size = infile->tellg();
+        data.resize(static_cast<std::vector<char>::size_type>(size));
+        // data = new char [size];
+        infile->seekg (0, std::ios::beg);
+        infile->read (&data.front(), size);
+        // infile->close();
+
+        // delete[] data;
+        delete infile;
+        return std::string(&data[0], data.size());
+        // return data; 
+    } 
+    else 
+    {   
+        delete infile;
+        return std::string("");
+        // return data;
+    }
+    
 }
 
 void RunSQL(Connection connection, std::string sql)
@@ -93,77 +125,97 @@ BOOST_AUTO_TEST_SUITE(OCITest)
 
 
 
-BOOST_AUTO_TEST_CASE(initialize)
+// BOOST_AUTO_TEST_CASE(initialize)
+// {
+//     if (!ShouldRunTest()) return;
+//     
+//     Options options = GetOptions();
+//     
+//     Connection connection = Connect(options);
+//     
+//     std::string base_table_name = options.GetPTree().get<std::string>("base_table_name");
+//     std::string create_pc_table("CREATE TABLE " + base_table_name +" (id number, CLOUD SDO_PC, DESCRIPTION VARCHAR2(20), HEADER BLOB, BOUNDARY SDO_GEOMETRY)");
+//     RunSQL(connection, create_pc_table);
+//     
+//     std::string block_table_name = options.GetPTree().get<std::string>("block_table_name");
+//     std::string create_block_table = "CREATE TABLE " + block_table_name + " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
+//     RunSQL(connection, create_block_table);
+// }
+// 
+// 
+// BOOST_AUTO_TEST_CASE(test_writer)
+// {
+//     if (!ShouldRunTest()) return;
+// 
+//     Options options = GetOptions();
+//     libpc::drivers::liblas::LiblasReader reader(Support::datapath("1.2-with-color.las"));
+// 
+//     boost::uint32_t capacity = GetOptions().GetPTree().get<boost::uint32_t>("capacity");
+//     libpc::filters::CacheFilter cache(reader, 1, 1024);
+//     libpc::filters::Chipper chipper(cache, capacity);
+//     libpc::drivers::oci::Writer writer(chipper, options);
+//     
+//     BOOST_CHECK_MESSAGE(writer.getConnection().get(), "Unable to connect to Oracle" );
+//     
+//     writer.write(0);
+//     
+// }
+// 
+// BOOST_AUTO_TEST_CASE(test_reader)
+// {
+//     if (!ShouldRunTest()) return;
+// 
+//     Options options = GetOptions();
+// 
+//     libpc::drivers::oci::Reader reader(options);
+//     const boost::uint64_t numPoints = reader.getNumPoints();
+//     BOOST_CHECK_EQUAL(numPoints, 0);
+//     
+//     boost::scoped_ptr<SequentialIterator> iter(reader.createSequentialIterator());
+//     
+//     PointBuffer buffer(reader.getSchema(), 1065);
+//     
+//     const boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
+//     
+//     BOOST_CHECK_EQUAL(numPointsReadThisChunk, 1065);
+//     // std::ostream* ofs = Utils::createFile("temp.las");
+//     // 
+//     // libpc::drivers::liblas::LiblasWriter writer(reader, *ofs);
+//     // writer.write(0);
+//     // 
+//     // Utils::closeFile(ofs);
+// 
+//     
+// }
+
+BOOST_AUTO_TEST_CASE(test_schema)
 {
     if (!ShouldRunTest()) return;
-    
-    Options options = GetOptions();
-    
-    Connection connection = Connect(options);
-    
-    std::string base_table_name = options.GetPTree().get<std::string>("base_table_name");
-    std::string create_pc_table("CREATE TABLE " + base_table_name +" (id number, CLOUD SDO_PC, DESCRIPTION VARCHAR2(20), HEADER BLOB, BOUNDARY SDO_GEOMETRY)");
-    RunSQL(connection, create_pc_table);
-    
-    std::string block_table_name = options.GetPTree().get<std::string>("block_table_name");
-    std::string create_block_table = "CREATE TABLE " + block_table_name + " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
-    RunSQL(connection, create_block_table);
-}
 
-
-BOOST_AUTO_TEST_CASE(test_writer)
-{
-    if (!ShouldRunTest()) return;
-
-    Options options = GetOptions();
-    libpc::drivers::liblas::LiblasReader reader(Support::datapath("1.2-with-color.las"));
-
-    boost::uint32_t capacity = GetOptions().GetPTree().get<boost::uint32_t>("capacity");
-    libpc::filters::CacheFilter cache(reader, 1, 1024);
-    libpc::filters::Chipper chipper(cache, capacity);
-    libpc::drivers::oci::Writer writer(chipper, options);
     
-    BOOST_CHECK_MESSAGE(writer.getConnection().get(), "Unable to connect to Oracle" );
+    std::string xml = ReadXML("/Users/hobu/hg/liblas/schemas/las.xml");
+    std::string xsd = ReadXML("/Users/hobu/hg/liblas/schemas/LAS.xsd");
     
-    writer.write(0);
+    libpc::drivers::oci::Schema schema(xml, xsd);
+    
     
 }
 
-BOOST_AUTO_TEST_CASE(test_reader)
-{
-    if (!ShouldRunTest()) return;
-
-    Options options = GetOptions();
-
-    libpc::drivers::oci::Reader reader(options);
-    const boost::uint64_t numPoints = reader.getNumPoints();
-    
-    BOOST_CHECK_EQUAL(numPoints, 14);
-    std::ostream* ofs = Utils::createFile("temp.las");
-    
-    libpc::drivers::liblas::LiblasWriter writer(reader, *ofs);
-    writer.write(0);
-    
-    Utils::closeFile(ofs);
-
-    
-}
-
-BOOST_AUTO_TEST_CASE(clean_up)
-{
-    if (!ShouldRunTest()) return;
-    
-    libpc::drivers::oci::Options options = GetOptions();
-    
-    Connection connection = Connect(options);
-
-    std::string base_table_name = options.GetPTree().get<std::string>("base_table_name");
-    std::string block_table_name = options.GetPTree().get<std::string>("block_table_name");
-    
-    std::string drop_base_table = "DROP TABLE " + base_table_name;
-    std::string drop_block_table = "DROP TABLE " + block_table_name;
-    RunSQL(connection, drop_base_table);
-    RunSQL(connection, drop_block_table);    
-}
+// BOOST_AUTO_TEST_CASE(clean_up)
+// {
+//     if (!ShouldRunTest()) return;
+//     
+//     libpc::drivers::oci::Options options = GetOptions();
+//     
+//     Connection connection = Connect(options);
+// 
+//     std::string base_table_name = options.GetPTree().get<std::string>("base_table_name");
+//     std::string block_table_name = options.GetPTree().get<std::string>("block_table_name");
+//     
+//     std::string drop_base_table = "DROP TABLE " + base_table_name;
+//     std::string drop_block_table = "DROP TABLE " + block_table_name;
+//     RunSQL(connection, drop_base_table);
+//     RunSQL(connection, drop_block_table);    
+// }
 
 BOOST_AUTO_TEST_SUITE_END()

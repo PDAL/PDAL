@@ -37,17 +37,60 @@
 #include <libpc/Utils.hpp>
 
 #include <sstream>
-#include <map>
-#include <algorithm>
+
 
 
 namespace libpc { namespace drivers { namespace oci {
 
-Schema::Schema()
+
+void OCISchemaStructuredErrorHandler 
+    (void * userData, xmlErrorPtr error)
+{
+    std::ostringstream oss;
+    
+    oss << "XML error: '" << error->message <<"' ";
+    oss << "on line " << error->line;
+    throw schema_error(oss.str());
+}
+
+void OCISchemaGenericErrorHandler 
+    (void * ctx, const char* message, ... )
+{
+    
+    const int ERROR_MESSAGE_SIZE = 256;
+    char error[ERROR_MESSAGE_SIZE];
+    va_list arg_ptr;
+
+    va_start(arg_ptr, message);
+    vsnprintf(error, ERROR_MESSAGE_SIZE, message, arg_ptr);
+    va_end(arg_ptr);
+
+    
+    std::ostringstream oss;
+    
+    oss << "Generic error: '" << error <<"' ";
+    throw schema_error(oss.str());
+    
+}
+
+
+Schema::Schema(std::string xml, std::string xmlschema)
 
 {
 
     LIBXML_TEST_VERSION
+
+
+    
+    xmlSetGenericErrorFunc(NULL, (xmlGenericErrorFunc) &OCISchemaGenericErrorHandler);
+    xmlSetStructuredErrorFunc(NULL, (xmlStructuredErrorFunc) & OCISchemaStructuredErrorHandler);
+
+    // No network access
+    // http://xmlsoft.org/html/libxml-parser.html#xmlParserOption
+    m_doc = xmlReadMemory(xml.c_str(), xml.size(), "noname.xml", NULL, XML_PARSE_NONET);
+
+    
+    
     return;
 }
 
