@@ -15,6 +15,8 @@ set ORACLE_HOME=%OSGEO4W_DIR%
 set FREEGLUT_DIR=d:\dev\freeglut-2.6.0-3.mp
 set GLUT_DIR=d:\dev\freeglut-2.6.0-3.mp
 
+set LIBXML2_DIR=C:\Utils\libxml2-2.7.7.win32
+
 set BUILD_TYPE=Release
 set BUILD_TYPE=Debug
 
@@ -26,6 +28,9 @@ cmake -G %COMPILER% ^
     -DWITH_LASZIP=ON ^
     -DWITH_LIBLAS=ON ^
     -DWITH_FREEGLUT=ON ^
+    -DWITH_LIBXML2=ON ^
+    -DLIBXML2_LIBRARIES=%LIBXML2_DIR%\lib\libxml2.lib ^
+    -DLIBXML2_INCLUDE_DIR=%LIBXML2_DIR%\include ^
     -DFREEGLUT_LIBRARY=%FREEGLUT_DIR%\lib\freeglut.lib ^
     -DFREEGLUT_INCLUDE_DIR=%FREEGLUT_DIR%\include ^
     -DGLUT_LIBRARY=%FREEGLUT_DIR%\lib ^
