@@ -49,6 +49,7 @@
 #include <libpc/drivers/faux/Writer.hpp>
 
 #include <libpc/drivers/liblas/Writer.hpp>
+#include <libpc/Iterator.hpp>
 
 #include "support.hpp"
 
@@ -76,7 +77,7 @@ Options GetOptions()
     tree.put("scale.z", 0.001);
     tree.put("block_table_name", "LIBPC_TEST_BLOCKS");
     tree.put("base_table_name", "LIBPC_TEST_BASE");
-    tree.put("select_sql", "SELECT * FROM LIBPC_TEST_BLOCKS");
+    tree.put("select_sql", "SELECT CLOUD FROM LIBPC_TEST_BASE where ID=1");
     return options;
 }
 
@@ -135,33 +136,40 @@ BOOST_AUTO_TEST_CASE(test_reader)
 
     libpc::drivers::oci::Reader reader(options);
     const boost::uint64_t numPoints = reader.getNumPoints();
+    BOOST_CHECK_EQUAL(numPoints, 0);
     
-    BOOST_CHECK_EQUAL(numPoints, 14);
-    std::ostream* ofs = Utils::createFile("temp.las");
+    boost::scoped_ptr<SequentialIterator> iter(reader.createSequentialIterator());
     
-    libpc::drivers::liblas::LiblasWriter writer(reader, *ofs);
-    writer.write(0);
+    PointBuffer buffer(reader.getSchema(), 1065);
     
-    Utils::closeFile(ofs);
+    const boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
+    
+    BOOST_CHECK_EQUAL(numPointsReadThisChunk, 1065);
+    // std::ostream* ofs = Utils::createFile("temp.las");
+    // 
+    // libpc::drivers::liblas::LiblasWriter writer(reader, *ofs);
+    // writer.write(0);
+    // 
+    // Utils::closeFile(ofs);
 
     
 }
 
-BOOST_AUTO_TEST_CASE(clean_up)
-{
-    if (!ShouldRunTest()) return;
-    
-    libpc::drivers::oci::Options options = GetOptions();
-    
-    Connection connection = Connect(options);
-
-    std::string base_table_name = options.GetPTree().get<std::string>("base_table_name");
-    std::string block_table_name = options.GetPTree().get<std::string>("block_table_name");
-    
-    std::string drop_base_table = "DROP TABLE " + base_table_name;
-    std::string drop_block_table = "DROP TABLE " + block_table_name;
-    RunSQL(connection, drop_base_table);
-    RunSQL(connection, drop_block_table);    
-}
+// BOOST_AUTO_TEST_CASE(clean_up)
+// {
+//     if (!ShouldRunTest()) return;
+//     
+//     libpc::drivers::oci::Options options = GetOptions();
+//     
+//     Connection connection = Connect(options);
+// 
+//     std::string base_table_name = options.GetPTree().get<std::string>("base_table_name");
+//     std::string block_table_name = options.GetPTree().get<std::string>("block_table_name");
+//     
+//     std::string drop_base_table = "DROP TABLE " + base_table_name;
+//     std::string drop_block_table = "DROP TABLE " + block_table_name;
+//     RunSQL(connection, drop_base_table);
+//     RunSQL(connection, drop_block_table);    
+// }
 
 BOOST_AUTO_TEST_SUITE_END()
