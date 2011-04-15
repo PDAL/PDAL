@@ -57,7 +57,7 @@ namespace libpc { namespace drivers { namespace oci {
 void OCISchemaGenericErrorHandler (void * ctx, const char* message, ...);
 void OCISchemaStructuredErrorHandler (void * userData, xmlErrorPtr error);
 
-class Schema
+class LIBPC_DLL Schema
 {
 public:
     Schema(std::string xml, std::string xmlschema);
