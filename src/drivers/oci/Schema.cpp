@@ -37,17 +37,40 @@
 #include <libpc/Utils.hpp>
 
 #include <sstream>
-#include <map>
-#include <algorithm>
+
 
 
 namespace libpc { namespace drivers { namespace oci {
 
-Schema::Schema()
+
+void OCISchemaGenericErrorHandler 
+    (void * userData, xmlErrorPtr error)
+{
+    std::ostringstream oss;
+    
+    oss << "Generic XML error: '" << error->message <<"' ";
+    oss << "on line " << error->line;
+    throw schema_error(oss.str());
+}
+
+
+Schema::Schema(std::string xml, std::string xmlschema)
 
 {
 
     LIBXML_TEST_VERSION
+
+
+    
+        
+    // No network access
+    // http://xmlsoft.org/html/libxml-parser.html#xmlParserOption
+    m_doc = xmlReadMemory(&(xml[0]), xml.size(), "noname.xml", NULL, XML_PARSE_NONET);
+    if (m_doc == NULL) {
+        throw schema_error("Failed to parse document");
+    }
+    
+    
     return;
 }
 
