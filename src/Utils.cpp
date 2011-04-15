@@ -79,7 +79,7 @@ std::istream* Utils::openFile(std::string const& filename, bool asBinary)
     if (!Utils::fileExists(filename))
         throw libpc_error("File not found: " + filename);
 
-    std::ios::openmode mode = std::ios::out;
+    std::ios::openmode mode = std::ios::in;
     if (asBinary)
       mode |= std::ios::binary;
 
@@ -93,7 +93,7 @@ std::istream* Utils::openFile(std::string const& filename, bool asBinary)
 
 std::ostream* Utils::createFile(std::string const& filename, bool asBinary)
 {
-    std::ios::openmode mode = std::ios::in;
+    std::ios::openmode mode = std::ios::out;
     if (asBinary)
       mode  |= std::ios::binary;
 
