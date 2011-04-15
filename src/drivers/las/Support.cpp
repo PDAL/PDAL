@@ -251,9 +251,10 @@ boost::uint16_t Support::getPointDataSize(PointFormat pointFormat)
     case PointFormat1: return 28;
     case PointFormat2: return 26;
     case PointFormat3: return 34;
+    default:
+        throw invalid_format("point format unsupported");
     }
 
-    throw invalid_format("point format unsupported");
 }
 
 
