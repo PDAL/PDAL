@@ -7,7 +7,7 @@
 ###############################################################################
 SET(LIBPC_UNIT_TEST libpc_test)
 
-SET(LIBPC_UNIT_TEST_SRC
+SET(LIBPC_UNITTEST_TEST_SRC
     BoundsTest.cpp
     CacheFilterTest.cpp
     ChipperTest.cpp
@@ -29,22 +29,53 @@ SET(LIBPC_UNIT_TEST_SRC
     SchemaLayoutTest.cpp
     SchemaTest.cpp
     SignallerTest.cpp
-    Support.cpp
-    Support.hpp
-    TestConfig.cpp
-    TestConfig.hpp
     UtilsTest.cpp
     VectorTest.cpp
-    main.cpp)
+    )
+
+SET(LIBPC_UNITTEST_TEST_INC
+    )
+    
+SET(LIBPC_UNITTEST_CONFIG_SRC
+    Support.cpp
+    TestConfig.cpp
+    main.cpp
+    )
+
+SET(LIBPC_UNITTEST_CONFIG_INC
+    Support.hpp
+    TestConfig.hpp
+    )
+
 
 if (WITH_ORACLE)
     set(LIBPC_OCI_TEST_CPP OCITest.cpp)
 
     FOREACH(file ${LIBPC_OCI_TEST_CPP})
-            SET(LIBPC_UNIT_TEST_SRC "${LIBPC_UNIT_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
+            SET(LIBPC_UNITTEST_TEST_SRC "${LIBPC_UNITTEST_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
     ENDFOREACH(file)
     
 endif (WITH_ORACLE)
+
+
+set(LIBPC_UNITTEST_SOURCES "")
+FOREACH(file ${LIBPC_UNITTEST_TEST_SRC})
+        SET(LIBPC_UNITTEST_SOURCES "${LIBPC_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
+ENDFOREACH(file)
+FOREACH(file ${LIBPC_UNITTEST_TEST_INC})
+        SET(LIBPC_UNITTEST_SOURCES "${LIBPC_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
+ENDFOREACH(file)
+FOREACH(file ${LIBPC_UNITTEST_CONFIG_SRC})
+        SET(LIBPC_UNITTEST_SOURCES "${LIBPC_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
+ENDFOREACH(file)
+FOREACH(file ${LIBPC_UNITTEST_CONFIG_INC})
+        SET(LIBPC_UNITTEST_SOURCES "${LIBPC_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
+ENDFOREACH(file)
+
+source_group("Header Files" FILES ${LIBPC_UNITTEST_TEST_INC})
+source_group("Header Files\\config" FILES ${LIBPC_UNITTEST_CONFIG_INC})
+source_group("Source Files" FILES ${LIBPC_UNITTEST_TEST_SRC})
+source_group("Source Files\\config" FILES ${LIBPC_UNITTEST_CONFIG_SRC})
 
 
 INCLUDE_DIRECTORIES(
@@ -53,7 +84,7 @@ INCLUDE_DIRECTORIES(
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR})
 
-ADD_EXECUTABLE(${LIBPC_UNIT_TEST} ${LIBPC_UNIT_TEST_SRC} )
+ADD_EXECUTABLE(${LIBPC_UNIT_TEST} ${LIBPC_UNITTEST_SOURCES})
 
 set_target_properties(${LIBPC_UNIT_TEST} PROPERTIES COMPILE_DEFINITIONS LIBPC_DLL_IMPORT)
 
