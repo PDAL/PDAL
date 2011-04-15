@@ -41,6 +41,7 @@
 #include <libpc/drivers/oci/Reader.hpp>
 
 #include <string>
+#include <stdarg.h>
 
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
@@ -53,7 +54,7 @@
 namespace libpc { namespace drivers { namespace oci {
 
 
-void OCISchemaGenericErrorHandler (void * userData, xmlErrorPtr error);
+void OCISchemaGenericErrorHandler (void * ctx, const char* message, ...);
 void OCISchemaStructuredErrorHandler (void * userData, xmlErrorPtr error);
 
 class Schema
