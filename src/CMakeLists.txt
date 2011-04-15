@@ -175,6 +175,7 @@ set(LIBPC_DRIVERS_OCI_HPP
   ${LIBPC_HEADERS_DIR}/drivers/oci/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/drivers/oci/oci_wrapper.h
   ${LIBPC_HEADERS_DIR}/drivers/oci/Common.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/oci/Schema.hpp
 )
 
 set (LIBPC_DRIVERS_OCI_CPP 
@@ -183,6 +184,7 @@ set (LIBPC_DRIVERS_OCI_CPP
   ./drivers/oci/Reader.cpp
   ./drivers/oci/Iterator.cpp
   ./drivers/oci/Writer.cpp
+  ./drivers/oci/Schema.cpp
 )
    
 FOREACH(file ${LIBPC_DRIVERS_OCI_HPP})
@@ -348,7 +350,8 @@ target_link_libraries(${APPS_CPP_DEPENDENCIES}
   ${GEOTIFF_LIBRARY}
   ${GDAL_LIBRARY}
   ${LASZIP_LIBRARY}
-  ${Boost_LIBRARIES})
+  ${Boost_LIBRARIES}
+  ${LIBXML2_LIBRARIES})
 
 
 set_target_properties(${LIBPC_LIB_NAME}
