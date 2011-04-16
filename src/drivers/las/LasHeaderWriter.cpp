@@ -43,6 +43,7 @@
 #include "LasHeaderWriter.hpp"
 
 #include <libpc/drivers/las/Header.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 
 namespace libpc { namespace drivers { namespace las {
@@ -183,11 +184,24 @@ void LasHeaderWriter::write()
     } 
 
     // 3-6. GUID data
-    uint8_t d16[16] = { 0 };
-    boost::uuids::uuid g = m_header.GetProjectId();
-    memcpy(d16,g.data,16);
-    Utils::write_n(m_ostream, d16, 16);
-    
+    {
+        boost::uint8_t d[16];
+        boost::uuids::uuid u = m_header.GetProjectId();
+        // BUG: this following is to maintain compatability with the liblas driver
+        // I have no idea why I need to do this.
+        d[0] = u.data[3];
+        d[1] = u.data[2];
+        d[2] = u.data[1];
+        d[3] = u.data[0];
+        d[4] = u.data[5];
+        d[5] = u.data[4];
+        d[6] = u.data[7];
+        d[7] = u.data[6];
+        for (int i=8; i<16; i++)
+            d[i] = u.data[i];
+        Utils::write_n(m_ostream, d, 16);
+    }
+
     // 7. Version major
     n1 = m_header.GetVersionMajor();
     assert(1 == n1);

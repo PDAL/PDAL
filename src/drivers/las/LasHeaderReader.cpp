@@ -44,6 +44,7 @@
 
 #include <libpc/Utils.hpp>
 #include <libpc/drivers/las/Header.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
@@ -90,11 +91,14 @@ void LasHeaderReader::read(Schema& schema)
     m_header.SetReserved(n2);
 
     // 4-7. Project ID
-    uint8_t d16[16];
-    Utils::read_n(d16, m_istream, sizeof(d16));
-    boost::uuids::uuid u;
-    memcpy(&u, d16, 16);
-    m_header.SetProjectId(u);
+    {
+        boost::uint8_t d[16];
+        Utils::read_n(d, m_istream, 16);
+        boost::uuids::uuid u;
+        for (int i=0; i<16; i++)
+            u.data[i] = d[i];
+        m_header.SetProjectId(u);
+    }
 
     // 8. Version major
     Utils::read_n(n1, m_istream, sizeof(n1));
