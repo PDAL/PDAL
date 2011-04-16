@@ -49,6 +49,7 @@ class LIBPC_DLL Writer
 {
 public:
     Writer(Stage& prevStage);
+    virtual ~Writer() {}
 
     // Implement this in your concrete classes to return a constant string
     // as the name of the stage.  Use upper camel case, with spaces between

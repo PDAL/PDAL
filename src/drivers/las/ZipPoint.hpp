@@ -32,68 +32,45 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_WRITER_HPP
-#define INCLUDED_DRIVERS_LAS_WRITER_HPP
+#ifndef INCLUDED_DRIVERS_LAS_ZIPPOINT_HPP
+#define INCLUDED_DRIVERS_LAS_ZIPPOINT_HPP
 
-#include <libpc/libpc.hpp>
 
-#include <libpc/Writer.hpp>
-#include <libpc/drivers/las/Header.hpp>
-#include <libpc/drivers/las/SummaryData.hpp>
+#include <libpc/drivers/las/Support.hpp>
 
 // liblaszip
 class LASzipper;
+class LASitem;
 
 namespace libpc { namespace drivers { namespace las {
 
-class ZipPoint;
-
-class LIBPC_DLL LasWriter : public Writer
+class ZipPoint
 {
 public:
-    LasWriter(Stage& prevStage, std::ostream&);
-    ~LasWriter();
+    ZipPoint(PointFormat);
+    ~ZipPoint();
 
-    const std::string& getName() const;
+//    void ConstructVLR(VariableRecord&) const;
 
-    void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
-    void setPointFormat(PointFormat);
-    void setDate(boost::uint16_t dayOfYear, boost::uint16_t year);
+    // these will return false iff we find a laszip VLR and it doesn't match
+    // the point format this object wasd constructed with
+//    bool ValidateVLR(std::vector<VariableRecord> const& vlrs) const;
+//    bool ValidateVLR(const VariableRecord& vlr) const;
     
-    void setProjectId(const boost::uuids::uuid&);
-
-    // up to 32 chars (default is "libPC")
-    void setSystemIdentifier(const std::string& systemId); 
-    
-    // up to 32 chars (default is "libPC x.y.z")
-    void setGeneratingSoftware(const std::string& softwareId);
-
-    // default false
-    void setCompressed(bool);
-
-protected:
-    // this is called once before the loop with the writeBuffer calls
-    virtual void writeBegin();
-
-    // called repeatedly, until out of data
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
-
-    // called once, after the writeBuffer calls
-    virtual void writeEnd();
+//    bool IsZipVLR(const VariableRecord& vlr) const;
 
 private:
-    std::ostream& m_ostream;
-    LasHeader m_lasHeader;
-    boost::uint32_t m_numPointsWritten;
-    bool m_isCompressed;
-    SummaryData m_summaryData;
-    LASzipper* m_zipper;
-    ZipPoint* m_zipPoint;
+    void ConstructItems(PointFormat);
 
-    LasWriter& operator=(const LasWriter&); // not implemented
-    LasWriter(const LasWriter&); // not implemented
+public: // for now
+    unsigned int m_num_items;
+    LASitem* m_items;
+    unsigned char** m_lz_point;
+    unsigned char* m_lz_point_data;
+    unsigned int m_lz_point_size;
 };
 
-} } } // namespaces
+} } } // namespace
 
-#endif
+
+#endif // LIBLAS_DETAIL_ZIPPOINT_HPP_INCLUDED

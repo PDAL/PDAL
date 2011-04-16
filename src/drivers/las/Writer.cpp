@@ -35,6 +35,13 @@
 #include <libpc/drivers/las/Writer.hpp>
 
 #include "LasHeaderWriter.hpp"
+
+// local
+#include "ZipPoint.hpp"
+
+// laszip
+#include <laszip/laszipper.hpp>
+
 #include <libpc/exceptions.hpp>
 #include <libpc/Stage.hpp>
 #include <libpc/SchemaLayout.hpp>
@@ -51,8 +58,17 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
     , m_ostream(ostream)
     , m_numPointsWritten(0)
     , m_isCompressed(false)
+    , m_zipper(NULL)
+    , m_zipPoint(NULL)
 {
     return;
+}
+
+
+LasWriter::~LasWriter()
+{
+    delete m_zipper;
+    delete m_zipPoint;
 }
 
 
@@ -136,6 +152,50 @@ void LasWriter::writeBegin()
 
     m_summaryData.reset();
 
+    if (m_lasHeader.Compressed())
+    {
+        delete m_zipper;
+        delete m_zipPoint;
+        m_zipper = NULL;
+        m_zipPoint = NULL;
+
+        try
+        {
+            m_zipper = new LASzipper();
+        }
+        catch(...)
+        {
+            delete m_zipper;
+            m_zipper = NULL;
+            throw libpc_error("Error opening compression engine (1)");
+        }
+
+        PointFormat format = m_lasHeader.getPointFormat();
+        m_zipPoint = new ZipPoint(format);
+
+        unsigned int stat = 1;
+        try
+        {
+            stat = m_zipper->open(m_ostream, m_zipPoint->m_num_items, m_zipPoint->m_items, LASzip::DEFAULT_COMPRESSION);
+        }
+        catch(...)
+        {
+            delete m_zipper;
+            delete m_zipPoint;
+            m_zipper = NULL;
+            m_zipPoint = NULL;
+            throw libpc_error("Error opening compression engine (3)");
+        }
+        if (stat != 0)
+        {
+            delete m_zipper;
+            delete m_zipPoint;
+            m_zipper = NULL;
+            m_zipPoint = NULL;
+            throw libpc_error("Error opening compression engine (2)");
+        }
+    }
+
     return;
 }
 
@@ -218,7 +278,20 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
             Utils::write_field<boost::uint16_t>(p, blue);
         }
 
-        Utils::write_n(m_ostream, buf, Support::getPointDataSize(pointFormat));
+        if (m_zipPoint)
+        {
+            for (unsigned int i=0; i<m_zipPoint->m_lz_point_size; i++)
+            {
+                m_zipPoint->m_lz_point_data[i] = buf[i];
+                //printf("%d %d\n", v[i], i);
+            }
+            bool ok = m_zipper->write(m_zipPoint->m_lz_point);
+            assert(ok);
+        }
+        else
+        {
+            Utils::write_n(m_ostream, buf, Support::getPointDataSize(pointFormat));
+        }
 
         ++numValidPoints;
 

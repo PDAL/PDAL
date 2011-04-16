@@ -114,6 +114,7 @@ ENDFOREACH(file)
 set (LIBPC_DRIVERS_LAS_HPP
   ./drivers/las/LasHeaderReader.hpp
   ./drivers/las/LasHeaderWriter.hpp
+  ./drivers/las/ZipPoint.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Header.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Reader.hpp
@@ -131,6 +132,7 @@ set (LIBPC_DRIVERS_LAS_CPP
   ./drivers/las/SummaryData.cpp
   ./drivers/las/Support.cpp
   ./drivers/las/Writer.cpp
+  ./drivers/las/ZipPoint.cpp
 )
   
 FOREACH(file ${LIBPC_DRIVERS_LAS_HPP})
