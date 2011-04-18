@@ -50,6 +50,7 @@ Controller::Controller()
     , m_cameraZ(m_defaultCameraZ)
     , m_numPoints(0)
     , m_points(NULL)
+    , m_colors(NULL)
     , m_minx(0.0f)
     , m_miny(0.0f)
     , m_minz(0.0f)
@@ -187,10 +188,17 @@ const float* Controller::getPoints() const
 }
  
 
-void Controller::setPoints(const float* points, int numPoints)
+const boost::uint16_t* Controller::getColors() const
+{
+    return m_colors;
+}
+
+
+void Controller::setPoints(const float* points, const boost::uint16_t* colors, int numPoints)
 {
     m_numPoints = numPoints;
     m_points = points;
+    m_colors = colors;
 }
 
 

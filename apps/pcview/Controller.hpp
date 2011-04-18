@@ -37,6 +37,7 @@
 
 #include <deque>
 
+#include <boost/cstdint.hpp>
 
 class Command;
 
@@ -66,7 +67,8 @@ public:
 
     int getNumPoints() const;
     const float* getPoints() const;
-    void setPoints(const float* points, int numPoints);
+    const boost::uint16_t* getColors() const;
+    void setPoints(const float* points, const boost::uint16_t* colors, int numPoints);
 
     void setBounds(float minx, float miny, float minz, float maxx, float maxy, float maxz);
     void getBounds(float& minx, float& miny, float& minz, float& maxx, float& maxy, float& maxz, float& delx, float& dely, float& delz);
@@ -94,6 +96,7 @@ private:
 
     int m_numPoints;
     const float* m_points;
+    const boost::uint16_t* m_colors;
 
     float m_minx, m_miny, m_minz, m_maxx, m_maxy, m_maxz;
 

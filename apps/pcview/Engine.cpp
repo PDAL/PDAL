@@ -133,6 +133,7 @@ void Engine::reset()
 
     controller.reset();
 
+    delete m_arcBall;
     m_arcBall = new ArcBallControl(controller.getWindowSizeW(), controller.getWindowSizeH());
 
     m_scale = 1.0;
@@ -229,6 +230,7 @@ void Engine::doKeyboard(unsigned char key, int /*x*/, int /*y*/)
         break;
 
     case 27: // ESC key
+    case 'q':
         controller.pushCommand(new CommandExit());
         break;
 
@@ -355,8 +357,10 @@ void Engine::doDisplay()
     glTranslated(-minx-delx/2.0,-miny-dely/2.0,-minz-delx/2.0);
 
     const float* points = controller.getPoints();
+    const boost::uint16_t* colors = controller.getColors();
     const int numPoints = controller.getNumPoints();
     
+#if 0
     // draw points
     glBegin(GL_POINTS);
     glColor3f(1,1,1);
@@ -365,10 +369,36 @@ void Engine::doDisplay()
         float x = points[i];
         float y = points[i+1];
         float z = points[i+2];
-        glVertex3f(x,y,z);
+
+        if (colors != NULL)
+        {
+            boost::uint16_t r = colors[i];
+            boost::uint16_t g = colors[i+1];
+            boost::uint16_t b = colors[i+2];
+
+            glColor3us(r, g, b);
+        }
+
+        glVertex3f(x, y, z);
     }
     glEnd();
+#else
+    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glColorPointer(3, GL_UNSIGNED_SHORT, 0, colors);
+    glVertexPointer(3, GL_FLOAT, 0, points);
+    
+    glBegin(GL_POINTS);
+    for (int i=0; i<numPoints; i++)
+    {
+        glArrayElement(i);
+    }
+    glEnd();
+    //glDrawElements(GL_POINTS, numPoints, GL_FLOAT, points);
+#endif
 
+    if (0)
+    {
     // draw cube
     glBegin(GL_LINES);
     
@@ -410,7 +440,9 @@ void Engine::doDisplay()
     glVertex3f(maxx,maxy,maxz);
 
     glEnd();
+    }
 
+#if 0
     // put indicator at orgin
     glBegin(GL_LINE_STRIP);
     glColor3f(1,1,1);
@@ -419,6 +451,7 @@ void Engine::doDisplay()
     glVertex3f(minx, miny, minz+0.2f*delz);
     glVertex3f(minx+0.2f*delx, miny, minz);
     glEnd();
+#endif
 
     glFlush();
 
