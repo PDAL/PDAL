@@ -56,17 +56,17 @@ void ColorFilter::checkImpedance()
 {
     Schema& schema = getSchemaRef();
 
-    Dimension dimZ(Dimension::Field_Z, Dimension::Uint8);
+    Dimension dimZ(Dimension::Field_Z, Dimension::Int32);
     if (schema.hasDimension(dimZ) == false)
     {
-        throw impedance_invalid("color filter does not have Z/uint8 field");
+        throw impedance_invalid("color filter does not have Z/Int32 field");
     }
 
-    Dimension dimRed(Dimension::Field_Red, Dimension::Uint8);     
-    Dimension dimGreen(Dimension::Field_Green, Dimension::Uint8);
-    Dimension dimBlue(Dimension::Field_Blue, Dimension::Uint8);
+    Dimension dimRed(Dimension::Field_Red, Dimension::Uint16);
+    Dimension dimGreen(Dimension::Field_Green, Dimension::Uint16);
+    Dimension dimBlue(Dimension::Field_Blue, Dimension::Uint16);
 
-    // are there already u8 fields for color?
+    // are there already u16 fields for color?
     if (!schema.hasDimension(dimRed))
     {
         schema.addDimension(dimRed);
@@ -93,35 +93,38 @@ const std::string& ColorFilter::getName() const
 
 void ColorFilter::processBuffer(PointBuffer& data) const
 {
-    boost::uint32_t numPoints = data.getNumPoints();
+    const boost::uint32_t numPoints = data.getNumPoints();
 
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
 
-    int fieldIndexR = schema.getDimensionIndex(Dimension::Field_Red, Dimension::Float);
-    int fieldIndexG = schema.getDimensionIndex(Dimension::Field_Green, Dimension::Float);
-    int fieldIndexB = schema.getDimensionIndex(Dimension::Field_Blue, Dimension::Float);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Uint8);
+    const int indexR = schema.getDimensionIndex(Dimension::Field_Red, Dimension::Uint16);
+    const int indexG = schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint16);
+    const int indexB = schema.getDimensionIndex(Dimension::Field_Blue, Dimension::Uint16);
+    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+    const Dimension& zDim = schema.getDimension(indexZ);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        float z = data.getField<float>(pointIndex, offsetZ);
-        boost::uint8_t red, green, blue;
-        this->getColor(z, red, green, blue);
+        const boost::int32_t zraw = data.getField<boost::int32_t>(pointIndex, indexZ);
+        const double z = zDim.applyScaling(zraw);
 
-        // now we store the 3 u8's in the point data...
-        data.setField<boost::uint8_t>(pointIndex, fieldIndexR, red);
-        data.setField<boost::uint8_t>(pointIndex, fieldIndexG, green);
-        data.setField<boost::uint8_t>(pointIndex, fieldIndexB, blue);
+        boost::uint16_t red, green, blue;
+        this->getColor_F64_U16(z, red, green, blue);
+
+        // now we store the 3 u16's in the point data...
+        data.setField<boost::uint16_t>(pointIndex, indexR, red);
+        data.setField<boost::uint16_t>(pointIndex, indexG, green);
+        data.setField<boost::uint16_t>(pointIndex, indexB, blue);
+
         data.setNumPoints(pointIndex+1);
-
     }
 
     return;
 }
 
 
-void ColorFilter::getColor(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const
+void ColorFilter::getColor_F32_U8(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const
 {
     double fred, fgreen, fblue;
 
@@ -132,6 +135,22 @@ void ColorFilter::getColor(float value, boost::uint8_t& red, boost::uint8_t& gre
     red = (boost::uint8_t)(fred * vmax);
     green = (boost::uint8_t)(fgreen * vmax);
     blue = (boost::uint8_t)(fblue * vmax);
+
+    return;
+}
+
+
+void ColorFilter::getColor_F64_U16(double value, boost::uint16_t& red, boost::uint16_t& green, boost::uint16_t& blue) const
+{
+    double fred, fgreen, fblue;
+
+    const Range<double>& zrange = getBounds().dimensions()[2];
+    Color::interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(), fred, fblue, fgreen);
+
+    const double vmax = (std::numeric_limits<boost::uint16_t>::max)();
+    red = (boost::uint16_t)(fred * vmax);
+    green = (boost::uint16_t)(fgreen * vmax);
+    blue = (boost::uint16_t)(fblue * vmax);
 
     return;
 }

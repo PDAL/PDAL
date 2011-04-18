@@ -103,11 +103,6 @@ void PointBuffer::setSpatialBounds(const Bounds<double>& bounds)
 }
 
 
-boost::uint8_t* PointBuffer::getData(std::size_t index) const
-{
-    return m_data.get() + m_pointSize * index;
-}
-
 void PointBuffer::setData(boost::uint8_t* data, std::size_t index)
 {
     memcpy(m_data.get() + m_pointSize * index, data, getSchemaLayout().getByteSize());
@@ -119,42 +114,12 @@ boost::uint32_t PointBuffer::getNumPoints() const
     return m_numPoints;
 }
 
+
 void PointBuffer::getData(boost::uint8_t** data, std::size_t* array_size) const
 {
     *array_size = getSchemaLayout().getByteSize();
     *data = (uint8_t*) malloc (*array_size);
     memcpy(*data, m_data.get(), *array_size);
-}
-
-void PointBuffer::copyPointFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer)
-{
-    assert(getSchemaLayout() == srcPointBuffer.getSchemaLayout());
-
-    boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
-    boost::uint8_t* dest = getData(destPointIndex);
-    std::size_t len = getSchemaLayout().getByteSize();
-
-    memcpy(dest, src, len);
-
-    assert(m_numPoints <= m_capacity);
-
-    return;
-}
-
-
-void PointBuffer::copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer, std::size_t numPoints)
-{
-    assert(getSchemaLayout() == srcPointBuffer.getSchemaLayout());
-
-    boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
-    boost::uint8_t* dest = getData(destPointIndex);
-    std::size_t len = getSchemaLayout().getByteSize();
-
-    memcpy(dest, src, len * numPoints);
-    
-    assert(m_numPoints <= m_capacity);
-
-    return;
 }
 
 

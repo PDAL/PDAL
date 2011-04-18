@@ -70,16 +70,16 @@ boost::uint32_t DecimationFilterSequentialIterator::readImpl(PointBuffer& dstDat
     boost::uint32_t numPointsNeeded = dstData.getCapacity();
     assert(dstData.getNumPoints() == 0);
 
+    // set up buffer to be filled by prev stage
+    PointBuffer srcData(dstData.getSchemaLayout(), numPointsNeeded);
+
     while (numPointsNeeded > 0)
     {
-        // set up buffer to be filled by prev stage
-        PointBuffer srcData(dstData.getSchemaLayout(), numPointsNeeded);
-
         // read from prev stage
         const boost::uint64_t srcStartIndex = getPrevIterator().getIndex();
         const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
         assert(numSrcPointsRead == srcData.getNumPoints());
-        assert(numSrcPointsRead <= numPointsNeeded);
+        //assert(numSrcPointsRead <= numPointsNeeded);
 
         // we got no data, and there is no more to get -- exit the loop
         if (numSrcPointsRead == 0) break;
@@ -89,6 +89,7 @@ boost::uint32_t DecimationFilterSequentialIterator::readImpl(PointBuffer& dstDat
         const boost::uint32_t numPointsAdded = m_filter.processBuffer(dstData, srcData, srcStartIndex);
 
         numPointsNeeded -= numPointsAdded;
+        //printf(".");fflush(stdout);
     }
 
     const boost::uint32_t numPointsAchieved = dstData.getNumPoints();

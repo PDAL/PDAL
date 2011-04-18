@@ -73,7 +73,10 @@ public:
     }
 
     /// Fetch total byte size -- sum of all dimensions
-    std::size_t getByteSize() const;
+    inline std::size_t getByteSize() const
+    {
+        return m_byteSize;
+    }
 
     const DimensionLayout& getDimensionLayout(std::size_t index) const
     {

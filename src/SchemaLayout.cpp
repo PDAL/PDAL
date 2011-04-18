@@ -131,12 +131,6 @@ void SchemaLayout::calculateSizes()
 }
 
 
-std::size_t SchemaLayout::getByteSize() const
-{
-    return m_byteSize;
-}
-
-
 std::ostream& operator<<(std::ostream& os, SchemaLayout const&)
 {
     ////using property_tree::ptree;

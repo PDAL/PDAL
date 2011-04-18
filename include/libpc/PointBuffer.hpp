@@ -87,7 +87,7 @@ public:
     inline boost::uint32_t getCapacity() const { return m_capacity; }
 
     // schema (number and kinds of fields) for a point in this buffer
-    const SchemaLayout& getSchemaLayout() const
+    inline const SchemaLayout& getSchemaLayout() const
     {
         return m_schemaLayout;
     }
@@ -105,13 +105,42 @@ public:
     // bulk copy all the fields from the given point into this object
     // NOTE: this is only legal if the src and dest schemas are exactly the same
     // (later, this will be implemented properly, to handle the general cases slowly and the best case quickly)
-    void copyPointFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer);
+    inline void copyPointFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer)
+    {
+        assert(getSchemaLayout() == srcPointBuffer.getSchemaLayout());
+
+        const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
+        boost::uint8_t* dest = getData(destPointIndex);
+        const std::size_t len = getSchemaLayout().getByteSize();
+
+        memcpy(dest, src, len);
+
+        assert(m_numPoints <= m_capacity);
+
+        return;
+    }
     
     // same as above, but copies N points
-    void copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer, std::size_t numPoints);
+    inline void copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer, std::size_t numPoints)
+    {
+        assert(getSchemaLayout() == srcPointBuffer.getSchemaLayout());
+
+        const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
+        boost::uint8_t* dest = getData(destPointIndex);
+        const std::size_t len = getSchemaLayout().getByteSize();
+
+        memcpy(dest, src, len * numPoints);
+
+        assert(m_numPoints <= m_capacity);
+
+        return;
+    }
 
     // access to the raw memory
-    boost::uint8_t* getData(std::size_t pointIndex) const;
+    inline boost::uint8_t* getData(std::size_t pointIndex) const
+    {
+        return m_data.get() + m_pointSize * pointIndex;
+    }
 
     // copy in raw data
     void setData(boost::uint8_t* data, std::size_t pointIndex);

@@ -122,11 +122,16 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
 
     const PointIndexes indexes(schema, pointFormat);
 
+    const bool hasTime = Support::hasTime(pointFormat);
+    const bool hasColor = Support::hasColor(pointFormat);
+    const int pointByteCount = Support::getPointDataSize(pointFormat);
+
+    assert(100 > pointByteCount);
     boost::uint8_t buf[100]; // set to something larger than the largest point format requires
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        Utils::read_n(buf, stream, Support::getPointDataSize(pointFormat));
+        Utils::read_n(buf, stream, pointByteCount);
 
         boost::uint8_t* p = buf;
 
@@ -161,13 +166,13 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
             data.setField<boost::uint16_t>(pointIndex, indexes.PointSourceId, pointSourceId);
         }
 
-        if (Support::hasTime(pointFormat))
+        if (hasTime)
         {
             const double time = Utils::read_field<double>(p);
             data.setField<double>(pointIndex, indexes.Time, time);
         }
 
-        if (Support::hasColor(pointFormat))
+        if (hasColor)
         {
             const boost::uint16_t red = Utils::read_field<boost::uint16_t>(p);
             const boost::uint16_t green = Utils::read_field<boost::uint16_t>(p);

@@ -70,15 +70,25 @@ boost::uint32_t DecimationFilter::processBuffer(PointBuffer& dstData, const Poin
 
     boost::uint32_t numPointsAdded = 0;
 
-    for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
+    boost::uint32_t srcIndex = 0;
+
+    // find start point
+    if ((srcStartIndex+srcIndex) % m_step != 0)
     {
-        if ((srcStartIndex+srcIndex) % m_step == 0)
-        {
-            dstData.copyPointFast(dstIndex, srcIndex, srcData);
-            dstData.setNumPoints(dstIndex+1);
-            ++dstIndex;
-            ++numPointsAdded;
-        }
+        srcIndex += m_step - ( (srcStartIndex+srcIndex) % m_step ) ;
+        assert((srcStartIndex+srcIndex) % m_step == 0);
+    }
+
+    while (srcIndex < numSrcPoints)
+    {
+        assert((srcStartIndex+srcIndex) % m_step == 0);
+        
+        dstData.copyPointFast(dstIndex, srcIndex, srcData);
+        dstData.setNumPoints(dstIndex+1);
+        ++dstIndex;
+        ++numPointsAdded;
+        
+        srcIndex += m_step;
     }
     
     assert(dstIndex <= dstData.getCapacity());
