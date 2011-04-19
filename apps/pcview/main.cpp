@@ -293,17 +293,66 @@ static void readFile(Controller& controller, const string& file)
 }
 
 
+static void readFileSimple(Controller& controller, const string& file)
+{
+    boost::timer timer;
+
+    libpc::Stage* reader = new libpc::drivers::las::LasReader(file);
+    
+    libpc::Stage* decimator = new libpc::filters::DecimationFilter(*reader, factor);
+
+    libpc::Stage* colorizer = new libpc::filters::ColorFilter(*decimator);
+
+    const boost::uint32_t numPoints = (boost::uint32_t)colorizer->getNumPoints();
+
+#if 1
+    ThreadArgs t1arg(controller, *colorizer, 0, numPoints);
+    givePointsToEngine(&t1arg);
+    const boost::uint32_t numRead1 = t1arg.m_numRead;
+    cout << "moved " << numRead1 << " points into buffer1 done\n";
+#else
+    ThreadArgs t1arg(controller, *colorizer, 0, numPoints/2);
+    ThreadArgs t2arg(controller, *colorizer, numPoints/2, numPoints/2);
+    boost::thread t1(givePointsToEngine, &t1arg);
+    boost::thread t2(givePointsToEngine, &t2arg);
+
+    t1.join();
+    t2.join();
+
+    const boost::uint32_t numRead1 = t1arg.m_numRead;
+    const boost::uint32_t numRead2 = t2arg.m_numRead;
+
+    cout << "moved " << numRead1 << " points into buffer1 done\n";
+    cout << "moved " << numRead2 << " points into buffer2 done\n";
+#endif
+
+    cout << "done reading points\n";
+    cout << "  elapsed time: " << timer.elapsed() << " seconds" << std::endl;
+    
+    const libpc::Bounds<double>& bounds = colorizer->getBounds();
+    controller.setBounds((float)bounds.getMinimum(0), (float)bounds.getMinimum(1), (float)bounds.getMinimum(2), 
+                         (float)bounds.getMaximum(0), (float)bounds.getMaximum(1), (float)bounds.getMaximum(2));
+
+    delete colorizer;
+    delete decimator;
+    delete reader;
+
+    return;
+}
+
+
 int main(int argc, char** argv)
 {
     Controller controller;
-    //argc=1;
+
     if (argc==1)
     {
         readFakeFile(controller);
     }
     else
     {
-        readFile(controller, argv[1]);
+        //readFile(controller, argv[1]);
+        readFileSimple(controller, argv[1]);
     }
 
     controller.setWindowSize(500,500);
