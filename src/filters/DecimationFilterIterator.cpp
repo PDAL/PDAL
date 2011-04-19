@@ -50,7 +50,10 @@ DecimationFilterSequentialIterator::DecimationFilterSequentialIterator(const Dec
 
 boost::uint64_t DecimationFilterSequentialIterator::skipImpl(boost::uint64_t count)
 {
-    return naiveSkipImpl(count);
+    //return naiveSkipImpl(count);
+
+    // BUG: this is not exactly correct
+    return getPrevIterator().skip(count * m_filter.getStep());
 }
 
 
@@ -78,7 +81,7 @@ boost::uint32_t DecimationFilterSequentialIterator::readImpl(PointBuffer& dstDat
         // read from prev stage
         const boost::uint64_t srcStartIndex = getPrevIterator().getIndex();
         const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
-        assert(numSrcPointsRead == srcData.getNumPoints());
+        assert(numSrcPointsRead <= srcData.getNumPoints());
         //assert(numSrcPointsRead <= numPointsNeeded);
 
         // we got no data, and there is no more to get -- exit the loop
