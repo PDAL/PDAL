@@ -48,9 +48,6 @@ Controller::Controller()
     , m_cameraX(m_defaultCameraX)
     , m_cameraY(m_defaultCameraY)
     , m_cameraZ(m_defaultCameraZ)
-    , m_numPoints(0)
-    , m_points(NULL)
-    , m_colors(NULL)
     , m_minx(0.0f)
     , m_miny(0.0f)
     , m_minz(0.0f)
@@ -176,29 +173,19 @@ void Controller::setCamera(double x, double y, double z)
 }
 
 
-int Controller::getNumPoints() const
+std::vector<Controller::Data> Controller::getDataVector() const
 {
-    return m_numPoints;
-}
- 
-
-const float* Controller::getPoints() const
-{
-    return m_points;
-}
- 
-
-const boost::uint16_t* Controller::getColors() const
-{
-    return m_colors;
+    return m_dataVector;
 }
 
 
-void Controller::setPoints(const float* points, const boost::uint16_t* colors, int numPoints)
+void Controller::addPoints(float* points, boost::uint16_t* colors, int numPoints)
 {
-    m_numPoints = numPoints;
-    m_points = points;
-    m_colors = colors;
+    Data data;
+    data.points = points;
+    data.colors = colors;
+    data.numPoints = numPoints;
+    m_dataVector.push_back(data);
 }
 
 

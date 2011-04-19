@@ -36,6 +36,7 @@
 #define INCLUDED_PCVIEW_CONTROLLER_H
 
 #include <deque>
+#include <vector>
 
 #include <boost/cstdint.hpp>
 
@@ -65,10 +66,14 @@ public:
     double getCameraZ() const;
     void setCamera(double x, double y, double z);
 
-    int getNumPoints() const;
-    const float* getPoints() const;
-    const boost::uint16_t* getColors() const;
-    void setPoints(const float* points, const boost::uint16_t* colors, int numPoints);
+    typedef struct
+    {
+        int numPoints;
+        float* points;
+        boost::uint16_t* colors;
+    } Data;
+    std::vector<Data> getDataVector() const;
+    void addPoints(float* points, boost::uint16_t* colors, int numPoints);
 
     void setBounds(float minx, float miny, float minz, float maxx, float maxy, float maxz);
     void getBounds(float& minx, float& miny, float& minz, float& maxx, float& maxy, float& maxz, float& delx, float& dely, float& delz);
@@ -94,9 +99,7 @@ private:
     double m_cameraY;
     double m_cameraZ;
 
-    int m_numPoints;
-    const float* m_points;
-    const boost::uint16_t* m_colors;
+    std::vector<Data> m_dataVector;
 
     float m_minx, m_miny, m_minz, m_maxx, m_maxy, m_maxz;
 

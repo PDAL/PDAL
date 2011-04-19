@@ -345,6 +345,8 @@ void Engine::doDisplay()
     // handle arc rotation
     glMultMatrixf(m_arcBall->getTransform());
 
+    float zAdjust = 1.0f;
+
     // scale and translate scale from model coords to view coords
     float minx, miny, minz, maxx, maxy, maxz, delx, dely, delz;
     controller.getBounds(minx, miny, minz, maxx, maxy, maxz, delx, dely, delz);
@@ -352,52 +354,11 @@ void Engine::doDisplay()
     float rangeMax = delx;
     if (dely > rangeMax) rangeMax = dely;
     if (delz > rangeMax) rangeMax = delz;
-    glScaled(1.0/rangeMax, 1.0/rangeMax, 1.0/rangeMax);
+    glScaled(1.0/rangeMax, 1.0/rangeMax, zAdjust * 1.0/rangeMax);
 
-    glTranslated(-minx-delx/2.0,-miny-dely/2.0,-minz-delx/2.0);
+    glTranslated(-minx-delx/2.0,-miny-dely/2.0,(-minz-delx/2.0)/zAdjust);
 
-    const float* points = controller.getPoints();
-    const boost::uint16_t* colors = controller.getColors();
-    const int numPoints = controller.getNumPoints();
-    
-#if 0
-    // draw points
-    glBegin(GL_POINTS);
-    glColor3f(1,1,1);
-    for (int i=0; i<numPoints*3; i+=3)
-    {
-        float x = points[i];
-        float y = points[i+1];
-        float z = points[i+2];
-
-        if (colors != NULL)
-        {
-            boost::uint16_t r = colors[i];
-            boost::uint16_t g = colors[i+1];
-            boost::uint16_t b = colors[i+2];
-
-            glColor3us(r, g, b);
-        }
-
-        glVertex3f(x, y, z);
-    }
-    glEnd();
-#else
-    glEnableClientState(GL_COLOR_ARRAY);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glColorPointer(3, GL_UNSIGNED_SHORT, 0, colors);
-    glVertexPointer(3, GL_FLOAT, 0, points);
-    
-    glBegin(GL_POINTS);
-    for (int i=0; i<numPoints; i++)
-    {
-        glArrayElement(i);
-    }
-    glEnd();
-    //glDrawElements(GL_POINTS, numPoints, GL_FLOAT, points);
-#endif
-
-    if (0)
+    if (1)
     {
     // draw cube
     glBegin(GL_LINES);
@@ -440,7 +401,6 @@ void Engine::doDisplay()
     glVertex3f(maxx,maxy,maxz);
 
     glEnd();
-    }
 
 #if 0
     // put indicator at orgin
@@ -452,6 +412,65 @@ void Engine::doDisplay()
     glVertex3f(minx+0.2f*delx, miny, minz);
     glEnd();
 #endif
+    }
+
+    for (size_t v=0; v<controller.getDataVector().size(); v++)
+    {
+        const float* points = controller.getDataVector()[v].points;
+        const boost::uint16_t* colors = controller.getDataVector()[v].colors;
+        const int numPoints = controller.getDataVector()[v].numPoints;
+        
+#if 0
+        // draw points
+        glBegin(GL_POINTS);
+        glColor3f(1,1,1);
+        for (int i=0; i<numPoints*3; i+=3)
+        {
+            float x = points[i];
+            float y = points[i+1];
+            float z = points[i+2];
+
+            if (colors != NULL)
+            {
+                boost::uint16_t r = colors[i];
+                boost::uint16_t g = colors[i+1];
+                boost::uint16_t b = colors[i+2];
+
+                glColor3us(r, g, b);
+            }
+
+            glVertex3f(x, y, z);
+        }
+        glEnd();
+#else
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(3, GL_FLOAT, 0, points);
+
+        if (colors)
+        {
+            glEnableClientState(GL_COLOR_ARRAY);
+            glColorPointer(3, GL_UNSIGNED_SHORT, 0, colors);
+        }
+        else
+        {
+            glColor3f(1,1,1);
+        }
+
+        glBegin(GL_POINTS);
+        {
+            if (!colors)
+            {
+                glColor3f(1,1,1);
+            }
+            for (int i=0; i<numPoints; i++)
+            {
+                glArrayElement(i);
+            }
+        }
+        glEnd();
+        //glDrawElements(GL_POINTS, numPoints, GL_FLOAT, points);
+#endif
+    }
 
     glFlush();
 

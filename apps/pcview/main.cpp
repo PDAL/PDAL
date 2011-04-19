@@ -35,6 +35,7 @@
 #include <stdlib.h>
 
 #include <boost/timer.hpp>
+#include <boost/thread.hpp>
 
 #include "Engine.hpp"
 #include "Controller.hpp"
@@ -53,9 +54,6 @@
 #include <libpc/Iterator.hpp>
 
 using namespace std;
-
-static float* g_points = NULL;
-static boost::uint16_t* g_colors = NULL;
 
 
 static float myrand_gaussian() // returns [0..1]
@@ -83,8 +81,8 @@ static float myrand_normal() // returns [0..1]
 static void readFakeFile(Controller& controller)
 {
     const int numPoints = 10000;
-    g_points = new float[numPoints * 3];
-    g_colors = new boost::uint16_t[numPoints * 3];
+    float* points = new float[numPoints * 3];
+    boost::uint16_t* colors = new boost::uint16_t[numPoints * 3];
 
     const float minx = 100.0;
     const float maxx = 200.0;
@@ -102,9 +100,9 @@ static void readFakeFile(Controller& controller)
         float y = miny + dely*myrand_normal();
         float z = minz + delz*myrand_gaussian();
 
-        g_points[i] = (float)x;
-        g_points[i+1] = (float)y;
-        g_points[i+2] = (float)z;
+        points[i] = (float)x;
+        points[i+1] = (float)y;
+        points[i+2] = (float)z;
 
         double red,green,blue;
         libpc::Color::interpolateColor(z,minz,maxz,red,green,blue);
@@ -114,58 +112,69 @@ static void readFakeFile(Controller& controller)
         boost::uint16_t g16 = (boost::uint16_t)(green * vmax);
         boost::uint16_t b16 = (boost::uint16_t)(blue * vmax);
 
-        g_colors[i] = r16;
-        g_colors[i+1] = g16;
-        g_colors[i+2] = b16;
+        colors[i] = r16;
+        colors[i+1] = g16;
+        colors[i+2] = b16;
     }
 
-    controller.setPoints(g_points, g_colors, numPoints);
+    controller.addPoints(points, colors, numPoints);
     controller.setBounds(minx, miny, minz, maxx, maxy, maxz);
 
     return;
 }
 
-
-static void readFile(Controller& controller, const string& file)
-{
-    boost::timer timer;
-
-    const int maxPoints = 10 * 1000;
-
-    libpc::Stage* reader = new libpc::drivers::las::LasReader(file);
-    //libpc::Stage* reader = new libpc::drivers::liblas::LiblasReader(file);
-    libpc::Stage* stage = reader;
     
-    printf("given %d points\n", (boost::uint32_t)stage->getNumPoints());
+boost::uint32_t maxPoints = 1000 * 1000;
+boost::uint32_t factor = 100; //(boost::uint32_t)reader->getNumPoints() / maxPoints;
+bool useColor = true;
 
-    libpc::Stage* decimator = NULL;
-    if (reader->getNumPoints() > maxPoints)
-    {
-        boost::uint32_t factor = (boost::uint32_t)reader->getNumPoints() / maxPoints;
-        decimator = new libpc::filters::DecimationFilter(*stage, factor);
-        stage = decimator;
-    }
 
-    libpc::Stage* colorizer = NULL;
-    {
-        colorizer = new libpc::filters::ColorFilter(*stage);
-        stage = colorizer;
-    }
+class ThreadArgs
+{
+public:
+    ThreadArgs(Controller& controller, libpc::Stage& stage, boost::uint32_t startPoint, boost::uint32_t numPoints)
+        : m_controller(controller)
+        , m_stage(stage)
+        , m_startPoint(startPoint)
+        , m_numPoints(numPoints)
+        , m_numRead(0)
+    { }
 
-    boost::uint32_t numPoints = (boost::uint32_t)stage->getNumPoints();
-    printf("reading of %d points started\n", numPoints);
-    std::cout << "Elapsed time: " << timer.elapsed() << " seconds" << std::endl;
+    Controller& m_controller;
+    libpc::Stage& m_stage;
+    boost::uint32_t m_startPoint;
+    boost::uint32_t m_numPoints;
+    boost::uint32_t m_numRead;
 
-    const libpc::Schema& schema = stage->getSchema();
+private:
+    ThreadArgs(); // nope
+    ThreadArgs& operator=(const ThreadArgs&); //nope
+};
+
+static boost::mutex mutex;
+
+
+static void givePointsToEngine(ThreadArgs* threadArgs)
+{
+    Controller& controller = threadArgs->m_controller;
+    libpc::Stage& stage = threadArgs->m_stage;
+    boost::uint32_t startPoint = threadArgs->m_startPoint;
+    boost::uint32_t numPoints = threadArgs->m_numPoints;
+
+    const libpc::Schema& schema = stage.getSchema();
     const libpc::SchemaLayout schemaLayout(schema);
+
+    libpc::SequentialIterator* iter = stage.createSequentialIterator();
     libpc::PointBuffer buffer(schemaLayout, numPoints);
+    iter->skip(startPoint);
+    const boost::uint32_t numRead = iter->read(buffer);
 
-    libpc::SequentialIterator* iter = stage->createSequentialIterator();
-    boost::uint32_t numRead = iter->read(buffer);
-    assert(numPoints==numRead);
-
-    printf("reading into buffer done\n", numPoints);
-    std::cout << "Elapsed time: " << timer.elapsed() << " seconds" << std::endl;
+    float* points = new float[numRead * 3];
+    boost::uint16_t *colors = NULL;
+    if (useColor)
+    {
+        colors = new boost::uint16_t[numRead * 3];
+    }
 
     const int offsetX = schema.getDimensionIndex(libpc::Dimension::Field_X, libpc::Dimension::Int32);
     const int offsetY = schema.getDimensionIndex(libpc::Dimension::Field_Y, libpc::Dimension::Int32);
@@ -178,9 +187,6 @@ static void readFile(Controller& controller, const string& file)
     const libpc::Dimension& yDim = schema.getDimension(offsetY);
     const libpc::Dimension& zDim = schema.getDimension(offsetZ);
 
-    g_points = new float[numRead * 3];
-    g_colors = new boost::uint16_t[numRead * 3];
-
     int cnt=0;
     for (boost::uint32_t i=0; i<numRead; i++)
     {
@@ -188,37 +194,100 @@ static void readFile(Controller& controller, const string& file)
         const boost::int32_t yraw = buffer.getField<boost::int32_t>(i, offsetY);
         const boost::int32_t zraw = buffer.getField<boost::int32_t>(i, offsetZ);
         
-        const boost::int16_t r16 = buffer.getField<boost::int16_t>(i, offsetR);
-        const boost::int16_t g16 = buffer.getField<boost::int16_t>(i, offsetG);
-        const boost::int16_t b16 = buffer.getField<boost::int16_t>(i, offsetB);
-
         const double x = xDim.applyScaling(xraw);
         const double y = yDim.applyScaling(yraw);
         const double z = zDim.applyScaling(zraw);
 
-        g_points[cnt] = (float)x;
-        g_points[cnt+1] = (float)y;
-        g_points[cnt+2] = (float)z;
+        points[cnt] = (float)x;
+        points[cnt+1] = (float)y;
+        points[cnt+2] = (float)z;
 
-        g_colors[cnt] = r16;
-        g_colors[cnt+1] = g16;
-        g_colors[cnt+2] = b16;
+        if (useColor)
+        {
+            const boost::int16_t r16 = buffer.getField<boost::int16_t>(i, offsetR);
+            const boost::int16_t g16 = buffer.getField<boost::int16_t>(i, offsetG);
+            const boost::int16_t b16 = buffer.getField<boost::int16_t>(i, offsetB);
+
+            colors[cnt] = r16;
+            colors[cnt+1] = g16;
+            colors[cnt+2] = b16;
+        }
 
         cnt += 3;
     }
 
-    const libpc::Bounds<double>& bounds = stage->getBounds();
+    mutex.lock();
+    controller.addPoints(points, colors, numRead);
+    mutex.unlock();
 
-    controller.setPoints(g_points, g_colors, numRead);
+    delete iter;
+
+    threadArgs->m_numRead = numRead;
+
+    return;
+}
+
+
+static void readFile(Controller& controller, const string& file)
+{
+    boost::timer timer;
+
+    libpc::Stage* reader = new libpc::drivers::las::LasReader(file);
+    libpc::Stage* stage = reader;
+    
+    cout << "file has " << stage->getNumPoints() << " points\n";
+
+    libpc::Stage* decimator = NULL;
+    if (factor > 0)
+    {
+        assert(maxPoints * factor >= stage->getNumPoints()); // make sure we cover the whole file
+        decimator = new libpc::filters::DecimationFilter(*stage, factor);
+        stage = decimator;
+    }
+
+    libpc::Stage* colorizer = NULL;
+    if (useColor) 
+    {
+        colorizer = new libpc::filters::ColorFilter(*stage);
+        stage = colorizer;
+    }
+
+    boost::uint32_t numPoints = (boost::uint32_t)stage->getNumPoints();
+    numPoints = std::min(numPoints, maxPoints);
+    cout << "ready to read " << numPoints << " points\n";
+    cout << "  elapsed time: " << timer.elapsed() << " seconds" << std::endl;
+
+#if 0
+    ThreadArgs t1arg(controller, *stage, 0, numPoints);
+    givePointsToEngine(&t1arg);
+    const boost::uint32_t numRead1 = t1arg.m_numRead;
+    cout << "moved " << numRead1 << " points into buffer1 done\n";
+#else
+    ThreadArgs t1arg(controller, *stage, 0, numPoints/2);
+    ThreadArgs t2arg(controller, *stage, numPoints/2, numPoints/2);
+    boost::thread t1(givePointsToEngine, &t1arg);
+    boost::thread t2(givePointsToEngine, &t2arg);
+
+    t1.join();
+    t2.join();
+
+    const boost::uint32_t numRead1 = t1arg.m_numRead;
+    const boost::uint32_t numRead2 = t2arg.m_numRead;
+
+    cout << "moved " << numRead1 << " points into buffer1 done\n";
+    cout << "moved " << numRead2 << " points into buffer2 done\n";
+#endif
+
+    cout << "done reading points\n";
+    cout << "  elapsed time: " << timer.elapsed() << " seconds" << std::endl;
+    
+    const libpc::Bounds<double>& bounds = stage->getBounds();
     controller.setBounds((float)bounds.getMinimum(0), (float)bounds.getMinimum(1), (float)bounds.getMinimum(2), 
                          (float)bounds.getMaximum(0), (float)bounds.getMaximum(1), (float)bounds.getMaximum(2));
 
     delete colorizer;
     delete decimator;
     delete reader;
-
-    printf("reading of %d points done\n", numRead);
-    std::cout << "Elapsed time: " << timer.elapsed() << " seconds" << std::endl;
 
     return;
 }
@@ -244,8 +313,8 @@ int main(int argc, char** argv)
 
     engine.initialize(argc, argv);
 
-    delete[] g_points;
-    delete[] g_colors;
+    //delete[] g_points;
+    //delete[] g_colors;
 
     return 0;
 }
