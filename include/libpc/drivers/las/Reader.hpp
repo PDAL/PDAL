@@ -71,7 +71,7 @@ public:
     libpc::RandomIterator* createRandomIterator() const;
 
     // this is called by the stage's iterator
-    boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream) const;
+    boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft) const;
 
     PointFormat getPointFormat() const;
     boost::uint8_t getVersionMajor() const;

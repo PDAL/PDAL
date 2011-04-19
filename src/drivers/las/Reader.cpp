@@ -111,9 +111,11 @@ libpc::RandomIterator* LasReader::createRandomIterator() const
 }
 
 
-boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream) const
+boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream, boost::uint64_t numPointsLeft) const
 {
-    boost::uint32_t numPoints = data.getCapacity();
+    // we must not read more points than are left in the file
+    const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(), numPointsLeft);
+    const boost::uint32_t numPoints = (boost::uint32_t)std::min<boost::uint64_t>(numPoints64, std::numeric_limits<boost::uint32_t>::max());
 
     const LasHeader& lasHeader = getLasHeader();
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
