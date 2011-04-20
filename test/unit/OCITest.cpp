@@ -93,6 +93,7 @@ std::string ReadXML(std::string filename)
     // char* data;
     std::vector<char> data;
     if (infile->good()){
+        infile->seekg(0, std::ios::end);
         size = infile->tellg();
         data.resize(static_cast<std::vector<char>::size_type>(size));
         // data = new char [size];
@@ -107,8 +108,7 @@ std::string ReadXML(std::string filename)
     } 
     else 
     {   
-        delete infile;
-        return std::string("");
+        throw libpc_error("unable to open file!");
         // return data;
     }
     
