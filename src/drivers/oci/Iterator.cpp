@@ -121,6 +121,21 @@ boost::uint32_t IteratorBase::unpackOracleData(PointBuffer& data)
     const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
     const int indexTime = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Double);
     const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification, Dimension::Uint8);
+    const int indexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity, Dimension::Uint16);
+
+
+    const int indexReturnNumber = schema.getDimensionIndex(Dimension::Field_ReturnNumber, Dimension::Uint8);
+    const int indexNumberOfReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns, Dimension::Uint8);
+    const int indexScanDirectionFlag = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag, Dimension::Uint8);
+    const int indexEdgeOfFlightLine = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine, Dimension::Uint8);
+    const int indexScanAngleRank = schema.getDimensionIndex(Dimension::Field_ScanAngleRank, Dimension::Int8);
+    const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData, Dimension::Uint8);
+    const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId, Dimension::Uint16);
+
+    const int indexRed = schema.getDimensionIndex(Dimension::Field_Red, Dimension::Uint16);
+    const int indexGreen = schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint16);
+    const int indexBlue = schema.getDimensionIndex(Dimension::Field_Blue, Dimension::Uint16);
+    
 
     const Dimension& dimX = schema.getDimension(indexX);
     const Dimension& dimY = schema.getDimension(indexY);
@@ -134,17 +149,33 @@ boost::uint32_t IteratorBase::unpackOracleData(PointBuffer& data)
     double offsety = dimY.getNumericOffset();
     double offsetz = dimZ.getNumericOffset();
      
-    FiveDimensionOCI* d;
+    EightDimensionOCI* d;
+    
     for (boost::uint32_t i = 0; i < static_cast<boost::uint32_t>(m_block->num_points); i++)
     {
-        boost::uint32_t byte_position = i*sizeof(FiveDimensionOCI);
+        boost::uint32_t byte_position = i*sizeof(EightDimensionOCI);
         
-        d = (FiveDimensionOCI*)(&(*m_block->chunk)[byte_position]);
+        d = (EightDimensionOCI*)(&(*m_block->chunk)[byte_position]);
         SWAP_BE_TO_LE(d->x);
         SWAP_BE_TO_LE(d->y);
         SWAP_BE_TO_LE(d->z);
-        SWAP_BE_TO_LE(d->t);
-        SWAP_BE_TO_LE(d->c);
+        SWAP_BE_TO_LE(d->time);
+        SWAP_BE_TO_LE(d->cls);
+        SWAP_BE_TO_LE(d->intensity);
+
+        SWAP_BE_TO_LE(d->returnNumber);
+        SWAP_BE_TO_LE(d->numberOfReturns);
+        SWAP_BE_TO_LE(d->scanDirFlag);
+        SWAP_BE_TO_LE(d->edgeOfFlightLine);
+        SWAP_BE_TO_LE(d->scanAngleRank);
+        SWAP_BE_TO_LE(d->userData);
+        SWAP_BE_TO_LE(d->pointSourceId);
+
+        SWAP_BE_TO_LE(d->red);
+        SWAP_BE_TO_LE(d->green);
+        SWAP_BE_TO_LE(d->blue);
+        SWAP_BE_TO_LE(d->alpha);
+        
         SWAP_BE_TO_LE(d->blk_id);
         SWAP_BE_TO_LE(d->pc_id);
         
@@ -158,9 +189,23 @@ boost::uint32_t IteratorBase::unpackOracleData(PointBuffer& data)
         data.setField(point_position, indexY, y);
         data.setField(point_position, indexZ, z);
         
-        data.setField(point_position, indexTime, d->t);
-        data.setField(point_position, indexClassification, static_cast<boost::uint8_t>(d->c));
-        
+        data.setField(point_position, indexTime, d->time);
+        data.setField(point_position, indexClassification, static_cast<boost::uint8_t>(d->cls));
+        data.setField<boost::int16_t>(point_position, indexIntensity, static_cast<boost::int16_t>(d->intensity));
+
+        data.setField<boost::int8_t>(point_position, indexReturnNumber, d->returnNumber);
+        data.setField<boost::int8_t>(point_position, indexNumberOfReturns, d->numberOfReturns);
+        data.setField<boost::int8_t>(point_position, indexScanDirectionFlag, d->scanDirFlag);
+        data.setField<boost::int8_t>(point_position, indexEdgeOfFlightLine, d->edgeOfFlightLine);
+        data.setField<boost::int8_t>(point_position, indexScanAngleRank, d->scanAngleRank);
+        data.setField<boost::int8_t>(point_position, indexUserData, d->userData);
+        data.setField<boost::uint16_t>(point_position, indexPointSourceId, d->pointSourceId);
+
+
+        data.setField<boost::uint16_t>(point_position, indexRed, d->red);
+        data.setField<boost::uint16_t>(point_position, indexGreen, d->green);
+        data.setField<boost::uint16_t>(point_position, indexBlue, d->blue);
+                
         point_position++;
         data.setNumPoints(point_position);
     

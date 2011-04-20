@@ -125,8 +125,31 @@ struct FiveDimensionOCI
     double z;
     double t;
     double c;
-    uint32_t blk_id;
-    uint32_t pc_id;
+    boost::uint32_t blk_id;
+    boost::uint32_t pc_id;
+};
+
+struct EightDimensionOCI
+{
+    double x;
+    double y;
+    double z;
+    double time;
+    double cls;
+    double intensity;
+    boost::int8_t returnNumber;
+    boost::int8_t numberOfReturns;
+    boost::int8_t scanDirFlag;
+    boost::int8_t edgeOfFlightLine;
+    boost::int8_t scanAngleRank;
+    boost::int8_t userData;
+    boost::int16_t pointSourceId;
+    boost::uint16_t red;
+    boost::uint16_t green;
+    boost::uint16_t blue;
+    boost::uint16_t alpha;
+    boost::uint32_t blk_id;
+    boost::uint32_t pc_id;
 };
 
 
