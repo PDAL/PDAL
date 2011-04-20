@@ -36,6 +36,10 @@
 #define INCLUDED_DRIVERS_OCI_SCHEMA_HPP
 
 #include <libpc/libpc.hpp>
+#include <libpc/Schema.hpp>
+#include <libpc/SchemaLayout.hpp>
+#include <libpc/Dimension.hpp>
+#include <libpc/DimensionLayout.hpp>
 
 #include <libpc/drivers/oci/Common.hpp>
 #include <libpc/drivers/oci/Reader.hpp>
@@ -71,7 +75,10 @@ public:
 
 
 protected:
-    void StructuredErrorHandler (void * userData, xmlErrorPtr error);
+
+    void LoadSchema();
+    Dimension::DataType GetDimensionType(std::string const& interpretation);
+    Dimension::Field GetDimensionField(std::string const& name, position);
     
 private:
     
@@ -91,12 +98,13 @@ private:
     DocPtr m_schema_doc;
     
     SchemaParserCtxtPtr m_schema_parser_ctx;
-    SchemaPtr m_schema;
+    SchemaPtr m_schema_ptr;
     SchemaValidCtxtPtr m_schema_valid_ctx;
     
     xmlParserOption m_doc_options;
     
     void* m_global_context;
+    libpc::Schema m_schema;
     
     
     

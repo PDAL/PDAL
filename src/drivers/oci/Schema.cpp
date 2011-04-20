@@ -38,6 +38,9 @@
 
 #include <sstream>
 #include <iostream>
+#include <list>
+#include <cstdlib>
+
 
 struct XMLDocDeleter
 {
@@ -221,12 +224,12 @@ Schema::Schema(std::string const& xml, std::string const &xsd)
                                         m_global_context);
 
 
-    m_schema = SchemaPtr(
+    m_schema_ptr = SchemaPtr(
                     xmlSchemaParse(static_cast<xmlSchemaParserCtxtPtr>(m_schema_parser_ctx.get())), 
                     SchemaDeleter());
 
     m_schema_valid_ctx = SchemaValidCtxtPtr(
-                            xmlSchemaNewValidCtxt(static_cast<xmlSchemaPtr>(m_schema.get())),
+                            xmlSchemaNewValidCtxt(static_cast<xmlSchemaPtr>(m_schema_ptr.get())),
                             SchemaValidCtxtDeleter());
 
     xmlSchemaSetValidErrors(static_cast<xmlSchemaValidCtxtPtr>(m_schema_valid_ctx.get()), 
@@ -239,6 +242,8 @@ Schema::Schema(std::string const& xml, std::string const &xsd)
     
     if (valid_schema != 0)
         throw schema_error("Document did not validate against schema!");
+    
+    LoadSchema();
     return;
 }
 
@@ -248,5 +253,225 @@ Schema::~Schema()
 }
 
 
+static void
+print_element_names(xmlNode * a_node)
+{
+    xmlNode *cur_node = NULL;
+
+    for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
+        if (cur_node->type == XML_ELEMENT_NODE) {
+            printf("node type: Element, name: %s\n", cur_node->name);
+        }
+
+        print_element_names(cur_node->children);
+    }
+}
+void Schema::LoadSchema()
+{
+    std::list<DimensionLayout> layouts;
+    
+    xmlDocPtr doc = static_cast<xmlDocPtr>(m_doc.get());
+    xmlNode* root = xmlDocGetRootElement(doc);
+    // print_element_names(root);
+
+    
+    if (strcasecmp((const char*)root->name, "PointCloudSchema"))
+        throw schema_error("First node of document was not named 'PointCloudSchema'");
+    
+    xmlNode* dimension = root->children;
+    
+    while(dimension != NULL)
+    {
+        if (dimension->type != XML_ELEMENT_NODE) 
+        {
+            dimension = dimension->next;
+            continue;
+        }
+        
+        // if (strcasecmp((const char*)dimension->name, "dimension"))
+        // {
+        //     throw schema_error("Children element of PointCloudSchema are not named 'dimension'");
+        // }
+
+        xmlNode* properties = dimension->children;
+        
+        std::string name;
+        boost::uint32_t size;
+        boost::uint32_t position;
+        std::string description;
+        std::string interpretation;
+        double offset;
+        double scale;
+        double minimum;
+        double maximum;
+        
+        while(properties != NULL)
+        {
+            if (properties->type != XML_ELEMENT_NODE) 
+            {
+                properties = properties->next;
+                continue;
+            }
+            
+            if (!strcasecmp((const char*)properties->name, "name"))
+            {
+                xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
+                if (!n) throw schema_error("Unable to fetch name!");
+                name = std::string((const char*)n);
+                xmlFree(n);
+                std::cout << "Dimension name: " << name << std::endl;
+            }
+
+            if (!strcasecmp((const char*)properties->name, "size"))
+            {
+                xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
+                if (!n) throw schema_error("Unable to fetch size!");
+                int s = std::atoi((const char*)n);
+                if (s < 1) 
+                {
+                    throw schema_error("Dimension size is < 1!");
+                }
+                xmlFree(n);
+                size = static_cast<boost::uint32_t>(s);
+                std::cout << "Dimension size: " << size << std::endl;
+            }
+
+            if (!strcasecmp((const char*)properties->name, "position"))
+            {
+                xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
+                if (!n) throw schema_error("Unable to fetch position!");
+                int p = std::atoi((const char*)n);
+                if (p < 1) 
+                {
+                    throw schema_error("Dimension position is < 1!");
+                }
+                xmlFree(n);
+                position = static_cast<boost::uint32_t>(p);
+                std::cout << "Dimension position: " << position << std::endl;
+            }
+            if (!strcasecmp((const char*)properties->name, "description"))
+            {
+                xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
+                if (!n) throw schema_error("Unable to fetch description!");
+                description = std::string((const char*)n);
+                xmlFree(n);
+            }
+            if (!strcasecmp((const char*)properties->name, "interpretation"))
+            {
+                xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
+                if (!n) throw schema_error("Unable to fetch interpretation!");
+                interpretation = std::string((const char*)n);
+                xmlFree(n);
+            }
+
+            if (!strcasecmp((const char*)properties->name, "minimum"))
+            {
+                xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
+                if (!n) throw schema_error("Unable to fetch minimum value!");
+                
+                minimum = std::atof((const char*)n);
+                xmlFree(n);
+                std::cout << "Dimension minimum: " << minimum << std::endl;
+            }
+
+            if (!strcasecmp((const char*)properties->name, "maximum"))
+            {
+                xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
+                if (!n) throw schema_error("Unable to fetch maximum value!");
+                
+                maximum = std::atof((const char*)n);
+                xmlFree(n);
+                std::cout << "Dimension maximum: " << maximum << std::endl;
+            }
+
+            if (!strcasecmp((const char*)properties->name, "offset"))
+            {
+                xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
+                if (!n) throw schema_error("Unable to fetch offset value!");
+                
+                offset = std::atof((const char*)n);
+                xmlFree(n);
+                std::cout << "Dimension offset: " << offset << std::endl;
+            }
+            if (!strcasecmp((const char*)properties->name, "scale"))
+            {
+                xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
+                if (!n) throw schema_error("Unable to fetch scale value!");
+                
+                scale = std::atof((const char*)n);
+                xmlFree(n);
+                std::cout << "Dimension scale: " << scale << std::endl;
+            }
+
+            // printf("property name: %s\n", properties->name);
+            properties = properties->next;
+        }
+        
+        dimension = dimension->next;
+    }
+    
+}
+
+Dimension::DataType Schema::GetDimensionType(std::string const& interpretation)
+{
+
+    // enum DataType
+    // {
+    //     Int8,
+    //     Uint8,
+    //     Int16,
+    //     Uint16,
+    //     Int32,
+    //     Uint32,
+    //     Int64,
+    //     Uint64,
+    //     Float,       // 32 bits
+    //     Double,       // 64 bits
+    //     Undefined
+    // };
+
+
+    if (!strcasecmp(interpretation.c_str(), "int8_t") || 
+        !strcasecmp(interpretation.c_str(), "int8"))
+        return Dimension::Int8;
+
+    if (!strcasecmp(interpretation.c_str(), "uint8_t") || 
+        !strcasecmp(interpretation.c_str(), "uint8"))
+        return Dimension::UInt8;
+
+    if (!strcasecmp(interpretation.c_str(), "int16_t") || 
+        !strcasecmp(interpretation.c_str(), "int16"))
+        return Dimension::Int16;
+
+    if (!strcasecmp(interpretation.c_str(), "uint16_t") || 
+        !strcasecmp(interpretation.c_str(), "uint16"))
+        return Dimension::UInt16;
+    
+    
+    if (!strcasecmp(interpretation.c_str(), "int32_t") || 
+        !strcasecmp(interpretation.c_str(), "int32"))
+        return Dimension::Int32;
+
+    if (!strcasecmp(interpretation.c_str(), "uint32_t") || 
+        !strcasecmp(interpretation.c_str(), "uint32"))
+        return Dimension::UInt32;
+
+    if (!strcasecmp(interpretation.c_str(), "int64_t") || 
+        !strcasecmp(interpretation.c_str(), "int64"))
+        return Dimension::Int64;
+
+    if (!strcasecmp(interpretation.c_str(), "uint64_t") || 
+        !strcasecmp(interpretation.c_str(), "uint64"))
+        return Dimension::UInt64;
+
+    if (!strcasecmp(interpretation.c_str(), "float"))
+        return Dimension::Float;
+
+    if (!strcasecmp(interpretation.c_str(), "double"))
+        return Dimension::Double;
+
+
+    return Dimension::Undefined;
+}
 
 } } } // namespaces
