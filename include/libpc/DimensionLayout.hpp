@@ -93,6 +93,15 @@ public:
         m_position = v;
     }
 
+    inline bool operator < (DimensionLayout const& dim) const 
+    {
+        return m_position < dim.m_position;
+    }
+    inline bool operator > (DimensionLayout const& dim) const 
+    {
+        return m_position > dim.m_position;
+    }
+
 private:
     Dimension m_dimension;
     std::size_t m_byteOffset;
