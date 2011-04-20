@@ -40,7 +40,7 @@
 #include <iostream>
 #include <list>
 #include <cstdlib>
-
+#include <map>
 
 struct XMLDocDeleter
 {
@@ -268,7 +268,7 @@ print_element_names(xmlNode * a_node)
 }
 void Schema::LoadSchema()
 {
-    std::list<DimensionLayout> layouts;
+    std::map<boost::uint32_t, libpc::Dimension> layouts;
     
     xmlDocPtr doc = static_cast<xmlDocPtr>(m_doc.get());
     xmlNode* root = xmlDocGetRootElement(doc);
@@ -287,11 +287,6 @@ void Schema::LoadSchema()
             dimension = dimension->next;
             continue;
         }
-        
-        // if (strcasecmp((const char*)dimension->name, "dimension"))
-        // {
-        //     throw schema_error("Children element of PointCloudSchema are not named 'dimension'");
-        // }
 
         xmlNode* properties = dimension->children;
         
@@ -407,6 +402,12 @@ void Schema::LoadSchema()
             properties = properties->next;
         }
         
+        Dimension::DataType t = GetDimensionType(interpretation);
+        Dimension::Field f = GetDimensionField(name, position);
+        
+        Dimension d(f, t);
+        
+        layouts.insert(std::pair<boost::uint32_t, libpc::Dimension>(position, d));
         dimension = dimension->next;
     }
     
@@ -437,7 +438,7 @@ Dimension::DataType Schema::GetDimensionType(std::string const& interpretation)
 
     if (!strcasecmp(interpretation.c_str(), "uint8_t") || 
         !strcasecmp(interpretation.c_str(), "uint8"))
-        return Dimension::UInt8;
+        return Dimension::Uint8;
 
     if (!strcasecmp(interpretation.c_str(), "int16_t") || 
         !strcasecmp(interpretation.c_str(), "int16"))
@@ -445,7 +446,7 @@ Dimension::DataType Schema::GetDimensionType(std::string const& interpretation)
 
     if (!strcasecmp(interpretation.c_str(), "uint16_t") || 
         !strcasecmp(interpretation.c_str(), "uint16"))
-        return Dimension::UInt16;
+        return Dimension::Uint16;
     
     
     if (!strcasecmp(interpretation.c_str(), "int32_t") || 
@@ -454,7 +455,7 @@ Dimension::DataType Schema::GetDimensionType(std::string const& interpretation)
 
     if (!strcasecmp(interpretation.c_str(), "uint32_t") || 
         !strcasecmp(interpretation.c_str(), "uint32"))
-        return Dimension::UInt32;
+        return Dimension::Uint32;
 
     if (!strcasecmp(interpretation.c_str(), "int64_t") || 
         !strcasecmp(interpretation.c_str(), "int64"))
@@ -462,7 +463,7 @@ Dimension::DataType Schema::GetDimensionType(std::string const& interpretation)
 
     if (!strcasecmp(interpretation.c_str(), "uint64_t") || 
         !strcasecmp(interpretation.c_str(), "uint64"))
-        return Dimension::UInt64;
+        return Dimension::Uint64;
 
     if (!strcasecmp(interpretation.c_str(), "float"))
         return Dimension::Float;
@@ -472,6 +473,76 @@ Dimension::DataType Schema::GetDimensionType(std::string const& interpretation)
 
 
     return Dimension::Undefined;
+}
+
+Dimension::Field Schema::GetDimensionField(std::string const& name, boost::uint32_t position)
+{
+    
+    if (name.size() == 0)
+    {
+        // Yes, this is scary.  What else can we do?  The user didn't give us a 
+        // name to map to, so we'll just assume the positions are the same as 
+        // our dimension positions
+        for (unsigned int i = 1; i < Dimension::Field_INVALID; ++i)
+        {
+            if (i == position)
+                return static_cast<Dimension::Field>(i);
+        }
+    }
+    
+    if (!strcasecmp(name.c_str(), "X"))
+        return Dimension::Field_X;
+
+    if (!strcasecmp(name.c_str(), "Y"))
+        return Dimension::Field_Y;
+
+    if (!strcasecmp(name.c_str(), "Z"))
+        return Dimension::Field_Z;
+
+    if (!strcasecmp(name.c_str(), "Intensity"))
+        return Dimension::Field_Intensity;
+
+    if (!strcasecmp(name.c_str(), "Return Number"))
+        return Dimension::Field_ReturnNumber;
+
+    if (!strcasecmp(name.c_str(), "Number of Returns"))
+        return Dimension::Field_NumberOfReturns;
+
+    if (!strcasecmp(name.c_str(), "Number of Returns"))
+        return Dimension::Field_NumberOfReturns;
+
+    if (!strcasecmp(name.c_str(), "Scan Direction"))
+        return Dimension::Field_ScanDirectionFlag;
+
+    if (!strcasecmp(name.c_str(), "Flightline Edge"))
+        return Dimension::Field_EdgeOfFlightLine;
+
+    if (!strcasecmp(name.c_str(), "Classification"))
+        return Dimension::Field_Classification;
+
+    if (!strcasecmp(name.c_str(), "Scan Angle Rank"))
+        return Dimension::Field_ScanAngleRank;
+
+    if (!strcasecmp(name.c_str(), "User Data"))
+        return Dimension::Field_UserData;
+
+    if (!strcasecmp(name.c_str(), "Point Source ID"))
+        return Dimension::Field_PointSourceId;
+
+    if (!strcasecmp(name.c_str(), "Time"))
+        return Dimension::Field_Time;
+
+    if (!strcasecmp(name.c_str(), "Red"))
+        return Dimension::Field_Red;
+
+    if (!strcasecmp(name.c_str(), "Green"))
+        return Dimension::Field_Green;
+
+    if (!strcasecmp(name.c_str(), "Blue"))
+        return Dimension::Field_Blue;
+
+
+    return Dimension::Field_INVALID;
 }
 
 } } } // namespaces
