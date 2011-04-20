@@ -85,6 +85,32 @@ public:
     {}
 };
 
+class schema_validation_error : public libpc_error
+{
+public:
+    schema_validation_error(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
+
+class schema_parsing_error : public libpc_error
+{
+public:
+    schema_parsing_error(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
+
+class schema_generic_error : public libpc_error
+{
+public:
+    schema_generic_error(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
+
+
+
 
 #ifdef LIBPC_COMPILER_MSVC
 #define compare_no_case(a,b,n)  _strnicmp( (a), (b), (n) )

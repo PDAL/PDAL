@@ -143,7 +143,6 @@ void LasWriter::writeBegin()
     std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
     std::cout.precision(8);
 
-    std::cout << "scale: " << dimX.getNumericScale() <<" " << dimY.getNumericScale() << " " << dimZ.getNumericScale() << std::endl;
     boost::uint32_t cnt = static_cast<boost::uint32_t>(m_targetNumPointsToWrite);
     m_lasHeader.SetPointRecordsCount(cnt);
 

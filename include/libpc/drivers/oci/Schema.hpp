@@ -42,6 +42,7 @@
 
 #include <string>
 #include <stdarg.h>
+#include <functional>
 
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
@@ -50,6 +51,10 @@
 #include <libxml/tree.h>
 #include <libxml/xinclude.h>
 #include <libxml/xmlIO.h>
+
+#include <boost/shared_ptr.hpp>
+#include <boost/concept_check.hpp>
+#include <boost/function.hpp>
 
 namespace libpc { namespace drivers { namespace oci {
 
@@ -60,17 +65,40 @@ void OCISchemaStructuredErrorHandler (void * userData, xmlErrorPtr error);
 class LIBPC_DLL Schema
 {
 public:
-    Schema(std::string xml, std::string xmlschema);
+    Schema(std::string const& xml, std::string const& xmlschema);
     ~Schema();
 
 
+
+protected:
+    void StructuredErrorHandler (void * userData, xmlErrorPtr error);
+    
 private:
     
     Schema& operator=(const Schema&); // not implemented
     Schema(const Schema&); // not implemented;
     
-    xmlDocPtr m_doc;
-    xmlDocPtr m_schema;
+    // We're going to put all of our libxml2 primatives into shared_ptrs 
+    // that have custom deleters that clean up after themselves so we 
+    // have a good chance at having clean exception-safe code
+    
+    typedef boost::shared_ptr<void> DocPtr;
+    typedef boost::shared_ptr<void> SchemaParserCtxtPtr;    
+    typedef boost::shared_ptr<void> SchemaPtr;
+    typedef boost::shared_ptr<void> SchemaValidCtxtPtr;
+
+    DocPtr m_doc;
+    DocPtr m_schema_doc;
+    
+    SchemaParserCtxtPtr m_schema_parser_ctx;
+    SchemaPtr m_schema;
+    SchemaValidCtxtPtr m_schema_valid_ctx;
+    
+    xmlParserOption m_doc_options;
+    
+    void* m_global_context;
+    
+    
     
 
 };
