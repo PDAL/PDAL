@@ -63,7 +63,7 @@ Reader::Reader(Options& options)
 
     m_querytype = describeQueryType();
     
-    if (m_querytype == QUERY_SDO_PC_BLK)
+    if (m_querytype == QUERY_BLK_TABLE)
         m_block = defineBlock();
     else if (m_querytype == QUERY_SDO_PC)
     {
