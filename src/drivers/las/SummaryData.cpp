@@ -85,7 +85,7 @@ void SummaryData::reset()
 
 void SummaryData::addPoint(double x, double y, double z, int returnNumber)
 {
-    if (returnNumber <= 0 || returnNumber > s_maxNumReturns)
+    if (returnNumber < 0 || returnNumber > s_maxNumReturns)
         throw invalid_point_data("point returnNumber is out of range", 0);
 
     if (m_isFirst)
