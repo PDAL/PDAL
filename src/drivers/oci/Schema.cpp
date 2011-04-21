@@ -42,6 +42,8 @@
 #include <cstdlib>
 #include <map>
 
+#include <string.h>
+
 #ifdef LIBPC_COMPILER_MSVC
 #pragma warning(disable:4996) // "strcmpi is deprecated"
 #endif
