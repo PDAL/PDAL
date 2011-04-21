@@ -32,71 +32,82 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_READER_HPP
-#define INCLUDED_DRIVERS_LAS_READER_HPP
+#include <libpc/MetadataRecord.hpp>
 
-#include <libpc/libpc.hpp>
-
-#include <libpc/Stage.hpp>
-#include <libpc/drivers/las/Header.hpp>
-
+#include <sstream>
 
 namespace libpc
 {
-    class PointBuffer;
+
+
+MetadataRecord::MetadataRecord(const boost::uint8_t* bytes, std::size_t length)
+    : m_bytes(new boost::uint8_t[length])
+    , m_length(length)
+{
+    memcpy(m_bytes.get(), bytes, m_length);
+    return;
 }
 
-namespace libpc { namespace drivers { namespace las {
 
-class LasHeader;
-
-class LIBPC_DLL LasReader : public Stage
+MetadataRecord::MetadataRecord(const MetadataRecord& other)
+    : m_bytes(other.m_bytes)
+    , m_length(other.m_length)
 {
-public:
-    LasReader(const std::string& filename);
+    return;
+}
 
-    const std::string& getName() const;
 
-    const std::string& getFileName() const;
+MetadataRecord::~MetadataRecord()
+{
+    m_length = 0;
+}
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random ) return true;
-        
-        return false;
+
+MetadataRecord& MetadataRecord::operator=(MetadataRecord const& rhs)
+{
+    if (&rhs != this)
+    {
+        m_length = rhs.m_length;
+        m_bytes = rhs.m_bytes;
+    }
+    return *this;
+}
+
+
+bool MetadataRecord::operator==(MetadataRecord const& rhs) const
+{
+    if (m_length == rhs.m_length)
+    {
+        for (std::size_t i=0; i<m_length; i++)
+        {
+            if (m_bytes[i] != rhs.m_bytes[i]) return false;
+        }
+        return true;
     }
 
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const;
-
-    // this is called by the stage's iterator
-    boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft) const;
-
-    int getMetadataRecordCount() const;
-    const MetadataRecord& getMetadataRecord(int index) const;
-
-    PointFormat getPointFormat() const;
-    boost::uint8_t getVersionMajor() const;
-    boost::uint8_t getVersionMinor() const;
-
-    boost::uint64_t getPointDataOffset() const;
-
-protected:
-    const LasHeader& getLasHeader() const { return m_lasHeader; }
-    LasHeader& getLasHeaderRef() { return m_lasHeader; }
-
-    MetadataRecord& getMetadataRecordRef(int index);
-
-private:
-    const std::string m_filename;
-    LasHeader m_lasHeader;
-
-    LasReader& operator=(const LasReader&); // not implemented
-    LasReader(const LasReader&); // not implemented
-};
+    return false;
+}
 
 
-} } } // namespaces
+const boost::shared_array<boost::uint8_t> MetadataRecord::getBytes() const
+{
+    return m_bytes;
+}
 
-#endif
+
+std::size_t MetadataRecord::getLength() const
+{
+    return m_length;
+}
+
+
+std::ostream& operator<<(std::ostream& ostr, const MetadataRecord& metadata)
+{
+    ostr << "MetadataRecord: ";
+    ostr << "  len=" << metadata.getLength();
+    ostr << std::endl;
+    return ostr;
+}
+
+
+} // namespace libpc

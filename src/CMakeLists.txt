@@ -41,7 +41,7 @@ set(LIBPC_BASE_HPP
   ${LIBPC_HEADERS_DIR}/Filter.hpp
   ${LIBPC_HEADERS_DIR}/FilterIterator.hpp
   ${LIBPC_HEADERS_DIR}/Iterator.hpp
-  ${LIBPC_HEADERS_DIR}/Metadata.hpp
+  ${LIBPC_HEADERS_DIR}/MetadataRecord.hpp
   ${LIBPC_HEADERS_DIR}/Vector.hpp  
   ${LIBPC_HEADERS_DIR}/PointBuffer.hpp  
   ${LIBPC_HEADERS_DIR}/PointBufferCache.hpp  
@@ -63,7 +63,7 @@ set(LIBPC_BASE_CPP
   Filter.cpp
   FilterIterator.cpp
   Iterator.cpp
-  Metadata.cpp
+  MetadataRecord.cpp
   Vector.cpp  
   PointBuffer.cpp
   PointBufferCache.cpp
@@ -121,6 +121,7 @@ set (LIBPC_DRIVERS_LAS_HPP
   ${LIBPC_HEADERS_DIR}/drivers/las/SummaryData.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Support.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Writer.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/las/VariableLengthRecord.hpp
 )
  
 set (LIBPC_DRIVERS_LAS_CPP
@@ -131,6 +132,7 @@ set (LIBPC_DRIVERS_LAS_CPP
   ./drivers/las/Reader.cpp
   ./drivers/las/SummaryData.cpp
   ./drivers/las/Support.cpp
+  ./drivers/las/VariableLengthRecord.cpp
   ./drivers/las/Writer.cpp
   ./drivers/las/ZipPoint.cpp
 )

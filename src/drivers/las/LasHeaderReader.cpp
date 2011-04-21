@@ -44,8 +44,10 @@
 
 #include <libpc/Utils.hpp>
 #include <libpc/drivers/las/Header.hpp>
-#include <boost/uuid/uuid_io.hpp>
+#include <libpc/drivers/las/VariableLengthRecord.hpp>
 
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/scoped_array.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
 namespace libpc { namespace drivers { namespace las {
@@ -256,28 +258,29 @@ void LasHeaderReader::read(Schema& schema)
     m_istream.seekg(m_header.GetDataOffset());
     
 
-    if (HasLAS10PadSignature()) {
+    if (hasLAS10PadSignature()) 
+    {
         std::streamsize const current_pos = m_istream.tellg();
         m_istream.seekg(current_pos + 2);
         m_header.SetDataOffset(m_header.GetDataOffset() + 2);
     }
      
-    // only go read VLRs if we have them.
-    if (m_header.GetRecordsCount() > 0)
-        ReadVLRs();
-
-
+    readAllVLRs();
 
     // If we're eof, we need to reset the state
     if (m_istream.eof())
+    {
         m_istream.clear();
+    }
 
     // Seek to the data offset so we can start reading points
     m_istream.seekg(m_header.GetDataOffset());
 
+    return;
 }
 
-bool LasHeaderReader::HasLAS10PadSignature()
+
+bool LasHeaderReader::hasLAS10PadSignature()
 {
     uint8_t const sgn1 = 0xCC;
     uint8_t const sgn2 = 0xDD;
@@ -324,48 +327,58 @@ bool LasHeaderReader::HasLAS10PadSignature()
     return found;
 }
 
-void LasHeaderReader::ReadVLRs()
-{
-#if 0
-    VLRHeader vlrh = { 0 };
 
-    if (m_istream.eof()) {
-        // if we hit the end of the file already, it's because 
-        // we don't have any points.  We still want to read the VLRs 
-        // in that case.
-        m_istream.clear();  
+void LasHeaderReader::readOneVLR()
+{
+    // assumes the stream is already positioned to the beginning
+
+    boost::uint8_t buf[libpc::drivers::las::VariableLengthRecord::s_headerLength];
+
+    Utils::read_n(buf, m_istream, libpc::drivers::las::VariableLengthRecord::s_headerLength);
+    boost::uint8_t* p = buf;
+
+    const boost::uint16_t reserved = Utils::read_field<boost::uint16_t>(p);
+    boost::ignore_unused_variable_warning(reserved);
+
+    boost::uint8_t userId[16];
+    Utils::read_array_field(p, userId, 16);
+
+    const boost::uint16_t recordId = Utils::read_field<boost::uint16_t>(p);
+    const boost::uint16_t recordLenAfterHeader = Utils::read_field<boost::uint16_t>(p);
+
+    boost::uint8_t description[32];
+    Utils::read_array_field(p, description, 32);
+
+    boost::uint8_t* data = new boost::uint8_t[recordLenAfterHeader];
+    Utils::read_n(data, m_istream, recordLenAfterHeader);
+
+    VariableLengthRecord vlr(userId, recordId, recordLenAfterHeader, description, data, recordLenAfterHeader);
+    
+    m_header.getVLRsRef().push_back(vlr);
+
+    delete[] data;
+
+    return;
+}
+
+
+void LasHeaderReader::readAllVLRs()
+{
+    const uint32_t count = m_header.GetRecordsCount();
+    if (count == 0)
+    {
+        return;
     }
 
     // seek to the start of the VLRs
-    m_istream.seekg(GetHeaderSize(), std::ios::beg);
+    m_istream.seekg(m_header.GetHeaderSize(), std::ios::beg);
 
-    uint32_t count = GetRecordsCount();
-    
-    // We set the VLR records count to 0 because AddVLR 
-    // will ++ it each time we add a VLR instance to the 
-    // header.
-    SetRecordsCount(0);
-    for (uint32_t i = 0; i < count; ++i)
+    for (boost::uint32_t i = 0; i < count; ++i)
     {
-        Utils::read_n(vlrh, m_istream, sizeof(VLRHeader));
-
-        uint16_t length = vlrh.recordLengthAfterHeader;
-
-        std::vector<uint8_t> data(length);
-
-        Utils::read_n(data.front(), m_istream, length);
-         
-        VariableRecord vlr;
-        vlr.SetReserved(vlrh.reserved);
-        vlr.SetUserId(std::string(vlrh.userId));
-        vlr.SetDescription(std::string(vlrh.description));
-        vlr.SetRecordLength(vlrh.recordLengthAfterHeader);
-        vlr.SetRecordId(vlrh.recordId);
-        vlr.SetData(data);
-
-        AddVLR(vlr);
+        readOneVLR();
     }
 
+#if 0
     liblas::SpatialReference srs(GetVLRs());    
     SetSRS(srs);
     
@@ -399,10 +412,12 @@ void LasHeaderReader::ReadVLRs()
     }
 #endif
 #endif
+
+    return;
 }
 
 
-void LasHeaderReader::Validate()
+void LasHeaderReader::validate()
 {
     // Check that the point count actually describes the number of points 
     // in the file.  If it doesn't, we're going to throw an error telling 

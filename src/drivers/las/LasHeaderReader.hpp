@@ -66,9 +66,11 @@ private:
     LasHeader& m_header;
     std::istream& m_istream;
 
-    bool HasLAS10PadSignature();
-    void ReadVLRs();
-    void Validate();
+    void readAllVLRs();
+    void readOneVLR();
+
+    bool hasLAS10PadSignature();
+    void validate();
 
     LasHeaderReader& operator=(const LasHeaderReader&); // nope
     LasHeaderReader(const LasHeaderReader&); // nope

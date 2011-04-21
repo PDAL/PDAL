@@ -34,7 +34,12 @@
 
 #include <libpc/Stage.hpp>
 
+#include <boost/concept_check.hpp> // ignore_unused_variable_warning
+
 #include <iostream>
+
+#include <libpc/exceptions.hpp>
+
 
 namespace libpc
 {
@@ -118,15 +123,25 @@ void Stage::setSpatialReference(const SpatialReference& spatialReference)
 }
 
 
-const Metadata::Array& Stage::getMetadata() const
+int Stage::getMetadataRecordCount() const
 {
-    return m_metadataArray;
+    return 0;
 }
 
 
-Metadata::Array& Stage::getMetadata()
+const MetadataRecord& Stage::getMetadataRecord(int index) const
 {
-    return m_metadataArray;
+    // the default behaviour is to have no records at all...
+    boost::ignore_unused_variable_warning(index);
+    throw libpc_error("no such metadata record");
+}
+
+
+MetadataRecord& Stage::getMetadataRecordRef(int index)
+{
+    // the default behaviour is to have no records at all...
+    boost::ignore_unused_variable_warning(index);
+    throw libpc_error("no such metadata record");
 }
 
 
@@ -137,7 +152,6 @@ void Stage::setCoreProperties(const Stage& stage)
     this->setPointCountType(stage.getPointCountType());
     this->setBounds(stage.getBounds());
     this->setSpatialReference(stage.getSpatialReference());
-    this->getMetadata() = stage.getMetadata();
 
     return;
 }

@@ -54,6 +54,7 @@
 #include <libpc/Vector.hpp>
 #include <libpc/Bounds.hpp>
 #include <libpc/drivers/las/Support.hpp>
+#include <libpc/drivers/las/VariableLengthRecord.hpp>
 
 namespace libpc { namespace drivers { namespace las {
 
@@ -334,6 +335,9 @@ public:
     /// Sets whether or not the points are compressed.
     void SetCompressed(bool b);
 
+    const std::vector<VariableLengthRecord>& getVLRs() const;
+    std::vector<VariableLengthRecord>& getVLRsRef();
+
     //void to_rst(std::ostream& os) const;
     //void to_xml(std::ostream& os) const;
     //void to_json(std::ostream& os) const;
@@ -385,6 +389,8 @@ private:
     PointFormat m_pointFormat;
 
     Bounds<double> m_bounds;
+
+    std::vector<VariableLengthRecord> m_vlrs;
 
     LasHeader& operator=(const LasHeader&); // nope
     LasHeader(const LasHeader&); // nope

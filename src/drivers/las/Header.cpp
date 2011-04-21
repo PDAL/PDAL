@@ -464,6 +464,19 @@ void LasHeader::initialize()
     m_isCompressed = false;
 }
 
+
+std::vector<VariableLengthRecord>& LasHeader::getVLRsRef()
+{
+    return m_vlrs;
+}
+
+
+const std::vector<VariableLengthRecord>& LasHeader::getVLRs() const
+{
+    return m_vlrs;
+}
+
+
 //bool SameVLRs(std::string const& name, boost::uint16_t id, liblas::VariableRecord const& record)
 //{
 //    if (record.GetUserId(false) == name) {

@@ -32,88 +32,45 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/Metadata.hpp>
+#ifndef INCLUDED_DRIVERS_LAS_VARIABLELENGTHRECORD_HPP
+#define INCLUDED_DRIVERS_LAS_VARIABLELENGTHRECORD_HPP
 
-#include <sstream>
+#include <libpc/libpc.hpp>
 
-namespace libpc
+#include <libpc/MetadataRecord.hpp>
+
+#include <iostream>
+
+namespace libpc { namespace drivers { namespace las {
+    
+
+class LIBPC_DLL VariableLengthRecord : public MetadataRecord
 {
+public:
+    // makes a local copy of the bytes buffer, which is a shared ptr among by all copes of the metadata record
+    VariableLengthRecord(boost::uint8_t userId[16], 
+                         boost::uint16_t recordId,
+                         boost::uint16_t recordLenAfterHeader,
+                         boost::uint8_t description[32],
+                         const boost::uint8_t* bytes, std::size_t len);
+    VariableLengthRecord(const VariableLengthRecord&);
+
+    ~VariableLengthRecord();
+
+    bool operator==(const VariableLengthRecord&) const;
+    VariableLengthRecord& operator=(const VariableLengthRecord&);
+
+    static const int s_headerLength = 54;
+
+private:
+    boost::uint16_t m_reserved;
+    boost::uint8_t m_userId[16];
+    boost::uint16_t m_recordId;
+    boost::uint16_t m_recordLenAfterHeader;
+    boost::uint8_t m_description[32];
+};
 
 
-Metadata::Metadata(const boost::uint8_t* bytes, std::size_t length)
-    : m_bytes(NULL)
-    , m_length(length)
-{
-    m_bytes = new boost::uint8_t[m_length];
-    memcpy(m_bytes, bytes, m_length);
-    return;
-}
+} } } // namespace
 
-
-Metadata::Metadata(const Metadata& other)
-    : m_bytes(NULL)
-    , m_length(other.m_length)
-{
-    m_bytes = new boost::uint8_t[m_length];
-    memcpy(m_bytes, other.m_bytes, m_length);
-    return;
-}
-
-
-Metadata::~Metadata()
-{
-    delete[] m_bytes;
-    m_bytes = NULL;
-    m_length = 0;
-}
-
-
-Metadata& Metadata::operator=(Metadata const& rhs)
-{
-    if (&rhs != this)
-    {
-        m_length = rhs.m_length;
-        m_bytes = new boost::uint8_t[m_length];
-        memcpy(m_bytes, rhs.m_bytes, m_length);
-    }
-    return *this;
-}
-
-
-bool Metadata::operator==(Metadata const& rhs) const
-{
-    if (m_length == rhs.m_length)
-    {
-        for (std::size_t i=0; i<m_length; i++)
-        {
-            if (m_bytes[i] != rhs.m_bytes[i]) return false;
-        }
-        return true;
-    }
-
-    return false;
-}
-
-
-const boost::uint8_t* Metadata::getBytes() const
-{
-    return m_bytes;
-}
-
-
-std::size_t Metadata::getLength() const
-{
-    return m_length;
-}
-
-
-std::ostream& operator<<(std::ostream& ostr, const Metadata& metadata)
-{
-    ostr << "Metadata: ";
-    ostr << "  len=" << metadata.getLength();
-    ostr << std::endl;
-    return ostr;
-}
-
-
-} // namespace libpc
+#endif

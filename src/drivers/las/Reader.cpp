@@ -75,6 +75,24 @@ const std::string& LasReader::getFileName() const
 }
 
 
+int LasReader::getMetadataRecordCount() const
+{
+    return m_lasHeader.getVLRs().size();
+}
+
+
+const MetadataRecord& LasReader::getMetadataRecord(int index) const
+{
+    return m_lasHeader.getVLRs()[index];
+}
+
+
+MetadataRecord& LasReader::getMetadataRecordRef(int index)
+{
+    return m_lasHeader.getVLRsRef()[index];
+}
+
+
 PointFormat LasReader::getPointFormat() const
 {
     return m_lasHeader.getPointFormat();

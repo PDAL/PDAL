@@ -106,6 +106,14 @@ public:
         return tmp;
     }
 
+    template<class T>
+    static inline void read_array_field(boost::uint8_t*& src, T* dest, std::size_t count)
+    {
+        memcpy((boost::uint8_t*)dest, (boost::uint8_t*)(T*)src, sizeof(T)*count);
+        src += sizeof(T) * count;
+        return;
+    }
+
     template <typename T>
     static inline void read_n(T& dest, std::istream& src, std::streamsize const& num)
     {

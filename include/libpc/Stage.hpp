@@ -42,7 +42,7 @@
 #include <libpc/Schema.hpp>
 #include <libpc/Bounds.hpp>
 #include <libpc/SpatialReference.hpp>
-#include <libpc/Metadata.hpp>
+#include <libpc/MetadataRecord.hpp>
 
 namespace libpc
 {
@@ -70,7 +70,9 @@ public:
     PointCountType getPointCountType() const;
     const Bounds<double>& getBounds() const;
     const SpatialReference& getSpatialReference() const;
-    const Metadata::Array& getMetadata() const;
+    
+    virtual int getMetadataRecordCount() const;
+    virtual const MetadataRecord& getMetadataRecord(int index) const;
 
     virtual bool supportsIterator (StageIteratorType) const = 0;
 
@@ -88,7 +90,8 @@ protected:
     void setPointCountType(PointCountType);
     void setBounds(const Bounds<double>&);
     void setSpatialReference(const SpatialReference&);
-    Metadata::Array& getMetadata();
+    
+    virtual MetadataRecord& getMetadataRecordRef(int index);
 
     // convenience function, for doing a "copy ctor" on all the core props
     // (used by the Filter stage, for example)
@@ -100,7 +103,6 @@ private:
     PointCountType m_pointCountType;
     Bounds<double> m_bounds;
     SpatialReference m_spatialReference;
-    Metadata::Array m_metadataArray;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented

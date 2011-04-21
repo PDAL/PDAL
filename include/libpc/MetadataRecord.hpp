@@ -32,45 +32,40 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_METADATA_HPP
-#define INCLUDED_METADATA_HPP
+#ifndef INCLUDED_METADATARECORD_HPP
+#define INCLUDED_METADATARECORD_HPP
 
 #include <libpc/libpc.hpp>
 
-#include <vector>
+#include <boost/shared_array.hpp>
 
 namespace libpc
 {
 
-// this needs work, but the idea is this will be something that specific file formats
-// could derive from
-class LIBPC_DLL Metadata
+class LIBPC_DLL MetadataRecord
 {
 public:
-    typedef std::vector<Metadata> Array;
+    // makes a local copy of the buffer, which is a shared ptr among by all copes of the metadata record
+    MetadataRecord(const boost::uint8_t* bytes, std::size_t len);
 
-public:
-    // makes a local copy of the buffer
-    Metadata(const boost::uint8_t* bytes, std::size_t len);
+    MetadataRecord(const MetadataRecord&);
 
-    Metadata(const Metadata&);
+    virtual ~MetadataRecord();
 
-    virtual ~Metadata();
+    MetadataRecord& operator=(MetadataRecord const& rhs);
 
-    Metadata& operator=(Metadata const& rhs);
+    bool operator==(MetadataRecord const& rhs) const;
 
-    bool operator==(Metadata const& rhs) const;
-
-    const boost::uint8_t* getBytes() const;
+    const boost::shared_array<boost::uint8_t> getBytes() const;
     std::size_t getLength() const;
 
 private:
-    boost::uint8_t* m_bytes;
+    boost::shared_array<boost::uint8_t> m_bytes;
     std::size_t m_length;
 };
 
 
-std::ostream& operator<<(std::ostream& ostr, const Metadata& srs);
+std::ostream& operator<<(std::ostream& ostr, const MetadataRecord& srs);
 
 
 } // namespace libpc
