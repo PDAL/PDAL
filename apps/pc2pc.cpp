@@ -136,7 +136,7 @@ int Application_pc2pc::execute()
         
         boost::uint32_t capacity = 10000;
         tree.put("capacity", capacity);
-        tree.put("overwrite", true);
+        tree.put("overwrite", false);
         tree.put("connection", "lidar/lidar@oracle.hobu.biz/orcl");
         // tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
         tree.put("debug", true);
