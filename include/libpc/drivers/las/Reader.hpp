@@ -39,6 +39,7 @@
 
 #include <libpc/Stage.hpp>
 #include <libpc/drivers/las/Header.hpp>
+#include <libpc/drivers/las/ReaderBase.hpp>
 
 
 namespace libpc
@@ -50,7 +51,7 @@ namespace libpc { namespace drivers { namespace las {
 
 class LasHeader;
 
-class LIBPC_DLL LasReader : public Stage
+class LIBPC_DLL LasReader : public LasReaderBase
 {
 public:
     LasReader(const std::string& filename);

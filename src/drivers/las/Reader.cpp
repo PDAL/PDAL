@@ -45,7 +45,7 @@ namespace libpc { namespace drivers { namespace las {
 
 
 LasReader::LasReader(const std::string& filename)
-    : Stage()
+    : LasReaderBase()
     , m_filename(filename)
 {
     std::istream* str = Utils::openFile(m_filename);

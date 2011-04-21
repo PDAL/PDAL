@@ -118,6 +118,7 @@ set (LIBPC_DRIVERS_LAS_HPP
   ${LIBPC_HEADERS_DIR}/drivers/las/Header.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Reader.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/las/ReaderBase.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/SummaryData.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Support.hpp
   ${LIBPC_HEADERS_DIR}/drivers/las/Writer.hpp

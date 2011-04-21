@@ -352,7 +352,7 @@ void LasHeaderReader::readOneVLR()
     boost::uint8_t* data = new boost::uint8_t[recordLenAfterHeader];
     Utils::read_n(data, m_istream, recordLenAfterHeader);
 
-    VariableLengthRecord vlr(userId, recordId, recordLenAfterHeader, description, data, recordLenAfterHeader);
+    VariableLengthRecord vlr(reserved, userId, recordId, description, data, recordLenAfterHeader);
     
     m_header.getVLRsRef().push_back(vlr);
 

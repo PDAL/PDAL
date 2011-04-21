@@ -32,48 +32,33 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_LAS_VARIABLELENGTHRECORD_HPP
-#define INCLUDED_DRIVERS_LAS_VARIABLELENGTHRECORD_HPP
+#ifndef INCLUDED_DRIVERS_LAS_READERBASE_HPP
+#define INCLUDED_DRIVERS_LAS_READERBASE_HPP
 
 #include <libpc/libpc.hpp>
 
-#include <libpc/MetadataRecord.hpp>
+#include <libpc/Stage.hpp>
 
-#include <iostream>
 
 namespace libpc { namespace drivers { namespace las {
-    
 
-class LIBPC_DLL VariableLengthRecord : public MetadataRecord
+
+// this class gives the interfaces for the LAS-specific header data access functions -- we use
+// this to make sure that the native las and liblas readers both have the same API
+class LIBPC_DLL LasReaderBase: public Stage
 {
 public:
-    // makes a local copy of the bytes buffer, which is a shared ptr among by all copes of the metadata record
-    VariableLengthRecord(boost::uint16_t reserved,
-                         boost::uint8_t* userId,   // always 16 bytes
-                         boost::uint16_t recordId,
-                         boost::uint8_t* description, // always 32 bytes
-                         const boost::uint8_t* bytes, std::size_t len);
-    VariableLengthRecord(const VariableLengthRecord&);
-    ~VariableLengthRecord();
+    LasReaderBase() : Stage() {}
 
-    boost::uint16_t getReserved() const { return m_reserved; }
-    boost::uint8_t* getUserId() const { return (boost::uint8_t*)m_userId; }
-    boost::uint16_t getRecordId() const { return m_recordId; }
-    boost::uint8_t* getDescription() const { return (boost::uint8_t*)m_description; }
+    virtual int getMetadataRecordCount() const = 0;
+    virtual const MetadataRecord& getMetadataRecord(int index) const = 0;
 
-    bool operator==(const VariableLengthRecord&) const;
-    VariableLengthRecord& operator=(const VariableLengthRecord&);
-
-    static const int s_headerLength = 54;
-
-private:
-    boost::uint16_t m_reserved;
-    boost::uint8_t* m_userId; // always 16 bytes
-    boost::uint16_t m_recordId;
-    boost::uint8_t* m_description;  // always 32 bytes
+    virtual PointFormat getPointFormat() const = 0;
+    virtual boost::uint8_t getVersionMajor() const = 0;
+    virtual boost::uint8_t getVersionMinor() const = 0;
 };
 
 
-} } } // namespace
+} } } // namespaces
 
 #endif

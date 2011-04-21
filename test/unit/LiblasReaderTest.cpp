@@ -428,4 +428,14 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_vlr)
+{
+    libpc::drivers::liblas::LiblasReader reader(Support::datapath("lots_of_vlr.las"));
+
+    BOOST_CHECK(reader.getMetadataRecordCount() == 390);
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

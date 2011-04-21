@@ -39,17 +39,18 @@
 
 namespace libpc { namespace drivers { namespace las {
 
-VariableLengthRecord::VariableLengthRecord(boost::uint8_t userId[16], 
+VariableLengthRecord::VariableLengthRecord(boost::uint16_t reserved,
+                                           boost::uint8_t* userId, 
                                            boost::uint16_t recordId,
-                                           boost::uint16_t recordLenAfterHeader,
-                                           boost::uint8_t description[32],
+                                           boost::uint8_t* description,
                                            const boost::uint8_t* bytes, std::size_t len)
     : MetadataRecord(bytes, len)
-    , m_reserved(0)
+    , m_reserved(reserved)
     , m_recordId(recordId)
-    , m_recordLenAfterHeader(recordLenAfterHeader)
 {
+    m_userId = new boost::uint8_t[16];
     memcpy(m_userId, userId, 16);
+    m_description = new boost::uint8_t[32];
     memcpy(m_description, description, 32);
     return;
 }
@@ -59,9 +60,10 @@ VariableLengthRecord::VariableLengthRecord(const VariableLengthRecord& vlr)
     : MetadataRecord(vlr)
     , m_reserved(vlr.m_reserved)
     , m_recordId(vlr.m_recordId)
-    , m_recordLenAfterHeader(vlr.m_recordLenAfterHeader)
 {
+    m_userId = new boost::uint8_t[16];
     memcpy(m_userId, vlr.m_userId, 16);
+    m_description = new boost::uint8_t[32];
     memcpy(m_description, vlr.m_description, 32);
     return;
 }
@@ -69,6 +71,8 @@ VariableLengthRecord::VariableLengthRecord(const VariableLengthRecord& vlr)
 
 VariableLengthRecord::~VariableLengthRecord()
 {
+    delete[] m_userId;
+    delete[] m_description;
     return;
 }
 
@@ -79,7 +83,6 @@ VariableLengthRecord& VariableLengthRecord::operator=(const VariableLengthRecord
 
     m_reserved = vlr.m_reserved;
     m_recordId = vlr.m_recordId;
-    m_recordLenAfterHeader = vlr.m_recordLenAfterHeader;
 
     memcpy(m_userId, vlr.m_userId, 16);
     memcpy(m_description, vlr.m_description, 32);
@@ -92,7 +95,6 @@ bool VariableLengthRecord::operator==(const VariableLengthRecord& vlr) const
 {
     if (m_reserved != vlr.m_reserved) return false;
     if (m_recordId != vlr.m_recordId) return false;
-    if (m_recordLenAfterHeader != vlr.m_recordLenAfterHeader) return false;
 
     for (int i=0; i<16; i++)
         if (m_userId[i] != vlr.m_userId[i]) return false;

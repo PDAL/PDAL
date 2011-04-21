@@ -37,9 +37,11 @@
 
 #include <libpc/libpc.hpp>
 
-#include <libpc/Stage.hpp>
+#include <vector>
 
+#include <libpc/Stage.hpp>
 #include <libpc/drivers/las/Support.hpp>
+#include <libpc/drivers/las/ReaderBase.hpp>
 
 // fwd decls
 namespace liblas
@@ -51,7 +53,7 @@ namespace libpc { namespace drivers { namespace liblas {
 
 class LiblasHeader;
 
-class LIBPC_DLL LiblasReader : public Stage
+class LIBPC_DLL LiblasReader : public libpc::drivers::las::LasReaderBase
 {
 public:
     LiblasReader(const std::string& filename);
@@ -65,6 +67,9 @@ public:
     
     boost::uint8_t getVersionMajor() const;
     boost::uint8_t getVersionMinor() const;
+
+    int LiblasReader::getMetadataRecordCount() const;
+    const MetadataRecord& LiblasReader::getMetadataRecord(int index) const;
 
     bool supportsIterator (StageIteratorType t) const
     {   
@@ -80,6 +85,7 @@ public:
 private:
     void processExternalHeader(::liblas::Reader& externalReader);
     void registerFields(::liblas::Reader& externalReader);
+    MetadataRecord& LiblasReader::getMetadataRecordRef(int index);
 
     std::string m_filename;
 
@@ -95,6 +101,8 @@ private:
     bool m_isCompressed;
     
     ::libpc::drivers::las::PointFormat m_pointFormat;
+
+    std::vector<MetadataRecord> m_metadataRecords;
 
     LiblasReader& operator=(const LiblasReader&); // not implemented
     LiblasReader(const LiblasReader&); // not implemented
