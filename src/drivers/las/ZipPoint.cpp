@@ -39,6 +39,9 @@
 #include "ZipPoint.hpp"
 
 #include <libpc/exceptions.hpp>
+#include <libpc/drivers/las/VariableLengthRecord.hpp>
+#include <string.h>
+
 
 // laszip
 #include <laszip/laszip.hpp>
@@ -52,9 +55,9 @@
 
 namespace libpc { namespace drivers { namespace las {
 
-static std::string laszip_userid("laszip encoded");
+static const char* laszip_userid("laszip encoded");
 static boost::uint16_t laszip_recordid = 22204;
-static std::string laszip_description = "encoded for sequential access";
+static const char* laszip_description = "encoded for sequential access";
 
 
 ZipPoint::ZipPoint(PointFormat format) :
@@ -144,34 +147,10 @@ void ZipPoint::ConstructItems(PointFormat format)
     return;
 }
 
-template<class T>
-static inline boost::uint8_t* PutBytes(boost::uint8_t* p, T d)
-{
-    LIBLAS_SWAP_BYTES(d);
-    memcpy(p, &d, sizeof(T));
-    return p+sizeof(T);
-}
 
-template<class T>
-static inline boost::uint8_t* GetBytes(boost::uint8_t* p, T& d)
-{
-    memcpy(&d, p, sizeof(T));
-    LIBLAS_SWAP_BYTES(d);
-    return p+sizeof(T);
-}
-
-
-#if 0
-void ZipPoint::ConstructVLR(VariableRecord& v) const
+VariableLengthRecord ZipPoint::ConstructVLR() const
 {
     boost::uint16_t record_length_after_header = (boost::uint16_t)(34+6*m_num_items);
-
-    // set the header
-    v.SetReserved(0xAABB);
-    v.SetUserId(laszip_userid);
-    v.SetRecordId(laszip_recordid);
-    v.SetRecordLength(record_length_after_header);
-    v.SetDescription(laszip_description);
 
     // the data following the header of the variable length record is
     //     U32  compression        4 bytes   0
@@ -195,73 +174,58 @@ void ZipPoint::ConstructVLR(VariableRecord& v) const
     // will be doing, but since we only ever use the default we'll just
     // use that for now
     boost::uint32_t compression_type = LASzip::DEFAULT_COMPRESSION;
-    p = PutBytes<boost::uint32_t>(p, compression_type);
+    Utils::write_field<boost::uint32_t>(p, compression_type);
 
     boost::uint8_t version_major = LASZIP_VERSION_MAJOR;
-    p = PutBytes<boost::uint8_t>(p, version_major);
+    Utils::write_field<boost::uint8_t>(p, version_major);
     boost::uint8_t version_minor = LASZIP_VERSION_MINOR;
-    p = PutBytes<boost::uint8_t>(p, version_minor);
+    Utils::write_field<boost::uint8_t>(p, version_minor);
     boost::uint16_t version_revision = LASZIP_VERSION_REVISION;
-    p = PutBytes<boost::uint16_t>(p, version_revision);
+    Utils::write_field<boost::uint16_t>(p, version_revision);
     
     boost::uint32_t options = 0;
-    p = PutBytes<boost::uint32_t>(p, options);
+    Utils::write_field<boost::uint32_t>(p, options);
     boost::uint32_t num_chunks = 1;
-    p = PutBytes<boost::uint32_t>(p, num_chunks);
+    Utils::write_field<boost::uint32_t>(p, num_chunks);
     boost::int64_t num_points = -1;
-    p = PutBytes<boost::int64_t>(p, num_points);
+    Utils::write_field<boost::int64_t>(p, num_points);
     boost::int64_t num_bytes = -1;
-    p = PutBytes<boost::int64_t>(p, num_bytes);
+    Utils::write_field<boost::int64_t>(p, num_bytes);
     boost::uint16_t num_items = (boost::uint16_t)m_num_items;
-    p = PutBytes<boost::uint16_t>(p, num_items);
+    Utils::write_field<boost::uint16_t>(p, num_items);
 
     for (boost::uint32_t i = 0; i < num_items; i++)
     {
         boost::uint16_t type = (boost::uint16_t)m_items[i].type;
-        p = PutBytes<boost::uint16_t>(p, type);
+        Utils::write_field<boost::uint16_t>(p, type);
         boost::uint16_t size = (boost::uint16_t)m_items[i].size;
-        p = PutBytes<boost::uint16_t>(p, size);
+        Utils::write_field<boost::uint16_t>(p, size);
         boost::uint16_t version = (boost::uint16_t)m_items[i].version;
-        p = PutBytes<boost::uint16_t>(p, version);
+        Utils::write_field<boost::uint16_t>(p, version);
     }
 
     assert(p == data + record_length_after_header);
 
-    // Ick.
-    std::vector<boost::uint8_t> vdata;
-    for (boost::uint32_t i=0; i<record_length_after_header; i++)
-    {
-        vdata.push_back(data[i]);
-    }
-        
-    v.SetData(vdata);
-    
+    boost::uint8_t laszip_userid_data[16];
+    for (std::size_t i=0; i<16; i++) laszip_userid_data[i] = 0;
+    for (std::size_t i=0; i<strlen(laszip_userid); i++) laszip_userid_data[i] = laszip_userid[i];
+
+    boost::uint8_t laszip_description_data[32];
+    for (std::size_t i=0; i<32; i++) laszip_description_data[i] = 0;
+    for (std::size_t i=0; i<strlen(laszip_description); i++) laszip_description_data[i] = laszip_description[i];
+
+    VariableLengthRecord vlr(0xAABB, laszip_userid_data, laszip_recordid, laszip_description_data, data, record_length_after_header);
+
     if (data != 0)
     delete [] data;
 
-    return;
+    return vlr;
 }
 
 
-bool ZipPoint::ValidateVLR(std::vector<VariableRecord> const& vlrs) const
+bool ZipPoint::IsZipVLR(const VariableLengthRecord& vlr) const
 {
-    std::vector<VariableRecord>::const_iterator it;
-    for (it = vlrs.begin(); it != vlrs.end(); ++it)
-    {
-        VariableRecord const& vlr = *it;
-        if (IsZipVLR(vlr))
-        {
-            return ValidateVLR(vlr);
-        }
-    }
-
-    // if we didn't find one, but we don't care (for now)
-    return true;
-}
-
-bool ZipPoint::IsZipVLR(const VariableRecord& vlr) const
-{
-    if (laszip_userid == vlr.GetUserId(true).c_str() && laszip_recordid == vlr.GetRecordId())
+    if (strcmp(laszip_userid, (const char*)vlr.getUserId())==0 && strcmp(laszip_description, (const char*)vlr.getDescription())==0)
     {
         return true;
     }
@@ -269,19 +233,6 @@ bool ZipPoint::IsZipVLR(const VariableRecord& vlr) const
     return false;
 }
 
-bool ZipPoint::ValidateVLR(const VariableRecord& vlr) const
-{
-    if (laszip_userid != vlr.GetUserId(true).c_str())
-        return false;
-    
-    if (laszip_recordid != vlr.GetRecordId())
-        return false;
-
-    // (all validation checking is now done inside the liblas library)
-
-    return true;
-}
-#endif
 
 } } } // namespaces
 

@@ -44,20 +44,21 @@ class LASitem;
 
 namespace libpc { namespace drivers { namespace las {
 
+class VariableLengthRecord;
+
 class ZipPoint
 {
 public:
     ZipPoint(PointFormat);
     ~ZipPoint();
 
-//    void ConstructVLR(VariableRecord&) const;
+    VariableLengthRecord ConstructVLR() const;
 
-    // these will return false iff we find a laszip VLR and it doesn't match
-    // the point format this object wasd constructed with
-//    bool ValidateVLR(std::vector<VariableRecord> const& vlrs) const;
-//    bool ValidateVLR(const VariableRecord& vlr) const;
-    
-//    bool IsZipVLR(const VariableRecord& vlr) const;
+    // this will return false iff we find a laszip VLR and it doesn't match
+    // the point format this object was constructed with
+    bool ValidateVLR(const VariableLengthRecord& vlr) const;
+
+    bool IsZipVLR(const VariableLengthRecord& vlr) const;
 
 private:
     void ConstructItems(PointFormat);

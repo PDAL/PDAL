@@ -43,8 +43,10 @@
 #include "LasHeaderReader.hpp"
 
 #include <libpc/Utils.hpp>
+#include <libpc/exceptions.hpp>
 #include <libpc/drivers/las/Header.hpp>
 #include <libpc/drivers/las/VariableLengthRecord.hpp>
+#include "ZipPoint.hpp"
 
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/scoped_array.hpp>
@@ -399,18 +401,6 @@ void LasHeaderReader::readAllVLRs()
         SetSchema(schema);
         boost::ignore_unused_variable_warning(e);
     }
-
-#ifdef LIBPC_HAVE_LASZIP
-    if (Compressed())
-    {
-         ZipPoint zpd(GetDataFormatId());
-         bool ok = zpd.ValidateVLR(GetVLRs());
-         if (!ok)
-         {
-            throw configuration_error("LASzip compression format does not match the LAS header format.");
-         }
-    }
-#endif
 #endif
 
     return;
