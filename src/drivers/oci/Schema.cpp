@@ -42,6 +42,11 @@
 #include <cstdlib>
 #include <map>
 
+#ifdef LIBPC_COMPILER_MSVC
+#pragma warning(disable:4996) // "strcmpi is deprecated"
+#endif
+
+
 struct XMLDocDeleter
 {
    template <typename T>
@@ -275,7 +280,7 @@ void Schema::LoadSchema()
     // print_element_names(root);
 
     
-    if (strcasecmp((const char*)root->name, "PointCloudSchema"))
+    if (strcmpi((const char*)root->name, "PointCloudSchema"))
         throw schema_error("First node of document was not named 'PointCloudSchema'");
     
     xmlNode* dimension = root->children;
@@ -308,7 +313,7 @@ void Schema::LoadSchema()
                 continue;
             }
             
-            if (!strcasecmp((const char*)properties->name, "name"))
+            if (!strcmpi((const char*)properties->name, "name"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_error("Unable to fetch name!");
@@ -317,7 +322,7 @@ void Schema::LoadSchema()
                 std::cout << "Dimension name: " << name << std::endl;
             }
 
-            if (!strcasecmp((const char*)properties->name, "size"))
+            if (!strcmpi((const char*)properties->name, "size"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_error("Unable to fetch size!");
@@ -331,7 +336,7 @@ void Schema::LoadSchema()
                 std::cout << "Dimension size: " << size << std::endl;
             }
 
-            if (!strcasecmp((const char*)properties->name, "position"))
+            if (!strcmpi((const char*)properties->name, "position"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_error("Unable to fetch position!");
@@ -344,14 +349,14 @@ void Schema::LoadSchema()
                 position = static_cast<boost::uint32_t>(p);
                 std::cout << "Dimension position: " << position << std::endl;
             }
-            if (!strcasecmp((const char*)properties->name, "description"))
+            if (!strcmpi((const char*)properties->name, "description"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_error("Unable to fetch description!");
                 description = std::string((const char*)n);
                 xmlFree(n);
             }
-            if (!strcasecmp((const char*)properties->name, "interpretation"))
+            if (!strcmpi((const char*)properties->name, "interpretation"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_error("Unable to fetch interpretation!");
@@ -359,7 +364,7 @@ void Schema::LoadSchema()
                 xmlFree(n);
             }
 
-            if (!strcasecmp((const char*)properties->name, "minimum"))
+            if (!strcmpi((const char*)properties->name, "minimum"))
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
                 if (!n) throw schema_error("Unable to fetch minimum value!");
@@ -369,7 +374,7 @@ void Schema::LoadSchema()
                 std::cout << "Dimension minimum: " << minimum << std::endl;
             }
 
-            if (!strcasecmp((const char*)properties->name, "maximum"))
+            if (!strcmpi((const char*)properties->name, "maximum"))
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
                 if (!n) throw schema_error("Unable to fetch maximum value!");
@@ -379,7 +384,7 @@ void Schema::LoadSchema()
                 std::cout << "Dimension maximum: " << maximum << std::endl;
             }
 
-            if (!strcasecmp((const char*)properties->name, "offset"))
+            if (!strcmpi((const char*)properties->name, "offset"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_error("Unable to fetch offset value!");
@@ -388,7 +393,7 @@ void Schema::LoadSchema()
                 xmlFree(n);
                 std::cout << "Dimension offset: " << offset << std::endl;
             }
-            if (!strcasecmp((const char*)properties->name, "scale"))
+            if (!strcmpi((const char*)properties->name, "scale"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_error("Unable to fetch scale value!");
@@ -432,43 +437,43 @@ Dimension::DataType Schema::GetDimensionType(std::string const& interpretation)
     // };
 
 
-    if (!strcasecmp(interpretation.c_str(), "int8_t") || 
-        !strcasecmp(interpretation.c_str(), "int8"))
+    if (!strcmpi(interpretation.c_str(), "int8_t") || 
+        !strcmpi(interpretation.c_str(), "int8"))
         return Dimension::Int8;
 
-    if (!strcasecmp(interpretation.c_str(), "uint8_t") || 
-        !strcasecmp(interpretation.c_str(), "uint8"))
+    if (!strcmpi(interpretation.c_str(), "uint8_t") || 
+        !strcmpi(interpretation.c_str(), "uint8"))
         return Dimension::Uint8;
 
-    if (!strcasecmp(interpretation.c_str(), "int16_t") || 
-        !strcasecmp(interpretation.c_str(), "int16"))
+    if (!strcmpi(interpretation.c_str(), "int16_t") || 
+        !strcmpi(interpretation.c_str(), "int16"))
         return Dimension::Int16;
 
-    if (!strcasecmp(interpretation.c_str(), "uint16_t") || 
-        !strcasecmp(interpretation.c_str(), "uint16"))
+    if (!strcmpi(interpretation.c_str(), "uint16_t") || 
+        !strcmpi(interpretation.c_str(), "uint16"))
         return Dimension::Uint16;
     
     
-    if (!strcasecmp(interpretation.c_str(), "int32_t") || 
-        !strcasecmp(interpretation.c_str(), "int32"))
+    if (!strcmpi(interpretation.c_str(), "int32_t") || 
+        !strcmpi(interpretation.c_str(), "int32"))
         return Dimension::Int32;
 
-    if (!strcasecmp(interpretation.c_str(), "uint32_t") || 
-        !strcasecmp(interpretation.c_str(), "uint32"))
+    if (!strcmpi(interpretation.c_str(), "uint32_t") || 
+        !strcmpi(interpretation.c_str(), "uint32"))
         return Dimension::Uint32;
 
-    if (!strcasecmp(interpretation.c_str(), "int64_t") || 
-        !strcasecmp(interpretation.c_str(), "int64"))
+    if (!strcmpi(interpretation.c_str(), "int64_t") || 
+        !strcmpi(interpretation.c_str(), "int64"))
         return Dimension::Int64;
 
-    if (!strcasecmp(interpretation.c_str(), "uint64_t") || 
-        !strcasecmp(interpretation.c_str(), "uint64"))
+    if (!strcmpi(interpretation.c_str(), "uint64_t") || 
+        !strcmpi(interpretation.c_str(), "uint64"))
         return Dimension::Uint64;
 
-    if (!strcasecmp(interpretation.c_str(), "float"))
+    if (!strcmpi(interpretation.c_str(), "float"))
         return Dimension::Float;
 
-    if (!strcasecmp(interpretation.c_str(), "double"))
+    if (!strcmpi(interpretation.c_str(), "double"))
         return Dimension::Double;
 
 
@@ -490,55 +495,55 @@ Dimension::Field Schema::GetDimensionField(std::string const& name, boost::uint3
         }
     }
     
-    if (!strcasecmp(name.c_str(), "X"))
+    if (!strcmpi(name.c_str(), "X"))
         return Dimension::Field_X;
 
-    if (!strcasecmp(name.c_str(), "Y"))
+    if (!strcmpi(name.c_str(), "Y"))
         return Dimension::Field_Y;
 
-    if (!strcasecmp(name.c_str(), "Z"))
+    if (!strcmpi(name.c_str(), "Z"))
         return Dimension::Field_Z;
 
-    if (!strcasecmp(name.c_str(), "Intensity"))
+    if (!strcmpi(name.c_str(), "Intensity"))
         return Dimension::Field_Intensity;
 
-    if (!strcasecmp(name.c_str(), "Return Number"))
+    if (!strcmpi(name.c_str(), "Return Number"))
         return Dimension::Field_ReturnNumber;
 
-    if (!strcasecmp(name.c_str(), "Number of Returns"))
+    if (!strcmpi(name.c_str(), "Number of Returns"))
         return Dimension::Field_NumberOfReturns;
 
-    if (!strcasecmp(name.c_str(), "Number of Returns"))
+    if (!strcmpi(name.c_str(), "Number of Returns"))
         return Dimension::Field_NumberOfReturns;
 
-    if (!strcasecmp(name.c_str(), "Scan Direction"))
+    if (!strcmpi(name.c_str(), "Scan Direction"))
         return Dimension::Field_ScanDirectionFlag;
 
-    if (!strcasecmp(name.c_str(), "Flightline Edge"))
+    if (!strcmpi(name.c_str(), "Flightline Edge"))
         return Dimension::Field_EdgeOfFlightLine;
 
-    if (!strcasecmp(name.c_str(), "Classification"))
+    if (!strcmpi(name.c_str(), "Classification"))
         return Dimension::Field_Classification;
 
-    if (!strcasecmp(name.c_str(), "Scan Angle Rank"))
+    if (!strcmpi(name.c_str(), "Scan Angle Rank"))
         return Dimension::Field_ScanAngleRank;
 
-    if (!strcasecmp(name.c_str(), "User Data"))
+    if (!strcmpi(name.c_str(), "User Data"))
         return Dimension::Field_UserData;
 
-    if (!strcasecmp(name.c_str(), "Point Source ID"))
+    if (!strcmpi(name.c_str(), "Point Source ID"))
         return Dimension::Field_PointSourceId;
 
-    if (!strcasecmp(name.c_str(), "Time"))
+    if (!strcmpi(name.c_str(), "Time"))
         return Dimension::Field_Time;
 
-    if (!strcasecmp(name.c_str(), "Red"))
+    if (!strcmpi(name.c_str(), "Red"))
         return Dimension::Field_Red;
 
-    if (!strcasecmp(name.c_str(), "Green"))
+    if (!strcmpi(name.c_str(), "Green"))
         return Dimension::Field_Green;
 
-    if (!strcasecmp(name.c_str(), "Blue"))
+    if (!strcmpi(name.c_str(), "Blue"))
         return Dimension::Field_Blue;
 
 
