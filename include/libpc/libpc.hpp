@@ -45,4 +45,12 @@
 // we use explicitly-sized types everywhere, so include this here
 #include <boost/cstdint.hpp>
 
+#ifdef __cplusplus
+#  define LIBPC_C_START           extern "C" {
+#  define LIBPC_C_END             }
+#else
+#  define LIBPC_C_START
+#  define LIBPC_C_END
+#endif
+
 #endif
