@@ -337,7 +337,6 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
     // Add a WKT VLR if we have a WKT definition.
     if( wkt != "" )
     {
-        std::vector<uint8_t> data;
         const uint8_t* wkt_bytes = reinterpret_cast<const uint8_t*>(wkt.c_str());
 
         boost::uint8_t userid[16];
@@ -348,24 +347,19 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
         for (int i=0; i<32; i++) description[i]=0;
         memcpy((char*)description,(char*)"OGR variant of OpenGIS WKT SRS",strlen("OGR variant of OpenGIS WKT SRS"));
 
-        // Would you be surprised if this remarshalling of bytes
-        // was annoying to me? FrankW
-        while( *wkt_bytes != 0 )
-            data.push_back( *(wkt_bytes++) );
+        boost::uint16_t len = static_cast<boost::uint16_t>(strlen((const char*)wkt_bytes));
 
-        data.push_back( '\0' );
-
-        if (data.size() > std::numeric_limits<boost::uint16_t>::max())
+        if (len > std::numeric_limits<boost::uint16_t>::max())
         {
             std::ostringstream oss;
-            std::vector<uint8_t>::size_type overrun = data.size() - static_cast<std::vector<uint8_t>::size_type>(std::numeric_limits<boost::uint16_t>::max());
-            oss << "The size of the wkt, " << data.size() << ", is " << overrun 
+            std::vector<uint8_t>::size_type overrun = len - static_cast<std::vector<uint8_t>::size_type>(std::numeric_limits<boost::uint16_t>::max());
+            oss << "The size of the wkt, " << len << ", is " << overrun 
                 << " bytes too large to fit inside the maximum size of a VLR which is " 
                 << std::numeric_limits<boost::uint16_t>::max() << " bytes.";
-            throw std::runtime_error(oss.str());
+            throw std::runtime_error(oss.str()); 
         }
 
-        VariableLengthRecord wkt_record(0, userid, 2112, description, &data[0], static_cast<boost::uint16_t>(data.size()));
+        VariableLengthRecord wkt_record(0, userid, 2112, description, wkt_bytes, len);
 
         vlrs.push_back( wkt_record );
     }
