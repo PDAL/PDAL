@@ -35,10 +35,23 @@
 #include <boost/test/unit_test.hpp>
 
 #include <libpc/SpatialReference.hpp>
+#include <libpc/Utils.hpp>
 
 using namespace libpc;
 
 BOOST_AUTO_TEST_SUITE(SpatialReferenceTest)
+
+
+    BOOST_AUTO_TEST_CASE(test_env_vars)
+{
+    const char* gdal_data = getenv("GDAL_DATA");
+    const char* proj_lib = getenv("PROJ_LIB");
+
+    BOOST_CHECK(Utils::fileExists(gdal_data));
+    BOOST_CHECK(Utils::fileExists(proj_lib));
+
+    return;
+}
 
 
 BOOST_AUTO_TEST_CASE(test_ctor)
@@ -55,7 +68,6 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 // Test round-tripping proj.4 string
 BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
 {
-#if 0
     SpatialReference ref;
     
     const std::string proj4 = "+proj=utm +zone=15 +datum=WGS84 +units=m +no_defs ";
@@ -63,12 +75,11 @@ BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
 
     ref.setProj4(proj4);
     const std::string ret = ref.getProj4();
-    BOOST_CHECK(ret == proj4);
+    BOOST_CHECK(ret == proj4 || ret == proj4_ellps);
 
     ref.setProj4(proj4_ellps);
     const std::string ret2 = ref.getProj4();
     BOOST_CHECK(ret2 == proj4_ellps);
-#endif
 
     return;
 }
@@ -77,20 +88,20 @@ BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
 // Test setting EPSG:4326 from User string
 BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
 {
-#if 0
     SpatialReference ref;
 
     const std::string code = "EPSG:4326";
     const std::string proj4 = "+proj=longlat +datum=WGS84 +no_defs ";
+    const std::string proj4_ellps = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ";
     const std::string wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
+    const std::string wkt_vs2010_debug = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
     ref.setFromUserInput(code);
 
     const std::string ret_proj = ref.getProj4();
     const std::string ret_wkt = ref.getWKT();
 
-    BOOST_CHECK(ret_proj == proj4);
-    BOOST_CHECK(ret_wkt == wkt);
-#endif
+    BOOST_CHECK(ret_proj == proj4 || ret_proj == proj4_ellps);
+    BOOST_CHECK(ret_wkt == wkt || ret_wkt == wkt_vs2010_debug);
 
     return;
 }
