@@ -184,7 +184,7 @@ void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord
 
 void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs)
 {
-    vlrs.clear();
+    //vlrs.clear();
 
 #ifdef LIBPC_SRS_ENABLED
 
@@ -202,12 +202,6 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
     int acount = 0;
     int atype =0;
     
-    //////if (!m_tiff)
-    //////    throw std::invalid_argument("m_tiff was null, cannot reset VLRs without m_tiff");
-
-    //////if (!m_gtiff)
-    //////    throw std::invalid_argument("m_gtiff was null, cannot reset VLRs without m_gtiff");
-
     //GTIFF_GEOKEYDIRECTORY == 34735
     ret = srs.geotiff_ST_GetKey(34735, &kcount, &ktype, (void**)&kdata);
     if (ret)
@@ -218,7 +212,7 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
 
         boost::uint8_t description[32];
         for (int i=0; i<32; i++) description[i]=0;
-        memcpy((char*)userid,(char*)"GeoTIFF GeoKeyDirectoryTag",strlen("GeoTIFF GeoKeyDirectoryTag"));
+        memcpy((char*)description,(char*)"GeoTIFF GeoKeyDirectoryTag",strlen("GeoTIFF GeoKeyDirectoryTag"));
 
         uint16_t length = 2 * static_cast<uint16_t>(kcount);
 
@@ -249,7 +243,7 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
 
         boost::uint8_t description[32];
         for (int i=0; i<32; i++) description[i]=0;
-        memcpy((char*)userid,(char*)"GeoTIFF GeoDoubleParamsTag",strlen("GeoTIFF GeoDoubleParamsTag"));
+        memcpy((char*)description,(char*)"GeoTIFF GeoDoubleParamsTag",strlen("GeoTIFF GeoDoubleParamsTag"));
 
         uint16_t length = 8 * static_cast<uint16_t>(dcount);
         
@@ -287,7 +281,7 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
 
         boost::uint8_t description[32];
         for (int i=0; i<32; i++) description[i]=0;
-        memcpy((char*)userid,(char*)"GeoTIFF GeoAsciiParamsTag",strlen("GeoTIFF GeoAsciiParamsTag"));
+        memcpy((char*)description,(char*)"GeoTIFF GeoAsciiParamsTag",strlen("GeoTIFF GeoAsciiParamsTag"));
         
          uint16_t length = static_cast<uint16_t>(acount);
 
@@ -329,8 +323,7 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
 
          vlrs.push_back(record);
     }
-#endif // ndef HAVE_LIBGEOTIFF
-
+#endif
 
     std::string wkt = srs.getWKT( SpatialReference::eCompoundOK );
 

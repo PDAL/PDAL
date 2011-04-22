@@ -477,62 +477,42 @@ const std::vector<VariableLengthRecord>& LasHeader::getVLRs() const
 }
 
 
-//bool SameVLRs(std::string const& name, boost::uint16_t id, liblas::VariableRecord const& record)
-//{
-//    if (record.GetUserId(false) == name) {
-//        if (record.GetRecordId() == id) {
-//            return true;
-//        }
-//    }
-//    return false;
-//}
-//
-//
-//void Header::DeleteVLRs(std::string const& name, boost::uint16_t id)
-//{
-//
-//    m_vlrs.erase( std::remove_if( m_vlrs.begin(), 
-//                                  m_vlrs.end(),
-//                                  boost::bind( &SameVLRs, name, id, _1 ) ),
-//                  m_vlrs.end());
-//
-//    m_recordsCount = static_cast<uint32_t>(m_vlrs.size());        
-//
-//}
+static bool sameVLRs(const std::string& name, boost::uint16_t id, const VariableLengthRecord& record)
+{
+    if (record.compareUserId(name)) 
+    {
+        if (record.getRecordId() == id) 
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
 
+static void deleteVLRs(const std::string& name, boost::uint16_t id, std::vector<VariableLengthRecord>& vlrs)
+{
+    vlrs.erase( std::remove_if( vlrs.begin(), 
+                                vlrs.end(),
+                                boost::bind( &sameVLRs, name, id, _1 ) ),
+                vlrs.end());
 
-//void LasHeader::SetGeoreference() 
-//{    
-//    std::vector<VariableRecord> vlrs = m_srs.GetVLRs();
-//
-//    // Wipe the GeoTIFF-related VLR records off of the Header
-//    DeleteVLRs("LASF_Projection", 34735);
-//    DeleteVLRs("LASF_Projection", 34736);
-//    DeleteVLRs("LASF_Projection", 34737);
-//
-//    std::vector<VariableRecord>::const_iterator i;
-//
-//    for (i = vlrs.begin(); i != vlrs.end(); ++i) 
-//    {
-//        AddVLR(*i);
-//    }
-//}
-//
-//SpatialReference Header::GetSRS() const
-//{
-//    return m_srs;
-//}
-//
-//void Header::SetSRS(SpatialReference& srs)
-//{
-//    m_srs = srs;
-//}
+    return;
+}
 
 
 void LasHeader::setSpatialReference(const SpatialReference& srs)
 {
     m_spatialReference = srs;
+
+    // Wipe the GeoTIFF-related VLR records off of the Header
+    deleteVLRs("LASF_Projection", 34735, m_vlrs);
+    deleteVLRs("LASF_Projection", 34736, m_vlrs);
+    deleteVLRs("LASF_Projection", 34737, m_vlrs);
+
+    VariableLengthRecord::setVLRsFromSRS(srs, m_vlrs);
+
+    return;
 }
 
 

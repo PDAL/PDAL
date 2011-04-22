@@ -333,9 +333,11 @@ void LasHeaderWriter::WriteVLRs()
         throw std::runtime_error(oss.str());
     }
 
-    for (uint32_t i = 0; i < m_header.GetRecordsCount(); ++i)
+    const std::vector<VariableLengthRecord>&vlrs = m_header.getVLRs();
+
+    for (uint32_t i = 0; i < vlrs.size(); ++i)
     {
-        VariableLengthRecord const &vlr = m_header.getVLRs()[i];
+        VariableLengthRecord const &vlr = vlrs[i];
 
         Utils::write_n(m_ostream, vlr.getReserved(), sizeof(uint16_t));
         Utils::write_n(m_ostream, vlr.getUserId(), 16);

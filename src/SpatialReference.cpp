@@ -203,6 +203,7 @@ void SpatialReference::geotiff_ResetTags()
 
 int SpatialReference::geotiff_ST_GetKey(int tag, int *count, int *st_type, void **data_ptr) const
 {
+    if (m_tiffstuff->m_tiff == 0) return 0;
     return ST_GetKey(m_tiffstuff->m_tiff, tag, count, st_type, data_ptr);
 }
 
