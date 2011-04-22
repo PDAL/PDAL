@@ -8,7 +8,7 @@ set LIBPC_DIR=d:\dev\libpc
 set LIBLAS_DIR=d:\dev\liblas
 set LASZIP_DIR=d:\dev\laszip
 set OSGEO4W_DIR=C:\OSGeo4W
-set OSGEO4W_GDAL=C:\OSGeo4W\apps\gdal-17
+set GDAL_DIR=d:\dev\gdal
 set BOOST_DIR="C:\Utils\boost_1_45_0-win32"
 set ORACLE_HOME=%OSGEO4W_DIR%
 
@@ -35,8 +35,8 @@ cmake -G %COMPILER% ^
     -DFREEGLUT_INCLUDE_DIR=%FREEGLUT_DIR%\include ^
     -DGLUT_LIBRARY=%FREEGLUT_DIR%\lib ^
     -DGLUT_INCLUDE_DIR=%FREEGLUT_DIR%\include ^
-    -DGDAL_INCLUDE_DIR=%OSGEO4W_GDAL%\include ^
-    -DGDAL_LIBRARY=%OSGEO4W_GDAL%\lib\gdal_i.lib ^
+    -DGDAL_INCLUDE_DIR=%GDAL_DIR%\gcore ^
+    -DGDAL_LIBRARY=%GDAL_DIR%\gdal_i.lib ^
     -DTIFF_INCLUDE_DIR=%OSGEO4W_DIR%\include ^
     -DTIFF_LIBRARY=%OSGEO4W_DIR%\lib\libtiff_i.lib ^
     -DGEOTIFF_INCLUDE_DIR=%OSGEO4W_DIR%\include ^

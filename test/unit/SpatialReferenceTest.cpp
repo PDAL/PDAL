@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
 
     ref.setProj4(proj4_ellps);
     const std::string ret2 = ref.getProj4();
-    BOOST_CHECK(ret2 == proj4_ellps);
+    BOOST_CHECK(ret == proj4 || ret == proj4_ellps);
 
     return;
 }
