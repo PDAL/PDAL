@@ -41,7 +41,7 @@
 #include <libpc/Utils.hpp>
 #include <libpc/Schema.hpp>
 #include <libpc/Dimension.hpp>
-#include <libpc/PointBUffer.hpp>
+#include <libpc/PointBuffer.hpp>
 
 #include "TestConfig.hpp"
 
