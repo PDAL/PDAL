@@ -71,6 +71,8 @@ public:
     int getMetadataRecordCount() const;
     const MetadataRecord& getMetadataRecord(int index) const;
 
+    const SpatialReference& getSpatialReference() const;
+
     bool supportsIterator (StageIteratorType t) const
     {   
         if (t == StageIterator_Sequential ) return true;

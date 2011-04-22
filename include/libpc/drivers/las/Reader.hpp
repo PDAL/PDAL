@@ -81,6 +81,8 @@ public:
     boost::uint8_t getVersionMajor() const;
     boost::uint8_t getVersionMinor() const;
 
+    const SpatialReference& getSpatialReference() const;
+
     boost::uint64_t getPointDataOffset() const;
 
 protected:

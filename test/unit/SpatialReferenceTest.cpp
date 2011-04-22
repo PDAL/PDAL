@@ -36,8 +36,9 @@
 
 #include <libpc/SpatialReference.hpp>
 #include <libpc/Utils.hpp>
+#include <libpc/drivers/las/Reader.hpp>
 
-using namespace libpc;
+#include "Support.hpp"
 
 BOOST_AUTO_TEST_SUITE(SpatialReferenceTest)
 
@@ -47,8 +48,8 @@ BOOST_AUTO_TEST_SUITE(SpatialReferenceTest)
     const char* gdal_data = getenv("GDAL_DATA");
     const char* proj_lib = getenv("PROJ_LIB");
 
-    BOOST_CHECK(Utils::fileExists(gdal_data));
-    BOOST_CHECK(Utils::fileExists(proj_lib));
+    BOOST_CHECK(libpc::Utils::fileExists(gdal_data));
+    BOOST_CHECK(libpc::Utils::fileExists(proj_lib));
 
     return;
 }
@@ -56,7 +57,7 @@ BOOST_AUTO_TEST_SUITE(SpatialReferenceTest)
 
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
-    SpatialReference srs;
+    libpc::SpatialReference srs;
 
     BOOST_CHECK(srs.getProj4() == "");
     BOOST_CHECK(srs.getWKT() == "");
@@ -68,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 // Test round-tripping proj.4 string
 BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
 {
-    SpatialReference ref;
+    libpc::SpatialReference ref;
     
     const std::string proj4 = "+proj=utm +zone=15 +datum=WGS84 +units=m +no_defs ";
     const std::string proj4_ellps = "+proj=utm +zone=15 +ellps=WGS84 +datum=WGS84 +units=m +no_defs ";
@@ -88,7 +89,7 @@ BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
 // Test setting EPSG:4326 from User string
 BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
 {
-    SpatialReference ref;
+    libpc::SpatialReference ref;
 
     const std::string code = "EPSG:4326";
     const std::string proj4 = "+proj=longlat +datum=WGS84 +no_defs ";
@@ -106,32 +107,25 @@ BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
     return;
 }
 
+       
+// Test fetching SRS from an existing file
+BOOST_AUTO_TEST_CASE(test_read_srs)
+{
+    libpc::drivers::las::LasReader reader(Support::datapath("utm17.las"));
+
+    //////libpc::SpatialReference const& ref = reader.getSpatialReference();
+
+    //////const std::string wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"32617\"]]";
+    //////BOOST_CHECK(ref.getWKT() == wkt);
+
+    //////const std::string proj4 = "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs ";
+    //////BOOST_CHECK(ref.getProj4() == proj4);
+
+    return;
+}
+
 
 #if 0
-   utm17_filename(g_test_data_path + "//srs.las")
-   utm15_filename(g_test_data_path + "//1.2_3.las")
-        
-  
-
-    // Test fetching SRS from an existing file
-    void to::test<2>()
-    {
-        std::ifstream ifs;
-        ifs.open(utm17_filename.c_str(), std::ios::in | std::ios::binary);
-        liblas::Reader reader(ifs);
-        
-        liblas::Header const& header = reader.GetHeader();
-        liblas::SpatialReference const& ref = header.GetSRS();
-        
-        const char* wkt_c = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"32617\"]]";
-        ensure_equals("WKT comparison", ref.GetWKT(), wkt_c );
-        
-        const char* proj4_c = "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs ";
-        ensure_equals("Proj.4 comparison", ref.GetProj4(), proj4_c);
-
-    }
-
-
 
     // Test reprojecting UTM 15 to DD with a filter
     void to::test<5>()

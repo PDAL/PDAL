@@ -113,6 +113,12 @@ boost::uint8_t LiblasReader::getVersionMinor() const
 }
 
 
+const SpatialReference& LiblasReader::getSpatialReference() const
+{
+    throw not_yet_implemented("SRS support in liblas reader not yet implemented");
+}
+
+
 void LiblasReader::processExternalHeader(::liblas::Reader& externalReader)
 {
     const ::liblas::Header& externalHeader = externalReader.GetHeader();
