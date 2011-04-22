@@ -34,6 +34,7 @@
 
 #include <libpc/drivers/oci/Reader.hpp>
 #include <libpc/drivers/oci/Iterator.hpp>
+#include <libpc/Utils.hpp>
 
 #include <libpc/exceptions.hpp>
 
