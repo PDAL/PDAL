@@ -90,7 +90,7 @@ SpatialReference::SpatialReference(SpatialReference const& other)
     , m_wkt(other.m_wkt)
 {
     ////////////////////////////////////////////////////////////SetVLRs(other.GetVLRs());
-    GetGTIF();
+    getGTIF();
 }
 
 
@@ -99,7 +99,7 @@ SpatialReference& SpatialReference::operator=(SpatialReference const& rhs)
     if (&rhs != this)
     {
         ////////////////////////////////////////////////SetVLRs(rhs.GetVLRs());
-        GetGTIF();
+        getGTIF();
         m_wkt = rhs.m_wkt;
     }
     return *this;
@@ -123,7 +123,7 @@ SpatialReference::~SpatialReference()
 }
 
 
-void SpatialReference::SetGTIF(GTIF* pgtiff, ST_TIFF* ptiff) 
+void SpatialReference::setGTIF(GTIF* pgtiff, ST_TIFF* ptiff) 
 {
     m_gtiff = (GTIF*)pgtiff;
     m_tiff = (ST_TIFF*)ptiff;
@@ -133,7 +133,7 @@ void SpatialReference::SetGTIF(GTIF* pgtiff, ST_TIFF* ptiff)
 }
 
 
-const GTIF* SpatialReference::GetGTIF()
+const GTIF* SpatialReference::getGTIF()
 {
 #ifndef LIBPC_SRS_ENABLED
     return 0;
@@ -204,14 +204,52 @@ const GTIF* SpatialReference::GetGTIF()
 }
 
 
-std::string SpatialReference::GetWKT( WKTModeFlag mode_flag) const 
+int SpatialReference::geotiff_ST_SetKey(int tag, int count, GeotiffKeyType geotiff_key_type, void *data)
 {
-    return GetWKT(mode_flag, false);
+    return ST_SetKey(m_tiff, tag, count, (int)geotiff_key_type, data);
+}
+
+
+void SpatialReference::geotiff_SetTags()
+{
+    m_gtiff = GTIFNewSimpleTags(m_tiff);
+    if (!m_gtiff) 
+        throw std::runtime_error("The geotiff keys could not be read from VLR records");
+    return;
+}
+
+
+void SpatialReference::geotiff_ResetTags()
+{
+    // If we already have m_gtiff and m_tiff, that is because we have 
+    // already called GetGTIF once before.  VLRs ultimately drive how the 
+    // SpatialReference is defined, not the GeoTIFF keys.  
+    if (m_tiff != 0 )
+    {
+        ST_Destroy(m_tiff);
+        m_tiff = 0;
+    }
+
+    if (m_gtiff != 0 )
+    {
+        GTIFFree(m_gtiff);
+        m_gtiff = 0;
+    }
+
+    m_tiff = ST_Create();
+
+    return;
+}
+
+
+std::string SpatialReference::getWKT( WKTModeFlag mode_flag) const 
+{
+    return getWKT(mode_flag, false);
 }
 
 
 /// Fetch the SRS as WKT
-std::string SpatialReference::GetWKT(WKTModeFlag mode_flag , bool pretty) const 
+std::string SpatialReference::getWKT(WKTModeFlag mode_flag , bool pretty) const 
 {
 #ifndef LIBPC_SRS_ENABLED
     boost::ignore_unused_variable_warning(mode_flag);
@@ -311,7 +349,7 @@ std::string SpatialReference::GetWKT(WKTModeFlag mode_flag , bool pretty) const
 }
 
 
-void SpatialReference::SetFromUserInput(std::string const& v)
+void SpatialReference::setFromUserInput(std::string const& v)
 {
 #ifdef LIBPC_SRS_ENABLED
 
@@ -320,7 +358,8 @@ void SpatialReference::SetFromUserInput(std::string const& v)
     
     // OGRSpatialReference* poSRS = (OGRSpatialReference*) OSRNewSpatialReference(NULL);
     OGRSpatialReference srs(NULL);
-    if (OGRERR_NONE != srs.SetFromUserInput(const_cast<char *> (input)))
+    OGRErr err = srs.SetFromUserInput(const_cast<char *> (input));
+    if (err != OGRERR_NONE)
     {
         throw std::invalid_argument("could not import coordinate system into OSRSpatialReference SetFromUserInput");
     }
@@ -330,7 +369,7 @@ void SpatialReference::SetFromUserInput(std::string const& v)
     std::string tmp(poWKT);
     CPLFree(poWKT);
     
-    SetWKT(tmp);
+    setWKT(tmp);
 #else
     boost::ignore_unused_variable_warning(v);
     throw std::runtime_error("GDAL is not available, SpatialReference could not be set from WKT");
@@ -338,13 +377,13 @@ void SpatialReference::SetFromUserInput(std::string const& v)
 }
 
 
-void SpatialReference::SetWKT(std::string const& v)
+void SpatialReference::setWKT(std::string const& v)
 {
     m_wkt = v;
 
     if (!m_gtiff)
     {
-        GetGTIF(); 
+        getGTIF(); 
     }
 
 #ifdef LIBPC_SRS_ENABLED
@@ -368,14 +407,14 @@ void SpatialReference::SetWKT(std::string const& v)
 }
 
 
-void SpatialReference::SetVerticalCS(boost::int32_t verticalCSType, 
+void SpatialReference::setVerticalCS(boost::int32_t verticalCSType, 
                                      std::string const& citation,
                                      boost::int32_t verticalDatum,
                                      boost::int32_t verticalUnits)
 {
     if (!m_gtiff)
     {
-        GetGTIF(); 
+        getGTIF(); 
     }
 
 #ifdef LIBPC_SRS_ENABLED
@@ -414,11 +453,11 @@ void SpatialReference::SetVerticalCS(boost::int32_t verticalCSType,
 }
     
 
-std::string SpatialReference::GetProj4() const 
+std::string SpatialReference::getProj4() const 
 {
 #ifdef LIBPC_SRS_ENABLED
     
-    std::string wkt = GetWKT(eCompoundOK);
+    std::string wkt = getWKT(eCompoundOK);
     const char* poWKT = wkt.c_str();
     
     OGRSpatialReference srs(NULL);
@@ -442,11 +481,11 @@ std::string SpatialReference::GetProj4() const
 }
 
 
-void SpatialReference::SetProj4(std::string const& v)
+void SpatialReference::setProj4(std::string const& v)
 {
     if (!m_gtiff)
     {
-        GetGTIF();
+        getGTIF();
         ////////////////////////////////ResetVLRs();
     }
    
@@ -494,18 +533,18 @@ void SpatialReference::SetProj4(std::string const& v)
 }
 
 
-boost::property_tree::ptree SpatialReference::GetPTree( ) const
+boost::property_tree::ptree SpatialReference::getPTree( ) const
 {
     using boost::property_tree::ptree;
     ptree srs;
 
 #ifdef LIBPC_SRS_ENABLED
-    srs.put("proj4", GetProj4());
-    srs.put("prettywkt", GetWKT(SpatialReference::eHorizontalOnly, true));
-    srs.put("wkt", GetWKT(SpatialReference::eHorizontalOnly, false));
-    srs.put("compoundwkt", GetWKT(eCompoundOK, false));
-    srs.put("prettycompoundwkt", GetWKT(eCompoundOK, true));
-    srs.put("gtiff", GetGTIFFText());
+    srs.put("proj4", getProj4());
+    srs.put("prettywkt", getWKT(SpatialReference::eHorizontalOnly, true));
+    srs.put("wkt", getWKT(SpatialReference::eHorizontalOnly, false));
+    srs.put("compoundwkt", getWKT(eCompoundOK, false));
+    srs.put("prettycompoundwkt", getWKT(eCompoundOK, true));
+    srs.put("gtiff", getGTIFFText());
 
 #else
 
@@ -567,7 +606,7 @@ static int libpcGeoTIFFPrint(char* data, void* aux)
 
 
 
-std::string SpatialReference::GetGTIFFText() const
+std::string SpatialReference::getGTIFFText() const
 {
 #ifndef LIBPC_SRS_ENABLED
     return std::string("");
@@ -586,7 +625,7 @@ std::string SpatialReference::GetGTIFFText() const
 std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 {
     ostr << "SRS: ";
-    ostr << srs.GetWKT();
+    ostr << srs.getWKT();
     ostr << std::endl;
     return ostr;
 }
@@ -598,13 +637,12 @@ std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 
 #if 0
 
-SpatialReference::SpatialReference(std::vector<VariableRecord> const& vlrs) 
-    : m_gtiff(0)
-    , m_tiff(0)
-{
-    SetVLRs(vlrs);
-    GetGTIF();
-}
+    enum GeoVLRType
+    {
+        eGeoTIFF = 1,
+        eOGRWKT = 2
+    };
+
 
 /// Keep a copy of the VLRs that are related to GeoTIFF SRS information.
 void SpatialReference::SetVLRs(std::vector<VariableRecord> const& vlrs)
@@ -628,50 +666,6 @@ void SpatialReference::SetVLRs(std::vector<VariableRecord> const& vlrs)
     }
 }
 
-void SpatialReference::AddVLR(VariableRecord const& vlr) 
-{
-    if (IsGeoVLR(vlr))
-    {
-        m_vlrs.push_back(vlr);
-    }
-}
-
-bool SpatialReference::IsGeoVLR(VariableRecord const& vlr) const
-{
-    std::string const las_projid("LASF_Projection");
-    std::string const liblas_id("liblas");
-    
-    // GTIFF_GEOKEYDIRECTORY == 34735
-    if (las_projid == vlr.GetUserId(true).c_str() && 34735 == vlr.GetRecordId())
-    {
-        return true;
-    }
-    
-    // GTIFF_DOUBLEPARAMS == 34736
-    if (las_projid == vlr.GetUserId(true).c_str() && 34736 == vlr.GetRecordId())
-    {
-        return true;
-    }
-    
-    // GTIFF_ASCIIPARAMS == 34737
-    if (las_projid == vlr.GetUserId(true).c_str() && 34737 == vlr.GetRecordId())
-    {
-        return true;
-    }
-
-    // OGR_WKT?
-    if (liblas_id == vlr.GetUserId(true).c_str() && 2112 == vlr.GetRecordId())
-    {
-        return true;
-    }
-
-    return false;
-}
-
-std::vector<VariableRecord> SpatialReference::GetVLRs() const
-{
-    return m_vlrs;
-}
 
 void SpatialReference::ClearVLRs( GeoVLRType eType )
 

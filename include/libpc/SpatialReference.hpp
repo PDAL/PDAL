@@ -85,9 +85,9 @@ public:
     
     /// Returns a pointer to the internal GTIF*.  Only available if 
     /// you have libgeotiff linked in.
-    const GTIF* GetGTIF();
+    const GTIF* getGTIF();
 
-    void SetGTIF(GTIF* pgtiff, ST_TIFF* ptiff);
+    void setGTIF(GTIF* pgtiff, ST_TIFF* ptiff);
 
     /// Returns the OGC WKT describing Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine 
@@ -97,13 +97,13 @@ public:
     /// eCompoundOK indicating the the returned WKT may be a compound 
     /// coordinate system if there is vertical coordinate system info 
     /// available.
-    std::string GetWKT(WKTModeFlag mode_flag = eHorizontalOnly) const;
-    std::string GetWKT(WKTModeFlag mode_flag, bool pretty) const;
+    std::string getWKT(WKTModeFlag mode_flag = eHorizontalOnly) const;
+    std::string getWKT(WKTModeFlag mode_flag, bool pretty) const;
     
     /// Sets the SRS using GDAL's OGC WKT. If GDAL is not linked, this 
     /// operation has no effect.
     /// \param v - a string containing the WKT string.  
-    void SetWKT(std::string const& v);
+    void setWKT(std::string const& v);
 
     /// Sets the vertical coordinate system using geotiff key values.
     /// This operation should normally be done after setting the horizontal
@@ -117,7 +117,7 @@ public:
     /// range 5100 to 5299 - implied by verticalCSType if that is provided, or 
     /// -1 if no value is available.
     /// \param verticalUnits - the EPSG vertical units code, often 9001 for Metre.
-    void SetVerticalCS(boost::int32_t verticalCSType, 
+    void setVerticalCS(boost::int32_t verticalCSType, 
                        std::string const& citation = std::string(0),
                        boost::int32_t verticalDatum = -1,
                        boost::int32_t verticalUnits = 9001);
@@ -125,14 +125,14 @@ public:
     /// Sets the SRS using GDAL's SetFromUserInput function. If GDAL is not linked, this 
     /// operation has no effect.
     /// \param v - a string containing the definition (filename, proj4, wkt, etc).  
-    void SetFromUserInput(std::string const& v);
+    void setFromUserInput(std::string const& v);
         
     /// Returns the Proj.4 string describing the Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine 
     /// the Proj.4 string -- otherwise, if libgeotiff is linked, it uses 
     /// that.  Note that GDAL's operations are much more mature and 
     /// support more coordinate systems and descriptions.
-    std::string GetProj4() const;
+    std::string getProj4() const;
 
     /// Sets the Proj.4 string describing the Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine 
@@ -140,9 +140,19 @@ public:
     /// that.  Note that GDAL's operations are much more mature and 
     /// support more coordinate systems and descriptions.
     /// \param v - a string containing the Proj.4 string.
-    void SetProj4(std::string const& v);
+    void setProj4(std::string const& v);
     
-    boost::property_tree::ptree GetPTree() const;    
+    boost::property_tree::ptree getPTree() const;    
+
+    enum GeotiffKeyType
+    {
+        Geotiff_KeyType_SHORT=1,
+        Geotiff_KeyType_DOUBLE=2,
+        Geotiff_KeyType_ASCII=3
+    };
+    int geotiff_ST_SetKey(int tag, int count, GeotiffKeyType geotiff_key_type, void *data);
+    void geotiff_SetTags();
+    void geotiff_ResetTags();
 
 private:
 
@@ -152,8 +162,7 @@ private:
 
     std::string m_wkt;
 
-    std::string GetGTIFFText() const;
-
+    std::string getGTIFFText() const;
 };
 
 
@@ -179,50 +188,4 @@ void SetGeogCSCitation(GTIF* psGTIF, OGRSpatialReference* poSRS, char* angUnitNa
 #endif // defined __geotiff_h_
 LIBPC_C_END
 
-
 #endif
-
-
-#if 0
-#include <liblas/detail/fwd.hpp>
-#include <liblas/detail/private_utility.hpp>
-#include <liblas/variablerecord.hpp>
-#include <liblas/exception.hpp>
-#include <liblas/capi/las_config.h>
-#include <liblas/export.hpp>
-#include <liblas/external/property_tree/ptree.hpp>
-#include <stdexcept> // std::out_of_range
-#include <cstdlib> // std::size_t
-#include <string>
-
-    enum GeoVLRType
-    {
-        eGeoTIFF = 1,
-        eOGRWKT = 2
-    };
-
-    /// Set the LASVLRs for the SpatialReference.  SetVLRs will only copy 
-    /// VLR records that pertain to the GeoTIFF keys, and extraneous 
-    /// VLR records will not be copied.
-    /// \param vlrs - A list of VLRs that contains VLRs describing GeoTIFF keys
-    void SetVLRs(std::vector<VariableRecord> const& vlrs);
-    
-    /// Add a VLR representing GeoTIFF keys to the SRS
-    void AddVLR(VariableRecord const& vlr);
-    
-    /// Return a copy of the LASVLRs that SpatialReference maintains
-    std::vector<VariableRecord> GetVLRs() const;
-
-    void ClearVLRs( GeoVLRType eType );
-
-    std::vector<VariableRecord> m_vlrs;
-    bool IsGeoVLR(VariableRecord const& vlr) const;
-
-    /// Reset the VLRs of the SpatialReference using the existing GTIF* and ST_TIF*
-    /// Until this method is called, 
-    /// the SpatialReference will only contain a SRS description using the VLRs 
-    /// that it was first instantiated with.  SetWKT and SetProj4 can 
-    /// be used to change the GTIF* 
-    void ResetVLRs();
-
-#endif 

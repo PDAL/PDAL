@@ -175,7 +175,7 @@ std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
 //    ostr << "    Size in bytes: " << header.getSchema().getByteSize() << std::endl;
 
     ostr << "  Spatial Reference:" << std::endl;
-    ostr << "    WKT: " << stage.getSpatialReference().GetWKT() << std::endl;
+    ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;
 
     return ostr;
 }

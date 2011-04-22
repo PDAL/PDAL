@@ -40,6 +40,11 @@
 #include <libpc/MetadataRecord.hpp>
 
 #include <iostream>
+#include <vector>
+
+namespace libpc {
+    class SpatialReference;
+}
 
 namespace libpc { namespace drivers { namespace las {
     
@@ -61,6 +66,11 @@ public:
     boost::uint16_t getRecordId() const { return m_recordId; }
     boost::uint8_t* getDescription() const { return (boost::uint8_t*)m_description; }
 
+    static void setSRS(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);
+    bool VariableLengthRecord::isGeoVLR() const;
+
+    bool compareUserId(const std::string& str) const;
+
     bool operator==(const VariableLengthRecord&) const;
     VariableLengthRecord& operator=(const VariableLengthRecord&);
 
@@ -68,9 +78,9 @@ public:
 
 private:
     boost::uint16_t m_reserved;
-    boost::uint8_t* m_userId; // always 16 bytes
+    boost::uint8_t* m_userId; // always 16 bytes   // BUG: make this a std::string?
     boost::uint16_t m_recordId;
-    boost::uint8_t* m_description;  // always 32 bytes
+    boost::uint8_t* m_description;  // always 32 bytes   // BUG: make this a std::string?
 };
 
 

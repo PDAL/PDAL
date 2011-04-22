@@ -34,6 +34,8 @@
 
 #include <libpc/drivers/las/VariableLengthRecord.hpp>
 
+#include <libpc/SpatialReference.hpp>
+
 #include <libpc/exceptions.hpp>
 
 
@@ -106,5 +108,116 @@ bool VariableLengthRecord::operator==(const VariableLengthRecord& vlr) const
     return true;
 }
 
+
+bool VariableLengthRecord::compareUserId(const std::string& str) const
+{
+    int len = str.length();
+    if (memcmp(getUserId(), str.c_str(), len) == 0)
+        return true;
+    return false;
+}
+
+
+void VariableLengthRecord::setSRS(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs)
+{
+    srs.geotiff_ResetTags();
+
+    const std::string uid("LASF_Projection");
+    
+    // nothing is going to happen here if we don't have any vlrs describing
+    // srs information on the spatialreference.  
+    for (std::size_t i = 0; i < vlrs.size(); ++i)
+    {
+        const VariableLengthRecord& vlr = vlrs[i];
+        
+        if (!vlr.compareUserId(uid))
+            continue;
+
+        boost::shared_array<boost::uint8_t> data = vlr.getBytes();
+        std::size_t length = vlr.getLength();
+
+        switch (vlr.getRecordId())
+        {
+        case 34735:
+            {
+                int count = length / sizeof(double);
+                // discard invalid "zero" geotags some software emits.
+                while( count > 4 
+                    && data[count-1] == 0
+                    && data[count-2] == 0
+                    && data[count-3] == 0
+                    && data[count-4] == 0 )
+                {
+                    count -= 4;
+                    data[3] -= 1;
+                }
+
+                srs.geotiff_ST_SetKey(34735, count, SpatialReference::Geotiff_KeyType_SHORT, data.get());
+            }
+            break;
+
+        case 34736:
+            {
+                int count = length / sizeof(double);
+                srs.geotiff_ST_SetKey(34736, count, SpatialReference::Geotiff_KeyType_DOUBLE, data.get());
+            }        
+            break;
+
+        case 34737:
+            {
+                int count = length/sizeof(uint8_t);
+                srs.geotiff_ST_SetKey(34737, count, SpatialReference::Geotiff_KeyType_ASCII, data.get());
+            }
+            break;
+
+        default:
+            // ummm....?
+            break;
+        }
+    }
+
+    srs.geotiff_SetTags();
+    
+    return;
+}
+
+
+bool VariableLengthRecord::isGeoVLR() const
+{
+    std::string const las_projid("LASF_Projection");
+    std::string const liblas_id("liblas");
+    
+    if (compareUserId(las_projid))
+    {
+        // GTIFF_GEOKEYDIRECTORY == 34735
+        if (34735 == getRecordId())
+        {
+            return true;
+        }
+
+        // GTIFF_DOUBLEPARAMS == 34736
+        if (34736 == getRecordId())
+        {
+            return true;
+        }
+
+        // GTIFF_ASCIIPARAMS == 34737
+        if (34737 == getRecordId())
+        {
+            return true;
+        }
+    }
+
+    if (compareUserId(liblas_id))
+    {
+        // OGR_WKT?
+        if (2112 == getRecordId())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 } } } // namespaces

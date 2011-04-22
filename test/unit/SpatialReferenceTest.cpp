@@ -41,12 +41,56 @@ using namespace libpc;
 BOOST_AUTO_TEST_SUITE(SpatialReferenceTest)
 
 
-BOOST_AUTO_TEST_CASE(test_1)
+BOOST_AUTO_TEST_CASE(test_ctor)
 {
     SpatialReference srs;
 
-    BOOST_CHECK(srs.GetProj4() == "");
-    BOOST_CHECK(srs.GetWKT() == "");
+    BOOST_CHECK(srs.getProj4() == "");
+    BOOST_CHECK(srs.getWKT() == "");
+
+    return;
+}
+
+
+// Test round-tripping proj.4 string
+BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
+{
+#if 0
+    SpatialReference ref;
+    
+    const std::string proj4 = "+proj=utm +zone=15 +datum=WGS84 +units=m +no_defs ";
+    const std::string proj4_ellps = "+proj=utm +zone=15 +ellps=WGS84 +datum=WGS84 +units=m +no_defs ";
+
+    ref.setProj4(proj4);
+    const std::string ret = ref.getProj4();
+    BOOST_CHECK(ret == proj4);
+
+    ref.setProj4(proj4_ellps);
+    const std::string ret2 = ref.getProj4();
+    BOOST_CHECK(ret2 == proj4_ellps);
+#endif
+
+    return;
+}
+
+
+// Test setting EPSG:4326 from User string
+BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
+{
+#if 0
+    SpatialReference ref;
+
+    const std::string code = "EPSG:4326";
+    const std::string proj4 = "+proj=longlat +datum=WGS84 +no_defs ";
+    const std::string wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
+    ref.setFromUserInput(code);
+
+    const std::string ret_proj = ref.getProj4();
+    const std::string ret_wkt = ref.getWKT();
+
+    BOOST_CHECK(ret_proj == proj4);
+    BOOST_CHECK(ret_wkt == wkt);
+#endif
 
     return;
 }
@@ -76,30 +120,7 @@ BOOST_AUTO_TEST_CASE(test_1)
 
     }
 
-    // Test round-tripping proj.4 string
-    void to::test<3>()
-    {
-        liblas::SpatialReference ref;
-        const char* proj4_c = "+proj=utm +zone=15 +datum=WGS84 +units=m +no_defs ";
-        ref.SetProj4(proj4_c);
-        
-        ensure_equals("Proj.4 comparison", ref.GetProj4(), proj4_c);
-        
-    }
 
-    // Test setting EPSG:4326 from User string
-    void to::test<4>()
-    {
-        liblas::SpatialReference ref;
-        const char* code = "EPSG:4326";
-        const char* proj4_c = "+proj=longlat +datum=WGS84 +no_defs ";
-        const char* wkt_c = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
-        ref.SetFromUserInput(code);
-        
-        ensure_equals("Proj.4 comparison", ref.GetProj4(), proj4_c);
-        ensure_equals("WKT comparison", ref.GetWKT(), wkt_c );
-        
-    }
 
     // Test reprojecting UTM 15 to DD with a filter
     void to::test<5>()
