@@ -301,10 +301,10 @@ bool Writer::IsGeographic(boost::int32_t srid)
         throw std::runtime_error(oss.str());
     }  
     
-    if (compare_no_case(kind.get(), "GEOGRAPHIC2D",12) == 0) {
+    if (compare_no_case(kind.get(), "GEOGRAPHIC2D") == 0) {
         return true;
     }
-    if (compare_no_case(kind.get(), "GEOGRAPHIC3D",12) == 0) {
+    if (compare_no_case(kind.get(), "GEOGRAPHIC3D") == 0) {
         return true;
     }
 

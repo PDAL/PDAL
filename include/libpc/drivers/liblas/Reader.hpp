@@ -68,8 +68,8 @@ public:
     boost::uint8_t getVersionMajor() const;
     boost::uint8_t getVersionMinor() const;
 
-    int LiblasReader::getMetadataRecordCount() const;
-    const MetadataRecord& LiblasReader::getMetadataRecord(int index) const;
+    int getMetadataRecordCount() const;
+    const MetadataRecord& getMetadataRecord(int index) const;
 
     bool supportsIterator (StageIteratorType t) const
     {   
@@ -85,7 +85,7 @@ public:
 private:
     void processExternalHeader(::liblas::Reader& externalReader);
     void registerFields(::liblas::Reader& externalReader);
-    MetadataRecord& LiblasReader::getMetadataRecordRef(int index);
+    MetadataRecord& getMetadataRecordRef(int index);
 
     std::string m_filename;
 
