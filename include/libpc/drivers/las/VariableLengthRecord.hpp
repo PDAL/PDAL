@@ -66,8 +66,15 @@ public:
     boost::uint16_t getRecordId() const { return m_recordId; }
     boost::uint8_t* getDescription() const { return (boost::uint8_t*)m_description; }
 
-    static void setSRS(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);
+    static void setSRSFromVLRs(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);
+    static void setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs);
     bool VariableLengthRecord::isGeoVLR() const;
+    enum GeoVLRType
+    {
+        eGeoTIFF = 1,
+        eOGRWKT = 2
+    };
+    static void clearVLRs(GeoVLRType eType, std::vector<VariableLengthRecord>& vlrs);
 
     bool compareUserId(const std::string& str) const;
 

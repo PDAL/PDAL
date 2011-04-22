@@ -53,6 +53,7 @@
 #include <libpc/Schema.hpp>
 #include <libpc/Vector.hpp>
 #include <libpc/Bounds.hpp>
+#include <libpc/SpatialReference.hpp>
 #include <libpc/drivers/las/Support.hpp>
 #include <libpc/drivers/las/VariableLengthRecord.hpp>
 
@@ -338,6 +339,9 @@ public:
     const std::vector<VariableLengthRecord>& getVLRs() const;
     std::vector<VariableLengthRecord>& getVLRsRef();
 
+    void setSpatialReference(const SpatialReference&);
+    const SpatialReference& getSpatialReference() const;
+
     //void to_rst(std::ostream& os) const;
     //void to_xml(std::ostream& os) const;
     //void to_json(std::ostream& os) const;
@@ -391,6 +395,8 @@ private:
     Bounds<double> m_bounds;
 
     std::vector<VariableLengthRecord> m_vlrs;
+
+    SpatialReference m_spatialReference;
 
     LasHeader& operator=(const LasHeader&); // nope
     LasHeader(const LasHeader&); // nope

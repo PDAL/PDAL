@@ -44,6 +44,7 @@
 #endif
 
 #include <boost/property_tree/ptree.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <string>
 #include <ostream>
@@ -85,9 +86,7 @@ public:
     
     /// Returns a pointer to the internal GTIF*.  Only available if 
     /// you have libgeotiff linked in.
-    const GTIF* getGTIF();
-
-    void setGTIF(GTIF* pgtiff, ST_TIFF* ptiff);
+    void rebuildGTIFFromVLRs();
 
     /// Returns the OGC WKT describing Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine 
@@ -153,12 +152,19 @@ public:
     int geotiff_ST_SetKey(int tag, int count, GeotiffKeyType geotiff_key_type, void *data);
     void geotiff_SetTags();
     void geotiff_ResetTags();
+    int geotiff_ST_GetKey(int tag, int *count, int *st_key_type, void **data_ptr) const;
 
 private:
 
-    // FIXME: Define as shared_ptr<GTIF> with custom deleter to get rid of bloated mem management, unsafe anyway --mloskot
-    GTIF*       m_gtiff;
-    ST_TIFF*    m_tiff;
+    class TiffStuff
+    {
+    public:
+        TiffStuff();
+        ~TiffStuff();
+        GTIF*       m_gtiff;
+        ST_TIFF*    m_tiff;
+    };
+    boost::shared_ptr<TiffStuff> m_tiffstuff;
 
     std::string m_wkt;
 

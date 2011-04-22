@@ -71,6 +71,8 @@ public:
     // default false
     void setCompressed(bool);
 
+    void setSpatialReference(const SpatialReference&);
+
 protected:
     // this is called once before the loop with the writeBuffer calls
     virtual void writeBegin();
@@ -89,6 +91,7 @@ private:
     SummaryData m_summaryData;
     LASzipper* m_zipper;
     ZipPoint* m_zipPoint;
+    SpatialReference m_spatialReference;
 
     LasWriter& operator=(const LasWriter&); // not implemented
     LasWriter(const LasWriter&); // not implemented

@@ -313,47 +313,47 @@ void LasHeaderWriter::write()
     //////{
     //////    ostream.seekp(m_header.GetDataOffset(), std::ios::beg);
     //////}
-    
+
+    return;
 }
 
 void LasHeaderWriter::WriteVLRs()
 {
+    // Seek to the end of the public header block (beginning of the VLRs)
+    // to start writing
+    m_ostream.seekp(m_header.GetHeaderSize(), std::ios::beg);
 
-    ////// Seek to the end of the public header block (beginning of the VLRs)
-    ////// to start writing
-    ////ostream.seekp(GetHeaderSize(), std::ios::beg);
+    int32_t diff = m_header.GetDataOffset() - GetRequiredHeaderSize();
+    
+    if (diff < 0) {
+        std::ostringstream oss;
+        oss << "Header is not large enough to contain VLRs.  Data offset is ";
+        oss << m_header.GetDataOffset() << " while the required total size ";
+        oss << "for the VLRs is " << GetRequiredHeaderSize();
+        throw std::runtime_error(oss.str());
+    }
 
-    ////int32_t diff = GetDataOffset() - GetRequiredHeaderSize();
-    ////
-    ////if (diff < 0) {
-    ////    std::ostringstream oss;
-    ////    oss << "Header is not large enough to contain VLRs.  Data offset is ";
-    ////    oss << m_header.GetDataOffset() << " while the required total size ";
-    ////    oss << "for the VLRs is " << GetRequiredHeaderSize();
-    ////    throw std::runtime_error(oss.str());
-    ////}
+    for (uint32_t i = 0; i < m_header.GetRecordsCount(); ++i)
+    {
+        VariableLengthRecord const &vlr = m_header.getVLRs()[i];
 
-    ////for (uint32_t i = 0; i < m_header.GetRecordsCount(); ++i)
-    ////{
-    ////    VariableRecord const &vlr = m_header.GetVLR(i);
+        Utils::write_n(m_ostream, vlr.getReserved(), sizeof(uint16_t));
+        Utils::write_n(m_ostream, vlr.getUserId(), 16);
+        Utils::write_n(m_ostream, vlr.getRecordId(), sizeof(uint16_t));
+        Utils::write_n(m_ostream, vlr.getLength(), sizeof(uint16_t));
+        Utils::write_n(m_ostream, vlr.getDescription(), 32);
+        boost::shared_array<uint8_t> data(vlr.getBytes());
+        Utils::write_n(m_ostream, &(data[0]), vlr.getLength());
+    }
 
-    ////    Utils::write_n(m_ostream, vlr.GetReserved(), sizeof(uint16_t));
-    ////    Utils::write_n(m_ostream, vlr.GetUserId(true).c_str(), 16);
-    ////    Utils::write_n(m_ostream, vlr.GetRecordId(), sizeof(uint16_t));
-    ////    Utils::write_n(m_ostream, vlr.GetRecordLength(), sizeof(uint16_t));
-    ////    Utils::write_n(m_ostream, vlr.GetDescription(true).c_str(), 32);
-    ////    std::vector<uint8_t> const& data = vlr.GetData();
-    ////    std::streamsize const size = static_cast<std::streamsize>(data.size());
-    ////    Utils::write_n(m_ostream, data.front(), size);
-    ////}
+    // if we had more room than we need for the VLRs, we need to pad that with 
+    // 0's.  We must also not forget to add the 1.0 pad bytes to the end of this
+    // but the impl should be the one doing that, not us.
+    if (diff > 0) {
+        Utils::write_n(m_ostream, "\0", diff);
+    }
 
-    ////// if we had more room than we need for the VLRs, we need to pad that with 
-    ////// 0's.  We must also not forget to add the 1.0 pad bytes to the end of this
-    ////// but the impl should be the one doing that, not us.
-    ////if (diff > 0) {
-    ////    Utils::write_n(m_ostream, "\0", diff);
-    ////}
-
+    return;
 }
 
 std::size_t LasHeaderWriter::GetRequiredHeaderSize() const

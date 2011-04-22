@@ -530,6 +530,17 @@ const std::vector<VariableLengthRecord>& LasHeader::getVLRs() const
 //}
 
 
+void LasHeader::setSpatialReference(const SpatialReference& srs)
+{
+    m_spatialReference = srs;
+}
+
+
+const SpatialReference& LasHeader::getSpatialReference() const
+{
+    return m_spatialReference;
+}
+
 
 void LasHeader::SetCompressed(bool b)
 {

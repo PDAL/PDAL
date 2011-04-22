@@ -61,6 +61,8 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
     , m_zipper(NULL)
     , m_zipPoint(NULL)
 {
+    m_spatialReference = prevStage.getSpatialReference();
+
     return;
 }
 
@@ -123,6 +125,12 @@ void LasWriter::setGeneratingSoftware(const std::string& softwareId)
 }
 
 
+void LasWriter::setSpatialReference(const SpatialReference& srs)
+{
+    m_spatialReference = srs;
+}
+
+
 void LasWriter::writeBegin()
 {
     // need to set properties of the header here, based on prev->getHeader() and on the user's preferences
@@ -145,6 +153,8 @@ void LasWriter::writeBegin()
 
     boost::uint32_t cnt = static_cast<boost::uint32_t>(m_targetNumPointsToWrite);
     m_lasHeader.SetPointRecordsCount(cnt);
+
+    m_lasHeader.setSpatialReference(m_spatialReference);
 
     LasHeaderWriter lasHeaderWriter(m_lasHeader, m_ostream);
     lasHeaderWriter.write();

@@ -56,6 +56,7 @@ public:
     LasHeaderWriter(LasHeader& header, std::ostream&);
     void write();
 
+
 private:
     void WriteLAS10PadSignature();
     std::size_t GetRequiredHeaderSize() const;

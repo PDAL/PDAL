@@ -56,13 +56,13 @@ LasReader::LasReader(const std::string& filename)
     this->setBounds(m_lasHeader.getBounds());
     this->setNumPoints(m_lasHeader.GetPointRecordsCount());
 
-    //const std::vector<VariableLengthRecord>& vlrs = m_lasHeader.getVLRs();
-    //if (vlrs.size() > 0)
-    //{
-    //    SpatialReference srs;
-    //    VariableLengthRecord::setSRS(vlrs, srs);
-    //    this->setSpatialReference(srs);
-    //}
+    const std::vector<VariableLengthRecord>& vlrs = m_lasHeader.getVLRs();
+    if (vlrs.size() > 0)
+    {
+        SpatialReference srs;
+        VariableLengthRecord::setSRSFromVLRs(vlrs, srs);
+        this->setSpatialReference(srs);
+    }
 
     Utils::closeFile(str);
 
@@ -119,9 +119,9 @@ boost::uint8_t LasReader::getVersionMinor() const
 }
 
 
-const SpatialReference& LasReader::getSpatialReference() const
+const std::vector<VariableLengthRecord>& LasReader::getVLRs() const
 {
-    throw not_yet_implemented("SRS support in native las reader not yet implemented");
+    return m_lasHeader.getVLRs();
 }
 
 
