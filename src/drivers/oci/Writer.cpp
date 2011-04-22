@@ -441,12 +441,15 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     std::string header_blob_column_name = to_upper(tree.get<std::string>("header_blob_column_name"));
     std::string base_table_boundary_column = to_upper(tree.get<std::string>("base_table_boundary_column"));
     std::string base_table_boundary_wkt = to_upper(tree.get<std::string>("base_table_boundary_wkt"));
+    std::string point_schema_override = to_upper(tree.get<std::string>("point_schema_override"));
     
     boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
     boost::uint32_t precision = tree.get<boost::uint32_t>("precision");
     boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
     boost::uint32_t dimensions = tree.get<boost::uint32_t>("dimensions");
     bool bUse3d = tree.get<bool>("is3d");
+
+    bool bHaveSchemaOverride = (point_schema_override.size() > 0);
     
     std::ostringstream oss;
 
@@ -466,11 +469,16 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
         values << "pc";
     }
 
-    int nPos = 2; // Bind column position    
-    if (!header_blob_column_name.empty()){
-        columns << "," << header_blob_column_name;
-        values <<", :" << nPos;
-    }
+    int nPCPos = 1;
+    int nSchemaPos = 1;
+    if (bHaveSchemaOverride)
+        nSchemaPos++;
+
+    int nPos = nSchemaPos+1; // Bind column position    
+    // if (!header_blob_column_name.empty()){
+    //     columns << "," << header_blob_column_name;
+    //     values <<", :" << nPos;
+    // }
 
     if (!base_table_boundary_column.empty()){
         columns << "," << base_table_boundary_column;
@@ -484,7 +492,8 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
 
     std::ostringstream s_srid;
     std::ostringstream s_geom;
-
+    std::ostringstream s_schema;
+    
 
     // IsGeographic(srid);
 
@@ -497,6 +506,14 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
         s_srid << srid;
     }
 
+    if (bHaveSchemaOverride)
+    {
+        s_schema << "xmltype(:"<<nSchemaPos<<")";
+    } else
+    {
+        s_schema << "NULL";
+    }
+    
     long gtype = GetGType();
     
     std::string eleminfo = CreatePCElemInfo();
@@ -524,7 +541,7 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     
     
 oss << "declare\n"
-"  pc_id NUMBER := :1;\n"
+"  pc_id NUMBER := :"<<nPCPos<<";\n"
 "  pc sdo_pc;\n"
 
 "begin\n"
@@ -538,8 +555,10 @@ oss << "declare\n"
 ",  -- Extent\n"
 "     0.5, -- Tolerance for point cloud\n"
 "           "<<dimensions<<", -- Total number of dimensions\n"
-"           null);\n"
-"  :1 := pc.pc_id;\n"
+"           NULL,"
+"            NULL,"
+"            "<< s_schema.str() <<");\n"
+"  :"<<nPCPos<<" := pc.pc_id;\n"
 
 "  -- Insert the Point Cloud object  into the \"base\" table.\n"
 "  insert into " << base_table_name << " ( ID, "<< columns.str() <<
@@ -554,6 +573,19 @@ oss << "declare\n"
     Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
 
     statement->Bind(&pc_id);
+
+
+    OCILobLocator* schema_locator ; 
+    OCILobLocator* boundary_locator ; 
+
+    if (bHaveSchemaOverride)
+    {
+        char* schema = (char*) malloc(point_schema_override.size() * sizeof(char));
+        strncpy(schema, point_schema_override.c_str(), point_schema_override.size());
+        statement->WriteCLob( &schema_locator, schema ); 
+        statement->Bind(&schema_locator);
+    }
+
     // if (header_data->size() != 0) 
     // {
     //     OCILobLocator** locator =(OCILobLocator**) VSIMalloc( sizeof(OCILobLocator*) * 1 );
@@ -565,10 +597,8 @@ oss << "declare\n"
     strncpy(wkt, base_table_boundary_wkt.c_str(), base_table_boundary_wkt.size());
     if (!base_table_boundary_column.empty())
     {
-
-        OCILobLocator* locator ; 
-        statement->WriteCLob( &locator, wkt ); 
-        statement->Bind(&locator);
+        statement->WriteCLob( &boundary_locator, wkt ); 
+        statement->Bind(&boundary_locator);
         statement->Bind((long int*)&srid);
 
     }

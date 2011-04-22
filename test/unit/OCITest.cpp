@@ -193,7 +193,8 @@ BOOST_AUTO_TEST_CASE(test_schema)
     if (!ShouldRunTest()) return;
 
     
-    std::string xml = ReadXML("/Users/hobu/hg/liblas/schemas/las.xml");
+    // std::string xml = ReadXML("/Users/hobu/hg/liblas/schemas/las.xml");
+    std::string xml = ReadXML("/Users/hobu/hg/weblas/8-dimension-schema.xml");
     std::string xsd = ReadXML("/Users/hobu/hg/liblas/schemas/LAS.xsd");
     
     libpc::drivers::oci::Schema schema(xml, xsd);
