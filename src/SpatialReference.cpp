@@ -32,83 +32,10 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/SpatialReference.hpp>
-
-namespace libpc
-{
-
-
-SpatialReference::SpatialReference()
-    : m_wkt("NONE")
-{
-    return;
-}
-
-
-SpatialReference::SpatialReference(std::string wkt)
-    : m_wkt(wkt)
-{
-    return;
-}
-
-
-SpatialReference::SpatialReference(const SpatialReference& other)
-    : m_wkt(other.m_wkt)
-{
-    return;
-}
-
-
-SpatialReference& SpatialReference::operator=(SpatialReference const& rhs)
-{
-    if (&rhs != this)
-    {
-        m_wkt = rhs.m_wkt;
-    }
-    return *this;
-}
-
-
-bool SpatialReference::operator==(SpatialReference const& rhs) const
-{
-    if (m_wkt == rhs.m_wkt)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-
-const std::string& SpatialReference::getWKT() const
-{
-    return m_wkt;
-}
-
-
-std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
-{
-    ostr << "SRS: ";
-    ostr << srs.getWKT();
-    ostr << std::endl;
-    return ostr;
-}
-
-
-} // namespace libpc
-
-
-
-#if 0
-
+#include <libpc/libpc.hpp>
 
 // GDAL OSR
-#ifdef HAVE_GDAL
-
-// Supress inclusion of cpl_serv.h per #194, perhaps remove one day
-// when libgeotiff 1.4.0+ is widely used
-#define CPL_SERV_H_INCLUDED
-
+#ifdef LIBPC_HAVE_GDAL
 #include <ogr_srs_api.h>
 #include <cpl_port.h>
 #include <geo_normalize.h>
@@ -120,31 +47,33 @@ std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 #endif
 
 // GeoTIFF
-#ifdef HAVE_LIBGEOTIFF
+#ifdef LIBPC_HAVE_LIBGEOTIFF
 #include <geotiff.h>
 #include <geo_simpletags.h>
 #include <geo_normalize.h>
 #include <geo_simpletags.h>
 #include <geovalues.h>
-#endif // HAVE_LIBGEOTIFF
+#endif
 
-#include <liblas/spatialreference.hpp>
-#include <liblas/detail/private_utility.hpp>
+#include <libpc/SpatialReference.hpp>
+
 // boost
 #include <boost/concept_check.hpp>
 #include <boost/cstdint.hpp>
+
 // std
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#ifdef HAVE_GDAL
+#ifdef LIBPC_HAVE_GDAL
 #  include "cpl_conv.h"
 #endif
 
-using namespace boost;
 
-namespace liblas {
+namespace libpc
+{
+   
 
 SpatialReference::SpatialReference()
     : m_gtiff(0)
@@ -154,37 +83,32 @@ SpatialReference::SpatialReference()
     assert(0 == m_tiff);
 }
 
-SpatialReference::SpatialReference(std::vector<VariableRecord> const& vlrs) 
-    : m_gtiff(0)
-    , m_tiff(0)
-{
-    SetVLRs(vlrs);
-    GetGTIF();
-}
 
 SpatialReference::SpatialReference(SpatialReference const& other) 
     : m_gtiff(0)
     , m_tiff(0)
     , m_wkt(other.m_wkt)
 {
-    SetVLRs(other.GetVLRs());
+    ////////////////////////////////////////////////////////////SetVLRs(other.GetVLRs());
     GetGTIF();
 }
+
 
 SpatialReference& SpatialReference::operator=(SpatialReference const& rhs)
 {
     if (&rhs != this)
     {
-        SetVLRs(rhs.GetVLRs());
+        ////////////////////////////////////////////////SetVLRs(rhs.GetVLRs());
         GetGTIF();
         m_wkt = rhs.m_wkt;
     }
     return *this;
 }
 
+
 SpatialReference::~SpatialReference() 
 {
-#ifdef HAVE_LIBGEOTIFF
+#ifdef LIBPC_SRS_ENABLED
     if (m_gtiff != 0)
     {
         GTIFFree(m_gtiff);
@@ -196,6 +120,490 @@ SpatialReference::~SpatialReference()
         m_tiff = 0;
     }
 #endif
+}
+
+
+void SpatialReference::SetGTIF(GTIF* pgtiff, ST_TIFF* ptiff) 
+{
+    m_gtiff = (GTIF*)pgtiff;
+    m_tiff = (ST_TIFF*)ptiff;
+    ////////////////////////////////////////ResetVLRs();
+    m_gtiff = 0;
+    m_tiff = 0;
+}
+
+
+const GTIF* SpatialReference::GetGTIF()
+{
+#ifndef LIBPC_SRS_ENABLED
+    return 0;
+#else
+
+    // If we already have m_gtiff and m_tiff, that is because we have 
+    // already called GetGTIF once before.  VLRs ultimately drive how the 
+    // SpatialReference is defined, not the GeoTIFF keys.  
+    if (m_tiff != 0 )
+    {
+        ST_Destroy(m_tiff);
+        m_tiff = 0;
+    }
+
+    if (m_gtiff != 0 )
+    {
+        GTIFFree(m_gtiff);
+        m_gtiff = 0;
+    }
+    
+    m_tiff = ST_Create();
+    std::string const uid("LASF_Projection");
+    
+    ////////////// Nothing is going to happen here if we don't have any VLRs describing
+    ////////////// SRS information on the SpatialReference.  
+    ////////////for (uint16_t i = 0; i < m_vlrs.size(); ++i)
+    ////////////{
+    ////////////    VariableRecord record = m_vlrs[i];
+    ////////////    std::vector<uint8_t> data = record.GetData();
+    ////////////    if (uid == record.GetUserId(true).c_str() && 34735 == record.GetRecordId())
+    ////////////    {
+    ////////////        int count = data.size()/sizeof(int16_t);
+    ////////////        short *data_s = (short *) &(data[0]);
+
+    ////////////        // discard invalid "zero" geotags some software emits.
+    ////////////        while( count > 4 
+    ////////////               && data_s[count-1] == 0
+    ////////////               && data_s[count-2] == 0
+    ////////////               && data_s[count-3] == 0
+    ////////////               && data_s[count-4] == 0 )
+    ////////////        {
+    ////////////            count -= 4;
+    ////////////            data_s[3] -= 1;
+    ////////////        }
+
+    ////////////        ST_SetKey(m_tiff, record.GetRecordId(), count, STT_SHORT, data_s);
+    ////////////    }
+
+    ////////////    if (uid == record.GetUserId(true).c_str() && 34736 == record.GetRecordId())
+    ////////////    {
+    ////////////        int count = data.size() / sizeof(double);
+    ////////////        ST_SetKey(m_tiff, record.GetRecordId(), count, STT_DOUBLE, &(data[0]));
+    ////////////    }        
+
+    ////////////    if (uid == record.GetUserId(true).c_str() && 34737 == record.GetRecordId())
+    ////////////    {
+    ////////////        int count = data.size()/sizeof(uint8_t);
+    ////////////        ST_SetKey(m_tiff, record.GetRecordId(), count, STT_ASCII, &(data[0]));
+    ////////////    }
+    ////////////}
+
+    m_gtiff = GTIFNewSimpleTags(m_tiff);
+    if (!m_gtiff) 
+        throw std::runtime_error("The geotiff keys could not be read from VLR records");
+    
+    return m_gtiff;
+#endif
+}
+
+
+std::string SpatialReference::GetWKT( WKTModeFlag mode_flag) const 
+{
+    return GetWKT(mode_flag, false);
+}
+
+
+/// Fetch the SRS as WKT
+std::string SpatialReference::GetWKT(WKTModeFlag mode_flag , bool pretty) const 
+{
+#ifndef LIBPC_SRS_ENABLED
+    boost::ignore_unused_variable_warning(mode_flag);
+    boost::ignore_unused_variable_warning(pretty);
+
+    // we don't have a way of making this pretty, or of stripping the compound wrapper.
+    return m_wkt;
+#else
+
+    // If we already have Well Known Text then try return it, possibly
+    // after some preprocessing.
+    if( m_wkt != "" )
+    {
+        std::string result_wkt = m_wkt;
+        
+        if( (mode_flag == eHorizontalOnly 
+             && strstr(result_wkt.c_str(),"COMPD_CS") != NULL)
+            || pretty )
+        {
+            OGRSpatialReference* poSRS = (OGRSpatialReference*) OSRNewSpatialReference(result_wkt.c_str());
+            char *pszWKT = NULL;
+
+            if( mode_flag == eHorizontalOnly )
+                poSRS->StripVertical();
+
+            if (pretty) 
+                poSRS->exportToPrettyWkt(&pszWKT, FALSE );
+            else
+                poSRS->exportToWkt( &pszWKT );
+            
+            OSRDestroySpatialReference( poSRS );
+
+            result_wkt = pszWKT;
+            CPLFree( pszWKT );
+        }
+
+        return result_wkt;
+    }
+
+    // Otherwise build WKT from GeoTIFF VLRs. 
+
+    GTIFDefn sGTIFDefn;
+    char* pszWKT = 0;
+    if (!m_gtiff)
+    {
+        return std::string();
+    }
+
+    if (GTIFGetDefn(m_gtiff, &sGTIFDefn))
+    {
+        pszWKT = GTIFGetOGISDefn( m_gtiff, &sGTIFDefn );
+
+        if (pretty) {
+            OGRSpatialReference* poSRS = (OGRSpatialReference*) OSRNewSpatialReference(NULL);
+            char *pszOrigWKT = pszWKT;
+            poSRS->importFromWkt( &pszOrigWKT );
+            
+            CPLFree( pszWKT );
+            pszWKT = NULL;
+            poSRS->exportToPrettyWkt(&pszWKT, false);
+            OSRDestroySpatialReference( poSRS );
+
+        }
+
+        // save this for future calls, etc.
+        // m_wkt = std::string( pszWKT );
+
+        if( pszWKT 
+            && mode_flag == eHorizontalOnly 
+            && strstr(pszWKT,"COMPD_CS") != NULL )
+        {
+            OGRSpatialReference* poSRS = (OGRSpatialReference*) OSRNewSpatialReference(NULL);
+            char *pszOrigWKT = pszWKT;
+            poSRS->importFromWkt( &pszOrigWKT );
+
+            CPLFree( pszWKT );
+            pszWKT = NULL;
+
+            poSRS->StripVertical();
+            if (pretty) 
+                poSRS->exportToPrettyWkt(&pszWKT, false);
+            else
+                poSRS->exportToWkt( &pszWKT );
+            
+            OSRDestroySpatialReference( poSRS );
+        }
+
+        if (pszWKT)
+        {
+            std::string tmp(pszWKT);
+            CPLFree(pszWKT);
+            return tmp;
+        }
+    }
+    return std::string();
+#endif
+}
+
+
+void SpatialReference::SetFromUserInput(std::string const& v)
+{
+#ifdef LIBPC_SRS_ENABLED
+
+    char* poWKT = 0;
+    const char* input = v.c_str();
+    
+    // OGRSpatialReference* poSRS = (OGRSpatialReference*) OSRNewSpatialReference(NULL);
+    OGRSpatialReference srs(NULL);
+    if (OGRERR_NONE != srs.SetFromUserInput(const_cast<char *> (input)))
+    {
+        throw std::invalid_argument("could not import coordinate system into OSRSpatialReference SetFromUserInput");
+    }
+    
+    srs.exportToWkt(&poWKT);
+    
+    std::string tmp(poWKT);
+    CPLFree(poWKT);
+    
+    SetWKT(tmp);
+#else
+    boost::ignore_unused_variable_warning(v);
+    throw std::runtime_error("GDAL is not available, SpatialReference could not be set from WKT");
+#endif
+}
+
+
+void SpatialReference::SetWKT(std::string const& v)
+{
+    m_wkt = v;
+
+    if (!m_gtiff)
+    {
+        GetGTIF(); 
+    }
+
+#ifdef LIBPC_SRS_ENABLED
+    int ret = 0;
+    ret = GTIFSetFromOGISDefn( m_gtiff, v.c_str() );
+    if (!ret) 
+    {
+        throw std::invalid_argument("could not set m_gtiff from WKT");
+    }
+
+    ret = GTIFWriteKeys(m_gtiff);
+    if (!ret) 
+    {
+        throw std::runtime_error("The geotiff keys could not be written");
+    }
+#else
+    boost::ignore_unused_variable_warning(v);
+#endif
+
+    ////////////////////////////////ResetVLRs();
+}
+
+
+void SpatialReference::SetVerticalCS(boost::int32_t verticalCSType, 
+                                     std::string const& citation,
+                                     boost::int32_t verticalDatum,
+                                     boost::int32_t verticalUnits)
+{
+    if (!m_gtiff)
+    {
+        GetGTIF(); 
+    }
+
+#ifdef LIBPC_SRS_ENABLED
+    if( verticalCSType != KvUserDefined && verticalCSType > 0 )
+        GTIFKeySet( m_gtiff, VerticalCSTypeGeoKey, TYPE_SHORT, 1,
+                    verticalCSType );
+
+    if( citation != "" )
+        GTIFKeySet( m_gtiff, VerticalCitationGeoKey, TYPE_ASCII, 0, 
+                    citation.c_str() );			       
+
+    if( verticalDatum > 0 && verticalDatum != KvUserDefined )
+        GTIFKeySet( m_gtiff, VerticalDatumGeoKey, TYPE_SHORT, 1,
+                    verticalDatum );
+        
+    if( verticalUnits > 0 && verticalUnits != KvUserDefined )
+        GTIFKeySet( m_gtiff, VerticalUnitsGeoKey, TYPE_SHORT, 1,
+                    verticalUnits );
+
+    int ret = GTIFWriteKeys(m_gtiff);
+    if (!ret) 
+    {
+        throw std::runtime_error("The geotiff keys could not be written");
+    }
+
+    // Clear WKT so it gets regenerated 
+    m_wkt = std::string("");
+    
+    ///////////////////////////////ResetVLRs();
+#else
+    boost::ignore_unused_variable_warning(citation);
+    boost::ignore_unused_variable_warning(verticalUnits);
+    boost::ignore_unused_variable_warning(verticalDatum);
+    boost::ignore_unused_variable_warning(verticalCSType);
+#endif
+}
+    
+
+std::string SpatialReference::GetProj4() const 
+{
+#ifdef LIBPC_SRS_ENABLED
+    
+    std::string wkt = GetWKT(eCompoundOK);
+    const char* poWKT = wkt.c_str();
+    
+    OGRSpatialReference srs(NULL);
+    if (OGRERR_NONE != srs.importFromWkt(const_cast<char **> (&poWKT)))
+    {
+        return std::string();
+    }
+    
+    char* proj4 = 0;
+    srs.exportToProj4(&proj4);
+    std::string tmp(proj4);
+    CPLFree(proj4);
+    
+    return tmp;
+
+#else
+
+    // By default or if we have neither GDAL nor proj.4, we can't do squat
+    return std::string();
+#endif
+}
+
+
+void SpatialReference::SetProj4(std::string const& v)
+{
+    if (!m_gtiff)
+    {
+        GetGTIF();
+        ////////////////////////////////ResetVLRs();
+    }
+   
+#ifdef LIBPC_SRS_ENABLED
+    char* poWKT = 0;
+    const char* poProj4 = v.c_str();
+
+    OGRSpatialReference srs(NULL);
+    if (OGRERR_NONE != srs.importFromProj4(const_cast<char *>(poProj4)))
+    {
+        throw std::invalid_argument("could not import proj4 into OSRSpatialReference SetProj4");
+    }
+    
+    srs.exportToWkt(&poWKT);
+    
+    std::string tmp(poWKT);
+    CPLFree(poWKT);
+        
+    int ret = 0;
+    ret = GTIFSetFromOGISDefn( m_gtiff, tmp.c_str() );
+    if (!ret)
+    {
+        throw std::invalid_argument("could not set m_gtiff from Proj4");
+    }
+
+    ret = GTIFWriteKeys(m_gtiff);
+    if (!ret) 
+    {
+        throw std::runtime_error("The geotiff keys could not be written");
+    }
+
+    GTIFDefn defn;
+
+    if (m_gtiff && GTIFGetDefn(m_gtiff, &defn)) 
+    {
+        char* proj4def = GTIFGetProj4Defn(&defn);
+        std::string tmp(proj4def);
+        GTIFFreeMemory( proj4def );
+    }
+#else
+    boost::ignore_unused_variable_warning(v);
+#endif
+
+    ////////////////////////////////ResetVLRs();
+}
+
+
+boost::property_tree::ptree SpatialReference::GetPTree( ) const
+{
+    using boost::property_tree::ptree;
+    ptree srs;
+
+#ifdef LIBPC_SRS_ENABLED
+    srs.put("proj4", GetProj4());
+    srs.put("prettywkt", GetWKT(SpatialReference::eHorizontalOnly, true));
+    srs.put("wkt", GetWKT(SpatialReference::eHorizontalOnly, false));
+    srs.put("compoundwkt", GetWKT(eCompoundOK, false));
+    srs.put("prettycompoundwkt", GetWKT(eCompoundOK, true));
+    srs.put("gtiff", GetGTIFFText());
+
+#else
+
+    std::string message;
+    if (m_wkt.size() == 0)
+    {
+        message = "Reference defined with VLR keys, but GeoTIFF and GDAL support are not available to produce definition";
+    } 
+    else if (m_wkt.size() > 0)
+    {
+        message = "Reference defined with WKT, but GeoTIFF and GDAL support are not available to produce definition";
+    } else
+    {
+        message = "None";
+    }
+
+    srs.put("proj4", message);
+    srs.put("prettywkt", message);
+    srs.put("wkt", message);
+    srs.put("compoundwkt", message);
+    srs.put("prettycompoundwkt", message);
+    srs.put("gtiff", message);
+#endif
+    
+    return srs;
+    
+}
+
+
+// Utility functor with accompanying to print GeoTIFF directory.
+struct geotiff_dir_printer
+{
+    geotiff_dir_printer() {}
+
+    std::string output() const { return m_oss.str(); }
+    std::string::size_type size() const { return m_oss.str().size(); }
+
+    void operator()(char* data, void* aux)
+    {     
+        ::boost::ignore_unused_variable_warning(aux);
+
+        if (0 != data)
+        {
+            m_oss << data;
+        }
+    }
+
+private:
+    std::ostringstream m_oss;
+};
+
+
+static int libpcGeoTIFFPrint(char* data, void* aux)
+{
+    geotiff_dir_printer* printer = reinterpret_cast<geotiff_dir_printer*>(aux);
+    (*printer)(data, 0);
+    return static_cast<int>(printer->size());
+}
+
+
+
+std::string SpatialReference::GetGTIFFText() const
+{
+#ifndef LIBPC_SRS_ENABLED
+    return std::string("");
+#else
+
+    if( m_gtiff == NULL )
+        return std::string("");
+
+    geotiff_dir_printer geotiff_printer;
+    GTIFPrint(m_gtiff, libpcGeoTIFFPrint, &geotiff_printer);
+    return geotiff_printer.output();
+#endif
+}
+
+
+std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
+{
+    ostr << "SRS: ";
+    ostr << srs.GetWKT();
+    ostr << std::endl;
+    return ostr;
+}
+
+
+} // namespace libpc
+
+
+
+#if 0
+
+SpatialReference::SpatialReference(std::vector<VariableRecord> const& vlrs) 
+    : m_gtiff(0)
+    , m_tiff(0)
+{
+    SetVLRs(vlrs);
+    GetGTIF();
 }
 
 /// Keep a copy of the VLRs that are related to GeoTIFF SRS information.
@@ -497,472 +905,5 @@ void SpatialReference::ResetVLRs()
         m_vlrs.push_back( wkt_record );
     }
 }
-
-void SpatialReference::SetGTIF(GTIF* pgtiff, ST_TIFF* ptiff) 
-{
-    m_gtiff = (GTIF*)pgtiff;
-    m_tiff = (ST_TIFF*)ptiff;
-    ResetVLRs();
-    m_gtiff = 0;
-    m_tiff = 0;
-}
-const GTIF* SpatialReference::GetGTIF()
-{
-#ifndef HAVE_LIBGEOTIFF
-    return 0;
-#else
-
-    // If we already have m_gtiff and m_tiff, that is because we have 
-    // already called GetGTIF once before.  VLRs ultimately drive how the 
-    // SpatialReference is defined, not the GeoTIFF keys.  
-    if (m_tiff != 0 )
-    {
-        ST_Destroy(m_tiff);
-        m_tiff = 0;
-    }
-
-    if (m_gtiff != 0 )
-    {
-        GTIFFree(m_gtiff);
-        m_gtiff = 0;
-    }
-    
-    m_tiff = ST_Create();
-    std::string const uid("LASF_Projection");
-    
-    // Nothing is going to happen here if we don't have any VLRs describing
-    // SRS information on the SpatialReference.  
-    for (uint16_t i = 0; i < m_vlrs.size(); ++i)
-    {
-        VariableRecord record = m_vlrs[i];
-        std::vector<uint8_t> data = record.GetData();
-        if (uid == record.GetUserId(true).c_str() && 34735 == record.GetRecordId())
-        {
-            int count = data.size()/sizeof(int16_t);
-            short *data_s = (short *) &(data[0]);
-
-            // discard invalid "zero" geotags some software emits.
-            while( count > 4 
-                   && data_s[count-1] == 0
-                   && data_s[count-2] == 0
-                   && data_s[count-3] == 0
-                   && data_s[count-4] == 0 )
-            {
-                count -= 4;
-                data_s[3] -= 1;
-            }
-
-            ST_SetKey(m_tiff, record.GetRecordId(), count, STT_SHORT, data_s);
-        }
-
-        if (uid == record.GetUserId(true).c_str() && 34736 == record.GetRecordId())
-        {
-            int count = data.size() / sizeof(double);
-            ST_SetKey(m_tiff, record.GetRecordId(), count, STT_DOUBLE, &(data[0]));
-        }        
-
-        if (uid == record.GetUserId(true).c_str() && 34737 == record.GetRecordId())
-        {
-            int count = data.size()/sizeof(uint8_t);
-            ST_SetKey(m_tiff, record.GetRecordId(), count, STT_ASCII, &(data[0]));
-        }
-    }
-
-    m_gtiff = GTIFNewSimpleTags(m_tiff);
-    if (!m_gtiff) 
-        throw std::runtime_error("The geotiff keys could not be read from VLR records");
-    
-    return m_gtiff;
-#endif
-}
-
-std::string SpatialReference::GetWKT( WKTModeFlag mode_flag) const 
-{
-    return GetWKT(mode_flag, false);
-}
-
-/// Fetch the SRS as WKT
-std::string SpatialReference::GetWKT(WKTModeFlag mode_flag , bool pretty) const 
-{
-#ifndef HAVE_GDAL
-    boost::ignore_unused_variable_warning(mode_flag);
-    boost::ignore_unused_variable_warning(pretty);
-
-    // we don't have a way of making this pretty, or of stripping the compound wrapper.
-    return m_wkt;
-#else
-
-    // If we already have Well Known Text then try return it, possibly
-    // after some preprocessing.
-    if( m_wkt != "" )
-    {
-        std::string result_wkt = m_wkt;
-        
-        if( (mode_flag == eHorizontalOnly 
-             && strstr(result_wkt.c_str(),"COMPD_CS") != NULL)
-            || pretty )
-        {
-            OGRSpatialReference* poSRS = (OGRSpatialReference*) OSRNewSpatialReference(result_wkt.c_str());
-            char *pszWKT = NULL;
-
-            if( mode_flag == eHorizontalOnly )
-                poSRS->StripVertical();
-
-            if (pretty) 
-                poSRS->exportToPrettyWkt(&pszWKT, FALSE );
-            else
-                poSRS->exportToWkt( &pszWKT );
-            
-            OSRDestroySpatialReference( poSRS );
-
-            result_wkt = pszWKT;
-            CPLFree( pszWKT );
-        }
-
-        return result_wkt;
-    }
-
-    // Otherwise build WKT from GeoTIFF VLRs. 
-
-    GTIFDefn sGTIFDefn;
-    char* pszWKT = 0;
-    if (!m_gtiff)
-    {
-        return std::string();
-    }
-
-    if (GTIFGetDefn(m_gtiff, &sGTIFDefn))
-    {
-        pszWKT = GTIFGetOGISDefn( m_gtiff, &sGTIFDefn );
-
-        if (pretty) {
-            OGRSpatialReference* poSRS = (OGRSpatialReference*) OSRNewSpatialReference(NULL);
-            char *pszOrigWKT = pszWKT;
-            poSRS->importFromWkt( &pszOrigWKT );
-            
-            CPLFree( pszWKT );
-            pszWKT = NULL;
-            poSRS->exportToPrettyWkt(&pszWKT, false);
-            OSRDestroySpatialReference( poSRS );
-
-        }
-
-        // save this for future calls, etc.
-        // m_wkt = std::string( pszWKT );
-
-        // Older versions of GDAL lack StripVertical(), but should never
-        // actually return COMPD_CS anyways.
-#if (GDAL_VERSION_NUM >= 1700) && (GDAL_RELEASE_DATE >= 20100110)
-        if( pszWKT 
-            && mode_flag == eHorizontalOnly 
-            && strstr(pszWKT,"COMPD_CS") != NULL )
-        {
-            OGRSpatialReference* poSRS = (OGRSpatialReference*) OSRNewSpatialReference(NULL);
-            char *pszOrigWKT = pszWKT;
-            poSRS->importFromWkt( &pszOrigWKT );
-
-            CPLFree( pszWKT );
-            pszWKT = NULL;
-
-            poSRS->StripVertical();
-            if (pretty) 
-                poSRS->exportToPrettyWkt(&pszWKT, false);
-            else
-                poSRS->exportToWkt( &pszWKT );
-            
-            OSRDestroySpatialReference( poSRS );
-        }
-#else
-        boost::ignore_unused_variable_warning(mode_flag);
-#endif
-
-        if (pszWKT)
-        {
-            std::string tmp(pszWKT);
-            CPLFree(pszWKT);
-            return tmp;
-        }
-    }
-    return std::string();
-#endif
-}
-
-void SpatialReference::SetFromUserInput(std::string const& v)
-{
-#ifdef HAVE_GDAL
-
-    char* poWKT = 0;
-    const char* input = v.c_str();
-    
-    // OGRSpatialReference* poSRS = (OGRSpatialReference*) OSRNewSpatialReference(NULL);
-    OGRSpatialReference srs(NULL);
-    if (OGRERR_NONE != srs.SetFromUserInput(const_cast<char *> (input)))
-    {
-        throw std::invalid_argument("could not import coordinate system into OSRSpatialReference SetFromUserInput");
-    }
-    
-    srs.exportToWkt(&poWKT);
-    
-    std::string tmp(poWKT);
-    CPLFree(poWKT);
-    
-    SetWKT(tmp);
-#else
-    boost::ignore_unused_variable_warning(v);
-    throw std::runtime_error("GDAL is not available, SpatialReference could not be set from WKT");
-#endif
-}
-
-void SpatialReference::SetWKT(std::string const& v)
-{
-    m_wkt = v;
-
-    if (!m_gtiff)
-    {
-        GetGTIF(); 
-    }
-
-#ifdef HAVE_GDAL
-    int ret = 0;
-    ret = GTIFSetFromOGISDefn( m_gtiff, v.c_str() );
-    if (!ret) 
-    {
-        throw std::invalid_argument("could not set m_gtiff from WKT");
-    }
-
-    ret = GTIFWriteKeys(m_gtiff);
-    if (!ret) 
-    {
-        throw std::runtime_error("The geotiff keys could not be written");
-    }
-#else
-    boost::ignore_unused_variable_warning(v);
-#endif
-
-    ResetVLRs();
-}
-
-void SpatialReference::SetVerticalCS(boost::int32_t verticalCSType, 
-                                     std::string const& citation,
-                                     boost::int32_t verticalDatum,
-                                     boost::int32_t verticalUnits)
-{
-    if (!m_gtiff)
-    {
-        GetGTIF(); 
-    }
-
-#ifdef HAVE_LIBGEOTIFF
-    if( verticalCSType != KvUserDefined && verticalCSType > 0 )
-        GTIFKeySet( m_gtiff, VerticalCSTypeGeoKey, TYPE_SHORT, 1,
-                    verticalCSType );
-
-    if( citation != "" )
-        GTIFKeySet( m_gtiff, VerticalCitationGeoKey, TYPE_ASCII, 0, 
-                    citation.c_str() );			       
-
-    if( verticalDatum > 0 && verticalDatum != KvUserDefined )
-        GTIFKeySet( m_gtiff, VerticalDatumGeoKey, TYPE_SHORT, 1,
-                    verticalDatum );
-        
-    if( verticalUnits > 0 && verticalUnits != KvUserDefined )
-        GTIFKeySet( m_gtiff, VerticalUnitsGeoKey, TYPE_SHORT, 1,
-                    verticalUnits );
-
-    int ret = GTIFWriteKeys(m_gtiff);
-    if (!ret) 
-    {
-        throw std::runtime_error("The geotiff keys could not be written");
-    }
-
-    // Clear WKT so it gets regenerated 
-    m_wkt = std::string("");
-    
-    ResetVLRs();
-#else
-    boost::ignore_unused_variable_warning(citation);
-    boost::ignore_unused_variable_warning(verticalUnits);
-    boost::ignore_unused_variable_warning(verticalDatum);
-    boost::ignore_unused_variable_warning(verticalCSType);
-#endif /* def HAVE_LIBGEOTIFF */
-}
-                                         
-std::string SpatialReference::GetProj4() const 
-{
-#ifdef HAVE_GDAL
-    
-    std::string wkt = GetWKT(eCompoundOK);
-    const char* poWKT = wkt.c_str();
-    
-    OGRSpatialReference srs(NULL);
-    if (OGRERR_NONE != srs.importFromWkt(const_cast<char **> (&poWKT)))
-    {
-        return std::string();
-    }
-    
-    char* proj4 = 0;
-    srs.exportToProj4(&proj4);
-    std::string tmp(proj4);
-    CPLFree(proj4);
-    
-    return tmp;
-#endif
-
-// if we have libgeotiff but not GDAL, we'll use the 
-// simple method in libgeotiff
-#if defined(HAVE_LIBGEOTIFF) && !defined(HAVE_GDAL)
-
-    GTIFDefn defn;
-
-    if (m_gtiff && GTIFGetDefn(m_gtiff, &defn)) 
-    {
-        char* proj4def = GTIFGetProj4Defn(&defn);
-        std::string tmp(proj4def);
-        GTIFFreeMemory( proj4def );
-        return tmp;
-    }
-#endif
-
-#ifndef HAVE_GDAL
-    // By default or if we have neither GDAL nor proj.4, we can't do squat
-    return std::string();
-#endif
-}
-
-void SpatialReference::SetProj4(std::string const& v)
-{
-    if (!m_gtiff)
-    {
-        GetGTIF();
-        ResetVLRs();
-    }
-   
-#ifdef HAVE_GDAL
-    char* poWKT = 0;
-    const char* poProj4 = v.c_str();
-
-    OGRSpatialReference srs(NULL);
-    if (OGRERR_NONE != srs.importFromProj4(const_cast<char *>(poProj4)))
-    {
-        throw std::invalid_argument("could not import proj4 into OSRSpatialReference SetProj4");
-    }
-    
-    srs.exportToWkt(&poWKT);
-    
-    std::string tmp(poWKT);
-    CPLFree(poWKT);
-        
-    int ret = 0;
-    ret = GTIFSetFromOGISDefn( m_gtiff, tmp.c_str() );
-    if (!ret)
-    {
-        throw std::invalid_argument("could not set m_gtiff from Proj4");
-    }
-
-    ret = GTIFWriteKeys(m_gtiff);
-    if (!ret) 
-    {
-        throw std::runtime_error("The geotiff keys could not be written");
-    }
-
-    GTIFDefn defn;
-
-    if (m_gtiff && GTIFGetDefn(m_gtiff, &defn)) 
-    {
-        char* proj4def = GTIFGetProj4Defn(&defn);
-        std::string tmp(proj4def);
-        GTIFFreeMemory( proj4def );
-    }
-#else
-    boost::ignore_unused_variable_warning(v);
-#endif
-
-// if we have libgeotiff but not GDAL, we'll use the 
-// simple method in libgeotiff
-#if defined(HAVE_LIBGEOTIFF) && !defined(HAVE_GDAL)
-
-    int ret = 0;
-    ret = GTIFSetFromProj4( m_gtiff, v.c_str());
-    if (!ret) 
-    {
-        throw std::invalid_argument("PROJ.4 string is invalid or unsupported");
-    }
-
-    ret = GTIFWriteKeys(m_gtiff);
-    if (!ret) 
-    {
-        throw std::runtime_error("The geotiff keys could not be written");
-    }    
-#endif
-
-    ResetVLRs();
-}
-
-liblas::property_tree::ptree SpatialReference::GetPTree( ) const
-{
-    using liblas::property_tree::ptree;
-    ptree srs;
-
-#if defined(HAVE_GDAL)
-    srs.put("proj4", GetProj4());
-    srs.put("prettywkt", GetWKT(liblas::SpatialReference::eHorizontalOnly, true));
-    srs.put("wkt", GetWKT(liblas::SpatialReference::eHorizontalOnly, false));
-    srs.put("compoundwkt", GetWKT(eCompoundOK, false));
-    srs.put("prettycompoundwkt", GetWKT(eCompoundOK, true));
-    srs.put("gtiff", GetGTIFFText());
-#endif
-
-#if defined(HAVE_LIBGEOTIFF) && !defined(HAVE_GDAL)
-
-    std::string message("Reference defined, but GDAL is not available for WKT support");
-    srs.put("proj4", GetProj4());
-    srs.put("prettywkt", message);
-    srs.put("wkt", message);
-    srs.put("compoundwkt", message);
-    srs.put("prettycompoundwkt", message);
-    srs.put("gtiff", GetGTIFFText());
-#endif
-
-#if !defined(HAVE_LIBGEOTIFF) && !defined(HAVE_GDAL)
-
-    std::string message;
-    if (m_vlrs.size() > 0 && m_wkt.size() == 0)
-    {
-        message = "Reference defined with VLR keys, but GeoTIFF and GDAL support are not available to produce definition";
-    } else if (m_wkt.size() > 0)
-    {
-        message = "Reference defined with WKT, but GeoTIFF and GDAL support are not available to produce definition";
-    } else
-    {
-        message = "None";
-    }
-
-    srs.put("proj4", message);
-    srs.put("prettywkt", message);
-    srs.put("wkt", message);
-    srs.put("compoundwkt", message);
-    srs.put("prettycompoundwkt", message);
-    srs.put("gtiff", message);
-#endif
-    
-    return srs;
-    
-}
-
-std::string SpatialReference::GetGTIFFText() const
-{
-#ifndef HAVE_LIBGEOTIFF
-    return std::string("");
-#else
-
-    if( m_gtiff == NULL )
-        return std::string("");
-
-    detail::geotiff_dir_printer geotiff_printer;
-    GTIFPrint(m_gtiff, detail::libLASGeoTIFFPrint, &geotiff_printer);
-    return geotiff_printer.output();
-#endif
-}
-
 
 #endif

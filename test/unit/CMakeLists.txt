@@ -31,6 +31,7 @@ SET(LIBPC_UNITTEST_TEST_SRC
     SchemaLayoutTest.cpp
     SchemaTest.cpp
     SignallerTest.cpp
+    SpatialReferenceTest.cpp
     UtilsTest.cpp
     VectorTest.cpp
     )

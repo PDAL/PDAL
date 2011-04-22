@@ -37,53 +37,16 @@
 
 #include <libpc/libpc.hpp>
 
-#include <string>
-#include <ostream>
-
-namespace libpc
-{
-
-class LIBPC_DLL SpatialReference
-{
-public:
-    SpatialReference();
-    SpatialReference(std::string wkt);
-    SpatialReference(const SpatialReference&);
-
-    SpatialReference& operator=(SpatialReference const& rhs);
-
-    bool operator==(SpatialReference const& rhs) const;
-
-    const std::string& getWKT() const;
-
-private:
-    // for now, we'll just fake it
-    std::string m_wkt;
-};
-
-
-std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs);
-
-
-} // namespace libpc
-
+// We have two modes: with GDAL and geotiff, SRS is enabled -- otherwise, it's disabled
+// we use one macro to simplify the control
+#if defined(LIBPC_HAVE_GDAL) && defined(LIBPC_HAVE_LIBGEOTIFF)
+#define LIBPC_SRS_ENABLED
 #endif
 
+#include <boost/property_tree/ptree.hpp>
 
-#if 0
-
-#include <liblas/detail/fwd.hpp>
-#include <liblas/detail/private_utility.hpp>
-#include <liblas/variablerecord.hpp>
-#include <liblas/exception.hpp>
-#include <liblas/capi/las_config.h>
-#include <liblas/export.hpp>
-#include <liblas/external/property_tree/ptree.hpp>
-
-// std
-#include <stdexcept> // std::out_of_range
-#include <cstdlib> // std::size_t
 #include <string>
+#include <ostream>
 
 // Fake out the compiler if we don't have libgeotiff includes already
 #if !defined(__geotiff_h_)
@@ -93,10 +56,11 @@ typedef struct GTIFS *GTIF;
 typedef struct ST_TIFFS *ST_TIFF;
 #endif
 
-namespace liblas {
 
-/// Spatial Reference System container for libLAS
-class LAS_DLL SpatialReference
+namespace libpc
+{
+
+class LIBPC_DLL SpatialReference
 {
 public:
     enum WKTModeFlag
@@ -105,11 +69,6 @@ public:
         eCompoundOK = 2
     };
 
-    enum GeoVLRType
-    {
-        eGeoTIFF = 1,
-        eOGRWKT = 2
-    };
 
     /// Default constructor.
     SpatialReference();
@@ -117,9 +76,6 @@ public:
     /// Destructor.
     /// If libgeotiff is enabled, deallocates libtiff and libgeotiff objects used internally.
     ~SpatialReference();
-
-    /// Constructor creating SpatialReference instance from given Variable-Length Record.
-    SpatialReference(std::vector<VariableRecord> const& vlrs);
 
     /// Copy constryctor.
     SpatialReference(SpatialReference const& other);
@@ -186,6 +142,65 @@ public:
     /// \param v - a string containing the Proj.4 string.
     void SetProj4(std::string const& v);
     
+    boost::property_tree::ptree GetPTree() const;    
+
+private:
+
+    // FIXME: Define as shared_ptr<GTIF> with custom deleter to get rid of bloated mem management, unsafe anyway --mloskot
+    GTIF*       m_gtiff;
+    ST_TIFF*    m_tiff;
+
+    std::string m_wkt;
+
+    std::string GetGTIFFText() const;
+
+};
+
+
+std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs);
+
+} // namespace libpc
+
+
+LIBPC_C_START
+#ifdef __geotiff_h_
+
+#ifdef GEO_NORMALIZE_H_INCLUDED
+char LIBPC_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
+#endif
+
+int LIBPC_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
+void SetLinearUnitCitation(GTIF* psGTIF, char* pszLinearUOMName);
+
+#ifdef _OGR_SRS_API_H_INCLUDED
+void SetGeogCSCitation(GTIF* psGTIF, OGRSpatialReference* poSRS, char* angUnitName, int nDatum, short nSpheroid);
+#endif // defined _OGR_SRS_API_H_INCLUDED
+
+#endif // defined __geotiff_h_
+LIBPC_C_END
+
+
+#endif
+
+
+#if 0
+#include <liblas/detail/fwd.hpp>
+#include <liblas/detail/private_utility.hpp>
+#include <liblas/variablerecord.hpp>
+#include <liblas/exception.hpp>
+#include <liblas/capi/las_config.h>
+#include <liblas/export.hpp>
+#include <liblas/external/property_tree/ptree.hpp>
+#include <stdexcept> // std::out_of_range
+#include <cstdlib> // std::size_t
+#include <string>
+
+    enum GeoVLRType
+    {
+        eGeoTIFF = 1,
+        eOGRWKT = 2
+    };
+
     /// Set the LASVLRs for the SpatialReference.  SetVLRs will only copy 
     /// VLR records that pertain to the GeoTIFF keys, and extraneous 
     /// VLR records will not be copied.
@@ -200,18 +215,8 @@ public:
 
     void ClearVLRs( GeoVLRType eType );
 
-    liblas::property_tree::ptree GetPTree() const;    
-private:
-
-    // FIXME: Define as shared_ptr<GTIF> with custom deleter to get rid of bloated mem management, unsafe anyway --mloskot
-    GTIF*       m_gtiff;
-    ST_TIFF*    m_tiff;
-
-    std::string m_wkt;
-
     std::vector<VariableRecord> m_vlrs;
     bool IsGeoVLR(VariableRecord const& vlr) const;
-    std::string GetGTIFFText() const;
 
     /// Reset the VLRs of the SpatialReference using the existing GTIF* and ST_TIF*
     /// Until this method is called, 
@@ -219,24 +224,5 @@ private:
     /// that it was first instantiated with.  SetWKT and SetProj4 can 
     /// be used to change the GTIF* 
     void ResetVLRs();
-};
-
-} // namespace liblas
-
-LAS_C_START
-#if defined(__geotiff_h_)
-#if defined(GEO_NORMALIZE_H_INCLUDED)
-char LAS_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
-#endif
-
-int  LAS_DLL   GTIFSetFromOGISDefn(GTIF*, const char*);
-void SetLinearUnitCitation(GTIF* psGTIF, char* pszLinearUOMName);
-
-#if defined(_OGR_SRS_API_H_INCLUDED)
-void SetGeogCSCitation(GTIF* psGTIF, OGRSpatialReference* poSRS, char* angUnitName, int nDatum, short nSpheroid);
-#endif // defined _OGR_SRS_API_H_INCLUDED
-#endif // defined __geotiff_h_
-
-LAS_C_END
 
 #endif 
