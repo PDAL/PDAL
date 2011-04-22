@@ -354,9 +354,9 @@ QueryType Reader::describeQueryType() const
         if ( hType == SQLT_NTY)
         {
                 
-                if (compare_no_case(szTypeName, "SDO_PC", 6) == 0)
+                if (compare_no_case(szTypeName, "SDO_PC") == 0)
                     isPCObject = true;
-                if (compare_no_case(szTypeName, "SDO_PC_BLK_TYPE", 6) == 0)
+                if (compare_no_case(szTypeName, "SDO_PC_BLK_TYPE") == 0)
                     isBlockTableType = true;
                 std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
         }
@@ -437,52 +437,52 @@ BlockPtr Reader::defineBlock() const
     {
         std::string name = to_upper(std::string(szFieldName));
 
-        if (compare_no_case(szFieldName, "OBJ_ID", 6) == 0)
+        if (compare_no_case(szFieldName, "OBJ_ID") == 0)
         {
             m_statement->Define(&(block->obj_id));
         }
 
-        if (compare_no_case(szFieldName, "BLK_ID", 6) == 0)
+        if (compare_no_case(szFieldName, "BLK_ID") == 0)
         {
             m_statement->Define(&(block->blk_id));
         }
 
-        if (compare_no_case(szFieldName, "BLK_EXTENT", 10) == 0)
+        if (compare_no_case(szFieldName, "BLK_EXTENT") == 0)
         {
             m_statement->Define(&(block->blk_extent));
         }
 
-        if (compare_no_case(szFieldName, "BLK_DOMAIN", 10) == 0)
+        if (compare_no_case(szFieldName, "BLK_DOMAIN") == 0)
         {
             m_statement->Define(&(block->blk_domain));
         }
         
-        if (compare_no_case(szFieldName, "PCBLK_MIN_RES", 13) == 0)
+        if (compare_no_case(szFieldName, "PCBLK_MIN_RES") == 0)
         {
             m_statement->Define(&(block->pcblk_min_res));
         }
 
-        if (compare_no_case(szFieldName, "PCBLK_MAX_RES", 13) == 0)
+        if (compare_no_case(szFieldName, "PCBLK_MAX_RES") == 0)
         {
             m_statement->Define(&(block->pcblk_max_res));
         }
 
-        if (compare_no_case(szFieldName, "NUM_POINTS", 10) == 0)
+        if (compare_no_case(szFieldName, "NUM_POINTS") == 0)
         {
             m_statement->Define(&(block->num_points));
         }
 
-        if (compare_no_case(szFieldName, "NUM_UNSORTED_POINTS", 19) == 0)
+        if (compare_no_case(szFieldName, "NUM_UNSORTED_POINTS") == 0)
         {
             m_statement->Define(&(block->num_unsorted_points));
         }
 
-        if (compare_no_case(szFieldName, "PT_SORT_DIM", 11) == 0)
+        if (compare_no_case(szFieldName, "PT_SORT_DIM") == 0)
         {
             m_statement->Define(&(block->pt_sort_dim));
         }
 
-        if (compare_no_case(szFieldName, "POINTS", 6) == 0)
+        if (compare_no_case(szFieldName, "POINTS") == 0)
         {
             std::cout << "Defined POINTS as BLOB" << std::endl;
             m_statement->Define( &(block->locator) ); 

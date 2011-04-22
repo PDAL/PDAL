@@ -113,9 +113,12 @@ public:
 
 
 #ifdef LIBPC_COMPILER_MSVC
-#define compare_no_case(a,b,n)  _strnicmp( (a), (b), (n) )
+#define compare_no_case_n(a,b,n)  _strnicmp( (a), (b), (n) )
+#define compare_no_case(a, b) _stricmp( (a), (b) )
 #else
-#define compare_no_case(a,b,n)  strncasecmp( (a), (b), (n) )
+#define compare_no_case_n(a,b,n)  strncasecmp( (a), (b), (n) )
+#define compare_no_case(a, b) strcasecmp( (a), (b) )
+
 #endif
 
 struct FiveDimensionOCI
