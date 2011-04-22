@@ -37,10 +37,10 @@ cmake -G %COMPILER% ^
     -DGLUT_INCLUDE_DIR=%FREEGLUT_DIR%\include ^
     -DGDAL_INCLUDE_DIR=%GDAL_DIR%\gcore ^
     -DGDAL_LIBRARY=%GDAL_DIR%\gdal_i.lib ^
-    -DTIFF_INCLUDE_DIR=%OSGEO4W_DIR%\include ^
-    -DTIFF_LIBRARY=%OSGEO4W_DIR%\lib\libtiff_i.lib ^
-    -DGEOTIFF_INCLUDE_DIR=%OSGEO4W_DIR%\include ^
-    -DGEOTIFF_LIBRARY=%OSGEO4W_DIR%\lib\geotiff_i.lib ^
+    -DTIFF_INCLUDE_DIR=%GDAL_DIR%\frmts\gtiff\libtiff ^
+    -DTIFF_LIBRARY=%GDAL_DIR%\gdal_i.lib ^
+    -DGEOTIFF_INCLUDE_DIR=%GDAL_DIR%\frmts\gtiff\libgeotiff ^
+    -DGEOTIFF_LIBRARY=%GDAL_DIR%\gdal_i.lib ^
     -DORACLE_INCLUDE_DIR=%ORACLE_HOME%\include ^
     -DORACLE_OCI_LIBRARY=%ORACLE_HOME%\lib\oci.lib ^
     -DLASZIP_INCLUDE_DIR=%LASZIP_DIR%\include ^
