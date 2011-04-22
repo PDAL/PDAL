@@ -140,7 +140,7 @@ void VariableLengthRecord::setSRS(const std::vector<VariableLengthRecord>& vlrs,
         {
         case 34735:
             {
-                int count = length / sizeof(double);
+                int count = length / sizeof(short);
                 // discard invalid "zero" geotags some software emits.
                 while( count > 4 
                     && data[count-1] == 0
