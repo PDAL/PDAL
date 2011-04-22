@@ -192,6 +192,14 @@ private:
     }
 };
 
+
+#ifdef LIBPC_COMPILER_MSVC
+#define compare_no_case(a,b,n)  _strnicmp( (a), (b), (n) )
+#else
+#define compare_no_case(a,b,n)  strncasecmp( (a), (b), (n) )
+#endif
+
+
 } // namespace libpc
 
 #endif
