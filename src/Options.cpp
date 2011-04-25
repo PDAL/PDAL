@@ -132,7 +132,7 @@ bool Options::IsSolid() const
 }
 
 
-std::ostream& operator<<(std::ostream& ostr, const Options& options)
+std::ostream& operator<<(std::ostream& ostr, const Options& /*options*/)
 {
 //     ostr << "  Num points: " << stage.getNumPoints() << std::endl;
 // 

@@ -322,6 +322,7 @@ void Engine::doReshape(int w, int h)
     return;
 }
 
+bool s_drawCube = true;
 
 void Engine::doDisplay()
 {
@@ -358,7 +359,7 @@ void Engine::doDisplay()
 
     glTranslated(-minx-delx/2.0,-miny-dely/2.0,(-minz-delx/2.0)/zAdjust);
 
-    if (1)
+    if (s_drawCube)
     {
     // draw cube
     glBegin(GL_LINES);

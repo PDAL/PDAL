@@ -46,6 +46,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <iostream>
+#include <limits>
 
 using namespace std;
 using namespace libpc::filters::chipper;
@@ -149,9 +150,12 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     libpc::Schema const& schema = m_prevStage.getSchema();
     
     boost::uint64_t count = m_prevStage.getNumPoints();
-    xvec.reserve(count);
-    yvec.reserve(count);
-    spare.resize(count);
+    if (count > std::numeric_limits<std::size_t>::max())
+        throw libpc_error("numPoints too large for Chipper");
+    boost::uint32_t count32 = (boost::uint32_t)count;
+    xvec.reserve(count32);
+    yvec.reserve(count32);
+    spare.resize(count32);
     
     // boost::uint32_t chunks = count/m_threshold;
 
@@ -170,7 +174,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     double yoffset = dimY.getNumericOffset();
 
     std::size_t num_points_loaded = 0;
-    std::size_t num_points_to_load = count;
+    std::size_t num_points_to_load = count32;
     
     boost::scoped_ptr<SequentialIterator> iter(m_prevStage.createSequentialIterator());
     
