@@ -116,14 +116,17 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
 {
     libpc::drivers::las::LasReader reader(Support::datapath("utm17.las"));
 
-    libpc::SpatialReference const& ref = reader.getSpatialReference();
+    const libpc::SpatialReference& ref = reader.getSpatialReference();
+
+    BOOST_CHECK(reader.getVLRs().size() == 3);
+
+    const std::string ret_wkt = ref.getWKT();
+    const std::string ret_proj4 = ref.getProj4();
 
     const std::string wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"32617\"]]";
-    const std::string ret_wkt = ref.getWKT();
     BOOST_CHECK(ret_wkt == wkt);
 
     const std::string proj4 = "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs ";
-    const std::string ret_proj4 = ref.getProj4();
     BOOST_CHECK(ret_proj4 == proj4);
 
     return;
@@ -226,6 +229,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
     {
         libpc::drivers::las::LasReader reader(tmpfile);
         libpc::SpatialReference result_ref = reader.getSpatialReference();
+        std::string xx = result_ref.getWKT();
 
         std::string result_wkt = result_ref.getWKT(libpc::SpatialReference::eCompoundOK);
         BOOST_CHECK(result_wkt == wkt);

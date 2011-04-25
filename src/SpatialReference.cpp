@@ -103,11 +103,11 @@ SpatialReference::SpatialReference()
 }
 
 
-SpatialReference::SpatialReference(SpatialReference const& other) 
-    : m_tiffstuff(new TiffStuff())
-    , m_wkt(other.m_wkt)
+SpatialReference::SpatialReference(SpatialReference const& rhs) 
+    : m_tiffstuff(rhs.m_tiffstuff)
+    , m_wkt(rhs.m_wkt)
 {
-    rebuildGTIFFromVLRs();
+    return;
 }
 
 
@@ -116,7 +116,6 @@ SpatialReference& SpatialReference::operator=(SpatialReference const& rhs)
     if (&rhs != this)
     {
         this->m_tiffstuff = rhs.m_tiffstuff;
-        //////////////////////////////////////////////rebuildGTIFFromVLRs();
         m_wkt = rhs.m_wkt;
     }
     return *this;
@@ -454,7 +453,6 @@ void SpatialReference::setProj4(std::string const& v)
     if (!m_tiffstuff->m_gtiff)
     {
         rebuildGTIFFromVLRs();
-        ////////////////////////////////ResetVLRs();
     }
    
 #ifdef LIBPC_SRS_ENABLED

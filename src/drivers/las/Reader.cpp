@@ -58,8 +58,9 @@ LasReader::LasReader(const std::string& filename)
     this->setNumPoints(m_lasHeader.GetPointRecordsCount());
 
     {
-        SpatialReference srs = m_lasHeader.getVLRs().constructSRS();
-        this->setSpatialReference(srs);
+        SpatialReference srs;
+        m_lasHeader.getVLRs().constructSRS(srs);
+        setSpatialReference(srs);
     }
 
     Utils::closeFile(str);

@@ -121,7 +121,7 @@ public:
 
     boost::uint32_t count() const;
 
-    SpatialReference constructSRS() const;
+    void constructSRS(SpatialReference&) const;
     void addVLRsFromSRS(const SpatialReference& srs);
 
 private:
