@@ -60,7 +60,7 @@ typedef boost::shared_ptr<OWConnection> Connection ;
 typedef boost::shared_ptr<OWStatement> Statement ;
 
 
-Options GetDefaultOptions();
+extern Options LIBPC_DLL GetDefaultOptions();
 
 class connection_failed : public libpc_error
 {
