@@ -72,6 +72,8 @@ private:
     bool hasLAS10PadSignature();
     void validate();
 
+    boost::uint32_t m_numVLRs;
+
     LasHeaderReader& operator=(const LasHeaderReader&); // nope
     LasHeaderReader(const LasHeaderReader&); // nope
 };

@@ -58,6 +58,7 @@ namespace libpc { namespace drivers { namespace las {
 LasHeaderReader::LasHeaderReader(LasHeader& header, std::istream& istream)
     : m_header(header)
     , m_istream(istream)
+    , m_numVLRs(0)
 {
     return;
 }
@@ -153,8 +154,7 @@ void LasHeaderReader::read(Schema& schema)
     m_header.SetDataOffset(n4);
 
     // 16. Number of variable length records
-    Utils::read_n(n4, m_istream, sizeof(n4));
-    m_header.SetRecordsCount(n4);
+    Utils::read_n(m_numVLRs, m_istream, sizeof(m_numVLRs));
 
     // 17. Point Data Format ID
     Utils::read_n(n1, m_istream, sizeof(n1));
@@ -356,7 +356,7 @@ void LasHeaderReader::readOneVLR()
 
     VariableLengthRecord vlr(reserved, userId, recordId, description, data, recordLenAfterHeader);
     
-    m_header.getVLRsRef().push_back(vlr);
+    m_header.getVLRs().add(vlr);
 
     delete[] data;
 
@@ -366,7 +366,7 @@ void LasHeaderReader::readOneVLR()
 
 void LasHeaderReader::readAllVLRs()
 {
-    const uint32_t count = m_header.GetRecordsCount();
+    const uint32_t count = m_numVLRs;
     if (count == 0)
     {
         return;

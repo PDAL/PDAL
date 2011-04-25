@@ -118,7 +118,7 @@ bool VariableLengthRecord::compareUserId(const std::string& str) const
 }
 
 
-void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs)
+void VariableLengthRecord::setSRSFromVLRs_X(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs)
 {
     srs.geotiff_ResetTags();
 
@@ -182,7 +182,7 @@ void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord
 }
 
 
-void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs)
+void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs)
 {
     //vlrs.clear();
 
@@ -452,6 +452,91 @@ bool VariableLengthRecord::isGeoVLR() const
     }
 
     return false;
+}
+
+//--------------------------------------------------------------------------------------
+
+void VLRList::add(VariableLengthRecord const& v) 
+{
+    m_list.push_back(v);
+}
+
+
+const VariableLengthRecord& VLRList::get(uint32_t index) const 
+{
+    return m_list[index];
+}
+
+
+VariableLengthRecord& VLRList::get(uint32_t index)
+{
+    return m_list[index];
+}
+
+
+const std::vector<VariableLengthRecord>& VLRList::getAll() const
+{
+    return m_list;
+}
+
+
+std::vector<VariableLengthRecord>& VLRList::getAll()
+{
+    return m_list;
+}
+
+
+void VLRList::remove(uint32_t index) 
+{    
+    if (index >= m_list.size())
+        throw std::out_of_range("index is out of range");
+
+    std::vector<VariableLengthRecord>::iterator i = m_list.begin() + index;
+
+    m_list.erase(i);
+
+}
+
+
+static bool sameVLRs(const std::string& name, boost::uint16_t id, const VariableLengthRecord& record)
+{
+    if (record.compareUserId(name)) 
+    {
+        if (record.getRecordId() == id) 
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+void VLRList::remove(const std::string& name, boost::uint16_t id)
+{
+    m_list.erase( std::remove_if( m_list.begin(), 
+                                m_list.end(),
+                                boost::bind( &sameVLRs, name, id, _1 ) ),
+                m_list.end());
+
+    return;
+}
+
+
+boost::uint32_t VLRList::count() const
+{
+    return m_list.size();
+}
+    
+
+void VLRList::constructSRS(SpatialReference& srs)
+{
+    VariableLengthRecord::setSRSFromVLRs_X(m_list, srs);
+}
+
+
+void VLRList::addVLRsFromSRS(const SpatialReference& srs)
+{
+    VariableLengthRecord::setVLRsFromSRS_X(srs, m_list);
 }
 
 } } } // namespaces

@@ -66,8 +66,6 @@ public:
     boost::uint16_t getRecordId() const { return m_recordId; }
     boost::uint8_t* getDescription() const { return (boost::uint8_t*)m_description; }
 
-    static void setSRSFromVLRs(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);
-    static void setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs);
     bool isGeoVLR() const;
     enum GeoVLRType
     {
@@ -83,11 +81,37 @@ public:
 
     static const int s_headerLength = 54;
 
+    static void setSRSFromVLRs_X(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);
+    static void setVLRsFromSRS_X(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs);
+
 private:
     boost::uint16_t m_reserved;
     boost::uint8_t* m_userId; // always 16 bytes   // BUG: make this a std::string?
     boost::uint16_t m_recordId;
     boost::uint8_t* m_description;  // always 32 bytes   // BUG: make this a std::string?
+};
+
+
+class LIBPC_DLL VLRList
+{
+public:
+    void add(const VariableLengthRecord& v);
+    
+    const VariableLengthRecord& get(boost::uint32_t index) const;
+    VariableLengthRecord& get(boost::uint32_t index);
+    
+    const std::vector<VariableLengthRecord>& getAll() const;
+    std::vector<VariableLengthRecord>& getAll();
+
+    void remove(boost::uint32_t index);
+    void remove(std::string const& userId, boost::uint16_t recordId);
+
+    boost::uint32_t count() const;
+
+    void constructSRS(SpatialReference& srs);
+    void addVLRsFromSRS(const SpatialReference& srs);
+private:
+   std::vector<VariableLengthRecord> m_list;
 };
 
 

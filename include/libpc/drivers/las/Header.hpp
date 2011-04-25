@@ -221,12 +221,6 @@ public:
     /// for the LAS 1.0 format and 227 bytes for the LAS 1.1 format.
     void SetDataOffset(boost::uint32_t v);
 
-    /// Get number of variable-length records.
-    boost::uint32_t GetRecordsCount() const;
-
-    /// Set number of variable-length records.
-    void SetRecordsCount(boost::uint32_t v);
-    
     /// Get identifier of point data (record) format.
     PointFormat getPointFormat() const;
 
@@ -308,22 +302,8 @@ public:
     const Bounds<double>& getBounds() const { return m_bounds; }
     void setBounds(const Bounds<double>& bounds) { m_bounds = bounds; }
 
-    ///// Adds a variable length record to the header
-    //void AddVLR(VariableRecord const& v);
-    //
-    ///// Returns a VLR 
-    //VariableRecord const& GetVLR(boost::uint32_t index) const;
-    //
-    ///// Returns all of the VLRs
-    //const std::vector<VariableRecord>& GetVLRs() const;
-
-    ///// Removes a VLR from the the header.
-    //void DeleteVLR(boost::uint32_t index);
-    //void DeleteVLRs(std::string const& name, boost::uint16_t id);
-
-    ///// Rewrite variable-length record with georeference infomation, if available.
-    //void SetGeoreference();
-    
+    const VLRList& getVLRs() const;
+    VLRList& getVLRs();
 
     /// Returns a property_tree that contains 
     /// all of the header data in a structured format.
@@ -335,9 +315,6 @@ public:
 
     /// Sets whether or not the points are compressed.
     void SetCompressed(bool b);
-
-    const std::vector<VariableLengthRecord>& getVLRs() const;
-    std::vector<VariableLengthRecord>& getVLRsRef();
 
     void setSpatialReference(const SpatialReference&);
     const SpatialReference& getSpatialReference() const;
@@ -383,7 +360,6 @@ private:
     boost::uint16_t m_createYear;
     boost::uint16_t m_headerSize;
     boost::uint32_t m_dataOffset;
-    boost::uint32_t m_recordsCount;
     boost::uint32_t m_pointRecordsCount;
     RecordsByReturnArray m_pointRecordsByReturn;
     PointScales m_scales;
@@ -394,7 +370,7 @@ private:
 
     Bounds<double> m_bounds;
 
-    std::vector<VariableLengthRecord> m_vlrs;
+    VLRList m_vlrList;
 
     SpatialReference m_spatialReference;
 

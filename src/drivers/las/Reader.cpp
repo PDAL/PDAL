@@ -36,6 +36,7 @@
 
 #include <libpc/drivers/las/Header.hpp>
 #include <libpc/drivers/las/Iterator.hpp>
+#include <libpc/drivers/las/VariableLengthRecord.hpp>
 #include "LasHeaderReader.hpp"
 #include <libpc/exceptions.hpp>
 #include <libpc/PointBuffer.hpp>
@@ -56,11 +57,9 @@ LasReader::LasReader(const std::string& filename)
     this->setBounds(m_lasHeader.getBounds());
     this->setNumPoints(m_lasHeader.GetPointRecordsCount());
 
-    const std::vector<VariableLengthRecord>& vlrs = m_lasHeader.getVLRs();
-    if (vlrs.size() > 0)
     {
         SpatialReference srs;
-        VariableLengthRecord::setSRSFromVLRs(vlrs, srs);
+        m_lasHeader.getVLRs().constructSRS(srs);
         this->setSpatialReference(srs);
     }
 
@@ -85,19 +84,20 @@ const std::string& LasReader::getFileName() const
 
 int LasReader::getMetadataRecordCount() const
 {
-    return m_lasHeader.getVLRs().size();
+    return m_lasHeader.getVLRs().count();
 }
 
 
 const MetadataRecord& LasReader::getMetadataRecord(int index) const
 {
-    return m_lasHeader.getVLRs()[index];
+    return m_lasHeader.getVLRs().get(index);
 }
 
 
 MetadataRecord& LasReader::getMetadataRecordRef(int index)
 {
-    return m_lasHeader.getVLRsRef()[index];
+    VariableLengthRecord& v = m_lasHeader.getVLRs().get(index);
+    return v;
 }
 
 
@@ -121,7 +121,7 @@ boost::uint8_t LasReader::getVersionMinor() const
 
 const std::vector<VariableLengthRecord>& LasReader::getVLRs() const
 {
-    return m_lasHeader.getVLRs();
+    return m_lasHeader.getVLRs().getAll();
 }
 
 

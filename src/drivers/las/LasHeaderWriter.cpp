@@ -42,6 +42,8 @@
 
 #include "LasHeaderWriter.hpp"
 
+#include "ZipPoint.hpp"
+
 #include <libpc/drivers/las/Header.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
@@ -66,11 +68,6 @@ void LasHeaderWriter::write()
     uint16_t n2 = 0;
     uint32_t n4 = 0;
     
-    // Figure out how many points we already have.  
-    // Figure out if we're in append mode.  If we are, we can't rewrite 
-    // any of the VLRs including the Schema and SpatialReference ones.
-    bool bAppendMode = false;
-
     // This test should only be true if we were opened in both 
     // std::ios::in *and* std::ios::out
 
@@ -81,76 +78,53 @@ void LasHeaderWriter::write()
     // Seek to the end
     m_ostream.seekp(0, ios::end);
     ios::pos_type end = m_ostream.tellp();
-    if ((begin != end) && (end != static_cast<ios::pos_type>(0))) {
-        bAppendMode = true;
+
+    // we initially have no VLRs
+    assert(m_header.getVLRs().count() == 0);
+
+    {
+        // Rewrite the georeference VLR entries if they exist
+        m_header.getVLRs().remove("liblas", 2112);
+        
+        // Wipe the GeoTIFF-related VLR records off of the Header
+        m_header.getVLRs().remove("LASF_Projection", 34735);
+        m_header.getVLRs().remove("LASF_Projection", 34736);
+        m_header.getVLRs().remove("LASF_Projection", 34737);
+
+        m_header.getVLRs().addVLRsFromSRS(m_header.getSpatialReference());
     }
 
-    ////// If we are in append mode, we are not touching *any* VLRs. 
-    ////if (bAppendMode) 
-    ////{
-    ////    // We're opened in append mode
-    ////    
-    ////    if (!Compressed())
-    ////    {
-    ////        ios::off_type points = end - static_cast<ios::off_type>(GetDataOffset());
-    ////        ios::off_type count = points / static_cast<ios::off_type>(GetDataRecordLength());
-    ////    
-    ////        if (points < 0) {
-    ////            std::ostringstream oss;
-    ////            oss << "The header's data offset, " << GetDataOffset() 
-    ////                <<", is much larger than the size of the file, " << end
-    ////                <<", and something is amiss.  Did you use the right header"
-    ////                <<" offset value?";
-    ////            throw std::runtime_error(oss.str());
-    ////        }
-    ////        
-    ////        m_pointCount = static_cast<uint32_t>(count);
-
-    ////    } else {
-    ////        m_pointCount = GetPointRecordsCount();
-    ////    }
-
-    ////    // Position to the beginning of the file to start writing the header
-    ////    ostream.seekp(0, ios::beg);
-
-    ////} 
-    ////else 
     {
-        
-////        // Rewrite the georeference VLR entries if they exist
-////        m_header.DeleteVLRs("liblas", 2112);
-////        m_header.SetGeoreference();
-////
-////        // If we have a custom schema, add the VLR and write it into the 
-////        // file.  
-////        if (m_header.GetSchema().IsCustom()) {
-////            
-////            // Wipe any schema-related VLRs we might have, as this is now out of date.
-////            m_header.DeleteVLRs("liblas", 7);
-////        
-////            VariableRecord v = m_header.GetSchema().GetVLR();
-////            std::cout <<  m_header.GetSchema()<< std::endl;
-////            m_header.AddVLR(v);
-////        }
-////    
-////        // add the laszip VLR, if needed
-////        if (m_header.Compressed())
-////        {
-////#ifdef HAVE_LASZIP
-////            m_header.DeleteVLRs("laszip encoded", 22204);
-////            ZipPoint zpd(m_header.GetDataFormatId());
-////            VariableRecord v;
-////            zpd.ConstructVLR(v);
-////            m_header.AddVLR(v);
-////#else
-////            throw configuration_error("LASzip compression support not enabled in this libLAS configuration.");
-////#endif
-////        }
-////        else
-////        {
-////            m_header.DeleteVLRs("laszip encoded", 22204);
-////        }
+        //// If we have a custom schema, add the VLR and write it into the 
+        //// file.  
+        //if (m_header.GetSchema().IsCustom()) {
+        //    
+        //    // Wipe any schema-related VLRs we might have, as this is now out of date.
+        //    m_header.DeleteVLRs("liblas", 7);
+        //
+        //    VariableRecord v = m_header.GetSchema().GetVLR();
+        //    std::cout <<  m_header.GetSchema()<< std::endl;
+        //    m_header.AddVLR(v);
+        //}
+    }
+    
+    {
+        m_header.getVLRs().remove("laszip encoded", 22204);
 
+        // add the laszip VLR, if needed
+        if (m_header.Compressed())
+        {
+#ifdef LIBPC_HAVE_LASZIP
+            ZipPoint zpd(m_header.getPointFormat());
+            VariableLengthRecord v = zpd.ConstructVLR();
+            m_header.getVLRs().add(v);
+#else
+            throw configuration_error("LASzip compression support not enabled in this libLAS configuration.");
+#endif
+        }
+    }
+
+    {
         int32_t difference = (int32_t)m_header.GetDataOffset() - (int32_t)GetRequiredHeaderSize();
 
         if (difference <= 0) 
@@ -166,8 +140,7 @@ void LasHeaderWriter::write()
 
     }
 
-    
-    // 1. File Signature
+        // 1. File Signature
     std::string const filesig(m_header.GetFileSignature());
     assert(filesig.size() == 4);
     Utils::write_n(m_ostream, filesig.c_str(), 4);
@@ -239,7 +212,7 @@ void LasHeaderWriter::write()
     Utils::write_n(m_ostream, n4, sizeof(n4));
 
     // 15. Number of variable length records
-    n4 = m_header.GetRecordsCount();
+    n4 = m_header.getVLRs().count();
     Utils::write_n(m_ostream, n4, sizeof(n4));
 
     // 16. Point Data Format ID
@@ -289,30 +262,10 @@ void LasHeaderWriter::write()
     Utils::write_n(m_ostream, m_header.GetMaxZ(), sizeof(double));
     Utils::write_n(m_ostream, m_header.GetMinZ(), sizeof(double));
 
-    // If WriteVLR returns a value, it is because the header's 
-    // offset is not large enough to contain the VLRs.  The value 
-    // it returns is the number of bytes we must increase the header
-    // by in order for it to contain the VLRs.  We do not touch VLRs if we 
-    // are in append mode.
+    WriteVLRs();
 
-    if (!bAppendMode) 
-    {
-        WriteVLRs();
-
-        // Write the 1.0 pad signature if we need to.
-        WriteLAS10PadSignature(); 
-
-    }           
-    //////// If we already have points, we're going to put it at the end of the file.  
-    //////// If we don't have any points,  we're going to leave it where it is.
-    //////if (m_pointCount != 0)
-    //////{
-    //////    ostream.seekp(0, std::ios::end);
-    //////}
-    //////else
-    //////{
-    //////    ostream.seekp(m_header.GetDataOffset(), std::ios::beg);
-    //////}
+    // Write the 1.0 pad signature if we need to.
+    WriteLAS10PadSignature(); 
 
     return;
 }
@@ -333,11 +286,9 @@ void LasHeaderWriter::WriteVLRs()
         throw std::runtime_error(oss.str());
     }
 
-    const std::vector<VariableLengthRecord>&vlrs = m_header.getVLRs();
-
-    for (uint32_t i = 0; i < vlrs.size(); ++i)
+    for (uint32_t i = 0; i < m_header.getVLRs().count(); ++i)
     {
-        VariableLengthRecord const &vlr = vlrs[i];
+        VariableLengthRecord const &vlr = m_header.getVLRs().get(i);
 
         Utils::write_n(m_ostream, vlr.getReserved(), sizeof(uint16_t));
         Utils::write_n(m_ostream, vlr.getUserId(), 16);

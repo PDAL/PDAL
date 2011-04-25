@@ -249,16 +249,6 @@ void LasHeader::SetDataOffset(uint32_t v)
     
 }
 
-uint32_t LasHeader::GetRecordsCount() const
-{
-    return m_recordsCount;
-}
-
-void LasHeader::SetRecordsCount(uint32_t v)
-{
-    m_recordsCount = v;
-}
-
 libpc::drivers::las::PointFormat LasHeader::getPointFormat() const
 {
     return m_pointFormat;
@@ -387,35 +377,6 @@ void LasHeader::SetMin(double x, double y, double z)
     m_bounds = temp;
 }
 
-//void Header::AddVLR(VariableRecord const& v) 
-//{
-//    m_vlrs.push_back(v);
-//    m_recordsCount += 1;
-//}
-//
-//VariableRecord const& Header::GetVLR(uint32_t index) const 
-//{
-//    return m_vlrs[index];
-//}
-//
-//const std::vector<VariableRecord>& Header::GetVLRs() const
-//{
-//    return m_vlrs;
-//}
-//
-//void Header::DeleteVLR(uint32_t index) 
-//{    
-//    if (index >= m_vlrs.size())
-//        throw std::out_of_range("index is out of range");
-//
-//    std::vector<VariableRecord>::iterator i = m_vlrs.begin() + index;
-//
-//    m_vlrs.erase(i);
-//    m_recordsCount = static_cast<uint32_t>(m_vlrs.size());
-//
-//}
-
-
 void LasHeader::initialize()
 {
     // Initialize public header block with default
@@ -441,7 +402,6 @@ void LasHeader::initialize()
     memset(m_projectGuid.data, 0, 16);
 
     m_dataOffset = eHeaderSize; // excluding 2 bytes of Point Data Start Signature
-    m_recordsCount = 0;
     m_pointRecordsCount = 0;
 
     std::memset(m_signature, 0, eFileSignatureSize);
@@ -465,53 +425,22 @@ void LasHeader::initialize()
 }
 
 
-std::vector<VariableLengthRecord>& LasHeader::getVLRsRef()
+VLRList& LasHeader::getVLRs()
 {
-    return m_vlrs;
+    return m_vlrList;
 }
 
 
-const std::vector<VariableLengthRecord>& LasHeader::getVLRs() const
+const VLRList& LasHeader::getVLRs() const
 {
-    return m_vlrs;
+    return m_vlrList;
 }
 
-
-static bool sameVLRs(const std::string& name, boost::uint16_t id, const VariableLengthRecord& record)
-{
-    if (record.compareUserId(name)) 
-    {
-        if (record.getRecordId() == id) 
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-
-static void deleteVLRs(const std::string& name, boost::uint16_t id, std::vector<VariableLengthRecord>& vlrs)
-{
-    vlrs.erase( std::remove_if( vlrs.begin(), 
-                                vlrs.end(),
-                                boost::bind( &sameVLRs, name, id, _1 ) ),
-                vlrs.end());
-
-    return;
-}
 
 
 void LasHeader::setSpatialReference(const SpatialReference& srs)
 {
     m_spatialReference = srs;
-
-    // Wipe the GeoTIFF-related VLR records off of the Header
-    deleteVLRs("LASF_Projection", 34735, m_vlrs);
-    deleteVLRs("LASF_Projection", 34736, m_vlrs);
-    deleteVLRs("LASF_Projection", 34737, m_vlrs);
-
-    VariableLengthRecord::setVLRsFromSRS(srs, m_vlrs);
-
     return;
 }
 

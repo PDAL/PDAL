@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_vlr_sizes)
     ref.setFromUserInput(code);
 
     std::vector<libpc::drivers::las::VariableLengthRecord> vlrs;
-    libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(ref, vlrs);
+    libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS_X(ref, vlrs);
 
     BOOST_CHECK(vlrs.size() == boost::uint32_t(4));
     BOOST_CHECK(vlrs[0].getLength() == boost::uint32_t(64));
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datum)
     BOOST_CHECK(ref.getWKT(libpc::SpatialReference::eCompoundOK) == wkt);
 
     std::vector<libpc::drivers::las::VariableLengthRecord> vlrs;
-    libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(ref, vlrs);
+    libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS_X(ref, vlrs);
     
     BOOST_CHECK(vlrs.size() == 4);
     BOOST_CHECK(vlrs[0].getLength() == boost::uint32_t(96));
@@ -190,15 +190,14 @@ BOOST_AUTO_TEST_CASE(test_vertical_datum)
 BOOST_AUTO_TEST_CASE(test_vertical_datums)
 {
     std::string tmpfile("tmp_srs.las");
+    libpc::Utils::deleteFile(tmpfile);
 
-    libpc::SpatialReference ref, result_ref;
     const std::string wkt = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx,g2003alaska.gtx,g2003h01.gtx,g2003p01.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
-
+    libpc::SpatialReference ref;
     ref.setFromUserInput(wkt);
 
     // Write a very simple file with our SRS and one point.
     {
-        libpc::Utils::deleteFile(tmpfile);
 
         libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));    
 
@@ -226,10 +225,11 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
     // Reopen and check contents. 
     {
         libpc::drivers::las::LasReader reader(tmpfile);
-        result_ref = reader.getSpatialReference();
-    }
+        libpc::SpatialReference result_ref = reader.getSpatialReference();
 
-    BOOST_CHECK(ref.getWKT(libpc::SpatialReference::eCompoundOK) == wkt);
+        std::string result_wkt = result_ref.getWKT(libpc::SpatialReference::eCompoundOK);
+        BOOST_CHECK(result_wkt == wkt);
+    }
 
     // Cleanup 
     libpc::Utils::deleteFile(tmpfile);
@@ -242,15 +242,15 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 // file still works ok.
 BOOST_AUTO_TEST_CASE(test_writing_vlr)
 {
-#if 1
     std::string tmpfile("tmp_srs_9.las");
-    libpc::SpatialReference ref, result_ref;
+    libpc::SpatialReference ref;
 
     ref.setFromUserInput( "EPSG:4326" );
     {
         std::vector<libpc::drivers::las::VariableLengthRecord> vlrsx;
-        libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(ref, vlrsx);
+        libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS_X(ref, vlrsx);
         libpc::drivers::las::VariableLengthRecord::clearVLRs(libpc::drivers::las::VariableLengthRecord::eGeoTIFF, vlrsx);
+        libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs_X(vlrsx, ref);
     }
 
     // Write a very simple file with our SRS and one point.
@@ -279,26 +279,25 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
     libpc::Utils::closeFile(ofs);
 
     // Reopen and check contents. 
-    libpc::drivers::las::LasReader reader(tmpfile);
+    {
+        libpc::drivers::las::LasReader reader(tmpfile);
 
-    result_ref = reader.getSpatialReference();
+        libpc::SpatialReference result_ref = reader.getSpatialReference();
 
-#if 0
-    const std::vector<libpc::drivers::las::VariableLengthRecord>& vlrs = reader.getVLRs();
-    BOOST_CHECK(vlrs.size() == 1);
+        const std::vector<libpc::drivers::las::VariableLengthRecord>& vlrs = reader.getVLRs();
+        BOOST_CHECK(vlrs.size() == 1);
+        
+        boost::property_tree::ptree tree = ref.getPTree();
+        std::string gtiff = tree.get<std::string>("gtiff");
 
-    boost::property_tree::ptree tree = ref.getPTree();
-    std::string gtiff = tree.get<std::string>("gtiff");
-
-    // there should be no geotiff definition.
-    BOOST_CHECK(gtiff == "");
-#endif
+        // there should be no geotiff definition.
+        BOOST_CHECK(gtiff == "Geotiff_Information:\n   Version: 1\n   Key_Revision: 1.0\n   Tagged_Information:\n      End_Of_Tags.\n   Keyed_Information:\n      End_Of_Keys.\n   End_Of_Geotiff.\n");
+    }
 
     // Cleanup 
     libpc::Utils::deleteFile(tmpfile);
 
     return;
-#endif
 }
 
 
