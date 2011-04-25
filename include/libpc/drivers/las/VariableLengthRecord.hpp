@@ -68,7 +68,7 @@ public:
 
     static void setSRSFromVLRs(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);
     static void setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs);
-    bool VariableLengthRecord::isGeoVLR() const;
+    bool isGeoVLR() const;
     enum GeoVLRType
     {
         eGeoTIFF = 1,
