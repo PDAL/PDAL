@@ -85,6 +85,11 @@ const std::string& Reader::getDescription() const
     return name;
 }
 
+const std::string& Reader::getName() const
+{
+    static std::string name("drivers.faux.reader");
+    return name;
+}
 
 Reader::Mode Reader::getMode() const
 {

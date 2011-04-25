@@ -90,6 +90,11 @@ const std::string& ColorFilter::getDescription() const
     return name;
 }
 
+const std::string& ColorFilter::getName() const
+{
+    static std::string name("filters.color");
+    return name;
+}
 
 void ColorFilter::processBuffer(PointBuffer& data) const
 {

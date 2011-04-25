@@ -63,7 +63,7 @@ public:
     // Implement this in your concrete classes to return a constant string
     // as the name of the stage.  Use upper camel case, with spaces between
     // words.  The last word should generally be "Reader" or "Filter".
-    virtual const std::string& getName() const;
+    virtual const std::string& getName() const = 0;
     virtual const std::string& getDescription() const = 0;
     
     // core properties of all stages

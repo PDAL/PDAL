@@ -57,7 +57,8 @@ public:
     ~LiblasWriter();
 
     const std::string& getDescription() const;
-    
+    const std::string& getName() const;
+
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
     void setPointFormat(::libpc::drivers::las::PointFormat);
     void setDate(boost::uint16_t dayOfYear, boost::uint16_t year);

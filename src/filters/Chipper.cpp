@@ -441,6 +441,11 @@ const std::string& Chipper::getDescription() const
     return name;
 }
 
+const std::string& Chipper::getName() const
+{
+    static std::string name("filters.chipper");
+    return name;
+}
 
 
 libpc::RandomIterator* Chipper::createRandomIterator() const

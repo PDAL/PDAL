@@ -295,6 +295,13 @@ const std::string& Reader::getDescription() const
     return name;
 }
 
+const std::string& Reader::getName() const
+{
+    static std::string name("drivers.oci.reader");
+    return name;
+}
+
+
 Reader::~Reader()
 {
 

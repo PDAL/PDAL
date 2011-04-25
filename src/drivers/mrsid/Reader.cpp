@@ -169,6 +169,12 @@ const std::string& Reader::getDescription() const
     return name;
 }
 
+const std::string& Reader::getName() const
+{
+    static std::string name("drivers.mrsid.reader");
+    return name;
+}
+
 boost::uint32_t Reader::readBuffer(PointBuffer& PointBuffer)
 {
     return 0;

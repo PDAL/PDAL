@@ -78,6 +78,11 @@ const std::string& LiblasWriter::getDescription() const
     return name;
 }
 
+const std::string& LiblasWriter::getName() const
+{
+    static std::string name("drivers.liblas.writer");
+    return name;
+}
 
 void LiblasWriter::setupExternalHeader()
 {

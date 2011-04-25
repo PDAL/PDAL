@@ -80,6 +80,11 @@ const std::string& LasWriter::getDescription() const
     return name;
 }
 
+const std::string& LasWriter::getName() const
+{
+    static std::string name("drivers.las.writer");
+    return name;
+}
 
 void LasWriter::setCompressed(bool v)
 {

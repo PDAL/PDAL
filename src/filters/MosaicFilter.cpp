@@ -98,6 +98,11 @@ const std::string& MosaicFilter::getDescription() const
     return name;
 }
 
+const std::string& MosaicFilter::getName() const
+{
+    static std::string name("filters.mosaic");
+    return name;
+}
 
 const std::vector<const Stage*>& MosaicFilter::getPrevStages() const
 {

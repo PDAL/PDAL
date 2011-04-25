@@ -66,6 +66,11 @@ const std::string& CacheFilter::getDescription() const
     return name;
 }
 
+const std::string& CacheFilter::getName() const
+{
+    static std::string name("filters.cache");
+    return name;
+}
 
 boost::uint32_t CacheFilter::getCacheBlockSize() const
 {

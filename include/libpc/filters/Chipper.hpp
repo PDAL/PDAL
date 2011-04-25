@@ -166,6 +166,7 @@ public:
         { return m_blocks[i]; }
 
     const std::string& getDescription() const ;
+    const std::string& getName() const;
 
     bool supportsIterator (StageIteratorType t) const
     {   

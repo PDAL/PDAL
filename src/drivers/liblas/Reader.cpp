@@ -87,6 +87,12 @@ const std::string& LiblasReader::getDescription() const
     return name;
 }
 
+const std::string& LiblasReader::getName() const
+{
+    static std::string name("drivers.liblas.reader");
+    return name;
+}
+
 
 
 const std::string& LiblasReader::getFileName() const

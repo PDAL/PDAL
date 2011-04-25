@@ -62,6 +62,7 @@ public:
     ~CacheFilter();
 
     const std::string& getDescription() const;
+    const std::string& getName() const;
 
     boost::uint32_t getCacheBlockSize() const;
 

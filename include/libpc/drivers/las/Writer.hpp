@@ -55,6 +55,7 @@ public:
     ~LasWriter();
 
     const std::string& getDescription() const;
+    const std::string& getName() const;
 
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
     void setPointFormat(PointFormat);

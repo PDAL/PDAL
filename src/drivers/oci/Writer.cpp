@@ -75,6 +75,12 @@ const std::string& Writer::getDescription() const
     return name;
 }
 
+const std::string& Writer::getName() const
+{
+    static std::string name("drivers.oci.writer");
+    return name;
+}
+
 
 
 

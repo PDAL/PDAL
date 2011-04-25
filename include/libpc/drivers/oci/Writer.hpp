@@ -55,6 +55,7 @@ public:
     ~Writer();
     
     const std::string& getDescription() const;
+    const std::string& getName() const;
 
     void run(std::ostringstream const& command);
     inline void setBounds(libpc::Bounds<double> bounds) {m_bounds = bounds; }

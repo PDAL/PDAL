@@ -60,6 +60,12 @@ const std::string& CropFilter::getDescription() const
     return name;
 }
 
+const std::string& CropFilter::getName() const
+{
+    static std::string name("filters.crop");
+    return name;
+}
+
 
 const Bounds<double>& CropFilter::getBounds() const
 {

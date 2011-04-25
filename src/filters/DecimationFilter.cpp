@@ -56,6 +56,12 @@ const std::string& DecimationFilter::getDescription() const
     return name;
 }
 
+const std::string& DecimationFilter::getName() const
+{
+    static std::string name("filters.decimation");
+    return name;
+}
+
 
 boost::uint32_t DecimationFilter::getStep() const
 {

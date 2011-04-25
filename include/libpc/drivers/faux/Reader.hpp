@@ -78,7 +78,8 @@ public:
     Reader(const Bounds<double>&, int numPoints, Mode mode, const std::vector<Dimension>& dimensions);
 
     const std::string& getDescription() const;
-
+    const std::string& getName() const;
+    
     Mode getMode() const;
     
     bool supportsIterator (StageIteratorType t) const

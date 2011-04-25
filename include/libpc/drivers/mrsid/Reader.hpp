@@ -57,6 +57,7 @@ public:
     Reader(const char *);
 
     const std::string& getDescription() const;
+    const std::string& getName() const;
 
     void seekToPoint(boost::uint64_t pointNum);
 
