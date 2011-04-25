@@ -148,32 +148,6 @@ void LiblasReader::processExternalHeader(::liblas::Reader& externalReader)
         throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
     }
 
-    // convert their VLRs into ours
-    for (std::size_t i=0; i<externalHeader.GetVLRs().size(); i++)
-    {
-        const ::liblas::VariableRecord& external_vlr = externalHeader.GetVLR(i);
-
-        const boost::uint16_t reserved = external_vlr.GetReserved();
-        const std::string userId = external_vlr.GetUserId(true);
-        const boost::uint16_t recordId = external_vlr.GetRecordId();
-        const boost::uint16_t recordLen = external_vlr.GetRecordLength();
-        const std::string description = external_vlr.GetDescription(true);
-
-        boost::uint8_t userid_data[16];
-        memset(userid_data, 0, 16);
-        for (std::size_t i=0; i<userId.length(); i++) userid_data[i] = userId[i];
-        
-        boost::uint8_t description_data[32];
-        memset(description_data, 0, 32);
-        for (std::size_t i=0; i<description.length(); i++) description_data[i] = description[i];
-        
-        const std::vector<boost::uint8_t> data = external_vlr.GetData();
-        const boost::uint8_t* data_ptr = &data[0];
-
-        libpc::drivers::las::VariableLengthRecord vlr(reserved, userid_data, recordId, description_data, data_ptr, recordLen);
-        m_metadataRecords.push_back(vlr);
-    }
-
     return;
 }
 

@@ -206,15 +206,7 @@ VariableLengthRecord ZipPoint::ConstructVLR() const
 
     assert(p == data + record_length_after_header);
 
-    boost::uint8_t laszip_userid_data[16];
-    for (std::size_t i=0; i<16; i++) laszip_userid_data[i] = 0;
-    for (std::size_t i=0; i<strlen(laszip_userid); i++) laszip_userid_data[i] = laszip_userid[i];
-
-    boost::uint8_t laszip_description_data[32];
-    for (std::size_t i=0; i<32; i++) laszip_description_data[i] = 0;
-    for (std::size_t i=0; i<strlen(laszip_description); i++) laszip_description_data[i] = laszip_description[i];
-
-    VariableLengthRecord vlr(0xAABB, laszip_userid_data, laszip_recordid, laszip_description_data, data, record_length_after_header);
+    VariableLengthRecord vlr(0xAABB, laszip_userid, laszip_recordid, laszip_description, data, record_length_after_header);
 
     if (data != 0)
     delete [] data;
@@ -225,7 +217,7 @@ VariableLengthRecord ZipPoint::ConstructVLR() const
 
 bool ZipPoint::IsZipVLR(const VariableLengthRecord& vlr) const
 {
-    if (strcmp(laszip_userid, (const char*)vlr.getUserId())==0 && strcmp(laszip_description, (const char*)vlr.getDescription())==0)
+    if (laszip_userid == vlr.getUserId() && laszip_description == vlr.getDescription())
     {
         return true;
     }

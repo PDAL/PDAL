@@ -84,20 +84,19 @@ const std::string& LasReader::getFileName() const
 
 int LasReader::getMetadataRecordCount() const
 {
-    return m_lasHeader.getVLRs().count();
+    return m_metadataRecords.size();
 }
 
 
 const MetadataRecord& LasReader::getMetadataRecord(int index) const
 {
-    return m_lasHeader.getVLRs().get(index);
+    return m_metadataRecords[index];
 }
 
 
 MetadataRecord& LasReader::getMetadataRecordRef(int index)
 {
-    VariableLengthRecord& v = m_lasHeader.getVLRs().get(index);
-    return v;
+    return m_metadataRecords[index];
 }
 
 

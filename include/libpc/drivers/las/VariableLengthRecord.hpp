@@ -49,22 +49,23 @@ namespace libpc {
 namespace libpc { namespace drivers { namespace las {
     
 
-class LIBPC_DLL VariableLengthRecord : public MetadataRecord
+class LIBPC_DLL VariableLengthRecord
 {
 public:
     // makes a local copy of the bytes buffer, which is a shared ptr among by all copes of the metadata record
     VariableLengthRecord(boost::uint16_t reserved,
-                         boost::uint8_t* userId,   // always 16 bytes
+                         std::string userId,
                          boost::uint16_t recordId,
-                         boost::uint8_t* description, // always 32 bytes
-                         const boost::uint8_t* bytes, std::size_t len);
+                         std::string description,
+                         const boost::uint8_t* bytes,
+                         std::size_t len);
     VariableLengthRecord(const VariableLengthRecord&);
     ~VariableLengthRecord();
 
     boost::uint16_t getReserved() const { return m_reserved; }
-    boost::uint8_t* getUserId() const { return (boost::uint8_t*)m_userId; }
+    std::string getUserId() const { return m_userId; }
     boost::uint16_t getRecordId() const { return m_recordId; }
-    boost::uint8_t* getDescription() const { return (boost::uint8_t*)m_description; }
+    std::string getDescription() const { return m_description; }
 
     bool isGeoVLR() const;
     enum GeoVLRType
@@ -79,16 +80,28 @@ public:
     bool operator==(const VariableLengthRecord&) const;
     VariableLengthRecord& operator=(const VariableLengthRecord&);
 
+    const boost::uint8_t* getBytes() const;
+    std::size_t getLength() const;
+
     static const int s_headerLength = 54;
 
     static void setSRSFromVLRs_X(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);
     static void setVLRsFromSRS_X(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs);
 
+    static std::string bytes2string(boost::uint8_t* bytes, boost::uint32_t len);
+
+    // bytes array is return, user responsible for deleting
+    // len is the size of the array he wants, it will be padded with zeros if str.length() < len
+    static boost::uint8_t* string2bytes(boost::uint32_t len, const std::string& str);
+
 private:
     boost::uint16_t m_reserved;
-    boost::uint8_t* m_userId; // always 16 bytes   // BUG: make this a std::string?
+    std::string m_userId; // always stored as 16 bytes (padded with 0's)
     boost::uint16_t m_recordId;
-    boost::uint8_t* m_description;  // always 32 bytes   // BUG: make this a std::string?
+    std::string m_description; // always stored as 16 bytes (padded with 0's)
+    
+    boost::uint8_t* m_bytes;
+    std::size_t m_length;
 };
 
 

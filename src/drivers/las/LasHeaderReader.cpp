@@ -342,14 +342,16 @@ void LasHeaderReader::readOneVLR()
     const boost::uint16_t reserved = Utils::read_field<boost::uint16_t>(p);
     boost::ignore_unused_variable_warning(reserved);
 
-    boost::uint8_t userId[16];
-    Utils::read_array_field(p, userId, 16);
+    boost::uint8_t userId_data[16];
+    Utils::read_array_field(p, userId_data, 16);
+    std::string userId = VariableLengthRecord::bytes2string(userId_data, 16);
 
     const boost::uint16_t recordId = Utils::read_field<boost::uint16_t>(p);
     const boost::uint16_t recordLenAfterHeader = Utils::read_field<boost::uint16_t>(p);
 
-    boost::uint8_t description[32];
-    Utils::read_array_field(p, description, 32);
+    boost::uint8_t description_data[32];
+    Utils::read_array_field(p, description_data, 32);
+    std::string description = VariableLengthRecord::bytes2string(description_data, 32);
 
     boost::uint8_t* data = new boost::uint8_t[recordLenAfterHeader];
     Utils::read_n(data, m_istream, recordLenAfterHeader);

@@ -46,6 +46,7 @@
 
 #include <libpc/drivers/las/Header.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/scoped_ptr.hpp>
 
 
 namespace libpc { namespace drivers { namespace las {
@@ -290,13 +291,15 @@ void LasHeaderWriter::WriteVLRs()
     {
         VariableLengthRecord const &vlr = m_header.getVLRs().get(i);
 
+        boost::scoped_ptr<boost::uint8_t> userId_data(VariableLengthRecord::string2bytes(16, vlr.getUserId()));
+        boost::scoped_ptr<boost::uint8_t> description_data(VariableLengthRecord::string2bytes(32, vlr.getDescription()));
+
         Utils::write_n(m_ostream, vlr.getReserved(), sizeof(uint16_t));
-        Utils::write_n(m_ostream, vlr.getUserId(), 16);
+        Utils::write_n(m_ostream, userId_data, 16);
         Utils::write_n(m_ostream, vlr.getRecordId(), sizeof(uint16_t));
         Utils::write_n(m_ostream, vlr.getLength(), sizeof(uint16_t));
-        Utils::write_n(m_ostream, vlr.getDescription(), 32);
-        boost::shared_array<uint8_t> data(vlr.getBytes());
-        Utils::write_n(m_ostream, &(data[0]), vlr.getLength());
+        Utils::write_n(m_ostream, description_data, 32);
+        Utils::write_n(m_ostream, vlr.getBytes(), vlr.getLength());
     }
 
     // if we had more room than we need for the VLRs, we need to pad that with 

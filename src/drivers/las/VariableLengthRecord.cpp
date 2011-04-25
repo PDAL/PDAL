@@ -42,79 +42,129 @@
 namespace libpc { namespace drivers { namespace las {
 
 VariableLengthRecord::VariableLengthRecord(boost::uint16_t reserved,
-                                           boost::uint8_t* userId, 
+                                           std::string userId, 
                                            boost::uint16_t recordId,
-                                           boost::uint8_t* description,
-                                           const boost::uint8_t* bytes, std::size_t len)
-    : MetadataRecord(bytes, len)
-    , m_reserved(reserved)
+                                           std::string description,
+                                           const boost::uint8_t* bytes,
+                                           std::size_t length)
+    : m_reserved(reserved)
+    , m_userId(userId)
     , m_recordId(recordId)
+    , m_description(description)
+    , m_bytes(0)
+    , m_length(length)
 {
-    m_userId = new boost::uint8_t[16];
-    memcpy(m_userId, userId, 16);
-    m_description = new boost::uint8_t[32];
-    memcpy(m_description, description, 32);
+    m_bytes = new boost::uint8_t[m_length];
+    memcpy(m_bytes, bytes, m_length);
+
     return;
 }
 
 
-VariableLengthRecord::VariableLengthRecord(const VariableLengthRecord& vlr)
-    : MetadataRecord(vlr)
-    , m_reserved(vlr.m_reserved)
-    , m_recordId(vlr.m_recordId)
+VariableLengthRecord::VariableLengthRecord(const VariableLengthRecord& rhs)
+    : m_reserved(rhs.m_reserved)
+    , m_userId(rhs.m_userId)
+    , m_recordId(rhs.m_recordId)
+    , m_description(rhs.m_description)
+    , m_bytes(0)
+    , m_length(rhs.m_length)
 {
-    m_userId = new boost::uint8_t[16];
-    memcpy(m_userId, vlr.m_userId, 16);
-    m_description = new boost::uint8_t[32];
-    memcpy(m_description, vlr.m_description, 32);
+    m_bytes = new boost::uint8_t[m_length];
+    memcpy(m_bytes, rhs.getBytes(), m_length);
     return;
 }
 
 
 VariableLengthRecord::~VariableLengthRecord()
 {
-    delete[] m_userId;
-    delete[] m_description;
+    delete m_bytes;
+    m_bytes = 0;
+    m_length = 0;
     return;
 }
 
 
-VariableLengthRecord& VariableLengthRecord::operator=(const VariableLengthRecord& vlr)
+VariableLengthRecord& VariableLengthRecord::operator=(const VariableLengthRecord& rhs)
 {
-    (MetadataRecord&)vlr = *(MetadataRecord*)this;
+    if (&rhs != this)
+    {
+        m_length = rhs.m_length;
+        delete[] m_bytes;
+        m_bytes = new boost::uint8_t[m_length];
 
-    m_reserved = vlr.m_reserved;
-    m_recordId = vlr.m_recordId;
+        m_reserved = rhs.m_reserved;
+        m_recordId = rhs.m_recordId;
 
-    memcpy(m_userId, vlr.m_userId, 16);
-    memcpy(m_description, vlr.m_description, 32);
+        m_userId = rhs.m_userId;
+        m_description = rhs.m_description;
+    }
 
     return *this;
 }
 
 
-bool VariableLengthRecord::operator==(const VariableLengthRecord& vlr) const
+bool VariableLengthRecord::operator==(const VariableLengthRecord& rhs) const
 {
-    if (m_reserved != vlr.m_reserved) return false;
-    if (m_recordId != vlr.m_recordId) return false;
+    if (m_reserved != rhs.m_reserved) return false;
+    if (m_recordId != rhs.m_recordId) return false;
 
-    for (int i=0; i<16; i++)
-        if (m_userId[i] != vlr.m_userId[i]) return false;
-    for (int i=0; i<32; i++)
-        if (m_description[i] != vlr.m_description[i]) return false;
+    if (m_userId != rhs.m_userId) return false;
+    if (m_description != rhs.m_description) return false;
 
-    if (!((MetadataRecord&)vlr == *(MetadataRecord*)this)) return false;
+    if (m_length != rhs.m_length) return false;
+    for (std::size_t i=0; i<m_length; i++)
+    {
+        if (m_bytes[i] != rhs.m_bytes[i]) return false;
+    }
 
     return true;
 }
 
 
-bool VariableLengthRecord::compareUserId(const std::string& str) const
+std::string VariableLengthRecord::bytes2string(boost::uint8_t* bytes, boost::uint32_t len)
 {
-    int len = str.length();
-    if (memcmp(getUserId(), str.c_str(), len) == 0)
-        return true;
-    return false;
+    std::string s = "";
+    for (boost::uint32_t i=0; i<len; i++)
+    {
+        if (bytes[i]==0) break;
+        s += (char)bytes[i];
+    }
+    return s;
+}
+
+
+boost::uint8_t* VariableLengthRecord::string2bytes(boost::uint32_t len, const std::string& str)
+{
+    boost::uint8_t* bytes = new boost::uint8_t[len];
+    memset(bytes, 0, len);
+
+    assert(str.length() <= len);
+    for (boost::uint32_t i=0; i<str.length(); i++)
+    {
+        bytes[i] = (boost::uint8_t)str[i];
+    }
+    return bytes;
+}
+
+
+const boost::uint8_t* VariableLengthRecord::getBytes() const
+{
+    return m_bytes;
+}
+
+
+std::size_t VariableLengthRecord::getLength() const
+{
+    return m_length;
+}
+
+
+bool VariableLengthRecord::compareUserId(const std::string& userId) const
+{
+    const std::string& p = m_userId;
+    const std::string& q = userId;
+           
+    return p==q;
 }
 
 
@@ -133,8 +183,12 @@ void VariableLengthRecord::setSRSFromVLRs_X(const std::vector<VariableLengthReco
         if (!vlr.compareUserId(uid))
             continue;
 
-        boost::shared_array<boost::uint8_t> data = vlr.getBytes();
+        const boost::uint8_t* datax = vlr.getBytes();
         std::size_t length = vlr.getLength();
+
+        // make a writable copy of the array
+        boost::uint8_t* data = new boost::uint8_t[length];
+        memcpy(data, datax, length);
 
         switch (vlr.getRecordId())
         {
@@ -152,21 +206,21 @@ void VariableLengthRecord::setSRSFromVLRs_X(const std::vector<VariableLengthReco
                     data[3] -= 1;
                 }
 
-                srs.geotiff_ST_SetKey(34735, count, SpatialReference::Geotiff_KeyType_SHORT, data.get());
+                srs.geotiff_ST_SetKey(34735, count, SpatialReference::Geotiff_KeyType_SHORT, data);
             }
             break;
 
         case 34736:
             {
                 int count = length / sizeof(double);
-                srs.geotiff_ST_SetKey(34736, count, SpatialReference::Geotiff_KeyType_DOUBLE, data.get());
+                srs.geotiff_ST_SetKey(34736, count, SpatialReference::Geotiff_KeyType_DOUBLE, data);
             }        
             break;
 
         case 34737:
             {
                 int count = length/sizeof(uint8_t);
-                srs.geotiff_ST_SetKey(34737, count, SpatialReference::Geotiff_KeyType_ASCII, data.get());
+                srs.geotiff_ST_SetKey(34737, count, SpatialReference::Geotiff_KeyType_ASCII, data);
             }
             break;
 
@@ -174,6 +228,8 @@ void VariableLengthRecord::setSRSFromVLRs_X(const std::vector<VariableLengthReco
             // ummm....?
             break;
         }
+
+        delete[] data;
     }
 
     srs.geotiff_SetTags();
@@ -201,19 +257,19 @@ void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::ve
     int kcount = 0;
     int acount = 0;
     int atype =0;
-    
+
+    const std::string userId123 = "LASF_Projection";
+    const std::string description1 = "GeoTIFF GeoKeyDirectoryTag";
+    const std::string description2 = "GeoTIFF GeoDoubleParamsTag";
+    const std::string description3 = "GeoTIFF GeoAsciiParamsTag";
+        
+    const std::string userId4 = "liblas";
+    const std::string description4 = "OGR variant of OpenGIS WKT SRS";
+
     //GTIFF_GEOKEYDIRECTORY == 34735
     ret = srs.geotiff_ST_GetKey(34735, &kcount, &ktype, (void**)&kdata);
     if (ret)
     {    
-        boost::uint8_t userid[16];
-        for (int i=0; i<16; i++) userid[i]=0;
-        memcpy((char*)userid,(char*)"LASF_Projection",strlen("LASF_Projection"));
-
-        boost::uint8_t description[32];
-        for (int i=0; i<32; i++) description[i]=0;
-        memcpy((char*)description,(char*)"GeoTIFF GeoKeyDirectoryTag",strlen("GeoTIFF GeoKeyDirectoryTag"));
-
         uint16_t length = 2 * static_cast<uint16_t>(kcount);
 
         std::vector<uint8_t> data;
@@ -229,7 +285,7 @@ void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::ve
             data.push_back(v[1]);
         }
 
-        VariableLengthRecord record(0, userid, 34735, description, &data[0], length);
+        VariableLengthRecord record(0, userId123, 34735, description1, &data[0], length);
         vlrs.push_back(record);
     }
 
@@ -237,14 +293,6 @@ void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::ve
     ret = srs.geotiff_ST_GetKey(34736, &dcount, &dtype, (void**)&ddata);
     if (ret)
     {    
-        boost::uint8_t userid[16];
-        for (int i=0; i<16; i++) userid[i]=0;
-        memcpy((char*)userid,(char*)"LASF_Projection",strlen("LASF_Projection"));
-
-        boost::uint8_t description[32];
-        for (int i=0; i<32; i++) description[i]=0;
-        memcpy((char*)description,(char*)"GeoTIFF GeoDoubleParamsTag",strlen("GeoTIFF GeoDoubleParamsTag"));
-
         uint16_t length = 8 * static_cast<uint16_t>(dcount);
         
         std::vector<uint8_t> data;
@@ -266,7 +314,7 @@ void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::ve
             data.push_back(v[7]);   
         }        
 
-        VariableLengthRecord record(0, userid, 34736, description, &data[0], length);
+        VariableLengthRecord record(0, userId123, 34736, description2, &data[0], length);
 
         vlrs.push_back(record);
     }
@@ -275,14 +323,6 @@ void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::ve
     ret = srs.geotiff_ST_GetKey(34737, &acount, &atype, (void**)&adata);
     if (ret) 
     {                    
-        boost::uint8_t userid[16];
-        for (int i=0; i<16; i++) userid[i]=0;
-        memcpy((char*)userid,(char*)"LASF_Projection",strlen("LASF_Projection"));
-
-        boost::uint8_t description[32];
-        for (int i=0; i<32; i++) description[i]=0;
-        memcpy((char*)description,(char*)"GeoTIFF GeoAsciiParamsTag",strlen("GeoTIFF GeoAsciiParamsTag"));
-        
          uint16_t length = static_cast<uint16_t>(acount);
 
          std::vector<uint8_t> data;
@@ -307,7 +347,7 @@ void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::ve
              data.push_back(v[0]);
          }
 
-         VariableLengthRecord record(0, userid, 34737, description, &data[0], length);
+         VariableLengthRecord record(0, userId123, 34737, description3, &data[0], length);
 
 
         if (data.size() > (std::numeric_limits<boost::uint16_t>::max()))
@@ -332,14 +372,6 @@ void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::ve
     {
         const uint8_t* wkt_bytes = reinterpret_cast<const uint8_t*>(wkt.c_str());
 
-        boost::uint8_t userid[16];
-        for (int i=0; i<16; i++) userid[i]=0;
-        memcpy((char*)userid,(char*)"liblas",strlen("liblas"));
-
-        boost::uint8_t description[32];
-        for (int i=0; i<32; i++) description[i]=0;
-        memcpy((char*)description,(char*)"OGR variant of OpenGIS WKT SRS",strlen("OGR variant of OpenGIS WKT SRS"));
-
         boost::uint16_t len = static_cast<boost::uint16_t>(strlen((const char*)wkt_bytes));
 
         if (len > std::numeric_limits<boost::uint16_t>::max())
@@ -352,7 +384,7 @@ void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::ve
             throw std::runtime_error(oss.str()); 
         }
 
-        VariableLengthRecord wkt_record(0, userid, 2112, description, wkt_bytes, len);
+        VariableLengthRecord wkt_record(0, userId4, 2112, description4, wkt_bytes, len);
 
         vlrs.push_back( wkt_record );
     }

@@ -429,7 +429,7 @@ BOOST_AUTO_TEST_CASE(test_vlr)
 {
     libpc::drivers::las::LasReader reader(Support::datapath("lots_of_vlr.las"));
 
-    BOOST_CHECK(reader.getMetadataRecordCount() == 390);
+    BOOST_CHECK(reader.getVLRs().size() == 390);
 
     return;
 }

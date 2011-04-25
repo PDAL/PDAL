@@ -83,6 +83,7 @@ public:
 
     boost::uint64_t getPointDataOffset() const;
 
+    // we shouldn't have to expose this
     const std::vector<VariableLengthRecord>& getVLRs() const;
 
 protected:
@@ -94,6 +95,7 @@ protected:
 private:
     const std::string m_filename;
     LasHeader m_lasHeader;
+    std::vector<MetadataRecord> m_metadataRecords;
 
     LasReader& operator=(const LasReader&); // not implemented
     LasReader(const LasReader&); // not implemented
