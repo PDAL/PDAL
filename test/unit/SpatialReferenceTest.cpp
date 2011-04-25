@@ -45,14 +45,16 @@
 BOOST_AUTO_TEST_SUITE(SpatialReferenceTest)
 
 
-    BOOST_AUTO_TEST_CASE(test_env_vars)
+BOOST_AUTO_TEST_CASE(test_env_vars)
 {
+    
+#ifdef _MSC_VER
     const char* gdal_data = getenv("GDAL_DATA");
     const char* proj_lib = getenv("PROJ_LIB");
 
     BOOST_CHECK(libpc::Utils::fileExists(gdal_data));
     BOOST_CHECK(libpc::Utils::fileExists(proj_lib));
-
+#endif
     return;
 }
 
