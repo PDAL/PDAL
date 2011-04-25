@@ -45,8 +45,6 @@
 
 namespace libpc { namespace drivers { namespace oci {
 
-class Options;
-
 
 
 class LIBPC_DLL Writer : public libpc::Writer

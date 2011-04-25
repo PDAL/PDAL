@@ -131,7 +131,7 @@ int Application_pc2pc::execute()
     
         const boost::uint64_t numPoints = reader.getNumPoints();
         
-        libpc::drivers::oci::Options options;
+        libpc::Options options = libpc::drivers::oci::GetDefaultOptions();
         boost::property_tree::ptree& tree = options.GetPTree();
         
         boost::uint32_t capacity = 10000;
@@ -157,7 +157,7 @@ int Application_pc2pc::execute()
         else if (hasOption("oracle-reader"))
         {
     #ifdef LIBPC_HAVE_ORACLE
-            libpc::drivers::oci::Options options;
+            libpc::Options options = libpc::drivers::oci::GetDefaultOptions();
             boost::property_tree::ptree& tree = options.GetPTree();
             tree.put("capacity", 12);
             tree.put("connection", "lidar/lidar@oracle.hobu.biz/orcl");

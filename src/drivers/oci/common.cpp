@@ -46,36 +46,38 @@
 namespace libpc { namespace drivers { namespace oci {
 
 
-Options::Options()
+Options GetDefaultOptions() 
 {
-    m_tree.put("is3d", false);
-    m_tree.put("solid", false);
-    m_tree.put("overwrite", false);
-    m_tree.put("debug", false);
-    m_tree.put("verbose", false);
-    m_tree.put("srid", 4269);
-    m_tree.put("capacity", 8000);
-    m_tree.put("precision", 8);
-    m_tree.put("cloud_id", -1);
-    m_tree.put("dimensions", 5);
-    m_tree.put("connection", std::string(""));
-    m_tree.put("block_table_name", std::string("output"));
-    m_tree.put("block_table_partition_column", std::string(""));
-    m_tree.put("block_table_partition_value", boost::int32_t(0));
-    m_tree.put("base_table_name", std::string("hobu"));
-    m_tree.put("cloud_column_name", std::string("cloud"));
-    m_tree.put("header_blob_column_name", std::string(""));
-    m_tree.put("base_table_aux_columns", std::string(""));
-    m_tree.put("base_table_aux_values", std::string(""));
-    m_tree.put("base_table_boundary_column", std::string(""));
-    m_tree.put("base_table_boundary_wkt", std::string(""));
-    m_tree.put("pre_block_sql", std::string(""));
-    m_tree.put("pre_sql", std::string(""));
-    m_tree.put("post_block_sql", std::string(""));
-    m_tree.put("select_sql", std::string(""));
-    m_tree.put("base_table_bounds", libpc::Bounds<double>());
-    m_tree.put("blob_read_byte_size", boost::uint32_t(2000));
-    m_tree.put("point_schema_override", "");
+    Options options;
+    boost::property_tree::ptree& tree = options.GetPTree();
+    tree.put("is3d", false);
+    tree.put("solid", false);
+    tree.put("overwrite", false);
+    tree.put("debug", false);
+    tree.put("verbose", false);
+    tree.put("srid", 4269);
+    tree.put("capacity", 8000);
+    tree.put("precision", 8);
+    tree.put("cloud_id", -1);
+    tree.put("dimensions", 5);
+    tree.put("connection", std::string(""));
+    tree.put("block_table_name", std::string("output"));
+    tree.put("block_table_partition_column", std::string(""));
+    tree.put("block_table_partition_value", boost::int32_t(0));
+    tree.put("base_table_name", std::string("hobu"));
+    tree.put("cloud_column_name", std::string("cloud"));
+    tree.put("header_blob_column_name", std::string(""));
+    tree.put("base_table_aux_columns", std::string(""));
+    tree.put("base_table_aux_values", std::string(""));
+    tree.put("base_table_boundary_column", std::string(""));
+    tree.put("base_table_boundary_wkt", std::string(""));
+    tree.put("pre_block_sql", std::string(""));
+    tree.put("pre_sql", std::string(""));
+    tree.put("post_block_sql", std::string(""));
+    tree.put("select_sql", std::string(""));
+    tree.put("base_table_bounds", libpc::Bounds<double>());
+    tree.put("blob_read_byte_size", boost::uint32_t(2000));
+    tree.put("point_schema_override", "");
     
     boost::property_tree::ptree scales;
     scales.put("x", double(0.01));
@@ -87,51 +89,52 @@ Options::Options()
     offsets.put("y", double(0.0));
     offsets.put("z", double(0.0));
     
-    m_tree.add_child("scale", scales);
-    m_tree.add_child("offset", offsets);
+    tree.add_child("scale", scales);
+    tree.add_child("offset", offsets);
+    return options;
 }    
-
-bool Options::IsDebug() const
-{
-    bool debug = false;
-    try
-    {
-        debug = m_tree.get<bool>("debug");
-    }
-    catch (boost::property_tree::ptree_bad_path const& e) {
-      ::boost::ignore_unused_variable_warning(e);
-
-    }
-    return debug;
-}
-
-bool Options::Is3d() const
-{
-    bool is3d = false;
-    try
-    {
-        is3d = m_tree.get<bool>("is3d");
-    }
-    catch (boost::property_tree::ptree_bad_path const& e) {
-      ::boost::ignore_unused_variable_warning(e);
-
-    }
-    return is3d;
-}
-
-bool Options::IsSolid() const
-{
-    bool IsSolid = false;
-    try
-    {
-        IsSolid = m_tree.get<bool>("solid");
-    }
-    catch (boost::property_tree::ptree_bad_path const& e) {
-      ::boost::ignore_unused_variable_warning(e);
-
-    }
-    return IsSolid;
-}
+// 
+// bool Options::IsDebug() const
+// {
+//     bool debug = false;
+//     try
+//     {
+//         debug = m_tree.get<bool>("debug");
+//     }
+//     catch (boost::property_tree::ptree_bad_path const& e) {
+//       ::boost::ignore_unused_variable_warning(e);
+// 
+//     }
+//     return debug;
+// }
+// 
+// bool Options::Is3d() const
+// {
+//     bool is3d = false;
+//     try
+//     {
+//         is3d = m_tree.get<bool>("is3d");
+//     }
+//     catch (boost::property_tree::ptree_bad_path const& e) {
+//       ::boost::ignore_unused_variable_warning(e);
+// 
+//     }
+//     return is3d;
+// }
+// 
+// bool Options::IsSolid() const
+// {
+//     bool IsSolid = false;
+//     try
+//     {
+//         IsSolid = m_tree.get<bool>("solid");
+//     }
+//     catch (boost::property_tree::ptree_bad_path const& e) {
+//       ::boost::ignore_unused_variable_warning(e);
+// 
+//     }
+//     return IsSolid;
+// }
 
 
 Block::Block(Connection connection)

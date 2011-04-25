@@ -37,6 +37,7 @@
 
 #include <libpc/libpc.hpp>
 #include <libpc/exceptions.hpp>
+#include <libpc/Options.hpp>
 
 #include "oci_wrapper.h"
 #include "Endian.hpp"
@@ -44,7 +45,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include <boost/property_tree/ptree.hpp>
 
 #include <cpl_port.h>
 
@@ -60,6 +60,7 @@ typedef boost::shared_ptr<OWConnection> Connection ;
 typedef boost::shared_ptr<OWStatement> Statement ;
 
 
+Options GetDefaultOptions();
 
 class connection_failed : public libpc_error
 {
@@ -206,23 +207,8 @@ private:
 
 typedef boost::shared_ptr<Block> BlockPtr;
 
-class LIBPC_DLL Options
-{
 
-private:
-    boost::property_tree::ptree m_tree;
-
-public:
-
-    Options();
-    bool IsDebug() const;
-    bool Is3d() const;
-    bool IsSolid() const;
-    boost::property_tree::ptree& GetPTree() {return m_tree; }
-    boost::property_tree::ptree const& GetPTree() const {return m_tree; }
-};
-
-LIBPC_DLL Connection Connect(Options const& options);
+LIBPC_DLL Connection Connect(libpc::Options const& options);
 
 std::string to_upper(std::string const& input);
 

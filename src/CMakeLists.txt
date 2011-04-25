@@ -43,6 +43,7 @@ set(LIBPC_BASE_HPP
   ${LIBPC_HEADERS_DIR}/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/MetadataRecord.hpp
   ${LIBPC_HEADERS_DIR}/Vector.hpp  
+  ${LIBPC_HEADERS_DIR}/Options.hpp
   ${LIBPC_HEADERS_DIR}/PointBuffer.hpp  
   ${LIBPC_HEADERS_DIR}/PointBufferCache.hpp  
   ${LIBPC_HEADERS_DIR}/Range.hpp
@@ -67,6 +68,7 @@ set(LIBPC_BASE_CPP
   Vector.cpp  
   PointBuffer.cpp
   PointBufferCache.cpp
+  Options.cpp
   Schema.cpp
   SchemaLayout.cpp
   Signaller.cpp
