@@ -435,12 +435,17 @@ void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widem
     m_blocks.push_back(b);
 }
 
-const std::string& Chipper::getName() const
+const std::string& Chipper::getDescription() const
 {
     static std::string name("Chipper");
     return name;
 }
 
+const std::string& Chipper::getName() const
+{
+    static std::string name("filters.chipper");
+    return name;
+}
 
 
 libpc::RandomIterator* Chipper::createRandomIterator() const

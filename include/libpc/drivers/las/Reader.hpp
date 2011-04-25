@@ -56,6 +56,7 @@ class LIBPC_DLL LasReader : public LasReaderBase
 public:
     LasReader(const std::string& filename);
 
+    const std::string& getDescription() const;
     const std::string& getName() const;
 
     const std::string& getFileName() const;

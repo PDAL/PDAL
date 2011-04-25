@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_crop)
     libpc::drivers::faux::Reader reader(srcBounds, 1000, libpc::drivers::faux::Reader::Ramp);
 
     libpc::filters::CropFilter filter(reader, dstBounds);
-    BOOST_CHECK(filter.getName() == "Crop Filter");
+    BOOST_CHECK(filter.getDescription() == "Crop Filter");
 
     libpc::drivers::faux::Writer writer(filter);
 

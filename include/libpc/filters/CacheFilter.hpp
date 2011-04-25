@@ -61,6 +61,7 @@ public:
     CacheFilter(const Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
     ~CacheFilter();
 
+    const std::string& getDescription() const;
     const std::string& getName() const;
 
     boost::uint32_t getCacheBlockSize() const;

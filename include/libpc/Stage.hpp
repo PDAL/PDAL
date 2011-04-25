@@ -43,6 +43,7 @@
 #include <libpc/Bounds.hpp>
 #include <libpc/SpatialReference.hpp>
 #include <libpc/MetadataRecord.hpp>
+#include <libpc/Options.hpp>
 
 namespace libpc
 {
@@ -63,7 +64,8 @@ public:
     // as the name of the stage.  Use upper camel case, with spaces between
     // words.  The last word should generally be "Reader" or "Filter".
     virtual const std::string& getName() const = 0;
-
+    virtual const std::string& getDescription() const = 0;
+    
     // core properties of all stages
     const Schema& getSchema() const;
     virtual boost::uint64_t getNumPoints() const;

@@ -55,6 +55,7 @@ class LIBPC_DLL DecimationFilter : public Filter
 public:
     DecimationFilter(const Stage& prevStage, boost::uint32_t step);
 
+    const std::string& getDescription() const;
     const std::string& getName() const;
 
     bool supportsIterator (StageIteratorType t) const

@@ -79,12 +79,17 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std
 }
 
 
-const std::string& Reader::getName() const
+const std::string& Reader::getDescription() const
 {
     static std::string name("Faux Reader");
     return name;
 }
 
+const std::string& Reader::getName() const
+{
+    static std::string name("drivers.faux.reader");
+    return name;
+}
 
 Reader::Mode Reader::getMode() const
 {

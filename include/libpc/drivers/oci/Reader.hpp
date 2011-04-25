@@ -56,6 +56,7 @@ public:
     Reader(Options& options);
     ~Reader();
     
+    const std::string& getDescription() const;
     const std::string& getName() const;
  
     bool supportsIterator (StageIteratorType t) const

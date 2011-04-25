@@ -162,9 +162,9 @@ void Stage::dump() const
     std::cout << *this;
 }
 
-
 std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
 {
+    ostr << "  Name: " << stage.getName() << std::endl;
     ostr << "  Num points: " << stage.getNumPoints() << std::endl;
 
     ostr << "  Bounds:" << std::endl;

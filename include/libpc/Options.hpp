@@ -32,58 +32,36 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_CROPFILTER_HPP
-#define INCLUDED_FILTERS_CROPFILTER_HPP
+#ifndef INCLUDED_OPTIONS_HPP
+#define INCLUDED_OPTIONS_HPP
 
 #include <libpc/libpc.hpp>
-//#include <libpc/export.hpp>
-#include <libpc/Filter.hpp>
-#include <libpc/FilterIterator.hpp>
 #include <libpc/Bounds.hpp>
+#include <boost/property_tree/ptree.hpp>
+
 
 namespace libpc
 {
-    class PointBuffer;
-}
 
-namespace libpc { namespace filters {
-
-class CropFilterSequentialIterator;
-
-// removes any points outside of the given range
-// updates the header accordingly
-class LIBPC_DLL CropFilter : public Filter
+class LIBPC_DLL Options
 {
-public:
-    CropFilter(const Stage& prevStage, Bounds<double> const& bounds);
-
-    const std::string& getDescription() const;
-    const std::string& getName() const;
-
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-
-        return false;
-    }
-    
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const { return NULL; }
-
-    // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
-    // if we're calling this routine multiple times with the same buffer
-    boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const;
-
-    const Bounds<double>& getBounds() const;
 
 private:
-    Bounds<double> m_bounds;
+    boost::property_tree::ptree m_tree;
 
-    CropFilter& operator=(const CropFilter&); // not implemented
-    CropFilter(const CropFilter&); // not implemented
+public:
+
+    Options();
+    bool IsDebug() const;
+    bool Is3d() const;
+    bool IsSolid() const;
+    boost::property_tree::ptree& GetPTree() {return m_tree; }
+    boost::property_tree::ptree const& GetPTree() const {return m_tree; }
 };
 
 
-} } // namespaces
+LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const Options&);
+
+} // namespace libpc
 
 #endif

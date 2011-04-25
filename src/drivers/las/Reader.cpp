@@ -69,11 +69,18 @@ LasReader::LasReader(const std::string& filename)
 }
 
 
-const std::string& LasReader::getName() const
+const std::string& LasReader::getDescription() const
 {
     static std::string name("Las Reader");
     return name;
 }
+
+const std::string& LasReader::getName() const
+{
+    static std::string name("drivers.las.reader");
+    return name;
+}
+
 
 
 const std::string& LasReader::getFileName() const

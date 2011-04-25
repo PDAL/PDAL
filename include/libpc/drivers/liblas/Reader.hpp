@@ -59,8 +59,9 @@ public:
     LiblasReader(const std::string& filename);
     ~LiblasReader();
 
+    const std::string& getDescription() const;
     const std::string& getName() const;
-
+    
     const std::string& getFileName() const;
 
     ::libpc::drivers::las::PointFormat getPointFormat() const;

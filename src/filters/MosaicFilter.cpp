@@ -92,12 +92,17 @@ MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
 }
 
 
-const std::string& MosaicFilter::getName() const
+const std::string& MosaicFilter::getDescription() const
 {
     static std::string name("Mosaic Filter");
     return name;
 }
 
+const std::string& MosaicFilter::getName() const
+{
+    static std::string name("filters.mosaic");
+    return name;
+}
 
 const std::vector<const Stage*>& MosaicFilter::getPrevStages() const
 {

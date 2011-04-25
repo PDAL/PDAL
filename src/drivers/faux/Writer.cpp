@@ -46,12 +46,17 @@ Writer::Writer(Stage& prevStage) :
 }
 
 
-const std::string& Writer::getName() const
+const std::string& Writer::getDescription() const
 {
     static std::string name("Faux Writer");
     return name;
 }
 
+const std::string& Writer::getName() const
+{
+    static std::string name("drivers.faux.writer");
+    return name;
+}
 
 void Writer::writeBegin()
 {

@@ -58,6 +58,7 @@ class LIBPC_DLL ColorFilter : public Filter
 public:
     ColorFilter(const Stage& prevStage);
 
+    const std::string& getDescription() const;
     const std::string& getName() const;
 
     void getColor_F32_U8(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;

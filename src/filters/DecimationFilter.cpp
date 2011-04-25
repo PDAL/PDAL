@@ -50,9 +50,15 @@ DecimationFilter::DecimationFilter(const Stage& prevStage, boost::uint32_t step)
 }
 
 
-const std::string& DecimationFilter::getName() const
+const std::string& DecimationFilter::getDescription() const
 {
     static std::string name("Decimation Filter");
+    return name;
+}
+
+const std::string& DecimationFilter::getName() const
+{
+    static std::string name("filters.decimation");
     return name;
 }
 

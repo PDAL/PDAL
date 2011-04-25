@@ -45,8 +45,6 @@
 
 namespace libpc { namespace drivers { namespace oci {
 
-class Options;
-
 
 
 class LIBPC_DLL Writer : public libpc::Writer
@@ -56,6 +54,7 @@ public:
     Writer(Stage& prevStage, Options& options);
     ~Writer();
     
+    const std::string& getDescription() const;
     const std::string& getName() const;
 
     void run(std::ostringstream const& command);

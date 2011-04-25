@@ -289,11 +289,18 @@ void Reader::registerFields()
     return;
 }
 
-const std::string& Reader::getName() const
+const std::string& Reader::getDescription() const
 {
     static std::string name("OCI Reader");
     return name;
 }
+
+const std::string& Reader::getName() const
+{
+    static std::string name("drivers.oci.reader");
+    return name;
+}
+
 
 Reader::~Reader()
 {

@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Constant);
 
     libpc::drivers::faux::Writer writer(reader);
-    BOOST_CHECK(writer.getName() == "Faux Writer");
+    BOOST_CHECK(writer.getDescription() == "Faux Writer");
 
     boost::uint64_t numWritten = writer.write(750);
 

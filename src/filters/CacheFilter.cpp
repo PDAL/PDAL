@@ -60,12 +60,17 @@ CacheFilter::~CacheFilter()
 }
 
 
-const std::string& CacheFilter::getName() const
+const std::string& CacheFilter::getDescription() const
 {
     static std::string name("Cache Filter");
     return name;
 }
 
+const std::string& CacheFilter::getName() const
+{
+    static std::string name("filters.cache");
+    return name;
+}
 
 boost::uint32_t CacheFilter::getCacheBlockSize() const
 {
