@@ -249,25 +249,27 @@ void LasHeaderReader::read(Schema& schema)
 
     m_header.SetMax(x1, y1, z1);
     m_header.SetMin(x2, y2, z2);
-    
-    
 
-    // We're going to check the two bytes off the end of the header to 
-    // see if they're pad bytes anyway.  Some softwares, notably older QTModeler, 
-    // write 1.0-style pad bytes off the end of their header but state that the
-    // offset is actually 2 bytes back.  We need to set the dataoffset 
-    // appropriately in those cases anyway. 
-    m_istream.seekg(m_header.GetDataOffset());
-    
-
-    if (hasLAS10PadSignature()) 
     {
-        std::streamsize const current_pos = m_istream.tellg();
-        m_istream.seekg(current_pos + 2);
-        m_header.SetDataOffset(m_header.GetDataOffset() + 2);
+        // We're going to check the two bytes off the end of the header to 
+        // see if they're pad bytes anyway.  Some softwares, notably older QTModeler, 
+        // write 1.0-style pad bytes off the end of their header but state that the
+        // offset is actually 2 bytes back.  We need to set the dataoffset 
+        // appropriately in those cases anyway. 
+        m_istream.seekg(m_header.GetDataOffset());
+
+        if (hasLAS10PadSignature()) 
+        {
+            std::streamsize const current_pos = m_istream.tellg();
+            m_istream.seekg(current_pos + 2);
+            m_header.SetDataOffset(m_header.GetDataOffset() + 2);
+        }
     }
-     
-    readAllVLRs();
+
+    {
+        m_istream.seekg(m_header.GetHeaderSize());
+        readAllVLRs();
+    }
 
     // If we're eof, we need to reset the state
     if (m_istream.eof())
@@ -334,27 +336,36 @@ void LasHeaderReader::readOneVLR()
 {
     // assumes the stream is already positioned to the beginning
 
-    boost::uint8_t buf[libpc::drivers::las::VariableLengthRecord::s_headerLength];
+    boost::uint16_t reserved = 0;
+    std::string userId = "";
+    boost::uint16_t recordId = 0;
+    boost::uint16_t recordLenAfterHeader = 0;
+    std::string description = "";
 
-    Utils::read_n(buf, m_istream, libpc::drivers::las::VariableLengthRecord::s_headerLength);
-    boost::uint8_t* p = buf;
+    {
+        boost::uint8_t buf1[libpc::drivers::las::VariableLengthRecord::s_headerLength];
+        Utils::read_n(buf1, m_istream, libpc::drivers::las::VariableLengthRecord::s_headerLength);
+        boost::uint8_t* p1 = buf1;
 
-    const boost::uint16_t reserved = Utils::read_field<boost::uint16_t>(p);
-    boost::ignore_unused_variable_warning(reserved);
+        reserved = Utils::read_field<boost::uint16_t>(p1);
+        boost::ignore_unused_variable_warning(reserved);
 
-    boost::uint8_t userId_data[16];
-    Utils::read_array_field(p, userId_data, 16);
-    std::string userId = VariableLengthRecord::bytes2string(userId_data, 16);
+        boost::uint8_t userId_data[16];
+        Utils::read_array_field(p1, userId_data, 16);
+        userId = VariableLengthRecord::bytes2string(userId_data, 16);
 
-    const boost::uint16_t recordId = Utils::read_field<boost::uint16_t>(p);
-    const boost::uint16_t recordLenAfterHeader = Utils::read_field<boost::uint16_t>(p);
+        recordId = Utils::read_field<boost::uint16_t>(p1);
+        recordLenAfterHeader = Utils::read_field<boost::uint16_t>(p1);
 
-    boost::uint8_t description_data[32];
-    Utils::read_array_field(p, description_data, 32);
-    std::string description = VariableLengthRecord::bytes2string(description_data, 32);
+        boost::uint8_t description_data[32];
+        Utils::read_array_field(p1, description_data, 32);
+        description = VariableLengthRecord::bytes2string(description_data, 32);
+    }
 
     boost::uint8_t* data = new boost::uint8_t[recordLenAfterHeader];
-    Utils::read_n(data, m_istream, recordLenAfterHeader);
+    {
+        Utils::read_n(data, m_istream, recordLenAfterHeader);
+    }
 
     VariableLengthRecord vlr(reserved, userId, recordId, description, data, recordLenAfterHeader);
     
@@ -382,28 +393,26 @@ void LasHeaderReader::readAllVLRs()
         readOneVLR();
     }
 
-#if 0
-    liblas::SpatialReference srs(GetVLRs());    
-    SetSRS(srs);
+    //SpatialReference srs = m_header.getVLRs().constructSRS();
+    //m_header.setSpatialReference(srs);
     
-    // Go fetch the schema from the VLRs if we've got one.
-    try {
-        liblas::Schema schema(GetVLRs());
-        SetSchema(schema);
+    //////// Go fetch the schema from the VLRs if we've got one.
+    //////try {
+    //////    liblas::Schema schema(GetVLRs());
+    //////    SetSchema(schema);
 
-    } catch (std::runtime_error const& e) 
-    {
-        // Create one from the PointFormat if we don't have
-        // one in the VLRs.  Create a custom dimension on the schema 
-        // That comprises the rest of the bytes after the end of the 
-        // required dimensions.
-        liblas::Schema schema(GetDataFormatId());
-        
-        // FIXME: handle custom bytes here.
-        SetSchema(schema);
-        boost::ignore_unused_variable_warning(e);
-    }
-#endif
+    //////} catch (std::runtime_error const& e) 
+    //////{
+    //////    // Create one from the PointFormat if we don't have
+    //////    // one in the VLRs.  Create a custom dimension on the schema 
+    //////    // That comprises the rest of the bytes after the end of the 
+    //////    // required dimensions.
+    //////    liblas::Schema schema(GetDataFormatId());
+    //////    
+    //////    // FIXME: handle custom bytes here.
+    //////    SetSchema(schema);
+    //////    boost::ignore_unused_variable_warning(e);
+    //////}
 
     return;
 }

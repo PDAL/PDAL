@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
 BOOST_AUTO_TEST_CASE(test_simple_laz)
 {
     // remove file from earlier run, if needed
-    Utils::deleteFile("temp.las");
+    Utils::deleteFile("temp.laz");
 
     libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     
@@ -112,6 +112,10 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     }
 
     Utils::closeFile(ofs);
+
+    {
+        libpc::drivers::las::LasReader reader("temp.laz");
+    }
 
     //bool filesSame = Support::compare_files("temp.laz", Support::datapath("simple.laz"));
     //BOOST_CHECK(filesSame);

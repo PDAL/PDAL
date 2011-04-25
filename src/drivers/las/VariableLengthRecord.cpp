@@ -560,9 +560,11 @@ boost::uint32_t VLRList::count() const
 }
     
 
-void VLRList::constructSRS(SpatialReference& srs)
+SpatialReference VLRList::constructSRS() const
 {
+    SpatialReference srs;
     VariableLengthRecord::setSRSFromVLRs_X(m_list, srs);
+    return srs;
 }
 
 

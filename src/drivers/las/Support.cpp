@@ -297,34 +297,42 @@ PointIndexes::PointIndexes(const Schema& schema, PointFormat format)
 
 void Support::rewriteHeader(std::ostream& stream, const SummaryData& data)
 {
-    boost::uint8_t buf[256];
-    boost::uint8_t* p = buf;
-
     // move from header start to "number of point records" field
     stream.seekp(107, std::ios_base::cur);
 
-    Utils::write_field<boost::uint32_t>(p, data.getTotalNumPoints());
-
-    for (int i=1; i<=SummaryData::s_maxNumReturns; i++)
     {
-        Utils::write_field<boost::uint32_t>(p, data.getReturnCount(i));
-    }
+        boost::uint8_t buf[256];
+        boost::uint8_t* p = buf;
 
-    Utils::write_n(stream, buf, 4 + 4*SummaryData::s_maxNumReturns);
+        Utils::write_field<boost::uint32_t>(p, data.getTotalNumPoints());
+
+        for (int i=1; i<=SummaryData::s_maxNumReturns; i++)
+        {
+            Utils::write_field<boost::uint32_t>(p, data.getReturnCount(i));
+        }
+
+        Utils::write_n(stream, buf, 4 + 4*SummaryData::s_maxNumReturns);
+    }
 
     // skip over scale/offset fields
     stream.seekp(8*6, std::ios_base::cur);
 
-    p = buf;
-    double minX, minY, minZ, maxX, maxY, maxZ;
-    data.getBounds(minX, minY, minZ, maxX, maxY, maxZ);
-    Utils::write_field<double>(p, maxX);
-    Utils::write_field<double>(p, minX);
-    Utils::write_field<double>(p, maxY);
-    Utils::write_field<double>(p, minY);
-    Utils::write_field<double>(p, maxZ);
-    Utils::write_field<double>(p, minZ);
-    Utils::write_n(stream, buf, 6*8);
+    {
+        boost::uint8_t buf[256];
+        boost::uint8_t* p = buf;
+
+        double minX, minY, minZ, maxX, maxY, maxZ;
+        data.getBounds(minX, minY, minZ, maxX, maxY, maxZ);
+        Utils::write_field<double>(p, maxX);
+        Utils::write_field<double>(p, minX);
+        Utils::write_field<double>(p, maxY);
+        Utils::write_field<double>(p, minY);
+        Utils::write_field<double>(p, maxZ);
+        Utils::write_field<double>(p, minZ);
+        Utils::write_n(stream, buf, 6*8);
+    }
+
+    stream.seekp(0, std::ios_base::end);
 
     return;
 }

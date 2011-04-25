@@ -121,8 +121,9 @@ public:
 
     boost::uint32_t count() const;
 
-    void constructSRS(SpatialReference& srs);
+    SpatialReference constructSRS() const;
     void addVLRsFromSRS(const SpatialReference& srs);
+
 private:
    std::vector<VariableLengthRecord> m_list;
 };

@@ -291,15 +291,18 @@ void LasHeaderWriter::WriteVLRs()
     {
         VariableLengthRecord const &vlr = m_header.getVLRs().get(i);
 
-        boost::scoped_ptr<boost::uint8_t> userId_data(VariableLengthRecord::string2bytes(16, vlr.getUserId()));
-        boost::scoped_ptr<boost::uint8_t> description_data(VariableLengthRecord::string2bytes(32, vlr.getDescription()));
+        boost::uint8_t* userId_data = VariableLengthRecord::string2bytes(16, vlr.getUserId());
+        boost::uint8_t* description_data = VariableLengthRecord::string2bytes(32, vlr.getDescription());
 
         Utils::write_n(m_ostream, vlr.getReserved(), sizeof(uint16_t));
-        Utils::write_n(m_ostream, userId_data, 16);
+        m_ostream.write((const char*)userId_data, 16); // BUG: move to Utils function
         Utils::write_n(m_ostream, vlr.getRecordId(), sizeof(uint16_t));
         Utils::write_n(m_ostream, vlr.getLength(), sizeof(uint16_t));
-        Utils::write_n(m_ostream, description_data, 32);
-        Utils::write_n(m_ostream, vlr.getBytes(), vlr.getLength());
+        m_ostream.write((const char*)description_data, 32); // BUG: move to Utils::write_array function
+        m_ostream.write((const char*)vlr.getBytes(), vlr.getLength());
+
+        delete[] userId_data;
+        delete[] description_data;
     }
 
     // if we had more room than we need for the VLRs, we need to pad that with 
@@ -318,15 +321,15 @@ std::size_t LasHeaderWriter::GetRequiredHeaderSize() const
     // small, we need to throw an error.
     std::size_t vlr_total_size = 0;
         
-    ////// Calculate a new data offset size
-    ////for (uint32_t i = 0; i < GetRecordsCount(); ++i)
-    ////{
-    ////    VariableRecord const & vlr = m_header.GetVLR(i);
-    ////    vlr_total_size += vlr.GetTotalSize();
-    ////}
+    // Calculate a new data offset size
+    const VLRList& vlrs = m_header.getVLRs();
+    for (uint32_t i = 0; i < vlrs.count(); ++i)
+    {
+        const VariableLengthRecord& vlr = vlrs.get(i);
+        vlr_total_size += vlr.s_headerLength + vlr.getLength();
+    }
     
-    // int32_t difference = m_header.GetDataOffset() - (vlr_total_size + m_header.GetHeaderSize());
-    std::size_t size = vlr_total_size + m_header.GetHeaderSize();
+    const std::size_t size = vlr_total_size + m_header.GetHeaderSize();
     return size;
     
 }
