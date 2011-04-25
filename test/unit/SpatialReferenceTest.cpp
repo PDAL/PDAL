@@ -39,6 +39,7 @@
 #include <libpc/drivers/las/VariableLengthRecord.hpp>
 #include <libpc/drivers/las/Writer.hpp>
 #include <libpc/drivers/las/Reader.hpp>
+#include <libpc/filters/ReprojectionFilter.hpp>
 
 #include "Support.hpp"
 
@@ -306,91 +307,84 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 
 
 
-#if 0
-
+BOOST_AUTO_TEST_CASE(test_reprojection)
+{
     // Test reprojecting UTM 15 to DD with a filter
-    void to::test<5>()
-    {
-        std::ifstream ifs;
-        ifs.open(utm15_filename.c_str(), std::ios::in | std::ios::binary);
-        liblas::Reader reader(ifs);
+    libpc::drivers::las::LasReader reader(Support::datapath("utm15.las"));
         
-        liblas::Header const& header = reader.GetHeader();
-        liblas::SpatialReference const& in_ref = header.GetSRS();
+    const libpc::SpatialReference& in_ref = reader.getSpatialReference();
         
-        const char* utm15_wkt = "PROJCS[\"NAD83 / UTM zone 15N\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.2572221010002,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-93],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"26915\"]]";
-        ensure_equals("Input WKT comparison", in_ref.GetWKT(), utm15_wkt);
+    const char* utm15_wkt = "PROJCS[\"NAD83 / UTM zone 15N\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.2572221010002,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-93],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"26915\"]]";
+    BOOST_CHECK(in_ref.getWKT() == utm15_wkt);
 
-        const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
+    const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
         
-        liblas::SpatialReference out_ref;
-        out_ref.SetWKT(epsg4326_wkt);
-        ensure_equals("Output WKT comparison", out_ref.GetWKT(), epsg4326_wkt);
+    libpc::SpatialReference out_ref;
+    out_ref.setWKT(epsg4326_wkt);
+    BOOST_CHECK(out_ref.getWKT() == epsg4326_wkt);
         
-        liblas::HeaderPtr out_hdr = liblas::HeaderPtr(new liblas::Header(header));
-        out_hdr->SetScale(0.00000001, 0.00000001, 0.01);
-        out_hdr->SetOffset(0,0,0);
-        liblas::TransformPtr srs_transform = liblas::TransformPtr(new liblas::ReprojectionTransform(in_ref, out_ref, out_hdr));
+#if 0
+    liblas::HeaderPtr out_hdr = liblas::HeaderPtr(new liblas::Header(header));
+    out_hdr->SetScale(0.00000001, 0.00000001, 0.01);
+    out_hdr->SetOffset(0,0,0);
+    liblas::TransformPtr srs_transform = liblas::TransformPtr(new liblas::ReprojectionTransform(in_ref, out_ref, out_hdr));
         
-        std::vector<liblas::TransformPtr> transforms;
-        transforms.push_back(srs_transform);
-        reader.ReadPointAt(0);
+    std::vector<liblas::TransformPtr> transforms;
+    transforms.push_back(srs_transform);
+    reader.ReadPointAt(0);
 
-        liblas::Point unprojected_point = reader.GetPoint();
+    liblas::Point unprojected_point = reader.GetPoint();
         
-        ensure_distance("unprojected_point.GetX()", 
+    ensure_distance("unprojected_point.GetX()", 
                         unprojected_point.GetX(), 
                         double(470692.44), 
                         0.01);
 
-        ensure_distance("unprojected_point.GetY()", 
-                        unprojected_point.GetY(), 
-                        double(4602888.90), 
-                        0.01);
+    ensure_distance("unprojected_point.GetY()", 
+        unprojected_point.GetY(), 
+        double(4602888.90), 
+        0.01);
                         
-        reader.SetTransforms(transforms);
+    reader.SetTransforms(transforms);
 
-        // This should throw an out of range exception because the given scale/offset 
-        // combination is not sufficient to store the data.
-        try
-        {
-            reader.ReadPointAt(0);
-            ensure("std::domain_error was not thrown", false);
-        }
-        catch (std::domain_error const& e)
-        {
-            ensure(e.what(), true);
-        }
-        
-
-        out_hdr->SetScale(0.0000001, 0.0000001, 0.01);
-        out_hdr->SetOffset(0,0,0);
-        srs_transform = liblas::TransformPtr(new liblas::ReprojectionTransform(in_ref, out_ref, out_hdr));
-        
-        transforms.clear();
-        transforms.push_back(srs_transform);
-        reader.SetTransforms(transforms);
-        
-        reader.Reset();
+    // This should throw an out of range exception because the given scale/offset 
+    // combination is not sufficient to store the data.
+    try
+    {
         reader.ReadPointAt(0);
-
-        
-        liblas::Point const& projected_point = reader.GetPoint();
-
-        ensure_distance("projected_point.GetX()", 
-                        projected_point.GetX(), 
-                        double(-93.35156259), 
-                        0.0000001);
-        ensure_distance("projected_point.GetY()", 
-                        projected_point.GetY(), 
-                        double(41.57714839), 
-                        0.000001);
-        
+        ensure("std::domain_error was not thrown", false);
+    }
+    catch (std::domain_error const& e)
+    {
+        ensure(e.what(), true);
     }
 
 
+    out_hdr->SetScale(0.0000001, 0.0000001, 0.01);
+    out_hdr->SetOffset(0,0,0);
+    srs_transform = liblas::TransformPtr(new liblas::ReprojectionTransform(in_ref, out_ref, out_hdr));
+
+    transforms.clear();
+    transforms.push_back(srs_transform);
+    reader.SetTransforms(transforms);
+
+    reader.Reset();
+    reader.ReadPointAt(0);
 
 
+    liblas::Point const& projected_point = reader.GetPoint();
+
+    ensure_distance("projected_point.GetX()", 
+        projected_point.GetX(), 
+        double(-93.35156259), 
+        0.0000001);
+    ensure_distance("projected_point.GetY()", 
+        projected_point.GetY(), 
+        double(41.57714839), 
+        0.000001);
 #endif
+
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()

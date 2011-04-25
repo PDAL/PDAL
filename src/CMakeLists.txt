@@ -241,6 +241,8 @@ set(LIBPC_FILTERS_HPP
   ${LIBPC_HEADERS_DIR}/filters/DecimationFilterIterator.hpp
   ${LIBPC_HEADERS_DIR}/filters/MosaicFilter.hpp
   ${LIBPC_HEADERS_DIR}/filters/MosaicFilterIterator.hpp
+  ${LIBPC_HEADERS_DIR}/filters/ReprojectionFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/ReprojectionFilterIterator.hpp
 )
 
 set (LIBPC_FILTERS_CPP 
@@ -256,6 +258,8 @@ set (LIBPC_FILTERS_CPP
   ./filters/DecimationFilterIterator.cpp
   ./filters/MosaicFilter.cpp
   ./filters/MosaicFilterIterator.cpp
+  ./filters/ReprojectionFilter.cpp
+  ./filters/ReprojectionFilterIterator.cpp
 )
 
 FOREACH(file ${LIBPC_FILTERS_HPP})
