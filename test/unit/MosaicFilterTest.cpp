@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test1)
     vec.push_back(&reader3);
 
     libpc::filters::MosaicFilter mosaic(vec);
-    BOOST_CHECK(mosaic.getName() == "Mosaic Filter");
+    BOOST_CHECK(mosaic.getDescription() == "Mosaic Filter");
 
     const Schema& schema = mosaic.getSchema();
     SchemaLayout layout(schema);

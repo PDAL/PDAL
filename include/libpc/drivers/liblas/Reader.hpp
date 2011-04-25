@@ -59,7 +59,7 @@ public:
     LiblasReader(const std::string& filename);
     ~LiblasReader();
 
-    const std::string& getName() const;
+    const std::string& getDescription() const;
 
     const std::string& getFileName() const;
 

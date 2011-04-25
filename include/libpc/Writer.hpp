@@ -51,10 +51,6 @@ public:
     Writer(Stage& prevStage);
     virtual ~Writer() {}
 
-    // Implement this in your concrete classes to return a constant string
-    // as the name of the stage.  Use upper camel case, with spaces between
-    // words.  The last word should generally be "Writer".
-    virtual const std::string& getName() const = 0;
 
     // size of the PointBuffer buffer to use
     void setChunkSize(boost::uint32_t);

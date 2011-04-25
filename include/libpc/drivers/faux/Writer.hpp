@@ -54,7 +54,7 @@ class LIBPC_DLL Writer : public libpc::Writer
 public:
     Writer(Stage& prevStage);
 
-    const std::string& getName() const;
+    const std::string& getDescription() const;
 
     // retrieve the summary info
     double getMinX() const { return m_minimumX; }

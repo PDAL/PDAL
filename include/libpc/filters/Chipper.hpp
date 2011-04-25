@@ -165,7 +165,7 @@ public:
     const chipper::Block& GetBlock(std::vector<chipper::Block>::size_type i) const
         { return m_blocks[i]; }
 
-    const std::string& getName() const ;
+    const std::string& getDescription() const ;
 
     bool supportsIterator (StageIteratorType t) const
     {   

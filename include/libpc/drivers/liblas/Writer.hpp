@@ -56,7 +56,7 @@ public:
     LiblasWriter(Stage& prevStage, std::ostream&);
     ~LiblasWriter();
 
-    const std::string& getName() const;
+    const std::string& getDescription() const;
     
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
     void setPointFormat(::libpc::drivers::las::PointFormat);

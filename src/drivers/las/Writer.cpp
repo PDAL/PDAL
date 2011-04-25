@@ -74,7 +74,7 @@ LasWriter::~LasWriter()
 }
 
 
-const std::string& LasWriter::getName() const
+const std::string& LasWriter::getDescription() const
 {
     static std::string name("Las Writer");
     return name;

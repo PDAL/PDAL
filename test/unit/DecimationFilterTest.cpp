@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test)
     libpc::drivers::faux::Reader reader(srcBounds, 1000, libpc::drivers::faux::Reader::Random);
 
     libpc::filters::DecimationFilter filter(reader, 10);
-    BOOST_CHECK(filter.getName() == "Decimation Filter");
+    BOOST_CHECK(filter.getDescription() == "Decimation Filter");
 
     const Schema& schema = filter.getSchema();
     SchemaLayout layout(schema);

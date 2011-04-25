@@ -60,7 +60,7 @@ CacheFilter::~CacheFilter()
 }
 
 
-const std::string& CacheFilter::getName() const
+const std::string& CacheFilter::getDescription() const
 {
     static std::string name("Cache Filter");
     return name;

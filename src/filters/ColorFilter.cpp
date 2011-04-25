@@ -84,7 +84,7 @@ void ColorFilter::checkImpedance()
 }
 
 
-const std::string& ColorFilter::getName() const
+const std::string& ColorFilter::getDescription() const
 {
     static std::string name("Color Filter");
     return name;

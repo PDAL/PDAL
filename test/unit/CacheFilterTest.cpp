@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(test1)
     libpc::drivers::faux::Reader reader(srcBounds, 10000, libpc::drivers::faux::Reader::Constant);
 
     libpc::filters::CacheFilter cache(reader, 2, 1024);
-    BOOST_CHECK(cache.getName() == "Cache Filter");
+    BOOST_CHECK(cache.getDescription() == "Cache Filter");
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);

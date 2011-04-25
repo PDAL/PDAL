@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 
             // need to scope the writer, so that's it dtor can use the stream
             libpc::drivers::las::LasWriter writer(reader, *ofs);
-            BOOST_CHECK(writer.getName() == "Las Writer");
+            BOOST_CHECK(writer.getDescription() == "Las Writer");
 
             writer.setCompressed(false);
             writer.setDate(0, 0);
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 
         // need to scope the writer, so that's it dtor can use the stream
         libpc::drivers::las::LasWriter writer(readerx, *ofs);
-        BOOST_CHECK(writer.getName() == "Las Writer");
+        BOOST_CHECK(writer.getDescription() == "Las Writer");
 
         writer.setCompressed(false);
         writer.setDate(0, 0);

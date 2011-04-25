@@ -54,7 +54,7 @@ public:
     LasWriter(Stage& prevStage, std::ostream&);
     ~LasWriter();
 
-    const std::string& getName() const;
+    const std::string& getDescription() const;
 
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
     void setPointFormat(PointFormat);

@@ -81,7 +81,7 @@ LiblasReader::~LiblasReader()
 }
 
 
-const std::string& LiblasReader::getName() const
+const std::string& LiblasReader::getDescription() const
 {
     static std::string name("Liblas Reader");
     return name;

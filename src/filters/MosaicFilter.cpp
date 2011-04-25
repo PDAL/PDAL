@@ -92,7 +92,7 @@ MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
 }
 
 
-const std::string& MosaicFilter::getName() const
+const std::string& MosaicFilter::getDescription() const
 {
     static std::string name("Mosaic Filter");
     return name;

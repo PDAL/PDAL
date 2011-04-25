@@ -46,7 +46,7 @@ Writer::Writer(Stage& prevStage) :
 }
 
 
-const std::string& Writer::getName() const
+const std::string& Writer::getDescription() const
 {
     static std::string name("Faux Writer");
     return name;

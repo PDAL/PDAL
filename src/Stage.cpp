@@ -162,6 +162,12 @@ void Stage::dump() const
     std::cout << *this;
 }
 
+std::string const& Stage::getName() const
+{
+    static std::string name("libPC Stage");
+    return name;
+}
+
 
 std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
 {

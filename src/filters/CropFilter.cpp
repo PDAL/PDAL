@@ -54,7 +54,7 @@ CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
 }
 
 
-const std::string& CropFilter::getName() const
+const std::string& CropFilter::getDescription() const
 {
     static std::string name("Crop Filter");
     return name;

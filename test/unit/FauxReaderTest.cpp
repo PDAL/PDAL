@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Constant);
 
-    BOOST_CHECK_EQUAL(reader.getName(), "Faux Reader");
+    BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Constant);
 
-    BOOST_CHECK_EQUAL(reader.getName(), "Faux Reader");
+    BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);

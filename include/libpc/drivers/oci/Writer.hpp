@@ -54,7 +54,7 @@ public:
     Writer(Stage& prevStage, Options& options);
     ~Writer();
     
-    const std::string& getName() const;
+    const std::string& getDescription() const;
 
     void run(std::ostringstream const& command);
     inline void setBounds(libpc::Bounds<double> bounds) {m_bounds = bounds; }

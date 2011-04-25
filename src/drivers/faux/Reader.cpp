@@ -79,7 +79,7 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std
 }
 
 
-const std::string& Reader::getName() const
+const std::string& Reader::getDescription() const
 {
     static std::string name("Faux Reader");
     return name;

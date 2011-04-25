@@ -56,7 +56,7 @@ class LIBPC_DLL Reader : public libpc::Stage
 public:
     Reader(const char *);
 
-    const std::string& getName() const;
+    const std::string& getDescription() const;
 
     void seekToPoint(boost::uint64_t pointNum);
 

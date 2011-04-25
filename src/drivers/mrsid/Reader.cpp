@@ -163,7 +163,7 @@ TypeEnumOf(LizardTech::DataType ldt)
     }
 }
 
-const std::string& Reader::getName() const
+const std::string& Reader::getDescription() const
 {
     static std::string name("MrSID/LiDAR Reader");
     return name;

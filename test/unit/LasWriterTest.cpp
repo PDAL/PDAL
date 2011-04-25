@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
 
         // need to scope the writer, so that's it dtor can use the stream
         libpc::drivers::las::LasWriter writer(reader, *ofs);
-        BOOST_CHECK(writer.getName() == "Las Writer");
+        BOOST_CHECK(writer.getDescription() == "Las Writer");
 
         writer.setCompressed(false);
         writer.setDate(0, 0);
@@ -139,7 +139,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
 
         // need to scope the writer, so that's it dtor can use the stream
         libpc::drivers::las::LasWriter writer(reader, *ofs);
-        BOOST_CHECK(writer.getName() == "Las Writer");
+        BOOST_CHECK(writer.getDescription() == "Las Writer");
 
         writer.setCompressed(false);
         writer.setDate(78, 2008);

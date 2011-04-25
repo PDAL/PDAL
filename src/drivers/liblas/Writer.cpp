@@ -72,7 +72,7 @@ LiblasWriter::~LiblasWriter()
 }
 
 
-const std::string& LiblasWriter::getName() const
+const std::string& LiblasWriter::getDescription() const
 {
     static std::string name("Liblas Writer");
     return name;
