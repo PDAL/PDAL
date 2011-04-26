@@ -35,7 +35,13 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <ctype.h>
+
 #include <libpc/Range.hpp>
+#include <libpc/exceptions.hpp>
 
 using namespace libpc;
 
@@ -188,14 +194,31 @@ BOOST_AUTO_TEST_CASE(test_ranges)
     BOOST_CHECK(r1.getMaximum() == 122);
 }
 
-BOOST_AUTO_TEST_CASE(test_dump)
+
+BOOST_AUTO_TEST_CASE(test_output)
 {
     Range<int> r(10,20);
   
-    std::ostringstream s;
-    s << r;
+    std::stringstream oss;
+    oss << r;
 
-    BOOST_CHECK(s.str() == "[10 .. 20]");
+    BOOST_CHECK(oss.str() == "[10 .. 20]");
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_input)
+{
+    Range<double> r(10,20);
+  
+    std::stringstream ss("[10 , 20]", std::stringstream::in | std::stringstream::out);
+
+    Range<double> rr;
+    ss >> rr;
+
+    BOOST_CHECK(r == rr);
+
     return;
 }
 

@@ -35,6 +35,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include <libpc/Bounds.hpp>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 using namespace libpc;
 
@@ -239,6 +242,38 @@ BOOST_AUTO_TEST_CASE(test_static)
 
     BOOST_CHECK(t.getMinimum() == minv);
     BOOST_CHECK(t.getMaximum() == maxv);
+}
+
+
+BOOST_AUTO_TEST_CASE(test_output)
+{
+    Bounds<double> b2(1,2,101,102);
+    Bounds<double> b3(1,2,3,101,102,103);
+    
+    std::stringstream oss;
+    oss << b2;
+
+    std::string b2s = oss.str();
+
+    BOOST_CHECK(b2s == "([1 , 101], [2, 102])");
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_input)
+{
+    Bounds<int> r(1,2,10,20);
+  
+    std::stringstream iss;
+    iss << "[10 .. 20]";
+
+    Bounds<int> rr;
+    iss >> rr;
+
+    BOOST_CHECK(r == rr);
+
+    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()
