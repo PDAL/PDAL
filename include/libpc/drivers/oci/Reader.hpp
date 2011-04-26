@@ -75,6 +75,7 @@ public:
     BlockPtr getBlock() const { return m_block; }
     std::string getQuery() const;
     bool isVerbose() const;
+    bool isDebug() const;
 
 private:
 

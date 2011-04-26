@@ -88,6 +88,11 @@ bool Reader::isVerbose() const
     return m_options.GetPTree().get<bool>("verbose");
 }
 
+bool Reader::isDebug() const
+{
+    return m_options.GetPTree().get<bool>("debug");
+}
+
 std::string Reader::getQuery() const
 {
     return m_options.GetPTree().get<std::string>("select_sql");
@@ -95,7 +100,7 @@ std::string Reader::getQuery() const
 
 void Reader::Debug()
 {
-    bool debug = m_options.IsDebug();
+    bool debug = isDebug();
 
     CPLPopErrorHandler();
 

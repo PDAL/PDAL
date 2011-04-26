@@ -111,7 +111,7 @@ void Writer::WipeBlockTable()
     {
         // if we failed, let's try dropping the spatial index for the block_table_name
         oss.str("");
-        if (m_options.IsDebug()) 
+        if (isDebug()) 
             std::cout << "Dropping index " << block_table_name 
                       << "_cloud_idx for block_table_name" 
                       << std::endl;
@@ -154,16 +154,37 @@ void Writer::WipeBlockTable()
     run(oss);
 }
 
+bool Writer::isVerbose() const
+{
+    return m_options.GetPTree().get<bool>("verbose");
+}
+
+bool Writer::isDebug() const
+{
+    return m_options.GetPTree().get<bool>("debug");
+}
+
+bool Writer::is3d() const
+{
+    return m_options.GetPTree().get<bool>("is3d");
+}
+
+bool Writer::isSolid() const
+{
+    return m_options.GetPTree().get<bool>("solid");
+}
+
+
 void Writer::CreateBlockIndex()
 {
     std::ostringstream oss;
     std::string block_table_name = m_options.GetPTree().get<std::string>("block_table_name");
     
-    bool is3d = m_options.Is3d();
+    bool bUse3d = is3d();
     oss << "CREATE INDEX "<< block_table_name << "_cloud_idx on "
         << block_table_name << "(blk_extent) INDEXTYPE IS MDSYS.SPATIAL_INDEX";
     
-    if (is3d)
+    if (bUse3d)
     {
         oss <<" PARAMETERS('sdo_indx_dims=3')";
     }
@@ -187,7 +208,7 @@ void Writer::CreateSDOEntry()
     boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
     boost::uint32_t precision = tree.get<boost::uint32_t>("precision");
     
-    bool bUse3d = m_options.Is3d();
+    bool bUse3d = is3d();
     
 
     std::ostringstream oss;
@@ -370,7 +391,7 @@ void Writer::RunFileSQL(std::string const& filename)
 
    
 
-    if (m_options.IsDebug())
+    if (isDebug())
         std::cout << "running "<< filename << " ..." <<std::endl;
 
     run(oss);
@@ -380,7 +401,7 @@ void Writer::RunFileSQL(std::string const& filename)
 long Writer::GetGType()
 {
     boost::property_tree::ptree  tree = m_options.GetPTree();    
-    bool bUse3d = tree.get<bool>("is3d");
+    bool bUse3d = is3d();
     bool bUseSolidGeometry = tree.get<bool>("solid");
     long gtype = 0;
     if (bUse3d) {
@@ -405,7 +426,7 @@ long Writer::GetGType()
 std::string Writer::CreatePCElemInfo()
 {
     boost::property_tree::ptree  tree = m_options.GetPTree();    
-    bool bUse3d = tree.get<bool>("is3d");
+    bool bUse3d = is3d();
     bool bUseSolidGeometry = tree.get<bool>("solid");
     
     std::ostringstream s_eleminfo;
@@ -453,7 +474,7 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     boost::uint32_t precision = tree.get<boost::uint32_t>("precision");
     boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
     boost::uint32_t dimensions = tree.get<boost::uint32_t>("dimensions");
-    bool bUse3d = tree.get<bool>("is3d");
+    bool bUse3d = is3d();
 
     bool bHaveSchemaOverride = (point_schema_override.size() > 0);
     
@@ -792,7 +813,7 @@ void Writer::SetElements(   Statement statement,
     
 
     statement->AddElement(elem_info, 1);
-    bool bUseSolidGeometry = m_options.IsSolid();
+    bool bUseSolidGeometry = isSolid();
     if (bUseSolidGeometry == true) {
         //"(1,1007,3)";
         statement->AddElement(elem_info, 1007);
@@ -987,7 +1008,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 
 void Writer::Debug()
 {
-    bool debug = m_options.IsDebug();
+    bool debug = isDebug();
     
 
     

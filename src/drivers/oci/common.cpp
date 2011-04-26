@@ -92,49 +92,8 @@ Options GetDefaultOptions()
     tree.add_child("scale", scales);
     tree.add_child("offset", offsets);
     return options;
-}    
-// 
-// bool Options::IsDebug() const
-// {
-//     bool debug = false;
-//     try
-//     {
-//         debug = m_tree.get<bool>("debug");
-//     }
-//     catch (boost::property_tree::ptree_bad_path const& e) {
-//       ::boost::ignore_unused_variable_warning(e);
-// 
-//     }
-//     return debug;
-// }
-// 
-// bool Options::Is3d() const
-// {
-//     bool is3d = false;
-//     try
-//     {
-//         is3d = m_tree.get<bool>("is3d");
-//     }
-//     catch (boost::property_tree::ptree_bad_path const& e) {
-//       ::boost::ignore_unused_variable_warning(e);
-// 
-//     }
-//     return is3d;
-// }
-// 
-// bool Options::IsSolid() const
-// {
-//     bool IsSolid = false;
-//     try
-//     {
-//         IsSolid = m_tree.get<bool>("solid");
-//     }
-//     catch (boost::property_tree::ptree_bad_path const& e) {
-//       ::boost::ignore_unused_variable_warning(e);
-// 
-//     }
-//     return IsSolid;
-// }
+}
+
 
 
 Block::Block(Connection connection)

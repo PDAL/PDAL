@@ -62,6 +62,9 @@ public:
     inline libpc::Bounds<double>  getBounds() const { return m_bounds; }
     
     inline Connection getConnection() const { return m_connection;}
+
+
+
 protected:
     // this is called once before the loop with the writeBuffer calls
     virtual void writeBegin();
@@ -102,8 +105,13 @@ private:
                       libpc::Bounds<double> const& extent);
     void SetElements(Statement statement,
                      OCIArray* elem_info);
+
+    bool isVerbose() const;
+    bool isDebug() const;
+    bool is3d() const;
+    bool isSolid() const;
+    
     Stage& m_stage;
-    // filters::Chipper m_chipper;
     
     Options& m_options;
     libpc::Bounds<double> m_bounds; // Bounds of the entire point cloud
