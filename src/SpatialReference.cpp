@@ -32,35 +32,15 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/libpc.hpp>
-
-// GDAL OSR
-#ifdef LIBPC_HAVE_GDAL
-#include <ogr_srs_api.h>
-#include <cpl_port.h>
-#include <geo_normalize.h>
-#include <geovalues.h>
-#include <ogr_spatialref.h>
-#include <gdal.h>
-#include <xtiffio.h>
-#include <cpl_multiproc.h>
-#endif
-
 #include <libpc/SpatialReference.hpp>
 
-// boost
-#include <boost/concept_check.hpp>
-#include <boost/cstdint.hpp>
-
-// std
-#include <stdexcept>
-#include <string>
-#include <vector>
-
+// gdal
 #ifdef LIBPC_HAVE_GDAL
-#  include "cpl_conv.h"
+#include <ogr_spatialref.h>
+#include <cpl_conv.h>
 #endif
 
+#include <libpc/Utils.hpp>
 
 namespace libpc
 {
@@ -176,22 +156,6 @@ void SpatialReference::setWKT(std::string const& v)
 }
 
 
-static std::string trim(const std::string& str)
-{
-    // Trim Both leading and trailing spaces
-    std::size_t startpos = str.find_first_not_of(" \t"); // Find the first character position after excluding leading blank spaces
-    std::size_t endpos = str.find_last_not_of(" \t"); // Find the first character position from reverse af
- 
-    // if all spaces or empty return an empty string
-    if((std::string::npos == startpos ) || (std::string::npos == endpos))
-    {
-        return "";
-    }
-    
-    return str.substr( startpos, endpos-startpos+1 );
-}
-
-
 std::string SpatialReference::getProj4() const 
 {
 #ifdef LIBPC_SRS_ENABLED
@@ -210,7 +174,7 @@ std::string SpatialReference::getProj4() const
     std::string tmp(proj4);
     CPLFree(proj4);
     
-    tmp = trim(tmp);
+    tmp = Utils::trim(tmp);
     return tmp;
 
 #else

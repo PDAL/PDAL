@@ -37,17 +37,7 @@
 
 #include <libpc/libpc.hpp>
 
-// We have two modes: with GDAL and geotiff, SRS is enabled -- otherwise, it's disabled
-// we use one macro to simplify the control
-#if defined(LIBPC_HAVE_GDAL) && defined(LIBPC_HAVE_LIBGEOTIFF)
-#define LIBPC_SRS_ENABLED
-#endif
-
 #include <boost/property_tree/ptree.hpp>
-
-#include <string>
-#include <ostream>
-
 
 namespace libpc
 {
@@ -89,7 +79,6 @@ public:
     /// operation has no effect.
     /// \param v - a string containing the WKT string.  
     void setWKT(std::string const& v);
-
 
     /// Sets the SRS using GDAL's SetFromUserInput function. If GDAL is not linked, this 
     /// operation has no effect.

@@ -5,6 +5,8 @@
  *
  * Note this is a C-style header.  Do not use C++ syntax.
  */
+#ifndef LIBPC_DEFINES_H
+#define LIBPC_DEFINES_H
 
 /*
  * version settings
@@ -55,3 +57,14 @@
 #cmakedefine LIBPC_COMPILER_VC8
 #cmakedefine LIBPC_COMPILER_GCC
 #cmakedefine LIBPC_COMPILER_CLANG
+
+
+/*
+ * We have two modes: with GDAL and geotiff, SRS is enabled -- otherwise, it's disabled
+ * we use one macro to simplify the control
+ */
+#if defined(LIBPC_HAVE_GDAL) && defined(LIBPC_HAVE_LIBGEOTIFF)
+#define LIBPC_SRS_ENABLED
+#endif
+
+#endif

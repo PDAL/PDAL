@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(test_vlr_sizes)
     ref.setFromUserInput(code);
 
     std::vector<libpc::drivers::las::VariableLengthRecord> vlrs;
-    libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS_X(ref, vlrs);
+    libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(ref, vlrs);
 
     BOOST_CHECK(vlrs.size() == boost::uint32_t(4));
     BOOST_CHECK(vlrs[0].getLength() == boost::uint32_t(64));
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datum)
 
     std::vector<libpc::drivers::las::VariableLengthRecord> vlrs;
     {
-        libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS_X(ref, vlrs);
+        libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(ref, vlrs);
         BOOST_CHECK(vlrs.size() == 4);
         BOOST_CHECK(vlrs[0].getLength() == boost::uint32_t(96));
     }
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datum)
         // derived version instead.
         libpc::drivers::las::VariableLengthRecord::clearVLRs(libpc::drivers::las::VariableLengthRecord::eOGRWKT, vlrs);
         libpc::SpatialReference ref2;
-        libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs_X(vlrs, ref2);
+        libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs(vlrs, ref2);
 
         const std::string wkt2 = "COMPD_CS[\"unknown\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx,g2003alaska.gtx,g2003h01.gtx,g2003p01.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
 
@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
         const libpc::SpatialReference ref2 = reader.getSpatialReference();
         const std::string wkt2 = ref2.getWKT(libpc::SpatialReference::eCompoundOK);
         
-        BOOST_CHECK(wkt == wkt2); // fails
+        BOOST_CHECK(wkt == wkt2); // BUG: they say "WGS84+VERT_CS", but we say "unknown"
     }
 
     // Cleanup 
@@ -267,21 +267,21 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
     }
     {
         std::vector<libpc::drivers::las::VariableLengthRecord> vlrs;
-        libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS_X(ref, vlrs);
+        libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(ref, vlrs);
         BOOST_CHECK(vlrs.size() == 4);
         libpc::drivers::las::VariableLengthRecord::clearVLRs(libpc::drivers::las::VariableLengthRecord::eGeoTIFF, vlrs);
         BOOST_CHECK(vlrs.size() == 1);
-        libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs_X(vlrs, ref);
+        libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs(vlrs, ref);
         {
             libpc::SpatialReference xxx;
-            libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs_X(vlrs, xxx);
+            libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs(vlrs, xxx);
             const std::string wkt = xxx.getWKT();
-            BOOST_CHECK(wkt == ""); // BUG: shouldn't this be equal to reference_wkt (as in the next test immediately below us?)
+            BOOST_CHECK(wkt == reference_wkt); // BUG: shouldn't this be equal to reference_wkt (as in the next test immediately below us?)
         }
     }
     {
         const std::string wkt = ref.getWKT();
-        BOOST_CHECK(wkt == reference_wkt);
+        BOOST_CHECK(wkt == reference_wkt);  // BUG: wkt shouldn't be empty here
     }
 
     // Write a very simple file with our SRS and one point.
@@ -311,11 +311,11 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
         libpc::SpatialReference result_ref = reader.getSpatialReference();
 
         const std::vector<libpc::drivers::las::VariableLengthRecord>& vlrs = reader.getVLRs();
-        BOOST_CHECK(vlrs.size() == 1);
+        BOOST_CHECK(vlrs.size() == 1); // BUG: we get 0, should be 1
 
         {
             libpc::SpatialReference xxx;
-            libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs_X(vlrs, xxx);
+            libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs(vlrs, xxx);
             const std::string wkt = xxx.getWKT();
             BOOST_CHECK(wkt == "");
         }

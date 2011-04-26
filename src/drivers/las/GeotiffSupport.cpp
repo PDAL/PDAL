@@ -34,27 +34,10 @@
 
 #include "GeotiffSupport.hpp"
 
-#include <libpc/exceptions.hpp>
-
-// GeoTIFF
-#ifdef LIBPC_HAVE_LIBGEOTIFF
-#include <geotiff.h>
-#include <geo_simpletags.h>
-#include <geo_normalize.h>
-#include <geo_simpletags.h>
-#include <geovalues.h>
-#endif
-
-// GDAL OSR
+// GDAL
 #ifdef LIBPC_HAVE_GDAL
-#include <ogr_srs_api.h>
-#include <cpl_port.h>
 #include <geo_normalize.h>
-#include <geovalues.h>
 #include <ogr_spatialref.h>
-#include <gdal.h>
-#include <xtiffio.h>
-#include <cpl_multiproc.h>
 #endif
 
 #include <sstream>

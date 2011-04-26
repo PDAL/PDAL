@@ -37,15 +37,9 @@
 
 #include <libpc/libpc.hpp>
 
-
 #ifdef LIBPC_HAVE_LIBGEOTIFF
-#include <geotiff.h>
 #include <geo_simpletags.h>
-#include <geo_normalize.h>
-#include <geo_simpletags.h>
-#include <geovalues.h>
 #endif
-
 
 namespace libpc { namespace drivers { namespace las {
     

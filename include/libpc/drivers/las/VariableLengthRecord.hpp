@@ -37,9 +37,7 @@
 
 #include <libpc/libpc.hpp>
 
-#include <libpc/MetadataRecord.hpp>
-
-#include <iostream>
+#include <string>
 #include <vector>
 
 namespace libpc {
@@ -85,8 +83,8 @@ public:
 
     static const int s_headerLength = 54;
 
-    static void setSRSFromVLRs_X(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);
-    static void setVLRsFromSRS_X(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs);
+    static void setSRSFromVLRs(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);
+    static void setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs);
 
     static std::string bytes2string(boost::uint8_t* bytes, boost::uint32_t len);
 

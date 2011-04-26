@@ -169,7 +169,7 @@ bool VariableLengthRecord::compareUserId(const std::string& userId) const
 }
 
 
-void VariableLengthRecord::setSRSFromVLRs_X(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs)
+void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs)
 {
     if (vlrs.size() == 0)
     {
@@ -262,7 +262,7 @@ void VariableLengthRecord::setSRSFromVLRs_X(const std::vector<VariableLengthReco
 }
 
 
-void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs)
+void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs)
 {
 #ifdef LIBPC_SRS_ENABLED
 
@@ -573,14 +573,14 @@ boost::uint32_t VLRList::count() const
 
 void VLRList::constructSRS(SpatialReference& srs) const
 {
-    VariableLengthRecord::setSRSFromVLRs_X(m_list, srs);
+    VariableLengthRecord::setSRSFromVLRs(m_list, srs);
     return;
 }
 
 
 void VLRList::addVLRsFromSRS(const SpatialReference& srs)
 {
-    VariableLengthRecord::setVLRsFromSRS_X(srs, m_list);
+    VariableLengthRecord::setVLRsFromSRS(srs, m_list);
 }
 
 } } } // namespaces
