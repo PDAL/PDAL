@@ -135,7 +135,7 @@ void SummaryData::getBounds(double& minX, double& minY, double& minZ, double& ma
 
 boost::uint32_t SummaryData::getReturnCount(int returnNumber) const
 {
-    if (returnNumber <= 0 || returnNumber > s_maxNumReturns)
+    if (returnNumber < 0 || returnNumber > s_maxNumReturns)
         throw invalid_point_data("point returnNumber is out of range", 0);
 
     return m_returnCounts[returnNumber-1];
