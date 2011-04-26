@@ -218,13 +218,12 @@ BOOST_AUTO_TEST_CASE(test_output)
 
 BOOST_AUTO_TEST_CASE(test_input)
 {
-    Range<double> r(10,20);
-  
-    std::stringstream ss("[10 , 20]", std::stringstream::in | std::stringstream::out);
+    std::stringstream ss("[1.1, 2.2]", std::stringstream::in | std::stringstream::out);
 
     Range<double> rr;
     ss >> rr;
 
+    const Range<double> r(1.1,2.2);
     BOOST_CHECK(r == rr);
 
     return;

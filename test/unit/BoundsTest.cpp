@@ -258,14 +258,12 @@ BOOST_AUTO_TEST_CASE(test_output)
 
 BOOST_AUTO_TEST_CASE(test_input)
 {
-    Bounds<double> r(1,2,10,20);
-  
-    std::stringstream iss;
-    iss << "[10 .. 20]";
+    std::stringstream ss("([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])", std::stringstream::in | std::stringstream::out);
 
     Bounds<double> rr;
-    iss >> rr;
+    ss >> rr;
 
+    Bounds<double> r(1.1,2.2,3.3,101.1,102.2,103.3);
     BOOST_CHECK(r == rr);
 
     return;

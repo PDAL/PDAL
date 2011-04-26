@@ -47,8 +47,6 @@ std::istream& operator>>(std::istream& istr, Bounds<double>& bounds)
 {
     Bounds<double>::RangeVector v;
     
-    char c;
-
     Utils::eatwhitespace(istr);
     
     if (!Utils::eatcharacter(istr,'('))
@@ -61,20 +59,24 @@ std::istream& operator>>(std::istream& istr, Bounds<double>& bounds)
 
         Range<double> r;
         istr >> r;
+        v.push_back(r);
 
         Utils::eatwhitespace(istr);
 
-        if ((c = (char)istr.peek()) == ',')
+        if (Utils::eatcharacter(istr,','))
+        {
             done = false;
-        else if ((c = (char)istr.peek()) == ')')
+        }
+        else if (Utils::eatcharacter(istr,')'))
+        {
             done = true;
+        }
         else
+        {
             throw libpc_error("Bounds parser failed");
+        }
     }
     
-    if (!Utils::eatcharacter(istr,')'))
-        throw libpc_error("Bounds parser failed");
-
     Bounds<double> xxx(v);
     bounds = xxx;
 

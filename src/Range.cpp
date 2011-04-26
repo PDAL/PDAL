@@ -53,6 +53,8 @@ std::istream& operator>>(std::istream& istr, Range<double>& range)
 
     istr >> low;
 
+    Utils::eatwhitespace(istr);
+
     if (!Utils::eatcharacter(istr,','))
         throw libpc_error("Range parser failed");
 

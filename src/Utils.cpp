@@ -50,6 +50,10 @@
 #include <libpc/exceptions.hpp>
 
 
+#ifdef LIBPC_COMPILER_MSVC
+#  pragma warning(disable: 4127)  // conditional expression is constant
+#endif
+
 namespace libpc
 {
 
@@ -179,20 +183,26 @@ int Utils::putenv(const char* env)
 
 void Utils::eatwhitespace(std::istream& s)
 {
-    char c;
-    while (isspace(c = (char)s.peek()))
+    while (true)
     {
-        s >> c;
+        const char c = (char)s.peek();
+        if (!isspace(c)) break;
+
+        // throw it away
+        s.get();
     }
+    return;
 }
     
 
 bool Utils::eatcharacter(std::istream& s, char x)
 {
-    char c = (char)s.peek();
+    const char c = (char)s.peek();
     if (c != x) return false;
 
-    s >> c;
+    // throw it away
+    s.get();
+
     return true;
 }
 
