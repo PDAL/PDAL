@@ -234,7 +234,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
             return 0;
         }
         
-        if (m_block->num_points > data.getCapacity())
+        if (m_block->num_points > static_cast<boost::int32_t>(data.getCapacity()))
         {
             throw buffer_too_small("The PointBuffer is too small to contain this block.");
         }
