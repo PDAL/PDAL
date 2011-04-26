@@ -160,12 +160,14 @@ BOOST_AUTO_TEST_CASE(test_1)
         libpc::SequentialIterator* iter1 = reader1.createSequentialIterator();
         boost::uint32_t numRead = iter1->read(data1);
         BOOST_CHECK(numRead == 1);
+        delete iter1;
     }
 
     {
         libpc::SequentialIterator* iter2 = filter2.createSequentialIterator();
         boost::uint32_t numRead = iter2->read(data2);
         BOOST_CHECK(numRead == 1);
+        delete iter2;
     }
 
     double x1, x2, y1, y2, z1, z2;
