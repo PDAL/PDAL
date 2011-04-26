@@ -60,7 +60,6 @@ LasHeaderWriter::LasHeaderWriter(LasHeader& header, std::ostream& ostream)
 }
 
 
-
 void LasHeaderWriter::write()
 {
     using namespace std;
@@ -271,6 +270,7 @@ void LasHeaderWriter::write()
     return;
 }
 
+
 void LasHeaderWriter::WriteVLRs()
 {
     // Seek to the end of the public header block (beginning of the VLRs)
@@ -315,6 +315,7 @@ void LasHeaderWriter::WriteVLRs()
     return;
 }
 
+
 std::size_t LasHeaderWriter::GetRequiredHeaderSize() const
 {
     // if the VLRs won't fit because the data offset is too 
@@ -333,6 +334,7 @@ std::size_t LasHeaderWriter::GetRequiredHeaderSize() const
     return size;
     
 }
+
 
 void LasHeaderWriter::WriteLAS10PadSignature()
 {
@@ -353,8 +355,7 @@ void LasHeaderWriter::WriteLAS10PadSignature()
         oss << "for the VLRs is " << GetRequiredHeaderSize();
         throw std::runtime_error(oss.str());
     }    
-    
-    
+        
     // step back two bytes to write the pad bytes.  We should have already
     // determined by this point if a) they will fit b) they won't overwrite 
     // exiting real data 

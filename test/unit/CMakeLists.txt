@@ -28,6 +28,7 @@ SET(LIBPC_UNITTEST_TEST_SRC
     PointBufferCacheTest.cpp
     PointBufferTest.cpp
     RangeTest.cpp
+    ReprojectionFilterTest.cpp
     SchemaLayoutTest.cpp
     SchemaTest.cpp
     SignallerTest.cpp

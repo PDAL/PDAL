@@ -160,7 +160,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
 
     Utils::closeFile(ofs);
 
-    //bool filesSame = Support::compare_files("temp.las", Support::datapath(refFile));
+    bool filesSame = Support::compare_files("temp.las", Support::datapath(refFile));
     //BOOST_CHECK(filesSame);
 
     //if (filesSame)

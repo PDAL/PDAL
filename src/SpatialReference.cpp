@@ -128,7 +128,7 @@ SpatialReference::~SpatialReference()
 }
 
 
-void SpatialReference::rebuildGTIFFromVLRs()
+void SpatialReference::rebuildGTIF()
 {
 #ifndef LIBPC_SRS_ENABLED
     return 0;
@@ -151,7 +151,7 @@ void SpatialReference::rebuildGTIFFromVLRs()
     
     m_tiffstuff->m_tiff = ST_Create();
    
-    //////// here it used to read in the VLRs ////////
+    // (here it used to read in the VLRs)
 
     m_tiffstuff->m_gtiff = GTIFNewSimpleTags(m_tiffstuff->m_tiff);
     if (!m_tiffstuff->m_gtiff) 
@@ -350,7 +350,7 @@ void SpatialReference::setWKT(std::string const& v)
 
     if (!m_tiffstuff->m_gtiff)
     {
-        rebuildGTIFFromVLRs(); 
+        rebuildGTIF(); 
     }
 
 #ifdef LIBPC_SRS_ENABLED
@@ -370,7 +370,7 @@ void SpatialReference::setWKT(std::string const& v)
     boost::ignore_unused_variable_warning(v);
 #endif
 
-    ////////////////////////////////ResetVLRs();
+    return;
 }
 
 
@@ -381,7 +381,7 @@ void SpatialReference::setVerticalCS(boost::int32_t verticalCSType,
 {
     if (!m_tiffstuff->m_gtiff)
     {
-        rebuildGTIFFromVLRs(); 
+        rebuildGTIF(); 
     }
 
 #ifdef LIBPC_SRS_ENABLED
@@ -410,13 +410,14 @@ void SpatialReference::setVerticalCS(boost::int32_t verticalCSType,
     // Clear WKT so it gets regenerated 
     m_wkt = std::string("");
     
-    ///////////////////////////////ResetVLRs();
 #else
     boost::ignore_unused_variable_warning(citation);
     boost::ignore_unused_variable_warning(verticalUnits);
     boost::ignore_unused_variable_warning(verticalDatum);
     boost::ignore_unused_variable_warning(verticalCSType);
 #endif
+
+    return;
 }
     
 
@@ -452,7 +453,7 @@ void SpatialReference::setProj4(std::string const& v)
 {
     if (!m_tiffstuff->m_gtiff)
     {
-        rebuildGTIFFromVLRs();
+        rebuildGTIF();
     }
    
 #ifdef LIBPC_SRS_ENABLED
@@ -495,7 +496,7 @@ void SpatialReference::setProj4(std::string const& v)
     boost::ignore_unused_variable_warning(v);
 #endif
 
-    ////////////////////////////////ResetVLRs();
+    return;
 }
 
 
@@ -571,7 +572,6 @@ static int libpcGeoTIFFPrint(char* data, void* aux)
 }
 
 
-
 std::string SpatialReference::getGTIFFText() const
 {
 #ifndef LIBPC_SRS_ENABLED
@@ -598,34 +598,3 @@ std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 
 
 } // namespace libpc
-
-
-
-#if 0
-
-
-
-/// Keep a copy of the VLRs that are related to GeoTIFF SRS information.
-void SpatialReference::SetVLRs(std::vector<VariableRecord> const& vlrs)
-{
-    
-    std::string const uid("LASF_Projection");
-    
-    // Wipe out any existing VLRs that might exist on the SpatialReference
-    m_vlrs.clear();
-    
-    // We only copy VLR records from the list which are related to GeoTIFF keys.
-    // They must have an id of "LASF_Projection" and a record id that's related.
-    std::vector<VariableRecord>::const_iterator it;
-    for (it = vlrs.begin(); it != vlrs.end(); ++it)
-    {
-        VariableRecord const& vlr = *it;
-        if (IsGeoVLR(vlr))
-        {
-            m_vlrs.push_back(vlr);
-        }
-    }
-}
-
-
-#endif

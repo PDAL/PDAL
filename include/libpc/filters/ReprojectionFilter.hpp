@@ -36,11 +36,10 @@
 #define INCLUDED_FILTERS_REPROJECTIONFILTER_HPP
 
 #include <libpc/libpc.hpp>
-//#include <boost/cstdint.hpp>
-//
-//#include <libpc/export.hpp>
+
+#include <boost/shared_ptr.hpp>
+
 #include <libpc/Filter.hpp>
-//#include <libpc/FilterIterator.hpp>
 
 namespace libpc
 {
@@ -54,7 +53,9 @@ class ReprojectionFilterSequentialIterator;
 class LIBPC_DLL ReprojectionFilter : public Filter
 {
 public:
-    ReprojectionFilter(const Stage& prevStage);
+    ReprojectionFilter(const Stage& prevStage,
+                       const SpatialReference& inSRS,
+                       const SpatialReference& outSRS);
 
     const std::string& getDescription() const;
     const std::string& getName() const;
@@ -73,6 +74,17 @@ public:
 
 private:
     void checkImpedance();
+    void initialize();
+    void transform(double& x, double& y, double& z) const;
+
+    SpatialReference m_inSRS;
+    SpatialReference m_outSRS;
+
+    typedef boost::shared_ptr<void> ReferencePtr;
+    typedef boost::shared_ptr<void> TransformPtr;
+    ReferencePtr m_in_ref_ptr;
+    ReferencePtr m_out_ref_ptr;
+    TransformPtr m_transform_ptr;
 
     ReprojectionFilter& operator=(const ReprojectionFilter&); // not implemented
     ReprojectionFilter(const ReprojectionFilter&); // not implemented

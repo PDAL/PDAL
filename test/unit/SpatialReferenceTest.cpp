@@ -39,7 +39,6 @@
 #include <libpc/drivers/las/VariableLengthRecord.hpp>
 #include <libpc/drivers/las/Writer.hpp>
 #include <libpc/drivers/las/Reader.hpp>
-#include <libpc/filters/ReprojectionFilter.hpp>
 
 #include "Support.hpp"
 
@@ -155,35 +154,41 @@ BOOST_AUTO_TEST_CASE(test_vlr_sizes)
 // into GeoTIFF VLRs. 
 BOOST_AUTO_TEST_CASE(test_vertical_datum)
 {
-    libpc::SpatialReference ref;
     const std::string wkt = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
     const std::string exp_gtiff = "Geotiff_Information:\n   Version: 1\n   Key_Revision: 1.0\n   Tagged_Information:\n      End_Of_Tags.\n   Keyed_Information:\n      GTRasterTypeGeoKey (Short,1): RasterPixelIsArea\n      GTModelTypeGeoKey (Short,1): ModelTypeGeographic\n      GeogAngularUnitsGeoKey (Short,1): Angular_Degree\n      GeogCitationGeoKey (Ascii,7): \"WGS 84\"\n      GeographicTypeGeoKey (Short,1): GCS_WGS_84\n      GeogInvFlatteningGeoKey (Double,1): 298.257223563    \n      GeogSemiMajorAxisGeoKey (Double,1): 6378137          \n      VerticalCitationGeoKey (Ascii,14): \"NAVD88 height\"\n      VerticalCSTypeGeoKey (Short,1): Unknown-5703\n      VerticalDatumGeoKey (Short,1): Unknown-5103\n      VerticalUnitsGeoKey (Short,1): Linear_Meter\n      End_Of_Keys.\n   End_Of_Geotiff.\n";
 
-    ref.setFromUserInput(wkt);
-
-    BOOST_CHECK(ref.getWKT(libpc::SpatialReference::eCompoundOK) == wkt);
+    libpc::SpatialReference ref;
+    {
+        ref.setFromUserInput(wkt);
+        BOOST_CHECK(ref.getWKT(libpc::SpatialReference::eCompoundOK) == wkt);
+    }
 
     std::vector<libpc::drivers::las::VariableLengthRecord> vlrs;
-    libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS_X(ref, vlrs);
-    
-    BOOST_CHECK(vlrs.size() == 4);
-    BOOST_CHECK(vlrs[0].getLength() == boost::uint32_t(96));
+    {
+        libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS_X(ref, vlrs);
+        BOOST_CHECK(vlrs.size() == 4);
+        BOOST_CHECK(vlrs[0].getLength() == boost::uint32_t(96));
+    }
 
-    boost::property_tree::ptree tree = ref.getPTree();
-    std::string gtiff = tree.get<std::string>("gtiff");
+    {
+        boost::property_tree::ptree tree = ref.getPTree();
+        std::string gtiff = tree.get<std::string>("gtiff");
 
-    BOOST_CHECK(gtiff == exp_gtiff);
+        BOOST_CHECK(gtiff == exp_gtiff);
+    }
 
-    // Now try stripping away the WKT VLR and see that we get the GeoTIFF 
-    // derived version instead.
-    libpc::drivers::las::VariableLengthRecord::clearVLRs(libpc::drivers::las::VariableLengthRecord::eOGRWKT, vlrs);
+    {
+        // Now try stripping away the WKT VLR and see that we get the GeoTIFF 
+        // derived version instead.
+        libpc::drivers::las::VariableLengthRecord::clearVLRs(libpc::drivers::las::VariableLengthRecord::eOGRWKT, vlrs);
+        libpc::SpatialReference ref2;
+        libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs_X(vlrs, ref2);
 
-    // BUG: the below wkt has changed -- is the new one OK?
-    ///const std::string wkt2 = "COMPD_CS[\"unknown\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx,g2003alaska.gtx,g2003h01.gtx,g2003p01.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
-    const std::string wkt2 = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
+        const std::string wkt2 = "COMPD_CS[\"unknown\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx,g2003alaska.gtx,g2003h01.gtx,g2003p01.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
 
-    const std::string wkt2_ret = ref.getWKT(libpc::SpatialReference::eCompoundOK);
-    BOOST_CHECK(wkt2_ret == wkt2);
+        const std::string wkt2_ret = ref2.getWKT(libpc::SpatialReference::eCompoundOK);
+        BOOST_CHECK(wkt2_ret == wkt2);
+    }
 
     return;
 }
@@ -197,12 +202,16 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
     libpc::Utils::deleteFile(tmpfile);
 
     const std::string wkt = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx,g2003alaska.gtx,g2003h01.gtx,g2003p01.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
-    libpc::SpatialReference ref;
-    ref.setFromUserInput(wkt);
 
-    // Write a very simple file with our SRS and one point.
     {
+        libpc::SpatialReference ref;
+        ref.setFromUserInput(wkt);
+        {
+            const std::string wkt2 = ref.getWKT(libpc::SpatialReference::eCompoundOK);
+            BOOST_CHECK(wkt == wkt2); // just to make sure
+        }
 
+        // Write a very simple file with our SRS and one point.
         libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));    
 
         std::ostream* ofs = libpc::Utils::createFile(tmpfile);
@@ -211,13 +220,6 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 
             // need to scope the writer, so that's it dtor can use the stream
             libpc::drivers::las::LasWriter writer(reader, *ofs);
-            BOOST_CHECK(writer.getDescription() == "Las Writer");
-
-            writer.setCompressed(false);
-            writer.setDate(0, 0);
-            writer.setPointFormat(::libpc::drivers::las::PointFormat3);
-            writer.setSystemIdentifier("");
-            writer.setGeneratingSoftware("TerraScan");
 
             writer.setSpatialReference(ref);
 
@@ -229,11 +231,11 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
     // Reopen and check contents. 
     {
         libpc::drivers::las::LasReader reader(tmpfile);
-        libpc::SpatialReference result_ref = reader.getSpatialReference();
-        std::string xx = result_ref.getWKT();
 
-        std::string result_wkt = result_ref.getWKT(libpc::SpatialReference::eCompoundOK);
-        BOOST_CHECK(result_wkt == wkt);
+        const libpc::SpatialReference ref2 = reader.getSpatialReference();
+        const std::string wkt2 = ref2.getWKT(libpc::SpatialReference::eCompoundOK);
+        
+        BOOST_CHECK(wkt == wkt2); // fails
     }
 
     // Cleanup 
@@ -250,38 +252,51 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
     std::string tmpfile("tmp_srs_9.las");
     libpc::SpatialReference ref;
 
+    const std::string reference_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
+
     ref.setFromUserInput( "EPSG:4326" );
     {
-        std::vector<libpc::drivers::las::VariableLengthRecord> vlrsx;
-        libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS_X(ref, vlrsx);
-        libpc::drivers::las::VariableLengthRecord::clearVLRs(libpc::drivers::las::VariableLengthRecord::eGeoTIFF, vlrsx);
-        libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs_X(vlrsx, ref);
+        const std::string wkt = ref.getWKT();
+        BOOST_CHECK(wkt == reference_wkt);
+    }
+    {
+        std::vector<libpc::drivers::las::VariableLengthRecord> vlrs;
+        libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS_X(ref, vlrs);
+        BOOST_CHECK(vlrs.size() == 4);
+        libpc::drivers::las::VariableLengthRecord::clearVLRs(libpc::drivers::las::VariableLengthRecord::eGeoTIFF, vlrs);
+        BOOST_CHECK(vlrs.size() == 1);
+        libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs_X(vlrs, ref);
+        {
+            libpc::SpatialReference xxx;
+            libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs_X(vlrs, xxx);
+            const std::string wkt = xxx.getWKT();
+            BOOST_CHECK(wkt == ""); // BUG: shouldn't this be equal to reference_wkt (as in the next test immediately below us?)
+        }
+    }
+    {
+        const std::string wkt = ref.getWKT();
+        BOOST_CHECK(wkt == reference_wkt);
     }
 
     // Write a very simple file with our SRS and one point.
-    libpc::Utils::deleteFile(tmpfile);
-
-    libpc::drivers::las::LasReader readerx(Support::datapath("1.2-with-color.las"));    
-
-    std::ostream* ofs = libpc::Utils::createFile(tmpfile);
     {
-        const boost::uint64_t numPoints = readerx.getNumPoints();
+        libpc::Utils::deleteFile(tmpfile);
 
-        // need to scope the writer, so that's it dtor can use the stream
-        libpc::drivers::las::LasWriter writer(readerx, *ofs);
-        BOOST_CHECK(writer.getDescription() == "Las Writer");
+        libpc::drivers::las::LasReader readerx(Support::datapath("1.2-with-color.las"));    
 
-        writer.setCompressed(false);
-        writer.setDate(0, 0);
-        writer.setPointFormat(::libpc::drivers::las::PointFormat3);
-        writer.setSystemIdentifier("");
-        writer.setGeneratingSoftware("TerraScan");
+        std::ostream* ofs = libpc::Utils::createFile(tmpfile);
+        {
+            const boost::uint64_t numPoints = readerx.getNumPoints();
 
-        writer.setSpatialReference(ref);
+            // need to scope the writer, so that's it dtor can use the stream
+            libpc::drivers::las::LasWriter writer(readerx, *ofs);
 
-        writer.write(numPoints);
+            writer.setSpatialReference(ref);
+
+            writer.write(numPoints);
+        }
+        libpc::Utils::closeFile(ofs);
     }
-    libpc::Utils::closeFile(ofs);
 
     // Reopen and check contents. 
     {
@@ -291,7 +306,17 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 
         const std::vector<libpc::drivers::las::VariableLengthRecord>& vlrs = reader.getVLRs();
         BOOST_CHECK(vlrs.size() == 1);
-        
+
+        {
+            libpc::SpatialReference xxx;
+            libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs_X(vlrs, xxx);
+            const std::string wkt = xxx.getWKT();
+            BOOST_CHECK(wkt == "");
+        }
+
+        const std::string wkt = result_ref.getWKT();
+        BOOST_CHECK(wkt == "");
+
         boost::property_tree::ptree tree = ref.getPTree();
         std::string gtiff = tree.get<std::string>("gtiff");
 
@@ -305,86 +330,5 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
     return;
 }
 
-
-
-BOOST_AUTO_TEST_CASE(test_reprojection)
-{
-    // Test reprojecting UTM 15 to DD with a filter
-    libpc::drivers::las::LasReader reader(Support::datapath("utm15.las"));
-        
-    const libpc::SpatialReference& in_ref = reader.getSpatialReference();
-        
-    const char* utm15_wkt = "PROJCS[\"NAD83 / UTM zone 15N\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.2572221010002,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-93],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"26915\"]]";
-    BOOST_CHECK(in_ref.getWKT() == utm15_wkt);
-
-    const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
-        
-    libpc::SpatialReference out_ref;
-    out_ref.setWKT(epsg4326_wkt);
-    BOOST_CHECK(out_ref.getWKT() == epsg4326_wkt);
-        
-#if 0
-    liblas::HeaderPtr out_hdr = liblas::HeaderPtr(new liblas::Header(header));
-    out_hdr->SetScale(0.00000001, 0.00000001, 0.01);
-    out_hdr->SetOffset(0,0,0);
-    liblas::TransformPtr srs_transform = liblas::TransformPtr(new liblas::ReprojectionTransform(in_ref, out_ref, out_hdr));
-        
-    std::vector<liblas::TransformPtr> transforms;
-    transforms.push_back(srs_transform);
-    reader.ReadPointAt(0);
-
-    liblas::Point unprojected_point = reader.GetPoint();
-        
-    ensure_distance("unprojected_point.GetX()", 
-                        unprojected_point.GetX(), 
-                        double(470692.44), 
-                        0.01);
-
-    ensure_distance("unprojected_point.GetY()", 
-        unprojected_point.GetY(), 
-        double(4602888.90), 
-        0.01);
-                        
-    reader.SetTransforms(transforms);
-
-    // This should throw an out of range exception because the given scale/offset 
-    // combination is not sufficient to store the data.
-    try
-    {
-        reader.ReadPointAt(0);
-        ensure("std::domain_error was not thrown", false);
-    }
-    catch (std::domain_error const& e)
-    {
-        ensure(e.what(), true);
-    }
-
-
-    out_hdr->SetScale(0.0000001, 0.0000001, 0.01);
-    out_hdr->SetOffset(0,0,0);
-    srs_transform = liblas::TransformPtr(new liblas::ReprojectionTransform(in_ref, out_ref, out_hdr));
-
-    transforms.clear();
-    transforms.push_back(srs_transform);
-    reader.SetTransforms(transforms);
-
-    reader.Reset();
-    reader.ReadPointAt(0);
-
-
-    liblas::Point const& projected_point = reader.GetPoint();
-
-    ensure_distance("projected_point.GetX()", 
-        projected_point.GetX(), 
-        double(-93.35156259), 
-        0.0000001);
-    ensure_distance("projected_point.GetY()", 
-        projected_point.GetY(), 
-        double(41.57714839), 
-        0.000001);
-#endif
-
-    return;
-}
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -240,8 +240,6 @@ void VariableLengthRecord::setSRSFromVLRs_X(const std::vector<VariableLengthReco
 
 void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs)
 {
-    //vlrs.clear();
-
 #ifdef LIBPC_SRS_ENABLED
 
     int ret = 0;
@@ -425,27 +423,8 @@ void VariableLengthRecord::clearVLRs(GeoVLRType eType, std::vector<VariableLengt
         }
     }
 
-//    if( eType == eOGRWKT )
-//        m_wkt = "";
-//    else if( eType == eGeoTIFF )
-//    {
-//#ifdef HAVE_LIBGEOTIFF
-//        if (m_gtiff != 0)
-//        {
-//            GTIFFree(m_gtiff);
-//            m_gtiff = 0;
-//        }
-//        if (m_tiff != 0)
-//        {
-//            ST_Destroy(m_tiff);
-//            m_tiff = 0;
-//        }
-//#endif
-//    }
-
     return;
 }
-
 
 
 bool VariableLengthRecord::isGeoVLR() const

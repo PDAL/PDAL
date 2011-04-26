@@ -86,7 +86,7 @@ public:
     
     /// Returns a pointer to the internal GTIF*.  Only available if 
     /// you have libgeotiff linked in.
-    void rebuildGTIFFromVLRs();
+    void rebuildGTIF();
 
     /// Returns the OGC WKT describing Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine 
@@ -155,6 +155,7 @@ public:
     int geotiff_ST_GetKey(int tag, int *count, int *st_key_type, void **data_ptr) const;
 
 private:
+    std::string getGTIFFText() const;
 
     class TiffStuff
     {
@@ -167,12 +168,10 @@ private:
     boost::shared_ptr<TiffStuff> m_tiffstuff;
 
     std::string m_wkt;
-
-    std::string getGTIFFText() const;
 };
 
 
-std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs);
+extern LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs);
 
 } // namespace libpc
 

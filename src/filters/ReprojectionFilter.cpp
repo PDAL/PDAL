@@ -40,12 +40,56 @@
 #include <libpc/PointBuffer.hpp>
 #include <libpc/filters/ReprojectionFilterIterator.hpp>
 
+#ifdef LIBPC_HAVE_GDAL
+#include <gdal.h>
+#include <ogr_spatialref.h>
+#endif
+
 namespace libpc { namespace filters {
 
-ReprojectionFilter::ReprojectionFilter(const Stage& prevStage)
+
+#ifdef LIBPC_HAVE_GDAL
+    struct OGRSpatialReferenceDeleter
+    {
+       template <typename T>
+       void operator()(T* ptr)
+       {
+           ::OSRDestroySpatialReference(ptr);
+       }
+    };
+
+    struct OSRTransformDeleter
+    {
+       template <typename T>
+       void operator()(T* ptr)
+       {
+           ::OCTDestroyCoordinateTransformation(ptr);
+       }
+    };
+
+
+    struct GDALSourceDeleter
+    {
+       template <typename T>
+       void operator()(T* ptr)
+       {
+           ::GDALClose(ptr);
+       }
+    };
+#endif
+
+
+
+ReprojectionFilter::ReprojectionFilter(const Stage& prevStage,
+                                       const SpatialReference& inSRS,
+                                       const SpatialReference& outSRS)
     : Filter(prevStage)
+    , m_inSRS(inSRS)
+    , m_outSRS(outSRS)
 {
     checkImpedance();
+
+    initialize();
 
     return;
 }
@@ -57,11 +101,94 @@ void ReprojectionFilter::checkImpedance()
 }
 
 
+void ReprojectionFilter::initialize()
+{
+#ifdef LIBPC_HAVE_GDAL
+    
+    m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
+    m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
+    
+    int result = OSRSetFromUserInput(m_in_ref_ptr.get(), m_inSRS.getWKT(libpc::SpatialReference::eCompoundOK).c_str());
+    if (result != OGRERR_NONE) 
+    {
+        std::ostringstream msg; 
+        msg << "Could not import input spatial reference for ReprojectionTransform:: " 
+            << CPLGetLastErrorMsg() << " code: " << result 
+            << "wkt: '" << m_inSRS.getWKT() << "'";
+        throw std::runtime_error(msg.str());
+    }
+    
+    result = OSRSetFromUserInput(m_out_ref_ptr.get(), m_outSRS.getWKT(libpc::SpatialReference::eCompoundOK).c_str());
+    if (result != OGRERR_NONE) 
+    {
+        std::ostringstream msg; 
+        msg << "Could not import output spatial reference for ReprojectionTransform:: " 
+            << CPLGetLastErrorMsg() << " code: " << result 
+            << "wkt: '" << m_outSRS.getWKT() << "'";
+        std::string message(msg.str());
+        throw std::runtime_error(message);
+    }
+    m_transform_ptr = TransformPtr(OCTNewCoordinateTransformation( m_in_ref_ptr.get(), m_out_ref_ptr.get()), OSRTransformDeleter());
+#endif
+
+    return;
+}
+
+
+void ReprojectionFilter::transform(double& x, double& y, double& z) const
+{
+#ifdef LIBPC_HAVE_GDAL
+    
+    int ret = 0;
+
+    ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);    
+    if (!ret)
+    {
+        std::ostringstream msg; 
+        msg << "Could not project point for ReprojectionTransform::" << CPLGetLastErrorMsg() << ret;
+        throw std::runtime_error(msg.str());
+    }
+    
+    //if (m_new_header.get()) 
+    //{
+    //    point.SetHeaderPtr(m_new_header);
+    //}
+
+    //point.SetX(x);
+    //point.SetY(y);
+    //point.SetZ(z);
+    //
+    //if (detail::compare_distance(point.GetRawX(), (std::numeric_limits<boost::int32_t>::max)()) ||
+    //    detail::compare_distance(point.GetRawX(), (std::numeric_limits<boost::int32_t>::min)())) {
+    //    throw std::domain_error("X scale and offset combination is insufficient to represent the data");
+    //}
+
+    //if (detail::compare_distance(point.GetRawY(), (std::numeric_limits<boost::int32_t>::max)()) ||
+    //    detail::compare_distance(point.GetRawY(), (std::numeric_limits<boost::int32_t>::min)())) {
+    //    throw std::domain_error("Y scale and offset combination is insufficient to represent the data");
+    //}    
+
+    //if (detail::compare_distance(point.GetRawZ(), (std::numeric_limits<boost::int32_t>::max)()) ||
+    //    detail::compare_distance(point.GetRawZ(), (std::numeric_limits<boost::int32_t>::min)())) {
+    //    throw std::domain_error("Z scale and offset combination is insufficient to represent the data");
+    //}        
+
+#else
+    boost::ignore_unused_variable_warning(x);
+    boost::ignore_unused_variable_warning(y);
+    boost::ignore_unused_variable_warning(z);
+#endif
+
+    return;
+}
+
+
 const std::string& ReprojectionFilter::getDescription() const
 {
     static std::string name("Reprojection Filter");
     return name;
 }
+
 
 const std::string& ReprojectionFilter::getName() const
 {
@@ -69,22 +196,40 @@ const std::string& ReprojectionFilter::getName() const
     return name;
 }
 
+
 void ReprojectionFilter::processBuffer(PointBuffer& data) const
 {
     const boost::uint32_t numPoints = data.getNumPoints();
 
-    //const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    //const Schema& schema = schemaLayout.getSchema();
+    const SchemaLayout& schemaLayout = data.getSchemaLayout();
+    const Schema& schema = schemaLayout.getSchema();
 
-    //const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
-    //const Dimension& zDim = schema.getDimension(indexZ);
+    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+    const Dimension& xDim = schema.getDimension(indexX);
+    const Dimension& yDim = schema.getDimension(indexY);
+    const Dimension& zDim = schema.getDimension(indexZ);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        //const boost::int32_t zraw = data.getField<boost::int32_t>(pointIndex, indexZ);
-        //const double z = zDim.applyScaling(zraw);
+        boost::int32_t xraw = data.getField<boost::int32_t>(pointIndex, indexX);
+        boost::int32_t yraw = data.getField<boost::int32_t>(pointIndex, indexY);
+        boost::int32_t zraw = data.getField<boost::int32_t>(pointIndex, indexZ);
 
-        //data.setField<boost::uint16_t>(pointIndex, indexB, blue);
+        double x = xDim.applyScaling(xraw);
+        double y = yDim.applyScaling(yraw);
+        double z = zDim.applyScaling(zraw);
+
+        this->transform(x,y,z);
+
+        xraw = xDim.removeScaling<boost::int32_t>(x);
+        yraw = yDim.removeScaling<boost::int32_t>(y);
+        zraw = zDim.removeScaling<boost::int32_t>(z);
+
+        data.setField<boost::int32_t>(pointIndex, indexX, xraw);
+        data.setField<boost::int32_t>(pointIndex, indexY, yraw);
+        data.setField<boost::int32_t>(pointIndex, indexZ, zraw);
 
         data.setNumPoints(pointIndex+1);
     }
