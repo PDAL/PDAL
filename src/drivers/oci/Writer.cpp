@@ -40,9 +40,40 @@
 
 #include <libpc/exceptions.hpp>
 
+#include <fstream>
 
 namespace libpc { namespace drivers { namespace oci {
 
+
+
+std::string ReadFile(std::string filename)
+{
+
+    std::istream* infile = Utils::openFile(filename, true);
+    std::ifstream::pos_type size;
+    // char* data;
+    std::vector<char> data;
+    if (infile->good()){
+        infile->seekg(0, std::ios::end);
+        size = infile->tellg();
+        data.resize(static_cast<std::vector<char>::size_type>(size));
+        // data = new char [size];
+        infile->seekg (0, std::ios::beg);
+        infile->read (&data.front(), size);
+        // infile->close();
+
+        // delete[] data;
+        delete infile;
+        return std::string(&data[0], data.size());
+        // return data; 
+    } 
+    else 
+    {   
+        throw libpc_error("unable to open file!");
+        // return data;
+    }
+    
+}
 
 Writer::Writer(Stage& prevStage, Options& options)
     : libpc::Writer(prevStage)
@@ -607,8 +638,10 @@ oss << "declare\n"
 
     if (bHaveSchemaOverride)
     {
-        char* schema = (char*) malloc(point_schema_override.size() * sizeof(char));
-        strncpy(schema, point_schema_override.c_str(), point_schema_override.size());
+        std::string schema_data = ReadFile(point_schema_override);
+        char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
+        strncpy(schema, schema_data.c_str(), schema_data.size());
+        schema[schema_data.size()] = '\0';
         statement->WriteCLob( &schema_locator, schema ); 
         statement->Bind(&schema_locator);
     }
