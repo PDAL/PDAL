@@ -36,6 +36,8 @@
 #include <libpc/drivers/oci/Reader.hpp>
 #endif
 
+#include <boost/property_tree/xml_parser.hpp>
+
 #include "Application.hpp"
 
 using namespace libpc;
@@ -54,8 +56,7 @@ private:
 
     std::string m_inputFile;
     std::string m_outputFile;
-    std::string m_OracleReadSQL;
-    std::string m_OracleWriteSQL;
+    std::string m_xml;
     
 };
 
@@ -92,8 +93,9 @@ void Application_pc2pc::addOptions()
         ("input,i", po::value<std::string>(&m_inputFile), "input file name")
         ("output,o", po::value<std::string>(&m_outputFile), "output file name")
         ("native", "use native LAS classes (not liblas)")
-        ("oracle-writer", "write data into oracle (must edit source to make this work right now)")
-        ("oracle-reader", po::value<std::string>(&m_OracleReadSQL), "SQL to select a block table")
+        ("oracle-writer", "Read data from LAS file and write to Oracle")
+        ("oracle-reader", "Read data from Oracle and write LAS file")
+        ("xml", po::value<std::string>(&m_xml)->default_value("log.xml"), "XML file to load process (OCI only right now)")
         ;
 
     addOptionSet(file_options);
@@ -130,26 +132,29 @@ int Application_pc2pc::execute()
         libpc::drivers::liblas::LiblasReader reader(m_inputFile);
     
         const boost::uint64_t numPoints = reader.getNumPoints();
+
+        boost::property_tree::ptree load_tree;
         
-        libpc::Options options = libpc::drivers::oci::GetDefaultOptions();
+        boost::property_tree::read_xml(m_xml, load_tree);
+        
+        boost::property_tree::ptree oracle_options = load_tree.get_child("drivers.oci.writer");
+    
+        libpc::Options options(oracle_options);
+    
         boost::property_tree::ptree& tree = options.GetPTree();
         
-        boost::uint32_t capacity = 10000;
-        tree.put("capacity", capacity);
-        tree.put("overwrite", false);
-        tree.put("connection", "lidar/lidar@oracle.hobu.biz/orcl");
-        // tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
-        tree.put("debug", true);
-        tree.put("verbose", true);
-        tree.put("scale.x", 0.0000001);
-        tree.put("scale.y", 0.0000001);
-        tree.put("scale.z", 0.001);
+        boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
+        
         
         libpc::filters::CacheFilter cache(reader, 1, 1024);
         libpc::filters::Chipper chipper(cache, capacity);
         libpc::drivers::oci::Writer writer(chipper, options);
 
         writer.write(numPoints);
+        boost::property_tree::ptree output_tree;
+        output_tree.put_child(writer.getName(), options.GetPTree());
+        boost::property_tree::write_xml(m_xml, output_tree);
+                    
 #else
         throw configuration_error("libPC not compiled with Oracle support");
 #endif
@@ -157,38 +162,37 @@ int Application_pc2pc::execute()
         else if (hasOption("oracle-reader"))
         {
     #ifdef LIBPC_HAVE_ORACLE
-            libpc::Options options = libpc::drivers::oci::GetDefaultOptions();
-            boost::property_tree::ptree& tree = options.GetPTree();
-            tree.put("capacity", 12);
-            tree.put("connection", "lidar/lidar@oracle.hobu.biz/orcl");
-            // tree.put("connection", "lidar/lidar@oracle.hobu.biz/crrel");
-            tree.put("debug", true);
-            tree.put("verbose", true);
-        tree.put("scale.x", 0.0000001);
-        tree.put("scale.y", 0.0000001);
-        tree.put("scale.z", 0.001);
-            // tree.put("select_sql", "select * from output");
-            // tree.put("select_sql", "select cloud from hobu where id = 5");
-            // tree.put("select_sql", "select cloud from hobu where id = 1");
+
+        boost::property_tree::ptree load_tree;
+        
+        boost::property_tree::read_xml(m_xml, load_tree);
+        
+        boost::property_tree::ptree oracle_options = load_tree.get_child("drivers.oci.reader");
+    
+        libpc::Options options(oracle_options);
+
+        libpc::drivers::oci::Reader reader(options);
+
+        const boost::uint64_t numPoints = reader.getNumPoints();
+
+
+
+        libpc::drivers::las::LasWriter writer(reader, *ofs);
+        // writer.setPointFormat( 3);
+        writer.write(numPoints);
+
+        boost::property_tree::ptree output_tree;
+        
+        output_tree.put_child(reader.getName(), options.GetPTree());
+        // output_tree.put_child(writer.getName(), )
+        boost::property_tree::write_xml(m_xml, output_tree);
             
-            if (m_OracleReadSQL.size() == 0) {
-                throw libpc_error("Select statement to read OCI data is empty!");
-            }
-            tree.put("select_sql", m_OracleReadSQL);
-
-            libpc::drivers::oci::Reader reader(options);
-
-            const boost::uint64_t numPoints = reader.getNumPoints();
-
-
-
-            libpc::drivers::las::LasWriter writer(reader, *ofs);
-            // writer.setPointFormat( 3);
-            writer.write(numPoints);
     #else
             throw configuration_error("libPC not compiled with Oracle support");
     #endif
         }
+
+
 
     else
     {

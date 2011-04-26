@@ -59,7 +59,7 @@ Options GetDefaultOptions()
     tree.put("capacity", 8000);
     tree.put("precision", 8);
     tree.put("cloud_id", -1);
-    tree.put("dimensions", 5);
+    tree.put("dimensions", 8);
     tree.put("connection", std::string(""));
     tree.put("block_table_name", std::string("output"));
     tree.put("block_table_partition_column", std::string(""));
