@@ -35,11 +35,12 @@
 #include <libpc/drivers/las/VariableLengthRecord.hpp>
 
 #include <libpc/SpatialReference.hpp>
+#include "GeotiffSupport.hpp"
 
 #include <libpc/exceptions.hpp>
 
-
 namespace libpc { namespace drivers { namespace las {
+
 
 VariableLengthRecord::VariableLengthRecord(boost::uint16_t reserved,
                                            std::string userId, 
@@ -170,10 +171,20 @@ bool VariableLengthRecord::compareUserId(const std::string& userId) const
 
 void VariableLengthRecord::setSRSFromVLRs_X(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs)
 {
-    srs.geotiff_ResetTags();
+    if (vlrs.size() == 0)
+    {
+        srs.setWKT("");
+        return;
+    }
+
+    GeotiffSupport geotiff;
+
+    geotiff.resetTags();
 
     const std::string uid("LASF_Projection");
     
+    bool gotSomething = false;
+
     // nothing is going to happen here if we don't have any vlrs describing
     // srs information on the spatialreference.  
     for (std::size_t i = 0; i < vlrs.size(); ++i)
@@ -206,22 +217,25 @@ void VariableLengthRecord::setSRSFromVLRs_X(const std::vector<VariableLengthReco
                     data[3] -= 1;
                 }
 
-                srs.geotiff_ST_SetKey(34735, count, SpatialReference::Geotiff_KeyType_SHORT, data);
+                geotiff.setKey(34735, count, GeotiffSupport::Geotiff_KeyType_SHORT, data);
             }
+            gotSomething = true;
             break;
 
         case 34736:
             {
                 int count = length / sizeof(double);
-                srs.geotiff_ST_SetKey(34736, count, SpatialReference::Geotiff_KeyType_DOUBLE, data);
+                geotiff.setKey(34736, count, GeotiffSupport::Geotiff_KeyType_DOUBLE, data);
             }        
+            gotSomething = true;
             break;
 
         case 34737:
             {
                 int count = length/sizeof(uint8_t);
-                srs.geotiff_ST_SetKey(34737, count, SpatialReference::Geotiff_KeyType_ASCII, data);
+                geotiff.setKey(34737, count, GeotiffSupport::Geotiff_KeyType_ASCII, data);
             }
+            gotSomething = true;
             break;
 
         default:
@@ -232,8 +246,18 @@ void VariableLengthRecord::setSRSFromVLRs_X(const std::vector<VariableLengthReco
         delete[] data;
     }
 
-    srs.geotiff_SetTags();
-    
+    if (!gotSomething)
+    {
+        srs.setWKT("");
+        return;
+    }
+
+    geotiff.setTags();
+
+    const std::string wkt = geotiff.getWkt(false,false);
+
+    srs.setFromUserInput(wkt);
+
     return;
 }
 
@@ -264,8 +288,14 @@ void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::ve
     const std::string userId4 = "liblas";
     const std::string description4 = "OGR variant of OpenGIS WKT SRS";
 
+    GeotiffSupport geotiff;
+    {
+        const std::string wkt = srs.getWKT(SpatialReference::eCompoundOK, false);
+        geotiff.setWkt(wkt);
+    }
+
     //GTIFF_GEOKEYDIRECTORY == 34735
-    ret = srs.geotiff_ST_GetKey(34735, &kcount, &ktype, (void**)&kdata);
+    ret = geotiff.getKey(34735, &kcount, &ktype, (void**)&kdata);
     if (ret)
     {    
         uint16_t length = 2 * static_cast<uint16_t>(kcount);
@@ -288,7 +318,7 @@ void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::ve
     }
 
     // GTIFF_DOUBLEPARAMS == 34736
-    ret = srs.geotiff_ST_GetKey(34736, &dcount, &dtype, (void**)&ddata);
+    ret = geotiff.getKey(34736, &dcount, &dtype, (void**)&ddata);
     if (ret)
     {    
         uint16_t length = 8 * static_cast<uint16_t>(dcount);
@@ -318,7 +348,7 @@ void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::ve
     }
     
     // GTIFF_ASCIIPARAMS == 34737
-    ret = srs.geotiff_ST_GetKey(34737, &acount, &atype, (void**)&adata);
+    ret = geotiff.getKey(34737, &acount, &atype, (void**)&adata);
     if (ret) 
     {                    
          uint16_t length = static_cast<uint16_t>(acount);
@@ -389,6 +419,7 @@ void VariableLengthRecord::setVLRsFromSRS_X(const SpatialReference& srs, std::ve
 
     return;
 }
+
 
 void VariableLengthRecord::clearVLRs(GeoVLRType eType, std::vector<VariableLengthRecord>& vlrs)
 {
@@ -464,6 +495,7 @@ bool VariableLengthRecord::isGeoVLR() const
 
     return false;
 }
+
 
 //--------------------------------------------------------------------------------------
 

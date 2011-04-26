@@ -73,18 +73,32 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 // Test round-tripping proj.4 string
 BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
 {
-    libpc::SpatialReference ref;
-    
-    const std::string proj4 = "+proj=utm +zone=15 +datum=WGS84 +units=m +no_defs ";
-    const std::string proj4_ellps = "+proj=utm +zone=15 +ellps=WGS84 +datum=WGS84 +units=m +no_defs ";
+    const std::string proj4 = "+proj=utm +zone=15 +datum=WGS84 +units=m +no_defs";
+    const std::string proj4_ellps = "+proj=utm +zone=15 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
+    const std::string proj4_out = "+proj=utm +zone=15 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs";
 
-    ref.setProj4(proj4);
-    const std::string ret = ref.getProj4();
-    BOOST_CHECK(ret == proj4);
+    {
+        libpc::SpatialReference ref;
+        ref.setProj4(proj4);
+        const std::string ret = ref.getProj4();
+        //BOOST_CHECK(ret == proj4);
+        BOOST_CHECK(ret == proj4_out);
+    }
 
-    ref.setProj4(proj4_ellps);
-    const std::string ret2 = ref.getProj4();
-    BOOST_CHECK(ret == proj4);
+    {
+        libpc::SpatialReference ref;
+        ref.setProj4(proj4_ellps);
+        const std::string ret = ref.getProj4();
+        //BOOST_CHECK(ret == proj4);
+        BOOST_CHECK(ret == proj4_out);
+    }
+
+    {
+        libpc::SpatialReference ref;
+        ref.setProj4(proj4_out);
+        const std::string ret = ref.getProj4();
+        BOOST_CHECK(ret == proj4_out);
+    }
 
     return;
 }
@@ -96,8 +110,8 @@ BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
     libpc::SpatialReference ref;
 
     const std::string code = "EPSG:4326";
-    const std::string proj4 = "+proj=longlat +datum=WGS84 +no_defs ";
-    const std::string proj4_ellps = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ";
+    const std::string proj4 = "+proj=longlat +datum=WGS84 +no_defs";
+    const std::string proj4_ellps = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
     const std::string wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
     ref.setFromUserInput(code);
 
@@ -126,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
     const std::string wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"32617\"]]";
     BOOST_CHECK(ret_wkt == wkt);
 
-    const std::string proj4 = "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs ";
+    const std::string proj4 = "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs";
     BOOST_CHECK(ret_proj4 == proj4);
 
     return;
@@ -155,7 +169,6 @@ BOOST_AUTO_TEST_CASE(test_vlr_sizes)
 BOOST_AUTO_TEST_CASE(test_vertical_datum)
 {
     const std::string wkt = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
-    const std::string exp_gtiff = "Geotiff_Information:\n   Version: 1\n   Key_Revision: 1.0\n   Tagged_Information:\n      End_Of_Tags.\n   Keyed_Information:\n      GTRasterTypeGeoKey (Short,1): RasterPixelIsArea\n      GTModelTypeGeoKey (Short,1): ModelTypeGeographic\n      GeogAngularUnitsGeoKey (Short,1): Angular_Degree\n      GeogCitationGeoKey (Ascii,7): \"WGS 84\"\n      GeographicTypeGeoKey (Short,1): GCS_WGS_84\n      GeogInvFlatteningGeoKey (Double,1): 298.257223563    \n      GeogSemiMajorAxisGeoKey (Double,1): 6378137          \n      VerticalCitationGeoKey (Ascii,14): \"NAVD88 height\"\n      VerticalCSTypeGeoKey (Short,1): Unknown-5703\n      VerticalDatumGeoKey (Short,1): Unknown-5103\n      VerticalUnitsGeoKey (Short,1): Linear_Meter\n      End_Of_Keys.\n   End_Of_Geotiff.\n";
 
     libpc::SpatialReference ref;
     {
@@ -168,13 +181,6 @@ BOOST_AUTO_TEST_CASE(test_vertical_datum)
         libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS_X(ref, vlrs);
         BOOST_CHECK(vlrs.size() == 4);
         BOOST_CHECK(vlrs[0].getLength() == boost::uint32_t(96));
-    }
-
-    {
-        boost::property_tree::ptree tree = ref.getPTree();
-        std::string gtiff = tree.get<std::string>("gtiff");
-
-        BOOST_CHECK(gtiff == exp_gtiff);
     }
 
     {
@@ -316,12 +322,6 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 
         const std::string wkt = result_ref.getWKT();
         BOOST_CHECK(wkt == "");
-
-        boost::property_tree::ptree tree = ref.getPTree();
-        std::string gtiff = tree.get<std::string>("gtiff");
-
-        // there should be no geotiff definition.
-        BOOST_CHECK(gtiff == "Geotiff_Information:\n   Version: 1\n   Key_Revision: 1.0\n   Tagged_Information:\n      End_Of_Tags.\n   Keyed_Information:\n      End_Of_Keys.\n   End_Of_Geotiff.\n");
     }
 
     // Cleanup 

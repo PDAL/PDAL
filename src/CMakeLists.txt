@@ -115,6 +115,7 @@ ENDFOREACH(file)
 #
 
 set (LIBPC_DRIVERS_LAS_HPP
+  ./drivers/las/GeotiffSupport.hpp
   ./drivers/las/LasHeaderReader.hpp
   ./drivers/las/LasHeaderWriter.hpp
   ./drivers/las/ZipPoint.hpp
@@ -129,6 +130,7 @@ set (LIBPC_DRIVERS_LAS_HPP
 )
  
 set (LIBPC_DRIVERS_LAS_CPP
+  ./drivers/las/GeotiffSupport.cpp
   ./drivers/las/Header.cpp
   ./drivers/las/Iterator.cpp
   ./drivers/las/LasHeaderReader.cpp
