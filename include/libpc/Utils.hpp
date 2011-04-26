@@ -159,6 +159,8 @@ public:
     // if char found, eats it and returns true; otherwise, don't eat it and then return false
     static bool eatcharacter(std::istream& s, char x);
 
+    static std::string trim(const std::string& str);
+
 private:
     template<typename T>
     static inline char* as_buffer(T& data)
