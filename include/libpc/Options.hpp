@@ -43,6 +43,38 @@
 namespace libpc
 {
 
+template <typename T>
+class LIBPC_DLL Option
+{
+
+    
+private:
+    T m_value;
+    std::string m_description;
+    std::string m_name;
+
+public:
+
+    Option(std::string const& name, T value, std::string const& description) 
+    : m_value(value), m_description(description), m_name(name) {}
+    
+    std::string const& getName() const { return m_name; }
+    std::string const& getDescription() const { return m_description; }
+    T const& getValue() const { return m_value; }
+    
+    boost::property_tree::ptree& getTree() const 
+    {
+        boost::property_tree::ptree t;
+        t.put("description", getDescription());
+        t.put("value", getValue());
+        boost::property_tree::ptree output;
+        output.put_child(getName(), t);
+        return output;
+    }
+
+};
+
+
 class LIBPC_DLL Options
 {
 
@@ -52,9 +84,12 @@ private:
 public:
 
     Options();
+    Options(boost::property_tree::ptree const& tree) { m_tree = tree; }
+    template<class T> void add(Option<T> const& option) { m_tree.put_child(option.getTree()); }
+    template<class T> Option<T> const& get(std::string const& name) { return m_tree.get<T>(name); }
     
-    boost::property_tree::ptree& GetPTree() {return m_tree; }
-    boost::property_tree::ptree const& GetPTree() const {return m_tree; }
+    boost::property_tree::ptree& GetPTree() { return m_tree; }
+    boost::property_tree::ptree const& GetPTree() const { return m_tree; }
 };
 
 
