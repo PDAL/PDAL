@@ -177,4 +177,24 @@ int Utils::putenv(const char* env)
 }
 
 
+void Utils::eatwhitespace(std::istream& s)
+{
+    char c;
+    while (isspace(c = (char)s.peek()))
+    {
+        s >> c;
+    }
+}
+    
+
+bool Utils::eatcharacter(std::istream& s, char x)
+{
+    char c = (char)s.peek();
+    if (c != x) return false;
+
+    s >> c;
+    return true;
+}
+
+
 } // namespace libpc

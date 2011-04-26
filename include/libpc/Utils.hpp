@@ -152,6 +152,13 @@ public:
     static char* getenv(const char* env);
     static int putenv(const char* env);
 
+    // aid to operator>> parsers
+    static void eatwhitespace(std::istream& s);
+
+    // aid to operator>> parsers
+    // if char found, eats it and returns true; otherwise, don't eat it and then return false
+    static bool eatcharacter(std::istream& s, char x);
+
 private:
     template<typename T>
     static inline char* as_buffer(T& data)
