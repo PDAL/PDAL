@@ -295,7 +295,7 @@ void Schema::LoadSchema()
         
         std::string name;
         boost::uint32_t size;
-        boost::uint32_t position;
+        boost::uint32_t position(1);
         std::string description;
         std::string interpretation;
         double offset;
