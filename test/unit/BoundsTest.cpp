@@ -216,16 +216,6 @@ BOOST_AUTO_TEST_CASE(test_grow)
     return;
 }
 
-BOOST_AUTO_TEST_CASE(test_dump)
-{
-    Bounds<int> r(1,2,3,7,8,9);
-  
-    std::ostringstream s;
-    s << r;
-
-    BOOST_CHECK(s.str() == "([1 .. 7], [2 .. 8], [3 .. 9])");
-    return;
-}
 
 BOOST_AUTO_TEST_CASE(test_static)
 {
@@ -247,15 +237,20 @@ BOOST_AUTO_TEST_CASE(test_static)
 
 BOOST_AUTO_TEST_CASE(test_output)
 {
-    Bounds<double> b2(1,2,101,102);
-    Bounds<double> b3(1,2,3,101,102,103);
+    const Bounds<int> b2(1,2,101,102);
+    const Bounds<double> b3(1.1,2.2,3.3,101.1,102.2,103.3);
     
-    std::stringstream oss;
-    oss << b2;
+    std::stringstream ss2(std::stringstream::in | std::stringstream::out);
+    std::stringstream ss3(std::stringstream::in | std::stringstream::out);
 
-    std::string b2s = oss.str();
+    ss2 << b2;
+    ss3 << b3;
 
-    BOOST_CHECK(b2s == "([1 , 101], [2, 102])");
+    const std::string out2 = ss2.str();
+    const std::string out3 = ss3.str();
+
+    BOOST_CHECK(out2 == "([1, 101], [2, 102])");
+    BOOST_CHECK(out3 == "([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])");
 
     return;
 }

@@ -197,12 +197,20 @@ BOOST_AUTO_TEST_CASE(test_ranges)
 
 BOOST_AUTO_TEST_CASE(test_output)
 {
-    Range<int> r(10,20);
+    const Range<int> r1(1,2);
+    const Range<double> r2(1.1,2.2);
   
-    std::stringstream oss;
-    oss << r;
+    std::stringstream ss1(std::stringstream::in | std::stringstream::out);
+    std::stringstream ss2(std::stringstream::in | std::stringstream::out);
 
-    BOOST_CHECK(oss.str() == "[10 .. 20]");
+    ss1 << r1;
+    ss2 << r2;
+
+    const std::string out1 = ss1.str();
+    const std::string out2 = ss2.str();
+
+    BOOST_CHECK(out1 == "[1, 2]");
+    BOOST_CHECK(out2 == "[1.1, 2.2]");
 
     return;
 }
