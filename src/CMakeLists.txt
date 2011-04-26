@@ -69,6 +69,7 @@ set(LIBPC_BASE_CPP
   PointBuffer.cpp
   PointBufferCache.cpp
   Options.cpp
+  Range.cpp
   Schema.cpp
   SchemaLayout.cpp
   Signaller.cpp

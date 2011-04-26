@@ -426,6 +426,7 @@ public:
     }
 };
 
+
 template<class T>
 std::ostream& operator<<(std::ostream& ostr, const Bounds<T>& bounds)
 {
@@ -439,6 +440,10 @@ std::ostream& operator<<(std::ostream& ostr, const Bounds<T>& bounds)
     ostr << ")";
     return ostr;
 }
+
+
+extern LIBPC_DLL std::istream& operator>>(std::istream& istr, Bounds<double>& bounds);
+
 
 } // namespace libpc
 

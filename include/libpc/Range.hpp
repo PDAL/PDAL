@@ -188,12 +188,17 @@ public:
     }
 };
 
+
 template<class T>
 std::ostream& operator<<(std::ostream& ostr, const Range<T>& range)
 {
-    ostr << "[" << range.getMinimum() << " .. " << range.getMaximum() << "]";
+    ostr << "[" << range.getMinimum() << " , " << range.getMaximum() << "]";
     return ostr;
 }
+
+
+extern LIBPC_DLL std::istream& operator>>(std::istream& istr, Range<double>& range);
+
 
 } // namespace libpc
 

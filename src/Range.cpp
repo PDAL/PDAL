@@ -32,51 +32,37 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-
-#include <libpc/Bounds.hpp>
 #include <libpc/Range.hpp>
-#include <libpc/Utils.hpp>
 #include <libpc/exceptions.hpp>
 
 
-namespace libpc
+namespace libpc 
 {
 
 
-std::istream& operator>>(std::istream& istr, Bounds<double>& bounds)
+std::istream& operator>>(std::istream& istr, Range<double>& range)
 {
-    Bounds<double>::RangeVector v;
-    
-    char c;
+    double low, high;
 
     Utils::eatwhitespace(istr);
     
-    if (!Utils::eatcharacter(istr,'('))
-        throw libpc_error("Bounds parser failed");
+    if (!Utils::eatcharacter(istr,'['))
+        throw libpc_error("Range parser failed");
 
-    bool done = false;
-    while (!done)
-    {
-        Utils::eatwhitespace(istr);
+    Utils::eatwhitespace(istr);
 
-        Range<double> r;
-        istr >> r;
+    istr >> low;
 
-        Utils::eatwhitespace(istr);
+    if (!Utils::eatcharacter(istr,','))
+        throw libpc_error("Range parser failed");
 
-        if ((c = (char)istr.peek()) == ',')
-            done = false;
-        else if ((c = (char)istr.peek()) == ')')
-            done = true;
-        else
-            throw libpc_error("Bounds parser failed");
-    }
-    
-    if (!Utils::eatcharacter(istr,')'))
-        throw libpc_error("Bounds parser failed");
+    istr >> high;
 
-    Bounds<double> xxx(v);
-    bounds = xxx;
+    if (!Utils::eatcharacter(istr,']'))
+        throw libpc_error("Range parser failed");
+
+    range.setMinimum(low);
+    range.setMaximum(high);
 
     return istr;
 }
