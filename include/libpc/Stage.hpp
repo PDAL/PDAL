@@ -61,8 +61,10 @@ public:
     virtual ~Stage();
 
     // Implement this in your concrete classes to return a constant string
-    // as the name of the stage.  Use upper camel case, with spaces between
-    // words.  The last word should generally be "Reader" or "Filter".
+    // as the name of the stage.  Use a dotted, XPath-style name for your 
+    // stage.  For example, 'drivers.las.reader' or 'filters.crop'.  This 
+    // XPath-style name will also correspond to an entry in the libpc::Options
+    // tree for the given stage.
     virtual const std::string& getName() const = 0;
     virtual const std::string& getDescription() const = 0;
     
