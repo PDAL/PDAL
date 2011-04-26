@@ -702,12 +702,13 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
     libpc::Schema const& schema = buffer.getSchema();
     // std::vector<boost::uint32_t> ids = block.GetIDs();
 
-    bool hasTimeData = schema.hasDimension(Dimension::Field_Time, Dimension::Uint64);
+    bool hasTimeData = schema.hasDimension(Dimension::Field_Time, Dimension::Double);
+    bool hasColorData = schema.hasDimension(Dimension::Field_Red, Dimension::Uint16);
     
     boost::uint64_t count = buffer.getNumPoints();
 
     point_data.clear(); // wipe whatever was there    
-    boost::uint32_t oracle_record_size = 8+8+8+8+8+4+4;
+    boost::uint32_t oracle_record_size = (8*8)+4+4;
     // point_data.resize(count*oracle_record_size);
     
     // assert(count*oracle_record_size == point_data.size());
@@ -717,6 +718,23 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
     const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
     const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification, Dimension::Uint8);
     const int indexTime = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Double);
+    const int indexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity, Dimension::Uint16);
+    const int indexReturnNumber = schema.getDimensionIndex(Dimension::Field_ReturnNumber, Dimension::Uint8);
+    const int indexNumberOfReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns, Dimension::Uint8);
+    const int indexScanDirectionFlag = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag, Dimension::Uint8);
+    const int indexEdgeOfFlightLine = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine, Dimension::Uint8);
+    const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData, Dimension::Uint8);
+    const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId, Dimension::Uint16);
+    const int indexScanAngleRank = schema.getDimensionIndex(Dimension::Field_ScanAngleRank, Dimension::Int8);
+    const int indexRed = schema.getDimensionIndex(Dimension::Field_Red, Dimension::Uint16);
+    const int indexGreen = schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint16);
+    const int indexBlue = schema.getDimensionIndex(Dimension::Field_Blue, Dimension::Uint16);
+
+
+
+
+
+
     
     // "Global" ids from the chipper are also available here.
     // const int indexId = schema.getDimensionIndex(Dimension::Field_User1, Dimension::Int32);
@@ -746,14 +764,37 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
         double z = (buffer.getField<boost::int32_t>(counter, indexZ) * zscale) + zoffset;
         boost::uint8_t classification = buffer.getField<boost::uint8_t>(counter, indexClassification);
         double c = static_cast<double>(classification);
+        
+        boost::uint16_t i = buffer.getField<boost::uint16_t>(counter, indexIntensity);
+        double intensity = static_cast<double>(i);
+        
         // boost::uint32_t id = buffer.getField<boost::uint32_t>(counter, indexId);
         boost::uint32_t block_id = buffer.getField<boost::uint32_t>(counter, indexBlockId);
         // boost::uint32_t id = ids[counter];
         // std::cout << x <<" "<< y  <<" "<< z << " "<< id << " " << block_id <<" " << c <<std::endl;
+
+        boost::uint8_t returnNumber = buffer.getField<boost::uint8_t>(counter, indexReturnNumber);
+        boost::uint8_t numberOfReturns = buffer.getField<boost::uint8_t>(counter, indexNumberOfReturns);
+        boost::uint8_t scanDirFlag = buffer.getField<boost::uint8_t>(counter, indexScanDirectionFlag);
+        boost::uint8_t edgeOfFlightLine = buffer.getField<boost::uint8_t>(counter, indexEdgeOfFlightLine);
+        boost::int8_t scanAngleRank = buffer.getField<boost::int8_t>(counter, indexScanAngleRank);
+
+        boost::uint8_t userData = buffer.getField<boost::uint8_t>(counter, indexUserData);
+        boost::uint16_t pointSourceId = buffer.getField<boost::uint16_t>(counter, indexPointSourceId);
+
         
         double t = 0.0;
         if (hasTimeData)
             t = buffer.getField<double>(counter, indexTime);
+
+        boost::uint16_t red(0), green(0), blue(0), alpha(0);
+        if (hasColorData)
+        {
+            red = buffer.getField<double>(counter, indexRed);
+            green = buffer.getField<double>(counter, indexGreen);
+            blue = buffer.getField<double>(counter, indexBlue);
+            
+        }
 
         boost::uint8_t* x_b =  reinterpret_cast<boost::uint8_t*>(&x);
         boost::uint8_t* y_b =  reinterpret_cast<boost::uint8_t*>(&y);
@@ -761,7 +802,24 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
         boost::uint8_t* t_b =  reinterpret_cast<boost::uint8_t*>(&t);
         boost::uint8_t* c_b =  reinterpret_cast<boost::uint8_t*>(&c);
 
-        // big-endian
+        boost::uint8_t* intensity_b =  reinterpret_cast<boost::uint8_t*>(&intensity);
+    
+        boost::uint8_t* returnNumber_b =  reinterpret_cast<boost::uint8_t*>(&returnNumber);
+        boost::uint8_t* numberOfReturns_b =  reinterpret_cast<boost::uint8_t*>(&numberOfReturns);
+        boost::uint8_t* scanDirFlag_b =  reinterpret_cast<boost::uint8_t*>(&scanDirFlag);
+        boost::uint8_t* edgeOfFlightLine_b =  reinterpret_cast<boost::uint8_t*>(&edgeOfFlightLine);
+        boost::uint8_t* scanAngleRank_b =  reinterpret_cast<boost::uint8_t*>(&scanAngleRank);
+        boost::uint8_t* userData_b =  reinterpret_cast<boost::uint8_t*>(&userData);
+        boost::uint8_t* pointSourceId_b =  reinterpret_cast<boost::uint8_t*>(&pointSourceId);
+
+
+        boost::uint8_t* red_b =  reinterpret_cast<boost::uint8_t*>(&red);
+        boost::uint8_t* green_b =  reinterpret_cast<boost::uint8_t*>(&green);
+        boost::uint8_t* blue_b =  reinterpret_cast<boost::uint8_t*>(&blue);
+        boost::uint8_t* alpha_b =  reinterpret_cast<boost::uint8_t*>(&alpha);
+ 
+
+    // big-endian
         for (int i = sizeof(double) - 1; i >= 0; i--) {
             point_data.push_back(x_b[i]);
         }
@@ -773,7 +831,6 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
         for (int i = sizeof(double) - 1; i >= 0; i--) {
             point_data.push_back(z_b[i]);
         }
-
     
         for (int i = sizeof(double) - 1; i >= 0; i--) {
             point_data.push_back(t_b[i]);
@@ -785,6 +842,40 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
         for (int i = sizeof(double) - 1; i >= 0; i--) {
             point_data.push_back(c_b[i]);
         }
+
+        // Intensity is only two bytes, but 
+        // we need to store it in an 8 byte big-endian 
+        // double to satisfy OPC
+        for (int i = sizeof(double) - 1; i >= 0; i--) {
+            point_data.push_back(intensity_b[i]);
+        }
+
+
+        // Pack dimension with a number of fields totalling 8 bytes
+        point_data.push_back(returnNumber_b[0]);
+        point_data.push_back(numberOfReturns_b[0]);
+        point_data.push_back(scanDirFlag_b[0]);
+        point_data.push_back(edgeOfFlightLine_b[0]);
+        point_data.push_back(scanAngleRank_b[0]);
+        point_data.push_back(userData_b[0]);
+        for (int i = sizeof(uint16_t) - 1; i >= 0; i--) {
+            point_data.push_back(pointSourceId_b[i]);
+        }
+
+        // Pack dimension with RGBA for a total of 8 bytes
+        for (int i = sizeof(uint16_t) - 1; i >= 0; i--) {
+            point_data.push_back(red_b[i]);
+        }    
+        for (int i = sizeof(uint16_t) - 1; i >= 0; i--) {
+            point_data.push_back(green_b[i]);
+        }    
+        for (int i = sizeof(uint16_t) - 1; i >= 0; i--) {
+            point_data.push_back(blue_b[i]);
+        }    
+        for (int i = sizeof(uint16_t) - 1; i >= 0; i--) {
+            point_data.push_back(alpha_b[i]);
+        }    
+
 
         boost::uint8_t* id_b = reinterpret_cast<boost::uint8_t*>(&counter); 
         boost::uint8_t* block_b = reinterpret_cast<boost::uint8_t*>(&block_id); 
