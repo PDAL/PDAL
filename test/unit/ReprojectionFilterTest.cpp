@@ -137,12 +137,12 @@ BOOST_AUTO_TEST_CASE(test_1)
     getPoint(data2, 0, x2, y2, z2);
 
     BOOST_CHECK_CLOSE(x1, 470692.44, 1);
-    ////BOOST_CHECK_CLOSE(y1, 4602888.90, 1);
-    //BOOST_CHECK_CLOSE(z1, 0, 1);
+    BOOST_CHECK_CLOSE(y1, 4602888.90, 1);
+    BOOST_CHECK_CLOSE(z1, 16, 1);
 
     BOOST_CHECK_CLOSE(x2, -93.35156259, 1);
-    ////BOOST_CHECK_CLOSE(y2, 41.57714839, 1);
-    //BOOST_CHECK_CLOSE(z2, 0, 1);
+//////    BOOST_CHECK_CLOSE(y2, 41.57714839, 1); // BUG: I get 90
+//////    BOOST_CHECK_CLOSE(z2, 16, 1); // BUG: I get 0 (no idea what this is supposed to be, not in liblas test)
 
     ////////out_hdr->SetScale(0.00000001, 0.00000001, 0.01);
 
