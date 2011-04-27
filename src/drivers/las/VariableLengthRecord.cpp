@@ -317,7 +317,7 @@ void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord
 }
 
 
-void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs)
+void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs, SpatialReference::WKTModeFlag modeFlag)
 {
 #ifdef LIBPC_SRS_ENABLED
 
@@ -337,7 +337,7 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
 
     GeotiffSupport geotiff;
     {
-        const std::string wkt = srs.getWKT(SpatialReference::eCompoundOK, false);
+        const std::string wkt = srs.getWKT(modeFlag, false);
         geotiff.setWkt(wkt);
     }
 
@@ -603,9 +603,9 @@ void VLRList::constructSRS(SpatialReference& srs) const
 }
 
 
-void VLRList::addVLRsFromSRS(const SpatialReference& srs)
+void VLRList::addVLRsFromSRS(const SpatialReference& srs, SpatialReference::WKTModeFlag modeFlag)
 {
-    VariableLengthRecord::setVLRsFromSRS(srs, m_list);
+    VariableLengthRecord::setVLRsFromSRS(srs, m_list, modeFlag);
 }
 
 } } } // namespaces

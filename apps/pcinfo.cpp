@@ -111,11 +111,13 @@ int Application_pcinfo::execute()
         return 1;
     }
 
-    boost::uint64_t numPoints = reader->getNumPoints();
-
-    delete reader;
+    const boost::uint64_t numPoints = reader->getNumPoints();
+    const SpatialReference& srs = reader->getSpatialReference();
 
     std::cout << numPoints << " points\n";
+    std::cout << "WKT: " << srs.getWKT() << "\n";
+
+    delete reader;
 
     return 0;
 }

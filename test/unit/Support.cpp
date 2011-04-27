@@ -55,6 +55,10 @@ std::string Support::datapath(const std::string& file)
 
 bool Support::compare_files(const std::string& file1, const std::string& file2)
 {
+    if (!libpc::Utils::fileExists(file1) ||
+        !libpc::Utils::fileExists(file2))
+        return false;
+
     uintmax_t len1x = libpc::Utils::fileSize(file1);
     uintmax_t len2x = libpc::Utils::fileSize(file2);
     size_t len1 = (size_t)len1x; // BUG

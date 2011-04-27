@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(test_vlr_sizes)
     ref.setFromUserInput(code);
 
     std::vector<libpc::drivers::las::VariableLengthRecord> vlrs;
-    libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(ref, vlrs);
+    libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(ref, vlrs, libpc::SpatialReference::eCompoundOK);
 
     BOOST_CHECK(vlrs.size() == boost::uint32_t(4));
     BOOST_CHECK(vlrs[0].getLength() == boost::uint32_t(64));
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datum)
 
     std::vector<libpc::drivers::las::VariableLengthRecord> vlrs;
     {
-        libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(ref, vlrs);
+        libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(ref, vlrs, libpc::SpatialReference::eCompoundOK);
         BOOST_CHECK(vlrs.size() == 4);
         BOOST_CHECK(vlrs[0].getLength() == boost::uint32_t(96));
     }
@@ -199,6 +199,31 @@ BOOST_AUTO_TEST_CASE(test_vertical_datum)
     return;
 }
 
+
+BOOST_AUTO_TEST_CASE(test_vertical_datum_notcompound)
+{
+    const std::string wkt = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
+    const libpc::SpatialReference srs(wkt);
+
+    std::vector<libpc::drivers::las::VariableLengthRecord> vlrs_compound;
+    std::vector<libpc::drivers::las::VariableLengthRecord> vlrs_horizonly;
+
+    libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(srs, vlrs_compound, libpc::SpatialReference::eCompoundOK);
+    libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(srs, vlrs_horizonly, libpc::SpatialReference::eHorizontalOnly);
+
+    BOOST_CHECK(vlrs_compound.size() == 4);
+    BOOST_CHECK(vlrs_horizonly.size() == 4);
+    BOOST_CHECK(vlrs_compound[0].getLength() == 96);
+    BOOST_CHECK(vlrs_compound[1].getLength() == 16);
+    BOOST_CHECK(vlrs_compound[2].getLength() == 21);
+    BOOST_CHECK(vlrs_compound[3].getLength() == 511);
+    BOOST_CHECK(vlrs_horizonly[0].getLength() == 64);
+    BOOST_CHECK(vlrs_horizonly[1].getLength() == 16);
+    BOOST_CHECK(vlrs_horizonly[2].getLength() == 7);
+    BOOST_CHECK(vlrs_horizonly[3].getLength() == 511);
+
+    return;
+}
 
 // Try writing a compound coordinate system to file and ensure we get back
 // WKT with the geoidgrids (from the WKT VLR).
@@ -267,7 +292,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
     }
     {
         std::vector<libpc::drivers::las::VariableLengthRecord> vlrs;
-        libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(ref, vlrs);
+        libpc::drivers::las::VariableLengthRecord::setVLRsFromSRS(ref, vlrs, libpc::SpatialReference::eCompoundOK);
         BOOST_CHECK(vlrs.size() == 4);
         libpc::drivers::las::VariableLengthRecord::clearVLRs(libpc::drivers::las::VariableLengthRecord::eGeoTIFF, vlrs);
         BOOST_CHECK(vlrs.size() == 1);

@@ -46,6 +46,8 @@
 #include <libpc/libpc.hpp>
 #include <iosfwd>
 
+#include <libpc/SpatialReference.hpp>
+
 namespace libpc { namespace drivers { namespace las {
 
 class LasHeader;
@@ -56,6 +58,8 @@ public:
     LasHeaderWriter(LasHeader& header, std::ostream&);
     void write();
 
+    // default is eCompoundOK
+    void setWktModeFlag(SpatialReference::WKTModeFlag);
 
 private:
     void WriteLAS10PadSignature();
@@ -64,6 +68,7 @@ private:
 
     LasHeader& m_header; // note this is not const
     std::ostream& m_ostream;
+    SpatialReference::WKTModeFlag m_wktModeFlag;
 
     LasHeaderWriter& operator=(const LasHeaderWriter&); // nope
     LasHeaderWriter(const LasHeaderWriter&); // nope

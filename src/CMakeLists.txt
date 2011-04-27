@@ -246,6 +246,8 @@ set(LIBPC_FILTERS_HPP
   ${LIBPC_HEADERS_DIR}/filters/MosaicFilterIterator.hpp
   ${LIBPC_HEADERS_DIR}/filters/ReprojectionFilter.hpp
   ${LIBPC_HEADERS_DIR}/filters/ReprojectionFilterIterator.hpp
+  ${LIBPC_HEADERS_DIR}/filters/ScalingFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/ScalingFilterIterator.hpp
 )
 
 set (LIBPC_FILTERS_CPP 
@@ -263,6 +265,8 @@ set (LIBPC_FILTERS_CPP
   ./filters/MosaicFilterIterator.cpp
   ./filters/ReprojectionFilter.cpp
   ./filters/ReprojectionFilterIterator.cpp
+  ./filters/ScalingFilter.cpp
+  ./filters/ScalingFilterIterator.cpp
 )
 
 FOREACH(file ${LIBPC_FILTERS_HPP})

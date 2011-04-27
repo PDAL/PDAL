@@ -52,6 +52,14 @@ SpatialReference::SpatialReference()
 }
 
 
+SpatialReference::SpatialReference(const std::string& s)
+    : m_wkt("")
+{
+    this->setFromUserInput(s);
+    return;
+}
+
+
 SpatialReference::SpatialReference(SpatialReference const& rhs) 
     : m_wkt(rhs.m_wkt)
 {
