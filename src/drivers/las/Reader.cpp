@@ -226,6 +226,8 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
 
     delete[] buf;
 
+    data.setSpatialBounds( lasHeader.getBounds() );
+
     return numPoints;
 }
 
