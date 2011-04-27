@@ -39,6 +39,7 @@
 
 #ifdef LIBPC_HAVE_LIBGEOTIFF
 #include <geo_simpletags.h>
+#include <cpl_conv.h>
 #endif
 
 #include <string>
