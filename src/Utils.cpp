@@ -143,7 +143,10 @@ void Utils::closeFile(std::istream* ifs)
 
 bool Utils::deleteFile(const std::string& file)
 {
-  return boost::filesystem::remove(file);
+    if (!fileExists(file))
+        return false;
+        
+    return boost::filesystem::remove(file);
 }
 
 
