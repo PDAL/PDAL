@@ -94,11 +94,11 @@ void Application_pc2pc::addOptions()
     file_options->add_options()
         ("input,i", po::value<std::string>(&m_inputFile), "input file name")
         ("output,o", po::value<std::string>(&m_outputFile), "output file name")
-        ("output,o", po::value<std::string>(&m_outputFile), "output file name")
         ("native", "use native LAS classes (not liblas)")
         ("oracle-writer", "Read data from LAS file and write to Oracle")
+        ("oracle-reader", "Read data from Oracle and write to LAS")
         ("a_srs", po::value<std::string>(&m_srs)->default_value(""), "Assign output coordinate system")
-        ("compress", po::value<bool>(&m_bCompress)->default_value(false),"Compress output data if available")
+        ("compress", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true),"Compress output data if available")
         ("xml", po::value<std::string>(&m_xml)->default_value("log.xml"), "XML file to load process (OCI only right now)")
         ;
 
