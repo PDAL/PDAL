@@ -156,10 +156,10 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
 
     Utils::closeFile(ofs);
 
-    bool filesSame = Support::compare_files("temp.las", Support::datapath(refFile));
-    //BOOST_CHECK(filesSame);
+    const bool filesSame = Support::compare_files("temp.las", Support::datapath(refFile));
+    BOOST_CHECK(filesSame);
 
-    //if (filesSame)
+    if (filesSame)
     {
         Utils::deleteFile("temp.las");
     }
@@ -169,16 +169,16 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
 
 BOOST_AUTO_TEST_CASE(test_different_formats)
 {
-    test_a_format("1.0_0.las", 1, 0, 0);
-    test_a_format("1.0_1.las", 1, 0, 1);
+    test_a_format("1.0_0_nosrs.las", 1, 0, 0);
+    test_a_format("1.0_1_nosrs.las", 1, 0, 1);
     
-    test_a_format("1.1_0.las", 1, 1, 0);
-    test_a_format("1.1_1.las", 1, 1, 1);
+    test_a_format("1.1_0_nosrs.las", 1, 1, 0);
+    test_a_format("1.1_1_nosrs.las", 1, 1, 1);
 
-    test_a_format("1.2_0.las", 1, 2, 0);
-    test_a_format("1.2_1.las", 1, 2, 1);
-    test_a_format("1.2_2.las", 1, 2, 2);
-    test_a_format("1.2_3.las", 1, 2, 3);
+    test_a_format("1.2_0_nosrs.las", 1, 2, 0);
+    test_a_format("1.2_1_nosrs.las", 1, 2, 1);
+    test_a_format("1.2_2_nosrs.las", 1, 2, 2);
+    test_a_format("1.2_3_nosrs.las", 1, 2, 3);
 
     return;
 }
