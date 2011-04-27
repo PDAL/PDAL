@@ -38,14 +38,17 @@
 #ifdef LIBPC_HAVE_GDAL
 #include <geo_normalize.h>
 #include <ogr_spatialref.h>
+
 #endif
 
 #include <sstream>
+
 #include <boost/concept_check.hpp>
 
 
 LIBPC_C_START
 #ifdef __geotiff_h_
+
 
 #ifdef GEO_NORMALIZE_H_INCLUDED
 char LIBPC_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
