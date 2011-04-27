@@ -117,10 +117,10 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
         libpc::drivers::las::LasReader reader("temp.laz");
     }
 
-    //bool filesSame = Support::compare_files("temp.laz", Support::datapath("simple.laz"));
-    //BOOST_CHECK(filesSame);
+    bool filesSame = Support::compare_files("temp.laz", Support::datapath("simple.laz"));
+    BOOST_CHECK(filesSame);
 
-    //if (filesSame)
+    if (filesSame)
     {
         Utils::deleteFile("temp.laz");
     }
