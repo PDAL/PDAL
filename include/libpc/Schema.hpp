@@ -73,6 +73,8 @@ public:
     void addDimension(Dimension const& dim);
     void addDimensions(const std::vector<Dimension>& dims);
 
+    void removeDimension(Dimension const& dim);
+
     const Dimension& getDimension(std::size_t index) const;
     Dimension& getDimension(std::size_t index);
     const Dimensions& getDimensions() const;

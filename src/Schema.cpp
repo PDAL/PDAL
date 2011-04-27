@@ -147,6 +147,19 @@ void Schema::addDimension(Dimension const& dim)
 }
 
 
+void Schema::removeDimension(Dimension const& dim)
+{
+    const Dimension::Field field = dim.getField();
+    assert(m_indexTable[field] != -1);
+    m_indexTable[field] = -1;
+
+    //std::size_t index = getDimensionIndex(dim);
+    //m_dimensions[index] = Dimension(Dimension::Field_INVALID, Dimension::Int32);
+
+    return;
+}
+
+
 const Dimension& Schema::getDimension(std::size_t index) const
 {
     return m_dimensions[index];
