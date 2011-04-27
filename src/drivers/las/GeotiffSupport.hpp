@@ -41,6 +41,9 @@
 #include <geo_simpletags.h>
 #endif
 
+#include <string>
+#include <stdexcept>
+
 namespace libpc { namespace drivers { namespace las {
     
 
