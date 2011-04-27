@@ -54,6 +54,9 @@ public:
     /// Default constructor.
     SpatialReference();
 
+    // calls setFromUserInput() with the given string
+    SpatialReference(const std::string& userInput);
+
     /// Destructor.
     /// If libgeotiff is enabled, deallocates libtiff and libgeotiff objects used internally.
     ~SpatialReference();

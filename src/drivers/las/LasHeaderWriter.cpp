@@ -55,6 +55,7 @@ namespace libpc { namespace drivers { namespace las {
 LasHeaderWriter::LasHeaderWriter(LasHeader& header, std::ostream& ostream)
     : m_header(header)
     , m_ostream(ostream)
+    , m_wktModeFlag(SpatialReference::eCompoundOK)
 {
     return;
 }
@@ -91,7 +92,7 @@ void LasHeaderWriter::write()
         m_header.getVLRs().remove("LASF_Projection", 34736);
         m_header.getVLRs().remove("LASF_Projection", 34737);
 
-        m_header.getVLRs().addVLRsFromSRS(m_header.getSpatialReference());
+        m_header.getVLRs().addVLRsFromSRS(m_header.getSpatialReference(), m_wktModeFlag);
     }
 
     {
