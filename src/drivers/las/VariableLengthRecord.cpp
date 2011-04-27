@@ -41,6 +41,18 @@
 
 namespace libpc { namespace drivers { namespace las {
 
+static const std::string s_geotiffUserId = "LASF_Projection";
+static const boost::uint16_t s_geotiffRecordId_directory = 34735;
+static const boost::uint16_t s_geotiffRecordId_doubleparams = 34736;
+static const boost::uint16_t s_geotiffRecordId_asciiparams = 34737;
+static const std::string s_geotiffDescriptionId_directory = "GeoTIFF GeoKeyDirectoryTag";
+static const std::string s_geotiffDescriptionId_doubleparams = "GeoTIFF GeoDoubleParamsTag";
+static const std::string s_geotiffDescriptionId_asciiparams = "GeoTIFF GeoAsciiParamsTag";
+        
+static const std::string s_wktUserId = "liblas";
+static const boost::uint16_t s_wktRecordId = 2112;
+static const std::string s_wktDescription = "OGR variant of OpenGIS WKT SRS";
+
 
 VariableLengthRecord::VariableLengthRecord(boost::uint16_t reserved,
                                            std::string userId, 
@@ -78,7 +90,7 @@ VariableLengthRecord::VariableLengthRecord(const VariableLengthRecord& rhs)
 
 VariableLengthRecord::~VariableLengthRecord()
 {
-    delete m_bytes;
+    delete[] m_bytes;
     m_bytes = 0;
     m_length = 0;
     return;
@@ -92,6 +104,7 @@ VariableLengthRecord& VariableLengthRecord::operator=(const VariableLengthRecord
         m_length = rhs.m_length;
         delete[] m_bytes;
         m_bytes = new boost::uint8_t[m_length];
+        memcpy(m_bytes, rhs.m_bytes, m_length);
 
         m_reserved = rhs.m_reserved;
         m_recordId = rhs.m_recordId;
@@ -122,7 +135,7 @@ bool VariableLengthRecord::operator==(const VariableLengthRecord& rhs) const
 }
 
 
-std::string VariableLengthRecord::bytes2string(boost::uint8_t* bytes, boost::uint32_t len)
+std::string VariableLengthRecord::bytes2string(const boost::uint8_t* bytes, boost::uint32_t len)
 {
     std::string s = "";
     for (boost::uint32_t i=0; i<len; i++)
@@ -160,30 +173,48 @@ std::size_t VariableLengthRecord::getLength() const
 }
 
 
-bool VariableLengthRecord::compareUserId(const std::string& userId) const
+bool VariableLengthRecord::isMatch(const std::string& userId) const
 {
-    const std::string& p = m_userId;
-    const std::string& q = userId;
-           
-    return p==q;
+    return (userId == m_userId);
 }
 
 
-void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs)
+bool VariableLengthRecord::isMatch(const std::string& userId, boost::uint16_t recordId) const
 {
-    if (vlrs.size() == 0)
+    return (userId == m_userId && recordId == m_recordId);
+}
+
+
+static bool setSRSFromVLRs_wkt(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs)
+{
+    for (std::size_t i = 0; i < vlrs.size(); ++i)
     {
-        srs.setWKT("");
-        return;
+        const VariableLengthRecord& vlr = vlrs[i];
+        
+        if (vlr.isMatch(s_wktUserId, s_wktRecordId))
+        {
+            const boost::uint8_t* data = vlr.getBytes();
+            std::size_t length = vlr.getLength();
+
+            const std::string wkt = VariableLengthRecord::bytes2string(data, length);
+            srs.setWKT(wkt);
+            return true;
+        }
     }
 
+    return false;
+}
+
+
+static bool setSRSFromVLRs_geotiff(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs)
+{
     GeotiffSupport geotiff;
 
     geotiff.resetTags();
 
-    const std::string uid("LASF_Projection");
-    
     bool gotSomething = false;
+
+    // first we try to get the 2212 VLR
 
     // nothing is going to happen here if we don't have any vlrs describing
     // srs information on the spatialreference.  
@@ -191,7 +222,7 @@ void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord
     {
         const VariableLengthRecord& vlr = vlrs[i];
         
-        if (!vlr.compareUserId(uid))
+        if (!vlr.isMatch(s_geotiffUserId))
             continue;
 
         const boost::uint8_t* datax = vlr.getBytes();
@@ -203,7 +234,7 @@ void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord
 
         switch (vlr.getRecordId())
         {
-        case 34735:
+        case s_geotiffRecordId_directory:
             {
                 int count = length / sizeof(short);
                 // discard invalid "zero" geotags some software emits.
@@ -217,23 +248,23 @@ void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord
                     data[3] -= 1;
                 }
 
-                geotiff.setKey(34735, count, GeotiffSupport::Geotiff_KeyType_SHORT, data);
+                geotiff.setKey(s_geotiffRecordId_directory, count, GeotiffSupport::Geotiff_KeyType_SHORT, data);
             }
             gotSomething = true;
             break;
 
-        case 34736:
+        case s_geotiffRecordId_doubleparams:
             {
                 int count = length / sizeof(double);
-                geotiff.setKey(34736, count, GeotiffSupport::Geotiff_KeyType_DOUBLE, data);
+                geotiff.setKey(s_geotiffRecordId_doubleparams, count, GeotiffSupport::Geotiff_KeyType_DOUBLE, data);
             }        
             gotSomething = true;
             break;
 
-        case 34737:
+        case s_geotiffRecordId_asciiparams:
             {
                 int count = length/sizeof(uint8_t);
-                geotiff.setKey(34737, count, GeotiffSupport::Geotiff_KeyType_ASCII, data);
+                geotiff.setKey(s_geotiffRecordId_asciiparams, count, GeotiffSupport::Geotiff_KeyType_ASCII, data);
             }
             gotSomething = true;
             break;
@@ -248,8 +279,7 @@ void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord
 
     if (!gotSomething)
     {
-        srs.setWKT("");
-        return;
+        return false;
     }
 
     geotiff.setTags();
@@ -257,6 +287,31 @@ void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord
     const std::string wkt = geotiff.getWkt(false,false);
 
     srs.setFromUserInput(wkt);
+
+    return true;
+}
+
+
+void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs)
+{
+    srs.setWKT("");
+
+    if (vlrs.size() == 0)
+    {
+        return;
+    }
+
+    bool ok = setSRSFromVLRs_wkt(vlrs, srs);
+    if (ok)
+    {
+        return;
+    }
+
+    ok = setSRSFromVLRs_geotiff(vlrs, srs);
+    if (ok)
+    {
+        return;
+    }
 
     return;
 }
@@ -280,22 +335,13 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
     int acount = 0;
     int atype =0;
 
-    const std::string userId123 = "LASF_Projection";
-    const std::string description1 = "GeoTIFF GeoKeyDirectoryTag";
-    const std::string description2 = "GeoTIFF GeoDoubleParamsTag";
-    const std::string description3 = "GeoTIFF GeoAsciiParamsTag";
-        
-    const std::string userId4 = "liblas";
-    const std::string description4 = "OGR variant of OpenGIS WKT SRS";
-
     GeotiffSupport geotiff;
     {
         const std::string wkt = srs.getWKT(SpatialReference::eCompoundOK, false);
         geotiff.setWkt(wkt);
     }
 
-    //GTIFF_GEOKEYDIRECTORY == 34735
-    ret = geotiff.getKey(34735, &kcount, &ktype, (void**)&kdata);
+    ret = geotiff.getKey(s_geotiffRecordId_directory, &kcount, &ktype, (void**)&kdata);
     if (ret)
     {    
         uint16_t length = 2 * static_cast<uint16_t>(kcount);
@@ -313,12 +359,11 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
             data.push_back(v[1]);
         }
 
-        VariableLengthRecord record(0, userId123, 34735, description1, &data[0], length);
+        VariableLengthRecord record(0, s_geotiffUserId, s_geotiffRecordId_directory, s_geotiffDescriptionId_directory, &data[0], length);
         vlrs.push_back(record);
     }
 
-    // GTIFF_DOUBLEPARAMS == 34736
-    ret = geotiff.getKey(34736, &dcount, &dtype, (void**)&ddata);
+    ret = geotiff.getKey(s_geotiffRecordId_doubleparams, &dcount, &dtype, (void**)&ddata);
     if (ret)
     {    
         uint16_t length = 8 * static_cast<uint16_t>(dcount);
@@ -342,13 +387,12 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
             data.push_back(v[7]);   
         }        
 
-        VariableLengthRecord record(0, userId123, 34736, description2, &data[0], length);
+        VariableLengthRecord record(0, s_geotiffUserId, s_geotiffRecordId_doubleparams, s_geotiffDescriptionId_doubleparams, &data[0], length);
 
         vlrs.push_back(record);
     }
     
-    // GTIFF_ASCIIPARAMS == 34737
-    ret = geotiff.getKey(34737, &acount, &atype, (void**)&adata);
+    ret = geotiff.getKey(s_geotiffRecordId_asciiparams, &acount, &atype, (void**)&adata);
     if (ret) 
     {                    
          uint16_t length = static_cast<uint16_t>(acount);
@@ -375,7 +419,7 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
              data.push_back(v[0]);
          }
 
-         VariableLengthRecord record(0, userId123, 34737, description3, &data[0], length);
+         VariableLengthRecord record(0, s_geotiffUserId, s_geotiffRecordId_asciiparams, s_geotiffDescriptionId_asciiparams, &data[0], length);
 
 
         if (data.size() > (std::numeric_limits<boost::uint16_t>::max()))
@@ -412,7 +456,7 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
             throw std::runtime_error(oss.str()); 
         }
 
-        VariableLengthRecord wkt_record(0, userId4, 2112, description4, wkt_bytes, len);
+        VariableLengthRecord wkt_record(0, s_wktUserId, s_wktRecordId, s_wktDescription, wkt_bytes, len);
 
         vlrs.push_back( wkt_record );
     }
@@ -424,22 +468,20 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
 void VariableLengthRecord::clearVLRs(GeoVLRType eType, std::vector<VariableLengthRecord>& vlrs)
 {
     std::vector<VariableLengthRecord>::iterator it;
-    std::string const liblas_id("liblas");
     
     for (it = vlrs.begin(); it != vlrs.end(); )
     {
         VariableLengthRecord const& vlr = *it;
         bool wipe = false;
 
-        // for now we can assume all m_vlrs records are LASF_Projection.
-        if (eType == eOGRWKT && 
-            2112 == vlr.getRecordId() && 
-            vlr.compareUserId(liblas_id))
+        if (eType == eOGRWKT && vlr.isMatch(s_wktUserId, s_wktRecordId))
         {
             wipe = true;
         }
         else if (eType == eGeoTIFF && 
-                 (34735 == vlr.getRecordId() || 34736 == vlr.getRecordId() || 34737 == vlr.getRecordId()))
+                 (s_geotiffRecordId_directory == vlr.getRecordId() || 
+                  s_geotiffRecordId_doubleparams == vlr.getRecordId() || 
+                  s_geotiffRecordId_asciiparams == vlr.getRecordId()))
         {
             wipe = true;
         }
@@ -460,37 +502,27 @@ void VariableLengthRecord::clearVLRs(GeoVLRType eType, std::vector<VariableLengt
 
 bool VariableLengthRecord::isGeoVLR() const
 {
-    std::string const las_projid("LASF_Projection");
-    std::string const liblas_id("liblas");
-    
-    if (compareUserId(las_projid))
+    if (isMatch(s_geotiffUserId))
     {
-        // GTIFF_GEOKEYDIRECTORY == 34735
-        if (34735 == getRecordId())
+        if (s_geotiffRecordId_directory == getRecordId())
         {
             return true;
         }
 
-        // GTIFF_DOUBLEPARAMS == 34736
-        if (34736 == getRecordId())
+        if (s_geotiffRecordId_doubleparams == getRecordId())
         {
             return true;
         }
 
-        // GTIFF_ASCIIPARAMS == 34737
-        if (34737 == getRecordId())
+        if (s_geotiffRecordId_asciiparams == getRecordId())
         {
             return true;
         }
     }
 
-    if (compareUserId(liblas_id))
+    if (isMatch(s_wktUserId, s_wktRecordId))
     {
-        // OGR_WKT?
-        if (2112 == getRecordId())
-        {
-            return true;
-        }
+        return true;
     }
 
     return false;
@@ -541,16 +573,9 @@ void VLRList::remove(uint32_t index)
 }
 
 
-static bool sameVLRs(const std::string& name, boost::uint16_t id, const VariableLengthRecord& record)
+static bool sameVLRs(const std::string& userId, boost::uint16_t recordId, const VariableLengthRecord& vlr)
 {
-    if (record.compareUserId(name)) 
-    {
-        if (record.getRecordId() == id) 
-        {
-            return true;
-        }
-    }
-    return false;
+    return vlr.isMatch(userId, recordId);
 }
 
 

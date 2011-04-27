@@ -73,7 +73,8 @@ public:
     };
     static void clearVLRs(GeoVLRType eType, std::vector<VariableLengthRecord>& vlrs);
 
-    bool compareUserId(const std::string& str) const;
+    bool isMatch(const std::string& userId) const;
+    bool isMatch(const std::string& userId, boost::uint16_t recordId) const;
 
     bool operator==(const VariableLengthRecord&) const;
     VariableLengthRecord& operator=(const VariableLengthRecord&);
@@ -86,7 +87,7 @@ public:
     static void setSRSFromVLRs(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);
     static void setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs);
 
-    static std::string bytes2string(boost::uint8_t* bytes, boost::uint32_t len);
+    static std::string bytes2string(const boost::uint8_t* bytes, boost::uint32_t len);
 
     // bytes array is return, user responsible for deleting
     // len is the size of the array he wants, it will be padded with zeros if str.length() < len

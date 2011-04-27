@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
         const libpc::SpatialReference ref2 = reader.getSpatialReference();
         const std::string wkt2 = ref2.getWKT(libpc::SpatialReference::eCompoundOK);
         
-        BOOST_CHECK(wkt == wkt2); // BUG: they say "WGS84+VERT_CS", but we say "unknown"
+        BOOST_CHECK(wkt == wkt2);
     }
 
     // Cleanup 
@@ -273,15 +273,15 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
         BOOST_CHECK(vlrs.size() == 1);
         libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs(vlrs, ref);
         {
-            libpc::SpatialReference xxx;
-            libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs(vlrs, xxx);
-            const std::string wkt = xxx.getWKT();
-            BOOST_CHECK(wkt == reference_wkt); // BUG: shouldn't this be equal to reference_wkt (as in the next test immediately below us?)
+            libpc::SpatialReference srs;
+            libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs(vlrs, srs);
+            const std::string wkt = srs.getWKT();
+            BOOST_CHECK(wkt == reference_wkt);
         }
     }
     {
         const std::string wkt = ref.getWKT();
-        BOOST_CHECK(wkt == reference_wkt);  // BUG: wkt shouldn't be empty here
+        BOOST_CHECK(wkt == reference_wkt);
     }
 
     // Write a very simple file with our SRS and one point.
@@ -311,17 +311,17 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
         libpc::SpatialReference result_ref = reader.getSpatialReference();
 
         const std::vector<libpc::drivers::las::VariableLengthRecord>& vlrs = reader.getVLRs();
-        BOOST_CHECK(vlrs.size() == 1); // BUG: we get 0, should be 1
+        BOOST_CHECK(vlrs.size() == 4);
 
         {
             libpc::SpatialReference xxx;
             libpc::drivers::las::VariableLengthRecord::setSRSFromVLRs(vlrs, xxx);
             const std::string wkt = xxx.getWKT();
-            BOOST_CHECK(wkt == "");
+            BOOST_CHECK(wkt == reference_wkt);
         }
 
         const std::string wkt = result_ref.getWKT();
-        BOOST_CHECK(wkt == "");
+        BOOST_CHECK(wkt == reference_wkt);
     }
 
     // Cleanup 
