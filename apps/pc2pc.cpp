@@ -187,8 +187,11 @@ int Application_pc2pc::execute()
         if (hasOption("a_srs"))
         {
             libpc::SpatialReference ref;
-            ref.setFromUserInput(m_srs);
-            writer.setSpatialReference(ref);            
+            if (m_srs.size() > 0)
+            {
+                ref.setFromUserInput(m_srs);
+                writer.setSpatialReference(ref);                            
+            }
         }
         if (hasOption("compress"))
         {
