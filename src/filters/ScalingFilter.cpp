@@ -45,8 +45,9 @@ namespace libpc { namespace filters {
 
 
 
-ScalingFilter::ScalingFilter(const Stage& prevStage)
+ScalingFilter::ScalingFilter(const Stage& prevStage, bool forward)
     : Filter(prevStage)
+    , m_forward(forward)
 {
     checkImpedance();
 
@@ -58,13 +59,86 @@ ScalingFilter::ScalingFilter(const Stage& prevStage)
 
 void ScalingFilter::checkImpedance()
 {
-    const Schema& schema = this->getSchema();
+    Schema& schema = this->getSchemaRef();
 
-    if (!schema.hasDimension(Dimension::Field_X, Dimension::Double) ||
-        !schema.hasDimension(Dimension::Field_Y, Dimension::Double) ||
-        !schema.hasDimension(Dimension::Field_Z, Dimension::Double))
+    if (m_forward)
     {
-        throw impedance_invalid("Reprojection filter requires X,Y,Z dimensions as doubles");
+        // doubles --> ints
+
+        const int indexXd = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
+        const int indexYd = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
+        const int indexZd = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+
+        const Dimension& dimXd = schema.getDimension(indexXd);
+        const Dimension& dimYd = schema.getDimension(indexYd);
+        const Dimension& dimZd = schema.getDimension(indexZd);
+
+        Dimension dimXi(Dimension::Field_X, Dimension::Int32);
+        Dimension dimYi(Dimension::Field_Y, Dimension::Int32);
+        Dimension dimZi(Dimension::Field_Z, Dimension::Int32);
+
+        if (!schema.hasDimension(dimXd) || !schema.hasDimension(dimYd) || !schema.hasDimension(dimZd))
+        {
+            throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as doubles (forward direction)");
+        }
+        if (schema.hasDimension(dimXi) || schema.hasDimension(dimYi) || schema.hasDimension(dimZi))
+        {
+            throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as ints not be initially present (forward direction)");
+        }
+
+        schema.removeDimension(dimXd);
+        schema.removeDimension(dimYd);
+        schema.removeDimension(dimZd);
+
+        dimXi.setNumericScale(dimXd.getNumericScale());
+        dimXi.setNumericOffset(dimXd.getNumericOffset());
+        dimYi.setNumericScale(dimYd.getNumericScale());
+        dimYi.setNumericOffset(dimYd.getNumericOffset());
+        dimZi.setNumericScale(dimZd.getNumericScale());
+        dimZi.setNumericOffset(dimZd.getNumericOffset());
+
+        schema.addDimension(dimXi);
+        schema.addDimension(dimYi);
+        schema.addDimension(dimZi);
+    }
+    else
+    {
+        const int indexXi = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+        const int indexYi = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+        const int indexZi = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+        
+        const Dimension& dimXi = schema.getDimension(indexXi);
+        const Dimension& dimYi = schema.getDimension(indexYi);
+        const Dimension& dimZi = schema.getDimension(indexZi);
+
+        Dimension dimXd(Dimension::Field_X, Dimension::Double);
+        Dimension dimYd(Dimension::Field_Y, Dimension::Double);
+        Dimension dimZd(Dimension::Field_Z, Dimension::Double);
+
+        // ints --> doubles
+        if (!schema.hasDimension(dimXi) || !schema.hasDimension(dimYi) || !schema.hasDimension(dimZi))
+        {
+            throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as int32s (reverse direction)");
+        }
+        if (schema.hasDimension(dimXd) || schema.hasDimension(dimYd) || schema.hasDimension(dimZd))
+        {
+            throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as int32s not be initially present (reverse direction)");
+        }
+
+        dimXd.setNumericScale(dimXi.getNumericScale());
+        dimXd.setNumericOffset(dimXi.getNumericOffset());
+        dimYd.setNumericScale(dimYi.getNumericScale());
+        dimYd.setNumericOffset(dimYi.getNumericOffset());
+        dimZd.setNumericScale(dimZi.getNumericScale());
+        dimZd.setNumericOffset(dimZi.getNumericOffset());
+
+        schema.removeDimension(dimXi);
+        schema.removeDimension(dimYi);
+        schema.removeDimension(dimZi);
+
+        schema.addDimension(dimXd);
+        schema.addDimension(dimYd);
+        schema.addDimension(dimZd);
     }
 
     return;
@@ -77,103 +151,85 @@ void ScalingFilter::initialize()
 }
 
 
-//void ScalingFilter::transform(double& x, double& y, double& z) const
-//{
-//#ifdef LIBPC_HAVE_GDAL
-//    
-//    int ret = 0;
-//
-//    ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);    
-//    if (!ret)
-//    {
-//        std::ostringstream msg; 
-//        msg << "Could not project point for ReprojectionTransform::" << CPLGetLastErrorMsg() << ret;
-//        throw std::runtime_error(msg.str());
-//    }
-//    
-//    //if (m_new_header.get()) 
-//    //{
-//    //    point.SetHeaderPtr(m_new_header);
-//    //}
-//
-//    //point.SetX(x);
-//    //point.SetY(y);
-//    //point.SetZ(z);
-//    //
-//    //if (detail::compare_distance(point.GetRawX(), (std::numeric_limits<boost::int32_t>::max)()) ||
-//    //    detail::compare_distance(point.GetRawX(), (std::numeric_limits<boost::int32_t>::min)())) {
-//    //    throw std::domain_error("X scale and offset combination is insufficient to represent the data");
-//    //}
-//
-//    //if (detail::compare_distance(point.GetRawY(), (std::numeric_limits<boost::int32_t>::max)()) ||
-//    //    detail::compare_distance(point.GetRawY(), (std::numeric_limits<boost::int32_t>::min)())) {
-//    //    throw std::domain_error("Y scale and offset combination is insufficient to represent the data");
-//    //}    
-//
-//    //if (detail::compare_distance(point.GetRawZ(), (std::numeric_limits<boost::int32_t>::max)()) ||
-//    //    detail::compare_distance(point.GetRawZ(), (std::numeric_limits<boost::int32_t>::min)())) {
-//    //    throw std::domain_error("Z scale and offset combination is insufficient to represent the data");
-//    //}        
-//
-//#else
-//    boost::ignore_unused_variable_warning(x);
-//    boost::ignore_unused_variable_warning(y);
-//    boost::ignore_unused_variable_warning(z);
-//#endif
-//
-//    return;
-//}
-//
-
 const std::string& ScalingFilter::getDescription() const
 {
-    static std::string name("Reprojection Filter");
+    static std::string name("Scaling Filter");
     return name;
 }
 
 
 const std::string& ScalingFilter::getName() const
 {
-    static std::string name("filters.reprojection");
+    static std::string name("filters.scaling");
     return name;
 }
 
 
-void ScalingFilter::processBuffer(PointBuffer& data) const
+void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstData) const
 {
-    const boost::uint32_t numPoints = data.getNumPoints();
+    const boost::uint32_t numPoints = srcData.getNumPoints();
 
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
+    const SchemaLayout& srcSchemaLayout = srcData.getSchemaLayout();
+    const Schema& srcSchema = srcSchemaLayout.getSchema();
 
-    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
-    const Dimension& xDim = schema.getDimension(indexX);
-    const Dimension& yDim = schema.getDimension(indexY);
-    const Dimension& zDim = schema.getDimension(indexZ);
+    const SchemaLayout& dstSchemaLayout = dstData.getSchemaLayout();
+    const Schema& dstSchema = dstSchemaLayout.getSchema();
+
+    // rather than think about "src/dst", we will think in terms of "doubles" and "ints"
+    const Schema& schemaD = (m_forward ? srcSchema : dstSchema);
+    const Schema& schemaI = (m_forward ? dstSchema : srcSchema);
+
+    assert(schemaD.hasDimension(Dimension::Field_X, Dimension::Double));
+    assert(schemaI.hasDimension(Dimension::Field_X, Dimension::Int32));
+
+    const int indexXd = schemaD.getDimensionIndex(Dimension::Field_X, Dimension::Double);
+    const int indexYd = schemaD.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
+    const int indexZd = schemaD.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+    const int indexXi = schemaI.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    const int indexYi = schemaI.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+    const int indexZi = schemaI.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+
+    const Dimension& dimXd = schemaD.getDimension(indexXd);
+    const Dimension& dimYd = schemaD.getDimension(indexYd);
+    const Dimension& dimZd = schemaD.getDimension(indexZd);
+    const Dimension& dimXi = schemaI.getDimension(indexXi);
+    const Dimension& dimYi = schemaI.getDimension(indexYi);
+    const Dimension& dimZi = schemaI.getDimension(indexZi);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        boost::int32_t xraw = data.getField<boost::int32_t>(pointIndex, indexX);
-        boost::int32_t yraw = data.getField<boost::int32_t>(pointIndex, indexY);
-        boost::int32_t zraw = data.getField<boost::int32_t>(pointIndex, indexZ);
+        if (m_forward)
+        {
+            // doubles --> ints  (removeScaling)
+            const double xd = srcData.getField<double>(pointIndex, indexXd);
+            const double yd = srcData.getField<double>(pointIndex, indexYd);
+            const double zd = srcData.getField<double>(pointIndex, indexZd);
 
-        double x = xDim.applyScaling(xraw);
-        double y = yDim.applyScaling(yraw);
-        double z = zDim.applyScaling(zraw);
+            const boost::int32_t xi = dimXd.removeScaling<boost::int32_t>(xd);
+            const boost::int32_t yi = dimYd.removeScaling<boost::int32_t>(yd);
+            const boost::int32_t zi = dimZd.removeScaling<boost::int32_t>(zd);
 
-        //this->transform(x,y,z);
+            dstData.setField<boost::int32_t>(pointIndex, indexXi, xi);
+            dstData.setField<boost::int32_t>(pointIndex, indexYi, yi);
+            dstData.setField<boost::int32_t>(pointIndex, indexZi, zi);
+        }
+        else
+        {
+            // ints --> doubles  (applyScaling)
+            const boost::int32_t xi = srcData.getField<boost::int32_t>(pointIndex, indexXi);
+            const boost::int32_t yi = srcData.getField<boost::int32_t>(pointIndex, indexYi);
+            const boost::int32_t zi = srcData.getField<boost::int32_t>(pointIndex, indexZi);
 
-        xraw = xDim.removeScaling<boost::int32_t>(x);
-        yraw = yDim.removeScaling<boost::int32_t>(y);
-        zraw = zDim.removeScaling<boost::int32_t>(z);
+            const double xd = dimXi.applyScaling(xi);
+            const double yd = dimYi.applyScaling(yi);
+            const double zd = dimZi.applyScaling(zi);
 
-        data.setField<boost::int32_t>(pointIndex, indexX, xraw);
-        data.setField<boost::int32_t>(pointIndex, indexY, yraw);
-        data.setField<boost::int32_t>(pointIndex, indexZ, zraw);
+            dstData.setField<double>(pointIndex, indexXd, xd);
+            dstData.setField<double>(pointIndex, indexYd, yd);
+            dstData.setField<double>(pointIndex, indexZd, zd);
+        }
 
-        data.setNumPoints(pointIndex+1);
+        dstData.setNumPoints(pointIndex+1);
     }
 
     return;

@@ -34,6 +34,8 @@
 
 #include <libpc/filters/ScalingFilterIterator.hpp>
 
+#include <libpc/SchemaLayout.hpp>
+#include <libpc/PointBuffer.hpp>
 #include <libpc/filters/ScalingFilter.hpp>
 
 namespace libpc { namespace filters {
@@ -47,11 +49,13 @@ ScalingFilterSequentialIterator::ScalingFilterSequentialIterator(const ScalingFi
 }
 
 
-boost::uint32_t ScalingFilterSequentialIterator::readImpl(PointBuffer& data)
+boost::uint32_t ScalingFilterSequentialIterator::readImpl(PointBuffer& dstData)
 {
-    const boost::uint32_t numRead = getPrevIterator().read(data);
+    SchemaLayout srcLayout(m_scalingFilter.getPrevStage().getSchema());
+    PointBuffer srcData(srcLayout, dstData.getCapacity());
+    const boost::uint32_t numRead = getPrevIterator().read(srcData);
 
-    m_scalingFilter.processBuffer(data);
+    m_scalingFilter.processBuffer(srcData, dstData);
 
     return numRead;
 }

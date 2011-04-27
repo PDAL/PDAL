@@ -97,6 +97,15 @@ ReprojectionFilter::ReprojectionFilter(const Stage& prevStage,
 
 void ReprojectionFilter::checkImpedance()
 {
+    const Schema& schema = this->getSchema();
+
+    if (!schema.hasDimension(Dimension::Field_X, Dimension::Double) ||
+        !schema.hasDimension(Dimension::Field_Y, Dimension::Double) ||
+        !schema.hasDimension(Dimension::Field_Z, Dimension::Double))
+    {
+        throw impedance_invalid("Reprojection filter requires X,Y,Z dimensions as doubles");
+    }
+
     return;
 }
 
@@ -137,8 +146,6 @@ void ReprojectionFilter::initialize()
 
 void ReprojectionFilter::transform(double& x, double& y, double& z) const
 {
-#ifdef LIBPC_HAVE_GDAL
-    
     int ret = 0;
 
     ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);    
@@ -149,36 +156,6 @@ void ReprojectionFilter::transform(double& x, double& y, double& z) const
         throw std::runtime_error(msg.str());
     }
     
-    //if (m_new_header.get()) 
-    //{
-    //    point.SetHeaderPtr(m_new_header);
-    //}
-
-    //point.SetX(x);
-    //point.SetY(y);
-    //point.SetZ(z);
-    //
-    //if (detail::compare_distance(point.GetRawX(), (std::numeric_limits<boost::int32_t>::max)()) ||
-    //    detail::compare_distance(point.GetRawX(), (std::numeric_limits<boost::int32_t>::min)())) {
-    //    throw std::domain_error("X scale and offset combination is insufficient to represent the data");
-    //}
-
-    //if (detail::compare_distance(point.GetRawY(), (std::numeric_limits<boost::int32_t>::max)()) ||
-    //    detail::compare_distance(point.GetRawY(), (std::numeric_limits<boost::int32_t>::min)())) {
-    //    throw std::domain_error("Y scale and offset combination is insufficient to represent the data");
-    //}    
-
-    //if (detail::compare_distance(point.GetRawZ(), (std::numeric_limits<boost::int32_t>::max)()) ||
-    //    detail::compare_distance(point.GetRawZ(), (std::numeric_limits<boost::int32_t>::min)())) {
-    //    throw std::domain_error("Z scale and offset combination is insufficient to represent the data");
-    //}        
-
-#else
-    boost::ignore_unused_variable_warning(x);
-    boost::ignore_unused_variable_warning(y);
-    boost::ignore_unused_variable_warning(z);
-#endif
-
     return;
 }
 
@@ -204,32 +181,21 @@ void ReprojectionFilter::processBuffer(PointBuffer& data) const
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
 
-    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
-    const Dimension& xDim = schema.getDimension(indexX);
-    const Dimension& yDim = schema.getDimension(indexY);
-    const Dimension& zDim = schema.getDimension(indexZ);
+    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
+    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
+    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        boost::int32_t xraw = data.getField<boost::int32_t>(pointIndex, indexX);
-        boost::int32_t yraw = data.getField<boost::int32_t>(pointIndex, indexY);
-        boost::int32_t zraw = data.getField<boost::int32_t>(pointIndex, indexZ);
-
-        double x = xDim.applyScaling(xraw);
-        double y = yDim.applyScaling(yraw);
-        double z = zDim.applyScaling(zraw);
+        double x = data.getField<boost::int32_t>(pointIndex, indexX);
+        double y = data.getField<boost::int32_t>(pointIndex, indexY);
+        double z = data.getField<boost::int32_t>(pointIndex, indexZ);
 
         this->transform(x,y,z);
 
-        xraw = xDim.removeScaling<boost::int32_t>(x);
-        yraw = yDim.removeScaling<boost::int32_t>(y);
-        zraw = zDim.removeScaling<boost::int32_t>(z);
-
-        data.setField<boost::int32_t>(pointIndex, indexX, xraw);
-        data.setField<boost::int32_t>(pointIndex, indexY, yraw);
-        data.setField<boost::int32_t>(pointIndex, indexZ, zraw);
+        data.setField<double>(pointIndex, indexX, x);
+        data.setField<double>(pointIndex, indexY, y);
+        data.setField<double>(pointIndex, indexZ, z);
 
         data.setNumPoints(pointIndex+1);
     }

@@ -37,10 +37,12 @@
 #include <libpc/SpatialReference.hpp>
 #include <libpc/drivers/las/Reader.hpp>
 #include <libpc/filters/ReprojectionFilter.hpp>
+#include <libpc/filters/ScalingFilter.hpp>
 #include <libpc/Iterator.hpp>
 #include <libpc/Schema.hpp>
 #include <libpc/SchemaLayout.hpp>
 #include <libpc/PointBuffer.hpp>
+#include <libpc/exceptions.hpp>
 
 #include "Support.hpp"
 
@@ -53,6 +55,7 @@ static void getPoint(const libpc::PointBuffer& data, boost::uint32_t pointIndex,
 
     const Schema& schema = data.getSchema();
 
+#if 1
     const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
     const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
     const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
@@ -67,6 +70,18 @@ static void getPoint(const libpc::PointBuffer& data, boost::uint32_t pointIndex,
     x = xDim.applyScaling(xraw);
     y = yDim.applyScaling(yraw);
     z = zDim.applyScaling(zraw);
+#else
+    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
+    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
+    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+    const Dimension& xDim = schema.getDimension(indexX);
+    const Dimension& yDim = schema.getDimension(indexY);
+    const Dimension& zDim = schema.getDimension(indexZ);
+
+    x = data.getField<double>(pointIndex, indexX);
+    y = data.getField<double>(pointIndex, indexY);
+    z = data.getField<double>(pointIndex, indexZ);
+#endif
 
     return;
 }
@@ -80,81 +95,28 @@ BOOST_AUTO_TEST_CASE(test_1)
         
     const libpc::SpatialReference& in_ref = reader1.getSpatialReference();
         
-    const char* utm15_wkt = "PROJCS[\"NAD83 / UTM zone 15N\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.2572221010002,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-93],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"26915\"]]";
-    BOOST_CHECK(in_ref.getWKT() == utm15_wkt);
-
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
-        
-    libpc::SpatialReference out_ref;
-    out_ref.setWKT(epsg4326_wkt);
-    BOOST_CHECK(out_ref.getWKT() == epsg4326_wkt);
-        
-    libpc::filters::ReprojectionFilter filter2(reader2, in_ref, out_ref);
+    libpc::SpatialReference out_ref(epsg4326_wkt);
 
-    ////liblas::HeaderPtr out_hdr = liblas::HeaderPtr(new liblas::Header(header));
-    ////out_hdr->SetScale(0.00000001, 0.00000001, 0.01);
-    ////out_hdr->SetOffset(0,0,0);
-    ////liblas::TransformPtr srs_transform = liblas::TransformPtr(new liblas::ReprojectionTransform(in_ref, out_ref, out_hdr));
+    {
+        const char* utm15_wkt = "PROJCS[\"NAD83 / UTM zone 15N\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.2572221010002,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-93],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"26915\"]]";
+        BOOST_CHECK(in_ref.getWKT() == utm15_wkt);
+        BOOST_CHECK(out_ref.getWKT() == epsg4326_wkt);
+    }
 
-    ////std::vector<liblas::TransformPtr> transforms;
-    ////transforms.push_back(srs_transform);
-    ////reader.ReadPointAt(0);
+    libpc::filters::ScalingFilter scalingFilter(reader2, false);
 
-    ////liblas::Point unprojected_point = reader.GetPoint();
-    //    
-    ////ensure_distance("unprojected_point.GetX()", 
-    ////                    unprojected_point.GetX(), 
-    ////                    double(470692.44), 
-    ////                    0.01);
+    libpc::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+    
+    libpc::filters::ScalingFilter descalingFilter(reprojectionFilter, true);
 
-    ////ensure_distance("unprojected_point.GetY()", 
-    ////    unprojected_point.GetY(), 
-    ////    double(4602888.90), 
-    ////    0.01);
-    //                    
-    ////reader.SetTransforms(transforms);
+    const libpc::Schema& schema1 = reader1.getSchema();
+    const libpc::SchemaLayout layout1(schema1);
+    libpc::PointBuffer data1(layout1, 1);
 
-    ////// This should throw an out of range exception because the given scale/offset 
-    ////// combination is not sufficient to store the data.
-    ////try
-    ////{
-    ////    reader.ReadPointAt(0);
-    ////    ensure("std::domain_error was not thrown", false);
-    ////}
-    ////catch (std::domain_error const& e)
-    ////{
-    ////    ensure(e.what(), true);
-    ////}
-
-
-    ////out_hdr->SetScale(0.0000001, 0.0000001, 0.01);
-    ////out_hdr->SetOffset(0,0,0);
-    ////srs_transform = liblas::TransformPtr(new liblas::ReprojectionTransform(in_ref, out_ref, out_hdr));
-
-    ////transforms.clear();
-    ////transforms.push_back(srs_transform);
-    ////reader.SetTransforms(transforms);
-
-    ////reader.Reset();
-    ////reader.ReadPointAt(0);
-
-
-    ////liblas::Point const& projected_point = reader.GetPoint();
-
-    ////ensure_distance("projected_point.GetX()", 
-    ////    projected_point.GetX(), 
-    ////    double(-93.35156259), 
-    ////    0.0000001);
-    ////ensure_distance("projected_point.GetY()", 
-    ////    projected_point.GetY(), 
-    ////    double(41.57714839), 
-    ////    0.000001);
-
-
-    const libpc::Schema& schema = reader1.getSchema();
-    libpc::SchemaLayout layout(schema);
-    libpc::PointBuffer data1(layout, 1);
-    libpc::PointBuffer data2(layout, 1);
+    const libpc::Schema& schema2 = descalingFilter.getSchema();
+    const libpc::SchemaLayout layout2(schema2);
+    libpc::PointBuffer data2(layout2, 1);
 
     {
         libpc::SequentialIterator* iter1 = reader1.createSequentialIterator();
@@ -164,7 +126,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     }
 
     {
-        libpc::SequentialIterator* iter2 = filter2.createSequentialIterator();
+        libpc::SequentialIterator* iter2 = descalingFilter.createSequentialIterator();
         boost::uint32_t numRead = iter2->read(data2);
         BOOST_CHECK(numRead == 1);
         delete iter2;
@@ -174,9 +136,42 @@ BOOST_AUTO_TEST_CASE(test_1)
     getPoint(data1, 0, x1, y1, z1);
     getPoint(data2, 0, x2, y2, z2);
 
-    BOOST_CHECK(x1 != x2);
-    BOOST_CHECK(y1 != y2);
-    BOOST_CHECK(z1 == z2);
+    BOOST_CHECK_CLOSE(x1, 470692.44, 1);
+    ////BOOST_CHECK_CLOSE(y1, 4602888.90, 1);
+    //BOOST_CHECK_CLOSE(z1, 0, 1);
+
+    BOOST_CHECK_CLOSE(x2, -93.35156259, 1);
+    ////BOOST_CHECK_CLOSE(y2, 41.57714839, 1);
+    //BOOST_CHECK_CLOSE(z2, 0, 1);
+
+    ////////out_hdr->SetScale(0.00000001, 0.00000001, 0.01);
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_impedence_mismatch)
+{
+    libpc::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        
+    const libpc::SpatialReference& in_ref = reader.getSpatialReference();
+        
+    const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
+        
+    libpc::SpatialReference out_ref;
+    out_ref.setWKT(epsg4326_wkt);
+        
+    bool ok = false;
+    try
+    {
+        libpc::filters::ReprojectionFilter filter(reader, in_ref, out_ref);
+        ok = false;
+    }
+    catch (libpc::impedance_invalid&)
+    {
+        ok = true;
+    }
+    BOOST_CHECK(ok == true);
 
     return;
 }

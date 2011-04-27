@@ -53,7 +53,13 @@ class ScalingFilterSequentialIterator;
 class LIBPC_DLL ScalingFilter : public Filter
 {
 public:
-    ScalingFilter(const Stage& prevStage);
+    // for now...
+    //   - we only support scaling of the X,Y,Z fields
+    //   - we only support scaling doubles <--> int32s
+    // notes:
+    //   - "forward=true" means doubles --> ints
+    //   - "forward=false" means ints --> doubles
+    ScalingFilter(const Stage& prevStage, bool forward);
 
     const std::string& getDescription() const;
     const std::string& getName() const;
@@ -68,11 +74,13 @@ public:
     libpc::SequentialIterator* createSequentialIterator() const;
     libpc::RandomIterator* createRandomIterator() const { return NULL; }
 
-    void processBuffer(PointBuffer& data) const;
+    void processBuffer(const PointBuffer& srcData, PointBuffer& dstData) const;
 
 private:
     void checkImpedance();
     void initialize();
+    
+    bool m_forward;
 
     ScalingFilter& operator=(const ScalingFilter&); // not implemented
     ScalingFilter(const ScalingFilter&); // not implemented
