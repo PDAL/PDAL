@@ -210,9 +210,9 @@ void ReprojectionFilter::processBuffer(PointBuffer& data) const
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        double x = data.getField<boost::int32_t>(pointIndex, indexX);
-        double y = data.getField<boost::int32_t>(pointIndex, indexY);
-        double z = data.getField<boost::int32_t>(pointIndex, indexZ);
+        double x = data.getField<double>(pointIndex, indexX);
+        double y = data.getField<double>(pointIndex, indexY);
+        double z = data.getField<double>(pointIndex, indexZ);
 
         this->transform(x,y,z);
 

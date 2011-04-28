@@ -59,7 +59,9 @@ public:
     // notes:
     //   - "forward=true" means doubles --> ints
     //   - "forward=false" means ints --> doubles
+    //   - 1st version uses the scale/offset values already present
     ScalingFilter(const Stage& prevStage, bool forward);
+    ScalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ, bool forward);
 
     const std::string& getDescription() const;
     const std::string& getName() const;
@@ -80,6 +82,9 @@ private:
     void checkImpedance();
     void initialize();
     
+    bool m_customScaleOffset;
+    double m_scaleX, m_scaleY, m_scaleZ;
+    double m_offsetX, m_offsetY, m_offsetZ;
     bool m_forward;
 
     ScalingFilter& operator=(const ScalingFilter&); // not implemented

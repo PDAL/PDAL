@@ -47,6 +47,32 @@ namespace libpc { namespace filters {
 
 ScalingFilter::ScalingFilter(const Stage& prevStage, bool forward)
     : Filter(prevStage)
+    , m_customScaleOffset(false)
+    , m_scaleX(0.0)
+    , m_scaleY(0.0)
+    , m_scaleZ(0.0)
+    , m_offsetX(0.0)
+    , m_offsetY(0.0)
+    , m_offsetZ(0.0)
+    , m_forward(forward)
+{
+    checkImpedance();
+
+    initialize();
+
+    return;
+}
+
+
+ScalingFilter::ScalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ, bool forward)
+    : Filter(prevStage)
+    , m_customScaleOffset(true)
+    , m_scaleX(scaleX)
+    , m_scaleY(scaleY)
+    , m_scaleZ(scaleZ)
+    , m_offsetX(offsetX)
+    , m_offsetY(offsetY)
+    , m_offsetZ(offsetZ)
     , m_forward(forward)
 {
     checkImpedance();
@@ -90,12 +116,24 @@ void ScalingFilter::checkImpedance()
         schema.removeDimension(dimYd);
         schema.removeDimension(dimZd);
 
-        dimXi.setNumericScale(dimXd.getNumericScale());
-        dimXi.setNumericOffset(dimXd.getNumericOffset());
-        dimYi.setNumericScale(dimYd.getNumericScale());
-        dimYi.setNumericOffset(dimYd.getNumericOffset());
-        dimZi.setNumericScale(dimZd.getNumericScale());
-        dimZi.setNumericOffset(dimZd.getNumericOffset());
+        if (m_customScaleOffset)
+        {
+            dimXi.setNumericScale(m_scaleX);
+            dimXi.setNumericOffset(m_offsetX);
+            dimYi.setNumericScale(m_scaleY);
+            dimYi.setNumericOffset(m_offsetY);
+            dimZi.setNumericScale(m_scaleZ);
+            dimZi.setNumericOffset(m_offsetZ);
+        }
+        else
+        {
+            dimXi.setNumericScale(dimXd.getNumericScale());
+            dimXi.setNumericOffset(dimXd.getNumericOffset());
+            dimYi.setNumericScale(dimYd.getNumericScale());
+            dimYi.setNumericOffset(dimYd.getNumericOffset());
+            dimZi.setNumericScale(dimZd.getNumericScale());
+            dimZi.setNumericOffset(dimZd.getNumericOffset());
+        }
 
         schema.addDimension(dimXi);
         schema.addDimension(dimYi);
@@ -125,12 +163,24 @@ void ScalingFilter::checkImpedance()
             throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as int32s not be initially present (reverse direction)");
         }
 
-        dimXd.setNumericScale(dimXi.getNumericScale());
-        dimXd.setNumericOffset(dimXi.getNumericOffset());
-        dimYd.setNumericScale(dimYi.getNumericScale());
-        dimYd.setNumericOffset(dimYi.getNumericOffset());
-        dimZd.setNumericScale(dimZi.getNumericScale());
-        dimZd.setNumericOffset(dimZi.getNumericOffset());
+        if (m_customScaleOffset)
+        {
+            dimXd.setNumericScale(m_scaleX);
+            dimXd.setNumericOffset(m_offsetX);
+            dimYd.setNumericScale(m_scaleY);
+            dimYd.setNumericOffset(m_offsetY);
+            dimZd.setNumericScale(m_scaleZ);
+            dimZd.setNumericOffset(m_offsetY);
+        }
+        else
+        {
+            dimXd.setNumericScale(dimXi.getNumericScale());
+            dimXd.setNumericOffset(dimXi.getNumericOffset());
+            dimYd.setNumericScale(dimYi.getNumericScale());
+            dimYd.setNumericOffset(dimYi.getNumericOffset());
+            dimZd.setNumericScale(dimZi.getNumericScale());
+            dimZd.setNumericOffset(dimZi.getNumericOffset());
+        }
 
         schema.removeDimension(dimXi);
         schema.removeDimension(dimYi);
@@ -205,9 +255,9 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
             const double yd = srcData.getField<double>(pointIndex, indexYd);
             const double zd = srcData.getField<double>(pointIndex, indexZd);
 
-            const boost::int32_t xi = dimXd.removeScaling<boost::int32_t>(xd);
-            const boost::int32_t yi = dimYd.removeScaling<boost::int32_t>(yd);
-            const boost::int32_t zi = dimZd.removeScaling<boost::int32_t>(zd);
+            const boost::int32_t xi = dimXi.removeScaling<boost::int32_t>(xd);
+            const boost::int32_t yi = dimYi.removeScaling<boost::int32_t>(yd);
+            const boost::int32_t zi = dimZi.removeScaling<boost::int32_t>(zd);
 
             dstData.setField<boost::int32_t>(pointIndex, indexXi, xi);
             dstData.setField<boost::int32_t>(pointIndex, indexYi, yi);
@@ -220,9 +270,9 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
             const boost::int32_t yi = srcData.getField<boost::int32_t>(pointIndex, indexYi);
             const boost::int32_t zi = srcData.getField<boost::int32_t>(pointIndex, indexZi);
 
-            const double xd = dimXi.applyScaling(xi);
-            const double yd = dimYi.applyScaling(yi);
-            const double zd = dimZi.applyScaling(zi);
+            const double xd = dimXd.applyScaling(xi);
+            const double yd = dimYd.applyScaling(yi);
+            const double zd = dimZd.applyScaling(zi);
 
             dstData.setField<double>(pointIndex, indexXd, xd);
             dstData.setField<double>(pointIndex, indexYd, yd);
