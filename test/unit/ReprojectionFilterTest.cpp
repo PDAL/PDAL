@@ -82,51 +82,11 @@ static void getPoint(const libpc::PointBuffer& data, double& x, double& y, doubl
 }
 
 
-BOOST_AUTO_TEST_CASE(test_internal_scale)
+// Test reprojecting UTM 15 to DD with a filter
+BOOST_AUTO_TEST_CASE(test_1)
 {
-    // Test reprojecting UTM 15 to DD with a filter
-
-    libpc::drivers::las::LasReader reader1(Support::datapath("utm15.las"));
-    libpc::drivers::las::LasReader reader2(Support::datapath("utm15.las"));
-        
-    const libpc::SpatialReference& in_ref = reader1.getSpatialReference();
-        
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
-    libpc::SpatialReference out_ref(epsg4326_wkt);
-
-    {
-        const char* utm15_wkt = "PROJCS[\"NAD83 / UTM zone 15N\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.2572221010002,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-93],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"26915\"]]";
-        BOOST_CHECK(in_ref.getWKT() == utm15_wkt);
-        BOOST_CHECK(out_ref.getWKT() == epsg4326_wkt);
-    }
-
-    libpc::filters::ScalingFilter scalingFilter(reader2, false);
-
-    libpc::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
-    
-    libpc::filters::ScalingFilter descalingFilter(reprojectionFilter, true);
-
-    const libpc::Schema& schema1 = reader1.getSchema();
-    const libpc::SchemaLayout layout1(schema1);
-    libpc::PointBuffer data1(layout1, 1);
-
-    const libpc::Schema& schema2 = descalingFilter.getSchema();
-    const libpc::SchemaLayout layout2(schema2);
-    libpc::PointBuffer data2(layout2, 1);
-
-    {
-        libpc::SequentialIterator* iter1 = reader1.createSequentialIterator();
-        boost::uint32_t numRead = iter1->read(data1);
-        BOOST_CHECK(numRead == 1);
-        delete iter1;
-    }
-
-    {
-        libpc::SequentialIterator* iter2 = descalingFilter.createSequentialIterator();
-        boost::uint32_t numRead = iter2->read(data2);
-        BOOST_CHECK(numRead == 1);
-        delete iter2;
-    }
+    const char* utm15_wkt = "PROJCS[\"NAD83 / UTM zone 15N\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.2572221010002,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-93],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"26915\"]]";
 
     const double preX = 470692.447538;
     const double preY = 4602888.904642;
@@ -135,95 +95,112 @@ BOOST_AUTO_TEST_CASE(test_internal_scale)
     const double postY = 41.577148;
     const double postZ = 16.000000;
 
-    // note this file has only 1 points, so yes, the extent's mins and maxes are the same
-    const libpc::Bounds<double> oldBounds_ref(preX, preY, preZ, preX, preY, preZ);
-    const libpc::Bounds<double> newBounds_ref(postX, postY, postZ, postX, postY, postZ);
-    const libpc::Bounds<double>& oldBounds = reader1.getBounds();
-    const libpc::Bounds<double>& newBounds = descalingFilter.getBounds();
-    compareBounds(oldBounds_ref, oldBounds);
-    compareBounds(newBounds_ref, newBounds);
+    // we compute three answers:
+    //   (1) w/out reprojection
+    //   (2) with scaling and reproj
+    //   (3) with custom scaling and reproj
 
-    double x1=0, x2=0, y1=0, y2=0, z1=0, z2=0;
-    getPoint(data1, x1, y1, z1, 0.01, 0.01, 0.01);
-    getPoint(data2, x2, y2, z2, 0.01, 0.01, 0.01);
-
-    BOOST_CHECK_CLOSE(x1, preX, 1);
-    BOOST_CHECK_CLOSE(y1, preY, 1);
-    BOOST_CHECK_CLOSE(z1, preZ, 1);
-
-    BOOST_CHECK_CLOSE(x2, postX, 1);
-    BOOST_CHECK_CLOSE(y2, postY, 1);
-    BOOST_CHECK_CLOSE(z2, postZ, 1);
-
-    return;
-}
-
-
-BOOST_AUTO_TEST_CASE(test_custom_scale)
-{
-    // Test reprojecting UTM 15 to DD with a filter
-    libpc::drivers::las::LasReader reader1(Support::datapath("utm15.las"));
-    libpc::drivers::las::LasReader reader2(Support::datapath("utm15.las"));
-        
-    const libpc::SpatialReference& in_ref = reader1.getSpatialReference();
-        
-    const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
-    libpc::SpatialReference out_ref(epsg4326_wkt);
-
+    //
+    // (1)
+    //
     {
-        const char* utm15_wkt = "PROJCS[\"NAD83 / UTM zone 15N\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.2572221010002,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-93],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"26915\"]]";
+        libpc::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        
+        const libpc::SpatialReference in_ref(reader.getSpatialReference());
+        const libpc::SpatialReference out_ref(epsg4326_wkt);
+
         BOOST_CHECK(in_ref.getWKT() == utm15_wkt);
         BOOST_CHECK(out_ref.getWKT() == epsg4326_wkt);
-    }
 
-    // convert to doubles, use internal scale factor
-    libpc::filters::ScalingFilter scalingFilter(reader2, false);
+        const libpc::Schema& schema = reader.getSchema();
+        const libpc::SchemaLayout layout(schema);
+        libpc::PointBuffer data(layout, 1);
 
-    libpc::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+        libpc::SequentialIterator* iter = reader.createSequentialIterator();
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 1);
+        delete iter;
     
-    // convert to ints, using custom scale factor
-    libpc::filters::ScalingFilter descalingFilter(reprojectionFilter, 0.000001, 0.0, 0.000001, 0.0, 0.01, 0.0, true);
+        // note this file has only 1 points, so yes, the extent's mins and maxes are the same
+        const libpc::Bounds<double> oldBounds_ref(preX, preY, preZ, preX, preY, preZ);
+        const libpc::Bounds<double>& oldBounds = reader.getBounds();
+        compareBounds(oldBounds_ref, oldBounds);
 
-    const libpc::Schema& schema1 = reader1.getSchema();
-    const libpc::SchemaLayout layout1(schema1);
-    libpc::PointBuffer data1(layout1, 1);
+        double x=0, y=0, z=0;
+        getPoint(data, x, y, z, 0.01, 0.01, 0.01);
 
-    const libpc::Schema& schema2 = descalingFilter.getSchema();
-    const libpc::SchemaLayout layout2(schema2);
-    libpc::PointBuffer data2(layout2, 1);
-
-    {
-        libpc::SequentialIterator* iter1 = reader1.createSequentialIterator();
-        boost::uint32_t numRead = iter1->read(data1);
-        BOOST_CHECK(numRead == 1);
-        delete iter1;
+        BOOST_CHECK_CLOSE(x, preX, 1);
+        BOOST_CHECK_CLOSE(y, preY, 1);
+        BOOST_CHECK_CLOSE(z, preZ, 1);
     }
 
+    //
+    // (2)
+    //
     {
-        libpc::SequentialIterator* iter2 = descalingFilter.createSequentialIterator();
-        boost::uint32_t numRead = iter2->read(data2);
+        libpc::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+
+        const libpc::SpatialReference in_ref(reader.getSpatialReference());
+        const libpc::SpatialReference out_ref(epsg4326_wkt);
+
+        libpc::filters::ScalingFilter scalingFilter(reader, false);
+        libpc::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+        libpc::filters::ScalingFilter descalingFilter(reprojectionFilter, true);
+
+        const libpc::Schema& schema = descalingFilter.getSchema();
+        const libpc::SchemaLayout layout(schema);
+        libpc::PointBuffer data(layout, 1);
+
+        libpc::SequentialIterator* iter = descalingFilter.createSequentialIterator();
+        boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
-        delete iter2;
+        delete iter;
+
+        const libpc::Bounds<double> newBounds_ref(postX, postY, postZ, postX, postY, postZ);
+        const libpc::Bounds<double>& newBounds = descalingFilter.getBounds();
+        compareBounds(newBounds_ref, newBounds);
+
+        double x=0, y=0, z=0;
+        getPoint(data, x, y, z, 0.01, 0.01, 0.01);
+
+        BOOST_CHECK_CLOSE(x, postX, 1);
+        BOOST_CHECK_CLOSE(y, postY, 1);
+        BOOST_CHECK_CLOSE(z, postZ, 1);
     }
 
-    const double preX = 470692.447538;
-    const double preY = 4602888.904642;
-    const double preZ = 16.000000;
-    const double postX = -93.351563;
-    const double postY = 41.577148;
-    const double postZ = 16.000000;
+    //
+    // (3)
+    //
+    {
+        libpc::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+            
+        const libpc::SpatialReference in_ref(reader.getSpatialReference());
+        const libpc::SpatialReference out_ref(epsg4326_wkt);
 
-    double x1=0, x2=0, y1=0, y2=0, z1=0, z2=0;
-    getPoint(data1, x1, y1, z1, 0.01, 0.01, 0.01);
-    getPoint(data2, x2, y2, z2, 0.000001, 0.000001, 0.01);
+        // convert to doubles, use internal scale factor
+        libpc::filters::ScalingFilter scalingFilter(reader, false);
 
-    BOOST_CHECK_CLOSE(x1, preX, 1);
-    BOOST_CHECK_CLOSE(y1, preY, 1);
-    BOOST_CHECK_CLOSE(z1, preZ, 1);
+        libpc::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+    
+        // convert to ints, using custom scale factor
+        libpc::filters::ScalingFilter descalingFilter(reprojectionFilter, 0.000001, 0.0, 0.000001, 0.0, 0.01, 0.0, true);
 
-    BOOST_CHECK_CLOSE(x2, postX, 1);
-    BOOST_CHECK_CLOSE(y2, postY, 1);
-    BOOST_CHECK_CLOSE(z2, postZ, 1);
+        const libpc::Schema& schema = descalingFilter.getSchema();
+        const libpc::SchemaLayout layout(schema);
+        libpc::PointBuffer data2(layout, 1);
+
+        libpc::SequentialIterator* iter = descalingFilter.createSequentialIterator();
+        boost::uint32_t numRead = iter->read(data2);
+        BOOST_CHECK(numRead == 1);
+        delete iter;
+
+        double x=0, y=0, z=0;
+        getPoint(data2, x, y, z, 0.000001, 0.000001, 0.01);
+
+        BOOST_CHECK_CLOSE(x, postX, 1);
+        BOOST_CHECK_CLOSE(y, postY, 1);
+        BOOST_CHECK_CLOSE(z, postZ, 1);
+    }
 
     return;
 }
