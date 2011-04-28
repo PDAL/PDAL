@@ -49,6 +49,17 @@
 BOOST_AUTO_TEST_SUITE(ReprojectionFilterTest)
 
 
+static void compareBounds(const libpc::Bounds<double>& p, const libpc::Bounds<double>& q)
+{
+    BOOST_CHECK_CLOSE(p.getMinimum(0), q.getMinimum(0), 1);
+    BOOST_CHECK_CLOSE(p.getMinimum(1), q.getMinimum(1), 1);
+    BOOST_CHECK_CLOSE(p.getMinimum(2), q.getMinimum(2), 1);
+    BOOST_CHECK_CLOSE(p.getMaximum(0), q.getMaximum(0), 1);
+    BOOST_CHECK_CLOSE(p.getMaximum(1), q.getMaximum(1), 1);
+    BOOST_CHECK_CLOSE(p.getMaximum(2), q.getMaximum(2), 1);
+}
+
+
 static void getPoint(const libpc::PointBuffer& data, boost::uint32_t pointIndex, double& x, double& y, double& z)
 {
     using namespace libpc;
@@ -132,17 +143,32 @@ BOOST_AUTO_TEST_CASE(test_1)
         delete iter2;
     }
 
+    const double preX = 470692.447538;
+    const double preY = 4602888.904642;
+    const double preZ = 16.000000;
+    const double postX = -93.351563;
+    const double postY = 41.577148;
+    const double postZ = 16.000000;
+
+    // note this file has only 1 points, so yes, the extent's mins and maxes are the same
+    const libpc::Bounds<double> oldBounds_ref(preX, preY, preZ, preX, preY, preZ);
+    const libpc::Bounds<double> newBounds_ref(postX, postY, postZ, postX, postY, postZ);
+    const libpc::Bounds<double>& oldBounds = reader1.getBounds();
+    const libpc::Bounds<double>& newBounds = descalingFilter.getBounds();
+    compareBounds(oldBounds_ref, oldBounds);
+    compareBounds(newBounds_ref, newBounds);
+
     double x1, x2, y1, y2, z1, z2;
     getPoint(data1, 0, x1, y1, z1);
     getPoint(data2, 0, x2, y2, z2);
 
-    BOOST_CHECK_CLOSE(x1, 470692.44, 1);
-    BOOST_CHECK_CLOSE(y1, 4602888.90, 1);
-    BOOST_CHECK_CLOSE(z1, 16, 1);
+    BOOST_CHECK_CLOSE(x1, preX, 1);
+    BOOST_CHECK_CLOSE(y1, preY, 1);
+    BOOST_CHECK_CLOSE(z1, preZ, 1);
 
-    BOOST_CHECK_CLOSE(x2, -93.35156259, 1);
-//////    BOOST_CHECK_CLOSE(y2, 41.57714839, 1); // BUG: I get 90
-//////    BOOST_CHECK_CLOSE(z2, 16, 1); // BUG: I get 0 (no idea what this is supposed to be, not in liblas test)
+    BOOST_CHECK_CLOSE(x2, postX, 1);
+//////    BOOST_CHECK_CLOSE(y2, postY, 1); // BUG: I get 90
+//////    BOOST_CHECK_CLOSE(z2, postZ, 1); // BUG: I get 0 (no idea what this is supposed to be, not in liblas test)
 
     ////////out_hdr->SetScale(0.00000001, 0.00000001, 0.01);
 

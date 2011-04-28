@@ -91,6 +91,29 @@ ReprojectionFilter::ReprojectionFilter(const Stage& prevStage,
 
     initialize();
 
+    updateBounds();
+
+    return;
+}
+
+void ReprojectionFilter::updateBounds()
+{
+    const Bounds<double>& oldBounds = getBounds();
+
+    double minx = oldBounds.getMinimum(0);
+    double miny = oldBounds.getMinimum(1);
+    double minz = oldBounds.getMinimum(2);
+    double maxx = oldBounds.getMaximum(0);
+    double maxy = oldBounds.getMaximum(1);
+    double maxz = oldBounds.getMaximum(2);
+
+    transform(minx, miny, minz);
+    transform(maxx, maxy, maxz);
+
+    Bounds<double> newBounds(minx, miny, minz, maxx, maxy, maxz);
+
+    setBounds(newBounds);
+
     return;
 }
 

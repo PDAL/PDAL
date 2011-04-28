@@ -73,6 +73,7 @@ public:
     void processBuffer(PointBuffer& data) const;
 
 private:
+    void updateBounds();
     void checkImpedance();
     void initialize();
     void transform(double& x, double& y, double& z) const;
