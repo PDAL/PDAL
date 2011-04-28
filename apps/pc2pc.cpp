@@ -190,12 +190,13 @@ int Application_pc2pc::execute()
             if (m_srs.size() > 0)
             {
                 ref.setFromUserInput(m_srs);
-                writer.setSpatialReference(ref);                            
+                writer.setSpatialReference(ref);
             }
         }
         if (hasOption("compress"))
         {
-            writer.setCompressed(true);            
+            if (m_bCompress)
+                writer.setCompressed(true);            
         }
         writer.write(numPoints);
 
