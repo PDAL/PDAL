@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pc:PointCloudSchema xmlns:pc="http://libpc.org/schemas/PC/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <pc:dimension>
+    <pc:position>1</pc:position>
+    <pc:size>8</pc:size>
+    <pc:name>X</pc:name>
+    <pc:interpretation>double</pc:interpretation>
+    <pc:description>x coordinate as a double</pc:description>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>2</pc:position>
+    <pc:size>8</pc:size>
+    <pc:name>Y</pc:name>
+    <pc:interpretation>double</pc:interpretation>
+    <pc:description>y coordinate as a double</pc:description>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>3</pc:position>
+    <pc:size>8</pc:size>
+    <pc:name>Z</pc:name>
+    <pc:interpretation>double</pc:interpretation>
+    <pc:description>z coordinate as a double</pc:description>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>4</pc:position>
+    <pc:size>8</pc:size>
+    <pc:name>Time</pc:name>
+    <pc:description>The GPS Time is the double floating point time tag value at which the point was acquired. It is GPS Week Time if the Global Encoding low bit is clear and Adjusted Standard GPS Time if the Global Encoding low bit is set (see Global Encoding in the Public Header Block description).</pc:description>
+    <pc:interpretation>double</pc:interpretation>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>5</pc:position>
+    <pc:size>8</pc:size>
+    <pc:name>Classification</pc:name>
+    <pc:description>Classification in LAS 1.0 was essentially user defined and optional. LAS 1.1 defines a standard set of ASPRS classifications. In addition, the field is now mandatory. If a point has never been classified, this byte must be set to zero. There are no user defined classes since both point format 0 and point format 1 supply 8 bits per point for user defined operations. Note that the format for classification is a bit encoded field with the lower five bits used for class and the three high bits used for flags.</pc:description>
+    <pc:interpretation>uint8_t</pc:interpretation>    
+  </pc:dimension>  
+  <pc:dimension>
+    <pc:position>6</pc:position>
+    <pc:size>8</pc:size>
+    <pc:name>Intensity</pc:name>
+    <pc:description>The intensity value is the integer representation of the pulse return magnitude. This value is optional and system specific. However, it should always be included if available.</pc:description>
+    <pc:interpretation>int16_t</pc:interpretation>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>7</pc:position>
+    <pc:size>1</pc:size>
+    <pc:interpretation>uint8_t</pc:interpretation>
+    <pc:name>Return Number</pc:name>
+    <pc:description>Return Number: The Return Number is the pulse return number for a given output pulse. A given output laser pulse can have many returns, and they must be marked in sequence of return. The first return will have a Return Number of one, the second a Return Number of two, and so on up to five returns.</pc:description>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>8</pc:position>
+    <pc:size>1</pc:size>
+    <pc:interpretation>uint8_t</pc:interpretation>
+    <pc:name>Number of Returns</pc:name>
+    <pc:description>Number of Returns (for this emitted pulse): The Number of Returns is the total number of returns for a given pulse. For example, a laser data point may be return two (Return Number) within a total number of five returns.</pc:description>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>9</pc:position>
+    <pc:size>1</pc:size>
+    <pc:interpretation>uint8_t</pc:interpretation>
+    <pc:name>Scan Direction</pc:name>
+    <pc:description>The Scan Direction Flag denotes the direction at which the scanner mirror was traveling at the time of the output pulse. A bit value of 1 is a positive scan direction, and a bit value of 0 is a negative scan direction (where positive scan direction is a scan moving from the left side of the in-track direction to the right side and negative the opposite). </pc:description>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>10</pc:position>
+    <pc:size>1</pc:size>
+    <pc:interpretation>uint8_t</pc:interpretation>
+    <pc:name>Flightline Edge</pc:name>
+    <pc:description>The Edge of Flight Line data bit has a value of 1 only when the point is at the end of a scan. It is the last point on a given scan line before it changes direction.</pc:description>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>11</pc:position>
+    <pc:size>1</pc:size>
+    <pc:name>Scan Angle Rank</pc:name>
+    <pc:description>The Scan Angle Rank is a signed one-byte number with a valid range from -90 to +90. The Scan Angle Rank is the angle (rounded to the nearest integer in the absolute value sense) at which the laser point was output from the laser system including the roll of the aircraft. The scan angle is within 1 degree of accuracy from +90 to –90 degrees. The scan angle is an angle based on 0 degrees being nadir, and –90 degrees to the left side of the aircraft in the direction of flight.</pc:description>
+    <pc:interpretation>int8_t</pc:interpretation>    
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>12</pc:position>
+    <pc:size>1</pc:size>
+    <pc:name>User Data</pc:name>
+    <pc:interpretation>uint8_t</pc:interpretation>
+    <pc:description>This field may be used at the users discretion</pc:description>
+    <pc:active>false</pc:active>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>13</pc:position>
+    <pc:size>2</pc:size>
+    <pc:name>Point Source ID</pc:name>
+    <pc:description>This value indicates the file from which this point originated. Valid values for this field are 1 to 65,535 inclusive with zero being used for a special case discussed below. The numerical value corresponds to the File Source ID from which this point originated. Zero is reserved as a convenience to system implementers. A Point Source ID of zero implies that this point originated in this file. This implies that processing software should set the Point Source ID equal to the File Source ID of the file containing this point at some time during processing.</pc:description>
+    <pc:interpretation>uint16_t</pc:interpretation>    
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>14</pc:position>
+    <pc:size>2</pc:size>
+    <pc:name>Red</pc:name>
+    <pc:description>The red image channel value associated with this point</pc:description>
+    <pc:interpretation>uint16_t</pc:interpretation>    
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>15</pc:position>
+    <pc:size>2</pc:size>
+    <pc:name>Green</pc:name>
+    <pc:description>The green image channel value associated with this point</pc:description>
+    <pc:interpretation>uint16_t</pc:interpretation>    
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>16</pc:position>
+    <pc:size>2</pc:size>
+    <pc:name>Blue</pc:name>
+    <pc:description>The blue image channel value associated with this point</pc:description>
+    <pc:interpretation>uint16_t</pc:interpretation>    
+  </pc:dimension>
+</pc:PointCloudSchema>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns:pc="http://libpc.org/schemas/PC/1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://libpc.org/schemas/PC/1.0" version="1.0">
+
+    <xs:simpleType name="interpretationType">
+        <xs:annotation>
+      <xs:documentation>
+            Common interpretations of the data that may be used.  This 
+            type may be extended under the expectation that clients 
+            know how to consume the data.  In the case of string-like 
+            data, use uint8_t (common byte) as the interpretation 
+            and transform accordingly.  Because nulls (or even 
+            multi-byte strings) might be allowed, there are 
+            no common string interpretations provided by default.
+        </xs:documentation>
+    </xs:annotation>   
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="int8_t"/>
+            <xs:enumeration value="uint8_t"/>
+            <xs:enumeration value="int16_t"/>
+            <xs:enumeration value="uint16_t"/>
+            <xs:enumeration value="int32_t"/>
+            <xs:enumeration value="uint32_t"/>
+            <xs:enumeration value="int64_t"/>
+            <xs:enumeration value="uint64_t"/>
+            <xs:enumeration value="double"/>
+            <xs:enumeration value="float"/>
+            <xs:enumeration value="unknown"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="rangeType">
+        <xs:attribute name="units" type="pc:interpretationType"/>
+        <xs:attribute name="value" type="xs:decimal"/>
+    </xs:complexType>
+    
+    <xs:complexType name="dimensionType">
+        <xs:all>
+            <xs:element name="position" type="xs:nonNegativeInteger">
+                <xs:annotation>
+                    <xs:documentation>
+                        The dimension's position in the block of point data
+                        (counting from 0)
+                    </xs:documentation>
+                </xs:annotation>                
+            </xs:element>
+
+            <xs:element name="size" type="xs:nonNegativeInteger">
+                <xs:annotation>
+                    <xs:documentation>
+                        The size of this dimension in bytes.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>            
+            
+            <xs:element minOccurs="0" name="name" type="xs:string"/>
+            <xs:element minOccurs="0" name="description" type="xs:string"/>
+
+            <xs:element minOccurs="0" name="active" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>
+                    A dimension may have be holding its place in bytes but
+                    might not have actual values that mean anything. This flag
+                    can be used to skip the dimension in that case.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
+            
+            <xs:element minOccurs="0" name="interpretation" type="pc:interpretationType">
+                <xs:annotation>
+                    <xs:documentation>
+                        This element describes how the data should be
+                        interpreted. In the case of conflicting data, for
+                        example when then size is 2,  but the
+                        interpretation is "uint32_t", the size determines how
+                        much precision is available.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
+            <xs:element minOccurs="0" name="minimum" type="pc:rangeType">
+                <xs:annotation>
+                    <xs:documentation>
+                        The minimum value of this dimension.
+                    </xs:documentation>
+                </xs:annotation>                   
+            </xs:element>
+
+            <xs:element minOccurs="0" name="maximum" type="pc:rangeType">
+                <xs:annotation>
+                    <xs:documentation>
+                        The maximum value of this dimension.
+                    </xs:documentation>
+                </xs:annotation>   
+            </xs:element>
+
+            <xs:element minOccurs="0" name="offset" type="xs:double">
+                <xs:annotation>
+                    <xs:documentation>
+                        The double offset to use when applying a scaling 
+                        factor to an integer dimension
+                    </xs:documentation>
+                </xs:annotation>   
+            </xs:element>
+            <xs:element minOccurs="0" name="scale" type="xs:double">
+                <xs:annotation>
+                    <xs:documentation>
+                        The scale of this dimension.  Used to support scaled integer types
+                    </xs:documentation>
+                </xs:annotation>   
+            </xs:element>        
+        </xs:all>
+    </xs:complexType>
+    
+  
+    <xs:element name="PointCloudSchema">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" minOccurs="1" name="dimension" type="pc:dimensionType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+        
+              
+
+</xs:schema>

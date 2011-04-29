@@ -41,6 +41,7 @@
 #include <list>
 #include <cstdlib>
 #include <map>
+#include <algorithm>
 
 #include <string.h>
 
@@ -81,7 +82,10 @@ struct SchemaValidCtxtDeleter
    }
 };
 
-
+static bool sort_dimensions(libpc::DimensionLayout const& a, libpc::DimensionLayout const& b)
+{
+   return a < b;
+}
 
 namespace libpc { namespace drivers { namespace oci {
 
@@ -271,7 +275,7 @@ print_element_names(xmlNode * a_node)
 }
 void Schema::LoadSchema()
 {
-    std::map<boost::uint32_t, libpc::Dimension> layouts;
+    std::vector<libpc::DimensionLayout> layouts;
     
     xmlDocPtr doc = static_cast<xmlDocPtr>(m_doc.get());
     xmlNode* root = xmlDocGetRootElement(doc);
@@ -282,14 +286,18 @@ void Schema::LoadSchema()
         throw schema_error("First node of document was not named 'PointCloudSchema'");
     
     xmlNode* dimension = root->children;
+
     
     while(dimension != NULL)
     {
-        if (dimension->type != XML_ELEMENT_NODE) 
+        // printf("node name: %s\n", (const char*)dimension->name);
+        if (dimension->type != XML_ELEMENT_NODE || compare_no_case((const char*)dimension->name, "dimension")) 
         {
             dimension = dimension->next;
             continue;
         }
+
+
 
         xmlNode* properties = dimension->children;
         
@@ -317,7 +325,7 @@ void Schema::LoadSchema()
                 if (!n) throw schema_error("Unable to fetch name!");
                 name = std::string((const char*)n);
                 xmlFree(n);
-                std::cout << "Dimension name: " << name << std::endl;
+                // std::cout << "Dimension name: " << name << std::endl;
             }
 
             if (!compare_no_case((const char*)properties->name, "size"))
@@ -331,7 +339,7 @@ void Schema::LoadSchema()
                 }
                 xmlFree(n);
                 size = static_cast<boost::uint32_t>(s);
-                std::cout << "Dimension size: " << size << std::endl;
+                // std::cout << "Dimension size: " << size << std::endl;
             }
 
             if (!compare_no_case((const char*)properties->name, "position"))
@@ -345,7 +353,7 @@ void Schema::LoadSchema()
                 }
                 xmlFree(n);
                 position = static_cast<boost::uint32_t>(p);
-                std::cout << "Dimension position: " << position << std::endl;
+                // std::cout << "Dimension position: " << position << std::endl;
             }
             if (!compare_no_case((const char*)properties->name, "description"))
             {
@@ -369,7 +377,7 @@ void Schema::LoadSchema()
                 
                 minimum = std::atof((const char*)n);
                 xmlFree(n);
-                std::cout << "Dimension minimum: " << minimum << std::endl;
+                // std::cout << "Dimension minimum: " << minimum << std::endl;
             }
 
             if (!compare_no_case((const char*)properties->name, "maximum"))
@@ -379,7 +387,7 @@ void Schema::LoadSchema()
                 
                 maximum = std::atof((const char*)n);
                 xmlFree(n);
-                std::cout << "Dimension maximum: " << maximum << std::endl;
+                // std::cout << "Dimension maximum: " << maximum << std::endl;
             }
 
             if (!compare_no_case((const char*)properties->name, "offset"))
@@ -389,7 +397,7 @@ void Schema::LoadSchema()
                 
                 offset = std::atof((const char*)n);
                 xmlFree(n);
-                std::cout << "Dimension offset: " << offset << std::endl;
+                // std::cout << "Dimension offset: " << offset << std::endl;
             }
             if (!compare_no_case((const char*)properties->name, "scale"))
             {
@@ -398,7 +406,7 @@ void Schema::LoadSchema()
                 
                 scale = std::atof((const char*)n);
                 xmlFree(n);
-                std::cout << "Dimension scale: " << scale << std::endl;
+                // std::cout << "Dimension scale: " << scale << std::endl;
             }
 
             // printf("property name: %s\n", properties->name);
@@ -409,11 +417,22 @@ void Schema::LoadSchema()
         Dimension::Field f = GetDimensionField(name, position);
         
         Dimension d(f, t);
+        DimensionLayout l(d);
+        l.setPosition(position);
+        layouts.push_back(l);
         
-        layouts.insert(std::pair<boost::uint32_t, libpc::Dimension>(position, d));
         dimension = dimension->next;
     }
     
+    std::sort(layouts.begin(), layouts.end(), sort_dimensions);
+    
+    std::vector<DimensionLayout>::const_iterator i;
+    for (i = layouts.begin(); i!= layouts.end(); ++i)
+    {
+        m_schema.addDimension(i->getDimension());
+    }
+    
+    // m_schema.dump();
 }
 
 Dimension::DataType Schema::GetDimensionType(std::string const& interpretation)
