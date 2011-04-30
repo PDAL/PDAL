@@ -82,6 +82,16 @@ struct SchemaValidCtxtDeleter
    }
 };
 
+struct WriterDeleter
+{
+   template <typename T>
+   void operator()(T* ptr)
+   {
+       ::xmlFreeTextWriter(ptr);
+   }
+};
+
+
 static bool sort_dimensions(libpc::DimensionLayout const& a, libpc::DimensionLayout const& b)
 {
    return a < b;
@@ -273,6 +283,20 @@ print_element_names(xmlNode * a_node)
         print_element_names(cur_node->children);
     }
 }
+
+Schema::TextWriterPtr Schema::writeHeader(DocPtr doc)
+{
+    xmlDoc* d = static_cast<xmlDoc*>(doc.get());
+                             
+    TextWriterPtr writer = TextWriterPtr(xmlNewTextWriterDoc(&d, FALSE), WriterDeleter());
+    
+    xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());
+    
+    xmlTextWriterSetIndent(w, TRUE);
+    xmlTextWriterStartDocument(writer, NULL, "utf-8", NULL);
+    return writer;
+}
+
 void Schema::LoadSchema()
 {
     std::vector<libpc::DimensionLayout> layouts;

@@ -55,6 +55,8 @@
 #include <libxml/tree.h>
 #include <libxml/xinclude.h>
 #include <libxml/xmlIO.h>
+#include <libxml/encoding.h>
+#include <libxml/xmlwriter.h>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/concept_check.hpp>
@@ -84,15 +86,20 @@ private:
     
     Schema& operator=(const Schema&); // not implemented
     Schema(const Schema&); // not implemented;
+
+
     
     // We're going to put all of our libxml2 primatives into shared_ptrs 
     // that have custom deleters that clean up after themselves so we 
-    // have a good chance at having clean exception-safe code
-    
+    // have a good chance at having clean exception-safe code    
     typedef boost::shared_ptr<void> DocPtr;
     typedef boost::shared_ptr<void> SchemaParserCtxtPtr;    
     typedef boost::shared_ptr<void> SchemaPtr;
     typedef boost::shared_ptr<void> SchemaValidCtxtPtr;
+    typedef boost::shared_ptr<void> TextWriterPtr;
+
+    TextWriterPtr writeHeader(DocPtr doc);
+
 
     DocPtr m_doc;
     DocPtr m_schema_doc;
@@ -102,6 +109,7 @@ private:
     SchemaValidCtxtPtr m_schema_valid_ctx;
     
     xmlParserOption m_doc_options;
+
     
     void* m_global_context;
     libpc::Schema m_schema;
