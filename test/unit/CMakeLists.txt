@@ -27,6 +27,7 @@ SET(LIBPC_UNITTEST_TEST_SRC
     MosaicFilterTest.cpp
     PointBufferCacheTest.cpp
     PointBufferTest.cpp
+    QFITReaderTest.cpp
     RangeTest.cpp
     ReprojectionFilterTest.cpp
     SchemaLayoutTest.cpp

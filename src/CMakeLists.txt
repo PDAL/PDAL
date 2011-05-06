@@ -227,6 +227,27 @@ FOREACH(file ${LIBPC_DRIVERS_MRSID_CPP})
 ENDFOREACH(file)
 endif()
 
+
+#
+# drivers/qfit
+#
+set(LIBPC_DRIVERS_QFIT_HPP
+  ${LIBPC_HEADERS_DIR}/drivers/qfit/Reader.hpp
+)
+
+set (LIBPC_DRIVERS_QFIT_CPP 
+  ./drivers/qfit/Reader.cpp
+)
+   
+FOREACH(file ${LIBPC_DRIVERS_QFIT_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+FOREACH(file ${LIBPC_DRIVERS_QFIT_CPP})
+        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+
 #
 # filters
 #
