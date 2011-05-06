@@ -97,6 +97,12 @@ public:
         Field_User7,
         Field_User8,
         Field_User9,
+        Field_User10,
+        Field_User11,
+        Field_User12,
+        Field_User13,
+        Field_User14,
+        Field_User15,
         // ...
         // feel free to use your own int here
 
