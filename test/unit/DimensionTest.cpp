@@ -64,6 +64,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK(d3 == d1);
 
     Dimension d4(Dimension::Field_Y, Dimension::Uint32);
+    d4.setEndianness(Endian_Big);
     BOOST_CHECK(d1 != d4);
     BOOST_CHECK(d4 != d1);
 }

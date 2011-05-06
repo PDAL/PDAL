@@ -54,6 +54,7 @@ bool Dimension::s_fieldNamesValid = false;
 Dimension::Dimension(Field field, DataType dataType)
     : m_dataType(dataType)
     , m_field(field)
+    , m_endian(libpc::Endian_Little)
     , m_byteSize(0)
     , m_description(std::string(""))
     , m_min(0.0)
@@ -69,6 +70,7 @@ Dimension::Dimension(Field field, DataType dataType)
 Dimension::Dimension(Dimension const& other) 
     : m_dataType(other.m_dataType)
     , m_field(other.m_field)
+    , m_endian(other.m_endian)
     , m_byteSize(other.m_byteSize)
     , m_description(other.m_description)
     , m_min(other.m_min)
@@ -86,6 +88,7 @@ Dimension& Dimension::operator=(Dimension const& rhs)
     {
         m_dataType = rhs.m_dataType;
         m_field = rhs.m_field;
+        m_endian = rhs.m_endian;
         m_byteSize = rhs.m_byteSize;
         m_description = rhs.m_description;
         m_min = rhs.m_min;
@@ -103,6 +106,7 @@ bool Dimension::operator==(const Dimension& other) const
 {
     if (m_dataType == other.m_dataType &&
         m_field == other.m_field &&
+        m_endian == other.m_endian &&
         m_byteSize == other.m_byteSize &&
         m_description == other.m_description &&
         Utils::compare_approx(m_min, other.m_min, (std::numeric_limits<double>::min)()) &&
@@ -135,6 +139,11 @@ boost::property_tree::ptree Dimension::GetPTree() const
     dim.put("datatype", getDataTypeName(getDataType()));
     dim.put("description", getDescription());
     dim.put("bytesize", getByteSize());
+    
+    std::string e("little");
+    if (getEndianness() == Endian_Big) 
+        e = std::string("big");
+    dim.put("endianness", e);
 
     if (isNumeric())
     {

@@ -39,6 +39,12 @@
 
 namespace libpc {
 
+enum EndianType
+{
+    Endian_Little,
+    Endian_Big,
+    Endian_Unknown = 128
+};
 
 enum PointCountType
 {

@@ -254,11 +254,23 @@ public:
         m_precise = v;
     }
 
+    /// The scaling value for this dimension as a double.  This should
+    /// be positive or negative powers of ten.
+    inline EndianType getEndianness() const
+    {
+        return m_endian;
+    }
+    inline void setEndianness(EndianType v)
+    {
+        m_endian = v;
+    }
+
     boost::property_tree::ptree GetPTree() const;
 
 private:
     DataType m_dataType;
     Field m_field;
+    EndianType m_endian;
     std::size_t m_byteSize;
     std::string m_description;
     double m_min;
