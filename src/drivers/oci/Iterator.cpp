@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
 *
 * All rights reserved.
 *
