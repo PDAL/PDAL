@@ -239,7 +239,12 @@ public:
     template<class T>
     double applyScaling(T v) const
     {
-        return (double)v * m_numericScale + m_numericOffset;
+        if ( !Utils::compare_approx(m_numericScale, 0.0, (std::numeric_limits<double>::min)()))
+            return (double)v * m_numericScale + m_numericOffset;
+        else 
+        {
+            return v;
+        }
     }
 
     template<class T>
