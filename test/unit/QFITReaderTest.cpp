@@ -53,6 +53,8 @@ BOOST_AUTO_TEST_CASE(test_sequential)
     libpc::Options options;
     std::string filename = Support::datapath("20050903_231839.qi");
     
+    boost::property_tree::ptree& tree = options.GetPTree();
+    tree.put<std::string>("input", filename);
     libpc::drivers::qfit::Reader reader(options);
     BOOST_CHECK(reader.getDescription() == "QFIT Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.qfit.reader");

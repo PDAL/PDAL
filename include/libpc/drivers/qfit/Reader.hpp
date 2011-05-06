@@ -38,16 +38,60 @@
 #include <libpc/libpc.hpp>
 
 #include <libpc/Stage.hpp>
+
+#include <libpc/SchemaLayout.hpp>
+
 #include <libpc/Iterator.hpp>
+#include <libpc/exceptions.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
 #include <vector>
 
+#include <boost/detail/endian.hpp>
+
+#ifdef BOOST_LITTLE_ENDIAN
+# define QFIT_SWAP_BE_TO_LE(p) \
+    do { \
+        char* first = static_cast<char*>(static_cast<void*>(&p)); \
+        char* last = first + sizeof(p) - 1; \
+        for(; first < last; ++first, --last) { \
+            char const x = *last; \
+            *last = *first; \
+            *first = x; \
+        }} while(false)
+
+# define QFIT_SWAP_BE_TO_LE_N(p, n) \
+    do { \
+        char* first = static_cast<char*>(static_cast<void*>(&p)); \
+        char* last = first + n - 1; \
+        for(; first < last; ++first, --last) { \
+            char const x = *last; \
+            *last = *first; \
+            *first = x; \
+        }} while(false)
+#endif
+
 namespace libpc { namespace drivers { namespace qfit {
 
 
+enum QFIT_Format_Type
+{
+    QFIT_Format_10 = 10,
+    QFIT_Format_12 = 12,
+    QFIT_Format_14 = 14,
+    QFIT_Format_Unknown = 128
+};
+
+class qfit_error : public libpc_error
+{
+public:
+
+    qfit_error(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
 
 class LIBPC_DLL Reader : public libpc::Stage
 {
@@ -71,6 +115,8 @@ public:
     
     Options& getOptions() const { return m_options; }
 
+protected:
+    inline QFIT_Format_Type getFormat() const { return m_format; }
 
 private:
 
@@ -78,6 +124,7 @@ private:
     Reader(const Reader&); // not implemented
 
     Options& m_options;
+    QFIT_Format_Type m_format;
     
     void registerFields();
 
