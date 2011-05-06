@@ -43,15 +43,56 @@
 #include <libpc/filters/CacheFilter.hpp>
 #include "Support.hpp"
 
+#include <iostream>
+
 using namespace libpc;
 
 BOOST_AUTO_TEST_SUITE(QfitReaderTest)
 
 
-BOOST_AUTO_TEST_CASE(test_sequential)
+#define Compare(x,y)    BOOST_CHECK_CLOSE(x,y,0.00001);
+
+
+void Check_Point(const libpc::PointBuffer& data, const ::libpc::Schema& schema, 
+                       std::size_t index, 
+                       double xref, double yref, double zref,
+                       boost::int32_t tref)
+{
+
+    int offsetX = schema.getDimensionIndex(libpc::Dimension::Field_X, libpc::Dimension::Int32);
+    int offsetY = schema.getDimensionIndex(libpc::Dimension::Field_Y, libpc::Dimension::Int32);
+    int offsetZ = schema.getDimensionIndex(libpc::Dimension::Field_Z, libpc::Dimension::Int32);
+    int offsetTime = schema.getDimensionIndex(libpc::Dimension::Field_Time, libpc::Dimension::Int32);
+    
+    boost::int32_t x = data.getField<boost::int32_t>(index, offsetX);
+    boost::int32_t y = data.getField<boost::int32_t>(index, offsetY);
+    boost::int32_t z = data.getField<boost::int32_t>(index, offsetZ);
+    boost::int32_t t = data.getField<boost::int32_t>(index, offsetTime);
+
+    double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x);
+    double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y);
+    double z0 = schema.getDimension(offsetZ).applyScaling<boost::int32_t>(z);
+
+  
+    // std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    // std::cout.precision(6);
+    // std::cout << "expected x: " << xref << " y: " << yref << " z: " << zref << " t: " << tref << std::endl;
+    // 
+    // std::cout << "actual   x: " << x0 << " y: " << y0 << " z: " << z0 << " t: " << t << std::endl;
+    // 
+    Compare(x0, xref);
+    Compare(y0, yref);
+    Compare(z0, zref);
+    BOOST_CHECK_EQUAL(t, tref);
+}
+
+BOOST_AUTO_TEST_CASE(test_10_word)
 {
     libpc::Options options;
-    std::string filename = Support::datapath("20050903_231839.qi");
+    // std::string filename = Support::datapath("20050903_231839.qi");
+
+    std::string filename = Support::datapath("qfit/10-word.qi");
+
     
     boost::property_tree::ptree& tree = options.GetPTree();
     tree.put<std::string>("input", filename);
@@ -64,17 +105,54 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 
     PointBuffer data(layout, 3);
     
-    // libpc::SequentialIterator* iter = reader.createSequentialIterator();
-    // 
-    // {
-    //     boost::uint32_t numRead = iter->read(data);
-    //     BOOST_CHECK(numRead == 3);
-    // 
-    // }
+    libpc::SequentialIterator* iter = reader.createSequentialIterator();
+    
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK_EQUAL(numRead,3);
+    }
+
+
+    Check_Point(data, schema, 0, 59.205160, 221.826822, 32090.0, 0);
+    Check_Point(data, schema, 1, 59.205161, 221.826740, 32019.0, 0);
+    Check_Point(data, schema, 2, 59.205164, 221.826658, 32000.0, 0);
+
 
     return;
 }
 
+BOOST_AUTO_TEST_CASE(test_14_word)
+{
+    libpc::Options options;
+    // std::string filename = Support::datapath("20050903_231839.qi");
+
+    std::string filename = Support::datapath("qfit/14-word.qi");
+
+    
+    boost::property_tree::ptree& tree = options.GetPTree();
+    tree.put<std::string>("input", filename);
+    libpc::drivers::qfit::Reader reader(options);
+
+    const Schema& schema = reader.getSchema();
+    SchemaLayout layout(schema);
+
+    PointBuffer data(layout, 3);
+    
+    libpc::SequentialIterator* iter = reader.createSequentialIterator();
+    
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK_EQUAL(numRead,3);
+    }
+
+
+    Check_Point(data, schema, 0, 35.623317, 244.306337, 1056830.000000, 903);
+    Check_Point(data, schema, 1, 35.623280, 244.306260, 1056409.000000, 903);
+    Check_Point(data, schema, 2, 35.623257, 244.306204, 1056483.000000, 903);
+
+
+    return;
+}
 
 
 

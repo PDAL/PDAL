@@ -232,10 +232,12 @@ endif()
 # drivers/qfit
 #
 set(LIBPC_DRIVERS_QFIT_HPP
+  ${LIBPC_HEADERS_DIR}/drivers/qfit/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/drivers/qfit/Reader.hpp
 )
 
 set (LIBPC_DRIVERS_QFIT_CPP 
+  ./drivers/qfit/Iterator.cpp
   ./drivers/qfit/Reader.cpp
 )
    

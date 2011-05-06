@@ -38,14 +38,13 @@
 #include <libpc/libpc.hpp>
 
 #include <libpc/Stage.hpp>
+#include <libpc/Options.hpp>
 
 #include <libpc/SchemaLayout.hpp>
 
 #include <libpc/Iterator.hpp>
 #include <libpc/exceptions.hpp>
 
-#include <boost/scoped_ptr.hpp>
-#include <boost/scoped_array.hpp>
 
 #include <vector>
 
@@ -93,6 +92,31 @@ public:
     {}
 };
 
+class PointIndexes
+{
+public:
+    PointIndexes(const Schema& schema, QFIT_Format_Type format);
+    int Time;
+    int X;
+    int Y;
+    int Z;
+    
+    int StartPulse;
+    int ReflectedPulse;
+    int ScanAngleRank;
+    int Pitch;
+    int Roll;
+    int PDOP;
+    int PulseWidth;
+    int GPSTime;
+    int PassiveSignal;
+    int PassiveX;
+    int PassiveY;
+    int PassiveZ;
+    
+};
+
+
 class LIBPC_DLL Reader : public libpc::Stage
 {
 
@@ -102,18 +126,30 @@ public:
     
     const std::string& getDescription() const;
     const std::string& getName() const;
+    std::string getFileName() const;
+
  
     bool supportsIterator (StageIteratorType t) const
     {   
         if (t == StageIterator_Sequential ) return true;
+        if (t == StageIterator_Random ) return true;
+        
         return false;
     }
 
     boost::uint64_t getNumPoints() { return 0; }
     
     libpc::SequentialIterator* createSequentialIterator() const;
+    libpc::RandomIterator* createRandomIterator() const;
     
     Options& getOptions() const { return m_options; }
+
+    std::size_t getPointDataOffset() const { return m_offset; }
+    boost::uint32_t getPointDataSize() const { return m_size; }
+
+    // this is called by the stage's iterator
+    boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft) const;
+
 
 protected:
     inline QFIT_Format_Type getFormat() const { return m_format; }
@@ -125,6 +161,8 @@ private:
 
     Options& m_options;
     QFIT_Format_Type m_format;
+    std::size_t m_offset;
+    boost::uint32_t m_size;
     
     void registerFields();
 

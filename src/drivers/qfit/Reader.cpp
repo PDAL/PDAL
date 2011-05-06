@@ -168,7 +168,8 @@ Word #       Content
 
 
 #include <libpc/drivers/qfit/Reader.hpp>
-#include <libpc/drivers/oci/Iterator.hpp>
+#include <libpc/drivers/qfit/Iterator.hpp>
+#include <libpc/PointBuffer.hpp>
 #include <libpc/Utils.hpp>
 
 #include <libpc/exceptions.hpp>
@@ -178,12 +179,51 @@ Word #       Content
 
 namespace libpc { namespace drivers { namespace qfit {
 
+PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
+{
+    Time = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Int32);
+    X = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    Y = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+    Z = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+    
+    StartPulse = schema.getDimensionIndex(Dimension::Field_User1, Dimension::Int32);
+    ReflectedPulse = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
+    ScanAngleRank = schema.getDimensionIndex(Dimension::Field_User3, Dimension::Int32);
+    Pitch = schema.getDimensionIndex(Dimension::Field_User4, Dimension::Int32);
+    Roll = schema.getDimensionIndex(Dimension::Field_User5, Dimension::Int32);
+
+    if (format == QFIT_Format_14) 
+    {
+        PassiveSignal = schema.getDimensionIndex(Dimension::Field_User6, Dimension::Int32);
+        PassiveX = schema.getDimensionIndex(Dimension::Field_User7, Dimension::Int32);
+        PassiveY = schema.getDimensionIndex(Dimension::Field_User8, Dimension::Int32);
+        PassiveZ = schema.getDimensionIndex(Dimension::Field_User9, Dimension::Int32);
+        GPSTime = schema.getDimensionIndex(Dimension::Field_User10, Dimension::Int32);
+        
+    } else if (format == QFIT_Format_12)
+    {
+        PDOP = schema.getDimensionIndex(Dimension::Field_User6, Dimension::Int32);
+        PulseWidth = schema.getDimensionIndex(Dimension::Field_User7, Dimension::Int32);
+        GPSTime = schema.getDimensionIndex(Dimension::Field_User8, Dimension::Int32);
+
+    } else
+    {
+        GPSTime = schema.getDimensionIndex(Dimension::Field_User6, Dimension::Int32);
+
+    }
+        
+    return;
+}
+
+
 
 Reader::Reader(Options& options)
     : libpc::Stage()
     , m_options(options)
+    , m_format(QFIT_Format_Unknown)
+    , m_size(0)
 {
-    std::string filename= m_options.GetPTree().get<std::string>("input");
+    std::string filename= getFileName();
     
     std::istream* str = Utils::openFile(filename);
     
@@ -197,15 +237,16 @@ Reader::Reader(Options& options)
     if ( int4 % 4 != 0)
         throw qfit_error("Base QFIT format is not a multiple of 4, unrecognized format!");
     
-    m_format = static_cast<QFIT_Format_Type>(int4/sizeof(int4));
-    // std::cout << "QFIT Point format " << m_format << std::endl;
+    m_size = int4;
+    m_format = static_cast<QFIT_Format_Type>(m_size/sizeof(m_size));
+    // std::cout << "QFIT Point format " << m_format << " with size: " << m_size << std::endl;
     
     // The offset to start reading point data should be here.
-    str->seekg(44);
+    str->seekg(m_size+sizeof(int4));
 
     Utils::read_n(int4, *str, sizeof(int4));
     QFIT_SWAP_BE_TO_LE(int4);
-    std::size_t off = static_cast<std::size_t>(int4);
+    m_offset = static_cast<std::size_t>(int4);
     
     registerFields();
     
@@ -221,7 +262,7 @@ Reader::Reader(Options& options)
     std::ios::off_type size = end - beginning;
 
     // First integer is the format of the file
-    std::ios::off_type offset = static_cast<std::ios::off_type>(off);  
+    std::ios::off_type offset = static_cast<std::ios::off_type>(m_offset);  
     std::ios::off_type length = static_cast<std::ios::off_type>(layout.getByteSize());
     std::ios::off_type point_bytes = end - offset;
 
@@ -229,7 +270,7 @@ Reader::Reader(Options& options)
     // extra slop in there.
     std::ios::off_type count = point_bytes / length;
     std::ios::off_type remainder = point_bytes % length;    
-
+    // 
     // std::cout << "count: " << count << std::endl;
     // std::cout <<" point_bytes: " << point_bytes << std::endl;
     // std::cout <<" length: " << length << std::endl;
@@ -243,7 +284,7 @@ Reader::Reader(Options& options)
         msg <<  "The number of points in the header that was set "
                 "by the software does not match the actual number of points in the file "
                 "as determined by subtracting the data offset (" 
-                << off << ") from the file length (" 
+                << m_offset << ") from the file length (" 
                 << size <<  ") and dividing by the point record length (" 
                 << layout.getByteSize() << ")."
                 " It also does not perfectly contain an exact number of"
@@ -260,7 +301,17 @@ Reader::Reader(Options& options)
 }    
 
 
-
+std::string Reader::getFileName() const
+{
+    try
+    {
+        return m_options.GetPTree().get<std::string>("input");
+        
+    } catch (boost::property_tree::ptree_bad_path const&)
+    {
+        return std::string("");
+    }
+}
 void Reader::registerFields()
 {
     Schema& schema = getSchemaRef();
@@ -422,11 +473,134 @@ Reader::~Reader()
     return;
 }
 
+boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, boost::uint64_t numPointsLeft) const
+{
+    // we must not read more points than are left in the file
+    const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(), numPointsLeft);
+    const boost::uint32_t numPoints = (boost::uint32_t)std::min<boost::uint64_t>(numPoints64, std::numeric_limits<boost::uint32_t>::max());
+
+    const SchemaLayout& schemaLayout = data.getSchemaLayout();
+    const Schema& schema = schemaLayout.getSchema();
+    
+    const int pointByteCount = getPointDataSize();
+    const PointIndexes indexes(schema, m_format);
+    
+    boost::uint8_t* buf = new boost::uint8_t[pointByteCount * numPoints];
+    Utils::read_n(buf, stream, pointByteCount * numPoints);
+
+    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
+    {
+        boost::uint8_t* p = buf + pointByteCount * pointIndex;
+
+        // always read the base fields
+        {
+
+            boost::int32_t time = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(time);
+            data.setField<boost::int32_t>(pointIndex, indexes.Time, time);
+
+            boost::int32_t x = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(x);
+            data.setField<boost::int32_t>(pointIndex, indexes.X, x);
+
+            boost::int32_t y = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(y);
+            data.setField<boost::int32_t>(pointIndex, indexes.Y, y);
+
+            boost::int32_t z = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(z);
+            data.setField<boost::int32_t>(pointIndex, indexes.Z, z);
+
+            boost::int32_t start_pulse = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(start_pulse);
+            data.setField<boost::int32_t>(pointIndex, indexes.StartPulse, start_pulse);
+
+            boost::int32_t reflected_pulse = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(reflected_pulse);
+            data.setField<boost::int32_t>(pointIndex, indexes.ReflectedPulse, reflected_pulse);
+
+            boost::int32_t scan_angle = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(scan_angle);
+            data.setField<boost::int32_t>(pointIndex, indexes.ScanAngleRank, scan_angle);
+
+            boost::int32_t pitch = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(pitch);
+            data.setField<boost::int32_t>(pointIndex, indexes.Pitch, pitch);
+
+            boost::int32_t roll = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(roll);
+            data.setField<boost::int32_t>(pointIndex, indexes.Roll, roll);
+
+        }
+
+        if (m_format == QFIT_Format_12) 
+        {
+            boost::int32_t pdop = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(pdop);
+            data.setField<boost::int32_t>(pointIndex, indexes.PDOP, pdop);
+
+            boost::int32_t pulse_width = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(pulse_width);
+            data.setField<boost::int32_t>(pointIndex, indexes.PulseWidth, pulse_width);
+
+            boost::int32_t gpstime = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(gpstime);
+            data.setField<boost::int32_t>(pointIndex, indexes.GPSTime, gpstime);
+
+        }
+
+        else if (m_format == QFIT_Format_14)
+        {
+            boost::int32_t passive_signal = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(passive_signal);
+            data.setField<boost::int32_t>(pointIndex, indexes.PassiveSignal, passive_signal);
+
+            boost::int32_t passive_x = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(passive_x);
+            data.setField<boost::int32_t>(pointIndex, indexes.PassiveX, passive_x);
+
+            boost::int32_t passive_y = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(passive_y);
+            data.setField<boost::int32_t>(pointIndex, indexes.PassiveY, passive_y);
+
+            boost::int32_t passive_z = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(passive_z);
+            data.setField<boost::int32_t>(pointIndex, indexes.PassiveZ, passive_z);
+
+            boost::int32_t gpstime = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(gpstime);
+            data.setField<boost::int32_t>(pointIndex, indexes.GPSTime, gpstime);
+
+     
+        }
+        else {
+            boost::int32_t gpstime = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(gpstime);
+            data.setField<boost::int32_t>(pointIndex, indexes.GPSTime, gpstime);
+            
+        }
+        data.setNumPoints(pointIndex+1);
+    }
+
+    delete[] buf;
+
+    // data.setSpatialBounds( lasHeader.getBounds() );
+
+    return numPoints;
+}
+
 libpc::SequentialIterator* Reader::createSequentialIterator() const
 {
-    // return new libpc::drivers::qfit::SequentialIterator(*this);
-    return NULL;
+    return new libpc::drivers::qfit::SequentialIterator(*this);
 }
+
+
+libpc::RandomIterator* Reader::createRandomIterator() const
+{
+    return new libpc::drivers::qfit::RandomIterator(*this);
+}
+
+
 
 
 }}} // namespace libpc::driver::oci
