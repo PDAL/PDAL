@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
-*
+* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com *
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -100,13 +99,13 @@ static bool sort_dimensions(libpc::DimensionLayout const& a, libpc::DimensionLay
 namespace libpc { namespace drivers { namespace oci {
 
 
-void OCISchemaStructuredErrorHandler 
+void OCISchemaStructuredErrorHandler
     (void * userData, xmlErrorPtr error)
 {
     std::ostringstream oss;
-    
+
     oss << "XML error: '" << error->message <<"' ";
-    
+
     if (error->str1)
         oss << " extra info1: '" << error->str1 << "' ";
     if (error->str2)
@@ -114,41 +113,41 @@ void OCISchemaStructuredErrorHandler
     if (error->str3)
         oss << " extra info3: '" << error->str3 << "' ";
     oss << "on line " << error->line;
-    
+
     if (error->ctxt)
     {
         xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr) error->ctxt;
         xmlParserInputPtr input = ctxt->input;
-        
+
         xmlParserPrintFileContext(input);
     }
     throw schema_error(oss.str());
 }
 
-void OCISchemaParserStructuredErrorHandler 
+void OCISchemaParserStructuredErrorHandler
     (void * userData, xmlErrorPtr error)
 {
     std::ostringstream oss;
-    
+
     oss << "Schema parsing error: '" << error->message <<"' ";
     oss << "on line " << error->line;
     throw schema_parsing_error(oss.str());
 }
 
-void OCISchemaValidationStructuredErrorHandler 
+void OCISchemaValidationStructuredErrorHandler
     (void * userData, xmlErrorPtr error)
 {
     std::ostringstream oss;
-    
+
     oss << "Schema validation error: '" << error->message <<"' ";
     oss << "on line " << error->line;
     throw schema_validation_error(oss.str());
 }
 
-void OCISchemaValidityError 
+void OCISchemaValidityError
     (void * ctx, const char* message, ... )
 {
-    
+
     const int ERROR_MESSAGE_SIZE = 256;
     char error[ERROR_MESSAGE_SIZE];
     va_list arg_ptr;
@@ -157,18 +156,18 @@ void OCISchemaValidityError
     vsnprintf(error, ERROR_MESSAGE_SIZE, message, arg_ptr);
     va_end(arg_ptr);
 
-    
+
     std::ostringstream oss;
-    
+
     oss << "Schema valididy error: '" << error <<"' ";
     throw schema_validation_error(oss.str());
-    
+
 }
 
-void OCISchemaValidityDebug 
+void OCISchemaValidityDebug
     (void * ctx, const char* message, ... )
 {
-    
+
     const int ERROR_MESSAGE_SIZE = 256;
     char error[ERROR_MESSAGE_SIZE];
     va_list arg_ptr;
@@ -177,19 +176,19 @@ void OCISchemaValidityDebug
     vsnprintf(error, ERROR_MESSAGE_SIZE, message, arg_ptr);
     va_end(arg_ptr);
 
-    
+
     std::ostringstream oss;
-    
+
     oss << "Schema validity debug: '" << error <<"' ";
     std::cout << oss.str() << std::endl;
-    
+
 }
 
 
-void OCISchemaGenericErrorHandler 
+void OCISchemaGenericErrorHandler
     (void * ctx, const char* message, ... )
 {
-    
+
     const int ERROR_MESSAGE_SIZE = 256;
     char error[ERROR_MESSAGE_SIZE];
     va_list arg_ptr;
@@ -198,12 +197,12 @@ void OCISchemaGenericErrorHandler
     vsnprintf(error, ERROR_MESSAGE_SIZE, message, arg_ptr);
     va_end(arg_ptr);
 
-    
+
     std::ostringstream oss;
-    
+
     oss << "Generic error: '" << error <<"' ";
     throw schema_generic_error(oss.str());
-    
+
 }
 
 
@@ -219,47 +218,47 @@ Schema::Schema(std::string const& xml, std::string const &xsd)
 
 
     LIBXML_TEST_VERSION
-    
+
     xmlSetGenericErrorFunc(m_global_context, (xmlGenericErrorFunc) &OCISchemaGenericErrorHandler);
     xmlSetStructuredErrorFunc(m_global_context, (xmlStructuredErrorFunc) & OCISchemaStructuredErrorHandler);
 
 
     m_doc = DocPtr(
-                   xmlReadMemory(xml.c_str(), xml.size(), NULL, NULL, m_doc_options), 
+                   xmlReadMemory(xml.c_str(), xml.size(), NULL, NULL, m_doc_options),
                    XMLDocDeleter());
-                   
+
     m_schema_doc = DocPtr(
-                        xmlReadMemory(xsd.c_str(), xsd.size(), NULL, NULL, m_doc_options), 
+                        xmlReadMemory(xsd.c_str(), xsd.size(), NULL, NULL, m_doc_options),
                          XMLDocDeleter());
 
     m_schema_parser_ctx = SchemaParserCtxtPtr(
                             xmlSchemaNewDocParserCtxt(static_cast<xmlDocPtr>(m_schema_doc.get())),
                             SchemaParserCtxDeleter());
-    
-    xmlSchemaSetParserStructuredErrors(static_cast<xmlSchemaParserCtxtPtr>(m_schema_parser_ctx.get()), 
+
+    xmlSchemaSetParserStructuredErrors(static_cast<xmlSchemaParserCtxtPtr>(m_schema_parser_ctx.get()),
                                         &OCISchemaParserStructuredErrorHandler,
                                         m_global_context);
 
 
     m_schema_ptr = SchemaPtr(
-                    xmlSchemaParse(static_cast<xmlSchemaParserCtxtPtr>(m_schema_parser_ctx.get())), 
+                    xmlSchemaParse(static_cast<xmlSchemaParserCtxtPtr>(m_schema_parser_ctx.get())),
                     SchemaDeleter());
 
     m_schema_valid_ctx = SchemaValidCtxtPtr(
                             xmlSchemaNewValidCtxt(static_cast<xmlSchemaPtr>(m_schema_ptr.get())),
                             SchemaValidCtxtDeleter());
 
-    xmlSchemaSetValidErrors(static_cast<xmlSchemaValidCtxtPtr>(m_schema_valid_ctx.get()), 
+    xmlSchemaSetValidErrors(static_cast<xmlSchemaValidCtxtPtr>(m_schema_valid_ctx.get()),
                             &OCISchemaValidityError,
                             &OCISchemaValidityDebug,
                             m_global_context);
-    
+
     int valid_schema = xmlSchemaValidateDoc(static_cast<xmlSchemaValidCtxtPtr>(m_schema_valid_ctx.get()),
                                               static_cast<xmlDocPtr>(m_doc.get()));
-    
+
     if (valid_schema != 0)
         throw schema_error("Document did not validate against schema!");
-    
+
     LoadSchema();
     return;
 }
@@ -287,35 +286,37 @@ print_element_names(xmlNode * a_node)
 Schema::TextWriterPtr Schema::writeHeader(DocPtr doc)
 {
     xmlDoc* d = static_cast<xmlDoc*>(doc.get());
-                             
+
     TextWriterPtr writer = TextWriterPtr(xmlNewTextWriterDoc(&d, FALSE), WriterDeleter());
-    
+
     xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());
-    
+
     xmlTextWriterSetIndent(w, TRUE);
-    xmlTextWriterStartDocument(writer, NULL, "utf-8", NULL);
+    xmlTextWriterStartDocument(w, NULL, "utf-8", NULL);
+    xmlTextWriterStartElement(w, BAD_CAST "PointCloudSchema");
+    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "pc", NULL, BAD_CAST "http://libpc.org/schemas/PC/1.0");
     return writer;
 }
 
 void Schema::LoadSchema()
 {
     std::vector<libpc::DimensionLayout> layouts;
-    
+
     xmlDocPtr doc = static_cast<xmlDocPtr>(m_doc.get());
     xmlNode* root = xmlDocGetRootElement(doc);
     // print_element_names(root);
 
-    
+
     if (compare_no_case((const char*)root->name, "PointCloudSchema"))
         throw schema_error("First node of document was not named 'PointCloudSchema'");
-    
+
     xmlNode* dimension = root->children;
 
-    
+
     while(dimension != NULL)
     {
         // printf("node name: %s\n", (const char*)dimension->name);
-        if (dimension->type != XML_ELEMENT_NODE || compare_no_case((const char*)dimension->name, "dimension")) 
+        if (dimension->type != XML_ELEMENT_NODE || compare_no_case((const char*)dimension->name, "dimension"))
         {
             dimension = dimension->next;
             continue;
@@ -324,7 +325,7 @@ void Schema::LoadSchema()
 
 
         xmlNode* properties = dimension->children;
-        
+
         std::string name;
         boost::uint32_t size;
         boost::uint32_t position(1);
@@ -334,15 +335,15 @@ void Schema::LoadSchema()
         double scale;
         double minimum;
         double maximum;
-        
+
         while(properties != NULL)
         {
-            if (properties->type != XML_ELEMENT_NODE) 
+            if (properties->type != XML_ELEMENT_NODE)
             {
                 properties = properties->next;
                 continue;
             }
-            
+
             if (!compare_no_case((const char*)properties->name, "name"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
@@ -357,7 +358,7 @@ void Schema::LoadSchema()
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_error("Unable to fetch size!");
                 int s = std::atoi((const char*)n);
-                if (s < 1) 
+                if (s < 1)
                 {
                     throw schema_error("Dimension size is < 1!");
                 }
@@ -371,7 +372,7 @@ void Schema::LoadSchema()
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_error("Unable to fetch position!");
                 int p = std::atoi((const char*)n);
-                if (p < 1) 
+                if (p < 1)
                 {
                     throw schema_error("Dimension position is < 1!");
                 }
@@ -398,7 +399,7 @@ void Schema::LoadSchema()
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
                 if (!n) throw schema_error("Unable to fetch minimum value!");
-                
+
                 minimum = std::atof((const char*)n);
                 xmlFree(n);
                 // std::cout << "Dimension minimum: " << minimum << std::endl;
@@ -408,7 +409,7 @@ void Schema::LoadSchema()
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
                 if (!n) throw schema_error("Unable to fetch maximum value!");
-                
+
                 maximum = std::atof((const char*)n);
                 xmlFree(n);
                 // std::cout << "Dimension maximum: " << maximum << std::endl;
@@ -418,7 +419,7 @@ void Schema::LoadSchema()
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_error("Unable to fetch offset value!");
-                
+
                 offset = std::atof((const char*)n);
                 xmlFree(n);
                 // std::cout << "Dimension offset: " << offset << std::endl;
@@ -427,7 +428,7 @@ void Schema::LoadSchema()
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_error("Unable to fetch scale value!");
-                
+
                 scale = std::atof((const char*)n);
                 xmlFree(n);
                 // std::cout << "Dimension scale: " << scale << std::endl;
@@ -436,26 +437,26 @@ void Schema::LoadSchema()
             // printf("property name: %s\n", properties->name);
             properties = properties->next;
         }
-        
+
         Dimension::DataType t = GetDimensionType(interpretation);
         Dimension::Field f = GetDimensionField(name, position);
-        
+
         Dimension d(f, t);
         DimensionLayout l(d);
         l.setPosition(position);
         layouts.push_back(l);
-        
+
         dimension = dimension->next;
     }
-    
+
     std::sort(layouts.begin(), layouts.end(), sort_dimensions);
-    
+
     std::vector<DimensionLayout>::const_iterator i;
     for (i = layouts.begin(); i!= layouts.end(); ++i)
     {
         m_schema.addDimension(i->getDimension());
     }
-    
+
     // m_schema.dump();
 }
 
@@ -478,36 +479,36 @@ Dimension::DataType Schema::GetDimensionType(std::string const& interpretation)
     // };
 
 
-    if (!compare_no_case(interpretation.c_str(), "int8_t") || 
+    if (!compare_no_case(interpretation.c_str(), "int8_t") ||
         !compare_no_case(interpretation.c_str(), "int8"))
         return Dimension::Int8;
 
-    if (!compare_no_case(interpretation.c_str(), "uint8_t") || 
+    if (!compare_no_case(interpretation.c_str(), "uint8_t") ||
         !compare_no_case(interpretation.c_str(), "uint8"))
         return Dimension::Uint8;
 
-    if (!compare_no_case(interpretation.c_str(), "int16_t") || 
+    if (!compare_no_case(interpretation.c_str(), "int16_t") ||
         !compare_no_case(interpretation.c_str(), "int16"))
         return Dimension::Int16;
 
-    if (!compare_no_case(interpretation.c_str(), "uint16_t") || 
+    if (!compare_no_case(interpretation.c_str(), "uint16_t") ||
         !compare_no_case(interpretation.c_str(), "uint16"))
         return Dimension::Uint16;
-    
-    
-    if (!compare_no_case(interpretation.c_str(), "int32_t") || 
+
+
+    if (!compare_no_case(interpretation.c_str(), "int32_t") ||
         !compare_no_case(interpretation.c_str(), "int32"))
         return Dimension::Int32;
 
-    if (!compare_no_case(interpretation.c_str(), "uint32_t") || 
+    if (!compare_no_case(interpretation.c_str(), "uint32_t") ||
         !compare_no_case(interpretation.c_str(), "uint32"))
         return Dimension::Uint32;
 
-    if (!compare_no_case(interpretation.c_str(), "int64_t") || 
+    if (!compare_no_case(interpretation.c_str(), "int64_t") ||
         !compare_no_case(interpretation.c_str(), "int64"))
         return Dimension::Int64;
 
-    if (!compare_no_case(interpretation.c_str(), "uint64_t") || 
+    if (!compare_no_case(interpretation.c_str(), "uint64_t") ||
         !compare_no_case(interpretation.c_str(), "uint64"))
         return Dimension::Uint64;
 
@@ -523,11 +524,11 @@ Dimension::DataType Schema::GetDimensionType(std::string const& interpretation)
 
 Dimension::Field Schema::GetDimensionField(std::string const& name, boost::uint32_t position)
 {
-    
+
     if (name.size() == 0)
     {
-        // Yes, this is scary.  What else can we do?  The user didn't give us a 
-        // name to map to, so we'll just assume the positions are the same as 
+        // Yes, this is scary.  What else can we do?  The user didn't give us a
+        // name to map to, so we'll just assume the positions are the same as
         // our dimension positions
         for (unsigned int i = 1; i < Dimension::Field_INVALID; ++i)
         {
@@ -535,7 +536,7 @@ Dimension::Field Schema::GetDimensionField(std::string const& name, boost::uint3
                 return static_cast<Dimension::Field>(i);
         }
     }
-    
+
     if (!compare_no_case(name.c_str(), "X"))
         return Dimension::Field_X;
 
