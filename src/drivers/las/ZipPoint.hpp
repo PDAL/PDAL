@@ -49,10 +49,10 @@ class VariableLengthRecord;
 class ZipPoint
 {
 public:
-    ZipPoint(PointFormat);
+    ZipPoint(PointFormat, const std::vector<VariableLengthRecord>& vlrs);
     ~ZipPoint();
 
-    VariableLengthRecord ConstructVLR() const;
+    VariableLengthRecord ConstructVLR(PointFormat format) const;
 
     // this will return false iff we find a laszip VLR and it doesn't match
     // the point format this object was constructed with
@@ -64,6 +64,13 @@ private:
     void ConstructItems(PointFormat);
 
 public: // for now
+    // LASzip::pack() allocates/sets vlr_data and vlr_num for us, and deletes it for us  ["his"]
+    // LASzip::unpack() just reads from the vlr_data we give it (we allocate and delete)  ["our"]
+    int his_vlr_num;
+    unsigned char* his_vlr_data;
+    int our_vlr_num;
+    unsigned char* our_vlr_data;
+
     unsigned int m_num_items;
     LASitem* m_items;
     unsigned char** m_lz_point;

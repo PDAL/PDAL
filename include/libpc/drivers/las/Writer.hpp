@@ -42,6 +42,7 @@
 #include <libpc/drivers/las/SummaryData.hpp>
 
 // liblaszip
+class LASzip;
 class LASzipper;
 
 namespace libpc { namespace drivers { namespace las {
@@ -90,6 +91,7 @@ private:
     boost::uint32_t m_numPointsWritten;
     bool m_isCompressed;
     SummaryData m_summaryData;
+    LASzip* m_zip;
     LASzipper* m_zipper;
     ZipPoint* m_zipPoint;
     SpatialReference m_spatialReference;

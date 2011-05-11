@@ -116,8 +116,8 @@ void LasHeaderWriter::write()
         if (m_header.Compressed())
         {
 #ifdef LIBPC_HAVE_LASZIP
-            ZipPoint zpd(m_header.getPointFormat());
-            VariableLengthRecord v = zpd.ConstructVLR();
+            ZipPoint zpd(m_header.getPointFormat(), m_header.getVLRs().getAll());
+            VariableLengthRecord v = zpd.ConstructVLR(m_header.getPointFormat());
             m_header.getVLRs().add(v);
 #else
             throw configuration_error("LASzip compression support not enabled in this libLAS configuration.");

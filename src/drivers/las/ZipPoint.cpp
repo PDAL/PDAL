@@ -38,6 +38,9 @@
 
 #include "ZipPoint.hpp"
 
+#include <laszip/laszip.hpp>
+#include <laszip/laszipper.hpp>
+
 #include <libpc/exceptions.hpp>
 #include <libpc/drivers/las/VariableLengthRecord.hpp>
 #include <string.h>
@@ -60,14 +63,39 @@ static boost::uint16_t laszip_recordid = 22204;
 static const char* laszip_description = "encoded for sequential access";
 
 
-ZipPoint::ZipPoint(PointFormat format) :
-    m_num_items(0),
-    m_items(NULL),
-    m_lz_point(NULL),
-    m_lz_point_data(NULL),
-    m_lz_point_size(0)
+ZipPoint::ZipPoint(PointFormat format, const std::vector<VariableLengthRecord>& vlrs)
+    : his_vlr_num(0)
+    , his_vlr_data(0)
+    , our_vlr_num(0)
+    , our_vlr_data(0)
+    , m_num_items(0)
+    , m_items(NULL)
+    , m_lz_point(NULL)
+    , m_lz_point_data(NULL)
+    , m_lz_point_size(0)
 {
     ConstructItems(format);
+
+    const VariableLengthRecord* vlr = NULL;
+    for (unsigned int i=0; i<vlrs.size(); i++)
+    {
+        const VariableLengthRecord& p = vlrs[i];
+        if (p.getRecordId() == 22204)
+        {
+            vlr = &p;
+            break;
+        }
+    }
+    if (vlr)
+    {
+        our_vlr_num = vlr->getLength();
+        our_vlr_data = new unsigned char[our_vlr_num];
+        for (int i=0; i<our_vlr_num; i++)
+        {
+            our_vlr_data[i] = vlr->getBytes()[i];
+        }
+    }
+
     return;
 }
 
@@ -80,6 +108,8 @@ ZipPoint::~ZipPoint()
     delete[] m_lz_point;
     delete[] m_lz_point_data;
 
+    delete[] our_vlr_data;
+
     return;
 }
 
@@ -90,37 +120,37 @@ void ZipPoint::ConstructItems(PointFormat format)
     case PointFormat0:
         m_num_items = 1;
         m_items = new LASitem[1];
-        m_items[0].set(LASitem::POINT10);
+        m_items[0].type = LASitem::POINT10;
+        m_items[0].size = 20;
         break;
 
     case PointFormat1:
         m_num_items = 2;
         m_items = new LASitem[2];
-        m_items[0].set(LASitem::POINT10);
-        m_items[1].set(LASitem::GPSTIME11);
+        m_items[0].type = LASitem::POINT10;
+        m_items[0].size = 8;
+        m_items[1].type = LASitem::GPSTIME11;
+        m_items[1].size = 8;
         break;
 
     case PointFormat2:
         m_num_items = 2;
         m_items = new LASitem[2];
-        m_items[0].set(LASitem::POINT10);
-        m_items[1].set(LASitem::RGB12);
+        m_items[0].type = LASitem::POINT10;
+        m_items[0].size = 20;
+        m_items[1].type = LASitem::RGB12;
+        m_items[1].size = 6;
         break;
 
     case PointFormat3:
         m_num_items = 3;
         m_items = new LASitem[3];
-        m_items[0].set(LASitem::POINT10);
-        m_items[1].set(LASitem::GPSTIME11);
-        m_items[2].set(LASitem::RGB12);
-        break;
-
-    case PointFormat4:
-        m_num_items = 3;
-        m_items = new LASitem[3];
-        m_items[0].set(LASitem::POINT10);
-        m_items[1].set(LASitem::GPSTIME11);
-        m_items[2].set(LASitem::WAVEPACKET13);
+        m_items[0].type = LASitem::POINT10;
+        m_items[0].size = 20;
+        m_items[1].type = LASitem::GPSTIME11;
+        m_items[1].size = 8;
+        m_items[2].type = LASitem::RGB12;
+        m_items[2].size = 6;
         break;
 
     default:
@@ -148,68 +178,42 @@ void ZipPoint::ConstructItems(PointFormat format)
 }
 
 
-VariableLengthRecord ZipPoint::ConstructVLR() const
+VariableLengthRecord ZipPoint::ConstructVLR(PointFormat format) const
 {
-    boost::uint16_t record_length_after_header = (boost::uint16_t)(34+6*m_num_items);
-
-    // the data following the header of the variable length record is
-    //     U32  compression        4 bytes   0
-    //     U8   version_major      1 byte    4
-    //     U8   version_minor      1 byte    5
-    //     U16  version_revision   2 bytes   6
-    //     U32  options            4 bytes   8
-    //     U32  num_chunks         4 bytes   12
-    //     I64  num_points         8 bytes   16
-    //     I64  num_bytes          8 bytes   24
-    //     U16  num_items          2 bytes   32
-    //        U16 type                2 bytes * num_items
-    //        U16 size                2 bytes * num_items
-    //        U16 version             2 bytes * num_items
-    // which totals 34+6*num_items
-
-    boost::uint8_t* data = new boost::uint8_t[record_length_after_header];
-    boost::uint8_t* p = data;
-
-    // the header doesn't know what kind of compression the zipwriter 
-    // will be doing, but since we only ever use the default we'll just
-    // use that for now
-    boost::uint32_t compression_type = LASzip::DEFAULT_COMPRESSION;
-    Utils::write_field<boost::uint32_t>(p, compression_type);
-
-    boost::uint8_t version_major = LASZIP_VERSION_MAJOR;
-    Utils::write_field<boost::uint8_t>(p, version_major);
-    boost::uint8_t version_minor = LASZIP_VERSION_MINOR;
-    Utils::write_field<boost::uint8_t>(p, version_minor);
-    boost::uint16_t version_revision = LASZIP_VERSION_REVISION;
-    Utils::write_field<boost::uint16_t>(p, version_revision);
-    
-    boost::uint32_t options = 0;
-    Utils::write_field<boost::uint32_t>(p, options);
-    boost::uint32_t num_chunks = 1;
-    Utils::write_field<boost::uint32_t>(p, num_chunks);
-    boost::int64_t num_points = -1;
-    Utils::write_field<boost::int64_t>(p, num_points);
-    boost::int64_t num_bytes = -1;
-    Utils::write_field<boost::int64_t>(p, num_bytes);
-    boost::uint16_t num_items = (boost::uint16_t)m_num_items;
-    Utils::write_field<boost::uint16_t>(p, num_items);
-
-    for (boost::uint32_t i = 0; i < num_items; i++)
+    unsigned char pointFormat = 0;
+    unsigned short pointSize = 0;
+    switch (format)
     {
-        boost::uint16_t type = (boost::uint16_t)m_items[i].type;
-        Utils::write_field<boost::uint16_t>(p, type);
-        boost::uint16_t size = (boost::uint16_t)m_items[i].size;
-        Utils::write_field<boost::uint16_t>(p, size);
-        boost::uint16_t version = (boost::uint16_t)m_items[i].version;
-        Utils::write_field<boost::uint16_t>(p, version);
+    case PointFormat0:
+        pointFormat = 0;
+        pointSize = Support::getPointDataSize(format);
+        break;
+    case PointFormat1:
+        pointFormat = 1;
+        pointSize = Support::getPointDataSize(format);
+        break;
+    case PointFormat2:
+        pointFormat = 2;
+        pointSize = Support::getPointDataSize(format);
+        break;
+    case PointFormat3:
+        pointFormat = 3;
+        pointSize = Support::getPointDataSize(format);
+        break;
+    default:
+        throw libpc_error("point format not supported by laszip");
     }
 
-    assert(p == data + record_length_after_header);
+    LASzip laszip;
+    laszip.setup(pointFormat, pointSize);
 
-    VariableLengthRecord vlr(0xAABB, laszip_userid, laszip_recordid, laszip_description, data, record_length_after_header);
+    LASzipper zipper;
+    
+    unsigned char* data;
+    int num;
+    laszip.pack(data, num);
 
-    if (data != 0)
-    delete [] data;
+    VariableLengthRecord vlr(0xAABB, laszip_userid, laszip_recordid, laszip_description, data, num);
 
     return vlr;
 }
