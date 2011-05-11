@@ -392,6 +392,7 @@ void Dimension::initFieldNames()
     s_fieldNames[Field_WaveformXt] = "WaveformXt";
     s_fieldNames[Field_WaveformYt] = "WaveformYt";
     s_fieldNames[Field_WaveformZt] = "WaveformZt";
+    s_fieldNames[Field_Alpha] = "Alpha";
 
     s_fieldNamesValid = true;
 }
