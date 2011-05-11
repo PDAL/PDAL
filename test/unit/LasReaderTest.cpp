@@ -126,7 +126,6 @@ BOOST_AUTO_TEST_CASE(test_random)
 
 BOOST_AUTO_TEST_CASE(test_random_laz)
 {
-    return; // BUG
     libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.laz"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 

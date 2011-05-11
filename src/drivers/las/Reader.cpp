@@ -34,12 +34,15 @@
 
 #include <libpc/drivers/las/Reader.hpp>
 
+#include <laszip/lasunzipper.hpp>
+
 #include <libpc/drivers/las/Header.hpp>
 #include <libpc/drivers/las/Iterator.hpp>
 #include <libpc/drivers/las/VariableLengthRecord.hpp>
 #include "LasHeaderReader.hpp"
 #include <libpc/exceptions.hpp>
 #include <libpc/PointBuffer.hpp>
+#include "ZipPoint.hpp"
 
 namespace libpc { namespace drivers { namespace las {
 
@@ -137,6 +140,12 @@ boost::uint64_t LasReader::getPointDataOffset() const
 }
 
 
+bool LasReader::isCompressed() const
+{
+    return m_lasHeader.Compressed();
+}
+
+
 libpc::SequentialIterator* LasReader::createSequentialIterator() const
 {
     return new SequentialIterator(*this);
@@ -149,7 +158,7 @@ libpc::RandomIterator* LasReader::createRandomIterator() const
 }
 
 
-boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream, boost::uint64_t numPointsLeft) const
+boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream, boost::uint64_t numPointsLeft, LASunzipper* unzipper, ZipPoint* zipPoint) const
 {
     // we must not read more points than are left in the file
     const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(), numPointsLeft);
@@ -167,7 +176,35 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
     const int pointByteCount = Support::getPointDataSize(pointFormat);
 
     boost::uint8_t* buf = new boost::uint8_t[pointByteCount * numPoints];
-    Utils::read_n(buf, stream, pointByteCount * numPoints);
+
+    if (zipPoint)
+    {
+        boost::uint8_t* p = buf;
+
+        for (boost::uint32_t i=0; i<numPoints; i++)
+        {
+            bool ok = false;
+            try
+            {
+                ok = unzipper->read(zipPoint->m_lz_point);
+            }
+            catch(...)
+            {
+                throw libpc_error("Error reading compressed point data (1)");
+            }
+            if (!ok)
+            {
+                throw libpc_error("Error reading compressed point data (2)");
+            }
+
+            memcpy(p, zipPoint->m_lz_point_data, zipPoint->m_lz_point_size);
+            p +=  zipPoint->m_lz_point_size;
+        }
+    }
+    else
+    {
+        Utils::read_n(buf, stream, pointByteCount * numPoints);
+    }
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {

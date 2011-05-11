@@ -40,12 +40,40 @@
 #include <libpc/Iterator.hpp>
 #include <iosfwd>
 
+class LASzip;
+class LASunzipper;
 
 namespace libpc { namespace drivers { namespace las {
 
 class LasReader;
+class ZipPoint;
 
-class SequentialIterator : public libpc::SequentialIterator
+
+class IteratorBase
+{
+public:
+    IteratorBase(const LasReader& reader);
+    ~IteratorBase();
+
+private:
+    void initializeZip();
+
+protected:
+    const LasReader& m_reader;
+    std::istream* m_istream;
+
+public:
+    LASzip* m_zip;
+    LASunzipper* m_unzipper;
+    ZipPoint* m_zipPoint;
+
+private:
+    IteratorBase& operator=(const IteratorBase&); // not implemented
+    IteratorBase(const IteratorBase&); // not implemented
+};
+
+
+class SequentialIterator : public IteratorBase, public libpc::SequentialIterator
 {
 public:
     SequentialIterator(const LasReader& reader);
@@ -55,13 +83,10 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readImpl(PointBuffer&);
     bool atEndImpl() const;
-
-    const LasReader& m_reader;
-    std::istream* m_istream;
 };
 
 
-class RandomIterator : public libpc::RandomIterator
+class RandomIterator : public IteratorBase, public libpc::RandomIterator
 {
 public:
     RandomIterator(const LasReader& reader);
@@ -70,9 +95,6 @@ public:
 private:
     boost::uint64_t seekImpl(boost::uint64_t);
     boost::uint32_t readImpl(PointBuffer&);
-
-    const LasReader& m_reader;
-    std::istream* m_istream;
 };
 
 } } } // namespaces
