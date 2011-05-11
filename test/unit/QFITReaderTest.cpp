@@ -112,6 +112,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
         BOOST_CHECK_EQUAL(numRead,3);
     }
 
+    delete iter;
 
     Check_Point(data, schema, 0, 59.205160, 221.826822, 32090.0, 0);
     Check_Point(data, schema, 1, 59.205161, 221.826740, 32019.0, 0);
@@ -145,6 +146,7 @@ BOOST_AUTO_TEST_CASE(test_14_word)
         BOOST_CHECK_EQUAL(numRead,3);
     }
 
+    delete iter;
 
     Check_Point(data, schema, 0, 35.623317, 244.306337, 1056830.000000, 903);
     Check_Point(data, schema, 1, 35.623280, 244.306260, 1056409.000000, 903);
