@@ -127,6 +127,49 @@ BOOST_AUTO_TEST_CASE(test_random)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_random_laz)
+{
+    LiblasReader reader(Support::datapath("1.2-with-color.laz"));
+    BOOST_CHECK(reader.getDescription() == "Liblas Reader");
+
+    const Schema& schema = reader.getSchema();
+    SchemaLayout layout(schema);
+
+    PointBuffer data(layout, 3);
+    
+    libpc::RandomIterator* iter = reader.createRandomIterator();
+
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        Support::check_p0_p1_p2(data, schema);
+    }
+
+    // Can we seek it? Yes, we can!
+    iter->seek(100);
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        Support::check_p100_p101_p102(data, schema);
+    }
+
+    // Can we seek to beginning? Yes, we can!
+    iter->seek(0);
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        Support::check_p0_p1_p2(data, schema);
+    }
+    
+    delete iter;
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_CASE(test_two_iters)
 {
     LiblasReader reader(Support::datapath("1.2-with-color.las"));
