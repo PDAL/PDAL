@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_SUITE(TerraSolidReaderTest)
 void Check_Point(const libpc::PointBuffer& data, const ::libpc::Schema& schema, 
                        std::size_t index, 
                        double xref, double yref, double zref,
-                       boost::int32_t tref)
+                       double tref)
 {
 
     int offsetX = schema.getDimensionIndex(libpc::Dimension::Field_X, libpc::Dimension::Int32);
@@ -67,23 +67,24 @@ void Check_Point(const libpc::PointBuffer& data, const ::libpc::Schema& schema,
     boost::int32_t x = data.getField<boost::int32_t>(index, offsetX);
     boost::int32_t y = data.getField<boost::int32_t>(index, offsetY);
     boost::int32_t z = data.getField<boost::int32_t>(index, offsetZ);
-    boost::int32_t t = data.getField<boost::uint32_t>(index, offsetTime);
+    boost::uint32_t t = data.getField<boost::uint32_t>(index, offsetTime);
 
     double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x);
     double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y);
     double z0 = schema.getDimension(offsetZ).applyScaling<boost::int32_t>(z);
+    double t0 = schema.getDimension(offsetTime).applyScaling<boost::uint32_t>(t);
 
   
-    std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    std::cout.precision(6);
-    std::cout << "expected x: " << xref << " y: " << yref << " z: " << zref << " t: " << tref << std::endl;
-    
-    std::cout << "actual   x: " << x0 << " y: " << y0 << " z: " << z0 << " t: " << t << std::endl;
+    // std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    // std::cout.precision(6);
+    // std::cout << "expected x: " << xref << " y: " << yref << " z: " << zref << " t: " << tref << std::endl;
+    // 
+    // std::cout << "actual   x: " << x0 << " y: " << y0 << " z: " << z0 << " t0: " << t0 << std::endl;
     
     Compare(x0, xref);
     Compare(y0, yref);
     Compare(z0, zref);
-    BOOST_CHECK_EQUAL(t, tref);
+    Compare(t0, tref);
 }
 
 BOOST_AUTO_TEST_CASE(test_10_word)
@@ -91,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     libpc::Options options;
     // std::string filename = Support::datapath("20050903_231839.qi");
 
-    std::string filename = Support::datapath("terrasolid/TerraSolid.bin");
+    std::string filename = Support::datapath("terrasolid/20020715-time-color.bin");
 
     
     boost::property_tree::ptree& tree = options.GetPTree();
@@ -99,6 +100,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     libpc::drivers::terrasolid::Reader reader(options);
     BOOST_CHECK(reader.getDescription() == "TerraSolid Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.terrasolid.reader");
+    BOOST_CHECK_EQUAL(reader.getNumPoints(), 1000);
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
@@ -113,9 +115,9 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     }
 
     
-    Check_Point(data, schema, 0, 59.205160, 221.826822, 32090.0, 0);
-    Check_Point(data, schema, 1, 59.205161, 221.826740, 32019.0, 0);
-    Check_Point(data, schema, 2, 59.205164, 221.826658, 32000.0, 0);
+    Check_Point(data, schema, 0, 363127.94, 3437612.33, 55.26, 580220.5528);
+    Check_Point(data, schema, 1, 363128.12, 3437613.01, 55.33, 580220.5530);
+    Check_Point(data, schema, 2, 363128.29, 3437613.66, 55.28, 580220.5530);
 
 
     return;

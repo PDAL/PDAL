@@ -145,7 +145,6 @@ public:
         return false;
     }
 
-    boost::uint64_t getNumPoints() { return 0; }
     
     libpc::SequentialIterator* createSequentialIterator() const;
     libpc::RandomIterator* createRandomIterator() const;

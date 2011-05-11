@@ -103,7 +103,7 @@ Reader::Reader(Options& options)
     m_header.swap(h);
     Utils::read_n(*m_header, *stream, sizeof(TerraSolidHeader));
 
-    std::cout << "RecogVal: " << m_header->RecogVal << std::endl;
+    // std::cout << "RecogVal: " << m_header->RecogVal << std::endl;
     if ( m_header->RecogVal != 970401)
         throw terrasolid_error("Header identifier was not '970401', is this a TerraSolid .bin file?");
 
@@ -113,6 +113,7 @@ Reader::Reader(Options& options)
     m_haveColor = static_cast<bool>(m_header->Color);
     m_haveTime = static_cast<bool>(m_header->Time);
     m_format = static_cast<TERRASOLID_Format_Type>(m_header->HdrVersion);
+    
     
     if ( !( (m_format==TERRASOLID_Format_1) || (m_format == TERRASOLID_Format_2) ) )
     {
@@ -124,16 +125,20 @@ Reader::Reader(Options& options)
 
     registerFields();
     
-    std::cout << "format: " << m_format << std::endl;
-    std::cout << "OrgX: " << m_header->OrgX << std::endl;
-    std::cout << "OrgY: " << m_header->OrgY << std::endl;
-    std::cout << "OrgZ: " << m_header->OrgZ << std::endl;
-    std::cout << "Units: " << m_header->Units << std::endl;
-    std::cout << "Time: " << m_header->Time << std::endl;
-    std::cout << "Color: " << m_header->Color << std::endl;
-    std::cout << "Count: " << m_header->PntCnt << std::endl;
+    m_offset = 56;
+    SchemaLayout layout(getSchemaRef());
+    m_size = layout.getByteSize();
+    
+    // std::cout << "format: " << m_format << std::endl;
+    // std::cout << "OrgX: " << m_header->OrgX << std::endl;
+    // std::cout << "OrgY: " << m_header->OrgY << std::endl;
+    // std::cout << "OrgZ: " << m_header->OrgZ << std::endl;
+    // std::cout << "Units: " << m_header->Units << std::endl;
+    // std::cout << "Time: " << m_header->Time << std::endl;
+    // std::cout << "Color: " << m_header->Color << std::endl;
+    // std::cout << "Count: " << m_header->PntCnt << std::endl;
    
-    getSchemaRef().dump();
+    // getSchemaRef().dump();
     delete stream;
 }    
 
@@ -275,6 +280,8 @@ void Reader::registerFields()
         Dimension time(Dimension::Field_Time, Dimension::Uint32);
         text << "32 bit integer time stamps. Time stamps are assumed to be GPS week seconds. The storage format is a 32 bit unsigned integer where each integer step is 0.0002 seconds.";
         time.setDescription(text.str());
+        time.setNumericScale(0.0002);
+        time.setNumericOffset(0.0);
         schema.addDimension(time);
         text.str("");
     }
@@ -392,7 +399,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
 
         if (m_format == TERRASOLID_Format_2) 
         {
-
+            // std::cout << "Reading TERRASOLID_Format_2" << std::endl;
             boost::int32_t x = Utils::read_field<boost::int32_t>(p);
             data.setField<boost::int32_t>(pointIndex, indexes.X, x);
             
@@ -401,7 +408,9 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             
             boost::int32_t z = Utils::read_field<boost::int32_t>(p);
             data.setField<boost::int32_t>(pointIndex, indexes.Z, z);
-
+            
+            // std::cout << "x: " << x << " y: " << y << " z: " << z << std::endl;
+            
             boost::uint8_t classification = Utils::read_field<boost::uint8_t>(p);
             data.setField<boost::uint8_t>(pointIndex, indexes.Classification, classification);
             
@@ -426,6 +435,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             {
                 boost::uint32_t time = Utils::read_field<boost::uint32_t>(p);
                 data.setField<boost::uint32_t>(pointIndex, indexes.Time, time);
+                // std::cout << "We have time " << time << std::endl;
             }
             
             if (indexes.Red != -1)
@@ -441,6 +451,8 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
 
                 boost::uint8_t alpha = Utils::read_field<boost::uint8_t>(p);
                 data.setField<boost::uint8_t>(pointIndex, indexes.Alpha, alpha);
+                // std::cout << "Red: " << (int)red << " Green: " << (int)green << " Blue: " << (int)blue << std::endl;
+
             }
         }
 
