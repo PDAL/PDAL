@@ -233,6 +233,7 @@ void LasWriter::writeBegin()
             }
 
             PointFormat format = m_lasHeader.getPointFormat();
+            delete m_zipPoint;
             m_zipPoint = new ZipPoint(format, m_lasHeader.getVLRs().getAll());
 
             unsigned int stat = 1;
