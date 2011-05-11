@@ -34,6 +34,7 @@ SET(LIBPC_UNITTEST_TEST_SRC
     SchemaTest.cpp
     SignallerTest.cpp
     SpatialReferenceTest.cpp
+    TerraSolidTest.cpp
     UtilsTest.cpp
     VectorTest.cpp
     )

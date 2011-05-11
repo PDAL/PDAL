@@ -249,6 +249,26 @@ FOREACH(file ${LIBPC_DRIVERS_QFIT_CPP})
         SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
+#
+# drivers/qfit
+#
+set(LIBPC_DRIVERS_TERRASOLID_HPP
+  ${LIBPC_HEADERS_DIR}/drivers/terrasolid/Iterator.hpp
+  ${LIBPC_HEADERS_DIR}/drivers/terrasolid/Reader.hpp
+)
+
+set (LIBPC_DRIVERS_TERRASOLID_CPP 
+  ./drivers/terrasolid/Iterator.cpp
+  ./drivers/terrasolid/Reader.cpp
+)
+   
+FOREACH(file ${LIBPC_DRIVERS_TERRASOLID_HPP})
+        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
+
+FOREACH(file ${LIBPC_DRIVERS_TERRASOLID_CPP})
+        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+ENDFOREACH(file)
 
 #
 # filters
