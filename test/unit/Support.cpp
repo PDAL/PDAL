@@ -86,13 +86,12 @@ bool Support::compare_files(const std::string& file1, const std::string& file2)
     char* p = buf1;
     char* q = buf2;
 
+    int numdiffs = 0;
     for (uintmax_t i=0; i<len1; i++)
     {
         if (*p != *q) 
         {
-            delete[] buf1;
-            delete[] buf2;
-            return false;
+            ++numdiffs;
         }
         ++p;
         ++q;
@@ -101,7 +100,7 @@ bool Support::compare_files(const std::string& file1, const std::string& file2)
     delete[] buf1;
     delete[] buf2;
 
-    return true;
+    return (numdiffs==0);
 }
 
 
