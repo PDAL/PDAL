@@ -85,6 +85,7 @@ public:
         Field_WaveformXt,
         Field_WaveformYt,
         Field_WaveformZt,
+        Field_Alpha,
         // ...
 
         // add more here
@@ -219,6 +220,13 @@ public:
     }
     inline void setNumericScale(double v)
     {
+        // If you set a scale that isn't 0, you just made the dimension 
+        // finite precision by default.
+        if ( !Utils::compare_approx(v, 0.0, (std::numeric_limits<double>::min)()))
+        {
+            m_precise = true;
+        }        
+
         m_numericScale = v;
     }
 
