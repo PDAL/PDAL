@@ -264,5 +264,9 @@ std::ostream& operator<<(std::ostream& os, Schema const& schema)
     return os;
 }
 
+Schema Schema::from_xml(std::istream* stream)
+{
+    return Schema();
+}
 
 } // namespace libpc

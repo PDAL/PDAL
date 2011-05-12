@@ -39,7 +39,6 @@
 #include <libpc/drivers/oci/Reader.hpp>
 #include <libpc/drivers/oci/Writer.hpp>
 #include <libpc/drivers/oci/Common.hpp>
-#include <libpc/drivers/oci/Schema.hpp>
 
 #include <libpc/drivers/liblas/Reader.hpp>
 
@@ -85,34 +84,6 @@ Options GetOptions()
     return options;
 }
 
-std::string ReadXML(std::string filename)
-{
-
-    std::istream* infile = Utils::openFile(filename, true);
-    std::ifstream::pos_type size;
-    // char* data;
-    std::vector<char> data;
-    if (infile->good()){
-        infile->seekg(0, std::ios::end);
-        size = infile->tellg();
-        data.resize(static_cast<std::vector<char>::size_type>(size));
-        // data = new char [size];
-        infile->seekg (0, std::ios::beg);
-        infile->read (&data.front(), size);
-        // infile->close();
-
-        // delete[] data;
-        delete infile;
-        return std::string(&data[0], data.size());
-        // return data; 
-    } 
-    else 
-    {   
-        throw libpc_error("unable to open file!");
-        // return data;
-    }
-    
-}
 
 void RunSQL(Connection connection, std::string sql)
 {
@@ -188,15 +159,6 @@ BOOST_AUTO_TEST_SUITE(OCITest)
 //     
 // }
 
-BOOST_AUTO_TEST_CASE(test_schema)
-{
-    std::string xml = ReadXML(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
-    std::string xsd = ReadXML(TestConfig::g_data_path+"/schemas/LAS.xsd");
-    
-    libpc::drivers::oci::Schema schema(xml, xsd);
-    
-    
-}
 
 // BOOST_AUTO_TEST_CASE(clean_up)
 // {

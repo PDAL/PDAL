@@ -93,6 +93,9 @@ public:
     boost::property_tree::ptree getPTree() const;
 
     void dump() const;
+    
+    static Schema from_xml(std::istream* stream);
+    static std::ostream* to_xml(Schema const& schema);
 
 private:
     std::vector<Dimension> m_dimensions;

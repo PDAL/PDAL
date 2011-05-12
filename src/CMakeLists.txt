@@ -54,6 +54,7 @@ set(LIBPC_BASE_HPP
   ${LIBPC_HEADERS_DIR}/Stage.hpp
   ${LIBPC_HEADERS_DIR}/Utils.hpp
   ${LIBPC_HEADERS_DIR}/Writer.hpp
+  ${LIBPC_HEADERS_DIR}/XMLSchema.hpp
 )
 
 set(LIBPC_BASE_CPP
@@ -77,6 +78,7 @@ set(LIBPC_BASE_CPP
   Stage.cpp
   Utils.cpp
   Writer.cpp
+  XMLSchema.cpp
 )
 
 FOREACH(file ${LIBPC_BASE_HPP})
@@ -185,7 +187,6 @@ set(LIBPC_DRIVERS_OCI_HPP
   ${LIBPC_HEADERS_DIR}/drivers/oci/Iterator.hpp
   ${LIBPC_HEADERS_DIR}/drivers/oci/oci_wrapper.h
   ${LIBPC_HEADERS_DIR}/drivers/oci/Common.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/oci/Schema.hpp
 )
 
 set (LIBPC_DRIVERS_OCI_CPP 
@@ -194,7 +195,6 @@ set (LIBPC_DRIVERS_OCI_CPP
   ./drivers/oci/Reader.cpp
   ./drivers/oci/Iterator.cpp
   ./drivers/oci/Writer.cpp
-  ./drivers/oci/Schema.cpp
 )
    
 FOREACH(file ${LIBPC_DRIVERS_OCI_HPP})

@@ -31,7 +31,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/oci/Schema.hpp>
+#include <libpc/XMLSchema.hpp>
 #include <libpc/exceptions.hpp>
 #include <libpc/Utils.hpp>
 
@@ -96,7 +96,7 @@ static bool sort_dimensions(libpc::DimensionLayout const& a, libpc::DimensionLay
    return a < b;
 }
 
-namespace libpc { namespace drivers { namespace oci {
+namespace libpc { 
 
 
 void OCISchemaStructuredErrorHandler
@@ -210,7 +210,7 @@ void OCISchemaGenericErrorHandler
 // XML_PARSE_NONET No network access
 // http://xmlsoft.org/html/libxml-parser.html#xmlParserOption
 
-Schema::Schema(std::string const& xml, std::string const &xsd)
+XMLSchema::XMLSchema(std::string const& xml, std::string const &xsd)
 : m_doc_options(XML_PARSE_NONET)
 {
     if (xml.size() == 0) throw schema_generic_error("Inputted XML has no size, is there data there?");
@@ -264,7 +264,7 @@ Schema::Schema(std::string const& xml, std::string const &xsd)
 }
 
 
-Schema::~Schema()
+XMLSchema::~XMLSchema()
 {
 }
 
@@ -283,7 +283,7 @@ print_element_names(xmlNode * a_node)
     }
 }
 
-Schema::TextWriterPtr Schema::writeHeader(DocPtr doc)
+XMLSchema::TextWriterPtr XMLSchema::writeHeader(DocPtr doc)
 {
     xmlDoc* d = static_cast<xmlDoc*>(doc.get());
 
@@ -298,7 +298,7 @@ Schema::TextWriterPtr Schema::writeHeader(DocPtr doc)
     return writer;
 }
 
-void Schema::LoadSchema()
+void XMLSchema::LoadSchema()
 {
     std::vector<libpc::DimensionLayout> layouts;
 
@@ -460,7 +460,7 @@ void Schema::LoadSchema()
     // m_schema.dump();
 }
 
-Dimension::DataType Schema::GetDimensionType(std::string const& interpretation)
+Dimension::DataType XMLSchema::GetDimensionType(std::string const& interpretation)
 {
 
     // enum DataType
@@ -522,7 +522,7 @@ Dimension::DataType Schema::GetDimensionType(std::string const& interpretation)
     return Dimension::Undefined;
 }
 
-Dimension::Field Schema::GetDimensionField(std::string const& name, boost::uint32_t position)
+Dimension::Field XMLSchema::GetDimensionField(std::string const& name, boost::uint32_t position)
 {
 
     if (name.size() == 0)
@@ -592,4 +592,4 @@ Dimension::Field Schema::GetDimensionField(std::string const& name, boost::uint3
     return Dimension::Field_INVALID;
 }
 
-} } } // namespaces
+} // namespaces

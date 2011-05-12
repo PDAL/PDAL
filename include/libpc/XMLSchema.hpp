@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_OCI_SCHEMA_HPP
-#define INCLUDED_DRIVERS_OCI_SCHEMA_HPP
+#ifndef INCLUDED_XMLSCHEMA_HPP
+#define INCLUDED_XMLSCHEMA_HPP
 
 #include <libpc/libpc.hpp>
 #include <libpc/Schema.hpp>
@@ -62,17 +62,52 @@
 #include <boost/concept_check.hpp>
 #include <boost/function.hpp>
 
-namespace libpc { namespace drivers { namespace oci {
+namespace libpc { 
 
 
 void OCISchemaGenericErrorHandler (void * ctx, const char* message, ...);
 void OCISchemaStructuredErrorHandler (void * userData, xmlErrorPtr error);
 
-class LIBPC_DLL Schema
+class schema_error : public libpc_error
 {
 public:
-    Schema(std::string const& xml, std::string const& xmlschema);
-    ~Schema();
+    schema_error(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
+
+
+
+class schema_validation_error : public libpc_error
+{
+public:
+    schema_validation_error(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
+
+class schema_parsing_error : public libpc_error
+{
+public:
+    schema_parsing_error(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
+
+class schema_generic_error : public libpc_error
+{
+public:
+    schema_generic_error(std::string const& msg)
+        : libpc_error(msg)
+    {}
+};
+
+
+class LIBPC_DLL XMLSchema
+{
+public:
+    XMLSchema(std::string const& xml, std::string const& xmlschema);
+    ~XMLSchema();
 
 
 
@@ -84,8 +119,8 @@ protected:
     
 private:
     
-    Schema& operator=(const Schema&); // not implemented
-    Schema(const Schema&); // not implemented;
+    XMLSchema& operator=(const XMLSchema&); // not implemented
+    XMLSchema(const XMLSchema&); // not implemented;
 
 
     
@@ -121,6 +156,6 @@ private:
 
 
 
-} } } // namespaces
+} // namespaces
 
 #endif

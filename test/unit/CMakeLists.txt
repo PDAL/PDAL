@@ -37,6 +37,7 @@ SET(LIBPC_UNITTEST_TEST_SRC
     TerraSolidTest.cpp
     UtilsTest.cpp
     VectorTest.cpp
+    XMLSchemaTest.cpp
     )
 
 SET(LIBPC_UNITTEST_TEST_INC
