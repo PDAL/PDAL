@@ -36,6 +36,9 @@
 
 #include <iostream>
 
+#include "ZipPoint.hpp"
+#include <laszip/lasunzipper.hpp>
+
 #include <libpc/drivers/las/Reader.hpp>
 #include <libpc/exceptions.hpp>
 #include <libpc/Utils.hpp>
@@ -44,28 +47,133 @@
 namespace libpc { namespace drivers { namespace las {
 
 
-SequentialIterator::SequentialIterator(const LasReader& reader)
-    : libpc::SequentialIterator(reader)
-    , m_reader(reader)
+IteratorBase::IteratorBase(const LasReader& reader)
+    : m_reader(reader)
     , m_istream(NULL)
+    , m_zip(NULL)
+    , m_unzipper(NULL)
+    , m_zipPoint(NULL)
 {
     m_istream = Utils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());
+
+    if (m_reader.isCompressed())
+    {
+        initializeZip();
+    }
+
+    return;
+}
+
+
+IteratorBase::~IteratorBase()
+{
+    delete m_unzipper;
+    delete m_zip;
+    delete m_zipPoint;
+    Utils::closeFile(m_istream);
+}
+
+
+void IteratorBase::initializeZip()
+{
+    try
+    {
+        m_zip = new LASzip();
+    }
+    catch(...)
+    {
+        throw libpc_error("Failed to open laszip compression core (1)"); 
+    }
+
+    PointFormat format = m_reader.getPointFormat();
+    delete m_zipPoint;
+    m_zipPoint = new ZipPoint(format, m_reader.getVLRs());
+
+    bool ok = false;
+    try
+    {
+        ok = m_zip->setup((unsigned char)format, (unsigned short)m_reader.getPointDataOffset());
+    }
+    catch(...)
+    {
+        throw libpc_error("Error opening compression core (3)");
+    }
+    if (!ok)
+    {
+        throw libpc_error("Error opening compression core (2)");
+    }
+
+    try
+    {
+
+        ok = m_zip->unpack(m_zipPoint->our_vlr_data, m_zipPoint->our_vlr_num);
+    }
+    catch(...)
+    {
+        throw libpc_error("Failed to open laszip compression core (2)"); 
+    }
+    if (!ok)
+    {
+        throw libpc_error("Failed to open laszip compression core (3)"); 
+    }
+
+    if (!m_unzipper)
+    {
+        try
+        {
+            m_unzipper = new LASunzipper();
+        }
+        catch(...)
+        {
+            throw libpc_error("Failed to open laszip decompression engine (1)"); 
+        }
+
+        unsigned int stat = 1;
+        try
+        {
+            m_istream->seekg(m_reader.getPointDataOffset(), std::ios::beg);
+            stat = m_unzipper->open(*m_istream, m_zip);
+        }
+        catch(...)
+        {
+            throw libpc_error("Failed to open laszip decompression engine (2)"); 
+        }
+        if (stat != 0)
+        {
+            throw libpc_error("Failed to open laszip decompression engine (3)"); 
+        }
+    }
+
+    return;
+}
+
+
+SequentialIterator::SequentialIterator(const LasReader& reader)
+    : IteratorBase(reader)
+    , libpc::SequentialIterator(reader)
+{
     return;
 }
 
 
 SequentialIterator::~SequentialIterator()
 {
-    Utils::closeFile(m_istream);
     return;
 }
 
 
 boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 {
-    boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
-    m_istream->seekg(delta * count, std::ios::cur);
+    if (m_zip)
+    {
+        m_unzipper->seek(getIndex() + count);
+    }
+    else
+    {
+        boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+        m_istream->seekg(delta * count, std::ios::cur);
+    }
     return count;
 }
 
@@ -78,40 +186,43 @@ bool SequentialIterator::atEndImpl() const
 
 boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 {
-    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex());
+    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), m_unzipper, m_zipPoint);
 }
 
 
 
 RandomIterator::RandomIterator(const LasReader& reader)
-    : libpc::RandomIterator(reader)
-    , m_reader(reader)
-    , m_istream(NULL)
+    : IteratorBase(reader)
+    , libpc::RandomIterator(reader)
 {
-    m_istream = Utils::openFile(m_reader.getFileName());
-    m_istream->seekg(m_reader.getPointDataOffset());
     return;
 }
 
 
 RandomIterator::~RandomIterator()
 {
-    Utils::closeFile(m_istream);
     return;
 }
 
 
 boost::uint64_t RandomIterator::seekImpl(boost::uint64_t count)
 {
-    boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
-    m_istream->seekg(m_reader.getPointDataOffset() + delta * count);
+    if (m_zip)
+    {
+        m_unzipper->seek(count);
+    }
+    else
+    {
+        boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+        m_istream->seekg(m_reader.getPointDataOffset() + delta * count);
+    }
     return count;
 }
 
 
 boost::uint32_t RandomIterator::readImpl(PointBuffer& data)
 {
-    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex());
+    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), m_unzipper, m_zipPoint);
 }
 
 

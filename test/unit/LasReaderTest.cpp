@@ -69,6 +69,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
     // Can we seek it? Yes, we can!
     iter->skip(97);
     {
+        BOOST_CHECK(iter->getIndex() == 100);
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
@@ -103,6 +104,7 @@ BOOST_AUTO_TEST_CASE(test_random)
     // Can we seek it? Yes, we can!
     iter->seek(100);
     {
+        BOOST_CHECK(iter->getIndex() == 100);
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
@@ -112,6 +114,52 @@ BOOST_AUTO_TEST_CASE(test_random)
     // Can we seek to beginning? Yes, we can!
     iter->seek(0);
     {
+        BOOST_CHECK(iter->getIndex() == 0);
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        Support::check_p0_p1_p2(data, schema);
+    }
+    
+    delete iter;
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_random_laz)
+{
+    libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.laz"));
+    BOOST_CHECK(reader.getDescription() == "Las Reader");
+
+    const Schema& schema = reader.getSchema();
+    SchemaLayout layout(schema);
+
+    PointBuffer data(layout, 3);
+    
+    libpc::RandomIterator* iter = reader.createRandomIterator();
+
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        Support::check_p0_p1_p2(data, schema);
+    }
+
+    // Can we seek it? Yes, we can!
+    iter->seek(100);
+    {
+        BOOST_CHECK(iter->getIndex() == 100);
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        Support::check_p100_p101_p102(data, schema);
+    }
+
+    // Can we seek to beginning? Yes, we can!
+    iter->seek(0);
+    {
+        BOOST_CHECK(iter->getIndex() == 0);
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 

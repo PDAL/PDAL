@@ -57,6 +57,7 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
     , m_ostream(ostream)
     , m_numPointsWritten(0)
     , m_isCompressed(false)
+    , m_zip(NULL)
     , m_zipper(NULL)
     , m_zipPoint(NULL)
 {
@@ -70,6 +71,7 @@ LasWriter::~LasWriter()
 {
     delete m_zipper;
     delete m_zipPoint;
+    delete m_zip;
 }
 
 
@@ -174,40 +176,87 @@ void LasWriter::writeBegin()
         m_zipper = NULL;
         m_zipPoint = NULL;
 
-        try
+        if (m_zip==NULL)
         {
-            m_zipper = new LASzipper();
-        }
-        catch(...)
-        {
-            delete m_zipper;
-            m_zipper = NULL;
-            throw libpc_error("Error opening compression engine (1)");
+            try
+            {
+                m_zip = new LASzip();
+            }
+            catch(...)
+            {
+                throw libpc_error("Error opening compression core (1)");
+            }
+
+            PointFormat format = m_lasHeader.getPointFormat();
+            delete m_zipPoint;
+            m_zipPoint = new ZipPoint(format, m_lasHeader.getVLRs().getAll());
+
+            bool ok = false;
+            try
+            {
+                ok = m_zip->setup((unsigned char)format, m_lasHeader.GetDataRecordLength());
+            }
+            catch(...)
+            {
+                throw libpc_error("Error opening compression core (3)");
+            }
+            if (!ok)
+            {
+                throw libpc_error("Error opening compression core (2)");
+            }
+
+            try
+            {
+                ok = m_zip->pack(m_zipPoint->his_vlr_data, m_zipPoint->his_vlr_num);
+            }
+            catch(...)
+            {
+                throw libpc_error("Error opening compression core (3)");
+            }
+            if (!ok)
+            {
+                throw libpc_error("Error opening compression core (2)");
+            }
         }
 
-        PointFormat format = m_lasHeader.getPointFormat();
-        m_zipPoint = new ZipPoint(format);
+        if (m_zipper == NULL)
+        {
+            try
+            {
+                m_zipper = new LASzipper();
+            }
+            catch(...)
+            {
+                delete m_zipper;
+                m_zipper = NULL;
+                throw libpc_error("Error opening compression engine (1)");
+            }
 
-        unsigned int stat = 1;
-        try
-        {
-            stat = m_zipper->open(m_ostream, m_zipPoint->m_num_items, m_zipPoint->m_items, LASzip::DEFAULT_COMPRESSION);
-        }
-        catch(...)
-        {
-            delete m_zipper;
+            PointFormat format = m_lasHeader.getPointFormat();
             delete m_zipPoint;
-            m_zipper = NULL;
-            m_zipPoint = NULL;
-            throw libpc_error("Error opening compression engine (3)");
-        }
-        if (stat != 0)
-        {
-            delete m_zipper;
-            delete m_zipPoint;
-            m_zipper = NULL;
-            m_zipPoint = NULL;
-            throw libpc_error("Error opening compression engine (2)");
+            m_zipPoint = new ZipPoint(format, m_lasHeader.getVLRs().getAll());
+
+            unsigned int stat = 1;
+            try
+            {
+                stat = m_zipper->open(m_ostream, m_zip);
+            }
+            catch(...)
+            {
+                delete m_zipper;
+                delete m_zipPoint;
+                m_zipper = NULL;
+                m_zipPoint = NULL;
+                throw libpc_error("Error opening compression engine (3)");
+            }
+            if (stat != 0)
+            {
+                delete m_zipper;
+                delete m_zipPoint;
+                m_zipper = NULL;
+                m_zipPoint = NULL;
+                throw libpc_error("Error opening compression engine (2)");
+            }
         }
     }
 

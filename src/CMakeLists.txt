@@ -250,7 +250,7 @@ FOREACH(file ${LIBPC_DRIVERS_QFIT_CPP})
 ENDFOREACH(file)
 
 #
-# drivers/qfit
+# drivers/terrasolid
 #
 set(LIBPC_DRIVERS_TERRASOLID_HPP
   ${LIBPC_HEADERS_DIR}/drivers/terrasolid/Iterator.hpp
@@ -355,15 +355,19 @@ source_group("Header Files\\drivers\\faux" FILES ${LIBPC_DRIVERS_FAUX_HPP})
 source_group("Header Files\\drivers\\las" FILES ${LIBPC_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\liblas" FILES ${LIBPC_DRIVERS_LIBLAS_HPP})
 source_group("Header Files\\drivers\\oci" FILES ${LIBPC_DRIVERS_OCI_HPP})
+source_group("Header Files\\drivers\\qfit" FILES ${LIBPC_DRIVERS_QFIT_HPP})
+source_group("Header Files\\drivers\\terrasolid" FILES ${LIBPC_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\filters" FILES ${LIBPC_FILTERS_HPP})
 
 source_group("Source Files" FILES ${LIBPC_BASE_CPP})
 source_group("Source Files\\config" FILES ${LIBPC_CONFIG_CPP})
-source_group("Source Files\\filter" FILES ${LIBPC_FILTERS_CPP})
 source_group("Source Files\\drivers\\faux" FILES ${LIBPC_DRIVERS_FAUX_CPP})
 source_group("Source Files\\drivers\\las" FILES ${LIBPC_DRIVERS_LAS_CPP})
 source_group("Source Files\\drivers\\liblas" FILES ${LIBPC_DRIVERS_LIBLAS_CPP})
 source_group("Source Files\\drivers\\oci" FILES ${LIBPC_DRIVERS_OCI_CPP})
+source_group("Source Files\\drivers\\qfit" FILES ${LIBPC_DRIVERS_QFIT_CPP})
+source_group("Source Files\\drivers\\terrasolid" FILES ${LIBPC_DRIVERS_TERRASOLID_CPP})
+source_group("Source Files\\filters" FILES ${LIBPC_FILTERS_CPP})
 
 #
 # rest of stuff

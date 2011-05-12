@@ -41,6 +41,7 @@
 #include <libpc/drivers/las/Header.hpp>
 #include <libpc/drivers/las/ReaderBase.hpp>
 
+class LASunzipper;
 
 namespace libpc
 {
@@ -50,6 +51,7 @@ namespace libpc
 namespace libpc { namespace drivers { namespace las {
 
 class LasHeader;
+class ZipPoint;
 
 class LIBPC_DLL LasReader : public LasReaderBase
 {
@@ -73,7 +75,7 @@ public:
     libpc::RandomIterator* createRandomIterator() const;
 
     // this is called by the stage's iterator
-    boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft) const;
+    boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft, LASunzipper* unzipper, ZipPoint* zipPoint) const;
 
     int getMetadataRecordCount() const;
     const MetadataRecord& getMetadataRecord(int index) const;
@@ -86,6 +88,8 @@ public:
 
     // we shouldn't have to expose this
     const std::vector<VariableLengthRecord>& getVLRs() const;
+
+    bool isCompressed() const;
 
 protected:
     const LasHeader& getLasHeader() const { return m_lasHeader; }
