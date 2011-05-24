@@ -59,7 +59,7 @@ using namespace libpc;
 std::string ReadXML(std::string filename)
 {
 
-    std::istream* infile = Utils::openFile(filename, true);
+    std::istream* infile = Utils::openFile(filename);
     std::ifstream::pos_type size;
     // char* data;
     std::vector<char> data;
@@ -93,48 +93,40 @@ BOOST_AUTO_TEST_SUITE(XMLSchemaTest)
 
 BOOST_AUTO_TEST_CASE(test_schema_read)
 {
-    std::istream* xml_stream = Utils::openFile(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
-    std::istream* xsd_stream = Utils::openFile(TestConfig::g_data_path+"/schemas/LAS.xsd");
+    // std::istream* xml_stream = Utils::openFile(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
+    // std::istream* xsd_stream = Utils::openFile(TestConfig::g_data_path+"/schemas/LAS.xsd");
     
+    std::string xml = ReadXML(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
+    std::string xsd = ReadXML(TestConfig::g_data_path+"/schemas/LAS.xsd");
+    libpc::schema::Reader reader(xml, xsd);
     
-    libpc::schema::Reader schema(xml_stream, xsd_stream);
+    libpc::Schema schema = reader.getSchema();
     
+    libpc::schema::Writer writer(schema);
+    std::string xml_output = writer.write();
+
+    libpc::schema::Reader reader2(xml_output, xsd);
+    libpc::Schema schema2 = reader2.getSchema();
+    
+    libpc::Schema::Dimensions const& dims1 = schema.getDimensions();
+    libpc::Schema::Dimensions const& dims2 = schema2.getDimensions();
+    
+    BOOST_CHECK_EQUAL(dims1.size(), dims2.size());
+    
+    for (boost::uint32_t i = 0; i < dims2.size(); ++i)
+    {
+        libpc::Dimension const& dim1 = schema.getDimension(i);
+        libpc::Dimension const& dim2 = schema2.getDimension(i);
+    
+        BOOST_CHECK_EQUAL(dim1.getDataType(), dim2.getDataType());
+        BOOST_CHECK_EQUAL(dim1.getByteSize(), dim2.getByteSize());
+
+        BOOST_CHECK_EQUAL(dim1.getField(), dim2.getField());
+        BOOST_CHECK_EQUAL(dim1.getDescription(), dim2.getDescription());
+        
+    }
     
 }
 
-
-BOOST_AUTO_TEST_CASE(test_schema_writer)
-{
-    libpc::drivers::las::LasReader reader(TestConfig::g_data_path+"1.2-with-color.las");
-    BOOST_CHECK(reader.getDescription() == "Las Reader");
-
-    const Schema& schema = reader.getSchema();
-    SchemaLayout layout(schema);
-     
-    Schema s(schema);
-    Dimension& d = s.getDimension(15);
-    d.setMinimum(14.00);
-    d.setMaximum(142.00);
-    libpc::schema::Writer sw(s);
-    sw.write();// << std::endl;
-    
-    
-}
-// BOOST_AUTO_TEST_CASE(clean_up)
-// {
-//     if (!ShouldRunTest()) return;
-//     
-//     libpc::drivers::oci::Options options = GetOptions();
-//     
-//     Connection connection = Connect(options);
-// 
-//     std::string base_table_name = options.GetPTree().get<std::string>("base_table_name");
-//     std::string block_table_name = options.GetPTree().get<std::string>("block_table_name");
-//     
-//     std::string drop_base_table = "DROP TABLE " + base_table_name;
-//     std::string drop_block_table = "DROP TABLE " + block_table_name;
-//     RunSQL(connection, drop_base_table);
-//     RunSQL(connection, drop_block_table);    
-// }
 
 BOOST_AUTO_TEST_SUITE_END()
