@@ -42,6 +42,8 @@
 #include <libpc/drivers/faux/Reader.hpp>
 #include <libpc/drivers/faux/Writer.hpp>
 
+#include <libpc/drivers/las/Reader.hpp>
+
 #include <libpc/Iterator.hpp>
 #include <libpc/Utils.hpp>
 
@@ -89,16 +91,35 @@ BOOST_AUTO_TEST_SUITE(XMLSchemaTest)
 
 
 
-BOOST_AUTO_TEST_CASE(test_schema)
+BOOST_AUTO_TEST_CASE(test_schema_read)
 {
-    std::string xml = ReadXML(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
-    std::string xsd = ReadXML(TestConfig::g_data_path+"/schemas/LAS.xsd");
+    std::istream* xml_stream = Utils::openFile(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
+    std::istream* xsd_stream = Utils::openFile(TestConfig::g_data_path+"/schemas/LAS.xsd");
     
-    libpc::XMLSchema schema(xml, xsd);
+    
+    libpc::schema::Reader schema(xml_stream, xsd_stream);
     
     
 }
 
+
+BOOST_AUTO_TEST_CASE(test_schema_writer)
+{
+    libpc::drivers::las::LasReader reader(TestConfig::g_data_path+"1.2-with-color.las");
+    BOOST_CHECK(reader.getDescription() == "Las Reader");
+
+    const Schema& schema = reader.getSchema();
+    SchemaLayout layout(schema);
+     
+    Schema s(schema);
+    Dimension& d = s.getDimension(15);
+    d.setMinimum(14.00);
+    d.setMaximum(142.00);
+    libpc::schema::Writer sw(s);
+    sw.write();// << std::endl;
+    
+    
+}
 // BOOST_AUTO_TEST_CASE(clean_up)
 // {
 //     if (!ShouldRunTest()) return;

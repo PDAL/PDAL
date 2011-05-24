@@ -35,7 +35,7 @@
     
     <xs:complexType name="dimensionType">
         <xs:all>
-            <xs:element name="position" type="xs:nonNegativeInteger">
+            <xs:element name="position" type="xs:positiveInteger">
                 <xs:annotation>
                     <xs:documentation>
                         The dimension's position in the block of point data
@@ -44,7 +44,7 @@
                 </xs:annotation>                
             </xs:element>
 
-            <xs:element name="size" type="xs:nonNegativeInteger">
+            <xs:element name="size" type="xs:positiveInteger">
                 <xs:annotation>
                     <xs:documentation>
                         The size of this dimension in bytes.

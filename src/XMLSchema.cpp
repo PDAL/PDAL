@@ -37,12 +37,14 @@
 
 #include <sstream>
 #include <iostream>
+#include <istream>
 #include <list>
 #include <cstdlib>
 #include <map>
 #include <algorithm>
 
 #include <string.h>
+#include <stdlib.h>
 
 
 struct XMLDocDeleter
@@ -90,13 +92,31 @@ struct WriterDeleter
    }
 };
 
+struct BufferDeleter
+{
+   template <typename T>
+   void operator()(T* ptr)
+   {
+       ::xmlBufferFree(ptr);
+   }
+};
+
+struct xmlCharDeleter
+{
+   template <typename T>
+   void operator()(T* ptr)
+   {
+       ::xmlFree(ptr);
+   }
+};
+
 
 static bool sort_dimensions(libpc::DimensionLayout const& a, libpc::DimensionLayout const& b)
 {
    return a < b;
 }
 
-namespace libpc { 
+namespace libpc { namespace schema {
 
 
 void OCISchemaStructuredErrorHandler
@@ -210,11 +230,11 @@ void OCISchemaGenericErrorHandler
 // XML_PARSE_NONET No network access
 // http://xmlsoft.org/html/libxml-parser.html#xmlParserOption
 
-XMLSchema::XMLSchema(std::string const& xml, std::string const &xsd)
-: m_doc_options(XML_PARSE_NONET)
+
+void Reader::Initialize() 
 {
-    if (xml.size() == 0) throw schema_generic_error("Inputted XML has no size, is there data there?");
-    if (xsd.size() == 0) throw schema_generic_error("Inputted XSD has no size, is there data there?");
+    if (m_xml.size() == 0) throw schema_generic_error("Inputted XML has no size, is there data there?");
+    if (m_xsd.size() == 0) throw schema_generic_error("Inputted XSD has no size, is there data there?");
 
 
     LIBXML_TEST_VERSION
@@ -224,11 +244,11 @@ XMLSchema::XMLSchema(std::string const& xml, std::string const &xsd)
 
 
     m_doc = DocPtr(
-                   xmlReadMemory(xml.c_str(), xml.size(), NULL, NULL, m_doc_options),
+                   xmlReadMemory(m_xml.c_str(), m_xml.size(), NULL, NULL, m_doc_options),
                    XMLDocDeleter());
 
     m_schema_doc = DocPtr(
-                        xmlReadMemory(xsd.c_str(), xsd.size(), NULL, NULL, m_doc_options),
+                        xmlReadMemory(m_xsd.c_str(), m_xsd.size(), NULL, NULL, m_doc_options),
                          XMLDocDeleter());
 
     m_schema_parser_ctx = SchemaParserCtxtPtr(
@@ -258,13 +278,59 @@ XMLSchema::XMLSchema(std::string const& xml, std::string const &xsd)
 
     if (valid_schema != 0)
         throw schema_error("Document did not validate against schema!");
+    
+}
 
-    LoadSchema();
+Reader::Reader(std::string const& xml, std::string const &xsd)
+: m_doc_options(XML_PARSE_NONET)
+{
+    
+    m_xml = xml;
+    m_xsd = xsd;
+    Initialize();
+    Load();
     return;
 }
 
+Reader::Reader(std::istream* xml, std::istream *xsd) : m_doc_options(XML_PARSE_NONET)
+{
+    
+    if (!xml)
+        throw schema_generic_error("libpc::schema::Reader: xml istream pointer was null!");
+    
+    std::istream::pos_type size;
 
-XMLSchema::~XMLSchema()
+    std::vector<char> data;
+    xml->seekg(0, std::ios::end);
+    size = xml->tellg();
+    data.resize(static_cast<std::vector<char>::size_type>(size));
+    xml->seekg (0, std::ios::beg);
+    xml->read (&data.front(), size);
+    xml->seekg (0, std::ios::beg);
+
+    m_xml = std::string(&data[0], data.size());
+
+    if (xsd)
+    {
+
+        std::istream::pos_type size;
+
+        std::vector<char> data;
+        xsd->seekg(0, std::ios::end);
+        size = xsd->tellg();
+        data.resize(static_cast<std::vector<char>::size_type>(size));
+        xsd->seekg (0, std::ios::beg);
+        xsd->read (&data.front(), size);
+        xsd->seekg(0, std::ios::end);
+
+        m_xsd = std::string(&data[0], data.size());
+    }
+
+    Initialize();
+    Load();
+}
+
+Reader::~Reader()
 {
 }
 
@@ -283,22 +349,9 @@ print_element_names(xmlNode * a_node)
     }
 }
 
-XMLSchema::TextWriterPtr XMLSchema::writeHeader(DocPtr doc)
-{
-    xmlDoc* d = static_cast<xmlDoc*>(doc.get());
 
-    TextWriterPtr writer = TextWriterPtr(xmlNewTextWriterDoc(&d, FALSE), WriterDeleter());
 
-    xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());
-
-    xmlTextWriterSetIndent(w, TRUE);
-    xmlTextWriterStartDocument(w, NULL, "utf-8", NULL);
-    xmlTextWriterStartElement(w, BAD_CAST "PointCloudSchema");
-    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "pc", NULL, BAD_CAST "http://libpc.org/schemas/PC/1.0");
-    return writer;
-}
-
-void XMLSchema::LoadSchema()
+void Reader::Load()
 {
     std::vector<libpc::DimensionLayout> layouts;
 
@@ -308,7 +361,7 @@ void XMLSchema::LoadSchema()
 
 
     if (compare_no_case((const char*)root->name, "PointCloudSchema"))
-        throw schema_error("First node of document was not named 'PointCloudSchema'");
+        throw schema_loading_error("First node of document was not named 'PointCloudSchema'");
 
     xmlNode* dimension = root->children;
 
@@ -346,21 +399,24 @@ void XMLSchema::LoadSchema()
 
             if (!compare_no_case((const char*)properties->name, "name"))
             {
-                xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
-                if (!n) throw schema_error("Unable to fetch name!");
-                name = std::string((const char*)n);
-                xmlFree(n);
+                CharPtr n = CharPtr(
+                                xmlNodeListGetString(doc, properties->children, 1),
+                                xmlCharDeleter());                
+                            // xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
+                if (!n) throw schema_loading_error("Unable to fetch name!");
+                name = std::string((const char*)n.get());
+                // xmlFree(n);
                 // std::cout << "Dimension name: " << name << std::endl;
             }
 
             if (!compare_no_case((const char*)properties->name, "size"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
-                if (!n) throw schema_error("Unable to fetch size!");
+                if (!n) throw schema_loading_error("Unable to fetch size!");
                 int s = std::atoi((const char*)n);
                 if (s < 1)
                 {
-                    throw schema_error("Dimension size is < 1!");
+                    throw schema_loading_error("Dimension size is < 1!");
                 }
                 xmlFree(n);
                 size = static_cast<boost::uint32_t>(s);
@@ -370,11 +426,11 @@ void XMLSchema::LoadSchema()
             if (!compare_no_case((const char*)properties->name, "position"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
-                if (!n) throw schema_error("Unable to fetch position!");
+                if (!n) throw schema_loading_error("Unable to fetch position!");
                 int p = std::atoi((const char*)n);
                 if (p < 1)
                 {
-                    throw schema_error("Dimension position is < 1!");
+                    throw schema_loading_error("Dimension position is < 1!");
                 }
                 xmlFree(n);
                 position = static_cast<boost::uint32_t>(p);
@@ -383,14 +439,14 @@ void XMLSchema::LoadSchema()
             if (!compare_no_case((const char*)properties->name, "description"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
-                if (!n) throw schema_error("Unable to fetch description!");
+                if (!n) throw schema_loading_error("Unable to fetch description!");
                 description = std::string((const char*)n);
                 xmlFree(n);
             }
             if (!compare_no_case((const char*)properties->name, "interpretation"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
-                if (!n) throw schema_error("Unable to fetch interpretation!");
+                if (!n) throw schema_loading_error("Unable to fetch interpretation!");
                 interpretation = std::string((const char*)n);
                 xmlFree(n);
             }
@@ -398,7 +454,7 @@ void XMLSchema::LoadSchema()
             if (!compare_no_case((const char*)properties->name, "minimum"))
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
-                if (!n) throw schema_error("Unable to fetch minimum value!");
+                if (!n) throw schema_loading_error("Unable to fetch minimum value!");
 
                 minimum = std::atof((const char*)n);
                 xmlFree(n);
@@ -408,7 +464,7 @@ void XMLSchema::LoadSchema()
             if (!compare_no_case((const char*)properties->name, "maximum"))
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
-                if (!n) throw schema_error("Unable to fetch maximum value!");
+                if (!n) throw schema_loading_error("Unable to fetch maximum value!");
 
                 maximum = std::atof((const char*)n);
                 xmlFree(n);
@@ -418,7 +474,7 @@ void XMLSchema::LoadSchema()
             if (!compare_no_case((const char*)properties->name, "offset"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
-                if (!n) throw schema_error("Unable to fetch offset value!");
+                if (!n) throw schema_loading_error("Unable to fetch offset value!");
 
                 offset = std::atof((const char*)n);
                 xmlFree(n);
@@ -427,7 +483,7 @@ void XMLSchema::LoadSchema()
             if (!compare_no_case((const char*)properties->name, "scale"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
-                if (!n) throw schema_error("Unable to fetch scale value!");
+                if (!n) throw schema_loading_error("Unable to fetch scale value!");
 
                 scale = std::atof((const char*)n);
                 xmlFree(n);
@@ -460,7 +516,7 @@ void XMLSchema::LoadSchema()
     // m_schema.dump();
 }
 
-Dimension::DataType XMLSchema::GetDimensionType(std::string const& interpretation)
+Dimension::DataType Reader::GetDimensionType(std::string const& interpretation)
 {
 
     // enum DataType
@@ -522,7 +578,7 @@ Dimension::DataType XMLSchema::GetDimensionType(std::string const& interpretatio
     return Dimension::Undefined;
 }
 
-Dimension::Field XMLSchema::GetDimensionField(std::string const& name, boost::uint32_t position)
+Dimension::Field Reader::GetDimensionField(std::string const& name, boost::uint32_t position)
 {
 
     if (name.size() == 0)
@@ -592,4 +648,188 @@ Dimension::Field XMLSchema::GetDimensionField(std::string const& name, boost::ui
     return Dimension::Field_INVALID;
 }
 
-} // namespaces
+Writer::Writer(libpc::Schema const& schema)
+ : m_schema(schema) {}
+
+std::string Writer::write()
+{
+    BufferPtr buffer = BufferPtr(xmlBufferCreate(), BufferDeleter());
+    
+    xmlBufferPtr b = static_cast<xmlBuffer*>(buffer.get());
+    TextWriterPtr writer = TextWriterPtr(xmlNewTextWriterMemory(b, 0), WriterDeleter());
+
+   
+    write(writer);
+
+    xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());     
+    xmlTextWriterFlush(w);
+    printf("xml: %s", (const char *) b->content);
+    return std::string((const char *) b->content, b->size);
+    
+}
+
+void Writer::write(TextWriterPtr writer)
+{
+
+    xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get()); 
+    
+    xmlTextWriterSetIndent(w, 1);
+    xmlTextWriterStartDocument(w, NULL, "utf-8", NULL);
+    xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "PointCloudSchema", NULL);
+    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "pc", NULL, BAD_CAST "http://libpc.org/schemas/PC/1.0");
+    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "xsi", NULL, BAD_CAST "http://www.w3.org/2001/XMLSchema-instance");
+    
+    writeSchema(writer);
+    xmlTextWriterEndElement(w);
+    xmlTextWriterEndDocument(w);
+}
+
+boost::uint32_t GetStreamPrecision(double scale)
+{
+    double frac = 0;
+    double integer = 0;
+    
+    frac = std::modf(scale, &integer);
+    double precision = std::fabs(std::floor(std::log10(frac)));
+    
+    boost::uint32_t output = static_cast<boost::uint32_t>(precision);
+    return output;
+}
+void Writer::writeSchema(TextWriterPtr writer)
+{
+
+    xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get()); 
+    
+    libpc::Schema::Dimensions const& dims = m_schema.getDimensions();
+    
+    for (boost::uint32_t i = 0; i < dims.size(); i++)
+    {
+        Dimension const& dim = dims[i];
+        xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "dimension", NULL);
+        
+        std::ostringstream position;
+        position << i+1;
+        xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "position", NULL, BAD_CAST position.str().c_str());
+        
+        std::ostringstream size;
+        size << dim.getByteSize();
+        xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "size", NULL, BAD_CAST size.str().c_str());
+        
+        std::ostringstream description;
+        description << dim.getDescription();
+        if (description.str().size())
+            xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "description", NULL, BAD_CAST description.str().c_str());
+        
+        libpc::Dimension::Field f = dim.getField();
+        
+        std::ostringstream name;
+        name << dim.getFieldName(f);
+        if (name.str().size())
+            xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "name", NULL, BAD_CAST name.str().c_str());
+        
+        std::ostringstream type;
+        libpc::Dimension::DataType t = dim.getDataType();
+    
+        switch (t)
+        {
+            case libpc::Dimension::Int8:
+                type << "int8_t";
+                break;
+            case libpc::Dimension::Uint8:
+                type << "uint8_t";
+                break;
+            case libpc::Dimension::Int16:
+                type << "int16_t";
+                break;
+            case libpc::Dimension::Uint16:
+                type << "uint16_t";
+                break;
+            case libpc::Dimension::Int32:
+                type << "int32_t";
+                break;
+            case libpc::Dimension::Uint32:
+                type << "uint32_t";
+                break;
+            case libpc::Dimension::Int64:
+                type << "int64_t";
+                break;
+            case libpc::Dimension::Uint64:
+                type << "uint64_t";
+                break;
+            case libpc::Dimension::Float:
+                type << "float";
+                break;
+            case libpc::Dimension::Double:
+                type << "double";
+                break;
+            case libpc::Dimension::Undefined:
+                type << "unknown";
+                break;
+
+   
+        }
+        xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "interpretation", NULL, BAD_CAST type.str().c_str());
+        
+        double minimum = dim.getMinimum();
+        if (!Utils::compare_distance<double>(minimum, 0.0))
+        {
+            std::ostringstream mn;
+            mn.setf(std::ios_base::fixed, std::ios_base::floatfield);
+            mn.precision(12);
+            mn << minimum;
+            xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "minimum", NULL);
+
+            xmlTextWriterWriteAttributeNS(w, BAD_CAST "pc", BAD_CAST "units", NULL, BAD_CAST "double");
+            xmlTextWriterWriteAttributeNS(w, BAD_CAST "pc", BAD_CAST "value", NULL, BAD_CAST mn.str().c_str());
+            xmlTextWriterEndElement(w);            
+        }
+        
+
+        double maximum = dim.getMaximum();
+        if (!Utils::compare_distance<double>(minimum, 0.0))
+        {
+            std::ostringstream mn;
+            mn.setf(std::ios_base::fixed, std::ios_base::floatfield);
+            mn.precision(12);
+            mn << maximum;
+            xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "maximum", NULL);
+
+            xmlTextWriterWriteAttributeNS(w, BAD_CAST "pc", BAD_CAST "units", NULL, BAD_CAST "double");
+            xmlTextWriterWriteAttributeNS(w, BAD_CAST "pc", BAD_CAST "value", NULL, BAD_CAST mn.str().c_str());
+            xmlTextWriterEndElement(w);            
+
+        }
+
+        double scale = dim.getNumericScale();
+        if (!Utils::compare_distance<double>(scale, 0.0))
+        {
+            std::ostringstream out;
+            out.setf(std::ios_base::fixed, std::ios_base::floatfield);
+            out.precision(GetStreamPrecision(scale));
+            out << scale;
+            xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "scale", NULL, BAD_CAST out.str().c_str());
+
+        }        
+
+        double offset = dim.getNumericOffset();
+        if (!Utils::compare_distance<double>(offset, 0.0))
+        {
+            std::ostringstream out;
+            out.setf(std::ios_base::fixed, std::ios_base::floatfield);
+            out.precision(12);
+            out << offset;
+            xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "offset", NULL, BAD_CAST out.str().c_str());
+
+        }        
+
+        xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "active", NULL, BAD_CAST "true");
+
+        xmlTextWriterEndElement(w);
+
+        xmlTextWriterFlush(w);
+    }
+    
+}
+
+
+} } // namespaces

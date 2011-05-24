@@ -37,12 +37,11 @@
 
 #include <libpc/libpc.hpp>
 #include <libpc/Schema.hpp>
+#include <libpc/Utils.hpp>
 #include <libpc/SchemaLayout.hpp>
 #include <libpc/Dimension.hpp>
 #include <libpc/DimensionLayout.hpp>
-
-#include <libpc/drivers/oci/Common.hpp>
-#include <libpc/drivers/oci/Reader.hpp>
+#include <libpc/exceptions.hpp>
 
 #include <string>
 #include <stdarg.h>
@@ -62,7 +61,7 @@
 #include <boost/concept_check.hpp>
 #include <boost/function.hpp>
 
-namespace libpc { 
+namespace libpc { namespace schema {
 
 
 void OCISchemaGenericErrorHandler (void * ctx, const char* message, ...);
@@ -76,64 +75,81 @@ public:
     {}
 };
 
+class schema_loading_error : public schema_error
+{
+public:
+    schema_loading_error(std::string const& msg)
+        : schema_error(msg)
+    {}
+};
+
+class schema_writing_error : public schema_error
+{
+public:
+    schema_writing_error(std::string const& msg)
+        : schema_error(msg)
+    {}
+};
 
 
-class schema_validation_error : public libpc_error
+class schema_validation_error : public schema_error
 {
 public:
     schema_validation_error(std::string const& msg)
-        : libpc_error(msg)
+        : schema_error(msg)
     {}
 };
 
-class schema_parsing_error : public libpc_error
+class schema_parsing_error : public schema_error
 {
 public:
     schema_parsing_error(std::string const& msg)
-        : libpc_error(msg)
+        : schema_error(msg)
     {}
 };
 
-class schema_generic_error : public libpc_error
+class schema_generic_error : public schema_error
 {
 public:
     schema_generic_error(std::string const& msg)
-        : libpc_error(msg)
+        : schema_error(msg)
     {}
 };
 
 
-class LIBPC_DLL XMLSchema
+// We're going to put all of our libxml2 primatives into shared_ptrs 
+// that have custom deleters that clean up after themselves so we 
+// have a good chance at having clean exception-safe code    
+typedef boost::shared_ptr<void> DocPtr;
+typedef boost::shared_ptr<void> SchemaParserCtxtPtr;    
+typedef boost::shared_ptr<void> SchemaPtr;
+typedef boost::shared_ptr<void> SchemaValidCtxtPtr;
+typedef boost::shared_ptr<void> TextWriterPtr;
+typedef boost::shared_ptr<void> BufferPtr;
+typedef boost::shared_ptr<void> CharPtr;
+
+class LIBPC_DLL Reader
 {
 public:
-    XMLSchema(std::string const& xml, std::string const& xmlschema);
-    ~XMLSchema();
+    Reader(std::string const& xml, std::string const& xmlschema);
+    Reader(std::istream* xml, std::istream* schema);
+    ~Reader();
 
 
 
 protected:
 
-    void LoadSchema();
+    void Initialize();
+    void Load();
     Dimension::DataType GetDimensionType(std::string const& interpretation);
     Dimension::Field GetDimensionField(std::string const& name, boost::uint32_t position);
     
 private:
     
-    XMLSchema& operator=(const XMLSchema&); // not implemented
-    XMLSchema(const XMLSchema&); // not implemented;
+    Reader& operator=(const Reader&); // not implemented
+    Reader(const Reader&); // not implemented;
 
 
-    
-    // We're going to put all of our libxml2 primatives into shared_ptrs 
-    // that have custom deleters that clean up after themselves so we 
-    // have a good chance at having clean exception-safe code    
-    typedef boost::shared_ptr<void> DocPtr;
-    typedef boost::shared_ptr<void> SchemaParserCtxtPtr;    
-    typedef boost::shared_ptr<void> SchemaPtr;
-    typedef boost::shared_ptr<void> SchemaValidCtxtPtr;
-    typedef boost::shared_ptr<void> TextWriterPtr;
-
-    TextWriterPtr writeHeader(DocPtr doc);
 
 
     DocPtr m_doc;
@@ -149,6 +165,39 @@ private:
     void* m_global_context;
     libpc::Schema m_schema;
     
+    std::string m_xml;
+    std::string m_xsd;
+    
+    
+
+};
+
+
+class LIBPC_DLL Writer
+{
+public:
+    Writer(libpc::Schema const& schema);
+    ~Writer() {};
+
+    std::string write();
+
+
+protected:
+
+
+    
+private:
+    
+    Writer& operator=(const Writer&); // not implemented
+    Writer(const Writer&); // not implemented;
+
+
+    
+
+    void write(TextWriterPtr w);
+    void writeSchema(TextWriterPtr w);
+    void* m_global_context;
+    libpc::Schema const& m_schema;
     
     
 
@@ -156,6 +205,6 @@ private:
 
 
 
-} // namespaces
+}} // namespaces
 
 #endif
