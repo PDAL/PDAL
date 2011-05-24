@@ -135,6 +135,7 @@ public:
     Reader(std::istream* xml, std::istream* schema);
     ~Reader();
 
+    inline libpc::Schema getSchema() { return m_schema; }
 
 
 protected:
