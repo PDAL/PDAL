@@ -37,7 +37,6 @@
 
 #include <sstream>
 #include <iostream>
-#include <istream>
 #include <list>
 #include <cstdlib>
 #include <map>
@@ -519,22 +518,6 @@ void Reader::Load()
 Dimension::DataType Reader::GetDimensionType(std::string const& interpretation)
 {
 
-    // enum DataType
-    // {
-    //     Int8,
-    //     Uint8,
-    //     Int16,
-    //     Uint16,
-    //     Int32,
-    //     Uint32,
-    //     Int64,
-    //     Uint64,
-    //     Float,       // 32 bits
-    //     Double,       // 64 bits
-    //     Undefined
-    // };
-
-
     if (!compare_no_case(interpretation.c_str(), "int8_t") ||
         !compare_no_case(interpretation.c_str(), "int8"))
         return Dimension::Int8;
@@ -605,31 +588,41 @@ Dimension::Field Reader::GetDimensionField(std::string const& name, boost::uint3
     if (!compare_no_case(name.c_str(), "Intensity"))
         return Dimension::Field_Intensity;
 
-    if (!compare_no_case(name.c_str(), "Return Number"))
+    if (!compare_no_case(name.c_str(), "Return Number") ||
+        !compare_no_case(name.c_str(), "ReturnNumber"))
         return Dimension::Field_ReturnNumber;
 
-    if (!compare_no_case(name.c_str(), "Number of Returns"))
+    if (!compare_no_case(name.c_str(), "Number of Returns") ||
+        !compare_no_case(name.c_str(), "NumberOfReturns"))
         return Dimension::Field_NumberOfReturns;
 
     if (!compare_no_case(name.c_str(), "Number of Returns"))
         return Dimension::Field_NumberOfReturns;
 
-    if (!compare_no_case(name.c_str(), "Scan Direction"))
+    if (!compare_no_case(name.c_str(), "Scan Direction") ||
+        !compare_no_case(name.c_str(), "ScanDirectionFlag") ||
+        !compare_no_case(name.c_str(), "ScanDirection"))
         return Dimension::Field_ScanDirectionFlag;
 
-    if (!compare_no_case(name.c_str(), "Flightline Edge"))
+    if (!compare_no_case(name.c_str(), "Flightline Edge") ||
+        !compare_no_case(name.c_str(), "EdgeOfFlightLine") ||
+        !compare_no_case(name.c_str(), "FlightlineEdge"))
         return Dimension::Field_EdgeOfFlightLine;
 
     if (!compare_no_case(name.c_str(), "Classification"))
         return Dimension::Field_Classification;
 
-    if (!compare_no_case(name.c_str(), "Scan Angle Rank"))
+    if (!compare_no_case(name.c_str(), "Scan Angle Rank") ||
+        !compare_no_case(name.c_str(), "ScanAngle") ||
+        !compare_no_case(name.c_str(), "ScanAngleRank"))
         return Dimension::Field_ScanAngleRank;
 
-    if (!compare_no_case(name.c_str(), "User Data"))
+    if (!compare_no_case(name.c_str(), "User Data") ||
+        !compare_no_case(name.c_str(), "UserData"))
         return Dimension::Field_UserData;
 
-    if (!compare_no_case(name.c_str(), "Point Source ID"))
+    if (!compare_no_case(name.c_str(), "Point Source ID")||
+        !compare_no_case(name.c_str(), "PointSourceId"))
         return Dimension::Field_PointSourceId;
 
     if (!compare_no_case(name.c_str(), "Time"))
@@ -644,6 +637,8 @@ Dimension::Field Reader::GetDimensionField(std::string const& name, boost::uint3
     if (!compare_no_case(name.c_str(), "Blue"))
         return Dimension::Field_Blue;
 
+    if (!compare_no_case(name.c_str(), "Alpha"))
+        return Dimension::Field_Alpha;
 
     return Dimension::Field_INVALID;
 }
@@ -663,7 +658,7 @@ std::string Writer::write()
 
     xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());     
     xmlTextWriterFlush(w);
-    printf("xml: %s", (const char *) b->content);
+    // printf("xml: %s", (const char *) b->content);
     return std::string((const char *) b->content, b->size);
     
 }
@@ -695,6 +690,7 @@ boost::uint32_t GetStreamPrecision(double scale)
     boost::uint32_t output = static_cast<boost::uint32_t>(precision);
     return output;
 }
+
 void Writer::writeSchema(TextWriterPtr writer)
 {
 
