@@ -32,6 +32,18 @@
         <xs:attribute name="units" type="pc:interpretationType"/>
         <xs:attribute name="value" type="xs:decimal"/>
     </xs:complexType>
+
+    <xs:simpleType name="endiannessType">
+        <xs:annotation>
+      <xs:documentation>
+            Used to describe the storage endianness of the data in the dimension.
+        </xs:documentation>
+    </xs:annotation>   
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="big"/>
+            <xs:enumeration value="little"/>
+        </xs:restriction>
+    </xs:simpleType>
     
     <xs:complexType name="dimensionType">
         <xs:all>
@@ -108,7 +120,14 @@
                         The scale of this dimension.  Used to support scaled integer types
                     </xs:documentation>
                 </xs:annotation>   
-            </xs:element>        
+            </xs:element>
+            <xs:element minOccurs="0" name="endianness" type="pc:endiannessType">
+                <xs:annotation>
+                    <xs:documentation>
+                        Describes the storage endianness of the dimension.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>          
         </xs:all>
     </xs:complexType>
     
