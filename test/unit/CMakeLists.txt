@@ -9,6 +9,7 @@ SET(LIBPC_UNIT_TEST libpc_test)
 
 SET(LIBPC_UNITTEST_TEST_SRC
     BoundsTest.cpp
+    ByteSwapFilterTest.cpp
     CacheFilterTest.cpp
     ChipperTest.cpp
     ColorTest.cpp

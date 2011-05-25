@@ -275,6 +275,8 @@ ENDFOREACH(file)
 #
 
 set(LIBPC_FILTERS_HPP
+  ${LIBPC_HEADERS_DIR}/filters/ByteSwapFilter.hpp
+  ${LIBPC_HEADERS_DIR}/filters/ByteSwapFilterIterator.hpp
   ${LIBPC_HEADERS_DIR}/filters/CacheFilter.hpp
   ${LIBPC_HEADERS_DIR}/filters/CacheFilterIterator.hpp
   ${LIBPC_HEADERS_DIR}/filters/Chipper.hpp
@@ -294,6 +296,8 @@ set(LIBPC_FILTERS_HPP
 )
 
 set (LIBPC_FILTERS_CPP 
+  ./filters/ByteSwapFilter.cpp
+  ./filters/ByteSwapFilterIterator.cpp
   ./filters/CacheFilter.cpp
   ./filters/CacheFilterIterator.cpp
   ./filters/Chipper.cpp
