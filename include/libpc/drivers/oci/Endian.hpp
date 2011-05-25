@@ -58,6 +58,16 @@
             *first = x; \
         }} while(false)
 
+# define SWAP_LE_TO_BE(p) \
+    do { \
+        char* first = static_cast<char*>(static_cast<void*>(&p)); \
+        char* last = first + sizeof(p) - 1; \
+        for(; first < last; ++first, --last) { \
+            char const x = *last; \
+            *last = *first; \
+            *first = x; \
+        }} while(false)
+
 # define SWAP_BE_TO_LE_N(p, n) \
     do { \
         char* first = static_cast<char*>(static_cast<void*>(&p)); \
