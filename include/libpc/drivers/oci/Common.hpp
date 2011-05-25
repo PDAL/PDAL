@@ -105,7 +105,7 @@ struct EightDimensionOCI
     boost::int8_t edgeOfFlightLine;
     boost::int8_t scanAngleRank;
     boost::int8_t userData;
-    boost::int16_t pointSourceId;
+    boost::uint16_t pointSourceId;
     boost::uint16_t red;
     boost::uint16_t green;
     boost::uint16_t blue;
