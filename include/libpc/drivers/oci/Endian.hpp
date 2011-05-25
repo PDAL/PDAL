@@ -78,4 +78,14 @@
             *first = x; \
         }} while(false)
 
+# define SWAP_LE_TO_BE_N(p, n) \
+    do { \
+        char* first = static_cast<char*>(static_cast<void*>(&p)); \
+        char* last = first + n - 1; \
+        for(; first < last; ++first, --last) { \
+            char const x = *last; \
+            *last = *first; \
+            *first = x; \
+        }} while(false)
+
 #endif
