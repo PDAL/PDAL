@@ -98,6 +98,18 @@ public:
         return m_schemaLayout.getSchema();
     }
 
+    // schema (number and kinds of fields) for a point in this buffer
+    inline SchemaLayout& getSchemaLayout()
+    {
+        return m_schemaLayout;
+    }
+
+    // convenience function
+    Schema& getSchema() 
+    {
+        return m_schemaLayout.getSchema();
+    }
+    
     // accessors to a particular field of a particular point in this buffer
     template<class T> T getField(std::size_t pointIndex, boost::int32_t fieldIndex) const;
     template<class T> void setField(std::size_t pointIndex, boost::int32_t fieldIndex, T value);

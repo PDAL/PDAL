@@ -72,6 +72,11 @@ public:
       return m_schema;
     }
 
+    inline Schema& getSchema() 
+    {
+      return m_schema;
+    }
+    
     /// Fetch total byte size -- sum of all dimensions
     inline std::size_t getByteSize() const
     {
