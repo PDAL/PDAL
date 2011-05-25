@@ -305,7 +305,6 @@ if(WITH_ORACLE)
 
   if(ORACLE_FOUND)
     include_directories(${ORACLE_INCLUDE_DIR})
-    add_definitions(-DHAVE_ORACLE=1)
     set(LIBPC_HAVE_ORACLE 1)
   endif()
 endif()
