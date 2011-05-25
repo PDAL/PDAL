@@ -646,14 +646,13 @@ Dimension::Field Reader::GetDimensionField(std::string const& name, boost::uint3
 Writer::Writer(libpc::Schema const& schema)
  : m_schema(schema) {}
 
-std::string Writer::write()
+std::string Writer::getXML()
 {
     BufferPtr buffer = BufferPtr(xmlBufferCreate(), BufferDeleter());
     
     xmlBufferPtr b = static_cast<xmlBuffer*>(buffer.get());
     TextWriterPtr writer = TextWriterPtr(xmlNewTextWriterMemory(b, 0), WriterDeleter());
 
-   
     write(writer);
 
     xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());     

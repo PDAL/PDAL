@@ -180,7 +180,7 @@ public:
     Writer(libpc::Schema const& schema);
     ~Writer() {};
 
-    std::string write();
+    std::string getXML();
 
 
 protected:
