@@ -60,32 +60,34 @@ boost::uint32_t ByteSwapFilterSequentialIterator::readImpl(PointBuffer& dstData)
     // We will read from our previous stage until we get that amount (or
     // until the previous stage runs out of points).
 
-    // boost::uint32_t numPointsNeeded = dstData.getCapacity();
-    // assert(dstData.getNumPoints() == 0);
-    // 
-    // while (numPointsNeeded > 0)
-    // {
-    //     // set up buffer to be filled by prev stage
-    //     PointBuffer srcData(dstData.getSchemaLayout(), numPointsNeeded);
-    // 
-    //     // read from prev stage
-    //     const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
-    //     assert(numSrcPointsRead == srcData.getNumPoints());
-    //     assert(numSrcPointsRead <= numPointsNeeded);
-    // 
-    //     // we got no data, and there is no more to get -- exit the loop
-    //     if (numSrcPointsRead == 0) break;
-    // 
-    //     // copy points from src (prev stage) into dst (our stage), 
-    //     // based on the CropFilter's rules (i.e. its bounds)
-    //     const boost::uint32_t numPointsProcessed = m_cropFilter.processBuffer(dstData, srcData);
-    // 
-    //     numPointsNeeded -= numPointsProcessed;
-    // }
-    // 
-    // const boost::uint32_t numPointsAchieved = dstData.getNumPoints();
+    boost::uint32_t numPointsNeeded = dstData.getCapacity();
+    assert(dstData.getNumPoints() == 0);
+    
+    while (numPointsNeeded > 0)
+    {
+        // set up buffer to be filled by prev stage
+        PointBuffer srcData(dstData.getSchemaLayout(), numPointsNeeded);
+    
+        // read from prev stage
+        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+        assert(numSrcPointsRead == srcData.getNumPoints());
+        assert(numSrcPointsRead <= numPointsNeeded);
+    
+        // we got no data, and there is no more to get -- exit the loop
+        if (numSrcPointsRead == 0) break;
+    
+        // copy points from src (prev stage) into dst (our stage), 
+        // based on the CropFilter's rules (i.e. its bounds)
+        const boost::uint32_t numPointsProcessed = m_swapFilter.processBuffer(dstData, srcData);
+    
+        numPointsNeeded -= numPointsProcessed;
+    }
+    
+    const boost::uint32_t numPointsAchieved = dstData.getNumPoints();
 
-    return 0;
+    dstData.setNumPoints(dstData.getCapacity());
+
+    return dstData.getCapacity();
 }
 
 
