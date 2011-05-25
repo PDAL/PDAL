@@ -282,6 +282,7 @@ Schema Schema::from_xml(std::string const& xml, std::string const& xsd)
     libpc::schema::Reader reader(xml, xsd);
     
     libpc::Schema schema = reader.getSchema();
+    return schema;
 
 #endif
 }
@@ -295,6 +296,7 @@ Schema Schema::from_xml(std::string const& xml)
     libpc::schema::Reader reader(xml, xsd);
     
     libpc::Schema schema = reader.getSchema();
+    return schema;
 
 #endif
 }
