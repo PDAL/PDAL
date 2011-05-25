@@ -40,7 +40,7 @@
 #include <libpc/Options.hpp>
 
 #include "oci_wrapper.h"
-#include "Endian.hpp"
+#include <libpc/Endian.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
