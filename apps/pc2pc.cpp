@@ -156,8 +156,8 @@ int Application_pc2pc::execute()
 
         writer.write(numPoints);
         boost::property_tree::ptree output_tree;
-        output_tree.put_child(writer.getName(), options.GetPTree());
-        boost::property_tree::write_xml(m_xml, output_tree);
+        // output_tree.put_child(writer.getName(), options.GetPTree());
+        // boost::property_tree::write_xml(m_xml, output_tree);
                     
 #else
         throw configuration_error("libPC not compiled with Oracle support");
@@ -204,7 +204,7 @@ int Application_pc2pc::execute()
         
         output_tree.put_child(reader.getName(), options.GetPTree());
         // output_tree.put_child(writer.getName(), )
-        boost::property_tree::write_xml(m_xml, output_tree);
+        // boost::property_tree::write_xml(m_xml, output_tree);
             
     #else
             throw configuration_error("libPC not compiled with Oracle support");
