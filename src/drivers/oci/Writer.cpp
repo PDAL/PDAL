@@ -636,15 +636,20 @@ oss << "declare\n"
     OCILobLocator* schema_locator ; 
     OCILobLocator* boundary_locator ; 
 
+    std::string schema_data;
     if (bHaveSchemaOverride)
     {
-        std::string schema_data = ReadFile(point_schema_override);
-        char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
-        strncpy(schema, schema_data.c_str(), schema_data.size());
-        schema[schema_data.size()] = '\0';
-        statement->WriteCLob( &schema_locator, schema ); 
-        statement->Bind(&schema_locator);
+        schema_data = ReadFile(point_schema_override);
+    } else {
+        schema_data = libpc::Schema::to_xml(m_stage.getSchema());
     }
+
+    char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
+    strncpy(schema, schema_data.c_str(), schema_data.size());
+    schema[schema_data.size()] = '\0';
+    statement->WriteCLob( &schema_locator, schema ); 
+    statement->Bind(&schema_locator);
+
 
     // if (header_data->size() != 0) 
     // {
