@@ -154,6 +154,11 @@ public:
         return m_data.get() + m_pointSize * pointIndex;
     }
 
+    inline boost::uint8_t* getData(std::size_t pointIndex)
+    {
+        return m_data.get() + m_pointSize * pointIndex;
+    }
+    
     // copy in raw data
     void setData(boost::uint8_t* data, std::size_t pointIndex);
 
