@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     libpc::Schema schema = reader.getSchema();
     
     libpc::schema::Writer writer(schema);
-    std::string xml_output = writer.write();
+    std::string xml_output = writer.getXML();
 
     libpc::schema::Reader reader2(xml_output, xsd);
     libpc::Schema schema2 = reader2.getSchema();
