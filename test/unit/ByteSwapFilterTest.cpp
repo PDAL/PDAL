@@ -34,30 +34,85 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
+#include <libpc/Endian.hpp>
 
 #include <libpc/drivers/faux/Reader.hpp>
 #include <libpc/drivers/faux/Writer.hpp>
 #include <libpc/filters/ByteSwapFilter.hpp>
 
+#include <boost/scoped_ptr.hpp>
+#include <libpc/PointBuffer.hpp>
+#include <libpc/Endian.hpp>
+#include <iostream>
+
 using namespace libpc;
 
 BOOST_AUTO_TEST_SUITE(ByteSwapFilterTest)
 
-BOOST_AUTO_TEST_CASE(test_crop)
+BOOST_AUTO_TEST_CASE(test_swapping)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
-
-    // crop the window to 1/3rd the size in each dimension
-    Bounds<double> dstBounds(3.33333, 33.33333, 333.33333, 6.66666, 66.66666, 666.66666);
     
-    libpc::drivers::faux::Reader reader(srcBounds, 1000, libpc::drivers::faux::Reader::Ramp);
-    // 
-    // libpc::filters::CropFilter filter(reader, dstBounds);
-    // BOOST_CHECK(filter.getDescription() == "Crop Filter");
-    // 
-    // libpc::drivers::faux::Writer writer(filter);
-    // 
-    // boost::uint64_t numWritten = writer.write(1000);
+    boost::uint32_t buffer_size = 20;
+    libpc::drivers::faux::Reader reader(srcBounds, buffer_size, libpc::drivers::faux::Reader::Ramp);
+
+    libpc::filters::ByteSwapFilter filter(reader);
+    BOOST_CHECK_EQUAL(filter.getName(), "filters.byteswap");
+
+    boost::scoped_ptr<SequentialIterator> unflipped_iter(reader.createSequentialIterator());
+    boost::scoped_ptr<SequentialIterator> flipped_iter(filter.createSequentialIterator());
+
+    const Schema& schema = reader.getSchema();
+    
+    PointBuffer flipped(filter.getSchema(), buffer_size);
+    const boost::uint32_t fliped_read = flipped_iter->read(flipped);
+    BOOST_CHECK_EQUAL(fliped_read, buffer_size);
+
+    PointBuffer unflipped(schema, buffer_size);
+    const boost::uint32_t unfliped_read = unflipped_iter->read(unflipped);
+    BOOST_CHECK_EQUAL(unfliped_read, buffer_size);
+    
+
+    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
+    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
+    
+    BOOST_CHECK_EQUAL(offsetX, 0);
+    BOOST_CHECK_EQUAL(offsetY, 1);
+    BOOST_CHECK_EQUAL(offsetZ, 2);
+    BOOST_CHECK_EQUAL(offsetT, 3);
+    
+    for (boost::uint32_t i = 0 ; i < buffer_size; ++i)
+    {
+
+        double unflipped_x = unflipped.getField<double>(i, offsetX);
+        double unflipped_y = unflipped.getField<double>(i, offsetY);
+        double unflipped_z = unflipped.getField<double>(i, offsetZ);
+        boost::uint64_t unflipped_t = unflipped.getField<boost::uint64_t>(i, offsetT);
+        
+
+        double flipped_x = flipped.getField<double>(i, offsetX);
+        double flipped_y = flipped.getField<double>(i, offsetY);
+        double flipped_z = flipped.getField<double>(i, offsetZ);
+        boost::uint64_t flipped_t = flipped.getField<boost::uint64_t>(i, offsetT);
+
+        double reflipped_x = flipped_x;
+        SWAP_ENDIANNESS(reflipped_x);
+        BOOST_CHECK_EQUAL(unflipped_x, reflipped_x);
+
+        double reflipped_y = flipped_y;
+        SWAP_ENDIANNESS(reflipped_y);
+        BOOST_CHECK_EQUAL(unflipped_y, reflipped_y);
+
+        double reflipped_z = flipped_z;
+        SWAP_ENDIANNESS(reflipped_z);
+        BOOST_CHECK_EQUAL(unflipped_z, reflipped_z);        
+
+        boost::uint64_t reflipped_t = flipped_t;
+        SWAP_ENDIANNESS(reflipped_t);
+        BOOST_CHECK_EQUAL(unflipped_t, reflipped_t);
+    }
     // 
     // // 1000 * 1/3 = 333, plus or minus a bit for rounding
     // BOOST_CHECK(Utils::compare_approx<double>(static_cast<double>(numWritten), 333, 6));

@@ -37,7 +37,8 @@
 #include <libpc/filters/ByteSwapFilterIterator.hpp>
 #include <libpc/Schema.hpp>
 #include <libpc/PointBuffer.hpp>
-
+#include <libpc/Endian.hpp>
+#include <iostream>
 namespace libpc { namespace filters {
 
 
@@ -45,9 +46,9 @@ ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
     : Filter(prevStage)
 {
 
-    this->setNumPoints(0);
-    this->setPointCountType(PointCount_Unknown);
-
+    this->setNumPoints(prevStage.getNumPoints());
+    this->setPointCountType(prevStage.getPointCountType());
+    
     return;
 }
 
@@ -64,14 +65,46 @@ const std::string& ByteSwapFilter::getName() const
     return name;
 }
 
-
-
-
-// append all points from src buffer to end of dst buffer, based on the our bounds
 boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const
 {
-    // const SchemaLayout& schemaLayout = dstData.getSchemaLayout();
-    //  const Schema& schema = schemaLayout.getSchema();
+    SchemaLayout& dstSchemaLayout = dstData.getSchemaLayout();
+    Schema & dstSchema = dstSchemaLayout.getSchema();
+    
+    libpc::Schema::Dimensions const& dstDims = dstSchema.getDimensions();
+
+    dstData.copyPointsFast(0, 0, srcData, srcData.getNumPoints());
+    dstData.setNumPoints(srcData.getNumPoints());
+    
+    for (boost::uint32_t i = 0; i != dstData.getNumPoints(); ++i)
+    {
+        boost::uint8_t* data = dstData.getData(i);
+        std::size_t position = 0;
+        for (boost::uint32_t n = 0; n < dstDims.size(); ++n)
+        {
+            Dimension const& d = dstSchema.getDimension(n);
+            std::size_t size = d.getByteSize();
+            
+            boost::uint8_t* pos = data + position;
+            SWAP_ENDIANNESS_N(*pos, size);
+            position = position + size;
+        }
+            
+    }
+    
+
+    for (boost::uint32_t i = 0; i < dstDims.size(); ++i)
+    {
+        Dimension& d = dstSchema.getDimension(i);
+        if (d.getEndianness() == Endian_Little)
+            d.setEndianness(Endian_Big);
+        if (d.getEndianness() == Endian_Big)
+            d.setEndianness(Endian_Little);
+    }
+            
+    
+    
+
+
     // 
     //  int fieldX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
     //  int fieldY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
@@ -103,7 +136,8 @@ boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointB
     //  
     //  assert(dstIndex <= dstData.getCapacity());
 
-    return 0;
+    dstData.setNumPoints(dstData.getCapacity());
+    return dstData.getNumPoints();
 }
 
 
