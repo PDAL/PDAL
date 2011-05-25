@@ -94,8 +94,9 @@ public:
 
     void dump() const;
     
-    static Schema from_xml(std::istream* stream);
-    static std::ostream* to_xml(Schema const& schema);
+    static Schema from_xml(std::string const& xml, std::string const& xsd);
+    static Schema from_xml(std::string const& xml);
+    static std::string to_xml(Schema const& schema);
 
 private:
     std::vector<Dimension> m_dimensions;

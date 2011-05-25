@@ -45,6 +45,10 @@
 
 #include <libpc/exceptions.hpp>
 
+#ifdef LIBPC_HAVE_LIBXML2
+#include <libpc/XMLSchema.hpp>
+#endif
+
 namespace libpc
 {
 
@@ -264,9 +268,46 @@ std::ostream& operator<<(std::ostream& os, Schema const& schema)
     return os;
 }
 
-Schema Schema::from_xml(std::istream* stream)
+
+#ifdef LIBPC_HAVE_LIBXML2
+
+
+#endif
+
+
+Schema Schema::from_xml(std::string const& xml, std::string const& xsd)
 {
-    return Schema();
+#ifdef LIBPC_HAVE_LIBXML2
+
+    libpc::schema::Reader reader(xml, xsd);
+    
+    libpc::Schema schema = reader.getSchema();
+
+#endif
+}
+
+Schema Schema::from_xml(std::string const& xml)
+{
+#ifdef LIBPC_HAVE_LIBXML2
+    
+    std::string xsd("");
+    
+    libpc::schema::Reader reader(xml, xsd);
+    
+    libpc::Schema schema = reader.getSchema();
+
+#endif
+}
+
+std::string Schema::to_xml(Schema const& schema)
+{
+#ifdef LIBPC_HAVE_LIBXML2
+
+    libpc::schema::Writer writer(schema);
+    
+    return writer.getXML();
+
+#endif
 }
 
 } // namespace libpc
