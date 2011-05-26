@@ -56,9 +56,6 @@ boost::uint64_t ChipperSequentialIterator::skipImpl(boost::uint64_t count)
 
 boost::uint32_t ChipperSequentialIterator::readImpl(PointBuffer& buffer)
 {
-    // The client has asked us for dstData.getCapacity() points.
-    // We will read from our previous stage until we get that amount (or
-    // until the previous stage runs out of points).
 
     if (m_currentBlockId == m_chipper.GetBlockCount())
         return 0; // we're done.
@@ -76,15 +73,12 @@ boost::uint32_t ChipperSequentialIterator::readImpl(PointBuffer& buffer)
         throw libpc_error("Buffer not large enough to hold block!");
     }
     block.GetBuffer(m_chipper.getPrevStage(), buffer, m_currentBlockId);
-    
-    // FIXME: Set the PointBuffer's Bounds
-    
+
     buffer.setSpatialBounds(block.GetBounds());
     m_currentBlockId++;
     return numPointsThisBlock;
 
 }
-
 
 bool ChipperSequentialIterator::atEndImpl() const
 {
@@ -93,71 +87,5 @@ bool ChipperSequentialIterator::atEndImpl() const
     const SequentialIterator& iter = getPrevIterator();
     return iter.atEnd();
 }
-
-
-// boost::uint64_t ChipperSequentialIterator::skipImpl(boost::uint64_t count)
-// {
-//     getPrevIterator().skip(count);
-//     return count;
-// }
-// 
-// 
-// bool ChipperSequentialIterator::atEndImpl() const
-// {
-//     return getPrevIterator().atEnd();
-// }
-// 
-// 
-// boost::uint32_t ChipperSequentialIterator::readImpl(PointBuffer& data)
-// {
-//     const boost::uint32_t numRead = getPrevIterator().read(data);
-//     // const boost::uint32_t cacheBlockSize = m_filter.getCacheBlockSize();
-//     // 
-//     // const boost::uint64_t currentPointIndex = getIndex();
-//     // 
-//     // // for now, we only read from the cache if they are asking for one point
-//     // // (this avoids the problem of an N-point request needing more than one
-//     // // cached block to satisfy it)
-//     // if (data.getCapacity() != 1)
-//     // {
-//     //     const boost::uint32_t numRead = getPrevIterator().read(data);
-//     // 
-//     //     // if they asked for a full block and we got a full block,
-//     //     // and the block we got is properly aligned and not already cached,
-//     //     // then let's cache it!
-//     //     const bool isCacheable = (data.getCapacity() == cacheBlockSize) && 
-//     //                              (numRead == cacheBlockSize) && 
-//     //                              (currentPointIndex % cacheBlockSize == 0);
-//     //     if (isCacheable && (m_filter.lookupInCache(currentPointIndex) == NULL))
-//     //     {
-//     //         m_filter.addToCache(currentPointIndex, data);
-//     //     }
-//     // 
-//     //     m_filter.updateStats(numRead, data.getCapacity());
-//     // 
-//     //     return numRead;
-//     // }
-//     // 
-//     // // they asked for just one point -- first, check Mister Cache
-//     // const PointBuffer* block = m_filter.lookupInCache(currentPointIndex);
-//     // if (block != NULL)
-//     // {
-//     //     // A hit! A palpable hit!
-//     //     data.copyPointFast(0,  currentPointIndex % cacheBlockSize, *block);
-//     //     
-//     //     m_filter.updateStats(0, 1);
-//     // 
-//     //     return 1;
-//     // }
-//     // 
-//     // // Not in the cache, so do a normal read :-(
-//     // const boost::uint32_t numRead = getPrevIterator().read(data);
-//     // m_filter.updateStats(numRead, numRead);
-// 
-//     return numRead;
-// }
-// 
-
-
 
 } } // namespaces
