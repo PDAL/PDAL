@@ -27,6 +27,7 @@
 //#include <libpc/LasHeader.hpp>
 #include <libpc/drivers/las/Writer.hpp>
 #include <libpc/filters/CacheFilter.hpp>
+#include <libpc/filters/ByteSwapFilter.hpp>
 
 #include <libpc/drivers/liblas/Writer.hpp>
 #include <libpc/drivers/liblas/Reader.hpp>
@@ -150,9 +151,14 @@ int Application_pc2pc::execute()
         boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
         
         
-        libpc::filters::CacheFilter cache(reader, 1, 1024);
+        libpc::filters::CacheFilter cache(reader, 1, capacity);
         libpc::filters::Chipper chipper(cache, capacity);
-        libpc::drivers::oci::Writer writer(chipper, options);
+        libpc::filters::ByteSwapFilter swapper(chipper);
+        libpc::drivers::oci::Writer writer(swapper, options);
+
+        // libpc::filters::CacheFilter cache(reader, 1, capacity);
+        // libpc::filters::Chipper chipper(cache, capacity);
+        // libpc::drivers::oci::Writer writer(chipper, options);
 
         writer.write(numPoints);
         boost::property_tree::ptree output_tree;
@@ -179,9 +185,11 @@ int Application_pc2pc::execute()
 
         const boost::uint64_t numPoints = reader.getNumPoints();
 
+        libpc::filters::ByteSwapFilter swapper(reader);
 
 
-        libpc::drivers::las::LasWriter writer(reader, *ofs);
+
+        libpc::drivers::las::LasWriter writer(swapper, *ofs);
 
 
         if (hasOption("a_srs"))
