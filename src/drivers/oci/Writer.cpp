@@ -1150,6 +1150,7 @@ void Writer::SetOrdinates(Statement statement,
                           libpc::Bounds<double> const& extent)
 {
     
+    std::cout << extent << std::endl;
     statement->AddElement(ordinates, extent.getMinimum(0));
     statement->AddElement(ordinates, extent.getMaximum(1));
     if (extent.dimensions().size() > 2)
@@ -1163,10 +1164,11 @@ void Writer::SetOrdinates(Statement statement,
 
 }
 
-bool Writer::WriteBlock(PointBuffer const& buffer, 
-                                 std::vector<boost::uint8_t>& point_data)
+bool Writer::WriteBlock(PointBuffer const& buffer)
 {
-
+    
+    boost::uint8_t* point_data = buffer.getData(0);
+    
     boost::property_tree::ptree&  tree = m_options.GetPTree();
     
     std::string block_table_name = to_upper(tree.get<std::string>("block_table_name"));
@@ -1181,8 +1183,9 @@ bool Writer::WriteBlock(PointBuffer const& buffer,
     // Pluck the block id out of the first point in the buffer
     libpc::Schema const& schema = buffer.getSchema();
     const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
-    long block_id  = buffer.getField<boost::int32_t>(0, indexBlockId);
+    boost::int32_t block_id  = buffer.getField<boost::int32_t>(0, indexBlockId);
     
+    SWAP_ENDIANNESS(block_id); //We've already swapped these data, but we need to write a real number here.
     std::ostringstream oss;
     std::ostringstream partition;
     
@@ -1227,6 +1230,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer,
     long* p_num_points = (long*) malloc (1 * sizeof(long));
     p_num_points[0] = (long)buffer.getNumPoints();
     
+    std::cout << "point count on write: " << buffer.getNumPoints() << std::endl;
+    
     
     // :1
     statement->Bind( p_pc_id );
@@ -1245,7 +1250,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer,
     // bool gotdata = GetResultData(result, reader, data, 3);
     // if (! gotdata) throw std::runtime_error("unable to fetch point data byte array");
 
-    statement->Bind((char*)&(point_data[0]),(long)point_data.size());
+    statement->Bind((char*)&(point_data[0]),(long)buffer.getSchemaLayout().getByteSize());
 
     // :5
     long* p_gtype = (long*) malloc (1 * sizeof(long));
@@ -1317,10 +1322,14 @@ bool Writer::WriteBlock(PointBuffer const& buffer,
 boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 {
     boost::uint32_t numPoints = buffer.getNumPoints();
-    std::vector<boost::uint8_t> oracle_buffer;
-
-    FillOraclePointBuffer(buffer, oracle_buffer);
-    WriteBlock(buffer, oracle_buffer);
+    std::cout << buffer.getSchemaLayout().getSchema();
+    // std::vector<boost::uint8_t> oracle_array;
+    // 
+    // boost::uint8_t* raw_data = buffer.getData(0)
+    // PointBuffer& output_buffer = ConstructBuffer(buffer)
+    // 
+    // FillOraclePointBuffer(output_buffer, oracle_array);
+    WriteBlock(buffer);
 
     return numPoints;
 }

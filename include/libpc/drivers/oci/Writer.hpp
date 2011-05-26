@@ -97,8 +97,7 @@ private:
     
     bool FillOraclePointBuffer(PointBuffer const& buffer, 
                              std::vector<boost::uint8_t>& point_data);
-    bool WriteBlock(PointBuffer const& buffer, 
-                             std::vector<boost::uint8_t>& point_data);
+    bool WriteBlock(PointBuffer const& buffer);
 
     void SetOrdinates(Statement statement,
                       OCIArray* ordinates, 
@@ -110,6 +109,7 @@ private:
     bool isDebug() const;
     bool is3d() const;
     bool isSolid() const;
+    // PointBuffer& ConstructBuffer(const PointBuffer& input) const;
     
     Stage& m_stage;
     
