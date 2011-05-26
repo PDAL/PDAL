@@ -72,7 +72,9 @@ boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointB
     
     libpc::Schema::Dimensions const& dstDims = dstSchema.getDimensions();
 
+    dstData.setSpatialBounds(srcData.getSpatialBounds());
     dstData.copyPointsFast(0, 0, srcData, srcData.getNumPoints());
+    
     dstData.setNumPoints(srcData.getNumPoints());
     
     for (boost::uint32_t i = 0; i != dstData.getNumPoints(); ++i)
@@ -136,7 +138,7 @@ boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointB
     //  
     //  assert(dstIndex <= dstData.getCapacity());
 
-    dstData.setNumPoints(dstData.getCapacity());
+    // dstData.setNumPoints(dstData.getCapacity());
     return dstData.getNumPoints();
 }
 

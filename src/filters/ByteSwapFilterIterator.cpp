@@ -85,9 +85,8 @@ boost::uint32_t ByteSwapFilterSequentialIterator::readImpl(PointBuffer& dstData)
     
     const boost::uint32_t numPointsAchieved = dstData.getNumPoints();
 
-    dstData.setNumPoints(dstData.getCapacity());
 
-    return dstData.getCapacity();
+    return numPointsAchieved;
 }
 
 
