@@ -277,6 +277,8 @@ Writer::Writer(Stage& prevStage, Options& options)
     
     m_connection = Connect(m_options);
     
+    boost::uint32_t capacity = m_options.GetPTree().get<boost::uint32_t>("capacity");
+    setChunkSize(capacity);
     return;
 }
 
@@ -719,7 +721,7 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
 
     int nPCPos = 1;
     int nSchemaPos = 1;
-    if (bHaveSchemaOverride)
+    // if (bHaveSchemaOverride)
         nSchemaPos++;
 
     int nPos = nSchemaPos+1; // Bind column position    
@@ -754,13 +756,13 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
         s_srid << srid;
     }
 
-    if (bHaveSchemaOverride)
-    {
+    // if (bHaveSchemaOverride)
+    // {
         s_schema << "xmltype(:"<<nSchemaPos<<")";
-    } else
-    {
-        s_schema << "NULL";
-    }
+    // } else
+    // {
+    //     s_schema << "NULL";
+    // }
     
     long gtype = GetGType();
     
@@ -1250,7 +1252,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     // bool gotdata = GetResultData(result, reader, data, 3);
     // if (! gotdata) throw std::runtime_error("unable to fetch point data byte array");
 
-    statement->Bind((char*)&(point_data[0]),(long)buffer.getSchemaLayout().getByteSize());
+    statement->Bind((char*)point_data,(long)buffer.getSchemaLayout().getByteSize()*buffer.getNumPoints());
 
     // :5
     long* p_gtype = (long*) malloc (1 * sizeof(long));
@@ -1322,13 +1324,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 {
     boost::uint32_t numPoints = buffer.getNumPoints();
-    std::cout << buffer.getSchemaLayout().getSchema();
-    // std::vector<boost::uint8_t> oracle_array;
-    // 
-    // boost::uint8_t* raw_data = buffer.getData(0)
-    // PointBuffer& output_buffer = ConstructBuffer(buffer)
-    // 
-    // FillOraclePointBuffer(output_buffer, oracle_array);
+
     WriteBlock(buffer);
 
     return numPoints;

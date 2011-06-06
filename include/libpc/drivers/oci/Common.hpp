@@ -44,7 +44,9 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/tokenizer.hpp>
 
+typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
 #include <cpl_port.h>
 
@@ -130,19 +132,12 @@ public:
     Cloud(Connection connection);
     ~Cloud();
     
-    OCIString* base_table;
-    OCIString* base_column;
-    OCINumber pc_id;
-    OCIString* blk_table;
-    OCIString* ptn_params;
+    std::string base_table;
+    std::string base_column;
+    boost::int32_t pc_id;
+    std::string blk_table;
     sdo_geometry* pc_geometry;
-    OCINumber pc_tol;
-    OCINumber pc_tot_dimensions;
-    sdo_orgscl_type* pc_domain;
-    OCIString* pc_val_attr_tables;
-    boost::scoped_ptr<std::vector<uint8_t> > schema;
-    OCILobLocator           *locator;
-    Connection              m_connection;
+    Connection              connection;
         
 };
 typedef boost::shared_ptr<Cloud> CloudPtr;

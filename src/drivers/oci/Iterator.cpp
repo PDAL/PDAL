@@ -51,29 +51,26 @@
 namespace libpc { namespace drivers { namespace oci {
 
 IteratorBase::IteratorBase(const Reader& reader)
-    : m_statement(reader.getStatement())
+    : m_statement(Statement())
     , m_at_end(false)
-    , m_block(reader.getBlock())
+    , m_cloud(reader.getCloud())
     , m_reader(reader)
 
 {
-    // oci::Options& options = m_reader.getOptions();
-
-    // m_reader.getConnection()->CreateType(&m_pc);
     
-    // m_querytype = describeQueryType();
+    std::ostringstream select_blocks;
+    
+    select_blocks
+        << "select T.OBJ_ID, T.BLK_ID, T.BLK_EXTENT, T.NUM_POINTS, T.POINTS from " 
+        << m_cloud->blk_table << " T WHERE T.OBJ_ID = " 
+        << m_cloud->pc_id;
 
-    // if (m_querytype == QUERY_SDO_PC)
-    // {
-    //     // m_statement->Define(&m_pc);
-    //     // Unpack SDO_PC object to get at block 
-    //     // table, select that stuff, and unpack the blocks
-    // } 
-    // else if (m_querytype == QUERY_BLK_TABLE)
-    // {
-    //     doBlockTableDefine();
-    // }
 
+    m_statement = Statement(m_cloud->connection->CreateStatement(select_blocks.str().c_str()));
+
+    m_statement->Execute(0);
+    m_block = defineBlock(m_statement);
+    
     return;
 }
 
@@ -222,6 +219,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     bool bDidRead = false;
 
 
+    std::cout << "m_block->num_points: " << m_block->num_points << std::endl;
     if (!m_block->num_points) 
     {
         // We still have a block of data from the last readBuffer call
@@ -274,13 +272,19 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
             m_block->chunk->resize(blob_length);
         }
         
+        std::cout << "blob_length: " << blob_length << std::endl;
+
         bool read_all_data = m_statement->ReadBlob( m_block->locator,
                                          (void*)(&(*m_block->chunk)[0]),
                                          m_block->chunk->size() , 
                                          &nAmountRead);
         if (!read_all_data) throw libpc_error("Did not read all blob data!");
 
-        unpackOracleData(data);
+        std::cout << "nAmountRead: " << nAmountRead << std::endl;
+        
+        data.setNumPoints(numPointsRead);
+        data.setAllData(&(*m_block->chunk)[0], m_block->chunk->size());
+        // unpackOracleData(data);
         bDidRead = m_statement->Fetch();
         if (!bDidRead)
         {
@@ -292,24 +296,24 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
 
 
 
-    // double x, y, z;
+    double x, y, z;
     // 
     // boost::int32_t elem1, elem2, elem3;
     // m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 0, &elem1);
     // m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 1, &elem2);
     // m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 2, &elem3);
     // 
-    // boost::int32_t gtype, srid;
+    boost::int32_t gtype, srid;
     // gtype= m_statement->GetInteger(&(m_block->blk_extent->sdo_gtype));
     // srid =m_statement->GetInteger(&(m_block->blk_extent->sdo_srid));
 
     
     // See http://download.oracle.com/docs/cd/B28359_01/appdev.111/b28400/sdo_objrelschema.htm#g1013735
 
-    // boost::uint32_t dimension = gtype / 1000;
-    // boost::uint32_t geom_type = gtype % 100;
-    // boost::uint32_t referencing= ((gtype % 1000) / 100);
-    // std::cout << "dimension: " << dimension << " geometry type: " << geom_type << " referencing " << referencing << std::endl;
+    boost::uint32_t dimension = gtype / 1000;
+    boost::uint32_t geom_type = gtype % 100;
+    boost::uint32_t referencing= ((gtype % 1000) / 100);
+    std::cout << "dimension: " << dimension << " geometry type: " << geom_type << " referencing " << referencing << std::endl;
     
     libpc::Vector<double> mins;
     libpc::Vector<double> maxs;
@@ -336,11 +340,11 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     // std::cout << "elem_info size " << m_statement->GetArrayLength(&(m_block->blk_extent->sdo_elem_info)) << std::endl;
     // std::cout << "sdo_ordinates size " << m_statement->GetArrayLength(&(m_block->blk_extent->sdo_ordinates)) << std::endl;
 
-    // m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 0, &x);
-    // m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 1, &y);
-    // m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 2, &z);
+    m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 0, &x);
+    m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 1, &y);
+    m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 2, &z);
 
-    // std::cout << "x, y, z " << x << " " << y << " " << z << std::endl;
+    std::cout << "x, y, z " << x << " " << y << " " << z << std::endl;
 
 
     return numPointsRead;
@@ -390,6 +394,79 @@ boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
     return 0;
 }
 
+BlockPtr IteratorBase::defineBlock(Statement statement)
+{
+
+    int   iCol = 0;
+    char  szFieldName[OWNAME];
+    int   hType = 0;
+    int   nSize = 0;
+    int   nPrecision = 0;
+    signed short nScale = 0;
+    char szTypeName[OWNAME];
+    
+    BlockPtr block = BlockPtr(new Block(m_cloud->connection));
+
+    m_cloud->connection->CreateType(&(block->blk_extent));    
+
+    while( statement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName) )
+    {
+        std::string name = to_upper(std::string(szFieldName));
+
+        if (compare_no_case(szFieldName, "OBJ_ID") == 0)
+        {
+            statement->Define(&(block->obj_id));
+        }
+
+        if (compare_no_case(szFieldName, "BLK_ID") == 0)
+        {
+            statement->Define(&(block->blk_id));
+        }
+
+        if (compare_no_case(szFieldName, "BLK_EXTENT") == 0)
+        {
+            statement->Define(&(block->blk_extent));
+        }
+
+        if (compare_no_case(szFieldName, "BLK_DOMAIN") == 0)
+        {
+            statement->Define(&(block->blk_domain));
+        }
+        
+        if (compare_no_case(szFieldName, "PCBLK_MIN_RES") == 0)
+        {
+            statement->Define(&(block->pcblk_min_res));
+        }
+
+        if (compare_no_case(szFieldName, "PCBLK_MAX_RES") == 0)
+        {
+            statement->Define(&(block->pcblk_max_res));
+        }
+
+        if (compare_no_case(szFieldName, "NUM_POINTS") == 0)
+        {
+            statement->Define(&(block->num_points));
+        }
+
+        if (compare_no_case(szFieldName, "NUM_UNSORTED_POINTS") == 0)
+        {
+            statement->Define(&(block->num_unsorted_points));
+        }
+
+        if (compare_no_case(szFieldName, "PT_SORT_DIM") == 0)
+        {
+            statement->Define(&(block->pt_sort_dim));
+        }
+
+        if (compare_no_case(szFieldName, "POINTS") == 0)
+        {
+            statement->Define( &(block->locator) ); 
+        }
+        iCol++;
+    }
+    
+    return block;
+}
 
 
 bool SequentialIterator::atEndImpl() const

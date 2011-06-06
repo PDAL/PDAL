@@ -41,6 +41,7 @@
 #include <iostream>
 #include <map>
 
+
 namespace libpc { namespace drivers { namespace oci {
 
 
@@ -63,13 +64,21 @@ Reader::Reader(Options& options)
     m_statement->Execute(0);
 
     m_querytype = describeQueryType();
+
+
     
-    if (m_querytype == QUERY_BLK_TABLE)
-        m_block = defineBlock();
-    else if (m_querytype == QUERY_SDO_PC)
+    if (m_querytype == QUERY_SDO_PC)
     {
-        m_cloud = defineCloud();
-        throw libpc_error("not yet implemented");
+        m_connection->CreateType(&m_pc);
+
+        m_statement->Define(&(m_pc));
+    
+        bool bDidRead = m_statement->Fetch(); 
+    
+        if (!bDidRead) throw libpc_error("Unable to fetch a point cloud entry entry!");
+        Schema& schema = getSchemaRef(); 
+        schema = fetchSchema(m_pc);
+        std::cout << schema << std::endl;
     }
     
     else 
@@ -78,7 +87,7 @@ Reader::Reader(Options& options)
 
 
     
-    registerFields();
+
     
     // setNumPoints(1000);
 }    
@@ -506,23 +515,85 @@ BlockPtr Reader::defineBlock() const
     return block;
 }
 
-CloudPtr Reader::defineCloud() 
+libpc::Schema Reader::fetchSchema(sdo_pc* pc) 
 {
 
+    std::ostringstream select_schema;
+    OCILobLocator* metadata = NULL;    
+    select_schema
+        << "DECLARE" << std::endl
+        << "PC_TABLE VARCHAR2(32) := '" << m_statement->GetString(pc->base_table) << "';" << std::endl
+        << "PC_ID NUMBER := " << m_statement->GetInteger(&(pc->pc_id)) << ";" << std::endl
+        << "PC_COLUMN VARCHAR2(32) := '" << m_statement->GetString(pc->base_column) << "';" << std::endl
+        << "BEGIN" << std::endl
+        << std::endl 
+        << "EXECUTE IMMEDIATE" << std::endl
+        << " 'SELECT T.'||PC_COLUMN||'.PC_OTHER_ATTRS.getClobVal(), T.'||PC_COLUMN||'.PTN_PARAMS FROM '||pc_table||' T WHERE T.ID='||PC_ID INTO :metadata, :capacity;"
+        << std::endl
+        << "END;"
+        << std::endl;
+    Statement get_schema(m_connection->CreateStatement(select_schema.str().c_str()));
+    get_schema->BindName( ":metadata", &metadata );
     
-    CloudPtr cloud = CloudPtr(new Cloud(m_connection));
+    int capacity_length = 1024;
+    char* capacity = (char*) malloc (sizeof(char*) * capacity_length);
+    get_schema->BindName( ":capacity", capacity, capacity_length );
+    get_schema->Execute();
+    
+    char* pc_schema = get_schema->ReadCLob(metadata);
+    
+    std::ostream* out = Utils::createFile("schema-xml.xml");
+    out->write(pc_schema, strlen(pc_schema));
+    delete out;
+    
+    
+    int block_capacity = 0;
 
-    m_connection->CreateType(&m_pc);
+    boost::char_separator<char> sep_space(" ");
+    boost::char_separator<char> sep_equal("=");
 
-    m_statement->Define(&(m_pc));
+    std::string s_cap(capacity);
+    tokenizer parameters(s_cap, sep_space);
+    for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t) {
+        tokenizer parameter((*t), sep_equal);
+
+        for(tokenizer::iterator c = parameter.begin(); c != parameter.end(); ++c)
+        {
+            if (compare_no_case(c->c_str(), "blk_capacity") == 0)
+            {
+                tokenizer::iterator d = ++c;
+                block_capacity = atoi(d->c_str());
+            }
+        }
+    }    
+
+    if (block_capacity < 1) 
+    {
+        std::ostringstream oss;
+        oss << "Invalid block capacity for point cloud object in Oracle: " << block_capacity;
+        throw libpc_error(oss.str());
+    }
     
-    bool bDidRead = m_statement->Fetch(); 
+    m_options.GetPTree().put("capacity", block_capacity);
     
-    if (!bDidRead) throw libpc_error("Unable to fetch first cloud entry!");
-    
-    std::cout << "block_table_name: " << m_statement->GetString(m_pc->blk_table);
-    
-    return cloud;
+    std::string pc_schema_xml(pc_schema);
+    CPLFree(pc_schema);
+    free(capacity);
+    Schema schema = Schema::from_xml(pc_schema_xml);
+
+    return schema;
+}
+
+CloudPtr Reader::getCloud() const
+{
+
+    CloudPtr output(new Cloud(getConnection()));
+    output->base_table = m_statement->GetString(m_pc->base_table);
+    output->base_column = m_statement->GetString(m_pc->base_column);
+    output->pc_id = m_statement->GetInteger(&(m_pc->pc_id));
+    output->blk_table = m_statement->GetString(m_pc->blk_table);
+    return output;
+
 }
 
 libpc::SequentialIterator* Reader::createSequentialIterator() const

@@ -72,7 +72,7 @@ public:
     Connection getConnection () const { return m_connection;}
     Statement getStatement () const { return m_statement;}
     Options& getOptions() const { return m_options; }
-    BlockPtr getBlock() const { return m_block; }
+    CloudPtr getCloud() const;
     std::string getQuery() const;
     bool isVerbose() const;
     bool isDebug() const;
@@ -88,16 +88,15 @@ private:
     void fetchPCFields();
     QueryType describeQueryType() const;    
     BlockPtr defineBlock() const;
-    CloudPtr defineCloud();
+    Schema fetchSchema(sdo_pc* pc);
 
     Options& m_options;
     Connection m_connection;
     Statement m_statement;
     QueryType m_querytype;
-    BlockPtr m_block;
-    CloudPtr m_cloud;
+    // BlockPtr m_block;
+    Schema m_schema;
     sdo_pc* m_pc;
-
 
 };
 
