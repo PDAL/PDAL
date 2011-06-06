@@ -233,7 +233,8 @@ void OCISchemaGenericErrorHandler
 void Reader::Initialize() 
 {
     if (m_xml.size() == 0) throw schema_generic_error("Inputted XML has no size, is there data there?");
-    if (m_xsd.size() == 0) throw schema_generic_error("Inputted XSD has no size, is there data there?");
+    
+    // if (m_xsd.size() == 0) throw schema_generic_error("Inputted XSD has no size, is there data there?");
 
 
     LIBXML_TEST_VERSION
@@ -245,43 +246,49 @@ void Reader::Initialize()
     m_doc = DocPtr(
                    xmlReadMemory(m_xml.c_str(), m_xml.size(), NULL, NULL, m_doc_options),
                    XMLDocDeleter());
+                   
+    if (m_xsd.size())
+    {
+        m_schema_doc = DocPtr(
+                            xmlReadMemory(m_xsd.c_str(), m_xsd.size(), NULL, NULL, m_doc_options),
+                             XMLDocDeleter());
 
-    m_schema_doc = DocPtr(
-                        xmlReadMemory(m_xsd.c_str(), m_xsd.size(), NULL, NULL, m_doc_options),
-                         XMLDocDeleter());
+        m_schema_parser_ctx = SchemaParserCtxtPtr(
+                                xmlSchemaNewDocParserCtxt(static_cast<xmlDocPtr>(m_schema_doc.get())),
+                                SchemaParserCtxDeleter());
 
-    m_schema_parser_ctx = SchemaParserCtxtPtr(
-                            xmlSchemaNewDocParserCtxt(static_cast<xmlDocPtr>(m_schema_doc.get())),
-                            SchemaParserCtxDeleter());
-
-    xmlSchemaSetParserStructuredErrors(static_cast<xmlSchemaParserCtxtPtr>(m_schema_parser_ctx.get()),
-                                        &OCISchemaParserStructuredErrorHandler,
-                                        m_global_context);
+        xmlSchemaSetParserStructuredErrors(static_cast<xmlSchemaParserCtxtPtr>(m_schema_parser_ctx.get()),
+                                            &OCISchemaParserStructuredErrorHandler,
+                                            m_global_context);
 
 
-    m_schema_ptr = SchemaPtr(
-                    xmlSchemaParse(static_cast<xmlSchemaParserCtxtPtr>(m_schema_parser_ctx.get())),
-                    SchemaDeleter());
+        m_schema_ptr = SchemaPtr(
+                        xmlSchemaParse(static_cast<xmlSchemaParserCtxtPtr>(m_schema_parser_ctx.get())),
+                        SchemaDeleter());
 
-    m_schema_valid_ctx = SchemaValidCtxtPtr(
-                            xmlSchemaNewValidCtxt(static_cast<xmlSchemaPtr>(m_schema_ptr.get())),
-                            SchemaValidCtxtDeleter());
+        m_schema_valid_ctx = SchemaValidCtxtPtr(
+                                xmlSchemaNewValidCtxt(static_cast<xmlSchemaPtr>(m_schema_ptr.get())),
+                                SchemaValidCtxtDeleter());
 
-    xmlSchemaSetValidErrors(static_cast<xmlSchemaValidCtxtPtr>(m_schema_valid_ctx.get()),
-                            &OCISchemaValidityError,
-                            &OCISchemaValidityDebug,
-                            m_global_context);
+        xmlSchemaSetValidErrors(static_cast<xmlSchemaValidCtxtPtr>(m_schema_valid_ctx.get()),
+                                &OCISchemaValidityError,
+                                &OCISchemaValidityDebug,
+                                m_global_context);
 
-    int valid_schema = xmlSchemaValidateDoc(static_cast<xmlSchemaValidCtxtPtr>(m_schema_valid_ctx.get()),
-                                              static_cast<xmlDocPtr>(m_doc.get()));
+        int valid_schema = xmlSchemaValidateDoc(static_cast<xmlSchemaValidCtxtPtr>(m_schema_valid_ctx.get()),
+                                                  static_cast<xmlDocPtr>(m_doc.get()));
 
-    if (valid_schema != 0)
-        throw schema_error("Document did not validate against schema!");
+        if (valid_schema != 0)
+            throw schema_error("Document did not validate against schema!");
+        
+    }
+
     
 }
 
 Reader::Reader(std::string const& xml, std::string const &xsd)
 : m_doc_options(XML_PARSE_NONET)
+, m_field_position(512)
 {
     
     m_xml = xml;
@@ -564,17 +571,9 @@ Dimension::DataType Reader::GetDimensionType(std::string const& interpretation)
 Dimension::Field Reader::GetDimensionField(std::string const& name, boost::uint32_t position)
 {
 
-    if (name.size() == 0)
-    {
-        // Yes, this is scary.  What else can we do?  The user didn't give us a
-        // name to map to, so we'll just assume the positions are the same as
-        // our dimension positions
-        for (unsigned int i = 1; i < Dimension::Field_INVALID; ++i)
-        {
-            if (i == position)
-                return static_cast<Dimension::Field>(i);
-        }
-    }
+
+
+
 
     if (!compare_no_case(name.c_str(), "X"))
         return Dimension::Field_X;
@@ -640,7 +639,12 @@ Dimension::Field Reader::GetDimensionField(std::string const& name, boost::uint3
     if (!compare_no_case(name.c_str(), "Alpha"))
         return Dimension::Field_Alpha;
 
-    return Dimension::Field_INVALID;
+    // Yes, this is scary.  What else can we do?  The user didn't give us a
+    // name to map to, so we'll just assume the positions are the same as
+    // our dimension positions
+    m_field_position = m_field_position + 1;
+    return static_cast<Dimension::Field>(m_field_position -1 );
+
 }
 
 Writer::Writer(libpc::Schema const& schema)
