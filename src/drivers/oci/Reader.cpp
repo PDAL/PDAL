@@ -78,7 +78,6 @@ Reader::Reader(Options& options)
         if (!bDidRead) throw libpc_error("Unable to fetch a point cloud entry entry!");
         Schema& schema = getSchemaRef(); 
         schema = fetchSchema(m_pc);
-        std::cout << schema << std::endl;
     }
     
     else 
@@ -121,8 +120,8 @@ void Reader::Debug()
             Utils::putenv("CPL_DEBUG=ON");
         }
         
-        const char* gdal_debug2 = getenv("CPL_DEBUG");
-        std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
+        // const char* gdal_debug2 = getenv("CPL_DEBUG");
+        // std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
         CPLPushErrorHandler(OCIGDALDebugErrorHandler);
         
     }
@@ -380,7 +379,7 @@ QueryType Reader::describeQueryType() const
                     isPCObject = true;
                 if (compare_no_case(szTypeName, "SDO_PC_BLK_TYPE") == 0)
                     isBlockTableType = true;
-                std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
+                // std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
         }
 
         iCol++;
@@ -506,7 +505,7 @@ BlockPtr Reader::defineBlock() const
 
         if (compare_no_case(szFieldName, "POINTS") == 0)
         {
-            std::cout << "Defined POINTS as BLOB" << std::endl;
+            // std::cout << "Defined POINTS as BLOB" << std::endl;
             m_statement->Define( &(block->locator) ); 
         }
         iCol++;

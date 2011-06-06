@@ -219,7 +219,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     bool bDidRead = false;
 
 
-    std::cout << "m_block->num_points: " << m_block->num_points << std::endl;
+    // std::cout << "m_block->num_points: " << m_block->num_points << std::endl;
     if (!m_block->num_points) 
     {
         // We still have a block of data from the last readBuffer call
@@ -272,7 +272,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
             m_block->chunk->resize(blob_length);
         }
         
-        std::cout << "blob_length: " << blob_length << std::endl;
+        // std::cout << "blob_length: " << blob_length << std::endl;
 
         bool read_all_data = m_statement->ReadBlob( m_block->locator,
                                          (void*)(&(*m_block->chunk)[0]),
@@ -280,7 +280,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
                                          &nAmountRead);
         if (!read_all_data) throw libpc_error("Did not read all blob data!");
 
-        std::cout << "nAmountRead: " << nAmountRead << std::endl;
+        // std::cout << "nAmountRead: " << nAmountRead << std::endl;
         
         data.setNumPoints(numPointsRead);
         data.setAllData(&(*m_block->chunk)[0], m_block->chunk->size());
@@ -303,17 +303,17 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     // m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 1, &elem2);
     // m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 2, &elem3);
     // 
-    boost::int32_t gtype, srid;
+    // boost::int32_t gtype, srid;
     // gtype= m_statement->GetInteger(&(m_block->blk_extent->sdo_gtype));
     // srid =m_statement->GetInteger(&(m_block->blk_extent->sdo_srid));
 
     
     // See http://download.oracle.com/docs/cd/B28359_01/appdev.111/b28400/sdo_objrelschema.htm#g1013735
 
-    boost::uint32_t dimension = gtype / 1000;
-    boost::uint32_t geom_type = gtype % 100;
-    boost::uint32_t referencing= ((gtype % 1000) / 100);
-    std::cout << "dimension: " << dimension << " geometry type: " << geom_type << " referencing " << referencing << std::endl;
+    // boost::uint32_t dimension = gtype / 1000;
+    // boost::uint32_t geom_type = gtype % 100;
+    // boost::uint32_t referencing= ((gtype % 1000) / 100);
+    // std::cout << "dimension: " << dimension << " geometry type: " << geom_type << " referencing " << referencing << std::endl;
     
     libpc::Vector<double> mins;
     libpc::Vector<double> maxs;
@@ -344,7 +344,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 1, &y);
     m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 2, &z);
 
-    std::cout << "x, y, z " << x << " " << y << " " << z << std::endl;
+    // std::cout << "x, y, z " << x << " " << y << " " << z << std::endl;
 
 
     return numPointsRead;

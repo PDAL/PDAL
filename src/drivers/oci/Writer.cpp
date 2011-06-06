@@ -1152,7 +1152,7 @@ void Writer::SetOrdinates(Statement statement,
                           libpc::Bounds<double> const& extent)
 {
     
-    std::cout << extent << std::endl;
+    // std::cout << extent << std::endl;
     statement->AddElement(ordinates, extent.getMinimum(0));
     statement->AddElement(ordinates, extent.getMaximum(1));
     if (extent.dimensions().size() > 2)
@@ -1232,7 +1232,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     long* p_num_points = (long*) malloc (1 * sizeof(long));
     p_num_points[0] = (long)buffer.getNumPoints();
     
-    std::cout << "point count on write: " << buffer.getNumPoints() << std::endl;
+    // std::cout << "point count on write: " << buffer.getNumPoints() << std::endl;
     
     
     // :1
@@ -1351,8 +1351,8 @@ void Writer::Debug()
             Utils::putenv("CPL_DEBUG=ON");
         }
         
-        const char* gdal_debug2 = getenv("CPL_DEBUG");
-        std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
+        // const char* gdal_debug2 = getenv("CPL_DEBUG");
+        // std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
         CPLPushErrorHandler(OCIGDALDebugErrorHandler);
         
     }
