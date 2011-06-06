@@ -182,15 +182,11 @@ int Application_pc2pc::execute()
         libpc::Options options(oracle_options);
 
         libpc::drivers::oci::Reader reader(options);
-
-        const boost::uint64_t numPoints = reader.getNumPoints();
-
         libpc::filters::ByteSwapFilter swapper(reader);
-
-
-
+        const boost::uint64_t numPoints = reader.getNumPoints();
         libpc::drivers::las::LasWriter writer(swapper, *ofs);
-
+        
+        writer.setChunkSize(options.GetPTree().get<boost::uint32_t>("capacity"));
 
         if (hasOption("a_srs"))
         {
