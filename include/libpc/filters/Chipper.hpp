@@ -157,6 +157,8 @@ public:
         m_xvec(chipper::DIR_X), m_yvec(chipper::DIR_Y), m_spare(chipper::DIR_NONE) 
     {
         checkImpedance();
+        setPointCountType(PointCount_Fixed);
+        setNumPoints(0);
     }
 
     void Chip();
@@ -191,7 +193,8 @@ private:
         chipper::RefList& narrow, boost::uint32_t narrowmin, boost::uint32_t narrowmax );
 
     void checkImpedance();
-
+    
+    
     boost::uint32_t m_threshold;
     std::vector<chipper::Block> m_blocks;
     std::vector<boost::uint32_t> m_partitions;
