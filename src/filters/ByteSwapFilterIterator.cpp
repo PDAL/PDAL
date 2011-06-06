@@ -36,7 +36,8 @@
 
 #include <libpc/filters/ByteSwapFilter.hpp>
 #include <libpc/PointBuffer.hpp>
-
+#include <libpc/filters/Chipper.hpp>
+#include <iostream>
 namespace libpc { namespace filters {
 
 
@@ -59,31 +60,52 @@ boost::uint32_t ByteSwapFilterSequentialIterator::readImpl(PointBuffer& dstData)
     // The client has asked us for dstData.getCapacity() points.
     // We will read from our previous stage until we get that amount (or
     // until the previous stage runs out of points).
+    
+    Stage const* prevStage = &(m_swapFilter.getPrevStage());
+
+        // std::cout << "Source: " << dstData.getSchemaLayout().getSchema() << std::endl;
+        // std::cout << "prev stage: " << prevStage->getSchema() << std::endl;    
+    Chipper const* chip = dynamic_cast<Chipper const*>(prevStage);
+    
+    if (chip)
+    {
+        PointBuffer srcData(dstData.getSchemaLayout(), dstData.getCapacity());
+        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+        const boost::uint32_t numPointsProcessed = m_swapFilter.processBuffer(dstData, srcData);
+                        
+        std::cout << "Prev stage was a chipper!" << std::endl;
+        return numPointsProcessed;
+    }
 
     boost::uint32_t numPointsNeeded = dstData.getCapacity();
-    assert(dstData.getNumPoints() == 0);
+    boost::uint32_t numPointsAchieved = 0;
+    // assert(dstData.getNumPoints() == 0);
     
     while (numPointsNeeded > 0)
     {
         // set up buffer to be filled by prev stage
         PointBuffer srcData(dstData.getSchemaLayout(), numPointsNeeded);
+
     
         // read from prev stage
         const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
         assert(numSrcPointsRead == srcData.getNumPoints());
         assert(numSrcPointsRead <= numPointsNeeded);
-    
+
+        numPointsAchieved += numSrcPointsRead;
+            
         // we got no data, and there is no more to get -- exit the loop
-        if (numSrcPointsRead == 0) break;
+        if (numSrcPointsRead == 0) return numPointsAchieved;
     
         // copy points from src (prev stage) into dst (our stage), 
         // based on the CropFilter's rules (i.e. its bounds)
         const boost::uint32_t numPointsProcessed = m_swapFilter.processBuffer(dstData, srcData);
     
         numPointsNeeded -= numPointsProcessed;
+
     }
     
-    const boost::uint32_t numPointsAchieved = dstData.getNumPoints();
+
 
 
     return numPointsAchieved;
