@@ -225,5 +225,19 @@ std::string Utils::trim(const std::string& str)
     return str.substr( startpos, endpos-startpos+1 );
 }
 
+boost::uint32_t Utils::getStreamPrecision(double scale)
+{
+    double frac = 0;
+    double integer = 0;
+    
+    frac = std::modf(scale, &integer);
+    double precision = std::fabs(std::floor(std::log10(frac)));
+    
+    // FIXME: This should test that precision actually ends up being a 
+    // whole number
+    boost::uint32_t output = static_cast<boost::uint32_t>(precision);
+    return output;
+}
+
 
 } // namespace libpc

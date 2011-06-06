@@ -161,6 +161,9 @@ public:
 
     static std::string trim(const std::string& str);
 
+    static boost::uint32_t getStreamPrecision(double scale);
+
+
 private:
     template<typename T>
     static inline char* as_buffer(T& data)
@@ -199,6 +202,8 @@ private:
             throw std::runtime_error("fatal I/O error occured");
         return true;
     }
+
+
 };
 
 
