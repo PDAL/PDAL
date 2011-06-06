@@ -73,7 +73,8 @@ boost::uint32_t ByteSwapFilterSequentialIterator::readImpl(PointBuffer& dstData)
         const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
         const boost::uint32_t numPointsProcessed = m_swapFilter.processBuffer(dstData, srcData);
                         
-        std::cout << "Prev stage was a chipper!" << std::endl;
+        assert (numSrcPointsRead == numPointsProcessed);
+        // std::cout << "Prev stage was a chipper!" << std::endl;
         return numPointsProcessed;
     }
 
