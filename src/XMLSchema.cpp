@@ -386,14 +386,15 @@ void Reader::Load()
         xmlNode* properties = dimension->children;
 
         std::string name;
-        boost::uint32_t size;
+        boost::uint32_t size(0);
         boost::uint32_t position(1);
         std::string description;
         std::string interpretation;
-        double offset;
-        double scale;
-        double minimum;
-        double maximum;
+        double offset(0.0);
+        double scale(0.0);
+        double minimum(0.0);
+        double maximum(0.0);
+        EndianType endianness = Endian_Little;
 
         while(properties != NULL)
         {
@@ -495,6 +496,19 @@ void Reader::Load()
                 xmlFree(n);
                 // std::cout << "Dimension scale: " << scale << std::endl;
             }
+            if (!compare_no_case((const char*)properties->name, "endianness"))
+            {
+                xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
+                if (!n) throw schema_loading_error("Unable to fetch endianness value!");
+                
+                if (!compare_no_case((const char*) n, "big"))
+                    endianness = Endian_Big;
+                else
+                    endianness = Endian_Little;
+                    
+                xmlFree(n);
+                // std::cout << "Dimension endianness: " << endianness << std::endl;
+            }
 
             // printf("property name: %s\n", properties->name);
             properties = properties->next;
@@ -504,6 +518,29 @@ void Reader::Load()
         Dimension::Field f = GetDimensionField(name, position);
 
         Dimension d(f, t);
+        if (! Utils::compare_distance(scale, 0.0))
+        {
+            d.setNumericScale(scale);
+        }
+        if (! Utils::compare_distance(offset, 0.0))
+        {
+            d.setNumericOffset(offset);
+        }
+        if (! Utils::compare_distance(minimum, 0.0))
+        {
+            d.setMinimum(minimum);
+        }
+        if (! Utils::compare_distance(maximum, 0.0))
+        {
+            d.setMaximum(maximum);
+        }
+        
+        if (description.size())
+        {
+            d.setDescription(description);
+        }
+        d.setEndianness(endianness);
+
         DimensionLayout l(d);
         l.setPosition(position);
         layouts.push_back(l);
@@ -519,7 +556,6 @@ void Reader::Load()
         m_schema.addDimension(i->getDimension());
     }
 
-    // m_schema.dump();
 }
 
 Dimension::DataType Reader::GetDimensionType(std::string const& interpretation)
