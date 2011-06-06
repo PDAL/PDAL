@@ -169,6 +169,8 @@ private:
     std::string m_xml;
     std::string m_xsd;
     
+    boost::uint32_t m_field_position;
+    
     
 
 };
