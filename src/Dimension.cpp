@@ -190,7 +190,7 @@ std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
         double value = tree.get<double>("scale");
         boost::uint32_t precision = Utils::getStreamPrecision(value);
         os.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        os.precision(6);
+        os.precision(precision);
         os << " scale: " << value;
     }
     catch (boost::property_tree::ptree_bad_path const& ) {
