@@ -52,7 +52,7 @@ namespace pdal
 {
 
 
-class LIBPC_DLL SchemaLayout
+class PDAL_DLL SchemaLayout
 {
 public:
     typedef std::vector<DimensionLayout> DimensionLayouts;
@@ -107,7 +107,7 @@ private:
 };
 
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& os, SchemaLayout const&);
+PDAL_DLL std::ostream& operator<<(std::ostream& os, SchemaLayout const&);
 
 
 } // namespace liblas

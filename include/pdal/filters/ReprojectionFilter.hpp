@@ -50,7 +50,7 @@ namespace pdal { namespace filters {
 
 class ReprojectionFilterSequentialIterator;
 
-class LIBPC_DLL ReprojectionFilter : public Filter
+class PDAL_DLL ReprojectionFilter : public Filter
 {
 public:
     ReprojectionFilter(const Stage& prevStage,

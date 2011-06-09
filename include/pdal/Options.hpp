@@ -44,7 +44,7 @@ namespace pdal
 {
 
 template <typename T>
-class LIBPC_DLL Option
+class PDAL_DLL Option
 {
 
     
@@ -75,7 +75,7 @@ public:
 };
 
 
-class LIBPC_DLL Options
+class PDAL_DLL Options
 {
 
 private:
@@ -93,7 +93,7 @@ public:
 };
 
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const Options&);
+PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Options&);
 
 } // namespace pdal
 

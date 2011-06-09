@@ -62,7 +62,7 @@ typedef boost::shared_ptr<OWConnection> Connection ;
 typedef boost::shared_ptr<OWStatement> Statement ;
 
 
-extern Options LIBPC_DLL GetDefaultOptions();
+extern Options PDAL_DLL GetDefaultOptions();
 
 class connection_failed : public pdal_error
 {
@@ -171,7 +171,7 @@ private:
 typedef boost::shared_ptr<Block> BlockPtr;
 
 
-LIBPC_DLL Connection Connect(pdal::Options const& options);
+PDAL_DLL Connection Connect(pdal::Options const& options);
 
 std::string to_upper(std::string const& input);
 

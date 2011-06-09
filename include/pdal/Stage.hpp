@@ -54,7 +54,7 @@ class RandomIterator;
 class BlockIterator;
 
 // every stage owns its own header, they are not shared
-class LIBPC_DLL Stage
+class PDAL_DLL Stage
 {
 public:
     Stage();
@@ -112,7 +112,7 @@ private:
     Stage(const Stage&); // not implemented
 };
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);
+PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);
 
 } // namespace pdal
 

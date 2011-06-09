@@ -55,7 +55,7 @@ namespace pdal
 {
 
 template <typename T>
-class LIBPC_DLL Bounds
+class PDAL_DLL Bounds
 {
 public:
     typedef typename std::vector< Range<T> > RangeVector;
@@ -442,15 +442,15 @@ std::ostream& operator<<(std::ostream& ostr, const Bounds<T>& bounds)
 }
 
 
-extern LIBPC_DLL std::istream& operator>>(std::istream& istr, Bounds<double>& bounds);
+extern PDAL_DLL std::istream& operator>>(std::istream& istr, Bounds<double>& bounds);
 
 
 } // namespace pdal
 
 // Needed for C++ DLL exports
 #ifdef LIBPC_COMPILER_MSVC
-template class LIBPC_DLL pdal::Range<double>;
-template class LIBPC_DLL pdal::Bounds<double>;
+template class PDAL_DLL pdal::Range<double>;
+template class PDAL_DLL pdal::Bounds<double>;
 #endif
 
 #endif

@@ -52,7 +52,7 @@ class CropFilterSequentialIterator;
 
 // removes any points outside of the given range
 // updates the header accordingly
-class LIBPC_DLL CropFilter : public Filter
+class PDAL_DLL CropFilter : public Filter
 {
 public:
     CropFilter(const Stage& prevStage, Bounds<double> const& bounds);

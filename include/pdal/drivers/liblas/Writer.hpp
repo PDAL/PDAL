@@ -50,7 +50,7 @@
 namespace pdal { namespace drivers { namespace liblas {
 
 // we default to LAS 1.2, point format 0
-class LIBPC_DLL LiblasWriter : public Writer
+class PDAL_DLL LiblasWriter : public Writer
 {
 public:
     LiblasWriter(Stage& prevStage, std::ostream&);

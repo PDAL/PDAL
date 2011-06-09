@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class LIBPC_DLL Filter : public Stage
+class PDAL_DLL Filter : public Stage
 {
 public:
     Filter(const Stage& prevStage);

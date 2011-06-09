@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class LIBPC_DLL MetadataRecord
+class PDAL_DLL MetadataRecord
 {
 public:
     // makes a local copy of the buffer, which is a shared ptr among by all copes of the metadata record

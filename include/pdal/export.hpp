@@ -37,20 +37,20 @@
 
 #include <pdal/pdal_defines.h>
 
-#ifndef LIBPC_DLL
+#ifndef PDAL_DLL
 #if defined(LIBPC_COMPILER_MSVC) && !defined(LIBPC_DISABLE_DLL)
-#if defined(LIBPC_DLL_EXPORT)
-#   define LIBPC_DLL   __declspec(dllexport)
-#elif defined(LIBPC_DLL_IMPORT)
-#   define LIBPC_DLL   __declspec(dllimport)
+#if defined(PDAL_DLL_EXPORT)
+#   define PDAL_DLL   __declspec(dllexport)
+#elif defined(PDAL_DLL_IMPORT)
+#   define PDAL_DLL   __declspec(dllimport)
 #else
-#   define LIBPC_DLL
+#   define PDAL_DLL
 #endif
 #else
 #  if defined(USE_GCC_VISIBILITY_FLAG)
-#    define LIBPC_DLL     __attribute__ ((visibility("default")))
+#    define PDAL_DLL     __attribute__ ((visibility("default")))
 #  else
-#    define LIBPC_DLL
+#    define PDAL_DLL
 #  endif
 #endif
 #endif

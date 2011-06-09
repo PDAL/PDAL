@@ -47,7 +47,7 @@ namespace pdal { namespace drivers { namespace oci {
 
 
 
-class LIBPC_DLL Writer : public pdal::Writer
+class PDAL_DLL Writer : public pdal::Writer
 {
     
 public:

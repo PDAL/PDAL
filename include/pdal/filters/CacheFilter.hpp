@@ -55,7 +55,7 @@ namespace filters {
 //   - we only cache on 'blockSize' boundaries
 //   - we only look into the cache if 1 point is being requested
 //
-class LIBPC_DLL CacheFilter : public Filter
+class PDAL_DLL CacheFilter : public Filter
 {
 public:
     CacheFilter(const Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);

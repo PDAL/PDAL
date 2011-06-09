@@ -60,7 +60,7 @@
 namespace pdal { namespace drivers { namespace las {
 
 
-class LIBPC_DLL LasHeader
+class PDAL_DLL LasHeader
 {
 public:
     /// Version numbers of the ASPRS LAS Specification.
@@ -378,7 +378,7 @@ private:
     LasHeader(const LasHeader&); // nope
 };
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const LasHeader&);
+PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const LasHeader&);
 
 } } } // namespace
 

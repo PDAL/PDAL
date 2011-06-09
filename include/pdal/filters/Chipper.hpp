@@ -61,7 +61,7 @@ namespace filters
 
 
 
-class LIBPC_DLL Chipper;
+class PDAL_DLL Chipper;
 
 namespace chipper {
 
@@ -72,7 +72,7 @@ enum Direction
     DIR_NONE
 };
 
-class LIBPC_DLL PtRef
+class PDAL_DLL PtRef
 {
 public:
     double m_pos;
@@ -83,7 +83,7 @@ public:
         { return m_pos < pt.m_pos; }
 };
 
-struct LIBPC_DLL RefList
+struct PDAL_DLL RefList
 {
 public:
     std::vector<PtRef> m_vec;
@@ -118,7 +118,7 @@ public:
 
 
  
-class LIBPC_DLL Block
+class PDAL_DLL Block
 {
     friend class pdal::filters::Chipper;
 
@@ -149,7 +149,7 @@ public:
 
 } // namespace chipper 
 
-class LIBPC_DLL Chipper : public pdal::Filter
+class PDAL_DLL Chipper : public pdal::Filter
 {
 public:
     Chipper(Stage& prevStage, boost::uint32_t max_partition_size) :

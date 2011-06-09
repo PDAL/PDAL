@@ -45,7 +45,7 @@ namespace pdal
 {
 
 template <typename T>
-class LIBPC_DLL Vector
+class PDAL_DLL Vector
 {
 private:
     std::vector<T> m_data;

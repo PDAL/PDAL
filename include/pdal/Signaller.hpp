@@ -46,7 +46,7 @@ namespace pdal
 //
 // Apps should override these two functions as they desire.
 //
-class LIBPC_DLL Signaller
+class PDAL_DLL Signaller
 {
 public:
     Signaller() {}

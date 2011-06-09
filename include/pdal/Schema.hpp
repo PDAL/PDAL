@@ -54,7 +54,7 @@ namespace pdal
 
 
 /// Schema definition
-class LIBPC_DLL Schema
+class PDAL_DLL Schema
 {
 public:
     typedef std::vector<Dimension> Dimensions;
@@ -107,7 +107,7 @@ private:
 };
 
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& os, Schema const&);
+PDAL_DLL std::ostream& operator<<(std::ostream& os, Schema const&);
 
 
 } // namespace liblas

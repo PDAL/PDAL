@@ -45,7 +45,7 @@ namespace pdal
 class Stage;
 class PointBuffer;
 
-class LIBPC_DLL Writer
+class PDAL_DLL Writer
 {
 public:
     Writer(Stage& prevStage);

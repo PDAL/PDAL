@@ -125,7 +125,7 @@ public:
 };
 
 
-class LIBPC_DLL Reader : public pdal::Stage
+class PDAL_DLL Reader : public pdal::Stage
 {
 
 public:

@@ -290,7 +290,7 @@ class OWStatement;
 //  OWConnection
 //  ---------------------------------------------------------------------------
 
-class LIBPC_DLL OWConnection
+class PDAL_DLL OWConnection
 {
     friend class OWStatement;
 
@@ -378,7 +378,7 @@ public:
 /*                           OWStatement                                   */
 /***************************************************************************/
 
-class LIBPC_DLL OWStatement
+class PDAL_DLL OWStatement
 {
 
 public:

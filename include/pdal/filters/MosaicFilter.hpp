@@ -48,7 +48,7 @@ namespace pdal { namespace filters {
 
 
 // this doesn't derive from Stage since it takes more than one stage as input
-class LIBPC_DLL MosaicFilter : public Stage
+class PDAL_DLL MosaicFilter : public Stage
 {
 public:
     // entries may not be null

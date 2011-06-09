@@ -50,7 +50,7 @@ namespace pdal
 {
 
 /// RGB color container
-class LIBPC_DLL Color
+class PDAL_DLL Color
 {
 public:
     typedef boost::uint16_t value_type;
@@ -139,13 +139,13 @@ private:
 };
 
 
-LIBPC_DLL inline bool operator==(Color const& lhs, Color const& rhs)
+PDAL_DLL inline bool operator==(Color const& lhs, Color const& rhs)
 {
     return lhs[0] == rhs[0] && lhs[1] == rhs[1] && lhs[2] == rhs[2];
 }
 
 
-LIBPC_DLL inline bool operator!=(Color const& lhs, Color const& rhs)
+PDAL_DLL inline bool operator!=(Color const& lhs, Color const& rhs)
 {
     return !(lhs == rhs);
 }

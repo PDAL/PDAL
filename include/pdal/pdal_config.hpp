@@ -51,17 +51,17 @@
 namespace pdal
 {
 
-LIBPC_DLL bool IsLibLASEnabled();
-LIBPC_DLL bool IsGDALEnabled();
-LIBPC_DLL bool IsLibGeoTIFFEnabled();
-LIBPC_DLL bool IsLasZipEnabled();
+PDAL_DLL bool IsLibLASEnabled();
+PDAL_DLL bool IsGDALEnabled();
+PDAL_DLL bool IsLibGeoTIFFEnabled();
+PDAL_DLL bool IsLasZipEnabled();
 
-LIBPC_DLL std::string GetFullVersionString();
-LIBPC_DLL std::string GetVersionString();
-LIBPC_DLL int GetVersionInteger();
-LIBPC_DLL int GetVersionMajor();
-LIBPC_DLL int GetVersionMinor();
-LIBPC_DLL int GetVersionPatch();
+PDAL_DLL std::string GetFullVersionString();
+PDAL_DLL std::string GetVersionString();
+PDAL_DLL int GetVersionInteger();
+PDAL_DLL int GetVersionMajor();
+PDAL_DLL int GetVersionMinor();
+PDAL_DLL int GetVersionPatch();
 
 } // namespace pdal
 

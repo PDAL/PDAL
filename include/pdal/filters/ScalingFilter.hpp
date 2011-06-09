@@ -50,7 +50,7 @@ namespace pdal { namespace filters {
 
 class ScalingFilterSequentialIterator;
 
-class LIBPC_DLL ScalingFilter : public Filter
+class PDAL_DLL ScalingFilter : public Filter
 {
 public:
     // for now...

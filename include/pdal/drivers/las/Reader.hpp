@@ -53,7 +53,7 @@ namespace pdal { namespace drivers { namespace las {
 class LasHeader;
 class ZipPoint;
 
-class LIBPC_DLL LasReader : public LasReaderBase
+class PDAL_DLL LasReader : public LasReaderBase
 {
 public:
     LasReader(const std::string& filename);

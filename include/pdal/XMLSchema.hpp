@@ -128,7 +128,7 @@ typedef boost::shared_ptr<void> TextWriterPtr;
 typedef boost::shared_ptr<void> BufferPtr;
 typedef boost::shared_ptr<void> CharPtr;
 
-class LIBPC_DLL Reader
+class PDAL_DLL Reader
 {
 public:
     Reader(std::string const& xml, std::string const& xmlschema);
@@ -176,7 +176,7 @@ private:
 };
 
 
-class LIBPC_DLL Writer
+class PDAL_DLL Writer
 {
 public:
     Writer(pdal::Schema const& schema);

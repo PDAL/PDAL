@@ -52,7 +52,7 @@ class ByteSwapFilterSequentialIterator;
 
 // removes any points outside of the given range
 // updates the header accordingly
-class LIBPC_DLL ByteSwapFilter : public Filter
+class PDAL_DLL ByteSwapFilter : public Filter
 {
 public:
     ByteSwapFilter(const Stage& prevStage);

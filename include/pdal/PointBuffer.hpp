@@ -55,7 +55,7 @@ namespace pdal
 // Many of the methods take a first parameter "index", to specify which point in the
 // collection is to be operated upon.  The point index is a uint32; you can't read
 // more than 4 billion points at a time.
-class LIBPC_DLL PointBuffer
+class PDAL_DLL PointBuffer
 
 {
     
@@ -210,7 +210,7 @@ inline T PointBuffer::getField(std::size_t pointIndex, boost::int32_t fieldIndex
 }
 
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);
+PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);
 
 
 } // namespace pdal

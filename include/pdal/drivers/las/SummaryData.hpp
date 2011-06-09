@@ -41,7 +41,7 @@ namespace pdal {
 namespace drivers {
 namespace las {
 
-class LIBPC_DLL SummaryData
+class PDAL_DLL SummaryData
 {
 public:
     SummaryData();
@@ -79,7 +79,7 @@ private:
 };
 
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const SummaryData&);
+PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const SummaryData&);
 
 
 } } } // namespaces

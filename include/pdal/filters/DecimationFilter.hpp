@@ -50,7 +50,7 @@ namespace pdal { namespace filters {
 class DecimationFilterSequentialIterator;
 
 // we keep only 1 out of every step points; if step=100, we get 1% of the file
-class LIBPC_DLL DecimationFilter : public Filter
+class PDAL_DLL DecimationFilter : public Filter
 {
 public:
     DecimationFilter(const Stage& prevStage, boost::uint32_t step);

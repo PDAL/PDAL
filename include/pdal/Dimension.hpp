@@ -57,7 +57,7 @@ namespace pdal
 /// When a dimension is added to a Schema, it also gets two more properties: the position (index)
 /// of this dimension in the schema's list of dimensions, and the byte offset where the dimension
 /// is stored in the PointBuffer's raw bytes
-class LIBPC_DLL Dimension
+class PDAL_DLL Dimension
 {
 public:
     enum Field
@@ -304,7 +304,7 @@ private:
 };
 
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d);
+PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d);
 
 
 } // namespace pdal

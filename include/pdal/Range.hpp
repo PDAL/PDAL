@@ -43,7 +43,7 @@ namespace pdal
 {
 
 template <typename T>
-class LIBPC_DLL Range
+class PDAL_DLL Range
 {
 private:
     T m_minimum;
@@ -197,7 +197,7 @@ std::ostream& operator<<(std::ostream& ostr, const Range<T>& range)
 }
 
 
-extern LIBPC_DLL std::istream& operator>>(std::istream& istr, Range<double>& range);
+extern PDAL_DLL std::istream& operator>>(std::istream& istr, Range<double>& range);
 
 
 } // namespace pdal

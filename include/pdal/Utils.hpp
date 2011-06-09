@@ -47,7 +47,7 @@
 namespace pdal
 {
 
-class LIBPC_DLL Utils
+class PDAL_DLL Utils
 {
 public:
     static void random_seed(unsigned int seed);

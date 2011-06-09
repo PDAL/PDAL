@@ -53,7 +53,7 @@ class ColorFilterSequentialIterator;
 
 // adds three new u8 fields (R,G,B) for the colourization of the Z axis
 // the color is done as a ramp from the declared Z min/max values in the header
-class LIBPC_DLL ColorFilter : public Filter
+class PDAL_DLL ColorFilter : public Filter
 {
 public:
     ColorFilter(const Stage& prevStage);

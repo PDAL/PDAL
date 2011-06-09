@@ -85,7 +85,7 @@ public:
 };
 
 
-class LIBPC_DLL Support
+class PDAL_DLL Support
 {
 public:
     static void registerFields(Schema& schema, PointFormat pointFormat);

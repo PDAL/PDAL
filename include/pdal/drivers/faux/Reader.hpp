@@ -63,7 +63,7 @@ namespace pdal { namespace drivers { namespace faux {
 //   - "ramp" generates its points as a linear ramp from the minimum of the bbox to the maximum
 // In all these modes, however, the Time field is always set to the point number.
 //
-class LIBPC_DLL Reader : public pdal::Stage
+class PDAL_DLL Reader : public pdal::Stage
 {
 public:
     enum Mode

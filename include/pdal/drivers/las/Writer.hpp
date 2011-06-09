@@ -49,7 +49,7 @@ namespace pdal { namespace drivers { namespace las {
 
 class ZipPoint;
 
-class LIBPC_DLL LasWriter : public Writer
+class PDAL_DLL LasWriter : public Writer
 {
 public:
     LasWriter(Stage& prevStage, std::ostream&);

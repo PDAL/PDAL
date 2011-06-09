@@ -51,7 +51,7 @@ namespace pdal
 {
 
 
-class LIBPC_DLL DimensionLayout
+class PDAL_DLL DimensionLayout
 {
 public:
     DimensionLayout(const Dimension&);
@@ -109,7 +109,7 @@ private:
 };
 
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& os, pdal::DimensionLayout const& d);
+PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::DimensionLayout const& d);
 
 
 } // namespace pdal

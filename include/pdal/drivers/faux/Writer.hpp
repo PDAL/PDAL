@@ -49,7 +49,7 @@ namespace pdal { namespace drivers { namespace faux {
 //
 // This writer knows only about three dimensions: X,Y,Z (as doubles).
 //
-class LIBPC_DLL Writer : public pdal::Writer
+class PDAL_DLL Writer : public pdal::Writer
 {
 public:
     Writer(Stage& prevStage);

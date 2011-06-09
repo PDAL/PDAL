@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-class LIBPC_DLL SpatialReference
+class PDAL_DLL SpatialReference
 {
 public:
     enum WKTModeFlag
@@ -110,7 +110,7 @@ private:
 };
 
 
-extern LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs);
+extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs);
 
 } // namespace pdal
 

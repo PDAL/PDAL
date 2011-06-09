@@ -45,7 +45,7 @@ namespace pdal { namespace drivers { namespace las {
 
 // this class gives the interfaces for the LAS-specific header data access functions -- we use
 // this to make sure that the native las and liblas readers both have the same API
-class LIBPC_DLL LasReaderBase: public Stage
+class PDAL_DLL LasReaderBase: public Stage
 {
 public:
     LasReaderBase() : Stage() {}

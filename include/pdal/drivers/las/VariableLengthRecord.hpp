@@ -46,7 +46,7 @@
 namespace pdal { namespace drivers { namespace las {
     
 
-class LIBPC_DLL VariableLengthRecord
+class PDAL_DLL VariableLengthRecord
 {
 public:
     // makes a local copy of the bytes buffer, which is a shared ptr among by all copes of the metadata record
@@ -103,7 +103,7 @@ private:
 };
 
 
-class LIBPC_DLL VLRList
+class PDAL_DLL VLRList
 {
 public:
     void add(const VariableLengthRecord& v);

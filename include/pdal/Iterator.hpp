@@ -44,7 +44,7 @@ class PointBuffer;
 
 
 
-class LIBPC_DLL Iterator
+class PDAL_DLL Iterator
 {
 public:
     Iterator(const Stage& stage);
@@ -94,7 +94,7 @@ private:
 };
 
 
-class LIBPC_DLL SequentialIterator : public Iterator
+class PDAL_DLL SequentialIterator : public Iterator
 {
 public:
     SequentialIterator(const Stage& stage);
@@ -122,7 +122,7 @@ protected:
 };
 
 
-class LIBPC_DLL RandomIterator : public Iterator
+class PDAL_DLL RandomIterator : public Iterator
 {
 public:
     RandomIterator(const Stage& stage);
@@ -143,7 +143,7 @@ protected:
     virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
 };
 
-class LIBPC_DLL BlockIterator : public Iterator
+class PDAL_DLL BlockIterator : public Iterator
 {
 public:
     BlockIterator(const Stage& stage);
