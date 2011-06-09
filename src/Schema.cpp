@@ -285,6 +285,7 @@ Schema Schema::from_xml(std::string const& xml, std::string const& xsd)
     return schema;
 
 #endif
+    return Schema();
 }
 
 Schema Schema::from_xml(std::string const& xml)
@@ -299,6 +300,7 @@ Schema Schema::from_xml(std::string const& xml)
     return schema;
 
 #endif
+    return Schema();
 }
 
 std::string Schema::to_xml(Schema const& schema)
@@ -310,6 +312,7 @@ std::string Schema::to_xml(Schema const& schema)
     return writer.getXML();
 
 #endif
+    return std::string("");
 }
 
 } // namespace pdal
