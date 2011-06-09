@@ -171,149 +171,146 @@ list (APPEND PDAL_HPP ${PDAL_DRIVERS_LIBLAS_HPP} )
 #
 # drivers/oci
 #
-if (WITH_ORACLE)
+
+set(PDAL_ORACLE_PATH drivers/oci)
+set(PDAL_ORACLE_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_ORACLE_PATH})
+set(PDAL_ORACLE_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_ORACLE_PATH})
+
 set(PDAL_DRIVERS_OCI_HPP
-  ${PDAL_HEADERS_DIR}/drivers/oci/Writer.hpp
-  ${PDAL_HEADERS_DIR}/drivers/oci/Reader.hpp
-  ${PDAL_HEADERS_DIR}/drivers/oci/Iterator.hpp
-  ${PDAL_HEADERS_DIR}/drivers/oci/oci_wrapper.h
-  ${PDAL_HEADERS_DIR}/drivers/oci/Common.hpp
+  ${PDAL_ORACLE_HEADERS}/Writer.hpp
+  ${PDAL_ORACLE_HEADERS}/Reader.hpp
+  ${PDAL_ORACLE_HEADERS}/Iterator.hpp
+  ${PDAL_ORACLE_HEADERS}/oci_wrapper.h
+  ${PDAL_ORACLE_HEADERS}/Common.hpp
 )
 
 set (PDAL_DRIVERS_OCI_CPP 
-  ./drivers/oci/oci_wrapper.cpp
-  ./drivers/oci/common.cpp
-  ./drivers/oci/Reader.cpp
-  ./drivers/oci/Iterator.cpp
-  ./drivers/oci/Writer.cpp
+  ${PDAL_ORACLE_SRC}/oci_wrapper.cpp
+  ${PDAL_ORACLE_SRC}/common.cpp
+  ${PDAL_ORACLE_SRC}/Reader.cpp
+  ${PDAL_ORACLE_SRC}/Iterator.cpp
+  ${PDAL_ORACLE_SRC}/Writer.cpp
 )
    
-FOREACH(file ${PDAL_DRIVERS_OCI_HPP})
-        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
-
-FOREACH(file ${PDAL_DRIVERS_OCI_CPP})
-        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
+if (ORACLE_FOUND)
+    list (APPEND PDAL_CPP ${PDAL_DRIVERS_OCI_CPP} )
+    list (APPEND PDAL_HPP ${PDAL_DRIVERS_OCI_HPP} )
 endif()
 
 #
 # drivers/mrsid
 #
-if (MRSID_FOUND)
+set(PDAL_MRSID_PATH drivers/mrsid)
+set(PDAL_MRSID_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_MRSID_PATH})
+set(PDAL_MRSID_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_MRSID_PATH})
+
 set(PDAL_DRIVERS_MRSID_HPP
-  ${PDAL_HEADERS_DIR}/drivers/mrsid/Reader.hpp
+  ${PDAL_MRSID_HEADERS}/Reader.hpp
 )
 
 set (PDAL_DRIVERS_MRSID_CPP 
-  ./drivers/mrsid/Reader.cpp
+  ${PDAL_MRSID_SRC}/Reader.cpp
 )
-   
-FOREACH(file ${PDAL_DRIVERS_MRSID_HPP})
-        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for drivers/mrsid")
-ENDFOREACH(file)
 
-FOREACH(file ${PDAL_DRIVERS_MRSID_CPP})
-        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for drivers/mrsid")
-ENDFOREACH(file)
+if (MRSID_FOUND)
+    list (APPEND PDAL_CPP ${PDAL_DRIVERS_MRSID_CPP} )
+    list (APPEND PDAL_HPP ${PDAL_DRIVERS_MRSID_HPP} )
 endif()
 
 
 #
 # drivers/qfit
 #
+set(PDAL_QFIT_PATH drivers/qfit)
+set(PDAL_QFIT_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_QFIT_PATH})
+set(PDAL_QFIT_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_QFIT_PATH})
+
 set(PDAL_DRIVERS_QFIT_HPP
-  ${PDAL_HEADERS_DIR}/drivers/qfit/Iterator.hpp
-  ${PDAL_HEADERS_DIR}/drivers/qfit/Reader.hpp
+  ${PDAL_QFIT_HEADERS}/Iterator.hpp
+  ${PDAL_QFIT_HEADERS}/Reader.hpp
 )
 
 set (PDAL_DRIVERS_QFIT_CPP 
-  ./drivers/qfit/Iterator.cpp
-  ./drivers/qfit/Reader.cpp
+  ${PDAL_QFIT_SRC}/Iterator.cpp
+  ${PDAL_QFIT_SRC}/Reader.cpp
 )
-   
-FOREACH(file ${PDAL_DRIVERS_QFIT_HPP})
-        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
 
-FOREACH(file ${PDAL_DRIVERS_QFIT_CPP})
-        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_QFIT_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_QFIT_HPP} )
 
 #
 # drivers/terrasolid
 #
+set(PDAL_TERRASOLID_PATH drivers/terrasolid)
+set(PDAL_TERRASOLID_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_TERRASOLID_PATH})
+set(PDAL_TERRASOLID_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_TERRASOLID_PATH})
+
 set(PDAL_DRIVERS_TERRASOLID_HPP
-  ${PDAL_HEADERS_DIR}/drivers/terrasolid/Iterator.hpp
-  ${PDAL_HEADERS_DIR}/drivers/terrasolid/Reader.hpp
+  ${PDAL_TERRASOLID_HEADERS}/Iterator.hpp
+  ${PDAL_TERRASOLID_HEADERS}/Reader.hpp
 )
 
 set (PDAL_DRIVERS_TERRASOLID_CPP 
-  ./drivers/terrasolid/Iterator.cpp
-  ./drivers/terrasolid/Reader.cpp
+  ${PDAL_TERRASOLID_SRC}/Iterator.cpp
+  ${PDAL_TERRASOLID_SRC}/Reader.cpp
 )
-   
-FOREACH(file ${PDAL_DRIVERS_TERRASOLID_HPP})
-        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
 
-FOREACH(file ${PDAL_DRIVERS_TERRASOLID_CPP})
-        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_TERRASOLID_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_TERRASOLID_HPP} )
 
 #
 # filters
 #
 
+set(PDAL_FILTERS_PATH filters)
+set(PDAL_FILTERS_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_FILTERS_PATH})
+set(PDAL_FILTERS_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH})
+
 set(PDAL_FILTERS_HPP
-  ${PDAL_HEADERS_DIR}/filters/ByteSwapFilter.hpp
-  ${PDAL_HEADERS_DIR}/filters/ByteSwapFilterIterator.hpp
-  ${PDAL_HEADERS_DIR}/filters/CacheFilter.hpp
-  ${PDAL_HEADERS_DIR}/filters/CacheFilterIterator.hpp
-  ${PDAL_HEADERS_DIR}/filters/Chipper.hpp
-  ${PDAL_HEADERS_DIR}/filters/ChipperIterator.hpp
-  ${PDAL_HEADERS_DIR}/filters/ColorFilter.hpp
-  ${PDAL_HEADERS_DIR}/filters/ColorFilterIterator.hpp
-  ${PDAL_HEADERS_DIR}/filters/CropFilter.hpp
-  ${PDAL_HEADERS_DIR}/filters/CropFilterIterator.hpp
-  ${PDAL_HEADERS_DIR}/filters/DecimationFilter.hpp
-  ${PDAL_HEADERS_DIR}/filters/DecimationFilterIterator.hpp
-  ${PDAL_HEADERS_DIR}/filters/MosaicFilter.hpp
-  ${PDAL_HEADERS_DIR}/filters/MosaicFilterIterator.hpp
-  ${PDAL_HEADERS_DIR}/filters/ReprojectionFilter.hpp
-  ${PDAL_HEADERS_DIR}/filters/ReprojectionFilterIterator.hpp
-  ${PDAL_HEADERS_DIR}/filters/ScalingFilter.hpp
-  ${PDAL_HEADERS_DIR}/filters/ScalingFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/ByteSwapFilter.hpp
+  ${PDAL_FILTERS_HEADERS}/ByteSwapFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/CacheFilter.hpp
+  ${PDAL_FILTERS_HEADERS}/CacheFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/Chipper.hpp
+  ${PDAL_FILTERS_HEADERS}/ChipperIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/ColorFilter.hpp
+  ${PDAL_FILTERS_HEADERS}/ColorFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/CropFilter.hpp
+  ${PDAL_FILTERS_HEADERS}/CropFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/DecimationFilter.hpp
+  ${PDAL_FILTERS_HEADERS}/DecimationFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/MosaicFilter.hpp
+  ${PDAL_FILTERS_HEADERS}/MosaicFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/ReprojectionFilter.hpp
+  ${PDAL_FILTERS_HEADERS}/ReprojectionFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/ScalingFilter.hpp
+  ${PDAL_FILTERS_HEADERS}/ScalingFilterIterator.hpp
 )
 
 set (PDAL_FILTERS_CPP 
-  ./filters/ByteSwapFilter.cpp
-  ./filters/ByteSwapFilterIterator.cpp
-  ./filters/CacheFilter.cpp
-  ./filters/CacheFilterIterator.cpp
-  ./filters/Chipper.cpp
-  ./filters/ChipperIterator.cpp
-  ./filters/ColorFilter.cpp
-  ./filters/ColorFilterIterator.cpp
-  ./filters/CropFilter.cpp
-  ./filters/CropFilterIterator.cpp
-  ./filters/DecimationFilter.cpp
-  ./filters/DecimationFilterIterator.cpp
-  ./filters/MosaicFilter.cpp
-  ./filters/MosaicFilterIterator.cpp
-  ./filters/ReprojectionFilter.cpp
-  ./filters/ReprojectionFilterIterator.cpp
-  ./filters/ScalingFilter.cpp
-  ./filters/ScalingFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/ByteSwapFilter.cpp
+  ${PDAL_FILTERS_SRC}/ByteSwapFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/CacheFilter.cpp
+  ${PDAL_FILTERS_SRC}/CacheFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/Chipper.cpp
+  ${PDAL_FILTERS_SRC}/ChipperIterator.cpp
+  ${PDAL_FILTERS_SRC}/ColorFilter.cpp
+  ${PDAL_FILTERS_SRC}/ColorFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/CropFilter.cpp
+  ${PDAL_FILTERS_SRC}/CropFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/DecimationFilter.cpp
+  ${PDAL_FILTERS_SRC}/DecimationFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/MosaicFilter.cpp
+  ${PDAL_FILTERS_SRC}/MosaicFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/ReprojectionFilter.cpp
+  ${PDAL_FILTERS_SRC}/ReprojectionFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/ScalingFilter.cpp
+  ${PDAL_FILTERS_SRC}/ScalingFilterIterator.cpp
 )
 
-FOREACH(file ${PDAL_FILTERS_HPP})
-        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
+list (APPEND PDAL_CPP ${PDAL_FILTERS_CPP} )
+list (APPEND PDAL_HPP ${PDAL_FILTERS_HPP} )
 
-FOREACH(file ${PDAL_FILTERS_CPP})
-        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
 
 #
 # config
@@ -327,16 +324,11 @@ set(PDAL_CONFIG_HPP
 )
 
 set (PDAL_CONFIG_CPP 
-  ./pdal_config.cpp
+  ${PROJECT_SOURCE_DIR}/src/pdal_config.cpp
 )
 
-FOREACH(file ${PDAL_CONFIG_HPP})
-        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
-
-FOREACH(file ${PDAL_CONFIG_CPP})
-        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
+list (APPEND PDAL_CPP ${PDAL_CONFIG_CPP} )
+list (APPEND PDAL_HPP ${PDAL_CONFIG_HPP} )
 
 #
 # Group source files for IDE source explorers (e.g. Visual Studio)
