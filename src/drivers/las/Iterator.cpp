@@ -69,9 +69,11 @@ IteratorBase::IteratorBase(const LasReader& reader)
 
 IteratorBase::~IteratorBase()
 {
+#ifdef PDAL_HAVE_LASZIP
     m_zipPoint.reset();
     m_zip.reset();
     m_unzipper.reset();
+#endif
     Utils::closeFile(m_istream);
 }
 

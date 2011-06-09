@@ -6,15 +6,6 @@
 #
 ###############################################################################
 
-# Collect dependencies configuration
-if(GDAL_FOUND)
-  set(PDAL_GDAL_CPP
-    gt_citation.cpp
-    gt_wkt_srs.cpp
-    tifvsi.cpp)
-endif()
-
-
 ###############################################################################
 # Source files specification
 #
@@ -24,7 +15,7 @@ endif()
 #   PDAL_<dirname>_CPP - all the .cpp files for the given subdir/namespace
 #   ...
 
-set(PDAL_HEADERS_DIR ../include/pdal)
+set(PDAL_HEADERS_DIR ${PROJECT_SOURCE_DIR}/include/pdal)
 set(PDAL_HPP "")
 set(PDAL_CPP "")
 
@@ -85,114 +76,97 @@ set(PDAL_BASE_CPP
   ${PDAL_XML_SRC}
 )
 
-
-FOREACH(file ${PDAL_BASE_HPP})
-        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
-
-FOREACH(file ${PDAL_BASE_CPP})
-        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
+list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
+list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
 
 #
 # drivers/faux
 #
-set(PDAL_DRIVERS_FAUX_HPP
-  ${PDAL_HEADERS_DIR}/drivers/faux/Iterator.hpp
-  ${PDAL_HEADERS_DIR}/drivers/faux/Reader.hpp
-  ${PDAL_HEADERS_DIR}/drivers/faux/Writer.hpp
+set(PDAL_FAUX_PATH drivers/faux)
+set(PDAL_FAUX_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_FAUX_PATH})
+set(PDAL_FAUX_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_FAUX_PATH})
+set(PDAL_DRIVERS_FAUX_HPP 
+  ${PDAL_FAUX_HEADERS}/Iterator.hpp
+  ${PDAL_FAUX_HEADERS}/Reader.hpp
+  ${PDAL_FAUX_HEADERS}/Writer.hpp
 )
 
 set (PDAL_DRIVERS_FAUX_CPP
-  ./drivers/faux/Iterator.cpp
-  ./drivers/faux/Reader.cpp
-  ./drivers/faux/Writer.cpp 
+  ${PDAL_FAUX_SRC}/Iterator.cpp
+  ${PDAL_FAUX_SRC}/Reader.cpp
+  ${PDAL_FAUX_SRC}/Writer.cpp 
 )
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_FAUX_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_FAUX_HPP} )
 
-FOREACH(file ${PDAL_DRIVERS_FAUX_HPP})
-        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
-
-FOREACH(file ${PDAL_DRIVERS_FAUX_CPP})
-        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
 
 #
 # drivers/las
 #
-
-set (PDAL_DRIVERS_LAS_INCLUDE_DIR ${PDAL_HEADERS_DIR}/drivers/las)
-set (PDAL_DRIVERS_LAS_SRC_DIR ./drivers/las)
-
+set(PDAL_LAS_PATH drivers/las)
+set(PDAL_LAS_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_LAS_PATH})
+set(PDAL_LAS_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_LAS_PATH})
 set (PDAL_DRIVERS_LAS_HPP
-  ${PDAL_DRIVERS_LAS_SRC_DIR}/GeotiffSupport.hpp
-  ${PDAL_DRIVERS_LAS_SRC_DIR}/LasHeaderReader.hpp
-  ${PDAL_DRIVERS_LAS_SRC_DIR}/LasHeaderWriter.hpp
-  ${PDAL_DRIVERS_LAS_SRC_DIR}/ZipPoint.hpp
-  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/Header.hpp
-  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/Iterator.hpp
-  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/Reader.hpp
-  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/ReaderBase.hpp
-  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/SummaryData.hpp
-  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/Support.hpp
-  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/Writer.hpp
-  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/VariableLengthRecord.hpp
+  ${PDAL_LAS_SRC}/GeotiffSupport.hpp
+  ${PDAL_LAS_SRC}/LasHeaderReader.hpp
+  ${PDAL_LAS_SRC}/LasHeaderWriter.hpp
+  ${PDAL_LAS_SRC}/ZipPoint.hpp
+  ${PDAL_LAS_HEADERS}/Header.hpp
+  ${PDAL_LAS_HEADERS}/Iterator.hpp
+  ${PDAL_LAS_HEADERS}/Reader.hpp
+  ${PDAL_LAS_HEADERS}/ReaderBase.hpp
+  ${PDAL_LAS_HEADERS}/SummaryData.hpp
+  ${PDAL_LAS_HEADERS}/Support.hpp
+  ${PDAL_LAS_HEADERS}/Writer.hpp
+  ${PDAL_LAS_HEADERS}/VariableLengthRecord.hpp
 )
 
-if (GEOTIFF_FOUND)
-    if (PDAL_HAVE_GDAL)
-    set (PDAL_DRIVERS_LAS_GTIFF ${PDAL_DRIVERS_LAS_SRC_DIR}/GeotiffSupport.cpp)
-    endif()
+if ((GEOTIFF_FOUND) AND (GDAL_FOUND))
+    set (PDAL_DRIVERS_LAS_GTIFF ${PDAL_LAS_SRC}/GeotiffSupport.cpp)
 endif()
 
 if (LASZIP_FOUND)
-    set(PDAL_DRIVERS_LAS_LASZIP   ${PDAL_DRIVERS_LAS_SRC_DIR}/ZipPoint.cpp)
+    set(PDAL_DRIVERS_LAS_LASZIP   ${PDAL_LAS_SRC}/ZipPoint.cpp)
 endif()
+
 set (PDAL_DRIVERS_LAS_CPP
   ${PDAL_DRIVERS_LAS_GTIFF}
-  ${PDAL_DRIVERS_LAS_SRC_DIR}/Header.cpp
-  ${PDAL_DRIVERS_LAS_SRC_DIR}//Iterator.cpp
-  ${PDAL_DRIVERS_LAS_SRC_DIR}/LasHeaderReader.cpp
-  ${PDAL_DRIVERS_LAS_SRC_DIR}/LasHeaderWriter.cpp
-  ${PDAL_DRIVERS_LAS_SRC_DIR}/Reader.cpp
-  ${PDAL_DRIVERS_LAS_SRC_DIR}/SummaryData.cpp
-  ${PDAL_DRIVERS_LAS_SRC_DIR}/Support.cpp
-  ${PDAL_DRIVERS_LAS_SRC_DIR}/VariableLengthRecord.cpp
-  ${PDAL_DRIVERS_LAS_SRC_DIR}/Writer.cpp
   ${PDAL_DRIVERS_LAS_LASZIP}
+  ${PDAL_LAS_SRC}/Header.cpp
+  ${PDAL_LAS_SRC}/Iterator.cpp
+  ${PDAL_LAS_SRC}/LasHeaderReader.cpp
+  ${PDAL_LAS_SRC}/LasHeaderWriter.cpp
+  ${PDAL_LAS_SRC}/Reader.cpp
+  ${PDAL_LAS_SRC}/SummaryData.cpp
+  ${PDAL_LAS_SRC}/Support.cpp
+  ${PDAL_LAS_SRC}/VariableLengthRecord.cpp
+  ${PDAL_LAS_SRC}/Writer.cpp
 )
-  
-FOREACH(file ${PDAL_DRIVERS_LAS_HPP})
-        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
-
-FOREACH(file ${PDAL_DRIVERS_LAS_CPP})
-        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_LAS_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_LAS_HPP} )
 
 #
 # drivers/liblas
 #
 
+set(PDAL_LIBLAS_PATH drivers/liblas)
+set(PDAL_LIBLAS_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_LIBLAS_PATH})
+set(PDAL_LIBLAS_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_LIBLAS_PATH})
+
 set (PDAL_DRIVERS_LIBLAS_HPP
-  ${PDAL_HEADERS_DIR}/drivers/liblas/Iterator.hpp
-  ${PDAL_HEADERS_DIR}/drivers/liblas/Reader.hpp
-  ${PDAL_HEADERS_DIR}/drivers/liblas/Writer.hpp
+  ${PDAL_LIBLAS_HEADERS}/Iterator.hpp
+  ${PDAL_LIBLAS_HEADERS}/Reader.hpp
+  ${PDAL_LIBLAS_HEADERS}/Writer.hpp
 )
 
 set (PDAL_DRIVERS_LIBLAS_CPP 
-  ./drivers/liblas/Iterator.cpp
-  ./drivers/liblas/Reader.cpp
-  ./drivers/liblas/Writer.cpp
+  ${PDAL_LIBLAS_SRC}/Iterator.cpp
+  ${PDAL_LIBLAS_SRC}/Reader.cpp
+  ${PDAL_LIBLAS_SRC}/Writer.cpp
 )
 
-FOREACH(file ${PDAL_DRIVERS_LIBLAS_HPP})
-        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
-
-FOREACH(file ${PDAL_DRIVERS_LIBLAS_CPP})
-        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
-ENDFOREACH(file)
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_LIBLAS_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_LIBLAS_HPP} )
 
 #
 # drivers/oci
@@ -390,13 +364,6 @@ source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
 
-#
-# rest of stuff
-#
-
-if(GDAL_FOUND)
-    source_group("Source Files\\gdal" FILES ${PDAL_GDAL_CPP})
-endif()
 
 # Standard include directory of PDAL library
 include_directories(../include)
