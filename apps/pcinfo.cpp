@@ -13,7 +13,7 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/liblas/Reader.hpp>
 #include <pdal/Utils.hpp>
-#ifdef LIBPC_HAVE_MRSID
+#ifdef PDAL_HAVE_MRSID
 #include <pdal/drivers/mrsid/Reader.hpp>
 #endif
 
@@ -97,7 +97,7 @@ int Application_pcinfo::execute()
                 reader = new pdal::drivers::liblas::LiblasReader(m_inputFile);
             }
         }
-#ifdef LIBPC_HAVE_MRSID
+#ifdef PDAL_HAVE_MRSID
         else if (!m_inputFile.substr(ext).compare("sid"))
         {
             reader = new pdal::drivers::mrsid::Reader(m_inputFile.c_str());

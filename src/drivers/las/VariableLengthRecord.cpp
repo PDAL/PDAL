@@ -319,7 +319,7 @@ void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord
 
 void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs, SpatialReference::WKTModeFlag modeFlag)
 {
-#ifdef LIBPC_SRS_ENABLED
+#ifdef PDAL_SRS_ENABLED
 
     int ret = 0;
     short* kdata = 0;

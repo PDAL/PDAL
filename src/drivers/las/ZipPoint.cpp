@@ -34,7 +34,7 @@
 
 #include <pdal/pdal.hpp>
 
-#ifdef LIBPC_HAVE_LASZIP
+#ifdef PDAL_HAVE_LASZIP
 
 #include "ZipPoint.hpp"
 
@@ -232,4 +232,4 @@ bool ZipPoint::IsZipVLR(const VariableLengthRecord& vlr) const
 
 } } } // namespaces
 
-#endif // LIBPC_HAVE_LASZIP
+#endif // PDAL_HAVE_LASZIP

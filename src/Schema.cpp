@@ -45,7 +45,7 @@
 
 #include <pdal/exceptions.hpp>
 
-#ifdef LIBPC_HAVE_LIBXML2
+#ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
 #endif
 
@@ -269,7 +269,7 @@ std::ostream& operator<<(std::ostream& os, Schema const& schema)
 }
 
 
-#ifdef LIBPC_HAVE_LIBXML2
+#ifdef PDAL_HAVE_LIBXML2
 
 
 #endif
@@ -277,7 +277,7 @@ std::ostream& operator<<(std::ostream& os, Schema const& schema)
 
 Schema Schema::from_xml(std::string const& xml, std::string const& xsd)
 {
-#ifdef LIBPC_HAVE_LIBXML2
+#ifdef PDAL_HAVE_LIBXML2
 
     pdal::schema::Reader reader(xml, xsd);
     
@@ -290,7 +290,7 @@ Schema Schema::from_xml(std::string const& xml, std::string const& xsd)
 
 Schema Schema::from_xml(std::string const& xml)
 {
-#ifdef LIBPC_HAVE_LIBXML2
+#ifdef PDAL_HAVE_LIBXML2
     
     std::string xsd("");
     
@@ -305,7 +305,7 @@ Schema Schema::from_xml(std::string const& xml)
 
 std::string Schema::to_xml(Schema const& schema)
 {
-#ifdef LIBPC_HAVE_LIBXML2
+#ifdef PDAL_HAVE_LIBXML2
 
     pdal::schema::Writer writer(schema);
     

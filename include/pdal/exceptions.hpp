@@ -40,8 +40,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef LIBPC_EXCEPTION_HPP_INCLUDED
-#define LIBPC_EXCEPTION_HPP_INCLUDED
+#ifndef PDAL_EXCEPTION_HPP_INCLUDED
+#define PDAL_EXCEPTION_HPP_INCLUDED
 
 #include <pdal/pdal.hpp>
 #include <stdexcept>
@@ -151,4 +151,4 @@ public:
 
 } // namespace pdal
 
-#endif // LIBPC_EXCEPTION_HPP_INCLUDED
+#endif // PDAL_EXCEPTION_HPP_INCLUDED

@@ -448,7 +448,7 @@ extern PDAL_DLL std::istream& operator>>(std::istream& istr, Bounds<double>& bou
 } // namespace pdal
 
 // Needed for C++ DLL exports
-#ifdef LIBPC_COMPILER_MSVC
+#ifdef PDAL_COMPILER_MSVC
 template class PDAL_DLL pdal::Range<double>;
 template class PDAL_DLL pdal::Bounds<double>;
 #endif

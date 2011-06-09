@@ -46,19 +46,19 @@
 #include <sstream>
 #include <pdal/pdal_defines.h>
 
-#ifdef LIBPC_HAVE_LIBLAS
+#ifdef PDAL_HAVE_LIBLAS
 #include <liblas/version.hpp>
 #endif
 
-#ifdef LIBPC_HAVE_LIBGEOTIFF
+#ifdef PDAL_HAVE_LIBGEOTIFF
 #include <geotiff.h>
 #endif
 
-#ifdef LIBPC_HAVE_GDAL
+#ifdef PDAL_HAVE_GDAL
 #include <gdal.h>
 #endif
 
-#ifdef LIBPC_HAVE_LASZIP
+#ifdef PDAL_HAVE_LASZIP
 #include <laszip/laszip.hpp>
 #endif
 
@@ -68,7 +68,7 @@ namespace pdal
 /// Check if libLAS support has been built in to PDAL
 bool IsLibLASEnabled()
 {
-#ifdef LIBPC_HAVE_LIBLAS
+#ifdef PDAL_HAVE_LIBLAS
     return true;
 #else
     return false;
@@ -78,7 +78,7 @@ bool IsLibLASEnabled()
 /// Check if GDAL support has been built in to PDAL
 bool IsGDALEnabled()
 {
-#ifdef LIBPC_HAVE_GDAL
+#ifdef PDAL_HAVE_GDAL
     return true;
 #else
     return false;
@@ -88,7 +88,7 @@ bool IsGDALEnabled()
 /// Check if GeoTIFF support has been built in to PDAL
 bool IsLibGeoTIFFEnabled()
 {
-#ifdef LIBPC_HAVE_LIBGEOTIFF
+#ifdef PDAL_HAVE_LIBGEOTIFF
     return true;
 #else
     return false;
@@ -98,7 +98,7 @@ bool IsLibGeoTIFFEnabled()
 /// Check if LasZip compression support has been built in to PDAL
 bool IsLasZipEnabled()
 {
-#ifdef LIBPC_HAVE_LASZIP
+#ifdef PDAL_HAVE_LASZIP
     return true;
 #else
     return false;
@@ -108,27 +108,27 @@ bool IsLasZipEnabled()
 
 int GetVersionMajor()
 {
-    return LIBPC_VERSION_MAJOR;
+    return PDAL_VERSION_MAJOR;
 }
 
 int GetVersionMinor()
 {
-    return LIBPC_VERSION_MINOR;
+    return PDAL_VERSION_MINOR;
 }
 
 int GetVersionPatch()
 {
-    return LIBPC_VERSION_PATCH;
+    return PDAL_VERSION_PATCH;
 }
 
 std::string GetVersionString()
 {
-    return std::string(LIBPC_VERSION_STRING);
+    return std::string(PDAL_VERSION_STRING);
 }
 
 int GetVersionInteger()
 {
-    return LIBPC_VERSION_INTEGER;
+    return PDAL_VERSION_INTEGER;
 }
 
 
@@ -137,25 +137,25 @@ std::string GetFullVersionString()
 {
     std::ostringstream os;
 
-#ifdef LIBPC_HAVE_LIBLAS
+#ifdef PDAL_HAVE_LIBLAS
     os << " libLAS "
        << (LIBLAS_VERSION / 100000) << '.'
        << (LIBLAS_VERSION / 100 % 1000) << '.'
        << (LIBLAS_VERSION % 100);
 #endif
 
-#ifdef LIBPC_HAVE_LIBGEOTIFF
+#ifdef PDAL_HAVE_LIBGEOTIFF
     os << " GeoTIFF "
        << (LIBGEOTIFF_VERSION / 1000) << '.'
        << (LIBGEOTIFF_VERSION / 100 % 10) << '.'
        << (LIBGEOTIFF_VERSION % 100 / 10);
 #endif
 
-#ifdef LIBPC_HAVE_GDAL
+#ifdef PDAL_HAVE_GDAL
     os << " GDAL " << GDALVersionInfo("RELEASE_NAME");
 #endif
 
-#ifdef LIBPC_HAVE_LASZIP
+#ifdef PDAL_HAVE_LASZIP
     os << " LASzip "
        << LASZIP_VERSION_MAJOR << "."
        << LASZIP_VERSION_MINOR << "."
@@ -164,7 +164,7 @@ std::string GetFullVersionString()
 
     std::string info(os.str());
     os.str("");
-    os << "PDAL " << LIBPC_VERSION_STRING;
+    os << "PDAL " << PDAL_VERSION_STRING;
     if (!info.empty())
     {
         os << " with" << info;

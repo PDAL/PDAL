@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LIBPC_DRIVER_QFIT_READER_HPP
-#define INCLUDED_LIBPC_DRIVER_QFIT_READER_HPP
+#ifndef INCLUDED_PDAL_DRIVER_QFIT_READER_HPP
+#define INCLUDED_PDAL_DRIVER_QFIT_READER_HPP
 
 #include <pdal/pdal.hpp>
 
@@ -170,4 +170,4 @@ private:
 }}} // namespace pdal::driver::oci
 
 
-#endif // INCLUDED_LIBPC_DRIVER_OCI_READER_HPP
+#endif // INCLUDED_PDAL_DRIVER_OCI_READER_HPP

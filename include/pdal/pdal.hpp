@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LIBPC_HPP
-#define INCLUDED_LIBPC_HPP
+#ifndef INCLUDED_PDAL_HPP
+#define INCLUDED_PDAL_HPP
 
 // This file is for all the things that basically everybody has to include.
 
@@ -46,11 +46,11 @@
 #include <boost/cstdint.hpp>
 
 #ifdef __cplusplus
-#  define LIBPC_C_START           extern "C" {
-#  define LIBPC_C_END             }
+#  define PDAL_C_START           extern "C" {
+#  define PDAL_C_END             }
 #else
-#  define LIBPC_C_START
-#  define LIBPC_C_END
+#  define PDAL_C_START
+#  define PDAL_C_END
 #endif
 
 #endif

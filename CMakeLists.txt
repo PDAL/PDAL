@@ -37,11 +37,7 @@ SET(PDAL_C_LIB_SOVERSION ${PDAL_VERSION_MAJOR})
 
 
 # Name of C++ library
-if(WIN32)
-  set(PDAL_LIB_NAME pdal)
-else()
-  set(PDAL_LIB_NAME pc)
-endif()
+set(PDAL_LIB_NAME pdal)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 

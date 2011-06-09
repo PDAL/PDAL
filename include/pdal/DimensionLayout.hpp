@@ -39,8 +39,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef LIBPC_DIMENSIONLAYOUT_HPP_INCLUDED
-#define LIBPC_DIMENSIONLAYOUT_HPP_INCLUDED
+#ifndef PDAL_DIMENSIONLAYOUT_HPP_INCLUDED
+#define PDAL_DIMENSIONLAYOUT_HPP_INCLUDED
 
 #include <pdal/pdal.hpp>
 
@@ -114,4 +114,4 @@ PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::DimensionLayout const&
 
 } // namespace pdal
 
-#endif // LIBPC_DIMENSIONLAYOUT_HPP_INCLUDED
+#endif // PDAL_DIMENSIONLAYOUT_HPP_INCLUDED

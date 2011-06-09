@@ -78,9 +78,9 @@ Options GetOptions()
     tree.put("scale.x", 0.0000001);
     tree.put("scale.y", 0.0000001);
     tree.put("scale.z", 0.001);
-    tree.put("block_table_name", "LIBPC_TEST_BLOCKS");
-    tree.put("base_table_name", "LIBPC_TEST_BASE");
-    tree.put("select_sql", "SELECT CLOUD FROM LIBPC_TEST_BASE where ID=1");
+    tree.put("block_table_name", "PDAL_TEST_BLOCKS");
+    tree.put("base_table_name", "PDAL_TEST_BASE");
+    tree.put("select_sql", "SELECT CLOUD FROM PDAL_TEST_BASE where ID=1");
     return options;
 }
 

@@ -207,7 +207,7 @@ private:
 };
 
 
-#ifdef LIBPC_COMPILER_MSVC
+#ifdef PDAL_COMPILER_MSVC
 #define compare_no_case_n(a,b,n) _strnicmp( (a), (b), (n) )
 #define compare_no_case(a, b) _stricmp( (a), (b) )
 #else

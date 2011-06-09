@@ -11,7 +11,7 @@ If questions, contact mpg@flaxen.com.
 The C# work does not use CMake, as CMake doesn't yet support C# builds.
 
 * You need to set these environment variables:
-  - set LIBPC_SWIG_BOOST_HOME=C:\Utils\boost_1_45_0-win32
+  - set PDAL_SWIG_BOOST_HOME=C:\Utils\boost_1_45_0-win32
 
 * To build PCVeiw, you will need the DLLs for SlimDX and SlimDXControl.
 

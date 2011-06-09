@@ -40,7 +40,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/ReprojectionFilterIterator.hpp>
 
-#ifdef LIBPC_HAVE_GDAL
+#ifdef PDAL_HAVE_GDAL
 #include <gdal.h>
 #include <ogr_spatialref.h>
 #endif
@@ -48,7 +48,7 @@
 namespace pdal { namespace filters {
 
 
-#ifdef LIBPC_HAVE_GDAL
+#ifdef PDAL_HAVE_GDAL
     struct OGRSpatialReferenceDeleter
     {
        template <typename T>
@@ -135,7 +135,7 @@ void ReprojectionFilter::checkImpedance()
 
 void ReprojectionFilter::initialize()
 {
-#ifdef LIBPC_HAVE_GDAL
+#ifdef PDAL_HAVE_GDAL
     
     m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
     m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
@@ -169,6 +169,8 @@ void ReprojectionFilter::initialize()
 
 void ReprojectionFilter::transform(double& x, double& y, double& z) const
 {
+
+#ifdef PDAL_HAVE_GDAL
     int ret = 0;
 
     ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);    
@@ -180,6 +182,7 @@ void ReprojectionFilter::transform(double& x, double& y, double& z) const
     }
     
     return;
+#endif
 }
 
 

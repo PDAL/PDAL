@@ -38,7 +38,7 @@
 #include <pdal/pdal_defines.h>
 
 #ifndef PDAL_DLL
-#if defined(LIBPC_COMPILER_MSVC) && !defined(LIBPC_DISABLE_DLL)
+#if defined(PDAL_COMPILER_MSVC) && !defined(PDAL_DISABLE_DLL)
 #if defined(PDAL_DLL_EXPORT)
 #   define PDAL_DLL   __declspec(dllexport)
 #elif defined(PDAL_DLL_IMPORT)
@@ -55,8 +55,8 @@
 #endif
 #endif
 
-#ifdef LIBPC_COMPILER_MSVC
+#ifdef PDAL_COMPILER_MSVC
 #pragma warning(disable:4251)// [templated class] needs to have dll-interface...
 #endif
 
-#endif // LIBPC_HPP_INCLUDED
+#endif // PDAL_HPP_INCLUDED

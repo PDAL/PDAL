@@ -19,13 +19,13 @@
 // http://www.bottlenose.demon.co.uk/article/lru.htm.  It is under an
 // Internet Systems Consortium (ISC) license (an OSI-approved BSD-alike license).
 
-#ifndef INCLUDED_LIBPC_POINTBUFFERCACHE_HPP
-#define INCLUDED_LIBPC_POINTBUFFERCACHE_HPP
+#ifndef INCLUDED_PDAL_POINTBUFFERCACHE_HPP
+#define INCLUDED_PDAL_POINTBUFFERCACHE_HPP
 
 #include <pdal/pdal.hpp>
 
 
-#ifdef LIBPC_COMPILER_MSVC
+#ifdef PDAL_COMPILER_MSVC
 #  pragma warning(push)
 #  pragma warning(disable: 4512)  // assignment operator could not be generated
 #endif
@@ -33,7 +33,7 @@
 #include <boost/bimap/list_of.hpp>
 //#include <boost/bimap/set_of.hpp>
 //#include <boost/function.hpp>
-#ifdef LIBPC_COMPILER_MSVC
+#ifdef PDAL_COMPILER_MSVC
 #  pragma warning(pop)
 #endif
 

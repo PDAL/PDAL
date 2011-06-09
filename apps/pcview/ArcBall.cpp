@@ -16,7 +16,7 @@
 
 #include <pdal/pdal.hpp>
 
-#ifdef LIBPC_COMPILER_MSVC
+#ifdef PDAL_COMPILER_MSVC
 #include <windows.h>
 #endif
 

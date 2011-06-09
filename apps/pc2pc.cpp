@@ -32,7 +32,7 @@
 #include <pdal/drivers/liblas/Writer.hpp>
 #include <pdal/drivers/liblas/Reader.hpp>
 
-#ifdef LIBPC_HAVE_ORACLE
+#ifdef PDAL_HAVE_ORACLE
 #include <pdal/drivers/oci/Writer.hpp>
 #include <pdal/drivers/oci/Reader.hpp>
 #endif
@@ -133,7 +133,7 @@ int Application_pc2pc::execute()
 
     else if (hasOption("oracle-writer"))
     {
-#ifdef LIBPC_HAVE_ORACLE
+#ifdef PDAL_HAVE_ORACLE
         pdal::drivers::liblas::LiblasReader reader(m_inputFile);
     
         const boost::uint64_t numPoints = reader.getNumPoints();
@@ -171,7 +171,7 @@ int Application_pc2pc::execute()
     }
         else if (hasOption("oracle-reader"))
         {
-    #ifdef LIBPC_HAVE_ORACLE
+    #ifdef PDAL_HAVE_ORACLE
 
         boost::property_tree::ptree load_tree;
         

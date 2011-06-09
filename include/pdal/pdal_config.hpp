@@ -41,8 +41,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef INCLUDED_LIBPC_CONFIG_HPP
-#define INCLUDED_LIBPC_CONFIG_HPP
+#ifndef INCLUDED_PDAL_CONFIG_HPP
+#define INCLUDED_PDAL_CONFIG_HPP
 
 #include <pdal/pdal.hpp>
 

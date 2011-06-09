@@ -35,7 +35,7 @@
 #include "GeotiffSupport.hpp"
 
 // GDAL
-#ifdef LIBPC_HAVE_GDAL
+#ifdef PDAL_HAVE_GDAL
 #include <geo_normalize.h>
 #include <ogr_spatialref.h>
 
@@ -46,7 +46,7 @@
 #include <boost/concept_check.hpp>
 
 
-LIBPC_C_START
+PDAL_C_START
 #ifdef __geotiff_h_
 
 
@@ -62,7 +62,7 @@ void SetGeogCSCitation(GTIF* psGTIF, OGRSpatialReference* poSRS, char* angUnitNa
 #endif // defined _OGR_SRS_API_H_INCLUDED
 
 #endif // defined __geotiff_h_
-LIBPC_C_END
+PDAL_C_END
 
 
 namespace pdal { namespace drivers { namespace las {
@@ -77,7 +77,7 @@ GeotiffSupport::GeotiffSupport()
 
 GeotiffSupport::~GeotiffSupport()
 {
-#ifdef LIBPC_SRS_ENABLED
+#ifdef PDAL_SRS_ENABLED
     if (m_gtiff != 0)
     {
         GTIFFree(m_gtiff);
@@ -312,7 +312,7 @@ void SpatialReference::setVerticalCS(boost::int32_t verticalCSType,
         rebuildGTIF(); 
     }
 
-#ifdef LIBPC_SRS_ENABLED
+#ifdef PDAL_SRS_ENABLED
     if( verticalCSType != KvUserDefined && verticalCSType > 0 )
         GTIFKeySet( m_tiffstuff->m_gtiff, VerticalCSTypeGeoKey, TYPE_SHORT, 1,
                     verticalCSType );
@@ -356,7 +356,7 @@ void SpatialReference::setProj4(std::string const& v)
         rebuildGTIF();
     }
    
-#ifdef LIBPC_SRS_ENABLED
+#ifdef PDAL_SRS_ENABLED
     char* poWKT = 0;
     const char* poProj4 = v.c_str();
 

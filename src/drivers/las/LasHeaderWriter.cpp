@@ -115,7 +115,7 @@ void LasHeaderWriter::write()
         // add the laszip VLR, if needed
         if (m_header.Compressed())
         {
-#ifdef LIBPC_HAVE_LASZIP
+#ifdef PDAL_HAVE_LASZIP
             ZipPoint zpd(m_header.getPointFormat(), m_header.getVLRs().getAll());
             VariableLengthRecord v = zpd.ConstructVLR(m_header.getPointFormat());
             m_header.getVLRs().add(v);

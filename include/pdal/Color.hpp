@@ -38,8 +38,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef LIBPC_COLOR_HPP_INCLUDED
-#define LIBPC_COLOR_HPP_INCLUDED
+#ifndef PDAL_COLOR_HPP_INCLUDED
+#define PDAL_COLOR_HPP_INCLUDED
 
 #include <pdal/pdal.hpp>
 
@@ -152,4 +152,4 @@ PDAL_DLL inline bool operator!=(Color const& lhs, Color const& rhs)
 
 } // namespace pdal
 
-#endif // LIBPC_COLOR_HPP_INCLUDED
+#endif // PDAL_COLOR_HPP_INCLUDED

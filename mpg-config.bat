@@ -3,7 +3,7 @@
 set COMPILER="Visual Studio 10 Win64"
 set COMPILER="Visual Studio 10"
 
-set LIBPC_DIR=d:\dev\pdal
+set PDAL_DIR=d:\dev\pdal
 
 set LIBLAS_DIR=d:\dev\liblas
 set LASZIP_DIR=d:\dev\laszip
@@ -49,6 +49,6 @@ cmake -G %COMPILER% ^
     -DLIBLAS_LIBRARY=%LIBLAS_DIR%\bin\Debug\Debug\liblas.lib ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
-    %LIBPC_DIR%
+    %PDAL_DIR%
 
-set LIBPC_SWIG_BOOST_HOME=C:\Utils\boost_1_45_0-win32
+set PDAL_SWIG_BOOST_HOME=C:\Utils\boost_1_45_0-win32

@@ -12,7 +12,7 @@ include_directories(
 set(PCVIEW pcview)
 
 
-SET(LIBPC_PCVIEW_CPP
+SET(PDAL_PCVIEW_CPP
     ArcBall.cpp
     ArcBallMath.cpp
     Commands.cpp
@@ -21,7 +21,7 @@ SET(LIBPC_PCVIEW_CPP
     main.cpp
     )
 
-SET(LIBPC_PCVIEW_HPP
+SET(PDAL_PCVIEW_HPP
     ArcBall.hpp
     ArcBallMath.hpp
     Commands.hpp
@@ -65,7 +65,7 @@ source_group("Source Files\\ArcBall" FILES
 #------------------------------------------------------------------------------
 
 set(APPS_CPP_DEPENDENCIES
-    ${LIBPC_LIB_NAME}
+    ${PDAL_LIB_NAME}
     ${LIBLAS_LIBRARY}
     ${TIFF_LIBRARY}
     ${GEOTIFF_LIBRARY}
@@ -77,5 +77,5 @@ set(APPS_CPP_DEPENDENCIES
 
 link_directories(${Boost_LIBRARY_DIRS})
 
-add_executable(${PCVIEW} ${LIBPC_PCVIEW_CPP} ${LIBPC_PCVIEW_HPP})
+add_executable(${PCVIEW} ${PDAL_PCVIEW_CPP} ${PDAL_PCVIEW_HPP})
 target_link_libraries(${PCVIEW} ${APPS_CPP_DEPENDENCIES} )

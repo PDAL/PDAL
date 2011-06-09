@@ -39,8 +39,8 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef LIBPC_SCHEMALAYOUT_HPP_INCLUDED
-#define LIBPC_SCHEMALAYOUT_HPP_INCLUDED
+#ifndef PDAL_SCHEMALAYOUT_HPP_INCLUDED
+#define PDAL_SCHEMALAYOUT_HPP_INCLUDED
 
 #include <pdal/pdal.hpp>
 
@@ -112,4 +112,4 @@ PDAL_DLL std::ostream& operator<<(std::ostream& os, SchemaLayout const&);
 
 } // namespace liblas
 
-#endif // LIBPC_SCHEMALAYOUT_HPP_INCLUDED
+#endif // PDAL_SCHEMALAYOUT_HPP_INCLUDED
