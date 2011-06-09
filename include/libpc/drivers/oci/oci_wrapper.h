@@ -255,17 +255,14 @@ typedef struct sdo_pc_ind SDO_PC_ind;
 
 struct sdo_pc_blk
 {
-    OCINumber           obj_id;
-    OCINumber           blk_id;
-    SDO_GEOMETRY_TYPE   blk_extent;
-    SDO_ORGSCL_TYPE     blk_domain;
-    OCINumber           pcblk_min_res;
-    OCINumber           pcblk_max_res;
-    OCINumber           num_points;
-    OCINumber           num_unsorted_points;
-    OCINumber           pt_sort_dim;
-    void*               points;
+    SDO_PC_TYPE              inp;
+    SDO_GEOMETRY_TYPE   ind_dimqry;
+    SDO_MBR_TYPE     other_dimqry;
+    OCINumber           qry_min_res;
+    OCINumber           qry_max_res;
+    OCINumber           blkno;
 };
+
 typedef struct sdo_pc_blk SDO_PC_BLK_TYPE;
 
 struct sdo_pc_blk_type_ind
@@ -349,6 +346,8 @@ public:
     void                DestroyType( sdo_geometry** pphData );
     void                CreateType( sdo_pc** pphData );
     void                DestroyType( sdo_pc** pphData );
+    void                CreateType( sdo_pc_blk** pphData );
+    void                DestroyType( sdo_pc_blk** pphData );
     void                CreateType( sdo_orgscl_type** pphData );
     void                DestroyType( sdo_orgscl_type** pphData );
     void                CreateType( OCIArray** phData , OCIType* type);
@@ -438,8 +437,8 @@ public:
     void                Define( sdo_georaster** pphData );
     void                Define( sdo_geometry** pphData );
     void                Define( sdo_pc** pphData );
-    void                Define( sdo_orgscl_type** pphData );
     void                Define( sdo_pc_blk** pphData );
+    void                Define( sdo_orgscl_type** pphData );
     void                Define( OCILobLocator** pphLocator, long nIterations );
     void                DefineClob( OCILobLocator** pphLocator, long nIterations );
     void                BindName( const char* pszName, int* pnData );

@@ -120,8 +120,7 @@ struct EightDimensionOCI
 enum QueryType
 {
     QUERY_SDO_PC,
-    QUERY_SDO_PC_BLK,
-    QUERY_BLK_TABLE,
+    QUERY_SDO_PC_BLK_TYPE,
     QUERY_UNKNOWN
 };
 

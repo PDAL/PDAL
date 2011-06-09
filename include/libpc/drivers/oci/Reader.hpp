@@ -97,6 +97,7 @@ private:
     // BlockPtr m_block;
     Schema m_schema;
     sdo_pc* m_pc;
+    sdo_pc_blk* m_pc_block;
 
 };
 

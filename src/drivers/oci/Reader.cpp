@@ -79,9 +79,22 @@ Reader::Reader(Options& options)
         Schema& schema = getSchemaRef(); 
         schema = fetchSchema(m_pc);
     }
+    else if (m_querytype == QUERY_SDO_PC_BLK_TYPE)
+    {
+        m_connection->CreateType(&m_pc_block);
+        // m_connection->CreateType(&(m_pc_block->inp));
+        m_statement->Define(&m_pc_block);
+
+        bool bDidRead = m_statement->Fetch(); 
+    
+        if (!bDidRead) throw libpc_error("Unable to fetch a point cloud entry entry!");
+        Schema& schema = getSchemaRef(); 
+        schema = fetchSchema(m_pc);
+        
+    }
     
     else 
-        throw libpc_error("SQL statement does not define a SDO_PC or CLIP_CP block");
+        throw libpc_error("SQL statement does not define a SDO_PC or CLIP_PC block");
 
 
 
@@ -334,95 +347,24 @@ QueryType Reader::describeQueryType() const
     int   nPrecision = 0;
     signed short nScale = 0;
     char szTypeName[OWNAME];
-    
-    bool isPCObject = false;
-    bool isBlockTableQuery = false;
-    bool isBlockTableType = false;
-    
-    
-    const int columns_size = 10;
-    std::string block_columns[columns_size];
-    block_columns[0] = "OBJ_ID";
-    block_columns[1] = "BLK_ID";
-    block_columns[2] = "BLK_EXTENT";
-    block_columns[3] = "BLK_DOMAIN";
-    block_columns[4] = "PCBLK_MIN_RES";
-    block_columns[5] = "PCBLK_MAX_RES";
-    block_columns[6] = "NUM_POINTS";
-    block_columns[7] = "NUM_UNSORTED_POINTS";
-    block_columns[8] = "PT_SORT_DIM";
-    block_columns[9] = "POINTS";
-    
-    std::map<std::string, bool> columns_map;
 
-    for(int i = 0; i < columns_size; ++i)
-    {
-        columns_map.insert(std::pair<std::string, bool>(block_columns[i], false));
-    }
-    
     while( m_statement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName) )
     {
-        std::string name = to_upper(std::string(szFieldName));
-        
-        std::map<std::string, bool>::iterator it = columns_map.find(name);
-        if (it != columns_map.end())
-        {
-            // std::cout << "setting columns to true for " << it->first << std::endl;
-            (*it).second = true;
-            
-        }
 
         if ( hType == SQLT_NTY)
         {
-                
-                if (compare_no_case(szTypeName, "SDO_PC") == 0)
-                    isPCObject = true;
-                if (compare_no_case(szTypeName, "SDO_PC_BLK_TYPE") == 0)
-                    isBlockTableType = true;
                 // std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
+                if (compare_no_case(szTypeName, "SDO_PC") == 0)
+                    return QUERY_SDO_PC;
+                if (compare_no_case(szTypeName, "SDO_PC_BLK_TYPE") == 0)
+                    return QUERY_SDO_PC_BLK_TYPE;
         }
-
-        iCol++;
     }
 
-    // Assume we're a block table until we say we aren't.  Loop through all of 
-    // the required columns that make up a block table and if we find one that 
-    // wasn't marked in the loop above, we're not a block table.
-    isBlockTableQuery = true;
-    std::map<std::string, bool>::iterator it = columns_map.begin();
-    while (it != columns_map.end())
-    {   
-        if (it->second == false) 
-        {
-            isBlockTableQuery = false; 
-            break;
-        }
-        ++it;
-    }
-    
-    // If we have all of the block table columns + some extras, we aren't a block table for now
-    if (iCol != 10 && isBlockTableQuery) {
-        isBlockTableQuery = false;
-    }
-    
-    if (!isBlockTableQuery && !isPCObject) 
-    {
-        std::ostringstream oss;
-        oss << "Select statement '" << getQuery() << "' does not fetch an SDO_PC object" 
-              " or one that is equivalent to SDO_PC_BLK_TYPE";
-        throw libpc_error(oss.str());
-    }
-
-    if (isBlockTableQuery) 
-        return QUERY_BLK_TABLE;
-    
-    if (isPCObject)
-        return QUERY_SDO_PC;
-    
-    if (isBlockTableType)
-        return QUERY_SDO_PC_BLK;
-    
-    return QUERY_UNKNOWN;
+    std::ostringstream oss;
+    oss << "Select statement '" << getQuery() << "' does not fetch an SDO_PC object" 
+          " or SDO_PC_BLK_TYPE";
+    throw libpc_error(oss.str());
 }
 
 BlockPtr Reader::defineBlock() const
@@ -534,9 +476,9 @@ libpc::Schema Reader::fetchSchema(sdo_pc* pc)
     Statement get_schema(m_connection->CreateStatement(select_schema.str().c_str()));
     get_schema->BindName( ":metadata", &metadata );
     
-    int capacity_length = 1024;
-    char* capacity = (char*) malloc (sizeof(char*) * capacity_length);
-    get_schema->BindName( ":capacity", capacity, capacity_length );
+    int ptn_params_length = 1024;
+    char* ptn_params = (char*) malloc (sizeof(char*) * ptn_params_length);
+    get_schema->BindName( ":capacity", ptn_params, ptn_params_length );
     get_schema->Execute();
     
     char* pc_schema = get_schema->ReadCLob(metadata);
@@ -551,7 +493,7 @@ libpc::Schema Reader::fetchSchema(sdo_pc* pc)
     boost::char_separator<char> sep_space(" ");
     boost::char_separator<char> sep_equal("=");
 
-    std::string s_cap(capacity);
+    std::string s_cap(ptn_params);
     tokenizer parameters(s_cap, sep_space);
     for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t) {
         tokenizer parameter((*t), sep_equal);
@@ -577,7 +519,7 @@ libpc::Schema Reader::fetchSchema(sdo_pc* pc)
     
     std::string pc_schema_xml(pc_schema);
     CPLFree(pc_schema);
-    free(capacity);
+    free(ptn_params);
     Schema schema = Schema::from_xml(pc_schema_xml);
 
     return schema;
