@@ -69,6 +69,9 @@ IteratorBase::IteratorBase(const LasReader& reader)
 
 IteratorBase::~IteratorBase()
 {
+    m_zipPoint.reset();
+    m_zip.reset();
+    m_unzipper.reset();
     Utils::closeFile(m_istream);
 }
 
