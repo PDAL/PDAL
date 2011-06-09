@@ -145,6 +145,9 @@ if (GEOTIFF_FOUND)
     endif()
 endif()
 
+if (LASZIP_FOUND)
+    set(PDAL_DRIVERS_LAS_LASZIP   ${PDAL_DRIVERS_LAS_SRC_DIR}/ZipPoint.cpp)
+endif()
 set (PDAL_DRIVERS_LAS_CPP
   ${PDAL_DRIVERS_LAS_GTIFF}
   ${PDAL_DRIVERS_LAS_SRC_DIR}/Header.cpp
@@ -156,7 +159,7 @@ set (PDAL_DRIVERS_LAS_CPP
   ${PDAL_DRIVERS_LAS_SRC_DIR}/Support.cpp
   ${PDAL_DRIVERS_LAS_SRC_DIR}/VariableLengthRecord.cpp
   ${PDAL_DRIVERS_LAS_SRC_DIR}/Writer.cpp
-  ${PDAL_DRIVERS_LAS_SRC_DIR}/ZipPoint.cpp
+  ${PDAL_DRIVERS_LAS_LASZIP}
 )
   
 FOREACH(file ${PDAL_DRIVERS_LAS_HPP})
