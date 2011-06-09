@@ -7,6 +7,10 @@
 ###############################################################################
 SET(PDAL_UNIT_TEST pdal_test)
 
+if (LIBXML2_FOUND)
+SET (PDAL_UNITTEST_XMLSCHEMA_TEST XMLSchemaTest.cpp)
+endif()
+
 SET(PDAL_UNITTEST_TEST_SRC
     BoundsTest.cpp
     ByteSwapFilterTest.cpp
@@ -38,7 +42,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     TerraSolidTest.cpp
     UtilsTest.cpp
     VectorTest.cpp
-    XMLSchemaTest.cpp
+    ${PDAL_UNITTEST_XMLSCHEMA_TEST}
     )
 
 SET(PDAL_UNITTEST_TEST_INC
