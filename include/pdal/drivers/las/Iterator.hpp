@@ -38,6 +38,7 @@
 #include <pdal/pdal.hpp>
 
 #include <pdal/Iterator.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <iosfwd>
 
 class LASzip;
@@ -63,9 +64,12 @@ protected:
     std::istream* m_istream;
 
 public:
-    LASzip* m_zip;
-    LASunzipper* m_unzipper;
-    ZipPoint* m_zipPoint;
+    boost::scoped_ptr<LASzip> m_zip;
+    boost::scoped_ptr<LASunzipper> m_unzipper;
+    boost::scoped_ptr<ZipPoint> m_zipPoint;
+    // LASzip* m_zip;
+    // LASunzipper* m_unzipper;
+    // ZipPoint* m_zipPoint;
 
 private:
     IteratorBase& operator=(const IteratorBase&); // not implemented

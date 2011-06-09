@@ -68,9 +68,6 @@ IteratorBase::IteratorBase(const LasReader& reader)
 
 IteratorBase::~IteratorBase()
 {
-    delete m_unzipper;
-    delete m_zip;
-    delete m_zipPoint;
     Utils::closeFile(m_istream);
 }
 
@@ -79,7 +76,10 @@ void IteratorBase::initializeZip()
 {
     try
     {
-        m_zip = new LASzip();
+        // Initialize a scoped_ptr and swap it with our member variable 
+        // that will contain it.
+        boost::scoped_ptr<LASzip> s(new LASzip());
+        m_zip.swap(s);
     }
     catch(...)
     {
@@ -87,8 +87,10 @@ void IteratorBase::initializeZip()
     }
 
     PointFormat format = m_reader.getPointFormat();
-    delete m_zipPoint;
-    m_zipPoint = new ZipPoint(format, m_reader.getVLRs());
+    
+    boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_reader.getVLRs()));
+    m_zipPoint.swap(z);
+
 
     bool ok = false;
     try
@@ -122,7 +124,8 @@ void IteratorBase::initializeZip()
     {
         try
         {
-            m_unzipper = new LASunzipper();
+            boost::scoped_ptr<LASunzipper> z(new LASunzipper());
+            m_unzipper.swap(z);
         }
         catch(...)
         {
@@ -133,7 +136,7 @@ void IteratorBase::initializeZip()
         try
         {
             m_istream->seekg(m_reader.getPointDataOffset(), std::ios::beg);
-            stat = m_unzipper->open(*m_istream, m_zip);
+            stat = m_unzipper->open(*m_istream, m_zip.get());
         }
         catch(...)
         {
@@ -186,7 +189,7 @@ bool SequentialIterator::atEndImpl() const
 
 boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 {
-    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), m_unzipper, m_zipPoint);
+    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), m_unzipper.get(), m_zipPoint.get());
 }
 
 
@@ -222,7 +225,7 @@ boost::uint64_t RandomIterator::seekImpl(boost::uint64_t count)
 
 boost::uint32_t RandomIterator::readImpl(PointBuffer& data)
 {
-    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), m_unzipper, m_zipPoint);
+    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), m_unzipper.get(), m_zipPoint.get());
 }
 
 
