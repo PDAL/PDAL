@@ -33,9 +33,10 @@
  ****************************************************************************/
 
 #include <pdal/SpatialReference.hpp>
+#include <boost/concept_check.hpp>
 
 // gdal
-#ifdef LIBPC_HAVE_GDAL
+#ifdef PDAL_HAVE_GDAL
 #include <ogr_spatialref.h>
 #include <cpl_conv.h>
 #endif
@@ -92,7 +93,7 @@ std::string SpatialReference::getWKT( WKTModeFlag mode_flag) const
 /// Fetch the SRS as WKT
 std::string SpatialReference::getWKT(WKTModeFlag mode_flag , bool pretty) const 
 {
-#ifndef LIBPC_SRS_ENABLED
+#ifndef PDAL_SRS_ENABLED
     boost::ignore_unused_variable_warning(mode_flag);
     boost::ignore_unused_variable_warning(pretty);
 
@@ -130,7 +131,7 @@ std::string SpatialReference::getWKT(WKTModeFlag mode_flag , bool pretty) const
 
 void SpatialReference::setFromUserInput(std::string const& v)
 {
-#ifdef LIBPC_SRS_ENABLED
+#ifdef PDAL_SRS_ENABLED
 
     char* poWKT = 0;
     const char* input = v.c_str();
@@ -166,7 +167,7 @@ void SpatialReference::setWKT(std::string const& v)
 
 std::string SpatialReference::getProj4() const 
 {
-#ifdef LIBPC_SRS_ENABLED
+#ifdef PDAL_SRS_ENABLED
     
     std::string wkt = getWKT(eCompoundOK);
     const char* poWKT = wkt.c_str();
@@ -195,7 +196,7 @@ std::string SpatialReference::getProj4() const
 
 void SpatialReference::setProj4(std::string const& v)
 {
-#ifdef LIBPC_SRS_ENABLED
+#ifdef PDAL_SRS_ENABLED
     char* poWKT = 0;
     const char* poProj4 = v.c_str();
 
@@ -225,7 +226,7 @@ boost::property_tree::ptree SpatialReference::getPTree( ) const
     using boost::property_tree::ptree;
     ptree srs;
 
-#ifdef LIBPC_SRS_ENABLED
+#ifdef PDAL_SRS_ENABLED
     srs.put("proj4", getProj4());
     srs.put("prettywkt", getWKT(SpatialReference::eHorizontalOnly, true));
     srs.put("wkt", getWKT(SpatialReference::eHorizontalOnly, false));
