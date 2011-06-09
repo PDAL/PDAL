@@ -37,9 +37,17 @@
 
 #include <pdal/pdal.hpp>
 
-#ifdef LIBPC_HAVE_LIBGEOTIFF
+#ifdef PDAL_HAVE_LIBGEOTIFF
 #include <geo_simpletags.h>
 #include <cpl_conv.h>
+#endif
+
+// Fake out the compiler if we don't have libgeotiff includes already
+#if !defined(__geotiff_h_)
+typedef struct GTIFS *GTIF;
+#endif
+#if !defined(__geo_simpletags_h_)
+typedef struct ST_TIFFS *ST_TIFF;
 #endif
 
 #include <string>
@@ -48,7 +56,7 @@
 namespace pdal { namespace drivers { namespace las {
     
 
-class LIBPC_DLL GeotiffSupport
+class PDAL_DLL GeotiffSupport
 {
 public:
     enum GeotiffKeyType

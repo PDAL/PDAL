@@ -8,7 +8,7 @@
 
 # Collect dependencies configuration
 if(GDAL_FOUND)
-  set(LIBPC_GDAL_CPP
+  set(PDAL_GDAL_CPP
     gt_citation.cpp
     gt_wkt_srs.cpp
     tifvsi.cpp)
@@ -19,45 +19,49 @@ endif()
 # Source files specification
 #
 # Naming format:
-#   LIBPC_CPP - all the .cpp files
-#   LIBPC_HPP - all the .hpp files
-#   LIBPC_<dirname>_CPP - all the .cpp files for the given subdir/namespace
+#   PDAL_CPP - all the .cpp files
+#   PDAL_HPP - all the .hpp files
+#   PDAL_<dirname>_CPP - all the .cpp files for the given subdir/namespace
 #   ...
 
-set(LIBPC_HEADERS_DIR ../include/pdal)
-set(LIBPC_HPP "")
-set(LIBPC_CPP "")
+set(PDAL_HEADERS_DIR ../include/pdal)
+set(PDAL_HPP "")
+set(PDAL_CPP "")
 
 #
 # base
 #
-set(LIBPC_BASE_HPP
-  ${LIBPC_HEADERS_DIR}/exceptions.hpp
-  ${LIBPC_HEADERS_DIR}/types.hpp
-  ${LIBPC_HEADERS_DIR}/Bounds.hpp
-  ${LIBPC_HEADERS_DIR}/Color.hpp
-  ${LIBPC_HEADERS_DIR}/Dimension.hpp
-  ${LIBPC_HEADERS_DIR}/DimensionLayout.hpp
-  ${LIBPC_HEADERS_DIR}/Filter.hpp
-  ${LIBPC_HEADERS_DIR}/FilterIterator.hpp
-  ${LIBPC_HEADERS_DIR}/Iterator.hpp
-  ${LIBPC_HEADERS_DIR}/MetadataRecord.hpp
-  ${LIBPC_HEADERS_DIR}/Vector.hpp  
-  ${LIBPC_HEADERS_DIR}/Options.hpp
-  ${LIBPC_HEADERS_DIR}/PointBuffer.hpp  
-  ${LIBPC_HEADERS_DIR}/PointBufferCache.hpp  
-  ${LIBPC_HEADERS_DIR}/Range.hpp
-  ${LIBPC_HEADERS_DIR}/Schema.hpp
-  ${LIBPC_HEADERS_DIR}/SchemaLayout.hpp
-  ${LIBPC_HEADERS_DIR}/Signaller.hpp
-  ${LIBPC_HEADERS_DIR}/SpatialReference.hpp
-  ${LIBPC_HEADERS_DIR}/Stage.hpp
-  ${LIBPC_HEADERS_DIR}/Utils.hpp
-  ${LIBPC_HEADERS_DIR}/Writer.hpp
-  ${LIBPC_HEADERS_DIR}/XMLSchema.hpp
+set(PDAL_BASE_HPP
+  ${PDAL_HEADERS_DIR}/exceptions.hpp
+  ${PDAL_HEADERS_DIR}/types.hpp
+  ${PDAL_HEADERS_DIR}/Bounds.hpp
+  ${PDAL_HEADERS_DIR}/Color.hpp
+  ${PDAL_HEADERS_DIR}/Dimension.hpp
+  ${PDAL_HEADERS_DIR}/DimensionLayout.hpp
+  ${PDAL_HEADERS_DIR}/Filter.hpp
+  ${PDAL_HEADERS_DIR}/FilterIterator.hpp
+  ${PDAL_HEADERS_DIR}/Iterator.hpp
+  ${PDAL_HEADERS_DIR}/MetadataRecord.hpp
+  ${PDAL_HEADERS_DIR}/Vector.hpp  
+  ${PDAL_HEADERS_DIR}/Options.hpp
+  ${PDAL_HEADERS_DIR}/PointBuffer.hpp  
+  ${PDAL_HEADERS_DIR}/PointBufferCache.hpp  
+  ${PDAL_HEADERS_DIR}/Range.hpp
+  ${PDAL_HEADERS_DIR}/Schema.hpp
+  ${PDAL_HEADERS_DIR}/SchemaLayout.hpp
+  ${PDAL_HEADERS_DIR}/Signaller.hpp
+  ${PDAL_HEADERS_DIR}/SpatialReference.hpp
+  ${PDAL_HEADERS_DIR}/Stage.hpp
+  ${PDAL_HEADERS_DIR}/Utils.hpp
+  ${PDAL_HEADERS_DIR}/Writer.hpp
+  ${PDAL_HEADERS_DIR}/XMLSchema.hpp
 )
 
-set(LIBPC_BASE_CPP
+if (PDAL_HAVE_LIBXML2)
+  SET (PDAL_XML_SRC XMLSchema.cpp)
+endif()
+
+set(PDAL_BASE_CPP
   Bounds.cpp
   Color.cpp
   Dimension.cpp
@@ -78,118 +82,128 @@ set(LIBPC_BASE_CPP
   Stage.cpp
   Utils.cpp
   Writer.cpp
-  XMLSchema.cpp
+  ${PDAL_XML_SRC}
 )
 
-FOREACH(file ${LIBPC_BASE_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+
+FOREACH(file ${PDAL_BASE_HPP})
+        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
-FOREACH(file ${LIBPC_BASE_CPP})
-        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_BASE_CPP})
+        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
 #
 # drivers/faux
 #
-set(LIBPC_DRIVERS_FAUX_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/faux/Iterator.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/faux/Reader.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/faux/Writer.hpp
+set(PDAL_DRIVERS_FAUX_HPP
+  ${PDAL_HEADERS_DIR}/drivers/faux/Iterator.hpp
+  ${PDAL_HEADERS_DIR}/drivers/faux/Reader.hpp
+  ${PDAL_HEADERS_DIR}/drivers/faux/Writer.hpp
 )
 
-set (LIBPC_DRIVERS_FAUX_CPP
+set (PDAL_DRIVERS_FAUX_CPP
   ./drivers/faux/Iterator.cpp
   ./drivers/faux/Reader.cpp
   ./drivers/faux/Writer.cpp 
 )
 
-FOREACH(file ${LIBPC_DRIVERS_FAUX_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_DRIVERS_FAUX_HPP})
+        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
-FOREACH(file ${LIBPC_DRIVERS_FAUX_CPP})
-        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_DRIVERS_FAUX_CPP})
+        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
 #
 # drivers/las
 #
 
-set (LIBPC_DRIVERS_LAS_HPP
-  ./drivers/las/GeotiffSupport.hpp
-  ./drivers/las/LasHeaderReader.hpp
-  ./drivers/las/LasHeaderWriter.hpp
-  ./drivers/las/ZipPoint.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/las/Header.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/las/Iterator.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/las/Reader.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/las/ReaderBase.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/las/SummaryData.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/las/Support.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/las/Writer.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/las/VariableLengthRecord.hpp
+set (PDAL_DRIVERS_LAS_INCLUDE_DIR ${PDAL_HEADERS_DIR}/drivers/las)
+set (PDAL_DRIVERS_LAS_SRC_DIR ./drivers/las)
+
+set (PDAL_DRIVERS_LAS_HPP
+  ${PDAL_DRIVERS_LAS_SRC_DIR}/GeotiffSupport.hpp
+  ${PDAL_DRIVERS_LAS_SRC_DIR}/LasHeaderReader.hpp
+  ${PDAL_DRIVERS_LAS_SRC_DIR}/LasHeaderWriter.hpp
+  ${PDAL_DRIVERS_LAS_SRC_DIR}/ZipPoint.hpp
+  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/Header.hpp
+  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/Iterator.hpp
+  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/Reader.hpp
+  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/ReaderBase.hpp
+  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/SummaryData.hpp
+  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/Support.hpp
+  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/Writer.hpp
+  ${PDAL_DRIVERS_LAS_INCLUDE_DIR}/VariableLengthRecord.hpp
 )
- 
-set (LIBPC_DRIVERS_LAS_CPP
-  ./drivers/las/GeotiffSupport.cpp
-  ./drivers/las/Header.cpp
-  ./drivers/las/Iterator.cpp
-  ./drivers/las/LasHeaderReader.cpp
-  ./drivers/las/LasHeaderWriter.cpp
-  ./drivers/las/Reader.cpp
-  ./drivers/las/SummaryData.cpp
-  ./drivers/las/Support.cpp
-  ./drivers/las/VariableLengthRecord.cpp
-  ./drivers/las/Writer.cpp
-  ./drivers/las/ZipPoint.cpp
+
+if (GEOTIFF_FOUND)
+    if (PDAL_HAVE_GDAL)
+    set (PDAL_DRIVERS_LAS_GTIFF ${PDAL_DRIVERS_LAS_SRC_DIR}/GeotiffSupport.cpp)
+    endif()
+endif()
+
+set (PDAL_DRIVERS_LAS_CPP
+  ${PDAL_DRIVERS_LAS_GTIFF}
+  ${PDAL_DRIVERS_LAS_SRC_DIR}/Header.cpp
+  ${PDAL_DRIVERS_LAS_SRC_DIR}//Iterator.cpp
+  ${PDAL_DRIVERS_LAS_SRC_DIR}/LasHeaderReader.cpp
+  ${PDAL_DRIVERS_LAS_SRC_DIR}/LasHeaderWriter.cpp
+  ${PDAL_DRIVERS_LAS_SRC_DIR}/Reader.cpp
+  ${PDAL_DRIVERS_LAS_SRC_DIR}/SummaryData.cpp
+  ${PDAL_DRIVERS_LAS_SRC_DIR}/Support.cpp
+  ${PDAL_DRIVERS_LAS_SRC_DIR}/VariableLengthRecord.cpp
+  ${PDAL_DRIVERS_LAS_SRC_DIR}/Writer.cpp
+  ${PDAL_DRIVERS_LAS_SRC_DIR}/ZipPoint.cpp
 )
   
-FOREACH(file ${LIBPC_DRIVERS_LAS_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_DRIVERS_LAS_HPP})
+        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
-FOREACH(file ${LIBPC_DRIVERS_LAS_CPP})
-        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_DRIVERS_LAS_CPP})
+        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
 #
 # drivers/liblas
 #
 
-set (LIBPC_DRIVERS_LIBLAS_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/liblas/Iterator.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/liblas/Reader.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/liblas/Writer.hpp
+set (PDAL_DRIVERS_LIBLAS_HPP
+  ${PDAL_HEADERS_DIR}/drivers/liblas/Iterator.hpp
+  ${PDAL_HEADERS_DIR}/drivers/liblas/Reader.hpp
+  ${PDAL_HEADERS_DIR}/drivers/liblas/Writer.hpp
 )
 
-set (LIBPC_DRIVERS_LIBLAS_CPP 
+set (PDAL_DRIVERS_LIBLAS_CPP 
   ./drivers/liblas/Iterator.cpp
   ./drivers/liblas/Reader.cpp
   ./drivers/liblas/Writer.cpp
 )
 
-FOREACH(file ${LIBPC_DRIVERS_LIBLAS_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_DRIVERS_LIBLAS_HPP})
+        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
-FOREACH(file ${LIBPC_DRIVERS_LIBLAS_CPP})
-        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_DRIVERS_LIBLAS_CPP})
+        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
 #
 # drivers/oci
 #
 if (WITH_ORACLE)
-set(LIBPC_DRIVERS_OCI_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/oci/Writer.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/oci/Reader.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/oci/Iterator.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/oci/oci_wrapper.h
-  ${LIBPC_HEADERS_DIR}/drivers/oci/Common.hpp
+set(PDAL_DRIVERS_OCI_HPP
+  ${PDAL_HEADERS_DIR}/drivers/oci/Writer.hpp
+  ${PDAL_HEADERS_DIR}/drivers/oci/Reader.hpp
+  ${PDAL_HEADERS_DIR}/drivers/oci/Iterator.hpp
+  ${PDAL_HEADERS_DIR}/drivers/oci/oci_wrapper.h
+  ${PDAL_HEADERS_DIR}/drivers/oci/Common.hpp
 )
 
-set (LIBPC_DRIVERS_OCI_CPP 
+set (PDAL_DRIVERS_OCI_CPP 
   ./drivers/oci/oci_wrapper.cpp
   ./drivers/oci/common.cpp
   ./drivers/oci/Reader.cpp
@@ -197,12 +211,12 @@ set (LIBPC_DRIVERS_OCI_CPP
   ./drivers/oci/Writer.cpp
 )
    
-FOREACH(file ${LIBPC_DRIVERS_OCI_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_DRIVERS_OCI_HPP})
+        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
-FOREACH(file ${LIBPC_DRIVERS_OCI_CPP})
-        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_DRIVERS_OCI_CPP})
+        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 endif()
 
@@ -210,20 +224,20 @@ endif()
 # drivers/mrsid
 #
 if (MRSID_FOUND)
-set(LIBPC_DRIVERS_MRSID_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/mrsid/Reader.hpp
+set(PDAL_DRIVERS_MRSID_HPP
+  ${PDAL_HEADERS_DIR}/drivers/mrsid/Reader.hpp
 )
 
-set (LIBPC_DRIVERS_MRSID_CPP 
+set (PDAL_DRIVERS_MRSID_CPP 
   ./drivers/mrsid/Reader.cpp
 )
    
-FOREACH(file ${LIBPC_DRIVERS_MRSID_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for drivers/mrsid")
+FOREACH(file ${PDAL_DRIVERS_MRSID_HPP})
+        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for drivers/mrsid")
 ENDFOREACH(file)
 
-FOREACH(file ${LIBPC_DRIVERS_MRSID_CPP})
-        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for drivers/mrsid")
+FOREACH(file ${PDAL_DRIVERS_MRSID_CPP})
+        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for drivers/mrsid")
 ENDFOREACH(file)
 endif()
 
@@ -231,71 +245,71 @@ endif()
 #
 # drivers/qfit
 #
-set(LIBPC_DRIVERS_QFIT_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/qfit/Iterator.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/qfit/Reader.hpp
+set(PDAL_DRIVERS_QFIT_HPP
+  ${PDAL_HEADERS_DIR}/drivers/qfit/Iterator.hpp
+  ${PDAL_HEADERS_DIR}/drivers/qfit/Reader.hpp
 )
 
-set (LIBPC_DRIVERS_QFIT_CPP 
+set (PDAL_DRIVERS_QFIT_CPP 
   ./drivers/qfit/Iterator.cpp
   ./drivers/qfit/Reader.cpp
 )
    
-FOREACH(file ${LIBPC_DRIVERS_QFIT_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_DRIVERS_QFIT_HPP})
+        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
-FOREACH(file ${LIBPC_DRIVERS_QFIT_CPP})
-        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_DRIVERS_QFIT_CPP})
+        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
 #
 # drivers/terrasolid
 #
-set(LIBPC_DRIVERS_TERRASOLID_HPP
-  ${LIBPC_HEADERS_DIR}/drivers/terrasolid/Iterator.hpp
-  ${LIBPC_HEADERS_DIR}/drivers/terrasolid/Reader.hpp
+set(PDAL_DRIVERS_TERRASOLID_HPP
+  ${PDAL_HEADERS_DIR}/drivers/terrasolid/Iterator.hpp
+  ${PDAL_HEADERS_DIR}/drivers/terrasolid/Reader.hpp
 )
 
-set (LIBPC_DRIVERS_TERRASOLID_CPP 
+set (PDAL_DRIVERS_TERRASOLID_CPP 
   ./drivers/terrasolid/Iterator.cpp
   ./drivers/terrasolid/Reader.cpp
 )
    
-FOREACH(file ${LIBPC_DRIVERS_TERRASOLID_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_DRIVERS_TERRASOLID_HPP})
+        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
-FOREACH(file ${LIBPC_DRIVERS_TERRASOLID_CPP})
-        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_DRIVERS_TERRASOLID_CPP})
+        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
 #
 # filters
 #
 
-set(LIBPC_FILTERS_HPP
-  ${LIBPC_HEADERS_DIR}/filters/ByteSwapFilter.hpp
-  ${LIBPC_HEADERS_DIR}/filters/ByteSwapFilterIterator.hpp
-  ${LIBPC_HEADERS_DIR}/filters/CacheFilter.hpp
-  ${LIBPC_HEADERS_DIR}/filters/CacheFilterIterator.hpp
-  ${LIBPC_HEADERS_DIR}/filters/Chipper.hpp
-  ${LIBPC_HEADERS_DIR}/filters/ChipperIterator.hpp
-  ${LIBPC_HEADERS_DIR}/filters/ColorFilter.hpp
-  ${LIBPC_HEADERS_DIR}/filters/ColorFilterIterator.hpp
-  ${LIBPC_HEADERS_DIR}/filters/CropFilter.hpp
-  ${LIBPC_HEADERS_DIR}/filters/CropFilterIterator.hpp
-  ${LIBPC_HEADERS_DIR}/filters/DecimationFilter.hpp
-  ${LIBPC_HEADERS_DIR}/filters/DecimationFilterIterator.hpp
-  ${LIBPC_HEADERS_DIR}/filters/MosaicFilter.hpp
-  ${LIBPC_HEADERS_DIR}/filters/MosaicFilterIterator.hpp
-  ${LIBPC_HEADERS_DIR}/filters/ReprojectionFilter.hpp
-  ${LIBPC_HEADERS_DIR}/filters/ReprojectionFilterIterator.hpp
-  ${LIBPC_HEADERS_DIR}/filters/ScalingFilter.hpp
-  ${LIBPC_HEADERS_DIR}/filters/ScalingFilterIterator.hpp
+set(PDAL_FILTERS_HPP
+  ${PDAL_HEADERS_DIR}/filters/ByteSwapFilter.hpp
+  ${PDAL_HEADERS_DIR}/filters/ByteSwapFilterIterator.hpp
+  ${PDAL_HEADERS_DIR}/filters/CacheFilter.hpp
+  ${PDAL_HEADERS_DIR}/filters/CacheFilterIterator.hpp
+  ${PDAL_HEADERS_DIR}/filters/Chipper.hpp
+  ${PDAL_HEADERS_DIR}/filters/ChipperIterator.hpp
+  ${PDAL_HEADERS_DIR}/filters/ColorFilter.hpp
+  ${PDAL_HEADERS_DIR}/filters/ColorFilterIterator.hpp
+  ${PDAL_HEADERS_DIR}/filters/CropFilter.hpp
+  ${PDAL_HEADERS_DIR}/filters/CropFilterIterator.hpp
+  ${PDAL_HEADERS_DIR}/filters/DecimationFilter.hpp
+  ${PDAL_HEADERS_DIR}/filters/DecimationFilterIterator.hpp
+  ${PDAL_HEADERS_DIR}/filters/MosaicFilter.hpp
+  ${PDAL_HEADERS_DIR}/filters/MosaicFilterIterator.hpp
+  ${PDAL_HEADERS_DIR}/filters/ReprojectionFilter.hpp
+  ${PDAL_HEADERS_DIR}/filters/ReprojectionFilterIterator.hpp
+  ${PDAL_HEADERS_DIR}/filters/ScalingFilter.hpp
+  ${PDAL_HEADERS_DIR}/filters/ScalingFilterIterator.hpp
 )
 
-set (LIBPC_FILTERS_CPP 
+set (PDAL_FILTERS_CPP 
   ./filters/ByteSwapFilter.cpp
   ./filters/ByteSwapFilterIterator.cpp
   ./filters/CacheFilter.cpp
@@ -316,35 +330,35 @@ set (LIBPC_FILTERS_CPP
   ./filters/ScalingFilterIterator.cpp
 )
 
-FOREACH(file ${LIBPC_FILTERS_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_FILTERS_HPP})
+        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
-FOREACH(file ${LIBPC_FILTERS_CPP})
-        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_FILTERS_CPP})
+        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
 #
 # config
 #
 
-set(LIBPC_CONFIG_HPP
-  ${LIBPC_HEADERS_DIR}/export.hpp
-  ${LIBPC_HEADERS_DIR}/pdal.hpp
-  ${LIBPC_HEADERS_DIR}/pdal_config.hpp
-  ${LIBPC_HEADERS_DIR}/pdal_defines.h
+set(PDAL_CONFIG_HPP
+  ${PDAL_HEADERS_DIR}/export.hpp
+  ${PDAL_HEADERS_DIR}/pdal.hpp
+  ${PDAL_HEADERS_DIR}/pdal_config.hpp
+  ${PDAL_HEADERS_DIR}/pdal_defines.h
 )
 
-set (LIBPC_CONFIG_CPP 
+set (PDAL_CONFIG_CPP 
   ./pdal_config.cpp
 )
 
-FOREACH(file ${LIBPC_CONFIG_HPP})
-        SET(LIBPC_HPP "${LIBPC_HPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_CONFIG_HPP})
+        SET(PDAL_HPP "${PDAL_HPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
-FOREACH(file ${LIBPC_CONFIG_CPP})
-        SET(LIBPC_CPP "${LIBPC_CPP};${file}" CACHE INTERNAL "source files for foo")
+FOREACH(file ${PDAL_CONFIG_CPP})
+        SET(PDAL_CPP "${PDAL_CPP};${file}" CACHE INTERNAL "source files for foo")
 ENDFOREACH(file)
 
 #
@@ -353,45 +367,45 @@ ENDFOREACH(file)
 
 source_group("CMake Files" FILES CMakeLists.txt)
 
-source_group("Header Files" FILES ${LIBPC_BASE_HPP})
-source_group("Header Files\\config" FILES ${LIBPC_CONFIG_HPP})
-source_group("Header Files\\drivers\\faux" FILES ${LIBPC_DRIVERS_FAUX_HPP})
-source_group("Header Files\\drivers\\las" FILES ${LIBPC_DRIVERS_LAS_HPP})
-source_group("Header Files\\drivers\\liblas" FILES ${LIBPC_DRIVERS_LIBLAS_HPP})
-source_group("Header Files\\drivers\\oci" FILES ${LIBPC_DRIVERS_OCI_HPP})
-source_group("Header Files\\drivers\\qfit" FILES ${LIBPC_DRIVERS_QFIT_HPP})
-source_group("Header Files\\drivers\\terrasolid" FILES ${LIBPC_DRIVERS_TERRASOLID_HPP})
-source_group("Header Files\\filters" FILES ${LIBPC_FILTERS_HPP})
+source_group("Header Files" FILES ${PDAL_BASE_HPP})
+source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
+source_group("Header Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_HPP})
+source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
+source_group("Header Files\\drivers\\liblas" FILES ${PDAL_DRIVERS_LIBLAS_HPP})
+source_group("Header Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_HPP})
+source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
+source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
+source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
 
-source_group("Source Files" FILES ${LIBPC_BASE_CPP})
-source_group("Source Files\\config" FILES ${LIBPC_CONFIG_CPP})
-source_group("Source Files\\drivers\\faux" FILES ${LIBPC_DRIVERS_FAUX_CPP})
-source_group("Source Files\\drivers\\las" FILES ${LIBPC_DRIVERS_LAS_CPP})
-source_group("Source Files\\drivers\\liblas" FILES ${LIBPC_DRIVERS_LIBLAS_CPP})
-source_group("Source Files\\drivers\\oci" FILES ${LIBPC_DRIVERS_OCI_CPP})
-source_group("Source Files\\drivers\\qfit" FILES ${LIBPC_DRIVERS_QFIT_CPP})
-source_group("Source Files\\drivers\\terrasolid" FILES ${LIBPC_DRIVERS_TERRASOLID_CPP})
-source_group("Source Files\\filters" FILES ${LIBPC_FILTERS_CPP})
+source_group("Source Files" FILES ${PDAL_BASE_CPP})
+source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
+source_group("Source Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_CPP})
+source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
+source_group("Source Files\\drivers\\liblas" FILES ${PDAL_DRIVERS_LIBLAS_CPP})
+source_group("Source Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_CPP})
+source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
+source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
+source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
 
 #
 # rest of stuff
 #
 
 if(GDAL_FOUND)
-    source_group("Source Files\\gdal" FILES ${LIBPC_GDAL_CPP})
+    source_group("Source Files\\gdal" FILES ${PDAL_GDAL_CPP})
 endif()
 
 # Standard include directory of PDAL library
 include_directories(../include)
 
-set (APPS_CPP_DEPENDENCIES "${LIBPC_LIB_NAME}" CACHE INTERNAL "libraries to link")
+set (APPS_CPP_DEPENDENCIES "${PDAL_LIB_NAME}" CACHE INTERNAL "libraries to link")
 
 ###############################################################################
 # Targets settings
 
-set(LIBPC_SOURCES
-  ${LIBPC_HPP}
-  ${LIBPC_CPP})
+set(PDAL_SOURCES
+  ${PDAL_HPP}
+  ${PDAL_CPP})
 
 # NOTE:
 # This hack is required to correctly link static into shared library.
@@ -402,16 +416,16 @@ set(LIBPC_SOURCES
 #endif()
 
 if(WIN32)
-    add_definitions("-DLIBPC_DLL_EXPORT=1")
+    add_definitions("-DPDAL_DLL_EXPORT=1")
 if (NOT WITH_STATIC_LASZIP)
     add_definitions("-DLASZIP_DLL_IMPORT=1")
 endif()
 endif()
 
-add_library(${LIBPC_LIB_NAME} SHARED ${LIBPC_SOURCES})
+add_library(${PDAL_LIB_NAME} SHARED ${PDAL_SOURCES})
 
 target_link_libraries(${APPS_CPP_DEPENDENCIES}
-  ${LIBPC_LIB_NAME}
+  ${PDAL_LIB_NAME}
   ${LIBLAS_LIBRARY}
   ${TIFF_LIBRARY}
   ${ORACLE_LIBRARY}
@@ -423,12 +437,12 @@ target_link_libraries(${APPS_CPP_DEPENDENCIES}
   ${LIBXML2_LIBRARIES})
 
 
-set_target_properties(${LIBPC_LIB_NAME}
-  PROPERTIES SOVERSION "${LIBPC_LIB_SOVERSION}" )
+set_target_properties(${PDAL_LIB_NAME}
+  PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
 
 if (APPLE)
   set_target_properties(
-    ${LIBPC_LIB_NAME}
+    ${PDAL_LIB_NAME}
     PROPERTIES
     INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 endif()
@@ -436,11 +450,11 @@ endif()
 ###############################################################################
 # Targets installation
 
-install(TARGETS ${LIBPC_LIB_NAME} ${LIBPC_C_LIB_NAME}
-  RUNTIME DESTINATION ${LIBPC_BIN_DIR}
-  LIBRARY DESTINATION ${LIBPC_LIB_DIR}
-  ARCHIVE DESTINATION ${LIBPC_LIB_DIR})
+install(TARGETS ${PDAL_LIB_NAME} ${PDAL_C_LIB_NAME}
+  RUNTIME DESTINATION ${PDAL_BIN_DIR}
+  LIBRARY DESTINATION ${PDAL_LIB_DIR}
+  ARCHIVE DESTINATION ${PDAL_LIB_DIR})
 
-install(DIRECTORY ${LIBPC_HEADERS_DIR}
-  DESTINATION ${LIBPC_INCLUDE_DIR}
+install(DIRECTORY ${PDAL_HEADERS_DIR}
+  DESTINATION ${PDAL_INCLUDE_DIR}
   FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")

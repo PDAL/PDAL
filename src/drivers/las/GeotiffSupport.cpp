@@ -51,10 +51,10 @@ LIBPC_C_START
 
 
 #ifdef GEO_NORMALIZE_H_INCLUDED
-char LIBPC_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
+char PDAL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
 #endif
 
-int LIBPC_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
+int PDAL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
 void SetLinearUnitCitation(GTIF* psGTIF, char* pszLinearUOMName);
 
 #ifdef _OGR_SRS_API_H_INCLUDED

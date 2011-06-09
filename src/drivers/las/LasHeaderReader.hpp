@@ -55,7 +55,7 @@ namespace pdal { namespace drivers { namespace las {
 
 class LasHeader;
 
-class LIBPC_DLL LasHeaderReader
+class PDAL_DLL LasHeaderReader
 {
 public:
     LasHeaderReader(LasHeader& header, std::istream& istream);

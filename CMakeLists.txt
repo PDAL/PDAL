@@ -27,20 +27,20 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
 # the next three lines are the ONLY place in the entire pdal system where
 # the version info is hard-coded
-SET(LIBPC_VERSION_MAJOR "0")
-SET(LIBPC_VERSION_MINOR "1")
-SET(LIBPC_VERSION_PATCH "0")
+SET(PDAL_VERSION_MAJOR "0")
+SET(PDAL_VERSION_MINOR "1")
+SET(PDAL_VERSION_PATCH "0")
 
-set(LIBPC_VERSION_STRING "${LIBPC_VERSION_MAJOR}.${LIBPC_VERSION_MINOR}.${LIBPC_VERSION_PATCH}")
-SET(LIBPC_LIB_SOVERSION ${LIBPC_VERSION_MAJOR})
-SET(LIBPC_C_LIB_SOVERSION ${LIBPC_VERSION_MAJOR})
+set(PDAL_VERSION_STRING "${PDAL_VERSION_MAJOR}.${PDAL_VERSION_MINOR}.${PDAL_VERSION_PATCH}")
+SET(PDAL_LIB_SOVERSION ${PDAL_VERSION_MAJOR})
+SET(PDAL_C_LIB_SOVERSION ${PDAL_VERSION_MAJOR})
 
 
 # Name of C++ library
 if(WIN32)
-  set(LIBPC_LIB_NAME pdal)
+  set(PDAL_LIB_NAME pdal)
 else()
-  set(LIBPC_LIB_NAME pc)
+  set(PDAL_LIB_NAME pc)
 endif()
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
@@ -61,7 +61,7 @@ set(WITH_PKGCONFIG FALSE CACHE BOOL
 
 set(WITH_ENDIANAWARE FALSE CACHE BOOL "Choose whether or not PDAL should do runtime endianness switching.  Note that this can slow things down considerably if enabled by default")
 if (WITH_ENDIANAWARE)
-    set(LIBPC_ENDIAN_AWARE 1)
+    set(PDAL_ENDIAN_AWARE 1)
 endif()
 
 
@@ -70,7 +70,7 @@ endif()
 #------------------------------------------------------------------------------
 
 # Name of test suite runner
-set(LIBPC_UNIT_TEST pdal_test)
+set(PDAL_UNIT_TEST pdal_test)
 
 # Enable CTest and submissions to PDAL dashboard at CDash
 # http://my.cdash.org/index.php?project=PDAL
@@ -92,19 +92,19 @@ if(NOT MSVC_IDE)
   message(STATUS "Setting PDAL build type - ${CMAKE_BUILD_TYPE}")
 endif()
 
-set(LIBPC_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 
 # TODO: Still testing the output paths --mloskot
-set(LIBPC_BUILD_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set(PDAL_BUILD_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 # Output directory in which to build RUNTIME target files.
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${LIBPC_BUILD_OUTPUT_DIRECTORY})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PDAL_BUILD_OUTPUT_DIRECTORY})
 
 # Output directory in which to build LIBRARY target files
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIBPC_BUILD_OUTPUT_DIRECTORY})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PDAL_BUILD_OUTPUT_DIRECTORY})
 
 # Output directory in which to build ARCHIVE target files.
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LIBPC_BUILD_OUTPUT_DIRECTORY}) 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PDAL_BUILD_OUTPUT_DIRECTORY}) 
 
 
 #------------------------------------------------------------------------------
@@ -119,13 +119,13 @@ if(WIN32)
       add_definitions(-D_CRT_NONSTDC_NO_WARNING)
       add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 
-      set(LIBPC_COMPILER_MSVC 1)
+      set(PDAL_COMPILER_MSVC 1)
       if (MSVC10)
-        set(LIBPC_COMPILER_VC10 1)
+        set(PDAL_COMPILER_VC10 1)
       elseif (MSVC9)
-        set(LIBPC_COMPILER_VC9 1)
+        set(PDAL_COMPILER_VC9 1)
       elseif (MSVC8)
-        set(LIBPC_COMPILER_VC8 1)
+        set(PDAL_COMPILER_VC8 1)
       endif()
     endif()
     
@@ -140,28 +140,28 @@ if(WIN32)
   set(CMAKE_INCLUDE_PATH c:/osgeo4w/include;$ENV{CMAKE_INCLUDE_PATH})
   set(CMAKE_LIBRARY_PATH c:/osgeo4w/lib;$ENV{CMAKE_LIBRARY_PATH})
 
-  set(LIBPC_OS_WIN32 1)
+  set(PDAL_OS_WIN32 1)
 
 else()
   # not WIN32
 
   # Recommended C++ compilation flags
   # -Weffc++
-  set(LIBPC_COMMON_CXX_FLAGS
+  set(PDAL_COMMON_CXX_FLAGS
     "-pedantic -ansi -Wall -Wpointer-arith -Wcast-align -Wcast-qual -Wfloat-equal -Wredundant-decls -Wno-long-long")
 
   if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LIBPC_COMMON_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
     if (CMAKE_COMPILER_IS_GNUCXX)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
     endif()
     
-    set(LIBPC_COMPILER_GCC 1)
+    set(PDAL_COMPILER_GCC 1)
     
   elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR "${CMAKE_CXX_COMPILER}" MATCHES "clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LIBPC_COMMON_CXX_FLAGS}")
-    set(LIBPC_COMPILER_CLANG 1)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
+    set(PDAL_COMPILER_CLANG 1)
   endif()
 endif(WIN32)
 
@@ -214,7 +214,7 @@ set(WITH_GDAL FALSE CACHE BOOL "Choose if GDAL support should be built")
 
 if(WITH_GDAL)
   find_package(GDAL 1.6.0)
-  set(LIBPC_HAVE_GDAL 1)
+  set(PDAL_HAVE_GDAL 1)
   include_directories(${GDAL_INCLUDE_DIR})
   mark_as_advanced(CLEAR GDAL_INCLUDE_DIR) 
   mark_as_advanced(CLEAR GDAL_LIBRARY) 
@@ -229,7 +229,7 @@ if(WITH_GEOTIFF)
     include(CheckFunctionExists) 
     set(CMAKE_REQUIRED_LIBRARIES ${GEOTIFF_LIBRARY})
     include_directories(${GEOTIFF_INCLUDE_DIR})
-    set(LIBPC_HAVE_LIBGEOTIFF 1)
+    set(PDAL_HAVE_LIBGEOTIFF 1)
   endif()
 
   # Determine libTIFF availability, required
@@ -274,12 +274,12 @@ if(WITH_SWIG_CSHARP OR WITH_SWIG_PYTHON)
     message(STATUS "Found Swig version ${SWIG_VERSION}")
     if(WITH_SWIG_CSHARP)
         add_subdirectory(csharp)
-        set(LIBPC_HAVE_SWIG_CSHARP 1)
+        set(PDAL_HAVE_SWIG_CSHARP 1)
         message(STATUS "Enabling swig for csharp")
     endif()
     if(WITH_SWIG_PYTHON)
         add_subdirectory(python)
-        set(LIBPC_HAVE_SWIG_PYTHON 1)
+        set(PDAL_HAVE_SWIG_PYTHON 1)
         message(STATUS "Enabling swig for python")
     endif()
 endif()
@@ -293,7 +293,7 @@ if(WITH_LIBXML2)
     mark_as_advanced(CLEAR LIBXML2_LIBRARIES)
     if(LIBXML2_FOUND)
         include_directories(${LIBXML2_INCLUDE_DIR})
-        set(LIBPC_HAVE_LIBXML2 1)
+        set(PDAL_HAVE_LIBXML2 1)
     endif()
 endif()
 
@@ -305,7 +305,7 @@ if(WITH_ORACLE)
 
   if(ORACLE_FOUND)
     include_directories(${ORACLE_INCLUDE_DIR})
-    set(LIBPC_HAVE_ORACLE 1)
+    set(PDAL_HAVE_ORACLE 1)
   endif()
 endif()
 
@@ -322,7 +322,7 @@ if(WITH_LASZIP)
         mark_as_advanced(CLEAR LASZIP_INCLUDE_DIR) 
         mark_as_advanced(CLEAR LASZIP_LIBRARY) 
         mark_as_advanced(CLEAR LASZIP_VERSION) 
-        set(LIBPC_HAVE_LASZIP 1)
+        set(PDAL_HAVE_LASZIP 1)
     endif()
 endif()
 
@@ -339,7 +339,7 @@ if(WITH_LIBLAS)
         mark_as_advanced(CLEAR LIBLAS_INCLUDE_DIR) 
         mark_as_advanced(CLEAR LIBLAS_LIBRARY) 
         mark_as_advanced(CLEAR LIBLAS_VERSION) 
-        set(LIBPC_HAVE_LIBLAS 1)
+        set(PDAL_HAVE_LIBLAS 1)
     endif()
 endif()
 
@@ -357,7 +357,7 @@ if(WITH_MRSID)
         set(CMAKE_REQUIRED_LIBRARIES ${MRSID_LIBRARY})
         include_directories(${MRSID_INCLUDE_DIR})
         add_definitions(-DHAVE_MRSID=1)
-        set(LIBPC_HAVE_MRSID 1)
+        set(PDAL_HAVE_MRSID 1)
     endif()
 endif()
 
@@ -366,7 +366,7 @@ if(WITH_FREEGLUT)
   if(FREEGLUT_FOUND)
     include_directories(${FREEGLUT_INCLUDE_DIR})
     add_definitions(-DHAVE_FREEGLUT=1)
-    set(LIBPC_HAVE_FREEGLUT 1)
+    set(PDAL_HAVE_FREEGLUT 1)
     message(STATUS "Found FreeGLUT")
   endif()
 endif()
@@ -395,24 +395,24 @@ endif()
 
 # Locations are changeable by user to customize layout of PDAL installation
 # (default values are platform-specific)
-set(LIBPC_BIN_SUBDIR ${DEFAULT_BIN_SUBDIR} CACHE STRING
+set(PDAL_BIN_SUBDIR ${DEFAULT_BIN_SUBDIR} CACHE STRING
   "Subdirectory where executables will be installed")
-set(LIBPC_LIB_SUBDIR ${DEFAULT_LIB_SUBDIR} CACHE STRING
+set(PDAL_LIB_SUBDIR ${DEFAULT_LIB_SUBDIR} CACHE STRING
   "Subdirectory where libraries will be installed")
-set(LIBPC_INCLUDE_SUBDIR ${DEFAULT_INCLUDE_SUBDIR} CACHE STRING
+set(PDAL_INCLUDE_SUBDIR ${DEFAULT_INCLUDE_SUBDIR} CACHE STRING
   "Subdirectory where header files will be installed")
-set(LIBPC_DATA_SUBDIR ${DEFAULT_DATA_SUBDIR} CACHE STRING
+set(PDAL_DATA_SUBDIR ${DEFAULT_DATA_SUBDIR} CACHE STRING
   "Subdirectory where data will be installed")
 
 # Mark *_SUBDIR variables as advanced and dedicated to use by power-users only.
-mark_as_advanced(LIBPC_BIN_SUBDIR
-  LIBPC_LIB_SUBDIR LIBPC_INCLUDE_SUBDIR LIBPC_DATA_SUBDIR)
+mark_as_advanced(PDAL_BIN_SUBDIR
+  PDAL_LIB_SUBDIR PDAL_INCLUDE_SUBDIR PDAL_DATA_SUBDIR)
 
 # Full paths for the installation
-set(LIBPC_BIN_DIR ${LIBPC_BIN_SUBDIR})
-set(LIBPC_LIB_DIR ${LIBPC_LIB_SUBDIR})
-set(LIBPC_INCLUDE_DIR ${LIBPC_INCLUDE_SUBDIR})
-set(LIBPC_DATA_DIR ${LIBPC_DATA_SUBDIR})
+set(PDAL_BIN_DIR ${PDAL_BIN_SUBDIR})
+set(PDAL_LIB_DIR ${PDAL_LIB_SUBDIR})
+set(PDAL_INCLUDE_DIR ${PDAL_INCLUDE_SUBDIR})
+set(PDAL_DATA_DIR ${PDAL_DATA_SUBDIR})
 
 
 
@@ -421,7 +421,7 @@ set(LIBPC_DATA_DIR ${LIBPC_DATA_SUBDIR})
 #------------------------------------------------------------------------------
 
 install(FILES AUTHORS.txt LICENSE.txt
-  DESTINATION ${LIBPC_DATA_DIR}/doc)
+  DESTINATION ${PDAL_DATA_DIR}/doc)
 
 
 
@@ -462,9 +462,9 @@ endif()
 # CPACK controls
 #------------------------------------------------------------------------------
 
-SET(CPACK_PACKAGE_VERSION_MAJOR ${LIBPC_VERSION_MAJOR})
-SET(CPACK_PACKAGE_VERSION_MINOR ${LIBPC_VERSION_MINOR})
-SET(CPACK_PACKAGE_VERSION_PATCH ${LIBPC_VERSION_MINOR})
+SET(CPACK_PACKAGE_VERSION_MAJOR ${PDAL_VERSION_MAJOR})
+SET(CPACK_PACKAGE_VERSION_MINOR ${PDAL_VERSION_MINOR})
+SET(CPACK_PACKAGE_VERSION_PATCH ${PDAL_VERSION_MINOR})
 
 SET(CPACK_SOURCE_GENERATOR "TGZ;ZIP;TBZ2")
 SET(CPACK_CMAKE_GENERATOR "Unix Makefiles")

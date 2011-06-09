@@ -44,6 +44,7 @@
 #define INCLUDED_DRIVERS_LAS_LASHEADERWRITER_HPP
 
 #include <pdal/pdal.hpp>
+#include <pdal/exceptions.hpp>
 #include <iosfwd>
 
 #include <pdal/SpatialReference.hpp>
@@ -52,7 +53,7 @@ namespace pdal { namespace drivers { namespace las {
 
 class LasHeader;
 
-class LIBPC_DLL LasHeaderWriter
+class PDAL_DLL LasHeaderWriter
 {
 public:
     LasHeaderWriter(LasHeader& header, std::ostream&);
