@@ -64,12 +64,12 @@ protected:
     std::istream* m_istream;
 
 public:
+#ifdef PDAL_HAVE_LASZIP
     boost::scoped_ptr<LASzip> m_zip;
     boost::scoped_ptr<LASunzipper> m_unzipper;
     boost::scoped_ptr<ZipPoint> m_zipPoint;
-    // LASzip* m_zip;
-    // LASunzipper* m_unzipper;
-    // ZipPoint* m_zipPoint;
+
+#endif
 
 private:
     IteratorBase& operator=(const IteratorBase&); // not implemented

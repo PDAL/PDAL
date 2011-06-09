@@ -50,16 +50,17 @@ namespace pdal { namespace drivers { namespace las {
 IteratorBase::IteratorBase(const LasReader& reader)
     : m_reader(reader)
     , m_istream(NULL)
-    , m_zip(NULL)
-    , m_unzipper(NULL)
-    , m_zipPoint(NULL)
 {
     m_istream = Utils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());
 
     if (m_reader.isCompressed())
     {
+#ifdef PDAL_HAVE_LASZIP
         initializeZip();
+#else
+        throw pdal_error("LASzip is not enabled for this pdal::drivers::las::IteratorBase!");
+#endif
     }
 
     return;
@@ -74,6 +75,8 @@ IteratorBase::~IteratorBase()
 
 void IteratorBase::initializeZip()
 {
+#ifdef PDAL_HAVE_LASZIP
+
     try
     {
         // Initialize a scoped_ptr and swap it with our member variable 
@@ -147,7 +150,7 @@ void IteratorBase::initializeZip()
             throw pdal_error("Failed to open laszip decompression engine (3)"); 
         }
     }
-
+#endif
     return;
 }
 
@@ -168,6 +171,7 @@ SequentialIterator::~SequentialIterator()
 
 boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 {
+#ifdef PDAL_HAVE_LASZIP
     if (m_zip)
     {
         m_unzipper->seek(getIndex() + count);
@@ -177,6 +181,10 @@ boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
         boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
         m_istream->seekg(delta * count, std::ios::cur);
     }
+#else
+        boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+        m_istream->seekg(delta * count, std::ios::cur);
+#endif
     return count;
 }
 
@@ -189,7 +197,12 @@ bool SequentialIterator::atEndImpl() const
 
 boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 {
+#ifdef PDAL_HAVE_LASZIP
     return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), m_unzipper.get(), m_zipPoint.get());
+#else
+    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), NULL, NULL);
+
+#endif
 }
 
 
@@ -210,6 +223,7 @@ RandomIterator::~RandomIterator()
 
 boost::uint64_t RandomIterator::seekImpl(boost::uint64_t count)
 {
+#ifdef PDAL_HAVE_LASZIP
     if (m_zip)
     {
         m_unzipper->seek(count);
@@ -219,13 +233,25 @@ boost::uint64_t RandomIterator::seekImpl(boost::uint64_t count)
         boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
         m_istream->seekg(m_reader.getPointDataOffset() + delta * count);
     }
+#else
+
+    boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+    m_istream->seekg(m_reader.getPointDataOffset() + delta * count);
+
+#endif
+
     return count;
 }
 
 
 boost::uint32_t RandomIterator::readImpl(PointBuffer& data)
 {
+#ifdef PDAL_HAVE_LASZIP
     return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), m_unzipper.get(), m_zipPoint.get());
+#else
+    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), NULL, NULL);
+
+#endif
 }
 
 

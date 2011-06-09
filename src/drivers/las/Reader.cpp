@@ -179,6 +179,7 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
 
     if (zipPoint)
     {
+#ifdef PDAL_HAVE_LASZIP
         boost::uint8_t* p = buf;
 
         for (boost::uint32_t i=0; i<numPoints; i++)
@@ -200,6 +201,9 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
             memcpy(p, zipPoint->m_lz_point_data, zipPoint->m_lz_point_size);
             p +=  zipPoint->m_lz_point_size;
         }
+#else
+                throw pdal_error("LASzip is not enabled for this pdal::drivers::las::Reader::processBuffer");
+#endif
     }
     else
     {
