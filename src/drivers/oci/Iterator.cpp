@@ -32,23 +32,23 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/oci/Iterator.hpp>
-#include <libpc/Utils.hpp>
+#include <pdal/drivers/oci/Iterator.hpp>
+#include <pdal/Utils.hpp>
 
 #include <liblas/factory.hpp>
 
-#include <libpc/exceptions.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/Utils.hpp>
-#include <libpc/drivers/oci/Reader.hpp>
-#include <libpc/Vector.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/Utils.hpp>
+#include <pdal/drivers/oci/Reader.hpp>
+#include <pdal/Vector.hpp>
 
 #include <sstream>
 #include <map>
 #include <algorithm>
 
 
-namespace libpc { namespace drivers { namespace oci {
+namespace pdal { namespace drivers { namespace oci {
 
 IteratorBase::IteratorBase(const Reader& reader)
     : m_statement(Statement())
@@ -98,7 +98,7 @@ boost::uint32_t IteratorBase::unpackOracleData(PointBuffer& data)
     {
         std::ostringstream oss;
         oss << "This oracle block has a num_points that is negative (" << m_block->num_points <<")!";
-        throw libpc_error(oss.str());
+        throw pdal_error(oss.str());
     }
     
     if (space < static_cast<boost::uint32_t>(m_block->num_points))
@@ -106,7 +106,7 @@ boost::uint32_t IteratorBase::unpackOracleData(PointBuffer& data)
         std::ostringstream oss;
         oss << "Not enough space to store this block!  The space left in the buffer is ";
         oss << space << ", the Oracle block has " << m_block->num_points << " points ";
-        throw libpc_error(oss.str());
+        throw pdal_error(oss.str());
     }
 
     std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -278,7 +278,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
                                          (void*)(&(*m_block->chunk)[0]),
                                          m_block->chunk->size() , 
                                          &nAmountRead);
-        if (!read_all_data) throw libpc_error("Did not read all blob data!");
+        if (!read_all_data) throw pdal_error("Did not read all blob data!");
 
         // std::cout << "nAmountRead: " << nAmountRead << std::endl;
         
@@ -315,8 +315,8 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
     // boost::uint32_t referencing= ((gtype % 1000) / 100);
     // std::cout << "dimension: " << dimension << " geometry type: " << geom_type << " referencing " << referencing << std::endl;
     
-    libpc::Vector<double> mins;
-    libpc::Vector<double> maxs;
+    pdal::Vector<double> mins;
+    pdal::Vector<double> maxs;
     
     boost::int32_t bounds_length = m_statement->GetArrayLength(&(m_block->blk_extent->sdo_ordinates));
     
@@ -329,7 +329,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
         maxs.add(v);
     }
     
-    libpc::Bounds<double> block_bounds(mins, maxs);
+    pdal::Bounds<double> block_bounds(mins, maxs);
     
     data.setSpatialBounds(block_bounds);
     
@@ -362,7 +362,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
 
 SequentialIterator::SequentialIterator(const Reader& reader)
     : IteratorBase(reader)
-    , libpc::SequentialIterator(reader)
+    , pdal::SequentialIterator(reader)
 {
     return;
 }
@@ -383,7 +383,7 @@ boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
     // 
     // if (newPos64 > std::numeric_limits<size_t>::max())
     // {
-    //     throw libpc_error("cannot support seek offsets greater than 32-bits");
+    //     throw pdal_error("cannot support seek offsets greater than 32-bits");
     // }
     // 
     // // safe cast, since we just handled the overflow case

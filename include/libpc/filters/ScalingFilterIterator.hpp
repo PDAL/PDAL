@@ -35,15 +35,15 @@
 #ifndef INCLUDED_FILTERS_SCALINGFILTERITERATOR_HPP
 #define INCLUDED_FILTERS_SCALINGFILTERITERATOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/filters/ScalingFilter.hpp>
-#include <libpc/FilterIterator.hpp>
+#include <pdal/filters/ScalingFilter.hpp>
+#include <pdal/FilterIterator.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
-class ScalingFilterSequentialIterator : public libpc::FilterSequentialIterator
+class ScalingFilterSequentialIterator : public pdal::FilterSequentialIterator
 {
 public:
     ScalingFilterSequentialIterator(const ScalingFilter& filter);

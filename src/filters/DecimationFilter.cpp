@@ -32,12 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/DecimationFilter.hpp>
+#include <pdal/filters/DecimationFilter.hpp>
 
-#include <libpc/filters/DecimationFilterIterator.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/filters/DecimationFilterIterator.hpp>
+#include <pdal/PointBuffer.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 DecimationFilter::DecimationFilter(const Stage& prevStage, boost::uint32_t step)
@@ -103,7 +103,7 @@ boost::uint32_t DecimationFilter::processBuffer(PointBuffer& dstData, const Poin
 }
 
 
-libpc::SequentialIterator* DecimationFilter::createSequentialIterator() const
+pdal::SequentialIterator* DecimationFilter::createSequentialIterator() const
 {
     return new DecimationFilterSequentialIterator(*this);
 }

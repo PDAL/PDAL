@@ -35,15 +35,15 @@
 #ifndef INCLUDED_FILTERS_CROPFILTERITERATOR_HPP
 #define INCLUDED_FILTERS_CROPFILTERITERATOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/FilterIterator.hpp>
+#include <pdal/FilterIterator.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 class ByteSwapFilter;
 
-class ByteSwapFilterSequentialIterator : public libpc::FilterSequentialIterator
+class ByteSwapFilterSequentialIterator : public pdal::FilterSequentialIterator
 {
 public:
     ByteSwapFilterSequentialIterator(const ByteSwapFilter& filter);

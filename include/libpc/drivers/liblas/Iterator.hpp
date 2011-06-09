@@ -35,14 +35,14 @@
 #ifndef INCLUDED_DRIVERS_LIBLAS_ITERATOR_HPP
 #define INCLUDED_DRIVERS_LIBLAS_ITERATOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-//#include <libpc/Stage.hpp>
-#include <libpc/Iterator.hpp>
+//#include <pdal/Stage.hpp>
+#include <pdal/Iterator.hpp>
 
 #include <string>
 
-//#include <libpc/drivers/liblas/Header.hpp>
+//#include <pdal/drivers/liblas/Header.hpp>
 
 // fwd decls
 namespace liblas
@@ -50,7 +50,7 @@ namespace liblas
     class Reader;
 }
 
-namespace libpc { namespace drivers { namespace liblas {
+namespace pdal { namespace drivers { namespace liblas {
 
 class LiblasReader;
 
@@ -78,7 +78,7 @@ private:
 };
 
 
-class SequentialIterator : public LiblasIteratorBase, public libpc::SequentialIterator
+class SequentialIterator : public LiblasIteratorBase, public pdal::SequentialIterator
 {
 public:
     SequentialIterator(const LiblasReader& reader);
@@ -91,7 +91,7 @@ private:
 };
 
 
-class RandomIterator : public LiblasIteratorBase, public libpc::RandomIterator
+class RandomIterator : public LiblasIteratorBase, public pdal::RandomIterator
 {
 public:
     RandomIterator(const LiblasReader& reader);

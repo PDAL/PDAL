@@ -35,15 +35,15 @@
 #ifndef INCLUDED_DRIVERS_LAS_ITERATOR_HPP
 #define INCLUDED_DRIVERS_LAS_ITERATOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Iterator.hpp>
+#include <pdal/Iterator.hpp>
 #include <iosfwd>
 
 class LASzip;
 class LASunzipper;
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 class LasReader;
 class ZipPoint;
@@ -73,7 +73,7 @@ private:
 };
 
 
-class SequentialIterator : public IteratorBase, public libpc::SequentialIterator
+class SequentialIterator : public IteratorBase, public pdal::SequentialIterator
 {
 public:
     SequentialIterator(const LasReader& reader);
@@ -86,7 +86,7 @@ private:
 };
 
 
-class RandomIterator : public IteratorBase, public libpc::RandomIterator
+class RandomIterator : public IteratorBase, public pdal::RandomIterator
 {
 public:
     RandomIterator(const LasReader& reader);

@@ -43,18 +43,18 @@
 #ifndef LIBPC_EXCEPTION_HPP_INCLUDED
 #define LIBPC_EXCEPTION_HPP_INCLUDED
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 #include <stdexcept>
 
-namespace libpc
+namespace pdal
 {
 
 
-// base class for all libpc exceptions
-class libpc_error : public std::runtime_error
+// base class for all pdal exceptions
+class pdal_error : public std::runtime_error
 {
 public:
-    libpc_error(std::string const& msg)
+    pdal_error(std::string const& msg)
         : std::runtime_error(msg)
     {}
 };
@@ -62,11 +62,11 @@ public:
 
 /// Exception reporting invalid point data.
 /// It's usually thrown by Point::Validate function.
-class invalid_point_data : public libpc_error
+class invalid_point_data : public pdal_error
 {
 public:
     invalid_point_data(std::string const& msg, unsigned int who)
-        : libpc_error(msg), m_who(who)
+        : pdal_error(msg), m_who(who)
     {}
 
     /// Return flags identifying invalid point data members.
@@ -82,73 +82,73 @@ private:
 };
 
 
-class invalid_expression : public libpc_error
+class invalid_expression : public pdal_error
 {
 public:
 
     invalid_expression(std::string const& msg)
-        : libpc_error(msg)
+        : pdal_error(msg)
     {}
 };
 
 
-class invalid_format : public libpc_error
+class invalid_format : public pdal_error
 {
 public:
 
     invalid_format(std::string const& msg)
-        : libpc_error(msg)
+        : pdal_error(msg)
     {}
 };
 
 // for when a stage doesn't get the schema it expects
-class impedance_invalid : public libpc_error
+class impedance_invalid : public pdal_error
 {
 public:
 
     impedance_invalid(std::string const& msg)
-        : libpc_error(msg)
+        : pdal_error(msg)
     {}
 };
 
 // use this for attempts to use a feature not compiled in, e.g. laszip or gdal
-class configuration_error : public libpc_error
+class configuration_error : public pdal_error
 {
 public:
     configuration_error(std::string const& msg)
-        : libpc_error(msg)
+        : pdal_error(msg)
     {}
 };
 
 // use this for situations where indeterminate point counts prevent some 
 // operation from happening
-class indeterminate_count_error : public libpc_error
+class indeterminate_count_error : public pdal_error
 {
 public:
     indeterminate_count_error(std::string const& msg)
-        : libpc_error(msg)
+        : pdal_error(msg)
     {}
 };
 
-class dimension_not_found : public libpc_error
+class dimension_not_found : public pdal_error
 {
 public:
 
     dimension_not_found(std::string const& msg)
-        : libpc_error(msg)
+        : pdal_error(msg)
     {}
 };
 
 
 // use this for code still under development
-class not_yet_implemented : public libpc_error
+class not_yet_implemented : public pdal_error
 {
 public:
     not_yet_implemented(std::string const& msg)
-        : libpc_error(msg)
+        : pdal_error(msg)
     {}
 };
 
-} // namespace libpc
+} // namespace pdal
 
 #endif // LIBPC_EXCEPTION_HPP_INCLUDED

@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #ifdef LIBPC_COMPILER_MSVC
 #include <windows.h>

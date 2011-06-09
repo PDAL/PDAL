@@ -35,18 +35,18 @@
 #ifndef INCLUDED_FILTERS_REPROJECTIONFILTER_HPP
 #define INCLUDED_FILTERS_REPROJECTIONFILTER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <boost/shared_ptr.hpp>
 
-#include <libpc/Filter.hpp>
+#include <pdal/Filter.hpp>
 
-namespace libpc
+namespace pdal
 {
     class PointBuffer;
 }
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 class ReprojectionFilterSequentialIterator;
 
@@ -67,8 +67,8 @@ public:
         return false;
     }
 
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const { return NULL; }
+    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::RandomIterator* createRandomIterator() const { return NULL; }
 
     void processBuffer(PointBuffer& data) const;
 

@@ -35,17 +35,17 @@
 #ifndef INCLUDED_STAGE_HPP
 #define INCLUDED_STAGE_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <string>
 
-#include <libpc/Schema.hpp>
-#include <libpc/Bounds.hpp>
-#include <libpc/SpatialReference.hpp>
-#include <libpc/MetadataRecord.hpp>
-#include <libpc/Options.hpp>
+#include <pdal/Schema.hpp>
+#include <pdal/Bounds.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/MetadataRecord.hpp>
+#include <pdal/Options.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 class Iterator;
@@ -63,7 +63,7 @@ public:
     // Implement this in your concrete classes to return a constant string
     // as the name of the stage.  Use a dotted, XPath-style name for your 
     // stage.  For example, 'drivers.las.reader' or 'filters.crop'.  This 
-    // XPath-style name will also correspond to an entry in the libpc::Options
+    // XPath-style name will also correspond to an entry in the pdal::Options
     // tree for the given stage.
     virtual const std::string& getName() const = 0;
     virtual const std::string& getDescription() const = 0;
@@ -114,6 +114,6 @@ private:
 
 LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);
 
-} // namespace libpc
+} // namespace pdal
 
 #endif

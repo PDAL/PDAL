@@ -32,10 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/FilterIterator.hpp>
-#include <libpc/Filter.hpp>
+#include <pdal/FilterIterator.hpp>
+#include <pdal/Filter.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 
@@ -126,4 +126,4 @@ const BlockIterator& FilterBlockIterator::getPrevIterator() const
 }
 
 
-} // namespace libpc
+} // namespace pdal

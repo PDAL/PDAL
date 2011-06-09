@@ -65,7 +65,7 @@ void SetGeogCSCitation(GTIF* psGTIF, OGRSpatialReference* poSRS, char* angUnitNa
 LIBPC_C_END
 
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 
 GeotiffSupport::GeotiffSupport()
@@ -278,7 +278,7 @@ private:
 };
 
 
-static int libpcGeoTIFFPrint(char* data, void* aux)
+static int pdalGeoTIFFPrint(char* data, void* aux)
 {
     geotiff_dir_printer* printer = reinterpret_cast<geotiff_dir_printer*>(aux);
     (*printer)(data, 0);
@@ -292,7 +292,7 @@ std::string GeotiffSupport::getText() const
         return std::string("");
 
     geotiff_dir_printer geotiff_printer;
-    GTIFPrint(m_gtiff, libpcGeoTIFFPrint, &geotiff_printer);
+    GTIFPrint(m_gtiff, pdalGeoTIFFPrint, &geotiff_printer);
     const std::string s = geotiff_printer.output();
     return s;
 }

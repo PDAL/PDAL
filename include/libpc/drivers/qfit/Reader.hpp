@@ -35,15 +35,15 @@
 #ifndef INCLUDED_LIBPC_DRIVER_QFIT_READER_HPP
 #define INCLUDED_LIBPC_DRIVER_QFIT_READER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Stage.hpp>
-#include <libpc/Options.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/Options.hpp>
 
-#include <libpc/SchemaLayout.hpp>
+#include <pdal/SchemaLayout.hpp>
 
-#include <libpc/Iterator.hpp>
-#include <libpc/exceptions.hpp>
+#include <pdal/Iterator.hpp>
+#include <pdal/exceptions.hpp>
 
 
 #include <vector>
@@ -72,7 +72,7 @@
         }} while(false)
 #endif
 
-namespace libpc { namespace drivers { namespace qfit {
+namespace pdal { namespace drivers { namespace qfit {
 
 
 enum QFIT_Format_Type
@@ -83,12 +83,12 @@ enum QFIT_Format_Type
     QFIT_Format_Unknown = 128
 };
 
-class qfit_error : public libpc_error
+class qfit_error : public pdal_error
 {
 public:
 
     qfit_error(std::string const& msg)
-        : libpc_error(msg)
+        : pdal_error(msg)
     {}
 };
 
@@ -117,7 +117,7 @@ public:
 };
 
 
-class LIBPC_DLL Reader : public libpc::Stage
+class LIBPC_DLL Reader : public pdal::Stage
 {
 
 public:
@@ -137,8 +137,8 @@ public:
         return false;
     }
     
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const;
+    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::RandomIterator* createRandomIterator() const;
     
     Options& getOptions() const { return m_options; }
 
@@ -167,7 +167,7 @@ private:
 
 };
 
-}}} // namespace libpc::driver::oci
+}}} // namespace pdal::driver::oci
 
 
 #endif // INCLUDED_LIBPC_DRIVER_OCI_READER_HPP

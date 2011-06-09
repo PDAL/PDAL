@@ -35,11 +35,11 @@
 #ifndef INCLUDED_METADATARECORD_HPP
 #define INCLUDED_METADATARECORD_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <boost/shared_array.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 class LIBPC_DLL MetadataRecord
@@ -68,6 +68,6 @@ private:
 std::ostream& operator<<(std::ostream& ostr, const MetadataRecord& srs);
 
 
-} // namespace libpc
+} // namespace pdal
 
 #endif

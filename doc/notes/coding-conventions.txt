@@ -57,13 +57,13 @@ Other Conventions
 * the use of getter and setter methods is preferred to exposing member
   variables
   
-* Surround all code with "namespace libpc {...}"; where justifiable, you 
+* Surround all code with "namespace pdal {...}"; where justifiable, you 
   may introduce a nested namespace.  Keep non-public names in the 
-  libpc::detail\:: space.
+  pdal::detail\:: space.
   
 * Use exceptions for exceptional events that are not going to be handled 
   directly within the context of where the event occurs.  Avoid status
-  codes.  See exceptions.hpp for a set of libpc-specific exception types 
+  codes.  See exceptions.hpp for a set of pdal-specific exception types 
   you may throw.
 
 
@@ -80,27 +80,27 @@ Layout/Organization of Source Tree
 #include Conventions
 ====================
 
-* For public headers from the ./include/libpc directory, use angle brackets:
-  #include <libpc/Stage.h>
+* For public headers from the ./include/pdal directory, use angle brackets:
+  #include <pdal/Stage.h>
 
 * For private headers (from somehwere in ./src), use quotes:
   #include "support.hpp"
 
 * #include lines should be grouped and arranged in this order: C++/std headers,
-  3rd-party headers (e.g. gdal or boost), libpc headers, local headers.  The
-  libpc headers may be further grouped by subdirectory, e.g. drivers/liblas,
+  3rd-party headers (e.g. gdal or boost), pdal headers, local headers.  The
+  pdal headers may be further grouped by subdirectory, e.g. drivers/liblas,
   filters, etc.
 
 * First exception to the above: source files (.cpp) should #include their
   corresponding .hpp file first.  This assures that the header is including
   all the files it needs to.
   
-* Second exception to the above: header files (.hpp) should #include libpc.hpp
+* Second exception to the above: header files (.hpp) should #include pdal.hpp
   first.  This assures that we are consistent in including all "standard" stuff
   we use everywhere.
 
 * Don't #include a file where a simple forward declaration will do.
-  (Note: this only applies to libpc files; don't forward declare from system
+  (Note: this only applies to pdal files; don't forward declare from system
   or 3rd party headers.)
 
 * Don't include a file unless it actually is required to compile the source unit.

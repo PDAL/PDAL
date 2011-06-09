@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/Utils.hpp>
+#include <pdal/Utils.hpp>
 
 #include <cassert>
 
@@ -47,14 +47,14 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/filesystem.hpp>
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
 
 #ifdef LIBPC_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
-namespace libpc
+namespace pdal
 {
 
 
@@ -81,7 +81,7 @@ double Utils::random(double minimum, double maximum)
 std::istream* Utils::openFile(std::string const& filename, bool asBinary)
 {
     if (!Utils::fileExists(filename))
-        throw libpc_error("File not found: " + filename);
+        throw pdal_error("File not found: " + filename);
 
     std::ios::openmode mode = std::ios::in;
     if (asBinary)
@@ -240,4 +240,4 @@ boost::uint32_t Utils::getStreamPrecision(double scale)
 }
 
 
-} // namespace libpc
+} // namespace pdal

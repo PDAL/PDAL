@@ -35,18 +35,18 @@
 #ifndef INCLUDED_FILTERS_SCALINGFILTER_HPP
 #define INCLUDED_FILTERS_SCALINGFILTER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <boost/shared_ptr.hpp>
 
-#include <libpc/Filter.hpp>
+#include <pdal/Filter.hpp>
 
-namespace libpc
+namespace pdal
 {
     class PointBuffer;
 }
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 class ScalingFilterSequentialIterator;
 
@@ -73,8 +73,8 @@ public:
         return false;
     }
 
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const { return NULL; }
+    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::RandomIterator* createRandomIterator() const { return NULL; }
 
     void processBuffer(const PointBuffer& srcData, PointBuffer& dstData) const;
 

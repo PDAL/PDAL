@@ -35,11 +35,11 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/faux/Writer.hpp>
-#include <libpc/filters/ColorFilter.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/drivers/faux/Writer.hpp>
+#include <pdal/filters/ColorFilter.hpp>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(ColorFilterTest)
 

@@ -32,16 +32,16 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/MosaicFilterIterator.hpp>
+#include <pdal/filters/MosaicFilterIterator.hpp>
 
-#include <libpc/PointBuffer.hpp>
-#include <libpc/filters/MosaicFilter.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/filters/MosaicFilter.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 MosaicFilterSequentialIterator::MosaicFilterSequentialIterator(const MosaicFilter& filter)
-    : libpc::SequentialIterator(filter)
+    : pdal::SequentialIterator(filter)
     , m_filter(filter)
 {
     for (size_t i=0; i<filter.getPrevStages().size(); ++i)

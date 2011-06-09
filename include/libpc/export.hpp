@@ -35,7 +35,7 @@
 #ifndef EXPORT_HPP_INCLUDED
 #define EXPORT_HPP_INCLUDED
 
-#include <libpc/libpc_defines.h>
+#include <pdal/pdal_defines.h>
 
 #ifndef LIBPC_DLL
 #if defined(LIBPC_COMPILER_MSVC) && !defined(LIBPC_DISABLE_DLL)

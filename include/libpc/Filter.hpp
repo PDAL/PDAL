@@ -35,11 +35,11 @@
 #ifndef INCLUDED_FILTER_HPP
 #define INCLUDED_FILTER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Stage.hpp>
+#include <pdal/Stage.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 class LIBPC_DLL Filter : public Stage
@@ -57,6 +57,6 @@ private:
     Filter(const Filter&); // not implemented
 };
 
-}  // namespace libpc
+}  // namespace pdal
 
 #endif

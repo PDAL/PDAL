@@ -41,10 +41,10 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/libpc_config.hpp>
+#include <pdal/pdal_config.hpp>
 
 #include <sstream>
-#include <libpc/libpc_defines.h>
+#include <pdal/pdal_defines.h>
 
 #ifdef LIBPC_HAVE_LIBLAS
 #include <liblas/version.hpp>
@@ -62,10 +62,10 @@
 #include <laszip/laszip.hpp>
 #endif
 
-namespace libpc
+namespace pdal
 {
 
-/// Check if libLAS support has been built in to libPC
+/// Check if libLAS support has been built in to PDAL
 bool IsLibLASEnabled()
 {
 #ifdef LIBPC_HAVE_LIBLAS
@@ -75,7 +75,7 @@ bool IsLibLASEnabled()
 #endif
 }
 
-/// Check if GDAL support has been built in to libPC
+/// Check if GDAL support has been built in to PDAL
 bool IsGDALEnabled()
 {
 #ifdef LIBPC_HAVE_GDAL
@@ -85,7 +85,7 @@ bool IsGDALEnabled()
 #endif
 }
 
-/// Check if GeoTIFF support has been built in to libPC
+/// Check if GeoTIFF support has been built in to PDAL
 bool IsLibGeoTIFFEnabled()
 {
 #ifdef LIBPC_HAVE_LIBGEOTIFF
@@ -95,7 +95,7 @@ bool IsLibGeoTIFFEnabled()
 #endif
 }
 
-/// Check if LasZip compression support has been built in to libPC
+/// Check if LasZip compression support has been built in to PDAL
 bool IsLasZipEnabled()
 {
 #ifdef LIBPC_HAVE_LASZIP
@@ -132,7 +132,7 @@ int GetVersionInteger()
 }
 
 
-/// Tell the user a bit about libPC's compilation
+/// Tell the user a bit about PDAL's compilation
 std::string GetFullVersionString()
 {
     std::ostringstream os;
@@ -164,7 +164,7 @@ std::string GetFullVersionString()
 
     std::string info(os.str());
     os.str("");
-    os << "libPC " << LIBPC_VERSION_STRING;
+    os << "PDAL " << LIBPC_VERSION_STRING;
     if (!info.empty())
     {
         os << " with" << info;
@@ -173,4 +173,4 @@ std::string GetFullVersionString()
     return os.str();
 }
 
-} // namespace libpc
+} // namespace pdal

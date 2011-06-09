@@ -35,15 +35,15 @@
 #ifndef INCLUDED_DRIVERS_LAS_VARIABLELENGTHRECORD_HPP
 #define INCLUDED_DRIVERS_LAS_VARIABLELENGTHRECORD_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <string>
 #include <vector>
 
-#include <libpc/SpatialReference.hpp>
+#include <pdal/SpatialReference.hpp>
 
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
     
 
 class LIBPC_DLL VariableLengthRecord

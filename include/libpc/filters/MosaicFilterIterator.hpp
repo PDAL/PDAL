@@ -35,19 +35,19 @@
 #ifndef INCLUDED_FILTERS_MOSAICFILTERITERATOR_HPP
 #define INCLUDED_FILTERS_MOSAICFILTERITERATOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <vector>
-//#include <libpc/Filter.hpp>
-#include <libpc/FilterIterator.hpp>
-//#include <libpc/Bounds.hpp>
+//#include <pdal/Filter.hpp>
+#include <pdal/FilterIterator.hpp>
+//#include <pdal/Bounds.hpp>
 
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 class MosaicFilter;
 
-class MosaicFilterSequentialIterator : public libpc::SequentialIterator
+class MosaicFilterSequentialIterator : public pdal::SequentialIterator
 {
 public:
     MosaicFilterSequentialIterator(const MosaicFilter& filter);

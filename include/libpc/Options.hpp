@@ -35,12 +35,12 @@
 #ifndef INCLUDED_OPTIONS_HPP
 #define INCLUDED_OPTIONS_HPP
 
-#include <libpc/libpc.hpp>
-#include <libpc/Bounds.hpp>
+#include <pdal/pdal.hpp>
+#include <pdal/Bounds.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 
-namespace libpc
+namespace pdal
 {
 
 template <typename T>
@@ -95,6 +95,6 @@ public:
 
 LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const Options&);
 
-} // namespace libpc
+} // namespace pdal
 
 #endif

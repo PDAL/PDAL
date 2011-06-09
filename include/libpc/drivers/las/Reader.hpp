@@ -35,20 +35,20 @@
 #ifndef INCLUDED_DRIVERS_LAS_READER_HPP
 #define INCLUDED_DRIVERS_LAS_READER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Stage.hpp>
-#include <libpc/drivers/las/Header.hpp>
-#include <libpc/drivers/las/ReaderBase.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/drivers/las/Header.hpp>
+#include <pdal/drivers/las/ReaderBase.hpp>
 
 class LASunzipper;
 
-namespace libpc
+namespace pdal
 {
     class PointBuffer;
 }
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 class LasHeader;
 class ZipPoint;
@@ -71,8 +71,8 @@ public:
         return false;
     }
 
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const;
+    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::RandomIterator* createRandomIterator() const;
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft, LASunzipper* unzipper, ZipPoint* zipPoint) const;

@@ -35,14 +35,14 @@
 #ifndef INCLUDED_POINTBUFFER_HPP
 #define INCLUDED_POINTBUFFER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <boost/scoped_array.hpp>
 
-#include <libpc/Bounds.hpp>
-#include <libpc/SchemaLayout.hpp>
+#include <pdal/Bounds.hpp>
+#include <pdal/SchemaLayout.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 // a PointBuffer object is just an untyped array of N bytes,
@@ -213,6 +213,6 @@ inline T PointBuffer::getField(std::size_t pointIndex, boost::int32_t fieldIndex
 LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);
 
 
-} // namespace libpc
+} // namespace pdal
 
 #endif

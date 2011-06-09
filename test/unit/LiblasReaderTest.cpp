@@ -35,16 +35,16 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/Iterator.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/drivers/liblas/Reader.hpp>
-#include <libpc/filters/CacheFilter.hpp>
+#include <pdal/Iterator.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/drivers/liblas/Reader.hpp>
+#include <pdal/filters/CacheFilter.hpp>
 #include "Support.hpp"
 
-using namespace libpc;
-using namespace libpc::drivers::liblas;
-using namespace libpc::filters;
+using namespace pdal;
+using namespace pdal::drivers::liblas;
+using namespace pdal::filters;
 
 
 BOOST_AUTO_TEST_SUITE(LiblasReaderTest)
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 
     PointBuffer data(layout, 3);
     
-    libpc::SequentialIterator* iter = reader.createSequentialIterator();
+    pdal::SequentialIterator* iter = reader.createSequentialIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 
     PointBuffer data(layout, 3);
     
-    libpc::RandomIterator* iter = reader.createRandomIterator();
+    pdal::RandomIterator* iter = reader.createRandomIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 
     PointBuffer data(layout, 3);
     
-    libpc::RandomIterator* iter = reader.createRandomIterator();
+    pdal::RandomIterator* iter = reader.createRandomIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
     PointBuffer data(layout, 1065);
 
     {
-        libpc::SequentialIterator* iter = reader.createSequentialIterator();
+        pdal::SequentialIterator* iter = reader.createSequentialIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         boost::uint32_t numRead = iter->read(data);
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
     }
 
     {
-        libpc::RandomIterator* iter = reader.createRandomIterator();
+        pdal::RandomIterator* iter = reader.createRandomIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         boost::uint32_t numRead = iter->read(data);
@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     boost::uint32_t numRead;
 
     {
-        libpc::SequentialIterator* iter = cache.createSequentialIterator();
+        pdal::SequentialIterator* iter = cache.createSequentialIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         numRead = iter->read(data);
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     }
 
     {
-        libpc::RandomIterator* iter = cache.createRandomIterator();
+        pdal::RandomIterator* iter = cache.createRandomIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         // read the middle third
@@ -320,16 +320,16 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 
     boost::uint32_t numRead;
 
-    libpc::SequentialIterator* iterS1 = reader.createSequentialIterator();
+    pdal::SequentialIterator* iterS1 = reader.createSequentialIterator();
     BOOST_CHECK(iterS1->getIndex() == 0);
 
-    libpc::SequentialIterator* iterS2 = reader.createSequentialIterator();
+    pdal::SequentialIterator* iterS2 = reader.createSequentialIterator();
     BOOST_CHECK(iterS2->getIndex() == 0);
 
-    libpc::RandomIterator* iterR1 = reader.createRandomIterator();
+    pdal::RandomIterator* iterR1 = reader.createRandomIterator();
     BOOST_CHECK(iterR1->getIndex() == 0);
 
-    libpc::RandomIterator* iterR2 = reader.createRandomIterator();
+    pdal::RandomIterator* iterR2 = reader.createRandomIterator();
     BOOST_CHECK(iterR2->getIndex() == 0);
 
     {
@@ -446,7 +446,7 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
 
     PointBuffer data(layout, 1);
     
-    libpc::SequentialIterator* iter = reader.createSequentialIterator();
+    pdal::SequentialIterator* iter = reader.createSequentialIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -477,7 +477,7 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 
 BOOST_AUTO_TEST_CASE(test_vlr)
 {
-    libpc::drivers::liblas::LiblasReader reader(Support::datapath("lots_of_vlr.las"));
+    pdal::drivers::liblas::LiblasReader reader(Support::datapath("lots_of_vlr.las"));
 
     ////// BUG: this is not yet supported
     ////BOOST_CHECK(reader.getVLRs().count() == 390);

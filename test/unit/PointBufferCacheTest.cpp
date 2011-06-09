@@ -19,10 +19,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <libpc/PointBuffer.hpp>
-#include <libpc/PointBufferCache.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/PointBufferCache.hpp>
 
-using namespace libpc;
+using namespace pdal;
 
 
 BOOST_AUTO_TEST_SUITE(PointBufferCacheTest)

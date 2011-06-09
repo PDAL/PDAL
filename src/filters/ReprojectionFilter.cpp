@@ -32,20 +32,20 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/ReprojectionFilter.hpp>
+#include <pdal/filters/ReprojectionFilter.hpp>
 
-#include <libpc/Dimension.hpp>
-#include <libpc/Schema.hpp>
-#include <libpc/exceptions.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/filters/ReprojectionFilterIterator.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/Schema.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/filters/ReprojectionFilterIterator.hpp>
 
 #ifdef LIBPC_HAVE_GDAL
 #include <gdal.h>
 #include <ogr_spatialref.h>
 #endif
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 #ifdef LIBPC_HAVE_GDAL
@@ -140,7 +140,7 @@ void ReprojectionFilter::initialize()
     m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
     m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
     
-    int result = OSRSetFromUserInput(m_in_ref_ptr.get(), m_inSRS.getWKT(libpc::SpatialReference::eCompoundOK).c_str());
+    int result = OSRSetFromUserInput(m_in_ref_ptr.get(), m_inSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
     if (result != OGRERR_NONE) 
     {
         std::ostringstream msg; 
@@ -150,7 +150,7 @@ void ReprojectionFilter::initialize()
         throw std::runtime_error(msg.str());
     }
     
-    result = OSRSetFromUserInput(m_out_ref_ptr.get(), m_outSRS.getWKT(libpc::SpatialReference::eCompoundOK).c_str());
+    result = OSRSetFromUserInput(m_out_ref_ptr.get(), m_outSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
     if (result != OGRERR_NONE) 
     {
         std::ostringstream msg; 
@@ -227,7 +227,7 @@ void ReprojectionFilter::processBuffer(PointBuffer& data) const
 }
 
 
-libpc::SequentialIterator* ReprojectionFilter::createSequentialIterator() const
+pdal::SequentialIterator* ReprojectionFilter::createSequentialIterator() const
 {
     return new ReprojectionFilterSequentialIterator(*this);
 }

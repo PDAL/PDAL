@@ -22,7 +22,7 @@
 #ifndef INCLUDED_LIBPC_POINTBUFFERCACHE_HPP
 #define INCLUDED_LIBPC_POINTBUFFERCACHE_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 
 #ifdef LIBPC_COMPILER_MSVC
@@ -37,10 +37,10 @@
 #  pragma warning(pop)
 #endif
 
-#include <libpc/PointBuffer.hpp>
+#include <pdal/PointBuffer.hpp>
 
 
-namespace libpc
+namespace pdal
 {
 
 

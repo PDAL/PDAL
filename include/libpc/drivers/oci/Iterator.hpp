@@ -35,16 +35,16 @@
 #ifndef INCLUDED_DRIVERS_OCI_ITERATOR_HPP
 #define INCLUDED_DRIVERS_OCI_ITERATOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Iterator.hpp>
+#include <pdal/Iterator.hpp>
 
-#include <libpc/drivers/oci/Common.hpp>
-#include <libpc/drivers/oci/Reader.hpp>
+#include <pdal/drivers/oci/Common.hpp>
+#include <pdal/drivers/oci/Reader.hpp>
 
 #include <string>
 
-namespace libpc { namespace drivers { namespace oci {
+namespace pdal { namespace drivers { namespace oci {
 
 
 class IteratorBase
@@ -77,7 +77,7 @@ private:
 };
 
 
-class SequentialIterator : public IteratorBase, public libpc::SequentialIterator
+class SequentialIterator : public IteratorBase, public pdal::SequentialIterator
 {
 public:
     SequentialIterator(const Reader& reader);

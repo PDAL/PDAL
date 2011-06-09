@@ -42,14 +42,14 @@
 #ifndef LIBPC_SCHEMA_HPP_INCLUDED
 #define LIBPC_SCHEMA_HPP_INCLUDED
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <vector>
 
-#include <libpc/Dimension.hpp>
+#include <pdal/Dimension.hpp>
 
 
-namespace libpc
+namespace pdal
 {
 
 

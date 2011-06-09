@@ -44,12 +44,12 @@
 
 #include "ZipPoint.hpp"
 
-#include <libpc/drivers/las/Header.hpp>
+#include <pdal/drivers/las/Header.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/scoped_ptr.hpp>
 
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 
 LasHeaderWriter::LasHeaderWriter(LasHeader& header, std::ostream& ostream)

@@ -39,12 +39,12 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/Dimension.hpp>
+#include <pdal/Dimension.hpp>
 
-#include <libpc/exceptions.hpp>
-#include <libpc/Utils.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/Utils.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 std::string Dimension::s_fieldNames[Field_LAST];
@@ -54,7 +54,7 @@ bool Dimension::s_fieldNamesValid = false;
 Dimension::Dimension(Field field, DataType dataType)
     : m_dataType(dataType)
     , m_field(field)
-    , m_endian(libpc::Endian_Little)
+    , m_endian(pdal::Endian_Little)
     , m_byteSize(0)
     , m_description(std::string(""))
     , m_min(0.0)
@@ -166,7 +166,7 @@ boost::property_tree::ptree Dimension::GetPTree() const
 }
 
 
-std::ostream& operator<<(std::ostream& os, libpc::Dimension const& d)
+std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
 {
     using boost::property_tree::ptree;
     ptree tree = d.GetPTree();
@@ -375,12 +375,12 @@ std::string const& Dimension::getFieldName(Field field)
         initFieldNames();
 
     if (field > Field_LAST)
-        throw libpc_error("invalid field value (too large)");
+        throw pdal_error("invalid field value (too large)");
 
     const std::string& s =  s_fieldNames[field];
     if (s.empty())
     {
-        throw libpc_error("Field name not set for built-in field value");
+        throw pdal_error("Field name not set for built-in field value");
     }        
 
     return s;
@@ -426,4 +426,4 @@ void Dimension::initFieldNames()
 }
 
 
-} // namespace libpc
+} // namespace pdal

@@ -32,14 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/las/VariableLengthRecord.hpp>
+#include <pdal/drivers/las/VariableLengthRecord.hpp>
 
-#include <libpc/SpatialReference.hpp>
+#include <pdal/SpatialReference.hpp>
 #include "GeotiffSupport.hpp"
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 static const std::string s_geotiffUserId = "LASF_Projection";
 static const boost::uint16_t s_geotiffRecordId_directory = 34735;

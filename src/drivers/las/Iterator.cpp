@@ -32,19 +32,19 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/las/Iterator.hpp>
+#include <pdal/drivers/las/Iterator.hpp>
 
 #include <iostream>
 
 #include "ZipPoint.hpp"
 #include <laszip/lasunzipper.hpp>
 
-#include <libpc/drivers/las/Reader.hpp>
-#include <libpc/exceptions.hpp>
-#include <libpc/Utils.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/Utils.hpp>
+#include <pdal/PointBuffer.hpp>
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 
 IteratorBase::IteratorBase(const LasReader& reader)
@@ -83,7 +83,7 @@ void IteratorBase::initializeZip()
     }
     catch(...)
     {
-        throw libpc_error("Failed to open laszip compression core (1)"); 
+        throw pdal_error("Failed to open laszip compression core (1)"); 
     }
 
     PointFormat format = m_reader.getPointFormat();
@@ -97,11 +97,11 @@ void IteratorBase::initializeZip()
     }
     catch(...)
     {
-        throw libpc_error("Error opening compression core (3)");
+        throw pdal_error("Error opening compression core (3)");
     }
     if (!ok)
     {
-        throw libpc_error("Error opening compression core (2)");
+        throw pdal_error("Error opening compression core (2)");
     }
 
     try
@@ -111,11 +111,11 @@ void IteratorBase::initializeZip()
     }
     catch(...)
     {
-        throw libpc_error("Failed to open laszip compression core (2)"); 
+        throw pdal_error("Failed to open laszip compression core (2)"); 
     }
     if (!ok)
     {
-        throw libpc_error("Failed to open laszip compression core (3)"); 
+        throw pdal_error("Failed to open laszip compression core (3)"); 
     }
 
     if (!m_unzipper)
@@ -126,7 +126,7 @@ void IteratorBase::initializeZip()
         }
         catch(...)
         {
-            throw libpc_error("Failed to open laszip decompression engine (1)"); 
+            throw pdal_error("Failed to open laszip decompression engine (1)"); 
         }
 
         unsigned int stat = 1;
@@ -137,11 +137,11 @@ void IteratorBase::initializeZip()
         }
         catch(...)
         {
-            throw libpc_error("Failed to open laszip decompression engine (2)"); 
+            throw pdal_error("Failed to open laszip decompression engine (2)"); 
         }
         if (stat != 0)
         {
-            throw libpc_error("Failed to open laszip decompression engine (3)"); 
+            throw pdal_error("Failed to open laszip decompression engine (3)"); 
         }
     }
 
@@ -151,7 +151,7 @@ void IteratorBase::initializeZip()
 
 SequentialIterator::SequentialIterator(const LasReader& reader)
     : IteratorBase(reader)
-    , libpc::SequentialIterator(reader)
+    , pdal::SequentialIterator(reader)
 {
     return;
 }
@@ -193,7 +193,7 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 
 RandomIterator::RandomIterator(const LasReader& reader)
     : IteratorBase(reader)
-    , libpc::RandomIterator(reader)
+    , pdal::RandomIterator(reader)
 {
     return;
 }

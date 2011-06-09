@@ -32,14 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/ChipperIterator.hpp>
+#include <pdal/filters/ChipperIterator.hpp>
 
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 ChipperSequentialIterator::ChipperSequentialIterator(Chipper const& filter)
-    : libpc::FilterSequentialIterator(filter)
+    : pdal::FilterSequentialIterator(filter)
     , m_chipper(filter)
     , m_currentBlockId(0)
     , m_currentPointCount(0)
@@ -70,7 +70,7 @@ boost::uint32_t ChipperSequentialIterator::readImpl(PointBuffer& buffer)
     if (buffer.getCapacity() < numPointsThisBlock)
     {
         // FIXME: Expand the buffer?
-        throw libpc_error("Buffer not large enough to hold block!");
+        throw pdal_error("Buffer not large enough to hold block!");
     }
     block.GetBuffer(m_chipper.getPrevStage(), buffer, m_currentBlockId);
 

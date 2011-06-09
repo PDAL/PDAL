@@ -32,9 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/PointBuffer.hpp>
+#include <pdal/PointBuffer.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 
@@ -201,4 +201,4 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& PointBuffer)
 }
 
 
-} // namespace libpc
+} // namespace pdal

@@ -32,7 +32,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/SpatialReference.hpp>
+#include <pdal/SpatialReference.hpp>
 
 // gdal
 #ifdef LIBPC_HAVE_GDAL
@@ -40,9 +40,9 @@
 #include <cpl_conv.h>
 #endif
 
-#include <libpc/Utils.hpp>
+#include <pdal/Utils.hpp>
 
-namespace libpc
+namespace pdal
 {
    
 SpatialReference::SpatialReference()
@@ -269,4 +269,4 @@ std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 }
 
 
-} // namespace libpc
+} // namespace pdal

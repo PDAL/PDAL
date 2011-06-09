@@ -35,7 +35,7 @@
 #ifndef INCLUDED_DRIVERS_LAS_GEOTIFFSUPPORT_HPP
 #define INCLUDED_DRIVERS_LAS_GEOTIFFSUPPORT_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #ifdef LIBPC_HAVE_LIBGEOTIFF
 #include <geo_simpletags.h>
@@ -45,7 +45,7 @@
 #include <string>
 #include <stdexcept>
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
     
 
 class LIBPC_DLL GeotiffSupport

@@ -42,13 +42,13 @@
 #ifndef LIBPC_SCHEMALAYOUT_HPP_INCLUDED
 #define LIBPC_SCHEMALAYOUT_HPP_INCLUDED
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Schema.hpp>
-#include <libpc/DimensionLayout.hpp>
+#include <pdal/Schema.hpp>
+#include <pdal/DimensionLayout.hpp>
 
 
-namespace libpc
+namespace pdal
 {
 
 

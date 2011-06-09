@@ -32,17 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/ByteSwapFilterIterator.hpp>
+#include <pdal/filters/ByteSwapFilterIterator.hpp>
 
-#include <libpc/filters/ByteSwapFilter.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/filters/Chipper.hpp>
+#include <pdal/filters/ByteSwapFilter.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/filters/Chipper.hpp>
 #include <iostream>
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 ByteSwapFilterSequentialIterator::ByteSwapFilterSequentialIterator(const ByteSwapFilter& filter)
-    : libpc::FilterSequentialIterator(filter)
+    : pdal::FilterSequentialIterator(filter)
     , m_swapFilter(filter)
 {
     return;

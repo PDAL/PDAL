@@ -37,14 +37,14 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/liblas/Writer.hpp>
-#include <libpc/drivers/liblas/Reader.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/drivers/liblas/Writer.hpp>
+#include <pdal/drivers/liblas/Reader.hpp>
 
 #include "Support.hpp"
 
-using namespace libpc;
-using namespace libpc::drivers::liblas;
+using namespace pdal;
+using namespace pdal::drivers::liblas;
 
 
 BOOST_AUTO_TEST_SUITE(LiblasWriterTest)
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
 
         writer.setCompressed(false);
         writer.setDate(0, 0);
-        writer.setPointFormat(::libpc::drivers::las::PointFormat3);
+        writer.setPointFormat(::pdal::drivers::las::PointFormat3);
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
 
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
 
         writer.setCompressed(true);
         writer.setDate(0, 0);
-        writer.setPointFormat(::libpc::drivers::las::PointFormat3);
+        writer.setPointFormat(::pdal::drivers::las::PointFormat3);
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
 
@@ -143,7 +143,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
 
         writer.setCompressed(false);
         writer.setDate(78, 2008);
-        writer.setPointFormat((::libpc::drivers::las::PointFormat)pointFormat);
+        writer.setPointFormat((::pdal::drivers::las::PointFormat)pointFormat);
         writer.setFormatVersion(majorVersion, minorVersion);
         writer.setSystemIdentifier("libLAS");
         writer.setGeneratingSoftware("libLAS 1.2");

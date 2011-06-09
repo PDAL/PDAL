@@ -36,13 +36,13 @@
 #define INCLUDED_DRIVERS_LAS_ZIPPOINT_HPP
 
 
-#include <libpc/drivers/las/Support.hpp>
+#include <pdal/drivers/las/Support.hpp>
 
 // liblaszip
 class LASzipper;
 class LASitem;
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 class VariableLengthRecord;
 

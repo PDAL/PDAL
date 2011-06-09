@@ -32,14 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/ByteSwapFilter.hpp>
+#include <pdal/filters/ByteSwapFilter.hpp>
 
-#include <libpc/filters/ByteSwapFilterIterator.hpp>
-#include <libpc/Schema.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/Endian.hpp>
+#include <pdal/filters/ByteSwapFilterIterator.hpp>
+#include <pdal/Schema.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/Endian.hpp>
 #include <iostream>
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
@@ -70,7 +70,7 @@ boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointB
     SchemaLayout& dstSchemaLayout = dstData.getSchemaLayout();
     Schema & dstSchema = dstSchemaLayout.getSchema();
     
-    libpc::Schema::Dimensions const& dstDims = dstSchema.getDimensions();
+    pdal::Schema::Dimensions const& dstDims = dstSchema.getDimensions();
 
     dstData.setSpatialBounds(srcData.getSpatialBounds());
     dstData.copyPointsFast(0, 0, srcData, srcData.getNumPoints());
@@ -143,7 +143,7 @@ boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointB
 }
 
 
-libpc::SequentialIterator* ByteSwapFilter::createSequentialIterator() const
+pdal::SequentialIterator* ByteSwapFilter::createSequentialIterator() const
 {
     return new ByteSwapFilterSequentialIterator(*this);
 }

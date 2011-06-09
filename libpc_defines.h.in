@@ -1,7 +1,7 @@
 /* 
- * libpc_defines.h.in is used by cmake to generate libpc_defines.h
+ * pdal_defines.h.in is used by cmake to generate pdal_defines.h
  *
- * Do not edit libpc_defines.h!
+ * Do not edit pdal_defines.h!
  *
  * Note this is a C-style header.  Do not use C++ syntax.
  */

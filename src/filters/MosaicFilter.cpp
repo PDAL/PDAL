@@ -32,13 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/MosaicFilter.hpp>
+#include <pdal/filters/MosaicFilter.hpp>
 
-#include <libpc/exceptions.hpp>
-#include <libpc/Bounds.hpp>
-#include <libpc/filters/MosaicFilterIterator.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/Bounds.hpp>
+#include <pdal/filters/MosaicFilterIterator.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
@@ -46,14 +46,14 @@ MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
 {
     if (prevStages.size() == 0)
     {
-        throw libpc_error("empty stage list passed to mosaic filter");
+        throw pdal_error("empty stage list passed to mosaic filter");
     }
 
     for (size_t i=0; i<prevStages.size(); i++)
     {
         if (prevStages[i] == NULL)
         {
-            throw libpc_error("null stage passed to mosaic filter");
+            throw pdal_error("null stage passed to mosaic filter");
         }
         m_prevStages.push_back(prevStages[i]);
     }
@@ -73,11 +73,11 @@ MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
         const Stage* stage = prevStages[i];
         if (stage==NULL)
         {
-            throw libpc_error("bad stage passed to MosaicFilter");
+            throw pdal_error("bad stage passed to MosaicFilter");
         }
         if (prevStage.getSchema() != this->getSchema())
         {
-            throw libpc_error("impedance mismatch in MosaicFilter");
+            throw pdal_error("impedance mismatch in MosaicFilter");
         }
 
         bigbox.grow(this->getBounds());
@@ -110,7 +110,7 @@ const std::vector<const Stage*>& MosaicFilter::getPrevStages() const
 }
 
 
-libpc::SequentialIterator* MosaicFilter::createSequentialIterator() const
+pdal::SequentialIterator* MosaicFilter::createSequentialIterator() const
 {
     return new MosaicFilterSequentialIterator(*this);
 }

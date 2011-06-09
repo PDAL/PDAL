@@ -44,11 +44,11 @@
 #ifndef INCLUDED_LIBPC_CONFIG_HPP
 #define INCLUDED_LIBPC_CONFIG_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <string>
 
-namespace libpc
+namespace pdal
 {
 
 LIBPC_DLL bool IsLibLASEnabled();
@@ -63,6 +63,6 @@ LIBPC_DLL int GetVersionMajor();
 LIBPC_DLL int GetVersionMinor();
 LIBPC_DLL int GetVersionPatch();
 
-} // namespace libpc
+} // namespace pdal
 
 #endif

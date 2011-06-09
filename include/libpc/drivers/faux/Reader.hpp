@@ -35,18 +35,18 @@
 #ifndef INCLUDED_DRIVERS_FAUX_READER_HPP
 #define INCLUDED_DRIVERS_FAUX_READER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Stage.hpp>
-#include <libpc/Bounds.hpp>
-#include <libpc/Dimension.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/Bounds.hpp>
+#include <pdal/Dimension.hpp>
 
-namespace libpc
+namespace pdal
 {
     class PointBuffer;
 }
 
-namespace libpc { namespace drivers { namespace faux {
+namespace pdal { namespace drivers { namespace faux {
 
 
 // The FauxReader doesn't read from disk, but instead just makes up data for its
@@ -63,7 +63,7 @@ namespace libpc { namespace drivers { namespace faux {
 //   - "ramp" generates its points as a linear ramp from the minimum of the bbox to the maximum
 // In all these modes, however, the Time field is always set to the point number.
 //
-class LIBPC_DLL Reader : public libpc::Stage
+class LIBPC_DLL Reader : public pdal::Stage
 {
 public:
     enum Mode
@@ -90,8 +90,8 @@ public:
         return false;
     }
 
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const;
+    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::RandomIterator* createRandomIterator() const;
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;

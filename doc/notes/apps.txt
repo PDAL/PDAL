@@ -1,11 +1,11 @@
 .. _apps:
 
 =========================
-libPC Project Notes: Apps
+PDAL Project Notes: Apps
 =========================
 
-libPC will contain a number of command line applications that are built on
-top of the libPC libraries.  This Note lists those apps.
+PDAL will contain a number of command line applications that are built on
+top of the PDAL libraries.  This Note lists those apps.
 
 This should be fleshed out to list the (major) options for each of the apps.
 

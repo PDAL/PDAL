@@ -35,17 +35,17 @@
 #ifndef INCLUDED_DRIVERS_LAS_WRITER_HPP
 #define INCLUDED_DRIVERS_LAS_WRITER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Writer.hpp>
-#include <libpc/drivers/las/Header.hpp>
-#include <libpc/drivers/las/SummaryData.hpp>
+#include <pdal/Writer.hpp>
+#include <pdal/drivers/las/Header.hpp>
+#include <pdal/drivers/las/SummaryData.hpp>
 
 // liblaszip
 class LASzip;
 class LASzipper;
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 class ZipPoint;
 
@@ -64,10 +64,10 @@ public:
     
     void setProjectId(const boost::uuids::uuid&);
 
-    // up to 32 chars (default is "libPC")
+    // up to 32 chars (default is "PDAL")
     void setSystemIdentifier(const std::string& systemId); 
     
-    // up to 32 chars (default is "libPC x.y.z")
+    // up to 32 chars (default is "PDAL x.y.z")
     void setGeneratingSoftware(const std::string& softwareId);
 
     // default false

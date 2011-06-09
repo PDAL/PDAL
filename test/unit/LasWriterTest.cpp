@@ -38,13 +38,13 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/concept_check.hpp>
 
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/las/Writer.hpp>
-#include <libpc/drivers/las/Reader.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/drivers/las/Writer.hpp>
+#include <pdal/drivers/las/Reader.hpp>
 
 #include "Support.hpp"
 
-using namespace libpc;
+using namespace pdal;
 
 
 BOOST_AUTO_TEST_SUITE(LasWriterTest)
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     
     std::ostream* ofs = Utils::createFile("temp.las");
 
@@ -62,12 +62,12 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        libpc::drivers::las::LasWriter writer(reader, *ofs);
+        pdal::drivers::las::LasWriter writer(reader, *ofs);
         BOOST_CHECK(writer.getDescription() == "Las Writer");
 
         writer.setCompressed(false);
         writer.setDate(0, 0);
-        writer.setPointFormat(::libpc::drivers::las::PointFormat3);
+        writer.setPointFormat(::pdal::drivers::las::PointFormat3);
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
 
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.laz");
 
-    libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     
     std::ostream* ofs = Utils::createFile("temp.laz");
 
@@ -101,11 +101,11 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        libpc::drivers::las::LasWriter writer(reader, *ofs);
+        pdal::drivers::las::LasWriter writer(reader, *ofs);
 
         writer.setCompressed(true);
         writer.setDate(0, 0);
-        writer.setPointFormat(::libpc::drivers::las::PointFormat3);
+        writer.setPointFormat(::pdal::drivers::las::PointFormat3);
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
 
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     Utils::closeFile(ofs);
 
     {
-        libpc::drivers::las::LasReader reader("temp.laz");
+        pdal::drivers::las::LasReader reader("temp.laz");
     }
 
     bool filesSame = Support::compare_files("temp.laz", Support::datapath("1.2-with-color.laz"));
@@ -135,7 +135,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    libpc::drivers::las::LasReader reader(Support::datapath("1.2_3.las"));
+    pdal::drivers::las::LasReader reader(Support::datapath("1.2_3.las"));
     
     std::ostream* ofs = Utils::createFile("temp.las");
 
@@ -143,12 +143,12 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        libpc::drivers::las::LasWriter writer(reader, *ofs);
+        pdal::drivers::las::LasWriter writer(reader, *ofs);
         BOOST_CHECK(writer.getDescription() == "Las Writer");
 
         writer.setCompressed(false);
         writer.setDate(78, 2008);
-        writer.setPointFormat((::libpc::drivers::las::PointFormat)pointFormat);
+        writer.setPointFormat((::pdal::drivers::las::PointFormat)pointFormat);
         writer.setFormatVersion(majorVersion, minorVersion);
         writer.setSystemIdentifier("libLAS");
         writer.setGeneratingSoftware("libLAS 1.2");

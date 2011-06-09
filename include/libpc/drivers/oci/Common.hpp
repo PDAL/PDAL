@@ -35,12 +35,12 @@
 #ifndef INCLUDED_DRIVER_OCI_COMMON_HPP
 #define INCLUDED_DRIVER_OCI_COMMON_HPP
 
-#include <libpc/libpc.hpp>
-#include <libpc/exceptions.hpp>
-#include <libpc/Options.hpp>
+#include <pdal/pdal.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/Options.hpp>
 
 #include "oci_wrapper.h"
-#include <libpc/Endian.hpp>
+#include <pdal/Endian.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -56,7 +56,7 @@ void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *m
 void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
 
 
-namespace libpc { namespace drivers { namespace oci {
+namespace pdal { namespace drivers { namespace oci {
 
 typedef boost::shared_ptr<OWConnection> Connection ;
 typedef boost::shared_ptr<OWStatement> Statement ;
@@ -64,19 +64,19 @@ typedef boost::shared_ptr<OWStatement> Statement ;
 
 extern Options LIBPC_DLL GetDefaultOptions();
 
-class connection_failed : public libpc_error
+class connection_failed : public pdal_error
 {
 public:
     connection_failed(std::string const& msg)
-        : libpc_error(msg)
+        : pdal_error(msg)
     {}
 };
 
-class buffer_too_small : public libpc_error
+class buffer_too_small : public pdal_error
 {
 public:
     buffer_too_small(std::string const& msg)
-        : libpc_error(msg)
+        : pdal_error(msg)
     {}
 };
 
@@ -171,14 +171,14 @@ private:
 typedef boost::shared_ptr<Block> BlockPtr;
 
 
-LIBPC_DLL Connection Connect(libpc::Options const& options);
+LIBPC_DLL Connection Connect(pdal::Options const& options);
 
 std::string to_upper(std::string const& input);
 
 
 
 
-}}} // namespace libpc::driver::oci
+}}} // namespace pdal::driver::oci
 
 
 #endif

@@ -32,17 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/liblas/Iterator.hpp>
+#include <pdal/drivers/liblas/Iterator.hpp>
 
 #include <liblas/factory.hpp>
 
-#include <libpc/exceptions.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/Utils.hpp>
-#include <libpc/drivers/liblas/Reader.hpp>
-#include <libpc/drivers/las/Support.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/Utils.hpp>
+#include <pdal/drivers/liblas/Reader.hpp>
+#include <pdal/drivers/las/Support.hpp>
 
-namespace libpc { namespace drivers { namespace liblas {
+namespace pdal { namespace drivers { namespace liblas {
 
 
 //---------------------------------------------------------------------------
@@ -94,15 +94,15 @@ boost::uint32_t LiblasIteratorBase::readBuffer(PointBuffer& data)
 
     const Schema& schema = data.getSchema();
 
-    ::libpc::drivers::las::PointFormat pointFormat = m_reader.getPointFormat();
-    ::libpc::drivers::las::PointIndexes indexes(schema, pointFormat);
+    ::pdal::drivers::las::PointFormat pointFormat = m_reader.getPointFormat();
+    ::pdal::drivers::las::PointIndexes indexes(schema, pointFormat);
 
     for (i=0; i<numPoints; i++)
     {
         bool ok = getExternalReader().ReadNextPoint();
         if (!ok)
         {
-            throw libpc_error("liblas reader failed to retrieve point");
+            throw pdal_error("liblas reader failed to retrieve point");
         }
 
         const ::liblas::Point& pt = getExternalReader().GetPoint();
@@ -135,14 +135,14 @@ boost::uint32_t LiblasIteratorBase::readBuffer(PointBuffer& data)
         data.setField(i, indexes.UserData, userData);
         data.setField(i, indexes.PointSourceId, pointSourceId);
 
-        if (libpc::drivers::las::Support::hasTime(pointFormat))
+        if (pdal::drivers::las::Support::hasTime(pointFormat))
         {
             const double time = pt.GetTime();
             
             data.setField(i, indexes.Time, time);
         }
 
-        if (libpc::drivers::las::Support::hasColor(pointFormat))
+        if (pdal::drivers::las::Support::hasColor(pointFormat))
         {
             const ::liblas::Color color = pt.GetColor();
             const boost::uint16_t red = color.GetRed();
@@ -155,7 +155,7 @@ boost::uint32_t LiblasIteratorBase::readBuffer(PointBuffer& data)
         }
         
         data.setNumPoints(i+1);
-        if (libpc::drivers::las::Support::hasWave(pointFormat))
+        if (pdal::drivers::las::Support::hasWave(pointFormat))
         {
             throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
         }
@@ -174,7 +174,7 @@ boost::uint32_t LiblasIteratorBase::readBuffer(PointBuffer& data)
 
 SequentialIterator::SequentialIterator(const LiblasReader& reader)
     : LiblasIteratorBase(reader)
-    , libpc::SequentialIterator(reader)
+    , pdal::SequentialIterator(reader)
 {
     return;
 }
@@ -195,7 +195,7 @@ boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 
     if (newPos64 > std::numeric_limits<size_t>::max())
     {
-        throw libpc_error("cannot support seek offsets greater than 32-bits");
+        throw pdal_error("cannot support seek offsets greater than 32-bits");
     }
 
     // safe cast, since we just handled the overflow case
@@ -228,7 +228,7 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 
 RandomIterator::RandomIterator(const LiblasReader& reader)
     : LiblasIteratorBase(reader)
-    , libpc::RandomIterator(reader)
+    , pdal::RandomIterator(reader)
 {
     return;
 }
@@ -247,7 +247,7 @@ boost::uint64_t RandomIterator::seekImpl(boost::uint64_t newPos64)
 
     if (newPos64 > std::numeric_limits<size_t>::max())
     {
-        throw libpc_error("cannot support seek offsets greater than 32-bits");
+        throw pdal_error("cannot support seek offsets greater than 32-bits");
     }
 
     // safe cast, since we just handled the overflow case

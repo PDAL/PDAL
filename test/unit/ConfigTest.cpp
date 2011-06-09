@@ -35,10 +35,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/libpc.hpp>
-#include <libpc/libpc_config.hpp>
+#include <pdal/pdal.hpp>
+#include <pdal/pdal_config.hpp>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(ConfigTest)
 

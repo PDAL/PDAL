@@ -39,9 +39,9 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/Color.hpp>
+#include <pdal/Color.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 Color::Color()

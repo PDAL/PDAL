@@ -35,11 +35,11 @@
 #ifndef INCLUDED_DRIVERS_LIBLAS_LIBLASWRITER_HPP
 #define INCLUDED_DRIVERS_LIBLAS_LIBLASWRITER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Writer.hpp>
-#include <libpc/drivers/las/Support.hpp>
-#include <libpc/drivers/las/SummaryData.hpp>
+#include <pdal/Writer.hpp>
+#include <pdal/drivers/las/Support.hpp>
+#include <pdal/drivers/las/SummaryData.hpp>
 
 #include <liblas/liblas.hpp>
 #include <liblas/guid.hpp>
@@ -47,7 +47,7 @@
 #include <boost/uuid/uuid.hpp>
 
 
-namespace libpc { namespace drivers { namespace liblas {
+namespace pdal { namespace drivers { namespace liblas {
 
 // we default to LAS 1.2, point format 0
 class LIBPC_DLL LiblasWriter : public Writer
@@ -60,15 +60,15 @@ public:
     const std::string& getName() const;
 
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
-    void setPointFormat(::libpc::drivers::las::PointFormat);
+    void setPointFormat(::pdal::drivers::las::PointFormat);
     void setDate(boost::uint16_t dayOfYear, boost::uint16_t year);
     
     void setProjectId(const boost::uuids::uuid&);
 
-    // up to 32 chars (default is "libPC")
+    // up to 32 chars (default is "PDAL")
     void setSystemIdentifier(const std::string& systemId); 
     
-    // up to 32 chars (default is "libPC x.y.z")
+    // up to 32 chars (default is "PDAL x.y.z")
     void setGeneratingSoftware(const std::string& softwareId);
 
     // default false
@@ -91,7 +91,7 @@ private:
     ::liblas::Writer* m_externalWriter;
     ::liblas::HeaderPtr m_externalHeader;
 
-    ::libpc::drivers::las::SummaryData m_summaryData;
+    ::pdal::drivers::las::SummaryData m_summaryData;
 
     LiblasWriter& operator=(const LiblasWriter&); // not implemented
     LiblasWriter(const LiblasWriter&); // not implemented

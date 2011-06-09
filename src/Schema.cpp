@@ -39,17 +39,17 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/Schema.hpp>
+#include <pdal/Schema.hpp>
 
 #include <iostream>
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
 #ifdef LIBPC_HAVE_LIBXML2
-#include <libpc/XMLSchema.hpp>
+#include <pdal/XMLSchema.hpp>
 #endif
 
-namespace libpc
+namespace pdal
 {
 
 
@@ -190,7 +190,7 @@ int Schema::getDimensionIndex(Dimension::Field field, Dimension::DataType dataty
     if (index == -1)
     {
         return -1;
-        // throw libpc_error("Requested dimension field not present");
+        // throw pdal_error("Requested dimension field not present");
     }
     
     const Dimension& dim = m_dimensions[index];
@@ -279,9 +279,9 @@ Schema Schema::from_xml(std::string const& xml, std::string const& xsd)
 {
 #ifdef LIBPC_HAVE_LIBXML2
 
-    libpc::schema::Reader reader(xml, xsd);
+    pdal::schema::Reader reader(xml, xsd);
     
-    libpc::Schema schema = reader.getSchema();
+    pdal::Schema schema = reader.getSchema();
     return schema;
 
 #endif
@@ -293,9 +293,9 @@ Schema Schema::from_xml(std::string const& xml)
     
     std::string xsd("");
     
-    libpc::schema::Reader reader(xml, xsd);
+    pdal::schema::Reader reader(xml, xsd);
     
-    libpc::Schema schema = reader.getSchema();
+    pdal::Schema schema = reader.getSchema();
     return schema;
 
 #endif
@@ -305,11 +305,11 @@ std::string Schema::to_xml(Schema const& schema)
 {
 #ifdef LIBPC_HAVE_LIBXML2
 
-    libpc::schema::Writer writer(schema);
+    pdal::schema::Writer writer(schema);
     
     return writer.getXML();
 
 #endif
 }
 
-} // namespace libpc
+} // namespace pdal

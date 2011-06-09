@@ -32,15 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/faux/Iterator.hpp>
+#include <pdal/drivers/faux/Iterator.hpp>
 
-#include <libpc/drivers/faux/Reader.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
 
 
-namespace libpc { namespace drivers { namespace faux {
+namespace pdal { namespace drivers { namespace faux {
 
 SequentialIterator::SequentialIterator(const Reader& reader)
-    : libpc::SequentialIterator(reader)
+    : pdal::SequentialIterator(reader)
     , m_reader(reader)
 {
     return;
@@ -70,7 +70,7 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 
 
 RandomIterator::RandomIterator(const Reader& reader)
-    : libpc::RandomIterator(reader)
+    : pdal::RandomIterator(reader)
     , m_reader(reader)
 {
     return;

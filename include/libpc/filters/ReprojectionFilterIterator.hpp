@@ -35,15 +35,15 @@
 #ifndef INCLUDED_FILTERS_REPROJECTIONFILTERITERATOR_HPP
 #define INCLUDED_FILTERS_REPROJECTIONFILTERITERATOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/filters/ReprojectionFilter.hpp>
-#include <libpc/FilterIterator.hpp>
+#include <pdal/filters/ReprojectionFilter.hpp>
+#include <pdal/FilterIterator.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
-class ReprojectionFilterSequentialIterator : public libpc::FilterSequentialIterator
+class ReprojectionFilterSequentialIterator : public pdal::FilterSequentialIterator
 {
 public:
     ReprojectionFilterSequentialIterator(const ReprojectionFilter& filter);

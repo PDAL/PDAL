@@ -35,15 +35,15 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/Iterator.hpp>
-#include <libpc/Schema.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/faux/Writer.hpp>
-#include <libpc/filters/DecimationFilter.hpp>
+#include <pdal/Iterator.hpp>
+#include <pdal/Schema.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/drivers/faux/Writer.hpp>
+#include <pdal/filters/DecimationFilter.hpp>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(DecimationFilterTest)
 
@@ -51,9 +51,9 @@ BOOST_AUTO_TEST_CASE(test)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
 
-    libpc::drivers::faux::Reader reader(srcBounds, 1000, libpc::drivers::faux::Reader::Random);
+    pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Random);
 
-    libpc::filters::DecimationFilter filter(reader, 10);
+    pdal::filters::DecimationFilter filter(reader, 10);
     BOOST_CHECK(filter.getDescription() == "Decimation Filter");
 
     const Schema& schema = filter.getSchema();

@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# src/CMakeLists.txt controls building of libPC library
+# src/CMakeLists.txt controls building of PDAL library
 #
 # Copyright (c) 2009 Mateusz Loskot <mateusz@loskot.net>
 #
@@ -24,7 +24,7 @@ endif()
 #   LIBPC_<dirname>_CPP - all the .cpp files for the given subdir/namespace
 #   ...
 
-set(LIBPC_HEADERS_DIR ../include/libpc)
+set(LIBPC_HEADERS_DIR ../include/pdal)
 set(LIBPC_HPP "")
 set(LIBPC_CPP "")
 
@@ -330,13 +330,13 @@ ENDFOREACH(file)
 
 set(LIBPC_CONFIG_HPP
   ${LIBPC_HEADERS_DIR}/export.hpp
-  ${LIBPC_HEADERS_DIR}/libpc.hpp
-  ${LIBPC_HEADERS_DIR}/libpc_config.hpp
-  ${LIBPC_HEADERS_DIR}/libpc_defines.h
+  ${LIBPC_HEADERS_DIR}/pdal.hpp
+  ${LIBPC_HEADERS_DIR}/pdal_config.hpp
+  ${LIBPC_HEADERS_DIR}/pdal_defines.h
 )
 
 set (LIBPC_CONFIG_CPP 
-  ./libpc_config.cpp
+  ./pdal_config.cpp
 )
 
 FOREACH(file ${LIBPC_CONFIG_HPP})
@@ -381,7 +381,7 @@ if(GDAL_FOUND)
     source_group("Source Files\\gdal" FILES ${LIBPC_GDAL_CPP})
 endif()
 
-# Standard include directory of libPC library
+# Standard include directory of PDAL library
 include_directories(../include)
 
 set (APPS_CPP_DEPENDENCIES "${LIBPC_LIB_NAME}" CACHE INTERNAL "libraries to link")

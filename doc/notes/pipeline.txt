@@ -1,10 +1,10 @@
 .. _pipeline:
 
 =============================
-libPC Project Notes: Pipeline
+PDAL Project Notes: Pipeline
 =============================
 
-A common design pattern for projects like libPC is to provide a set of base
+A common design pattern for projects like PDAL is to provide a set of base
 classes which, when connected together, form a processing chain -- that is,
 a pipeline.
 
@@ -122,10 +122,10 @@ not then a runtime error ("impedance mismatch!") would be returned at
 runtime.
 
 
-Questions for libPC
+Questions for PDAL
 ===================
 
-How should we handle the buffering issue in libPC for Points?
+How should we handle the buffering issue in PDAL for Points?
 
 Should we use a very static buffering strategy like the above, or something different?
 

@@ -35,21 +35,21 @@
 #ifndef INCLUDED_LIBPC_DRIVER_OCI_READER_HPP
 #define INCLUDED_LIBPC_DRIVER_OCI_READER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Stage.hpp>
-#include <libpc/drivers/oci/Common.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/drivers/oci/Common.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
 #include <vector>
 
-namespace libpc { namespace drivers { namespace oci {
+namespace pdal { namespace drivers { namespace oci {
 
 
 
-class LIBPC_DLL Reader : public libpc::Stage
+class LIBPC_DLL Reader : public pdal::Stage
 {
 
 public:
@@ -67,7 +67,7 @@ public:
 
     boost::uint64_t getNumPoints() { return 0; }
     
-    libpc::SequentialIterator* createSequentialIterator() const;
+    pdal::SequentialIterator* createSequentialIterator() const;
     
     Connection getConnection () const { return m_connection;}
     Statement getStatement () const { return m_statement;}
@@ -101,7 +101,7 @@ private:
 
 };
 
-}}} // namespace libpc::driver::oci
+}}} // namespace pdal::driver::oci
 
 
 #endif // INCLUDED_LIBPC_DRIVER_OCI_READER_HPP

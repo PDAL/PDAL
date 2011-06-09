@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# libPC documentation build configuration file, created by
+# PDAL documentation build configuration file, created by
 # sphinx-quickstart on Tue Mar 15 15:22:19 2011.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ source_suffix = '.txt'
 master_doc = 'index'
 
 # General information about the project.
-project = u'libPC'
+project = u'PDAL'
 copyright = u'2011, Howard Butler'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -164,7 +164,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'libPCdoc'
+htmlhelp_basename = 'PDALdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -178,7 +178,7 @@ htmlhelp_basename = 'libPCdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'libPC.tex', u'libPC Documentation',
+  ('index', 'PDAL.tex', u'PDAL Documentation',
    u'Howard Butler', 'manual'),
 ]
 
@@ -211,7 +211,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'libpc', u'libPC Documentation',
+    ('index', 'pdal', u'PDAL Documentation',
      [u'Howard Butler'], 1)
 ]
 
@@ -219,7 +219,7 @@ man_pages = [
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'libPC'
+epub_title = u'PDAL'
 epub_author = u'Howard Butler'
 epub_publisher = u'Howard Butler'
 epub_copyright = u'2011, Howard Butler'

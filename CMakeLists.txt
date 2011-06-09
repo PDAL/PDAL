@@ -1,10 +1,10 @@
 #
-# top-level CMake configuration file for libPC
+# top-level CMake configuration file for PDAL
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
 cmake_minimum_required(VERSION 2.6.0)
-project(libPC)
+project(PDAL)
 
 #------------------------------------------------------------------------------
 # internal cmake settings
@@ -20,12 +20,12 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
 
 #------------------------------------------------------------------------------
-# libPC general settings
+# PDAL general settings
 #------------------------------------------------------------------------------
 
 
 
-# the next three lines are the ONLY place in the entire libpc system where
+# the next three lines are the ONLY place in the entire pdal system where
 # the version info is hard-coded
 SET(LIBPC_VERSION_MAJOR "0")
 SET(LIBPC_VERSION_MINOR "1")
@@ -38,7 +38,7 @@ SET(LIBPC_C_LIB_SOVERSION ${LIBPC_VERSION_MAJOR})
 
 # Name of C++ library
 if(WIN32)
-  set(LIBPC_LIB_NAME libpc)
+  set(LIBPC_LIB_NAME pdal)
 else()
   set(LIBPC_LIB_NAME pc)
 endif()
@@ -52,14 +52,14 @@ set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 #------------------------------------------------------------------------------
 
 # Choose package components
-set(WITH_APPS TRUE CACHE BOOL "Choose if libPC utilities should be built")
-set(WITH_TESTS TRUE CACHE BOOL "Choose if libPC unit tests should be built")
+set(WITH_APPS TRUE CACHE BOOL "Choose if PDAL utilities should be built")
+set(WITH_TESTS TRUE CACHE BOOL "Choose if PDAL unit tests should be built")
 
 # Choose to use pkg-config or not
 set(WITH_PKGCONFIG FALSE CACHE BOOL
-  "Choose whether a pkgconfig file (libPC.pc) should be installed")
+  "Choose whether a pkgconfig file (PDAL.pc) should be installed")
 
-set(WITH_ENDIANAWARE FALSE CACHE BOOL "Choose whether or not libPC should do runtime endianness switching.  Note that this can slow things down considerably if enabled by default")
+set(WITH_ENDIANAWARE FALSE CACHE BOOL "Choose whether or not PDAL should do runtime endianness switching.  Note that this can slow things down considerably if enabled by default")
 if (WITH_ENDIANAWARE)
     set(LIBPC_ENDIAN_AWARE 1)
 endif()
@@ -70,10 +70,10 @@ endif()
 #------------------------------------------------------------------------------
 
 # Name of test suite runner
-set(LIBPC_UNIT_TEST libpc_test)
+set(LIBPC_UNIT_TEST pdal_test)
 
-# Enable CTest and submissions to libPC dashboard at CDash
-# http://my.cdash.org/index.php?project=libPC
+# Enable CTest and submissions to PDAL dashboard at CDash
+# http://my.cdash.org/index.php?project=PDAL
 set(ENABLE_CTEST FALSE CACHE BOOL
   "Enable CTest to support submissions of results to CDash at http://cdash.org")
 
@@ -89,7 +89,7 @@ if(NOT MSVC_IDE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING 
     "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
   endif()
-  message(STATUS "Setting libPC build type - ${CMAKE_BUILD_TYPE}")
+  message(STATUS "Setting PDAL build type - ${CMAKE_BUILD_TYPE}")
 endif()
 
 set(LIBPC_BUILD_TYPE ${CMAKE_BUILD_TYPE})
@@ -345,7 +345,7 @@ endif()
 
 if (NOT LIBLAS_FOUND)
   message(FATAL_ERROR
-    "libPC currently requires a working libLAS installation 1.6.0 or greater")
+    "PDAL currently requires a working libLAS installation 1.6.0 or greater")
 endif()
 
 # MrSID/LiDAR support - optiona, default=OFF
@@ -389,11 +389,11 @@ else()
   # Common locatoins for Unix and Mac OS X
   set(DEFAULT_BIN_SUBDIR bin)
   set(DEFAULT_LIB_SUBDIR lib)
-  set(DEFAULT_DATA_SUBDIR share/libpc)
+  set(DEFAULT_DATA_SUBDIR share/pdal)
   set(DEFAULT_INCLUDE_SUBDIR include)
 endif()
 
-# Locations are changeable by user to customize layout of libPC installation
+# Locations are changeable by user to customize layout of PDAL installation
 # (default values are platform-specific)
 set(LIBPC_BIN_SUBDIR ${DEFAULT_BIN_SUBDIR} CACHE STRING
   "Subdirectory where executables will be installed")
@@ -434,7 +434,7 @@ add_subdirectory(src)
 add_subdirectory(apps)
 
 if(WITH_TESTS)
-  message(STATUS "Enable libPC unit tests to build - done")
+  message(STATUS "Enable PDAL unit tests to build - done")
   enable_testing()
 
   if(ENABLE_CTEST)
@@ -442,7 +442,7 @@ if(WITH_TESTS)
       "Enable CTest to support submissions of results to CDash at http://cdash.org")
     cmake_minimum_required(VERSION 2.8.0)
     # Dashboard has been prepared for experiments
-    # http://my.cdash.org/index.php?project=libPC
+    # http://my.cdash.org/index.php?project=PDAL
     include(CTest)
     message(STATUS
       "Enable CTest to support submissions of results to CDash at http://cdash.org - done")
@@ -452,7 +452,7 @@ if(WITH_TESTS)
 else()
   if(ENABLE_CTEST)
     message(WARNING
-      "CTest support requested but WITH_TESTS option not specified to build of libPC unit tests")
+      "CTest support requested but WITH_TESTS option not specified to build of PDAL unit tests")
   endif()
 endif()
 
@@ -487,8 +487,8 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "CPackConfig.cmake")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "schemas")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "hobu-config.bat")
 
-list(APPEND CPACK_SOURCE_IGNORE_FILES "libpc-osgeo4w-init.bat")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "libpc-osgeo4w-start.bat.tmpl")
+list(APPEND CPACK_SOURCE_IGNORE_FILES "pdal-osgeo4w-init.bat")
+list(APPEND CPACK_SOURCE_IGNORE_FILES "pdal-osgeo4w-start.bat.tmpl")
 
 include(CPack)
 
@@ -496,9 +496,9 @@ include(CPack)
 
 
 #------------------------------------------------------------------------------
-# finally, generate the libpc_config.h header
+# finally, generate the pdal_config.h header
 #------------------------------------------------------------------------------
 
 configure_file(
-  "${PROJECT_SOURCE_DIR}/libpc_defines.h.in"
-  "${PROJECT_SOURCE_DIR}/include/libpc/libpc_defines.h")
+  "${PROJECT_SOURCE_DIR}/pdal_defines.h.in"
+  "${PROJECT_SOURCE_DIR}/include/pdal/pdal_defines.h")

@@ -1,5 +1,5 @@
 #
-# ./apps CMake configuration file for libPC utilties
+# ./apps CMake configuration file for PDAL utilties
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
@@ -90,7 +90,7 @@ if(UNIX)
     #  if(WITH_GDAL)
     #    set(PKGCFG_INC_DIR "${PKGCFG_INC_DIR} ${GDAL_INCLUDE_DIR}")
     #  endif()
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libpc.pc
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc
       DESTINATION ${LIBPC_LIB_DIR}/pkgconfig
       PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
     
@@ -101,7 +101,7 @@ if(UNIX)
     set(exec_prefix ${CMAKE_INSTALL_PREFIX}/bin)
     set(libdir ${CMAKE_INSTALL_PREFIX}/lib)
 
-    GET_DIRECTORY_PROPERTY(LIBPC_DEFINITIONS DIRECTORY ${libPC_SOURCE_DIR}/ COMPILE_DEFINITIONS)   
+    GET_DIRECTORY_PROPERTY(LIBPC_DEFINITIONS DIRECTORY ${PDAL_SOURCE_DIR}/ COMPILE_DEFINITIONS)   
 
     set(LIBPC_CONFIG_DEFINITIONS "")
     foreach(definition ${LIBPC_DEFINITIONS})
@@ -109,10 +109,10 @@ if(UNIX)
     endforeach()
 
      
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libpc-config.in
-      ${CMAKE_CURRENT_BINARY_DIR}/libpc-config @ONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pdal-config.in
+      ${CMAKE_CURRENT_BINARY_DIR}/pdal-config @ONLY)
       
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libpc-config
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal-config
       DESTINATION bin/
       PERMISSIONS
       OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)

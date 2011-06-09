@@ -35,12 +35,12 @@
 #ifndef INCLUDED_FILTER_CACHEFILTER_HPP
 #define INCLUDED_FILTER_CACHEFILTER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Filter.hpp>
-//#include <libpc/FilterIterator.hpp>
+#include <pdal/Filter.hpp>
+//#include <pdal/FilterIterator.hpp>
 
-namespace libpc {
+namespace pdal {
 
 class PointBufferCache;
 class PointBuffer;
@@ -98,8 +98,8 @@ public:
         return false;
     }
 
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const;
+    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::RandomIterator* createRandomIterator() const;
 
 private:
     // these are mutable to allow const-ness for updating stats

@@ -42,16 +42,16 @@
 #ifndef INCLUDED_BOUNDS_HPP
 #define INCLUDED_BOUNDS_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <cassert>
 #include <vector>
 #include <sstream>
 
-#include <libpc/Vector.hpp>
-#include <libpc/Range.hpp>
+#include <pdal/Vector.hpp>
+#include <pdal/Range.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 template <typename T>
@@ -445,12 +445,12 @@ std::ostream& operator<<(std::ostream& ostr, const Bounds<T>& bounds)
 extern LIBPC_DLL std::istream& operator>>(std::istream& istr, Bounds<double>& bounds);
 
 
-} // namespace libpc
+} // namespace pdal
 
 // Needed for C++ DLL exports
 #ifdef LIBPC_COMPILER_MSVC
-template class LIBPC_DLL libpc::Range<double>;
-template class LIBPC_DLL libpc::Bounds<double>;
+template class LIBPC_DLL pdal::Range<double>;
+template class LIBPC_DLL pdal::Bounds<double>;
 #endif
 
 #endif

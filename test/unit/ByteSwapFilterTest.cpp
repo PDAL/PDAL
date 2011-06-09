@@ -34,18 +34,18 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
-#include <libpc/Endian.hpp>
+#include <pdal/Endian.hpp>
 
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/faux/Writer.hpp>
-#include <libpc/filters/ByteSwapFilter.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/drivers/faux/Writer.hpp>
+#include <pdal/filters/ByteSwapFilter.hpp>
 
 #include <boost/scoped_ptr.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/Endian.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/Endian.hpp>
 #include <iostream>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(ByteSwapFilterTest)
 
@@ -54,9 +54,9 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
     
     boost::uint32_t buffer_size = 20;
-    libpc::drivers::faux::Reader reader(srcBounds, buffer_size, libpc::drivers::faux::Reader::Ramp);
+    pdal::drivers::faux::Reader reader(srcBounds, buffer_size, pdal::drivers::faux::Reader::Ramp);
 
-    libpc::filters::ByteSwapFilter filter(reader);
+    pdal::filters::ByteSwapFilter filter(reader);
     BOOST_CHECK_EQUAL(filter.getName(), "filters.byteswap");
 
     boost::scoped_ptr<SequentialIterator> unflipped_iter(reader.createSequentialIterator());

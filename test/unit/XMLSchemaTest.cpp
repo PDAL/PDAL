@@ -36,22 +36,22 @@
 #include <boost/cstdint.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include <libpc/XMLSchema.hpp>
+#include <pdal/XMLSchema.hpp>
 
 
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/faux/Writer.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/drivers/faux/Writer.hpp>
 
-#include <libpc/drivers/las/Reader.hpp>
+#include <pdal/drivers/las/Reader.hpp>
 
-#include <libpc/Iterator.hpp>
-#include <libpc/Utils.hpp>
+#include <pdal/Iterator.hpp>
+#include <pdal/Utils.hpp>
 
 #include "Support.hpp"
 #include "TestConfig.hpp"
 
 #include <fstream>
-using namespace libpc;
+using namespace pdal;
 
 
 
@@ -79,7 +79,7 @@ std::string ReadXML(std::string filename)
     } 
     else 
     {   
-        throw libpc_error("unable to open file!");
+        throw pdal_error("unable to open file!");
         // return data;
     }
     
@@ -98,25 +98,25 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     
     std::string xml = ReadXML(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
     std::string xsd = ReadXML(TestConfig::g_data_path+"/schemas/LAS.xsd");
-    libpc::schema::Reader reader(xml, xsd);
+    pdal::schema::Reader reader(xml, xsd);
     
-    libpc::Schema schema = reader.getSchema();
+    pdal::Schema schema = reader.getSchema();
     
-    libpc::schema::Writer writer(schema);
+    pdal::schema::Writer writer(schema);
     std::string xml_output = writer.getXML();
 
-    libpc::schema::Reader reader2(xml_output, xsd);
-    libpc::Schema schema2 = reader2.getSchema();
+    pdal::schema::Reader reader2(xml_output, xsd);
+    pdal::Schema schema2 = reader2.getSchema();
     
-    libpc::Schema::Dimensions const& dims1 = schema.getDimensions();
-    libpc::Schema::Dimensions const& dims2 = schema2.getDimensions();
+    pdal::Schema::Dimensions const& dims1 = schema.getDimensions();
+    pdal::Schema::Dimensions const& dims2 = schema2.getDimensions();
     
     BOOST_CHECK_EQUAL(dims1.size(), dims2.size());
     
     for (boost::uint32_t i = 0; i < dims2.size(); ++i)
     {
-        libpc::Dimension const& dim1 = schema.getDimension(i);
-        libpc::Dimension const& dim2 = schema2.getDimension(i);
+        pdal::Dimension const& dim1 = schema.getDimension(i);
+        pdal::Dimension const& dim2 = schema2.getDimension(i);
     
         BOOST_CHECK_EQUAL(dim1.getDataType(), dim2.getDataType());
         BOOST_CHECK_EQUAL(dim1.getByteSize(), dim2.getByteSize());

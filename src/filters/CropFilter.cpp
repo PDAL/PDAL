@@ -32,13 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/CropFilter.hpp>
+#include <pdal/filters/CropFilter.hpp>
 
-#include <libpc/filters/CropFilterIterator.hpp>
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/filters/CropFilterIterator.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/PointBuffer.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
@@ -113,7 +113,7 @@ boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffe
 }
 
 
-libpc::SequentialIterator* CropFilter::createSequentialIterator() const
+pdal::SequentialIterator* CropFilter::createSequentialIterator() const
 {
     return new CropFilterSequentialIterator(*this);
 }

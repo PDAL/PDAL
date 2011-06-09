@@ -33,28 +33,28 @@
 ****************************************************************************/
 
 
-#include <libpc/drivers/oci/Writer.hpp>
+#include <pdal/drivers/oci/Writer.hpp>
 
 #include <iostream>
 
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
 #include <fstream>
 
-namespace libpc { namespace drivers { namespace oci {
+namespace pdal { namespace drivers { namespace oci {
 
 
-libpc::Schema Get8DimensionFixedSchema()
+pdal::Schema Get8DimensionFixedSchema()
 {
     std::ostringstream text;
-    libpc::Schema schema;
+    pdal::Schema schema;
     
     Dimension x(Dimension::Field_X, Dimension::Double);
     text << "x coordinate as a long integer.  You must use the scale and "
          << "offset information of the header to determine the double value.";
     x.setDescription(text.str());
-    x.setEndianness(libpc::Endian_Big);
+    x.setEndianness(pdal::Endian_Big);
     schema.addDimension(x);
     text.str("");
 
@@ -62,7 +62,7 @@ libpc::Schema Get8DimensionFixedSchema()
     text << "y coordinate as a long integer.  You must use the scale and "
          << "offset information of the header to determine the double value.";
     y.setDescription(text.str());
-    y.setEndianness(libpc::Endian_Big);
+    y.setEndianness(pdal::Endian_Big);
     schema.addDimension(y);
     text.str("");
 
@@ -70,7 +70,7 @@ libpc::Schema Get8DimensionFixedSchema()
     text << "z coordinate as a long integer.  You must use the scale and "
          << "offset information of the header to determine the double value.";
     z.setDescription(text.str());
-    z.setEndianness(libpc::Endian_Big);
+    z.setEndianness(pdal::Endian_Big);
     schema.addDimension(z);
     text.str("");
 
@@ -81,7 +81,7 @@ libpc::Schema Get8DimensionFixedSchema()
         "Time if the Global Encoding low bit is set (see Global Encoding "
         "in the Public Header Block description).";
     t.setDescription(text.str());
-    t.setEndianness(libpc::Endian_Big);
+    t.setEndianness(pdal::Endian_Big);
     schema.addDimension(t);
     text.str("");
 
@@ -95,7 +95,7 @@ libpc::Schema Get8DimensionFixedSchema()
          "bit encoded field with the lower five bits used for class and the "
          "three high bits used for flags.";
     classification.setDescription(text.str());
-    classification.setEndianness(libpc::Endian_Big);
+    classification.setEndianness(pdal::Endian_Big);
     schema.addDimension(classification);
     text.str("");
     
@@ -104,7 +104,7 @@ libpc::Schema Get8DimensionFixedSchema()
          "return magnitude. This value is optional and system specific. "
          "However, it should always be included if available.";
     intensity.setDescription(text.str());
-    intensity.setEndianness(libpc::Endian_Big);
+    intensity.setEndianness(pdal::Endian_Big);
     schema.addDimension(intensity);
     text.str("");
 
@@ -115,7 +115,7 @@ libpc::Schema Get8DimensionFixedSchema()
          "return will have a Return Number of one, the second a Return "
          "Number of two, and so on up to five returns.";
     return_no.setDescription(text.str());
-    return_no.setEndianness(libpc::Endian_Big);
+    return_no.setEndianness(pdal::Endian_Big);
     schema.addDimension(return_no);
     text.str("");
 
@@ -125,7 +125,7 @@ libpc::Schema Get8DimensionFixedSchema()
          "a laser data point may be return two (Return Number) within a "
          "total number of five returns.";
     no_returns.setDescription(text.str());
-    no_returns.setEndianness(libpc::Endian_Big);
+    no_returns.setEndianness(pdal::Endian_Big);
     schema.addDimension(no_returns);
     text.str("");
 
@@ -137,7 +137,7 @@ libpc::Schema Get8DimensionFixedSchema()
          "is a scan moving from the left side of the in-track direction to "
          "the right side and negative the opposite). ";
     scan_dir.setDescription(text.str());
-    scan_dir.setEndianness(libpc::Endian_Big);
+    scan_dir.setEndianness(pdal::Endian_Big);
     schema.addDimension(scan_dir);
     text.str("");
 
@@ -146,7 +146,7 @@ libpc::Schema Get8DimensionFixedSchema()
          "the point is at the end of a scan. It is the last point on "
          "a given scan line before it changes direction.";
     edge.setDescription(text.str());
-    edge.setEndianness(libpc::Endian_Big);
+    edge.setEndianness(pdal::Endian_Big);
     schema.addDimension(edge);
     text.str("");
 
@@ -163,14 +163,14 @@ libpc::Schema Get8DimensionFixedSchema()
          "and ñ90 degrees to the left side of the aircraft in the "
          "direction of flight.";
     scan_angle.setDescription(text.str());
-    scan_angle.setEndianness(libpc::Endian_Big);
+    scan_angle.setEndianness(pdal::Endian_Big);
     schema.addDimension(scan_angle);
     text.str("");
 
     Dimension user_data(Dimension::Field_UserData, Dimension::Uint8);
     text << "This field may be used at the userís discretion";
     user_data.setDescription(text.str());
-    user_data.setEndianness(libpc::Endian_Big);
+    user_data.setEndianness(pdal::Endian_Big);
     schema.addDimension(user_data);
     text.str("");
 
@@ -185,7 +185,7 @@ libpc::Schema Get8DimensionFixedSchema()
          "ID equal to the File Source ID of the file containing this point "
          "at some time during processing. ";
     point_source_id.setDescription(text.str());
-    point_source_id.setEndianness(libpc::Endian_Big);
+    point_source_id.setEndianness(pdal::Endian_Big);
     schema.addDimension(point_source_id);
     text.str("");
 
@@ -194,42 +194,42 @@ libpc::Schema Get8DimensionFixedSchema()
     Dimension red(Dimension::Field_Red, Dimension::Uint16);
     text << "The red image channel value associated with this point";
     red.setDescription(text.str());
-    red.setEndianness(libpc::Endian_Big);
+    red.setEndianness(pdal::Endian_Big);
     schema.addDimension(red);
     text.str("");
 
     Dimension green(Dimension::Field_Green, Dimension::Uint16);
     text << "The green image channel value associated with this point";
     green.setDescription(text.str());
-    green.setEndianness(libpc::Endian_Big);
+    green.setEndianness(pdal::Endian_Big);
     schema.addDimension(green);
     text.str("");
 
     Dimension blue(Dimension::Field_Blue, Dimension::Uint16);
     text << "The blue image channel value associated with this point";
     blue.setDescription(text.str());
-    blue.setEndianness(libpc::Endian_Big);
+    blue.setEndianness(pdal::Endian_Big);
     schema.addDimension(blue);
     text.str("");
 
     Dimension alpha(Dimension::Field_Alpha, Dimension::Uint16);
     text << "The alpha image channel value associated with this point";
     alpha.setDescription(text.str());
-    alpha.setEndianness(libpc::Endian_Big);
+    alpha.setEndianness(pdal::Endian_Big);
     schema.addDimension(alpha);
     text.str("");
 
     Dimension blk_id(Dimension::Field_User1, Dimension::Uint32);
     text << "The block id for this point";
     blk_id.setDescription(text.str());
-    blk_id.setEndianness(libpc::Endian_Big);
+    blk_id.setEndianness(pdal::Endian_Big);
     schema.addDimension(blk_id);
     text.str("");
 
     Dimension pt_id(Dimension::Field_User2, Dimension::Uint32);
     text << "The point id for this point";
     pt_id.setDescription(text.str());
-    pt_id.setEndianness(libpc::Endian_Big);
+    pt_id.setEndianness(pdal::Endian_Big);
     schema.addDimension(pt_id);
     text.str("");
         
@@ -259,14 +259,14 @@ std::string ReadFile(std::string filename)
     } 
     else 
     {   
-        throw libpc_error("unable to open file!");
+        throw pdal_error("unable to open file!");
         // return data;
     }
     
 }
 
 Writer::Writer(Stage& prevStage, Options& options)
-    : libpc::Writer(prevStage)
+    : pdal::Writer(prevStage)
     , m_stage(prevStage)
     , m_options(options)
     , m_verbose(false)
@@ -330,7 +330,7 @@ void Writer::WipeBlockTable()
     oss << "DELETE FROM " << block_table_name;
     try {
         run(oss);    
-    } catch (libpc_error const&) 
+    } catch (pdal_error const&) 
     {
         // if we failed, let's try dropping the spatial index for the block_table_name
         oss.str("");
@@ -452,7 +452,7 @@ void Writer::CreateSDOEntry()
     }
 
     double tolerance = 0.05;
-    libpc::Bounds<double> e = m_bounds;
+    pdal::Bounds<double> e = m_bounds;
 
     if (IsGeographic(srid)) {
         // FIXME: This should be overrideable
@@ -500,7 +500,7 @@ bool Writer::BlockTableExists()
     
     try {
         statement->Execute();
-    } catch (libpc_error const& ) {
+    } catch (pdal_error const& ) {
         // Assume for now that an error returned here is OCI_NODATA, which means 
         // the table doesn't exist.  If this really isn't the case, we're going 
         // to get more legit message further down the line.
@@ -545,7 +545,7 @@ bool Writer::IsGeographic(boost::int32_t srid)
     
     try {
         statement->Execute();
-    } catch (libpc_error const& e) {
+    } catch (pdal_error const& e) {
         std::ostringstream oss;
         oss << "Failed to fetch geographicness of srid " << srid << std::endl << e.what() << std::endl;
         throw std::runtime_error(oss.str());
@@ -569,7 +569,7 @@ std::string Writer::LoadSQLData(std::string const& filename)
     {
         std::ostringstream oss;
         oss << filename << " does not exist";
-        throw libpc_error(oss.str());
+        throw pdal_error(oss.str());
     }
 
     std::istream::pos_type size;    
@@ -768,7 +768,7 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     
     std::string eleminfo = CreatePCElemInfo();
 
-    libpc::Bounds<double> e = m_bounds;
+    pdal::Bounds<double> e = m_bounds;
 
     s_geom << "           mdsys.sdo_geometry("<< gtype <<", "<<s_srid.str()<<", null,\n"
 "              mdsys.sdo_elem_info_array"<< eleminfo <<",\n"
@@ -833,7 +833,7 @@ oss << "declare\n"
     {
         schema_data = ReadFile(point_schema_override);
     } else {
-        schema_data = libpc::Schema::to_xml(m_stage.getSchema());
+        schema_data = pdal::Schema::to_xml(m_stage.getSchema());
     }
 
     char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
@@ -929,7 +929,7 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
 {
 
 
-    libpc::Schema const& schema = buffer.getSchema();
+    pdal::Schema const& schema = buffer.getSchema();
     // std::vector<boost::uint32_t> ids = block.GetIDs();
 
     bool hasTimeData = schema.hasDimension(Dimension::Field_Time, Dimension::Double);
@@ -1149,7 +1149,7 @@ void Writer::SetElements(   Statement statement,
 
 void Writer::SetOrdinates(Statement statement,
                           OCIArray* ordinates, 
-                          libpc::Bounds<double> const& extent)
+                          pdal::Bounds<double> const& extent)
 {
     
     // std::cout << extent << std::endl;
@@ -1183,7 +1183,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     // std::vector<boost::uint32_t> ids = block.GetIDs();
     
     // Pluck the block id out of the first point in the buffer
-    libpc::Schema const& schema = buffer.getSchema();
+    pdal::Schema const& schema = buffer.getSchema();
     const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
     boost::int32_t block_id  = buffer.getField<boost::int32_t>(0, indexBlockId);
     
@@ -1366,4 +1366,4 @@ void Writer::Debug()
 
 
 
-}}} // namespace libpc::driver::oci
+}}} // namespace pdal::driver::oci

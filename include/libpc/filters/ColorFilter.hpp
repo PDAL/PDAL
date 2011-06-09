@@ -35,19 +35,19 @@
 #ifndef INCLUDED_FILTERS_COLORFILTER_HPP
 #define INCLUDED_FILTERS_COLORFILTER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 //#include <boost/cstdint.hpp>
 //
-//#include <libpc/export.hpp>
-#include <libpc/Filter.hpp>
-//#include <libpc/FilterIterator.hpp>
+//#include <pdal/export.hpp>
+#include <pdal/Filter.hpp>
+//#include <pdal/FilterIterator.hpp>
 
-namespace libpc
+namespace pdal
 {
     class PointBuffer;
 }
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 class ColorFilterSequentialIterator;
 
@@ -71,8 +71,8 @@ public:
         return false;
     }
 
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const { return NULL; }
+    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::RandomIterator* createRandomIterator() const { return NULL; }
 
     void processBuffer(PointBuffer& data) const;
 

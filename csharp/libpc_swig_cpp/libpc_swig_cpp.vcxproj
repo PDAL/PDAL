@@ -19,22 +19,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="libpc.i">
+    <CustomBuild Include="pdal.i">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">del ..\libpc_swig_cs\*.cs
-swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../libpc_swig_cs -namespace Libpc -o libpc_wrap.cpp "%(FullPath)"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">del ..\libpc_swig_cs\*.cs
-swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../libpc_swig_cs -namespace Libpc -o libpc_wrap.cpp "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">del ..\pdal_swig_cs\*.cs
+swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../pdal_swig_cs -namespace Libpc -o pdal_wrap.cpp "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">del ..\pdal_swig_cs\*.cs
+swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../pdal_swig_cs -namespace Libpc -o pdal_wrap.cpp "%(FullPath)"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </AdditionalInputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">del ..\libpc_swig_cs\*.cs
-swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../libpc_swig_cs -namespace Libpc -o libpc_wrap.cpp "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">del ..\pdal_swig_cs\*.cs
+swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../pdal_swig_cs -namespace Libpc -o pdal_wrap.cpp "%(FullPath)"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </AdditionalInputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">del ..\libpc_swig_cs\*.cs
-swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../libpc_swig_cs -namespace Libpc -o libpc_wrap.cpp "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">del ..\pdal_swig_cs\*.cs
+swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../pdal_swig_cs -namespace Libpc -o pdal_wrap.cpp "%(FullPath)"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename)_wrap.cpp;%(Outputs)</Outputs>
@@ -48,7 +48,7 @@ swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../libpc_swig_cs -na
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="libpc_wrap.cpp" />
+    <ClCompile Include="pdal_wrap.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D8860CDB-E45E-4CD4-B63C-EC08D7C21E13}</ProjectGuid>
@@ -95,26 +95,26 @@ swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../libpc_swig_cs -na
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>..\..\bin\$(Configuration)\</OutDir>
-    <TargetName>libpc_swig_cpp</TargetName>
+    <TargetName>pdal_swig_cpp</TargetName>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>..\..\bin\$(Configuration)\</OutDir>
-    <TargetName>libpc_swig_cpp</TargetName>
+    <TargetName>pdal_swig_cpp</TargetName>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>..\..\bin\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <TargetName>libpc_swig_cpp</TargetName>
+    <TargetName>pdal_swig_cpp</TargetName>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>..\..\bin\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TargetName>libpc_swig_cpp</TargetName>
+    <TargetName>pdal_swig_cpp</TargetName>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -128,7 +128,7 @@ swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../libpc_swig_cs -na
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>%(AdditionalDependencies);..\..\bin\Debug\libpc.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);..\..\bin\Debug\pdal.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -144,7 +144,7 @@ swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../libpc_swig_cs -na
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>%(AdditionalDependencies);..\..\bin\Debug\libpc.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);..\..\bin\Debug\pdal.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\boost\boost_1_44\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>

@@ -35,16 +35,16 @@
 #ifndef INCLUDED_FILTERS_MOSAICFILTER_HPP
 #define INCLUDED_FILTERS_MOSAICFILTER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <vector>
 
-#include <libpc/Filter.hpp>
-//#include <libpc/FilterIterator.hpp>
-//#include <libpc/Bounds.hpp>
+#include <pdal/Filter.hpp>
+//#include <pdal/FilterIterator.hpp>
+//#include <pdal/Bounds.hpp>
 
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 // this doesn't derive from Stage since it takes more than one stage as input
@@ -68,8 +68,8 @@ public:
         return false;
     }
     
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const { return NULL; }
+    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::RandomIterator* createRandomIterator() const { return NULL; }
 
 private:
     std::vector<const Stage*> m_prevStages;

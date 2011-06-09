@@ -32,19 +32,19 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/las/Reader.hpp>
+#include <pdal/drivers/las/Reader.hpp>
 
 #include <laszip/lasunzipper.hpp>
 
-#include <libpc/drivers/las/Header.hpp>
-#include <libpc/drivers/las/Iterator.hpp>
-#include <libpc/drivers/las/VariableLengthRecord.hpp>
+#include <pdal/drivers/las/Header.hpp>
+#include <pdal/drivers/las/Iterator.hpp>
+#include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include "LasHeaderReader.hpp"
-#include <libpc/exceptions.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/PointBuffer.hpp>
 #include "ZipPoint.hpp"
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 
 
@@ -146,13 +146,13 @@ bool LasReader::isCompressed() const
 }
 
 
-libpc::SequentialIterator* LasReader::createSequentialIterator() const
+pdal::SequentialIterator* LasReader::createSequentialIterator() const
 {
     return new SequentialIterator(*this);
 }
 
 
-libpc::RandomIterator* LasReader::createRandomIterator() const
+pdal::RandomIterator* LasReader::createRandomIterator() const
 {
     return new RandomIterator(*this);
 }
@@ -190,11 +190,11 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
             }
             catch(...)
             {
-                throw libpc_error("Error reading compressed point data (1)");
+                throw pdal_error("Error reading compressed point data (1)");
             }
             if (!ok)
             {
-                throw libpc_error("Error reading compressed point data (2)");
+                throw pdal_error("Error reading compressed point data (2)");
             }
 
             memcpy(p, zipPoint->m_lz_point_data, zipPoint->m_lz_point_size);

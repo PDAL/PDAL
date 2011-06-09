@@ -35,17 +35,17 @@
 #ifndef INCLUDED_FILTERS_DECIMATIONFILTERITERATOR_HPP
 #define INCLUDED_FILTERS_DECIMATIONFILTERITERATOR_HPP
 
-#include <libpc/libpc.hpp>
-//#include <libpc/export.hpp>
-//#include <libpc/Filter.hpp>
-#include <libpc/FilterIterator.hpp>
-//#include <libpc/Bounds.hpp>
+#include <pdal/pdal.hpp>
+//#include <pdal/export.hpp>
+//#include <pdal/Filter.hpp>
+#include <pdal/FilterIterator.hpp>
+//#include <pdal/Bounds.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 class DecimationFilter;
 
-class DecimationFilterSequentialIterator : public libpc::FilterSequentialIterator
+class DecimationFilterSequentialIterator : public pdal::FilterSequentialIterator
 {
 public:
     DecimationFilterSequentialIterator(const DecimationFilter& filter);

@@ -35,13 +35,13 @@
 #ifndef INCLUDED_DRIVERS_LIBLAS_LIBLASREADER_HPP
 #define INCLUDED_DRIVERS_LIBLAS_LIBLASREADER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <vector>
 
-#include <libpc/Stage.hpp>
-#include <libpc/drivers/las/Support.hpp>
-#include <libpc/drivers/las/ReaderBase.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/drivers/las/Support.hpp>
+#include <pdal/drivers/las/ReaderBase.hpp>
 
 // fwd decls
 namespace liblas
@@ -49,11 +49,11 @@ namespace liblas
     class Reader;
 }
 
-namespace libpc { namespace drivers { namespace liblas {
+namespace pdal { namespace drivers { namespace liblas {
 
 class LiblasHeader;
 
-class LIBPC_DLL LiblasReader : public libpc::drivers::las::LasReaderBase
+class LIBPC_DLL LiblasReader : public pdal::drivers::las::LasReaderBase
 {
 public:
     LiblasReader(const std::string& filename);
@@ -64,7 +64,7 @@ public:
     
     const std::string& getFileName() const;
 
-    ::libpc::drivers::las::PointFormat getPointFormat() const;
+    ::pdal::drivers::las::PointFormat getPointFormat() const;
     
     boost::uint8_t getVersionMajor() const;
     boost::uint8_t getVersionMinor() const;
@@ -82,8 +82,8 @@ public:
         return false;
     }
 
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const;
+    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::RandomIterator* createRandomIterator() const;
 
 private:
     void processExternalHeader(::liblas::Reader& externalReader);
@@ -103,7 +103,7 @@ private:
     double m_offsetZ;
     bool m_isCompressed;
     
-    ::libpc::drivers::las::PointFormat m_pointFormat;
+    ::pdal::drivers::las::PointFormat m_pointFormat;
 
     std::vector<MetadataRecord> m_metadataRecords;
 

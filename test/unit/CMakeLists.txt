@@ -1,11 +1,11 @@
 ###############################################################################
 #
-# test/unit/CMakeLists.txt controls building of libPC unit tests suite
+# test/unit/CMakeLists.txt controls building of PDAL unit tests suite
 #
 # Copyright (c) 2009 Mateusz Loskot <mateusz@loskot.net>
 #
 ###############################################################################
-SET(LIBPC_UNIT_TEST libpc_test)
+SET(LIBPC_UNIT_TEST pdal_test)
 
 SET(LIBPC_UNITTEST_TEST_SRC
     BoundsTest.cpp
@@ -118,4 +118,4 @@ TARGET_LINK_LIBRARIES(${LIBPC_UNIT_TEST}
     ${GDAL_LIBRARY}
     ${SPATIALINDEX_LIBRARY})
 
-ADD_TEST(libpc_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/libpc_test ${PROJECT_SOURCE_DIR}/test/data)
+ADD_TEST(pdal_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/pdal_test ${PROJECT_SOURCE_DIR}/test/data)

@@ -35,15 +35,15 @@
 #ifndef INCLUDED_LIBPC_DRIVER_TERRASOLID_READER_HPP
 #define INCLUDED_LIBPC_DRIVER_TERRASOLID_READER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Stage.hpp>
-#include <libpc/Options.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/Options.hpp>
 
-#include <libpc/SchemaLayout.hpp>
+#include <pdal/SchemaLayout.hpp>
 
-#include <libpc/Iterator.hpp>
-#include <libpc/exceptions.hpp>
+#include <pdal/Iterator.hpp>
+#include <pdal/exceptions.hpp>
 
 
 #include <vector>
@@ -52,7 +52,7 @@
 #include <boost/scoped_ptr.hpp>
 
 
-namespace libpc { namespace drivers { namespace terrasolid {
+namespace pdal { namespace drivers { namespace terrasolid {
 
 
 enum TERRASOLID_Format_Type
@@ -92,12 +92,12 @@ struct TerraSolidHeader
 };
 
 typedef boost::scoped_ptr<TerraSolidHeader> TerraSolidHeaderPtr ;
-class terrasolid_error : public libpc_error
+class terrasolid_error : public pdal_error
 {
 public:
 
     terrasolid_error(std::string const& msg)
-        : libpc_error(msg)
+        : pdal_error(msg)
     {}
 };
 
@@ -125,7 +125,7 @@ public:
 };
 
 
-class LIBPC_DLL Reader : public libpc::Stage
+class LIBPC_DLL Reader : public pdal::Stage
 {
 
 public:
@@ -146,8 +146,8 @@ public:
     }
 
     
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const;
+    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::RandomIterator* createRandomIterator() const;
     
     Options& getOptions() const { return m_options; }
 
@@ -180,7 +180,7 @@ private:
 
 };
 
-}}} // namespace libpc::driver::oci
+}}} // namespace pdal::driver::oci
 
 
 #endif // INCLUDED_LIBPC_DRIVER_OCI_READER_HPP

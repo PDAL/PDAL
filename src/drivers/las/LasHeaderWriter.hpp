@@ -43,12 +43,12 @@
 #ifndef INCLUDED_DRIVERS_LAS_LASHEADERWRITER_HPP
 #define INCLUDED_DRIVERS_LAS_LASHEADERWRITER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 #include <iosfwd>
 
-#include <libpc/SpatialReference.hpp>
+#include <pdal/SpatialReference.hpp>
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 class LasHeader;
 

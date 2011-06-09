@@ -39,7 +39,7 @@
 
 #include <boost/cstdint.hpp>
 
-namespace libpc
+namespace pdal
 {
     class PointBuffer;
     class Schema;
@@ -57,22 +57,22 @@ public:
     static bool compare_files(const std::string& file1, const std::string& file2);
 
     // validate a point's XYZ values
-    static void check_pN(const libpc::PointBuffer& data, const libpc::Schema& schema, 
+    static void check_pN(const pdal::PointBuffer& data, const pdal::Schema& schema, 
                          std::size_t index, 
                          double xref, double yref, double zref);
                        
     // validate a point's XYZ, Time, and Color values
-    static void check_pN(const libpc::PointBuffer& data, const libpc::Schema& schema, 
+    static void check_pN(const pdal::PointBuffer& data, const pdal::Schema& schema, 
                          std::size_t index, 
                          double xref, double yref, double zref,
                          double tref,
                          boost::uint16_t rref, boost::uint16_t gref, boost::uint16_t bref);
 
     // these are for the 1.2-with-color image
-    static void check_p0_p1_p2(const libpc::PointBuffer& data, const libpc::Schema& schema);
-    static void check_p100_p101_p102(const libpc::PointBuffer& data, const libpc::Schema& schema);
-    static void check_p355_p356_p357(const libpc::PointBuffer& data, const libpc::Schema& schema);
-    static void check_p710_p711_p712(const libpc::PointBuffer& data, const libpc::Schema& schema);
+    static void check_p0_p1_p2(const pdal::PointBuffer& data, const pdal::Schema& schema);
+    static void check_p100_p101_p102(const pdal::PointBuffer& data, const pdal::Schema& schema);
+    static void check_p355_p356_p357(const pdal::PointBuffer& data, const pdal::Schema& schema);
+    static void check_p710_p711_p712(const pdal::PointBuffer& data, const pdal::Schema& schema);
 
 };
 

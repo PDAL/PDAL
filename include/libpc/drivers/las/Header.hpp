@@ -43,21 +43,21 @@
 #ifndef INCLUDED_DRIVERS_LAS_HEADER_HPP
 #define INCLUDED_DRIVERS_LAS_HEADER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <vector>
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include <libpc/Schema.hpp>
-#include <libpc/Vector.hpp>
-#include <libpc/Bounds.hpp>
-#include <libpc/SpatialReference.hpp>
-#include <libpc/drivers/las/Support.hpp>
-#include <libpc/drivers/las/VariableLengthRecord.hpp>
+#include <pdal/Schema.hpp>
+#include <pdal/Vector.hpp>
+#include <pdal/Bounds.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/drivers/las/Support.hpp>
+#include <pdal/drivers/las/VariableLengthRecord.hpp>
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 
 class LIBPC_DLL LasHeader

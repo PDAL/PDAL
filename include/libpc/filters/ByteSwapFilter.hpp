@@ -35,18 +35,18 @@
 #ifndef INCLUDED_FILTERS_CROPFILTER_HPP
 #define INCLUDED_FILTERS_CROPFILTER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Filter.hpp>
-#include <libpc/FilterIterator.hpp>
-#include <libpc/Bounds.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/FilterIterator.hpp>
+#include <pdal/Bounds.hpp>
 
-namespace libpc
+namespace pdal
 {
     class PointBuffer;
 }
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 class ByteSwapFilterSequentialIterator;
 
@@ -67,8 +67,8 @@ public:
         return false;
     }
     
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const { return NULL; }
+    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::RandomIterator* createRandomIterator() const { return NULL; }
 
     // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
     // if we're calling this routine multiple times with the same buffer

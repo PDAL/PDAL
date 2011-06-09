@@ -42,12 +42,12 @@
 #ifndef LIBPC_DIMENSIONLAYOUT_HPP_INCLUDED
 #define LIBPC_DIMENSIONLAYOUT_HPP_INCLUDED
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Dimension.hpp>
+#include <pdal/Dimension.hpp>
 
 
-namespace libpc
+namespace pdal
 {
 
 
@@ -109,9 +109,9 @@ private:
 };
 
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& os, libpc::DimensionLayout const& d);
+LIBPC_DLL std::ostream& operator<<(std::ostream& os, pdal::DimensionLayout const& d);
 
 
-} // namespace libpc
+} // namespace pdal
 
 #endif // LIBPC_DIMENSIONLAYOUT_HPP_INCLUDED

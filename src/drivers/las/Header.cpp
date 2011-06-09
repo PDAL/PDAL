@@ -40,13 +40,13 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/drivers/las/Header.hpp>
+#include <pdal/drivers/las/Header.hpp>
 
 #include <boost/uuid/uuid_io.hpp>
 
-#include <libpc/Stage.hpp>
+#include <pdal/Stage.hpp>
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
     
 // BUG: should be std::string
@@ -249,12 +249,12 @@ void LasHeader::SetDataOffset(uint32_t v)
     
 }
 
-libpc::drivers::las::PointFormat LasHeader::getPointFormat() const
+pdal::drivers::las::PointFormat LasHeader::getPointFormat() const
 {
     return m_pointFormat;
 }
 
-void LasHeader::setPointFormat(libpc::drivers::las::PointFormat v)
+void LasHeader::setPointFormat(pdal::drivers::las::PointFormat v)
 {
     m_pointFormat = v;
 }
@@ -262,7 +262,7 @@ void LasHeader::setPointFormat(libpc::drivers::las::PointFormat v)
 uint16_t LasHeader::GetDataRecordLength() const
 {
     // No matter what the schema says, this must be a short in size.
-    return libpc::drivers::las::Support::getPointDataSize(m_pointFormat);
+    return pdal::drivers::las::Support::getPointDataSize(m_pointFormat);
 }
 
 uint32_t LasHeader::GetPointRecordsCount() const
@@ -381,7 +381,7 @@ void LasHeader::initialize()
 {
     // Initialize public header block with default
     // values according to LAS 1.2
-    m_pointFormat = libpc::drivers::las::PointFormat0;
+    m_pointFormat = pdal::drivers::las::PointFormat0;
 
     m_versionMajor = 1;
     m_versionMinor = 2;

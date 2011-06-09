@@ -35,13 +35,13 @@
 #ifndef INCLUDED_VECTOR_HPP
 #define INCLUDED_VECTOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <vector>
 
-#include <libpc/Utils.hpp>
+#include <pdal/Utils.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 template <typename T>
@@ -191,6 +191,6 @@ std::ostream& operator<<(std::ostream& ostr, const Vector<T>& vector)
 }
 
 
-} // namespace libpc
+} // namespace pdal
 
 #endif

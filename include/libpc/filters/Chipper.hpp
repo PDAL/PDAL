@@ -1,8 +1,8 @@
 /******************************************************************************
  * $Id$
  *
- * Project:  libPC - http://libpc.org - A BSD library for point cloud data.
- * Purpose:  libPC chipper class
+ * Project:  PDAL - http://pdal.org - A BSD library for point cloud data.
+ * Purpose:  PDAL chipper class
  * Author:   Howard Butler, hobu.inc@gmail.com
  *
  ******************************************************************************
@@ -42,15 +42,15 @@
 #ifndef LIBPC_CHIPPER_H
 #define LIBPC_CHIPPER_H
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <vector>
 
-#include <libpc/Filter.hpp>
-#include <libpc/Bounds.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/Bounds.hpp>
+#include <pdal/PointBuffer.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 class Stage;
@@ -120,13 +120,13 @@ public:
  
 class LIBPC_DLL Block
 {
-    friend class libpc::filters::Chipper;
+    friend class pdal::filters::Chipper;
 
 private:
     RefList *m_list_p;
     boost::uint32_t m_left;
     boost::uint32_t m_right;
-    libpc::Bounds<double> m_bounds;
+    pdal::Bounds<double> m_bounds;
     // double m_xmin;
     // double m_ymin;
     // double m_xmax;
@@ -134,8 +134,8 @@ private:
 
 public:
     std::vector<boost::uint32_t> GetIDs() const; 
-    libpc::Bounds<double> const& GetBounds() const {return m_bounds;} 
-    void SetBounds(libpc::Bounds<double> const& bounds) {m_bounds = bounds;}
+    pdal::Bounds<double> const& GetBounds() const {return m_bounds;} 
+    void SetBounds(pdal::Bounds<double> const& bounds) {m_bounds = bounds;}
     void GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t block_id) const;    
     // double GetXmin() const
     //     { return m_xmin; }
@@ -149,11 +149,11 @@ public:
 
 } // namespace chipper 
 
-class LIBPC_DLL Chipper : public libpc::Filter
+class LIBPC_DLL Chipper : public pdal::Filter
 {
 public:
     Chipper(Stage& prevStage, boost::uint32_t max_partition_size) :
-        libpc::Filter(prevStage), m_threshold(max_partition_size),
+        pdal::Filter(prevStage), m_threshold(max_partition_size),
         m_xvec(chipper::DIR_X), m_yvec(chipper::DIR_Y), m_spare(chipper::DIR_NONE) 
     {
         checkImpedance();
@@ -176,8 +176,8 @@ public:
         return false;
     }
 
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const;
+    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::RandomIterator* createRandomIterator() const;
 
 private:
     void Load(chipper::RefList& xvec, chipper::RefList& yvec, chipper::RefList& spare);

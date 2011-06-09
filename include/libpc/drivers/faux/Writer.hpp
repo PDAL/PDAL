@@ -35,12 +35,12 @@
 #ifndef INCLUDED_DRIVERS_FAUX_WRITER_HPP
 #define INCLUDED_DRIVERS_FAUX_WRITER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Writer.hpp>
+#include <pdal/Writer.hpp>
 
 
-namespace libpc { namespace drivers { namespace faux {
+namespace pdal { namespace drivers { namespace faux {
 
 
 //
@@ -49,7 +49,7 @@ namespace libpc { namespace drivers { namespace faux {
 //
 // This writer knows only about three dimensions: X,Y,Z (as doubles).
 //
-class LIBPC_DLL Writer : public libpc::Writer
+class LIBPC_DLL Writer : public pdal::Writer
 {
 public:
     Writer(Stage& prevStage);

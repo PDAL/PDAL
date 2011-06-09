@@ -32,12 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/CacheFilter.hpp>
+#include <pdal/filters/CacheFilter.hpp>
 
-#include <libpc/PointBufferCache.hpp>
-#include <libpc/filters/CacheFilterIterator.hpp>
+#include <pdal/PointBufferCache.hpp>
+#include <pdal/filters/CacheFilterIterator.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 // cache block size is measured in Points, not bytes
@@ -145,13 +145,13 @@ void CacheFilter::updateStats(boost::uint64_t numRead, boost::uint64_t numReques
 }
 
 
-libpc::SequentialIterator* CacheFilter::createSequentialIterator() const
+pdal::SequentialIterator* CacheFilter::createSequentialIterator() const
 {
     return new CacheFilterSequentialIterator(*this);
 }
 
 
-libpc::RandomIterator* CacheFilter::createRandomIterator() const
+pdal::RandomIterator* CacheFilter::createRandomIterator() const
 {
     return new CacheFilterRandomIterator(*this);
 }

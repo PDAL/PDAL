@@ -32,9 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/Filter.hpp>
+#include <pdal/Filter.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 
@@ -55,4 +55,4 @@ const Stage& Filter::getPrevStage() const
 }
 
 
-} // namespace libpc
+} // namespace pdal

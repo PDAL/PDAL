@@ -32,15 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/faux/Writer.hpp>
+#include <pdal/drivers/faux/Writer.hpp>
 
-#include <libpc/PointBuffer.hpp>
+#include <pdal/PointBuffer.hpp>
 
 
-namespace libpc { namespace drivers { namespace faux {
+namespace pdal { namespace drivers { namespace faux {
 
 Writer::Writer(Stage& prevStage) :
-    libpc::Writer(prevStage)
+    pdal::Writer(prevStage)
 {
     return;
 }

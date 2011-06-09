@@ -1,4 +1,4 @@
-The libPC team acknowledges and thanks the following people and companies for
+The PDAL team acknowledges and thanks the following people and companies for
 their contributions to this project. The open source community appreciates
 their efforts.
 

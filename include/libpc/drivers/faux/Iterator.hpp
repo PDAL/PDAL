@@ -35,18 +35,18 @@
 #ifndef INCLUDED_DRIVERS_FAUX_READER_ITERATOR_HPP
 #define INCLUDED_DRIVERS_FAUX_READER_ITERATOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Iterator.hpp>
+#include <pdal/Iterator.hpp>
 
 
-namespace libpc { namespace drivers { namespace faux {
+namespace pdal { namespace drivers { namespace faux {
 
 
 class Reader;
 
 
-class SequentialIterator : public libpc::SequentialIterator
+class SequentialIterator : public pdal::SequentialIterator
 {
 public:
     SequentialIterator(const Reader& reader);
@@ -60,7 +60,7 @@ private:
 };
 
 
-class RandomIterator : public libpc::RandomIterator
+class RandomIterator : public pdal::RandomIterator
 {
 public:
     RandomIterator(const Reader& reader);

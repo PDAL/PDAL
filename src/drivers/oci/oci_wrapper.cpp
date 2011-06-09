@@ -28,7 +28,7 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#include <libpc/drivers/oci/oci_wrapper.h>
+#include <pdal/drivers/oci/oci_wrapper.h>
 
 #include <iostream>
 

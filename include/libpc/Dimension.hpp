@@ -42,12 +42,12 @@
 #ifndef LIBPC_DIMENSION_HPP_INCLUDED
 #define LIBPC_DIMENSION_HPP_INCLUDED
 
-#include <libpc/libpc.hpp>
-#include <libpc/Utils.hpp>
+#include <pdal/pdal.hpp>
+#include <pdal/Utils.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 
-namespace libpc
+namespace pdal
 {
 
 
@@ -304,9 +304,9 @@ private:
 };
 
 
-LIBPC_DLL std::ostream& operator<<(std::ostream& os, libpc::Dimension const& d);
+LIBPC_DLL std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d);
 
 
-} // namespace libpc
+} // namespace pdal
 
 #endif // LIBPC_DIMENSION_HPP_INCLUDED

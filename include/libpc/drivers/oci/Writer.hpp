@@ -35,19 +35,19 @@
 #ifndef INCLUDED_LIBPC_DRIVER_OCI_WRITER_HPP
 #define INCLUDED_LIBPC_DRIVER_OCI_WRITER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Writer.hpp>
-#include <libpc/Bounds.hpp>
-#include <libpc/filters/Chipper.hpp>
+#include <pdal/Writer.hpp>
+#include <pdal/Bounds.hpp>
+#include <pdal/filters/Chipper.hpp>
 
 #include "Common.hpp"
 
-namespace libpc { namespace drivers { namespace oci {
+namespace pdal { namespace drivers { namespace oci {
 
 
 
-class LIBPC_DLL Writer : public libpc::Writer
+class LIBPC_DLL Writer : public pdal::Writer
 {
     
 public:
@@ -58,8 +58,8 @@ public:
     const std::string& getName() const;
 
     void run(std::ostringstream const& command);
-    inline void setBounds(libpc::Bounds<double> bounds) {m_bounds = bounds; }
-    inline libpc::Bounds<double>  getBounds() const { return m_bounds; }
+    inline void setBounds(pdal::Bounds<double> bounds) {m_bounds = bounds; }
+    inline pdal::Bounds<double>  getBounds() const { return m_bounds; }
     
     inline Connection getConnection() const { return m_connection;}
 
@@ -101,7 +101,7 @@ private:
 
     void SetOrdinates(Statement statement,
                       OCIArray* ordinates, 
-                      libpc::Bounds<double> const& extent);
+                      pdal::Bounds<double> const& extent);
     void SetElements(Statement statement,
                      OCIArray* elem_info);
 
@@ -114,13 +114,13 @@ private:
     Stage& m_stage;
     
     Options& m_options;
-    libpc::Bounds<double> m_bounds; // Bounds of the entire point cloud
+    pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
     bool m_verbose;
     bool m_doCreateIndex;
 };
 
-}}} // namespace libpc::driver::oci
+}}} // namespace pdal::driver::oci
 
 
 #endif // INCLUDED_OCIWRITER_HPP

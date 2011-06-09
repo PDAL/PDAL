@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- * Project:  libPC - http://libpc.org - A BSD library for point clouds
- * Purpose:  swig/python bindings for libpc
+ * Project:  PDAL - http://pdal.org - A BSD library for point clouds
+ * Purpose:  swig/python bindings for pdal
  * Author:   Pete J. Gadomski (pete.gadomski@gmail.com)
  *
  ******************************************************************************
@@ -38,18 +38,18 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
  
-%module libpc
+%module pdal
 
 %{
 #include <iostream>
 
-#include "libpc/libpc_config.hpp"
+#include "pdal/pdal_config.hpp"
 
-#include "libpc/Bounds.hpp"
+#include "pdal/Bounds.hpp"
 
 %}
 
-namespace libpc
+namespace pdal
 {
 
 template <typename T>

@@ -39,9 +39,9 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/DimensionLayout.hpp>
+#include <pdal/DimensionLayout.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 
@@ -93,7 +93,7 @@ bool DimensionLayout::operator!=(const DimensionLayout& other) const
 }
 
 
-std::ostream& operator<<(std::ostream& os, libpc::DimensionLayout const&)
+std::ostream& operator<<(std::ostream& os, pdal::DimensionLayout const&)
 {
     ////using boost::property_tree::ptree;
     ////ptree tree = d.GetPTree();
@@ -119,4 +119,4 @@ std::ostream& operator<<(std::ostream& os, libpc::DimensionLayout const&)
 }
 
 
-} // namespace libpc
+} // namespace pdal

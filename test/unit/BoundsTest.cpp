@@ -34,12 +34,12 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <libpc/Bounds.hpp>
+#include <pdal/Bounds.hpp>
 #include <iostream>
 #include <sstream>
 #include <string>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(BoundsTest)
 

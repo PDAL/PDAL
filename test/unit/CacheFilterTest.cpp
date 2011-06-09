@@ -35,22 +35,22 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/Iterator.hpp>
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/filters/CacheFilter.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/Iterator.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/filters/CacheFilter.hpp>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(CacheFilterTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
-    libpc::drivers::faux::Reader reader(srcBounds, 10000, libpc::drivers::faux::Reader::Constant);
+    pdal::drivers::faux::Reader reader(srcBounds, 10000, pdal::drivers::faux::Reader::Constant);
 
-    libpc::filters::CacheFilter cache(reader, 2, 1024);
+    pdal::filters::CacheFilter cache(reader, 2, 1024);
     BOOST_CHECK(cache.getDescription() == "Cache Filter");
 
     const Schema& schema = reader.getSchema();

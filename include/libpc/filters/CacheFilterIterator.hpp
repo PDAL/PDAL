@@ -35,11 +35,11 @@
 #ifndef INCLUDED_FILTER_CACHEFILTERITERATOR_HPP
 #define INCLUDED_FILTER_CACHEFILTERITERATOR_HPP
 
-#include <libpc/libpc.hpp>
-//#include <libpc/Filter.hpp>
-#include <libpc/FilterIterator.hpp>
+#include <pdal/pdal.hpp>
+//#include <pdal/Filter.hpp>
+#include <pdal/FilterIterator.hpp>
 
-namespace libpc {
+namespace pdal {
 
 class PointBufferCache;
     
@@ -47,7 +47,7 @@ namespace filters {
 
 class CacheFilter;
 
-class CacheFilterSequentialIterator : public libpc::FilterSequentialIterator
+class CacheFilterSequentialIterator : public pdal::FilterSequentialIterator
 {
 public:
     CacheFilterSequentialIterator(const CacheFilter& filter);
@@ -61,7 +61,7 @@ private:
 };
 
 
-class CacheFilterRandomIterator : public libpc::FilterRandomIterator
+class CacheFilterRandomIterator : public pdal::FilterRandomIterator
 {
 public:
     CacheFilterRandomIterator(const CacheFilter& filter);

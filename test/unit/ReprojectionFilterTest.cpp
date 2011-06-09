@@ -34,22 +34,22 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <libpc/SpatialReference.hpp>
-#include <libpc/drivers/las/Reader.hpp>
-#include <libpc/filters/ReprojectionFilter.hpp>
-#include <libpc/filters/ScalingFilter.hpp>
-#include <libpc/Iterator.hpp>
-#include <libpc/Schema.hpp>
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/exceptions.hpp>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/filters/ReprojectionFilter.hpp>
+#include <pdal/filters/ScalingFilter.hpp>
+#include <pdal/Iterator.hpp>
+#include <pdal/Schema.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/exceptions.hpp>
 
 #include "Support.hpp"
 
 BOOST_AUTO_TEST_SUITE(ReprojectionFilterTest)
 
 
-static void compareBounds(const libpc::Bounds<double>& p, const libpc::Bounds<double>& q)
+static void compareBounds(const pdal::Bounds<double>& p, const pdal::Bounds<double>& q)
 {
     BOOST_CHECK_CLOSE(p.getMinimum(0), q.getMinimum(0), 1);
     BOOST_CHECK_CLOSE(p.getMinimum(1), q.getMinimum(1), 1);
@@ -60,9 +60,9 @@ static void compareBounds(const libpc::Bounds<double>& p, const libpc::Bounds<do
 }
 
 
-static void getPoint(const libpc::PointBuffer& data, double& x, double& y, double& z, double scaleX, double scaleY, double scaleZ)
+static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double& z, double scaleX, double scaleY, double scaleZ)
 {
-    using namespace libpc;
+    using namespace pdal;
 
     const Schema& schema = data.getSchema();
 
@@ -104,26 +104,26 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (1)
     //
     {
-        libpc::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
         
-        const libpc::SpatialReference in_ref(reader.getSpatialReference());
-        const libpc::SpatialReference out_ref(epsg4326_wkt);
+        const pdal::SpatialReference in_ref(reader.getSpatialReference());
+        const pdal::SpatialReference out_ref(epsg4326_wkt);
 
         BOOST_CHECK(in_ref.getWKT() == utm15_wkt);
         BOOST_CHECK(out_ref.getWKT() == epsg4326_wkt);
 
-        const libpc::Schema& schema = reader.getSchema();
-        const libpc::SchemaLayout layout(schema);
-        libpc::PointBuffer data(layout, 1);
+        const pdal::Schema& schema = reader.getSchema();
+        const pdal::SchemaLayout layout(schema);
+        pdal::PointBuffer data(layout, 1);
 
-        libpc::SequentialIterator* iter = reader.createSequentialIterator();
+        pdal::SequentialIterator* iter = reader.createSequentialIterator();
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
         delete iter;
     
         // note this file has only 1 points, so yes, the extent's mins and maxes are the same
-        const libpc::Bounds<double> oldBounds_ref(preX, preY, preZ, preX, preY, preZ);
-        const libpc::Bounds<double>& oldBounds = reader.getBounds();
+        const pdal::Bounds<double> oldBounds_ref(preX, preY, preZ, preX, preY, preZ);
+        const pdal::Bounds<double>& oldBounds = reader.getBounds();
         compareBounds(oldBounds_ref, oldBounds);
 
         double x=0, y=0, z=0;
@@ -138,26 +138,26 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (2)
     //
     {
-        libpc::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
 
-        const libpc::SpatialReference in_ref(reader.getSpatialReference());
-        const libpc::SpatialReference out_ref(epsg4326_wkt);
+        const pdal::SpatialReference in_ref(reader.getSpatialReference());
+        const pdal::SpatialReference out_ref(epsg4326_wkt);
 
-        libpc::filters::ScalingFilter scalingFilter(reader, false);
-        libpc::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
-        libpc::filters::ScalingFilter descalingFilter(reprojectionFilter, true);
+        pdal::filters::ScalingFilter scalingFilter(reader, false);
+        pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+        pdal::filters::ScalingFilter descalingFilter(reprojectionFilter, true);
 
-        const libpc::Schema& schema = descalingFilter.getSchema();
-        const libpc::SchemaLayout layout(schema);
-        libpc::PointBuffer data(layout, 1);
+        const pdal::Schema& schema = descalingFilter.getSchema();
+        const pdal::SchemaLayout layout(schema);
+        pdal::PointBuffer data(layout, 1);
 
-        libpc::SequentialIterator* iter = descalingFilter.createSequentialIterator();
+        pdal::SequentialIterator* iter = descalingFilter.createSequentialIterator();
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
         delete iter;
 
-        const libpc::Bounds<double> newBounds_ref(postX, postY, postZ, postX, postY, postZ);
-        const libpc::Bounds<double>& newBounds = descalingFilter.getBounds();
+        const pdal::Bounds<double> newBounds_ref(postX, postY, postZ, postX, postY, postZ);
+        const pdal::Bounds<double>& newBounds = descalingFilter.getBounds();
         compareBounds(newBounds_ref, newBounds);
 
         double x=0, y=0, z=0;
@@ -172,24 +172,24 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (3)
     //
     {
-        libpc::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
             
-        const libpc::SpatialReference in_ref(reader.getSpatialReference());
-        const libpc::SpatialReference out_ref(epsg4326_wkt);
+        const pdal::SpatialReference in_ref(reader.getSpatialReference());
+        const pdal::SpatialReference out_ref(epsg4326_wkt);
 
         // convert to doubles, use internal scale factor
-        libpc::filters::ScalingFilter scalingFilter(reader, false);
+        pdal::filters::ScalingFilter scalingFilter(reader, false);
 
-        libpc::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+        pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
     
         // convert to ints, using custom scale factor
-        libpc::filters::ScalingFilter descalingFilter(reprojectionFilter, 0.000001, 0.0, 0.000001, 0.0, 0.01, 0.0, true);
+        pdal::filters::ScalingFilter descalingFilter(reprojectionFilter, 0.000001, 0.0, 0.000001, 0.0, 0.01, 0.0, true);
 
-        const libpc::Schema& schema = descalingFilter.getSchema();
-        const libpc::SchemaLayout layout(schema);
-        libpc::PointBuffer data2(layout, 1);
+        const pdal::Schema& schema = descalingFilter.getSchema();
+        const pdal::SchemaLayout layout(schema);
+        pdal::PointBuffer data2(layout, 1);
 
-        libpc::SequentialIterator* iter = descalingFilter.createSequentialIterator();
+        pdal::SequentialIterator* iter = descalingFilter.createSequentialIterator();
         boost::uint32_t numRead = iter->read(data2);
         BOOST_CHECK(numRead == 1);
         delete iter;
@@ -208,22 +208,22 @@ BOOST_AUTO_TEST_CASE(test_1)
 
 BOOST_AUTO_TEST_CASE(test_impedence_mismatch)
 {
-    libpc::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+    pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
         
-    const libpc::SpatialReference& in_ref = reader.getSpatialReference();
+    const pdal::SpatialReference& in_ref = reader.getSpatialReference();
         
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
         
-    libpc::SpatialReference out_ref;
+    pdal::SpatialReference out_ref;
     out_ref.setWKT(epsg4326_wkt);
         
     bool ok = false;
     try
     {
-        libpc::filters::ReprojectionFilter filter(reader, in_ref, out_ref);
+        pdal::filters::ReprojectionFilter filter(reader, in_ref, out_ref);
         ok = false;
     }
-    catch (libpc::impedance_invalid&)
+    catch (pdal::impedance_invalid&)
     {
         ok = true;
     }

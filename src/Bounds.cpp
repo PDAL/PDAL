@@ -33,13 +33,13 @@
 ****************************************************************************/
 
 
-#include <libpc/Bounds.hpp>
-#include <libpc/Range.hpp>
-#include <libpc/Utils.hpp>
-#include <libpc/exceptions.hpp>
+#include <pdal/Bounds.hpp>
+#include <pdal/Range.hpp>
+#include <pdal/Utils.hpp>
+#include <pdal/exceptions.hpp>
 
 
-namespace libpc
+namespace pdal
 {
 
 
@@ -50,7 +50,7 @@ std::istream& operator>>(std::istream& istr, Bounds<double>& bounds)
     Utils::eatwhitespace(istr);
     
     if (!Utils::eatcharacter(istr,'('))
-        throw libpc_error("Bounds parser failed");
+        throw pdal_error("Bounds parser failed");
 
     bool done = false;
     while (!done)
@@ -73,7 +73,7 @@ std::istream& operator>>(std::istream& istr, Bounds<double>& bounds)
         }
         else
         {
-            throw libpc_error("Bounds parser failed");
+            throw pdal_error("Bounds parser failed");
         }
     }
     

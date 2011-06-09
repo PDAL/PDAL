@@ -32,16 +32,16 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/CacheFilterIterator.hpp>
+#include <pdal/filters/CacheFilterIterator.hpp>
 
-#include <libpc/filters/CacheFilter.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/filters/CacheFilter.hpp>
+#include <pdal/PointBuffer.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 CacheFilterSequentialIterator::CacheFilterSequentialIterator(const CacheFilter& filter)
-    : libpc::FilterSequentialIterator(filter)
+    : pdal::FilterSequentialIterator(filter)
     , m_filter(filter)
 {
     return;
@@ -112,7 +112,7 @@ boost::uint32_t CacheFilterSequentialIterator::readImpl(PointBuffer& data)
 
 
 CacheFilterRandomIterator::CacheFilterRandomIterator(const CacheFilter& filter)
-    : libpc::FilterRandomIterator(filter)
+    : pdal::FilterRandomIterator(filter)
     , m_filter(filter)
 {
     return;

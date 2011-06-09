@@ -35,9 +35,9 @@
 #ifndef INCLUDED_SIGNALLER_HPP
 #define INCLUDED_SIGNALLER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 // This is the abstract base class used for out-of-band interactions 

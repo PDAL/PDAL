@@ -35,20 +35,20 @@
 #ifndef INCLUDED_CHIPPERITERATOR_HPP
 #define INCLUDED_CHIPPERITERATOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/FilterIterator.hpp>
-#include <libpc/filters/Chipper.hpp>
-#include <libpc/exceptions.hpp>
+#include <pdal/FilterIterator.hpp>
+#include <pdal/filters/Chipper.hpp>
+#include <pdal/exceptions.hpp>
 
-namespace libpc {
+namespace pdal {
 
 
 namespace filters {
 
 
 
-class ChipperSequentialIterator : public libpc::FilterSequentialIterator
+class ChipperSequentialIterator : public pdal::FilterSequentialIterator
 {
 public:
     ChipperSequentialIterator(Chipper const& filter);

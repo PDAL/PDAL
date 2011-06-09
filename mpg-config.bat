@@ -3,7 +3,7 @@
 set COMPILER="Visual Studio 10 Win64"
 set COMPILER="Visual Studio 10"
 
-set LIBPC_DIR=d:\dev\libpc
+set LIBPC_DIR=d:\dev\pdal
 
 set LIBLAS_DIR=d:\dev\liblas
 set LASZIP_DIR=d:\dev\laszip

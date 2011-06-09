@@ -35,13 +35,13 @@
 #ifndef INCLUDED_XMLSCHEMA_HPP
 #define INCLUDED_XMLSCHEMA_HPP
 
-#include <libpc/libpc.hpp>
-#include <libpc/Schema.hpp>
-#include <libpc/Utils.hpp>
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/Dimension.hpp>
-#include <libpc/DimensionLayout.hpp>
-#include <libpc/exceptions.hpp>
+#include <pdal/pdal.hpp>
+#include <pdal/Schema.hpp>
+#include <pdal/Utils.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/DimensionLayout.hpp>
+#include <pdal/exceptions.hpp>
 
 #include <string>
 #include <stdarg.h>
@@ -61,17 +61,17 @@
 #include <boost/concept_check.hpp>
 #include <boost/function.hpp>
 
-namespace libpc { namespace schema {
+namespace pdal { namespace schema {
 
 
 void OCISchemaGenericErrorHandler (void * ctx, const char* message, ...);
 void OCISchemaStructuredErrorHandler (void * userData, xmlErrorPtr error);
 
-class schema_error : public libpc_error
+class schema_error : public pdal_error
 {
 public:
     schema_error(std::string const& msg)
-        : libpc_error(msg)
+        : pdal_error(msg)
     {}
 };
 
@@ -135,7 +135,7 @@ public:
     Reader(std::istream* xml, std::istream* schema);
     ~Reader();
 
-    inline libpc::Schema getSchema() { return m_schema; }
+    inline pdal::Schema getSchema() { return m_schema; }
 
 
 protected:
@@ -164,7 +164,7 @@ private:
 
     
     void* m_global_context;
-    libpc::Schema m_schema;
+    pdal::Schema m_schema;
     
     std::string m_xml;
     std::string m_xsd;
@@ -179,7 +179,7 @@ private:
 class LIBPC_DLL Writer
 {
 public:
-    Writer(libpc::Schema const& schema);
+    Writer(pdal::Schema const& schema);
     ~Writer() {};
 
     std::string getXML();
@@ -200,7 +200,7 @@ private:
     void write(TextWriterPtr w);
     void writeSchema(TextWriterPtr w);
     void* m_global_context;
-    libpc::Schema const& m_schema;
+    pdal::Schema const& m_schema;
     
     
 

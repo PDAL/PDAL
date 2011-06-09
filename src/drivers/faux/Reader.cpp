@@ -32,18 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/faux/Reader.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
 
-#include <libpc/drivers/faux/Iterator.hpp>
-#include <libpc/exceptions.hpp>
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/drivers/faux/Iterator.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/PointBuffer.hpp>
 
 
-namespace libpc { namespace drivers { namespace faux {
+namespace pdal { namespace drivers { namespace faux {
 
 Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
-    : libpc::Stage()
+    : pdal::Stage()
     , m_mode(mode)
 {
     Schema& schema = getSchemaRef();
@@ -62,7 +62,7 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
 }
 
 Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : libpc::Stage()
+    : pdal::Stage()
     , m_mode(mode)
 {
     Schema& schema = getSchemaRef();
@@ -97,13 +97,13 @@ Reader::Mode Reader::getMode() const
 }
 
 
-libpc::SequentialIterator* Reader::createSequentialIterator() const
+pdal::SequentialIterator* Reader::createSequentialIterator() const
 {
     return new SequentialIterator(*this);
 }
 
 
-libpc::RandomIterator* Reader::createRandomIterator() const
+pdal::RandomIterator* Reader::createRandomIterator() const
 {
     return new RandomIterator(*this);
 }
@@ -175,7 +175,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
             z = minZ + delZ * pointIndex;
             break;
         default:
-            throw libpc_error("invalid mode in FauxReader");
+            throw pdal_error("invalid mode in FauxReader");
             break;
         }
 

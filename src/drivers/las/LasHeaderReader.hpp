@@ -43,15 +43,15 @@
 #ifndef INCLUDED_DRIVERS_LAS_LASHEADERREADER_HPP
 #define INCLUDED_DRIVERS_LAS_LASHEADERREADER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <iosfwd>
 
-namespace libpc {
+namespace pdal {
     class Schema;
 }
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 class LasHeader;
 

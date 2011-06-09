@@ -32,11 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/mrsid/Reader.hpp>
-#include <libpc/exceptions.hpp>
+#include <pdal/drivers/mrsid/Reader.hpp>
+#include <pdal/exceptions.hpp>
 #include "lidar/MG4PointReader.h"
 
-namespace libpc
+namespace pdal
 {
 namespace drivers
 {
@@ -45,11 +45,11 @@ namespace mrsid
 
 LT_USE_LIDAR_NAMESPACE
 
-static libpc::Dimension::Field FieldEnumOf(const char *);
-static libpc::Dimension::DataType TypeEnumOf(LizardTech::DataType);
+static pdal::Dimension::Field FieldEnumOf(const char *);
+static pdal::Dimension::DataType TypeEnumOf(LizardTech::DataType);
 
 Reader::Reader(const char * filepath)
-    : libpc::Stage(), m_reader(NULL)
+    : pdal::Stage(), m_reader(NULL)
 {
     try
     {
@@ -86,7 +86,7 @@ Reader::Reader(const char * filepath)
     return;
 }
 
-libpc::Dimension::Field
+pdal::Dimension::Field
 FieldEnumOf(const char * fieldname)
 {
     if (!strcmp(CHANNEL_NAME_X, fieldname))
@@ -132,7 +132,7 @@ FieldEnumOf(const char * fieldname)
     return Dimension::Field_X;
 }
 
-libpc::Dimension::DataType
+pdal::Dimension::DataType
 TypeEnumOf(LizardTech::DataType ldt)
 {
     switch (ldt)

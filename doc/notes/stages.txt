@@ -1,10 +1,10 @@
 .. _stages:
 
 ===========================
-libPC Project Notes: Stages
+PDAL Project Notes: Stages
 ===========================
 
-As discussed in another Note, libPC is designed to construct simple
+As discussed in another Note, PDAL is designed to construct simple
 pipelines, each pipeline stage performing one specific operation (or, where
 warranted for efficiency, a stage might perform several specific
 operations).  This Note lists all the stages we envision.

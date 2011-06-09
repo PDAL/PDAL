@@ -41,12 +41,12 @@
 #ifndef LIBPC_COLOR_HPP_INCLUDED
 #define LIBPC_COLOR_HPP_INCLUDED
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <boost/array.hpp>
 
 
-namespace libpc
+namespace pdal
 {
 
 /// RGB color container
@@ -150,6 +150,6 @@ LIBPC_DLL inline bool operator!=(Color const& lhs, Color const& rhs)
     return !(lhs == rhs);
 }
 
-} // namespace libpc
+} // namespace pdal
 
 #endif // LIBPC_COLOR_HPP_INCLUDED

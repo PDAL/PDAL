@@ -35,9 +35,9 @@
 #ifndef INCLUDED_ITERATOR_HPP
 #define INCLUDED_ITERATOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-namespace libpc
+namespace pdal
 {
 class Stage;
 class PointBuffer;
@@ -155,6 +155,6 @@ protected:
 
 };
 
-} // namespace libpc
+} // namespace pdal
 
 #endif

@@ -36,28 +36,28 @@
 #include <boost/cstdint.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include <libpc/drivers/oci/Reader.hpp>
-#include <libpc/drivers/oci/Writer.hpp>
-#include <libpc/drivers/oci/Common.hpp>
+#include <pdal/drivers/oci/Reader.hpp>
+#include <pdal/drivers/oci/Writer.hpp>
+#include <pdal/drivers/oci/Common.hpp>
 
-#include <libpc/drivers/liblas/Reader.hpp>
+#include <pdal/drivers/liblas/Reader.hpp>
 
-#include <libpc/filters/CacheFilter.hpp>
-#include <libpc/filters/Chipper.hpp>
+#include <pdal/filters/CacheFilter.hpp>
+#include <pdal/filters/Chipper.hpp>
 
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/faux/Writer.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/drivers/faux/Writer.hpp>
 
-#include <libpc/drivers/liblas/Writer.hpp>
-#include <libpc/Iterator.hpp>
-#include <libpc/Utils.hpp>
+#include <pdal/drivers/liblas/Writer.hpp>
+#include <pdal/Iterator.hpp>
+#include <pdal/Utils.hpp>
 
 #include "Support.hpp"
 #include "TestConfig.hpp"
 
-using namespace libpc;
+using namespace pdal;
 
-using namespace libpc::drivers::oci;
+using namespace pdal::drivers::oci;
 
 
 bool ShouldRunTest()
@@ -119,12 +119,12 @@ BOOST_AUTO_TEST_SUITE(OCITest)
 //     if (!ShouldRunTest()) return;
 // 
 //     Options options = GetOptions();
-//     libpc::drivers::liblas::LiblasReader reader(Support::datapath("1.2-with-color.las"));
+//     pdal::drivers::liblas::LiblasReader reader(Support::datapath("1.2-with-color.las"));
 // 
 //     boost::uint32_t capacity = GetOptions().GetPTree().get<boost::uint32_t>("capacity");
-//     libpc::filters::CacheFilter cache(reader, 1, 1024);
-//     libpc::filters::Chipper chipper(cache, capacity);
-//     libpc::drivers::oci::Writer writer(chipper, options);
+//     pdal::filters::CacheFilter cache(reader, 1, 1024);
+//     pdal::filters::Chipper chipper(cache, capacity);
+//     pdal::drivers::oci::Writer writer(chipper, options);
 //     
 //     BOOST_CHECK_MESSAGE(writer.getConnection().get(), "Unable to connect to Oracle" );
 //     
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_SUITE(OCITest)
 // 
 //     Options options = GetOptions();
 // 
-//     libpc::drivers::oci::Reader reader(options);
+//     pdal::drivers::oci::Reader reader(options);
 //     const boost::uint64_t numPoints = reader.getNumPoints();
 //     BOOST_CHECK_EQUAL(numPoints, 0);
 //     
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_SUITE(OCITest)
 //     BOOST_CHECK_EQUAL(numPointsReadThisChunk, 1065);
 //     // std::ostream* ofs = Utils::createFile("temp.las");
 //     // 
-//     // libpc::drivers::liblas::LiblasWriter writer(reader, *ofs);
+//     // pdal::drivers::liblas::LiblasWriter writer(reader, *ofs);
 //     // writer.write(0);
 //     // 
 //     // Utils::closeFile(ofs);
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_SUITE(OCITest)
 // {
 //     if (!ShouldRunTest()) return;
 //     
-//     libpc::drivers::oci::Options options = GetOptions();
+//     pdal::drivers::oci::Options options = GetOptions();
 //     
 //     Connection connection = Connect(options);
 // 

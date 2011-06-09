@@ -35,17 +35,17 @@
 #ifndef INCLUDED_DRIVERS_QFIT_ITERATOR_HPP
 #define INCLUDED_DRIVERS_QFIT_ITERATOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Iterator.hpp>
+#include <pdal/Iterator.hpp>
 #include <iosfwd>
 
 
-namespace libpc { namespace drivers { namespace qfit {
+namespace pdal { namespace drivers { namespace qfit {
 
 class Reader;
 
-class SequentialIterator : public libpc::SequentialIterator
+class SequentialIterator : public pdal::SequentialIterator
 {
 public:
     SequentialIterator(const Reader& reader);
@@ -61,7 +61,7 @@ private:
 };
 
 
-class RandomIterator : public libpc::RandomIterator
+class RandomIterator : public pdal::RandomIterator
 {
 public:
     RandomIterator(const Reader& reader);

@@ -6,7 +6,7 @@ using System.Text;
 using Libpc;
 using System.Diagnostics;
 
-namespace libpc_swig_test
+namespace pdal_swig_test
 {
    internal class TestDimension : TestBase
    {

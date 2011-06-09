@@ -36,9 +36,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <libpc/Vector.hpp>
+#include <pdal/Vector.hpp>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(VectorTest)
 

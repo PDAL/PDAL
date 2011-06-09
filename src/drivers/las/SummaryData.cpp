@@ -32,13 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/las/SummaryData.hpp>
+#include <pdal/drivers/las/SummaryData.hpp>
 
 #include <iostream>
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
-namespace libpc { 
+namespace pdal { 
 namespace drivers { 
 namespace las {
 

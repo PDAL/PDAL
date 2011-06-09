@@ -35,11 +35,11 @@
 #ifndef INCLUDED_SPATIALREFERENCE_HPP
 #define INCLUDED_SPATIALREFERENCE_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 class LIBPC_DLL SpatialReference
@@ -112,6 +112,6 @@ private:
 
 extern LIBPC_DLL std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs);
 
-} // namespace libpc
+} // namespace pdal
 
 #endif

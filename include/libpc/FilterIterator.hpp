@@ -35,11 +35,11 @@
 #ifndef INCLUDED_FILTERITERATOR_HPP
 #define INCLUDED_FILTERITERATOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Iterator.hpp>
+#include <pdal/Iterator.hpp>
 
-namespace libpc
+namespace pdal
 {
 class Filter;
 
@@ -102,6 +102,6 @@ private:
     BlockIterator* m_prevIterator;
 };
 
-} // namespace libpc
+} // namespace pdal
 
 #endif

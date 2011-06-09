@@ -14,7 +14,7 @@
 // http://nehe.gamedev.net/data/lessons/lesson.asp?lesson=48
 //
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #ifdef LIBPC_COMPILER_MSVC
 #include <windows.h>

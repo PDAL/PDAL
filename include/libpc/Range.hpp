@@ -35,11 +35,11 @@
 #ifndef INCLUDED_RANGE_HPP
 #define INCLUDED_RANGE_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Utils.hpp>
+#include <pdal/Utils.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 template <typename T>
@@ -200,6 +200,6 @@ std::ostream& operator<<(std::ostream& ostr, const Range<T>& range)
 extern LIBPC_DLL std::istream& operator>>(std::istream& istr, Range<double>& range);
 
 
-} // namespace libpc
+} // namespace pdal
 
 #endif

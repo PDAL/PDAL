@@ -35,14 +35,14 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/filters/Chipper.hpp>
-#include <libpc/drivers/liblas/Writer.hpp>
-#include <libpc/drivers/liblas/Reader.hpp>
+#include <pdal/filters/Chipper.hpp>
+#include <pdal/drivers/liblas/Writer.hpp>
+#include <pdal/drivers/liblas/Reader.hpp>
 
 #include "Support.hpp"
 
-using namespace libpc;
-using namespace libpc::drivers::liblas;
+using namespace pdal;
+using namespace pdal::drivers::liblas;
 
 BOOST_AUTO_TEST_SUITE(ChipperTest)
 
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
         const boost::uint64_t num_points = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        libpc::filters::Chipper chipper(reader, 15);
+        pdal::filters::Chipper chipper(reader, 15);
 
         chipper.Chip();
         boost::uint32_t num_blocks = chipper.GetBlockCount();
@@ -63,13 +63,13 @@ BOOST_AUTO_TEST_CASE(test_construction)
         BOOST_CHECK(num_blocks==71);
         
         
-        libpc::Bounds<double> const& bounds = chipper.GetBlock(0).GetBounds();
+        pdal::Bounds<double> const& bounds = chipper.GetBlock(0).GetBounds();
 
         
         std::vector< Range<double> > ranges = bounds.dimensions();
         
-        libpc::Range<double> x = ranges[0];
-        libpc::Range<double> y = ranges[1];
+        pdal::Range<double> x = ranges[0];
+        pdal::Range<double> y = ranges[1];
         
         BOOST_CHECK_CLOSE (x.getMinimum(), 635674.0, 0.05);
         BOOST_CHECK_CLOSE (x.getMaximum(), 635994.0, 0.05);
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
         BOOST_CHECK(ids.size() == 15);
         BOOST_CHECK(ids[14] == 1050 );
         
-        libpc::Schema const& schema = reader.getSchema();
+        pdal::Schema const& schema = reader.getSchema();
         PointBuffer buffer(schema, 15);
         chipper.GetBlock(20).GetBuffer(reader, buffer, 70);
 

@@ -31,9 +31,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/XMLSchema.hpp>
-#include <libpc/exceptions.hpp>
-#include <libpc/Utils.hpp>
+#include <pdal/XMLSchema.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/Utils.hpp>
 
 #include <sstream>
 #include <iostream>
@@ -110,12 +110,12 @@ struct xmlCharDeleter
 };
 
 
-static bool sort_dimensions(libpc::DimensionLayout const& a, libpc::DimensionLayout const& b)
+static bool sort_dimensions(pdal::DimensionLayout const& a, pdal::DimensionLayout const& b)
 {
    return a < b;
 }
 
-namespace libpc { namespace schema {
+namespace pdal { namespace schema {
 
 
 void OCISchemaStructuredErrorHandler
@@ -302,7 +302,7 @@ Reader::Reader(std::istream* xml, std::istream *xsd) : m_doc_options(XML_PARSE_N
 {
     
     if (!xml)
-        throw schema_generic_error("libpc::schema::Reader: xml istream pointer was null!");
+        throw schema_generic_error("pdal::schema::Reader: xml istream pointer was null!");
     
     std::istream::pos_type size;
 
@@ -359,7 +359,7 @@ print_element_names(xmlNode * a_node)
 
 void Reader::Load()
 {
-    std::vector<libpc::DimensionLayout> layouts;
+    std::vector<pdal::DimensionLayout> layouts;
 
     xmlDocPtr doc = static_cast<xmlDocPtr>(m_doc.get());
     xmlNode* root = xmlDocGetRootElement(doc);
@@ -683,7 +683,7 @@ Dimension::Field Reader::GetDimensionField(std::string const& name, boost::uint3
 
 }
 
-Writer::Writer(libpc::Schema const& schema)
+Writer::Writer(pdal::Schema const& schema)
  : m_schema(schema) {}
 
 std::string Writer::getXML()
@@ -710,7 +710,7 @@ void Writer::write(TextWriterPtr writer)
     xmlTextWriterSetIndent(w, 1);
     xmlTextWriterStartDocument(w, NULL, "utf-8", NULL);
     xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "PointCloudSchema", NULL);
-    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "pc", NULL, BAD_CAST "http://libpc.org/schemas/PC/1.0");
+    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "pc", NULL, BAD_CAST "http://pdal.org/schemas/PC/1.0");
     xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "xsi", NULL, BAD_CAST "http://www.w3.org/2001/XMLSchema-instance");
     
     writeSchema(writer);
@@ -735,7 +735,7 @@ void Writer::writeSchema(TextWriterPtr writer)
 
     xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get()); 
     
-    libpc::Schema::Dimensions const& dims = m_schema.getDimensions();
+    pdal::Schema::Dimensions const& dims = m_schema.getDimensions();
     
     for (boost::uint32_t i = 0; i < dims.size(); i++)
     {
@@ -755,7 +755,7 @@ void Writer::writeSchema(TextWriterPtr writer)
         if (description.str().size())
             xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "description", NULL, BAD_CAST description.str().c_str());
         
-        libpc::Dimension::Field f = dim.getField();
+        pdal::Dimension::Field f = dim.getField();
         
         std::ostringstream name;
         name << dim.getFieldName(f);
@@ -763,41 +763,41 @@ void Writer::writeSchema(TextWriterPtr writer)
             xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "name", NULL, BAD_CAST name.str().c_str());
         
         std::ostringstream type;
-        libpc::Dimension::DataType t = dim.getDataType();
+        pdal::Dimension::DataType t = dim.getDataType();
     
         switch (t)
         {
-            case libpc::Dimension::Int8:
+            case pdal::Dimension::Int8:
                 type << "int8_t";
                 break;
-            case libpc::Dimension::Uint8:
+            case pdal::Dimension::Uint8:
                 type << "uint8_t";
                 break;
-            case libpc::Dimension::Int16:
+            case pdal::Dimension::Int16:
                 type << "int16_t";
                 break;
-            case libpc::Dimension::Uint16:
+            case pdal::Dimension::Uint16:
                 type << "uint16_t";
                 break;
-            case libpc::Dimension::Int32:
+            case pdal::Dimension::Int32:
                 type << "int32_t";
                 break;
-            case libpc::Dimension::Uint32:
+            case pdal::Dimension::Uint32:
                 type << "uint32_t";
                 break;
-            case libpc::Dimension::Int64:
+            case pdal::Dimension::Int64:
                 type << "int64_t";
                 break;
-            case libpc::Dimension::Uint64:
+            case pdal::Dimension::Uint64:
                 type << "uint64_t";
                 break;
-            case libpc::Dimension::Float:
+            case pdal::Dimension::Float:
                 type << "float";
                 break;
-            case libpc::Dimension::Double:
+            case pdal::Dimension::Double:
                 type << "double";
                 break;
-            case libpc::Dimension::Undefined:
+            case pdal::Dimension::Undefined:
                 type << "unknown";
                 break;
 

@@ -36,7 +36,7 @@
 #define INCLUDED_DRIVERS_MRSID_READER_HPP
 
 #include <string>
-#include <libpc/Stage.hpp>
+#include <pdal/Stage.hpp>
 #include "lidar/MG4PointReader.h"
 
 namespace LizardTech
@@ -44,14 +44,14 @@ namespace LizardTech
 class MG4PointReader;
 }
 
-namespace libpc
+namespace pdal
 {
 namespace drivers
 {
 namespace mrsid
 {
 
-class LIBPC_DLL Reader : public libpc::Stage
+class LIBPC_DLL Reader : public pdal::Stage
 {
 public:
     Reader(const char *);

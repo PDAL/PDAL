@@ -35,11 +35,11 @@
 #ifndef INCLUDED_WRITER_HPP
 #define INCLUDED_WRITER_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <string>
 
-namespace libpc
+namespace pdal
 {
 
 class Stage;
@@ -86,6 +86,6 @@ private:
     Writer(const Writer&); // not implemented
 };
 
-} // namespace libpc
+} // namespace pdal
 
 #endif

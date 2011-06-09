@@ -32,23 +32,23 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/liblas/Writer.hpp>
+#include <pdal/drivers/liblas/Writer.hpp>
 
 #include <boost/uuid/uuid_io.hpp>
 
 #include <liblas/header.hpp>
 #include <liblas/writer.hpp>
 
-#include <libpc/exceptions.hpp>
-#include <libpc/libpc_config.hpp>
-#include <libpc/Schema.hpp>
-#include <libpc/Stage.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/pdal_config.hpp>
+#include <pdal/Schema.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/PointBuffer.hpp>
 
-#include <libpc/drivers/las/Support.hpp>
+#include <pdal/drivers/las/Support.hpp>
 
 
-namespace libpc { namespace drivers { namespace liblas {
+namespace pdal { namespace drivers { namespace liblas {
 
 
 
@@ -87,11 +87,11 @@ const std::string& LiblasWriter::getName() const
 void LiblasWriter::setupExternalHeader()
 {
     setFormatVersion(1,2);
-    setPointFormat(::libpc::drivers::las::PointFormat3);
+    setPointFormat(::pdal::drivers::las::PointFormat3);
 
     setCompressed(false);
 
-    setSystemIdentifier("libPC");
+    setSystemIdentifier("PDAL");
     setGeneratingSoftware(GetVersionString());
 
     const Schema& schema = getPrevStage().getSchema();
@@ -122,7 +122,7 @@ void LiblasWriter::setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t 
 }
 
 
-void LiblasWriter::setPointFormat(::libpc::drivers::las::PointFormat pointFormat)
+void LiblasWriter::setPointFormat(::pdal::drivers::las::PointFormat pointFormat)
 {
     m_externalHeader->SetDataFormatId((::liblas::PointFormatName)pointFormat);
 }
@@ -173,7 +173,7 @@ void LiblasWriter::writeEnd()
     //std::cout << m_summaryData;
 
     m_ostream.seekp(0);
-    ::libpc::drivers::las::Support::rewriteHeader(m_ostream, m_summaryData);
+    ::pdal::drivers::las::Support::rewriteHeader(m_ostream, m_summaryData);
 
     return;
 }
@@ -181,11 +181,11 @@ void LiblasWriter::writeEnd()
 
 boost::uint32_t LiblasWriter::writeBuffer(const PointBuffer& PointBuffer)
 {
-    const ::libpc::drivers::las::PointFormat pointFormat = (::libpc::drivers::las::PointFormat)m_externalHeader->GetDataFormatId();
+    const ::pdal::drivers::las::PointFormat pointFormat = (::pdal::drivers::las::PointFormat)m_externalHeader->GetDataFormatId();
 
     const Schema& schema = PointBuffer.getSchema();
 
-    const libpc::drivers::las::PointIndexes indexes(schema, pointFormat);
+    const pdal::drivers::las::PointIndexes indexes(schema, pointFormat);
 
     ::liblas::Point pt(m_externalHeader);
 
@@ -218,13 +218,13 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointBuffer& PointBuffer)
         pt.SetUserData(userData);
         pt.SetPointSourceID(pointSourceId);
 
-        if (::libpc::drivers::las::Support::hasTime(pointFormat))
+        if (::pdal::drivers::las::Support::hasTime(pointFormat))
         {
             const double time = PointBuffer.getField<double>(i, indexes.Time);
             pt.SetTime(time);
         }
 
-        if (::libpc::drivers::las::Support::hasColor(pointFormat))
+        if (::pdal::drivers::las::Support::hasColor(pointFormat))
         {
             const boost::uint16_t red = PointBuffer.getField<boost::uint16_t>(i, indexes.Red);
             const boost::uint16_t green = PointBuffer.getField<boost::uint16_t>(i, indexes.Green);
@@ -233,7 +233,7 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointBuffer& PointBuffer)
             pt.SetColor(color);
         }
 
-        if (::libpc::drivers::las::Support::hasWave(pointFormat))
+        if (::pdal::drivers::las::Support::hasWave(pointFormat))
         {
             assert(false);
         }

@@ -35,9 +35,9 @@
 #ifndef INCLUDED_TYPES_HPP
 #define INCLUDED_TYPES_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-namespace libpc {
+namespace pdal {
 
 enum EndianType
 {

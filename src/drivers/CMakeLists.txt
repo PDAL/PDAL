@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# src/drivers/CMakeLists.txt controls building of libPC library
+# src/drivers/CMakeLists.txt controls building of PDAL library
 #
 # Copyright (c) 2011 Howard Butler <hobu@hobu.net>
 #

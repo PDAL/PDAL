@@ -35,7 +35,7 @@
 #ifndef INCLUDED_UTILS_HPP
 #define INCLUDED_UTILS_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
 #include <string>
 #include <cassert>
@@ -44,7 +44,7 @@
 #include <ostream>
 #include <istream>
 
-namespace libpc
+namespace pdal
 {
 
 class LIBPC_DLL Utils
@@ -216,6 +216,6 @@ private:
 #endif 
 
 
-} // namespace libpc
+} // namespace pdal
 
 #endif

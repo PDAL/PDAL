@@ -35,19 +35,19 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/faux/Writer.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/drivers/faux/Writer.hpp>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(FauxWriterTest)
 
 BOOST_AUTO_TEST_CASE(test_1)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Constant);
+    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
 
-    libpc::drivers::faux::Writer writer(reader);
+    pdal::drivers::faux::Writer writer(reader);
     BOOST_CHECK(writer.getDescription() == "Faux Writer");
 
     boost::uint64_t numWritten = writer.write(750);
@@ -73,9 +73,9 @@ BOOST_AUTO_TEST_CASE(test_1)
 BOOST_AUTO_TEST_CASE(test_2)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    libpc::drivers::faux::Reader reader(bounds, 1000, libpc::drivers::faux::Reader::Random);
+    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
 
-    libpc::drivers::faux::Writer writer(reader);
+    pdal::drivers::faux::Writer writer(reader);
 
     boost::uint64_t numWritten = writer.write(750);
 

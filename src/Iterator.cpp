@@ -32,14 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/Iterator.hpp>
+#include <pdal/Iterator.hpp>
 
 #include <algorithm> // for std::min/max
 
-#include <libpc/Stage.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/PointBuffer.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 static boost::uint32_t s_defaultChunkSize = 1024;
@@ -209,4 +209,4 @@ BlockIterator::~BlockIterator()
 
 
 
-} // namespace libpc
+} // namespace pdal

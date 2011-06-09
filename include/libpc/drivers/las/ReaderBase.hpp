@@ -35,12 +35,12 @@
 #ifndef INCLUDED_DRIVERS_LAS_READERBASE_HPP
 #define INCLUDED_DRIVERS_LAS_READERBASE_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/Stage.hpp>
+#include <pdal/Stage.hpp>
 
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 
 // this class gives the interfaces for the LAS-specific header data access functions -- we use

@@ -39,9 +39,9 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/SchemaLayout.hpp>
+#include <pdal/SchemaLayout.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 
@@ -167,4 +167,4 @@ std::ostream& operator<<(std::ostream& os, SchemaLayout const&)
 }
 
 
-} // namespace libpc
+} // namespace pdal

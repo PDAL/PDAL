@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/las/Writer.hpp>
+#include <pdal/drivers/las/Writer.hpp>
 
 #include "LasHeaderWriter.hpp"
 
@@ -42,14 +42,14 @@
 // laszip
 #include <laszip/laszipper.hpp>
 
-#include <libpc/exceptions.hpp>
-#include <libpc/Stage.hpp>
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/PointBuffer.hpp>
 
 #include <iostream>
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 
 LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
@@ -184,7 +184,7 @@ void LasWriter::writeBegin()
             }
             catch(...)
             {
-                throw libpc_error("Error opening compression core (1)");
+                throw pdal_error("Error opening compression core (1)");
             }
 
             PointFormat format = m_lasHeader.getPointFormat();
@@ -198,11 +198,11 @@ void LasWriter::writeBegin()
             }
             catch(...)
             {
-                throw libpc_error("Error opening compression core (3)");
+                throw pdal_error("Error opening compression core (3)");
             }
             if (!ok)
             {
-                throw libpc_error("Error opening compression core (2)");
+                throw pdal_error("Error opening compression core (2)");
             }
 
             try
@@ -211,11 +211,11 @@ void LasWriter::writeBegin()
             }
             catch(...)
             {
-                throw libpc_error("Error opening compression core (3)");
+                throw pdal_error("Error opening compression core (3)");
             }
             if (!ok)
             {
-                throw libpc_error("Error opening compression core (2)");
+                throw pdal_error("Error opening compression core (2)");
             }
         }
 
@@ -229,7 +229,7 @@ void LasWriter::writeBegin()
             {
                 delete m_zipper;
                 m_zipper = NULL;
-                throw libpc_error("Error opening compression engine (1)");
+                throw pdal_error("Error opening compression engine (1)");
             }
 
             PointFormat format = m_lasHeader.getPointFormat();
@@ -247,7 +247,7 @@ void LasWriter::writeBegin()
                 delete m_zipPoint;
                 m_zipper = NULL;
                 m_zipPoint = NULL;
-                throw libpc_error("Error opening compression engine (3)");
+                throw pdal_error("Error opening compression engine (3)");
             }
             if (stat != 0)
             {
@@ -255,7 +255,7 @@ void LasWriter::writeBegin()
                 delete m_zipPoint;
                 m_zipper = NULL;
                 m_zipPoint = NULL;
-                throw libpc_error("Error opening compression engine (2)");
+                throw pdal_error("Error opening compression engine (2)");
             }
         }
     }

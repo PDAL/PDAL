@@ -35,17 +35,17 @@
 #ifndef INCLUDED_FILTERS_DECIMATIONFILTER_HPP
 #define INCLUDED_FILTERS_DECIMATIONFILTER_HPP
 
-#include <libpc/libpc.hpp>
-//#include <libpc/export.hpp>
-#include <libpc/Filter.hpp>
-//#include <libpc/FilterIterator.hpp>
-//#include <libpc/Bounds.hpp>
+#include <pdal/pdal.hpp>
+//#include <pdal/export.hpp>
+#include <pdal/Filter.hpp>
+//#include <pdal/FilterIterator.hpp>
+//#include <pdal/Bounds.hpp>
 
-namespace libpc { 
+namespace pdal { 
     class PointBuffer;
 }
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 class DecimationFilterSequentialIterator;
 
@@ -65,8 +65,8 @@ public:
         return false;
     }
     
-    libpc::SequentialIterator* createSequentialIterator() const;
-    libpc::RandomIterator* createRandomIterator() const { return NULL; }
+    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::RandomIterator* createRandomIterator() const { return NULL; }
 
     boost::uint32_t getStep() const;
 

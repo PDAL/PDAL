@@ -32,17 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/ScalingFilterIterator.hpp>
+#include <pdal/filters/ScalingFilterIterator.hpp>
 
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/filters/ScalingFilter.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/filters/ScalingFilter.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 ScalingFilterSequentialIterator::ScalingFilterSequentialIterator(const ScalingFilter& filter)
-    : libpc::FilterSequentialIterator(filter)
+    : pdal::FilterSequentialIterator(filter)
     , m_scalingFilter(filter)
 {
     return;

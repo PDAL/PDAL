@@ -36,11 +36,11 @@
 
 #include <boost/timer.hpp>
 
-#include <libpc/libpc_config.hpp>
+#include <pdal/pdal_config.hpp>
 
 #include "Application.hpp"
 
-using namespace libpc;
+using namespace pdal;
 namespace po = boost::program_options;
 
 
@@ -167,9 +167,9 @@ void Application::outputHelp()
         std::cout << std::endl;
     }
 
-    std::cout <<"\nFor more information, see the full documentation for libPC at:\n";
+    std::cout <<"\nFor more information, see the full documentation for PDAL at:\n";
     
-    std::cout << "  http://libpc.org/\n";
+    std::cout << "  http://pdal.org/\n";
     std::cout << "--------------------------------------------------------------------\n";
     std::cout << std::endl;
 
@@ -180,7 +180,7 @@ void Application::outputHelp()
 void Application::outputVersion()
 {
     std::cout << "--------------------------------------------------------------------\n";
-    std::cout << m_appName << " (" << libpc::GetFullVersionString() << ")\n";
+    std::cout << m_appName << " (" << pdal::GetFullVersionString() << ")\n";
     std::cout << "--------------------------------------------------------------------\n";
     std::cout << std::endl;
 }

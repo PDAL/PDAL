@@ -27,7 +27,7 @@ content will include:
   
 * usage guide for the command-line apps
   
-* developer-oriented information like libPC architecture and core classes
+* developer-oriented information like PDAL architecture and core classes
   
 * information about specific file format readers and writers, e.g. details
   on what versions of the LAS spec is supported

@@ -35,15 +35,15 @@
 #ifndef INCLUDED_FILTERS_COLORFILTERITERATOR_HPP
 #define INCLUDED_FILTERS_COLORFILTERITERATOR_HPP
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#include <libpc/filters/ColorFilter.hpp>
-#include <libpc/FilterIterator.hpp>
+#include <pdal/filters/ColorFilter.hpp>
+#include <pdal/FilterIterator.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
-class ColorFilterSequentialIterator : public libpc::FilterSequentialIterator
+class ColorFilterSequentialIterator : public pdal::FilterSequentialIterator
 {
 public:
     ColorFilterSequentialIterator(const ColorFilter& filter);

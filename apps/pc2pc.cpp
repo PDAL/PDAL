@@ -12,36 +12,36 @@
 
 #include <iostream>
 
-#include <libpc/exceptions.hpp>
-//#include <libpc/libpc_config.hpp>
-//#include <libpc/Bounds.hpp>
-//#include <libpc/Color.hpp>
-//#include <libpc/Dimension.hpp>
-//#include <libpc/Schema.hpp>
-#include <libpc/filters/Chipper.hpp>
-//#include <libpc/ColorFilter.hpp>
-//#include <libpc/MosaicFilter.hpp>
-//#include <libpc/FauxReader.hpp>
-//#include <libpc/FauxWriter.hpp>
-#include <libpc/drivers/las/Reader.hpp>
-//#include <libpc/LasHeader.hpp>
-#include <libpc/drivers/las/Writer.hpp>
-#include <libpc/filters/CacheFilter.hpp>
-#include <libpc/filters/ByteSwapFilter.hpp>
+#include <pdal/exceptions.hpp>
+//#include <pdal/pdal_config.hpp>
+//#include <pdal/Bounds.hpp>
+//#include <pdal/Color.hpp>
+//#include <pdal/Dimension.hpp>
+//#include <pdal/Schema.hpp>
+#include <pdal/filters/Chipper.hpp>
+//#include <pdal/ColorFilter.hpp>
+//#include <pdal/MosaicFilter.hpp>
+//#include <pdal/FauxReader.hpp>
+//#include <pdal/FauxWriter.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+//#include <pdal/LasHeader.hpp>
+#include <pdal/drivers/las/Writer.hpp>
+#include <pdal/filters/CacheFilter.hpp>
+#include <pdal/filters/ByteSwapFilter.hpp>
 
-#include <libpc/drivers/liblas/Writer.hpp>
-#include <libpc/drivers/liblas/Reader.hpp>
+#include <pdal/drivers/liblas/Writer.hpp>
+#include <pdal/drivers/liblas/Reader.hpp>
 
 #ifdef LIBPC_HAVE_ORACLE
-#include <libpc/drivers/oci/Writer.hpp>
-#include <libpc/drivers/oci/Reader.hpp>
+#include <pdal/drivers/oci/Writer.hpp>
+#include <pdal/drivers/oci/Reader.hpp>
 #endif
 
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "Application.hpp"
 
-using namespace libpc;
+using namespace pdal;
 namespace po = boost::program_options;
 
 
@@ -118,11 +118,11 @@ int Application_pc2pc::execute()
 
     if (hasOption("native"))
     {
-        libpc::drivers::las::LasReader reader(m_inputFile);
+        pdal::drivers::las::LasReader reader(m_inputFile);
     
         const boost::uint64_t numPoints = reader.getNumPoints();
 
-        libpc::drivers::las::LasWriter writer(reader, *ofs);
+        pdal::drivers::las::LasWriter writer(reader, *ofs);
 
         //BUG: handle laz writer.setCompressed(false);
 
@@ -134,7 +134,7 @@ int Application_pc2pc::execute()
     else if (hasOption("oracle-writer"))
     {
 #ifdef LIBPC_HAVE_ORACLE
-        libpc::drivers::liblas::LiblasReader reader(m_inputFile);
+        pdal::drivers::liblas::LiblasReader reader(m_inputFile);
     
         const boost::uint64_t numPoints = reader.getNumPoints();
 
@@ -144,21 +144,21 @@ int Application_pc2pc::execute()
         
         boost::property_tree::ptree oracle_options = load_tree.get_child("drivers.oci.writer");
     
-        libpc::Options options(oracle_options);
+        pdal::Options options(oracle_options);
     
         boost::property_tree::ptree& tree = options.GetPTree();
         
         boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
         
         
-        libpc::filters::CacheFilter cache(reader, 1, capacity);
-        libpc::filters::Chipper chipper(cache, capacity);
-        libpc::filters::ByteSwapFilter swapper(chipper);
-        libpc::drivers::oci::Writer writer(swapper, options);
+        pdal::filters::CacheFilter cache(reader, 1, capacity);
+        pdal::filters::Chipper chipper(cache, capacity);
+        pdal::filters::ByteSwapFilter swapper(chipper);
+        pdal::drivers::oci::Writer writer(swapper, options);
 
-        // libpc::filters::CacheFilter cache(reader, 1, capacity);
-        // libpc::filters::Chipper chipper(cache, capacity);
-        // libpc::drivers::oci::Writer writer(chipper, options);
+        // pdal::filters::CacheFilter cache(reader, 1, capacity);
+        // pdal::filters::Chipper chipper(cache, capacity);
+        // pdal::drivers::oci::Writer writer(chipper, options);
 
         writer.write(numPoints);
         boost::property_tree::ptree output_tree;
@@ -166,7 +166,7 @@ int Application_pc2pc::execute()
         // boost::property_tree::write_xml(m_xml, output_tree);
                     
 #else
-        throw configuration_error("libPC not compiled with Oracle support");
+        throw configuration_error("PDAL not compiled with Oracle support");
 #endif
     }
         else if (hasOption("oracle-reader"))
@@ -179,18 +179,18 @@ int Application_pc2pc::execute()
         
         boost::property_tree::ptree oracle_options = load_tree.get_child("drivers.oci.reader");
     
-        libpc::Options options(oracle_options);
+        pdal::Options options(oracle_options);
 
-        libpc::drivers::oci::Reader reader(options);
-        libpc::filters::ByteSwapFilter swapper(reader);
+        pdal::drivers::oci::Reader reader(options);
+        pdal::filters::ByteSwapFilter swapper(reader);
         const boost::uint64_t numPoints = reader.getNumPoints();
-        libpc::drivers::las::LasWriter writer(swapper, *ofs);
+        pdal::drivers::las::LasWriter writer(swapper, *ofs);
         
         writer.setChunkSize(options.GetPTree().get<boost::uint32_t>("capacity"));
 
         if (hasOption("a_srs"))
         {
-            libpc::SpatialReference ref;
+            pdal::SpatialReference ref;
             if (m_srs.size() > 0)
             {
                 ref.setFromUserInput(m_srs);
@@ -211,7 +211,7 @@ int Application_pc2pc::execute()
         // boost::property_tree::write_xml(m_xml, output_tree);
             
     #else
-            throw configuration_error("libPC not compiled with Oracle support");
+            throw configuration_error("PDAL not compiled with Oracle support");
     #endif
         }
 
@@ -219,11 +219,11 @@ int Application_pc2pc::execute()
 
     else
     {
-        libpc::drivers::liblas::LiblasReader reader(m_inputFile);
+        pdal::drivers::liblas::LiblasReader reader(m_inputFile);
     
         const boost::uint64_t numPoints = reader.getNumPoints();
 
-        libpc::drivers::liblas::LiblasWriter writer(reader, *ofs);
+        pdal::drivers::liblas::LiblasWriter writer(reader, *ofs);
 
         //BUG: handle laz writer.setCompressed(false);
 

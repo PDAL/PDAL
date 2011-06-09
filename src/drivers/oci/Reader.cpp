@@ -32,21 +32,21 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/oci/Reader.hpp>
-#include <libpc/drivers/oci/Iterator.hpp>
-#include <libpc/Utils.hpp>
+#include <pdal/drivers/oci/Reader.hpp>
+#include <pdal/drivers/oci/Iterator.hpp>
+#include <pdal/Utils.hpp>
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
 #include <iostream>
 #include <map>
 
 
-namespace libpc { namespace drivers { namespace oci {
+namespace pdal { namespace drivers { namespace oci {
 
 
 Reader::Reader(Options& options)
-    : libpc::Stage()
+    : pdal::Stage()
     , m_options(options)
     , m_querytype(QUERY_UNKNOWN)
 {
@@ -57,7 +57,7 @@ Reader::Reader(Options& options)
 
 
     if (getQuery().size() == 0 )
-        throw libpc_error("'select_sql' statement is empty. No data can be read from libpc::drivers::oci::Reader");
+        throw pdal_error("'select_sql' statement is empty. No data can be read from pdal::drivers::oci::Reader");
 
     m_statement = Statement(m_connection->CreateStatement(getQuery().c_str()));
     
@@ -75,7 +75,7 @@ Reader::Reader(Options& options)
     
         bool bDidRead = m_statement->Fetch(); 
     
-        if (!bDidRead) throw libpc_error("Unable to fetch a point cloud entry entry!");
+        if (!bDidRead) throw pdal_error("Unable to fetch a point cloud entry entry!");
         Schema& schema = getSchemaRef(); 
         schema = fetchSchema(m_pc);
     }
@@ -87,14 +87,14 @@ Reader::Reader(Options& options)
 
         bool bDidRead = m_statement->Fetch(); 
     
-        if (!bDidRead) throw libpc_error("Unable to fetch a point cloud entry entry!");
+        if (!bDidRead) throw pdal_error("Unable to fetch a point cloud entry entry!");
         Schema& schema = getSchemaRef(); 
         schema = fetchSchema(m_pc);
         
     }
     
     else 
-        throw libpc_error("SQL statement does not define a SDO_PC or CLIP_PC block");
+        throw pdal_error("SQL statement does not define a SDO_PC or CLIP_PC block");
 
 
 
@@ -364,7 +364,7 @@ QueryType Reader::describeQueryType() const
     std::ostringstream oss;
     oss << "Select statement '" << getQuery() << "' does not fetch an SDO_PC object" 
           " or SDO_PC_BLK_TYPE";
-    throw libpc_error(oss.str());
+    throw pdal_error(oss.str());
 }
 
 BlockPtr Reader::defineBlock() const
@@ -456,7 +456,7 @@ BlockPtr Reader::defineBlock() const
     return block;
 }
 
-libpc::Schema Reader::fetchSchema(sdo_pc* pc) 
+pdal::Schema Reader::fetchSchema(sdo_pc* pc) 
 {
 
     std::ostringstream select_schema;
@@ -512,7 +512,7 @@ libpc::Schema Reader::fetchSchema(sdo_pc* pc)
     {
         std::ostringstream oss;
         oss << "Invalid block capacity for point cloud object in Oracle: " << block_capacity;
-        throw libpc_error(oss.str());
+        throw pdal_error(oss.str());
     }
     
     m_options.GetPTree().put("capacity", block_capacity);
@@ -537,10 +537,10 @@ CloudPtr Reader::getCloud() const
 
 }
 
-libpc::SequentialIterator* Reader::createSequentialIterator() const
+pdal::SequentialIterator* Reader::createSequentialIterator() const
 {
-    return new libpc::drivers::oci::SequentialIterator(*this);
+    return new pdal::drivers::oci::SequentialIterator(*this);
 }
 
 
-}}} // namespace libpc::driver::oci
+}}} // namespace pdal::driver::oci
