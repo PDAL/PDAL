@@ -107,12 +107,16 @@ public:
     
     boost::property_tree::ptree getPTree() const;    
 
+    const std::string& getDescription() const;
+    const std::string& getName() const;
+
 private:
     std::string m_wkt;
 };
 
 
 extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs);
+extern PDAL_DLL std::istream& operator>>(std::istream& istr, SpatialReference& srs);
 
 } // namespace pdal
 

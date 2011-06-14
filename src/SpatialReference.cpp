@@ -33,7 +33,10 @@
  ****************************************************************************/
 
 #include <pdal/SpatialReference.hpp>
+
 #include <boost/concept_check.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+
 
 // gdal
 #ifdef PDAL_HAVE_GDAL
@@ -282,11 +285,43 @@ bool SpatialReference::operator==(const SpatialReference& input) const
 
 std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 {
-    ostr << "SRS: ";
-    ostr << srs.getWKT();
-    ostr << std::endl;
+
+#ifdef PDAL_SRS_ENABLED
+    boost::property_tree::ptree tree;
+    std::string name = srs.getName();
+    tree.put_child(name, srs.getPTree());
+    boost::property_tree::write_xml(ostr, tree);
     return ostr;
+
+#else
+    throw pdal_error ("SpatialReference io operator<< is not available without GDAL+libgeotiff support");
+#endif
 }
 
+
+std::istream& operator>>(std::istream& istr, SpatialReference& srs)
+{
+
+#ifdef PDAL_SRS_ENABLED
+    boost::property_tree::ptree tree;
+    boost::property_tree::read_xml(istr, tree, 0);
+    std::string wkt = tree.get<std::string>("pdal.spatialreference.compoundwkt");
+    SpatialReference ref;
+    ref.setWKT(wkt);
+    srs = ref;
+    return istr;
+    
+#else
+    throw pdal_error ("SpatialReference io operator>> is not available without GDAL+libgeotiff support");
+#endif
+}
+
+
+
+const std::string& SpatialReference::getName() const
+{
+    static std::string name("pdal.spatialreference");
+    return name;
+}
 
 } // namespace pdal

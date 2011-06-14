@@ -362,4 +362,25 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 }
 
 
+
+BOOST_AUTO_TEST_CASE(test_io)
+{
+    const std::string wkt = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
+
+    pdal::SpatialReference ref;
+    ref.setFromUserInput(wkt);
+
+    std::stringstream ss(std::stringstream::in | std::stringstream::out);
+    
+    ss << ref;
+    
+    pdal::SpatialReference ref2;
+    ss >> ref2;
+    
+    BOOST_CHECK(ref == ref2);
+    
+
+    return;
+}
+
 BOOST_AUTO_TEST_SUITE_END()
