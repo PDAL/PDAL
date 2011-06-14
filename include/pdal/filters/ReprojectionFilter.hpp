@@ -36,10 +36,10 @@
 #define INCLUDED_FILTERS_REPROJECTIONFILTER_HPP
 
 #include <pdal/pdal.hpp>
+#include <pdal/Filter.hpp>
 
 #include <boost/shared_ptr.hpp>
 
-#include <pdal/Filter.hpp>
 
 namespace pdal
 {
