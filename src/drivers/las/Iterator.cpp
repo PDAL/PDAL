@@ -140,7 +140,7 @@ void IteratorBase::initializeZip()
             throw pdal_error("Failed to open laszip decompression engine (1)"); 
         }
 
-        unsigned int stat = 1;
+        bool stat(false);
         try
         {
             m_istream->seekg(m_reader.getPointDataOffset(), std::ios::beg);
@@ -150,7 +150,7 @@ void IteratorBase::initializeZip()
         {
             throw pdal_error("Failed to open laszip decompression engine (2)"); 
         }
-        if (stat != 0)
+        if (!stat)
         {
             throw pdal_error("Failed to open laszip decompression engine (3)"); 
         }

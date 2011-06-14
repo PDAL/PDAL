@@ -230,7 +230,7 @@ void LasWriter::writeBegin()
             PointFormat format = m_lasHeader.getPointFormat();
             boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_lasHeader.getVLRs().getAll()));
             m_zipPoint.swap(z);
-            unsigned int stat = 1;
+            bool stat(false);
             try
             {
                 stat = m_zipper->open(m_ostream, m_zip.get());
@@ -239,7 +239,7 @@ void LasWriter::writeBegin()
             {
                 throw pdal_error("Error opening compression engine (3)");
             }
-            if (stat != 0)
+            if (!stat)
             {
                 throw pdal_error("Error opening compression engine (2)");
             }
