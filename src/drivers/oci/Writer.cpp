@@ -1020,9 +1020,9 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
         boost::uint16_t red(0), green(0), blue(0), alpha(0);
         if (hasColorData)
         {
-            red = buffer.getField<double>(counter, indexRed);
-            green = buffer.getField<double>(counter, indexGreen);
-            blue = buffer.getField<double>(counter, indexBlue);
+            red = buffer.getField<boost::uint16_t>(counter, indexRed);
+            green = buffer.getField<boost::uint16_t>(counter, indexGreen);
+            blue = buffer.getField<boost::uint16_t>(counter, indexBlue);
             
         }
 
