@@ -260,6 +260,25 @@ boost::property_tree::ptree SpatialReference::getPTree( ) const
     
 }
 
+bool SpatialReference::operator==(const SpatialReference& input) const
+{
+#ifdef PDAL_SRS_ENABLED
+
+    OGRSpatialReferenceH current = OSRNewSpatialReference(getWKT(eCompoundOK, false).c_str());
+    OGRSpatialReferenceH other = OSRNewSpatialReference(input.getWKT(eCompoundOK, false).c_str());
+
+    int output = OSRIsSame(current, other);
+
+    OSRDestroySpatialReference( current );
+    OSRDestroySpatialReference( other );
+    
+    return bool(output);
+    
+#else
+    throw pdal_error ("SpatialReference equality testing not available without GDAL+libgeotiff support");
+#endif
+
+}
 
 std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 {

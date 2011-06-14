@@ -66,6 +66,8 @@ public:
 
     /// Assignment operator.
     SpatialReference& operator=(SpatialReference const& rhs);
+    
+    bool operator==(const SpatialReference& other) const;
 
     /// Returns the OGC WKT describing Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine 
