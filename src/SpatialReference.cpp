@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include <pdal/SpatialReference.hpp>
+#include <pdal/exceptions.hpp>
 
 #include <boost/concept_check.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -288,7 +289,7 @@ std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 
 #ifdef PDAL_SRS_ENABLED
     boost::property_tree::ptree tree;
-    std::string name = srs.getName();
+    std::string name ("spatialreference");
     tree.put_child(name, srs.getPTree());
     boost::property_tree::write_xml(ostr, tree);
     return ostr;
@@ -305,9 +306,25 @@ std::istream& operator>>(std::istream& istr, SpatialReference& srs)
 #ifdef PDAL_SRS_ENABLED
     boost::property_tree::ptree tree;
     boost::property_tree::read_xml(istr, tree, 0);
-    std::string wkt = tree.get<std::string>("pdal.spatialreference.compoundwkt");
-    SpatialReference ref;
-    ref.setWKT(wkt);
+
+    SpatialReference ref;    
+    try {
+        std::string wkt = tree.get<std::string>("spatialreference.compoundwkt");
+        ref.setWKT(wkt);
+    }
+    catch (boost::property_tree::ptree_bad_path const& e) {
+      ::boost::ignore_unused_variable_warning(e);
+      
+        try {
+            std::string input = tree.get<std::string>("spatialreference.userinput");
+            ref.setFromUserInput(input);
+        }
+        catch (boost::property_tree::ptree_bad_path const& e) {
+          ::boost::ignore_unused_variable_warning(e);
+            throw pdal_error("Unable to ingest SpatialReference via operator >>  Does the data contain either a compoundwkt or userinput node?");
+        }
+    }
+
     srs = ref;
     return istr;
     
