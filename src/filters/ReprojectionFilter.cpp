@@ -106,9 +106,16 @@ void ReprojectionFilter::updateBounds()
     double maxx = oldBounds.getMaximum(0);
     double maxy = oldBounds.getMaximum(1);
     double maxz = oldBounds.getMaximum(2);
+    
+    try {
 
-    transform(minx, miny, minz);
-    transform(maxx, maxy, maxz);
+        transform(minx, miny, minz);
+        transform(maxx, maxy, maxz);
+        
+    } catch (pdal::pdal_error&) 
+    {
+        return;
+    }
 
     Bounds<double> newBounds(minx, miny, minz, maxx, maxy, maxz);
 
@@ -162,7 +169,8 @@ void ReprojectionFilter::initialize()
     }
     m_transform_ptr = TransformPtr(OCTNewCoordinateTransformation( m_in_ref_ptr.get(), m_out_ref_ptr.get()), OSRTransformDeleter());
 #endif
-
+    
+    setSpatialReference(m_outSRS);
     return;
 }
 
