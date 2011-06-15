@@ -170,7 +170,7 @@ void ScalingFilter::checkImpedance()
             dimYd.setNumericScale(m_scaleY);
             dimYd.setNumericOffset(m_offsetY);
             dimZd.setNumericScale(m_scaleZ);
-            dimZd.setNumericOffset(m_offsetY);
+            dimZd.setNumericOffset(m_offsetZ);
         }
         else
         {
