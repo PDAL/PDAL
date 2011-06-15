@@ -458,7 +458,26 @@ BlockPtr Reader::defineBlock() const
 
 pdal::Schema Reader::fetchSchema(sdo_pc* pc) 
 {
+    
+    // Fetch the WKT for the SRID to set the coordinate system of this stage
+    int srid = m_statement->GetInteger(&(pc->pc_geometry.sdo_srid));
+    
+    std::ostringstream select_wkt;
+    select_wkt
+        << "SELECT WKTEXT3D from MDSYS.CS_SRS WHERE SRID = " << srid;
 
+    int wkt_length = 3999;
+    char* wkt = (char*) malloc (sizeof(char*) * wkt_length);
+    Statement get_wkt(m_connection->CreateStatement(select_wkt.str().c_str()));
+    get_wkt->Define( wkt, wkt_length );    
+    get_wkt->Execute();    
+    std::string s_wkt(wkt);
+    free(wkt);
+    
+    setSpatialReference(pdal::SpatialReference(s_wkt));
+    
+    
+    // Fetch the XML that defines the schema for this point cloud
     std::ostringstream select_schema;
     OCILobLocator* metadata = NULL;    
     select_schema
