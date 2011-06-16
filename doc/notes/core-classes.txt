@@ -4,7 +4,7 @@
 Core Classes
 ============
 
-This Notes describes the core classes used by libPC.
+This Notes describes the core classes used by PDAL.
 
 * Range
 

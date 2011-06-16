@@ -32,14 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/las/Support.hpp>
+#include <pdal/drivers/las/Support.hpp>
 
-#include <libpc/drivers/las/SummaryData.hpp>
+#include <pdal/drivers/las/SummaryData.hpp>
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 void Support::registerFields(Schema& schema, PointFormat format)
 {

@@ -33,17 +33,17 @@
 ****************************************************************************/
 
 
-#include <libpc/drivers/oci/Common.hpp>
+#include <pdal/drivers/oci/Common.hpp>
 
 #include <iostream>
 
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 #include <boost/make_shared.hpp>
 
-#include <libpc/Bounds.hpp>
-#include <libpc/exceptions.hpp>
+#include <pdal/Bounds.hpp>
+#include <pdal/exceptions.hpp>
 
-namespace libpc { namespace drivers { namespace oci {
+namespace pdal { namespace drivers { namespace oci {
 
 
 Options GetDefaultOptions() 
@@ -75,7 +75,7 @@ Options GetDefaultOptions()
     tree.put("pre_sql", std::string(""));
     tree.put("post_block_sql", std::string(""));
     tree.put("select_sql", std::string(""));
-    tree.put("base_table_bounds", libpc::Bounds<double>());
+    tree.put("base_table_bounds", pdal::Bounds<double>());
     tree.put("blob_read_byte_size", boost::uint32_t(2000));
     tree.put("point_schema_override", "");
     
@@ -118,22 +118,16 @@ Block::~Block()
     // m_connection->DestroyType(&blk_extent);
 }
 
-Cloud::Cloud(Connection connection)
-    : schema(new std::vector<boost::uint8_t>)
-    , m_connection(connection)
+Cloud::Cloud(Connection con)
+    : connection(con)
 {
-    m_connection->CreateType(&pc_geometry);
-    m_connection->CreateType(&pc_geometry->sdo_ordinates, m_connection->GetOrdinateType());
-    m_connection->CreateType(&pc_geometry->sdo_elem_info, m_connection->GetElemInfoType());
-    m_connection->CreateType(&pc_domain);
+
+
 }
 
 Cloud::~Cloud()
 {
 
-    // FIXME: For some reason having the dtor destroy this
-    // causes a segfault
-    // m_connection->DestroyType(&blk_extent);
 }
 
 
@@ -156,7 +150,7 @@ Connection Connect(Options const& options)
         
     } catch (boost::property_tree::ptree_bad_path const& ) 
     {
-        throw libpc_error("'connection' string for oracle not set in options");
+        throw pdal_error("'connection' string for oracle not set in options");
     }
 
     bool verbose = false;
@@ -165,11 +159,11 @@ Connection Connect(Options const& options)
         
     } catch (boost::property_tree::ptree_bad_path const& ) 
     {
-        throw libpc_error("'verbose' bool for oracle not set in options");
+        throw pdal_error("'verbose' bool for oracle not set in options");
     }
     
     if (connection.empty())
-        throw libpc_error("Oracle connection string empty! Unable to connect");
+        throw pdal_error("Oracle connection string empty! Unable to connect");
 
     
     std::string::size_type slash_pos = connection.find("/",0);
@@ -194,7 +188,7 @@ Connection Connect(Options const& options)
 }
 
 
-}}} // namespace libpc::driver::oci
+}}} // namespace pdal::driver::oci
 
 void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
 {
@@ -202,7 +196,7 @@ void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *m
     
     if (eErrClass == CE_Failure || eErrClass == CE_Fatal) {
         oss <<"GDAL Failure number=" << err_no << ": " << msg;
-        throw libpc::libpc_error(oss.str());
+        throw pdal::pdal_error(oss.str());
     } else {
         return;
     }
@@ -214,7 +208,7 @@ void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const ch
     
     if (eErrClass == CE_Failure || eErrClass == CE_Fatal) {
         oss <<"GDAL Failure number=" << err_no << ": " << msg;
-        throw libpc::libpc_error(oss.str());
+        throw pdal::pdal_error(oss.str());
     } else if (eErrClass == CE_Debug) {
         std::cout <<"GDAL Debug: " << msg << std::endl;
     } else {

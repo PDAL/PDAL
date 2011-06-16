@@ -33,18 +33,208 @@
 ****************************************************************************/
 
 
-#include <libpc/drivers/oci/Writer.hpp>
+#include <pdal/drivers/oci/Writer.hpp>
 
 #include <iostream>
 
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
 #include <fstream>
 
-namespace libpc { namespace drivers { namespace oci {
+namespace pdal { namespace drivers { namespace oci {
 
 
+pdal::Schema Get8DimensionFixedSchema()
+{
+    std::ostringstream text;
+    pdal::Schema schema;
+    
+    Dimension x(Dimension::Field_X, Dimension::Double);
+    text << "x coordinate as a long integer.  You must use the scale and "
+         << "offset information of the header to determine the double value.";
+    x.setDescription(text.str());
+    x.setEndianness(pdal::Endian_Big);
+    schema.addDimension(x);
+    text.str("");
+
+    Dimension y(Dimension::Field_Y, Dimension::Double);
+    text << "y coordinate as a long integer.  You must use the scale and "
+         << "offset information of the header to determine the double value.";
+    y.setDescription(text.str());
+    y.setEndianness(pdal::Endian_Big);
+    schema.addDimension(y);
+    text.str("");
+
+    Dimension z(Dimension::Field_Z, Dimension::Double);
+    text << "z coordinate as a long integer.  You must use the scale and "
+         << "offset information of the header to determine the double value.";
+    z.setDescription(text.str());
+    z.setEndianness(pdal::Endian_Big);
+    schema.addDimension(z);
+    text.str("");
+
+    Dimension t(Dimension::Field_Time, Dimension::Double);
+    text << "The GPS Time is the double floating point time tag value at "
+        "which the point was acquired. It is GPS Week Time if the "
+        "Global Encoding low bit is clear and Adjusted Standard GPS "
+        "Time if the Global Encoding low bit is set (see Global Encoding "
+        "in the Public Header Block description).";
+    t.setDescription(text.str());
+    t.setEndianness(pdal::Endian_Big);
+    schema.addDimension(t);
+    text.str("");
+
+    Dimension classification(Dimension::Field_Classification, Dimension::Double);
+    text << "Classification in LAS 1.0 was essentially user defined and optional. "
+         "LAS 1.1 defines a standard set of ASPRS classifications. In addition, "
+         "the field is now mandatory. If a point has never been classified, this "
+         "byte must be set to zero. There are no user defined classes since "
+         "both point format 0 and point format 1 supply 8 bits per point for "
+         "user defined operations. Note that the format for classification is a "
+         "bit encoded field with the lower five bits used for class and the "
+         "three high bits used for flags.";
+    classification.setDescription(text.str());
+    classification.setEndianness(pdal::Endian_Big);
+    schema.addDimension(classification);
+    text.str("");
+    
+    Dimension intensity(Dimension::Field_Intensity, Dimension::Double);
+    text << "The intensity value is the integer representation of the pulse "
+         "return magnitude. This value is optional and system specific. "
+         "However, it should always be included if available.";
+    intensity.setDescription(text.str());
+    intensity.setEndianness(pdal::Endian_Big);
+    schema.addDimension(intensity);
+    text.str("");
+
+    Dimension return_no(Dimension::Field_ReturnNumber, Dimension::Uint8); // 3 bits only
+    text << "Return Number: The Return Number is the pulse return number for "
+         "a given output pulse. A given output laser pulse can have many "
+         "returns, and they must be marked in sequence of return. The first "
+         "return will have a Return Number of one, the second a Return "
+         "Number of two, and so on up to five returns.";
+    return_no.setDescription(text.str());
+    return_no.setEndianness(pdal::Endian_Big);
+    schema.addDimension(return_no);
+    text.str("");
+
+    Dimension no_returns(Dimension::Field_NumberOfReturns, Dimension::Uint8); // 3 bits only
+    text << "Number of Returns (for this emitted pulse): The Number of Returns "
+         "is the total number of returns for a given pulse. For example, "
+         "a laser data point may be return two (Return Number) within a "
+         "total number of five returns.";
+    no_returns.setDescription(text.str());
+    no_returns.setEndianness(pdal::Endian_Big);
+    schema.addDimension(no_returns);
+    text.str("");
+
+    Dimension scan_dir(Dimension::Field_ScanDirectionFlag, Dimension::Uint8); // 1 bit only
+    text << "The Scan Direction Flag denotes the direction at which the "
+         "scanner mirror was traveling at the time of the output pulse. "
+         "A bit value of 1 is a positive scan direction, and a bit value "
+         "of 0 is a negative scan direction (where positive scan direction "
+         "is a scan moving from the left side of the in-track direction to "
+         "the right side and negative the opposite). ";
+    scan_dir.setDescription(text.str());
+    scan_dir.setEndianness(pdal::Endian_Big);
+    schema.addDimension(scan_dir);
+    text.str("");
+
+    Dimension edge(Dimension::Field_EdgeOfFlightLine, Dimension::Uint8); // 1 bit only
+    text << "The Edge of Flight Line data bit has a value of 1 only when "
+         "the point is at the end of a scan. It is the last point on "
+         "a given scan line before it changes direction.";
+    edge.setDescription(text.str());
+    edge.setEndianness(pdal::Endian_Big);
+    schema.addDimension(edge);
+    text.str("");
+
+
+
+    Dimension scan_angle(Dimension::Field_ScanAngleRank, Dimension::Int8);
+    text << "The Scan Angle Rank is a signed one-byte number with a "
+         "valid range from -90 to +90. The Scan Angle Rank is the "
+         "angle (rounded to the nearest integer in the absolute "
+         "value sense) at which the laser point was output from the "
+         "laser system including the roll of the aircraft. The scan "
+         "angle is within 1 degree of accuracy from +90 to ñ90 degrees. "
+         "The scan angle is an angle based on 0 degrees being nadir, "
+         "and ñ90 degrees to the left side of the aircraft in the "
+         "direction of flight.";
+    scan_angle.setDescription(text.str());
+    scan_angle.setEndianness(pdal::Endian_Big);
+    schema.addDimension(scan_angle);
+    text.str("");
+
+    Dimension user_data(Dimension::Field_UserData, Dimension::Uint8);
+    text << "This field may be used at the userís discretion";
+    user_data.setDescription(text.str());
+    user_data.setEndianness(pdal::Endian_Big);
+    schema.addDimension(user_data);
+    text.str("");
+
+    Dimension point_source_id(Dimension::Field_PointSourceId, Dimension::Uint16);
+    text << "This value indicates the file from which this point originated. "
+         "Valid values for this field are 1 to 65,535 inclusive with zero "
+         "being used for a special case discussed below. The numerical value "
+         "corresponds to the File Source ID from which this point originated. "
+         "Zero is reserved as a convenience to system implementers. A Point "
+         "Source ID of zero implies that this point originated in this file. "
+         "This implies that processing software should set the Point Source "
+         "ID equal to the File Source ID of the file containing this point "
+         "at some time during processing. ";
+    point_source_id.setDescription(text.str());
+    point_source_id.setEndianness(pdal::Endian_Big);
+    schema.addDimension(point_source_id);
+    text.str("");
+
+
+
+    Dimension red(Dimension::Field_Red, Dimension::Uint16);
+    text << "The red image channel value associated with this point";
+    red.setDescription(text.str());
+    red.setEndianness(pdal::Endian_Big);
+    schema.addDimension(red);
+    text.str("");
+
+    Dimension green(Dimension::Field_Green, Dimension::Uint16);
+    text << "The green image channel value associated with this point";
+    green.setDescription(text.str());
+    green.setEndianness(pdal::Endian_Big);
+    schema.addDimension(green);
+    text.str("");
+
+    Dimension blue(Dimension::Field_Blue, Dimension::Uint16);
+    text << "The blue image channel value associated with this point";
+    blue.setDescription(text.str());
+    blue.setEndianness(pdal::Endian_Big);
+    schema.addDimension(blue);
+    text.str("");
+
+    Dimension alpha(Dimension::Field_Alpha, Dimension::Uint16);
+    text << "The alpha image channel value associated with this point";
+    alpha.setDescription(text.str());
+    alpha.setEndianness(pdal::Endian_Big);
+    schema.addDimension(alpha);
+    text.str("");
+
+    Dimension blk_id(Dimension::Field_User1, Dimension::Uint32);
+    text << "The block id for this point";
+    blk_id.setDescription(text.str());
+    blk_id.setEndianness(pdal::Endian_Big);
+    schema.addDimension(blk_id);
+    text.str("");
+
+    Dimension pt_id(Dimension::Field_User2, Dimension::Uint32);
+    text << "The point id for this point";
+    pt_id.setDescription(text.str());
+    pt_id.setEndianness(pdal::Endian_Big);
+    schema.addDimension(pt_id);
+    text.str("");
+        
+    return schema;
+}
 
 std::string ReadFile(std::string filename)
 {
@@ -69,14 +259,14 @@ std::string ReadFile(std::string filename)
     } 
     else 
     {   
-        throw libpc_error("unable to open file!");
+        throw pdal_error("unable to open file!");
         // return data;
     }
     
 }
 
 Writer::Writer(Stage& prevStage, Options& options)
-    : libpc::Writer(prevStage)
+    : pdal::Writer(prevStage)
     , m_stage(prevStage)
     , m_options(options)
     , m_verbose(false)
@@ -87,6 +277,8 @@ Writer::Writer(Stage& prevStage, Options& options)
     
     m_connection = Connect(m_options);
     
+    boost::uint32_t capacity = m_options.GetPTree().get<boost::uint32_t>("capacity");
+    setChunkSize(capacity);
     return;
 }
 
@@ -138,7 +330,7 @@ void Writer::WipeBlockTable()
     oss << "DELETE FROM " << block_table_name;
     try {
         run(oss);    
-    } catch (libpc_error const&) 
+    } catch (pdal_error const&) 
     {
         // if we failed, let's try dropping the spatial index for the block_table_name
         oss.str("");
@@ -260,7 +452,7 @@ void Writer::CreateSDOEntry()
     }
 
     double tolerance = 0.05;
-    libpc::Bounds<double> e = m_bounds;
+    pdal::Bounds<double> e = m_bounds;
 
     if (IsGeographic(srid)) {
         // FIXME: This should be overrideable
@@ -308,7 +500,7 @@ bool Writer::BlockTableExists()
     
     try {
         statement->Execute();
-    } catch (libpc_error const& ) {
+    } catch (pdal_error const& ) {
         // Assume for now that an error returned here is OCI_NODATA, which means 
         // the table doesn't exist.  If this really isn't the case, we're going 
         // to get more legit message further down the line.
@@ -353,7 +545,7 @@ bool Writer::IsGeographic(boost::int32_t srid)
     
     try {
         statement->Execute();
-    } catch (libpc_error const& e) {
+    } catch (pdal_error const& e) {
         std::ostringstream oss;
         oss << "Failed to fetch geographicness of srid " << srid << std::endl << e.what() << std::endl;
         throw std::runtime_error(oss.str());
@@ -377,7 +569,7 @@ std::string Writer::LoadSQLData(std::string const& filename)
     {
         std::ostringstream oss;
         oss << filename << " does not exist";
-        throw libpc_error(oss.str());
+        throw pdal_error(oss.str());
     }
 
     std::istream::pos_type size;    
@@ -529,7 +721,7 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
 
     int nPCPos = 1;
     int nSchemaPos = 1;
-    if (bHaveSchemaOverride)
+    // if (bHaveSchemaOverride)
         nSchemaPos++;
 
     int nPos = nSchemaPos+1; // Bind column position    
@@ -564,19 +756,19 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
         s_srid << srid;
     }
 
-    if (bHaveSchemaOverride)
-    {
+    // if (bHaveSchemaOverride)
+    // {
         s_schema << "xmltype(:"<<nSchemaPos<<")";
-    } else
-    {
-        s_schema << "NULL";
-    }
+    // } else
+    // {
+    //     s_schema << "NULL";
+    // }
     
     long gtype = GetGType();
     
     std::string eleminfo = CreatePCElemInfo();
 
-    libpc::Bounds<double> e = m_bounds;
+    pdal::Bounds<double> e = m_bounds;
 
     s_geom << "           mdsys.sdo_geometry("<< gtype <<", "<<s_srid.str()<<", null,\n"
 "              mdsys.sdo_elem_info_array"<< eleminfo <<",\n"
@@ -636,15 +828,20 @@ oss << "declare\n"
     OCILobLocator* schema_locator ; 
     OCILobLocator* boundary_locator ; 
 
+    std::string schema_data;
     if (bHaveSchemaOverride)
     {
-        std::string schema_data = ReadFile(point_schema_override);
-        char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
-        strncpy(schema, schema_data.c_str(), schema_data.size());
-        schema[schema_data.size()] = '\0';
-        statement->WriteCLob( &schema_locator, schema ); 
-        statement->Bind(&schema_locator);
+        schema_data = ReadFile(point_schema_override);
+    } else {
+        schema_data = pdal::Schema::to_xml(m_stage.getSchema());
     }
+
+    char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
+    strncpy(schema, schema_data.c_str(), schema_data.size());
+    schema[schema_data.size()] = '\0';
+    statement->WriteCLob( &schema_locator, schema ); 
+    statement->Bind(&schema_locator);
+
 
     // if (header_data->size() != 0) 
     // {
@@ -732,7 +929,7 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
 {
 
 
-    libpc::Schema const& schema = buffer.getSchema();
+    pdal::Schema const& schema = buffer.getSchema();
     // std::vector<boost::uint32_t> ids = block.GetIDs();
 
     bool hasTimeData = schema.hasDimension(Dimension::Field_Time, Dimension::Double);
@@ -823,9 +1020,9 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
         boost::uint16_t red(0), green(0), blue(0), alpha(0);
         if (hasColorData)
         {
-            red = buffer.getField<double>(counter, indexRed);
-            green = buffer.getField<double>(counter, indexGreen);
-            blue = buffer.getField<double>(counter, indexBlue);
+            red = buffer.getField<boost::uint16_t>(counter, indexRed);
+            green = buffer.getField<boost::uint16_t>(counter, indexGreen);
+            blue = buffer.getField<boost::uint16_t>(counter, indexBlue);
             
         }
 
@@ -952,9 +1149,10 @@ void Writer::SetElements(   Statement statement,
 
 void Writer::SetOrdinates(Statement statement,
                           OCIArray* ordinates, 
-                          libpc::Bounds<double> const& extent)
+                          pdal::Bounds<double> const& extent)
 {
     
+    // std::cout << extent << std::endl;
     statement->AddElement(ordinates, extent.getMinimum(0));
     statement->AddElement(ordinates, extent.getMaximum(1));
     if (extent.dimensions().size() > 2)
@@ -968,10 +1166,11 @@ void Writer::SetOrdinates(Statement statement,
 
 }
 
-bool Writer::WriteBlock(PointBuffer const& buffer, 
-                                 std::vector<boost::uint8_t>& point_data)
+bool Writer::WriteBlock(PointBuffer const& buffer)
 {
-
+    
+    boost::uint8_t* point_data = buffer.getData(0);
+    
     boost::property_tree::ptree&  tree = m_options.GetPTree();
     
     std::string block_table_name = to_upper(tree.get<std::string>("block_table_name"));
@@ -984,10 +1183,11 @@ bool Writer::WriteBlock(PointBuffer const& buffer,
     // std::vector<boost::uint32_t> ids = block.GetIDs();
     
     // Pluck the block id out of the first point in the buffer
-    libpc::Schema const& schema = buffer.getSchema();
+    pdal::Schema const& schema = buffer.getSchema();
     const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
-    long block_id  = buffer.getField<boost::int32_t>(0, indexBlockId);
+    boost::int32_t block_id  = buffer.getField<boost::int32_t>(0, indexBlockId);
     
+    SWAP_ENDIANNESS(block_id); //We've already swapped these data, but we need to write a real number here.
     std::ostringstream oss;
     std::ostringstream partition;
     
@@ -1032,6 +1232,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer,
     long* p_num_points = (long*) malloc (1 * sizeof(long));
     p_num_points[0] = (long)buffer.getNumPoints();
     
+    // std::cout << "point count on write: " << buffer.getNumPoints() << std::endl;
+    
     
     // :1
     statement->Bind( p_pc_id );
@@ -1050,7 +1252,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer,
     // bool gotdata = GetResultData(result, reader, data, 3);
     // if (! gotdata) throw std::runtime_error("unable to fetch point data byte array");
 
-    statement->Bind((char*)&(point_data[0]),(long)point_data.size());
+    statement->Bind((char*)point_data,(long)buffer.getSchemaLayout().getByteSize()*buffer.getNumPoints());
 
     // :5
     long* p_gtype = (long*) malloc (1 * sizeof(long));
@@ -1122,10 +1324,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer,
 boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
 {
     boost::uint32_t numPoints = buffer.getNumPoints();
-    std::vector<boost::uint8_t> oracle_buffer;
 
-    FillOraclePointBuffer(buffer, oracle_buffer);
-    WriteBlock(buffer, oracle_buffer);
+    WriteBlock(buffer);
 
     return numPoints;
 }
@@ -1151,8 +1351,8 @@ void Writer::Debug()
             Utils::putenv("CPL_DEBUG=ON");
         }
         
-        const char* gdal_debug2 = getenv("CPL_DEBUG");
-        std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
+        // const char* gdal_debug2 = getenv("CPL_DEBUG");
+        // std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
         CPLPushErrorHandler(OCIGDALDebugErrorHandler);
         
     }
@@ -1166,4 +1366,4 @@ void Writer::Debug()
 
 
 
-}}} // namespace libpc::driver::oci
+}}} // namespace pdal::driver::oci

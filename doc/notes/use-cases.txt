@@ -1,11 +1,11 @@
 .. _use-cases:
 
 ================================
-libPC Project Notes: Use Cases
+PDAL Project Notes: Use Cases
 ================================
 
-This document lists some use cases that we would like libPC to be able to
-satisfy.  We are speaking here about libPC at the API level, and not the 
+This document lists some use cases that we would like PDAL to be able to
+satisfy.  We are speaking here about PDAL at the API level, and not the 
 command line apps that come with it (although in many cases the apps will
 directly address these use cases).
 

@@ -32,16 +32,16 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/Options.hpp>
+#include <pdal/Options.hpp>
 
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 #include <boost/optional.hpp>
 #include <iostream>
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
 
-namespace libpc
+namespace pdal
 {
 
 Options::Options()
@@ -70,4 +70,4 @@ std::ostream& operator<<(std::ostream& ostr, const Options& /*options*/)
 }
 
 
-} // namespace libpc
+} // namespace pdal

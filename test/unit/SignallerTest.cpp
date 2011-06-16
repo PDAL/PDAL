@@ -34,9 +34,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <libpc/Signaller.hpp>
+#include <pdal/Signaller.hpp>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(SignallerTest)
 

@@ -167,17 +167,17 @@ Word #       Content
 */
 
 
-#include <libpc/drivers/qfit/Reader.hpp>
-#include <libpc/drivers/qfit/Iterator.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/Utils.hpp>
+#include <pdal/drivers/qfit/Reader.hpp>
+#include <pdal/drivers/qfit/Iterator.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/Utils.hpp>
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
 #include <iostream>
 #include <map>
 
-namespace libpc { namespace drivers { namespace qfit {
+namespace pdal { namespace drivers { namespace qfit {
 
 PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 {
@@ -218,7 +218,7 @@ PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 
 
 Reader::Reader(Options& options)
-    : libpc::Stage()
+    : pdal::Stage()
     , m_options(options)
     , m_format(QFIT_Format_Unknown)
     , m_size(0)
@@ -589,18 +589,18 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     return numPoints;
 }
 
-libpc::SequentialIterator* Reader::createSequentialIterator() const
+pdal::SequentialIterator* Reader::createSequentialIterator() const
 {
-    return new libpc::drivers::qfit::SequentialIterator(*this);
+    return new pdal::drivers::qfit::SequentialIterator(*this);
 }
 
 
-libpc::RandomIterator* Reader::createRandomIterator() const
+pdal::RandomIterator* Reader::createRandomIterator() const
 {
-    return new libpc::drivers::qfit::RandomIterator(*this);
+    return new pdal::drivers::qfit::RandomIterator(*this);
 }
 
 
 
 
-}}} // namespace libpc::driver::oci
+}}} // namespace pdal::driver::oci

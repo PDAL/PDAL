@@ -32,20 +32,21 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/oci/Reader.hpp>
-#include <libpc/drivers/oci/Iterator.hpp>
-#include <libpc/Utils.hpp>
+#include <pdal/drivers/oci/Reader.hpp>
+#include <pdal/drivers/oci/Iterator.hpp>
+#include <pdal/Utils.hpp>
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
 #include <iostream>
 #include <map>
 
-namespace libpc { namespace drivers { namespace oci {
+
+namespace pdal { namespace drivers { namespace oci {
 
 
 Reader::Reader(Options& options)
-    : libpc::Stage()
+    : pdal::Stage()
     , m_options(options)
     , m_querytype(QUERY_UNKNOWN)
 {
@@ -56,29 +57,49 @@ Reader::Reader(Options& options)
 
 
     if (getQuery().size() == 0 )
-        throw libpc_error("'select_sql' statement is empty. No data can be read from libpc::drivers::oci::Reader");
+        throw pdal_error("'select_sql' statement is empty. No data can be read from pdal::drivers::oci::Reader");
 
     m_statement = Statement(m_connection->CreateStatement(getQuery().c_str()));
     
     m_statement->Execute(0);
 
     m_querytype = describeQueryType();
+
+
     
-    if (m_querytype == QUERY_BLK_TABLE)
-        m_block = defineBlock();
-    else if (m_querytype == QUERY_SDO_PC)
+    if (m_querytype == QUERY_SDO_PC)
     {
-        m_cloud = defineCloud();
-        throw libpc_error("not yet implemented");
+        m_connection->CreateType(&m_pc);
+
+        m_statement->Define(&(m_pc));
+    
+        bool bDidRead = m_statement->Fetch(); 
+    
+        if (!bDidRead) throw pdal_error("Unable to fetch a point cloud entry entry!");
+        Schema& schema = getSchemaRef(); 
+        schema = fetchSchema(m_pc);
+    }
+    else if (m_querytype == QUERY_SDO_PC_BLK_TYPE)
+    {
+        m_connection->CreateType(&m_pc_block);
+        // m_connection->CreateType(&(m_pc_block->inp));
+        m_statement->Define(&m_pc_block);
+
+        bool bDidRead = m_statement->Fetch(); 
+    
+        if (!bDidRead) throw pdal_error("Unable to fetch a point cloud entry entry!");
+        Schema& schema = getSchemaRef(); 
+        schema = fetchSchema(m_pc);
+        
     }
     
     else 
-        throw libpc_error("SQL statement does not define a SDO_PC or CLIP_CP block");
+        throw pdal_error("SQL statement does not define a SDO_PC or CLIP_PC block");
 
 
 
     
-    registerFields();
+
     
     // setNumPoints(1000);
 }    
@@ -112,8 +133,8 @@ void Reader::Debug()
             Utils::putenv("CPL_DEBUG=ON");
         }
         
-        const char* gdal_debug2 = getenv("CPL_DEBUG");
-        std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
+        // const char* gdal_debug2 = getenv("CPL_DEBUG");
+        // std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
         CPLPushErrorHandler(OCIGDALDebugErrorHandler);
         
     }
@@ -326,95 +347,24 @@ QueryType Reader::describeQueryType() const
     int   nPrecision = 0;
     signed short nScale = 0;
     char szTypeName[OWNAME];
-    
-    bool isPCObject = false;
-    bool isBlockTableQuery = false;
-    bool isBlockTableType = false;
-    
-    
-    const int columns_size = 10;
-    std::string block_columns[columns_size];
-    block_columns[0] = "OBJ_ID";
-    block_columns[1] = "BLK_ID";
-    block_columns[2] = "BLK_EXTENT";
-    block_columns[3] = "BLK_DOMAIN";
-    block_columns[4] = "PCBLK_MIN_RES";
-    block_columns[5] = "PCBLK_MAX_RES";
-    block_columns[6] = "NUM_POINTS";
-    block_columns[7] = "NUM_UNSORTED_POINTS";
-    block_columns[8] = "PT_SORT_DIM";
-    block_columns[9] = "POINTS";
-    
-    std::map<std::string, bool> columns_map;
 
-    for(int i = 0; i < columns_size; ++i)
-    {
-        columns_map.insert(std::pair<std::string, bool>(block_columns[i], false));
-    }
-    
     while( m_statement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName) )
     {
-        std::string name = to_upper(std::string(szFieldName));
-        
-        std::map<std::string, bool>::iterator it = columns_map.find(name);
-        if (it != columns_map.end())
-        {
-            // std::cout << "setting columns to true for " << it->first << std::endl;
-            (*it).second = true;
-            
-        }
 
         if ( hType == SQLT_NTY)
         {
-                
+                // std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
                 if (compare_no_case(szTypeName, "SDO_PC") == 0)
-                    isPCObject = true;
+                    return QUERY_SDO_PC;
                 if (compare_no_case(szTypeName, "SDO_PC_BLK_TYPE") == 0)
-                    isBlockTableType = true;
-                std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
+                    return QUERY_SDO_PC_BLK_TYPE;
         }
-
-        iCol++;
     }
 
-    // Assume we're a block table until we say we aren't.  Loop through all of 
-    // the required columns that make up a block table and if we find one that 
-    // wasn't marked in the loop above, we're not a block table.
-    isBlockTableQuery = true;
-    std::map<std::string, bool>::iterator it = columns_map.begin();
-    while (it != columns_map.end())
-    {   
-        if (it->second == false) 
-        {
-            isBlockTableQuery = false; 
-            break;
-        }
-        ++it;
-    }
-    
-    // If we have all of the block table columns + some extras, we aren't a block table for now
-    if (iCol != 10 && isBlockTableQuery) {
-        isBlockTableQuery = false;
-    }
-    
-    if (!isBlockTableQuery && !isPCObject) 
-    {
-        std::ostringstream oss;
-        oss << "Select statement '" << getQuery() << "' does not fetch an SDO_PC object" 
-              " or one that is equivalent to SDO_PC_BLK_TYPE";
-        throw libpc_error(oss.str());
-    }
-
-    if (isBlockTableQuery) 
-        return QUERY_BLK_TABLE;
-    
-    if (isPCObject)
-        return QUERY_SDO_PC;
-    
-    if (isBlockTableType)
-        return QUERY_SDO_PC_BLK;
-    
-    return QUERY_UNKNOWN;
+    std::ostringstream oss;
+    oss << "Select statement '" << getQuery() << "' does not fetch an SDO_PC object" 
+          " or SDO_PC_BLK_TYPE";
+    throw pdal_error(oss.str());
 }
 
 BlockPtr Reader::defineBlock() const
@@ -497,7 +447,7 @@ BlockPtr Reader::defineBlock() const
 
         if (compare_no_case(szFieldName, "POINTS") == 0)
         {
-            std::cout << "Defined POINTS as BLOB" << std::endl;
+            // std::cout << "Defined POINTS as BLOB" << std::endl;
             m_statement->Define( &(block->locator) ); 
         }
         iCol++;
@@ -506,29 +456,110 @@ BlockPtr Reader::defineBlock() const
     return block;
 }
 
-CloudPtr Reader::defineCloud() 
+pdal::Schema Reader::fetchSchema(sdo_pc* pc) 
 {
+    
+    // Fetch the WKT for the SRID to set the coordinate system of this stage
+    int srid = m_statement->GetInteger(&(pc->pc_geometry.sdo_srid));
+    
+    std::ostringstream select_wkt;
+    select_wkt
+        << "SELECT WKTEXT3D from MDSYS.CS_SRS WHERE SRID = " << srid;
 
+    int wkt_length = 3999;
+    char* wkt = (char*) malloc (sizeof(char*) * wkt_length);
+    Statement get_wkt(m_connection->CreateStatement(select_wkt.str().c_str()));
+    get_wkt->Define( wkt, wkt_length );    
+    get_wkt->Execute();    
+    std::string s_wkt(wkt);
+    free(wkt);
     
-    CloudPtr cloud = CloudPtr(new Cloud(m_connection));
+    setSpatialReference(pdal::SpatialReference(s_wkt));
+    
+    
+    // Fetch the XML that defines the schema for this point cloud
+    std::ostringstream select_schema;
+    OCILobLocator* metadata = NULL;    
+    select_schema
+        << "DECLARE" << std::endl
+        << "PC_TABLE VARCHAR2(32) := '" << m_statement->GetString(pc->base_table) << "';" << std::endl
+        << "PC_ID NUMBER := " << m_statement->GetInteger(&(pc->pc_id)) << ";" << std::endl
+        << "PC_COLUMN VARCHAR2(32) := '" << m_statement->GetString(pc->base_column) << "';" << std::endl
+        << "BEGIN" << std::endl
+        << std::endl 
+        << "EXECUTE IMMEDIATE" << std::endl
+        << " 'SELECT T.'||PC_COLUMN||'.PC_OTHER_ATTRS.getClobVal(), T.'||PC_COLUMN||'.PTN_PARAMS FROM '||pc_table||' T WHERE T.ID='||PC_ID INTO :metadata, :capacity;"
+        << std::endl
+        << "END;"
+        << std::endl;
+    Statement get_schema(m_connection->CreateStatement(select_schema.str().c_str()));
+    get_schema->BindName( ":metadata", &metadata );
+    
+    int ptn_params_length = 1024;
+    char* ptn_params = (char*) malloc (sizeof(char*) * ptn_params_length);
+    get_schema->BindName( ":capacity", ptn_params, ptn_params_length );
+    get_schema->Execute();
+    
+    char* pc_schema = get_schema->ReadCLob(metadata);
+    
+    std::ostream* out = Utils::createFile("schema-xml.xml");
+    out->write(pc_schema, strlen(pc_schema));
+    delete out;
+    
+    
+    int block_capacity = 0;
 
-    m_connection->CreateType(&m_pc);
+    boost::char_separator<char> sep_space(" ");
+    boost::char_separator<char> sep_equal("=");
 
-    m_statement->Define(&(m_pc));
+    std::string s_cap(ptn_params);
+    tokenizer parameters(s_cap, sep_space);
+    for (tokenizer::iterator t = parameters.begin(); t != parameters.end(); ++t) {
+        tokenizer parameter((*t), sep_equal);
+
+        for(tokenizer::iterator c = parameter.begin(); c != parameter.end(); ++c)
+        {
+            if (compare_no_case(c->c_str(), "blk_capacity") == 0)
+            {
+                tokenizer::iterator d = ++c;
+                block_capacity = atoi(d->c_str());
+            }
+        }
+    }    
+
+    if (block_capacity < 1) 
+    {
+        std::ostringstream oss;
+        oss << "Invalid block capacity for point cloud object in Oracle: " << block_capacity;
+        throw pdal_error(oss.str());
+    }
     
-    bool bDidRead = m_statement->Fetch(); 
+    m_options.GetPTree().put("capacity", block_capacity);
     
-    if (!bDidRead) throw libpc_error("Unable to fetch first cloud entry!");
-    
-    std::cout << "block_table_name: " << m_statement->GetString(m_pc->blk_table);
-    
-    return cloud;
+    std::string pc_schema_xml(pc_schema);
+    CPLFree(pc_schema);
+    free(ptn_params);
+    Schema schema = Schema::from_xml(pc_schema_xml);
+
+    return schema;
 }
 
-libpc::SequentialIterator* Reader::createSequentialIterator() const
+CloudPtr Reader::getCloud() const
 {
-    return new libpc::drivers::oci::SequentialIterator(*this);
+
+    CloudPtr output(new Cloud(getConnection()));
+    output->base_table = m_statement->GetString(m_pc->base_table);
+    output->base_column = m_statement->GetString(m_pc->base_column);
+    output->pc_id = m_statement->GetInteger(&(m_pc->pc_id));
+    output->blk_table = m_statement->GetString(m_pc->blk_table);
+    return output;
+
+}
+
+pdal::SequentialIterator* Reader::createSequentialIterator() const
+{
+    return new pdal::drivers::oci::SequentialIterator(*this);
 }
 
 
-}}} // namespace libpc::driver::oci
+}}} // namespace pdal::driver::oci

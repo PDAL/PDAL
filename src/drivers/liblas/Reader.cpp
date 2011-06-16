@@ -32,17 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/liblas/Reader.hpp>
+#include <pdal/drivers/liblas/Reader.hpp>
 
 #include <liblas/factory.hpp>
 #include <liblas/variablerecord.hpp>
 
-#include <libpc/exceptions.hpp>
-#include <libpc/drivers/liblas/Iterator.hpp>
-#include <libpc/drivers/las/VariableLengthRecord.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/drivers/liblas/Iterator.hpp>
+#include <pdal/drivers/las/VariableLengthRecord.hpp>
 
 
-namespace libpc { namespace drivers { namespace liblas {
+namespace pdal { namespace drivers { namespace liblas {
 
 LiblasReader::LiblasReader(const std::string& filename)
     : LasReaderBase()
@@ -56,7 +56,7 @@ LiblasReader::LiblasReader(const std::string& filename)
     , m_offsetY(0.0)
     , m_offsetZ(0.0)
     , m_isCompressed(false)
-    , m_pointFormat(::libpc::drivers::las::PointFormatUnknown)
+    , m_pointFormat(::pdal::drivers::las::PointFormatUnknown)
 {
     std::istream* str = Utils::openFile(m_filename);
 
@@ -101,7 +101,7 @@ const std::string& LiblasReader::getFileName() const
 }
 
 
-::libpc::drivers::las::PointFormat LiblasReader::getPointFormat() const
+::pdal::drivers::las::PointFormat LiblasReader::getPointFormat() const
 {
     return m_pointFormat;
 }
@@ -147,9 +147,9 @@ void LiblasReader::processExternalHeader(::liblas::Reader& externalReader)
 
     m_isCompressed = externalHeader.Compressed();
 
-    m_pointFormat = (::libpc::drivers::las::PointFormat)externalHeader.GetDataFormatId();
+    m_pointFormat = (::pdal::drivers::las::PointFormat)externalHeader.GetDataFormatId();
 
-    if (::libpc::drivers::las::Support::hasWave(m_pointFormat))
+    if (::pdal::drivers::las::Support::hasWave(m_pointFormat))
     {
         throw not_yet_implemented("Waveform data (types 4 and 5) not supported");
     }
@@ -181,9 +181,9 @@ void LiblasReader::registerFields(::liblas::Reader& externalReader)
     const ::liblas::Header& externalHeader = externalReader.GetHeader();
     Schema& schema = getSchemaRef();
 
-    ::libpc::drivers::las::Support::registerFields(schema, getPointFormat());
+    ::pdal::drivers::las::Support::registerFields(schema, getPointFormat());
 
-    ::libpc::drivers::las::Support::setScaling(schema, 
+    ::pdal::drivers::las::Support::setScaling(schema, 
         externalHeader.GetScaleX(),
         externalHeader.GetScaleY(),
         externalHeader.GetScaleZ(),
@@ -195,13 +195,13 @@ void LiblasReader::registerFields(::liblas::Reader& externalReader)
 }
 
 
-libpc::SequentialIterator* LiblasReader::createSequentialIterator() const
+pdal::SequentialIterator* LiblasReader::createSequentialIterator() const
 {
     return new SequentialIterator(*this);
 }
 
 
-libpc::RandomIterator* LiblasReader::createRandomIterator() const
+pdal::RandomIterator* LiblasReader::createRandomIterator() const
 {
     return new RandomIterator(*this);
 }

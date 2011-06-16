@@ -1,13 +1,13 @@
-Unless otherwise indicated, all files in the libPC distribution are
+Unless otherwise indicated, all files in the PDAL distribution are
 
   Copyright (c) 2011, Howard Butler (hobu.inc@gmail.com)
 
 and are released under the terms of the BSD open source license.
 
-This file contains the license terms of all files within libPC.
+This file contains the license terms of all files within PDAL.
 
 
-Overall libPC license (BSD)
+Overall PDAL license (BSD)
 ===========================
 
  Copyright (c) 2011, Howard Butler (hobu.inc@gmail.com)

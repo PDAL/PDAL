@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/las/Writer.hpp>
+#include <pdal/drivers/las/Writer.hpp>
 
 #include "LasHeaderWriter.hpp"
 
@@ -40,16 +40,18 @@
 #include "ZipPoint.hpp"
 
 // laszip
+#ifdef PDAL_HAVE_LASZIP
 #include <laszip/laszipper.hpp>
+#endif
 
-#include <libpc/exceptions.hpp>
-#include <libpc/Stage.hpp>
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/PointBuffer.hpp>
 
 #include <iostream>
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 
 LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
@@ -57,9 +59,6 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
     , m_ostream(ostream)
     , m_numPointsWritten(0)
     , m_isCompressed(false)
-    , m_zip(NULL)
-    , m_zipper(NULL)
-    , m_zipPoint(NULL)
 {
     m_spatialReference = prevStage.getSpatialReference();
 
@@ -69,9 +68,7 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
 
 LasWriter::~LasWriter()
 {
-    delete m_zipper;
-    delete m_zipPoint;
-    delete m_zip;
+
 }
 
 
@@ -171,25 +168,24 @@ void LasWriter::writeBegin()
 
     if (m_lasHeader.Compressed())
     {
-        delete m_zipper;
-        delete m_zipPoint;
-        m_zipper = NULL;
-        m_zipPoint = NULL;
-
-        if (m_zip==NULL)
+#ifdef PDAL_HAVE_LASZIP
+        if (!m_zip)
         {
             try
             {
-                m_zip = new LASzip();
+                // Initialize a scoped_ptr and swap it with our member variable 
+                // that will contain it.
+                boost::scoped_ptr<LASzip> s(new LASzip());
+                m_zip.swap(s);
             }
             catch(...)
             {
-                throw libpc_error("Error opening compression core (1)");
+                throw pdal_error("Error opening compression core (1)");
             }
 
             PointFormat format = m_lasHeader.getPointFormat();
-            delete m_zipPoint;
-            m_zipPoint = new ZipPoint(format, m_lasHeader.getVLRs().getAll());
+            boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_lasHeader.getVLRs().getAll()));
+            m_zipPoint.swap(z);
 
             bool ok = false;
             try
@@ -198,11 +194,11 @@ void LasWriter::writeBegin()
             }
             catch(...)
             {
-                throw libpc_error("Error opening compression core (3)");
+                throw pdal_error("Error opening compression core (3)");
             }
             if (!ok)
             {
-                throw libpc_error("Error opening compression core (2)");
+                throw pdal_error("Error opening compression core (2)");
             }
 
             try
@@ -211,53 +207,46 @@ void LasWriter::writeBegin()
             }
             catch(...)
             {
-                throw libpc_error("Error opening compression core (3)");
+                throw pdal_error("Error opening compression core (3)");
             }
             if (!ok)
             {
-                throw libpc_error("Error opening compression core (2)");
+                throw pdal_error("Error opening compression core (2)");
             }
         }
 
-        if (m_zipper == NULL)
+        if (!m_zipper)
         {
             try
             {
-                m_zipper = new LASzipper();
+                boost::scoped_ptr<LASzipper> z(new LASzipper());
+                m_zipper.swap(z);
             }
             catch(...)
             {
-                delete m_zipper;
-                m_zipper = NULL;
-                throw libpc_error("Error opening compression engine (1)");
+                throw pdal_error("Error opening compression engine (1)");
             }
 
             PointFormat format = m_lasHeader.getPointFormat();
-            delete m_zipPoint;
-            m_zipPoint = new ZipPoint(format, m_lasHeader.getVLRs().getAll());
-
-            unsigned int stat = 1;
+            boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_lasHeader.getVLRs().getAll()));
+            m_zipPoint.swap(z);
+            bool stat(false);
             try
             {
-                stat = m_zipper->open(m_ostream, m_zip);
+                stat = m_zipper->open(m_ostream, m_zip.get());
             }
             catch(...)
             {
-                delete m_zipper;
-                delete m_zipPoint;
-                m_zipper = NULL;
-                m_zipPoint = NULL;
-                throw libpc_error("Error opening compression engine (3)");
+                throw pdal_error("Error opening compression engine (3)");
             }
-            if (stat != 0)
+            if (!stat)
             {
-                delete m_zipper;
-                delete m_zipPoint;
-                m_zipper = NULL;
-                m_zipPoint = NULL;
-                throw libpc_error("Error opening compression engine (2)");
+                throw pdal_error("Error opening compression engine (2)");
             }
         }
+#else
+        throw pdal_error("LASzip compression is not enabled for this compressed file!");
+#endif
     }
 
     return;
@@ -342,6 +331,7 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
             Utils::write_field<boost::uint16_t>(p, blue);
         }
 
+#ifdef PDAL_HAVE_LASZIP
         if (m_zipPoint)
         {
             for (unsigned int i=0; i<m_zipPoint->m_lz_point_size; i++)
@@ -356,7 +346,10 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
         {
             Utils::write_n(m_ostream, buf, Support::getPointDataSize(pointFormat));
         }
+#else
+            Utils::write_n(m_ostream, buf, Support::getPointDataSize(pointFormat));
 
+#endif
         ++numValidPoints;
 
         const double xValue = schema.getDimension(indexes.X).applyScaling<boost::int32_t>(x);

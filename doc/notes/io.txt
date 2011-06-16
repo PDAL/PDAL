@@ -4,7 +4,7 @@
 I/O
 ===
 
-Given the sheer volume of data being processed by libPC apps, it is very
+Given the sheer volume of data being processed by PDAL apps, it is very
 important we pay attention to I/O speed.
 
 In some quarters, there are yet some questions as to whether C-style I/O
@@ -17,7 +17,7 @@ Guidelines
 ==========
 
 Unless strong (empirical, quantitative) evidence can be presented for a
-specific workflow, libPC will follow these guidelines.
+specific workflow, PDAL will follow these guidelines.
 
 * C++-stlye streams should be used instead of C-style FILE* calls.
 
@@ -33,7 +33,7 @@ specific workflow, libPC will follow these guidelines.
   which require Boost-specific stream classes.  (Given the previous
   guideline, this guideline would seem to have to be followed anyway.)
 
-* The libPC API provides helper functions for opening and closing file
+* The PDAL API provides helper functions for opening and closing file
   streams.  Applications should prefer to use those over writing their own.
 
 * Objects should provide an operator<< method for debugging purposes.
@@ -46,7 +46,7 @@ specific workflow, libPC will follow these guidelines.
 Endianness
 ==========
 
-libPC will not be supporting big-endian (BE) platforms at this time.  We
+PDAL will not be supporting big-endian (BE) platforms at this time.  We
 recognize it would be good to do so, since endianness ports always seem to
 shake out twiddly little bugs, but we don't have ready access a BE
 development box.

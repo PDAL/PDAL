@@ -32,11 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/Range.hpp>
-#include <libpc/exceptions.hpp>
+#include <pdal/Range.hpp>
+#include <pdal/exceptions.hpp>
 
 
-namespace libpc 
+namespace pdal 
 {
 
 
@@ -47,7 +47,7 @@ std::istream& operator>>(std::istream& istr, Range<double>& range)
     Utils::eatwhitespace(istr);
     
     if (!Utils::eatcharacter(istr,'['))
-        throw libpc_error("Range parser failed");
+        throw pdal_error("Range parser failed");
 
     Utils::eatwhitespace(istr);
 
@@ -56,12 +56,12 @@ std::istream& operator>>(std::istream& istr, Range<double>& range)
     Utils::eatwhitespace(istr);
 
     if (!Utils::eatcharacter(istr,','))
-        throw libpc_error("Range parser failed");
+        throw pdal_error("Range parser failed");
 
     istr >> high;
 
     if (!Utils::eatcharacter(istr,']'))
-        throw libpc_error("Range parser failed");
+        throw pdal_error("Range parser failed");
 
     range.setMinimum(low);
     range.setMaximum(high);

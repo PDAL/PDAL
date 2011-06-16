@@ -35,10 +35,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/libpc.hpp>
-#include <libpc/libpc_config.hpp>
+#include <pdal/pdal.hpp>
+#include <pdal/pdal_config.hpp>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(ConfigTest)
 
@@ -49,25 +49,25 @@ BOOST_AUTO_TEST_CASE(test_3rdparty_libs)
     bool geotiff = IsLibGeoTIFFEnabled();
     bool laszip = IsLasZipEnabled();
 
-#ifdef LIBPC_HAVE_LIBLAS
+#ifdef PDAL_HAVE_LIBLAS
     BOOST_CHECK(liblas);
 #else
     BOOST_CHECK(!liblas);
 #endif
 
-#ifdef LIBPC_HAVE_GDAL
+#ifdef PDAL_HAVE_GDAL
     BOOST_CHECK(gdal);
 #else
     BOOST_CHECK(!gdal);
 #endif
 
-#ifdef LIBPC_HAVE_LIBGEOTIFF
+#ifdef PDAL_HAVE_LIBGEOTIFF
     BOOST_CHECK(geotiff);
 #else
     BOOST_CHECK(!geotiff);
 #endif
 
-#ifdef LIBPC_HAVE_LASZIP
+#ifdef PDAL_HAVE_LASZIP
     BOOST_CHECK(laszip);
 #else
     BOOST_CHECK(!laszip);

@@ -38,10 +38,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <libpc/Utils.hpp>
-#include <libpc/Schema.hpp>
-#include <libpc/Dimension.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/Utils.hpp>
+#include <pdal/Schema.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/PointBuffer.hpp>
 
 #include "TestConfig.hpp"
 
@@ -55,12 +55,12 @@ std::string Support::datapath(const std::string& file)
 
 bool Support::compare_files(const std::string& file1, const std::string& file2)
 {
-    if (!libpc::Utils::fileExists(file1) ||
-        !libpc::Utils::fileExists(file2))
+    if (!pdal::Utils::fileExists(file1) ||
+        !pdal::Utils::fileExists(file2))
         return false;
 
-    uintmax_t len1x = libpc::Utils::fileSize(file1);
-    uintmax_t len2x = libpc::Utils::fileSize(file2);
+    uintmax_t len1x = pdal::Utils::fileSize(file1);
+    uintmax_t len2x = pdal::Utils::fileSize(file2);
     size_t len1 = (size_t)len1x; // BUG
     size_t len2 = (size_t)len2x;
 
@@ -69,8 +69,8 @@ bool Support::compare_files(const std::string& file1, const std::string& file2)
         return false;
     }
 
-    std::istream* str1 = libpc::Utils::openFile(file1);
-    std::istream* str2 = libpc::Utils::openFile(file2);
+    std::istream* str1 = pdal::Utils::openFile(file1);
+    std::istream* str2 = pdal::Utils::openFile(file2);
     BOOST_CHECK(str1);
     BOOST_CHECK(str2);
 
@@ -80,8 +80,8 @@ bool Support::compare_files(const std::string& file1, const std::string& file2)
     str1->read(buf1,len1);
     str2->read(buf2,len2);
 
-    libpc::Utils::closeFile(str1);
-    libpc::Utils::closeFile(str2);
+    pdal::Utils::closeFile(str1);
+    pdal::Utils::closeFile(str2);
 
     char* p = buf1;
     char* q = buf2;
@@ -104,15 +104,15 @@ bool Support::compare_files(const std::string& file1, const std::string& file2)
 }
 
 
-#define Compare(x,y)    BOOST_CHECK(libpc::Utils::compare_approx((x),(y),0.001));
+#define Compare(x,y)    BOOST_CHECK(pdal::Utils::compare_approx((x),(y),0.001));
 
-void Support::check_pN(const libpc::PointBuffer& data, const libpc::Schema& schema, 
+void Support::check_pN(const pdal::PointBuffer& data, const pdal::Schema& schema, 
                        std::size_t index, 
                        double xref, double yref, double zref)
 {
-    int offsetX = schema.getDimensionIndex(libpc::Dimension::Field_X, libpc::Dimension::Int32);
-    int offsetY = schema.getDimensionIndex(libpc::Dimension::Field_Y, libpc::Dimension::Int32);
-    int offsetZ = schema.getDimensionIndex(libpc::Dimension::Field_Z, libpc::Dimension::Int32);
+    int offsetX = schema.getDimensionIndex(pdal::Dimension::Field_X, pdal::Dimension::Int32);
+    int offsetY = schema.getDimensionIndex(pdal::Dimension::Field_Y, pdal::Dimension::Int32);
+    int offsetZ = schema.getDimensionIndex(pdal::Dimension::Field_Z, pdal::Dimension::Int32);
 
     boost::int32_t x0raw = data.getField<boost::int32_t>(index, offsetX);
     boost::int32_t y0raw = data.getField<boost::int32_t>(index, offsetY);
@@ -127,7 +127,7 @@ void Support::check_pN(const libpc::PointBuffer& data, const libpc::Schema& sche
 }
 
 
-void Support::check_pN(const libpc::PointBuffer& data, const ::libpc::Schema& schema, 
+void Support::check_pN(const pdal::PointBuffer& data, const ::pdal::Schema& schema, 
                        std::size_t index, 
                        double xref, double yref, double zref,
                        double tref,
@@ -135,13 +135,13 @@ void Support::check_pN(const libpc::PointBuffer& data, const ::libpc::Schema& sc
 {
     check_pN(data, schema, index, xref, yref, zref);
 
-    int offsetT = schema.getDimensionIndex(libpc::Dimension::Field_Time, libpc::Dimension::Double);
+    int offsetT = schema.getDimensionIndex(pdal::Dimension::Field_Time, pdal::Dimension::Double);
     double t0 = data.getField<double>(index, offsetT);
     Compare(t0, tref);
 
-    int offsetR = schema.getDimensionIndex(libpc::Dimension::Field_Red, libpc::Dimension::Uint16);
-    int offsetG = schema.getDimensionIndex(libpc::Dimension::Field_Green, libpc::Dimension::Uint16);
-    int offsetB = schema.getDimensionIndex(libpc::Dimension::Field_Blue, libpc::Dimension::Uint16);
+    int offsetR = schema.getDimensionIndex(pdal::Dimension::Field_Red, pdal::Dimension::Uint16);
+    int offsetG = schema.getDimensionIndex(pdal::Dimension::Field_Green, pdal::Dimension::Uint16);
+    int offsetB = schema.getDimensionIndex(pdal::Dimension::Field_Blue, pdal::Dimension::Uint16);
     boost::uint16_t r0 = data.getField<boost::uint16_t>(index, offsetR);
     boost::uint16_t g0 = data.getField<boost::uint16_t>(index, offsetG);
     boost::uint16_t b0 = data.getField<boost::uint16_t>(index, offsetB);
@@ -151,7 +151,7 @@ void Support::check_pN(const libpc::PointBuffer& data, const ::libpc::Schema& sc
 }
 
 
-void Support::check_p0_p1_p2(const libpc::PointBuffer& data, const libpc::Schema& schema)
+void Support::check_p0_p1_p2(const pdal::PointBuffer& data, const pdal::Schema& schema)
 {
     Support::check_pN(data, schema, 0, 637012.240000, 849028.310000, 431.660000);
     Support::check_pN(data, schema, 1, 636896.330000, 849087.700000, 446.390000);
@@ -159,7 +159,7 @@ void Support::check_p0_p1_p2(const libpc::PointBuffer& data, const libpc::Schema
 }
 
 
-void Support::check_p100_p101_p102(const libpc::PointBuffer& data, const libpc::Schema& schema)
+void Support::check_p100_p101_p102(const pdal::PointBuffer& data, const pdal::Schema& schema)
 {
     Support::check_pN(data, schema, 0, 636661.060000, 849854.130000, 424.900000);
     Support::check_pN(data, schema, 1, 636568.180000, 850179.490000, 441.800000);
@@ -167,7 +167,7 @@ void Support::check_p100_p101_p102(const libpc::PointBuffer& data, const libpc::
 }
 
 
-void Support::check_p355_p356_p357(const libpc::PointBuffer& data, const libpc::Schema& schema)
+void Support::check_p355_p356_p357(const pdal::PointBuffer& data, const pdal::Schema& schema)
 {
     Support::check_pN(data, schema, 0, 636462.600000, 850566.110000, 432.610000);
     Support::check_pN(data, schema, 1, 636356.140000, 850530.480000, 432.680000);
@@ -175,7 +175,7 @@ void Support::check_p355_p356_p357(const libpc::PointBuffer& data, const libpc::
 }
 
 
-void Support::check_p710_p711_p712(const libpc::PointBuffer& data, const libpc::Schema& schema)
+void Support::check_p710_p711_p712(const pdal::PointBuffer& data, const pdal::Schema& schema)
 {
     Support::check_pN(data, schema, 0, 638720.670000, 850926.640000, 417.320000);
     Support::check_pN(data, schema, 1, 638672.380000, 851081.660000, 420.670000);

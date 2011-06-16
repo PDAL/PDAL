@@ -10,18 +10,18 @@
  **************************************************************************/
 
 
-#include <libpc/drivers/las/Reader.hpp>
-#include <libpc/drivers/liblas/Reader.hpp>
-#include <libpc/Utils.hpp>
-#ifdef LIBPC_HAVE_MRSID
-#include <libpc/drivers/mrsid/Reader.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/liblas/Reader.hpp>
+#include <pdal/Utils.hpp>
+#ifdef PDAL_HAVE_MRSID
+#include <pdal/drivers/mrsid/Reader.hpp>
 #endif
 
 #include <iostream>
 
 #include "Application.hpp"
 
-using namespace libpc;
+using namespace pdal;
 namespace po = boost::program_options;
 
 class Application_pcinfo : public Application
@@ -80,7 +80,7 @@ int Application_pcinfo::execute()
         return 1;
     }
 
-    libpc::Stage* reader = NULL;
+    pdal::Stage* reader = NULL;
     size_t ext = m_inputFile.find_last_of('.');
     if (ext != std::string::npos)
     {
@@ -90,17 +90,17 @@ int Application_pcinfo::execute()
         {
             if (hasOption("native"))
             {
-                reader = new libpc::drivers::las::LasReader(m_inputFile);
+                reader = new pdal::drivers::las::LasReader(m_inputFile);
             }
             else
             {
-                reader = new libpc::drivers::liblas::LiblasReader(m_inputFile);
+                reader = new pdal::drivers::liblas::LiblasReader(m_inputFile);
             }
         }
-#ifdef LIBPC_HAVE_MRSID
+#ifdef PDAL_HAVE_MRSID
         else if (!m_inputFile.substr(ext).compare("sid"))
         {
-            reader = new libpc::drivers::mrsid::Reader(m_inputFile.c_str());
+            reader = new pdal::drivers::mrsid::Reader(m_inputFile.c_str());
         }
 #endif
     }

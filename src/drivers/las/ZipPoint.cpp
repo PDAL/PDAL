@@ -32,17 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#ifdef LIBPC_HAVE_LASZIP
+#ifdef PDAL_HAVE_LASZIP
 
 #include "ZipPoint.hpp"
 
 #include <laszip/laszip.hpp>
 #include <laszip/laszipper.hpp>
 
-#include <libpc/exceptions.hpp>
-#include <libpc/drivers/las/VariableLengthRecord.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include <string.h>
 
 
@@ -56,7 +56,7 @@
 //#include <cstdlib> // std::size_t
 //#include <cassert>
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 static const char* laszip_userid("laszip encoded");
 static boost::uint16_t laszip_recordid = 22204;
@@ -154,7 +154,7 @@ void ZipPoint::ConstructItems(PointFormat format)
         break;
 
     default:
-        throw libpc_error("Bad point format in header"); 
+        throw pdal_error("Bad point format in header"); 
     }
 
     // construct the object that will hold a laszip point
@@ -201,7 +201,7 @@ VariableLengthRecord ZipPoint::ConstructVLR(PointFormat format) const
         pointSize = Support::getPointDataSize(format);
         break;
     default:
-        throw libpc_error("point format not supported by laszip");
+        throw pdal_error("point format not supported by laszip");
     }
 
     LASzip laszip;
@@ -232,4 +232,4 @@ bool ZipPoint::IsZipVLR(const VariableLengthRecord& vlr) const
 
 } } } // namespaces
 
-#endif // LIBPC_HAVE_LASZIP
+#endif // PDAL_HAVE_LASZIP

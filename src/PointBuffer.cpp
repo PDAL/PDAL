@@ -32,9 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/PointBuffer.hpp>
+#include <pdal/PointBuffer.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 
@@ -108,6 +108,10 @@ void PointBuffer::setData(boost::uint8_t* data, std::size_t index)
     memcpy(m_data.get() + m_pointSize * index, data, getSchemaLayout().getByteSize());
 }
 
+void PointBuffer::setAllData(boost::uint8_t* data, boost::uint32_t byteCount)
+{
+    memcpy(m_data.get(), data, byteCount);
+}
 
 boost::uint32_t PointBuffer::getNumPoints() const
 {
@@ -197,4 +201,4 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& PointBuffer)
 }
 
 
-} // namespace libpc
+} // namespace pdal

@@ -35,17 +35,17 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/Iterator.hpp>
-#include <libpc/Options.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/drivers/terrasolid/Reader.hpp>
-#include <libpc/filters/CacheFilter.hpp>
+#include <pdal/Iterator.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/drivers/terrasolid/Reader.hpp>
+#include <pdal/filters/CacheFilter.hpp>
 #include "Support.hpp"
 
 #include <iostream>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(TerraSolidReaderTest)
 
@@ -53,16 +53,16 @@ BOOST_AUTO_TEST_SUITE(TerraSolidReaderTest)
 #define Compare(x,y)    BOOST_CHECK_CLOSE(x,y,0.00001);
 
 
-void Check_Point(const libpc::PointBuffer& data, const ::libpc::Schema& schema, 
+void Check_Point(const pdal::PointBuffer& data, const ::pdal::Schema& schema, 
                        std::size_t index, 
                        double xref, double yref, double zref,
                        double tref)
 {
 
-    int offsetX = schema.getDimensionIndex(libpc::Dimension::Field_X, libpc::Dimension::Int32);
-    int offsetY = schema.getDimensionIndex(libpc::Dimension::Field_Y, libpc::Dimension::Int32);
-    int offsetZ = schema.getDimensionIndex(libpc::Dimension::Field_Z, libpc::Dimension::Int32);
-    int offsetTime = schema.getDimensionIndex(libpc::Dimension::Field_Time, libpc::Dimension::Uint32);
+    int offsetX = schema.getDimensionIndex(pdal::Dimension::Field_X, pdal::Dimension::Int32);
+    int offsetY = schema.getDimensionIndex(pdal::Dimension::Field_Y, pdal::Dimension::Int32);
+    int offsetZ = schema.getDimensionIndex(pdal::Dimension::Field_Z, pdal::Dimension::Int32);
+    int offsetTime = schema.getDimensionIndex(pdal::Dimension::Field_Time, pdal::Dimension::Uint32);
     
     boost::int32_t x = data.getField<boost::int32_t>(index, offsetX);
     boost::int32_t y = data.getField<boost::int32_t>(index, offsetY);
@@ -89,7 +89,7 @@ void Check_Point(const libpc::PointBuffer& data, const ::libpc::Schema& schema,
 
 BOOST_AUTO_TEST_CASE(test_10_word)
 {
-    libpc::Options options;
+    pdal::Options options;
     // std::string filename = Support::datapath("20050903_231839.qi");
 
     std::string filename = Support::datapath("terrasolid/20020715-time-color.bin");
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     
     boost::property_tree::ptree& tree = options.GetPTree();
     tree.put<std::string>("input", filename);
-    libpc::drivers::terrasolid::Reader reader(options);
+    pdal::drivers::terrasolid::Reader reader(options);
     BOOST_CHECK(reader.getDescription() == "TerraSolid Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.terrasolid.reader");
     BOOST_CHECK_EQUAL(reader.getNumPoints(), 1000);
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     PointBuffer data(layout, 3);
     
-    libpc::SequentialIterator* iter = reader.createSequentialIterator();
+    pdal::SequentialIterator* iter = reader.createSequentialIterator();
     
     {
         boost::uint32_t numRead = iter->read(data);
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 // 
 // BOOST_AUTO_TEST_CASE(test_14_word)
 // {
-//     libpc::Options options;
+//     pdal::Options options;
 //     // std::string filename = Support::datapath("20050903_231839.qi");
 // 
 //     std::string filename = Support::datapath("terrasolid/14-word.qi");
@@ -134,14 +134,14 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 //     
 //     boost::property_tree::ptree& tree = options.GetPTree();
 //     tree.put<std::string>("input", filename);
-//     libpc::drivers::terrasolid::Reader reader(options);
+//     pdal::drivers::terrasolid::Reader reader(options);
 // 
 //     const Schema& schema = reader.getSchema();
 //     SchemaLayout layout(schema);
 // 
 //     PointBuffer data(layout, 3);
 //     
-//     libpc::SequentialIterator* iter = reader.createSequentialIterator();
+//     pdal::SequentialIterator* iter = reader.createSequentialIterator();
 //     
 //     {
 //         boost::uint32_t numRead = iter->read(data);

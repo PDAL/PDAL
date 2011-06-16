@@ -32,11 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/MetadataRecord.hpp>
+#include <pdal/MetadataRecord.hpp>
 
 #include <sstream>
 
-namespace libpc
+namespace pdal
 {
 
 
@@ -110,4 +110,4 @@ std::ostream& operator<<(std::ostream& ostr, const MetadataRecord& metadata)
 }
 
 
-} // namespace libpc
+} // namespace pdal

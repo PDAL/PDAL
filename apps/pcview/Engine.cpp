@@ -32,9 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/libpc.hpp>
+#include <pdal/pdal.hpp>
 
-#ifdef LIBPC_COMPILER_MSVC
+#ifdef PDAL_COMPILER_MSVC
 #include <windows.h>
 #endif
 
@@ -42,7 +42,7 @@
 #include <cstdlib>
 #include <cassert>
 
-#ifdef LIBPC_COMPILER_MSVC
+#ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4505)  // unreferenced local function has been removed
 #endif
 #include <GL/freeglut.h>

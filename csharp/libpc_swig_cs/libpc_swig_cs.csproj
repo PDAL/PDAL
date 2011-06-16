@@ -8,8 +8,8 @@
     <ProjectGuid>{616B6A25-ECBF-4FCC-B0B2-DF8C26112753}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>libpc_swig_cs</RootNamespace>
-    <AssemblyName>libpc_swig_cs</AssemblyName>
+    <RootNamespace>pdal_swig_cs</RootNamespace>
+    <AssemblyName>pdal_swig_cs</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -99,8 +99,8 @@
     <Compile Include="istream.cs" />
     <Compile Include="LiblasHeader.cs" />
     <Compile Include="LiblasReader.cs" />
-    <Compile Include="libpc_swig_cpp.cs" />
-    <Compile Include="libpc_swig_cppPINVOKE.cs" />
+    <Compile Include="pdal_swig_cpp.cs" />
+    <Compile Include="pdal_swig_cppPINVOKE.cs" />
     <Compile Include="ostream.cs" />
     <Compile Include="PointData.cs" />
     <Compile Include="Producer.cs" />

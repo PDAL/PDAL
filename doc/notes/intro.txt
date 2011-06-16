@@ -1,17 +1,17 @@
 .. _intro:
 
 ==========================
-libPC Project Notes: Intro
+PDAL Project Notes: Intro
 ==========================
 
-The design, architecture, and implementation of libPC will be captured in a
+The design, architecture, and implementation of PDAL will be captured in a
 set of Notes.  Each Note file will, in general, discuss a single topic, such
 as Use Cases, Pipeline Design, or Testing.  Notes files are intended to
 capture all the decisions made on that topic, as well as keep track of
 points still to be decided.
 
 Better yet, these notes can serve as fodder for eventual public
-documentation for libPC developers and users.
+documentation for PDAL developers and users.
 
 Notes files will be RST text files and will live in the hg repo under 
 doc/notes.

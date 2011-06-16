@@ -32,14 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/las/VariableLengthRecord.hpp>
+#include <pdal/drivers/las/VariableLengthRecord.hpp>
 
-#include <libpc/SpatialReference.hpp>
+#include <pdal/SpatialReference.hpp>
 #include "GeotiffSupport.hpp"
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 static const std::string s_geotiffUserId = "LASF_Projection";
 static const boost::uint16_t s_geotiffRecordId_directory = 34735;
@@ -208,6 +208,7 @@ static bool setSRSFromVLRs_wkt(const std::vector<VariableLengthRecord>& vlrs, Sp
 
 static bool setSRSFromVLRs_geotiff(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs)
 {
+#ifdef PDAL_SRS_ENABLED
     GeotiffSupport geotiff;
 
     geotiff.resetTags();
@@ -287,7 +288,7 @@ static bool setSRSFromVLRs_geotiff(const std::vector<VariableLengthRecord>& vlrs
     const std::string wkt = geotiff.getWkt(false,false);
 
     srs.setFromUserInput(wkt);
-
+#endif
     return true;
 }
 
@@ -319,7 +320,7 @@ void VariableLengthRecord::setSRSFromVLRs(const std::vector<VariableLengthRecord
 
 void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs, SpatialReference::WKTModeFlag modeFlag)
 {
-#ifdef LIBPC_SRS_ENABLED
+#ifdef PDAL_SRS_ENABLED
 
     int ret = 0;
     short* kdata = 0;

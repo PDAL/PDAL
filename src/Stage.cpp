@@ -32,16 +32,16 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/Stage.hpp>
+#include <pdal/Stage.hpp>
 
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
 #include <iostream>
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
 
-namespace libpc
+namespace pdal
 {
 
 Stage::Stage()
@@ -133,7 +133,7 @@ const MetadataRecord& Stage::getMetadataRecord(int index) const
 {
     // the default behaviour is to have no records at all...
     boost::ignore_unused_variable_warning(index);
-    throw libpc_error("no such metadata record");
+    throw pdal_error("no such metadata record");
 }
 
 
@@ -141,7 +141,7 @@ MetadataRecord& Stage::getMetadataRecordRef(int index)
 {
     // the default behaviour is to have no records at all...
     boost::ignore_unused_variable_warning(index);
-    throw libpc_error("no such metadata record");
+    throw pdal_error("no such metadata record");
 }
 
 
@@ -181,4 +181,4 @@ std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
 }
 
 
-} // namespace libpc
+} // namespace pdal

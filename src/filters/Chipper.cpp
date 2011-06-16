@@ -38,10 +38,10 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/filters/Chipper.hpp>
+#include <pdal/filters/Chipper.hpp>
 
-#include <libpc/filters/ChipperIterator.hpp>
-#include <libpc/exceptions.hpp>
+#include <pdal/filters/ChipperIterator.hpp>
+#include <pdal/exceptions.hpp>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -49,7 +49,7 @@
 #include <limits>
 
 using namespace std;
-using namespace libpc::filters::chipper;
+using namespace pdal::filters::chipper;
 
 /**
 The objective is to split the region into non-overlapping blocks, each
@@ -81,7 +81,7 @@ from the narrow array so that the approriate extrema of the block can
 be stored.
 **/
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 vector<boost::uint32_t> Block::GetIDs() const
 {
@@ -94,21 +94,21 @@ vector<boost::uint32_t> Block::GetIDs() const
 
 void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t block_id) const
 {
-    libpc::Schema const& schema = buffer.getSchema();
+    pdal::Schema const& schema = buffer.getSchema();
 
     
         
     boost::int32_t size = m_right - m_left + 1;
     if (size < 0)
-        throw libpc_error("m_right - m_left + 1 was less than 0 in Block::GetBuffer()!");
+        throw pdal_error("m_right - m_left + 1 was less than 0 in Block::GetBuffer()!");
 
     if (!stage.supportsIterator(StageIterator_Random))
-        throw libpc_error("Chipper GetBuffer is unable to read data source randomly!");
+        throw pdal_error("Chipper GetBuffer is unable to read data source randomly!");
             
     boost::scoped_ptr<RandomIterator> iter(stage.createRandomIterator());
 
     std::vector<boost::uint32_t> ids = GetIDs();
-    libpc::PointBuffer one_point(schema, 1);
+    pdal::PointBuffer one_point(schema, 1);
 
     std::vector<boost::uint32_t>::const_iterator it;
     boost::uint32_t count = 0;
@@ -147,11 +147,11 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     boost::uint32_t idx;
     vector<PtRef>::iterator it;
    
-    libpc::Schema const& schema = m_prevStage.getSchema();
+    pdal::Schema const& schema = m_prevStage.getSchema();
     
     boost::uint64_t count = m_prevStage.getNumPoints();
     if (count > std::numeric_limits<std::size_t>::max())
-        throw libpc_error("numPoints too large for Chipper");
+        throw pdal_error("numPoints too large for Chipper");
     boost::uint32_t count32 = (boost::uint32_t)count;
     xvec.reserve(count32);
     yvec.reserve(count32);
@@ -256,7 +256,7 @@ void Chipper::Partition(boost::uint32_t size)
     m_partitions.push_back(0);
     for (boost::uint32_t i = 0; i < num_partitions; ++i) {
         total += partition_size;
-        boost::uint32_t itotal = static_cast<boost::uint32_t>(libpc::Utils::sround(total));
+        boost::uint32_t itotal = static_cast<boost::uint32_t>(pdal::Utils::sround(total));
         m_partitions.push_back(itotal);
     }
 }
@@ -417,7 +417,7 @@ void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widem
     if (wide.m_dir == DIR_X) { 
         
         // minx, miny, maxx, maxy
-        libpc::Bounds<double> bnd(wide[widemin].m_pos, narrow[narrowmin].m_pos, wide[widemax].m_pos,  narrow[narrowmax].m_pos);
+        pdal::Bounds<double> bnd(wide[widemin].m_pos, narrow[narrowmin].m_pos, wide[widemax].m_pos,  narrow[narrowmax].m_pos);
         b.SetBounds(bnd);
 
         // b.m_xmin = wide[widemin].m_pos;
@@ -426,7 +426,7 @@ void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widem
         // b.m_ymax = narrow[narrowmax].m_pos;
     }
     else {
-        libpc::Bounds<double> bnd(narrow[narrowmin].m_pos, wide[widemin].m_pos, narrow[narrowmax].m_pos, wide[widemax].m_pos);
+        pdal::Bounds<double> bnd(narrow[narrowmin].m_pos, wide[widemin].m_pos, narrow[narrowmax].m_pos, wide[widemax].m_pos);
         b.SetBounds(bnd);
 
         // b.m_xmin = narrow[narrowmin].m_pos;
@@ -452,12 +452,12 @@ const std::string& Chipper::getName() const
 }
 
 
-libpc::RandomIterator* Chipper::createRandomIterator() const
+pdal::RandomIterator* Chipper::createRandomIterator() const
 {
     return 0;
 }
 
-libpc::SequentialIterator* Chipper::createSequentialIterator() const
+pdal::SequentialIterator* Chipper::createSequentialIterator() const
 {
     return new ChipperSequentialIterator(*this);
 }

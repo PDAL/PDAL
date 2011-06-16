@@ -1,14 +1,19 @@
 ###############################################################################
 #
-# test/unit/CMakeLists.txt controls building of libPC unit tests suite
+# test/unit/CMakeLists.txt controls building of PDAL unit tests suite
 #
 # Copyright (c) 2009 Mateusz Loskot <mateusz@loskot.net>
 #
 ###############################################################################
-SET(LIBPC_UNIT_TEST libpc_test)
+SET(PDAL_UNIT_TEST pdal_test)
 
-SET(LIBPC_UNITTEST_TEST_SRC
+if (LIBXML2_FOUND)
+SET (PDAL_UNITTEST_XMLSCHEMA_TEST XMLSchemaTest.cpp)
+endif()
+
+SET(PDAL_UNITTEST_TEST_SRC
     BoundsTest.cpp
+    ByteSwapFilterTest.cpp
     CacheFilterTest.cpp
     ChipperTest.cpp
     ColorTest.cpp
@@ -37,52 +42,52 @@ SET(LIBPC_UNITTEST_TEST_SRC
     TerraSolidTest.cpp
     UtilsTest.cpp
     VectorTest.cpp
-    XMLSchemaTest.cpp
+    ${PDAL_UNITTEST_XMLSCHEMA_TEST}
     )
 
-SET(LIBPC_UNITTEST_TEST_INC
+SET(PDAL_UNITTEST_TEST_INC
     )
     
-SET(LIBPC_UNITTEST_CONFIG_SRC
+SET(PDAL_UNITTEST_CONFIG_SRC
     Support.cpp
     TestConfig.cpp
     main.cpp
     )
 
-SET(LIBPC_UNITTEST_CONFIG_INC
+SET(PDAL_UNITTEST_CONFIG_INC
     Support.hpp
     TestConfig.hpp
     )
 
 
 if (WITH_ORACLE)
-    set(LIBPC_OCI_TEST_CPP OCITest.cpp)
+    set(PDAL_OCI_TEST_CPP OCITest.cpp)
 
-    FOREACH(file ${LIBPC_OCI_TEST_CPP})
-            SET(LIBPC_UNITTEST_TEST_SRC "${LIBPC_UNITTEST_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
+    FOREACH(file ${PDAL_OCI_TEST_CPP})
+            SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
     ENDFOREACH(file)
     
 endif (WITH_ORACLE)
 
 
-set(LIBPC_UNITTEST_SOURCES "")
-FOREACH(file ${LIBPC_UNITTEST_TEST_SRC})
-        SET(LIBPC_UNITTEST_SOURCES "${LIBPC_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
+set(PDAL_UNITTEST_SOURCES "")
+FOREACH(file ${PDAL_UNITTEST_TEST_SRC})
+        SET(PDAL_UNITTEST_SOURCES "${PDAL_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
 ENDFOREACH(file)
-FOREACH(file ${LIBPC_UNITTEST_TEST_INC})
-        SET(LIBPC_UNITTEST_SOURCES "${LIBPC_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
+FOREACH(file ${PDAL_UNITTEST_TEST_INC})
+        SET(PDAL_UNITTEST_SOURCES "${PDAL_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
 ENDFOREACH(file)
-FOREACH(file ${LIBPC_UNITTEST_CONFIG_SRC})
-        SET(LIBPC_UNITTEST_SOURCES "${LIBPC_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
+FOREACH(file ${PDAL_UNITTEST_CONFIG_SRC})
+        SET(PDAL_UNITTEST_SOURCES "${PDAL_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
 ENDFOREACH(file)
-FOREACH(file ${LIBPC_UNITTEST_CONFIG_INC})
-        SET(LIBPC_UNITTEST_SOURCES "${LIBPC_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
+FOREACH(file ${PDAL_UNITTEST_CONFIG_INC})
+        SET(PDAL_UNITTEST_SOURCES "${PDAL_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
 ENDFOREACH(file)
 
-source_group("Header Files" FILES ${LIBPC_UNITTEST_TEST_INC})
-source_group("Header Files\\config" FILES ${LIBPC_UNITTEST_CONFIG_INC})
-source_group("Source Files" FILES ${LIBPC_UNITTEST_TEST_SRC})
-source_group("Source Files\\config" FILES ${LIBPC_UNITTEST_CONFIG_SRC})
+source_group("Header Files" FILES ${PDAL_UNITTEST_TEST_INC})
+source_group("Header Files\\config" FILES ${PDAL_UNITTEST_CONFIG_INC})
+source_group("Source Files" FILES ${PDAL_UNITTEST_TEST_SRC})
+source_group("Source Files\\config" FILES ${PDAL_UNITTEST_CONFIG_SRC})
 
 
 INCLUDE_DIRECTORIES(
@@ -91,12 +96,12 @@ INCLUDE_DIRECTORIES(
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR})
 
-ADD_EXECUTABLE(${LIBPC_UNIT_TEST} ${LIBPC_UNITTEST_SOURCES})
+ADD_EXECUTABLE(${PDAL_UNIT_TEST} ${PDAL_UNITTEST_SOURCES})
 
-set_target_properties(${LIBPC_UNIT_TEST} PROPERTIES COMPILE_DEFINITIONS LIBPC_DLL_IMPORT)
+set_target_properties(${PDAL_UNIT_TEST} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
 
 if(WIN32)
-    add_definitions("-DLIBPC_DLL_EXPORT=1")
+    add_definitions("-DPDAL_DLL_EXPORT=1")
   if (MSVC)
     #add_definitions("-DBOOST_TEST_DYN_LINK")
   endif()
@@ -108,8 +113,8 @@ else()
     endif()
 endif()
 
-TARGET_LINK_LIBRARIES(${LIBPC_UNIT_TEST} 
-    ${LIBPC_LIB_NAME}
+TARGET_LINK_LIBRARIES(${PDAL_UNIT_TEST} 
+    ${PDAL_LIB_NAME}
     ${LIBLAS_LIBRARY}
     ${ZLIB_LIBRARIES}
     ${TIFF_LIBRARY}
@@ -117,4 +122,4 @@ TARGET_LINK_LIBRARIES(${LIBPC_UNIT_TEST}
     ${GDAL_LIBRARY}
     ${SPATIALINDEX_LIBRARY})
 
-ADD_TEST(libpc_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/libpc_test ${PROJECT_SOURCE_DIR}/test/data)
+ADD_TEST(pdal_test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/pdal_test ${PROJECT_SOURCE_DIR}/test/data)

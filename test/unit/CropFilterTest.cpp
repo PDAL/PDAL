@@ -35,11 +35,11 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/faux/Writer.hpp>
-#include <libpc/filters/CropFilter.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/drivers/faux/Writer.hpp>
+#include <pdal/filters/CropFilter.hpp>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(CropFilterTest)
 
@@ -50,12 +50,12 @@ BOOST_AUTO_TEST_CASE(test_crop)
     // crop the window to 1/3rd the size in each dimension
     Bounds<double> dstBounds(3.33333, 33.33333, 333.33333, 6.66666, 66.66666, 666.66666);
     
-    libpc::drivers::faux::Reader reader(srcBounds, 1000, libpc::drivers::faux::Reader::Ramp);
+    pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
-    libpc::filters::CropFilter filter(reader, dstBounds);
+    pdal::filters::CropFilter filter(reader, dstBounds);
     BOOST_CHECK(filter.getDescription() == "Crop Filter");
 
-    libpc::drivers::faux::Writer writer(filter);
+    pdal::drivers::faux::Writer writer(filter);
 
     boost::uint64_t numWritten = writer.write(1000);
 

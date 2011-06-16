@@ -42,17 +42,17 @@
 
 #include "LasHeaderReader.hpp"
 
-#include <libpc/Utils.hpp>
-#include <libpc/exceptions.hpp>
-#include <libpc/drivers/las/Header.hpp>
-#include <libpc/drivers/las/VariableLengthRecord.hpp>
+#include <pdal/Utils.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/drivers/las/Header.hpp>
+#include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include "ZipPoint.hpp"
 
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
     
 
 LasHeaderReader::LasHeaderReader(LasHeader& header, std::istream& istream)
@@ -184,9 +184,9 @@ void LasHeaderReader::read(Schema& schema)
     n1 &= 0x3f;
     if (n1 <= 5)
     {
-        const libpc::drivers::las::PointFormat format = (libpc::drivers::las::PointFormat)n1;
+        const pdal::drivers::las::PointFormat format = (pdal::drivers::las::PointFormat)n1;
         m_header.setPointFormat(format);
-        libpc::drivers::las::Support::registerFields(schema, format);
+        pdal::drivers::las::Support::registerFields(schema, format);
     } 
     else
     {
@@ -343,8 +343,8 @@ void LasHeaderReader::readOneVLR()
     std::string description = "";
 
     {
-        boost::uint8_t buf1[libpc::drivers::las::VariableLengthRecord::s_headerLength];
-        Utils::read_n(buf1, m_istream, libpc::drivers::las::VariableLengthRecord::s_headerLength);
+        boost::uint8_t buf1[pdal::drivers::las::VariableLengthRecord::s_headerLength];
+        Utils::read_n(buf1, m_istream, pdal::drivers::las::VariableLengthRecord::s_headerLength);
         boost::uint8_t* p1 = buf1;
 
         reserved = Utils::read_field<boost::uint16_t>(p1);

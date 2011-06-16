@@ -40,18 +40,18 @@
 #include "Engine.hpp"
 #include "Controller.hpp"
 
-#include <libpc/filters/DecimationFilter.hpp>
-#include <libpc/filters/ColorFilter.hpp>
-#include <libpc/drivers/las/Reader.hpp>
-#include <libpc/drivers/liblas/Reader.hpp>
-#include <libpc/drivers/las/Reader.hpp>
-#include <libpc/Color.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/Schema.hpp>
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/Bounds.hpp>
-#include <libpc/Dimension.hpp>
-#include <libpc/Iterator.hpp>
+#include <pdal/filters/DecimationFilter.hpp>
+#include <pdal/filters/ColorFilter.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/liblas/Reader.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/Color.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/Schema.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/Bounds.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/Iterator.hpp>
 
 using namespace std;
 
@@ -105,7 +105,7 @@ static void readFakeFile(Controller& controller)
         points[i+2] = (float)z;
 
         double red,green,blue;
-        libpc::Color::interpolateColor(z,minz,maxz,red,green,blue);
+        pdal::Color::interpolateColor(z,minz,maxz,red,green,blue);
         
         const double vmax = (std::numeric_limits<boost::uint16_t>::max)();
         boost::uint16_t r16 = (boost::uint16_t)(red * vmax);
@@ -132,7 +132,7 @@ bool useColor = true;
 class ThreadArgs
 {
 public:
-    ThreadArgs(Controller& controller, libpc::Stage& stage, boost::uint32_t startPoint, boost::uint32_t numPoints)
+    ThreadArgs(Controller& controller, pdal::Stage& stage, boost::uint32_t startPoint, boost::uint32_t numPoints)
         : m_controller(controller)
         , m_stage(stage)
         , m_startPoint(startPoint)
@@ -141,7 +141,7 @@ public:
     { }
 
     Controller& m_controller;
-    libpc::Stage& m_stage;
+    pdal::Stage& m_stage;
     boost::uint32_t m_startPoint;
     boost::uint32_t m_numPoints;
     boost::uint32_t m_numRead;
@@ -157,15 +157,15 @@ static boost::mutex mutex;
 static void givePointsToEngine(ThreadArgs* threadArgs)
 {
     Controller& controller = threadArgs->m_controller;
-    libpc::Stage& stage = threadArgs->m_stage;
+    pdal::Stage& stage = threadArgs->m_stage;
     boost::uint32_t startPoint = threadArgs->m_startPoint;
     boost::uint32_t numPoints = threadArgs->m_numPoints;
 
-    const libpc::Schema& schema = stage.getSchema();
-    const libpc::SchemaLayout schemaLayout(schema);
+    const pdal::Schema& schema = stage.getSchema();
+    const pdal::SchemaLayout schemaLayout(schema);
 
-    libpc::SequentialIterator* iter = stage.createSequentialIterator();
-    libpc::PointBuffer buffer(schemaLayout, numPoints);
+    pdal::SequentialIterator* iter = stage.createSequentialIterator();
+    pdal::PointBuffer buffer(schemaLayout, numPoints);
     iter->skip(startPoint);
     const boost::uint32_t numRead = iter->read(buffer);
 
@@ -176,16 +176,16 @@ static void givePointsToEngine(ThreadArgs* threadArgs)
         colors = new boost::uint16_t[numRead * 3];
     }
 
-    const int offsetX = schema.getDimensionIndex(libpc::Dimension::Field_X, libpc::Dimension::Int32);
-    const int offsetY = schema.getDimensionIndex(libpc::Dimension::Field_Y, libpc::Dimension::Int32);
-    const int offsetZ = schema.getDimensionIndex(libpc::Dimension::Field_Z, libpc::Dimension::Int32);
-    const int offsetR = schema.getDimensionIndex(libpc::Dimension::Field_Red, libpc::Dimension::Uint16);
-    const int offsetG = schema.getDimensionIndex(libpc::Dimension::Field_Green, libpc::Dimension::Uint16);
-    const int offsetB = schema.getDimensionIndex(libpc::Dimension::Field_Blue, libpc::Dimension::Uint16);
+    const int offsetX = schema.getDimensionIndex(pdal::Dimension::Field_X, pdal::Dimension::Int32);
+    const int offsetY = schema.getDimensionIndex(pdal::Dimension::Field_Y, pdal::Dimension::Int32);
+    const int offsetZ = schema.getDimensionIndex(pdal::Dimension::Field_Z, pdal::Dimension::Int32);
+    const int offsetR = schema.getDimensionIndex(pdal::Dimension::Field_Red, pdal::Dimension::Uint16);
+    const int offsetG = schema.getDimensionIndex(pdal::Dimension::Field_Green, pdal::Dimension::Uint16);
+    const int offsetB = schema.getDimensionIndex(pdal::Dimension::Field_Blue, pdal::Dimension::Uint16);
 
-    const libpc::Dimension& xDim = schema.getDimension(offsetX);
-    const libpc::Dimension& yDim = schema.getDimension(offsetY);
-    const libpc::Dimension& zDim = schema.getDimension(offsetZ);
+    const pdal::Dimension& xDim = schema.getDimension(offsetX);
+    const pdal::Dimension& yDim = schema.getDimension(offsetY);
+    const pdal::Dimension& zDim = schema.getDimension(offsetZ);
 
     int cnt=0;
     for (boost::uint32_t i=0; i<numRead; i++)
@@ -232,11 +232,11 @@ static void readFileSimple(Controller& controller, const string& file)
 {
     boost::timer timer;
 
-    libpc::Stage* reader = new libpc::drivers::las::LasReader(file);
+    pdal::Stage* reader = new pdal::drivers::las::LasReader(file);
     
-    libpc::Stage* decimator = new libpc::filters::DecimationFilter(*reader, factor);
+    pdal::Stage* decimator = new pdal::filters::DecimationFilter(*reader, factor);
 
-    libpc::Stage* colorizer = new libpc::filters::ColorFilter(*decimator);
+    pdal::Stage* colorizer = new pdal::filters::ColorFilter(*decimator);
 
     const boost::uint32_t numPoints = (boost::uint32_t)colorizer->getNumPoints();
 
@@ -264,7 +264,7 @@ static void readFileSimple(Controller& controller, const string& file)
     cout << "done reading points\n";
     cout << "  elapsed time: " << timer.elapsed() << " seconds" << std::endl;
     
-    const libpc::Bounds<double>& bounds = colorizer->getBounds();
+    const pdal::Bounds<double>& bounds = colorizer->getBounds();
     controller.setBounds((float)bounds.getMinimum(0), (float)bounds.getMinimum(1), (float)bounds.getMinimum(2), 
                          (float)bounds.getMaximum(0), (float)bounds.getMaximum(1), (float)bounds.getMaximum(2));
 

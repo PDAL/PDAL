@@ -32,16 +32,16 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/ScalingFilter.hpp>
+#include <pdal/filters/ScalingFilter.hpp>
 
-#include <libpc/Dimension.hpp>
-#include <libpc/Schema.hpp>
-#include <libpc/exceptions.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/filters/ScalingFilterIterator.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/Schema.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/filters/ScalingFilterIterator.hpp>
 
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 
@@ -170,7 +170,7 @@ void ScalingFilter::checkImpedance()
             dimYd.setNumericScale(m_scaleY);
             dimYd.setNumericOffset(m_offsetY);
             dimZd.setNumericScale(m_scaleZ);
-            dimZd.setNumericOffset(m_offsetY);
+            dimZd.setNumericOffset(m_offsetZ);
         }
         else
         {
@@ -286,7 +286,7 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
 }
 
 
-libpc::SequentialIterator* ScalingFilter::createSequentialIterator() const
+pdal::SequentialIterator* ScalingFilter::createSequentialIterator() const
 {
     return new ScalingFilterSequentialIterator(*this);
 }

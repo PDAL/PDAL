@@ -32,16 +32,16 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/ColorFilter.hpp>
+#include <pdal/filters/ColorFilter.hpp>
 
-#include <libpc/Dimension.hpp>
-#include <libpc/Schema.hpp>
-#include <libpc/exceptions.hpp>
-#include <libpc/Color.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/filters/ColorFilterIterator.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/Schema.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/Color.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/filters/ColorFilterIterator.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 ColorFilter::ColorFilter(const Stage& prevStage)
     : Filter(prevStage)
@@ -161,7 +161,7 @@ void ColorFilter::getColor_F64_U16(double value, boost::uint16_t& red, boost::ui
 }
 
 
-libpc::SequentialIterator* ColorFilter::createSequentialIterator() const
+pdal::SequentialIterator* ColorFilter::createSequentialIterator() const
 {
     return new ColorFilterSequentialIterator(*this);
 }

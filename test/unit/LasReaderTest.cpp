@@ -35,21 +35,21 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/Iterator.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/drivers/las/Reader.hpp>
-#include <libpc/filters/CacheFilter.hpp>
+#include <pdal/Iterator.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/filters/CacheFilter.hpp>
 #include "Support.hpp"
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(LasReaderTest)
 
 
 BOOST_AUTO_TEST_CASE(test_sequential)
 {
-    libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
     const Schema& schema = reader.getSchema();
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 
     PointBuffer data(layout, 3);
     
-    libpc::SequentialIterator* iter = reader.createSequentialIterator();
+    pdal::SequentialIterator* iter = reader.createSequentialIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 
 BOOST_AUTO_TEST_CASE(test_random)
 {
-    libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
     const Schema& schema = reader.getSchema();
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 
     PointBuffer data(layout, 3);
     
-    libpc::RandomIterator* iter = reader.createRandomIterator();
+    pdal::RandomIterator* iter = reader.createRandomIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 
 BOOST_AUTO_TEST_CASE(test_random_laz)
 {
-    libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.laz"));
+    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.laz"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
     const Schema& schema = reader.getSchema();
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 
     PointBuffer data(layout, 3);
     
-    libpc::RandomIterator* iter = reader.createRandomIterator();
+    pdal::RandomIterator* iter = reader.createRandomIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 
 BOOST_AUTO_TEST_CASE(test_two_iters)
 {
-    libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
     const Schema& schema = reader.getSchema();
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
     PointBuffer data(layout, 1065);
 
     {
-        libpc::SequentialIterator* iter = reader.createSequentialIterator();
+        pdal::SequentialIterator* iter = reader.createSequentialIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         boost::uint32_t numRead = iter->read(data);
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
     }
 
     {
-        libpc::RandomIterator* iter = reader.createRandomIterator();
+        pdal::RandomIterator* iter = reader.createRandomIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         boost::uint32_t numRead = iter->read(data);
@@ -215,13 +215,13 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
 
 BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 {
-    libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
     BOOST_CHECK(reader.getNumPoints() == 1065);
     BOOST_CHECK(355 * 3 == 1065);
 
-    libpc::filters::CacheFilter cache(reader, 1, 355);
+    pdal::filters::CacheFilter cache(reader, 1, 355);
     BOOST_CHECK(cache.getNumPoints() == 1065);
 
     const Schema& schema = cache.getSchema();
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     boost::uint32_t numRead;
 
     {
-        libpc::SequentialIterator* iter = cache.createSequentialIterator();
+        pdal::SequentialIterator* iter = cache.createSequentialIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         numRead = iter->read(data);
@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     }
 
     {
-        libpc::RandomIterator* iter = cache.createRandomIterator();
+        pdal::RandomIterator* iter = cache.createRandomIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         // read the middle third
@@ -305,7 +305,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 
 BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 {
-    libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
     BOOST_CHECK(reader.getNumPoints() == 1065);
@@ -318,16 +318,16 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 
     boost::uint32_t numRead;
 
-    libpc::SequentialIterator* iterS1 = reader.createSequentialIterator();
+    pdal::SequentialIterator* iterS1 = reader.createSequentialIterator();
     BOOST_CHECK(iterS1->getIndex() == 0);
 
-    libpc::SequentialIterator* iterS2 = reader.createSequentialIterator();
+    pdal::SequentialIterator* iterS2 = reader.createSequentialIterator();
     BOOST_CHECK(iterS2->getIndex() == 0);
 
-    libpc::RandomIterator* iterR1 = reader.createRandomIterator();
+    pdal::RandomIterator* iterR1 = reader.createRandomIterator();
     BOOST_CHECK(iterR1->getIndex() == 0);
 
-    libpc::RandomIterator* iterR2 = reader.createRandomIterator();
+    pdal::RandomIterator* iterR2 = reader.createRandomIterator();
     BOOST_CHECK(iterR2->getIndex() == 0);
 
     {
@@ -422,7 +422,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 
 BOOST_AUTO_TEST_CASE(test_iterator_checks)
 {
-    libpc::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
 
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);
@@ -433,7 +433,7 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
 static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
                               double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
 {
-    libpc::drivers::las::LasReader reader(Support::datapath(file));
+    pdal::drivers::las::LasReader reader(Support::datapath(file));
 
     BOOST_CHECK(reader.getPointFormat() == pointFormat);
     BOOST_CHECK(reader.getVersionMajor() == majorVersion);
@@ -444,7 +444,7 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
 
     PointBuffer data(layout, 1);
     
-    libpc::SequentialIterator* iter = reader.createSequentialIterator();
+    pdal::SequentialIterator* iter = reader.createSequentialIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -475,7 +475,7 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 
 BOOST_AUTO_TEST_CASE(test_vlr)
 {
-    libpc::drivers::las::LasReader reader(Support::datapath("lots_of_vlr.las"));
+    pdal::drivers::las::LasReader reader(Support::datapath("lots_of_vlr.las"));
 
     BOOST_CHECK(reader.getVLRs().size() == 390);
 

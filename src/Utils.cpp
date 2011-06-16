@@ -32,29 +32,29 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/Utils.hpp>
+#include <pdal/Utils.hpp>
 
 #include <cassert>
 
-#ifdef LIBPC_COMPILER_MSVC
+#ifdef PDAL_COMPILER_MSVC
 #  pragma warning(push)
 #  pragma warning(disable: 4702)  // unreachable code
 #endif
 #include <boost/iostreams/device/file.hpp>
-#ifdef LIBPC_COMPILER_MSVC
+#ifdef PDAL_COMPILER_MSVC
 #  pragma warning(pop)
 #endif
 #include <boost/iostreams/stream.hpp>
 #include <boost/filesystem.hpp>
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
 
-#ifdef LIBPC_COMPILER_MSVC
+#ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
-namespace libpc
+namespace pdal
 {
 
 
@@ -81,7 +81,7 @@ double Utils::random(double minimum, double maximum)
 std::istream* Utils::openFile(std::string const& filename, bool asBinary)
 {
     if (!Utils::fileExists(filename))
-        throw libpc_error("File not found: " + filename);
+        throw pdal_error("File not found: " + filename);
 
     std::ios::openmode mode = std::ios::in;
     if (asBinary)
@@ -176,7 +176,7 @@ char* Utils::getenv(const char* env)
 
 int Utils::putenv(const char* env)
 {
-#ifdef LIBPC_COMPILER_MSVC
+#ifdef PDAL_COMPILER_MSVC
     return ::_putenv(env);
 #else
     return ::putenv(const_cast<char*>(env));
@@ -225,5 +225,19 @@ std::string Utils::trim(const std::string& str)
     return str.substr( startpos, endpos-startpos+1 );
 }
 
+boost::uint32_t Utils::getStreamPrecision(double scale)
+{
+    double frac = 0;
+    double integer = 0;
+    
+    frac = std::modf(scale, &integer);
+    double precision = std::fabs(std::floor(std::log10(frac)));
+    
+    // FIXME: This should test that precision actually ends up being a 
+    // whole number
+    boost::uint32_t output = static_cast<boost::uint32_t>(precision);
+    return output;
+}
 
-} // namespace libpc
+
+} // namespace pdal

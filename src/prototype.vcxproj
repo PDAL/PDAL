@@ -93,21 +93,21 @@
     <ClCompile Include="Writer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\libpc\Bounds.hpp" />
-    <ClInclude Include="..\include\libpc\ColorFilter.hpp" />
-    <ClInclude Include="..\include\libpc\CropFilter.hpp" />
-    <ClInclude Include="..\include\libpc\FauxReader.hpp" />
-    <ClInclude Include="..\include\libpc\FauxWriter.hpp" />
-    <ClInclude Include="..\include\libpc\Field.hpp" />
-    <ClInclude Include="..\include\libpc\Filter.hpp" />
-    <ClInclude Include="..\include\libpc\Header.hpp" />
-    <ClInclude Include="..\include\libpc\MosaicFilter.hpp" />
-    <ClInclude Include="..\include\libpc\PointLayout.hpp" />
-    <ClInclude Include="..\include\libpc\PointData.hpp" />
-    <ClInclude Include="..\include\libpc\Reader.hpp" />
-    <ClInclude Include="..\include\libpc\Stage.hpp" />
-    <ClInclude Include="..\include\libpc\Utils.hpp" />
-    <ClInclude Include="..\include\libpc\Writer.hpp" />
+    <ClInclude Include="..\include\pdal\Bounds.hpp" />
+    <ClInclude Include="..\include\pdal\ColorFilter.hpp" />
+    <ClInclude Include="..\include\pdal\CropFilter.hpp" />
+    <ClInclude Include="..\include\pdal\FauxReader.hpp" />
+    <ClInclude Include="..\include\pdal\FauxWriter.hpp" />
+    <ClInclude Include="..\include\pdal\Field.hpp" />
+    <ClInclude Include="..\include\pdal\Filter.hpp" />
+    <ClInclude Include="..\include\pdal\Header.hpp" />
+    <ClInclude Include="..\include\pdal\MosaicFilter.hpp" />
+    <ClInclude Include="..\include\pdal\PointLayout.hpp" />
+    <ClInclude Include="..\include\pdal\PointData.hpp" />
+    <ClInclude Include="..\include\pdal\Reader.hpp" />
+    <ClInclude Include="..\include\pdal\Stage.hpp" />
+    <ClInclude Include="..\include\pdal\Utils.hpp" />
+    <ClInclude Include="..\include\pdal\Writer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

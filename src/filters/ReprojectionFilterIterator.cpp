@@ -32,15 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/ReprojectionFilterIterator.hpp>
+#include <pdal/filters/ReprojectionFilterIterator.hpp>
 
-#include <libpc/filters/ReprojectionFilter.hpp>
+#include <pdal/filters/ReprojectionFilter.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 ReprojectionFilterSequentialIterator::ReprojectionFilterSequentialIterator(const ReprojectionFilter& filter)
-    : libpc::FilterSequentialIterator(filter)
+    : pdal::FilterSequentialIterator(filter)
     , m_reprojectionFilter(filter)
 {
     return;

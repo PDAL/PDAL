@@ -32,20 +32,20 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/qfit/Iterator.hpp>
+#include <pdal/drivers/qfit/Iterator.hpp>
 
-#include <libpc/drivers/qfit/Reader.hpp>
-#include <libpc/exceptions.hpp>
-#include <libpc/Utils.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/drivers/qfit/Reader.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/Utils.hpp>
+#include <pdal/PointBuffer.hpp>
 
 #include <iostream>
 
-namespace libpc { namespace drivers { namespace qfit {
+namespace pdal { namespace drivers { namespace qfit {
 
 
 SequentialIterator::SequentialIterator(const qfit::Reader& reader)
-    : libpc::SequentialIterator(reader)
+    : pdal::SequentialIterator(reader)
     , m_reader(reader)
     , m_istream(NULL)
 {
@@ -83,7 +83,7 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 
 
 RandomIterator::RandomIterator(const Reader& reader)
-    : libpc::RandomIterator(reader)
+    : pdal::RandomIterator(reader)
     , m_reader(reader)
     , m_istream(NULL)
 {

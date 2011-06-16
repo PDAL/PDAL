@@ -39,13 +39,17 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/Schema.hpp>
+#include <pdal/Schema.hpp>
 
 #include <iostream>
 
-#include <libpc/exceptions.hpp>
+#include <pdal/exceptions.hpp>
 
-namespace libpc
+#ifdef PDAL_HAVE_LIBXML2
+#include <pdal/XMLSchema.hpp>
+#endif
+
+namespace pdal
 {
 
 
@@ -186,7 +190,7 @@ int Schema::getDimensionIndex(Dimension::Field field, Dimension::DataType dataty
     if (index == -1)
     {
         return -1;
-        // throw libpc_error("Requested dimension field not present");
+        // throw pdal_error("Requested dimension field not present");
     }
     
     const Dimension& dim = m_dimensions[index];
@@ -264,9 +268,51 @@ std::ostream& operator<<(std::ostream& os, Schema const& schema)
     return os;
 }
 
-Schema Schema::from_xml(std::istream* stream)
+
+#ifdef PDAL_HAVE_LIBXML2
+
+
+#endif
+
+
+Schema Schema::from_xml(std::string const& xml, std::string const& xsd)
 {
+#ifdef PDAL_HAVE_LIBXML2
+
+    pdal::schema::Reader reader(xml, xsd);
+    
+    pdal::Schema schema = reader.getSchema();
+    return schema;
+
+#endif
     return Schema();
 }
 
-} // namespace libpc
+Schema Schema::from_xml(std::string const& xml)
+{
+#ifdef PDAL_HAVE_LIBXML2
+    
+    std::string xsd("");
+    
+    pdal::schema::Reader reader(xml, xsd);
+    
+    pdal::Schema schema = reader.getSchema();
+    return schema;
+
+#endif
+    return Schema();
+}
+
+std::string Schema::to_xml(Schema const& schema)
+{
+#ifdef PDAL_HAVE_LIBXML2
+
+    pdal::schema::Writer writer(schema);
+    
+    return writer.getXML();
+
+#endif
+    return std::string("");
+}
+
+} // namespace pdal

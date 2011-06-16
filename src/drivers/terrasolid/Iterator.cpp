@@ -32,20 +32,20 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/drivers/terrasolid/Iterator.hpp>
+#include <pdal/drivers/terrasolid/Iterator.hpp>
 
-#include <libpc/drivers/terrasolid/Reader.hpp>
-#include <libpc/exceptions.hpp>
-#include <libpc/Utils.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/drivers/terrasolid/Reader.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/Utils.hpp>
+#include <pdal/PointBuffer.hpp>
 
 #include <iostream>
 
-namespace libpc { namespace drivers { namespace terrasolid {
+namespace pdal { namespace drivers { namespace terrasolid {
 
 
 SequentialIterator::SequentialIterator(const terrasolid::Reader& reader)
-    : libpc::SequentialIterator(reader)
+    : pdal::SequentialIterator(reader)
     , m_reader(reader)
     , m_istream(NULL)
 {
@@ -83,7 +83,7 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 
 
 RandomIterator::RandomIterator(const Reader& reader)
-    : libpc::RandomIterator(reader)
+    : pdal::RandomIterator(reader)
     , m_reader(reader)
     , m_istream(NULL)
 {

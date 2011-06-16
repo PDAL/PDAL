@@ -32,6 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/Vector.hpp>
+#include <pdal/Vector.hpp>
 
 // (no code here, everything is in the header)

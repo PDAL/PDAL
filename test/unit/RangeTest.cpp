@@ -40,10 +40,10 @@
 #include <string>
 #include <ctype.h>
 
-#include <libpc/Range.hpp>
-#include <libpc/exceptions.hpp>
+#include <pdal/Range.hpp>
+#include <pdal/exceptions.hpp>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(RangeTest)
 

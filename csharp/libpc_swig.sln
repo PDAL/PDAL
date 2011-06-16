@@ -6,14 +6,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.txt = README.txt
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpc_swig_cpp", "libpc_swig_cpp\libpc_swig_cpp.vcxproj", "{D8860CDB-E45E-4CD4-B63C-EC08D7C21E13}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pdal_swig_cpp", "pdal_swig_cpp\pdal_swig_cpp.vcxproj", "{D8860CDB-E45E-4CD4-B63C-EC08D7C21E13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libpc_swig_cs", "libpc_swig_cs\libpc_swig_cs.csproj", "{616B6A25-ECBF-4FCC-B0B2-DF8C26112753}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pdal_swig_cs", "pdal_swig_cs\pdal_swig_cs.csproj", "{616B6A25-ECBF-4FCC-B0B2-DF8C26112753}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D8860CDB-E45E-4CD4-B63C-EC08D7C21E13} = {D8860CDB-E45E-4CD4-B63C-EC08D7C21E13}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libpc_swig_test", "libpc_swig_test\libpc_swig_test.csproj", "{3F5B745F-81E8-41A6-BA7B-E997B8A46396}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pdal_swig_test", "pdal_swig_test\pdal_swig_test.csproj", "{3F5B745F-81E8-41A6-BA7B-E997B8A46396}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D8860CDB-E45E-4CD4-B63C-EC08D7C21E13} = {D8860CDB-E45E-4CD4-B63C-EC08D7C21E13}
 	EndProjectSection

@@ -32,15 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/ColorFilterIterator.hpp>
+#include <pdal/filters/ColorFilterIterator.hpp>
 
-#include <libpc/filters/ColorFilter.hpp>
+#include <pdal/filters/ColorFilter.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 ColorFilterSequentialIterator::ColorFilterSequentialIterator(const ColorFilter& filter)
-    : libpc::FilterSequentialIterator(filter)
+    : pdal::FilterSequentialIterator(filter)
     , m_colorFilter(filter)
 {
     return;

@@ -39,12 +39,12 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <libpc/Dimension.hpp>
+#include <pdal/Dimension.hpp>
 
-#include <libpc/exceptions.hpp>
-#include <libpc/Utils.hpp>
+#include <pdal/exceptions.hpp>
+#include <pdal/Utils.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 std::string Dimension::s_fieldNames[Field_LAST];
@@ -54,7 +54,7 @@ bool Dimension::s_fieldNamesValid = false;
 Dimension::Dimension(Field field, DataType dataType)
     : m_dataType(dataType)
     , m_field(field)
-    , m_endian(libpc::Endian_Little)
+    , m_endian(pdal::Endian_Little)
     , m_byteSize(0)
     , m_description(std::string(""))
     , m_min(0.0)
@@ -145,21 +145,28 @@ boost::property_tree::ptree Dimension::GetPTree() const
         e = std::string("big");
     dim.put("endianness", e);
 
-    if (isNumeric())
-    {
-        if (! (Utils::compare_distance(getMinimum(), getMaximum()) && 
-               Utils::compare_distance(0.0, getMaximum())))
-        {
-            dim.put("minimum", getMinimum());
-            dim.put("maximum", getMaximum());
-        }
-    }
 
+    if (! (Utils::compare_distance(getMinimum(), getMaximum()) && 
+           Utils::compare_distance(0.0, getMaximum())))
+    {
+        dim.put("minimum", getMinimum());
+        dim.put("maximum", getMaximum());
+    }
+    if (! (Utils::compare_distance(getNumericScale(), 0.0)))
+    {
+        dim.put("scale", getNumericScale());
+    }
+    if (! (Utils::compare_distance(getNumericOffset(), 0.0)))
+    {
+        dim.put("offset", getNumericOffset());
+    }
+    
+    dim.put("scale", getNumericScale());
     return dim;
 }
 
 
-std::ostream& operator<<(std::ostream& os, libpc::Dimension const& d)
+std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
 {
     using boost::property_tree::ptree;
     ptree tree = d.GetPTree();
@@ -171,13 +178,34 @@ std::ostream& operator<<(std::ostream& os, libpc::Dimension const& d)
     std::ostringstream pad;
     std::string const& cur = quoted_name.str();
     std::string::size_type size = cur.size();
-    std::string::size_type pad_size = 30 - size;
+    std::string::size_type pad_size = 24 - size;
 
     for (std::string::size_type i=0; i != pad_size; i++ )
     {
         pad << " ";
     }
     os << quoted_name.str() << pad.str() <<" -- "<< " size: " << tree.get<boost::uint32_t>("bytesize");
+
+    try {
+        double value = tree.get<double>("scale");
+        boost::uint32_t precision = Utils::getStreamPrecision(value);
+        os.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        os.precision(precision);
+        os << " scale: " << value;
+    }
+    catch (boost::property_tree::ptree_bad_path const& ) {
+    }    
+
+    try {
+        double value = tree.get<double>("offset");
+        boost::uint32_t precision = Utils::getStreamPrecision(value);
+        os.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        os.precision(precision);
+        os << " offset: " << value;
+    }
+    catch (boost::property_tree::ptree_bad_path const& ) {
+    }    
+    
     //os << " offset: " << tree.get<boost::uint32_t>("byteoffset");
     os << std::endl;
 
@@ -347,12 +375,12 @@ std::string const& Dimension::getFieldName(Field field)
         initFieldNames();
 
     if (field > Field_LAST)
-        throw libpc_error("invalid field value (too large)");
+        throw pdal_error("invalid field value (too large)");
 
     const std::string& s =  s_fieldNames[field];
     if (s.empty())
     {
-        throw libpc_error("Field name not set for built-in field value");
+        throw pdal_error("Field name not set for built-in field value");
     }        
 
     return s;
@@ -398,4 +426,4 @@ void Dimension::initFieldNames()
 }
 
 
-} // namespace libpc
+} // namespace pdal

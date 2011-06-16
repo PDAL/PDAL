@@ -41,7 +41,7 @@ using Libpc;
 using System.Diagnostics;
 using System.IO;
 
-namespace libpc_swig_test
+namespace pdal_swig_test
 {
    public class Program
    {

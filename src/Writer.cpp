@@ -35,13 +35,13 @@
 //
 #include <boost/scoped_ptr.hpp>
 
-#include <libpc/Writer.hpp>
-#include <libpc/Iterator.hpp>
-#include <libpc/Stage.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/exceptions.hpp>
+#include <pdal/Writer.hpp>
+#include <pdal/Iterator.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/exceptions.hpp>
 
-namespace libpc
+namespace pdal
 {
 
 const boost::uint32_t Writer::s_defaultChunkSize = 1024 * 32;
@@ -89,13 +89,13 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
     {
         if (count_type == PointCount_Unknown)
         {
-            throw libpc_error("Unable to write points with an unknowable point count");
+            throw pdal_error("Unable to write points with an unknowable point count");
         }
     }
     
     boost::scoped_ptr<SequentialIterator> iter(m_prevStage.createSequentialIterator());
     
-    if (!iter) throw libpc_error("Unable to obtain iterator from previous stage!");
+    if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
 
     writeBegin();
 
@@ -149,4 +149,4 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 }
 
 
-} // namespace libpc
+} // namespace pdal

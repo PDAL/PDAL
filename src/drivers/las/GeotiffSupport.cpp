@@ -35,7 +35,7 @@
 #include "GeotiffSupport.hpp"
 
 // GDAL
-#ifdef LIBPC_HAVE_GDAL
+#ifdef PDAL_HAVE_GDAL
 #include <geo_normalize.h>
 #include <ogr_spatialref.h>
 
@@ -46,15 +46,15 @@
 #include <boost/concept_check.hpp>
 
 
-LIBPC_C_START
+PDAL_C_START
 #ifdef __geotiff_h_
 
 
 #ifdef GEO_NORMALIZE_H_INCLUDED
-char LIBPC_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
+char PDAL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
 #endif
 
-int LIBPC_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
+int PDAL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
 void SetLinearUnitCitation(GTIF* psGTIF, char* pszLinearUOMName);
 
 #ifdef _OGR_SRS_API_H_INCLUDED
@@ -62,10 +62,10 @@ void SetGeogCSCitation(GTIF* psGTIF, OGRSpatialReference* poSRS, char* angUnitNa
 #endif // defined _OGR_SRS_API_H_INCLUDED
 
 #endif // defined __geotiff_h_
-LIBPC_C_END
+PDAL_C_END
 
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 
 GeotiffSupport::GeotiffSupport()
@@ -77,7 +77,7 @@ GeotiffSupport::GeotiffSupport()
 
 GeotiffSupport::~GeotiffSupport()
 {
-#ifdef LIBPC_SRS_ENABLED
+#ifdef PDAL_SRS_ENABLED
     if (m_gtiff != 0)
     {
         GTIFFree(m_gtiff);
@@ -278,7 +278,7 @@ private:
 };
 
 
-static int libpcGeoTIFFPrint(char* data, void* aux)
+static int pdalGeoTIFFPrint(char* data, void* aux)
 {
     geotiff_dir_printer* printer = reinterpret_cast<geotiff_dir_printer*>(aux);
     (*printer)(data, 0);
@@ -292,7 +292,7 @@ std::string GeotiffSupport::getText() const
         return std::string("");
 
     geotiff_dir_printer geotiff_printer;
-    GTIFPrint(m_gtiff, libpcGeoTIFFPrint, &geotiff_printer);
+    GTIFPrint(m_gtiff, pdalGeoTIFFPrint, &geotiff_printer);
     const std::string s = geotiff_printer.output();
     return s;
 }
@@ -312,7 +312,7 @@ void SpatialReference::setVerticalCS(boost::int32_t verticalCSType,
         rebuildGTIF(); 
     }
 
-#ifdef LIBPC_SRS_ENABLED
+#ifdef PDAL_SRS_ENABLED
     if( verticalCSType != KvUserDefined && verticalCSType > 0 )
         GTIFKeySet( m_tiffstuff->m_gtiff, VerticalCSTypeGeoKey, TYPE_SHORT, 1,
                     verticalCSType );
@@ -356,7 +356,7 @@ void SpatialReference::setProj4(std::string const& v)
         rebuildGTIF();
     }
    
-#ifdef LIBPC_SRS_ENABLED
+#ifdef PDAL_SRS_ENABLED
     char* poWKT = 0;
     const char* poProj4 = v.c_str();
 

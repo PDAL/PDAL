@@ -35,9 +35,9 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/SchemaLayout.hpp>
+#include <pdal/SchemaLayout.hpp>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(SchemaLayoutTest)
 

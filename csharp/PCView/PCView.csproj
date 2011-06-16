@@ -132,9 +132,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\libpc_swig_cs\libpc_swig_cs.csproj">
+    <ProjectReference Include="..\pdal_swig_cs\pdal_swig_cs.csproj">
       <Project>{616B6A25-ECBF-4FCC-B0B2-DF8C26112753}</Project>
-      <Name>libpc_swig_cs</Name>
+      <Name>pdal_swig_cs</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

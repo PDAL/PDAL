@@ -1,0 +1,70 @@
+/* 
+ * pdal_defines.h.in is used by cmake to generate pdal_defines.h
+ *
+ * Do not edit pdal_defines.h!
+ *
+ * Note this is a C-style header.  Do not use C++ syntax.
+ */
+#ifndef PDAL_DEFINES_H
+#define PDAL_DEFINES_H
+
+/*
+ * version settings
+ */
+#define PDAL_VERSION_MAJOR @PDAL_VERSION_MAJOR@
+#define PDAL_VERSION_MINOR @PDAL_VERSION_MINOR@
+#define PDAL_VERSION_PATCH @PDAL_VERSION_PATCH@
+
+#define PDAL_VERSION_STRING "@PDAL_VERSION_STRING@"
+
+/* (note this will look yucky until we get to major>=1) */
+#define PDAL_VERSION_INTEGER ((PDAL_VERSION_MAJOR*100*100)+(PDAL_VERSION_MINOR*100)+PDAL_VERSION_PATCH)
+
+
+/*
+ * availability of 3rd-party libraries
+ */
+#cmakedefine PDAL_HAVE_LIBLAS
+#cmakedefine PDAL_HAVE_LASZIP
+#cmakedefine PDAL_HAVE_ORACLE
+#cmakedefine PDAL_HAVE_GDAL
+#cmakedefine PDAL_HAVE_LIBXML2
+#cmakedefine PDAL_HAVE_LIBGEOTIFF
+#cmakedefine PDAL_HAVE_MRSID
+
+
+/*
+ * platform endianness
+ */
+#cmakedefine PDAL_ENDIAN_AWARE
+
+/*
+ * Debug or Release build?
+ */
+#define PDAL_BUILD_TYPE "@PDAL_BUILD_TYPE@"
+
+/*
+ * platform OS
+ */
+#cmakedefine PDAL_PLATFORM_WIN32
+
+/*
+ * platform compiler 
+ */
+#cmakedefine PDAL_COMPILER_MSVC
+#cmakedefine PDAL_COMPILER_VC10
+#cmakedefine PDAL_COMPILER_VC9
+#cmakedefine PDAL_COMPILER_VC8
+#cmakedefine PDAL_COMPILER_GCC
+#cmakedefine PDAL_COMPILER_CLANG
+
+
+/*
+ * We have two modes: with GDAL and geotiff, SRS is enabled -- otherwise, it's disabled
+ * we use one macro to simplify the control
+ */
+#if defined(PDAL_HAVE_GDAL) && defined(PDAL_HAVE_LIBGEOTIFF)
+#define PDAL_SRS_ENABLED
+#endif
+
+#endif

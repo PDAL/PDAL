@@ -38,31 +38,31 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
  
-%module libpc_swig_cpp
+%module pdal_swig_cpp
 
 %{
 #include <iostream>
 
-#include "libpc/libpc_config.hpp"
+#include "pdal/pdal_config.hpp"
 
-#include "libpc/Bounds.hpp"
-#include "libpc/Range.hpp"
+#include "pdal/Bounds.hpp"
+#include "pdal/Range.hpp"
 
-#include "libpc/Dimension.hpp"
-#include "libpc/DimensionLayout.hpp"
-#include "libpc/Schema.hpp"
-#include "libpc/SchemaLayout.hpp"
-#include "libpc/PointData.hpp"
+#include "pdal/Dimension.hpp"
+#include "pdal/DimensionLayout.hpp"
+#include "pdal/Schema.hpp"
+#include "pdal/SchemaLayout.hpp"
+#include "pdal/PointData.hpp"
 
-#include "libpc/Header.hpp"
-#include "libpc/Stage.hpp"
-#include "libpc/Filter.hpp"
-#include "libpc/Producer.hpp"
+#include "pdal/Header.hpp"
+#include "pdal/Stage.hpp"
+#include "pdal/Filter.hpp"
+#include "pdal/Producer.hpp"
 
-#include "libpc/DecimationFilter.hpp"
+#include "pdal/DecimationFilter.hpp"
 
-#include "libpc/../../src/drivers/liblas/header.hpp"
-#include "libpc/../../src/drivers/liblas/reader.hpp"
+#include "pdal/../../src/drivers/liblas/header.hpp"
+#include "pdal/../../src/drivers/liblas/reader.hpp"
 %}
 
 %include "typemaps.i"
@@ -76,8 +76,8 @@ namespace std
 {
    %template(std_vector_u8) vector<unsigned char>;
    %template(std_vector_double) vector<double>;
-   %template(std_vector_Dimension) vector<libpc::Dimension>;
-   %template(std_vector_Range_double) vector<libpc::Range<double> >;
+   %template(std_vector_Dimension) vector<pdal::Dimension>;
+   %template(std_vector_Range_double) vector<pdal::Range<double> >;
 };
  
 
@@ -102,7 +102,7 @@ namespace boost
 };
 
 
-namespace libpc
+namespace pdal
 {
 
 template <typename T>
@@ -295,7 +295,7 @@ public:
 class DimensionLayout
 {
 public:
-    DimensionLayout(const libpc::Dimension&);
+    DimensionLayout(const pdal::Dimension&);
     const Dimension& getDimension() const;
     inline std::size_t getByteOffset() const;
     inline void setByteOffset(std::size_t v);
@@ -422,7 +422,7 @@ class LiblasReader : public Producer
 public:
     LiblasReader(std::istream&);
     ~LiblasReader();
-    const libpc::LiblasHeader& getLiblasHeader() const;
+    const pdal::LiblasHeader& getLiblasHeader() const;
     boost::int8_t getPointFormatNumber() const;
 };
 

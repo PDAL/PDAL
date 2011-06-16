@@ -44,12 +44,12 @@
 
 #include "ZipPoint.hpp"
 
-#include <libpc/drivers/las/Header.hpp>
+#include <pdal/drivers/las/Header.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/scoped_ptr.hpp>
 
 
-namespace libpc { namespace drivers { namespace las {
+namespace pdal { namespace drivers { namespace las {
 
 
 LasHeaderWriter::LasHeaderWriter(LasHeader& header, std::ostream& ostream)
@@ -115,7 +115,7 @@ void LasHeaderWriter::write()
         // add the laszip VLR, if needed
         if (m_header.Compressed())
         {
-#ifdef LIBPC_HAVE_LASZIP
+#ifdef PDAL_HAVE_LASZIP
             ZipPoint zpd(m_header.getPointFormat(), m_header.getVLRs().getAll());
             VariableLengthRecord v = zpd.ConstructVLR(m_header.getPointFormat());
             m_header.getVLRs().add(v);

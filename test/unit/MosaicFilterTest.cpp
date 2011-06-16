@@ -35,33 +35,33 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <libpc/Iterator.hpp>
-#include <libpc/PointBuffer.hpp>
-#include <libpc/SchemaLayout.hpp>
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/filters/MosaicFilter.hpp>
+#include <pdal/Iterator.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/filters/MosaicFilter.hpp>
 
-using namespace libpc;
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(MosaicFilterTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
     Bounds<double> bounds1(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
-    libpc::drivers::faux::Reader reader1(bounds1, 100, libpc::drivers::faux::Reader::Constant);
+    pdal::drivers::faux::Reader reader1(bounds1, 100, pdal::drivers::faux::Reader::Constant);
 
     Bounds<double> bounds2(100.0, 100.0, 100.0, 200.0, 200.0, 200.0);
-    libpc::drivers::faux::Reader reader2(bounds2, 100, libpc::drivers::faux::Reader::Constant);
+    pdal::drivers::faux::Reader reader2(bounds2, 100, pdal::drivers::faux::Reader::Constant);
 
     Bounds<double> bounds3(200.0, 200.0, 200.0, 300.0, 300.0, 300.0);
-    libpc::drivers::faux::Reader reader3(bounds3, 100, libpc::drivers::faux::Reader::Constant);
+    pdal::drivers::faux::Reader reader3(bounds3, 100, pdal::drivers::faux::Reader::Constant);
 
     std::vector<const Stage*> vec;
     vec.push_back(&reader1);
     vec.push_back(&reader2);
     vec.push_back(&reader3);
 
-    libpc::filters::MosaicFilter mosaic(vec);
+    pdal::filters::MosaicFilter mosaic(vec);
     BOOST_CHECK(mosaic.getDescription() == "Mosaic Filter");
 
     const Schema& schema = mosaic.getSchema();

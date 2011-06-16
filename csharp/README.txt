@@ -1,36 +1,36 @@
-README for libPC C# Support
+README for PDAL C# Support
 ===========================
 
  *** UNDER DEVELOPMENT ***  (proceed with caution)
 
 This directory contains the code needed to create C# bindings and the pcview
-app for libPC.
+app for PDAL.
 
 If questions, contact mpg@flaxen.com.
 
 The C# work does not use CMake, as CMake doesn't yet support C# builds.
 
 * You need to set these environment variables:
-  - set LIBPC_SWIG_BOOST_HOME=C:\Utils\boost_1_45_0-win32
+  - set PDAL_SWIG_BOOST_HOME=C:\Utils\boost_1_45_0-win32
 
 * To build PCVeiw, you will need the DLLs for SlimDX and SlimDXControl.
 
-* The solution file libpc_swig.sln has three projects:
-  - libpc_swig_cpp
+* The solution file pdal_swig.sln has three projects:
+  - pdal_swig_cpp
     . runs swig on the .i file
 	  - creates the .cpp wrapper file
 	  - creates the .cs wrapper classes
 	. compiles the .cpp wrapper file
-	. creates libpc_swig_cpp.dll
-  - libpc_swig_cs
+	. creates pdal_swig_cpp.dll
+  - pdal_swig_cs
     . compiled the .cs wrapper classes
-	. creates libpc_swig_cs.dll
-  - libpc_swig_test
+	. creates pdal_swig_cs.dll
+  - pdal_swig_test
     . compiles a simple test app to verify the bindings work
 	. creates swig_test.exe
 
 
-* The two DLLs and the EXE are put into the main libpc bin directory, for ease of use.
+* The two DLLs and the EXE are put into the main pdal bin directory, for ease of use.
 
 
 * Only Visual Studio 2010 is supported.  Four build configurations are possible:
@@ -46,4 +46,4 @@ what's up with that.  See this thread:
   http://old.nabble.com/SWIG-examples-will-not-run-on-my-windows-7---64-bits-td29085404.html
 
 
-* The test app should be run from the csharp/libpc-swig-test directory.
+* The test app should be run from the csharp/pdal-swig-test directory.

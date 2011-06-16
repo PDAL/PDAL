@@ -1,5 +1,5 @@
 # usage (for a single file):
-#  AStyle.exe --options=astylerc include/libpc/Bounds.hpp
+#  AStyle.exe --options=astylerc include/pdal/Bounds.hpp
 #
 # usage (for directories):
 #  AStyle.exe --options=astylerc --recursive "include/*.hpp" "src/*.cpp"

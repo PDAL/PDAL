@@ -36,20 +36,22 @@
 #include <boost/cstdint.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include <libpc/XMLSchema.hpp>
+#include <pdal/XMLSchema.hpp>
 
 
-#include <libpc/drivers/faux/Reader.hpp>
-#include <libpc/drivers/faux/Writer.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
+#include <pdal/drivers/faux/Writer.hpp>
 
-#include <libpc/Iterator.hpp>
-#include <libpc/Utils.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+
+#include <pdal/Iterator.hpp>
+#include <pdal/Utils.hpp>
 
 #include "Support.hpp"
 #include "TestConfig.hpp"
 
 #include <fstream>
-using namespace libpc;
+using namespace pdal;
 
 
 
@@ -57,7 +59,7 @@ using namespace libpc;
 std::string ReadXML(std::string filename)
 {
 
-    std::istream* infile = Utils::openFile(filename, true);
+    std::istream* infile = Utils::openFile(filename);
     std::ifstream::pos_type size;
     // char* data;
     std::vector<char> data;
@@ -77,7 +79,7 @@ std::string ReadXML(std::string filename)
     } 
     else 
     {   
-        throw libpc_error("unable to open file!");
+        throw pdal_error("unable to open file!");
         // return data;
     }
     
@@ -89,31 +91,42 @@ BOOST_AUTO_TEST_SUITE(XMLSchemaTest)
 
 
 
-BOOST_AUTO_TEST_CASE(test_schema)
+BOOST_AUTO_TEST_CASE(test_schema_read)
 {
+    // std::istream* xml_stream = Utils::openFile(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
+    // std::istream* xsd_stream = Utils::openFile(TestConfig::g_data_path+"/schemas/LAS.xsd");
+    
     std::string xml = ReadXML(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
     std::string xsd = ReadXML(TestConfig::g_data_path+"/schemas/LAS.xsd");
+    pdal::schema::Reader reader(xml, xsd);
     
-    libpc::XMLSchema schema(xml, xsd);
+    pdal::Schema schema = reader.getSchema();
     
+    pdal::schema::Writer writer(schema);
+    std::string xml_output = writer.getXML();
+
+    pdal::schema::Reader reader2(xml_output, xsd);
+    pdal::Schema schema2 = reader2.getSchema();
+    
+    pdal::Schema::Dimensions const& dims1 = schema.getDimensions();
+    pdal::Schema::Dimensions const& dims2 = schema2.getDimensions();
+    
+    BOOST_CHECK_EQUAL(dims1.size(), dims2.size());
+    
+    for (boost::uint32_t i = 0; i < dims2.size(); ++i)
+    {
+        pdal::Dimension const& dim1 = schema.getDimension(i);
+        pdal::Dimension const& dim2 = schema2.getDimension(i);
+    
+        BOOST_CHECK_EQUAL(dim1.getDataType(), dim2.getDataType());
+        BOOST_CHECK_EQUAL(dim1.getByteSize(), dim2.getByteSize());
+
+        BOOST_CHECK_EQUAL(dim1.getField(), dim2.getField());
+        BOOST_CHECK_EQUAL(dim1.getDescription(), dim2.getDescription());
+        
+    }
     
 }
 
-// BOOST_AUTO_TEST_CASE(clean_up)
-// {
-//     if (!ShouldRunTest()) return;
-//     
-//     libpc::drivers::oci::Options options = GetOptions();
-//     
-//     Connection connection = Connect(options);
-// 
-//     std::string base_table_name = options.GetPTree().get<std::string>("base_table_name");
-//     std::string block_table_name = options.GetPTree().get<std::string>("block_table_name");
-//     
-//     std::string drop_base_table = "DROP TABLE " + base_table_name;
-//     std::string drop_block_table = "DROP TABLE " + block_table_name;
-//     RunSQL(connection, drop_base_table);
-//     RunSQL(connection, drop_block_table);    
-// }
 
 BOOST_AUTO_TEST_SUITE_END()

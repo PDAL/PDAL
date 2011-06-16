@@ -32,16 +32,16 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <libpc/filters/CropFilterIterator.hpp>
+#include <pdal/filters/CropFilterIterator.hpp>
 
-#include <libpc/filters/CropFilter.hpp>
-#include <libpc/PointBuffer.hpp>
+#include <pdal/filters/CropFilter.hpp>
+#include <pdal/PointBuffer.hpp>
 
-namespace libpc { namespace filters {
+namespace pdal { namespace filters {
 
 
 CropFilterSequentialIterator::CropFilterSequentialIterator(const CropFilter& filter)
-    : libpc::FilterSequentialIterator(filter)
+    : pdal::FilterSequentialIterator(filter)
     , m_cropFilter(filter)
 {
     return;

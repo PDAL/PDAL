@@ -28,7 +28,7 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#include <libpc/drivers/oci/oci_wrapper.h>
+#include <pdal/drivers/oci/oci_wrapper.h>
 
 #include <iostream>
 
@@ -351,6 +351,30 @@ void OWConnection::DestroyType( sdo_pc** pphData )
         (dvoid*) *pphData,
         (ub2) 0), NULL );
 }
+
+void OWConnection::CreateType( sdo_pc_blk** pphData )
+{
+    CheckError( OCIObjectNew(
+        hEnv,
+        hError,
+        hSvcCtx,
+        OCI_TYPECODE_OBJECT,
+        hPC_BLK_TDO,
+        (dvoid *) 0,
+        OCI_DURATION_CALL,
+        TRUE,
+        (dvoid **) pphData), hError );
+}
+
+void OWConnection::DestroyType( sdo_pc_blk** pphData )
+{
+    CheckError( OCIObjectFree(
+        hEnv,
+        hError,
+        (dvoid*) *pphData,
+        (ub2) 0), NULL );
+}
+
 
 void OWConnection::CreateType( sdo_orgscl_type** pphData )
 {
@@ -1408,7 +1432,6 @@ void OWStatement::Define( sdo_pc** pphData )
         (dvoid**) NULL,
         (ub4*) NULL ), hError );
 }
-
 
 void OWStatement::Define( sdo_orgscl_type** pphData )
 {
