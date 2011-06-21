@@ -691,7 +691,7 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     std::string header_blob_column_name = to_upper(tree.get<std::string>("header_blob_column_name"));
     std::string base_table_boundary_column = to_upper(tree.get<std::string>("base_table_boundary_column"));
     std::string base_table_boundary_wkt = to_upper(tree.get<std::string>("base_table_boundary_wkt"));
-    std::string point_schema_override = to_upper(tree.get<std::string>("point_schema_override"));
+    std::string point_schema_override = tree.get<std::string>("point_schema_override");
     
     boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
     boost::uint32_t precision = tree.get<boost::uint32_t>("precision");
