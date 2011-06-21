@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pc:PointCloudSchema xmlns:pc="http://pdal.org/schemas/PC/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<pc:PointCloudSchema xmlns:pc="http://pointcloud.org/schemas/PC/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pointcloud.org/schemas/PC/1.0">
   <pc:dimension>
     <pc:position>1</pc:position>
     <pc:size>8</pc:size>
