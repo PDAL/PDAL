@@ -19,6 +19,10 @@
 //#include <pdal/Dimension.hpp>
 //#include <pdal/Schema.hpp>
 #include <pdal/filters/Chipper.hpp>
+
+#include <pdal/filters/ReprojectionFilter.hpp>
+#include <pdal/filters/ScalingFilter.hpp>
+
 //#include <pdal/ColorFilter.hpp>
 //#include <pdal/MosaicFilter.hpp>
 //#include <pdal/FauxReader.hpp>
@@ -142,7 +146,7 @@ int Application_pc2pc::execute()
         
         boost::property_tree::read_xml(m_xml, load_tree);
         
-        boost::property_tree::ptree oracle_options = load_tree.get_child("drivers.oci.writer");
+        boost::property_tree::ptree oracle_options = load_tree.get_child("pdal.drivers.oci.writer");
     
         pdal::Options options(oracle_options);
     
@@ -177,38 +181,77 @@ int Application_pc2pc::execute()
         
         boost::property_tree::read_xml(m_xml, load_tree);
         
-        boost::property_tree::ptree oracle_options = load_tree.get_child("drivers.oci.reader");
-    
+        boost::property_tree::ptree oracle_options = load_tree.get_child("pdal.drivers.oci.reader");
+
+        boost::property_tree::ptree las_options = load_tree.get_child("pdal.drivers.las");
+        boost::property_tree::ptree srs_options = las_options.get_child("spatialreference");
+        
+        bool compress = las_options.get<bool>("compress");
+        
+        std::string out_wkt = srs_options.get<std::string>("userinput");
         pdal::Options options(oracle_options);
-
-        pdal::drivers::oci::Reader reader(options);
-        pdal::filters::ByteSwapFilter swapper(reader);
-        const boost::uint64_t numPoints = reader.getNumPoints();
-        pdal::drivers::las::LasWriter writer(swapper, *ofs);
         
-        writer.setChunkSize(options.GetPTree().get<boost::uint32_t>("capacity"));
-
-        if (hasOption("a_srs"))
+        if (out_wkt.size() != 0) 
         {
-            pdal::SpatialReference ref;
-            if (m_srs.size() > 0)
-            {
-                ref.setFromUserInput(m_srs);
-                writer.setSpatialReference(ref);
-            }
-        }
-        if (hasOption("compress"))
-        {
-            if (m_bCompress)
-                writer.setCompressed(true);            
-        }
-        writer.write(numPoints);
+            pdal::SpatialReference out_ref(out_wkt);
 
-        boost::property_tree::ptree output_tree;
+            pdal::drivers::oci::Reader reader(options);
+            pdal::SpatialReference in_ref(reader.getSpatialReference());
+
+            pdal::filters::ByteSwapFilter swapper(reader);
+
+            pdal::filters::ScalingFilter scalingFilter(swapper, false);
+
+            pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+
+            // convert to ints, using custom scale factor
+            
+            double scalex = las_options.get<double>("scale.x");
+            double scaley = las_options.get<double>("scale.y");
+            double scalez = las_options.get<double>("scale.z");
+
+            double offsetx = las_options.get<double>("offset.x");
+            double offsety = las_options.get<double>("offset.y");
+            double offsetz = las_options.get<double>("offset.z");
+
+            pdal::filters::ScalingFilter descalingFilter(   reprojectionFilter, 
+                                                            scalex, offsetx,
+                                                            scaley, offsety, 
+                                                            scalez, offsetz, 
+                                                            true);
+
+            pdal::drivers::las::LasWriter writer(descalingFilter, *ofs);
+
+
+            if (compress)
+                writer.setCompressed(true);
+            writer.setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));            
+            writer.write(0);
+        } else 
+        {
+            pdal::SpatialReference out_ref(out_wkt);
+
+            pdal::drivers::oci::Reader reader(options);
+            pdal::SpatialReference in_ref(reader.getSpatialReference());
+            pdal::filters::ByteSwapFilter swapper(reader);
+            
+
+            pdal::drivers::las::LasWriter writer(swapper, *ofs);
+            if (compress)
+                writer.setCompressed(true);
         
-        output_tree.put_child(reader.getName(), options.GetPTree());
-        // output_tree.put_child(writer.getName(), )
-        // boost::property_tree::write_xml(m_xml, output_tree);
+            writer.setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));            
+            writer.write(0);
+        }
+
+
+
+
+        // boost::property_tree::ptree output_tree;
+        // 
+        // output_tree.put_child(reader.getName(), options.GetPTree());
+        // // output_tree.put_child(writer.getName(), )
+        // // boost::property_tree::write_xml(m_xml, output_tree);
             
     #else
             throw configuration_error("PDAL not compiled with Oracle support");
