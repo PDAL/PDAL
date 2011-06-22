@@ -177,6 +177,10 @@ Word #       Content
 #include <iostream>
 #include <map>
 
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(disable: 4127)  // conditional expression is constant
+#endif
+
 namespace pdal { namespace drivers { namespace qfit {
 
 PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)

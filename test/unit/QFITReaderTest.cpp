@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     
     {
         boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead,3);
+        BOOST_CHECK_EQUAL(numRead,3u);
     }
 
     delete iter;
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     
     {
         boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead,3);
+        BOOST_CHECK_EQUAL(numRead,3u);
     }
 
     delete iter;
