@@ -617,7 +617,7 @@ Dimension::Field Reader::GetDimensionField(std::string const& name, boost::uint3
 {
     if (!compare_no_case(name.c_str(), "X"))
         return Dimension::Field_X;
-
+    
     if (!compare_no_case(name.c_str(), "Y"))
         return Dimension::Field_Y;
 

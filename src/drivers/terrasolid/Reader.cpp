@@ -110,8 +110,8 @@ Reader::Reader(Options& options)
 
     setNumPoints(m_header->PntCnt);
 
-    m_haveColor = static_cast<bool>(m_header->Color);
-    m_haveTime = static_cast<bool>(m_header->Time);
+    m_haveColor = (m_header->Color==1);
+    m_haveTime = (m_header->Time==1);
     m_format = static_cast<TERRASOLID_Format_Type>(m_header->HdrVersion);
     
     
