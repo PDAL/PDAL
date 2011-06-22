@@ -174,12 +174,25 @@ SequentialIterator::~SequentialIterator()
 }
 
 
+static inline boost::uint32_t safeconvert64to32(boost::uint64_t x64) // BUG: move this to Utils header?
+{
+    if (x64 > std::numeric_limits<boost::uint32_t>::max())
+    {
+        throw pdal_error("cannot support seek offsets greater than 32-bits");
+    }
+
+    const boost::uint32_t x32 = static_cast<boost::uint32_t>(x64);
+    return x32;
+}
+
+
 boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 {
 #ifdef PDAL_HAVE_LASZIP
     if (m_zip)
     {
-        m_unzipper->seek(getIndex() + count);
+        const boost::uint32_t pos32 = safeconvert64to32(getIndex() + count);
+        m_unzipper->seek(pos32);
     }
     else
     {
@@ -231,7 +244,8 @@ boost::uint64_t RandomIterator::seekImpl(boost::uint64_t count)
 #ifdef PDAL_HAVE_LASZIP
     if (m_zip)
     {
-        m_unzipper->seek(count);
+        const boost::uint32_t pos32 = safeconvert64to32(count);
+        m_unzipper->seek(pos32);
     }
     else
     {

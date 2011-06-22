@@ -39,6 +39,11 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Endian.hpp>
 #include <iostream>
+
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(disable: 4127)  // conditional expression is constant
+#endif
+
 namespace pdal { namespace filters {
 
 

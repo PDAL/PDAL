@@ -121,6 +121,8 @@ namespace pdal { namespace schema {
 void OCISchemaStructuredErrorHandler
     (void * userData, xmlErrorPtr error)
 {
+    boost::ignore_unused_variable_warning(userData);
+ 
     std::ostringstream oss;
 
     oss << "XML error: '" << error->message <<"' ";
@@ -146,6 +148,8 @@ void OCISchemaStructuredErrorHandler
 void OCISchemaParserStructuredErrorHandler
     (void * userData, xmlErrorPtr error)
 {
+    boost::ignore_unused_variable_warning(userData);
+
     std::ostringstream oss;
 
     oss << "Schema parsing error: '" << error->message <<"' ";
@@ -156,6 +160,8 @@ void OCISchemaParserStructuredErrorHandler
 void OCISchemaValidationStructuredErrorHandler
     (void * userData, xmlErrorPtr error)
 {
+    boost::ignore_unused_variable_warning(userData);
+
     std::ostringstream oss;
 
     oss << "Schema validation error: '" << error->message <<"' ";
@@ -166,6 +172,7 @@ void OCISchemaValidationStructuredErrorHandler
 void OCISchemaValidityError
     (void * ctx, const char* message, ... )
 {
+    boost::ignore_unused_variable_warning(ctx);
 
     const int ERROR_MESSAGE_SIZE = 256;
     char error[ERROR_MESSAGE_SIZE];
@@ -186,6 +193,7 @@ void OCISchemaValidityError
 void OCISchemaValidityDebug
     (void * ctx, const char* message, ... )
 {
+    boost::ignore_unused_variable_warning(ctx);
 
     const int ERROR_MESSAGE_SIZE = 256;
     char error[ERROR_MESSAGE_SIZE];
@@ -207,6 +215,7 @@ void OCISchemaValidityDebug
 void OCISchemaGenericErrorHandler
     (void * ctx, const char* message, ... )
 {
+    boost::ignore_unused_variable_warning(ctx);
 
     const int ERROR_MESSAGE_SIZE = 256;
     char error[ERROR_MESSAGE_SIZE];
@@ -606,11 +615,6 @@ Dimension::DataType Reader::GetDimensionType(std::string const& interpretation)
 
 Dimension::Field Reader::GetDimensionField(std::string const& name, boost::uint32_t position)
 {
-
-
-
-
-
     if (!compare_no_case(name.c_str(), "X"))
         return Dimension::Field_X;
 

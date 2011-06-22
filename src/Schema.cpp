@@ -284,8 +284,9 @@ Schema Schema::from_xml(std::string const& xml, std::string const& xsd)
     pdal::Schema schema = reader.getSchema();
     return schema;
 
-#endif
+#else
     return Schema();
+#endif
 }
 
 Schema Schema::from_xml(std::string const& xml)
@@ -299,8 +300,9 @@ Schema Schema::from_xml(std::string const& xml)
     pdal::Schema schema = reader.getSchema();
     return schema;
 
-#endif
+#else
     return Schema();
+#endif
 }
 
 std::string Schema::to_xml(Schema const& schema)
@@ -311,8 +313,9 @@ std::string Schema::to_xml(Schema const& schema)
     
     return writer.getXML();
 
-#endif
+#else
     return std::string("");
+#endif
 }
 
 } // namespace pdal
