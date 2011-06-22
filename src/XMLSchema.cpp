@@ -714,7 +714,7 @@ void Writer::write(TextWriterPtr writer)
     xmlTextWriterSetIndent(w, 1);
     xmlTextWriterStartDocument(w, NULL, "utf-8", NULL);
     xmlTextWriterStartElementNS(w, BAD_CAST "pc", BAD_CAST "PointCloudSchema", NULL);
-    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "pc", NULL, BAD_CAST "http://pdal.org/schemas/PC/1.0");
+    xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "pc", NULL, BAD_CAST "http://pointcloud.org/schemas/PC/1.0");
     xmlTextWriterWriteAttributeNS(w, BAD_CAST "xmlns", BAD_CAST "xsi", NULL, BAD_CAST "http://www.w3.org/2001/XMLSchema-instance");
     
     writeSchema(writer);
