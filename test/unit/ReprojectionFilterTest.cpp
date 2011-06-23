@@ -105,12 +105,15 @@ BOOST_AUTO_TEST_CASE(test_1)
     //
     {
         pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+
+        const pdal::SpatialReference in_ref_test(utm15_wkt);
+        const pdal::SpatialReference out_ref_test(epsg4326_wkt);
         
         const pdal::SpatialReference in_ref(reader.getSpatialReference());
         const pdal::SpatialReference out_ref(epsg4326_wkt);
 
-        BOOST_CHECK(in_ref.getWKT() == utm15_wkt);
-        BOOST_CHECK(out_ref.getWKT() == epsg4326_wkt);
+        BOOST_CHECK_EQUAL(in_ref, in_ref_test);
+        BOOST_CHECK(out_ref == out_ref_test);
 
         const pdal::Schema& schema = reader.getSchema();
         const pdal::SchemaLayout layout(schema);
