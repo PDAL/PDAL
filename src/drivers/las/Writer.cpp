@@ -171,17 +171,11 @@ void LasWriter::writeBegin()
 #ifdef PDAL_HAVE_LASZIP
         if (!m_zip)
         {
-            try
-            {
-                // Initialize a scoped_ptr and swap it with our member variable 
-                // that will contain it.
-                boost::scoped_ptr<LASzip> s(new LASzip());
-                m_zip.swap(s);
-            }
-            catch(...)
-            {
-                throw pdal_error("Error opening compression core (1)");
-            }
+            // Initialize a scoped_ptr and swap it with our member variable 
+            // that will contain it.
+            boost::scoped_ptr<LASzip> s(new LASzip());
+            m_zip.swap(s);
+
 
             PointFormat format = m_lasHeader.getPointFormat();
             boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_lasHeader.getVLRs().getAll()));
@@ -198,50 +192,34 @@ void LasWriter::writeBegin()
             }
             if (!ok)
             {
-                throw pdal_error("Error opening compression core (2)");
+                std::ostringstream oss;
+                oss << "Error opening compression core: " << std::string(m_zip->get_error());
+                throw pdal_error(oss.str());
             }
 
-            try
-            {
-                ok = m_zip->pack(m_zipPoint->his_vlr_data, m_zipPoint->his_vlr_num);
-            }
-            catch(...)
-            {
-                throw pdal_error("Error opening compression core (3)");
-            }
+            ok = m_zip->pack(m_zipPoint->his_vlr_data, m_zipPoint->his_vlr_num);
             if (!ok)
             {
-                throw pdal_error("Error opening compression core (2)");
+                std::ostringstream oss;
+                oss << "Error packing VLR data for compression: " << std::string(m_zip->get_error());
+                throw pdal_error(oss.str());
             }
         }
 
         if (!m_zipper)
         {
-            try
-            {
-                boost::scoped_ptr<LASzipper> z(new LASzipper());
-                m_zipper.swap(z);
-            }
-            catch(...)
-            {
-                throw pdal_error("Error opening compression engine (1)");
-            }
+            boost::scoped_ptr<LASzipper> z(new LASzipper());
+            m_zipper.swap(z);
 
-            PointFormat format = m_lasHeader.getPointFormat();
-            boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_lasHeader.getVLRs().getAll()));
-            m_zipPoint.swap(z);
+
+
             bool stat(false);
-            try
-            {
-                stat = m_zipper->open(m_ostream, m_zip.get());
-            }
-            catch(...)
-            {
-                throw pdal_error("Error opening compression engine (3)");
-            }
+            stat = m_zipper->open(m_ostream, m_zip.get());
             if (!stat)
             {
-                throw pdal_error("Error opening compression engine (2)");
+                std::ostringstream oss;
+                oss << "Error opening LASzipper: " << std::string(m_zip->get_error());
+                throw pdal_error(oss.str());
             }
         }
 #else

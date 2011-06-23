@@ -82,17 +82,10 @@ void IteratorBase::initializeZip()
 {
 #ifdef PDAL_HAVE_LASZIP
 
-    try
-    {
-        // Initialize a scoped_ptr and swap it with our member variable 
-        // that will contain it.
-        boost::scoped_ptr<LASzip> s(new LASzip());
-        m_zip.swap(s);
-    }
-    catch(...)
-    {
-        throw pdal_error("Failed to open laszip compression core (1)"); 
-    }
+    // Initialize a scoped_ptr and swap it with our member variable 
+    // that will contain it.
+    boost::scoped_ptr<LASzip> s(new LASzip());
+    m_zip.swap(s);
 
     PointFormat format = m_reader.getPointFormat();
     
@@ -101,58 +94,38 @@ void IteratorBase::initializeZip()
 
 
     bool ok = false;
-    try
-    {
-        ok = m_zip->setup((unsigned char)format, (unsigned short)m_reader.getPointDataOffset());
-    }
-    catch(...)
-    {
-        throw pdal_error("Error opening compression core (3)");
-    }
+    ok = m_zip->setup((unsigned char)format, (unsigned short)m_reader.getPointDataOffset());
+
     if (!ok)
     {
-        throw pdal_error("Error opening compression core (2)");
+        std::ostringstream oss;
+        oss << "Error setting up compression engine: " << std::string(m_zip->get_error());
+        throw pdal_error(oss.str());
     }
 
-    try
-    {
+    ok = m_zip->unpack(m_zipPoint->our_vlr_data, m_zipPoint->our_vlr_num);
 
-        ok = m_zip->unpack(m_zipPoint->our_vlr_data, m_zipPoint->our_vlr_num);
-    }
-    catch(...)
-    {
-        throw pdal_error("Failed to open laszip compression core (2)"); 
-    }
     if (!ok)
     {
-        throw pdal_error("Failed to open laszip compression core (3)"); 
+        std::ostringstream oss;
+        oss << "Error unpacking zip VLR data: " << std::string(m_zip->get_error());
+        throw pdal_error(oss.str());
     }
 
     if (!m_unzipper)
     {
-        try
-        {
-            boost::scoped_ptr<LASunzipper> z(new LASunzipper());
-            m_unzipper.swap(z);
-        }
-        catch(...)
-        {
-            throw pdal_error("Failed to open laszip decompression engine (1)"); 
-        }
+        boost::scoped_ptr<LASunzipper> z(new LASunzipper());
+        m_unzipper.swap(z);
 
         bool stat(false);
-        try
-        {
-            m_istream->seekg(m_reader.getPointDataOffset(), std::ios::beg);
-            stat = m_unzipper->open(*m_istream, m_zip.get());
-        }
-        catch(...)
-        {
-            throw pdal_error("Failed to open laszip decompression engine (2)"); 
-        }
+        m_istream->seekg(m_reader.getPointDataOffset(), std::ios::beg);
+        stat = m_unzipper->open(*m_istream, m_zip.get());
+
         if (!stat)
         {
-            throw pdal_error("Failed to open laszip decompression engine (3)"); 
+            std::ostringstream oss;
+            oss << "Failed to open LASzip stream: " << std::string(m_zip->get_error());
+            throw pdal_error(oss.str());
         }
     }
 #endif

@@ -182,20 +182,15 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
 #ifdef PDAL_HAVE_LASZIP
         boost::uint8_t* p = buf;
 
+        bool ok = false;
         for (boost::uint32_t i=0; i<numPoints; i++)
         {
-            bool ok = false;
-            try
-            {
-                ok = unzipper->read(zipPoint->m_lz_point);
-            }
-            catch(...)
-            {
-                throw pdal_error("Error reading compressed point data (1)");
-            }
+            ok = unzipper->read(zipPoint->m_lz_point);
             if (!ok)
             {
-                throw pdal_error("Error reading compressed point data (2)");
+                std::ostringstream oss;
+                oss << "Error reading compressed point data: " << std::string(unzipper->get_error());
+                throw pdal_error(oss.str());
             }
 
             memcpy(p, zipPoint->m_lz_point_data, zipPoint->m_lz_point_size);
