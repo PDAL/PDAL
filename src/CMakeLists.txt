@@ -33,8 +33,8 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/FilterIterator.hpp
   ${PDAL_HEADERS_DIR}/Iterator.hpp
   ${PDAL_HEADERS_DIR}/MetadataRecord.hpp
-  ${PDAL_HEADERS_DIR}/Vector.hpp  
   ${PDAL_HEADERS_DIR}/Options.hpp
+  ${PDAL_HEADERS_DIR}/PipelineManager.hpp
   ${PDAL_HEADERS_DIR}/PointBuffer.hpp  
   ${PDAL_HEADERS_DIR}/PointBufferCache.hpp  
   ${PDAL_HEADERS_DIR}/Range.hpp
@@ -44,6 +44,7 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/SpatialReference.hpp
   ${PDAL_HEADERS_DIR}/Stage.hpp
   ${PDAL_HEADERS_DIR}/Utils.hpp
+  ${PDAL_HEADERS_DIR}/Vector.hpp  
   ${PDAL_HEADERS_DIR}/Writer.hpp
   ${PDAL_HEADERS_DIR}/XMLSchema.hpp
 )
@@ -61,10 +62,10 @@ set(PDAL_BASE_CPP
   FilterIterator.cpp
   Iterator.cpp
   MetadataRecord.cpp
-  Vector.cpp  
+  Options.cpp
+  PipelineManager.cpp
   PointBuffer.cpp
   PointBufferCache.cpp
-  Options.cpp
   Range.cpp
   Schema.cpp
   SchemaLayout.cpp
@@ -72,6 +73,7 @@ set(PDAL_BASE_CPP
   SpatialReference.cpp
   Stage.cpp
   Utils.cpp
+  Vector.cpp  
   Writer.cpp
   ${PDAL_XML_SRC}
 )
