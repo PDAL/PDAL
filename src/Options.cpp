@@ -43,7 +43,6 @@
 #include <sstream>
 #include <iostream>
 
-
 #include <pdal/exceptions.hpp>
 
 
@@ -72,15 +71,15 @@ boost::property_tree::ptree OptionsNew::getOptionPTree(std::string const& name) 
         if (v.first == "option")
         {
             // v.second is <option><name>..</name><value>..</value><desc>..</desc></option>
-            const std::string aname = v.second.get_child("name").get_value<std::string>();
-            if (name == aname)
+            const std::string s = v.second.get_child("name").get_value<std::string>();
+            if (name == s)
             {
                 return v.second;
             }
         }
     }
 
-    throw;
+    throw pdal_error("requested option not found");
 }
 
 
