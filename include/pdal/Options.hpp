@@ -103,9 +103,9 @@ private:
 
 
 
-// An Options is just a set of Option items.
+// An Options object is just a tree of Option objects.
 //
-// Dumped as XML, it looks like this:
+// Dumped as XML, an Options object with two Option objects looks like this:
 //     <?xml...>
 //     <option>
 //       <name>my name</name>
