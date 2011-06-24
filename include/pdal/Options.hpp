@@ -43,38 +43,7 @@
 namespace pdal
 {
 
-template <typename T>
-class PDAL_DLL Option
-{
-
     
-private:
-    T m_value;
-    std::string m_description;
-    std::string m_name;
-
-public:
-
-    Option(std::string const& name, T value, std::string const& description) 
-    : m_value(value), m_description(description), m_name(name) {}
-    
-    std::string const& getName() const { return m_name; }
-    std::string const& getDescription() const { return m_description; }
-    T const& getValue() const { return m_value; }
-    
-    boost::property_tree::ptree& getTree() const 
-    {
-        boost::property_tree::ptree t;
-        t.put("description", getDescription());
-        t.put("value", getValue());
-        boost::property_tree::ptree output;
-        output.put_child(getName(), t);
-        return output;
-    }
-
-};
-
-
 class PDAL_DLL Options
 {
 
@@ -85,15 +54,110 @@ public:
 
     Options();
     Options(boost::property_tree::ptree const& tree) { m_tree = tree; }
-    template<class T> void add(Option<T> const& option) { m_tree.put_child(option.getTree()); }
-    template<class T> Option<T> const& get(std::string const& name) { return m_tree.get<T>(name); }
+    //template<class T> void add(Option<T> const& option) { m_tree.put_child(option.getTree()); }
+    //template<class T> Option<T> const& get(std::string const& name) { return m_tree.get<T>(name); }
     
     boost::property_tree::ptree& GetPTree() { return m_tree; }
     boost::property_tree::ptree const& GetPTree() const { return m_tree; }
 };
 
 
+// An Option is just a record with three fields: name, value, and description.
+//
+// Dumped as XML, it looks like this:
+//     <?xml...>
+//     <name>my name</name>
+//     <description>my descr</description>
+//     <value>17</value>
+// although of course that's not valid XML, since it has no single root element.
+
+template <typename T>
+class PDAL_DLL OptionNew
+{
+public:
+    OptionNew(std::string const& name, T value, std::string const& description) 
+        : m_value(value)
+        , m_description(description)
+        , m_name(name)
+    {}
+    
+    std::string const& getName() const { return m_name; }
+    std::string const& getDescription() const { return m_description; }
+    T const& getValue() const { return m_value; }
+    
+    boost::property_tree::ptree getPTree() const 
+    {
+        boost::property_tree::ptree t;
+        t.put("name", getName());
+        t.put("description", getDescription());
+        t.put("value", getValue());
+        return t;
+    }
+         
+private:
+    std::string m_name;
+    std::string m_description;
+    T m_value;
+};
+
+
+
+
+// An Options is just a set of Option items.
+//
+// Dumped as XML, it looks like this:
+//     <?xml...>
+//     <option>
+//       <name>my name</name>
+//       <description>my descr</description>
+//       <value>17</value>
+//     </option>
+//     <option>
+//       <name>my name2</name>
+//       <description>my descr2</description>
+//       <value>13</value>
+//     </option>
+// although of course that's not valid XML, since it has no single root element.
+class PDAL_DLL OptionsNew
+{
+public:
+    OptionsNew();
+
+    // add an option
+    template<class T> void add(OptionNew<T> const& option)
+    {
+       boost::property_tree::ptree fields = option.getPTree();
+       m_tree.add_child("option", fields);
+    }
+
+    // add an option (shortcut version, bypass need for an Option object)
+    template<class T> void add(const std::string& name, T value, const std::string& description)
+    {
+        OptionNew<T> opt(name, value, description);
+        add(opt);
+    }
+
+    // get value of an option
+    template<class T> T getValue(std::string const& name) const
+    {
+        boost::property_tree::ptree optionTree = getOptionPTree(name);
+        return optionTree.get_child("value").get_value<T>();
+    }
+
+    // get description of an option
+    std::string getDescription(std::string const& name) const;
+    
+    boost::property_tree::ptree const& getPTree() const;
+   
+private:
+    boost::property_tree::ptree OptionsNew::getOptionPTree(std::string const& name) const;
+
+    boost::property_tree::ptree m_tree;
+};
+
+
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Options&);
+
 
 } // namespace pdal
 

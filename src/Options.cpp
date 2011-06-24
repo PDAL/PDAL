@@ -34,9 +34,15 @@
 
 #include <pdal/Options.hpp>
 
+#include <boost/property_tree/xml_parser.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 #include <boost/optional.hpp>
+#include <boost/foreach.hpp>
+
 #include <iostream>
+#include <sstream>
+#include <iostream>
+
 
 #include <pdal/exceptions.hpp>
 
@@ -49,6 +55,47 @@ Options::Options()
     m_tree.put("is3d", false);
 
 }    
+
+
+
+OptionsNew::OptionsNew()
+{
+}    
+
+
+boost::property_tree::ptree OptionsNew::getOptionPTree(std::string const& name) const
+{
+    using boost::property_tree::ptree;
+
+    BOOST_FOREACH(ptree::value_type v, m_tree)
+    {
+        if (v.first == "option")
+        {
+            // v.second is <option><name>..</name><value>..</value><desc>..</desc></option>
+            const std::string aname = v.second.get_child("name").get_value<std::string>();
+            if (name == aname)
+            {
+                return v.second;
+            }
+        }
+    }
+
+    throw;
+}
+
+
+std::string OptionsNew::getDescription(std::string const& name) const
+{
+    boost::property_tree::ptree optionTree = getOptionPTree(name);
+    return optionTree.get_child("description").get_value<std::string>();
+}
+
+
+
+boost::property_tree::ptree const& OptionsNew::getPTree() const
+{
+    return m_tree;
+}
 
 
 

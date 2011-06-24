@@ -30,6 +30,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     LiblasReaderTest.cpp
     LiblasWriterTest.cpp
     MosaicFilterTest.cpp
+    OptionsTest.cpp
     PipelineManagerTest.cpp
     PointBufferCacheTest.cpp
     PointBufferTest.cpp

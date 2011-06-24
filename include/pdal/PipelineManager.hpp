@@ -35,16 +35,31 @@
 #ifndef INCLUDED_PIPELINEMANAGER_HPP
 #define INCLUDED_PIPELINEMANAGER_HPP
 
-#include <pdal/pdal.hpp>
+#include <vector>
 
-#include <string>
+#include <pdal/Stage.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/Writer.hpp>
+
 
 namespace pdal
 {
 
+class OptionsNew;
+
 class PDAL_DLL PipelineManager
 {
 public:
+    PipelineManager();
+
+    boost::uint32_t addReader(const std::string& type, const OptionsNew&);
+    boost::uint32_t addFilter(const std::string& type, boost::uint32_t prevStage, const OptionsNew&);
+    boost::uint32_t addFilter(const std::string& type, std::vector<boost::uint32_t> prevStages, const OptionsNew&);
+    boost::uint32_t addWriter(const std::string& type, boost::uint32_t prevStage, const OptionsNew&);
+    
+    Stage* getStage(boost::uint32_t);
+    Filter* getFilter(boost::uint32_t);
+    Writer* getWriter(boost::uint32_t);
 
 private:
     PipelineManager& operator=(const PipelineManager&); // not implemented

@@ -37,5 +37,9 @@
 namespace pdal
 {
 
+PipelineManager::PipelineManager()
+{
+}
+
 
 } // namespace pdal
