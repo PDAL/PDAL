@@ -3,22 +3,25 @@
 set COMPILER="Visual Studio 10 Win64"
 set COMPILER="Visual Studio 10"
 
-set PDAL_DIR=d:\dev\pdal
-
-set LIBLAS_DIR=d:\dev\liblas
-set LASZIP_DIR=d:\dev\laszip
-set OSGEO4W_DIR=C:\OSGeo4W
-set GDAL_DIR=d:\dev\gdal
-set BOOST_DIR="C:\Utils\boost_1_45_0-win32"
-set ORACLE_HOME=%OSGEO4W_DIR%
-
-set FREEGLUT_DIR=d:\dev\freeglut-2.6.0-3.mp
-set GLUT_DIR=d:\dev\freeglut-2.6.0-3.mp
-
-set LIBXML2_DIR=C:\Utils\libxml2-2.7.7.win32
-
 set BUILD_TYPE=Release
 set BUILD_TYPE=Debug
+
+set UTILS_DIR=c:\Utils
+set DEV_DIR=d:\dev
+
+set PDAL_DIR=%DEV_DIR%\pdal
+
+set LIBLAS_DIR=%DEV_DIR%\liblas
+set LASZIP_DIR=%DEV_DIR%\laszip
+set OSGEO4W_DIR=C:\OSGeo4W
+set GDAL_DIR=%DEV_DIR%\gdal
+set BOOST_DIR=%UTILS_DIR%\boost_pro_1_46_1
+set ORACLE_HOME=%OSGEO4W_DIR%
+
+set FREEGLUT_DIR=%DEV_DIR%\freeglut-2.6.0-3.mp
+set GLUT_DIR=%DEV_DIR%\freeglut-2.6.0-3.mp
+
+set LIBXML2_DIR=%UTILS_DIR%\libxml2-2.7.7.win32
 
 cmake -G %COMPILER% ^
     -DBOOST_INCLUDEDIR=%BOOST_DIR% ^
@@ -51,4 +54,4 @@ cmake -G %COMPILER% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
     %PDAL_DIR%
 
-set PDAL_SWIG_BOOST_HOME=C:\Utils\boost_1_45_0-win32
+set PDAL_SWIG_BOOST_HOME=%UTILS_DIR%\boost_1_45_0-win32
