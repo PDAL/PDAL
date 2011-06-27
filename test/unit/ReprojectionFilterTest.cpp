@@ -81,6 +81,7 @@ static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double
     return;
 }
 
+#ifdef PDAL_SRS_ENABLED
 
 // Test reprojecting UTM 15 to DD with a filter
 BOOST_AUTO_TEST_CASE(test_1)
@@ -208,6 +209,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     return;
 }
 
+#endif
 
 BOOST_AUTO_TEST_CASE(test_impedence_mismatch)
 {
