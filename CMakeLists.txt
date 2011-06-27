@@ -213,7 +213,9 @@ if(WITH_GDAL)
   set(PDAL_HAVE_GDAL 1)
   include_directories(${GDAL_INCLUDE_DIR})
   mark_as_advanced(CLEAR GDAL_INCLUDE_DIR) 
-  mark_as_advanced(CLEAR GDAL_LIBRARY) 
+  mark_as_advanced(CLEAR GDAL_LIBRARY)
+else()
+  set(GDAL_LIBRARY "") 
 endif()
 
 # GeoTIFF support - optional, default=OFF
@@ -279,6 +281,19 @@ if(WITH_SWIG_CSHARP OR WITH_SWIG_PYTHON)
         message(STATUS "Enabling swig for python")
     endif()
 endif()
+
+# if you want to build with libxml2 AND you are not building with GDAL/OSGeo4W, you'll need to supply your own iconv library
+set(WITH_ICONV FALSE CACHE BOOL "Choose if IConv support should be built")
+if(WITH_ICONV)
+    find_package(ICONV)
+    mark_as_advanced(CLEAR ICONV_INCLUDE_DIR)
+    mark_as_advanced(CLEAR ICONV_LIBRARIES)
+    if(ICONV_FOUND)
+        include_directories(${ICONV_INCLUDE_DIR})
+        set(PDAL_HAVE_ICONV 1)
+    endif()
+endif()
+
 
 # libxml2 support - optional, default=ON
 set(WITH_LIBXML2 FALSE CACHE BOOL "Choose if libxml2 support should be built ")

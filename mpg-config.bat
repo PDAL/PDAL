@@ -23,6 +23,8 @@ set GLUT_DIR=%DEV_DIR%\freeglut-2.6.0-3.mp
 
 set LIBXML2_DIR=%UTILS_DIR%\libxml2-2.7.7.win32
 
+set ICONV_DIR=%UTILS_DIR%\iconv-1.9.2.win32
+
 cmake -G %COMPILER% ^
     -DBOOST_INCLUDEDIR=%BOOST_DIR% ^
     -DWITH_GDAL=ON ^
@@ -32,8 +34,11 @@ cmake -G %COMPILER% ^
     -DWITH_LIBLAS=ON ^
     -DWITH_FREEGLUT=ON ^
     -DWITH_LIBXML2=ON ^
+    -DWITH_ICONV=ON ^
     -DLIBXML2_LIBRARIES=%LIBXML2_DIR%\lib\libxml2.lib ^
     -DLIBXML2_INCLUDE_DIR=%LIBXML2_DIR%\include ^
+    -DICONV_LIBRARY=%ICONV_DIR%\lib\iconv.lib ^
+    -DICONV_INCLUDE_DIR=%ICONV_DIR%\include ^
     -DFREEGLUT_LIBRARY=%FREEGLUT_DIR%\lib\freeglut.lib ^
     -DFREEGLUT_INCLUDE_DIR=%FREEGLUT_DIR%\include ^
     -DGLUT_LIBRARY=%FREEGLUT_DIR%\lib ^
