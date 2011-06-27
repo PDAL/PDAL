@@ -34,6 +34,8 @@
 
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 
+#include <boost/concept_check.hpp> // ignore_unused_variable_warning
+
 #include <pdal/SpatialReference.hpp>
 #include "GeotiffSupport.hpp"
 
@@ -288,6 +290,9 @@ static bool setSRSFromVLRs_geotiff(const std::vector<VariableLengthRecord>& vlrs
     const std::string wkt = geotiff.getWkt(false,false);
 
     srs.setFromUserInput(wkt);
+#else
+    boost::ignore_unused_variable_warning(srs);
+    boost::ignore_unused_variable_warning(vlrs);
 #endif
     return true;
 }
@@ -437,6 +442,7 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
          vlrs.push_back(record);
     }
 #endif
+    boost::ignore_unused_variable_warning(modeFlag);
 
     std::string wkt = srs.getWKT( SpatialReference::eCompoundOK );
 

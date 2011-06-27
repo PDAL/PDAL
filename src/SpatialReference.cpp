@@ -37,6 +37,7 @@
 
 #include <boost/concept_check.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
 
 // gdal
@@ -279,6 +280,7 @@ bool SpatialReference::operator==(const SpatialReference& input) const
     return (output==1);
     
 #else
+    boost::ignore_unused_variable_warning(input);
     throw pdal_error ("SpatialReference equality testing not available without GDAL+libgeotiff support");
 #endif
 
@@ -295,6 +297,8 @@ std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
     return ostr;
 
 #else
+    boost::ignore_unused_variable_warning(ostr);
+    boost::ignore_unused_variable_warning(srs);
     throw pdal_error ("SpatialReference io operator<< is not available without GDAL+libgeotiff support");
 #endif
 }
@@ -329,6 +333,8 @@ std::istream& operator>>(std::istream& istr, SpatialReference& srs)
     return istr;
     
 #else
+    boost::ignore_unused_variable_warning(istr);
+    boost::ignore_unused_variable_warning(srs);
     throw pdal_error ("SpatialReference io operator>> is not available without GDAL+libgeotiff support");
 #endif
 }

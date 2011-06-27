@@ -34,6 +34,8 @@
 
 #include <pdal/filters/ReprojectionFilter.hpp>
 
+#include <boost/concept_check.hpp> // ignore_unused_variable_warning
+
 #include <pdal/Dimension.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/exceptions.hpp>
@@ -197,9 +199,13 @@ void ReprojectionFilter::transform(double& x, double& y, double& z) const
         msg << "Could not project point for ReprojectionTransform::" << CPLGetLastErrorMsg() << ret;
         throw std::runtime_error(msg.str());
     }
-    
-    return;
+#else
+    boost::ignore_unused_variable_warning(x);
+    boost::ignore_unused_variable_warning(y);
+    boost::ignore_unused_variable_warning(z);
 #endif
+ 
+    return;
 }
 
 
