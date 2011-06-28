@@ -150,7 +150,7 @@ public:
     boost::property_tree::ptree const& getPTree() const;
    
 private:
-    boost::property_tree::ptree OptionsNew::getOptionPTree(std::string const& name) const;
+    boost::property_tree::ptree getOptionPTree(std::string const& name) const;
 
     boost::property_tree::ptree m_tree;
 };
