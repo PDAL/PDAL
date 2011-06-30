@@ -724,7 +724,7 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     // if (bHaveSchemaOverride)
         nSchemaPos++;
 
-    // int nPos = nSchemaPos+1; // Bind column position    
+    int nPos = nSchemaPos; // Bind column position    
     // if (!header_blob_column_name.empty()){
     //     columns << "," << header_blob_column_name;
     //     values <<", :" << nPos;
