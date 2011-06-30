@@ -138,7 +138,7 @@ int Application_pc2pc::execute()
     else if (hasOption("oracle-writer"))
     {
 #ifdef PDAL_HAVE_ORACLE
-        pdal::drivers::liblas::LasReader reader(m_inputFile);
+        pdal::drivers::las::LasReader reader(m_inputFile);
     
         const boost::uint64_t numPoints = reader.getNumPoints();
 
@@ -149,7 +149,14 @@ int Application_pc2pc::execute()
         boost::property_tree::ptree oracle_options = load_tree.get_child("pdal.drivers.oci.writer");
     
         pdal::Options options(oracle_options);
-    
+        
+        boost::property_tree::ptree in_srs_options = oracle_options.get_child("spatialreference");
+        std::string in_wkt = in_srs_options.get<std::string>("userinput");
+
+        boost::property_tree::ptree las_options = load_tree.get_child("pdal.drivers.las");
+        boost::property_tree::ptree out_srs_options = las_options.get_child("spatialreference");
+        std::string out_wkt = out_srs_options.get<std::string>("userinput");
+                
         boost::property_tree::ptree& tree = options.GetPTree();
         
         boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
@@ -158,7 +165,30 @@ int Application_pc2pc::execute()
         pdal::filters::CacheFilter cache(reader, 1, capacity);
         pdal::filters::Chipper chipper(cache, capacity);
         pdal::filters::ByteSwapFilter swapper(chipper);
-        pdal::drivers::oci::Writer writer(swapper, options);
+
+        pdal::SpatialReference in_ref(in_wkt);
+        pdal::SpatialReference out_ref(out_wkt);            
+        pdal::filters::ScalingFilter scalingFilter(swapper, false);
+
+        pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+
+        // convert to ints, using custom scale factor
+        
+        double scalex = oracle_options.get<double>("scale.x");
+        double scaley = oracle_options.get<double>("scale.y");
+        double scalez = oracle_options.get<double>("scale.z");
+
+        double offsetx = oracle_options.get<double>("offset.x");
+        double offsety = oracle_options.get<double>("offset.y");
+        double offsetz = oracle_options.get<double>("offset.z");
+
+        pdal::filters::ScalingFilter descalingFilter(   reprojectionFilter, 
+                                                        scalex, offsetx,
+                                                        scaley, offsety, 
+                                                        scalez, offsetz, 
+                                                        true);
+        
+        pdal::drivers::oci::Writer writer(descalingFilter, options);
 
         // pdal::filters::CacheFilter cache(reader, 1, capacity);
         // pdal::filters::Chipper chipper(cache, capacity);
