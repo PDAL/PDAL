@@ -452,6 +452,8 @@ void Writer::CreateSDOEntry()
     }
 
     double tolerance = 0.05;
+    
+
     pdal::Bounds<double> e = m_bounds;
 
     if (IsGeographic(srid)) {
@@ -768,7 +770,10 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     
     std::string eleminfo = CreatePCElemInfo();
 
-    pdal::Bounds<double> e = m_bounds;
+    std::string bounds_string  = tree.get<std::string>("base_table_bounds");
+    std::stringstream ss(bounds_string, std::stringstream::in | std::stringstream::out);
+    pdal::Bounds<double> e;
+    ss >> e;
 
     s_geom << "           mdsys.sdo_geometry("<< gtype <<", "<<s_srid.str()<<", null,\n"
 "              mdsys.sdo_elem_info_array"<< eleminfo <<",\n"
