@@ -197,7 +197,7 @@ void ReprojectionFilter::transform(double& x, double& y, double& z) const
     {
         std::ostringstream msg; 
         msg << "Could not project point for ReprojectionTransform::" << CPLGetLastErrorMsg() << ret;
-        throw std::runtime_error(msg.str());
+        throw pdal_error(msg.str());
     }
 #else
     boost::ignore_unused_variable_warning(x);
