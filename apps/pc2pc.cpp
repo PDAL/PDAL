@@ -138,7 +138,7 @@ int Application_pc2pc::execute()
     else if (hasOption("oracle-writer"))
     {
 #ifdef PDAL_HAVE_ORACLE
-        pdal::drivers::liblas::LiblasReader reader(m_inputFile);
+        pdal::drivers::liblas::LasReader reader(m_inputFile);
     
         const boost::uint64_t numPoints = reader.getNumPoints();
 
