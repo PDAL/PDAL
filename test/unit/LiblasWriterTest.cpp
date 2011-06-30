@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
 
     Utils::closeFile(ofs);
 
-    bool filesSame = Support::compare_files("temp.laz", Support::datapath("1.2-with-color.laz"));
+    bool filesSame = Support::compare_files("temp.laz", Support::datapath("1.2-with-color_LIBLAS.laz"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
