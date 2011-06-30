@@ -60,7 +60,7 @@ namespace pdal { namespace drivers { namespace las {
 
 static const char* laszip_userid("laszip encoded");
 static boost::uint16_t laszip_recordid = 22204;
-static const char* laszip_description = "encoded for sequential access";
+static const char* laszip_description = "http://laszip.org";
 
 
 ZipPoint::ZipPoint(PointFormat format, const std::vector<VariableLengthRecord>& vlrs)
