@@ -151,11 +151,12 @@ int Application_pc2pc::execute()
         pdal::Options options(oracle_options);
         
         boost::property_tree::ptree in_srs_options = oracle_options.get_child("spatialreference");
-        std::string in_wkt = in_srs_options.get<std::string>("userinput");
-
+        std::string out_wkt = in_srs_options.get<std::string>("userinput");
         boost::property_tree::ptree las_options = load_tree.get_child("pdal.drivers.las");
         boost::property_tree::ptree out_srs_options = las_options.get_child("spatialreference");
-        std::string out_wkt = out_srs_options.get<std::string>("userinput");
+        std::string in_wkt = out_srs_options.get<std::string>("userinput");
+        pdal::SpatialReference in_ref(in_wkt);
+        pdal::SpatialReference out_ref(out_wkt);
                 
         boost::property_tree::ptree& tree = options.GetPTree();
         
@@ -166,8 +167,7 @@ int Application_pc2pc::execute()
         pdal::filters::Chipper chipper(cache, capacity);
         pdal::filters::ByteSwapFilter swapper(chipper);
 
-        pdal::SpatialReference in_ref(in_wkt);
-        pdal::SpatialReference out_ref(out_wkt);            
+     
         pdal::filters::ScalingFilter scalingFilter(swapper, false);
 
         pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);

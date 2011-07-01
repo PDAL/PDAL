@@ -575,22 +575,26 @@ std::string Writer::LoadSQLData(std::string const& filename)
     }
 
     std::istream::pos_type size;    
-    std::istream* input = Utils::openFile(filename);
-    input->seekg(std::ios::end);
+    std::istream* input = Utils::openFile(filename, true);
     
-    char* data;
-    if (input->good()){
-        size = input->tellg();
-        data = new char [static_cast<boost::uint32_t>(size)];
-        input->seekg (0, std::ios::beg);
-        input->read (data, size);
-        // infile->close();
 
-        std::string output = std::string(data, (std::size_t) size);
-        delete[] data;
-        Utils::closeFile(input);
+    if (input->good()) {
+        std::string output;
+        std::string line;
+        while ( input->good() )
+        {
+            getline(*input, line);
+            if (output.size())
+            {
+                output = output + "\n" + line;            
+            }
+            else {
+                output = line;
+            }
+        }
+    
         return output;
-    } 
+    }
     else 
     {   
         Utils::closeFile(input);
@@ -692,7 +696,7 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     std::string base_table_aux_values = to_upper(tree.get<std::string>("base_table_aux_values"));
     std::string header_blob_column_name = to_upper(tree.get<std::string>("header_blob_column_name"));
     std::string base_table_boundary_column = to_upper(tree.get<std::string>("base_table_boundary_column"));
-    std::string base_table_boundary_wkt = to_upper(tree.get<std::string>("base_table_boundary_wkt"));
+    std::string base_table_boundary_wkt = tree.get<std::string>("base_table_boundary_wkt");
     std::string point_schema_override = tree.get<std::string>("point_schema_override");
     
     boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
@@ -855,8 +859,19 @@ oss << "declare\n"
     //     statement->Bind((char*)&(header_data[0]),(long)header_data->size());
     // }
 
-    char* wkt = (char*) malloc(base_table_boundary_wkt.size() * sizeof(char));
-    strncpy(wkt, base_table_boundary_wkt.c_str(), base_table_boundary_wkt.size());
+    std::ostringstream wkt_s;
+
+    if (!Utils::fileExists(base_table_boundary_wkt))
+    {
+        wkt_s << base_table_boundary_wkt;
+    } else {
+        wkt_s << LoadSQLData(base_table_boundary_wkt);
+    }
+    
+    std::string wkt_string = wkt_s.str();
+    char* wkt = (char*) malloc(wkt_string.size() * sizeof(char)+1);
+    strncpy(wkt, wkt_string.c_str(), wkt_string.size());
+    wkt[wkt_string.size()] = '\0';
     if (!base_table_boundary_column.empty())
     {
         statement->WriteCLob( &boundary_locator, wkt ); 
@@ -925,6 +940,7 @@ void Writer::writeEnd()
         CreateSDOEntry();
         CreateBlockIndex();
     }
+    RunFileSQL("post_block_sql");
     return;
 }
 
