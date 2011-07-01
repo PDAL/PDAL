@@ -1,4 +1,3 @@
-#if 0
 /******************************************************************************
 * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
@@ -33,77 +32,44 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERITERATOR_HPP
-#define INCLUDED_FILTERITERATOR_HPP
+#ifndef INCLUDED_MULTIFILTERITERATOR_HPP
+#define INCLUDED_MULTIFILTERITERATOR_HPP
 
 #include <pdal/pdal.hpp>
 
-#include <pdal/Iterator.hpp>
+#include <vector>
+
+#include <pdal/StageIterator.hpp>
 
 namespace pdal
 {
-class Filter;
+class MultiFilter;
 
-class FilterSequentialIterator : public SequentialIterator
+class MultiFilterSequentialIterator : public StageSequentialIterator
 {
 public:
-    FilterSequentialIterator(const Filter&);
-    virtual ~FilterSequentialIterator();
+    MultiFilterSequentialIterator(const MultiFilter&);
+    virtual ~MultiFilterSequentialIterator();
 
 protected:
-    // from SequentialIterator
+    // from StageSequentialIterator
     virtual boost::uint32_t readImpl(PointBuffer&) = 0;
     virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
     virtual bool atEndImpl() const = 0;
 
-    SequentialIterator& getPrevIterator();
-    const SequentialIterator& getPrevIterator() const;
+    StageSequentialIterator& getPrevIterator();
+    const StageSequentialIterator& getPrevIterator() const;
+
+    const std::vector<StageSequentialIterator*>& getPrevIterators() const;
+
+    const MultiFilter& m_filter;
+    std::vector<StageSequentialIterator*> m_prevIterators;
+    StageSequentialIterator* m_prevIterator;
 
 private:
-    const Filter& m_filter;
-    SequentialIterator* m_prevIterator;
 };
 
-
-class FilterRandomIterator : public RandomIterator
-{
-public:
-    FilterRandomIterator(const Filter&);
-    virtual ~FilterRandomIterator();
-
-protected:
-    // from RandomIterator
-    virtual boost::uint32_t readImpl(PointBuffer&) = 0;
-    virtual boost::uint64_t seekImpl(boost::uint64_t pointNum) = 0;
-
-    RandomIterator& getPrevIterator();
-    const RandomIterator& getPrevIterator() const;
-
-private:
-    const Filter& m_filter;
-    RandomIterator* m_prevIterator;
-};
-
-class FilterBlockIterator : public BlockIterator
-{
-public:
-    FilterBlockIterator(const Filter&);
-    virtual ~FilterBlockIterator();
-
-protected:
-    // from RandomIterator
-    virtual boost::uint32_t readImpl(PointBuffer&) = 0;
-    virtual boost::uint64_t seekImpl(boost::uint64_t pointNum) = 0;
-
-    BlockIterator& getPrevIterator();
-    const BlockIterator& getPrevIterator() const;
-
-private:
-    const Filter& m_filter;
-    BlockIterator* m_prevIterator;
-};
 
 } // namespace pdal
 
-#endif
 #endif

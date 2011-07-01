@@ -41,33 +41,18 @@ namespace pdal { namespace filters {
 
 
 MosaicFilterSequentialIterator::MosaicFilterSequentialIterator(const MosaicFilter& filter)
-    : pdal::StageSequentialIterator(filter)
-    , m_filter(filter)
+    : MultiFilterSequentialIterator(filter)
 {
-    for (size_t i=0; i<filter.getPrevStages().size(); ++i)
-    {
-        const Stage* stage = filter.getPrevStages()[i];
-        m_prevIterators.push_back(stage->createSequentialIterator());
-    }
-
     return;
 }
 
 
 MosaicFilterSequentialIterator::~MosaicFilterSequentialIterator()
 {
-    for (size_t i=0; i<m_prevIterators.size(); ++i)
-    {
-        StageSequentialIterator* iter = m_prevIterators[i];
-        delete iter;
-    }
+    return;
 }
 
 
-const std::vector<StageSequentialIterator*>& MosaicFilterSequentialIterator::getPrevIterators() const
-{
-    return m_prevIterators;
-}
 
 
 boost::uint64_t MosaicFilterSequentialIterator::skipImpl(boost::uint64_t count)

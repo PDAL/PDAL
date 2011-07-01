@@ -42,7 +42,7 @@ namespace pdal { namespace filters {
 
 
 MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
-    : Stage()
+    : MultiFilter(prevStages)
 {
     if (prevStages.size() == 0)
     {
@@ -102,11 +102,6 @@ const std::string& MosaicFilter::getName() const
 {
     static std::string name("filters.mosaic");
     return name;
-}
-
-const std::vector<const Stage*>& MosaicFilter::getPrevStages() const
-{
-    return m_prevStages;
 }
 
 

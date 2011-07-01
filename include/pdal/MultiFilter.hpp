@@ -1,4 +1,3 @@
-#if 0
 /******************************************************************************
 * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
@@ -33,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTER_HPP
-#define INCLUDED_FILTER_HPP
+#ifndef INCLUDED_MULTIFILTER_HPP
+#define INCLUDED_MULTIFILTER_HPP
 
 #include <pdal/pdal.hpp>
 
@@ -43,22 +42,23 @@
 namespace pdal
 {
 
-class PDAL_DLL Filter : public Stage
+class PDAL_DLL MultiFilter : public Stage
 {
 public:
-    Filter(const Stage& prevStage);
+    // entries may not be null
+    // vector.size() must be > 0
+    MultiFilter(std::vector<const Stage*> prevStages);
 
-    const Stage& getPrevStage() const;
+    const std::vector<const Stage*>& getPrevStages() const;
 
 protected:
-    const Stage& m_prevStage;
+    std::vector<const Stage*> m_prevStages;
 
 private:
-    Filter& operator=(const Filter&); // not implemented
-    Filter(const Filter&); // not implemented
+    MultiFilter& operator=(const MultiFilter&); // not implemented
+    MultiFilter(const MultiFilter&); // not implemented
 };
 
 }  // namespace pdal
 
-#endif
 #endif

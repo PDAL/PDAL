@@ -39,7 +39,7 @@
 
 #include <vector>
 
-#include <pdal/Stage.hpp>
+#include <pdal/MultiFilter.hpp>
 #include <pdal/StageIterator.hpp>
 //#include <pdal/Bounds.hpp>
 
@@ -48,7 +48,7 @@ namespace pdal { namespace filters {
 
 
 // this doesn't derive from Stage since it takes more than one stage as input
-class PDAL_DLL MosaicFilter : public Stage
+class PDAL_DLL MosaicFilter : public MultiFilter
 {
 public:
     // entries may not be null
@@ -57,8 +57,6 @@ public:
     
     const std::string& getDescription() const;
     const std::string& getName() const;
-
-    const std::vector<const Stage*>& getPrevStages() const;
 
     bool supportsIterator (StageIteratorType t) const
     {   
@@ -72,8 +70,6 @@ public:
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
 private:
-    std::vector<const Stage*> m_prevStages;
-
     MosaicFilter& operator=(const MosaicFilter&); // not implemented
     MosaicFilter(const MosaicFilter&); // not implemented
 };

@@ -1,4 +1,3 @@
-#if 0
 /******************************************************************************
 * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
@@ -33,99 +32,48 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/FilterIterator.hpp>
-#include <pdal/Filter.hpp>
+#include <pdal/MultiFilterIterator.hpp>
+#include <pdal/MultiFilter.hpp>
 
 namespace pdal
 {
 
 
-FilterSequentialIterator::FilterSequentialIterator(const Filter& filter)
-    : SequentialIterator(filter)
+MultiFilterSequentialIterator::MultiFilterSequentialIterator(const MultiFilter& filter)
+    : StageSequentialIterator(filter)
     , m_filter(filter)
     , m_prevIterator(NULL)
 {
-    m_prevIterator = m_filter.getPrevStage().createSequentialIterator();
+    for (size_t i=0; i<filter.getPrevStages().size(); ++i)
+    {
+        const Stage* stage = filter.getPrevStages()[i];
+        m_prevIterators.push_back(stage->createSequentialIterator());
+    }
 
     return;
 }
 
 
-FilterSequentialIterator::~FilterSequentialIterator()
+MultiFilterSequentialIterator::~MultiFilterSequentialIterator()
 {
-    delete m_prevIterator;
+    for (size_t i=0; i<m_prevIterators.size(); ++i)
+    {
+        StageSequentialIterator* iter = m_prevIterators[i];
+        delete iter;
+    }
 }
 
 
-SequentialIterator& FilterSequentialIterator::getPrevIterator()
+const std::vector<StageSequentialIterator*>& MultiFilterSequentialIterator::getPrevIterators() const
 {
-    return *m_prevIterator;
+    return m_prevIterators;
 }
 
-
-const SequentialIterator& FilterSequentialIterator::getPrevIterator() const
-{
-    return *m_prevIterator;
-}
-
-
-
-FilterRandomIterator::FilterRandomIterator(const Filter& filter)
-    : RandomIterator(filter)
-    , m_filter(filter)
-    , m_prevIterator(NULL)
-{
-    m_prevIterator = m_filter.getPrevStage().createRandomIterator();
-
-    return;
-}
-
-
-FilterRandomIterator::~FilterRandomIterator()
-{
-    delete m_prevIterator;
-}
-
-
-RandomIterator& FilterRandomIterator::getPrevIterator()
+const StageSequentialIterator& MultiFilterSequentialIterator::getPrevIterator() const
 {
     return *m_prevIterator;
 }
 
-
-const RandomIterator& FilterRandomIterator::getPrevIterator() const
-{
-    return *m_prevIterator;
-}
-
-FilterBlockIterator::FilterBlockIterator(const Filter& filter)
-    : BlockIterator(filter)
-    , m_filter(filter)
-    , m_prevIterator(NULL)
-{
-    m_prevIterator = m_filter.getPrevStage().createBlockIterator();
-
-    return;
-}
-
-
-FilterBlockIterator::~FilterBlockIterator()
-{
-    delete m_prevIterator;
-}
-
-
-BlockIterator& FilterBlockIterator::getPrevIterator()
-{
-    return *m_prevIterator;
-}
-
-
-const BlockIterator& FilterBlockIterator::getPrevIterator() const
-{
-    return *m_prevIterator;
-}
 
 
 } // namespace pdal
-#endif

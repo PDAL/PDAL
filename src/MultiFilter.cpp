@@ -1,4 +1,3 @@
-#if 0
 /******************************************************************************
 * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
@@ -33,28 +32,69 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Filter.hpp>
+#include <pdal/MultiFilter.hpp>
+#include <pdal/exceptions.hpp>
 
 namespace pdal
 {
 
 
-Filter::Filter(const Stage& prevStage) :
-    m_prevStage(prevStage)
+MultiFilter::MultiFilter(std::vector<const Stage*> prevStages) :
+    Stage()
 {
-    // by default, we set our core properties to be the same as those 
-    // of the previous stage
-    this->setCoreProperties(m_prevStage);
+    if (prevStages.size() == 0)
+    {
+        throw pdal_error("empty stage list passed to mosaic filter");
+    }
+
+    for (size_t i=0; i<prevStages.size(); i++)
+    {
+        if (prevStages[i] == NULL)
+        {
+            throw pdal_error("null stage passed to mosaic filter");
+        }
+        m_prevStages.push_back(prevStages[i]);
+    }
+
+    const Stage& prevStage = *m_prevStages[0];
+
+    {
+        setCoreProperties(prevStage);  // BUG: clearly insufficient
+    }
+
+    boost::uint64_t totalPoints = 0;
+
+    Bounds<double> bigbox(prevStage.getBounds());
+
+    for (size_t i=0; i<prevStages.size(); i++)
+    {
+        const Stage* stage = prevStages[i];
+        if (stage==NULL)
+        {
+            throw pdal_error("bad stage passed to MosaicFilter");
+        }
+        if (prevStage.getSchema() != this->getSchema())
+        {
+            throw pdal_error("impedance mismatch in MosaicFilter");
+        }
+
+        bigbox.grow(this->getBounds());
+        totalPoints += this->getNumPoints();
+        m_prevStages.push_back(stage);
+    }
+
+    setBounds(bigbox);
+    setNumPoints(totalPoints);
 
     return;
 }
 
 
-const Stage& Filter::getPrevStage() const
+const std::vector<const Stage*>& MultiFilter::getPrevStages() const
 {
-    return m_prevStage;
+    return m_prevStages;
 }
 
 
+
 } // namespace pdal
-#endif
