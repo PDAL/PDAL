@@ -556,7 +556,7 @@ CloudPtr Reader::getCloud() const
 
 }
 
-pdal::SequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
     return new pdal::drivers::oci::SequentialIterator(*this);
 }

@@ -67,7 +67,7 @@ public:
 
     boost::uint64_t getNumPoints() { return 0; }
     
-    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
     
     Connection getConnection () const { return m_connection;}
     Statement getStatement () const { return m_statement;}

@@ -362,7 +362,7 @@ boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
 
 SequentialIterator::SequentialIterator(const Reader& reader)
     : IteratorBase(reader)
-    , pdal::SequentialIterator(reader)
+    , pdal::StageSequentialIterator(reader)
 {
     return;
 }

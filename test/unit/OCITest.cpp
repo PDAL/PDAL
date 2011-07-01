@@ -49,7 +49,7 @@
 #include <pdal/drivers/faux/Writer.hpp>
 
 #include <pdal/drivers/liblas/Writer.hpp>
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/Utils.hpp>
 
 #include "Support.hpp"
