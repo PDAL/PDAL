@@ -146,13 +146,13 @@ bool LasReader::isCompressed() const
 }
 
 
-pdal::SequentialIterator* LasReader::createSequentialIterator() const
+pdal::StageSequentialIterator* LasReader::createSequentialIterator() const
 {
     return new SequentialIterator(*this);
 }
 
 
-pdal::RandomIterator* LasReader::createRandomIterator() const
+pdal::StageRandomIterator* LasReader::createRandomIterator() const
 {
     return new RandomIterator(*this);
 }

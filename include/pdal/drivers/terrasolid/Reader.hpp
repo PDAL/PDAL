@@ -37,12 +37,12 @@
 
 #include <pdal/pdal.hpp>
 
-#include <pdal/Stage.hpp>
+#include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
 
 #include <pdal/SchemaLayout.hpp>
 
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/exceptions.hpp>
 
 
@@ -125,7 +125,7 @@ public:
 };
 
 
-class PDAL_DLL Reader : public pdal::Stage
+class PDAL_DLL Reader : public pdal::Reader
 {
 
 public:
@@ -146,8 +146,8 @@ public:
     }
 
     
-    pdal::SequentialIterator* createSequentialIterator() const;
-    pdal::RandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const;
     
     Options& getOptions() const { return m_options; }
 

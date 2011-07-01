@@ -37,7 +37,7 @@
 
 #include <pdal/pdal.hpp>
 
-#include <pdal/Iterator.hpp>
+#include <pdal/ReaderIterator.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <iosfwd>
 
@@ -77,7 +77,7 @@ private:
 };
 
 
-class SequentialIterator : public IteratorBase, public pdal::SequentialIterator
+class SequentialIterator : public IteratorBase, public pdal::ReaderSequentialIterator
 {
 public:
     SequentialIterator(const LasReader& reader);
@@ -90,7 +90,7 @@ private:
 };
 
 
-class RandomIterator : public IteratorBase, public pdal::RandomIterator
+class RandomIterator : public IteratorBase, public pdal::ReaderRandomIterator
 {
 public:
     RandomIterator(const LasReader& reader);

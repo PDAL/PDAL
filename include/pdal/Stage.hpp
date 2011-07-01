@@ -49,9 +49,9 @@ namespace pdal
 {
 
 class Iterator;
-class SequentialIterator;
-class RandomIterator;
-class BlockIterator;
+class StageSequentialIterator;
+class StageRandomIterator;
+class StageBlockIterator;
 
 // every stage owns its own header, they are not shared
 class PDAL_DLL Stage
@@ -80,9 +80,9 @@ public:
 
     virtual bool supportsIterator (StageIteratorType) const = 0;
 
-    virtual SequentialIterator* createSequentialIterator() const { return NULL; }
-    virtual RandomIterator* createRandomIterator() const  { return NULL; }
-    virtual BlockIterator* createBlockIterator() const  { return NULL; }
+    virtual StageSequentialIterator* createSequentialIterator() const { return NULL; }
+    virtual StageRandomIterator* createRandomIterator() const  { return NULL; }
+    virtual StageBlockIterator* createBlockIterator() const  { return NULL; }
 
     void dump() const;
 

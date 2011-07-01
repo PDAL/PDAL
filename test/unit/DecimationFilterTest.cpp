@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/SchemaLayout.hpp>
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test)
 
     PointBuffer data(layout, 3);
 
-    SequentialIterator* iter = filter.createSequentialIterator();
+    StageSequentialIterator* iter = filter.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 3);

@@ -1,3 +1,4 @@
+#if 0
 /******************************************************************************
 * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
@@ -32,54 +33,99 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_DECIMATIONFILTER_HPP
-#define INCLUDED_FILTERS_DECIMATIONFILTER_HPP
-
-#include <pdal/pdal.hpp>
-//#include <pdal/export.hpp>
+#include <pdal/FilterIterator.hpp>
 #include <pdal/Filter.hpp>
-//#include <pdal/FilterIterator.hpp>
-//#include <pdal/Bounds.hpp>
 
-namespace pdal { 
-    class PointBuffer;
+namespace pdal
+{
+
+
+FilterSequentialIterator::FilterSequentialIterator(const Filter& filter)
+    : SequentialIterator(filter)
+    , m_filter(filter)
+    , m_prevIterator(NULL)
+{
+    m_prevIterator = m_filter.getPrevStage().createSequentialIterator();
+
+    return;
 }
 
-namespace pdal { namespace filters {
 
-class DecimationFilterSequentialIterator;
-
-// we keep only 1 out of every step points; if step=100, we get 1% of the file
-class PDAL_DLL DecimationFilter : public Filter
+FilterSequentialIterator::~FilterSequentialIterator()
 {
-public:
-    DecimationFilter(const Stage& prevStage, boost::uint32_t step);
-
-    const std::string& getDescription() const;
-    const std::string& getName() const;
-
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-
-        return false;
-    }
-    
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
-
-    boost::uint32_t getStep() const;
-
-    boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData, boost::uint64_t srcStartIndex) const;
-
-private:
-    boost::uint32_t m_step;
-
-    DecimationFilter& operator=(const DecimationFilter&); // not implemented
-    DecimationFilter(const DecimationFilter&); // not implemented
-};
+    delete m_prevIterator;
+}
 
 
-} } // namespaces
+SequentialIterator& FilterSequentialIterator::getPrevIterator()
+{
+    return *m_prevIterator;
+}
 
+
+const SequentialIterator& FilterSequentialIterator::getPrevIterator() const
+{
+    return *m_prevIterator;
+}
+
+
+
+FilterRandomIterator::FilterRandomIterator(const Filter& filter)
+    : RandomIterator(filter)
+    , m_filter(filter)
+    , m_prevIterator(NULL)
+{
+    m_prevIterator = m_filter.getPrevStage().createRandomIterator();
+
+    return;
+}
+
+
+FilterRandomIterator::~FilterRandomIterator()
+{
+    delete m_prevIterator;
+}
+
+
+RandomIterator& FilterRandomIterator::getPrevIterator()
+{
+    return *m_prevIterator;
+}
+
+
+const RandomIterator& FilterRandomIterator::getPrevIterator() const
+{
+    return *m_prevIterator;
+}
+
+FilterBlockIterator::FilterBlockIterator(const Filter& filter)
+    : BlockIterator(filter)
+    , m_filter(filter)
+    , m_prevIterator(NULL)
+{
+    m_prevIterator = m_filter.getPrevStage().createBlockIterator();
+
+    return;
+}
+
+
+FilterBlockIterator::~FilterBlockIterator()
+{
+    delete m_prevIterator;
+}
+
+
+BlockIterator& FilterBlockIterator::getPrevIterator()
+{
+    return *m_prevIterator;
+}
+
+
+const BlockIterator& FilterBlockIterator::getPrevIterator() const
+{
+    return *m_prevIterator;
+}
+
+
+} // namespace pdal
 #endif

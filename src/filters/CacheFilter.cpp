@@ -145,13 +145,13 @@ void CacheFilter::updateStats(boost::uint64_t numRead, boost::uint64_t numReques
 }
 
 
-pdal::SequentialIterator* CacheFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* CacheFilter::createSequentialIterator() const
 {
     return new CacheFilterSequentialIterator(*this);
 }
 
 
-pdal::RandomIterator* CacheFilter::createRandomIterator() const
+pdal::StageRandomIterator* CacheFilter::createRandomIterator() const
 {
     return new CacheFilterRandomIterator(*this);
 }

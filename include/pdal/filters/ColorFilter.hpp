@@ -71,8 +71,8 @@ public:
         return false;
     }
 
-    pdal::SequentialIterator* createSequentialIterator() const;
-    pdal::RandomIterator* createRandomIterator() const { return NULL; }
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     void processBuffer(PointBuffer& data) const;
 

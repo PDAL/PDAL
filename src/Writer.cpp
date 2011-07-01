@@ -36,7 +36,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <pdal/Writer.hpp>
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/exceptions.hpp>
@@ -93,7 +93,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
         }
     }
     
-    boost::scoped_ptr<SequentialIterator> iter(m_prevStage.createSequentialIterator());
+    boost::scoped_ptr<StageSequentialIterator> iter(m_prevStage.createSequentialIterator());
     
     if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
 

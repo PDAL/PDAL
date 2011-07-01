@@ -176,8 +176,8 @@ public:
         return false;
     }
 
-    pdal::SequentialIterator* createSequentialIterator() const;
-    pdal::RandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const;
 
 private:
     void Load(chipper::RefList& xvec, chipper::RefList& yvec, chipper::RefList& spare);

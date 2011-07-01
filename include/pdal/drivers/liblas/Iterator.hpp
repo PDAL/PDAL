@@ -38,7 +38,7 @@
 #include <pdal/pdal.hpp>
 
 //#include <pdal/Stage.hpp>
-#include <pdal/Iterator.hpp>
+#include <pdal/ReaderIterator.hpp>
 
 #include <string>
 
@@ -78,7 +78,7 @@ private:
 };
 
 
-class SequentialIterator : public LiblasIteratorBase, public pdal::SequentialIterator
+class SequentialIterator : public LiblasIteratorBase, public pdal::ReaderSequentialIterator
 {
 public:
     SequentialIterator(const LiblasReader& reader);
@@ -91,7 +91,7 @@ private:
 };
 
 
-class RandomIterator : public LiblasIteratorBase, public pdal::RandomIterator
+class RandomIterator : public LiblasIteratorBase, public pdal::ReaderRandomIterator
 {
 public:
     RandomIterator(const LiblasReader& reader);

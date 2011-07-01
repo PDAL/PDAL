@@ -7,7 +7,7 @@ set BUILD_TYPE=Release
 set BUILD_TYPE=Debug
 
 set UTILS_DIR=c:\Utils
-set DEV_DIR=d:\dev
+set DEV_DIR=c:\dev
 
 set PDAL_DIR=%DEV_DIR%\pdal
 
@@ -27,9 +27,9 @@ set ICONV_DIR=%UTILS_DIR%\iconv-1.9.2.win32
 
 cmake -G %COMPILER% ^
     -DBOOST_INCLUDEDIR=%BOOST_DIR% ^
-    -DWITH_GDAL=ON ^
-    -DWITH_GEOTIFF=ON ^
-    -DWITH_ORACLE=ON ^
+    -DWITH_GDAL=OFF ^
+    -DWITH_GEOTIFF=OFF ^
+    -DWITH_ORACLE=OFF ^
     -DWITH_LASZIP=ON ^
     -DWITH_LIBLAS=ON ^
     -DWITH_FREEGLUT=ON ^
@@ -43,14 +43,6 @@ cmake -G %COMPILER% ^
     -DFREEGLUT_INCLUDE_DIR=%FREEGLUT_DIR%\include ^
     -DGLUT_LIBRARY=%FREEGLUT_DIR%\lib ^
     -DGLUT_INCLUDE_DIR=%FREEGLUT_DIR%\include ^
-    -DGDAL_INCLUDE_DIR=%GDAL_DIR%\gcore ^
-    -DGDAL_LIBRARY=%GDAL_DIR%\gdal_i.lib ^
-    -DTIFF_INCLUDE_DIR=%GDAL_DIR%\frmts\gtiff\libtiff ^
-    -DTIFF_LIBRARY=%GDAL_DIR%\gdal_i.lib ^
-    -DGEOTIFF_INCLUDE_DIR=%GDAL_DIR%\frmts\gtiff\libgeotiff ^
-    -DGEOTIFF_LIBRARY=%GDAL_DIR%\gdal_i.lib ^
-    -DORACLE_INCLUDE_DIR=%ORACLE_HOME%\include ^
-    -DORACLE_OCI_LIBRARY=%ORACLE_HOME%\lib\oci.lib ^
     -DLASZIP_INCLUDE_DIR=%LASZIP_DIR%\include ^
     -DLASZIP_LIBRARY=%LASZIP_DIR%\bin\Debug\Debug\laszip.lib ^
     -DLIBLAS_INCLUDE_DIR=%LIBLAS_DIR%\include ^

@@ -105,7 +105,7 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t 
     if (!stage.supportsIterator(StageIterator_Random))
         throw pdal_error("Chipper GetBuffer is unable to read data source randomly!");
             
-    boost::scoped_ptr<RandomIterator> iter(stage.createRandomIterator());
+    boost::scoped_ptr<StageRandomIterator> iter(stage.createRandomIterator());
 
     std::vector<boost::uint32_t> ids = GetIDs();
     pdal::PointBuffer one_point(schema, 1);
@@ -176,7 +176,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     std::size_t num_points_loaded = 0;
     std::size_t num_points_to_load = count32;
     
-    boost::scoped_ptr<SequentialIterator> iter(m_prevStage.createSequentialIterator());
+    boost::scoped_ptr<StageSequentialIterator> iter(m_prevStage.createSequentialIterator());
     
     boost::uint32_t counter = 0;
     while (num_points_loaded < num_points_to_load)
@@ -452,12 +452,12 @@ const std::string& Chipper::getName() const
 }
 
 
-pdal::RandomIterator* Chipper::createRandomIterator() const
+pdal::StageRandomIterator* Chipper::createRandomIterator() const
 {
     return 0;
 }
 
-pdal::SequentialIterator* Chipper::createSequentialIterator() const
+pdal::StageSequentialIterator* Chipper::createSequentialIterator() const
 {
     return new ChipperSequentialIterator(*this);
 }

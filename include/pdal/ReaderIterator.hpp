@@ -32,54 +32,53 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_DECIMATIONFILTER_HPP
-#define INCLUDED_FILTERS_DECIMATIONFILTER_HPP
+#ifndef INCLUDED_READERITERATOR_HPP
+#define INCLUDED_READERITERATOR_HPP
 
 #include <pdal/pdal.hpp>
-//#include <pdal/export.hpp>
-#include <pdal/Filter.hpp>
-//#include <pdal/FilterIterator.hpp>
-//#include <pdal/Bounds.hpp>
 
-namespace pdal { 
-    class PointBuffer;
-}
+#include <pdal/StageIterator.hpp>
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+class Reader;
+class PointBuffer;
 
-class DecimationFilterSequentialIterator;
 
-// we keep only 1 out of every step points; if step=100, we get 1% of the file
-class PDAL_DLL DecimationFilter : public Filter
+class PDAL_DLL ReaderIterator : StageIterator
 {
 public:
-    DecimationFilter(const Stage& prevStage, boost::uint32_t step);
-
-    const std::string& getDescription() const;
-    const std::string& getName() const;
-
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-
-        return false;
-    }
-    
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
-
-    boost::uint32_t getStep() const;
-
-    boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData, boost::uint64_t srcStartIndex) const;
+    ReaderIterator(const Reader& reader);
+    virtual ~ReaderIterator();
 
 private:
-    boost::uint32_t m_step;
-
-    DecimationFilter& operator=(const DecimationFilter&); // not implemented
-    DecimationFilter(const DecimationFilter&); // not implemented
+    ReaderIterator& operator=(const ReaderIterator&); // not implemented
+    ReaderIterator(const ReaderIterator&); // not implemented
 };
 
 
-} } // namespaces
+class PDAL_DLL ReaderSequentialIterator : public StageSequentialIterator
+{
+public:
+    ReaderSequentialIterator(const Reader& reader);
+    virtual ~ReaderSequentialIterator();
+};
+
+
+class PDAL_DLL ReaderRandomIterator : public StageRandomIterator
+{
+public:
+    ReaderRandomIterator(const Reader& reader);
+    virtual ~ReaderRandomIterator();
+};
+
+class PDAL_DLL ReaderBlockIterator : public StageBlockIterator
+{
+public:
+    ReaderBlockIterator(const Reader& reader);
+    virtual ~ReaderBlockIterator();
+};
+
+} // namespace pdal
 
 #endif

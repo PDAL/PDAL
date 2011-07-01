@@ -37,69 +37,69 @@
 
 #include <pdal/pdal.hpp>
 
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 
 namespace pdal
 {
 class Filter;
 
-class FilterSequentialIterator : public SequentialIterator
+class FilterSequentialIterator : public StageSequentialIterator
 {
 public:
     FilterSequentialIterator(const Filter&);
     virtual ~FilterSequentialIterator();
 
 protected:
-    // from SequentialIterator
+    // from StageSequentialIterator
     virtual boost::uint32_t readImpl(PointBuffer&) = 0;
     virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
     virtual bool atEndImpl() const = 0;
 
-    SequentialIterator& getPrevIterator();
-    const SequentialIterator& getPrevIterator() const;
+    StageSequentialIterator& getPrevIterator();
+    const StageSequentialIterator& getPrevIterator() const;
 
 private:
     const Filter& m_filter;
-    SequentialIterator* m_prevIterator;
+    StageSequentialIterator* m_prevIterator;
 };
 
 
-class FilterRandomIterator : public RandomIterator
+class FilterRandomIterator : public StageRandomIterator
 {
 public:
     FilterRandomIterator(const Filter&);
     virtual ~FilterRandomIterator();
 
 protected:
-    // from RandomIterator
+    // from StageRandomIterator
     virtual boost::uint32_t readImpl(PointBuffer&) = 0;
     virtual boost::uint64_t seekImpl(boost::uint64_t pointNum) = 0;
 
-    RandomIterator& getPrevIterator();
-    const RandomIterator& getPrevIterator() const;
+    StageRandomIterator& getPrevIterator();
+    const StageRandomIterator& getPrevIterator() const;
 
 private:
     const Filter& m_filter;
-    RandomIterator* m_prevIterator;
+    StageRandomIterator* m_prevIterator;
 };
 
-class FilterBlockIterator : public BlockIterator
+class FilterBlockIterator : public StageBlockIterator
 {
 public:
     FilterBlockIterator(const Filter&);
     virtual ~FilterBlockIterator();
 
 protected:
-    // from RandomIterator
+    // from StageRandomIterator
     virtual boost::uint32_t readImpl(PointBuffer&) = 0;
     virtual boost::uint64_t seekImpl(boost::uint64_t pointNum) = 0;
 
-    BlockIterator& getPrevIterator();
-    const BlockIterator& getPrevIterator() const;
+    StageBlockIterator& getPrevIterator();
+    const StageBlockIterator& getPrevIterator() const;
 
 private:
     const Filter& m_filter;
-    BlockIterator* m_prevIterator;
+    StageBlockIterator* m_prevIterator;
 };
 
 } // namespace pdal

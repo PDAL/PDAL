@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/SchemaLayout.hpp>
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     PointBuffer data(layout, 3);
     
-    pdal::SequentialIterator* iter = reader.createSequentialIterator();
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
     
     {
         boost::uint32_t numRead = iter->read(data);

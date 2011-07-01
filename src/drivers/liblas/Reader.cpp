@@ -195,13 +195,13 @@ void LiblasReader::registerFields(::liblas::Reader& externalReader)
 }
 
 
-pdal::SequentialIterator* LiblasReader::createSequentialIterator() const
+pdal::StageSequentialIterator* LiblasReader::createSequentialIterator() const
 {
     return new SequentialIterator(*this);
 }
 
 
-pdal::RandomIterator* LiblasReader::createRandomIterator() const
+pdal::StageRandomIterator* LiblasReader::createRandomIterator() const
 {
     return new RandomIterator(*this);
 }

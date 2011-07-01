@@ -1,3 +1,4 @@
+#if 0
 /******************************************************************************
 * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
@@ -32,54 +33,28 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_DECIMATIONFILTER_HPP
-#define INCLUDED_FILTERS_DECIMATIONFILTER_HPP
-
-#include <pdal/pdal.hpp>
-//#include <pdal/export.hpp>
 #include <pdal/Filter.hpp>
-//#include <pdal/FilterIterator.hpp>
-//#include <pdal/Bounds.hpp>
 
-namespace pdal { 
-    class PointBuffer;
+namespace pdal
+{
+
+
+Filter::Filter(const Stage& prevStage) :
+    m_prevStage(prevStage)
+{
+    // by default, we set our core properties to be the same as those 
+    // of the previous stage
+    this->setCoreProperties(m_prevStage);
+
+    return;
 }
 
-namespace pdal { namespace filters {
 
-class DecimationFilterSequentialIterator;
-
-// we keep only 1 out of every step points; if step=100, we get 1% of the file
-class PDAL_DLL DecimationFilter : public Filter
+const Stage& Filter::getPrevStage() const
 {
-public:
-    DecimationFilter(const Stage& prevStage, boost::uint32_t step);
-
-    const std::string& getDescription() const;
-    const std::string& getName() const;
-
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-
-        return false;
-    }
-    
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
-
-    boost::uint32_t getStep() const;
-
-    boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData, boost::uint64_t srcStartIndex) const;
-
-private:
-    boost::uint32_t m_step;
-
-    DecimationFilter& operator=(const DecimationFilter&); // not implemented
-    DecimationFilter(const DecimationFilter&); // not implemented
-};
+    return m_prevStage;
+}
 
 
-} } // namespaces
-
+} // namespace pdal
 #endif

@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 
     PointBuffer data(layout, 750);
  
-    SequentialIterator* iter = reader.createSequentialIterator();
+    StageSequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead, 750u);
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
     int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
 
-    RandomIterator* iter = reader.createRandomIterator();
+    StageRandomIterator* iter = reader.createRandomIterator();
 
     boost::uint32_t numRead = iter->read(data);
     BOOST_CHECK_EQUAL(numRead, 10u);
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
 
     PointBuffer data(layout, 750);
 
-    SequentialIterator* iter = reader.createSequentialIterator();
+    StageSequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead, 750u);
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
 
     PointBuffer data(layout, 2);
 
-    SequentialIterator* iter = reader.createSequentialIterator();
+    StageSequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead, 2u);
@@ -295,7 +295,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
 
     PointBuffer data(layout, 750);
 
-    SequentialIterator* iter = reader.createSequentialIterator();
+    StageSequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead,750u);

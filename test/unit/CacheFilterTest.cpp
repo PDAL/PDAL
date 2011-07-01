@@ -37,7 +37,7 @@
 
 #include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/filters/CacheFilter.hpp>
 
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test1)
     PointBuffer dataBig(layout, 1024);
     PointBuffer dataSmall(layout, 1);
 
-    SequentialIterator* iter1 = cache.createSequentialIterator();
+    StageSequentialIterator* iter1 = cache.createSequentialIterator();
 
     //BOOST_CHECK(cache.getIndex() == 0);
     BOOST_CHECK(cache.getNumPointsRequested() == 0);
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test1)
     BOOST_CHECK(cache.getNumPointsRequested() == 2048);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
 
-    SequentialIterator* iter2 = cache.createSequentialIterator();
+    StageSequentialIterator* iter2 = cache.createSequentialIterator();
 
     iter2->skip(42);
     iter2->read(dataSmall);

@@ -110,7 +110,7 @@ const std::vector<const Stage*>& MosaicFilter::getPrevStages() const
 }
 
 
-pdal::SequentialIterator* MosaicFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* MosaicFilter::createSequentialIterator() const
 {
     return new MosaicFilterSequentialIterator(*this);
 }

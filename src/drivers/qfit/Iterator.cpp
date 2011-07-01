@@ -45,7 +45,7 @@ namespace pdal { namespace drivers { namespace qfit {
 
 
 SequentialIterator::SequentialIterator(const qfit::Reader& reader)
-    : pdal::SequentialIterator(reader)
+    : pdal::ReaderSequentialIterator(reader)
     , m_reader(reader)
     , m_istream(NULL)
 {
@@ -83,7 +83,7 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 
 
 RandomIterator::RandomIterator(const Reader& reader)
-    : pdal::RandomIterator(reader)
+    : pdal::ReaderRandomIterator(reader)
     , m_reader(reader)
     , m_istream(NULL)
 {

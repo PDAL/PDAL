@@ -253,7 +253,7 @@ void ReprojectionFilter::processBuffer(PointBuffer& data) const
 }
 
 
-pdal::SequentialIterator* ReprojectionFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* ReprojectionFilter::createSequentialIterator() const
 {
     return new ReprojectionFilterSequentialIterator(*this);
 }

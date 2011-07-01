@@ -1,3 +1,4 @@
+#if 0
 /******************************************************************************
 * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
@@ -32,54 +33,77 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_DECIMATIONFILTER_HPP
-#define INCLUDED_FILTERS_DECIMATIONFILTER_HPP
+#ifndef INCLUDED_FILTERITERATOR_HPP
+#define INCLUDED_FILTERITERATOR_HPP
 
 #include <pdal/pdal.hpp>
-//#include <pdal/export.hpp>
-#include <pdal/Filter.hpp>
-//#include <pdal/FilterIterator.hpp>
-//#include <pdal/Bounds.hpp>
 
-namespace pdal { 
-    class PointBuffer;
-}
+#include <pdal/Iterator.hpp>
 
-namespace pdal { namespace filters {
+namespace pdal
+{
+class Filter;
 
-class DecimationFilterSequentialIterator;
-
-// we keep only 1 out of every step points; if step=100, we get 1% of the file
-class PDAL_DLL DecimationFilter : public Filter
+class FilterSequentialIterator : public SequentialIterator
 {
 public:
-    DecimationFilter(const Stage& prevStage, boost::uint32_t step);
+    FilterSequentialIterator(const Filter&);
+    virtual ~FilterSequentialIterator();
 
-    const std::string& getDescription() const;
-    const std::string& getName() const;
+protected:
+    // from SequentialIterator
+    virtual boost::uint32_t readImpl(PointBuffer&) = 0;
+    virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
+    virtual bool atEndImpl() const = 0;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-
-        return false;
-    }
-    
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
-
-    boost::uint32_t getStep() const;
-
-    boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData, boost::uint64_t srcStartIndex) const;
+    SequentialIterator& getPrevIterator();
+    const SequentialIterator& getPrevIterator() const;
 
 private:
-    boost::uint32_t m_step;
-
-    DecimationFilter& operator=(const DecimationFilter&); // not implemented
-    DecimationFilter(const DecimationFilter&); // not implemented
+    const Filter& m_filter;
+    SequentialIterator* m_prevIterator;
 };
 
 
-} } // namespaces
+class FilterRandomIterator : public RandomIterator
+{
+public:
+    FilterRandomIterator(const Filter&);
+    virtual ~FilterRandomIterator();
 
+protected:
+    // from RandomIterator
+    virtual boost::uint32_t readImpl(PointBuffer&) = 0;
+    virtual boost::uint64_t seekImpl(boost::uint64_t pointNum) = 0;
+
+    RandomIterator& getPrevIterator();
+    const RandomIterator& getPrevIterator() const;
+
+private:
+    const Filter& m_filter;
+    RandomIterator* m_prevIterator;
+};
+
+class FilterBlockIterator : public BlockIterator
+{
+public:
+    FilterBlockIterator(const Filter&);
+    virtual ~FilterBlockIterator();
+
+protected:
+    // from RandomIterator
+    virtual boost::uint32_t readImpl(PointBuffer&) = 0;
+    virtual boost::uint64_t seekImpl(boost::uint64_t pointNum) = 0;
+
+    BlockIterator& getPrevIterator();
+    const BlockIterator& getPrevIterator() const;
+
+private:
+    const Filter& m_filter;
+    BlockIterator* m_prevIterator;
+};
+
+} // namespace pdal
+
+#endif
 #endif

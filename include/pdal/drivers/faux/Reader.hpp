@@ -37,7 +37,7 @@
 
 #include <pdal/pdal.hpp>
 
-#include <pdal/Stage.hpp>
+#include <pdal/Reader.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/Dimension.hpp>
 
@@ -63,7 +63,7 @@ namespace pdal { namespace drivers { namespace faux {
 //   - "ramp" generates its points as a linear ramp from the minimum of the bbox to the maximum
 // In all these modes, however, the Time field is always set to the point number.
 //
-class PDAL_DLL Reader : public pdal::Stage
+class PDAL_DLL Reader : public pdal::Reader
 {
 public:
     enum Mode
@@ -90,8 +90,8 @@ public:
         return false;
     }
 
-    pdal::SequentialIterator* createSequentialIterator() const;
-    pdal::RandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const;
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;

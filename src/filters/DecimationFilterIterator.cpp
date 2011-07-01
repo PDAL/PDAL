@@ -59,7 +59,7 @@ boost::uint64_t DecimationFilterSequentialIterator::skipImpl(boost::uint64_t cou
 
 bool DecimationFilterSequentialIterator::atEndImpl() const
 {
-    const SequentialIterator& iter = getPrevIterator();
+    const StageSequentialIterator& iter = getPrevIterator();
     return iter.atEnd();
 }
 

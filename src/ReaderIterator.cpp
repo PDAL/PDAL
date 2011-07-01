@@ -32,131 +32,49 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Iterator.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/ReaderIterator.hpp>
 
-#include <algorithm> // for std::min/max
-
-#include <pdal/Stage.hpp>
-#include <pdal/PointBuffer.hpp>
 
 namespace pdal
 {
 
-static boost::uint32_t s_defaultChunkSize = 1024;
-
 
 //---------------------------------------------------------------------------
 //
-// Iterator
+// ReaderIterator
 //
 //---------------------------------------------------------------------------
 
-Iterator::Iterator(const Stage& stage)
-    : m_index(0)
-    , m_stage(stage)
-    , m_chunkSize(s_defaultChunkSize)
+ReaderIterator::ReaderIterator(const Reader& reader)
+    : StageIterator(reader)
 {
     return;
 }
 
 
-Iterator::~Iterator()
+ReaderIterator::~ReaderIterator()
 {
     return;
-}
-
-
-const Stage& Iterator::getStage() const
-{
-    return m_stage;
-}
-
-
-boost::uint64_t Iterator::getIndex() const
-{
-    return m_index;
-}
-
-
-void Iterator::setChunkSize(boost::uint32_t size)
-{
-    m_chunkSize = size;
-}
-
-
-boost::uint32_t Iterator::getChunkSize() const
-{
-    return m_chunkSize;
-}
-
-
-boost::uint32_t Iterator::read(PointBuffer& data)
-{
-    const boost::uint32_t numRead = readImpl(data);
-
-    m_index += numRead;
-
-    return numRead;
-}
-
-
-boost::uint64_t Iterator::naiveSkipImpl(boost::uint64_t count)
-{
-    boost::uint64_t totalNumRead = 0;
-
-    // read (and discard) all the next 'count' points
-    // in case count is really big, we do this in blocks of size 'chunk'
-    while (count > 0)
-    {
-        const boost::uint64_t thisCount64 = std::min<boost::uint64_t>(getChunkSize(), count);
-        // getChunkSize is a uint32, so this cast is safe
-        const boost::uint32_t thisCount = static_cast<boost::uint32_t>(thisCount64);
-
-        PointBuffer junk(getStage().getSchema(), thisCount);
-        
-        const boost::uint32_t numRead = read(junk);
-        if (numRead == 0) break; // end of file or something
-
-        count -= numRead;
-        totalNumRead += numRead;
-    }
-
-    return totalNumRead;
 }
 
 
 //---------------------------------------------------------------------------
 //
-// SequentialIterator
+// ReaderSequentialIterator
 //
 //---------------------------------------------------------------------------
 
-SequentialIterator::SequentialIterator(const Stage& stage)
-    : Iterator(stage)
+ReaderSequentialIterator::ReaderSequentialIterator(const Reader& reader)
+    : StageSequentialIterator(reader)
 {
     return;
 }
 
 
-SequentialIterator::~SequentialIterator()
+ReaderSequentialIterator::~ReaderSequentialIterator()
 {
     return;
-}
-
-
-boost::uint64_t SequentialIterator::skip(boost::uint64_t count)
-{
-    const boost::uint64_t numSkipped = skipImpl(count);
-
-    m_index += numSkipped;
-
-    return numSkipped;
-}
-
-
-bool SequentialIterator::atEnd() const
-{
-    return atEndImpl();
 }
 
 
@@ -166,43 +84,34 @@ bool SequentialIterator::atEnd() const
 //
 //---------------------------------------------------------------------------
 
-RandomIterator::RandomIterator(const Stage& stage)
-    : Iterator(stage)
+ReaderRandomIterator::ReaderRandomIterator(const Reader& reader)
+    : StageRandomIterator(reader)
 {
     return;
 }
 
 
-RandomIterator::~RandomIterator()
+ReaderRandomIterator::~ReaderRandomIterator()
 {
     return;
 }
 
-
-boost::uint64_t RandomIterator::seek(boost::uint64_t position)
-{
-    const boost::uint64_t newPos = seekImpl(position);
-
-    m_index = newPos;
-
-    return newPos;
-}
 
 
 //---------------------------------------------------------------------------
 //
-// BlockIterator
+// ReaderBlockIterator
 //
 //---------------------------------------------------------------------------
 
-BlockIterator::BlockIterator(const Stage& stage)
-    : Iterator(stage)
+ReaderBlockIterator::ReaderBlockIterator(const Reader& reader)
+    : StageBlockIterator(reader)
 {
     return;
 }
 
 
-BlockIterator::~BlockIterator()
+ReaderBlockIterator::~ReaderBlockIterator()
 {
     return;
 }

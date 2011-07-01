@@ -31,18 +31,22 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/DimensionLayout.hpp
   ${PDAL_HEADERS_DIR}/Filter.hpp
   ${PDAL_HEADERS_DIR}/FilterIterator.hpp
-  ${PDAL_HEADERS_DIR}/Iterator.hpp
   ${PDAL_HEADERS_DIR}/MetadataRecord.hpp
+  ${PDAL_HEADERS_DIR}/MultiFilter.hpp
+  ${PDAL_HEADERS_DIR}/MultiFilterIterator.hpp
   ${PDAL_HEADERS_DIR}/Options.hpp
   ${PDAL_HEADERS_DIR}/PipelineManager.hpp
   ${PDAL_HEADERS_DIR}/PointBuffer.hpp  
-  ${PDAL_HEADERS_DIR}/PointBufferCache.hpp  
+  ${PDAL_HEADERS_DIR}/PointBufferCache.hpp
   ${PDAL_HEADERS_DIR}/Range.hpp
+  ${PDAL_HEADERS_DIR}/Reader.hpp
+  ${PDAL_HEADERS_DIR}/ReaderIterator.hpp
   ${PDAL_HEADERS_DIR}/Schema.hpp
   ${PDAL_HEADERS_DIR}/SchemaLayout.hpp
   ${PDAL_HEADERS_DIR}/Signaller.hpp
   ${PDAL_HEADERS_DIR}/SpatialReference.hpp
   ${PDAL_HEADERS_DIR}/Stage.hpp
+  ${PDAL_HEADERS_DIR}/StageIterator.hpp
   ${PDAL_HEADERS_DIR}/Utils.hpp
   ${PDAL_HEADERS_DIR}/Vector.hpp  
   ${PDAL_HEADERS_DIR}/Writer.hpp
@@ -60,18 +64,22 @@ set(PDAL_BASE_CPP
   DimensionLayout.cpp
   Filter.cpp
   FilterIterator.cpp
-  Iterator.cpp
   MetadataRecord.cpp
+  MultiFilter.cpp
+  MultiFilterIterator.cpp
   Options.cpp
   PipelineManager.cpp
   PointBuffer.cpp
   PointBufferCache.cpp
   Range.cpp
+  Reader.cpp
+  ReaderIterator.cpp
   Schema.cpp
   SchemaLayout.cpp
   Signaller.cpp
   SpatialReference.cpp
   Stage.cpp
+  StageIterator.cpp
   Utils.cpp
   Vector.cpp  
   Writer.cpp

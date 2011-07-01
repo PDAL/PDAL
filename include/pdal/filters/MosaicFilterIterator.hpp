@@ -47,7 +47,7 @@ namespace pdal { namespace filters {
 
 class MosaicFilter;
 
-class MosaicFilterSequentialIterator : public pdal::SequentialIterator
+class MosaicFilterSequentialIterator : public pdal::StageSequentialIterator
 {
 public:
     MosaicFilterSequentialIterator(const MosaicFilter& filter);
@@ -58,10 +58,10 @@ private:
     boost::uint32_t readImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const std::vector<SequentialIterator*>& getPrevIterators() const;
+    const std::vector<StageSequentialIterator*>& getPrevIterators() const;
 
     const MosaicFilter& m_filter;
-    std::vector<SequentialIterator*> m_prevIterators;
+    std::vector<StageSequentialIterator*> m_prevIterators;
 };
 
 

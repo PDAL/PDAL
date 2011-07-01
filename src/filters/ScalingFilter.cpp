@@ -286,7 +286,7 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
 }
 
 
-pdal::SequentialIterator* ScalingFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* ScalingFilter::createSequentialIterator() const
 {
     return new ScalingFilterSequentialIterator(*this);
 }

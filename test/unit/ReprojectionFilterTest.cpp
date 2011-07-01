@@ -38,7 +38,7 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/ReprojectionFilter.hpp>
 #include <pdal/filters/ScalingFilter.hpp>
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>

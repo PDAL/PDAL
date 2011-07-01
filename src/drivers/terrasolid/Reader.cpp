@@ -87,7 +87,7 @@ PointIndexes::PointIndexes(const Schema& schema, TERRASOLID_Format_Type format)
 
 
 Reader::Reader(Options& options)
-    : pdal::Stage()
+    : pdal::Reader()
     , m_options(options)
     , m_format(TERRASOLID_Format_Unknown)
     , m_haveColor(false)
@@ -466,13 +466,13 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     return numPoints;
 }
 
-pdal::SequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
     return new pdal::drivers::terrasolid::SequentialIterator(*this);
 }
 
 
-pdal::RandomIterator* Reader::createRandomIterator() const
+pdal::StageRandomIterator* Reader::createRandomIterator() const
 {
     return new pdal::drivers::terrasolid::RandomIterator(*this);
 }

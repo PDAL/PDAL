@@ -39,8 +39,8 @@
 
 #include <vector>
 
-#include <pdal/Filter.hpp>
-//#include <pdal/FilterIterator.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/StageIterator.hpp>
 //#include <pdal/Bounds.hpp>
 
 
@@ -68,8 +68,8 @@ public:
         return false;
     }
     
-    pdal::SequentialIterator* createSequentialIterator() const;
-    pdal::RandomIterator* createRandomIterator() const { return NULL; }
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
 private:
     std::vector<const Stage*> m_prevStages;
