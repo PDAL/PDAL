@@ -462,7 +462,7 @@ void Writer::CreateSDOEntry()
         e.setMinimum(1,-90.0); e.setMaximum(1,90.0);
         e.setMinimum(2,0.0); e.setMaximum(2,20000.0);
 
-        tolerance = 0.000000005;
+        tolerance = 0.0005;
     }
 
  
@@ -843,6 +843,10 @@ oss << "declare\n"
         schema_data = ReadFile(point_schema_override);
     } else {
         schema_data = pdal::Schema::to_xml(m_stage.getSchema());
+        std::cout << m_stage.getSchema() << std::endl;
+        std::ostream* output= Utils::createFile("oracle-write-schema.xml",true);
+        *output << schema_data <<std::endl;
+        Utils::closeFile(output);
     }
 
     char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
