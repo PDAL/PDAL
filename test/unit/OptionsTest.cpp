@@ -54,12 +54,12 @@ BOOST_AUTO_TEST_CASE(test_option)
     std::ostringstream ostr_s;
     const std::string ref_s = xml_header + xml_str_ref;
 
-    const pdal::OptionNew<int> option_i("my_int", 17, "This is my integral option.");
+    const pdal::Option<int> option_i("my_int", 17, "This is my integral option.");
     BOOST_CHECK(option_i.getName() == "my_int");
     BOOST_CHECK(option_i.getDescription() == "This is my integral option.");
     BOOST_CHECK(option_i.getValue() == 17);
 
-    const pdal::OptionNew<std::string> option_s("my_string", "Yow.", "This is my stringy option.");
+    const pdal::Option<std::string> option_s("my_string", "Yow.", "This is my stringy option.");
     BOOST_CHECK(option_s.getName() == "my_string");
     BOOST_CHECK(option_s.getDescription() == "This is my stringy option.");
     BOOST_CHECK(option_s.getValue() == "Yow.");
@@ -79,9 +79,9 @@ BOOST_AUTO_TEST_CASE(test_option)
 
 BOOST_AUTO_TEST_CASE(test_options)
 {
-    pdal::OptionsNew opts;
+    pdal::Options opts;
 
-    const pdal::OptionNew<int> option_i("my_int", 17, "This is my integral option.");
+    const pdal::Option<int> option_i("my_int", 17, "This is my integral option.");
     opts.add(option_i);
 
     opts.add("my_string", "Yow.", "This is my stringy option.");

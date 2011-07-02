@@ -53,7 +53,7 @@ class PDAL_DLL Reader : public pdal::Stage
 {
 
 public:
-    Reader(Options& options);
+    Reader(OptionsOld& options);
     ~Reader();
     
     const std::string& getDescription() const;
@@ -71,7 +71,7 @@ public:
     
     Connection getConnection () const { return m_connection;}
     Statement getStatement () const { return m_statement;}
-    Options& getOptions() const { return m_options; }
+    OptionsOld& getOptionsOld() const { return m_optionsOld; }
     CloudPtr getCloud() const;
     std::string getQuery() const;
     bool isVerbose() const;
@@ -90,7 +90,7 @@ private:
     BlockPtr defineBlock() const;
     Schema fetchSchema(sdo_pc* pc);
 
-    Options& m_options;
+    OptionsOld& m_optionsOld;
     Connection m_connection;
     Statement m_statement;
     QueryType m_querytype;

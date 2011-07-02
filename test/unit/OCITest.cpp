@@ -65,9 +65,9 @@ bool ShouldRunTest()
     return TestConfig::g_oracle_connection.size() > 0;
 }
 
-Options GetOptions()
+OptionsOld GetOptions()
 {
-    Options options;
+    OptionsOld options;
     boost::property_tree::ptree& tree = options.GetPTree();
 
     tree.put("capacity", 333);

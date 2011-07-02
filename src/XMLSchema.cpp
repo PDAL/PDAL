@@ -613,7 +613,7 @@ Dimension::DataType Reader::GetDimensionType(std::string const& interpretation)
     return Dimension::Undefined;
 }
 
-Dimension::Field Reader::GetDimensionField(std::string const& name, boost::uint32_t position)
+Dimension::Field Reader::GetDimensionField(std::string const& name, boost::uint32_t /*position*/)
 {
     if (!compare_no_case(name.c_str(), "X"))
         return Dimension::Field_X;

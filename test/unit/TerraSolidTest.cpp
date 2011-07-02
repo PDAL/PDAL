@@ -89,7 +89,7 @@ void Check_Point(const pdal::PointBuffer& data, const ::pdal::Schema& schema,
 
 BOOST_AUTO_TEST_CASE(test_10_word)
 {
-    pdal::Options options;
+    pdal::OptionsOld options;
     // std::string filename = Support::datapath("20050903_231839.qi");
 
     std::string filename = Support::datapath("terrasolid/20020715-time-color.bin");

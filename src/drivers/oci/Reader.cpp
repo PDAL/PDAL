@@ -45,15 +45,15 @@
 namespace pdal { namespace drivers { namespace oci {
 
 
-Reader::Reader(Options& options)
+Reader::Reader(OptionsOld& optionsOld)
     : pdal::Stage()
-    , m_options(options)
+    , m_optionsOld(optionsOld)
     , m_querytype(QUERY_UNKNOWN)
 {
 
     Debug();
     
-    m_connection = Connect(m_options);
+    m_connection = Connect(m_optionsOld);
 
 
     if (getQuery().size() == 0 )
@@ -106,17 +106,17 @@ Reader::Reader(Options& options)
 
 bool Reader::isVerbose() const
 {
-    return m_options.GetPTree().get<bool>("verbose");
+    return m_optionsOld.GetPTree().get<bool>("verbose");
 }
 
 bool Reader::isDebug() const
 {
-    return m_options.GetPTree().get<bool>("debug");
+    return m_optionsOld.GetPTree().get<bool>("debug");
 }
 
 std::string Reader::getQuery() const
 {
-    return m_options.GetPTree().get<std::string>("select_sql");
+    return m_optionsOld.GetPTree().get<std::string>("select_sql");
 }
 
 void Reader::Debug()
@@ -152,7 +152,7 @@ void Reader::registerFields()
     Dimension y(Dimension::Field_Y, Dimension::Int32);
     Dimension z(Dimension::Field_Z, Dimension::Int32);
     
-    boost::property_tree::ptree tree = m_options.GetPTree();
+    boost::property_tree::ptree tree = m_optionsOld.GetPTree();
     double scalex = tree.get<double>("scale.x");
     double scaley = tree.get<double>("scale.y");
     double scalez = tree.get<double>("scale.z");
@@ -534,7 +534,7 @@ pdal::Schema Reader::fetchSchema(sdo_pc* pc)
         throw pdal_error(oss.str());
     }
     
-    m_options.GetPTree().put("capacity", block_capacity);
+    m_optionsOld.GetPTree().put("capacity", block_capacity);
     
     std::string pc_schema_xml(pc_schema);
     CPLFree(pc_schema);

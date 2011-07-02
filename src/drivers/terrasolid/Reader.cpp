@@ -86,9 +86,9 @@ PointIndexes::PointIndexes(const Schema& schema, TERRASOLID_Format_Type format)
 
 
 
-Reader::Reader(Options& options)
+Reader::Reader(OptionsOld& optionsOld)
     : pdal::Reader()
-    , m_options(options)
+    , m_optionsOld(optionsOld)
     , m_format(TERRASOLID_Format_Unknown)
     , m_haveColor(false)
     , m_haveTime(false)
@@ -147,7 +147,7 @@ std::string Reader::getFileName() const
 {
     try
     {
-        return m_options.GetPTree().get<std::string>("input");
+        return m_optionsOld.GetPTree().get<std::string>("input");
         
     } catch (boost::property_tree::ptree_bad_path const&)
     {
