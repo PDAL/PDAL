@@ -57,8 +57,10 @@ class StageBlockIterator;
 class PDAL_DLL Stage
 {
 public:
-    Stage();
+    Stage(const Options& options);
     virtual ~Stage();
+
+    const Options& getOptions() const;
 
     // Implement this in your concrete classes to return a constant string
     // as the name of the stage.  Use a dotted, XPath-style name for your 
@@ -87,6 +89,8 @@ public:
     void dump() const;
 
 protected:
+    Options& getOptions();
+
     // setters for the core properties
     Schema& getSchemaRef();
     void setSchema(const Schema&);
@@ -102,6 +106,8 @@ protected:
     void setCoreProperties(const Stage&);
 
 private:
+    Options m_options;
+
     Schema m_schema;
     boost::uint64_t m_numPoints;
     PointCountType m_pointCountType;

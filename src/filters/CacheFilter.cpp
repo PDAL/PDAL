@@ -42,7 +42,7 @@ namespace pdal { namespace filters {
 
 // cache block size is measured in Points, not bytes
 CacheFilter::CacheFilter(const Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
-    : Filter(prevStage)
+    : Filter(prevStage, Options::none())
     , m_numPointsRequested(0)
     , m_numPointsRead(0)
     , m_cache(NULL)

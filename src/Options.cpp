@@ -62,6 +62,13 @@ Options::Options()
 }    
 
 
+static Options s_noOptions;
+const Options& Options::none()
+{
+    return s_noOptions;
+}
+
+
 boost::property_tree::ptree Options::getOptionPTree(std::string const& name) const
 {
     using boost::property_tree::ptree;

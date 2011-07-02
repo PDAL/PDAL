@@ -38,7 +38,7 @@
 
 #include <pdal/drivers/oci/Reader.hpp>
 #include <pdal/drivers/oci/Writer.hpp>
-#include <pdal/drivers/oci/Common.hpp>
+#include <pdal/drivers/oci/common.hpp>
 
 #include <pdal/drivers/liblas/Reader.hpp>
 

@@ -93,7 +93,7 @@ public:
         t.put("value", getValue());
         return t;
     }
-         
+    
 private:
     std::string m_name;
     std::string m_description;
@@ -149,6 +149,9 @@ public:
     
     boost::property_tree::ptree const& getPTree() const;
    
+    // return the empty options list
+    static const Options& none();
+
 private:
     boost::property_tree::ptree getOptionPTree(std::string const& name) const;
 

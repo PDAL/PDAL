@@ -45,7 +45,7 @@
 namespace pdal { namespace drivers { namespace liblas {
 
 LiblasReader::LiblasReader(const std::string& filename)
-    : LasReaderBase()
+    : LasReaderBase(Options::none())
     , m_filename(filename)
     , m_versionMajor(0)
     , m_versionMinor(0)

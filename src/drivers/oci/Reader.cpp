@@ -46,7 +46,7 @@ namespace pdal { namespace drivers { namespace oci {
 
 
 Reader::Reader(OptionsOld& optionsOld)
-    : pdal::Stage()
+    : pdal::Stage(Options::none())
     , m_optionsOld(optionsOld)
     , m_querytype(QUERY_UNKNOWN)
 {

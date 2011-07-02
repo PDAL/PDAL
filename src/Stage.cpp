@@ -44,8 +44,9 @@
 namespace pdal
 {
 
-Stage::Stage()
-    : m_numPoints(0)
+Stage::Stage(const Options& options)
+    : m_options(options)
+    , m_numPoints(0)
     , m_pointCountType(PointCount_Fixed)
 {
     return;
@@ -56,6 +57,19 @@ Stage::~Stage()
 {
     return;
 }
+
+
+const Options& Stage::getOptions() const
+{
+    return m_options;
+}
+
+
+Options& Stage::getOptions()
+{
+    return m_options;
+}
+
 
 const Bounds<double>& Stage::getBounds() const
 {

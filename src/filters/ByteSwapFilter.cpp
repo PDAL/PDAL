@@ -48,7 +48,7 @@ namespace pdal { namespace filters {
 
 
 ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
-    : Filter(prevStage)
+    : Filter(prevStage, Options::none())
 {
 
     this->setNumPoints(prevStage.getNumPoints());

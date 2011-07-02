@@ -41,7 +41,7 @@ namespace pdal { namespace filters {
 
 
 DecimationFilter::DecimationFilter(const Stage& prevStage, boost::uint32_t step)
-    : Filter(prevStage)
+    : Filter(prevStage, Options::none())
     , m_step(step)
 {
     this->setNumPoints( this->getNumPoints() / step );

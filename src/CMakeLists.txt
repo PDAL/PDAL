@@ -191,7 +191,7 @@ set(PDAL_DRIVERS_OCI_HPP
   ${PDAL_ORACLE_HEADERS}/Reader.hpp
   ${PDAL_ORACLE_HEADERS}/Iterator.hpp
   ${PDAL_ORACLE_HEADERS}/oci_wrapper.h
-  ${PDAL_ORACLE_HEADERS}/Common.hpp
+  ${PDAL_ORACLE_HEADERS}/common.hpp
 )
 
 set (PDAL_DRIVERS_OCI_CPP 

@@ -85,7 +85,7 @@ namespace pdal { namespace filters {
 ReprojectionFilter::ReprojectionFilter(const Stage& prevStage,
                                        const SpatialReference& inSRS,
                                        const SpatialReference& outSRS)
-    : Filter(prevStage)
+    : Filter(prevStage, Options::none())
     , m_inSRS(inSRS)
     , m_outSRS(outSRS)
 {

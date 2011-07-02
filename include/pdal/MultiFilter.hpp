@@ -47,7 +47,7 @@ class PDAL_DLL MultiFilter : public Stage
 public:
     // entries may not be null
     // vector.size() must be > 0
-    MultiFilter(std::vector<const Stage*> prevStages);
+    MultiFilter(std::vector<const Stage*> prevStages, const Options& options);
 
     const std::vector<const Stage*>& getPrevStages() const;
 

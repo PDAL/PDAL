@@ -53,7 +53,7 @@ namespace pdal { namespace drivers { namespace liblas {
 
 
 LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
-    : Writer(prevStage)
+    : Writer(prevStage, Options::none())
     , m_ostream(ostream)
     , m_externalWriter(NULL)
 {

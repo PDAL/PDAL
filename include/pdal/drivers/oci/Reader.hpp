@@ -38,7 +38,7 @@
 #include <pdal/pdal.hpp>
 
 #include <pdal/Stage.hpp>
-#include <pdal/drivers/oci/Common.hpp>
+#include <pdal/drivers/oci/common.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>

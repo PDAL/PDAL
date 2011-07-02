@@ -42,7 +42,7 @@ namespace pdal { namespace filters {
 
 
 CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
-    : Filter(prevStage)
+    : Filter(prevStage, Options::none())
     , m_bounds(bounds)
 {
     this->setBounds(bounds);

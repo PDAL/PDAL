@@ -41,7 +41,7 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/filters/Chipper.hpp>
 
-#include "Common.hpp"
+#include "common.hpp"
 
 namespace pdal { namespace drivers { namespace oci {
 

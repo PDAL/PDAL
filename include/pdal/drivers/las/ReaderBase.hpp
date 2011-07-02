@@ -48,7 +48,7 @@ namespace pdal { namespace drivers { namespace las {
 class PDAL_DLL LasReaderBase: public Reader
 {
 public:
-    LasReaderBase() : Reader() {}
+    LasReaderBase(const Options& options) : Reader(options) {}
 
     virtual int getMetadataRecordCount() const = 0;
     virtual const MetadataRecord& getMetadataRecord(int index) const = 0;

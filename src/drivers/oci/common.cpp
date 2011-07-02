@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 
-#include <pdal/drivers/oci/Common.hpp>
+#include <pdal/drivers/oci/common.hpp>
 
 #include <iostream>
 

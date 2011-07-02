@@ -266,7 +266,7 @@ std::string ReadFile(std::string filename)
 }
 
 Writer::Writer(Stage& prevStage, OptionsOld& optionsOld)
-    : pdal::Writer(prevStage)
+    : pdal::Writer(prevStage, Options::none())
     , m_stage(prevStage)
     , m_optionsOld(optionsOld)
     , m_verbose(false)

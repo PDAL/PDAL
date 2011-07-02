@@ -39,7 +39,7 @@
 
 #include <pdal/StageIterator.hpp>
 
-#include <pdal/drivers/oci/Common.hpp>
+#include <pdal/drivers/oci/common.hpp>
 #include <pdal/drivers/oci/Reader.hpp>
 
 #include <string>

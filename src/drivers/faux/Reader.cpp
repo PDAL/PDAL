@@ -43,7 +43,7 @@
 namespace pdal { namespace drivers { namespace faux {
 
 Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
-    : pdal::Reader()
+    : pdal::Reader(Options::none())
     , m_mode(mode)
 {
     Schema& schema = getSchemaRef();
@@ -62,7 +62,7 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
 }
 
 Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : pdal::Reader()
+    : pdal::Reader( Options::none())
     , m_mode(mode)
 {
     Schema& schema = getSchemaRef();

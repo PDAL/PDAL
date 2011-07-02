@@ -44,7 +44,7 @@
 namespace pdal { namespace filters {
 
 ColorFilter::ColorFilter(const Stage& prevStage)
-    : Filter(prevStage)
+    : Filter(prevStage, Options::none())
 {
     checkImpedance();
 
