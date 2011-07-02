@@ -10,6 +10,13 @@ set UTILS_DIR=c:\Utils
 set DEV_DIR=c:\dev
 set OSGEO4W_DIR=C:\OSGeo4W
 
+rem *** These packages are needed from OSGeo4W
+rem ***  gdal
+rem ***  libxml2
+rem ***  iconv  (might be pulled in automatically by libxml2?)
+rem ***  oci
+
+
 set BOOST_DIR=%UTILS_DIR%\boost_pro_1_46_1
 set FREEGLUT_DIR=%DEV_DIR%\freeglut-2.6.0-3.mp
 set GDAL_DIR=%DEV_DIR%\gdal
@@ -18,7 +25,6 @@ set ICONV_DIR=%UTILS_DIR%\iconv-1.9.2.win32
 set LASZIP_DIR=%DEV_DIR%\laszip
 set LIBLAS_DIR=%DEV_DIR%\liblas
 set LIBXML2_DIR=%UTILS_DIR%\libxml2-2.7.7.win32
-set ORACLE_HOME=%OSGEO4W_DIR%
 set PDAL_DIR=%DEV_DIR%\pdal
 
 cmake -G %COMPILER% ^
@@ -41,8 +47,8 @@ cmake -G %COMPILER% ^
     -DGEOTIFF_LIBRARY=%OSGEO4W_DIR%\lib\geotiff_i.lib ^
     -DGDAL_INCLUDE_DIR=%OSGEO4W_DIR%\include ^
     -DGDAL_LIBRARY=%OSGEO4W_DIR%\lib\gdal_i.lib ^
-    -DORACLE_INCLUDE_DIR=%ORACLE_HOME%\include ^
-    -DORACLE_OCI_LIBRARY=%ORACLE_HOME%\lib\oci.lib ^
+    -DORACLE_INCLUDE_DIR=%OSGEO4W_DIR%\include ^
+    -DORACLE_OCI_LIBRARY=%OSGEO4W_DIR%\lib\oci.lib ^
     -DLASZIP_INCLUDE_DIR=%LASZIP_DIR%\include ^
     -DLASZIP_LIBRARY=%LASZIP_DIR%\bin\Debug\Debug\laszip.lib ^
     -DLIBLAS_INCLUDE_DIR=%LIBLAS_DIR%\include ^
