@@ -48,10 +48,47 @@
 
 #include <pdal/Dimension.hpp>
 
+// boost
+#include <boost/cstdint.hpp>
+#include <boost/any.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/foreach.hpp>
+#include <boost/array.hpp>
+#include <boost/optional.hpp>
+
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/member.hpp>
+#include <boost/multi_index/ordered_index.hpp>
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/sequenced_index.hpp>
+#include <boost/multi_index/mem_fun.hpp>
+#include <boost/multi_index/random_access_index.hpp>
+
 
 namespace pdal
 {
 
+namespace schema {
+namespace index {
+    
+struct name{};
+struct position{};
+struct index{};
+
+typedef boost::multi_index::multi_index_container<
+  Dimension,
+  boost::multi_index::indexed_by<
+    // sort by Dimension::operator<
+    // boost::multi_index::ordered_unique<boost::multi_index::tag<position>, boost::multi_index::identity<Dimension> >,
+    
+    // Random access
+    boost::multi_index::random_access<boost::multi_index::tag<index> >
+    // sort by less<string> on GetName
+    // boost::multi_index::hashed_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::GetName> >
+      >
+> IndexMap;
+
+}} // pdal::schema::index
 
 /// Schema definition
 class PDAL_DLL Schema
