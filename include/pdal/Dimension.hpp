@@ -247,12 +247,7 @@ public:
     template<class T>
     double applyScaling(T v) const
     {
-        if ( !Utils::compare_approx(m_numericScale, 0.0, (std::numeric_limits<double>::min)()))
-            return (double)v * m_numericScale + m_numericOffset;
-        else 
-        {
-            return v;
-        }
+        return static_cast<double(v) * m_numericScale + m_numericOffset;
     }
 
     template<class T>
@@ -273,8 +268,6 @@ public:
         m_precise = v;
     }
 
-    /// The scaling value for this dimension as a double.  This should
-    /// be positive or negative powers of ten.
     inline EndianType getEndianness() const
     {
         return m_endian;
