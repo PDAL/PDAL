@@ -48,11 +48,12 @@ const boost::uint32_t Writer::s_defaultChunkSize = 1024 * 32;
 
 
 Writer::Writer(Stage& prevStage, const Options& options)
-    : m_options(options)
-    , m_actualNumPointsWritten(0)
+    : m_actualNumPointsWritten(0)
     , m_targetNumPointsToWrite(0)
+    , m_options(options)
     , m_prevStage(prevStage)
     , m_chunkSize(s_defaultChunkSize)
+
 {
     return;
 }
