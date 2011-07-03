@@ -37,9 +37,34 @@
 namespace pdal
 {
 
+
 PipelineManager::PipelineManager()
 {
 }
 
+/*
+
+    boost::uint32_t PipelineManager::addReader(const std::string& type, const OptionsNew&);
+    boost::uint32_t PipelineManager::addFilter(const std::string& type, boost::uint32_t prevStage, const OptionsNew&);
+    boost::uint32_t PipelineManager::addFilter(const std::string& type, const std::vector<boost::uint32_t>& prevStages, const OptionsNew&);
+    boost::uint32_t PipelineManager::addWriter(const std::string& type, boost::uint32_t prevStage, const OptionsNew&);
+    
+    Stage* PipelineManager::getStage(boost::uint32_t);
+    Filter* PipelineManager::getFilter(boost::uint32_t);
+    Writer* PipelineManager::getWriter(boost::uint32_t);
+
+    typedef Stage* PipelineManager::readerCreatorFunction(const OptionsNew&);
+    typedef Filter* PipelineManager::filter1CreatorFunction(boost::uint32_t prevStage, const OptionsNew&);
+    typedef Filter* PipelineManager::filterNCreatorFunction(const std::vector<boost::uint32_t>& prevStage, const OptionsNew&);
+    typedef Writer* PipelineManager::writerCreatorFunction(boost::uint32_t prevStage, const OptionsNew&);
+    void PipelineManager::registerReader(const std::string& type, readerCreatorFunction);
+    void PipelineManager::registerFilter(const std::string& type, filter1CreatorFunction);
+    void PipelineManager::registerFilter(const std::string& type, filterNCreatorFunction);
+    void PipelineManager::registerWriter(const std::string& type, writCreatorFunction);
+
+    void PipelineManager::registerKnownReaders();
+    void PipelineManager::registerKnownFilters();
+    void PipelineManager::registerKnownWriters();
+    */
 
 } // namespace pdal

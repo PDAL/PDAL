@@ -42,7 +42,7 @@ namespace pdal { namespace filters {
 
 
 MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
-    : Stage()
+    : MultiFilter(prevStages, Options::none())
 {
     if (prevStages.size() == 0)
     {
@@ -104,13 +104,8 @@ const std::string& MosaicFilter::getName() const
     return name;
 }
 
-const std::vector<const Stage*>& MosaicFilter::getPrevStages() const
-{
-    return m_prevStages;
-}
 
-
-pdal::SequentialIterator* MosaicFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* MosaicFilter::createSequentialIterator() const
 {
     return new MosaicFilterSequentialIterator(*this);
 }

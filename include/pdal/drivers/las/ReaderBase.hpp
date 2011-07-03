@@ -37,7 +37,7 @@
 
 #include <pdal/pdal.hpp>
 
-#include <pdal/Stage.hpp>
+#include <pdal/Reader.hpp>
 
 
 namespace pdal { namespace drivers { namespace las {
@@ -45,10 +45,10 @@ namespace pdal { namespace drivers { namespace las {
 
 // this class gives the interfaces for the LAS-specific header data access functions -- we use
 // this to make sure that the native las and liblas readers both have the same API
-class PDAL_DLL LasReaderBase: public Stage
+class PDAL_DLL LasReaderBase: public Reader
 {
 public:
-    LasReaderBase() : Stage() {}
+    LasReaderBase(const Options& options) : Reader(options) {}
 
     virtual int getMetadataRecordCount() const = 0;
     virtual const MetadataRecord& getMetadataRecord(int index) const = 0;

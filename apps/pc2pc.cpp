@@ -148,7 +148,7 @@ int Application_pc2pc::execute()
         
         boost::property_tree::ptree oracle_options = load_tree.get_child("pdal.drivers.oci.writer");
     
-        pdal::Options options(oracle_options);
+        pdal::OptionsOld options(oracle_options);
         
         boost::property_tree::ptree in_srs_options = oracle_options.get_child("spatialreference");
         std::string out_wkt = in_srs_options.get<std::string>("userinput");
@@ -219,7 +219,7 @@ int Application_pc2pc::execute()
         bool compress = las_options.get<bool>("compress");
         
         std::string out_wkt = srs_options.get<std::string>("userinput");
-        pdal::Options options(oracle_options);
+        pdal::OptionsOld options(oracle_options);
         
         if (out_wkt.size() != 0) 
         {

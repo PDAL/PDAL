@@ -49,7 +49,7 @@ namespace pdal { namespace drivers { namespace las {
 
 
 LasReader::LasReader(const std::string& filename)
-    : LasReaderBase()
+    : LasReaderBase(Options::none())
     , m_filename(filename)
 {
     std::istream* str = Utils::openFile(m_filename);
@@ -146,13 +146,13 @@ bool LasReader::isCompressed() const
 }
 
 
-pdal::SequentialIterator* LasReader::createSequentialIterator() const
+pdal::StageSequentialIterator* LasReader::createSequentialIterator() const
 {
     return new SequentialIterator(*this);
 }
 
 
-pdal::RandomIterator* LasReader::createRandomIterator() const
+pdal::StageRandomIterator* LasReader::createRandomIterator() const
 {
     return new RandomIterator(*this);
 }

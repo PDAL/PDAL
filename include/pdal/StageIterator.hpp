@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_ITERATOR_HPP
-#define INCLUDED_ITERATOR_HPP
+#ifndef INCLUDED_STAGEITERATOR_HPP
+#define INCLUDED_STAGEITERATOR_HPP
 
 #include <pdal/pdal.hpp>
 
@@ -44,11 +44,11 @@ class PointBuffer;
 
 
 
-class PDAL_DLL Iterator
+class PDAL_DLL StageIterator
 {
 public:
-    Iterator(const Stage& stage);
-    virtual ~Iterator();
+    StageIterator(const Stage& stage);
+    virtual ~StageIterator();
 
     const Stage& getStage() const;
 
@@ -89,16 +89,16 @@ private:
     const Stage& m_stage;
     boost::uint32_t m_chunkSize;
 
-    Iterator& operator=(const Iterator&); // not implemented
-    Iterator(const Iterator&); // not implemented
+    StageIterator& operator=(const StageIterator&); // not implemented
+    StageIterator(const StageIterator&); // not implemented
 };
 
 
-class PDAL_DLL SequentialIterator : public Iterator
+class PDAL_DLL StageSequentialIterator : public StageIterator
 {
 public:
-    SequentialIterator(const Stage& stage);
-    virtual ~SequentialIterator();
+    StageSequentialIterator(const Stage& stage);
+    virtual ~StageSequentialIterator();
 
     // advance N points ahead in the file
     //
@@ -122,11 +122,11 @@ protected:
 };
 
 
-class PDAL_DLL RandomIterator : public Iterator
+class PDAL_DLL StageRandomIterator : public StageIterator
 {
 public:
-    RandomIterator(const Stage& stage);
-    virtual ~RandomIterator();
+    StageRandomIterator(const Stage& stage);
+    virtual ~StageRandomIterator();
 
     // seek to point N (an absolute value)
     //
@@ -143,14 +143,14 @@ protected:
     virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
 };
 
-class PDAL_DLL BlockIterator : public Iterator
+class PDAL_DLL StageBlockIterator : public StageIterator
 {
 public:
-    BlockIterator(const Stage& stage);
-    virtual ~BlockIterator();
+    StageBlockIterator(const Stage& stage);
+    virtual ~StageBlockIterator();
 
 protected:
-    // from Iterator
+    // from StageIterator
     virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
 
 };

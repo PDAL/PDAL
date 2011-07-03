@@ -40,7 +40,7 @@ namespace pdal
 
 
 FilterSequentialIterator::FilterSequentialIterator(const Filter& filter)
-    : SequentialIterator(filter)
+    : StageSequentialIterator(filter)
     , m_filter(filter)
     , m_prevIterator(NULL)
 {
@@ -56,13 +56,13 @@ FilterSequentialIterator::~FilterSequentialIterator()
 }
 
 
-SequentialIterator& FilterSequentialIterator::getPrevIterator()
+StageSequentialIterator& FilterSequentialIterator::getPrevIterator()
 {
     return *m_prevIterator;
 }
 
 
-const SequentialIterator& FilterSequentialIterator::getPrevIterator() const
+const StageSequentialIterator& FilterSequentialIterator::getPrevIterator() const
 {
     return *m_prevIterator;
 }
@@ -70,7 +70,7 @@ const SequentialIterator& FilterSequentialIterator::getPrevIterator() const
 
 
 FilterRandomIterator::FilterRandomIterator(const Filter& filter)
-    : RandomIterator(filter)
+    : StageRandomIterator(filter)
     , m_filter(filter)
     , m_prevIterator(NULL)
 {
@@ -86,19 +86,19 @@ FilterRandomIterator::~FilterRandomIterator()
 }
 
 
-RandomIterator& FilterRandomIterator::getPrevIterator()
+StageRandomIterator& FilterRandomIterator::getPrevIterator()
 {
     return *m_prevIterator;
 }
 
 
-const RandomIterator& FilterRandomIterator::getPrevIterator() const
+const StageRandomIterator& FilterRandomIterator::getPrevIterator() const
 {
     return *m_prevIterator;
 }
 
 FilterBlockIterator::FilterBlockIterator(const Filter& filter)
-    : BlockIterator(filter)
+    : StageBlockIterator(filter)
     , m_filter(filter)
     , m_prevIterator(NULL)
 {
@@ -114,13 +114,13 @@ FilterBlockIterator::~FilterBlockIterator()
 }
 
 
-BlockIterator& FilterBlockIterator::getPrevIterator()
+StageBlockIterator& FilterBlockIterator::getPrevIterator()
 {
     return *m_prevIterator;
 }
 
 
-const BlockIterator& FilterBlockIterator::getPrevIterator() const
+const StageBlockIterator& FilterBlockIterator::getPrevIterator() const
 {
     return *m_prevIterator;
 }

@@ -41,7 +41,7 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/filters/Chipper.hpp>
 
-#include "Common.hpp"
+#include "common.hpp"
 
 namespace pdal { namespace drivers { namespace oci {
 
@@ -51,7 +51,7 @@ class PDAL_DLL Writer : public pdal::Writer
 {
     
 public:
-    Writer(Stage& prevStage, Options& options);
+    Writer(Stage& prevStage, OptionsOld& options);
     ~Writer();
     
     const std::string& getDescription() const;
@@ -113,7 +113,7 @@ private:
     
     Stage& m_stage;
     
-    Options& m_options;
+    OptionsOld& m_optionsOld;
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
     bool m_verbose;

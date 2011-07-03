@@ -36,7 +36,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <pdal/Writer.hpp>
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/exceptions.hpp>
@@ -47,8 +47,9 @@ namespace pdal
 const boost::uint32_t Writer::s_defaultChunkSize = 1024 * 32;
 
 
-Writer::Writer(Stage& prevStage)
-    : m_actualNumPointsWritten(0)
+Writer::Writer(Stage& prevStage, const Options& options)
+    : m_options(options)
+    , m_actualNumPointsWritten(0)
     , m_targetNumPointsToWrite(0)
     , m_prevStage(prevStage)
     , m_chunkSize(s_defaultChunkSize)
@@ -93,7 +94,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
         }
     }
     
-    boost::scoped_ptr<SequentialIterator> iter(m_prevStage.createSequentialIterator());
+    boost::scoped_ptr<StageSequentialIterator> iter(m_prevStage.createSequentialIterator());
     
     if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
 

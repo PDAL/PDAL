@@ -85,7 +85,7 @@ namespace pdal { namespace filters {
 ReprojectionFilter::ReprojectionFilter(const Stage& prevStage,
                                        const SpatialReference& inSRS,
                                        const SpatialReference& outSRS)
-    : Filter(prevStage)
+    : Filter(prevStage, Options::none())
     , m_inSRS(inSRS)
     , m_outSRS(outSRS)
 {
@@ -253,7 +253,7 @@ void ReprojectionFilter::processBuffer(PointBuffer& data) const
 }
 
 
-pdal::SequentialIterator* ReprojectionFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* ReprojectionFilter::createSequentialIterator() const
 {
     return new ReprojectionFilterSequentialIterator(*this);
 }

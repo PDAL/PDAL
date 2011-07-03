@@ -32,49 +32,44 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_MOSAICFILTER_HPP
-#define INCLUDED_FILTERS_MOSAICFILTER_HPP
+#ifndef INCLUDED_MULTIFILTERITERATOR_HPP
+#define INCLUDED_MULTIFILTERITERATOR_HPP
 
 #include <pdal/pdal.hpp>
 
 #include <vector>
 
-#include <pdal/MultiFilter.hpp>
 #include <pdal/StageIterator.hpp>
-//#include <pdal/Bounds.hpp>
 
+namespace pdal
+{
+class MultiFilter;
 
-namespace pdal { namespace filters {
-
-
-// this doesn't derive from Stage since it takes more than one stage as input
-class PDAL_DLL MosaicFilter : public MultiFilter
+class MultiFilterSequentialIterator : public StageSequentialIterator
 {
 public:
-    // entries may not be null
-    // vector.size() must be > 0
-    MosaicFilter(std::vector<const Stage*> prevStages);
-    
-    const std::string& getDescription() const;
-    const std::string& getName() const;
+    MultiFilterSequentialIterator(const MultiFilter&);
+    virtual ~MultiFilterSequentialIterator();
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random) return false; // BUG: could be true
+protected:
+    // from StageSequentialIterator
+    virtual boost::uint32_t readImpl(PointBuffer&) = 0;
+    virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
+    virtual bool atEndImpl() const = 0;
 
-        return false;
-    }
-    
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+    StageSequentialIterator& getPrevIterator();
+    const StageSequentialIterator& getPrevIterator() const;
+
+    const std::vector<StageSequentialIterator*>& getPrevIterators() const;
+
+    const MultiFilter& m_filter;
+    std::vector<StageSequentialIterator*> m_prevIterators;
+    StageSequentialIterator* m_prevIterator;
 
 private:
-    MosaicFilter& operator=(const MosaicFilter&); // not implemented
-    MosaicFilter(const MosaicFilter&); // not implemented
 };
 
 
-} } // namespaces
+} // namespace pdal
 
 #endif

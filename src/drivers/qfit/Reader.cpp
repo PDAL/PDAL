@@ -221,9 +221,9 @@ PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 
 
 
-Reader::Reader(Options& options)
-    : pdal::Stage()
-    , m_options(options)
+Reader::Reader(OptionsOld& optionsOld)
+    : pdal::Reader(Options::none())
+    , m_optionsOld(optionsOld)
     , m_format(QFIT_Format_Unknown)
     , m_size(0)
 {
@@ -309,7 +309,7 @@ std::string Reader::getFileName() const
 {
     try
     {
-        return m_options.GetPTree().get<std::string>("input");
+        return m_optionsOld.GetPTree().get<std::string>("input");
         
     } catch (boost::property_tree::ptree_bad_path const&)
     {
@@ -593,13 +593,13 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     return numPoints;
 }
 
-pdal::SequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
     return new pdal::drivers::qfit::SequentialIterator(*this);
 }
 
 
-pdal::RandomIterator* Reader::createRandomIterator() const
+pdal::StageRandomIterator* Reader::createRandomIterator() const
 {
     return new pdal::drivers::qfit::RandomIterator(*this);
 }

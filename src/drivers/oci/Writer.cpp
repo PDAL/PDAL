@@ -265,19 +265,19 @@ std::string ReadFile(std::string filename)
     
 }
 
-Writer::Writer(Stage& prevStage, Options& options)
-    : pdal::Writer(prevStage)
+Writer::Writer(Stage& prevStage, OptionsOld& optionsOld)
+    : pdal::Writer(prevStage, Options::none())
     , m_stage(prevStage)
-    , m_options(options)
+    , m_optionsOld(optionsOld)
     , m_verbose(false)
     , m_doCreateIndex(false)
 {
 
     Debug();
     
-    m_connection = Connect(m_options);
+    m_connection = Connect(m_optionsOld);
     
-    boost::uint32_t capacity = m_options.GetPTree().get<boost::uint32_t>("capacity");
+    boost::uint32_t capacity = m_optionsOld.GetPTree().get<boost::uint32_t>("capacity");
     setChunkSize(capacity);
     return;
 }
@@ -323,9 +323,9 @@ void Writer::WipeBlockTable()
 {
     std::ostringstream oss;
     
-    std::string block_table_name = m_options.GetPTree().get<std::string>("block_table_name");
-    std::string base_table_name = m_options.GetPTree().get<std::string>("base_table_name");
-    std::string cloud_column_name = m_options.GetPTree().get<std::string>("cloud_column_name");
+    std::string block_table_name = m_optionsOld.GetPTree().get<std::string>("block_table_name");
+    std::string base_table_name = m_optionsOld.GetPTree().get<std::string>("base_table_name");
+    std::string cloud_column_name = m_optionsOld.GetPTree().get<std::string>("cloud_column_name");
     
     oss << "DELETE FROM " << block_table_name;
     try {
@@ -379,29 +379,29 @@ void Writer::WipeBlockTable()
 
 bool Writer::isVerbose() const
 {
-    return m_options.GetPTree().get<bool>("verbose");
+    return m_optionsOld.GetPTree().get<bool>("verbose");
 }
 
 bool Writer::isDebug() const
 {
-    return m_options.GetPTree().get<bool>("debug");
+    return m_optionsOld.GetPTree().get<bool>("debug");
 }
 
 bool Writer::is3d() const
 {
-    return m_options.GetPTree().get<bool>("is3d");
+    return m_optionsOld.GetPTree().get<bool>("is3d");
 }
 
 bool Writer::isSolid() const
 {
-    return m_options.GetPTree().get<bool>("solid");
+    return m_optionsOld.GetPTree().get<bool>("solid");
 }
 
 
 void Writer::CreateBlockIndex()
 {
     std::ostringstream oss;
-    std::string block_table_name = m_options.GetPTree().get<std::string>("block_table_name");
+    std::string block_table_name = m_optionsOld.GetPTree().get<std::string>("block_table_name");
     
     bool bUse3d = is3d();
     oss << "CREATE INDEX "<< block_table_name << "_cloud_idx on "
@@ -425,7 +425,7 @@ void Writer::CreateBlockIndex()
 
 void Writer::CreateSDOEntry()
 {
-    boost::property_tree::ptree  tree = m_options.GetPTree();    
+    boost::property_tree::ptree  tree = m_optionsOld.GetPTree();    
     std::string block_table_name = tree.get<std::string>("block_table_name");
 
     boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
@@ -487,7 +487,7 @@ bool Writer::BlockTableExists()
 {
 
     std::ostringstream oss;
-    std::string block_table_name = m_options.GetPTree().get<std::string>("block_table_name");
+    std::string block_table_name = m_optionsOld.GetPTree().get<std::string>("block_table_name");
     
     char szTable[OWNAME]= "";
     oss << "select table_name from user_tables where table_name like upper('%%"<< block_table_name <<"%%') ";
@@ -516,7 +516,7 @@ bool Writer::BlockTableExists()
 void Writer::CreateBlockTable()
 {
     std::ostringstream oss;
-    std::string block_table_name = m_options.GetPTree().get<std::string>("block_table_name");
+    std::string block_table_name = m_optionsOld.GetPTree().get<std::string>("block_table_name");
     
     oss << "CREATE TABLE " << block_table_name << " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
     
@@ -606,7 +606,7 @@ std::string Writer::LoadSQLData(std::string const& filename)
 void Writer::RunFileSQL(std::string const& filename)
 {
     std::ostringstream oss;
-    std::string sql = m_options.GetPTree().get<std::string>(filename);
+    std::string sql = m_optionsOld.GetPTree().get<std::string>(filename);
         
     if (!sql.size()) return;
 
@@ -629,7 +629,7 @@ void Writer::RunFileSQL(std::string const& filename)
 
 long Writer::GetGType()
 {
-    boost::property_tree::ptree  tree = m_options.GetPTree();    
+    boost::property_tree::ptree  tree = m_optionsOld.GetPTree();    
     bool bUse3d = is3d();
     bool bUseSolidGeometry = tree.get<bool>("solid");
     long gtype = 0;
@@ -654,7 +654,7 @@ long Writer::GetGType()
 
 std::string Writer::CreatePCElemInfo()
 {
-    boost::property_tree::ptree  tree = m_options.GetPTree();    
+    boost::property_tree::ptree  tree = m_optionsOld.GetPTree();    
     bool bUse3d = is3d();
     bool bUseSolidGeometry = tree.get<bool>("solid");
     
@@ -687,7 +687,7 @@ std::string Writer::CreatePCElemInfo()
 
 void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
 {
-    boost::property_tree::ptree&  tree = m_options.GetPTree();
+    boost::property_tree::ptree&  tree = m_optionsOld.GetPTree();
     
     std::string block_table_name = to_upper(tree.get<std::string>("block_table_name"));
     std::string base_table_name = to_upper(tree.get<std::string>("base_table_name"));
@@ -915,7 +915,7 @@ void Writer::writeBegin()
     // Set up debugging info
 
     
-    if (m_options.GetPTree().get<bool>("overwrite"))
+    if (m_optionsOld.GetPTree().get<bool>("overwrite"))
     {
         if (BlockTableExists())
         {
@@ -1196,7 +1196,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     
     boost::uint8_t* point_data = buffer.getData(0);
     
-    boost::property_tree::ptree&  tree = m_options.GetPTree();
+    boost::property_tree::ptree&  tree = m_optionsOld.GetPTree();
     
     std::string block_table_name = to_upper(tree.get<std::string>("block_table_name"));
     std::string block_table_partition_column = to_upper(tree.get<std::string>("block_table_partition_column"));

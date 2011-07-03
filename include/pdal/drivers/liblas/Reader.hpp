@@ -82,8 +82,8 @@ public:
         return false;
     }
 
-    pdal::SequentialIterator* createSequentialIterator() const;
-    pdal::RandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const;
 
 private:
     void processExternalHeader(::liblas::Reader& externalReader);

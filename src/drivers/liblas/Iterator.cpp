@@ -174,7 +174,7 @@ boost::uint32_t LiblasIteratorBase::readBuffer(PointBuffer& data)
 
 SequentialIterator::SequentialIterator(const LiblasReader& reader)
     : LiblasIteratorBase(reader)
-    , pdal::SequentialIterator(reader)
+    , pdal::ReaderSequentialIterator(reader)
 {
     return;
 }
@@ -228,7 +228,7 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 
 RandomIterator::RandomIterator(const LiblasReader& reader)
     : LiblasIteratorBase(reader)
-    , pdal::RandomIterator(reader)
+    , pdal::ReaderRandomIterator(reader)
 {
     return;
 }

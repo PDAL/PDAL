@@ -49,16 +49,18 @@ namespace pdal
 {
 
 class Iterator;
-class SequentialIterator;
-class RandomIterator;
-class BlockIterator;
+class StageSequentialIterator;
+class StageRandomIterator;
+class StageBlockIterator;
 
 // every stage owns its own header, they are not shared
 class PDAL_DLL Stage
 {
 public:
-    Stage();
+    Stage(const Options& options);
     virtual ~Stage();
+
+    const Options& getOptions() const;
 
     // Implement this in your concrete classes to return a constant string
     // as the name of the stage.  Use a dotted, XPath-style name for your 
@@ -80,13 +82,15 @@ public:
 
     virtual bool supportsIterator (StageIteratorType) const = 0;
 
-    virtual SequentialIterator* createSequentialIterator() const { return NULL; }
-    virtual RandomIterator* createRandomIterator() const  { return NULL; }
-    virtual BlockIterator* createBlockIterator() const  { return NULL; }
+    virtual StageSequentialIterator* createSequentialIterator() const { return NULL; }
+    virtual StageRandomIterator* createRandomIterator() const  { return NULL; }
+    virtual StageBlockIterator* createBlockIterator() const  { return NULL; }
 
     void dump() const;
 
 protected:
+    Options& getOptions();
+
     // setters for the core properties
     Schema& getSchemaRef();
     void setSchema(const Schema&);
@@ -102,6 +106,8 @@ protected:
     void setCoreProperties(const Stage&);
 
 private:
+    Options m_options;
+
     Schema m_schema;
     boost::uint64_t m_numPoints;
     PointCountType m_pointCountType;

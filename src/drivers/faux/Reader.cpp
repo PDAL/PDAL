@@ -43,7 +43,7 @@
 namespace pdal { namespace drivers { namespace faux {
 
 Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
-    : pdal::Stage()
+    : pdal::Reader(Options::none())
     , m_mode(mode)
 {
     Schema& schema = getSchemaRef();
@@ -62,7 +62,7 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
 }
 
 Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : pdal::Stage()
+    : pdal::Reader( Options::none())
     , m_mode(mode)
 {
     Schema& schema = getSchemaRef();
@@ -97,13 +97,13 @@ Reader::Mode Reader::getMode() const
 }
 
 
-pdal::SequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
     return new SequentialIterator(*this);
 }
 
 
-pdal::RandomIterator* Reader::createRandomIterator() const
+pdal::StageRandomIterator* Reader::createRandomIterator() const
 {
     return new RandomIterator(*this);
 }

@@ -32,49 +32,33 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_MOSAICFILTER_HPP
-#define INCLUDED_FILTERS_MOSAICFILTER_HPP
+#ifndef INCLUDED_MULTIFILTER_HPP
+#define INCLUDED_MULTIFILTER_HPP
 
 #include <pdal/pdal.hpp>
 
-#include <vector>
+#include <pdal/Stage.hpp>
 
-#include <pdal/MultiFilter.hpp>
-#include <pdal/StageIterator.hpp>
-//#include <pdal/Bounds.hpp>
+namespace pdal
+{
 
-
-namespace pdal { namespace filters {
-
-
-// this doesn't derive from Stage since it takes more than one stage as input
-class PDAL_DLL MosaicFilter : public MultiFilter
+class PDAL_DLL MultiFilter : public Stage
 {
 public:
     // entries may not be null
     // vector.size() must be > 0
-    MosaicFilter(std::vector<const Stage*> prevStages);
-    
-    const std::string& getDescription() const;
-    const std::string& getName() const;
+    MultiFilter(std::vector<const Stage*> prevStages, const Options& options);
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random) return false; // BUG: could be true
+    const std::vector<const Stage*>& getPrevStages() const;
 
-        return false;
-    }
-    
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+protected:
+    std::vector<const Stage*> m_prevStages;
 
 private:
-    MosaicFilter& operator=(const MosaicFilter&); // not implemented
-    MosaicFilter(const MosaicFilter&); // not implemented
+    MultiFilter& operator=(const MultiFilter&); // not implemented
+    MultiFilter(const MultiFilter&); // not implemented
 };
 
-
-} } // namespaces
+}  // namespace pdal
 
 #endif

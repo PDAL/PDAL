@@ -38,7 +38,7 @@
 
 #include <pdal/drivers/oci/Reader.hpp>
 #include <pdal/drivers/oci/Writer.hpp>
-#include <pdal/drivers/oci/Common.hpp>
+#include <pdal/drivers/oci/common.hpp>
 
 #include <pdal/drivers/liblas/Reader.hpp>
 
@@ -49,7 +49,7 @@
 #include <pdal/drivers/faux/Writer.hpp>
 
 #include <pdal/drivers/liblas/Writer.hpp>
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/Utils.hpp>
 
 #include "Support.hpp"
@@ -65,9 +65,9 @@ bool ShouldRunTest()
     return TestConfig::g_oracle_connection.size() > 0;
 }
 
-Options GetOptions()
+OptionsOld GetOptions()
 {
-    Options options;
+    OptionsOld options;
     boost::property_tree::ptree& tree = options.GetPTree();
 
     tree.put("capacity", 333);

@@ -49,7 +49,7 @@
 namespace pdal
 {
 
-Options::Options()
+OptionsOld::OptionsOld()
 {
     m_tree.put("is3d", false);
 
@@ -57,12 +57,19 @@ Options::Options()
 
 
 
-OptionsNew::OptionsNew()
+Options::Options()
 {
 }    
 
 
-boost::property_tree::ptree OptionsNew::getOptionPTree(std::string const& name) const
+static Options s_noOptions;
+const Options& Options::none()
+{
+    return s_noOptions;
+}
+
+
+boost::property_tree::ptree Options::getOptionPTree(std::string const& name) const
 {
     using boost::property_tree::ptree;
 
@@ -83,7 +90,7 @@ boost::property_tree::ptree OptionsNew::getOptionPTree(std::string const& name) 
 }
 
 
-std::string OptionsNew::getDescription(std::string const& name) const
+std::string Options::getDescription(std::string const& name) const
 {
     boost::property_tree::ptree optionTree = getOptionPTree(name);
     return optionTree.get_child("description").get_value<std::string>();
@@ -91,14 +98,14 @@ std::string OptionsNew::getDescription(std::string const& name) const
 
 
 
-boost::property_tree::ptree const& OptionsNew::getPTree() const
+boost::property_tree::ptree const& Options::getPTree() const
 {
     return m_tree;
 }
 
 
 
-std::ostream& operator<<(std::ostream& ostr, const Options& /*options*/)
+std::ostream& operator<<(std::ostream& ostr, const OptionsOld& /*options*/)
 {
 //     ostr << "  Num points: " << stage.getNumPoints() << std::endl;
 // 

@@ -45,7 +45,7 @@ namespace pdal
 class PDAL_DLL Filter : public Stage
 {
 public:
-    Filter(const Stage& prevStage);
+    Filter(const Stage& prevStage, const Options& options);
 
     const Stage& getPrevStage() const;
 

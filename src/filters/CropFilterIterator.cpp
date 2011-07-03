@@ -93,7 +93,7 @@ bool CropFilterSequentialIterator::atEndImpl() const
 {
     // we don't have a fixed point point --
     // we are at the end only when our source is at the end
-    const SequentialIterator& iter = getPrevIterator();
+    const StageSequentialIterator& iter = getPrevIterator();
     return iter.atEnd();
 }
 

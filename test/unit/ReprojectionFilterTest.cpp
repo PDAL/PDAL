@@ -38,7 +38,7 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/ReprojectionFilter.hpp>
 #include <pdal/filters/ScalingFilter.hpp>
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(test_1)
         const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data(layout, 1);
 
-        pdal::SequentialIterator* iter = reader.createSequentialIterator();
+        pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
         delete iter;
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(test_1)
         const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data(layout, 1);
 
-        pdal::SequentialIterator* iter = descalingFilter.createSequentialIterator();
+        pdal::StageSequentialIterator* iter = descalingFilter.createSequentialIterator();
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
         delete iter;
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(test_1)
         const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data2(layout, 1);
 
-        pdal::SequentialIterator* iter = descalingFilter.createSequentialIterator();
+        pdal::StageSequentialIterator* iter = descalingFilter.createSequentialIterator();
         boost::uint32_t numRead = iter->read(data2);
         BOOST_CHECK(numRead == 1);
         delete iter;

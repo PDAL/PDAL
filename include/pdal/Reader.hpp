@@ -32,49 +32,27 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_MOSAICFILTER_HPP
-#define INCLUDED_FILTERS_MOSAICFILTER_HPP
+#ifndef INCLUDED_READER_HPP
+#define INCLUDED_READER_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/Options.hpp>
 
-#include <vector>
+namespace pdal
+{
 
-#include <pdal/MultiFilter.hpp>
-#include <pdal/StageIterator.hpp>
-//#include <pdal/Bounds.hpp>
+class ReaderIterator;
+class ReaderSequentialIterator;
+class ReaderRandomIterator;
+class ReaderBlockIterator;
 
-
-namespace pdal { namespace filters {
-
-
-// this doesn't derive from Stage since it takes more than one stage as input
-class PDAL_DLL MosaicFilter : public MultiFilter
+class PDAL_DLL Reader : public Stage
 {
 public:
-    // entries may not be null
-    // vector.size() must be > 0
-    MosaicFilter(std::vector<const Stage*> prevStages);
-    
-    const std::string& getDescription() const;
-    const std::string& getName() const;
-
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random) return false; // BUG: could be true
-
-        return false;
-    }
-    
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
-
-private:
-    MosaicFilter& operator=(const MosaicFilter&); // not implemented
-    MosaicFilter(const MosaicFilter&); // not implemented
+    Reader(const Options& options);
+    virtual ~Reader();
 };
 
-
-} } // namespaces
+} // namespace pdal
 
 #endif

@@ -37,7 +37,7 @@
 
 #include <pdal/pdal.hpp>
 
-#include <pdal/Iterator.hpp>
+#include <pdal/ReaderIterator.hpp>
 
 
 namespace pdal { namespace drivers { namespace faux {
@@ -46,7 +46,7 @@ namespace pdal { namespace drivers { namespace faux {
 class Reader;
 
 
-class SequentialIterator : public pdal::SequentialIterator
+class SequentialIterator : public pdal::ReaderSequentialIterator
 {
 public:
     SequentialIterator(const Reader& reader);
@@ -60,7 +60,7 @@ private:
 };
 
 
-class RandomIterator : public pdal::RandomIterator
+class RandomIterator : public pdal::ReaderRandomIterator
 {
 public:
     RandomIterator(const Reader& reader);

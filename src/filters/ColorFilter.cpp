@@ -44,7 +44,7 @@
 namespace pdal { namespace filters {
 
 ColorFilter::ColorFilter(const Stage& prevStage)
-    : Filter(prevStage)
+    : Filter(prevStage, Options::none())
 {
     checkImpedance();
 
@@ -161,7 +161,7 @@ void ColorFilter::getColor_F64_U16(double value, boost::uint16_t& red, boost::ui
 }
 
 
-pdal::SequentialIterator* ColorFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* ColorFilter::createSequentialIterator() const
 {
     return new ColorFilterSequentialIterator(*this);
 }

@@ -41,33 +41,18 @@ namespace pdal { namespace filters {
 
 
 MosaicFilterSequentialIterator::MosaicFilterSequentialIterator(const MosaicFilter& filter)
-    : pdal::SequentialIterator(filter)
-    , m_filter(filter)
+    : MultiFilterSequentialIterator(filter)
 {
-    for (size_t i=0; i<filter.getPrevStages().size(); ++i)
-    {
-        const Stage* stage = filter.getPrevStages()[i];
-        m_prevIterators.push_back(stage->createSequentialIterator());
-    }
-
     return;
 }
 
 
 MosaicFilterSequentialIterator::~MosaicFilterSequentialIterator()
 {
-    for (size_t i=0; i<m_prevIterators.size(); ++i)
-    {
-        SequentialIterator* iter = m_prevIterators[i];
-        delete iter;
-    }
+    return;
 }
 
 
-const std::vector<SequentialIterator*>& MosaicFilterSequentialIterator::getPrevIterators() const
-{
-    return m_prevIterators;
-}
 
 
 boost::uint64_t MosaicFilterSequentialIterator::skipImpl(boost::uint64_t count)
@@ -106,7 +91,7 @@ boost::uint32_t MosaicFilterSequentialIterator::readImpl(PointBuffer& destData)
     // for each stage, we read as many points as we can
     for (size_t i=0; i<getPrevIterators().size(); i++)
     {
-        SequentialIterator* iterator = getPrevIterators()[i];
+        StageSequentialIterator* iterator = getPrevIterators()[i];
         const Stage& stage = iterator->getStage();
 
         const boost::uint64_t stageStopIndex = stageStartIndex + stage.getNumPoints();

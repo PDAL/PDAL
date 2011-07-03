@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 
-#include <pdal/drivers/oci/Common.hpp>
+#include <pdal/drivers/oci/common.hpp>
 
 #include <iostream>
 
@@ -46,9 +46,9 @@
 namespace pdal { namespace drivers { namespace oci {
 
 
-Options GetDefaultOptions() 
+OptionsOld GetDefaultOptions() 
 {
-    Options options;
+    OptionsOld options;
     boost::property_tree::ptree& tree = options.GetPTree();
     tree.put("is3d", false);
     tree.put("solid", false);
@@ -142,7 +142,7 @@ std::string to_upper(const std::string& input)
 }
 
 
-Connection Connect(Options const& options)
+Connection Connect(OptionsOld const& options)
 {
     std::string connection;
     try {

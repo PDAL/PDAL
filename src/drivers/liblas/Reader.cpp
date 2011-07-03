@@ -45,7 +45,7 @@
 namespace pdal { namespace drivers { namespace liblas {
 
 LiblasReader::LiblasReader(const std::string& filename)
-    : LasReaderBase()
+    : LasReaderBase(Options::none())
     , m_filename(filename)
     , m_versionMajor(0)
     , m_versionMinor(0)
@@ -195,13 +195,13 @@ void LiblasReader::registerFields(::liblas::Reader& externalReader)
 }
 
 
-pdal::SequentialIterator* LiblasReader::createSequentialIterator() const
+pdal::StageSequentialIterator* LiblasReader::createSequentialIterator() const
 {
     return new SequentialIterator(*this);
 }
 
 
-pdal::RandomIterator* LiblasReader::createRandomIterator() const
+pdal::StageRandomIterator* LiblasReader::createRandomIterator() const
 {
     return new RandomIterator(*this);
 }

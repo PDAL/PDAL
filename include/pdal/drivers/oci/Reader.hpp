@@ -38,7 +38,7 @@
 #include <pdal/pdal.hpp>
 
 #include <pdal/Stage.hpp>
-#include <pdal/drivers/oci/Common.hpp>
+#include <pdal/drivers/oci/common.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
@@ -53,7 +53,7 @@ class PDAL_DLL Reader : public pdal::Stage
 {
 
 public:
-    Reader(Options& options);
+    Reader(OptionsOld& options);
     ~Reader();
     
     const std::string& getDescription() const;
@@ -67,11 +67,11 @@ public:
 
     boost::uint64_t getNumPoints() { return 0; }
     
-    pdal::SequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
     
     Connection getConnection () const { return m_connection;}
     Statement getStatement () const { return m_statement;}
-    Options& getOptions() const { return m_options; }
+    OptionsOld& getOptionsOld() const { return m_optionsOld; }
     CloudPtr getCloud() const;
     std::string getQuery() const;
     bool isVerbose() const;
@@ -90,7 +90,7 @@ private:
     BlockPtr defineBlock() const;
     Schema fetchSchema(sdo_pc* pc);
 
-    Options& m_options;
+    OptionsOld& m_optionsOld;
     Connection m_connection;
     Statement m_statement;
     QueryType m_querytype;

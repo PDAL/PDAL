@@ -40,7 +40,7 @@
 namespace pdal { namespace drivers { namespace faux {
 
 Writer::Writer(Stage& prevStage) :
-    pdal::Writer(prevStage)
+    pdal::Writer(prevStage, Options::none())
 {
     return;
 }

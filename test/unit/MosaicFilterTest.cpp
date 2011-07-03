@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/SchemaLayout.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
     PointBuffer data(layout, 300);
 
-    SequentialIterator* iter = mosaic.createSequentialIterator();
+    StageSequentialIterator* iter = mosaic.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 300);

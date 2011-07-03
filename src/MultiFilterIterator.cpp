@@ -32,49 +32,48 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_MOSAICFILTER_HPP
-#define INCLUDED_FILTERS_MOSAICFILTER_HPP
-
-#include <pdal/pdal.hpp>
-
-#include <vector>
-
+#include <pdal/MultiFilterIterator.hpp>
 #include <pdal/MultiFilter.hpp>
-#include <pdal/StageIterator.hpp>
-//#include <pdal/Bounds.hpp>
 
-
-namespace pdal { namespace filters {
-
-
-// this doesn't derive from Stage since it takes more than one stage as input
-class PDAL_DLL MosaicFilter : public MultiFilter
+namespace pdal
 {
-public:
-    // entries may not be null
-    // vector.size() must be > 0
-    MosaicFilter(std::vector<const Stage*> prevStages);
-    
-    const std::string& getDescription() const;
-    const std::string& getName() const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random) return false; // BUG: could be true
 
-        return false;
+MultiFilterSequentialIterator::MultiFilterSequentialIterator(const MultiFilter& filter)
+    : StageSequentialIterator(filter)
+    , m_filter(filter)
+    , m_prevIterator(NULL)
+{
+    for (size_t i=0; i<filter.getPrevStages().size(); ++i)
+    {
+        const Stage* stage = filter.getPrevStages()[i];
+        m_prevIterators.push_back(stage->createSequentialIterator());
     }
-    
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
-private:
-    MosaicFilter& operator=(const MosaicFilter&); // not implemented
-    MosaicFilter(const MosaicFilter&); // not implemented
-};
+    return;
+}
 
 
-} } // namespaces
+MultiFilterSequentialIterator::~MultiFilterSequentialIterator()
+{
+    for (size_t i=0; i<m_prevIterators.size(); ++i)
+    {
+        StageSequentialIterator* iter = m_prevIterators[i];
+        delete iter;
+    }
+}
 
-#endif
+
+const std::vector<StageSequentialIterator*>& MultiFilterSequentialIterator::getPrevIterators() const
+{
+    return m_prevIterators;
+}
+
+const StageSequentialIterator& MultiFilterSequentialIterator::getPrevIterator() const
+{
+    return *m_prevIterator;
+}
+
+
+
+} // namespace pdal

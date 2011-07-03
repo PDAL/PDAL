@@ -46,7 +46,7 @@ namespace pdal { namespace filters {
 
 
 ScalingFilter::ScalingFilter(const Stage& prevStage, bool forward)
-    : Filter(prevStage)
+    : Filter(prevStage, Options::none())
     , m_customScaleOffset(false)
     , m_scaleX(0.0)
     , m_scaleY(0.0)
@@ -65,7 +65,7 @@ ScalingFilter::ScalingFilter(const Stage& prevStage, bool forward)
 
 
 ScalingFilter::ScalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ, bool forward)
-    : Filter(prevStage)
+    : Filter(prevStage, Options::none())
     , m_customScaleOffset(true)
     , m_scaleX(scaleX)
     , m_scaleY(scaleY)
@@ -286,7 +286,7 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
 }
 
 
-pdal::SequentialIterator* ScalingFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* ScalingFilter::createSequentialIterator() const
 {
     return new ScalingFilterSequentialIterator(*this);
 }

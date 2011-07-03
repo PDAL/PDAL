@@ -44,7 +44,7 @@
 
 #include <pdal/drivers/las/Reader.hpp>
 
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/Utils.hpp>
 
 #include "Support.hpp"

@@ -37,12 +37,12 @@
 
 #include <pdal/pdal.hpp>
 
-#include <pdal/Stage.hpp>
+#include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
 
 #include <pdal/SchemaLayout.hpp>
 
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/exceptions.hpp>
 
 
@@ -117,11 +117,11 @@ public:
 };
 
 
-class PDAL_DLL Reader : public pdal::Stage
+class PDAL_DLL Reader : public pdal::Reader
 {
 
 public:
-    Reader(Options& options);
+    Reader(OptionsOld& options);
     ~Reader();
     
     const std::string& getDescription() const;
@@ -137,10 +137,10 @@ public:
         return false;
     }
     
-    pdal::SequentialIterator* createSequentialIterator() const;
-    pdal::RandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const;
     
-    Options& getOptions() const { return m_options; }
+    OptionsOld& getOptionsOld() const { return m_optionsOld; }
 
     std::size_t getPointDataOffset() const { return m_offset; }
     boost::uint32_t getPointDataSize() const { return m_size; }
@@ -157,7 +157,7 @@ private:
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 
-    Options& m_options;
+    OptionsOld& m_optionsOld;
     QFIT_Format_Type m_format;
     std::size_t m_offset;
     boost::uint32_t m_size;

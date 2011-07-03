@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/SchemaLayout.hpp>
@@ -88,7 +88,7 @@ void Check_Point(const pdal::PointBuffer& data, const ::pdal::Schema& schema,
 
 BOOST_AUTO_TEST_CASE(test_10_word)
 {
-    pdal::Options options;
+    pdal::OptionsOld options;
     // std::string filename = Support::datapath("20050903_231839.qi");
 
     std::string filename = Support::datapath("qfit/10-word.qi");
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     PointBuffer data(layout, 3);
     
-    pdal::SequentialIterator* iter = reader.createSequentialIterator();
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
     
     {
         boost::uint32_t numRead = iter->read(data);
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
 BOOST_AUTO_TEST_CASE(test_14_word)
 {
-    pdal::Options options;
+    pdal::OptionsOld options;
     // std::string filename = Support::datapath("20050903_231839.qi");
 
     std::string filename = Support::datapath("qfit/14-word.qi");
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(test_14_word)
 
     PointBuffer data(layout, 3);
     
-    pdal::SequentialIterator* iter = reader.createSequentialIterator();
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
     
     {
         boost::uint32_t numRead = iter->read(data);

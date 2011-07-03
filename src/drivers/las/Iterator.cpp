@@ -135,7 +135,7 @@ void IteratorBase::initializeZip()
 
 SequentialIterator::SequentialIterator(const LasReader& reader)
     : IteratorBase(reader)
-    , pdal::SequentialIterator(reader)
+    , pdal::ReaderSequentialIterator(reader)
 {
     return;
 }
@@ -200,7 +200,7 @@ boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
 
 RandomIterator::RandomIterator(const LasReader& reader)
     : IteratorBase(reader)
-    , pdal::RandomIterator(reader)
+    , pdal::ReaderRandomIterator(reader)
 {
     return;
 }

@@ -51,7 +51,7 @@
 #include <pdal/SchemaLayout.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/Dimension.hpp>
-#include <pdal/Iterator.hpp>
+#include <pdal/StageIterator.hpp>
 
 using namespace std;
 
@@ -164,7 +164,7 @@ static void givePointsToEngine(ThreadArgs* threadArgs)
     const pdal::Schema& schema = stage.getSchema();
     const pdal::SchemaLayout schemaLayout(schema);
 
-    pdal::SequentialIterator* iter = stage.createSequentialIterator();
+    pdal::StageSequentialIterator* iter = stage.createSequentialIterator();
     pdal::PointBuffer buffer(schemaLayout, numPoints);
     iter->skip(startPoint);
     const boost::uint32_t numRead = iter->read(buffer);

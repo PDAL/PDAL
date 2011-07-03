@@ -98,8 +98,8 @@ public:
         return false;
     }
 
-    pdal::SequentialIterator* createSequentialIterator() const;
-    pdal::RandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const;
 
 private:
     // these are mutable to allow const-ness for updating stats

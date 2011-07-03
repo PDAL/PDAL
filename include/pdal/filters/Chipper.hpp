@@ -152,9 +152,12 @@ public:
 class PDAL_DLL Chipper : public pdal::Filter
 {
 public:
-    Chipper(Stage& prevStage, boost::uint32_t max_partition_size) :
-        pdal::Filter(prevStage), m_threshold(max_partition_size),
-        m_xvec(chipper::DIR_X), m_yvec(chipper::DIR_Y), m_spare(chipper::DIR_NONE) 
+    Chipper(Stage& prevStage, boost::uint32_t max_partition_size)
+        : pdal::Filter(prevStage, Options::none())
+        , m_threshold(max_partition_size)
+        , m_xvec(chipper::DIR_X)
+        , m_yvec(chipper::DIR_Y)
+        , m_spare(chipper::DIR_NONE) 
     {
         checkImpedance();
         setPointCountType(PointCount_Fixed);
@@ -176,8 +179,8 @@ public:
         return false;
     }
 
-    pdal::SequentialIterator* createSequentialIterator() const;
-    pdal::RandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const;
 
 private:
     void Load(chipper::RefList& xvec, chipper::RefList& yvec, chipper::RefList& spare);

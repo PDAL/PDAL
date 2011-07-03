@@ -42,7 +42,7 @@ namespace pdal { namespace filters {
 
 // cache block size is measured in Points, not bytes
 CacheFilter::CacheFilter(const Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
-    : Filter(prevStage)
+    : Filter(prevStage, Options::none())
     , m_numPointsRequested(0)
     , m_numPointsRead(0)
     , m_cache(NULL)
@@ -145,13 +145,13 @@ void CacheFilter::updateStats(boost::uint64_t numRead, boost::uint64_t numReques
 }
 
 
-pdal::SequentialIterator* CacheFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* CacheFilter::createSequentialIterator() const
 {
     return new CacheFilterSequentialIterator(*this);
 }
 
 
-pdal::RandomIterator* CacheFilter::createRandomIterator() const
+pdal::StageRandomIterator* CacheFilter::createRandomIterator() const
 {
     return new CacheFilterRandomIterator(*this);
 }

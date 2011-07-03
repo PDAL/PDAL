@@ -65,8 +65,8 @@ public:
         return false;
     }
     
-    pdal::SequentialIterator* createSequentialIterator() const;
-    pdal::RandomIterator* createRandomIterator() const { return NULL; }
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     boost::uint32_t getStep() const;
 
