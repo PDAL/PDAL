@@ -251,7 +251,7 @@ public:
     template<class T>
     double applyScaling(T v) const
     {
-        return static_cast<double(v) * m_numericScale + m_numericOffset;
+        return static_cast<double>(v) * m_numericScale + m_numericOffset;
     }
 
     template<class T>
