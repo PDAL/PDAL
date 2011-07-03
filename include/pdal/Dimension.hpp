@@ -241,6 +241,10 @@ public:
     }
     inline void setNumericOffset(double v)
     {
+        if ( !Utils::compare_approx(v, 0.0, (std::numeric_limits<double>::min)()))
+        {
+            m_precise = true;
+        }       
         m_numericOffset = v;
     }
 
