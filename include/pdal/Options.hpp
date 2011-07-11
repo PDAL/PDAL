@@ -140,8 +140,16 @@ public:
     // get value of an option
     template<class T> T getValue(std::string const& name) const
     {
-        boost::property_tree::ptree optionTree = getOptionPTree(name);
-        return optionTree.get_child("value").get_value<T>();
+        try 
+        {
+            boost::property_tree::ptree optionTree = getOptionPTree(name);
+            return optionTree.get_child("value").get_value<T>();
+        } catch (boost::property_tree::ptree_bad_path const&)
+        {
+            return T();
+        }
+    
+
     }
 
     // get description of an option
