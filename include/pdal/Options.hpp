@@ -76,9 +76,9 @@ class PDAL_DLL Option
 {
 public:
     Option(std::string const& name, T value, std::string const& description) 
-        : m_value(value)
+        : m_name(name)
         , m_description(description)
-        , m_name(name)
+        , m_value(value)
     {}
     
     std::string const& getName() const { return m_name; }
