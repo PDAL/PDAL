@@ -221,9 +221,8 @@ PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 
 
 
-Reader::Reader(OptionsOld& optionsOld)
-    : pdal::Reader(Options::none())
-    , m_optionsOld(optionsOld)
+Reader::Reader(Options& options)
+    : pdal::Reader(options)
     , m_format(QFIT_Format_Unknown)
     , m_size(0)
 {
@@ -307,15 +306,9 @@ Reader::Reader(OptionsOld& optionsOld)
 
 std::string Reader::getFileName() const
 {
-    try
-    {
-        return m_optionsOld.GetPTree().get<std::string>("input");
-        
-    } catch (boost::property_tree::ptree_bad_path const&)
-    {
-        return std::string("");
-    }
+    return getOptions().getValue<std::string>("input");
 }
+
 void Reader::registerFields()
 {
     Schema& schema = getSchemaRef();

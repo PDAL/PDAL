@@ -121,7 +121,7 @@ class PDAL_DLL Reader : public pdal::Reader
 {
 
 public:
-    Reader(OptionsOld& options);
+    Reader(Options& options);
     ~Reader();
     
     const std::string& getDescription() const;
@@ -140,8 +140,6 @@ public:
     pdal::StageSequentialIterator* createSequentialIterator() const;
     pdal::StageRandomIterator* createRandomIterator() const;
     
-    OptionsOld& getOptionsOld() const { return m_optionsOld; }
-
     std::size_t getPointDataOffset() const { return m_offset; }
     boost::uint32_t getPointDataSize() const { return m_size; }
 
@@ -157,7 +155,7 @@ private:
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 
-    OptionsOld& m_optionsOld;
+    // OptionsOld& m_optionsOld;
     QFIT_Format_Type m_format;
     std::size_t m_offset;
     boost::uint32_t m_size;

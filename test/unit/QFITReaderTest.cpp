@@ -71,15 +71,15 @@ void Check_Point(const pdal::PointBuffer& data, const ::pdal::Schema& schema,
 
     double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x);
     double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y);
-    double z0 = schema.getDimension(offsetZ).applyScaling<boost::int32_t>(z);
+    double z0 = static_cast<double>(z);
 
-  
+    //   
     // std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
     // std::cout.precision(6);
     // std::cout << "expected x: " << xref << " y: " << yref << " z: " << zref << " t: " << tref << std::endl;
     // 
     // std::cout << "actual   x: " << x0 << " y: " << y0 << " z: " << z0 << " t: " << t << std::endl;
-    // 
+    
     Compare(x0, xref);
     Compare(y0, yref);
     Compare(z0, zref);
@@ -88,14 +88,11 @@ void Check_Point(const pdal::PointBuffer& data, const ::pdal::Schema& schema,
 
 BOOST_AUTO_TEST_CASE(test_10_word)
 {
-    pdal::OptionsOld options;
+    pdal::Options options;
     // std::string filename = Support::datapath("20050903_231839.qi");
 
-    std::string filename = Support::datapath("qfit/10-word.qi");
-
-    
-    boost::property_tree::ptree& tree = options.GetPTree();
-    tree.put<std::string>("input", filename);
+    pdal::Option<std::string> filename("input", Support::datapath("qfit/10-word.qi"), "Input filename for reader to use" );
+    options.add(filename);
     pdal::drivers::qfit::Reader reader(options);
     BOOST_CHECK(reader.getDescription() == "QFIT Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.qfit.reader");
@@ -124,15 +121,12 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
 BOOST_AUTO_TEST_CASE(test_14_word)
 {
-    pdal::OptionsOld options;
-    // std::string filename = Support::datapath("20050903_231839.qi");
+    pdal::Options options;
 
-    std::string filename = Support::datapath("qfit/14-word.qi");
-
-    
-    boost::property_tree::ptree& tree = options.GetPTree();
-    tree.put<std::string>("input", filename);
+    pdal::Option<std::string> filename("input", Support::datapath("qfit/14-word.qi"), "Input filename for reader to use" );
+    options.add(filename);
     pdal::drivers::qfit::Reader reader(options);
+    
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
