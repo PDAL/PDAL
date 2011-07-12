@@ -23,10 +23,11 @@ include_directories(
 
 set(PC2PC pc2pc)
 set(PCINFO pcinfo)
+set(QFIT2LAS qfit2las)
 
 
 set(PDAL_UTILITIES
-    ${PCINFO} ${PC2PC} ${PCVIEW})
+    ${PCINFO} ${PC2PC} ${PCVIEW} ${QFIT2LAS})
 
 
 #------------------------------------------------------------------------------
@@ -58,6 +59,11 @@ endif()
 if(PC2PC)
     add_executable(${PC2PC} pc2pc.cpp Application.cpp Application.hpp)
     target_link_libraries(${PC2PC} ${APPS_CPP_DEPENDENCIES} )
+endif()
+
+if(QFIT2LAS)
+    add_executable(${QFIT2LAS} qfit2las.cpp Application.cpp Application.hpp)
+    target_link_libraries(${QFIT2LAS} ${APPS_CPP_DEPENDENCIES} )
 endif()
 
 
