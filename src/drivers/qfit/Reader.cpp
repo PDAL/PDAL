@@ -339,9 +339,9 @@ void Reader::registerFields()
     text.str("");
 
     Dimension z(Dimension::Field_Z, Dimension::Int32);
-    text << "z coordinate as a long integer.  You must use the scale and "
-         << "offset information of the header to determine the double value.";
+    text << "Elevation (millimeters)";
     z.setDescription(text.str());
+    z.setNumericScale(1.0);
     schema.addDimension(z);
     text.str("");
 
