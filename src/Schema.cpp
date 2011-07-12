@@ -42,8 +42,11 @@
 #include <pdal/Schema.hpp>
 
 #include <iostream>
+#include <algorithm>
 
 #include <pdal/exceptions.hpp>
+
+#include <boost/lambda/lambda.hpp>
 
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
@@ -53,12 +56,13 @@ namespace pdal
 {
 
 
-Schema::Schema()
+Schema::Schema() 
 {
     for (int i=0; i<Dimension::Field_LAST; i++)
     {
         m_indexTable[i] = -1;
     }
+    m_index.reserve(512);
     return;
 }
 
@@ -146,8 +150,17 @@ void Schema::addDimension(Dimension const& dim)
     const Dimension::Field field = dim.getField();
     assert(m_indexTable[field] == -1);
     m_indexTable[field] = (int)index;
+    
+    schema::index::index_by_index & idx = m_index.get<schema::index::index>();
+    idx.push_back(dim);
 
     return;
+}
+
+bool SameDimension(Dimension const& dim1, Dimension const& dim2)
+{
+    if (dim1 == dim2) return true;
+    return false;
 }
 
 
@@ -159,6 +172,29 @@ void Schema::removeDimension(Dimension const& dim)
 
     //std::size_t index = getDimensionIndex(dim);
     //m_dimensions[index] = Dimension(Dimension::Field_INVALID, Dimension::Int32);
+
+    // Add/reset the dimension ptr on the dimensions map
+    schema::index::index_by_index & idx = m_index.get<schema::index::index>();
+
+    schema::index::index_by_index::iterator it = idx.begin();
+
+    while (it != idx.end())
+    {
+        if (*it == dim)
+        {
+            idx.erase(it);
+            break;
+            
+        }
+        ++it;
+    }
+
+    
+    // 
+    // if (it != name_index.end())
+    //     name_index.replace(it, dim);
+    // else 
+    //     m_index.insert(d);    
 
     return;
 }
