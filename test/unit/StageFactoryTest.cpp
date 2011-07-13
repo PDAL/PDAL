@@ -34,18 +34,16 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <pdal/PipelineManager.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/Options.hpp>
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(PipelineManagerTest)
+BOOST_AUTO_TEST_SUITE(StageFactoryTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
-    PipelineManager mgr;
-
-    mgr.addReader("drivers.las.reader", Options::none());
+    StageFactory fac;
 
     return;
 }

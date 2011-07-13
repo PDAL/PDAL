@@ -34,37 +34,105 @@
 
 #include <pdal/PipelineManager.hpp>
 
+#include <pdal/Filter.hpp>
+#include <pdal/MultiFilter.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/Writer.hpp>
+
+#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/las/Writer.hpp>
+#include <pdal/drivers/liblas/Reader.hpp>
+#include <pdal/drivers/liblas/Writer.hpp>
+
+#include <boost/shared_ptr.hpp>
+
+
 namespace pdal
 {
-
-
+    
 PipelineManager::PipelineManager()
 {
+
+    return;
 }
 
-/*
 
-    boost::uint32_t PipelineManager::addReader(const std::string& type, const OptionsNew&);
-    boost::uint32_t PipelineManager::addFilter(const std::string& type, boost::uint32_t prevStage, const OptionsNew&);
-    boost::uint32_t PipelineManager::addFilter(const std::string& type, const std::vector<boost::uint32_t>& prevStages, const OptionsNew&);
-    boost::uint32_t PipelineManager::addWriter(const std::string& type, boost::uint32_t prevStage, const OptionsNew&);
-    
-    Stage* PipelineManager::getStage(boost::uint32_t);
-    Filter* PipelineManager::getFilter(boost::uint32_t);
-    Writer* PipelineManager::getWriter(boost::uint32_t);
+PipelineManager::~PipelineManager()
+{
+    while (m_readerStages.size())
+    {
+        m_readerStages.pop_back();
+    }
+    while (m_filterStages.size())
+    {
+        m_filterStages.pop_back();
+    }
+    while (m_multifilterStages.size())
+    {
+        m_multifilterStages.pop_back();
+    }
+    while (m_writerStages.size())
+    {
+        m_writerStages.pop_back();
+    }
+    return;
+}
 
-    typedef Stage* PipelineManager::readerCreatorFunction(const OptionsNew&);
-    typedef Filter* PipelineManager::filter1CreatorFunction(boost::uint32_t prevStage, const OptionsNew&);
-    typedef Filter* PipelineManager::filterNCreatorFunction(const std::vector<boost::uint32_t>& prevStage, const OptionsNew&);
-    typedef Writer* PipelineManager::writerCreatorFunction(boost::uint32_t prevStage, const OptionsNew&);
-    void PipelineManager::registerReader(const std::string& type, readerCreatorFunction);
-    void PipelineManager::registerFilter(const std::string& type, filter1CreatorFunction);
-    void PipelineManager::registerFilter(const std::string& type, filterNCreatorFunction);
-    void PipelineManager::registerWriter(const std::string& type, writCreatorFunction);
 
-    void PipelineManager::registerKnownReaders();
-    void PipelineManager::registerKnownFilters();
-    void PipelineManager::registerKnownWriters();
-    */
+boost::uint32_t PipelineManager::addReader(const std::string& type, const Options& options)
+{
+    boost::shared_ptr<Reader> stage = m_factory.createReader(type, options);
+    m_readerStages.push_back(stage);
+    return m_readerStages.size() - 1;
+}
+
+
+boost::uint32_t PipelineManager::addFilter(const std::string& type, boost::uint32_t prevStage, const Options& options)
+{
+    boost::shared_ptr<Filter> stage = m_factory.createFilter(type, prevStage, options);
+    m_filterStages.push_back(stage);
+    return m_filterStages.size() - 1;
+}
+
+
+boost::uint32_t PipelineManager::addMultiFilter(const std::string& type, const std::vector<boost::uint32_t>& prevStages, const Options& options)
+{
+    boost::shared_ptr<MultiFilter> stage = m_factory.createMultiFilter(type, prevStages, options);
+    m_multifilterStages.push_back(stage);
+    return m_multifilterStages.size() - 1;
+}
+
+
+boost::uint32_t PipelineManager::addWriter(const std::string& type, boost::uint32_t prevStage, const Options& options)
+{
+    boost::shared_ptr<Writer> stage = m_factory.createWriter(type, prevStage, options);
+    m_writerStages.push_back(stage);
+    return m_writerStages.size() - 1;
+}
+
+
+boost::shared_ptr<Reader> PipelineManager::getReader(boost::uint32_t index)
+{
+    return m_readerStages[index];
+}
+
+
+boost::shared_ptr<Filter> PipelineManager::getFilter(boost::uint32_t index)
+{
+    return m_filterStages[index];
+}
+
+
+boost::shared_ptr<MultiFilter> PipelineManager::getMultiFilter(boost::uint32_t index)
+{
+    return m_multifilterStages[index];
+}
+
+
+boost::shared_ptr<Writer> PipelineManager::getWriter(boost::uint32_t index)
+{
+    return m_writerStages[index];
+}
+
 
 } // namespace pdal

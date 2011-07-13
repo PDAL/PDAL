@@ -32,11 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PIPELINEMANAGER_HPP
-#define INCLUDED_PIPELINEMANAGER_HPP
+#ifndef INCLUDED_STAGEFACTORY_HPP
+#define INCLUDED_STAGEFACTORY_HPP
 
 #include <pdal/pdal.hpp>
-#include <pdal/StageFactory.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -56,32 +55,42 @@ class Writer;
 class Options;
 
 
-class PDAL_DLL PipelineManager
+class PDAL_DLL StageFactory
 {
 public:
-    PipelineManager();
-    ~PipelineManager();
+    typedef Reader* readerCreatorFunction(const Options&);
+    typedef Filter* filterCreatorFunction(boost::uint32_t prevStage, const Options&);
+    typedef MultiFilter* multifilterCreatorFunction(const std::vector<boost::uint32_t>& prevStage, const Options&);
+    typedef Writer* writerCreatorFunction(boost::uint32_t prevStage, const Options&);
 
-    boost::uint32_t addReader(const std::string& type, const Options&);
-    boost::uint32_t addFilter(const std::string& type, boost::uint32_t prevStage, const Options&);
-    boost::uint32_t addMultiFilter(const std::string& type, const std::vector<boost::uint32_t>& prevStages, const Options&);
-    boost::uint32_t addWriter(const std::string& type, boost::uint32_t prevStage, const Options&);
-    
-    boost::shared_ptr<Reader> getReader(boost::uint32_t);
-    boost::shared_ptr<Filter> getFilter(boost::uint32_t);
-    boost::shared_ptr<MultiFilter> getMultiFilter(boost::uint32_t);
-    boost::shared_ptr<Writer> getWriter(boost::uint32_t);
+public:
+    StageFactory();
+
+    boost::shared_ptr<Reader> createReader(const std::string& type, const Options& options);
+    boost::shared_ptr<Filter> createFilter(const std::string& type, boost::uint32_t prevStage, const Options& options);
+    boost::shared_ptr<MultiFilter> createMultiFilter(const std::string& type, const std::vector<boost::uint32_t>& prevStage, const Options& options);
+    boost::shared_ptr<Writer> createWriter(const std::string& type, boost::uint32_t prevStage, const Options& options);
+
+    void registerReader(const std::string& type, readerCreatorFunction* f);
+    void registerFilter(const std::string& type, filterCreatorFunction* f);
+    void registerMultiFilter(const std::string& type, multifilterCreatorFunction* f);
+    void registerWriter(const std::string& type, writerCreatorFunction* f);
 
 private:
-    StageFactory m_factory;
+    readerCreatorFunction* getReaderCreator(const std::string& type);
+    filterCreatorFunction* getFilterCreator(const std::string& type);
+    multifilterCreatorFunction* getMultiFilterCreator(const std::string& type);
+    writerCreatorFunction* getWriterCreator(const std::string& type);
 
-    std::vector<boost::shared_ptr<Reader>> m_readerStages;
-    std::vector<boost::shared_ptr<Filter>> m_filterStages;
-    std::vector<boost::shared_ptr<MultiFilter>> m_multifilterStages;
-    std::vector<boost::shared_ptr<Writer>> m_writerStages;
+    void registerKnownStages();
 
-    PipelineManager& operator=(const PipelineManager&); // not implemented
-    PipelineManager(const PipelineManager&); // not implemented
+    std::map<std::string, readerCreatorFunction*> m_readerCreators;
+    std::map<std::string, filterCreatorFunction*> m_filterCreators;
+    std::map<std::string, multifilterCreatorFunction*> m_multifilterCreators;
+    std::map<std::string, writerCreatorFunction*> m_writerCreators;
+
+    StageFactory& operator=(const StageFactory&); // not implemented
+    StageFactory(const StageFactory&); // not implemented
 };
 
 
