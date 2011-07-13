@@ -71,7 +71,8 @@ void Check_Point(const pdal::PointBuffer& data, const ::pdal::Schema& schema,
 
     double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x);
     double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y);
-    double z0 = static_cast<double>(z);
+    double z0 = schema.getDimension(offsetZ).applyScaling<boost::int32_t>(z);
+    // double z0 = static_cast<double>(z);
 
     //   
     // std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -79,7 +80,7 @@ void Check_Point(const pdal::PointBuffer& data, const ::pdal::Schema& schema,
     // std::cout << "expected x: " << xref << " y: " << yref << " z: " << zref << " t: " << tref << std::endl;
     // 
     // std::cout << "actual   x: " << x0 << " y: " << y0 << " z: " << z0 << " t: " << t << std::endl;
-    
+    // 
     Compare(x0, xref);
     Compare(y0, yref);
     Compare(z0, zref);
