@@ -34,6 +34,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "Support.hpp"
+
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Filter.hpp>
@@ -48,9 +50,14 @@ BOOST_AUTO_TEST_CASE(test1)
 {
     PipelineManager mgr;
 
-    boost::shared_ptr<Reader> reader = mgr.addReader("drivers.las.reader", Options::none());
-    boost::shared_ptr<Filter> filter = mgr.addFilter("filters.crop", *reader, Options::none());
-    boost::shared_ptr<Writer> writer = mgr.addWriter("drivers.las.writer", *filter, Options::none());
+    const Options optsR("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    boost::shared_ptr<Reader> reader = mgr.addReader("drivers.las.reader", optsR);
+
+    const Options optsF("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
+    boost::shared_ptr<Filter> filter = mgr.addFilter("filters.crop", *reader, optsF);
+
+    const Options optsW("filename", "temp.las", "file to write to");
+    boost::shared_ptr<Writer> writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
 
     return;
 }

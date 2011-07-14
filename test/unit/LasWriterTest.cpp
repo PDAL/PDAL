@@ -54,15 +54,14 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    Options optsR("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    pdal::drivers::las::LasReader reader(optsR);
     
-    std::ostream* ofs = Utils::createFile("temp.las");
-
     {
         const boost::uint64_t numPoints = reader.getNumPoints();
 
-        // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::LasWriter writer(reader, *ofs);
+        Options optsW("filename", "temp.las", "file to write to");
+        pdal::drivers::las::LasWriter writer(reader, optsW);
         BOOST_CHECK(writer.getDescription() == "Las Writer");
 
         writer.setCompressed(false);
@@ -73,8 +72,6 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
 
         writer.write(numPoints);
     }
-
-    Utils::closeFile(ofs);
 
     bool filesSame = Support::compare_files("temp.las", Support::datapath("simple.las"));
     BOOST_CHECK(filesSame);
@@ -93,15 +90,14 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.laz");
 
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    Options optsR("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    pdal::drivers::las::LasReader reader(optsR);
     
-    std::ostream* ofs = Utils::createFile("temp.laz");
-
     {
         const boost::uint64_t numPoints = reader.getNumPoints();
 
-        // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::LasWriter writer(reader, *ofs);
+        Options optsW("filename", "temp.laz", "file to write to");
+        pdal::drivers::las::LasWriter writer(reader, optsW);
 
         writer.setCompressed(true);
         writer.setDate(0, 0);
@@ -112,10 +108,9 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
         writer.write(numPoints);
     }
 
-    Utils::closeFile(ofs);
-
     {
-        pdal::drivers::las::LasReader reader("temp.laz");
+        Options opts("filename", "temp.laz", "file to read from");
+        pdal::drivers::las::LasReader reader(opts);
     }
 
     bool filesSame = Support::compare_files("temp.laz", Support::datapath("1.2-with-color.laz"));
@@ -135,15 +130,14 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2_3.las"));
+    Options opts("filename", Support::datapath("1.2_3.las"), "file to read from");
+    pdal::drivers::las::LasReader reader(opts);
     
-    std::ostream* ofs = Utils::createFile("temp.las");
-
     {
         const boost::uint64_t numPoints = reader.getNumPoints();
 
-        // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::LasWriter writer(reader, *ofs);
+        Options optsW("filename", "temp.las", "file to write to");
+        pdal::drivers::las::LasWriter writer(reader, optsW);
         BOOST_CHECK(writer.getDescription() == "Las Writer");
 
         writer.setCompressed(false);
@@ -158,8 +152,6 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
 
         writer.write(numPoints);
     }
-
-    Utils::closeFile(ofs);
 
     // BUG: the following test commented out as per ticket #35
     boost::ignore_unused_variable_warning(refFile);

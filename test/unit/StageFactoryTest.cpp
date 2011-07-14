@@ -34,6 +34,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "Support.hpp"
+
 #include <pdal/StageFactory.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Filter.hpp>
@@ -53,13 +55,16 @@ BOOST_AUTO_TEST_CASE(test1)
     boost::shared_ptr<Filter> ptrF;
     boost::shared_ptr<Writer> ptrW;
     
-    ptrR = factory.createReader("drivers.las.reader", Options::none());
+    const Options optsR("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    ptrR = factory.createReader("drivers.las.reader", optsR);
     BOOST_CHECK(ptrR->getName() == "drivers.las.reader");
 
-    ptrF = factory.createFilter("filters.crop", *ptrR, Options::none());
+    const Options optsF("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
+    ptrF = factory.createFilter("filters.crop", *ptrR, optsF);
     BOOST_CHECK(ptrF->getName() == "filters.crop");
 
-    ptrW = factory.createWriter("drivers.las.writer", *ptrF, Options::none());
+    const Options optsW("filename", "temp.las", "file to write to");
+    ptrW = factory.createWriter("drivers.las.writer", *ptrF, optsW);
     BOOST_CHECK(ptrW->getName() == "drivers.las.writer");
 
     return;

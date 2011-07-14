@@ -49,7 +49,8 @@ BOOST_AUTO_TEST_SUITE(LasReaderTest)
 
 BOOST_AUTO_TEST_CASE(test_sequential)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    Options opts("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    pdal::drivers::las::LasReader reader(opts);
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
     const Schema& schema = reader.getSchema();
@@ -84,7 +85,8 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 
 BOOST_AUTO_TEST_CASE(test_random)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    Options opts("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    pdal::drivers::las::LasReader reader(opts);
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
     const Schema& schema = reader.getSchema();
@@ -129,7 +131,8 @@ BOOST_AUTO_TEST_CASE(test_random)
 
 BOOST_AUTO_TEST_CASE(test_random_laz)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.laz"));
+    Options opts("filename", Support::datapath("1.2-with-color.laz"), "file to read from");
+    pdal::drivers::las::LasReader reader(opts);
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
     const Schema& schema = reader.getSchema();
@@ -174,7 +177,8 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 
 BOOST_AUTO_TEST_CASE(test_two_iters)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    Options opts("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    pdal::drivers::las::LasReader reader(opts);
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
     const Schema& schema = reader.getSchema();
@@ -215,7 +219,8 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
 
 BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    Options opts("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    pdal::drivers::las::LasReader reader(opts);
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
     BOOST_CHECK(reader.getNumPoints() == 1065);
@@ -305,7 +310,8 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 
 BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    Options opts("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    pdal::drivers::las::LasReader reader(opts);
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
     BOOST_CHECK(reader.getNumPoints() == 1065);
@@ -422,7 +428,8 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 
 BOOST_AUTO_TEST_CASE(test_iterator_checks)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    Options opts("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    pdal::drivers::las::LasReader reader(opts);
 
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);
@@ -433,7 +440,8 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
 static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
                               double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath(file));
+    Options opts("filename", Support::datapath(file), "file to read from");
+    pdal::drivers::las::LasReader reader(opts);
 
     BOOST_CHECK(reader.getPointFormat() == pointFormat);
     BOOST_CHECK(reader.getVersionMajor() == majorVersion);
@@ -475,7 +483,8 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 
 BOOST_AUTO_TEST_CASE(test_vlr)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("lots_of_vlr.las"));
+    Options opts("filename", Support::datapath("lots_of_vlr.las"), "file to read from");
+    pdal::drivers::las::LasReader reader(opts);
 
     BOOST_CHECK(reader.getVLRs().size() == 390);
 

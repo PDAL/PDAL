@@ -42,17 +42,12 @@
 namespace pdal { namespace filters {
 
 
+
 CropFilter::CropFilter(const Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
+    : Filter(prevStage, options)
 {
-     //throw not_yet_implemented("crop filter options support"); 
-}
+    const Bounds<double> bounds = options.getValue<Bounds<double>>("bounds");
 
-
-CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
-    : Filter(prevStage, Options::none())
-    , m_bounds(bounds)
-{
     this->setBounds(bounds);
 
     this->setNumPoints(0);
@@ -72,12 +67,6 @@ const std::string& CropFilter::getName() const
 {
     static std::string name("filters.crop");
     return name;
-}
-
-
-const Bounds<double>& CropFilter::getBounds() const
-{
-    return m_bounds;
 }
 
 

@@ -57,7 +57,6 @@ class PDAL_DLL LasReader : public LasReaderBase
 {
 public:
     LasReader(const Options& options);
-    LasReader(const std::string& filename);
 
     const std::string& getDescription() const;
     const std::string& getName() const;
@@ -99,7 +98,7 @@ protected:
     MetadataRecord& getMetadataRecordRef(int index);
 
 private:
-    const std::string m_filename;
+    std::string m_filename;
     LasHeader m_lasHeader;
     std::vector<MetadataRecord> m_metadataRecords;
 

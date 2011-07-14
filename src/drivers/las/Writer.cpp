@@ -53,20 +53,17 @@
 
 namespace pdal { namespace drivers { namespace las {
 
+
 LasWriter::LasWriter(const Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
-    , m_ostream(std::cout)
-{
-     //throw not_yet_implemented("las writer options support"); 
-}
-
-
-LasWriter::LasWriter(const Stage& prevStage, std::ostream& ostream)
-    : pdal::Writer(prevStage, Options::none())
-    , m_ostream(ostream)
+    , m_filename("")
+    , m_ostream(NULL)
     , m_numPointsWritten(0)
     , m_isCompressed(false)
 {
+    m_filename = options.getValue<std::string>("filename");
+    m_ostream = Utils::createFile(m_filename);
+
     m_spatialReference = prevStage.getSpatialReference();
 
     return;
@@ -75,7 +72,14 @@ LasWriter::LasWriter(const Stage& prevStage, std::ostream& ostream)
 
 LasWriter::~LasWriter()
 {
+    if (m_zipper)
+    {
+        // the zipper writes to the stream in the dtor, so we need to manually close
+        // the zipper here, otherwise we'd have already close the stream it wants
+        m_zipper->close();
+    }
 
+    Utils::closeFile(m_ostream);
 }
 
 
@@ -168,7 +172,7 @@ void LasWriter::writeBegin()
 
     m_lasHeader.setSpatialReference(m_spatialReference);
 
-    LasHeaderWriter lasHeaderWriter(m_lasHeader, m_ostream);
+    LasHeaderWriter lasHeaderWriter(m_lasHeader, *m_ostream);
     lasHeaderWriter.write();
 
     m_summaryData.reset();
@@ -221,7 +225,7 @@ void LasWriter::writeBegin()
 
 
             bool stat(false);
-            stat = m_zipper->open(m_ostream, m_zip.get());
+            stat = m_zipper->open(*m_ostream, m_zip.get());
             if (!stat)
             {
                 std::ostringstream oss;
@@ -247,8 +251,8 @@ void LasWriter::writeEnd()
     //LasHeaderWriter lasHeaderWriter(m_lasHeader, m_ostream);
     //Utils::write_n(m_ostream, m_numPointsWritten, sizeof(m_numPointsWritten));
         
-    m_ostream.seekp(0);
-    Support::rewriteHeader(m_ostream, m_summaryData);
+    m_ostream->seekp(0);
+    Support::rewriteHeader(*m_ostream, m_summaryData);
 
     return;
 }
@@ -329,7 +333,7 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
         }
         else
         {
-            Utils::write_n(m_ostream, buf, Support::getPointDataSize(pointFormat));
+            Utils::write_n(*m_ostream, buf, Support::getPointDataSize(pointFormat));
         }
 #else
             Utils::write_n(m_ostream, buf, Support::getPointDataSize(pointFormat));

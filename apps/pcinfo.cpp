@@ -13,6 +13,8 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/liblas/Reader.hpp>
 #include <pdal/Utils.hpp>
+#include <pdal/Options.hpp>
+
 #ifdef PDAL_HAVE_MRSID
 #include <pdal/drivers/mrsid/Reader.hpp>
 #endif
@@ -88,13 +90,15 @@ int Application_pcinfo::execute()
         if (!m_inputFile.substr(ext).compare("las") ||
             !m_inputFile.substr(ext).compare("laz"))
         {
+            Options opts;
+            opts.add("filename", m_inputFile, "file to read from");
             if (hasOption("native"))
             {
-                reader = new pdal::drivers::las::LasReader(m_inputFile);
+                reader = new pdal::drivers::las::LasReader(opts);
             }
             else
             {
-                reader = new pdal::drivers::liblas::LiblasReader(m_inputFile);
+                reader = new pdal::drivers::liblas::LiblasReader(opts);
             }
         }
 #ifdef PDAL_HAVE_MRSID

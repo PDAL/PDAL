@@ -40,6 +40,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <pdal/Options.hpp>
+#include <pdal/exceptions.hpp>
 
 BOOST_AUTO_TEST_SUITE(OptionsTest)
 
@@ -102,6 +103,30 @@ BOOST_AUTO_TEST_CASE(test_options)
     BOOST_CHECK(val_s == "Yow.");
     BOOST_CHECK(desc_i == "This is my integral option.");
     BOOST_CHECK(desc_s == "This is my stringy option.");
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_valid_options)
+{
+    pdal::Options opts;
+
+    bool reached = false;
+    try
+    {
+        opts.getValue<int>("foo");
+        reached = false;
+    }
+    catch (pdal::option_not_found ex)
+    {
+        BOOST_CHECK(strcmp(ex.what(), "foo") == 0);
+        reached = true;
+    }
+    BOOST_CHECK(reached == true);
+
+    bool ok = opts.hasOption("bar");
+    BOOST_CHECK(!ok);
 
     return;
 }

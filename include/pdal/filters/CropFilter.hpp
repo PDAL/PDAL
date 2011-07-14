@@ -56,7 +56,6 @@ class PDAL_DLL CropFilter : public Filter
 {
 public:
     CropFilter(const Stage& prevStage, const Options& options);
-    CropFilter(const Stage& prevStage, Bounds<double> const& bounds);
 
     const std::string& getDescription() const;
     const std::string& getName() const;
@@ -75,11 +74,7 @@ public:
     // if we're calling this routine multiple times with the same buffer
     boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const;
 
-    const Bounds<double>& getBounds() const;
-
 private:
-    Bounds<double> m_bounds;
-
     CropFilter& operator=(const CropFilter&); // not implemented
     CropFilter(const CropFilter&); // not implemented
 };

@@ -105,7 +105,8 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (1)
     //
     {
-        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        pdal::Options optsR("filename", Support::datapath("utm15.las"), "file to read from");
+        pdal::drivers::las::LasReader reader(optsR);
 
         const pdal::SpatialReference in_ref_test(utm15_wkt);
         const pdal::SpatialReference out_ref_test(epsg4326_wkt);
@@ -142,7 +143,8 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (2)
     //
     {
-        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        pdal::Options opts("filename", Support::datapath("utm15.las"), "file to read from");
+        pdal::drivers::las::LasReader reader(opts);
 
         const pdal::SpatialReference in_ref(reader.getSpatialReference());
         const pdal::SpatialReference out_ref(epsg4326_wkt);
@@ -176,7 +178,8 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (3)
     //
     {
-        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        pdal::Options opts("filename", Support::datapath("utm15.las"), "file to read from");
+        pdal::drivers::las::LasReader reader(opts);
             
         const pdal::SpatialReference in_ref(reader.getSpatialReference());
         const pdal::SpatialReference out_ref(epsg4326_wkt);
@@ -213,7 +216,8 @@ BOOST_AUTO_TEST_CASE(test_1)
 
 BOOST_AUTO_TEST_CASE(test_impedence_mismatch)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+    pdal::Options opts("filename", Support::datapath("utm15.las"), "file to read from");
+    pdal::drivers::las::LasReader reader(opts);
         
     const pdal::SpatialReference& in_ref = reader.getSpatialReference();
         

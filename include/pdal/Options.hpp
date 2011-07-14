@@ -121,7 +121,43 @@ private:
 class PDAL_DLL Options
 {
 public:
-    Options();
+    // defult ctor, empy options list
+    Options()
+    {
+    }
+
+    // convenience ctor, which adds 1 option
+    template<class T>
+    Options(const std::string& name, T value, const std::string& description)
+    {
+        Option<T> opt(name, value, description);
+        add(opt);
+    }
+
+    // convenience ctor, which adds 2 options
+    template<class T1, class T2>
+    Options(const std::string& name1, T1 value1, const std::string& description1,
+            const std::string& name2, T2 value2, const std::string& description2)
+    {
+        Option<T1> opt1(name1, value1, description1);
+        add(opt1);
+        Option<T2> opt2(name2, value2, description2);
+        add(opt2);
+    }
+
+    // convenience ctor, which adds 3 options
+    template<class T1, class T2, class T3>
+    Options(const std::string& name1, T1 value1, const std::string& description1,
+            const std::string& name2, T2 value2, const std::string& description2,
+            const std::string& name3, T3 value3, const std::string& description3)
+    {
+        Option<T1> opt1(name1, value1, description1);
+        add(opt1);
+        Option<T2> opt2(name2, value2, description2);
+        add(opt2);
+        Option<T3> opt3(name3, value3, description3);
+        add(opt3);
+    }
 
     // add an option
     template<class T> void add(Option<T> const& option)
@@ -138,23 +174,32 @@ public:
     }
 
     // get value of an option
+    // throws pdal::option_not_found if the option name is not valid
     template<class T> T getValue(std::string const& name) const
     {
+        T value;
         try 
         {
             boost::property_tree::ptree optionTree = getOptionPTree(name);
-            return optionTree.get_child("value").get_value<T>();
-        } catch (boost::property_tree::ptree_bad_path const&)
+            value = optionTree.get_child("value").get_value<T>();
+        } 
+        catch (boost::property_tree::ptree_bad_path const&)
         {
-            return T();
+            throw option_not_found(name);
         }
-    
 
+        return value;
     }
 
     // get description of an option
+    // throws pdal::option_not_found if the option name is not valid
     std::string getDescription(std::string const& name) const;
-    
+
+    // returns true iff the option name is valid
+    bool hasOption(std::string const& name) const;
+
+    // get the ptree for an option
+    // throws pdal::option_not_found if the option name is not valid
     boost::property_tree::ptree const& getPTree() const;
    
     // return the empty options list

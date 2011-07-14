@@ -118,15 +118,16 @@ int Application_pc2pc::execute()
         return 1;
     }
 
-    std::ostream* ofs = Utils::createFile(m_outputFile);
+    Options optsW("filename", m_outputFile, "file to write to");
 
     if (hasOption("native"))
     {
-        pdal::drivers::las::LasReader reader(m_inputFile);
+        Options optsR("filename", m_inputFile, "file to read from");
+        pdal::drivers::las::LasReader reader(optsR);
     
         const boost::uint64_t numPoints = reader.getNumPoints();
 
-        pdal::drivers::las::LasWriter writer(reader, *ofs);
+        pdal::drivers::las::LasWriter writer(reader, optsW);
 
         //BUG: handle laz writer.setCompressed(false);
 
@@ -138,7 +139,8 @@ int Application_pc2pc::execute()
     else if (hasOption("oracle-writer"))
     {
 #ifdef PDAL_HAVE_ORACLE
-        pdal::drivers::las::LasReader reader(m_inputFile);
+        Options optsR("filename", m_inputFile, "file to read from");
+        pdal::drivers::las::LasReader reader(optsR);
     
         const boost::uint64_t numPoints = reader.getNumPoints();
 
@@ -250,7 +252,7 @@ int Application_pc2pc::execute()
                                                             scalez, offsetz, 
                                                             true);
 
-            pdal::drivers::las::LasWriter writer(descalingFilter, *ofs);
+            pdal::drivers::las::LasWriter writer(descalingFilter, optsW);
 
 
             if (compress)
@@ -266,7 +268,7 @@ int Application_pc2pc::execute()
             pdal::filters::ByteSwapFilter swapper(reader);
             
 
-            pdal::drivers::las::LasWriter writer(swapper, *ofs);
+            pdal::drivers::las::LasWriter writer(swapper, optsW);
             if (compress)
                 writer.setCompressed(true);
         
@@ -296,7 +298,7 @@ int Application_pc2pc::execute()
     
         const boost::uint64_t numPoints = reader.getNumPoints();
 
-        pdal::drivers::liblas::LiblasWriter writer(reader, *ofs);
+        pdal::drivers::liblas::LiblasWriter writer(reader, optsW);
 
         //BUG: handle laz writer.setCompressed(false);
 
@@ -304,8 +306,6 @@ int Application_pc2pc::execute()
 
         writer.write(numPoints);
     }
-
-    Utils::closeFile(ofs);
 
     return 0;
 }

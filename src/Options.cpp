@@ -57,11 +57,6 @@ OptionsOld::OptionsOld()
 
 
 
-Options::Options()
-{
-}    
-
-
 static Options s_noOptions;
 const Options& Options::none()
 {
@@ -86,16 +81,42 @@ boost::property_tree::ptree Options::getOptionPTree(std::string const& name) con
         }
     }
 
-    throw pdal_error("requested option not found");
+    throw option_not_found(name);
 }
 
 
 std::string Options::getDescription(std::string const& name) const
 {
-    boost::property_tree::ptree optionTree = getOptionPTree(name);
-    return optionTree.get_child("description").get_value<std::string>();
+    std::string value;
+    try 
+    {
+        boost::property_tree::ptree optionTree = getOptionPTree(name);
+        value = optionTree.get_child("description").get_value<std::string>();
+    } 
+    catch (boost::property_tree::ptree_bad_path const&)
+    {
+        throw option_not_found(name);
+    }
+
+    return value;
 }
 
+
+bool Options::hasOption(std::string const& name) const
+{
+    bool ok = false;
+    try 
+    {
+        boost::property_tree::ptree optionTree = getOptionPTree(name);
+        ok = true;
+    } 
+    catch (const option_not_found&)
+    {
+        ok = false;
+    }
+
+    return ok;
+}
 
 
 boost::property_tree::ptree const& Options::getPTree() const

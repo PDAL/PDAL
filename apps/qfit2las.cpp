@@ -84,7 +84,6 @@ int Application_pc2pc::execute()
         return 1;
     }
 
-    std::ostream* ofs = Utils::createFile(m_outputFile);
     pdal::Options options;
 
     pdal::Option<std::string> filename("input", m_inputFile, "Input filename for reader to use" );
@@ -93,15 +92,12 @@ int Application_pc2pc::execute()
     
     const boost::uint64_t numPoints = reader.getNumPoints();
 
-    pdal::drivers::las::LasWriter writer(reader, *ofs);
-
+    Options optsW("filename", m_outputFile, "file to write to");
+    pdal::drivers::las::LasWriter writer(reader, optsW);
 
     // writer.setPointFormat( reader.getPointFormat() );
 
     writer.write(numPoints);
-
-
-    Utils::closeFile(ofs);
 
     return 0;
 }

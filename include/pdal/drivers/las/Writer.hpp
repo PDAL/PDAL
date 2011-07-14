@@ -54,7 +54,6 @@ class PDAL_DLL LasWriter : public Writer
 {
 public:
     LasWriter(const Stage& prevStage, const Options& options);
-    LasWriter(const Stage& prevStage, std::ostream&);
     ~LasWriter();
 
     const std::string& getDescription() const;
@@ -88,7 +87,8 @@ protected:
     virtual void writeEnd();
 
 private:
-    std::ostream& m_ostream;
+    std::string m_filename;
+    std::ostream* m_ostream;
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
     bool m_isCompressed;
