@@ -44,6 +44,12 @@
 namespace pdal { namespace filters {
 
 
+ScalingFilter::ScalingFilter(const Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+{
+     throw not_yet_implemented("scaling filter options support"); 
+}
+
 
 ScalingFilter::ScalingFilter(const Stage& prevStage, bool forward)
     : Filter(prevStage, Options::none())

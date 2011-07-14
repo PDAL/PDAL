@@ -50,10 +50,18 @@
 
 namespace pdal { namespace drivers { namespace liblas {
 
+LiblasWriter::LiblasWriter(const Stage& prevStage, const Options& options)
+    : pdal::Writer(prevStage, options)
+    , m_ostream(std::cout)
+    , m_externalWriter(NULL)
+{
+     throw not_yet_implemented("liblas writer options support"); 
+}
 
 
-LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
-    : Writer(prevStage, Options::none())
+
+LiblasWriter::LiblasWriter(const Stage& prevStage, std::ostream& ostream)
+    : pdal::Writer(prevStage, Options::none())
     , m_ostream(ostream)
     , m_externalWriter(NULL)
 {

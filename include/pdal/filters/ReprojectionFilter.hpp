@@ -53,6 +53,7 @@ class ReprojectionFilterSequentialIterator;
 class PDAL_DLL ReprojectionFilter : public Filter
 {
 public:
+    ReprojectionFilter(const Stage& prevStage, const Options& options);
     ReprojectionFilter(const Stage& prevStage,
                        const SpatialReference& inSRS,
                        const SpatialReference& outSRS);

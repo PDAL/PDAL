@@ -34,10 +34,18 @@
 
 #include <pdal/filters/CacheFilter.hpp>
 
+#include <pdal/exceptions.hpp>
 #include <pdal/PointBufferCache.hpp>
 #include <pdal/filters/CacheFilterIterator.hpp>
 
 namespace pdal { namespace filters {
+
+
+CacheFilter::CacheFilter(const Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+{
+     throw not_yet_implemented("cache filter options support"); 
+}
 
 
 // cache block size is measured in Points, not bytes

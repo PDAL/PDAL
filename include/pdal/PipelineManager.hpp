@@ -62,15 +62,15 @@ public:
     PipelineManager();
     ~PipelineManager();
 
-    boost::uint32_t addReader(const std::string& type, const Options&);
-    boost::uint32_t addFilter(const std::string& type, boost::uint32_t prevStage, const Options&);
-    boost::uint32_t addMultiFilter(const std::string& type, const std::vector<boost::uint32_t>& prevStages, const Options&);
-    boost::uint32_t addWriter(const std::string& type, boost::uint32_t prevStage, const Options&);
+    boost::shared_ptr<Reader> addReader(const std::string& type, const Options&);
+    boost::shared_ptr<Filter> addFilter(const std::string& type, const Stage& prevStage, const Options&);
+    boost::shared_ptr<MultiFilter> addMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options&);
+    boost::shared_ptr<Writer> addWriter(const std::string& type, const Stage& prevStage, const Options&);
     
-    boost::shared_ptr<Reader> getReader(boost::uint32_t);
-    boost::shared_ptr<Filter> getFilter(boost::uint32_t);
-    boost::shared_ptr<MultiFilter> getMultiFilter(boost::uint32_t);
-    boost::shared_ptr<Writer> getWriter(boost::uint32_t);
+    //boost::shared_ptr<Reader> getReader(boost::uint32_t);
+    //boost::shared_ptr<Filter> getFilter(boost::uint32_t);
+    //boost::shared_ptr<MultiFilter> getMultiFilter(boost::uint32_t);
+    //boost::shared_ptr<Writer> getWriter(boost::uint32_t);
 
 private:
     StageFactory m_factory;

@@ -55,6 +55,7 @@ class CropFilterSequentialIterator;
 class PDAL_DLL CropFilter : public Filter
 {
 public:
+    CropFilter(const Stage& prevStage, const Options& options);
     CropFilter(const Stage& prevStage, Bounds<double> const& bounds);
 
     const std::string& getDescription() const;

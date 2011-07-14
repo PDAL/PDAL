@@ -53,7 +53,8 @@ namespace pdal { namespace drivers { namespace liblas {
 class PDAL_DLL LiblasWriter : public Writer
 {
 public:
-    LiblasWriter(Stage& prevStage, std::ostream&);
+    LiblasWriter(const Stage& prevStage, const Options& options);
+    LiblasWriter(const Stage& prevStage, std::ostream&);
     ~LiblasWriter();
 
     const std::string& getDescription() const;

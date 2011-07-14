@@ -59,17 +59,17 @@ class PDAL_DLL StageFactory
 {
 public:
     typedef Reader* readerCreatorFunction(const Options&);
-    typedef Filter* filterCreatorFunction(boost::uint32_t prevStage, const Options&);
-    typedef MultiFilter* multifilterCreatorFunction(const std::vector<boost::uint32_t>& prevStage, const Options&);
-    typedef Writer* writerCreatorFunction(boost::uint32_t prevStage, const Options&);
+    typedef Filter* filterCreatorFunction(const Stage& prevStage, const Options&);
+    typedef MultiFilter* multifilterCreatorFunction(const std::vector<const Stage*>& prevStage, const Options&);
+    typedef Writer* writerCreatorFunction(const Stage& prevStage, const Options&);
 
 public:
     StageFactory();
 
     boost::shared_ptr<Reader> createReader(const std::string& type, const Options& options);
-    boost::shared_ptr<Filter> createFilter(const std::string& type, boost::uint32_t prevStage, const Options& options);
-    boost::shared_ptr<MultiFilter> createMultiFilter(const std::string& type, const std::vector<boost::uint32_t>& prevStage, const Options& options);
-    boost::shared_ptr<Writer> createWriter(const std::string& type, boost::uint32_t prevStage, const Options& options);
+    boost::shared_ptr<Filter> createFilter(const std::string& type, const Stage& prevStage, const Options& options);
+    boost::shared_ptr<MultiFilter> createMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStage, const Options& options);
+    boost::shared_ptr<Writer> createWriter(const std::string& type, const Stage& prevStage, const Options& options);
 
     void registerReader(const std::string& type, readerCreatorFunction* f);
     void registerFilter(const std::string& type, filterCreatorFunction* f);

@@ -53,6 +53,7 @@ class DecimationFilterSequentialIterator;
 class PDAL_DLL DecimationFilter : public Filter
 {
 public:
+    DecimationFilter(const Stage& prevStage, const Options& options);
     DecimationFilter(const Stage& prevStage, boost::uint32_t step);
 
     const std::string& getDescription() const;

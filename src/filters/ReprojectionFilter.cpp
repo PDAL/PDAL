@@ -81,6 +81,13 @@ namespace pdal { namespace filters {
 #endif
 
 
+ReprojectionFilter::ReprojectionFilter(const Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+{
+     throw not_yet_implemented("reprojection filter options support"); 
+}
+
+
 
 ReprojectionFilter::ReprojectionFilter(const Stage& prevStage,
                                        const SpatialReference& inSRS,

@@ -56,6 +56,7 @@ class ColorFilterSequentialIterator;
 class PDAL_DLL ColorFilter : public Filter
 {
 public:
+    ColorFilter(const Stage& prevStage, const Options& options);
     ColorFilter(const Stage& prevStage);
 
     const std::string& getDescription() const;

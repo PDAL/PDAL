@@ -265,7 +265,18 @@ std::string ReadFile(std::string filename)
     
 }
 
-Writer::Writer(Stage& prevStage, OptionsOld& optionsOld)
+Writer::Writer(const Stage& prevStage, const Options& options)
+    : pdal::Writer(prevStage, options)
+    , m_stage(prevStage)
+    , m_optionsOld(*(new OptionsOld()))
+    , m_verbose(false)
+    , m_doCreateIndex(false)
+{
+     throw not_yet_implemented("oci writer options support"); 
+}
+
+
+Writer::Writer(const Stage& prevStage, OptionsOld& optionsOld)
     : pdal::Writer(prevStage, Options::none())
     , m_stage(prevStage)
     , m_optionsOld(optionsOld)

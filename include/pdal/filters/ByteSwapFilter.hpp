@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_CROPFILTER_HPP
-#define INCLUDED_FILTERS_CROPFILTER_HPP
+#ifndef INCLUDED_FILTERS_BYTESWAPFILTER_HPP
+#define INCLUDED_FILTERS_BYTESWAPFILTER_HPP
 
 #include <pdal/pdal.hpp>
 
@@ -55,6 +55,7 @@ class ByteSwapFilterSequentialIterator;
 class PDAL_DLL ByteSwapFilter : public Filter
 {
 public:
+    ByteSwapFilter(const Stage& prevStage, const Options& options);
     ByteSwapFilter(const Stage& prevStage);
 
     const std::string& getDescription() const;

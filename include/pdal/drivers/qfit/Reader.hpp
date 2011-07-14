@@ -121,7 +121,7 @@ class PDAL_DLL Reader : public pdal::Reader
 {
 
 public:
-    Reader(Options& options);
+    Reader(const Options& options);
     ~Reader();
     
     const std::string& getDescription() const;

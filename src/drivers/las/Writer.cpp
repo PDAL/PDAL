@@ -53,9 +53,16 @@
 
 namespace pdal { namespace drivers { namespace las {
 
+LasWriter::LasWriter(const Stage& prevStage, const Options& options)
+    : pdal::Writer(prevStage, options)
+    , m_ostream(std::cout)
+{
+     throw not_yet_implemented("las writer options support"); 
+}
 
-LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
-    : Writer(prevStage, Options::none())
+
+LasWriter::LasWriter(const Stage& prevStage, std::ostream& ostream)
+    : pdal::Writer(prevStage, Options::none())
     , m_ostream(ostream)
     , m_numPointsWritten(0)
     , m_isCompressed(false)

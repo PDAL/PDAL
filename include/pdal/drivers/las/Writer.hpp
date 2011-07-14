@@ -53,7 +53,8 @@ class ZipPoint;
 class PDAL_DLL LasWriter : public Writer
 {
 public:
-    LasWriter(Stage& prevStage, std::ostream&);
+    LasWriter(const Stage& prevStage, const Options& options);
+    LasWriter(const Stage& prevStage, std::ostream&);
     ~LasWriter();
 
     const std::string& getDescription() const;

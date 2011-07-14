@@ -56,6 +56,7 @@ class ZipPoint;
 class PDAL_DLL LasReader : public LasReaderBase
 {
 public:
+    LasReader(const Options& options);
     LasReader(const std::string& filename);
 
     const std::string& getDescription() const;

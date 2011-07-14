@@ -79,59 +79,35 @@ PipelineManager::~PipelineManager()
 }
 
 
-boost::uint32_t PipelineManager::addReader(const std::string& type, const Options& options)
+boost::shared_ptr<Reader> PipelineManager::addReader(const std::string& type, const Options& options)
 {
     boost::shared_ptr<Reader> stage = m_factory.createReader(type, options);
     m_readerStages.push_back(stage);
-    return m_readerStages.size() - 1;
+    return stage;
 }
 
 
-boost::uint32_t PipelineManager::addFilter(const std::string& type, boost::uint32_t prevStage, const Options& options)
+boost::shared_ptr<Filter> PipelineManager::addFilter(const std::string& type, const Stage& prevStage, const Options& options)
 {
     boost::shared_ptr<Filter> stage = m_factory.createFilter(type, prevStage, options);
     m_filterStages.push_back(stage);
-    return m_filterStages.size() - 1;
+    return stage;
 }
 
 
-boost::uint32_t PipelineManager::addMultiFilter(const std::string& type, const std::vector<boost::uint32_t>& prevStages, const Options& options)
+boost::shared_ptr<MultiFilter> PipelineManager::addMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options& options)
 {
     boost::shared_ptr<MultiFilter> stage = m_factory.createMultiFilter(type, prevStages, options);
     m_multifilterStages.push_back(stage);
-    return m_multifilterStages.size() - 1;
+    return stage;
 }
 
 
-boost::uint32_t PipelineManager::addWriter(const std::string& type, boost::uint32_t prevStage, const Options& options)
+boost::shared_ptr<Writer> PipelineManager::addWriter(const std::string& type, const Stage& prevStage, const Options& options)
 {
     boost::shared_ptr<Writer> stage = m_factory.createWriter(type, prevStage, options);
     m_writerStages.push_back(stage);
-    return m_writerStages.size() - 1;
-}
-
-
-boost::shared_ptr<Reader> PipelineManager::getReader(boost::uint32_t index)
-{
-    return m_readerStages[index];
-}
-
-
-boost::shared_ptr<Filter> PipelineManager::getFilter(boost::uint32_t index)
-{
-    return m_filterStages[index];
-}
-
-
-boost::shared_ptr<MultiFilter> PipelineManager::getMultiFilter(boost::uint32_t index)
-{
-    return m_multifilterStages[index];
-}
-
-
-boost::shared_ptr<Writer> PipelineManager::getWriter(boost::uint32_t index)
-{
-    return m_writerStages[index];
+    return stage;
 }
 
 

@@ -34,11 +34,19 @@
 
 #include <pdal/filters/CropFilter.hpp>
 
+#include <pdal/exceptions.hpp>
 #include <pdal/filters/CropFilterIterator.hpp>
 #include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
 
 namespace pdal { namespace filters {
+
+
+CropFilter::CropFilter(const Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+{
+     throw not_yet_implemented("crop filter options support"); 
+}
 
 
 CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)

@@ -42,6 +42,13 @@
 
 namespace pdal { namespace drivers { namespace faux {
 
+Reader::Reader(const Options& options)
+    : pdal::Reader(options)
+{
+     throw not_yet_implemented("faux reader options support"); 
+}
+
+
 Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
     : pdal::Reader(Options::none())
     , m_mode(mode)

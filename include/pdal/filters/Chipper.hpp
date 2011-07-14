@@ -49,6 +49,7 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/exceptions.hpp>
 
 namespace pdal
 {
@@ -152,6 +153,12 @@ public:
 class PDAL_DLL Chipper : public pdal::Filter
 {
 public:
+    Chipper(const Stage& prevStage, const Options& options)
+        : pdal::Filter(prevStage, options)
+    {
+        throw not_yet_implemented("chipper filter options support"); 
+    }
+
     Chipper(Stage& prevStage, boost::uint32_t max_partition_size)
         : pdal::Filter(prevStage, Options::none())
         , m_threshold(max_partition_size)

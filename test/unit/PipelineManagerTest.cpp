@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(test1)
 {
     PipelineManager mgr;
 
-    mgr.addReader("drivers.las.reader", Options::none());
+//    mgr.addReader("drivers.las.reader", Options::none());
 
     return;
 }

@@ -35,11 +35,18 @@
 #include <pdal/drivers/faux/Writer.hpp>
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/exceptions.hpp>
 
 
 namespace pdal { namespace drivers { namespace faux {
 
-Writer::Writer(Stage& prevStage) :
+Writer::Writer(const Stage& prevStage, const Options& options)
+    : pdal::Writer(prevStage, options)
+{
+     throw not_yet_implemented("faux writer options support"); 
+}
+
+Writer::Writer(const Stage& prevStage) :
     pdal::Writer(prevStage, Options::none())
 {
     return;

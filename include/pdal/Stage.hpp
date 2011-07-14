@@ -54,11 +54,13 @@ class StageRandomIterator;
 class StageBlockIterator;
 
 // every stage owns its own header, they are not shared
-class PDAL_DLL Stage
+
+// Stage and Writer both derive from StageBase
+class PDAL_DLL StageBase
 {
 public:
-    Stage(const Options& options);
-    virtual ~Stage();
+    StageBase(const Options& options);
+    virtual ~StageBase();
 
     const Options& getOptions() const;
 
@@ -69,7 +71,25 @@ public:
     // tree for the given stage.
     virtual const std::string& getName() const = 0;
     virtual const std::string& getDescription() const = 0;
-    
+
+protected:
+    Options& getOptions();
+
+private:
+    Options m_options;
+
+    StageBase& operator=(const StageBase&); // not implemented
+    StageBase(const StageBase&); // not implemented
+};
+
+
+// Reader and Filter both derive from Stage
+class PDAL_DLL Stage : public StageBase
+{
+public:
+    Stage(const Options& options);
+    virtual ~Stage();
+   
     // core properties of all stages
     const Schema& getSchema() const;
     virtual boost::uint64_t getNumPoints() const;
@@ -89,7 +109,6 @@ public:
     void dump() const;
 
 protected:
-    Options& getOptions();
 
     // setters for the core properties
     Schema& getSchemaRef();
@@ -106,8 +125,6 @@ protected:
     void setCoreProperties(const Stage&);
 
 private:
-    Options m_options;
-
     Schema m_schema;
     boost::uint64_t m_numPoints;
     PointCountType m_pointCountType;

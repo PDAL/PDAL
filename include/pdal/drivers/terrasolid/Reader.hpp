@@ -129,6 +129,7 @@ class PDAL_DLL Reader : public pdal::Reader
 {
 
 public:
+    Reader(const Options& options);
     Reader(OptionsOld& options);
     ~Reader();
     

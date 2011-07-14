@@ -58,6 +58,7 @@ namespace filters {
 class PDAL_DLL CacheFilter : public Filter
 {
 public:
+    CacheFilter(const Stage& prevStage, const Options& options);
     CacheFilter(const Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
     ~CacheFilter();
 

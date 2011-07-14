@@ -52,7 +52,8 @@ namespace pdal { namespace drivers { namespace faux {
 class PDAL_DLL Writer : public pdal::Writer
 {
 public:
-    Writer(Stage& prevStage);
+    Writer(const Stage& prevStage, const Options& options);
+    Writer(const Stage& prevStage);
 
     const std::string& getDescription() const;
     const std::string& getName() const;

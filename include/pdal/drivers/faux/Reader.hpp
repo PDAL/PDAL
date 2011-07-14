@@ -74,6 +74,7 @@ public:
     };
 
 public:
+    Reader(const Options& options);
     Reader(const Bounds<double>&, int numPoints, Mode mode);
     Reader(const Bounds<double>&, int numPoints, Mode mode, const std::vector<Dimension>& dimensions);
 

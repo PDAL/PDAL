@@ -38,6 +38,7 @@
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Endian.hpp>
+#include <pdal/exceptions.hpp>
 #include <iostream>
 
 #ifdef PDAL_COMPILER_MSVC
@@ -46,6 +47,12 @@
 
 namespace pdal { namespace filters {
 
+
+ByteSwapFilter::ByteSwapFilter(const Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+{
+     throw not_yet_implemented("byteswap filter options support"); 
+}
 
 ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
     : Filter(prevStage, Options::none())

@@ -221,7 +221,7 @@ PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 
 
 
-Reader::Reader(Options& options)
+Reader::Reader(const Options& options)
     : pdal::Reader(options)
     , m_format(QFIT_Format_Unknown)
     , m_size(0)

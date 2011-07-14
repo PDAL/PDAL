@@ -47,6 +47,12 @@
 namespace pdal { namespace drivers { namespace las {
 
 
+LasReader::LasReader(const Options& options)
+    : LasReaderBase(options)
+{
+     throw not_yet_implemented("las reader options support"); 
+}
+
 
 LasReader::LasReader(const std::string& filename)
     : LasReaderBase(Options::none())

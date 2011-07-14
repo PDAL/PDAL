@@ -84,6 +84,16 @@ PointIndexes::PointIndexes(const Schema& schema, TERRASOLID_Format_Type format)
     return;
 }
 
+Reader::Reader(const Options& options)
+    : pdal::Reader(options)
+    , m_optionsOld(*(new OptionsOld()))
+    , m_format(TERRASOLID_Format_Unknown)
+    , m_haveColor(false)
+    , m_haveTime(false)
+{
+     throw not_yet_implemented("terrasolid reader options support"); 
+}
+
 
 
 Reader::Reader(OptionsOld& optionsOld)

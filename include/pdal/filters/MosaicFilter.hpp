@@ -53,7 +53,8 @@ class PDAL_DLL MosaicFilter : public MultiFilter
 public:
     // entries may not be null
     // vector.size() must be > 0
-    MosaicFilter(std::vector<const Stage*> prevStages);
+    MosaicFilter(const std::vector<const Stage*>& prevStages, const Options& options);
+    MosaicFilter(const std::vector<const Stage*>& prevStages);
     
     const std::string& getDescription() const;
     const std::string& getName() const;
