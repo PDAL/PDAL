@@ -57,7 +57,7 @@ LasWriter::LasWriter(const Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_ostream(std::cout)
 {
-     throw not_yet_implemented("las writer options support"); 
+     //throw not_yet_implemented("las writer options support"); 
 }
 
 

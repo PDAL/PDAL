@@ -143,7 +143,7 @@ boost::shared_ptr<Writer> StageFactory::createWriter(const std::string& type, co
 StageFactory::readerCreatorFunction* StageFactory::getReaderCreator(const std::string& type)
 {
     std::map<std::string, readerCreatorFunction*>::const_iterator iter = m_readerCreators.find(type);
-    if (iter == m_readerCreators.end()) throw;
+    if (iter == m_readerCreators.end()) throw pdal_error("unknown reader stage type");
     readerCreatorFunction* f = iter->second;
     return f;
 }
@@ -152,7 +152,7 @@ StageFactory::readerCreatorFunction* StageFactory::getReaderCreator(const std::s
 StageFactory::filterCreatorFunction* StageFactory::getFilterCreator(const std::string& type)
 {
     std::map<std::string, filterCreatorFunction*>::const_iterator iter = m_filterCreators.find(type);
-    if (iter == m_filterCreators.end()) throw;
+    if (iter == m_filterCreators.end()) throw pdal_error("unknown filter stage type");
     filterCreatorFunction* f = iter->second;
     return f;
 }
@@ -161,7 +161,7 @@ StageFactory::filterCreatorFunction* StageFactory::getFilterCreator(const std::s
 StageFactory::multifilterCreatorFunction* StageFactory::getMultiFilterCreator(const std::string& type)
 {
     std::map<std::string, multifilterCreatorFunction*>::const_iterator iter = m_multifilterCreators.find(type);
-    if (iter == m_multifilterCreators.end()) throw;
+    if (iter == m_multifilterCreators.end()) throw pdal_error("unknown multifilter stage type");
     multifilterCreatorFunction* f = iter->second;
     return f;
 }
@@ -170,7 +170,7 @@ StageFactory::multifilterCreatorFunction* StageFactory::getMultiFilterCreator(co
 StageFactory::writerCreatorFunction* StageFactory::getWriterCreator(const std::string& type)
 {
     std::map<std::string, writerCreatorFunction*>::const_iterator iter = m_writerCreators.find(type);
-    if (iter == m_writerCreators.end()) throw;
+    if (iter == m_writerCreators.end()) throw pdal_error("unknown writer stage type");
     writerCreatorFunction* f = iter->second;
     return f;
 }
@@ -213,19 +213,19 @@ void StageFactory::registerKnownStages()
     registerReader("drivers.qfit.reader", create_drivers_qfit_reader);
     registerReader("drivers.terrasolid.reader", create_drivers_terrasolid_reader);
 
-    registerWriter("drivers.faux.reader", create_drivers_faux_writer);
-    registerWriter("drivers.las.reader", create_drivers_las_writer);
-    registerWriter("drivers.liblas.reader", create_drivers_liblas_writer);
-    registerWriter("drivers.oci.reader", create_drivers_oci_writer);
+    registerWriter("drivers.faux.writer", create_drivers_faux_writer);
+    registerWriter("drivers.las.writer", create_drivers_las_writer);
+    registerWriter("drivers.liblas.writer", create_drivers_liblas_writer);
+    registerWriter("drivers.oci.writer", create_drivers_oci_writer);
 
-    registerFilter("filters.byteswapfilter", create_filters_byteswapfilter);
-    registerFilter("filters.cachefilter", create_filters_cachefilter);
+    registerFilter("filters.byteswap", create_filters_byteswapfilter);
+    registerFilter("filters.cache", create_filters_cachefilter);
     registerFilter("filters.chipper", create_filters_chipper);
-    registerFilter("filters.colorfilter", create_filters_colorfilter);
-    registerFilter("filters.cropfilter", create_filters_cropfilter);
-    registerFilter("filters.decimationfilter", create_filters_decimationfilter);
-    registerFilter("filters.reprojectionfilter", create_filters_reprojectionfilter);
-    registerFilter("filters.scalingfilter", create_filters_scalingfilter);
+    registerFilter("filters.color", create_filters_colorfilter);
+    registerFilter("filters.crop", create_filters_cropfilter);
+    registerFilter("filters.decimation", create_filters_decimationfilter);
+    registerFilter("filters.reprojection", create_filters_reprojectionfilter);
+    registerFilter("filters.scaling", create_filters_scalingfilter);
 
     registerMultiFilter("filters.mosaicfilter", create_filters_mosaicfilter);
 

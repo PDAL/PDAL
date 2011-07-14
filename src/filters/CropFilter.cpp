@@ -45,7 +45,7 @@ namespace pdal { namespace filters {
 CropFilter::CropFilter(const Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
-     throw not_yet_implemented("crop filter options support"); 
+     //throw not_yet_implemented("crop filter options support"); 
 }
 
 

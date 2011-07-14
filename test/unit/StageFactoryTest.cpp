@@ -35,15 +35,32 @@
 #include <boost/test/unit_test.hpp>
 
 #include <pdal/StageFactory.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/Writer.hpp>
 #include <pdal/Options.hpp>
 
 using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(StageFactoryTest)
 
+
 BOOST_AUTO_TEST_CASE(test1)
 {
-    StageFactory fac;
+    StageFactory factory;
+
+    boost::shared_ptr<Reader> ptrR;
+    boost::shared_ptr<Filter> ptrF;
+    boost::shared_ptr<Writer> ptrW;
+    
+    ptrR = factory.createReader("drivers.las.reader", Options::none());
+    BOOST_CHECK(ptrR->getName() == "drivers.las.reader");
+
+    ptrF = factory.createFilter("filters.crop", *ptrR, Options::none());
+    BOOST_CHECK(ptrF->getName() == "filters.crop");
+
+    ptrW = factory.createWriter("drivers.las.writer", *ptrF, Options::none());
+    BOOST_CHECK(ptrW->getName() == "drivers.las.writer");
 
     return;
 }

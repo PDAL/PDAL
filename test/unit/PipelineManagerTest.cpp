@@ -35,6 +35,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include <pdal/PipelineManager.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/Writer.hpp>
 #include <pdal/Options.hpp>
 
 using namespace pdal;
@@ -45,7 +48,9 @@ BOOST_AUTO_TEST_CASE(test1)
 {
     PipelineManager mgr;
 
-//    mgr.addReader("drivers.las.reader", Options::none());
+    boost::shared_ptr<Reader> reader = mgr.addReader("drivers.las.reader", Options::none());
+    boost::shared_ptr<Filter> filter = mgr.addFilter("filters.crop", *reader, Options::none());
+    boost::shared_ptr<Writer> writer = mgr.addWriter("drivers.las.writer", *filter, Options::none());
 
     return;
 }
