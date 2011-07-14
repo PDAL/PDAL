@@ -67,7 +67,7 @@ ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
 
 const std::string& ByteSwapFilter::getDescription() const
 {
-    static std::string name("Crop Filter");
+    static std::string name("Byteswap Filter");
     return name;
 }
 
