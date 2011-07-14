@@ -68,10 +68,6 @@
 namespace pdal
 {
     
-// We keep a list of (driver name, creation function) pairs.  The list is
-// initialized with the core stages we know about, and we allow the user
-// to add more to it.  (I wish C++ had anonymous functions.)
-
 static Reader* create_drivers_faux_reader(const Options& options)        { return new pdal::drivers::faux::Reader(options); }
 static Reader* create_drivers_las_reader(const Options& options)         { return new pdal::drivers::las::LasReader(options); }
 static Reader* create_drivers_liblas_reader(const Options& options)      { return new pdal::drivers::liblas::LiblasReader(options); }
@@ -106,7 +102,7 @@ StageFactory::StageFactory()
 
 boost::shared_ptr<Reader> StageFactory::createReader(const std::string& type, const Options& options)
 {
-    readerCreatorFunction* f = getReaderCreator(type);
+    ReaderCreator* f = getReaderCreator(type);
     Reader* stage = f(options);
     boost::shared_ptr<Reader> ptr(stage);
     return ptr;
@@ -115,7 +111,7 @@ boost::shared_ptr<Reader> StageFactory::createReader(const std::string& type, co
 
 boost::shared_ptr<Filter> StageFactory::createFilter(const std::string& type, const Stage& prevStage, const Options& options)
 {
-    filterCreatorFunction* f = getFilterCreator(type);
+    FilterCreator* f = getFilterCreator(type);
     Filter* stage = f(prevStage, options);
     boost::shared_ptr<Filter> ptr(stage);
     return ptr;
@@ -124,7 +120,7 @@ boost::shared_ptr<Filter> StageFactory::createFilter(const std::string& type, co
 
 boost::shared_ptr<MultiFilter> StageFactory::createMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options& options)
 {
-    multifilterCreatorFunction* f = getMultiFilterCreator(type);
+    MultiFilterCreator* f = getMultiFilterCreator(type);
     MultiFilter* stage = f(prevStages, options);
     boost::shared_ptr<MultiFilter> ptr(stage);
     return ptr;
@@ -133,73 +129,73 @@ boost::shared_ptr<MultiFilter> StageFactory::createMultiFilter(const std::string
 
 boost::shared_ptr<Writer> StageFactory::createWriter(const std::string& type, const Stage& prevStage, const Options& options)
 {
-    writerCreatorFunction* f = getWriterCreator(type);
+    WriterCreator* f = getWriterCreator(type);
     Writer* stage = f(prevStage, options);
     boost::shared_ptr<Writer> ptr(stage);
     return ptr;
 }
 
 
-StageFactory::readerCreatorFunction* StageFactory::getReaderCreator(const std::string& type)
+StageFactory::ReaderCreator* StageFactory::getReaderCreator(const std::string& type)
 {
-    std::map<std::string, readerCreatorFunction*>::const_iterator iter = m_readerCreators.find(type);
+    ReaderCreatorList::const_iterator iter = m_readerCreators.find(type);
     if (iter == m_readerCreators.end()) throw pdal_error("unknown reader stage type");
-    readerCreatorFunction* f = iter->second;
+    ReaderCreator* f = iter->second;
     return f;
 }
 
 
-StageFactory::filterCreatorFunction* StageFactory::getFilterCreator(const std::string& type)
+StageFactory::FilterCreator* StageFactory::getFilterCreator(const std::string& type)
 {
-    std::map<std::string, filterCreatorFunction*>::const_iterator iter = m_filterCreators.find(type);
+    FilterCreatorList::const_iterator iter = m_filterCreators.find(type);
     if (iter == m_filterCreators.end()) throw pdal_error("unknown filter stage type");
-    filterCreatorFunction* f = iter->second;
+    FilterCreator* f = iter->second;
     return f;
 }
 
 
-StageFactory::multifilterCreatorFunction* StageFactory::getMultiFilterCreator(const std::string& type)
+StageFactory::MultiFilterCreator* StageFactory::getMultiFilterCreator(const std::string& type)
 {
-    std::map<std::string, multifilterCreatorFunction*>::const_iterator iter = m_multifilterCreators.find(type);
+    MultiFilterCreatorList::const_iterator iter = m_multifilterCreators.find(type);
     if (iter == m_multifilterCreators.end()) throw pdal_error("unknown multifilter stage type");
-    multifilterCreatorFunction* f = iter->second;
+    MultiFilterCreator* f = iter->second;
     return f;
 }
 
 
-StageFactory::writerCreatorFunction* StageFactory::getWriterCreator(const std::string& type)
+StageFactory::WriterCreator* StageFactory::getWriterCreator(const std::string& type)
 {
-    std::map<std::string, writerCreatorFunction*>::const_iterator iter = m_writerCreators.find(type);
+    WriterCreatorList::const_iterator iter = m_writerCreators.find(type);
     if (iter == m_writerCreators.end()) throw pdal_error("unknown writer stage type");
-    writerCreatorFunction* f = iter->second;
+    WriterCreator* f = iter->second;
     return f;
 }
 
 
-void StageFactory::registerReader(const std::string& type, readerCreatorFunction* f)
+void StageFactory::registerReader(const std::string& type, ReaderCreator* f)
 {
-    std::pair<std::string, readerCreatorFunction*> p(type, f);
+    std::pair<std::string, ReaderCreator*> p(type, f);
     m_readerCreators.insert(p);
 }
 
 
-void StageFactory::registerFilter(const std::string& type, filterCreatorFunction* f)
+void StageFactory::registerFilter(const std::string& type, FilterCreator* f)
 {
-    std::pair<std::string, filterCreatorFunction*> p(type, f);
+    std::pair<std::string, FilterCreator*> p(type, f);
     m_filterCreators.insert(p);
 }
 
 
-void StageFactory::registerMultiFilter(const std::string& type, multifilterCreatorFunction* f)
+void StageFactory::registerMultiFilter(const std::string& type, MultiFilterCreator* f)
 {
-    std::pair<std::string, multifilterCreatorFunction*> p(type, f);
+    std::pair<std::string, MultiFilterCreator*> p(type, f);
     m_multifilterCreators.insert(p);
 }
 
 
-void StageFactory::registerWriter(const std::string& type, writerCreatorFunction* f)
+void StageFactory::registerWriter(const std::string& type, WriterCreator* f)
 {
-    std::pair<std::string, writerCreatorFunction*> p(type, f);
+    std::pair<std::string, WriterCreator*> p(type, f);
     m_writerCreators.insert(p);
 }
 
