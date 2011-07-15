@@ -223,7 +223,7 @@ void StageFactory::registerKnownStages()
     registerFilter("filters.reprojection", create_filters_reprojectionfilter);
     registerFilter("filters.scaling", create_filters_scalingfilter);
 
-    registerMultiFilter("filters.mosaicfilter", create_filters_mosaicfilter);
+    registerMultiFilter("filters.mosaic", create_filters_mosaicfilter);
 
     return;
 }
