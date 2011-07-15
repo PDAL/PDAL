@@ -36,6 +36,7 @@
 #define INCLUDED_OPTIONS_HPP
 
 #include <pdal/pdal.hpp>
+#include <pdal/exceptions.hpp>
 #include <pdal/Bounds.hpp>
 #include <boost/property_tree/ptree.hpp>
 
