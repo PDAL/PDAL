@@ -44,13 +44,6 @@ namespace pdal { namespace filters {
 MosaicFilter::MosaicFilter(const std::vector<const Stage*>& prevStages, const Options& options)
     : pdal::MultiFilter(prevStages, options)
 {
-     throw not_yet_implemented("mosaic filter options support"); 
-}
-
-
-MosaicFilter::MosaicFilter(const std::vector<const Stage*>& prevStages)
-    : MultiFilter(prevStages, Options::none())
-{
     if (prevStages.size() == 0)
     {
         throw pdal_error("empty stage list passed to mosaic filter");

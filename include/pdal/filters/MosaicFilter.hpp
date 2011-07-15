@@ -54,7 +54,6 @@ public:
     // entries may not be null
     // vector.size() must be > 0
     MosaicFilter(const std::vector<const Stage*>& prevStages, const Options& options);
-    MosaicFilter(const std::vector<const Stage*>& prevStages);
     
     const std::string& getDescription() const;
     const std::string& getName() const;
