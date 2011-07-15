@@ -41,6 +41,10 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/las/Writer.hpp>
+#include <pdal/filters/CropFilter.hpp>
+#include <pdal/filters/MosaicFilter.hpp>
 
 using namespace pdal;
 
@@ -53,6 +57,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
     boost::shared_ptr<Reader> ptrR;
     boost::shared_ptr<Filter> ptrF;
+    boost::shared_ptr<MultiFilter> ptrM;
     boost::shared_ptr<Writer> ptrW;
     
     const Options optsR("filename", Support::datapath("1.2-with-color.las"), "file to read from");
@@ -63,9 +68,92 @@ BOOST_AUTO_TEST_CASE(test1)
     ptrF = factory.createFilter("filters.crop", *ptrR, optsF);
     BOOST_CHECK(ptrF->getName() == "filters.crop");
 
+    const Options optsM;
+    std::vector<const Stage*> stages;
+    stages.push_back(ptrR.get());
+    ptrM = factory.createMultiFilter("filters.mosaic", stages, optsM);
+    BOOST_CHECK(ptrM->getName() == "filters.mosaic");
+
     const Options optsW("filename", "temp.las", "file to write to");
     ptrW = factory.createWriter("drivers.las.writer", *ptrF, optsW);
     BOOST_CHECK(ptrW->getName() == "drivers.las.writer");
+
+    return;
+}
+
+
+static int s_demoflag = 0;
+Reader* demoReaderCreator(const Options& options)
+{
+    s_demoflag = options.getValue<int>("flag");
+
+    // this is where you'd do something like:
+    //     return new MyCustomXyzReader(options);
+
+    const Options optsR("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    return new pdal::drivers::las::LasReader(optsR);
+}
+
+Filter* demoFilterCreator(const Stage& prev, const Options& options)
+{
+    s_demoflag = options.getValue<int>("flag");
+
+    const Options optsF("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
+    return new pdal::filters::CropFilter(prev, optsF);
+}
+
+MultiFilter* demoMultiFilterCreator(const std::vector<const Stage*>& prevs, const Options& options)
+{
+    s_demoflag = options.getValue<int>("flag");
+
+    const Options optsM;
+    return new pdal::filters::MosaicFilter(prevs, optsM);
+}
+
+Writer* demoWriterCreator(const Stage& prev, const Options& options)
+{
+    s_demoflag = options.getValue<int>("flag");
+
+    const Options optsW("filename", "temp.las", "file to write to");
+    return new pdal::drivers::las::LasWriter(prev, optsW);
+}
+
+
+
+BOOST_AUTO_TEST_CASE(test2)
+{
+    StageFactory factory;
+
+    factory.registerReader("demoR", demoReaderCreator);
+    factory.registerFilter("demoF", demoFilterCreator);
+    factory.registerMultiFilter("demoM", demoMultiFilterCreator);
+    factory.registerWriter("demoW", demoWriterCreator);
+
+    s_demoflag = 0;
+    Options optsR("flag",11,"my flag");
+    boost::shared_ptr<Reader> reader = factory.createReader("demoR", optsR);
+    BOOST_CHECK(reader->getName() == "drivers.las.reader");
+    BOOST_CHECK(s_demoflag == 11);
+
+    s_demoflag = 0;
+    Options optsF("flag",22,"my flag");
+    boost::shared_ptr<Filter> filter = factory.createFilter("demoF", *reader, optsF);
+    BOOST_CHECK(filter->getName() == "filters.crop");
+    BOOST_CHECK(s_demoflag == 22);
+
+    s_demoflag = 0;
+    Options optsM("flag",33,"my flag");
+    std::vector<const Stage*> stages;
+    stages.push_back(reader.get());
+    boost::shared_ptr<MultiFilter> multifilter = factory.createMultiFilter("demoM", stages, optsM);
+    BOOST_CHECK(multifilter->getName() == "filters.mosaic");
+    BOOST_CHECK(s_demoflag == 33);
+
+    s_demoflag = 0;
+    Options optsW("flag",44,"my flag");
+    boost::shared_ptr<Writer> writer = factory.createWriter("demoW", *reader, optsW);
+    BOOST_CHECK(writer->getName() == "drivers.las.writer");
+    BOOST_CHECK(s_demoflag == 44);
 
     return;
 }
