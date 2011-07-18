@@ -46,7 +46,7 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(PipelineManagerTest)
 
-BOOST_AUTO_TEST_CASE(test1)
+BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
 {
     PipelineManager mgr;
 
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test1)
 }
 
 
-BOOST_AUTO_TEST_CASE(test2)
+BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
 {
     PipelineManager mgr;
 

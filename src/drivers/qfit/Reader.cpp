@@ -306,7 +306,7 @@ Reader::Reader(const Options& options)
 
 std::string Reader::getFileName() const
 {
-    return getOptions().getValue<std::string>("input");
+    return getOptions().getOption<std::string>("input").getValue();
 }
 
 void Reader::registerFields()

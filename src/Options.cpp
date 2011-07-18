@@ -56,6 +56,43 @@ OptionsOld::OptionsOld()
 }    
 
 
+Options::Options(boost::property_tree::ptree t)
+{
+    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, t.get_child("option"))
+    {
+        v;
+    }
+
+
+    //boost::property_tree::ptree tt = t.get_value<std::string>("option");
+    
+    //Option<std::string> opt = t.get<std::string>("option");
+
+    std::string name = t.get<std::string>("name");
+    std::string value = t.get<std::string>("value");
+    std::string description = t.get<std::string>("description");
+}
+
+
+Options::Options(std::istream& istr)
+{
+    boost::property_tree::xml_parser::read_xml(istr, m_tree);
+
+
+    boost::property_tree::ptree::const_iterator iter = m_tree.begin();
+    while (iter != m_tree.end())
+    {
+        std::string g = (*iter).first;
+        assert(g == "option");
+        boost::property_tree::ptree h = (*iter).second;
+        Option<std::string> hopt(h);
+        ++iter;
+    }
+
+
+    return;
+}
+
 
 static Options s_noOptions;
 const Options& Options::none()
@@ -64,7 +101,7 @@ const Options& Options::none()
 }
 
 
-boost::property_tree::ptree Options::getOptionPTree(std::string const& name) const
+const boost::property_tree::ptree Options::getOptionPTree(const std::string& name) const
 {
     using boost::property_tree::ptree;
 
@@ -84,39 +121,6 @@ boost::property_tree::ptree Options::getOptionPTree(std::string const& name) con
     throw option_not_found(name);
 }
 
-
-std::string Options::getDescription(std::string const& name) const
-{
-    std::string value;
-    try 
-    {
-        boost::property_tree::ptree optionTree = getOptionPTree(name);
-        value = optionTree.get_child("description").get_value<std::string>();
-    } 
-    catch (boost::property_tree::ptree_bad_path const&)
-    {
-        throw option_not_found(name);
-    }
-
-    return value;
-}
-
-
-bool Options::hasOption(std::string const& name) const
-{
-    bool ok = false;
-    try 
-    {
-        boost::property_tree::ptree optionTree = getOptionPTree(name);
-        ok = true;
-    } 
-    catch (const option_not_found&)
-    {
-        ok = false;
-    }
-
-    return ok;
-}
 
 
 boost::property_tree::ptree const& Options::getPTree() const

@@ -61,7 +61,7 @@ LasWriter::LasWriter(const DataStagePtr& prevStage, const Options& options)
     , m_numPointsWritten(0)
     , m_isCompressed(false)
 {
-    m_filename = options.getValue<std::string>("filename");
+    m_filename = options.getOption<std::string>("filename").getValue();
     m_ostream = Utils::createFile(m_filename);
 
     m_spatialReference = prevStage->getSpatialReference();

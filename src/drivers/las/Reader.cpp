@@ -51,7 +51,7 @@ namespace pdal { namespace drivers { namespace las {
 LasReader::LasReader(const Options& options)
     : LasReaderBase(options)
 {
-    m_filename = options.getValue<std::string>("filename");
+    m_filename = options.getOption<std::string>("filename").getValue();
 
     std::istream* str = Utils::openFile(m_filename);
 

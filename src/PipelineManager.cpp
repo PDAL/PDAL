@@ -145,57 +145,84 @@ static const xmlChar* toXmlChar(const char* str)
 }
 
 
-void PipelineManager::parseOption(xmlDocPtr doc, xmlNodePtr cur, Options& options)
+const char* PipelineManager::getElementText(xmlDocPtr doc, xmlNodePtr cur)
 {
-    // cur is an option element, such as this:
-    //    <filename>foo.bar</filename>
-    // we assume the body of the element is just text
-    // this function will process the element and return an Option from it
-
     assert(isElement(cur));
-
-    const char* name = fromXmlChar(cur->name);
-    const char* text = NULL;
 
     cur = cur->children;
 
-    while (cur)
+    if (!isText(cur))
     {
-        if (isText(cur))
-        {
-            text = fromXmlChar(cur->content);
-        }
-        cur = cur->next;
+        throw pdal_error("xml reader text node not in option element");
     }
 
-    Option<std::string> option(name, text, "");
+    const char* text = fromXmlChar(cur->content);
 
-    options.add(option);
-
-    return;
+    return text;
 }
 
 
-Options PipelineManager::parseOptions(xmlDocPtr doc, xmlNodePtr cur)
+Option<std::string> PipelineManager::parseOption(xmlDocPtr doc, xmlNodePtr cur)
 {
-    // cur is a Reader element
-    // this function will process the children and return a Reader
-    assert(isElement(cur, "Options"));
+    // cur is an option element, such as this:
+    //     <option>
+    //       <name>myname</name>
+    //       <description>my descr</description>
+    //       <value>17</value>
+    //     </option>
+    // this function will process the element and return an Option from it
+
+    assert(isElement(cur, "option"));
+
+    const char* name = NULL;
+    const char* value = NULL;
+    const char* description = NULL;
 
     cur = cur->children;
-
-    Options options;
 
     while (cur)
     {
         if (isElement(cur))
         {
-            parseOption(doc, cur, options);
+            if (isElement(cur, "name"))
+            {
+                if (name != NULL) throw pdal_error("xml reader found extra name element in option block");
+                name = getElementText(doc, cur);
+            }
+            else if (isElement(cur, "value"))
+            {
+                if (value != NULL) throw pdal_error("xml reader found extra value element in option block");
+                value = getElementText(doc, cur);
+            }
+            else if (isElement(cur, "description"))
+            {
+                if (description != NULL) throw pdal_error("xml reader found extra description element in option block");
+                description = getElementText(doc, cur);
+            }
+            else
+            {
+                throw pdal_error("xml reader found bad element in option block");
+            }
         }
         cur = cur->next;
     }
 
-    return options;
+    if (name == NULL)
+    {
+        throw pdal_error("xml reader found no text in option");
+    }
+    if (value == NULL)
+    {
+        throw pdal_error("xml reader found no value in option");
+    }
+    if (description == NULL)
+    {
+        description = "";
+    }
+
+    Option<std::string> option(name, value, description);
+
+    return option;
 }
 
 
@@ -269,9 +296,10 @@ ReaderPtr PipelineManager::parseReader(xmlDocPtr doc, xmlNodePtr cur)
     {
         if (isElement(cur))
         {
-            if (isElement(cur, "Options"))
+            if (isElement(cur, "option"))
             {
-                options = parseOptions(doc, cur);
+                Option<std::string> option = parseOption(doc, cur);
+                options.add(option);
             }
             else
             {
@@ -306,9 +334,10 @@ FilterPtr PipelineManager::parseFilter(xmlDocPtr doc, xmlNodePtr cur)
     {
         if (isElement(cur))
         {
-            if (isElement(cur, "Options"))
+            if (isElement(cur, "option"))
             {
-                options = parseOptions(doc, cur);
+                Option<std::string> option = parseOption(doc, cur);
+                options.add(option);
             }
             else if (isDataStageElement(cur))
             {
@@ -356,9 +385,10 @@ MultiFilterPtr PipelineManager::parseMultiFilter(xmlDocPtr doc, xmlNodePtr cur)
     {
         if (isElement(cur))
         {
-            if (isElement(cur, "Options"))
+            if (isElement(cur, "option"))
             {
-                options = parseOptions(doc, cur);
+                Option<std::string> option = parseOption(doc, cur);
+                options.add(option);
             }
             else if (isDataStageElement(cur))
             {
@@ -403,9 +433,10 @@ WriterPtr PipelineManager::parseWriter(xmlDocPtr doc, xmlNodePtr cur)
     {
         if (isElement(cur))
         {
-            if (isElement(cur, "Options"))
+            if (isElement(cur, "option"))
             {
-                options = parseOptions(doc, cur);
+                Option<std::string> option = parseOption(doc, cur);
+                options.add(option);
             }
             else if (isDataStageElement(cur))
             {

@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(test1)
 static int s_demoflag = 0;
 static Reader* demoReaderCreator(const Options& options)
 {
-    s_demoflag = options.getValue<int>("flag");
+    s_demoflag = options.getOption<int>("flag").getValue();
 
     // this is where you'd do something like:
     //     return new MyCustomXyzReader(options);
@@ -94,7 +94,7 @@ static Reader* demoReaderCreator(const Options& options)
 
 Filter* demoFilterCreator(const DataStagePtr& prev, const Options& options)
 {
-    s_demoflag = options.getValue<int>("flag");
+    s_demoflag = options.getOption<int>("flag").getValue();
 
     const Options optsF("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
     Filter* filter = new pdal::filters::CropFilter(prev, optsF);
@@ -104,7 +104,7 @@ Filter* demoFilterCreator(const DataStagePtr& prev, const Options& options)
 
 MultiFilter* demoMultiFilterCreator(const std::vector<const DataStagePtr>& prevs, const Options& options)
 {
-    s_demoflag = options.getValue<int>("flag");
+    s_demoflag = options.getOption<int>("flag").getValue();
 
     const Options optsM;
     MultiFilter* multifilter = new pdal::filters::MosaicFilter(prevs, optsM);
@@ -114,7 +114,7 @@ MultiFilter* demoMultiFilterCreator(const std::vector<const DataStagePtr>& prevs
 
 Writer* demoWriterCreator(const DataStagePtr& prev, const Options& options)
 {
-    s_demoflag = options.getValue<int>("flag");
+    s_demoflag = options.getOption<int>("flag").getValue();
 
     const Options optsW("filename", "temp.las", "file to write to");
     Writer* writer = new pdal::drivers::las::LasWriter(prev, optsW);

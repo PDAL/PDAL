@@ -67,7 +67,7 @@ public:
 //
 // Dumped as XML, it looks like this:
 //     <?xml...>
-//     <name>my name</name>
+//     <name>myname</name>
 //     <description>my descr</description>
 //     <value>17</value>
 // although of course that's not valid XML, since it has no single root element.
@@ -76,17 +76,38 @@ template <typename T>
 class PDAL_DLL Option
 {
 public:
-    Option(std::string const& name, T value, std::string const& description) 
+    // construct it manually
+    Option(std::string const& name, T value, std::string const& description)
         : m_name(name)
         , m_description(description)
         , m_value(value)
     {}
     
+    // construct it from an xml stream
+    Option(std::istream& istr)
+    {
+        boost::property_tree::ptree t;
+        boost::property_tree::xml_parser::read_xml(istr, t);
+        m_name = t.get<std::string>("name");
+        m_value = t.get<T>("value");
+        m_description = t.get<std::string>("description");
+    }
+
+    // construct it from a ptree
+    Option(const boost::property_tree::ptree t)
+    {
+        m_name = t.get<std::string>("name");
+        m_value = t.get<T>("value");
+        m_description = t.get<std::string>("description");
+    }
+
+    // getters
     std::string const& getName() const { return m_name; }
     std::string const& getDescription() const { return m_description; }
     T const& getValue() const { return m_value; }
     
-    boost::property_tree::ptree getPTree() const 
+    // return a ptree representation
+    boost::property_tree::ptree getPTree() const
     {
         boost::property_tree::ptree t;
         t.put("name", getName());
@@ -95,6 +116,14 @@ public:
         return t;
     }
     
+    // return an xml representation
+    void write_xml(std::ostream& ostr) const
+    {
+        const boost::property_tree::ptree tree = getPTree();
+        boost::property_tree::xml_parser::write_xml(ostr, tree);
+        return;
+    }
+
 private:
     std::string m_name;
     std::string m_description;
@@ -109,12 +138,12 @@ private:
 // Dumped as XML, an Options object with two Option objects looks like this:
 //     <?xml...>
 //     <option>
-//       <name>my name</name>
+//       <name>myname</name>
 //       <description>my descr</description>
 //       <value>17</value>
 //     </option>
 //     <option>
-//       <name>my name2</name>
+//       <name>myname2</name>
 //       <description>my descr2</description>
 //       <value>13</value>
 //     </option>
@@ -123,9 +152,12 @@ class PDAL_DLL Options
 {
 public:
     // defult ctor, empy options list
-    Options()
-    {
-    }
+    Options() {}
+
+    Options(boost::property_tree::ptree t);
+
+    // read options from an xml stream
+    Options(std::istream& istr);
 
     // convenience ctor, which adds 1 option
     template<class T>
@@ -174,40 +206,50 @@ public:
         add(opt);
     }
 
-    // get value of an option
+    // get an option, by name
     // throws pdal::option_not_found if the option name is not valid
-    template<class T> T getValue(std::string const& name) const
+    template<typename T> Option<T> getOption(std::string const& name) const
     {
-        T value;
-        try 
+        boost::property_tree::ptree::const_iterator iter = m_tree.begin();
+        while (iter != m_tree.end())
         {
-            boost::property_tree::ptree optionTree = getOptionPTree(name);
-            value = optionTree.get_child("value").get_value<T>();
-        } 
-        catch (boost::property_tree::ptree_bad_path const&)
-        {
-            throw option_not_found(name);
+            std::string oname = (*iter).first;
+            if (oname == "option")
+            {
+                boost::property_tree::ptree optionTree = (*iter).second;
+                Option<T> option(optionTree);
+                if (option.getName() == name)
+                    return option;
+            }
+            ++iter;
         }
-
-        return value;
+        throw option_not_found(name);
     }
 
-    // get description of an option
-    // throws pdal::option_not_found if the option name is not valid
-    std::string getDescription(std::string const& name) const;
-
     // returns true iff the option name is valid
-    bool hasOption(std::string const& name) const;
+    template<typename T> bool hasOption(std::string const& name) const
+    {
+        try
+        {
+            Option<T> option = getOption<T>(name);
+        }
+        catch (option_not_found&)
+        {
+            return false;
+        }
+        return true;
+    }
 
-    // get the ptree for an option
-    // throws pdal::option_not_found if the option name is not valid
-    boost::property_tree::ptree const& getPTree() const;
+    // get the ptree for the whole option block
+    const boost::property_tree::ptree& getPTree() const;
    
     // return the empty options list
     static const Options& none();
 
 private:
-    boost::property_tree::ptree getOptionPTree(std::string const& name) const;
+    // get the ptree for an option
+    // throws pdal::option_not_found if the option name is not valid
+    const boost::property_tree::ptree getOptionPTree(const std::string& name) const;
 
     boost::property_tree::ptree m_tree;
 };

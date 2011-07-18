@@ -76,8 +76,8 @@ private:
     MultiFilterPtr parseMultiFilter(xmlDocPtr doc, xmlNodePtr cur);
     WriterPtr parseWriter(xmlDocPtr doc, xmlNodePtr cur);
 
-    void parseOption(xmlDocPtr doc, xmlNodePtr cur, Options&);
-    Options parseOptions(xmlDocPtr doc, xmlNodePtr cur);
+    Option<std::string> parseOption(xmlDocPtr doc, xmlNodePtr cur);
+    const char* getElementText(xmlDocPtr doc, xmlNodePtr cur);
 
     StageFactory m_factory;
 
