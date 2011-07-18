@@ -75,10 +75,10 @@ public:
 private:
     StageFactory m_factory;
 
-    std::vector<boost::shared_ptr<Reader>> m_readerStages;
-    std::vector<boost::shared_ptr<Filter>> m_filterStages;
-    std::vector<boost::shared_ptr<MultiFilter>> m_multifilterStages;
-    std::vector<boost::shared_ptr<Writer>> m_writerStages;
+    std::vector<boost::shared_ptr<Reader> > m_readerStages;
+    std::vector<boost::shared_ptr<Filter> > m_filterStages;
+    std::vector<boost::shared_ptr<MultiFilter> > m_multifilterStages;
+    std::vector<boost::shared_ptr<Writer> > m_writerStages;
 
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented
