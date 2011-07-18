@@ -123,26 +123,26 @@ int Application_pc2pc::execute()
     if (hasOption("native"))
     {
         Options optsR("filename", m_inputFile, "file to read from");
-        pdal::drivers::las::LasReader reader(optsR);
+        DataStagePtr reader(new pdal::drivers::las::LasReader(optsR));
     
-        const boost::uint64_t numPoints = reader.getNumPoints();
+        const boost::uint64_t numPoints = reader->getNumPoints();
 
-        pdal::drivers::las::LasWriter writer(reader, optsW);
+        WriterPtr writer(new pdal::drivers::las::LasWriter(reader, optsW));
 
         //BUG: handle laz writer.setCompressed(false);
 
         //writer.setPointFormat( reader.getPointFormatNumber() );
 
-        writer.write(numPoints);
+        writer->write(numPoints);
     }
 
     else if (hasOption("oracle-writer"))
     {
 #ifdef PDAL_HAVE_ORACLE
         Options optsR("filename", m_inputFile, "file to read from");
-        pdal::drivers::las::LasReader reader(optsR);
+        DataStagePtr reader(new pdal::drivers::las::LasReader(optsR));
     
-        const boost::uint64_t numPoints = reader.getNumPoints();
+        const boost::uint64_t numPoints = reader->getNumPoints();
 
         boost::property_tree::ptree load_tree;
         
@@ -165,14 +165,13 @@ int Application_pc2pc::execute()
         boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
         
         
-        pdal::filters::CacheFilter cache(reader, 1, capacity);
-        pdal::filters::Chipper chipper(cache, capacity);
-        pdal::filters::ByteSwapFilter swapper(chipper);
+        DataStagePtr cache(new pdal::filters::CacheFilter(reader, 1, capacity));
+        DataStagePtr chipper(new pdal::filters::Chipper(cache, capacity));
+        DataStagePtr swapper(new pdal::filters::ByteSwapFilter(chipper));
 
-     
-        pdal::filters::ScalingFilter scalingFilter(swapper, false);
+        DataStagePtr scalingFilter(new pdal::filters::ScalingFilter(swapper, false));
 
-        pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+        DataStagePtr reprojectionFilter(new pdal::filters::ReprojectionFilter(scalingFilter, in_ref, out_ref));
 
         // convert to ints, using custom scale factor
         
@@ -184,19 +183,19 @@ int Application_pc2pc::execute()
         double offsety = oracle_options.get<double>("offset.y");
         double offsetz = oracle_options.get<double>("offset.z");
 
-        pdal::filters::ScalingFilter descalingFilter(   reprojectionFilter, 
+        DataStagePtr descalingFilter(new pdal::filters::ScalingFilter (   reprojectionFilter, 
                                                         scalex, offsetx,
                                                         scaley, offsety, 
                                                         scalez, offsetz, 
-                                                        true);
+                                                        true));
         
-        pdal::drivers::oci::Writer writer(descalingFilter, options);
+        WriterPtr writer(new pdal::drivers::oci::Writer(descalingFilter, options));
 
         // pdal::filters::CacheFilter cache(reader, 1, capacity);
         // pdal::filters::Chipper chipper(cache, capacity);
         // pdal::drivers::oci::Writer writer(chipper, options);
 
-        writer.write(numPoints);
+        writer->write(numPoints);
         boost::property_tree::ptree output_tree;
         // output_tree.put_child(writer.getName(), options.GetPTree());
         // boost::property_tree::write_xml(m_xml, output_tree);
@@ -227,14 +226,14 @@ int Application_pc2pc::execute()
         {
             pdal::SpatialReference out_ref(out_wkt);
 
-            pdal::drivers::oci::Reader reader(options);
-            pdal::SpatialReference in_ref(reader.getSpatialReference());
+            DataStagePtr reader(new pdal::drivers::oci::Reader(options));
+            pdal::SpatialReference in_ref(reader->getSpatialReference());
 
-            pdal::filters::ByteSwapFilter swapper(reader);
+            DataStagePtr swapper(new pdal::filters::ByteSwapFilter(reader));
 
-            pdal::filters::ScalingFilter scalingFilter(swapper, false);
+            DataStagePtr scalingFilter(new pdal::filters::ScalingFilter(swapper, false));
 
-            pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+            DataStagePtr reprojectionFilter(new pdal::filters::ReprojectionFilter(scalingFilter, in_ref, out_ref));
 
             // convert to ints, using custom scale factor
             
@@ -246,34 +245,34 @@ int Application_pc2pc::execute()
             double offsety = las_options.get<double>("offset.y");
             double offsetz = las_options.get<double>("offset.z");
 
-            pdal::filters::ScalingFilter descalingFilter(   reprojectionFilter, 
-                                                            scalex, offsetx,
-                                                            scaley, offsety, 
-                                                            scalez, offsetz, 
-                                                            true);
+            DataStagePtr descalingFilter(new pdal::filters::ScalingFilter(reprojectionFilter, 
+                                                                          scalex, offsetx,
+                                                                          scaley, offsety, 
+                                                                          scalez, offsetz, 
+                                                                          true));
 
-            pdal::drivers::las::LasWriter writer(descalingFilter, optsW);
+            pdal::drivers::las::LasWriterPtr writer(new pdal::drivers::las::LasWriter(descalingFilter, optsW));
 
 
             if (compress)
-                writer.setCompressed(true);
-            writer.setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));            
-            writer.write(0);
+                writer->setCompressed(true);
+            writer->setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));            
+            writer->write(0);
         } else 
         {
             pdal::SpatialReference out_ref(out_wkt);
 
-            pdal::drivers::oci::Reader reader(options);
-            pdal::SpatialReference in_ref(reader.getSpatialReference());
-            pdal::filters::ByteSwapFilter swapper(reader);
+            DataStagePtr reader(new pdal::drivers::oci::Reader(options));
+            pdal::SpatialReference in_ref(reader->getSpatialReference());
+            DataStagePtr swapper(new pdal::filters::ByteSwapFilter(reader));
             
 
-            pdal::drivers::las::LasWriter writer(swapper, optsW);
+            pdal::drivers::las::LasWriterPtr writer(new pdal::drivers::las::LasWriter(swapper, optsW));
             if (compress)
-                writer.setCompressed(true);
+                writer->setCompressed(true);
         
-            writer.setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));            
-            writer.write(0);
+            writer->setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));            
+            writer->write(0);
         }
 
 
@@ -294,17 +293,17 @@ int Application_pc2pc::execute()
 
     else
     {
-        pdal::drivers::liblas::LiblasReader reader(m_inputFile);
+        pdal::drivers::liblas::LiblasReaderPtr reader(new pdal::drivers::liblas::LiblasReader(m_inputFile));
     
-        const boost::uint64_t numPoints = reader.getNumPoints();
+        const boost::uint64_t numPoints = reader->getNumPoints();
 
-        pdal::drivers::liblas::LiblasWriter writer(reader, optsW);
+        pdal::drivers::liblas::LiblasWriterPtr writer(new pdal::drivers::liblas::LiblasWriter(reader, optsW));
 
         //BUG: handle laz writer.setCompressed(false);
 
-        writer.setPointFormat( reader.getPointFormat() );
+        writer->setPointFormat( reader->getPointFormat() );
 
-        writer.write(numPoints);
+        writer->write(numPoints);
     }
 
     return 0;

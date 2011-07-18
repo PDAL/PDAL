@@ -41,7 +41,7 @@
 namespace pdal { namespace filters {
 
 
-CacheFilter::CacheFilter(const Stage& prevStage, const Options& options)
+CacheFilter::CacheFilter(const DataStagePtr& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
      throw not_yet_implemented("cache filter options support"); 
@@ -49,7 +49,7 @@ CacheFilter::CacheFilter(const Stage& prevStage, const Options& options)
 
 
 // cache block size is measured in Points, not bytes
-CacheFilter::CacheFilter(const Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
+CacheFilter::CacheFilter(const DataStagePtr& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
     : Filter(prevStage, Options::none())
     , m_numPointsRequested(0)
     , m_numPointsRead(0)

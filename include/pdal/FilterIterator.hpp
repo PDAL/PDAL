@@ -38,10 +38,10 @@
 #include <pdal/pdal.hpp>
 
 #include <pdal/StageIterator.hpp>
+#include <pdal/Filter.hpp>
 
 namespace pdal
 {
-class Filter;
 
 class FilterSequentialIterator : public StageSequentialIterator
 {

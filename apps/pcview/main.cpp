@@ -132,7 +132,7 @@ bool useColor = true;
 class ThreadArgs
 {
 public:
-    ThreadArgs(Controller& controller, pdal::Stage& stage, boost::uint32_t startPoint, boost::uint32_t numPoints)
+    ThreadArgs(Controller& controller, pdal::DataStage& stage, boost::uint32_t startPoint, boost::uint32_t numPoints)
         : m_controller(controller)
         , m_stage(stage)
         , m_startPoint(startPoint)
@@ -141,7 +141,7 @@ public:
     { }
 
     Controller& m_controller;
-    pdal::Stage& m_stage;
+    pdal::DataStage& m_stage;
     boost::uint32_t m_startPoint;
     boost::uint32_t m_numPoints;
     boost::uint32_t m_numRead;
@@ -157,7 +157,7 @@ static boost::mutex mutex;
 static void givePointsToEngine(ThreadArgs* threadArgs)
 {
     Controller& controller = threadArgs->m_controller;
-    pdal::Stage& stage = threadArgs->m_stage;
+    pdal::DataStage& stage = threadArgs->m_stage;
     boost::uint32_t startPoint = threadArgs->m_startPoint;
     boost::uint32_t numPoints = threadArgs->m_numPoints;
 
@@ -233,11 +233,11 @@ static void readFileSimple(Controller& controller, const string& file)
     boost::timer timer;
 
     pdal::Options optsR("filename", file, "file to read from");
-    pdal::Stage* reader = new pdal::drivers::las::LasReader(optsR);
+    pdal::DataStagePtr reader(new pdal::drivers::las::LasReader(optsR));
     
-    pdal::Stage* decimator = new pdal::filters::DecimationFilter(*reader, factor);
+    pdal::DataStagePtr decimator(new pdal::filters::DecimationFilter(reader, factor));
 
-    pdal::Stage* colorizer = new pdal::filters::ColorFilter(*decimator);
+    pdal::DataStagePtr colorizer(new pdal::filters::ColorFilter(decimator));
 
     const boost::uint32_t numPoints = (boost::uint32_t)colorizer->getNumPoints();
 
@@ -268,10 +268,6 @@ static void readFileSimple(Controller& controller, const string& file)
     const pdal::Bounds<double>& bounds = colorizer->getBounds();
     controller.setBounds((float)bounds.getMinimum(0), (float)bounds.getMinimum(1), (float)bounds.getMinimum(2), 
                          (float)bounds.getMaximum(0), (float)bounds.getMaximum(1), (float)bounds.getMaximum(2));
-
-    delete colorizer;
-    delete decimator;
-    delete reader;
 
     return;
 }

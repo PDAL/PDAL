@@ -55,10 +55,10 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     Utils::deleteFile("temp.las");
 
     Options optsR("filename", Support::datapath("1.2-with-color.las"), "file to read from");
-    pdal::drivers::las::LasReader reader(optsR);
+    DataStagePtr reader(new pdal::drivers::las::LasReader(optsR));
     
     {
-        const boost::uint64_t numPoints = reader.getNumPoints();
+        const boost::uint64_t numPoints = reader->getNumPoints();
 
         Options optsW("filename", "temp.las", "file to write to");
         pdal::drivers::las::LasWriter writer(reader, optsW);
@@ -91,21 +91,21 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     Utils::deleteFile("temp.laz");
 
     Options optsR("filename", Support::datapath("1.2-with-color.las"), "file to read from");
-    pdal::drivers::las::LasReader reader(optsR);
+    DataStagePtr reader(new pdal::drivers::las::LasReader(optsR));
     
     {
-        const boost::uint64_t numPoints = reader.getNumPoints();
+        const boost::uint64_t numPoints = reader->getNumPoints();
 
         Options optsW("filename", "temp.laz", "file to write to");
-        pdal::drivers::las::LasWriter writer(reader, optsW);
+        pdal::drivers::las::LasWriterPtr writer(new pdal::drivers::las::LasWriter(reader, optsW));
 
-        writer.setCompressed(true);
-        writer.setDate(0, 0);
-        writer.setPointFormat(::pdal::drivers::las::PointFormat3);
-        writer.setSystemIdentifier("");
-        writer.setGeneratingSoftware("TerraScan");
+        writer->setCompressed(true);
+        writer->setDate(0, 0);
+        writer->setPointFormat(::pdal::drivers::las::PointFormat3);
+        writer->setSystemIdentifier("");
+        writer->setGeneratingSoftware("TerraScan");
 
-        writer.write(numPoints);
+        writer->write(numPoints);
     }
 
     {
@@ -131,26 +131,26 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     Utils::deleteFile("temp.las");
 
     Options opts("filename", Support::datapath("1.2_3.las"), "file to read from");
-    pdal::drivers::las::LasReader reader(opts);
+    DataStagePtr reader(new pdal::drivers::las::LasReader(opts));
     
     {
-        const boost::uint64_t numPoints = reader.getNumPoints();
+        const boost::uint64_t numPoints = reader->getNumPoints();
 
         Options optsW("filename", "temp.las", "file to write to");
-        pdal::drivers::las::LasWriter writer(reader, optsW);
-        BOOST_CHECK(writer.getDescription() == "Las Writer");
+        pdal::drivers::las::LasWriterPtr writer(new pdal::drivers::las::LasWriter(reader, optsW));
+        BOOST_CHECK(writer->getDescription() == "Las Writer");
 
-        writer.setCompressed(false);
-        writer.setDate(78, 2008);
-        writer.setPointFormat((::pdal::drivers::las::PointFormat)pointFormat);
-        writer.setFormatVersion(majorVersion, minorVersion);
-        writer.setSystemIdentifier("libLAS");
-        writer.setGeneratingSoftware("libLAS 1.2");
+        writer->setCompressed(false);
+        writer->setDate(78, 2008);
+        writer->setPointFormat((::pdal::drivers::las::PointFormat)pointFormat);
+        writer->setFormatVersion(majorVersion, minorVersion);
+        writer->setSystemIdentifier("libLAS");
+        writer->setGeneratingSoftware("libLAS 1.2");
         
         boost::uuids::uuid u = boost::lexical_cast<boost::uuids::uuid>("8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
-        writer.setProjectId(u);
+        writer->setProjectId(u);
 
-        writer.write(numPoints);
+        writer->write(numPoints);
     }
 
     // BUG: the following test commented out as per ticket #35

@@ -92,7 +92,7 @@ vector<boost::uint32_t> Block::GetIDs() const
     return ids;
 }
 
-void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t block_id) const
+void Block::GetBuffer(const DataStagePtr& stage, PointBuffer& buffer, boost::uint32_t block_id) const
 {
     pdal::Schema const& schema = buffer.getSchema();
 
@@ -102,10 +102,10 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t 
     if (size < 0)
         throw pdal_error("m_right - m_left + 1 was less than 0 in Block::GetBuffer()!");
 
-    if (!stage.supportsIterator(StageIterator_Random))
+    if (!stage->supportsIterator(StageIterator_Random))
         throw pdal_error("Chipper GetBuffer is unable to read data source randomly!");
             
-    boost::scoped_ptr<StageRandomIterator> iter(stage.createRandomIterator());
+    boost::scoped_ptr<StageRandomIterator> iter(stage->createRandomIterator());
 
     std::vector<boost::uint32_t> ids = GetIDs();
     pdal::PointBuffer one_point(schema, 1);
@@ -147,9 +147,9 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     boost::uint32_t idx;
     vector<PtRef>::iterator it;
    
-    pdal::Schema const& schema = m_prevStage.getSchema();
+    pdal::Schema const& schema = getPrevStage()->getSchema();
     
-    boost::uint64_t count = m_prevStage.getNumPoints();
+    boost::uint64_t count = getPrevStage()->getNumPoints();
     if (count > std::numeric_limits<std::size_t>::max())
         throw pdal_error("numPoints too large for Chipper");
     boost::uint32_t count32 = (boost::uint32_t)count;
@@ -176,7 +176,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     std::size_t num_points_loaded = 0;
     std::size_t num_points_to_load = count32;
     
-    boost::scoped_ptr<StageSequentialIterator> iter(m_prevStage.createSequentialIterator());
+    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage()->createSequentialIterator());
     
     boost::uint32_t counter = 0;
     while (num_points_loaded < num_points_to_load)

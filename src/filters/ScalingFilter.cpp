@@ -44,14 +44,14 @@
 namespace pdal { namespace filters {
 
 
-ScalingFilter::ScalingFilter(const Stage& prevStage, const Options& options)
+ScalingFilter::ScalingFilter(const DataStagePtr& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
      throw not_yet_implemented("scaling filter options support"); 
 }
 
 
-ScalingFilter::ScalingFilter(const Stage& prevStage, bool forward)
+ScalingFilter::ScalingFilter(const DataStagePtr& prevStage, bool forward)
     : Filter(prevStage, Options::none())
     , m_customScaleOffset(false)
     , m_scaleX(0.0)
@@ -70,7 +70,7 @@ ScalingFilter::ScalingFilter(const Stage& prevStage, bool forward)
 }
 
 
-ScalingFilter::ScalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ, bool forward)
+ScalingFilter::ScalingFilter(const DataStagePtr& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ, bool forward)
     : Filter(prevStage, Options::none())
     , m_customScaleOffset(true)
     , m_scaleX(scaleX)

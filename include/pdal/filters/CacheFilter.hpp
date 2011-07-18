@@ -55,11 +55,15 @@ namespace filters {
 //   - we only cache on 'blockSize' boundaries
 //   - we only look into the cache if 1 point is being requested
 //
+
+class CacheFilter;
+typedef boost::shared_ptr<CacheFilter> CacheFilterPtr;
+
 class PDAL_DLL CacheFilter : public Filter
 {
 public:
-    CacheFilter(const Stage& prevStage, const Options& options);
-    CacheFilter(const Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
+    CacheFilter(const DataStagePtr& prevStage, const Options& options);
+    CacheFilter(const DataStagePtr& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
     ~CacheFilter();
 
     const std::string& getDescription() const;

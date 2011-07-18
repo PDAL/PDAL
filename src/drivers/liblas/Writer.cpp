@@ -50,7 +50,7 @@
 
 namespace pdal { namespace drivers { namespace liblas {
 
-LiblasWriter::LiblasWriter(const Stage& prevStage, const Options& options)
+LiblasWriter::LiblasWriter(const DataStagePtr& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_ostream(std::cout)
     , m_externalWriter(NULL)
@@ -60,7 +60,7 @@ LiblasWriter::LiblasWriter(const Stage& prevStage, const Options& options)
 
 
 
-LiblasWriter::LiblasWriter(const Stage& prevStage, std::ostream& ostream)
+LiblasWriter::LiblasWriter(const DataStagePtr& prevStage, std::ostream& ostream)
     : pdal::Writer(prevStage, Options::none())
     , m_ostream(ostream)
     , m_externalWriter(NULL)
@@ -102,7 +102,7 @@ void LiblasWriter::setupExternalHeader()
     setSystemIdentifier("PDAL");
     setGeneratingSoftware(GetVersionString());
 
-    const Schema& schema = getPrevStage().getSchema();
+    const Schema& schema = getPrevStage()->getSchema();
 
     int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
     int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);

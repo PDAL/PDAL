@@ -51,17 +51,17 @@ BOOST_AUTO_TEST_CASE(test)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
 
-    pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Random);
+    DataStagePtr reader(new pdal::drivers::faux::Reader(srcBounds, 1000, pdal::drivers::faux::Reader::Random));
 
-    pdal::filters::DecimationFilter filter(reader, 10);
-    BOOST_CHECK(filter.getDescription() == "Decimation Filter");
+    DataStagePtr filter(new pdal::filters::DecimationFilter(reader, 10));
+    BOOST_CHECK(filter->getDescription() == "Decimation Filter");
 
-    const Schema& schema = filter.getSchema();
+    const Schema& schema = filter->getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 3);
 
-    StageSequentialIterator* iter = filter.createSequentialIterator();
+    StageSequentialIterator* iter = filter->createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 3);

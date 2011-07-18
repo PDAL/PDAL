@@ -55,12 +55,24 @@ class StageBlockIterator;
 
 // every stage owns its own header, they are not shared
 
-// Stage and Writer both derive from StageBase
-class PDAL_DLL StageBase
+
+// DataStage and Writer both derive from Stage
+
+class Stage;
+class DataStage;
+typedef boost::shared_ptr<Stage> StagePtr;
+typedef boost::shared_ptr<DataStage> DataStagePtr;
+
+class PDAL_DLL Stage
 {
 public:
-    StageBase(const Options& options);
-    virtual ~StageBase();
+    Stage(const Options& options);
+    Stage(const DataStagePtr&, const Options& options);
+    Stage(const std::vector<const DataStagePtr>&, const Options& options);
+    virtual ~Stage();
+
+    DataStagePtr getPrevStage() const;
+    const std::vector<const DataStagePtr>& getPrevStages() const;
 
     const Options& getOptions() const;
 
@@ -77,18 +89,21 @@ protected:
 
 private:
     Options m_options;
+    std::vector<const DataStagePtr> m_prevStages;
 
-    StageBase& operator=(const StageBase&); // not implemented
-    StageBase(const StageBase&); // not implemented
+    Stage& operator=(const Stage&); // not implemented
+    Stage(const Stage&); // not implemented
 };
 
 
-// Reader and Filter both derive from Stage
-class PDAL_DLL Stage : public StageBase
+// Reader and Filter both derive from DataStage
+class PDAL_DLL DataStage : public Stage
 {
 public:
-    Stage(const Options& options);
-    virtual ~Stage();
+    DataStage(const Options& options);
+    DataStage(const DataStagePtr&, const Options& options);
+    DataStage(const std::vector<const DataStagePtr>&, const Options& options);
+    virtual ~DataStage();
    
     // core properties of all stages
     const Schema& getSchema() const;
@@ -122,7 +137,7 @@ protected:
 
     // convenience function, for doing a "copy ctor" on all the core props
     // (used by the Filter stage, for example)
-    void setCoreProperties(const Stage&);
+    void setCoreProperties(const DataStagePtr&);
 
 private:
     Schema m_schema;
@@ -131,8 +146,8 @@ private:
     Bounds<double> m_bounds;
     SpatialReference m_spatialReference;
 
-    Stage& operator=(const Stage&); // not implemented
-    Stage(const Stage&); // not implemented
+    DataStage& operator=(const DataStage&); // not implemented
+    DataStage(const DataStage&); // not implemented
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);

@@ -51,7 +51,7 @@ static boost::uint32_t s_defaultChunkSize = 1024;
 //
 //---------------------------------------------------------------------------
 
-StageIterator::StageIterator(const Stage& stage)
+StageIterator::StageIterator(const DataStage& stage)
     : m_index(0)
     , m_stage(stage)
     , m_chunkSize(s_defaultChunkSize)
@@ -66,7 +66,7 @@ StageIterator::~StageIterator()
 }
 
 
-const Stage& StageIterator::getStage() const
+const DataStage& StageIterator::getStage() const
 {
     return m_stage;
 }
@@ -131,7 +131,7 @@ boost::uint64_t StageIterator::naiveSkipImpl(boost::uint64_t count)
 //
 //---------------------------------------------------------------------------
 
-StageSequentialIterator::StageSequentialIterator(const Stage& stage)
+StageSequentialIterator::StageSequentialIterator(const DataStage& stage)
     : StageIterator(stage)
 {
     return;
@@ -166,7 +166,7 @@ bool StageSequentialIterator::atEnd() const
 //
 //---------------------------------------------------------------------------
 
-StageRandomIterator::StageRandomIterator(const Stage& stage)
+StageRandomIterator::StageRandomIterator(const DataStage& stage)
     : StageIterator(stage)
 {
     return;
@@ -195,7 +195,7 @@ boost::uint64_t StageRandomIterator::seek(boost::uint64_t position)
 //
 //---------------------------------------------------------------------------
 
-StageBlockIterator::StageBlockIterator(const Stage& stage)
+StageBlockIterator::StageBlockIterator(const DataStage& stage)
     : StageIterator(stage)
 {
     return;

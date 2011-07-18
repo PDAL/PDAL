@@ -40,10 +40,10 @@
 #include <vector>
 
 #include <pdal/StageIterator.hpp>
+#include <pdal/MultiFilter.hpp>
 
 namespace pdal
 {
-class MultiFilter;
 
 class MultiFilterSequentialIterator : public StageSequentialIterator
 {

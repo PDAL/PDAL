@@ -53,6 +53,9 @@ namespace pdal { namespace drivers { namespace liblas {
 
 class LiblasHeader;
 
+class LiblasReader;
+typedef boost::shared_ptr<LiblasReader> LiblasReaderPtr;
+
 class PDAL_DLL LiblasReader : public pdal::drivers::las::LasReaderBase
 {
 public:

@@ -50,11 +50,14 @@ namespace pdal { namespace filters {
 
 class ReprojectionFilterSequentialIterator;
 
+class ReprojectionFilter;
+typedef boost::shared_ptr<ReprojectionFilter> ReprojectionFilterPtr;
+
 class PDAL_DLL ReprojectionFilter : public Filter
 {
 public:
-    ReprojectionFilter(const Stage& prevStage, const Options& options);
-    ReprojectionFilter(const Stage& prevStage,
+    ReprojectionFilter(const DataStagePtr& prevStage, const Options& options);
+    ReprojectionFilter(const DataStagePtr& prevStage,
                        const SpatialReference& inSRS,
                        const SpatialReference& outSRS);
 

@@ -217,16 +217,16 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
 
 BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
-    BOOST_CHECK(reader.getDescription() == "Liblas Reader");
+    DataStagePtr reader(new LiblasReader(Support::datapath("1.2-with-color.las")));
+    BOOST_CHECK(reader->getDescription() == "Liblas Reader");
 
-    BOOST_CHECK(reader.getNumPoints() == 1065);
+    BOOST_CHECK(reader->getNumPoints() == 1065);
     BOOST_CHECK(355 * 3 == 1065);
 
-    CacheFilter cache(reader, 1, 355);
-    BOOST_CHECK(cache.getNumPoints() == 1065);
+    CacheFilterPtr cache(new CacheFilter(reader, 1, 355));
+    BOOST_CHECK(cache->getNumPoints() == 1065);
 
-    const Schema& schema = cache.getSchema();
+    const Schema& schema = cache->getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 355);
@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     boost::uint32_t numRead;
 
     {
-        pdal::StageSequentialIterator* iter = cache.createSequentialIterator();
+        pdal::StageSequentialIterator* iter = cache->createSequentialIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         numRead = iter->read(data);
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     }
 
     {
-        pdal::StageRandomIterator* iter = cache.createRandomIterator();
+        pdal::StageRandomIterator* iter = cache->createRandomIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         // read the middle third

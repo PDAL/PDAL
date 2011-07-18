@@ -61,11 +61,11 @@ boost::uint32_t ByteSwapFilterSequentialIterator::readImpl(PointBuffer& dstData)
     // We will read from our previous stage until we get that amount (or
     // until the previous stage runs out of points).
     
-    Stage const* prevStage = &(m_swapFilter.getPrevStage());
+    const DataStagePtr prevStage = m_swapFilter.getPrevStage();
 
         // std::cout << "Source: " << dstData.getSchemaLayout().getSchema() << std::endl;
         // std::cout << "prev stage: " << prevStage->getSchema() << std::endl;    
-    Chipper const* chip = dynamic_cast<Chipper const*>(prevStage);
+    Chipper const* chip = dynamic_cast<Chipper const*>(prevStage.get());
     
     if (chip)
     {

@@ -48,18 +48,18 @@
 namespace pdal { namespace filters {
 
 
-ByteSwapFilter::ByteSwapFilter(const Stage& prevStage, const Options& options)
+ByteSwapFilter::ByteSwapFilter(const DataStagePtr& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
      throw not_yet_implemented("byteswap filter options support"); 
 }
 
-ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
+ByteSwapFilter::ByteSwapFilter(const DataStagePtr& prevStage)
     : Filter(prevStage, Options::none())
 {
 
-    this->setNumPoints(prevStage.getNumPoints());
-    this->setPointCountType(prevStage.getPointCountType());
+    this->setNumPoints(prevStage->getNumPoints());
+    this->setPointCountType(prevStage->getPointCountType());
     
     return;
 }

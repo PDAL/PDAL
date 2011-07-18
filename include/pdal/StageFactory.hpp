@@ -36,6 +36,11 @@
 #define INCLUDED_STAGEFACTORY_HPP
 
 #include <pdal/pdal.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/MultiFilter.hpp>
+#include <pdal/Writer.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -47,11 +52,6 @@
 namespace pdal
 {
 
-class Stage;
-class Reader;
-class Filter;
-class MultiFilter;
-class Writer;
 class Options;
 
 
@@ -72,10 +72,10 @@ class PDAL_DLL StageFactory
 {
 public:
     typedef Reader* ReaderCreator(const Options&);
-    typedef Filter* FilterCreator(const Stage& prevStage, const Options&);
-    typedef MultiFilter* MultiFilterCreator(const std::vector<const Stage*>& prevStage, const Options&);
-    typedef Writer* WriterCreator(const Stage& prevStage, const Options&);
-
+    typedef Filter* FilterCreator(const DataStagePtr& prevStage, const Options&);
+    typedef MultiFilter* MultiFilterCreator(const std::vector<const DataStagePtr>& prevStages, const Options&);
+    typedef Writer* WriterCreator(const DataStagePtr& prevStage, const Options&);
+    
     typedef std::map<std::string, ReaderCreator*> ReaderCreatorList;
     typedef std::map<std::string, FilterCreator*> FilterCreatorList;
     typedef std::map<std::string, MultiFilterCreator*> MultiFilterCreatorList;
@@ -84,10 +84,10 @@ public:
 public:
     StageFactory();
 
-    boost::shared_ptr<Reader> createReader(const std::string& type, const Options& options);
-    boost::shared_ptr<Filter> createFilter(const std::string& type, const Stage& prevStage, const Options& options);
-    boost::shared_ptr<MultiFilter> createMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStage, const Options& options);
-    boost::shared_ptr<Writer> createWriter(const std::string& type, const Stage& prevStage, const Options& options);
+    ReaderPtr createReader(const std::string& type, const Options& options);
+    FilterPtr createFilter(const std::string& type, const DataStagePtr& prevStage, const Options& options);
+    MultiFilterPtr createMultiFilter(const std::string& type, const std::vector<const DataStagePtr>& prevStages, const Options& options);
+    WriterPtr createWriter(const std::string& type, const DataStagePtr& prevStage, const Options& options);
 
     void registerReader(const std::string& type, ReaderCreator* f);
     void registerFilter(const std::string& type, FilterCreator* f);
@@ -95,12 +95,15 @@ public:
     void registerWriter(const std::string& type, WriterCreator* f);
 
 private:
-    ReaderCreator* getReaderCreator(const std::string& type);
-    FilterCreator* getFilterCreator(const std::string& type);
-    MultiFilterCreator* getMultiFilterCreator(const std::string& type);
-    WriterCreator* getWriterCreator(const std::string& type);
+    ReaderCreator* getReaderCreator(const std::string& type) const;
+    FilterCreator* getFilterCreator(const std::string& type) const;
+    MultiFilterCreator* getMultiFilterCreator(const std::string& type) const;
+    WriterCreator* getWriterCreator(const std::string& type) const;
 
-    void registerKnownStages();
+    void registerKnownReaders();
+    void registerKnownFilters();
+    void registerKnownMultiFilters();
+    void registerKnownWriters();
 
     // these are the "registries" of the factory creator functions
     ReaderCreatorList m_readerCreators;

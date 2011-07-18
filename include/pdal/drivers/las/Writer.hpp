@@ -50,10 +50,13 @@ namespace pdal { namespace drivers { namespace las {
 
 class ZipPoint;
 
+class LasWriter;
+typedef boost::shared_ptr<LasWriter> LasWriterPtr;
+
 class PDAL_DLL LasWriter : public Writer
 {
 public:
-    LasWriter(const Stage& prevStage, const Options& options);
+    LasWriter(const DataStagePtr& prevStage, const Options& options);
     ~LasWriter();
 
     const std::string& getDescription() const;

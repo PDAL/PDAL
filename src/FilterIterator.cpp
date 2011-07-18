@@ -44,7 +44,7 @@ FilterSequentialIterator::FilterSequentialIterator(const Filter& filter)
     , m_filter(filter)
     , m_prevIterator(NULL)
 {
-    m_prevIterator = m_filter.getPrevStage().createSequentialIterator();
+    m_prevIterator = m_filter.getPrevStage()->createSequentialIterator();
 
     return;
 }
@@ -74,7 +74,7 @@ FilterRandomIterator::FilterRandomIterator(const Filter& filter)
     , m_filter(filter)
     , m_prevIterator(NULL)
 {
-    m_prevIterator = m_filter.getPrevStage().createRandomIterator();
+    m_prevIterator = m_filter.getPrevStage()->createRandomIterator();
 
     return;
 }
@@ -102,7 +102,7 @@ FilterBlockIterator::FilterBlockIterator(const Filter& filter)
     , m_filter(filter)
     , m_prevIterator(NULL)
 {
-    m_prevIterator = m_filter.getPrevStage().createBlockIterator();
+    m_prevIterator = m_filter.getPrevStage()->createBlockIterator();
 
     return;
 }

@@ -51,16 +51,23 @@ BOOST_AUTO_TEST_CASE(test1)
     PipelineManager mgr;
 
     const Options optsR("filename", Support::datapath("1.2-with-color.las"), "file to read from");
-    boost::shared_ptr<Reader> reader = mgr.addReader("drivers.las.reader", optsR);
+    ReaderPtr reader = mgr.addReader("drivers.las.reader", optsR);
 
     const Options optsF("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
-    boost::shared_ptr<Filter> filter = mgr.addFilter("filters.crop", *reader, optsF);
+    FilterPtr filter = mgr.addFilter("filters.crop", reader, optsF);
 
     const Options optsW("filename", "temp.las", "file to write to");
-    boost::shared_ptr<Writer> writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
+    WriterPtr writer = mgr.addWriter("drivers.las.writer", filter, optsW);
 
     return;
 }
 
+
+BOOST_AUTO_TEST_CASE(test2)
+{
+    PipelineManager mgr;
+
+    mgr.readXml(Support::datapath("pipeline1.xml"));
+}
 
 BOOST_AUTO_TEST_SUITE_END()

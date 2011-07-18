@@ -88,16 +88,16 @@ int Application_pc2pc::execute()
 
     pdal::Option<std::string> filename("input", m_inputFile, "Input filename for reader to use" );
     options.add(filename);
-    pdal::drivers::qfit::Reader reader(options);
+    DataStagePtr reader(new pdal::drivers::qfit::Reader(options));
     
-    const boost::uint64_t numPoints = reader.getNumPoints();
+    const boost::uint64_t numPoints = reader->getNumPoints();
 
     Options optsW("filename", m_outputFile, "file to write to");
-    pdal::drivers::las::LasWriter writer(reader, optsW);
+    WriterPtr writer(new pdal::drivers::las::LasWriter(reader, optsW));
 
     // writer.setPointFormat( reader.getPointFormat() );
 
-    writer.write(numPoints);
+    writer->write(numPoints);
 
     return 0;
 }

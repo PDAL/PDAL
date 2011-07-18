@@ -49,11 +49,15 @@ namespace pdal { namespace drivers { namespace faux {
 //
 // This writer knows only about three dimensions: X,Y,Z (as doubles).
 //
+
+class Writer;
+typedef boost::shared_ptr<Writer> WriterPtr;
+
 class PDAL_DLL Writer : public pdal::Writer
 {
 public:
-    Writer(const Stage& prevStage, const Options& options);
-    Writer(const Stage& prevStage);
+    Writer(const DataStagePtr& prevStage, const Options& options);
+    Writer(const DataStagePtr& prevStage);
 
     const std::string& getDescription() const;
     const std::string& getName() const;

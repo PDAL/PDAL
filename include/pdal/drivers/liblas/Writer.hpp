@@ -49,12 +49,15 @@
 
 namespace pdal { namespace drivers { namespace liblas {
 
+class LiblasWriter;
+typedef boost::shared_ptr<LiblasWriter> LiblasWriterPtr;
+
 // we default to LAS 1.2, point format 0
 class PDAL_DLL LiblasWriter : public Writer
 {
 public:
-    LiblasWriter(const Stage& prevStage, const Options& options);
-    LiblasWriter(const Stage& prevStage, std::ostream&);
+    LiblasWriter(const DataStagePtr& prevStage, const Options& options);
+    LiblasWriter(const DataStagePtr& prevStage, std::ostream&);
     ~LiblasWriter();
 
     const std::string& getDescription() const;

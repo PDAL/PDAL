@@ -50,13 +50,16 @@ namespace pdal { namespace filters {
 
 class ByteSwapFilterSequentialIterator;
 
+class ByteSwapFilter;
+typedef boost::shared_ptr<ByteSwapFilter> ByteSwapFilterPtr;
+
 // removes any points outside of the given range
 // updates the header accordingly
 class PDAL_DLL ByteSwapFilter : public Filter
 {
 public:
-    ByteSwapFilter(const Stage& prevStage, const Options& options);
-    ByteSwapFilter(const Stage& prevStage);
+    ByteSwapFilter(const DataStagePtr& prevStage, const Options& options);
+    ByteSwapFilter(const DataStagePtr& prevStage);
 
     const std::string& getDescription() const;
     const std::string& getName() const;

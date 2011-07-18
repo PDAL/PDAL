@@ -43,7 +43,7 @@ namespace pdal { namespace filters {
 
 
 
-CropFilter::CropFilter(const Stage& prevStage, const Options& options)
+CropFilter::CropFilter(const DataStagePtr& prevStage, const Options& options)
     : Filter(prevStage, options)
 {
     const Bounds<double> bounds = options.getValue<Bounds<double>>("bounds");

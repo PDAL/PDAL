@@ -265,9 +265,8 @@ std::string ReadFile(std::string filename)
     
 }
 
-Writer::Writer(const Stage& prevStage, const Options& options)
+Writer::Writer(const DataStagePtr& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
-    , m_stage(prevStage)
     , m_optionsOld(*(new OptionsOld()))
     , m_verbose(false)
     , m_doCreateIndex(false)
@@ -276,9 +275,8 @@ Writer::Writer(const Stage& prevStage, const Options& options)
 }
 
 
-Writer::Writer(const Stage& prevStage, OptionsOld& optionsOld)
+Writer::Writer(const DataStagePtr& prevStage, OptionsOld& optionsOld)
     : pdal::Writer(prevStage, Options::none())
-    , m_stage(prevStage)
     , m_optionsOld(optionsOld)
     , m_verbose(false)
     , m_doCreateIndex(false)
@@ -853,8 +851,8 @@ oss << "declare\n"
     {
         schema_data = ReadFile(point_schema_override);
     } else {
-        schema_data = pdal::Schema::to_xml(m_stage.getSchema());
-        std::cout << m_stage.getSchema() << std::endl;
+        schema_data = pdal::Schema::to_xml(getPrevStage()->getSchema());
+        std::cout << getPrevStage()->getSchema() << std::endl;
         std::ostream* output= Utils::createFile("oracle-write-schema.xml",true);
         *output << schema_data <<std::endl;
         Utils::closeFile(output);

@@ -52,10 +52,15 @@ class CropFilterSequentialIterator;
 
 // removes any points outside of the given range
 // updates the header accordingly
+
+
+class CropFilter;
+typedef boost::shared_ptr<CropFilter> CropFilterPtr;
+
 class PDAL_DLL CropFilter : public Filter
 {
 public:
-    CropFilter(const Stage& prevStage, const Options& options);
+    CropFilter(const DataStagePtr& prevStage, const Options& options);
 
     const std::string& getDescription() const;
     const std::string& getName() const;

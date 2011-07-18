@@ -46,37 +46,26 @@ namespace pdal
 
 //--------------------------------------------------------------------------------
 
-StageBase::StageBase(const Options& options)
+Stage::Stage(const Options& options)
     : m_options(options)
 {
     return;
 }
 
 
-StageBase::~StageBase()
+Stage::Stage(const DataStagePtr& prev, const Options& options)
+    : m_options(options)
 {
+    m_prevStages.push_back(prev);
     return;
 }
 
-const Options& StageBase::getOptions() const
+
+Stage::Stage(const std::vector<const DataStagePtr>& prevs, const Options& options)
+    : m_options(options)
 {
-    return m_options;
-}
-
-
-Options& StageBase::getOptions()
-{
-    return m_options;
-}
-
-//--------------------------------------------------------------------------------
-
-
-Stage::Stage(const Options& options)
-    : StageBase(options)
-    , m_numPoints(0)
-    , m_pointCountType(PointCount_Fixed)
-{
+    for (boost::uint32_t i=0; i<prevs.size(); i++)
+        m_prevStages.push_back(prevs[i]);
     return;
 }
 
@@ -86,80 +75,142 @@ Stage::~Stage()
     return;
 }
 
+const Options& Stage::getOptions() const
+{
+    return m_options;
+}
 
-const Bounds<double>& Stage::getBounds() const
+
+Options& Stage::getOptions()
+{
+    return m_options;
+}
+
+
+DataStagePtr Stage::getPrevStage() const
+{
+    if (m_prevStages.size() == 0)
+        throw pdal_error("internal error - no prev stages");
+    DataStagePtr ptr = m_prevStages[0];
+    return ptr;
+}
+
+
+const std::vector<const DataStagePtr>& Stage::getPrevStages() const
+{
+    return m_prevStages;
+}
+
+
+//--------------------------------------------------------------------------------
+
+
+DataStage::DataStage(const Options& options)
+    : Stage(options)
+    , m_numPoints(0)
+    , m_pointCountType(PointCount_Fixed)
+{
+    return;
+}
+
+
+DataStage::DataStage(const DataStagePtr& prev, const Options& options)
+    : Stage(prev, options)
+    , m_numPoints(0)
+    , m_pointCountType(PointCount_Fixed)
+{
+    return;
+}
+
+
+DataStage::DataStage(const std::vector<const DataStagePtr>& prevs, const Options& options)
+    : Stage(prevs, options)
+    , m_numPoints(0)
+    , m_pointCountType(PointCount_Fixed)
+{
+    return;
+}
+
+
+DataStage::~DataStage()
+{
+    return;
+}
+
+
+const Bounds<double>& DataStage::getBounds() const
 {
     return m_bounds;
 }
 
 
-void Stage::setBounds(const Bounds<double>& bounds)
+void DataStage::setBounds(const Bounds<double>& bounds)
 {
     m_bounds = bounds;
 }
 
 
-const Schema& Stage::getSchema() const
+const Schema& DataStage::getSchema() const
 {
     return m_schema;
 }
 
 
-Schema& Stage::getSchemaRef()
+Schema& DataStage::getSchemaRef()
 {
     return m_schema;
 }
 
 
-void Stage::setSchema(const Schema& schema)
+void DataStage::setSchema(const Schema& schema)
 {
     m_schema = schema;
 }
 
 
-boost::uint64_t Stage::getNumPoints() const
+boost::uint64_t DataStage::getNumPoints() const
 {
     return m_numPoints;
 }
 
 
-void Stage::setNumPoints(boost::uint64_t numPoints)
+void DataStage::setNumPoints(boost::uint64_t numPoints)
 {
     m_numPoints = numPoints;
 }
 
 
-PointCountType Stage::getPointCountType() const
+PointCountType DataStage::getPointCountType() const
 {
     return m_pointCountType;
 }
 
 
-void Stage::setPointCountType(PointCountType pointCountType)
+void DataStage::setPointCountType(PointCountType pointCountType)
 {
     m_pointCountType = pointCountType;
 }
 
 
-const SpatialReference& Stage::getSpatialReference() const
+const SpatialReference& DataStage::getSpatialReference() const
 {
     return m_spatialReference;
 }
 
 
-void Stage::setSpatialReference(const SpatialReference& spatialReference)
+void DataStage::setSpatialReference(const SpatialReference& spatialReference)
 {
     m_spatialReference = spatialReference;
 }
 
 
-int Stage::getMetadataRecordCount() const
+int DataStage::getMetadataRecordCount() const
 {
     return 0;
 }
 
 
-const MetadataRecord& Stage::getMetadataRecord(int index) const
+const MetadataRecord& DataStage::getMetadataRecord(int index) const
 {
     // the default behaviour is to have no records at all...
     boost::ignore_unused_variable_warning(index);
@@ -167,7 +218,7 @@ const MetadataRecord& Stage::getMetadataRecord(int index) const
 }
 
 
-MetadataRecord& Stage::getMetadataRecordRef(int index)
+MetadataRecord& DataStage::getMetadataRecordRef(int index)
 {
     // the default behaviour is to have no records at all...
     boost::ignore_unused_variable_warning(index);
@@ -175,19 +226,19 @@ MetadataRecord& Stage::getMetadataRecordRef(int index)
 }
 
 
-void Stage::setCoreProperties(const Stage& stage)
+void DataStage::setCoreProperties(const DataStagePtr& stage)
 {
-    this->setSchema(stage.getSchema());
-    this->setNumPoints(stage.getNumPoints());
-    this->setPointCountType(stage.getPointCountType());
-    this->setBounds(stage.getBounds());
-    this->setSpatialReference(stage.getSpatialReference());
+    this->setSchema(stage->getSchema());
+    this->setNumPoints(stage->getNumPoints());
+    this->setPointCountType(stage->getPointCountType());
+    this->setBounds(stage->getBounds());
+    this->setSpatialReference(stage->getSpatialReference());
 
     return;
 }
 
 
-void Stage::dump() const
+void DataStage::dump() const
 {
     std::cout << *this;
 }
@@ -195,17 +246,17 @@ void Stage::dump() const
 std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
 {
     ostr << "  Name: " << stage.getName() << std::endl;
-    ostr << "  Num points: " << stage.getNumPoints() << std::endl;
+//    ostr << "  Num points: " << stage.getNumPoints() << std::endl;
 
-    ostr << "  Bounds:" << std::endl;
-    ostr << "    " << stage.getBounds() << std::endl;
+//    ostr << "  Bounds:" << std::endl;
+//    ostr << "    " << stage.getBounds() << std::endl;
 
-    ostr << "  Schema: " << std::endl;
-    ostr << "    Num dims: " << stage.getSchema().getDimensions().size() << std::endl;
+//    ostr << "  Schema: " << std::endl;
+//    ostr << "    Num dims: " << stage.getSchema().getDimensions().size() << std::endl;
 //    ostr << "    Size in bytes: " << header.getSchema().getByteSize() << std::endl;
 
-    ostr << "  Spatial Reference:" << std::endl;
-    ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;
+//    ostr << "  Spatial Reference:" << std::endl;
+//    ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;
 
     return ostr;
 }

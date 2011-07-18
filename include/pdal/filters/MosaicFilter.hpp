@@ -46,6 +46,8 @@
 
 namespace pdal { namespace filters {
 
+class MosaicFilter;
+typedef boost::shared_ptr<MosaicFilter> MosaicFilterPtr;
 
 // this doesn't derive from Stage since it takes more than one stage as input
 class PDAL_DLL MosaicFilter : public MultiFilter
@@ -53,8 +55,7 @@ class PDAL_DLL MosaicFilter : public MultiFilter
 public:
     // entries may not be null
     // vector.size() must be > 0
-    MosaicFilter(const std::vector<const Stage*>& prevStages, const Options& options);
-    MosaicFilter(const std::vector<const Stage*>& prevStages);
+    MosaicFilter(const std::vector<const DataStagePtr>& prevStages, const Options& options);
     
     const std::string& getDescription() const;
     const std::string& getName() const;

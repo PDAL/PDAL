@@ -41,7 +41,7 @@
 namespace pdal { namespace filters {
 
 
-DecimationFilter::DecimationFilter(const Stage& prevStage, const Options& options)
+DecimationFilter::DecimationFilter(const DataStagePtr& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
      throw not_yet_implemented("decimation filter options support"); 
@@ -49,7 +49,7 @@ DecimationFilter::DecimationFilter(const Stage& prevStage, const Options& option
 
 
 
-DecimationFilter::DecimationFilter(const Stage& prevStage, boost::uint32_t step)
+DecimationFilter::DecimationFilter(const DataStagePtr& prevStage, boost::uint32_t step)
     : Filter(prevStage, Options::none())
     , m_step(step)
 {

@@ -50,6 +50,10 @@ namespace pdal { namespace filters {
 
 class ScalingFilterSequentialIterator;
 
+
+class ScalingFilter;
+typedef boost::shared_ptr<ScalingFilter> ScalingFilterPtr;
+
 class PDAL_DLL ScalingFilter : public Filter
 {
 public:
@@ -60,9 +64,9 @@ public:
     //   - "forward=true" means doubles --> ints
     //   - "forward=false" means ints --> doubles
     //   - 1st version uses the scale/offset values already present
-    ScalingFilter(const Stage& prevStage, const Options& options);
-    ScalingFilter(const Stage& prevStage, bool forward);
-    ScalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ, bool forward);
+    ScalingFilter(const DataStagePtr& prevStage, const Options& options);
+    ScalingFilter(const DataStagePtr& prevStage, bool forward);
+    ScalingFilter(const DataStagePtr& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ, bool forward);
 
     const std::string& getDescription() const;
     const std::string& getName() const;

@@ -46,7 +46,7 @@ MultiFilterSequentialIterator::MultiFilterSequentialIterator(const MultiFilter& 
 {
     for (size_t i=0; i<filter.getPrevStages().size(); ++i)
     {
-        const Stage* stage = filter.getPrevStages()[i];
+        const DataStagePtr stage = filter.getPrevStages()[i];
         m_prevIterators.push_back(stage->createSequentialIterator());
     }
 

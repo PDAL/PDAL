@@ -50,11 +50,11 @@ BOOST_AUTO_TEST_CASE(test_crop)
     // crop the window to 1/3rd the size in each dimension
     Bounds<double> dstBounds(3.33333, 33.33333, 333.33333, 6.66666, 66.66666, 666.66666);
     
-    pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Ramp);
+    DataStagePtr reader(new pdal::drivers::faux::Reader(srcBounds, 1000, pdal::drivers::faux::Reader::Ramp));
 
     Options opts("bounds", dstBounds, "crop bounds");
-    pdal::filters::CropFilter filter(reader, opts);
-    BOOST_CHECK(filter.getDescription() == "Crop Filter");
+    DataStagePtr filter(new pdal::filters::CropFilter(reader, opts));
+    BOOST_CHECK(filter->getDescription() == "Crop Filter");
 
     pdal::drivers::faux::Writer writer(filter);
 

@@ -252,17 +252,17 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 
         // Write a very simple file with our SRS and one point.
         pdal::Options opts("filename", Support::datapath("1.2-with-color.las"), "file to read from");
-        pdal::drivers::las::LasReader reader(opts);
+        pdal::ReaderPtr reader(new pdal::drivers::las::LasReader(opts));
 
         {
-            const boost::uint64_t numPoints = reader.getNumPoints();
+            const boost::uint64_t numPoints = reader->getNumPoints();
 
             pdal::Options optsW("filename", tmpfile, "file to write to");
-            pdal::drivers::las::LasWriter writer(reader, optsW);
+            pdal::drivers::las::LasWriterPtr writer(new pdal::drivers::las::LasWriter(reader, optsW));
 
-            writer.setSpatialReference(ref);
+            writer->setSpatialReference(ref);
 
-            writer.write(numPoints);
+            writer->write(numPoints);
         }
     }
 
@@ -322,10 +322,10 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
         pdal::Utils::deleteFile(tmpfile);
 
         pdal::Options opts("filename", Support::datapath("1.2-with-color.las"), "file to read from");
-        pdal::drivers::las::LasReader readerx(opts);
+        pdal::ReaderPtr readerx(new pdal::drivers::las::LasReader(opts));
 
         {
-            const boost::uint64_t numPoints = readerx.getNumPoints();
+            const boost::uint64_t numPoints = readerx->getNumPoints();
 
             pdal::Options optsW("filename", tmpfile, "file to write to");
             pdal::drivers::las::LasWriter writer(readerx, optsW);

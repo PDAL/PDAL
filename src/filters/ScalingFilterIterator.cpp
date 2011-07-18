@@ -51,7 +51,7 @@ ScalingFilterSequentialIterator::ScalingFilterSequentialIterator(const ScalingFi
 
 boost::uint32_t ScalingFilterSequentialIterator::readImpl(PointBuffer& dstData)
 {
-    SchemaLayout srcLayout(m_scalingFilter.getPrevStage().getSchema());
+    SchemaLayout srcLayout(m_scalingFilter.getPrevStage()->getSchema());
     PointBuffer srcData(srcLayout, dstData.getCapacity());
     const boost::uint32_t numRead = getPrevIterator().read(srcData);
 

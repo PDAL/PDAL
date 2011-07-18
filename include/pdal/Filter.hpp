@@ -42,15 +42,16 @@
 namespace pdal
 {
 
-class PDAL_DLL Filter : public Stage
+class Filter;
+typedef boost::shared_ptr<Filter> FilterPtr;
+
+class PDAL_DLL Filter : public DataStage
 {
 public:
-    Filter(const Stage& prevStage, const Options& options);
-
-    const Stage& getPrevStage() const;
+    Filter(const DataStagePtr& prevStage, const Options& options);
+    Filter(const std::vector<const DataStagePtr>& prevStage, const Options& options);
 
 protected:
-    const Stage& m_prevStage;
 
 private:
     Filter& operator=(const Filter&); // not implemented

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<Pipeline>
+    <Writer type="drivers.las.writer">
+        <Options>
+            <filename>
+              out.las
+            </filename>
+        </Options>
+        <Filter type="filters.crop">
+            <Options>
+            </Options>
+            <Reader type="drivers.las.reader">
+                <Options>
+                    <filename>in.las</filename>
+                </Options>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>

@@ -49,12 +49,15 @@ namespace pdal { namespace filters {
 
 class DecimationFilterSequentialIterator;
 
+class DecimationFilter;
+typedef boost::shared_ptr<DecimationFilter> DecimationFilterPtr;
+
 // we keep only 1 out of every step points; if step=100, we get 1% of the file
 class PDAL_DLL DecimationFilter : public Filter
 {
 public:
-    DecimationFilter(const Stage& prevStage, const Options& options);
-    DecimationFilter(const Stage& prevStage, boost::uint32_t step);
+    DecimationFilter(const DataStagePtr& prevStage, const Options& options);
+    DecimationFilter(const DataStagePtr& prevStage, boost::uint32_t step);
 
     const std::string& getDescription() const;
     const std::string& getName() const;
