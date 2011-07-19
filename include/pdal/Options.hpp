@@ -39,7 +39,7 @@
 #include <pdal/exceptions.hpp>
 #include <pdal/Bounds.hpp>
 #include <boost/property_tree/ptree.hpp>
-
+#include <boost/property_tree/xml_parser.hpp>
 
 namespace pdal
 {
