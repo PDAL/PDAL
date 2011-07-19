@@ -63,7 +63,6 @@ class PDAL_DLL CacheFilter : public Filter
 {
 public:
     CacheFilter(const DataStagePtr& prevStage, const Options& options);
-    CacheFilter(const DataStagePtr& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
     ~CacheFilter();
 
     const std::string& getDescription() const;

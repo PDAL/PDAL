@@ -276,7 +276,7 @@ Writer::Writer(const DataStagePtr& prevStage, const Options& options)
 
 
 Writer::Writer(const DataStagePtr& prevStage, OptionsOld& optionsOld)
-    : pdal::Writer(prevStage, Options::none())
+    : pdal::Writer(prevStage, Options::empty)
     , m_optionsOld(optionsOld)
     , m_verbose(false)
     , m_doCreateIndex(false)

@@ -57,7 +57,6 @@ class PDAL_DLL DecimationFilter : public Filter
 {
 public:
     DecimationFilter(const DataStagePtr& prevStage, const Options& options);
-    DecimationFilter(const DataStagePtr& prevStage, boost::uint32_t step);
 
     const std::string& getDescription() const;
     const std::string& getName() const;

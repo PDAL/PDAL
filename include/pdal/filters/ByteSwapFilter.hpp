@@ -59,7 +59,6 @@ class PDAL_DLL ByteSwapFilter : public Filter
 {
 public:
     ByteSwapFilter(const DataStagePtr& prevStage, const Options& options);
-    ByteSwapFilter(const DataStagePtr& prevStage);
 
     const std::string& getDescription() const;
     const std::string& getName() const;

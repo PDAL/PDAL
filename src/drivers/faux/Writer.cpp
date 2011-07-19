@@ -43,12 +43,6 @@ namespace pdal { namespace drivers { namespace faux {
 Writer::Writer(const DataStagePtr& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
 {
-     throw not_yet_implemented("faux writer options support"); 
-}
-
-Writer::Writer(const DataStagePtr& prevStage) :
-    pdal::Writer(prevStage, Options::none())
-{
     return;
 }
 

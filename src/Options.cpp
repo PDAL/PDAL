@@ -49,28 +49,11 @@
 namespace pdal
 {
 
-OptionsOld::OptionsOld()
+
+Options::Options(boost::property_tree::ptree t) :
+    m_tree(t)
 {
-    m_tree.put("is3d", false);
-
-}    
-
-
-Options::Options(boost::property_tree::ptree t)
-{
-    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, t.get_child("option"))
-    {
-        v;
-    }
-
-
-    //boost::property_tree::ptree tt = t.get_value<std::string>("option");
-    
-    //Option<std::string> opt = t.get<std::string>("option");
-
-    std::string name = t.get<std::string>("name");
-    std::string value = t.get<std::string>("value");
-    std::string description = t.get<std::string>("description");
+    return;
 }
 
 
@@ -78,27 +61,24 @@ Options::Options(std::istream& istr)
 {
     boost::property_tree::xml_parser::read_xml(istr, m_tree);
 
-
+#if DEBUG
     boost::property_tree::ptree::const_iterator iter = m_tree.begin();
     while (iter != m_tree.end())
     {
         std::string g = (*iter).first;
-        assert(g == "option");
+        assert(g == "Option");
         boost::property_tree::ptree h = (*iter).second;
         Option<std::string> hopt(h);
         ++iter;
     }
-
+#endif
 
     return;
 }
 
 
-static Options s_noOptions;
-const Options& Options::none()
-{
-    return s_noOptions;
-}
+// the empty options set
+const Options Options::empty;
 
 
 const boost::property_tree::ptree Options::getOptionPTree(const std::string& name) const
@@ -107,10 +87,10 @@ const boost::property_tree::ptree Options::getOptionPTree(const std::string& nam
 
     BOOST_FOREACH(ptree::value_type v, m_tree)
     {
-        if (v.first == "option")
+        if (v.first == "Option")
         {
             // v.second is <option><name>..</name><value>..</value><desc>..</desc></option>
-            const std::string s = v.second.get_child("name").get_value<std::string>();
+            const std::string s = v.second.get_child("Name").get_value<std::string>();
             if (name == s)
             {
                 return v.second;
@@ -122,8 +102,7 @@ const boost::property_tree::ptree Options::getOptionPTree(const std::string& nam
 }
 
 
-
-boost::property_tree::ptree const& Options::getPTree() const
+const boost::property_tree::ptree& Options::getPTree() const
 {
     return m_tree;
 }

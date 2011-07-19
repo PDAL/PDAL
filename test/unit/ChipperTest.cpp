@@ -49,13 +49,15 @@ BOOST_AUTO_TEST_SUITE(ChipperTest)
 
 BOOST_AUTO_TEST_CASE(test_construction)
 {
-    DataStagePtr reader(new LiblasReader(Support::datapath("1.2-with-color.las")));
+    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    DataStagePtr reader(new LiblasReader(readerOptions));
 
     {
         const boost::uint64_t num_points = reader->getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::filters::ChipperPtr chipper(new pdal::filters::Chipper(reader, 15));
+        Options chipperOptions("max_partition_size", 15);
+        pdal::filters::ChipperPtr chipper(new pdal::filters::Chipper(reader, chipperOptions));
 
         chipper->Chip();
         boost::uint32_t num_blocks = chipper->GetBlockCount();

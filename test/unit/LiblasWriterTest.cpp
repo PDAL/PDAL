@@ -54,7 +54,8 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    DataStagePtr reader(new LiblasReader(Support::datapath("1.2-with-color.las")));
+    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    DataStagePtr reader(new LiblasReader(readerOptions));
     
     std::ostream* ofs = Utils::createFile("temp.las");
 
@@ -92,7 +93,8 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    DataStagePtr reader(new LiblasReader(Support::datapath("1.2-with-color.las")));
+    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    DataStagePtr reader(new LiblasReader(readerOptions));
     
     std::ostream* ofs = Utils::createFile("temp.laz");
 
@@ -130,7 +132,8 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    ReaderPtr reader(new LiblasReader(Support::datapath("1.2_3.las")));
+    Options readerOptions("filename", Support::datapath("1.2_3.las"));
+    ReaderPtr reader(new LiblasReader(readerOptions));
     
     std::ostream* ofs = Utils::createFile("temp.las");
 

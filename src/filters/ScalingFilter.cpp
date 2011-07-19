@@ -52,7 +52,7 @@ ScalingFilter::ScalingFilter(const DataStagePtr& prevStage, const Options& optio
 
 
 ScalingFilter::ScalingFilter(const DataStagePtr& prevStage, bool forward)
-    : Filter(prevStage, Options::none())
+    : Filter(prevStage, Options::empty)
     , m_customScaleOffset(false)
     , m_scaleX(0.0)
     , m_scaleY(0.0)
@@ -71,7 +71,7 @@ ScalingFilter::ScalingFilter(const DataStagePtr& prevStage, bool forward)
 
 
 ScalingFilter::ScalingFilter(const DataStagePtr& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ, bool forward)
-    : Filter(prevStage, Options::none())
+    : Filter(prevStage, Options::empty)
     , m_customScaleOffset(true)
     , m_scaleX(scaleX)
     , m_scaleY(scaleY)

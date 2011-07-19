@@ -45,9 +45,13 @@ BOOST_AUTO_TEST_SUITE(FauxWriterTest)
 BOOST_AUTO_TEST_CASE(test_1)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    DataStagePtr reader(new pdal::drivers::faux::Reader(bounds, 1000, pdal::drivers::faux::Reader::Constant));
+    Options readerOptions;
+    readerOptions.add("bounds", bounds);
+    readerOptions.add("num_points", 1000);
+    readerOptions.add("mode", "constant");
+    DataStagePtr reader(new pdal::drivers::faux::Reader(readerOptions));
 
-    pdal::drivers::faux::WriterPtr writer(new pdal::drivers::faux::Writer(reader));
+    pdal::drivers::faux::WriterPtr writer(new pdal::drivers::faux::Writer(reader, Options::empty));
     BOOST_CHECK(writer->getDescription() == "Faux Writer");
 
     boost::uint64_t numWritten = writer->write(750);
@@ -73,9 +77,13 @@ BOOST_AUTO_TEST_CASE(test_1)
 BOOST_AUTO_TEST_CASE(test_2)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    DataStagePtr reader(new pdal::drivers::faux::Reader(bounds, 1000, pdal::drivers::faux::Reader::Random));
+    Options readerOptions;
+    readerOptions.add("bounds", bounds);
+    readerOptions.add("num_points", 1000);
+    readerOptions.add("mode", "random");
+    DataStagePtr reader(new pdal::drivers::faux::Reader(readerOptions));
 
-    pdal::drivers::faux::WriterPtr writer(new pdal::drivers::faux::Writer(reader));
+    pdal::drivers::faux::WriterPtr writer(new pdal::drivers::faux::Writer(reader, Options::empty));
 
     boost::uint64_t numWritten = writer->write(750);
 

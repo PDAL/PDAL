@@ -57,7 +57,6 @@ class PDAL_DLL Writer : public pdal::Writer
 {
 public:
     Writer(const DataStagePtr& prevStage, const Options& options);
-    Writer(const DataStagePtr& prevStage);
 
     const std::string& getDescription() const;
     const std::string& getName() const;

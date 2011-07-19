@@ -168,10 +168,10 @@ BOOST_AUTO_TEST_CASE(test_valid_options)
 
     {
         pdal::Options optI("foo", 19, "foo as an int");
-        bool okI = optI.hasOption<int>("foo");
-        BOOST_CHECK(okI);
-        bool okD = optI.hasOption<double>("foo");
-        // BOOST_CHECK(!okD);  // BUG: we would like this to return false;
+        ok = optI.hasOption<int>("foo");
+        BOOST_CHECK(ok);
+        ok = optI.hasOption<double>("foo");
+        // BOOST_CHECK(!ok);  // BUG: we would like this to return false;
     }
 
     return;

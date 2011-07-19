@@ -42,17 +42,22 @@
 
 namespace pdal { namespace drivers { namespace faux {
 
-Reader::Reader(const Options& options)
-    : pdal::Reader(options)
+static Reader::Mode toMode(const std::string& str)
 {
-     throw not_yet_implemented("faux reader options support"); 
+    if (str == "constant") return Reader::Constant;
+    if (str == "random") return Reader::Random;
+    if (str == "ramp") return Reader::Ramp;
+    throw pdal_error("unknown mode");
 }
 
 
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
-    : pdal::Reader(Options::none())
-    , m_mode(mode)
+Reader::Reader(const Options& options)
+    : pdal::Reader(options)
 {
+    const Bounds<double> bounds = options.getOption<Bounds<double> >("bounds").getValue();
+    const int numPoints = options.getOption<int>("num_points").getValue();
+    const Mode mode = toMode(options.getOption<std::string>("mode").getValue());
+
     Schema& schema = getSchemaRef();
 
     schema.addDimension(Dimension(Dimension::Field_X, Dimension::Double));
@@ -64,14 +69,19 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
     setPointCountType(PointCount_Fixed);
 
     setBounds(bounds);
+    
+    m_mode = mode;
 
     return;
 }
 
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : pdal::Reader( Options::none())
-    , m_mode(mode)
+Reader::Reader(const Options& options, const std::vector<Dimension>& dimensions)
+    : pdal::Reader(options)
 {
+    const Bounds<double> bounds = options.getOption<Bounds<double> >("bounds").getValue();
+    const int numPoints = options.getOption<int>("numpoints").getValue();
+    const Mode mode = toMode(options.getOption<std::string>("mode").getValue());
+
     Schema& schema = getSchemaRef();
     if (dimensions.size() == 0)
     {
@@ -80,7 +90,11 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std
     schema.addDimensions(dimensions);
 
     setNumPoints(numPoints);
+    setPointCountType(PointCount_Fixed);
+
     setBounds(bounds);
+    
+    m_mode = mode;
 
     return;
 }

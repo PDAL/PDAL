@@ -61,7 +61,7 @@ LiblasWriter::LiblasWriter(const DataStagePtr& prevStage, const Options& options
 
 
 LiblasWriter::LiblasWriter(const DataStagePtr& prevStage, std::ostream& ostream)
-    : pdal::Writer(prevStage, Options::none())
+    : pdal::Writer(prevStage, Options::empty)
     , m_ostream(ostream)
     , m_externalWriter(NULL)
 {

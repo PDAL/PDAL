@@ -52,11 +52,16 @@ BOOST_AUTO_TEST_SUITE(ByteSwapFilterTest)
 BOOST_AUTO_TEST_CASE(test_swapping)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
-    
     boost::uint32_t buffer_size = 20;
-    DataStagePtr reader(new pdal::drivers::faux::Reader(srcBounds, buffer_size, pdal::drivers::faux::Reader::Ramp));
 
-    DataStagePtr filter(new pdal::filters::ByteSwapFilter(reader));
+    Options options;
+    options.add("bounds", srcBounds);
+    options.add("num_points", buffer_size);
+    options.add("mode", "ramp");
+
+    DataStagePtr reader(new pdal::drivers::faux::Reader(options));
+
+    DataStagePtr filter(new pdal::filters::ByteSwapFilter(reader, Options::empty));
     BOOST_CHECK_EQUAL(filter->getName(), "filters.byteswap");
 
     boost::scoped_ptr<StageSequentialIterator> unflipped_iter(reader->createSequentialIterator());

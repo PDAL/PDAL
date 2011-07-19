@@ -46,13 +46,6 @@ namespace pdal { namespace filters {
 ColorFilter::ColorFilter(const DataStagePtr& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
-     throw not_yet_implemented("color filter options support"); 
-}
-
-
-ColorFilter::ColorFilter(const DataStagePtr& prevStage)
-    : Filter(prevStage, Options::none())
-{
     checkImpedance();
 
     return;

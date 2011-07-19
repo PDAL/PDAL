@@ -134,6 +134,21 @@ void Block::GetBuffer(const DataStagePtr& stage, PointBuffer& buffer, boost::uin
 }
 
 
+Chipper::Chipper(const DataStagePtr& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+    , m_xvec(chipper::DIR_X)
+    , m_yvec(chipper::DIR_Y)
+    , m_spare(chipper::DIR_NONE) 
+{
+    boost::uint32_t max_partition_size = options.getOption<boost::uint32_t>("max_partition_size").getValue();
+    m_threshold = max_partition_size;
+
+    checkImpedance();
+    setPointCountType(PointCount_Fixed);
+    setNumPoints(0);
+}
+
+
 void Chipper::Chip()
 {
     Load(m_xvec, m_yvec, m_spare);

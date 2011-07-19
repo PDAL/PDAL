@@ -47,17 +47,16 @@ namespace pdal
     
 class PDAL_DLL OptionsOld
 {
-
 private:
     boost::property_tree::ptree m_tree;
 
 public:
+    OptionsOld()
+    {
+        m_tree.put("is3d", false);
+    }
 
-    OptionsOld();
     OptionsOld(boost::property_tree::ptree const& tree) { m_tree = tree; }
-    //template<class T> void add(Option<T> const& option) { m_tree.put_child(option.getTree()); }
-    //template<class T> Option<T> const& get(std::string const& name) { return m_tree.get<T>(name); }
-    
     boost::property_tree::ptree& GetPTree() { return m_tree; }
     boost::property_tree::ptree const& GetPTree() const { return m_tree; }
 };
@@ -67,9 +66,9 @@ public:
 //
 // Dumped as XML, it looks like this:
 //     <?xml...>
-//     <name>myname</name>
-//     <description>my descr</description>
-//     <value>17</value>
+//     <Name>myname</Name>
+//     <Description>my descr</Description>
+//     <Value>17</Value>
 // although of course that's not valid XML, since it has no single root element.
 
 template <typename T>
@@ -77,7 +76,7 @@ class PDAL_DLL Option
 {
 public:
     // construct it manually
-    Option(std::string const& name, T value, std::string const& description)
+    Option(std::string const& name, T value, std::string const& description="")
         : m_name(name)
         , m_description(description)
         , m_value(value)
@@ -88,17 +87,17 @@ public:
     {
         boost::property_tree::ptree t;
         boost::property_tree::xml_parser::read_xml(istr, t);
-        m_name = t.get<std::string>("name");
-        m_value = t.get<T>("value");
-        m_description = t.get<std::string>("description");
+        m_name = t.get<std::string>("Name");
+        m_value = t.get<T>("Value");
+        m_description = t.get<std::string>("Description");
     }
 
     // construct it from a ptree
     Option(const boost::property_tree::ptree t)
     {
-        m_name = t.get<std::string>("name");
-        m_value = t.get<T>("value");
-        m_description = t.get<std::string>("description");
+        m_name = t.get<std::string>("Name");
+        m_value = t.get<T>("Value");
+        m_description = t.get<std::string>("Description");
     }
 
     // getters
@@ -110,9 +109,9 @@ public:
     boost::property_tree::ptree getPTree() const
     {
         boost::property_tree::ptree t;
-        t.put("name", getName());
-        t.put("description", getDescription());
-        t.put("value", getValue());
+        t.put("Name", getName());
+        t.put("Description", getDescription());
+        t.put("Value", getValue());
         return t;
     }
     
@@ -161,46 +160,21 @@ public:
 
     // convenience ctor, which adds 1 option
     template<class T>
-    Options(const std::string& name, T value, const std::string& description)
+    Options(const std::string& name, T value, const std::string& description="")
     {
         Option<T> opt(name, value, description);
         add(opt);
-    }
-
-    // convenience ctor, which adds 2 options
-    template<class T1, class T2>
-    Options(const std::string& name1, T1 value1, const std::string& description1,
-            const std::string& name2, T2 value2, const std::string& description2)
-    {
-        Option<T1> opt1(name1, value1, description1);
-        add(opt1);
-        Option<T2> opt2(name2, value2, description2);
-        add(opt2);
-    }
-
-    // convenience ctor, which adds 3 options
-    template<class T1, class T2, class T3>
-    Options(const std::string& name1, T1 value1, const std::string& description1,
-            const std::string& name2, T2 value2, const std::string& description2,
-            const std::string& name3, T3 value3, const std::string& description3)
-    {
-        Option<T1> opt1(name1, value1, description1);
-        add(opt1);
-        Option<T2> opt2(name2, value2, description2);
-        add(opt2);
-        Option<T3> opt3(name3, value3, description3);
-        add(opt3);
     }
 
     // add an option
     template<class T> void add(Option<T> const& option)
     {
        boost::property_tree::ptree fields = option.getPTree();
-       m_tree.add_child("option", fields);
+       m_tree.add_child("Option", fields);
     }
 
     // add an option (shortcut version, bypass need for an Option object)
-    template<class T> void add(const std::string& name, T value, const std::string& description)
+    template<class T> void add(const std::string& name, T value, const std::string& description="")
     {
         Option<T> opt(name, value, description);
         add(opt);
@@ -214,7 +188,7 @@ public:
         while (iter != m_tree.end())
         {
             std::string oname = (*iter).first;
-            if (oname == "option")
+            if (oname == "Option")
             {
                 boost::property_tree::ptree optionTree = (*iter).second;
                 Option<T> option(optionTree);
@@ -243,8 +217,8 @@ public:
     // get the ptree for the whole option block
     const boost::property_tree::ptree& getPTree() const;
    
-    // return the empty options list
-    static const Options& none();
+    // the empty options list
+    static const Options empty;
 
 private:
     // get the ptree for an option

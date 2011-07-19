@@ -51,9 +51,14 @@ BOOST_AUTO_TEST_CASE(test)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
 
-    DataStagePtr reader(new pdal::drivers::faux::Reader(srcBounds, 1000, pdal::drivers::faux::Reader::Random));
+    Options readerOptions;
+    readerOptions.add("bounds", srcBounds);
+    readerOptions.add("num_points", 1000);
+    readerOptions.add("mode", "random");
+    DataStagePtr reader(new pdal::drivers::faux::Reader(readerOptions));
 
-    DataStagePtr filter(new pdal::filters::DecimationFilter(reader, 10));
+    Options filterOptions("step", 10);
+    DataStagePtr filter(new pdal::filters::DecimationFilter(reader, filterOptions));
     BOOST_CHECK(filter->getDescription() == "Decimation Filter");
 
     const Schema& schema = filter->getSchema();

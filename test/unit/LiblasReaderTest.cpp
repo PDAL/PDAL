@@ -52,7 +52,8 @@ BOOST_AUTO_TEST_SUITE(LiblasReaderTest)
 
 BOOST_AUTO_TEST_CASE(test_sequential)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    LiblasReader reader(readerOptions);
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
     const Schema& schema = reader.getSchema();
@@ -87,7 +88,8 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 
 BOOST_AUTO_TEST_CASE(test_random)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    LiblasReader reader(readerOptions);
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
     const Schema& schema = reader.getSchema();
@@ -132,7 +134,8 @@ BOOST_AUTO_TEST_CASE(test_random)
 
 BOOST_AUTO_TEST_CASE(test_random_laz)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.laz"));
+    Options readerOptions("filename", Support::datapath("1.2-with-color.laz"));
+    LiblasReader reader(readerOptions);
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
     const Schema& schema = reader.getSchema();
@@ -176,7 +179,8 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 
 BOOST_AUTO_TEST_CASE(test_two_iters)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    LiblasReader reader(readerOptions);
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
     const Schema& schema = reader.getSchema();
@@ -217,13 +221,17 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
 
 BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 {
-    DataStagePtr reader(new LiblasReader(Support::datapath("1.2-with-color.las")));
+    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    DataStagePtr reader(new LiblasReader(readerOptions));
     BOOST_CHECK(reader->getDescription() == "Liblas Reader");
 
     BOOST_CHECK(reader->getNumPoints() == 1065);
     BOOST_CHECK(355 * 3 == 1065);
 
-    CacheFilterPtr cache(new CacheFilter(reader, 1, 355));
+    Options cacheOptions;
+    cacheOptions.add("max_cache_blocks", 1);
+    cacheOptions.add("cache_block_size", 355);
+    CacheFilterPtr cache(new CacheFilter(reader, cacheOptions));
     BOOST_CHECK(cache->getNumPoints() == 1065);
 
     const Schema& schema = cache->getSchema();
@@ -307,7 +315,8 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 
 BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    LiblasReader reader(readerOptions);
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
     BOOST_CHECK(reader.getNumPoints() == 1065);
@@ -424,7 +433,8 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 
 BOOST_AUTO_TEST_CASE(test_iterator_checks)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    LiblasReader reader(readerOptions);
 
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);
@@ -435,7 +445,8 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
 static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
                               double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
 {
-    LiblasReader reader(Support::datapath(file));
+    Options readerOptions("filename", Support::datapath(file));
+    LiblasReader reader(readerOptions);
 
     BOOST_CHECK(reader.getPointFormat() == pointFormat);
     BOOST_CHECK(reader.getVersionMajor() == majorVersion);
@@ -477,7 +488,8 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 
 BOOST_AUTO_TEST_CASE(test_vlr)
 {
-    pdal::drivers::liblas::LiblasReader reader(Support::datapath("lots_of_vlr.las"));
+    Options readerOptions("filename", Support::datapath("lots_of_vlr.las"));
+    pdal::drivers::liblas::LiblasReader reader(readerOptions);
 
     ////// BUG: this is not yet supported
     ////BOOST_CHECK(reader.getVLRs().count() == 390);

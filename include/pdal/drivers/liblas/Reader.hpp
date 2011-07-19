@@ -60,7 +60,6 @@ class PDAL_DLL LiblasReader : public pdal::drivers::las::LasReaderBase
 {
 public:
     LiblasReader(const Options& options);
-    LiblasReader(const std::string& filename);
     ~LiblasReader();
 
     const std::string& getDescription() const;

@@ -164,10 +164,16 @@ int Application_pc2pc::execute()
         
         boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
         
-        
-        DataStagePtr cache(new pdal::filters::CacheFilter(reader, 1, capacity));
-        DataStagePtr chipper(new pdal::filters::Chipper(cache, capacity));
-        DataStagePtr swapper(new pdal::filters::ByteSwapFilter(chipper));
+        pdal::Options cacheOptions;
+        cacheOptions.add("max_cache_blocks", 1);
+        cacheOptions.add("cache_block_size", capacity);
+        DataStagePtr cache(new pdal::filters::CacheFilter(reader, cacheOptions));
+
+        pdal::Options chipperOptions;
+        cacheOptions.add("max_partition_size", capacity);
+        DataStagePtr chipper(new pdal::filters::Chipper(cache, chipperOptions));
+
+        DataStagePtr swapper(new pdal::filters::ByteSwapFilter(chipper, Options::empty));
 
         DataStagePtr scalingFilter(new pdal::filters::ScalingFilter(swapper, false));
 
@@ -229,7 +235,7 @@ int Application_pc2pc::execute()
             DataStagePtr reader(new pdal::drivers::oci::Reader(options));
             pdal::SpatialReference in_ref(reader->getSpatialReference());
 
-            DataStagePtr swapper(new pdal::filters::ByteSwapFilter(reader));
+            DataStagePtr swapper(new pdal::filters::ByteSwapFilter(reader, Options::empty));
 
             DataStagePtr scalingFilter(new pdal::filters::ScalingFilter(swapper, false));
 
@@ -264,7 +270,7 @@ int Application_pc2pc::execute()
 
             DataStagePtr reader(new pdal::drivers::oci::Reader(options));
             pdal::SpatialReference in_ref(reader->getSpatialReference());
-            DataStagePtr swapper(new pdal::filters::ByteSwapFilter(reader));
+            DataStagePtr swapper(new pdal::filters::ByteSwapFilter(reader, Options::empty));
             
 
             pdal::drivers::las::LasWriterPtr writer(new pdal::drivers::las::LasWriter(swapper, optsW));
@@ -293,7 +299,9 @@ int Application_pc2pc::execute()
 
     else
     {
-        pdal::drivers::liblas::LiblasReaderPtr reader(new pdal::drivers::liblas::LiblasReader(m_inputFile));
+        pdal::Options readerOptions;
+        readerOptions.add("filename", m_inputFile);
+        pdal::drivers::liblas::LiblasReaderPtr reader(new pdal::drivers::liblas::LiblasReader(readerOptions));
     
         const boost::uint64_t numPoints = reader->getNumPoints();
 

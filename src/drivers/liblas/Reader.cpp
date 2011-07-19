@@ -46,14 +46,6 @@ namespace pdal { namespace drivers { namespace liblas {
 
 LiblasReader::LiblasReader(const Options& options)
     : LasReaderBase(options)
-{
-     throw not_yet_implemented("liblas reader options support"); 
-}
-
-
-LiblasReader::LiblasReader(const std::string& filename)
-    : LasReaderBase(Options::none())
-    , m_filename(filename)
     , m_versionMajor(0)
     , m_versionMinor(0)
     , m_scaleX(0.0)
@@ -65,6 +57,8 @@ LiblasReader::LiblasReader(const std::string& filename)
     , m_isCompressed(false)
     , m_pointFormat(::pdal::drivers::las::PointFormatUnknown)
 {
+    m_filename = options.getOption<std::string>("filename").getValue();
+
     std::istream* str = Utils::openFile(m_filename);
 
     {

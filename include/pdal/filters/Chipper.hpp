@@ -156,23 +156,7 @@ typedef boost::shared_ptr<Chipper> ChipperPtr;
 class PDAL_DLL Chipper : public pdal::Filter
 {
 public:
-    Chipper(const DataStagePtr& prevStage, const Options& options)
-        : pdal::Filter(prevStage, options)
-    {
-        throw not_yet_implemented("chipper filter options support"); 
-    }
-
-    Chipper(DataStagePtr& prevStage, boost::uint32_t max_partition_size)
-        : pdal::Filter(prevStage, Options::none())
-        , m_threshold(max_partition_size)
-        , m_xvec(chipper::DIR_X)
-        , m_yvec(chipper::DIR_Y)
-        , m_spare(chipper::DIR_NONE) 
-    {
-        checkImpedance();
-        setPointCountType(PointCount_Fixed);
-        setNumPoints(0);
-    }
+    Chipper(const DataStagePtr& prevStage, const Options& options);
 
     void Chip();
     std::vector<chipper::Block>::size_type GetBlockCount() const

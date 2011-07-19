@@ -234,10 +234,11 @@ static void readFileSimple(Controller& controller, const string& file)
 
     pdal::Options optsR("filename", file, "file to read from");
     pdal::DataStagePtr reader(new pdal::drivers::las::LasReader(optsR));
-    
-    pdal::DataStagePtr decimator(new pdal::filters::DecimationFilter(reader, factor));
 
-    pdal::DataStagePtr colorizer(new pdal::filters::ColorFilter(decimator));
+    pdal::Options decimatorOptions("step", factor);
+    pdal::DataStagePtr decimator(new pdal::filters::DecimationFilter(reader, decimatorOptions));
+
+    pdal::DataStagePtr colorizer(new pdal::filters::ColorFilter(decimator, pdal::Options::empty));
 
     const boost::uint32_t numPoints = (boost::uint32_t)colorizer->getNumPoints();
 

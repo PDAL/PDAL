@@ -60,7 +60,6 @@ class PDAL_DLL ColorFilter : public Filter
 {
 public:
     ColorFilter(const DataStagePtr& prevStage, const Options& options);
-    ColorFilter(const DataStagePtr& prevStage);
 
     const std::string& getDescription() const;
     const std::string& getName() const;

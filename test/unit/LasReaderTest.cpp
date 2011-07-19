@@ -226,7 +226,10 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     BOOST_CHECK(reader->getNumPoints() == 1065);
     BOOST_CHECK(355 * 3 == 1065);
 
-    DataStagePtr cache(new pdal::filters::CacheFilter(reader, 1, 355));
+    Options cacheOptions;
+    cacheOptions.add("max_cache_blocks", 1);
+    cacheOptions.add("cache_block_size", 355);
+    DataStagePtr cache(new pdal::filters::CacheFilter(reader, cacheOptions));
     BOOST_CHECK(cache->getNumPoints() == 1065);
 
     const Schema& schema = cache->getSchema();

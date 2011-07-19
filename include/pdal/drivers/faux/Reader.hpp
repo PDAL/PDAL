@@ -75,8 +75,7 @@ public:
 
 public:
     Reader(const Options& options);
-    Reader(const Bounds<double>&, int numPoints, Mode mode);
-    Reader(const Bounds<double>&, int numPoints, Mode mode, const std::vector<Dimension>& dimensions);
+    Reader(const Options& options, const std::vector<Dimension>& dimensions);
 
     const std::string& getDescription() const;
     const std::string& getName() const;

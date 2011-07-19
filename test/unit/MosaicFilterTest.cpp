@@ -48,20 +48,32 @@ BOOST_AUTO_TEST_SUITE(MosaicFilterTest)
 BOOST_AUTO_TEST_CASE(test1)
 {
     Bounds<double> bounds1(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
-    ReaderPtr reader1(new pdal::drivers::faux::Reader(bounds1, 100, pdal::drivers::faux::Reader::Constant));
+    Options readerOptions1;
+    readerOptions1.add("bounds", bounds1);
+    readerOptions1.add("num_points", 100);
+    readerOptions1.add("mode", "constant");
+    ReaderPtr reader1(new pdal::drivers::faux::Reader(readerOptions1));
 
     Bounds<double> bounds2(100.0, 100.0, 100.0, 200.0, 200.0, 200.0);
-    ReaderPtr reader2(new pdal::drivers::faux::Reader(bounds2, 100, pdal::drivers::faux::Reader::Constant));
+    Options readerOptions2;
+    readerOptions2.add("bounds", bounds2);
+    readerOptions2.add("num_points", 100);
+    readerOptions2.add("mode", "constant");
+    ReaderPtr reader2(new pdal::drivers::faux::Reader(readerOptions2));
 
     Bounds<double> bounds3(200.0, 200.0, 200.0, 300.0, 300.0, 300.0);
-    ReaderPtr reader3(new pdal::drivers::faux::Reader(bounds3, 100, pdal::drivers::faux::Reader::Constant));
+    Options readerOptions3;
+    readerOptions1.add("bounds", bounds3);
+    readerOptions2.add("num_points", 100);
+    readerOptions3.add("mode", "constant");
+    ReaderPtr reader3(new pdal::drivers::faux::Reader(readerOptions3));
 
     std::vector<const DataStagePtr> vec;
     vec.push_back(reader1);
     vec.push_back(reader2);
     vec.push_back(reader3);
 
-    DataStagePtr mosaic(new pdal::filters::MosaicFilter(vec, Options::none()));
+    DataStagePtr mosaic(new pdal::filters::MosaicFilter(vec, Options::empty));
     BOOST_CHECK(mosaic->getDescription() == "Mosaic Filter");
 
     const Schema& schema = mosaic->getSchema();

@@ -48,9 +48,16 @@ BOOST_AUTO_TEST_SUITE(CacheFilterTest)
 BOOST_AUTO_TEST_CASE(test1)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
-    DataStagePtr reader(new pdal::drivers::faux::Reader(srcBounds, 10000, pdal::drivers::faux::Reader::Constant));
+    Options readerOptions;
+    readerOptions.add("bounds", srcBounds);
+    readerOptions.add("num_points", 10000);
+    readerOptions.add("mode", "constant");
+    DataStagePtr reader(new pdal::drivers::faux::Reader(readerOptions));
 
-    pdal::filters::CacheFilterPtr cache(new pdal::filters::CacheFilter(reader, 2, 1024));
+    Options cacheOptions;
+    cacheOptions.add("max_cache_blocks", 2);
+    cacheOptions.add("cache_block_size", 1024);
+    pdal::filters::CacheFilterPtr cache(new pdal::filters::CacheFilter(reader, cacheOptions));
     BOOST_CHECK(cache->getDescription() == "Cache Filter");
 
     const Schema& schema = reader->getSchema();
