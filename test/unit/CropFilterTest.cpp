@@ -56,11 +56,12 @@ BOOST_AUTO_TEST_CASE(test_crop)
     readerOptions.add("mode", "ramp");
     DataStagePtr reader(new pdal::drivers::faux::Reader(readerOptions));
 
-    Options filterOptions("bounds", dstBounds, "crop bounds");
+    Options filterOptions;
+    filterOptions.add("bounds", dstBounds);
     DataStagePtr filter(new pdal::filters::CropFilter(reader, filterOptions));
     BOOST_CHECK(filter->getDescription() == "Crop Filter");
 
-    pdal::drivers::faux::Writer writer(filter, Options::empty);
+    pdal::drivers::faux::Writer writer(filter, Options::empty());
 
     boost::uint64_t numWritten = writer.write(1000);
 

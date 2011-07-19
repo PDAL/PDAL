@@ -46,8 +46,8 @@
 BOOST_AUTO_TEST_SUITE(OptionsTest)
 
 static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-static std::string xml_int_ref = "<name>my_int</name><description>This is my integral option.</description><value>17</value>";
-static std::string xml_str_ref = "<name>my_string</name><description>This is my stringy option.</description><value>Yow.</value>";
+static std::string xml_int_ref = "<Name>my_int</Name><Description>This is my integral option.</Description><Value>17</Value>";
+static std::string xml_str_ref = "<Name>my_string</Name><Description>This is my stringy option.</Description><Value>Yow.</Value>";
 
 
 BOOST_AUTO_TEST_CASE(test_option_writing)
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_options_writing)
     opts.add("my_string", "Yow.", "This is my stringy option.");
 
     std::ostringstream ostr;
-    const std::string ref = xml_header + "<option>" + xml_int_ref + "</option><option>" + xml_str_ref + "</option>";
+    const std::string ref = xml_header + "<Option>" + xml_int_ref + "</Option><Option>" + xml_str_ref + "</Option>";
 
     const boost::property_tree::ptree& tree = opts.getPTree();
     boost::property_tree::xml_parser::write_xml(ostr, tree);
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(test_options_writing)
 
 BOOST_AUTO_TEST_CASE(test_options_reading)
 {
-    const std::string ref = xml_header + "<option>" + xml_int_ref + "</option><option>" + xml_str_ref + "</option>";
+    const std::string ref = xml_header + "<Option>" + xml_int_ref + "</Option><Option>" + xml_str_ref + "</Option>";
     std::istringstream istr(ref);
 
     pdal::Options opts_from_istr(istr);
@@ -167,7 +167,8 @@ BOOST_AUTO_TEST_CASE(test_valid_options)
     BOOST_CHECK(!ok);
 
     {
-        pdal::Options optI("foo", 19, "foo as an int");
+        pdal::Options optI;
+        optI.add("foo", 19, "foo as an int");
         ok = optI.hasOption<int>("foo");
         BOOST_CHECK(ok);
         ok = optI.hasOption<double>("foo");

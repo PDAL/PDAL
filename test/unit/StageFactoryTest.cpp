@@ -51,25 +51,28 @@ using namespace pdal;
 BOOST_AUTO_TEST_SUITE(StageFactoryTest)
 
 
-BOOST_AUTO_TEST_CASE(test1)
+BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
 {
     StageFactory factory;
 
-    const Options optsR("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    Options optsR;
+    optsR.add("filename", Support::datapath("1.2-with-color.las"), "file to read from");
     ReaderPtr ptrR = factory.createReader("drivers.las.reader", optsR);
     BOOST_CHECK(ptrR->getName() == "drivers.las.reader");
 
-    const Options optsF("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
+    Options optsF;
+    optsF.add("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
     FilterPtr ptrF = factory.createFilter("filters.crop", ptrR, optsF);
     BOOST_CHECK(ptrF->getName() == "filters.crop");
 
-    const Options optsM;
+    Options optsM;
     std::vector<const DataStagePtr> stages;
     stages.push_back(ptrR);
     MultiFilterPtr ptrM = factory.createMultiFilter("filters.mosaic", stages, optsM);
     BOOST_CHECK(ptrM->getName() == "filters.mosaic");
 
-    const Options optsW("filename", "temp.las", "file to write to");
+    Options optsW;
+    optsW.add("filename", "temp.las", "file to write to");
     WriterPtr ptrW = factory.createWriter("drivers.las.writer", ptrF, optsW);
     BOOST_CHECK(ptrW->getName() == "drivers.las.writer");
 
@@ -85,7 +88,8 @@ static Reader* demoReaderCreator(const Options& options)
     // this is where you'd do something like:
     //     return new MyCustomXyzReader(options);
 
-    const Options optsR("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    Options optsR;
+    optsR.add("filename", Support::datapath("1.2-with-color.las"), "file to read from");
     Reader* reader = new pdal::drivers::las::LasReader(optsR);
     return reader;
 }
@@ -95,7 +99,8 @@ Filter* demoFilterCreator(const DataStagePtr& prev, const Options& options)
 {
     s_demoflag = options.getOption<int>("flag").getValue();
 
-    const Options optsF("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
+    Options optsF;
+    optsF.add("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
     Filter* filter = new pdal::filters::CropFilter(prev, optsF);
     return filter;
 }
@@ -115,7 +120,8 @@ Writer* demoWriterCreator(const DataStagePtr& prev, const Options& options)
 {
     s_demoflag = options.getOption<int>("flag").getValue();
 
-    const Options optsW("filename", "temp.las", "file to write to");
+    Options optsW;
+    optsW.add("filename", "temp.las", "file to write to");
     Writer* writer = new pdal::drivers::las::LasWriter(prev, optsW);
     return writer;
 }
@@ -131,19 +137,22 @@ BOOST_AUTO_TEST_CASE(test2)
     factory.registerWriter("demoW", demoWriterCreator);
 
     s_demoflag = 0;
-    Options optsR("flag",11,"my flag");
+    Options optsR;
+    optsR.add("flag",11,"my flag");
     DataStagePtr reader = factory.createReader("demoR", optsR);
     BOOST_CHECK(reader->getName() == "drivers.las.reader");
     BOOST_CHECK(s_demoflag == 11);
 
     s_demoflag = 0;
-    Options optsF("flag",22,"my flag");
+    Options optsF;
+    optsF.add("flag",22,"my flag");
     DataStagePtr filter = factory.createFilter("demoF", reader, optsF);
     BOOST_CHECK(filter->getName() == "filters.crop");
     BOOST_CHECK(s_demoflag == 22);
 
     s_demoflag = 0;
-    Options optsM("flag",33,"my flag");
+    Options optsM;
+    optsM.add("flag",33,"my flag");
     std::vector<const DataStagePtr> stages;
     stages.push_back(reader);
     StagePtr multifilter = factory.createMultiFilter("demoM", stages, optsM);
@@ -151,7 +160,8 @@ BOOST_AUTO_TEST_CASE(test2)
     BOOST_CHECK(s_demoflag == 33);
 
     s_demoflag = 0;
-    Options optsW("flag",44,"my flag");
+    Options optsW;
+    optsW.add("flag",44,"my flag");
     StagePtr writer = factory.createWriter("demoW", reader, optsW);
     BOOST_CHECK(writer->getName() == "drivers.las.writer");
     BOOST_CHECK(s_demoflag == 44);

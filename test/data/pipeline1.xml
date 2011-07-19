@@ -1,25 +1,23 @@
 <?xml version="1.0"?>
 <Pipeline>
     <Writer>
-        <type>drivers.las.writer</type>
-        <option>
-            <name>filename</name>
-            <value>out.las</value>
-            <description>d</description>
-        </option>
+        <Type>drivers.las.writer</Type>
+        <Option>
+            <Name>filename</Name>
+            <Value>out.las</Value>
+            <Description>junk junk junk</Description>
+        </Option>
         <Filter>
-            <type>filters.crop</type>
-            <option>
-                <name>bounds</name>
-                <value>([0,1],[0,1],[0,1])</value>
-                <description>d</description>
-            </option>
+            <Type>filters.crop</Type>
+            <Option>
+                <Name>bounds</Name>
+                <Value>([0,1],[0,1],[0,1])</Value>
+            </Option>
             <Reader>
-                <type>drivers.las.reader</type>
-                <option>
-                    <name>filename</name>
-                    <value>../../test/data/1.2-with-color.las</value>
-                    <description>d</description>
+                <Type>drivers.las.reader</Type>
+                <Option>
+                    <Name>filename</Name>
+                    <Value>../../test/data/1.2-with-color.las</Value>
                 </option>
             </Reader>
         </Filter>

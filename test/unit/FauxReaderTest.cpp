@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
     Options readerOptions;
     readerOptions.add("bounds", bounds);
     readerOptions.add("num_points", 750);
-    readerOptions.add("mode", "cramp");
+    readerOptions.add("mode", "ramp");
     pdal::drivers::faux::Reader reader(readerOptions);
 
     const Schema& schema = reader.getSchema();

@@ -232,13 +232,15 @@ static void readFileSimple(Controller& controller, const string& file)
 {
     boost::timer timer;
 
-    pdal::Options optsR("filename", file, "file to read from");
-    pdal::DataStagePtr reader(new pdal::drivers::las::LasReader(optsR));
+    pdal::Options readerOptions;
+    readerOptions.add("filename", file);
+    pdal::DataStagePtr reader(new pdal::drivers::las::LasReader(readerOptions));
 
-    pdal::Options decimatorOptions("step", factor);
+    pdal::Options decimatorOptions;
+    decimatorOptions.add("step", factor);
     pdal::DataStagePtr decimator(new pdal::filters::DecimationFilter(reader, decimatorOptions));
 
-    pdal::DataStagePtr colorizer(new pdal::filters::ColorFilter(decimator, pdal::Options::empty));
+    pdal::DataStagePtr colorizer(new pdal::filters::ColorFilter(decimator, pdal::Options::empty()));
 
     const boost::uint32_t numPoints = (boost::uint32_t)colorizer->getNumPoints();
 

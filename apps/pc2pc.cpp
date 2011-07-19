@@ -118,16 +118,18 @@ int Application_pc2pc::execute()
         return 1;
     }
 
-    Options optsW("filename", m_outputFile, "file to write to");
+    Options writerOptions;
+    writerOptions.add("filename", m_outputFile);
 
     if (hasOption("native"))
     {
-        Options optsR("filename", m_inputFile, "file to read from");
-        DataStagePtr reader(new pdal::drivers::las::LasReader(optsR));
+        Options readerOptions;
+        readerOptions.add("filename", m_inputFile);
+        DataStagePtr reader(new pdal::drivers::las::LasReader(readerOptions));
     
         const boost::uint64_t numPoints = reader->getNumPoints();
 
-        WriterPtr writer(new pdal::drivers::las::LasWriter(reader, optsW));
+        WriterPtr writer(new pdal::drivers::las::LasWriter(reader, writerOptions));
 
         //BUG: handle laz writer.setCompressed(false);
 
@@ -139,8 +141,9 @@ int Application_pc2pc::execute()
     else if (hasOption("oracle-writer"))
     {
 #ifdef PDAL_HAVE_ORACLE
-        Options optsR("filename", m_inputFile, "file to read from");
-        DataStagePtr reader(new pdal::drivers::las::LasReader(optsR));
+        Options readerOptions;
+        readerOptions.add("filename", m_inputFile);
+        DataStagePtr reader(new pdal::drivers::las::LasReader(readerOptions));
     
         const boost::uint64_t numPoints = reader->getNumPoints();
 
@@ -173,7 +176,7 @@ int Application_pc2pc::execute()
         cacheOptions.add("max_partition_size", capacity);
         DataStagePtr chipper(new pdal::filters::Chipper(cache, chipperOptions));
 
-        DataStagePtr swapper(new pdal::filters::ByteSwapFilter(chipper, Options::empty));
+        DataStagePtr swapper(new pdal::filters::ByteSwapFilter(chipper, Options::empty()));
 
         DataStagePtr scalingFilter(new pdal::filters::ScalingFilter(swapper, false));
 
@@ -235,7 +238,7 @@ int Application_pc2pc::execute()
             DataStagePtr reader(new pdal::drivers::oci::Reader(options));
             pdal::SpatialReference in_ref(reader->getSpatialReference());
 
-            DataStagePtr swapper(new pdal::filters::ByteSwapFilter(reader, Options::empty));
+            DataStagePtr swapper(new pdal::filters::ByteSwapFilter(reader, Options::empty()));
 
             DataStagePtr scalingFilter(new pdal::filters::ScalingFilter(swapper, false));
 
@@ -257,7 +260,7 @@ int Application_pc2pc::execute()
                                                                           scalez, offsetz, 
                                                                           true));
 
-            pdal::drivers::las::LasWriterPtr writer(new pdal::drivers::las::LasWriter(descalingFilter, optsW));
+            pdal::drivers::las::LasWriterPtr writer(new pdal::drivers::las::LasWriter(descalingFilter, writerOptions));
 
 
             if (compress)
@@ -270,10 +273,10 @@ int Application_pc2pc::execute()
 
             DataStagePtr reader(new pdal::drivers::oci::Reader(options));
             pdal::SpatialReference in_ref(reader->getSpatialReference());
-            DataStagePtr swapper(new pdal::filters::ByteSwapFilter(reader, Options::empty));
+            DataStagePtr swapper(new pdal::filters::ByteSwapFilter(reader, Options::empty()));
             
 
-            pdal::drivers::las::LasWriterPtr writer(new pdal::drivers::las::LasWriter(swapper, optsW));
+            pdal::drivers::las::LasWriterPtr writer(new pdal::drivers::las::LasWriter(swapper, writerOptions));
             if (compress)
                 writer->setCompressed(true);
         
@@ -305,7 +308,7 @@ int Application_pc2pc::execute()
     
         const boost::uint64_t numPoints = reader->getNumPoints();
 
-        pdal::drivers::liblas::LiblasWriterPtr writer(new pdal::drivers::liblas::LiblasWriter(reader, optsW));
+        pdal::drivers::liblas::LiblasWriterPtr writer(new pdal::drivers::liblas::LiblasWriter(reader, writerOptions));
 
         //BUG: handle laz writer.setCompressed(false);
 

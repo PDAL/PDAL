@@ -55,7 +55,7 @@ Reader::Reader(const Options& options)
     : pdal::Reader(options)
 {
     const Bounds<double> bounds = options.getOption<Bounds<double> >("bounds").getValue();
-    const int numPoints = options.getOption<int>("num_points").getValue();
+    const boost::uint32_t numPoints = options.getOption<boost::uint32_t>("num_points").getValue();
     const Mode mode = toMode(options.getOption<std::string>("mode").getValue());
 
     Schema& schema = getSchemaRef();
@@ -79,7 +79,7 @@ Reader::Reader(const Options& options, const std::vector<Dimension>& dimensions)
     : pdal::Reader(options)
 {
     const Bounds<double> bounds = options.getOption<Bounds<double> >("bounds").getValue();
-    const int numPoints = options.getOption<int>("numpoints").getValue();
+    const boost::uint32_t numPoints = options.getOption<boost::uint32_t>("num_points").getValue();
     const Mode mode = toMode(options.getOption<std::string>("mode").getValue());
 
     Schema& schema = getSchemaRef();

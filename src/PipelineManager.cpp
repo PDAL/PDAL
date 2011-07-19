@@ -123,7 +123,7 @@ std::string PipelineManager::parseType(const boost::property_tree::ptree& tree)
     // tree is this:
     //     <type>drivers.foo.writer</type>
 
-    std::string s = tree.get_value("type");
+    std::string s = tree.get_value("Type");
 
     return s;
 }
@@ -137,12 +137,12 @@ ReaderPtr PipelineManager::parseReader(const boost::property_tree::ptree& tree)
     boost::property_tree::ptree::const_iterator iter = tree.begin();
     while (iter != tree.end())
     {
-        if (iter->first == "type")
+        if (iter->first == "Type")
         {
             const boost::property_tree::ptree subtree = iter->second;
             type = parseType(subtree);
         }
-        else if (iter->first == "option")
+        else if (iter->first == "Option")
         {
             const boost::property_tree::ptree subtree = iter->second;
             Option<std::string> option = parseOption(subtree);
@@ -170,12 +170,12 @@ FilterPtr PipelineManager::parseFilter(const boost::property_tree::ptree& tree)
     boost::property_tree::ptree::const_iterator iter = tree.begin();
     while (iter != tree.end())
     {
-        if (iter->first == "type")
+        if (iter->first == "Type")
         {
             const boost::property_tree::ptree subtree = iter->second;
             type = parseType(subtree);
         }
-        else if (iter->first == "option")
+        else if (iter->first == "Option")
         {
             const boost::property_tree::ptree subtree = iter->second;
             Option<std::string> option = parseOption(subtree);
@@ -218,12 +218,12 @@ MultiFilterPtr PipelineManager::parseMultiFilter(const boost::property_tree::ptr
     boost::property_tree::ptree::const_iterator iter = tree.begin();
     while (iter != tree.end())
     {
-        if (iter->first == "type")
+        if (iter->first == "Type")
         {
             const boost::property_tree::ptree subtree = iter->second;
             type = parseType(subtree);
         }
-        else if (iter->first == "option")
+        else if (iter->first == "Option")
         {
             const boost::property_tree::ptree subtree = iter->second;
             Option<std::string> option = parseOption(subtree);
@@ -269,12 +269,12 @@ WriterPtr PipelineManager::parseWriter(const boost::property_tree::ptree& tree)
     boost::property_tree::ptree::const_iterator iter = tree.begin();
     while (iter != tree.end())
     {
-        if (iter->first == "type")
+        if (iter->first == "Type")
         {
             const boost::property_tree::ptree subtree = iter->second;
             type = parseType(subtree);
         }
-        else if (iter->first == "option")
+        else if (iter->first == "Option")
         {
             const boost::property_tree::ptree subtree = iter->second;
             Option<std::string> option = parseOption(subtree);

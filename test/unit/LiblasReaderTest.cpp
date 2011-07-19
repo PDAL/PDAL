@@ -52,7 +52,8 @@ BOOST_AUTO_TEST_SUITE(LiblasReaderTest)
 
 BOOST_AUTO_TEST_CASE(test_sequential)
 {
-    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
     LiblasReader reader(readerOptions);
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
@@ -88,7 +89,8 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 
 BOOST_AUTO_TEST_CASE(test_random)
 {
-    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
     LiblasReader reader(readerOptions);
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
@@ -134,7 +136,8 @@ BOOST_AUTO_TEST_CASE(test_random)
 
 BOOST_AUTO_TEST_CASE(test_random_laz)
 {
-    Options readerOptions("filename", Support::datapath("1.2-with-color.laz"));
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("1.2-with-color.laz"));
     LiblasReader reader(readerOptions);
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
@@ -179,7 +182,8 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 
 BOOST_AUTO_TEST_CASE(test_two_iters)
 {
-    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
     LiblasReader reader(readerOptions);
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
@@ -221,7 +225,8 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
 
 BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 {
-    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
     DataStagePtr reader(new LiblasReader(readerOptions));
     BOOST_CHECK(reader->getDescription() == "Liblas Reader");
 
@@ -315,7 +320,8 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 
 BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 {
-    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
     LiblasReader reader(readerOptions);
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
@@ -433,7 +439,8 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 
 BOOST_AUTO_TEST_CASE(test_iterator_checks)
 {
-    Options readerOptions("filename", Support::datapath("1.2-with-color.las"));
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
     LiblasReader reader(readerOptions);
 
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
@@ -445,7 +452,8 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
 static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
                               double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
 {
-    Options readerOptions("filename", Support::datapath(file));
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath(file));
     LiblasReader reader(readerOptions);
 
     BOOST_CHECK(reader.getPointFormat() == pointFormat);
@@ -488,7 +496,8 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 
 BOOST_AUTO_TEST_CASE(test_vlr)
 {
-    Options readerOptions("filename", Support::datapath("lots_of_vlr.las"));
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("lots_of_vlr.las"));
     pdal::drivers::liblas::LiblasReader reader(readerOptions);
 
     ////// BUG: this is not yet supported

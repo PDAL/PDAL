@@ -92,7 +92,7 @@ ReprojectionFilter::ReprojectionFilter(const DataStagePtr& prevStage, const Opti
 ReprojectionFilter::ReprojectionFilter(const DataStagePtr& prevStage,
                                        const SpatialReference& inSRS,
                                        const SpatialReference& outSRS)
-    : Filter(prevStage, Options::empty)
+    : Filter(prevStage, Options::empty())
     , m_inSRS(inSRS)
     , m_outSRS(outSRS)
 {

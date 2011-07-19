@@ -45,7 +45,7 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(CacheFilterTest)
 
-BOOST_AUTO_TEST_CASE(test1)
+BOOST_AUTO_TEST_CASE(CacheFilterTest_test1)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
     Options readerOptions;

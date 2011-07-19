@@ -105,7 +105,8 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (1)
     //
     {
-        pdal::Options optsR("filename", Support::datapath("utm15.las"), "file to read from");
+        pdal::Options optsR;
+        optsR.add("filename", Support::datapath("utm15.las"), "file to read from");
         pdal::drivers::las::LasReader reader(optsR);
 
         const pdal::SpatialReference in_ref_test(utm15_wkt);
@@ -143,7 +144,8 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (2)
     //
     {
-        pdal::Options opts("filename", Support::datapath("utm15.las"), "file to read from");
+        pdal::Options opts;
+        opts.add("filename", Support::datapath("utm15.las"), "file to read from");
         pdal::ReaderPtr reader(new pdal::drivers::las::LasReader(opts));
 
         const pdal::SpatialReference in_ref(reader->getSpatialReference());
@@ -178,7 +180,8 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (3)
     //
     {
-        pdal::Options opts("filename", Support::datapath("utm15.las"), "file to read from");
+        pdal::Options opts;
+        opts.add("filename", Support::datapath("utm15.las"), "file to read from");
         pdal::ReaderPtr reader(new pdal::drivers::las::LasReader(opts));
             
         const pdal::SpatialReference in_ref(reader->getSpatialReference());
@@ -216,7 +219,8 @@ BOOST_AUTO_TEST_CASE(test_1)
 
 BOOST_AUTO_TEST_CASE(test_impedence_mismatch)
 {
-    pdal::Options opts("filename", Support::datapath("utm15.las"), "file to read from");
+    pdal::Options opts;
+    opts.add("filename", Support::datapath("utm15.las"), "file to read from");
     pdal::ReaderPtr reader(new pdal::drivers::las::LasReader(opts));
         
     const pdal::SpatialReference& in_ref = reader->getSpatialReference();

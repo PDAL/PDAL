@@ -97,7 +97,7 @@ Reader::Reader(const Options& options)
 
 
 Reader::Reader(OptionsOld& optionsOld)
-    : pdal::Reader(Options::empty)
+    : pdal::Reader(Options::empty())
     , m_optionsOld(optionsOld)
     , m_format(TERRASOLID_Format_Unknown)
     , m_haveColor(false)

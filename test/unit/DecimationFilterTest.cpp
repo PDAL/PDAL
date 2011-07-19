@@ -57,7 +57,8 @@ BOOST_AUTO_TEST_CASE(test)
     readerOptions.add("mode", "random");
     DataStagePtr reader(new pdal::drivers::faux::Reader(readerOptions));
 
-    Options filterOptions("step", 10);
+    Options filterOptions;
+    filterOptions.add("step", 10);
     DataStagePtr filter(new pdal::filters::DecimationFilter(reader, filterOptions));
     BOOST_CHECK(filter->getDescription() == "Decimation Filter");
 

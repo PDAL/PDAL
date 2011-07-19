@@ -78,7 +78,11 @@ Options::Options(std::istream& istr)
 
 
 // the empty options set
-const Options Options::empty;
+static const Options s_empty;
+const Options& Options::empty()
+{
+    return s_empty;
+}
 
 
 const boost::property_tree::ptree Options::getOptionPTree(const std::string& name) const

@@ -52,13 +52,16 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
 {
     PipelineManager mgr;
 
-    const Options optsR("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    Options optsR;
+    optsR.add("filename", Support::datapath("1.2-with-color.las"), "file to read from");
     ReaderPtr reader = mgr.addReader("drivers.las.reader", optsR);
 
-    const Options optsF("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
+    Options optsF;
+    optsF.add("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
     FilterPtr filter = mgr.addFilter("filters.crop", reader, optsF);
 
-    const Options optsW("filename", "temp.las", "file to write to");
+    Options optsW;
+    optsW.add("filename", "temp.las", "file to write to");
     WriterPtr writer = mgr.addWriter("drivers.las.writer", filter, optsW);
 
     return;

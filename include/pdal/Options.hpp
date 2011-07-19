@@ -89,7 +89,7 @@ public:
         boost::property_tree::xml_parser::read_xml(istr, t);
         m_name = t.get<std::string>("Name");
         m_value = t.get<T>("Value");
-        m_description = t.get<std::string>("Description");
+        m_description = t.get<std::string>("Description", "");
     }
 
     // construct it from a ptree
@@ -97,7 +97,7 @@ public:
     {
         m_name = t.get<std::string>("Name");
         m_value = t.get<T>("Value");
-        m_description = t.get<std::string>("Description");
+        m_description = t.get<std::string>("Description", "");
     }
 
     // getters
@@ -158,14 +158,6 @@ public:
     // read options from an xml stream
     Options(std::istream& istr);
 
-    // convenience ctor, which adds 1 option
-    template<class T>
-    Options(const std::string& name, T value, const std::string& description="")
-    {
-        Option<T> opt(name, value, description);
-        add(opt);
-    }
-
     // add an option
     template<class T> void add(Option<T> const& option)
     {
@@ -187,13 +179,14 @@ public:
         boost::property_tree::ptree::const_iterator iter = m_tree.begin();
         while (iter != m_tree.end())
         {
-            std::string oname = (*iter).first;
-            if (oname == "Option")
+            if (iter->first != "Option")
+                throw pdal_error("malformed Options ptree");
+
+            const boost::property_tree::ptree& optionTree = iter->second;
+            if (optionTree.get_child("Name").get_value<std::string>() == name)
             {
-                boost::property_tree::ptree optionTree = (*iter).second;
                 Option<T> option(optionTree);
-                if (option.getName() == name)
-                    return option;
+                return option;
             }
             ++iter;
         }
@@ -203,22 +196,28 @@ public:
     // returns true iff the option name is valid
     template<typename T> bool hasOption(std::string const& name) const
     {
+        bool ok = false;
+
         try
         {
             Option<T> option = getOption<T>(name);
+            ok = true;
         }
         catch (option_not_found&)
         {
-            return false;
+            ok = false;
         }
-        return true;
+        // any other exception will bubble up
+
+        return ok;
     }
 
     // get the ptree for the whole option block
     const boost::property_tree::ptree& getPTree() const;
    
     // the empty options list
-    static const Options empty;
+    // BUG: this should be a member variable, not a function, but doing so causes vs2010 to fail to link
+    static const Options& empty();
 
 private:
     // get the ptree for an option
