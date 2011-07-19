@@ -57,7 +57,6 @@ class PDAL_DLL LiblasWriter : public Writer
 {
 public:
     LiblasWriter(const DataStagePtr& prevStage, const Options& options);
-    LiblasWriter(const DataStagePtr& prevStage, std::ostream&);
     ~LiblasWriter();
 
     const std::string& getDescription() const;
@@ -91,7 +90,7 @@ protected:
 private:
     void setupExternalHeader();
 
-    std::ostream& m_ostream;
+    std::ostream* m_ostream;
     ::liblas::Writer* m_externalWriter;
     ::liblas::HeaderPtr m_externalHeader;
 

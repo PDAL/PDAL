@@ -58,13 +58,12 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
     DataStagePtr reader(new LiblasReader(readerOptions));
     
-    std::ostream* ofs = Utils::createFile("temp.las");
-
     {
         const boost::uint64_t numPoints = reader->getNumPoints();
 
-        // need to scope the writer, so that's it dtor can use the stream
-        LiblasWriterPtr writer(new LiblasWriter(reader, *ofs));
+        Options writerOptions;
+        writerOptions.add("filename","temp.las");
+        LiblasWriterPtr writer(new LiblasWriter(reader, writerOptions));
         BOOST_CHECK(writer->getDescription() == "Liblas Writer");
 
         writer->setCompressed(false);
@@ -75,8 +74,6 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
 
         writer->write(numPoints);
     }
-
-    Utils::closeFile(ofs);
 
     bool filesSame = Support::compare_files("temp.las", Support::datapath("simple.las"));
     BOOST_CHECK(filesSame);
@@ -98,13 +95,12 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
     DataStagePtr reader(new LiblasReader(readerOptions));
     
-    std::ostream* ofs = Utils::createFile("temp.laz");
-
     {
         const boost::uint64_t numPoints = reader->getNumPoints();
 
-        // need to scope the writer, so that's it dtor can use the stream
-        LiblasWriterPtr writer(new LiblasWriter(reader, *ofs));
+        Options writerOptions;
+        writerOptions.add("filename","temp.laz");
+        LiblasWriterPtr writer(new LiblasWriter(reader, writerOptions));
 
         writer->setCompressed(true);
         writer->setDate(0, 0);
@@ -114,8 +110,6 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
 
         writer->write(numPoints);
     }
-
-    Utils::closeFile(ofs);
 
     bool filesSame = Support::compare_files("temp.laz", Support::datapath("1.2-with-color.laz"));
     BOOST_CHECK(filesSame);
@@ -138,13 +132,12 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     readerOptions.add("filename", Support::datapath("1.2_3.las"));
     ReaderPtr reader(new LiblasReader(readerOptions));
     
-    std::ostream* ofs = Utils::createFile("temp.las");
-
     {
         const boost::uint64_t numPoints = reader->getNumPoints();
 
-        // need to scope the writer, so that's it dtor can use the stream
-        LiblasWriterPtr writer(new LiblasWriter(reader, *ofs));
+        Options writerOptions;
+        writerOptions.add("filename","temp.las");
+        LiblasWriterPtr writer(new LiblasWriter(reader, writerOptions));
         BOOST_CHECK(writer->getDescription() == "Liblas Writer");
 
         writer->setCompressed(false);
@@ -159,8 +152,6 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
 
         writer->write(numPoints);
     }
-
-    Utils::closeFile(ofs);
 
     const bool filesSame = Support::compare_files("temp.las", Support::datapath(refFile));
     BOOST_CHECK(filesSame);
