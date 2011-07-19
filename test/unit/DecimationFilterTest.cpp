@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(test)
 
     PointBuffer data(layout, 3);
 
-    StageSequentialIterator* iter = filter->createSequentialIterator();
+    StageSequentialIteratorPtr iter = filter->createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 3);
@@ -81,8 +81,6 @@ BOOST_AUTO_TEST_CASE(test)
     BOOST_CHECK(t0 == 0);
     BOOST_CHECK(t1 == 10);
     BOOST_CHECK(t2 == 20);
-
-    delete iter;
 
     return;
 }

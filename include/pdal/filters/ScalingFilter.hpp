@@ -51,8 +51,7 @@ namespace pdal { namespace filters {
 class ScalingFilterSequentialIterator;
 
 
-class ScalingFilter;
-typedef boost::shared_ptr<ScalingFilter> ScalingFilterPtr;
+MAKE_PTR(ScalingFilter);
 
 class PDAL_DLL ScalingFilter : public Filter
 {
@@ -78,8 +77,7 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
 
     void processBuffer(const PointBuffer& srcData, PointBuffer& dstData) const;
 

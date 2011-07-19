@@ -105,9 +105,9 @@ boost::uint32_t DecimationFilter::processBuffer(PointBuffer& dstData, const Poin
 }
 
 
-pdal::StageSequentialIterator* DecimationFilter::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr DecimationFilter::createSequentialIterator() const
 {
-    return new DecimationFilterSequentialIterator(*this);
+    return StageSequentialIteratorPtr(new DecimationFilterSequentialIterator(*this));
 }
 
 } } // namespaces

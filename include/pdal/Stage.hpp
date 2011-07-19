@@ -48,20 +48,17 @@
 namespace pdal
 {
 
-class Iterator;
-class StageSequentialIterator;
-class StageRandomIterator;
-class StageBlockIterator;
+MAKE_PTR(StageSequentialIterator);
+MAKE_PTR(StageRandomIterator);
+MAKE_PTR(StageBlockIterator);
 
 // every stage owns its own header, they are not shared
 
 
 // DataStage and Writer both derive from Stage
 
-class Stage;
-class DataStage;
-typedef boost::shared_ptr<Stage> StagePtr;
-typedef boost::shared_ptr<DataStage> DataStagePtr;
+MAKE_PTR(Stage);
+MAKE_PTR(DataStage);
 
 class PDAL_DLL Stage
 {
@@ -117,9 +114,9 @@ public:
 
     virtual bool supportsIterator (StageIteratorType) const = 0;
 
-    virtual StageSequentialIterator* createSequentialIterator() const { return NULL; }
-    virtual StageRandomIterator* createRandomIterator() const  { return NULL; }
-    virtual StageBlockIterator* createBlockIterator() const  { return NULL; }
+    virtual StageSequentialIteratorPtr createSequentialIterator() const { return StageSequentialIteratorPtr(); }
+    virtual StageRandomIteratorPtr createRandomIterator() const  { return StageRandomIteratorPtr(); }
+    virtual StageBlockIteratorPtr createBlockIterator() const  { return StageBlockIteratorPtr(); }
 
     void dump() const;
 

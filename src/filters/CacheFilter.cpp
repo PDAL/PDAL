@@ -150,15 +150,15 @@ void CacheFilter::updateStats(boost::uint64_t numRead, boost::uint64_t numReques
 }
 
 
-pdal::StageSequentialIterator* CacheFilter::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr CacheFilter::createSequentialIterator() const
 {
-    return new CacheFilterSequentialIterator(*this);
+    return StageSequentialIteratorPtr(new CacheFilterSequentialIterator(*this));
 }
 
 
-pdal::StageRandomIterator* CacheFilter::createRandomIterator() const
+pdal::StageRandomIteratorPtr CacheFilter::createRandomIterator() const
 {
-    return new CacheFilterRandomIterator(*this);
+    return StageRandomIteratorPtr(new CacheFilterRandomIterator(*this));
 }
 
 } } // namespaces

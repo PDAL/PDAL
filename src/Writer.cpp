@@ -88,7 +88,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
         }
     }
     
-    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage()->createSequentialIterator());
+    StageSequentialIteratorPtr iter(getPrevStage()->createSequentialIterator());
     
     if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
 

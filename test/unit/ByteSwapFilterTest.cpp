@@ -64,8 +64,8 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     DataStagePtr filter(new pdal::filters::ByteSwapFilter(reader, Options::empty()));
     BOOST_CHECK_EQUAL(filter->getName(), "filters.byteswap");
 
-    boost::scoped_ptr<StageSequentialIterator> unflipped_iter(reader->createSequentialIterator());
-    boost::scoped_ptr<StageSequentialIterator> flipped_iter(filter->createSequentialIterator());
+    StageSequentialIteratorPtr unflipped_iter(reader->createSequentialIterator());
+    StageSequentialIteratorPtr flipped_iter(filter->createSequentialIterator());
 
     const Schema& schema = reader->getSchema();
     

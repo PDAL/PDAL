@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test1)
     PointBuffer dataBig(layout, 1024);
     PointBuffer dataSmall(layout, 1);
 
-    StageSequentialIterator* iter1 = cache->createSequentialIterator();
+    StageSequentialIteratorPtr iter1 = cache->createSequentialIterator();
 
     //BOOST_CHECK(cache.getIndex() == 0);
     BOOST_CHECK(cache->getNumPointsRequested() == 0);
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test1)
     BOOST_CHECK(cache->getNumPointsRequested() == 2048);
     BOOST_CHECK(cache->getNumPointsRead() == 2048);
 
-    StageSequentialIterator* iter2 = cache->createSequentialIterator();
+    StageSequentialIteratorPtr iter2 = cache->createSequentialIterator();
 
     iter2->skip(42);
     iter2->read(dataSmall);
@@ -93,9 +93,6 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test1)
     //BOOST_CHECK(cache.getIndex() == 43);
     BOOST_CHECK(cache->getNumPointsRequested() == 2048+1);
     BOOST_CHECK(cache->getNumPointsRead() == 2048);
-
-    delete iter1;
-    delete iter2;
 
     return;
 }

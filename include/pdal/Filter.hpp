@@ -42,8 +42,7 @@
 namespace pdal
 {
 
-class Filter;
-typedef boost::shared_ptr<Filter> FilterPtr;
+MAKE_PTR(Filter);
 
 class PDAL_DLL Filter : public DataStage
 {

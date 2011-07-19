@@ -54,8 +54,7 @@ class CropFilterSequentialIterator;
 // updates the header accordingly
 
 
-class CropFilter;
-typedef boost::shared_ptr<CropFilter> CropFilterPtr;
+MAKE_PTR(CropFilter);
 
 class PDAL_DLL CropFilter : public Filter
 {
@@ -72,8 +71,7 @@ public:
         return false;
     }
     
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
 
     // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
     // if we're calling this routine multiple times with the same buffer

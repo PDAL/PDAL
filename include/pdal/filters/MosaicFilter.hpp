@@ -46,8 +46,7 @@
 
 namespace pdal { namespace filters {
 
-class MosaicFilter;
-typedef boost::shared_ptr<MosaicFilter> MosaicFilterPtr;
+MAKE_PTR(MosaicFilter);
 
 // this doesn't derive from Stage since it takes more than one stage as input
 class PDAL_DLL MosaicFilter : public MultiFilter
@@ -68,8 +67,7 @@ public:
         return false;
     }
     
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
 
 private:
     MosaicFilter& operator=(const MosaicFilter&); // not implemented

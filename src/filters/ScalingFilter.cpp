@@ -292,9 +292,9 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
 }
 
 
-pdal::StageSequentialIterator* ScalingFilter::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr ScalingFilter::createSequentialIterator() const
 {
-    return new ScalingFilterSequentialIterator(*this);
+    return StageSequentialIteratorPtr(new ScalingFilterSequentialIterator(*this));
 }
 
 } } // namespaces

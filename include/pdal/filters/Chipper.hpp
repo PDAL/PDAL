@@ -150,8 +150,7 @@ public:
 
 } // namespace chipper 
 
-class Chipper;
-typedef boost::shared_ptr<Chipper> ChipperPtr;
+MAKE_PTR(Chipper);
 
 class PDAL_DLL Chipper : public pdal::Filter
 {
@@ -173,8 +172,7 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
 
 private:
     void Load(chipper::RefList& xvec, chipper::RefList& yvec, chipper::RefList& spare);

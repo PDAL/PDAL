@@ -50,8 +50,7 @@ namespace pdal { namespace drivers { namespace faux {
 // This writer knows only about three dimensions: X,Y,Z (as doubles).
 //
 
-class Writer;
-typedef boost::shared_ptr<Writer> WriterPtr;
+MAKE_PTR(Writer);
 
 class PDAL_DLL Writer : public pdal::Writer
 {

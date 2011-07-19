@@ -50,8 +50,7 @@ namespace pdal { namespace filters {
 
 class ByteSwapFilterSequentialIterator;
 
-class ByteSwapFilter;
-typedef boost::shared_ptr<ByteSwapFilter> ByteSwapFilterPtr;
+MAKE_PTR(ByteSwapFilter);
 
 // removes any points outside of the given range
 // updates the header accordingly
@@ -70,8 +69,7 @@ public:
         return false;
     }
     
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
 
     // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
     // if we're calling this routine multiple times with the same buffer

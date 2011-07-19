@@ -161,9 +161,9 @@ void ColorFilter::getColor_F64_U16(double value, boost::uint16_t& red, boost::ui
 }
 
 
-pdal::StageSequentialIterator* ColorFilter::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr ColorFilter::createSequentialIterator() const
 {
-    return new ColorFilterSequentialIterator(*this);
+    return StageSequentialIteratorPtr(new ColorFilterSequentialIterator(*this));
 }
 
 } } // namespaces

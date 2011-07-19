@@ -110,9 +110,9 @@ boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffe
 }
 
 
-pdal::StageSequentialIterator* CropFilter::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr CropFilter::createSequentialIterator() const
 {
-    return new CropFilterSequentialIterator(*this);
+    return StageSequentialIteratorPtr(new CropFilterSequentialIterator(*this));
 }
 
 

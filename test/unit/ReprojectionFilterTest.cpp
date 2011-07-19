@@ -122,10 +122,9 @@ BOOST_AUTO_TEST_CASE(test_1)
         const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data(layout, 1);
 
-        pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
+        pdal::StageSequentialIteratorPtr iter = reader.createSequentialIterator();
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
-        delete iter;
     
         // note this file has only 1 points, so yes, the extent's mins and maxes are the same
         const pdal::Bounds<double> oldBounds_ref(preX, preY, preZ, preX, preY, preZ);
@@ -159,10 +158,9 @@ BOOST_AUTO_TEST_CASE(test_1)
         const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data(layout, 1);
 
-        pdal::StageSequentialIterator* iter = descalingFilter->createSequentialIterator();
+        pdal::StageSequentialIteratorPtr iter = descalingFilter->createSequentialIterator();
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
-        delete iter;
 
         const pdal::Bounds<double> newBounds_ref(postX, postY, postZ, postX, postY, postZ);
         const pdal::Bounds<double>& newBounds = descalingFilter->getBounds();
@@ -199,10 +197,9 @@ BOOST_AUTO_TEST_CASE(test_1)
         const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data2(layout, 1);
 
-        pdal::StageSequentialIterator* iter = descalingFilter->createSequentialIterator();
+        pdal::StageSequentialIteratorPtr iter = descalingFilter->createSequentialIterator();
         boost::uint32_t numRead = iter->read(data2);
         BOOST_CHECK(numRead == 1);
-        delete iter;
 
         double x=0, y=0, z=0;
         getPoint(data2, x, y, z, 0.000001, 0.000001, 0.01);

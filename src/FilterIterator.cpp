@@ -42,7 +42,6 @@ namespace pdal
 FilterSequentialIterator::FilterSequentialIterator(const Filter& filter)
     : StageSequentialIterator(filter)
     , m_filter(filter)
-    , m_prevIterator(NULL)
 {
     m_prevIterator = m_filter.getPrevStage()->createSequentialIterator();
 
@@ -52,19 +51,19 @@ FilterSequentialIterator::FilterSequentialIterator(const Filter& filter)
 
 FilterSequentialIterator::~FilterSequentialIterator()
 {
-    delete m_prevIterator;
+    return;
 }
 
 
-StageSequentialIterator& FilterSequentialIterator::getPrevIterator()
+StageSequentialIteratorPtr FilterSequentialIterator::getPrevIterator()
 {
-    return *m_prevIterator;
+    return m_prevIterator;
 }
 
 
-const StageSequentialIterator& FilterSequentialIterator::getPrevIterator() const
+const StageSequentialIteratorPtr FilterSequentialIterator::getPrevIterator() const
 {
-    return *m_prevIterator;
+    return m_prevIterator;
 }
 
 
@@ -72,7 +71,6 @@ const StageSequentialIterator& FilterSequentialIterator::getPrevIterator() const
 FilterRandomIterator::FilterRandomIterator(const Filter& filter)
     : StageRandomIterator(filter)
     , m_filter(filter)
-    , m_prevIterator(NULL)
 {
     m_prevIterator = m_filter.getPrevStage()->createRandomIterator();
 
@@ -82,25 +80,24 @@ FilterRandomIterator::FilterRandomIterator(const Filter& filter)
 
 FilterRandomIterator::~FilterRandomIterator()
 {
-    delete m_prevIterator;
+    return;
 }
 
 
-StageRandomIterator& FilterRandomIterator::getPrevIterator()
+StageRandomIteratorPtr FilterRandomIterator::getPrevIterator()
 {
-    return *m_prevIterator;
+    return m_prevIterator;
 }
 
 
-const StageRandomIterator& FilterRandomIterator::getPrevIterator() const
+const StageRandomIteratorPtr FilterRandomIterator::getPrevIterator() const
 {
-    return *m_prevIterator;
+    return m_prevIterator;
 }
 
 FilterBlockIterator::FilterBlockIterator(const Filter& filter)
     : StageBlockIterator(filter)
     , m_filter(filter)
-    , m_prevIterator(NULL)
 {
     m_prevIterator = m_filter.getPrevStage()->createBlockIterator();
 
@@ -110,19 +107,19 @@ FilterBlockIterator::FilterBlockIterator(const Filter& filter)
 
 FilterBlockIterator::~FilterBlockIterator()
 {
-    delete m_prevIterator;
+    return;
 }
 
 
-StageBlockIterator& FilterBlockIterator::getPrevIterator()
+StageBlockIteratorPtr FilterBlockIterator::getPrevIterator()
 {
-    return *m_prevIterator;
+    return m_prevIterator;
 }
 
 
-const StageBlockIterator& FilterBlockIterator::getPrevIterator() const
+const StageBlockIteratorPtr FilterBlockIterator::getPrevIterator() const
 {
-    return *m_prevIterator;
+    return m_prevIterator;
 }
 
 

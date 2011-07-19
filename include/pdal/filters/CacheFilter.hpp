@@ -56,8 +56,7 @@ namespace filters {
 //   - we only look into the cache if 1 point is being requested
 //
 
-class CacheFilter;
-typedef boost::shared_ptr<CacheFilter> CacheFilterPtr;
+MAKE_PTR(CacheFilter);
 
 class PDAL_DLL CacheFilter : public Filter
 {
@@ -102,8 +101,8 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
+    pdal::StageRandomIteratorPtr createRandomIterator() const;
 
 private:
     // these are mutable to allow const-ness for updating stats

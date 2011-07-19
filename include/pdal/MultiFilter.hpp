@@ -42,8 +42,7 @@
 namespace pdal
 {
 
-class MultiFilter;
-typedef boost::shared_ptr<MultiFilter> MultiFilterPtr;
+MAKE_PTR(MultiFilter);
 
 class PDAL_DLL MultiFilter : public DataStage
 {

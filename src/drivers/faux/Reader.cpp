@@ -118,15 +118,15 @@ Reader::Mode Reader::getMode() const
 }
 
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr Reader::createSequentialIterator() const
 {
-    return new SequentialIterator(*this);
+    return StageSequentialIteratorPtr(new SequentialIterator(*this));
 }
 
 
-pdal::StageRandomIterator* Reader::createRandomIterator() const
+pdal::StageRandomIteratorPtr Reader::createRandomIterator() const
 {
-    return new RandomIterator(*this);
+    return StageRandomIteratorPtr(new RandomIterator(*this));
 }
 
 

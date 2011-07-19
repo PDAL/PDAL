@@ -55,12 +55,12 @@ protected:
     virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
     virtual bool atEndImpl() const = 0;
 
-    StageSequentialIterator& getPrevIterator();
-    const StageSequentialIterator& getPrevIterator() const;
+    StageSequentialIteratorPtr getPrevIterator();
+    const StageSequentialIteratorPtr getPrevIterator() const;
 
 private:
     const Filter& m_filter;
-    StageSequentialIterator* m_prevIterator;
+    StageSequentialIteratorPtr m_prevIterator;
 };
 
 
@@ -75,12 +75,12 @@ protected:
     virtual boost::uint32_t readImpl(PointBuffer&) = 0;
     virtual boost::uint64_t seekImpl(boost::uint64_t pointNum) = 0;
 
-    StageRandomIterator& getPrevIterator();
-    const StageRandomIterator& getPrevIterator() const;
+    StageRandomIteratorPtr getPrevIterator();
+    const StageRandomIteratorPtr getPrevIterator() const;
 
 private:
     const Filter& m_filter;
-    StageRandomIterator* m_prevIterator;
+    StageRandomIteratorPtr m_prevIterator;
 };
 
 class FilterBlockIterator : public StageBlockIterator
@@ -94,12 +94,12 @@ protected:
     virtual boost::uint32_t readImpl(PointBuffer&) = 0;
     virtual boost::uint64_t seekImpl(boost::uint64_t pointNum) = 0;
 
-    StageBlockIterator& getPrevIterator();
-    const StageBlockIterator& getPrevIterator() const;
+    StageBlockIteratorPtr getPrevIterator();
+    const StageBlockIteratorPtr getPrevIterator() const;
 
 private:
     const Filter& m_filter;
-    StageBlockIterator* m_prevIterator;
+    StageBlockIteratorPtr m_prevIterator;
 };
 
 } // namespace pdal

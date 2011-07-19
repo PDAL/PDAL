@@ -46,8 +46,7 @@ class ReaderSequentialIterator;
 class ReaderRandomIterator;
 class ReaderBlockIterator;
 
-class Reader;
-typedef boost::shared_ptr<Reader> ReaderPtr;
+MAKE_PTR(Reader);
 
 class PDAL_DLL Reader : public DataStage
 {

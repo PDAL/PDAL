@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(MosaicFilterTest_test1)
 
     PointBuffer data(layout, 300);
 
-    StageSequentialIterator* iter = mosaic->createSequentialIterator();
+    StageSequentialIteratorPtr iter = mosaic->createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 300);
@@ -118,8 +118,6 @@ BOOST_AUTO_TEST_CASE(MosaicFilterTest_test1)
         }
         BOOST_CHECK(t == i % 100);
     }
-
-    delete iter;
 
     return;
 }

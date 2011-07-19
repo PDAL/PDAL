@@ -90,8 +90,8 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
+    pdal::StageRandomIteratorPtr createRandomIterator() const;
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;

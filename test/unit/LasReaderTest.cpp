@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 
     PointBuffer data(layout, 3);
     
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
+    pdal::StageSequentialIteratorPtr iter = reader.createSequentialIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -78,8 +78,6 @@ BOOST_AUTO_TEST_CASE(test_sequential)
         Support::check_p100_p101_p102(data, schema);
     }
 
-    delete iter;
-
     return;
 }
 
@@ -96,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 
     PointBuffer data(layout, 3);
     
-    pdal::StageRandomIterator* iter = reader.createRandomIterator();
+    pdal::StageRandomIteratorPtr iter = reader.createRandomIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -125,8 +123,6 @@ BOOST_AUTO_TEST_CASE(test_random)
         Support::check_p0_p1_p2(data, schema);
     }
     
-    delete iter;
-
     return;
 }
 
@@ -143,7 +139,7 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 
     PointBuffer data(layout, 3);
     
-    pdal::StageRandomIterator* iter = reader.createRandomIterator();
+    pdal::StageRandomIteratorPtr iter = reader.createRandomIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -172,8 +168,6 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
         Support::check_p0_p1_p2(data, schema);
     }
     
-    delete iter;
-
     return;
 }
 
@@ -192,7 +186,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
     PointBuffer data(layout, 1065);
 
     {
-        pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
+        pdal::StageSequentialIteratorPtr iter = reader.createSequentialIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         boost::uint32_t numRead = iter->read(data);
@@ -200,12 +194,10 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
         BOOST_CHECK(iter->getIndex() == 1065);
 
         Support::check_p0_p1_p2(data, schema);
-
-        delete iter;
     }
 
     {
-        pdal::StageRandomIterator* iter = reader.createRandomIterator();
+        pdal::StageRandomIteratorPtr iter = reader.createRandomIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         boost::uint32_t numRead = iter->read(data);
@@ -213,8 +205,6 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
         BOOST_CHECK(iter->getIndex() == 1065);
         
         Support::check_p0_p1_p2(data, schema);
-
-        delete iter;
     }
 
     return;
@@ -245,7 +235,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     boost::uint32_t numRead;
 
     {
-        pdal::StageSequentialIterator* iter = cache->createSequentialIterator();
+        pdal::StageSequentialIteratorPtr iter = cache->createSequentialIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         numRead = iter->read(data);
@@ -265,12 +255,10 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
         BOOST_CHECK(iter->getIndex() == 1065);
 
         Support::check_p710_p711_p712(data, schema);
-
-        delete iter;
     }
 
     {
-        pdal::StageRandomIterator* iter = cache->createRandomIterator();
+        pdal::StageRandomIteratorPtr iter = cache->createRandomIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         // read the middle third
@@ -308,8 +296,6 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
         BOOST_CHECK(iter->getIndex() == 1065);
 
         Support::check_p710_p711_p712(data, schema);
-
-        delete iter;
     }
 
     return;
@@ -333,16 +319,16 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 
     boost::uint32_t numRead;
 
-    pdal::StageSequentialIterator* iterS1 = reader.createSequentialIterator();
+    pdal::StageSequentialIteratorPtr iterS1 = reader.createSequentialIterator();
     BOOST_CHECK(iterS1->getIndex() == 0);
 
-    pdal::StageSequentialIterator* iterS2 = reader.createSequentialIterator();
+    pdal::StageSequentialIteratorPtr iterS2 = reader.createSequentialIterator();
     BOOST_CHECK(iterS2->getIndex() == 0);
 
-    pdal::StageRandomIterator* iterR1 = reader.createRandomIterator();
+    pdal::StageRandomIteratorPtr iterR1 = reader.createRandomIterator();
     BOOST_CHECK(iterR1->getIndex() == 0);
 
-    pdal::StageRandomIterator* iterR2 = reader.createRandomIterator();
+    pdal::StageRandomIteratorPtr iterR2 = reader.createRandomIterator();
     BOOST_CHECK(iterR2->getIndex() == 0);
 
     {
@@ -427,11 +413,6 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
         Support::check_p0_p1_p2(data, schema);
     }
 
-    delete iterS1;
-    delete iterS2;
-    delete iterR1;
-    delete iterR2;
-
     return;
 }
 
@@ -463,7 +444,7 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
 
     PointBuffer data(layout, 1);
     
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
+    pdal::StageSequentialIteratorPtr iter = reader.createSequentialIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -471,8 +452,6 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
 
         Support::check_pN(data, schema, 0, xref, yref, zref, tref, rref, gref, bref);
     }
-
-    delete iter;
 }
 
 BOOST_AUTO_TEST_CASE(test_different_formats)

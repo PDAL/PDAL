@@ -196,15 +196,15 @@ void LiblasReader::registerFields(::liblas::Reader& externalReader)
 }
 
 
-pdal::StageSequentialIterator* LiblasReader::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr LiblasReader::createSequentialIterator() const
 {
-    return new SequentialIterator(*this);
+    return StageSequentialIteratorPtr(new SequentialIterator(*this));
 }
 
 
-pdal::StageRandomIterator* LiblasReader::createRandomIterator() const
+pdal::StageRandomIteratorPtr LiblasReader::createRandomIterator() const
 {
-    return new RandomIterator(*this);
+    return StageRandomIteratorPtr(new RandomIterator(*this));
 }
 
 

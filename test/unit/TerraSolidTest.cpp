@@ -107,14 +107,12 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     PointBuffer data(layout, 3);
     
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
+    pdal::StageSequentialIteratorPtr iter = reader.createSequentialIterator();
     
     {
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK_EQUAL(numRead,3u);
     }
-
-    delete iter;
 
     Check_Point(data, schema, 0, 363127.94, 3437612.33, 55.26, 580220.5528);
     Check_Point(data, schema, 1, 363128.12, 3437613.01, 55.33, 580220.5530);

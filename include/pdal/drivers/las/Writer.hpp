@@ -50,8 +50,7 @@ namespace pdal { namespace drivers { namespace las {
 
 class ZipPoint;
 
-class LasWriter;
-typedef boost::shared_ptr<LasWriter> LasWriterPtr;
+MAKE_PTR(LasWriter);
 
 class PDAL_DLL LasWriter : public Writer
 {

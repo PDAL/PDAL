@@ -149,9 +149,9 @@ boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointB
 }
 
 
-pdal::StageSequentialIterator* ByteSwapFilter::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr ByteSwapFilter::createSequentialIterator() const
 {
-    return new ByteSwapFilterSequentialIterator(*this);
+    return StageSequentialIteratorPtr(new ByteSwapFilterSequentialIterator(*this));
 }
 
 

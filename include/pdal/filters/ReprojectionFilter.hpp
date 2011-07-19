@@ -50,8 +50,7 @@ namespace pdal { namespace filters {
 
 class ReprojectionFilterSequentialIterator;
 
-class ReprojectionFilter;
-typedef boost::shared_ptr<ReprojectionFilter> ReprojectionFilterPtr;
+MAKE_PTR(ReprojectionFilter);
 
 class PDAL_DLL ReprojectionFilter : public Filter
 {
@@ -71,8 +70,7 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
 
     void processBuffer(PointBuffer& data) const;
 

@@ -86,9 +86,9 @@ const std::string& MosaicFilter::getName() const
 }
 
 
-pdal::StageSequentialIterator* MosaicFilter::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr MosaicFilter::createSequentialIterator() const
 {
-    return new MosaicFilterSequentialIterator(*this);
+    return StageSequentialIteratorPtr(new MosaicFilterSequentialIterator(*this));
 }
 
 } } // namespaces

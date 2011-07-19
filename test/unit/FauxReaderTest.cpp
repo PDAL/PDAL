@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 
     PointBuffer data(layout, 750);
  
-    StageSequentialIterator* iter = reader.createSequentialIterator();
+    StageSequentialIteratorPtr iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead, 750u);
@@ -84,8 +84,6 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
         BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
         BOOST_CHECK_EQUAL(t, i);
     }
-
-    delete iter;
 
     return;
 }
@@ -112,7 +110,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
     int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
 
-    StageRandomIterator* iter = reader.createRandomIterator();
+    StageRandomIteratorPtr iter = reader.createRandomIterator();
 
     boost::uint32_t numRead = iter->read(data);
     BOOST_CHECK_EQUAL(numRead, 10u);
@@ -192,8 +190,6 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
         }
     }
 
-    delete iter;
-
     return;
 }
 
@@ -212,7 +208,7 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
 
     PointBuffer data(layout, 750);
 
-    StageSequentialIterator* iter = reader.createSequentialIterator();
+    StageSequentialIteratorPtr iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead, 750u);
@@ -245,8 +241,6 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
         // BOOST_CHECK(t == i);
     }
 
-    delete iter;
-
     return;
 }
 
@@ -264,7 +258,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
 
     PointBuffer data(layout, 2);
 
-    StageSequentialIterator* iter = reader.createSequentialIterator();
+    StageSequentialIteratorPtr iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead, 2u);
@@ -295,8 +289,6 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     BOOST_CHECK_EQUAL(t1, 1);
 
 
-    delete iter;
-
     return;
 }
 
@@ -315,7 +307,7 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
 
     PointBuffer data(layout, 750);
 
-    StageSequentialIterator* iter = reader.createSequentialIterator();
+    StageSequentialIteratorPtr iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead,750u);
@@ -342,8 +334,6 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
         BOOST_CHECK_EQUAL(t, i);
 
     }
-
-    delete iter;
 
     return;
 }

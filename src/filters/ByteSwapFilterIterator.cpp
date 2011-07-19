@@ -70,7 +70,7 @@ boost::uint32_t ByteSwapFilterSequentialIterator::readImpl(PointBuffer& dstData)
     if (chip)
     {
         PointBuffer srcData(dstData.getSchemaLayout(), dstData.getCapacity());
-        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+        const boost::uint32_t numSrcPointsRead = getPrevIterator()->read(srcData);
         const boost::uint32_t numPointsProcessed = m_swapFilter.processBuffer(dstData, srcData);
                         
         assert (numSrcPointsRead == numPointsProcessed);
@@ -89,7 +89,7 @@ boost::uint32_t ByteSwapFilterSequentialIterator::readImpl(PointBuffer& dstData)
 
     
         // read from prev stage
-        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+        const boost::uint32_t numSrcPointsRead = getPrevIterator()->read(srcData);
         assert(numSrcPointsRead == srcData.getNumPoints());
         assert(numSrcPointsRead <= numPointsNeeded);
 
@@ -117,8 +117,8 @@ bool ByteSwapFilterSequentialIterator::atEndImpl() const
 {
     // we don't have a fixed point point --
     // we are at the end only when our source is at the end
-    const StageSequentialIterator& iter = getPrevIterator();
-    return iter.atEnd();
+    const StageSequentialIteratorPtr iter = getPrevIterator();
+    return iter->atEnd();
 }
 
 

@@ -45,8 +45,8 @@ namespace pdal
 {
 
 class PointBuffer;
-class Writer;
-typedef boost::shared_ptr<Writer> WriterPtr;
+
+MAKE_PTR(Writer);
 
 class PDAL_DLL Writer : public Stage
 {

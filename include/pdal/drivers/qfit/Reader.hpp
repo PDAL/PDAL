@@ -137,8 +137,8 @@ public:
         return false;
     }
     
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
+    pdal::StageRandomIteratorPtr createRandomIterator() const;
     
     std::size_t getPointDataOffset() const { return m_offset; }
     boost::uint32_t getPointDataSize() const { return m_size; }

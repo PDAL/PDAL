@@ -164,7 +164,7 @@ static void givePointsToEngine(ThreadArgs* threadArgs)
     const pdal::Schema& schema = stage.getSchema();
     const pdal::SchemaLayout schemaLayout(schema);
 
-    pdal::StageSequentialIterator* iter = stage.createSequentialIterator();
+    pdal::StageSequentialIteratorPtr iter = stage.createSequentialIterator();
     pdal::PointBuffer buffer(schemaLayout, numPoints);
     iter->skip(startPoint);
     const boost::uint32_t numRead = iter->read(buffer);
@@ -219,8 +219,6 @@ static void givePointsToEngine(ThreadArgs* threadArgs)
     mutex.lock();
     controller.addPoints(points, colors, numRead);
     mutex.unlock();
-
-    delete iter;
 
     threadArgs->m_numRead = numRead;
 
