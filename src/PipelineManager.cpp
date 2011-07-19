@@ -47,9 +47,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include <libxml/xmlmemory.h>
-#include <libxml/parser.h>
-
 namespace pdal
 {
     
