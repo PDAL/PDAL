@@ -37,7 +37,6 @@
 #include "Support.hpp"
 
 #include <pdal/StageFactory.hpp>
-#include <pdal/exceptions.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/Writer.hpp>

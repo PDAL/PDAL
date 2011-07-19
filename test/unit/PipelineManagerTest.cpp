@@ -34,6 +34,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <boost/property_tree/xml_parser.hpp>
+
 #include "Support.hpp"
 
 #include <pdal/PipelineManager.hpp>
@@ -68,6 +70,8 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
     PipelineManager mgr;
 
     mgr.readXml(Support::datapath("pipeline1.xml"));
+
+    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

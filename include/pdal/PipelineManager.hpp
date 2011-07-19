@@ -68,16 +68,16 @@ public:
     void readXml(const std::string&);
 
 private:
-    StagePtr parsePipeline(xmlDocPtr doc, xmlNodePtr cur);
-    StagePtr parseStage(xmlDocPtr doc, xmlNodePtr cur);
-    DataStagePtr parseDataStage(xmlDocPtr doc, xmlNodePtr cur);
-    ReaderPtr parseReader(xmlDocPtr doc, xmlNodePtr cur);
-    FilterPtr parseFilter(xmlDocPtr doc, xmlNodePtr cur);
-    MultiFilterPtr parseMultiFilter(xmlDocPtr doc, xmlNodePtr cur);
-    WriterPtr parseWriter(xmlDocPtr doc, xmlNodePtr cur);
+    StagePtr parsePipeline(const boost::property_tree::ptree&);
 
-    Option<std::string> parseOption(xmlDocPtr doc, xmlNodePtr cur);
-    const char* getElementText(xmlDocPtr doc, xmlNodePtr cur);
+    ReaderPtr parseReader(const boost::property_tree::ptree& tree);
+    FilterPtr parseFilter(const boost::property_tree::ptree& tree);
+    MultiFilterPtr parseMultiFilter(const boost::property_tree::ptree& tree);
+    WriterPtr parseWriter(const boost::property_tree::ptree& tree);
+
+    Option<std::string> parseOption(const boost::property_tree::ptree& tree);
+    std::string parseType(const boost::property_tree::ptree& tree);
+
 
     StageFactory m_factory;
 
