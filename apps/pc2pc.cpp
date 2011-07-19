@@ -118,51 +118,70 @@ int Application_pc2pc::execute()
         return 1;
     }
 
-    Options optsW("filename", m_outputFile, "file to write to");
+    Options writerOptions;
+    writerOptions.add("filename", m_outputFile);
 
     if (hasOption("native"))
     {
-        Options optsR("filename", m_inputFile, "file to read from");
-        pdal::drivers::las::LasReader reader(optsR);
+        Options readerOptions;
+        readerOptions.add("filename", m_inputFile);
+        DataStagePtr reader(new pdal::drivers::las::LasReader(readerOptions));
     
-        const boost::uint64_t numPoints = reader.getNumPoints();
+        const boost::uint64_t numPoints = reader->getNumPoints();
 
-        pdal::drivers::las::LasWriter writer(reader, optsW);
+        WriterPtr writer(new pdal::drivers::las::LasWriter(reader, writerOptions));
 
         //BUG: handle laz writer.setCompressed(false);
 
         //writer.setPointFormat( reader.getPointFormatNumber() );
 
-        writer.write(numPoints);
+        writer->write(numPoints);
     }
 
     else if (hasOption("oracle-writer"))
     {
 #ifdef PDAL_HAVE_ORACLE
-        Options optsR("filename", m_inputFile, "file to read from");
-        pdal::drivers::las::LasReader reader(optsR);
+        Options readerOptions;
+        readerOptions.add("filename", m_inputFile);
+        DataStagePtr reader(new pdal::drivers::las::LasReader(readerOptions));
     
-        const boost::uint64_t numPoints = reader.getNumPoints();
+        const boost::uint64_t numPoints = reader->getNumPoints();
 
         boost::property_tree::ptree load_tree;
         
         boost::property_tree::read_xml(m_xml, load_tree);
         
         boost::property_tree::ptree oracle_options = load_tree.get_child("pdal.drivers.oci.writer");
-        boost::property_tree::ptree las_options = load_tree.get_child("pdal.drivers.las");
     
         pdal::OptionsOld options(oracle_options);
         
-        boost::property_tree::ptree in_srs_options = las_options.get_child("spatialreference");
-        boost::property_tree::ptree out_srs_options = oracle_options.get_child("spatialreference");
-
-        std::string in_wkt = in_srs_options.get<std::string>("userinput");
-        std::string out_wkt = out_srs_options.get<std::string>("userinput");
+        boost::property_tree::ptree in_srs_options = oracle_options.get_child("spatialreference");
+        std::string out_wkt = in_srs_options.get<std::string>("userinput");
+        boost::property_tree::ptree las_options = load_tree.get_child("pdal.drivers.las");
+        boost::property_tree::ptree out_srs_options = las_options.get_child("spatialreference");
+        std::string in_wkt = out_srs_options.get<std::string>("userinput");
         pdal::SpatialReference in_ref(in_wkt);
         pdal::SpatialReference out_ref(out_wkt);
                 
         boost::property_tree::ptree& tree = options.GetPTree();
+        
         boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
+        
+        pdal::Options cacheOptions;
+        cacheOptions.add("max_cache_blocks", 1);
+        cacheOptions.add("cache_block_size", capacity);
+        DataStagePtr cache(new pdal::filters::CacheFilter(reader, cacheOptions));
+
+        pdal::Options chipperOptions;
+        cacheOptions.add("max_partition_size", capacity);
+        DataStagePtr chipper(new pdal::filters::Chipper(cache, chipperOptions));
+
+        DataStagePtr swapper(new pdal::filters::ByteSwapFilter(chipper, Options::empty()));
+
+        DataStagePtr scalingFilter(new pdal::filters::ScalingFilter(swapper, false));
+
+        DataStagePtr reprojectionFilter(new pdal::filters::ReprojectionFilter(scalingFilter, in_ref, out_ref));
+
         // convert to ints, using custom scale factor
         
         double scalex = oracle_options.get<double>("scale.x");
@@ -172,21 +191,20 @@ int Application_pc2pc::execute()
         double offsetx = oracle_options.get<double>("offset.x");
         double offsety = oracle_options.get<double>("offset.y");
         double offsetz = oracle_options.get<double>("offset.z");
-        
-        pdal::filters::CacheFilter cache(reader, 1, capacity);
-        pdal::filters::Chipper chipper(cache, capacity);
-        pdal::filters::ScalingFilter scalingFilter(cache, false);
-        pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
-        pdal::filters::ScalingFilter descalingFilter(   reprojectionFilter, 
+
+        DataStagePtr descalingFilter(new pdal::filters::ScalingFilter (   reprojectionFilter, 
                                                         scalex, offsetx,
                                                         scaley, offsety, 
                                                         scalez, offsetz, 
-                                                        true);
-        // pdal::filters::ByteSwapFilter swapper(chipper);
-        pdal::drivers::oci::Writer writer(descalingFilter, options);
+                                                        true));
+        
+        WriterPtr writer(new pdal::drivers::oci::Writer(descalingFilter, options));
 
+        // pdal::filters::CacheFilter cache(reader, 1, capacity);
+        // pdal::filters::Chipper chipper(cache, capacity);
+        // pdal::drivers::oci::Writer writer(chipper, options);
 
-        writer.write(numPoints);
+        writer->write(numPoints);
         boost::property_tree::ptree output_tree;
         // output_tree.put_child(writer.getName(), options.GetPTree());
         // boost::property_tree::write_xml(m_xml, output_tree);
@@ -212,42 +230,59 @@ int Application_pc2pc::execute()
         
         std::string out_wkt = srs_options.get<std::string>("userinput");
         pdal::OptionsOld options(oracle_options);
-
+        
+        if (out_wkt.size() != 0) 
+        {
             pdal::SpatialReference out_ref(out_wkt);
 
-            pdal::drivers::oci::Reader reader(options);
-            pdal::SpatialReference in_ref(reader.getSpatialReference());
+            DataStagePtr reader(new pdal::drivers::oci::Reader(options));
+            pdal::SpatialReference in_ref(reader->getSpatialReference());
 
-            // pdal::filters::ByteSwapFilter swapper(reader);
+            DataStagePtr swapper(new pdal::filters::ByteSwapFilter(reader, Options::empty()));
 
-            pdal::filters::ScalingFilter scalingFilter(reader, false);
-            
-            pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
-            
+            DataStagePtr scalingFilter(new pdal::filters::ScalingFilter(swapper, false));
+
+            DataStagePtr reprojectionFilter(new pdal::filters::ReprojectionFilter(scalingFilter, in_ref, out_ref));
+
             // convert to ints, using custom scale factor
             
             double scalex = las_options.get<double>("scale.x");
             double scaley = las_options.get<double>("scale.y");
             double scalez = las_options.get<double>("scale.z");
-            
+
             double offsetx = las_options.get<double>("offset.x");
             double offsety = las_options.get<double>("offset.y");
             double offsetz = las_options.get<double>("offset.z");
-            
-            pdal::filters::ScalingFilter descalingFilter(   reprojectionFilter, 
-                                                            scalex, offsetx,
-                                                            scaley, offsety, 
-                                                            scalez, offsetz, 
-                                                            true);
 
-            pdal::drivers::las::LasWriter writer(descalingFilter, optsW);
+            DataStagePtr descalingFilter(new pdal::filters::ScalingFilter(reprojectionFilter, 
+                                                                          scalex, offsetx,
+                                                                          scaley, offsety, 
+                                                                          scalez, offsetz, 
+                                                                          true));
+
+            pdal::drivers::las::LasWriterPtr writer(new pdal::drivers::las::LasWriter(descalingFilter, writerOptions));
 
 
             if (compress)
-                writer.setCompressed(true);
-            writer.setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));     
-            writer.setPointFormat(pdal::drivers::las::PointFormat3);       
-            writer.write(0);
+                writer->setCompressed(true);
+            writer->setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));            
+            writer->write(0);
+        } else 
+        {
+            pdal::SpatialReference out_ref(out_wkt);
+
+            DataStagePtr reader(new pdal::drivers::oci::Reader(options));
+            pdal::SpatialReference in_ref(reader->getSpatialReference());
+            DataStagePtr swapper(new pdal::filters::ByteSwapFilter(reader, Options::empty()));
+            
+
+            pdal::drivers::las::LasWriterPtr writer(new pdal::drivers::las::LasWriter(swapper, writerOptions));
+            if (compress)
+                writer->setCompressed(true);
+        
+            writer->setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));            
+            writer->write(0);
+        }
 
 
 
@@ -267,17 +302,19 @@ int Application_pc2pc::execute()
 
     else
     {
-        pdal::drivers::liblas::LiblasReader reader(m_inputFile);
+        pdal::Options readerOptions;
+        readerOptions.add("filename", m_inputFile);
+        pdal::drivers::liblas::LiblasReaderPtr reader(new pdal::drivers::liblas::LiblasReader(readerOptions));
     
-        const boost::uint64_t numPoints = reader.getNumPoints();
+        const boost::uint64_t numPoints = reader->getNumPoints();
 
-        pdal::drivers::liblas::LiblasWriter writer(reader, optsW);
+        pdal::drivers::liblas::LiblasWriterPtr writer(new pdal::drivers::liblas::LiblasWriter(reader, writerOptions));
 
         //BUG: handle laz writer.setCompressed(false);
 
-        writer.setPointFormat( reader.getPointFormat() );
+        writer->setPointFormat( reader->getPointFormat() );
 
-        writer.write(numPoints);
+        writer->write(numPoints);
     }
 
     return 0;
