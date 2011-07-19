@@ -88,10 +88,6 @@ typedef boost::multi_index::multi_index_container<
       >
 > IndexMap;
 
-// typedef IndexMap::index<name>::type index_by_name;
-// typedef IndexMap::index<position>::type index_by_position;
-typedef IndexMap::index<index>::type index_by_index;
-
 }} // pdal::schema::index
 
 /// Schema definition
@@ -141,7 +137,6 @@ public:
 
 private:
     std::vector<Dimension> m_dimensions;
-    pdal::schema::index::IndexMap m_index;
 
     // this is a mapping from field name to index position in the
     // m_dimensions array (or -1 if field not present)
