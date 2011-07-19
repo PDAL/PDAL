@@ -42,11 +42,10 @@ namespace pdal
 MultiFilterSequentialIterator::MultiFilterSequentialIterator(const MultiFilter& filter)
     : StageSequentialIterator(filter)
     , m_filter(filter)
-    , m_prevIterator(NULL)
 {
     for (size_t i=0; i<filter.getPrevStages().size(); ++i)
     {
-        const Stage* stage = filter.getPrevStages()[i];
+        const DataStagePtr stage = filter.getPrevStages()[i];
         m_prevIterators.push_back(stage->createSequentialIterator());
     }
 
@@ -56,22 +55,18 @@ MultiFilterSequentialIterator::MultiFilterSequentialIterator(const MultiFilter& 
 
 MultiFilterSequentialIterator::~MultiFilterSequentialIterator()
 {
-    for (size_t i=0; i<m_prevIterators.size(); ++i)
-    {
-        StageSequentialIterator* iter = m_prevIterators[i];
-        delete iter;
-    }
+    return;
 }
 
 
-const std::vector<StageSequentialIterator*>& MultiFilterSequentialIterator::getPrevIterators() const
+const std::vector<StageSequentialIteratorPtr>& MultiFilterSequentialIterator::getPrevIterators() const
 {
     return m_prevIterators;
 }
 
-const StageSequentialIterator& MultiFilterSequentialIterator::getPrevIterator() const
+const StageSequentialIteratorPtr MultiFilterSequentialIterator::getPrevIterator() const
 {
-    return *m_prevIterator;
+    return m_prevIterator;
 }
 
 

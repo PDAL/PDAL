@@ -41,22 +41,19 @@
 namespace pdal { namespace filters {
 
 
-CacheFilter::CacheFilter(const Stage& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-{
-     throw not_yet_implemented("cache filter options support"); 
-}
-
-
 // cache block size is measured in Points, not bytes
-CacheFilter::CacheFilter(const Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
-    : Filter(prevStage, Options::none())
+CacheFilter::CacheFilter(const DataStagePtr& prevStage, const Options& options)
+    : Filter(prevStage, Options::empty())
     , m_numPointsRequested(0)
     , m_numPointsRead(0)
     , m_cache(NULL)
-    , m_maxCacheBlocks(maxCacheBlocks)
-    , m_cacheBlockSize(cacheBlockSize)
 {
+    const boost::uint32_t maxCacheBlocks = options.getOption<boost::uint32_t>("max_cache_blocks").getValue();
+    const boost::uint32_t cacheBlockSize = options.getOption<boost::uint32_t>("cache_block_size").getValue();
+
+    m_maxCacheBlocks = maxCacheBlocks;
+    m_cacheBlockSize = cacheBlockSize;
+
     resetCache();
     return;
 }
@@ -153,15 +150,15 @@ void CacheFilter::updateStats(boost::uint64_t numRead, boost::uint64_t numReques
 }
 
 
-pdal::StageSequentialIterator* CacheFilter::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr CacheFilter::createSequentialIterator() const
 {
-    return new CacheFilterSequentialIterator(*this);
+    return StageSequentialIteratorPtr(new CacheFilterSequentialIterator(*this));
 }
 
 
-pdal::StageRandomIterator* CacheFilter::createRandomIterator() const
+pdal::StageRandomIteratorPtr CacheFilter::createRandomIterator() const
 {
-    return new CacheFilterRandomIterator(*this);
+    return StageRandomIteratorPtr(new CacheFilterRandomIterator(*this));
 }
 
 } } // namespaces

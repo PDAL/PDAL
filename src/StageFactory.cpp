@@ -67,108 +67,110 @@
 
 namespace pdal
 {
-    
-static Reader* create_drivers_faux_reader(const Options& options)        { return new pdal::drivers::faux::Reader(options); }
-static Reader* create_drivers_las_reader(const Options& options)         { return new pdal::drivers::las::LasReader(options); }
-static Reader* create_drivers_liblas_reader(const Options& options)      { return new pdal::drivers::liblas::LiblasReader(options); }
-static Reader* create_drivers_oci_reader(const Options& options)         { return new pdal::drivers::oci::Reader(options); }
-static Reader* create_drivers_qfit_reader(const Options& options)        { return new pdal::drivers::qfit::Reader(options); }
-static Reader* create_drivers_terrasolid_reader(const Options& options)  { return new pdal::drivers::terrasolid::Reader(options); }
 
-static Writer* create_drivers_faux_writer(const Stage& prevStage, const Options& options)    { return new pdal::drivers::faux::Writer(prevStage, options); }
-static Writer* create_drivers_las_writer(const Stage& prevStage, const Options& options)     { return new pdal::drivers::las::LasWriter(prevStage, options); }
-static Writer* create_drivers_liblas_writer(const Stage& prevStage, const Options& options)  { return new pdal::drivers::liblas::LiblasWriter(prevStage, options); }
-static Writer* create_drivers_oci_writer(const Stage& prevStage, const Options& options)     { return new pdal::drivers::oci::Writer(prevStage, options); }
+Reader* create_drivers_faux_reader(const Options& options) { return new pdal::drivers::faux::Reader(options); }
 
-static Filter* create_filters_byteswapfilter(const Stage& prevStage, const Options& options)      { return new pdal::filters::ByteSwapFilter(prevStage, options); }
-static Filter* create_filters_cachefilter(const Stage& prevStage, const Options& options)         { return new pdal::filters::CacheFilter(prevStage, options); }
-static Filter* create_filters_chipper(const Stage& prevStage, const Options& options)             { return new pdal::filters::Chipper(prevStage, options); }
-static Filter* create_filters_colorfilter(const Stage& prevStage, const Options& options)         { return new pdal::filters::ColorFilter(prevStage, options); }
-static Filter* create_filters_cropfilter(const Stage& prevStage, const Options& options)          { return new pdal::filters::CropFilter(prevStage, options); }
-static Filter* create_filters_decimationfilter(const Stage& prevStage, const Options& options)    { return new pdal::filters::DecimationFilter(prevStage, options); }
-static Filter* create_filters_reprojectionfilter(const Stage& prevStage, const Options& options)  { return new pdal::filters::ReprojectionFilter(prevStage, options); }
-static Filter* create_filters_scalingfilter(const Stage& prevStage, const Options& options)       { return new pdal::filters::ScalingFilter(prevStage, options); }
+Reader* create_drivers_las_reader(const Options& options) { return new pdal::drivers::las::LasReader(options); }
+Reader* create_drivers_liblas_reader(const Options& options) { return new pdal::drivers::liblas::LiblasReader(options); }
+Reader* create_drivers_oci_reader(const Options& options) { return new pdal::drivers::oci::Reader(options); }
+Reader* create_drivers_qfit_reader(const Options& options) { return new pdal::drivers::qfit::Reader(options); }
+Reader* create_drivers_terrasolid_reader(const Options& options) { return new pdal::drivers::terrasolid::Reader(options); }
 
-static MultiFilter* create_filters_mosaicfilter(const std::vector<const Stage*>& prevStages, const Options& options)  { return new pdal::filters::MosaicFilter(prevStages, options); }
+Writer* create_drivers_faux_writer(const DataStagePtr& prevStage, const Options& options) { return new pdal::drivers::faux::Writer(prevStage, options); }
+Writer* create_drivers_las_writer(const DataStagePtr& prevStage, const Options& options) { return new pdal::drivers::las::LasWriter(prevStage, options); }
+Writer* create_drivers_liblas_writer(const DataStagePtr& prevStage, const Options& options) { return new pdal::drivers::liblas::LiblasWriter(prevStage, options); }
+Writer* create_drivers_oci_writer(const DataStagePtr& prevStage, const Options& options) { return new pdal::drivers::oci::Writer(prevStage, options); }
+
+Filter* create_filters_byteswapfilter(const DataStagePtr& prevStage, const Options& options) { return new pdal::filters::ByteSwapFilter(prevStage, options); }
+Filter* create_filters_cachefilter(const DataStagePtr& prevStage, const Options& options) { return new pdal::filters::CacheFilter(prevStage, options); }
+Filter* create_filters_chipper(const DataStagePtr& prevStage, const Options& options) { return new pdal::filters::Chipper(prevStage, options); }
+Filter* create_filters_colorfilter(const DataStagePtr& prevStage, const Options& options) { return new pdal::filters::ColorFilter(prevStage, options); }
+Filter* create_filters_cropfilter(const DataStagePtr& prevStage, const Options& options) { return new pdal::filters::CropFilter(prevStage, options); }
+Filter* create_filters_decimationfilter(const DataStagePtr& prevStage, const Options& options) { return new pdal::filters::DecimationFilter(prevStage, options); }
+Filter* create_filters_reprojectionfilter(const DataStagePtr& prevStage, const Options& options) { return new pdal::filters::ReprojectionFilter(prevStage, options); }
+Filter* create_filters_scalingfilter(const DataStagePtr& prevStage, const Options& options) { return new pdal::filters::ScalingFilter(prevStage, options); }
+
+MultiFilter* create_filters_mosaicfilter(const std::vector<const DataStagePtr>& prevStages, const Options& options) { return new pdal::filters::MosaicFilter(prevStages, options); }
 
 
 StageFactory::StageFactory()
 {
-    registerKnownStages();
+    registerKnownReaders();
+    registerKnownFilters();
+    registerKnownMultiFilters();
+    registerKnownWriters();
 
     return;
 }
 
 
-boost::shared_ptr<Reader> StageFactory::createReader(const std::string& type, const Options& options)
+ReaderPtr StageFactory::createReader(const std::string& type, const Options& options)
 {
     ReaderCreator* f = getReaderCreator(type);
     Reader* stage = f(options);
-    boost::shared_ptr<Reader> ptr(stage);
+    ReaderPtr ptr(stage);
     return ptr;
 }
 
 
-boost::shared_ptr<Filter> StageFactory::createFilter(const std::string& type, const Stage& prevStage, const Options& options)
+FilterPtr StageFactory::createFilter(const std::string& type, const DataStagePtr& prevStage, const Options& options)
 {
     FilterCreator* f = getFilterCreator(type);
     Filter* stage = f(prevStage, options);
-    boost::shared_ptr<Filter> ptr(stage);
+    FilterPtr ptr(stage);
     return ptr;
 }
 
 
-boost::shared_ptr<MultiFilter> StageFactory::createMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options& options)
+MultiFilterPtr StageFactory::createMultiFilter(const std::string& type, const std::vector<const DataStagePtr>& prevStages, const Options& options)
 {
     MultiFilterCreator* f = getMultiFilterCreator(type);
     MultiFilter* stage = f(prevStages, options);
-    boost::shared_ptr<MultiFilter> ptr(stage);
+    MultiFilterPtr ptr(stage);
     return ptr;
 }
 
 
-boost::shared_ptr<Writer> StageFactory::createWriter(const std::string& type, const Stage& prevStage, const Options& options)
+WriterPtr StageFactory::createWriter(const std::string& type, const DataStagePtr& prevStage, const Options& options)
 {
     WriterCreator* f = getWriterCreator(type);
     Writer* stage = f(prevStage, options);
-    boost::shared_ptr<Writer> ptr(stage);
+    WriterPtr ptr(stage);
     return ptr;
 }
 
 
-StageFactory::ReaderCreator* StageFactory::getReaderCreator(const std::string& type)
+template<typename T>
+static T* findFirst(const std::string& type, std::map<std::string, T*> list)
 {
-    ReaderCreatorList::const_iterator iter = m_readerCreators.find(type);
-    if (iter == m_readerCreators.end()) throw pdal_error("unknown reader stage type");
-    ReaderCreator* f = iter->second;
-    return f;
+    std::map<std::string, T*>::const_iterator iter = list.find(type);
+    if (iter == list.end())
+        return NULL;
+    return (*iter).second;
 }
 
 
-StageFactory::FilterCreator* StageFactory::getFilterCreator(const std::string& type)
+StageFactory::ReaderCreator* StageFactory::getReaderCreator(const std::string& type) const
 {
-    FilterCreatorList::const_iterator iter = m_filterCreators.find(type);
-    if (iter == m_filterCreators.end()) throw pdal_error("unknown filter stage type");
-    FilterCreator* f = iter->second;
-    return f;
+    return findFirst<ReaderCreator>(type, m_readerCreators);
 }
 
 
-StageFactory::MultiFilterCreator* StageFactory::getMultiFilterCreator(const std::string& type)
+StageFactory::FilterCreator* StageFactory::getFilterCreator(const std::string& type) const
 {
-    MultiFilterCreatorList::const_iterator iter = m_multifilterCreators.find(type);
-    if (iter == m_multifilterCreators.end()) throw pdal_error("unknown multifilter stage type");
-    MultiFilterCreator* f = iter->second;
-    return f;
+    return findFirst<FilterCreator>(type, m_filterCreators);
 }
 
 
-StageFactory::WriterCreator* StageFactory::getWriterCreator(const std::string& type)
+StageFactory::MultiFilterCreator* StageFactory::getMultiFilterCreator(const std::string& type) const
 {
-    WriterCreatorList::const_iterator iter = m_writerCreators.find(type);
-    if (iter == m_writerCreators.end()) throw pdal_error("unknown writer stage type");
-    WriterCreator* f = iter->second;
-    return f;
+    return findFirst<MultiFilterCreator>(type, m_multifilterCreators);
+}
+
+
+StageFactory::WriterCreator* StageFactory::getWriterCreator(const std::string& type) const
+{
+    return findFirst<WriterCreator>(type, m_writerCreators);
 }
 
 
@@ -200,7 +202,7 @@ void StageFactory::registerWriter(const std::string& type, WriterCreator* f)
 }
 
 
-void StageFactory::registerKnownStages()
+void StageFactory::registerKnownReaders()
 {
     registerReader("drivers.faux.reader", create_drivers_faux_reader);
     registerReader("drivers.las.reader", create_drivers_las_reader);
@@ -208,12 +210,11 @@ void StageFactory::registerKnownStages()
     registerReader("drivers.oci.reader", create_drivers_oci_reader);
     registerReader("drivers.qfit.reader", create_drivers_qfit_reader);
     registerReader("drivers.terrasolid.reader", create_drivers_terrasolid_reader);
+}
 
-    registerWriter("drivers.faux.writer", create_drivers_faux_writer);
-    registerWriter("drivers.las.writer", create_drivers_las_writer);
-    registerWriter("drivers.liblas.writer", create_drivers_liblas_writer);
-    registerWriter("drivers.oci.writer", create_drivers_oci_writer);
 
+void StageFactory::registerKnownFilters()
+{
     registerFilter("filters.byteswap", create_filters_byteswapfilter);
     registerFilter("filters.cache", create_filters_cachefilter);
     registerFilter("filters.chipper", create_filters_chipper);
@@ -222,10 +223,21 @@ void StageFactory::registerKnownStages()
     registerFilter("filters.decimation", create_filters_decimationfilter);
     registerFilter("filters.reprojection", create_filters_reprojectionfilter);
     registerFilter("filters.scaling", create_filters_scalingfilter);
+}
 
+
+void StageFactory::registerKnownMultiFilters()
+{
     registerMultiFilter("filters.mosaic", create_filters_mosaicfilter);
+}
 
-    return;
+
+void StageFactory::registerKnownWriters()
+{
+    registerWriter("drivers.faux.writer", create_drivers_faux_writer);
+    registerWriter("drivers.las.writer", create_drivers_las_writer);
+    registerWriter("drivers.liblas.writer", create_drivers_liblas_writer);
+    registerWriter("drivers.oci.writer", create_drivers_oci_writer);
 }
 
 

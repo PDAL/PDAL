@@ -82,7 +82,7 @@ int Application_pcinfo::execute()
         return 1;
     }
 
-    pdal::Stage* reader = NULL;
+    pdal::DataStage* reader = NULL;
     size_t ext = m_inputFile.find_last_of('.');
     if (ext != std::string::npos)
     {

@@ -306,7 +306,7 @@ Reader::Reader(const Options& options)
 
 std::string Reader::getFileName() const
 {
-    return getOptions().getValue<std::string>("input");
+    return getOptions().getOption<std::string>("input").getValue();
 }
 
 void Reader::registerFields()
@@ -586,15 +586,15 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     return numPoints;
 }
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr Reader::createSequentialIterator() const
 {
-    return new pdal::drivers::qfit::SequentialIterator(*this);
+    return StageSequentialIteratorPtr(new pdal::drivers::qfit::SequentialIterator(*this));
 }
 
 
-pdal::StageRandomIterator* Reader::createRandomIterator() const
+pdal::StageRandomIteratorPtr Reader::createRandomIterator() const
 {
-    return new pdal::drivers::qfit::RandomIterator(*this);
+    return StageRandomIteratorPtr(new pdal::drivers::qfit::RandomIterator(*this));
 }
 
 

@@ -91,8 +91,8 @@ boost::uint32_t MosaicFilterSequentialIterator::readImpl(PointBuffer& destData)
     // for each stage, we read as many points as we can
     for (size_t i=0; i<getPrevIterators().size(); i++)
     {
-        StageSequentialIterator* iterator = getPrevIterators()[i];
-        const Stage& stage = iterator->getStage();
+        StageSequentialIteratorPtr iterator = getPrevIterators()[i];
+        const DataStage& stage = iterator->getStage();
 
         const boost::uint64_t stageStopIndex = stageStartIndex + stage.getNumPoints();
 

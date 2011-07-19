@@ -69,7 +69,7 @@ boost::uint32_t CropFilterSequentialIterator::readImpl(PointBuffer& dstData)
         PointBuffer srcData(dstData.getSchemaLayout(), numPointsNeeded);
 
         // read from prev stage
-        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+        const boost::uint32_t numSrcPointsRead = getPrevIterator()->read(srcData);
         assert(numSrcPointsRead == srcData.getNumPoints());
         assert(numSrcPointsRead <= numPointsNeeded);
 
@@ -93,8 +93,8 @@ bool CropFilterSequentialIterator::atEndImpl() const
 {
     // we don't have a fixed point point --
     // we are at the end only when our source is at the end
-    const StageSequentialIterator& iter = getPrevIterator();
-    return iter.atEnd();
+    const StageSequentialIteratorPtr iter = getPrevIterator();
+    return iter->atEnd();
 }
 
 

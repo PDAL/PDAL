@@ -46,7 +46,9 @@ class ReaderSequentialIterator;
 class ReaderRandomIterator;
 class ReaderBlockIterator;
 
-class PDAL_DLL Reader : public Stage
+MAKE_PTR(Reader);
+
+class PDAL_DLL Reader : public DataStage
 {
 public:
     Reader(const Options& options);

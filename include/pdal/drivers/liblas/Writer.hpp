@@ -49,12 +49,13 @@
 
 namespace pdal { namespace drivers { namespace liblas {
 
+MAKE_PTR(LiblasWriter);
+
 // we default to LAS 1.2, point format 0
 class PDAL_DLL LiblasWriter : public Writer
 {
 public:
-    LiblasWriter(const Stage& prevStage, const Options& options);
-    LiblasWriter(const Stage& prevStage, std::ostream&);
+    LiblasWriter(const DataStagePtr& prevStage, const Options& options);
     ~LiblasWriter();
 
     const std::string& getDescription() const;
@@ -88,7 +89,7 @@ protected:
 private:
     void setupExternalHeader();
 
-    std::ostream& m_ostream;
+    std::ostream* m_ostream;
     ::liblas::Writer* m_externalWriter;
     ::liblas::HeaderPtr m_externalHeader;
 

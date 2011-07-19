@@ -49,21 +49,25 @@ BOOST_AUTO_TEST_SUITE(ChipperTest)
 
 BOOST_AUTO_TEST_CASE(test_construction)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
+    DataStagePtr reader(new LiblasReader(readerOptions));
 
     {
-        const boost::uint64_t num_points = reader.getNumPoints();
+        const boost::uint64_t num_points = reader->getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::filters::Chipper chipper(reader, 15);
+        Options chipperOptions;
+        chipperOptions.add("max_partition_size", 15);
+        pdal::filters::ChipperPtr chipper(new pdal::filters::Chipper(reader, chipperOptions));
 
-        chipper.Chip();
-        boost::uint32_t num_blocks = chipper.GetBlockCount();
+        chipper->Chip();
+        boost::uint32_t num_blocks = chipper->GetBlockCount();
         BOOST_CHECK(num_points == 1065);
         BOOST_CHECK(num_blocks==71);
         
         
-        pdal::Bounds<double> const& bounds = chipper.GetBlock(0).GetBounds();
+        pdal::Bounds<double> const& bounds = chipper->GetBlock(0).GetBounds();
 
         
         std::vector< Range<double> > ranges = bounds.dimensions();
@@ -76,14 +80,14 @@ BOOST_AUTO_TEST_CASE(test_construction)
         BOOST_CHECK_CLOSE (y.getMinimum(), 848992.0, 0.05);
         BOOST_CHECK_CLOSE (y.getMaximum(), 849427.0, 0.05);
 
-        std::vector<boost::uint32_t> ids = chipper.GetBlock(70).GetIDs();
+        std::vector<boost::uint32_t> ids = chipper->GetBlock(70).GetIDs();
 
         BOOST_CHECK(ids.size() == 15);
         BOOST_CHECK(ids[14] == 1050 );
         
-        pdal::Schema const& schema = reader.getSchema();
+        pdal::Schema const& schema = reader->getSchema();
         PointBuffer buffer(schema, 15);
-        chipper.GetBlock(20).GetBuffer(reader, buffer, 70);
+        chipper->GetBlock(20).GetBuffer(reader, buffer, 70);
 
         // 
         // std::cout << buffer.getField<boost::int32_t>(0, 0) << std::endl;

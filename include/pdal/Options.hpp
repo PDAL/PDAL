@@ -47,17 +47,16 @@ namespace pdal
     
 class PDAL_DLL OptionsOld
 {
-
 private:
     boost::property_tree::ptree m_tree;
 
 public:
+    OptionsOld()
+    {
+        m_tree.put("is3d", false);
+    }
 
-    OptionsOld();
     OptionsOld(boost::property_tree::ptree const& tree) { m_tree = tree; }
-    //template<class T> void add(Option<T> const& option) { m_tree.put_child(option.getTree()); }
-    //template<class T> Option<T> const& get(std::string const& name) { return m_tree.get<T>(name); }
-    
     boost::property_tree::ptree& GetPTree() { return m_tree; }
     boost::property_tree::ptree const& GetPTree() const { return m_tree; }
 };
@@ -67,34 +66,63 @@ public:
 //
 // Dumped as XML, it looks like this:
 //     <?xml...>
-//     <name>my name</name>
-//     <description>my descr</description>
-//     <value>17</value>
+//     <Name>myname</Name>
+//     <Description>my descr</Description>
+//     <Value>17</Value>
 // although of course that's not valid XML, since it has no single root element.
 
 template <typename T>
 class PDAL_DLL Option
 {
 public:
-    Option(std::string const& name, T value, std::string const& description) 
+    // construct it manually
+    Option(std::string const& name, T value, std::string const& description="")
         : m_name(name)
         , m_description(description)
         , m_value(value)
     {}
     
+    // construct it from an xml stream
+    Option(std::istream& istr)
+    {
+        boost::property_tree::ptree t;
+        boost::property_tree::xml_parser::read_xml(istr, t);
+        m_name = t.get<std::string>("Name");
+        m_value = t.get<T>("Value");
+        m_description = t.get<std::string>("Description", "");
+    }
+
+    // construct it from a ptree
+    Option(const boost::property_tree::ptree t)
+    {
+        m_name = t.get<std::string>("Name");
+        m_value = t.get<T>("Value");
+        m_description = t.get<std::string>("Description", "");
+    }
+
+    // getters
     std::string const& getName() const { return m_name; }
     std::string const& getDescription() const { return m_description; }
     T const& getValue() const { return m_value; }
     
-    boost::property_tree::ptree getPTree() const 
+    // return a ptree representation
+    boost::property_tree::ptree getPTree() const
     {
         boost::property_tree::ptree t;
-        t.put("name", getName());
-        t.put("description", getDescription());
-        t.put("value", getValue());
+        t.put("Name", getName());
+        t.put("Description", getDescription());
+        t.put("Value", getValue());
         return t;
     }
     
+    // return an xml representation
+    void write_xml(std::ostream& ostr) const
+    {
+        const boost::property_tree::ptree tree = getPTree();
+        boost::property_tree::xml_parser::write_xml(ostr, tree);
+        return;
+    }
+
 private:
     std::string m_name;
     std::string m_description;
@@ -109,12 +137,12 @@ private:
 // Dumped as XML, an Options object with two Option objects looks like this:
 //     <?xml...>
 //     <option>
-//       <name>my name</name>
+//       <name>myname</name>
 //       <description>my descr</description>
 //       <value>17</value>
 //     </option>
 //     <option>
-//       <name>my name2</name>
+//       <name>myname2</name>
 //       <description>my descr2</description>
 //       <value>13</value>
 //     </option>
@@ -123,91 +151,78 @@ class PDAL_DLL Options
 {
 public:
     // defult ctor, empy options list
-    Options()
-    {
-    }
+    Options() {}
 
-    // convenience ctor, which adds 1 option
-    template<class T>
-    Options(const std::string& name, T value, const std::string& description)
-    {
-        Option<T> opt(name, value, description);
-        add(opt);
-    }
+    Options(boost::property_tree::ptree t);
 
-    // convenience ctor, which adds 2 options
-    template<class T1, class T2>
-    Options(const std::string& name1, T1 value1, const std::string& description1,
-            const std::string& name2, T2 value2, const std::string& description2)
-    {
-        Option<T1> opt1(name1, value1, description1);
-        add(opt1);
-        Option<T2> opt2(name2, value2, description2);
-        add(opt2);
-    }
-
-    // convenience ctor, which adds 3 options
-    template<class T1, class T2, class T3>
-    Options(const std::string& name1, T1 value1, const std::string& description1,
-            const std::string& name2, T2 value2, const std::string& description2,
-            const std::string& name3, T3 value3, const std::string& description3)
-    {
-        Option<T1> opt1(name1, value1, description1);
-        add(opt1);
-        Option<T2> opt2(name2, value2, description2);
-        add(opt2);
-        Option<T3> opt3(name3, value3, description3);
-        add(opt3);
-    }
+    // read options from an xml stream
+    Options(std::istream& istr);
 
     // add an option
     template<class T> void add(Option<T> const& option)
     {
        boost::property_tree::ptree fields = option.getPTree();
-       m_tree.add_child("option", fields);
+       m_tree.add_child("Option", fields);
     }
 
     // add an option (shortcut version, bypass need for an Option object)
-    template<class T> void add(const std::string& name, T value, const std::string& description)
+    template<class T> void add(const std::string& name, T value, const std::string& description="")
     {
         Option<T> opt(name, value, description);
         add(opt);
     }
 
-    // get value of an option
+    // get an option, by name
     // throws pdal::option_not_found if the option name is not valid
-    template<class T> T getValue(std::string const& name) const
+    template<typename T> Option<T> getOption(std::string const& name) const
     {
-        T value;
-        try 
+        boost::property_tree::ptree::const_iterator iter = m_tree.begin();
+        while (iter != m_tree.end())
         {
-            boost::property_tree::ptree optionTree = getOptionPTree(name);
-            value = optionTree.get_child("value").get_value<T>();
-        } 
-        catch (boost::property_tree::ptree_bad_path const&)
-        {
-            throw option_not_found(name);
-        }
+            if (iter->first != "Option")
+                throw pdal_error("malformed Options ptree");
 
-        return value;
+            const boost::property_tree::ptree& optionTree = iter->second;
+            if (optionTree.get_child("Name").get_value<std::string>() == name)
+            {
+                Option<T> option(optionTree);
+                return option;
+            }
+            ++iter;
+        }
+        throw option_not_found(name);
     }
 
-    // get description of an option
-    // throws pdal::option_not_found if the option name is not valid
-    std::string getDescription(std::string const& name) const;
-
     // returns true iff the option name is valid
-    bool hasOption(std::string const& name) const;
+    template<typename T> bool hasOption(std::string const& name) const
+    {
+        bool ok = false;
 
-    // get the ptree for an option
-    // throws pdal::option_not_found if the option name is not valid
-    boost::property_tree::ptree const& getPTree() const;
+        try
+        {
+            Option<T> option = getOption<T>(name);
+            ok = true;
+        }
+        catch (option_not_found&)
+        {
+            ok = false;
+        }
+        // any other exception will bubble up
+
+        return ok;
+    }
+
+    // get the ptree for the whole option block
+    const boost::property_tree::ptree& getPTree() const;
    
-    // return the empty options list
-    static const Options& none();
+    // the empty options list
+    // BUG: this should be a member variable, not a function, but doing so causes vs2010 to fail to link
+    static const Options& empty();
 
 private:
-    boost::property_tree::ptree getOptionPTree(std::string const& name) const;
+    // get the ptree for an option
+    // throws pdal::option_not_found if the option name is not valid
+    const boost::property_tree::ptree getOptionPTree(const std::string& name) const;
 
     boost::property_tree::ptree m_tree;
 };

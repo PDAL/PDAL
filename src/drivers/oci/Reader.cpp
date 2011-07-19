@@ -54,7 +54,7 @@ Reader::Reader(const Options& options)
 
 
 Reader::Reader(OptionsOld& optionsOld)
-    : pdal::Reader(Options::none())
+    : pdal::Reader(Options::empty())
     , m_optionsOld(optionsOld)
     , m_querytype(QUERY_UNKNOWN)
 {
@@ -564,9 +564,9 @@ CloudPtr Reader::getCloud() const
 
 }
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr Reader::createSequentialIterator() const
 {
-    return new pdal::drivers::oci::SequentialIterator(*this);
+    return StageSequentialIteratorPtr(new pdal::drivers::oci::SequentialIterator(*this));
 }
 
 

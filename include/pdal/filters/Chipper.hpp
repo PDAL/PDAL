@@ -137,7 +137,7 @@ public:
     std::vector<boost::uint32_t> GetIDs() const; 
     pdal::Bounds<double> const& GetBounds() const {return m_bounds;} 
     void SetBounds(pdal::Bounds<double> const& bounds) {m_bounds = bounds;}
-    void GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t block_id) const;    
+    void GetBuffer(const DataStagePtr& stage, PointBuffer& buffer, boost::uint32_t block_id) const;    
     // double GetXmin() const
     //     { return m_xmin; }
     // double GetYmin() const
@@ -150,26 +150,12 @@ public:
 
 } // namespace chipper 
 
+MAKE_PTR(Chipper);
+
 class PDAL_DLL Chipper : public pdal::Filter
 {
 public:
-    Chipper(const Stage& prevStage, const Options& options)
-        : pdal::Filter(prevStage, options)
-    {
-        throw not_yet_implemented("chipper filter options support"); 
-    }
-
-    Chipper(Stage& prevStage, boost::uint32_t max_partition_size)
-        : pdal::Filter(prevStage, Options::none())
-        , m_threshold(max_partition_size)
-        , m_xvec(chipper::DIR_X)
-        , m_yvec(chipper::DIR_Y)
-        , m_spare(chipper::DIR_NONE) 
-    {
-        checkImpedance();
-        setPointCountType(PointCount_Fixed);
-        setNumPoints(0);
-    }
+    Chipper(const DataStagePtr& prevStage, const Options& options);
 
     void Chip();
     std::vector<chipper::Block>::size_type GetBlockCount() const
@@ -186,8 +172,7 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
 
 private:
     void Load(chipper::RefList& xvec, chipper::RefList& yvec, chipper::RefList& spare);

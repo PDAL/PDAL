@@ -75,8 +75,7 @@ public:
 
 public:
     Reader(const Options& options);
-    Reader(const Bounds<double>&, int numPoints, Mode mode);
-    Reader(const Bounds<double>&, int numPoints, Mode mode, const std::vector<Dimension>& dimensions);
+    Reader(const Options& options, const std::vector<Dimension>& dimensions);
 
     const std::string& getDescription() const;
     const std::string& getName() const;
@@ -91,8 +90,8 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
+    pdal::StageRandomIteratorPtr createRandomIterator() const;
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;

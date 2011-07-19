@@ -38,10 +38,10 @@
 #include <pdal/pdal.hpp>
 
 #include <pdal/StageIterator.hpp>
+#include <pdal/Reader.hpp>
 
 namespace pdal
 {
-class Reader;
 class PointBuffer;
 
 

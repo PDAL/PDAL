@@ -50,21 +50,14 @@
 
 namespace pdal { namespace drivers { namespace liblas {
 
-LiblasWriter::LiblasWriter(const Stage& prevStage, const Options& options)
+LiblasWriter::LiblasWriter(const DataStagePtr& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
-    , m_ostream(std::cout)
+    , m_ostream(NULL)
     , m_externalWriter(NULL)
 {
-     throw not_yet_implemented("liblas writer options support"); 
-}
+    const std::string filename = options.getOption<std::string>("filename").getValue();
+    m_ostream = Utils::createFile(filename);
 
-
-
-LiblasWriter::LiblasWriter(const Stage& prevStage, std::ostream& ostream)
-    : pdal::Writer(prevStage, Options::none())
-    , m_ostream(ostream)
-    , m_externalWriter(NULL)
-{
     m_externalHeader = ::liblas::HeaderPtr(new ::liblas::Header);
     m_externalHeader->SetCompressed(false);
 
@@ -76,6 +69,7 @@ LiblasWriter::LiblasWriter(const Stage& prevStage, std::ostream& ostream)
 
 LiblasWriter::~LiblasWriter()
 {
+    Utils::closeFile(m_ostream);
     return;
 }
 
@@ -102,7 +96,7 @@ void LiblasWriter::setupExternalHeader()
     setSystemIdentifier("PDAL");
     setGeneratingSoftware(GetVersionString());
 
-    const Schema& schema = getPrevStage().getSchema();
+    const Schema& schema = getPrevStage()->getSchema();
 
     int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
     int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
@@ -165,7 +159,7 @@ void LiblasWriter::setGeneratingSoftware(const std::string& softwareId)
 
 void LiblasWriter::writeBegin()
 {
-    m_externalWriter = new ::liblas::Writer(m_ostream, *m_externalHeader);
+    m_externalWriter = new ::liblas::Writer(*m_ostream, *m_externalHeader);
 
     m_summaryData.reset();
 
@@ -180,8 +174,8 @@ void LiblasWriter::writeEnd()
 
     //std::cout << m_summaryData;
 
-    m_ostream.seekp(0);
-    ::pdal::drivers::las::Support::rewriteHeader(m_ostream, m_summaryData);
+    m_ostream->seekp(0);
+    ::pdal::drivers::las::Support::rewriteHeader(*m_ostream, m_summaryData);
 
     return;
 }

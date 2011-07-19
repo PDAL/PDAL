@@ -81,7 +81,7 @@ namespace pdal { namespace filters {
 #endif
 
 
-ReprojectionFilter::ReprojectionFilter(const Stage& prevStage, const Options& options)
+ReprojectionFilter::ReprojectionFilter(const DataStagePtr& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
      throw not_yet_implemented("reprojection filter options support"); 
@@ -89,10 +89,10 @@ ReprojectionFilter::ReprojectionFilter(const Stage& prevStage, const Options& op
 
 
 
-ReprojectionFilter::ReprojectionFilter(const Stage& prevStage,
+ReprojectionFilter::ReprojectionFilter(const DataStagePtr& prevStage,
                                        const SpatialReference& inSRS,
                                        const SpatialReference& outSRS)
-    : Filter(prevStage, Options::none())
+    : Filter(prevStage, Options::empty())
     , m_inSRS(inSRS)
     , m_outSRS(outSRS)
 {
@@ -260,9 +260,9 @@ void ReprojectionFilter::processBuffer(PointBuffer& data) const
 }
 
 
-pdal::StageSequentialIterator* ReprojectionFilter::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr ReprojectionFilter::createSequentialIterator() const
 {
-    return new ReprojectionFilterSequentialIterator(*this);
+    return StageSequentialIteratorPtr(new ReprojectionFilterSequentialIterator(*this));
 }
 
 } } // namespaces

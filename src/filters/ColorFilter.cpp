@@ -43,15 +43,8 @@
 
 namespace pdal { namespace filters {
 
-ColorFilter::ColorFilter(const Stage& prevStage, const Options& options)
+ColorFilter::ColorFilter(const DataStagePtr& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
-{
-     throw not_yet_implemented("color filter options support"); 
-}
-
-
-ColorFilter::ColorFilter(const Stage& prevStage)
-    : Filter(prevStage, Options::none())
 {
     checkImpedance();
 
@@ -168,9 +161,9 @@ void ColorFilter::getColor_F64_U16(double value, boost::uint16_t& red, boost::ui
 }
 
 
-pdal::StageSequentialIterator* ColorFilter::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr ColorFilter::createSequentialIterator() const
 {
-    return new ColorFilterSequentialIterator(*this);
+    return StageSequentialIteratorPtr(new ColorFilterSequentialIterator(*this));
 }
 
 } } // namespaces

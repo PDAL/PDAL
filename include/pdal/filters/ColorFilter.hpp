@@ -51,13 +51,14 @@ namespace pdal { namespace filters {
 
 class ColorFilterSequentialIterator;
 
+MAKE_PTR(ColorFilter);
+
 // adds three new u8 fields (R,G,B) for the colourization of the Z axis
 // the color is done as a ramp from the declared Z min/max values in the header
 class PDAL_DLL ColorFilter : public Filter
 {
 public:
-    ColorFilter(const Stage& prevStage, const Options& options);
-    ColorFilter(const Stage& prevStage);
+    ColorFilter(const DataStagePtr& prevStage, const Options& options);
 
     const std::string& getDescription() const;
     const std::string& getName() const;
@@ -72,8 +73,7 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
 
     void processBuffer(PointBuffer& data) const;
 

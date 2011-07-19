@@ -40,10 +40,10 @@
 #include <vector>
 
 #include <pdal/StageIterator.hpp>
+#include <pdal/MultiFilter.hpp>
 
 namespace pdal
 {
-class MultiFilter;
 
 class MultiFilterSequentialIterator : public StageSequentialIterator
 {
@@ -57,14 +57,14 @@ protected:
     virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
     virtual bool atEndImpl() const = 0;
 
-    StageSequentialIterator& getPrevIterator();
-    const StageSequentialIterator& getPrevIterator() const;
+    StageSequentialIteratorPtr getPrevIterator();
+    const StageSequentialIteratorPtr getPrevIterator() const;
 
-    const std::vector<StageSequentialIterator*>& getPrevIterators() const;
+    const std::vector<StageSequentialIteratorPtr>& getPrevIterators() const;
 
     const MultiFilter& m_filter;
-    std::vector<StageSequentialIterator*> m_prevIterators;
-    StageSequentialIterator* m_prevIterator;
+    std::vector<StageSequentialIteratorPtr> m_prevIterators;
+    StageSequentialIteratorPtr m_prevIterator;
 
 private:
 };

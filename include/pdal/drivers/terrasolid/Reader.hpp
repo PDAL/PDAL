@@ -147,8 +147,8 @@ public:
     }
 
     
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const;
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
+    pdal::StageRandomIteratorPtr createRandomIterator() const;
     
     OptionsOld& getOptionsOld() const { return m_optionsOld; }
 

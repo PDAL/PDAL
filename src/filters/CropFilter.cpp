@@ -43,10 +43,10 @@ namespace pdal { namespace filters {
 
 
 
-CropFilter::CropFilter(const Stage& prevStage, const Options& options)
+CropFilter::CropFilter(const DataStagePtr& prevStage, const Options& options)
     : Filter(prevStage, options)
 {
-    const Bounds<double> bounds = options.getValue<Bounds<double> >("bounds");
+    const Bounds<double> bounds = options.getOption<Bounds<double> >("bounds").getValue();
 
     this->setBounds(bounds);
 
@@ -110,9 +110,9 @@ boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffe
 }
 
 
-pdal::StageSequentialIterator* CropFilter::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr CropFilter::createSequentialIterator() const
 {
-    return new CropFilterSequentialIterator(*this);
+    return StageSequentialIteratorPtr(new CropFilterSequentialIterator(*this));
 }
 
 

@@ -97,7 +97,7 @@ Reader::Reader(const Options& options)
 
 
 Reader::Reader(OptionsOld& optionsOld)
-    : pdal::Reader(Options::none())
+    : pdal::Reader(Options::empty())
     , m_optionsOld(optionsOld)
     , m_format(TERRASOLID_Format_Unknown)
     , m_haveColor(false)
@@ -476,15 +476,15 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     return numPoints;
 }
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr Reader::createSequentialIterator() const
 {
-    return new pdal::drivers::terrasolid::SequentialIterator(*this);
+    return StageSequentialIteratorPtr(new pdal::drivers::terrasolid::SequentialIterator(*this));
 }
 
 
-pdal::StageRandomIterator* Reader::createRandomIterator() const
+pdal::StageRandomIteratorPtr Reader::createRandomIterator() const
 {
-    return new pdal::drivers::terrasolid::RandomIterator(*this);
+    return StageRandomIteratorPtr(new pdal::drivers::terrasolid::RandomIterator(*this));
 }
 
 

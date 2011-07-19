@@ -50,13 +50,14 @@ namespace pdal { namespace filters {
 
 class ByteSwapFilterSequentialIterator;
 
+MAKE_PTR(ByteSwapFilter);
+
 // removes any points outside of the given range
 // updates the header accordingly
 class PDAL_DLL ByteSwapFilter : public Filter
 {
 public:
-    ByteSwapFilter(const Stage& prevStage, const Options& options);
-    ByteSwapFilter(const Stage& prevStage);
+    ByteSwapFilter(const DataStagePtr& prevStage, const Options& options);
 
     const std::string& getDescription() const;
     const std::string& getName() const;
@@ -68,8 +69,7 @@ public:
         return false;
     }
     
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
 
     // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
     // if we're calling this routine multiple times with the same buffer

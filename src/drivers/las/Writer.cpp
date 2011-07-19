@@ -54,17 +54,17 @@
 namespace pdal { namespace drivers { namespace las {
 
 
-LasWriter::LasWriter(const Stage& prevStage, const Options& options)
+LasWriter::LasWriter(const DataStagePtr& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_filename("")
     , m_ostream(NULL)
     , m_numPointsWritten(0)
     , m_isCompressed(false)
 {
-    m_filename = options.getValue<std::string>("filename");
+    m_filename = options.getOption<std::string>("filename").getValue();
     m_ostream = Utils::createFile(m_filename);
 
-    m_spatialReference = prevStage.getSpatialReference();
+    m_spatialReference = prevStage->getSpatialReference();
 
     return;
 }
@@ -150,9 +150,9 @@ void LasWriter::setSpatialReference(const SpatialReference& srs)
 void LasWriter::writeBegin()
 {
     // need to set properties of the header here, based on prev->getHeader() and on the user's preferences
-    m_lasHeader.setBounds( getPrevStage().getBounds() );
+    m_lasHeader.setBounds( getPrevStage()->getBounds() );
 
-    const Schema& schema = getPrevStage().getSchema();
+    const Schema& schema = getPrevStage()->getSchema();
 
     int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
     int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);

@@ -53,4 +53,9 @@
 #  define PDAL_C_END
 #endif
 
+// this macro makes a type T into a shared ptr called TPtr
+#define MAKE_PTR(T) \
+    class T; \
+    typedef boost::shared_ptr<T> T##Ptr;
+
 #endif

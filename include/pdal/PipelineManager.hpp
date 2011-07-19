@@ -40,6 +40,9 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
+
 #include <vector>
 #include <map>
 #include <string>
@@ -48,11 +51,6 @@
 namespace pdal
 {
 
-class Stage;
-class Reader;
-class Filter;
-class MultiFilter;
-class Writer;
 class Options;
 
 
@@ -62,23 +60,29 @@ public:
     PipelineManager();
     ~PipelineManager();
 
-    boost::shared_ptr<Reader> addReader(const std::string& type, const Options&);
-    boost::shared_ptr<Filter> addFilter(const std::string& type, const Stage& prevStage, const Options&);
-    boost::shared_ptr<MultiFilter> addMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options&);
-    boost::shared_ptr<Writer> addWriter(const std::string& type, const Stage& prevStage, const Options&);
+    ReaderPtr addReader(const std::string& type, const Options&);
+    FilterPtr addFilter(const std::string& type, const DataStagePtr& prevStage, const Options&);
+    MultiFilterPtr addMultiFilter(const std::string& type, const std::vector<const DataStagePtr>& prevStages, const Options&);
+    WriterPtr addWriter(const std::string& type, const DataStagePtr& prevStage, const Options&);
     
-    //boost::shared_ptr<Reader> getReader(boost::uint32_t);
-    //boost::shared_ptr<Filter> getFilter(boost::uint32_t);
-    //boost::shared_ptr<MultiFilter> getMultiFilter(boost::uint32_t);
-    //boost::shared_ptr<Writer> getWriter(boost::uint32_t);
+    void readXml(const std::string&);
 
 private:
+    StagePtr parsePipeline(const boost::property_tree::ptree&);
+
+    ReaderPtr parseReader(const boost::property_tree::ptree& tree);
+    FilterPtr parseFilter(const boost::property_tree::ptree& tree);
+    MultiFilterPtr parseMultiFilter(const boost::property_tree::ptree& tree);
+    WriterPtr parseWriter(const boost::property_tree::ptree& tree);
+
+    Option<std::string> parseOption(const boost::property_tree::ptree& tree);
+    std::string parseType(const boost::property_tree::ptree& tree);
+
+
     StageFactory m_factory;
 
-    std::vector<boost::shared_ptr<Reader> > m_readerStages;
-    std::vector<boost::shared_ptr<Filter> > m_filterStages;
-    std::vector<boost::shared_ptr<MultiFilter> > m_multifilterStages;
-    std::vector<boost::shared_ptr<Writer> > m_writerStages;
+    typedef std::vector<StagePtr> StagePtrList;
+    StagePtrList m_stages;
 
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented

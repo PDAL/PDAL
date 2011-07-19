@@ -41,19 +41,12 @@
 namespace pdal { namespace filters {
 
 
-DecimationFilter::DecimationFilter(const Stage& prevStage, const Options& options)
+DecimationFilter::DecimationFilter(const DataStagePtr& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
-     throw not_yet_implemented("decimation filter options support"); 
-}
+     m_step = options.getOption<boost::uint32_t>("step").getValue();
 
-
-
-DecimationFilter::DecimationFilter(const Stage& prevStage, boost::uint32_t step)
-    : Filter(prevStage, Options::none())
-    , m_step(step)
-{
-    this->setNumPoints( this->getNumPoints() / step );
+     this->setNumPoints( this->getNumPoints() / m_step );
 
     return;
 }
@@ -112,9 +105,9 @@ boost::uint32_t DecimationFilter::processBuffer(PointBuffer& dstData, const Poin
 }
 
 
-pdal::StageSequentialIterator* DecimationFilter::createSequentialIterator() const
+pdal::StageSequentialIteratorPtr DecimationFilter::createSequentialIterator() const
 {
-    return new DecimationFilterSequentialIterator(*this);
+    return StageSequentialIteratorPtr(new DecimationFilterSequentialIterator(*this));
 }
 
 } } // namespaces

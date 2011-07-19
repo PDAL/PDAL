@@ -45,50 +45,54 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(CacheFilterTest)
 
-BOOST_AUTO_TEST_CASE(test1)
+BOOST_AUTO_TEST_CASE(CacheFilterTest_test1)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
-    pdal::drivers::faux::Reader reader(srcBounds, 10000, pdal::drivers::faux::Reader::Constant);
+    Options readerOptions;
+    readerOptions.add("bounds", srcBounds);
+    readerOptions.add("num_points", 10000);
+    readerOptions.add("mode", "constant");
+    DataStagePtr reader(new pdal::drivers::faux::Reader(readerOptions));
 
-    pdal::filters::CacheFilter cache(reader, 2, 1024);
-    BOOST_CHECK(cache.getDescription() == "Cache Filter");
+    Options cacheOptions;
+    cacheOptions.add("max_cache_blocks", 2);
+    cacheOptions.add("cache_block_size", 1024);
+    pdal::filters::CacheFilterPtr cache(new pdal::filters::CacheFilter(reader, cacheOptions));
+    BOOST_CHECK(cache->getDescription() == "Cache Filter");
 
-    const Schema& schema = reader.getSchema();
+    const Schema& schema = reader->getSchema();
     SchemaLayout layout(schema);
     const int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
 
     PointBuffer dataBig(layout, 1024);
     PointBuffer dataSmall(layout, 1);
 
-    StageSequentialIterator* iter1 = cache.createSequentialIterator();
+    StageSequentialIteratorPtr iter1 = cache->createSequentialIterator();
 
     //BOOST_CHECK(cache.getIndex() == 0);
-    BOOST_CHECK(cache.getNumPointsRequested() == 0);
-    BOOST_CHECK(cache.getNumPointsRead() == 0);
+    BOOST_CHECK(cache->getNumPointsRequested() == 0);
+    BOOST_CHECK(cache->getNumPointsRead() == 0);
 
     iter1->read(dataBig);
     BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 0);
     //BOOST_CHECK(cache.getIndex() == 1024);
-    BOOST_CHECK(cache.getNumPointsRequested() == 1024);
-    BOOST_CHECK(cache.getNumPointsRead() == 1024);
+    BOOST_CHECK(cache->getNumPointsRequested() == 1024);
+    BOOST_CHECK(cache->getNumPointsRead() == 1024);
 
     iter1->read(dataBig);
     BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 1024);
    // BOOST_CHECK(cache.getIndex() == 2048);
-    BOOST_CHECK(cache.getNumPointsRequested() == 2048);
-    BOOST_CHECK(cache.getNumPointsRead() == 2048);
+    BOOST_CHECK(cache->getNumPointsRequested() == 2048);
+    BOOST_CHECK(cache->getNumPointsRead() == 2048);
 
-    StageSequentialIterator* iter2 = cache.createSequentialIterator();
+    StageSequentialIteratorPtr iter2 = cache->createSequentialIterator();
 
     iter2->skip(42);
     iter2->read(dataSmall);
     BOOST_CHECK(dataSmall.getField<boost::uint64_t>(0, offsetT) == 42);
     //BOOST_CHECK(cache.getIndex() == 43);
-    BOOST_CHECK(cache.getNumPointsRequested() == 2048+1);
-    BOOST_CHECK(cache.getNumPointsRead() == 2048);
-
-    delete iter1;
-    delete iter2;
+    BOOST_CHECK(cache->getNumPointsRequested() == 2048+1);
+    BOOST_CHECK(cache->getNumPointsRead() == 2048);
 
     return;
 }

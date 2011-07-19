@@ -54,27 +54,26 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
+    DataStagePtr reader(new LiblasReader(readerOptions));
     
-    std::ostream* ofs = Utils::createFile("temp.las");
-
     {
-        const boost::uint64_t numPoints = reader.getNumPoints();
+        const boost::uint64_t numPoints = reader->getNumPoints();
 
-        // need to scope the writer, so that's it dtor can use the stream
-        LiblasWriter writer(reader, *ofs);
-        BOOST_CHECK(writer.getDescription() == "Liblas Writer");
+        Options writerOptions;
+        writerOptions.add("filename","temp.las");
+        LiblasWriterPtr writer(new LiblasWriter(reader, writerOptions));
+        BOOST_CHECK(writer->getDescription() == "Liblas Writer");
 
-        writer.setCompressed(false);
-        writer.setDate(0, 0);
-        writer.setPointFormat(::pdal::drivers::las::PointFormat3);
-        writer.setSystemIdentifier("");
-        writer.setGeneratingSoftware("TerraScan");
+        writer->setCompressed(false);
+        writer->setDate(0, 0);
+        writer->setPointFormat(::pdal::drivers::las::PointFormat3);
+        writer->setSystemIdentifier("");
+        writer->setGeneratingSoftware("TerraScan");
 
-        writer.write(numPoints);
+        writer->write(numPoints);
     }
-
-    Utils::closeFile(ofs);
 
     bool filesSame = Support::compare_files("temp.las", Support::datapath("simple.las"));
     BOOST_CHECK(filesSame);
@@ -92,26 +91,25 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
+    DataStagePtr reader(new LiblasReader(readerOptions));
     
-    std::ostream* ofs = Utils::createFile("temp.laz");
-
     {
-        const boost::uint64_t numPoints = reader.getNumPoints();
+        const boost::uint64_t numPoints = reader->getNumPoints();
 
-        // need to scope the writer, so that's it dtor can use the stream
-        LiblasWriter writer(reader, *ofs);
+        Options writerOptions;
+        writerOptions.add("filename","temp.laz");
+        LiblasWriterPtr writer(new LiblasWriter(reader, writerOptions));
 
-        writer.setCompressed(true);
-        writer.setDate(0, 0);
-        writer.setPointFormat(::pdal::drivers::las::PointFormat3);
-        writer.setSystemIdentifier("");
-        writer.setGeneratingSoftware("TerraScan");
+        writer->setCompressed(true);
+        writer->setDate(0, 0);
+        writer->setPointFormat(::pdal::drivers::las::PointFormat3);
+        writer->setSystemIdentifier("");
+        writer->setGeneratingSoftware("TerraScan");
 
-        writer.write(numPoints);
+        writer->write(numPoints);
     }
-
-    Utils::closeFile(ofs);
 
     bool filesSame = Support::compare_files("temp.laz", Support::datapath("1.2-with-color.laz"));
     BOOST_CHECK(filesSame);
@@ -130,31 +128,30 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    LiblasReader reader(Support::datapath("1.2_3.las"));
+    Options readerOptions;
+    readerOptions.add("filename", Support::datapath("1.2_3.las"));
+    ReaderPtr reader(new LiblasReader(readerOptions));
     
-    std::ostream* ofs = Utils::createFile("temp.las");
-
     {
-        const boost::uint64_t numPoints = reader.getNumPoints();
+        const boost::uint64_t numPoints = reader->getNumPoints();
 
-        // need to scope the writer, so that's it dtor can use the stream
-        LiblasWriter writer(reader, *ofs);
-        BOOST_CHECK(writer.getDescription() == "Liblas Writer");
+        Options writerOptions;
+        writerOptions.add("filename","temp.las");
+        LiblasWriterPtr writer(new LiblasWriter(reader, writerOptions));
+        BOOST_CHECK(writer->getDescription() == "Liblas Writer");
 
-        writer.setCompressed(false);
-        writer.setDate(78, 2008);
-        writer.setPointFormat((::pdal::drivers::las::PointFormat)pointFormat);
-        writer.setFormatVersion(majorVersion, minorVersion);
-        writer.setSystemIdentifier("libLAS");
-        writer.setGeneratingSoftware("libLAS 1.2");
+        writer->setCompressed(false);
+        writer->setDate(78, 2008);
+        writer->setPointFormat((::pdal::drivers::las::PointFormat)pointFormat);
+        writer->setFormatVersion(majorVersion, minorVersion);
+        writer->setSystemIdentifier("libLAS");
+        writer->setGeneratingSoftware("libLAS 1.2");
         
         boost::uuids::uuid u = boost::lexical_cast<boost::uuids::uuid>("8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
-        writer.setProjectId(u);
+        writer->setProjectId(u);
 
-        writer.write(numPoints);
+        writer->write(numPoints);
     }
-
-    Utils::closeFile(ofs);
 
     const bool filesSame = Support::compare_files("temp.las", Support::datapath(refFile));
     BOOST_CHECK(filesSame);
