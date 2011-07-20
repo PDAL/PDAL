@@ -7,7 +7,7 @@ set BUILD_TYPE=Release
 set BUILD_TYPE=Debug
 
 set UTILS_DIR=c:\Utils
-set DEV_DIR=c:\dev
+set DEV_DIR=d:\dev
 set OSGEO4W_DIR=C:\OSGeo4W
 
 rem *** These packages are needed from OSGeo4W
@@ -26,6 +26,8 @@ set LASZIP_DIR=%DEV_DIR%\laszip
 set LIBLAS_DIR=%DEV_DIR%\liblas
 set LIBXML2_DIR=%UTILS_DIR%\libxml2-2.7.7.win32
 set PDAL_DIR=%DEV_DIR%\pdal
+
+set ORACLE_HOME=%OSGEO4W_DIR%
 
 cmake -G %COMPILER% ^
     -DBOOST_INCLUDEDIR=%BOOST_DIR% ^

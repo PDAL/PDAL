@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<Pipeline>
+    <Writer>
+        <Type>drivers.las.writer</Type>
+        <Option>
+            <Name>filename</Name>
+            <Value>out.las</Value>
+            <Description>junk junk junk</Description>
+        </Option>
+        <Filter>
+            <Type>filters.crop</Type>
+            <Option>
+                <Name>bounds</Name>
+                <Value>([0,1],[0,1],[0,1])</Value>
+            </Option>
+            <Reader>
+                <Type>drivers.las.reader</Type>
+                <Option>
+                    <Name>filename</Name>
+                    <Value>../../test/data/1.2-with-color.las</Value>
+                </option>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>
