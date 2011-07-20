@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
         pdal::drivers::las::LasReader reader("temp.laz");
     }
 
-    bool filesSame = Support::compare_files("temp.laz", Support::datapath("1.2-with-color_NATIVE.laz"));
+    bool filesSame = Support::compare_files("temp.laz", Support::datapath("1.2-with-color.laz"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
