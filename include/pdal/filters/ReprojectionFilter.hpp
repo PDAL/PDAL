@@ -50,13 +50,10 @@ namespace pdal { namespace filters {
 
 class ReprojectionFilterSequentialIterator;
 
-MAKE_PTR(ReprojectionFilter);
-
 class PDAL_DLL ReprojectionFilter : public Filter
 {
 public:
-    ReprojectionFilter(const DataStagePtr& prevStage, const Options& options);
-    ReprojectionFilter(const DataStagePtr& prevStage,
+    ReprojectionFilter(const Stage& prevStage,
                        const SpatialReference& inSRS,
                        const SpatialReference& outSRS);
 
@@ -70,7 +67,8 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     void processBuffer(PointBuffer& data) const;
 

@@ -71,8 +71,7 @@ void Check_Point(const pdal::PointBuffer& data, const ::pdal::Schema& schema,
 
     double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x);
     double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y);
-    double z0 = schema.getDimension(offsetZ).applyScaling<boost::int32_t>(z);
-    // double z0 = static_cast<double>(z);
+    double z0 = static_cast<double>(z);
 
     //   
     // std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -80,7 +79,7 @@ void Check_Point(const pdal::PointBuffer& data, const ::pdal::Schema& schema,
     // std::cout << "expected x: " << xref << " y: " << yref << " z: " << zref << " t: " << tref << std::endl;
     // 
     // std::cout << "actual   x: " << x0 << " y: " << y0 << " z: " << z0 << " t: " << t << std::endl;
-    // 
+    
     Compare(x0, xref);
     Compare(y0, yref);
     Compare(z0, zref);
@@ -103,12 +102,14 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     PointBuffer data(layout, 3);
     
-    pdal::StageSequentialIteratorPtr iter = reader.createSequentialIterator();
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
     
     {
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK_EQUAL(numRead,3u);
     }
+
+    delete iter;
 
     Check_Point(data, schema, 0, 59.205160, 221.826822, 32090.0, 0);
     Check_Point(data, schema, 1, 59.205161, 221.826740, 32019.0, 0);
@@ -132,12 +133,14 @@ BOOST_AUTO_TEST_CASE(test_14_word)
 
     PointBuffer data(layout, 3);
     
-    pdal::StageSequentialIteratorPtr iter = reader.createSequentialIterator();
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
     
     {
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK_EQUAL(numRead,3u);
     }
+
+    delete iter;
 
     Check_Point(data, schema, 0, 35.623317, 244.306337, 1056830.000000, 903);
     Check_Point(data, schema, 1, 35.623280, 244.306260, 1056409.000000, 903);

@@ -84,20 +84,10 @@ PointIndexes::PointIndexes(const Schema& schema, TERRASOLID_Format_Type format)
     return;
 }
 
-Reader::Reader(const Options& options)
-    : pdal::Reader(options)
-    , m_optionsOld(*(new OptionsOld()))
-    , m_format(TERRASOLID_Format_Unknown)
-    , m_haveColor(false)
-    , m_haveTime(false)
-{
-     throw not_yet_implemented("terrasolid reader options support"); 
-}
-
 
 
 Reader::Reader(OptionsOld& optionsOld)
-    : pdal::Reader(Options::empty())
+    : pdal::Reader(Options::none())
     , m_optionsOld(optionsOld)
     , m_format(TERRASOLID_Format_Unknown)
     , m_haveColor(false)
@@ -476,15 +466,15 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     return numPoints;
 }
 
-pdal::StageSequentialIteratorPtr Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return StageSequentialIteratorPtr(new pdal::drivers::terrasolid::SequentialIterator(*this));
+    return new pdal::drivers::terrasolid::SequentialIterator(*this);
 }
 
 
-pdal::StageRandomIteratorPtr Reader::createRandomIterator() const
+pdal::StageRandomIterator* Reader::createRandomIterator() const
 {
-    return StageRandomIteratorPtr(new pdal::drivers::terrasolid::RandomIterator(*this));
+    return new pdal::drivers::terrasolid::RandomIterator(*this);
 }
 
 

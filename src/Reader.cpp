@@ -38,7 +38,7 @@ namespace pdal
 {
 
 Reader::Reader(const Options& options)
-    : DataStage(options)
+    : Stage(options)
 {
     return;
 }

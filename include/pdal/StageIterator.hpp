@@ -36,10 +36,10 @@
 #define INCLUDED_STAGEITERATOR_HPP
 
 #include <pdal/pdal.hpp>
-#include <pdal/Stage.hpp>
 
 namespace pdal
 {
+class Stage;
 class PointBuffer;
 
 
@@ -47,10 +47,10 @@ class PointBuffer;
 class PDAL_DLL StageIterator
 {
 public:
-    StageIterator(const DataStage& stage);
+    StageIterator(const Stage& stage);
     virtual ~StageIterator();
 
-    const DataStage& getStage() const;
+    const Stage& getStage() const;
 
     // This reads a set of points at the current position in the file.
     //
@@ -86,7 +86,7 @@ protected:
     boost::uint64_t m_index;
 
 private:
-    const DataStage& m_stage;
+    const Stage& m_stage;
     boost::uint32_t m_chunkSize;
 
     StageIterator& operator=(const StageIterator&); // not implemented
@@ -97,7 +97,7 @@ private:
 class PDAL_DLL StageSequentialIterator : public StageIterator
 {
 public:
-    StageSequentialIterator(const DataStage& stage);
+    StageSequentialIterator(const Stage& stage);
     virtual ~StageSequentialIterator();
 
     // advance N points ahead in the file
@@ -125,7 +125,7 @@ protected:
 class PDAL_DLL StageRandomIterator : public StageIterator
 {
 public:
-    StageRandomIterator(const DataStage& stage);
+    StageRandomIterator(const Stage& stage);
     virtual ~StageRandomIterator();
 
     // seek to point N (an absolute value)
@@ -146,7 +146,7 @@ protected:
 class PDAL_DLL StageBlockIterator : public StageIterator
 {
 public:
-    StageBlockIterator(const DataStage& stage);
+    StageBlockIterator(const Stage& stage);
     virtual ~StageBlockIterator();
 
 protected:

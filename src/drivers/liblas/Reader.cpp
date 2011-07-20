@@ -44,8 +44,9 @@
 
 namespace pdal { namespace drivers { namespace liblas {
 
-LiblasReader::LiblasReader(const Options& options)
-    : LasReaderBase(options)
+LiblasReader::LiblasReader(const std::string& filename)
+    : LasReaderBase(Options::none())
+    , m_filename(filename)
     , m_versionMajor(0)
     , m_versionMinor(0)
     , m_scaleX(0.0)
@@ -57,8 +58,6 @@ LiblasReader::LiblasReader(const Options& options)
     , m_isCompressed(false)
     , m_pointFormat(::pdal::drivers::las::PointFormatUnknown)
 {
-    m_filename = options.getOption<std::string>("filename").getValue();
-
     std::istream* str = Utils::openFile(m_filename);
 
     {
@@ -196,15 +195,15 @@ void LiblasReader::registerFields(::liblas::Reader& externalReader)
 }
 
 
-pdal::StageSequentialIteratorPtr LiblasReader::createSequentialIterator() const
+pdal::StageSequentialIterator* LiblasReader::createSequentialIterator() const
 {
-    return StageSequentialIteratorPtr(new SequentialIterator(*this));
+    return new SequentialIterator(*this);
 }
 
 
-pdal::StageRandomIteratorPtr LiblasReader::createRandomIterator() const
+pdal::StageRandomIterator* LiblasReader::createRandomIterator() const
 {
-    return StageRandomIteratorPtr(new RandomIterator(*this));
+    return new RandomIterator(*this);
 }
 
 

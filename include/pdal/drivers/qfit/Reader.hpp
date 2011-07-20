@@ -121,7 +121,7 @@ class PDAL_DLL Reader : public pdal::Reader
 {
 
 public:
-    Reader(const Options& options);
+    Reader(Options& options);
     ~Reader();
     
     const std::string& getDescription() const;
@@ -137,8 +137,8 @@ public:
         return false;
     }
     
-    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
-    pdal::StageRandomIteratorPtr createRandomIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const;
     
     std::size_t getPointDataOffset() const { return m_offset; }
     boost::uint32_t getPointDataSize() const { return m_size; }

@@ -44,15 +44,9 @@
 namespace pdal { namespace filters {
 
 
-ScalingFilter::ScalingFilter(const DataStagePtr& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
-{
-     throw not_yet_implemented("scaling filter options support"); 
-}
 
-
-ScalingFilter::ScalingFilter(const DataStagePtr& prevStage, bool forward)
-    : Filter(prevStage, Options::empty())
+ScalingFilter::ScalingFilter(const Stage& prevStage, bool forward)
+    : Filter(prevStage, Options::none())
     , m_customScaleOffset(false)
     , m_scaleX(0.0)
     , m_scaleY(0.0)
@@ -70,8 +64,8 @@ ScalingFilter::ScalingFilter(const DataStagePtr& prevStage, bool forward)
 }
 
 
-ScalingFilter::ScalingFilter(const DataStagePtr& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ, bool forward)
-    : Filter(prevStage, Options::empty())
+ScalingFilter::ScalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ, bool forward)
+    : Filter(prevStage, Options::none())
     , m_customScaleOffset(true)
     , m_scaleX(scaleX)
     , m_scaleY(scaleY)
@@ -101,9 +95,9 @@ void ScalingFilter::checkImpedance()
         const int indexYd = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
         const int indexZd = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
 
-        const Dimension dimXd = schema.getDimension(indexXd);
-        const Dimension dimYd = schema.getDimension(indexYd);
-        const Dimension dimZd = schema.getDimension(indexZd);
+        const Dimension& dimXd = schema.getDimension(indexXd);
+        const Dimension& dimYd = schema.getDimension(indexYd);
+        const Dimension& dimZd = schema.getDimension(indexZd);
 
         Dimension dimXi(Dimension::Field_X, Dimension::Int32);
         Dimension dimYi(Dimension::Field_Y, Dimension::Int32);
@@ -151,9 +145,9 @@ void ScalingFilter::checkImpedance()
         const int indexYi = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
         const int indexZi = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
         
-        const Dimension dimXi = schema.getDimension(indexXi);
-        const Dimension dimYi = schema.getDimension(indexYi);
-        const Dimension dimZi = schema.getDimension(indexZi);
+        const Dimension& dimXi = schema.getDimension(indexXi);
+        const Dimension& dimYi = schema.getDimension(indexYi);
+        const Dimension& dimZi = schema.getDimension(indexZi);
 
         Dimension dimXd(Dimension::Field_X, Dimension::Double);
         Dimension dimYd(Dimension::Field_Y, Dimension::Double);
@@ -292,9 +286,9 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
 }
 
 
-pdal::StageSequentialIteratorPtr ScalingFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* ScalingFilter::createSequentialIterator() const
 {
-    return StageSequentialIteratorPtr(new ScalingFilterSequentialIterator(*this));
+    return new ScalingFilterSequentialIterator(*this);
 }
 
 } } // namespaces

@@ -50,12 +50,10 @@ namespace pdal { namespace drivers { namespace las {
 
 class ZipPoint;
 
-MAKE_PTR(LasWriter);
-
 class PDAL_DLL LasWriter : public Writer
 {
 public:
-    LasWriter(const DataStagePtr& prevStage, const Options& options);
+    LasWriter(Stage& prevStage, std::ostream&);
     ~LasWriter();
 
     const std::string& getDescription() const;
@@ -89,8 +87,7 @@ protected:
     virtual void writeEnd();
 
 private:
-    std::string m_filename;
-    std::ostream* m_ostream;
+    std::ostream& m_ostream;
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
     bool m_isCompressed;

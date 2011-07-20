@@ -45,30 +45,26 @@ BOOST_AUTO_TEST_SUITE(FauxWriterTest)
 BOOST_AUTO_TEST_CASE(test_1)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    Options readerOptions;
-    readerOptions.add("bounds", bounds);
-    readerOptions.add("num_points", 1000);
-    readerOptions.add("mode", "constant");
-    DataStagePtr reader(new pdal::drivers::faux::Reader(readerOptions));
+    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
 
-    pdal::drivers::faux::WriterPtr writer(new pdal::drivers::faux::Writer(reader, Options::empty()));
-    BOOST_CHECK(writer->getDescription() == "Faux Writer");
+    pdal::drivers::faux::Writer writer(reader);
+    BOOST_CHECK(writer.getDescription() == "Faux Writer");
 
-    boost::uint64_t numWritten = writer->write(750);
+    boost::uint64_t numWritten = writer.write(750);
 
     BOOST_CHECK(numWritten == 750);
 
-    BOOST_CHECK(Utils::compare_approx(writer->getMinX(), 1.0, (std::numeric_limits<double>::min)()) == true);
-    BOOST_CHECK(Utils::compare_approx(writer->getMinY(), 2.0, (std::numeric_limits<double>::min)()) == true);
-    BOOST_CHECK(Utils::compare_approx(writer->getMinZ(), 3.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getMinX(), 1.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getMinY(), 2.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getMinZ(), 3.0, (std::numeric_limits<double>::min)()) == true);
 
-    BOOST_CHECK(Utils::compare_approx(writer->getMaxX(), 1.0, (std::numeric_limits<double>::min)()) == true);
-    BOOST_CHECK(Utils::compare_approx(writer->getMaxY(), 2.0, (std::numeric_limits<double>::min)()) == true);
-    BOOST_CHECK(Utils::compare_approx(writer->getMaxZ(), 3.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getMaxX(), 1.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getMaxY(), 2.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getMaxZ(), 3.0, (std::numeric_limits<double>::min)()) == true);
 
-    BOOST_CHECK(Utils::compare_approx(writer->getAvgX(), 1.0, (std::numeric_limits<double>::min)()) == true);
-    BOOST_CHECK(Utils::compare_approx(writer->getAvgY(), 2.0, (std::numeric_limits<double>::min)()) == true);
-    BOOST_CHECK(Utils::compare_approx(writer->getAvgZ(), 3.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getAvgX(), 1.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getAvgY(), 2.0, (std::numeric_limits<double>::min)()) == true);
+    BOOST_CHECK(Utils::compare_approx(writer.getAvgZ(), 3.0, (std::numeric_limits<double>::min)()) == true);
 
 
     return;
@@ -77,28 +73,24 @@ BOOST_AUTO_TEST_CASE(test_1)
 BOOST_AUTO_TEST_CASE(test_2)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    Options readerOptions;
-    readerOptions.add("bounds", bounds);
-    readerOptions.add("num_points", 1000);
-    readerOptions.add("mode", "random");
-    DataStagePtr reader(new pdal::drivers::faux::Reader(readerOptions));
+    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
 
-    pdal::drivers::faux::WriterPtr writer(new pdal::drivers::faux::Writer(reader, Options::empty()));
+    pdal::drivers::faux::Writer writer(reader);
 
-    boost::uint64_t numWritten = writer->write(750);
+    boost::uint64_t numWritten = writer.write(750);
 
     BOOST_CHECK(numWritten == 750);
 
     // test all the values to +/- 10%
-    BOOST_CHECK(Utils::compare_approx<double>(writer->getMinX(), 1.0, 10.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer->getMinY(), 2.0, 10.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer->getMinZ(), 3.0, 10.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer->getMaxX(), 101.0, 10.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer->getMaxY(), 102.0, 10.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer->getMaxZ(), 103.0, 10.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer->getAvgX(), 51.0, 10.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer->getAvgY(), 52.0, 10.0));
-    BOOST_CHECK(Utils::compare_approx<double>(writer->getAvgZ(), 53.0, 10.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getMinX(), 1.0, 10.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getMinY(), 2.0, 10.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getMinZ(), 3.0, 10.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getMaxX(), 101.0, 10.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getMaxY(), 102.0, 10.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getMaxZ(), 103.0, 10.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getAvgX(), 51.0, 10.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getAvgY(), 52.0, 10.0));
+    BOOST_CHECK(Utils::compare_approx<double>(writer.getAvgZ(), 53.0, 10.0));
 
     return;
 }

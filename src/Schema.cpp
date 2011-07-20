@@ -42,10 +42,8 @@
 #include <pdal/Schema.hpp>
 
 #include <iostream>
-#include <algorithm>
 
 #include <pdal/exceptions.hpp>
-
 
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
@@ -55,13 +53,12 @@ namespace pdal
 {
 
 
-Schema::Schema() 
+Schema::Schema()
 {
-    // for (int i=0; i<Dimension::Field_LAST; i++)
-    // {
-    //     m_indexTable[i] = -1;
-    // }
-
+    for (int i=0; i<Dimension::Field_LAST; i++)
+    {
+        m_indexTable[i] = -1;
+    }
     return;
 }
 
@@ -70,10 +67,10 @@ Schema::Schema()
 Schema::Schema(Schema const& other) 
     : m_dimensions(other.m_dimensions)
 {
-    // for (int i=0; i<Dimension::Field_LAST; i++)
-    // {
-    //     m_indexTable[i] = other.m_indexTable[i];
-    // }
+    for (int i=0; i<Dimension::Field_LAST; i++)
+    {
+        m_indexTable[i] = other.m_indexTable[i];
+    }
 }
 
 
@@ -83,10 +80,10 @@ Schema& Schema::operator=(Schema const& rhs)
     if (&rhs != this)
     {
         m_dimensions = rhs.m_dimensions;
-        // for (int i=0; i<Dimension::Field_LAST; i++)
-        // {
-        //     m_indexTable[i] = rhs.m_indexTable[i];
-        // }
+        for (int i=0; i<Dimension::Field_LAST; i++)
+        {
+            m_indexTable[i] = rhs.m_indexTable[i];
+        }
     }
 
     return *this;
@@ -97,10 +94,10 @@ bool Schema::operator==(const Schema& other) const
 {
     if (m_dimensions == other.m_dimensions)
     {
-        // for (int i=0; i<Dimension::Field_LAST; i++)
-        // {
-        //     if (m_indexTable[i] != other.m_indexTable[i]) return false;
-        // }
+        for (int i=0; i<Dimension::Field_LAST; i++)
+        {
+            if (m_indexTable[i] != other.m_indexTable[i]) return false;
+        }
         return true;
     }
 
@@ -142,36 +139,27 @@ void Schema::addDimensions(const std::vector<Dimension>& dims)
 
 void Schema::addDimension(Dimension const& dim)
 {
-    // std::size_t index = m_dimensions.size();
+    std::size_t index = m_dimensions.size();
 
     m_dimensions.push_back(dim);
 
-    // const Dimension::Field field = dim.getField();
-    // 
-    // 
-    // assert(m_indexTable[field] == -1);
-    // m_indexTable[field] = (int)index;
-
+    const Dimension::Field field = dim.getField();
+    assert(m_indexTable[field] == -1);
+    m_indexTable[field] = (int)index;
 
     return;
-}
-
-bool SameDimension(Dimension const& dim1, Dimension const& dim2)
-{
-    if (dim1 == dim2) return true;
-    return false;
 }
 
 
 void Schema::removeDimension(Dimension const& dim)
 {
+    const Dimension::Field field = dim.getField();
+    assert(m_indexTable[field] != -1);
+    m_indexTable[field] = -1;
 
-    DimensionsIter it = m_dimensions.begin();
+    //std::size_t index = getDimensionIndex(dim);
+    //m_dimensions[index] = Dimension(Dimension::Field_INVALID, Dimension::Int32);
 
-    Dimension d(dim);
-    m_dimensions.erase( std::remove( m_dimensions.begin(), m_dimensions.end(), dim), 
-                        m_dimensions.end());
-    
     return;
 }
 
@@ -196,35 +184,24 @@ const Schema::Dimensions& Schema::getDimensions() const
 
 int Schema::getDimensionIndex(Dimension::Field field, Dimension::DataType datatype) const
 {
-    // const int index = m_indexTable[field];
-    // 
-    // // assert(index != -1);
-    // if (index == -1)
-    // {
-    //     return -1;
-    //     // throw pdal_error("Requested dimension field not present");
-    // }
-    // 
-    // const Dimension& dim = m_dimensions[index];
-    // 
-    // // assert(dim.getDataType() == datatype);
-    // if (dim.getDataType() != datatype)
-    // {
-    // }
-    // 
+    const int index = m_indexTable[field];
     
-    DimensionsCIter it = m_dimensions.begin();
-    int i = 0;
-    while (it != m_dimensions.end())
+    // assert(index != -1);
+    if (index == -1)
     {
-        if (field == it->getField() && datatype == it->getDataType())
-            return i;
-        ++it;
-        ++i;
+        return -1;
+        // throw pdal_error("Requested dimension field not present");
     }
     
-    return -1;
-    // throw dimension_not_found("Requested dimension not found");
+    const Dimension& dim = m_dimensions[index];
+    
+    // assert(dim.getDataType() == datatype);
+    if (dim.getDataType() != datatype)
+    {
+        throw dimension_not_found("Requested dimension field present, but with different datatype");
+    }
+    
+    return index;
 }
 
 
@@ -236,13 +213,11 @@ int Schema::getDimensionIndex(const Dimension& dim) const
 
 bool Schema::hasDimension(Dimension::Field field, Dimension::DataType datatype) const
 {
-    int t = getDimensionIndex(field, datatype);
-    
-    if (t == -1) 
-        return false;
-    
+    const int index = m_indexTable[field];
+    if (index == -1) return false;
+    const Dimension& dim = m_dimensions[index];
+    if (dim.getDataType() != datatype) return false;
     return true;
-
 }
 
 

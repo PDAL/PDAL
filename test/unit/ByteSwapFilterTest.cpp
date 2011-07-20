@@ -52,24 +52,19 @@ BOOST_AUTO_TEST_SUITE(ByteSwapFilterTest)
 BOOST_AUTO_TEST_CASE(test_swapping)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
-    boost::uint32_t buffer_size = 20;
-
-    Options options;
-    options.add("bounds", srcBounds);
-    options.add("num_points", buffer_size);
-    options.add("mode", "ramp");
-
-    DataStagePtr reader(new pdal::drivers::faux::Reader(options));
-
-    DataStagePtr filter(new pdal::filters::ByteSwapFilter(reader, Options::empty()));
-    BOOST_CHECK_EQUAL(filter->getName(), "filters.byteswap");
-
-    StageSequentialIteratorPtr unflipped_iter(reader->createSequentialIterator());
-    StageSequentialIteratorPtr flipped_iter(filter->createSequentialIterator());
-
-    const Schema& schema = reader->getSchema();
     
-    PointBuffer flipped(filter->getSchema(), buffer_size);
+    boost::uint32_t buffer_size = 20;
+    pdal::drivers::faux::Reader reader(srcBounds, buffer_size, pdal::drivers::faux::Reader::Ramp);
+
+    pdal::filters::ByteSwapFilter filter(reader);
+    BOOST_CHECK_EQUAL(filter.getName(), "filters.byteswap");
+
+    boost::scoped_ptr<StageSequentialIterator> unflipped_iter(reader.createSequentialIterator());
+    boost::scoped_ptr<StageSequentialIterator> flipped_iter(filter.createSequentialIterator());
+
+    const Schema& schema = reader.getSchema();
+    
+    PointBuffer flipped(filter.getSchema(), buffer_size);
     const boost::uint32_t fliped_read = flipped_iter->read(flipped);
     BOOST_CHECK_EQUAL(fliped_read, buffer_size);
 

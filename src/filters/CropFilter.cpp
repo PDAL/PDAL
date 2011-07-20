@@ -34,7 +34,6 @@
 
 #include <pdal/filters/CropFilter.hpp>
 
-#include <pdal/exceptions.hpp>
 #include <pdal/filters/CropFilterIterator.hpp>
 #include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -42,12 +41,10 @@
 namespace pdal { namespace filters {
 
 
-
-CropFilter::CropFilter(const DataStagePtr& prevStage, const Options& options)
-    : Filter(prevStage, options)
+CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
+    : Filter(prevStage, Options::none())
+    , m_bounds(bounds)
 {
-    const Bounds<double> bounds = options.getOption<Bounds<double> >("bounds").getValue();
-
     this->setBounds(bounds);
 
     this->setNumPoints(0);
@@ -67,6 +64,12 @@ const std::string& CropFilter::getName() const
 {
     static std::string name("filters.crop");
     return name;
+}
+
+
+const Bounds<double>& CropFilter::getBounds() const
+{
+    return m_bounds;
 }
 
 
@@ -110,9 +113,9 @@ boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffe
 }
 
 
-pdal::StageSequentialIteratorPtr CropFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* CropFilter::createSequentialIterator() const
 {
-    return StageSequentialIteratorPtr(new CropFilterSequentialIterator(*this));
+    return new CropFilterSequentialIterator(*this);
 }
 
 

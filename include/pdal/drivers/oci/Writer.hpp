@@ -51,8 +51,7 @@ class PDAL_DLL Writer : public pdal::Writer
 {
     
 public:
-    Writer(const DataStagePtr& prevStage, const Options& options);
-    Writer(const DataStagePtr& prevStage, OptionsOld& options);
+    Writer(Stage& prevStage, OptionsOld& options);
     ~Writer();
     
     const std::string& getDescription() const;
@@ -111,6 +110,8 @@ private:
     bool is3d() const;
     bool isSolid() const;
     // PointBuffer& ConstructBuffer(const PointBuffer& input) const;
+    
+    Stage& m_stage;
     
     OptionsOld& m_optionsOld;
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud

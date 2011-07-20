@@ -34,7 +34,6 @@
 
 #include <pdal/filters/CacheFilter.hpp>
 
-#include <pdal/exceptions.hpp>
 #include <pdal/PointBufferCache.hpp>
 #include <pdal/filters/CacheFilterIterator.hpp>
 
@@ -42,18 +41,14 @@ namespace pdal { namespace filters {
 
 
 // cache block size is measured in Points, not bytes
-CacheFilter::CacheFilter(const DataStagePtr& prevStage, const Options& options)
-    : Filter(prevStage, Options::empty())
+CacheFilter::CacheFilter(const Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
+    : Filter(prevStage, Options::none())
     , m_numPointsRequested(0)
     , m_numPointsRead(0)
     , m_cache(NULL)
+    , m_maxCacheBlocks(maxCacheBlocks)
+    , m_cacheBlockSize(cacheBlockSize)
 {
-    const boost::uint32_t maxCacheBlocks = options.getOption<boost::uint32_t>("max_cache_blocks").getValue();
-    const boost::uint32_t cacheBlockSize = options.getOption<boost::uint32_t>("cache_block_size").getValue();
-
-    m_maxCacheBlocks = maxCacheBlocks;
-    m_cacheBlockSize = cacheBlockSize;
-
     resetCache();
     return;
 }
@@ -150,15 +145,15 @@ void CacheFilter::updateStats(boost::uint64_t numRead, boost::uint64_t numReques
 }
 
 
-pdal::StageSequentialIteratorPtr CacheFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* CacheFilter::createSequentialIterator() const
 {
-    return StageSequentialIteratorPtr(new CacheFilterSequentialIterator(*this));
+    return new CacheFilterSequentialIterator(*this);
 }
 
 
-pdal::StageRandomIteratorPtr CacheFilter::createRandomIterator() const
+pdal::StageRandomIterator* CacheFilter::createRandomIterator() const
 {
-    return StageRandomIteratorPtr(new CacheFilterRandomIterator(*this));
+    return new CacheFilterRandomIterator(*this);
 }
 
 } } // namespaces

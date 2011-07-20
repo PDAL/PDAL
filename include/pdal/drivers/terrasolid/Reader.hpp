@@ -129,7 +129,6 @@ class PDAL_DLL Reader : public pdal::Reader
 {
 
 public:
-    Reader(const Options& options);
     Reader(OptionsOld& options);
     ~Reader();
     
@@ -147,8 +146,8 @@ public:
     }
 
     
-    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
-    pdal::StageRandomIteratorPtr createRandomIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const;
     
     OptionsOld& getOptionsOld() const { return m_optionsOld; }
 

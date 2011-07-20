@@ -38,10 +38,10 @@
 #include <pdal/pdal.hpp>
 
 #include <pdal/FilterIterator.hpp>
-#include <pdal/filters/ByteSwapFilter.hpp>
 
 namespace pdal { namespace filters {
 
+class ByteSwapFilter;
 
 class ByteSwapFilterSequentialIterator : public pdal::FilterSequentialIterator
 {

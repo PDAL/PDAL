@@ -105,9 +105,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (1)
     //
     {
-        pdal::Options optsR;
-        optsR.add("filename", Support::datapath("utm15.las"), "file to read from");
-        pdal::drivers::las::LasReader reader(optsR);
+        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
 
         const pdal::SpatialReference in_ref_test(utm15_wkt);
         const pdal::SpatialReference out_ref_test(epsg4326_wkt);
@@ -122,9 +120,10 @@ BOOST_AUTO_TEST_CASE(test_1)
         const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data(layout, 1);
 
-        pdal::StageSequentialIteratorPtr iter = reader.createSequentialIterator();
+        pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
+        delete iter;
     
         // note this file has only 1 points, so yes, the extent's mins and maxes are the same
         const pdal::Bounds<double> oldBounds_ref(preX, preY, preZ, preX, preY, preZ);
@@ -143,27 +142,26 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (2)
     //
     {
-        pdal::Options opts;
-        opts.add("filename", Support::datapath("utm15.las"), "file to read from");
-        pdal::ReaderPtr reader(new pdal::drivers::las::LasReader(opts));
+        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
 
-        const pdal::SpatialReference in_ref(reader->getSpatialReference());
+        const pdal::SpatialReference in_ref(reader.getSpatialReference());
         const pdal::SpatialReference out_ref(epsg4326_wkt);
 
-        pdal::DataStagePtr scalingFilter(new pdal::filters::ScalingFilter(reader, false));
-        pdal::DataStagePtr reprojectionFilter(new pdal::filters::ReprojectionFilter(scalingFilter, in_ref, out_ref));
-        pdal::DataStagePtr descalingFilter(new pdal::filters::ScalingFilter(reprojectionFilter, true));
+        pdal::filters::ScalingFilter scalingFilter(reader, false);
+        pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+        pdal::filters::ScalingFilter descalingFilter(reprojectionFilter, true);
 
-        const pdal::Schema& schema = descalingFilter->getSchema();
+        const pdal::Schema& schema = descalingFilter.getSchema();
         const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data(layout, 1);
 
-        pdal::StageSequentialIteratorPtr iter = descalingFilter->createSequentialIterator();
+        pdal::StageSequentialIterator* iter = descalingFilter.createSequentialIterator();
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
+        delete iter;
 
         const pdal::Bounds<double> newBounds_ref(postX, postY, postZ, postX, postY, postZ);
-        const pdal::Bounds<double>& newBounds = descalingFilter->getBounds();
+        const pdal::Bounds<double>& newBounds = descalingFilter.getBounds();
         compareBounds(newBounds_ref, newBounds);
 
         double x=0, y=0, z=0;
@@ -178,28 +176,27 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (3)
     //
     {
-        pdal::Options opts;
-        opts.add("filename", Support::datapath("utm15.las"), "file to read from");
-        pdal::ReaderPtr reader(new pdal::drivers::las::LasReader(opts));
+        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
             
-        const pdal::SpatialReference in_ref(reader->getSpatialReference());
+        const pdal::SpatialReference in_ref(reader.getSpatialReference());
         const pdal::SpatialReference out_ref(epsg4326_wkt);
 
         // convert to doubles, use internal scale factor
-        pdal::DataStagePtr scalingFilter(new pdal::filters::ScalingFilter(reader, false));
+        pdal::filters::ScalingFilter scalingFilter(reader, false);
 
-        pdal::DataStagePtr reprojectionFilter(new pdal::filters::ReprojectionFilter(scalingFilter, in_ref, out_ref));
+        pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
     
         // convert to ints, using custom scale factor
-        pdal::DataStagePtr descalingFilter(new pdal::filters::ScalingFilter(reprojectionFilter, 0.000001, 0.0, 0.000001, 0.0, 0.01, 0.0, true));
+        pdal::filters::ScalingFilter descalingFilter(reprojectionFilter, 0.000001, 0.0, 0.000001, 0.0, 0.01, 0.0, true);
 
-        const pdal::Schema& schema = descalingFilter->getSchema();
+        const pdal::Schema& schema = descalingFilter.getSchema();
         const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data2(layout, 1);
 
-        pdal::StageSequentialIteratorPtr iter = descalingFilter->createSequentialIterator();
+        pdal::StageSequentialIterator* iter = descalingFilter.createSequentialIterator();
         boost::uint32_t numRead = iter->read(data2);
         BOOST_CHECK(numRead == 1);
+        delete iter;
 
         double x=0, y=0, z=0;
         getPoint(data2, x, y, z, 0.000001, 0.000001, 0.01);
@@ -216,11 +213,9 @@ BOOST_AUTO_TEST_CASE(test_1)
 
 BOOST_AUTO_TEST_CASE(test_impedence_mismatch)
 {
-    pdal::Options opts;
-    opts.add("filename", Support::datapath("utm15.las"), "file to read from");
-    pdal::ReaderPtr reader(new pdal::drivers::las::LasReader(opts));
+    pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
         
-    const pdal::SpatialReference& in_ref = reader->getSpatialReference();
+    const pdal::SpatialReference& in_ref = reader.getSpatialReference();
         
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
         
@@ -230,7 +225,7 @@ BOOST_AUTO_TEST_CASE(test_impedence_mismatch)
     bool ok = false;
     try
     {
-        pdal::DataStagePtr filter(new pdal::filters::ReprojectionFilter(reader, in_ref, out_ref));
+        pdal::filters::ReprojectionFilter filter(reader, in_ref, out_ref);
         ok = false;
     }
     catch (pdal::impedance_invalid&)

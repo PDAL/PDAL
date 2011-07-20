@@ -52,14 +52,10 @@ class CropFilterSequentialIterator;
 
 // removes any points outside of the given range
 // updates the header accordingly
-
-
-MAKE_PTR(CropFilter);
-
 class PDAL_DLL CropFilter : public Filter
 {
 public:
-    CropFilter(const DataStagePtr& prevStage, const Options& options);
+    CropFilter(const Stage& prevStage, Bounds<double> const& bounds);
 
     const std::string& getDescription() const;
     const std::string& getName() const;
@@ -71,13 +67,18 @@ public:
         return false;
     }
     
-    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
     // if we're calling this routine multiple times with the same buffer
     boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const;
 
+    const Bounds<double>& getBounds() const;
+
 private:
+    Bounds<double> m_bounds;
+
     CropFilter& operator=(const CropFilter&); // not implemented
     CropFilter(const CropFilter&); // not implemented
 };

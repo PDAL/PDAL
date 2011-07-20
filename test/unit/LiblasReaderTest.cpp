@@ -52,9 +52,7 @@ BOOST_AUTO_TEST_SUITE(LiblasReaderTest)
 
 BOOST_AUTO_TEST_CASE(test_sequential)
 {
-    Options readerOptions;
-    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
-    LiblasReader reader(readerOptions);
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
     const Schema& schema = reader.getSchema();
@@ -62,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 
     PointBuffer data(layout, 3);
     
-    pdal::StageSequentialIteratorPtr iter = reader.createSequentialIterator();
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -81,15 +79,15 @@ BOOST_AUTO_TEST_CASE(test_sequential)
         Support::check_p100_p101_p102(data, schema);
     }
 
+    delete iter;
+
     return;
 }
 
 
 BOOST_AUTO_TEST_CASE(test_random)
 {
-    Options readerOptions;
-    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
-    LiblasReader reader(readerOptions);
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
     const Schema& schema = reader.getSchema();
@@ -97,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 
     PointBuffer data(layout, 3);
     
-    pdal::StageRandomIteratorPtr iter = reader.createRandomIterator();
+    pdal::StageRandomIterator* iter = reader.createRandomIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -126,15 +124,15 @@ BOOST_AUTO_TEST_CASE(test_random)
         Support::check_p0_p1_p2(data, schema);
     }
     
+    delete iter;
+
     return;
 }
 
 
 BOOST_AUTO_TEST_CASE(test_random_laz)
 {
-    Options readerOptions;
-    readerOptions.add("filename", Support::datapath("1.2-with-color.laz"));
-    LiblasReader reader(readerOptions);
+    LiblasReader reader(Support::datapath("1.2-with-color.laz"));
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
     const Schema& schema = reader.getSchema();
@@ -142,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 
     PointBuffer data(layout, 3);
     
-    pdal::StageRandomIteratorPtr iter = reader.createRandomIterator();
+    pdal::StageRandomIterator* iter = reader.createRandomIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -170,15 +168,15 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
         Support::check_p0_p1_p2(data, schema);
     }
     
+    delete iter;
+
     return;
 }
 
 
 BOOST_AUTO_TEST_CASE(test_two_iters)
 {
-    Options readerOptions;
-    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
-    LiblasReader reader(readerOptions);
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
     const Schema& schema = reader.getSchema();
@@ -188,7 +186,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
     PointBuffer data(layout, 1065);
 
     {
-        pdal::StageSequentialIteratorPtr iter = reader.createSequentialIterator();
+        pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         boost::uint32_t numRead = iter->read(data);
@@ -196,10 +194,12 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
         BOOST_CHECK(iter->getIndex() == 1065);
 
         Support::check_p0_p1_p2(data, schema);
+
+        delete iter;
     }
 
     {
-        pdal::StageRandomIteratorPtr iter = reader.createRandomIterator();
+        pdal::StageRandomIterator* iter = reader.createRandomIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         boost::uint32_t numRead = iter->read(data);
@@ -207,6 +207,8 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
         BOOST_CHECK(iter->getIndex() == 1065);
         
         Support::check_p0_p1_p2(data, schema);
+
+        delete iter;
     }
 
     return;
@@ -215,21 +217,16 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
 
 BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 {
-    Options readerOptions;
-    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
-    DataStagePtr reader(new LiblasReader(readerOptions));
-    BOOST_CHECK(reader->getDescription() == "Liblas Reader");
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
-    BOOST_CHECK(reader->getNumPoints() == 1065);
+    BOOST_CHECK(reader.getNumPoints() == 1065);
     BOOST_CHECK(355 * 3 == 1065);
 
-    Options cacheOptions;
-    cacheOptions.add("max_cache_blocks", 1);
-    cacheOptions.add("cache_block_size", 355);
-    CacheFilterPtr cache(new CacheFilter(reader, cacheOptions));
-    BOOST_CHECK(cache->getNumPoints() == 1065);
+    CacheFilter cache(reader, 1, 355);
+    BOOST_CHECK(cache.getNumPoints() == 1065);
 
-    const Schema& schema = cache->getSchema();
+    const Schema& schema = cache.getSchema();
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 355);
@@ -237,7 +234,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     boost::uint32_t numRead;
 
     {
-        pdal::StageSequentialIteratorPtr iter = cache->createSequentialIterator();
+        pdal::StageSequentialIterator* iter = cache.createSequentialIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         numRead = iter->read(data);
@@ -257,10 +254,12 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
         BOOST_CHECK(iter->getIndex() == 1065);
 
         Support::check_p710_p711_p712(data, schema);
+
+        delete iter;
     }
 
     {
-        pdal::StageRandomIteratorPtr iter = cache->createRandomIterator();
+        pdal::StageRandomIterator* iter = cache.createRandomIterator();
         BOOST_CHECK(iter->getIndex() == 0);
 
         // read the middle third
@@ -298,6 +297,8 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
         BOOST_CHECK(iter->getIndex() == 1065);
 
         Support::check_p710_p711_p712(data, schema);
+
+        delete iter;
     }
 
     return;
@@ -306,9 +307,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 
 BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 {
-    Options readerOptions;
-    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
-    LiblasReader reader(readerOptions);
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
     BOOST_CHECK(reader.getNumPoints() == 1065);
@@ -321,16 +320,16 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 
     boost::uint32_t numRead;
 
-    pdal::StageSequentialIteratorPtr iterS1 = reader.createSequentialIterator();
+    pdal::StageSequentialIterator* iterS1 = reader.createSequentialIterator();
     BOOST_CHECK(iterS1->getIndex() == 0);
 
-    pdal::StageSequentialIteratorPtr iterS2 = reader.createSequentialIterator();
+    pdal::StageSequentialIterator* iterS2 = reader.createSequentialIterator();
     BOOST_CHECK(iterS2->getIndex() == 0);
 
-    pdal::StageRandomIteratorPtr iterR1 = reader.createRandomIterator();
+    pdal::StageRandomIterator* iterR1 = reader.createRandomIterator();
     BOOST_CHECK(iterR1->getIndex() == 0);
 
-    pdal::StageRandomIteratorPtr iterR2 = reader.createRandomIterator();
+    pdal::StageRandomIterator* iterR2 = reader.createRandomIterator();
     BOOST_CHECK(iterR2->getIndex() == 0);
 
     {
@@ -415,14 +414,17 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
         Support::check_p0_p1_p2(data, schema);
     }
 
+    delete iterS1;
+    delete iterS2;
+    delete iterR1;
+    delete iterR2;
+
     return;
 }
 
 BOOST_AUTO_TEST_CASE(test_iterator_checks)
 {
-    Options readerOptions;
-    readerOptions.add("filename", Support::datapath("1.2-with-color.las"));
-    LiblasReader reader(readerOptions);
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
 
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);
@@ -433,9 +435,7 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
 static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
                               double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
 {
-    Options readerOptions;
-    readerOptions.add("filename", Support::datapath(file));
-    LiblasReader reader(readerOptions);
+    LiblasReader reader(Support::datapath(file));
 
     BOOST_CHECK(reader.getPointFormat() == pointFormat);
     BOOST_CHECK(reader.getVersionMajor() == majorVersion);
@@ -446,7 +446,7 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
 
     PointBuffer data(layout, 1);
     
-    pdal::StageSequentialIteratorPtr iter = reader.createSequentialIterator();
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
 
     {
         boost::uint32_t numRead = iter->read(data);
@@ -454,6 +454,8 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
 
         Support::check_pN(data, schema, 0, xref, yref, zref, tref, rref, gref, bref);
     }
+
+    delete iter;
 }
 
 BOOST_AUTO_TEST_CASE(test_different_formats)
@@ -475,9 +477,7 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 
 BOOST_AUTO_TEST_CASE(test_vlr)
 {
-    Options readerOptions;
-    readerOptions.add("filename", Support::datapath("lots_of_vlr.las"));
-    pdal::drivers::liblas::LiblasReader reader(readerOptions);
+    pdal::drivers::liblas::LiblasReader reader(Support::datapath("lots_of_vlr.las"));
 
     ////// BUG: this is not yet supported
     ////BOOST_CHECK(reader.getVLRs().count() == 390);

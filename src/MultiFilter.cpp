@@ -39,38 +39,60 @@ namespace pdal
 {
 
 
-MultiFilter::MultiFilter(const std::vector<const DataStagePtr> prevStages, const Options& options)
-    : DataStage(prevStages, options)
+MultiFilter::MultiFilter(std::vector<const Stage*> prevStages, const Options& options)
+    : Stage(options)
 {
     if (prevStages.size() == 0)
     {
-        throw pdal_error("empty stage list passed to MosaicFilter");
+        throw pdal_error("empty stage list passed to mosaic filter");
     }
 
+    for (size_t i=0; i<prevStages.size(); i++)
     {
-        setCoreProperties(prevStages[0]);  // BUG: clearly insufficient
+        if (prevStages[i] == NULL)
+        {
+            throw pdal_error("null stage passed to mosaic filter");
+        }
+        m_prevStages.push_back(prevStages[i]);
+    }
+
+    const Stage& prevStage = *m_prevStages[0];
+
+    {
+        setCoreProperties(prevStage);  // BUG: clearly insufficient
     }
 
     boost::uint64_t totalPoints = 0;
 
-    Bounds<double> bigbox(prevStages[0]->getBounds());
+    Bounds<double> bigbox(prevStage.getBounds());
 
     for (size_t i=0; i<prevStages.size(); i++)
     {
-        const DataStagePtr stage = prevStages[i];
-        if (prevStages[0]->getSchema() != this->getSchema())
+        const Stage* stage = prevStages[i];
+        if (stage==NULL)
+        {
+            throw pdal_error("bad stage passed to MosaicFilter");
+        }
+        if (prevStage.getSchema() != this->getSchema())
         {
             throw pdal_error("impedance mismatch in MosaicFilter");
         }
 
         bigbox.grow(this->getBounds());
         totalPoints += this->getNumPoints();
+        m_prevStages.push_back(stage);
     }
 
     setBounds(bigbox);
     setNumPoints(totalPoints);
 
     return;
+}
+
+
+const std::vector<const Stage*>& MultiFilter::getPrevStages() const
+{
+    return m_prevStages;
 }
 
 

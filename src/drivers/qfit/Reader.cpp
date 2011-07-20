@@ -221,7 +221,7 @@ PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 
 
 
-Reader::Reader(const Options& options)
+Reader::Reader(Options& options)
     : pdal::Reader(options)
     , m_format(QFIT_Format_Unknown)
     , m_size(0)
@@ -306,7 +306,7 @@ Reader::Reader(const Options& options)
 
 std::string Reader::getFileName() const
 {
-    return getOptions().getOption<std::string>("input").getValue();
+    return getOptions().getValue<std::string>("input");
 }
 
 void Reader::registerFields()
@@ -339,9 +339,9 @@ void Reader::registerFields()
     text.str("");
 
     Dimension z(Dimension::Field_Z, Dimension::Int32);
-    text << "Elevation (millimeters)";
+    text << "z coordinate as a long integer.  You must use the scale and "
+         << "offset information of the header to determine the double value.";
     z.setDescription(text.str());
-    z.setNumericScale(1.0);
     schema.addDimension(z);
     text.str("");
 
@@ -586,15 +586,15 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     return numPoints;
 }
 
-pdal::StageSequentialIteratorPtr Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return StageSequentialIteratorPtr(new pdal::drivers::qfit::SequentialIterator(*this));
+    return new pdal::drivers::qfit::SequentialIterator(*this);
 }
 
 
-pdal::StageRandomIteratorPtr Reader::createRandomIterator() const
+pdal::StageRandomIterator* Reader::createRandomIterator() const
 {
-    return StageRandomIteratorPtr(new pdal::drivers::qfit::RandomIterator(*this));
+    return new pdal::drivers::qfit::RandomIterator(*this);
 }
 
 

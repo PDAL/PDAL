@@ -41,7 +41,7 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(DimensionLayoutTest)
 
-BOOST_AUTO_TEST_CASE(DimensionLayoutTest_test1)
+BOOST_AUTO_TEST_CASE(test1)
 {
     Dimension d1(Dimension::Field_X, Dimension::Uint32);
     DimensionLayout l1(d1);

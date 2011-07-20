@@ -53,12 +53,10 @@ namespace pdal { namespace drivers { namespace liblas {
 
 class LiblasHeader;
 
-MAKE_PTR(LiblasReader);
-
 class PDAL_DLL LiblasReader : public pdal::drivers::las::LasReaderBase
 {
 public:
-    LiblasReader(const Options& options);
+    LiblasReader(const std::string& filename);
     ~LiblasReader();
 
     const std::string& getDescription() const;
@@ -84,8 +82,8 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
-    pdal::StageRandomIteratorPtr createRandomIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const;
 
 private:
     void processExternalHeader(::liblas::Reader& externalReader);

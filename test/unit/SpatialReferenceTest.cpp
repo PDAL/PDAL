@@ -129,9 +129,7 @@ BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
 // Test fetching SRS from an existing file
 BOOST_AUTO_TEST_CASE(test_read_srs)
 {
-    pdal::Options opts;
-    opts.add("filename", Support::datapath("utm17.las"), "file to read from");
-    pdal::drivers::las::LasReader reader(opts);
+    pdal::drivers::las::LasReader reader(Support::datapath("utm17.las"));
 
     const pdal::SpatialReference& ref = reader.getSpatialReference();
 
@@ -252,28 +250,25 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
         }
 
         // Write a very simple file with our SRS and one point.
-        pdal::Options opts;
-        opts.add("filename", Support::datapath("1.2-with-color.las"), "file to read from");
-        pdal::ReaderPtr reader(new pdal::drivers::las::LasReader(opts));
+        pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));    
 
+        std::ostream* ofs = pdal::Utils::createFile(tmpfile);
         {
-            const boost::uint64_t numPoints = reader->getNumPoints();
+            const boost::uint64_t numPoints = reader.getNumPoints();
 
-            pdal::Options optsW;
-            optsW.add("filename", tmpfile, "file to write to");
-            pdal::drivers::las::LasWriterPtr writer(new pdal::drivers::las::LasWriter(reader, optsW));
+            // need to scope the writer, so that's it dtor can use the stream
+            pdal::drivers::las::LasWriter writer(reader, *ofs);
 
-            writer->setSpatialReference(ref);
+            writer.setSpatialReference(ref);
 
-            writer->write(numPoints);
+            writer.write(numPoints);
         }
+        pdal::Utils::closeFile(ofs);
     }
 
     // Reopen and check contents. 
     {
-        pdal::Options opts;
-        opts.add("filename", tmpfile, "file to read from");
-        pdal::drivers::las::LasReader reader(opts);
+        pdal::drivers::las::LasReader reader(tmpfile);
 
         const pdal::SpatialReference ref2 = reader.getSpatialReference();
         const std::string wkt2 = ref2.getWKT(pdal::SpatialReference::eCompoundOK);
@@ -325,28 +320,25 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
     {
         pdal::Utils::deleteFile(tmpfile);
 
-        pdal::Options opts;
-        opts.add("filename", Support::datapath("1.2-with-color.las"), "file to read from");
-        pdal::ReaderPtr readerx(new pdal::drivers::las::LasReader(opts));
+        pdal::drivers::las::LasReader readerx(Support::datapath("1.2-with-color.las"));    
 
+        std::ostream* ofs = pdal::Utils::createFile(tmpfile);
         {
-            const boost::uint64_t numPoints = readerx->getNumPoints();
+            const boost::uint64_t numPoints = readerx.getNumPoints();
 
-            pdal::Options optsW;
-            optsW.add("filename", tmpfile, "file to write to");
-            pdal::drivers::las::LasWriter writer(readerx, optsW);
+            // need to scope the writer, so that's it dtor can use the stream
+            pdal::drivers::las::LasWriter writer(readerx, *ofs);
 
             writer.setSpatialReference(ref);
 
             writer.write(numPoints);
         }
+        pdal::Utils::closeFile(ofs);
     }
 
     // Reopen and check contents. 
     {
-        pdal::Options opts;
-        opts.add("filename", tmpfile, "file to read from");
-        pdal::drivers::las::LasReader reader(opts);
+        pdal::drivers::las::LasReader reader(tmpfile);
 
         pdal::SpatialReference result_ref = reader.getSpatialReference();
 

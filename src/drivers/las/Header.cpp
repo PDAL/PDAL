@@ -51,11 +51,11 @@ namespace pdal { namespace drivers { namespace las {
     
 // BUG: should be std::string
 char const* const LasHeader::FileSignature = "LASF";
-char const* const LasHeader::SystemIdentifier = "PDAL";
-char const* const LasHeader::SoftwareIdentifier = "PDAL 0.1.0";
+char const* const LasHeader::SystemIdentifier = "libLAS";
+char const* const LasHeader::SoftwareIdentifier = "libLAS 1.6.0";
 
 LasHeader::LasHeader()
-    : m_scales(1.0,1.0,1.0)
+    : m_scales(0.01,0.01,0.01)
 {
     // BUG: set default here -- m_schema(LasSchema::ePointFormat3)
     initialize();
@@ -307,14 +307,10 @@ double LasHeader::GetScaleZ() const
 void LasHeader::SetScale(double x, double y, double z)
 {
 
-    // double const minscale = 0.01;
-    // m_scales[0] = Utils::compare_distance(0.0, x) ? minscale : x;
-    // m_scales[1] = Utils::compare_distance(0.0, y) ? minscale : y;
-    // m_scales[2] = Utils::compare_distance(0.0, z) ? minscale : z;
-
-    m_scales[0] = x;
-    m_scales[1] = y;
-    m_scales[2] = z;
+    double const minscale = 0.01;
+    m_scales[0] = Utils::compare_distance(0.0, x) ? minscale : x;
+    m_scales[1] = Utils::compare_distance(0.0, y) ? minscale : y;
+    m_scales[2] = Utils::compare_distance(0.0, z) ? minscale : z;
 }
 
 double LasHeader::GetOffsetX() const

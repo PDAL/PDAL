@@ -42,16 +42,17 @@
 namespace pdal
 {
 
-MAKE_PTR(MultiFilter);
-
-class PDAL_DLL MultiFilter : public DataStage
+class PDAL_DLL MultiFilter : public Stage
 {
 public:
     // entries may not be null
     // vector.size() must be > 0
-    MultiFilter(const std::vector<const DataStagePtr> prevStages, const Options& options);
+    MultiFilter(std::vector<const Stage*> prevStages, const Options& options);
+
+    const std::vector<const Stage*>& getPrevStages() const;
 
 protected:
+    std::vector<const Stage*> m_prevStages;
 
 private:
     MultiFilter& operator=(const MultiFilter&); // not implemented

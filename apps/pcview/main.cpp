@@ -132,7 +132,7 @@ bool useColor = true;
 class ThreadArgs
 {
 public:
-    ThreadArgs(Controller& controller, pdal::DataStage& stage, boost::uint32_t startPoint, boost::uint32_t numPoints)
+    ThreadArgs(Controller& controller, pdal::Stage& stage, boost::uint32_t startPoint, boost::uint32_t numPoints)
         : m_controller(controller)
         , m_stage(stage)
         , m_startPoint(startPoint)
@@ -141,7 +141,7 @@ public:
     { }
 
     Controller& m_controller;
-    pdal::DataStage& m_stage;
+    pdal::Stage& m_stage;
     boost::uint32_t m_startPoint;
     boost::uint32_t m_numPoints;
     boost::uint32_t m_numRead;
@@ -157,14 +157,14 @@ static boost::mutex mutex;
 static void givePointsToEngine(ThreadArgs* threadArgs)
 {
     Controller& controller = threadArgs->m_controller;
-    pdal::DataStage& stage = threadArgs->m_stage;
+    pdal::Stage& stage = threadArgs->m_stage;
     boost::uint32_t startPoint = threadArgs->m_startPoint;
     boost::uint32_t numPoints = threadArgs->m_numPoints;
 
     const pdal::Schema& schema = stage.getSchema();
     const pdal::SchemaLayout schemaLayout(schema);
 
-    pdal::StageSequentialIteratorPtr iter = stage.createSequentialIterator();
+    pdal::StageSequentialIterator* iter = stage.createSequentialIterator();
     pdal::PointBuffer buffer(schemaLayout, numPoints);
     iter->skip(startPoint);
     const boost::uint32_t numRead = iter->read(buffer);
@@ -220,6 +220,8 @@ static void givePointsToEngine(ThreadArgs* threadArgs)
     controller.addPoints(points, colors, numRead);
     mutex.unlock();
 
+    delete iter;
+
     threadArgs->m_numRead = numRead;
 
     return;
@@ -230,15 +232,11 @@ static void readFileSimple(Controller& controller, const string& file)
 {
     boost::timer timer;
 
-    pdal::Options readerOptions;
-    readerOptions.add("filename", file);
-    pdal::DataStagePtr reader(new pdal::drivers::las::LasReader(readerOptions));
+    pdal::Stage* reader = new pdal::drivers::las::LasReader(file);
+    
+    pdal::Stage* decimator = new pdal::filters::DecimationFilter(*reader, factor);
 
-    pdal::Options decimatorOptions;
-    decimatorOptions.add("step", factor);
-    pdal::DataStagePtr decimator(new pdal::filters::DecimationFilter(reader, decimatorOptions));
-
-    pdal::DataStagePtr colorizer(new pdal::filters::ColorFilter(decimator, pdal::Options::empty()));
+    pdal::Stage* colorizer = new pdal::filters::ColorFilter(*decimator);
 
     const boost::uint32_t numPoints = (boost::uint32_t)colorizer->getNumPoints();
 
@@ -269,6 +267,10 @@ static void readFileSimple(Controller& controller, const string& file)
     const pdal::Bounds<double>& bounds = colorizer->getBounds();
     controller.setBounds((float)bounds.getMinimum(0), (float)bounds.getMinimum(1), (float)bounds.getMinimum(2), 
                          (float)bounds.getMaximum(0), (float)bounds.getMaximum(1), (float)bounds.getMaximum(2));
+
+    delete colorizer;
+    delete decimator;
+    delete reader;
 
     return;
 }

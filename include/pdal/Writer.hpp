@@ -37,21 +37,19 @@
 
 #include <pdal/pdal.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/Stage.hpp>
 
 #include <string>
 
 namespace pdal
 {
 
+class Stage;
 class PointBuffer;
 
-MAKE_PTR(Writer);
-
-class PDAL_DLL Writer : public Stage
+class PDAL_DLL Writer
 {
 public:
-    Writer(const DataStagePtr& prevStage, const Options& options);
+    Writer(Stage& prevStage, const Options& options);
     virtual ~Writer() {}
 
     // size of the PointBuffer buffer to use
@@ -63,6 +61,8 @@ public:
     // actually written.
     boost::uint64_t write(boost::uint64_t targetNumPointsToWrite);
 
+    const Options& getOptions() const;
+
 protected:
     // this is called once before the loop with the writeBuffer calls
     virtual void writeBegin() = 0;
@@ -73,11 +73,17 @@ protected:
     // called once, after the writeBuffer calls
     virtual void writeEnd() = 0;
 
+    Stage& getPrevStage();
+
     // these two are valid for use after writeBegin has been called
     boost::uint64_t m_actualNumPointsWritten;
     boost::uint64_t m_targetNumPointsToWrite;
 
+    Options& getOptions();
+
 private:
+    Options m_options;
+    Stage& m_prevStage;
     boost::uint32_t m_chunkSize;
     static const boost::uint32_t s_defaultChunkSize;
 

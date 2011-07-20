@@ -44,17 +44,9 @@
 
 namespace pdal { namespace drivers { namespace oci {
 
-Reader::Reader(const Options& options)
-    : pdal::Reader(options)
-    , m_optionsOld(*(new OptionsOld()))
-    , m_querytype(QUERY_UNKNOWN)
-{
-     throw not_yet_implemented("oci reader options support"); 
-}
-
 
 Reader::Reader(OptionsOld& optionsOld)
-    : pdal::Reader(Options::empty())
+    : pdal::Stage(Options::none())
     , m_optionsOld(optionsOld)
     , m_querytype(QUERY_UNKNOWN)
 {
@@ -564,9 +556,9 @@ CloudPtr Reader::getCloud() const
 
 }
 
-pdal::StageSequentialIteratorPtr Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return StageSequentialIteratorPtr(new pdal::drivers::oci::SequentialIterator(*this));
+    return new pdal::drivers::oci::SequentialIterator(*this);
 }
 
 

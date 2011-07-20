@@ -43,7 +43,7 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(ColorFilterTest)
 
-BOOST_AUTO_TEST_CASE(ColorFilterTest_test1)
+BOOST_AUTO_TEST_CASE(test1)
 {
     // BUG: tbd
 

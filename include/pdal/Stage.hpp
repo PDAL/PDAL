@@ -48,28 +48,17 @@
 namespace pdal
 {
 
-MAKE_PTR(StageSequentialIterator);
-MAKE_PTR(StageRandomIterator);
-MAKE_PTR(StageBlockIterator);
+class Iterator;
+class StageSequentialIterator;
+class StageRandomIterator;
+class StageBlockIterator;
 
 // every stage owns its own header, they are not shared
-
-
-// DataStage and Writer both derive from Stage
-
-MAKE_PTR(Stage);
-MAKE_PTR(DataStage);
-
 class PDAL_DLL Stage
 {
 public:
     Stage(const Options& options);
-    Stage(const DataStagePtr&, const Options& options);
-    Stage(const std::vector<const DataStagePtr>&, const Options& options);
     virtual ~Stage();
-
-    DataStagePtr getPrevStage() const;
-    const std::vector<const DataStagePtr>& getPrevStages() const;
 
     const Options& getOptions() const;
 
@@ -80,28 +69,7 @@ public:
     // tree for the given stage.
     virtual const std::string& getName() const = 0;
     virtual const std::string& getDescription() const = 0;
-
-protected:
-    Options& getOptions();
-
-private:
-    Options m_options;
-    std::vector<const DataStagePtr> m_prevStages;
-
-    Stage& operator=(const Stage&); // not implemented
-    Stage(const Stage&); // not implemented
-};
-
-
-// Reader and Filter both derive from DataStage
-class PDAL_DLL DataStage : public Stage
-{
-public:
-    DataStage(const Options& options);
-    DataStage(const DataStagePtr&, const Options& options);
-    DataStage(const std::vector<const DataStagePtr>&, const Options& options);
-    virtual ~DataStage();
-   
+    
     // core properties of all stages
     const Schema& getSchema() const;
     virtual boost::uint64_t getNumPoints() const;
@@ -114,13 +82,14 @@ public:
 
     virtual bool supportsIterator (StageIteratorType) const = 0;
 
-    virtual StageSequentialIteratorPtr createSequentialIterator() const { return StageSequentialIteratorPtr(); }
-    virtual StageRandomIteratorPtr createRandomIterator() const  { return StageRandomIteratorPtr(); }
-    virtual StageBlockIteratorPtr createBlockIterator() const  { return StageBlockIteratorPtr(); }
+    virtual StageSequentialIterator* createSequentialIterator() const { return NULL; }
+    virtual StageRandomIterator* createRandomIterator() const  { return NULL; }
+    virtual StageBlockIterator* createBlockIterator() const  { return NULL; }
 
     void dump() const;
 
 protected:
+    Options& getOptions();
 
     // setters for the core properties
     Schema& getSchemaRef();
@@ -134,17 +103,19 @@ protected:
 
     // convenience function, for doing a "copy ctor" on all the core props
     // (used by the Filter stage, for example)
-    void setCoreProperties(const DataStagePtr&);
+    void setCoreProperties(const Stage&);
 
 private:
+    Options m_options;
+
     Schema m_schema;
     boost::uint64_t m_numPoints;
     PointCountType m_pointCountType;
     Bounds<double> m_bounds;
     SpatialReference m_spatialReference;
 
-    DataStage& operator=(const DataStage&); // not implemented
-    DataStage(const DataStage&); // not implemented
+    Stage& operator=(const Stage&); // not implemented
+    Stage(const Stage&); // not implemented
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);

@@ -47,14 +47,21 @@ namespace pdal
 const boost::uint32_t Writer::s_defaultChunkSize = 1024 * 32;
 
 
-Writer::Writer(const DataStagePtr& prevStage, const Options& options)
-    : Stage(prevStage, options)
-    , m_actualNumPointsWritten(0)
+Writer::Writer(Stage& prevStage, const Options& options)
+    : m_actualNumPointsWritten(0)
     , m_targetNumPointsToWrite(0)
+    , m_options(options)
+    , m_prevStage(prevStage)
     , m_chunkSize(s_defaultChunkSize)
 
 {
     return;
+}
+
+
+Stage& Writer::getPrevStage()
+{
+    return m_prevStage;
 }
 
 
@@ -75,7 +82,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
     m_targetNumPointsToWrite = targetNumPointsToWrite;
     m_actualNumPointsWritten = 0;
     
-    PointCountType count_type = getPrevStage()->getPointCountType();
+    PointCountType count_type = m_prevStage.getPointCountType();
     
     // passing in a 0 for the number of points means "write to the end"
     // but we need to have an end to actually do that.  This code isn't 
@@ -88,7 +95,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
         }
     }
     
-    StageSequentialIteratorPtr iter(getPrevStage()->createSequentialIterator());
+    boost::scoped_ptr<StageSequentialIterator> iter(m_prevStage.createSequentialIterator());
     
     if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
 
@@ -98,7 +105,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
     
     if (targetNumPointsToWrite == 0)
     {
-        PointBuffer buffer(getPrevStage()->getSchema(), m_chunkSize);
+        PointBuffer buffer(m_prevStage.getSchema(), m_chunkSize);
         boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
         boost::uint32_t numPointsWrittenThisChunk = 0;
         while (numPointsReadThisChunk != 0)
@@ -118,7 +125,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
             // this case is safe because m_chunkSize is a uint32
             const boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(numPointsToReadThisChunk64);
 
-            PointBuffer buffer(getPrevStage()->getSchema(), numPointsToReadThisChunk);
+            PointBuffer buffer(m_prevStage.getSchema(), numPointsToReadThisChunk);
 
             const boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
             assert(numPointsReadThisChunk <= numPointsToReadThisChunk);

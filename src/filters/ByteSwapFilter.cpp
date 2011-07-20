@@ -38,7 +38,6 @@
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Endian.hpp>
-#include <pdal/exceptions.hpp>
 #include <iostream>
 
 #ifdef PDAL_COMPILER_MSVC
@@ -48,12 +47,12 @@
 namespace pdal { namespace filters {
 
 
-ByteSwapFilter::ByteSwapFilter(const DataStagePtr& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
+ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
+    : Filter(prevStage, Options::none())
 {
 
-    this->setNumPoints(prevStage->getNumPoints());
-    this->setPointCountType(prevStage->getPointCountType());
+    this->setNumPoints(prevStage.getNumPoints());
+    this->setPointCountType(prevStage.getPointCountType());
     
     return;
 }
@@ -61,7 +60,7 @@ ByteSwapFilter::ByteSwapFilter(const DataStagePtr& prevStage, const Options& opt
 
 const std::string& ByteSwapFilter::getDescription() const
 {
-    static std::string name("Byteswap Filter");
+    static std::string name("Crop Filter");
     return name;
 }
 
@@ -149,9 +148,9 @@ boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointB
 }
 
 
-pdal::StageSequentialIteratorPtr ByteSwapFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* ByteSwapFilter::createSequentialIterator() const
 {
-    return StageSequentialIteratorPtr(new ByteSwapFilterSequentialIterator(*this));
+    return new ByteSwapFilterSequentialIterator(*this);
 }
 
 

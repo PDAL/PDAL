@@ -49,7 +49,7 @@ ReprojectionFilterSequentialIterator::ReprojectionFilterSequentialIterator(const
 
 boost::uint32_t ReprojectionFilterSequentialIterator::readImpl(PointBuffer& data)
 {
-    const boost::uint32_t numRead = getPrevIterator()->read(data);
+    const boost::uint32_t numRead = getPrevIterator().read(data);
 
     m_reprojectionFilter.processBuffer(data);
 
@@ -59,14 +59,14 @@ boost::uint32_t ReprojectionFilterSequentialIterator::readImpl(PointBuffer& data
 
 boost::uint64_t ReprojectionFilterSequentialIterator::skipImpl(boost::uint64_t count)
 {
-    getPrevIterator()->skip(count);
+    getPrevIterator().skip(count);
     return count;
 }
 
 
 bool ReprojectionFilterSequentialIterator::atEndImpl() const
 {
-    return getPrevIterator()->atEnd();
+    return getPrevIterator().atEnd();
 }
 
 } } // namespaces

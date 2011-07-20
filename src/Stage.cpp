@@ -44,28 +44,11 @@
 namespace pdal
 {
 
-//--------------------------------------------------------------------------------
-
 Stage::Stage(const Options& options)
     : m_options(options)
+    , m_numPoints(0)
+    , m_pointCountType(PointCount_Fixed)
 {
-    return;
-}
-
-
-Stage::Stage(const DataStagePtr& prev, const Options& options)
-    : m_options(options)
-{
-    m_prevStages.push_back(prev);
-    return;
-}
-
-
-Stage::Stage(const std::vector<const DataStagePtr>& prevs, const Options& options)
-    : m_options(options)
-{
-    for (boost::uint32_t i=0; i<prevs.size(); i++)
-        m_prevStages.push_back(prevs[i]);
     return;
 }
 
@@ -74,6 +57,7 @@ Stage::~Stage()
 {
     return;
 }
+
 
 const Options& Stage::getOptions() const
 {
@@ -87,130 +71,79 @@ Options& Stage::getOptions()
 }
 
 
-DataStagePtr Stage::getPrevStage() const
-{
-    if (m_prevStages.size() == 0)
-        throw pdal_error("internal error - no prev stages");
-    DataStagePtr ptr = m_prevStages[0];
-    return ptr;
-}
-
-
-const std::vector<const DataStagePtr>& Stage::getPrevStages() const
-{
-    return m_prevStages;
-}
-
-
-//--------------------------------------------------------------------------------
-
-
-DataStage::DataStage(const Options& options)
-    : Stage(options)
-    , m_numPoints(0)
-    , m_pointCountType(PointCount_Fixed)
-{
-    return;
-}
-
-
-DataStage::DataStage(const DataStagePtr& prev, const Options& options)
-    : Stage(prev, options)
-    , m_numPoints(0)
-    , m_pointCountType(PointCount_Fixed)
-{
-    return;
-}
-
-
-DataStage::DataStage(const std::vector<const DataStagePtr>& prevs, const Options& options)
-    : Stage(prevs, options)
-    , m_numPoints(0)
-    , m_pointCountType(PointCount_Fixed)
-{
-    return;
-}
-
-
-DataStage::~DataStage()
-{
-    return;
-}
-
-
-const Bounds<double>& DataStage::getBounds() const
+const Bounds<double>& Stage::getBounds() const
 {
     return m_bounds;
 }
 
 
-void DataStage::setBounds(const Bounds<double>& bounds)
+void Stage::setBounds(const Bounds<double>& bounds)
 {
     m_bounds = bounds;
 }
 
 
-const Schema& DataStage::getSchema() const
+const Schema& Stage::getSchema() const
 {
     return m_schema;
 }
 
 
-Schema& DataStage::getSchemaRef()
+Schema& Stage::getSchemaRef()
 {
     return m_schema;
 }
 
 
-void DataStage::setSchema(const Schema& schema)
+void Stage::setSchema(const Schema& schema)
 {
     m_schema = schema;
 }
 
 
-boost::uint64_t DataStage::getNumPoints() const
+boost::uint64_t Stage::getNumPoints() const
 {
     return m_numPoints;
 }
 
 
-void DataStage::setNumPoints(boost::uint64_t numPoints)
+void Stage::setNumPoints(boost::uint64_t numPoints)
 {
     m_numPoints = numPoints;
 }
 
 
-PointCountType DataStage::getPointCountType() const
+PointCountType Stage::getPointCountType() const
 {
     return m_pointCountType;
 }
 
 
-void DataStage::setPointCountType(PointCountType pointCountType)
+void Stage::setPointCountType(PointCountType pointCountType)
 {
     m_pointCountType = pointCountType;
 }
 
 
-const SpatialReference& DataStage::getSpatialReference() const
+const SpatialReference& Stage::getSpatialReference() const
 {
     return m_spatialReference;
 }
 
 
-void DataStage::setSpatialReference(const SpatialReference& spatialReference)
+void Stage::setSpatialReference(const SpatialReference& spatialReference)
 {
     m_spatialReference = spatialReference;
 }
 
 
-int DataStage::getMetadataRecordCount() const
+int Stage::getMetadataRecordCount() const
 {
     return 0;
 }
 
 
-const MetadataRecord& DataStage::getMetadataRecord(int index) const
+const MetadataRecord& Stage::getMetadataRecord(int index) const
 {
     // the default behaviour is to have no records at all...
     boost::ignore_unused_variable_warning(index);
@@ -218,7 +151,7 @@ const MetadataRecord& DataStage::getMetadataRecord(int index) const
 }
 
 
-MetadataRecord& DataStage::getMetadataRecordRef(int index)
+MetadataRecord& Stage::getMetadataRecordRef(int index)
 {
     // the default behaviour is to have no records at all...
     boost::ignore_unused_variable_warning(index);
@@ -226,19 +159,19 @@ MetadataRecord& DataStage::getMetadataRecordRef(int index)
 }
 
 
-void DataStage::setCoreProperties(const DataStagePtr& stage)
+void Stage::setCoreProperties(const Stage& stage)
 {
-    this->setSchema(stage->getSchema());
-    this->setNumPoints(stage->getNumPoints());
-    this->setPointCountType(stage->getPointCountType());
-    this->setBounds(stage->getBounds());
-    this->setSpatialReference(stage->getSpatialReference());
+    this->setSchema(stage.getSchema());
+    this->setNumPoints(stage.getNumPoints());
+    this->setPointCountType(stage.getPointCountType());
+    this->setBounds(stage.getBounds());
+    this->setSpatialReference(stage.getSpatialReference());
 
     return;
 }
 
 
-void DataStage::dump() const
+void Stage::dump() const
 {
     std::cout << *this;
 }
@@ -246,17 +179,17 @@ void DataStage::dump() const
 std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
 {
     ostr << "  Name: " << stage.getName() << std::endl;
-//    ostr << "  Num points: " << stage.getNumPoints() << std::endl;
+    ostr << "  Num points: " << stage.getNumPoints() << std::endl;
 
-//    ostr << "  Bounds:" << std::endl;
-//    ostr << "    " << stage.getBounds() << std::endl;
+    ostr << "  Bounds:" << std::endl;
+    ostr << "    " << stage.getBounds() << std::endl;
 
-//    ostr << "  Schema: " << std::endl;
-//    ostr << "    Num dims: " << stage.getSchema().getDimensions().size() << std::endl;
+    ostr << "  Schema: " << std::endl;
+    ostr << "    Num dims: " << stage.getSchema().getDimensions().size() << std::endl;
 //    ostr << "    Size in bytes: " << header.getSchema().getByteSize() << std::endl;
 
-//    ostr << "  Spatial Reference:" << std::endl;
-//    ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;
+    ostr << "  Spatial Reference:" << std::endl;
+    ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;
 
     return ostr;
 }

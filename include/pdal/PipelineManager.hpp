@@ -35,59 +35,49 @@
 #ifndef INCLUDED_PIPELINEMANAGER_HPP
 #define INCLUDED_PIPELINEMANAGER_HPP
 
-#include <pdal/pdal.hpp>
-#include <pdal/StageFactory.hpp>
-
-#include <boost/shared_ptr.hpp>
-
-#include <libxml/xmlmemory.h>
-#include <libxml/parser.h>
-
 #include <vector>
-#include <map>
-#include <string>
+
+#include <pdal/Stage.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/Writer.hpp>
 
 
 namespace pdal
 {
 
-class Options;
-
+class OptionsNew;
 
 class PDAL_DLL PipelineManager
 {
 public:
     PipelineManager();
-    ~PipelineManager();
 
-    ReaderPtr addReader(const std::string& type, const Options&);
-    FilterPtr addFilter(const std::string& type, const DataStagePtr& prevStage, const Options&);
-    MultiFilterPtr addMultiFilter(const std::string& type, const std::vector<const DataStagePtr>& prevStages, const Options&);
-    WriterPtr addWriter(const std::string& type, const DataStagePtr& prevStage, const Options&);
+    boost::uint32_t addReader(const std::string& type, const OptionsNew&);
+    boost::uint32_t addFilter(const std::string& type, boost::uint32_t prevStage, const OptionsNew&);
+    boost::uint32_t addFilter(const std::string& type, const std::vector<boost::uint32_t>& prevStages, const OptionsNew&);
+    boost::uint32_t addWriter(const std::string& type, boost::uint32_t prevStage, const OptionsNew&);
     
-    void readXml(const std::string&);
+    Stage* getStage(boost::uint32_t);
+    Filter* getFilter(boost::uint32_t);
+    Writer* getWriter(boost::uint32_t);
+
+    typedef Stage* readerCreatorFunction(const OptionsNew&);
+    typedef Filter* filter1CreatorFunction(boost::uint32_t prevStage, const OptionsNew&);
+    typedef Filter* filterNCreatorFunction(const std::vector<boost::uint32_t>& prevStage, const OptionsNew&);
+    typedef Writer* writerCreatorFunction(boost::uint32_t prevStage, const OptionsNew&);
+    void registerReader(const std::string& type, readerCreatorFunction);
+    void registerFilter(const std::string& type, filter1CreatorFunction);
+    void registerFilter(const std::string& type, filterNCreatorFunction);
+    void registerWriter(const std::string& type, writerCreatorFunction);
 
 private:
-    StagePtr parsePipeline(const boost::property_tree::ptree&);
-
-    ReaderPtr parseReader(const boost::property_tree::ptree& tree);
-    FilterPtr parseFilter(const boost::property_tree::ptree& tree);
-    MultiFilterPtr parseMultiFilter(const boost::property_tree::ptree& tree);
-    WriterPtr parseWriter(const boost::property_tree::ptree& tree);
-
-    Option<std::string> parseOption(const boost::property_tree::ptree& tree);
-    std::string parseType(const boost::property_tree::ptree& tree);
-
-
-    StageFactory m_factory;
-
-    typedef std::vector<StagePtr> StagePtrList;
-    StagePtrList m_stages;
+    void registerKnownReaders();
+    void registerKnownFilters();
+    void registerKnownWriters();
 
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented
 };
-
 
 } // namespace pdal
 

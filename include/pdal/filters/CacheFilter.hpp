@@ -55,13 +55,10 @@ namespace filters {
 //   - we only cache on 'blockSize' boundaries
 //   - we only look into the cache if 1 point is being requested
 //
-
-MAKE_PTR(CacheFilter);
-
 class PDAL_DLL CacheFilter : public Filter
 {
 public:
-    CacheFilter(const DataStagePtr& prevStage, const Options& options);
+    CacheFilter(const Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
     ~CacheFilter();
 
     const std::string& getDescription() const;
@@ -101,8 +98,8 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
-    pdal::StageRandomIteratorPtr createRandomIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const;
 
 private:
     // these are mutable to allow const-ness for updating stats

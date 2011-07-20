@@ -42,15 +42,15 @@
 namespace pdal
 {
 
-MAKE_PTR(Filter);
-
-class PDAL_DLL Filter : public DataStage
+class PDAL_DLL Filter : public Stage
 {
 public:
-    Filter(const DataStagePtr& prevStage, const Options& options);
-    Filter(const std::vector<const DataStagePtr>& prevStage, const Options& options);
+    Filter(const Stage& prevStage, const Options& options);
+
+    const Stage& getPrevStage() const;
 
 protected:
+    const Stage& m_prevStage;
 
 private:
     Filter& operator=(const Filter&); // not implemented

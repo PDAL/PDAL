@@ -41,29 +41,48 @@
 namespace pdal { namespace filters {
 
 
-MosaicFilter::MosaicFilter(const std::vector<const DataStagePtr>& prevStages, const Options& options)
-    : pdal::MultiFilter(prevStages, options)
+MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
+    : MultiFilter(prevStages, Options::none())
 {
-    const DataStagePtr& prevStage0 = prevStages[0];
+    if (prevStages.size() == 0)
+    {
+        throw pdal_error("empty stage list passed to mosaic filter");
+    }
+
+    for (size_t i=0; i<prevStages.size(); i++)
+    {
+        if (prevStages[i] == NULL)
+        {
+            throw pdal_error("null stage passed to mosaic filter");
+        }
+        m_prevStages.push_back(prevStages[i]);
+    }
+
+    const Stage& prevStage = *m_prevStages[0];
 
     {
-        setCoreProperties(prevStage0);  // BUG: clearly insufficient
+        setCoreProperties(prevStage);  // BUG: clearly insufficient
     }
 
     boost::uint64_t totalPoints = 0;
 
-    Bounds<double> bigbox(prevStage0->getBounds());
+    Bounds<double> bigbox(prevStage.getBounds());
 
     for (size_t i=0; i<prevStages.size(); i++)
     {
-        const DataStagePtr prevStageI = prevStages[i];
-        if (prevStageI->getSchema() != this->getSchema())
+        const Stage* stage = prevStages[i];
+        if (stage==NULL)
+        {
+            throw pdal_error("bad stage passed to MosaicFilter");
+        }
+        if (prevStage.getSchema() != this->getSchema())
         {
             throw pdal_error("impedance mismatch in MosaicFilter");
         }
 
         bigbox.grow(this->getBounds());
         totalPoints += this->getNumPoints();
+        m_prevStages.push_back(stage);
     }
 
     setBounds(bigbox);
@@ -86,9 +105,9 @@ const std::string& MosaicFilter::getName() const
 }
 
 
-pdal::StageSequentialIteratorPtr MosaicFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* MosaicFilter::createSequentialIterator() const
 {
-    return StageSequentialIteratorPtr(new MosaicFilterSequentialIterator(*this));
+    return new MosaicFilterSequentialIterator(*this);
 }
 
 } } // namespaces

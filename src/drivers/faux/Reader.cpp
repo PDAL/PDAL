@@ -42,22 +42,10 @@
 
 namespace pdal { namespace drivers { namespace faux {
 
-static Reader::Mode toMode(const std::string& str)
+Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
+    : pdal::Reader(Options::none())
+    , m_mode(mode)
 {
-    if (str == "constant") return Reader::Constant;
-    if (str == "random") return Reader::Random;
-    if (str == "ramp") return Reader::Ramp;
-    throw pdal_error("unknown mode");
-}
-
-
-Reader::Reader(const Options& options)
-    : pdal::Reader(options)
-{
-    const Bounds<double> bounds = options.getOption<Bounds<double> >("bounds").getValue();
-    const boost::uint32_t numPoints = options.getOption<boost::uint32_t>("num_points").getValue();
-    const Mode mode = toMode(options.getOption<std::string>("mode").getValue());
-
     Schema& schema = getSchemaRef();
 
     schema.addDimension(Dimension(Dimension::Field_X, Dimension::Double));
@@ -69,19 +57,14 @@ Reader::Reader(const Options& options)
     setPointCountType(PointCount_Fixed);
 
     setBounds(bounds);
-    
-    m_mode = mode;
 
     return;
 }
 
-Reader::Reader(const Options& options, const std::vector<Dimension>& dimensions)
-    : pdal::Reader(options)
+Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
+    : pdal::Reader( Options::none())
+    , m_mode(mode)
 {
-    const Bounds<double> bounds = options.getOption<Bounds<double> >("bounds").getValue();
-    const boost::uint32_t numPoints = options.getOption<boost::uint32_t>("num_points").getValue();
-    const Mode mode = toMode(options.getOption<std::string>("mode").getValue());
-
     Schema& schema = getSchemaRef();
     if (dimensions.size() == 0)
     {
@@ -90,11 +73,7 @@ Reader::Reader(const Options& options, const std::vector<Dimension>& dimensions)
     schema.addDimensions(dimensions);
 
     setNumPoints(numPoints);
-    setPointCountType(PointCount_Fixed);
-
     setBounds(bounds);
-    
-    m_mode = mode;
 
     return;
 }
@@ -118,15 +97,15 @@ Reader::Mode Reader::getMode() const
 }
 
 
-pdal::StageSequentialIteratorPtr Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return StageSequentialIteratorPtr(new SequentialIterator(*this));
+    return new SequentialIterator(*this);
 }
 
 
-pdal::StageRandomIteratorPtr Reader::createRandomIterator() const
+pdal::StageRandomIterator* Reader::createRandomIterator() const
 {
-    return StageRandomIteratorPtr(new RandomIterator(*this));
+    return new RandomIterator(*this);
 }
 
 

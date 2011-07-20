@@ -51,9 +51,9 @@ ScalingFilterSequentialIterator::ScalingFilterSequentialIterator(const ScalingFi
 
 boost::uint32_t ScalingFilterSequentialIterator::readImpl(PointBuffer& dstData)
 {
-    SchemaLayout srcLayout(m_scalingFilter.getPrevStage()->getSchema());
+    SchemaLayout srcLayout(m_scalingFilter.getPrevStage().getSchema());
     PointBuffer srcData(srcLayout, dstData.getCapacity());
-    const boost::uint32_t numRead = getPrevIterator()->read(srcData);
+    const boost::uint32_t numRead = getPrevIterator().read(srcData);
 
     m_scalingFilter.processBuffer(srcData, dstData);
 
@@ -63,14 +63,14 @@ boost::uint32_t ScalingFilterSequentialIterator::readImpl(PointBuffer& dstData)
 
 boost::uint64_t ScalingFilterSequentialIterator::skipImpl(boost::uint64_t count)
 {
-    getPrevIterator()->skip(count);
+    getPrevIterator().skip(count);
     return count;
 }
 
 
 bool ScalingFilterSequentialIterator::atEndImpl() const
 {
-    return getPrevIterator()->atEnd();
+    return getPrevIterator().atEnd();
 }
 
 } } // namespaces

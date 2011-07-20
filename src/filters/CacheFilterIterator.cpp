@@ -50,14 +50,14 @@ CacheFilterSequentialIterator::CacheFilterSequentialIterator(const CacheFilter& 
 
 boost::uint64_t CacheFilterSequentialIterator::skipImpl(boost::uint64_t count)
 {
-    getPrevIterator()->skip(count);
+    getPrevIterator().skip(count);
     return count;
 }
 
 
 bool CacheFilterSequentialIterator::atEndImpl() const
 {
-    return getPrevIterator()->atEnd();
+    return getPrevIterator().atEnd();
 }
 
 
@@ -72,7 +72,7 @@ boost::uint32_t CacheFilterSequentialIterator::readImpl(PointBuffer& data)
     // cached block to satisfy it)
     if (data.getCapacity() != 1)
     {
-        const boost::uint32_t numRead = getPrevIterator()->read(data);
+        const boost::uint32_t numRead = getPrevIterator().read(data);
 
         // if they asked for a full block and we got a full block,
         // and the block we got is properly aligned and not already cached,
@@ -103,7 +103,7 @@ boost::uint32_t CacheFilterSequentialIterator::readImpl(PointBuffer& data)
     }
 
     // Not in the cache, so do a normal read :-(
-    const boost::uint32_t numRead = getPrevIterator()->read(data);
+    const boost::uint32_t numRead = getPrevIterator().read(data);
     m_filter.updateStats(numRead, numRead);
 
     return numRead;
@@ -121,7 +121,7 @@ CacheFilterRandomIterator::CacheFilterRandomIterator(const CacheFilter& filter)
 
 boost::uint64_t CacheFilterRandomIterator::seekImpl(boost::uint64_t count)
 {
-    return getPrevIterator()->seek(count);
+    return getPrevIterator().seek(count);
 }
 
 
@@ -137,7 +137,7 @@ boost::uint32_t CacheFilterRandomIterator::readImpl(PointBuffer& data)
     // cached block to satisfy it)
     if (data.getCapacity() != 1)
     {
-        const boost::uint32_t numRead = getPrevIterator()->read(data);
+        const boost::uint32_t numRead = getPrevIterator().read(data);
 
         // if they asked for a full block and we got a full block,
         // and the block we got is properly aligned and not already cached,
@@ -168,7 +168,7 @@ boost::uint32_t CacheFilterRandomIterator::readImpl(PointBuffer& data)
     }
 
     // Not in the cache, so do a normal read :-(
-    const boost::uint32_t numRead = getPrevIterator()->read(data);
+    const boost::uint32_t numRead = getPrevIterator().read(data);
     m_filter.updateStats(numRead, numRead);
 
     return numRead;

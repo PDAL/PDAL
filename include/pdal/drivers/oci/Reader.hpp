@@ -37,7 +37,7 @@
 
 #include <pdal/pdal.hpp>
 
-#include <pdal/Reader.hpp>
+#include <pdal/Stage.hpp>
 #include <pdal/drivers/oci/common.hpp>
 
 #include <boost/scoped_ptr.hpp>
@@ -48,11 +48,11 @@
 namespace pdal { namespace drivers { namespace oci {
 
 
-class PDAL_DLL Reader : public pdal::Reader
+
+class PDAL_DLL Reader : public pdal::Stage
 {
 
 public:
-    Reader(const Options& options);
     Reader(OptionsOld& options);
     ~Reader();
     
@@ -67,7 +67,7 @@ public:
 
     boost::uint64_t getNumPoints() { return 0; }
     
-    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
     
     Connection getConnection () const { return m_connection;}
     Statement getStatement () const { return m_statement;}

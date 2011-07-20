@@ -36,7 +36,7 @@
 #define INCLUDED_FILTER_CACHEFILTERITERATOR_HPP
 
 #include <pdal/pdal.hpp>
-#include <pdal/filters/CacheFilter.hpp>
+//#include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
 
 namespace pdal {
@@ -45,6 +45,7 @@ class PointBufferCache;
     
 namespace filters {
 
+class CacheFilter;
 
 class CacheFilterSequentialIterator : public pdal::FilterSequentialIterator
 {

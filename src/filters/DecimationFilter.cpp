@@ -34,19 +34,17 @@
 
 #include <pdal/filters/DecimationFilter.hpp>
 
-#include <pdal/exceptions.hpp>
 #include <pdal/filters/DecimationFilterIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 
 namespace pdal { namespace filters {
 
 
-DecimationFilter::DecimationFilter(const DataStagePtr& prevStage, const Options& options)
-    : pdal::Filter(prevStage, options)
+DecimationFilter::DecimationFilter(const Stage& prevStage, boost::uint32_t step)
+    : Filter(prevStage, Options::none())
+    , m_step(step)
 {
-     m_step = options.getOption<boost::uint32_t>("step").getValue();
-
-     this->setNumPoints( this->getNumPoints() / m_step );
+    this->setNumPoints( this->getNumPoints() / step );
 
     return;
 }
@@ -105,9 +103,9 @@ boost::uint32_t DecimationFilter::processBuffer(PointBuffer& dstData, const Poin
 }
 
 
-pdal::StageSequentialIteratorPtr DecimationFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* DecimationFilter::createSequentialIterator() const
 {
-    return StageSequentialIteratorPtr(new DecimationFilterSequentialIterator(*this));
+    return new DecimationFilterSequentialIterator(*this);
 }
 
 } } // namespaces

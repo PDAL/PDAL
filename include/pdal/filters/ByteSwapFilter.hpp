@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_BYTESWAPFILTER_HPP
-#define INCLUDED_FILTERS_BYTESWAPFILTER_HPP
+#ifndef INCLUDED_FILTERS_CROPFILTER_HPP
+#define INCLUDED_FILTERS_CROPFILTER_HPP
 
 #include <pdal/pdal.hpp>
 
@@ -50,14 +50,12 @@ namespace pdal { namespace filters {
 
 class ByteSwapFilterSequentialIterator;
 
-MAKE_PTR(ByteSwapFilter);
-
 // removes any points outside of the given range
 // updates the header accordingly
 class PDAL_DLL ByteSwapFilter : public Filter
 {
 public:
-    ByteSwapFilter(const DataStagePtr& prevStage, const Options& options);
+    ByteSwapFilter(const Stage& prevStage);
 
     const std::string& getDescription() const;
     const std::string& getName() const;
@@ -69,7 +67,8 @@ public:
         return false;
     }
     
-    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
     // if we're calling this routine multiple times with the same buffer

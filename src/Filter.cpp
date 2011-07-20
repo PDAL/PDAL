@@ -38,14 +38,21 @@ namespace pdal
 {
 
 
-Filter::Filter(const DataStagePtr& prevStage, const Options& options)
-    : DataStage(prevStage, options)
+Filter::Filter(const Stage& prevStage, const Options& options)
+    : Stage(options)
+    , m_prevStage(prevStage)
 {
     // by default, we set our core properties to be the same as those 
     // of the previous stage
-    this->setCoreProperties(prevStage);
+    this->setCoreProperties(m_prevStage);
 
     return;
+}
+
+
+const Stage& Filter::getPrevStage() const
+{
+    return m_prevStage;
 }
 
 

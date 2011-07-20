@@ -56,7 +56,7 @@ class ZipPoint;
 class PDAL_DLL LasReader : public LasReaderBase
 {
 public:
-    LasReader(const Options& options);
+    LasReader(const std::string& filename);
 
     const std::string& getDescription() const;
     const std::string& getName() const;
@@ -71,8 +71,8 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIteratorPtr createSequentialIterator() const;
-    pdal::StageRandomIteratorPtr createRandomIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const;
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft, LASunzipper* unzipper, ZipPoint* zipPoint) const;
@@ -98,7 +98,7 @@ protected:
     MetadataRecord& getMetadataRecordRef(int index);
 
 private:
-    std::string m_filename;
+    const std::string m_filename;
     LasHeader m_lasHeader;
     std::vector<MetadataRecord> m_metadataRecords;
 
