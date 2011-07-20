@@ -33,6 +33,9 @@
 ****************************************************************************/
 
 
+#include <pdal/Vector.hpp>
+#include <pdal/Bounds.hpp>
+
 #include <pdal/drivers/oci/Writer.hpp>
 
 #include <iostream>
@@ -1177,7 +1180,6 @@ void Writer::SetOrdinates(Statement statement,
                           pdal::Bounds<double> const& extent)
 {
     
-    // std::cout << extent << std::endl;
     statement->AddElement(ordinates, extent.getMinimum(0));
     statement->AddElement(ordinates, extent.getMaximum(1));
     if (extent.dimensions().size() > 2)
@@ -1191,6 +1193,38 @@ void Writer::SetOrdinates(Statement statement,
 
 }
 
+pdal::Bounds<double> CalculateBounds(PointBuffer const& buffer)
+{
+    
+    pdal::Bounds<double> output;
+    pdal::Schema const& schema = buffer.getSchemaLayout().getSchema();
+    
+    const int indexXi = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    const int indexYi = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+
+    const Dimension& dimXi = schema.getDimension(indexXi);
+    const Dimension& dimYi = schema.getDimension(indexYi);
+    
+    bool first = true;
+    for (boost::uint32_t pointIndex=0; pointIndex<buffer.getNumPoints(); pointIndex++)
+    {
+        const boost::int32_t xi = buffer.getField<boost::int32_t>(pointIndex, indexXi);
+        const boost::int32_t yi = buffer.getField<boost::int32_t>(pointIndex, indexYi);
+        
+        const double xd = dimXi.applyScaling(xi);
+        const double yd = dimYi.applyScaling(yi);
+        
+        Vector<double> v(xd, yd);
+        if (first){
+            output = pdal::Bounds<double>(xd, xd, yd, yd);
+            first = false;
+        }
+        output.grow(v);
+    }
+    
+    return output;
+    
+}
 bool Writer::WriteBlock(PointBuffer const& buffer)
 {
     
@@ -1306,7 +1340,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
     
      // x0, x1, y0, y1, z0, z1, bUse3d
-    SetOrdinates(statement, sdo_ordinates, buffer.getSpatialBounds());
+    pdal::Bounds<double> bounds = CalculateBounds(buffer);
+    SetOrdinates(statement, sdo_ordinates, bounds);
     statement->Bind(&sdo_ordinates, m_connection->GetOrdinateType());
     
     // :9
