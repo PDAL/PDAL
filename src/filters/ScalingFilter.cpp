@@ -95,9 +95,9 @@ void ScalingFilter::checkImpedance()
         const int indexYd = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
         const int indexZd = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
 
-        const Dimension& dimXd = schema.getDimension(indexXd);
-        const Dimension& dimYd = schema.getDimension(indexYd);
-        const Dimension& dimZd = schema.getDimension(indexZd);
+        const Dimension dimXd = schema.getDimension(indexXd);
+        const Dimension dimYd = schema.getDimension(indexYd);
+        const Dimension dimZd = schema.getDimension(indexZd);
 
         Dimension dimXi(Dimension::Field_X, Dimension::Int32);
         Dimension dimYi(Dimension::Field_Y, Dimension::Int32);
@@ -145,9 +145,9 @@ void ScalingFilter::checkImpedance()
         const int indexYi = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
         const int indexZi = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
         
-        const Dimension& dimXi = schema.getDimension(indexXi);
-        const Dimension& dimYi = schema.getDimension(indexYi);
-        const Dimension& dimZi = schema.getDimension(indexZi);
+        const Dimension dimXi = schema.getDimension(indexXi);
+        const Dimension dimYi = schema.getDimension(indexYi);
+        const Dimension dimZi = schema.getDimension(indexZi);
 
         Dimension dimXd(Dimension::Field_X, Dimension::Double);
         Dimension dimYd(Dimension::Field_Y, Dimension::Double);
