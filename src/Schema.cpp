@@ -55,10 +55,6 @@ namespace pdal
 
 Schema::Schema()
 {
-    for (int i=0; i<Dimension::Field_LAST; i++)
-    {
-        m_indexTable[i] = -1;
-    }
     return;
 }
 
@@ -67,10 +63,7 @@ Schema::Schema()
 Schema::Schema(Schema const& other) 
     : m_dimensions(other.m_dimensions)
 {
-    for (int i=0; i<Dimension::Field_LAST; i++)
-    {
-        m_indexTable[i] = other.m_indexTable[i];
-    }
+
 }
 
 
@@ -80,10 +73,6 @@ Schema& Schema::operator=(Schema const& rhs)
     if (&rhs != this)
     {
         m_dimensions = rhs.m_dimensions;
-        for (int i=0; i<Dimension::Field_LAST; i++)
-        {
-            m_indexTable[i] = rhs.m_indexTable[i];
-        }
     }
 
     return *this;
@@ -94,10 +83,6 @@ bool Schema::operator==(const Schema& other) const
 {
     if (m_dimensions == other.m_dimensions)
     {
-        for (int i=0; i<Dimension::Field_LAST; i++)
-        {
-            if (m_indexTable[i] != other.m_indexTable[i]) return false;
-        }
         return true;
     }
 
@@ -139,27 +124,15 @@ void Schema::addDimensions(const std::vector<Dimension>& dims)
 
 void Schema::addDimension(Dimension const& dim)
 {
-    std::size_t index = m_dimensions.size();
-
     m_dimensions.push_back(dim);
-
-    const Dimension::Field field = dim.getField();
-    assert(m_indexTable[field] == -1);
-    m_indexTable[field] = (int)index;
-
     return;
 }
 
 
 void Schema::removeDimension(Dimension const& dim)
 {
-    const Dimension::Field field = dim.getField();
-    assert(m_indexTable[field] != -1);
-    m_indexTable[field] = -1;
-
-    //std::size_t index = getDimensionIndex(dim);
-    //m_dimensions[index] = Dimension(Dimension::Field_INVALID, Dimension::Int32);
-
+    m_dimensions.erase( std::remove( m_dimensions.begin(), m_dimensions.end(), dim), 
+                        m_dimensions.end());
     return;
 }
 
@@ -184,24 +157,17 @@ const Schema::Dimensions& Schema::getDimensions() const
 
 int Schema::getDimensionIndex(Dimension::Field field, Dimension::DataType datatype) const
 {
-    const int index = m_indexTable[field];
-    
-    // assert(index != -1);
-    if (index == -1)
+    DimensionsCIter it = m_dimensions.begin();
+    int i = 0;
+    while (it != m_dimensions.end())
     {
-        return -1;
-        // throw pdal_error("Requested dimension field not present");
+        if (field == it->getField() && datatype == it->getDataType())
+            return i;
+        ++it;
+        ++i;
     }
-    
-    const Dimension& dim = m_dimensions[index];
-    
-    // assert(dim.getDataType() == datatype);
-    if (dim.getDataType() != datatype)
-    {
-        throw dimension_not_found("Requested dimension field present, but with different datatype");
-    }
-    
-    return index;
+
+    return -1;
 }
 
 
@@ -213,10 +179,9 @@ int Schema::getDimensionIndex(const Dimension& dim) const
 
 bool Schema::hasDimension(Dimension::Field field, Dimension::DataType datatype) const
 {
-    const int index = m_indexTable[field];
-    if (index == -1) return false;
-    const Dimension& dim = m_dimensions[index];
-    if (dim.getDataType() != datatype) return false;
+    int t = getDimensionIndex(field, datatype);
+    if (t == -1)
+        return false;
     return true;
 }
 
