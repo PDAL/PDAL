@@ -152,9 +152,9 @@ int Application_pc2pc::execute()
         pdal::OptionsOld options(oracle_options);
         
         boost::property_tree::ptree in_srs_options = las_options.get_child("spatialreference");
-        std::string out_wkt = in_srs_options.get<std::string>("userinput");
+        std::string in_wkt = in_srs_options.get<std::string>("userinput");
         boost::property_tree::ptree out_srs_options = oracle_options.get_child("spatialreference");
-        std::string in_wkt = out_srs_options.get<std::string>("userinput");
+        std::string out_wkt = out_srs_options.get<std::string>("userinput");
         
         pdal::SpatialReference in_ref(in_wkt);
         pdal::SpatialReference out_ref(out_wkt);
@@ -180,7 +180,7 @@ int Application_pc2pc::execute()
                                                         scalez, offsetz, 
                                                         true);
         
-        pdal::filters::ByteSwapFilter swapper(descalingFilter);
+        // pdal::filters::ByteSwapFilter swapper(descalingFilter);
         pdal::drivers::oci::Writer writer(descalingFilter, options);
 
         writer.write(numPoints);
