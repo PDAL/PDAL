@@ -171,8 +171,8 @@ int Application_pc2pc::execute()
         double offsetz = oracle_options.get<double>("offset.z");        
         
         pdal::filters::CacheFilter cache(reader, 1, capacity);
-        // pdal::filters::Chipper chipper(cache, capacity);
-        pdal::filters::ScalingFilter scalingFilter(cache, false);
+        pdal::filters::Chipper chipper(cache, capacity);
+        pdal::filters::ScalingFilter scalingFilter(chipper, false);
         pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
         pdal::filters::ScalingFilter descalingFilter(   reprojectionFilter, 
                                                         scalex, offsetx,
@@ -222,7 +222,7 @@ int Application_pc2pc::execute()
         pdal::drivers::oci::Reader reader(options);
         // pdal::filters::ByteSwapFilter swapper(reader);
         pdal::filters::ScalingFilter scalingFilter(reader, false);
-
+        
         pdal::SpatialReference out_ref(out_wkt);
         pdal::SpatialReference in_ref(reader.getSpatialReference());
         
