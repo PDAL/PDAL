@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_QFIT_ITERATOR_HPP
-#define INCLUDED_DRIVERS_QFIT_ITERATOR_HPP
+#ifndef INCLUDED_DRIVERS_TERRASOLID_ITERATOR_HPP
+#define INCLUDED_DRIVERS_TERRASOLID_ITERATOR_HPP
 
 #include <pdal/pdal.hpp>
 
