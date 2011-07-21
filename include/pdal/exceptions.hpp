@@ -149,6 +149,16 @@ public:
     {}
 };
 
+
+// for Option processing
+class option_not_found : public pdal_error
+{
+public:
+    option_not_found(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
 } // namespace pdal
 
 #endif // PDAL_EXCEPTION_HPP_INCLUDED

@@ -34,16 +34,47 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <boost/property_tree/xml_parser.hpp>
+
+#include "Support.hpp"
+
 #include <pdal/PipelineManager.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/Writer.hpp>
+#include <pdal/Options.hpp>
 
 using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(PipelineManagerTest)
 
-BOOST_AUTO_TEST_CASE(test1)
+BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
 {
+    PipelineManager mgr;
+#if 0
+    Options optsR;
+    optsR.add("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    Reader* reader = mgr.addReader("drivers.las.reader", optsR);
+
+    Options optsF;
+    optsF.add("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
+    Filter* filter = mgr.addFilter("filters.crop", *reader, optsF);
+
+    Options optsW;
+    optsW.add("filename", "temp.las", "file to write to");
+    Writer* writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
+#endif
     return;
 }
 
+
+BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
+{
+    PipelineManager mgr;
+#if 0
+    mgr.readXml(Support::datapath("pipeline1.xml"));
+#endif
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()
