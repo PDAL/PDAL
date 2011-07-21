@@ -113,7 +113,8 @@ public:
     // accessors to a particular field of a particular point in this buffer
     template<class T> T getField(std::size_t pointIndex, boost::int32_t fieldIndex) const;
     template<class T> void setField(std::size_t pointIndex, boost::int32_t fieldIndex, T value);
-
+    void setFieldData(std::size_t pointIndex, boost::int32_t fieldIndex, const boost::uint8_t* data);
+    
     // bulk copy all the fields from the given point into this object
     // NOTE: this is only legal if the src and dest schemas are exactly the same
     // (later, this will be implemented properly, to handle the general cases slowly and the best case quickly)
@@ -191,6 +192,23 @@ inline void PointBuffer::setField(std::size_t pointIndex, boost::int32_t fieldIn
     boost::uint8_t* p = m_data.get() + offset;
 
     *(T*)p = value;
+}
+
+inline void PointBuffer::setFieldData(std::size_t pointIndex, boost::int32_t fieldIndex, const boost::uint8_t* data)
+{
+    if (fieldIndex == -1)
+    {
+        return; // no-op in the case where fieldIndex is -1 and we don't actually have that field
+    }
+    DimensionLayout const& dl = m_schemaLayout.getDimensionLayout(fieldIndex);
+    Dimension const& d = dl.getDimension();
+    std::size_t offset = (pointIndex * m_pointSize) + dl.getByteOffset();
+    std::size_t size = d.getDataTypeSize(d.getDataType());
+    std::cout << "copying field " << fieldIndex << " of size " << size << " at offset " << offset << std::endl;
+    // assert(offset + sizeof(T) <= m_pointSize * m_capacity);
+    boost::uint8_t* p = m_data.get() + offset;
+    
+    memcpy(p, data, size);
 }
 
 
