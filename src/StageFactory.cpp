@@ -139,7 +139,7 @@ Writer* StageFactory::createWriter(const std::string& type, const Stage& prevSta
 template<typename T>
 static T* findFirst(const std::string& type, std::map<std::string, T*> list)
 {
-    std::map<std::string, T*>::const_iterator iter = list.find(type);
+    typename std::map<std::string, T*>::const_iterator iter = list.find(type);
     if (iter == list.end())
         return NULL;
     return (*iter).second;
