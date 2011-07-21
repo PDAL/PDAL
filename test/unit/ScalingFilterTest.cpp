@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_SUITE(ScalingFilterTest)
 
 
 static void getDoublePoint(const pdal::PointBuffer& data, double& x, double& y, double& z, 
-                            boost::uint16_t& intensity, boost::int16_t scan_angle, boost::uint16_t green)
+                            boost::uint16_t& intensity, boost::int16_t& scan_angle, boost::uint16_t& green)
 {
     using namespace pdal;
 
