@@ -1,4 +1,3 @@
-#if 0
 /******************************************************************************
 * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
@@ -73,9 +72,9 @@ class PDAL_DLL StageFactory
 {
 public:
     typedef Reader* ReaderCreator(const Options&);
-    typedef Filter* FilterCreator(const DataStagePtr& prevStage, const Options&);
-    typedef MultiFilter* MultiFilterCreator(const std::vector<const DataStagePtr>& prevStages, const Options&);
-    typedef Writer* WriterCreator(const DataStagePtr& prevStage, const Options&);
+    typedef Filter* FilterCreator(const Stage& prevStage, const Options&);
+    typedef MultiFilter* MultiFilterCreator(const std::vector<const Stage*>& prevStages, const Options&);
+    typedef Writer* WriterCreator(const Stage& prevStage, const Options&);
     
     typedef std::map<std::string, ReaderCreator*> ReaderCreatorList;
     typedef std::map<std::string, FilterCreator*> FilterCreatorList;
@@ -85,10 +84,10 @@ public:
 public:
     StageFactory();
 
-    ReaderPtr createReader(const std::string& type, const Options& options);
-    FilterPtr createFilter(const std::string& type, const DataStagePtr& prevStage, const Options& options);
-    MultiFilterPtr createMultiFilter(const std::string& type, const std::vector<const DataStagePtr>& prevStages, const Options& options);
-    WriterPtr createWriter(const std::string& type, const DataStagePtr& prevStage, const Options& options);
+    Reader* createReader(const std::string& type, const Options& options);
+    Filter* createFilter(const std::string& type, const Stage& prevStage, const Options& options);
+    MultiFilter* createMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options& options);
+    Writer* createWriter(const std::string& type, const Stage& prevStage, const Options& options);
 
     void registerReader(const std::string& type, ReaderCreator* f);
     void registerFilter(const std::string& type, FilterCreator* f);
@@ -119,5 +118,4 @@ private:
 
 } // namespace pdal
 
-#endif
 #endif
