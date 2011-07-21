@@ -42,6 +42,7 @@
 #include <pdal/filters/ScalingFilterIterator.hpp>
 
 #include <iostream>
+#include <map>
 namespace pdal { namespace filters {
 
 
@@ -248,7 +249,26 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
     const Dimension& dimZi = schemaI.getDimension(indexZi);
     
     std::vector<DimensionLayout> const& src_layouts = srcSchemaLayout.getDimensionLayouts();
-    std::vector<DimensionLayout> const& dst_layouts = dstSchemaLayout.getDimensionLayouts();
+    
+    std::map<boost::uint32_t, boost::uint32_t> dimensions_lookup;
+
+    boost::uint32_t srcFieldIndex = 0;
+    boost::uint32_t dstFieldIndex = 0;
+    for (std::vector<DimensionLayout>::const_iterator i = src_layouts.begin(); i != src_layouts.end(); ++i)
+    {
+        Dimension const& d = i->getDimension();
+        std::size_t src_offset = i->getByteOffset();
+
+        dstFieldIndex = dstSchemaLayout.getSchema().getDimensionIndex(d);
+        srcFieldIndex = srcSchemaLayout.getSchema().getDimensionIndex(d);
+
+    // DimensionLayout const& dl = m_schemaLayout.getDimensionLayout(fieldIndex);
+    // Dimension const& d = dl.getDimension();
+    // std::size_t offset = (pointIndex * srcSchemaLayout.getByteSize()) + i->getByteOffset();
+    // std::size_t size = d.getDataTypeSize(d.getDataType());
+
+        dimensions_lookup[dstFieldIndex] = src_offset;
+    }
     
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
@@ -265,26 +285,32 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
             const boost::int32_t zi = dimZi.removeScaling<boost::int32_t>(zd);
 
             const boost::uint8_t* src_raw_data = srcData.getData(pointIndex);
-            boost::uint8_t* dst_raw_data = dstData.getData(pointIndex);
 
-
-            boost::uint32_t srcFieldIndex = 0;
-            boost::uint32_t dstFieldIndex = 0;
-            for (std::vector<DimensionLayout>::const_iterator i = src_layouts.begin(); i != src_layouts.end(); ++i)
+            for (std::map<boost::uint32_t, boost::uint32_t>::const_iterator i = dimensions_lookup.begin();
+            i != dimensions_lookup.end(); ++i)
             {
-
-                Dimension const& d = i->getDimension();
-                std::size_t src_offset = i->getByteOffset();
-                
-                if (d != dimXd && d != dimYd && d != dimZd)
-                {
-                    dstFieldIndex = dstSchemaLayout.getSchema().getDimensionIndex(d);
-                    srcFieldIndex = srcSchemaLayout.getSchema().getDimensionIndex(d);
-                    std::size_t size = d.getDataTypeSize(d.getDataType());
-
-                    dstData.setFieldData(pointIndex, dstFieldIndex, src_raw_data+src_offset);
-                }
+                boost::uint32_t dstFieldIndex = i->first;
+                boost::uint32_t src_offset = i ->second;
+                dstData.setFieldData(pointIndex, dstFieldIndex, src_raw_data+src_offset);
             }
+
+            // boost::uint32_t srcFieldIndex = 0;
+            // boost::uint32_t dstFieldIndex = 0;
+            // for (std::vector<DimensionLayout>::const_iterator i = src_layouts.begin(); i != src_layouts.end(); ++i)
+            // {
+            // 
+            //     Dimension const& d = i->getDimension();
+            //     std::size_t src_offset = i->getByteOffset();
+            //     
+            //     if (d != dimXd && d != dimYd && d != dimZd)
+            //     {
+            //         dstFieldIndex = dstSchemaLayout.getSchema().getDimensionIndex(d);
+            //         srcFieldIndex = srcSchemaLayout.getSchema().getDimensionIndex(d);
+            //         std::size_t size = d.getDataTypeSize(d.getDataType());
+            // 
+            //         dstData.setFieldData(pointIndex, dstFieldIndex, src_raw_data+src_offset);
+            //     }
+            // }
 
             dstData.setField<boost::int32_t>(pointIndex, indexXi, xi);
             dstData.setField<boost::int32_t>(pointIndex, indexYi, yi);
@@ -305,27 +331,31 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
             const double zd = dimZd.applyScaling(zi);
             
             const boost::uint8_t* src_raw_data = srcData.getData(pointIndex);
-            boost::uint8_t* dst_raw_data = dstData.getData(pointIndex);
-
-            boost::uint32_t srcFieldIndex = 0;
-            boost::uint32_t dstFieldIndex = 0;
-            for (std::vector<DimensionLayout>::const_iterator i = src_layouts.begin(); i != src_layouts.end(); ++i)
+            
+            for (std::map<boost::uint32_t, boost::uint32_t>::const_iterator i = dimensions_lookup.begin();
+            i != dimensions_lookup.end(); ++i)
             {
-
-                Dimension const& d = i->getDimension();
-                std::size_t src_offset = i->getByteOffset();
-                
-                if (d != dimXi && d != dimYi && d != dimZi)
-                {
-                    dstFieldIndex = dstSchemaLayout.getSchema().getDimensionIndex(d);
-                    srcFieldIndex = srcSchemaLayout.getSchema().getDimensionIndex(d);
-                    std::size_t size = d.getDataTypeSize(d.getDataType());
-                    dstData.setFieldData(pointIndex, dstFieldIndex, src_raw_data+src_offset);
-
-
-                }
-
+                boost::uint32_t dstFieldIndex = i->first;
+                boost::uint32_t src_offset = i ->second;
+                dstData.setFieldData(pointIndex, dstFieldIndex, src_raw_data+src_offset);
             }
+            // for (std::vector<DimensionLayout>::const_iterator i = src_layouts.begin(); i != src_layouts.end(); ++i)
+            // {
+            // 
+            //     Dimension const& d = i->getDimension();
+            //     std::size_t src_offset = i->getByteOffset();
+            //     
+            //     if (d != dimXi && d != dimYi && d != dimZi)
+            //     {
+            //         dstFieldIndex = dstSchemaLayout.getSchema().getDimensionIndex(d);
+            //         srcFieldIndex = srcSchemaLayout.getSchema().getDimensionIndex(d);
+            //         std::size_t size = d.getDataTypeSize(d.getDataType());
+            //         dstData.setFieldData(pointIndex, dstFieldIndex, src_raw_data+src_offset);
+            // 
+            // 
+            //     }
+            // 
+            // }
 
             dstData.setField<double>(pointIndex, indexXd, xd);
             dstData.setField<double>(pointIndex, indexYd, yd);
