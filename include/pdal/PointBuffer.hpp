@@ -204,7 +204,7 @@ inline void PointBuffer::setFieldData(std::size_t pointIndex, boost::int32_t fie
     Dimension const& d = dl.getDimension();
     std::size_t offset = (pointIndex * m_pointSize) + dl.getByteOffset();
     std::size_t size = d.getDataTypeSize(d.getDataType());
-    std::cout << "copying field " << fieldIndex << " of size " << size << " at offset " << offset << std::endl;
+    // std::cout << "copying field " << d.getFieldName() << " with index" << fieldIndex << " of size " << size << " at offset " << offset << std::endl;
     // assert(offset + sizeof(T) <= m_pointSize * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
     
