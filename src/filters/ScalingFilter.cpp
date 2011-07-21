@@ -229,10 +229,6 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
     // rather than think about "src/dst", we will think in terms of "doubles" and "ints"
     const Schema& schemaD = (m_forward ? srcSchema : dstSchema);
     const Schema& schemaI = (m_forward ? dstSchema : srcSchema);
-    
-    // std::cout << " Source Schema: " << std::endl << srcSchema << std::endl;
-    // std::cout << " DST Schema: " << std::endl << dstSchema << std::endl;
-    
 
     assert(schemaD.hasDimension(Dimension::Field_X, Dimension::Double));
     assert(schemaI.hasDimension(Dimension::Field_X, Dimension::Int32));
@@ -268,6 +264,28 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
             const boost::int32_t yi = dimYi.removeScaling<boost::int32_t>(yd);
             const boost::int32_t zi = dimZi.removeScaling<boost::int32_t>(zd);
 
+            const boost::uint8_t* src_raw_data = srcData.getData(pointIndex);
+            boost::uint8_t* dst_raw_data = dstData.getData(pointIndex);
+
+
+            boost::uint32_t srcFieldIndex = 0;
+            boost::uint32_t dstFieldIndex = 0;
+            for (std::vector<DimensionLayout>::const_iterator i = src_layouts.begin(); i != src_layouts.end(); ++i)
+            {
+
+                Dimension const& d = i->getDimension();
+                std::size_t src_offset = i->getByteOffset();
+                
+                if (d != dimXd && d != dimYd && d != dimZd)
+                {
+                    dstFieldIndex = dstSchemaLayout.getSchema().getDimensionIndex(d);
+                    srcFieldIndex = srcSchemaLayout.getSchema().getDimensionIndex(d);
+                    std::size_t size = d.getDataTypeSize(d.getDataType());
+
+                    dstData.setFieldData(pointIndex, dstFieldIndex, src_raw_data+src_offset);
+                }
+            }
+
             dstData.setField<boost::int32_t>(pointIndex, indexXi, xi);
             dstData.setField<boost::int32_t>(pointIndex, indexYi, yi);
             dstData.setField<boost::int32_t>(pointIndex, indexZi, zi);
@@ -279,7 +297,8 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
             // ints --> doubles  (applyScaling)
             const boost::int32_t xi = srcData.getField<boost::int32_t>(pointIndex, indexXi);
             const boost::int32_t yi = srcData.getField<boost::int32_t>(pointIndex, indexYi);
-            const boost::int32_t zi = srcData.getField<boost::int32_t>(pointIndex, indexZi);
+            const boost::int32_t zi = srcData.getField<boost::int32_t>(pointIndex, indexZi);    
+
 
             const double xd = dimXd.applyScaling(xi);
             const double yd = dimYd.applyScaling(yi);
@@ -288,8 +307,6 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
             const boost::uint8_t* src_raw_data = srcData.getData(pointIndex);
             boost::uint8_t* dst_raw_data = dstData.getData(pointIndex);
 
-            std::size_t src_position = 0;
-            std::size_t dst_position = 0;
             boost::uint32_t srcFieldIndex = 0;
             boost::uint32_t dstFieldIndex = 0;
             for (std::vector<DimensionLayout>::const_iterator i = src_layouts.begin(); i != src_layouts.end(); ++i)
@@ -300,15 +317,10 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
                 
                 if (d != dimXi && d != dimYi && d != dimZi)
                 {
-                dstFieldIndex = dstSchemaLayout.getSchema().getDimensionIndex(d);
-                srcFieldIndex = srcSchemaLayout.getSchema().getDimensionIndex(d);
-                std::size_t size = d.getDataTypeSize(d.getDataType());
-                
-                std::cout << " src osffset: " << src_offset
-                          << " srcFieldIndex: " << srcFieldIndex 
-                          << " dstFieldIndex: " << dstFieldIndex  
-                          << std::endl;
-                dstData.setFieldData(pointIndex, dstFieldIndex, src_raw_data+src_offset);
+                    dstFieldIndex = dstSchemaLayout.getSchema().getDimensionIndex(d);
+                    srcFieldIndex = srcSchemaLayout.getSchema().getDimensionIndex(d);
+                    std::size_t size = d.getDataTypeSize(d.getDataType());
+                    dstData.setFieldData(pointIndex, dstFieldIndex, src_raw_data+src_offset);
 
 
                 }
