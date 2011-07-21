@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_SUITE(ScalingFilterTest)
 
 
 static void getDoublePoint(const pdal::PointBuffer& data, double& x, double& y, double& z, 
-                            boost::uint16_t& intensity, boost::int16_t scan_angle, boost::uint16_t green)
+                            boost::uint16_t& intensity, boost::int8_t& scan_angle, boost::uint16_t& green)
 {
     using namespace pdal;
 
@@ -61,15 +61,15 @@ static void getDoublePoint(const pdal::PointBuffer& data, double& x, double& y, 
     const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
     const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
     const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
-    const int indexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity, Dimension::Uint16);
-    const int indexScanAngle = schema.getDimensionIndex(Dimension::Field_ScanAngleRank, Dimension::Int16);
+    const int indexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity, Dimension::Uint8);
+    const int indexScanAngle = schema.getDimensionIndex(Dimension::Field_ScanAngleRank, Dimension::Int8);
     const int indexGreen = schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint16);
 
 
     x = data.getField<double>(0, indexX);
     y = data.getField<double>(0, indexY);
     z = data.getField<double>(0, indexZ);
-    scan_angle = data.getField<boost::int16_t>(0, indexScanAngle);
+    scan_angle = data.getField<boost::int8_t>(0, indexScanAngle);
     intensity = data.getField<boost::uint16_t>(0, indexIntensity);
     green = data.getField<boost::uint16_t>(0, indexGreen);
 
@@ -100,9 +100,9 @@ BOOST_AUTO_TEST_CASE(test_1)
         delete iter;
 
         double x=0, y=0, z=0;
-        boost::uint16_t intensity;
-        boost::int16_t scan_angle;
-        boost::uint16_t green;
+        boost::uint16_t intensity(0);
+        boost::int8_t scan_angle(06);
+        boost::uint16_t green(0);
         getDoublePoint(data2, x, y, z, intensity, scan_angle, green);
 
         BOOST_CHECK_CLOSE(x, 470692.44, 1);
