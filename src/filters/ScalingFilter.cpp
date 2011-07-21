@@ -36,11 +36,12 @@
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Schema.hpp>
+#include <pdal/SchemaLayout.hpp>
 #include <pdal/exceptions.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/ScalingFilterIterator.hpp>
 
-
+#include <iostream>
 namespace pdal { namespace filters {
 
 
@@ -228,6 +229,10 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
     // rather than think about "src/dst", we will think in terms of "doubles" and "ints"
     const Schema& schemaD = (m_forward ? srcSchema : dstSchema);
     const Schema& schemaI = (m_forward ? dstSchema : srcSchema);
+    
+    // std::cout << " Source Schema: " << std::endl << srcSchema << std::endl;
+    // std::cout << " DST Schema: " << std::endl << dstSchema << std::endl;
+    
 
     assert(schemaD.hasDimension(Dimension::Field_X, Dimension::Double));
     assert(schemaI.hasDimension(Dimension::Field_X, Dimension::Int32));
@@ -245,9 +250,13 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
     const Dimension& dimXi = schemaI.getDimension(indexXi);
     const Dimension& dimYi = schemaI.getDimension(indexYi);
     const Dimension& dimZi = schemaI.getDimension(indexZi);
-
+    
+    std::vector<DimensionLayout> const& src_layouts = srcSchemaLayout.getDimensionLayouts();
+    std::vector<DimensionLayout> const& dst_layouts = dstSchemaLayout.getDimensionLayouts();
+    
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
+
         if (m_forward)
         {
             // doubles --> ints  (removeScaling)
@@ -262,6 +271,8 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
             dstData.setField<boost::int32_t>(pointIndex, indexXi, xi);
             dstData.setField<boost::int32_t>(pointIndex, indexYi, yi);
             dstData.setField<boost::int32_t>(pointIndex, indexZi, zi);
+
+            
         }
         else
         {
@@ -273,10 +284,41 @@ void ScalingFilter::processBuffer(const PointBuffer& srcData, PointBuffer& dstDa
             const double xd = dimXd.applyScaling(xi);
             const double yd = dimYd.applyScaling(yi);
             const double zd = dimZd.applyScaling(zi);
+            
+            const boost::uint8_t* src_raw_data = srcData.getData(pointIndex);
+            boost::uint8_t* dst_raw_data = dstData.getData(pointIndex);
+
+            std::size_t src_position = 0;
+            std::size_t dst_position = 0;
+            boost::uint32_t srcFieldIndex = 0;
+            boost::uint32_t dstFieldIndex = 0;
+            for (std::vector<DimensionLayout>::const_iterator i = src_layouts.begin(); i != src_layouts.end(); ++i)
+            {
+
+                Dimension const& d = i->getDimension();
+                std::size_t src_offset = i->getByteOffset();
+                
+                if (d != dimXi && d != dimYi && d != dimZi)
+                {
+                dstFieldIndex = dstSchemaLayout.getSchema().getDimensionIndex(d);
+                srcFieldIndex = srcSchemaLayout.getSchema().getDimensionIndex(d);
+                std::size_t size = d.getDataTypeSize(d.getDataType());
+                
+                std::cout << " src osffset: " << src_offset
+                          << " srcFieldIndex: " << srcFieldIndex 
+                          << " dstFieldIndex: " << dstFieldIndex  
+                          << std::endl;
+                dstData.setFieldData(pointIndex, dstFieldIndex, src_raw_data+src_offset);
+
+
+                }
+
+            }
 
             dstData.setField<double>(pointIndex, indexXd, xd);
             dstData.setField<double>(pointIndex, indexYd, yd);
             dstData.setField<double>(pointIndex, indexZd, zd);
+
         }
 
         dstData.setNumPoints(pointIndex+1);
