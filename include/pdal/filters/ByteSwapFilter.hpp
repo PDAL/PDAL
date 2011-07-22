@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_CROPFILTER_HPP
-#define INCLUDED_FILTERS_CROPFILTER_HPP
+#ifndef INCLUDED_FILTERS_BYTESWAPFILTER_HPP
+#define INCLUDED_FILTERS_BYTESWAPFILTER_HPP
 
 #include <pdal/pdal.hpp>
 
