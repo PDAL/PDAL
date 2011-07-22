@@ -695,10 +695,10 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     std::string block_table_name = to_upper(tree.get<std::string>("block_table_name"));
     std::string base_table_name = to_upper(tree.get<std::string>("base_table_name"));
     std::string cloud_column_name = to_upper(tree.get<std::string>("cloud_column_name"));
-    std::string base_table_aux_columns = to_upper(tree.get<std::string>("base_table_aux_columns"));
-    std::string base_table_aux_values = to_upper(tree.get<std::string>("base_table_aux_values"));
-    std::string header_blob_column_name = to_upper(tree.get<std::string>("header_blob_column_name"));
-    std::string base_table_boundary_column = to_upper(tree.get<std::string>("base_table_boundary_column"));
+    std::string base_table_aux_columns = tree.get<std::string>("base_table_aux_columns");
+    std::string base_table_aux_values = tree.get<std::string>("base_table_aux_values");
+    std::string header_blob_column_name = tree.get<std::string>("header_blob_column_name");
+    std::string base_table_boundary_column = tree.get<std::string>("base_table_boundary_column");
     std::string base_table_boundary_wkt = tree.get<std::string>("base_table_boundary_wkt");
     std::string point_schema_override = tree.get<std::string>("point_schema_override");
     
