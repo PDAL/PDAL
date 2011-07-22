@@ -48,6 +48,13 @@ static Options s_defaultOptions;
 IMPLEMENT_STATICS(ColorFilter, "filters.color", "Color Filter")
 
 
+ColorFilter::ColorFilter(const Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
+
 ColorFilter::ColorFilter(const Stage& prevStage)
     : Filter(prevStage, Options::none())
 {

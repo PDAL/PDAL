@@ -47,6 +47,13 @@ static Options s_defaultOptions;
 IMPLEMENT_STATICS(Reader, "drivers.faux.reader", "Faux Reader")
 
 
+Reader::Reader(const Options& options)
+    : pdal::Reader(options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
+
 Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
     : pdal::Reader(Options::none())
     , m_mode(mode)

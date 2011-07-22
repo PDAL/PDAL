@@ -85,6 +85,13 @@ static Options s_defaultOptions;
 IMPLEMENT_STATICS(ReprojectionFilter, "filters.reprojection", "Reprojection Filter")
 
 
+ReprojectionFilter::ReprojectionFilter(const Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
+
 ReprojectionFilter::ReprojectionFilter(const Stage& prevStage,
                                        const SpatialReference& inSRS,
                                        const SpatialReference& outSRS)

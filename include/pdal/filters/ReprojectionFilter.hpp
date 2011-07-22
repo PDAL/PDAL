@@ -55,6 +55,7 @@ class PDAL_DLL ReprojectionFilter : public Filter
     DECLARE_STATICS
 
 public:
+    ReprojectionFilter(const Stage& prevStage, const Options&);
     ReprojectionFilter(const Stage& prevStage,
                        const SpatialReference& inSRS,
                        const SpatialReference& outSRS);

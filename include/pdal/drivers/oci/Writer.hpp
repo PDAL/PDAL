@@ -52,6 +52,7 @@ class PDAL_DLL Writer : public pdal::Writer
     DECLARE_STATICS
 
 public:
+    Writer(const Stage& prevStage, const Options&);
     Writer(Stage& prevStage, OptionsOld& options);
     ~Writer();
     

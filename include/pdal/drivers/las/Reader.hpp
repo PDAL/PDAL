@@ -58,6 +58,7 @@ class PDAL_DLL LasReader : public LasReaderBase
     DECLARE_STATICS
 
 public:
+    LasReader(const Options&);
     LasReader(const std::string& filename);
 
     const std::string& getFileName() const;

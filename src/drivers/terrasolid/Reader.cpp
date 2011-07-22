@@ -88,6 +88,14 @@ PointIndexes::PointIndexes(const Schema& schema, TERRASOLID_Format_Type format)
 static Options s_defaultOptions;
 IMPLEMENT_STATICS(Reader, "drivers.terrasolid.reader", "TerraSolid Reader")
 
+static OptionsOld dummy;
+Reader::Reader(const Options& options)
+    : pdal::Reader(options)
+    , m_optionsOld(dummy)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
 
 Reader::Reader(OptionsOld& optionsOld)
     : pdal::Reader(Options::none())

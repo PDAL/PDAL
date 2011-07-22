@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
 
-    pdal::drivers::faux::Writer writer(reader);
+    pdal::drivers::faux::Writer writer(reader, Options::none());
     BOOST_CHECK(writer.getDescription() == "Faux Writer");
 
     boost::uint64_t numWritten = writer.write(750);
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(test_2)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
 
-    pdal::drivers::faux::Writer writer(reader);
+    pdal::drivers::faux::Writer writer(reader, Options::none());
 
     boost::uint64_t numWritten = writer.write(750);
 

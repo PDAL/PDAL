@@ -55,6 +55,14 @@ static Options s_defaultOptions;
 IMPLEMENT_STATICS(LiblasWriter, "drivers.liblas.writer", "Liblas Writer")
 
 
+LiblasWriter::LiblasWriter(const Stage& prevStage, const Options& options)
+    : pdal::Writer(prevStage, options)
+    , m_ostream(std::cout)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
+
 LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
     : Writer(prevStage, Options::none())
     , m_ostream(ostream)

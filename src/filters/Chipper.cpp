@@ -138,6 +138,13 @@ static Options s_defaultOptions;
 IMPLEMENT_STATICS(Chipper, "filters.chipper", "Chipper")
 
 
+Chipper::Chipper(const Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
+
 void Chipper::Chip()
 {
     Load(m_xvec, m_yvec, m_spare);

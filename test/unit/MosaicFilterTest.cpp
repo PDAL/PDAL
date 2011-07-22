@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test1)
     vec.push_back(&reader2);
     vec.push_back(&reader3);
 
-    pdal::filters::MosaicFilter mosaic(vec);
+    pdal::filters::MosaicFilter mosaic(vec, Options::none());
     BOOST_CHECK(mosaic.getDescription() == "Mosaic Filter");
 
     const Schema& schema = mosaic.getSchema();

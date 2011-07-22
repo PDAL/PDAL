@@ -62,6 +62,7 @@ public:
     //   - "forward=true" means doubles --> ints
     //   - "forward=false" means ints --> doubles
     //   - 1st version uses the scale/offset values already present
+    ScalingFilter(const Stage& prevStage, const Options&);
     ScalingFilter(const Stage& prevStage, bool forward);
     ScalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ, bool forward);
 

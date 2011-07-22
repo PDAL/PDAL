@@ -51,6 +51,13 @@ static Options s_defaultOptions;
 IMPLEMENT_STATICS(ByteSwapFilter, "filters.byteswap", "Crop Filter");
 
 
+ByteSwapFilter::ByteSwapFilter(const Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
+
 ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
     : Filter(prevStage, Options::none())
 {

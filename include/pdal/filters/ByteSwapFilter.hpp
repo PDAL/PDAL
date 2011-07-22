@@ -57,6 +57,7 @@ class PDAL_DLL ByteSwapFilter : public Filter
     DECLARE_STATICS
 
 public:
+    ByteSwapFilter(const Stage& prevStage, const Options&);
     ByteSwapFilter(const Stage& prevStage);
 
     bool supportsIterator (StageIteratorType t) const

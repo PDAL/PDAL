@@ -49,6 +49,13 @@ static Options s_defaultOptions;
 IMPLEMENT_STATICS(LiblasReader, "drivers.liblas.reader", "Liblas Reader")
 
 
+LiblasReader::LiblasReader(const Options& options)
+    : LasReaderBase(options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
+
 LiblasReader::LiblasReader(const std::string& filename)
     : LasReaderBase(Options::none())
     , m_filename(filename)

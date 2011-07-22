@@ -47,7 +47,7 @@ namespace pdal
 const boost::uint32_t Writer::s_defaultChunkSize = 1024 * 32;
 
 
-Writer::Writer(Stage& prevStage, const Options& options)
+Writer::Writer(const Stage& prevStage, const Options& options)
     : StageBase(options)
     , m_actualNumPointsWritten(0)
     , m_targetNumPointsToWrite(0)
@@ -59,7 +59,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
 }
 
 
-Stage& Writer::getPrevStage()
+const Stage& Writer::getPrevStage()
 {
     return m_prevStage;
 }

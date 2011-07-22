@@ -55,6 +55,7 @@ class PDAL_DLL LasWriter : public Writer
     DECLARE_STATICS
 
 public:
+    LasWriter(const Stage& prevStage, const Options&);
     LasWriter(Stage& prevStage, std::ostream&);
     ~LasWriter();
 

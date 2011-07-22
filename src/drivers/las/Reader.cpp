@@ -51,6 +51,13 @@ static Options s_defaultOptions;
 IMPLEMENT_STATICS(LasReader, "drivers.las.reader", "Las Reader")
 
 
+LasReader::LasReader(const Options& options)
+    : LasReaderBase(options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
+
 LasReader::LasReader(const std::string& filename)
     : LasReaderBase(Options::none())
     , m_filename(filename)

@@ -45,8 +45,8 @@ static Options s_defaultOptions;
 IMPLEMENT_STATICS(MosaicFilter, "filters.mosaic", "Mosaic Filter")
 
 
-MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
-    : MultiFilter(prevStages, Options::none())
+MosaicFilter::MosaicFilter(const std::vector<const Stage*>& prevStages, const Options& options)
+    : MultiFilter(prevStages, options)
 {
     if (prevStages.size() == 0)
     {

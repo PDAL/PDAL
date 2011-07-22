@@ -58,6 +58,7 @@ class PDAL_DLL ColorFilter : public Filter
     DECLARE_STATICS
 
 public:
+    ColorFilter(const Stage& prevStage, const Options&);
     ColorFilter(const Stage& prevStage);
 
     void getColor_F32_U8(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;

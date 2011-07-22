@@ -44,8 +44,8 @@ static Options s_defaultOptions;
 IMPLEMENT_STATICS(Writer, "drivers.faux.writer", "Faux Writer");
 
 
-Writer::Writer(Stage& prevStage) :
-    pdal::Writer(prevStage, Options::none())
+Writer::Writer(const Stage& prevStage, const Options& options)
+    : pdal::Writer(prevStage, options)
 {
     return;
 }

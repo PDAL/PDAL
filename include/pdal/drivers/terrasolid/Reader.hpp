@@ -130,6 +130,7 @@ class PDAL_DLL Reader : public pdal::Reader
     DECLARE_STATICS
 
 public:
+    Reader(const Options&);
     Reader(OptionsOld& options);
     ~Reader();
     
