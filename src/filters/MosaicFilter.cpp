@@ -41,6 +41,10 @@
 namespace pdal { namespace filters {
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(MosaicFilter, "filters.mosaic", "Mosaic Filter")
+
+
 MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
     : MultiFilter(prevStages, Options::none())
 {
@@ -89,19 +93,6 @@ MosaicFilter::MosaicFilter(std::vector<const Stage*> prevStages)
     setNumPoints(totalPoints);
 
     return;
-}
-
-
-const std::string& MosaicFilter::getDescription() const
-{
-    static std::string name("Mosaic Filter");
-    return name;
-}
-
-const std::string& MosaicFilter::getName() const
-{
-    static std::string name("filters.mosaic");
-    return name;
 }
 
 

@@ -54,11 +54,10 @@ class ByteSwapFilterSequentialIterator;
 // updates the header accordingly
 class PDAL_DLL ByteSwapFilter : public Filter
 {
+    DECLARE_STATICS
+
 public:
     ByteSwapFilter(const Stage& prevStage);
-
-    const std::string& getDescription() const;
-    const std::string& getName() const;
 
     bool supportsIterator (StageIteratorType t) const
     {   

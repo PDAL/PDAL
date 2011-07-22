@@ -65,6 +65,8 @@ namespace pdal { namespace drivers { namespace faux {
 //
 class PDAL_DLL Reader : public pdal::Reader
 {
+    DECLARE_STATICS
+
 public:
     enum Mode
     {
@@ -76,9 +78,6 @@ public:
 public:
     Reader(const Bounds<double>&, int numPoints, Mode mode);
     Reader(const Bounds<double>&, int numPoints, Mode mode, const std::vector<Dimension>& dimensions);
-
-    const std::string& getDescription() const;
-    const std::string& getName() const;
     
     Mode getMode() const;
     

@@ -127,13 +127,12 @@ public:
 
 class PDAL_DLL Reader : public pdal::Reader
 {
+    DECLARE_STATICS
 
 public:
     Reader(OptionsOld& options);
     ~Reader();
     
-    const std::string& getDescription() const;
-    const std::string& getName() const;
     std::string getFileName() const;
 
  

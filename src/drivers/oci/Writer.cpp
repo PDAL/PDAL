@@ -268,6 +268,11 @@ std::string ReadFile(std::string filename)
     
 }
 
+
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(Writer, "drivers.oci.writer", "OCI Writer")
+
+
 Writer::Writer(Stage& prevStage, OptionsOld& optionsOld)
     : pdal::Writer(prevStage, Options::none())
     , m_stage(prevStage)
@@ -293,23 +298,6 @@ Writer::~Writer()
 
     return;
 }
-
-
-const std::string& Writer::getDescription() const
-{
-    static std::string name("OCI Writer");
-    return name;
-}
-
-const std::string& Writer::getName() const
-{
-    static std::string name("drivers.oci.writer");
-    return name;
-}
-
-
-
-
 
 
 void Writer::run(std::ostringstream const& command)

@@ -55,13 +55,12 @@ class LiblasHeader;
 
 class PDAL_DLL LiblasReader : public pdal::drivers::las::LasReaderBase
 {
+    DECLARE_STATICS
+
 public:
     LiblasReader(const std::string& filename);
     ~LiblasReader();
 
-    const std::string& getDescription() const;
-    const std::string& getName() const;
-    
     const std::string& getFileName() const;
 
     ::pdal::drivers::las::PointFormat getPointFormat() const;

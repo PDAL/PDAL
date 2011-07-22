@@ -43,6 +43,11 @@
 
 namespace pdal { namespace filters {
 
+
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(ColorFilter, "filters.color", "Color Filter")
+
+
 ColorFilter::ColorFilter(const Stage& prevStage)
     : Filter(prevStage, Options::none())
 {
@@ -83,18 +88,6 @@ void ColorFilter::checkImpedance()
     return;
 }
 
-
-const std::string& ColorFilter::getDescription() const
-{
-    static std::string name("Color Filter");
-    return name;
-}
-
-const std::string& ColorFilter::getName() const
-{
-    static std::string name("filters.color");
-    return name;
-}
 
 void ColorFilter::processBuffer(PointBuffer& data) const
 {

@@ -52,6 +52,8 @@ class ScalingFilterSequentialIterator;
 
 class PDAL_DLL ScalingFilter : public Filter
 {
+    DECLARE_STATICS
+
 public:
     // for now...
     //   - we only support scaling of the X,Y,Z fields
@@ -62,9 +64,6 @@ public:
     //   - 1st version uses the scale/offset values already present
     ScalingFilter(const Stage& prevStage, bool forward);
     ScalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ, bool forward);
-
-    const std::string& getDescription() const;
-    const std::string& getName() const;
 
     bool supportsIterator (StageIteratorType t) const
     {   

@@ -45,6 +45,10 @@
 namespace pdal { namespace drivers { namespace oci {
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(Reader, "drivers.oci.reader", "OCI Reader")
+
+
 Reader::Reader(OptionsOld& optionsOld)
     : pdal::Stage(Options::none())
     , m_optionsOld(optionsOld)
@@ -313,18 +317,6 @@ void Reader::registerFields()
 
     
     return;
-}
-
-const std::string& Reader::getDescription() const
-{
-    static std::string name("OCI Reader");
-    return name;
-}
-
-const std::string& Reader::getName() const
-{
-    static std::string name("drivers.oci.reader");
-    return name;
 }
 
 

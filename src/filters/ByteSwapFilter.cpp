@@ -47,6 +47,10 @@
 namespace pdal { namespace filters {
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(ByteSwapFilter, "filters.byteswap", "Crop Filter");
+
+
 ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
     : Filter(prevStage, Options::none())
 {
@@ -57,18 +61,6 @@ ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
     return;
 }
 
-
-const std::string& ByteSwapFilter::getDescription() const
-{
-    static std::string name("Crop Filter");
-    return name;
-}
-
-const std::string& ByteSwapFilter::getName() const
-{
-    static std::string name("filters.byteswap");
-    return name;
-}
 
 boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const
 {

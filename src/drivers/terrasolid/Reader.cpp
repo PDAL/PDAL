@@ -85,6 +85,9 @@ PointIndexes::PointIndexes(const Schema& schema, TERRASOLID_Format_Type format)
 }
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(Reader, "drivers.terrasolid.reader", "TerraSolid Reader")
+
 
 Reader::Reader(OptionsOld& optionsOld)
     : pdal::Reader(Options::none())
@@ -315,18 +318,6 @@ void Reader::registerFields()
     }
 
     return;
-}
-
-const std::string& Reader::getDescription() const
-{
-    static std::string name("TerraSolid Reader");
-    return name;
-}
-
-const std::string& Reader::getName() const
-{
-    static std::string name("drivers.terrasolid.reader");
-    return name;
 }
 
 

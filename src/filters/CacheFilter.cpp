@@ -40,6 +40,10 @@
 namespace pdal { namespace filters {
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(CacheFilter, "filters.cache", "Cache Filter");
+
+
 // cache block size is measured in Points, not bytes
 CacheFilter::CacheFilter(const Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
     : Filter(prevStage, Options::none())
@@ -59,18 +63,6 @@ CacheFilter::~CacheFilter()
     delete m_cache;
 }
 
-
-const std::string& CacheFilter::getDescription() const
-{
-    static std::string name("Cache Filter");
-    return name;
-}
-
-const std::string& CacheFilter::getName() const
-{
-    static std::string name("filters.cache");
-    return name;
-}
 
 boost::uint32_t CacheFilter::getCacheBlockSize() const
 {

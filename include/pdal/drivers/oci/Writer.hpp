@@ -49,14 +49,12 @@ namespace pdal { namespace drivers { namespace oci {
 
 class PDAL_DLL Writer : public pdal::Writer
 {
-    
+    DECLARE_STATICS
+
 public:
     Writer(Stage& prevStage, OptionsOld& options);
     ~Writer();
     
-    const std::string& getDescription() const;
-    const std::string& getName() const;
-
     void run(std::ostringstream const& command);
     inline void setBounds(pdal::Bounds<double> bounds) {m_bounds = bounds; }
     inline pdal::Bounds<double>  getBounds() const { return m_bounds; }

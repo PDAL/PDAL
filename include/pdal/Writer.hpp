@@ -37,6 +37,7 @@
 
 #include <pdal/pdal.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/Stage.hpp>
 
 #include <string>
 
@@ -46,7 +47,7 @@ namespace pdal
 class Stage;
 class PointBuffer;
 
-class PDAL_DLL Writer
+class PDAL_DLL Writer : public StageBase
 {
 public:
     Writer(Stage& prevStage, const Options& options);
@@ -60,8 +61,6 @@ public:
     // and then write them out to wherever.  Returns total number of points
     // actually written.
     boost::uint64_t write(boost::uint64_t targetNumPointsToWrite);
-
-    const Options& getOptions() const;
 
 protected:
     // this is called once before the loop with the writeBuffer calls
@@ -79,10 +78,7 @@ protected:
     boost::uint64_t m_actualNumPointsWritten;
     boost::uint64_t m_targetNumPointsToWrite;
 
-    Options& getOptions();
-
 private:
-    Options m_options;
     Stage& m_prevStage;
     boost::uint32_t m_chunkSize;
     static const boost::uint32_t s_defaultChunkSize;

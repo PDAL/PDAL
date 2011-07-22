@@ -41,6 +41,10 @@
 namespace pdal { namespace filters {
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(CropFilter, "filters.crop", "Crop Filter")
+
+
 CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
     : Filter(prevStage, Options::none())
     , m_bounds(bounds)
@@ -51,19 +55,6 @@ CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
     this->setPointCountType(PointCount_Unknown);
 
     return;
-}
-
-
-const std::string& CropFilter::getDescription() const
-{
-    static std::string name("Crop Filter");
-    return name;
-}
-
-const std::string& CropFilter::getName() const
-{
-    static std::string name("filters.crop");
-    return name;
 }
 
 

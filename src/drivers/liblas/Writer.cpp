@@ -51,6 +51,9 @@
 namespace pdal { namespace drivers { namespace liblas {
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(LiblasWriter, "drivers.liblas.writer", "Liblas Writer")
+
 
 LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
     : Writer(prevStage, Options::none())
@@ -71,18 +74,6 @@ LiblasWriter::~LiblasWriter()
     return;
 }
 
-
-const std::string& LiblasWriter::getDescription() const
-{
-    static std::string name("Liblas Writer");
-    return name;
-}
-
-const std::string& LiblasWriter::getName() const
-{
-    static std::string name("drivers.liblas.writer");
-    return name;
-}
 
 void LiblasWriter::setupExternalHeader()
 {
