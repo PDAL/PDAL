@@ -37,13 +37,11 @@
 
 #include <pdal/pdal.hpp>
 
-#include <string>
-
+#include <pdal/StageBase.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/MetadataRecord.hpp>
-#include <pdal/Options.hpp>
 
 namespace pdal
 {
@@ -52,61 +50,6 @@ class Iterator;
 class StageSequentialIterator;
 class StageRandomIterator;
 class StageBlockIterator;
-
-
-// both Stages and Writers have a few common properties, so 
-class PDAL_DLL StageBase
-{
-public:
-    StageBase(const Options& options);
-
-    const Options& getOptions() const;
-
-    // For Name, Description, and DefaultOptions:
-    //   each concrete class should provide a static function s_getX() which returns a static object
-    //   each concrete class should provide a virtual getX() which returns s_getX()
-    // This is automated via the GenerateStatics() macro below.
-
-    // Use a dotted, XPath-style name for your 
-    // stage.  For example, 'drivers.las.reader' or 'filters.crop'.  This 
-    // XPath-style name will also correspond to an entry in the pdal::Options
-    // tree for the given stage.
-
-    virtual const Options& getDefaultOptions() const = 0; // { return s_getDefaultOptions(); }
-    virtual const std::string& getName() const = 0; // { return s_getName(); }
-    virtual const std::string& getDescription() const = 0; // { return s_getDescription(); }
-    //static const Options& s_getDefaultOptions();
-    //static const std::string& s_getName();
-    //static const std::string& s_getDescription();
-    
-#define DECLARE_STATICS  \
-    public: \
-    static const Options& s_getDefaultOptions(); \
-    virtual const Options& getDefaultOptions() const;  \
-    static const std::string& s_getName();  \
-    virtual const std::string& getName() const;  \
-    static const std::string& s_getDescription();  \
-    virtual const std::string& getDescription() const;  \
-    private:
-
-#define IMPLEMENT_STATICS(T, name, description)  \
-    const Options& T::s_getDefaultOptions() { return s_defaultOptions; } \
-    const Options& T::getDefaultOptions() const { return s_getDefaultOptions(); }  \
-    const std::string& T::s_getName() { static std::string s(name); return s; }  \
-    const std::string& T::getName() const { return s_getName(); }  \
-    const std::string& T::s_getDescription() { static std::string s(description); return s; }  \
-    const std::string& T::getDescription() const { return s_getDescription(); }
-
-protected:
-    Options& getOptions();
-
-private:
-    Options m_options;
-
-    StageBase& operator=(const StageBase&); // not implemented
-    StageBase(const StageBase&); // not implemented
-};
-
 
 // every stage owns its own header, they are not shared
 class PDAL_DLL Stage : public StageBase

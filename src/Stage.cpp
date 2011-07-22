@@ -45,25 +45,6 @@ namespace pdal
 {
 
 
-StageBase::StageBase(const Options& options)
-    : m_options(options)
-{
-    return;
-}
-
-
-const Options& StageBase::getOptions() const
-{
-    return m_options;
-}
-
-
-Options& StageBase::getOptions()
-{
-    return m_options;
-}
-
-
 Stage::Stage(const Options& options)
     : StageBase(options)
     , m_numPoints(0)
