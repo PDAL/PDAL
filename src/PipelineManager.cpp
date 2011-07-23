@@ -160,8 +160,8 @@ Reader* PipelineManager::parseReader(const boost::property_tree::ptree& tree)
 Filter* PipelineManager::parseFilter(const boost::property_tree::ptree& tree)
 {
     Options options;
-    std::string type;
-    Stage* prevStage;
+    std::string type = "";
+    Stage* prevStage = NULL;
 
     boost::property_tree::ptree::const_iterator iter = tree.begin();
     while (iter != tree.end())
@@ -208,7 +208,7 @@ Filter* PipelineManager::parseFilter(const boost::property_tree::ptree& tree)
 MultiFilter* PipelineManager::parseMultiFilter(const boost::property_tree::ptree& tree)
 {
     Options options;
-    std::string type;
+    std::string type = "";
     std::vector<const Stage*> prevStages;
 
     boost::property_tree::ptree::const_iterator iter = tree.begin();
@@ -259,8 +259,8 @@ MultiFilter* PipelineManager::parseMultiFilter(const boost::property_tree::ptree
 Writer* PipelineManager::parseWriter(const boost::property_tree::ptree& tree)
 {
     Options options;
-    std::string type;
-    Stage* prevStage;
+    std::string type = "";
+    Stage* prevStage = NULL;
 
     boost::property_tree::ptree::const_iterator iter = tree.begin();
     while (iter != tree.end())

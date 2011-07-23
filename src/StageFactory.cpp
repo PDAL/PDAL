@@ -68,29 +68,41 @@
 namespace pdal
 {
 
-Reader* create_drivers_faux_reader(const Options& options) { return 0;}//new pdal::drivers::faux::Reader(options); }
+#define MAKE_READER_CREATOR(T, FullT) \
+    Reader* create_##T(const Options& options) { return new FullT(options); }
 
-Reader* create_drivers_las_reader(const Options& options) { return 0;}//new pdal::drivers::las::LasReader(options); }
-Reader* create_drivers_liblas_reader(const Options& options) { return 0;}//new pdal::drivers::liblas::LiblasReader(options); }
-Reader* create_drivers_oci_reader(const Options& options) { return 0;}//new pdal::drivers::oci::Reader(options); }
-Reader* create_drivers_qfit_reader(const Options& options) { return 0;}//new pdal::drivers::qfit::Reader(options); }
-Reader* create_drivers_terrasolid_reader(const Options& options) { return 0;}//new pdal::drivers::terrasolid::Reader(options); }
+#define MAKE_FILTER_CREATOR(T, FullT) \
+    Filter* create_##T(const Stage& prevStage, const Options& options) { return new FullT(prevStage, options); }
 
-Writer* create_drivers_faux_writer(const Stage& prevStage, const Options& options) { return 0;}//new pdal::drivers::faux::Writer(prevStage, options); }
-Writer* create_drivers_las_writer(const Stage& prevStage, const Options& options) { return 0;}//new pdal::drivers::las::LasWriter(prevStage, options); }
-Writer* create_drivers_liblas_writer(const Stage& prevStage, const Options& options) { return 0;}//new pdal::drivers::liblas::LiblasWriter(prevStage, options); }
-Writer* create_drivers_oci_writer(const Stage& prevStage, const Options& options) { return 0;}//new pdal::drivers::oci::Writer(prevStage, options); }
+#define MAKE_MULTIFILTER_CREATOR(T, FullT) \
+    MultiFilter* create_##T(const std::vector<const Stage*>& prevStages, const Options& options) { return new FullT(prevStages, options); }
 
-Filter* create_filters_byteswapfilter(const Stage& prevStage, const Options& options) { return 0;}//new pdal::filters::ByteSwapFilter(prevStage, options); }
-Filter* create_filters_cachefilter(const Stage& prevStage, const Options& options) { return 0;}//new pdal::filters::CacheFilter(prevStage, options); }
-Filter* create_filters_chipper(const Stage& prevStage, const Options& options) { return 0;}//new pdal::filters::Chipper(prevStage, options); }
-Filter* create_filters_colorfilter(const Stage& prevStage, const Options& options) { return 0;}//new pdal::filters::ColorFilter(prevStage, options); }
-Filter* create_filters_cropfilter(const Stage& prevStage, const Options& options) { return 0;}//new pdal::filters::CropFilter(prevStage, options); }
-Filter* create_filters_decimationfilter(const Stage& prevStage, const Options& options) { return 0;}//new pdal::filters::DecimationFilter(prevStage, options); }
-Filter* create_filters_reprojectionfilter(const Stage& prevStage, const Options& options) { return 0;}//new pdal::filters::ReprojectionFilter(prevStage, options); }
-Filter* create_filters_scalingfilter(const Stage& prevStage, const Options& options) { return 0;}//new pdal::filters::ScalingFilter(prevStage, options); }
+#define MAKE_WRITER_CREATOR(T, FullT) \
+    Writer* create_##T(const Stage& prevStage, const Options& options) { return new FullT(prevStage, options); }
 
-MultiFilter* create_filters_mosaicfilter(const std::vector<const Stage*>& prevStages, const Options& options) { return 0;}//new pdal::filters::MosaicFilter(prevStages, options); }
+MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
+MAKE_READER_CREATOR(LasReader, pdal::drivers::las::LasReader);
+MAKE_READER_CREATOR(LiblasReader, pdal::drivers::liblas::LiblasReader)
+MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
+MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
+MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
+
+MAKE_FILTER_CREATOR(ByteSwapFilter, pdal::filters::ByteSwapFilter)
+MAKE_FILTER_CREATOR(CacheFilter, pdal::filters::CacheFilter)
+MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
+MAKE_FILTER_CREATOR(ColorFilter, pdal::filters::ColorFilter)
+MAKE_FILTER_CREATOR(CropFilter, pdal::filters::CropFilter)
+MAKE_FILTER_CREATOR(DecimationFilter, pdal::filters::DecimationFilter)
+MAKE_FILTER_CREATOR(ReprojectionFilter, pdal::filters::ReprojectionFilter)
+MAKE_FILTER_CREATOR(ScalingFilter, pdal::filters::ScalingFilter)
+
+MAKE_MULTIFILTER_CREATOR(MosaicFilter, pdal::filters::MosaicFilter)
+
+MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
+MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::LasWriter)
+MAKE_WRITER_CREATOR(LiblasWriter, pdal::drivers::liblas::LiblasWriter)
+MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
+
 
 
 StageFactory::StageFactory()
@@ -200,40 +212,52 @@ void StageFactory::registerWriter(const std::string& type, WriterCreator* f)
 
 void StageFactory::registerKnownReaders()
 {
-    registerReader("drivers.faux.reader", create_drivers_faux_reader);
-    registerReader("drivers.las.reader", create_drivers_las_reader);
-    registerReader("drivers.liblas.reader", create_drivers_liblas_reader);
-    registerReader("drivers.oci.reader", create_drivers_oci_reader);
-    registerReader("drivers.qfit.reader", create_drivers_qfit_reader);
-    registerReader("drivers.terrasolid.reader", create_drivers_terrasolid_reader);
+#define REGISTER_READER(T, FullT) \
+    registerReader(FullT::s_getName(), create_##T)
+
+    REGISTER_READER(FauxReader, pdal::drivers::faux::Reader);
+    REGISTER_READER(LasReader, pdal::drivers::las::LasReader);
+    REGISTER_READER(LiblasReader, pdal::drivers::liblas::LiblasReader);
+    REGISTER_READER(OciReader, pdal::drivers::oci::Reader);
+    REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
+    REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
 }
 
 
 void StageFactory::registerKnownFilters()
 {
-    registerFilter("filters.byteswap", create_filters_byteswapfilter);
-    registerFilter("filters.cache", create_filters_cachefilter);
-    registerFilter("filters.chipper", create_filters_chipper);
-    registerFilter("filters.color", create_filters_colorfilter);
-    registerFilter("filters.crop", create_filters_cropfilter);
-    registerFilter("filters.decimation", create_filters_decimationfilter);
-    registerFilter("filters.reprojection", create_filters_reprojectionfilter);
-    registerFilter("filters.scaling", create_filters_scalingfilter);
+#define REGISTER_FILTER(T, FullT) \
+    registerFilter(FullT::s_getName(), create_##T)
+
+    REGISTER_FILTER(ByteSwapFilter, pdal::filters::ByteSwapFilter);
+    REGISTER_FILTER(CacheFilter, pdal::filters::CacheFilter);
+    REGISTER_FILTER(Chipper, pdal::filters::Chipper);
+    REGISTER_FILTER(ColorFilter, pdal::filters::ColorFilter);
+    REGISTER_FILTER(CropFilter, pdal::filters::CropFilter);
+    REGISTER_FILTER(DecimationFilter, pdal::filters::DecimationFilter);
+    REGISTER_FILTER(ReprojectionFilter, pdal::filters::ReprojectionFilter);
+    REGISTER_FILTER(ScalingFilter, pdal::filters::ScalingFilter);
 }
 
 
 void StageFactory::registerKnownMultiFilters()
 {
-    registerMultiFilter("filters.mosaic", create_filters_mosaicfilter);
+#define REGISTER_MULTIFILTER(T, FullT) \
+    registerMultiFilter(FullT::s_getName(), create_##T)
+    
+    REGISTER_MULTIFILTER(MosaicFilter, pdal::filters::MosaicFilter);
 }
 
 
 void StageFactory::registerKnownWriters()
 {
-    registerWriter("drivers.faux.writer", create_drivers_faux_writer);
-    registerWriter("drivers.las.writer", create_drivers_las_writer);
-    registerWriter("drivers.liblas.writer", create_drivers_liblas_writer);
-    registerWriter("drivers.oci.writer", create_drivers_oci_writer);
+#define REGISTER_WRITER(T, FullT) \
+    registerWriter(FullT::s_getName(), create_##T)
+
+    REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
+    REGISTER_WRITER(LasWriter, pdal::drivers::las::LasWriter);
+    REGISTER_WRITER(LiblasWriter, pdal::drivers::liblas::LiblasWriter);
+    REGISTER_WRITER(OciWriter, pdal::drivers::oci::Writer);
 }
 
 
