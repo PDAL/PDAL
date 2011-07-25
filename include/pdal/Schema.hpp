@@ -85,6 +85,7 @@ public:
     const Dimension& getDimension(std::size_t index) const;
     Dimension& getDimension(std::size_t index);
     const Dimensions& getDimensions() const;
+    Dimensions& getDimensions();
 
     // returns the index of the field
     //
