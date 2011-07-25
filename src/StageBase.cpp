@@ -32,73 +32,43 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/MosaicFilter.hpp>
+#include <pdal/StageBase.hpp>
+
+#include <iostream>
 
 #include <pdal/exceptions.hpp>
-#include <pdal/Bounds.hpp>
-#include <pdal/filters/MosaicFilterIterator.hpp>
-
-namespace pdal { namespace filters {
 
 
-static Options s_defaultOptions;
-IMPLEMENT_STATICS(MosaicFilter, "filters.mosaic", "Mosaic Filter")
-
-
-MosaicFilter::MosaicFilter(const std::vector<const Stage*>& prevStages, const Options& options)
-    : MultiFilter(prevStages, options)
+namespace pdal
 {
-    if (prevStages.size() == 0)
-    {
-        throw pdal_error("empty stage list passed to mosaic filter");
-    }
 
-    for (size_t i=0; i<prevStages.size(); i++)
-    {
-        if (prevStages[i] == NULL)
-        {
-            throw pdal_error("null stage passed to mosaic filter");
-        }
-        m_prevStages.push_back(prevStages[i]);
-    }
 
-    const Stage& prevStage = *m_prevStages[0];
-
-    {
-        setCoreProperties(prevStage);  // BUG: clearly insufficient
-    }
-
-    boost::uint64_t totalPoints = 0;
-
-    Bounds<double> bigbox(prevStage.getBounds());
-
-    for (size_t i=0; i<prevStages.size(); i++)
-    {
-        const Stage* stage = prevStages[i];
-        if (stage==NULL)
-        {
-            throw pdal_error("bad stage passed to MosaicFilter");
-        }
-        if (prevStage.getSchema() != this->getSchema())
-        {
-            throw pdal_error("impedance mismatch in MosaicFilter");
-        }
-
-        bigbox.grow(this->getBounds());
-        totalPoints += this->getNumPoints();
-        m_prevStages.push_back(stage);
-    }
-
-    setBounds(bigbox);
-    setNumPoints(totalPoints);
-
+StageBase::StageBase(const Options& options)
+    : m_options(options)
+{
     return;
 }
 
 
-pdal::StageSequentialIterator* MosaicFilter::createSequentialIterator() const
+const Options& StageBase::getOptions() const
 {
-    return new MosaicFilterSequentialIterator(*this);
+    return m_options;
 }
 
-} } // namespaces
+
+Options& StageBase::getOptions()
+{
+    return m_options;
+}
+
+
+std::ostream& operator<<(std::ostream& ostr, const StageBase& stage)
+{
+    ostr << "  Name: " << stage.getName() << std::endl;
+    ostr << "  Description: " << stage.getDescription() << std::endl;
+
+    return ostr;
+}
+
+
+} // namespace pdal

@@ -81,6 +81,16 @@ namespace pdal { namespace filters {
 #endif
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(ReprojectionFilter, "filters.reprojection", "Reprojection Filter")
+
+
+ReprojectionFilter::ReprojectionFilter(const Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
 
 ReprojectionFilter::ReprojectionFilter(const Stage& prevStage,
                                        const SpatialReference& inSRS,
@@ -206,20 +216,6 @@ void ReprojectionFilter::transform(double& x, double& y, double& z) const
 #endif
  
     return;
-}
-
-
-const std::string& ReprojectionFilter::getDescription() const
-{
-    static std::string name("Reprojection Filter");
-    return name;
-}
-
-
-const std::string& ReprojectionFilter::getName() const
-{
-    static std::string name("filters.reprojection");
-    return name;
 }
 
 

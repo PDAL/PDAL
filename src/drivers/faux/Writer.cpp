@@ -39,24 +39,17 @@
 
 namespace pdal { namespace drivers { namespace faux {
 
-Writer::Writer(Stage& prevStage) :
-    pdal::Writer(prevStage, Options::none())
+    
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(Writer, "drivers.faux.writer", "Faux Writer");
+
+
+Writer::Writer(const Stage& prevStage, const Options& options)
+    : pdal::Writer(prevStage, options)
 {
     return;
 }
 
-
-const std::string& Writer::getDescription() const
-{
-    static std::string name("Faux Writer");
-    return name;
-}
-
-const std::string& Writer::getName() const
-{
-    static std::string name("drivers.faux.writer");
-    return name;
-}
 
 void Writer::writeBegin()
 {

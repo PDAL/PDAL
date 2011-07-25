@@ -37,13 +37,11 @@
 
 #include <pdal/pdal.hpp>
 
-#include <string>
-
+#include <pdal/StageBase.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/MetadataRecord.hpp>
-#include <pdal/Options.hpp>
 
 namespace pdal
 {
@@ -54,22 +52,12 @@ class StageRandomIterator;
 class StageBlockIterator;
 
 // every stage owns its own header, they are not shared
-class PDAL_DLL Stage
+class PDAL_DLL Stage : public StageBase
 {
 public:
     Stage(const Options& options);
     virtual ~Stage();
 
-    const Options& getOptions() const;
-
-    // Implement this in your concrete classes to return a constant string
-    // as the name of the stage.  Use a dotted, XPath-style name for your 
-    // stage.  For example, 'drivers.las.reader' or 'filters.crop'.  This 
-    // XPath-style name will also correspond to an entry in the pdal::Options
-    // tree for the given stage.
-    virtual const std::string& getName() const = 0;
-    virtual const std::string& getDescription() const = 0;
-    
     // core properties of all stages
     const Schema& getSchema() const;
     virtual boost::uint64_t getNumPoints() const;
@@ -89,8 +77,6 @@ public:
     void dump() const;
 
 protected:
-    Options& getOptions();
-
     // setters for the core properties
     Schema& getSchemaRef();
     void setSchema(const Schema&);
@@ -106,8 +92,6 @@ protected:
     void setCoreProperties(const Stage&);
 
 private:
-    Options m_options;
-
     Schema m_schema;
     boost::uint64_t m_numPoints;
     PointCountType m_pointCountType;

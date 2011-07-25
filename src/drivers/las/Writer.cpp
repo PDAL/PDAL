@@ -54,6 +54,18 @@
 namespace pdal { namespace drivers { namespace las {
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(LasWriter, "drivers.las.writer", "Las Writer")
+
+
+LasWriter::LasWriter(const Stage& prevStage, const Options& options)
+    : pdal::Writer(prevStage, options)
+    , m_ostream(std::cout)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
+
 LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
     : Writer(prevStage, Options::none())
     , m_ostream(ostream)
@@ -69,20 +81,6 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
 LasWriter::~LasWriter()
 {
 
-}
-
-
-const std::string& LasWriter::getDescription() const
-{
-    static std::string name("Las Writer");
-    return name;
-}
-
-
-const std::string& LasWriter::getName() const
-{
-    static std::string name("drivers.las.writer");
-    return name;
 }
 
 

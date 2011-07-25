@@ -134,6 +134,17 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t 
 }
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(Chipper, "filters.chipper", "Chipper")
+
+
+Chipper::Chipper(const Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
+
 void Chipper::Chip()
 {
     Load(m_xvec, m_yvec, m_spare);
@@ -437,18 +448,6 @@ void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widem
     b.m_left = widemin;
     b.m_right = widemax;
     m_blocks.push_back(b);
-}
-
-const std::string& Chipper::getDescription() const
-{
-    static std::string name("Chipper");
-    return name;
-}
-
-const std::string& Chipper::getName() const
-{
-    static std::string name("filters.chipper");
-    return name;
 }
 
 

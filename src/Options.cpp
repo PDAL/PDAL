@@ -55,6 +55,17 @@ Options::Options(boost::property_tree::ptree t) :
 }
 
 
+Options::Options(std::vector<Option<std::string> > options)
+{
+    BOOST_FOREACH(const Option<std::string>& option, options)
+    {
+        add(option);
+    }
+
+    return;
+}
+
+
 Options::Options(std::istream& istr)
 {
     boost::property_tree::xml_parser::read_xml(istr, m_tree);

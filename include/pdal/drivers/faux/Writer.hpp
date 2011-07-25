@@ -51,12 +51,11 @@ namespace pdal { namespace drivers { namespace faux {
 //
 class PDAL_DLL Writer : public pdal::Writer
 {
-public:
-    Writer(Stage& prevStage);
+    DECLARE_STATICS
 
-    const std::string& getDescription() const;
-    const std::string& getName() const;
-    
+public:
+    Writer(const Stage& prevStage, const Options&);
+
     // retrieve the summary info
     double getMinX() const { return m_minimumX; }
     double getMinY() const { return m_minimumY; }

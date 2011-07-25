@@ -42,6 +42,18 @@
 
 namespace pdal { namespace drivers { namespace faux {
 
+
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(Reader, "drivers.faux.reader", "Faux Reader")
+
+
+Reader::Reader(const Options& options)
+    : pdal::Reader(options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
+
 Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
     : pdal::Reader(Options::none())
     , m_mode(mode)
@@ -78,18 +90,6 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std
     return;
 }
 
-
-const std::string& Reader::getDescription() const
-{
-    static std::string name("Faux Reader");
-    return name;
-}
-
-const std::string& Reader::getName() const
-{
-    static std::string name("drivers.faux.reader");
-    return name;
-}
 
 Reader::Mode Reader::getMode() const
 {

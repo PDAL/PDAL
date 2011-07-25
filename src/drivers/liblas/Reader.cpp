@@ -44,6 +44,18 @@
 
 namespace pdal { namespace drivers { namespace liblas {
 
+    
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(LiblasReader, "drivers.liblas.reader", "Liblas Reader")
+
+
+LiblasReader::LiblasReader(const Options& options)
+    : LasReaderBase(options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
+
 LiblasReader::LiblasReader(const std::string& filename)
     : LasReaderBase(Options::none())
     , m_filename(filename)
@@ -79,20 +91,6 @@ LiblasReader::~LiblasReader()
 {
     return;
 }
-
-
-const std::string& LiblasReader::getDescription() const
-{
-    static std::string name("Liblas Reader");
-    return name;
-}
-
-const std::string& LiblasReader::getName() const
-{
-    static std::string name("drivers.liblas.reader");
-    return name;
-}
-
 
 
 const std::string& LiblasReader::getFileName() const

@@ -46,6 +46,16 @@
 namespace pdal { namespace filters {
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(ScalingFilter, "filters.scaling", "Scaling Filter")
+
+
+ScalingFilter::ScalingFilter(const Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
 
 ScalingFilter::ScalingFilter(const Stage& prevStage, bool forward)
     : Filter(prevStage, Options::none())
@@ -200,20 +210,6 @@ void ScalingFilter::checkImpedance()
 void ScalingFilter::initialize()
 {
     return;
-}
-
-
-const std::string& ScalingFilter::getDescription() const
-{
-    static std::string name("Scaling Filter");
-    return name;
-}
-
-
-const std::string& ScalingFilter::getName() const
-{
-    static std::string name("filters.scaling");
-    return name;
 }
 
 

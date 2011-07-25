@@ -46,6 +46,7 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/Signaller.hpp
   ${PDAL_HEADERS_DIR}/SpatialReference.hpp
   ${PDAL_HEADERS_DIR}/Stage.hpp
+  ${PDAL_HEADERS_DIR}/StageBase.hpp
   ${PDAL_HEADERS_DIR}/StageFactory.hpp
   ${PDAL_HEADERS_DIR}/StageIterator.hpp
   ${PDAL_HEADERS_DIR}/Utils.hpp
@@ -80,6 +81,7 @@ set(PDAL_BASE_CPP
   Signaller.cpp
   SpatialReference.cpp
   Stage.cpp
+  StageBase.cpp
   StageFactory.cpp
   StageIterator.cpp
   Utils.cpp

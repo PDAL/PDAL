@@ -37,7 +37,7 @@
 
 #include <pdal/pdal.hpp>
 
-#include <pdal/Stage.hpp>
+#include <pdal/Reader.hpp>
 #include <pdal/drivers/oci/common.hpp>
 
 #include <boost/scoped_ptr.hpp>
@@ -49,15 +49,14 @@ namespace pdal { namespace drivers { namespace oci {
 
 
 
-class PDAL_DLL Reader : public pdal::Stage
+class PDAL_DLL Reader : public pdal::Reader
 {
+    DECLARE_STATICS
 
 public:
+    Reader(const Options&);
     Reader(OptionsOld& options);
     ~Reader();
-    
-    const std::string& getDescription() const;
-    const std::string& getName() const;
  
     bool supportsIterator (StageIteratorType t) const
     {   

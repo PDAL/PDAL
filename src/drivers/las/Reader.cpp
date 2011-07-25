@@ -47,6 +47,16 @@
 namespace pdal { namespace drivers { namespace las {
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(LasReader, "drivers.las.reader", "Las Reader")
+
+
+LasReader::LasReader(const Options& options)
+    : LasReaderBase(options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
 
 LasReader::LasReader(const std::string& filename)
     : LasReaderBase(Options::none())
@@ -70,20 +80,6 @@ LasReader::LasReader(const std::string& filename)
 
     return;
 }
-
-
-const std::string& LasReader::getDescription() const
-{
-    static std::string name("Las Reader");
-    return name;
-}
-
-const std::string& LasReader::getName() const
-{
-    static std::string name("drivers.las.reader");
-    return name;
-}
-
 
 
 const std::string& LasReader::getFileName() const

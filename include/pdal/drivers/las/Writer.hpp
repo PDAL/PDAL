@@ -52,12 +52,12 @@ class ZipPoint;
 
 class PDAL_DLL LasWriter : public Writer
 {
+    DECLARE_STATICS
+
 public:
+    LasWriter(const Stage& prevStage, const Options&);
     LasWriter(Stage& prevStage, std::ostream&);
     ~LasWriter();
-
-    const std::string& getDescription() const;
-    const std::string& getName() const;
 
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
     void setPointFormat(PointFormat);

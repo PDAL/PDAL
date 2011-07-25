@@ -220,8 +220,11 @@ PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 }
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(Reader, "drivers.qfit.reader", "QFIT Reader")
 
-Reader::Reader(Options& options)
+
+Reader::Reader(const Options& options)
     : pdal::Reader(options)
     , m_format(QFIT_Format_Unknown)
     , m_size(0)
@@ -449,18 +452,6 @@ void Reader::registerFields()
 
     
     return;
-}
-
-const std::string& Reader::getDescription() const
-{
-    static std::string name("QFIT Reader");
-    return name;
-}
-
-const std::string& Reader::getName() const
-{
-    static std::string name("drivers.qfit.reader");
-    return name;
 }
 
 

@@ -151,7 +151,10 @@ public:
 
 class PDAL_DLL Chipper : public pdal::Filter
 {
+    DECLARE_STATICS
+
 public:
+    Chipper(const Stage& prevStage, const Options&);
     Chipper(Stage& prevStage, boost::uint32_t max_partition_size)
         : pdal::Filter(prevStage, Options::none())
         , m_threshold(max_partition_size)
@@ -169,9 +172,6 @@ public:
         { return m_blocks.size(); }
     const chipper::Block& GetBlock(std::vector<chipper::Block>::size_type i) const
         { return m_blocks[i]; }
-
-    const std::string& getDescription() const ;
-    const std::string& getName() const;
 
     bool supportsIterator (StageIteratorType t) const
     {   

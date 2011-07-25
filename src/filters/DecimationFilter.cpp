@@ -40,6 +40,17 @@
 namespace pdal { namespace filters {
 
 
+static Options s_defaultOptions;
+IMPLEMENT_STATICS(DecimationFilter, "filters.decimation", "Decimation Filter")
+
+
+DecimationFilter::DecimationFilter(const Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+{
+    throw not_yet_implemented("options ctor"); 
+}
+
+
 DecimationFilter::DecimationFilter(const Stage& prevStage, boost::uint32_t step)
     : Filter(prevStage, Options::none())
     , m_step(step)
@@ -47,19 +58,6 @@ DecimationFilter::DecimationFilter(const Stage& prevStage, boost::uint32_t step)
     this->setNumPoints( this->getNumPoints() / step );
 
     return;
-}
-
-
-const std::string& DecimationFilter::getDescription() const
-{
-    static std::string name("Decimation Filter");
-    return name;
-}
-
-const std::string& DecimationFilter::getName() const
-{
-    static std::string name("filters.decimation");
-    return name;
 }
 
 
