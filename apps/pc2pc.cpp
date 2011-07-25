@@ -183,7 +183,15 @@ int Application_pc2pc::execute()
         // pdal::filters::ByteSwapFilter swapper(descalingFilter);
         pdal::drivers::oci::Writer writer(descalingFilter, options);
 
-        writer.write(numPoints);
+        try{
+            writer.write(numPoints);
+            
+        } catch (pdal::pdal_error& e)
+        {
+            std::cerr << "Error writing oracle: " << e.what() << std::endl;
+            
+        }
+
         boost::property_tree::ptree output_tree;
         // output_tree.put_child(writer.getName(), options.GetPTree());
         // boost::property_tree::write_xml(m_xml, output_tree);
@@ -240,7 +248,15 @@ int Application_pc2pc::execute()
             writer.setCompressed(true);
         writer.setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));
         writer.setPointFormat(pdal::drivers::las::PointFormat3);
-        writer.write(0);
+        
+        try{
+            writer.write(0);
+            
+        } catch (pdal::pdal_error& e)
+        {
+            std::cerr << "Error reading oracle: " << e.what() << std::endl;
+            
+        }
             
 
     #else
