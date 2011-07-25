@@ -48,24 +48,24 @@ static std::string xml_int_ref = "<Name>my_int</Name><Description>This is my int
 static std::string xml_str_ref = "<Name>my_string</Name><Description>This is my stringy option.</Description><Value>Yow.</Value>";
 
 
-INIT_OPTIONS(s_defaultOptions, \
-             (pdal::Option<std::string>("r","s","t")) \
-             (pdal::Option<std::string>("u","v","w")) \
-             (pdal::Option<std::string>("x","y","z")) )
-
-
-BOOST_AUTO_TEST_CASE(test_static_options)
-{
-    BOOST_CHECK(s_defaultOptions.hasOption<std::string>("r"));
-    BOOST_CHECK(s_defaultOptions.hasOption<std::string>("u"));
-    BOOST_CHECK(s_defaultOptions.hasOption<std::string>("x"));
-
-    const boost::property_tree::ptree& pt = s_defaultOptions.getPTree();
-    BOOST_CHECK(pt.size() == 3);
-
-    return;
-}
-
+// INIT_OPTIONS(s_defaultOptions, \
+//              (pdal::Option<std::string>("r","s","t")) \
+//              (pdal::Option<std::string>("u","v","w")) \
+//              (pdal::Option<std::string>("x","y","z")) )
+// 
+// 
+// BOOST_AUTO_TEST_CASE(test_static_options)
+// {
+//     BOOST_CHECK(s_defaultOptions.hasOption<std::string>("r"));
+//     BOOST_CHECK(s_defaultOptions.hasOption<std::string>("u"));
+//     BOOST_CHECK(s_defaultOptions.hasOption<std::string>("x"));
+// 
+//     const boost::property_tree::ptree& pt = s_defaultOptions.getPTree();
+//     BOOST_CHECK(pt.size() == 3);
+// 
+//     return;
+// }
+// 
 
 BOOST_AUTO_TEST_CASE(test_option_writing)
 {
