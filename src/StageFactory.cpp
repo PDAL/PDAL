@@ -81,7 +81,7 @@ namespace pdal
     Writer* create_##T(const Stage& prevStage, const Options& options) { return new FullT(prevStage, options); }
 
 MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
-MAKE_READER_CREATOR(LasReader, pdal::drivers::las::LasReader);
+MAKE_READER_CREATOR(LasReader, pdal::drivers::las::LasReader)
 MAKE_READER_CREATOR(LiblasReader, pdal::drivers::liblas::LiblasReader)
 MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
 MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)

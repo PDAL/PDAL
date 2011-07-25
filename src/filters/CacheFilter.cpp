@@ -41,7 +41,7 @@ namespace pdal { namespace filters {
 
 
 static Options s_defaultOptions;
-IMPLEMENT_STATICS(CacheFilter, "filters.cache", "Cache Filter");
+IMPLEMENT_STATICS(CacheFilter, "filters.cache", "Cache Filter")
 
 
 CacheFilter::CacheFilter(const Stage& prevStage, const Options& options)
