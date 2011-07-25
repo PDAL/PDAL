@@ -697,7 +697,6 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     std::string header_blob_column_name = tree.get<std::string>("header_blob_column_name");
     std::string base_table_boundary_column = tree.get<std::string>("base_table_boundary_column");
     std::string base_table_boundary_wkt = tree.get<std::string>("base_table_boundary_wkt");
-    std::string point_schema_override = tree.get<std::string>("point_schema_override");
     
     boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
     boost::uint32_t precision = tree.get<boost::uint32_t>("precision");
@@ -705,7 +704,6 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     boost::uint32_t dimensions = tree.get<boost::uint32_t>("dimensions");
     bool bUse3d = is3d();
 
-    bool bHaveSchemaOverride = (point_schema_override.size() > 0);
     
     std::ostringstream oss;
 
@@ -727,7 +725,6 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
 
     int nPCPos = 1;
     int nSchemaPos = 1;
-    // if (bHaveSchemaOverride)
         nSchemaPos++;
 
     int nPos = nSchemaPos; // Bind column position    
@@ -762,13 +759,7 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
         s_srid << srid;
     }
 
-    // if (bHaveSchemaOverride)
-    // {
-        s_schema << "xmltype(:"<<nSchemaPos<<")";
-    // } else
-    // {
-    //     s_schema << "NULL";
-    // }
+    s_schema << "xmltype(:"<<nSchemaPos<<")";
     
     long gtype = GetGType();
     
@@ -838,16 +829,11 @@ oss << "declare\n"
     OCILobLocator* boundary_locator ; 
 
     std::string schema_data;
-    if (bHaveSchemaOverride)
-    {
-        schema_data = ReadFile(point_schema_override);
-    } else {
         schema_data = pdal::Schema::to_xml(m_stage.getSchema());
-        std::cout << m_stage.getSchema() << std::endl;
-        std::ostream* output= Utils::createFile("oracle-write-schema.xml",true);
-        *output << schema_data <<std::endl;
-        Utils::closeFile(output);
-    }
+        // std::cout << m_stage.getSchema() << std::endl;
+        // std::ostream* output= Utils::createFile("oracle-write-schema.xml",true);
+        // *output << schema_data <<std::endl;
+        // Utils::closeFile(output);
 
     char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
     strncpy(schema, schema_data.c_str(), schema_data.size());
