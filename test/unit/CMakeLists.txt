@@ -43,6 +43,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     SignallerTest.cpp
     SpatialReferenceTest.cpp
     StageFactoryTest.cpp
+    StreamOwnerTest.cpp
     TerraSolidTest.cpp
     UtilsTest.cpp
     VectorTest.cpp
