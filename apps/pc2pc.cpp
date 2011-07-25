@@ -138,6 +138,7 @@ int Application_pc2pc::execute()
     else if (hasOption("oracle-writer"))
     {
 #ifdef PDAL_HAVE_ORACLE
+        try{
         pdal::drivers::las::LasReader reader(m_inputFile);
     
         const boost::uint64_t numPoints = reader.getNumPoints();
@@ -183,19 +184,20 @@ int Application_pc2pc::execute()
         // pdal::filters::ByteSwapFilter swapper(descalingFilter);
         pdal::drivers::oci::Writer writer(descalingFilter, options);
 
-        try{
-            writer.write(numPoints);
+
+        writer.write(numPoints);
             
-        } catch (pdal::pdal_error& e)
-        {
-            std::cerr << "Error writing oracle: " << e.what() << std::endl;
-            
-        }
+
 
         boost::property_tree::ptree output_tree;
         // output_tree.put_child(writer.getName(), options.GetPTree());
         // boost::property_tree::write_xml(m_xml, output_tree);
-                    
+
+        } catch (pdal::pdal_error& e)
+        {
+            std::cerr << "Error writing oracle: " << e.what() << std::endl;
+            
+        }                    
 #else
         throw configuration_error("PDAL not compiled with Oracle support");
 #endif
@@ -203,7 +205,7 @@ int Application_pc2pc::execute()
         else if (hasOption("oracle-reader"))
         {
     #ifdef PDAL_HAVE_ORACLE
-
+        try{
         boost::property_tree::ptree load_tree;
         
         boost::property_tree::read_xml(m_xml, load_tree);
@@ -249,8 +251,8 @@ int Application_pc2pc::execute()
         writer.setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));
         writer.setPointFormat(pdal::drivers::las::PointFormat3);
         
-        try{
-            writer.write(0);
+
+        writer.write(0);
             
         } catch (pdal::pdal_error& e)
         {
