@@ -58,10 +58,34 @@ PipelineManager::PipelineManager()
 
 PipelineManager::~PipelineManager()
 {
-    //while (m_stages.size())
-    //{
-    //    m_stages.pop_back();
-    //}
+    while (m_readers.size())
+    {
+        Reader* reader = m_readers.back();
+        m_readers.pop_back();
+        delete reader;
+    }
+
+    while (m_filters.size())
+    {
+        Filter* filter = m_filters.back();
+        m_filters.pop_back();
+        delete filter;
+    }
+
+    while (m_multifilters.size())
+    {
+        MultiFilter* multifilter = m_multifilters.back();
+        m_multifilters.pop_back();
+        delete multifilter;
+    }
+
+    while (m_writers.size())
+    {
+        Writer* writer = m_writers.back();
+        m_writers.pop_back();
+        delete writer;
+    }
+
     return;
 }
 
@@ -69,7 +93,7 @@ PipelineManager::~PipelineManager()
 Reader* PipelineManager::addReader(const std::string& type, const Options& options)
 {
     Reader* stage = m_factory.createReader(type, options);
-    //m_stages.push_back(stage);
+    m_readers.push_back(stage);
     return stage;
 }
 
@@ -77,7 +101,7 @@ Reader* PipelineManager::addReader(const std::string& type, const Options& optio
 Filter* PipelineManager::addFilter(const std::string& type, const Stage& prevStage, const Options& options)
 {
     Filter* stage = m_factory.createFilter(type, prevStage, options);
-    //m_stages.push_back(stage);
+    m_filters.push_back(stage);
     return stage;
 }
 
@@ -85,7 +109,7 @@ Filter* PipelineManager::addFilter(const std::string& type, const Stage& prevSta
 MultiFilter* PipelineManager::addMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options& options)
 {
     MultiFilter* stage = m_factory.createMultiFilter(type, prevStages, options);
-    //m_stages.push_back(stage);
+    m_multifilters.push_back(stage);
     return stage;
 }
 
@@ -93,7 +117,7 @@ MultiFilter* PipelineManager::addMultiFilter(const std::string& type, const std:
 Writer* PipelineManager::addWriter(const std::string& type, const Stage& prevStage, const Options& options)
 {
     Writer* stage = m_factory.createWriter(type, prevStage, options);
-    //m_stages.push_back(stage);
+    m_writers.push_back(stage);
     return stage;
 }
 

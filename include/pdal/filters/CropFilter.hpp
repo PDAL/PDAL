@@ -77,6 +77,8 @@ public:
     const Bounds<double>& getBounds() const;
 
 private:
+    void initialize();
+
     Bounds<double> m_bounds;
 
     CropFilter& operator=(const CropFilter&); // not implemented

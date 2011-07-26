@@ -57,24 +57,29 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
 
     Options optsR;
     optsR.add("filename", Support::datapath("1.2-with-color.las"), "file to read from");
-    //Reader* ptrR = factory.createReader("drivers.las.reader", optsR);
-    //BOOST_CHECK(ptrR->getName() == "drivers.las.reader");
+    Reader* ptrR = factory.createReader("drivers.las.reader", optsR);
+    BOOST_CHECK(ptrR->getName() == "drivers.las.reader");
 
     Options optsF;
     optsF.add("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
-    //Filter* ptrF = factory.createFilter("filters.crop", *ptrR, optsF);
-    //BOOST_CHECK(ptrF->getName() == "filters.crop");
+    Filter* ptrF = factory.createFilter("filters.crop", *ptrR, optsF);
+    BOOST_CHECK(ptrF->getName() == "filters.crop");
 
     Options optsM;
     std::vector<const Stage*> stages;
-    //stages.push_back(ptrR);
-    //MultiFilter* ptrM = factory.createMultiFilter("filters.mosaic", stages, optsM);
-    //BOOST_CHECK(ptrM->getName() == "filters.mosaic");
+    stages.push_back(ptrR);
+    MultiFilter* ptrM = factory.createMultiFilter("filters.mosaic", stages, optsM);
+    BOOST_CHECK(ptrM->getName() == "filters.mosaic");
 
     Options optsW;
     optsW.add("filename", "temp.las", "file to write to");
-    //Writer* ptrW = factory.createWriter("drivers.las.writer", *ptrF, optsW);
-    //BOOST_CHECK(ptrW->getName() == "drivers.las.writer");
+    Writer* ptrW = factory.createWriter("drivers.las.writer", *ptrF, optsW);
+    BOOST_CHECK(ptrW->getName() == "drivers.las.writer");
+
+    delete ptrW;
+    delete ptrM;
+    delete ptrF;
+    delete ptrR;
 
     return;
 }
@@ -139,32 +144,37 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test2)
     s_demoflag = 0;
     Options optsR;
     optsR.add("flag",11,"my flag");
-    //Stage* reader = factory.createReader("demoR", optsR);
-    //BOOST_CHECK(reader->getName() == "drivers.las.reader");
-    //BOOST_CHECK(s_demoflag == 11);
+    Stage* reader = factory.createReader("demoR", optsR);
+    BOOST_CHECK(reader->getName() == "drivers.las.reader");
+    BOOST_CHECK(s_demoflag == 11);
 
     s_demoflag = 0;
     Options optsF;
     optsF.add("flag",22,"my flag");
-    //Stage* filter = factory.createFilter("demoF", *reader, optsF);
-    //BOOST_CHECK(filter->getName() == "filters.crop");
-    //BOOST_CHECK(s_demoflag == 22);
+    Stage* filter = factory.createFilter("demoF", *reader, optsF);
+    BOOST_CHECK(filter->getName() == "filters.crop");
+    BOOST_CHECK(s_demoflag == 22);
 
     s_demoflag = 0;
     Options optsM;
     optsM.add("flag",33,"my flag");
     std::vector<const Stage*> stages;
-    //stages.push_back(reader);
-    //Stage* multifilter = factory.createMultiFilter("demoM", stages, optsM);
-    //BOOST_CHECK(multifilter->getName() == "filters.mosaic");
-    //BOOST_CHECK(s_demoflag == 33);
+    stages.push_back(reader);
+    Stage* multifilter = factory.createMultiFilter("demoM", stages, optsM);
+    BOOST_CHECK(multifilter->getName() == "filters.mosaic");
+    BOOST_CHECK(s_demoflag == 33);
 
     s_demoflag = 0;
     Options optsW;
     optsW.add("flag",44,"my flag");
-    //Writer* writer = factory.createWriter("demoW", *reader, optsW);
-    //BOOST_CHECK(writer->getName() == "drivers.las.writer");
-    //BOOST_CHECK(s_demoflag == 44);
+    Writer* writer = factory.createWriter("demoW", *reader, optsW);
+    BOOST_CHECK(writer->getName() == "drivers.las.writer");
+    BOOST_CHECK(s_demoflag == 44);
+
+    delete writer;
+    delete multifilter;
+    delete filter;
+    delete reader;
 
     return;
 }

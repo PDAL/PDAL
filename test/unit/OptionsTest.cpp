@@ -52,8 +52,8 @@ BOOST_AUTO_TEST_CASE(test_static_options)
 {
     const pdal::Options& opts = pdal::filters::CropFilter::s_getDefaultOptions();
 
-    BOOST_CHECK(opts.hasOption<std::string>("foo"));
-    BOOST_CHECK(!opts.hasOption<std::string>("bar"));
+    BOOST_CHECK(opts.hasOption<std::string>("bounds"));
+    BOOST_CHECK(!opts.hasOption<std::string>("metes"));
     const boost::property_tree::ptree& pt = opts.getPTree();
     BOOST_CHECK(pt.size() == 1);
 

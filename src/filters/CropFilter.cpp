@@ -37,6 +37,7 @@
 #include <pdal/filters/CropFilterIterator.hpp>
 #include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <sstream>
 
 namespace pdal { namespace filters {
 
@@ -47,7 +48,12 @@ IMPLEMENT_STATICS(CropFilter, "filters.crop", "Crop Filter")
 CropFilter::CropFilter(const Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
-    throw not_yet_implemented("options ctor"); 
+    std::stringstream bounds_str ( options.getOption<std::string>("bounds").getValue() );
+    bounds_str >> m_bounds;
+
+    initialize();
+
+    return;
 }
 
 
@@ -55,7 +61,15 @@ CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
     : Filter(prevStage, Options::none())
     , m_bounds(bounds)
 {
-    this->setBounds(bounds);
+    initialize();
+
+    return;
+}
+
+
+void CropFilter::initialize()
+{
+    this->setBounds(m_bounds);
 
     this->setNumPoints(0);
     this->setPointCountType(PointCount_Unknown);
@@ -66,8 +80,8 @@ CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
 
 const Options& CropFilter::s_getDefaultOptions()
 {
-    static Option<std::string> opt1("foo","bar","baz"); // test
-    static Options options(opt1);
+    static Option<std::string> option1("bounds","","bounds to crop to");
+    static Options options(option1);
     return options;
 }
 

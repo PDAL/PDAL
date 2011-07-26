@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
             const boost::uint64_t numPoints = reader.getNumPoints();
 
             // need to scope the writer, so that's it dtor can use the stream
-            pdal::drivers::las::LasWriter writer(reader, *ofs);
+            pdal::drivers::las::LasWriter writer(reader, ofs);
 
             writer.setSpatialReference(ref);
 
@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
             const boost::uint64_t numPoints = readerx.getNumPoints();
 
             // need to scope the writer, so that's it dtor can use the stream
-            pdal::drivers::las::LasWriter writer(readerx, *ofs);
+            pdal::drivers::las::LasWriter writer(readerx, ofs);
 
             writer.setSpatialReference(ref);
 

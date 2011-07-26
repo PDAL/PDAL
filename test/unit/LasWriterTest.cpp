@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::LasWriter writer(reader, *ofs);
+        pdal::drivers::las::LasWriter writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Las Writer");
 
         writer.setCompressed(false);
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::LasWriter writer(reader, *ofs);
+        pdal::drivers::las::LasWriter writer(reader, ofs);
 
         writer.setCompressed(true);
         writer.setDate(0, 0);
@@ -143,7 +143,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::LasWriter writer(reader, *ofs);
+        pdal::drivers::las::LasWriter writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Las Writer");
 
         writer.setCompressed(false);

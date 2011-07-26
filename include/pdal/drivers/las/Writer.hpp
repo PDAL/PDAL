@@ -40,6 +40,7 @@
 #include <pdal/Writer.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/SummaryData.hpp>
+#include <pdal/StreamManager.hpp>
 #include <boost/scoped_ptr.hpp>
 
 // liblaszip
@@ -56,7 +57,7 @@ class PDAL_DLL LasWriter : public Writer
 
 public:
     LasWriter(const Stage& prevStage, const Options&);
-    LasWriter(Stage& prevStage, std::ostream&);
+    LasWriter(Stage& prevStage, std::ostream*);
     ~LasWriter();
 
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
@@ -87,7 +88,10 @@ protected:
     virtual void writeEnd();
 
 private:
-    std::ostream& m_ostream;
+    void initialize();
+
+    OStreamManager m_streamManager;
+
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
     bool m_isCompressed;

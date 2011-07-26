@@ -52,8 +52,13 @@ IMPLEMENT_STATICS(LasReader, "drivers.las.reader", "Las Reader")
 
 LasReader::LasReader(const Options& options)
     : LasReaderBase(options)
+    , m_filename("")
 {
-    throw not_yet_implemented("options ctor"); 
+    m_filename = options.getOption<std::string>("filename").getValue();
+
+    initialize();
+
+    return;
 }
 
 
@@ -61,9 +66,17 @@ LasReader::LasReader(const std::string& filename)
     : LasReaderBase(Options::none())
     , m_filename(filename)
 {
-    std::istream* str = Utils::openFile(m_filename);
+    initialize();
 
-    LasHeaderReader lasHeaderReader(m_lasHeader, *str);
+    return;
+}
+
+
+void LasReader::initialize()
+{
+    std::istream* stream = Utils::openFile(m_filename);
+
+    LasHeaderReader lasHeaderReader(m_lasHeader, *stream);
     lasHeaderReader.read( getSchemaRef() );
 
     this->setBounds(m_lasHeader.getBounds());
@@ -75,7 +88,7 @@ LasReader::LasReader(const std::string& filename)
         setSpatialReference(srs);
     }
 
-    Utils::closeFile(str);
+    Utils::closeFile(stream);
 
     return;
 }
@@ -83,7 +96,8 @@ LasReader::LasReader(const std::string& filename)
 
 const Options& LasReader::s_getDefaultOptions()
 {
-    static Options options;
+    static Option<std::string> option1("filename", "", "file to read from");
+    static Options options(option1);
     return options;
 }
 

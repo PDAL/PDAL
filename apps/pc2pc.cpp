@@ -126,7 +126,7 @@ int Application_pc2pc::execute()
     
         const boost::uint64_t numPoints = reader.getNumPoints();
 
-        pdal::drivers::las::LasWriter writer(reader, *ofs);
+        pdal::drivers::las::LasWriter writer(reader, ofs);
 
         //BUG: handle laz writer.setCompressed(false);
 
@@ -243,7 +243,7 @@ int Application_pc2pc::execute()
                                                         scalez, offsetz, 
                                                         true);
 
-        pdal::drivers::las::LasWriter writer(descalingFilter, *ofs);
+        pdal::drivers::las::LasWriter writer(descalingFilter, ofs);
 
 
         if (compress)

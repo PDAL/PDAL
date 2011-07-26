@@ -77,8 +77,14 @@ private:
 
     StageFactory m_factory;
 
-    //typedef std::vector<StagePtr> StagePtrList;
-    //StagePtrList m_stages;
+    typedef std::vector<Reader*> ReaderList;
+    typedef std::vector<Filter*> FilterList;
+    typedef std::vector<MultiFilter*> MultiFilterList;
+    typedef std::vector<Writer*> WriterList;
+    ReaderList m_readers;
+    FilterList m_filters;
+    MultiFilterList m_multifilters;
+    WriterList m_writers;
 
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented

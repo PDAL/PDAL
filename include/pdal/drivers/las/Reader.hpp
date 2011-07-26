@@ -98,7 +98,9 @@ protected:
     MetadataRecord& getMetadataRecordRef(int index);
 
 private:
-    const std::string m_filename;
+    void initialize();
+
+    std::string m_filename;
     LasHeader m_lasHeader;
     std::vector<MetadataRecord> m_metadataRecords;
 
