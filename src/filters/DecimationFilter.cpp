@@ -40,7 +40,6 @@
 namespace pdal { namespace filters {
 
 
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(DecimationFilter, "filters.decimation", "Decimation Filter")
 
 
@@ -58,6 +57,13 @@ DecimationFilter::DecimationFilter(const Stage& prevStage, boost::uint32_t step)
     this->setNumPoints( this->getNumPoints() / step );
 
     return;
+}
+
+
+const Options& DecimationFilter::s_getDefaultOptions()
+{
+    static Options options;
+    return options;
 }
 
 

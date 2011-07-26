@@ -51,7 +51,6 @@
 namespace pdal { namespace drivers { namespace liblas {
 
 
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(LiblasWriter, "drivers.liblas.writer", "Liblas Writer")
 
 
@@ -80,6 +79,13 @@ LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
 LiblasWriter::~LiblasWriter()
 {
     return;
+}
+
+
+const Options& LiblasWriter::s_getDefaultOptions()
+{
+    static Options options;
+    return options;
 }
 
 

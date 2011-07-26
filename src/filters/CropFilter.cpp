@@ -41,7 +41,6 @@
 namespace pdal { namespace filters {
 
 
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(CropFilter, "filters.crop", "Crop Filter")
 
 
@@ -62,6 +61,14 @@ CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
     this->setPointCountType(PointCount_Unknown);
 
     return;
+}
+
+
+const Options& CropFilter::s_getDefaultOptions()
+{
+    static Option<std::string> opt1("foo","bar","baz"); // test
+    static Options options(opt1);
+    return options;
 }
 
 

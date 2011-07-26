@@ -81,7 +81,6 @@ public:
     private:
 
 #define IMPLEMENT_STATICS(T, name, description)  \
-    const Options& T::s_getDefaultOptions() { return s_defaultOptions; } \
     const Options& T::getDefaultOptions() const { return s_getDefaultOptions(); }  \
     const std::string& T::s_getName() { static std::string s(name); return s; }  \
     const std::string& T::getName() const { return s_getName(); }  \

@@ -40,7 +40,6 @@
 namespace pdal { namespace filters {
 
 
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(CacheFilter, "filters.cache", "Cache Filter")
 
 
@@ -68,6 +67,13 @@ CacheFilter::CacheFilter(const Stage& prevStage, boost::uint32_t maxCacheBlocks,
 CacheFilter::~CacheFilter()
 {
     delete m_cache;
+}
+
+
+const Options& CacheFilter::s_getDefaultOptions()
+{
+    static Options options;
+    return options;
 }
 
 

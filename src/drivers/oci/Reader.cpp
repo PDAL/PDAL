@@ -45,7 +45,6 @@
 namespace pdal { namespace drivers { namespace oci {
 
 
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(Reader, "drivers.oci.reader", "OCI Reader")
 
 static OptionsOld dummy;
@@ -115,6 +114,14 @@ Reader::Reader(OptionsOld& optionsOld)
     
     // setNumPoints(1000);
 }    
+
+
+const Options& Reader::s_getDefaultOptions()
+{
+    static Options options;
+    return options;
+}
+
 
 bool Reader::isVerbose() const
 {

@@ -269,7 +269,6 @@ std::string ReadFile(std::string filename)
 }
 
 
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(Writer, "drivers.oci.writer", "OCI Writer")
 
 static OptionsOld dummy;
@@ -306,6 +305,13 @@ Writer::~Writer()
     m_connection->Commit();
 
     return;
+}
+
+
+const Options& Writer::s_getDefaultOptions()
+{
+    static Options options;
+    return options;
 }
 
 

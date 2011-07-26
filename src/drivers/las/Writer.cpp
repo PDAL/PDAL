@@ -54,7 +54,6 @@
 namespace pdal { namespace drivers { namespace las {
 
 
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(LasWriter, "drivers.las.writer", "Las Writer")
 
 
@@ -81,6 +80,13 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream& ostream)
 LasWriter::~LasWriter()
 {
 
+}
+
+
+const Options& LasWriter::s_getDefaultOptions()
+{
+    static Options options;
+    return options;
 }
 
 

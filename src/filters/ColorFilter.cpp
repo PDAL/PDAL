@@ -44,7 +44,6 @@
 namespace pdal { namespace filters {
 
 
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(ColorFilter, "filters.color", "Color Filter")
 
 
@@ -61,6 +60,13 @@ ColorFilter::ColorFilter(const Stage& prevStage)
     checkImpedance();
 
     return;
+}
+
+
+const Options& ColorFilter::s_getDefaultOptions()
+{
+    static Options options;
+    return options;
 }
 
 

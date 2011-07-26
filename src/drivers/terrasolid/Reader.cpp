@@ -85,7 +85,6 @@ PointIndexes::PointIndexes(const Schema& schema, TERRASOLID_Format_Type format)
 }
 
 
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(Reader, "drivers.terrasolid.reader", "TerraSolid Reader")
 
 static OptionsOld dummy;
@@ -152,6 +151,13 @@ Reader::Reader(OptionsOld& optionsOld)
     // getSchemaRef().dump();
     delete stream;
 }    
+
+
+const Options& Reader::s_getDefaultOptions()
+{
+    static Options options;
+    return options;
+}
 
 
 std::string Reader::getFileName() const

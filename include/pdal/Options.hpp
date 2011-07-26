@@ -82,7 +82,7 @@ public:
         , m_description(description)
         , m_value(value)
     {}
-    
+
     // construct it from an xml stream
     Option(std::istream& istr)
     {
@@ -154,10 +154,13 @@ public:
     // defult ctor, empy options list
     Options() {}
 
-    // construct from an array of Option items
-    // (useful for initialization of a static Options object)
-    Options(std::vector<pdal::Option<std::string> > options);
+    // what's a better way to do this?
+    Options(const Option<std::string>&);
+    Options(const Option<std::string>&, const Option<std::string>&);
+    Options(const Option<std::string>&, const Option<std::string>&, const Option<std::string>&);
+    Options(const Option<std::string>&, const Option<std::string>&, const Option<std::string>&, const Option<std::string>&);
 
+    // initialize from a property tree
     Options(boost::property_tree::ptree t);
 
     // read options from an xml stream
@@ -234,16 +237,6 @@ private:
 
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const OptionsOld&);
-
-
-// Use this to create a static variable initialized to the given Option items.
-// Note that option_items must use boost::assign syntax, e.g.
-//      INIT_OPTIONS(s_defaultOptions, (pdal::Option<std::string>("r","s","t")) (pdal::Option<std::string>("u","v","w")) )
-// The reason for this mess is that we want to initialize static Options objects, and there's no clean way to do that.
-
-#define INIT_OPTIONS(var, option_items) \
-    static const std::vector<pdal::Option<std::string> > var##_vector(boost::assign::list_of option_items); \
-    static const pdal::Options var(var##_vector);
 
 
 } // namespace pdal

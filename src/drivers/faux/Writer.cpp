@@ -40,7 +40,6 @@
 namespace pdal { namespace drivers { namespace faux {
 
     
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(Writer, "drivers.faux.writer", "Faux Writer")
 
 
@@ -49,6 +48,14 @@ Writer::Writer(const Stage& prevStage, const Options& options)
 {
     return;
 }
+
+
+const Options& Writer::s_getDefaultOptions()
+{
+    static Options options;
+    return options;
+}
+
 
 
 void Writer::writeBegin()

@@ -46,7 +46,6 @@
 namespace pdal { namespace filters {
 
 
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(ScalingFilter, "filters.scaling", "Scaling Filter")
 
 
@@ -92,6 +91,13 @@ ScalingFilter::ScalingFilter(const Stage& prevStage, double scaleX, double offse
     initialize();
 
     return;
+}
+
+
+const Options& ScalingFilter::s_getDefaultOptions()
+{
+    static Options options;
+    return options;
 }
 
 

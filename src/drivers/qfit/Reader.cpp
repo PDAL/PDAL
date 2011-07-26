@@ -220,7 +220,6 @@ PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 }
 
 
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(Reader, "drivers.qfit.reader", "QFIT Reader")
 
 
@@ -305,6 +304,13 @@ Reader::Reader(const Options& options)
     // getSchemaRef().dump();
     delete str;
 }    
+
+
+const Options& Reader::s_getDefaultOptions()
+{
+    static Options options;
+    return options;
+}
 
 
 std::string Reader::getFileName() const
