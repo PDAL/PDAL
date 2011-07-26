@@ -866,7 +866,7 @@ oss << "declare\n"
     {
         statement->WriteCLob( &boundary_locator, wkt ); 
         statement->Bind(&boundary_locator);
-        statement->Bind((long int*)&srid);
+        statement->Bind((int*)&srid);
 
     }
 
