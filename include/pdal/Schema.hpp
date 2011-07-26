@@ -45,6 +45,7 @@
 #include <pdal/pdal.hpp>
 
 #include <vector>
+#include <map>
 
 #include <pdal/Dimension.hpp>
 
@@ -56,9 +57,15 @@
 #include <boost/array.hpp>
 #include <boost/optional.hpp>
 
+#include <boost/tuple/tuple.hpp>
+#include <boost/tuple/tuple_comparison.hpp>
+
+
 
 namespace pdal
 {
+
+typedef boost::tuple<Dimension::Field, Dimension::DataType> tpl_t;
 
 /// Schema definition
 class PDAL_DLL Schema
@@ -85,7 +92,7 @@ public:
     const Dimension& getDimension(std::size_t index) const;
     Dimension& getDimension(std::size_t index);
     const Dimensions& getDimensions() const;
-    Dimensions& getDimensions();
+    // Dimensions& getDimensions();
 
     // returns the index of the field
     //
@@ -109,6 +116,7 @@ public:
 private:
     std::vector<Dimension> m_dimensions;
 
+    std::map<tpl_t, std::size_t> m_dimensions_map;
     // this is a mapping from field name to index position in the
     // m_dimensions array (or -1 if field not present)
     // int m_indexTable[Dimension::Field_LAST];
