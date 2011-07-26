@@ -37,7 +37,11 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <pdal/Range.hpp>
+#include <pdal/StreamOwner.hpp>
+#include <pdal/Utils.hpp>
+#include <pdal/exceptions.hpp>
+
+#include "Support.hpp"
 
 using namespace pdal;
 
@@ -45,6 +49,62 @@ BOOST_AUTO_TEST_SUITE(StreamOwnerTest)
 
 BOOST_AUTO_TEST_CASE(StreamOwnerTest_test1)
 {
+    const std::string rfile = Support::datapath("1.2-with-color.las");
+    const std::string wfile = "temp.txt";
+
+    // remove file from earlier run, if needed
+    Utils::deleteFile(wfile);
+    BOOST_CHECK(!Utils::fileExists(wfile));
+
+    {
+        // filename, reading
+        pdal::IStreamOwner file1(rfile);
+        BOOST_CHECK(file1.istream() != NULL);
+        BOOST_CHECK(file1.getFileName() == rfile);
+    }
+
+    {
+        // filename, reading -- should throw
+        bool ok = false;
+        try
+        {
+            pdal::IStreamOwner file1x("sillyfilenamethatdoesnotexist.xml");
+            ok = false;
+        }
+        catch (pdal::pdal_error ex)
+        {
+            ok = true;
+        }
+        BOOST_CHECK(ok);
+    }
+
+    {
+        // filename, writing
+        pdal::OStreamOwner file2(wfile);
+        BOOST_CHECK(file2.ostream() != NULL);
+        BOOST_CHECK(file2.getFileName() == wfile);
+
+        BOOST_CHECK(Utils::fileExists(wfile));
+    }
+
+    {
+        // stream, reading
+        pdal::IStreamOwner file3(std::cin);
+        BOOST_CHECK(file3.istream() == std::cin);
+        BOOST_CHECK(file3.getFileName() == "");
+    }
+
+    {
+        // stream, writing
+        pdal::OStreamOwner file4(std::cout);
+        BOOST_CHECK(file4.ostream() == std::cout);
+        BOOST_CHECK(file4.getFileName() == "");
+    }
+
+    // cleanup
+    Utils::deleteFile(wfile);
+    BOOST_CHECK(!Utils::fileExists(wfile));
+
     return;
 }
 

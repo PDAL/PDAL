@@ -54,31 +54,51 @@ namespace pdal
 // This could, I suppose, evolve into something that even takes in things
 // other than std streams or filenames.
 
-class PDAL_DLL StreamOwner
+class PDAL_DLL StreamOwnerBase
 {
 public:
-    enum Mode { ReadMode, WriteMode };
+    StreamOwnerBase(const std::string& filename);
+    virtual ~StreamOwnerBase() {}
 
-public:
-    StreamOwner(const std::string filename, Mode mode);
-    StreamOwner(std::istream*);
-    StreamOwner(std::ostream*);
-    ~StreamOwner();
-
-    std::istream* istream();
-    std::ostream* ostream();
+    // returns "" if stream-based ctor was used
+    virtual const std::string& getFileName() const;
 
 private:
-    Mode m_mode; // read or write?
-    bool m_owned; // if true, we have to delete the stream
+    std::string m_filename;
 
-    std::istream* m_istream;
-    std::ostream* m_ostream;
-
-    StreamOwner& operator=(const StreamOwner&); // not implemented
-    StreamOwner(const StreamOwner&); // not implemented
+    StreamOwnerBase(const StreamOwnerBase&); // nope
+    StreamOwnerBase operator=(const StreamOwnerBase&); // nope
 };
 
+
+class PDAL_DLL IStreamOwner : public StreamOwnerBase
+{
+public:
+    IStreamOwner(const std::string& filename);
+    IStreamOwner(std::istream&);
+    ~IStreamOwner();
+
+    std::istream& istream();
+
+private:
+    std::istream* m_pistream; // not NULL iff we own the stream
+    std::istream& m_istream;
+};
+
+
+class PDAL_DLL OStreamOwner : public StreamOwnerBase
+{
+public:
+    OStreamOwner(const std::string& filename);
+    OStreamOwner(std::ostream&);
+    ~OStreamOwner();
+
+    std::ostream& ostream();
+
+private:
+    std::ostream* m_postream;
+    std::ostream& m_ostream;
+};
 
 } // namespace pdal
 

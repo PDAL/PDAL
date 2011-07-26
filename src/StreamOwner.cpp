@@ -40,88 +40,93 @@
 namespace pdal
 {
 
-StreamOwner::StreamOwner(const std::string filename, Mode mode)
-    : m_mode(mode)
-    , m_owned(true)
-    , m_istream(NULL)
-    , m_ostream(NULL)
-{
-    if (m_mode == ReadMode)
-    {
-        m_istream = Utils::openFile(filename);
-    }
-    else if (m_mode == WriteMode)
-    {
-        m_ostream = Utils::createFile(filename);
-    }
-    else
-    {
-        throw pdal_error("invalid file mode");
-    }
 
+StreamOwnerBase::StreamOwnerBase(const std::string& filename)
+    : m_filename(filename)
+{
     return;
 }
 
 
-StreamOwner::StreamOwner(std::istream* istream)
-    : m_mode(ReadMode)
-    , m_owned(false)
+const std::string& StreamOwnerBase::getFileName() const
+{
+    return m_filename;
+}
+
+
+// -------------------------------------------------------------------------------
+
+IStreamOwner::IStreamOwner(const std::string& filename)
+    : StreamOwnerBase(filename)
+    , m_pistream(Utils::openFile(filename, true))
+    , m_istream(*m_pistream)
+{
+    return;
+}
+
+
+IStreamOwner::IStreamOwner(std::istream& istream)
+    : StreamOwnerBase("")
+    , m_pistream(NULL)
     , m_istream(istream)
-    , m_ostream(NULL)
 {
     return;
 }
 
 
-StreamOwner::StreamOwner(std::ostream* ostream)
-    : m_mode(WriteMode)
-    , m_owned(false)
-    , m_istream(NULL)
+IStreamOwner::~IStreamOwner()
+{
+    if (m_pistream)
+    {
+        Utils::closeFile(m_pistream);
+        m_pistream = NULL;
+    }
+
+    return;
+}
+
+
+std::istream& IStreamOwner::istream()
+{
+    return m_istream;
+}
+
+
+// -------------------------------------------------------------------------------
+
+
+OStreamOwner::OStreamOwner(const std::string& filename)
+    : StreamOwnerBase(filename)
+    , m_postream(Utils::createFile(filename, true))
+    , m_ostream(*m_postream)
+{
+    return;
+}
+
+
+OStreamOwner::OStreamOwner(std::ostream& ostream)
+    : StreamOwnerBase("")
+    , m_postream(NULL)
     , m_ostream(ostream)
 {
     return;
 }
 
 
-StreamOwner::~StreamOwner()
+OStreamOwner::~OStreamOwner()
 {
-    if (m_istream)
+    if (m_postream)
     {
-        if (m_owned)
-        {
-            Utils::closeFile(m_istream);
-        }
-        m_istream = NULL;
-    }
-    if (m_ostream)
-    {
-        if (m_owned)
-        {
-            Utils::closeFile(m_ostream);
-        }
-        m_ostream = NULL;
+        Utils::closeFile(m_postream);
+        m_postream = NULL;
     }
 
     return;
 }
 
 
-std::istream* StreamOwner::istream()
+std::ostream& OStreamOwner::ostream()
 {
-    if (m_mode != ReadMode)
-    {
-        throw pdal_error("invalid file mode");
-    }
-    return m_istream;
-}
-
-
-std::ostream* StreamOwner::ostream()
-{
-    if (m_mode != WriteMode)
-    {
-        throw pdal_error("invalid file mode");
-    }
     return m_ostream;
 }
 
