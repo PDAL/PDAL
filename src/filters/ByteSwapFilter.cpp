@@ -66,20 +66,21 @@ ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
 
     Schema& schema = this->getSchemaRef();
 
-    std::vector<Dimension>& dimensions = schema.getDimensions();
-    for (std::vector<Dimension>::iterator i = dimensions.begin(); i != dimensions.end(); ++i)
-    {
-        pdal::EndianType t = i->getEndianness();
-        if (t == Endian_Little)
-        {
-            i->setEndianness(Endian_Big);
-        } else if (t == Endian_Big)
-        {
-            i->setEndianness(Endian_Little);
-        } else {
-            throw pdal_error("ByteSwapFilter can only swap big/little endian dimensions");
-        }
-    }    
+    // FIXME:  this doesn't work anymore
+    // std::vector<Dimension>& dimensions = schema.getDimensions();
+    // for (std::vector<Dimension>::iterator i = dimensions.begin(); i != dimensions.end(); ++i)
+    // {
+    //     pdal::EndianType t = i->getEndianness();
+    //     if (t == Endian_Little)
+    //     {
+    //         i->setEndianness(Endian_Big);
+    //     } else if (t == Endian_Big)
+    //     {
+    //         i->setEndianness(Endian_Little);
+    //     } else {
+    //         throw pdal_error("ByteSwapFilter can only swap big/little endian dimensions");
+    //     }
+    // }    
         
     return;
 }
