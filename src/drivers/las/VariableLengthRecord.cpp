@@ -62,7 +62,7 @@ VariableLengthRecord::VariableLengthRecord(boost::uint16_t reserved,
                                            std::string description,
                                            const boost::uint8_t* bytes,
                                            std::size_t length)
-    : m_reserved(reserved)
+    : m_reserved(0xAABB)
     , m_userId(userId)
     , m_recordId(recordId)
     , m_description(description)
