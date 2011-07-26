@@ -49,61 +49,90 @@ BOOST_AUTO_TEST_SUITE(StreamOwnerTest)
 
 BOOST_AUTO_TEST_CASE(StreamOwnerTest_test1)
 {
-    const std::string rfile = Support::datapath("1.2-with-color.las");
-    const std::string wfile = "temp.txt";
+    const std::string rfilename = Support::datapath("1.2-with-color.las");
+    const std::string wfilename = "temp.txt";
 
-    // remove file from earlier run, if needed
-    Utils::deleteFile(wfile);
-    BOOST_CHECK(!Utils::fileExists(wfile));
-
+    // filename, reading
     {
-        // filename, reading
-        pdal::IStreamOwner file1(rfile);
-        BOOST_CHECK(file1.istream() != NULL);
-        BOOST_CHECK(file1.getFileName() == rfile);
-    }
-
-    {
-        // filename, reading -- should throw
-        bool ok = false;
-        try
+        BOOST_CHECK(Utils::fileExists(rfilename));
         {
-            pdal::IStreamOwner file1x("sillyfilenamethatdoesnotexist.xml");
-            ok = false;
+            pdal::IStreamOwner rfile(rfilename);
+            rfile.open();
+            BOOST_CHECK(rfile.getFileName() == rfilename);
+            rfile.close();
         }
-        catch (pdal::pdal_error ex)
+    }
+
+    // filename, reading -- should throw
+    {
+        const std::string silly = "sillyfilenamethatdoesnotexist.xml";
+        BOOST_CHECK(!Utils::fileExists(silly));
+
         {
-            ok = true;
+            bool ok = false;
+            try
+            {
+                pdal::IStreamOwner file(silly);
+                file.open();
+                ok = false;
+            }
+            catch (pdal::pdal_error ex)
+            {
+                ok = true;
+            }
+            BOOST_CHECK(ok);
         }
-        BOOST_CHECK(ok);
     }
-
+    
+    // filename, writing
     {
-        // filename, writing
-        pdal::OStreamOwner file2(wfile);
-        BOOST_CHECK(file2.ostream() != NULL);
-        BOOST_CHECK(file2.getFileName() == wfile);
+        Utils::deleteFile(wfilename);
+        BOOST_CHECK(!Utils::fileExists(wfilename));
 
-        BOOST_CHECK(Utils::fileExists(wfile));
+        {
+            pdal::OStreamOwner wfile(wfilename);
+            wfile.open();
+            BOOST_CHECK(wfile.getFileName() == wfilename);
+
+            BOOST_CHECK(Utils::fileExists(wfilename));
+            wfile.close();
+        }
+     
+        // cleanup
+        Utils::deleteFile(wfilename);
+        BOOST_CHECK(!Utils::fileExists(wfilename));
     }
 
+    // stream, reading
     {
-        // stream, reading
-        pdal::IStreamOwner file3(std::cin);
-        BOOST_CHECK(file3.istream() == std::cin);
-        BOOST_CHECK(file3.getFileName() == "");
+        std::istream* istreamname = Utils::openFile(rfilename);
+        
+        {
+            pdal::IStreamOwner istream(istreamname);
+            istream.open();
+            BOOST_CHECK(istream.istream() == *istreamname);
+            BOOST_CHECK(istream.getFileName() == "");
+            istream.close();
+        }
+
+        Utils::closeFile(istreamname);
     }
 
+    // stream, writing
     {
-        // stream, writing
-        pdal::OStreamOwner file4(std::cout);
-        BOOST_CHECK(file4.ostream() == std::cout);
-        BOOST_CHECK(file4.getFileName() == "");
-    }
+        std::ostream* ostreamname = Utils::createFile(wfilename);
+        
+        {
+            pdal::OStreamOwner ostream(ostreamname);
+            ostream.open();
+            BOOST_CHECK(ostream.ostream() == *ostreamname);
+            BOOST_CHECK(ostream.getFileName() == "");
+            ostream.close();
+        }
 
-    // cleanup
-    Utils::deleteFile(wfile);
-    BOOST_CHECK(!Utils::fileExists(wfile));
+        Utils::closeFile(ostreamname);
+        Utils::deleteFile(wfilename);
+    }
 
     return;
 }

@@ -53,21 +53,38 @@ namespace pdal
 //
 // This could, I suppose, evolve into something that even takes in things
 // other than std streams or filenames.
+//
+// You must always call open(), regardless of what kind of ctor you call,
+// i.e. stream or filename.  Calling close() is optional (the dtor will do
+// it for you.)
 
 class PDAL_DLL StreamOwnerBase
 {
 public:
-    StreamOwnerBase(const std::string& filename);
+    enum Type { Stream, File };
+
+    StreamOwnerBase(const std::string& filename, Type type);
     virtual ~StreamOwnerBase() {}
+
+    virtual void open() = 0; // throws
+    virtual void close() = 0;
 
     // returns "" if stream-based ctor was used
     virtual const std::string& getFileName() const;
 
+    Type getType() const;
+    bool isOpen() const;
+
+protected:
+    bool m_isOpen;
+
 private:
+    const Type m_type;
+
     std::string m_filename;
 
     StreamOwnerBase(const StreamOwnerBase&); // nope
-    StreamOwnerBase operator=(const StreamOwnerBase&); // nope
+    StreamOwnerBase& operator=(const StreamOwnerBase&); // nope
 };
 
 
@@ -75,14 +92,16 @@ class PDAL_DLL IStreamOwner : public StreamOwnerBase
 {
 public:
     IStreamOwner(const std::string& filename);
-    IStreamOwner(std::istream&);
+    IStreamOwner(std::istream*); // may not be NULL
     ~IStreamOwner();
+
+    virtual void open(); // throws
+    virtual void close();
 
     std::istream& istream();
 
 private:
-    std::istream* m_pistream; // not NULL iff we own the stream
-    std::istream& m_istream;
+    std::istream* m_istream; // not NULL iff we own the stream
 };
 
 
@@ -90,14 +109,16 @@ class PDAL_DLL OStreamOwner : public StreamOwnerBase
 {
 public:
     OStreamOwner(const std::string& filename);
-    OStreamOwner(std::ostream&);
+    OStreamOwner(std::ostream*); // may not be NULL
     ~OStreamOwner();
+
+    virtual void open(); // throws
+    virtual void close();
 
     std::ostream& ostream();
 
 private:
-    std::ostream* m_postream;
-    std::ostream& m_ostream;
+    std::ostream* m_ostream;
 };
 
 } // namespace pdal
