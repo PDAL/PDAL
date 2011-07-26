@@ -57,10 +57,11 @@ public:
     void setChunkSize(boost::uint32_t);
     boost::uint32_t getChunkSize() const;
 
-    // Read the  given number of points (or less, if the reader runs out first), 
+    // Read the given number of points (or less, if the reader runs out first), 
     // and then write them out to wherever.  Returns total number of points
     // actually written.
-    boost::uint64_t write(boost::uint64_t targetNumPointsToWrite);
+    // If given number of points is 0, do as many points as the reader supplies to us.
+    boost::uint64_t write(boost::uint64_t targetNumPointsToWrite=0);
 
 protected:
     // this is called once before the loop with the writeBuffer calls

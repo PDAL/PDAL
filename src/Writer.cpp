@@ -81,20 +81,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 {
     m_targetNumPointsToWrite = targetNumPointsToWrite;
     m_actualNumPointsWritten = 0;
-    
-    PointCountType count_type = m_prevStage.getPointCountType();
-    
-    // passing in a 0 for the number of points means "write to the end"
-    // but we need to have an end to actually do that.  This code isn't 
-    // currently sufficient to go on writing forever.
-    if (targetNumPointsToWrite == 0)
-    {
-        if (count_type == PointCount_Unknown)
-        {
-            throw pdal_error("Unable to write points with an unknowable point count");
-        }
-    }
-    
+         
     boost::scoped_ptr<StageSequentialIterator> iter(m_prevStage.createSequentialIterator());
     
     if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
@@ -112,6 +99,8 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
         {
             numPointsWrittenThisChunk = writeBuffer(buffer);
             m_actualNumPointsWritten += numPointsWrittenThisChunk;
+
+            buffer.setNumPoints(0); // reset the buffer, so we can use it again
             numPointsReadThisChunk = iter->read(buffer);
         }
     } else 
