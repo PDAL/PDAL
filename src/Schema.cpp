@@ -62,6 +62,7 @@ Schema::Schema()
 /// copy constructor
 Schema::Schema(Schema const& other) 
     : m_dimensions(other.m_dimensions)
+    , m_dimensions_map(other.m_dimensions_map)
 {
 
 }
@@ -73,6 +74,7 @@ Schema& Schema::operator=(Schema const& rhs)
     if (&rhs != this)
     {
         m_dimensions = rhs.m_dimensions;
+        m_dimensions_map = rhs.m_dimensions_map;
     }
 
     return *this;
@@ -81,7 +83,8 @@ Schema& Schema::operator=(Schema const& rhs)
 
 bool Schema::operator==(const Schema& other) const
 {
-    if (m_dimensions == other.m_dimensions)
+    if (m_dimensions == other.m_dimensions &&
+        m_dimensions_map == other.m_dimensions_map)
     {
         return true;
     }
@@ -125,6 +128,8 @@ void Schema::addDimensions(const std::vector<Dimension>& dims)
 void Schema::addDimension(Dimension const& dim)
 {
     m_dimensions.push_back(dim);
+    std::pair<tpl_t, std::size_t> p(tpl_t(dim.getField(),dim.getDataType() ), m_dimensions.size()-1);
+    m_dimensions_map.insert(p);
     return;
 }
 
@@ -133,6 +138,19 @@ void Schema::removeDimension(Dimension const& dim)
 {
     m_dimensions.erase( std::remove( m_dimensions.begin(), m_dimensions.end(), dim), 
                         m_dimensions.end());
+    
+    m_dimensions_map.clear();
+    DimensionsCIter it = m_dimensions.begin();
+    int i(0);
+    while (it != m_dimensions.end())
+    {
+        std::pair<tpl_t, std::size_t> p(tpl_t(it->getField(),it->getDataType() ), i);
+
+        m_dimensions_map.insert(p);
+        ++it;
+        ++i;
+    }
+    
     return;
 }
 
@@ -154,25 +172,44 @@ const Schema::Dimensions& Schema::getDimensions() const
     return m_dimensions;
 }
 
-Schema::Dimensions& Schema::getDimensions()
-{
-    return m_dimensions;
-}
+// Schema::Dimensions& Schema::getDimensions()
+// {
+//     return m_dimensions;
+// }
 
 
 int Schema::getDimensionIndex(Dimension::Field field, Dimension::DataType datatype) const
 {
-    DimensionsCIter it = m_dimensions.begin();
-    int i = 0;
-    while (it != m_dimensions.end())
-    {
-        if (field == it->getField() && datatype == it->getDataType())
-            return i;
-        ++it;
-        ++i;
-    }
 
-    return -1;
+    tpl_t t(field,datatype);
+    
+    std::map<tpl_t, std::size_t>::const_iterator i = m_dimensions_map.find(t);
+    
+    int m = 0;
+    
+    if (i == m_dimensions_map.end()) m = -1;
+    else
+        m = i->second;
+    
+    
+
+    // DimensionsCIter it = m_dimensions.begin();
+    // int j = 0;
+    // while (it != m_dimensions.end())
+    // {
+    //     if (field == it->getField() && datatype == it->getDataType())
+    //     {
+    //         break;
+    //     }
+    //     ++it;
+    //     ++j;
+    // }
+    
+    // if (j == m_dimensions.size()) j = -1;
+    
+    // std::cout << "i->second: " << m << " j: " << j << " map size: "<< m_dimensions_map.size() << " vec size: " << m_dimensions.size() << std::endl;
+    return m;
+
 }
 
 
