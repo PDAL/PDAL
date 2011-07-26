@@ -11,14 +11,14 @@
             <Type>filters.crop</Type>
             <Option>
                 <Name>bounds</Name>
-                <Value>([0,1],[0,1],[0,1])</Value>
+                <Value>([0,1000000],[0,1000000],[0,1000000])</Value>
             </Option>
             <Reader>
                 <Type>drivers.las.reader</Type>
                 <Option>
                     <Name>filename</Name>
                     <Value>../../test/data/1.2-with-color.las</Value>
-                </option>
+                </Option>
             </Reader>
         </Filter>
     </Writer>

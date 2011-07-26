@@ -367,7 +367,7 @@ void PipelineManager::parsePipeline(const boost::property_tree::ptree& tree, Wri
 }
 
 
-void PipelineManager::readXml(const std::string& filename)
+Writer* PipelineManager::readWriterPipeline(const std::string& filename)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::xml_parser::read_xml(filename, tree);
@@ -378,7 +378,7 @@ void PipelineManager::readXml(const std::string& filename)
     Stage* stage = NULL;
     parsePipeline(pipeline, writer, stage);
 
-    return;
+    return writer;
 }
 
 

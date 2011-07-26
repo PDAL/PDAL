@@ -56,30 +56,33 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
     StageFactory factory;
 
     Options optsR;
-    optsR.add("filename", Support::datapath("1.2-with-color.las"), "file to read from");
-    Reader* ptrR = factory.createReader("drivers.las.reader", optsR);
-    BOOST_CHECK(ptrR->getName() == "drivers.las.reader");
+    optsR.add("filename", Support::datapath("1.2-with-color.las"));
+    Reader* reader = factory.createReader("drivers.las.reader", optsR);
+    BOOST_CHECK(reader->getName() == "drivers.las.reader");
 
     Options optsF;
-    optsF.add("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
-    Filter* ptrF = factory.createFilter("filters.crop", *ptrR, optsF);
-    BOOST_CHECK(ptrF->getName() == "filters.crop");
+    optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000));
+    Filter* filter = factory.createFilter("filters.crop", *reader, optsF);
+    BOOST_CHECK(filter->getName() == "filters.crop");
 
-    Options optsM;
-    std::vector<const Stage*> stages;
-    stages.push_back(ptrR);
-    MultiFilter* ptrM = factory.createMultiFilter("filters.mosaic", stages, optsM);
-    BOOST_CHECK(ptrM->getName() == "filters.mosaic");
+    //Options optsM;
+    //std::vector<const Stage*> stages;
+    //stages.push_back(filter);
+    //MultiFilter* multifilter = factory.createMultiFilter("filters.mosaic", stages, optsM);
+    //BOOST_CHECK(multifilter->getName() == "filters.mosaic");
 
     Options optsW;
     optsW.add("filename", "temp.las", "file to write to");
-    Writer* ptrW = factory.createWriter("drivers.las.writer", *ptrF, optsW);
-    BOOST_CHECK(ptrW->getName() == "drivers.las.writer");
+    Writer* writer = factory.createWriter("drivers.las.writer", *filter, optsW);
+    BOOST_CHECK(writer->getName() == "drivers.las.writer");
 
-    delete ptrW;
-    delete ptrM;
-    delete ptrF;
-    delete ptrR;
+    const boost::uint64_t np = writer->write( reader->getNumPoints() );
+    BOOST_CHECK(np == 1065);
+
+    delete writer;
+    //delete multifilter;
+    delete filter;
+    delete reader;
 
     return;
 }

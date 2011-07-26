@@ -57,12 +57,15 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
     Reader* reader = mgr.addReader("drivers.las.reader", optsR);
 
     Options optsF;
-    optsF.add("bounds", Bounds<double>(0,0,0,1,1,1), "crop bounds");
+    optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000), "crop bounds");
     Filter* filter = mgr.addFilter("filters.crop", *reader, optsF);
 
     Options optsW;
     optsW.add("filename", "temp.las", "file to write to");
     Writer* writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
+
+    const boost::uint64_t np = writer->write( reader->getNumPoints() );
+    BOOST_CHECK(np == 1065);
 
     return;
 }
@@ -72,7 +75,10 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
 {
     PipelineManager mgr;
 
-    mgr.readXml(Support::datapath("pipeline1.xml"));
+    Writer* writer = mgr.readWriterPipeline(Support::datapath("pipeline1.xml"));
+
+    const boost::uint64_t np = writer->write();
+    BOOST_CHECK(np == 1065);
 
     return;
 }

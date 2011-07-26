@@ -62,7 +62,7 @@ public:
     MultiFilter* addMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options&);
     Writer* addWriter(const std::string& type, const Stage& prevStage, const Options&);
     
-    void readXml(const std::string&);
+    Writer* readWriterPipeline(const std::string&);
 
 private:
     void parsePipeline(const boost::property_tree::ptree&, Writer*& writer, Stage*& stage);
