@@ -43,7 +43,6 @@
 namespace pdal { namespace drivers { namespace faux {
 
 
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(Reader, "drivers.faux.reader", "Faux Reader")
 
 
@@ -88,6 +87,13 @@ Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std
     setBounds(bounds);
 
     return;
+}
+
+
+const Options& Reader::s_getDefaultOptions()
+{
+    static Options options;
+    return options;
 }
 
 

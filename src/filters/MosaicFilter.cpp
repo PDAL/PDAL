@@ -41,7 +41,6 @@
 namespace pdal { namespace filters {
 
 
-static Options s_defaultOptions;
 IMPLEMENT_STATICS(MosaicFilter, "filters.mosaic", "Mosaic Filter")
 
 
@@ -93,6 +92,13 @@ MosaicFilter::MosaicFilter(const std::vector<const Stage*>& prevStages, const Op
     setNumPoints(totalPoints);
 
     return;
+}
+
+
+const Options& MosaicFilter::s_getDefaultOptions()
+{
+    static Options options;
+    return options;
 }
 
 

@@ -55,13 +55,36 @@ Options::Options(boost::property_tree::ptree t) :
 }
 
 
-Options::Options(std::vector<Option<std::string> > options)
+Options::Options(const Option<std::string>& opt1)
 {
-    BOOST_FOREACH(const Option<std::string>& option, options)
-    {
-        add(option);
-    }
+    add(opt1);
+    return;
+}
 
+
+Options::Options(const Option<std::string>& opt1, const Option<std::string>& opt2)
+{
+    add(opt1);
+    add(opt2);
+    return;
+}
+
+
+Options::Options(const Option<std::string>& opt1, const Option<std::string>& opt2, const Option<std::string>& opt3)
+{
+    add(opt1);
+    add(opt2);
+    add(opt3);
+    return;
+}
+
+
+Options::Options(const Option<std::string>& opt1, const Option<std::string>& opt2, const Option<std::string>& opt3, const Option<std::string>& opt4)
+{
+    add(opt1);
+    add(opt2);
+    add(opt3);
+    add(opt4);
     return;
 }
 

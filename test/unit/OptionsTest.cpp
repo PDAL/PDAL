@@ -33,12 +33,12 @@
 ****************************************************************************/
 
 #include <boost/test/unit_test.hpp>
-#include <boost/assign/list_of.hpp>
 #include <sstream>
 #include <iostream>
 #include <string>
 
 #include <pdal/Options.hpp>
+#include <pdal/filters/CropFilter.hpp>
 
 
 BOOST_AUTO_TEST_SUITE(OptionsTest)
@@ -48,24 +48,18 @@ static std::string xml_int_ref = "<Name>my_int</Name><Description>This is my int
 static std::string xml_str_ref = "<Name>my_string</Name><Description>This is my stringy option.</Description><Value>Yow.</Value>";
 
 
-// INIT_OPTIONS(s_defaultOptions, \
-//              (pdal::Option<std::string>("r","s","t")) \
-//              (pdal::Option<std::string>("u","v","w")) \
-//              (pdal::Option<std::string>("x","y","z")) )
-// 
-// 
-// BOOST_AUTO_TEST_CASE(test_static_options)
-// {
-//     BOOST_CHECK(s_defaultOptions.hasOption<std::string>("r"));
-//     BOOST_CHECK(s_defaultOptions.hasOption<std::string>("u"));
-//     BOOST_CHECK(s_defaultOptions.hasOption<std::string>("x"));
-// 
-//     const boost::property_tree::ptree& pt = s_defaultOptions.getPTree();
-//     BOOST_CHECK(pt.size() == 3);
-// 
-//     return;
-// }
-// 
+BOOST_AUTO_TEST_CASE(test_static_options)
+{
+    const pdal::Options& opts = pdal::filters::CropFilter::s_getDefaultOptions();
+
+    BOOST_CHECK(opts.hasOption<std::string>("foo"));
+    BOOST_CHECK(!opts.hasOption<std::string>("bar"));
+    const boost::property_tree::ptree& pt = opts.getPTree();
+    BOOST_CHECK(pt.size() == 1);
+
+    return;
+}
+
 
 BOOST_AUTO_TEST_CASE(test_option_writing)
 {
