@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <sstream>
+#include <iostream>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
