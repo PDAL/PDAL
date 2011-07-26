@@ -47,10 +47,8 @@ IMPLEMENT_STATICS(CropFilter, "filters.crop", "Crop Filter")
 
 CropFilter::CropFilter(const Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
+    , m_bounds(options.getOption<Bounds<double> >("bounds").getValue())
 {
-    std::stringstream bounds_str ( options.getOption<std::string>("bounds").getValue() );
-    bounds_str >> m_bounds;
-
     initialize();
 
     return;
