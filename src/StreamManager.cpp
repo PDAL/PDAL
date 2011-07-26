@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/StreamOwner.hpp>
+#include <pdal/StreamManager.hpp>
 #include <pdal/Utils.hpp>
 #include <pdal/exceptions.hpp>
 
@@ -41,7 +41,7 @@ namespace pdal
 {
 
 
-StreamOwnerBase::StreamOwnerBase(const std::string& filename, Type type)
+StreamManagerBase::StreamManagerBase(const std::string& filename, Type type)
     : m_isOpen(false)
     , m_type(type)
     , m_filename(filename)
@@ -50,49 +50,49 @@ StreamOwnerBase::StreamOwnerBase(const std::string& filename, Type type)
 }
 
 
-const std::string& StreamOwnerBase::getFileName() const
+const std::string& StreamManagerBase::getFileName() const
 {
     return m_filename;
 }
 
 
-StreamOwnerBase::Type StreamOwnerBase::getType() const
+StreamManagerBase::Type StreamManagerBase::getType() const
 {
     return m_type;
 }
 
 
-bool StreamOwnerBase::isOpen() const
+bool StreamManagerBase::isOpen() const
 {
     return m_isOpen;
 }
 
 // -------------------------------------------------------------------------------
 
-IStreamOwner::IStreamOwner(const std::string& filename)
-    : StreamOwnerBase(filename, File)
+IStreamManager::IStreamManager(const std::string& filename)
+    : StreamManagerBase(filename, File)
     , m_istream(NULL)
 {
     return;
 }
 
 
-IStreamOwner::IStreamOwner(std::istream* istream)
-    : StreamOwnerBase("", Stream)
+IStreamManager::IStreamManager(std::istream* istream)
+    : StreamManagerBase("", Stream)
     , m_istream(istream)
 {
     return;
 }
 
 
-IStreamOwner::~IStreamOwner()
+IStreamManager::~IStreamManager()
 {
     close();
     return;
 }
 
 
-void IStreamOwner::open()
+void IStreamManager::open()
 {
     if (m_isOpen)
         throw pdal_error("cannot re-open file or stream");
@@ -118,7 +118,7 @@ void IStreamOwner::open()
 }
 
 
-void IStreamOwner::close()
+void IStreamManager::close()
 {
     if (!m_isOpen) return;
 
@@ -142,7 +142,7 @@ void IStreamOwner::close()
 }
 
 
-std::istream& IStreamOwner::istream()
+std::istream& IStreamManager::istream()
 {
     if (!isOpen() || !m_istream)
         throw pdal_error("invalid stream");
@@ -153,30 +153,30 @@ std::istream& IStreamOwner::istream()
 // -------------------------------------------------------------------------------
 
 
-OStreamOwner::OStreamOwner(const std::string& filename)
-    : StreamOwnerBase(filename, File)
+OStreamManager::OStreamManager(const std::string& filename)
+    : StreamManagerBase(filename, File)
     , m_ostream(NULL)
 {
     return;
 }
 
 
-OStreamOwner::OStreamOwner(std::ostream* ostream)
-    : StreamOwnerBase("", Stream)
+OStreamManager::OStreamManager(std::ostream* ostream)
+    : StreamManagerBase("", Stream)
     , m_ostream(ostream)
 {
     return;
 }
 
 
-OStreamOwner::~OStreamOwner()
+OStreamManager::~OStreamManager()
 {
     close();
     return;
 }
 
 
-void OStreamOwner::open()
+void OStreamManager::open()
 {
     if (m_isOpen)
         throw pdal_error("cannot re-open file or stream");
@@ -202,7 +202,7 @@ void OStreamOwner::open()
 }
 
 
-void OStreamOwner::close()
+void OStreamManager::close()
 {
     if (!m_isOpen) return;
 
@@ -226,7 +226,7 @@ void OStreamOwner::close()
 }
 
 
-std::ostream& OStreamOwner::ostream()
+std::ostream& OStreamManager::ostream()
 {
     if (!isOpen() || !m_ostream)
         throw pdal_error("invalid stream");

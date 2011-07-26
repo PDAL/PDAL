@@ -37,7 +37,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <pdal/StreamOwner.hpp>
+#include <pdal/StreamManager.hpp>
 #include <pdal/Utils.hpp>
 #include <pdal/exceptions.hpp>
 
@@ -45,9 +45,9 @@
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(StreamOwnerTest)
+BOOST_AUTO_TEST_SUITE(StreamManagerTest)
 
-BOOST_AUTO_TEST_CASE(StreamOwnerTest_test1)
+BOOST_AUTO_TEST_CASE(StreamManagerTest_test1)
 {
     const std::string rfilename = Support::datapath("1.2-with-color.las");
     const std::string wfilename = "temp.txt";
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(StreamOwnerTest_test1)
     {
         BOOST_CHECK(Utils::fileExists(rfilename));
         {
-            pdal::IStreamOwner rfile(rfilename);
+            pdal::IStreamManager rfile(rfilename);
             rfile.open();
             BOOST_CHECK(rfile.getFileName() == rfilename);
             rfile.close();
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(StreamOwnerTest_test1)
             bool ok = false;
             try
             {
-                pdal::IStreamOwner file(silly);
+                pdal::IStreamManager file(silly);
                 file.open();
                 ok = false;
             }
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(StreamOwnerTest_test1)
         BOOST_CHECK(!Utils::fileExists(wfilename));
 
         {
-            pdal::OStreamOwner wfile(wfilename);
+            pdal::OStreamManager wfile(wfilename);
             wfile.open();
             BOOST_CHECK(wfile.getFileName() == wfilename);
 
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(StreamOwnerTest_test1)
         std::istream* istreamname = Utils::openFile(rfilename);
         
         {
-            pdal::IStreamOwner istream(istreamname);
+            pdal::IStreamManager istream(istreamname);
             istream.open();
             BOOST_CHECK(istream.istream() == *istreamname);
             BOOST_CHECK(istream.getFileName() == "");
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(StreamOwnerTest_test1)
         std::ostream* ostreamname = Utils::createFile(wfilename);
         
         {
-            pdal::OStreamOwner ostream(ostreamname);
+            pdal::OStreamManager ostream(ostreamname);
             ostream.open();
             BOOST_CHECK(ostream.ostream() == *ostreamname);
             BOOST_CHECK(ostream.getFileName() == "");

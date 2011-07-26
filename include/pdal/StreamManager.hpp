@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_STREAMOWNER_HPP
-#define INCLUDED_STREAMOWNER_HPP
+#ifndef INCLUDED_STREAMMANAGER_HPP
+#define INCLUDED_STREAMMANAGER_HPP
 
 #include <pdal/pdal.hpp>
 
@@ -58,13 +58,13 @@ namespace pdal
 // i.e. stream or filename.  Calling close() is optional (the dtor will do
 // it for you.)
 
-class PDAL_DLL StreamOwnerBase
+class PDAL_DLL StreamManagerBase
 {
 public:
     enum Type { Stream, File };
 
-    StreamOwnerBase(const std::string& filename, Type type);
-    virtual ~StreamOwnerBase() {}
+    StreamManagerBase(const std::string& filename, Type type);
+    virtual ~StreamManagerBase() {}
 
     virtual void open() = 0; // throws
     virtual void close() = 0;
@@ -83,17 +83,17 @@ private:
 
     std::string m_filename;
 
-    StreamOwnerBase(const StreamOwnerBase&); // nope
-    StreamOwnerBase& operator=(const StreamOwnerBase&); // nope
+    StreamManagerBase(const StreamManagerBase&); // nope
+    StreamManagerBase& operator=(const StreamManagerBase&); // nope
 };
 
 
-class PDAL_DLL IStreamOwner : public StreamOwnerBase
+class PDAL_DLL IStreamManager : public StreamManagerBase
 {
 public:
-    IStreamOwner(const std::string& filename);
-    IStreamOwner(std::istream*); // may not be NULL
-    ~IStreamOwner();
+    IStreamManager(const std::string& filename);
+    IStreamManager(std::istream*); // may not be NULL
+    ~IStreamManager();
 
     virtual void open(); // throws
     virtual void close();
@@ -105,12 +105,12 @@ private:
 };
 
 
-class PDAL_DLL OStreamOwner : public StreamOwnerBase
+class PDAL_DLL OStreamManager : public StreamManagerBase
 {
 public:
-    OStreamOwner(const std::string& filename);
-    OStreamOwner(std::ostream*); // may not be NULL
-    ~OStreamOwner();
+    OStreamManager(const std::string& filename);
+    OStreamManager(std::ostream*); // may not be NULL
+    ~OStreamManager();
 
     virtual void open(); // throws
     virtual void close();
