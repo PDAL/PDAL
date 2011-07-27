@@ -416,7 +416,9 @@ void PipelineManager::writeWriterPipeline(const std::string& filename) const
     
     boost::property_tree::ptree tree = generateTreeFromWriter(*writer);
 
-    boost::property_tree::xml_parser::write_xml(filename, tree);
+    
+    const boost::property_tree::xml_parser::xml_writer_settings<char> settings(' ', 4);
+    boost::property_tree::xml_parser::write_xml(filename, tree, std::locale(), settings);
 
     return;
 }
