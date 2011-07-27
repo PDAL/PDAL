@@ -136,7 +136,7 @@ public:
     std::vector<boost::uint32_t> GetIDs() const; 
     pdal::Bounds<double> const& GetBounds() const {return m_bounds;} 
     void SetBounds(pdal::Bounds<double> const& bounds) {m_bounds = bounds;}
-    void GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t block_id) const;    
+    void GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t block_id, boost::int32_t indexId, boost::int32_t indexBlockId) const;    
     // double GetXmin() const
     //     { return m_xmin; }
     // double GetYmin() const

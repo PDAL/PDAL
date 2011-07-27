@@ -92,7 +92,7 @@ vector<boost::uint32_t> Block::GetIDs() const
     return ids;
 }
 
-void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t block_id) const
+void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t block_id, boost::int32_t indexId, boost::int32_t indexBlockId) const
 {
     pdal::Schema const& schema = buffer.getSchema();
 
@@ -113,8 +113,8 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t 
     std::vector<boost::uint32_t>::const_iterator it;
     boost::uint32_t count = 0;
     
-    const int indexId = schema.getDimensionIndex(Dimension::Field_User1, Dimension::Int32);
-    const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
+    // const int indexId = schema.getDimensionIndex(Dimension::Field_User1, Dimension::Int32);
+    // const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
     
     for (it = ids.begin(); it != ids.end(); it++)
     {
