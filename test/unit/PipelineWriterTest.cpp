@@ -37,35 +37,36 @@
 #include "Support.hpp"
 
 #include <pdal/PipelineManager.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/PipelineReader.hpp>
+#include <pdal/PipelineWriter.hpp>
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(PipelineManagerTest)
+BOOST_AUTO_TEST_SUITE(PipelineWriterTest)
 
 
-BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
+
+BOOST_AUTO_TEST_CASE(PipelineWriterTest_test1)
 {
     {
-        PipelineManager mgr;
+        PipelineManager manager;
+        PipelineReader reader(manager);
+        PipelineWriter writer(manager);
 
-        Options optsR;
-        optsR.add("filename", Support::datapath("1.2-with-color.las"));
-        Reader* reader = mgr.addReader("drivers.las.reader", optsR);
+        reader.readWriterPipeline(Support::datapath("pipeline_write.xml"));
 
-        Options optsF;
-        optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000));
-        Filter* filter = mgr.addFilter("filters.crop", *reader, optsF);
-
-        Options optsW;
-        optsW.add("filename", "temp.las", "file to write to");
-        Writer* writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
-
-        const boost::uint64_t np = writer->write( reader->getNumPoints() );
-        BOOST_CHECK(np == 1065);
+        writer.writeWriterPipeline("test.xml");
     }
 
-    Utils::deleteFile("temp.las");
+    Utils::deleteFile("out.las");
+
+    bool filesSame = Support::compare_text_files("test.xml", Support::datapath("pipeline_write.xml"));
+    BOOST_CHECK(filesSame);
+
+    if (filesSame)
+    {
+        Utils::deleteFile("test.xml");
+    }
 
     return;
 }

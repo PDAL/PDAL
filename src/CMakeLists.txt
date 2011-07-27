@@ -36,6 +36,8 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/MultiFilterIterator.hpp
   ${PDAL_HEADERS_DIR}/Options.hpp
   ${PDAL_HEADERS_DIR}/PipelineManager.hpp
+  ${PDAL_HEADERS_DIR}/PipelineReader.hpp
+  ${PDAL_HEADERS_DIR}/PipelineWriter.hpp
   ${PDAL_HEADERS_DIR}/PointBuffer.hpp  
   ${PDAL_HEADERS_DIR}/PointBufferCache.hpp
   ${PDAL_HEADERS_DIR}/Range.hpp
@@ -72,6 +74,8 @@ set(PDAL_BASE_CPP
   MultiFilterIterator.cpp
   Options.cpp
   PipelineManager.cpp
+  PipelineReader.cpp
+  PipelineWriter.cpp
   PointBuffer.cpp
   PointBufferCache.cpp
   Range.cpp

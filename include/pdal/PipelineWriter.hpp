@@ -32,43 +32,33 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#ifndef INCLUDED_PIPELINEWRITER_HPP
+#define INCLUDED_PIPELINEWRITER_HPP
 
-#include "Support.hpp"
+#include <pdal/pdal.hpp>
+#include <string>
 
-#include <pdal/PipelineManager.hpp>
-#include <pdal/Utils.hpp>
-
-using namespace pdal;
-
-BOOST_AUTO_TEST_SUITE(PipelineManagerTest)
-
-
-BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
+namespace pdal
 {
-    {
-        PipelineManager mgr;
 
-        Options optsR;
-        optsR.add("filename", Support::datapath("1.2-with-color.las"));
-        Reader* reader = mgr.addReader("drivers.las.reader", optsR);
+class PipelineManager;
 
-        Options optsF;
-        optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000));
-        Filter* filter = mgr.addFilter("filters.crop", *reader, optsF);
+class PDAL_DLL PipelineWriter
+{
+public:
+    PipelineWriter(const PipelineManager&);
+    ~PipelineWriter();
 
-        Options optsW;
-        optsW.add("filename", "temp.las", "file to write to");
-        Writer* writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
+    void writeWriterPipeline(const std::string& filename) const;
 
-        const boost::uint64_t np = writer->write( reader->getNumPoints() );
-        BOOST_CHECK(np == 1065);
-    }
+private:
+    const PipelineManager& m_manager;
 
-    Utils::deleteFile("temp.las");
-
-    return;
-}
+    PipelineWriter& operator=(const PipelineWriter&); // not implemented
+    PipelineWriter(const PipelineWriter&); // not implemented
+};
 
 
-BOOST_AUTO_TEST_SUITE_END()
+} // namespace pdal
+
+#endif

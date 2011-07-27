@@ -32,16 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PIPELINEMANAGER_HPP
-#define INCLUDED_PIPELINEMANAGER_HPP
+#ifndef INCLUDED_PIPELINEREADER_HPP
+#define INCLUDED_PIPELINEREADER_HPP
 
 #include <pdal/pdal.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 #include <vector>
-#include <map>
 #include <string>
 
 
@@ -49,47 +46,47 @@ namespace pdal
 {
 
 class Options;
+class PipelineManager;
 
-
-class PDAL_DLL PipelineManager
+class PDAL_DLL PipelineReader
 {
+private:
+    class StageParserContext;
+
 public:
-    PipelineManager();
-    ~PipelineManager();
+    PipelineReader(PipelineManager&);
+    ~PipelineReader();
 
-    // Use these to manually add stages into the pipeline manager.
-    Reader* addReader(const std::string& type, const Options&);
-    Filter* addFilter(const std::string& type, const Stage& prevStage, const Options&);
-    MultiFilter* addMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options&);
-    Writer* addWriter(const std::string& type, const Stage& prevStage, const Options&);
-    
-    // returns true iff the pipeline endpoint is a writer
-    bool isWriterPipeline() const;
+   
+    // Use this to fill in a pipeline manager with an XML file that
+    // contains a <Writer> as the last pipeline stage.
+    void readWriterPipeline(const std::string&);
 
-    // return the pipeline writer endpoint (or NULL, if not a writer pipeline)
-    Writer* getWriter() const;
-
-    // return the pipeline reader endpoint (or NULL, if not a reader pipeline)
-    const Stage* getStage() const;
+    // Use this to fill in a pipeline manager with an XML file that 
+    // don't contain a <Writer>.  (Even though this is called "parse 
+    // READER pipeline", it actually returns a Stage; it can be used 
+    // where the last pipeline stage is a Reader or Filter.)
+    void readReaderPipeline(const std::string&);
 
 private:
-    StageFactory m_factory;
+    boost::property_tree::ptree parsePipelineElement(const std::string& filename);
+    Writer* parseWriterRoot(const boost::property_tree::ptree&);
+    Stage* parseStageRoot(const boost::property_tree::ptree&);
 
-    typedef std::vector<Reader*> ReaderList;
-    typedef std::vector<Filter*> FilterList;
-    typedef std::vector<MultiFilter*> MultiFilterList;
-    typedef std::vector<Writer*> WriterList;
-    ReaderList m_readers;
-    FilterList m_filters;
-    MultiFilterList m_multifilters;
-    WriterList m_writers;
+    Stage* parseStageElement(const std::string& name, const boost::property_tree::ptree& subtree);
+    Reader* parseReaderElement(const boost::property_tree::ptree& tree);
+    Filter* parseFilterElement(const boost::property_tree::ptree& tree);
+    MultiFilter* parseMultiFilterElement(const boost::property_tree::ptree& tree);
+    Writer* parseWriterElement(const boost::property_tree::ptree& tree);
 
-    Stage* m_lastStage;
-    Writer* m_lastWriter;
-    bool m_isWriterPipeline;
+    Option<std::string> parseOptionElement(const boost::property_tree::ptree& tree);
+    std::string parseTypeElement(const boost::property_tree::ptree& tree);
 
-    PipelineManager& operator=(const PipelineManager&); // not implemented
-    PipelineManager(const PipelineManager&); // not implemented
+private:
+    PipelineManager& m_manager;
+
+    PipelineReader& operator=(const PipelineReader&); // not implemented
+    PipelineReader(const PipelineReader&); // not implemented
 };
 
 

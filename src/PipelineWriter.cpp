@@ -32,43 +32,63 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#include <pdal/PipelineWriter.hpp>
 
-#include "Support.hpp"
-
+#include <pdal/Filter.hpp>
+#include <pdal/MultiFilter.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/Writer.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/Utils.hpp>
 
-using namespace pdal;
+#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/las/Writer.hpp>
+#include <pdal/drivers/liblas/Reader.hpp>
+#include <pdal/drivers/liblas/Writer.hpp>
 
-BOOST_AUTO_TEST_SUITE(PipelineManagerTest)
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/optional.hpp>
 
-
-BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
+namespace pdal
 {
-    {
-        PipelineManager mgr;
-
-        Options optsR;
-        optsR.add("filename", Support::datapath("1.2-with-color.las"));
-        Reader* reader = mgr.addReader("drivers.las.reader", optsR);
-
-        Options optsF;
-        optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000));
-        Filter* filter = mgr.addFilter("filters.crop", *reader, optsF);
-
-        Options optsW;
-        optsW.add("filename", "temp.las", "file to write to");
-        Writer* writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
-
-        const boost::uint64_t np = writer->write( reader->getNumPoints() );
-        BOOST_CHECK(np == 1065);
-    }
-
-    Utils::deleteFile("temp.las");
+    
+PipelineWriter::PipelineWriter(const PipelineManager& manager)
+    : m_manager(manager)
+{
 
     return;
 }
 
 
-BOOST_AUTO_TEST_SUITE_END()
+PipelineWriter::~PipelineWriter()
+{
+    return;
+}
+
+
+static boost::property_tree::ptree generateTreeFromWriter(const Writer& writer)
+{
+    boost::property_tree::ptree subtree = writer.generatePTree();
+
+    boost::property_tree::ptree tree;
+
+    tree.add_child("Pipeline", subtree);
+
+    return tree;
+}
+
+
+void PipelineWriter::writeWriterPipeline(const std::string& filename) const
+{
+    const Writer* writer = m_manager.getWriter();
+    
+    boost::property_tree::ptree tree = generateTreeFromWriter(*writer);
+
+    
+    const boost::property_tree::xml_parser::xml_writer_settings<char> settings(' ', 4);
+    boost::property_tree::xml_parser::write_xml(filename, tree, std::locale(), settings);
+
+    return;
+}
+
+
+} // namespace pdal

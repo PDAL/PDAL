@@ -32,6 +32,8 @@ SET(PDAL_UNITTEST_TEST_SRC
     MosaicFilterTest.cpp
     OptionsTest.cpp
     PipelineManagerTest.cpp
+    PipelineReaderTest.cpp
+    PipelineWriterTest.cpp
     PointBufferCacheTest.cpp
     PointBufferTest.cpp
     QFITReaderTest.cpp
