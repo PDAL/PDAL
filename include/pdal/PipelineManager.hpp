@@ -53,6 +53,9 @@ class Options;
 
 class PDAL_DLL PipelineManager
 {
+private:
+    class StageParserContext;
+
 public:
     PipelineManager();
     ~PipelineManager();
@@ -76,15 +79,18 @@ public:
     void writeWriterPipeline(const std::string& filename) const;
 
 private:
-    void parsePipeline(const boost::property_tree::ptree&, Writer*& writer, Stage*& stage);
+    boost::property_tree::ptree parsePipelineElement(const std::string& filename);
+    Writer* parseWriterRoot(const boost::property_tree::ptree&);
+    Stage* parseStageRoot(const boost::property_tree::ptree&);
 
-    Reader* parseReader(const boost::property_tree::ptree& tree);
-    Filter* parseFilter(const boost::property_tree::ptree& tree);
-    MultiFilter* parseMultiFilter(const boost::property_tree::ptree& tree);
-    Writer* parseWriter(const boost::property_tree::ptree& tree);
+    Stage* parseStageElement(const std::string& name, const boost::property_tree::ptree& subtree);
+    Reader* parseReaderElement(const boost::property_tree::ptree& tree);
+    Filter* parseFilterElement(const boost::property_tree::ptree& tree);
+    MultiFilter* parseMultiFilterElement(const boost::property_tree::ptree& tree);
+    Writer* parseWriterElement(const boost::property_tree::ptree& tree);
 
-    Option<std::string> parseOption(const boost::property_tree::ptree& tree);
-    std::string parseType(const boost::property_tree::ptree& tree);
+    Option<std::string> parseOptionElement(const boost::property_tree::ptree& tree);
+    std::string parseTypeElement(const boost::property_tree::ptree& tree);
 
     StageFactory m_factory;
 

@@ -127,4 +127,48 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test4)
 }
 
 
+BOOST_AUTO_TEST_CASE(PipelineManagerTest_test5)
+{
+    PipelineManager mgr;
+
+    // missing Type
+    BOOST_CHECK_THROW( mgr.readWriterPipeline(Support::datapath("pipeline_bad01.xml")), pipeline_xml_error);
+
+    // missing child of filter
+    BOOST_CHECK_THROW( mgr.readWriterPipeline(Support::datapath("pipeline_bad02.xml")), pipeline_xml_error);
+
+    // missing child of multifilter
+    BOOST_CHECK_THROW( mgr.readWriterPipeline(Support::datapath("pipeline_bad03.xml")), pipeline_xml_error);
+
+    // missing child of writer
+    BOOST_CHECK_THROW( mgr.readWriterPipeline(Support::datapath("pipeline_bad04.xml")), pipeline_xml_error);
+
+    // extra child of filter
+    BOOST_CHECK_THROW( mgr.readWriterPipeline(Support::datapath("pipeline_bad05.xml")), pipeline_xml_error);
+
+    // extra child of writer
+    BOOST_CHECK_THROW( mgr.readWriterPipeline(Support::datapath("pipeline_bad06.xml")), pipeline_xml_error);
+
+    // child of reader
+    BOOST_CHECK_THROW( mgr.readWriterPipeline(Support::datapath("pipeline_bad07.xml")), pipeline_xml_error);
+
+    // unknown element
+    BOOST_CHECK_THROW( mgr.readWriterPipeline(Support::datapath("pipeline_bad08.xml")), pipeline_xml_error);
+
+    // no Pipeline for writer xml
+    BOOST_CHECK_THROW( mgr.readWriterPipeline(Support::datapath("pipeline_bad09.xml")), pipeline_xml_error);
+
+    // no Pipeline for reader xml
+    BOOST_CHECK_THROW( mgr.readReaderPipeline(Support::datapath("pipeline_bad10.xml")), pipeline_xml_error);
+
+    // try to make a reader pipeline from a writer pipeline xml file
+    BOOST_CHECK_THROW( mgr.readReaderPipeline(Support::datapath("pipeline_write.xml")), pipeline_xml_error);
+
+    // try to make a writer pipeline from a reader pipeline xml file
+    BOOST_CHECK_THROW( mgr.readWriterPipeline(Support::datapath("pipeline_read.xml")), pipeline_xml_error);
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

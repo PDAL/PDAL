@@ -159,6 +159,16 @@ public:
     {}
 };
 
+
+// for errors when reading pipeline XML
+class pipeline_xml_error : public pdal_error
+{
+public:
+    pipeline_xml_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
 } // namespace pdal
 
 #endif // PDAL_EXCEPTION_HPP_INCLUDED
