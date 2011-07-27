@@ -45,6 +45,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageIterator.hpp>
+#include <pdal/Utils.hpp>
 
 using namespace pdal;
 
@@ -52,22 +53,26 @@ BOOST_AUTO_TEST_SUITE(PipelineManagerTest)
 
 BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
 {
-    PipelineManager mgr;
+    {
+        PipelineManager mgr;
 
-    Options optsR;
-    optsR.add("filename", Support::datapath("1.2-with-color.las"));
-    Reader* reader = mgr.addReader("drivers.las.reader", optsR);
+        Options optsR;
+        optsR.add("filename", Support::datapath("1.2-with-color.las"));
+        Reader* reader = mgr.addReader("drivers.las.reader", optsR);
 
-    Options optsF;
-    optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000));
-    Filter* filter = mgr.addFilter("filters.crop", *reader, optsF);
+        Options optsF;
+        optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000));
+        Filter* filter = mgr.addFilter("filters.crop", *reader, optsF);
 
-    Options optsW;
-    optsW.add("filename", "temp.las", "file to write to");
-    Writer* writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
+        Options optsW;
+        optsW.add("filename", "temp.las", "file to write to");
+        Writer* writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
 
-    const boost::uint64_t np = writer->write( reader->getNumPoints() );
-    BOOST_CHECK(np == 1065);
+        const boost::uint64_t np = writer->write( reader->getNumPoints() );
+        BOOST_CHECK(np == 1065);
+    }
+
+    Utils::deleteFile("temp.las");
 
     return;
 }
@@ -96,12 +101,16 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
 
 BOOST_AUTO_TEST_CASE(PipelineManagerTest_test3)
 {
-    PipelineManager mgr;
+    {
+        PipelineManager mgr;
 
-    Writer& writer = mgr.readWriterPipeline(Support::datapath("pipeline_write.xml"));
+        Writer& writer = mgr.readWriterPipeline(Support::datapath("pipeline_write.xml"));
 
-    const boost::uint64_t np = writer.write();
-    BOOST_CHECK(np == 1065);
+        const boost::uint64_t np = writer.write();
+        BOOST_CHECK(np == 1065);
+    }
+
+    Utils::deleteFile("out.las");
 
     return;
 }
@@ -109,11 +118,15 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test3)
 
 BOOST_AUTO_TEST_CASE(PipelineManagerTest_test4)
 {
-    PipelineManager mgr;
+    {
+        PipelineManager mgr;
 
-    mgr.readWriterPipeline(Support::datapath("pipeline_write.xml"));
+        mgr.readWriterPipeline(Support::datapath("pipeline_write.xml"));
 
-    mgr.writeWriterPipeline("test.xml");
+        mgr.writeWriterPipeline("test.xml");
+    }
+
+    Utils::deleteFile("out.las");
 
     bool filesSame = Support::compare_text_files("test.xml", Support::datapath("pipeline_write.xml"));
     BOOST_CHECK(filesSame);

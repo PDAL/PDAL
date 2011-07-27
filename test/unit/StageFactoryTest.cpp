@@ -84,6 +84,8 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
     delete filter;
     delete reader;
 
+    Utils::deleteFile("temp.las");
+
     return;
 }
 
@@ -178,6 +180,8 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test2)
     delete multifilter;
     delete filter;
     delete reader;
+
+    Utils::deleteFile("temp.las");
 
     return;
 }
