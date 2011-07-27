@@ -230,35 +230,56 @@ int Application_pc2pc::execute()
 
 
         pdal::drivers::oci::Reader reader(options);
-        // pdal::filters::ByteSwapFilter swapper(reader);
-        pdal::filters::ScalingFilter scalingFilter(reader, false);
-        
+        pdal::drivers::las::LasWriter* writer;
+
         pdal::SpatialReference out_ref(out_wkt);
         pdal::SpatialReference in_ref(reader.getSpatialReference());
+        if (!(in_ref == out_ref)) 
+        {
+            // pdal::filters::ByteSwapFilter swapper(reader);
+            pdal::filters::ScalingFilter scalingFilter(reader, false);
+            pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+            pdal::filters::ScalingFilter descalingFilter(   reprojectionFilter, 
+                                                            scalex, offsetx,
+                                                            scaley, offsety, 
+                                                            scalez, offsetz, 
+                                                            true);
+
+            writer = new pdal::drivers::las::LasWriter(descalingFilter, ofs);
+            if (compress)
+                writer->setCompressed(true);
+            writer->setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));
+            writer->setPointFormat(pdal::drivers::las::PointFormat3);
         
-        pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
-        pdal::filters::ScalingFilter descalingFilter(   reprojectionFilter, 
-                                                        scalex, offsetx,
-                                                        scaley, offsety, 
-                                                        scalez, offsetz, 
-                                                        true);
 
-        pdal::drivers::las::LasWriter writer(descalingFilter, ofs);
-
-
-        if (compress)
-            writer.setCompressed(true);
-        writer.setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));
-        writer.setPointFormat(pdal::drivers::las::PointFormat3);
+            writer->write(0);
+            delete writer;
+        }
+        else
+        {
+            writer = new pdal::drivers::las::LasWriter(reader, ofs);
+            if (compress)
+                writer->setCompressed(true);
+            writer->setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));
+            writer->setPointFormat(pdal::drivers::las::PointFormat3);
         
 
-        writer.write(0);
+            writer->write(0);
+            delete writer;
+        }
+        
+
+
+
+
             
         } catch (pdal::pdal_error& e)
         {
             std::cerr << "Error reading oracle: " << e.what() << std::endl;
+            return 1;
             
         }
+        
             
 
     #else
