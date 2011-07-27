@@ -55,6 +55,7 @@ public:
 
     // verify if two files are the same
     static bool compare_files(const std::string& file1, const std::string& file2);
+    static bool compare_text_files(const std::string& file1, const std::string& file2);
 
     // validate a point's XYZ values
     static void check_pN(const pdal::PointBuffer& data, const pdal::Schema& schema, 

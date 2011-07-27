@@ -35,6 +35,7 @@
 #include "Support.hpp"
 
 #include <iostream>
+#include <string>
 
 #include <boost/test/unit_test.hpp>
 
@@ -52,6 +53,39 @@ std::string Support::datapath(const std::string& file)
     return s;
 }
 
+
+// same as compare_files, but for text files: ignores CRLF differences
+bool Support::compare_text_files(const std::string& file1, const std::string& file2)
+{
+    if (!pdal::Utils::fileExists(file1) ||
+        !pdal::Utils::fileExists(file2))
+        return false;
+
+    std::istream* str1 = pdal::Utils::openFile(file1, false);
+    std::istream* str2 = pdal::Utils::openFile(file2, false);
+    BOOST_CHECK(str1);
+    BOOST_CHECK(str2);
+
+    bool same = true;
+    while (!str1->eof())
+    {
+        std::string buf1;
+        std::string buf2;
+        std::getline(*str1, buf1);
+        std::getline(*str2, buf2);
+
+        same = (str1->eof() == str2->eof());
+        if (!same) break;
+
+        same = (buf1 == buf2);
+        if (!same) break;
+    }
+
+    pdal::Utils::closeFile(str1);
+    pdal::Utils::closeFile(str2);
+
+    return same;
+}
 
 bool Support::compare_files(const std::string& file1, const std::string& file2)
 {
