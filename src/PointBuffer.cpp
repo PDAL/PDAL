@@ -122,7 +122,7 @@ boost::uint32_t PointBuffer::getNumPoints() const
 void PointBuffer::getData(boost::uint8_t** data, std::size_t* array_size) const
 {
     *array_size = getSchemaLayout().getByteSize();
-    *data = (uint8_t*) malloc (*array_size);
+    *data = (boost::uint8_t*) malloc (*array_size);
     memcpy(*data, m_data.get(), *array_size);
 }
 

@@ -160,8 +160,8 @@ void LasHeaderReader::read(Schema& schema)
     Utils::read_n(n1, m_istream, sizeof(n1));
 
     // the high two bits are reserved for laszip compression type
-    uint8_t compression_bit_7 = (n1 & 0x80) >> 7;
-    uint8_t compression_bit_6 = (n1 & 0x40) >> 6;
+    boost::uint8_t compression_bit_7 = (n1 & 0x80) >> 7;
+    boost::uint8_t compression_bit_6 = (n1 & 0x40) >> 6;
     if (!compression_bit_7 && !compression_bit_6)
     {
         m_header.SetCompressed(false);
@@ -214,8 +214,8 @@ void LasHeaderReader::read(Schema& schema)
     std::size_t const return_count_length = 5; 
     for (std::size_t i = 0; i < return_count_length; ++i)
     {
-        uint32_t count = 0;
-        Utils::read_n(count, m_istream, sizeof(uint32_t));
+        boost::uint32_t count = 0;
+        Utils::read_n(count, m_istream, sizeof(boost::uint32_t));
         m_header.SetPointRecordsByReturnCount(i, count);
     }  
 
@@ -286,10 +286,10 @@ void LasHeaderReader::read(Schema& schema)
 
 bool LasHeaderReader::hasLAS10PadSignature()
 {
-    uint8_t const sgn1 = 0xCC;
-    uint8_t const sgn2 = 0xDD;
-    uint8_t pad1 = 0x0; 
-    uint8_t pad2 = 0x0;
+    boost::uint8_t const sgn1 = 0xCC;
+    boost::uint8_t const sgn2 = 0xDD;
+    boost::uint8_t pad1 = 0x0; 
+    boost::uint8_t pad2 = 0x0;
 
     std::streamsize const current_pos = m_istream.tellg();
     
@@ -298,8 +298,8 @@ bool LasHeaderReader::hasLAS10PadSignature()
     // borken dishes back up in the cabinet
     try
     {
-        Utils::read_n(pad1, m_istream, sizeof(uint8_t));
-        Utils::read_n(pad2, m_istream, sizeof(uint8_t));
+        Utils::read_n(pad1, m_istream, sizeof(boost::uint8_t));
+        Utils::read_n(pad2, m_istream, sizeof(boost::uint8_t));
     }
     catch (std::out_of_range& e) 
     {
@@ -379,7 +379,7 @@ void LasHeaderReader::readOneVLR()
 
 void LasHeaderReader::readAllVLRs()
 {
-    const uint32_t count = m_numVLRs;
+    const boost::uint32_t count = m_numVLRs;
     if (count == 0)
     {
         return;
@@ -453,7 +453,7 @@ void LasHeaderReader::validate()
         std::ios::off_type remainder = point_bytes % length;
         
 
-        if ( m_header.GetPointRecordsCount() != static_cast<uint32_t>(count)) {
+        if ( m_header.GetPointRecordsCount() != static_cast<boost::uint32_t>(count)) {
   
                 std::ostringstream msg; 
                 msg <<  "The number of points in the header that was set "

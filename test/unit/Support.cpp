@@ -93,8 +93,8 @@ bool Support::compare_files(const std::string& file1, const std::string& file2)
         !pdal::Utils::fileExists(file2))
         return false;
 
-    uintmax_t len1x = pdal::Utils::fileSize(file1);
-    uintmax_t len2x = pdal::Utils::fileSize(file2);
+    boost::uintmax_t len1x = pdal::Utils::fileSize(file1);
+    boost::uintmax_t len2x = pdal::Utils::fileSize(file2);
     size_t len1 = (size_t)len1x; // BUG
     size_t len2 = (size_t)len2x;
 
@@ -121,7 +121,7 @@ bool Support::compare_files(const std::string& file1, const std::string& file2)
     char* q = buf2;
 
     int numdiffs = 0;
-    for (uintmax_t i=0; i<len1; i++)
+    for (boost::uintmax_t i=0; i<len1; i++)
     {
         if (*p != *q) 
         {

@@ -449,14 +449,14 @@ void VariableLengthRecord::setVLRsFromSRS(const SpatialReference& srs, std::vect
     // Add a WKT VLR if we have a WKT definition.
     if( wkt != "" )
     {
-        const uint8_t* wkt_bytes = reinterpret_cast<const uint8_t*>(wkt.c_str());
+        const boost::uint8_t* wkt_bytes = reinterpret_cast<const boost::uint8_t*>(wkt.c_str());
 
         boost::uint16_t len = static_cast<boost::uint16_t>(strlen((const char*)wkt_bytes));
 
         if (len > std::numeric_limits<boost::uint16_t>::max())
         {
             std::ostringstream oss;
-            std::vector<uint8_t>::size_type overrun = len - static_cast<std::vector<uint8_t>::size_type>(std::numeric_limits<boost::uint16_t>::max());
+            std::vector<boost::uint8_t>::size_type overrun = len - static_cast<std::vector<boost::uint8_t>::size_type>(std::numeric_limits<boost::uint16_t>::max());
             oss << "The size of the wkt, " << len << ", is " << overrun 
                 << " bytes too large to fit inside the maximum size of a VLR which is " 
                 << std::numeric_limits<boost::uint16_t>::max() << " bytes.";
@@ -544,13 +544,13 @@ void VLRList::add(VariableLengthRecord const& v)
 }
 
 
-const VariableLengthRecord& VLRList::get(uint32_t index) const 
+const VariableLengthRecord& VLRList::get(boost::uint32_t index) const 
 {
     return m_list[index];
 }
 
 
-VariableLengthRecord& VLRList::get(uint32_t index)
+VariableLengthRecord& VLRList::get(boost::uint32_t index)
 {
     return m_list[index];
 }
@@ -568,7 +568,7 @@ std::vector<VariableLengthRecord>& VLRList::getAll()
 }
 
 
-void VLRList::remove(uint32_t index) 
+void VLRList::remove(boost::uint32_t index) 
 {    
     if (index >= m_list.size())
         throw std::out_of_range("index is out of range");

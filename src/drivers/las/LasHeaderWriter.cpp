@@ -65,9 +65,9 @@ void LasHeaderWriter::write()
 {
     using namespace std;
 
-    uint8_t n1 = 0;
-    uint16_t n2 = 0;
-    uint32_t n4 = 0;
+    boost::uint8_t n1 = 0;
+    boost::uint16_t n2 = 0;
+    boost::uint32_t n4 = 0;
     
     // This test should only be true if we were opened in both 
     // std::ios::in *and* std::ios::out
@@ -126,11 +126,11 @@ void LasHeaderWriter::write()
     }
 
     {
-        int32_t difference = (int32_t)m_header.GetDataOffset() - (int32_t)GetRequiredHeaderSize();
+        boost::int32_t difference = (boost::int32_t)m_header.GetDataOffset() - (boost::int32_t)GetRequiredHeaderSize();
 
         if (difference <= 0) 
         {
-            int32_t d = abs(difference);
+            boost::int32_t d = abs(difference);
             if (m_header.GetVersionMinor()  ==  0) 
             {
                 // Add the two extra bytes for the 1.0 pad
@@ -217,8 +217,8 @@ void LasHeaderWriter::write()
     Utils::write_n(m_ostream, n4, sizeof(n4));
 
     // 16. Point Data Format ID
-    n1 = static_cast<uint8_t>(m_header.getPointFormat());
-    uint8_t n1tmp = n1;
+    n1 = static_cast<boost::uint8_t>(m_header.getPointFormat());
+    boost::uint8_t n1tmp = n1;
     if (m_header.Compressed()) // high bit set indicates laszip compression
         n1tmp |= 0x80;
     Utils::write_n(m_ostream, n1tmp, sizeof(n1tmp));
@@ -233,11 +233,11 @@ void LasHeaderWriter::write()
     Utils::write_n(m_ostream, n4, sizeof(n4));
 
     // 19. Number of points by return
-    std::vector<uint32_t>::size_type const srbyr = 5;
-    std::vector<uint32_t> const& vpbr = m_header.GetPointRecordsByReturnCount();
+    std::vector<boost::uint32_t>::size_type const srbyr = 5;
+    std::vector<boost::uint32_t> const& vpbr = m_header.GetPointRecordsByReturnCount();
     // TODO: fix this for 1.3, which has srbyr = 7;  See detail/reader/header.cpp for more details
     // assert(vpbr.size() <= srbyr);
-    uint32_t pbr[srbyr] = { 0 };
+    boost::uint32_t pbr[srbyr] = { 0 };
     std::copy(vpbr.begin(), vpbr.begin() + srbyr, pbr); // FIXME: currently, copies only 5 records, to be improved
     Utils::write_n(m_ostream, pbr, sizeof(pbr));
 
@@ -278,7 +278,7 @@ void LasHeaderWriter::WriteVLRs()
     // to start writing
     m_ostream.seekp(m_header.GetHeaderSize(), std::ios::beg);
 
-    int32_t diff = m_header.GetDataOffset() - GetRequiredHeaderSize();
+    boost::int32_t diff = m_header.GetDataOffset() - GetRequiredHeaderSize();
     
     if (diff < 0) {
         std::ostringstream oss;
@@ -288,17 +288,17 @@ void LasHeaderWriter::WriteVLRs()
         throw std::runtime_error(oss.str());
     }
 
-    for (uint32_t i = 0; i < m_header.getVLRs().count(); ++i)
+    for (boost::uint32_t i = 0; i < m_header.getVLRs().count(); ++i)
     {
         VariableLengthRecord const &vlr = m_header.getVLRs().get(i);
 
         boost::uint8_t* userId_data = VariableLengthRecord::string2bytes(16, vlr.getUserId());
         boost::uint8_t* description_data = VariableLengthRecord::string2bytes(32, vlr.getDescription());
 
-        Utils::write_n(m_ostream, vlr.getReserved(), sizeof(uint16_t));
+        Utils::write_n(m_ostream, vlr.getReserved(), sizeof(boost::uint16_t));
         m_ostream.write((const char*)userId_data, 16); // BUG: move to Utils function
-        Utils::write_n(m_ostream, vlr.getRecordId(), sizeof(uint16_t));
-        Utils::write_n(m_ostream, vlr.getLength(), sizeof(uint16_t));
+        Utils::write_n(m_ostream, vlr.getRecordId(), sizeof(boost::uint16_t));
+        Utils::write_n(m_ostream, vlr.getLength(), sizeof(boost::uint16_t));
         m_ostream.write((const char*)description_data, 32); // BUG: move to Utils::write_array function
         m_ostream.write((const char*)vlr.getBytes(), vlr.getLength());
 
@@ -325,7 +325,7 @@ std::size_t LasHeaderWriter::GetRequiredHeaderSize() const
         
     // Calculate a new data offset size
     const VLRList& vlrs = m_header.getVLRs();
-    for (uint32_t i = 0; i < vlrs.count(); ++i)
+	for (boost::uint32_t i = 0; i < vlrs.count(); ++i)
     {
         const VariableLengthRecord& vlr = vlrs.get(i);
         vlr_total_size += vlr.s_headerLength + vlr.getLength();
@@ -347,7 +347,7 @@ void LasHeaderWriter::WriteLAS10PadSignature()
         return;
     }
 
-    int32_t diff = (int32_t)m_header.GetDataOffset() - (int32_t)GetRequiredHeaderSize();
+    boost::int32_t diff = (boost::int32_t)m_header.GetDataOffset() - (boost::int32_t)GetRequiredHeaderSize();
 
     if (diff < 2) {
         std::ostringstream oss;
@@ -363,10 +363,10 @@ void LasHeaderWriter::WriteLAS10PadSignature()
     m_ostream.seekp(m_header.GetDataOffset() - 2, std::ios::beg);
     
     // Write the pad bytes.
-    uint8_t const sgn1 = 0xCC;
-    uint8_t const sgn2 = 0xDD;
-    Utils::write_n(m_ostream, sgn1, sizeof(uint8_t));
-    Utils::write_n(m_ostream, sgn2, sizeof(uint8_t));
+    boost::uint8_t const sgn1 = 0xCC;
+    boost::uint8_t const sgn2 = 0xDD;
+    Utils::write_n(m_ostream, sgn1, sizeof(boost::uint8_t));
+    Utils::write_n(m_ostream, sgn2, sizeof(boost::uint8_t));
 }
 
 

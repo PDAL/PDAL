@@ -78,24 +78,24 @@ void LasHeader::SetFileSignature(std::string const& v)
     std::strncpy(m_signature, v.c_str(), eFileSignatureSize);
 }
 
-uint16_t LasHeader::GetFileSourceId() const
+boost::uint16_t LasHeader::GetFileSourceId() const
 {
     return m_sourceId;
 }
 
-void LasHeader::SetFileSourceId(uint16_t v)
+void LasHeader::SetFileSourceId(boost::uint16_t v)
 {
     // TODO: Should we warn or throw about type overflow occuring when
     //       user passes 65535 + 1 = 0
     m_sourceId = v;
 }
 
-uint16_t LasHeader::GetReserved() const
+boost::uint16_t LasHeader::GetReserved() const
 {
     return m_reserved;
 }
 
-void LasHeader::SetReserved(uint16_t v)
+void LasHeader::SetReserved(boost::uint16_t v)
 {
     // TODO: Should we warn or throw about type overflow occuring when
     //       user passes 65535 + 1 = 0
@@ -112,12 +112,12 @@ void LasHeader::SetProjectId(boost::uuids::uuid const& v)
     m_projectGuid = v;
 }
 
-uint8_t LasHeader::GetVersionMajor() const
+boost::uint8_t LasHeader::GetVersionMajor() const
 {
     return m_versionMajor;
 }
 
-void LasHeader::SetVersionMajor(uint8_t v)
+void LasHeader::SetVersionMajor(boost::uint8_t v)
 {
     if (eVersionMajorMin > v || v > eVersionMajorMax)
         throw std::out_of_range("version major out of range");
@@ -125,12 +125,12 @@ void LasHeader::SetVersionMajor(uint8_t v)
     m_versionMajor = v;
 }
 
-uint8_t LasHeader::GetVersionMinor() const
+boost::uint8_t LasHeader::GetVersionMinor() const
 {
     return m_versionMinor;
 }
 
-void LasHeader::SetVersionMinor(uint8_t v)
+void LasHeader::SetVersionMinor(boost::uint8_t v)
 {
     if (v > eVersionMinorMax)
         throw std::out_of_range("version minor out of range");
@@ -190,12 +190,12 @@ void LasHeader::SetSoftwareId(std::string const& v)
     std::strncpy(m_softwareId, v.c_str(), eSoftwareIdSize);
 }
 
-uint16_t LasHeader::GetCreationDOY() const
+boost::uint16_t LasHeader::GetCreationDOY() const
 {
     return m_createDOY;
 }
 
-void LasHeader::SetCreationDOY(uint16_t v)
+void LasHeader::SetCreationDOY(boost::uint16_t v)
 {
     if (v > 366)
         throw std::out_of_range("day of year out of range");
@@ -203,12 +203,12 @@ void LasHeader::SetCreationDOY(uint16_t v)
     m_createDOY = v;
 }
 
-uint16_t LasHeader::GetCreationYear() const
+boost::uint16_t LasHeader::GetCreationYear() const
 {
     return m_createYear;
 }
 
-void LasHeader::SetCreationYear(uint16_t v)
+void LasHeader::SetCreationYear(boost::uint16_t v)
 {
     // mloskot: I've taken these values arbitrarily
     if (v > 9999)
@@ -217,26 +217,26 @@ void LasHeader::SetCreationYear(uint16_t v)
     m_createYear = v;
 }
 
-uint16_t LasHeader::GetHeaderSize() const
+boost::uint16_t LasHeader::GetHeaderSize() const
 {
     return m_headerSize;
 }
 
-void LasHeader::SetHeaderSize(uint16_t v)
+void LasHeader::SetHeaderSize(boost::uint16_t v)
 {
 
     m_headerSize = v;
 }
 
-uint32_t LasHeader::GetDataOffset() const
+boost::uint32_t LasHeader::GetDataOffset() const
 {
     return m_dataOffset;
 }
 
-void LasHeader::SetDataOffset(uint32_t v)
+void LasHeader::SetDataOffset(boost::uint32_t v)
 {
-    // uint32_t const dataSignatureSize = 2;
-    // uint16_t const hsize = GetHeaderSize();
+    // boost::uint32_t const dataSignatureSize = 2;
+    // boost::uint16_t const hsize = GetHeaderSize();
     // 
     // if ( (m_versionMinor == 0 && v < hsize + dataSignatureSize) ||
     //      (m_versionMinor == 1 && v < hsize) ||
@@ -259,18 +259,18 @@ void LasHeader::setPointFormat(pdal::drivers::las::PointFormat v)
     m_pointFormat = v;
 }
 
-uint16_t LasHeader::GetDataRecordLength() const
+boost::uint16_t LasHeader::GetDataRecordLength() const
 {
     // No matter what the schema says, this must be a short in size.
     return pdal::drivers::las::Support::getPointDataSize(m_pointFormat);
 }
 
-uint32_t LasHeader::GetPointRecordsCount() const
+boost::uint32_t LasHeader::GetPointRecordsCount() const
 {
     return m_pointRecordsCount;
 }
 
-void LasHeader::SetPointRecordsCount(uint32_t v)
+void LasHeader::SetPointRecordsCount(boost::uint32_t v)
 {
     m_pointRecordsCount = v;
 }
@@ -280,11 +280,11 @@ LasHeader::RecordsByReturnArray const& LasHeader::GetPointRecordsByReturnCount()
     return m_pointRecordsByReturn;
 }
 
-void LasHeader::SetPointRecordsByReturnCount(std::size_t index, uint32_t v)
+void LasHeader::SetPointRecordsByReturnCount(std::size_t index, boost::uint32_t v)
 {
     assert(m_pointRecordsByReturn.size() == LasHeader::ePointsByReturnSize);
 
-    uint32_t& t = m_pointRecordsByReturn.at(index);
+    boost::uint32_t& t = m_pointRecordsByReturn.at(index);
     t = v;
 }
 
@@ -392,13 +392,13 @@ void LasHeader::initialize()
     std::tm* ptm = std::gmtime(&now);
     if (0 != ptm)
     {
-        m_createDOY = static_cast<uint16_t>(ptm->tm_yday);
-        m_createYear = static_cast<uint16_t>(ptm->tm_year + 1900);
+        m_createDOY = static_cast<boost::uint16_t>(ptm->tm_yday);
+        m_createYear = static_cast<boost::uint16_t>(ptm->tm_year + 1900);
     }
 
     m_headerSize = eHeaderSize;
 
-    m_sourceId = m_reserved = uint16_t();
+    m_sourceId = m_reserved = boost::uint16_t();
     memset(m_projectGuid.data, 0, 16);
 
     m_dataOffset = eHeaderSize; // excluding 2 bytes of Point Data Start Signature
