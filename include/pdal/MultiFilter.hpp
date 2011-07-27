@@ -51,6 +51,8 @@ public:
 
     const std::vector<const Stage*>& getPrevStages() const;
 
+    virtual boost::property_tree::ptree generatePTree() const;
+
 protected:
     std::vector<const Stage*> m_prevStages;
 

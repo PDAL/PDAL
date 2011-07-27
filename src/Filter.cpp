@@ -56,4 +56,25 @@ const Stage& Filter::getPrevStage() const
 }
 
 
+boost::property_tree::ptree Filter::generatePTree() const
+{
+    boost::property_tree::ptree tree;
+
+    tree.add("Type", getName());
+    
+    boost::property_tree::ptree optiontree = getOptions().getPTree();
+    tree.add_child(optiontree.begin()->first, optiontree.begin()->second);
+
+    const Stage& stage = getPrevStage();
+    boost::property_tree::ptree subtree = stage.generatePTree();
+
+    tree.add_child(subtree.begin()->first, subtree.begin()->second);
+    
+    boost::property_tree::ptree root;
+    root.add_child("Filter", tree);
+
+    return root;
+}
+
+
 } // namespace pdal

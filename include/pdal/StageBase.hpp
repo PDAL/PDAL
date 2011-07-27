@@ -53,6 +53,10 @@ public:
 
     const Options& getOptions() const;
 
+    // This is used to generate pipeline xml files.  It will
+    // recursively visit all child stages to populate the tree.
+    virtual boost::property_tree::ptree generatePTree() const = 0;
+
     // For Name, Description, and DefaultOptions:
     //   each concrete class should provide a static function s_getX() which returns a static object
     //   each concrete class should provide a virtual getX() which returns s_getX()

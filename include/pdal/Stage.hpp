@@ -75,7 +75,7 @@ public:
     virtual StageBlockIterator* createBlockIterator() const  { return NULL; }
 
     void dump() const;
-
+    
 protected:
     // setters for the core properties
     Schema& getSchemaRef();

@@ -367,7 +367,7 @@ void PipelineManager::parsePipeline(const boost::property_tree::ptree& tree, Wri
 }
 
 
-Writer* PipelineManager::readWriterPipeline(const std::string& filename)
+Writer& PipelineManager::readWriterPipeline(const std::string& filename)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::xml_parser::read_xml(filename, tree);
@@ -378,7 +378,47 @@ Writer* PipelineManager::readWriterPipeline(const std::string& filename)
     Stage* stage = NULL;
     parsePipeline(pipeline, writer, stage);
 
-    return writer;
+    return *writer;
+}
+
+
+const Stage& PipelineManager::readReaderPipeline(const std::string& filename)
+{
+    boost::property_tree::ptree tree;
+    boost::property_tree::xml_parser::read_xml(filename, tree);
+
+    boost::property_tree::ptree pipeline = tree.get_child("Pipeline"); // err check
+
+    Writer* writer = NULL;
+    Stage* stage = NULL;
+    parsePipeline(pipeline, writer, stage);
+
+    return *stage;
+}
+
+
+static boost::property_tree::ptree generateTreeFromWriter(const Writer& writer)
+{
+    boost::property_tree::ptree subtree = writer.generatePTree();
+
+    boost::property_tree::ptree tree;
+
+    tree.add_child("Pipeline", subtree);
+
+    return tree;
+}
+
+
+void PipelineManager::writeWriterPipeline(const std::string& filename) const
+{
+
+    const Writer* writer = m_writers.back();
+    
+    boost::property_tree::ptree tree = generateTreeFromWriter(*writer);
+
+    boost::property_tree::xml_parser::write_xml(filename, tree);
+
+    return;
 }
 
 

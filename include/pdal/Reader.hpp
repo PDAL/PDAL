@@ -51,6 +51,8 @@ class PDAL_DLL Reader : public Stage
 public:
     Reader(const Options& options);
     virtual ~Reader();
+
+    virtual boost::property_tree::ptree generatePTree() const;
 };
 
 } // namespace pdal

@@ -43,6 +43,8 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/StageIterator.hpp>
 
 using namespace pdal;
 
@@ -53,11 +55,11 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
     PipelineManager mgr;
 
     Options optsR;
-    optsR.add("filename", Support::datapath("1.2-with-color.las"), "file to read from");
+    optsR.add("filename", Support::datapath("1.2-with-color.las"));
     Reader* reader = mgr.addReader("drivers.las.reader", optsR);
 
     Options optsF;
-    optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000), "crop bounds");
+    optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000));
     Filter* filter = mgr.addFilter("filters.crop", *reader, optsF);
 
     Options optsW;
@@ -75,12 +77,54 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
 {
     PipelineManager mgr;
 
-    Writer* writer = mgr.readWriterPipeline(Support::datapath("pipeline1.xml"));
+    const Stage& stage = mgr.readReaderPipeline(Support::datapath("pipeline_read.xml"));
 
-    const boost::uint64_t np = writer->write();
+    {
+        const Schema& schema = stage.getSchema();
+        SchemaLayout layout(schema);
+        PointBuffer data(layout, 2048);
+        StageSequentialIterator* iter = stage.createSequentialIterator();
+        boost::uint32_t np = iter->read(data);
+        BOOST_CHECK(np == 1065);
+
+        delete iter;
+    }
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(PipelineManagerTest_test3)
+{
+    PipelineManager mgr;
+
+    Writer& writer = mgr.readWriterPipeline(Support::datapath("pipeline_write.xml"));
+
+    const boost::uint64_t np = writer.write();
     BOOST_CHECK(np == 1065);
 
     return;
 }
+
+
+BOOST_AUTO_TEST_CASE(PipelineManagerTest_test4)
+{
+    PipelineManager mgr;
+
+    mgr.readWriterPipeline(Support::datapath("pipeline_write.xml"));
+
+    mgr.writeWriterPipeline("test.xml");
+
+    bool filesSame = Support::compare_files("test.xml", Support::datapath("pipeline_write_out.xml"));
+    BOOST_CHECK(filesSame);
+
+    //if (filesSame)
+    {
+        Utils::deleteFile("test.xml");
+    }
+
+    return;
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

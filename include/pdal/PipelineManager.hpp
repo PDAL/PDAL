@@ -57,12 +57,23 @@ public:
     PipelineManager();
     ~PipelineManager();
 
+    // Use these to manually add stages into the pipeline manager.
     Reader* addReader(const std::string& type, const Options&);
     Filter* addFilter(const std::string& type, const Stage& prevStage, const Options&);
     MultiFilter* addMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options&);
     Writer* addWriter(const std::string& type, const Stage& prevStage, const Options&);
     
-    Writer* readWriterPipeline(const std::string&);
+    // Use this to fill in a pipeline manager with an XML file that
+    // contains a <Writer> as the last pipeline stage.
+    Writer& readWriterPipeline(const std::string&);
+
+    // Use this to fill in a pipeline manager with an XML file that 
+    // don't contain a <Writer>.  (Even though this is called "parse 
+    // READER pipeline", it actually returns a Stage; it can be used 
+    // where the last pipeline stage is a Reader or Filter.)
+    const Stage& readReaderPipeline(const std::string&);
+
+    void writeWriterPipeline(const std::string& filename) const;
 
 private:
     void parsePipeline(const boost::property_tree::ptree&, Writer*& writer, Stage*& stage);

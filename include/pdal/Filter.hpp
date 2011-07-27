@@ -49,6 +49,8 @@ public:
 
     const Stage& getPrevStage() const;
 
+    virtual boost::property_tree::ptree generatePTree() const;
+
 protected:
     const Stage& m_prevStage;
 

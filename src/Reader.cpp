@@ -50,4 +50,20 @@ Reader::~Reader()
 }
 
 
+boost::property_tree::ptree Reader::generatePTree() const
+{
+    boost::property_tree::ptree tree;
+
+    tree.add("Type", getName());
+
+    boost::property_tree::ptree optiontree = getOptions().getPTree();
+    tree.add_child(optiontree.begin()->first, optiontree.begin()->second);
+    
+    boost::property_tree::ptree root;
+    root.add_child("Reader", tree);
+
+    return root;
+}
+
+
 } // namespace pdal

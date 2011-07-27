@@ -63,6 +63,8 @@ public:
     // If given number of points is 0, do as many points as the reader supplies to us.
     boost::uint64_t write(boost::uint64_t targetNumPointsToWrite=0);
 
+    virtual boost::property_tree::ptree generatePTree() const;
+
 protected:
     // this is called once before the loop with the writeBuffer calls
     virtual void writeBegin() = 0;
@@ -73,7 +75,7 @@ protected:
     // called once, after the writeBuffer calls
     virtual void writeEnd() = 0;
 
-    const Stage& getPrevStage();
+    const Stage& getPrevStage() const;
 
     // these two are valid for use after writeBegin has been called
     boost::uint64_t m_actualNumPointsWritten;

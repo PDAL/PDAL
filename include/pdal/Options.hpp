@@ -68,8 +68,8 @@ public:
 // Dumped as XML, it looks like this:
 //     <?xml...>
 //     <Name>myname</Name>
-//     <Description>my descr</Description>
 //     <Value>17</Value>
+//     <Description>my descr</Description>
 // although of course that's not valid XML, since it has no single root element.
 
 template <typename T>
@@ -79,8 +79,8 @@ public:
     // construct it manually
     Option(std::string const& name, T value, std::string const& description="")
         : m_name(name)
-        , m_description(description)
         , m_value(value)
+        , m_description(description)
     {}
 
     // construct it from an xml stream
@@ -103,16 +103,19 @@ public:
 
     // getters
     std::string const& getName() const { return m_name; }
-    std::string const& getDescription() const { return m_description; }
     T const& getValue() const { return m_value; }
+    std::string const& getDescription() const { return m_description; }
     
     // return a ptree representation
     boost::property_tree::ptree getPTree() const
     {
         boost::property_tree::ptree t;
         t.put("Name", getName());
-        t.put("Description", getDescription());
         t.put("Value", getValue());
+        if (getDescription() != "")
+        {
+            t.put("Description", getDescription());
+        }
         return t;
     }
     
@@ -126,8 +129,8 @@ public:
 
 private:
     std::string m_name;
-    std::string m_description;
     T m_value;
+    std::string m_description; // optional field
 };
 
 
@@ -137,16 +140,16 @@ private:
 //
 // Dumped as XML, an Options object with two Option objects looks like this:
 //     <?xml...>
-//     <option>
-//       <name>myname</name>
-//       <description>my descr</description>
-//       <value>17</value>
-//     </option>
-//     <option>
-//       <name>myname2</name>
-//       <description>my descr2</description>
-//       <value>13</value>
-//     </option>
+//     <Option>
+//       <Name>myname</name>
+//       <Value>17</value>
+//       <Description>my descr</description>
+//     </Option>
+//     <Option>
+//       <Name>myname2</name>
+//       <Value>13</value>
+//       <Description>my descr2</description>
+//     </Option>
 // although of course that's not valid XML, since it has no single root element.
 class PDAL_DLL Options
 {

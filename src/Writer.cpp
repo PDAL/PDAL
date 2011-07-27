@@ -59,7 +59,7 @@ Writer::Writer(const Stage& prevStage, const Options& options)
 }
 
 
-const Stage& Writer::getPrevStage()
+const Stage& Writer::getPrevStage() const
 {
     return m_prevStage;
 }
@@ -137,6 +137,27 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
     // assert(m_actualNumPointsWritten <= m_targetNumPointsToWrite);
 
     return m_actualNumPointsWritten;
+}
+
+
+boost::property_tree::ptree Writer::generatePTree() const
+{
+    boost::property_tree::ptree tree;
+
+    tree.add("Type", getName());
+
+    boost::property_tree::ptree optiontree = getOptions().getPTree();
+    tree.add_child(optiontree.begin()->first, optiontree.begin()->second);
+
+    const Stage& stage = getPrevStage();
+    boost::property_tree::ptree subtree = stage.generatePTree();
+
+    tree.add_child(subtree.begin()->first, subtree.begin()->second);
+    
+    boost::property_tree::ptree root;
+    root.add_child("Writer", tree);
+
+    return root;
 }
 
 

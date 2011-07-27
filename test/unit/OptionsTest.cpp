@@ -44,8 +44,8 @@
 BOOST_AUTO_TEST_SUITE(OptionsTest)
 
 static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-static std::string xml_int_ref = "<Name>my_int</Name><Description>This is my integral option.</Description><Value>17</Value>";
-static std::string xml_str_ref = "<Name>my_string</Name><Description>This is my stringy option.</Description><Value>Yow.</Value>";
+static std::string xml_int_ref = "<Name>my_int</Name><Value>17</Value><Description>This is my integral option.</Description>";
+static std::string xml_str_ref = "<Name>my_string</Name><Value>Yow.</Value><Description>This is my stringy option.</Description>";
 
 
 BOOST_AUTO_TEST_CASE(test_static_options)
