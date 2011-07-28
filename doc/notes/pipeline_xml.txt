@@ -1,0 +1,218 @@
+.. _pipeline_xml:
+
+============
+Pipeline XML
+============
+
+This note describes the XML structure used for describing pipelines.
+
+The pipeline XML syntax mirrors very closely the Stage class hierarchy
+and construction format used by the C++ API.
+
+There are two kinds of pipelines that can be expressed: "writer pipelines"
+have Writer stages as their endpoint, and "reader pipelines" have general
+Stage stages (Reader/Filter/Multifilter) as their endpoint.
+
+We have two use cases specifically in mind:
+
+    * a command-line app that reads an XML file to allow a user to easily
+      construct arbitrary writer pipelines, as opposed to having to build apps
+      custom to individual needs with arbitary options, filters, etc
+      
+    * within the Python environment, the user can provide XML for a reader
+      pipeline, construct it via a simple call to the PipelineManager API,
+      and then use native Python to perform the read and do any processing
+      of the emitted points
+
+
+Examples
+========
+
+A writer pipeline::
+
+    <?xml version="1.0" encoding="utf-8"?>
+    <Pipeline>
+        <Writer>
+            <Type>drivers.las.writer</Type>
+            <Option>
+                <Name>filename</Name>
+                <Value>out.las</Value>
+                <Description>junk junk junk</Description>
+            </Option>
+            <Filter>
+                <Type>filters.crop</Type>
+                <Option>
+                    <Name>bounds</Name>
+                    <Value>([0,1000000],[0,1000000],[0,1000000])</Value>
+                </Option>
+                <Reader>
+                    <Type>drivers.las.reader</Type>
+                    <Option>
+                        <Name>filename</Name>
+                        <Value>../../test/data/1.2-with-color.las</Value>
+                    </Option>
+                </Reader>
+            </Filter>
+        </Writer>
+    </Pipeline>
+
+A reader pipeline::
+
+    <?xml version="1.0"?>
+    <Pipeline>
+            <Filter>
+                <Type>filters.crop</Type>
+                <Option>
+                    <Name>bounds</Name>
+                    <Value>([0,1000000],[0,1000000],[0,1000000])</Value>
+                </Option>
+                <Reader>
+                    <Type>drivers.las.reader</Type>
+                    <Option>
+                        <Name>filename</Name>
+                        <Value>../../test/data/1.2-with-color.las</Value>
+                    </Option>
+                </Reader>
+            </Filter>
+    </Pipeline>
+
+
+Syntax Specification
+====================
+
+* <Pipeline>
+
+    * this is the root element for all pipeline xml
+
+    * mandatory
+
+    * child elements:
+
+        * exactly one of the following four:
+
+            * <Writer> element, for writer pipelines
+
+            * <Reader> or <Filter> or <MultiFilter> element, for reader pipelines
+
+* <Writer>
+
+    * indicates a writer stage
+
+    * child elements:
+
+        * exactly one <Type> element
+
+        * zero or more <Option> elements
+
+        * exactly one <Reader> or <Filter> or <MultiFilter> element
+
+* <Reader>
+
+    * indicates a reader stage
+
+    * child elements:
+
+        * exactly one <Type> element
+
+        * zero or more <Option> elements
+
+* <Filter>
+
+    * indicates a filter stage
+
+    * child elements:
+
+        * exactly one <Type> element
+
+        * zero or more <Option> elements
+
+        * exactly one <Reader> or <Filter> or <MultiFilter> element
+
+* <MultiFilter>
+
+    * indicates a multifilter stage (filter than takes >1 input stage)
+
+    * child elements:
+
+        * exactly one <Type> element
+
+        * zero or more <Option> elements
+
+        * one or more <Reader> or <Filter> or <MultiFilter> elements
+
+* <Option>
+
+    * indicates an option parameter to the pipeline stage
+
+    * may only be a child of a <Reader>, <Writer>, <Filter>, or <MultiFilter> element
+
+    * child elements
+
+        * exactly one <Name> element
+
+        * exactly one <Value> element
+
+        * zero or one <Description> element
+
+ * <Name>
+
+    * indicates the text name of an option
+
+    * may only be a child of an <Option>
+
+    * no child elements
+
+    * body text: the name of the option, e.g. "filename" or "bounds"
+
+* <Value>
+
+    * indicates the (textual) value of an option
+
+    * may only be a child of an <Option>
+
+    * no child elements
+
+    * body text: the text representaion of the option value, e.g. "input.las" or "42"
+
+* <Description>
+
+    * indicates the description field of an option (currently ignored)
+
+    * may only be a child of an <Option>
+
+    * no child elements
+
+    * body text: the text representaion of the option description
+
+ * <Type>
+
+    * indicates the type of the stage
+
+    * may only be a child of a <Reader>, <Writer>, <Filter>, or <MultiFilter> element
+
+    * no child elements
+
+    * body text: the text name of the stage, e.g. "drivers.las.reader" or "filters.crop"
+
+
+
+Notes
+=====
+
+* In the implementation, ptrees are used to read and write the pipelines.
+  This means less parsing hassle for us, but also means we can't produce
+  decent error messages (esp. since we don't have line numbers).
+
+* Attributes are not used anywhere.  This is in part because ptree's don’t
+  support them uniformly across all file formats.
+
+* The schema is intended to be something that can be validated via XSD,
+  although we don’t do that today.
+
+* No version numbering yet, need to add that.  Would like to be an attr on
+  the <Pipeline> element.
+
+* We might want to change <Pipeline> to <ReaderPipeline> and
+  <WriterPipeline>, to simplify the implementation and API, as well as
+  improve error checking.
+
