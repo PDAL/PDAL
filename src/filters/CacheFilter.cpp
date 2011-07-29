@@ -45,8 +45,14 @@ IMPLEMENT_STATICS(CacheFilter, "filters.cache", "Cache Filter")
 
 CacheFilter::CacheFilter(const Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
+    , m_numPointsRequested(0)
+    , m_numPointsRead(0)
+    , m_cache(NULL)
+    , m_maxCacheBlocks(options.getValueOrThrow<boost::uint32_t>("max_cache_blocks"))
+    , m_cacheBlockSize(options.getValueOrThrow<boost::uint32_t>("cache_block_size"))
 {
-    throw not_yet_implemented("options ctor"); 
+    initialize();
+    return;
 }
 
 
@@ -59,7 +65,7 @@ CacheFilter::CacheFilter(const Stage& prevStage, boost::uint32_t maxCacheBlocks,
     , m_maxCacheBlocks(maxCacheBlocks)
     , m_cacheBlockSize(cacheBlockSize)
 {
-    resetCache();
+    initialize();
     return;
 }
 
@@ -67,6 +73,13 @@ CacheFilter::CacheFilter(const Stage& prevStage, boost::uint32_t maxCacheBlocks,
 CacheFilter::~CacheFilter()
 {
     delete m_cache;
+}
+
+
+void CacheFilter::initialize()
+{
+    resetCache();
+    return;
 }
 
 

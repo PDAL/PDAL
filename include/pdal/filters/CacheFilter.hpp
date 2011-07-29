@@ -102,6 +102,8 @@ public:
     pdal::StageRandomIterator* createRandomIterator() const;
 
 private:
+    void initialize();
+
     // these are mutable to allow const-ness for updating stats
     // BUG: need to make thread-safe
     mutable boost::uint64_t m_numPointsRequested;
