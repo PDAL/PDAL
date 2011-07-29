@@ -47,6 +47,52 @@ using namespace pdal;
 BOOST_AUTO_TEST_SUITE(LasReaderTest)
 
 
+BOOST_AUTO_TEST_CASE(test_base_options)
+{
+    const std::string file(Support::datapath("1.2-with-color.las"));
+
+    const pdal::Option<std::string> opt_filename("filename", file);
+    const pdal::Option<std::string> opt_verbose_string("verbose", "99");
+    const pdal::Option<boost::uint8_t> opt_verbose_uint8("verbose", 99);
+    const pdal::Option<std::string> opt_debug_string("debug", "true");
+    const pdal::Option<bool> opt_debug_bool("debug", true);
+
+    {
+        pdal::Options opts;
+        opts.add(opt_filename);
+
+        pdal::drivers::las::LasReader reader(opts);
+        BOOST_CHECK(reader.getFileName() == file);
+        BOOST_CHECK(reader.getVerboseLevel() == 0);
+        BOOST_CHECK(reader.isDebug() == false);
+    }
+
+    {
+        pdal::Options opts;
+        opts.add(opt_filename);
+        opts.add(opt_verbose_string);
+        opts.add(opt_debug_string);
+        pdal::drivers::las::LasReader reader(opts);
+        BOOST_CHECK(reader.getFileName() == file);
+        BOOST_CHECK(reader.getVerboseLevel() == 99);
+        BOOST_CHECK(reader.isDebug() == true);
+    }
+
+    {
+        pdal::Options opts;
+        opts.add(opt_filename);
+        opts.add(opt_verbose_uint8);
+        opts.add(opt_debug_bool);
+        pdal::drivers::las::LasReader reader(opts);
+        BOOST_CHECK(reader.getFileName() == file);
+        BOOST_CHECK(reader.getVerboseLevel() == 99);
+        BOOST_CHECK(reader.isDebug() == true);
+    }
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_CASE(test_sequential)
 {
     pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));

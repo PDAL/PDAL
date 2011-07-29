@@ -52,10 +52,8 @@ IMPLEMENT_STATICS(LasReader, "drivers.las.reader", "Las Reader")
 
 LasReader::LasReader(const Options& options)
     : LasReaderBase(options)
-    , m_filename("")
+    , m_filename(options.getValueOrThrow<std::string>("filename"))
 {
-    m_filename = options.getOption<std::string>("filename").getValue();
-
     initialize();
 
     return;

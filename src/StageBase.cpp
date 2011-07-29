@@ -45,8 +45,8 @@ namespace pdal
 
 StageBase::StageBase(const Options& options)
     : m_options(options)
-    , m_debug(false)
-    , m_verbose(0)
+    , m_debug(options.getValueOrDefault<bool>("debug", false))
+    , m_verbose(options.getValueOrDefault<boost::uint8_t>("verbose", 0))
 {
     return;
 }

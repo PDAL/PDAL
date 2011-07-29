@@ -204,6 +204,31 @@ public:
         throw option_not_found(name);
     }
 
+    // get value of an option, or throw option_not_found if option not present
+    template<typename T> T getValueOrThrow(std::string const& name) const
+    {
+        Option<T> opt = getOption<T>(name);  // might throw
+        return opt.getValue();
+    }
+
+    // get value of an option, or use given default if option not present
+    template<typename T> T getValueOrDefault(std::string const& name, T defaultValue) const
+    {
+        T result;
+
+        try
+        {
+            Option<T> opt = getOption<T>(name);  // might throw
+            result = opt.getValue();
+        }
+        catch (option_not_found)
+        {
+           result = defaultValue;
+        }
+        
+        return result;
+    }
+
     // returns true iff the option name is valid
     template<typename T> bool hasOption(std::string const& name) const
     {
