@@ -45,8 +45,11 @@ IMPLEMENT_STATICS(DecimationFilter, "filters.decimation", "Decimation Filter")
 
 DecimationFilter::DecimationFilter(const Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
+    , m_step(options.getValueOrThrow<boost::uint32_t>("step"))
 {
-    throw not_yet_implemented("options ctor"); 
+    initialize();
+
+    return;
 }
 
 
@@ -54,7 +57,15 @@ DecimationFilter::DecimationFilter(const Stage& prevStage, boost::uint32_t step)
     : Filter(prevStage, Options::none())
     , m_step(step)
 {
-    this->setNumPoints( this->getNumPoints() / step );
+    initialize();
+
+    return;
+}
+
+
+void DecimationFilter::initialize()
+{
+    this->setNumPoints( this->getNumPoints() / m_step );
 
     return;
 }

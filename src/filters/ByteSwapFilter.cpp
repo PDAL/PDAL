@@ -53,16 +53,24 @@ IMPLEMENT_STATICS(ByteSwapFilter, "filters.byteswap", "Crop Filter")
 ByteSwapFilter::ByteSwapFilter(const Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
-    throw not_yet_implemented("options ctor"); 
+    initialize();
+    return;
 }
 
 
 ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
     : Filter(prevStage, Options::none())
 {
+    initialize();
+    return;
+}
 
-    this->setNumPoints(prevStage.getNumPoints());
-    this->setPointCountType(prevStage.getPointCountType());
+
+void ByteSwapFilter::initialize()
+{
+    const Stage& stage = getPrevStage();
+    this->setNumPoints(stage.getNumPoints());
+    this->setPointCountType(stage.getPointCountType());
 
     Schema& schema = this->getSchemaRef();
 
@@ -80,9 +88,9 @@ ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
     //     } else {
     //         throw pdal_error("ByteSwapFilter can only swap big/little endian dimensions");
     //     }
-    // }    
-        
-    return;
+    // }
+
+    return;        
 }
 
 

@@ -87,6 +87,54 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_options)
+{
+    const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    Option<Bounds<double> > opt1("bounds", bounds);
+    Option<std::string> opt2("mode", "conSTanT");
+    Option<boost::uint64_t> opt3("num_points", 1000);
+    Options opts;
+    opts.add(opt1);
+    opts.add(opt2);
+    opts.add(opt3);
+    pdal::drivers::faux::Reader reader(opts);
+
+    BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
+
+    const Schema& schema = reader.getSchema();
+    SchemaLayout layout(schema);
+
+    PointBuffer data(layout, 750);
+ 
+    StageSequentialIterator* iter = reader.createSequentialIterator();
+    boost::uint32_t numRead = iter->read(data);
+
+    BOOST_CHECK_EQUAL(numRead, 750u);
+
+    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
+    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
+    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
+
+    for (boost::uint32_t i=0; i<numRead; i++)
+    {
+        double x = data.getField<double>(i, offsetX);
+        double y = data.getField<double>(i, offsetY);
+        double z = data.getField<double>(i, offsetZ);
+        boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+
+        BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
+        BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
+        BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
+        BOOST_CHECK_EQUAL(t, i);
+    }
+
+    delete iter;
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);

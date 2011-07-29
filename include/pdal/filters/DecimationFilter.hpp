@@ -75,6 +75,8 @@ public:
 private:
     boost::uint32_t m_step;
 
+    void initialize();
+
     DecimationFilter& operator=(const DecimationFilter&); // not implemented
     DecimationFilter(const DecimationFilter&); // not implemented
 };

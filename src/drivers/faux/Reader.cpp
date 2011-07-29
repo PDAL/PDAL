@@ -45,48 +45,84 @@ namespace pdal { namespace drivers { namespace faux {
 
 IMPLEMENT_STATICS(Reader, "drivers.faux.reader", "Faux Reader")
 
-
-Reader::Reader(const Options& options)
-    : pdal::Reader(options)
+static Reader::Mode string2mode(const std::string& str)
 {
-    throw not_yet_implemented("options ctor"); 
+    if (compare_no_case(str.c_str(), "constant")==0) return Reader::Constant;
+    if (compare_no_case(str.c_str(), "random")==0) return Reader::Random;
+    if (compare_no_case(str.c_str(), "ramp")==0) return Reader::Ramp;
+    throw pdal_error("invalid Mode option: " + str);
 }
 
 
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode)
-    : pdal::Reader(Options::none())
-    , m_mode(mode)
+Reader::Reader(const Options& options)
+    : pdal::Reader(options)
+    , m_bounds(options.getValueOrThrow<Bounds<double> >("bounds"))
+    , m_numPoints(options.getValueOrThrow<boost::uint64_t>("num_points"))
+    , m_mode(string2mode(options.getValueOrThrow<std::string>("mode")))
 {
-    Schema& schema = getSchemaRef();
-
-    schema.addDimension(Dimension(Dimension::Field_X, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Y, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Z, Dimension::Double));
-    schema.addDimension(Dimension(Dimension::Field_Time, Dimension::Uint64));
-
-    setNumPoints(numPoints);
-    setPointCountType(PointCount_Fixed);
-
-    setBounds(bounds);
+    initialize();
 
     return;
 }
 
-Reader::Reader(const Bounds<double>& bounds, int numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : pdal::Reader( Options::none())
+
+Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mode)
+    : pdal::Reader(Options::none())
+    , m_bounds(bounds)
+    , m_numPoints(numPoints)
     , m_mode(mode)
 {
-    Schema& schema = getSchemaRef();
+    initialize();
+
+    return;
+}
+
+Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mode, const std::vector<Dimension>& dimensions)
+    : pdal::Reader( Options::none())
+    , m_bounds(bounds)
+    , m_numPoints(numPoints)
+    , m_mode(mode)
+{
     if (dimensions.size() == 0)
     {
         throw; // BUG
     }
-    schema.addDimensions(dimensions);
 
-    setNumPoints(numPoints);
-    setBounds(bounds);
+    initialize(dimensions);
 
     return;
+}
+
+
+void Reader::initialize()
+{
+    std::vector<Dimension> dimensions;
+
+    Dimension dimx(Dimension::Field_X, Dimension::Double);
+    Dimension dimy(Dimension::Field_Y, Dimension::Double);
+    Dimension dimz(Dimension::Field_Z, Dimension::Double);
+    Dimension dimt(Dimension::Field_Time, Dimension::Uint64);
+
+    dimensions.push_back(dimx);
+    dimensions.push_back(dimy);
+    dimensions.push_back(dimz);
+    dimensions.push_back(dimt);
+    
+    initialize(dimensions);
+
+    return;
+}
+
+
+void Reader::initialize(const std::vector<Dimension>& dimensions)
+{
+    Schema& schema = getSchemaRef();
+    schema.addDimensions(dimensions);
+
+    setNumPoints(m_numPoints);
+    setPointCountType(PointCount_Fixed);
+
+    setBounds(m_bounds);
 }
 
 

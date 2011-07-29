@@ -47,7 +47,7 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(DecimationFilterTest)
 
-BOOST_AUTO_TEST_CASE(test)
+BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
 
@@ -80,5 +80,42 @@ BOOST_AUTO_TEST_CASE(test)
 
     return;
 }
+
+BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
+{
+    Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
+
+    pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Random);
+
+    pdal::Option<std::string> opt("step", "10");
+    pdal::Options opts(opt);
+    pdal::filters::DecimationFilter filter(reader, opts);
+    BOOST_CHECK(filter.getDescription() == "Decimation Filter");
+
+    const Schema& schema = filter.getSchema();
+    SchemaLayout layout(schema);
+
+    PointBuffer data(layout, 3);
+
+    StageSequentialIterator* iter = filter.createSequentialIterator();
+    boost::uint32_t numRead = iter->read(data);
+
+    BOOST_CHECK(numRead == 3);
+
+    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
+
+    boost::uint64_t t0 = data.getField<boost::uint64_t>(0, offsetT);
+    boost::uint64_t t1 = data.getField<boost::uint64_t>(1, offsetT);
+    boost::uint64_t t2 = data.getField<boost::uint64_t>(2, offsetT);
+
+    BOOST_CHECK(t0 == 0);
+    BOOST_CHECK(t1 == 10);
+    BOOST_CHECK(t2 == 20);
+
+    delete iter;
+
+    return;
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

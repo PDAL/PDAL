@@ -76,7 +76,7 @@ public:
 
 
 private:
-
+    void initialize();
 
     ByteSwapFilter& operator=(const ByteSwapFilter&); // not implemented
     ByteSwapFilter(const ByteSwapFilter&); // not implemented
