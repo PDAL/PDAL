@@ -143,4 +143,11 @@ const Stage* PipelineManager::getStage() const
     return m_lastStage;
 }
 
+
+boost::uint64_t PipelineManager::execute()
+{
+    return getWriter()->write(0);
+}
+
+
 } // namespace pdal

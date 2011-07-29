@@ -72,6 +72,10 @@ public:
     // return the pipeline reader endpoint (or NULL, if not a reader pipeline)
     const Stage* getStage() const;
 
+    // for writer pipelines, this convenience function calls getWriter()->write() so that
+    // the user doesn't even need to know anything about the Writer class
+    boost::uint64_t execute();
+
 private:
     StageFactory m_factory;
 

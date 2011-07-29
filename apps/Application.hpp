@@ -76,7 +76,8 @@ protected:
     Application(int argc, char* argv[], const std::string& appName);
     void addOptionSet(boost::program_options::options_description* options);
     void addPositionalOption(const char* name, int max_count);
-    bool isVerbose() const;
+    bool isDebug() const;
+    boost::uint8_t getVerboseLevel() const;
     bool hasOption(const std::string& name);
     void usageError(const std::string&);
     void runtimeError(const std::string&);
@@ -87,7 +88,8 @@ private:
     void outputVersion();
     void addBasicOptionSet();
 
-    bool m_isVerbose;
+    bool m_isDebug;
+    boost::uint8_t m_verboseLevel;
     const int m_argc;
     char** m_argv;
     const std::string m_appName;

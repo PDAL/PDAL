@@ -7,7 +7,7 @@ set BUILD_TYPE=Release
 set BUILD_TYPE=Debug
 
 set UTILS_DIR=c:\Utils
-set DEV_DIR=c:\dev
+set DEV_DIR=d:\dev
 set OSGEO4W_DIR=C:\OSGeo4W
 
 rem *** These packages are needed from OSGeo4W

@@ -23,10 +23,11 @@ include_directories(
 
 set(PC2PC pc2pc)
 set(PCINFO pcinfo)
+set(PCPIPELINE pcpipeline)
 
 
 set(PDAL_UTILITIES
-    ${PCINFO} ${PC2PC} ${PCVIEW})
+    ${PCPIPELINE} ${PCINFO} ${PC2PC} ${PCVIEW})
 
 
 #------------------------------------------------------------------------------
@@ -60,6 +61,10 @@ if(PC2PC)
     target_link_libraries(${PC2PC} ${APPS_CPP_DEPENDENCIES} )
 endif()
 
+if(PCPIPELINE)
+    add_executable(${PCPIPELINE} pcpipeline.cpp Application.cpp Application.hpp)
+    target_link_libraries(${PCPIPELINE} ${APPS_CPP_DEPENDENCIES} )
+endif()
 
 #------------------------------------------------------------------------------
 # Targets installation

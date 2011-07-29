@@ -39,6 +39,7 @@
 #include <pdal/MultiFilter.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
+#include <pdal/Options.hpp>
 
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
@@ -119,9 +120,21 @@ private:
 // ------------------------------------------------------------------------
 
 
-PipelineReader::PipelineReader(PipelineManager& manager)
+PipelineReader::PipelineReader(PipelineManager& manager, bool isDebug, boost::uint8_t verboseLevel)
     : m_manager(manager)
+    , m_isDebug(isDebug)
+    , m_verboseLevel(verboseLevel)
 {
+    if (m_isDebug)
+    {
+        Option<bool> opt("debug", true);
+        m_baseOptions.add(opt);
+    }
+    if (m_verboseLevel)
+    {
+        Option<boost::uint8_t> opt("verbose", m_verboseLevel);
+        m_baseOptions.add(opt);
+    }
 
     return;
 }
@@ -187,7 +200,7 @@ Stage* PipelineReader::parseElement_anystage(const std::string& name, const boos
 
 Reader* PipelineReader::parseElement_Reader(const boost::property_tree::ptree& tree)
 {
-    Options options;
+    Options options(m_baseOptions);
     std::string type;
     
     StageParserContext context(StageParserContext::None);
@@ -225,7 +238,7 @@ Reader* PipelineReader::parseElement_Reader(const boost::property_tree::ptree& t
 
 Filter* PipelineReader::parseElement_Filter(const boost::property_tree::ptree& tree)
 {
-    Options options;
+    Options options(m_baseOptions);
     std::string type = "";
     Stage* prevStage = NULL;
 
@@ -269,7 +282,7 @@ Filter* PipelineReader::parseElement_Filter(const boost::property_tree::ptree& t
 
 MultiFilter* PipelineReader::parseElement_MultiFilter(const boost::property_tree::ptree& tree)
 {
-    Options options;
+    Options options(m_baseOptions);
     std::string type = "";
     std::vector<const Stage*> prevStages;
     StageParserContext context(StageParserContext::Many);
@@ -313,7 +326,7 @@ MultiFilter* PipelineReader::parseElement_MultiFilter(const boost::property_tree
 
 Writer* PipelineReader::parseElement_Writer(const boost::property_tree::ptree& tree)
 {
-    Options options;
+    Options options(m_baseOptions);
     std::string type = "";
     Stage* prevStage = NULL;
     StageParserContext context(StageParserContext::One);

@@ -45,7 +45,8 @@ namespace po = boost::program_options;
 
 
 Application::Application(int argc, char* argv[], const std::string& appName)
-    : m_isVerbose(false)
+    : m_isDebug(false)
+    , m_verboseLevel(0)
     , m_argc(argc)
     , m_argv(argv)
     , m_appName(appName)
@@ -136,9 +137,15 @@ bool Application::hasOption(const std::string& name)
 }
 
 
-bool Application::isVerbose() const
+bool Application::isDebug() const
 {
-    return m_isVerbose;
+    return m_isDebug;
+}
+
+
+boost::uint8_t Application::getVerboseLevel() const
+{
+    return m_verboseLevel;
 }
 
 
@@ -192,7 +199,8 @@ void Application::addBasicOptionSet()
 
     basic_options->add_options()
         ("help,h", "produce help message")
-        ("verbose,v", po::value<bool>(&m_isVerbose)->zero_tokens(), "Verbose message output")
+        ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens(), "Enable debug mode")
+        ("verbose,v", po::value<boost::uint8_t>(&m_verboseLevel)->default_value(0), "Set verbose message level (default is 0)")
         ("version", "Show version info")
         ("timer", "Show execution time")
         ;

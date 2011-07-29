@@ -54,7 +54,7 @@ private:
     class StageParserContext;
 
 public:
-    PipelineReader(PipelineManager&);
+    PipelineReader(PipelineManager&, bool debug=false, boost::uint8_t verbose=0);
     ~PipelineReader();
 
    
@@ -82,6 +82,9 @@ private:
 
 private:
     PipelineManager& m_manager;
+    bool m_isDebug;
+    boost::uint8_t m_verboseLevel;
+    Options m_baseOptions;
 
     PipelineReader& operator=(const PipelineReader&); // not implemented
     PipelineReader(const PipelineReader&); // not implemented
