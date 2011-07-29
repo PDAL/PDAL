@@ -41,7 +41,7 @@
 namespace pdal { namespace filters {
 
 
-ScalingFilterSequentialIterator::ScalingFilterSequentialIterator(const ScalingFilter& filter)
+ScalingFilterSequentialIterator::ScalingFilterSequentialIterator(const ScalingFilterBase& filter)
     : pdal::FilterSequentialIterator(filter)
     , m_scalingFilter(filter)
 {

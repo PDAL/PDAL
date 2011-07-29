@@ -101,6 +101,7 @@ MAKE_FILTER_CREATOR(CropFilter, pdal::filters::CropFilter)
 MAKE_FILTER_CREATOR(DecimationFilter, pdal::filters::DecimationFilter)
 MAKE_FILTER_CREATOR(ReprojectionFilter, pdal::filters::ReprojectionFilter)
 MAKE_FILTER_CREATOR(ScalingFilter, pdal::filters::ScalingFilter)
+MAKE_FILTER_CREATOR(DescalingFilter, pdal::filters::DescalingFilter)
 
 MAKE_MULTIFILTER_CREATOR(MosaicFilter, pdal::filters::MosaicFilter)
 
@@ -246,6 +247,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(DecimationFilter, pdal::filters::DecimationFilter);
     REGISTER_FILTER(ReprojectionFilter, pdal::filters::ReprojectionFilter);
     REGISTER_FILTER(ScalingFilter, pdal::filters::ScalingFilter);
+    REGISTER_FILTER(DescalingFilter, pdal::filters::DescalingFilter);
 }
 
 

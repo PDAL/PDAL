@@ -46,14 +46,14 @@ namespace pdal { namespace filters {
 class ScalingFilterSequentialIterator : public pdal::FilterSequentialIterator
 {
 public:
-    ScalingFilterSequentialIterator(const ScalingFilter& filter);
+    ScalingFilterSequentialIterator(const ScalingFilterBase& filter);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const ScalingFilter& m_scalingFilter;
+    const ScalingFilterBase& m_scalingFilter;
 };
 
 

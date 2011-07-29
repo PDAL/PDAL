@@ -147,9 +147,9 @@ BOOST_AUTO_TEST_CASE(test_1)
         const pdal::SpatialReference in_ref(reader.getSpatialReference());
         const pdal::SpatialReference out_ref(epsg4326_wkt);
 
-        pdal::filters::ScalingFilter scalingFilter(reader, false);
+        pdal::filters::ScalingFilter scalingFilter(reader);
         pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
-        pdal::filters::ScalingFilter descalingFilter(reprojectionFilter, true);
+        pdal::filters::DescalingFilter descalingFilter(reprojectionFilter);
 
         const pdal::Schema& schema = descalingFilter.getSchema();
         const pdal::SchemaLayout layout(schema);
@@ -182,12 +182,12 @@ BOOST_AUTO_TEST_CASE(test_1)
         const pdal::SpatialReference out_ref(epsg4326_wkt);
 
         // convert to doubles, use internal scale factor
-        pdal::filters::ScalingFilter scalingFilter(reader, false);
+        pdal::filters::ScalingFilter scalingFilter(reader);
 
         pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
     
         // convert to ints, using custom scale factor
-        pdal::filters::ScalingFilter descalingFilter(reprojectionFilter, 0.000001, 0.0, 0.000001, 0.0, 0.01, 0.0, true);
+        pdal::filters::DescalingFilter descalingFilter(reprojectionFilter, 0.000001, 0.0, 0.000001, 0.0, 0.01, 0.0);
 
         const pdal::Schema& schema = descalingFilter.getSchema();
         const pdal::SchemaLayout layout(schema);

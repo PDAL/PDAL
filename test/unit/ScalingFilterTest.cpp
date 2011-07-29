@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(test_1)
         pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
             
         // convert to doubles, use internal scale factor
-        pdal::filters::ScalingFilter scalingFilter(reader, false);
+        pdal::filters::ScalingFilter scalingFilter(reader);
 
         const pdal::Schema& schema = scalingFilter.getSchema();
         const pdal::SchemaLayout layout(schema);

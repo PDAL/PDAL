@@ -173,13 +173,12 @@ int Application_pc2pc::execute()
         
         pdal::filters::CacheFilter cache(reader, 1, capacity);
         pdal::filters::Chipper chipper(cache, capacity);
-        pdal::filters::ScalingFilter scalingFilter(chipper, false);
+        pdal::filters::ScalingFilter scalingFilter(chipper);
         pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
-        pdal::filters::ScalingFilter descalingFilter(   reprojectionFilter, 
-                                                        scalex, offsetx,
-                                                        scaley, offsety, 
-                                                        scalez, offsetz, 
-                                                        true);
+        pdal::filters::DescalingFilter descalingFilter(reprojectionFilter,
+                                                       scalex, offsetx,
+                                                       scaley, offsety,
+                                                       scalez, offsetz);
         
         // pdal::filters::ByteSwapFilter swapper(descalingFilter);
         pdal::drivers::oci::Writer writer(descalingFilter, options);
@@ -237,13 +236,12 @@ int Application_pc2pc::execute()
         if (!(in_ref == out_ref)) 
         {
             // pdal::filters::ByteSwapFilter swapper(reader);
-            pdal::filters::ScalingFilter scalingFilter(reader, false);
+            pdal::filters::ScalingFilter scalingFilter(reader);
             pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
-            pdal::filters::ScalingFilter descalingFilter(   reprojectionFilter, 
-                                                            scalex, offsetx,
-                                                            scaley, offsety, 
-                                                            scalez, offsetz, 
-                                                            true);
+            pdal::filters::DescalingFilter descalingFilter(reprojectionFilter, 
+                                                           scalex, offsetx,
+                                                           scaley, offsety,
+                                                           scalez, offsetz);
 
             writer = new pdal::drivers::las::LasWriter(descalingFilter, ofs);
             if (compress)

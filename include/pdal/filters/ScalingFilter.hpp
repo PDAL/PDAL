@@ -50,11 +50,10 @@ namespace pdal { namespace filters {
 
 class ScalingFilterSequentialIterator;
 
-class PDAL_DLL ScalingFilter : public Filter
+class PDAL_DLL ScalingFilterBase : public Filter
 {
-    DECLARE_STATICS
+protected: // the ctors are protected, since we want people to use the two derived classes below
 
-public:
     // for now...
     //   - we only support scaling of the X,Y,Z fields
     //   - we only support scaling doubles <--> int32s
@@ -62,10 +61,11 @@ public:
     //   - "forward=true" means doubles --> ints
     //   - "forward=false" means ints --> doubles
     //   - 1st version uses the scale/offset values already present
-    ScalingFilter(const Stage& prevStage, const Options&);
-    ScalingFilter(const Stage& prevStage, bool forward);
-    ScalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ, bool forward);
+    ScalingFilterBase(const Stage& prevStage, bool isDescaling, const Options&);
+    ScalingFilterBase(const Stage& prevStage, bool isDescaling);
+    ScalingFilterBase(const Stage& prevStage, bool isDescaling, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
 
+public:
     bool supportsIterator (StageIteratorType t) const
     {   
         if (t == StageIterator_Sequential ) return true;
@@ -85,10 +85,30 @@ private:
     bool m_customScaleOffset;
     double m_scaleX, m_scaleY, m_scaleZ;
     double m_offsetX, m_offsetY, m_offsetZ;
-    bool m_forward;
+    bool m_isDescaling;
 
-    ScalingFilter& operator=(const ScalingFilter&); // not implemented
-    ScalingFilter(const ScalingFilter&); // not implemented
+    ScalingFilterBase& operator=(const ScalingFilterBase&); // not implemented
+    ScalingFilterBase(const ScalingFilterBase&); // not implemented
+};
+
+
+class PDAL_DLL ScalingFilter: public ScalingFilterBase
+{
+    DECLARE_STATICS
+public:
+    ScalingFilter(const Stage& prevStage);
+    ScalingFilter(const Stage& prevStage, const Options&);
+    ScalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
+};
+
+
+class PDAL_DLL DescalingFilter: public ScalingFilterBase
+{
+    DECLARE_STATICS
+public:
+    DescalingFilter(const Stage& prevStage);
+    DescalingFilter(const Stage& prevStage, const Options&);
+    DescalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
 };
 
 
