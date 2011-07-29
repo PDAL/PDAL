@@ -57,6 +57,15 @@ public:
     // recursively visit all child stages to populate the tree.
     virtual boost::property_tree::ptree generatePTree() const = 0;
 
+    // set by the "debug" option, which is a boolean
+    bool isDebug() const;
+    
+    // set by the "verbose" option, which is in range [0..255]
+    // 0 means no verbosity at all; the meanings of other values are 
+    // defined by the individual stages
+    bool isVerbose() const; // true iff verbosity>0 
+    boost::uint8_t getVerboseLevel() const; 
+
     // For Name, Description, and DefaultOptions:
     //   each concrete class should provide a static function s_getX() which returns a static object
     //   each concrete class should provide a virtual getX() which returns s_getX()
@@ -96,6 +105,8 @@ protected:
 
 private:
     Options m_options;
+    bool m_debug;
+    boost::uint8_t m_verbose;
 
     StageBase& operator=(const StageBase&); // not implemented
     StageBase(const StageBase&); // not implemented

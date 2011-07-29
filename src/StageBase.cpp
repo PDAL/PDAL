@@ -45,6 +45,8 @@ namespace pdal
 
 StageBase::StageBase(const Options& options)
     : m_options(options)
+    , m_debug(false)
+    , m_verbose(0)
 {
     return;
 }
@@ -59,6 +61,24 @@ const Options& StageBase::getOptions() const
 Options& StageBase::getOptions()
 {
     return m_options;
+}
+
+
+bool StageBase::isDebug() const
+{
+    return m_debug;
+}
+
+
+bool StageBase::isVerbose() const
+{   
+    return m_verbose>0;
+}
+
+
+boost::uint8_t StageBase::getVerboseLevel() const
+{
+    return m_verbose;
 }
 
 
