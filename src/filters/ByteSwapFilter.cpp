@@ -72,7 +72,7 @@ void ByteSwapFilter::initialize()
     this->setNumPoints(stage.getNumPoints());
     this->setPointCountType(stage.getPointCountType());
 
-    Schema& schema = this->getSchemaRef();
+    //Schema& schema = this->getSchemaRef();
 
     // FIXME:  this doesn't work anymore
     // std::vector<Dimension>& dimensions = schema.getDimensions();
