@@ -69,18 +69,16 @@ public:
     void readReaderPipeline(const std::string&);
 
 private:
-    boost::property_tree::ptree parsePipelineElement(const std::string& filename);
-    Writer* parseWriterRoot(const boost::property_tree::ptree&);
-    Stage* parseStageRoot(const boost::property_tree::ptree&);
+    Writer* parseElement_WriterPipeline(const boost::property_tree::ptree&);
+    Stage* parseElement_ReaderPipeline(const boost::property_tree::ptree&);
+    Stage* parseElement_anystage(const std::string& name, const boost::property_tree::ptree& subtree);
+    Reader* parseElement_Reader(const boost::property_tree::ptree& tree);
+    Filter* parseElement_Filter(const boost::property_tree::ptree& tree);
+    MultiFilter* parseElement_MultiFilter(const boost::property_tree::ptree& tree);
+    Writer* parseElement_Writer(const boost::property_tree::ptree& tree);
 
-    Stage* parseStageElement(const std::string& name, const boost::property_tree::ptree& subtree);
-    Reader* parseReaderElement(const boost::property_tree::ptree& tree);
-    Filter* parseFilterElement(const boost::property_tree::ptree& tree);
-    MultiFilter* parseMultiFilterElement(const boost::property_tree::ptree& tree);
-    Writer* parseWriterElement(const boost::property_tree::ptree& tree);
-
-    Option<std::string> parseOptionElement(const boost::property_tree::ptree& tree);
-    std::string parseTypeElement(const boost::property_tree::ptree& tree);
+    Option<std::string> parseElement_Option(const boost::property_tree::ptree& tree);
+    std::string parseElement_Type(const boost::property_tree::ptree& tree);
 
 private:
     PipelineManager& m_manager;

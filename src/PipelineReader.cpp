@@ -53,7 +53,8 @@ namespace pdal
     
 // ------------------------------------------------------------------------
 
-    
+// this class helps keep tracks of what child nodes we've seen, so we
+// can keep all the error checking in one place
 class PipelineReader::StageParserContext
 {
 public:
@@ -132,7 +133,7 @@ PipelineReader::~PipelineReader()
 }
 
 
-Option<std::string> PipelineReader::parseOptionElement(const boost::property_tree::ptree& tree)
+Option<std::string> PipelineReader::parseElement_Option(const boost::property_tree::ptree& tree)
 {
     // cur is an option element, such as this:
     //     <option>
@@ -148,7 +149,7 @@ Option<std::string> PipelineReader::parseOptionElement(const boost::property_tre
 }
 
 
-std::string PipelineReader::parseTypeElement(const boost::property_tree::ptree& tree)
+std::string PipelineReader::parseElement_Type(const boost::property_tree::ptree& tree)
 {
     // tree is this:
     //     <type>drivers.foo.writer</type>
@@ -159,21 +160,21 @@ std::string PipelineReader::parseTypeElement(const boost::property_tree::ptree& 
 }
 
 
-Stage* PipelineReader::parseStageElement(const std::string& name, const boost::property_tree::ptree& subtree)
+Stage* PipelineReader::parseElement_anystage(const std::string& name, const boost::property_tree::ptree& subtree)
 {
     Stage* stage = NULL;
 
     if (name == "Filter")
     {
-        stage = parseFilterElement(subtree);
+        stage = parseElement_Filter(subtree);
     }
     else if (name == "MultiFilter")
     {
-        stage = parseMultiFilterElement(subtree);
+        stage = parseElement_MultiFilter(subtree);
     }
     else if (name == "Reader")
     {
-        stage = parseReaderElement(subtree);
+        stage = parseElement_Reader(subtree);
     }
     else
     {
@@ -184,7 +185,7 @@ Stage* PipelineReader::parseStageElement(const std::string& name, const boost::p
 }
 
 
-Reader* PipelineReader::parseReaderElement(const boost::property_tree::ptree& tree)
+Reader* PipelineReader::parseElement_Reader(const boost::property_tree::ptree& tree)
 {
     Options options;
     std::string type;
@@ -200,11 +201,11 @@ Reader* PipelineReader::parseReaderElement(const boost::property_tree::ptree& tr
         if (name == "Type")
         {
             context.addType();
-            type = parseTypeElement(subtree);
+            type = parseElement_Type(subtree);
         }
         else if (name == "Option")
         {
-            Option<std::string> option = parseOptionElement(subtree);
+            Option<std::string> option = parseElement_Option(subtree);
             options.add(option);
         }
         else
@@ -222,7 +223,7 @@ Reader* PipelineReader::parseReaderElement(const boost::property_tree::ptree& tr
 }
 
 
-Filter* PipelineReader::parseFilterElement(const boost::property_tree::ptree& tree)
+Filter* PipelineReader::parseElement_Filter(const boost::property_tree::ptree& tree)
 {
     Options options;
     std::string type = "";
@@ -239,17 +240,17 @@ Filter* PipelineReader::parseFilterElement(const boost::property_tree::ptree& tr
         if (name == "Type")
         {
             context.addType();
-            type = parseTypeElement(subtree);
+            type = parseElement_Type(subtree);
         }
         else if (name == "Option")
         {
-            Option<std::string> option = parseOptionElement(subtree);
+            Option<std::string> option = parseElement_Option(subtree);
             options.add(option);
         }
         else if (name == "Filter" || name == "MultiFilter" || name == "Reader")
         {
             context.addStage();
-            prevStage = parseStageElement(name, subtree);
+            prevStage = parseElement_anystage(name, subtree);
         }
         else
         {
@@ -266,7 +267,7 @@ Filter* PipelineReader::parseFilterElement(const boost::property_tree::ptree& tr
 }
 
 
-MultiFilter* PipelineReader::parseMultiFilterElement(const boost::property_tree::ptree& tree)
+MultiFilter* PipelineReader::parseElement_MultiFilter(const boost::property_tree::ptree& tree)
 {
     Options options;
     std::string type = "";
@@ -282,17 +283,17 @@ MultiFilter* PipelineReader::parseMultiFilterElement(const boost::property_tree:
         if (name == "Type")
         {
             context.addType();
-            type = parseTypeElement(subtree);
+            type = parseElement_Type(subtree);
         }
         else if (name == "Option")
         {
-            Option<std::string> option = parseOptionElement(subtree);
+            Option<std::string> option = parseElement_Option(subtree);
             options.add(option);
         }
         else if (name == "Filter" || name == "MultiFilter" || name == "Reader")
         {
             context.addStage();
-            Stage* prevStage = parseStageElement(name, subtree);
+            Stage* prevStage = parseElement_anystage(name, subtree);
             prevStages.push_back(prevStage);
         }
         else
@@ -310,7 +311,7 @@ MultiFilter* PipelineReader::parseMultiFilterElement(const boost::property_tree:
 }
 
 
-Writer* PipelineReader::parseWriterElement(const boost::property_tree::ptree& tree)
+Writer* PipelineReader::parseElement_Writer(const boost::property_tree::ptree& tree)
 {
     Options options;
     std::string type = "";
@@ -326,17 +327,17 @@ Writer* PipelineReader::parseWriterElement(const boost::property_tree::ptree& tr
         if (name == "Type")
         {
             context.addType();
-            type = parseTypeElement(subtree);
+            type = parseElement_Type(subtree);
         }
         else if (name == "Option")
         {
-            Option<std::string> option = parseOptionElement(subtree);
+            Option<std::string> option = parseElement_Option(subtree);
             options.add(option);
         }
         else if (name == "Filter" || name == "MultiFilter" || name == "Reader")
         {
             context.addStage();
-            prevStage = parseStageElement(name, subtree);
+            prevStage = parseElement_anystage(name, subtree);
         }
         else
         {
@@ -353,7 +354,7 @@ Writer* PipelineReader::parseWriterElement(const boost::property_tree::ptree& tr
 }
 
 
-Writer* PipelineReader::parseWriterRoot(const boost::property_tree::ptree& tree)
+Writer* PipelineReader::parseElement_WriterPipeline(const boost::property_tree::ptree& tree)
 {
     Writer* writer = NULL;
 
@@ -363,7 +364,7 @@ Writer* PipelineReader::parseWriterRoot(const boost::property_tree::ptree& tree)
         if (iter->first == "Writer")
         {
             const boost::property_tree::ptree subtree = iter->second;
-            writer = parseWriterElement(subtree);
+            writer = parseElement_Writer(subtree);
         }
         else
         {
@@ -381,56 +382,49 @@ Writer* PipelineReader::parseWriterRoot(const boost::property_tree::ptree& tree)
 }
 
 
-Stage* PipelineReader::parseStageRoot(const boost::property_tree::ptree& tree)
+Stage* PipelineReader::parseElement_ReaderPipeline(const boost::property_tree::ptree& tree)
 {
     Stage* stage = NULL;
 
     boost::property_tree::ptree::const_iterator iter = tree.begin();
+    const std::string& name = iter->first;
+    const boost::property_tree::ptree subtree = iter->second;
 
     {
-        const std::string& name = iter->first;
-        const boost::property_tree::ptree& subtree = iter->second;
-
         if (name == "Reader" || name == "Filter" || name == "MultiFilter")
         {
-            stage = parseStageElement(name, subtree);
+            stage = parseElement_anystage(name, subtree);
         }
         else
         {
-            throw pipeline_xml_error("xml reader invalid child of Pipeline element");
+            throw pipeline_xml_error("xml reader invalid child of ReaderPipeline element");
         }
     }
-
+    
     ++iter;
     if (iter != tree.end())
     {
-        throw pipeline_xml_error("extra nodes at front of stage pipeline");
+        throw pipeline_xml_error("extra nodes at front of writer pipeline");
     }
 
     return stage;
 }
 
 
-boost::property_tree::ptree PipelineReader::parsePipelineElement(const std::string& filename)
+void PipelineReader::readWriterPipeline(const std::string& filename)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::xml_parser::read_xml(filename, tree);
 
-    boost::optional<boost::property_tree::ptree> opt( tree.get_child_optional("Pipeline") );
+    boost::optional<boost::property_tree::ptree> opt( tree.get_child_optional("WriterPipeline") );
     if (!opt.is_initialized())
     {
-        throw pipeline_xml_error("root element is not Pipeline");
+        throw pipeline_xml_error("root element is not WriterPipeline");
     }
 
-    return opt.get();
-}
+    boost::property_tree::ptree subtree = opt.get();
 
-
-void PipelineReader::readWriterPipeline(const std::string& filename)
-{
-    boost::property_tree::ptree tree = parsePipelineElement(filename);
-
-    (void)parseWriterRoot(tree);
+    (void)parseElement_WriterPipeline(subtree);
 
     return;
 }
@@ -438,9 +432,18 @@ void PipelineReader::readWriterPipeline(const std::string& filename)
 
 void PipelineReader::readReaderPipeline(const std::string& filename)
 {
-    boost::property_tree::ptree tree = parsePipelineElement(filename);
+    boost::property_tree::ptree tree;
+    boost::property_tree::xml_parser::read_xml(filename, tree);
 
-    (void)parseStageRoot(tree);
+    boost::optional<boost::property_tree::ptree> opt( tree.get_child_optional("ReaderPipeline") );
+    if (!opt.is_initialized())
+    {
+        throw pipeline_xml_error("root element is not ReaderPipeline");
+    }
+
+    boost::property_tree::ptree subtree = opt.get();
+
+    (void)parseElement_ReaderPipeline(subtree);
 
     return;
 }

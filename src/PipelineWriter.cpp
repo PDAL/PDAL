@@ -71,7 +71,7 @@ static boost::property_tree::ptree generateTreeFromWriter(const Writer& writer)
 
     boost::property_tree::ptree tree;
 
-    tree.add_child("Pipeline", subtree);
+    tree.add_child("WriterPipeline", subtree);
 
     return tree;
 }

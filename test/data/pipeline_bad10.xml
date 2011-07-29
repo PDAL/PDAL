@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- bad: root element not Pipeline -->
-<!--<Pipeline>-->
+<!--<ReaderPipeline>-->
         <Filter>
             <Type>filters.crop</Type>
             <Option>
@@ -15,4 +15,4 @@
                 </Option>
             </Reader>
         </Filter>
-<!--</Pipeline>-->
+<!--</ReaderPipeline>-->
