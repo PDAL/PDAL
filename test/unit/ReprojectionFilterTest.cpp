@@ -173,6 +173,44 @@ BOOST_AUTO_TEST_CASE(test_1)
     }
 
     //
+    // (2), but using the Option-based ctor
+    //
+    {
+        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+
+        const pdal::SpatialReference in_ref(reader.getSpatialReference());
+        const pdal::SpatialReference out_ref(epsg4326_wkt);
+
+        pdal::Option<std::string> opt1("in_srs", in_ref.getWKT());
+        pdal::Option<std::string> opt2("out_srs", out_ref.getWKT());
+        pdal::Options opts(opt1, opt2);
+
+        pdal::filters::ScalingFilter scalingFilter(reader);
+        pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, opts);
+        pdal::filters::DescalingFilter descalingFilter(reprojectionFilter);
+
+        const pdal::Schema& schema = descalingFilter.getSchema();
+        const pdal::SchemaLayout layout(schema);
+        pdal::PointBuffer data(layout, 1);
+
+        pdal::StageSequentialIterator* iter = descalingFilter.createSequentialIterator();
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 1);
+        delete iter;
+
+        const pdal::Bounds<double> newBounds_ref(postX, postY, postZ, postX, postY, postZ);
+        const pdal::Bounds<double>& newBounds = descalingFilter.getBounds();
+        compareBounds(newBounds_ref, newBounds);
+
+        double x=0, y=0, z=0;
+        getPoint(data, x, y, z, 0.01, 0.01, 0.01);
+
+        BOOST_CHECK_CLOSE(x, postX, 1);
+        BOOST_CHECK_CLOSE(y, postY, 1);
+        BOOST_CHECK_CLOSE(z, postZ, 1);
+    }
+
+    //
     // (3)
     //
     {

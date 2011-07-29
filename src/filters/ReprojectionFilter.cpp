@@ -86,8 +86,16 @@ IMPLEMENT_STATICS(ReprojectionFilter, "filters.reprojection", "Reprojection Filt
 
 ReprojectionFilter::ReprojectionFilter(const Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
+    , m_inSRS(options.getValueOrThrow<std::string>("in_srs"))
+    , m_outSRS(options.getValueOrThrow<std::string>("out_srs"))
 {
-    throw not_yet_implemented("options ctor"); 
+    checkImpedance();
+
+    initialize();
+
+    updateBounds();
+
+    return;
 }
 
 
