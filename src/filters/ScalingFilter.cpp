@@ -59,6 +59,33 @@ ScalingFilterBase::ScalingFilterBase(const Stage& prevStage, bool isDescaling, c
     , m_offsetZ(0.0)
     , m_isDescaling(isDescaling)
 {
+    int sum = 0;
+    if (options.hasOption<double>("scale_x")) ++sum;
+    if (options.hasOption<double>("scale_y")) ++sum;
+    if (options.hasOption<double>("scale_z")) ++sum;
+    if (options.hasOption<double>("offset_x")) ++sum;
+    if (options.hasOption<double>("offset_y")) ++sum;
+    if (options.hasOption<double>("offset_z")) ++sum;
+    if (sum == 6)
+    {
+        m_customScaleOffset = true;
+    }
+    else if (sum == 0)
+    {
+        m_customScaleOffset = false;
+    }
+    else
+    {
+        throw pdal_error("not all 6 scaling factor options specified");
+    }
+
+    m_scaleX = options.getValueOrDefault<double>("scale_x", 0.0);
+    m_scaleY = options.getValueOrDefault<double>("scale_y", 0.0);
+    m_scaleZ = options.getValueOrDefault<double>("scale_z", 0.0);
+    m_offsetX = options.getValueOrDefault<double>("offset_x", 0.0);
+    m_offsetY = options.getValueOrDefault<double>("offset_y", 0.0);
+    m_offsetZ = options.getValueOrDefault<double>("offset_z", 0.0);
+
     checkImpedance();
 
     initialize();
