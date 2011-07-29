@@ -86,6 +86,7 @@ public:
     pdal::StageRandomIterator* createRandomIterator() const;
 
 private:
+    void initialize();
     void processExternalHeader(::liblas::Reader& externalReader);
     void registerFields(::liblas::Reader& externalReader);
     MetadataRecord& getMetadataRecordRef(int index);

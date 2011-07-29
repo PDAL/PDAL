@@ -38,6 +38,7 @@
 #include <pdal/pdal.hpp>
 
 #include <pdal/Writer.hpp>
+#include <pdal/StreamManager.hpp>
 #include <pdal/drivers/las/Support.hpp>
 #include <pdal/drivers/las/SummaryData.hpp>
 
@@ -56,7 +57,7 @@ class PDAL_DLL LiblasWriter : public Writer
 
 public:
     LiblasWriter(const Stage& prevStage, const Options&);
-    LiblasWriter(Stage& prevStage, std::ostream&);
+    LiblasWriter(Stage& prevStage, std::ostream*);
     ~LiblasWriter();
 
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
@@ -85,9 +86,10 @@ protected:
     virtual void writeEnd();
 
 private:
+    void initialize();
     void setupExternalHeader();
 
-    std::ostream& m_ostream;
+    OStreamManager m_ostreamManager;
     ::liblas::Writer* m_externalWriter;
     ::liblas::HeaderPtr m_externalHeader;
 

@@ -56,28 +56,36 @@ IMPLEMENT_STATICS(LiblasWriter, "drivers.liblas.writer", "Liblas Writer")
 
 LiblasWriter::LiblasWriter(const Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
-    , m_ostream(std::cout)
+    , m_ostreamManager(options.getValueOrThrow<std::string>("filename"))
 {
-    throw not_yet_implemented("options ctor"); 
+    initialize();
 }
 
 
-LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream& ostream)
+LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream* ostream)
     : Writer(prevStage, Options::none())
-    , m_ostream(ostream)
+    , m_ostreamManager(ostream)
     , m_externalWriter(NULL)
 {
-    m_externalHeader = ::liblas::HeaderPtr(new ::liblas::Header);
-    m_externalHeader->SetCompressed(false);
-
-    setupExternalHeader();
-
-    return;
+    initialize();
 }
 
 
 LiblasWriter::~LiblasWriter()
 {
+    return;
+}
+
+
+void LiblasWriter::initialize()
+{
+    m_ostreamManager.open();
+
+    m_externalHeader = ::liblas::HeaderPtr(new ::liblas::Header);
+    m_externalHeader->SetCompressed(false);
+
+    setupExternalHeader();
+
     return;
 }
 
@@ -162,7 +170,7 @@ void LiblasWriter::setGeneratingSoftware(const std::string& softwareId)
 
 void LiblasWriter::writeBegin()
 {
-    m_externalWriter = new ::liblas::Writer(m_ostream, *m_externalHeader);
+    m_externalWriter = new ::liblas::Writer(m_ostreamManager.ostream(), *m_externalHeader);
 
     m_summaryData.reset();
 
@@ -177,8 +185,8 @@ void LiblasWriter::writeEnd()
 
     //std::cout << m_summaryData;
 
-    m_ostream.seekp(0);
-    ::pdal::drivers::las::Support::rewriteHeader(m_ostream, m_summaryData);
+    m_ostreamManager.ostream().seekp(0);
+    ::pdal::drivers::las::Support::rewriteHeader(m_ostreamManager.ostream(), m_summaryData);
 
     return;
 }

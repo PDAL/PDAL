@@ -85,6 +85,33 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_options)
+{
+    Option<std::string> opt("filename", Support::datapath("1.2-with-color.las"));
+    Options opts(opt);
+    LiblasReader reader(opt);
+    BOOST_CHECK(reader.getDescription() == "Liblas Reader");
+
+    const Schema& schema = reader.getSchema();
+    SchemaLayout layout(schema);
+
+    PointBuffer data(layout, 3);
+    
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
+
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 3);
+
+        Support::check_p0_p1_p2(data, schema);
+    }
+
+    delete iter;
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_CASE(test_random)
 {
     LiblasReader reader(Support::datapath("1.2-with-color.las"));

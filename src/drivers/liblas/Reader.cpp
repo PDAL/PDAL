@@ -50,8 +50,19 @@ IMPLEMENT_STATICS(LiblasReader, "drivers.liblas.reader", "Liblas Reader")
 
 LiblasReader::LiblasReader(const Options& options)
     : LasReaderBase(options)
+    , m_filename(options.getValueOrThrow<std::string>("filename"))
+    , m_versionMajor(0)
+    , m_versionMinor(0)
+    , m_scaleX(0.0)
+    , m_scaleY(0.0)
+    , m_scaleZ(0.0)
+    , m_offsetX(0.0)
+    , m_offsetY(0.0)
+    , m_offsetZ(0.0)
+    , m_isCompressed(false)
+    , m_pointFormat(::pdal::drivers::las::PointFormatUnknown)
 {
-    throw not_yet_implemented("options ctor"); 
+    initialize();
 }
 
 
@@ -69,6 +80,18 @@ LiblasReader::LiblasReader(const std::string& filename)
     , m_isCompressed(false)
     , m_pointFormat(::pdal::drivers::las::PointFormatUnknown)
 {
+    initialize();
+}
+
+
+LiblasReader::~LiblasReader()
+{
+    return;
+}
+
+
+void LiblasReader::initialize()
+{
     std::istream* str = Utils::openFile(m_filename);
 
     {
@@ -82,12 +105,6 @@ LiblasReader::LiblasReader(const std::string& filename)
 
     Utils::closeFile(str);
 
-    return;
-}
-
-
-LiblasReader::~LiblasReader()
-{
     return;
 }
 

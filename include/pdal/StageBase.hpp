@@ -57,12 +57,19 @@ public:
     // recursively visit all child stages to populate the tree.
     virtual boost::property_tree::ptree generatePTree() const = 0;
 
-    // set by the "debug" option, which is a boolean
+    // This is set by the "debug" option, which is a boolean.
+    // 
+    // This is intended to be used for adding debug code to stages, e.g. more than just the
+    // extra logging that "verbose" implies.
     bool isDebug() const;
     
-    // set by the "verbose" option, which is in range [0..255]
-    // 0 means no verbosity at all; the meanings of other values are 
-    // defined by the individual stages
+    // This is set by the "verbose" option, which is in range [0..255].
+    //    0 - no verbosity at all
+    //    >0 - meaning is left to the implementors of the individual stages
+    //
+    // "Verbose" is intended to only add logging/tracing/output functionality; to add or enable
+    // extra validation checks and such (code which is potentially side-effecting) you want to
+    // use the "debug" option.
     bool isVerbose() const; // true iff verbosity>0 
     boost::uint8_t getVerboseLevel() const; 
 

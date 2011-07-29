@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        LiblasWriter writer(reader, *ofs);
+        LiblasWriter writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Liblas Writer");
 
         writer.setCompressed(false);
@@ -87,6 +87,44 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(test_options)
+{
+    // remove file from earlier run, if needed
+    Utils::deleteFile("temp.las");
+
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+
+    Option<std::string> opt("filename", "temp.las");
+    Options opts(opt);
+
+    {
+        const boost::uint64_t numPoints = reader.getNumPoints();
+
+        // need to scope the writer, so that's it dtor can use the stream
+        LiblasWriter writer(reader, opts);
+        BOOST_CHECK(writer.getDescription() == "Liblas Writer");
+
+        writer.setCompressed(false);
+        writer.setDate(0, 0);
+        writer.setPointFormat(::pdal::drivers::las::PointFormat3);
+        writer.setSystemIdentifier("");
+        writer.setGeneratingSoftware("TerraScan");
+
+        writer.write(numPoints);
+    }
+
+    bool filesSame = Support::compare_files("temp.las", Support::datapath("simple.las"));
+    BOOST_CHECK(filesSame);
+
+    if (filesSame)
+    {
+        Utils::deleteFile("temp.las");
+    }
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_CASE(test_simple_laz)
 {
     // remove file from earlier run, if needed
@@ -100,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        LiblasWriter writer(reader, *ofs);
+        LiblasWriter writer(reader, ofs);
 
         writer.setCompressed(true);
         writer.setDate(0, 0);
@@ -138,7 +176,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        LiblasWriter writer(reader, *ofs);
+        LiblasWriter writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Liblas Writer");
 
         writer.setCompressed(false);

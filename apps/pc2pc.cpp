@@ -295,7 +295,7 @@ int Application_pc2pc::execute()
     
         const boost::uint64_t numPoints = reader.getNumPoints();
 
-        pdal::drivers::liblas::LiblasWriter writer(reader, *ofs);
+        pdal::drivers::liblas::LiblasWriter writer(reader, ofs);
 
         //BUG: handle laz writer.setCompressed(false);
 
