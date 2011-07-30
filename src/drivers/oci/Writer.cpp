@@ -1170,7 +1170,7 @@ void Writer::SetOrdinates(Statement statement,
 {
     
     statement->AddElement(ordinates, extent.getMinimum(0));
-    statement->AddElement(ordinates, extent.getMaximum(1));
+    statement->AddElement(ordinates, extent.getMinimum(1));
     if (extent.dimensions().size() > 2)
         statement->AddElement(ordinates, extent.getMinimum(2));
     
