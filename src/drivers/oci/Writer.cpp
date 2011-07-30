@@ -1205,7 +1205,7 @@ pdal::Bounds<double> CalculateBounds(PointBuffer const& buffer)
         
         Vector<double> v(xd, yd);
         if (first){
-            output = pdal::Bounds<double>(xd, xd, yd, yd);
+            output = pdal::Bounds<double>(xd, yd, xd, yd);
             first = false;
         }
         output.grow(v);
