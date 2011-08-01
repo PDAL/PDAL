@@ -61,11 +61,13 @@ protected: // the ctors are protected, since we want people to use the two deriv
     //   - "forward=true" means doubles --> ints
     //   - "forward=false" means ints --> doubles
     //   - 1st version uses the scale/offset values already present
-    ScalingFilterBase(const Stage& prevStage, bool isDescaling, const Options&);
-    ScalingFilterBase(const Stage& prevStage, bool isDescaling);
-    ScalingFilterBase(const Stage& prevStage, bool isDescaling, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
+    ScalingFilterBase(Stage& prevStage, bool isDescaling, const Options&);
+    ScalingFilterBase(Stage& prevStage, bool isDescaling);
+    ScalingFilterBase(Stage& prevStage, bool isDescaling, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
 
 public:
+    virtual void initialize();
+
     bool supportsIterator (StageIteratorType t) const
     {   
         if (t == StageIterator_Sequential ) return true;
@@ -80,7 +82,6 @@ public:
 
 private:
     void checkImpedance();
-    void initialize();
     
     bool m_customScaleOffset;
     double m_scaleX, m_scaleY, m_scaleZ;
@@ -96,9 +97,9 @@ class PDAL_DLL ScalingFilter: public ScalingFilterBase
 {
     DECLARE_STATICS
 public:
-    ScalingFilter(const Stage& prevStage);
-    ScalingFilter(const Stage& prevStage, const Options&);
-    ScalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
+    ScalingFilter(Stage& prevStage);
+    ScalingFilter(Stage& prevStage, const Options&);
+    ScalingFilter(Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
 };
 
 
@@ -106,9 +107,9 @@ class PDAL_DLL DescalingFilter: public ScalingFilterBase
 {
     DECLARE_STATICS
 public:
-    DescalingFilter(const Stage& prevStage);
-    DescalingFilter(const Stage& prevStage, const Options&);
-    DescalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
+    DescalingFilter(Stage& prevStage);
+    DescalingFilter(Stage& prevStage, const Options&);
+    DescalingFilter(Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
 };
 
 

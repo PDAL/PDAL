@@ -49,7 +49,7 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(LasWriterTest)
 
-BOOST_AUTO_TEST_CASE(test_simple_las)
+BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
 {
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
@@ -59,11 +59,12 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     std::ostream* ofs = Utils::createFile("temp.las");
 
     {
-        const boost::uint64_t numPoints = reader.getNumPoints();
-
         // need to scope the writer, so that's it dtor can use the stream
         pdal::drivers::las::LasWriter writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Las Writer");
+        writer.initialize();
+
+        const boost::uint64_t numPoints = reader.getNumPoints();
 
         writer.setCompressed(false);
         writer.setDate(0, 0);
@@ -88,7 +89,7 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_simple_laz)
+BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 {
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.laz");
@@ -102,6 +103,7 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
 
         // need to scope the writer, so that's it dtor can use the stream
         pdal::drivers::las::LasWriter writer(reader, ofs);
+        writer.initialize();
 
         writer.setCompressed(true);
         writer.setDate(0, 0);
@@ -145,6 +147,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         // need to scope the writer, so that's it dtor can use the stream
         pdal::drivers::las::LasWriter writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Las Writer");
+        writer.initialize();
 
         writer.setCompressed(false);
         writer.setDate(78, 2008);

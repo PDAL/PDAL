@@ -59,9 +59,9 @@ public:
 
     // Use these to manually add stages into the pipeline manager.
     Reader* addReader(const std::string& type, const Options&);
-    Filter* addFilter(const std::string& type, const Stage& prevStage, const Options&);
-    MultiFilter* addMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options&);
-    Writer* addWriter(const std::string& type, const Stage& prevStage, const Options&);
+    Filter* addFilter(const std::string& type, Stage& prevStage, const Options&);
+    MultiFilter* addMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options&);
+    Writer* addWriter(const std::string& type, Stage& prevStage, const Options&);
     
     // returns true iff the pipeline endpoint is a writer
     bool isWriterPipeline() const;
@@ -70,7 +70,7 @@ public:
     Writer* getWriter() const;
 
     // return the pipeline reader endpoint (or NULL, if not a reader pipeline)
-    const Stage* getStage() const;
+    Stage* getStage() const;
 
     // for writer pipelines, this convenience function calls getWriter()->write() so that
     // the user doesn't even need to know anything about the Writer class

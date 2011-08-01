@@ -55,8 +55,9 @@ class PDAL_DLL DecimationFilter : public Filter
     DECLARE_STATICS
 
 public:
-    DecimationFilter(const Stage& prevStage, const Options&);
-    DecimationFilter(const Stage& prevStage, boost::uint32_t step);
+    DecimationFilter(Stage& prevStage, const Options&);
+    DecimationFilter(Stage& prevStage, boost::uint32_t step);
+    virtual void initialize();
 
     bool supportsIterator (StageIteratorType t) const
     {   
@@ -74,8 +75,6 @@ public:
 
 private:
     boost::uint32_t m_step;
-
-    void initialize();
 
     DecimationFilter& operator=(const DecimationFilter&); // not implemented
     DecimationFilter(const DecimationFilter&); // not implemented

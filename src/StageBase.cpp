@@ -44,11 +44,42 @@ namespace pdal
 
 
 StageBase::StageBase(const Options& options)
-    : m_options(options)
+    : m_initialized(false)
+    , m_options(options)
     , m_debug(options.getValueOrDefault<bool>("debug", false))
     , m_verbose(options.getValueOrDefault<boost::uint8_t>("verbose", 0))
 {
     return;
+}
+
+
+StageBase::~StageBase()
+{
+    return;
+}
+
+
+void StageBase::initialize()
+{
+    // it is legal now to call initialize() twice (but you really shouldn't)
+    //
+    if (m_initialized)
+    {
+        throw pdal_error("Class already initialized: " + this->getName());
+    }
+
+    m_debug = m_options.getValueOrDefault<bool>("debug", false);
+    m_verbose = m_options.getValueOrDefault<boost::uint8_t>("verbose", 0);
+
+    m_initialized = true;
+
+    return;
+}
+
+
+bool StageBase::isInitialized() const
+{
+    return m_initialized;
 }
 
 

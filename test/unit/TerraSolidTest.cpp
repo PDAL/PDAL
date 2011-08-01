@@ -98,6 +98,8 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     boost::property_tree::ptree& tree = options.GetPTree();
     tree.put<std::string>("input", filename);
     pdal::drivers::terrasolid::Reader reader(options);
+    reader.initialize();
+
     BOOST_CHECK(reader.getDescription() == "TerraSolid Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.terrasolid.reader");
     BOOST_CHECK_EQUAL(reader.getNumPoints(), 1000);

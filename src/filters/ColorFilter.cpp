@@ -47,7 +47,7 @@ namespace pdal { namespace filters {
 IMPLEMENT_STATICS(ColorFilter, "filters.color", "Color Filter")
 
 
-ColorFilter::ColorFilter(const Stage& prevStage, const Options& options)
+ColorFilter::ColorFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
     checkImpedance();
@@ -56,12 +56,18 @@ ColorFilter::ColorFilter(const Stage& prevStage, const Options& options)
 }
 
 
-ColorFilter::ColorFilter(const Stage& prevStage)
+ColorFilter::ColorFilter(Stage& prevStage)
     : Filter(prevStage, Options::none())
 {
     checkImpedance();
 
     return;
+}
+
+
+void ColorFilter::initialize()
+{
+    Filter::initialize();
 }
 
 

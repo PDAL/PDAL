@@ -45,28 +45,26 @@ namespace pdal { namespace filters {
 IMPLEMENT_STATICS(CropFilter, "filters.crop", "Crop Filter")
 
 
-CropFilter::CropFilter(const Stage& prevStage, const Options& options)
+CropFilter::CropFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
     , m_bounds(options.getValueOrThrow<Bounds<double> >("bounds"))
 {
-    initialize();
-
     return;
 }
 
 
-CropFilter::CropFilter(const Stage& prevStage, Bounds<double> const& bounds)
+CropFilter::CropFilter(Stage& prevStage, Bounds<double> const& bounds)
     : Filter(prevStage, Options::none())
     , m_bounds(bounds)
 {
-    initialize();
-
     return;
 }
 
 
 void CropFilter::initialize()
 {
+    Filter::initialize();
+
     this->setBounds(m_bounds);
 
     this->setNumPoints(0);

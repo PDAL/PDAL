@@ -50,6 +50,14 @@ Reader::~Reader()
 }
 
 
+void Reader::initialize()
+{
+    Stage::initialize();
+
+    return;
+}
+
+
 boost::property_tree::ptree Reader::generatePTree() const
 {
     boost::property_tree::ptree tree;

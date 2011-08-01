@@ -62,6 +62,8 @@ public:
     LiblasReader(const std::string& filename);
     ~LiblasReader();
 
+    virtual void initialize();
+
     const std::string& getFileName() const;
 
     ::pdal::drivers::las::PointFormat getPointFormat() const;
@@ -86,7 +88,6 @@ public:
     pdal::StageRandomIterator* createRandomIterator() const;
 
 private:
-    void initialize();
     void processExternalHeader(::liblas::Reader& externalReader);
     void registerFields(::liblas::Reader& externalReader);
     MetadataRecord& getMetadataRecordRef(int index);

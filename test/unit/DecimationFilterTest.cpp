@@ -55,6 +55,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
 
     pdal::filters::DecimationFilter filter(reader, 10);
     BOOST_CHECK(filter.getDescription() == "Decimation Filter");
+    filter.initialize();
 
     const Schema& schema = filter.getSchema();
     SchemaLayout layout(schema);
@@ -91,6 +92,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
     pdal::Options opts(opt);
     pdal::filters::DecimationFilter filter(reader, opts);
     BOOST_CHECK(filter.getDescription() == "Decimation Filter");
+    filter.initialize();
 
     const Schema& schema = filter.getSchema();
     SchemaLayout layout(schema);

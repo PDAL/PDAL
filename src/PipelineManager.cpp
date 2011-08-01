@@ -103,7 +103,7 @@ Reader* PipelineManager::addReader(const std::string& type, const Options& optio
 }
 
 
-Filter* PipelineManager::addFilter(const std::string& type, const Stage& prevStage, const Options& options)
+Filter* PipelineManager::addFilter(const std::string& type, Stage& prevStage, const Options& options)
 {
     Filter* stage = m_factory.createFilter(type, prevStage, options);
     m_filters.push_back(stage);
@@ -112,7 +112,7 @@ Filter* PipelineManager::addFilter(const std::string& type, const Stage& prevSta
 }
 
 
-MultiFilter* PipelineManager::addMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options& options)
+MultiFilter* PipelineManager::addMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options& options)
 {
     MultiFilter* stage = m_factory.createMultiFilter(type, prevStages, options);
     m_multifilters.push_back(stage);
@@ -121,7 +121,7 @@ MultiFilter* PipelineManager::addMultiFilter(const std::string& type, const std:
 }
 
 
-Writer* PipelineManager::addWriter(const std::string& type, const Stage& prevStage, const Options& options)
+Writer* PipelineManager::addWriter(const std::string& type, Stage& prevStage, const Options& options)
 {
     m_isWriterPipeline = true;
 
@@ -138,7 +138,7 @@ Writer* PipelineManager::getWriter() const
 }
 
 
-const Stage* PipelineManager::getStage() const
+Stage* PipelineManager::getStage() const
 {
     return m_lastStage;
 }
@@ -146,6 +146,7 @@ const Stage* PipelineManager::getStage() const
 
 boost::uint64_t PipelineManager::execute()
 {
+    getWriter()->initialize();
     return getWriter()->write(0);
 }
 

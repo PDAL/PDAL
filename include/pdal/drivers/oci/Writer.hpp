@@ -52,10 +52,11 @@ class PDAL_DLL Writer : public pdal::Writer
     DECLARE_STATICS
 
 public:
-    Writer(const Stage& prevStage, const Options&);
+    Writer(Stage& prevStage, const Options&);
     Writer(Stage& prevStage, OptionsOld& options);
     ~Writer();
-    
+    virtual void initialize();
+
     void run(std::ostringstream const& command);
     inline void setBounds(pdal::Bounds<double> bounds) {m_bounds = bounds; }
     inline pdal::Bounds<double>  getBounds() const { return m_bounds; }

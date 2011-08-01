@@ -54,8 +54,6 @@ LasReader::LasReader(const Options& options)
     : LasReaderBase(options)
     , m_filename(options.getValueOrThrow<std::string>("filename"))
 {
-    initialize();
-
     return;
 }
 
@@ -64,14 +62,14 @@ LasReader::LasReader(const std::string& filename)
     : LasReaderBase(Options::none())
     , m_filename(filename)
 {
-    initialize();
-
     return;
 }
 
 
 void LasReader::initialize()
 {
+    Reader::initialize();
+
     std::istream* stream = Utils::openFile(m_filename);
 
     LasHeaderReader lasHeaderReader(m_lasHeader, *stream);

@@ -96,6 +96,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     pdal::drivers::qfit::Reader reader(options);
     BOOST_CHECK(reader.getDescription() == "QFIT Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.qfit.reader");
+    reader.initialize();
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
@@ -126,7 +127,7 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     pdal::Option<std::string> filename("input", Support::datapath("qfit/14-word.qi"), "Input filename for reader to use" );
     options.add(filename);
     pdal::drivers::qfit::Reader reader(options);
-    
+    reader.initialize();    
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);

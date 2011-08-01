@@ -47,7 +47,7 @@ namespace pdal
 const boost::uint32_t Writer::s_defaultChunkSize = 1024 * 32;
 
 
-Writer::Writer(const Stage& prevStage, const Options& options)
+Writer::Writer(Stage& prevStage, const Options& options)
     : StageBase(options)
     , m_actualNumPointsWritten(0)
     , m_targetNumPointsToWrite(0)
@@ -59,7 +59,23 @@ Writer::Writer(const Stage& prevStage, const Options& options)
 }
 
 
+void Writer::initialize()
+{
+    getPrevStage().initialize();
+
+    StageBase::initialize();
+
+    return;
+}
+
+
 const Stage& Writer::getPrevStage() const
+{
+    return m_prevStage;
+}
+
+
+Stage& Writer::getPrevStage()
 {
     return m_prevStage;
 }
@@ -79,6 +95,11 @@ boost::uint32_t Writer::getChunkSize() const
 
 boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 {
+    if (!isInitialized())
+    {
+        throw pdal_error("stage not initialized");
+    }
+
     m_targetNumPointsToWrite = targetNumPointsToWrite;
     m_actualNumPointsWritten = 0;
          

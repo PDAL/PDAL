@@ -54,7 +54,9 @@ class PDAL_DLL Writer : public pdal::Writer
     DECLARE_STATICS
 
 public:
-    Writer(const Stage& prevStage, const Options&);
+    Writer(Stage& prevStage, const Options&);
+
+    virtual void initialize();
 
     // retrieve the summary info
     double getMinX() const { return m_minimumX; }

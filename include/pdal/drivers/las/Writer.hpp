@@ -56,9 +56,11 @@ class PDAL_DLL LasWriter : public Writer
     DECLARE_STATICS
 
 public:
-    LasWriter(const Stage& prevStage, const Options&);
+    LasWriter(Stage& prevStage, const Options&);
     LasWriter(Stage& prevStage, std::ostream*);
     ~LasWriter();
+
+    virtual void initialize();
 
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
     void setPointFormat(PointFormat);
@@ -88,8 +90,6 @@ protected:
     virtual void writeEnd();
 
 private:
-    void initialize();
-
     OStreamManager m_streamManager;
 
     LasHeader m_lasHeader;

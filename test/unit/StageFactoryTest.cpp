@@ -53,6 +53,8 @@ BOOST_AUTO_TEST_SUITE(StageFactoryTest)
 
 BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
 {
+    Utils::deleteFile("temp.las");
+
     StageFactory factory;
 
     Options optsR;
@@ -75,6 +77,8 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
     optsW.add("filename", "temp.las", "file to write to");
     Writer* writer = factory.createWriter("drivers.las.writer", *filter, optsW);
     BOOST_CHECK(writer->getName() == "drivers.las.writer");
+
+    writer->initialize();
 
     const boost::uint64_t np = writer->write( reader->getNumPoints() );
     BOOST_CHECK(np == 1065);
@@ -105,7 +109,7 @@ static Reader* demoReaderCreator(const Options& options)
 }
 
 
-Filter* demoFilterCreator(const Stage& prev, const Options& options)
+Filter* demoFilterCreator(Stage& prev, const Options& options)
 {
     s_demoflag = options.getOption<int>("flag").getValue();
 
@@ -116,7 +120,7 @@ Filter* demoFilterCreator(const Stage& prev, const Options& options)
 }
 
 
-MultiFilter* demoMultiFilterCreator(const std::vector<const Stage*>& prevs, const Options& options)
+MultiFilter* demoMultiFilterCreator(const std::vector<Stage*>& prevs, const Options& options)
 {
     s_demoflag = options.getOption<int>("flag").getValue();
 
@@ -126,7 +130,7 @@ MultiFilter* demoMultiFilterCreator(const std::vector<const Stage*>& prevs, cons
 }
 
 
-Writer* demoWriterCreator(const Stage& prev, const Options& options)
+Writer* demoWriterCreator(Stage& prev, const Options& options)
 {
     s_demoflag = options.getOption<int>("flag").getValue();
 
@@ -139,6 +143,8 @@ Writer* demoWriterCreator(const Stage& prev, const Options& options)
 
 BOOST_AUTO_TEST_CASE(StageFactoryTest_test2)
 {
+    Utils::deleteFile("temp.las");
+
     StageFactory factory;
 
     factory.registerReader("demoR", demoReaderCreator);
@@ -163,7 +169,7 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test2)
     s_demoflag = 0;
     Options optsM;
     optsM.add("flag",33,"my flag");
-    std::vector<const Stage*> stages;
+    std::vector<Stage*> stages;
     stages.push_back(reader);
     Stage* multifilter = factory.createMultiFilter("demoM", stages, optsM);
     BOOST_CHECK(multifilter->getName() == "filters.mosaic");
@@ -174,6 +180,7 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test2)
     optsW.add("flag",44,"my flag");
     Writer* writer = factory.createWriter("demoW", *reader, optsW);
     BOOST_CHECK(writer->getName() == "drivers.las.writer");
+    writer->initialize();
     BOOST_CHECK(s_demoflag == 44);
 
     delete writer;

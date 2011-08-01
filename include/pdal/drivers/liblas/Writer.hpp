@@ -56,9 +56,11 @@ class PDAL_DLL LiblasWriter : public Writer
     DECLARE_STATICS
 
 public:
-    LiblasWriter(const Stage& prevStage, const Options&);
+    LiblasWriter(Stage& prevStage, const Options&);
     LiblasWriter(Stage& prevStage, std::ostream*);
     ~LiblasWriter();
+
+    virtual void initialize();
 
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
     void setPointFormat(::pdal::drivers::las::PointFormat);
@@ -86,7 +88,6 @@ protected:
     virtual void writeEnd();
 
 private:
-    void initialize();
     void setupExternalHeader();
 
     OStreamManager m_ostreamManager;

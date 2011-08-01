@@ -76,7 +76,7 @@ static void getDoublePoint(const pdal::PointBuffer& data, double& x, double& y, 
     return;
 }
 
-BOOST_AUTO_TEST_CASE(test_1)
+BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
 {
 
  
@@ -86,9 +86,10 @@ BOOST_AUTO_TEST_CASE(test_1)
     //
     {
         pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
-            
+
         // convert to doubles, use internal scale factor
         pdal::filters::ScalingFilter scalingFilter(reader);
+        scalingFilter.initialize();
 
         const pdal::Schema& schema = scalingFilter.getSchema();
         const pdal::SchemaLayout layout(schema);

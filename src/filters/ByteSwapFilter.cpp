@@ -50,24 +50,24 @@ namespace pdal { namespace filters {
 IMPLEMENT_STATICS(ByteSwapFilter, "filters.byteswap", "Crop Filter")
 
 
-ByteSwapFilter::ByteSwapFilter(const Stage& prevStage, const Options& options)
+ByteSwapFilter::ByteSwapFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
-    initialize();
     return;
 }
 
 
-ByteSwapFilter::ByteSwapFilter(const Stage& prevStage)
+ByteSwapFilter::ByteSwapFilter(Stage& prevStage)
     : Filter(prevStage, Options::none())
 {
-    initialize();
     return;
 }
 
 
 void ByteSwapFilter::initialize()
 {
+    Filter::initialize();
+
     const Stage& stage = getPrevStage();
     this->setNumPoints(stage.getNumPoints());
     this->setPointCountType(stage.getPointCountType());

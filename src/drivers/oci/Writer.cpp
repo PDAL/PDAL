@@ -272,7 +272,7 @@ std::string ReadFile(std::string filename)
 IMPLEMENT_STATICS(Writer, "drivers.oci.writer", "OCI Writer")
 
 static OptionsOld dummy;
-Writer::Writer(const Stage& prevStage, const Options& options)
+Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_stage((Stage&)prevStage)
     , m_optionsOld(dummy)
@@ -305,6 +305,12 @@ Writer::~Writer()
     m_connection->Commit();
 
     return;
+}
+
+
+void Writer::initialize()
+{
+    pdal::Writer::initialize();
 }
 
 

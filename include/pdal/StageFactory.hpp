@@ -72,9 +72,9 @@ class PDAL_DLL StageFactory
 {
 public:
     typedef Reader* ReaderCreator(const Options&);
-    typedef Filter* FilterCreator(const Stage& prevStage, const Options&);
-    typedef MultiFilter* MultiFilterCreator(const std::vector<const Stage*>& prevStages, const Options&);
-    typedef Writer* WriterCreator(const Stage& prevStage, const Options&);
+    typedef Filter* FilterCreator(Stage& prevStage, const Options&);
+    typedef MultiFilter* MultiFilterCreator(const std::vector<Stage*>& prevStages, const Options&);
+    typedef Writer* WriterCreator(Stage& prevStage, const Options&);
     
     typedef std::map<std::string, ReaderCreator*> ReaderCreatorList;
     typedef std::map<std::string, FilterCreator*> FilterCreatorList;
@@ -85,9 +85,9 @@ public:
     StageFactory();
 
     Reader* createReader(const std::string& type, const Options& options);
-    Filter* createFilter(const std::string& type, const Stage& prevStage, const Options& options);
-    MultiFilter* createMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options& options);
-    Writer* createWriter(const std::string& type, const Stage& prevStage, const Options& options);
+    Filter* createFilter(const std::string& type, Stage& prevStage, const Options& options);
+    MultiFilter* createMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options& options);
+    Writer* createWriter(const std::string& type, Stage& prevStage, const Options& options);
 
     void registerReader(const std::string& type, ReaderCreator* f);
     void registerFilter(const std::string& type, FilterCreator* f);

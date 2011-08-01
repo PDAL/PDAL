@@ -125,6 +125,8 @@ public:
     Reader(const Options& options);
     ~Reader();
     
+    virtual void initialize();
+
     std::string getFileName() const;
 
  

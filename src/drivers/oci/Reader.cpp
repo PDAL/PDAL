@@ -116,6 +116,12 @@ Reader::Reader(OptionsOld& optionsOld)
 }    
 
 
+void Reader::initialize()
+{
+    pdal::Reader::initialize();
+}
+
+
 const Options& Reader::s_getDefaultOptions()
 {
     static Options options;

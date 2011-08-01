@@ -56,13 +56,14 @@ BOOST_AUTO_TEST_CASE(test1)
     Bounds<double> bounds3(200.0, 200.0, 200.0, 300.0, 300.0, 300.0);
     pdal::drivers::faux::Reader reader3(bounds3, 100, pdal::drivers::faux::Reader::Constant);
 
-    std::vector<const Stage*> vec;
+    std::vector<Stage*> vec;
     vec.push_back(&reader1);
     vec.push_back(&reader2);
     vec.push_back(&reader3);
 
     pdal::filters::MosaicFilter mosaic(vec, Options::none());
     BOOST_CHECK(mosaic.getDescription() == "Mosaic Filter");
+    mosaic.initialize();
 
     const Schema& schema = mosaic.getSchema();
     SchemaLayout layout(schema);

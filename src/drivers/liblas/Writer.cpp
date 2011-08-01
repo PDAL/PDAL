@@ -54,11 +54,11 @@ namespace pdal { namespace drivers { namespace liblas {
 IMPLEMENT_STATICS(LiblasWriter, "drivers.liblas.writer", "Liblas Writer")
 
 
-LiblasWriter::LiblasWriter(const Stage& prevStage, const Options& options)
+LiblasWriter::LiblasWriter(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_ostreamManager(options.getValueOrThrow<std::string>("filename"))
 {
-    initialize();
+    return;
 }
 
 
@@ -67,7 +67,7 @@ LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream* ostream)
     , m_ostreamManager(ostream)
     , m_externalWriter(NULL)
 {
-    initialize();
+    return;
 }
 
 
@@ -79,6 +79,8 @@ LiblasWriter::~LiblasWriter()
 
 void LiblasWriter::initialize()
 {
+    Writer::initialize();
+
     m_ostreamManager.open();
 
     m_externalHeader = ::liblas::HeaderPtr(new ::liblas::Header);

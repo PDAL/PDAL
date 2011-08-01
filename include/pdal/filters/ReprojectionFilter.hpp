@@ -55,10 +55,11 @@ class PDAL_DLL ReprojectionFilter : public Filter
     DECLARE_STATICS
 
 public:
-    ReprojectionFilter(const Stage& prevStage, const Options&);
-    ReprojectionFilter(const Stage& prevStage,
+    ReprojectionFilter(Stage& prevStage, const Options&);
+    ReprojectionFilter(Stage& prevStage,
                        const SpatialReference& inSRS,
                        const SpatialReference& outSRS);
+    virtual void initialize();
 
     bool supportsIterator (StageIteratorType t) const
     {   
@@ -75,7 +76,6 @@ public:
 private:
     void updateBounds();
     void checkImpedance();
-    void initialize();
     void transform(double& x, double& y, double& z) const;
 
     SpatialReference m_inSRS;

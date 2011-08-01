@@ -60,9 +60,11 @@ class PDAL_DLL CacheFilter : public Filter
     DECLARE_STATICS
 
 public:
-    CacheFilter(const Stage& prevStage, const Options&);
-    CacheFilter(const Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
+    CacheFilter(Stage& prevStage, const Options&);
+    CacheFilter(Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
     ~CacheFilter();
+
+    virtual void initialize();
 
     boost::uint32_t getCacheBlockSize() const;
 
@@ -102,8 +104,6 @@ public:
     pdal::StageRandomIterator* createRandomIterator() const;
 
 private:
-    void initialize();
-
     // these are mutable to allow const-ness for updating stats
     // BUG: need to make thread-safe
     mutable boost::uint64_t m_numPointsRequested;

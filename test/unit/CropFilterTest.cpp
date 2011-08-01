@@ -54,8 +54,8 @@ BOOST_AUTO_TEST_CASE(test_crop)
 
     pdal::filters::CropFilter filter(reader, dstBounds);
     BOOST_CHECK(filter.getDescription() == "Crop Filter");
-
     pdal::drivers::faux::Writer writer(filter, Options::none());
+    writer.initialize();
 
     boost::uint64_t numWritten = writer.write(1000);
 

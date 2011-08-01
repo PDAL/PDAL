@@ -58,6 +58,8 @@ public:
     Stage(const Options& options);
     virtual ~Stage();
 
+    virtual void initialize();
+
     // core properties of all stages
     const Schema& getSchema() const;
     virtual boost::uint64_t getNumPoints() const;

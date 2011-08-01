@@ -57,12 +57,10 @@ namespace pdal { namespace drivers { namespace las {
 IMPLEMENT_STATICS(LasWriter, "drivers.las.writer", "Las Writer")
 
 
-LasWriter::LasWriter(const Stage& prevStage, const Options& options)
+LasWriter::LasWriter(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_streamManager(options.getOption<std::string>("filename").getValue())
 {
-    initialize();
-
     return;
 }
 
@@ -73,8 +71,6 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream* ostream)
     , m_numPointsWritten(0)
     , m_isCompressed(false)
 {
-    initialize();
-
     return;
 }
 
@@ -88,6 +84,8 @@ LasWriter::~LasWriter()
 
 void LasWriter::initialize()
 {
+    Writer::initialize();
+
     m_spatialReference = getPrevStage().getSpatialReference();
 
     m_streamManager.open();

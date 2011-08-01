@@ -52,6 +52,8 @@ public:
     Reader(const Options& options);
     virtual ~Reader();
 
+    virtual void initialize();
+
     virtual boost::property_tree::ptree generatePTree() const;
 };
 

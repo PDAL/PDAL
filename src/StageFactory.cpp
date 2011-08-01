@@ -76,13 +76,13 @@ namespace pdal
     Reader* create_##T(const Options& options) { return new FullT(options); }
 
 #define MAKE_FILTER_CREATOR(T, FullT) \
-    Filter* create_##T(const Stage& prevStage, const Options& options) { return new FullT(prevStage, options); }
+    Filter* create_##T(Stage& prevStage, const Options& options) { return new FullT(prevStage, options); }
 
 #define MAKE_MULTIFILTER_CREATOR(T, FullT) \
-    MultiFilter* create_##T(const std::vector<const Stage*>& prevStages, const Options& options) { return new FullT(prevStages, options); }
+    MultiFilter* create_##T(const std::vector<Stage*>& prevStages, const Options& options) { return new FullT(prevStages, options); }
 
 #define MAKE_WRITER_CREATOR(T, FullT) \
-    Writer* create_##T(const Stage& prevStage, const Options& options) { return new FullT(prevStage, options); }
+    Writer* create_##T(Stage& prevStage, const Options& options) { return new FullT(prevStage, options); }
 
 MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::LasReader)
@@ -132,7 +132,7 @@ Reader* StageFactory::createReader(const std::string& type, const Options& optio
 }
 
 
-Filter* StageFactory::createFilter(const std::string& type, const Stage& prevStage, const Options& options)
+Filter* StageFactory::createFilter(const std::string& type, Stage& prevStage, const Options& options)
 {
     FilterCreator* f = getFilterCreator(type);
     Filter* stage = f(prevStage, options);
@@ -140,7 +140,7 @@ Filter* StageFactory::createFilter(const std::string& type, const Stage& prevSta
 }
 
 
-MultiFilter* StageFactory::createMultiFilter(const std::string& type, const std::vector<const Stage*>& prevStages, const Options& options)
+MultiFilter* StageFactory::createMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options& options)
 {
     MultiFilterCreator* f = getMultiFilterCreator(type);
     MultiFilter* stage = f(prevStages, options);
@@ -148,7 +148,7 @@ MultiFilter* StageFactory::createMultiFilter(const std::string& type, const std:
 }
 
 
-Writer* StageFactory::createWriter(const std::string& type, const Stage& prevStage, const Options& options)
+Writer* StageFactory::createWriter(const std::string& type, Stage& prevStage, const Options& options)
 {
     WriterCreator* f = getWriterCreator(type);
     Writer* stage = f(prevStage, options);

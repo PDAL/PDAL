@@ -62,7 +62,7 @@ LiblasReader::LiblasReader(const Options& options)
     , m_isCompressed(false)
     , m_pointFormat(::pdal::drivers::las::PointFormatUnknown)
 {
-    initialize();
+    return;
 }
 
 
@@ -80,7 +80,7 @@ LiblasReader::LiblasReader(const std::string& filename)
     , m_isCompressed(false)
     , m_pointFormat(::pdal::drivers::las::PointFormatUnknown)
 {
-    initialize();
+    return;
 }
 
 
@@ -92,6 +92,8 @@ LiblasReader::~LiblasReader()
 
 void LiblasReader::initialize()
 {
+    Reader::initialize();
+
     std::istream* str = Utils::openFile(m_filename);
 
     {

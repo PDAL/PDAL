@@ -97,6 +97,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 {
     pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
+    reader.initialize();
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
@@ -132,6 +133,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 {
     pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
+    reader.initialize();
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
@@ -177,6 +179,7 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 {
     pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.laz"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
+    reader.initialize();
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
@@ -222,6 +225,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
 {
     pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
+    reader.initialize();
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
@@ -264,10 +268,13 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
+    pdal::filters::CacheFilter cache(reader, 1, 355);
+
+    cache.initialize();
+
     BOOST_CHECK(reader.getNumPoints() == 1065);
     BOOST_CHECK(355 * 3 == 1065);
 
-    pdal::filters::CacheFilter cache(reader, 1, 355);
     BOOST_CHECK(cache.getNumPoints() == 1065);
 
     const Schema& schema = cache.getSchema();
@@ -353,6 +360,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 {
     pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
+    reader.initialize();
 
     BOOST_CHECK(reader.getNumPoints() == 1065);
     BOOST_CHECK(355 * 3 == 1065);
@@ -469,6 +477,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 BOOST_AUTO_TEST_CASE(test_iterator_checks)
 {
     pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    reader.initialize();
 
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);
@@ -480,6 +489,7 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
                               double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
 {
     pdal::drivers::las::LasReader reader(Support::datapath(file));
+    reader.initialize();
 
     BOOST_CHECK(reader.getPointFormat() == pointFormat);
     BOOST_CHECK(reader.getVersionMajor() == majorVersion);
@@ -522,6 +532,7 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 BOOST_AUTO_TEST_CASE(test_vlr)
 {
     pdal::drivers::las::LasReader reader(Support::datapath("lots_of_vlr.las"));
+    reader.initialize();
 
     BOOST_CHECK(reader.getVLRs().size() == 390);
 

@@ -48,7 +48,7 @@ namespace pdal { namespace filters {
 
 // ------------------------------------------------------------------------
 
-ScalingFilterBase::ScalingFilterBase(const Stage& prevStage, bool isDescaling, const Options& options)
+ScalingFilterBase::ScalingFilterBase(Stage& prevStage, bool isDescaling, const Options& options)
     : Filter(prevStage, options)
     , m_customScaleOffset(false)
     , m_scaleX(0.0)
@@ -86,15 +86,11 @@ ScalingFilterBase::ScalingFilterBase(const Stage& prevStage, bool isDescaling, c
     m_offsetY = options.getValueOrDefault<double>("offset_y", 0.0);
     m_offsetZ = options.getValueOrDefault<double>("offset_z", 0.0);
 
-    checkImpedance();
-
-    initialize();
-
     return;
 }
 
 
-ScalingFilterBase::ScalingFilterBase(const Stage& prevStage, bool isDescaling)
+ScalingFilterBase::ScalingFilterBase(Stage& prevStage, bool isDescaling)
     : Filter(prevStage, Options::none())
     , m_customScaleOffset(false)
     , m_scaleX(0.0)
@@ -105,15 +101,11 @@ ScalingFilterBase::ScalingFilterBase(const Stage& prevStage, bool isDescaling)
     , m_offsetZ(0.0)
     , m_isDescaling(isDescaling)
 {
-    checkImpedance();
-
-    initialize();
-
     return;
 }
 
 
-ScalingFilterBase::ScalingFilterBase(const Stage& prevStage, bool isDescaling, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ)
+ScalingFilterBase::ScalingFilterBase(Stage& prevStage, bool isDescaling, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ)
     : Filter(prevStage, Options::none())
     , m_customScaleOffset(true)
     , m_scaleX(scaleX)
@@ -124,9 +116,15 @@ ScalingFilterBase::ScalingFilterBase(const Stage& prevStage, bool isDescaling, d
     , m_offsetZ(offsetZ)
     , m_isDescaling(isDescaling)
 {
-    checkImpedance();
+    return;
+}
 
-    initialize();
+
+void ScalingFilterBase::initialize()
+{
+    Filter::initialize();
+
+    checkImpedance();
 
     return;
 }
@@ -240,12 +238,6 @@ void ScalingFilterBase::checkImpedance()
         schema.addDimension(dimZd);
     }
 
-    return;
-}
-
-
-void ScalingFilterBase::initialize()
-{
     return;
 }
 
@@ -370,19 +362,19 @@ pdal::StageSequentialIterator* ScalingFilterBase::createSequentialIterator() con
 IMPLEMENT_STATICS(ScalingFilter, "filters.scaling", "Scaling Filter")
 
 
-ScalingFilter::ScalingFilter(const Stage& prevStage, const Options& options)
+ScalingFilter::ScalingFilter(Stage& prevStage, const Options& options)
     : ScalingFilterBase(prevStage, false, options)
 {
 }
 
 
-ScalingFilter::ScalingFilter(const Stage& prevStage)
+ScalingFilter::ScalingFilter(Stage& prevStage)
     : ScalingFilterBase(prevStage, false)
 {
 }
 
 
-ScalingFilter::ScalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ)
+ScalingFilter::ScalingFilter(Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ)
     : ScalingFilterBase(prevStage, false, scaleX, offsetX, scaleY, offsetY, scaleZ, offsetZ)
 {
     return;
@@ -400,19 +392,19 @@ const Options& ScalingFilter::s_getDefaultOptions()
 IMPLEMENT_STATICS(DescalingFilter, "filters.descaling", "Descaling Filter")
 
 
-DescalingFilter::DescalingFilter(const Stage& prevStage, const Options& options)
+DescalingFilter::DescalingFilter(Stage& prevStage, const Options& options)
     : ScalingFilterBase(prevStage, true, options)
 {
 }
 
 
-DescalingFilter::DescalingFilter(const Stage& prevStage)
+DescalingFilter::DescalingFilter(Stage& prevStage)
     : ScalingFilterBase(prevStage, true)
 {
 }
 
 
-DescalingFilter::DescalingFilter(const Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ)
+DescalingFilter::DescalingFilter(Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ)
     : ScalingFilterBase(prevStage, true, scaleX, offsetX, scaleY, offsetY, scaleZ, offsetZ)
 {
     return;

@@ -60,6 +60,14 @@ Stage::~Stage()
 }
 
 
+void Stage::initialize()
+{
+    StageBase::initialize();
+
+    return;
+}
+
+
 const Bounds<double>& Stage::getBounds() const
 {
     return m_bounds;

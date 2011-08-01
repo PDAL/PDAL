@@ -57,6 +57,7 @@ public:
     Reader(const Options&);
     Reader(OptionsOld& options);
     ~Reader();
+    virtual void initialize();
  
     bool supportsIterator (StageIteratorType t) const
     {   

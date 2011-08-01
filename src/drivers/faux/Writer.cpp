@@ -43,10 +43,16 @@ namespace pdal { namespace drivers { namespace faux {
 IMPLEMENT_STATICS(Writer, "drivers.faux.writer", "Faux Writer")
 
 
-Writer::Writer(const Stage& prevStage, const Options& options)
+Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
 {
     return;
+}
+
+
+void Writer::initialize()
+{
+    pdal::Writer::initialize();
 }
 
 

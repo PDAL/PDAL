@@ -43,28 +43,26 @@ namespace pdal { namespace filters {
 IMPLEMENT_STATICS(DecimationFilter, "filters.decimation", "Decimation Filter")
 
 
-DecimationFilter::DecimationFilter(const Stage& prevStage, const Options& options)
+DecimationFilter::DecimationFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
     , m_step(options.getValueOrThrow<boost::uint32_t>("step"))
 {
-    initialize();
-
     return;
 }
 
 
-DecimationFilter::DecimationFilter(const Stage& prevStage, boost::uint32_t step)
+DecimationFilter::DecimationFilter(Stage& prevStage, boost::uint32_t step)
     : Filter(prevStage, Options::none())
     , m_step(step)
 {
-    initialize();
-
     return;
 }
 
 
 void DecimationFilter::initialize()
 {
+    Filter::initialize();
+
     this->setNumPoints( this->getNumPoints() / m_step );
 
     return;

@@ -92,6 +92,11 @@ boost::uint32_t StageIterator::getChunkSize() const
 
 boost::uint32_t StageIterator::read(PointBuffer& data)
 {
+    if (!m_stage.isInitialized())
+    {
+        throw pdal_error("stage not initialized: " + m_stage.getName());
+    }
+
     const boost::uint32_t numRead = readImpl(data);
 
     m_index += numRead;

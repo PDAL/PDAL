@@ -79,6 +79,8 @@ public:
     Reader(const Options& options);
     Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode);
     Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode, const std::vector<Dimension>& dimensions);
+
+    virtual void initialize();
     
     Mode getMode() const;
     
@@ -97,12 +99,10 @@ public:
     boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;
 
 private:
-    void initialize();
-    void initialize(const std::vector<Dimension>& dimensions);
-
     Bounds<double> m_bounds;
     boost::uint64_t m_numPoints;
     Mode m_mode;
+    std::vector<Dimension> m_dimensions;
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented

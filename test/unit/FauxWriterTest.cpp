@@ -42,13 +42,14 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(FauxWriterTest)
 
-BOOST_AUTO_TEST_CASE(test_1)
+BOOST_AUTO_TEST_CASE(FauxWriterTest_test_1)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
 
     pdal::drivers::faux::Writer writer(reader, Options::none());
     BOOST_CHECK(writer.getDescription() == "Faux Writer");
+    writer.initialize();
 
     boost::uint64_t numWritten = writer.write(750);
 
@@ -76,6 +77,7 @@ BOOST_AUTO_TEST_CASE(test_2)
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
 
     pdal::drivers::faux::Writer writer(reader, Options::none());
+    writer.initialize();
 
     boost::uint64_t numWritten = writer.write(750);
 

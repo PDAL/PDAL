@@ -53,8 +53,9 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test1)
     PipelineReader reader(manager);
 
     reader.readReaderPipeline(Support::datapath("pipeline_read.xml"));
-    const Stage* stage = manager.getStage();
+    Stage* stage = manager.getStage();
     BOOST_CHECK(stage != NULL);
+    stage->initialize();
 
     {
         const Schema& schema = stage->getSchema();
@@ -73,12 +74,15 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test1)
 
 BOOST_AUTO_TEST_CASE(PipelineReaderTest_test2)
 {
+    Utils::deleteFile("out.las");
+
     {
         PipelineManager manager;
         PipelineReader reader(manager);
 
         reader.readWriterPipeline(Support::datapath("pipeline_write.xml"));
         Writer* writerStage = manager.getWriter();
+        writerStage->initialize();
 
         const boost::uint64_t np = writerStage->write();
         BOOST_CHECK(np == 1065);

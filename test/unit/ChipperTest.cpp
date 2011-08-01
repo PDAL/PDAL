@@ -52,10 +52,11 @@ BOOST_AUTO_TEST_CASE(test_construction)
     LiblasReader reader(Support::datapath("1.2-with-color.las"));
 
     {
-        const boost::uint64_t num_points = reader.getNumPoints();
-
         // need to scope the writer, so that's it dtor can use the stream
         pdal::filters::Chipper chipper(reader, 15);
+        chipper.initialize();
+
+        const boost::uint64_t num_points = reader.getNumPoints();
 
         chipper.Chip();
         boost::uint32_t num_blocks = chipper.GetBlockCount();
@@ -119,7 +120,6 @@ BOOST_AUTO_TEST_CASE(test_construction)
 
     return;
 }
-
 
 
 BOOST_AUTO_TEST_SUITE_END()

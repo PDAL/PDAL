@@ -52,6 +52,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
     pdal::filters::CacheFilter cache(reader, 2, 1024);
     BOOST_CHECK(cache.getDescription() == "Cache Filter");
+    cache.initialize();
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
@@ -94,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test1)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_options)
+BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
 {
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
     pdal::drivers::faux::Reader reader(srcBounds, 10000, pdal::drivers::faux::Reader::Constant);
@@ -106,6 +107,7 @@ BOOST_AUTO_TEST_CASE(test_options)
     opts.add(opt2);
     pdal::filters::CacheFilter cache(reader, opts);
     BOOST_CHECK(cache.getDescription() == "Cache Filter");
+    cache.initialize();
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);

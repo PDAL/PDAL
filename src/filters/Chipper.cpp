@@ -137,10 +137,18 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t 
 IMPLEMENT_STATICS(Chipper, "filters.chipper", "Chipper")
 
 
-Chipper::Chipper(const Stage& prevStage, const Options& options)
+Chipper::Chipper(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
     throw not_yet_implemented("options ctor"); 
+}
+
+
+void Chipper::initialize()
+{
+    Filter::initialize();
+
+    return;
 }
 
 

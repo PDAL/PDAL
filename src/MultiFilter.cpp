@@ -39,7 +39,7 @@ namespace pdal
 {
 
 
-MultiFilter::MultiFilter(const std::vector<const Stage*>& prevStages, const Options& options)
+MultiFilter::MultiFilter(const std::vector<Stage*>& prevStages, const Options& options)
     : Stage(options)
 {
     if (prevStages.size() == 0)
@@ -56,43 +56,31 @@ MultiFilter::MultiFilter(const std::vector<const Stage*>& prevStages, const Opti
         m_prevStages.push_back(prevStages[i]);
     }
 
-    const Stage& prevStage = *m_prevStages[0];
+    return;
+}
 
+
+void MultiFilter::initialize()
+{
+    BOOST_FOREACH(Stage* prev, m_prevStages)
     {
-        setCoreProperties(prevStage);  // BUG: clearly insufficient
+        prev->initialize();
     }
 
-    boost::uint64_t totalPoints = 0;
-
-    Bounds<double> bigbox(prevStage.getBounds());
-
-    for (size_t i=0; i<prevStages.size(); i++)
-    {
-        const Stage* stage = prevStages[i];
-        if (stage==NULL)
-        {
-            throw pdal_error("bad stage passed to MosaicFilter");
-        }
-        if (prevStage.getSchema() != this->getSchema())
-        {
-            throw pdal_error("impedance mismatch in MosaicFilter");
-        }
-
-        bigbox.grow(this->getBounds());
-        totalPoints += this->getNumPoints();
-        m_prevStages.push_back(stage);
-    }
-
-    setBounds(bigbox);
-    setNumPoints(totalPoints);
+    Stage::initialize();
 
     return;
 }
 
 
-const std::vector<const Stage*>& MultiFilter::getPrevStages() const
+const std::vector<const Stage*> MultiFilter::getPrevStages() const
 {
-    return m_prevStages;
+    std::vector<const Stage*> vec;
+    BOOST_FOREACH(Stage* prev, m_prevStages)
+    {
+        vec.push_back(prev);
+    }
+    return vec;
 }
 
 

@@ -43,7 +43,7 @@ namespace pdal { namespace filters {
 IMPLEMENT_STATICS(CacheFilter, "filters.cache", "Cache Filter")
 
 
-CacheFilter::CacheFilter(const Stage& prevStage, const Options& options)
+CacheFilter::CacheFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
     , m_numPointsRequested(0)
     , m_numPointsRead(0)
@@ -51,13 +51,12 @@ CacheFilter::CacheFilter(const Stage& prevStage, const Options& options)
     , m_maxCacheBlocks(options.getValueOrThrow<boost::uint32_t>("max_cache_blocks"))
     , m_cacheBlockSize(options.getValueOrThrow<boost::uint32_t>("cache_block_size"))
 {
-    initialize();
     return;
 }
 
 
 // cache block size is measured in Points, not bytes
-CacheFilter::CacheFilter(const Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
+CacheFilter::CacheFilter(Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
     : Filter(prevStage, Options::none())
     , m_numPointsRequested(0)
     , m_numPointsRead(0)
@@ -65,7 +64,6 @@ CacheFilter::CacheFilter(const Stage& prevStage, boost::uint32_t maxCacheBlocks,
     , m_maxCacheBlocks(maxCacheBlocks)
     , m_cacheBlockSize(cacheBlockSize)
 {
-    initialize();
     return;
 }
 
@@ -78,6 +76,8 @@ CacheFilter::~CacheFilter()
 
 void CacheFilter::initialize()
 {
+    Filter::initialize();
+
     resetCache();
     return;
 }

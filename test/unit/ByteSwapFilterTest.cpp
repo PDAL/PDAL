@@ -59,6 +59,8 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     pdal::filters::ByteSwapFilter filter(reader);
     BOOST_CHECK_EQUAL(filter.getName(), "filters.byteswap");
 
+    filter.initialize();
+
     boost::scoped_ptr<StageSequentialIterator> unflipped_iter(reader.createSequentialIterator());
     boost::scoped_ptr<StageSequentialIterator> flipped_iter(filter.createSequentialIterator());
 

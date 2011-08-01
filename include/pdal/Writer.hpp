@@ -50,8 +50,10 @@ class PointBuffer;
 class PDAL_DLL Writer : public StageBase
 {
 public:
-    Writer(const Stage& prevStage, const Options& options);
+    Writer(Stage& prevStage, const Options& options);
     virtual ~Writer() {}
+
+    virtual void initialize();
 
     // size of the PointBuffer buffer to use
     void setChunkSize(boost::uint32_t);
@@ -65,6 +67,8 @@ public:
 
     virtual boost::property_tree::ptree generatePTree() const;
 
+    const Stage& getPrevStage() const;
+
 protected:
     // this is called once before the loop with the writeBuffer calls
     virtual void writeBegin() = 0;
@@ -75,14 +79,14 @@ protected:
     // called once, after the writeBuffer calls
     virtual void writeEnd() = 0;
 
-    const Stage& getPrevStage() const;
+    Stage& getPrevStage();
 
     // these two are valid for use after writeBegin has been called
     boost::uint64_t m_actualNumPointsWritten;
     boost::uint64_t m_targetNumPointsToWrite;
 
 private:
-    const Stage& m_prevStage;
+    Stage& m_prevStage;
     boost::uint32_t m_chunkSize;
     static const boost::uint32_t s_defaultChunkSize;
 

@@ -134,6 +134,8 @@ public:
     Reader(OptionsOld& options);
     ~Reader();
     
+    virtual void initialize();
+
     std::string getFileName() const;
 
  

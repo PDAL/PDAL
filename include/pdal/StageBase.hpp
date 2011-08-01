@@ -50,6 +50,17 @@ class PDAL_DLL StageBase
 {
 public:
     StageBase(const Options& options);
+    virtual ~StageBase();
+
+    // This function is for derived stages to perform "static" validation, e.g. bad Option arguments.
+    // It will recursively call initialize() on all previous stages.
+    // Users must call this after the last stage in the pipeline has been consturcted.  
+    // It is not illegal to call this twice for a stage, but that doesn't mean you should.
+    // Derived stages should feel free to provide their own implementations.  Remeber to call initialize() on
+    //   the parent class before your own class-specific code.
+    // This function will throw when errors are found.
+    virtual void initialize();
+    bool isInitialized() const;
 
     const Options& getOptions() const;
 
@@ -111,6 +122,7 @@ protected:
     Options& getOptions();
 
 private:
+    bool m_initialized;
     Options m_options;
     bool m_debug;
     boost::uint8_t m_verbose;

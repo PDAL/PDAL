@@ -61,6 +61,8 @@ public:
     LasReader(const Options&);
     LasReader(const std::string& filename);
 
+    virtual void initialize();
+
     const std::string& getFileName() const;
 
     bool supportsIterator (StageIteratorType t) const
@@ -98,8 +100,6 @@ protected:
     MetadataRecord& getMetadataRecordRef(int index);
 
 private:
-    void initialize();
-
     std::string m_filename;
     LasHeader m_lasHeader;
     std::vector<MetadataRecord> m_metadataRecords;

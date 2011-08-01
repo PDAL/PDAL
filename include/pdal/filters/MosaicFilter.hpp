@@ -55,7 +55,8 @@ class PDAL_DLL MosaicFilter : public MultiFilter
 public:
     // entries may not be null
     // vector.size() must be > 0
-    MosaicFilter(const std::vector<const Stage*>& prevStages, const Options&);
+    MosaicFilter(const std::vector<Stage*>& prevStages, const Options&);
+    virtual void initialize();
     
     bool supportsIterator (StageIteratorType t) const
     {   

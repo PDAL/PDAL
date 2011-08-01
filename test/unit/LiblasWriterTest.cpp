@@ -49,7 +49,7 @@ using namespace pdal::drivers::liblas;
 
 BOOST_AUTO_TEST_SUITE(LiblasWriterTest)
 
-BOOST_AUTO_TEST_CASE(test_simple_las)
+BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_las)
 {
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
@@ -59,11 +59,12 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     std::ostream* ofs = Utils::createFile("temp.las");
 
     {
-        const boost::uint64_t numPoints = reader.getNumPoints();
-
         // need to scope the writer, so that's it dtor can use the stream
         LiblasWriter writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Liblas Writer");
+        writer.initialize();
+
+        const boost::uint64_t numPoints = reader.getNumPoints();
 
         writer.setCompressed(false);
         writer.setDate(0, 0);
@@ -87,22 +88,22 @@ BOOST_AUTO_TEST_CASE(test_simple_las)
     return;
 }
 
-BOOST_AUTO_TEST_CASE(test_options)
+BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_options)
 {
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
 
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
-
     Option<std::string> opt("filename", "temp.las");
     Options opts(opt);
 
-    {
-        const boost::uint64_t numPoints = reader.getNumPoints();
+    LiblasReader reader(Support::datapath("1.2-with-color.las"));
 
+    {
         // need to scope the writer, so that's it dtor can use the stream
         LiblasWriter writer(reader, opts);
         BOOST_CHECK(writer.getDescription() == "Liblas Writer");
+
+        writer.initialize();
 
         writer.setCompressed(false);
         writer.setDate(0, 0);
@@ -110,6 +111,7 @@ BOOST_AUTO_TEST_CASE(test_options)
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
 
+        const boost::uint64_t numPoints = reader.getNumPoints();
         writer.write(numPoints);
     }
 
@@ -125,7 +127,7 @@ BOOST_AUTO_TEST_CASE(test_options)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_simple_laz)
+BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_laz)
 {
     // remove file from earlier run, if needed
     Utils::deleteFile("temp.las");
@@ -135,10 +137,11 @@ BOOST_AUTO_TEST_CASE(test_simple_laz)
     std::ostream* ofs = Utils::createFile("temp.laz");
 
     {
-        const boost::uint64_t numPoints = reader.getNumPoints();
-
         // need to scope the writer, so that's it dtor can use the stream
         LiblasWriter writer(reader, ofs);
+        writer.initialize();
+
+        const boost::uint64_t numPoints = reader.getNumPoints();
 
         writer.setCompressed(true);
         writer.setDate(0, 0);
@@ -173,11 +176,12 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     std::ostream* ofs = Utils::createFile("temp.las");
 
     {
-        const boost::uint64_t numPoints = reader.getNumPoints();
-
         // need to scope the writer, so that's it dtor can use the stream
         LiblasWriter writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Liblas Writer");
+        writer.initialize();
+
+        const boost::uint64_t numPoints = reader.getNumPoints();
 
         writer.setCompressed(false);
         writer.setDate(78, 2008);

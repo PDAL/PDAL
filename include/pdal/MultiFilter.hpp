@@ -47,14 +47,16 @@ class PDAL_DLL MultiFilter : public Stage
 public:
     // entries may not be null
     // vector.size() must be > 0
-    MultiFilter(const std::vector<const Stage*>& prevStages, const Options& options);
+    MultiFilter(const std::vector<Stage*>& prevStages, const Options& options);
 
-    const std::vector<const Stage*>& getPrevStages() const;
+    virtual void initialize();
+
+    const std::vector<const Stage*> getPrevStages() const;
 
     virtual boost::property_tree::ptree generatePTree() const;
 
 protected:
-    std::vector<const Stage*> m_prevStages;
+    std::vector<Stage*> m_prevStages;
 
 private:
     MultiFilter& operator=(const MultiFilter&); // not implemented

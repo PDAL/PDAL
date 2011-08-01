@@ -84,7 +84,7 @@ static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double
 #ifdef PDAL_SRS_ENABLED
 
 // Test reprojecting UTM 15 to DD with a filter
-BOOST_AUTO_TEST_CASE(test_1)
+BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
 {
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
     const char* utm15_wkt = "PROJCS[\"NAD83 / UTM zone 15N\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.2572221010002,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-93],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"26915\"]]";
@@ -106,6 +106,7 @@ BOOST_AUTO_TEST_CASE(test_1)
     //
     {
         pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        reader.initialize();
 
         const pdal::SpatialReference in_ref_test(utm15_wkt);
         const pdal::SpatialReference out_ref_test(epsg4326_wkt);
@@ -142,14 +143,21 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (2)
     //
     {
-        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
-
-        const pdal::SpatialReference in_ref(reader.getSpatialReference());
         const pdal::SpatialReference out_ref(epsg4326_wkt);
+        pdal::SpatialReference in_ref;
+        {
+            pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+            reader.initialize();
+            in_ref.setWKT(reader.getSpatialReference().getWKT());
+        }
+
+        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
 
         pdal::filters::ScalingFilter scalingFilter(reader);
         pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
         pdal::filters::DescalingFilter descalingFilter(reprojectionFilter);
+        
+        descalingFilter.initialize();
 
         const pdal::Schema& schema = descalingFilter.getSchema();
         const pdal::SchemaLayout layout(schema);
@@ -176,10 +184,15 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (2), but using the Option-based ctor
     //
     {
-        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
-
-        const pdal::SpatialReference in_ref(reader.getSpatialReference());
         const pdal::SpatialReference out_ref(epsg4326_wkt);
+        pdal::SpatialReference in_ref;
+        {
+            pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+            reader.initialize();
+            in_ref.setWKT(reader.getSpatialReference().getWKT());
+        }
+
+        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
 
         pdal::Option<std::string> opt1("in_srs", in_ref.getWKT());
         pdal::Option<std::string> opt2("out_srs", out_ref.getWKT());
@@ -188,6 +201,8 @@ BOOST_AUTO_TEST_CASE(test_1)
         pdal::filters::ScalingFilter scalingFilter(reader);
         pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, opts);
         pdal::filters::DescalingFilter descalingFilter(reprojectionFilter);
+        
+        descalingFilter.initialize();
 
         const pdal::Schema& schema = descalingFilter.getSchema();
         const pdal::SchemaLayout layout(schema);
@@ -214,11 +229,16 @@ BOOST_AUTO_TEST_CASE(test_1)
     // (3)
     //
     {
+        const pdal::SpatialReference out_ref(epsg4326_wkt);
+        pdal::SpatialReference in_ref;
+        {
+            pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+            reader.initialize();
+            in_ref.setWKT(reader.getSpatialReference().getWKT());
+        }
+
         pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
             
-        const pdal::SpatialReference in_ref(reader.getSpatialReference());
-        const pdal::SpatialReference out_ref(epsg4326_wkt);
-
         // convert to doubles, use internal scale factor
         pdal::filters::ScalingFilter scalingFilter(reader);
 
@@ -226,6 +246,8 @@ BOOST_AUTO_TEST_CASE(test_1)
     
         // convert to ints, using custom scale factor
         pdal::filters::DescalingFilter descalingFilter(reprojectionFilter, 0.000001, 0.0, 0.000001, 0.0, 0.01, 0.0);
+        
+        descalingFilter.initialize();
 
         const pdal::Schema& schema = descalingFilter.getSchema();
         const pdal::SchemaLayout layout(schema);
@@ -264,6 +286,7 @@ BOOST_AUTO_TEST_CASE(test_impedence_mismatch)
     try
     {
         pdal::filters::ReprojectionFilter filter(reader, in_ref, out_ref);
+        filter.initialize();
         ok = false;
     }
     catch (pdal::impedance_invalid&)

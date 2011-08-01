@@ -84,31 +84,70 @@ namespace pdal { namespace filters {
 IMPLEMENT_STATICS(ReprojectionFilter, "filters.reprojection", "Reprojection Filter")
 
 
-ReprojectionFilter::ReprojectionFilter(const Stage& prevStage, const Options& options)
+ReprojectionFilter::ReprojectionFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
     , m_inSRS(options.getValueOrThrow<std::string>("in_srs"))
     , m_outSRS(options.getValueOrThrow<std::string>("out_srs"))
 {
-    checkImpedance();
-
-    initialize();
-
-    updateBounds();
-
     return;
 }
 
 
-ReprojectionFilter::ReprojectionFilter(const Stage& prevStage,
+ReprojectionFilter::ReprojectionFilter(Stage& prevStage,
                                        const SpatialReference& inSRS,
                                        const SpatialReference& outSRS)
     : Filter(prevStage, Options::none())
     , m_inSRS(inSRS)
     , m_outSRS(outSRS)
 {
+    return;
+}
+
+
+void ReprojectionFilter::initialize()
+{
+    Filter::initialize();
+
     checkImpedance();
 
-    initialize();
+#ifdef PDAL_HAVE_GDAL
+    
+    m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
+    m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
+    
+    int result = OSRSetFromUserInput(m_in_ref_ptr.get(), m_inSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
+    if (result != OGRERR_NONE) 
+    {
+        std::ostringstream msg; 
+        msg << "Could not import input spatial reference for ReprojectionFilter:: " 
+            << CPLGetLastErrorMsg() << " code: " << result 
+            << "wkt: '" << m_inSRS.getWKT() << "'";
+        throw std::runtime_error(msg.str());
+    }
+    
+    result = OSRSetFromUserInput(m_out_ref_ptr.get(), m_outSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
+    if (result != OGRERR_NONE) 
+    {
+        std::ostringstream msg; 
+        msg << "Could not import output spatial reference for ReprojectionFilter:: " 
+            << CPLGetLastErrorMsg() << " code: " << result 
+            << "wkt: '" << m_outSRS.getWKT() << "'";
+        std::string message(msg.str());
+        throw std::runtime_error(message);
+    }
+    m_transform_ptr = TransformPtr(OCTNewCoordinateTransformation( m_in_ref_ptr.get(), m_out_ref_ptr.get()), OSRTransformDeleter());
+    
+    if (!m_transform_ptr.get())
+    {
+        std::ostringstream msg; 
+        msg << "Could not construct CoordinateTransformation in ReprojectionFilter:: ";
+        std::string message(msg.str());
+        throw std::runtime_error(message);
+    }    
+    
+#endif
+    
+    setSpatialReference(m_outSRS);
 
     updateBounds();
 
@@ -163,50 +202,6 @@ void ReprojectionFilter::checkImpedance()
         throw impedance_invalid("Reprojection filter requires X,Y,Z dimensions as doubles");
     }
 
-    return;
-}
-
-
-void ReprojectionFilter::initialize()
-{
-#ifdef PDAL_HAVE_GDAL
-    
-    m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
-    m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
-    
-    int result = OSRSetFromUserInput(m_in_ref_ptr.get(), m_inSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
-    if (result != OGRERR_NONE) 
-    {
-        std::ostringstream msg; 
-        msg << "Could not import input spatial reference for ReprojectionFilter:: " 
-            << CPLGetLastErrorMsg() << " code: " << result 
-            << "wkt: '" << m_inSRS.getWKT() << "'";
-        throw std::runtime_error(msg.str());
-    }
-    
-    result = OSRSetFromUserInput(m_out_ref_ptr.get(), m_outSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
-    if (result != OGRERR_NONE) 
-    {
-        std::ostringstream msg; 
-        msg << "Could not import output spatial reference for ReprojectionFilter:: " 
-            << CPLGetLastErrorMsg() << " code: " << result 
-            << "wkt: '" << m_outSRS.getWKT() << "'";
-        std::string message(msg.str());
-        throw std::runtime_error(message);
-    }
-    m_transform_ptr = TransformPtr(OCTNewCoordinateTransformation( m_in_ref_ptr.get(), m_out_ref_ptr.get()), OSRTransformDeleter());
-    
-    if (!m_transform_ptr.get())
-    {
-        std::ostringstream msg; 
-        msg << "Could not construct CoordinateTransformation in ReprojectionFilter:: ";
-        std::string message(msg.str());
-        throw std::runtime_error(message);
-    }    
-    
-#endif
-    
-    setSpatialReference(m_outSRS);
     return;
 }
 

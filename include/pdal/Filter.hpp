@@ -45,14 +45,18 @@ namespace pdal
 class PDAL_DLL Filter : public Stage
 {
 public:
-    Filter(const Stage& prevStage, const Options& options);
+    Filter(Stage& prevStage, const Options& options);
+
+    virtual void initialize();
 
     const Stage& getPrevStage() const;
 
     virtual boost::property_tree::ptree generatePTree() const;
 
 protected:
-    const Stage& m_prevStage;
+    Stage& getPrevStage();
+
+    Stage& m_prevStage;
 
 private:
     Filter& operator=(const Filter&); // not implemented

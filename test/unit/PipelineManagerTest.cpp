@@ -46,6 +46,8 @@ BOOST_AUTO_TEST_SUITE(PipelineManagerTest)
 
 BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
 {
+    Utils::deleteFile("temp.las");
+
     {
         PipelineManager mgr;
 
@@ -60,6 +62,8 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
         Options optsW;
         optsW.add("filename", "temp.las", "file to write to");
         Writer* writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
+
+        writer->initialize();
 
         const boost::uint64_t np = writer->write( reader->getNumPoints() );
         BOOST_CHECK(np == 1065);

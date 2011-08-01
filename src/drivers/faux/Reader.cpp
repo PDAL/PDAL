@@ -60,8 +60,6 @@ Reader::Reader(const Options& options)
     , m_numPoints(options.getValueOrThrow<boost::uint64_t>("num_points"))
     , m_mode(string2mode(options.getValueOrThrow<std::string>("mode")))
 {
-    initialize();
-
     return;
 }
 
@@ -72,8 +70,6 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
     , m_numPoints(numPoints)
     , m_mode(mode)
 {
-    initialize();
-
     return;
 }
 
@@ -88,7 +84,7 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
         throw; // BUG
     }
 
-    initialize(dimensions);
+    m_dimensions = dimensions;
 
     return;
 }
@@ -96,28 +92,24 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
 
 void Reader::initialize()
 {
-    std::vector<Dimension> dimensions;
+    pdal::Reader::initialize();
 
-    Dimension dimx(Dimension::Field_X, Dimension::Double);
-    Dimension dimy(Dimension::Field_Y, Dimension::Double);
-    Dimension dimz(Dimension::Field_Z, Dimension::Double);
-    Dimension dimt(Dimension::Field_Time, Dimension::Uint64);
+    if (m_dimensions.size() == 0)
+    {
+        // these are the default dimensions we use
+        const Dimension dimx(Dimension::Field_X, Dimension::Double);
+        const Dimension dimy(Dimension::Field_Y, Dimension::Double);
+        const Dimension dimz(Dimension::Field_Z, Dimension::Double);
+        const Dimension dimt(Dimension::Field_Time, Dimension::Uint64);
 
-    dimensions.push_back(dimx);
-    dimensions.push_back(dimy);
-    dimensions.push_back(dimz);
-    dimensions.push_back(dimt);
-    
-    initialize(dimensions);
+        m_dimensions.push_back(dimx);
+        m_dimensions.push_back(dimy);
+        m_dimensions.push_back(dimz);
+        m_dimensions.push_back(dimt);
+    }
 
-    return;
-}
-
-
-void Reader::initialize(const std::vector<Dimension>& dimensions)
-{
     Schema& schema = getSchemaRef();
-    schema.addDimensions(dimensions);
+    schema.addDimensions(m_dimensions);
 
     setNumPoints(m_numPoints);
     setPointCountType(PointCount_Fixed);

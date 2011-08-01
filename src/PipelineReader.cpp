@@ -284,7 +284,7 @@ MultiFilter* PipelineReader::parseElement_MultiFilter(const boost::property_tree
 {
     Options options(m_baseOptions);
     std::string type = "";
-    std::vector<const Stage*> prevStages;
+    std::vector<Stage*> prevStages;
     StageParserContext context(StageParserContext::Many);
 
     boost::property_tree::ptree::const_iterator iter = tree.begin();
