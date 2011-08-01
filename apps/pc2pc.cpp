@@ -132,6 +132,8 @@ int Application_pc2pc::execute()
 
         //writer.setPointFormat( reader.getPointFormatNumber() );
 
+        writer.initialize();
+
         writer.write(numPoints);
     }
 
@@ -183,6 +185,7 @@ int Application_pc2pc::execute()
         // pdal::filters::ByteSwapFilter swapper(descalingFilter);
         pdal::drivers::oci::Writer writer(descalingFilter, options);
 
+        writer.initialize();
 
         writer.write(numPoints);
             
@@ -249,6 +252,7 @@ int Application_pc2pc::execute()
             writer->setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));
             writer->setPointFormat(pdal::drivers::las::PointFormat3);
         
+            writer->initialize();
 
             writer->write(0);
             delete writer;
@@ -261,6 +265,7 @@ int Application_pc2pc::execute()
             writer->setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));
             writer->setPointFormat(pdal::drivers::las::PointFormat3);
         
+            writer->initialize();
 
             writer->write(0);
             delete writer;
@@ -298,6 +303,8 @@ int Application_pc2pc::execute()
         //BUG: handle laz writer.setCompressed(false);
 
         writer.setPointFormat( reader.getPointFormat() );
+
+        writer.initialize();
 
         writer.write(numPoints);
     }

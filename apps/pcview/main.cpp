@@ -238,6 +238,8 @@ static void readFileSimple(Controller& controller, const string& file)
 
     pdal::Stage* colorizer = new pdal::filters::ColorFilter(*decimator);
 
+    colorizer->initialize();
+
     const boost::uint32_t numPoints = (boost::uint32_t)colorizer->getNumPoints();
 
 #if 1
