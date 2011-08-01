@@ -63,10 +63,10 @@ void StageBase::initialize()
 {
     // it is legal now to call initialize() twice (but you really shouldn't)
     //
-    if (m_initialized)
-    {
-        throw pdal_error("Class already initialized: " + this->getName());
-    }
+    //if (m_initialized)
+    //{
+    //    throw pdal_error("Class already initialized: " + this->getName());
+    //}
 
     m_debug = m_options.getValueOrDefault<bool>("debug", false);
     m_verbose = m_options.getValueOrDefault<boost::uint8_t>("verbose", 0);

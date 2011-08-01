@@ -111,7 +111,7 @@ int Application_pcinfo::execute()
         return 1;
     }
 
-    reader.initialize();
+    reader->initialize();
 
     const boost::uint64_t numPoints = reader->getNumPoints();
     const SpatialReference& srs = reader->getSpatialReference();
