@@ -47,7 +47,7 @@ std::istream& operator>>(std::istream& istr, Range<double>& range)
     Utils::eatwhitespace(istr);
     
     if (!Utils::eatcharacter(istr,'['))
-        throw pdal_error("Range parser failed");
+        throw pdal_error("Range parser failed finding expected '[' character");
 
     Utils::eatwhitespace(istr);
 
@@ -56,12 +56,12 @@ std::istream& operator>>(std::istream& istr, Range<double>& range)
     Utils::eatwhitespace(istr);
 
     if (!Utils::eatcharacter(istr,','))
-        throw pdal_error("Range parser failed");
+        throw pdal_error("Range parser failed finding expected ',' character");
 
     istr >> high;
 
     if (!Utils::eatcharacter(istr,']'))
-        throw pdal_error("Range parser failed");
+        throw pdal_error("Range parser failed finding expected ']' character");
 
     range.setMinimum(low);
     range.setMaximum(high);
