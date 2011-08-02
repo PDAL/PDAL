@@ -85,7 +85,7 @@ public:
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readImpl(PointBuffer&);
+    boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
 };
 
@@ -98,7 +98,7 @@ public:
 
 private:
     boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readImpl(PointBuffer&);
+    boost::uint32_t readBufferImpl(PointBuffer&);
 };
 
 } } } // namespaces

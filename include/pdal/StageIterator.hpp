@@ -60,7 +60,30 @@ public:
     // we need to write into.
     //
     // Returns the number of valid points read.
-    boost::uint32_t read(PointBuffer&);
+    //
+    // (This function really just performs the readBegin..readEnd sequence)
+    boost::uint32_t read(PointBuffer& buffer);
+
+    // These functions just call into the corresponding 'Impls that the derived stage
+    // provides, plus some of them do a little internal bookkeeping we don't want to have 
+    // to make the derived stages keep track of.
+    //
+    // Mortal users are not intended to use these functions.  For read workflows, just
+    // call the above read() method.  For write workflows, Writer::write() will take
+    // care of calling these guys for you.
+    //
+    // Sequence:
+    //    - readBegin
+    //    - for each buffer chunk, do
+    //       . readBufferBegin
+    //       . readBuffer
+    //       . readBufferEnd
+    //    - readEnd
+    void readBegin();
+    void readBufferBegin(PointBuffer&);
+    boost::uint32_t readBuffer(PointBuffer&);
+    void readBufferEnd(PointBuffer&);
+    void readEnd();
 
     // Returns the current point number.  The first point is 0.
     // If this number if > getNumPoints(), then no more points
@@ -76,7 +99,11 @@ public:
     boost::uint32_t getChunkSize() const;
 
 protected:
-    virtual boost::uint32_t readImpl(PointBuffer&) = 0;
+    virtual void readBeginImpl() {}
+    virtual void readBufferBeginImpl(PointBuffer&) {}
+    virtual boost::uint32_t readBufferImpl(PointBuffer&) = 0;
+    virtual void readBufferEndImpl(PointBuffer&) {}
+    virtual void readEndImpl() {}
 
     // This is provided as a sample implementation that some stages could use
     // to implement their own skip or seek functions. It uses the read() call 
@@ -115,7 +142,7 @@ public:
 
 protected:
     // from Iterator
-    virtual boost::uint32_t readImpl(PointBuffer&) = 0;
+    virtual boost::uint32_t readBufferImpl(PointBuffer&) = 0;
 
     virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
     virtual bool atEndImpl() const = 0;

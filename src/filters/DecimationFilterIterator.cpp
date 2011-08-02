@@ -64,7 +64,7 @@ bool DecimationFilterSequentialIterator::atEndImpl() const
 }
 
 
-boost::uint32_t DecimationFilterSequentialIterator::readImpl(PointBuffer& dstData)
+boost::uint32_t DecimationFilterSequentialIterator::readBufferImpl(PointBuffer& dstData)
 {
     // The client has asked us for dstData.getCapacity() points.
     // We will read from our previous stage until we get that amount (or

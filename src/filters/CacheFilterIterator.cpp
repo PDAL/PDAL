@@ -61,7 +61,7 @@ bool CacheFilterSequentialIterator::atEndImpl() const
 }
 
 
-boost::uint32_t CacheFilterSequentialIterator::readImpl(PointBuffer& data)
+boost::uint32_t CacheFilterSequentialIterator::readBufferImpl(PointBuffer& data)
 {
     const boost::uint32_t cacheBlockSize = m_filter.getCacheBlockSize();
 
@@ -126,7 +126,7 @@ boost::uint64_t CacheFilterRandomIterator::seekImpl(boost::uint64_t count)
 
 
 // BUG: this duplicates the code above
-boost::uint32_t CacheFilterRandomIterator::readImpl(PointBuffer& data)
+boost::uint32_t CacheFilterRandomIterator::readBufferImpl(PointBuffer& data)
 {
     const boost::uint32_t cacheBlockSize = m_filter.getCacheBlockSize();
 

@@ -54,7 +54,7 @@ boost::uint64_t CropFilterSequentialIterator::skipImpl(boost::uint64_t count)
 }
 
 
-boost::uint32_t CropFilterSequentialIterator::readImpl(PointBuffer& dstData)
+boost::uint32_t CropFilterSequentialIterator::readBufferImpl(PointBuffer& dstData)
 {
     // The client has asked us for dstData.getCapacity() points.
     // We will read from our previous stage until we get that amount (or

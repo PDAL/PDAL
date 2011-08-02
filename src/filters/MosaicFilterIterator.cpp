@@ -70,7 +70,7 @@ bool MosaicFilterSequentialIterator::atEndImpl() const
 }
 
 
-boost::uint32_t MosaicFilterSequentialIterator::readImpl(PointBuffer& destData)
+boost::uint32_t MosaicFilterSequentialIterator::readBufferImpl(PointBuffer& destData)
 {
     // BUG: We know that the two prev stage schemas are compatible, 
     // but we can't be sure the have the same bitfield layouts as 

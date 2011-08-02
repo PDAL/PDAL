@@ -87,7 +87,7 @@ const LiblasReader& LiblasIteratorBase::getReader() const
 }
 
 
-boost::uint32_t LiblasIteratorBase::readBuffer(PointBuffer& data)
+boost::uint32_t LiblasIteratorBase::myReadBuffer(PointBuffer& data)
 {
     boost::uint32_t numPoints = data.getCapacity();
     boost::uint32_t i = 0;
@@ -214,9 +214,9 @@ bool SequentialIterator::atEndImpl() const
 }
 
 
-boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
+boost::uint32_t SequentialIterator::readBufferImpl(PointBuffer& data)
 {
-    return readBuffer(data);
+    return myReadBuffer(data);
 }
 
 
@@ -259,9 +259,9 @@ boost::uint64_t RandomIterator::seekImpl(boost::uint64_t newPos64)
 }
 
 
-boost::uint32_t RandomIterator::readImpl(PointBuffer& data)
+boost::uint32_t RandomIterator::readBufferImpl(PointBuffer& data)
 {
-    return readBuffer(data);
+    return myReadBuffer(data);
 }
 
 

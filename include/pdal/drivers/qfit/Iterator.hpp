@@ -53,7 +53,7 @@ public:
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readImpl(PointBuffer&);
+    boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
 
     const Reader& m_reader;
@@ -69,7 +69,7 @@ public:
 
 private:
     boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readImpl(PointBuffer&);
+    boost::uint32_t readBufferImpl(PointBuffer&);
 
     const Reader& m_reader;
     std::istream* m_istream;

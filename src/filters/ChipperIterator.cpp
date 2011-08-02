@@ -54,7 +54,7 @@ boost::uint64_t ChipperSequentialIterator::skipImpl(boost::uint64_t count)
 }
 
 
-boost::uint32_t ChipperSequentialIterator::readImpl(PointBuffer& buffer)
+boost::uint32_t ChipperSequentialIterator::readBufferImpl(PointBuffer& buffer)
 {
 
     if (m_currentBlockId == m_chipper.GetBlockCount())

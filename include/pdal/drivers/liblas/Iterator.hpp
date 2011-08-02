@@ -65,7 +65,7 @@ protected:
     ::liblas::Reader& getExternalReader() const;
     const LiblasReader& getReader() const;
     
-    boost::uint32_t readBuffer(PointBuffer& data);
+    boost::uint32_t myReadBuffer(PointBuffer& data);
 
 private:
     const LiblasReader& m_reader;
@@ -86,7 +86,7 @@ public:
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t count);
-    boost::uint32_t readImpl(PointBuffer& data);
+    boost::uint32_t readBufferImpl(PointBuffer& data);
     bool atEndImpl() const;
 };
 
@@ -99,7 +99,7 @@ public:
 
 private:
     boost::uint64_t seekImpl(boost::uint64_t pos);
-    boost::uint32_t readImpl(PointBuffer& data);
+    boost::uint32_t readBufferImpl(PointBuffer& data);
 };
 
 

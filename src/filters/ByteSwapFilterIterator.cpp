@@ -55,7 +55,7 @@ boost::uint64_t ByteSwapFilterSequentialIterator::skipImpl(boost::uint64_t count
 }
 
 
-boost::uint32_t ByteSwapFilterSequentialIterator::readImpl(PointBuffer& dstData)
+boost::uint32_t ByteSwapFilterSequentialIterator::readBufferImpl(PointBuffer& dstData)
 {
     // The client has asked us for dstData.getCapacity() points.
     // We will read from our previous stage until we get that amount (or

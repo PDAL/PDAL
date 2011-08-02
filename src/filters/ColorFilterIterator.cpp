@@ -47,7 +47,7 @@ ColorFilterSequentialIterator::ColorFilterSequentialIterator(const ColorFilter& 
 }
 
 
-boost::uint32_t ColorFilterSequentialIterator::readImpl(PointBuffer& data)
+boost::uint32_t ColorFilterSequentialIterator::readBufferImpl(PointBuffer& data)
 {
     const boost::uint32_t numRead = getPrevIterator().read(data);
 

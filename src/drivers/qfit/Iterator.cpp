@@ -75,7 +75,7 @@ bool SequentialIterator::atEndImpl() const
 }
 
 
-boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
+boost::uint32_t SequentialIterator::readBufferImpl(PointBuffer& data)
 {
     return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex());
 }
@@ -109,7 +109,7 @@ boost::uint64_t RandomIterator::seekImpl(boost::uint64_t count)
 }
 
 
-boost::uint32_t RandomIterator::readImpl(PointBuffer& data)
+boost::uint32_t RandomIterator::readBufferImpl(PointBuffer& data)
 {
     return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex());
 }

@@ -90,18 +90,62 @@ boost::uint32_t StageIterator::getChunkSize() const
 }
 
 
-boost::uint32_t StageIterator::read(PointBuffer& data)
+boost::uint32_t StageIterator::read(PointBuffer& buffer)
+{
+    readBegin();
+    readBufferBegin(buffer);
+    const boost::uint32_t numRead = readBuffer(buffer);
+    readBufferEnd(buffer);
+    readEnd();
+
+    return numRead;
+}
+
+
+void StageIterator::readBegin()
 {
     if (!m_stage.isInitialized())
     {
         throw pdal_error("stage not initialized: " + m_stage.getName());
     }
 
-    const boost::uint32_t numRead = readImpl(data);
+    readBeginImpl();
 
+    return;
+}
+
+
+void StageIterator::readBufferBegin(PointBuffer& buffer)
+{
+    readBufferBeginImpl(buffer);
+
+    return;
+}
+
+
+boost::uint32_t StageIterator::readBuffer(PointBuffer& buffer)
+{
+    const boost::uint32_t numRead = readBufferImpl(buffer);
+    
     m_index += numRead;
 
     return numRead;
+}
+
+
+void StageIterator::readBufferEnd(PointBuffer& buffer)
+{
+    readBufferEndImpl(buffer);
+
+    return;
+}
+
+
+void StageIterator::readEnd()
+{
+    readEndImpl();
+
+    return;
 }
 
 

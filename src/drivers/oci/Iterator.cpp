@@ -208,7 +208,7 @@ boost::uint32_t IteratorBase::unpackOracleData(PointBuffer& data)
     return 0;
 }
 
-boost::uint32_t IteratorBase::readBuffer(PointBuffer& data)
+boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
 {
     boost::uint32_t numPointsRead = 0;
 
@@ -474,9 +474,9 @@ bool SequentialIterator::atEndImpl() const
 }
 
 
-boost::uint32_t SequentialIterator::readImpl(PointBuffer& data)
+boost::uint32_t SequentialIterator::readBufferImpl(PointBuffer& data)
 {
-    return readBuffer(data);
+    return myReadBuffer(data);
 }
 
 

@@ -47,7 +47,7 @@ ReprojectionFilterSequentialIterator::ReprojectionFilterSequentialIterator(const
 }
 
 
-boost::uint32_t ReprojectionFilterSequentialIterator::readImpl(PointBuffer& data)
+boost::uint32_t ReprojectionFilterSequentialIterator::readBufferImpl(PointBuffer& data)
 {
     const boost::uint32_t numRead = getPrevIterator().read(data);
 

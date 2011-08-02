@@ -56,7 +56,7 @@ public:
 protected:
     const Reader& getReader() const;
     
-    boost::uint32_t readBuffer(PointBuffer& data);
+    boost::uint32_t myReadBuffer(PointBuffer& data);
     boost::uint32_t unpackOracleData(PointBuffer& data);
     BlockPtr defineBlock(Statement statement);
 
@@ -85,7 +85,7 @@ public:
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t count);
-    boost::uint32_t readImpl(PointBuffer& data);
+    boost::uint32_t readBufferImpl(PointBuffer& data);
     bool atEndImpl() const;
 };
 
