@@ -109,20 +109,29 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 
     writeBegin();
 
+    iter->readBegin();
+
     // in case targetNumPointsToWrite is really big, we will process just one chunk at a time
     
     if (targetNumPointsToWrite == 0)
     {
         PointBuffer buffer(m_prevStage.getSchema(), m_chunkSize);
-        boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
+        iter->readBufferBegin(buffer);
+        boost::uint32_t numPointsReadThisChunk = iter->readBuffer(buffer);
+        iter->readBufferEnd(buffer);
         boost::uint32_t numPointsWrittenThisChunk = 0;
         while (numPointsReadThisChunk != 0)
         {
+            writeBufferBegin(buffer);
             numPointsWrittenThisChunk = writeBuffer(buffer);
+            writeBufferEnd(buffer);
             m_actualNumPointsWritten += numPointsWrittenThisChunk;
 
             buffer.setNumPoints(0); // reset the buffer, so we can use it again
-            numPointsReadThisChunk = iter->read(buffer);
+
+            iter->readBufferBegin(buffer);
+            numPointsReadThisChunk = iter->readBuffer(buffer);
+            iter->readBufferEnd(buffer);
         }
     } else 
     {
@@ -137,11 +146,18 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 
             PointBuffer buffer(m_prevStage.getSchema(), numPointsToReadThisChunk);
 
-            const boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
+            iter->readBufferBegin(buffer);
+            const boost::uint32_t numPointsReadThisChunk = iter->readBuffer(buffer);
+            iter->readBufferEnd(buffer);
+
             assert(numPointsReadThisChunk <= numPointsToReadThisChunk);
+
+            writeBufferBegin(buffer);
 
             const boost::uint32_t numPointsWrittenThisChunk = writeBuffer(buffer);
             assert(numPointsWrittenThisChunk == numPointsReadThisChunk);
+
+            writeBufferEnd(buffer);
 
             m_actualNumPointsWritten += numPointsWrittenThisChunk;
 
@@ -152,6 +168,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
         }
     }
 
+    iter->readEnd();
 
     writeEnd();
 

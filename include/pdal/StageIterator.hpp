@@ -116,6 +116,9 @@ private:
     const Stage& m_stage;
     boost::uint32_t m_chunkSize;
 
+    bool m_readBeginPerformed;
+    bool m_readBufferBeginPerformed;
+
     StageIterator& operator=(const StageIterator&); // not implemented
     StageIterator(const StageIterator&); // not implemented
 };

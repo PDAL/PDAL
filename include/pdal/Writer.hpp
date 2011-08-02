@@ -73,8 +73,12 @@ protected:
     // this is called once before the loop with the writeBuffer calls
     virtual void writeBegin() = 0;
 
+    virtual void writeBufferBegin(const PointBuffer&) {}
+
     // called repeatedly, until out of data
     virtual boost::uint32_t writeBuffer(const PointBuffer&) = 0;
+
+    virtual void writeBufferEnd(const PointBuffer&) {}
 
     // called once, after the writeBuffer calls
     virtual void writeEnd() = 0;

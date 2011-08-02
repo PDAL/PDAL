@@ -55,6 +55,8 @@ StageIterator::StageIterator(const Stage& stage)
     : m_index(0)
     , m_stage(stage)
     , m_chunkSize(s_defaultChunkSize)
+    , m_readBeginPerformed(false)
+    , m_readBufferBeginPerformed(false)
 {
     return;
 }
@@ -62,6 +64,10 @@ StageIterator::StageIterator(const Stage& stage)
 
 StageIterator::~StageIterator()
 {
+    // sanity checks (these are not exceptions, because dtors should not throw)
+    //assert(!m_readBufferBeginPerformed);
+    //assert(!m_readBeginPerformed);
+
     return;
 }
 
@@ -109,7 +115,21 @@ void StageIterator::readBegin()
         throw pdal_error("stage not initialized: " + m_stage.getName());
     }
 
-    readBeginImpl();
+    if (m_readBeginPerformed)
+    {
+        throw pdal_error("readBegin called without corresponding readEnd");
+    }
+    m_readBeginPerformed = true;
+
+    try
+    {
+        readBeginImpl();
+    }
+    catch (...)
+    {
+        m_readBeginPerformed = false;
+        throw;
+    }
 
     return;
 }
@@ -117,7 +137,26 @@ void StageIterator::readBegin()
 
 void StageIterator::readBufferBegin(PointBuffer& buffer)
 {
-    readBufferBeginImpl(buffer);
+    if (!m_readBeginPerformed)
+    {
+        throw pdal_error("readBufferBegin called without corresponding readBegin");
+    }
+    if (m_readBufferBeginPerformed)
+    {
+        throw pdal_error("readBufferBegin called without corresponding readBufferEnd");
+    }
+    m_readBufferBeginPerformed = true;
+
+    try
+    {
+        readBufferBeginImpl(buffer);
+    }
+    catch (...)
+    {
+        m_readBeginPerformed = false;
+        m_readBufferBeginPerformed = false;
+        throw;
+    }
 
     return;
 }
@@ -125,8 +164,24 @@ void StageIterator::readBufferBegin(PointBuffer& buffer)
 
 boost::uint32_t StageIterator::readBuffer(PointBuffer& buffer)
 {
-    const boost::uint32_t numRead = readBufferImpl(buffer);
+    if (!m_readBufferBeginPerformed)
+    {
+        throw pdal_error("readBuffer called without corresponding readBufferBegin");
+    }
+
+    boost::uint32_t numRead = 0;
     
+    try
+    {
+        numRead = readBufferImpl(buffer);
+    }
+    catch (...)
+    {
+        m_readBeginPerformed = false;
+        m_readBufferBeginPerformed = false;
+        throw;
+    }
+
     m_index += numRead;
 
     return numRead;
@@ -135,7 +190,23 @@ boost::uint32_t StageIterator::readBuffer(PointBuffer& buffer)
 
 void StageIterator::readBufferEnd(PointBuffer& buffer)
 {
-    readBufferEndImpl(buffer);
+    if (!m_readBufferBeginPerformed)
+    {
+        throw pdal_error("readBufferEnd called without corresponding readBufferBegin");
+    }
+
+    try
+    {
+        readBufferEndImpl(buffer);
+    }
+    catch (...)
+    {
+        m_readBeginPerformed = false;
+        m_readBufferBeginPerformed = false;
+        throw;
+    }
+    
+    m_readBufferBeginPerformed = false;
 
     return;
 }
@@ -143,7 +214,22 @@ void StageIterator::readBufferEnd(PointBuffer& buffer)
 
 void StageIterator::readEnd()
 {
-    readEndImpl();
+    if (!m_readBeginPerformed)
+    {
+        throw pdal_error("readEnd called without corresponding readBegin");
+    }
+
+    try
+    {
+        readEndImpl();
+    }
+    catch (...)
+    {
+        m_readBeginPerformed = false;
+        throw;
+    }
+
+    m_readBeginPerformed = false;
 
     return;
 }
