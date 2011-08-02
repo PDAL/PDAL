@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_test1)
         writer.writeWriterPipeline("test.xml");
     }
 
-    FileUtils::deleteFile("out.las");
+    FileUtils::deleteFile(Support::datapath("out.las"));
 
     // BUG: can't compare the files, since the filename paths are now absolute, not relative
     ////bool filesSame = Support::compare_text_files("test.xml", Support::datapath("pipeline_write.xml"));
