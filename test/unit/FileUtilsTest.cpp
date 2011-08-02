@@ -32,12 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <sstream>
-
 #include <boost/test/unit_test.hpp>
-#include <boost/cstdint.hpp>
 
 #include <pdal/FileUtils.hpp>
+#include "Support.hpp"
 
 using namespace pdal;
 
@@ -78,6 +76,54 @@ BOOST_AUTO_TEST_CASE(test_file_ops)
     // delete test
     FileUtils::deleteFile(tmp2);
     BOOST_CHECK(FileUtils::fileExists(tmp2)==false);
+}
+
+
+BOOST_AUTO_TEST_CASE(test_getcwd)
+{
+#if 0
+    // this is hardcoded for mpg's environment
+    const std::string cwd = FileUtils::getcwd();
+    BOOST_CHECK(cwd == "D:/dev/pdal/test/unit");
+#endif
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_toAbsolutePath)
+{
+    using namespace std;
+
+    const string root = FileUtils::getcwd();
+
+#ifdef PDAL_COMPILER_MSVC
+    const string drive = "A:";
+#else
+    const string drive = "";
+#endif
+
+    // check 1-arg version: make absolute when file is relative, via current working dir
+    const string a = FileUtils::toAbsolutePath("foo.txt");
+    BOOST_CHECK(a == root + "/" + "foo.txt");
+
+    // check 1-arg version: make absolute when file is already absolute
+    const string b = FileUtils::toAbsolutePath(drive + "/baz/foo.txt");
+    BOOST_CHECK(b == "A:/baz/foo.txt");
+
+    // check 2-arg version: make absolute when file relative, via given base
+    const string c = FileUtils::toAbsolutePath("foo.txt", drive + "/a/b/c/d");
+    BOOST_CHECK(c == drive + "/a/b/c/d/foo.txt");
+
+    // check 2-arg version: make absolute when file is relative, via given base (which isn't absolute)
+    const string d = FileUtils::toAbsolutePath("foo.txt", "x/y/z");
+    BOOST_CHECK(d == root + "/" + "x/y/z/" + "foo.txt");
+
+    // check 1-arg version: make absolute when file is already absolute
+    const string e = FileUtils::toAbsolutePath(drive+"/baz/foo.txt", drive+"/a/b/c/d");
+    BOOST_CHECK(e == drive+"/baz/foo.txt");
+
+    return;
 }
 
 

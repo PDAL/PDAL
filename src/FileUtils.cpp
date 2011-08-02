@@ -134,4 +134,32 @@ boost::uintmax_t FileUtils::fileSize(const std::string& file)
 }
 
 
+std::string FileUtils::getcwd()
+{
+    const boost::filesystem::path p = boost::filesystem::current_path();
+    return p.generic_string();
+}
+
+
+// if the filename is an absolute path, just return it
+// otherwise, make it absolute (relative to current working dir) and return that
+std::string FileUtils::toAbsolutePath(const std::string& filename)
+{
+    const boost::filesystem::path p = boost::filesystem::absolute(filename);
+    return p.generic_string();
+}
+
+
+// if the filename is an absolute path, just return it
+// otherwise, make it absolute (relative to base dir) and return that
+// 
+// note: if base dir is not absolute, first make it absolute via toAbsolutePath(base)
+std::string FileUtils::toAbsolutePath(const std::string& filename, const std::string base)
+{
+    std::string newbase = toAbsolutePath(base);
+    boost::filesystem::path p = boost::filesystem::absolute(filename, newbase);
+    return p.generic_string();
+}
+
+
 } // namespace pdal

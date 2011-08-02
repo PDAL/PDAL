@@ -47,6 +47,7 @@
 namespace pdal
 {
 
+// this is a static class -- do not instantiate]
 class PDAL_DLL FileUtils
 {
 public:
@@ -64,7 +65,22 @@ public:
     static bool fileExists(const std::string& filename);
     static boost::uintmax_t fileSize(const std::string& filename);
 
+    // return current working dir
+    static std::string getcwd();
+
+    // if the filename is an absolute path, just return it
+    // otherwise, make it absolute (relative to current working dir) and return that
+    static std::string toAbsolutePath(const std::string& filename);
+
+    // if the filename is an absolute path, just return it
+    // otherwise, make it absolute (relative to base dir) and return that
+    // 
+    // note: if base dir is not absolute, first make it absolute via toAbsolutePath(base)
+    static std::string toAbsolutePath(const std::string& filename, const std::string base);
+
 private:
+    FileUtils& operator=(const FileUtils&); // not implemented
+    FileUtils(const FileUtils&); // not implemented;
 };
 
 
