@@ -142,7 +142,6 @@ int Application_pc2pc::execute()
 #ifdef PDAL_HAVE_ORACLE
         try{
         pdal::drivers::las::LasReader reader(m_inputFile);
-        reader.initialize();
     
         const boost::uint64_t numPoints = reader.getNumPoints();
 
@@ -233,7 +232,6 @@ int Application_pc2pc::execute()
 
 
         pdal::drivers::oci::Reader reader(options);
-        reader.initialize();
 
         pdal::drivers::las::LasWriter* writer;
 
