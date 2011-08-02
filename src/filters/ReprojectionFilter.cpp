@@ -86,8 +86,28 @@ IMPLEMENT_STATICS(ReprojectionFilter, "filters.reprojection", "Reprojection Filt
 
 ReprojectionFilter::ReprojectionFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
-    , m_inSRS(options.getValueOrThrow<std::string>("in_srs"))
     , m_outSRS(options.getValueOrThrow<std::string>("out_srs"))
+    , m_inferInputSRS(false)
+{
+    if (options.hasOption<std::string>("in_srs"))
+    {
+        m_inSRS = SpatialReference(options.getValueOrThrow<std::string>("in_srs"));
+        m_inferInputSRS = false;
+    }
+    else
+    {
+        m_inferInputSRS = true;
+    }
+
+    return;
+}
+
+
+ReprojectionFilter::ReprojectionFilter(Stage& prevStage,
+                                       const SpatialReference& outSRS)
+    : Filter(prevStage, Options::none())
+    , m_outSRS(outSRS)
+    , m_inferInputSRS(true)
 {
     return;
 }
@@ -99,6 +119,7 @@ ReprojectionFilter::ReprojectionFilter(Stage& prevStage,
     : Filter(prevStage, Options::none())
     , m_inSRS(inSRS)
     , m_outSRS(outSRS)
+    , m_inferInputSRS(false)
 {
     return;
 }
@@ -109,6 +130,11 @@ void ReprojectionFilter::initialize()
     Filter::initialize();
 
     checkImpedance();
+
+    if (m_inferInputSRS)
+    {
+        m_inSRS = getPrevStage().getSpatialReference();
+    }
 
 #ifdef PDAL_HAVE_GDAL
     

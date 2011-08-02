@@ -57,6 +57,8 @@ class PDAL_DLL ReprojectionFilter : public Filter
 public:
     ReprojectionFilter(Stage& prevStage, const Options&);
     ReprojectionFilter(Stage& prevStage,
+                       const SpatialReference& outSRS);
+    ReprojectionFilter(Stage& prevStage,
                        const SpatialReference& inSRS,
                        const SpatialReference& outSRS);
     virtual void initialize();
@@ -80,6 +82,7 @@ private:
 
     SpatialReference m_inSRS;
     SpatialReference m_outSRS;
+    bool m_inferInputSRS;
 
     typedef boost::shared_ptr<void> ReferencePtr;
     typedef boost::shared_ptr<void> TransformPtr;
