@@ -37,6 +37,7 @@
 
 // support functions for unit testing
 
+#include <pdal/Bounds.hpp>
 #include <boost/cstdint.hpp>
 
 namespace pdal
@@ -75,6 +76,7 @@ public:
     static void check_p355_p356_p357(const pdal::PointBuffer& data, const pdal::Schema& schema);
     static void check_p710_p711_p712(const pdal::PointBuffer& data, const pdal::Schema& schema);
 
+    static void compareBounds(const pdal::Bounds<double>& p, const pdal::Bounds<double>& q);
 };
 
 

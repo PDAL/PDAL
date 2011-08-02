@@ -41,6 +41,7 @@
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageIterator.hpp>
+#include <pdal/drivers/las/Reader.hpp>
 
 using namespace pdal;
 
@@ -88,7 +89,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test2)
         BOOST_CHECK(np == 1065);
     }
 
-    FileUtils::deleteFile("out.las");
+    FileUtils::deleteFile(Support::datapath("out.las"));
 
     return;
 }
@@ -158,5 +159,49 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test3)
 
     return;
 }
+
+
+BOOST_AUTO_TEST_CASE(PipelineReaderTest_test4)
+{
+    FileUtils::deleteFile("out2.las");
+
+    {
+        PipelineManager manager;
+        PipelineReader reader(manager);
+
+        reader.readWriterPipeline(Support::datapath("pipeline_write2.xml"));
+        Writer* writerStage = manager.getWriter();
+        writerStage->initialize();
+
+        const boost::uint64_t np = writerStage->write();
+        BOOST_CHECK(np == 1);
+    }
+
+    const double preX = 470692.447538;
+    const double preY = 4602888.904642;
+    const double preZ = 16.000000;
+    const double postX = -93.351563;
+    const double postY = 41.577148;
+    const double postZ = 16.000000;
+    {
+        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        reader.initialize();
+        const pdal::Bounds<double>& bounds = reader.getBounds();
+        const pdal::Bounds<double> ref(preX, preY, preZ, preX, preY, preZ);
+        Support::compareBounds(bounds, ref);
+    }
+    {
+        pdal::drivers::las::LasReader reader(Support::datapath("out2.las"));
+        reader.initialize();
+        const pdal::Bounds<double>& bounds = reader.getBounds();
+        const pdal::Bounds<double> ref(postX, postY, postZ, postX, postY, postZ);
+        Support::compareBounds(bounds, ref);
+    }
+
+    FileUtils::deleteFile(Support::datapath("out2.las"));
+
+    return;
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

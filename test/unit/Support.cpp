@@ -216,3 +216,13 @@ void Support::check_p710_p711_p712(const pdal::PointBuffer& data, const pdal::Sc
     Support::check_pN(data, schema, 2, 638598.880000, 851445.370000, 422.150000);
 }
 
+
+void Support::compareBounds(const pdal::Bounds<double>& p, const pdal::Bounds<double>& q)
+{
+    BOOST_CHECK_CLOSE(p.getMinimum(0), q.getMinimum(0), 1);
+    BOOST_CHECK_CLOSE(p.getMinimum(1), q.getMinimum(1), 1);
+    BOOST_CHECK_CLOSE(p.getMinimum(2), q.getMinimum(2), 1);
+    BOOST_CHECK_CLOSE(p.getMaximum(0), q.getMaximum(0), 1);
+    BOOST_CHECK_CLOSE(p.getMaximum(1), q.getMaximum(1), 1);
+    BOOST_CHECK_CLOSE(p.getMaximum(2), q.getMaximum(2), 1);
+}

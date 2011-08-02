@@ -49,17 +49,6 @@
 BOOST_AUTO_TEST_SUITE(ReprojectionFilterTest)
 
 
-static void compareBounds(const pdal::Bounds<double>& p, const pdal::Bounds<double>& q)
-{
-    BOOST_CHECK_CLOSE(p.getMinimum(0), q.getMinimum(0), 1);
-    BOOST_CHECK_CLOSE(p.getMinimum(1), q.getMinimum(1), 1);
-    BOOST_CHECK_CLOSE(p.getMinimum(2), q.getMinimum(2), 1);
-    BOOST_CHECK_CLOSE(p.getMaximum(0), q.getMaximum(0), 1);
-    BOOST_CHECK_CLOSE(p.getMaximum(1), q.getMaximum(1), 1);
-    BOOST_CHECK_CLOSE(p.getMaximum(2), q.getMaximum(2), 1);
-}
-
-
 static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double& z, double scaleX, double scaleY, double scaleZ)
 {
     using namespace pdal;
@@ -129,7 +118,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
         // note this file has only 1 points, so yes, the extent's mins and maxes are the same
         const pdal::Bounds<double> oldBounds_ref(preX, preY, preZ, preX, preY, preZ);
         const pdal::Bounds<double>& oldBounds = reader.getBounds();
-        compareBounds(oldBounds_ref, oldBounds);
+        Support::compareBounds(oldBounds_ref, oldBounds);
 
         double x=0, y=0, z=0;
         getPoint(data, x, y, z, 0.01, 0.01, 0.01);
@@ -164,7 +153,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
 
         const pdal::Bounds<double> newBounds_ref(postX, postY, postZ, postX, postY, postZ);
         const pdal::Bounds<double>& newBounds = descalingFilter.getBounds();
-        compareBounds(newBounds_ref, newBounds);
+        Support::compareBounds(newBounds_ref, newBounds);
 
         double x=0, y=0, z=0;
         getPoint(data, x, y, z, 0.01, 0.01, 0.01);
@@ -202,7 +191,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
 
         const pdal::Bounds<double> newBounds_ref(postX, postY, postZ, postX, postY, postZ);
         const pdal::Bounds<double>& newBounds = descalingFilter.getBounds();
-        compareBounds(newBounds_ref, newBounds);
+        Support::compareBounds(newBounds_ref, newBounds);
 
         double x=0, y=0, z=0;
         getPoint(data, x, y, z, 0.01, 0.01, 0.01);
