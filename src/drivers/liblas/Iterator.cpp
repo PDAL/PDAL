@@ -38,7 +38,7 @@
 
 #include <pdal/exceptions.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 #include <pdal/drivers/liblas/Reader.hpp>
 #include <pdal/drivers/las/Support.hpp>
 
@@ -58,7 +58,7 @@ LiblasIteratorBase::LiblasIteratorBase(const LiblasReader& reader)
     , m_istream(NULL)
     , m_externalReader(NULL)
 {
-    m_istream = Utils::openFile(m_filename);
+    m_istream = FileUtils::openFile(m_filename);
 
     ::liblas::ReaderFactory f;
     ::liblas::Reader extReader = f.CreateWithStream(*m_istream);
@@ -71,7 +71,7 @@ LiblasIteratorBase::LiblasIteratorBase(const LiblasReader& reader)
 LiblasIteratorBase::~LiblasIteratorBase()
 {
     delete m_externalReader;
-    Utils::closeFile(m_istream);
+    FileUtils::closeFile(m_istream);
 }
 
 

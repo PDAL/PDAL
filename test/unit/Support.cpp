@@ -39,7 +39,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -57,12 +57,12 @@ std::string Support::datapath(const std::string& file)
 // same as compare_files, but for text files: ignores CRLF differences
 bool Support::compare_text_files(const std::string& file1, const std::string& file2)
 {
-    if (!pdal::Utils::fileExists(file1) ||
-        !pdal::Utils::fileExists(file2))
+    if (!pdal::FileUtils::fileExists(file1) ||
+        !pdal::FileUtils::fileExists(file2))
         return false;
 
-    std::istream* str1 = pdal::Utils::openFile(file1, false);
-    std::istream* str2 = pdal::Utils::openFile(file2, false);
+    std::istream* str1 = pdal::FileUtils::openFile(file1, false);
+    std::istream* str2 = pdal::FileUtils::openFile(file2, false);
     BOOST_CHECK(str1);
     BOOST_CHECK(str2);
 
@@ -81,20 +81,20 @@ bool Support::compare_text_files(const std::string& file1, const std::string& fi
         if (!same) break;
     }
 
-    pdal::Utils::closeFile(str1);
-    pdal::Utils::closeFile(str2);
+    pdal::FileUtils::closeFile(str1);
+    pdal::FileUtils::closeFile(str2);
 
     return same;
 }
 
 bool Support::compare_files(const std::string& file1, const std::string& file2)
 {
-    if (!pdal::Utils::fileExists(file1) ||
-        !pdal::Utils::fileExists(file2))
+    if (!pdal::FileUtils::fileExists(file1) ||
+        !pdal::FileUtils::fileExists(file2))
         return false;
 
-    boost::uintmax_t len1x = pdal::Utils::fileSize(file1);
-    boost::uintmax_t len2x = pdal::Utils::fileSize(file2);
+    boost::uintmax_t len1x = pdal::FileUtils::fileSize(file1);
+    boost::uintmax_t len2x = pdal::FileUtils::fileSize(file2);
     size_t len1 = (size_t)len1x; // BUG
     size_t len2 = (size_t)len2x;
 
@@ -103,8 +103,8 @@ bool Support::compare_files(const std::string& file1, const std::string& file2)
         return false;
     }
 
-    std::istream* str1 = pdal::Utils::openFile(file1);
-    std::istream* str2 = pdal::Utils::openFile(file2);
+    std::istream* str1 = pdal::FileUtils::openFile(file1);
+    std::istream* str2 = pdal::FileUtils::openFile(file2);
     BOOST_CHECK(str1);
     BOOST_CHECK(str2);
 
@@ -114,8 +114,8 @@ bool Support::compare_files(const std::string& file1, const std::string& file2)
     str1->read(buf1,len1);
     str2->read(buf2,len2);
 
-    pdal::Utils::closeFile(str1);
-    pdal::Utils::closeFile(str2);
+    pdal::FileUtils::closeFile(str1);
+    pdal::FileUtils::closeFile(str2);
 
     char* p = buf1;
     char* q = buf2;

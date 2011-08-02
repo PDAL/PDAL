@@ -38,6 +38,7 @@
 #include <liblas/variablerecord.hpp>
 
 #include <pdal/exceptions.hpp>
+#include <pdal/FileUtils.hpp>
 #include <pdal/drivers/liblas/Iterator.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 
@@ -94,7 +95,7 @@ void LiblasReader::initialize()
 {
     Reader::initialize();
 
-    std::istream* str = Utils::openFile(m_filename);
+    std::istream* str = FileUtils::openFile(m_filename);
 
     {
         ::liblas::ReaderFactory factory;
@@ -105,7 +106,7 @@ void LiblasReader::initialize()
         registerFields(externalReader);
     }
 
-    Utils::closeFile(str);
+    FileUtils::closeFile(str);
 
     return;
 }

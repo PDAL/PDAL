@@ -45,7 +45,7 @@
 #include <pdal/drivers/las/Reader.hpp>
 
 #include <pdal/StageIterator.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 
 #include "Support.hpp"
 #include "TestConfig.hpp"
@@ -59,7 +59,7 @@ using namespace pdal;
 std::string ReadXML(std::string filename)
 {
 
-    std::istream* infile = Utils::openFile(filename);
+    std::istream* infile = FileUtils::openFile(filename);
     std::ifstream::pos_type size;
     // char* data;
     std::vector<char> data;

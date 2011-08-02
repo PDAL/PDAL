@@ -170,7 +170,7 @@ Word #       Content
 #include <pdal/drivers/qfit/Reader.hpp>
 #include <pdal/drivers/qfit/Iterator.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 
 #include <pdal/exceptions.hpp>
 
@@ -230,7 +230,7 @@ Reader::Reader(const Options& options)
 {
     std::string filename= getFileName();
     
-    std::istream* str = Utils::openFile(filename);
+    std::istream* str = FileUtils::openFile(filename);
     
     str->seekg(0);
     

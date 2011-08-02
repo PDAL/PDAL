@@ -40,6 +40,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/FileUtils.hpp>
 
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
@@ -48,6 +49,7 @@
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/optional.hpp>
+#include <boost/filesystem.hpp>
 
 namespace pdal
 {
@@ -157,6 +159,24 @@ Option<std::string> PipelineReader::parseElement_Option(const boost::property_tr
     // this function will process the element and return an Option from it
 
     Option<std::string> option(tree);
+
+    // filenames in the XML are fixed up as follows:
+    //   - if absolute path, leave it alone
+    //   - if relative path, make it absolute using the XML file's directory
+    // The toAbsolutePath function does exactly that magic for us.
+    if (option.getName() == "filename")
+    {
+        const std::string oldpath = option.getValue();
+        if (!FileUtils::isAbsolutePath(oldpath))
+        {
+            const std::string abspath = FileUtils::toAbsolutePath(m_inputXmlFile);
+            const std::string absdir = FileUtils::getDirectory(abspath);
+            const std::string newpath = FileUtils::toAbsolutePath(oldpath, absdir);
+            assert(FileUtils::isAbsolutePath(newpath));
+            const Option<std::string> option2(option.getName(), newpath, option.getDescription());
+            option = option2;
+        }
+    }
 
     return option;
 }
@@ -426,6 +446,8 @@ Stage* PipelineReader::parseElement_ReaderPipeline(const boost::property_tree::p
 
 void PipelineReader::readWriterPipeline(const std::string& filename)
 {
+    m_inputXmlFile = filename;
+
     boost::property_tree::ptree tree;
     boost::property_tree::xml_parser::read_xml(filename, tree);
 
@@ -439,12 +461,16 @@ void PipelineReader::readWriterPipeline(const std::string& filename)
 
     (void)parseElement_WriterPipeline(subtree);
 
+    m_inputXmlFile = "";
+
     return;
 }
 
 
 void PipelineReader::readReaderPipeline(const std::string& filename)
 {
+    m_inputXmlFile = filename;
+
     boost::property_tree::ptree tree;
     boost::property_tree::xml_parser::read_xml(filename, tree);
 
@@ -457,6 +483,8 @@ void PipelineReader::readReaderPipeline(const std::string& filename)
     boost::property_tree::ptree subtree = opt.get();
 
     (void)parseElement_ReaderPipeline(subtree);
+
+    m_inputXmlFile = "";
 
     return;
 }

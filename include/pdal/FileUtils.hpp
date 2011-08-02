@@ -32,63 +32,61 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PIPELINEREADER_HPP
-#define INCLUDED_PIPELINEREADER_HPP
+#ifndef INCLUDED_FILEUTILS_HPP
+#define INCLUDED_FILEUTILS_HPP
 
 #include <pdal/pdal.hpp>
-#include <pdal/StageFactory.hpp>
 
-#include <vector>
 #include <string>
-
+#include <cassert>
+#include <stdexcept>
+#include <cmath>
+#include <ostream>
+#include <istream>
 
 namespace pdal
 {
 
-class Options;
-class PipelineManager;
-
-class PDAL_DLL PipelineReader
+// this is a static class -- do not instantiate]
+class PDAL_DLL FileUtils
 {
-private:
-    class StageParserContext;
-
 public:
-    PipelineReader(PipelineManager&, bool debug=false, boost::uint8_t verbose=0);
-    ~PipelineReader();
+    // open existing file for reading
+    static std::istream* openFile(std::string const& filename, bool asBinary=true);
 
-   
-    // Use this to fill in a pipeline manager with an XML file that
-    // contains a <Writer> as the last pipeline stage.
-    void readWriterPipeline(const std::string&);
+    // open new file for writing
+    static std::ostream* createFile(std::string const& filename, bool asBinary=true);
 
-    // Use this to fill in a pipeline manager with an XML file that 
-    // don't contain a <Writer>.  (Even though this is called "parse 
-    // READER pipeline", it actually returns a Stage; it can be used 
-    // where the last pipeline stage is a Reader or Filter.)
-    void readReaderPipeline(const std::string&);
+    static void closeFile(std::ostream* ofs);
+    static void closeFile(std::istream* ifs);
+
+    static bool deleteFile(const std::string& filename);
+    static void renameFile(const std::string& dest, const std::string& src);
+    static bool fileExists(const std::string& filename);
+    static boost::uintmax_t fileSize(const std::string& filename);
+
+    // return current working dir
+    static std::string getcwd();
+
+    // return the directory component of the given path, e.g. "d:/foo/bar/a.c" -> "d:/foo/bar"
+    static std::string getDirectory(const std::string& path);
+
+    // returns true iff the path is not relative
+    static bool isAbsolutePath(const std::string& path);
+
+    // if the filename is an absolute path, just return it
+    // otherwise, make it absolute (relative to current working dir) and return that
+    static std::string toAbsolutePath(const std::string& filename);
+
+    // if the filename is an absolute path, just return it
+    // otherwise, make it absolute (relative to base dir) and return that
+    // 
+    // note: if base dir is not absolute, first make it absolute via toAbsolutePath(base)
+    static std::string toAbsolutePath(const std::string& filename, const std::string base);
 
 private:
-    Writer* parseElement_WriterPipeline(const boost::property_tree::ptree&);
-    Stage* parseElement_ReaderPipeline(const boost::property_tree::ptree&);
-    Stage* parseElement_anystage(const std::string& name, const boost::property_tree::ptree& subtree);
-    Reader* parseElement_Reader(const boost::property_tree::ptree& tree);
-    Filter* parseElement_Filter(const boost::property_tree::ptree& tree);
-    MultiFilter* parseElement_MultiFilter(const boost::property_tree::ptree& tree);
-    Writer* parseElement_Writer(const boost::property_tree::ptree& tree);
-
-    Option<std::string> parseElement_Option(const boost::property_tree::ptree& tree);
-    std::string parseElement_Type(const boost::property_tree::ptree& tree);
-
-private:
-    PipelineManager& m_manager;
-    bool m_isDebug;
-    boost::uint8_t m_verboseLevel;
-    Options m_baseOptions;
-    std::string m_inputXmlFile;
-
-    PipelineReader& operator=(const PipelineReader&); // not implemented
-    PipelineReader(const PipelineReader&); // not implemented
+    FileUtils& operator=(const FileUtils&); // not implemented
+    FileUtils(const FileUtils&); // not implemented;
 };
 
 

@@ -39,7 +39,7 @@
 #include <boost/cstdint.hpp>
 
 #include <pdal/StreamManager.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 #include <pdal/exceptions.hpp>
 
 #include "Support.hpp"
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(StreamManagerTest_test1)
 
     // filename, reading
     {
-        BOOST_CHECK(Utils::fileExists(rfilename));
+        BOOST_CHECK(FileUtils::fileExists(rfilename));
         {
             pdal::IStreamManager rfile(rfilename);
             rfile.open();
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(StreamManagerTest_test1)
     // filename, reading -- should throw
     {
         const std::string silly = "sillyfilenamethatdoesnotexist.xml";
-        BOOST_CHECK(!Utils::fileExists(silly));
+        BOOST_CHECK(!FileUtils::fileExists(silly));
 
         {
             bool ok = false;
@@ -87,26 +87,26 @@ BOOST_AUTO_TEST_CASE(StreamManagerTest_test1)
     
     // filename, writing
     {
-        Utils::deleteFile(wfilename);
-        BOOST_CHECK(!Utils::fileExists(wfilename));
+        FileUtils::deleteFile(wfilename);
+        BOOST_CHECK(!FileUtils::fileExists(wfilename));
 
         {
             pdal::OStreamManager wfile(wfilename);
             wfile.open();
             BOOST_CHECK(wfile.getFileName() == wfilename);
 
-            BOOST_CHECK(Utils::fileExists(wfilename));
+            BOOST_CHECK(FileUtils::fileExists(wfilename));
             wfile.close();
         }
      
         // cleanup
-        Utils::deleteFile(wfilename);
-        BOOST_CHECK(!Utils::fileExists(wfilename));
+        FileUtils::deleteFile(wfilename);
+        BOOST_CHECK(!FileUtils::fileExists(wfilename));
     }
 
     // stream, reading
     {
-        std::istream* istreamname = Utils::openFile(rfilename);
+        std::istream* istreamname = FileUtils::openFile(rfilename);
         
         {
             pdal::IStreamManager istream(istreamname);
@@ -116,12 +116,12 @@ BOOST_AUTO_TEST_CASE(StreamManagerTest_test1)
             istream.close();
         }
 
-        Utils::closeFile(istreamname);
+        FileUtils::closeFile(istreamname);
     }
 
     // stream, writing
     {
-        std::ostream* ostreamname = Utils::createFile(wfilename);
+        std::ostream* ostreamname = FileUtils::createFile(wfilename);
         
         {
             pdal::OStreamManager ostream(ostreamname);
@@ -131,8 +131,8 @@ BOOST_AUTO_TEST_CASE(StreamManagerTest_test1)
             ostream.close();
         }
 
-        Utils::closeFile(ostreamname);
-        Utils::deleteFile(wfilename);
+        FileUtils::closeFile(ostreamname);
+        FileUtils::deleteFile(wfilename);
     }
 
     return;

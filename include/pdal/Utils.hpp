@@ -76,20 +76,6 @@ public:
         return true;
     }
 
-    // open existing file for reading
-    static std::istream* openFile(std::string const& filename, bool asBinary=true);
-
-    // open new file for writing
-    static std::ostream* createFile(std::string const& filename, bool asBinary=true);
-
-    static void closeFile(std::ostream* ofs);
-    static void closeFile(std::istream* ifs);
-
-    static bool deleteFile(const std::string& filename);
-    static void renameFile(const std::string& dest, const std::string& src);
-    static bool fileExists(const std::string& filename);
-    static boost::uintmax_t fileSize(const std::string& filename);
-
     template<class T>
     static inline void write_field(boost::uint8_t*& dest, T v)
     {

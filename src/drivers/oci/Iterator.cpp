@@ -33,13 +33,11 @@
 ****************************************************************************/
 
 #include <pdal/drivers/oci/Iterator.hpp>
-#include <pdal/Utils.hpp>
 
 #include <liblas/factory.hpp>
 
 #include <pdal/exceptions.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/Utils.hpp>
 #include <pdal/drivers/oci/Reader.hpp>
 #include <pdal/Vector.hpp>
 

@@ -35,6 +35,7 @@
 
 #include <pdal/Vector.hpp>
 #include <pdal/Bounds.hpp>
+#include <pdal/FileUtils.hpp>
 
 #include <pdal/drivers/oci/Writer.hpp>
 
@@ -48,7 +49,6 @@
 namespace pdal { namespace drivers { namespace oci {
 
 IMPLEMENT_STATICS(Writer, "drivers.oci.writer", "OCI Writer")
-
 
 static OptionsOld dummy;
 Writer::Writer(Stage& prevStage, const Options& options)
@@ -362,7 +362,7 @@ bool Writer::IsGeographic(boost::int32_t srid)
 
 std::string Writer::LoadSQLData(std::string const& filename)
 {
-    if (!Utils::fileExists(filename))
+    if (!FileUtils::fileExists(filename))
     {
         std::ostringstream oss;
         oss << filename << " does not exist";
@@ -370,7 +370,7 @@ std::string Writer::LoadSQLData(std::string const& filename)
     }
 
     std::istream::pos_type size;    
-    std::istream* input = Utils::openFile(filename, true);
+    std::istream* input = FileUtils::openFile(filename, true);
     
 
     if (input->good()) {
@@ -392,7 +392,7 @@ std::string Writer::LoadSQLData(std::string const& filename)
     }
     else 
     {   
-        Utils::closeFile(input);
+        FileUtils::closeFile(input);
         return std::string("");
     }    
     
@@ -405,7 +405,7 @@ void Writer::RunFileSQL(std::string const& filename)
         
     if (!sql.size()) return;
 
-    if (!Utils::fileExists(sql))
+    if (!FileUtils::fileExists(sql))
     {
         oss << sql;
     } else {
@@ -646,7 +646,7 @@ oss << "declare\n"
 
     std::ostringstream wkt_s;
 
-    if (!Utils::fileExists(base_table_boundary_wkt))
+    if (!FileUtils::fileExists(base_table_boundary_wkt))
     {
         wkt_s << base_table_boundary_wkt;
     } else {
@@ -1011,8 +1011,7 @@ pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
     }
     
     m_pcExtent.grow(output);
-    std::cout << "block extent: " << output << std::endl;
-    std::cout << "pc extent: " << m_pcExtent << std::endl;
+
     return output;
     
 }
@@ -1181,7 +1180,6 @@ void Writer::UpdatePCExtent()
     std::string base_table_name = to_upper(tree.get<std::string>("base_table_name"));
     std::string cloud_column_name = to_upper(tree.get<std::string>("cloud_column_name"));
     
-    std::cout << "PC ID: " << getPCID() << std::endl;
     boost::uint32_t srid = tree.get<boost::uint32_t>("srid");    
 
     std::string bounds_string  = tree.get<std::string>("base_table_bounds");

@@ -29,6 +29,7 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/Color.hpp
   ${PDAL_HEADERS_DIR}/Dimension.hpp
   ${PDAL_HEADERS_DIR}/DimensionLayout.hpp
+  ${PDAL_HEADERS_DIR}/FileUtils.hpp
   ${PDAL_HEADERS_DIR}/Filter.hpp
   ${PDAL_HEADERS_DIR}/FilterIterator.hpp
   ${PDAL_HEADERS_DIR}/MetadataRecord.hpp
@@ -67,6 +68,7 @@ set(PDAL_BASE_CPP
   Color.cpp
   Dimension.cpp
   DimensionLayout.cpp
+  FileUtils.cpp
   Filter.cpp
   FilterIterator.cpp
   MetadataRecord.cpp

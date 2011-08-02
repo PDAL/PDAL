@@ -155,40 +155,4 @@ BOOST_AUTO_TEST_CASE(test_field_read_write)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_file_ops)
-{
-    std::string tmp1 = "unittest1.tmp";
-    std::string tmp2 = "unittest2.tmp";
-    
-    // first, clean up from any previous test run
-    Utils::deleteFile(tmp1);
-    Utils::deleteFile(tmp2);
-    BOOST_CHECK(Utils::fileExists(tmp1)==false);
-    BOOST_CHECK(Utils::fileExists(tmp2)==false);
-
-    // write test
-    std::ostream* ostr = Utils::createFile(tmp1);
-    *ostr << "yow";
-    Utils::closeFile(ostr);
-
-    BOOST_CHECK(Utils::fileExists(tmp1)==true);
-    BOOST_CHECK(Utils::fileSize(tmp1)==3);
-
-    // rename test
-    Utils::renameFile(tmp2,tmp1);
-    BOOST_CHECK(Utils::fileExists(tmp1)==false);
-    BOOST_CHECK(Utils::fileExists(tmp2)==true);
-
-    // read test
-    std::istream* istr = Utils::openFile(tmp2);
-    std::string yow;
-    *istr >> yow;
-    Utils::closeFile(istr);
-    BOOST_CHECK(yow=="yow");
-
-    // delete test
-    Utils::deleteFile(tmp2);
-    BOOST_CHECK(Utils::fileExists(tmp2)==false);
-}
-
 BOOST_AUTO_TEST_SUITE_END()

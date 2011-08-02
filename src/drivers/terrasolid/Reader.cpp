@@ -37,7 +37,7 @@
 #include <pdal/drivers/terrasolid/Reader.hpp>
 #include <pdal/drivers/terrasolid/Iterator.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 
 #include <pdal/exceptions.hpp>
 
@@ -105,7 +105,7 @@ Reader::Reader(OptionsOld& optionsOld)
 {
     std::string filename= getFileName();
     
-    std::istream* stream = Utils::openFile(filename);
+    std::istream* stream = FileUtils::openFile(filename);
     
     stream->seekg(0);
     
