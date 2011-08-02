@@ -85,6 +85,7 @@ private:
     bool m_isDebug;
     boost::uint8_t m_verboseLevel;
     Options m_baseOptions;
+    std::string m_inputXmlFile;
 
     PipelineReader& operator=(const PipelineReader&); // not implemented
     PipelineReader(const PipelineReader&); // not implemented
