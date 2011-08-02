@@ -559,8 +559,19 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     long gtype = GetGType();
     
     std::string eleminfo = CreatePCElemInfo();
+    
+    std::string bounds_string;
+    try {
+        bounds_string = tree.get<std::string>("base_table_bounds");
+    } catch (boost::property_tree::ptree_bad_path const& ) 
+    {
+        if (IsGeographic(srid))
+            bounds_string = std::string("([-179.99, 179.99], [-89.99, 89.99])");
+        else
+            bounds_string = std::string("[0.0, 0.0], [100.0, 100.0]");
+    }
 
-    std::string bounds_string  = tree.get<std::string>("base_table_bounds");
+
     std::stringstream ss(bounds_string, std::stringstream::in | std::stringstream::out);
     pdal::Bounds<double> e;
     ss >> e;
@@ -1182,14 +1193,19 @@ void Writer::UpdatePCExtent()
     
     boost::uint32_t srid = tree.get<boost::uint32_t>("srid");    
 
-    std::string bounds_string  = tree.get<std::string>("base_table_bounds");
-    std::stringstream ss(bounds_string, std::stringstream::in | std::stringstream::out);
     pdal::Bounds<double> e;
-    ss >> e;
-    
-    // If the user didn't override it in the options, we'll use our cumulated one
-    if (e.empty()) e = m_pcExtent;
-    
+    std::string bounds_string;
+    try {
+        bounds_string = tree.get<std::string>("base_table_bounds");
+        std::stringstream ss(bounds_string, std::stringstream::in | std::stringstream::out);
+        ss >> e;
+
+    } catch (boost::property_tree::ptree_bad_path const& ) 
+    {
+        // If the user didn't override it in the options, we'll use our cumulated one
+        e = m_pcExtent;
+    }
+
     long gtype = GetGType();
     
     std::string eleminfo = CreatePCElemInfo();
