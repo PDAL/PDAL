@@ -109,7 +109,7 @@ private:
     bool isDebug() const;
     bool is3d() const;
     bool isSolid() const;
-    // PointBuffer& ConstructBuffer(const PointBuffer& input) const;
+    pdal::Bounds<double> CalculateBounds(PointBuffer const& buffer);
     
     Stage& m_stage;
     
@@ -118,6 +118,7 @@ private:
     Connection m_connection;
     bool m_verbose;
     bool m_doCreateIndex;
+    Bounds<double> m_pcExtent;
 };
 
 }}} // namespace pdal::driver::oci
