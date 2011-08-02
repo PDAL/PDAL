@@ -45,24 +45,41 @@ namespace pdal
 
 std::istream& operator>>(std::istream& istr, Bounds<double>& bounds)
 {
+    // A really dirty way to check for an empty bounds object right off 
+    // the bat
+    const char left_paren = (char)istr.get();
+    const char left_brace = (char)istr.get();
+    const char right_brace = (char)istr.get();
+    const char right_paren = (char)istr.get();
+    if (left_paren == '(' && 
+        left_brace == '[' &&
+        right_brace == ']' && 
+        right_paren == ')')
+    {
+        Bounds<double> output;
+        bounds = output;
+        return istr;
+    }
+    istr.unget(); istr.unget(); // ])
+    istr.unget(); istr.unget(); // ([
+    
     Bounds<double>::RangeVector v;
     
     Utils::eatwhitespace(istr);
     
     if (!Utils::eatcharacter(istr,'('))
-        throw pdal_error("Bounds parser failed");
+        throw pdal_error("Bounds parser failed at first parentheses");
 
     bool done = false;
     while (!done)
     {
         Utils::eatwhitespace(istr);
-
+        
         Range<double> r;
         istr >> r;
         v.push_back(r);
 
         Utils::eatwhitespace(istr);
-
         if (Utils::eatcharacter(istr,','))
         {
             done = false;
