@@ -37,6 +37,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include <pdal/FileUtils.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/liblas/Writer.hpp>
 #include <pdal/drivers/liblas/Reader.hpp>
@@ -52,11 +53,11 @@ BOOST_AUTO_TEST_SUITE(LiblasWriterTest)
 BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_las)
 {
     // remove file from earlier run, if needed
-    Utils::deleteFile("temp.las");
+    FileUtils::deleteFile("temp.las");
 
     LiblasReader reader(Support::datapath("1.2-with-color.las"));
     
-    std::ostream* ofs = Utils::createFile("temp.las");
+    std::ostream* ofs = FileUtils::createFile("temp.las");
 
     {
         // need to scope the writer, so that's it dtor can use the stream
@@ -75,14 +76,14 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_las)
         writer.write(numPoints);
     }
 
-    Utils::closeFile(ofs);
+    FileUtils::closeFile(ofs);
 
     bool filesSame = Support::compare_files("temp.las", Support::datapath("simple.las"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
     {
-        Utils::deleteFile("temp.las");
+        FileUtils::deleteFile("temp.las");
     }
 
     return;
@@ -91,7 +92,7 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_las)
 BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_options)
 {
     // remove file from earlier run, if needed
-    Utils::deleteFile("temp.las");
+    FileUtils::deleteFile("temp.las");
 
     Option<std::string> opt("filename", "temp.las");
     Options opts(opt);
@@ -120,7 +121,7 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_options)
 
     if (filesSame)
     {
-        Utils::deleteFile("temp.las");
+        FileUtils::deleteFile("temp.las");
     }
 
     return;
@@ -130,11 +131,11 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_options)
 BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_laz)
 {
     // remove file from earlier run, if needed
-    Utils::deleteFile("temp.las");
+    FileUtils::deleteFile("temp.las");
 
     LiblasReader reader(Support::datapath("1.2-with-color.las"));
     
-    std::ostream* ofs = Utils::createFile("temp.laz");
+    std::ostream* ofs = FileUtils::createFile("temp.laz");
 
     {
         // need to scope the writer, so that's it dtor can use the stream
@@ -152,14 +153,14 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_laz)
         writer.write(numPoints);
     }
 
-    Utils::closeFile(ofs);
+    FileUtils::closeFile(ofs);
 
     bool filesSame = Support::compare_files("temp.laz", Support::datapath("1.2-with-color.laz"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
     {
-        Utils::deleteFile("temp.laz");
+        FileUtils::deleteFile("temp.laz");
     }
 
     return;
@@ -169,11 +170,11 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_laz)
 static void test_a_format(const std::string& refFile, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat)
 {
     // remove file from earlier run, if needed
-    Utils::deleteFile("temp.las");
+    FileUtils::deleteFile("temp.las");
 
     LiblasReader reader(Support::datapath("1.2_3.las"));
     
-    std::ostream* ofs = Utils::createFile("temp.las");
+    std::ostream* ofs = FileUtils::createFile("temp.las");
 
     {
         // need to scope the writer, so that's it dtor can use the stream
@@ -196,14 +197,14 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         writer.write(numPoints);
     }
 
-    Utils::closeFile(ofs);
+    FileUtils::closeFile(ofs);
 
     const bool filesSame = Support::compare_files("temp.las", Support::datapath(refFile));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
     {
-        Utils::deleteFile("temp.las");
+        FileUtils::deleteFile("temp.las");
     }
 
     return;

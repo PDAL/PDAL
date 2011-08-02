@@ -36,7 +36,6 @@
 #include <boost/cstdint.hpp>
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/Utils.hpp>
 
 using namespace pdal;
 

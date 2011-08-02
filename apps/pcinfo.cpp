@@ -12,7 +12,7 @@
 
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/liblas/Reader.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 #ifdef PDAL_HAVE_MRSID
 #include <pdal/drivers/mrsid/Reader.hpp>
 #endif
@@ -74,7 +74,7 @@ void Application_pcinfo::addOptions()
 
 int Application_pcinfo::execute()
 {
-    if (!Utils::fileExists(m_inputFile))
+    if (!FileUtils::fileExists(m_inputFile))
     {
         runtimeError("file not found: " + m_inputFile);
         return 1;

@@ -32,45 +32,42 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#ifndef INCLUDED_FILEUTILS_HPP
+#define INCLUDED_FILEUTILS_HPP
 
-#include "Support.hpp"
+#include <pdal/pdal.hpp>
 
-#include <pdal/FileUtils.hpp>
-#include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineReader.hpp>
-#include <pdal/PipelineWriter.hpp>
+#include <string>
+#include <cassert>
+#include <stdexcept>
+#include <cmath>
+#include <ostream>
+#include <istream>
 
-using namespace pdal;
-
-BOOST_AUTO_TEST_SUITE(PipelineWriterTest)
-
-
-
-BOOST_AUTO_TEST_CASE(PipelineWriterTest_test1)
+namespace pdal
 {
-    {
-        PipelineManager manager;
-        PipelineReader reader(manager);
-        PipelineWriter writer(manager);
 
-        reader.readWriterPipeline(Support::datapath("pipeline_write.xml"));
+class PDAL_DLL FileUtils
+{
+public:
+    // open existing file for reading
+    static std::istream* openFile(std::string const& filename, bool asBinary=true);
 
-        writer.writeWriterPipeline("test.xml");
-    }
+    // open new file for writing
+    static std::ostream* createFile(std::string const& filename, bool asBinary=true);
 
-    FileUtils::deleteFile("out.las");
+    static void closeFile(std::ostream* ofs);
+    static void closeFile(std::istream* ifs);
 
-    bool filesSame = Support::compare_text_files("test.xml", Support::datapath("pipeline_write.xml"));
-    BOOST_CHECK(filesSame);
+    static bool deleteFile(const std::string& filename);
+    static void renameFile(const std::string& dest, const std::string& src);
+    static bool fileExists(const std::string& filename);
+    static boost::uintmax_t fileSize(const std::string& filename);
 
-    if (filesSame)
-    {
-        FileUtils::deleteFile("test.xml");
-    }
-
-    return;
-}
+private:
+};
 
 
-BOOST_AUTO_TEST_SUITE_END()
+} // namespace pdal
+
+#endif

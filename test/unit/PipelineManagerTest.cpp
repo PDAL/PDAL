@@ -37,7 +37,7 @@
 #include "Support.hpp"
 
 #include <pdal/PipelineManager.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 
 using namespace pdal;
 
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_SUITE(PipelineManagerTest)
 
 BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
 {
-    Utils::deleteFile("temp.las");
+    FileUtils::deleteFile("temp.las");
 
     {
         PipelineManager mgr;
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
         BOOST_CHECK(np == 1065);
     }
 
-    Utils::deleteFile("temp.las");
+    FileUtils::deleteFile("temp.las");
 
     return;
 }

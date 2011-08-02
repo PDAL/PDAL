@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <pdal/SpatialReference.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 #include <pdal/drivers/las/Reader.hpp>
@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_CASE(test_env_vars)
     const char* gdal_data = getenv("GDAL_DATA");
     const char* proj_lib = getenv("PROJ_LIB");
 
-    BOOST_CHECK(pdal::Utils::fileExists(gdal_data));
-    BOOST_CHECK(pdal::Utils::fileExists(proj_lib));
+    BOOST_CHECK(pdal::FileUtils::fileExists(gdal_data));
+    BOOST_CHECK(pdal::FileUtils::fileExists(proj_lib));
 #endif
     return;
 }
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datum_notcompound)
 BOOST_AUTO_TEST_CASE(test_vertical_datums)
 {
     std::string tmpfile("tmp_srs.las");
-    pdal::Utils::deleteFile(tmpfile);
+    pdal::FileUtils::deleteFile(tmpfile);
 
     const std::string wkt = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx,g2003alaska.gtx,g2003h01.gtx,g2003p01.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
 
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
         // Write a very simple file with our SRS and one point.
         pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));    
 
-        std::ostream* ofs = pdal::Utils::createFile(tmpfile);
+        std::ostream* ofs = pdal::FileUtils::createFile(tmpfile);
         {
             const boost::uint64_t numPoints = reader.getNumPoints();
 
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 
             writer.write(numPoints);
         }
-        pdal::Utils::closeFile(ofs);
+        pdal::FileUtils::closeFile(ofs);
     }
 
     // Reopen and check contents. 
@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
     }
 
     // Cleanup 
-    pdal::Utils::deleteFile(tmpfile);
+    pdal::FileUtils::deleteFile(tmpfile);
 
     return;
 }
@@ -321,11 +321,11 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 
     // Write a very simple file with our SRS and one point.
     {
-        pdal::Utils::deleteFile(tmpfile);
+        pdal::FileUtils::deleteFile(tmpfile);
 
         pdal::drivers::las::LasReader readerx(Support::datapath("1.2-with-color.las"));    
 
-        std::ostream* ofs = pdal::Utils::createFile(tmpfile);
+        std::ostream* ofs = pdal::FileUtils::createFile(tmpfile);
         {
             const boost::uint64_t numPoints = readerx.getNumPoints();
 
@@ -337,7 +337,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 
             writer.write(numPoints);
         }
-        pdal::Utils::closeFile(ofs);
+        pdal::FileUtils::closeFile(ofs);
     }
 
     // Reopen and check contents. 
@@ -362,7 +362,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
     }
 
     // Cleanup 
-    pdal::Utils::deleteFile(tmpfile);
+    pdal::FileUtils::deleteFile(tmpfile);
 
     return;
 }

@@ -36,6 +36,7 @@
 
 #include <laszip/lasunzipper.hpp>
 
+#include <pdal/FileUtils.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/Iterator.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
@@ -70,7 +71,7 @@ void LasReader::initialize()
 {
     Reader::initialize();
 
-    std::istream* stream = Utils::openFile(m_filename);
+    std::istream* stream = FileUtils::openFile(m_filename);
 
     LasHeaderReader lasHeaderReader(m_lasHeader, *stream);
     lasHeaderReader.read( getSchemaRef() );
@@ -84,7 +85,7 @@ void LasReader::initialize()
         setSpatialReference(srs);
     }
 
-    Utils::closeFile(stream);
+    FileUtils::closeFile(stream);
 
     return;
 }

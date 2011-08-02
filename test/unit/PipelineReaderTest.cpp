@@ -38,7 +38,7 @@
 
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageIterator.hpp>
 
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test1)
 
 BOOST_AUTO_TEST_CASE(PipelineReaderTest_test2)
 {
-    Utils::deleteFile("out.las");
+    FileUtils::deleteFile("out.las");
 
     {
         PipelineManager manager;
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test2)
         BOOST_CHECK(np == 1065);
     }
 
-    Utils::deleteFile("out.las");
+    FileUtils::deleteFile("out.las");
 
     return;
 }

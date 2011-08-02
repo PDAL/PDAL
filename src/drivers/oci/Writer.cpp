@@ -35,6 +35,7 @@
 
 #include <pdal/Vector.hpp>
 #include <pdal/Bounds.hpp>
+#include <pdal/FileUtils.hpp>
 
 #include <pdal/drivers/oci/Writer.hpp>
 
@@ -242,7 +243,7 @@ pdal::Schema Get8DimensionFixedSchema()
 std::string ReadFile(std::string filename)
 {
 
-    std::istream* infile = Utils::openFile(filename, true);
+    std::istream* infile = FileUtils::openFile(filename, true);
     std::ifstream::pos_type size;
     // char* data;
     std::vector<char> data;
@@ -579,7 +580,7 @@ bool Writer::IsGeographic(boost::int32_t srid)
 
 std::string Writer::LoadSQLData(std::string const& filename)
 {
-    if (!Utils::fileExists(filename))
+    if (!FileUtils::fileExists(filename))
     {
         std::ostringstream oss;
         oss << filename << " does not exist";
@@ -587,7 +588,7 @@ std::string Writer::LoadSQLData(std::string const& filename)
     }
 
     std::istream::pos_type size;    
-    std::istream* input = Utils::openFile(filename, true);
+    std::istream* input = FileUtils::openFile(filename, true);
     
 
     if (input->good()) {
@@ -609,7 +610,7 @@ std::string Writer::LoadSQLData(std::string const& filename)
     }
     else 
     {   
-        Utils::closeFile(input);
+        FileUtils::closeFile(input);
         return std::string("");
     }    
     
@@ -622,7 +623,7 @@ void Writer::RunFileSQL(std::string const& filename)
         
     if (!sql.size()) return;
 
-    if (!Utils::fileExists(sql))
+    if (!FileUtils::fileExists(sql))
     {
         oss << sql;
     } else {
@@ -863,7 +864,7 @@ oss << "declare\n"
 
     std::ostringstream wkt_s;
 
-    if (!Utils::fileExists(base_table_boundary_wkt))
+    if (!FileUtils::fileExists(base_table_boundary_wkt))
     {
         wkt_s << base_table_boundary_wkt;
     } else {

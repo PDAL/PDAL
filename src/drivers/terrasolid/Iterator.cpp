@@ -36,8 +36,8 @@
 
 #include <pdal/drivers/terrasolid/Reader.hpp>
 #include <pdal/exceptions.hpp>
-#include <pdal/Utils.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/FileUtils.hpp>
 
 #include <iostream>
 
@@ -49,7 +49,7 @@ SequentialIterator::SequentialIterator(const terrasolid::Reader& reader)
     , m_reader(reader)
     , m_istream(NULL)
 {
-    m_istream = Utils::openFile(m_reader.getFileName());
+    m_istream = FileUtils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());
     return;
 }
@@ -57,7 +57,7 @@ SequentialIterator::SequentialIterator(const terrasolid::Reader& reader)
 
 SequentialIterator::~SequentialIterator()
 {
-    Utils::closeFile(m_istream);
+    FileUtils::closeFile(m_istream);
     return;
 }
 
@@ -87,7 +87,7 @@ RandomIterator::RandomIterator(const Reader& reader)
     , m_reader(reader)
     , m_istream(NULL)
 {
-    m_istream = Utils::openFile(m_reader.getFileName());
+    m_istream = FileUtils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());
     return;
 }
@@ -95,7 +95,7 @@ RandomIterator::RandomIterator(const Reader& reader)
 
 RandomIterator::~RandomIterator()
 {
-    Utils::closeFile(m_istream);
+    FileUtils::closeFile(m_istream);
     return;
 }
 

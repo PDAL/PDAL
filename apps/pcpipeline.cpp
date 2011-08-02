@@ -36,6 +36,7 @@
 
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
+#include <pdal/FileUtils.hpp>
 
 #include "Application.hpp"
 
@@ -91,7 +92,7 @@ void Application_pcpipeline::addOptions()
 
 int Application_pcpipeline::execute()
 {
-    if (!Utils::fileExists(m_inputFile))
+    if (!FileUtils::fileExists(m_inputFile))
     {
         runtimeError("file not found: " + m_inputFile);
         return 1;

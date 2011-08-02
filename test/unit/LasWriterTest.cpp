@@ -38,6 +38,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/concept_check.hpp>
 
+#include <pdal/FileUtils.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 #include <pdal/drivers/las/Reader.hpp>
@@ -52,11 +53,11 @@ BOOST_AUTO_TEST_SUITE(LasWriterTest)
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
 {
     // remove file from earlier run, if needed
-    Utils::deleteFile("temp.las");
+    FileUtils::deleteFile("temp.las");
 
     pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     
-    std::ostream* ofs = Utils::createFile("temp.las");
+    std::ostream* ofs = FileUtils::createFile("temp.las");
 
     {
         // need to scope the writer, so that's it dtor can use the stream
@@ -75,14 +76,14 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
         writer.write(numPoints);
     }
 
-    Utils::closeFile(ofs);
+    FileUtils::closeFile(ofs);
 
     bool filesSame = Support::compare_files("temp.las", Support::datapath("simple.las"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
     {
-        Utils::deleteFile("temp.las");
+        FileUtils::deleteFile("temp.las");
     }
 
     return;
@@ -92,11 +93,11 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 {
     // remove file from earlier run, if needed
-    Utils::deleteFile("temp.laz");
+    FileUtils::deleteFile("temp.laz");
 
     pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     
-    std::ostream* ofs = Utils::createFile("temp.laz");
+    std::ostream* ofs = FileUtils::createFile("temp.laz");
 
     {
         const boost::uint64_t numPoints = reader.getNumPoints();
@@ -114,7 +115,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
         writer.write(numPoints);
     }
 
-    Utils::closeFile(ofs);
+    FileUtils::closeFile(ofs);
 
     {
         pdal::drivers::las::LasReader reader("temp.laz");
@@ -125,7 +126,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 
     if (filesSame)
     {
-        Utils::deleteFile("temp.laz");
+        FileUtils::deleteFile("temp.laz");
     }
 
     return;
@@ -135,11 +136,11 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 static void test_a_format(const std::string& refFile, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat)
 {
     // remove file from earlier run, if needed
-    Utils::deleteFile("temp.las");
+    FileUtils::deleteFile("temp.las");
 
     pdal::drivers::las::LasReader reader(Support::datapath("1.2_3.las"));
     
-    std::ostream* ofs = Utils::createFile("temp.las");
+    std::ostream* ofs = FileUtils::createFile("temp.las");
 
     {
         const boost::uint64_t numPoints = reader.getNumPoints();
@@ -162,7 +163,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         writer.write(numPoints);
     }
 
-    Utils::closeFile(ofs);
+    FileUtils::closeFile(ofs);
 
     // BUG: the following test commented out as per ticket #35
     boost::ignore_unused_variable_warning(refFile);
@@ -171,7 +172,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     //
     //if (filesSame)
     {
-        Utils::deleteFile("temp.las");
+        FileUtils::deleteFile("temp.las");
     }
 
     return;

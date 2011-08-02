@@ -37,20 +37,6 @@
 #include <cassert>
 
 #ifdef PDAL_COMPILER_MSVC
-#  pragma warning(push)
-#  pragma warning(disable: 4702)  // unreachable code
-#endif
-#include <boost/iostreams/device/file.hpp>
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(pop)
-#endif
-#include <boost/iostreams/stream.hpp>
-#include <boost/filesystem.hpp>
-
-#include <pdal/exceptions.hpp>
-
-
-#ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
@@ -75,96 +61,6 @@ double Utils::random(double minimum, double maximum)
     assert(t <= maximum);
 
     return t;
-}
-
-
-std::istream* Utils::openFile(std::string const& filename, bool asBinary)
-{
-    if (!Utils::fileExists(filename))
-        throw pdal_error("File not found: " + filename);
-
-    std::ios::openmode mode = std::ios::in;
-    if (asBinary)
-      mode |= std::ios::binary;
-
-    namespace io = boost::iostreams;
-    io::stream<io::file_source>* ifs = new io::stream<io::file_source>();
-    ifs->open(filename.c_str(), mode);
-    if (ifs->is_open() == false) return NULL;
-    return ifs;
-}
-
-
-std::ostream* Utils::createFile(std::string const& filename, bool asBinary)
-{
-    std::ios::openmode mode = std::ios::out;
-    if (asBinary)
-      mode  |= std::ios::binary;
-
-    namespace io = boost::iostreams;
-    io::stream<io::file_sink>* ofs = new io::stream<io::file_sink>();
-    ofs->open(filename.c_str(), mode);
-    if (ofs->is_open() == false) return NULL;
-    return ofs;
-}
-
-
-void Utils::closeFile(std::ostream* ofs)
-{
-    namespace io = boost::iostreams;
-
-    // An ofstream is closeable and deletable, but
-    // an ostream like &std::cout isn't.
-    if (!ofs) return;
-    io::stream<io::file_sink>* sink = dynamic_cast<io::stream<io::file_sink>*>(ofs);
-    if (sink)
-    {
-        sink->close();
-        delete sink;
-    }
-}
-
-
-void Utils::closeFile(std::istream* ifs)
-{
-    namespace io = boost::iostreams;
-
-    // An ifstream is closeable and deletable, but
-    // an istream like &std::cin isn't.
-    if (!ifs) return;
-    io::stream<io::file_source>* source = dynamic_cast<io::stream<io::file_source>*>(ifs);
-    if (source)
-    {
-        source->close();
-        delete source;
-    }
-}
-
-
-bool Utils::deleteFile(const std::string& file)
-{
-    if (!fileExists(file))
-        return false;
-        
-    return boost::filesystem::remove(file);
-}
-
-
-void Utils::renameFile(const std::string& dest, const std::string& src)
-{
-  boost::filesystem::rename(src, dest);
-}
-
-
-bool Utils::fileExists(const std::string& file)
-{
-  return boost::filesystem::exists(file);
-}
-
-
-boost::uintmax_t Utils::fileSize(const std::string& file)
-{
-  return boost::filesystem::file_size(file);
 }
 
 

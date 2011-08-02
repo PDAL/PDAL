@@ -36,6 +36,7 @@
 
 #include "Support.hpp"
 
+#include <pdal/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Filter.hpp>
@@ -53,7 +54,7 @@ BOOST_AUTO_TEST_SUITE(StageFactoryTest)
 
 BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
 {
-    Utils::deleteFile("temp.las");
+    FileUtils::deleteFile("temp.las");
 
     StageFactory factory;
 
@@ -88,7 +89,7 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
     delete filter;
     delete reader;
 
-    Utils::deleteFile("temp.las");
+    FileUtils::deleteFile("temp.las");
 
     return;
 }
@@ -143,7 +144,7 @@ Writer* demoWriterCreator(Stage& prev, const Options& options)
 
 BOOST_AUTO_TEST_CASE(StageFactoryTest_test2)
 {
-    Utils::deleteFile("temp.las");
+    FileUtils::deleteFile("temp.las");
 
     StageFactory factory;
 
@@ -188,7 +189,7 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test2)
     delete filter;
     delete reader;
 
-    Utils::deleteFile("temp.las");
+    FileUtils::deleteFile("temp.las");
 
     return;
 }

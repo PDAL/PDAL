@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/StreamManager.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 #include <pdal/exceptions.hpp>
 
 
@@ -100,7 +100,7 @@ void IStreamManager::open()
     switch (getType())
     {
     case File:
-        m_istream = Utils::openFile(getFileName(), true);
+        m_istream = FileUtils::openFile(getFileName(), true);
         break;
     case Stream:
         // nothing to do
@@ -125,7 +125,7 @@ void IStreamManager::close()
     switch (getType())
     {
     case File:
-        Utils::closeFile(m_istream);
+        FileUtils::closeFile(m_istream);
         break;
     case Stream:
         // nothing to do
@@ -184,7 +184,7 @@ void OStreamManager::open()
     switch (getType())
     {
     case File:
-        m_ostream = Utils::createFile(getFileName(), true);
+        m_ostream = FileUtils::createFile(getFileName(), true);
         break;
     case Stream:
         // nothing to do
@@ -209,7 +209,7 @@ void OStreamManager::close()
     switch (getType())
     {
     case File:
-        Utils::closeFile(m_ostream);
+        FileUtils::closeFile(m_ostream);
         break;
     case Stream:
         // nothing to do

@@ -34,9 +34,9 @@
 
 #include <pdal/drivers/oci/Reader.hpp>
 #include <pdal/drivers/oci/Iterator.hpp>
-#include <pdal/Utils.hpp>
 
 #include <pdal/exceptions.hpp>
+#include <pdal/FileUtils.hpp>
 
 #include <iostream>
 #include <map>
@@ -515,7 +515,7 @@ pdal::Schema Reader::fetchSchema(sdo_pc* pc)
     
     char* pc_schema = get_schema->ReadCLob(metadata);
     
-    std::ostream* out = Utils::createFile("schema-xml.xml");
+    std::ostream* out = FileUtils::createFile("schema-xml.xml");
     out->write(pc_schema, strlen(pc_schema));
     delete out;
     

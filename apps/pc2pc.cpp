@@ -13,6 +13,7 @@
 #include <iostream>
 
 #include <pdal/exceptions.hpp>
+#include <pdal/FileUtils.hpp>
 //#include <pdal/pdal_config.hpp>
 //#include <pdal/Bounds.hpp>
 //#include <pdal/Color.hpp>
@@ -112,13 +113,13 @@ void Application_pc2pc::addOptions()
 
 int Application_pc2pc::execute()
 {
-    if (!Utils::fileExists(m_inputFile))
+    if (!FileUtils::fileExists(m_inputFile))
     {
         runtimeError("file not found: " + m_inputFile);
         return 1;
     }
 
-    std::ostream* ofs = Utils::createFile(m_outputFile);
+    std::ostream* ofs = FileUtils::createFile(m_outputFile);
 
     if (hasOption("native"))
     {
@@ -312,7 +313,7 @@ int Application_pc2pc::execute()
         writer.write(numPoints);
     }
 
-    Utils::closeFile(ofs);
+    FileUtils::closeFile(ofs);
 
     return 0;
 }

@@ -32,44 +32,52 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
+#include <sstream>
 
-#include "Support.hpp"
+#include <boost/test/unit_test.hpp>
+#include <boost/cstdint.hpp>
 
 #include <pdal/FileUtils.hpp>
-#include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineReader.hpp>
-#include <pdal/PipelineWriter.hpp>
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(PipelineWriterTest)
+BOOST_AUTO_TEST_SUITE(FileUtilsTest)
 
 
-
-BOOST_AUTO_TEST_CASE(PipelineWriterTest_test1)
+BOOST_AUTO_TEST_CASE(test_file_ops)
 {
-    {
-        PipelineManager manager;
-        PipelineReader reader(manager);
-        PipelineWriter writer(manager);
+    std::string tmp1 = "unittest1.tmp";
+    std::string tmp2 = "unittest2.tmp";
+    
+    // first, clean up from any previous test run
+    FileUtils::deleteFile(tmp1);
+    FileUtils::deleteFile(tmp2);
+    BOOST_CHECK(FileUtils::fileExists(tmp1)==false);
+    BOOST_CHECK(FileUtils::fileExists(tmp2)==false);
 
-        reader.readWriterPipeline(Support::datapath("pipeline_write.xml"));
+    // write test
+    std::ostream* ostr = FileUtils::createFile(tmp1);
+    *ostr << "yow";
+    FileUtils::closeFile(ostr);
 
-        writer.writeWriterPipeline("test.xml");
-    }
+    BOOST_CHECK(FileUtils::fileExists(tmp1)==true);
+    BOOST_CHECK(FileUtils::fileSize(tmp1)==3);
 
-    FileUtils::deleteFile("out.las");
+    // rename test
+    FileUtils::renameFile(tmp2,tmp1);
+    BOOST_CHECK(FileUtils::fileExists(tmp1)==false);
+    BOOST_CHECK(FileUtils::fileExists(tmp2)==true);
 
-    bool filesSame = Support::compare_text_files("test.xml", Support::datapath("pipeline_write.xml"));
-    BOOST_CHECK(filesSame);
+    // read test
+    std::istream* istr = FileUtils::openFile(tmp2);
+    std::string yow;
+    *istr >> yow;
+    FileUtils::closeFile(istr);
+    BOOST_CHECK(yow=="yow");
 
-    if (filesSame)
-    {
-        FileUtils::deleteFile("test.xml");
-    }
-
-    return;
+    // delete test
+    FileUtils::deleteFile(tmp2);
+    BOOST_CHECK(FileUtils::fileExists(tmp2)==false);
 }
 
 

@@ -41,7 +41,7 @@
 
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/exceptions.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 
 namespace pdal { namespace drivers { namespace las {
@@ -51,7 +51,7 @@ IteratorBase::IteratorBase(const LasReader& reader)
     : m_reader(reader)
     , m_istream(NULL)
 {
-    m_istream = Utils::openFile(m_reader.getFileName());
+    m_istream = FileUtils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());
 
     if (m_reader.isCompressed())
@@ -74,7 +74,7 @@ IteratorBase::~IteratorBase()
     m_zip.reset();
     m_unzipper.reset();
 #endif
-    Utils::closeFile(m_istream);
+    FileUtils::closeFile(m_istream);
 }
 
 
