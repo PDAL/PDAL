@@ -188,6 +188,10 @@ bool Writer::isSolid() const
     return m_optionsOld.GetPTree().get<bool>("solid");
 }
 
+boost::int32_t Writer::getPCID() const 
+{
+    return m_optionsOld.GetPTree().get<boost::int32_t>("cloud_id");
+}
 
 void Writer::CreateBlockIndex()
 {
@@ -721,6 +725,10 @@ void Writer::writeEnd()
         CreateSDOEntry();
         CreateBlockIndex();
     }
+    
+    // Update extent of SDO_PC entry
+    UpdatePCExtent();
+
     RunFileSQL("post_block_sql");
     return;
 }
@@ -956,12 +964,12 @@ void Writer::SetOrdinates(Statement statement,
     
     statement->AddElement(ordinates, extent.getMinimum(0));
     statement->AddElement(ordinates, extent.getMinimum(1));
-    if (extent.dimensions().size() > 2)
+    if (is3d())
         statement->AddElement(ordinates, extent.getMinimum(2));
     
     statement->AddElement(ordinates, extent.getMaximum(0));
     statement->AddElement(ordinates, extent.getMaximum(1));
-    if (extent.dimensions().size() > 2)
+    if (is3d())
         statement->AddElement(ordinates, extent.getMaximum(2));
         
 
@@ -995,12 +1003,16 @@ pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
         Vector<double> v(xd, yd, zd);
         if (first){
             output = pdal::Bounds<double>(xd, yd, zd, xd, yd, zd);
+            if (m_pcExtent.empty())
+                m_pcExtent = output;
             first = false;
         }
         output.grow(v);
     }
     
     m_pcExtent.grow(output);
+    std::cout << "block extent: " << output << std::endl;
+    std::cout << "pc extent: " << m_pcExtent << std::endl;
     return output;
     
 }
@@ -1158,6 +1170,65 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
     
     return true;
+}
+
+void Writer::UpdatePCExtent()
+{
+    
+    boost::property_tree::ptree&  tree = m_optionsOld.GetPTree();
+    
+    std::string block_table_name = to_upper(tree.get<std::string>("block_table_name"));
+    std::string base_table_name = to_upper(tree.get<std::string>("base_table_name"));
+    std::string cloud_column_name = to_upper(tree.get<std::string>("cloud_column_name"));
+    
+    std::cout << "PC ID: " << getPCID() << std::endl;
+    boost::uint32_t srid = tree.get<boost::uint32_t>("srid");    
+
+    std::string bounds_string  = tree.get<std::string>("base_table_bounds");
+    std::stringstream ss(bounds_string, std::stringstream::in | std::stringstream::out);
+    pdal::Bounds<double> e;
+    ss >> e;
+    
+    // If the user didn't override it in the options, we'll use our cumulated one
+    if (e.empty()) e = m_pcExtent;
+    
+    long gtype = GetGType();
+    
+    std::string eleminfo = CreatePCElemInfo();
+
+    std::ostringstream s_geom;
+    s_geom << "           mdsys.sdo_geometry("<< gtype <<", " << srid << ", null,\n"
+"              mdsys.sdo_elem_info_array"<< eleminfo <<",\n"
+"              mdsys.sdo_ordinate_array(\n";
+
+    s_geom << e.getMinimum(0) << "," << e.getMinimum(1) << ",";
+
+    if (is3d()) {
+        s_geom << e.getMinimum(2) << ",";
+    }
+    
+    s_geom << e.getMaximum(0) << "," << e.getMaximum(1);
+
+    if (is3d()) {
+        s_geom << "," << e.getMaximum(2);
+    }
+
+    s_geom << "))";
+
+
+    std::ostringstream oss;
+    oss << "UPDATE "<< base_table_name << 
+            " A SET A." << cloud_column_name <<".PC_EXTENT = " << s_geom.str() <<
+            " WHERE A.ID = " << getPCID();
+    
+    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+    try {
+        statement->Execute();
+    } catch (std::runtime_error const& e) {
+        std::ostringstream oss;
+        oss << "Failed to update cloud extent in '" << base_table_name << "' table with id " << getPCID() << ". Does the table exist? "  << std::endl << e.what() << std::endl;
+        throw std::runtime_error(oss.str());
+    }
 }
 
 boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)

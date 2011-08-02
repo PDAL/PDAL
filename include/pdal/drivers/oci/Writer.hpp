@@ -109,8 +109,10 @@ private:
     bool isDebug() const;
     bool is3d() const;
     bool isSolid() const;
+    boost::int32_t getPCID() const;
+    void UpdatePCExtent();
+
     pdal::Bounds<double> CalculateBounds(PointBuffer const& buffer);
-    
     Stage& m_stage;
     
     OptionsOld& m_optionsOld;
