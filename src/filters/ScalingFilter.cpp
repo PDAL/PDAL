@@ -152,11 +152,11 @@ void ScalingFilterBase::checkImpedance()
 
         if (!schema.hasDimension(dimXd) || !schema.hasDimension(dimYd) || !schema.hasDimension(dimZd))
         {
-            throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as doubles (forward direction)");
+            throw impedance_invalid("Descaling filter requires X,Y,Z dimensions as doubles");
         }
         if (schema.hasDimension(dimXi) || schema.hasDimension(dimYi) || schema.hasDimension(dimZi))
         {
-            throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as ints not be initially present (forward direction)");
+            throw impedance_invalid("Descaling filter requires X,Y,Z dimensions as ints not be initially present");
         }
 
         schema.removeDimension(dimXd);
@@ -203,11 +203,11 @@ void ScalingFilterBase::checkImpedance()
         // ints --> doubles
         if (!schema.hasDimension(dimXi) || !schema.hasDimension(dimYi) || !schema.hasDimension(dimZi))
         {
-            throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as int32s (reverse direction)");
+            throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as int32s");
         }
         if (schema.hasDimension(dimXd) || schema.hasDimension(dimYd) || schema.hasDimension(dimZd))
         {
-            throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as int32s not be initially present (reverse direction)");
+            throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as int32s not be initially present");
         }
 
         if (m_customScaleOffset)
