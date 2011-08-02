@@ -68,6 +68,12 @@ public:
     // return current working dir
     static std::string getcwd();
 
+    // return the directory component of the given path, e.g. "d:/foo/bar/a.c" -> "d:/foo/bar"
+    static std::string getDirectory(const std::string& path);
+
+    // returns true iff the path is not relative
+    static bool isAbsolutePath(const std::string& path);
+
     // if the filename is an absolute path, just return it
     // otherwise, make it absolute (relative to current working dir) and return that
     static std::string toAbsolutePath(const std::string& filename);

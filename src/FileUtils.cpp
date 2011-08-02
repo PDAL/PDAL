@@ -156,9 +156,23 @@ std::string FileUtils::toAbsolutePath(const std::string& filename)
 // note: if base dir is not absolute, first make it absolute via toAbsolutePath(base)
 std::string FileUtils::toAbsolutePath(const std::string& filename, const std::string base)
 {
-    std::string newbase = toAbsolutePath(base);
-    boost::filesystem::path p = boost::filesystem::absolute(filename, newbase);
+    const std::string newbase = toAbsolutePath(base);
+    const boost::filesystem::path p = boost::filesystem::absolute(filename, newbase);
     return p.generic_string();
+}
+
+
+std::string FileUtils::getDirectory(const std::string& path)
+{
+    const boost::filesystem::path dir = boost::filesystem::path(path).parent_path();
+    const std::string str = dir.generic_string();
+    return str;
+}
+
+
+bool FileUtils::isAbsolutePath(const std::string& path)
+{
+    return boost::filesystem::path(path).is_absolute();
 }
 
 

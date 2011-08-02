@@ -91,17 +91,18 @@ BOOST_AUTO_TEST_CASE(test_getcwd)
 }
 
 
+#ifdef PDAL_COMPILER_MSVC
+static const std::string drive = "A:";
+#else
+static const std::string drive = "";
+#endif
+
+
 BOOST_AUTO_TEST_CASE(test_toAbsolutePath)
 {
     using namespace std;
 
     const string root = FileUtils::getcwd();
-
-#ifdef PDAL_COMPILER_MSVC
-    const string drive = "A:";
-#else
-    const string drive = "";
-#endif
 
     // check 1-arg version: make absolute when file is relative, via current working dir
     const string a = FileUtils::toAbsolutePath("foo.txt");
@@ -122,6 +123,34 @@ BOOST_AUTO_TEST_CASE(test_toAbsolutePath)
     // check 1-arg version: make absolute when file is already absolute
     const string e = FileUtils::toAbsolutePath(drive+"/baz/foo.txt", drive+"/a/b/c/d");
     BOOST_CHECK(e == drive+"/baz/foo.txt");
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_getDirectory)
+{
+    // test absolute case
+    const std::string a = FileUtils::getDirectory(drive + "/a/b/foo.txt");
+    BOOST_CHECK(a == drive+"/a/b");
+
+    // test relative case
+    const std::string b = FileUtils::getDirectory("a/b/foo.txt");
+    BOOST_CHECK(b == "a/b");
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(test_isAbsolute)
+{
+    // test absolute case
+    const bool a = FileUtils::isAbsolutePath(drive + "/a/b/foo.txt");
+    BOOST_CHECK(a);
+
+    // test relative case
+    const bool b = FileUtils::isAbsolutePath("a/b/foo.txt");
+    BOOST_CHECK(!b);
 
     return;
 }
