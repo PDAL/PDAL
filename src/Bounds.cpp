@@ -37,31 +37,40 @@
 #include <pdal/Range.hpp>
 #include <pdal/Utils.hpp>
 #include <pdal/exceptions.hpp>
-
-
+#include <iostream>
 namespace pdal
 {
 
 
 std::istream& operator>>(std::istream& istr, Bounds<double>& bounds)
 {
+
+    
+    istr.get();
+    if (istr.eof())
+    {
+        Bounds<double> output;
+        bounds = output;
+        return istr;
+    } 
+
+    if (!istr.good()) throw pdal_error("stream is unreadable, unable to parse Bounds");
+
+    istr.unget();
+        
     // A really dirty way to check for an empty bounds object right off 
     // the bat
-    const char left_paren = (char)istr.get();
-    const char left_brace = (char)istr.get();
-    const char right_brace = (char)istr.get();
+    const char left_paren = (char)istr.get(); if (!istr.good()) throw pdal_error("stream0 is no good unable to parse Bounds");
     const char right_paren = (char)istr.get();
+    
     if (left_paren == '(' && 
-        left_brace == '[' &&
-        right_brace == ']' && 
         right_paren == ')')
     {
         Bounds<double> output;
         bounds = output;
         return istr;
     }
-    istr.unget(); istr.unget(); // ])
-    istr.unget(); istr.unget(); // ([
+    istr.unget(); istr.unget(); // ()
     
     Bounds<double>::RangeVector v;
     
