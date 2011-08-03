@@ -96,6 +96,130 @@ void Writer::initialize()
 const Options& Writer::s_getDefaultOptions()
 {
     static Options options;
+    
+    Option<bool > is3d("is3d",  false,"Should we use 3D objects for SDO_PC PC_EXTENT, \
+                                       BLK_EXTENT, and indexing");
+
+    Option<bool > solid("solid",false,"Define the point cloud's PC_EXTENT geometry \
+                                       gtype as (1,1007,3) instead of the normal \
+                                       (1,1003,3), and use gtype 3008/2008 vs \
+                                       3003/2003 for BLK_EXTENT geometry values.");
+
+    Option<bool > overwrite("overwrite",false,"Wipe the block table and recreate it before loading data");
+    Option<bool > verbose("verbose",false,"Wipe the block table and recreate it before loading data");
+    Option<boost::uint32_t> srid("srid", 0, "The Oracle numerical SRID value to use \
+                                             for PC_EXTENT, BLK_EXTENT, and indexing");
+    Option<boost::uint32_t> capacity("capacity", 
+                                     10000, 
+                                     "The block capacity or maximum number of \
+                                     points a block can contain");
+    Option<boost::uint16_t> stream_output_precision("stream_output_precision", 
+                                                    8, 
+                                                    "The number of digits past the decimal place for \
+                                                    outputting floats/doubles to streams. This is used \
+                                                    for creating the SDO_PC object and adding the \
+                                                    index entry to the USER_SDO_GEOM_METADATA for the \
+                                                    block table");
+
+    Option<boost::int32_t> cloud_id("cloud_id", 
+                                    -1, 
+                                    "The point cloud id that links the point cloud \
+                                    object to the entries in the block table.");
+
+    Option<std::string> connection("connection",
+                                   "",
+                                   "Oracle connection string to connect to database");
+                                   
+    Option<std::string> block_table_name("block_table_name",
+                                         "output",
+                                         "The table in which block data for the created SDO_PC will be placed");
+
+    Option<std::string> block_table_partition_column("block_table_partition_column",
+                                                     "",
+                                                     "The column name for which 'block_table_partition_value' \
+                                                     will be placed in the 'block_table_name'");
+    Option<boost::int32_t> block_table_partition_value("block_table_partition_value",
+                                                        0,
+                                                        "Integer value to use to assing partition \
+                                                        IDs in the block table. Used in conjunction \
+                                                        with 'block_table_partition_column'");
+    Option<std::string> base_table_name("base_table_name",
+                                        "hobu",
+                                        "The name of the table which will contain the SDO_PC object");
+    
+    Option<std::string> cloud_column_name("cloud_column_name",
+                                          "CLOUD",
+                                          "The column name in 'base_table_name' that will hold the SDO_PC object");
+
+    Option<std::string> base_table_aux_columns("base_table_aux_columns",
+                                                "",
+                                                "Quoted, comma-separated list of columns to \
+                                                add to the SQL that gets executed as part of \
+                                                the point cloud insertion into the \
+                                                'base_table_name' table");
+    Option<std::string> base_table_aux_values("base_table_aux_values",
+                                              "",
+                                              "Quoted, comma-separated values that correspond \
+                                              to 'base_table_aux_columns', entries that will \
+                                              get inserted as part of the creation of the \
+                                              SDO_PC entry in the 'base_table_name' table");
+
+    Option<std::string> base_table_boundary_column("base_table_boundary_column",
+                                                   "",
+                                                   "The SDO_GEOMETRY column in 'base_table_name' in which \
+                                                   to insert the WKT in 'base_table_boundary_wkt' representing \
+                                                   a boundary for the SDO_PC object. Note this is not \
+                                                   the same as the 'base_table_bounds', which is just \
+                                                   a bounding box that is placed on the SDO_PC object itself.");
+    Option<std::string> base_table_boundary_wkt("base_table_boundary_wkt",
+                                                "",
+                                                "WKT, in the form of a string or a file location, to insert \
+                                                into the SDO_GEOMTRY column defined by 'base_table_boundary_column'");
+    
+    Option<std::string> pre_block_sql("pre_block_sql",
+                                      "",
+                                      "SQL, in the form of a string or file location, that is executed \
+                                      after the SDO_PC object has been created but before the block \
+                                      data in 'block_table_name' are inserted into the database");
+    
+    Option<std::string> pre_sql("pre_sql",
+                                "",
+                                "SQL, in the form of a string or file location, that is executed \
+                                before the SDO_PC object is created.");
+
+    Option<std::string> post_block_sql("post_block_sql",
+                                       "",
+                                       "SQL, in the form of a string or file location, that is executed \
+                                       after the block data in 'block_table_name' have been inserted");
+
+    Option<pdal::Bounds<double> > base_table_bounds("base_table_bounds",
+                                                    Bounds<double>(),
+                                                    "A bounding box, given in the Oracle SRID specified in 'srid' \
+                                                    to set on the PC_EXTENT object of the SDO_PC. If none is specified, \
+                                                    the cumulated bounds of all of the block data are used.");
+
+    options.add(is3d);
+    options.add(solid);
+    options.add(overwrite);
+    options.add(verbose);
+    options.add(srid);
+    options.add(capacity);
+    options.add(stream_output_precision);
+    options.add(cloud_id);
+    options.add(connection);
+    options.add(block_table_name);
+    options.add(block_table_partition_column);
+    options.add(block_table_partition_value);
+    options.add(base_table_name);
+    options.add(cloud_column_name);
+    options.add(base_table_aux_columns);
+    options.add(base_table_aux_values);
+    options.add(base_table_boundary_column);
+    options.add(base_table_boundary_wkt);
+    options.add(pre_block_sql);
+    options.add(pre_sql);
+    options.add(post_block_sql);
+    options.add(base_table_bounds);
     return options;
 }
 
@@ -489,14 +613,14 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     std::string cloud_column_name = to_upper(tree.get<std::string>("cloud_column_name"));
     std::string base_table_aux_columns = tree.get<std::string>("base_table_aux_columns");
     std::string base_table_aux_values = tree.get<std::string>("base_table_aux_values");
-    std::string header_blob_column_name = tree.get<std::string>("header_blob_column_name");
+
     std::string base_table_boundary_column = tree.get<std::string>("base_table_boundary_column");
     std::string base_table_boundary_wkt = tree.get<std::string>("base_table_boundary_wkt");
     
     boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
     boost::uint32_t precision = tree.get<boost::uint32_t>("precision");
     boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
-    boost::uint32_t dimensions = tree.get<boost::uint32_t>("dimensions");
+
     bool bUse3d = is3d();
 
     
@@ -523,10 +647,6 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
         nSchemaPos++;
 
     int nPos = nSchemaPos; // Bind column position    
-    // if (!header_blob_column_name.empty()){
-    //     columns << "," << header_blob_column_name;
-    //     values <<", :" << nPos;
-    // }
 
     if (!base_table_boundary_column.empty()){
         columns << "," << base_table_boundary_column;
@@ -594,7 +714,7 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
 
     s_geom << "))";
 
-    
+    boost::uint32_t dimensions = 8;
     
 oss << "declare\n"
 "  pc_id NUMBER := :"<<nPCPos<<";\n"
