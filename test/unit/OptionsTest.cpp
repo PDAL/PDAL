@@ -38,6 +38,7 @@
 #include <string>
 
 #include <pdal/Options.hpp>
+#include <pdal/Bounds.hpp>
 #include <pdal/filters/CropFilter.hpp>
 
 
@@ -52,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_static_options)
 {
     const pdal::Options& opts = pdal::filters::CropFilter::s_getDefaultOptions();
 
-    BOOST_CHECK(opts.hasOption<std::string>("bounds"));
+    BOOST_CHECK(opts.hasOption<pdal::Bounds<double> >("bounds"));
     BOOST_CHECK(!opts.hasOption<std::string>("metes"));
     const boost::property_tree::ptree& pt = opts.getPTree();
     BOOST_CHECK(pt.size() == 1);
