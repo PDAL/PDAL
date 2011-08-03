@@ -53,11 +53,8 @@ const boost::uint32_t Writer::s_defaultChunkSize = 1024 * 32;
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : StageBase(options)
-    , m_actualNumPointsWritten(0)
-    , m_targetNumPointsToWrite(0)
     , m_prevStage(prevStage)
     , m_chunkSize(s_defaultChunkSize)
-
 {
     return;
 }
@@ -104,63 +101,32 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
         throw pdal_error("stage not initialized");
     }
 
-    m_targetNumPointsToWrite = targetNumPointsToWrite;
-    m_actualNumPointsWritten = 0;
+    boost::uint64_t actualNumPointsWritten = 0;
          
     boost::scoped_ptr<StageSequentialIterator> iter(m_prevStage.createSequentialIterator());
     
     if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
 
-    writeBegin();
+    writeBegin(targetNumPointsToWrite);
 
     iter->readBegin();
 
-    if (m_targetNumPointsToWrite == 0)
+    PointBuffer buffer(m_prevStage.getSchema(), m_chunkSize);
+
+    //
+    // The user has requested a specific number of points: proceed a 
+    // chunk at a time until we reach that number.  (If that number 
+    // is 0, we proceed until no more points can be read.)
+    //
+    while (true)
     {
-        //
-        // user has requested 0 points, which means "as many as is available":
-        // proceed a chunk at a time until we reach the end
-        //
-        PointBuffer buffer(m_prevStage.getSchema(), m_chunkSize);
+        // have we hit the end already?
+        if (iter->atEnd()) break;
 
-        while (true)
+        // rebuild our PointBuffer, if it needs to hold less than the default max chunk size
+        if (targetNumPointsToWrite != 0)
         {
-            // have we done enough yet?
-            if (iter->atEnd()) break;
-
-            // read...
-            iter->readBufferBegin(buffer);
-            const boost::uint32_t numPointsReadThisChunk = iter->readBuffer(buffer);
-            iter->readBufferEnd(buffer);
-
-            // have we reached the end yet?
-            if (numPointsReadThisChunk == 0) break;
-        
-            // write...
-            writeBufferBegin(buffer);
-            const boost::uint32_t numPointsWrittenThisChunk = writeBuffer(buffer);
-            writeBufferEnd(buffer);
-
-            // update count
-            m_actualNumPointsWritten += numPointsWrittenThisChunk;
-
-            // reset the buffer, so we can use it again
-            buffer.setNumPoints(0);
-        }
-    }
-    else 
-    {
-        //
-        // user has requested a specific number of points:
-        // proceed a chunk at a time until we reach that number
-        //
-        PointBuffer buffer(m_prevStage.getSchema(), m_chunkSize);
-        while (true)
-        {
-            // have we done enough yet?
-            if (iter->atEnd()) break;
-
-            const boost::uint64_t numRemainingPointsToRead = m_targetNumPointsToWrite - m_actualNumPointsWritten;
+            const boost::uint64_t numRemainingPointsToRead = targetNumPointsToWrite - actualNumPointsWritten;
         
             const boost::uint64_t numPointsToReadThisChunk64 = std::min<boost::uint64_t>(numRemainingPointsToRead, m_chunkSize);
             // this case is safe because m_chunkSize is a uint32
@@ -171,38 +137,45 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
             {
                 buffer = PointBuffer(m_prevStage.getSchema(), numPointsToReadThisChunk);
             }
-
-            // read...
-            iter->readBufferBegin(buffer);
-            const boost::uint32_t numPointsReadThisChunk = iter->readBuffer(buffer);
-            iter->readBufferEnd(buffer);
-
-            assert(numPointsReadThisChunk <= numPointsToReadThisChunk);
-
-            // have we reached the end yet?
-            if (numPointsReadThisChunk == 0) break;
-
-            // write...
-            writeBufferBegin(buffer);
-            const boost::uint32_t numPointsWrittenThisChunk = writeBuffer(buffer);
-            assert(numPointsWrittenThisChunk == numPointsReadThisChunk);
-            writeBufferEnd(buffer);
-
-            // update count
-            m_actualNumPointsWritten += numPointsWrittenThisChunk;
-
-            // have we done enough yet?
-            if (m_actualNumPointsWritten >= m_targetNumPointsToWrite) break;
         }
+
+        // read...
+        iter->readBufferBegin(buffer);
+        const boost::uint32_t numPointsReadThisChunk = iter->readBuffer(buffer);
+        iter->readBufferEnd(buffer);
+
+        assert(numPointsReadThisChunk == buffer.getNumPoints());
+        assert(numPointsReadThisChunk <= buffer.getCapacity());
+
+        // have we reached the end yet?
+        if (numPointsReadThisChunk == 0) break;
+
+        // write...
+        writeBufferBegin(buffer);
+        const boost::uint32_t numPointsWrittenThisChunk = writeBuffer(buffer);
+        assert(numPointsWrittenThisChunk == numPointsReadThisChunk);
+        writeBufferEnd(buffer);
+
+        // update count
+        actualNumPointsWritten += numPointsWrittenThisChunk;
+
+        if (targetNumPointsToWrite != 0)
+        {
+            // have we done enough yet?
+            if (actualNumPointsWritten >= targetNumPointsToWrite) break;
+        }
+
+        // reset the buffer, so we can use it again
+        buffer.setNumPoints(0);
     }
 
     iter->readEnd();
 
-    writeEnd();
+    writeEnd(actualNumPointsWritten);
 
-    // assert(m_actualNumPointsWritten <= m_targetNumPointsToWrite);
+    assert((targetNumPointsToWrite == 0) || (actualNumPointsWritten <= targetNumPointsToWrite));
 
-    return m_actualNumPointsWritten;
+    return actualNumPointsWritten;
 }
 
 

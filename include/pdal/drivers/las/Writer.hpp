@@ -80,14 +80,9 @@ public:
     void setSpatialReference(const SpatialReference&);
 
 protected:
-    // this is called once before the loop with the writeBuffer calls
-    virtual void writeBegin();
-
-    // called repeatedly, until out of data
+    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
     virtual boost::uint32_t writeBuffer(const PointBuffer&);
-
-    // called once, after the writeBuffer calls
-    virtual void writeEnd();
+    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
 private:
     OStreamManager m_streamManager;

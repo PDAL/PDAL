@@ -170,7 +170,7 @@ void LiblasWriter::setGeneratingSoftware(const std::string& softwareId)
 }
 
 
-void LiblasWriter::writeBegin()
+void LiblasWriter::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 {
     m_externalWriter = new ::liblas::Writer(m_ostreamManager.ostream(), *m_externalHeader);
 
@@ -180,7 +180,7 @@ void LiblasWriter::writeBegin()
 }
 
 
-void LiblasWriter::writeEnd()
+void LiblasWriter::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
     delete m_externalWriter;
     m_externalWriter = NULL;

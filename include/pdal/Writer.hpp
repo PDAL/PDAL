@@ -70,24 +70,22 @@ public:
     const Stage& getPrevStage() const;
 
 protected:
-    // this is called once before the loop with the writeBuffer calls
-    virtual void writeBegin() = 0;
+    // this is called once before the loop with all the writeBuffer calls
+    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite) = 0;
 
+    // this is called before each writeBuffer call
     virtual void writeBufferBegin(const PointBuffer&) {}
 
     // called repeatedly, until out of data
     virtual boost::uint32_t writeBuffer(const PointBuffer&) = 0;
 
+    // this is called after each writeBuffer call
     virtual void writeBufferEnd(const PointBuffer&) {}
 
-    // called once, after the writeBuffer calls
-    virtual void writeEnd() = 0;
+    // called once, after all the the writeBuffer calls
+    virtual void writeEnd(boost::uint64_t actualNumPointsWritten) = 0;
 
     Stage& getPrevStage();
-
-    // these two are valid for use after writeBegin has been called
-    boost::uint64_t m_actualNumPointsWritten;
-    boost::uint64_t m_targetNumPointsToWrite;
 
 private:
     Stage& m_prevStage;

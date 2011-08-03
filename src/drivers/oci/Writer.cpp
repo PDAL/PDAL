@@ -689,7 +689,7 @@ oss << "declare\n"
     tree.put("cloud_id", pc_id);
     
 }
-void Writer::writeBegin()
+void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 {
     
     // m_chipper.Chip();
@@ -728,7 +728,7 @@ void Writer::writeBegin()
 }
 
 
-void Writer::writeEnd()
+void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
 {
 
     if (m_doCreateIndex)

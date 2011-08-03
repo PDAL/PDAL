@@ -64,7 +64,7 @@ const Options& Writer::s_getDefaultOptions()
 
 
 
-void Writer::writeBegin()
+void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 {
     m_minimumX = m_minimumY = m_minimumZ = std::numeric_limits<double>::max();
     m_maximumX = m_maximumY = m_maximumZ = std::numeric_limits<double>::min();
@@ -74,14 +74,14 @@ void Writer::writeBegin()
 }
 
 
-void Writer::writeEnd()
+void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
 {
-    m_averageX /= (double)m_actualNumPointsWritten;
-    m_averageY /= (double)m_actualNumPointsWritten;
-    m_averageZ /= (double)m_actualNumPointsWritten;
+    m_averageX /= (double)actualNumPointsWritten;
+    m_averageY /= (double)actualNumPointsWritten;
+    m_averageZ /= (double)actualNumPointsWritten;
 
     //cout << "FauxWriter::writeEnd()" << endl;
-    //cout << "  wrote " << m_actualNumPointsWritten << " points" << endl;
+    //cout << "  wrote " << actualNumPointsWritten << " points" << endl;
 
     //cout << "  min X: " << m_minimumX << endl;
     //cout << "  min Y: " << m_minimumY << endl;

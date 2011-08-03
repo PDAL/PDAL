@@ -80,9 +80,9 @@ private:
     double m_averageY;
     double m_averageZ;
 
-    void writeBegin();
+    void writeBegin(boost::uint64_t targetNumPointsToWrite);
     boost::uint32_t writeBuffer(const PointBuffer&);
-    void writeEnd();
+    void writeEnd(boost::uint64_t actualNumPointsWritten);
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented

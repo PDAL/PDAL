@@ -152,7 +152,7 @@ void LasWriter::setSpatialReference(const SpatialReference& srs)
 }
 
 
-void LasWriter::writeBegin()
+void LasWriter::writeBegin(boost::uint64_t targetNumPointsToWrite)
 {
     // need to set properties of the header here, based on prev->getHeader() and on the user's preferences
     m_lasHeader.setBounds( getPrevStage().getBounds() );
@@ -172,7 +172,7 @@ void LasWriter::writeBegin()
     std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
     std::cout.precision(8);
 
-    boost::uint32_t cnt = static_cast<boost::uint32_t>(m_targetNumPointsToWrite);
+    boost::uint32_t cnt = static_cast<boost::uint32_t>(targetNumPointsToWrite);
     m_lasHeader.SetPointRecordsCount(cnt);
 
     m_lasHeader.setSpatialReference(m_spatialReference);
@@ -247,7 +247,7 @@ void LasWriter::writeBegin()
 }
 
 
-void LasWriter::writeEnd()
+void LasWriter::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
     m_lasHeader.SetPointRecordsCount(m_numPointsWritten);
 
