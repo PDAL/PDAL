@@ -76,8 +76,9 @@ void CropFilter::initialize()
 
 const Options& CropFilter::s_getDefaultOptions()
 {
-    static Option<std::string> option1("bounds","","bounds to crop to");
-    static Options options(option1);
+    static Options options;
+    Option<Bounds<double> > bounds("bounds",Bounds<double>(),"bounds to crop to");
+    options.add(bounds);
     return options;
 }
 
