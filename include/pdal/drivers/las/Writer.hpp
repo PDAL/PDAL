@@ -89,7 +89,6 @@ private:
 
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
-    bool m_isCompressed;
     SummaryData m_summaryData;
     SpatialReference m_spatialReference;
 

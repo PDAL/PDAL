@@ -61,6 +61,7 @@ LasWriter::LasWriter(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_streamManager(options.getOption<std::string>("filename").getValue())
 {
+
     return;
 }
 
@@ -69,7 +70,6 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream* ostream)
     : Writer(prevStage, Options::none())
     , m_streamManager(ostream)
     , m_numPointsWritten(0)
-    , m_isCompressed(false)
 {
     return;
 }
@@ -90,14 +90,29 @@ void LasWriter::initialize()
 
     m_streamManager.open();
 
+    try
+    {
+        Option<bool> compression = getOptions().getOption<bool>("compression");
+        setCompressed(compression.getValue());
+    }
+    catch (pdal::option_not_found const&)
+    {
+        // if we didn't get a compression option, no compression for you!
+    }
+    
+
     return;
 }
 
 
 const Options& LasWriter::s_getDefaultOptions()
 {
-    static Option<std::string> option1("filename", "", "file to read from");
-    static Options options(option1);
+    static Options options;
+
+    Option<std::string> filename("filename", "", "file to read from");
+    Option<bool> compression("compression", false, "Do we LASzip-compress the data?");
+    options.add(filename);
+    options.add(compression);
     return options;
 }
 
@@ -331,7 +346,7 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
             for (unsigned int i=0; i<m_zipPoint->m_lz_point_size; i++)
             {
                 m_zipPoint->m_lz_point_data[i] = buf[i];
-                //printf("%d %d\n", v[i], i);
+                // printf("%d %d\n", buf[i], i);
             }
             bool ok = m_zipper->write(m_zipPoint->m_lz_point);
             assert(ok);
@@ -341,7 +356,7 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
             Utils::write_n(m_streamManager.ostream(), buf, Support::getPointDataSize(pointFormat));
         }
 #else
-            Utils::write_n(m_ostream, buf, Support::getPointDataSize(pointFormat));
+            Utils::write_n(m_streamManager.ostream(), buf, Support::getPointDataSize(pointFormat));
 
 #endif
         ++numValidPoints;
