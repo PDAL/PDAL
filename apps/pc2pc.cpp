@@ -102,7 +102,6 @@ void Application_pc2pc::addOptions()
         ("output,o", po::value<std::string>(&m_outputFile), "output file name")
         ("native", "use native LAS classes (not liblas)")
         ("oracle-writer", "Read data from LAS file and write to Oracle")
-        ("oracle-reader", "Read data from Oracle and write to LAS")
         ("a_srs", po::value<std::string>(&m_srs)->default_value(""), "Assign output coordinate system")
         ("compress", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true),"Compress output data if available")
         ("xml", po::value<std::string>(&m_xml)->default_value("log.xml"), "XML file to load process (OCI only right now)")
@@ -205,92 +204,96 @@ int Application_pc2pc::execute()
         throw configuration_error("PDAL not compiled with Oracle support");
 #endif
     }
-        else if (hasOption("oracle-reader"))
-        {
-    #ifdef PDAL_HAVE_ORACLE
-        try{
-        boost::property_tree::ptree load_tree;
-        
-        boost::property_tree::read_xml(m_xml, load_tree);
-        
-        boost::property_tree::ptree oracle_options = load_tree.get_child("pdal.drivers.oci.reader");
-
-        boost::property_tree::ptree las_options = load_tree.get_child("pdal.drivers.las");
-        boost::property_tree::ptree srs_options = las_options.get_child("spatialreference");
-        
-        double scalex = las_options.get<double>("scale.x");
-        double scaley = las_options.get<double>("scale.y");
-        double scalez = las_options.get<double>("scale.z");
-
-        double offsetx = las_options.get<double>("offset.x");
-        double offsety = las_options.get<double>("offset.y");
-        double offsetz = las_options.get<double>("offset.z");
-        
-        bool compress = las_options.get<bool>("compress");
-        
-        std::string out_wkt = srs_options.get<std::string>("userinput");
-        pdal::OptionsOld options(oracle_options);
-
-
-        pdal::drivers::oci::Reader reader(options);
-
-        pdal::drivers::las::LasWriter* writer;
-
-        pdal::SpatialReference out_ref(out_wkt);
-        pdal::SpatialReference in_ref(reader.getSpatialReference());
-        if (!(in_ref == out_ref)) 
-        {
-            // pdal::filters::ByteSwapFilter swapper(reader);
-            pdal::filters::ScalingFilter scalingFilter(reader);
-            pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
-            pdal::filters::DescalingFilter descalingFilter(reprojectionFilter, 
-                                                           scalex, offsetx,
-                                                           scaley, offsety,
-                                                           scalez, offsetz);
-
-            writer = new pdal::drivers::las::LasWriter(descalingFilter, ofs);
-            if (compress)
-                writer->setCompressed(true);
-            writer->setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));
-            writer->setPointFormat(pdal::drivers::las::PointFormat3);
-        
-            writer->initialize();
-
-            writer->write(0);
-            delete writer;
-        }
-        else
-        {
-            writer = new pdal::drivers::las::LasWriter(reader, ofs);
-            if (compress)
-                writer->setCompressed(true);
-            writer->setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));
-            writer->setPointFormat(pdal::drivers::las::PointFormat3);
-        
-            writer->initialize();
-
-            writer->write(0);
-            delete writer;
-        }
-        
-
-
-
-
-            
-        } catch (pdal::pdal_error& e)
-        {
-            std::cerr << "Error reading oracle: " << e.what() << std::endl;
-            return 1;
-            
-        }
-        
-            
-
-    #else
-            throw configuration_error("PDAL not compiled with Oracle support");
-    #endif
-        }
+    //     else if (hasOption("oracle-reader"))
+    //     {
+    // #ifdef PDAL_HAVE_ORACLE
+    //     try{
+    //     boost::property_tree::ptree load_tree;
+    //     
+    //     boost::property_tree::read_xml(m_xml, load_tree);
+    //     
+    //     boost::property_tree::ptree oracle_options = load_tree.get_child("pdal.drivers.oci.reader");
+    // 
+    //     boost::property_tree::ptree las_options = load_tree.get_child("pdal.drivers.las");
+    //     boost::property_tree::ptree srs_options = las_options.get_child("spatialreference");
+    //     
+    //     double scalex = las_options.get<double>("scale.x");
+    //     double scaley = las_options.get<double>("scale.y");
+    //     double scalez = las_options.get<double>("scale.z");
+    // 
+    //     double offsetx = las_options.get<double>("offset.x");
+    //     double offsety = las_options.get<double>("offset.y");
+    //     double offsetz = las_options.get<double>("offset.z");
+    //     
+    //     bool compress = las_options.get<bool>("compress");
+    //     
+    //     std::string out_wkt = srs_options.get<std::string>("userinput");
+    //     pdal::OptionsOld options(oracle_options);
+    // 
+    // 
+    // 
+    //     pdal::drivers::oci::Reader reader_srs(options);
+    //     reader_srs.initialize();
+    //     
+    //     pdal::drivers::oci::Reader reader(options);
+    // 
+    //     pdal::drivers::las::LasWriter* writer;
+    // 
+    //     pdal::SpatialReference out_ref(out_wkt);
+    //     pdal::SpatialReference in_ref(reader_srs.getSpatialReference());
+    //     if (!(in_ref == out_ref)) 
+    //     {
+    //         // pdal::filters::ByteSwapFilter swapper(reader);
+    //         pdal::filters::ScalingFilter scalingFilter(reader);
+    //         pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+    //         pdal::filters::DescalingFilter descalingFilter(reprojectionFilter, 
+    //                                                        scalex, offsetx,
+    //                                                        scaley, offsety,
+    //                                                        scalez, offsetz);
+    // 
+    //         writer = new pdal::drivers::las::LasWriter(descalingFilter, ofs);
+    //         if (compress)
+    //             writer->setCompressed(true);
+    //         writer->setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));
+    //         writer->setPointFormat(pdal::drivers::las::PointFormat3);
+    //     
+    //         writer->initialize();
+    // 
+    //         writer->write(0);
+    //         delete writer;
+    //     }
+    //     else
+    //     {
+    //         writer = new pdal::drivers::las::LasWriter(reader, ofs);
+    //         if (compress)
+    //             writer->setCompressed(true);
+    //         writer->setChunkSize(oracle_options.get<boost::uint32_t>("capacity"));
+    //         writer->setPointFormat(pdal::drivers::las::PointFormat3);
+    //     
+    //         writer->initialize();
+    // 
+    //         writer->write(0);
+    //         delete writer;
+    //     }
+    //     
+    // 
+    // 
+    // 
+    // 
+    //         
+    //     } catch (pdal::pdal_error& e)
+    //     {
+    //         std::cerr << "Error reading oracle: " << e.what() << std::endl;
+    //         return 1;
+    //         
+    //     }
+    //     
+    //         
+    // 
+    // #else
+    //         throw configuration_error("PDAL not compiled with Oracle support");
+    // #endif
+    //     }
 
 
 
