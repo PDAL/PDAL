@@ -850,13 +850,15 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 
 void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
 {
+    m_connection->Commit();
 
     if (m_doCreateIndex)
     {
         CreateSDOEntry();
         CreateBlockIndex();
     }
-    
+
+        
     // Update extent of SDO_PC entry
     UpdatePCExtent();
 
@@ -1302,6 +1304,71 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     return true;
 }
 
+std::string Writer::ShutOff_SDO_PC_Trigger()
+{
+    boost::property_tree::ptree&  tree = m_optionsOld.GetPTree();
+    std::string base_table_name = to_upper(tree.get<std::string>("base_table_name"));
+    std::string cloud_column_name = to_upper(tree.get<std::string>("cloud_column_name"));
+
+    std::ostringstream oss;
+
+    char szTrigger[OWNAME] = "";
+    char szStatus[OWNAME] = "";
+
+    oss << "select trigger_name, status from all_triggers where table_name = '" << base_table_name << "' AND TRIGGER_NAME like upper('%%MDTNPC_%%') ";
+    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+    
+    statement->Define(szTrigger);
+    statement->Define(szStatus);
+    
+    statement->Execute();
+    std::cout << "Trigger: " << szTrigger << " status: " << szStatus << std::endl;
+
+    // Yes, we're assuming there's only one trigger that met these criteria.
+    
+    if (!strlen(szStatus))
+    {
+        // No rows returned, no trigger exists
+        return std::string("");
+    }
+    
+    
+    if (compare_no_case(szStatus, "ENABLED") == 0)
+    {
+        oss.str("");
+        oss << "ALTER TRIGGER " << szTrigger << " DISABLE ";
+    
+        statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+        statement->Execute();
+    
+        return std::string(szTrigger);
+    } else
+    {
+        return std::string("");
+    }
+
+
+    
+}
+
+void Writer::TurnOn_SDO_PC_Trigger(std::string trigger_name)
+{
+    
+    if (!trigger_name.size()) return;
+    
+    std::ostringstream oss;
+    boost::property_tree::ptree&  tree = m_optionsOld.GetPTree();
+    
+    std::string base_table_name = to_upper(tree.get<std::string>("base_table_name"));
+
+    oss << "ALTER TRIGGER " << trigger_name << " ENABLE ";
+    
+    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+    statement->Execute();
+
+        
+}
+
 void Writer::UpdatePCExtent()
 {
     
@@ -1330,7 +1397,14 @@ void Writer::UpdatePCExtent()
     
     std::string eleminfo = CreatePCElemInfo();
 
+
+    std::string trigger = ShutOff_SDO_PC_Trigger();
+    
     std::ostringstream s_geom;
+    boost::uint32_t precision = tree.get<boost::uint32_t>("precision");
+    s_geom.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    s_geom.precision(precision);
+
     s_geom << "           mdsys.sdo_geometry("<< gtype <<", " << srid << ", null,\n"
 "              mdsys.sdo_elem_info_array"<< eleminfo <<",\n"
 "              mdsys.sdo_ordinate_array(\n";
@@ -1351,6 +1425,7 @@ void Writer::UpdatePCExtent()
 
 
     std::ostringstream oss;
+
     oss << "UPDATE "<< base_table_name << 
             " A SET A." << cloud_column_name <<".PC_EXTENT = " << s_geom.str() <<
             " WHERE A.ID = " << getPCID();
@@ -1363,6 +1438,11 @@ void Writer::UpdatePCExtent()
         oss << "Failed to update cloud extent in '" << base_table_name << "' table with id " << getPCID() << ". Does the table exist? "  << std::endl << e.what() << std::endl;
         throw std::runtime_error(oss.str());
     }
+    m_connection->Commit();    
+
+    TurnOn_SDO_PC_Trigger(trigger);
+    m_connection->Commit();    
+    
 }
 
 boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
