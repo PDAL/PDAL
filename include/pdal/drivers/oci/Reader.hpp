@@ -55,7 +55,6 @@ class PDAL_DLL Reader : public pdal::Reader
 
 public:
     Reader(const Options&);
-    Reader(OptionsOld& options);
     ~Reader();
     virtual void initialize();
  
@@ -71,11 +70,8 @@ public:
     
     Connection getConnection () const { return m_connection;}
     Statement getStatement () const { return m_statement;}
-    OptionsOld& getOptionsOld() const { return m_optionsOld; }
     CloudPtr getCloud() const;
     std::string getQuery() const;
-    bool isVerbose() const;
-    bool isDebug() const;
 
 private:
 
@@ -89,8 +85,8 @@ private:
     QueryType describeQueryType() const;    
     BlockPtr defineBlock() const;
     Schema fetchSchema(sdo_pc* pc);
+    Connection Connect();
 
-    OptionsOld& m_optionsOld;
     Connection m_connection;
     Statement m_statement;
     QueryType m_querytype;
@@ -98,6 +94,7 @@ private:
     Schema m_schema;
     sdo_pc* m_pc;
     sdo_pc_blk* m_pc_block;
+    boost::uint32_t m_capacity;
 
 };
 

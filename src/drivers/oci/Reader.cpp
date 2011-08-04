@@ -38,6 +38,11 @@
 #include <pdal/exceptions.hpp>
 #include <pdal/FileUtils.hpp>
 
+#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/make_shared.hpp>
+
 #include <iostream>
 #include <map>
 
@@ -47,24 +52,54 @@ namespace pdal { namespace drivers { namespace oci {
 
 IMPLEMENT_STATICS(Reader, "drivers.oci.reader", "OCI Reader")
 
-static OptionsOld dummy;
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
-    , m_optionsOld(dummy)
+    , m_querytype(QUERY_UNKNOWN)
+    , m_capacity(0)
 {
-    throw not_yet_implemented("options ctor"); 
+
+
+
 }
 
-
-Reader::Reader(OptionsOld& optionsOld)
-    : pdal::Reader(Options::none())
-    , m_optionsOld(optionsOld)
-    , m_querytype(QUERY_UNKNOWN)
+pdal::drivers::oci::Connection Reader::Connect()
 {
+    std::string connection  = getOptions().getValueOrThrow<std::string>("connection");
+
+    
+    if (connection.empty())
+        throw pdal_error("Oracle connection string empty! Unable to connect");
+
+    
+    std::string::size_type slash_pos = connection.find("/",0);
+    std::string username = connection.substr(0,slash_pos);
+    std::string::size_type at_pos = connection.find("@",slash_pos);
+
+    std::string password = connection.substr(slash_pos+1, at_pos-slash_pos-1);
+    std::string instance = connection.substr(at_pos+1);
+    
+    Connection con = boost::make_shared<OWConnection>(username.c_str(),password.c_str(),instance.c_str());
+    
+    if (con->Succeeded())
+    {
+        if (isVerbose())
+            std::cout << "Oracle connection succeeded" << std::endl;        
+    }
+    else
+        throw connection_failed("Oracle connection failed");
+        
+    return con;
+    
+}
+
+void Reader::initialize()
+{
+    pdal::Reader::initialize();
+
 
     Debug();
     
-    m_connection = Connect(m_optionsOld);
+    m_connection = Connect();
 
 
     if (getQuery().size() == 0 )
@@ -107,18 +142,6 @@ Reader::Reader(OptionsOld& optionsOld)
     else 
         throw pdal_error("SQL statement does not define a SDO_PC or CLIP_PC block");
 
-
-
-    
-
-    
-    // setNumPoints(1000);
-}    
-
-
-void Reader::initialize()
-{
-    pdal::Reader::initialize();
 }
 
 
@@ -139,27 +162,16 @@ const Options& Reader::s_getDefaultOptions()
                                      0,
                                      "Block capacity");
 
-    Option<bool> debug("debug", false, "Do we output debugging info?");
-    Option<bool> verbose("verbose", false, "Do we output verbose info about what we're doing?");
 
     
     return options;
 }
 
 
-bool Reader::isVerbose() const
-{
-    return m_optionsOld.GetPTree().get<bool>("verbose");
-}
-
-bool Reader::isDebug() const
-{
-    return m_optionsOld.GetPTree().get<bool>("debug");
-}
 
 std::string Reader::getQuery() const
 {
-    return m_optionsOld.GetPTree().get<std::string>("select_sql");
+    return getOptions().getValueOrThrow<std::string>("query");
 }
 
 void Reader::Debug()
@@ -393,7 +405,7 @@ pdal::Schema Reader::fetchSchema(sdo_pc* pc)
         throw pdal_error(oss.str());
     }
     
-    m_optionsOld.GetPTree().put("capacity", block_capacity);
+    m_capacity = block_capacity;
     
     std::string pc_schema_xml(pc_schema);
     CPLFree(pc_schema);
