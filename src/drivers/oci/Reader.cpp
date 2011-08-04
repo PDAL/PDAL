@@ -126,7 +126,21 @@ const Options& Reader::s_getDefaultOptions()
 {
     static Options options;
     
+    Option<std::string> connection("connection",
+                                   "",
+                                   "Oracle connection string to connect to database");
+    
+    Option<std::string> query("query",
+                              "",
+                              "SELECT statement that returns an SDO_PC object \
+                              as its first and only queried item.");
 
+    Option<boost::uint32_t> capacity("capacity",
+                                     0,
+                                     "Block capacity");
+
+    Option<bool> debug("debug", false, "Do we output debugging info?");
+    Option<bool> verbose("verbose", false, "Do we output verbose info about what we're doing?");
 
     
     return options;
