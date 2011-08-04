@@ -68,6 +68,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <sstream>
 
 namespace pdal
 {
@@ -127,6 +128,11 @@ StageFactory::StageFactory()
 Reader* StageFactory::createReader(const std::string& type, const Options& options)
 {
     ReaderCreator* f = getReaderCreator(type);
+    if (!f) {
+        std::ostringstream oss;
+        oss << "Unable to create reader for type '" << type << "'. Does a driver with this type name exist?";
+        throw pdal_error(oss.str());
+    }
     Reader* stage = f(options);
     return stage;
 }
@@ -135,6 +141,12 @@ Reader* StageFactory::createReader(const std::string& type, const Options& optio
 Filter* StageFactory::createFilter(const std::string& type, Stage& prevStage, const Options& options)
 {
     FilterCreator* f = getFilterCreator(type);
+    if (!f) {
+        std::ostringstream oss;
+        oss << "Unable to create filter for type '" << type << "'. Does a driver with this type name exist?";
+        throw pdal_error(oss.str());
+    }
+
     Filter* stage = f(prevStage, options);
     return stage;
 }
@@ -143,6 +155,12 @@ Filter* StageFactory::createFilter(const std::string& type, Stage& prevStage, co
 MultiFilter* StageFactory::createMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options& options)
 {
     MultiFilterCreator* f = getMultiFilterCreator(type);
+    if (!f) {
+        std::ostringstream oss;
+        oss << "Unable to create multifilter for type '" << type << "'. Does a driver with this type name exist?";
+        throw pdal_error(oss.str());
+    }
+    
     MultiFilter* stage = f(prevStages, options);
     return stage;
 }
@@ -151,6 +169,12 @@ MultiFilter* StageFactory::createMultiFilter(const std::string& type, const std:
 Writer* StageFactory::createWriter(const std::string& type, Stage& prevStage, const Options& options)
 {
     WriterCreator* f = getWriterCreator(type);
+    if (!f) {
+        std::ostringstream oss;
+        oss << "Unable to create writer for type '" << type << "'. Does a driver with this type name exist?";
+        throw pdal_error(oss.str());
+    }
+
     Writer* stage = f(prevStage, options);
     return stage;
 }
