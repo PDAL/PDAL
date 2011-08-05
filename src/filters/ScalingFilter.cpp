@@ -51,9 +51,9 @@ namespace pdal { namespace filters {
 ScalingFilterBase::ScalingFilterBase(Stage& prevStage, bool isDescaling, const Options& options)
     : Filter(prevStage, options)
     , m_customScaleOffset(false)
-    , m_scaleX(0.0)
-    , m_scaleY(0.0)
-    , m_scaleZ(0.0)
+    , m_scaleX(1.0)
+    , m_scaleY(1.0)
+    , m_scaleZ(1.0)
     , m_offsetX(0.0)
     , m_offsetY(0.0)
     , m_offsetZ(0.0)
@@ -79,9 +79,9 @@ ScalingFilterBase::ScalingFilterBase(Stage& prevStage, bool isDescaling, const O
         throw pdal_error("not all 6 scaling factor options specified");
     }
 
-    m_scaleX = options.getValueOrDefault<double>("scale_x", 0.0);
-    m_scaleY = options.getValueOrDefault<double>("scale_y", 0.0);
-    m_scaleZ = options.getValueOrDefault<double>("scale_z", 0.0);
+    m_scaleX = options.getValueOrDefault<double>("scale_x", 1.0);
+    m_scaleY = options.getValueOrDefault<double>("scale_y", 1.0);
+    m_scaleZ = options.getValueOrDefault<double>("scale_z", 1.0);
     m_offsetX = options.getValueOrDefault<double>("offset_x", 0.0);
     m_offsetY = options.getValueOrDefault<double>("offset_y", 0.0);
     m_offsetZ = options.getValueOrDefault<double>("offset_z", 0.0);
