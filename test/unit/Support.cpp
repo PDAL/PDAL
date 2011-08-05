@@ -179,9 +179,9 @@ void Support::check_pN(const pdal::PointBuffer& data, const ::pdal::Schema& sche
     boost::uint16_t r0 = data.getField<boost::uint16_t>(index, offsetR);
     boost::uint16_t g0 = data.getField<boost::uint16_t>(index, offsetG);
     boost::uint16_t b0 = data.getField<boost::uint16_t>(index, offsetB);
-    BOOST_CHECK(r0 == rref);
-    BOOST_CHECK(g0 == gref);
-    BOOST_CHECK(b0 == bref);
+    BOOST_CHECK_EQUAL(r0, rref);
+    BOOST_CHECK_EQUAL(g0, gref);
+    BOOST_CHECK_EQUAL(b0, bref);
 }
 
 
