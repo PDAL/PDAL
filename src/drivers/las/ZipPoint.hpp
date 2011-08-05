@@ -38,9 +38,12 @@
 
 #include <pdal/drivers/las/Support.hpp>
 
+#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/scoped_array.hpp>
+
 // liblaszip
-class LASzipper;
-class LASitem;
+class LASzip;
 
 namespace pdal { namespace drivers { namespace las {
 
@@ -52,29 +55,29 @@ public:
     ZipPoint(PointFormat, const std::vector<VariableLengthRecord>& vlrs);
     ~ZipPoint();
 
-    VariableLengthRecord ConstructVLR(PointFormat format) const;
+    VariableLengthRecord ConstructVLR() const;
 
     // this will return false iff we find a laszip VLR and it doesn't match
     // the point format this object was constructed with
-    bool ValidateVLR(const VariableLengthRecord& vlr) const;
+    // bool ValidateVLR(const VariableLengthRecord& vlr) const;
 
     bool IsZipVLR(const VariableLengthRecord& vlr) const;
-
+    
+    LASzip* GetZipper() const { return m_zip.get(); }
+    
 private:
-    void ConstructItems(PointFormat);
+    void ConstructItems();
 
 public: // for now
     // LASzip::pack() allocates/sets vlr_data and vlr_num for us, and deletes it for us  ["his"]
     // LASzip::unpack() just reads from the vlr_data we give it (we allocate and delete)  ["our"]
     int his_vlr_num;
     unsigned char* his_vlr_data;
-    int our_vlr_num;
-    unsigned char* our_vlr_data;
 
-    unsigned int m_num_items;
-    LASitem* m_items;
+    boost::scoped_ptr<LASzip> m_zip;
+
     unsigned char** m_lz_point;
-    unsigned char* m_lz_point_data;
+    boost::scoped_array<boost::uint8_t> m_lz_point_data;
     unsigned int m_lz_point_size;
 };
 

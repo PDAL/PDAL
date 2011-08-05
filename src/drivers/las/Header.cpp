@@ -649,6 +649,7 @@ std::ostream& operator<<(std::ostream& ostr, const LasHeader& header)
     ostr << "  LasHeader" << std::endl;
     ostr << "    Header size: " << header.GetHeaderSize() << std::endl;
     ostr << "    Point records count: " << header.GetPointRecordsCount() << std::endl;
+    ostr << "    VLR count: " << header.getVLRs().count() << std::endl;
 
     return ostr;
 }

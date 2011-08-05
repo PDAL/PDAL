@@ -202,11 +202,13 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
             if (!ok)
             {
                 std::ostringstream oss;
-                oss << "Error reading compressed point data: " << std::string(unzipper->get_error());
+                const char* err = unzipper->get_error();
+                if (err==NULL) err="(unknown error)";
+                oss << "Error reading compressed point data: " << std::string(err);
                 throw pdal_error(oss.str());
             }
 
-            memcpy(p, zipPoint->m_lz_point_data, zipPoint->m_lz_point_size);
+            memcpy(p, zipPoint->m_lz_point_data.get(), zipPoint->m_lz_point_size);
             p +=  zipPoint->m_lz_point_size;
         }
 #else

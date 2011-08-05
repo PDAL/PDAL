@@ -194,47 +194,17 @@ void LasWriter::writeBegin(boost::uint64_t targetNumPointsToWrite)
 
     LasHeaderWriter lasHeaderWriter(m_lasHeader, m_streamManager.ostream());
     lasHeaderWriter.write();
-
+    
     m_summaryData.reset();
 
     if (m_lasHeader.Compressed())
     {
 #ifdef PDAL_HAVE_LASZIP
-        if (!m_zip)
+        if (!m_zipPoint)
         {
-            // Initialize a scoped_ptr and swap it with our member variable 
-            // that will contain it.
-            boost::scoped_ptr<LASzip> s(new LASzip());
-            m_zip.swap(s);
-
-
             PointFormat format = m_lasHeader.getPointFormat();
             boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_lasHeader.getVLRs().getAll()));
             m_zipPoint.swap(z);
-
-            bool ok = false;
-            try
-            {
-                ok = m_zip->setup((unsigned char)format, m_lasHeader.GetDataRecordLength());
-            }
-            catch(...)
-            {
-                throw pdal_error("Error opening compression core (3)");
-            }
-            if (!ok)
-            {
-                std::ostringstream oss;
-                oss << "Error opening compression core: " << std::string(m_zip->get_error());
-                throw pdal_error(oss.str());
-            }
-
-            ok = m_zip->pack(m_zipPoint->his_vlr_data, m_zipPoint->his_vlr_num);
-            if (!ok)
-            {
-                std::ostringstream oss;
-                oss << "Error packing VLR data for compression: " << std::string(m_zip->get_error());
-                throw pdal_error(oss.str());
-            }
         }
 
         if (!m_zipper)
@@ -242,14 +212,14 @@ void LasWriter::writeBegin(boost::uint64_t targetNumPointsToWrite)
             boost::scoped_ptr<LASzipper> z(new LASzipper());
             m_zipper.swap(z);
 
-
-
             bool stat(false);
-            stat = m_zipper->open(m_streamManager.ostream(), m_zip.get());
+            stat = m_zipper->open(m_streamManager.ostream(), m_zipPoint->GetZipper());
             if (!stat)
             {
                 std::ostringstream oss;
-                oss << "Error opening LASzipper: " << std::string(m_zip->get_error());
+                const char* err = m_zipper->get_error();
+                if (err==NULL) err="(unknown error)";
+                oss << "Error opening LASzipper: " << std::string(err);
                 throw pdal_error(oss.str());
             }
         }

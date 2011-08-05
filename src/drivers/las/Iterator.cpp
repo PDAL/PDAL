@@ -71,7 +71,6 @@ IteratorBase::~IteratorBase()
 {
 #ifdef PDAL_HAVE_LASZIP
     m_zipPoint.reset();
-    m_zip.reset();
     m_unzipper.reset();
 #endif
     FileUtils::closeFile(m_istream);
@@ -81,35 +80,11 @@ IteratorBase::~IteratorBase()
 void IteratorBase::initializeZip()
 {
 #ifdef PDAL_HAVE_LASZIP
-
-    // Initialize a scoped_ptr and swap it with our member variable 
-    // that will contain it.
-    boost::scoped_ptr<LASzip> s(new LASzip());
-    m_zip.swap(s);
-
-    PointFormat format = m_reader.getPointFormat();
-    
-    boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_reader.getVLRs()));
-    m_zipPoint.swap(z);
-
-
-    bool ok = false;
-    ok = m_zip->setup((unsigned char)format, (unsigned short)m_reader.getPointDataOffset());
-
-    if (!ok)
+    if (!m_zipPoint)
     {
-        std::ostringstream oss;
-        oss << "Error setting up compression engine: " << std::string(m_zip->get_error());
-        throw pdal_error(oss.str());
-    }
-
-    ok = m_zip->unpack(m_zipPoint->our_vlr_data, m_zipPoint->our_vlr_num);
-
-    if (!ok)
-    {
-        std::ostringstream oss;
-        oss << "Error unpacking zip VLR data: " << std::string(m_zip->get_error());
-        throw pdal_error(oss.str());
+        PointFormat format = m_reader.getPointFormat();
+        boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_reader.getVLRs()));
+        m_zipPoint.swap(z);
     }
 
     if (!m_unzipper)
@@ -119,12 +94,16 @@ void IteratorBase::initializeZip()
 
         bool stat(false);
         m_istream->seekg(m_reader.getPointDataOffset(), std::ios::beg);
-        stat = m_unzipper->open(*m_istream, m_zip.get());
+        stat = m_unzipper->open(*m_istream, m_zipPoint->GetZipper());
 
+        // Martin moves the stream on us 
+        m_zipReadStartPosition = m_istream->tellg();
         if (!stat)
         {
             std::ostringstream oss;
-            oss << "Failed to open LASzip stream: " << std::string(m_zip->get_error());
+            const char* err = m_unzipper->get_error();
+            if (err==NULL) err="(unknown error)";
+            oss << "Failed to open LASzip stream: " << std::string(err);
             throw pdal_error(oss.str());
         }
     }
@@ -162,7 +141,7 @@ static inline boost::uint32_t safeconvert64to32(boost::uint64_t x64) // BUG: mov
 boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 {
 #ifdef PDAL_HAVE_LASZIP
-    if (m_zip)
+    if (m_unzipper)
     {
         const boost::uint32_t pos32 = safeconvert64to32(getIndex() + count);
         m_unzipper->seek(pos32);
@@ -215,7 +194,7 @@ RandomIterator::~RandomIterator()
 boost::uint64_t RandomIterator::seekImpl(boost::uint64_t count)
 {
 #ifdef PDAL_HAVE_LASZIP
-    if (m_zip)
+    if (m_unzipper)
     {
         const boost::uint32_t pos32 = safeconvert64to32(count);
         m_unzipper->seek(pos32);

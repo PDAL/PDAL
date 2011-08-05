@@ -64,154 +64,93 @@ static const char* laszip_description = "http://laszip.org";
 
 
 ZipPoint::ZipPoint(PointFormat format, const std::vector<VariableLengthRecord>& vlrs)
-    : his_vlr_num(0)
-    , his_vlr_data(0)
-    , our_vlr_num(0)
-    , our_vlr_data(0)
-    , m_num_items(0)
-    , m_items(NULL)
-    , m_lz_point(NULL)
-    , m_lz_point_data(NULL)
+    : m_lz_point(NULL)
     , m_lz_point_size(0)
 {
-    ConstructItems(format);
+
+    boost::scoped_ptr<LASzip> s(new LASzip());
+    m_zip.swap(s);
 
     const VariableLengthRecord* vlr = NULL;
-    for (unsigned int i=0; i<vlrs.size(); i++)
+    for (std::vector<VariableLengthRecord>::size_type i=0; i<vlrs.size(); i++)
     {
         const VariableLengthRecord& p = vlrs[i];
-        if (p.getRecordId() == 22204)
+        if (IsZipVLR(p))
         {
             vlr = &p;
             break;
         }
     }
+    
     if (vlr)
     {
-        our_vlr_num = vlr->getLength();
-        our_vlr_data = new unsigned char[our_vlr_num];
-        for (int i=0; i<our_vlr_num; i++)
+        bool ok(false);
+        ok = m_zip->unpack(&(vlr->getBytes()[0]), vlr->getLength());
+        if (!ok)
         {
-            our_vlr_data[i] = vlr->getBytes()[i];
+            std::ostringstream oss;
+            const char* err = m_zip->get_error();
+            if (err==NULL) err="(unknown error)";            
+            oss << "Error unpacking zip VLR data: " << std::string(err);
+            throw pdal_error(oss.str());
+        }
+
+    } else
+    {
+
+        if (!m_zip->setup(format, Support::getPointDataSize(format)))
+        {
+            std::ostringstream oss;
+            const char* err = m_zip->get_error();
+            if (err==NULL) err="(unknown error)";
+            oss << "Error setting up LASzip for format " << format <<": " << err; 
+            throw pdal_error(oss.str());
         }
     }
 
+    ConstructItems();
     return;
 }
 
 ZipPoint::~ZipPoint()
 {
-    m_num_items = 0;
-    delete[] m_items;
-    m_items = NULL;
 
     delete[] m_lz_point;
-    delete[] m_lz_point_data;
-
-    delete[] our_vlr_data;
 
     return;
 }
 
-void ZipPoint::ConstructItems(PointFormat format)
+void ZipPoint::ConstructItems()
 {
-    switch (format)
-    {
-    case PointFormat0:
-        m_num_items = 1;
-        m_items = new LASitem[1];
-        m_items[0].type = LASitem::POINT10;
-        m_items[0].size = 20;
-        break;
-
-    case PointFormat1:
-        m_num_items = 2;
-        m_items = new LASitem[2];
-        m_items[0].type = LASitem::POINT10;
-        m_items[0].size = 8;
-        m_items[1].type = LASitem::GPSTIME11;
-        m_items[1].size = 8;
-        break;
-
-    case PointFormat2:
-        m_num_items = 2;
-        m_items = new LASitem[2];
-        m_items[0].type = LASitem::POINT10;
-        m_items[0].size = 20;
-        m_items[1].type = LASitem::RGB12;
-        m_items[1].size = 6;
-        break;
-
-    case PointFormat3:
-        m_num_items = 3;
-        m_items = new LASitem[3];
-        m_items[0].type = LASitem::POINT10;
-        m_items[0].size = 20;
-        m_items[1].type = LASitem::GPSTIME11;
-        m_items[1].size = 8;
-        m_items[2].type = LASitem::RGB12;
-        m_items[2].size = 6;
-        break;
-
-    default:
-        throw pdal_error("Bad point format in header"); 
-    }
-
     // construct the object that will hold a laszip point
 
     // compute the point size
     m_lz_point_size = 0;
-    for (unsigned int i = 0; i < m_num_items; i++) 
-        m_lz_point_size += m_items[i].size;
+    for (unsigned int i = 0; i < m_zip->num_items; i++)
+        m_lz_point_size += m_zip->items[i].size;
 
     // create the point data
     unsigned int point_offset = 0;
-    m_lz_point = new unsigned char*[m_num_items];
-    m_lz_point_data = new unsigned char[m_lz_point_size];
-    for (unsigned i = 0; i < m_num_items; i++)
+    m_lz_point = new unsigned char*[m_zip->num_items];
+    
+    boost::scoped_array<boost::uint8_t> d( new boost::uint8_t[ m_lz_point_size ] );
+    m_lz_point_data.swap(d);
+    for (unsigned i = 0; i < m_zip->num_items; i++)
     {
         m_lz_point[i] = &(m_lz_point_data[point_offset]);
-        point_offset += m_items[i].size;
+        point_offset += m_zip->items[i].size;
     }
-
+    
+    assert (point_offset == m_lz_point_size);
     return;
 }
 
 
-VariableLengthRecord ZipPoint::ConstructVLR(PointFormat format) const
+VariableLengthRecord ZipPoint::ConstructVLR() const
 {
-    unsigned char pointFormat = 0;
-    unsigned short pointSize = 0;
-    switch (format)
-    {
-    case PointFormat0:
-        pointFormat = 0;
-        pointSize = Support::getPointDataSize(format);
-        break;
-    case PointFormat1:
-        pointFormat = 1;
-        pointSize = Support::getPointDataSize(format);
-        break;
-    case PointFormat2:
-        pointFormat = 2;
-        pointSize = Support::getPointDataSize(format);
-        break;
-    case PointFormat3:
-        pointFormat = 3;
-        pointSize = Support::getPointDataSize(format);
-        break;
-    default:
-        throw pdal_error("point format not supported by laszip");
-    }
-
-    LASzip laszip;
-    laszip.setup(pointFormat, pointSize);
-
-    LASzipper zipper;
-    
     unsigned char* data;
     int num;
-    laszip.pack(data, num);
+    m_zip->pack(data, num);
 
     VariableLengthRecord vlr(0xAABB, laszip_userid, laszip_recordid, laszip_description, data, num);
 

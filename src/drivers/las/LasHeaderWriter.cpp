@@ -96,20 +96,6 @@ void LasHeaderWriter::write()
     }
 
     {
-        //// If we have a custom schema, add the VLR and write it into the 
-        //// file.  
-        //if (m_header.GetSchema().IsCustom()) {
-        //    
-        //    // Wipe any schema-related VLRs we might have, as this is now out of date.
-        //    m_header.DeleteVLRs("liblas", 7);
-        //
-        //    VariableRecord v = m_header.GetSchema().GetVLR();
-        //    std::cout <<  m_header.GetSchema()<< std::endl;
-        //    m_header.AddVLR(v);
-        //}
-    }
-    
-    {
         m_header.getVLRs().remove("laszip encoded", 22204);
 
         // add the laszip VLR, if needed
@@ -117,7 +103,7 @@ void LasHeaderWriter::write()
         {
 #ifdef PDAL_HAVE_LASZIP
             ZipPoint zpd(m_header.getPointFormat(), m_header.getVLRs().getAll());
-            VariableLengthRecord v = zpd.ConstructVLR(m_header.getPointFormat());
+            VariableLengthRecord v = zpd.ConstructVLR();
             m_header.getVLRs().add(v);
 #else
             throw configuration_error("LASzip compression support not enabled in this libLAS configuration.");
