@@ -141,30 +141,13 @@ std::string to_upper(const std::string& input)
 }
 
 
-Connection Connect(OptionsOld const& options)
+pdal::drivers::oci::Connection Connect(Options const& options, bool debug, int verbosity)
 {
-    std::string connection;
-    try {
-        connection = options.GetPTree().get<std::string>("connection");
-        
-    } catch (boost::property_tree::ptree_bad_path const& ) 
-    {
-        throw pdal_error("'connection' string for oracle not set in options");
-    }
+    std::string connection  = options.getValueOrThrow<std::string>("connection");
 
-    bool verbose = false;
-    try {
-        verbose = options.GetPTree().get<bool>("verbose");
-        
-    } catch (boost::property_tree::ptree_bad_path const& ) 
-    {
-        throw pdal_error("'verbose' bool for oracle not set in options");
-    }
-    
     if (connection.empty())
         throw pdal_error("Oracle connection string empty! Unable to connect");
 
-    
     std::string::size_type slash_pos = connection.find("/",0);
     std::string username = connection.substr(0,slash_pos);
     std::string::size_type at_pos = connection.find("@",slash_pos);
@@ -176,7 +159,7 @@ Connection Connect(OptionsOld const& options)
     
     if (con->Succeeded())
     {
-        if (verbose)
+        if (verbosity > 0)
             std::cout << "Oracle connection succeeded" << std::endl;        
     }
     else
@@ -185,6 +168,7 @@ Connection Connect(OptionsOld const& options)
     return con;
     
 }
+
 
 
 }}} // namespace pdal::driver::oci

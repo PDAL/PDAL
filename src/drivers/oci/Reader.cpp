@@ -62,44 +62,14 @@ Reader::Reader(const Options& options)
 
 }
 
-pdal::drivers::oci::Connection Reader::Connect()
-{
-    std::string connection  = getOptions().getValueOrThrow<std::string>("connection");
-
-    
-    if (connection.empty())
-        throw pdal_error("Oracle connection string empty! Unable to connect");
-
-    
-    std::string::size_type slash_pos = connection.find("/",0);
-    std::string username = connection.substr(0,slash_pos);
-    std::string::size_type at_pos = connection.find("@",slash_pos);
-
-    std::string password = connection.substr(slash_pos+1, at_pos-slash_pos-1);
-    std::string instance = connection.substr(at_pos+1);
-    
-    Connection con = boost::make_shared<OWConnection>(username.c_str(),password.c_str(),instance.c_str());
-    
-    if (con->Succeeded())
-    {
-        if (isVerbose())
-            std::cout << "Oracle connection succeeded" << std::endl;        
-    }
-    else
-        throw connection_failed("Oracle connection failed");
-        
-    return con;
-    
-}
 
 void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-
     Debug();
     
-    m_connection = Connect();
+    m_connection = Connect(getOptions(), isDebug(), getVerboseLevel());
 
 
     if (getQuery().size() == 0 )

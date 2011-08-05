@@ -85,7 +85,6 @@ private:
     QueryType describeQueryType() const;    
     BlockPtr defineBlock() const;
     Schema fetchSchema(sdo_pc* pc);
-    Connection Connect();
 
     Connection m_connection;
     Statement m_statement;
