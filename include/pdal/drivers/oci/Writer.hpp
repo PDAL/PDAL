@@ -53,7 +53,6 @@ class PDAL_DLL Writer : public pdal::Writer
 
 public:
     Writer(Stage& prevStage, const Options&);
-    Writer(Stage& prevStage, OptionsOld& options);
     ~Writer();
     virtual void initialize();
 
@@ -82,7 +81,7 @@ private:
     void CreateBlockIndex();
     void CreateBlockTable();
     void CreateSDOEntry();
-    void CreatePCEntry(std::vector<boost::uint8_t> const* header_data);
+    void CreatePCEntry();
     long GetGType();
     std::string CreatePCElemInfo();
     bool BlockTableExists();
@@ -99,9 +98,13 @@ private:
                       pdal::Bounds<double> const& extent);
     void SetElements(Statement statement,
                      OCIArray* elem_info);
-
-    bool isVerbose() const;
-    bool isDebug() const;
+    
+    template<typename T> T getDefaultedOption(std::string const& option_name) const
+    {
+        T default_value = Writer::s_getDefaultOptions().getOption<T>(option_name).getValue();
+        return getOptions().getValueOrDefault<T>(option_name, default_value);
+    }
+    
     bool is3d() const;
     bool isSolid() const;
     boost::int32_t getPCID() const;
@@ -111,12 +114,12 @@ private:
     pdal::Bounds<double> CalculateBounds(PointBuffer const& buffer);
     Stage& m_stage;
     
-    OptionsOld& m_optionsOld;
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
     bool m_verbose;
     bool m_doCreateIndex;
     Bounds<double> m_pcExtent;
+    int m_pc_id;
 };
 
 }}} // namespace pdal::driver::oci

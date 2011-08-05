@@ -54,28 +54,16 @@ static OptionsOld dummy;
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_stage((Stage&)prevStage)
-    , m_optionsOld(dummy)
+    , m_pc_id(0)
 {
-    throw not_yet_implemented("options ctor"); 
-}
-
-
-Writer::Writer(Stage& prevStage, OptionsOld& optionsOld)
-    : pdal::Writer(prevStage, Options::none())
-    , m_stage(prevStage)
-    , m_optionsOld(optionsOld)
-    , m_verbose(false)
-    , m_doCreateIndex(false)
-{
-
     Debug();
     
-    m_connection = Connect(m_optionsOld);
+    m_connection = Connect(getOptions(), isDebug(), getVerboseLevel());
     
-    boost::uint32_t capacity = m_optionsOld.GetPTree().get<boost::uint32_t>("capacity");
+    boost::uint32_t capacity = getOptions().getValueOrThrow<boost::uint32_t>("capacity");
     setChunkSize(capacity);
-    return;
 }
+
 
 
 
@@ -238,9 +226,9 @@ void Writer::WipeBlockTable()
 {
     std::ostringstream oss;
     
-    std::string block_table_name = m_optionsOld.GetPTree().get<std::string>("block_table_name");
-    std::string base_table_name = m_optionsOld.GetPTree().get<std::string>("base_table_name");
-    std::string cloud_column_name = m_optionsOld.GetPTree().get<std::string>("cloud_column_name");
+    std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
+    std::string base_table_name = getOptions().getValueOrThrow<std::string>("base_table_name");
+    std::string cloud_column_name = getOptions().getValueOrThrow<std::string>("cloud_column_name");
     
     oss << "DELETE FROM " << block_table_name;
     try {
@@ -292,35 +280,24 @@ void Writer::WipeBlockTable()
     run(oss);
 }
 
-bool Writer::isVerbose() const
-{
-    return m_optionsOld.GetPTree().get<bool>("verbose");
-}
-
-bool Writer::isDebug() const
-{
-    return m_optionsOld.GetPTree().get<bool>("debug");
-}
-
 bool Writer::is3d() const
 {
-    return m_optionsOld.GetPTree().get<bool>("is3d");
+    return getDefaultedOption<bool>("is3d");
 }
-
 bool Writer::isSolid() const
 {
-    return m_optionsOld.GetPTree().get<bool>("solid");
+    return getDefaultedOption<bool>("solid");
 }
 
 boost::int32_t Writer::getPCID() const 
 {
-    return m_optionsOld.GetPTree().get<boost::int32_t>("cloud_id");
+    return getOptions().getValueOrThrow<boost::int32_t>("cloud_id");
 }
 
 void Writer::CreateBlockIndex()
 {
     std::ostringstream oss;
-    std::string block_table_name = m_optionsOld.GetPTree().get<std::string>("block_table_name");
+    std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
     
     bool bUse3d = is3d();
     oss << "CREATE INDEX "<< block_table_name << "_cloud_idx on "
@@ -344,11 +321,10 @@ void Writer::CreateBlockIndex()
 
 void Writer::CreateSDOEntry()
 {
-    boost::property_tree::ptree  tree = m_optionsOld.GetPTree();    
-    std::string block_table_name = tree.get<std::string>("block_table_name");
+    std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
 
-    boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
-    boost::uint32_t precision = tree.get<boost::uint32_t>("precision");
+    boost::uint32_t srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");
+    boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("precision");
     
     bool bUse3d = is3d();
     
@@ -406,7 +382,7 @@ bool Writer::BlockTableExists()
 {
 
     std::ostringstream oss;
-    std::string block_table_name = m_optionsOld.GetPTree().get<std::string>("block_table_name");
+    std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
     
     char szTable[OWNAME]= "";
     oss << "select table_name from user_tables where table_name like upper('%%"<< block_table_name <<"%%') ";
@@ -435,7 +411,7 @@ bool Writer::BlockTableExists()
 void Writer::CreateBlockTable()
 {
     std::ostringstream oss;
-    std::string block_table_name = m_optionsOld.GetPTree().get<std::string>("block_table_name");
+    std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
     
     oss << "CREATE TABLE " << block_table_name << " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
     
@@ -459,7 +435,6 @@ bool Writer::IsGeographic(boost::int32_t srid)
 
     shared_long p_srid = boost::shared_ptr<long>(new long);
     *p_srid = srid;
-    // p_srid[0] = srid;
     
     statement->Bind(p_srid.get());
     statement->Define(kind.get());    
@@ -478,7 +453,6 @@ bool Writer::IsGeographic(boost::int32_t srid)
     if (compare_no_case(kind.get(), "GEOGRAPHIC3D") == 0) {
         return true;
     }
-
 
     return false;
     
@@ -525,7 +499,7 @@ std::string Writer::LoadSQLData(std::string const& filename)
 void Writer::RunFileSQL(std::string const& filename)
 {
     std::ostringstream oss;
-    std::string sql = m_optionsOld.GetPTree().get<std::string>(filename);
+    std::string sql = getOptions().getValueOrThrow<std::string>(filename);
         
     if (!sql.size()) return;
 
@@ -548,9 +522,8 @@ void Writer::RunFileSQL(std::string const& filename)
 
 long Writer::GetGType()
 {
-    boost::property_tree::ptree  tree = m_optionsOld.GetPTree();    
     bool bUse3d = is3d();
-    bool bUseSolidGeometry = tree.get<bool>("solid");
+    bool bUseSolidGeometry = getDefaultedOption<bool>("solid");
     long gtype = 0;
     if (bUse3d) {
         if (bUseSolidGeometry == true) {
@@ -573,9 +546,8 @@ long Writer::GetGType()
 
 std::string Writer::CreatePCElemInfo()
 {
-    boost::property_tree::ptree  tree = m_optionsOld.GetPTree();    
     bool bUse3d = is3d();
-    bool bUseSolidGeometry = tree.get<bool>("solid");
+    bool bUseSolidGeometry = getDefaultedOption<bool>("solid");
     
     std::ostringstream s_eleminfo;
     if (bUse3d) {
@@ -604,22 +576,21 @@ std::string Writer::CreatePCElemInfo()
       
 }
 
-void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
+void Writer::CreatePCEntry()
 {
-    boost::property_tree::ptree&  tree = m_optionsOld.GetPTree();
     
-    std::string block_table_name = to_upper(tree.get<std::string>("block_table_name"));
-    std::string base_table_name = to_upper(tree.get<std::string>("base_table_name"));
-    std::string cloud_column_name = to_upper(tree.get<std::string>("cloud_column_name"));
-    std::string base_table_aux_columns = tree.get<std::string>("base_table_aux_columns");
-    std::string base_table_aux_values = tree.get<std::string>("base_table_aux_values");
+    std::string block_table_name = to_upper(getOptions().getValueOrThrow<std::string>("block_table_name"));
+    std::string base_table_name = to_upper(getOptions().getValueOrThrow<std::string>("base_table_name"));
+    std::string cloud_column_name = to_upper(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
+    std::string base_table_aux_columns = getDefaultedOption<std::string>("base_table_aux_columns");
+    std::string base_table_aux_values = getDefaultedOption<std::string>("base_table_aux_values");
 
-    std::string base_table_boundary_column = tree.get<std::string>("base_table_boundary_column");
-    std::string base_table_boundary_wkt = tree.get<std::string>("base_table_boundary_wkt");
+    std::string base_table_boundary_column = getDefaultedOption<std::string>("base_table_boundary_column");
+    std::string base_table_boundary_wkt = getDefaultedOption<std::string>("base_table_boundary_wkt");
     
-    boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
-    boost::uint32_t precision = tree.get<boost::uint32_t>("precision");
-    boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
+    boost::uint32_t srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");
+    boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("precision");
+    boost::uint32_t capacity = getDefaultedOption<boost::uint32_t>("capacity");
 
     bool bUse3d = is3d();
 
@@ -680,36 +651,41 @@ void Writer::CreatePCEntry(std::vector<boost::uint8_t> const* header_data)
     
     std::string eleminfo = CreatePCElemInfo();
     
-    std::string bounds_string;
-    try {
-        bounds_string = tree.get<std::string>("base_table_bounds");
-    } catch (boost::property_tree::ptree_bad_path const& ) 
+    pdal::Bounds<double> base_table_bounds = getDefaultedOption<pdal::Bounds<double> >("base_table_bounds");
+    
+    if (base_table_bounds.empty())
     {
         if (IsGeographic(srid))
-            bounds_string = std::string("([-179.99, 179.99], [-89.99, 89.99])");
-        else
-            bounds_string = std::string("[0.0, 0.0], [100.0, 100.0]");
+        {
+            base_table_bounds.setMinimum(0, -179.99);
+            base_table_bounds.setMinimum(1, -89.99);
+            base_table_bounds.setMinimum(2, 0.0);
+            base_table_bounds.setMaximum(0, 179.99);
+            base_table_bounds.setMaximum(1, 89.99);
+            base_table_bounds.setMaximum(2, 20000.0);
+        } else {
+            base_table_bounds.setMinimum(0, 0.0);
+            base_table_bounds.setMinimum(1, 0.0);
+            base_table_bounds.setMinimum(2, 0.0);
+            base_table_bounds.setMaximum(0, 100.0);
+            base_table_bounds.setMaximum(1, 100.0);
+            base_table_bounds.setMaximum(2, 20000.0);
+        }
     }
-
-
-    std::stringstream ss(bounds_string, std::stringstream::in | std::stringstream::out);
-    pdal::Bounds<double> e;
-    ss >> e;
-
     s_geom << "           mdsys.sdo_geometry("<< gtype <<", "<<s_srid.str()<<", null,\n"
 "              mdsys.sdo_elem_info_array"<< eleminfo <<",\n"
 "              mdsys.sdo_ordinate_array(\n";
 
-    s_geom << e.getMinimum(0) << "," << e.getMinimum(1) << ",";
+    s_geom << base_table_bounds.getMinimum(0) << "," << base_table_bounds.getMinimum(1) << ",";
 
     if (bUse3d) {
-        s_geom << e.getMinimum(2) << ",";
+        s_geom << base_table_bounds.getMinimum(2) << ",";
     }
     
-    s_geom << e.getMaximum(0) << "," << e.getMaximum(1);
+    s_geom << base_table_bounds.getMaximum(0) << "," << base_table_bounds.getMaximum(1);
 
     if (bUse3d) {
-        s_geom << "," << e.getMaximum(2);
+        s_geom << "," << base_table_bounds.getMaximum(2);
     }
 
     s_geom << "))";
@@ -743,19 +719,16 @@ oss << "declare\n"
 "  "
 "end;\n";
 
-
-    int pc_id = 0;
-    long output = 0;
     Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
 
-    statement->Bind(&pc_id);
+    statement->Bind(&m_pc_id);
 
 
     OCILobLocator* schema_locator ; 
     OCILobLocator* boundary_locator ; 
 
     std::string schema_data;
-        schema_data = pdal::Schema::to_xml(m_stage.getSchema());
+    schema_data = pdal::Schema::to_xml(m_stage.getSchema());
         // std::cout << m_stage.getSchema() << std::endl;
         // std::ostream* output= Utils::createFile("oracle-write-schema.xml",true);
         // *output << schema_data <<std::endl;
@@ -803,31 +776,18 @@ oss << "declare\n"
         oss << "Failed at creating Point Cloud entry into " << base_table_name << " table. Does the table exist? "  << e.what();
         throw std::runtime_error(oss.str());
     }
-    output = pc_id;
     
     free(wkt);
-    tree.put("cloud_id", pc_id);
+
+    // tree.put("cloud_id", pc_id);
     
 }
 void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 {
-    
-    // m_chipper.Chip();
-    // 
-    // // cumulate a global bounds for the dataset
-    // for ( boost::uint32_t i = 0; i < m_chipper.GetBlockCount(); ++i )
-    // {
-    //     const filters::chipper::Block& b = m_chipper.GetBlock(i);
-    //     
-    //     // FIXME: This only gets called once!
-    //     if (m_bounds.empty()) // If the user already set the bounds for this writer, we're using that
-    //         m_bounds.grow(b.GetBounds());        
-    // }
 
-    // Set up debugging info
 
     
-    if (m_optionsOld.GetPTree().get<bool>("overwrite"))
+    if (getDefaultedOption<bool>("overwrite"))
     {
         if (BlockTableExists())
         {
@@ -842,7 +802,7 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
         CreateBlockTable();
     }
         
-    CreatePCEntry(0);
+    CreatePCEntry();
     
     return;
 }
@@ -1153,12 +1113,10 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     
     boost::uint8_t* point_data = buffer.getData(0);
     
-    boost::property_tree::ptree&  tree = m_optionsOld.GetPTree();
-    
-    std::string block_table_name = to_upper(tree.get<std::string>("block_table_name"));
-    std::string block_table_partition_column = to_upper(tree.get<std::string>("block_table_partition_column"));
-    boost::int32_t block_table_partition_value = tree.get<boost::uint32_t>("block_table_partition_value");
-    boost::uint32_t srid = tree.get<boost::uint32_t>("srid");
+    std::string block_table_name = to_upper(getOptions().getValueOrThrow<std::string>("block_table_name"));
+    std::string block_table_partition_column = to_upper(getDefaultedOption<std::string>("block_table_partition_column"));
+    boost::int32_t block_table_partition_value = getDefaultedOption<boost::uint32_t>("block_table_partition_value");
+    boost::uint32_t srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");
 
     bool bUsePartition = block_table_partition_column.size() != 0;
     
@@ -1204,9 +1162,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
     
 
-    long pc_id = tree.get<boost::int32_t>("cloud_id");
     long* p_pc_id = (long*) malloc( 1 * sizeof(long));
-    p_pc_id[0] = pc_id;
+    p_pc_id[0] = m_pc_id;
 
     long* p_result_id = (long*) malloc( 1 * sizeof(long));
     p_result_id[0] = (long)block_id;
@@ -1306,9 +1263,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
 std::string Writer::ShutOff_SDO_PC_Trigger()
 {
-    boost::property_tree::ptree&  tree = m_optionsOld.GetPTree();
-    std::string base_table_name = to_upper(tree.get<std::string>("base_table_name"));
-    std::string cloud_column_name = to_upper(tree.get<std::string>("cloud_column_name"));
+    std::string base_table_name = to_upper(getOptions().getValueOrThrow<std::string>("base_table_name"));
+    std::string cloud_column_name = to_upper(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
 
     std::ostringstream oss;
 
@@ -1357,9 +1313,8 @@ void Writer::TurnOn_SDO_PC_Trigger(std::string trigger_name)
     if (!trigger_name.size()) return;
     
     std::ostringstream oss;
-    boost::property_tree::ptree&  tree = m_optionsOld.GetPTree();
     
-    std::string base_table_name = to_upper(tree.get<std::string>("base_table_name"));
+    std::string base_table_name = to_upper(getOptions().getValueOrThrow<std::string>("base_table_name"));
 
     oss << "ALTER TRIGGER " << trigger_name << " ENABLE ";
     
@@ -1372,26 +1327,15 @@ void Writer::TurnOn_SDO_PC_Trigger(std::string trigger_name)
 void Writer::UpdatePCExtent()
 {
     
-    boost::property_tree::ptree&  tree = m_optionsOld.GetPTree();
+    std::string block_table_name = to_upper(getOptions().getValueOrThrow<std::string>("block_table_name"));
+    std::string base_table_name = to_upper(getOptions().getValueOrThrow<std::string>("base_table_name"));
+    std::string cloud_column_name = to_upper(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
     
-    std::string block_table_name = to_upper(tree.get<std::string>("block_table_name"));
-    std::string base_table_name = to_upper(tree.get<std::string>("base_table_name"));
-    std::string cloud_column_name = to_upper(tree.get<std::string>("cloud_column_name"));
+    boost::uint32_t srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");    
+
+    pdal::Bounds<double> base_table_bounds = getDefaultedOption<pdal::Bounds<double> >("base_table_bounds");
+    if (base_table_bounds.empty()) base_table_bounds = m_pcExtent;
     
-    boost::uint32_t srid = tree.get<boost::uint32_t>("srid");    
-
-    pdal::Bounds<double> e;
-    std::string bounds_string;
-    try {
-        bounds_string = tree.get<std::string>("base_table_bounds");
-        std::stringstream ss(bounds_string, std::stringstream::in | std::stringstream::out);
-        ss >> e;
-
-    } catch (boost::property_tree::ptree_bad_path const& ) 
-    {
-        // If the user didn't override it in the options, we'll use our cumulated one
-        e = m_pcExtent;
-    }
 
     long gtype = GetGType();
     
@@ -1401,7 +1345,7 @@ void Writer::UpdatePCExtent()
     std::string trigger = ShutOff_SDO_PC_Trigger();
     
     std::ostringstream s_geom;
-    boost::uint32_t precision = tree.get<boost::uint32_t>("precision");
+    boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("precision");
     s_geom.setf(std::ios_base::fixed, std::ios_base::floatfield);
     s_geom.precision(precision);
 
@@ -1409,16 +1353,16 @@ void Writer::UpdatePCExtent()
 "              mdsys.sdo_elem_info_array"<< eleminfo <<",\n"
 "              mdsys.sdo_ordinate_array(\n";
 
-    s_geom << e.getMinimum(0) << "," << e.getMinimum(1) << ",";
+    s_geom << base_table_bounds.getMinimum(0) << "," << base_table_bounds.getMinimum(1) << ",";
 
     if (is3d()) {
-        s_geom << e.getMinimum(2) << ",";
+        s_geom << base_table_bounds.getMinimum(2) << ",";
     }
     
-    s_geom << e.getMaximum(0) << "," << e.getMaximum(1);
+    s_geom << base_table_bounds.getMaximum(0) << "," << base_table_bounds.getMaximum(1);
 
     if (is3d()) {
-        s_geom << "," << e.getMaximum(2);
+        s_geom << "," << base_table_bounds.getMaximum(2);
     }
 
     s_geom << "))";
