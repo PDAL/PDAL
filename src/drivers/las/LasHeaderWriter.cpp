@@ -106,24 +106,43 @@ void LasHeaderWriter::write()
             VariableLengthRecord v = zpd.ConstructVLR();
             m_header.getVLRs().add(v);
 #else
-            throw configuration_error("LASzip compression support not enabled in this libLAS configuration.");
+            throw configuration_error("LASzip compression support not enabled in this PDAL configuration.");
 #endif
         }
     }
 
     {
-        boost::int32_t difference = (boost::int32_t)m_header.GetDataOffset() - (boost::int32_t)GetRequiredHeaderSize();
-
-        if (difference <= 0) 
+        int32_t existing_padding = m_header.GetDataOffset() - 
+                                  (m_header.getVLRBlockSize() + 
+                                   m_header.GetHeaderSize());        
+        if (existing_padding < 0) 
         {
-            boost::int32_t d = abs(difference);
-            if (m_header.GetVersionMinor()  ==  0) 
+            int32_t d = abs(existing_padding);
+            
+            // If our required VLR space is larger than we have 
+            // room for, we have no padding.  AddVLRs will take care 
+            // of incrementing up the space it needs.
+            if (static_cast<boost::int32_t>(m_header.getVLRBlockSize()) > d)
             {
-                // Add the two extra bytes for the 1.0 pad
-                d = d + 2;
+                m_header.SetHeaderPadding(0);
+            } else {
+                m_header.SetHeaderPadding(d - m_header.getVLRBlockSize());
             }
-            m_header.SetDataOffset(m_header.GetDataOffset() + d );
+        } else {
+            // cast is safe, we've already checked for < 0
+            if (static_cast<uint32_t>(existing_padding) >= m_header.GetHeaderPadding())
+            {
+                m_header.SetHeaderPadding(existing_padding);
+            }
+            else {
+                m_header.SetHeaderPadding(m_header.GetHeaderPadding() + existing_padding);
+            }
+
         }
+        
+        m_header.SetDataOffset( m_header.GetHeaderSize() + 
+                                m_header.getVLRBlockSize() + 
+                                m_header.GetHeaderPadding());
 
     }
 
@@ -251,6 +270,12 @@ void LasHeaderWriter::write()
 
     WriteVLRs();
 
+    // if we have padding, we should write it
+    if (m_header.GetHeaderPadding() > 0) {
+        m_ostream.seekp(m_header.GetHeaderSize() + m_header.getVLRBlockSize(), std::ios::end);
+        Utils::write_n(m_ostream, "\0", m_header.GetHeaderPadding());
+    }
+
     // Write the 1.0 pad signature if we need to.
     WriteLAS10PadSignature(); 
 
@@ -280,7 +305,6 @@ void LasHeaderWriter::WriteVLRs()
 
         boost::uint8_t* userId_data = VariableLengthRecord::string2bytes(16, vlr.getUserId());
         boost::uint8_t* description_data = VariableLengthRecord::string2bytes(32, vlr.getDescription());
-
         Utils::write_n(m_ostream, vlr.getReserved(), sizeof(boost::uint16_t));
         m_ostream.write((const char*)userId_data, 16); // BUG: move to Utils function
         Utils::write_n(m_ostream, vlr.getRecordId(), sizeof(boost::uint16_t));
@@ -305,21 +329,7 @@ void LasHeaderWriter::WriteVLRs()
 
 std::size_t LasHeaderWriter::GetRequiredHeaderSize() const
 {
-    // if the VLRs won't fit because the data offset is too 
-    // small, we need to throw an error.
-    std::size_t vlr_total_size = 0;
-        
-    // Calculate a new data offset size
-    const VLRList& vlrs = m_header.getVLRs();
-	for (boost::uint32_t i = 0; i < vlrs.count(); ++i)
-    {
-        const VariableLengthRecord& vlr = vlrs.get(i);
-        vlr_total_size += vlr.s_headerLength + vlr.getLength();
-    }
-    
-    const std::size_t size = vlr_total_size + m_header.GetHeaderSize();
-    return size;
-    
+    return m_header.getVLRBlockSize() + m_header.GetHeaderSize();
 }
 
 
@@ -336,11 +346,10 @@ void LasHeaderWriter::WriteLAS10PadSignature()
     boost::int32_t diff = (boost::int32_t)m_header.GetDataOffset() - (boost::int32_t)GetRequiredHeaderSize();
 
     if (diff < 2) {
-        std::ostringstream oss;
-        oss << "Header is not large enough to write extra 1.0 pad bytes.  Data offset is ";
-        oss << m_header.GetDataOffset() << " while the required total size ";
-        oss << "for the VLRs is " << GetRequiredHeaderSize();
-        throw std::runtime_error(oss.str());
+        m_header.SetDataOffset(m_header.GetDataOffset() + 2);
+        // Seek to the location of the data offset in the header and write a new one.
+        m_ostream.seekp(96, std::ios::beg);
+        Utils::write_n(m_ostream, m_header.GetDataOffset(), sizeof(m_header.GetDataOffset()));
     }    
         
     // step back two bytes to write the pad bytes.  We should have already

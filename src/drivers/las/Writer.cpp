@@ -319,7 +319,14 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
                 // printf("%d %d\n", buf[i], i);
             }
             bool ok = m_zipper->write(m_zipPoint->m_lz_point);
-            assert(ok);
+            if (!ok)
+            {
+                std::ostringstream oss;
+                const char* err = m_zipper->get_error();
+                if (err==NULL) err="(unknown error)";
+                oss << "Error writing point: " << std::string(err);
+                throw pdal_error(oss.str());
+            }
         }
         else
         {

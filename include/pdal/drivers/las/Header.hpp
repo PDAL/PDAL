@@ -305,6 +305,8 @@ public:
     const VLRList& getVLRs() const;
     VLRList& getVLRs();
 
+    std::size_t getVLRBlockSize() const;
+
     /// Returns a property_tree that contains 
     /// all of the header data in a structured format.
     boost::property_tree::ptree GetPTree() const;
@@ -319,10 +321,10 @@ public:
     void setSpatialReference(const SpatialReference&);
     const SpatialReference& getSpatialReference() const;
 
-    //void to_rst(std::ostream& os) const;
-    //void to_xml(std::ostream& os) const;
-    //void to_json(std::ostream& os) const;
-
+    void SetHeaderPadding(boost::uint32_t v);
+    boost::uint32_t GetHeaderPadding() const;
+    
+    
 private:
     typedef Vector<double> PointScales;
     typedef Vector<double> PointOffsets;
@@ -365,7 +367,8 @@ private:
     PointScales m_scales;
     PointOffsets m_offsets;
     bool m_isCompressed;
-
+    boost::uint32_t m_headerPadding;
+    
     PointFormat m_pointFormat;
 
     Bounds<double> m_bounds;

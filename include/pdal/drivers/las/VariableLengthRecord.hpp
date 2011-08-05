@@ -80,7 +80,8 @@ public:
 
     const boost::uint8_t* getBytes() const;
     std::size_t getLength() const;
-
+    std::size_t getTotalSize() const;
+    
     static const int s_headerLength = 54;
 
     static void setSRSFromVLRs(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);

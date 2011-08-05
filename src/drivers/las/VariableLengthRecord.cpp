@@ -174,6 +174,17 @@ std::size_t VariableLengthRecord::getLength() const
     return m_length;
 }
 
+std::size_t VariableLengthRecord::getTotalSize() const
+{
+    // Signature 2 bytes
+    // UserID 16 bytes
+    // RecordID 2 bytes
+    // RecordLength after Header 2 bytes
+    // Description 32 bytes
+    // Data length -- size of the data's vector * the size of uint8_t
+    std::size_t const sum = 2 + 16 + 2 + 2 + 32 + m_length * sizeof(uint8_t);
+    return sum;
+}
 
 bool VariableLengthRecord::isMatch(const std::string& userId) const
 {

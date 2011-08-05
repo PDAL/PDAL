@@ -363,6 +363,16 @@ double LasHeader::GetMinZ() const
     return m_bounds.getMinimum(2);
 }
 
+boost::uint32_t LasHeader::GetHeaderPadding() const
+{
+    return m_headerPadding;
+}
+
+void LasHeader::SetHeaderPadding( boost::uint32_t v) 
+{
+    m_headerPadding = v;
+}
+
 void LasHeader::SetMax(double x, double y, double z)
 {
     // m_extent = Bounds(m_extent.min(0), m_extent.min(1), m_extent.max(0), m_extent.max(1), m_extent.min(2), m_extent.max(2));
@@ -422,6 +432,7 @@ void LasHeader::initialize()
     SetScale(0.01, 0.01, 0.01);
 
     m_isCompressed = false;
+    m_headerPadding = 0;
 }
 
 
@@ -434,6 +445,21 @@ VLRList& LasHeader::getVLRs()
 const VLRList& LasHeader::getVLRs() const
 {
     return m_vlrList;
+}
+
+std::size_t LasHeader::getVLRBlockSize() const
+{
+    std::size_t vlr_total_size = 0;
+
+    VLRList const& vlrs = m_vlrList;
+    
+    for (uint32_t i = 0; i < m_vlrList.count(); ++i)
+    {
+        VariableLengthRecord const & vlr = vlrs.get(i);
+        vlr_total_size += static_cast<uint32_t>(vlr.getTotalSize());
+    }
+
+    return vlr_total_size;
 }
 
 

@@ -93,7 +93,6 @@ private:
     SpatialReference m_spatialReference;
 
 #ifdef PDAL_HAVE_LASZIP
-    boost::scoped_ptr<LASzip> m_zip;
     boost::scoped_ptr<LASzipper> m_zipper;
     boost::scoped_ptr<ZipPoint> m_zipPoint;
 #endif
