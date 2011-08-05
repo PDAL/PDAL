@@ -137,73 +137,73 @@ int Application_pc2pc::execute()
         writer.write(numPoints);
     }
 
-    else if (hasOption("oracle-writer"))
-    {
-#ifdef PDAL_HAVE_ORACLE
-        try{
-        pdal::drivers::las::LasReader reader(m_inputFile);
-    
-        const boost::uint64_t numPoints = reader.getNumPoints();
-
-        boost::property_tree::ptree load_tree;
-        
-        boost::property_tree::read_xml(m_xml, load_tree);
-        
-        boost::property_tree::ptree oracle_options = load_tree.get_child("pdal.drivers.oci.writer");
-        boost::property_tree::ptree las_options = load_tree.get_child("pdal.drivers.las");
-    
-        pdal::OptionsOld options(oracle_options);
-        
-        boost::property_tree::ptree in_srs_options = las_options.get_child("spatialreference");
-        std::string in_wkt = in_srs_options.get<std::string>("userinput");
-        boost::property_tree::ptree out_srs_options = oracle_options.get_child("spatialreference");
-        std::string out_wkt = out_srs_options.get<std::string>("userinput");
-        
-        pdal::SpatialReference in_ref(in_wkt);
-        pdal::SpatialReference out_ref(out_wkt);
-                
-        boost::property_tree::ptree& tree = options.GetPTree();
-        
-        boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
-        double scalex = oracle_options.get<double>("scale.x");
-        double scaley = oracle_options.get<double>("scale.y");
-        double scalez = oracle_options.get<double>("scale.z");
-
-        double offsetx = oracle_options.get<double>("offset.x");
-        double offsety = oracle_options.get<double>("offset.y");
-        double offsetz = oracle_options.get<double>("offset.z");        
-        
-        pdal::filters::CacheFilter cache(reader, 1, capacity);
-        pdal::filters::Chipper chipper(cache, capacity);
-        pdal::filters::ScalingFilter scalingFilter(chipper);
-        pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
-        pdal::filters::DescalingFilter descalingFilter(reprojectionFilter,
-                                                       scalex, offsetx,
-                                                       scaley, offsety,
-                                                       scalez, offsetz);
-        
-        // pdal::filters::ByteSwapFilter swapper(descalingFilter);
-        pdal::drivers::oci::Writer writer(descalingFilter, options);
-
-        writer.initialize();
-
-        writer.write(numPoints);
-            
-
-
-        boost::property_tree::ptree output_tree;
-        // output_tree.put_child(writer.getName(), options.GetPTree());
-        // boost::property_tree::write_xml(m_xml, output_tree);
-
-        } catch (pdal::pdal_error& e)
-        {
-            std::cerr << "Error writing oracle: " << e.what() << std::endl;
-            
-        }                    
-#else
-        throw configuration_error("PDAL not compiled with Oracle support");
-#endif
-    }
+//     else if (hasOption("oracle-writer"))
+//     {
+// #ifdef PDAL_HAVE_ORACLE
+//         try{
+//         pdal::drivers::las::LasReader reader(m_inputFile);
+//     
+//         const boost::uint64_t numPoints = reader.getNumPoints();
+// 
+//         boost::property_tree::ptree load_tree;
+//         
+//         boost::property_tree::read_xml(m_xml, load_tree);
+//         
+//         boost::property_tree::ptree oracle_options = load_tree.get_child("pdal.drivers.oci.writer");
+//         boost::property_tree::ptree las_options = load_tree.get_child("pdal.drivers.las");
+//     
+//         pdal::OptionsOld options(oracle_options);
+//         
+//         boost::property_tree::ptree in_srs_options = las_options.get_child("spatialreference");
+//         std::string in_wkt = in_srs_options.get<std::string>("userinput");
+//         boost::property_tree::ptree out_srs_options = oracle_options.get_child("spatialreference");
+//         std::string out_wkt = out_srs_options.get<std::string>("userinput");
+//         
+//         pdal::SpatialReference in_ref(in_wkt);
+//         pdal::SpatialReference out_ref(out_wkt);
+//                 
+//         boost::property_tree::ptree& tree = options.GetPTree();
+//         
+//         boost::uint32_t capacity = tree.get<boost::uint32_t>("capacity");
+//         double scalex = oracle_options.get<double>("scale.x");
+//         double scaley = oracle_options.get<double>("scale.y");
+//         double scalez = oracle_options.get<double>("scale.z");
+// 
+//         double offsetx = oracle_options.get<double>("offset.x");
+//         double offsety = oracle_options.get<double>("offset.y");
+//         double offsetz = oracle_options.get<double>("offset.z");        
+//         
+//         pdal::filters::CacheFilter cache(reader, 1, capacity);
+//         pdal::filters::Chipper chipper(cache, capacity);
+//         pdal::filters::ScalingFilter scalingFilter(chipper);
+//         pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, in_ref, out_ref);
+//         pdal::filters::DescalingFilter descalingFilter(reprojectionFilter,
+//                                                        scalex, offsetx,
+//                                                        scaley, offsety,
+//                                                        scalez, offsetz);
+//         
+//         // pdal::filters::ByteSwapFilter swapper(descalingFilter);
+//         pdal::drivers::oci::Writer writer(descalingFilter, options);
+// 
+//         writer.initialize();
+// 
+//         writer.write(numPoints);
+//             
+// 
+// 
+//         boost::property_tree::ptree output_tree;
+//         // output_tree.put_child(writer.getName(), options.GetPTree());
+//         // boost::property_tree::write_xml(m_xml, output_tree);
+// 
+//         } catch (pdal::pdal_error& e)
+//         {
+//             std::cerr << "Error writing oracle: " << e.what() << std::endl;
+//             
+//         }                    
+// #else
+//         throw configuration_error("PDAL not compiled with Oracle support");
+// #endif
+//     }
     //     else if (hasOption("oracle-reader"))
     //     {
     // #ifdef PDAL_HAVE_ORACLE
