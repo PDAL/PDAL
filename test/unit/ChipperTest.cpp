@@ -38,6 +38,7 @@
 #include <pdal/filters/Chipper.hpp>
 #include <pdal/drivers/liblas/Writer.hpp>
 #include <pdal/drivers/liblas/Reader.hpp>
+#include <pdal/Options.hpp>
 
 #include "Support.hpp"
 
@@ -53,7 +54,12 @@ BOOST_AUTO_TEST_CASE(test_construction)
 
     {
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::filters::Chipper chipper(reader, 15);
+        
+        pdal::Options options;
+        pdal::Option<boost::uint32_t> capacity("capacity", 15, "capacity");
+        options.add(capacity);
+        
+        pdal::filters::Chipper chipper(reader, options);
         chipper.initialize();
 
         const boost::uint64_t num_points = reader.getNumPoints();

@@ -139,8 +139,15 @@ IMPLEMENT_STATICS(Chipper, "filters.chipper", "Chipper")
 
 Chipper::Chipper(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
+    , m_xvec(chipper::DIR_X)
+    , m_yvec(chipper::DIR_Y)
+    , m_spare(chipper::DIR_NONE)
 {
-    throw not_yet_implemented("options ctor"); 
+    m_threshold = options.getValueOrThrow<boost::uint32_t>("capacity");
+
+    checkImpedance();
+    setPointCountType(PointCount_Fixed);
+    setNumPoints(0);
 }
 
 
