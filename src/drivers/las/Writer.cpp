@@ -77,6 +77,10 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream* ostream)
 
 LasWriter::~LasWriter()
 {
+#ifdef PDAL_HAVE_LASZIP
+    m_zipper.reset();
+    m_zipPoint.reset();
+#endif
     m_streamManager.close();
     return;
 }
