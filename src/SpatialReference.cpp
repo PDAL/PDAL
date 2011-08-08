@@ -290,10 +290,10 @@ std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 {
 
 #ifdef PDAL_SRS_ENABLED
-    boost::property_tree::ptree tree;
-    std::string name ("spatialreference");
-    tree.put_child(name, srs.getPTree());
-    boost::property_tree::write_xml(ostr, tree);
+    
+    std::string wkt = srs.getPTree().get<std::string>("prettycompoundwkt");
+    ostr << wkt;
+    
     return ostr;
 
 #else
@@ -308,27 +308,15 @@ std::istream& operator>>(std::istream& istr, SpatialReference& srs)
 {
 
 #ifdef PDAL_SRS_ENABLED
-    boost::property_tree::ptree tree;
-    boost::property_tree::read_xml(istr, tree, 0);
 
     SpatialReference ref;    
-    try {
-        std::string wkt = tree.get<std::string>("spatialreference.compoundwkt");
-        ref.setWKT(wkt);
-    }
-    catch (boost::property_tree::ptree_bad_path const& e) {
-      ::boost::ignore_unused_variable_warning(e);
-      
-        try {
-            std::string input = tree.get<std::string>("spatialreference.userinput");
-            ref.setFromUserInput(input);
-        }
-        catch (boost::property_tree::ptree_bad_path const& e) {
-          ::boost::ignore_unused_variable_warning(e);
-            throw pdal_error("Unable to ingest SpatialReference via operator >>  Does the data contain either a compoundwkt or userinput node?");
-        }
-    }
 
+    std::ostringstream oss;
+    oss << istr.rdbuf();
+    
+    std::string wkt = oss.str();
+    ref.setFromUserInput(wkt.c_str());
+    
     srs = ref;
     return istr;
     
