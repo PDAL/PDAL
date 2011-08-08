@@ -86,12 +86,12 @@ IMPLEMENT_STATICS(ReprojectionFilter, "filters.reprojection", "Reprojection Filt
 
 ReprojectionFilter::ReprojectionFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
-    , m_outSRS(options.getValueOrThrow<std::string>("out_srs"))
+    , m_outSRS(options.getValueOrThrow<pdal::SpatialReference>("out_srs"))
     , m_inferInputSRS(false)
 {
     if (options.hasOption<std::string>("in_srs"))
     {
-        m_inSRS = SpatialReference(options.getValueOrThrow<std::string>("in_srs"));
+        m_inSRS = options.getValueOrThrow<pdal::SpatialReference>("in_srs");
         m_inferInputSRS = false;
     }
     else
@@ -147,7 +147,7 @@ void ReprojectionFilter::initialize()
         std::ostringstream msg; 
         msg << "Could not import input spatial reference for ReprojectionFilter:: " 
             << CPLGetLastErrorMsg() << " code: " << result 
-            << "wkt: '" << m_inSRS.getWKT() << "'";
+            << " wkt: '" << m_inSRS.getWKT() << "'";
         throw std::runtime_error(msg.str());
     }
     
@@ -157,7 +157,7 @@ void ReprojectionFilter::initialize()
         std::ostringstream msg; 
         msg << "Could not import output spatial reference for ReprojectionFilter:: " 
             << CPLGetLastErrorMsg() << " code: " << result 
-            << "wkt: '" << m_outSRS.getWKT() << "'";
+            << " wkt: '" << m_outSRS.getWKT() << "'";
         std::string message(msg.str());
         throw std::runtime_error(message);
     }
