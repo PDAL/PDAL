@@ -78,7 +78,10 @@ void LasReader::initialize()
 
     this->setBounds(m_lasHeader.getBounds());
     this->setNumPoints(m_lasHeader.GetPointRecordsCount());
-
+    
+    // If the user is already overriding this by setting it on the stage, we'll 
+    // take their overridden value
+    if (getSpatialReference().getWKT(pdal::SpatialReference::eCompoundOK).empty())
     {
         SpatialReference srs;
         m_lasHeader.getVLRs().constructSRS(srs);
