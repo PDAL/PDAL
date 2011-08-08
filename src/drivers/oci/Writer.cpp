@@ -54,6 +54,7 @@ static OptionsOld dummy;
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_stage((Stage&)prevStage)
+    , m_doCreateIndex(false)
     , m_pc_id(0)
 {
     Debug();
@@ -291,7 +292,8 @@ bool Writer::isSolid() const
 
 boost::int32_t Writer::getPCID() const 
 {
-    return getOptions().getValueOrThrow<boost::int32_t>("cloud_id");
+    return m_pc_id;
+    // return getOptions().getValueOrThrow<boost::int32_t>("cloud_id");
 }
 
 void Writer::CreateBlockIndex()
@@ -324,7 +326,7 @@ void Writer::CreateSDOEntry()
     std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
 
     boost::uint32_t srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");
-    boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("precision");
+    boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("stream_output_precision");
     
     bool bUse3d = is3d();
     
@@ -402,7 +404,10 @@ bool Writer::BlockTableExists()
         // the table doesn't exist.  If this really isn't the case, we're going 
         // to get more legit message further down the line.
         return false;
-    }  
+    } 
+    
+    if (isDebug())
+        std::cout << "checking for " << szTable << " existence" << std::endl;
     
     return true;
     
@@ -589,7 +594,7 @@ void Writer::CreatePCEntry()
     std::string base_table_boundary_wkt = getDefaultedOption<std::string>("base_table_boundary_wkt");
     
     boost::uint32_t srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");
-    boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("precision");
+    boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("stream_output_precision");
     boost::uint32_t capacity = getDefaultedOption<boost::uint32_t>("capacity");
 
     bool bUse3d = is3d();
@@ -785,18 +790,18 @@ oss << "declare\n"
 void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 {
 
-
+    bool bHaveOutputTable = BlockTableExists();
     
     if (getDefaultedOption<bool>("overwrite"))
     {
-        if (BlockTableExists())
+        if (bHaveOutputTable)
         {
             WipeBlockTable();
         }
     }
     
     RunFileSQL("pre_sql");
-    if (!BlockTableExists())
+    if (!bHaveOutputTable)
     {
         m_doCreateIndex = true;
         CreateBlockTable();
@@ -1278,7 +1283,6 @@ std::string Writer::ShutOff_SDO_PC_Trigger()
     statement->Define(szStatus);
     
     statement->Execute();
-    std::cout << "Trigger: " << szTrigger << " status: " << szStatus << std::endl;
 
     // Yes, we're assuming there's only one trigger that met these criteria.
     
@@ -1345,7 +1349,7 @@ void Writer::UpdatePCExtent()
     std::string trigger = ShutOff_SDO_PC_Trigger();
     
     std::ostringstream s_geom;
-    boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("precision");
+    boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("stream_output_precision");
     s_geom.setf(std::ios_base::fixed, std::ios_base::floatfield);
     s_geom.precision(precision);
 
