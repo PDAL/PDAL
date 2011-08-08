@@ -63,7 +63,20 @@ Stage::~Stage()
 void Stage::initialize()
 {
     StageBase::initialize();
-
+    
+    // Try to fetch overridden options here
+    
+    
+    // If the user gave us an SRS via options, take that.
+    try 
+    {
+        m_spatialReference = getOptions().getValueOrThrow<pdal::SpatialReference>("spatialreference");
+        
+    } catch (pdal_error const&) 
+    {
+        // If one wasn't set on the options, we'll ignore at this 
+        // point.  Maybe another stage might forward/set it later.
+    }
     return;
 }
 
