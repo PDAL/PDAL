@@ -69,9 +69,6 @@ void LasHeaderWriter::write()
     boost::uint16_t n2 = 0;
     boost::uint32_t n4 = 0;
     
-    // This test should only be true if we were opened in both 
-    // std::ios::in *and* std::ios::out
-
     // Seek to the beginning
     m_ostream.seekp(0, ios::beg);
     ios::pos_type begin = m_ostream.tellp();
@@ -114,7 +111,8 @@ void LasHeaderWriter::write()
     {
         int32_t existing_padding = m_header.GetDataOffset() - 
                                   (m_header.getVLRBlockSize() + 
-                                   m_header.GetHeaderSize());        
+                                   m_header.GetHeaderSize());
+
         if (existing_padding < 0) 
         {
             int32_t d = abs(existing_padding);
