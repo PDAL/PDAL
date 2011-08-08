@@ -201,7 +201,9 @@ public:
             }
             ++iter;
         }
-        throw option_not_found(name);
+        std::ostringstream oss;
+        oss << "Required option '" << name << "' was not found on this stage";
+        throw option_not_found(oss.str());
     }
 
     // get value of an option, or throw option_not_found if option not present
