@@ -1127,7 +1127,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
     boost::int32_t block_id  = buffer.getField<boost::int32_t>(0, indexBlockId);
     
-    SWAP_ENDIANNESS(block_id); //We've already swapped these data, but we need to write a real number here.
+    // SWAP_ENDIANNESS(block_id); //We've already swapped these data, but we need to write a real number here.
     std::ostringstream oss;
     std::ostringstream partition;
     
