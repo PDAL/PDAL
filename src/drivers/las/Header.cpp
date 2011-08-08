@@ -51,8 +51,8 @@ namespace pdal { namespace drivers { namespace las {
     
 // BUG: should be std::string
 char const* const LasHeader::FileSignature = "LASF";
-char const* const LasHeader::SystemIdentifier = "libLAS";
-char const* const LasHeader::SoftwareIdentifier = "libLAS 1.6.0";
+char const* const LasHeader::SystemIdentifier = "PDAL";
+char const* const LasHeader::SoftwareIdentifier = "PDAL 0.1.0";
 
 LasHeader::LasHeader()
     : m_scales(0.01,0.01,0.01)
