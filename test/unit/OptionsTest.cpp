@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(test_valid_options)
     }
     catch (pdal::option_not_found ex)
     {
-        BOOST_CHECK(strcmp(ex.what(), "foo") == 0);
+        BOOST_CHECK(strcmp(ex.what(), "Required option 'foo' was not found on this stage") == 0);
         reached = true;
     }
     BOOST_CHECK(reached == true);
