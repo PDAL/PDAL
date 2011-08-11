@@ -43,6 +43,8 @@
 #include <cmath>
 #include <ostream>
 #include <istream>
+#include <limits>
+#include <cstring>
 
 namespace pdal
 {

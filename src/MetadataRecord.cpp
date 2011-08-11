@@ -35,6 +35,7 @@
 #include <pdal/MetadataRecord.hpp>
 
 #include <sstream>
+#include <cstring>
 
 namespace pdal
 {

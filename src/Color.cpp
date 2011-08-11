@@ -40,6 +40,7 @@
  ****************************************************************************/
 
 #include <pdal/Color.hpp>
+#include <limits>
 
 namespace pdal
 {
