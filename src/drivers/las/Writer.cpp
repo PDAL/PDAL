@@ -90,8 +90,6 @@ void LasWriter::initialize()
 {
     Writer::initialize();
 
-    m_spatialReference = getPrevStage().getSpatialReference();
-
     m_streamManager.open();
 
     try
