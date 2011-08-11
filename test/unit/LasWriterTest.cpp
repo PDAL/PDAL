@@ -122,12 +122,13 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
         pdal::drivers::las::LasReader reader(Support::datapath("laszip/LasWriterTest_test_simple_laz.laz"));
     }
 
-    bool filesSame = Support::compare_files(Support::datapath("laszip/LasWriterTest_test_simple_laz.laz"), Support::datapath("laszip/laszip-generated.laz"));
+    bool filesSame = Support::compare_files(Support::datapath("laszip/LasWriterTest_test_simple_laz.laz"), 
+                                            Support::datapath("laszip/laszip-generated.laz"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
     {
-        FileUtils::deleteFile("LasWriterTest_test_simple_laz.laz");
+        FileUtils::deleteFile(Support::datapath("laszip/LasWriterTest_test_simple_laz.laz"));
     }
 
     return;

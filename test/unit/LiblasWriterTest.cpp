@@ -92,9 +92,9 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_las)
 BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_options)
 {
     // remove file from earlier run, if needed
-    FileUtils::deleteFile("LiblasWriterTest_test_options.las");
+    FileUtils::deleteFile(Support::datapath("LiblasWriterTest_test_options.las"));
 
-    Option<std::string> opt("filename", "LiblasWriterTest_test_options.las");
+    Option<std::string> opt("filename", Support::datapath("LiblasWriterTest_test_options.las"));
     Options opts(opt);
 
     LiblasReader reader(Support::datapath("1.2-with-color.las"));
@@ -116,12 +116,13 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_options)
         writer.write(numPoints);
     }
 
-    bool filesSame = Support::compare_files("LiblasWriterTest_test_options.las", Support::datapath("simple.las"));
+    bool filesSame = Support::compare_files(Support::datapath("LiblasWriterTest_test_options.las"), 
+                                            Support::datapath("simple.las"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
     {
-        FileUtils::deleteFile("LiblasWriterTest_test_options.las");
+        FileUtils::deleteFile(Support::datapath("LiblasWriterTest_test_options.las"));
     }
 
     return;
@@ -131,11 +132,11 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_options)
 BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_laz)
 {
     // remove file from earlier run, if needed
-    FileUtils::deleteFile("laszip/LiblasWriterTest_test_simple_laz.las");
+    FileUtils::deleteFile(Support::datapath("laszip/LiblasWriterTest_test_simple_laz.laz"));
 
     LiblasReader reader(Support::datapath("laszip/basefile.las"));
     
-    std::ostream* ofs = FileUtils::createFile("laszip/LiblasWriterTest_test_simple_laz.laz");
+    std::ostream* ofs = FileUtils::createFile(Support::datapath("laszip/LiblasWriterTest_test_simple_laz.laz"));
 
     {
         // need to scope the writer, so that's it dtor can use the stream
@@ -155,12 +156,13 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_laz)
 
     FileUtils::closeFile(ofs);
 
-    bool filesSame = Support::compare_files("laszip/LiblasWriterTest_test_simple_laz.laz", Support::datapath("laszip/laszip-generated.laz"));
+    bool filesSame = Support::compare_files(Support::datapath("laszip/LiblasWriterTest_test_simple_laz.laz"), 
+                                            Support::datapath("laszip/laszip-generated.laz"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
     {
-        FileUtils::deleteFile("laszip/LiblasWriterTest_test_simple_laz.laz");
+        FileUtils::deleteFile(Support::datapath("laszip/LiblasWriterTest_test_simple_laz.laz"));
     }
 
     return;
