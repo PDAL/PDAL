@@ -132,11 +132,11 @@ BOOST_AUTO_TEST_CASE(test_getDirectory)
 {
     // test absolute case
     const std::string a = FileUtils::getDirectory(drive + "/a/b/foo.txt");
-    BOOST_CHECK(a == drive+"/a/b");
+    BOOST_CHECK_EQUAL(a, drive+"/a/b");
 
     // test relative case
     const std::string b = FileUtils::getDirectory("a/b/foo.txt");
-    BOOST_CHECK(b == "a/b");
+    BOOST_CHECK_EQUAL(b, "a/b");
 
     return;
 }
