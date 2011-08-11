@@ -106,23 +106,23 @@ BOOST_AUTO_TEST_CASE(test_toAbsolutePath)
 
     // check 1-arg version: make absolute when file is relative, via current working dir
     const string a = FileUtils::toAbsolutePath("foo.txt");
-    BOOST_CHECK(a == root + "/" + "foo.txt");
+    BOOST_CHECK_EQUAL(a, root + "/" + "foo.txt");
 
     // check 1-arg version: make absolute when file is already absolute
     const string b = FileUtils::toAbsolutePath(drive + "/baz/foo.txt");
-    BOOST_CHECK(b == "A:/baz/foo.txt");
+    BOOST_CHECK_EQUAL(b, drive + "/baz/foo.txt");
 
     // check 2-arg version: make absolute when file relative, via given base
     const string c = FileUtils::toAbsolutePath("foo.txt", drive + "/a/b/c/d");
-    BOOST_CHECK(c == drive + "/a/b/c/d/foo.txt");
+    BOOST_CHECK_EQUAL(c, drive + "/a/b/c/d/foo.txt");
 
     // check 2-arg version: make absolute when file is relative, via given base (which isn't absolute)
     const string d = FileUtils::toAbsolutePath("foo.txt", "x/y/z");
-    BOOST_CHECK(d == root + "/" + "x/y/z/" + "foo.txt");
+    BOOST_CHECK_EQUAL(d, root + "/" + "x/y/z/" + "foo.txt");
 
     // check 1-arg version: make absolute when file is already absolute
     const string e = FileUtils::toAbsolutePath(drive+"/baz/foo.txt", drive+"/a/b/c/d");
-    BOOST_CHECK(e == drive+"/baz/foo.txt");
+    BOOST_CHECK_EQUAL(e, drive+"/baz/foo.txt");
 
     return;
 }

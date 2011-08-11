@@ -42,8 +42,12 @@ BOOST_GLOBAL_FIXTURE(TestConfig)
 // Testing macros:
 //   BOOST_TEST_MESSAGE("...")
 //   BOOST_CHECK(bool)
-
-// for comparing to floating point values, use
+//   BOOST_CHECK_EQUAL(t1, t2)
+//
+// The 'CHECK_EQUAL function is preferred to plain 'CHECK, because the former
+// prints out the values of both arguments in the error message.
+//
+// For comparing to floating point values, use
 //   BOOST_CHECK_CLOSE(a,b,perc)
 // where perc is a percentage value in the range [0..100] (typically)
 
