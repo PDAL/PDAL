@@ -449,7 +449,8 @@ void PipelineReader::readWriterPipeline(const std::string& filename)
     m_inputXmlFile = filename;
 
     boost::property_tree::ptree tree;
-    boost::property_tree::xml_parser::read_xml(filename, tree);
+    boost::property_tree::xml_parser::read_xml(filename, tree,
+        boost::property_tree::xml_parser::no_comments);
 
     boost::optional<boost::property_tree::ptree> opt( tree.get_child_optional("WriterPipeline") );
     if (!opt.is_initialized())
@@ -472,7 +473,8 @@ void PipelineReader::readReaderPipeline(const std::string& filename)
     m_inputXmlFile = filename;
 
     boost::property_tree::ptree tree;
-    boost::property_tree::xml_parser::read_xml(filename, tree);
+    boost::property_tree::xml_parser::read_xml(filename, tree,
+        boost::property_tree::xml_parser::no_comments);
 
     boost::optional<boost::property_tree::ptree> opt( tree.get_child_optional("ReaderPipeline") );
     if (!opt.is_initialized())

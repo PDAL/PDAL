@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<ReaderPipeline>
+        <Filter>
+            <Type>filters.crop</Type>
+            <Option>
+                <Name>bounds</Name>
+                <Value>([0,1000000],[0,1000000],[0,1000000])</Value>
+            </Option>
+            <Reader>
+                <Type>drivers.las.reader</Type>
+                <Option>
+                    <Name>filename</Name>
+                    <Value>1.2-with-color.las</Value>
+                </Option>
+                <!-- This is a comment -->
+            </Reader>
+        </Filter>
+</ReaderPipeline>
