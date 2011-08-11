@@ -96,8 +96,6 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t 
 {
     pdal::Schema const& schema = buffer.getSchema();
 
-    
-        
     boost::int32_t size = m_right - m_left + 1;
     if (size < 0)
         throw pdal_error("m_right - m_left + 1 was less than 0 in Block::GetBuffer()!");
@@ -145,15 +143,16 @@ Chipper::Chipper(Stage& prevStage, const Options& options)
 {
     m_threshold = options.getValueOrThrow<boost::uint32_t>("capacity");
 
-    checkImpedance();
-    setPointCountType(PointCount_Fixed);
-    setNumPoints(0);
 }
 
 
 void Chipper::initialize()
 {
     Filter::initialize();
+
+    checkImpedance();
+    setPointCountType(PointCount_Fixed);
+    setNumPoints(0);
 
     return;
 }
@@ -499,7 +498,6 @@ void Chipper::checkImpedance()
         schema.addDimension(blockID);
     }
     
-    // std::cout << schema << std::endl;
     return;
 }
 
