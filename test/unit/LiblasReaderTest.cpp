@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random)
 
 BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random_laz)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.laz"));
+    LiblasReader reader(Support::datapath("laszip/laszip-generated.laz"));
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
     reader.initialize();
 
