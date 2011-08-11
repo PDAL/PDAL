@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(test_toAbsolutePath)
 
     // check 1-arg version: make absolute when file is already absolute
     const string b = FileUtils::toAbsolutePath(drive + "/baz/foo.txt");
-    BOOST_CHECK_EQUAL(b, "A:/baz/foo.txt");
+    BOOST_CHECK_EQUAL(b, drive + "/baz/foo.txt");
 
     // check 2-arg version: make absolute when file relative, via given base
     const string c = FileUtils::toAbsolutePath("foo.txt", drive + "/a/b/c/d");
