@@ -117,7 +117,8 @@ boost::uint32_t Support::diff_text_files(const std::string& file1, const std::st
 
 
 // do a byte-wise comparison of two (binary) files
-boost::uint32_t Support::diff_files(const std::string& file1, const std::string& file2)
+boost::uint32_t Support::diff_files(const std::string& file1, const std::string& file2,
+                                    boost::uint32_t* ignorable_start, boost::uint32_t* ignorable_length, boost::uint32_t num_ignorables)
 {
     if (!pdal::FileUtils::fileExists(file1) ||
         !pdal::FileUtils::fileExists(file2))
@@ -152,7 +153,30 @@ boost::uint32_t Support::diff_files(const std::string& file1, const std::string&
     {
         if (*p != *q) 
         {
-            ++numdiffs;
+            if (num_ignorables == 0)
+            {
+                ++numdiffs;
+            }
+            else
+            {
+                // only count the difference if we are NOT in an ignorable region
+                bool is_ignorable = false;
+                for (boost::uint32_t region=0; region<num_ignorables; region++)
+                {
+                    const boost::uint32_t start = ignorable_start[region];
+                    const boost::uint32_t end = start + ignorable_length[region];
+                    if (i >= start && i < end)
+                    {
+                        // we are in an ignorable region!
+                        is_ignorable = true;
+                        break;
+                    }
+                }
+                if (is_ignorable == false)
+                {
+                    ++numdiffs;
+                }
+            }
         }
 
         ++p;
@@ -168,6 +192,12 @@ boost::uint32_t Support::diff_files(const std::string& file1, const std::string&
     delete[] buf2;
 
     return numdiffs;
+}
+
+
+boost::uint32_t Support::diff_files(const std::string& file1, const std::string& file2)
+{
+    return diff_files(file1, file2, NULL, NULL, 0);
 }
 
 
