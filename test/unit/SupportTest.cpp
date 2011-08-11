@@ -35,10 +35,42 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Support.hpp"
+#include <pdal/FileUtils.hpp>
+
 
 using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(SupportTest)
+
+
+BOOST_AUTO_TEST_CASE(test_paths)
+{
+    // does the data path work?
+    const std::string data_file = Support::datapath("simple.las");
+    BOOST_CHECK(FileUtils::fileExists(data_file));
+
+    // make sure we have read access
+    std::istream* istr = FileUtils::openFile(data_file);
+    std::string yow;
+    *istr >> yow;
+    FileUtils::closeFile(istr);
+    
+    // does the temp path work?
+    const std::string temp_file_ok = Support::temppath("README.txt");
+    BOOST_CHECK(FileUtils::fileExists(temp_file_ok));
+    const std::string temp_file = Support::temppath("my_temp_file.dat");
+    BOOST_CHECK(!FileUtils::fileExists(temp_file));
+
+    // make sure we have write access to the temp dir
+    std::ostream* ostr = FileUtils::createFile(temp_file);
+    *ostr << "yow";
+    FileUtils::closeFile(ostr);
+    BOOST_CHECK(FileUtils::fileExists(temp_file));
+    BOOST_CHECK(FileUtils::deleteFile(temp_file));
+    BOOST_CHECK(!FileUtils::fileExists(temp_file));
+
+    return;
+}
 
 
 BOOST_AUTO_TEST_CASE(test_diff_file)

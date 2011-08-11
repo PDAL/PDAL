@@ -54,6 +54,13 @@ std::string Support::datapath(const std::string& file)
 }
 
 
+std::string Support::temppath(const std::string& file)
+{
+    std::string s = TestConfig::g_data_path + "../temp/" + file;
+    return s;
+}
+
+
 // do a comparison by line of two (text) files, ignoring CRLF differences
 boost::uint32_t Support::diff_text_files(const std::string& file1, const std::string& file2)
 {
