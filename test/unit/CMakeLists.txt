@@ -47,6 +47,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     SpatialReferenceTest.cpp
     StageFactoryTest.cpp
     StreamManagerTest.cpp
+    SupportTest.cpp
     TerraSolidTest.cpp
     UtilsTest.cpp
     VectorTest.cpp

@@ -54,7 +54,14 @@ class Support
 public:
     static std::string datapath(const std::string&);
 
-    // verify if two files are the same
+    // returns number of bytes different for two binary files (or maxint if a file doesn't exist)
+    static boost::uint32_t diff_files(const std::string& file1, const std::string& file2);
+
+    // returns number of lines different for two text files (or maxint if a file doesn't exist)
+    static boost::uint32_t diff_text_files(const std::string& file1, const std::string& file2);
+
+    // returns true iff the two (binary or ascii) files are the same,
+    // using the above diff_files/diff_text_files functions
     static bool compare_files(const std::string& file1, const std::string& file2);
     static bool compare_text_files(const std::string& file1, const std::string& file2);
 

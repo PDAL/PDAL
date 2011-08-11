@@ -54,54 +54,79 @@ std::string Support::datapath(const std::string& file)
 }
 
 
-// same as compare_files, but for text files: ignores CRLF differences
-bool Support::compare_text_files(const std::string& file1, const std::string& file2)
+// do a comparison by line of two (text) files, ignoring CRLF differences
+boost::uint32_t Support::diff_text_files(const std::string& file1, const std::string& file2)
 {
     if (!pdal::FileUtils::fileExists(file1) ||
         !pdal::FileUtils::fileExists(file2))
-        return false;
+        return std::numeric_limits<boost::uint32_t>::max();
 
     std::istream* str1 = pdal::FileUtils::openFile(file1, false);
     std::istream* str2 = pdal::FileUtils::openFile(file2, false);
     BOOST_CHECK(str1);
     BOOST_CHECK(str2);
 
-    bool same = true;
-    while (!str1->eof())
+    boost::uint32_t numdiffs = 0;
+    while (!str1->eof() && !str2->eof())
     {
         std::string buf1;
         std::string buf2;
         std::getline(*str1, buf1);
         std::getline(*str2, buf2);
 
-        same = (str1->eof() == str2->eof());
-        if (!same) break;
+        if (str1->eof() && str2->eof())
+        {
+            // hit end on both together
+            break;
+        }
+        else if (str1->eof() && !str2->eof())
+        {
+            // str1 ended, but str2 still going
+            while (!str2->eof())
+            {
+                std::getline(*str2, buf2);
+                ++numdiffs;
+            }
+            break;
+        }
+        else if (!str1->eof() && str2->eof())
+        {
+            // str2 ended, but str1 still going
+            while (!str1->eof())
+            {
+                std::getline(*str1, buf1);
+                ++numdiffs;
+            }
+            break;
+        }
 
-        same = (buf1 == buf2);
-        if (!same) break;
+        if (buf1 != buf2)
+        {
+            ++numdiffs;
+        }
     }
+
+    assert(str1->eof());
+    assert(str2->eof());
 
     pdal::FileUtils::closeFile(str1);
     pdal::FileUtils::closeFile(str2);
 
-    return same;
+    return numdiffs;
 }
 
-bool Support::compare_files(const std::string& file1, const std::string& file2)
+
+// do a byte-wise comparison of two (binary) files
+boost::uint32_t Support::diff_files(const std::string& file1, const std::string& file2)
 {
     if (!pdal::FileUtils::fileExists(file1) ||
         !pdal::FileUtils::fileExists(file2))
-        return false;
+        return std::numeric_limits<boost::uint32_t>::max();
 
     boost::uintmax_t len1x = pdal::FileUtils::fileSize(file1);
     boost::uintmax_t len2x = pdal::FileUtils::fileSize(file2);
-    size_t len1 = (size_t)len1x; // BUG
-    size_t len2 = (size_t)len2x;
-
-    if (len1 != len2)
-    {
-        return false;
-    }
+    const size_t len1 = (size_t)len1x; // BUG
+    const size_t len2 = (size_t)len2x;
 
     std::istream* str1 = pdal::FileUtils::openFile(file1);
     std::istream* str2 = pdal::FileUtils::openFile(file2);
@@ -120,22 +145,45 @@ bool Support::compare_files(const std::string& file1, const std::string& file2)
     char* p = buf1;
     char* q = buf2;
 
-    int numdiffs = 0;
-    for (boost::uintmax_t i=0; i<len1; i++)
+    boost::uint32_t numdiffs = 0;
+    const size_t minlen = (len1 < len2) ? len1 : len2;
+    const size_t maxlen = (len1 > len2) ? len1 : len2;
+    for (size_t i=0; i<minlen; i++)
     {
         if (*p != *q) 
         {
             ++numdiffs;
         }
+
         ++p;
         ++q;
+    }
+
+    if (minlen != maxlen)
+    {
+        numdiffs += (maxlen - minlen);
     }
 
     delete[] buf1;
     delete[] buf2;
 
-    return (numdiffs==0);
+    return numdiffs;
 }
+
+
+bool Support::compare_files(const std::string& file1, const std::string& file2)
+{
+    const boost::uint32_t numdiffs = diff_files(file1, file2);
+    return (numdiffs == 0);
+}
+
+
+bool Support::compare_text_files(const std::string& file1, const std::string& file2)
+{
+    boost::uint32_t numdiffs = diff_text_files(file1, file2);
+    return (numdiffs == 0);
+}
+
 
 
 #define Compare(x,y)    BOOST_CHECK(pdal::Utils::compare_approx((x),(y),0.001));
