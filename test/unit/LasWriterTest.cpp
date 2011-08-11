@@ -93,24 +93,25 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 {
     // remove file from earlier run, if needed
-    FileUtils::deleteFile("temp.laz");
+    FileUtils::deleteFile("laszip/LasWriterTest_test_simple_laz.laz");
 
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::LasReader reader(Support::datapath("laszip/basefile.las"));
     
-    std::ostream* ofs = FileUtils::createFile("temp.laz");
+    std::ostream* ofs = FileUtils::createFile(Support::datapath("laszip/LasWriterTest_test_simple_laz.laz"));
 
     {
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
         pdal::drivers::las::LasWriter writer(reader, ofs);
-        writer.initialize();
-
         writer.setCompressed(true);
         writer.setDate(0, 0);
         writer.setPointFormat(::pdal::drivers::las::PointFormat3);
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
+
+        writer.initialize();
+
 
         writer.write(numPoints);
     }
@@ -118,15 +119,15 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
     FileUtils::closeFile(ofs);
 
     {
-        pdal::drivers::las::LasReader reader("temp.laz");
+        pdal::drivers::las::LasReader reader(Support::datapath("laszip/LasWriterTest_test_simple_laz.laz"));
     }
 
-    bool filesSame = Support::compare_files("temp.laz", Support::datapath("1.2-with-color.laz"));
+    bool filesSame = Support::compare_files(Support::datapath("laszip/LasWriterTest_test_simple_laz.laz"), Support::datapath("laszip/laszip-generated.laz"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
     {
-        FileUtils::deleteFile("temp.laz");
+        FileUtils::deleteFile("LasWriterTest_test_simple_laz.laz");
     }
 
     return;
