@@ -95,21 +95,27 @@ private:
 
 class PDAL_DLL ScalingFilter: public ScalingFilterBase
 {
-    DECLARE_STATICS
 public:
+    SET_STAGE_NAME("filters.scaling", "Scaling Filter")
+
     ScalingFilter(Stage& prevStage);
     ScalingFilter(Stage& prevStage, const Options&);
     ScalingFilter(Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
+
+    virtual const Options getDefaultOptions() const;
 };
 
 
 class PDAL_DLL DescalingFilter: public ScalingFilterBase
 {
-    DECLARE_STATICS
 public:
+    SET_STAGE_NAME("filters.descaling", "Descaling Filter")
+
     DescalingFilter(Stage& prevStage);
     DescalingFilter(Stage& prevStage, const Options&);
     DescalingFilter(Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
+
+    virtual const Options getDefaultOptions() const;
 };
 
 

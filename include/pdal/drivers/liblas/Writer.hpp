@@ -53,14 +53,15 @@ namespace pdal { namespace drivers { namespace liblas {
 // we default to LAS 1.2, point format 0
 class PDAL_DLL LiblasWriter : public Writer
 {
-    DECLARE_STATICS
-
 public:
+    SET_STAGE_NAME("drivers.liblas.writer", "Liblas Writer")
+
     LiblasWriter(Stage& prevStage, const Options&);
     LiblasWriter(Stage& prevStage, std::ostream*);
     ~LiblasWriter();
 
     virtual void initialize();
+    virtual const Options getDefaultOptions() const;
 
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
     void setPointFormat(::pdal::drivers::las::PointFormat);

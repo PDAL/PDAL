@@ -40,6 +40,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/filters/CropFilter.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
 
 
 BOOST_AUTO_TEST_SUITE(OptionsTest)
@@ -51,7 +52,9 @@ static std::string xml_str_ref = "<Name>my_string</Name><Value>Yow.</Value><Desc
 
 BOOST_AUTO_TEST_CASE(test_static_options)
 {
-    const pdal::Options& opts = pdal::filters::CropFilter::s_getDefaultOptions();
+    pdal::drivers::faux::Reader reader(pdal::Bounds<double>(), 1, pdal::drivers::faux::Reader::Constant);
+    pdal::filters::CropFilter crop(reader, pdal::Bounds<double>());
+    const pdal::Options& opts = crop.getDefaultOptions();
 
     BOOST_CHECK(opts.hasOption<pdal::Bounds<double> >("bounds"));
     BOOST_CHECK(!opts.hasOption<std::string>("metes"));

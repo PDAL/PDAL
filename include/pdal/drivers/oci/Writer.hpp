@@ -49,12 +49,14 @@ namespace pdal { namespace drivers { namespace oci {
 
 class PDAL_DLL Writer : public pdal::Writer
 {
-    DECLARE_STATICS
-
 public:
+    SET_STAGE_NAME("drivers.oci.writer", "OCI Writer")
+
     Writer(Stage& prevStage, const Options&);
     ~Writer();
+
     virtual void initialize();
+    virtual const Options getDefaultOptions() const;
 
     void run(std::ostringstream const& command);
     inline void setBounds(pdal::Bounds<double> bounds) {m_bounds = bounds; }
@@ -101,7 +103,7 @@ private:
     
     template<typename T> T getDefaultedOption(std::string const& option_name) const
     {
-        T default_value = Writer::s_getDefaultOptions().getOption<T>(option_name).getValue();
+        T default_value = getDefaultOptions().getOption<T>(option_name).getValue();
         return getOptions().getValueOrDefault<T>(option_name, default_value);
     }
     

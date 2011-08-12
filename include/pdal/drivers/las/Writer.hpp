@@ -53,14 +53,15 @@ class ZipPoint;
 
 class PDAL_DLL LasWriter : public Writer
 {
-    DECLARE_STATICS
-
 public:
+    SET_STAGE_NAME("drivers.las.writer", "Las Writer")
+
     LasWriter(Stage& prevStage, const Options&);
     LasWriter(Stage& prevStage, std::ostream*);
     ~LasWriter();
 
     virtual void initialize();
+    virtual const Options getDefaultOptions() const;
 
     void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
     void setPointFormat(PointFormat);

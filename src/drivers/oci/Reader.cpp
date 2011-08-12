@@ -50,8 +50,6 @@
 namespace pdal { namespace drivers { namespace oci {
 
 
-IMPLEMENT_STATICS(Reader, "drivers.oci.reader", "OCI Reader")
-
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
     , m_querytype(QUERY_UNKNOWN)
@@ -115,9 +113,9 @@ void Reader::initialize()
 }
 
 
-const Options& Reader::s_getDefaultOptions()
+const Options Reader::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
     
     Option<std::string> connection("connection",
                                    "",

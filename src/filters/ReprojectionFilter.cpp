@@ -81,8 +81,6 @@ namespace pdal { namespace filters {
 #endif
 
 
-IMPLEMENT_STATICS(ReprojectionFilter, "filters.reprojection", "Reprojection Filter")
-
 
 ReprojectionFilter::ReprojectionFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
@@ -181,9 +179,9 @@ void ReprojectionFilter::initialize()
 }
 
 
-const Options& ReprojectionFilter::s_getDefaultOptions()
+const Options ReprojectionFilter::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
     return options;
 }
 

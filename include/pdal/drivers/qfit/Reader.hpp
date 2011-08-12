@@ -119,17 +119,17 @@ public:
 
 class PDAL_DLL Reader : public pdal::Reader
 {
-    DECLARE_STATICS
-
 public:
+    SET_STAGE_NAME("drivers.qfit.reader", "QFIT Reader")
+
     Reader(const Options& options);
     ~Reader();
     
     virtual void initialize();
+    virtual const Options getDefaultOptions() const;
 
     std::string getFileName() const;
 
- 
     bool supportsIterator (StageIteratorType t) const
     {   
         if (t == StageIterator_Sequential ) return true;

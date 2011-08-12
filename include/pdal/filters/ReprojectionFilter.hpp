@@ -52,16 +52,18 @@ class ReprojectionFilterSequentialIterator;
 
 class PDAL_DLL ReprojectionFilter : public Filter
 {
-    DECLARE_STATICS
-
 public:
+    SET_STAGE_NAME("filters.reprojection", "Reprojection Filter")
+
     ReprojectionFilter(Stage& prevStage, const Options&);
     ReprojectionFilter(Stage& prevStage,
                        const SpatialReference& outSRS);
     ReprojectionFilter(Stage& prevStage,
                        const SpatialReference& inSRS,
                        const SpatialReference& outSRS);
+
     virtual void initialize();
+    virtual const Options getDefaultOptions() const;
 
     bool supportsIterator (StageIteratorType t) const
     {   

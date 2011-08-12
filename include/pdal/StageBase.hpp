@@ -84,39 +84,27 @@ public:
     bool isVerbose() const; // true iff verbosity>0 
     boost::uint8_t getVerboseLevel() const; 
 
-    // For Name, Description, and DefaultOptions:
-    //   each concrete class should provide a static function s_getX() which returns a static object
-    //   each concrete class should provide a virtual getX() which returns s_getX()
-    // This is automated via the GenerateStatics() macro below.
+    // Everyone must implement this.  If you want to access the list of 
+    // options "statically", you are free to construct the stage with no
+    // arguments and cal getDefaultOptions() on it -- there is no need
+    // to call initialize(), so it should be a fast/safe operation.
+    virtual const Options getDefaultOptions() const = 0;
 
     // Use a dotted, XPath-style name for your 
     // stage.  For example, 'drivers.las.reader' or 'filters.crop'.  This 
     // XPath-style name will also correspond to an entry in the pdal::Options
     // tree for the given stage.
+    virtual std::string getName() const = 0;
+    virtual std::string getDescription() const = 0;
 
-    virtual const Options& getDefaultOptions() const = 0; // { return s_getDefaultOptions(); }
-    virtual const std::string& getName() const = 0; // { return s_getName(); }
-    virtual const std::string& getDescription() const = 0; // { return s_getDescription(); }
-    //static const Options& s_getDefaultOptions();
-    //static const std::string& s_getName();
-    //static const std::string& s_getDescription();
-    
-#define DECLARE_STATICS  \
-    public: \
-    static const Options& s_getDefaultOptions(); \
-    virtual const Options& getDefaultOptions() const;  \
-    static const std::string& s_getName();  \
-    virtual const std::string& getName() const;  \
-    static const std::string& s_getDescription();  \
-    virtual const std::string& getDescription() const;  \
-    private:
-
-#define IMPLEMENT_STATICS(T, name, description)  \
-    const Options& T::getDefaultOptions() const { return s_getDefaultOptions(); }  \
-    const std::string& T::s_getName() { static std::string s(name); return s; }  \
-    const std::string& T::getName() const { return s_getName(); }  \
-    const std::string& T::s_getDescription() { static std::string s(description); return s; }  \
-    const std::string& T::getDescription() const { return s_getDescription(); }
+    // For getName() and getDescription(), each stage provides a static and 
+    // a dynamic version of the function.  Each (concrete) stage should call 
+    // the following macro to create the functions for you.
+#define SET_STAGE_NAME(name, description)  \
+    static std::string s_getName() { return name; }  \
+    std::string getName() const { return name; }  \
+    static std::string s_getDescription() { return description; }  \
+    std::string getDescription() const { return description; }
 
 protected:
     Options& getOptions();

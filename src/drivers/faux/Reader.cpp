@@ -43,8 +43,6 @@
 namespace pdal { namespace drivers { namespace faux {
 
 
-IMPLEMENT_STATICS(Reader, "drivers.faux.reader", "Faux Reader")
-
 static Reader::Mode string2mode(const std::string& str)
 {
     if (compare_no_case(str.c_str(), "constant")==0) return Reader::Constant;
@@ -118,9 +116,9 @@ void Reader::initialize()
 }
 
 
-const Options& Reader::s_getDefaultOptions()
+const Options Reader::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
     return options;
 }
 

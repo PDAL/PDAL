@@ -359,9 +359,6 @@ pdal::StageSequentialIterator* ScalingFilterBase::createSequentialIterator() con
 // ------------------------------------------------------------------------
 
 
-IMPLEMENT_STATICS(ScalingFilter, "filters.scaling", "Scaling Filter")
-
-
 ScalingFilter::ScalingFilter(Stage& prevStage, const Options& options)
     : ScalingFilterBase(prevStage, false, options)
 {
@@ -381,15 +378,13 @@ ScalingFilter::ScalingFilter(Stage& prevStage, double scaleX, double offsetX, do
 }
 
 
-const Options& ScalingFilter::s_getDefaultOptions()
+const Options ScalingFilter::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
     return options;
 }
 
 // ------------------------------------------------------------------------
-
-IMPLEMENT_STATICS(DescalingFilter, "filters.descaling", "Descaling Filter")
 
 
 DescalingFilter::DescalingFilter(Stage& prevStage, const Options& options)
@@ -411,7 +406,7 @@ DescalingFilter::DescalingFilter(Stage& prevStage, double scaleX, double offsetX
 }
 
 
-const Options& DescalingFilter::s_getDefaultOptions()
+const Options DescalingFilter::getDefaultOptions() const
 {
     static Options options;
     return options;
