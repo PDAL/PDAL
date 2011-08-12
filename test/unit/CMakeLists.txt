@@ -12,6 +12,9 @@ SET (PDAL_UNITTEST_XMLSCHEMA_TEST XMLSchemaTest.cpp)
 endif()
 
 SET(PDAL_UNITTEST_TEST_SRC
+    pc2pcTest.cpp
+    pcinfoTest.cpp
+    pcpipelineTest.cpp
     BoundsTest.cpp
     ByteSwapFilterTest.cpp
     CacheFilterTest.cpp
