@@ -76,7 +76,9 @@ public:
 
     // default false
     void setCompressed(bool);
-
+    
+    void setHeaderPadding(boost::uint32_t const& v);
+    
 protected:
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
     virtual boost::uint32_t writeBuffer(const PointBuffer&);
