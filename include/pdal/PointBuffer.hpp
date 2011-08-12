@@ -148,6 +148,16 @@ public:
 
         return;
     }
+    
+    inline boost::uint64_t getBufferByteLength() const
+    {
+        return m_pointSize*m_numPoints;
+    }
+    inline boost::uint64_t getBufferByteCapacity() const
+    {
+        return m_pointSize*m_capacity;
+    }
+
 
     // access to the raw memory
     inline boost::uint8_t* getData(std::size_t pointIndex) const
