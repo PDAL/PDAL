@@ -43,7 +43,12 @@
 #include <pdal/Schema.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/PointBuffer.hpp>
-
+#include <pdal/StageIterator.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/exceptions.hpp>
 #include "TestConfig.hpp"
 
 
@@ -53,6 +58,56 @@ std::string Support::datapath()
     return s;
 }
 
+bool Support::compare_stage_data(pdal::Stage const& a, pdal::Stage const& b)
+{
+    pdal::Schema const& a_schema = a.getSchema();
+    pdal::Schema const& b_schema = b.getSchema();
+    if (a_schema != b_schema) return false;
+    
+    boost::uint64_t a_num_points = a.getNumPoints();
+    boost::uint64_t b_num_points = b.getNumPoints();
+    if (a_num_points != b_num_points) return false;
+    
+    pdal::StageSequentialIterator* a_itr = a.createSequentialIterator();
+    pdal::StageSequentialIterator* b_itr = b.createSequentialIterator();
+    
+    if (!a_itr) throw pdal::pdal_error("unable to create sequential iterator for compare_stage_data for stage a");
+    if (!b_itr) throw pdal::pdal_error("unable to create sequential iterator for compare_stage_data for stage b");
+
+    
+    // if we don't have any sizes here, we'll just use a small default
+    if (a_num_points == 0) a_num_points = 1024;
+    if (b_num_points == 0) b_num_points = 1024;
+    
+    pdal::PointBuffer a_data(a_schema, a_num_points);
+    pdal::PointBuffer b_data(b_schema, b_num_points);
+
+    {
+        boost::uint32_t a_numRead = a_itr->read(a_data);
+        boost::uint32_t b_numRead = b_itr->read(b_data);
+        if (a_numRead != b_numRead) return false;
+        
+        boost::uint8_t const* a_bytes = a_data.getData(0);
+        boost::uint8_t const* b_bytes = b_data.getData(0);
+        
+        boost::uint64_t a_length = a_data.getBufferByteLength();
+        // boost::uint64_t b_length = b_data.getBufferByteLength();
+    
+        for (boost::uintmax_t i=0; i<a_length; i++)
+        {
+            if (*a_bytes != *b_bytes) 
+            {
+                return false;
+            }
+            ++a_bytes;
+            ++b_bytes;
+        }
+        
+    }
+    
+    return true;
+    
+}
 
 std::string Support::datapath(const std::string& file)
 {

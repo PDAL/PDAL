@@ -129,6 +129,10 @@ void LiblasWriter::setCompressed(bool v)
     m_externalHeader->SetCompressed(v);
 }
 
+void LiblasWriter::setHeaderPadding(boost::uint32_t const& v)
+{
+    m_externalHeader->SetHeaderPadding(v);
+}
 
 void LiblasWriter::setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion)
 {

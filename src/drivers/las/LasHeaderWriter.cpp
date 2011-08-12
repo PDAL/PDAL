@@ -109,6 +109,7 @@ void LasHeaderWriter::write()
     }
 
     {
+        boost::uint32_t padding_before_calculations = m_header.GetHeaderPadding();
         int32_t existing_padding = m_header.GetDataOffset() - 
                                   (m_header.getVLRBlockSize() + 
                                    m_header.GetHeaderSize());
@@ -137,12 +138,14 @@ void LasHeaderWriter::write()
             }
 
         }
-        
-        m_header.SetDataOffset( m_header.GetHeaderSize() + 
-                                m_header.getVLRBlockSize() + 
-                                m_header.GetHeaderPadding());
+
+    m_header.SetDataOffset( m_header.GetHeaderSize() + 
+                            m_header.getVLRBlockSize() + 
+                            m_header.GetHeaderPadding() + padding_before_calculations);
 
     }
+    
+
 
         // 1. File Signature
     std::string const filesig(m_header.GetFileSignature());
