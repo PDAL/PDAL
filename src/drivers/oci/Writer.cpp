@@ -469,6 +469,7 @@ bool Writer::IsGeographic(boost::int32_t srid)
 
 std::string Writer::LoadSQLData(std::string const& filename)
 {
+    std::cout << "LoadSQLData for " << filename << std::endl;
     if (!FileUtils::fileExists(filename))
     {
         std::ostringstream oss;
@@ -761,12 +762,23 @@ oss << "declare\n"
 
     if (!FileUtils::fileExists(base_table_boundary_wkt))
     {
+        if (!IsValidWKT(base_table_boundary_wkt))
+        {
+            std::ostringstream oss;
+            oss << "WKT for base_table_boundary_wkt was not valid and '" << base_table_boundary_wkt
+                << "' doesn't exist as a file";
+            throw pdal::pdal_error(oss.str());
+        }        
         wkt_s << base_table_boundary_wkt;
     } else {
+        std::cout << "loading: " << base_table_boundary_wkt << std::endl;
         std::string wkt = LoadSQLData(base_table_boundary_wkt);
         if (!IsValidWKT(wkt))
         {
-            throw pdal::pdal_error("WKT for base_table_boundary_wkt was not valid");
+            std::ostringstream oss;
+            oss << "WKT for base_table_boundary_wkt was from file '" << base_table_boundary_wkt 
+                << "' is not valid";
+            throw pdal::pdal_error(oss.str());
         }
         wkt_s << wkt;
     }
