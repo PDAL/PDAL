@@ -96,6 +96,11 @@ public:
     static void check_p710_p711_p712(const pdal::PointBuffer& data, const pdal::Schema& schema);
 
     static void compareBounds(const pdal::Bounds<double>& p, const pdal::Bounds<double>& q);
+
+    // executes "cmd" via popen, copying stdout into output and returning the status code
+    //
+    // note: under windows, all "/" characrters in cmd will be converted to "\\" for you
+    static int run_command(const std::string& cmd, std::string& output);
 };
 
 

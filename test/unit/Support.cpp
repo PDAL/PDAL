@@ -311,3 +311,48 @@ void Support::compareBounds(const pdal::Bounds<double>& p, const pdal::Bounds<do
     BOOST_CHECK_CLOSE(p.getMaximum(1), q.getMaximum(1), 1);
     BOOST_CHECK_CLOSE(p.getMaximum(2), q.getMaximum(2), 1);
 }
+
+
+// http://www.codepedia.com/1/CppStringReplace
+static std::string replaceAll(std::string result, 
+                              const std::string& replaceWhat, 
+                              const std::string& replaceWithWhat)
+{
+    while(1)
+    {
+        const int pos = result.find(replaceWhat);
+        if (pos==-1) break;
+        result.replace(pos,replaceWhat.size(),replaceWithWhat);
+    }
+    return result;
+}
+
+
+int Support::run_command(const std::string& rawcmd, std::string& output)
+{
+    const int maxbuf = 4096;
+    char buf[maxbuf];
+
+    const std::string cmd = replaceAll(rawcmd, "/", "\\");
+
+    output = "";
+    
+    FILE* fp = _popen(cmd.c_str(), "r");
+    while (!feof(fp))
+    {
+        if (fgets(buf, maxbuf, fp) == NULL)
+        {
+            if (feof(fp)) break;
+
+            if (ferror(fp))
+            {
+                throw std::runtime_error("error executing command");
+            }
+        }
+
+        output += buf;
+    }
+
+    int stat = _pclose(fp);
+    return stat;
+}

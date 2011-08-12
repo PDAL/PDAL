@@ -207,4 +207,22 @@ BOOST_AUTO_TEST_CASE(test_diff_text_file)
     return;
 }
 
+
+BOOST_AUTO_TEST_CASE(test_run_command)
+{
+    //const char* cmd = "../../bin/Debug/pcinfo ../data/simple.las";
+    
+    // amazingly, this command works under both dos *and* unix shells
+    const char* cmd = "echo foo";
+
+    std::string output;
+    const int stat = Support::run_command(cmd, output);
+
+    BOOST_CHECK_EQUAL(output.substr(0, 3), "foo");
+    BOOST_CHECK_EQUAL(stat, 0);
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
