@@ -109,6 +109,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
         writer.setPointFormat(::pdal::drivers::las::PointFormat3);
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
+        writer.setHeaderPadding(2);
 
         writer.initialize();
 
