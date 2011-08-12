@@ -52,8 +52,26 @@ namespace pdal
 class Support
 {
 public:
-    static std::string datapath(const std::string&);
-    static std::string temppath(const std::string&);
+    // this is where the reference files (input data) live
+    static std::string datapath();
+
+    // returns "datapath + / + file"
+    static std::string datapath(const std::string& file);
+
+    // this is where the temporary output files go
+    static std::string temppath();
+
+    // returns "temppath + / + file"
+    static std::string temppath(const std::string& file);
+
+    // this is where the pdal executables live
+    static std::string binpath();
+
+    // return "bindir + / + file"
+    static std::string binpath(const std::string& file);
+
+    // returns "name" on unix and "name + .exe" on windows
+    static std::string exename(const std::string& name);
 
     // returns number of bytes different for two binary files (or maxint if a file doesn't exist)
     static boost::uint32_t diff_files(const std::string& file1, const std::string& file2);

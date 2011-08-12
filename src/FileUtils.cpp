@@ -134,10 +134,23 @@ boost::uintmax_t FileUtils::fileSize(const std::string& file)
 }
 
 
+std::string FileUtils::addTrailingSlash(const std::string& path)
+{
+    std::string ret = path;
+    
+    if (ret[ret.size() - 1] != '/')
+        ret += "/";
+
+    return ret;
+}
+
+
 std::string FileUtils::getcwd()
 {
     const boost::filesystem::path p = boost::filesystem::current_path();
-    return p.generic_string();
+    std::string path = p.generic_string();
+    path = addTrailingSlash(path);
+    return path;
 }
 
 
@@ -165,8 +178,9 @@ std::string FileUtils::toAbsolutePath(const std::string& filename, const std::st
 std::string FileUtils::getDirectory(const std::string& path)
 {
     const boost::filesystem::path dir = boost::filesystem::path(path).parent_path();
-    const std::string str = dir.generic_string();
-    return str;
+    std::string ret = dir.generic_string();
+    ret = addTrailingSlash(ret);
+    return ret;
 }
 
 

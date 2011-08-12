@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(test_getcwd)
 #if 0
     // this is hardcoded for mpg's environment
     const std::string cwd = FileUtils::getcwd();
-    BOOST_CHECK(cwd == "D:/dev/pdal/test/unit");
+    BOOST_CHECK(cwd == "D:/dev/pdal/test/unit/");
 #endif
 
     return;
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(test_toAbsolutePath)
 
     // check 1-arg version: make absolute when file is relative, via current working dir
     const string a = FileUtils::toAbsolutePath("foo.txt");
-    BOOST_CHECK_EQUAL(a, root + "/" + "foo.txt");
+    BOOST_CHECK_EQUAL(a, root + "foo.txt");
 
     // check 1-arg version: make absolute when file is already absolute
     const string b = FileUtils::toAbsolutePath(drive + "/baz/foo.txt");
@@ -118,11 +118,11 @@ BOOST_AUTO_TEST_CASE(test_toAbsolutePath)
 
     // check 2-arg version: make absolute when file is relative, via given base (which isn't absolute)
     const string d = FileUtils::toAbsolutePath("foo.txt", "x/y/z");
-    BOOST_CHECK_EQUAL(d, root + "/" + "x/y/z/" + "foo.txt");
+    BOOST_CHECK_EQUAL(d, root + "x/y/z/" + "foo.txt");
 
     // check 1-arg version: make absolute when file is already absolute
     const string e = FileUtils::toAbsolutePath(drive+"/baz/foo.txt", drive+"/a/b/c/d");
-    BOOST_CHECK_EQUAL(e, drive+"/baz/foo.txt");
+    BOOST_CHECK_EQUAL(e, drive + "/baz/foo.txt");
 
     return;
 }
@@ -132,11 +132,11 @@ BOOST_AUTO_TEST_CASE(test_getDirectory)
 {
     // test absolute case
     const std::string a = FileUtils::getDirectory(drive + "/a/b/foo.txt");
-    BOOST_CHECK_EQUAL(a, drive+"/a/b");
+    BOOST_CHECK_EQUAL(a, drive + "/a/b/");
 
     // test relative case
     const std::string b = FileUtils::getDirectory("a/b/foo.txt");
-    BOOST_CHECK_EQUAL(b, "a/b");
+    BOOST_CHECK_EQUAL(b, "a/b/");
 
     return;
 }

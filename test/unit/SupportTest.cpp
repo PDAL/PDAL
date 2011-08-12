@@ -69,6 +69,16 @@ BOOST_AUTO_TEST_CASE(test_paths)
     BOOST_CHECK(FileUtils::deleteFile(temp_file));
     BOOST_CHECK(!FileUtils::fileExists(temp_file));
 
+    // does binpath (and exename) work?
+    std::string this_bin = Support::exename("pdal_test");
+#ifdef PDAL_COMPILER_MSVC
+    BOOST_CHECK_EQUAL(this_bin, "pdal_test.exe");
+#else
+    BOOST_CHECK_EQUAL(this_bin, "pdal_test");
+#endif
+    this_bin = Support::binpath(this_bin);
+    BOOST_CHECK(FileUtils::fileExists(this_bin));
+
     return;
 }
 
@@ -209,11 +219,9 @@ BOOST_AUTO_TEST_CASE(test_diff_text_file)
 
 
 BOOST_AUTO_TEST_CASE(test_run_command)
-{
-    //const char* cmd = "../../bin/Debug/pcinfo ../data/simple.las";
-    
+{    
     // amazingly, this command works under both dos *and* unix shells
-    const char* cmd = "echo foo";
+    const std::string cmd = "echo foo";
 
     std::string output;
     const int stat = Support::run_command(cmd, output);

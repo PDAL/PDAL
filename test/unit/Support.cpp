@@ -47,17 +47,56 @@
 #include "TestConfig.hpp"
 
 
+std::string Support::datapath()
+{
+    const std::string s = TestConfig::g_data_path;
+    return s;
+}
+
+
 std::string Support::datapath(const std::string& file)
 {
-    std::string s = TestConfig::g_data_path + file;
+    const std::string s = datapath() + file;
+    return s;
+}
+
+
+std::string Support::temppath()
+{
+    const std::string s = TestConfig::g_data_path + "../temp/";
     return s;
 }
 
 
 std::string Support::temppath(const std::string& file)
 {
-    std::string s = TestConfig::g_data_path + "../temp/" + file;
+    const std::string s = temppath() + file;
     return s;
+}
+
+
+std::string Support::binpath()
+{
+    const std::string argv0 = boost::unit_test::framework::master_test_suite().argv[0];
+    const std::string s = pdal::FileUtils::getDirectory(argv0);
+    return s;
+}
+
+
+std::string Support::binpath(const std::string& file)
+{
+    const std::string s = binpath() + file;
+    return s;
+}
+
+
+std::string Support::exename(const std::string& name)
+{
+#ifdef PDAL_COMPILER_MSVC
+    return name + ".exe";
+#else
+    return name;
+#endif
 }
 
 

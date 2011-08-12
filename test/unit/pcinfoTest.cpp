@@ -33,6 +33,8 @@
 ****************************************************************************/
 
 #include <boost/test/unit_test.hpp>
+#include <pdal/FileUtils.hpp>
+#include "Support.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -43,7 +45,9 @@ BOOST_AUTO_TEST_SUITE(pcinfoTest)
 
 BOOST_AUTO_TEST_CASE(pcinfoTest_1)
 {
-      return;
+    const std::string cmd = Support::binpath(Support::exename("pcinfo"));
+    BOOST_CHECK(pdal::FileUtils::fileExists(cmd));
+    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

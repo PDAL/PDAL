@@ -66,9 +66,11 @@ public:
     static boost::uintmax_t fileSize(const std::string& filename);
 
     // return current working dir
+    // the result will always have a trailing '/'
     static std::string getcwd();
 
     // return the directory component of the given path, e.g. "d:/foo/bar/a.c" -> "d:/foo/bar"
+    // the result will always have a trailing '/'
     static std::string getDirectory(const std::string& path);
 
     // returns true iff the path is not relative
@@ -85,6 +87,8 @@ public:
     static std::string toAbsolutePath(const std::string& filename, const std::string base);
 
 private:
+    static std::string addTrailingSlash(const std::string& path);
+
     FileUtils& operator=(const FileUtils&); // not implemented
     FileUtils(const FileUtils&); // not implemented;
 };
