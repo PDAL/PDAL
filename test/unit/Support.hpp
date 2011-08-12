@@ -39,11 +39,13 @@
 
 #include <pdal/Bounds.hpp>
 #include <boost/cstdint.hpp>
+#include <pdal/pdal.hpp>
 
 namespace pdal
 {
     class PointBuffer;
     class Schema;
+    class Stage;
 }
 
 #include <boost/cstdint.hpp>
@@ -54,6 +56,8 @@ class Support
 public:
     static std::string datapath(const std::string&);
 
+    static bool compare_stage_data(pdal::Stage const& a, pdal::Stage const& b);
+    
     // verify if two files are the same
     static bool compare_files(const std::string& file1, const std::string& file2);
     static bool compare_text_files(const std::string& file1, const std::string& file2);
