@@ -80,14 +80,12 @@ public:
     // returns number of bytes different for two binary files (or maxint if a file doesn't exist)
     static boost::uint32_t diff_files(const std::string& file1, const std::string& file2);
 
-    // same as diff_files, but allows for regions of the file be to be ignored
-    //
-    // ignorable_start/length are arrays of byte-offsets and byte-lengths,
-    // for regions in the file we wish to NOT do the comparison on.  (We are 
-    // assuming such an ignorable region exists with the same length in both 
-    // files, such as would be the case if an embedded version number in two
-    // LAS files was different.)  The number of ignorable regions is set
-    // via num_ignorables.
+    // same as diff_files, but allows for a region of the file be to be ignored
+    // (region is specified with a starting offset and a length)
+    static boost::uint32_t diff_files(const std::string& file1, const std::string& file2,
+                                      boost::uint32_t ignorable_start, boost::uint32_t ignorable_length);
+
+    // same as above diff_files with ignorable region, but for multiple regions
     static boost::uint32_t diff_files(const std::string& file1, const std::string& file2,
                                       boost::uint32_t* ignorable_start, boost::uint32_t* ignorable_length, boost::uint32_t num_ignorables);
 

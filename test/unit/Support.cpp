@@ -217,6 +217,15 @@ boost::uint32_t Support::diff_text_files(const std::string& file1, const std::st
 }
 
 
+boost::uint32_t Support::diff_files(const std::string& file1, const std::string& file2,
+                                    boost::uint32_t ignorable_start, boost::uint32_t ignorable_length)
+{
+    boost::uint32_t start[] = { ignorable_start };
+    boost::uint32_t len[] = { ignorable_length };
+    return diff_files(file1, file2, start, len, 1);
+}
+
+
 // do a byte-wise comparison of two (binary) files
 boost::uint32_t Support::diff_files(const std::string& file1, const std::string& file2,
                                     boost::uint32_t* ignorable_start, boost::uint32_t* ignorable_length, boost::uint32_t num_ignorables)
