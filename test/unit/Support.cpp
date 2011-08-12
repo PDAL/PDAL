@@ -337,7 +337,12 @@ int Support::run_command(const std::string& rawcmd, std::string& output)
 
     output = "";
     
+#ifdef PDAL_COMPILER_MSVC
     FILE* fp = _popen(cmd.c_str(), "r");
+#else
+    FILE* fp = popen(cmd.c_str(), "r");
+#endif
+
     while (!feof(fp))
     {
         if (fgets(buf, maxbuf, fp) == NULL)
@@ -353,6 +358,11 @@ int Support::run_command(const std::string& rawcmd, std::string& output)
         output += buf;
     }
 
+#ifdef PDAL_COMPILER_MSVC
     int stat = _pclose(fp);
+#else
+    int stat = pclose(fp);
+#endif
+
     return stat;
 }
