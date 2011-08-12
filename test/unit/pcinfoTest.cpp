@@ -43,10 +43,26 @@
 
 BOOST_AUTO_TEST_SUITE(pcinfoTest)
 
+
+static std::string appName()
+{
+    const std::string app = Support::binpath(Support::exename("pcinfo"));
+    BOOST_CHECK(pdal::FileUtils::fileExists(app));
+    return app;
+}
+
+
 BOOST_AUTO_TEST_CASE(pcinfoTest_1)
 {
-    const std::string cmd = Support::binpath(Support::exename("pcinfo"));
-    BOOST_CHECK(pdal::FileUtils::fileExists(cmd));
+    const std::string cmd = appName();
+
+    std::string output;
+    int stat = Support::run_command(cmd, output);
+    BOOST_CHECK_EQUAL(stat, 1);
+
+    const std::string expected = "Usage error: input file name required";
+    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
+
     return;
 }
 

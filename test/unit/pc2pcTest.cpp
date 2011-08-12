@@ -33,6 +33,8 @@
 ****************************************************************************/
 
 #include <boost/test/unit_test.hpp>
+#include <pdal/FileUtils.hpp>
+#include "Support.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -41,8 +43,26 @@
 
 BOOST_AUTO_TEST_SUITE(pc2pcTest)
 
+
+static std::string appName()
+{
+    const std::string app = Support::binpath(Support::exename("pc2pc"));
+    BOOST_CHECK(pdal::FileUtils::fileExists(app));
+    return app;
+}
+
+
 BOOST_AUTO_TEST_CASE(pc2pcTest_test1)
 {
+    const std::string cmd = appName();
+
+    std::string output;
+    int stat = Support::run_command(cmd, output);
+    BOOST_CHECK_EQUAL(stat, 1);
+
+    const std::string expected = "Usage error: --input";
+    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
+
     return;
 }
 
