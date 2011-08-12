@@ -426,17 +426,24 @@ int Support::run_command(const std::string& rawcmd, std::string& output)
 {
     const int maxbuf = 4096;
     char buf[maxbuf];
+    
+    std::string cmd;
 
-    const std::string cmd = replaceAll(rawcmd, "/", "\\");
-
+#ifdef PDAL_COMPILER_MSVC
+    cmd = replaceAll(rawcmd, "/", "\\");
+#else
+    cmd = rawcmd;
+#endif
+    
     output = "";
     
+    FILE* fp = 0;
 #ifdef PDAL_COMPILER_MSVC
-    FILE* fp = _popen(cmd.c_str(), "r");
+    fp = _popen(cmd.c_str(), "r");
 #else
-    FILE* fp = popen(cmd.c_str(), "r");
+    fp = popen(cmd.c_str(), "r");
 #endif
-
+    
     while (!feof(fp))
     {
         if (fgets(buf, maxbuf, fp) == NULL)
@@ -445,6 +452,11 @@ int Support::run_command(const std::string& rawcmd, std::string& output)
 
             if (ferror(fp))
             {
+                #ifdef PDAL_COMPILER_MSVC
+                    _pclose(fp);
+                #else
+                    pclose(fp);
+                #endif
                 throw std::runtime_error("error executing command");
             }
         }
