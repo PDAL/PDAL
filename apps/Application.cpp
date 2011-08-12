@@ -91,21 +91,21 @@ int Application::run()
     // call derived function
     int status = 0;
     
-    // try
-    // {
+    try
+    {
         status = execute();
-    // }
-    // catch (std::exception e)
-    // {
-    //     const std::string s(e.what());
-    //     runtimeError("Caught exception: " + s);
-    //     status = 1;
-    // }
-    // catch (...)
-    // {
-    //     runtimeError("Caught unknown exception");
-    //     status = 1;
-    // }
+    }
+    catch (std::exception e)
+    {
+        const std::string s(e.what());
+        runtimeError("Caught exception: " + s);
+        status = 1;
+    }
+    catch (...)
+    {
+        runtimeError("Caught unknown exception");
+        status = 1;
+    }
 
     if (status == 0 && hasOption("timer"))
     {
