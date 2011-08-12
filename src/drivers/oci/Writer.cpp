@@ -46,6 +46,10 @@
 
 #include <fstream>
 
+#ifdef PDAL_HAVE_GDAL
+#include <ogr_api.h>
+#endif
+
 namespace pdal { namespace drivers { namespace oci {
 
 IMPLEMENT_STATICS(Writer, "drivers.oci.writer", "OCI Writer")
@@ -759,7 +763,12 @@ oss << "declare\n"
     {
         wkt_s << base_table_boundary_wkt;
     } else {
-        wkt_s << LoadSQLData(base_table_boundary_wkt);
+        std::string wkt = LoadSQLData(base_table_boundary_wkt);
+        if (!IsValidWKT(wkt))
+        {
+            throw pdal::pdal_error("WKT for base_table_boundary_wkt was not valid");
+        }
+        wkt_s << wkt;
     }
     
     std::string wkt_string = wkt_s.str();
@@ -786,6 +795,24 @@ oss << "declare\n"
 
     // tree.put("cloud_id", pc_id);
     
+}
+
+bool Writer::IsValidWKT(std::string const& input)
+{
+#ifdef PDAL_HAVE_GDAL
+    
+    OGRGeometryH g;
+    
+    char* wkt = const_cast<char*>(input.c_str());
+    OGRErr e = OGR_G_CreateFromWkt(&wkt, NULL, &g);
+    OGR_G_DestroyGeometry(g);
+    if (e != 0) return false;
+    
+    return true;
+#else
+
+    throw pdal_error("GDAL support not available for WKT validation");
+#endif        
 }
 void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 {

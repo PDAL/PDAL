@@ -112,6 +112,7 @@ private:
     std::string ShutOff_SDO_PC_Trigger();
     void TurnOn_SDO_PC_Trigger(std::string trigger_name);
     pdal::Bounds<double> CalculateBounds(PointBuffer const& buffer);
+    bool IsValidWKT(std::string const& wkt);
     Stage& m_stage;
     
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud
