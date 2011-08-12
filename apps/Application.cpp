@@ -145,7 +145,11 @@ bool Application::isDebug() const
 
 boost::uint8_t Application::getVerboseLevel() const
 {
-    return m_verboseLevel;
+    // verboseLevel is really a u8 value, but we have to store it in a u32
+    // object because if we don't then program_options prints the default
+    // value as an unsigned char (thanks, lexical_cast!)
+    const boost::uint8_t v = static_cast<boost::uint8_t>(m_verboseLevel & 0x000000ff);
+    return v;
 }
 
 
@@ -200,7 +204,7 @@ void Application::addBasicOptionSet()
     basic_options->add_options()
         ("help,h", "produce help message")
         ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens(), "Enable debug mode")
-        ("verbose,v", po::value<boost::uint8_t>(&m_verboseLevel)->default_value(0), "Set verbose message level (default is 0)")
+        ("verbose,v", po::value<boost::uint32_t>(&m_verboseLevel)->default_value(0), "Set verbose message level (default is 0)")
         ("version", "Show version info")
         ("timer", "Show execution time")
         ;
