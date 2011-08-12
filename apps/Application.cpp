@@ -204,7 +204,7 @@ void Application::addBasicOptionSet()
     basic_options->add_options()
         ("help,h", "produce help message")
         ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens(), "Enable debug mode")
-        ("verbose,v", po::value<boost::uint32_t>(&m_verboseLevel)->default_value(0), "Set verbose message level (default is 0)")
+        ("verbose,v", po::value<boost::uint32_t>(&m_verboseLevel)->default_value(0), "Set verbose message level")
         ("version", "Show version info")
         ("timer", "Show execution time")
         ;
