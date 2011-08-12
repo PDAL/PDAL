@@ -89,7 +89,7 @@ private:
     void addBasicOptionSet();
 
     bool m_isDebug;
-    boost::uint8_t m_verboseLevel;
+    boost::uint32_t m_verboseLevel;
     const int m_argc;
     char** m_argv;
     const std::string m_appName;

@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
 
     pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
     
-    std::ostream* ofs = FileUtils::createFile("temp.las");
+    std::ostream* ofs = FileUtils::createFile(Support::temppath("temp.las"));
 
     {
         // need to scope the writer, so that's it dtor can use the stream
@@ -78,12 +78,12 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
 
     FileUtils::closeFile(ofs);
 
-    bool filesSame = Support::compare_files("temp.las", Support::datapath("simple.las"));
+    bool filesSame = Support::compare_files(Support::temppath("temp.las"), Support::datapath("simple.las"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
     {
-        FileUtils::deleteFile("temp.las");
+        FileUtils::deleteFile(Support::temppath("temp.las"));
     }
 
     return;
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 
     pdal::drivers::las::LasReader reader(Support::datapath("laszip/basefile.las"));
     
-    std::ostream* ofs = FileUtils::createFile(Support::datapath("laszip/LasWriterTest_test_simple_laz.laz"));
+    std::ostream* ofs = FileUtils::createFile(Support::temppath("LasWriterTest_test_simple_laz.laz"));
 
     {
         const boost::uint64_t numPoints = reader.getNumPoints();
@@ -120,16 +120,16 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
     FileUtils::closeFile(ofs);
 
     {
-        pdal::drivers::las::LasReader reader(Support::datapath("laszip/LasWriterTest_test_simple_laz.laz"));
+        pdal::drivers::las::LasReader reader(Support::temppath("LasWriterTest_test_simple_laz.laz"));
     }
 
-    bool filesSame = Support::compare_files(Support::datapath("laszip/LasWriterTest_test_simple_laz.laz"), 
+    bool filesSame = Support::compare_files(Support::temppath("LasWriterTest_test_simple_laz.laz"), 
                                             Support::datapath("laszip/laszip-generated.laz"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
     {
-        FileUtils::deleteFile(Support::datapath("laszip/LasWriterTest_test_simple_laz.laz"));
+        FileUtils::deleteFile(Support::temppath("LasWriterTest_test_simple_laz.laz"));
     }
 
     return;
@@ -143,7 +143,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
 
     pdal::drivers::las::LasReader reader(Support::datapath("1.2_3.las"));
     
-    std::ostream* ofs = FileUtils::createFile("temp.las");
+    std::ostream* ofs = FileUtils::createFile(Support::temppath("temp.las"));
 
     {
         const boost::uint64_t numPoints = reader.getNumPoints();
@@ -175,7 +175,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     //
     //if (filesSame)
     {
-        FileUtils::deleteFile("temp.las");
+        FileUtils::deleteFile(Support::temppath("temp.las"));
     }
 
     return;

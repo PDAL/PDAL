@@ -157,6 +157,15 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test3)
     PipelineReader readerR(managerR);
     BOOST_CHECK_THROW( readerR.readWriterPipeline(Support::datapath("pipeline_read.xml")), pipeline_xml_error);
 
+    // comments are ok
+    PipelineManager managerComments1;
+    PipelineReader readerComments1(managerComments1);
+    BOOST_CHECK_NO_THROW( readerComments1.readReaderPipeline(Support::datapath("pipeline_readcomments.xml")));
+
+    PipelineManager managerComments2;
+    PipelineReader readerComments2(managerComments2);
+    BOOST_CHECK_NO_THROW( readerComments2.readWriterPipeline(Support::datapath("pipeline_writecomments.xml")));
+
     return;
 }
 

@@ -55,10 +55,30 @@ class Support
 {
 public:
     static std::string datapath(const std::string&);
+    static std::string temppath(const std::string&);
 
     static bool compare_stage_data(pdal::Stage const& a, pdal::Stage const& b);
     
-    // verify if two files are the same
+    // returns number of bytes different for two binary files (or maxint if a file doesn't exist)
+    static boost::uint32_t diff_files(const std::string& file1, const std::string& file2);
+
+    // same as diff_files, but allows for regions of the file be to be ignored
+    //
+    // ignorable_start/length are arrays of byte-offsets and byte-lengths,
+    // for regions in the file we wish to NOT do the comparison on.  (We are 
+    // assuming such an ignorable region exists with the same length in both 
+    // files, such as would be the case if an embedded version number in two
+    // LAS files was different.)  The number of ignorable regions is set
+    // via num_ignorables.
+    static boost::uint32_t diff_files(const std::string& file1, const std::string& file2,
+                                      boost::uint32_t* ignorable_start, boost::uint32_t* ignorable_length, boost::uint32_t num_ignorables);
+
+    // returns number of lines different for two text files (or maxint if a file doesn't exist)
+    static boost::uint32_t diff_text_files(const std::string& file1, const std::string& file2);
+
+    // returns true iff the two (binary or ascii) files are the same,
+    // using the above diff_files/diff_text_files functions
+
     static bool compare_files(const std::string& file1, const std::string& file2);
     static bool compare_text_files(const std::string& file1, const std::string& file2);
 
@@ -81,6 +101,11 @@ public:
     static void check_p710_p711_p712(const pdal::PointBuffer& data, const pdal::Schema& schema);
 
     static void compareBounds(const pdal::Bounds<double>& p, const pdal::Bounds<double>& q);
+
+    // executes "cmd" via popen, copying stdout into output and returning the status code
+    //
+    // note: under windows, all "/" characrters in cmd will be converted to "\\" for you
+    static int run_command(const std::string& cmd, std::string& output);
 };
 
 
