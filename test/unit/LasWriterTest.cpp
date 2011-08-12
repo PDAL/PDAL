@@ -123,11 +123,13 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
         pdal::drivers::las::LasReader reader(Support::temppath("LasWriterTest_test_simple_laz.laz"));
     }
 
-    bool filesSame = Support::compare_files(Support::temppath("LasWriterTest_test_simple_laz.laz"), 
-                                            Support::datapath("laszip/laszip-generated.laz"));
-    BOOST_CHECK(filesSame);
+    // these two files only differ by the description string in the VLR
+    const boost::uint32_t numdiffs = Support::diff_files(Support::temppath("LasWriterTest_test_simple_laz.laz"),
+                                                         Support::datapath("laszip/laszip-generated.laz"),
+                                                         249, 32);
+    BOOST_CHECK(numdiffs==0);
 
-    if (filesSame)
+    if (numdiffs==0)
     {
         FileUtils::deleteFile(Support::temppath("LasWriterTest_test_simple_laz.laz"));
     }
