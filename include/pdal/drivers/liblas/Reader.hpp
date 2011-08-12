@@ -55,14 +55,15 @@ class LiblasHeader;
 
 class PDAL_DLL LiblasReader : public pdal::drivers::las::LasReaderBase
 {
-    DECLARE_STATICS
-
 public:
+    SET_STAGE_NAME("drivers.liblas.reader", "Liblas Reader")
+
     LiblasReader(const Options&);
     LiblasReader(const std::string& filename);
     ~LiblasReader();
 
     virtual void initialize();
+    virtual const Options getDefaultOptions() const;
 
     const std::string& getFileName() const;
 

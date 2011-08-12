@@ -52,7 +52,6 @@
 
 namespace pdal { namespace drivers { namespace oci {
 
-IMPLEMENT_STATICS(Writer, "drivers.oci.writer", "OCI Writer")
 
 static OptionsOld dummy;
 Writer::Writer(Stage& prevStage, const Options& options)
@@ -86,9 +85,9 @@ void Writer::initialize()
 }
 
 
-const Options& Writer::s_getDefaultOptions()
+const Options Writer::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
     
     Option<bool > is3d("is3d",  false,"Should we use 3D objects for SDO_PC PC_EXTENT, \
                                        BLK_EXTENT, and indexing");

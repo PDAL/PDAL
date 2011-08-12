@@ -57,14 +57,15 @@ namespace filters {
 //
 class PDAL_DLL CacheFilter : public Filter
 {
-    DECLARE_STATICS
-
 public:
+    SET_STAGE_NAME("filters.cache", "Cache Filter")
+
     CacheFilter(Stage& prevStage, const Options&);
     CacheFilter(Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
     ~CacheFilter();
 
     virtual void initialize();
+    virtual const Options getDefaultOptions() const;
 
     boost::uint32_t getCacheBlockSize() const;
 

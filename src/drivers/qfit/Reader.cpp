@@ -220,9 +220,6 @@ PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 }
 
 
-IMPLEMENT_STATICS(Reader, "drivers.qfit.reader", "QFIT Reader")
-
-
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
     , m_format(QFIT_Format_Unknown)
@@ -312,9 +309,9 @@ void Reader::initialize()
 }
 
 
-const Options& Reader::s_getDefaultOptions()
+const Options Reader::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
     return options;
 }
 

@@ -55,12 +55,14 @@ class ColorFilterSequentialIterator;
 // the color is done as a ramp from the declared Z min/max values in the header
 class PDAL_DLL ColorFilter : public Filter
 {
-    DECLARE_STATICS
-
 public:
+    SET_STAGE_NAME("filters.color", "Color Filter")
+
     ColorFilter(Stage& prevStage, const Options&);
     ColorFilter(Stage& prevStage);
+
     virtual void initialize();
+    virtual const Options getDefaultOptions() const;
 
     void getColor_F32_U8(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;
     void getColor_F64_U16(double value, boost::uint16_t& red, boost::uint16_t& green, boost::uint16_t& blue) const;

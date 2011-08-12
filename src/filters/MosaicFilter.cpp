@@ -41,8 +41,6 @@
 namespace pdal { namespace filters {
 
 
-IMPLEMENT_STATICS(MosaicFilter, "filters.mosaic", "Mosaic Filter")
-
 
 MosaicFilter::MosaicFilter(const std::vector<Stage*>& prevStages, const Options& options)
     : MultiFilter(prevStages, options)
@@ -88,9 +86,9 @@ void MosaicFilter::initialize()
 }
 
 
-const Options& MosaicFilter::s_getDefaultOptions()
+const Options MosaicFilter::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
     return options;
 }
 

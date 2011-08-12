@@ -51,9 +51,6 @@
 namespace pdal { namespace drivers { namespace liblas {
 
 
-IMPLEMENT_STATICS(LiblasWriter, "drivers.liblas.writer", "Liblas Writer")
-
-
 LiblasWriter::LiblasWriter(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_ostreamManager(options.getValueOrThrow<std::string>("filename"))
@@ -92,9 +89,9 @@ void LiblasWriter::initialize()
 }
 
 
-const Options& LiblasWriter::s_getDefaultOptions()
+const Options LiblasWriter::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
     return options;
 }
 

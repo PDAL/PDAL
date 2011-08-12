@@ -54,13 +54,14 @@ class CropFilterSequentialIterator;
 // updates the header accordingly
 class PDAL_DLL CropFilter : public Filter
 {
-    DECLARE_STATICS
-
 public:
+    SET_STAGE_NAME("filters.crop", "Crop Filter")
+
     CropFilter(Stage& prevStage, const Options&);
     CropFilter(Stage& prevStage, Bounds<double> const& bounds);
 
     virtual void initialize();
+    virtual const Options getDefaultOptions() const;
 
     bool supportsIterator (StageIteratorType t) const
     {   

@@ -44,9 +44,6 @@
 namespace pdal { namespace filters {
 
 
-IMPLEMENT_STATICS(ColorFilter, "filters.color", "Color Filter")
-
-
 ColorFilter::ColorFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
@@ -71,9 +68,9 @@ void ColorFilter::initialize()
 }
 
 
-const Options& ColorFilter::s_getDefaultOptions()
+const Options ColorFilter::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
     return options;
 }
 

@@ -151,9 +151,9 @@ public:
 
 class PDAL_DLL Chipper : public pdal::Filter
 {
-    DECLARE_STATICS
-
 public:
+    SET_STAGE_NAME("filters.chipper", "Chipper")
+
     Chipper(Stage& prevStage, const Options&);
     // Chipper(Stage& prevStage, boost::uint32_t max_partition_size)
     //     : pdal::Filter(prevStage, Options::none())
@@ -168,6 +168,7 @@ public:
     // }
 
     virtual void initialize();
+    virtual const Options getDefaultOptions() const;
 
     void Chip();
     std::vector<chipper::Block>::size_type GetBlockCount() const

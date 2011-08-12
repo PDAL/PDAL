@@ -54,9 +54,6 @@
 namespace pdal { namespace drivers { namespace las {
 
 
-IMPLEMENT_STATICS(LasWriter, "drivers.las.writer", "Las Writer")
-
-
 LasWriter::LasWriter(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_streamManager(options.getOption<std::string>("filename").getValue())
@@ -107,9 +104,9 @@ void LasWriter::initialize()
 }
 
 
-const Options& LasWriter::s_getDefaultOptions()
+const Options LasWriter::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
 
     Option<std::string> filename("filename", "", "file to read from");
     Option<bool> compression("compression", false, "Do we LASzip-compress the data?");

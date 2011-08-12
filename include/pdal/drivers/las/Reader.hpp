@@ -55,13 +55,14 @@ class ZipPoint;
 
 class PDAL_DLL LasReader : public LasReaderBase
 {
-    DECLARE_STATICS
-
 public:
+    SET_STAGE_NAME("drivers.las.reader", "Las Reader")
+
     LasReader(const Options&);
     LasReader(const std::string& filename);
-
+    
     virtual void initialize();
+    virtual const Options getDefaultOptions() const;
 
     const std::string& getFileName() const;
 

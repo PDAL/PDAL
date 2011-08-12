@@ -51,12 +51,14 @@ namespace pdal { namespace drivers { namespace oci {
 
 class PDAL_DLL Reader : public pdal::Reader
 {
-    DECLARE_STATICS
-
 public:
+    SET_STAGE_NAME("drivers.oci.reader", "OCI Reader")
+
     Reader(const Options&);
     ~Reader();
+
     virtual void initialize();
+    virtual const Options getDefaultOptions() const;
  
     bool supportsIterator (StageIteratorType t) const
     {   

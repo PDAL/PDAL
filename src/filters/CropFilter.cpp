@@ -42,9 +42,6 @@
 namespace pdal { namespace filters {
 
 
-IMPLEMENT_STATICS(CropFilter, "filters.crop", "Crop Filter")
-
-
 CropFilter::CropFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
     , m_bounds(options.getValueOrThrow<Bounds<double> >("bounds"))
@@ -74,9 +71,9 @@ void CropFilter::initialize()
 }
 
 
-const Options& CropFilter::s_getDefaultOptions()
+const Options CropFilter::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
     Option<Bounds<double> > bounds("bounds",Bounds<double>(),"bounds to crop to");
     options.add(bounds);
     return options;

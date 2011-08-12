@@ -50,13 +50,15 @@ namespace pdal { namespace filters {
 // this doesn't derive from Stage since it takes more than one stage as input
 class PDAL_DLL MosaicFilter : public MultiFilter
 {
-    DECLARE_STATICS
-
 public:
+    SET_STAGE_NAME("filters.mosaic", "Mosaic Filter")
+
     // entries may not be null
     // vector.size() must be > 0
     MosaicFilter(const std::vector<Stage*>& prevStages, const Options&);
+
     virtual void initialize();
+    virtual const Options getDefaultOptions() const;
     
     bool supportsIterator (StageIteratorType t) const
     {   

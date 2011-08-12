@@ -40,9 +40,6 @@
 namespace pdal { namespace filters {
 
 
-IMPLEMENT_STATICS(CacheFilter, "filters.cache", "Cache Filter")
-
-
 CacheFilter::CacheFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
     , m_numPointsRequested(0)
@@ -83,7 +80,7 @@ void CacheFilter::initialize()
 }
 
 
-const Options& CacheFilter::s_getDefaultOptions()
+const Options CacheFilter::getDefaultOptions() const
 {
     static Options options;
     return options;

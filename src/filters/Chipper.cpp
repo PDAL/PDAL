@@ -132,8 +132,6 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t 
 }
 
 
-IMPLEMENT_STATICS(Chipper, "filters.chipper", "Chipper")
-
 
 Chipper::Chipper(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
@@ -158,9 +156,9 @@ void Chipper::initialize()
 }
 
 
-const Options& Chipper::s_getDefaultOptions()
+const Options Chipper::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
     return options;
 }
 

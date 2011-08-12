@@ -48,9 +48,6 @@
 namespace pdal { namespace drivers { namespace las {
 
 
-IMPLEMENT_STATICS(LasReader, "drivers.las.reader", "Las Reader")
-
-
 LasReader::LasReader(const Options& options)
     : LasReaderBase(options)
     , m_filename(options.getValueOrThrow<std::string>("filename"))
@@ -94,10 +91,10 @@ void LasReader::initialize()
 }
 
 
-const Options& LasReader::s_getDefaultOptions()
+const Options LasReader::getDefaultOptions() const
 {
-    static Option<std::string> option1("filename", "", "file to read from");
-    static Options options(option1);
+    Option<std::string> option1("filename", "", "file to read from");
+    Options options(option1);
     return options;
 }
 

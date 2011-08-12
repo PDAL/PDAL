@@ -46,9 +46,6 @@
 namespace pdal { namespace drivers { namespace liblas {
 
     
-IMPLEMENT_STATICS(LiblasReader, "drivers.liblas.reader", "Liblas Reader")
-
-
 LiblasReader::LiblasReader(const Options& options)
     : LasReaderBase(options)
     , m_filename(options.getValueOrThrow<std::string>("filename"))
@@ -112,9 +109,9 @@ void LiblasReader::initialize()
 }
 
 
-const Options& LiblasReader::s_getDefaultOptions()
+const Options LiblasReader::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
     return options;
 }
 

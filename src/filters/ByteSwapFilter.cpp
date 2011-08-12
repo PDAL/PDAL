@@ -47,9 +47,6 @@
 namespace pdal { namespace filters {
 
 
-IMPLEMENT_STATICS(ByteSwapFilter, "filters.byteswap", "Crop Filter")
-
-
 ByteSwapFilter::ByteSwapFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
@@ -94,9 +91,9 @@ void ByteSwapFilter::initialize()
 }
 
 
-const Options& ByteSwapFilter::s_getDefaultOptions()
+const Options ByteSwapFilter::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
     return options;
 }
 
