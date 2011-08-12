@@ -759,29 +759,32 @@ oss << "declare\n"
 
     std::ostringstream wkt_s;
 
-    if (!FileUtils::fileExists(base_table_boundary_wkt))
+    if (!base_table_boundary_column.empty())
     {
-        if (!IsValidWKT(base_table_boundary_wkt))
+        if (!FileUtils::fileExists(base_table_boundary_wkt))
         {
-            std::ostringstream oss;
-            oss << "WKT for base_table_boundary_wkt was not valid and '" << base_table_boundary_wkt
-                << "' doesn't exist as a file";
-            throw pdal::pdal_error(oss.str());
-        }        
-        wkt_s << base_table_boundary_wkt;
-    } else {
-        std::cout << "loading: " << base_table_boundary_wkt << std::endl;
-        std::string wkt = LoadSQLData(base_table_boundary_wkt);
-        if (!IsValidWKT(wkt))
-        {
-            std::ostringstream oss;
-            oss << "WKT for base_table_boundary_wkt was from file '" << base_table_boundary_wkt 
-                << "' is not valid";
-            throw pdal::pdal_error(oss.str());
+            if (!IsValidWKT(base_table_boundary_wkt))
+            {
+                std::ostringstream oss;
+                oss << "WKT for base_table_boundary_wkt was not valid and '" << base_table_boundary_wkt
+                    << "' doesn't exist as a file";
+                throw pdal::pdal_error(oss.str());
+            }
+            wkt_s << base_table_boundary_wkt;
+        } else {
+            std::cout << "loading: " << base_table_boundary_wkt << std::endl;
+            std::string wkt = LoadSQLData(base_table_boundary_wkt);
+            if (!IsValidWKT(wkt))
+            {
+                std::ostringstream oss;
+                oss << "WKT for base_table_boundary_wkt was from file '" << base_table_boundary_wkt 
+                    << "' is not valid";
+                throw pdal::pdal_error(oss.str());
+            }
+            wkt_s << wkt;
         }
-        wkt_s << wkt;
     }
-    
+
     std::string wkt_string = wkt_s.str();
     char* wkt = (char*) malloc(wkt_string.size() * sizeof(char)+1);
     strncpy(wkt, wkt_string.c_str(), wkt_string.size());
