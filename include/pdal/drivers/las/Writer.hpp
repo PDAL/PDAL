@@ -73,6 +73,8 @@ public:
     
     // up to 32 chars (default is "PDAL x.y.z")
     void setGeneratingSoftware(const std::string& softwareId);
+    
+    void setHeaderPadding(boost::uint32_t const& v);
 
     // default false
     void setCompressed(bool);

@@ -168,6 +168,10 @@ void LasWriter::setSpatialReference(const SpatialReference& srs)
     m_spatialReference = srs;
 }
 
+void LasWriter::setHeaderPadding(boost::uint32_t const& v)
+{
+    m_lasHeader.SetHeaderPadding(v);
+}
 
 void LasWriter::writeBegin(boost::uint64_t targetNumPointsToWrite)
 {
