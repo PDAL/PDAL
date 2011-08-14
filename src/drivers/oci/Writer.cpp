@@ -469,7 +469,6 @@ bool Writer::IsGeographic(boost::int32_t srid)
 
 std::string Writer::LoadSQLData(std::string const& filename)
 {
-    std::cout << "LoadSQLData for " << filename << std::endl;
     if (!FileUtils::fileExists(filename))
     {
         std::ostringstream oss;
@@ -771,7 +770,6 @@ oss << "declare\n"
         }        
         wkt_s << base_table_boundary_wkt;
     } else {
-        std::cout << "loading: " << base_table_boundary_wkt << std::endl;
         std::string wkt = LoadSQLData(base_table_boundary_wkt);
         if (!IsValidWKT(wkt))
         {
