@@ -226,9 +226,17 @@ void Application::parseOptions()
         options.add(*sub_options);
     }
 
-    po::store(po::command_line_parser(m_argc, m_argv).
-        options(options).positional(m_positionalOptions).run(), 
-        m_variablesMap);
+    try
+    {
+        po::store(po::command_line_parser(m_argc, m_argv).
+            options(options).positional(m_positionalOptions).run(), 
+            m_variablesMap);
+    }
+    catch (boost::program_options::unknown_option e)
+    {
+        usageError("unknown option: " + e.get_option_name());
+        exit(1);
+    }
 
     po::notify(m_variablesMap);
 
