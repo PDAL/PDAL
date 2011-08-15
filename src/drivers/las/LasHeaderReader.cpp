@@ -342,9 +342,9 @@ void LasHeaderReader::readOneVLR()
     std::string description = "";
 
     {
-        boost::uint8_t buf1[pdal::drivers::las::VariableLengthRecord::s_headerLength];
+        boost::scoped_ptr<boost::uint8_t> buf1( new boost::uint8_t[pdal::drivers::las::VariableLengthRecord::s_headerLength]);
         Utils::read_n(buf1, m_istream, pdal::drivers::las::VariableLengthRecord::s_headerLength);
-        boost::uint8_t* p1 = buf1;
+        boost::uint8_t* p1 = buf1.get();
 
         reserved = Utils::read_field<boost::uint16_t>(p1);
         boost::ignore_unused_variable_warning(reserved);

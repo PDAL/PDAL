@@ -55,6 +55,7 @@ static const std::string s_wktUserId = "liblas";
 static const boost::uint16_t s_wktRecordId = 2112;
 static const std::string s_wktDescription = "OGR variant of OpenGIS WKT SRS";
 
+const int VariableLengthRecord::s_headerLength = 54;
 
 VariableLengthRecord::VariableLengthRecord(boost::uint16_t reserved,
                                            std::string userId, 
