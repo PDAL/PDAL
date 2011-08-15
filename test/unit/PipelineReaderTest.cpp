@@ -170,6 +170,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test3)
 }
 
 
+#ifdef PDAL_HAVE_GDAL
 BOOST_AUTO_TEST_CASE(PipelineReaderTest_test4)
 {
     FileUtils::deleteFile("out2.las");
@@ -211,6 +212,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test4)
 
     return;
 }
+#endif
 
 
 BOOST_AUTO_TEST_SUITE_END()
