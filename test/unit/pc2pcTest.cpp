@@ -53,7 +53,7 @@ static std::string appName()
 
 
 #ifdef PDAL_COMPILER_MSVC
-BOOST_AUTO_TEST_CASE(pc2pcTest_test1)
+BOOST_AUTO_TEST_CASE(pc2pcTest_test_no_input)
 {
     const std::string cmd = appName();
 
@@ -68,4 +68,20 @@ BOOST_AUTO_TEST_CASE(pc2pcTest_test1)
 }
 #endif
 
+
+BOOST_AUTO_TEST_CASE(pc2pcTest_test_common_opts)
+{
+    const std::string cmd = appName();
+
+    std::string output;
+    int stat = Support::run_command(cmd + " -h", output);
+    BOOST_CHECK_EQUAL(stat, 0);
+
+    stat = Support::run_command(cmd + " --version", output);
+    BOOST_CHECK_EQUAL(stat, 0);
+
+    return;
+}
+
 BOOST_AUTO_TEST_SUITE_END()
+
