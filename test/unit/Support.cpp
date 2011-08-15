@@ -438,53 +438,68 @@ static std::string replaceAll(std::string result,
 #endif
 
 
-int Support::run_command(const std::string& rawcmd, std::string& output)
+static FILE* portable_popen(const std::string& command, const std::string& mode)
+{
+    FILE* fp = 0;
+    
+#ifdef PDAL_COMPILER_MSVC
+    const std::string dos_command = replaceAll(command, "/", "\\");
+    fp = _popen(dos_command.c_str(), "r");
+#else
+    fp = popen(command.c_str(), "r");
+#endif
+
+    return fp;
+}
+
+
+static int portable_pclose(FILE* fp)
+{
+    int status = 0;
+
+#ifdef PDAL_COMPILER_MSVC
+    status = _pclose(fp);
+#else
+    status = pclose(fp);
+    if (status == -1)
+    {
+        throw std::runtime_error("error executing command");
+    }
+    if (WIFEXITED(status) != 0)
+    {
+        status = WEXITSTATUS(status);
+    }
+    else
+    {
+        status = 0;
+    }
+    #endif
+
+    return status;
+}
+
+
+int Support::run_command(const std::string& cmd, std::string& output)
 {
     const int maxbuf = 4096;
     char buf[maxbuf];
-    
-    std::string cmd;
-
-#ifdef PDAL_COMPILER_MSVC
-    cmd = replaceAll(rawcmd, "/", "\\");
-#else
-    cmd = rawcmd;
-#endif
-    
+        
     output = "";
     
-    FILE* fp = 0;
-#ifdef PDAL_COMPILER_MSVC
-    fp = _popen(cmd.c_str(), "r");
-#else
-    fp = popen(cmd.c_str(), "r");
-#endif
+    FILE* fp = portable_popen(cmd.c_str(), "r");
     
     while (!feof(fp))
     {
         if (fgets(buf, maxbuf, fp) == NULL)
         {
             if (feof(fp)) break;
-
-            if (ferror(fp))
-            {
-                #ifdef PDAL_COMPILER_MSVC
-                    _pclose(fp);
-                #else
-                    pclose(fp);
-                #endif
-                throw std::runtime_error("error executing command");
-            }
+            if (ferror(fp)) break;                
         }
 
         output += buf;
     }
 
-#ifdef PDAL_COMPILER_MSVC
-    int stat = _pclose(fp);
-#else
-    int stat = pclose(fp);
-#endif
+    int stat = portable_pclose(fp);
 
     return stat;
 }
