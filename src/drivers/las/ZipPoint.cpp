@@ -98,7 +98,7 @@ ZipPoint::ZipPoint(PointFormat format, const std::vector<VariableLengthRecord>& 
     } else
     {
 
-        if (!m_zip->setup(format, Support::getPointDataSize(format)))
+        if (!m_zip->setup((boost::uint8_t)format, Support::getPointDataSize(format)))
         {
             std::ostringstream oss;
             const char* err = m_zip->get_error();
