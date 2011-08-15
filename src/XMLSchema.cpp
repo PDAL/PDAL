@@ -374,7 +374,7 @@ void Reader::Load()
     // print_element_names(root);
 
 
-    if (compare_no_case((const char*)root->name, "PointCloudSchema"))
+    if (Utils::compare_no_case((const char*)root->name, "PointCloudSchema"))
         throw schema_loading_error("First node of document was not named 'PointCloudSchema'");
 
     xmlNode* dimension = root->children;
@@ -383,7 +383,7 @@ void Reader::Load()
     while(dimension != NULL)
     {
         // printf("node name: %s\n", (const char*)dimension->name);
-        if (dimension->type != XML_ELEMENT_NODE || compare_no_case((const char*)dimension->name, "dimension"))
+        if (dimension->type != XML_ELEMENT_NODE || Utils::compare_no_case((const char*)dimension->name, "dimension"))
         {
             dimension = dimension->next;
             continue;
@@ -412,7 +412,7 @@ void Reader::Load()
                 continue;
             }
 
-            if (!compare_no_case((const char*)properties->name, "name"))
+            if (!Utils::compare_no_case((const char*)properties->name, "name"))
             {
                 CharPtr n = CharPtr(
                                 xmlNodeListGetString(doc, properties->children, 1),
@@ -424,7 +424,7 @@ void Reader::Load()
                 // std::cout << "Dimension name: " << name << std::endl;
             }
 
-            if (!compare_no_case((const char*)properties->name, "size"))
+            if (!Utils::compare_no_case((const char*)properties->name, "size"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch size!");
@@ -438,7 +438,7 @@ void Reader::Load()
                 // std::cout << "Dimension size: " << size << std::endl;
             }
 
-            if (!compare_no_case((const char*)properties->name, "position"))
+            if (!Utils::compare_no_case((const char*)properties->name, "position"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch position!");
@@ -451,14 +451,14 @@ void Reader::Load()
                 position = static_cast<boost::uint32_t>(p);
                 // std::cout << "Dimension position: " << position << std::endl;
             }
-            if (!compare_no_case((const char*)properties->name, "description"))
+            if (!Utils::compare_no_case((const char*)properties->name, "description"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch description!");
                 description = std::string((const char*)n);
                 xmlFree(n);
             }
-            if (!compare_no_case((const char*)properties->name, "interpretation"))
+            if (!Utils::compare_no_case((const char*)properties->name, "interpretation"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch interpretation!");
@@ -466,7 +466,7 @@ void Reader::Load()
                 xmlFree(n);
             }
 
-            if (!compare_no_case((const char*)properties->name, "minimum"))
+            if (!Utils::compare_no_case((const char*)properties->name, "minimum"))
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
                 if (!n) throw schema_loading_error("Unable to fetch minimum value!");
@@ -476,7 +476,7 @@ void Reader::Load()
                 // std::cout << "Dimension minimum: " << minimum << std::endl;
             }
 
-            if (!compare_no_case((const char*)properties->name, "maximum"))
+            if (!Utils::compare_no_case((const char*)properties->name, "maximum"))
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
                 if (!n) throw schema_loading_error("Unable to fetch maximum value!");
@@ -486,7 +486,7 @@ void Reader::Load()
                 // std::cout << "Dimension maximum: " << maximum << std::endl;
             }
 
-            if (!compare_no_case((const char*)properties->name, "offset"))
+            if (!Utils::compare_no_case((const char*)properties->name, "offset"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch offset value!");
@@ -495,7 +495,7 @@ void Reader::Load()
                 xmlFree(n);
                 // std::cout << "Dimension offset: " << offset << std::endl;
             }
-            if (!compare_no_case((const char*)properties->name, "scale"))
+            if (!Utils::compare_no_case((const char*)properties->name, "scale"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch scale value!");
@@ -504,12 +504,12 @@ void Reader::Load()
                 xmlFree(n);
                 // std::cout << "Dimension scale: " << scale << std::endl;
             }
-            if (!compare_no_case((const char*)properties->name, "endianness"))
+            if (!Utils::compare_no_case((const char*)properties->name, "endianness"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch endianness value!");
                 
-                if (!compare_no_case((const char*) n, "big"))
+                if (!Utils::compare_no_case((const char*) n, "big"))
                     endianness = Endian_Big;
                 else
                     endianness = Endian_Little;
@@ -569,43 +569,43 @@ void Reader::Load()
 Dimension::DataType Reader::GetDimensionType(std::string const& interpretation)
 {
 
-    if (!compare_no_case(interpretation.c_str(), "int8_t") ||
-        !compare_no_case(interpretation.c_str(), "int8"))
+    if (!Utils::compare_no_case(interpretation, "int8_t") ||
+        !Utils::compare_no_case(interpretation, "int8"))
         return Dimension::Int8;
 
-    if (!compare_no_case(interpretation.c_str(), "uint8_t") ||
-        !compare_no_case(interpretation.c_str(), "uint8"))
+    if (!Utils::compare_no_case(interpretation, "uint8_t") ||
+        !Utils::compare_no_case(interpretation, "uint8"))
         return Dimension::Uint8;
 
-    if (!compare_no_case(interpretation.c_str(), "int16_t") ||
-        !compare_no_case(interpretation.c_str(), "int16"))
+    if (!Utils::compare_no_case(interpretation, "int16_t") ||
+        !Utils::compare_no_case(interpretation, "int16"))
         return Dimension::Int16;
 
-    if (!compare_no_case(interpretation.c_str(), "uint16_t") ||
-        !compare_no_case(interpretation.c_str(), "uint16"))
+    if (!Utils::compare_no_case(interpretation, "uint16_t") ||
+        !Utils::compare_no_case(interpretation, "uint16"))
         return Dimension::Uint16;
 
 
-    if (!compare_no_case(interpretation.c_str(), "int32_t") ||
-        !compare_no_case(interpretation.c_str(), "int32"))
+    if (!Utils::compare_no_case(interpretation, "int32_t") ||
+        !Utils::compare_no_case(interpretation, "int32"))
         return Dimension::Int32;
 
-    if (!compare_no_case(interpretation.c_str(), "uint32_t") ||
-        !compare_no_case(interpretation.c_str(), "uint32"))
+    if (!Utils::compare_no_case(interpretation, "uint32_t") ||
+        !Utils::compare_no_case(interpretation, "uint32"))
         return Dimension::Uint32;
 
-    if (!compare_no_case(interpretation.c_str(), "int64_t") ||
-        !compare_no_case(interpretation.c_str(), "int64"))
+    if (!Utils::compare_no_case(interpretation, "int64_t") ||
+        !Utils::compare_no_case(interpretation, "int64"))
         return Dimension::Int64;
 
-    if (!compare_no_case(interpretation.c_str(), "uint64_t") ||
-        !compare_no_case(interpretation.c_str(), "uint64"))
+    if (!Utils::compare_no_case(interpretation, "uint64_t") ||
+        !Utils::compare_no_case(interpretation, "uint64"))
         return Dimension::Uint64;
 
-    if (!compare_no_case(interpretation.c_str(), "float"))
+    if (!Utils::compare_no_case(interpretation, "float"))
         return Dimension::Float;
 
-    if (!compare_no_case(interpretation.c_str(), "double"))
+    if (!Utils::compare_no_case(interpretation, "double"))
         return Dimension::Double;
 
 
@@ -614,68 +614,68 @@ Dimension::DataType Reader::GetDimensionType(std::string const& interpretation)
 
 Dimension::Field Reader::GetDimensionField(std::string const& name, boost::uint32_t /*position*/)
 {
-    if (!compare_no_case(name.c_str(), "X"))
+    if (!Utils::compare_no_case(name, "X"))
         return Dimension::Field_X;
     
-    if (!compare_no_case(name.c_str(), "Y"))
+    if (!Utils::compare_no_case(name, "Y"))
         return Dimension::Field_Y;
 
-    if (!compare_no_case(name.c_str(), "Z"))
+    if (!Utils::compare_no_case(name, "Z"))
         return Dimension::Field_Z;
 
-    if (!compare_no_case(name.c_str(), "Intensity"))
+    if (!Utils::compare_no_case(name, "Intensity"))
         return Dimension::Field_Intensity;
 
-    if (!compare_no_case(name.c_str(), "Return Number") ||
-        !compare_no_case(name.c_str(), "ReturnNumber"))
+    if (!Utils::compare_no_case(name, "Return Number") ||
+        !Utils::compare_no_case(name, "ReturnNumber"))
         return Dimension::Field_ReturnNumber;
 
-    if (!compare_no_case(name.c_str(), "Number of Returns") ||
-        !compare_no_case(name.c_str(), "NumberOfReturns"))
+    if (!Utils::compare_no_case(name, "Number of Returns") ||
+        !Utils::compare_no_case(name, "NumberOfReturns"))
         return Dimension::Field_NumberOfReturns;
 
-    if (!compare_no_case(name.c_str(), "Number of Returns"))
+    if (!Utils::compare_no_case(name, "Number of Returns"))
         return Dimension::Field_NumberOfReturns;
 
-    if (!compare_no_case(name.c_str(), "Scan Direction") ||
-        !compare_no_case(name.c_str(), "ScanDirectionFlag") ||
-        !compare_no_case(name.c_str(), "ScanDirection"))
+    if (!Utils::compare_no_case(name, "Scan Direction") ||
+        !Utils::compare_no_case(name, "ScanDirectionFlag") ||
+        !Utils::compare_no_case(name, "ScanDirection"))
         return Dimension::Field_ScanDirectionFlag;
 
-    if (!compare_no_case(name.c_str(), "Flightline Edge") ||
-        !compare_no_case(name.c_str(), "EdgeOfFlightLine") ||
-        !compare_no_case(name.c_str(), "FlightlineEdge"))
+    if (!Utils::compare_no_case(name, "Flightline Edge") ||
+        !Utils::compare_no_case(name, "EdgeOfFlightLine") ||
+        !Utils::compare_no_case(name, "FlightlineEdge"))
         return Dimension::Field_EdgeOfFlightLine;
 
-    if (!compare_no_case(name.c_str(), "Classification"))
+    if (!Utils::compare_no_case(name, "Classification"))
         return Dimension::Field_Classification;
 
-    if (!compare_no_case(name.c_str(), "Scan Angle Rank") ||
-        !compare_no_case(name.c_str(), "ScanAngle") ||
-        !compare_no_case(name.c_str(), "ScanAngleRank"))
+    if (!Utils::compare_no_case(name, "Scan Angle Rank") ||
+        !Utils::compare_no_case(name, "ScanAngle") ||
+        !Utils::compare_no_case(name, "ScanAngleRank"))
         return Dimension::Field_ScanAngleRank;
 
-    if (!compare_no_case(name.c_str(), "User Data") ||
-        !compare_no_case(name.c_str(), "UserData"))
+    if (!Utils::compare_no_case(name, "User Data") ||
+        !Utils::compare_no_case(name, "UserData"))
         return Dimension::Field_UserData;
 
-    if (!compare_no_case(name.c_str(), "Point Source ID")||
-        !compare_no_case(name.c_str(), "PointSourceId"))
+    if (!Utils::compare_no_case(name, "Point Source ID")||
+        !Utils::compare_no_case(name, "PointSourceId"))
         return Dimension::Field_PointSourceId;
 
-    if (!compare_no_case(name.c_str(), "Time"))
+    if (!Utils::compare_no_case(name, "Time"))
         return Dimension::Field_Time;
 
-    if (!compare_no_case(name.c_str(), "Red"))
+    if (!Utils::compare_no_case(name, "Red"))
         return Dimension::Field_Red;
 
-    if (!compare_no_case(name.c_str(), "Green"))
+    if (!Utils::compare_no_case(name, "Green"))
         return Dimension::Field_Green;
 
-    if (!compare_no_case(name.c_str(), "Blue"))
+    if (!Utils::compare_no_case(name, "Blue"))
         return Dimension::Field_Blue;
 
-    if (!compare_no_case(name.c_str(), "Alpha"))
+    if (!Utils::compare_no_case(name, "Alpha"))
         return Dimension::Field_Alpha;
 
     // Yes, this is scary.  What else can we do?  The user didn't give us a

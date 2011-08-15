@@ -267,6 +267,7 @@ boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
     return 0;
 }
 
+
 BlockPtr IteratorBase::defineBlock(Statement statement)
 {
 
@@ -286,52 +287,52 @@ BlockPtr IteratorBase::defineBlock(Statement statement)
     {
         std::string name = to_upper(std::string(szFieldName));
 
-        if (compare_no_case(szFieldName, "OBJ_ID") == 0)
+        if (Utils::compare_no_case(szFieldName, "OBJ_ID") == 0)
         {
             statement->Define(&(block->obj_id));
         }
 
-        if (compare_no_case(szFieldName, "BLK_ID") == 0)
+        if (Utils::compare_no_case(szFieldName, "BLK_ID") == 0)
         {
             statement->Define(&(block->blk_id));
         }
 
-        if (compare_no_case(szFieldName, "BLK_EXTENT") == 0)
+        if (Utils::compare_no_case(szFieldName, "BLK_EXTENT") == 0)
         {
             statement->Define(&(block->blk_extent));
         }
 
-        if (compare_no_case(szFieldName, "BLK_DOMAIN") == 0)
+        if (Utils::compare_no_case(szFieldName, "BLK_DOMAIN") == 0)
         {
             statement->Define(&(block->blk_domain));
         }
         
-        if (compare_no_case(szFieldName, "PCBLK_MIN_RES") == 0)
+        if (Utils::compare_no_case(szFieldName, "PCBLK_MIN_RES") == 0)
         {
             statement->Define(&(block->pcblk_min_res));
         }
 
-        if (compare_no_case(szFieldName, "PCBLK_MAX_RES") == 0)
+        if (Utils::compare_no_case(szFieldName, "PCBLK_MAX_RES") == 0)
         {
             statement->Define(&(block->pcblk_max_res));
         }
 
-        if (compare_no_case(szFieldName, "NUM_POINTS") == 0)
+        if (Utils::compare_no_case(szFieldName, "NUM_POINTS") == 0)
         {
             statement->Define(&(block->num_points));
         }
 
-        if (compare_no_case(szFieldName, "NUM_UNSORTED_POINTS") == 0)
+        if (Utils::compare_no_case(szFieldName, "NUM_UNSORTED_POINTS") == 0)
         {
             statement->Define(&(block->num_unsorted_points));
         }
 
-        if (compare_no_case(szFieldName, "PT_SORT_DIM") == 0)
+        if (Utils::compare_no_case(szFieldName, "PT_SORT_DIM") == 0)
         {
             statement->Define(&(block->pt_sort_dim));
         }
 
-        if (compare_no_case(szFieldName, "POINTS") == 0)
+        if (Utils::compare_no_case(szFieldName, "POINTS") == 0)
         {
             statement->Define( &(block->locator) ); 
         }

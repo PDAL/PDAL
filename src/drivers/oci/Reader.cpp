@@ -193,9 +193,9 @@ QueryType Reader::describeQueryType() const
         if ( hType == SQLT_NTY)
         {
                 // std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
-                if (compare_no_case(szTypeName, "SDO_PC") == 0)
+                if (Utils::compare_no_case(szTypeName, "SDO_PC") == 0)
                     return QUERY_SDO_PC;
-                if (compare_no_case(szTypeName, "SDO_PC_BLK_TYPE") == 0)
+                if (Utils::compare_no_case(szTypeName, "SDO_PC_BLK_TYPE") == 0)
                     return QUERY_SDO_PC_BLK_TYPE;
         }
     }
@@ -239,52 +239,52 @@ BlockPtr Reader::defineBlock() const
     {
         std::string name = to_upper(std::string(szFieldName));
 
-        if (compare_no_case(szFieldName, "OBJ_ID") == 0)
+        if (Utils::compare_no_case(szFieldName, "OBJ_ID") == 0)
         {
             m_statement->Define(&(block->obj_id));
         }
 
-        if (compare_no_case(szFieldName, "BLK_ID") == 0)
+        if (Utils::compare_no_case(szFieldName, "BLK_ID") == 0)
         {
             m_statement->Define(&(block->blk_id));
         }
 
-        if (compare_no_case(szFieldName, "BLK_EXTENT") == 0)
+        if (Utils::compare_no_case(szFieldName, "BLK_EXTENT") == 0)
         {
             m_statement->Define(&(block->blk_extent));
         }
 
-        if (compare_no_case(szFieldName, "BLK_DOMAIN") == 0)
+        if (Utils::compare_no_case(szFieldName, "BLK_DOMAIN") == 0)
         {
             m_statement->Define(&(block->blk_domain));
         }
         
-        if (compare_no_case(szFieldName, "PCBLK_MIN_RES") == 0)
+        if (Utils::compare_no_case(szFieldName, "PCBLK_MIN_RES") == 0)
         {
             m_statement->Define(&(block->pcblk_min_res));
         }
 
-        if (compare_no_case(szFieldName, "PCBLK_MAX_RES") == 0)
+        if (Utils::compare_no_case(szFieldName, "PCBLK_MAX_RES") == 0)
         {
             m_statement->Define(&(block->pcblk_max_res));
         }
 
-        if (compare_no_case(szFieldName, "NUM_POINTS") == 0)
+        if (Utils::compare_no_case(szFieldName, "NUM_POINTS") == 0)
         {
             m_statement->Define(&(block->num_points));
         }
 
-        if (compare_no_case(szFieldName, "NUM_UNSORTED_POINTS") == 0)
+        if (Utils::compare_no_case(szFieldName, "NUM_UNSORTED_POINTS") == 0)
         {
             m_statement->Define(&(block->num_unsorted_points));
         }
 
-        if (compare_no_case(szFieldName, "PT_SORT_DIM") == 0)
+        if (Utils::compare_no_case(szFieldName, "PT_SORT_DIM") == 0)
         {
             m_statement->Define(&(block->pt_sort_dim));
         }
 
-        if (compare_no_case(szFieldName, "POINTS") == 0)
+        if (Utils::compare_no_case(szFieldName, "POINTS") == 0)
         {
             // std::cout << "Defined POINTS as BLOB" << std::endl;
             m_statement->Define( &(block->locator) ); 
@@ -358,7 +358,7 @@ pdal::Schema Reader::fetchSchema(sdo_pc* pc)
 
         for(tokenizer::iterator c = parameter.begin(); c != parameter.end(); ++c)
         {
-            if (compare_no_case(c->c_str(), "blk_capacity") == 0)
+            if (Utils::compare_no_case(c->c_str(), "blk_capacity") == 0)
             {
                 tokenizer::iterator d = ++c;
                 block_capacity = atoi(d->c_str());

@@ -455,10 +455,10 @@ bool Writer::IsGeographic(boost::int32_t srid)
         throw std::runtime_error(oss.str());
     }  
     
-    if (compare_no_case(kind.get(), "GEOGRAPHIC2D") == 0) {
+    if (Utils::compare_no_case(kind.get(), "GEOGRAPHIC2D") == 0) {
         return true;
     }
-    if (compare_no_case(kind.get(), "GEOGRAPHIC3D") == 0) {
+    if (Utils::compare_no_case(kind.get(), "GEOGRAPHIC3D") == 0) {
         return true;
     }
 
@@ -1332,7 +1332,7 @@ std::string Writer::ShutOff_SDO_PC_Trigger()
     }
     
     
-    if (compare_no_case(szStatus, "ENABLED") == 0)
+    if (Utils::compare_no_case(szStatus, "ENABLED") == 0)
     {
         oss.str("");
         oss << "ALTER TRIGGER " << szTrigger << " DISABLE ";

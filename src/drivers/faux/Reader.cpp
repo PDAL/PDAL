@@ -45,9 +45,9 @@ namespace pdal { namespace drivers { namespace faux {
 
 static Reader::Mode string2mode(const std::string& str)
 {
-    if (compare_no_case(str.c_str(), "constant")==0) return Reader::Constant;
-    if (compare_no_case(str.c_str(), "random")==0) return Reader::Random;
-    if (compare_no_case(str.c_str(), "ramp")==0) return Reader::Ramp;
+    if (Utils::compare_no_case(str, "constant")==0) return Reader::Constant;
+    if (Utils::compare_no_case(str, "random")==0) return Reader::Random;
+    if (Utils::compare_no_case(str, "ramp")==0) return Reader::Ramp;
     throw pdal_error("invalid Mode option: " + str);
 }
 
