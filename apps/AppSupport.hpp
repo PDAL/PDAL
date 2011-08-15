@@ -32,100 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <iostream>
+#ifndef INCLUDED_APPSUPPORT_HPP
+#define INCLUDED_APPSUPPORT_HPP
 
-#include <pdal/PipelineReader.hpp>
-#include <pdal/PipelineManager.hpp>
-#include <pdal/FileUtils.hpp>
-
-#include "AppSupport.hpp"
-
-#include "Application.hpp"
-
-using namespace pdal;
-namespace po = boost::program_options;
-
-
-class Application_pcpipeline : public Application
+// this is a static class with some helper functions the cmd line apps need
+class AppSupport
 {
 public:
-    Application_pcpipeline(int argc, char* argv[]);
-    int execute();
+    static int foo();
 
-private:
-    void addOptions();
-    bool validateOptions();
-
-    std::string m_inputFile;
+    AppSupport& operator=(const AppSupport&); // not implemented
+    AppSupport(const AppSupport&); // not implemented
 };
 
-
-Application_pcpipeline::Application_pcpipeline(int argc, char* argv[])
-    : Application(argc, argv, "pcpipeline")
-    , m_inputFile("")
-{
-    return;
-}
-
-
-bool Application_pcpipeline::validateOptions()
-{
-    if (!hasOption("input"))
-    {
-        usageError("--input/-i required");
-        return false;
-    }
-
-    return true;
-}
-
-
-void Application_pcpipeline::addOptions()
-{
-    po::options_description* file_options = new po::options_description("file options");
-
-    file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile), "input file name (required)")
-        ;
-
-    addOptionSet(file_options);
-}
-
-
-int Application_pcpipeline::execute()
-{
-    if (!FileUtils::fileExists(m_inputFile))
-    {
-        runtimeError("file not found: " + m_inputFile);
-        return 1;
-    }
-
-    try
-    {
-        pdal::PipelineManager manager;
-
-        pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
-        reader.readWriterPipeline(m_inputFile);
-
-        const boost::uint64_t np = manager.execute();
-
-        std::cout << "Wrote " << np << " points.\n";
-    }
-    catch (pdal::pdal_error ex)
-    {
-        std::cout << "Caught exception: " << ex.what() << "\n";
-        return 1;
-    }
-
-    return 0;
-}
-
-
-int main(int argc, char* argv[])
-{
-    Application_pcpipeline app(argc, argv);
-    return app.run();
-}
-
-
-
+#endif

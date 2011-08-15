@@ -24,6 +24,8 @@
 
 #include <iostream>
 
+#include "AppSupport.hpp"
+
 #include "Application.hpp"
 
 using namespace pdal;

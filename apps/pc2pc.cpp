@@ -46,6 +46,8 @@
 
 #include <boost/property_tree/xml_parser.hpp>
 
+#include "AppSupport.hpp"
+
 #include "Application.hpp"
 
 using namespace pdal;

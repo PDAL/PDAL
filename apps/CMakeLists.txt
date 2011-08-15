@@ -25,6 +25,7 @@ set(PC2PC pc2pc)
 set(PCINFO pcinfo)
 set(PCPIPELINE pcpipeline)
 
+set(COMMON_APP_SOURCES Application.cpp Application.hpp AppSupport.cpp AppSupport.hpp)
 
 set(PDAL_UTILITIES
     ${PCPIPELINE} ${PCINFO} ${PC2PC} ${PCVIEW})
@@ -52,17 +53,17 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 # Build pcinfo
 if(PCINFO)
-    add_executable(${PCINFO} pcinfo.cpp Application.cpp Application.hpp)
+    add_executable(${PCINFO} pcinfo.cpp ${COMMON_APP_SOURCES})
     target_link_libraries(${PCINFO} ${APPS_CPP_DEPENDENCIES} )
 endif()
 
 if(PC2PC)
-    add_executable(${PC2PC} pc2pc.cpp Application.cpp Application.hpp)
+    add_executable(${PC2PC} pc2pc.cpp ${COMMON_APP_SOURCES})
     target_link_libraries(${PC2PC} ${APPS_CPP_DEPENDENCIES} )
 endif()
 
 if(PCPIPELINE)
-    add_executable(${PCPIPELINE} pcpipeline.cpp Application.cpp Application.hpp)
+    add_executable(${PCPIPELINE} pcpipeline.cpp ${COMMON_APP_SOURCES})
     target_link_libraries(${PCPIPELINE} ${APPS_CPP_DEPENDENCIES} )
 endif()
 
