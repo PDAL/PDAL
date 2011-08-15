@@ -53,9 +53,12 @@ public:
     virtual ~Signaller() {}
 
     // This is called by the pipeline at various times,
-    // passing in a value in range [0..1].  It could
+    // passing in a value in range [0..100].  It could
     // be called often, so the implementation should be fast.
     virtual void setPercentComplete(double value) = 0;
+
+    // returns a vlaue in range [0..100]
+    virtual double getPercentComplete() const = 0;
 
     // This is called by the pipeline at various times;
     // a return value of true means the pipeline should
@@ -63,6 +66,8 @@ public:
     // soon as possible.  It could be called often, so 
     // the implementation should be fast.
     virtual bool isInterruptRequested() const = 0;
+
+    virtual void requestInterrupt() = 0;
 
 private:
     Signaller& operator=(const Signaller&); // not implemented

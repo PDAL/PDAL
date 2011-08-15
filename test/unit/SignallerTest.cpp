@@ -53,7 +53,13 @@ public:
     // override
     void setPercentComplete(double value)
     {
-        m_perc = (int)(value * 100);
+        m_perc = value;
+    }
+
+    // override
+    double getPercentComplete() const
+    {
+        return m_perc;
     }
 
     // override
@@ -62,7 +68,14 @@ public:
         return m_stop;
     }
 
-    int m_perc;
+    // override
+    void requestInterrupt()
+    {
+        m_stop = true;
+    }
+
+private:
+    double m_perc;
     bool m_stop;
 };
 
@@ -76,13 +89,13 @@ public:
     {
     }
 
-    bool tick()
+    bool doWork()
     {
         if (m_sig.isInterruptRequested())
             return false;
 
         ++m_ticks;
-        m_sig.setPercentComplete((double)m_ticks / 100.0);
+        m_sig.setPercentComplete((double)m_ticks);
         return true;
     }
 
@@ -101,21 +114,21 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     Worker worker(sig);
     bool ok;
 
-    ok = worker.tick();
+    ok = worker.doWork();
     BOOST_CHECK(ok);
-    BOOST_CHECK_EQUAL(sig.m_perc, 1);
-    ok = worker.tick();
+    BOOST_CHECK_CLOSE(sig.getPercentComplete(), 1.0, 0.001);
+    ok = worker.doWork();
     BOOST_CHECK(ok);
-    BOOST_CHECK_EQUAL(sig.m_perc, 2);
-    ok = worker.tick();
+    BOOST_CHECK_CLOSE(sig.getPercentComplete(), 2.0, 0.001);
+    ok = worker.doWork();
     BOOST_CHECK(ok);
-    BOOST_CHECK_EQUAL(sig.m_perc, 3);
+    BOOST_CHECK_CLOSE(sig.getPercentComplete(), 3.0, 0.001);
 
-    sig.m_stop = true;
+    sig.requestInterrupt();
 
-    ok = worker.tick();
+    ok = worker.doWork();
     BOOST_CHECK(!ok);
-    BOOST_CHECK_EQUAL(sig.m_perc, 3);
+    BOOST_CHECK_CLOSE(sig.getPercentComplete(), 3.0, 0.001);
 
     return;
 }
