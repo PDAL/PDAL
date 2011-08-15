@@ -103,19 +103,19 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 
     ok = worker.tick();
     BOOST_CHECK(ok);
-    BOOST_CHECK(sig.m_perc == 1);
+    BOOST_CHECK_EQUAL(sig.m_perc, 1);
     ok = worker.tick();
     BOOST_CHECK(ok);
-    BOOST_CHECK(sig.m_perc == 2);
+    BOOST_CHECK_EQUAL(sig.m_perc, 2);
     ok = worker.tick();
     BOOST_CHECK(ok);
-    BOOST_CHECK(sig.m_perc == 3);
+    BOOST_CHECK_EQUAL(sig.m_perc, 3);
 
     sig.m_stop = true;
 
     ok = worker.tick();
     BOOST_CHECK(!ok);
-    BOOST_CHECK(sig.m_perc == 3);
+    BOOST_CHECK_EQUAL(sig.m_perc, 3);
 
     return;
 }
