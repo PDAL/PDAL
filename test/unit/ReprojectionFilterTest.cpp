@@ -49,6 +49,8 @@
 BOOST_AUTO_TEST_SUITE(ReprojectionFilterTest)
 
 
+#ifdef PDAL_SRS_ENABLED
+
 static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double& z, double scaleX, double scaleY, double scaleZ)
 {
     using namespace pdal;
@@ -70,7 +72,6 @@ static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double
     return;
 }
 
-#ifdef PDAL_SRS_ENABLED
 
 // Test reprojecting UTM 15 to DD with a filter
 BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)

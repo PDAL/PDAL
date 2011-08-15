@@ -51,6 +51,11 @@
 #include <pdal/exceptions.hpp>
 #include "TestConfig.hpp"
 
+#ifdef PDAL_COMPILER_GCC
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+//#pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
+
 
 std::string Support::datapath()
 {
@@ -416,6 +421,7 @@ void Support::compareBounds(const pdal::Bounds<double>& p, const pdal::Bounds<do
 }
 
 
+#ifdef PDAL_COMPILER_MSVC
 // http://www.codepedia.com/1/CppStringReplace
 static std::string replaceAll(std::string result, 
                               const std::string& replaceWhat, 
@@ -429,6 +435,7 @@ static std::string replaceAll(std::string result,
     }
     return result;
 }
+#endif
 
 
 int Support::run_command(const std::string& rawcmd, std::string& output)

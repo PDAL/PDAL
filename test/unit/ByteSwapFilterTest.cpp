@@ -45,6 +45,10 @@
 #include <pdal/Endian.hpp>
 #include <iostream>
 
+#ifdef PDAL_COMPILER_GCC
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#endif
+
 using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(ByteSwapFilterTest)
