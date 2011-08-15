@@ -34,8 +34,10 @@
 #include <pdal/filters/CacheFilter.hpp>
 #include <pdal/filters/ByteSwapFilter.hpp>
 
+#ifdef PDAL_HAVE_LIBLAS
 #include <pdal/drivers/liblas/Writer.hpp>
 #include <pdal/drivers/liblas/Reader.hpp>
+#endif
 
 #ifdef PDAL_HAVE_ORACLE
 #include <pdal/drivers/oci/Writer.hpp>
@@ -299,6 +301,7 @@ int Application_pc2pc::execute()
 
     else
     {
+#ifdef PDAL_HAVE_LIBLAS
         pdal::drivers::liblas::LiblasReader reader(m_inputFile);
     
         const boost::uint64_t numPoints = reader.getNumPoints();
@@ -312,6 +315,7 @@ int Application_pc2pc::execute()
         writer.initialize();
 
         writer.write(numPoints);
+#endif
     }
 
     FileUtils::closeFile(ofs);

@@ -36,21 +36,20 @@
 #include <boost/cstdint.hpp>
 
 #include <pdal/filters/Chipper.hpp>
-#include <pdal/drivers/liblas/Writer.hpp>
-#include <pdal/drivers/liblas/Reader.hpp>
+#include <pdal/drivers/las/Writer.hpp>
+#include <pdal/drivers/las/Reader.hpp>
 #include <pdal/Options.hpp>
 
 #include "Support.hpp"
 
 using namespace pdal;
-using namespace pdal::drivers::liblas;
 
 BOOST_AUTO_TEST_SUITE(ChipperTest)
 
 
 BOOST_AUTO_TEST_CASE(test_construction)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
 
     {
         // need to scope the writer, so that's it dtor can use the stream

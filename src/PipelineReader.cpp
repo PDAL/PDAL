@@ -42,11 +42,6 @@
 #include <pdal/Options.hpp>
 #include <pdal/FileUtils.hpp>
 
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/las/Writer.hpp>
-#include <pdal/drivers/liblas/Reader.hpp>
-#include <pdal/drivers/liblas/Writer.hpp>
-
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/optional.hpp>
 #include <boost/filesystem.hpp>

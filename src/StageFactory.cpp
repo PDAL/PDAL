@@ -41,7 +41,11 @@
 
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/las/Reader.hpp>
+
+#ifdef PDAL_HAVE_LIBLAS
 #include <pdal/drivers/liblas/Reader.hpp>
+#endif
+
 #ifdef PDAL_HAVE_ORACLE
 #include <pdal/drivers/oci/Reader.hpp>
 #endif
@@ -50,7 +54,11 @@
 
 #include <pdal/drivers/faux/Writer.hpp>
 #include <pdal/drivers/las/Writer.hpp>
+
+#ifdef PDAL_HAVE_LIBLAS
 #include <pdal/drivers/liblas/Writer.hpp>
+#endif
+
 #ifdef PDAL_HAVE_ORACLE
 #include <pdal/drivers/oci/Writer.hpp>
 #endif
@@ -87,10 +95,15 @@ namespace pdal
 
 MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::LasReader)
+
+#ifdef PDAL_HAVE_LIBLAS
 MAKE_READER_CREATOR(LiblasReader, pdal::drivers::liblas::LiblasReader)
+#endif
+
 #ifdef PDAL_HAVE_ORACLE
 MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
 #endif
+
 MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 
@@ -108,7 +121,11 @@ MAKE_MULTIFILTER_CREATOR(MosaicFilter, pdal::filters::MosaicFilter)
 
 MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
 MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::LasWriter)
+
+#ifdef PDAL_HAVE_LIBLAS
 MAKE_WRITER_CREATOR(LiblasWriter, pdal::drivers::liblas::LiblasWriter)
+#endif
+
 #ifdef PDAL_HAVE_ORACLE
 MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 #endif
@@ -249,7 +266,9 @@ void StageFactory::registerKnownReaders()
 
     REGISTER_READER(FauxReader, pdal::drivers::faux::Reader);
     REGISTER_READER(LasReader, pdal::drivers::las::LasReader);
+#ifdef PDAL_HAVE_LIBLAS
     REGISTER_READER(LiblasReader, pdal::drivers::liblas::LiblasReader);
+#endif
 #ifdef PDAL_HAVE_ORACLE
     REGISTER_READER(OciReader, pdal::drivers::oci::Reader);
 #endif
@@ -291,7 +310,9 @@ void StageFactory::registerKnownWriters()
 
     REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
     REGISTER_WRITER(LasWriter, pdal::drivers::las::LasWriter);
+#ifdef PDAL_HAVE_LIBLAS
     REGISTER_WRITER(LiblasWriter, pdal::drivers::liblas::LiblasWriter);
+#endif
 #ifdef PDAL_HAVE_ORACLE
     REGISTER_WRITER(OciWriter, pdal::drivers::oci::Writer);
 #endif

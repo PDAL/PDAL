@@ -11,6 +11,12 @@ if (LIBXML2_FOUND)
 SET (PDAL_UNITTEST_XMLSCHEMA_TEST XMLSchemaTest.cpp)
 endif()
 
+if (LIBLAS_FOUND)
+    SET(LIBLAS_TESTS LiblasReaderTest.cpp
+                        LiblasWriterTest.cpp 
+                        )
+endif()
+
 SET(PDAL_UNITTEST_TEST_SRC
     pc2pcTest.cpp
     pcinfoTest.cpp
@@ -31,8 +37,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     FileUtilsTest.cpp
     LasReaderTest.cpp
     LasWriterTest.cpp
-    LiblasReaderTest.cpp
-    LiblasWriterTest.cpp
+    ${LIBLAS_TESTS}
     MosaicFilterTest.cpp
     OptionsTest.cpp
     PipelineManagerTest.cpp

@@ -11,8 +11,13 @@
 
 
 #include <pdal/drivers/las/Reader.hpp>
+
+#ifdef PDAL_HAVE_LIBLAS
 #include <pdal/drivers/liblas/Reader.hpp>
+#endif
+
 #include <pdal/FileUtils.hpp>
+
 #ifdef PDAL_HAVE_MRSID
 #include <pdal/drivers/mrsid/Reader.hpp>
 #endif
@@ -92,10 +97,12 @@ int Application_pcinfo::execute()
             {
                 reader = new pdal::drivers::las::LasReader(m_inputFile);
             }
+#ifdef PDAL_HAVE_LIBLAS
             else
             {
                 reader = new pdal::drivers::liblas::LiblasReader(m_inputFile);
             }
+#endif
         }
 #ifdef PDAL_HAVE_MRSID
         else if (!m_inputFile.substr(ext).compare("sid"))
