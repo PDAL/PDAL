@@ -69,8 +69,13 @@ bool Support::compare_stage_data(pdal::Stage const& a, pdal::Stage const& b)
     pdal::Schema const& b_schema = b.getSchema();
     if (a_schema != b_schema) return false;
     
-    boost::uint64_t a_num_points = a.getNumPoints();
-    boost::uint64_t b_num_points = b.getNumPoints();
+    boost::uint64_t a_num_points64 = a.getNumPoints();
+    boost::uint64_t b_num_points64 = b.getNumPoints();
+    if (a_num_points64 > std::numeric_limits<boost::uint32_t>::max() ||
+        b_num_points64 > std::numeric_limits<boost::uint32_t>::max())
+        throw pdal::pdal_error("unable to do compare_stage_data for > 2^32 points");
+    boost::uint32_t a_num_points = static_cast<boost::uint32_t>(a_num_points64);
+    boost::uint32_t b_num_points = static_cast<boost::uint32_t>(b_num_points64);
     if (a_num_points != b_num_points) return false;
     
     pdal::StageSequentialIterator* a_itr = a.createSequentialIterator();
