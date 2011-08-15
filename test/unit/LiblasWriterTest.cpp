@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_laz)
     FileUtils::closeFile(ofs);
 
     bool filesSame = Support::compare_files(Support::temppath("LiblasWriterTest_test_simple_laz.laz"), 
-                                            Support::datapath("laszip/laszip-generated.laz"));
+                                            Support::datapath("laszip/laszip-generated_with2bytespadding.laz"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
