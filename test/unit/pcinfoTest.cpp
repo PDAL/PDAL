@@ -52,6 +52,7 @@ static std::string appName()
 }
 
 
+#ifdef PDAL_COMPILER_MSVC
 BOOST_AUTO_TEST_CASE(pcinfoTest_1)
 {
     const std::string cmd = appName();
@@ -65,5 +66,7 @@ BOOST_AUTO_TEST_CASE(pcinfoTest_1)
 
     return;
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
+

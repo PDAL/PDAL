@@ -444,9 +444,9 @@ static FILE* portable_popen(const std::string& command, const std::string& mode)
     
 #ifdef PDAL_COMPILER_MSVC
     const std::string dos_command = replaceAll(command, "/", "\\");
-    fp = _popen(dos_command.c_str(), "r");
+    fp = _popen(dos_command.c_str(), mode.c_str());
 #else
-    fp = popen(command.c_str(), "r");
+    fp = popen(command.c_str(), mode.c_str());
 #endif
 
     return fp;
@@ -473,12 +473,20 @@ static int portable_pclose(FILE* fp)
     {
         status = 0;
     }
-    #endif
+#endif
 
     return status;
 }
 
 
+// BUG:
+// Under unix, the pclose() operation causes the boost unit test system
+// to produce a fatal error iff the process started by popen returns a
+// nonzero status code.  For this reason, I've put all the "negative"
+// cmd line app tests under #ifdef PDAL_COMPILER_MSVC.
+//
+// This problem shows up on mpg's Ubuntu 11.4 machine (gcc 4.5.2, boost 1.47.0)
+// as well as on Hobu's machine.
 int Support::run_command(const std::string& cmd, std::string& output)
 {
     const int maxbuf = 4096;
