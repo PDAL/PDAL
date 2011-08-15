@@ -157,6 +157,9 @@ public:
     // defult ctor, empy options list
     Options() {}
 
+    // copy ctor
+    Options(const Options&);
+
     // what's a better way to do this?
     Options(const Option<std::string>&);
     Options(const Option<std::string>&, const Option<std::string>&);

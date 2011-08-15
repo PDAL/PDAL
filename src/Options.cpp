@@ -48,8 +48,15 @@ namespace pdal
 {
 
 
-Options::Options(boost::property_tree::ptree t) :
-    m_tree(t)
+Options::Options(const Options& rhs)
+    : m_tree(rhs.getPTree())
+{
+    return;
+}
+
+
+Options::Options(boost::property_tree::ptree t) 
+    : m_tree(t)
 {
     return;
 }
