@@ -35,11 +35,30 @@
 #ifndef INCLUDED_APPSUPPORT_HPP
 #define INCLUDED_APPSUPPORT_HPP
 
+#include <string>
+
+#include <pdal/Options.hpp>
+#include <pdal/Stage.hpp>
+
 // this is a static class with some helper functions the cmd line apps need
 class AppSupport
 {
 public:
-    static int foo();
+    enum FileType
+    {
+        LAS,
+        LAZ,
+        LIBLAS_LAS,
+        LIBLAS_LAZ,
+        XML,
+        UNKNOWN
+    };
+
+    static FileType inferFileType(const std::string& filename);
+
+    // creates a Reader using the given driver type
+    // caller takes ownership of the returned pointer... unless it's of type XML :-(
+    static pdal::Stage* createReader(FileType type, const std::string& filename, const pdal::Options& options);
 
     AppSupport& operator=(const AppSupport&); // not implemented
     AppSupport(const AppSupport&); // not implemented

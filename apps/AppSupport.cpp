@@ -34,8 +34,59 @@
 
 #include "AppSupport.hpp"
 
+#include <boost/filesystem.hpp>
+#include <pdal/Utils.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/PipelineReader.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+#ifdef PDAL_HAVE_LIBLAS
+#include <pdal/drivers/liblas/Reader.hpp>
+#endif
 
-int AppSupport::foo()
+AppSupport::FileType AppSupport::inferFileType(const std::string& filename)
 {
-    return 0;
+    const std::string ext = boost::filesystem::extension(filename);
+
+    if (pdal::Utils::compare_no_case(ext, ".las")==0) return LAS;
+    if (pdal::Utils::compare_no_case(ext, ".laz")==0) return LAZ;
+    if (pdal::Utils::compare_no_case(ext, ".xml")==0) return XML;
+
+    return UNKNOWN;
+}
+
+
+pdal::Stage* AppSupport::createReader(FileType type, const std::string& filename, const pdal::Options& extraOptions)
+{
+    pdal::Stage* reader = NULL;
+
+    pdal::Options opts(extraOptions);
+    opts.add<std::string>("filename", filename);
+
+    switch (type)
+    {
+    case LAS:
+    case LAZ:
+        reader = new pdal::drivers::las::LasReader(opts);
+        reader->initialize();
+        break;
+#ifdef PDAL_HAVE_LIBLAS
+    case LIBLAS_LAS:
+    case LIBLAS_LAZ:
+        reader = new pdal::drivers::liblas::LiblasReader(opts);
+        reader->initialize();
+        break;
+#endif
+    case XML:
+        {
+            pdal::PipelineManager* pipeManager(new pdal::PipelineManager); // BUG: memleak
+            pdal::PipelineReader pipeReader(*pipeManager);
+            pipeReader.readReaderPipeline(filename);
+            reader = pipeManager->getStage();
+        }
+        break;
+    default:
+        return NULL;
+    }
+
+    return reader;
 }
