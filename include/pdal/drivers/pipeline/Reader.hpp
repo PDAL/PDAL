@@ -39,6 +39,7 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/PipelineManager.hpp>
+#include <boost/scoped_ptr.hpp>
 
 
 namespace pdal { namespace drivers { namespace pipeline {
@@ -55,14 +56,7 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
     
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random ) return true;
-        
-        return false;
-    }
-
+    bool supportsIterator (StageIteratorType t) const;
     pdal::StageSequentialIterator* createSequentialIterator() const;
     pdal::StageRandomIterator* createRandomIterator() const;
 
@@ -71,8 +65,8 @@ public:
 
 private:
     std::string m_filename;
-    PipelineManager* m_manager;
-    Stage* m_stage;
+    boost::scoped_ptr<PipelineManager> m_manager;
+    Stage* m_stage; // owned by m_manager
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented

@@ -34,8 +34,6 @@
 
 #include <pdal/drivers/pipeline/Reader.hpp>
 
-#include <pdal/drivers/pipeline/Iterator.hpp>
-#include <pdal/exceptions.hpp>
 #include <pdal/PipelineReader.hpp>
 
 
@@ -53,7 +51,8 @@ Reader::Reader(const Options& options)
 
 Reader::~Reader()
 {
-    delete m_manager;
+    m_manager.reset();
+    return;
 }
 
 
@@ -61,16 +60,19 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    m_manager = new PipelineManager;
+    boost::scoped_ptr<PipelineManager> tmp(new PipelineManager());
+    m_manager.swap(tmp);
 
     PipelineReader xmlreader(*m_manager);
     xmlreader.readReaderPipeline(m_filename);
     m_stage = m_manager->getStage();
+    m_stage->initialize();
 
     setNumPoints(m_stage->getNumPoints());
     setPointCountType(m_stage->getPointCountType());
-
     setBounds(m_stage->getBounds());
+
+    return;
 }
 
 
@@ -81,22 +83,21 @@ const Options Reader::getDefaultOptions() const
 }
 
 
+bool Reader::supportsIterator (StageIteratorType t) const
+{   
+    return m_stage->supportsIterator(t);
+}
+
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return new SequentialIterator(*this);
+    return m_stage->createSequentialIterator();
 }
 
 
 pdal::StageRandomIterator* Reader::createRandomIterator() const
 {
-    return new RandomIterator(*this);
-}
-
-
-boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) const
-{
-    return 0;
+    return m_stage->createRandomIterator();
 }
 
 

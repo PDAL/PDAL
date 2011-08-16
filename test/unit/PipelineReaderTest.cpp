@@ -36,12 +36,14 @@
 
 #include "Support.hpp"
 
+#include <pdal/Options.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageIterator.hpp>
 #include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/pipeline/Reader.hpp>
 
 using namespace pdal;
 
@@ -214,5 +216,27 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test4)
 }
 #endif
 
+BOOST_AUTO_TEST_CASE(PipelineReaderTest_Reader)
+{
+    Option<std::string> option("filename", Support::datapath("pipeline/pipeline_read.xml"));
+    Options options(option);
+
+    pdal::drivers::pipeline::Reader reader(options);
+
+    reader.initialize();
+
+    {
+        const Schema& schema = reader.getSchema();
+        SchemaLayout layout(schema);
+        PointBuffer data(layout, 2048);
+        StageSequentialIterator* iter = reader.createSequentialIterator();
+        boost::uint32_t np = iter->read(data);
+        BOOST_CHECK(np == 1065);
+
+        delete iter;
+    }
+
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()
