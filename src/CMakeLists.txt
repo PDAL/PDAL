@@ -191,6 +191,28 @@ endif()
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_LIBLAS_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_LIBLAS_HPP} )
 
+
+#
+# drivers/mrsid
+#
+set(PDAL_MRSID_PATH drivers/mrsid)
+set(PDAL_MRSID_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_MRSID_PATH})
+set(PDAL_MRSID_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_MRSID_PATH})
+
+set(PDAL_DRIVERS_MRSID_HPP
+  ${PDAL_MRSID_HEADERS}/Reader.hpp
+)
+
+set (PDAL_DRIVERS_MRSID_CPP 
+  ${PDAL_MRSID_SRC}/Reader.cpp
+)
+
+if (MRSID_FOUND)
+    list (APPEND PDAL_CPP ${PDAL_DRIVERS_MRSID_CPP} )
+    list (APPEND PDAL_HPP ${PDAL_DRIVERS_MRSID_HPP} )
+endif()
+
+
 #
 # drivers/oci
 #
@@ -220,25 +242,27 @@ if (ORACLE_FOUND)
     list (APPEND PDAL_HPP ${PDAL_DRIVERS_OCI_HPP} )
 endif()
 
-#
-# drivers/mrsid
-#
-set(PDAL_MRSID_PATH drivers/mrsid)
-set(PDAL_MRSID_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_MRSID_PATH})
-set(PDAL_MRSID_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_MRSID_PATH})
 
-set(PDAL_DRIVERS_MRSID_HPP
-  ${PDAL_MRSID_HEADERS}/Reader.hpp
+#
+# drivers/pipeline
+#
+
+set(PDAL_PIPELINE_PATH drivers/pipeline)
+set(PDAL_PIPELINE_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_PIPELINE_PATH})
+set(PDAL_PIPELINE_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_PIPELINE_PATH})
+
+set (PDAL_DRIVERS_PIPELINE_HPP
+  ${PDAL_PIPELINE_HEADERS}/Iterator.hpp
+  ${PDAL_PIPELINE_HEADERS}/Reader.hpp
 )
 
-set (PDAL_DRIVERS_MRSID_CPP 
-  ${PDAL_MRSID_SRC}/Reader.cpp
+set (PDAL_DRIVERS_PIPELINE_CPP 
+  ${PDAL_PIPELINE_SRC}/Iterator.cpp
+  ${PDAL_PIPELINE_SRC}/Reader.cpp
 )
 
-if (MRSID_FOUND)
-    list (APPEND PDAL_CPP ${PDAL_DRIVERS_MRSID_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_DRIVERS_MRSID_HPP} )
-endif()
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_PIPELINE_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_PIPELINE_HPP} )
 
 
 #
@@ -365,6 +389,7 @@ source_group("Header Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\liblas" FILES ${PDAL_DRIVERS_LIBLAS_HPP})
 source_group("Header Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_HPP})
+source_group("Header Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
@@ -375,6 +400,7 @@ source_group("Source Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_CPP})
 source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
 source_group("Source Files\\drivers\\liblas" FILES ${PDAL_DRIVERS_LIBLAS_CPP})
 source_group("Source Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_CPP})
+source_group("Source Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
