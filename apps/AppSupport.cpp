@@ -35,30 +35,34 @@
 #include "AppSupport.hpp"
 
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
+
 #include <pdal/Utils.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/StageFactory.hpp>
 
+
+
 std::string AppSupport::inferReaderDriver(const std::string& filename)
 {
-    const std::string ext = boost::filesystem::extension(filename);
+    std::string ext = boost::filesystem::extension(filename);
+    if (ext == "") return "";
+    ext = ext.substr(1, ext.length()-1);
+    if (ext == "") return "";
+
+    boost::to_lower(ext);
 
     // maybe this should live in StageFactory?
     std::map<std::string, std::string> drivers;
-    drivers[".las"] = "drivers.las.reader";
-    drivers[".laz"] = "drivers.las.reader";
-    drivers[".bin"] = "drivers.terrasolid.reader";
-    drivers[".qi"] = "drivers.qfit.reader";
-    drivers[".xml"] = "drivers.pipeline.reader";
+    drivers["las"] = "drivers.las.reader";
+    drivers["laz"] = "drivers.las.reader";
+    drivers["bin"] = "drivers.terrasolid.reader";
+    drivers["qi"] = "drivers.qfit.reader";
+    drivers["xml"] = "drivers.pipeline.reader";
 
     std::string driver = drivers[ext];
-    if (driver == "")
-    {
-        return "";
-    }
-
-    return driver;
+    return driver; // will be "" if not found
 }
 
 
@@ -69,18 +73,8 @@ pdal::Stage* AppSupport::createReader(const std::string& driver, const std::stri
     pdal::Options opts(extraOptions);
     opts.add<std::string>("filename", filename);
 
-    if (driver == "drivers.pipeline.reader")
-    {
-        pdal::PipelineManager* pipeManager(new pdal::PipelineManager); // BUG: memleak
-        pdal::PipelineReader pipeReader(*pipeManager);
-        pipeReader.readReaderPipeline(filename);
-        reader = pipeManager->getStage();
-    }
-    else
-    {
-        pdal::StageFactory factory;
-        reader = factory.createReader(driver, opts);
-    }
+    pdal::StageFactory factory;
+    reader = factory.createReader(driver, opts);
 
     return reader;
 }

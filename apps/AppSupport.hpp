@@ -45,6 +45,7 @@ class AppSupport
 {
 public:
     // infer the driver to use based on filename extension
+    // returns "" if no driver found
     static std::string inferReaderDriver(const std::string& filename);
 
     // creates a Reader using the given driver type

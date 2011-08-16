@@ -116,26 +116,21 @@ int Application_pcinfo::execute()
         return 1;
     }
 
-    if (hasOption("liblas"))
+    if (hasOption("liblas") && driver == "drivers.las.reader")
     {
-        if (driver == "drivers.las.reader")
-        {
-            driver = "drivers.liblas.reader";
-        }
+        driver = "drivers.liblas.reader";
     }
 
     pdal::Stage* reader = AppSupport::createReader(driver, m_inputFile, pdal::Options::none());
 
+    reader->initialize();
+
     const boost::uint64_t numPoints = reader->getNumPoints();
     const pdal::SpatialReference& srs = reader->getSpatialReference();
 
+    std::cout << "driver type: " << reader->getName() << "\n";
     std::cout << numPoints << " points\n";
     std::cout << "WKT: " << srs.getWKT() << "\n";
-
-    if (driver != "drivers.pipeline.reader")
-    {
-        delete reader;
-    }
 
     return 0;
 }
