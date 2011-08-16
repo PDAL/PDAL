@@ -117,7 +117,8 @@ int Application::innerRun()
     }
     catch (app_usage_error e)
     {
-        printError(e.what());
+        std::string s("Usage error: ");
+        printError(s + e.what());
         outputHelp();
         return 1;
     }
