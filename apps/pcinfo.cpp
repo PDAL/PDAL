@@ -56,7 +56,7 @@ public:
 
 private:
     void addOptions();
-    bool validateOptions();
+    void validateOptions();
     void readOnePoint();
     void readAllPoints();
 
@@ -73,18 +73,18 @@ PcInfo::PcInfo(int argc, char* argv[])
     , m_inputFile("")
     , m_pointNumber(0)
 {
+    return;
 }
 
 
-bool PcInfo::validateOptions()
+void PcInfo::validateOptions()
 {
     if (!hasOption("input"))
     {
-        usageError("input file name required");
-        return false;
+        throw app_usage_error("input file name required");
     }
 
-    return true;
+    return;
 }
 
 
@@ -129,8 +129,7 @@ void PcInfo::readOnePoint()
     const boost::uint32_t numRead = iter->read(data);
     if (numRead != 1)
     {
-        runtimeError("problem reading point number " + m_pointNumber);
-        return;
+        throw app_runtime_error("problem reading point number " + m_pointNumber);
     }
 
     std::cout << "Read point " << m_pointNumber << "\n";
@@ -165,16 +164,14 @@ int PcInfo::execute()
 {
     if (!pdal::FileUtils::fileExists(m_inputFile))
     {
-        runtimeError("file not found: " + m_inputFile);
-        return 1;
+        throw app_runtime_error("file not found: " + m_inputFile);
     }
 
     std::string driver = AppSupport::inferReaderDriver(m_inputFile);
 
     if (driver == "")
     {
-        runtimeError("Cannot determine file type of " + m_inputFile);
-        return 1;
+        throw app_runtime_error("Cannot determine file type of " + m_inputFile);
     }
 
     if (hasOption("liblas") && driver == "drivers.las.reader")

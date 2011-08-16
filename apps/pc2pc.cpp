@@ -62,7 +62,7 @@ public:
 
 private:
     void addOptions();
-    bool validateOptions();
+    void validateOptions();
 
     std::string m_inputFile;
     std::string m_outputFile;
@@ -79,21 +79,19 @@ Application_pc2pc::Application_pc2pc(int argc, char* argv[])
 }
 
 
-bool Application_pc2pc::validateOptions()
+void Application_pc2pc::validateOptions()
 {
     if (!hasOption("input"))
     {
-        usageError("--input/-i required");
-        return false;
+        throw app_usage_error("--input/-i required");
     }
 
     if (!hasOption("output"))
     {
-        usageError("--output/-o required");
-        return false;
+        throw app_usage_error("--output/-o required");
     }
 
-    return true;
+    return;
 }
 
 
@@ -118,8 +116,7 @@ int Application_pc2pc::execute()
 {
     if (!FileUtils::fileExists(m_inputFile))
     {
-        runtimeError("file not found: " + m_inputFile);
-        return 1;
+        throw app_runtime_error("file not found: " + m_inputFile);
     }
 
     std::ostream* ofs = FileUtils::createFile(m_outputFile);

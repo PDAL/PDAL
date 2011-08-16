@@ -35,6 +35,7 @@
 #ifndef INCLUDED_APPLICATION_HPP
 #define INCLUDED_APPLICATION_HPP
 
+#include <pdal/exceptions.hpp>
 #include <iosfwd>
 
 
@@ -48,8 +49,26 @@
 #endif
 
 
+class app_usage_error : public pdal::pdal_error
+{
+public:
+    app_usage_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
+
+class app_runtime_error : public pdal::pdal_error
+{
+public:
+    app_runtime_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
+
 //
-// The pplication base class gives us these common options:
+// The application base class gives us these common options:
 //    --help / -h
 //    --verbose / -v
 //    --version
@@ -66,10 +85,11 @@ protected:
     virtual void addOptions() = 0;
 
     // implement this, to do sanity checking of cmd line
-    // return false if the user gave us bad options
-    virtual bool validateOptions() { return true; }
+    // will throw if the user gave us bad options
+    virtual void validateOptions() {}
 
     // implement this, to do your actual work
+    // it will be wrapped in a global catch try/block for you
     virtual int execute() = 0;
 
 protected:
@@ -79,10 +99,10 @@ protected:
     bool isDebug() const;
     boost::uint8_t getVerboseLevel() const;
     bool hasOption(const std::string& name);
-    void usageError(const std::string&);
-    void runtimeError(const std::string&);
+    void printError(const std::string&);
 
 private:
+    int innerRun();
     void parseOptions();
     void outputHelp();
     void outputVersion();

@@ -54,7 +54,39 @@ Application::Application(int argc, char* argv[], const std::string& appName)
     return;
 }
 
+
+// this just wraps ALL the code in total catch block
 int Application::run()
+{
+    int status = 1;
+
+    try
+    {
+        status = innerRun();
+    }
+    catch (pdal::pdal_error e)
+    {
+        const std::string s("Caught PDAL exception: ");
+        printError(s + e.what());
+        status = 1;
+    }
+    catch (std::exception e)
+    {
+        const std::string s("Caught exception: ");
+        printError(s + e.what());
+        status = 1;
+    }
+    catch (...)
+    {
+        printError("Caught unknown exception");
+        status = 1;
+    }
+
+    return status;
+}
+
+
+int Application::innerRun()
 {
     // add -h, -v, etc
     addBasicOptionSet();
@@ -78,35 +110,22 @@ int Application::run()
         return 0;
     }
 
-    // do any user-level sanity checking
-    bool happy = validateOptions();
-    if (!happy)
+    try
     {
+        // do any user-level sanity checking
+        validateOptions();
+    }
+    catch (app_usage_error e)
+    {
+        printError(e.what());
         outputHelp();
         return 1;
     }
 
     boost::timer timer;
     
-    // call derived function
-    int status = 0;
+    int status = execute();
     
-    try
-    {
-        status = execute();
-    }
-    catch (std::exception e)
-    {
-        const std::string s(e.what());
-        runtimeError("Caught exception: " + s);
-        status = 1;
-    }
-    catch (...)
-    {
-        runtimeError("Caught unknown exception");
-        status = 1;
-    }
-
     if (status == 0 && hasOption("timer"))
     {
         const double t = timer.elapsed();
@@ -117,16 +136,9 @@ int Application::run()
 }
 
 
-void Application::usageError(const std::string& err)
+void Application::printError(const std::string& err)
 {
-    std::cout << "Usage error: " << err << std::endl;
-    std::cout << std::endl;
-}
-
-
-void Application::runtimeError(const std::string& err)
-{
-    std::cout << "Error: " << err << std::endl;
+    std::cout << err << std::endl;
     std::cout << std::endl;
 }
 
@@ -234,8 +246,7 @@ void Application::parseOptions()
     }
     catch (boost::program_options::unknown_option e)
     {
-        usageError("unknown option: " + e.get_option_name());
-        exit(1);
+        throw app_usage_error("unknown option: " + e.get_option_name());
     }
 
     po::notify(m_variablesMap);

@@ -54,7 +54,7 @@ public:
 
 private:
     void addOptions();
-    bool validateOptions();
+    void validateOptions();
 
     std::string m_inputFile;
 };
@@ -68,15 +68,14 @@ Application_pcpipeline::Application_pcpipeline(int argc, char* argv[])
 }
 
 
-bool Application_pcpipeline::validateOptions()
+void Application_pcpipeline::validateOptions()
 {
     if (!hasOption("input"))
     {
-        usageError("--input/-i required");
-        return false;
+        throw app_usage_error("--input/-i required");
     }
 
-    return true;
+    return;
 }
 
 
@@ -96,8 +95,7 @@ int Application_pcpipeline::execute()
 {
     if (!FileUtils::fileExists(m_inputFile))
     {
-        runtimeError("file not found: " + m_inputFile);
-        return 1;
+        throw app_runtime_error("file not found: " + m_inputFile);
     }
 
     try
