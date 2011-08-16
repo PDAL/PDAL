@@ -38,54 +38,48 @@
 #include <pdal/Utils.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
-#include <pdal/drivers/las/Reader.hpp>
-#ifdef PDAL_HAVE_LIBLAS
-#include <pdal/drivers/liblas/Reader.hpp>
-#endif
+#include <pdal/StageFactory.hpp>
 
-AppSupport::FileType AppSupport::inferFileType(const std::string& filename)
+std::string AppSupport::inferReaderDriver(const std::string& filename)
 {
     const std::string ext = boost::filesystem::extension(filename);
 
-    if (pdal::Utils::compare_no_case(ext, ".las")==0) return LAS;
-    if (pdal::Utils::compare_no_case(ext, ".laz")==0) return LAZ;
-    if (pdal::Utils::compare_no_case(ext, ".xml")==0) return XML;
+    // maybe this should live in StageFactory?
+    std::map<std::string, std::string> drivers;
+    drivers[".las"] = "drivers.las.reader";
+    drivers[".laz"] = "drivers.las.reader";
+    drivers[".bin"] = "drivers.terrasolid.reader";
+    drivers[".qi"] = "drivers.qfit.reader";
+    drivers[".xml"] = "drivers.pipeline.reader";
 
-    return UNKNOWN;
+    std::string driver = drivers[ext];
+    if (driver == "")
+    {
+        return "";
+    }
+
+    return driver;
 }
 
 
-pdal::Stage* AppSupport::createReader(FileType type, const std::string& filename, const pdal::Options& extraOptions)
+pdal::Stage* AppSupport::createReader(const std::string& driver, const std::string& filename, const pdal::Options& extraOptions)
 {
     pdal::Stage* reader = NULL;
 
     pdal::Options opts(extraOptions);
     opts.add<std::string>("filename", filename);
 
-    switch (type)
+    if (driver == "drivers.pipeline.reader")
     {
-    case LAS:
-    case LAZ:
-        reader = new pdal::drivers::las::LasReader(opts);
-        reader->initialize();
-        break;
-#ifdef PDAL_HAVE_LIBLAS
-    case LIBLAS_LAS:
-    case LIBLAS_LAZ:
-        reader = new pdal::drivers::liblas::LiblasReader(opts);
-        reader->initialize();
-        break;
-#endif
-    case XML:
-        {
-            pdal::PipelineManager* pipeManager(new pdal::PipelineManager); // BUG: memleak
-            pdal::PipelineReader pipeReader(*pipeManager);
-            pipeReader.readReaderPipeline(filename);
-            reader = pipeManager->getStage();
-        }
-        break;
-    default:
-        return NULL;
+        pdal::PipelineManager* pipeManager(new pdal::PipelineManager); // BUG: memleak
+        pdal::PipelineReader pipeReader(*pipeManager);
+        pipeReader.readReaderPipeline(filename);
+        reader = pipeManager->getStage();
+    }
+    else
+    {
+        pdal::StageFactory factory;
+        reader = factory.createReader(driver, opts);
     }
 
     return reader;

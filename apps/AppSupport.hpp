@@ -44,21 +44,12 @@
 class AppSupport
 {
 public:
-    enum FileType
-    {
-        LAS,
-        LAZ,
-        LIBLAS_LAS,
-        LIBLAS_LAZ,
-        XML,
-        UNKNOWN
-    };
-
-    static FileType inferFileType(const std::string& filename);
+    // infer the driver to use based on filename extension
+    static std::string inferReaderDriver(const std::string& filename);
 
     // creates a Reader using the given driver type
     // caller takes ownership of the returned pointer... unless it's of type XML :-(
-    static pdal::Stage* createReader(FileType type, const std::string& filename, const pdal::Options& options);
+    static pdal::Stage* createReader(const std::string& driver, const std::string& filename, const pdal::Options& options);
 
     AppSupport& operator=(const AppSupport&); // not implemented
     AppSupport(const AppSupport&); // not implemented

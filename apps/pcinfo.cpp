@@ -50,6 +50,7 @@ private:
     bool validateOptions();
 
     std::string m_inputFile;
+    boost::uint64_t m_pointNumber;
 };
 
 
@@ -84,6 +85,15 @@ void Application_pcinfo::addOptions()
 
     addOptionSet(file_options);
 
+    po::options_description* processing_options = new po::options_description("processing options");
+
+    processing_options->add_options()
+        ("point,p", po::value<boost::uint64_t>(&m_pointNumber), "point to dump")
+        ("points", "dump stats on all points (read entire dataset)")
+        ;
+
+    addOptionSet(processing_options);
+
     addPositionalOption("input", 1);
 
     return;
@@ -98,9 +108,9 @@ int Application_pcinfo::execute()
         return 1;
     }
 
-    AppSupport::FileType type = AppSupport::inferFileType(m_inputFile);
+    std::string driver = AppSupport::inferReaderDriver(m_inputFile);
 
-    if (type == AppSupport::UNKNOWN)
+    if (driver == "")
     {
         runtimeError("Cannot determine file type of " + m_inputFile);
         return 1;
@@ -108,21 +118,13 @@ int Application_pcinfo::execute()
 
     if (hasOption("liblas"))
     {
-        switch (type)
+        if (driver == "drivers.las.reader")
         {
-        case AppSupport::LAS:
-            type = AppSupport::LIBLAS_LAS;
-            break;
-        case AppSupport::LAZ:
-            type = AppSupport::LIBLAS_LAZ;
-            break;
-        default:
-            // switch has no effect
-            break;
+            driver = "drivers.liblas.reader";
         }
     }
 
-    pdal::Stage* reader = AppSupport::createReader(type, m_inputFile, pdal::Options::none());
+    pdal::Stage* reader = AppSupport::createReader(driver, m_inputFile, pdal::Options::none());
 
     const boost::uint64_t numPoints = reader->getNumPoints();
     const pdal::SpatialReference& srs = reader->getSpatialReference();
@@ -130,7 +132,7 @@ int Application_pcinfo::execute()
     std::cout << numPoints << " points\n";
     std::cout << "WKT: " << srs.getWKT() << "\n";
 
-    if (type != AppSupport::XML)
+    if (driver != "drivers.pipeline.reader")
     {
         delete reader;
     }
@@ -147,17 +149,6 @@ int main(int argc, char* argv[])
 
 #if 0
 
-#include <liblas/liblas.hpp>
-#include "laskernel.hpp"
-
-#include <boost/cstdint.hpp>
-#include <boost/foreach.hpp>
-
-#include <locale>
-
-
-using namespace liblas;
-using namespace std;
 
 
 liblas::Summary check_points(   liblas::Reader& reader,
@@ -201,20 +192,7 @@ liblas::Summary check_points(   liblas::Reader& reader,
     
 }
 
-void OutputHelp( std::ostream & oss, po::options_description const& options)
-{
-    oss << "--------------------------------------------------------------------\n";
-    oss << "    lasinfo (" << GetFullVersion() << ")\n";
-    oss << "--------------------------------------------------------------------\n";
 
-    oss << options;
-
-    oss <<"\nFor more information, see the full documentation for lasinfo at:\n";
-    
-    oss << " http://liblas.org/utilities/lasinfo.html\n";
-    oss << "----------------------------------------------------------\n";
-
-}
 
 void PrintVLRs(std::ostream& os, liblas::Header const& header)
 {
@@ -249,26 +227,9 @@ int main(int argc, char* argv[])
     bool use_locale = false;
     boost::uint32_t point = 0;
     
-    std::vector<liblas::FilterPtr> filters;
-    std::vector<liblas::TransformPtr> transforms;
-    
-    liblas::Header header;
 
-    try {
-
-        po::options_description file_options("lasinfo options");
-        po::options_description filtering_options = GetFilteringOptions();
-        po::options_description header_options = GetHeaderOptions();
-
-        po::positional_options_description p;
-        p.add("input", 1);
-        p.add("output", 1);
 
         file_options.add_options()
-            ("help,h", "produce help message")
-            ("input,i", po::value< string >(), "input LAS file")
-
-            ("verbose,v", po::value<bool>(&verbose)->zero_tokens(), "Verbose message output")
             ("no-vlrs", po::value<bool>(&show_vlrs)->zero_tokens()->implicit_value(false), "Don't show VLRs")
             ("no-schema", po::value<bool>(&show_schema)->zero_tokens()->implicit_value(false), "Don't show schema")
             ("no-check", po::value<bool>(&check)->zero_tokens()->implicit_value(false), "Don't scan points")
@@ -280,60 +241,17 @@ int main(int argc, char* argv[])
 // --xml
 // --json
 // --restructured text output
-        ;
 
-        po::variables_map vm;
-        po::options_description options;
-        options.add(file_options).add(filtering_options);
-        po::store(po::command_line_parser(argc, argv).
-          options(options).positional(p).run(), vm);
 
-        po::notify(vm);
-
-        if (vm.count("help")) 
-        {
-            OutputHelp(std::cout, options);
-            return 1;
-        }
 
         if (vm.count("point")) 
         {
             show_point = true;
         }
 
-        if (vm.count("input")) 
-        {
-            input = vm["input"].as< string >();
-            std::ifstream ifs;
-            if (verbose)
-                std::cout << "Opening " << input << " to fetch Header" << std::endl;
-            if (!liblas::Open(ifs, input.c_str()))
-            {
-                std::cerr << "Cannot open " << input << " for read.  Exiting..." << std::endl;
-                return 1;
-            }
-            liblas::ReaderFactory f;
-            liblas::Reader reader = f.CreateWithStream(ifs);
-            header = reader.GetHeader();
-        } else {
-            std::cerr << "Input LAS file not specified!\n";
-            OutputHelp(std::cout, options);
-            return 1;
-        }
 
 
-        filters = GetFilters(vm, verbose);
 
-        std::ifstream ifs;
-        if (!liblas::Open(ifs, input.c_str()))
-        {
-            std::cerr << "Cannot open " << input << " for read.  Exiting..." << std::endl;
-            return false;
-        }
-    
-
-        liblas::ReaderFactory f;
-        liblas::Reader reader = f.CreateWithStream(ifs);
         if (show_point)
         {
             try 
@@ -415,18 +333,6 @@ int main(int argc, char* argv[])
             
         }
     }
-    catch(std::exception& e) {
-        std::cerr << "error: " << e.what() << "\n";
-        return 1;
-    }
-    catch(...) {
-        std::cerr << "Exception of unknown type!\n";
-    }
-    
-    return 0;
 
 
-}
-
-//las2las2 -i lt_srs_rt.las  -o foo.las -c 1,2 -b 2483590,366208,2484000,366612
 #endif
