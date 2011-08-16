@@ -33,34 +33,50 @@
 ****************************************************************************/
 
 
-#include <pdal/Stage.hpp>
-#include <pdal/FileUtils.hpp>
 #include <iostream>
+
+#include <boost/scoped_ptr.hpp>
+
+#include <pdal/Stage.hpp>
+#include <pdal/StageIterator.hpp>
+#include <pdal/SchemaLayout.hpp>
+#include <pdal/FileUtils.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/filters/StatsFilter.hpp>
+
 #include "AppSupport.hpp"
 #include "Application.hpp"
 
 
-class Application_pcinfo : public Application
+class PcInfo : public Application
 {
 public:
-    Application_pcinfo(int argc, char* argv[]);
+    PcInfo(int argc, char* argv[]);
     int execute();
+
 private:
     void addOptions();
     bool validateOptions();
+    void readOnePoint();
+    void readAllPoints();
 
+    pdal::Stage* m_reader;
     std::string m_inputFile;
     boost::uint64_t m_pointNumber;
+    boost::scoped_ptr<pdal::filters::StatsFilter> m_filter;
 };
 
 
-Application_pcinfo::Application_pcinfo(int argc, char* argv[])
+PcInfo::PcInfo(int argc, char* argv[])
     : Application(argc, argv, "pcinfo")
+    , m_reader(NULL)
+    , m_inputFile("")
+    , m_pointNumber(0)
 {
 }
 
 
-bool Application_pcinfo::validateOptions()
+bool PcInfo::validateOptions()
 {
     if (!hasOption("input"))
     {
@@ -72,7 +88,7 @@ bool Application_pcinfo::validateOptions()
 }
 
 
-void Application_pcinfo::addOptions()
+void PcInfo::addOptions()
 {
     namespace po = boost::program_options;
 
@@ -80,7 +96,7 @@ void Application_pcinfo::addOptions()
 
     file_options->add_options()
         ("input,i", po::value<std::string>(&m_inputFile), "input file name")
-        ("liblas", "use liblas LAS classes (not PDAL-native)")
+        ("liblas", "use libLAS driver (not PDAL native driver)")
         ;
 
     addOptionSet(file_options);
@@ -89,7 +105,7 @@ void Application_pcinfo::addOptions()
 
     processing_options->add_options()
         ("point,p", po::value<boost::uint64_t>(&m_pointNumber), "point to dump")
-        ("points", "dump stats on all points (read entire dataset)")
+        ("points,a", "dump stats on all points (read entire dataset)")
         ;
 
     addOptionSet(processing_options);
@@ -100,7 +116,52 @@ void Application_pcinfo::addOptions()
 }
 
 
-int Application_pcinfo::execute()
+void PcInfo::readOnePoint()
+{
+    const pdal::Schema& schema = m_reader->getSchema();
+    pdal::SchemaLayout layout(schema);
+
+    pdal::PointBuffer data(layout, 1);
+    
+    boost::scoped_ptr<pdal::StageSequentialIterator> iter(m_reader->createSequentialIterator());
+    iter->skip(m_pointNumber);
+
+    const boost::uint32_t numRead = iter->read(data);
+    if (numRead != 1)
+    {
+        runtimeError("problem reading point number " + m_pointNumber);
+        return;
+    }
+
+    std::cout << "Read point " << m_pointNumber << "\n";
+
+    return;
+}
+
+
+void PcInfo::readAllPoints()
+{
+    const pdal::Schema& schema = m_reader->getSchema();
+    pdal::SchemaLayout layout(schema);
+
+    boost::scoped_ptr<pdal::StageSequentialIterator> iter(m_reader->createSequentialIterator());
+
+    boost::uint64_t totRead = 0;
+    while (!iter->atEnd())
+    {
+        pdal::PointBuffer data(layout, 1024);
+
+        const boost::uint32_t numRead = iter->read(data);
+        totRead += numRead;
+    }
+
+    std::cout << "Read " << totRead << " points\n";
+    
+    return;
+}
+
+
+int PcInfo::execute()
 {
     if (!pdal::FileUtils::fileExists(m_inputFile))
     {
@@ -121,23 +182,41 @@ int Application_pcinfo::execute()
         driver = "drivers.liblas.reader";
     }
 
-    pdal::Stage* reader = AppSupport::createReader(driver, m_inputFile, pdal::Options::none());
+    pdal::Options options;
+    options.add<bool>("debug", isDebug());
+    options.add<boost::uint8_t>("verbose", getVerboseLevel());
 
-    reader->initialize();
+    m_reader = AppSupport::createReader(driver, m_inputFile, options);
 
-    const boost::uint64_t numPoints = reader->getNumPoints();
-    const pdal::SpatialReference& srs = reader->getSpatialReference();
+    
+    m_reader->initialize();
+    
+    if (hasOption("point"))
+    {
+        readOnePoint();
+    }
 
-    std::cout << "driver type: " << reader->getName() << "\n";
-    std::cout << numPoints << " points\n";
-    std::cout << "WKT: " << srs.getWKT() << "\n";
+    if (hasOption("points"))
+    {
+        readAllPoints();
+    }
+
+    {
+        const boost::uint64_t numPoints = m_reader->getNumPoints();
+        const pdal::SpatialReference& srs = m_reader->getSpatialReference();
+
+        std::cout << "driver type: " << m_reader->getName() << "\n";
+        std::cout << numPoints << " points\n";
+        std::cout << "WKT: " << srs.getWKT() << "\n";
+    }
 
     return 0;
 }
 
+
 int main(int argc, char* argv[])
 {
-    Application_pcinfo app(argc, argv);
+    PcInfo app(argc, argv);
     return app.run();
 }
 
