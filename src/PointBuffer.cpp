@@ -34,6 +34,11 @@
 
 #include <pdal/PointBuffer.hpp>
 
+#include <boost/lexical_cast.hpp>
+
+#include <pdal/exceptions.hpp>
+
+
 namespace pdal
 {
 
@@ -127,6 +132,75 @@ void PointBuffer::getData(boost::uint8_t** data, std::size_t* array_size) const
 }
 
 
+boost::property_tree::ptree PointBuffer::toPTree() const
+{
+    boost::property_tree::ptree tree;
+
+    const SchemaLayout& schemaLayout = getSchemaLayout();
+    const std::vector<DimensionLayout>& dimensionLayouts = schemaLayout.getDimensionLayouts();
+    const boost::uint32_t numPoints = getNumPoints();
+
+    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
+    {
+        const std::string pointstring = boost::lexical_cast<std::string>(pointIndex) + ".";
+        
+        for (SchemaLayout::DimensionLayoutsCIter citer=dimensionLayouts.begin(); citer != dimensionLayouts.end(); ++citer)
+        {
+            const DimensionLayout& dimensionLayout = *citer;
+            const Dimension& dimension = dimensionLayout.getDimension();
+            const std::size_t fieldIndex = dimensionLayout.getPosition();
+
+            const std::string key = pointstring + dimension.getFieldName();
+            
+            std::string value = "";
+            
+            switch (dimension.getDataType())
+            {
+#define GETFIELDAS(type) getField<##type##>(pointIndex, fieldIndex)
+#define STRINGIFY(x) boost::lexical_cast<std::string>(x)
+                // note we convert 8-bit fields to ints, so they aren't treated as chars
+            case Dimension::Int8:
+                value += STRINGIFY((int)GETFIELDAS(boost::int8_t));
+                break;
+            case Dimension::Uint8:
+                value += STRINGIFY((int)GETFIELDAS(boost::uint8_t));
+                break;
+            case Dimension::Int16:
+                value += STRINGIFY(GETFIELDAS(boost::int16_t));
+                break;
+            case Dimension::Uint16:
+                value += STRINGIFY(GETFIELDAS(boost::uint16_t));
+                break;
+            case Dimension::Int32:
+                value += STRINGIFY(GETFIELDAS(boost::int32_t));
+                break;
+            case Dimension::Uint32:
+                value += STRINGIFY(GETFIELDAS(boost::uint32_t));
+                break;
+            case Dimension::Int64:
+                value += STRINGIFY(GETFIELDAS(boost::int64_t));
+                break;
+            case Dimension::Uint64:
+                value += STRINGIFY(GETFIELDAS(boost::uint64_t));
+                break;
+            case Dimension::Float:
+                value += STRINGIFY(GETFIELDAS(float));
+                break;
+            case Dimension::Double:
+                value += STRINGIFY(GETFIELDAS(double));
+                break;
+            
+            default:
+                throw pdal_error("unknown dimension data type");
+            }
+
+            tree.add(key, value);
+        }
+    }
+    return tree;
+}
+
+
 std::ostream& operator<<(std::ostream& ostr, const PointBuffer& PointBuffer)
 {
     using std::endl;
@@ -135,18 +209,11 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& PointBuffer)
     const std::vector<DimensionLayout>& dimensionLayouts = schemaLayout.getDimensionLayouts();
     const std::size_t numPoints = PointBuffer.getNumPoints();
 
-    int cnt = 0;
-    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
-    {
-
-        ++cnt;
-    }
-    ostr << "Contains " << cnt << "  points (" << PointBuffer.getNumPoints() << " total)" << endl;
+    ostr << "Contains " << numPoints << "  points" << endl;
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-
-        
+       
         ostr << "Point: " << pointIndex << endl;
 
         for (SchemaLayout::DimensionLayoutsCIter citer=dimensionLayouts.begin(); citer != dimensionLayouts.end(); ++citer)

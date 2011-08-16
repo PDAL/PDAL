@@ -178,15 +178,32 @@ public:
     // access to the raw memory
     void getData(boost::uint8_t** data, std::size_t* array_size) const;
 
-private:
+    // returns a ptree containing the point records, useful for dumping
+    // and such
+    //
+    // The tree will look like this:
+    //
+    //    0:
+    //        X: 1.00
+    //        Y: 2.00
+    //        Z: 3.00
+    //    1:
+    //        X: 1.00
+    //        Y: 2.00
+    //        Z: 3.00
+    //
+    // If you want to print out details about the fields, e.g. the byte 
+    // offset or the datatype, use the Schema's ptree dumper.
+    // 
+    boost::property_tree::ptree toPTree() const;
 
+private:
     SchemaLayout m_schemaLayout;
     boost::scoped_array<boost::uint8_t> m_data;
     std::size_t m_pointSize;
     boost::uint32_t m_numPoints;
     boost::uint32_t m_capacity;    
     Bounds<double> m_bounds;
-
 };
 
 
