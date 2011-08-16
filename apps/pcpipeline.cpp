@@ -72,7 +72,7 @@ void Application_pcpipeline::validateOptions()
 {
     if (!hasOption("input"))
     {
-        throw app_usage_error("--input/-i required");
+        throw app_usage_error("input file name required");
     }
 
     return;
@@ -84,10 +84,11 @@ void Application_pcpipeline::addOptions()
     po::options_description* file_options = new po::options_description("file options");
 
     file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile), "input file name (required)")
+        ("input,i", po::value<std::string>(&m_inputFile), "input file name")
         ;
 
     addOptionSet(file_options);
+    addPositionalOption("input", 1);
 }
 
 
