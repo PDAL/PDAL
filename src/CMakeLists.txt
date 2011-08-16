@@ -330,6 +330,8 @@ set(PDAL_FILTERS_HPP
   ${PDAL_FILTERS_HEADERS}/ReprojectionFilterIterator.hpp
   ${PDAL_FILTERS_HEADERS}/ScalingFilter.hpp
   ${PDAL_FILTERS_HEADERS}/ScalingFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/StatsFilter.hpp
+  ${PDAL_FILTERS_HEADERS}/StatsFilterIterator.hpp
 )
 
 set (PDAL_FILTERS_CPP 
@@ -351,6 +353,8 @@ set (PDAL_FILTERS_CPP
   ${PDAL_FILTERS_SRC}/ReprojectionFilterIterator.cpp
   ${PDAL_FILTERS_SRC}/ScalingFilter.cpp
   ${PDAL_FILTERS_SRC}/ScalingFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/StatsFilter.cpp
+  ${PDAL_FILTERS_SRC}/StatsFilterIterator.cpp
 )
 
 list (APPEND PDAL_CPP ${PDAL_FILTERS_CPP} )

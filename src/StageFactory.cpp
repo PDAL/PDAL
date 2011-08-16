@@ -68,6 +68,7 @@
 #include <pdal/filters/DecimationFilter.hpp>
 #include <pdal/filters/ReprojectionFilter.hpp>
 #include <pdal/filters/ScalingFilter.hpp>
+#include <pdal/filters/StatsFilter.hpp>
 
 #include <pdal/filters/MosaicFilter.hpp>
 
@@ -129,9 +130,10 @@ namespace pdal
     MAKE_FILTER_CREATOR(ColorFilter, pdal::filters::ColorFilter)
     MAKE_FILTER_CREATOR(CropFilter, pdal::filters::CropFilter)
     MAKE_FILTER_CREATOR(DecimationFilter, pdal::filters::DecimationFilter)
+    MAKE_FILTER_CREATOR(DescalingFilter, pdal::filters::DescalingFilter)
     MAKE_FILTER_CREATOR(ReprojectionFilter, pdal::filters::ReprojectionFilter)
     MAKE_FILTER_CREATOR(ScalingFilter, pdal::filters::ScalingFilter)
-    MAKE_FILTER_CREATOR(DescalingFilter, pdal::filters::DescalingFilter)
+    MAKE_FILTER_CREATOR(StatsFilter, pdal::filters::StatsFilter)
 
     //
     // define the functions to create the multifilters
@@ -303,9 +305,10 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(ColorFilter, pdal::filters::ColorFilter);
     REGISTER_FILTER(CropFilter, pdal::filters::CropFilter);
     REGISTER_FILTER(DecimationFilter, pdal::filters::DecimationFilter);
+    REGISTER_FILTER(DescalingFilter, pdal::filters::DescalingFilter);
     REGISTER_FILTER(ReprojectionFilter, pdal::filters::ReprojectionFilter);
     REGISTER_FILTER(ScalingFilter, pdal::filters::ScalingFilter);
-    REGISTER_FILTER(DescalingFilter, pdal::filters::DescalingFilter);
+    REGISTER_FILTER(StatsFilter, pdal::filters::StatsFilter);
 }
 
 
