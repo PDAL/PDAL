@@ -43,6 +43,8 @@
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/StatsFilter.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 #include "AppSupport.hpp"
 #include "Application.hpp"
@@ -132,7 +134,12 @@ void PcInfo::readOnePoint()
         throw app_runtime_error("problem reading point number " + m_pointNumber);
     }
 
-    std::cout << "Read point " << m_pointNumber << "\n";
+    std::cout << "Read point " << m_pointNumber << ":\n";
+
+    boost::property_tree::ptree t = data.toPTree();
+    write_json(std::cout, t.get_child("0"));
+
+    std::cout << "\n";
 
     return;
 }
@@ -148,7 +155,7 @@ void PcInfo::readAllPoints()
     boost::uint64_t totRead = 0;
     while (!iter->atEnd())
     {
-        pdal::PointBuffer data(layout, 1024);
+        pdal::PointBuffer data(layout, iter->getChunkSize());
 
         const boost::uint32_t numRead = iter->read(data);
         totRead += numRead;
