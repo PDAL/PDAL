@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(pcpipelineTest_no_input)
     int stat = Support::run_command(cmd, output);
     BOOST_CHECK_EQUAL(stat, 1);
 
-    const std::string expected = "Usage error: --input";
+    const std::string expected = "Usage error: input file name required";
     BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
 
     return;
