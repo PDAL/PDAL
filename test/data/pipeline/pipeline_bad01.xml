@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WriterPipeline>
     <Writer>
-        <Type>drivers.las.writer</Type>
+        <!-- bad: no Type element -->
+        <!-- <Type>drivers.las.writer</Type> -->
         <Option>
             <Name>filename</Name>
             <Value>out.las</Value>
@@ -17,15 +18,7 @@
                 <Type>drivers.las.reader</Type>
                 <Option>
                     <Name>filename</Name>
-                    <Value>../../test/data/1.2-with-color.las</Value>
-                </Option>
-            </Reader>
-            <!-- bad: extra child of Filter -->
-            <Reader>
-                <Type>drivers.las.reader</Type>
-                <Option>
-                    <Name>filename</Name>
-                    <Value>../../test/data/1.2-with-color.las</Value>
+                    <Value>1.2-with-color.las</Value>
                 </Option>
             </Reader>
         </Filter>

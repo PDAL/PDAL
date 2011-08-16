@@ -54,19 +54,19 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_test1)
         PipelineReader reader(manager);
         PipelineWriter writer(manager);
 
-        reader.readWriterPipeline(Support::datapath("pipeline_write.xml"));
+        reader.readWriterPipeline(Support::datapath("pipeline/pipeline_write.xml"));
 
-        writer.writeWriterPipeline("test.xml");
+        writer.writeWriterPipeline(Support::temppath("test.xml"));
     }
 
-    FileUtils::deleteFile(Support::datapath("out.las"));
+    FileUtils::deleteFile(Support::datapath("pipeline/out.las"));
 
     // BUG: can't compare the files, since the filename paths are now absolute, not relative
     ////bool filesSame = Support::compare_text_files("test.xml", Support::datapath("pipeline_write.xml"));
     ////BOOST_CHECK(filesSame);
     ////if (filesSame)
     {
-        FileUtils::deleteFile("test.xml");
+        FileUtils::deleteFile(Support::temppath("test.xml"));
     }
 
     return;

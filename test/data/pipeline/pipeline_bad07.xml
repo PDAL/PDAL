@@ -17,14 +17,14 @@
                 <Type>drivers.las.reader</Type>
                 <Option>
                     <Name>filename</Name>
-                    <Value>../../test/data/1.2-with-color.las</Value>
+                    <Value>1.2-with-color.las</Value>
                 </Option>
                 <!-- bad: child of reader -->
                 <Reader>
                     <Type>drivers.las.reader</Type>
                     <Option>
                         <Name>filename</Name>
-                        <Value>../../test/data/1.2-with-color.las</Value>
+                        <Value>1.2-with-color.las</Value>
                     </Option>
                 </Reader>
             </Reader>

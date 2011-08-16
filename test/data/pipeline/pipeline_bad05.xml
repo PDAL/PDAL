@@ -13,14 +13,21 @@
                 <Name>bounds</Name>
                 <Value>([0,1000000],[0,1000000],[0,1000000])</Value>
             </Option>
-            <!-- bad: no child of Filter -->
-            <!--<Reader>
+            <Reader>
                 <Type>drivers.las.reader</Type>
                 <Option>
                     <Name>filename</Name>
-                    <Value>../../test/data/1.2-with-color.las</Value>
+                    <Value>1.2-with-color.las</Value>
                 </Option>
-            </Reader>-->
+            </Reader>
+            <!-- bad: extra child of Filter -->
+            <Reader>
+                <Type>drivers.las.reader</Type>
+                <Option>
+                    <Name>filename</Name>
+                    <Value>1.2-with-color.las</Value>
+                </Option>
+            </Reader>
         </Filter>
     </Writer>
 </WriterPipeline>

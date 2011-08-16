@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- bad: root element not WriterPipeline -->
-<!--<WriterPipeline>-->
+<WriterPipeline>
     <Writer>
         <Type>drivers.las.writer</Type>
         <Option>
@@ -8,7 +7,8 @@
             <Value>out.las</Value>
             <Description>junk junk junk</Description>
         </Option>
-        <Filter>
+        <!-- bad: no child of Writer -->
+        <!--<Filter>
             <Type>filters.crop</Type>
             <Option>
                 <Name>bounds</Name>
@@ -18,9 +18,9 @@
                 <Type>drivers.las.reader</Type>
                 <Option>
                     <Name>filename</Name>
-                    <Value>../../test/data/1.2-with-color.las</Value>
+                    <Value>1.2-with-color.las</Value>
                 </Option>
             </Reader>
-        </Filter>
+        </Filter>-->
     </Writer>
-<!--</WriterPipeline>-->
+</WriterPipeline>

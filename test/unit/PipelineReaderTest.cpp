@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test1)
     PipelineManager manager;
     PipelineReader reader(manager);
 
-    reader.readReaderPipeline(Support::datapath("pipeline_read.xml"));
+    reader.readReaderPipeline(Support::datapath("pipeline/pipeline_read.xml"));
     Stage* stage = manager.getStage();
     BOOST_CHECK(stage != NULL);
     stage->initialize();
@@ -75,13 +75,13 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test1)
 
 BOOST_AUTO_TEST_CASE(PipelineReaderTest_test2)
 {
-    FileUtils::deleteFile("out.las");
+    FileUtils::deleteFile("pipeline/out.las");
 
     {
         PipelineManager manager;
         PipelineReader reader(manager);
 
-        reader.readWriterPipeline(Support::datapath("pipeline_write.xml"));
+        reader.readWriterPipeline(Support::datapath("pipeline/pipeline_write.xml"));
         Writer* writerStage = manager.getWriter();
         writerStage->initialize();
 
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test2)
         BOOST_CHECK(np == 1065);
     }
 
-    FileUtils::deleteFile(Support::datapath("out.las"));
+    FileUtils::deleteFile(Support::datapath("pipeline/out.las"));
 
     return;
 }
@@ -100,71 +100,71 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test3)
     // missing Type
     PipelineManager manager01;
     PipelineReader reader01(manager01);
-    BOOST_CHECK_THROW( reader01.readWriterPipeline(Support::datapath("pipeline_bad01.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW( reader01.readWriterPipeline(Support::datapath("pipeline/pipeline_bad01.xml")), pipeline_xml_error);
 
     // missing child of filter
     PipelineManager manager02;
     PipelineReader reader02(manager02);
-    BOOST_CHECK_THROW( reader02.readWriterPipeline(Support::datapath("pipeline_bad02.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW( reader02.readWriterPipeline(Support::datapath("pipeline/pipeline_bad02.xml")), pipeline_xml_error);
 
     // missing child of multifilter
     PipelineManager manager03;
     PipelineReader reader03(manager03);
-    BOOST_CHECK_THROW( reader03.readWriterPipeline(Support::datapath("pipeline_bad03.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW( reader03.readWriterPipeline(Support::datapath("pipeline/pipeline_bad03.xml")), pipeline_xml_error);
 
     // missing child of writer
     PipelineManager manager04;
     PipelineReader reader04(manager04);
-    BOOST_CHECK_THROW( reader04.readWriterPipeline(Support::datapath("pipeline_bad04.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW( reader04.readWriterPipeline(Support::datapath("pipeline/pipeline_bad04.xml")), pipeline_xml_error);
 
     // extra child of filter
     PipelineManager manager05;
     PipelineReader reader05(manager05);
-    BOOST_CHECK_THROW( reader05.readWriterPipeline(Support::datapath("pipeline_bad05.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW( reader05.readWriterPipeline(Support::datapath("pipeline/pipeline_bad05.xml")), pipeline_xml_error);
 
     // extra child of writer
     PipelineManager manager06;
     PipelineReader reader06(manager06);
-    BOOST_CHECK_THROW( reader06.readWriterPipeline(Support::datapath("pipeline_bad06.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW( reader06.readWriterPipeline(Support::datapath("pipeline/pipeline_bad06.xml")), pipeline_xml_error);
 
     // child of reader
     PipelineManager manager07;
     PipelineReader reader07(manager07);
-    BOOST_CHECK_THROW( reader07.readWriterPipeline(Support::datapath("pipeline_bad07.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW( reader07.readWriterPipeline(Support::datapath("pipeline/pipeline_bad07.xml")), pipeline_xml_error);
 
     // unknown element
     PipelineManager manager08;
     PipelineReader reader08(manager08);
-    BOOST_CHECK_THROW( reader08.readWriterPipeline(Support::datapath("pipeline_bad08.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW( reader08.readWriterPipeline(Support::datapath("pipeline/pipeline_bad08.xml")), pipeline_xml_error);
 
     // no Pipeline for writer xml
     PipelineManager manager09;
     PipelineReader reader09(manager09);
-    BOOST_CHECK_THROW( reader08.readWriterPipeline(Support::datapath("pipeline_bad09.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW( reader08.readWriterPipeline(Support::datapath("pipeline/pipeline_bad09.xml")), pipeline_xml_error);
 
     // no Pipeline for reader xml
     PipelineManager manager10;
     PipelineReader reader10(manager10);
-    BOOST_CHECK_THROW( reader10.readReaderPipeline(Support::datapath("pipeline_bad10.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW( reader10.readReaderPipeline(Support::datapath("pipeline/pipeline_bad10.xml")), pipeline_xml_error);
 
     // try to make a reader pipeline from a writer pipeline xml file
     PipelineManager managerW;
     PipelineReader readerW(managerW);
-    BOOST_CHECK_THROW( readerW.readReaderPipeline(Support::datapath("pipeline_write.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW( readerW.readReaderPipeline(Support::datapath("pipeline/pipeline_write.xml")), pipeline_xml_error);
 
     // try to make a writer pipeline from a reader pipeline xml file
     PipelineManager managerR;
     PipelineReader readerR(managerR);
-    BOOST_CHECK_THROW( readerR.readWriterPipeline(Support::datapath("pipeline_read.xml")), pipeline_xml_error);
+    BOOST_CHECK_THROW( readerR.readWriterPipeline(Support::datapath("pipeline/pipeline_read.xml")), pipeline_xml_error);
 
     // comments are ok
     PipelineManager managerComments1;
     PipelineReader readerComments1(managerComments1);
-    BOOST_CHECK_NO_THROW( readerComments1.readReaderPipeline(Support::datapath("pipeline_readcomments.xml")));
+    BOOST_CHECK_NO_THROW( readerComments1.readReaderPipeline(Support::datapath("pipeline/pipeline_readcomments.xml")));
 
     PipelineManager managerComments2;
     PipelineReader readerComments2(managerComments2);
-    BOOST_CHECK_NO_THROW( readerComments2.readWriterPipeline(Support::datapath("pipeline_writecomments.xml")));
+    BOOST_CHECK_NO_THROW( readerComments2.readWriterPipeline(Support::datapath("pipeline/pipeline_writecomments.xml")));
 
     return;
 }
@@ -173,13 +173,13 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test3)
 #ifdef PDAL_HAVE_GDAL
 BOOST_AUTO_TEST_CASE(PipelineReaderTest_test4)
 {
-    FileUtils::deleteFile("out2.las");
+    FileUtils::deleteFile("pipeline/out2.las");
 
     {
         PipelineManager manager;
         PipelineReader reader(manager);
 
-        reader.readWriterPipeline(Support::datapath("pipeline_write2.xml"));
+        reader.readWriterPipeline(Support::datapath("pipeline/pipeline_write2.xml"));
         Writer* writerStage = manager.getWriter();
         writerStage->initialize();
 
@@ -194,21 +194,21 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test4)
     const double postY = 41.577148;
     const double postZ = 16.000000;
     {
-        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        pdal::drivers::las::LasReader reader(Support::datapath("pipeline/utm15.las"));
         reader.initialize();
         const pdal::Bounds<double>& bounds = reader.getBounds();
         const pdal::Bounds<double> ref(preX, preY, preZ, preX, preY, preZ);
         Support::compareBounds(bounds, ref);
     }
     {
-        pdal::drivers::las::LasReader reader(Support::datapath("out2.las"));
+        pdal::drivers::las::LasReader reader(Support::datapath("pipeline/out2.las"));
         reader.initialize();
         const pdal::Bounds<double>& bounds = reader.getBounds();
         const pdal::Bounds<double> ref(postX, postY, postZ, postX, postY, postZ);
         Support::compareBounds(bounds, ref);
     }
 
-    FileUtils::deleteFile(Support::datapath("out2.las"));
+    FileUtils::deleteFile(Support::datapath("pipeline/out2.las"));
 
     return;
 }
