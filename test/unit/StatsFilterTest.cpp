@@ -40,9 +40,13 @@
 #include <pdal/filters/StatsFilter.hpp>
 #include <pdal/filters/StatsFilterIterator.hpp>
 
+#ifdef PDAL_COMPILER_GCC
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#endif
+
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(StatsFilterTest)
+BOOST_AUTO_TEST_SUITE(StabtsFilterTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
@@ -68,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test1)
     boost::uint64_t count;
     filter.getData(count, minx, miny, minz, maxx, maxy, maxz, avgx, avgy, avgz);
 
-    BOOST_CHECK_EQUAL(count, 1000);
+    BOOST_CHECK_EQUAL(count, 1000u);
 
     BOOST_CHECK_CLOSE(minx, 1.0, 0.0001);
     BOOST_CHECK_CLOSE(miny, 2.0, 0.0001);
