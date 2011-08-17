@@ -82,7 +82,7 @@ public:
 
 protected:
     // implement this, with calls to addOptionSet()
-    virtual void addOptions() = 0;
+    virtual void addOptions() {}
 
     // implement this, to do sanity checking of cmd line
     // will throw if the user gave us bad options
