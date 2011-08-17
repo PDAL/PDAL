@@ -226,7 +226,36 @@ void SpatialReference::setProj4(std::string const& v)
 }
 
 
-boost::property_tree::ptree SpatialReference::getPTree( ) const
+bool SpatialReference::operator==(const SpatialReference& input) const
+{
+#ifdef PDAL_SRS_ENABLED
+
+    OGRSpatialReferenceH current = OSRNewSpatialReference(getWKT(eCompoundOK, false).c_str());
+    OGRSpatialReferenceH other = OSRNewSpatialReference(input.getWKT(eCompoundOK, false).c_str());
+
+    int output = OSRIsSame(current, other);
+
+    OSRDestroySpatialReference( current );
+    OSRDestroySpatialReference( other );
+    
+    return (output==1);
+    
+#else
+    boost::ignore_unused_variable_warning(input);
+    throw pdal_error ("SpatialReference equality testing not available without GDAL+libgeotiff support");
+#endif
+
+}
+
+
+const std::string& SpatialReference::getName() const
+{
+    static std::string name("pdal.spatialreference");
+    return name;
+}
+
+
+boost::property_tree::ptree SpatialReference::toPTree() const
 {
     using boost::property_tree::ptree;
     ptree srs;
@@ -262,36 +291,21 @@ boost::property_tree::ptree SpatialReference::getPTree( ) const
 #endif
     
     return srs;
-    
 }
 
-bool SpatialReference::operator==(const SpatialReference& input) const
+
+void SpatialReference::dump() const
 {
-#ifdef PDAL_SRS_ENABLED
-
-    OGRSpatialReferenceH current = OSRNewSpatialReference(getWKT(eCompoundOK, false).c_str());
-    OGRSpatialReferenceH other = OSRNewSpatialReference(input.getWKT(eCompoundOK, false).c_str());
-
-    int output = OSRIsSame(current, other);
-
-    OSRDestroySpatialReference( current );
-    OSRDestroySpatialReference( other );
-    
-    return (output==1);
-    
-#else
-    boost::ignore_unused_variable_warning(input);
-    throw pdal_error ("SpatialReference equality testing not available without GDAL+libgeotiff support");
-#endif
-
+    std::cout << *this;
 }
+
 
 std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 {
 
 #ifdef PDAL_SRS_ENABLED
     
-    std::string wkt = srs.getPTree().get<std::string>("prettycompoundwkt");
+    std::string wkt = srs.toPTree().get<std::string>("prettycompoundwkt");
     ostr << wkt;
     
     return ostr;
@@ -329,10 +343,5 @@ std::istream& operator>>(std::istream& istr, SpatialReference& srs)
 
 
 
-const std::string& SpatialReference::getName() const
-{
-    static std::string name("pdal.spatialreference");
-    return name;
-}
 
 } // namespace pdal

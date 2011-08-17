@@ -47,6 +47,7 @@
 #include <cassert>
 #include <vector>
 #include <sstream>
+#include <boost/property_tree/ptree.hpp>
 
 #include <pdal/Vector.hpp>
 #include <pdal/Range.hpp>
@@ -423,6 +424,22 @@ public:
         static T maxv(std::numeric_limits<T>::max());
         static Bounds v(minv,minv,minv,maxv,maxv,maxv);
         return v;
+    }
+
+    boost::property_tree::ptree toPTree() const
+    {
+        boost::property_tree::ptree tree;
+        for (std::size_t i = 0; i < size(); ++i)
+        {
+            const Range<T>& r = dimensions()[i];
+            tree.add_child(boost::lexical_cast<std::string>(i), r.toPTree());
+        }
+        return tree;
+    }
+
+    void dump() const
+    {
+        std::cout << *this;
     }
 };
 

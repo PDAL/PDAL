@@ -130,87 +130,6 @@ bool Dimension::operator!=(const Dimension& other) const
 }
 
 
-boost::property_tree::ptree Dimension::GetPTree() const
-{
-    using boost::property_tree::ptree;
-    ptree dim;
-    dim.put("name", getFieldName());
-    dim.put("datatype", getDataTypeName(getDataType()));
-    dim.put("description", getDescription());
-    dim.put("bytesize", getByteSize());
-    
-    std::string e("little");
-    if (getEndianness() == Endian_Big) 
-        e = std::string("big");
-    dim.put("endianness", e);
-
-
-    if (! (Utils::compare_distance(getMinimum(), getMaximum()) && 
-           Utils::compare_distance(0.0, getMaximum())))
-    {
-        dim.put("minimum", getMinimum());
-        dim.put("maximum", getMaximum());
-    }
-    if (! (Utils::compare_distance(getNumericScale(), 0.0)))
-    {
-        dim.put("scale", getNumericScale());
-    }
-    if (! (Utils::compare_distance(getNumericOffset(), 0.0)))
-    {
-        dim.put("offset", getNumericOffset());
-    }
-    
-    dim.put("scale", getNumericScale());
-    return dim;
-}
-
-
-std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
-{
-    using boost::property_tree::ptree;
-    ptree tree = d.GetPTree();
-
-    std::string const name = tree.get<std::string>("name");
-
-    std::ostringstream quoted_name;
-    quoted_name << "'" << name << "'";
-    std::ostringstream pad;
-    std::string const& cur = quoted_name.str();
-    std::string::size_type size = cur.size();
-    std::string::size_type pad_size = 24 - size;
-
-    for (std::string::size_type i=0; i != pad_size; i++ )
-    {
-        pad << " ";
-    }
-    os << quoted_name.str() << pad.str() <<" -- "<< " size: " << tree.get<boost::uint32_t>("bytesize");
-
-    try {
-        double value = tree.get<double>("scale");
-        boost::uint32_t precision = Utils::getStreamPrecision(value);
-        os.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        os.precision(precision);
-        os << " scale: " << value;
-    }
-    catch (boost::property_tree::ptree_bad_path const& ) {
-    }    
-
-    try {
-        double value = tree.get<double>("offset");
-        boost::uint32_t precision = Utils::getStreamPrecision(value);
-        os.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        os.precision(precision);
-        os << " offset: " << value;
-    }
-    catch (boost::property_tree::ptree_bad_path const& ) {
-    }    
-    
-    //os << " offset: " << tree.get<boost::uint32_t>("byteoffset");
-    os << std::endl;
-
-    return os;
-}
-
 std::string Dimension::getDataTypeName(DataType type)
 {
     switch (type)
@@ -422,6 +341,94 @@ void Dimension::initFieldNames()
     s_fieldNames[Field_Alpha] = "Alpha";
 
     s_fieldNamesValid = true;
+}
+
+
+boost::property_tree::ptree Dimension::toPTree() const
+{
+    using boost::property_tree::ptree;
+    ptree dim;
+    dim.put("name", getFieldName());
+    dim.put("datatype", getDataTypeName(getDataType()));
+    dim.put("description", getDescription());
+    dim.put("bytesize", getByteSize());
+    
+    std::string e("little");
+    if (getEndianness() == Endian_Big) 
+        e = std::string("big");
+    dim.put("endianness", e);
+
+
+    if (! (Utils::compare_distance(getMinimum(), getMaximum()) && 
+           Utils::compare_distance(0.0, getMaximum())))
+    {
+        dim.put("minimum", getMinimum());
+        dim.put("maximum", getMaximum());
+    }
+    if (! (Utils::compare_distance(getNumericScale(), 0.0)))
+    {
+        dim.put("scale", getNumericScale());
+    }
+    if (! (Utils::compare_distance(getNumericOffset(), 0.0)))
+    {
+        dim.put("offset", getNumericOffset());
+    }
+    
+    dim.put("scale", getNumericScale());
+    return dim;
+}
+
+
+void Dimension::dump() const
+{
+    std::cout << *this;
+}
+
+
+std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
+{
+    using boost::property_tree::ptree;
+    ptree tree = d.toPTree();
+
+    std::string const name = tree.get<std::string>("name");
+
+    std::ostringstream quoted_name;
+    quoted_name << "'" << name << "'";
+    std::ostringstream pad;
+    std::string const& cur = quoted_name.str();
+    std::string::size_type size = cur.size();
+    std::string::size_type pad_size = 24 - size;
+
+    for (std::string::size_type i=0; i != pad_size; i++ )
+    {
+        pad << " ";
+    }
+    os << quoted_name.str() << pad.str() <<" -- "<< " size: " << tree.get<boost::uint32_t>("bytesize");
+
+    try {
+        double value = tree.get<double>("scale");
+        boost::uint32_t precision = Utils::getStreamPrecision(value);
+        os.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        os.precision(precision);
+        os << " scale: " << value;
+    }
+    catch (boost::property_tree::ptree_bad_path const& ) {
+    }    
+
+    try {
+        double value = tree.get<double>("offset");
+        boost::uint32_t precision = Utils::getStreamPrecision(value);
+        os.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        os.precision(precision);
+        os << " offset: " << value;
+    }
+    catch (boost::property_tree::ptree_bad_path const& ) {
+    }    
+    
+    //os << " offset: " << tree.get<boost::uint32_t>("byteoffset");
+    os << std::endl;
+
+    return os;
 }
 
 

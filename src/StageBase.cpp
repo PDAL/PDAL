@@ -36,6 +36,8 @@
 
 #include <iostream>
 
+#include <boost/property_tree/json_parser.hpp>
+
 #include <pdal/exceptions.hpp>
 
 
@@ -112,10 +114,29 @@ boost::uint8_t StageBase::getVerboseLevel() const
 }
 
 
+boost::property_tree::ptree StageBase::toPTree() const
+{
+    boost::property_tree::ptree tree;
+
+    tree.add("name", getName());
+    tree.add("description", getDescription());
+    tree.add_child("options", getOptions().getPTree());
+
+    return tree;
+}
+
+
+void StageBase::dump() const
+{
+    std::cout << *this;
+}
+
+
 std::ostream& operator<<(std::ostream& ostr, const StageBase& stage)
 {
-    ostr << "  Name: " << stage.getName() << std::endl;
-    ostr << "  Description: " << stage.getDescription() << std::endl;
+    boost::property_tree::ptree tree = stage.toPTree();
+    
+    boost::property_tree::write_json(ostr, tree);
 
     return ostr;
 }

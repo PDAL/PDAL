@@ -35,6 +35,7 @@
 #include <pdal/Options.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 #include <boost/optional.hpp>
 #include <boost/foreach.hpp>
@@ -151,20 +152,17 @@ const boost::property_tree::ptree& Options::getPTree() const
 }
 
 
-
-std::ostream& operator<<(std::ostream& ostr, const OptionsOld& /*options*/)
+void Options::dump() const
 {
-//     ostr << "  Num points: " << stage.getNumPoints() << std::endl;
-// 
-//     ostr << "  Bounds:" << std::endl;
-//     ostr << "    " << stage.getBounds() << std::endl;
-// 
-//     ostr << "  Schema: " << std::endl;
-//     ostr << "    Num dims: " << stage.getSchema().getDimensions().size() << std::endl;
-// //    ostr << "    Size in bytes: " << header.getSchema().getByteSize() << std::endl;
-// 
-//     ostr << "  Spatial Reference:" << std::endl;
-//     ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;
+    std::cout << *this;
+}
+
+
+std::ostream& operator<<(std::ostream& ostr, const Options& options)
+{
+    const boost::property_tree::ptree& tree = options.getPTree();
+
+    boost::property_tree::write_json(ostr, tree);
 
     return ostr;
 }

@@ -37,6 +37,9 @@
 
 #include <pdal/pdal.hpp>
 
+#include <boost/lexical_cast.hpp>
+#include <boost/property_tree/ptree.hpp>
+
 #include <pdal/Utils.hpp>
 
 namespace pdal
@@ -185,6 +188,19 @@ public:
     T length() const
     {
         return m_maximum - m_minimum;
+    }
+
+    boost::property_tree::ptree toPTree() const
+    {
+        boost::property_tree::ptree tree;
+        tree.add("minimum", getMinimum());
+        tree.add("maximum", getMaximum());
+        return tree;
+    }
+
+    void dump() const
+    {
+        std::cout << *this;
     }
 };
 

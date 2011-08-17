@@ -43,6 +43,9 @@
 
 #include <iostream>
 
+#include <boost/lexical_cast.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 #include <pdal/exceptions.hpp>
 
 #ifdef PDAL_HAVE_LIBXML2
@@ -96,20 +99,6 @@ bool Schema::operator==(const Schema& other) const
 bool Schema::operator!=(const Schema& other) const
 {
   return !(*this==other);
-}
-
-
-boost::property_tree::ptree Schema::getPTree() const
-{
-    using boost::property_tree::ptree;
-    ptree pt;
-
-    for (DimensionsCIter iter = m_dimensions.begin(); iter != m_dimensions.end(); ++iter)
-    {
-        pt.add_child("LASSchema.dimensions.dimension", (*iter).GetPTree());
-    }
-
-    return pt;
 }
 
 
@@ -234,53 +223,6 @@ bool Schema::hasDimension(const Dimension& dim) const
 }
 
 
-void Schema::dump() const
-{
-    std::cout << *this;
-}
-
-
-std::ostream& operator<<(std::ostream& os, Schema const& schema)
-{
-    using boost::property_tree::ptree;
-    ptree tree = schema.getPTree();
-
-    os << "---------------------------------------------------------" << std::endl;
-    os << "  Schema Summary" << std::endl;
-    os << "---------------------------------------------------------" << std::endl;
-
-    ptree::const_iterator i;
-
-    //ptree dims = tree.get_child("LASSchema.dimensions");
-    ///////////os << "  Point Format ID:             " << tree.get<std::string>("LASSchema.formatid") << std::endl;
-    os << "  Number of dimensions:        " << schema.getDimensions().size() << std::endl;
-//    os << "  Size in bytes:               " << schema.getByteSize() << std::endl;
-
-    os << std::endl;
-    os << "  Dimensions" << std::endl;
-    os << "---------------------------------------------------------" << std::endl;
-
-    os << "  ";
-
-    const Schema::Dimensions& dimensions = schema.getDimensions();
-    for (Schema::DimensionsCIter iter = dimensions.begin(); iter != dimensions.end(); ++iter)
-    {
-        os << *iter;
-        os << "  ";
-    }
-
-
-    os << std::endl;
-
-    return os;
-}
-
-
-#ifdef PDAL_HAVE_LIBXML2
-
-
-#endif
-
 
 Schema Schema::from_xml(std::string const& xml, std::string const& xsd)
 {
@@ -324,5 +266,36 @@ std::string Schema::to_xml(Schema const& schema)
     return std::string("");
 #endif
 }
+
+
+boost::property_tree::ptree Schema::toPTree() const
+{
+    boost::property_tree::ptree tree;
+
+    for (DimensionsCIter iter = m_dimensions.begin(); iter != m_dimensions.end(); ++iter)
+    {
+        const Dimension& dim = *iter;
+        tree.add_child("dimension", dim.toPTree());
+    }
+
+    return tree;
+}
+
+
+void Schema::dump() const
+{
+    std::cout << *this;
+}
+
+
+std::ostream& operator<<(std::ostream& os, pdal::Schema const& schema)
+{
+    boost::property_tree::ptree tree = schema.toPTree();
+
+    boost::property_tree::write_json(os, tree);
+
+    return os;
+}
+
 
 } // namespace pdal

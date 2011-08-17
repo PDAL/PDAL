@@ -38,6 +38,8 @@
 #include <pdal/pdal.hpp>
 
 #include <vector>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <pdal/Utils.hpp>
 
@@ -116,7 +118,7 @@ public:
       return m_data[index];
     }
 
-    T get(std::size_t index)
+    T get(std::size_t index) const
     {
         return m_data[index];
     }
@@ -172,6 +174,22 @@ public:
     size_type size() const
     {
         return m_data.size();
+    }
+
+    boost::property_tree::ptree toPTree() const
+    {
+        boost::property_tree::ptree tree;
+        for (std::size_t i = 0; i < size(); ++i)
+        {
+            const T t = get(i);
+            tree.add<T>(boost::lexical_cast<std::string>(i), t);
+        }
+        return tree;
+    }
+
+    void dump() const
+    {
+        std::cout << *this;
     }
 };
 

@@ -98,6 +98,17 @@ public:
         return m_dimensionLayouts;
     }
 
+    // returns a ptree containing the SchemaLayout
+    //
+    // looks like this:
+    //     [DimensionLayout ptree]
+    //     [DimensionLayout ptree]
+    //     ...
+    // 
+    boost::property_tree::ptree toPTree() const;
+
+    void dump() const;
+
 private:
     void calculateSizes();
 
@@ -107,7 +118,7 @@ private:
 };
 
 
-PDAL_DLL std::ostream& operator<<(std::ostream& os, SchemaLayout const&);
+PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::SchemaLayout const& d);
 
 
 } // namespace liblas

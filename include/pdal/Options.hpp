@@ -260,6 +260,8 @@ public:
     // BUG: this should be a member variable, not a function, but doing so causes vs2010 to fail to link
     static const Options& none();
 
+    void dump() const;
+
 private:
     // get the ptree for an option
     // throws pdal::option_not_found if the option name is not valid
@@ -269,7 +271,7 @@ private:
 };
 
 
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const OptionsOld&);
+PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Options&);
 
 
 } // namespace pdal

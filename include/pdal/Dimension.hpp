@@ -281,7 +281,18 @@ public:
         m_endian = v;
     }
 
-    boost::property_tree::ptree GetPTree() const;
+    // returns a ptree representing the Dimension
+    //
+    // looks like this:
+    //     name: X
+    //     datatype: double
+    //     description: ...
+    //     bytesize:
+    //     ...
+    //
+    boost::property_tree::ptree toPTree() const;
+
+    void dump() const;
 
 private:
     DataType m_dataType;

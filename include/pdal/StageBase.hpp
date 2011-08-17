@@ -106,6 +106,9 @@ public:
     static std::string s_getDescription() { return description; }  \
     std::string getDescription() const { return description; }
 
+    virtual boost::property_tree::ptree toPTree() const;
+    virtual void dump() const;
+
 protected:
     Options& getOptions();
 

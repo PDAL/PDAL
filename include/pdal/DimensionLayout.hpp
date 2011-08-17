@@ -102,6 +102,18 @@ public:
         return m_position > dim.m_position;
     }
 
+    // returns a ptree representing the DimensionLayout
+    //
+    // looks like this:
+    //     dimension:
+    //         [Dimension ptree]
+    //     byteoffset: 41
+    //     position: 17
+    //
+    boost::property_tree::ptree toPTree() const;
+
+    void dump() const;
+
 private:
     Dimension m_dimension;
     std::size_t m_byteOffset;
@@ -110,7 +122,6 @@ private:
 
 
 PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::DimensionLayout const& d);
-
 
 } // namespace pdal
 

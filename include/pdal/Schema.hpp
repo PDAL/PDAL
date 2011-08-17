@@ -105,10 +105,19 @@ public:
     bool hasDimension(Dimension::Field field, Dimension::DataType datatype) const;
     bool hasDimension(const Dimension& dim) const;
 
-    boost::property_tree::ptree getPTree() const;
-
+    // returns a ptree reprsenting the Schema
+    //
+    // looks like this:
+    //    dimension:
+    //        [Dimension ptree]
+    //    dimension:
+    //        [Dimension ptree]
+    //    ...
+    //
+    boost::property_tree::ptree toPTree() const;
+   
     void dump() const;
-    
+
     static Schema from_xml(std::string const& xml, std::string const& xsd);
     static Schema from_xml(std::string const& xml);
     static std::string to_xml(Schema const& schema);
@@ -123,8 +132,7 @@ private:
 };
 
 
-PDAL_DLL std::ostream& operator<<(std::ostream& os, Schema const&);
-
+PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::Schema const& d);
 
 } // namespace liblas
 

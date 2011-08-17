@@ -41,6 +41,9 @@
 
 #include <pdal/DimensionLayout.hpp>
 
+#include <boost/property_tree/json_parser.hpp>
+
+
 namespace pdal
 {
 
@@ -93,27 +96,29 @@ bool DimensionLayout::operator!=(const DimensionLayout& other) const
 }
 
 
-std::ostream& operator<<(std::ostream& os, pdal::DimensionLayout const&)
+boost::property_tree::ptree DimensionLayout::toPTree() const
 {
-    ////using boost::property_tree::ptree;
-    ////ptree tree = d.GetPTree();
+    boost::property_tree::ptree tree;
 
-    ////std::string const name = tree.get<std::string>("name");
+    tree.add_child("dimension", getDimension().toPTree());
+    tree.add("byteoffset", getByteOffset());
+    tree.add("position", getPosition());
 
-    ////std::ostringstream quoted_name;
-    ////quoted_name << "'" << name << "'";
-    ////std::ostringstream pad;
-    ////std::string const& cur = quoted_name.str();
-    ////std::string::size_type size = cur.size();
-    ////std::string::size_type pad_size = 30 - size;
+    return tree;
+}
 
-    ////for (std::string::size_type i=0; i != pad_size; i++ )
-    ////{
-    ////    pad << " ";
-    ////}
-    ////os << quoted_name.str() << pad.str() <<" -- "<< " size: " << tree.get<boost::uint32_t>("bytesize");
-    ////os << " offset: " << tree.get<boost::uint32_t>("byteoffset");
-    ////os << std::endl;
+
+void DimensionLayout::dump() const
+{
+    std::cout << *this;
+}
+
+
+std::ostream& operator<<(std::ostream& os, pdal::DimensionLayout const& layout)
+{
+    boost::property_tree::ptree tree = layout.toPTree();
+
+    boost::property_tree::write_json(os, tree);
 
     return os;
 }

@@ -105,7 +105,8 @@ public:
     /// \param v - a string containing the Proj.4 string.
     void setProj4(std::string const& v);
     
-    boost::property_tree::ptree getPTree() const;    
+    boost::property_tree::ptree toPTree() const;    
+    void dump() const;
 
     const std::string& getDescription() const;
     const std::string& getName() const;

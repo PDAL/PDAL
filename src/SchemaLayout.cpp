@@ -41,13 +41,14 @@
 
 #include <pdal/SchemaLayout.hpp>
 
+#include <boost/property_tree/json_parser.hpp>
+
 namespace pdal
 {
 
 
 SchemaLayout::SchemaLayout(const Schema& schema)
-    : 
-    m_schema(schema)
+    : m_schema(schema)
     , m_byteSize(0)
 {
     calculateSizes();
@@ -131,37 +132,31 @@ void SchemaLayout::calculateSizes()
 }
 
 
-std::ostream& operator<<(std::ostream& os, SchemaLayout const&)
+boost::property_tree::ptree SchemaLayout::toPTree() const
 {
-    ////using property_tree::ptree;
-    ////ptree tree = schema.getPTree();
+    boost::property_tree::ptree tree;
 
-    ////os << "---------------------------------------------------------" << std::endl;
-    ////os << "  Schema Summary" << std::endl;
-    ////os << "---------------------------------------------------------" << std::endl;
+    for (DimensionLayoutsCIter iter = m_dimensionLayouts.begin(); iter != m_dimensionLayouts.end(); ++iter)
+    {
+        const DimensionLayout& dim = *iter;
+        tree.add_child("dimensionlayout", dim.toPTree());
+    }
 
-    ////ptree::const_iterator i;
-
-    //////ptree dims = tree.get_child("LASSchema.dimensions");
-    ///////////////os << "  Point Format ID:             " << tree.get<std::string>("LASSchema.formatid") << std::endl;
-    ////os << "  Number of dimensions:        " << schema.getDimensions().size() << std::endl;
-    ////os << "  Size in bytes:               " << schema.getByteSize() << std::endl;
-
-    ////os << std::endl;
-    ////os << "  Dimensions" << std::endl;
-    ////os << "---------------------------------------------------------" << std::endl;
-
-    ////os << "  ";
-
-    ////const Schema::Dimensions& dimensions = schema.getDimensions();
-    ////for (Schema::DimensionsCIter iter = dimensions.cbegin(); iter != dimensions.cend(); ++iter)
-    ////{
-    ////    os << *iter;
-    ////    os << "  ";
-    ////}
+    return tree;
+}
 
 
-    ////os << std::endl;
+void SchemaLayout::dump() const
+{
+    std::cout << *this;
+}
+
+
+std::ostream& operator<<(std::ostream& os, pdal::SchemaLayout const& layout)
+{
+    boost::property_tree::ptree tree = layout.toPTree();
+
+    boost::property_tree::write_json(os, tree);
 
     return os;
 }
