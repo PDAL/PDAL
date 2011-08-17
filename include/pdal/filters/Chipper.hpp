@@ -155,17 +155,6 @@ public:
     SET_STAGE_NAME("filters.chipper", "Chipper")
 
     Chipper(Stage& prevStage, const Options&);
-    // Chipper(Stage& prevStage, boost::uint32_t max_partition_size)
-    //     : pdal::Filter(prevStage, Options::none())
-    //     , m_threshold(max_partition_size)
-    //     , m_xvec(chipper::DIR_X)
-    //     , m_yvec(chipper::DIR_Y)
-    //     , m_spare(chipper::DIR_NONE) 
-    // {
-    //     checkImpedance();
-    //     setPointCountType(PointCount_Fixed);
-    //     setNumPoints(0);
-    // }
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
