@@ -196,28 +196,7 @@ void PcInfo::dumpStage() const
 
 int PcInfo::execute()
 {
-    if (!pdal::FileUtils::fileExists(m_inputFile))
-    {
-        throw app_runtime_error("file not found: " + m_inputFile);
-    }
-
-    std::string driver = AppSupport::inferReaderDriver(m_inputFile);
-
-    if (driver == "")
-    {
-        throw app_runtime_error("Cannot determine file type of " + m_inputFile);
-    }
-
-    if (hasOption("liblas") && driver == "drivers.las.reader")
-    {
-        driver = "drivers.liblas.reader";
-    }
-
-    pdal::Options options;
-    options.add<bool>("debug", isDebug());
-    options.add<boost::uint8_t>("verbose", getVerboseLevel());
-
-    m_reader = AppSupport::createReader(driver, m_inputFile, options);
+    m_reader = AppSupport::makeReader(m_inputFile, *this);
         
     m_reader->initialize();
     

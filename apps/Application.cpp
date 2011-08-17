@@ -137,14 +137,14 @@ int Application::innerRun()
 }
 
 
-void Application::printError(const std::string& err)
+void Application::printError(const std::string& err) const
 {
     std::cout << err << std::endl;
     std::cout << std::endl;
 }
 
 
-bool Application::hasOption(const std::string& name)
+bool Application::hasOption(const std::string& name) const
 {
     return m_variablesMap.count(name) > 0;
 }

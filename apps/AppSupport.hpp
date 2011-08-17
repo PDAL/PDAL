@@ -39,18 +39,37 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/Stage.hpp>
+#include <pdal/Writer.hpp>
+
+#include "Application.hpp"
+
 
 // this is a static class with some helper functions the cmd line apps need
 class AppSupport
 {
 public:
+    // makes a reader/stage, from just the filename and some options
+    static pdal::Stage* AppSupport::makeReader(const std::string& inputFile, const Application& app);
+
+    // makes a writer, from just the filename and some options (and the input stage)
+    static pdal::Writer* AppSupport::makeWriter(const std::string& outputFile, pdal::Stage& stage, const Application& app);
+
+private:
     // infer the driver to use based on filename extension
     // returns "" if no driver found
     static std::string inferReaderDriver(const std::string& filename);
 
+    // infer the driver to use based on filename extension
+    // returns "" if no driver found
+    static std::string inferWriterDriver(const std::string& filename);
+
     // creates a Reader using the given driver type
-    // caller takes ownership of the returned pointer... unless it's of type XML :-(
+    // caller does NOT take ownership of the returned pointer
     static pdal::Stage* createReader(const std::string& driver, const std::string& filename, const pdal::Options& options);
+
+    // creates a Writer using the given driver type
+    // caller does NOT take ownership of the returned pointer
+    static pdal::Writer* createWriter(const std::string& driver, const std::string& filename, pdal::Stage& stage, const pdal::Options& options);
 
     AppSupport& operator=(const AppSupport&); // not implemented
     AppSupport(const AppSupport&); // not implemented

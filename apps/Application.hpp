@@ -80,7 +80,15 @@ public:
     // call this, to start the machine
     int run();
 
+    bool isDebug() const;
+    boost::uint8_t getVerboseLevel() const;
+    bool hasOption(const std::string& name) const;
+    void printError(const std::string&) const;
+
 protected:
+    // this is protected; your derived class ctor will be the public entry point
+    Application(int argc, char* argv[], const std::string& appName);
+
     // implement this, with calls to addOptionSet()
     virtual void addOptions() {}
 
@@ -92,14 +100,8 @@ protected:
     // it will be wrapped in a global catch try/block for you
     virtual int execute() = 0;
 
-protected:
-    Application(int argc, char* argv[], const std::string& appName);
     void addOptionSet(boost::program_options::options_description* options);
     void addPositionalOption(const char* name, int max_count);
-    bool isDebug() const;
-    boost::uint8_t getVerboseLevel() const;
-    bool hasOption(const std::string& name);
-    void printError(const std::string&);
 
 private:
     int innerRun();
