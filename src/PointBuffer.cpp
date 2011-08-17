@@ -156,7 +156,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
             
             switch (dimension.getDataType())
             {
-#define GETFIELDAS(type) getField<##type##>(pointIndex, fieldIndex)
+#define GETFIELDAS(T) getField<T>(pointIndex, fieldIndex)
 #define STRINGIFY(x) boost::lexical_cast<std::string>(x)
                 // note we convert 8-bit fields to ints, so they aren't treated as chars
             case Dimension::Int8:
