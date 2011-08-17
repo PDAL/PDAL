@@ -54,13 +54,16 @@ class PcInfo : public Application
 {
 public:
     PcInfo(int argc, char* argv[]);
-    int execute();
+    int execute(); // overrride
 
 private:
-    void addOptions();
-    void validateOptions();
-    void readOnePoint();
-    void readAllPoints();
+    void addOptions(); // overrride
+    void validateOptions(); // overrride
+
+    void dumpOnePoint() const;
+    void dumpPointsSummary() const;
+    void dumpSchema() const;
+    void dumpStage() const;
 
     pdal::Stage* m_reader;
     std::string m_inputFile;
@@ -108,6 +111,7 @@ void PcInfo::addOptions()
     processing_options->add_options()
         ("point,p", po::value<boost::uint64_t>(&m_pointNumber), "point to dump")
         ("points,a", "dump stats on all points (read entire dataset)")
+        ("schema,s", "dump the schema")
         ;
 
     addOptionSet(processing_options);
@@ -118,7 +122,7 @@ void PcInfo::addOptions()
 }
 
 
-void PcInfo::readOnePoint()
+void PcInfo::dumpOnePoint() const
 {
     const pdal::Schema& schema = m_reader->getSchema();
     pdal::SchemaLayout layout(schema);
@@ -145,7 +149,7 @@ void PcInfo::readOnePoint()
 }
 
 
-void PcInfo::readAllPoints()
+void PcInfo::dumpPointsSummary() const
 {
     const pdal::Schema& schema = m_reader->getSchema();
     pdal::SchemaLayout layout(schema);
@@ -164,6 +168,29 @@ void PcInfo::readAllPoints()
     std::cout << "Read " << totRead << " points\n";
     
     return;
+}
+
+
+void PcInfo::dumpSchema() const
+{
+    const pdal::Schema& schema = m_reader->getSchema();
+
+    boost::property_tree::ptree tree = schema.toPTree();
+    
+    boost::property_tree::write_json(std::cout, tree);
+    
+    return;
+}
+
+
+void PcInfo::dumpStage() const
+{
+    const boost::uint64_t numPoints = m_reader->getNumPoints();
+    const pdal::SpatialReference& srs = m_reader->getSpatialReference();
+
+    std::cout << "driver type: " << m_reader->getName() << "\n";
+    std::cout << numPoints << " points\n";
+    std::cout << "WKT: " << srs.getWKT() << "\n";
 }
 
 
@@ -191,27 +218,24 @@ int PcInfo::execute()
     options.add<boost::uint8_t>("verbose", getVerboseLevel());
 
     m_reader = AppSupport::createReader(driver, m_inputFile, options);
-
-    
+        
     m_reader->initialize();
     
+    dumpStage();
+
     if (hasOption("point"))
     {
-        readOnePoint();
+        dumpOnePoint();
     }
 
     if (hasOption("points"))
     {
-        readAllPoints();
+        dumpPointsSummary();
     }
 
+    if (hasOption("schema"))
     {
-        const boost::uint64_t numPoints = m_reader->getNumPoints();
-        const pdal::SpatialReference& srs = m_reader->getSpatialReference();
-
-        std::cout << "driver type: " << m_reader->getName() << "\n";
-        std::cout << numPoints << " points\n";
-        std::cout << "WKT: " << srs.getWKT() << "\n";
+        dumpSchema();
     }
 
     return 0;
