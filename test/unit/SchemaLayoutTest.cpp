@@ -34,6 +34,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 #include <pdal/SchemaLayout.hpp>
 
@@ -94,6 +95,31 @@ BOOST_AUTO_TEST_CASE(test_layout_size)
     BOOST_CHECK(dl2.getDimension() == d2);
     BOOST_CHECK(dl2.getPosition() == 1);
     BOOST_CHECK(dl2.getByteOffset() == 4);
+}
+
+
+BOOST_AUTO_TEST_CASE(SchemaLayoutTest_ptree)
+{
+    Dimension d1(Dimension::Field_X, Dimension::Uint32);
+    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
+    Schema s1;
+    s1.addDimension(d1);
+    s1.addDimension(d2);
+    SchemaLayout sl1(s1);
+
+    std::stringstream ss1(std::stringstream::in | std::stringstream::out);
+  
+    boost::property_tree::ptree tree = sl1.toPTree();
+    boost::property_tree::write_xml(ss1, tree);
+
+    const std::string out1 = ss1.str();
+
+    static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+    const std::string ref = xml_header + "<dimensionlayout><dimension><name>X</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>0</byteoffset><position>0</position></dimensionlayout><dimensionlayout><dimension><name>Y</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>4</byteoffset><position>1</position></dimensionlayout>";
+
+    BOOST_CHECK_EQUAL(ref, out1);
+
+    return;
 }
 
 

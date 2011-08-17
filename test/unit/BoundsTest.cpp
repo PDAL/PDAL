@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <boost/test/unit_test.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 #include <pdal/Bounds.hpp>
 #include <iostream>
@@ -235,25 +236,45 @@ BOOST_AUTO_TEST_CASE(test_static)
 }
 
 
-// BOOST_AUTO_TEST_CASE(test_output)
-// {
-//     const Bounds<int> b2(1,2,101,102);
-//     const Bounds<double> b3(1.1,2.2,3.3,101.1,102.2,103.3);
-//     
-//     std::stringstream ss2(std::stringstream::in | std::stringstream::out);
-//     std::stringstream ss3(std::stringstream::in | std::stringstream::out);
-// 
-//     ss2 << b2;
-//     ss3 << b3;
-// 
-//     const std::string out2 = ss2.str();
-//     const std::string out3 = ss3.str();
-// 
-//     BOOST_CHECK(out2 == "([1, 101], [2, 102])");
-//     BOOST_CHECK(out3 == "([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])");
-// 
-//     return;
-// }
+ BOOST_AUTO_TEST_CASE(test_output)
+ {
+     const Bounds<int> b2(1,2,101,102);
+     const Bounds<double> b3(1.1,2.2,3.3,101.1,102.2,103.3);
+     
+     std::stringstream ss2(std::stringstream::in | std::stringstream::out);
+     std::stringstream ss3(std::stringstream::in | std::stringstream::out);
+ 
+     ss2 << b2;
+     ss3 << b3;
+ 
+     const std::string out2 = ss2.str();
+     const std::string out3 = ss3.str();
+ 
+     BOOST_CHECK_EQUAL(out2, "([1, 101], [2, 102])");
+     BOOST_CHECK_EQUAL(out3, "([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])");
+ 
+     return;
+ }
+
+
+BOOST_AUTO_TEST_CASE(BoundsTest_ptree)
+{
+    const Bounds<int> b2(1,2,101,102);
+
+    std::stringstream ss1(std::stringstream::in | std::stringstream::out);
+  
+    boost::property_tree::ptree tree = b2.toPTree();
+    boost::property_tree::write_xml(ss1, tree);
+
+    const std::string out1 = ss1.str();
+
+    static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+    const std::string ref = xml_header + "<0><minimum>1</minimum><maximum>101</maximum></0><1><minimum>2</minimum><maximum>102</maximum></1>";
+
+    BOOST_CHECK_EQUAL(ref, out1);
+
+    return;
+}
 
 
 BOOST_AUTO_TEST_CASE(test_input)

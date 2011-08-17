@@ -35,6 +35,7 @@
 #include <sstream>
 
 #include <boost/test/unit_test.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 #include <pdal/Vector.hpp>
 
@@ -135,5 +136,26 @@ BOOST_AUTO_TEST_CASE(test_dump)
     BOOST_CHECK(s.str() == "(1, 2, 3)");
     return;
 }
+
+
+BOOST_AUTO_TEST_CASE(VectorTest_ptree)
+{
+    const Vector<int> v(12,23,34);
+
+    std::stringstream ss1(std::stringstream::in | std::stringstream::out);
+  
+    boost::property_tree::ptree tree = v.toPTree();
+    boost::property_tree::write_xml(ss1, tree);
+
+    const std::string out1 = ss1.str();
+
+    static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+    const std::string ref = xml_header + "<0>12</0><1>23</1><2>34</2>";
+
+    BOOST_CHECK_EQUAL(ref, out1);
+
+    return;
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

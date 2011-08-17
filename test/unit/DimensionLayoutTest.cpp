@@ -34,7 +34,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
-
+#include <boost/property_tree/xml_parser.hpp>
 #include <pdal/DimensionLayout.hpp>
 
 using namespace pdal;
@@ -59,6 +59,27 @@ BOOST_AUTO_TEST_CASE(test1)
     BOOST_CHECK(l3==l1);
     BOOST_CHECK(l1==l4);
     BOOST_CHECK(l4==l1);
+}
+
+
+BOOST_AUTO_TEST_CASE(DimensionLayoutTest_ptree)
+{
+    Dimension d1(Dimension::Field_X, Dimension::Uint32);
+    DimensionLayout l1(d1);
+
+    std::stringstream ss1(std::stringstream::in | std::stringstream::out);
+  
+    boost::property_tree::ptree tree = l1.toPTree();
+    boost::property_tree::write_xml(ss1, tree);
+
+    const std::string out1 = ss1.str();
+
+    static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+    const std::string ref = xml_header + "<dimension><name>X</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>0</byteoffset><position>0</position>";
+
+    BOOST_CHECK_EQUAL(ref, out1);
+
+    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

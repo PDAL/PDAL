@@ -34,6 +34,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 #include <pdal/PointBuffer.hpp>
 
@@ -189,6 +190,29 @@ BOOST_AUTO_TEST_CASE(test_assignment_constructor)
     PointBuffer d2 = *data;
     verifyTestBuffer(d2);
     delete data;
+}
+
+
+BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
+{
+    PointBuffer* data = makeTestBuffer();
+
+    std::stringstream ss1(std::stringstream::in | std::stringstream::out);
+  
+    boost::property_tree::ptree tree = data->toPTree();
+
+    delete data;
+
+    boost::property_tree::write_xml(ss1, tree);
+
+    const std::string out1 = ss1.str();
+
+    static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+    const std::string ref = xml_header + "<0><X>1</X><Y>0</Y><Z>0</Z></0><1><X>2</X><Y>10</Y><Z>100</Z></1>";
+
+    BOOST_CHECK_EQUAL(ref, out1.substr(0, ref.length()));
+
+    return;
 }
 
 BOOST_AUTO_TEST_SUITE_END()
