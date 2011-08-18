@@ -149,10 +149,10 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     BOOST_CHECK(fileIsCompressed(outputLaz));
 
     // does "--input foo.laz" make an uncompressed output?
-//    stat = Support::run_command(cmd + " --input=" + inputLaz + " --output=" + outputLas, output);
-//    BOOST_CHECK_EQUAL(stat, 0);
-//    BOOST_CHECK(fileIsOkay(outputLas));
-//    BOOST_CHECK(!fileIsCompressed(outputLas));
+//BUG    stat = Support::run_command(cmd + " --input=" + inputLaz + " --output=" + outputLas, output);
+//BUG    BOOST_CHECK_EQUAL(stat, 0);
+//BUG    BOOST_CHECK(fileIsOkay(outputLas));
+//BUG    BOOST_CHECK(!fileIsCompressed(outputLas));
 
     // does --liblas work?
     stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --liblas", output);
