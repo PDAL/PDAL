@@ -172,6 +172,9 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(fileHasSrs(outputLas));
 
+    pdal::FileUtils::deleteFile(outputLas);
+    pdal::FileUtils::deleteFile(outputLaz);
+
     return;
 }
 
