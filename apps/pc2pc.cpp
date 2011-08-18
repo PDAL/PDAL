@@ -70,11 +70,12 @@ public:
     int execute();
 
 private:
-    void addOptions();
-    void validateOptions();
+    void addSwitches();
+    void validateSwitches();
 
     std::string m_inputFile;
     std::string m_outputFile;
+    bool m_useLiblas;
     std::string m_srs;
     bool m_bCompress;
     
@@ -83,19 +84,24 @@ private:
 
 Pc2Pc::Pc2Pc(int argc, char* argv[])
     : Application(argc, argv, "pc2pc")
+    , m_inputFile("")
+    , m_outputFile("")
+    , m_useLiblas(false)
+    , m_srs("")
+    , m_bCompress(false)
 {
     return;
 }
 
 
-void Pc2Pc::validateOptions()
+void Pc2Pc::validateSwitches()
 {
-    if (!hasOption("input"))
+    if (m_inputFile == "")
     {
         throw app_usage_error("--input/-i required");
     }
 
-    if (!hasOption("output"))
+    if (m_outputFile == "")
     {
         throw app_usage_error("--output/-o required");
     }
@@ -104,41 +110,59 @@ void Pc2Pc::validateOptions()
 }
 
 
-void Pc2Pc::addOptions()
+void Pc2Pc::addSwitches()
 {
     namespace po = boost::program_options;
     
     po::options_description* file_options = new po::options_description("file options");
 
     file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile), "input file name")
-        ("output,o", po::value<std::string>(&m_outputFile), "output file name")
-        ("liblas", "use libLAS driver (not PDAL native driver)")
-        ("a_srs", po::value<std::string>(&m_srs)->default_value(""), "Assign output coordinate system")
-        ("compress", "Compress output data (if supported by output format)")
+        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
+        ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
+        ("liblas", po::value<bool>(&m_useLiblas)->zero_tokens()->implicit_value(false), "use libLAS driver (not PDAL native driver)")
+        ("a_srs", po::value<std::string>(&m_srs)->default_value(""), "Assign output coordinate system (if supported by output format)")
+        ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(false), "Compress output data (if supported by output format)")
         ;
 
-    addOptionSet(file_options);
+    addSwitchSet(file_options);
 }
 
 
 int Pc2Pc::execute()
 {
-    pdal::Stage* stage = AppSupport::makeReader(m_inputFile, *this);
-
-    if (hasOption("a_srs"))
+    Options readerOptions;
     {
-        // ???
+        readerOptions.add<std::string>("filename", m_inputFile);
+        readerOptions.add<bool>("debug", isDebug());
+        readerOptions.add<boost::uint8_t>("verbose", getVerboseLevel());
+        readerOptions.add<bool>("liblas", m_useLiblas);
     }
+
+    Options writerOptions;
+    {
+        writerOptions.add<std::string>("filename", m_outputFile);
+        writerOptions.add<bool>("debug", isDebug());
+        writerOptions.add<boost::uint8_t>("verbose", getVerboseLevel());
+
+        if (m_srs != "")
+        {
+            writerOptions.add<std::string>("a_srs", m_srs);
+        }
+
+        writerOptions.add<bool>("compression", m_bCompress);
+        writerOptions.add<bool>("liblas", m_useLiblas);
+    }
+
+    Stage& stage = AppSupport::makeReader(readerOptions);
 
     // BUG: I don't know how we could do this...
     // writer.setPointFormat( reader.getPointFormat() );
 
-    pdal::Writer* writer = AppSupport::makeWriter(m_outputFile, *stage, *this);
+    Writer& writer = AppSupport::makeWriter(writerOptions, stage);
 
-    writer->initialize();
+    writer.initialize();
 
-    const boost::uint64_t numPoints = writer->write(0);
+    const boost::uint64_t numPoints = writer.write(0);
 
     std::cout << "Wrote " << numPoints << " points\n";
 

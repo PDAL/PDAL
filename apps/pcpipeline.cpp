@@ -46,21 +46,21 @@ using namespace pdal;
 namespace po = boost::program_options;
 
 
-class Application_pcpipeline : public Application
+class PcPipeline : public Application
 {
 public:
-    Application_pcpipeline(int argc, char* argv[]);
+    PcPipeline(int argc, char* argv[]);
     int execute();
 
 private:
-    void addOptions();
-    void validateOptions();
+    void addSwitches();
+    void validateSwitches();
 
     std::string m_inputFile;
 };
 
 
-Application_pcpipeline::Application_pcpipeline(int argc, char* argv[])
+PcPipeline::PcPipeline(int argc, char* argv[])
     : Application(argc, argv, "pcpipeline")
     , m_inputFile("")
 {
@@ -68,9 +68,9 @@ Application_pcpipeline::Application_pcpipeline(int argc, char* argv[])
 }
 
 
-void Application_pcpipeline::validateOptions()
+void PcPipeline::validateSwitches()
 {
-    if (!hasOption("input"))
+    if (m_inputFile == "")
     {
         throw app_usage_error("input file name required");
     }
@@ -79,42 +79,34 @@ void Application_pcpipeline::validateOptions()
 }
 
 
-void Application_pcpipeline::addOptions()
+void PcPipeline::addSwitches()
 {
     po::options_description* file_options = new po::options_description("file options");
 
     file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile), "input file name")
+        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
         ;
 
-    addOptionSet(file_options);
-    addPositionalOption("input", 1);
+    addSwitchSet(file_options);
+    addPositionalSwitch("input", 1);
 }
 
 
-int Application_pcpipeline::execute()
+int PcPipeline::execute()
 {
     if (!FileUtils::fileExists(m_inputFile))
     {
         throw app_runtime_error("file not found: " + m_inputFile);
     }
 
-    try
-    {
-        pdal::PipelineManager manager;
+    pdal::PipelineManager manager;
 
-        pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
-        reader.readWriterPipeline(m_inputFile);
+    pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
+    reader.readWriterPipeline(m_inputFile);
 
-        const boost::uint64_t np = manager.execute();
+    const boost::uint64_t np = manager.execute();
 
-        std::cout << "Wrote " << np << " points.\n";
-    }
-    catch (pdal::pdal_error ex)
-    {
-        std::cout << "Caught exception: " << ex.what() << "\n";
-        return 1;
-    }
+    std::cout << "Wrote " << np << " points.\n";
 
     return 0;
 }
@@ -122,7 +114,7 @@ int Application_pcpipeline::execute()
 
 int main(int argc, char* argv[])
 {
-    Application_pcpipeline app(argc, argv);
+    PcPipeline app(argc, argv);
     return app.run();
 }
 

@@ -47,6 +47,9 @@ namespace po = boost::program_options;
 Application::Application(int argc, char* argv[], const std::string& appName)
     : m_isDebug(false)
     , m_verboseLevel(0)
+    , m_showHelp(false)
+    , m_showVersion(false)
+    , m_showTime(false)
     , m_argc(argc)
     , m_argv(argv)
     , m_appName(appName)
@@ -89,22 +92,22 @@ int Application::run()
 int Application::innerRun()
 {
     // add -h, -v, etc
-    addBasicOptionSet();
+    addBasicSwitchSet();
 
     // add the options for the derived application
-    addOptions();
+    addSwitches();
 
     // parse the command line
-    parseOptions();
+    parseSwitches();
 
     // handle the well-known options
-    if (hasOption("version")) 
+    if (m_showVersion) 
     {
         outputVersion();
         return 0;
     }
     
-    if (hasOption("help")) 
+    if (m_showHelp) 
     {
         outputHelp();
         return 0;
@@ -113,7 +116,7 @@ int Application::innerRun()
     try
     {
         // do any user-level sanity checking
-        validateOptions();
+        validateSwitches();
     }
     catch (app_usage_error e)
     {
@@ -127,7 +130,7 @@ int Application::innerRun()
     
     int status = execute();
     
-    if (status == 0 && hasOption("timer"))
+    if (status == 0 && m_showTime)
     {
         const double t = timer.elapsed();
         std::cout << "Elapsed time: " << t << " seconds" << std::endl;
@@ -141,12 +144,6 @@ void Application::printError(const std::string& err) const
 {
     std::cout << err << std::endl;
     std::cout << std::endl;
-}
-
-
-bool Application::hasOption(const std::string& name) const
-{
-    return m_variablesMap.count(name) > 0;
 }
 
 
@@ -166,14 +163,14 @@ boost::uint8_t Application::getVerboseLevel() const
 }
 
 
-void Application::addOptionSet(po::options_description* options)
+void Application::addSwitchSet(po::options_description* options)
 {
     if (!options) return;
     m_options.push_back(options);
 }
 
 
-void Application::addPositionalOption(const char* name, int max_count)
+void Application::addPositionalSwitch(const char* name, int max_count)
 {
     m_positionalOptions.add(name, max_count);
 }
@@ -210,25 +207,25 @@ void Application::outputVersion()
 }
 
 
-void Application::addBasicOptionSet()
+void Application::addBasicSwitchSet()
 {
     po::options_description* basic_options = new po::options_description("basic options");
 
     basic_options->add_options()
-        ("help,h", "produce help message")
+        ("help,h", po::value<bool>(&m_showHelp)->zero_tokens(), "produce help message")
         ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens(), "Enable debug mode")
         ("verbose,v", po::value<boost::uint32_t>(&m_verboseLevel)->default_value(0), "Set verbose message level")
-        ("version", "Show version info")
-        ("timer", "Show execution time")
+        ("version", po::value<bool>(&m_showVersion)->zero_tokens(), "Show version info")
+        ("timer", po::value<bool>(&m_showTime)->zero_tokens(), "Show execution time")
         ;
 
-    addOptionSet(basic_options);
+    addSwitchSet(basic_options);
 
     return;
 }
 
 
-void Application::parseOptions()
+void Application::parseSwitches()
 {
     po::options_description options;
 

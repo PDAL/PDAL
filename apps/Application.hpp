@@ -82,7 +82,6 @@ public:
 
     bool isDebug() const;
     boost::uint8_t getVerboseLevel() const;
-    bool hasOption(const std::string& name) const;
     void printError(const std::string&) const;
 
 protected:
@@ -90,28 +89,31 @@ protected:
     Application(int argc, char* argv[], const std::string& appName);
 
     // implement this, with calls to addOptionSet()
-    virtual void addOptions() {}
+    virtual void addSwitches() {}
 
     // implement this, to do sanity checking of cmd line
     // will throw if the user gave us bad options
-    virtual void validateOptions() {}
+    virtual void validateSwitches() {}
 
     // implement this, to do your actual work
     // it will be wrapped in a global catch try/block for you
     virtual int execute() = 0;
 
-    void addOptionSet(boost::program_options::options_description* options);
-    void addPositionalOption(const char* name, int max_count);
+    void addSwitchSet(boost::program_options::options_description* options);
+    void addPositionalSwitch(const char* name, int max_count);
 
 private:
     int innerRun();
-    void parseOptions();
+    void parseSwitches();
     void outputHelp();
     void outputVersion();
-    void addBasicOptionSet();
+    void addBasicSwitchSet();
 
     bool m_isDebug;
     boost::uint32_t m_verboseLevel;
+    bool m_showHelp;
+    bool m_showVersion;
+    bool m_showTime;
     const int m_argc;
     char** m_argv;
     const std::string m_appName;

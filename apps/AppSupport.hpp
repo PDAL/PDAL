@@ -48,11 +48,11 @@
 class AppSupport
 {
 public:
-    // makes a reader/stage, from just the filename and some options
-    static pdal::Stage* AppSupport::makeReader(const std::string& inputFile, const Application& app);
+    // makes a reader/stage, from just the filename and some other options
+    static pdal::Stage& AppSupport::makeReader(pdal::Options& options);
 
-    // makes a writer, from just the filename and some options (and the input stage)
-    static pdal::Writer* AppSupport::makeWriter(const std::string& outputFile, pdal::Stage& stage, const Application& app);
+    // makes a writer, from just the filename and some other options (and the input stage)
+    static pdal::Writer& AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage);
 
 private:
     // infer the driver to use based on filename extension

@@ -94,16 +94,14 @@ std::string AppSupport::inferWriterDriver(const std::string& filename, pdal::Opt
 }
 
 
-pdal::Stage* AppSupport::makeReader(const std::string& inputFile, const Application& app)
+pdal::Stage& AppSupport::makeReader(pdal::Options& options)
 {
+    const std::string inputFile = options.getValueOrThrow<std::string>("filename");
+
     if (!pdal::FileUtils::fileExists(inputFile))
     {
         throw app_runtime_error("file not found: " + inputFile);
     }
-
-    pdal::Options options;
-    options.add<bool>("debug", app.isDebug());
-    options.add<boost::uint8_t>("verbose", app.getVerboseLevel());
 
     std::string driver = AppSupport::inferReaderDriver(inputFile, options);
     if (driver == "")
@@ -111,23 +109,25 @@ pdal::Stage* AppSupport::makeReader(const std::string& inputFile, const Applicat
         throw app_runtime_error("Cannot determine file type of " + inputFile);
     }
 
-    if (app.hasOption("liblas") && driver == "drivers.las.reader")
+    if (options.getValueOrDefault<bool>("liblas", false) && driver == "drivers.las.reader")
     {
         driver = "drivers.liblas.reader";
     }
 
     pdal::StageFactory factory;
     pdal::Stage* stage = factory.createReader(driver, options);
+    if (!stage)
+    {
+        throw app_runtime_error("reader creation failed");
+    }
 
-    return stage;
+    return *stage;
 }
 
 
-pdal::Writer* AppSupport::makeWriter(const std::string& outputFile, pdal::Stage& stage, const Application& app)
+pdal::Writer& AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
 {
-    pdal::Options options;
-    options.add<bool>("debug", app.isDebug());
-    options.add<boost::uint8_t>("verbose", app.getVerboseLevel());
+    const std::string outputFile = options.getValueOrThrow<std::string>("filename");
 
     std::string driver = AppSupport::inferWriterDriver(outputFile, options);
     if (driver == "")
@@ -135,15 +135,17 @@ pdal::Writer* AppSupport::makeWriter(const std::string& outputFile, pdal::Stage&
         throw app_runtime_error("Cannot determine file type of " + outputFile);
     }
 
-    if (app.hasOption("liblas") && driver == "drivers.las.writer")
+    if (options.getValueOrDefault<bool>("liblas", false) && driver == "drivers.las.writer")
     {
         driver = "drivers.liblas.writer";
     }
-
-    options.add<bool>("compression", app.hasOption("compress"));
-    
+        
     pdal::StageFactory factory;
     pdal::Writer* writer = factory.createWriter(driver, stage, options);
+    if (!writer)
+    {
+        throw app_runtime_error("writer creation failed");
+    }
 
-    return writer;
+    return *writer;
 }

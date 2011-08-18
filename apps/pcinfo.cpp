@@ -49,6 +49,8 @@
 #include "AppSupport.hpp"
 #include "Application.hpp"
 
+using namespace pdal;
+
 
 class PcInfo : public Application
 {
@@ -57,34 +59,38 @@ public:
     int execute(); // overrride
 
 private:
-    void addOptions(); // overrride
-    void validateOptions(); // overrride
+    void addSwitches(); // overrride
+    void validateSwitches(); // overrride
 
-    void dumpOnePoint() const;
-    void dumpPointsSummary() const;
-    void dumpSchema() const;
-    void dumpStage() const;
+    void dumpOnePoint(const Stage&) const;
+    void dumpPointsSummary(const Stage&) const;
+    void dumpSchema(const Stage&) const;
+    void dumpStage(const Stage&) const;
 
-    pdal::Stage* m_reader;
     std::string m_inputFile;
+    bool m_useLiblas;
+    bool m_summarizePoints;
+    bool m_showSchema;
     boost::uint64_t m_pointNumber;
-    boost::scoped_ptr<pdal::filters::StatsFilter> m_filter;
+    boost::scoped_ptr<filters::StatsFilter> m_filter;
 };
 
 
 PcInfo::PcInfo(int argc, char* argv[])
     : Application(argc, argv, "pcinfo")
-    , m_reader(NULL)
     , m_inputFile("")
-    , m_pointNumber(0)
+    , m_useLiblas(false)
+    , m_summarizePoints(false)
+    , m_showSchema(false)
+    , m_pointNumber((std::numeric_limits<boost::uint64_t>::max)())
 {
     return;
 }
 
 
-void PcInfo::validateOptions()
+void PcInfo::validateSwitches()
 {
-    if (!hasOption("input"))
+    if (m_inputFile == "")
     {
         throw app_usage_error("input file name required");
     }
@@ -93,43 +99,43 @@ void PcInfo::validateOptions()
 }
 
 
-void PcInfo::addOptions()
+void PcInfo::addSwitches()
 {
     namespace po = boost::program_options;
 
     po::options_description* file_options = new po::options_description("file options");
 
     file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile), "input file name")
-        ("liblas", "use libLAS driver (not PDAL native driver)")
+        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
+        ("liblas", po::value<bool>(&m_useLiblas)->zero_tokens()->implicit_value(false), "use libLAS driver (not PDAL native driver)")
         ;
 
-    addOptionSet(file_options);
+    addSwitchSet(file_options);
 
     po::options_description* processing_options = new po::options_description("processing options");
 
     processing_options->add_options()
-        ("point,p", po::value<boost::uint64_t>(&m_pointNumber), "point to dump")
-        ("points,a", "dump stats on all points (read entire dataset)")
-        ("schema,s", "dump the schema")
+        ("point,p", po::value<boost::uint64_t>(&m_pointNumber)->implicit_value((std::numeric_limits<boost::uint64_t>::max)()), "point to dump")
+        ("points,a", po::value<bool>(&m_summarizePoints)->zero_tokens()->implicit_value(false), "dump stats on all points (read entire dataset)")
+        ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(false), "dump the schema")
         ;
 
-    addOptionSet(processing_options);
+    addSwitchSet(processing_options);
 
-    addPositionalOption("input", 1);
+    addPositionalSwitch("input", 1);
 
     return;
 }
 
 
-void PcInfo::dumpOnePoint() const
+void PcInfo::dumpOnePoint(const Stage& stage) const
 {
-    const pdal::Schema& schema = m_reader->getSchema();
-    pdal::SchemaLayout layout(schema);
+    const Schema& schema = stage.getSchema();
+    SchemaLayout layout(schema);
 
-    pdal::PointBuffer data(layout, 1);
+    PointBuffer data(layout, 1);
     
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(m_reader->createSequentialIterator());
+    boost::scoped_ptr<StageSequentialIterator> iter(stage.createSequentialIterator());
     iter->skip(m_pointNumber);
 
     const boost::uint32_t numRead = iter->read(data);
@@ -149,17 +155,17 @@ void PcInfo::dumpOnePoint() const
 }
 
 
-void PcInfo::dumpPointsSummary() const
+void PcInfo::dumpPointsSummary(const Stage& stage) const
 {
-    const pdal::Schema& schema = m_reader->getSchema();
-    pdal::SchemaLayout layout(schema);
+    const Schema& schema = stage.getSchema();
+    SchemaLayout layout(schema);
 
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(m_reader->createSequentialIterator());
+    boost::scoped_ptr<StageSequentialIterator> iter(stage.createSequentialIterator());
 
     boost::uint64_t totRead = 0;
     while (!iter->atEnd())
     {
-        pdal::PointBuffer data(layout, iter->getChunkSize());
+        PointBuffer data(layout, iter->getChunkSize());
 
         const boost::uint32_t numRead = iter->read(data);
         totRead += numRead;
@@ -171,9 +177,9 @@ void PcInfo::dumpPointsSummary() const
 }
 
 
-void PcInfo::dumpSchema() const
+void PcInfo::dumpSchema(const Stage& stage) const
 {
-    const pdal::Schema& schema = m_reader->getSchema();
+    const Schema& schema = stage.getSchema();
 
     boost::property_tree::ptree tree = schema.toPTree();
     
@@ -183,12 +189,12 @@ void PcInfo::dumpSchema() const
 }
 
 
-void PcInfo::dumpStage() const
+void PcInfo::dumpStage(const Stage& stage) const
 {
-    const boost::uint64_t numPoints = m_reader->getNumPoints();
-    const pdal::SpatialReference& srs = m_reader->getSpatialReference();
+    const boost::uint64_t numPoints = stage.getNumPoints();
+    const SpatialReference& srs = stage.getSpatialReference();
 
-    std::cout << "driver type: " << m_reader->getName() << "\n";
+    std::cout << "driver type: " << stage.getName() << "\n";
     std::cout << numPoints << " points\n";
     std::cout << "WKT: " << srs.getWKT() << "\n";
 }
@@ -196,25 +202,33 @@ void PcInfo::dumpStage() const
 
 int PcInfo::execute()
 {
-    m_reader = AppSupport::makeReader(m_inputFile, *this);
+    Options readerOptions;
+    {
+        readerOptions.add<std::string>("filename", m_inputFile);
+        readerOptions.add<bool>("debug", isDebug());
+        readerOptions.add<boost::uint8_t>("verbose", getVerboseLevel());
+        readerOptions.add<bool>("liblas", m_useLiblas);
+    }
+
+    Stage& reader = AppSupport::makeReader(readerOptions);
         
-    m_reader->initialize();
+    reader.initialize();
     
-    dumpStage();
+    dumpStage(reader);
 
-    if (hasOption("point"))
+    if (m_pointNumber != (std::numeric_limits<boost::uint64_t>::max)())
     {
-        dumpOnePoint();
+        dumpOnePoint(reader);
     }
 
-    if (hasOption("points"))
+    if (m_summarizePoints)
     {
-        dumpPointsSummary();
+        dumpPointsSummary(reader);
     }
 
-    if (hasOption("schema"))
+    if (m_showSchema)
     {
-        dumpSchema();
+        dumpSchema(reader);
     }
 
     return 0;
