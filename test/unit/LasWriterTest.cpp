@@ -104,15 +104,14 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 
         // need to scope the writer, so that's it dtor can use the stream
         pdal::drivers::las::LasWriter writer(reader, ofs);
+        writer.initialize();
+
         writer.setCompressed(true);
         writer.setDate(0, 0);
         writer.setPointFormat(::pdal::drivers::las::PointFormat3);
         writer.setSystemIdentifier("");
         writer.setGeneratingSoftware("TerraScan");
         writer.setHeaderPadding(2);
-
-        writer.initialize();
-
 
         writer.write(numPoints);
     }
