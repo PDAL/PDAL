@@ -116,6 +116,12 @@ public:
     
 };
 
+//
+// supported options:
+//   <bool>debug
+//   <uint8>verbose
+//   <string>filename  [required]
+//
 
 class PDAL_DLL Reader : public pdal::Reader
 {
