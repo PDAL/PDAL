@@ -211,4 +211,18 @@ BOOST_AUTO_TEST_CASE(test_valid_options)
     return;
 }
 
+
+BOOST_AUTO_TEST_CASE(Options_test_add_vs_put)
+{
+    pdal::Options opts;
+
+    opts.add<int>("a",1);
+    opts.add<int>("a",2);
+    opts.add<int>("a",3);
+
+    BOOST_CHECK(opts.hasOption<int>("a"));
+// BUG BUG BUG    BOOST_CHECK_EQUAL(opts.getValueOrThrow<int>("a"), 3);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
