@@ -102,7 +102,8 @@ boost::uint32_t LiblasIteratorBase::myReadBuffer(PointBuffer& data)
         bool ok = getExternalReader().ReadNextPoint();
         if (!ok)
         {
-            throw pdal_error("liblas reader failed to retrieve point");
+            // we've hit the end of the file, or possibly something disasterous...
+            break;
         }
 
         const ::liblas::Point& pt = getExternalReader().GetPoint();
@@ -162,7 +163,7 @@ boost::uint32_t LiblasIteratorBase::myReadBuffer(PointBuffer& data)
         
     }
 
-    return numPoints;
+    return i;
 }
 
 
