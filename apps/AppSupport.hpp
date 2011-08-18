@@ -57,19 +57,16 @@ public:
 private:
     // infer the driver to use based on filename extension
     // returns "" if no driver found
-    static std::string inferReaderDriver(const std::string& filename);
+    // 
+    // this may also add on an option to pass to the driver, such as the filename
+    static std::string inferReaderDriver(const std::string& filename, pdal::Options& options);
 
     // infer the driver to use based on filename extension
     // returns "" if no driver found
-    static std::string inferWriterDriver(const std::string& filename);
-
-    // creates a Reader using the given driver type
-    // caller does NOT take ownership of the returned pointer
-    static pdal::Stage* createReader(const std::string& driver, const std::string& filename, const pdal::Options& options);
-
-    // creates a Writer using the given driver type
-    // caller does NOT take ownership of the returned pointer
-    static pdal::Writer* createWriter(const std::string& driver, const std::string& filename, pdal::Stage& stage, const pdal::Options& options);
+    // 
+    // this may also add on an option to pass to the driver, such as the filename
+    // (or something inferred from the extension, such as .laz means we need to use compress=true)
+    static std::string inferWriterDriver(const std::string& filename, pdal::Options& options);
 
     AppSupport& operator=(const AppSupport&); // not implemented
     AppSupport(const AppSupport&); // not implemented

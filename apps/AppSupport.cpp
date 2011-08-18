@@ -44,7 +44,7 @@
 #include <pdal/StageFactory.hpp>
 
 
-std::string AppSupport::inferReaderDriver(const std::string& filename)
+std::string AppSupport::inferReaderDriver(const std::string& filename, pdal::Options& options)
 {
     std::string ext = boost::filesystem::extension(filename);
     if (ext == "") return "";
@@ -52,6 +52,8 @@ std::string AppSupport::inferReaderDriver(const std::string& filename)
     if (ext == "") return "";
 
     boost::to_lower(ext);
+
+    options.add<std::string>("filename", filename);
 
     // maybe this should live in StageFactory?
     std::map<std::string, std::string> drivers;
@@ -66,7 +68,7 @@ std::string AppSupport::inferReaderDriver(const std::string& filename)
 }
 
 
-std::string AppSupport::inferWriterDriver(const std::string& filename)
+std::string AppSupport::inferWriterDriver(const std::string& filename, pdal::Options& options)
 {
     std::string ext = boost::filesystem::extension(filename);
     if (ext == "") return "";
@@ -74,6 +76,13 @@ std::string AppSupport::inferWriterDriver(const std::string& filename)
     if (ext == "") return "";
 
     boost::to_lower(ext);
+
+    if (ext == "laz")
+    {
+        options.add("compress", true);
+    }
+
+    options.add<std::string>("filename", filename);
 
     // maybe this should live in StageFactory?
     std::map<std::string, std::string> drivers;
@@ -85,34 +94,6 @@ std::string AppSupport::inferWriterDriver(const std::string& filename)
 }
 
 
-pdal::Stage* AppSupport::createReader(const std::string& driver, const std::string& filename, const pdal::Options& extraOptions)
-{
-    pdal::Stage* reader = NULL;
-
-    pdal::Options opts(extraOptions);
-    opts.add<std::string>("filename", filename);
-
-    pdal::StageFactory factory;
-    reader = factory.createReader(driver, opts);
-
-    return reader;
-}
-
-
-pdal::Writer* AppSupport::createWriter(const std::string& driver, const std::string& filename, pdal::Stage& stage, const pdal::Options& extraOptions)
-{
-    pdal::Writer* writer = NULL;
-
-    pdal::Options opts(extraOptions);
-    opts.add<std::string>("filename", filename);
-
-    pdal::StageFactory factory;
-    writer = factory.createWriter(driver, stage, opts);
-
-    return writer;
-}
-
-
 pdal::Stage* AppSupport::makeReader(const std::string& inputFile, const Application& app)
 {
     if (!pdal::FileUtils::fileExists(inputFile))
@@ -120,7 +101,11 @@ pdal::Stage* AppSupport::makeReader(const std::string& inputFile, const Applicat
         throw app_runtime_error("file not found: " + inputFile);
     }
 
-    std::string driver = AppSupport::inferReaderDriver(inputFile);
+    pdal::Options options;
+    options.add<bool>("debug", app.isDebug());
+    options.add<boost::uint8_t>("verbose", app.getVerboseLevel());
+
+    std::string driver = AppSupport::inferReaderDriver(inputFile, options);
     if (driver == "")
     {
         throw app_runtime_error("Cannot determine file type of " + inputFile);
@@ -131,11 +116,8 @@ pdal::Stage* AppSupport::makeReader(const std::string& inputFile, const Applicat
         driver = "drivers.liblas.reader";
     }
 
-    pdal::Options options;
-    options.add<bool>("debug", app.isDebug());
-    options.add<boost::uint8_t>("verbose", app.getVerboseLevel());
-
-    pdal::Stage* stage = AppSupport::createReader(driver, inputFile, options);
+    pdal::StageFactory factory;
+    pdal::Stage* stage = factory.createReader(driver, options);
 
     return stage;
 }
@@ -143,7 +125,11 @@ pdal::Stage* AppSupport::makeReader(const std::string& inputFile, const Applicat
 
 pdal::Writer* AppSupport::makeWriter(const std::string& outputFile, pdal::Stage& stage, const Application& app)
 {
-    std::string driver = AppSupport::inferWriterDriver(outputFile);
+    pdal::Options options;
+    options.add<bool>("debug", app.isDebug());
+    options.add<boost::uint8_t>("verbose", app.getVerboseLevel());
+
+    std::string driver = AppSupport::inferWriterDriver(outputFile, options);
     if (driver == "")
     {
         throw app_runtime_error("Cannot determine file type of " + outputFile);
@@ -154,11 +140,10 @@ pdal::Writer* AppSupport::makeWriter(const std::string& outputFile, pdal::Stage&
         driver = "drivers.liblas.writer";
     }
 
-    pdal::Options options;
-    options.add<bool>("debug", app.isDebug());
-    options.add<boost::uint8_t>("verbose", app.getVerboseLevel());
-
-    pdal::Writer* writer = AppSupport::createWriter(driver, outputFile, stage, options);
+    options.add<bool>("compression", app.hasOption("compress"));
+    
+    pdal::StageFactory factory;
+    pdal::Writer* writer = factory.createWriter(driver, stage, options);
 
     return writer;
 }

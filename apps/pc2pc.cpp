@@ -114,8 +114,8 @@ void Pc2Pc::addOptions()
         ("input,i", po::value<std::string>(&m_inputFile), "input file name")
         ("output,o", po::value<std::string>(&m_outputFile), "output file name")
         ("liblas", "use libLAS driver (not PDAL native driver)")
-//        ("a_srs", po::value<std::string>(&m_srs)->default_value(""), "Assign output coordinate system")
-//        ("compress", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true),"Compress output data if available")
+        ("a_srs", po::value<std::string>(&m_srs)->default_value(""), "Assign output coordinate system")
+        ("compress", "Compress output data (if supported by output format)")
         ;
 
     addOptionSet(file_options);
@@ -126,9 +126,13 @@ int Pc2Pc::execute()
 {
     pdal::Stage* stage = AppSupport::makeReader(m_inputFile, *this);
 
-    //BUG: handle laz writer.setCompressed(false);
+    if (hasOption("a_srs"))
+    {
+        // ???
+    }
 
-    //writer.setPointFormat( reader.getPointFormatNumber() );
+    // BUG: I don't know how we could do this...
+    // writer.setPointFormat( reader.getPointFormat() );
 
     pdal::Writer* writer = AppSupport::makeWriter(m_outputFile, *stage, *this);
 
