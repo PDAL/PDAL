@@ -107,7 +107,7 @@ void PcInfo::addSwitches()
 
     file_options->add_options()
         ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
-        ("liblas", po::value<bool>(&m_useLiblas)->zero_tokens()->implicit_value(false), "use libLAS driver (not PDAL native driver)")
+        ("liblas", po::value<bool>(&m_useLiblas)->zero_tokens()->implicit_value(true), "use libLAS driver (not PDAL native driver)")
         ;
 
     addSwitchSet(file_options);
@@ -116,8 +116,8 @@ void PcInfo::addSwitches()
 
     processing_options->add_options()
         ("point,p", po::value<boost::uint64_t>(&m_pointNumber)->implicit_value((std::numeric_limits<boost::uint64_t>::max)()), "point to dump")
-        ("points,a", po::value<bool>(&m_summarizePoints)->zero_tokens()->implicit_value(false), "dump stats on all points (read entire dataset)")
-        ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(false), "dump the schema")
+        ("points,a", po::value<bool>(&m_summarizePoints)->zero_tokens()->implicit_value(true), "dump stats on all points (read entire dataset)")
+        ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
         ;
 
     addSwitchSet(processing_options);

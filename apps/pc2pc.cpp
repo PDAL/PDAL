@@ -119,9 +119,9 @@ void Pc2Pc::addSwitches()
     file_options->add_options()
         ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
         ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
-        ("liblas", po::value<bool>(&m_useLiblas)->zero_tokens()->implicit_value(false), "use libLAS driver (not PDAL native driver)")
+        ("liblas", po::value<bool>(&m_useLiblas)->zero_tokens()->implicit_value(true), "use libLAS driver (not PDAL native driver)")
         ("a_srs", po::value<std::string>(&m_srs)->default_value(""), "Assign output coordinate system (if supported by output format)")
-        ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(false), "Compress output data (if supported by output format)")
+        ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true), "Compress output data (if supported by output format)")
         ;
 
     addSwitchSet(file_options);
@@ -149,7 +149,7 @@ int Pc2Pc::execute()
             writerOptions.add<std::string>("a_srs", m_srs);
         }
 
-        writerOptions.add<bool>("compression", m_bCompress);
+        writerOptions.add<bool>("compression_hack1", m_bCompress);
         writerOptions.add<bool>("liblas", m_useLiblas);
     }
 

@@ -33,7 +33,10 @@
 ****************************************************************************/
 
 #include <boost/test/unit_test.hpp>
+
 #include <pdal/FileUtils.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+
 #include "Support.hpp"
 
 #include <iostream>
@@ -83,5 +86,94 @@ BOOST_AUTO_TEST_CASE(pc2pcTest_test_common_opts)
     return;
 }
 
-BOOST_AUTO_TEST_SUITE_END()
 
+static bool fileIsOkay(const std::string& name)
+{
+    if (!pdal::FileUtils::fileExists(name)) return false;
+    if (pdal::FileUtils::fileSize(name) < 1000) return false;
+    return true;
+}
+
+
+static bool fileIsCompressed(const std::string& name)
+{
+    pdal::drivers::las::LasReader reader(name);
+    reader.initialize();
+    return reader.isCompressed();
+}
+
+
+static bool fileHasSrs(const std::string& name)
+{
+    pdal::drivers::las::LasReader reader(name);
+    reader.initialize();
+    return !reader.getSpatialReference().empty();
+}
+
+
+BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
+{
+    const std::string cmd = appName();
+
+    std::string inputLas = Support::datapath("apps/simple.las");
+    std::string inputLaz = Support::datapath("apps/simple.laz");
+    std::string outputLas = Support::temppath("temp.las");
+    std::string outputLaz = Support::temppath("temp.laz");
+
+    std::string output;
+
+    int stat = 0;
+    
+    // We don't generally test the outputted files against a reference file, because 
+    // we don't want to have to update the reference files everytime we change the driver
+    // implementation -- those issues are covered by the unit tests for the drivers.
+    // Instead, here we just check certain rough characteristics of the outputted file.
+
+    // do --input and --output work?
+    stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+    BOOST_CHECK(fileIsOkay(outputLas));
+    BOOST_CHECK(!fileIsCompressed(outputLas));
+    BOOST_CHECK(!fileHasSrs(outputLas));
+
+    // does --compress make a compressed file?
+    stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --compress", output);
+    BOOST_CHECK_EQUAL(stat, 0);
+    BOOST_CHECK(fileIsOkay(outputLas));
+    BOOST_CHECK(fileIsCompressed(outputLas));
+    
+    // does "--output foo.laz" make a compressed output?
+    stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLaz, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+    BOOST_CHECK(fileIsOkay(outputLaz));
+    BOOST_CHECK(fileIsCompressed(outputLaz));
+
+    // does "--input foo.laz" make an uncompressed output?
+//    stat = Support::run_command(cmd + " --input=" + inputLaz + " --output=" + outputLas, output);
+//    BOOST_CHECK_EQUAL(stat, 0);
+//    BOOST_CHECK(fileIsOkay(outputLas));
+//    BOOST_CHECK(!fileIsCompressed(outputLas));
+
+    // does --liblas work?
+    stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --liblas", output);
+    BOOST_CHECK_EQUAL(stat, 0);
+    BOOST_CHECK(fileIsOkay(outputLas));
+    BOOST_CHECK(!fileIsCompressed(outputLas));
+
+    // do --liblas and --compress work together?
+    stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --compress --liblas", output);
+    BOOST_CHECK_EQUAL(stat, 0);
+    BOOST_CHECK(fileIsOkay(outputLas));
+    BOOST_CHECK(fileIsCompressed(outputLas));
+
+    // does --a_srs add an SRS?
+    stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --a_srs=epsg:4326", output);
+    BOOST_CHECK_EQUAL(stat, 0);
+    BOOST_CHECK(fileIsOkay(outputLas));
+    BOOST_CHECK(fileHasSrs(outputLas));
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()
