@@ -66,6 +66,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 
     BOOST_CHECK(srs.getProj4() == "");
     BOOST_CHECK(srs.getWKT() == "");
+    BOOST_CHECK(srs.empty());
 
     return;
 }
@@ -81,6 +82,7 @@ BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
     {
         pdal::SpatialReference ref;
         ref.setProj4(proj4);
+        BOOST_CHECK(!ref.empty());
         const std::string ret = ref.getProj4();
         //BOOST_CHECK(ret == proj4);
         BOOST_CHECK(ret == proj4_out);
