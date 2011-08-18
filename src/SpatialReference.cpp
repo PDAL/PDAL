@@ -89,6 +89,12 @@ SpatialReference::~SpatialReference()
 }
 
 
+bool SpatialReference::empty() const
+{
+    return (getWKT() == "");
+}
+
+
 std::string SpatialReference::getWKT( WKTModeFlag mode_flag) const 
 {
     return getWKT(mode_flag, false);

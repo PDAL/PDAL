@@ -69,6 +69,10 @@ public:
     
     bool operator==(const SpatialReference& other) const;
 
+    // Returns true iff the object doesn't contain a valid srs.
+    // (this is a cleaner way of saying "getWKT() == "")
+    bool empty() const;
+
     /// Returns the OGC WKT describing Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine 
     /// the WKT.  If GDAL is not linked, no WKT is returned.
