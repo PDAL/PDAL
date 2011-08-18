@@ -84,5 +84,44 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_common_opts)
 }
 
 
+BOOST_AUTO_TEST_CASE(pcinfo_test_switches)
+{
+    const std::string cmd = appName();
+
+    std::string inputLas = Support::datapath("apps/simple.las");
+    std::string inputLaz = Support::datapath("apps/simple.laz");
+
+    std::string output;
+
+    int stat = 0;
+    
+    // does the default work?
+    stat = Support::run_command(cmd + " " + inputLas, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+
+    // does --input work?
+    stat = Support::run_command(cmd + " --input=" + inputLas, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+
+    // does -i work?
+    stat = Support::run_command(cmd + " -i " + inputLas, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+
+    // does it work for .laz?
+    stat = Support::run_command(cmd + " " + inputLaz, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+
+    // does --liblas work?
+    stat = Support::run_command(cmd + " --liblas " + inputLas, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+
+    // does --liblas work for .laz too?
+    stat = Support::run_command(cmd + " --liblas " + inputLaz, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
 
