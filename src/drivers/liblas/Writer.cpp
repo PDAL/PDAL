@@ -85,6 +85,13 @@ void LiblasWriter::initialize()
 
     setupExternalHeader();
 
+    setCompressed(getOptions().getValueOrDefault("compression", false));
+
+    if (getOptions().hasOption<std::string>("a_srs"))
+    {
+        setSpatialReference(getOptions().getValueOrThrow<std::string>("a_srs"));
+    }
+
     return;
 }
 

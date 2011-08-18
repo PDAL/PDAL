@@ -94,6 +94,18 @@ boost::uint32_t Writer::getChunkSize() const
 }
 
 
+const SpatialReference& Writer::getSpatialReference() const
+{
+    return m_spatialReference;
+}
+
+
+void Writer::setSpatialReference(const SpatialReference& srs)
+{
+    m_spatialReference = srs;
+}
+
+
 boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 {
     if (!isInitialized())

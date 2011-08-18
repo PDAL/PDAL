@@ -51,6 +51,14 @@ namespace pdal { namespace drivers { namespace las {
 
 class ZipPoint;
 
+//
+// supported options:
+//   <bool>debug
+//   <uint8>verbose
+//   <string>a_srs
+//   <bool>compression
+//   <string>filename  [required]
+//
 class PDAL_DLL LasWriter : public Writer
 {
 public:
@@ -80,8 +88,6 @@ public:
     // default false
     void setCompressed(bool);
 
-    void setSpatialReference(const SpatialReference&);
-
 protected:
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
     virtual boost::uint32_t writeBuffer(const PointBuffer&);
@@ -93,7 +99,6 @@ private:
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
     SummaryData m_summaryData;
-    SpatialReference m_spatialReference;
 
 #ifdef PDAL_HAVE_LASZIP
     boost::scoped_ptr<LASzipper> m_zipper;

@@ -50,6 +50,15 @@
 
 namespace pdal { namespace drivers { namespace liblas {
 
+//
+// supported options:
+//   <bool>debug
+//   <uint8>verbose
+//   <string>a_srs
+//   <bool>compression
+//   <string>filename  [required]
+//
+
 // we default to LAS 1.2, point format 0
 class PDAL_DLL LiblasWriter : public Writer
 {

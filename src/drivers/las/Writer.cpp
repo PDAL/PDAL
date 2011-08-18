@@ -89,16 +89,12 @@ void LasWriter::initialize()
 
     m_streamManager.open();
 
-    try
+    setCompressed(getOptions().getValueOrDefault("compression", false));
+
+    if (getOptions().hasOption<std::string>("a_srs"))
     {
-        Option<bool> compression = getOptions().getOption<bool>("compression");
-        setCompressed(compression.getValue());
+        setSpatialReference(getOptions().getValueOrThrow<std::string>("a_srs"));
     }
-    catch (pdal::option_not_found const&)
-    {
-        // if we didn't get a compression option, no compression for you!
-    }
-    
 
     return;
 }
@@ -160,11 +156,6 @@ void LasWriter::setGeneratingSoftware(const std::string& softwareId)
 }
 
 
-void LasWriter::setSpatialReference(const SpatialReference& srs)
-{
-    m_spatialReference = srs;
-}
-
 void LasWriter::setHeaderPadding(boost::uint32_t const& v)
 {
     m_lasHeader.SetHeaderPadding(v);
@@ -193,7 +184,7 @@ void LasWriter::writeBegin(boost::uint64_t targetNumPointsToWrite)
     boost::uint32_t cnt = static_cast<boost::uint32_t>(targetNumPointsToWrite);
     m_lasHeader.SetPointRecordsCount(cnt);
 
-    m_lasHeader.setSpatialReference(m_spatialReference);
+    m_lasHeader.setSpatialReference(getSpatialReference());
 
     LasHeaderWriter lasHeaderWriter(m_lasHeader, m_streamManager.ostream());
     lasHeaderWriter.write();

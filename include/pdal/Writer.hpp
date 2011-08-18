@@ -69,6 +69,9 @@ public:
 
     const Stage& getPrevStage() const;
 
+    const SpatialReference& getSpatialReference() const;
+    void setSpatialReference(const SpatialReference&);
+
 protected:
     // this is called once before the loop with all the writeBuffer calls
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite) = 0;
@@ -91,6 +94,7 @@ private:
     Stage& m_prevStage;
     boost::uint32_t m_chunkSize;
     static const boost::uint32_t s_defaultChunkSize;
+    SpatialReference m_spatialReference;
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
