@@ -68,21 +68,27 @@ private:
     void dumpStage(const Stage&) const;
 
     std::string m_inputFile;
+    std::string m_outputFile;
     bool m_useLiblas;
     bool m_summarizePoints;
     bool m_showSchema;
+    bool m_showStage;
     boost::uint64_t m_pointNumber;
     boost::scoped_ptr<filters::StatsFilter> m_filter;
+    std::ostream* m_outputStream;
 };
 
 
 PcInfo::PcInfo(int argc, char* argv[])
     : Application(argc, argv, "pcinfo")
     , m_inputFile("")
+    , m_outputFile("")
     , m_useLiblas(false)
     , m_summarizePoints(false)
     , m_showSchema(false)
+    , m_showStage(false)
     , m_pointNumber((std::numeric_limits<boost::uint64_t>::max)())
+    , m_outputStream(0)
 {
     return;
 }
@@ -107,6 +113,7 @@ void PcInfo::addSwitches()
 
     file_options->add_options()
         ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
+        ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
         ("liblas", po::value<bool>(&m_useLiblas)->zero_tokens()->implicit_value(true), "use libLAS driver (not PDAL native driver)")
         ;
 
@@ -118,6 +125,7 @@ void PcInfo::addSwitches()
         ("point,p", po::value<boost::uint64_t>(&m_pointNumber)->implicit_value((std::numeric_limits<boost::uint64_t>::max)()), "point to dump")
         ("points,a", po::value<bool>(&m_summarizePoints)->zero_tokens()->implicit_value(true), "dump stats on all points (read entire dataset)")
         ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
+        ("stage,r", po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true), "dump the stage info")
         ;
 
     addSwitchSet(processing_options);
@@ -144,12 +152,13 @@ void PcInfo::dumpOnePoint(const Stage& stage) const
         throw app_runtime_error("problem reading point number " + m_pointNumber);
     }
 
-    std::cout << "Read point " << m_pointNumber << ":\n";
+    boost::property_tree::ptree tree = data.toPTree();
+   
+    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
-    boost::property_tree::ptree t = data.toPTree();
-    write_json(std::cout, t.get_child("0"));
-
-    std::cout << "\n";
+    ostr << "Point " << m_pointNumber << ":\n";
+    write_json(ostr, tree.get_child("0"));
+    ostr << "\n";
 
     return;
 }
@@ -171,7 +180,9 @@ void PcInfo::dumpPointsSummary(const Stage& stage) const
         totRead += numRead;
     }
 
-    std::cout << "Read " << totRead << " points\n";
+    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+
+    ostr << "Read " << totRead << " points\n";
     
     return;
 }
@@ -183,7 +194,9 @@ void PcInfo::dumpSchema(const Stage& stage) const
 
     boost::property_tree::ptree tree = schema.toPTree();
     
-    boost::property_tree::write_json(std::cout, tree);
+    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+
+    boost::property_tree::write_json(ostr, tree);
     
     return;
 }
@@ -194,14 +207,27 @@ void PcInfo::dumpStage(const Stage& stage) const
     const boost::uint64_t numPoints = stage.getNumPoints();
     const SpatialReference& srs = stage.getSpatialReference();
 
-    std::cout << "driver type: " << stage.getName() << "\n";
-    std::cout << numPoints << " points\n";
-    std::cout << "WKT: " << srs.getWKT() << "\n";
+    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
+
+    ostr << "driver type: " << stage.getName() << "\n";
+    ostr << numPoints << " points\n";
+    ostr << "WKT: " << srs.getWKT() << "\n";
+
+    return;
 }
 
 
 int PcInfo::execute()
 {
+    if (m_outputFile != "")
+    {
+        m_outputStream = FileUtils::createFile(m_outputFile);
+        if (!m_outputStream)
+        {
+            throw app_runtime_error("cannot open output file: " + m_outputFile);
+        }
+    }
+
     Options readerOptions;
     {
         readerOptions.add<std::string>("filename", m_inputFile);
@@ -214,8 +240,6 @@ int PcInfo::execute()
         
     reader.initialize();
     
-    dumpStage(reader);
-
     if (m_pointNumber != (std::numeric_limits<boost::uint64_t>::max)())
     {
         dumpOnePoint(reader);
@@ -229,6 +253,16 @@ int PcInfo::execute()
     if (m_showSchema)
     {
         dumpSchema(reader);
+    }
+
+    if (m_showStage)
+    {
+        dumpStage(reader);
+    }
+
+    if (m_outputStream)
+    {
+        FileUtils::closeFile(m_outputStream);
     }
 
     return 0;

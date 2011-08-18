@@ -123,5 +123,37 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_switches)
 }
 
 
+BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
+{
+    const std::string cmd = appName();
+
+    const std::string inputLas = Support::datapath("apps/simple.las");
+    const std::string inputLaz = Support::datapath("apps/simple.laz");
+    const std::string outputTxt = Support::temppath("pcinfo.txt");
+
+    std::string output;
+
+    int stat = 0;
+    
+    // dump a single point to json
+    stat = Support::run_command(cmd + " --output=" + outputTxt + " --point=1 " + inputLas, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+
+    // dump summary of all points to json
+    stat = Support::run_command(cmd + " --output=" + outputTxt + " --points " + inputLas, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+
+    // dump schema to json
+    stat = Support::run_command(cmd + " --output=" + outputTxt + " --schema " + inputLas, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+
+    // dump stage info to json
+    stat = Support::run_command(cmd + " --output=" + outputTxt + " --stage " + inputLas, output);
+    BOOST_CHECK_EQUAL(stat, 0);
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
 
