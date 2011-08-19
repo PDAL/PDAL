@@ -99,14 +99,17 @@ BOOST_AUTO_TEST_CASE(FauxReaderTest_test_options)
     Option<Bounds<double> > opt1("bounds", bounds);
     Option<std::string> opt2("mode", "conSTanT");
     Option<boost::uint64_t> opt3("num_points", 1000);
+    Option<boost::uint32_t> opt4("id", 90210);
     Options opts;
     opts.add(opt1);
     opts.add(opt2);
     opts.add(opt3);
+    opts.add(opt4);
     pdal::drivers::faux::Reader reader(opts);
     reader.initialize();
 
     BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
+    BOOST_CHECK_EQUAL(reader.getId(), 90210u);
 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);

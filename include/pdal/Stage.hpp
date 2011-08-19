@@ -51,7 +51,13 @@ class StageSequentialIterator;
 class StageRandomIterator;
 class StageBlockIterator;
 
-// every stage owns its own header, they are not shared
+//
+// supported options:
+//   <uint32>id
+//   <bool>debug
+//   <uint8>verbose
+//
+
 class PDAL_DLL Stage : public StageBase
 {
 public:

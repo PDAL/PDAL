@@ -1,5 +1,6 @@
 {
     "name": "drivers.las.reader",
+    "id": "0",
     "description": "Las Reader",
     "options":
     {

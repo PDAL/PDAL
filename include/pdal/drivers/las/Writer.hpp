@@ -53,6 +53,7 @@ class ZipPoint;
 
 //
 // supported options:
+//   <uint32>id
 //   <bool>debug
 //   <uint8>verbose
 //   <string>a_srs

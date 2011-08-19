@@ -118,6 +118,7 @@ public:
 
 //
 // supported options:
+//   <uint32>id
 //   <bool>debug
 //   <uint8>verbose
 //   <string>filename  [required]

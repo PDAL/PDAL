@@ -42,6 +42,13 @@
 namespace pdal
 {
 
+//
+// supported options:
+//   <uint32>id
+//   <bool>debug
+//   <uint8>verbose
+//
+
 class PDAL_DLL MultiFilter : public Stage
 {
 public:

@@ -44,6 +44,12 @@
 namespace pdal
 {
 
+//
+// supported options:
+//   <uint32>id
+//   <bool>debug
+//   <uint8>verbose
+//
 
 // both Stages and Writers have a few common properties, so 
 class PDAL_DLL StageBase
@@ -110,6 +116,8 @@ public:
     virtual boost::property_tree::ptree toPTree() const;
     virtual void dump() const;
 
+    boost::uint32_t getId() const { return m_id; }
+
 protected:
     Options& getOptions();
 
@@ -118,6 +126,7 @@ private:
     Options m_options;
     bool m_debug;
     boost::uint8_t m_verbose;
+    const boost::uint32_t m_id;
 
     StageBase& operator=(const StageBase&); // not implemented
     StageBase(const StageBase&); // not implemented

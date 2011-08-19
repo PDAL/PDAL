@@ -46,6 +46,13 @@ class ReaderSequentialIterator;
 class ReaderRandomIterator;
 class ReaderBlockIterator;
 
+//
+// supported options:
+//   <uint32>id
+//   <bool>debug
+//   <uint8>verbose
+//
+
 class PDAL_DLL Reader : public Stage
 {
 public:
