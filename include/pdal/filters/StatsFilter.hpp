@@ -45,6 +45,29 @@ namespace pdal { namespace filters {
 
 class StatsFilterSequentialIterator;
 
+class StatsCollector
+{
+public:
+    StatsCollector();
+
+    void insert(double value);
+    void reset();
+
+    double minimum() const { return m_minimum; }
+    double maximum() const { return m_maximum; }
+    double average() const { return m_sum / (double)m_count; }
+    boost::uint64_t count() const { return m_count; }
+    
+    boost::property_tree::ptree toPTree() const;
+
+private:
+    boost::uint64_t m_count;
+    double m_minimum;
+    double m_maximum;
+    double m_sum;
+};
+
+
 // this is just a pass-thorugh filter, which collects some stats about the points
 // that are fed through it
 class PDAL_DLL StatsFilter : public Filter
@@ -54,6 +77,7 @@ public:
 
     StatsFilter(Stage& prevStage, const Options&);
     StatsFilter(Stage& prevStage);
+    ~StatsFilter();
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -72,19 +96,28 @@ public:
 
     void processBuffer(PointBuffer& data) const;
 
-    // clears the counters
+    // returns the stats for field i
+    const StatsCollector& getStats(Dimension::Field field) const;
+
+    // clears the counters for all fields
     void reset();
-    void getData(boost::uint64_t& count, 
-                 double& minx, double& miny, double& minz, 
-                 double& maxx, double& maxy, double& maxz,
-                 double& avgx, double& avgy, double& avgz) const;
+
+    // return a tree like this:
+    //    X:
+    //        cout: 100
+    //        min: 1.0
+    //        max: 100.0
+    //    Y:
+    //        cout: 100
+    //        min: 11.0
+    //        max: 110.0
+    //
+    boost::property_tree::ptree toStatsPTree() const;
 
 private:
+// the stats are keyed by the field name
     // BUG: not threadsafe, these should maybe live in the iterator
-    mutable boost::uint64_t m_totalPoints;
-    mutable double m_minimumX, m_minimumY, m_minimumZ;
-    mutable double m_maximumX, m_maximumY, m_maximumZ;
-    mutable double m_sumX, m_sumY, m_sumZ;
+    std::map<Dimension::Field,StatsCollector*> m_stats; // one Stats item per field in the schema
 
     StatsFilter& operator=(const StatsFilter&); // not implemented
     StatsFilter(const StatsFilter&); // not implemented

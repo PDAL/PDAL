@@ -46,9 +46,9 @@
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(StabtsFilterTest)
+BOOST_AUTO_TEST_SUITE(StatsFilterTest)
 
-BOOST_AUTO_TEST_CASE(test1)
+BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
@@ -68,23 +68,26 @@ BOOST_AUTO_TEST_CASE(test1)
         BOOST_CHECK(numRead == 1000);
     }
 
-    double minx, miny, minz, maxx, maxy, maxz, avgx, avgy, avgz;
-    boost::uint64_t count;
-    filter.getData(count, minx, miny, minz, maxx, maxy, maxz, avgx, avgy, avgz);
 
-    BOOST_CHECK_EQUAL(count, 1000u);
+    const pdal::filters::StatsCollector& statsX = filter.getStats(Dimension::Field_X);
+    const pdal::filters::StatsCollector& statsY = filter.getStats(Dimension::Field_Y);
+    const pdal::filters::StatsCollector& statsZ = filter.getStats(Dimension::Field_Z);
 
-    BOOST_CHECK_CLOSE(minx, 1.0, 0.0001);
-    BOOST_CHECK_CLOSE(miny, 2.0, 0.0001);
-    BOOST_CHECK_CLOSE(minz, 3.0, 0.0001);
+    BOOST_CHECK_EQUAL(statsX.count(), 1000u);
+    BOOST_CHECK_EQUAL(statsY.count(), 1000u);
+    BOOST_CHECK_EQUAL(statsZ.count(), 1000u);
 
-    BOOST_CHECK_CLOSE(maxx, 1.0, 0.0001);
-    BOOST_CHECK_CLOSE(maxy, 2.0, 0.0001);
-    BOOST_CHECK_CLOSE(maxz, 3.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsX.minimum(), 1.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsY.minimum(), 2.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsZ.minimum(), 3.0, 0.0001);
 
-    BOOST_CHECK_CLOSE(avgx, 1.0, 0.0001);
-    BOOST_CHECK_CLOSE(avgy, 2.0, 0.0001);
-    BOOST_CHECK_CLOSE(avgz, 3.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsX.maximum(), 1.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsY.maximum(), 2.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsZ.maximum(), 3.0, 0.0001);
+
+    BOOST_CHECK_CLOSE(statsX.average(), 1.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsY.average(), 2.0, 0.0001);
+    BOOST_CHECK_CLOSE(statsZ.average(), 3.0, 0.0001);
 
     return;
 }

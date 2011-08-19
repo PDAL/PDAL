@@ -43,6 +43,64 @@
 
 namespace pdal { namespace filters {
 
+//---------------------------------------------------------------------------
+
+StatsCollector::StatsCollector()
+    : m_count(0)
+    , m_minimum(0.0)
+    , m_maximum(0.0)
+    , m_sum(0.0)
+{
+    return;
+}
+
+
+void StatsCollector::reset()
+{
+    m_count = 0;
+    m_minimum = 0.0;
+    m_maximum = 0.0;
+    m_sum = 0.0;
+    return;
+}
+
+
+void StatsCollector::insert(double value)
+{
+    if (m_count==0)
+    {
+        m_minimum = value;
+        m_maximum = value;
+        m_sum = value;
+    }
+    else
+    {
+        m_minimum = std::min(m_minimum, value);
+        m_maximum = std::max(m_maximum, value);
+        m_sum += value;
+    }
+
+    ++m_count;
+
+    return;
+}
+
+
+boost::property_tree::ptree StatsCollector::toPTree() const
+{
+    boost::property_tree::ptree tree;
+
+    tree.put("count", count());
+    tree.put("minimum", minimum());
+    tree.put("maximum", maximum());
+    tree.put("average", average());
+
+    return tree;
+}
+
+
+//---------------------------------------------------------------------------
+
 
 StatsFilter::StatsFilter(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
@@ -58,11 +116,28 @@ StatsFilter::StatsFilter(Stage& prevStage)
 }
 
 
+StatsFilter::~StatsFilter()
+{
+    Schema::Dimensions dims = getSchema().getDimensions();
+    for (Schema::DimensionsIter iter = dims.begin(); iter != dims.end(); ++iter)
+    {
+        const Dimension& dim = *iter;
+        StatsCollector* stats = m_stats[dim.getField()];
+        delete stats;
+        m_stats.erase(dim.getField());
+    }
+}
+
 void StatsFilter::initialize()
 {
     Filter::initialize();
 
-    reset();
+    const Schema::Dimensions dims = getSchema().getDimensions();
+    for (Schema::DimensionsCIter iter = dims.begin(); iter != dims.end(); ++iter)
+    {
+        const Dimension& dim = *iter;
+        m_stats[dim.getField()] = new StatsCollector();
+    }
 
     return;
 }
@@ -77,43 +152,19 @@ const Options StatsFilter::getDefaultOptions() const
 
 void StatsFilter::reset()
 {
-    m_totalPoints = 0;
-
-    m_minimumX = 0.0;
-    m_minimumY = 0.0;
-    m_minimumZ = 0.0;
-    
-    m_maximumX = 0.0;
-    m_maximumY = 0.0;
-    m_maximumZ = 0.0;
-    
-    m_sumX = 0.0;
-    m_sumY = 0;
-    m_sumZ = 0;
-
-    return;
+    const Schema::Dimensions dims = getSchema().getDimensions();
+    for (Schema::DimensionsCIter iter = dims.begin(); iter != dims.end(); ++iter)
+    {
+        const Dimension& dim = *iter;
+        m_stats[dim.getField()]->reset();
+    }
 }
+    
 
-
-void StatsFilter::getData(boost::uint64_t& count, 
-                          double& minx, double& miny, double& minz, 
-                          double& maxx, double& maxy, double& maxz,
-                          double& avgx, double& avgy, double& avgz) const
+const StatsCollector& StatsFilter::getStats(Dimension::Field field) const
 {
-    minx = m_minimumX;
-    miny = m_minimumY;
-    minz = m_minimumZ;
-    maxx = m_maximumX;
-    maxy = m_maximumY;
-    maxz = m_maximumZ;
-
-    avgx = m_sumX / (double)m_totalPoints;
-    avgy = m_sumY / (double)m_totalPoints;
-    avgz = m_sumZ / (double)m_totalPoints;
-
-    count = m_totalPoints;
-
-    return;
+    const StatsCollector* s = m_stats.find(field)->second;
+    return *s;
 }
 
 
@@ -124,46 +175,23 @@ void StatsFilter::processBuffer(PointBuffer& data) const
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
 
-    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+
+    StatsCollector& statsX = *(m_stats.find(Dimension::Field_X)->second);
+    StatsCollector& statsY = *(m_stats.find(Dimension::Field_Y)->second);
+    StatsCollector& statsZ = *(m_stats.find(Dimension::Field_Z)->second);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        const double x = data.getField<double>(pointIndex, indexX);
-        const double y = data.getField<double>(pointIndex, indexY);
-        const double z = data.getField<double>(pointIndex, indexZ);
+        const double x = data.getField<boost::int32_t>(pointIndex, indexX);
+        const double y = data.getField<boost::int32_t>(pointIndex, indexY);
+        const double z = data.getField<boost::int32_t>(pointIndex, indexZ);
 
-        if (m_totalPoints==0)
-        {
-            m_minimumX = x;
-            m_minimumY = y;
-            m_minimumZ = z;
-
-            m_maximumX = x;
-            m_maximumY = y;
-            m_maximumZ = z;
-
-            m_sumX = x;
-            m_sumY = y;
-            m_sumZ = z;
-        }
-        else
-        {
-            m_minimumX = std::min(m_minimumX, x);
-            m_minimumY = std::min(m_minimumY, y);
-            m_minimumZ = std::min(m_minimumZ, z);
-
-            m_maximumX = std::max(m_maximumX, x);
-            m_maximumY = std::max(m_maximumY, y);
-            m_maximumZ = std::max(m_maximumZ, z);
-
-            m_sumX += x;
-            m_sumY += y;
-            m_sumZ += z;
-        }
-
-        ++m_totalPoints;
+        statsX.insert(x);
+        statsY.insert(y);
+        statsZ.insert(z);
 
         data.setNumPoints(pointIndex+1);
     }
@@ -176,5 +204,29 @@ pdal::StageSequentialIterator* StatsFilter::createSequentialIterator() const
 {
     return new StatsFilterSequentialIterator(*this);
 }
+
+
+boost::property_tree::ptree StatsFilter::toStatsPTree() const
+{
+    boost::property_tree::ptree tree;
+
+    for (std::map<Dimension::Field, StatsCollector*>::const_iterator iter = m_stats.cbegin();
+         iter != m_stats.cend();
+         ++iter)
+    {
+        const StatsCollector* stat = iter->second;
+        boost::property_tree::ptree subtree = stat->toPTree();
+
+        // BUG: make this work for all fields
+        if (iter->first == Dimension::Field_X || iter->first == Dimension::Field_Y ||iter->first == Dimension::Field_Z)
+        {
+            const std::string key = Dimension::getFieldName(iter->first);
+            tree.add_child(key, subtree);
+        }
+    }
+
+    return tree;
+}
+
 
 } } // namespaces
