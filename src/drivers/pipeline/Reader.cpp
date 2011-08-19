@@ -105,7 +105,7 @@ boost::property_tree::ptree Reader::toPTree() const
 {
     boost::property_tree::ptree tree = pdal::Reader::toPTree();
 
-    // add stuff here specific to this stage type
+    tree.add("filename", m_filename);
 
     return tree;
 }
