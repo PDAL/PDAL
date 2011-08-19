@@ -65,12 +65,16 @@ public:
     // If given number of points is 0, do as many points as the reader supplies to us.
     boost::uint64_t write(boost::uint64_t targetNumPointsToWrite=0);
 
+    // for xml serializion of pipelines
     virtual boost::property_tree::ptree generatePTree() const;
 
     const Stage& getPrevStage() const;
 
     const SpatialReference& getSpatialReference() const;
     void setSpatialReference(const SpatialReference&);
+
+    // for dumping
+    virtual boost::property_tree::ptree toPTree() const;
 
 protected:
     // this is called once before the loop with all the writeBuffer calls

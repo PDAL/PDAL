@@ -1474,5 +1474,14 @@ void Writer::Debug()
 }
 
 
+boost::property_tree::ptree Writer::toPTree() const
+{
+    boost::property_tree::ptree tree = pdal::Writer::toPTree();
+
+    // add stuff here specific to this stage type
+
+    return tree;
+}
+
 
 }}} // namespace pdal::driver::oci

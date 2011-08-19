@@ -274,4 +274,14 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointBuffer& PointBuffer)
     return numPoints;
 }
 
+
+boost::property_tree::ptree LiblasWriter::toPTree() const
+{
+    boost::property_tree::ptree tree = pdal::Writer::toPTree();
+
+    // add stuff here specific to this stage type
+
+    return tree;
+}
+
 } } } // namespaces

@@ -181,9 +181,16 @@ void Stage::setCoreProperties(const Stage& stage)
 }
 
 
-void Stage::dump() const
+boost::property_tree::ptree Stage::toPTree() const
 {
-    std::cout << *this;
+    boost::property_tree::ptree tree = StageBase::toPTree();
+
+    tree.add("NumPoints", getNumPoints());
+    tree.add("PointCountType", getPointCountType());
+    tree.add("Bounds", getBounds());
+    tree.add("SRS", getSpatialReference());
+
+    return tree;
 }
 
 

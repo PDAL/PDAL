@@ -88,6 +88,9 @@ public:
     pdal::StageSequentialIterator* createSequentialIterator() const;
     pdal::StageRandomIterator* createRandomIterator() const;
 
+    // for dumping
+    virtual boost::property_tree::ptree toPTree() const;
+
 private:
     void processExternalHeader(::liblas::Reader& externalReader);
     void registerFields(::liblas::Reader& externalReader);

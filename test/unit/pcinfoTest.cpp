@@ -155,6 +155,8 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_stage.txt")));
 
+    pdal::FileUtils::deleteFile(outputTxt);
+
     return;
 }
 

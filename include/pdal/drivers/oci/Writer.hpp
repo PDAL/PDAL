@@ -64,7 +64,8 @@ public:
     
     inline Connection getConnection() const { return m_connection;}
 
-
+        // for dumping
+    virtual boost::property_tree::ptree toPTree() const;
 
 protected:
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);

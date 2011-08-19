@@ -67,8 +67,7 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1000);
     }
-
-
+    
     const pdal::filters::StatsCollector& statsX = filter.getStats(Dimension::Field_X);
     const pdal::filters::StatsCollector& statsY = filter.getStats(Dimension::Field_Y);
     const pdal::filters::StatsCollector& statsZ = filter.getStats(Dimension::Field_Z);

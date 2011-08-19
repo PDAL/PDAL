@@ -1,3 +1,37 @@
-driver type: drivers.las.reader
-1065 points
-WKT: 
+{
+    "name": "drivers.las.reader",
+    "description": "Las Reader",
+    "options":
+    {
+        "Option":
+        {
+            "Name": "filename",
+            "Value": "..\\..\\test\\data\\apps\\simple.las"
+        },
+        "Option":
+        {
+            "Name": "debug",
+            "Value": "false"
+        },
+        "Option":
+        {
+            "Name": "verbose",
+            "Value": "0"
+        },
+        "Option":
+        {
+            "Name": "liblas",
+            "Value": "false"
+        },
+        "Option":
+        {
+            "Name": "filename",
+            "Value": "..\\..\\test\\data\\apps\\simple.las"
+        }
+    },
+    "NumPoints": "1065",
+    "PointCountType": "0",
+    "Bounds": "([635620, 638983], [848900, 853535], [406.59, 586.38])",
+    "SRS": "",
+    "Compression": "false"
+}

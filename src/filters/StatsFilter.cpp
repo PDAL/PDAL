@@ -175,9 +175,13 @@ void StatsFilter::processBuffer(PointBuffer& data) const
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
 
-    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+    // BUG: fix this!
+    const int indexXi = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
+    const int indexYi = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+    const int indexZi = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+    const int indexXd = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
+    const int indexYd = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
+    const int indexZd = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
 
     StatsCollector& statsX = *(m_stats.find(Dimension::Field_X)->second);
     StatsCollector& statsY = *(m_stats.find(Dimension::Field_Y)->second);
@@ -185,9 +189,9 @@ void StatsFilter::processBuffer(PointBuffer& data) const
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        const double x = data.getField<boost::int32_t>(pointIndex, indexX);
-        const double y = data.getField<boost::int32_t>(pointIndex, indexY);
-        const double z = data.getField<boost::int32_t>(pointIndex, indexZ);
+        const double x = (indexXi!=-1) ? data.getField<boost::int32_t>(pointIndex, indexXi) : data.getField<double>(pointIndex, indexXd);
+        const double y = (indexYi!=-1) ? data.getField<boost::int32_t>(pointIndex, indexYi) : data.getField<double>(pointIndex, indexYd);
+        const double z = (indexZi!=-1) ? data.getField<boost::int32_t>(pointIndex, indexZi) : data.getField<double>(pointIndex, indexZd);
 
         statsX.insert(x);
         statsY.insert(y);

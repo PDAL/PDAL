@@ -342,4 +342,14 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
     return numValidPoints;
 }
 
+
+boost::property_tree::ptree LasWriter::toPTree() const
+{
+    boost::property_tree::ptree tree = pdal::Writer::toPTree();
+
+    // add stuff here specific to this stage type
+
+    return tree;
+}
+
 } } } // namespaces

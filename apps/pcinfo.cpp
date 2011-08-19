@@ -206,14 +206,11 @@ void PcInfo::dumpSchema(const Stage& stage) const
 
 void PcInfo::dumpStage(const Stage& stage) const
 {
-    const boost::uint64_t numPoints = stage.getNumPoints();
-    const SpatialReference& srs = stage.getSpatialReference();
+    boost::property_tree::ptree tree = stage.toPTree();
 
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
-    ostr << "driver type: " << stage.getName() << "\n";
-    ostr << numPoints << " points\n";
-    ostr << "WKT: " << srs.getWKT() << "\n";
+    boost::property_tree::write_json(ostr, tree);
 
     return;
 }

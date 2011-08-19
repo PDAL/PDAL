@@ -76,7 +76,8 @@ public:
     virtual StageRandomIterator* createRandomIterator() const  { return NULL; }
     virtual StageBlockIterator* createBlockIterator() const  { return NULL; }
 
-    void dump() const;
+    // for dumping
+    virtual boost::property_tree::ptree toPTree() const;
     
 protected:
     // setters for the core properties

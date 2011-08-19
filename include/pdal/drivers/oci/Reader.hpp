@@ -75,6 +75,9 @@ public:
     CloudPtr getCloud() const;
     std::string getQuery() const;
 
+    // for dumping
+    virtual boost::property_tree::ptree toPTree() const;
+
 private:
 
     Reader& operator=(const Reader&); // not implemented

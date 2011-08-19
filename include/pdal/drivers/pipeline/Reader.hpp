@@ -63,6 +63,9 @@ public:
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;
 
+    // for dumping
+    virtual boost::property_tree::ptree toPTree() const;
+
 private:
     std::string m_filename;
     boost::scoped_ptr<PipelineManager> m_manager;

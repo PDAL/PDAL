@@ -94,6 +94,9 @@ public:
 
     bool isCompressed() const;
 
+    // for dumping
+    virtual boost::property_tree::ptree toPTree() const;
+
 protected:
     const LasHeader& getLasHeader() const { return m_lasHeader; }
     LasHeader& getLasHeaderRef() { return m_lasHeader; }

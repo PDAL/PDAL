@@ -54,7 +54,11 @@ public:
 
     virtual void initialize();
 
+    // for xml serializion of pipelines
     virtual boost::property_tree::ptree generatePTree() const;
+    
+    // for dumping
+    virtual boost::property_tree::ptree toPTree() const;
 };
 
 } // namespace pdal

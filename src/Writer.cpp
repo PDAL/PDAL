@@ -212,4 +212,14 @@ boost::property_tree::ptree Writer::generatePTree() const
 }
 
 
+boost::property_tree::ptree Writer::toPTree() const
+{
+    boost::property_tree::ptree tree = StageBase::toPTree();
+
+    // (nothing to add for a Writer)
+
+    return tree;
+}
+
+
 } // namespace pdal

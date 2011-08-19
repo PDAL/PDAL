@@ -283,4 +283,14 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
 }
 
 
+boost::property_tree::ptree LasReader::toPTree() const
+{
+    boost::property_tree::ptree tree = pdal::Reader::toPTree();
+
+    tree.add("Compression", this->isCompressed());
+    // add more stuff here specific to this stage type
+
+    return tree;
+}
+
 } } } // namespaces

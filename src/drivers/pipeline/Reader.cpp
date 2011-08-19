@@ -101,4 +101,13 @@ pdal::StageRandomIterator* Reader::createRandomIterator() const
 }
 
 
+boost::property_tree::ptree Reader::toPTree() const
+{
+    boost::property_tree::ptree tree = pdal::Reader::toPTree();
+
+    // add stuff here specific to this stage type
+
+    return tree;
+}
+
 } } } // namespaces

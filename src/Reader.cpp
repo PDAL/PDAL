@@ -74,4 +74,14 @@ boost::property_tree::ptree Reader::generatePTree() const
 }
 
 
+boost::property_tree::ptree Reader::toPTree() const
+{
+    boost::property_tree::ptree tree = Stage::toPTree();
+
+    // (nothing to add for a Reader)
+
+    return tree;
+}
+
+
 } // namespace pdal
