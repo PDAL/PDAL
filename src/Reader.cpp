@@ -58,7 +58,7 @@ void Reader::initialize()
 }
 
 
-boost::property_tree::ptree Reader::generatePTree() const
+boost::property_tree::ptree Reader::serializePipeline() const
 {
     boost::property_tree::ptree tree;
 

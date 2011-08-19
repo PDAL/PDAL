@@ -66,7 +66,7 @@ public:
     boost::uint64_t write(boost::uint64_t targetNumPointsToWrite=0);
 
     // for xml serializion of pipelines
-    virtual boost::property_tree::ptree generatePTree() const;
+    virtual boost::property_tree::ptree serializePipeline() const;
 
     const Stage& getPrevStage() const;
 

@@ -84,7 +84,7 @@ const std::vector<const Stage*> MultiFilter::getPrevStages() const
 }
 
 
-boost::property_tree::ptree MultiFilter::generatePTree() const
+boost::property_tree::ptree MultiFilter::serializePipeline() const
 {
     boost::property_tree::ptree tree;
 
@@ -95,7 +95,7 @@ boost::property_tree::ptree MultiFilter::generatePTree() const
 
     BOOST_FOREACH(const Stage* stage, getPrevStages())
     {
-        boost::property_tree::ptree subtree = stage->generatePTree();
+        boost::property_tree::ptree subtree = stage->serializePipeline();
 
         tree.add_child(subtree.begin()->first, subtree.begin()->second);
     }

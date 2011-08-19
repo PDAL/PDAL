@@ -54,7 +54,7 @@ public:
     const std::vector<const Stage*> getPrevStages() const;
 
     // for xml serializion of pipelines
-    virtual boost::property_tree::ptree generatePTree() const;
+    virtual boost::property_tree::ptree serializePipeline() const;
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;

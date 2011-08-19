@@ -66,7 +66,7 @@ public:
 
     // This is used to generate pipeline xml files.  It will
     // recursively visit all child stages to populate the tree.
-    virtual boost::property_tree::ptree generatePTree() const = 0;
+    virtual boost::property_tree::ptree serializePipeline() const = 0;
 
     // This is set by the "debug" option, which is a boolean.
     // 

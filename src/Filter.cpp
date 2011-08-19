@@ -72,7 +72,7 @@ Stage& Filter::getPrevStage()
 }
 
 
-boost::property_tree::ptree Filter::generatePTree() const
+boost::property_tree::ptree Filter::serializePipeline() const
 {
     boost::property_tree::ptree tree;
 
@@ -82,7 +82,7 @@ boost::property_tree::ptree Filter::generatePTree() const
     tree.add_child(optiontree.begin()->first, optiontree.begin()->second);
 
     const Stage& stage = getPrevStage();
-    boost::property_tree::ptree subtree = stage.generatePTree();
+    boost::property_tree::ptree subtree = stage.serializePipeline();
 
     tree.add_child(subtree.begin()->first, subtree.begin()->second);
     

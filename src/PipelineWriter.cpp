@@ -62,7 +62,7 @@ PipelineWriter::~PipelineWriter()
 
 static boost::property_tree::ptree generateTreeFromWriter(const Writer& writer)
 {
-    boost::property_tree::ptree subtree = writer.generatePTree();
+    boost::property_tree::ptree subtree = writer.serializePipeline();
 
     boost::property_tree::ptree tree;
 
