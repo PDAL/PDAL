@@ -63,18 +63,17 @@ private:
     void validateSwitches(); // overrride
 
     void dumpOnePoint(const Stage&) const;
-    void dumpPointsSummary(const Stage&) const;
+    void dumpStats(pdal::filters::StatsFilter& filter) const;
     void dumpSchema(const Stage&) const;
     void dumpStage(const Stage&) const;
 
     std::string m_inputFile;
     std::string m_outputFile;
     bool m_useLiblas;
-    bool m_summarizePoints;
+    bool m_showStats;
     bool m_showSchema;
     bool m_showStage;
     boost::uint64_t m_pointNumber;
-    boost::scoped_ptr<filters::StatsFilter> m_filter;
     std::ostream* m_outputStream;
 };
 
@@ -84,7 +83,7 @@ PcInfo::PcInfo(int argc, char* argv[])
     , m_inputFile("")
     , m_outputFile("")
     , m_useLiblas(false)
-    , m_summarizePoints(false)
+    , m_showStats(false)
     , m_showSchema(false)
     , m_showStage(false)
     , m_pointNumber((std::numeric_limits<boost::uint64_t>::max)())
@@ -123,7 +122,7 @@ void PcInfo::addSwitches()
 
     processing_options->add_options()
         ("point,p", po::value<boost::uint64_t>(&m_pointNumber)->implicit_value((std::numeric_limits<boost::uint64_t>::max)()), "point to dump")
-        ("points,a", po::value<bool>(&m_summarizePoints)->zero_tokens()->implicit_value(true), "dump stats on all points (read entire dataset)")
+        ("stats,a", po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true), "dump stats on all points (reads entire dataset)")
         ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
         ("stage,r", po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true), "dump the stage info")
         ;
@@ -164,12 +163,13 @@ void PcInfo::dumpOnePoint(const Stage& stage) const
 }
 
 
-void PcInfo::dumpPointsSummary(const Stage& stage) const
+void PcInfo::dumpStats(pdal::filters::StatsFilter& filter) const
 {
-    const Schema& schema = stage.getSchema();
+
+    const Schema& schema = filter.getSchema();
     SchemaLayout layout(schema);
 
-    boost::scoped_ptr<StageSequentialIterator> iter(stage.createSequentialIterator());
+    boost::scoped_ptr<StageSequentialIterator> iter(filter.createSequentialIterator());
 
     boost::uint64_t totRead = 0;
     while (!iter->atEnd())
@@ -180,9 +180,11 @@ void PcInfo::dumpPointsSummary(const Stage& stage) const
         totRead += numRead;
     }
 
+    boost::property_tree::ptree tree = filter.toStatsPTree();
+
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
-    ostr << "Read " << totRead << " points\n";
+    write_json(ostr, tree);
     
     return;
 }
@@ -238,16 +240,18 @@ int PcInfo::execute()
 
     Stage& reader = AppSupport::makeReader(readerOptions);
         
-    reader.initialize();
-    
+    pdal::filters::StatsFilter filter(reader);
+
+    filter.initialize();
+
     if (m_pointNumber != (std::numeric_limits<boost::uint64_t>::max)())
     {
-        dumpOnePoint(reader);
+        dumpOnePoint(filter);
     }
 
-    if (m_summarizePoints)
+    if (m_showStats)
     {
-        dumpPointsSummary(reader);
+        dumpStats(filter);
     }
 
     if (m_showSchema)

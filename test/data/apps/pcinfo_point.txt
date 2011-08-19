@@ -1,0 +1,20 @@
+Point 1:
+{
+    "X": "63689633",
+    "Y": "84908770",
+    "Z": "44639",
+    "Intensity": "18",
+    "ReturnNumber": "1",
+    "NumberOfReturns": "2",
+    "ScanDirectionFlag": "1",
+    "EdgeOfFlightLine": "0",
+    "Classification": "1",
+    "ScanAngleRank": "-11",
+    "UserData": "128",
+    "PointSourceId": "7326",
+    "Time": "245381.45279923646",
+    "Red": "54",
+    "Green": "66",
+    "Blue": "68"
+}
+

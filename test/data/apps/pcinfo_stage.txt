@@ -1,0 +1,3 @@
+driver type: drivers.las.reader
+1065 points
+WKT: 
