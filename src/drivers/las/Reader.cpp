@@ -93,7 +93,7 @@ void LasReader::initialize()
 
 const Options LasReader::getDefaultOptions() const
 {
-    Option<std::string> option1("filename", "", "file to read from");
+    Option option1("filename", "", "file to read from");
     Options options(option1);
     return options;
 }

@@ -49,7 +49,7 @@ StageBase::StageBase(const Options& options)
     : m_initialized(false)
     , m_options(options)
     , m_debug(options.getValueOrDefault<bool>("debug", false))
-    , m_verbose(options.getValueOrDefault<boost::uint8_t>("verbose", 0))
+    , m_verbose(options.getValueOrDefault<boost::uint32_t>("verbose", 0))
     , m_id(options.getValueOrDefault<boost::uint32_t>("id", 0))
 {
     return;
@@ -71,7 +71,7 @@ void StageBase::initialize()
     }
 
     m_debug = m_options.getValueOrDefault<bool>("debug", false);
-    m_verbose = m_options.getValueOrDefault<boost::uint8_t>("verbose", 0);
+    m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
 
     m_initialized = true;
 
@@ -109,7 +109,7 @@ bool StageBase::isVerbose() const
 }
 
 
-boost::uint8_t StageBase::getVerboseLevel() const
+boost::uint32_t StageBase::getVerboseLevel() const
 {
     return m_verbose;
 }
@@ -122,7 +122,7 @@ boost::property_tree::ptree StageBase::toPTree() const
     tree.add("name", getName());
     tree.add("id", getId());
     tree.add("description", getDescription());
-    tree.add_child("options", getOptions().getPTree());
+    tree.add_child("options", getOptions().toPTree());
 
     return tree;
 }

@@ -78,7 +78,7 @@ boost::property_tree::ptree Filter::serializePipeline() const
 
     tree.add("Type", getName());
     
-    boost::property_tree::ptree optiontree = getOptions().getPTree();
+    boost::property_tree::ptree optiontree = getOptions().toPTree();
     tree.add_child(optiontree.begin()->first, optiontree.begin()->second);
 
     const Stage& stage = getPrevStage();

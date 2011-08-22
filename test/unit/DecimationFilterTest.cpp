@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
 
     pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Random);
 
-    pdal::Option<std::string> opt("step", "10");
+    pdal::Option opt("step", "10");
     pdal::Options opts(opt);
     pdal::filters::DecimationFilter filter(reader, opts);
     BOOST_CHECK(filter.getDescription() == "Decimation Filter");

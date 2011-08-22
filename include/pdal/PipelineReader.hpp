@@ -54,7 +54,7 @@ private:
     class StageParserContext;
 
 public:
-    PipelineReader(PipelineManager&, bool debug=false, boost::uint8_t verbose=0);
+    PipelineReader(PipelineManager&, bool debug=false, boost::uint32_t verbose=0);
     ~PipelineReader();
 
    
@@ -77,13 +77,13 @@ private:
     MultiFilter* parseElement_MultiFilter(const boost::property_tree::ptree& tree);
     Writer* parseElement_Writer(const boost::property_tree::ptree& tree);
 
-    Option<std::string> parseElement_Option(const boost::property_tree::ptree& tree);
+    Option parseElement_Option(const boost::property_tree::ptree& tree);
     std::string parseElement_Type(const boost::property_tree::ptree& tree);
 
 private:
     PipelineManager& m_manager;
     bool m_isDebug;
-    boost::uint8_t m_verboseLevel;
+    boost::uint32_t m_verboseLevel;
     Options m_baseOptions;
     std::string m_inputXmlFile;
 

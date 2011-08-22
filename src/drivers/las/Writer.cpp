@@ -56,7 +56,7 @@ namespace pdal { namespace drivers { namespace las {
 
 LasWriter::LasWriter(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
-    , m_streamManager(options.getOption<std::string>("filename").getValue())
+    , m_streamManager(options.getOption("filename").getValue<std::string>())
 {
 
     return;
@@ -91,7 +91,7 @@ void LasWriter::initialize()
 
     setCompressed(getOptions().getValueOrDefault("compression", false));
 
-    if (getOptions().hasOption<std::string>("a_srs"))
+    if (getOptions().hasOption("a_srs"))
     {
         setSpatialReference(getOptions().getValueOrThrow<std::string>("a_srs"));
     }
@@ -104,8 +104,8 @@ const Options LasWriter::getDefaultOptions() const
 {
     Options options;
 
-    Option<std::string> filename("filename", "", "file to read from");
-    Option<bool> compression("compression", false, "Do we LASzip-compress the data?");
+    Option filename("filename", "", "file to read from");
+    Option compression("compression", false, "Do we LASzip-compress the data?");
     options.add(filename);
     options.add(compression);
     return options;

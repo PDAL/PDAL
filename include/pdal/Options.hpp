@@ -37,9 +37,9 @@
 
 #include <pdal/pdal.hpp>
 #include <pdal/exceptions.hpp>
-#include <pdal/Bounds.hpp>
 #include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
+#include <boost/lexical_cast.hpp>
+#include <map>
 
 
 namespace pdal
@@ -65,6 +65,17 @@ public:
 
 // An Option is just a record with three fields: name, value, and description.
 //
+// The value is stored as a string, and we rely on boost::lexical_cast to do the
+// serialization magic for us.  This means that an object you insert as an option
+// value must satisfay the requirements for being lexically-castable:
+//    - copy ctor
+//    - operator=
+//    - operator>>
+//    - operator<<
+//
+// Also, you should avoid using int8/uint8 types, as these tend to get confused
+// with chars.
+//
 // Dumped as XML, it looks like this:
 //     <?xml...>
 //     <Name>myname</Name>
@@ -72,71 +83,142 @@ public:
 //     <Description>my descr</Description>
 // although of course that's not valid XML, since it has no single root element.
 
-template <typename T>
 class PDAL_DLL Option
 {
 public:
-    // construct it manually
-    Option(std::string const& name, T value, std::string const& description="")
-        : m_name(name)
-        , m_value(value)
-        , m_description(description)
-    {}
-
-    // construct it from an xml stream
-    Option(std::istream& istr)
+    Option()
+        : m_name("")
+        , m_value("")
+        , m_description("")
     {
-        boost::property_tree::ptree t;
-        boost::property_tree::xml_parser::read_xml(istr, t);
-        m_name = t.get<std::string>("Name");
-        m_value = t.get<T>("Value");
-        m_description = t.get<std::string>("Description", "");
-    }
-
-    // construct it from a ptree
-    Option(const boost::property_tree::ptree t)
-    {
-        m_name = t.get<std::string>("Name");
-        m_value = t.get<T>("Value");
-        m_description = t.get<std::string>("Description", "");
-    }
-
-    // getters
-    std::string const& getName() const { return m_name; }
-    T const& getValue() const { return m_value; }
-    std::string const& getDescription() const { return m_description; }
-    
-    // return a ptree representation
-    boost::property_tree::ptree getPTree() const
-    {
-        boost::property_tree::ptree t;
-        t.put("Name", getName());
-        t.put("Value", getValue());
-        if (getDescription() != "")
-        {
-            t.put("Description", getDescription());
-        }
-        return t;
-    }
-    
-    // return an xml representation
-    void write_xml(std::ostream& ostr) const
-    {
-        const boost::property_tree::ptree tree = getPTree();
-        boost::property_tree::xml_parser::write_xml(ostr, tree);
         return;
     }
 
+    template <typename T>
+    Option(std::string const& name, const T& value, std::string const& description="")
+        : m_name(name)
+        , m_value("")
+        , m_description(description)
+    {
+        setValue<T>(value);
+        return;
+    }
+
+    // copy ctor
+    Option(const Option& rhs)
+        : m_name(rhs.m_name)
+        , m_value(rhs.m_value)
+        , m_description(rhs.m_description)
+    {
+        return;
+    }
+
+    // build an Option from a ptree
+    Option(const boost::property_tree::ptree& tree);
+
+    // assignment operator
+    Option& operator=(const Option& rhs)
+    {
+        if (&rhs != this)
+        {
+            m_name = rhs.m_name;
+            m_value = rhs.m_value;
+            m_description = rhs.m_description;
+        }
+        return *this;
+    }
+
+    bool equals(const Option& rhs) const
+    {
+        if (m_name == rhs.getName() && 
+            m_value == rhs.getValue<std::string>() && 
+            m_description == rhs.getDescription())
+        {
+            return true;
+        }
+        return false;
+    }
+
+    bool operator==(const Option& rhs) const
+    {
+        return equals(rhs);
+    }
+
+    bool operator!=(const Option& rhs) const
+    {
+        return (!equals(rhs));
+    }
+
+    void setName(const std::string& name) { m_name = name; }
+    const std::string& getName() const { return m_name; }
+
+    void setDescription(const std::string& description) { m_description = description; }
+    const std::string& getDescription() const { return m_description; }
+    
+    // get the value of an option
+    template<typename T> T getValue() const
+    { 
+        return boost::lexical_cast<T>(m_value);
+    }
+
+    // explicit specialization:
+    //   boost::lexical_cast only understands "0" and "1" for bools,
+    //   so we handle those situations explicitly
+    template<> bool getValue() const 
+    { 
+        if (m_value=="true") return true;
+        if (m_value=="false") return false;
+        return boost::lexical_cast<bool>(m_value);
+    }
+
+    // explicit specialization:
+    //   if we want to get out a (const ref) string, we don't need lexical_cast
+    template<> const std::string& getValue() const 
+    { 
+        return m_value;
+    }
+
+    // explicit specialization:
+    //   if we want to get out a string, we don't need lexical_cast
+    template<> std::string getValue() const 
+    { 
+        return m_value;
+    }
+
+    // set the value of the option
+    template<typename T> void setValue(const T& value)
+    { 
+        m_value = boost::lexical_cast<std::string>(value);
+    }
+
+    // explicit specialization:
+    //   if insert a bool, we don't want it to be "0" or "1" (which is
+    //   what lexical_cast would do)
+    template<> void setValue(const bool& value)
+    { 
+        m_value = value ? "true" : "false";
+    }
+
+    // explicit specialization:
+    //   if we want to insert a string, we don't need lexical_cast
+    template<> void setValue(const std::string& value)
+    { 
+        m_value = value;
+    }
+
+    // return a ptree representation
+    boost::property_tree::ptree toPTree() const;
+
 private:
     std::string m_name;
-    T m_value;
+    std::string m_value;
     std::string m_description; // optional field
 };
 
 
 
 
-// An Options object is just a tree of Option objects.
+// An Options object is just a map of names to Option objects.
 //
 // Dumped as XML, an Options object with two Option objects looks like this:
 //     <?xml...>
@@ -160,60 +242,33 @@ public:
     // copy ctor
     Options(const Options&);
 
-    // what's a better way to do this?
-    Options(const Option<std::string>&);
-    Options(const Option<std::string>&, const Option<std::string>&);
-    Options(const Option<std::string>&, const Option<std::string>&, const Option<std::string>&);
-    Options(const Option<std::string>&, const Option<std::string>&, const Option<std::string>&, const Option<std::string>&);
+    Options(const Option&);
 
-    // initialize from a property tree
-    Options(boost::property_tree::ptree t);
-
-    // read options from an xml stream
-    Options(std::istream& istr);
+    Options(const boost::property_tree::ptree& tree);
 
     // add an option
-    template<class T> void add(Option<T> const& option)
-    {
-       boost::property_tree::ptree fields = option.getPTree();
-       m_tree.add_child("Option", fields);
-    }
+    void add(const Option& option);
+
+    // if option name not present, just returns
+    void remove(const std::string& name);
 
     // add an option (shortcut version, bypass need for an Option object)
-    template<class T> void add(const std::string& name, T value, const std::string& description="")
+    template<typename T> void add(const std::string& name, T value, const std::string& description="")
     {
-        Option<T> opt(name, value, description);
+        Option opt(name, value, description);
         add(opt);
     }
 
     // get an option, by name
     // throws pdal::option_not_found if the option name is not valid
-    template<typename T> Option<T> getOption(std::string const& name) const
-    {
-        boost::property_tree::ptree::const_iterator iter = m_tree.begin();
-        while (iter != m_tree.end())
-        {
-            if (iter->first != "Option")
-                throw pdal_error("malformed Options ptree");
-
-            const boost::property_tree::ptree& optionTree = iter->second;
-            if (optionTree.get_child("Name").get_value<std::string>() == name)
-            {
-                Option<T> option(optionTree);
-                return option;
-            }
-            ++iter;
-        }
-        std::ostringstream oss;
-        oss << "Required option '" << name << "' was not found on this stage";
-        throw option_not_found(oss.str());
-    }
+    const Option& getOption(const std::string & name) const;
+    Option& getOptionByRef(const std::string& name);
 
     // get value of an option, or throw option_not_found if option not present
     template<typename T> T getValueOrThrow(std::string const& name) const
     {
-        Option<T> opt = getOption<T>(name);  // might throw
-        return opt.getValue();
+        const Option& opt = getOption(name);  // might throw
+        return opt.getValue<T>();
     }
 
     // get value of an option, or use given default if option not present
@@ -223,8 +278,8 @@ public:
 
         try
         {
-            Option<T> opt = getOption<T>(name);  // might throw
-            result = opt.getValue();
+            const Option& opt = getOption(name);  // might throw
+            result = opt.getValue<T>();
         }
         catch (option_not_found)
         {
@@ -235,26 +290,10 @@ public:
     }
 
     // returns true iff the option name is valid
-    template<typename T> bool hasOption(std::string const& name) const
-    {
-        bool ok = false;
+    bool hasOption(std::string const& name) const;
 
-        try
-        {
-            Option<T> option = getOption<T>(name);
-            ok = true;
-        }
-        catch (option_not_found&)
-        {
-            ok = false;
-        }
-        // any other exception will bubble up
-
-        return ok;
-    }
-
-    // get the ptree for the whole option block
-    const boost::property_tree::ptree& getPTree() const;
+    // returns a ptree for the whole option block
+    boost::property_tree::ptree toPTree() const;
    
     // the empty options list
     // BUG: this should be a member variable, not a function, but doing so causes vs2010 to fail to link
@@ -263,11 +302,8 @@ public:
     void dump() const;
 
 private:
-    // get the ptree for an option
-    // throws pdal::option_not_found if the option name is not valid
-    const boost::property_tree::ptree getOptionPTree(const std::string& name) const;
-
-    boost::property_tree::ptree m_tree;
+    typedef std::map<std::string, Option> map_t;
+    map_t m_options;
 };
 
 

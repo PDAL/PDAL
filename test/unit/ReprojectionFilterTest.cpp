@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
 
         pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
 
-        pdal::Option<std::string> opt2("out_srs", out_ref.getWKT());
+        pdal::Option opt2("out_srs", out_ref.getWKT());
         pdal::Options opts(opt2);
 
         pdal::filters::ScalingFilter scalingFilter(reader);

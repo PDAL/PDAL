@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
         // need to scope the writer, so that's it dtor can use the stream
         
         pdal::Options options;
-        pdal::Option<boost::uint32_t> capacity("capacity", 15, "capacity");
+        pdal::Option capacity("capacity", 15, "capacity");
         options.add(capacity);
         
         pdal::filters::Chipper chipper(reader, options);

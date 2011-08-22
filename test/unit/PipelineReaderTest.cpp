@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test4)
 
 BOOST_AUTO_TEST_CASE(PipelineReaderTest_Reader)
 {
-    Option<std::string> option("filename", Support::datapath("pipeline/pipeline_read.xml"));
+    Option option("filename", Support::datapath("pipeline/pipeline_read.xml"));
     Options options(option);
 
     pdal::drivers::pipeline::Reader reader(options);

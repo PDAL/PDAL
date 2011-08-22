@@ -104,7 +104,7 @@ private:
     
     template<typename T> T getDefaultedOption(std::string const& option_name) const
     {
-        T default_value = getDefaultOptions().getOption<T>(option_name).getValue();
+        T default_value = getDefaultOptions().getOption(option_name).getValue<T>();
         return getOptions().getValueOrDefault<T>(option_name, default_value);
     }
     

@@ -74,7 +74,7 @@ void CropFilter::initialize()
 const Options CropFilter::getDefaultOptions() const
 {
     Options options;
-    Option<Bounds<double> > bounds("bounds",Bounds<double>(),"bounds to crop to");
+    Option bounds("bounds",Bounds<double>(),"bounds to crop to");
     options.add(bounds);
     return options;
 }

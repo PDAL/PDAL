@@ -55,7 +55,7 @@ class StageBlockIterator;
 // supported options:
 //   <uint32>id
 //   <bool>debug
-//   <uint8>verbose
+//   <uint32>verbose
 //
 
 class PDAL_DLL Stage : public StageBase

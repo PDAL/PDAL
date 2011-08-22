@@ -6,18 +6,13 @@
     {
         "Option":
         {
-            "Name": "filename",
-            "Value": "..\\..\\test\\data\\apps\\simple.las"
-        },
-        "Option":
-        {
             "Name": "debug",
             "Value": "false"
         },
         "Option":
         {
-            "Name": "verbose",
-            "Value": "0"
+            "Name": "filename",
+            "Value": "..\\..\\test\\data\\apps\\simple.las"
         },
         "Option":
         {
@@ -26,8 +21,8 @@
         },
         "Option":
         {
-            "Name": "filename",
-            "Value": "..\\..\\test\\data\\apps\\simple.las"
+            "Name": "verbose",
+            "Value": "0"
         }
     },
     "NumPoints": "1065",

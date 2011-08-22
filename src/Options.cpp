@@ -48,72 +48,97 @@
 namespace pdal
 {
 
+//---------------------------------------------------------------------------
+
+
+Option::Option(const boost::property_tree::ptree& tree)
+    : m_name("")
+    , m_value("")
+    , m_description("")
+{
+    m_name = tree.get<std::string>("Name");
+    m_value = tree.get<std::string>("Value");
+    m_description = tree.count("Description") ? tree.get<std::string>("Description") : "";
+    return;
+}
+
+
+boost::property_tree::ptree Option::toPTree() const
+{
+    boost::property_tree::ptree t;
+    t.put("Name", getName());
+    t.put("Value", getValue<std::string>());
+    if (getDescription() != "")
+    {
+        t.put("Description", getDescription());
+    }
+    return t;
+}
+
+
+//---------------------------------------------------------------------------
+
 
 Options::Options(const Options& rhs)
-    : m_tree(rhs.getPTree())
+    : m_options(rhs.m_options)
 {
     return;
 }
 
 
-Options::Options(boost::property_tree::ptree t) 
-    : m_tree(t)
+Options::Options(const Option& opt)
 {
+    add(opt);
     return;
 }
 
 
-Options::Options(const Option<std::string>& opt1)
+Options::Options(const boost::property_tree::ptree& tree)
 {
-    add(opt1);
-    return;
-}
-
-
-Options::Options(const Option<std::string>& opt1, const Option<std::string>& opt2)
-{
-    add(opt1);
-    add(opt2);
-    return;
-}
-
-
-Options::Options(const Option<std::string>& opt1, const Option<std::string>& opt2, const Option<std::string>& opt3)
-{
-    add(opt1);
-    add(opt2);
-    add(opt3);
-    return;
-}
-
-
-Options::Options(const Option<std::string>& opt1, const Option<std::string>& opt2, const Option<std::string>& opt3, const Option<std::string>& opt4)
-{
-    add(opt1);
-    add(opt2);
-    add(opt3);
-    add(opt4);
-    return;
-}
-
-
-Options::Options(std::istream& istr)
-{
-    boost::property_tree::xml_parser::read_xml(istr, m_tree);
-
-#if DEBUG
-    boost::property_tree::ptree::const_iterator iter = m_tree.begin();
-    while (iter != m_tree.end())
+    for (boost::property_tree::ptree::const_iterator iter = tree.begin();
+         iter != tree.end();
+         ++iter)
     {
-        std::string g = (*iter).first;
-        assert(g == "Option");
-        boost::property_tree::ptree h = (*iter).second;
-        Option<std::string> hopt(h);
-        ++iter;
+        assert(iter->first == "Option");
+        Option opt(iter->second);
+        add(opt);
     }
-#endif
 
     return;
+}
+
+
+void Options::add(const Option& option)
+{
+    m_options[option.getName()] = option;
+}
+
+
+Option& Options::getOptionByRef(const std::string& name)
+{
+    map_t::iterator iter = m_options.find(name);
+    if (iter == m_options.end())
+    {
+        std::ostringstream oss;
+        oss << "Required option '" << name << "' was not found on this stage";
+        throw option_not_found(oss.str());
+    }
+    Option& option = iter->second;
+    return option;
+}
+
+
+const Option& Options::getOption(const std::string& name) const
+{
+    map_t::const_iterator iter = m_options.find(name);
+    if (iter == m_options.cend())
+    {
+        std::ostringstream oss;
+        oss << "Required option '" << name << "' was not found on this stage";
+        throw option_not_found(oss.str());
+    }
+    const Option& option = iter->second;
+    return option;
 }
 
 
@@ -125,30 +150,37 @@ const Options& Options::none()
 }
 
 
-const boost::property_tree::ptree Options::getOptionPTree(const std::string& name) const
+bool Options::hasOption(std::string const& name) const
 {
-    using boost::property_tree::ptree;
+    bool ok = false;
 
-    BOOST_FOREACH(ptree::value_type v, m_tree)
+    try
     {
-        if (v.first == "Option")
-        {
-            // v.second is <option><name>..</name><value>..</value><desc>..</desc></option>
-            const std::string s = v.second.get_child("Name").get_value<std::string>();
-            if (name == s)
-            {
-                return v.second;
-            }
-        }
+        (void)getOption(name);
+        ok = true;
     }
+    catch (option_not_found&)
+    {
+        ok = false;
+    }
+    // any other exception will bubble up
 
-    throw option_not_found(name);
+    return ok;
 }
 
 
-const boost::property_tree::ptree& Options::getPTree() const
+boost::property_tree::ptree Options::toPTree() const
 {
-    return m_tree;
+    boost::property_tree::ptree tree;
+
+    for (map_t::const_iterator citer = m_options.cbegin(); citer != m_options.cend(); ++citer)
+    {
+        const Option& option = citer->second;
+        boost::property_tree::ptree subtree = option.toPTree();
+        tree.add_child("Option", subtree);
+    }
+    
+    return tree;
 }
 
 
@@ -160,7 +192,7 @@ void Options::dump() const
 
 std::ostream& operator<<(std::ostream& ostr, const Options& options)
 {
-    const boost::property_tree::ptree& tree = options.getPTree();
+    const boost::property_tree::ptree tree = options.toPTree();
 
     boost::property_tree::write_json(ostr, tree);
 

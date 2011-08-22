@@ -87,7 +87,7 @@ void LiblasWriter::initialize()
 
     setCompressed(getOptions().getValueOrDefault("compression", false));
 
-    if (getOptions().hasOption<std::string>("a_srs"))
+    if (getOptions().hasOption("a_srs"))
     {
         setSpatialReference(getOptions().getValueOrThrow<std::string>("a_srs"));
     }

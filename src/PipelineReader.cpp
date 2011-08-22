@@ -117,19 +117,19 @@ private:
 // ------------------------------------------------------------------------
 
 
-PipelineReader::PipelineReader(PipelineManager& manager, bool isDebug, boost::uint8_t verboseLevel)
+PipelineReader::PipelineReader(PipelineManager& manager, bool isDebug, boost::uint32_t verboseLevel)
     : m_manager(manager)
     , m_isDebug(isDebug)
     , m_verboseLevel(verboseLevel)
 {
     if (m_isDebug)
     {
-        Option<bool> opt("debug", true);
+        Option opt("debug", true);
         m_baseOptions.add(opt);
     }
     if (m_verboseLevel)
     {
-        Option<boost::uint8_t> opt("verbose", m_verboseLevel);
+        Option opt("verbose", m_verboseLevel);
         m_baseOptions.add(opt);
     }
 
@@ -143,7 +143,7 @@ PipelineReader::~PipelineReader()
 }
 
 
-Option<std::string> PipelineReader::parseElement_Option(const boost::property_tree::ptree& tree)
+Option PipelineReader::parseElement_Option(const boost::property_tree::ptree& tree)
 {
     // cur is an option element, such as this:
     //     <option>
@@ -153,7 +153,7 @@ Option<std::string> PipelineReader::parseElement_Option(const boost::property_tr
     //     </option>
     // this function will process the element and return an Option from it
 
-    Option<std::string> option(tree);
+    Option option(tree);
 
     // filenames in the XML are fixed up as follows:
     //   - if absolute path, leave it alone
@@ -161,14 +161,14 @@ Option<std::string> PipelineReader::parseElement_Option(const boost::property_tr
     // The toAbsolutePath function does exactly that magic for us.
     if (option.getName() == "filename")
     {
-        const std::string oldpath = option.getValue();
+        const std::string oldpath = option.getValue<std::string>();
         if (!FileUtils::isAbsolutePath(oldpath))
         {
             const std::string abspath = FileUtils::toAbsolutePath(m_inputXmlFile);
             const std::string absdir = FileUtils::getDirectory(abspath);
             const std::string newpath = FileUtils::toAbsolutePath(oldpath, absdir);
             assert(FileUtils::isAbsolutePath(newpath));
-            const Option<std::string> option2(option.getName(), newpath, option.getDescription());
+            const Option option2(option.getName(), newpath, option.getDescription());
             option = option2;
         }
     }
@@ -233,7 +233,7 @@ Reader* PipelineReader::parseElement_Reader(const boost::property_tree::ptree& t
         }
         else if (name == "Option")
         {
-            Option<std::string> option = parseElement_Option(subtree);
+            Option option = parseElement_Option(subtree);
             options.add(option);
         }
         else
@@ -272,7 +272,7 @@ Filter* PipelineReader::parseElement_Filter(const boost::property_tree::ptree& t
         }
         else if (name == "Option")
         {
-            Option<std::string> option = parseElement_Option(subtree);
+            Option option = parseElement_Option(subtree);
             options.add(option);
         }
         else if (name == "Filter" || name == "MultiFilter" || name == "Reader")
@@ -315,7 +315,7 @@ MultiFilter* PipelineReader::parseElement_MultiFilter(const boost::property_tree
         }
         else if (name == "Option")
         {
-            Option<std::string> option = parseElement_Option(subtree);
+            Option option = parseElement_Option(subtree);
             options.add(option);
         }
         else if (name == "Filter" || name == "MultiFilter" || name == "Reader")
@@ -359,7 +359,7 @@ Writer* PipelineReader::parseElement_Writer(const boost::property_tree::ptree& t
         }
         else if (name == "Option")
         {
-            Option<std::string> option = parseElement_Option(subtree);
+            Option option = parseElement_Option(subtree);
             options.add(option);
         }
         else if (name == "Filter" || name == "MultiFilter" || name == "Reader")

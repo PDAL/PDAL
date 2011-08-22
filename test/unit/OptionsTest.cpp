@@ -42,6 +42,8 @@
 #include <pdal/filters/CropFilter.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 
+#include <boost/property_tree/xml_parser.hpp>
+
 
 BOOST_AUTO_TEST_SUITE(OptionsTest)
 
@@ -56,9 +58,9 @@ BOOST_AUTO_TEST_CASE(test_static_options)
     pdal::filters::CropFilter crop(reader, pdal::Bounds<double>());
     const pdal::Options& opts = crop.getDefaultOptions();
 
-    BOOST_CHECK(opts.hasOption<pdal::Bounds<double> >("bounds"));
-    BOOST_CHECK(!opts.hasOption<std::string>("metes"));
-    const boost::property_tree::ptree& pt = opts.getPTree();
+    BOOST_CHECK(opts.hasOption("bounds"));
+    BOOST_CHECK(!opts.hasOption("metes"));
+    const boost::property_tree::ptree& pt = opts.toPTree();
     BOOST_CHECK(pt.size() == 1);
 
     return;
@@ -72,22 +74,24 @@ BOOST_AUTO_TEST_CASE(test_option_writing)
     std::ostringstream ostr_s;
     const std::string ref_s = xml_header + xml_str_ref;
 
-    const pdal::Option<int> option_i("my_int", 17, "This is my integral option.");
+    const pdal::Option option_i("my_int", (boost::uint16_t)17, "This is my integral option.");
     BOOST_CHECK(option_i.getName() == "my_int");
     BOOST_CHECK(option_i.getDescription() == "This is my integral option.");
-    BOOST_CHECK(option_i.getValue() == 17);
+    BOOST_CHECK(option_i.getValue<boost::uint16_t>() == 17);
+    BOOST_CHECK(option_i.getValue<std::string>() == "17");
 
-    const pdal::Option<std::string> option_s("my_string", "Yow.", "This is my stringy option.");
+    const pdal::Option option_s("my_string", "Yow.", "This is my stringy option.");
     BOOST_CHECK(option_s.getName() == "my_string");
     BOOST_CHECK(option_s.getDescription() == "This is my stringy option.");
-    BOOST_CHECK(option_s.getValue() == "Yow.");
+    BOOST_CHECK(option_s.getValue<std::string>() == "Yow.");
+    BOOST_CHECK(option_s.getValue<std::string>() == "Yow.");
 
-    const boost::property_tree::ptree tree_i = option_i.getPTree();
+    const boost::property_tree::ptree tree_i = option_i.toPTree();
     boost::property_tree::xml_parser::write_xml(ostr_i, tree_i);
     const std::string str_i = ostr_i.str();
     BOOST_CHECK(str_i == ref_i);
    
-    const boost::property_tree::ptree tree_s = option_s.getPTree();
+    const boost::property_tree::ptree tree_s = option_s.toPTree();
     boost::property_tree::xml_parser::write_xml(ostr_s, tree_s);
     const std::string str_s = ostr_s.str();
     BOOST_CHECK(str_s == ref_s);
@@ -100,19 +104,23 @@ BOOST_AUTO_TEST_CASE(test_option_reading)
 {
     // from an xml stream
     std::istringstream istr(xml_int_ref);
-    pdal::Option<std::string> opt_from_istr(istr);
+    boost::property_tree::ptree tree1;
+    boost::property_tree::read_xml(istr,tree1);
+    pdal::Option opt_from_istr(tree1);
 
     BOOST_CHECK(opt_from_istr.getName() == "my_int");
     BOOST_CHECK(opt_from_istr.getDescription() == "This is my integral option.");
-    BOOST_CHECK(opt_from_istr.getValue() == "17");
+    BOOST_CHECK(opt_from_istr.getValue<std::string>() == "17");
+    BOOST_CHECK(opt_from_istr.getValue<int>() == 17);
 
     // from a ptree (assumed to be built correctly)
-    const boost::property_tree::ptree tree = opt_from_istr.getPTree();
-    pdal::Option<std::string> opt_from_ptree(tree);
+    const boost::property_tree::ptree tree2 = opt_from_istr.toPTree();
+    pdal::Option opt_from_ptree(tree2);
 
     BOOST_CHECK(opt_from_ptree.getName() == "my_int");
     BOOST_CHECK(opt_from_ptree.getDescription() == "This is my integral option.");
-    BOOST_CHECK(opt_from_ptree.getValue() == "17");
+    BOOST_CHECK(opt_from_ptree.getValue<std::string>() == "17");
+    BOOST_CHECK(opt_from_ptree.getValue<int>() == 17);
 
     return;
 }
@@ -120,8 +128,8 @@ BOOST_AUTO_TEST_CASE(test_option_reading)
 
 BOOST_AUTO_TEST_CASE(test_options_copy_ctor)
 {
-    const pdal::Option<int> opt_i("my_int", 17, "This is my integral option.");
-    const pdal::Option<std::string> opt_s("my_string", "Yow.", "This is my stringy option.");
+    const pdal::Option opt_i("my_int", 17, "This is my integral option.");
+    const pdal::Option opt_s("my_string", "Yow.", "This is my stringy option.");
 
     pdal::Options opts;
     opts.add(opt_i);
@@ -129,8 +137,8 @@ BOOST_AUTO_TEST_CASE(test_options_copy_ctor)
 
     pdal::Options copy(opts);
 
-    BOOST_CHECK(copy.hasOption<int>("my_int"));
-    BOOST_CHECK(copy.hasOption<std::string>("my_string"));
+    BOOST_CHECK(copy.hasOption("my_int"));
+    BOOST_CHECK(copy.hasOption("my_string"));
 
     return;
 }
@@ -140,7 +148,7 @@ BOOST_AUTO_TEST_CASE(test_options_writing)
 {
     pdal::Options opts;
 
-    const pdal::Option<int> option_i("my_int", 17, "This is my integral option.");
+    const pdal::Option option_i("my_int", 17, "This is my integral option.");
     opts.add(option_i);
 
     opts.add("my_string", "Yow.", "This is my stringy option.");
@@ -148,15 +156,15 @@ BOOST_AUTO_TEST_CASE(test_options_writing)
     std::ostringstream ostr;
     const std::string ref = xml_header + "<Option>" + xml_int_ref + "</Option><Option>" + xml_str_ref + "</Option>";
 
-    const boost::property_tree::ptree& tree = opts.getPTree();
+    const boost::property_tree::ptree& tree = opts.toPTree();
     boost::property_tree::xml_parser::write_xml(ostr, tree);
     const std::string str = ostr.str();
     BOOST_CHECK(str == ref);
 
-    int val_i = opts.getOption<int>("my_int").getValue();
-    std::string desc_i = opts.getOption<int>("my_int").getDescription();
-    std::string val_s = opts.getOption<std::string>("my_string").getValue();
-    std::string desc_s = opts.getOption<std::string>("my_string").getDescription();
+    int val_i = opts.getOption("my_int").getValue<int>();
+    std::string desc_i = opts.getOption("my_int").getDescription();
+    std::string val_s = opts.getOption("my_string").getValue<std::string>();
+    std::string desc_s = opts.getOption("my_string").getDescription();
     BOOST_CHECK(val_i == 17);
     BOOST_CHECK(val_s == "Yow.");
     BOOST_CHECK(desc_i == "This is my integral option.");
@@ -171,9 +179,14 @@ BOOST_AUTO_TEST_CASE(test_options_reading)
     const std::string ref = xml_header + "<Option>" + xml_int_ref + "</Option><Option>" + xml_str_ref + "</Option>";
     std::istringstream istr(ref);
 
-    pdal::Options opts_from_istr(istr);
+    boost::property_tree::ptree tree;
+    boost::property_tree::read_xml(istr,tree);
+    pdal::Options opts_from_istr(tree);
 
-    pdal::Option<std::string> opts = opts_from_istr.getOption<std::string>("my_int");
+    const pdal::Option& opt = opts_from_istr.getOption("my_int");
+
+    BOOST_CHECK(opt.getValue<std::string>() == "17");
+    BOOST_CHECK(opt.getValue<int>() == 17);
 
     return;
 }
@@ -186,7 +199,7 @@ BOOST_AUTO_TEST_CASE(test_valid_options)
     bool reached = false;
     try
     {
-        opts.getOption<int>("foo").getValue();
+        opts.getOption("foo").getValue<int>();
         reached = false;
     }
     catch (pdal::option_not_found ex)
@@ -196,16 +209,25 @@ BOOST_AUTO_TEST_CASE(test_valid_options)
     }
     BOOST_CHECK(reached == true);
 
-    bool ok = opts.hasOption<double>("bar");
+    bool ok = opts.hasOption("bar");
     BOOST_CHECK(!ok);
 
     {
         pdal::Options optI;
+        
         optI.add("foo", 19, "foo as an int");
-        ok = optI.hasOption<int>("foo");
+        ok = optI.hasOption("foo");
         BOOST_CHECK(ok);
-        ok = optI.hasOption<double>("foo");
-        // BOOST_CHECK(!ok);  // BUG: we would like this to return false;
+
+        const int i1 = optI.getValueOrThrow<int>("foo");
+        BOOST_CHECK(i1 == 19);
+
+        optI.add("foo", "nineteen", "foo as a string");
+        ok = optI.hasOption("foo");
+        BOOST_CHECK(ok);
+
+        const std::string s1 = optI.getValueOrThrow<std::string>("foo");
+        BOOST_CHECK(s1 == "nineteen");
     }
 
     return;
@@ -220,8 +242,29 @@ BOOST_AUTO_TEST_CASE(Options_test_add_vs_put)
     opts.add<int>("a",2);
     opts.add<int>("a",3);
 
-    BOOST_CHECK(opts.hasOption<int>("a"));
-// BUG BUG BUG    BOOST_CHECK_EQUAL(opts.getValueOrThrow<int>("a"), 3);
+    BOOST_CHECK(opts.hasOption("a"));
+    BOOST_CHECK_EQUAL(opts.getValueOrThrow<int>("a"), 3);
+}
+
+
+BOOST_AUTO_TEST_CASE(Options_test_bool)
+{
+    pdal::Option a("a","true");
+    pdal::Option b("b","false");
+    pdal::Option c("c",true);
+    pdal::Option d("d",false);
+
+    bool av = a.getValue<bool>();
+    bool bv = b.getValue<bool>();
+    bool cv = c.getValue<bool>();
+    bool dv = d.getValue<bool>();
+    
+    BOOST_CHECK_EQUAL(av, true);
+    BOOST_CHECK_EQUAL(bv, false);
+    BOOST_CHECK_EQUAL(cv, true);
+    BOOST_CHECK_EQUAL(dv, false);
+
+    return;
 }
 
 
