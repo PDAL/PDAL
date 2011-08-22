@@ -249,4 +249,15 @@ BOOST_AUTO_TEST_CASE(test_input)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(test_lexicalcast_whitespace)
+{
+    const Range<double> b1 = boost::lexical_cast< Range<double> >("[1,101]");
+    const Range<double> b2 = boost::lexical_cast< Range<double> >("[1, 101] ");
+    
+    BOOST_CHECK_EQUAL(b1, b2);
+    
+    return;
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
