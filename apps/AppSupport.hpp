@@ -49,10 +49,10 @@ class AppSupport
 {
 public:
     // makes a reader/stage, from just the filename and some other options
-    static pdal::Stage& AppSupport::makeReader(pdal::Options& options);
+    static pdal::Stage& makeReader(pdal::Options& options);
 
     // makes a writer, from just the filename and some other options (and the input stage)
-    static pdal::Writer& AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage);
+    static pdal::Writer& makeWriter(pdal::Options& options, pdal::Stage& stage);
 
 private:
     // infer the driver to use based on filename extension

@@ -34,7 +34,9 @@
 
 #include <pdal/drivers/las/Reader.hpp>
 
+#ifdef PDAL_HAVE_LASZIP
 #include <laszip/lasunzipper.hpp>
+#endif
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/drivers/las/Header.hpp>

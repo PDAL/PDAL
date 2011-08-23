@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
     return;
 }
 
-
+#ifdef PDAL_HAS_LASZIP
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 {
     // remove file from earlier run, if needed
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 
     return;
 }
-
+#endif
 
 static void test_a_format(const std::string& refFile, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat)
 {
