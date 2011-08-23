@@ -1,34 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WriterPipeline>
-    <Writer>
-        <Type>drivers.las.writer</Type>
-        <Option>
-            <Name>filename</Name>
-            <Value>out2.las</Value>
-            <Description>junk junk junk</Description>
+    <Writer type="drivers.las.writer">
+        <Option name="filename">
+            out2.las
         </Option>
         
-        <Filter>
-            <Type>filters.descaling</Type>
+        <Filter type="filters.descaling">
             
-            <Filter>
-                <Type>filters.reprojection</Type>
-                <Option>
-                    <Name>out_srs</Name>
-                    <Value>EPSG:4326</Value>
+            <Filter type="filters.reprojection">
+                <Option name="out_srs">
+                    EPSG:4326
                 </Option>
                 
-                <Filter>
-                    <Type>filters.scaling</Type>
+                <Filter type="filters.scaling">
                     
-                    <Reader>
-                        <Type>drivers.las.reader</Type>
-                        <Option>
-                            <Name>filename</Name>
-                            <Value>utm15.las</Value>
+                    <Reader type="drivers.las.reader">
+                        <Option name="filename">
+							utm15.las
                         </Option>
                     </Reader>
                 </Filter>
+				
             </Filter>
         </Filter>
     </Writer>
