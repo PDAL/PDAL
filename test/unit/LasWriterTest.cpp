@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
     return;
 }
 
-#ifdef PDAL_HAS_LASZIP
+#ifdef PDAL_HAVE_LASZIP
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 {
     // remove file from earlier run, if needed
