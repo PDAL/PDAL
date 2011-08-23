@@ -180,37 +180,20 @@ private:
 // explicit specialization:
 //   boost::lexical_cast only understands "0" and "1" for bools,
 //   so we handle those situations explicitly
-template<> bool Option::getValue() const 
-{ 
-    if (m_value=="true") return true;
-    if (m_value=="false") return false;
-    return boost::lexical_cast<bool>(m_value);
-}
-
+template<> bool Option::getValue() const;
 
 // explicit specialization:
 //   if we want to get out a (const ref) string, we don't need lexical_cast
-template<> const std::string& Option::getValue() const 
-{ 
-    return m_value;
-}
-
+template<> const std::string& Option::getValue() const;
 
 // explicit specialization:
 //   if insert a bool, we don't want it to be "0" or "1" (which is
 //   what lexical_cast would do)
-template<> void Option::setValue(const bool& value)
-{ 
-    m_value = value ? "true" : "false";
-}
-
+template<> void Option::setValue(const bool& value);
 
 // explicit specialization:
 //   if we want to insert a string, we don't need lexical_cast
-template<> void Option::setValue(const std::string& value)
-{ 
-    m_value = value;
-}
+template<> void Option::setValue(const std::string& value);
 
 
 // An Options object is just a map of names to Option objects.
