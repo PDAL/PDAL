@@ -80,6 +80,7 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_test1)
     if (filesSame)
     {
         FileUtils::deleteFile(Support::temppath("test.xml"));
+        FileUtils::deleteFile(Support::temppath("test2.xml"));
     }
 
     FileUtils::deleteFile(Support::datapath("pipeline/out.las"));
