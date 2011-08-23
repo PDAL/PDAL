@@ -76,7 +76,7 @@ static boost::property_tree::ptree generateTreeFromStageBase(const StageBase& st
 
 void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const Options& opts)
 {
-    boost::property_tree::ptree m_tree = opts.getPTree();
+    boost::property_tree::ptree m_tree = opts.toPTree();
 
     boost::property_tree::ptree::const_iterator iter = m_tree.begin();
     while (iter != m_tree.end())

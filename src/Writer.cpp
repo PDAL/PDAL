@@ -199,7 +199,7 @@ boost::property_tree::ptree Writer::serializePipeline() const
 
     tree.add("<xmlattr>.type", getName());
 
-    PipelineWriter::write_option_ptree(tree, getOptions().toPTree());
+    PipelineWriter::write_option_ptree(tree, getOptions());
 
     const Stage& stage = getPrevStage();
     boost::property_tree::ptree subtree = stage.serializePipeline();

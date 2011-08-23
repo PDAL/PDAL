@@ -91,7 +91,7 @@ boost::property_tree::ptree MultiFilter::serializePipeline() const
 
     tree.add("<xmlattr>.type", getName());
 
-    PipelineWriter::write_option_ptree(tree, getOptions().toPTree());
+    PipelineWriter::write_option_ptree(tree, getOptions());
 
     BOOST_FOREACH(const Stage* stage, getPrevStages())
     {
