@@ -10,6 +10,7 @@
             <xsd:element name="Filter" type="FilterType" />
             <xsd:element name="MultiFilter" type="MultiFilterType" />
         </xsd:choice>
+        <xsd:attribute name="type" type="xsd:string" use="required" />
     </xsd:complexType>
 
     <xsd:complexType name="TypeAndOptionsType">
