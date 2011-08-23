@@ -60,13 +60,15 @@ PipelineWriter::~PipelineWriter()
 }
 
 
-static boost::property_tree::ptree generateTreeFromWriter(const Writer& writer)
+static boost::property_tree::ptree generateTreeFromStageBase(const StageBase& stage)
 {
-    boost::property_tree::ptree subtree = writer.serializePipeline();
+    boost::property_tree::ptree subtree = stage.serializePipeline();
 
     boost::property_tree::ptree tree;
 
-    tree.add_child("WriterPipeline", subtree);
+    boost::property_tree::ptree& attrtree = tree.add_child("Pipeline", subtree);
+    
+    attrtree.put("<xmlattr>.version", "1.0");
 
     return tree;
 }
@@ -101,11 +103,11 @@ void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const
 }
 
 
-void PipelineWriter::writeWriterPipeline(const std::string& filename) const
+void PipelineWriter::writePipeline(const std::string& filename) const
 {
-    const Writer* writer = m_manager.getWriter();
+    const StageBase* stage = m_manager.isWriterPipeline() ? (StageBase*)m_manager.getWriter() : (StageBase*)m_manager.getStage();
     
-    boost::property_tree::ptree tree = generateTreeFromWriter(*writer);
+    boost::property_tree::ptree tree = generateTreeFromStageBase(*stage);
 
     
     const boost::property_tree::xml_parser::xml_writer_settings<char> settings(' ', 4);

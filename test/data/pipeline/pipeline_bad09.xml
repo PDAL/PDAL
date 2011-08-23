@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- bad: root element not WriterPipeline -->
-<!--<WriterPipeline>-->
+<!-- bad: root element not Pipeline -->
+<!--<Pipeline version="1.0">-->
     <Writer type="drivers.las.writer">
         <Option name="filename">
             out.las
@@ -16,4 +16,4 @@
             </Reader>
         </Filter>
     </Writer>
-<!--</WriterPipeline>-->
+<!--</Pipeline>-->

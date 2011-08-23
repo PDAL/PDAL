@@ -57,9 +57,9 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_test1)
         PipelineReader reader(manager);
         PipelineWriter writer(manager);
 
-        reader.readWriterPipeline(Support::datapath("pipeline/pipeline_write.xml"));
+        reader.readPipeline(Support::datapath("pipeline/pipeline_write.xml"));
 
-        writer.writeWriterPipeline(Support::temppath("test.xml"));
+        writer.writePipeline(Support::temppath("test.xml"));
     }
     
     // we can't compare top the reference fiel directly, since the filename
@@ -70,9 +70,9 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_test1)
         PipelineReader reader(manager);
         PipelineWriter writer(manager);
 
-        reader.readWriterPipeline(Support::temppath("test.xml"));
+        reader.readPipeline(Support::temppath("test.xml"));
 
-        writer.writeWriterPipeline(Support::temppath("test2.xml"));
+        writer.writePipeline(Support::temppath("test2.xml"));
     }
     
     bool filesSame = Support::compare_text_files(Support::temppath("test.xml"), Support::temppath("test2.xml"));

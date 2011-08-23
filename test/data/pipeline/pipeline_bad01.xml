@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<WriterPipeline>
+<Pipeline version="1.0">
     <Writer>
         <!-- bad: no Type element -->
         <!-- <Type>drivers.las.writer</Type> -->
@@ -17,4 +17,4 @@
             </Reader>
         </Filter>
     </Writer>
-</WriterPipeline>
+</Pipeline>

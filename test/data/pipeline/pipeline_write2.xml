@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<WriterPipeline>
+<Pipeline version="1.0">
     <Writer type="drivers.las.writer">
         <Option name="filename">
             out2.las
@@ -24,4 +24,4 @@
             </Filter>
         </Filter>
     </Writer>
-</WriterPipeline>
+</Pipeline>

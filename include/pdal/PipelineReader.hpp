@@ -56,23 +56,18 @@ private:
 public:
     PipelineReader(PipelineManager&, bool debug=false, boost::uint8_t verbose=0);
     ~PipelineReader();
-
    
     // Use this to fill in a pipeline manager with an XML file that
     // contains a <Writer> as the last pipeline stage.
-    void readWriterPipeline(const std::string&);
-
-    // Use this to fill in a pipeline manager with an XML file that 
-    // don't contain a <Writer>.  (Even though this is called "parse 
-    // READER pipeline", it actually returns a Stage; it can be used 
-    // where the last pipeline stage is a Reader or Filter.)
-    void readReaderPipeline(const std::string&);
+    //
+    // returns true iff the xml file is a writer pipeline (otherwise it is
+    // assumed to be a reader pipeline)
+    bool readPipeline(const std::string& filename);
 
 private:
     typedef std::map<std::string, std::string> map_t;
     
-    Writer* parseElement_WriterPipeline(const boost::property_tree::ptree&);
-    Stage* parseElement_ReaderPipeline(const boost::property_tree::ptree&);
+    bool parseElement_Pipeline(const boost::property_tree::ptree&);
     Stage* parseElement_anystage(const std::string& name, const boost::property_tree::ptree& subtree);
     Reader* parseElement_Reader(const boost::property_tree::ptree& tree);
     Filter* parseElement_Filter(const boost::property_tree::ptree& tree);

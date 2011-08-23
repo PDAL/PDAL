@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- bad: root element not Pipeline -->
-<!--<ReaderPipeline>-->
+<!--<Pipeline version="1.0">-->
         <Filter type="filters.crop">
             <Option name="bounds">
                 ([0,1000000],[0,1000000],[0,1000000])
@@ -11,4 +11,4 @@
                 </Option>
             </Reader>
         </Filter>
-<!--</ReaderPipeline>-->
+<!--</Pipeline>-->

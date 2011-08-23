@@ -443,70 +443,64 @@ Writer* PipelineReader::parseElement_Writer(const boost::property_tree::ptree& t
 }
 
 
-Writer* PipelineReader::parseElement_WriterPipeline(const boost::property_tree::ptree& tree)
+bool PipelineReader::parseElement_Pipeline(const boost::property_tree::ptree& tree)
 {
+    Stage* stage = NULL;
     Writer* writer = NULL;
 
     map_t attrs;
     collect_attributes(attrs, tree);
 
-    boost::property_tree::ptree::const_iterator iter = tree.begin();
-    
+    std::string version = "";
+    if (attrs.count("version"))
     {
-        if (iter->first == "Writer")
-        {
-            const boost::property_tree::ptree subtree = iter->second;
-            writer = parseElement_Writer(subtree);
-        }
-        else
-        {
-            throw pipeline_xml_error("xml reader invalid child of Pipeline element");
-        }
+        version = attrs["version"];
     }
-    
-    ++iter;
-    if (iter != tree.end())
+    if (version != "1.0")
     {
-        throw pipeline_xml_error("extra nodes at front of writer pipeline");
+        throw pipeline_xml_error("unsupported pipeline xml version");
     }
 
-    return writer;
-}
-
-
-Stage* PipelineReader::parseElement_ReaderPipeline(const boost::property_tree::ptree& tree)
-{
-    Stage* stage = NULL;
-
-    map_t attrs;
-    collect_attributes(attrs, tree);
-
     boost::property_tree::ptree::const_iterator iter = tree.begin();
-    const std::string& name = iter->first;
-    const boost::property_tree::ptree subtree = iter->second;
 
+    bool isWriter = false;
+
+    while (iter != tree.end())
     {
+        const std::string& name = iter->first;
+        const boost::property_tree::ptree subtree = iter->second;
+        
         if (name == "Reader" || name == "Filter" || name == "MultiFilter")
         {
             stage = parseElement_anystage(name, subtree);
+        }
+        else if (name == "Writer")
+        {
+            writer = parseElement_Writer(subtree);
+            isWriter = true;
+        }
+        else if (name == "<xmlattr>")
+        {
+            // ignore it, already parsed
         }
         else
         {
             throw pipeline_xml_error("xml reader invalid child of ReaderPipeline element");
         }
+
+        ++iter;
     }
     
-    ++iter;
-    if (iter != tree.end())
+    if (writer && stage)
     {
         throw pipeline_xml_error("extra nodes at front of writer pipeline");
     }
 
-    return stage;
+    return isWriter;
 }
 
 
-void PipelineReader::readWriterPipeline(const std::string& filename)
+bool PipelineReader::readPipeline(const std::string& filename)
 {
     m_inputXmlFile = filename;
 
@@ -514,46 +508,20 @@ void PipelineReader::readWriterPipeline(const std::string& filename)
     boost::property_tree::xml_parser::read_xml(filename, tree,
         boost::property_tree::xml_parser::no_comments);
 
-    boost::optional<boost::property_tree::ptree> opt( tree.get_child_optional("WriterPipeline") );
+    boost::optional<boost::property_tree::ptree> opt( tree.get_child_optional("Pipeline") );
     if (!opt.is_initialized())
     {
-        throw pipeline_xml_error("root element is not WriterPipeline");
+        throw pipeline_xml_error("root element is not Pipeline");
     }
 
     boost::property_tree::ptree subtree = opt.get();
 
-    (void)parseElement_WriterPipeline(subtree);
+    bool isWriter = parseElement_Pipeline(subtree);
 
     m_inputXmlFile = "";
 
-    return;
+    return isWriter;
 }
-
-
-void PipelineReader::readReaderPipeline(const std::string& filename)
-{
-    m_inputXmlFile = filename;
-
-    boost::property_tree::ptree tree;
-    boost::property_tree::xml_parser::read_xml(filename, tree,
-        boost::property_tree::xml_parser::no_comments);
-
-    boost::optional<boost::property_tree::ptree> opt( tree.get_child_optional("ReaderPipeline") );
-    if (!opt.is_initialized())
-    {
-        throw pipeline_xml_error("root element is not ReaderPipeline");
-    }
-
-    boost::property_tree::ptree subtree = opt.get();
-
-    (void)parseElement_ReaderPipeline(subtree);
-
-    m_inputXmlFile = "";
-
-    return;
-}
-
-
 
 
 } // namespace pdal

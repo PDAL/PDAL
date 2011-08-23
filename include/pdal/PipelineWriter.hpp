@@ -52,9 +52,9 @@ public:
     PipelineWriter(const PipelineManager&);
     ~PipelineWriter();
 
-    void writeWriterPipeline(const std::string& filename) const;
+    void writePipeline(const std::string& filename) const;
 
-    static void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const Options& opts);
+    static void write_option_ptree(boost::property_tree::ptree& tree, const Options& opts);
 
 private:
     const PipelineManager& m_manager;
