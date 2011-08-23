@@ -131,7 +131,7 @@ Option& Options::getOptionByRef(const std::string& name)
 const Option& Options::getOption(const std::string& name) const
 {
     map_t::const_iterator iter = m_options.find(name);
-    if (iter == m_options.cend())
+    if (iter == m_options.end())
     {
         std::ostringstream oss;
         oss << "Required option '" << name << "' was not found on this stage";
@@ -173,7 +173,7 @@ boost::property_tree::ptree Options::toPTree() const
 {
     boost::property_tree::ptree tree;
 
-    for (map_t::const_iterator citer = m_options.cbegin(); citer != m_options.cend(); ++citer)
+    for (map_t::const_iterator citer = m_options.begin(); citer != m_options.end(); ++citer)
     {
         const Option& option = citer->second;
         boost::property_tree::ptree subtree = option.toPTree();
