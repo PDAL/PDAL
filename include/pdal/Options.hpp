@@ -167,6 +167,43 @@ public:
         m_value = boost::lexical_cast<std::string>(value);
     }
 
+    #if defined(PDAL_COMPILER_VC10)
+    // explicit specialization:
+    //   boost::lexical_cast only understands "0" and "1" for bools,
+    //   so we handle those situations explicitly
+    template<> bool getValue() const 
+    { 
+        if (m_value=="true") return true;
+        if (m_value=="false") return false;
+        return boost::lexical_cast<bool>(m_value);
+    }
+
+
+    // explicit specialization:
+    //   if we want to get out a (const ref) string, we don't need lexical_cast
+    template<> const std::string& getValue() const 
+    { 
+        return m_value;
+    }
+
+
+    // explicit specialization:
+    //   if insert a bool, we don't want it to be "0" or "1" (which is
+    //   what lexical_cast would do)
+    template<> void setValue(const bool& value)
+    { 
+        m_value = value ? "true" : "false";
+    }
+
+
+    // explicit specialization:
+    //   if we want to insert a string, we don't need lexical_cast
+    template<> void setValue(const std::string& value)
+    { 
+        m_value = value;
+    }
+#endif
+
     // return a ptree representation
     boost::property_tree::ptree toPTree() const;
 
@@ -177,6 +214,7 @@ private:
 };
 
 
+#if !defined(PDAL_COMPILER_VC10)
 // explicit specialization:
 //   boost::lexical_cast only understands "0" and "1" for bools,
 //   so we handle those situations explicitly
@@ -194,7 +232,7 @@ template<> void Option::setValue(const bool& value);
 // explicit specialization:
 //   if we want to insert a string, we don't need lexical_cast
 template<> void Option::setValue(const std::string& value);
-
+#endif
 
 // An Options object is just a map of names to Option objects.
 //
