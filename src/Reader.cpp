@@ -65,7 +65,7 @@ boost::property_tree::ptree Reader::serializePipeline() const
 
     tree.add("<xmlattr>.type", getName());
 
-    PipelineWriter::write_option_ptree(tree, getOptions());
+    PipelineWriter::write_option_ptree(tree, getOptions().toPTree());
     
     boost::property_tree::ptree root;
     root.add_child("Reader", tree);

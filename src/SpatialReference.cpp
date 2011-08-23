@@ -319,7 +319,8 @@ std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 #else
     boost::ignore_unused_variable_warning(ostr);
     boost::ignore_unused_variable_warning(srs);
-    throw pdal_error ("SpatialReference io operator<< is not available without GDAL+libgeotiff support");
+    ostr << "SpatialReference data is not available without GDAL+libgeotiff support";
+    return ostr;
 #endif
 }
 

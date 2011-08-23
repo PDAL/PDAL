@@ -34,7 +34,9 @@
 
 #include <pdal/drivers/las/Reader.hpp>
 
+#ifdef PDAL_HAVE_LASZIP
 #include <laszip/lasunzipper.hpp>
+#endif
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/drivers/las/Header.hpp>
@@ -93,7 +95,7 @@ void LasReader::initialize()
 
 const Options LasReader::getDefaultOptions() const
 {
-    Option<std::string> option1("filename", "", "file to read from");
+    Option option1("filename", "", "file to read from");
     Options options(option1);
     return options;
 }

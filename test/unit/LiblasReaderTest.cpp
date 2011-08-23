@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_sequential)
 
 BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_options)
 {
-    Option<std::string> opt("filename", Support::datapath("1.2-with-color.las"));
+    Option opt("filename", Support::datapath("1.2-with-color.las"));
     Options opts(opt);
     LiblasReader reader(opt);
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");

@@ -48,7 +48,7 @@ namespace pdal
 // supported options:
 //   <uint32>id
 //   <bool>debug
-//   <uint8>verbose
+//   <uint32>verbose
 //
 
 // both Stages and Writers have a few common properties, so 
@@ -80,7 +80,7 @@ public:
     // extra logging that "verbose" implies.
     bool isDebug() const;
     
-    // This is set by the "verbose" option, which is in range [0..255].
+    // This is set by the "verbose" option
     //    0 - no verbosity at all
     //    >0 - meaning is left to the implementors of the individual stages
     //
@@ -88,7 +88,7 @@ public:
     // extra validation checks and such (code which is potentially side-effecting) you want to
     // use the "debug" option.
     bool isVerbose() const; // true iff verbosity>0 
-    boost::uint8_t getVerboseLevel() const; 
+    boost::uint32_t getVerboseLevel() const; 
 
     // Everyone must implement this.  If you want to access the list of 
     // options "statically", you are free to construct the stage with no
@@ -125,7 +125,7 @@ private:
     bool m_initialized;
     Options m_options;
     bool m_debug;
-    boost::uint8_t m_verbose;
+    boost::uint32_t m_verbose;
     const boost::uint32_t m_id;
 
     StageBase& operator=(const StageBase&); // not implemented

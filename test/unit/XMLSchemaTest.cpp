@@ -96,8 +96,8 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     // std::istream* xml_stream = Utils::openFile(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
     // std::istream* xsd_stream = Utils::openFile(TestConfig::g_data_path+"/schemas/LAS.xsd");
     
-    std::string xml = ReadXML(TestConfig::g_data_path+"schemas/8-dimension-schema.xml");
-    std::string xsd = ReadXML(TestConfig::g_data_path+"/schemas/LAS.xsd");
+    std::string xml = ReadXML(TestConfig::g_data_path+"../../schemas/8-dimension-schema.xml");
+    std::string xsd = ReadXML(TestConfig::g_data_path+"../../schemas/LAS.xsd");
     pdal::schema::Reader reader(xml, xsd);
     
     pdal::Schema schema = reader.getSchema();

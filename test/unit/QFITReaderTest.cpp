@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     pdal::Options options;
     // std::string filename = Support::datapath("20050903_231839.qi");
 
-    pdal::Option<std::string> filename("input", Support::datapath("qfit/10-word.qi"), "Input filename for reader to use" );
+    pdal::Option filename("input", Support::datapath("qfit/10-word.qi"), "Input filename for reader to use" );
     options.add(filename);
     pdal::drivers::qfit::Reader reader(options);
     BOOST_CHECK(reader.getDescription() == "QFIT Reader");
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(test_14_word)
 {
     pdal::Options options;
 
-    pdal::Option<std::string> filename("input", Support::datapath("qfit/14-word.qi"), "Input filename for reader to use" );
+    pdal::Option filename("input", Support::datapath("qfit/14-word.qi"), "Input filename for reader to use" );
     options.add(filename);
     pdal::drivers::qfit::Reader reader(options);
     reader.initialize();    

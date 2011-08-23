@@ -51,11 +51,11 @@ BOOST_AUTO_TEST_CASE(test_base_options)
 {
     const std::string file(Support::datapath("1.2-with-color.las"));
 
-    const pdal::Option<std::string> opt_filename("filename", file);
-    const pdal::Option<std::string> opt_verbose_string("verbose", "99");
-    const pdal::Option<boost::uint8_t> opt_verbose_uint8("verbose", 99);
-    const pdal::Option<std::string> opt_debug_string("debug", "true");
-    const pdal::Option<bool> opt_debug_bool("debug", true);
+    const pdal::Option opt_filename("filename", file);
+    const pdal::Option opt_verbose_string("verbose", "99");
+    const pdal::Option opt_verbose_uint8("verbose", 99);
+    const pdal::Option opt_debug_string("debug", "true");
+    const pdal::Option opt_debug_bool("debug", true);
 
     {
         pdal::Options opts;
@@ -175,6 +175,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 }
 
 
+#ifdef PDAL_HAVE_LASZIP
 BOOST_AUTO_TEST_CASE(test_random_laz)
 {
     pdal::drivers::las::LasReader reader(Support::datapath("laszip/laszip-generated.laz"));
@@ -219,6 +220,7 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 
     return;
 }
+#endif
 
 
 BOOST_AUTO_TEST_CASE(test_two_iters)

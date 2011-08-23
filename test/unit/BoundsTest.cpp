@@ -289,10 +289,23 @@ BOOST_AUTO_TEST_CASE(test_input)
 
     std::stringstream empty2_s("", std::stringstream::in | std::stringstream::out);
       
-      Bounds<double> empty2;
-      empty2_s >> empty2;
-      BOOST_CHECK_EQUAL(true, empty2.empty());    
-      return;
+    Bounds<double> empty2;
+    empty2_s >> empty2;
+    BOOST_CHECK_EQUAL(true, empty2.empty());
+
+    return;
 }
+
+
+BOOST_AUTO_TEST_CASE(test_lexicalcast_whitespace)
+{
+    const Bounds<double> b1 = boost::lexical_cast< Bounds<double> >("([1,101],[2,102],[3,103])");
+    const Bounds<double> b2 = boost::lexical_cast< Bounds<double> >("([1, 101], [2, 102], [3, 103])");
+    
+    BOOST_CHECK_EQUAL(b1, b2);
+    
+    return;
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

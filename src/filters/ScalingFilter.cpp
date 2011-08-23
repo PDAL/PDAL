@@ -60,12 +60,12 @@ ScalingFilterBase::ScalingFilterBase(Stage& prevStage, bool isDescaling, const O
     , m_isDescaling(isDescaling)
 {
     int sum = 0;
-    if (options.hasOption<double>("scale_x")) ++sum;
-    if (options.hasOption<double>("scale_y")) ++sum;
-    if (options.hasOption<double>("scale_z")) ++sum;
-    if (options.hasOption<double>("offset_x")) ++sum;
-    if (options.hasOption<double>("offset_y")) ++sum;
-    if (options.hasOption<double>("offset_z")) ++sum;
+    if (options.hasOption("scale_x")) ++sum;
+    if (options.hasOption("scale_y")) ++sum;
+    if (options.hasOption("scale_z")) ++sum;
+    if (options.hasOption("offset_x")) ++sum;
+    if (options.hasOption("offset_y")) ++sum;
+    if (options.hasOption("offset_z")) ++sum;
     if (sum == 6)
     {
         m_customScaleOffset = true;

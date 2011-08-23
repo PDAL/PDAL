@@ -231,7 +231,7 @@ int PcInfo::execute()
     {
         readerOptions.add<std::string>("filename", m_inputFile);
         readerOptions.add<bool>("debug", isDebug());
-        readerOptions.add<boost::uint8_t>("verbose", getVerboseLevel());
+        readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
         readerOptions.add<bool>("liblas", m_useLiblas);
     }
 

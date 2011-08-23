@@ -87,7 +87,7 @@ ReprojectionFilter::ReprojectionFilter(Stage& prevStage, const Options& options)
     , m_outSRS(options.getValueOrThrow<pdal::SpatialReference>("out_srs"))
     , m_inferInputSRS(false)
 {
-    if (options.hasOption<std::string>("in_srs"))
+    if (options.hasOption("in_srs"))
     {
         m_inSRS = options.getValueOrThrow<pdal::SpatialReference>("in_srs");
         m_inferInputSRS = false;

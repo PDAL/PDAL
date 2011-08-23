@@ -106,6 +106,8 @@ std::istream& operator>>(std::istream& istr, Bounds<double>& bounds)
     Bounds<double> xxx(v);
     bounds = xxx;
 
+    Utils::eatwhitespace(istr);
+
     return istr;
 }
 

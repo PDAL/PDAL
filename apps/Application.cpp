@@ -153,13 +153,9 @@ bool Application::isDebug() const
 }
 
 
-boost::uint8_t Application::getVerboseLevel() const
+boost::uint32_t Application::getVerboseLevel() const
 {
-    // verboseLevel is really a u8 value, but we have to store it in a u32
-    // object because if we don't then program_options prints the default
-    // value as an unsigned char (thanks, lexical_cast!)
-    const boost::uint8_t v = static_cast<boost::uint8_t>(m_verboseLevel & 0x000000ff);
-    return v;
+    return m_verboseLevel;
 }
 
 

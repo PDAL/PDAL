@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_options)
     // remove file from earlier run, if needed
     FileUtils::deleteFile(Support::datapath("LiblasWriterTest_test_options.las"));
 
-    Option<std::string> opt("filename", Support::temppath("LiblasWriterTest_test_options.las"));
+    Option opt("filename", Support::temppath("LiblasWriterTest_test_options.las"));
     Options opts(opt);
 
     LiblasReader reader(Support::datapath("1.2-with-color.las"));
