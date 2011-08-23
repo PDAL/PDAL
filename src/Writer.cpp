@@ -41,6 +41,8 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/exceptions.hpp>
 
+#include <pdal/PipelineWriter.hpp>
+
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
@@ -195,10 +197,9 @@ boost::property_tree::ptree Writer::serializePipeline() const
 {
     boost::property_tree::ptree tree;
 
-    tree.add("Type", getName());
+    tree.add("<xmlattr>.type", getName());
 
-    boost::property_tree::ptree optiontree = getOptions().getPTree();
-    tree.add_child(optiontree.begin()->first, optiontree.begin()->second);
+    PipelineWriter::write_option_ptree(tree, getOptions());
 
     const Stage& stage = getPrevStage();
     boost::property_tree::ptree subtree = stage.serializePipeline();

@@ -69,6 +69,8 @@ public:
     void readReaderPipeline(const std::string&);
 
 private:
+    typedef std::map<std::string, std::string> map_t;
+    
     Writer* parseElement_WriterPipeline(const boost::property_tree::ptree&);
     Stage* parseElement_ReaderPipeline(const boost::property_tree::ptree&);
     Stage* parseElement_anystage(const std::string& name, const boost::property_tree::ptree& subtree);
@@ -78,7 +80,9 @@ private:
     Writer* parseElement_Writer(const boost::property_tree::ptree& tree);
 
     Option<std::string> parseElement_Option(const boost::property_tree::ptree& tree);
-    std::string parseElement_Type(const boost::property_tree::ptree& tree);
+
+    void collect_attributes(map_t& attrs, const boost::property_tree::ptree& tree);
+    void parse_attributes(map_t& attrs, const boost::property_tree::ptree& tree);
 
 private:
     PipelineManager& m_manager;

@@ -34,6 +34,7 @@
 
 #include <pdal/MultiFilter.hpp>
 #include <pdal/exceptions.hpp>
+#include <pdal/PipelineWriter.hpp>
 
 namespace pdal
 {
@@ -88,10 +89,9 @@ boost::property_tree::ptree MultiFilter::serializePipeline() const
 {
     boost::property_tree::ptree tree;
 
-    tree.add("Type", getName());
+    tree.add("<xmlattr>.type", getName());
 
-    boost::property_tree::ptree optiontree = getOptions().getPTree();
-    tree.add_child(optiontree.begin()->first, optiontree.begin()->second);
+    PipelineWriter::write_option_ptree(tree, getOptions());
 
     BOOST_FOREACH(const Stage* stage, getPrevStages())
     {

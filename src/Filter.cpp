@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/Filter.hpp>
+#include <pdal/PipelineWriter.hpp>
 
 namespace pdal
 {
@@ -76,10 +77,9 @@ boost::property_tree::ptree Filter::serializePipeline() const
 {
     boost::property_tree::ptree tree;
 
-    tree.add("Type", getName());
+    tree.add("<xmlattr>.type", getName());
     
-    boost::property_tree::ptree optiontree = getOptions().getPTree();
-    tree.add_child(optiontree.begin()->first, optiontree.begin()->second);
+    PipelineWriter::write_option_ptree(tree, getOptions());
 
     const Stage& stage = getPrevStage();
     boost::property_tree::ptree subtree = stage.serializePipeline();
