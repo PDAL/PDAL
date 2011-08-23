@@ -175,6 +175,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 }
 
 
+#ifdef PDAL_HAVE_LASZIP
 BOOST_AUTO_TEST_CASE(test_random_laz)
 {
     pdal::drivers::las::LasReader reader(Support::datapath("laszip/laszip-generated.laz"));
@@ -219,6 +220,7 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 
     return;
 }
+#endif
 
 
 BOOST_AUTO_TEST_CASE(test_two_iters)
