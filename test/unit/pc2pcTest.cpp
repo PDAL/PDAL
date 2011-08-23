@@ -136,41 +136,55 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     BOOST_CHECK(!fileIsCompressed(outputLas));
     BOOST_CHECK(!fileHasSrs(outputLas));
 
+#ifdef PDAL_HAVE_LASZIP
     // does --compress make a compressed file?
     stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --compress", output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(fileIsCompressed(outputLas));
+#endif
     
+#ifdef PDAL_HAVE_LASZIP
     // does "--output foo.laz" make a compressed output?
     stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLaz, output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLaz));
     BOOST_CHECK(fileIsCompressed(outputLaz));
+#endif
 
+#ifdef PDAL_HAVE_LASZIP
     // does "--input foo.laz" make an uncompressed output?
 //BUG    stat = Support::run_command(cmd + " --input=" + inputLaz + " --output=" + outputLas, output);
 //BUG    BOOST_CHECK_EQUAL(stat, 0);
 //BUG    BOOST_CHECK(fileIsOkay(outputLas));
 //BUG    BOOST_CHECK(!fileIsCompressed(outputLas));
+#endif
 
+#ifdef PDAL_HAVE_LIBLAS
     // does --liblas work?
     stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --liblas", output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(!fileIsCompressed(outputLas));
+#endif
 
+#ifdef PDAL_HAVE_LIBLAS
+#ifdef PDAL_HAVE_LASZIP
     // do --liblas and --compress work together?
     stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --compress --liblas", output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(fileIsCompressed(outputLas));
+#endif
+#endif
 
+#ifdef PDAL_HAVE_GDAL
     // does --a_srs add an SRS?
     stat = Support::run_command(cmd + " --input=" + inputLas + " --output=" + outputLas + " --a_srs=epsg:4326", output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(fileIsOkay(outputLas));
     BOOST_CHECK(fileHasSrs(outputLas));
+#endif
 
     pdal::FileUtils::deleteFile(outputLas);
     pdal::FileUtils::deleteFile(outputLaz);
