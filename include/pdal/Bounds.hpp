@@ -394,8 +394,8 @@ public:
             if (getMinimum(d) > getMaximum(d) )
             {
                 // Check that we're not infinity either way
-                if (Utils::compare_distance<T>(getMinimum(d), std::numeric_limits<T>::max()) ||
-                    Utils::compare_distance<T>(getMaximum(d), -std::numeric_limits<T>::max()))
+                if (Utils::compare_distance<T>(getMinimum(d), (std::numeric_limits<T>::max)()) ||
+                    Utils::compare_distance<T>(getMaximum(d), -(std::numeric_limits<T>::max)()))
                 {
                     std::ostringstream msg;
                     msg << "liblas::Bounds::verify: Minimum point at dimension " << d
@@ -420,8 +420,8 @@ public:
 
     static const Bounds<T>& getDefaultSpatialExtent()
     {
-        static T minv(std::numeric_limits<T>::min());
-        static T maxv(std::numeric_limits<T>::max());
+        static T minv((std::numeric_limits<T>::min)());
+        static T maxv((std::numeric_limits<T>::max)());
         static Bounds v(minv,minv,minv,maxv,maxv,maxv);
         return v;
     }

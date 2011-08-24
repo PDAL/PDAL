@@ -56,8 +56,8 @@ public:
     typedef T value_type;
 
     Range()
-        : m_minimum(std::numeric_limits<T>::max())
-        , m_maximum(std::numeric_limits<T>::min()) 
+        : m_minimum((std::numeric_limits<T>::max)())
+        , m_maximum((std::numeric_limits<T>::min)()) 
     {
     }
 
