@@ -47,9 +47,14 @@
 #include "pdal/Schema.hpp"
 #include "pdal/SchemaLayout.hpp"
 #include "pdal/PointBuffer.hpp"
+#include "pdal/SpatialReference.hpp"
 
+#include "pdal/StageIterator.hpp"
 #include "pdal/Reader.hpp"
 #include "pdal/Writer.hpp"
+#include "pdal/Filter.hpp"
+#include "pdal/MultiFilter.hpp"
+#include "pdal/Options.hpp"
 
 //#include "pdal/DecimationFilter.hpp"
 
@@ -96,6 +101,29 @@ namespace boost
 
 namespace pdal
 {
+
+
+enum EndianType
+{
+    Endian_Little,
+    Endian_Big,
+    Endian_Unknown = 128
+};
+
+enum PointCountType
+{
+    PointCount_Fixed,       // getNumPoints will return value (which might be zero, though)
+    PointCount_Unknown      // the stage has an unknown count, and getNumPoints will return 0
+};
+
+enum StageIteratorType
+{
+    StageIterator_Sequential = 1,
+    StageIterator_Random = 2,
+    StageIterator_Block = 4,
+    StageIterator_Unknown = 8
+};
+
 
 template <typename T>
 class Range
@@ -181,6 +209,26 @@ public:
 
 %rename(Bounds_double) Bounds<double>;
 %template(Bounds_double) Bounds<double>;
+
+
+class SpatialReference
+{
+    enum WKTModeFlag
+    {
+        eHorizontalOnly = 1,
+        eCompoundOK = 2
+    };
+
+    SpatialReference();
+    SpatialReference(const std::string& userInput);
+    bool empty() const;
+    std::string getWKT(WKTModeFlag mode_flag, bool pretty) const;
+    void setWKT(std::string const& v);
+    void setFromUserInput(std::string const& v);
+    std::string getProj4() const;
+    void setProj4(std::string const& v);
+};
+
 
 
 class Dimension
@@ -309,8 +357,10 @@ public:
     Schema();
     const Dimension& getDimension(std::size_t index) const;
     const std::vector<Dimension>& getDimensions() const;
-    bool hasDimension(Dimension::Field field) const;
-    int getDimensionIndex(Dimension::Field field) const;
+    int getDimensionIndex(Dimension::Field field, Dimension::DataType datatype) const;
+    int getDimensionIndex(const Dimension& dim) const;
+    bool hasDimension(Dimension::Field field, Dimension::DataType datatype) const;
+    bool hasDimension(const Dimension& dim) const;
 };
 
 class SchemaLayout
@@ -326,13 +376,29 @@ public:
 class PointBuffer
 {
 public:
-    PointBuffer(const SchemaLayout&, boost::uint32_t numPoints);
+    PointBuffer(const SchemaLayout&, boost::uint32_t capacity);
+    const Bounds<double>& getSpatialBounds() const;
+    void setSpatialBounds(const Bounds<double>& bounds);
     boost::uint32_t getNumPoints() const;
+    void setNumPoints(boost::uint32_t v);
+    boost::uint32_t& getNumPointsRef();
+    boost::uint32_t getCapacity() const;
     const SchemaLayout& getSchemaLayout() const;
     const Schema& getSchema() const;
-    template<class T> T getField(std::size_t pointIndex, std::size_t fieldIndex) const;
-    template<class T> void setField(std::size_t pointIndex, std::size_t fieldIndex, T value);
-    void copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData, std::size_t numPoints);
+    //SchemaLayout& getSchemaLayout();
+    //Schema& getSchema();
+    template<class T> T getField(std::size_t pointIndex, boost::int32_t fieldIndex) const;
+    template<class T> void setField(std::size_t pointIndex, boost::int32_t fieldIndex, T value);
+    void setFieldData(std::size_t pointIndex, boost::int32_t fieldIndex, const boost::uint8_t* data);
+    void copyPointFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer);
+    void copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer, std::size_t numPoints);
+    boost::uint64_t getBufferByteLength() const;
+    boost::uint64_t getBufferByteCapacity() const;
+    //boost::uint8_t* getData(std::size_t pointIndex) const;
+    boost::uint8_t* getData(std::size_t pointIndex);
+    void setData(boost::uint8_t* data, std::size_t pointIndex);
+    void setAllData(boost::uint8_t* data, boost::uint32_t byteCount);
+    void getData(boost::uint8_t** data, std::size_t* array_size) const;
 };
 
 %extend PointBuffer
@@ -348,6 +414,30 @@ public:
     %template(getField_Float) getField<float>;
     %template(getField_Double) getField<double>;
 };
+
+
+class Option
+{
+    void setName(const std::string& name);
+    const std::string& getName() const;
+    void setDescription(const std::string& description);
+    const std::string& getDescription() const;
+   
+    template<typename T> T getValue() const;
+    template<typename T> void setValue(const T& value);
+};
+
+class Options
+{
+    void add(const Option& option);
+    void remove(const std::string& name);
+    const Option& getOption(const std::string & name) const;
+    template<typename T> T getValueOrThrow(std::string const& name) const;
+    template<typename T> T getValueOrDefault(std::string const& name, T defaultValue) const;
+    bool hasOption(std::string const& name) const;
+};
+
+
 
 class StageBase
 {
@@ -369,26 +459,10 @@ class StageBase
     boost::uint32_t getId() const;
 };
 
-class Stage : public StageBase
-{
-public:
-    virtual void initialize();
-
-    const Schema& getSchema() const;
-    virtual boost::uint64_t getNumPoints() const;
-    PointCountType getPointCountType() const;
-    const Bounds<double>& getBounds() const;
-    const SpatialReference& getSpatialReference() const;
-    
-    virtual bool supportsIterator (StageIteratorType) const = 0;
-
-    virtual StageSequentialIterator* createSequentialIterator() const { return NULL; }
-    virtual StageRandomIterator* createRandomIterator() const  { return NULL; }
-    virtual StageBlockIterator* createBlockIterator() const  { return NULL; }
-};
-
+//%feature("abstract") StageIterator;
 class StageIterator
 {
+    StageIterator(const Stage& stage);
     const Stage& getStage() const;
     boost::uint32_t read(PointBuffer& buffer);
     void readBegin();
@@ -411,6 +485,30 @@ class StageRandomIterator : public StageIterator
 {
     boost::uint64_t seek(boost::uint64_t position);
 };
+
+class StageBlockIterator : public StageIterator
+{
+};
+
+class Stage : public StageBase
+{
+public:
+    virtual void initialize();
+
+    const Schema& getSchema() const;
+    virtual boost::uint64_t getNumPoints() const;
+    PointCountType getPointCountType() const;
+    const Bounds<double>& getBounds() const;
+    const SpatialReference& getSpatialReference() const;
+    
+    virtual bool supportsIterator (StageIteratorType) const = 0;
+
+    virtual StageSequentialIterator* createSequentialIterator() const;
+    virtual StageRandomIterator* createRandomIterator() const;
+    virtual StageBlockIterator* createBlockIterator() const;
+};
+
+
 
 class Reader : public Stage
 {
@@ -448,6 +546,31 @@ class Writer : public StageBase
 };
 
 
+namespace drivers { namespace las {
+
+
+enum PointFormat
+{
+    PointFormat0 = 0,         // base
+    PointFormat1 = 1,         // base + time
+    PointFormat2 = 2,         // base + color
+    PointFormat3 = 3,         // base + time + color
+    PointFormat4 = 4,         // base + time + wave
+    PointFormat5 = 5,         // base + time + color + wave  (NOT SUPPORTED)
+    PointFormatUnknown = 99
+};
+
+class VariableLengthRecord
+{
+    VariableLengthRecord(boost::uint16_t reserved,
+                         std::string userId,
+                         boost::uint16_t recordId,
+                         std::string description,
+                         const boost::uint8_t* bytes,
+                         std::size_t len);
+};
+
+
 class LasReaderBase: public Reader
 {
     virtual PointFormat getPointFormat() const = 0;
@@ -458,7 +581,7 @@ class LasReaderBase: public Reader
 class LasReader : public LasReaderBase
 {
 public:
-    LasReader(const Options&);
+    //LasReader(const Options&);
     LasReader(const std::string& filename);
     
     virtual void initialize();
@@ -468,8 +591,8 @@ public:
 
     bool supportsIterator (StageIteratorType t) const;
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
-    pdal::StageRandomIterator* createRandomIterator() const;
+    StageSequentialIterator* createSequentialIterator() const;
+    StageRandomIterator* createRandomIterator() const;
 
     PointFormat getPointFormat() const;
     boost::uint8_t getVersionMajor() const;
@@ -511,7 +634,7 @@ class LasWriter : public Writer
 };
 
 
-
+}; }; // namespace
 
 
 // %feature("notabstract") LiblasReader;

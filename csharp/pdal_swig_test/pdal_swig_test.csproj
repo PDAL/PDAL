@@ -78,7 +78,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestDimension.cs" />
-    <Compile Include="TestLiblasReader.cs" />
+    <Compile Include="TestLasReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\pdal_swig_cs\pdal_swig_cs.csproj">

@@ -37,7 +37,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Libpc;
+using Pdal;
 using System.Diagnostics;
 using System.IO;
 
@@ -49,7 +49,7 @@ namespace pdal_swig_test
       {
          TestDimension a = new TestDimension();
          
-         TestLiblasReader r = new TestLiblasReader();
+         TestLasReader r = new TestLasReader();
 
          return 0;
       }

@@ -3,23 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Libpc;
+using Pdal;
 using System.Diagnostics;
 
 namespace pdal_swig_test
 {
-    internal class TestLiblasReader : TestBase
+    internal class TestLasReader : TestBase
     {
-        public TestLiblasReader()
+        public TestLasReader()
         {
             Test1();
         }
 
         private void Test1()
         {
-            istream stream = Utils.openFile("../../test/data/1.2-with-color.las");
-
-            LiblasReader reader = new LiblasReader(stream);
+            //istream stream = Utils.openFile("../../test/data/1.2-with-color.las");
+            
+            LasReader reader = new LasReader();
 
             ulong numPoints = reader.getNumPoints();
 
@@ -48,7 +48,7 @@ namespace pdal_swig_test
                 Debug.Assert(z0 == 431.660000);
             }
 
-            Utils.closeFile(stream);
+            //Utils.closeFile(stream);
 
             return;
         }

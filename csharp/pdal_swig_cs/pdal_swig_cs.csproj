@@ -88,27 +88,39 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bounds_double.cs" />
-    <Compile Include="DecimationFilter.cs" />
     <Compile Include="Dimension.cs" />
     <Compile Include="DimensionLayout.cs" />
+    <Compile Include="EndianType.cs" />
     <Compile Include="Filter.cs" />
-    <Compile Include="Header.cs" />
     <Compile Include="ios.cs" />
     <Compile Include="iostream.cs" />
     <Compile Include="ios_base.cs" />
     <Compile Include="istream.cs" />
-    <Compile Include="LiblasHeader.cs" />
-    <Compile Include="LiblasReader.cs" />
+    <Compile Include="LasReader.cs" />
+    <Compile Include="LasReaderBase.cs" />
+    <Compile Include="LasWriter.cs" />
+    <Compile Include="MultiFilter.cs" />
+    <Compile Include="Option.cs" />
+    <Compile Include="Options.cs" />
+    <Compile Include="ostream.cs" />
     <Compile Include="pdal_swig_cpp.cs" />
     <Compile Include="pdal_swig_cppPINVOKE.cs" />
-    <Compile Include="ostream.cs" />
-    <Compile Include="PointData.cs" />
-    <Compile Include="Producer.cs" />
+    <Compile Include="PointBuffer.cs" />
+    <Compile Include="PointCountType.cs" />
+    <Compile Include="PointFormat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Range_double.cs" />
+    <Compile Include="Reader.cs" />
     <Compile Include="Schema.cs" />
     <Compile Include="SchemaLayout.cs" />
+    <Compile Include="SpatialReference.cs" />
     <Compile Include="Stage.cs" />
+    <Compile Include="StageBase.cs" />
+    <Compile Include="StageBlockIterator.cs" />
+    <Compile Include="StageIterator.cs" />
+    <Compile Include="StageIteratorType.cs" />
+    <Compile Include="StageRandomIterator.cs" />
+    <Compile Include="StageSequentialIterator.cs" />
     <Compile Include="std_vector_Dimension.cs" />
     <Compile Include="std_vector_double.cs" />
     <Compile Include="std_vector_Range_double.cs" />
@@ -116,13 +128,18 @@
     <Compile Include="SWIGTYPE_p_char.cs" />
     <Compile Include="SWIGTYPE_p_f_enum_std__ios_base__event_r_std__ios_base_int__void.cs" />
     <Compile Include="SWIGTYPE_p_long.cs" />
+    <Compile Include="SWIGTYPE_p_p_unsigned_char.cs" />
     <Compile Include="SWIGTYPE_p_p_void.cs" />
     <Compile Include="SWIGTYPE_p_std__basic_streambufT_char_std__char_traitsT_char_t_t.cs" />
     <Compile Include="SWIGTYPE_p_std__locale.cs" />
+    <Compile Include="SWIGTYPE_p_std__vectorT_pdal__drivers__las__VariableLengthRecord_t.cs" />
     <Compile Include="SWIGTYPE_p_streamoff.cs" />
     <Compile Include="SWIGTYPE_p_streampos.cs" />
-    <Compile Include="Utils.cs" />
+    <Compile Include="SWIGTYPE_p_unsigned_char.cs" />
+    <Compile Include="SWIGTYPE_p_unsigned_int.cs" />
+    <Compile Include="VariableLengthRecord.cs" />
     <Compile Include="Vector_double.cs" />
+    <Compile Include="Writer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
