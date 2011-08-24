@@ -37,21 +37,53 @@
 #include <iostream>
 
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
 
+#include <pdal/Stage.hpp>
 #include <pdal/exceptions.hpp>
 
 
 namespace pdal
 {
 
+std::vector<StageBase*> StageBase::makeVector()
+{
+    std::vector<StageBase*> v;
+    return v;
+}
 
-StageBase::StageBase(const Options& options)
+std::vector<StageBase*> StageBase::makeVector(Stage& sref)
+{
+    Stage* s = &sref;
+    StageBase* sb = s;
+    std::vector<StageBase*> v;
+    v.push_back(sb);
+    return v;
+}
+
+std::vector<StageBase*> StageBase::makeVector(const std::vector<Stage*>& stages)
+{
+    std::vector<StageBase*> v;
+    BOOST_FOREACH(Stage* stage, stages)
+    {
+        v.push_back(stage);
+    }
+    return v;
+}
+
+StageBase::StageBase(const std::vector<StageBase*>& inputs, const Options& options)
     : m_initialized(false)
     , m_options(options)
     , m_debug(options.getValueOrDefault<bool>("debug", false))
     , m_verbose(options.getValueOrDefault<boost::uint32_t>("verbose", 0))
     , m_id(options.getValueOrDefault<boost::uint32_t>("id", 0))
+    , m_inputs(inputs)
 {
+    BOOST_FOREACH(StageBase* input, m_inputs)
+    {
+        input->m_outputs.push_back(this);
+    }
+
     return;
 }
 

@@ -41,7 +41,7 @@ namespace pdal
 
 
 MultiFilter::MultiFilter(const std::vector<Stage*>& prevStages, const Options& options)
-    : Stage(options)
+    : Stage(StageBase::makeVector(prevStages), options)
 {
     if (prevStages.size() == 0)
     {

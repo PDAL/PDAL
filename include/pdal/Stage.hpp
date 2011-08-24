@@ -61,7 +61,7 @@ class StageBlockIterator;
 class PDAL_DLL Stage : public StageBase
 {
 public:
-    Stage(const Options& options);
+    Stage(const std::vector<StageBase*>& prevs, const Options& options);
     virtual ~Stage();
 
     virtual void initialize();

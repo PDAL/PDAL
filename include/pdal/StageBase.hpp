@@ -39,11 +39,14 @@
 #include <pdal/Options.hpp>
 
 #include <string>
+#include <vector>
 
 
 namespace pdal
 {
 
+class Stage;
+    
 //
 // supported options:
 //   <uint32>id
@@ -55,14 +58,15 @@ namespace pdal
 class PDAL_DLL StageBase
 {
 public:
-    StageBase(const Options& options);
+    StageBase(const std::vector<StageBase*>& inputs, const Options& options);
+
     virtual ~StageBase();
 
     // This function is for derived stages to perform "static" validation, e.g. bad Option arguments.
     // It will recursively call initialize() on all previous stages.
     // Users must call this after the last stage in the pipeline has been consturcted.  
     // It is illegal to call this twice for a stage.
-    // Derived stages should feel free to provide their own implementations.  Remeber to call initialize() on
+    // Derived stages should feel free to provide their own implementations.  Remember to call initialize() on
     //   the parent class before your own class-specific code.
     // This function will throw when errors are found.
     virtual void initialize();
@@ -118,8 +122,18 @@ public:
 
     boost::uint32_t getId() const { return m_id; }
 
+    std::vector<StageBase*> getInputs();
+    std::vector<StageBase*> getOutputs();
+
 protected:
     Options& getOptions();
+
+    // These are used by the ctors of the derived classes, so they can call 
+    // the ctor of StageBase.  C++ doesn't support polymorphic arrays or
+    // inlined initialization of vectors, so we do it this way.
+    static std::vector<StageBase*> makeVector();
+    static std::vector<StageBase*> makeVector(Stage&);
+    static std::vector<StageBase*> makeVector(const std::vector<Stage*>&);
 
 private:
     bool m_initialized;
@@ -127,6 +141,9 @@ private:
     bool m_debug;
     boost::uint32_t m_verbose;
     const boost::uint32_t m_id;
+
+    std::vector<StageBase*> m_inputs;
+    std::vector<StageBase*> m_outputs;
 
     StageBase& operator=(const StageBase&); // not implemented
     StageBase(const StageBase&); // not implemented

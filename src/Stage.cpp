@@ -45,8 +45,8 @@ namespace pdal
 {
 
 
-Stage::Stage(const Options& options)
-    : StageBase(options)
+Stage::Stage(const std::vector<StageBase*>& prevs, const Options& options)
+    : StageBase(prevs, options)
     , m_numPoints(0)
     , m_pointCountType(PointCount_Fixed)
 {

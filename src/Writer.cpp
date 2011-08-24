@@ -54,7 +54,7 @@ const boost::uint32_t Writer::s_defaultChunkSize = 1024 * 32;
 
 
 Writer::Writer(Stage& prevStage, const Options& options)
-    : StageBase(options)
+    : StageBase(StageBase::makeVector(prevStage), options)
     , m_prevStage(prevStage)
     , m_chunkSize(s_defaultChunkSize)
 {

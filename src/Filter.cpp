@@ -40,7 +40,7 @@ namespace pdal
 
 
 Filter::Filter(Stage& prevStage, const Options& options)
-    : Stage(options)
+    : Stage(StageBase::makeVector(prevStage), options)
     , m_prevStage(prevStage)
 {
     return;
