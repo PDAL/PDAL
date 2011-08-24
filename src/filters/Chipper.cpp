@@ -114,13 +114,18 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t 
     // const int indexId = schema.getDimensionIndex(Dimension::Field_User1, Dimension::Int32);
     // const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
     
+    boost::uint8_t* p_block_id = reinterpret_cast<boost::uint8_t*>(&block_id);
     for (it = ids.begin(); it != ids.end(); it++)
     {
-        iter->seek(*it);
+        boost::uint32_t id = *it;
+        iter->seek(id);
         iter->read(one_point);
-
-        one_point.setField(0, indexId, *it);
-        one_point.setField(0, indexBlockId, block_id);
+        
+        boost::uint8_t* p_id = reinterpret_cast<boost::uint8_t*>(&id);
+        one_point.setFieldData(0, indexId, p_id);
+        one_point.setFieldData(0, indexBlockId, p_block_id);
+        // one_point.setField(0, indexId, *it);
+        // one_point.setField(0, indexBlockId, block_id);
         
         // put single point onto our block
         buffer.copyPointsFast(static_cast<std::size_t>(count), static_cast<std::size_t>(0), one_point, 1); 
