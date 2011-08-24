@@ -7,7 +7,7 @@ set BUILD_TYPE=Release
 set BUILD_TYPE=Debug
 
 set UTILS_DIR=c:\Utils
-set DEV_DIR=c:\dev
+set DEV_DIR=d:\dev
 set OSGEO4W_DIR=C:\OSGeo4W
 
 rem *** These packages are needed from OSGeo4W
@@ -39,6 +39,7 @@ cmake -G %COMPILER% ^
     -DWITH_FREEGLUT=ON ^
     -DWITH_LIBXML2=ON ^
     -DWITH_ICONV=OFF ^
+    -DWITH_SWIG_CSHARP=ON ^
     -DFREEGLUT_LIBRARY=%FREEGLUT_DIR%\lib\freeglut.lib ^
     -DFREEGLUT_INCLUDE_DIR=%FREEGLUT_DIR%\include ^
     -DGLUT_LIBRARY=%FREEGLUT_DIR%\lib ^
@@ -74,4 +75,4 @@ rem    -DLIBXML2_INCLUDE_DIR=%LIBXML2_DIR%\include ^
 rem    -DICONV_LIBRARY=%ICONV_DIR%\lib\iconv.lib ^
 rem    -DICONV_INCLUDE_DIR=%ICONV_DIR%\include ^
 
-set PDAL_SWIG_BOOST_HOME=%UTILS_DIR%\boost_1_45_0-win32
+set PDAL_SWIG_BOOST_HOME=%BOOST_DIR%
