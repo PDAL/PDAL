@@ -1,42 +1,36 @@
 /******************************************************************************
- *
- * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  swig/C# bindings for liblas
- * Author:   Michael P. Gerlek (mpg@flaxen.com)
- *
- ******************************************************************************
- * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
- *
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following 
- * conditions are met:
- * 
- *     * Redistributions of source code must retain the above copyright 
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright 
- *       notice, this list of conditions and the following disclaimer in 
- *       the documentation and/or other materials provided 
- *       with the distribution.
- *     * Neither the name of the Martin Isenburg or Iowa Department 
- *       of Natural Resources nor the names of its contributors may be 
- *       used to endorse or promote products derived from this software 
- *       without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS 
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED 
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
- * OF SUCH DAMAGE.
- ****************************************************************************/
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+*
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following
+* conditions are met:
+*
+*     * Redistributions of source code must retain the above copyright
+*       notice, this list of conditions and the following disclaimer.
+*     * Redistributions in binary form must reproduce the above copyright
+*       notice, this list of conditions and the following disclaimer in
+*       the documentation and/or other materials provided
+*       with the distribution.
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*       names of its contributors may be used to endorse or promote
+*       products derived from this software without specific prior
+*       written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+* AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+* OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+* OF SUCH DAMAGE.
+****************************************************************************/
  
 %module pdal_swig_cpp
 
@@ -52,17 +46,15 @@
 #include "pdal/DimensionLayout.hpp"
 #include "pdal/Schema.hpp"
 #include "pdal/SchemaLayout.hpp"
-#include "pdal/PointData.hpp"
+#include "pdal/PointBuffer.hpp"
 
-#include "pdal/Header.hpp"
-#include "pdal/Stage.hpp"
-#include "pdal/Filter.hpp"
-#include "pdal/Producer.hpp"
+#include "pdal/Reader.hpp"
+#include "pdal/Writer.hpp"
 
-#include "pdal/DecimationFilter.hpp"
+//#include "pdal/DecimationFilter.hpp"
 
-#include "pdal/../../src/drivers/liblas/header.hpp"
-#include "pdal/../../src/drivers/liblas/reader.hpp"
+#include "pdal/drivers/las/Reader.hpp"
+#include "pdal/drivers/las/Writer.hpp"
 %}
 
 %include "typemaps.i"
@@ -209,7 +201,7 @@ public:
         Field_ScanAngleRank,
         Field_UserData,
         Field_PointSourceId,
-        Field_GpsTime,
+        Field_Time,
         Field_Red,
         Field_Green,
         Field_Blue,
@@ -219,6 +211,7 @@ public:
         Field_WaveformXt,
         Field_WaveformYt,
         Field_WaveformZt,
+        Field_Alpha,
         // ...
 
         // add more here
@@ -231,6 +224,12 @@ public:
         Field_User7,
         Field_User8,
         Field_User9,
+        Field_User10,
+        Field_User11,
+        Field_User12,
+        Field_User13,
+        Field_User14,
+        Field_User15,
         // ...
         // feel free to use your own int here
 
@@ -248,7 +247,8 @@ public:
         Int64,
         Uint64,
         Float,       // 32 bits
-        Double       // 64 bits
+        Double,       // 64 bits
+        Undefined
     };
 
 public:
@@ -323,23 +323,19 @@ public:
 };
 
 
-class PointData
+class PointBuffer
 {
 public:
-    typedef std::vector<boost::uint8_t> valid_mask_type;
-    PointData(const SchemaLayout&, boost::uint32_t numPoints);
+    PointBuffer(const SchemaLayout&, boost::uint32_t numPoints);
     boost::uint32_t getNumPoints() const;
-    //boost::uint32_t getNumValidPoints();
     const SchemaLayout& getSchemaLayout() const;
     const Schema& getSchema() const;
-    bool allValid() const;
-    void setValid(valid_mask_type::size_type  pointIndex, bool value=true);
     template<class T> T getField(std::size_t pointIndex, std::size_t fieldIndex) const;
     template<class T> void setField(std::size_t pointIndex, std::size_t fieldIndex, T value);
     void copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointData& srcPointData, std::size_t numPoints);
 };
 
-%extend PointData
+%extend PointBuffer
 {
     %template(getField_Int8) getField<boost::int8_t>;
     %template(getField_UInt8) getField<boost::uint8_t>;
@@ -353,93 +349,179 @@ public:
     %template(getField_Double) getField<double>;
 };
 
+class StageBase
+{
+    virtual void initialize();
+    bool isInitialized() const;
 
+    const Options& getOptions() const;
 
-class Header
+    bool isDebug() const;
+    
+    bool isVerbose() const; // true iff verbosity>0 
+    boost::uint32_t getVerboseLevel() const; 
+
+    virtual const Options getDefaultOptions() const = 0;
+
+    virtual std::string getName() const = 0;
+    virtual std::string getDescription() const = 0;
+
+    boost::uint32_t getId() const;
+};
+
+class Stage : public StageBase
 {
 public:
-    Header();
+    virtual void initialize();
+
     const Schema& getSchema() const;
-    boost::uint64_t getNumPoints() const;
+    virtual boost::uint64_t getNumPoints() const;
+    PointCountType getPointCountType() const;
     const Bounds<double>& getBounds() const;
-    //const SpatialReference& getSpatialReference() const;
-    //const Metadata::Array& getMetadata() const;
+    const SpatialReference& getSpatialReference() const;
+    
+    virtual bool supportsIterator (StageIteratorType) const = 0;
+
+    virtual StageSequentialIterator* createSequentialIterator() const { return NULL; }
+    virtual StageRandomIterator* createRandomIterator() const  { return NULL; }
+    virtual StageBlockIterator* createBlockIterator() const  { return NULL; }
 };
 
-class Stage
+class StageIterator
 {
-public:
-    Stage();
-    virtual const std::string& getName() const = 0;
-    boost::uint32_t read(PointData&);
-    virtual void readBegin(boost::uint32_t numPointsToRead) = 0;
-    virtual boost::uint32_t readBuffer(PointData&) = 0;
-    virtual void readEnd(boost::uint32_t numPointsRead) = 0;
-    virtual void seekToPoint(boost::uint64_t pointNum) = 0;
-    virtual boost::uint64_t getCurrentPointIndex() const = 0;
-    boost::uint64_t getNumPoints() const;
+    const Stage& getStage() const;
+    boost::uint32_t read(PointBuffer& buffer);
+    void readBegin();
+    void readBufferBegin(PointBuffer&);
+    boost::uint32_t readBuffer(PointBuffer&);
+    void readBufferEnd(PointBuffer&);
+    void readEnd();
+    boost::uint64_t getIndex() const;
+    void setChunkSize(boost::uint32_t size);
+    boost::uint32_t getChunkSize() const;
+};
+
+class StageSequentialIterator : public StageIterator
+{
+    boost::uint64_t skip(boost::uint64_t count);
     bool atEnd() const;
-    const Header& getHeader() const;
 };
 
-
-class Producer : public Stage
+class StageRandomIterator : public StageIterator
 {
-public:
-    Reader(int);
-    virtual void readBegin(boost::uint32_t numPointsToRead);
+    boost::uint64_t seek(boost::uint64_t position);
+};
 
-    virtual void readEnd(boost::uint32_t numPointsRead);
-
-    virtual void seekToPoint(boost::uint64_t pointNum);
-
-    virtual boost::uint64_t getCurrentPointIndex() const;
+class Reader : public Stage
+{
+    virtual void initialize();
 };
 
 class Filter : public Stage
 {
-public:
-    Reader(int);
-    virtual void readBegin(boost::uint32_t numPointsToRead);
+    virtual void initialize();
+    const Stage& getPrevStage() const;
+};
 
-    virtual void readEnd(boost::uint32_t numPointsRead);
+class MultiFilter : public Stage
+{
+    virtual void initialize();
+    const std::vector<const Stage*> getPrevStages() const;
+};
 
-    virtual void seekToPoint(boost::uint64_t pointNum);
+class Writer : public StageBase
+{
+    Writer(Stage& prevStage, const Options& options);
+    virtual void initialize();
 
-    virtual boost::uint64_t getCurrentPointIndex() const;
+    void setChunkSize(boost::uint32_t);
+    boost::uint32_t getChunkSize() const;
+
+    boost::uint64_t write(boost::uint64_t targetNumPointsToWrite=0);
+
+    virtual boost::property_tree::ptree serializePipeline() const;
+
+    const Stage& getPrevStage() const;
+
+    const SpatialReference& getSpatialReference() const;
+    void setSpatialReference(const SpatialReference&);
 };
 
 
-class LiblasHeader : public Header
+class LasReaderBase: public Reader
+{
+    virtual PointFormat getPointFormat() const = 0;
+    virtual boost::uint8_t getVersionMajor() const = 0;
+    virtual boost::uint8_t getVersionMinor() const = 0;
+};
+
+class LasReader : public LasReaderBase
 {
 public:
+    LasReader(const Options&);
+    LasReader(const std::string& filename);
+    
+    virtual void initialize();
+    virtual const Options getDefaultOptions() const;
+
+    const std::string& getFileName() const;
+
+    bool supportsIterator (StageIteratorType t) const;
+
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const;
+
+    PointFormat getPointFormat() const;
+    boost::uint8_t getVersionMajor() const;
+    boost::uint8_t getVersionMinor() const;
+
+    boost::uint64_t getPointDataOffset() const;
+
+    // we shouldn't have to expose this
+    const std::vector<VariableLengthRecord>& getVLRs() const;
+
+    bool isCompressed() const;
 };
 
-
-%feature("notabstract") LiblasReader;
-class LiblasReader : public Producer
+class LasWriter : public Writer
 {
-public:
-    LiblasReader(std::istream&);
-    ~LiblasReader();
-    const pdal::LiblasHeader& getLiblasHeader() const;
-    boost::int8_t getPointFormatNumber() const;
+    LasWriter(Stage& prevStage, const Options&);
+    LasWriter(Stage& prevStage, std::ostream*);
+    ~LasWriter();
+
+    virtual void initialize();
+    virtual const Options getDefaultOptions() const;
+
+    void setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion);
+    void setPointFormat(PointFormat);
+    void setDate(boost::uint16_t dayOfYear, boost::uint16_t year);
+    
+    void setProjectId(const boost::uuids::uuid&);
+
+    // up to 32 chars (default is "PDAL")
+    void setSystemIdentifier(const std::string& systemId); 
+    
+    // up to 32 chars (default is "PDAL x.y.z")
+    void setGeneratingSoftware(const std::string& softwareId);
+    
+    void setHeaderPadding(boost::uint32_t const& v);
+
+    // default false
+    void setCompressed(bool);
 };
 
-%feature("notabstract") DecimationFilter;
-class DecimationFilter : public Filter
-{
-public:
-    DecimationFilter(Stage&, int);
-    ~LiblasReader();
-};
 
-class Utils
-{
-public:
-    static std::istream* openFile(std::string const& filename, bool asBinary=true);
-    static void closeFile(std::istream* ifs);
-};
+
+
+
+// %feature("notabstract") LiblasReader;
+
+//class Utils
+//{
+//public:
+//    static std::istream* openFile(std::string const& filename, bool asBinary=true);
+//    static void closeFile(std::istream* ifs);
+//};
 
 
 }; // namespace

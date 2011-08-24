@@ -30,8 +30,8 @@ ipch/
 *.sln.docstates
 
 # generated swig files
-csharp/libpc_swig_cs/*.cs
-csharp/libpc_swig_cpp/libpc_wrap.cpp
+csharp/pdal_swig_cs/*.cs
+csharp/pdal_swig_cpp/pdal_wrap.cpp
 *.pyc
 
 Makefile
