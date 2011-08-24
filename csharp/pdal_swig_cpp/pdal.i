@@ -337,7 +337,7 @@ public:
 
 %extend Dimension
 {
-    %template(getNumericValue_Int32) applyScaling<boost::int32_t>;
+    %template(applyScaling_Int32) applyScaling<boost::int32_t>;
 };
 
 
@@ -420,6 +420,7 @@ public:
 class Option
 {
 public:
+    Option();
     void setName(const std::string& name);
     const std::string& getName() const;
     void setDescription(const std::string& description);
@@ -432,8 +433,8 @@ public:
 class Options
 {
 public:
+    Options();
     void add(const Option& option);
-    void remove(const std::string& name);
     const Option& getOption(const std::string & name) const;
     template<typename T> T getValueOrThrow(std::string const& name) const;
     template<typename T> T getValueOrDefault(std::string const& name, T defaultValue) const;
@@ -452,22 +453,19 @@ public:
 
     bool isDebug() const;
     
-    bool isVerbose() const; // true iff verbosity>0 
+    bool isVerbose() const;
     boost::uint32_t getVerboseLevel() const; 
 
-    virtual const Options getDefaultOptions() const = 0;
-
-    virtual std::string getName() const = 0;
-    virtual std::string getDescription() const = 0;
-
     boost::uint32_t getId() const;
+protected:
+    StageBase(const Options& options);
 };
 
-//%feature("abstract") StageIterator;
+class Stage;
+
 class StageIterator
 {
 public:
-    StageIterator(const Stage& stage);
     const Stage& getStage() const;
     boost::uint32_t read(PointBuffer& buffer);
     void readBegin();
@@ -478,7 +476,10 @@ public:
     boost::uint64_t getIndex() const;
     void setChunkSize(boost::uint32_t size);
     boost::uint32_t getChunkSize() const;
+protected:
+    StageIterator(const Stage& stage);
 };
+
 
 class StageSequentialIterator : public StageIterator
 {
@@ -514,14 +515,17 @@ public:
     virtual StageSequentialIterator* createSequentialIterator() const;
     virtual StageRandomIterator* createRandomIterator() const;
     virtual StageBlockIterator* createBlockIterator() const;
+protected:
+    Stage(const Options& options);
 };
-
 
 
 class Reader : public Stage
 {
 public:
     virtual void initialize();
+protected:
+    Reader(const Options& options);
 };
 
 class Filter : public Stage
@@ -541,7 +545,6 @@ public:
 class Writer : public StageBase
 {
 public:
-    Writer(Stage& prevStage, const Options& options);
     virtual void initialize();
 
     void setChunkSize(boost::uint32_t);
@@ -555,6 +558,9 @@ public:
 
     const SpatialReference& getSpatialReference() const;
     void setSpatialReference(const SpatialReference&);
+
+protected:
+    Writer(Stage& prevStage, const Options& options);
 };
 
 
@@ -584,22 +590,24 @@ public:
 };
 
 
+
 class LasReaderBase: public Reader
 {
 public:
-    LasReaderBase(const Options&);
     virtual PointFormat getPointFormat() const = 0;
     virtual boost::uint8_t getVersionMajor() const = 0;
     virtual boost::uint8_t getVersionMinor() const = 0;
+protected:
+    LasReaderBase(const Options&);
 };
-//%feature("notabstract") LasReaderBase;
+
+
 
 
 class LasReader : public LasReaderBase
 {
 public:
     LasReader(const Options&);
-    
     LasReader(const std::string& filename);
     
     virtual void initialize();
