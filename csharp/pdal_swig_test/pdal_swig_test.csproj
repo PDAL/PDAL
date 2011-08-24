@@ -8,8 +8,8 @@
     <ProjectGuid>{3F5B745F-81E8-41A6-BA7B-E997B8A46396}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>swig_test</RootNamespace>
-    <AssemblyName>swig_test</AssemblyName>
+    <RootNamespace>pdal_swig_test</RootNamespace>
+    <AssemblyName>pdal_swig_test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>

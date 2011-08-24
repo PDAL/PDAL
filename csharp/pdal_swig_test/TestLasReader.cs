@@ -17,9 +17,9 @@ namespace pdal_swig_test
 
         private void Test1()
         {
-            //istream stream = Utils.openFile("../../test/data/1.2-with-color.las");
-            
-            LasReader reader = new LasReader();
+            Console.WriteLine("Starting LasReader test");
+
+            LasReader reader = new LasReader("../../test/data/1.2-with-color.las");
             reader.initialize();
 
             ulong numPoints = reader.getNumPoints();
@@ -31,27 +31,28 @@ namespace pdal_swig_test
 
             StageSequentialIterator iter = reader.createSequentialIterator();
 
-            uint numRead = iter.readBuffer(data);
+            uint numRead = iter.read(data);
 
             {
-                int offsetX = schema.getDimensionIndex(Dimension.Field.Field_X, Dimension.DataType.Uint32);
-                int offsetY = schema.getDimensionIndex(Dimension.Field.Field_Y, Dimension.DataType.Uint32);
-                int offsetZ = schema.getDimensionIndex(Dimension.Field.Field_Z, Dimension.DataType.Uint32);
-
+                Console.WriteLine("checking point 0...");
                 uint index = 0;
-                Int32 x0raw = data.getField_Int32(index, offsetX);
-                Int32 y0raw = data.getField_Int32(index, offsetY);
-                Int32 z0raw = data.getField_Int32(index, offsetZ);
-                double x0 = schema.getDimension((uint)offsetX).getNumericValue_Int32(x0raw);
-                double y0 = schema.getDimension((uint)offsetY).getNumericValue_Int32(y0raw);
-                double z0 = schema.getDimension((uint)offsetZ).getNumericValue_Int32(z0raw);
+
+                int offsetX = schema.getDimensionIndex(Dimension.Field.Field_X, Dimension.DataType.Int32);
+                int offsetY = schema.getDimensionIndex(Dimension.Field.Field_Y, Dimension.DataType.Int32);
+                int offsetZ = schema.getDimensionIndex(Dimension.Field.Field_Z, Dimension.DataType.Int32);
+
+                int x0raw = data.getField_Int32(index, offsetX);
+                int y0raw = data.getField_Int32(index, offsetY);
+                int z0raw = data.getField_Int32(index, offsetZ);
+                double x0 = schema.getDimension((uint)offsetX).applyScaling_Int32(x0raw);
+                double y0 = schema.getDimension((uint)offsetY).applyScaling_Int32(y0raw);
+                double z0 = schema.getDimension((uint)offsetZ).applyScaling_Int32(z0raw);
 
                 Debug.Assert(x0 == 637012.240000);
                 Debug.Assert(y0 == 849028.310000);
                 Debug.Assert(z0 == 431.660000);
+                Console.WriteLine("point 0 okay");
             }
-
-            //Utils.closeFile(stream);
 
             return;
         }

@@ -27,7 +27,7 @@ The C# work does not use CMake, as CMake doesn't yet support C# builds.
     . creates pdal_swig_cs.dll
   - pdal_swig_test
     . compiles a simple test app to verify the bindings work
-    . creates swig_test.exe
+    . creates pdal_swig_test.exe
 
 
 * The two DLLs and the EXE are put into the main pdal bin directory, for ease of use.
@@ -38,12 +38,7 @@ The C# work does not use CMake, as CMake doesn't yet support C# builds.
   - x86/Release
   - x64/Debug
   - x64/Release
-Of these four, only x64/Debug has actually been tested :-)
-
-There seems to be an issue with running swig-generated code in x86 mode on a
-64-bit OS, and the examples that ship with swig bear this out.  I'm not sure
-what's up with that.  See this thread:
-  http://old.nabble.com/SWIG-examples-will-not-run-on-my-windows-7---64-bits-td29085404.html
+Of these four, only x86/Debug has actually been tested :-)
 
 
 * The test app should be run from the csharp/pdal_swig_test directory.
