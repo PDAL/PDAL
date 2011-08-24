@@ -20,28 +20,31 @@ namespace pdal_swig_test
             //istream stream = Utils.openFile("../../test/data/1.2-with-color.las");
             
             LasReader reader = new LasReader();
+            reader.initialize();
 
             ulong numPoints = reader.getNumPoints();
 
-            Schema schema = reader.getHeader().getSchema();
+            Schema schema = reader.getSchema();
             SchemaLayout layout = new SchemaLayout(schema);
 
-            PointData data = new PointData(layout, 1);
+            PointBuffer data = new PointBuffer(layout, 512);
 
-            uint numRead = reader.read(data);
+            StageSequentialIterator iter = reader.createSequentialIterator();
+
+            uint numRead = iter.readBuffer(data);
 
             {
-                uint offsetX = (uint)schema.getDimensionIndex(Dimension.Field.Field_X);
-                uint offsetY = (uint)schema.getDimensionIndex(Dimension.Field.Field_Y);
-                uint offsetZ = (uint)schema.getDimensionIndex(Dimension.Field.Field_Z);
+                int offsetX = schema.getDimensionIndex(Dimension.Field.Field_X, Dimension.DataType.Uint32);
+                int offsetY = schema.getDimensionIndex(Dimension.Field.Field_Y, Dimension.DataType.Uint32);
+                int offsetZ = schema.getDimensionIndex(Dimension.Field.Field_Z, Dimension.DataType.Uint32);
 
                 uint index = 0;
                 Int32 x0raw = data.getField_Int32(index, offsetX);
                 Int32 y0raw = data.getField_Int32(index, offsetY);
                 Int32 z0raw = data.getField_Int32(index, offsetZ);
-                double x0 = schema.getDimension(offsetX).getNumericValue_Int32(x0raw);
-                double y0 = schema.getDimension(offsetY).getNumericValue_Int32(y0raw);
-                double z0 = schema.getDimension(offsetZ).getNumericValue_Int32(z0raw);
+                double x0 = schema.getDimension((uint)offsetX).getNumericValue_Int32(x0raw);
+                double y0 = schema.getDimension((uint)offsetY).getNumericValue_Int32(y0raw);
+                double z0 = schema.getDimension((uint)offsetZ).getNumericValue_Int32(z0raw);
 
                 Debug.Assert(x0 == 637012.240000);
                 Debug.Assert(y0 == 849028.310000);

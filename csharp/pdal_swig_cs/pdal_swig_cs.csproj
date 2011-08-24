@@ -132,7 +132,6 @@
     <Compile Include="SWIGTYPE_p_p_void.cs" />
     <Compile Include="SWIGTYPE_p_std__basic_streambufT_char_std__char_traitsT_char_t_t.cs" />
     <Compile Include="SWIGTYPE_p_std__locale.cs" />
-    <Compile Include="SWIGTYPE_p_std__vectorT_pdal__drivers__las__VariableLengthRecord_t.cs" />
     <Compile Include="SWIGTYPE_p_streamoff.cs" />
     <Compile Include="SWIGTYPE_p_streampos.cs" />
     <Compile Include="SWIGTYPE_p_unsigned_char.cs" />

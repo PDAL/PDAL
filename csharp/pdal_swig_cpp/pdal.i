@@ -213,6 +213,7 @@ public:
 
 class SpatialReference
 {
+public:
     enum WKTModeFlag
     {
         eHorizontalOnly = 1,
@@ -418,6 +419,7 @@ public:
 
 class Option
 {
+public:
     void setName(const std::string& name);
     const std::string& getName() const;
     void setDescription(const std::string& description);
@@ -429,6 +431,7 @@ class Option
 
 class Options
 {
+public:
     void add(const Option& option);
     void remove(const std::string& name);
     const Option& getOption(const std::string & name) const;
@@ -441,6 +444,7 @@ class Options
 
 class StageBase
 {
+public:
     virtual void initialize();
     bool isInitialized() const;
 
@@ -462,6 +466,7 @@ class StageBase
 //%feature("abstract") StageIterator;
 class StageIterator
 {
+public:
     StageIterator(const Stage& stage);
     const Stage& getStage() const;
     boost::uint32_t read(PointBuffer& buffer);
@@ -477,17 +482,20 @@ class StageIterator
 
 class StageSequentialIterator : public StageIterator
 {
+public:
     boost::uint64_t skip(boost::uint64_t count);
     bool atEnd() const;
 };
 
 class StageRandomIterator : public StageIterator
 {
+public:
     boost::uint64_t seek(boost::uint64_t position);
 };
 
 class StageBlockIterator : public StageIterator
 {
+public:
 };
 
 class Stage : public StageBase
@@ -512,23 +520,27 @@ public:
 
 class Reader : public Stage
 {
+public:
     virtual void initialize();
 };
 
 class Filter : public Stage
 {
+public:
     virtual void initialize();
     const Stage& getPrevStage() const;
 };
 
 class MultiFilter : public Stage
 {
+public:
     virtual void initialize();
     const std::vector<const Stage*> getPrevStages() const;
 };
 
 class Writer : public StageBase
 {
+public:
     Writer(Stage& prevStage, const Options& options);
     virtual void initialize();
 
@@ -562,6 +574,7 @@ enum PointFormat
 
 class VariableLengthRecord
 {
+public:
     VariableLengthRecord(boost::uint16_t reserved,
                          std::string userId,
                          boost::uint16_t recordId,
@@ -573,15 +586,20 @@ class VariableLengthRecord
 
 class LasReaderBase: public Reader
 {
+public:
+    LasReaderBase(const Options&);
     virtual PointFormat getPointFormat() const = 0;
     virtual boost::uint8_t getVersionMajor() const = 0;
     virtual boost::uint8_t getVersionMinor() const = 0;
 };
+//%feature("notabstract") LasReaderBase;
+
 
 class LasReader : public LasReaderBase
 {
 public:
-    //LasReader(const Options&);
+    LasReader(const Options&);
+    
     LasReader(const std::string& filename);
     
     virtual void initialize();
@@ -600,14 +618,15 @@ public:
 
     boost::uint64_t getPointDataOffset() const;
 
-    // we shouldn't have to expose this
     const std::vector<VariableLengthRecord>& getVLRs() const;
 
     bool isCompressed() const;
 };
 
+
 class LasWriter : public Writer
 {
+public:
     LasWriter(Stage& prevStage, const Options&);
     LasWriter(Stage& prevStage, std::ostream*);
     ~LasWriter();
