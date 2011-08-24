@@ -1,5 +1,5 @@
 @echo off
-
+ 
 set COMPILER="Visual Studio 10 Win64"
 set COMPILER="Visual Studio 10"
 
