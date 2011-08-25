@@ -38,9 +38,7 @@
 #include <pdal/pdal.hpp>
 
 #include <vector>
-//#include <pdal/Filter.hpp>
 #include <pdal/MultiFilterIterator.hpp>
-//#include <pdal/Bounds.hpp>
 
 
 namespace pdal { namespace filters {
