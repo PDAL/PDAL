@@ -51,13 +51,13 @@ SET(PDAL_UNITTEST_TEST_SRC
     ScalingFilterTest.cpp
     SchemaLayoutTest.cpp
     SchemaTest.cpp
-    SignallerTest.cpp
     SpatialReferenceTest.cpp
     StageFactoryTest.cpp
     StatsFilterTest.cpp
     StreamManagerTest.cpp
     SupportTest.cpp
     TerraSolidTest.cpp
+    UserCallbackTest.cpp
     UtilsTest.cpp
     VectorTest.cpp
     ${PDAL_UNITTEST_XMLSCHEMA_TEST}

@@ -35,6 +35,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
+#include <pdal/UserCallback.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
 
@@ -96,5 +97,116 @@ BOOST_AUTO_TEST_CASE(test_2)
 
     return;
 }
+
+
+class MyUserCallback_0 : public UserCallback
+{
+public:
+    virtual void callback()
+    {
+        // just run to completion
+        return;
+    }
+};
+
+class MyUserCallback_1 : public UserCallback
+{
+public:
+    virtual void callback()
+    {
+        if (getPercentComplete() > 50.0)
+        {
+            setInterruptFlag(true);
+        }
+    }
+};
+
+class MyUserCallback_2 : public UserCallback
+{
+public:
+    virtual void callback()
+    {
+        // whichever comes first
+        if (getHeartbeats() > 6)
+        {
+            setInterruptFlag(true);
+        }
+    }
+};
+
+
+BOOST_AUTO_TEST_CASE(test_callbacks)
+{
+    // write(0) and run to end without interrupts
+    {
+        Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+        pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
+        pdal::drivers::faux::Writer writer(reader, Options::none());
+        writer.initialize();
+        writer.setChunkSize(100);
+
+        MyUserCallback_0 cb;
+        writer.setUserCallback(&cb);
+
+        writer.write(0);
+
+        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 12);
+        BOOST_CHECK_EQUAL(cb.getPercentComplete(), 100);
+    }
+
+    // write(1000) and run to end without interrupts
+    {
+        Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+        pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
+        pdal::drivers::faux::Writer writer(reader, Options::none());
+        writer.initialize();
+        writer.setChunkSize(100);
+
+        MyUserCallback_0 cb;
+        writer.setUserCallback(&cb);
+
+        writer.write(1000);
+
+        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 12);
+        BOOST_CHECK_EQUAL(cb.getPercentComplete(), 100);
+    }
+
+    // write(1000) and get interrupted by perc completed
+    {
+        Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+        pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
+        pdal::drivers::faux::Writer writer(reader, Options::none());
+        writer.initialize();
+        writer.setChunkSize(100);
+
+        MyUserCallback_1 cb;
+        writer.setUserCallback(&cb);
+
+        BOOST_CHECK_THROW(writer.write(1000), pipeline_interrupt);
+
+        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 7);
+        BOOST_CHECK_EQUAL(cb.getPercentComplete(), 60);
+    }
+
+    // write(0) and get interrupted by heartbeats
+    {
+        Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+        pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Random);
+        pdal::drivers::faux::Writer writer(reader, Options::none());
+        writer.initialize();
+        writer.setChunkSize(100);
+
+        MyUserCallback_2 cb;
+        writer.setUserCallback(&cb);
+
+        BOOST_CHECK_THROW(writer.write(1000), pipeline_interrupt);
+
+        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 7);
+        BOOST_CHECK_EQUAL(cb.getPercentComplete(), 60);
+    }
+
+    return;
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

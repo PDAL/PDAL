@@ -91,6 +91,7 @@ public:
     {}
 };
 
+
 // use this for conditions that indicate a program bug -- things
 // that we'd assert can't happen
 class internal_error : public pdal_error
@@ -102,6 +103,7 @@ public:
     {}
 };
 
+
 class invalid_format : public pdal_error
 {
 public:
@@ -110,6 +112,7 @@ public:
         : pdal_error(msg)
     {}
 };
+
 
 // for when a stage doesn't get the schema it expects
 class impedance_invalid : public pdal_error
@@ -121,6 +124,7 @@ public:
     {}
 };
 
+
 // use this for attempts to use a feature not compiled in, e.g. laszip or gdal
 class configuration_error : public pdal_error
 {
@@ -129,6 +133,7 @@ public:
         : pdal_error(msg)
     {}
 };
+
 
 // use this for situations where indeterminate point counts prevent some 
 // operation from happening
@@ -139,6 +144,7 @@ public:
         : pdal_error(msg)
     {}
 };
+
 
 class dimension_not_found : public pdal_error
 {
@@ -178,6 +184,17 @@ public:
         : pdal_error(msg)
     {}
 };
+
+
+// use this when an executing pipeline needs to abort per user request
+class pipeline_interrupt : public pdal_error
+{
+public:
+    pipeline_interrupt(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
 
 } // namespace pdal
 

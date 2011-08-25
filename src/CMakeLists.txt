@@ -46,13 +46,13 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/ReaderIterator.hpp
   ${PDAL_HEADERS_DIR}/Schema.hpp
   ${PDAL_HEADERS_DIR}/SchemaLayout.hpp
-  ${PDAL_HEADERS_DIR}/Signaller.hpp
   ${PDAL_HEADERS_DIR}/SpatialReference.hpp
   ${PDAL_HEADERS_DIR}/Stage.hpp
   ${PDAL_HEADERS_DIR}/StageBase.hpp
   ${PDAL_HEADERS_DIR}/StageFactory.hpp
   ${PDAL_HEADERS_DIR}/StageIterator.hpp
   ${PDAL_HEADERS_DIR}/StreamManager.hpp
+  ${PDAL_HEADERS_DIR}/UserCallback.hpp
   ${PDAL_HEADERS_DIR}/Utils.hpp
   ${PDAL_HEADERS_DIR}/Vector.hpp  
   ${PDAL_HEADERS_DIR}/Writer.hpp
@@ -85,13 +85,13 @@ set(PDAL_BASE_CPP
   ReaderIterator.cpp
   Schema.cpp
   SchemaLayout.cpp
-  Signaller.cpp
   SpatialReference.cpp
   Stage.cpp
   StageBase.cpp
   StageFactory.cpp
   StageIterator.cpp
   StreamManager.cpp
+  UserCallback.cpp
   Utils.cpp
   Vector.cpp  
   Writer.cpp

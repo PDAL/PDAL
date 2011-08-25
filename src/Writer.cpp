@@ -40,6 +40,7 @@
 #include <pdal/Stage.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/exceptions.hpp>
+#include <pdal/UserCallback.hpp>
 
 #include <pdal/PipelineWriter.hpp>
 
@@ -56,6 +57,7 @@ const boost::uint32_t Writer::s_defaultChunkSize = 1024 * 32;
 Writer::Writer(Stage& prevStage, const Options& options)
     : StageBase(StageBase::makeVector(prevStage), options)
     , m_chunkSize(s_defaultChunkSize)
+    , m_userCallback(0)
 {
     return;
 }
@@ -93,6 +95,54 @@ void Writer::setSpatialReference(const SpatialReference& srs)
 }
 
 
+void Writer::setUserCallback(UserCallback* userCallback)
+{
+    m_userCallback = userCallback;
+}
+
+
+UserCallback* Writer::getUserCallback() const
+{
+    return m_userCallback;
+}
+
+
+static void do_callback(double perc, UserCallback* callback)
+{
+    if (!callback) return;
+
+    bool ok = callback->check(perc);
+    if (!ok)
+    {
+        throw pipeline_interrupt("user requested interrupt");
+    }
+
+    return;
+}
+
+
+static void do_callback(boost::uint64_t pointsWritten, boost::uint64_t pointsToWrite, UserCallback* callback)
+{
+    if (!callback) return;
+
+    bool ok = false;
+    if (pointsToWrite == 0)
+    {
+        ok = callback->check();
+    }
+    else
+    {
+        double perc = ((double)pointsWritten / (double)pointsToWrite) * 100.0;
+        ok = callback->check(perc);
+    }
+    if (!ok)
+    {
+        throw pipeline_interrupt("user requested interrupt");
+    }
+
+    return;
+}
+
 boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 {
     if (!isInitialized())
@@ -101,7 +151,10 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
     }
 
     boost::uint64_t actualNumPointsWritten = 0;
-         
+
+    UserCallback* callback = getUserCallback();
+    do_callback(0.0, callback);
+
     boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator());
     
     if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
@@ -117,6 +170,8 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
     // The user has requested a specific number of points: proceed a 
     // chunk at a time until we reach that number.  (If that number 
     // is 0, we proceed until no more points can be read.)
+    //
+    // If the user requests an interrupt while we're running, we'll throw.
     //
     while (true)
     {
@@ -159,6 +214,8 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
         // update count
         actualNumPointsWritten += numPointsWrittenThisChunk;
 
+        do_callback(actualNumPointsWritten, targetNumPointsToWrite, callback);
+
         if (targetNumPointsToWrite != 0)
         {
             // have we done enough yet?
@@ -174,6 +231,8 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
     writeEnd(actualNumPointsWritten);
 
     assert((targetNumPointsToWrite == 0) || (actualNumPointsWritten <= targetNumPointsToWrite));
+
+    do_callback(100.0, callback);
 
     return actualNumPointsWritten;
 }

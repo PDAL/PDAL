@@ -32,48 +32,96 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_SIGNALLER_HPP
-#define INCLUDED_SIGNALLER_HPP
+#include <boost/test/unit_test.hpp>
 
-#include <pdal/pdal.hpp>
+#include <pdal/UserCallback.hpp>
 
-namespace pdal
-{
+#ifdef PDAL_COMPILER_GCC
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#endif
 
-// This is the abstract base class used for out-of-band interactions 
-// between the executing pipeline and the main app: reporting 
-// percent-complete, and requesting the pipeline to be interrupted.
-//
-// Apps should override these two functions as they desire.
-//
-class PDAL_DLL Signaller
+using namespace pdal;
+
+BOOST_AUTO_TEST_SUITE(UserCallbackTest)
+
+
+// our implementation will be that we will request an interrupt
+// when we are more than half done
+class MyUserCallback : public UserCallback
 {
 public:
-    Signaller() {}
-    virtual ~Signaller() {}
-
-    // This is called by the pipeline at various times,
-    // passing in a value in range [0..100].  It could
-    // be called often, so the implementation should be fast.
-    virtual void setPercentComplete(double value) = 0;
-
-    // returns a vlaue in range [0..100]
-    virtual double getPercentComplete() const = 0;
-
-    // This is called by the pipeline at various times;
-    // a return value of true means the pipeline should
-    // abandon its work and do an orderly shutdown as
-    // soon as possible.  It could be called often, so 
-    // the implementation should be fast.
-    virtual bool isInterruptRequested() const = 0;
-
-    virtual void requestInterrupt() = 0;
-
-private:
-    Signaller& operator=(const Signaller&); // not implemented
-    Signaller(const Signaller&); // not implemented
+    virtual void callback()
+    {
+        if (getPercentComplete() > 50.0)
+        {
+            setInterruptFlag(true);
+        }
+    }
 };
 
+
+class Worker
+{
+public:
+    Worker(UserCallback& cb)
+      : m_cb(cb)
+      , m_ticks(0)
+    {
+    }
+
+    // each invocation of doWork will represent 1% more done
+    // returns true if work is going along okay, false otherwise
+    bool doWork()
+    {
+        if (!m_cb.check())
+        {
+            return false;
+        }
+
+        if (!m_cb.check())
+        {
+            return false;
+        }
+
+        if (!m_cb.check(m_ticks))
+        {
+            return false;
+        }
+
+        ++m_ticks;
+        return true;
+    }
+
+private:
+    UserCallback& m_cb;
+    int m_ticks;
+
+    Worker& operator=(const Worker&); // not implemented
+};
+
+
+BOOST_AUTO_TEST_CASE(test1)
+{
+    MyUserCallback cb;
+
+    Worker worker(cb);
+    bool ok;
+
+    // first 50%
+    for (int i=0; i<=50; i++)
+    {
+        ok = worker.doWork();
+        BOOST_CHECK(ok);
+        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 3*(i+1));
+        BOOST_CHECK_CLOSE(cb.getPercentComplete(), (double)i, 0.001);
+    }
+
+    // to 51%...
+    ok = worker.doWork();
+    BOOST_CHECK(!ok);
+    BOOST_CHECK_CLOSE(cb.getPercentComplete(), 51.0, 0.001);
+
+    return;
 }
 
-#endif
+BOOST_AUTO_TEST_SUITE_END()

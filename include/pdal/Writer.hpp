@@ -46,6 +46,7 @@ namespace pdal
 
 class Stage;
 class PointBuffer;
+class UserCallback;
 
 class PDAL_DLL Writer : public StageBase
 {
@@ -71,6 +72,8 @@ public:
     const SpatialReference& getSpatialReference() const;
     void setSpatialReference(const SpatialReference&);
 
+    void setUserCallback(UserCallback* userCallback);
+
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
@@ -90,10 +93,13 @@ protected:
     // called once, after all the the writeBuffer calls
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten) = 0;
 
+    UserCallback* getUserCallback() const;
+
 private:
     boost::uint32_t m_chunkSize;
     static const boost::uint32_t s_defaultChunkSize;
     SpatialReference m_spatialReference;
+    UserCallback* m_userCallback;
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
