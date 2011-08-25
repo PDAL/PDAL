@@ -96,6 +96,12 @@ StageBase::~StageBase()
 
 void StageBase::initialize()
 {
+    // first, initialize any previous stages
+    BOOST_FOREACH(StageBase* prev, getInputs())
+    {
+        prev->initialize();
+    }
+
     // it is illegal to call initialize() twice
     if (m_initialized)
     {
@@ -156,6 +162,31 @@ const std::vector<StageBase*>& StageBase::getInputs() const
 const std::vector<StageBase*>& StageBase::getOutputs() const
 {
     return m_outputs;
+}
+
+
+Stage& StageBase::getPrevStage() const
+{
+    // BUG: should probably do this once and cache it
+    if (getInputs().size()==0) throw internal_error("StageBase does not have any previous stages");
+    StageBase* sb = getInputs()[0];
+    Stage* s = dynamic_cast<Stage*>(sb);
+    if (!s) throw internal_error("previous StageBase is not a Stage");
+    return *s;
+}
+
+
+std::vector<Stage*> StageBase::getPrevStages() const
+{
+    // BUG: should probably do this once and cache it
+    std::vector<Stage*> vec;
+    BOOST_FOREACH(StageBase* prev, getInputs())
+    {
+        Stage* s = dynamic_cast<Stage*>(prev);
+        if (!s) throw internal_error("previous StageBase is not a Stage");
+        vec.push_back(s);
+    }
+    return vec;
 }
 
 

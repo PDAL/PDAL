@@ -125,6 +125,18 @@ public:
     const std::vector<StageBase*>& getInputs() const;
     const std::vector<StageBase*>& getOutputs() const;
 
+    // convenience function: returns the first input stage, as a Stage&
+    // (don't call this unless you know it is safe to do so, e.g Readers
+    // should not use this since they have no input stages)
+    Stage& getPrevStage() const;
+
+    // convenience function: returns the input stages, as a Stage* vector
+    // (don't call this unless you know it is safe to do so, e.g Readers
+    // should not use this since they have no input stages, and Filters
+    // probably won't want to use this either since they only have one
+    // prev stage)
+    std::vector<Stage*> getPrevStages() const;
+
 protected:
     Options& getOptions();
 

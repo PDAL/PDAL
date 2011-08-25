@@ -58,8 +58,6 @@ public:
 
     virtual void initialize();
 
-    std::vector<Stage*> getPrevStages() const;
-
     // for xml serializion of pipelines
     virtual boost::property_tree::ptree serializePipeline() const;
 

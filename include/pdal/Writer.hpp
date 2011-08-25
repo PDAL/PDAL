@@ -68,8 +68,6 @@ public:
     // for xml serializion of pipelines
     virtual boost::property_tree::ptree serializePipeline() const;
 
-    Stage& getPrevStage() const;
-
     const SpatialReference& getSpatialReference() const;
     void setSpatialReference(const SpatialReference&);
 

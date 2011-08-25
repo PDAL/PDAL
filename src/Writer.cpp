@@ -63,22 +63,9 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
 void Writer::initialize()
 {
-    getPrevStage().initialize();
-
     StageBase::initialize();
 
     return;
-}
-
-
-Stage& Writer::getPrevStage() const
-{
-    // BUG: should probably do this once and cache it
-    if (getInputs().size()==0) throw internal_error("input StageBase does not have a Stage");
-    StageBase* sb = getInputs()[0];
-    Stage* s = dynamic_cast<Stage*>(sb);
-    if (!s) throw internal_error("input StageBase is not a Stage");
-    return *s;
 }
 
 

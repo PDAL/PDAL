@@ -49,28 +49,9 @@ MultiFilter::MultiFilter(const std::vector<Stage*>& prevStages, const Options& o
 
 void MultiFilter::initialize()
 {
-    BOOST_FOREACH(StageBase* prev, getInputs())
-    {
-        prev->initialize();
-    }
-
     Stage::initialize();
 
     return;
-}
-
-
-std::vector<Stage*> MultiFilter::getPrevStages() const
-{
-    // BUG: should probably do this once and cache it
-    std::vector<Stage*> vec;
-    BOOST_FOREACH(StageBase* prev, getInputs())
-    {
-        Stage* s = dynamic_cast<Stage*>(prev);
-        if (!s) throw internal_error("input StageBase is not a Stage");
-        vec.push_back(s);
-    }
-    return vec;
 }
 
 

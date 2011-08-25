@@ -48,26 +48,13 @@ Filter::Filter(Stage& prevStage, const Options& options)
 
 void Filter::initialize()
 {
-    getPrevStage().initialize();
+    Stage::initialize();
 
     // by default, we set our core properties to be the same as those 
     // of the previous stage
     this->setCoreProperties(getPrevStage());
 
-    Stage::initialize();
-
     return;
-}
-
-
-Stage& Filter::getPrevStage() const
-{
-    // BUG: should probably do this once and cache it
-    if (getInputs().size()==0) throw internal_error("input StageBase does not have a Stage");
-    StageBase* sb = getInputs()[0];
-    Stage* s = dynamic_cast<Stage*>(sb);
-    if (!s) throw internal_error("input StageBase is not a Stage");
-    return *s;
 }
 
 
