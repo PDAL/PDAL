@@ -23,6 +23,7 @@ ipch/
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
+*.csproj.user
 *.vcproj.*.user
 *.sdf
 *.suo
