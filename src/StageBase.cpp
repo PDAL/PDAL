@@ -147,6 +147,18 @@ boost::uint32_t StageBase::getVerboseLevel() const
 }
 
 
+const std::vector<StageBase*>& StageBase::getInputs() const
+{
+    return m_inputs;
+}
+
+
+const std::vector<StageBase*>& StageBase::getOutputs() const
+{
+    return m_outputs;
+}
+
+
 boost::property_tree::ptree StageBase::toPTree() const
 {
     boost::property_tree::ptree tree;

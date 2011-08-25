@@ -122,8 +122,8 @@ public:
 
     boost::uint32_t getId() const { return m_id; }
 
-    std::vector<StageBase*> getInputs();
-    std::vector<StageBase*> getOutputs();
+    const std::vector<StageBase*>& getInputs() const;
+    const std::vector<StageBase*>& getOutputs() const;
 
 protected:
     Options& getOptions();
