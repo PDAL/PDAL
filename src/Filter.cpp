@@ -41,7 +41,6 @@ namespace pdal
 
 Filter::Filter(Stage& prevStage, const Options& options)
     : Stage(StageBase::makeVector(prevStage), options)
-    , m_prevStage(prevStage)
 {
     return;
 }
@@ -61,15 +60,14 @@ void Filter::initialize()
 }
 
 
-const Stage& Filter::getPrevStage() const
+Stage& Filter::getPrevStage() const
 {
-    return m_prevStage;
-}
-
-
-Stage& Filter::getPrevStage()
-{
-    return m_prevStage;
+    // BUG: should probably do this once and cache it
+    if (getInputs().size()==0) throw internal_error("input StageBase does not have a Stage");
+    StageBase* sb = getInputs()[0];
+    Stage* s = dynamic_cast<Stage*>(sb);
+    if (!s) throw internal_error("input StageBase is not a Stage");
+    return *s;
 }
 
 

@@ -58,16 +58,13 @@ public:
 
     virtual void initialize();
 
-    const std::vector<const Stage*> getPrevStages() const;
+    std::vector<Stage*> getPrevStages() const;
 
     // for xml serializion of pipelines
     virtual boost::property_tree::ptree serializePipeline() const;
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
-
-protected:
-    std::vector<Stage*> m_prevStages;
 
 private:
     MultiFilter& operator=(const MultiFilter&); // not implemented

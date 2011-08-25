@@ -43,27 +43,13 @@ namespace pdal
 MultiFilter::MultiFilter(const std::vector<Stage*>& prevStages, const Options& options)
     : Stage(StageBase::makeVector(prevStages), options)
 {
-    if (prevStages.size() == 0)
-    {
-        throw pdal_error("empty stage list passed to mosaic filter");
-    }
-
-    for (size_t i=0; i<prevStages.size(); i++)
-    {
-        if (prevStages[i] == NULL)
-        {
-            throw pdal_error("null stage passed to mosaic filter");
-        }
-        m_prevStages.push_back(prevStages[i]);
-    }
-
     return;
 }
 
 
 void MultiFilter::initialize()
 {
-    BOOST_FOREACH(Stage* prev, m_prevStages)
+    BOOST_FOREACH(StageBase* prev, getInputs())
     {
         prev->initialize();
     }
@@ -74,12 +60,15 @@ void MultiFilter::initialize()
 }
 
 
-const std::vector<const Stage*> MultiFilter::getPrevStages() const
+std::vector<Stage*> MultiFilter::getPrevStages() const
 {
-    std::vector<const Stage*> vec;
-    BOOST_FOREACH(Stage* prev, m_prevStages)
+    // BUG: should probably do this once and cache it
+    std::vector<Stage*> vec;
+    BOOST_FOREACH(StageBase* prev, getInputs())
     {
-        vec.push_back(prev);
+        Stage* s = dynamic_cast<Stage*>(prev);
+        if (!s) throw internal_error("input StageBase is not a Stage");
+        vec.push_back(s);
     }
     return vec;
 }

@@ -55,7 +55,6 @@ const boost::uint32_t Writer::s_defaultChunkSize = 1024 * 32;
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : StageBase(StageBase::makeVector(prevStage), options)
-    , m_prevStage(prevStage)
     , m_chunkSize(s_defaultChunkSize)
 {
     return;
@@ -72,15 +71,14 @@ void Writer::initialize()
 }
 
 
-const Stage& Writer::getPrevStage() const
+Stage& Writer::getPrevStage() const
 {
-    return m_prevStage;
-}
-
-
-Stage& Writer::getPrevStage()
-{
-    return m_prevStage;
+    // BUG: should probably do this once and cache it
+    if (getInputs().size()==0) throw internal_error("input StageBase does not have a Stage");
+    StageBase* sb = getInputs()[0];
+    Stage* s = dynamic_cast<Stage*>(sb);
+    if (!s) throw internal_error("input StageBase is not a Stage");
+    return *s;
 }
 
 
@@ -117,7 +115,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 
     boost::uint64_t actualNumPointsWritten = 0;
          
-    boost::scoped_ptr<StageSequentialIterator> iter(m_prevStage.createSequentialIterator());
+    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator());
     
     if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
 
@@ -125,7 +123,8 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 
     iter->readBegin();
 
-    PointBuffer buffer(m_prevStage.getSchema(), m_chunkSize);
+    const Schema& schema = getPrevStage().getSchema();
+    PointBuffer buffer(schema, m_chunkSize);
 
     //
     // The user has requested a specific number of points: proceed a 
@@ -149,7 +148,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
             // we are reusing the buffer, so we may need to adjust the capacity for the last (and likely undersized) chunk
             if (buffer.getCapacity() != numPointsToReadThisChunk)
             {
-                buffer = PointBuffer(m_prevStage.getSchema(), numPointsToReadThisChunk);
+                buffer = PointBuffer(schema, numPointsToReadThisChunk);
             }
         }
 

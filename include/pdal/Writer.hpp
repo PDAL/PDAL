@@ -68,7 +68,7 @@ public:
     // for xml serializion of pipelines
     virtual boost::property_tree::ptree serializePipeline() const;
 
-    const Stage& getPrevStage() const;
+    Stage& getPrevStage() const;
 
     const SpatialReference& getSpatialReference() const;
     void setSpatialReference(const SpatialReference&);
@@ -92,10 +92,7 @@ protected:
     // called once, after all the the writeBuffer calls
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten) = 0;
 
-    Stage& getPrevStage();
-
 private:
-    Stage& m_prevStage;
     boost::uint32_t m_chunkSize;
     static const boost::uint32_t s_defaultChunkSize;
     SpatialReference m_spatialReference;
