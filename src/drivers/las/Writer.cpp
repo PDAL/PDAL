@@ -95,7 +95,16 @@ void LasWriter::initialize()
     {
         setSpatialReference(getOptions().getValueOrThrow<std::string>("a_srs"));
     }
-
+    
+    setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));
+    setFormatVersion(getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
+                     getOptions().getValueOrDefault<boost::uint32_t>("minor_version", 2));
+    setDate(getOptions().getValueOrDefault<boost::uint32_t>("year", 0),
+            getOptions().getValueOrDefault<boost::uint32_t>("day_of_year", 0));
+    
+    setHeaderPadding(getOptions().getValueOrDefault<boost::uint32_t>("header_padding", 0));
+    setSystemIdentifier(getOptions().getValueOrDefault<std::string>("system_id", LasHeader::SystemIdentifier));
+    setGeneratingSoftware(getOptions().getValueOrDefault<std::string>("software_id", LasHeader::SoftwareIdentifier));
     return;
 }
 
@@ -106,6 +115,23 @@ const Options LasWriter::getDefaultOptions() const
 
     Option filename("filename", "", "file to read from");
     Option compression("compression", false, "Do we LASzip-compress the data?");
+    Option format("format", PointFormat3, "Point format to write");
+    Option major_version("major_version", 1, "LAS Major version");
+    Option minor_version("minor_version", 2, "LAS Minor version");
+    Option day_of_year("day_of_year", 0, "Day of Year for file");
+    Option year("year", 2011, "4-digit year value for file");
+    Option system_id("system_id", LasHeader::SystemIdentifier, "System ID for this file");
+    Option software_id("software_id", LasHeader::SoftwareIdentifier, "Software ID for this file");
+    Option header_padding("header_padding", 0, "Header padding (space between end of VLRs and beginning of point data)");
+
+    options.add(major_version);
+    options.add(minor_version);
+    options.add(day_of_year);
+    options.add(year);
+    options.add(system_id);
+    options.add(software_id);
+    options.add(header_padding);
+    options.add(format);
     options.add(filename);
     options.add(compression);
     return options;
