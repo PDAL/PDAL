@@ -38,7 +38,6 @@
 #include <pdal/pdal.hpp>
 
 #include <vector>
-#include <iostream>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>

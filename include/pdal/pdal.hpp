@@ -37,6 +37,7 @@
 
 // This file is for all the things that basically everybody has to include.
 
+#include <iostream>
 #include <pdal/export.hpp>
 #include <pdal/pdal_defines.h>
 // #include <pdal/pdal_config.hpp>
