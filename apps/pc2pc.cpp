@@ -149,7 +149,10 @@ int Pc2Pc::execute()
             writerOptions.add<std::string>("a_srs", m_srs);
         }
 
-        writerOptions.add<bool>("compression_hack1", m_bCompress);
+        if (m_bCompress)
+        {
+            writerOptions.add<bool>("compression", true);
+        }
         writerOptions.add<bool>("liblas", m_useLiblas);
     }
 

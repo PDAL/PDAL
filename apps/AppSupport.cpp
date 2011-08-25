@@ -79,7 +79,7 @@ std::string AppSupport::inferWriterDriver(const std::string& filename, pdal::Opt
 
     if (ext == "laz")
     {
-        options.add("compression_hack2", true);
+        options.add("compression", true);
     }
 
     options.add<std::string>("filename", filename);
@@ -140,8 +140,6 @@ pdal::Writer& AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
         driver = "drivers.liblas.writer";
     }
         
-    options.add<bool>("compression", options.getValueOrDefault("compression_hack1", false) || options.getValueOrDefault("compression_hack2", false));
-
     pdal::StageFactory factory;
     pdal::Writer* writer = factory.createWriter(driver, stage, options);
     if (!writer)
