@@ -1,17 +1,13 @@
 <?xml version="1.0"?>
-<ReaderPipeline>
-        <Filter>
-            <Type>filters.crop</Type>
-            <Option>
-                <Name>bounds</Name>
-                <Value>([0,1000000],[0,1000000],[0,1000000])</Value>
+<Pipeline version="1.0">
+        <Filter type="filters.crop">
+            <Option name="bounds">
+                ([0,1000000],[0,1000000],[0,1000000])
             </Option>
-            <Reader>
-                <Type>drivers.las.reader</Type>
-                <Option>
-                    <Name>filename</Name>
-                    <Value>1.2-with-color.las</Value>
+            <Reader type="drivers.las.reader">
+                <Option name="filename">
+                    1.2-with-color.las
                 </Option>
             </Reader>
         </Filter>
-</ReaderPipeline>
+</Pipeline>

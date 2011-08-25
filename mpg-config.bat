@@ -1,5 +1,6 @@
 @echo off
-
+ 
+ 
 set COMPILER="Visual Studio 10 Win64"
 set COMPILER="Visual Studio 10"
 
@@ -39,6 +40,7 @@ cmake -G %COMPILER% ^
     -DWITH_FREEGLUT=ON ^
     -DWITH_LIBXML2=ON ^
     -DWITH_ICONV=OFF ^
+    -DWITH_SWIG_CSHARP=ON ^
     -DFREEGLUT_LIBRARY=%FREEGLUT_DIR%\lib\freeglut.lib ^
     -DFREEGLUT_INCLUDE_DIR=%FREEGLUT_DIR%\include ^
     -DGLUT_LIBRARY=%FREEGLUT_DIR%\lib ^
@@ -74,4 +76,4 @@ rem    -DLIBXML2_INCLUDE_DIR=%LIBXML2_DIR%\include ^
 rem    -DICONV_LIBRARY=%ICONV_DIR%\lib\iconv.lib ^
 rem    -DICONV_INCLUDE_DIR=%ICONV_DIR%\include ^
 
-set PDAL_SWIG_BOOST_HOME=%UTILS_DIR%\boost_1_45_0-win32
+set PDAL_SWIG_BOOST_HOME=%BOOST_DIR%

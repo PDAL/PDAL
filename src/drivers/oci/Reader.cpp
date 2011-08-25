@@ -117,16 +117,16 @@ const Options Reader::getDefaultOptions() const
 {
     Options options;
     
-    Option<std::string> connection("connection",
+    Option connection("connection",
                                    "",
                                    "Oracle connection string to connect to database");
     
-    Option<std::string> query("query",
+    Option query("query",
                               "",
                               "SELECT statement that returns an SDO_PC object \
                               as its first and only queried item.");
 
-    Option<boost::uint32_t> capacity("capacity",
+    Option capacity("capacity",
                                      0,
                                      "Block capacity");
 

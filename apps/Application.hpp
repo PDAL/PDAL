@@ -81,7 +81,7 @@ public:
     int run();
 
     bool isDebug() const;
-    boost::uint8_t getVerboseLevel() const;
+    boost::uint32_t getVerboseLevel() const;
     void printError(const std::string&) const;
 
 protected:

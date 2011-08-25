@@ -100,8 +100,8 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
     pdal::drivers::faux::Reader reader(srcBounds, 10000, pdal::drivers::faux::Reader::Constant);
 
-    Option<boost::uint32_t> opt1("max_cache_blocks", 2);
-    Option<boost::uint32_t> opt2("cache_block_size", 1024);
+    Option opt1("max_cache_blocks", 2);
+    Option opt2("cache_block_size", 1024);
     Options opts;
     opts.add(opt1);
     opts.add(opt2);

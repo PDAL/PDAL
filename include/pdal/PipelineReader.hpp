@@ -54,36 +54,35 @@ private:
     class StageParserContext;
 
 public:
-    PipelineReader(PipelineManager&, bool debug=false, boost::uint8_t verbose=0);
+    PipelineReader(PipelineManager&, bool debug=false, boost::uint32_t verbose=0);
     ~PipelineReader();
-
    
     // Use this to fill in a pipeline manager with an XML file that
     // contains a <Writer> as the last pipeline stage.
-    void readWriterPipeline(const std::string&);
-
-    // Use this to fill in a pipeline manager with an XML file that 
-    // don't contain a <Writer>.  (Even though this is called "parse 
-    // READER pipeline", it actually returns a Stage; it can be used 
-    // where the last pipeline stage is a Reader or Filter.)
-    void readReaderPipeline(const std::string&);
+    //
+    // returns true iff the xml file is a writer pipeline (otherwise it is
+    // assumed to be a reader pipeline)
+    bool readPipeline(const std::string& filename);
 
 private:
-    Writer* parseElement_WriterPipeline(const boost::property_tree::ptree&);
-    Stage* parseElement_ReaderPipeline(const boost::property_tree::ptree&);
+    typedef std::map<std::string, std::string> map_t;
+    
+    bool parseElement_Pipeline(const boost::property_tree::ptree&);
     Stage* parseElement_anystage(const std::string& name, const boost::property_tree::ptree& subtree);
     Reader* parseElement_Reader(const boost::property_tree::ptree& tree);
     Filter* parseElement_Filter(const boost::property_tree::ptree& tree);
     MultiFilter* parseElement_MultiFilter(const boost::property_tree::ptree& tree);
     Writer* parseElement_Writer(const boost::property_tree::ptree& tree);
 
-    Option<std::string> parseElement_Option(const boost::property_tree::ptree& tree);
-    std::string parseElement_Type(const boost::property_tree::ptree& tree);
+    Option parseElement_Option(const boost::property_tree::ptree& tree);
+
+    void collect_attributes(map_t& attrs, const boost::property_tree::ptree& tree);
+    void parse_attributes(map_t& attrs, const boost::property_tree::ptree& tree);
 
 private:
     PipelineManager& m_manager;
     bool m_isDebug;
-    boost::uint8_t m_verboseLevel;
+    boost::uint32_t m_verboseLevel;
     Options m_baseOptions;
     std::string m_inputXmlFile;
 

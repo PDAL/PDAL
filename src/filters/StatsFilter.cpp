@@ -214,8 +214,8 @@ boost::property_tree::ptree StatsFilter::toStatsPTree() const
 {
     boost::property_tree::ptree tree;
 
-    for (std::map<Dimension::Field, StatsCollector*>::const_iterator iter = m_stats.cbegin();
-         iter != m_stats.cend();
+    for (std::map<Dimension::Field, StatsCollector*>::const_iterator iter = m_stats.begin();
+         iter != m_stats.end();
          ++iter)
     {
         const StatsCollector* stat = iter->second;

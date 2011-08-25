@@ -34,53 +34,24 @@
 
 #include <pdal/MultiFilter.hpp>
 #include <pdal/exceptions.hpp>
+#include <pdal/PipelineWriter.hpp>
 
 namespace pdal
 {
 
 
 MultiFilter::MultiFilter(const std::vector<Stage*>& prevStages, const Options& options)
-    : Stage(options)
+    : Stage(StageBase::makeVector(prevStages), options)
 {
-    if (prevStages.size() == 0)
-    {
-        throw pdal_error("empty stage list passed to mosaic filter");
-    }
-
-    for (size_t i=0; i<prevStages.size(); i++)
-    {
-        if (prevStages[i] == NULL)
-        {
-            throw pdal_error("null stage passed to mosaic filter");
-        }
-        m_prevStages.push_back(prevStages[i]);
-    }
-
     return;
 }
 
 
 void MultiFilter::initialize()
 {
-    BOOST_FOREACH(Stage* prev, m_prevStages)
-    {
-        prev->initialize();
-    }
-
     Stage::initialize();
 
     return;
-}
-
-
-const std::vector<const Stage*> MultiFilter::getPrevStages() const
-{
-    std::vector<const Stage*> vec;
-    BOOST_FOREACH(Stage* prev, m_prevStages)
-    {
-        vec.push_back(prev);
-    }
-    return vec;
 }
 
 
@@ -88,10 +59,9 @@ boost::property_tree::ptree MultiFilter::serializePipeline() const
 {
     boost::property_tree::ptree tree;
 
-    tree.add("Type", getName());
+    tree.add("<xmlattr>.type", getName());
 
-    boost::property_tree::ptree optiontree = getOptions().getPTree();
-    tree.add_child(optiontree.begin()->first, optiontree.begin()->second);
+    PipelineWriter::write_option_ptree(tree, getOptions());
 
     BOOST_FOREACH(const Stage* stage, getPrevStages())
     {

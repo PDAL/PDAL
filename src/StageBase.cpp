@@ -37,21 +37,53 @@
 #include <iostream>
 
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
 
+#include <pdal/Stage.hpp>
 #include <pdal/exceptions.hpp>
 
 
 namespace pdal
 {
 
+std::vector<StageBase*> StageBase::makeVector()
+{
+    std::vector<StageBase*> v;
+    return v;
+}
 
-StageBase::StageBase(const Options& options)
+std::vector<StageBase*> StageBase::makeVector(Stage& sref)
+{
+    Stage* s = &sref;
+    StageBase* sb = s;
+    std::vector<StageBase*> v;
+    v.push_back(sb);
+    return v;
+}
+
+std::vector<StageBase*> StageBase::makeVector(const std::vector<Stage*>& stages)
+{
+    std::vector<StageBase*> v;
+    BOOST_FOREACH(Stage* stage, stages)
+    {
+        v.push_back(stage);
+    }
+    return v;
+}
+
+StageBase::StageBase(const std::vector<StageBase*>& inputs, const Options& options)
     : m_initialized(false)
     , m_options(options)
     , m_debug(options.getValueOrDefault<bool>("debug", false))
-    , m_verbose(options.getValueOrDefault<boost::uint8_t>("verbose", 0))
+    , m_verbose(options.getValueOrDefault<boost::uint32_t>("verbose", 0))
     , m_id(options.getValueOrDefault<boost::uint32_t>("id", 0))
+    , m_inputs(inputs)
 {
+    BOOST_FOREACH(StageBase* input, m_inputs)
+    {
+        input->m_outputs.push_back(this);
+    }
+
     return;
 }
 
@@ -64,6 +96,12 @@ StageBase::~StageBase()
 
 void StageBase::initialize()
 {
+    // first, initialize any previous stages
+    BOOST_FOREACH(StageBase* prev, getInputs())
+    {
+        prev->initialize();
+    }
+
     // it is illegal to call initialize() twice
     if (m_initialized)
     {
@@ -71,7 +109,7 @@ void StageBase::initialize()
     }
 
     m_debug = m_options.getValueOrDefault<bool>("debug", false);
-    m_verbose = m_options.getValueOrDefault<boost::uint8_t>("verbose", 0);
+    m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
 
     m_initialized = true;
 
@@ -109,9 +147,46 @@ bool StageBase::isVerbose() const
 }
 
 
-boost::uint8_t StageBase::getVerboseLevel() const
+boost::uint32_t StageBase::getVerboseLevel() const
 {
     return m_verbose;
+}
+
+
+const std::vector<StageBase*>& StageBase::getInputs() const
+{
+    return m_inputs;
+}
+
+
+const std::vector<StageBase*>& StageBase::getOutputs() const
+{
+    return m_outputs;
+}
+
+
+Stage& StageBase::getPrevStage() const
+{
+    // BUG: should probably do this once and cache it
+    if (getInputs().size()==0) throw internal_error("StageBase does not have any previous stages");
+    StageBase* sb = getInputs()[0];
+    Stage* s = dynamic_cast<Stage*>(sb);
+    if (!s) throw internal_error("previous StageBase is not a Stage");
+    return *s;
+}
+
+
+std::vector<Stage*> StageBase::getPrevStages() const
+{
+    // BUG: should probably do this once and cache it
+    std::vector<Stage*> vec;
+    BOOST_FOREACH(StageBase* prev, getInputs())
+    {
+        Stage* s = dynamic_cast<Stage*>(prev);
+        if (!s) throw internal_error("previous StageBase is not a Stage");
+        vec.push_back(s);
+    }
+    return vec;
 }
 
 
@@ -122,7 +197,7 @@ boost::property_tree::ptree StageBase::toPTree() const
     tree.add("name", getName());
     tree.add("id", getId());
     tree.add("description", getDescription());
-    tree.add_child("options", getOptions().getPTree());
+    tree.add_child("options", getOptions().toPTree());
 
     return tree;
 }

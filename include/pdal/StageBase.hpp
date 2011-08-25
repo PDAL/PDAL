@@ -39,30 +39,34 @@
 #include <pdal/Options.hpp>
 
 #include <string>
+#include <vector>
 
 
 namespace pdal
 {
 
+class Stage;
+    
 //
 // supported options:
 //   <uint32>id
 //   <bool>debug
-//   <uint8>verbose
+//   <uint32>verbose
 //
 
 // both Stages and Writers have a few common properties, so 
 class PDAL_DLL StageBase
 {
 public:
-    StageBase(const Options& options);
+    StageBase(const std::vector<StageBase*>& inputs, const Options& options);
+
     virtual ~StageBase();
 
     // This function is for derived stages to perform "static" validation, e.g. bad Option arguments.
     // It will recursively call initialize() on all previous stages.
     // Users must call this after the last stage in the pipeline has been consturcted.  
     // It is illegal to call this twice for a stage.
-    // Derived stages should feel free to provide their own implementations.  Remeber to call initialize() on
+    // Derived stages should feel free to provide their own implementations.  Remember to call initialize() on
     //   the parent class before your own class-specific code.
     // This function will throw when errors are found.
     virtual void initialize();
@@ -80,7 +84,7 @@ public:
     // extra logging that "verbose" implies.
     bool isDebug() const;
     
-    // This is set by the "verbose" option, which is in range [0..255].
+    // This is set by the "verbose" option
     //    0 - no verbosity at all
     //    >0 - meaning is left to the implementors of the individual stages
     //
@@ -88,7 +92,7 @@ public:
     // extra validation checks and such (code which is potentially side-effecting) you want to
     // use the "debug" option.
     bool isVerbose() const; // true iff verbosity>0 
-    boost::uint8_t getVerboseLevel() const; 
+    boost::uint32_t getVerboseLevel() const; 
 
     // Everyone must implement this.  If you want to access the list of 
     // options "statically", you are free to construct the stage with no
@@ -118,15 +122,40 @@ public:
 
     boost::uint32_t getId() const { return m_id; }
 
+    const std::vector<StageBase*>& getInputs() const;
+    const std::vector<StageBase*>& getOutputs() const;
+
+    // convenience function: returns the first input stage, as a Stage&
+    // (don't call this unless you know it is safe to do so, e.g Readers
+    // should not use this since they have no input stages)
+    Stage& getPrevStage() const;
+
+    // convenience function: returns the input stages, as a Stage* vector
+    // (don't call this unless you know it is safe to do so, e.g Readers
+    // should not use this since they have no input stages, and Filters
+    // probably won't want to use this either since they only have one
+    // prev stage)
+    std::vector<Stage*> getPrevStages() const;
+
 protected:
     Options& getOptions();
+
+    // These are used by the ctors of the derived classes, so they can call 
+    // the ctor of StageBase.  C++ doesn't support polymorphic arrays or
+    // inlined initialization of vectors, so we do it this way.
+    static std::vector<StageBase*> makeVector();
+    static std::vector<StageBase*> makeVector(Stage&);
+    static std::vector<StageBase*> makeVector(const std::vector<Stage*>&);
 
 private:
     bool m_initialized;
     Options m_options;
     bool m_debug;
-    boost::uint8_t m_verbose;
+    boost::uint32_t m_verbose;
     const boost::uint32_t m_id;
+
+    std::vector<StageBase*> m_inputs;
+    std::vector<StageBase*> m_outputs;
 
     StageBase& operator=(const StageBase&); // not implemented
     StageBase(const StageBase&); // not implemented

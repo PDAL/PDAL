@@ -33,14 +33,14 @@
 ****************************************************************************/
 
 #include <pdal/Filter.hpp>
+#include <pdal/PipelineWriter.hpp>
 
 namespace pdal
 {
 
 
 Filter::Filter(Stage& prevStage, const Options& options)
-    : Stage(options)
-    , m_prevStage(prevStage)
+    : Stage(StageBase::makeVector(prevStage), options)
 {
     return;
 }
@@ -48,27 +48,13 @@ Filter::Filter(Stage& prevStage, const Options& options)
 
 void Filter::initialize()
 {
-    getPrevStage().initialize();
+    Stage::initialize();
 
     // by default, we set our core properties to be the same as those 
     // of the previous stage
     this->setCoreProperties(getPrevStage());
 
-    Stage::initialize();
-
     return;
-}
-
-
-const Stage& Filter::getPrevStage() const
-{
-    return m_prevStage;
-}
-
-
-Stage& Filter::getPrevStage()
-{
-    return m_prevStage;
 }
 
 
@@ -76,10 +62,9 @@ boost::property_tree::ptree Filter::serializePipeline() const
 {
     boost::property_tree::ptree tree;
 
-    tree.add("Type", getName());
+    tree.add("<xmlattr>.type", getName());
     
-    boost::property_tree::ptree optiontree = getOptions().getPTree();
-    tree.add_child(optiontree.begin()->first, optiontree.begin()->second);
+    PipelineWriter::write_option_ptree(tree, getOptions());
 
     const Stage& stage = getPrevStage();
     boost::property_tree::ptree subtree = stage.serializePipeline();

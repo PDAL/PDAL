@@ -146,4 +146,9 @@ boost::uint64_t PipelineManager::execute()
 }
 
 
+bool PipelineManager::isWriterPipeline() const
+{
+    return (m_lastWriter != NULL);
+}
+
 } // namespace pdal

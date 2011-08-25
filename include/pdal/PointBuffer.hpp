@@ -120,7 +120,7 @@ public:
     // (later, this will be implemented properly, to handle the general cases slowly and the best case quickly)
     inline void copyPointFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer)
     {
-        assert(getSchemaLayout() == srcPointBuffer.getSchemaLayout());
+        // assert(getSchemaLayout() == srcPointBuffer.getSchemaLayout());
 
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
@@ -136,7 +136,7 @@ public:
     // same as above, but copies N points
     inline void copyPointsFast(std::size_t destPointIndex, std::size_t srcPointIndex, const PointBuffer& srcPointBuffer, std::size_t numPoints)
     {
-        assert(getSchemaLayout() == srcPointBuffer.getSchemaLayout());
+        // assert(getSchemaLayout() == srcPointBuffer.getSchemaLayout());
 
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);

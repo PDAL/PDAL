@@ -318,7 +318,7 @@ const Options Reader::getDefaultOptions() const
 
 std::string Reader::getFileName() const
 {
-    return getOptions().getOption<std::string>("input").getValue();
+    return getOptions().getOption("input").getValue<std::string>();
 }
 
 void Reader::registerFields()

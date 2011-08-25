@@ -60,23 +60,54 @@ PipelineWriter::~PipelineWriter()
 }
 
 
-static boost::property_tree::ptree generateTreeFromWriter(const Writer& writer)
+static boost::property_tree::ptree generateTreeFromStageBase(const StageBase& stage)
 {
-    boost::property_tree::ptree subtree = writer.serializePipeline();
+    boost::property_tree::ptree subtree = stage.serializePipeline();
 
     boost::property_tree::ptree tree;
 
-    tree.add_child("WriterPipeline", subtree);
+    boost::property_tree::ptree& attrtree = tree.add_child("Pipeline", subtree);
+    
+    attrtree.put("<xmlattr>.version", "1.0");
 
     return tree;
 }
 
 
-void PipelineWriter::writeWriterPipeline(const std::string& filename) const
+void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const Options& opts)
 {
-    const Writer* writer = m_manager.getWriter();
+    boost::property_tree::ptree m_tree = opts.toPTree();
+
+    boost::property_tree::ptree::const_iterator iter = m_tree.begin();
+    while (iter != m_tree.end())
+    {
+        if (iter->first != "Option")
+            throw pdal_error("malformed Options ptree");
+        const boost::property_tree::ptree& optionTree = iter->second;
+        
+        // we want to create this:
+        //      ...
+        //      <Option name="file">foo.las</Option>
+        //      ...
+
+        const std::string& name = optionTree.get_child("Name").get_value<std::string>();
+        const std::string& value = optionTree.get_child("Value").get_value<std::string>();
+        
+        boost::property_tree::ptree& subtree = tree.put("Option", value);
+        subtree.put("<xmlattr>.name", name);
+
+        ++iter;
+    }
+
+    return;
+}
+
+
+void PipelineWriter::writePipeline(const std::string& filename) const
+{
+    const StageBase* stage = m_manager.isWriterPipeline() ? (StageBase*)m_manager.getWriter() : (StageBase*)m_manager.getStage();
     
-    boost::property_tree::ptree tree = generateTreeFromWriter(*writer);
+    boost::property_tree::ptree tree = generateTreeFromStageBase(*stage);
 
     
     const boost::property_tree::xml_parser::xml_writer_settings<char> settings(' ', 4);

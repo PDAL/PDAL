@@ -41,6 +41,9 @@
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineWriter.hpp>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+
 using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(PipelineWriterTest)
@@ -54,21 +57,65 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_test1)
         PipelineReader reader(manager);
         PipelineWriter writer(manager);
 
-        reader.readWriterPipeline(Support::datapath("pipeline/pipeline_write.xml"));
+        reader.readPipeline(Support::datapath("pipeline/pipeline_write.xml"));
 
-        writer.writeWriterPipeline(Support::temppath("test.xml"));
+        writer.writePipeline(Support::temppath("test.xml"));
+    }
+    
+    // we can't compare top the reference fiel directly, since the filename
+    // paths are now absolute and not relative -- instead, we'll round trip once
+    // more and compare that way
+    {
+        PipelineManager manager;
+        PipelineReader reader(manager);
+        PipelineWriter writer(manager);
+
+        reader.readPipeline(Support::temppath("test.xml"));
+
+        writer.writePipeline(Support::temppath("test2.xml"));
+    }
+    
+    bool filesSame = Support::compare_text_files(Support::temppath("test.xml"), Support::temppath("test2.xml"));
+    BOOST_CHECK(filesSame);
+    if (filesSame)
+    {
+        FileUtils::deleteFile(Support::temppath("test.xml"));
+        FileUtils::deleteFile(Support::temppath("test2.xml"));
     }
 
     FileUtils::deleteFile(Support::datapath("pipeline/out.las"));
 
-    // BUG: can't compare the files, since the filename paths are now absolute, not relative
-    ////bool filesSame = Support::compare_text_files("test.xml", Support::datapath("pipeline_write.xml"));
-    ////BOOST_CHECK(filesSame);
-    ////if (filesSame)
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(PipelineWriterTest_attr_test)
+{
+    std::stringstream s;
+
     {
-        FileUtils::deleteFile(Support::temppath("test.xml"));
+        boost::property_tree::ptree tree;
+
+        boost::property_tree::ptree subtree;
+        subtree.put("a", "aaa");
+        subtree.put("b", "bbb");
+
+        tree.put("child1", "one");
+        tree.put_child("x.<xmlattr>", subtree);
+        tree.put("child2", "two");
+
+        boost::property_tree::write_xml(s, tree);
     }
 
+    {
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_xml(s, tree);
+        BOOST_CHECK_EQUAL(tree.get<std::string>("child1"), "one");
+        BOOST_CHECK_EQUAL(tree.get<std::string>("x.<xmlattr>.a"), "aaa");
+        BOOST_CHECK_EQUAL(tree.get<std::string>("x.<xmlattr>.b"), "bbb");
+        BOOST_CHECK_EQUAL(tree.get<std::string>("child2"), "two");
+    }
+    
     return;
 }
 

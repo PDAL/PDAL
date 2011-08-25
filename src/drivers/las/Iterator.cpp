@@ -37,7 +37,9 @@
 #include <iostream>
 
 #include "ZipPoint.hpp"
+#ifdef PDAL_HAVE_LASZIP
 #include <laszip/lasunzipper.hpp>
+#endif
 
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/exceptions.hpp>

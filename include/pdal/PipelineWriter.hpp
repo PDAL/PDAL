@@ -38,6 +38,9 @@
 #include <pdal/pdal.hpp>
 #include <string>
 
+#include <boost/property_tree/ptree.hpp>
+#include <pdal/Options.hpp>
+
 namespace pdal
 {
 
@@ -49,7 +52,9 @@ public:
     PipelineWriter(const PipelineManager&);
     ~PipelineWriter();
 
-    void writeWriterPipeline(const std::string& filename) const;
+    void writePipeline(const std::string& filename) const;
+
+    static void write_option_ptree(boost::property_tree::ptree& tree, const Options& opts);
 
 private:
     const PipelineManager& m_manager;

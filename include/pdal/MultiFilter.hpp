@@ -46,7 +46,7 @@ namespace pdal
 // supported options:
 //   <uint32>id
 //   <bool>debug
-//   <uint8>verbose
+//   <uint32>verbose
 //
 
 class PDAL_DLL MultiFilter : public Stage
@@ -58,16 +58,11 @@ public:
 
     virtual void initialize();
 
-    const std::vector<const Stage*> getPrevStages() const;
-
     // for xml serializion of pipelines
     virtual boost::property_tree::ptree serializePipeline() const;
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
-
-protected:
-    std::vector<Stage*> m_prevStages;
 
 private:
     MultiFilter& operator=(const MultiFilter&); // not implemented

@@ -114,13 +114,18 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t 
     // const int indexId = schema.getDimensionIndex(Dimension::Field_User1, Dimension::Int32);
     // const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
     
+    boost::uint8_t* p_block_id = reinterpret_cast<boost::uint8_t*>(&block_id);
     for (it = ids.begin(); it != ids.end(); it++)
     {
-        iter->seek(*it);
+        boost::uint32_t id = *it;
+        iter->seek(id);
         iter->read(one_point);
-
-        one_point.setField(0, indexId, *it);
-        one_point.setField(0, indexBlockId, block_id);
+        
+        boost::uint8_t* p_id = reinterpret_cast<boost::uint8_t*>(&id);
+        one_point.setFieldData(0, indexId, p_id);
+        one_point.setFieldData(0, indexBlockId, p_block_id);
+        // one_point.setField(0, indexId, *it);
+        // one_point.setField(0, indexBlockId, block_id);
         
         // put single point onto our block
         buffer.copyPointsFast(static_cast<std::size_t>(count), static_cast<std::size_t>(0), one_point, 1); 
@@ -176,9 +181,9 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     boost::uint32_t idx;
     vector<PtRef>::iterator it;
    
-    pdal::Schema const& schema = m_prevStage.getSchema();
+    pdal::Schema const& schema = getPrevStage().getSchema();
     
-    boost::uint64_t count = m_prevStage.getNumPoints();
+    boost::uint64_t count = getPrevStage().getNumPoints();
     if (count > std::numeric_limits<std::size_t>::max())
         throw pdal_error("numPoints too large for Chipper");
     boost::uint32_t count32 = (boost::uint32_t)count;
@@ -205,7 +210,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     std::size_t num_points_loaded = 0;
     std::size_t num_points_to_load = count32;
     
-    boost::scoped_ptr<StageSequentialIterator> iter(m_prevStage.createSequentialIterator());
+    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator());
     
     boost::uint32_t counter = 0;
     while (num_points_loaded < num_points_to_load)

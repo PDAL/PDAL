@@ -96,10 +96,10 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 BOOST_AUTO_TEST_CASE(FauxReaderTest_test_options)
 {
     const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    Option<Bounds<double> > opt1("bounds", bounds);
-    Option<std::string> opt2("mode", "conSTanT");
-    Option<boost::uint64_t> opt3("num_points", 1000);
-    Option<boost::uint32_t> opt4("id", 90210);
+    Option opt1("bounds", bounds);
+    Option opt2("mode", "conSTanT");
+    Option opt3("num_points", 1000);
+    Option opt4("id", 90210);
     Options opts;
     opts.add(opt1);
     opts.add(opt2);

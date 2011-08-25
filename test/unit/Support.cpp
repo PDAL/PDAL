@@ -37,6 +37,8 @@
 #include <iostream>
 #include <string>
 
+#include <stdio.h>
+
 #include <boost/test/unit_test.hpp>
 
 #include <pdal/FileUtils.hpp>

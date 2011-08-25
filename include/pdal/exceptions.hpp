@@ -91,6 +91,16 @@ public:
     {}
 };
 
+// use this for conditions that indicate a program bug -- things
+// that we'd assert can't happen
+class internal_error : public pdal_error
+{
+public:
+
+    internal_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
 
 class invalid_format : public pdal_error
 {

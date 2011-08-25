@@ -46,7 +46,7 @@ namespace pdal
 // supported options:
 //   <uint32>id
 //   <bool>debug
-//   <uint8>verbose
+//   <uint32>verbose
 //
 
 class PDAL_DLL Filter : public Stage
@@ -56,18 +56,11 @@ public:
 
     virtual void initialize();
 
-    const Stage& getPrevStage() const;
-
     // for xml serializion of pipelines
     virtual boost::property_tree::ptree serializePipeline() const;
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
-
-protected:
-    Stage& getPrevStage();
-
-    Stage& m_prevStage;
 
 private:
     Filter& operator=(const Filter&); // not implemented

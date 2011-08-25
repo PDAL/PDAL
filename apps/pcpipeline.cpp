@@ -102,7 +102,9 @@ int PcPipeline::execute()
     pdal::PipelineManager manager;
 
     pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
-    reader.readWriterPipeline(m_inputFile);
+    bool isWriter = reader.readPipeline(m_inputFile);
+    if (!isWriter)
+        throw app_runtime_error("pipeline file is not a Writer");
 
     const boost::uint64_t np = manager.execute();
 

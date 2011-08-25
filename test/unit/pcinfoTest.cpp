@@ -107,17 +107,25 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_switches)
     stat = Support::run_command(cmd + " -i " + inputLas, output);
     BOOST_CHECK_EQUAL(stat, 0);
 
+#ifdef PDAL_HAVE_LASZIP
     // does it work for .laz?
     stat = Support::run_command(cmd + " " + inputLaz, output);
     BOOST_CHECK_EQUAL(stat, 0);
+#endif
 
+#ifdef PDAL_HAVE_LIBLAS
     // does --liblas work?
     stat = Support::run_command(cmd + " --liblas " + inputLas, output);
     BOOST_CHECK_EQUAL(stat, 0);
+#endif
 
+#ifdef PDAL_HAVE_LIBLAS
+#ifdef PDAL_HAVE_LASZIP
     // does --liblas work for .laz too?
     stat = Support::run_command(cmd + " --liblas " + inputLaz, output);
     BOOST_CHECK_EQUAL(stat, 0);
+#endif
+#endif
 
     return;
 }
@@ -153,7 +161,11 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     // dump stage info to json
     stat = Support::run_command(cmd + " --output=" + outputTxt + " --stage " + inputLas, output);
     BOOST_CHECK_EQUAL(stat, 0);
+#ifdef PDAL_HAVE_GDAL
     BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_stage.txt")));
+#else
+    BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_stage_nosrs.txt")));
+#endif
 
     pdal::FileUtils::deleteFile(outputTxt);
 

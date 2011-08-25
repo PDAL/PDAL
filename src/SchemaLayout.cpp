@@ -82,14 +82,14 @@ SchemaLayout& SchemaLayout::operator=(SchemaLayout const& rhs)
 
 bool SchemaLayout::operator==(const SchemaLayout& other) const
 {
-    if (m_byteSize == other.m_byteSize &&
-        m_dimensionLayouts == other.m_dimensionLayouts &&
-        m_schema == other.m_schema)
-    {
-        return true;
-    }
-
-    return false;
+    if (m_byteSize != other.m_byteSize )
+        return false;
+    if (m_schema != other.m_schema)
+        return false;
+    if (m_dimensionLayouts != other.m_dimensionLayouts)
+        return false;
+        
+    return true;
 }
 
 

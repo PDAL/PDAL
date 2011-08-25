@@ -134,7 +134,7 @@ int Pc2Pc::execute()
     {
         readerOptions.add<std::string>("filename", m_inputFile);
         readerOptions.add<bool>("debug", isDebug());
-        readerOptions.add<boost::uint8_t>("verbose", getVerboseLevel());
+        readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
         readerOptions.add<bool>("liblas", m_useLiblas);
     }
 
@@ -142,7 +142,7 @@ int Pc2Pc::execute()
     {
         writerOptions.add<std::string>("filename", m_outputFile);
         writerOptions.add<bool>("debug", isDebug());
-        writerOptions.add<boost::uint8_t>("verbose", getVerboseLevel());
+        writerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
         if (m_srs != "")
         {
