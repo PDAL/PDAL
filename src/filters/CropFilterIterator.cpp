@@ -65,6 +65,8 @@ boost::uint32_t CropFilterSequentialIterator::readBufferImpl(PointBuffer& dstDat
 
     while (numPointsNeeded > 0)
     {
+        if (getPrevIterator().atEnd()) break;
+
         // set up buffer to be filled by prev stage
         PointBuffer srcData(dstData.getSchemaLayout(), numPointsNeeded);
 
