@@ -336,6 +336,7 @@ pdal::Schema Reader::fetchSchema(sdo_pc* pc)
     
     int ptn_params_length = 1024;
     char* ptn_params = (char*) malloc (sizeof(char*) * ptn_params_length);
+    ptn_params[ptn_params_length-1] = '\0'; //added trailing null to fix ORA-01480
     get_schema->BindName( ":capacity", ptn_params, ptn_params_length );
     get_schema->Execute();
     
