@@ -97,10 +97,10 @@ void LasWriter::initialize()
     }
     
     setPointFormat(static_cast<PointFormat>(getOptions().getValueOrDefault<boost::uint32_t>("format", 3)));
-    setFormatVersion(getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
-                     getOptions().getValueOrDefault<boost::uint32_t>("minor_version", 2));
-    setDate(getOptions().getValueOrDefault<boost::uint32_t>("year", 0),
-            getOptions().getValueOrDefault<boost::uint32_t>("day_of_year", 0));
+    setFormatVersion((boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("major_version", 1),
+                     (boost::uint8_t)getOptions().getValueOrDefault<boost::uint32_t>("minor_version", 2));
+    setDate((boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("year", 0),
+            (boost::uint16_t)getOptions().getValueOrDefault<boost::uint32_t>("day_of_year", 0));
     
     setHeaderPadding(getOptions().getValueOrDefault<boost::uint32_t>("header_padding", 0));
     setSystemIdentifier(getOptions().getValueOrDefault<std::string>("system_id", LasHeader::SystemIdentifier));
