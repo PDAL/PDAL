@@ -46,7 +46,7 @@ div.footer {
     padding: 13px 0;
     text-align: center;
     font-size: 75%;
-    background-color: #6666AE;
+    background-color: #2c7fb8;
 }
  
 div.footer a {
@@ -59,7 +59,7 @@ div.footer a.hover {
 }
 
 div.related {
-    background-color: #6666AE;
+    background-color: #2c7fb8;
     line-height: 32px;
     color: #fff;
     font-size: 0.80em;
@@ -77,7 +77,7 @@ div.sphinxsidebar {
 
 div.sphinxsidebarwrapper{
     padding: 20px 0;
-    background-color: #E2E05A;
+    background-color: #b6f2fb;
 }
  
 div.sphinxsidebar h3,
@@ -88,7 +88,7 @@ div.sphinxsidebar h4 {
     font-weight: normal;
     margin: 0;
     padding: 5px 10px;
-    background-color: #E2E05A;
+    background-color: #b6f2fb;
 
 }
 
@@ -202,7 +202,7 @@ div.note {
 }
  
 div.seealso {
-    background-color: #E2E05A;
+    background-color: #b6f2fb;
     border: 1px solid #ff6;
 }
  
