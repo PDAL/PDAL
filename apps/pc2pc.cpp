@@ -78,7 +78,7 @@ private:
     bool m_useLiblas;
     std::string m_srs;
     bool m_bCompress;
-    
+    boost::uint32_t m_chunkSize;
 };
 
 
@@ -89,6 +89,7 @@ Pc2Pc::Pc2Pc(int argc, char* argv[])
     , m_useLiblas(false)
     , m_srs("")
     , m_bCompress(false)
+    , m_chunkSize(0)
 {
     return;
 }
@@ -122,6 +123,7 @@ void Pc2Pc::addSwitches()
         ("liblas", po::value<bool>(&m_useLiblas)->zero_tokens()->implicit_value(true), "use libLAS driver (not PDAL native driver)")
         ("a_srs", po::value<std::string>(&m_srs)->default_value(""), "Assign output coordinate system (if supported by output format)")
         ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true), "Compress output data (if supported by output format)")
+        ("chunk_size", po::value<boost::uint32_t>(&m_chunkSize), "Size of buffer, for blocked/chunked/tiled transfers")
         ;
 
     addSwitchSet(file_options);
@@ -149,8 +151,16 @@ int Pc2Pc::execute()
             writerOptions.add<std::string>("a_srs", m_srs);
         }
 
-        writerOptions.add<bool>("compression_hack1", m_bCompress);
+        if (m_bCompress)
+        {
+            writerOptions.add<bool>("compression", true);
+        }
         writerOptions.add<bool>("liblas", m_useLiblas);
+
+        if (m_chunkSize != 0)
+        {
+            writerOptions.add<boost::uint32_t>("chunk_size", m_chunkSize);
+        }
     }
 
     Stage& stage = AppSupport::makeReader(readerOptions);
@@ -162,9 +172,15 @@ int Pc2Pc::execute()
 
     writer.initialize();
 
-    const boost::uint64_t numPoints = writer.write(0);
+    const boost::uint64_t numPointsToRead = stage.getNumPoints();
+    boost::scoped_ptr<pdal::UserCallback> callback((numPointsToRead == 0) ? 
+        (pdal::UserCallback*)(new HeartbeatCallback) :
+        (pdal::UserCallback*)(new PercentageCallback));
+    writer.setUserCallback(callback.get());
 
-    std::cout << "Wrote " << numPoints << " points\n";
+    const boost::uint64_t numPointsRead = writer.write(numPointsToRead);
+
+    std::cout << "Wrote " << numPointsRead << " points\n";
 
     return 0;
 }

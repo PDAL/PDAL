@@ -79,7 +79,7 @@ std::string AppSupport::inferWriterDriver(const std::string& filename, pdal::Opt
 
     if (ext == "laz")
     {
-        options.add("compression_hack2", true);
+        options.add("compression", true);
     }
 
     options.add<std::string>("filename", filename);
@@ -140,8 +140,6 @@ pdal::Writer& AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
         driver = "drivers.liblas.writer";
     }
         
-    options.add<bool>("compression", options.getValueOrDefault("compression_hack1", false) || options.getValueOrDefault("compression_hack2", false));
-
     pdal::StageFactory factory;
     pdal::Writer* writer = factory.createWriter(driver, stage, options);
     if (!writer)
@@ -150,4 +148,46 @@ pdal::Writer& AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
     }
 
     return *writer;
+}
+
+
+PercentageCallback::PercentageCallback()
+    : m_lastMajorPerc(-10.0)
+    , m_lastMinorPerc(-2.0)
+{
+    return;
+}
+
+
+void PercentageCallback::callback()
+{
+    double currPerc = getPercentComplete();
+    
+    if (currPerc >= m_lastMajorPerc + 10.0)
+    {
+        std::cout << (int)currPerc;
+        m_lastMajorPerc = currPerc;
+        m_lastMinorPerc = currPerc;
+    }
+    else if (currPerc >= m_lastMinorPerc + 2.0)
+    {
+        std::cout << '.';
+        m_lastMinorPerc = currPerc;
+    }
+
+    return;
+}
+
+
+HeartbeatCallback::HeartbeatCallback()
+{
+    return;
+}
+
+
+void HeartbeatCallback::callback()
+{
+    std::cout << '.';
+
+    return;
 }
