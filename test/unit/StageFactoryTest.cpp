@@ -68,11 +68,11 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
     Filter* filter = factory.createFilter("filters.crop", *reader, optsF);
     BOOST_CHECK(filter->getName() == "filters.crop");
 
-    //Options optsM;
-    //std::vector<const Stage*> stages;
-    //stages.push_back(filter);
-    //MultiFilter* multifilter = factory.createMultiFilter("filters.mosaic", stages, optsM);
-    //BOOST_CHECK(multifilter->getName() == "filters.mosaic");
+    Options optsM;
+    std::vector<Stage*> stages;
+    stages.push_back(filter);
+    MultiFilter* multifilter = factory.createMultiFilter("filters.mosaic", stages, optsM);
+    BOOST_CHECK(multifilter->getName() == "filters.mosaic");
 
     Options optsW;
     optsW.add("filename", "temp.las", "file to write to");
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
     BOOST_CHECK(np == 1065);
 
     delete writer;
-    //delete multifilter;
+    delete multifilter;
     delete filter;
     delete reader;
 

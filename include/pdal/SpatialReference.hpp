@@ -67,7 +67,9 @@ public:
     /// Assignment operator.
     SpatialReference& operator=(SpatialReference const& rhs);
     
+    bool equals(const SpatialReference& other) const;
     bool operator==(const SpatialReference& other) const;
+    bool operator!=(const SpatialReference& other) const;
 
     // Returns true iff the object doesn't contain a valid srs.
     // (this is a cleaner way of saying "getWKT() == "")

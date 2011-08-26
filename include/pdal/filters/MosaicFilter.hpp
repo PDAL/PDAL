@@ -41,7 +41,6 @@
 
 #include <pdal/MultiFilter.hpp>
 #include <pdal/StageIterator.hpp>
-//#include <pdal/Bounds.hpp>
 
 
 namespace pdal { namespace filters {

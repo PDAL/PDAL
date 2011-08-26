@@ -53,33 +53,36 @@ void MosaicFilter::initialize()
 {
     MultiFilter::initialize();
 
-    const Stage& prevStage0 = *(getPrevStages()[0]);
+    const std::vector<Stage*>& stages = getPrevStages();
 
+    const Stage& stage0 = *stages[0];
+    const SpatialReference& srs0 = stage0.getSpatialReference();
+    const Schema& schema0 = stage0.getSchema();
+    PointCountType pointCountType0 = stage0.getPointCountType();
+    boost::uint64_t totalPoints = stage0.getNumPoints();
+    Bounds<double> bigbox(stage0.getBounds());
+
+    // we will only mosaic if all the stages have the same core properties: SRS, schema, etc
+    for (boost::uint32_t i=1; i<stages.size(); i++)
     {
-        setCoreProperties(prevStage0);  // BUG: clearly insufficient
+        Stage& stage = *(stages[i]);
+        if (stage.getSpatialReference() != srs0)
+            throw impedance_invalid("mosaicked stages must have same srs");
+        if (stage.getSchema() != schema0)
+            throw impedance_invalid("mosaicked stages must have same schema");
+        if (stage.getPointCountType() == PointCount_Unknown)
+            pointCountType0 = PointCount_Unknown;
+        
+        totalPoints += stage.getNumPoints();
+
+        bigbox.grow(stage.getBounds());
     }
 
-    boost::uint64_t totalPoints = 0;
-
-    Bounds<double> bigbox(prevStage0.getBounds());
-
-    for (size_t i=0; i<getPrevStages().size(); i++)
-    {
-        const Stage* stage = getPrevStages()[i];
-        if (stage==NULL)
-        {
-            throw pdal_error("bad stage passed to MosaicFilter");
-        }
-        if (stage->getSchema() != this->getSchema())
-        {
-            throw pdal_error("impedance mismatch in MosaicFilter");
-        }
-
-        bigbox.grow(this->getBounds());
-        totalPoints += this->getNumPoints();
-    }
-
-    setBounds(bigbox);
+    if (pointCountType0 == PointCount_Unknown)
+        totalPoints = 0;
+    
+    setCoreProperties(stage0);
+    setPointCountType(pointCountType0);
     setNumPoints(totalPoints);
 
     return;
