@@ -82,6 +82,7 @@ public:
 private:
     double m_lastMajorPerc;
     double m_lastMinorPerc;
+    bool m_done;
 };
 
 
