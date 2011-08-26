@@ -149,3 +149,53 @@ pdal::Writer& AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
 
     return *writer;
 }
+
+
+PercentageCallback::PercentageCallback()
+    : m_lastMajorPerc(-10.0)
+    , m_lastMinorPerc(-2.0)
+    , m_done(false)
+{
+    return;
+}
+
+
+void PercentageCallback::callback()
+{
+    if (m_done) return;
+
+    double currPerc = getPercentComplete();
+    
+    if (currPerc == 100.0)
+    {
+        std::cout << "100\n";
+        m_done = true;
+    }
+    else if (currPerc >= m_lastMajorPerc + 10.0)
+    {
+        std::cout << (int)currPerc;
+        m_lastMajorPerc = currPerc;
+        m_lastMinorPerc = currPerc;
+    }
+    else if (currPerc >= m_lastMinorPerc + 2.0)
+    {
+        std::cout << '.';
+        m_lastMinorPerc = currPerc;
+    }
+
+    return;
+}
+
+
+HeartbeatCallback::HeartbeatCallback()
+{
+    return;
+}
+
+
+void HeartbeatCallback::callback()
+{
+    std::cout << '.';
+
+    return;
+}

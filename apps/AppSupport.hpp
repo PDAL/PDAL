@@ -40,6 +40,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/Writer.hpp>
+#include <pdal/UserCallback.hpp>
 
 #include "Application.hpp"
 
@@ -70,6 +71,27 @@ private:
 
     AppSupport& operator=(const AppSupport&); // not implemented
     AppSupport(const AppSupport&); // not implemented
+};
+
+
+class PercentageCallback : public pdal::UserCallback
+{
+public:
+    PercentageCallback();
+    virtual void callback();
+private:
+    double m_lastMajorPerc;
+    double m_lastMinorPerc;
+    bool m_done;
+};
+
+
+class HeartbeatCallback : public pdal::UserCallback
+{
+public:
+    HeartbeatCallback();
+    virtual void callback();
+private:
 };
 
 #endif
