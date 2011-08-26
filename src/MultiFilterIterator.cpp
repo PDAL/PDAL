@@ -43,6 +43,7 @@ MultiFilterSequentialIterator::MultiFilterSequentialIterator(const MultiFilter& 
     : StageSequentialIterator(filter)
     , m_filter(filter)
     , m_prevIterator(NULL)
+    , m_iteratorIndex(0)
 {
     for (size_t i=0; i<filter.getPrevStages().size(); ++i)
     {

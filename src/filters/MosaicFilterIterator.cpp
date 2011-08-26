@@ -53,73 +53,73 @@ MosaicFilterSequentialIterator::~MosaicFilterSequentialIterator()
 }
 
 
-
-
-boost::uint64_t MosaicFilterSequentialIterator::skipImpl(boost::uint64_t count)
+boost::uint64_t MosaicFilterSequentialIterator::skipImpl(boost::uint64_t targetCount)
 {
-    // BUG: this is clearly not correct, we need to keep track of which tile we're on
-    m_prevIterators[0]->skip(count);
+    boost::uint64_t count = 0;
+
+    while (count < targetCount)
+    {
+        m_prevIterator = m_prevIterators[m_iteratorIndex];
+
+        // skip as much as we can in the current stage
+        boost::uint64_t thisCount = m_prevIterator->skip(count);
+        count += thisCount;
+
+        if (m_prevIterators[m_iteratorIndex]->atEnd())
+        {
+            ++m_iteratorIndex;
+        }
+        if (m_iteratorIndex == m_prevIterators.size())
+        {
+            // no more points
+            break;
+        }
+    }
+
     return count;
 }
 
 
 bool MosaicFilterSequentialIterator::atEndImpl() const
 {
-    // BUG: this is clearly not correct, we need to keep track of which tile we're on
-    return m_prevIterators[0]->atEnd();
+    if (m_iteratorIndex == m_prevIterators.size())
+        return true;
+    if (m_prevIterators[m_iteratorIndex]->atEnd())
+        return true;
+    return false;
 }
 
 
 boost::uint32_t MosaicFilterSequentialIterator::readBufferImpl(PointBuffer& destData)
 {
-    // BUG: We know that the two prev stage schemas are compatible, 
-    // but we can't be sure the have the same bitfield layouts as 
-    // the buffer we've been given.  We could handle it manually if 
-    // they differ, but that would be a pain for now.  (This affects
-    // all filters, I guess.)
-
-    // BUG: this doesn't account for isValid()
-
     boost::uint32_t totalNumPointsToRead = destData.getCapacity();
     boost::uint32_t totalNumPointsRead = 0;
-
-    boost::uint64_t currentPointIndex = getIndex();
-
-    int destPointIndex = 0;
-    boost::uint64_t stageStartIndex = 0;
+    boost::uint32_t destPointIndex = 0;
 
     // for each stage, we read as many points as we can
-    for (size_t i=0; i<getPrevIterators().size(); i++)
+    while (totalNumPointsRead < totalNumPointsToRead)
     {
-        StageSequentialIterator* iterator = getPrevIterators()[i];
-        const Stage& stage = iterator->getStage();
+        assert(m_iteratorIndex < m_prevIterators.size());
+        m_prevIterator = m_prevIterators[m_iteratorIndex];
 
-        const boost::uint64_t stageStopIndex = stageStartIndex + stage.getNumPoints();
+        // read as much as we can into temp buffer
+        PointBuffer tmp(destData.getSchemaLayout(), totalNumPointsToRead-totalNumPointsRead); 
+        boost::uint32_t numRead = m_prevIterator->read(tmp);
+        totalNumPointsRead += numRead;
 
-        if (currentPointIndex < stageStopIndex)
+        // concat the temp buffer on to end of real dest buffer
+        destData.copyPointsFast(destPointIndex, 0, tmp, numRead);
+        destPointIndex += numRead;
+        destData.setNumPoints( destData.getNumPoints() + numRead );
+
+        if (m_prevIterator->atEnd())
         {
-            // we need to read some points from this stage
-
-            boost::uint32_t pointsAvail = (boost::uint32_t)(stageStopIndex - currentPointIndex);
-            boost::uint32_t pointsToGet = std::min(pointsAvail, totalNumPointsToRead);
-
-            PointBuffer srcData(destData.getSchemaLayout(), pointsToGet);
-            boost::uint32_t pointsGotten = iterator->read(srcData);
-
-            for (boost::uint32_t idx=0; idx<pointsGotten; idx++)
-            {
-                destData.copyPointFast(destPointIndex, idx, srcData);
-                destPointIndex++;
-                destData.setNumPoints(idx+1);
-            }
-
-            totalNumPointsRead += pointsGotten;
-            currentPointIndex += pointsGotten;
+            ++m_iteratorIndex;
         }
-
-        stageStartIndex += stage.getNumPoints();
-
-        if (totalNumPointsRead == totalNumPointsToRead) break;
+        if (m_iteratorIndex == m_prevIterators.size())
+        {
+            break;
+        }
     }
 
     return totalNumPointsRead;

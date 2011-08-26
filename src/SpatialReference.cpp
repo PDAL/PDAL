@@ -232,7 +232,7 @@ void SpatialReference::setProj4(std::string const& v)
 }
 
 
-bool SpatialReference::operator==(const SpatialReference& input) const
+bool SpatialReference::equals(const SpatialReference& input) const
 {
 #ifdef PDAL_SRS_ENABLED
 
@@ -251,6 +251,18 @@ bool SpatialReference::operator==(const SpatialReference& input) const
     throw pdal_error ("SpatialReference equality testing not available without GDAL+libgeotiff support");
 #endif
 
+}
+
+
+bool SpatialReference::operator==(const SpatialReference& input) const
+{
+    return this->equals(input);
+}
+
+
+bool SpatialReference::operator!=(const SpatialReference& input) const
+{
+    return !(this->equals(input));
 }
 
 

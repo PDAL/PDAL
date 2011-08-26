@@ -159,6 +159,9 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
     
     if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
 
+    // if we don't have an SRS, try to forward the one from the prev stage
+    if (m_spatialReference.empty()) m_spatialReference = getPrevStage().getSpatialReference();
+    
     writeBegin(targetNumPointsToWrite);
 
     iter->readBegin();

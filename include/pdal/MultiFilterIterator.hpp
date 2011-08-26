@@ -65,6 +65,7 @@ protected:
     const MultiFilter& m_filter;
     std::vector<StageSequentialIterator*> m_prevIterators;
     StageSequentialIterator* m_prevIterator;
+    boost::uint32_t m_iteratorIndex;
 
 private:
 };

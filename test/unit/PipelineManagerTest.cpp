@@ -108,9 +108,8 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
 
         // check all the prev/next stage linkages
 
-// BUG: mosaicker still not working
-//        const boost::uint64_t np = writer->write( 0 );
-//        BOOST_CHECK(np == 1065 * 2);
+        const boost::uint64_t np = writer->write( 0 );
+        BOOST_CHECK(np == 1065 * 2);
 
         std::vector<StageBase*> reader1_inputs = reader1->getInputs();
         std::vector<StageBase*> reader2_inputs = reader2->getInputs();
