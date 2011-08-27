@@ -1,37 +1,46 @@
-.. PDAL documentation master file, created by
-   sphinx-quickstart on Tue Mar 15 15:22:19 2011.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. _home:
 
-Welcome to PDAL's documentation!
-=================================
+******************************************************************************
+PDAL - Point Data Abstraction Library
+******************************************************************************
 
-Contents:
+PDAL is a `BSD licensed`_ library for translating and manipulating `point cloud data`_ of 
+various formats. It is a library that is analogous to the `GDAL`_ raster library. 
+PDAL is focussed on reading, writing, and translating point cloud data from 
+the ever-growing constellation of data formats that are being developed for working 
+with multi-dimensional emitted-pulse scanning systems. While PDAL is not explicitly 
+limited to working with `LiDAR`_ data formats, its initial rollout is focused 
+in that area.
 
-.. toctree::
-   :maxdepth: 2
-   
-   notes/apps
-   notes/bindings
-   notes/c-api
-   notes/coding-conventions
-   notes/core-classes
-   notes/docs
-   notes/goals
-   notes/future
-   notes/intro
-   notes/io
-   notes/misc
-   notes/pipeline
-   notes/stages
-   notes/testing
-   notes/use-cases
-   sprint/notes
-  
-Indices and tables
-==================
+PDAL is *not* related to `PCL`_ except in the sense that both ostensibly work
+with point data. PDAL is for data format translation and data access, with
+some light filtering and processing algorithms to streamline those tasks. If
+you want a library that can do exploitation, visualization, and sophisticated
+processing of point cloud data, you want PCL at http://pointclouds.org.
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+
+.. image:: http://svn.osgeo.org/osgeo/foss4g/2011/documents/logo/foss4g_web_block_150x.png
+   :height: 150px
+   :width: 150px
+   :alt: FOSS4G 2011 in Denver, U.S.A.
+   :align: right
+   :target: http://2011.foss4g.org/
+
+Developers and Sponsorship
+------------------------------------------------------------------------------
+
+PDAL is developed by `Howard Butler`_ and `Michael Gerlek`_.
+
+PDAL is currently sponsored by the `U.S. Army Cold Regions Research and Engineering Laboratory`_.  
+Thanks to `Aerial Services, Inc`_ for the http://pointcloud.org domain.
+
+.. _`Aerial Services, Inc`: http://www.asi-gis.com/
+.. _`PCL`: http://pointclouds.org
+.. _`GDAL`: http://www.gdal.org
+.. _`BSD licensed`: http://www.opensource.org/licenses/bsd-license.php
+.. _`point cloud data`: http://en.wikipedia.org/wiki/Point_cloud
+.. _`LIDAR`: http://en.wikipedia.org/wiki/LIDAR
+.. _`U.S. Army Cold Regions Research and Engineering Laboratory` : http://www.crrel.usace.army.mil/
+.. _`Howard Butler`: http://hobu.biz
+.. _`Michael Gerlek`: http://flaxen.com
 
