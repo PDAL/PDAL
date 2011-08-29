@@ -11,6 +11,7 @@ Contents:
    :maxdepth: 2
    
    development/index
+   download
   
 Indices and tables
 ==================
