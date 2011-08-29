@@ -203,11 +203,11 @@ Notes
   This means less parsing hassle for us, but also means we can't produce
   decent error messages (esp. since we don't have line numbers).
 
-* Attributes are not used anywhere.  This is in part because ptree's don’t
+* Attributes are not used anywhere.  This is in part because ptree's don't
   support them uniformly across all file formats.
 
 * The schema is intended to be something that can be validated via XSD,
-  although we don’t do that today.
+  although we don't do that today.
 
 * No version numbering yet, need to add that.  Would like to be an attr on
   the <Pipeline> element.

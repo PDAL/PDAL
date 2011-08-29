@@ -131,6 +131,9 @@ const Options Reader::getDefaultOptions() const
                                      "Block capacity");
 
 
+    options.add(connection);
+    options.add(query);
+    options.add(capacity);
     
     return options;
 }

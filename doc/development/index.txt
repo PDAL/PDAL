@@ -1,0 +1,21 @@
+.. _development:
+
+******************************************************************************
+Development 
+******************************************************************************
+
+
+Contents:
+
+.. toctree::
+   :maxdepth: 2
+   
+   notes/index
+  
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
