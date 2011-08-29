@@ -100,7 +100,7 @@ public:
     static char const* const SoftwareIdentifier;
 
     /// Array of 5 elements - numbers of points recorded by each return.
-    /// \todo TODO: Consider replacing with {boost|std::tr1}::array<T, 5> --mloskot
+    /// \todo TODO: Consider replacing with boost::array<T, 5>
     typedef std::vector<boost::uint32_t> RecordsByReturnArray;
 
     /// Get ASPRS LAS file signature.
