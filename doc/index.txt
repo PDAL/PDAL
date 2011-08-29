@@ -4,6 +4,13 @@
 PDAL - Point Data Abstraction Library
 ******************************************************************************
 
+.. image:: http://svn.osgeo.org/osgeo/foss4g/2011/documents/logo/foss4g_web_block_150x.png
+   :height: 150px
+   :width: 150px
+   :alt: FOSS4G 2011 in Denver, U.S.A.
+   :align: right
+   :target: http://2011.foss4g.org/
+   
 PDAL is a `BSD licensed`_ library for translating and manipulating `point cloud data`_ of 
 various formats. It is a library that is analogous to the `GDAL`_ raster library. 
 PDAL is focussed on reading, writing, and translating point cloud data from 
@@ -12,6 +19,9 @@ with multi-dimensional emitted-pulse scanning systems. While PDAL is not explici
 limited to working with `LiDAR`_ data formats, its initial rollout is focused 
 in that area.
 
+
+
+
 PDAL is *not* related to `PCL`_ except in the sense that both ostensibly work
 with point data. PDAL is for data format translation and data access, with
 some light filtering and processing algorithms to streamline those tasks. If
@@ -19,12 +29,6 @@ you want a library that can do exploitation, visualization, and sophisticated
 processing of point cloud data, you want PCL at http://pointclouds.org.
 
 
-.. image:: http://svn.osgeo.org/osgeo/foss4g/2011/documents/logo/foss4g_web_block_150x.png
-   :height: 150px
-   :width: 150px
-   :alt: FOSS4G 2011 in Denver, U.S.A.
-   :align: right
-   :target: http://2011.foss4g.org/
 
 Developers and Sponsorship
 ------------------------------------------------------------------------------

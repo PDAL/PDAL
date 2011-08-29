@@ -121,7 +121,7 @@ void PcInfo::addSwitches()
     po::options_description* processing_options = new po::options_description("processing options");
 
     processing_options->add_options()
-        ("point,p", po::value<boost::uint64_t>(&m_pointNumber)->implicit_value((std::numeric_limits<boost::uint64_t>::max)()), "point to dump")
+        ("point,p", po::value<boost::uint64_t>(&m_pointNumber)->implicit_value(0), "point to dump")
         ("stats,a", po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true), "dump stats on all points (reads entire dataset)")
         ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
         ("stage,r", po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true), "dump the stage info")
