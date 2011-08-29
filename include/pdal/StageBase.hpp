@@ -58,94 +58,196 @@ class Stage;
 class PDAL_DLL StageBase
 {
 public:
+
+    /// Constructor.
+    ///
+    /// @param  inputs  The input stages.
+    /// @param  options Options for controlling the pipeline stage.
     StageBase(const std::vector<StageBase*>& inputs, const Options& options);
 
+    /// Destructor.
     virtual ~StageBase();
 
-    // This function is for derived stages to perform "static" validation, e.g. bad Option arguments.
-    // It will recursively call initialize() on all previous stages.
-    // Users must call this after the last stage in the pipeline has been consturcted.  
-    // It is illegal to call this twice for a stage.
-    // Derived stages should feel free to provide their own implementations.  Remember to call initialize() on
-    //   the parent class before your own class-specific code.
-    // This function will throw when errors are found.
+    /// Initializes this object.
+    ///
+    /// This function is for derived stages to perform "static" validation, e.g. bad Option arguments.
+    /// It will recursively call initialize() on all previous stages.
+    /// Users must call this after the last stage in the pipeline has been consturcted.  
+    /// It is illegal to call this twice for a stage.
+    /// Derived stages should feel free to provide their own implementations.  Remember to call initialize() on
+    ///   the parent class before your own class-specific code.
+    /// This function will throw when errors are found.
     virtual void initialize();
+
+    /// Query if this object is initialized.
+    ///
+    /// @return true if initialized, false if not.
     bool isInitialized() const;
 
+    /// Gets the Options set for the stage.
+    ///
+    /// @return The options.
     const Options& getOptions() const;
 
-    // This is used to generate pipeline xml files.  It will
-    // recursively visit all child stages to populate the tree.
+
+    /// Returns the serialized pipeline.
+    ///
+    /// This is used to generate pipeline xml files.  It will
+    /// recursively visit all child stages to populate the tree.
+    ///
+    /// @return the ptree for the stage
     virtual boost::property_tree::ptree serializePipeline() const = 0;
 
-    // This is set by the "debug" option, which is a boolean.
-    // 
-    // This is intended to be used for adding debug code to stages, e.g. more than just the
-    // extra logging that "verbose" implies.
+
+    /// Query if this object is debug.
+    ///
+    /// This is set by the "debug" option, which is a boolean.
+    /// 
+    /// This is intended to be used for adding debug code to stages, e.g. more than just the
+    /// extra logging that "verbose" implies.
+    /// 
+    /// @return true if debug, false if not.
     bool isDebug() const;
     
-    // This is set by the "verbose" option
-    //    0 - no verbosity at all
-    //    >0 - meaning is left to the implementors of the individual stages
-    //
-    // "Verbose" is intended to only add logging/tracing/output functionality; to add or enable
-    // extra validation checks and such (code which is potentially side-effecting) you want to
-    // use the "debug" option.
-    bool isVerbose() const; // true iff verbosity>0 
+
+    /// Query if this object is verbose.
+    ///
+    /// This is set by the "verbose" option
+    ///    0 - no verbosity at all
+    ///    >0 - meaning is left to the implementors of the individual stages
+    /// 
+    /// "Verbose" is intended to only add logging/tracing/output functionality; to add or enable
+    /// extra validation checks and such (code which is potentially side-effecting) you want to use
+    /// the "debug" option. 
+    /// 
+    /// @return true if verbosity>0, false if not.
+
+    bool isVerbose() const;
+
+    /// Gets the verbose level.
+    ///
+    /// @return The verbose level.
     boost::uint32_t getVerboseLevel() const; 
 
-    // Everyone must implement this.  If you want to access the list of 
-    // options "statically", you are free to construct the stage with no
-    // arguments and cal getDefaultOptions() on it -- there is no need
-    // to call initialize(), so it should be a fast/safe operation.
+
+    /// Gets the default options.
+    ///
+    /// Everyone must implement this.  If you want to access the list of 
+    /// options "statically", you are free to construct the stage with no
+    /// arguments and cal getDefaultOptions() on it -- there is no need
+    /// to call initialize(), so it should be a fast/safe operation.
+    ///
+    /// @return The default options.
     virtual const Options getDefaultOptions() const = 0;
 
-    // Use a dotted, XPath-style name for your 
-    // stage.  For example, 'drivers.las.reader' or 'filters.crop'.  This 
-    // XPath-style name will also correspond to an entry in the pdal::Options
-    // tree for the given stage.
+    /// Gets the name.
+    ///
+    /// Use a dotted, XPath-style name for your 
+    /// stage.  For example, 'drivers.las.reader' or 'filters.crop'.  This 
+    /// XPath-style name will also correspond to an entry in the pdal::Options
+    /// tree for the given stage.
+    ///
+    /// @return The name.
     virtual std::string getName() const = 0;
+
+    /// Gets the description.
+    ///
+    /// @return The description.
     virtual std::string getDescription() const = 0;
 
-    // For getName() and getDescription(), each stage provides a static and 
-    // a dynamic version of the function.  Each (concrete) stage should call 
-    // the following macro to create the functions for you.
+    /// For getName() and getDescription(), each stage provides a static and 
+    /// a dynamic version of the function.  Each (concrete) stage should call 
+    /// the following macro to create the functions for you.
+
 #define SET_STAGE_NAME(name, description)  \
     static std::string s_getName() { return name; }  \
     std::string getName() const { return name; }  \
     static std::string s_getDescription() { return description; }  \
     std::string getDescription() const { return description; }
 
-    // for dumping
+    /// Converts this object to a ptree.
+    ///
+    /// @return This object as a boost::property_tree::ptree.
     virtual boost::property_tree::ptree toPTree() const;
+
+    /// Dumps this object.
     virtual void dump() const;
 
+    /// Gets the stage's id.
+    ///
+    /// @return The id.
     boost::uint32_t getId() const { return m_id; }
 
+    /// Gets the list of input stages
+    ///
+    /// @return vector of input stages (may be empty)
     const std::vector<StageBase*>& getInputs() const;
+
+    /// Gets the list of output stages
+    ///
+    /// @return vector of output stages (may be empty)
     const std::vector<StageBase*>& getOutputs() const;
 
-    // convenience function: returns the first input stage, as a Stage&
-    // (don't call this unless you know it is safe to do so, e.g Readers
-    // should not use this since they have no input stages)
+
+    /// Gets the previous stage.
+    ///
+    /// convenience function: returns the first input stage, as a Stage&
+    /// (don't call this unless you know it is safe to do so, e.g Readers
+    /// should not use this since they have no input stages)
+    ///
+    /// @return The previous stage.
     Stage& getPrevStage() const;
 
-    // convenience function: returns the input stages, as a Stage* vector
-    // (don't call this unless you know it is safe to do so, e.g Readers
-    // should not use this since they have no input stages, and Filters
-    // probably won't want to use this either since they only have one
-    // prev stage)
+
+    /// Gets the previous stages.
+    ///
+    /// convenience function: returns the input stages, as a Stage* vector
+    /// (don't call this unless you know it is safe to do so, e.g Readers
+    /// should not use this since they have no input stages, and Filters
+    /// probably won't want to use this either since they only have one
+    /// prev stage)
+    ///
+    /// @return null if it fails, else the previous stages.
     std::vector<Stage*> getPrevStages() const;
 
 protected:
+
+    /// Gets the options.
+    ///
+    /// @return The options.
     Options& getOptions();
 
-    // These are used by the ctors of the derived classes, so they can call 
-    // the ctor of StageBase.  C++ doesn't support polymorphic arrays or
-    // inlined initialization of vectors, so we do it this way.
+
+    /// Makes an "empty" vector of StageBase pointers.
+    ///
+    /// This is used by the ctors of the derived classes, so they can call 
+    /// the ctor of StageBase.  This function goes along with the other
+    /// makeVector() functions.
+    /// 
+    /// @return an empty vector
     static std::vector<StageBase*> makeVector();
-    static std::vector<StageBase*> makeVector(Stage&);
-    static std::vector<StageBase*> makeVector(const std::vector<Stage*>&);
+
+    /// Makes a vector of one StageBase pointer from a single Stage reference
+    ///
+    /// This is used by the ctors of the derived classes, so they can call 
+    /// the ctor of StageBase.  C++ doesn't support polymorphic arrays or
+    /// inlined initialization of vectors, so we do it this way.
+    ///
+    /// @param src the Stage reference
+    /// 		       
+    /// @return a vector of one StageBase pointer
+    static std::vector<StageBase*> makeVector(Stage& src);
+
+    /// Makes a vector of StageBase pointers from a vector of Stages
+    ///
+    /// This is used by the ctors of the derived classes, so they can call 
+    /// the ctor of StageBase.  C++ doesn't support polymorphic arrays or
+    /// inlined initialization of vectors, so we do it this way.
+    ///
+    /// @param src the vector of Stages
+    ///
+    /// @return a vector of StageBase pointers
+    static std::vector<StageBase*> makeVector(const std::vector<Stage*>& src);
 
 private:
     bool m_initialized;
@@ -157,12 +259,18 @@ private:
     std::vector<StageBase*> m_inputs;
     std::vector<StageBase*> m_outputs;
 
-    StageBase& operator=(const StageBase&); // not implemented
+    StageBase& operator=(const StageBase& rhs); // not implemented
     StageBase(const StageBase&); // not implemented
 };
 
+/// Output operator for serialization
+///
+/// @param ostr    The output stream to write to
+/// @param src     The StageBase to be serialized out
+///
+/// @return The output stream
 
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const StageBase&);
+PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const StageBase& src);
 
 } // namespace pdal
 
