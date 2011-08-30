@@ -49,6 +49,7 @@ csharp/pdal_swig_cpp/pdal_wrap.cpp
 # doxygen cruft
 #
 doc/api/html
+doc/api/xml
 
 
 Makefile
