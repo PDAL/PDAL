@@ -20,7 +20,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/PointBufferCache.hpp>
+#include <pdal/filters/PointBufferCache.hpp>
 
 using namespace pdal;
 

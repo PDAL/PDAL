@@ -34,7 +34,7 @@
 
 #include <pdal/filters/CacheFilter.hpp>
 
-#include <pdal/PointBufferCache.hpp>
+#include <pdal/filters/PointBufferCache.hpp>
 #include <pdal/filters/CacheFilterIterator.hpp>
 
 namespace pdal { namespace filters {

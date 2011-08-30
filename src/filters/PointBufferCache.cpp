@@ -15,7 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <pdal/PointBufferCache.hpp>
+#include <pdal/filters/PointBufferCache.hpp>
 
 // All the functions are in the header, because if they are put in here then
 // VS2010 freaks out about absurdly long mangled symbol names.

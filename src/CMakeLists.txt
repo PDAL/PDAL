@@ -40,7 +40,6 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/PipelineReader.hpp
   ${PDAL_HEADERS_DIR}/PipelineWriter.hpp
   ${PDAL_HEADERS_DIR}/PointBuffer.hpp  
-  ${PDAL_HEADERS_DIR}/PointBufferCache.hpp
   ${PDAL_HEADERS_DIR}/Range.hpp
   ${PDAL_HEADERS_DIR}/Reader.hpp
   ${PDAL_HEADERS_DIR}/ReaderIterator.hpp
@@ -79,7 +78,6 @@ set(PDAL_BASE_CPP
   PipelineReader.cpp
   PipelineWriter.cpp
   PointBuffer.cpp
-  PointBufferCache.cpp
   Range.cpp
   Reader.cpp
   ReaderIterator.cpp
@@ -326,6 +324,7 @@ set(PDAL_FILTERS_HPP
   ${PDAL_FILTERS_HEADERS}/DecimationFilterIterator.hpp
   ${PDAL_FILTERS_HEADERS}/MosaicFilter.hpp
   ${PDAL_FILTERS_HEADERS}/MosaicFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/PointBufferCache.hpp
   ${PDAL_FILTERS_HEADERS}/ReprojectionFilter.hpp
   ${PDAL_FILTERS_HEADERS}/ReprojectionFilterIterator.hpp
   ${PDAL_FILTERS_HEADERS}/ScalingFilter.hpp
@@ -349,6 +348,7 @@ set (PDAL_FILTERS_CPP
   ${PDAL_FILTERS_SRC}/DecimationFilterIterator.cpp
   ${PDAL_FILTERS_SRC}/MosaicFilter.cpp
   ${PDAL_FILTERS_SRC}/MosaicFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/PointBufferCache.cpp
   ${PDAL_FILTERS_SRC}/ReprojectionFilter.cpp
   ${PDAL_FILTERS_SRC}/ReprojectionFilterIterator.cpp
   ${PDAL_FILTERS_SRC}/ScalingFilter.cpp
