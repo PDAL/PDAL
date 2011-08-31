@@ -45,7 +45,6 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/liblas/Reader.hpp>
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/Color.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/SchemaLayout.hpp>
@@ -105,7 +104,7 @@ static void readFakeFile(Controller& controller)
         points[i+2] = (float)z;
 
         double red,green,blue;
-        pdal::Color::interpolateColor(z,minz,maxz,red,green,blue);
+        pdal::filters::ColorFilter::interpolateColor(z,minz,maxz,red,green,blue);
         
         const double vmax = (std::numeric_limits<boost::uint16_t>::max)();
         boost::uint16_t r16 = (boost::uint16_t)(red * vmax);

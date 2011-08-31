@@ -36,7 +36,6 @@
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Schema.hpp>
-#include <pdal/Color.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/StatsFilterIterator.hpp>
 

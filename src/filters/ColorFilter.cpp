@@ -137,7 +137,7 @@ void ColorFilter::processBuffer(PointBuffer& data) const
 
 
 // static function to impute a color from within a range
-static void interpolateColor(double value, double minValue, double maxValue, double& red, double& green, double& blue)
+void ColorFilter::interpolateColor(double value, double minValue, double maxValue, double& red, double& green, double& blue)
 {
     // initialize to white
     red = 1.0;

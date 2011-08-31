@@ -74,6 +74,8 @@ public:
 
     void processBuffer(PointBuffer& data) const;
 
+    static void interpolateColor(double value, double minValue, double maxValue, double& red, double& green, double& blue);
+
 private:
     void checkImpedance();
 
