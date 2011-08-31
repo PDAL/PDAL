@@ -439,7 +439,7 @@ public:
 
 /** @name Default extent
 */ 
-    /// Returns a staticly-allocated 
+    /// Returns a staticly-allocated Bounds extent that represents infinity
     static const Bounds<T>& getDefaultSpatialExtent()
     {
         static T minv((std::numeric_limits<T>::min)());

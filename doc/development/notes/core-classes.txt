@@ -12,6 +12,7 @@ described in a different Note.
 
 * :cpp:class:`pdal::Bounds`
 
+* :cpp:class:`pdal::Dimension`
 * Color
 
 * Dimension, DimensionLayout

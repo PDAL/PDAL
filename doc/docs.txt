@@ -12,7 +12,7 @@ Contents:
    
    development/index
    download
-   cppapi
+   api/index
   
 Indices and tables
 ==================

@@ -290,3 +290,8 @@ breathe_projects = {
     'api':'doxygen/xml'
 }
 breathe_default_project = 'api'
+breathe_domain_by_extension = {
+        "hpp" : "cpp",
+        "h":"cpp"
+        }
+
