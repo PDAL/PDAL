@@ -1,7 +1,7 @@
 /******************************************************************************
  * $Id$
  *
- * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
+ * Project:  pdal - http://pdal.org - A BSD library for LAS format data.
  * Purpose:  LAS bounds class
  * Author:   Howard Butler, hobu.inc@gmail.com
  *
@@ -55,6 +55,9 @@
 namespace pdal
 {
 
+/// Bounds is for manipulating n-dimensional ranges of data.  Typically 
+/// used for defining the spatial extents of XYZ data, this class can also be 
+/// used for defining bounds of other dimensions.  
 template <typename T>
 class PDAL_DLL Bounds
 {
@@ -65,22 +68,32 @@ private:
     RangeVector m_ranges;
 
 public:
+
+/** @name Constructors
+*/  
+
+    /// Constructs an empty Bounds instance 
+    /// with no dimensions
     Bounds<T>()
     {
         m_ranges.resize(0);
     }
-
+    
+    /// Copy constructor
     Bounds(Bounds const& other)
         : m_ranges(other.m_ranges)
     {
     }
 
+    /// Constructs a Bounds instance from a vector 
+    /// of Range
     Bounds(RangeVector const& ranges)
         :
         m_ranges(ranges)
     {
     }
 
+    /// Convenience constructor for typical 3D case
     Bounds( T minx,
             T miny,
             T minz,
@@ -101,7 +114,8 @@ public:
         assert(verify());
 
     }
-
+    
+    /// Convenience constructor for typical 2D case
     Bounds( T minx,
             T miny,
             T maxx,
@@ -119,6 +133,8 @@ public:
         assert(verify());
     }
 
+    /// Convenience constructor for Vector of minimum and maximum 
+    /// values.
     Bounds(const Vector<T>& minimum, const Vector<T>& maximum)
     {
         assert(minimum.size() == maximum.size());
@@ -134,6 +150,9 @@ public:
         assert(verify());
     }
 
+/** @name Data manipulation
+*/ 
+
     T getMinimum(std::size_t const& index) const
     {
         if (m_ranges.size() <= index)
@@ -141,7 +160,7 @@ public:
             // std::ostringstream msg;
             // msg << "Bounds dimensions, " << ranges.size() <<", is less "
             //     << "than the given index, " << index;
-            // throw std::runtime_error(msg.str());
+            // throw pdal::bounds_error(msg.str());
             return 0;
         }
         return m_ranges[index].getMinimum();
@@ -163,7 +182,7 @@ public:
             // std::ostringstream msg;
             // msg << "Bounds dimensions, " << m_ranges.size() <<", is less "
             //     << "than the given index, " << index;
-            // throw std::runtime_error(msg.str());
+            // throw pdal::bounds_error(msg.str());
             return 0;
         }
         return m_ranges[index].getMaximum();
@@ -202,6 +221,8 @@ public:
         return Vector<T>(vec);
     }
 
+/** @name Equality
+*/ 
     inline bool operator==(Bounds<T> const& rhs) const
     {
         return equal(rhs);
@@ -212,7 +233,8 @@ public:
         return (!equal(rhs));
     }
 
-
+/** @name Identity
+*/ 
     Bounds<T>& operator=(Bounds<T> const& rhs)
     {
         if (&rhs != this)
@@ -222,6 +244,8 @@ public:
         return *this;
     }
 
+/** @name Data queries
+*/ 
     /// The vector of Range<T> for the Bounds
     RangeVector const& dimensions() const
     {
@@ -302,9 +326,9 @@ public:
         if( size() != deltas.size())
         {
             std::ostringstream msg;
-            msg << "liblas::Bounds::shift: Delta vector size, " << deltas.size()
+            msg << "pdal::Bounds::shift: Delta vector size, " << deltas.size()
                 << ", is larger than the dimensionality of the bounds, "<< size() << ".";
-            throw std::runtime_error(msg.str());
+            throw pdal::bounds_error(msg.str());
         }
         for (i = 0; i < deltas.size(); ++i)
         {
@@ -319,9 +343,9 @@ public:
         if( size() != deltas.size())
         {
             std::ostringstream msg;
-            msg << "liblas::Bounds::scale: Delta vector size, " << deltas.size()
+            msg << "pdal::Bounds::scale: Delta vector size, " << deltas.size()
                 << ", is larger than the dimensionality of the bounds, "<< size() << ".";
-            throw std::runtime_error(msg.str());
+            throw pdal::bounds_error(msg.str());
         }
         for (i = 0; i < deltas.size(); ++i)
         {
@@ -339,7 +363,7 @@ public:
         }
     }
 
-    /// Grow to the union of two liblas::Bounds
+    /// Grow to the union of two pdal::Bounds
     void grow(Bounds const& r)
     {
         RangeVector ds = r.dimensions();
@@ -349,7 +373,7 @@ public:
         }
     }
 
-    /// Expand the liblas::Bounds to include this point
+    /// Expand the pdal::Bounds to include this point
     void grow(Vector<T> const& point)
     {
         assert(point.size() == size());
@@ -359,6 +383,7 @@ public:
         }
     }
 
+    /// Calculate a n-dimensional volume for the Bounds instance
     T volume() const
     {
         T output = T(1);
@@ -370,6 +395,8 @@ public:
         return output;
     }
 
+    /// Returns true if the pdal::Bounds<T>::size() is 0 or 
+    /// all dimensions within the bounds are empty.
     bool empty() const
     {
         if (size()==0)
@@ -386,7 +413,10 @@ public:
         }
         return false;
     }
-
+    
+    /// Verifies that the minimums and maximums of each dimension within the 
+    /// bounds are not inverted (also works in the case where the bounds is 
+    /// at infinity or when the bounds is empty).
     bool verify()
     {
         for (std::size_t d = 0; d < size(); ++d)
@@ -398,26 +428,18 @@ public:
                     Utils::compare_distance<T>(getMaximum(d), -(std::numeric_limits<T>::max)()))
                 {
                     std::ostringstream msg;
-                    msg << "liblas::Bounds::verify: Minimum point at dimension " << d
+                    msg << "pdal::Bounds::verify: Minimum point at dimension " << d
                         << "is greater than maximum point.  Neither point is infinity.";
-                    throw std::runtime_error(msg.str());
+                    throw pdal::bounds_error(msg.str());
                 }
             }
         }
         return true;
     }
 
-    ////Bounds<T> project(liblas::SpatialReference const& in_ref, liblas::SpatialReference const& out_ref)
-    ////{
-    ////    liblas::ReprojectionTransform trans(in_ref, out_ref);
-    ////
-    ////    liblas::Point minimum = (min)();
-    ////    liblas::Point maximum = (max)();
-    ////    trans.transform(minimum);
-    ////    trans.transform(maximum);
-    ////    return Bounds<T>(minimum, maximum);
-    ////}
-
+/** @name Default extent
+*/ 
+    /// Returns a staticly-allocated 
     static const Bounds<T>& getDefaultSpatialExtent()
     {
         static T minv((std::numeric_limits<T>::min)());
@@ -426,6 +448,10 @@ public:
         return v;
     }
 
+/** @name Summary and serialization
+*/ 
+    /// Outputs a string-based boost::property_tree::ptree representation 
+    /// of the Bounds instance
     boost::property_tree::ptree toPTree() const
     {
         boost::property_tree::ptree tree;
@@ -437,6 +463,7 @@ public:
         return tree;
     }
 
+    /// Outputs a string representation of the Bounds instance to std::cout
     void dump() const
     {
         std::cout << *this;
