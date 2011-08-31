@@ -26,7 +26,6 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/exceptions.hpp
   ${PDAL_HEADERS_DIR}/types.hpp
   ${PDAL_HEADERS_DIR}/Bounds.hpp
-  ${PDAL_HEADERS_DIR}/Color.hpp
   ${PDAL_HEADERS_DIR}/Dimension.hpp
   ${PDAL_HEADERS_DIR}/DimensionLayout.hpp
   ${PDAL_HEADERS_DIR}/FileUtils.hpp
@@ -64,7 +63,6 @@ endif()
 
 set(PDAL_BASE_CPP
   Bounds.cpp
-  Color.cpp
   Dimension.cpp
   DimensionLayout.cpp
   FileUtils.cpp

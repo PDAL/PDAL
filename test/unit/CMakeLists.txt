@@ -25,7 +25,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     ByteSwapFilterTest.cpp
     CacheFilterTest.cpp
     ChipperTest.cpp
-    ColorTest.cpp
     ColorFilterTest.cpp
     ConfigTest.cpp
     CropFilterTest.cpp

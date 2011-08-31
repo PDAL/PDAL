@@ -34,10 +34,6 @@
 
 #include <pdal/filters/ColorFilter.hpp>
 
-#include <pdal/Dimension.hpp>
-#include <pdal/Schema.hpp>
-#include <pdal/exceptions.hpp>
-#include <pdal/Color.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/ColorFilterIterator.hpp>
 
@@ -140,12 +136,58 @@ void ColorFilter::processBuffer(PointBuffer& data) const
 }
 
 
+// static function to impute a color from within a range
+static void interpolateColor(double value, double minValue, double maxValue, double& red, double& green, double& blue)
+{
+    // initialize to white
+    red = 1.0;
+    green = 1.0;
+    blue = 1.0;
+
+    if (value < minValue)
+    {
+        value = minValue;
+    }
+
+    if (value > maxValue)
+    {
+        value = maxValue;
+    }
+
+    double dv = maxValue - minValue;
+
+    if (value < (minValue + (0.25 * dv)))
+    {
+        red = 0;
+        green = 4 * (value - minValue) / dv;
+    }
+    else if (value < (minValue + (0.5 * dv)))
+    {
+        red = 0;
+        blue = 1 + (4 * (minValue + (0.25 * dv) - value) / dv);
+    }
+    else if (value < (minValue + (0.75 * dv)))
+    {
+        red = 4 * (value - minValue - (0.5 * dv)) / dv;
+        blue = 0;
+    }
+    else
+    {
+        green = 1 + (4 * (minValue + (0.75 * dv) - value) / dv);
+        blue = 0;
+    }
+
+    return;
+}
+
+
+
 void ColorFilter::getColor_F32_U8(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const
 {
     double fred, fgreen, fblue;
 
     const Range<double>& zrange = getBounds().dimensions()[2];
-    Color::interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(), fred, fblue, fgreen);
+    interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(), fred, fblue, fgreen);
 
     const double vmax = (std::numeric_limits<boost::uint8_t>::max)();
     red = (boost::uint8_t)(fred * vmax);
@@ -161,7 +203,7 @@ void ColorFilter::getColor_F64_U16(double value, boost::uint16_t& red, boost::ui
     double fred, fgreen, fblue;
 
     const Range<double>& zrange = getBounds().dimensions()[2];
-    Color::interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(), fred, fblue, fgreen);
+    interpolateColor(value, zrange.getMinimum(), zrange.getMaximum(), fred, fblue, fgreen);
 
     const double vmax = (std::numeric_limits<boost::uint16_t>::max)();
     red = (boost::uint16_t)(fred * vmax);

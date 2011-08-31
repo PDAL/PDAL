@@ -35,12 +35,7 @@
 #ifndef INCLUDED_FILTERS_COLORFILTER_HPP
 #define INCLUDED_FILTERS_COLORFILTER_HPP
 
-#include <pdal/pdal.hpp>
-//#include <boost/cstdint.hpp>
-//
-//#include <pdal/export.hpp>
 #include <pdal/Filter.hpp>
-//#include <pdal/FilterIterator.hpp>
 
 namespace pdal
 {
