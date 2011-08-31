@@ -35,8 +35,6 @@ help:
 
 clean:
 	-rm -rf $(BUILDDIR)/*
-	-rm -rf api/html/*
-	-rm -rf api/xml/*
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
@@ -132,4 +130,4 @@ doctest:
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
 doxygen:
-	cd ../ ; doxygen doc/api/doxygen.conf
+	cd ../ ; doxygen doc/doxygen/doxygen.conf

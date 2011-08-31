@@ -10,7 +10,7 @@ Dimension, that are not described in Notes of their own.
 The classes describing the Pipeline/Stage system, howver, are
 described in a different Note.
 
-* Bounds
+* :cpp:class:`pdal::Bounds`
 
 * Color
 
