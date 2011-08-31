@@ -7,4 +7,4 @@ C++ API
 
 .. doxygenclass:: pdal::Bounds
    :members:
-
+   :no-link:

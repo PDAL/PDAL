@@ -287,6 +287,6 @@ epub_copyright = u'2011, Howard Butler'
 
 
 breathe_projects = {
-    'api':'api/xml'
+    'api':'doxygen/xml'
 }
 breathe_default_project = 'api'
