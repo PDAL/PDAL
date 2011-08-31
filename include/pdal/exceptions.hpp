@@ -43,7 +43,6 @@
 #ifndef PDAL_EXCEPTION_HPP_INCLUDED
 #define PDAL_EXCEPTION_HPP_INCLUDED
 
-#include <pdal/pdal.hpp>
 #include <stdexcept>
 
 namespace pdal
@@ -191,6 +190,16 @@ class pipeline_interrupt : public pdal_error
 {
 public:
     pipeline_interrupt(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
+/// Used for pdal::Bounds 
+class bounds_error : public pdal_error
+{
+public:
+
+    bounds_error(std::string const& msg)
         : pdal_error(msg)
     {}
 };

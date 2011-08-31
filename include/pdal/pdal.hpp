@@ -43,6 +43,9 @@
 // #include <pdal/pdal_config.hpp>
 #include <pdal/types.hpp>
 
+#include <pdal/exceptions.hpp>
+
+
 // we use explicitly-sized types everywhere, so include this here
 #include <boost/cstdint.hpp>
 
