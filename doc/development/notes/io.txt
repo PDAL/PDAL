@@ -1,8 +1,8 @@
 .. _io:
 
-===
-I/O
-===
+=====================
+I/O Streams and Files
+=====================
 
 Given the sheer volume of data being processed by PDAL apps, it is very
 important we pay attention to I/O speed.
@@ -24,14 +24,9 @@ specific workflow, PDAL will follow these guidelines.
 * Streams should be instantiated using Boost's I/O library, not the native
   std\:: library.
   
-* Implementations should accept as inputs std\:: base classes, and use
-  std\:: library calls.  That is, the ctor for a class like LasReader should
-  accept a std\::istream& stream instead of a std\::string file name or a
-  FILE* handle.  **[not sure why I feel this way - thoughts?]**
-
-* Implementations should use std\:: library calls as opposed to methods
-  which require Boost-specific stream classes.  (Given the previous
-  guideline, this guideline would seem to have to be followed anyway.)
+* Where appropriate, public interfaces should accept as inputs std\:: base classes
+  (as opposed to Boost-based classes).  Implementations should use std\:: library
+  calls as opposed to methods which require Boost-specific stream classes.
 
 * The PDAL API provides helper functions for opening and closing file
   streams.  Applications should prefer to use those over writing their own.
@@ -41,23 +36,3 @@ specific workflow, PDAL will follow these guidelines.
 * Formatted (text, non-binary) I/O is (typically) not performance sensitive.
   For consistency, however, C++ stream I/O should be used here too; do not
   use printf/scanf.
-
-
-Endianness
-==========
-
-PDAL will not be supporting big-endian (BE) platforms at this time.  We
-recognize it would be good to do so, since endianness ports always seem to
-shake out twiddly little bugs, but we don't have ready access a BE
-development box.
-
-Where you are writing endian-sensitive code, you should comment it loudly
-so future maintainers will know where to go to add BE support.
-
-
-Best Practices
-==============
-
-**[we should provide some sample code showing examples of good I/O styles,
-e.g. which APIs to use.  mpg even thinks this might turn into a facade
-class which exposes the basics people should use and nothing more]**

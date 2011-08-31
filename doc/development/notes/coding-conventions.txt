@@ -16,11 +16,11 @@ Source Formatting
 
 We use astyle (http://astyle.sourceforge.net) as a tool to reformat C++
 source code files in a consistent fashion.  The file astylerc, at the top
-of the hg repo, contains the default settings we use.
+of the github repo, contains the default settings we use.
 
 Our conventions are:
 
-* LF endings, not CRLF
+* LF endings (unix style), not CRLF (windows style)
 
 * spaces, not tabs
 
@@ -34,6 +34,10 @@ Our conventions are:
     {
        foo();
     }
+
+* copyright header on every file 
+
+* two spaces between major units, e.g. function bodies
 
 
 Naming Conventions
@@ -58,14 +62,25 @@ Other Conventions
   variables
   
 * Surround all code with "namespace pdal {...}"; where justifiable, you 
-  may introduce a nested namespace.  Keep non-public names in the 
-  pdal::detail\:: space.
+  may introduce a nested namespace.
   
 * Use exceptions for exceptional events that are not going to be handled 
   directly within the context of where the event occurs.  Avoid status
   codes.  See exceptions.hpp for a set of pdal-specific exception types 
-  you may throw.
+  you may throw.  (See Note on error handling)
 
+* Describe use of "debug" and "verbose" settings.
+
+* Don't put member function bodies in the class declaration in the
+  header file, unless clearly justified for performance reasons.
+  Use the "inline" keyword in these cases(?).
+  
+* Use const.
+
+* Don't put "using" declarations in headers.
+
+* Document all public (and protected) member functions using
+  doxygen markup.
 
 Layout/Organization of Source Tree
 ==================================

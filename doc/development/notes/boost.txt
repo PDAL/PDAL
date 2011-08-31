@@ -1,0 +1,18 @@
+.. _boost:
+
+===================
+PDAL's Use of Boost
+===================
+
+
+* we use boost
+
+* don't reinvent the wheel, use a boost package
+
+* ptrees
+
+* program_options
+
+* unit test
+
+* other packages we use

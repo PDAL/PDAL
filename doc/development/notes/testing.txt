@@ -8,13 +8,42 @@ Testing
 Unit Tests
 ==========
 
-A unit test framework will be provided, with the goal that all (nontrivial)
+A unit test framework is provided, with the goal that all (nontrivial)
 classes will have unit tests.  At the very least, each new class should have
 a corresponding unit test file stubbed in, even if there aren't any tests
 yet.
 
-A test harness will also be provided to exercise each of the command line
+Our unit tests also include testing of each of the command line
 apps.
+
+We use the Boost unit test framework.  This gives us automatic 
+memory leak testing as well.
+
+Unit tests for features that are configuration-dependent, e.g. laszip
+compression, should be put under the same #ifdef guards as the classes
+being tested.
+
+The Support class, in the test/unit directory, provides some functions for comparing files, etc, that are useful in writing test cases.
+
+Unit tests should not be long-running.  (As of this writing, a full test
+run executes 163 tests in under 10 seconds in Debug mode on mpg's little
+laptop.  This is good.)
+
+
+Test Data
+=========
+
+Use the directory ./test/data to store files used for unit tests.  A
+function is provided in the Support class for referencing that directory
+in a configuration-independent manner.
+
+Temporary output files from unit tests should go into the test/temp directory.
+A Support function is provided for referencing this directory as well.
+
+Unit tests should always clean up and remove any files that they create
+(except perhaps in case of a failed test, in which case leaving the output
+around might be helpful for debugging).
+
 
 
 Other Tests
@@ -27,5 +56,3 @@ We should also eventually have:
   
 * Performance testing.  (mpg would like to see us put together a set of 
   benchmark files, too.)
-  
-* Memory usage testing, to make sure we don't leak.

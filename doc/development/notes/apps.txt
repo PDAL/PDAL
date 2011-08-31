@@ -16,13 +16,14 @@ App Commonality
 The following notes apply to all apps:
 
 * The apps should have a common support/utilities library for processing
-  command line arguments, showing version information, etc.
+  command line arguments, showing version information, etc. -- describe
+  boost program_options, and Application/AppSupport classes
   
 * Input format detection should reside in the app, not in the library.
   There will be no equivalent meta GDALOpen-like function to do this work
   for you, as it is too expensive and too easy to screw up.
 
-
+* describe common switches: --version, --help, --verbose
 
 pc2pc
 =====
@@ -54,18 +55,26 @@ The dump should go the stdout, but options should be provided to dump to
 XML or similar, where it makes sense to do so.
 
 
+pcpipeline
+==========
+
+[tbd]
+
 
 pcview
 ======
 
-A simple 3D viewer for point clouds.  Strictly speaking, not a command-line
-app.  Will be a Windows-only thing (WPF + DirectX), unless someone else
-wants to do something too.
+A simple 3D viewer for point clouds, largely for development and testing
+as opposed to something for "rea" use.  Uses OpenGL; works under Windows,
+should work under Unix too.
+
 
 
 
 pcindex
 =======
+
+(future)
 
 Creates a serialized spatial index for a point cloud. First pass at this 
 is to repurpose liblas::Index which supports serialization.
@@ -75,12 +84,16 @@ is to repurpose liblas::Index which supports serialization.
 pcmerge
 =======
 
+(future -- likely to be part of pc2pc)
+
 Merges multiple files together.  (This is also known as mosacking.)
 
 
 
 pctile
 ======
+
+(future -- likely to be part of pc2pc)
 
 Chops one file up into multiple files.  This could be the liblas::Chipper, 
 leaf nodes of an index like an R-tree, or a simple quadtree build.

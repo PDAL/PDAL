@@ -9,71 +9,45 @@ This note describes the XML structure used for describing pipelines.
 The pipeline XML syntax mirrors very closely the Stage class hierarchy
 and construction format used by the C++ API.
 
-There are two kinds of pipelines that can be expressed: "writer pipelines"
-have Writer stages as their endpoint, and "reader pipelines" have general
-Stage stages (Reader/Filter/Multifilter) as their endpoint.
-
 We have two use cases specifically in mind:
 
     * a command-line app that reads an XML file to allow a user to easily
       construct arbitrary writer pipelines, as opposed to having to build apps
       custom to individual needs with arbitary options, filters, etc
       
-    * within the Python environment, the user can provide XML for a reader
+    * a user can provide XML for a reader
       pipeline, construct it via a simple call to the PipelineManager API,
-      and then use native Python to perform the read and do any processing
-      of the emitted points
+      and then use the Stage read() function to perform the read and and
+	  then do any processing of the points.  This style of operation
+	  is very appropriate for using PDAL from within environments
+	  like Python where the focus is on just getting the points,
+	  as opposed to complex pipeline construction.
 
 
 Examples
 ========
 
-A writer pipeline::
+A pipeline which reads two files, input1.las and input2.las, crops the points
+to a certain bounding box, and then writes the result as a compressed LAS file,
+output.laz::
 
     <?xml version="1.0" encoding="utf-8"?>
-    <Pipeline>
-        <Writer>
-            <Type>drivers.las.writer</Type>
-            <Option>
-                <Name>filename</Name>
-                <Value>out.las</Value>
-                <Description>junk junk junk</Description>
-            </Option>
-            <Filter>
-                <Type>filters.crop</Type>
-                <Option>
-                    <Name>bounds</Name>
-                    <Value>([0,1000000],[0,1000000],[0,1000000])</Value>
-                </Option>
-                <Reader>
-                    <Type>drivers.las.reader</Type>
-                    <Option>
-                        <Name>filename</Name>
-                        <Value>../../test/data/1.2-with-color.las</Value>
-                    </Option>
-                </Reader>
+    <Pipeline version="1.0">
+        <Writer type="drivers.las.writer">
+            <Option name="filename">output.laz</Option>
+            <Option name="compression">true</Option>
+            <Filter type="filters.crop">
+                <Option name="bounds">([0,1000000],[0,1000000],[0,1000000])</Option>
+				<MultiFilter type="filters.mosaic">
+					<Reader type="drivers.las.reader">
+						<Option name="filename">input1.las</Option>
+					</Reader>
+					<Reader type="drivers.las.reader">
+						<Option name="filename">input1.las</Option>
+					</Reader>
+				</MultiFilter>
             </Filter>
         </Writer>
-    </Pipeline>
-
-A reader pipeline::
-
-    <?xml version="1.0"?>
-    <Pipeline>
-            <Filter>
-                <Type>filters.crop</Type>
-                <Option>
-                    <Name>bounds</Name>
-                    <Value>([0,1000000],[0,1000000],[0,1000000])</Value>
-                </Option>
-                <Reader>
-                    <Type>drivers.las.reader</Type>
-                    <Option>
-                        <Name>filename</Name>
-                        <Value>../../test/data/1.2-with-color.las</Value>
-                    </Option>
-                </Reader>
-            </Filter>
     </Pipeline>
 
 
@@ -93,6 +67,11 @@ Syntax Specification
             * <Writer> element, for writer pipelines
 
             * <Reader> or <Filter> or <MultiFilter> element, for reader pipelines
+	
+	* attributes:
+	
+		* the "version" attribute must appear exactly once; the value of this
+		  attribute shall be the string "1.0"
 
 * <Writer>
 
@@ -100,11 +79,15 @@ Syntax Specification
 
     * child elements:
 
-        * exactly one <Type> element
-
         * zero or more <Option> elements
 
         * exactly one <Reader> or <Filter> or <MultiFilter> element
+		
+	* attributes:
+	
+		* the "type" attribute must appear exactly once; the value of this
+		  attribute shall be the string corresponding to the name of
+		  the Writer stage type, e.g. "drivers.las.writer"
 
 * <Reader>
 
@@ -112,9 +95,13 @@ Syntax Specification
 
     * child elements:
 
-        * exactly one <Type> element
-
         * zero or more <Option> elements
+
+	* attributes:
+	
+		* the "type" attribute must appear exactly once; the value of this
+		  attribute shall be the string corresponding to the name of
+		  the Reader stage type, e.g. "drivers.las.reader"
 
 * <Filter>
 
@@ -122,11 +109,15 @@ Syntax Specification
 
     * child elements:
 
-        * exactly one <Type> element
-
         * zero or more <Option> elements
 
         * exactly one <Reader> or <Filter> or <MultiFilter> element
+
+	* attributes:
+	
+		* the "type" attribute must appear exactly once; the value of this
+		  attribute shall be the string corresponding to the name of
+		  the filter stage type, e.g. "filters.crop"
 
 * <MultiFilter>
 
@@ -134,11 +125,15 @@ Syntax Specification
 
     * child elements:
 
-        * exactly one <Type> element
-
         * zero or more <Option> elements
 
         * one or more <Reader> or <Filter> or <MultiFilter> elements
+
+	* attributes:
+	
+		* the "type" attribute must appear exactly once; the value of this
+		  attribute shall be the string corresponding to the name of
+		  the MultiFilter stage type, e.g. "filter.mosaic"
 
 * <Option>
 
@@ -146,54 +141,16 @@ Syntax Specification
 
     * may only be a child of a <Reader>, <Writer>, <Filter>, or <MultiFilter> element
 
-    * child elements
-
-        * exactly one <Name> element
-
-        * exactly one <Value> element
-
-        * zero or one <Description> element
-
- * <Name>
-
-    * indicates the text name of an option
-
-    * may only be a child of an <Option>
-
+    * attributes:
+	
+		* the "name" attribute must appear exactly once; the value of this
+          attribute shall be the name of the option, e.g. "filename" 
     * no child elements
+	
+    * content:
 
-    * body text: the name of the option, e.g. "filename" or "bounds"
-
-* <Value>
-
-    * indicates the (textual) value of an option
-
-    * may only be a child of an <Option>
-
-    * no child elements
-
-    * body text: the text representaion of the option value, e.g. "input.las" or "42"
-
-* <Description>
-
-    * indicates the description field of an option (currently ignored)
-
-    * may only be a child of an <Option>
-
-    * no child elements
-
-    * body text: the text representaion of the option description
-
- * <Type>
-
-    * indicates the type of the stage
-
-    * may only be a child of a <Reader>, <Writer>, <Filter>, or <MultiFilter> element
-
-    * no child elements
-
-    * body text: the text name of the stage, e.g. "drivers.las.reader" or "filters.crop"
-
+        * the content of the element shall be the string representing the
+		  value of the option, e.g. "input.las"
 
 
 Notes
@@ -203,16 +160,10 @@ Notes
   This means less parsing hassle for us, but also means we can't produce
   decent error messages (esp. since we don't have line numbers).
 
-* Attributes are not used anywhere.  This is in part because ptree's don't
-  support them uniformly across all file formats.
-
 * The schema is intended to be something that can be validated via XSD,
-  although we don't do that today.
+  although we don't do that today.  (There is an XSD file in the schemas
+  directory.)
 
-* No version numbering yet, need to add that.  Would like to be an attr on
-  the <Pipeline> element.
-
-* We might want to change <Pipeline> to <ReaderPipeline> and
-  <WriterPipeline>, to simplify the implementation and API, as well as
-  improve error checking.
-
+* tbd: describe rule for interpetting file paths as relative to the
+  xml file
+  
