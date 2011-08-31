@@ -33,7 +33,6 @@
  ****************************************************************************/
 
 #include <pdal/SpatialReference.hpp>
-#include <pdal/exceptions.hpp>
 
 #include <boost/concept_check.hpp>
 #include <boost/property_tree/xml_parser.hpp>

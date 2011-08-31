@@ -34,7 +34,6 @@
 
 #include <pdal/filters/MosaicFilter.hpp>
 
-#include <pdal/exceptions.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/filters/MosaicFilterIterator.hpp>
 

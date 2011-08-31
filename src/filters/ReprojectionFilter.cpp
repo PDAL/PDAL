@@ -38,7 +38,6 @@
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Schema.hpp>
-#include <pdal/exceptions.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/ReprojectionFilterIterator.hpp>
 

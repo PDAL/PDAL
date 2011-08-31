@@ -34,7 +34,6 @@
 
 #include <pdal/drivers/oci/Iterator.hpp>
 
-#include <pdal/exceptions.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/oci/Reader.hpp>
 #include <pdal/Vector.hpp>

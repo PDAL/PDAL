@@ -46,7 +46,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#include <pdal/exceptions.hpp>
 
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>

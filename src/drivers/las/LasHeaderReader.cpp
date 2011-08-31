@@ -42,7 +42,6 @@
 
 #include "LasHeaderReader.hpp"
 
-#include <pdal/exceptions.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include "ZipPoint.hpp"

@@ -36,8 +36,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <pdal/exceptions.hpp>
-
 
 namespace pdal
 {

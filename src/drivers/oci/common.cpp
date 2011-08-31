@@ -41,7 +41,6 @@
 #include <boost/make_shared.hpp>
 
 #include <pdal/Bounds.hpp>
-#include <pdal/exceptions.hpp>
 
 namespace pdal { namespace drivers { namespace oci {
 

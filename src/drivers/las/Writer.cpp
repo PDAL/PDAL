@@ -44,7 +44,6 @@
 #include <laszip/laszipper.hpp>
 #endif
 
-#include <pdal/exceptions.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>

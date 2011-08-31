@@ -41,7 +41,6 @@
 
 #include <pdal/Dimension.hpp>
 
-#include <pdal/exceptions.hpp>
 
 namespace pdal
 {

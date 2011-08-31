@@ -39,7 +39,6 @@
 #include <liblas/header.hpp>
 #include <liblas/writer.hpp>
 
-#include <pdal/exceptions.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/Stage.hpp>

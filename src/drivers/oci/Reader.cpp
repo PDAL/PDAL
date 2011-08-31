@@ -35,7 +35,6 @@
 #include <pdal/drivers/oci/Reader.hpp>
 #include <pdal/drivers/oci/Iterator.hpp>
 
-#include <pdal/exceptions.hpp>
 #include <pdal/FileUtils.hpp>
 
 #include <boost/shared_ptr.hpp>

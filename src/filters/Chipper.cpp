@@ -41,7 +41,6 @@
 #include <pdal/filters/Chipper.hpp>
 
 #include <pdal/filters/ChipperIterator.hpp>
-#include <pdal/exceptions.hpp>
 
 #include <boost/scoped_ptr.hpp>
 

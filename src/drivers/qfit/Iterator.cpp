@@ -35,7 +35,6 @@
 #include <pdal/drivers/qfit/Iterator.hpp>
 
 #include <pdal/drivers/qfit/Reader.hpp>
-#include <pdal/exceptions.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 

@@ -42,7 +42,6 @@
 #include <ctype.h>
 
 #include <pdal/Range.hpp>
-#include <pdal/exceptions.hpp>
 
 using namespace pdal;
 

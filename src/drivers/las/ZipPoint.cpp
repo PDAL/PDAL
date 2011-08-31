@@ -41,7 +41,6 @@
 #include <laszip/laszip.hpp>
 #include <laszip/laszipper.hpp>
 
-#include <pdal/exceptions.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include <string.h>
 

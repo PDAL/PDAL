@@ -37,7 +37,6 @@
 #include <pdal/Dimension.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/SchemaLayout.hpp>
-#include <pdal/exceptions.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/ScalingFilterIterator.hpp>
 

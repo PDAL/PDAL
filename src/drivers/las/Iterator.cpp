@@ -42,7 +42,6 @@
 #endif
 
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/exceptions.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 

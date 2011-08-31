@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include <pdal/Range.hpp>
-#include <pdal/exceptions.hpp>
 
 
 namespace pdal 

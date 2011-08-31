@@ -23,7 +23,7 @@ set(PDAL_CPP "")
 # base
 #
 set(PDAL_BASE_HPP
-  ${PDAL_HEADERS_DIR}/exceptions.hpp
+  ${PDAL_HEADERS_DIR}/pdal_error.hpp
   ${PDAL_HEADERS_DIR}/types.hpp
   ${PDAL_HEADERS_DIR}/Bounds.hpp
   ${PDAL_HEADERS_DIR}/Dimension.hpp

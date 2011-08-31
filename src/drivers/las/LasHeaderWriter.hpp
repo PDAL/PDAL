@@ -44,8 +44,6 @@
 #define INCLUDED_DRIVERS_LAS_LASHEADERWRITER_HPP
 
 #include <pdal/pdal.hpp>
-#include <pdal/exceptions.hpp>
-#include <iosfwd>
 
 #include <pdal/SpatialReference.hpp>
 

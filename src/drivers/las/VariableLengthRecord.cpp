@@ -39,7 +39,6 @@
 #include <pdal/SpatialReference.hpp>
 #include "GeotiffSupport.hpp"
 
-#include <pdal/exceptions.hpp>
 
 namespace pdal { namespace drivers { namespace las {
 

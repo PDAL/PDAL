@@ -40,7 +40,6 @@
 #include <pdal/SchemaLayout.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/DimensionLayout.hpp>
-#include <pdal/exceptions.hpp>
 
 #include <string>
 #include <stdarg.h>

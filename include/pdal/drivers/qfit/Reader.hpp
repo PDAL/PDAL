@@ -43,7 +43,6 @@
 #include <pdal/SchemaLayout.hpp>
 
 #include <pdal/StageIterator.hpp>
-#include <pdal/exceptions.hpp>
 
 
 #include <vector>

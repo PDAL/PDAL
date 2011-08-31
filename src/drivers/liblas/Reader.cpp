@@ -37,7 +37,6 @@
 #include <liblas/factory.hpp>
 #include <liblas/variablerecord.hpp>
 
-#include <pdal/exceptions.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/drivers/liblas/Iterator.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>

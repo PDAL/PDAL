@@ -38,12 +38,11 @@
 // This file is for all the things that basically everybody has to include.
 
 #include <iostream>
+
 #include <pdal/export.hpp>
 #include <pdal/pdal_defines.h>
-// #include <pdal/pdal_config.hpp>
 #include <pdal/types.hpp>
-
-#include <pdal/exceptions.hpp>
+#include <pdal/pdal_error.hpp>
 
 
 // we use explicitly-sized types everywhere, so include this here

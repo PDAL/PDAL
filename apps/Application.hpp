@@ -35,8 +35,7 @@
 #ifndef INCLUDED_APPLICATION_HPP
 #define INCLUDED_APPLICATION_HPP
 
-#include <pdal/exceptions.hpp>
-#include <iosfwd>
+#include <pdal/pdal.hpp>
 
 
 #ifdef PDAL_COMPILER_MSVC

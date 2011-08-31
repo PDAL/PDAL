@@ -39,11 +39,6 @@
 
 #include <pdal/drivers/oci/Writer.hpp>
 
-#include <iostream>
-
-
-#include <pdal/exceptions.hpp>
-
 #include <fstream>
 
 #ifdef PDAL_HAVE_GDAL

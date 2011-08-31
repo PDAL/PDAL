@@ -36,10 +36,6 @@
 
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
-#include <iostream>
-
-#include <pdal/exceptions.hpp>
-
 
 namespace pdal
 {

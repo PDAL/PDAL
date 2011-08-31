@@ -40,7 +40,6 @@
 #include <boost/foreach.hpp>
 
 #include <pdal/Stage.hpp>
-#include <pdal/exceptions.hpp>
 
 
 namespace pdal

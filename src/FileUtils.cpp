@@ -38,7 +38,6 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/filesystem.hpp>
 //
-#include <pdal/exceptions.hpp>
 
 namespace pdal
 {

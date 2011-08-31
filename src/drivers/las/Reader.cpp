@@ -43,7 +43,6 @@
 #include <pdal/drivers/las/Iterator.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include "LasHeaderReader.hpp"
-#include <pdal/exceptions.hpp>
 #include <pdal/PointBuffer.hpp>
 #include "ZipPoint.hpp"
 

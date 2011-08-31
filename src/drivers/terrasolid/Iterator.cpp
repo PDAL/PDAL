@@ -35,7 +35,6 @@
 #include <pdal/drivers/terrasolid/Iterator.hpp>
 
 #include <pdal/drivers/terrasolid/Reader.hpp>
-#include <pdal/exceptions.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 

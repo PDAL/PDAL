@@ -172,9 +172,6 @@ Word #       Content
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 
-#include <pdal/exceptions.hpp>
-
-#include <iostream>
 #include <map>
 
 #ifdef PDAL_COMPILER_MSVC

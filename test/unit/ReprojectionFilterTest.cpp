@@ -42,7 +42,6 @@
 #include <pdal/Schema.hpp>
 #include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/exceptions.hpp>
 
 #include "Support.hpp"
 

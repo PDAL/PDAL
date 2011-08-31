@@ -36,7 +36,6 @@
 
 #include <liblas/factory.hpp>
 
-#include <pdal/exceptions.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/drivers/liblas/Reader.hpp>

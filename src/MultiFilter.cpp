@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include <pdal/MultiFilter.hpp>
-#include <pdal/exceptions.hpp>
 #include <pdal/PipelineWriter.hpp>
 
 namespace pdal

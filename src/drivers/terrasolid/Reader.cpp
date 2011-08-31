@@ -39,9 +39,6 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 
-#include <pdal/exceptions.hpp>
-
-#include <iostream>
 #include <map>
 
 namespace pdal { namespace drivers { namespace terrasolid {

@@ -32,9 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <iostream>
-
-#include <pdal/exceptions.hpp>
+#include <pdal/pdal.hpp>
 #include <pdal/FileUtils.hpp>
 
 #include <pdal/drivers/las/Reader.hpp>

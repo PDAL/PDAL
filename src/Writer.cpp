@@ -39,7 +39,6 @@
 #include <pdal/StageIterator.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/exceptions.hpp>
 #include <pdal/UserCallback.hpp>
 
 #include <pdal/PipelineWriter.hpp>

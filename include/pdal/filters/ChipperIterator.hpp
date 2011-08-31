@@ -39,7 +39,6 @@
 
 #include <pdal/FilterIterator.hpp>
 #include <pdal/filters/Chipper.hpp>
-#include <pdal/exceptions.hpp>
 
 namespace pdal {
 

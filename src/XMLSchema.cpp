@@ -32,7 +32,6 @@
 ****************************************************************************/
 
 #include <pdal/XMLSchema.hpp>
-#include <pdal/exceptions.hpp>
 
 #include <sstream>
 #include <iostream>

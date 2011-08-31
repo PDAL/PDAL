@@ -36,7 +36,6 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/Range.hpp>
 #include <pdal/Utils.hpp>
-#include <pdal/exceptions.hpp>
 #include <iostream>
 namespace pdal
 {

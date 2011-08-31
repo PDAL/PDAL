@@ -40,7 +40,6 @@
 
 #include <pdal/StreamManager.hpp>
 #include <pdal/FileUtils.hpp>
-#include <pdal/exceptions.hpp>
 
 #include "Support.hpp"
 

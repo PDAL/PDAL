@@ -36,8 +36,6 @@
 
 #include <pdal/drivers/las/SummaryData.hpp>
 
-#include <pdal/exceptions.hpp>
-
 
 namespace pdal { namespace drivers { namespace las {
 
