@@ -59,6 +59,73 @@ namespace pdal
 class PDAL_DLL Dimension
 {
 public:
+    /// \name Enumerations
+    enum Field
+    {
+        Field_INVALID = 0,
+        Field_X,
+        Field_Y,
+        Field_Z,
+        Field_Intensity,
+        Field_ReturnNumber,
+        Field_NumberOfReturns,
+        Field_ScanDirectionFlag,
+        Field_EdgeOfFlightLine,
+        Field_Classification,
+        Field_ScanAngleRank,
+        Field_UserData,
+        Field_PointSourceId,
+        Field_Time,
+        Field_Red,
+        Field_Green,
+        Field_Blue,
+        Field_WavePacketDescriptorIndex,
+        Field_WaveformDataOffset,
+        Field_ReturnPointWaveformLocation,
+        Field_WaveformXt,
+        Field_WaveformYt,
+        Field_WaveformZt,
+        Field_Alpha,
+        // ...
+
+        // add more here
+        Field_User1 = 512,
+        Field_User2,
+        Field_User3,
+        Field_User4,
+        Field_User5,
+        Field_User6,
+        Field_User7,
+        Field_User8,
+        Field_User9,
+        Field_User10,
+        Field_User11,
+        Field_User12,
+        Field_User13,
+        Field_User14,
+        Field_User15,
+        // ...
+        // feel free to use your own int here
+
+        Field_LAST = 1023
+    };
+
+    // Do not explicitly specify these enum values because they 
+    // are (probably wrongly) used to iterate through for Schema::getX, Schema::getY, Schema::getZ
+    enum DataType
+    {
+        Int8,
+        Uint8,
+        Int16,
+        Uint16,
+        Int32,
+        Uint32,
+        Int64,
+        Uint64,
+        Float,       // 32 bits
+        Double,       // 64 bits
+        Undefined
+    };
 
 /// \name Constructors
     Dimension(Field field, DataType type);
@@ -275,76 +342,6 @@ public:
 
     /// Outputs a string representation of the Dimension instance to std::cout
     void dump() const;
-
-
-/// \name Enumerations
-    enum Field
-    {
-        Field_INVALID = 0,
-        Field_X,
-        Field_Y,
-        Field_Z,
-        Field_Intensity,
-        Field_ReturnNumber,
-        Field_NumberOfReturns,
-        Field_ScanDirectionFlag,
-        Field_EdgeOfFlightLine,
-        Field_Classification,
-        Field_ScanAngleRank,
-        Field_UserData,
-        Field_PointSourceId,
-        Field_Time,
-        Field_Red,
-        Field_Green,
-        Field_Blue,
-        Field_WavePacketDescriptorIndex,
-        Field_WaveformDataOffset,
-        Field_ReturnPointWaveformLocation,
-        Field_WaveformXt,
-        Field_WaveformYt,
-        Field_WaveformZt,
-        Field_Alpha,
-        // ...
-
-        // add more here
-        Field_User1 = 512,
-        Field_User2,
-        Field_User3,
-        Field_User4,
-        Field_User5,
-        Field_User6,
-        Field_User7,
-        Field_User8,
-        Field_User9,
-        Field_User10,
-        Field_User11,
-        Field_User12,
-        Field_User13,
-        Field_User14,
-        Field_User15,
-        // ...
-        // feel free to use your own int here
-
-        Field_LAST = 1023
-    };
-
-    // Do not explicitly specify these enum values because they 
-    // are (probably wrongly) used to iterate through for Schema::getX, Schema::getY, Schema::getZ
-    enum DataType
-    {
-        Int8,
-        Uint8,
-        Int16,
-        Uint16,
-        Int32,
-        Uint32,
-        Int64,
-        Uint64,
-        Float,       // 32 bits
-        Double,       // 64 bits
-        Undefined
-    };
-
 
 private:
     DataType m_dataType;
