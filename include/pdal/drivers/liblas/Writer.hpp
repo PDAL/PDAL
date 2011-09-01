@@ -61,14 +61,14 @@ namespace pdal { namespace drivers { namespace liblas {
 //
 
 // we default to LAS 1.2, point format 0
-class PDAL_DLL LiblasWriter : public Writer
+class PDAL_DLL Writer : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.liblas.writer", "Liblas Writer")
 
-    LiblasWriter(Stage& prevStage, const Options&);
-    LiblasWriter(Stage& prevStage, std::ostream*);
-    ~LiblasWriter();
+    Writer(Stage& prevStage, const Options&);
+    Writer(Stage& prevStage, std::ostream*);
+    ~Writer();
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -107,8 +107,8 @@ private:
 
     ::pdal::drivers::las::SummaryData m_summaryData;
 
-    LiblasWriter& operator=(const LiblasWriter&); // not implemented
-    LiblasWriter(const LiblasWriter&); // not implemented
+    Writer& operator=(const Writer&); // not implemented
+    Writer(const Writer&); // not implemented
 };
 
 } } } // namespaces

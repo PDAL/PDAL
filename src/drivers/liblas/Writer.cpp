@@ -50,7 +50,7 @@
 namespace pdal { namespace drivers { namespace liblas {
 
 
-LiblasWriter::LiblasWriter(Stage& prevStage, const Options& options)
+Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_ostreamManager(options.getValueOrThrow<std::string>("filename"))
 {
@@ -58,8 +58,8 @@ LiblasWriter::LiblasWriter(Stage& prevStage, const Options& options)
 }
 
 
-LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream* ostream)
-    : Writer(prevStage, Options::none())
+Writer::Writer(Stage& prevStage, std::ostream* ostream)
+    : pdal::Writer(prevStage, Options::none())
     , m_ostreamManager(ostream)
     , m_externalWriter(NULL)
 {
@@ -67,15 +67,15 @@ LiblasWriter::LiblasWriter(Stage& prevStage, std::ostream* ostream)
 }
 
 
-LiblasWriter::~LiblasWriter()
+Writer::~Writer()
 {
     return;
 }
 
 
-void LiblasWriter::initialize()
+void Writer::initialize()
 {
-    Writer::initialize();
+    pdal::Writer::initialize();
 
     m_ostreamManager.open();
 
@@ -95,14 +95,14 @@ void LiblasWriter::initialize()
 }
 
 
-const Options LiblasWriter::getDefaultOptions() const
+const Options Writer::getDefaultOptions() const
 {
     Options options;
     return options;
 }
 
 
-void LiblasWriter::setupExternalHeader()
+void Writer::setupExternalHeader()
 {
     setFormatVersion(1,2);
     setPointFormat(::pdal::drivers::las::PointFormat3);
@@ -127,37 +127,37 @@ void LiblasWriter::setupExternalHeader()
 }
 
 
-void LiblasWriter::setCompressed(bool v)
+void Writer::setCompressed(bool v)
 {
     m_externalHeader->SetCompressed(v);
 }
 
-void LiblasWriter::setHeaderPadding(boost::uint32_t const& v)
+void Writer::setHeaderPadding(boost::uint32_t const& v)
 {
     m_externalHeader->SetHeaderPadding(v);
 }
 
-void LiblasWriter::setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion)
+void Writer::setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion)
 {
     m_externalHeader->SetVersionMajor(majorVersion);
     m_externalHeader->SetVersionMinor(minorVersion);
 }
 
 
-void LiblasWriter::setPointFormat(::pdal::drivers::las::PointFormat pointFormat)
+void Writer::setPointFormat(::pdal::drivers::las::PointFormat pointFormat)
 {
     m_externalHeader->SetDataFormatId((::liblas::PointFormatName)pointFormat);
 }
 
 
-void LiblasWriter::setDate(boost::uint16_t dayOfYear, boost::uint16_t year)
+void Writer::setDate(boost::uint16_t dayOfYear, boost::uint16_t year)
 {
     m_externalHeader->SetCreationDOY(dayOfYear);
     m_externalHeader->SetCreationYear(year);
 }
 
 
-void LiblasWriter::setProjectId(const boost::uuids::uuid& uuid)
+void Writer::setProjectId(const boost::uuids::uuid& uuid)
 {
     std::string s = to_string(uuid);
     ::liblas::guid g(s);
@@ -165,19 +165,19 @@ void LiblasWriter::setProjectId(const boost::uuids::uuid& uuid)
 }
 
 
-void LiblasWriter::setSystemIdentifier(const std::string& systemId) 
+void Writer::setSystemIdentifier(const std::string& systemId) 
 {
     m_externalHeader->SetSystemId(systemId);
 }
 
 
-void LiblasWriter::setGeneratingSoftware(const std::string& softwareId)
+void Writer::setGeneratingSoftware(const std::string& softwareId)
 {
     m_externalHeader->SetSoftwareId(softwareId);
 }
 
 
-void LiblasWriter::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
+void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 {
     m_externalWriter = new ::liblas::Writer(m_ostreamManager.ostream(), *m_externalHeader);
 
@@ -187,7 +187,7 @@ void LiblasWriter::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 }
 
 
-void LiblasWriter::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
+void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
     delete m_externalWriter;
     m_externalWriter = NULL;
@@ -201,7 +201,7 @@ void LiblasWriter::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 }
 
 
-boost::uint32_t LiblasWriter::writeBuffer(const PointBuffer& PointBuffer)
+boost::uint32_t Writer::writeBuffer(const PointBuffer& PointBuffer)
 {
     const ::pdal::drivers::las::PointFormat pointFormat = (::pdal::drivers::las::PointFormat)m_externalHeader->GetDataFormatId();
 
@@ -274,7 +274,7 @@ boost::uint32_t LiblasWriter::writeBuffer(const PointBuffer& PointBuffer)
 }
 
 
-boost::property_tree::ptree LiblasWriter::toPTree() const
+boost::property_tree::ptree Writer::toPTree() const
 {
     boost::property_tree::ptree tree = pdal::Writer::toPTree();
 

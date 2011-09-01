@@ -45,7 +45,7 @@
 namespace pdal { namespace drivers { namespace liblas {
 
     
-LiblasReader::LiblasReader(const Options& options)
+Reader::Reader(const Options& options)
     : ReaderBase(options)
     , m_filename(options.getValueOrThrow<std::string>("filename"))
     , m_versionMajor(0)
@@ -63,7 +63,7 @@ LiblasReader::LiblasReader(const Options& options)
 }
 
 
-LiblasReader::LiblasReader(const std::string& filename)
+Reader::Reader(const std::string& filename)
     : ReaderBase(Options::none())
     , m_filename(filename)
     , m_versionMajor(0)
@@ -81,15 +81,15 @@ LiblasReader::LiblasReader(const std::string& filename)
 }
 
 
-LiblasReader::~LiblasReader()
+Reader::~Reader()
 {
     return;
 }
 
 
-void LiblasReader::initialize()
+void Reader::initialize()
 {
-    Reader::initialize();
+    pdal::Reader::initialize();
 
     std::istream* str = FileUtils::openFile(m_filename);
 
@@ -108,44 +108,44 @@ void LiblasReader::initialize()
 }
 
 
-const Options LiblasReader::getDefaultOptions() const
+const Options Reader::getDefaultOptions() const
 {
     Options options;
     return options;
 }
 
 
-const std::string& LiblasReader::getFileName() const
+const std::string& Reader::getFileName() const
 {
     return m_filename;
 }
 
 
-::pdal::drivers::las::PointFormat LiblasReader::getPointFormat() const
+::pdal::drivers::las::PointFormat Reader::getPointFormat() const
 {
     return m_pointFormat;
 }
 
 
-boost::uint8_t LiblasReader::getVersionMajor() const
+boost::uint8_t Reader::getVersionMajor() const
 {
     return m_versionMajor;
 }
 
 
-boost::uint8_t LiblasReader::getVersionMinor() const
+boost::uint8_t Reader::getVersionMinor() const
 {
     return m_versionMinor;
 }
 
 
-const SpatialReference& LiblasReader::getSpatialReference() const
+const SpatialReference& Reader::getSpatialReference() const
 {
     throw not_yet_implemented("SRS support in liblas reader not yet implemented");
 }
 
 
-void LiblasReader::processExternalHeader(::liblas::Reader& externalReader)
+void Reader::processExternalHeader(::liblas::Reader& externalReader)
 {
     const ::liblas::Header& externalHeader = externalReader.GetHeader();
 
@@ -178,25 +178,25 @@ void LiblasReader::processExternalHeader(::liblas::Reader& externalReader)
 }
 
 
-int LiblasReader::getMetadataRecordCount() const
+int Reader::getMetadataRecordCount() const
 {
     return m_metadataRecords.size();
 }
 
 
-const MetadataRecord& LiblasReader::getMetadataRecord(int index) const
+const MetadataRecord& Reader::getMetadataRecord(int index) const
 {
     return m_metadataRecords[index];
 }
 
 
-MetadataRecord& LiblasReader::getMetadataRecordRef(int index)
+MetadataRecord& Reader::getMetadataRecordRef(int index)
 {
     return m_metadataRecords[index];
 }
 
 
-void LiblasReader::registerFields(::liblas::Reader& externalReader)
+void Reader::registerFields(::liblas::Reader& externalReader)
 {
     const ::liblas::Header& externalHeader = externalReader.GetHeader();
     Schema& schema = getSchemaRef();
@@ -215,19 +215,19 @@ void LiblasReader::registerFields(::liblas::Reader& externalReader)
 }
 
 
-pdal::StageSequentialIterator* LiblasReader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
     return new SequentialIterator(*this);
 }
 
 
-pdal::StageRandomIterator* LiblasReader::createRandomIterator() const
+pdal::StageRandomIterator* Reader::createRandomIterator() const
 {
     return new RandomIterator(*this);
 }
 
 
-boost::property_tree::ptree LiblasReader::toPTree() const
+boost::property_tree::ptree Reader::toPTree() const
 {
     boost::property_tree::ptree tree = pdal::Reader::toPTree();
 

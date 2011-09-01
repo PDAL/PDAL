@@ -53,14 +53,14 @@ namespace pdal { namespace drivers { namespace liblas {
 
 class LiblasHeader;
 
-class PDAL_DLL LiblasReader : public pdal::drivers::las::ReaderBase
+class PDAL_DLL Reader : public pdal::drivers::las::ReaderBase
 {
 public:
     SET_STAGE_NAME("drivers.liblas.reader", "Liblas Reader")
 
-    LiblasReader(const Options&);
-    LiblasReader(const std::string& filename);
-    ~LiblasReader();
+    Reader(const Options&);
+    Reader(const std::string& filename);
+    ~Reader();
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -113,8 +113,8 @@ private:
 
     std::vector<MetadataRecord> m_metadataRecords;
 
-    LiblasReader& operator=(const LiblasReader&); // not implemented
-    LiblasReader(const LiblasReader&); // not implemented
+    Reader& operator=(const Reader&); // not implemented
+    Reader(const Reader&); // not implemented
 };
 
 

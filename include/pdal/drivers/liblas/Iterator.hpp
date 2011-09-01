@@ -37,12 +37,8 @@
 
 #include <pdal/pdal.hpp>
 
-//#include <pdal/Stage.hpp>
 #include <pdal/ReaderIterator.hpp>
 
-#include <string>
-
-//#include <pdal/drivers/liblas/Header.hpp>
 
 // fwd decls
 namespace liblas
@@ -52,23 +48,23 @@ namespace liblas
 
 namespace pdal { namespace drivers { namespace liblas {
 
-class LiblasReader;
+class Reader;
 
 
 class LiblasIteratorBase
 {
 public:
-    LiblasIteratorBase(const LiblasReader& reader);
+    LiblasIteratorBase(const Reader& reader);
     ~LiblasIteratorBase();
 
 protected:
     ::liblas::Reader& getExternalReader() const;
-    const LiblasReader& getReader() const;
+    const Reader& getReader() const;
     
     boost::uint32_t myReadBuffer(PointBuffer& data);
 
 private:
-    const LiblasReader& m_reader;
+    const pdal::drivers::liblas::Reader& m_reader;
     std::string m_filename;
     std::istream* m_istream;
     ::liblas::Reader* m_externalReader;
@@ -81,7 +77,7 @@ private:
 class SequentialIterator : public LiblasIteratorBase, public pdal::ReaderSequentialIterator
 {
 public:
-    SequentialIterator(const LiblasReader& reader);
+    SequentialIterator(const Reader& reader);
     ~SequentialIterator();
 
 private:
@@ -94,7 +90,7 @@ private:
 class RandomIterator : public LiblasIteratorBase, public pdal::ReaderRandomIterator
 {
 public:
-    RandomIterator(const LiblasReader& reader);
+    RandomIterator(const Reader& reader);
     ~RandomIterator();
 
 private:

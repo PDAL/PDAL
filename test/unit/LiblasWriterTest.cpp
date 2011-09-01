@@ -45,7 +45,6 @@
 #include "Support.hpp"
 
 using namespace pdal;
-using namespace pdal::drivers::liblas;
 
 
 BOOST_AUTO_TEST_SUITE(LiblasWriterTest)
@@ -55,13 +54,13 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_las)
     // remove file from earlier run, if needed
     FileUtils::deleteFile("LiblasWriterTest_test_simple_las.las");
 
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::liblas::Reader reader(Support::datapath("1.2-with-color.las"));
     
     std::ostream* ofs = FileUtils::createFile(Support::temppath("LiblasWriterTest_test_simple_las.las"));
 
     {
         // need to scope the writer, so that's it dtor can use the stream
-        LiblasWriter writer(reader, ofs);
+        pdal::drivers::liblas::Writer writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Liblas Writer");
         writer.initialize();
 
@@ -97,11 +96,11 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_options)
     Option opt("filename", Support::temppath("LiblasWriterTest_test_options.las"));
     Options opts(opt);
 
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::liblas::Reader reader(Support::datapath("1.2-with-color.las"));
 
     {
         // need to scope the writer, so that's it dtor can use the stream
-        LiblasWriter writer(reader, opts);
+        pdal::drivers::liblas::Writer writer(reader, opts);
         BOOST_CHECK(writer.getDescription() == "Liblas Writer");
 
         writer.initialize();
@@ -134,13 +133,13 @@ BOOST_AUTO_TEST_CASE(LiblasWriterTest_test_simple_laz)
     // remove file from earlier run, if needed
     FileUtils::deleteFile(Support::temppath("LiblasWriterTest_test_simple_laz.laz"));
 
-    LiblasReader reader(Support::datapath("laszip/basefile.las"));
+    pdal::drivers::liblas::Reader reader(Support::datapath("laszip/basefile.las"));
     
     std::ostream* ofs = FileUtils::createFile(Support::temppath("LiblasWriterTest_test_simple_laz.laz"));
 
     {
         // need to scope the writer, so that's it dtor can use the stream
-        LiblasWriter writer(reader, ofs);
+        pdal::drivers::liblas::Writer writer(reader, ofs);
         writer.initialize();
 
         const boost::uint64_t numPoints = reader.getNumPoints();
@@ -175,13 +174,13 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     // remove file from earlier run, if needed
     FileUtils::deleteFile("temp.las");
 
-    LiblasReader reader(Support::datapath("1.2_3.las"));
+    pdal::drivers::liblas::Reader reader(Support::datapath("1.2_3.las"));
     
     std::ostream* ofs = FileUtils::createFile(Support::temppath("temp.las"));
 
     {
         // need to scope the writer, so that's it dtor can use the stream
-        LiblasWriter writer(reader, ofs);
+        pdal::drivers::liblas::Writer writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Liblas Writer");
         writer.initialize();
 

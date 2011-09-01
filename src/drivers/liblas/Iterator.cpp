@@ -51,7 +51,7 @@ namespace pdal { namespace drivers { namespace liblas {
 //---------------------------------------------------------------------------
 
 
-LiblasIteratorBase::LiblasIteratorBase(const LiblasReader& reader)
+LiblasIteratorBase::LiblasIteratorBase(const Reader& reader)
     : m_reader(reader)
     , m_filename(reader.getFileName())
     , m_istream(NULL)
@@ -80,7 +80,7 @@ LiblasIteratorBase::~LiblasIteratorBase()
 }
 
 
-const LiblasReader& LiblasIteratorBase::getReader() const
+const Reader& LiblasIteratorBase::getReader() const
 {
     return m_reader;
 }
@@ -172,7 +172,7 @@ boost::uint32_t LiblasIteratorBase::myReadBuffer(PointBuffer& data)
 //
 //---------------------------------------------------------------------------
 
-SequentialIterator::SequentialIterator(const LiblasReader& reader)
+SequentialIterator::SequentialIterator(const Reader& reader)
     : LiblasIteratorBase(reader)
     , pdal::ReaderSequentialIterator(reader)
 {
@@ -226,7 +226,7 @@ boost::uint32_t SequentialIterator::readBufferImpl(PointBuffer& data)
 //
 //---------------------------------------------------------------------------
 
-RandomIterator::RandomIterator(const LiblasReader& reader)
+RandomIterator::RandomIterator(const Reader& reader)
     : LiblasIteratorBase(reader)
     , pdal::ReaderRandomIterator(reader)
 {
