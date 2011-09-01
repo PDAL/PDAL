@@ -35,6 +35,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 #include <pdal/SchemaLayout.hpp>
 
@@ -112,11 +114,13 @@ BOOST_AUTO_TEST_CASE(SchemaLayoutTest_ptree)
     boost::property_tree::ptree tree = sl1.toPTree();
     boost::property_tree::write_xml(ss1, tree);
 
-    const std::string out1 = ss1.str();
+    std::string out1 = ss1.str();
 
     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    const std::string ref = xml_header + "<dimensionlayout><dimension><name>X</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>0</byteoffset><position>0</position></dimensionlayout><dimensionlayout><dimension><name>Y</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>4</byteoffset><position>1</position></dimensionlayout>";
+    std::string ref = xml_header + "<dimensionlayout><dimension><name>X</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>0</byteoffset><position>0</position></dimensionlayout><dimensionlayout><dimension><name>Y</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>4</byteoffset><position>1</position></dimensionlayout>";
 
+    boost::algorithm::erase_all(out1, "\n");
+    boost::algorithm::erase_all(ref, "\n");
     BOOST_CHECK_EQUAL(ref, out1);
 
     return;
