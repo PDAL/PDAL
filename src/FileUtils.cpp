@@ -197,7 +197,11 @@ std::string FileUtils::getDirectory(const std::string& path)
 
 bool FileUtils::isAbsolutePath(const std::string& path)
 {
+#if BOOST_VERSION >= 104600 && BOOST_FILESYSTEM_VERSION >= 3
     return boost::filesystem::path(path).is_absolute();
+#else
+    return boost::filesystem::path(path).is_complete();
+#endif
 }
 
 
