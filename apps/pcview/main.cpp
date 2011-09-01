@@ -231,7 +231,7 @@ static void readFileSimple(Controller& controller, const string& file)
 {
     boost::timer timer;
 
-    pdal::Stage* reader = new pdal::drivers::las::LasReader(file);
+    pdal::Stage* reader = new pdal::drivers::las::Reader(file);
     
     pdal::Stage* decimator = new pdal::filters::DecimationFilter(*reader, factor);
 

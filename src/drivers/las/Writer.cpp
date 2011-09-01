@@ -53,7 +53,7 @@
 namespace pdal { namespace drivers { namespace las {
 
 
-LasWriter::LasWriter(Stage& prevStage, const Options& options)
+Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_streamManager(options.getOption("filename").getValue<std::string>())
 {
@@ -62,8 +62,8 @@ LasWriter::LasWriter(Stage& prevStage, const Options& options)
 }
 
 
-LasWriter::LasWriter(Stage& prevStage, std::ostream* ostream)
-    : Writer(prevStage, Options::none())
+Writer::Writer(Stage& prevStage, std::ostream* ostream)
+    : pdal::Writer(prevStage, Options::none())
     , m_streamManager(ostream)
     , m_numPointsWritten(0)
 {
@@ -71,7 +71,7 @@ LasWriter::LasWriter(Stage& prevStage, std::ostream* ostream)
 }
 
 
-LasWriter::~LasWriter()
+Writer::~Writer()
 {
 #ifdef PDAL_HAVE_LASZIP
     m_zipper.reset();
@@ -82,9 +82,9 @@ LasWriter::~LasWriter()
 }
 
 
-void LasWriter::initialize()
+void Writer::initialize()
 {
-    Writer::initialize();
+    pdal::Writer::initialize();
 
     m_streamManager.open();
 
@@ -108,7 +108,7 @@ void LasWriter::initialize()
 }
 
 
-const Options LasWriter::getDefaultOptions() const
+const Options Writer::getDefaultOptions() const
 {
     Options options;
 
@@ -137,56 +137,56 @@ const Options LasWriter::getDefaultOptions() const
 }
 
 
-void LasWriter::setCompressed(bool v)
+void Writer::setCompressed(bool v)
 {
     m_lasHeader.SetCompressed(v);
 }
 
 
-void LasWriter::setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion)
+void Writer::setFormatVersion(boost::uint8_t majorVersion, boost::uint8_t minorVersion)
 {
     m_lasHeader.SetVersionMajor(majorVersion);
     m_lasHeader.SetVersionMinor(minorVersion);
 }
 
 
-void LasWriter::setPointFormat(PointFormat pointFormat)
+void Writer::setPointFormat(PointFormat pointFormat)
 {
     m_lasHeader.setPointFormat(pointFormat);
 }
 
 
-void LasWriter::setDate(boost::uint16_t dayOfYear, boost::uint16_t year)
+void Writer::setDate(boost::uint16_t dayOfYear, boost::uint16_t year)
 {
     m_lasHeader.SetCreationDOY(dayOfYear);
     m_lasHeader.SetCreationYear(year);
 }
 
 
-void LasWriter::setProjectId(const boost::uuids::uuid& id)
+void Writer::setProjectId(const boost::uuids::uuid& id)
 {
     m_lasHeader.SetProjectId(id);
 }
 
 
-void LasWriter::setSystemIdentifier(const std::string& systemId) 
+void Writer::setSystemIdentifier(const std::string& systemId) 
 {
     m_lasHeader.SetSystemId(systemId);
 }
 
 
-void LasWriter::setGeneratingSoftware(const std::string& softwareId)
+void Writer::setGeneratingSoftware(const std::string& softwareId)
 {
     m_lasHeader.SetSoftwareId(softwareId);
 }
 
 
-void LasWriter::setHeaderPadding(boost::uint32_t const& v)
+void Writer::setHeaderPadding(boost::uint32_t const& v)
 {
     m_lasHeader.SetHeaderPadding(v);
 }
 
-void LasWriter::writeBegin(boost::uint64_t targetNumPointsToWrite)
+void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 {
     // need to set properties of the header here, based on prev->getHeader() and on the user's preferences
     m_lasHeader.setBounds( getPrevStage().getBounds() );
@@ -251,7 +251,7 @@ void LasWriter::writeBegin(boost::uint64_t targetNumPointsToWrite)
 }
 
 
-void LasWriter::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
+void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
     m_lasHeader.SetPointRecordsCount(m_numPointsWritten);
 
@@ -267,7 +267,7 @@ void LasWriter::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 }
 
 
-boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
+boost::uint32_t Writer::writeBuffer(const PointBuffer& PointBuffer)
 {
     const SchemaLayout& schemaLayout = PointBuffer.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
@@ -368,7 +368,7 @@ boost::uint32_t LasWriter::writeBuffer(const PointBuffer& PointBuffer)
 }
 
 
-boost::property_tree::ptree LasWriter::toPTree() const
+boost::property_tree::ptree Writer::toPTree() const
 {
     boost::property_tree::ptree tree = pdal::Writer::toPTree();
 

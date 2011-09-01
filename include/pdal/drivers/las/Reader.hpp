@@ -53,13 +53,13 @@ namespace pdal { namespace drivers { namespace las {
 class LasHeader;
 class ZipPoint;
 
-class PDAL_DLL LasReader : public LasReaderBase
+class PDAL_DLL Reader : public ReaderBase
 {
 public:
     SET_STAGE_NAME("drivers.las.reader", "Las Reader")
 
-    LasReader(const Options&);
-    LasReader(const std::string& filename);
+    Reader(const Options&);
+    Reader(const std::string& filename);
     
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -108,8 +108,8 @@ private:
     LasHeader m_lasHeader;
     std::vector<MetadataRecord> m_metadataRecords;
 
-    LasReader& operator=(const LasReader&); // not implemented
-    LasReader(const LasReader&); // not implemented
+    Reader& operator=(const Reader&); // not implemented
+    Reader(const Reader&); // not implemented
 };
 
 

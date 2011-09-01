@@ -49,25 +49,25 @@
 namespace pdal { namespace drivers { namespace las {
 
 
-LasReader::LasReader(const Options& options)
-    : LasReaderBase(options)
+Reader::Reader(const Options& options)
+    : ReaderBase(options)
     , m_filename(options.getValueOrThrow<std::string>("filename"))
 {
     return;
 }
 
 
-LasReader::LasReader(const std::string& filename)
-    : LasReaderBase(Options::none())
+Reader::Reader(const std::string& filename)
+    : ReaderBase(Options::none())
     , m_filename(filename)
 {
     return;
 }
 
 
-void LasReader::initialize()
+void Reader::initialize()
 {
-    Reader::initialize();
+    pdal::Reader::initialize();
 
     std::istream* stream = FileUtils::openFile(m_filename);
 
@@ -92,7 +92,7 @@ void LasReader::initialize()
 }
 
 
-const Options LasReader::getDefaultOptions() const
+const Options Reader::getDefaultOptions() const
 {
     Option option1("filename", "", "file to read from");
     Options options(option1);
@@ -100,79 +100,79 @@ const Options LasReader::getDefaultOptions() const
 }
 
 
-const std::string& LasReader::getFileName() const
+const std::string& Reader::getFileName() const
 {
     return m_filename;
 }
 
 
-int LasReader::getMetadataRecordCount() const
+int Reader::getMetadataRecordCount() const
 {
     return m_metadataRecords.size();
 }
 
 
-const MetadataRecord& LasReader::getMetadataRecord(int index) const
+const MetadataRecord& Reader::getMetadataRecord(int index) const
 {
     return m_metadataRecords[index];
 }
 
 
-MetadataRecord& LasReader::getMetadataRecordRef(int index)
+MetadataRecord& Reader::getMetadataRecordRef(int index)
 {
     return m_metadataRecords[index];
 }
 
 
-PointFormat LasReader::getPointFormat() const
+PointFormat Reader::getPointFormat() const
 {
     return m_lasHeader.getPointFormat();
 }
 
 
-boost::uint8_t LasReader::getVersionMajor() const
+boost::uint8_t Reader::getVersionMajor() const
 {
     return m_lasHeader.GetVersionMajor();
 }
 
 
-boost::uint8_t LasReader::getVersionMinor() const
+boost::uint8_t Reader::getVersionMinor() const
 {
     return m_lasHeader.GetVersionMinor();
 }
 
 
-const std::vector<VariableLengthRecord>& LasReader::getVLRs() const
+const std::vector<VariableLengthRecord>& Reader::getVLRs() const
 {
     return m_lasHeader.getVLRs().getAll();
 }
 
 
-boost::uint64_t LasReader::getPointDataOffset() const
+boost::uint64_t Reader::getPointDataOffset() const
 {
     return m_lasHeader.GetDataOffset();
 }
 
 
-bool LasReader::isCompressed() const
+bool Reader::isCompressed() const
 {
     return m_lasHeader.Compressed();
 }
 
 
-pdal::StageSequentialIterator* LasReader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
     return new SequentialIterator(*this);
 }
 
 
-pdal::StageRandomIterator* LasReader::createRandomIterator() const
+pdal::StageRandomIterator* Reader::createRandomIterator() const
 {
     return new RandomIterator(*this);
 }
 
 
-boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream, boost::uint64_t numPointsLeft, LASunzipper* unzipper, ZipPoint* zipPoint) const
+boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, boost::uint64_t numPointsLeft, LASunzipper* unzipper, ZipPoint* zipPoint) const
 {
     // we must not read more points than are left in the file
     const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(), numPointsLeft);
@@ -284,7 +284,7 @@ boost::uint32_t LasReader::processBuffer(PointBuffer& data, std::istream& stream
 }
 
 
-boost::property_tree::ptree LasReader::toPTree() const
+boost::property_tree::ptree Reader::toPTree() const
 {
     boost::property_tree::ptree tree = pdal::Reader::toPTree();
 

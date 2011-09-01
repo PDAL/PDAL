@@ -55,13 +55,13 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
     // remove file from earlier run, if needed
     FileUtils::deleteFile("temp.las");
 
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     
     std::ostream* ofs = FileUtils::createFile(Support::temppath("temp.las"));
 
     {
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::LasWriter writer(reader, ofs);
+        pdal::drivers::las::Writer writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Las Writer");
         writer.initialize();
 
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
     // remove file from earlier run, if needed
     FileUtils::deleteFile("laszip/LasWriterTest_test_simple_laz.laz");
 
-    pdal::drivers::las::LasReader reader(Support::datapath("laszip/basefile.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("laszip/basefile.las"));
     
     std::ostream* ofs = FileUtils::createFile(Support::temppath("LasWriterTest_test_simple_laz.laz"));
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::LasWriter writer(reader, ofs);
+        pdal::drivers::las::Writer writer(reader, ofs);
         writer.initialize();
 
         writer.setCompressed(true);
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
     FileUtils::closeFile(ofs);
 
     {
-        pdal::drivers::las::LasReader reader(Support::temppath("LasWriterTest_test_simple_laz.laz"));
+        pdal::drivers::las::Reader reader(Support::temppath("LasWriterTest_test_simple_laz.laz"));
     }
 
     // these two files only differ by the description string in the VLR
@@ -142,7 +142,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
     // remove file from earlier run, if needed
     FileUtils::deleteFile("temp.las");
 
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2_3.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("1.2_3.las"));
     
     std::ostream* ofs = FileUtils::createFile(Support::temppath("temp.las"));
 
@@ -150,7 +150,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         const boost::uint64_t numPoints = reader.getNumPoints();
 
         // need to scope the writer, so that's it dtor can use the stream
-        pdal::drivers::las::LasWriter writer(reader, ofs);
+        pdal::drivers::las::Writer writer(reader, ofs);
         BOOST_CHECK(writer.getDescription() == "Las Writer");
         writer.initialize();
 

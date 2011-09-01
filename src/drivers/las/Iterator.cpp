@@ -48,7 +48,7 @@
 namespace pdal { namespace drivers { namespace las {
 
 
-IteratorBase::IteratorBase(const LasReader& reader)
+IteratorBase::IteratorBase(const Reader& reader)
     : m_reader(reader)
     , m_istream(NULL)
 {
@@ -113,7 +113,7 @@ void IteratorBase::initializeZip()
 }
 
 
-SequentialIterator::SequentialIterator(const LasReader& reader)
+SequentialIterator::SequentialIterator(const Reader& reader)
     : IteratorBase(reader)
     , pdal::ReaderSequentialIterator(reader)
 {
@@ -178,7 +178,7 @@ boost::uint32_t SequentialIterator::readBufferImpl(PointBuffer& data)
 
 
 
-RandomIterator::RandomIterator(const LasReader& reader)
+RandomIterator::RandomIterator(const Reader& reader)
     : IteratorBase(reader)
     , pdal::ReaderRandomIterator(reader)
 {

@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_base_options)
         pdal::Options opts;
         opts.add(opt_filename);
 
-        pdal::drivers::las::LasReader reader(opts);
+        pdal::drivers::las::Reader reader(opts);
         BOOST_CHECK(reader.getFileName() == file);
         BOOST_CHECK(reader.getVerboseLevel() == 0);
         BOOST_CHECK(reader.isDebug() == false);
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_base_options)
         opts.add(opt_filename);
         opts.add(opt_verbose_string);
         opts.add(opt_debug_string);
-        pdal::drivers::las::LasReader reader(opts);
+        pdal::drivers::las::Reader reader(opts);
         BOOST_CHECK(reader.getFileName() == file);
         BOOST_CHECK(reader.getVerboseLevel() == 99);
         BOOST_CHECK(reader.isDebug() == true);
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_base_options)
         opts.add(opt_filename);
         opts.add(opt_verbose_uint8);
         opts.add(opt_debug_bool);
-        pdal::drivers::las::LasReader reader(opts);
+        pdal::drivers::las::Reader reader(opts);
         BOOST_CHECK(reader.getFileName() == file);
         BOOST_CHECK(reader.getVerboseLevel() == 99);
         BOOST_CHECK(reader.isDebug() == true);
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_base_options)
 
 BOOST_AUTO_TEST_CASE(test_sequential)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.initialize();
 
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 
 BOOST_AUTO_TEST_CASE(test_random)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.initialize();
 
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(test_random)
 #ifdef PDAL_HAVE_LASZIP
 BOOST_AUTO_TEST_CASE(test_random_laz)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("laszip/laszip-generated.laz"));
+    pdal::drivers::las::Reader reader(Support::datapath("laszip/laszip-generated.laz"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.initialize();
 
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
 
 BOOST_AUTO_TEST_CASE(test_two_iters)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.initialize();
 
@@ -267,7 +267,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
 
 BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
     pdal::filters::CacheFilter cache(reader, 1, 355);
@@ -360,7 +360,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
 
 BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.initialize();
 
@@ -478,7 +478,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
 
 BOOST_AUTO_TEST_CASE(test_iterator_checks)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     reader.initialize();
 
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
@@ -490,7 +490,7 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
 static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
                               double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath(file));
+    pdal::drivers::las::Reader reader(Support::datapath(file));
     reader.initialize();
 
     BOOST_CHECK(reader.getPointFormat() == pointFormat);
@@ -533,7 +533,7 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 
 BOOST_AUTO_TEST_CASE(test_vlr)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("lots_of_vlr.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("lots_of_vlr.las"));
     reader.initialize();
 
     BOOST_CHECK(reader.getVLRs().size() == 390);

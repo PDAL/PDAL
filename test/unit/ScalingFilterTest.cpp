@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
     // (3)
     //
     {
-        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
 
         // convert to doubles, use internal scale factor
         pdal::filters::ScalingFilter scalingFilter(reader);

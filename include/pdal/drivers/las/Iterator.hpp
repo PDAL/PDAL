@@ -39,28 +39,27 @@
 
 #include <pdal/ReaderIterator.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <iosfwd>
 
 class LASzip;
 class LASunzipper;
 
 namespace pdal { namespace drivers { namespace las {
 
-class LasReader;
+class Reader;
 class ZipPoint;
 
 
 class IteratorBase
 {
 public:
-    IteratorBase(const LasReader& reader);
+    IteratorBase(const Reader& reader);
     ~IteratorBase();
 
 private:
     void initializeZip();
 
 protected:
-    const LasReader& m_reader;
+    const Reader& m_reader;
     std::istream* m_istream;
 
 public:
@@ -80,7 +79,7 @@ private:
 class SequentialIterator : public IteratorBase, public pdal::ReaderSequentialIterator
 {
 public:
-    SequentialIterator(const LasReader& reader);
+    SequentialIterator(const Reader& reader);
     ~SequentialIterator();
 
 private:
@@ -93,7 +92,7 @@ private:
 class RandomIterator : public IteratorBase, public pdal::ReaderRandomIterator
 {
 public:
-    RandomIterator(const LasReader& reader);
+    RandomIterator(const Reader& reader);
     ~RandomIterator();
 
 private:

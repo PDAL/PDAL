@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
 // Test fetching SRS from an existing file
 BOOST_AUTO_TEST_CASE(test_read_srs)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("utm17.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("utm17.las"));
     reader.initialize();
 
     const pdal::SpatialReference& ref = reader.getSpatialReference();
@@ -253,14 +253,14 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
         }
 
         // Write a very simple file with our SRS and one point.
-        pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));    
+        pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));    
 
         std::ostream* ofs = pdal::FileUtils::createFile(tmpfile);
         {
             const boost::uint64_t numPoints = reader.getNumPoints();
 
             // need to scope the writer, so that's it dtor can use the stream
-            pdal::drivers::las::LasWriter writer(reader, ofs);
+            pdal::drivers::las::Writer writer(reader, ofs);
             writer.initialize();
 
             writer.setSpatialReference(ref);
@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 
     // Reopen and check contents. 
     {
-        pdal::drivers::las::LasReader reader(tmpfile);
+        pdal::drivers::las::Reader reader(tmpfile);
         reader.initialize();
 
         const pdal::SpatialReference ref2 = reader.getSpatialReference();
@@ -325,14 +325,14 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
     {
         pdal::FileUtils::deleteFile(tmpfile);
 
-        pdal::drivers::las::LasReader readerx(Support::datapath("1.2-with-color.las"));    
+        pdal::drivers::las::Reader readerx(Support::datapath("1.2-with-color.las"));    
 
         std::ostream* ofs = pdal::FileUtils::createFile(tmpfile);
         {
             const boost::uint64_t numPoints = readerx.getNumPoints();
 
             // need to scope the writer, so that's it dtor can use the stream
-            pdal::drivers::las::LasWriter writer(readerx, ofs);
+            pdal::drivers::las::Writer writer(readerx, ofs);
             writer.initialize();
 
             writer.setSpatialReference(ref);
@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 
     // Reopen and check contents. 
     {
-        pdal::drivers::las::LasReader reader(tmpfile);
+        pdal::drivers::las::Reader reader(tmpfile);
         reader.initialize();
 
         pdal::SpatialReference result_ref = reader.getSpatialReference();

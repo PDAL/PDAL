@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
     // (1)
     //
     {
-        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
         reader.initialize();
 
         const pdal::SpatialReference in_ref_test(utm15_wkt);
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
     {
         const pdal::SpatialReference out_ref(epsg4326_wkt);
 
-        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
 
         pdal::filters::ScalingFilter scalingFilter(reader);
         pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, out_ref);
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
     {
         const pdal::SpatialReference out_ref(epsg4326_wkt);
 
-        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
 
         pdal::Option opt2("out_srs", out_ref.getWKT());
         pdal::Options opts(opt2);
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
     {
         const pdal::SpatialReference out_ref(epsg4326_wkt);
 
-        pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+        pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
             
         // convert to doubles, use internal scale factor
         pdal::filters::ScalingFilter scalingFilter(reader);
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
 
 BOOST_AUTO_TEST_CASE(test_impedence_mismatch)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("utm15.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
               
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
         

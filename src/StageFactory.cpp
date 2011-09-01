@@ -110,14 +110,14 @@ namespace pdal
     // define the functions to create the readers
     //
     MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
-    MAKE_READER_CREATOR(LasReader, pdal::drivers::las::LasReader)
+    MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 #ifdef PDAL_HAVE_LIBLAS
     MAKE_READER_CREATOR(LiblasReader, pdal::drivers::liblas::LiblasReader)
 #endif
 #ifdef PDAL_HAVE_ORACLE
     MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
 #endif
-    MAKE_READER_CREATOR(Reader, pdal::drivers::pipeline::Reader)
+    MAKE_READER_CREATOR(PipelineReader, pdal::drivers::pipeline::Reader)
     MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
     MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 
@@ -144,7 +144,7 @@ namespace pdal
     // define the functions to create the writers
     //
     MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
-    MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::LasWriter)
+    MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
 #ifdef PDAL_HAVE_LIBLAS
     MAKE_WRITER_CREATOR(LiblasWriter, pdal::drivers::liblas::LiblasWriter)
 #endif
@@ -284,14 +284,14 @@ void StageFactory::registerWriter(const std::string& type, WriterCreator* f)
 void StageFactory::registerKnownReaders()
 {
     REGISTER_READER(FauxReader, pdal::drivers::faux::Reader);
-    REGISTER_READER(LasReader, pdal::drivers::las::LasReader);
+    REGISTER_READER(LasReader, pdal::drivers::las::Reader);
 #ifdef PDAL_HAVE_LIBLAS
     REGISTER_READER(LiblasReader, pdal::drivers::liblas::LiblasReader);
 #endif
 #ifdef PDAL_HAVE_ORACLE
     REGISTER_READER(OciReader, pdal::drivers::oci::Reader);
 #endif
-    REGISTER_READER(Reader, pdal::drivers::pipeline::Reader);
+    REGISTER_READER(PipelineReader, pdal::drivers::pipeline::Reader);
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
 }
@@ -321,7 +321,7 @@ void StageFactory::registerKnownMultiFilters()
 void StageFactory::registerKnownWriters()
 {
     REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
-    REGISTER_WRITER(LasWriter, pdal::drivers::las::LasWriter);
+    REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
 #ifdef PDAL_HAVE_LIBLAS
     REGISTER_WRITER(LiblasWriter, pdal::drivers::liblas::LiblasWriter);
 #endif

@@ -105,7 +105,7 @@ static Reader* demoReaderCreator(const Options& options)
 
     Options optsR;
     optsR.add("filename", Support::datapath("1.2-with-color.las"), "file to read from");
-    Reader* reader = new pdal::drivers::las::LasReader(optsR);
+    Reader* reader = new pdal::drivers::las::Reader(optsR);
     return reader;
 }
 
@@ -137,7 +137,7 @@ Writer* demoWriterCreator(Stage& prev, const Options& options)
 
     Options optsW;
     optsW.add("filename", "temp.las", "file to write to");
-    Writer* writer = new pdal::drivers::las::LasWriter(prev, optsW);
+    Writer* writer = new pdal::drivers::las::Writer(prev, optsW);
     return writer;
 }
 

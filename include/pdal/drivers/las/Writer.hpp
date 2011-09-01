@@ -60,14 +60,14 @@ class ZipPoint;
 //   <bool>compression
 //   <string>filename  [required]
 //
-class PDAL_DLL LasWriter : public Writer
+class PDAL_DLL Writer : public pdal::Writer
 {
 public:
     SET_STAGE_NAME("drivers.las.writer", "Las Writer")
 
-    LasWriter(Stage& prevStage, const Options&);
-    LasWriter(Stage& prevStage, std::ostream*);
-    ~LasWriter();
+    Writer(Stage& prevStage, const Options&);
+    Writer(Stage& prevStage, std::ostream*);
+    ~Writer();
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -109,8 +109,8 @@ private:
     boost::scoped_ptr<ZipPoint> m_zipPoint;
 #endif
 
-    LasWriter& operator=(const LasWriter&); // not implemented
-    LasWriter(const LasWriter&); // not implemented
+    Writer& operator=(const Writer&); // not implemented
+    Writer(const Writer&); // not implemented
 };
 
 } } } // namespaces

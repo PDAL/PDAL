@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_SUITE(ChipperTest)
 
 BOOST_AUTO_TEST_CASE(test_construction)
 {
-    pdal::drivers::las::LasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
 
     {
         // need to scope the writer, so that's it dtor can use the stream

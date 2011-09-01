@@ -53,7 +53,7 @@ namespace pdal { namespace drivers { namespace liblas {
 
 class LiblasHeader;
 
-class PDAL_DLL LiblasReader : public pdal::drivers::las::LasReaderBase
+class PDAL_DLL LiblasReader : public pdal::drivers::las::ReaderBase
 {
 public:
     SET_STAGE_NAME("drivers.liblas.reader", "Liblas Reader")
