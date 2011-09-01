@@ -48,7 +48,7 @@
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
 
-#include <pdal/drivers/liblas/Writer.hpp>
+#include <pdal/drivers/las/Writer.hpp>
 #include <pdal/StageIterator.hpp>
 
 #include "Support.hpp"
