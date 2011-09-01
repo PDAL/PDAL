@@ -112,7 +112,7 @@ namespace pdal
     MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
     MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 #ifdef PDAL_HAVE_LIBLAS
-    MAKE_READER_CREATOR(LiblasReader, pdal::drivers::liblas::LiblasReader)
+    MAKE_READER_CREATOR(LiblasReader, pdal::drivers::liblas::Reader)
 #endif
 #ifdef PDAL_HAVE_ORACLE
     MAKE_READER_CREATOR(OciReader, pdal::drivers::oci::Reader)
@@ -146,7 +146,7 @@ namespace pdal
     MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
     MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
 #ifdef PDAL_HAVE_LIBLAS
-    MAKE_WRITER_CREATOR(LiblasWriter, pdal::drivers::liblas::LiblasWriter)
+    MAKE_WRITER_CREATOR(LiblasWriter, pdal::drivers::liblas::Writer)
 #endif
 #ifdef PDAL_HAVE_ORACLE
     MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
@@ -286,7 +286,7 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(FauxReader, pdal::drivers::faux::Reader);
     REGISTER_READER(LasReader, pdal::drivers::las::Reader);
 #ifdef PDAL_HAVE_LIBLAS
-    REGISTER_READER(LiblasReader, pdal::drivers::liblas::LiblasReader);
+    REGISTER_READER(LiblasReader, pdal::drivers::liblas::Reader);
 #endif
 #ifdef PDAL_HAVE_ORACLE
     REGISTER_READER(OciReader, pdal::drivers::oci::Reader);
@@ -323,7 +323,7 @@ void StageFactory::registerKnownWriters()
     REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
 #ifdef PDAL_HAVE_LIBLAS
-    REGISTER_WRITER(LiblasWriter, pdal::drivers::liblas::LiblasWriter);
+    REGISTER_WRITER(LiblasWriter, pdal::drivers::liblas::Writer);
 #endif
 #ifdef PDAL_HAVE_ORACLE
     REGISTER_WRITER(OciWriter, pdal::drivers::oci::Writer);

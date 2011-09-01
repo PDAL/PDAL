@@ -43,7 +43,6 @@
 #include "Support.hpp"
 
 using namespace pdal;
-using namespace pdal::drivers::liblas;
 using namespace pdal::filters;
 
 
@@ -52,7 +51,7 @@ BOOST_AUTO_TEST_SUITE(LiblasReaderTest)
 
 BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_sequential)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::liblas::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
     reader.initialize();
 
@@ -90,7 +89,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_options)
 {
     Option opt("filename", Support::datapath("1.2-with-color.las"));
     Options opts(opt);
-    LiblasReader reader(opt);
+    pdal::drivers::liblas::Reader reader(opt);
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
     reader.initialize();
 
@@ -116,7 +115,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_options)
 
 BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::liblas::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
     reader.initialize();
 
@@ -162,7 +161,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random)
 
 BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random_laz)
 {
-    LiblasReader reader(Support::datapath("laszip/laszip-generated.laz"));
+    pdal::drivers::liblas::Reader reader(Support::datapath("laszip/laszip-generated.laz"));
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
     reader.initialize();
 
@@ -207,7 +206,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random_laz)
 
 BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::liblas::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
     reader.initialize();
 
@@ -249,7 +248,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters)
 
 BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters_with_cache)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::liblas::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
 
@@ -342,7 +341,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters_with_cache)
 
 BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_simultaneous_iters)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::liblas::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
     reader.initialize();
 
@@ -460,7 +459,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_simultaneous_iters)
 
 BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_iterator_checks)
 {
-    LiblasReader reader(Support::datapath("1.2-with-color.las"));
+    pdal::drivers::liblas::Reader reader(Support::datapath("1.2-with-color.las"));
     reader.initialize();
 
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
@@ -472,7 +471,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_iterator_checks)
 static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
                               double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
 {
-    LiblasReader reader(Support::datapath(file));
+    pdal::drivers::liblas::Reader reader(Support::datapath(file));
     reader.initialize();
 
     BOOST_CHECK(reader.getPointFormat() == pointFormat);
@@ -515,7 +514,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_different_formats)
 
 BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_vlr)
 {
-    pdal::drivers::liblas::LiblasReader reader(Support::datapath("lots_of_vlr.las"));
+    pdal::drivers::liblas::Reader reader(Support::datapath("lots_of_vlr.las"));
     reader.initialize();
 
     ////// BUG: this is not yet supported
