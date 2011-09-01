@@ -37,7 +37,7 @@
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/filesystem.hpp>
-//
+#include <boost/version.hpp>
 
 namespace pdal
 {
@@ -147,7 +147,7 @@ std::string FileUtils::addTrailingSlash(const std::string& path)
 std::string FileUtils::getcwd()
 {
     const boost::filesystem::path p = boost::filesystem::current_path();
-    std::string path = p.generic_string();
+    std::string path = p.string();
     path = addTrailingSlash(path);
     return path;
 }
@@ -157,8 +157,14 @@ std::string FileUtils::getcwd()
 // otherwise, make it absolute (relative to current working dir) and return that
 std::string FileUtils::toAbsolutePath(const std::string& filename)
 {
+
+#if BOOST_VERSION >= 104600 && BOOST_FILESYSTEM_VERSION >= 3
     const boost::filesystem::path p = boost::filesystem::absolute(filename);
-    return p.generic_string();
+#else
+    const boost::filesystem::path p = boost::filesystem::complete(filename);
+#endif
+
+    return p.string();
 }
 
 
@@ -169,15 +175,21 @@ std::string FileUtils::toAbsolutePath(const std::string& filename)
 std::string FileUtils::toAbsolutePath(const std::string& filename, const std::string base)
 {
     const std::string newbase = toAbsolutePath(base);
+    
+#if BOOST_VERSION >= 104600 && BOOST_FILESYSTEM_VERSION >= 3
     const boost::filesystem::path p = boost::filesystem::absolute(filename, newbase);
-    return p.generic_string();
+#else
+    const boost::filesystem::path p = boost::filesystem::complete(filename, newbase);
+#endif
+
+    return p.string();
 }
 
 
 std::string FileUtils::getDirectory(const std::string& path)
 {
     const boost::filesystem::path dir = boost::filesystem::path(path).parent_path();
-    std::string ret = dir.generic_string();
+    std::string ret = dir.string();
     ret = addTrailingSlash(ret);
     return ret;
 }
