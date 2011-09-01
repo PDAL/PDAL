@@ -36,6 +36,9 @@
 #include <boost/cstdint.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/replace.hpp>
+
 #include <pdal/Schema.hpp>
 
 using namespace pdal;
@@ -88,11 +91,13 @@ BOOST_AUTO_TEST_CASE(SchemaTest_ptree)
     boost::property_tree::ptree tree = s1.toPTree();
     boost::property_tree::write_xml(ss1, tree);
 
-    const std::string out1 = ss1.str();
+    std::string out1 = ss1.str();
 
+    boost::algorithm::erase_all(out1, "\n");
     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    const std::string ref = xml_header + "<dimension><name>X</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><dimension><name>Y</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension>";
+    std::string ref = xml_header + "<dimension><name>X</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><dimension><name>Y</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension>";
 
+    boost::algorithm::erase_all(ref, "\n");
     BOOST_CHECK_EQUAL(ref, out1);
 
     return;
