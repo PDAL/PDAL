@@ -97,7 +97,6 @@
     <Compile Include="ios_base.cs" />
     <Compile Include="istream.cs" />
     <Compile Include="LasReader.cs" />
-    <Compile Include="LasReaderBase.cs" />
     <Compile Include="LasWriter.cs" />
     <Compile Include="MultiFilter.cs" />
     <Compile Include="Option.cs" />
@@ -111,6 +110,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Range_double.cs" />
     <Compile Include="Reader.cs" />
+    <Compile Include="ReaderBase.cs" />
     <Compile Include="Schema.cs" />
     <Compile Include="SchemaLayout.cs" />
     <Compile Include="SpatialReference.cs" />
@@ -135,7 +135,6 @@
     <Compile Include="SWIGTYPE_p_std__basic_streambufT_char_std__char_traitsT_char_t_t.cs" />
     <Compile Include="SWIGTYPE_p_std__locale.cs" />
     <Compile Include="SWIGTYPE_p_std__vectorT_pdal__drivers__las__VariableLengthRecord_t.cs" />
-    <Compile Include="SWIGTYPE_p_std__vectorT_pdal__Stage_const_p_t.cs" />
     <Compile Include="SWIGTYPE_p_streamoff.cs" />
     <Compile Include="SWIGTYPE_p_streampos.cs" />
     <Compile Include="SWIGTYPE_p_unsigned_char.cs" />

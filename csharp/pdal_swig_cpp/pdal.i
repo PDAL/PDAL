@@ -539,7 +539,7 @@ class MultiFilter : public Stage
 {
 public:
     virtual void initialize();
-    const std::vector<const Stage*> getPrevStages() const;
+    //////////////const std::vector<const Stage*> getPrevStages() const;
 };
 
 class Writer : public StageBase
@@ -563,6 +563,9 @@ protected:
     Writer(Stage& prevStage, const Options& options);
 };
 
+
+%rename(LasReader) drivers::las::Reader;
+%rename(LasWriter) drivers::las::Writer;
 
 namespace drivers { namespace las {
 
@@ -591,24 +594,23 @@ public:
 
 
 
-class LasReaderBase: public Reader
+class ReaderBase: public pdal::Reader
 {
 public:
     virtual PointFormat getPointFormat() const = 0;
     virtual boost::uint8_t getVersionMajor() const = 0;
     virtual boost::uint8_t getVersionMinor() const = 0;
 protected:
-    LasReaderBase(const Options&);
+    ReaderBase(const Options&);
 };
 
 
 
-
-class LasReader : public LasReaderBase
+class Reader : public ReaderBase
 {
 public:
-    LasReader(const Options&);
-    LasReader(const std::string& filename);
+    Reader(const Options&);
+    Reader(const std::string& filename);
     
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -632,12 +634,12 @@ public:
 };
 
 
-class LasWriter : public Writer
+class Writer : public pdal::Writer
 {
 public:
-    LasWriter(Stage& prevStage, const Options&);
-    LasWriter(Stage& prevStage, std::ostream*);
-    ~LasWriter();
+    Writer(Stage& prevStage, const Options&);
+    Writer(Stage& prevStage, std::ostream*);
+    ~Writer();
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
