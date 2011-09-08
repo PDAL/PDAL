@@ -48,8 +48,10 @@ namespace pdal_swig_test
       static int Main(string[] args)
       {
          TestDimension a = new TestDimension();
-         
+
          TestLasReader r = new TestLasReader();
+
+         TestLasWriter w = new TestLasWriter();
 
          return 0;
       }

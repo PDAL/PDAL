@@ -429,6 +429,10 @@ public:
     template<typename T> T getValue() const;
     template<typename T> void setValue(const T& value);
 };
+%extend Option
+{
+    %template(setValue_String) setValue<std::string>;
+};
 
 class Options
 {
