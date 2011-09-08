@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.las.writer">
+        <Option name="filename">
+            written-from-oracle.las
+        </Option>
+        <Option name="compression">
+            false
+        </Option>
+        
+        <Filter type="filters.descaling">
+            <Option name="scale_x">
+                0.01
+            </Option>
+            <Option name="scale_y">
+                0.01
+            </Option>
+            <Option name="scale_z">
+                0.0001
+            </Option>
+            <Option name="offset_x">
+                0.0
+            </Option>            
+            <Option name="offset_y">
+                0.0
+            </Option>            
+            <Option name="offset_z">
+                0.0
+            </Option>            
+            <Filter type="filters.reprojection">
+                <Option name="out_srs">
+                    EPSG:26917
+                </Option>
+                
+                <Filter type="filters.scaling">
+                    
+                    <Reader type="drivers.oci.reader">
+                        <Option name="query">
+                            SELECT CLOUD FROM HOBU where ID=1
+                        </Option>
+                        <Option name="connection">
+                            lidar/lidar@lidar.hobu.biz/lidar
+                        </Option>
+                        <Option name="debug">
+                            true
+                        </Option>
+                    </Reader>
+                </Filter>
+				
+            </Filter>
+        </Filter>
+    </Writer>
+</Pipeline>
