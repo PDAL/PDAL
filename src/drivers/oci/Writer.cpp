@@ -48,7 +48,6 @@
 namespace pdal { namespace drivers { namespace oci {
 
 
-static OptionsOld dummy;
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_stage((Stage&)prevStage)
@@ -795,7 +794,7 @@ oss << "declare\n"
     } catch (std::runtime_error const& e) {
         std::ostringstream oss;
         oss << "Failed at creating Point Cloud entry into " << base_table_name << " table. Does the table exist? "  << e.what();
-        throw std::runtime_error(oss.str());
+        throw pdal_error(oss.str());
     }
     
     free(wkt);
