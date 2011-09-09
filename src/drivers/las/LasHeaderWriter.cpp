@@ -45,7 +45,7 @@
 #include "ZipPoint.hpp"
 
 #include <pdal/drivers/las/Header.hpp>
-#include <boost/uuid/uuid_io.hpp>
+#include <pdal/external/boost/uuid/uuid_io.hpp>
 #include <boost/scoped_ptr.hpp>
 
 

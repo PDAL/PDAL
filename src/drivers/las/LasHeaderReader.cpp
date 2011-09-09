@@ -46,7 +46,7 @@
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include "ZipPoint.hpp"
 
-#include <boost/uuid/uuid_io.hpp>
+#include <pdal/external/boost/uuid/uuid_io.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
