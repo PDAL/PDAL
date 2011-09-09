@@ -29,8 +29,8 @@
 //  30 Nov 2009 - used BOOST_STATIC_CONSTANT
 //  02 Dec 2009 - removed BOOST_STATIC_CONSTANT - not all compilers like it
 
-#ifndef BOOST_UUID_HPP
-#define BOOST_UUID_HPP
+#ifndef PDAL_EXTERNAL_BOOST_UUID_HPP
+#define PDAL_EXTERNAL_BOOST_UUID_HPP
 
 #include <boost/config.hpp>
 #include <stddef.h>

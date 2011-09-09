@@ -5,11 +5,11 @@
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_UUID_NAME_GENERATOR_HPP
-#define BOOST_UUID_NAME_GENERATOR_HPP
+#ifndef PDAL_EXTERNAL_BOOST_UUID_NAME_GENERATOR_HPP
+#define PDAL_EXTERNAL_BOOST_UUID_NAME_GENERATOR_HPP
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/sha1.hpp>
+#include <pdal/external/boost/uuid/uuid.hpp>
+#include <pdal/external/boost/uuid/sha1.hpp>
 #include <boost/assert.hpp>
 #include <string>
 #include <cstring> // for strlen, wcslen

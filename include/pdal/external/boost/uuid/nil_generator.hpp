@@ -5,10 +5,10 @@
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_UUID_NIL_GENERATOR_HPP
-#define BOOST_UUID_NIL_GENERATOR_HPP
+#ifndef PDAL_EXTERNAL_BOOST_UUID_NIL_GENERATOR_HPP
+#define PDAL_EXTERNAL_BOOST_UUID_NIL_GENERATOR_HPP
 
-#include <boost/uuid/uuid.hpp>
+#include <pdal/external/boost/uuid/uuid.hpp>
 
 namespace boost {
 namespace uuids {

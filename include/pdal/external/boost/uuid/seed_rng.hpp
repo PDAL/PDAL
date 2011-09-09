@@ -18,8 +18,8 @@
 // Peter Dimov provided the details of sha1_random_digest_().
 // see http://archives.free.net.ph/message/20070507.175609.4c4f503a.en.html
 
-#ifndef BOOST_UUID_SEED_RNG_HPP
-#define BOOST_UUID_SEED_RNG_HPP
+#ifndef PDAL_EXTERNAL_BOOST_UUID_SEED_RNG_HPP
+#define PDAL_EXTERNAL_BOOST_UUID_SEED_RNG_HPP
 
 #include <boost/config.hpp>
 #include <cstring> // for memcpy
@@ -27,7 +27,7 @@
 #include <ctime> // for time_t, time, clock_t, clock
 #include <cstdlib> // for rand
 #include <cstdio> // for FILE, fopen, fread, fclose
-#include <boost/uuid/sha1.hpp>
+#include <pdal/external/boost/uuid/sha1.hpp>
 //#include <boost/nondet_random.hpp> //forward declare boost::random_device
 
 // can't use boost::generator_iterator since boost::random number seed(Iter&, Iter)

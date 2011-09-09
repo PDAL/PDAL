@@ -9,10 +9,10 @@
 //  20 Mar 2009 - Initial Revision
 //  28 Nov 2009 - disabled deprecated warnings for MSVC
 
-#ifndef BOOST_UUID_IO_HPP
-#define BOOST_UUID_IO_HPP
+#ifndef PDAL_EXTERNAL_BOOST_UUID_IO_HPP
+#define PDAL_EXTERNAL_BOOST_UUID_IO_HPP
 
-#include <boost/uuid/uuid.hpp>
+#include <pdal/external/boost/uuid/uuid.hpp>
 #include <ios>
 #include <ostream>
 #include <istream>

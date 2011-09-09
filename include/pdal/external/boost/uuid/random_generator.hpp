@@ -5,11 +5,11 @@
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_UUID_RANDOM_GENERATOR_HPP
-#define BOOST_UUID_RANDOM_GENERATOR_HPP
+#ifndef PDAL_EXTERNAL_BOOST_UUID_RANDOM_GENERATOR_HPP
+#define PDAL_EXTERNAL_BOOST_UUID_RANDOM_GENERATOR_HPP
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/seed_rng.hpp>
+#include <pdal/external/boost/uuid/uuid.hpp>
+#include <pdal/external/boost/uuid/seed_rng.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/mersenne_twister.hpp>

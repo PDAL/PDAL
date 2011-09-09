@@ -9,10 +9,10 @@
 //  12 Nov 2007 - Initial Revision
 //  25 Feb 2008 - moved to namespace boost::uuids::detail
 
-#ifndef BOOST_UUID_SERIALIZE_HPP
-#define BOOST_UUID_SERIALIZE_HPP
+#ifndef PDAL_EXTERNAL_BOOST_UUID_SERIALIZE_HPP
+#define PDAL_EXTERNAL_BOOST_UUID_SERIALIZE_HPP
 
-#include <boost/uuid/uuid.hpp>
+#include <pdal/external/boost/uuid/uuid.hpp>
 #include <boost/serialization/level.hpp>
 
 BOOST_CLASS_IMPLEMENTATION(boost::uuids::uuid, boost::serialization::primitive_type)
