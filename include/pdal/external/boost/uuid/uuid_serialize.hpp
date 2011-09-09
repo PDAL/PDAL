@@ -15,6 +15,6 @@
 #include <pdal/external/boost/uuid/uuid.hpp>
 #include <boost/serialization/level.hpp>
 
-BOOST_CLASS_IMPLEMENTATION(boost::uuids::uuid, boost::serialization::primitive_type)
+BOOST_CLASS_IMPLEMENTATION(pdal::external::boost::uuids::uuid, boost::serialization::primitive_type)
 
 #endif // BOOST_UUID_SERIALIZE_HPP

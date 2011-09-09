@@ -139,10 +139,10 @@ public:
 
     /// Get project identifier.
     /// \return Global Unique Identifier as an instance of liblas::guid class.
-    boost::uuids::uuid GetProjectId() const;
+	pdal::external::boost::uuids::uuid GetProjectId() const;
 
     /// Set project identifier.
-    void SetProjectId(boost::uuids::uuid const& v);
+    void SetProjectId(pdal::external::boost::uuids::uuid const& v);
 
     /// Get major component of version of LAS format.
     /// \return Always 1 is returned as the only valid value.
@@ -353,7 +353,7 @@ private:
     char m_signature[eFileSignatureSize]; // TODO: replace with boost::array --mloskot
     boost::uint16_t m_sourceId;
     boost::uint16_t m_reserved;
-    boost::uuids::uuid m_projectGuid;
+	pdal::external::boost::uuids::uuid m_projectGuid;
     boost::uint8_t m_versionMajor;
     boost::uint8_t m_versionMinor;
     char m_systemId[eSystemIdSize]; // TODO: replace with boost::array --mloskot

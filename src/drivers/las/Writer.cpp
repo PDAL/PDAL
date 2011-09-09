@@ -163,7 +163,7 @@ void Writer::setDate(boost::uint16_t dayOfYear, boost::uint16_t year)
 }
 
 
-void Writer::setProjectId(const boost::uuids::uuid& id)
+void Writer::setProjectId(const pdal::external::boost::uuids::uuid& id)
 {
     m_lasHeader.SetProjectId(id);
 }

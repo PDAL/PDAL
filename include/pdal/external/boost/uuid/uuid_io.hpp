@@ -25,14 +25,16 @@
 #pragma warning(disable : 4996) // Disable deprecated std::ctype<char>::widen, std::copy
 #endif
 
+namespace pdal {
+namespace external {
 namespace boost {
 namespace uuids {
 
 template <typename ch, typename char_traits>
     std::basic_ostream<ch, char_traits>& operator<<(std::basic_ostream<ch, char_traits> &os, uuid const& u)
 {
-    io::ios_flags_saver flags_saver(os);
-    io::basic_ios_fill_saver<ch, char_traits> fill_saver(os);
+	::boost::io::ios_flags_saver flags_saver(os);
+    ::boost::io::basic_ios_fill_saver<ch, char_traits> fill_saver(os);
 
     const typename std::basic_ostream<ch, char_traits>::sentry ok(os);
     if (ok) {
@@ -189,7 +191,7 @@ inline std::wstring to_wstring(uuid const& u)
 
 #endif
 
-}} //namespace boost::uuids
+}}}} //namespace boost::uuids
 
 #if defined(_MSC_VER)
 #pragma warning(pop) // Restore warnings to previous state.

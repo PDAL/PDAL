@@ -97,7 +97,7 @@ void LasHeaderReader::read(Schema& schema)
     {
         boost::uint8_t d[16];
         Utils::read_n(d, m_istream, 16);
-        boost::uuids::uuid u;
+		pdal::external::boost::uuids::uuid u;
         for (int i=0; i<16; i++)
             u.data[i] = d[i];
         m_header.SetProjectId(u);

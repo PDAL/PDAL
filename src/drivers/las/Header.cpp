@@ -102,12 +102,12 @@ void LasHeader::SetReserved(boost::uint16_t v)
     m_reserved = v;
 }
 
-boost::uuids::uuid LasHeader::GetProjectId() const
+pdal::external::boost::uuids::uuid LasHeader::GetProjectId() const
 {
     return m_projectGuid;
 }
 
-void LasHeader::SetProjectId(boost::uuids::uuid const& v)
+void LasHeader::SetProjectId(pdal::external::boost::uuids::uuid const& v)
 {
     m_projectGuid = v;
 }

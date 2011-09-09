@@ -17,6 +17,8 @@
 #include <boost/shared_ptr.hpp>
 #include <limits>
 
+namespace pdal {
+namespace external {
 namespace boost {
 namespace uuids {
 
@@ -114,6 +116,6 @@ private:
 
 typedef basic_random_generator<mt19937> random_generator;
 
-}} // namespace boost::uuids
+}}}} // namespace boost::uuids
 
 #endif //BOOST_UUID_RANDOM_GENERATOR_HPP

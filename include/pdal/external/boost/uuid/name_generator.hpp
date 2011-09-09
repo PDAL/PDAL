@@ -21,6 +21,8 @@ namespace std {
 } //namespace std
 #endif //BOOST_NO_STDC_NAMESPACE
 
+namespace pdal {
+namespace external {
 namespace boost {
 namespace uuids {
 
@@ -120,6 +122,6 @@ private:
     detail::sha1 sha;
 };
 
-}} // namespace boost::uuids
+}}}} // namespace boost::uuids
 
 #endif // BOOST_UUID_NAME_GENERATOR_HPP

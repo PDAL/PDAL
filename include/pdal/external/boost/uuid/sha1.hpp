@@ -25,6 +25,8 @@ namespace std {
 } // namespace std
 #endif
 
+namespace pdal {
+namespace external {
 namespace boost {
 namespace uuids {
 namespace detail {
@@ -203,6 +205,6 @@ inline void sha1::get_digest(digest_type digest)
     digest[4] = h_[4];
 }
 
-}}} // namespace boost::uuids::detail
+}}}}} // namespace boost::uuids::detail
 
 #endif

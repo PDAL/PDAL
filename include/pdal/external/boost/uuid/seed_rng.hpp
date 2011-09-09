@@ -60,6 +60,8 @@ namespace boost {
 class random_device;
 } //namespace boost
 
+namespace pdal {
+namespace external {
 namespace boost {
 namespace uuids {
 namespace detail {
@@ -252,7 +254,7 @@ inline void seed<boost::random_device>(boost::random_device&) {}
 template <>
 inline void seed<seed_rng>(seed_rng&) {}
 
-}}} //namespace boost::uuids::detail
+}}}}} //namespace boost::uuids::detail
 
 #if defined(_MSC_VER)
 #pragma warning(pop) // Restore warnings to previous state.
