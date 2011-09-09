@@ -240,7 +240,11 @@ void Application::parseSwitches()
     }
     catch (boost::program_options::unknown_option e)
     {
+#if BOOST_VERSION >= 104200
         throw app_usage_error("unknown option: " + e.get_option_name());
+#else
+		throw app_usage_error("unknown option: " + e.what());
+#endif
     }
 
     po::notify(m_variablesMap);
