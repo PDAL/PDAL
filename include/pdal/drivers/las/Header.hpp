@@ -47,7 +47,7 @@
 
 #include <vector>
 
-#include <boost/uuid/uuid.hpp>
+#include <pdal/external/boost/uuid/uuid.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include <pdal/Schema.hpp>
