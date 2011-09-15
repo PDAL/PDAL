@@ -427,11 +427,11 @@ void Support::compareBounds(const pdal::Bounds<double>& p, const pdal::Bounds<do
 }
 
 
-#ifdef PDAL_COMPILER_MSVC
+//#ifdef PDAL_COMPILER_MSVC
 // http://www.codepedia.com/1/CppStringReplace
-static std::string replaceAll(std::string result, 
-                              const std::string& replaceWhat, 
-                              const std::string& replaceWithWhat)
+std::string Support::replaceAll(std::string result, 
+                                const std::string& replaceWhat, 
+                                const std::string& replaceWithWhat)
 {
     while(1)
     {
@@ -441,7 +441,7 @@ static std::string replaceAll(std::string result,
     }
     return result;
 }
-#endif
+//#endif
 
 
 static FILE* portable_popen(const std::string& command, const std::string& mode)
@@ -449,7 +449,7 @@ static FILE* portable_popen(const std::string& command, const std::string& mode)
     FILE* fp = 0;
     
 #ifdef PDAL_COMPILER_MSVC
-    const std::string dos_command = replaceAll(command, "/", "\\");
+    const std::string dos_command = Support::replaceAll(command, "/", "\\");
     fp = _popen(dos_command.c_str(), mode.c_str());
 #else
     fp = popen(command.c_str(), mode.c_str());
