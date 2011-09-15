@@ -97,6 +97,16 @@ static const std::string drive = "A:";
 static const std::string drive = "";
 #endif
 
+static std::string normalize(const std::string p)
+{
+    return Support::replaceAll(p, "\\", "/");
+}
+
+static void compare_paths(const std::string a, const std::string b)
+{
+    BOOST_CHECK_EQUAL(normalize(a), normalize(b));
+}
+
 
 BOOST_AUTO_TEST_CASE(test_toAbsolutePath)
 {
@@ -106,23 +116,23 @@ BOOST_AUTO_TEST_CASE(test_toAbsolutePath)
 
     // check 1-arg version: make absolute when file is relative, via current working dir
     const string a = FileUtils::toAbsolutePath("foo.txt");
-    BOOST_CHECK_EQUAL(a, root + "foo.txt");
+    compare_paths(a, root + "foo.txt");
 
     // check 1-arg version: make absolute when file is already absolute
     const string b = FileUtils::toAbsolutePath(drive + "/baz/foo.txt");
-    BOOST_CHECK_EQUAL(b, drive + "/baz/foo.txt");
+    compare_paths(b, drive + "/baz/foo.txt");
 
     // check 2-arg version: make absolute when file relative, via given base
     const string c = FileUtils::toAbsolutePath("foo.txt", drive + "/a/b/c/d");
-    BOOST_CHECK_EQUAL(c, drive + "/a/b/c/d/foo.txt");
+    compare_paths(c, drive + "/a/b/c/d/foo.txt");
 
     // check 2-arg version: make absolute when file is relative, via given base (which isn't absolute)
     const string d = FileUtils::toAbsolutePath("foo.txt", "x/y/z");
-    BOOST_CHECK_EQUAL(d, root + "x/y/z/" + "foo.txt");
+    compare_paths(d, root + "x/y/z/" + "foo.txt");
 
     // check 1-arg version: make absolute when file is already absolute
     const string e = FileUtils::toAbsolutePath(drive+"/baz/foo.txt", drive+"/a/b/c/d");
-    BOOST_CHECK_EQUAL(e, drive + "/baz/foo.txt");
+    compare_paths(e, drive + "/baz/foo.txt");
 
     return;
 }
@@ -132,11 +142,11 @@ BOOST_AUTO_TEST_CASE(test_getDirectory)
 {
     // test absolute case
     const std::string a = FileUtils::getDirectory(drive + "/a/b/foo.txt");
-    BOOST_CHECK_EQUAL(a, drive + "/a/b/");
+    compare_paths(a, drive + "/a/b/");
 
     // test relative case
     const std::string b = FileUtils::getDirectory("a/b/foo.txt");
-    BOOST_CHECK_EQUAL(b, "a/b/");
+    compare_paths(b, "a/b/");
 
     return;
 }
