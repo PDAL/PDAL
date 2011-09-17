@@ -354,11 +354,6 @@ if(WITH_LIBLAS)
     endif()
 endif()
 
-# if (NOT LIBLAS_FOUND)
-#   message(FATAL_ERROR
-#     "PDAL currently requires a working libLAS installation 1.6.0 or greater")
-# endif()
-
 # MrSID/LiDAR support - optiona, default=OFF
 set(WITH_MRSID FALSE CACHE BOOL "Choose if MrSID/LiDAR support should be built")
 
