@@ -377,6 +377,28 @@ set (PDAL_CONFIG_CPP
 list (APPEND PDAL_CPP ${PDAL_CONFIG_CPP} )
 list (APPEND PDAL_HPP ${PDAL_CONFIG_HPP} )
 
+
+#
+# external/boost/uuid
+#
+
+set(PDAL_EXTERNAL_BOOST_UUID_HPP
+  ${PDAL_HEADERS_DIR}/external/boost/uuid/uuid.hpp
+  ${PDAL_HEADERS_DIR}/external/boost/uuid/name_generator.hpp
+  ${PDAL_HEADERS_DIR}/external/boost/uuid/nil_generator.hpp
+  ${PDAL_HEADERS_DIR}/external/boost/uuid/random_generator.hpp
+  ${PDAL_HEADERS_DIR}/external/boost/uuid/seed_rng.hpp
+  ${PDAL_HEADERS_DIR}/external/boost/uuid/sha1.hpp
+  ${PDAL_HEADERS_DIR}/external/boost/uuid/string_generator.hpp
+  ${PDAL_HEADERS_DIR}/external/boost/uuid/uuid.hpp
+  ${PDAL_HEADERS_DIR}/external/boost/uuid/uuid_generators.hpp
+  ${PDAL_HEADERS_DIR}/external/boost/uuid/uuid_io.hpp
+  ${PDAL_HEADERS_DIR}/external/boost/uuid/uuid_serialize.hpp
+)
+
+list (APPEND PDAL_HPP ${PDAL_EXTERNAL_BOOST_UUID_HPP} )
+
+
 #
 # Group source files for IDE source explorers (e.g. Visual Studio)
 #
@@ -385,6 +407,7 @@ source_group("CMake Files" FILES CMakeLists.txt)
 
 source_group("Header Files" FILES ${PDAL_BASE_HPP})
 source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
+source_group("Header Files\\external\\boost\\uuid" FILES ${PDAL_EXTERNAL_BOOST_UUID_HPP})
 source_group("Header Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\liblas" FILES ${PDAL_DRIVERS_LIBLAS_HPP})
