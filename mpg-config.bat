@@ -1,35 +1,74 @@
 @echo off
- 
- 
+
+:: Pick your architecture, 32 or 64 bits 
 set COMPILER="Visual Studio 10 Win64"
 set COMPILER="Visual Studio 10"
 
+
+:: Pick your build type
 set BUILD_TYPE=Release
 set BUILD_TYPE=Debug
 
+
+:: Set some useful path variables
+::    "utils" is where you might have libraries installed, like Boost
+::    "dev" is where you build things yourself, like PDAL and laszip
 set UTILS_DIR=c:\Utils
-set DEV_DIR=c:\dev
+set DEV_DIR=d:\dev
+
+
+:: Where is your OSGeo4W installed?
 set OSGEO4W_DIR=C:\OSGeo4W
 
-rem *** These packages are needed from OSGeo4W
-rem ***  gdal
-rem ***  libxml2
-rem ***  iconv  (might be pulled in automatically by libxml2?)
-rem ***  oci
+
+:: Where is boost installed?
+set BOOST_DIR=%UTILS_DIR%\boost_1_47
 
 
-set BOOST_DIR=%UTILS_DIR%\boost_pro_1_46_1
+:: Where are the GLUT libs installed?
+::  (only needed if you want to build pcview)
 set FREEGLUT_DIR=%DEV_DIR%\freeglut-2.6.0-3.mp
-set GDAL_DIR=%DEV_DIR%\gdal
 set GLUT_DIR=%DEV_DIR%\freeglut-2.6.0-3.mp
-set ICONV_DIR=%UTILS_DIR%\iconv-1.9.2.win32
-set LASZIP_DIR=%DEV_DIR%\laszip
-set LIBLAS_DIR=%DEV_DIR%\liblas
-set LIBXML2_DIR=%UTILS_DIR%\libxml2-2.7.7.win32
+
+:: Where is LASZIP?  (can be either from OSGeo4W or your own build tree)
+rem  set LASZIP_LIBRARY=%OSGEO4W_DIR%\laszip\laszip.lib
+rem  set LASZIP_INCLUDE_DIR=%OSGEO4W_DIR%\laszip\include
+set LASZIP_LIBRARY=%DEV_DIR%\laszip\bin\Debug\Debug\laszip.lib
+set LASZIP_INCLUDE_DIR=%DEV_DIR%\laszip\include
+
+
+:: Where is LIBLAS?  (can be either from OSGeo4W or your own build tree)
+rem  set LIBLAS_LIBRARY=%OSGEO4W_DIR%\lib\liblas.lib
+rem  set LIBLAS_INCLUDE_DIR=%OSGEO4W_DIR%\include
+set LIBLAS_LIBRARY=%DEV_DIR%\liblas\bin\Debug\Debug\liblas.lib
+set LIBLAS_INCLUDE_DIR=%DEV_DIR%\liblas\include
+
+
+:: Where is your PDAL build tree?
 set PDAL_DIR=%DEV_DIR%\pdal
 
+
+:: Where are the OCI libraries installed?
 set ORACLE_HOME=%OSGEO4W_DIR%
 
+
+:: (not needed?)
+rem set PDAL_SWIG_BOOST_HOME=%BOOST_DIR%
+
+
+:: If you set the above stuff correctly, then you should only need to
+:: modify the "WITH" (on/off) settings in the following CMAKE invocation.
+::
+:: For most people, you should have these turned ON:
+::    GDAL
+::    GEOTIFF
+::    ORACLE
+::    LASZIP
+::    LIBXML2
+:: and these turned OFF:
+::    LIBLAS
+::    FREEGLUT
+::    SWIG_CSHARP
 cmake -G %COMPILER% ^
     -DBOOST_INCLUDEDIR=%BOOST_DIR% ^
     -DWITH_GDAL=ON ^
@@ -39,7 +78,6 @@ cmake -G %COMPILER% ^
     -DWITH_LIBLAS=ON ^
     -DWITH_FREEGLUT=ON ^
     -DWITH_LIBXML2=ON ^
-    -DWITH_ICONV=OFF ^
     -DWITH_SWIG_CSHARP=ON ^
     -DFREEGLUT_LIBRARY=%FREEGLUT_DIR%\lib\freeglut.lib ^
     -DFREEGLUT_INCLUDE_DIR=%FREEGLUT_DIR%\include ^
@@ -53,27 +91,14 @@ cmake -G %COMPILER% ^
     -DGDAL_LIBRARY=%OSGEO4W_DIR%\lib\gdal_i.lib ^
     -DORACLE_INCLUDE_DIR=%OSGEO4W_DIR%\include ^
     -DORACLE_OCI_LIBRARY=%OSGEO4W_DIR%\lib\oci.lib ^
-    -DLASZIP_INCLUDE_DIR=%LASZIP_DIR%\include ^
-    -DLASZIP_LIBRARY=%LASZIP_DIR%\bin\Debug\Debug\laszip.lib ^
-    -DLIBLAS_INCLUDE_DIR=%LIBLAS_DIR%\include ^
-    -DLIBLAS_LIBRARY=%LIBLAS_DIR%\bin\Debug\Debug\liblas.lib ^
+    -DLASZIP_INCLUDE_DIR=%LASZIP_INCLUDE_DIR% ^
+    -DLASZIP_LIBRARY=%LASZIP_LIBRARY% ^
+    -DLIBLAS_INCLUDE_DIR=%LIBLAS_INCLUDE_DIR% ^
+    -DLIBLAS_LIBRARY=%LIBLAS_LIBRARY% ^
     -DLIBXML2_LIBRARIES=%OSGEO4W_DIR%\lib\libxml2.lib ^
     -DLIBXML2_INCLUDE_DIR=%OSGEO4W_DIR%\include ^
+	-DICONV_LIBRARY=%OSGEO4W_DIR%\lib\iconv.lib ^
+	-DICONV_INCLUDE_DIR=%OSGEO4W_DIR%\include ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
     %PDAL_DIR%
-
-rem *** for dev build of gdal ***
-rem    -DGDAL_INCLUDE_DIR=%GDAL_DIR%\gcore ^
-rem    -DGDAL_LIBRARY=%GDAL_DIR%\gdal_i.lib ^
-rem    -DTIFF_INCLUDE_DIR=%GDAL_DIR%\frmts\gtiff\libtiff ^
-rem    -DTIFF_LIBRARY=%GDAL_DIR%\gdal_i.lib ^
-rem    -DGEOTIFF_INCLUDE_DIR=%GDAL_DIR%\frmts\gtiff\libgeotiff ^
-rem    -DGEOTIFF_LIBRARY=%GDAL_DIR%\gdal_i.lib ^
-
-rem    -DLIBXML2_LIBRARIES=%LIBXML2_DIR%\lib\libxml2.lib ^
-rem    -DLIBXML2_INCLUDE_DIR=%LIBXML2_DIR%\include ^
-rem    -DICONV_LIBRARY=%ICONV_DIR%\lib\iconv.lib ^
-rem    -DICONV_INCLUDE_DIR=%ICONV_DIR%\include ^
-
-set PDAL_SWIG_BOOST_HOME=%BOOST_DIR%
