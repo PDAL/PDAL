@@ -343,9 +343,9 @@ void Support::check_pN(const pdal::PointBuffer& data, const pdal::Schema& schema
                        std::size_t index, 
                        double xref, double yref, double zref)
 {
-    int offsetX = schema.getDimensionIndex(pdal::Dimension::Field_X, pdal::Dimension::Int32);
-    int offsetY = schema.getDimensionIndex(pdal::Dimension::Field_Y, pdal::Dimension::Int32);
-    int offsetZ = schema.getDimensionIndex(pdal::Dimension::Field_Z, pdal::Dimension::Int32);
+    int offsetX = schema.getDimensionIndex(pdal::Dimension::Id_X_i32);
+    int offsetY = schema.getDimensionIndex(pdal::Dimension::Id_Y_i32);
+    int offsetZ = schema.getDimensionIndex(pdal::Dimension::Id_Z_i32);
 
     boost::int32_t x0raw = data.getField<boost::int32_t>(index, offsetX);
     boost::int32_t y0raw = data.getField<boost::int32_t>(index, offsetY);
@@ -368,13 +368,13 @@ void Support::check_pN(const pdal::PointBuffer& data, const ::pdal::Schema& sche
 {
     check_pN(data, schema, index, xref, yref, zref);
 
-    int offsetT = schema.getDimensionIndex(pdal::Dimension::Field_Time, pdal::Dimension::Double);
+    int offsetT = schema.getDimensionIndex(pdal::Dimension::Id_Las_Time);
     double t0 = data.getField<double>(index, offsetT);
-    Compare(t0, tref);
+    BOOST_CHECK_EQUAL(t0, tref);
 
-    int offsetR = schema.getDimensionIndex(pdal::Dimension::Field_Red, pdal::Dimension::Uint16);
-    int offsetG = schema.getDimensionIndex(pdal::Dimension::Field_Green, pdal::Dimension::Uint16);
-    int offsetB = schema.getDimensionIndex(pdal::Dimension::Field_Blue, pdal::Dimension::Uint16);
+    int offsetR = schema.getDimensionIndex(pdal::Dimension::Id_Red_u16);
+    int offsetG = schema.getDimensionIndex(pdal::Dimension::Id_Green_u16);
+    int offsetB = schema.getDimensionIndex(pdal::Dimension::Id_Blue_u16);
     boost::uint16_t r0 = data.getField<boost::uint16_t>(index, offsetR);
     boost::uint16_t g0 = data.getField<boost::uint16_t>(index, offsetG);
     boost::uint16_t b0 = data.getField<boost::uint16_t>(index, offsetB);

@@ -101,44 +101,12 @@ bool Schema::operator!=(const Schema& other) const
 }
 
 
-void Schema::addDimensions(const std::vector<Dimension>& dims)
-{
-    for (DimensionsCIter iter = dims.begin(); iter != dims.end(); ++iter)
-    {
-        const Dimension& dim = *iter;
-        addDimension(dim);
-    }
 
-    return;
-}
-
-
-void Schema::addDimension(Dimension const& dim)
+void Schema::appendDimension(const Dimension& dim)
 {
     m_dimensions.push_back(dim);
-    std::pair<tpl_t, std::size_t> p(tpl_t(dim.getField(),dim.getDataType() ), m_dimensions.size()-1);
+    std::pair<Dimension::Id, std::size_t> p(dim.getId(), m_dimensions.size()-1);
     m_dimensions_map.insert(p);
-    return;
-}
-
-
-void Schema::removeDimension(Dimension const& dim)
-{
-    m_dimensions.erase( std::remove( m_dimensions.begin(), m_dimensions.end(), dim), 
-                        m_dimensions.end());
-    
-    m_dimensions_map.clear();
-    DimensionsCIter it = m_dimensions.begin();
-    int i(0);
-    while (it != m_dimensions.end())
-    {
-        std::pair<tpl_t, std::size_t> p(tpl_t(it->getField(),it->getDataType() ), i);
-
-        m_dimensions_map.insert(p);
-        ++it;
-        ++i;
-    }
-    
     return;
 }
 
@@ -160,56 +128,31 @@ const Schema::Dimensions& Schema::getDimensions() const
     return m_dimensions;
 }
 
-// Schema::Dimensions& Schema::getDimensions()
-// {
-//     return m_dimensions;
-// }
 
-
-int Schema::getDimensionIndex(Dimension::Field field, Dimension::DataType datatype) const
+int Schema::getDimensionIndex(const Dimension::Id& id) const
 {
-
-    tpl_t t(field,datatype);
-    
-    std::map<tpl_t, std::size_t>::const_iterator i = m_dimensions_map.find(t);
+    std::map<Dimension::Id, std::size_t>::const_iterator i = m_dimensions_map.find(id);
     
     int m = 0;
     
-    if (i == m_dimensions_map.end()) m = -1;
+    if (i == m_dimensions_map.end()) 
+        m = -1;
     else
         m = i->second;
-    
-    
 
-    // DimensionsCIter it = m_dimensions.begin();
-    // int j = 0;
-    // while (it != m_dimensions.end())
-    // {
-    //     if (field == it->getField() && datatype == it->getDataType())
-    //     {
-    //         break;
-    //     }
-    //     ++it;
-    //     ++j;
-    // }
-    
-    // if (j == m_dimensions.size()) j = -1;
-    
-    // std::cout << "i->second: " << m << " j: " << j << " map size: "<< m_dimensions_map.size() << " vec size: " << m_dimensions.size() << std::endl;
     return m;
-
 }
 
 
 int Schema::getDimensionIndex(const Dimension& dim) const
 {
-    return getDimensionIndex(dim.getField(), dim.getDataType());
+    return getDimensionIndex(dim.getId());
 }
 
 
-bool Schema::hasDimension(Dimension::Field field, Dimension::DataType datatype) const
+bool Schema::hasDimension(const Dimension::Id& field) const
 {
-    int t = getDimensionIndex(field, datatype);
+    int t = getDimensionIndex(field);
     if (t == -1)
         return false;
     return true;
@@ -218,7 +161,7 @@ bool Schema::hasDimension(Dimension::Field field, Dimension::DataType datatype) 
 
 bool Schema::hasDimension(const Dimension& dim) const
 {
-    return hasDimension(dim.getField(), dim.getDataType());
+    return hasDimension(dim.getId());
 }
 
 

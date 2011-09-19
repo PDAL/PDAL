@@ -521,10 +521,9 @@ void Reader::Load()
             properties = properties->next;
         }
 
-        Dimension::DataType t = GetDimensionType(interpretation);
-        Dimension::Field f = GetDimensionField(name, position);
+        Dimension::Id f = GetDimensionField(name, position);
 
-        Dimension d(f, t);
+        Dimension d(f);
         if (! Utils::compare_distance(scale, 0.0))
         {
             d.setNumericScale(scale);
@@ -560,7 +559,7 @@ void Reader::Load()
     std::vector<DimensionLayout>::const_iterator i;
     for (i = layouts.begin(); i!= layouts.end(); ++i)
     {
-        m_schema.addDimension(i->getDimension());
+        m_schema.appendDimension(i->getDimension());
     }
 
 }
@@ -611,78 +610,75 @@ Dimension::DataType Reader::GetDimensionType(std::string const& interpretation)
     return Dimension::Undefined;
 }
 
-Dimension::Field Reader::GetDimensionField(std::string const& name, boost::uint32_t /*position*/)
+Dimension::Id Reader::GetDimensionField(std::string const& name, boost::uint32_t /*position*/)
 {
-    if (!Utils::compare_no_case(name, "X"))
-        return Dimension::Field_X;
+    // BUG: should we be checking for the Double datatype version of X,Y,Z too?
+    if (!Utils::compare_no_case(name, "X"))   
+        return Dimension::Id_X_i32;
     
     if (!Utils::compare_no_case(name, "Y"))
-        return Dimension::Field_Y;
+        return Dimension::Id_Y_i32;
 
     if (!Utils::compare_no_case(name, "Z"))
-        return Dimension::Field_Z;
+        return Dimension::Id_Z_i32;
 
     if (!Utils::compare_no_case(name, "Intensity"))
-        return Dimension::Field_Intensity;
+        return Dimension::Id_Las_Intensity;
 
     if (!Utils::compare_no_case(name, "Return Number") ||
         !Utils::compare_no_case(name, "ReturnNumber"))
-        return Dimension::Field_ReturnNumber;
+        return Dimension::Id_Las_ReturnNumber;
 
     if (!Utils::compare_no_case(name, "Number of Returns") ||
         !Utils::compare_no_case(name, "NumberOfReturns"))
-        return Dimension::Field_NumberOfReturns;
+        return Dimension::Id_Las_NumberOfReturns;
 
     if (!Utils::compare_no_case(name, "Number of Returns"))
-        return Dimension::Field_NumberOfReturns;
+        return Dimension::Id_Las_NumberOfReturns;
 
     if (!Utils::compare_no_case(name, "Scan Direction") ||
         !Utils::compare_no_case(name, "ScanDirectionFlag") ||
         !Utils::compare_no_case(name, "ScanDirection"))
-        return Dimension::Field_ScanDirectionFlag;
+        return Dimension::Id_Las_ScanDirectionFlag;
 
     if (!Utils::compare_no_case(name, "Flightline Edge") ||
         !Utils::compare_no_case(name, "EdgeOfFlightLine") ||
         !Utils::compare_no_case(name, "FlightlineEdge"))
-        return Dimension::Field_EdgeOfFlightLine;
+        return Dimension::Id_Las_EdgeOfFlightLine;
 
     if (!Utils::compare_no_case(name, "Classification"))
-        return Dimension::Field_Classification;
+        return Dimension::Id_Las_Classification;
 
     if (!Utils::compare_no_case(name, "Scan Angle Rank") ||
         !Utils::compare_no_case(name, "ScanAngle") ||
         !Utils::compare_no_case(name, "ScanAngleRank"))
-        return Dimension::Field_ScanAngleRank;
+        return Dimension::Id_Las_ScanAngleRank;
 
     if (!Utils::compare_no_case(name, "User Data") ||
         !Utils::compare_no_case(name, "UserData"))
-        return Dimension::Field_UserData;
+        return Dimension::Id_Las_UserData;
 
     if (!Utils::compare_no_case(name, "Point Source ID")||
         !Utils::compare_no_case(name, "PointSourceId"))
-        return Dimension::Field_PointSourceId;
+        return Dimension::Id_Las_PointSourceId;
 
     if (!Utils::compare_no_case(name, "Time"))
-        return Dimension::Field_Time;
+        return Dimension::Id_Las_Time;
 
     if (!Utils::compare_no_case(name, "Red"))
-        return Dimension::Field_Red;
+        return Dimension::Id_Red_u16;
 
     if (!Utils::compare_no_case(name, "Green"))
-        return Dimension::Field_Green;
+        return Dimension::Id_Green_u16;
 
     if (!Utils::compare_no_case(name, "Blue"))
-        return Dimension::Field_Blue;
+        return Dimension::Id_Blue_u16;
 
     if (!Utils::compare_no_case(name, "Alpha"))
-        return Dimension::Field_Alpha;
+        return Dimension::Id_TerraSolid_Alpha;
 
-    // Yes, this is scary.  What else can we do?  The user didn't give us a
-    // name to map to, so we'll just assume the positions are the same as
-    // our dimension positions
-    m_field_position = m_field_position + 1;
-    return static_cast<Dimension::Field>(m_field_position -1 );
-
+    // Yes, this is scary.  What else can we do?
+    throw pdal_error("unknown field name: " + name);
 }
 
 Writer::Writer(pdal::Schema const& schema)
@@ -757,10 +753,8 @@ void Writer::writeSchema(TextWriterPtr writer)
         if (description.str().size())
             xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "description", NULL, BAD_CAST description.str().c_str());
         
-        pdal::Dimension::Field f = dim.getField();
-        
         std::ostringstream name;
-        name << dim.getFieldName(f);
+        name << dim.getName();
         if (name.str().size())
             xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "name", NULL, BAD_CAST name.str().c_str());
         

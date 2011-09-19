@@ -45,39 +45,35 @@ namespace pdal { namespace drivers { namespace terrasolid {
 
 PointIndexes::PointIndexes(const Schema& schema, TERRASOLID_Format_Type format)
 {
-
     if (format == TERRASOLID_Format_1) 
     {
-        Classification = schema.getDimensionIndex(Dimension::Field_Classification, Dimension::Uint8);
-        PointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId, Dimension::Uint8);
-        EchoInt = schema.getDimensionIndex(Dimension::Field_ReturnNumber, Dimension::Uint16);
-        X = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-        Y = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-        Z = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
-        
-    } else if (format == TERRASOLID_Format_2)
+        Classification = schema.getDimensionIndex(Dimension::Id_TerraSolid_Classification);
+        PointSourceId = schema.getDimensionIndex(Dimension::Id_TerraSolid_PointSourceId_u8);
+        EchoInt = schema.getDimensionIndex(Dimension::Id_TerraSolid_ReturnNumber_u16);
+        X = schema.getDimensionIndex(Dimension::Id_X_i32);
+        Y = schema.getDimensionIndex(Dimension::Id_Y_i32);
+        Z = schema.getDimensionIndex(Dimension::Id_Z_i32);
+    } 
+    else if (format == TERRASOLID_Format_2)
     {
-        X = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-        Y = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-        Z = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
-        Classification = schema.getDimensionIndex(Dimension::Field_Classification, Dimension::Uint8);
-        ReturnNumber = schema.getDimensionIndex(Dimension::Field_ReturnNumber, Dimension::Uint8);
-        Flag = schema.getDimensionIndex(Dimension::Field_User1, Dimension::Uint8);
-        Mark = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Uint8);
-        PointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId, Dimension::Uint16);
-        Intensity = schema.getDimensionIndex(Dimension::Field_Intensity, Dimension::Uint16);
-
+        X = schema.getDimensionIndex(Dimension::Id_X_i32);
+        Y = schema.getDimensionIndex(Dimension::Id_Y_i32);
+        Z = schema.getDimensionIndex(Dimension::Id_Z_i32);
+        Classification = schema.getDimensionIndex(Dimension::Id_TerraSolid_Classification);
+        ReturnNumber = schema.getDimensionIndex(Dimension::Id_TerraSolid_ReturnNumber_u8);
+        Flag = schema.getDimensionIndex(Dimension::Id_TerraSolid_Flag);
+        Mark = schema.getDimensionIndex(Dimension::Id_TerraSolid_Mark);
+        PointSourceId = schema.getDimensionIndex(Dimension::Id_TerraSolid_PointSourceId_u16);
+        Intensity = schema.getDimensionIndex(Dimension::Id_TerraSolid_Intensity);
     } 
 
-    Time = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint32);
+    Time = schema.getDimensionIndex(Dimension::Id_TerraSolid_Time);
 
-    Red = schema.getDimensionIndex(Dimension::Field_Red, Dimension::Uint8);
-    Green = schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint8);
-    Blue = schema.getDimensionIndex(Dimension::Field_Blue, Dimension::Uint8);
-    Alpha = schema.getDimensionIndex(Dimension::Field_Alpha, Dimension::Uint8);
+    Red = schema.getDimensionIndex(Dimension::Id_Red_u8);
+    Green = schema.getDimensionIndex(Dimension::Id_Green_u8);
+    Blue = schema.getDimensionIndex(Dimension::Id_Blue_u8);
+    Alpha = schema.getDimensionIndex(Dimension::Id_TerraSolid_Alpha);
     
-
-
     return;
 }
 
@@ -178,158 +174,90 @@ void Reader::registerFields()
     
     double xyz_scale = 1/static_cast<double>(m_header->Units);
     
-    std::ostringstream text;
-    
     if (m_format == TERRASOLID_Format_1)
     {
-        Dimension classification(Dimension::Field_Classification, Dimension::Uint8);
-        text << "Classification code 0-255";
-        classification.setDescription(text.str());
-        schema.addDimension(classification);
-        text.str("");
+        Dimension classification(Dimension::Id_TerraSolid_Classification);
+        schema.appendDimension(classification);
 
-        Dimension flight_line(Dimension::Field_PointSourceId, Dimension::Uint8);
-        text << "Flightline number 0-255";
-        flight_line.setDescription(text.str());
-        schema.addDimension(flight_line);
-        text.str("");
+        Dimension flight_line(Dimension::Id_TerraSolid_PointSourceId_u8);
+        schema.appendDimension(flight_line);
 
-        Dimension echoint(Dimension::Field_User1, Dimension::Uint16);
-        text << "Intensity bits 0-13, echo bits 14-15";
-        echoint.setDescription(text.str());
-        schema.addDimension(echoint);
-        text.str("");
+        Dimension echoint(Dimension::Id_TerraSolid_Intensity);
+        schema.appendDimension(echoint);
 
-        Dimension x(Dimension::Field_X, Dimension::Int32);
-        text << "Easting";
-        x.setDescription(text.str());
+        Dimension x(Dimension::Id_X_i32);
         x.setNumericScale(xyz_scale);
         x.setNumericOffset(m_header->OrgX);
-        schema.addDimension(x);
-        text.str("");
+        schema.appendDimension(x);
 
-        Dimension y(Dimension::Field_Y, Dimension::Int32);
-        text << "Northing";
-        y.setDescription(text.str());
+        Dimension y(Dimension::Id_Y_i32);
         y.setNumericScale(xyz_scale);
         y.setNumericOffset(m_header->OrgY);
-        schema.addDimension(y);
-        text.str("");
+        schema.appendDimension(y);
 
-        Dimension z(Dimension::Field_Z, Dimension::Int32);
-        text << "Elevation";
-        z.setDescription(text.str());
+        Dimension z(Dimension::Id_Z_i32);
         z.setNumericScale(xyz_scale);
         z.setNumericOffset(m_header->OrgZ);
-        schema.addDimension(z);
-        text.str("");
-
+        schema.appendDimension(z);
     }
 
     if (m_format == TERRASOLID_Format_2)
     {
-        Dimension x(Dimension::Field_X, Dimension::Int32);
-        text << "Easting";
-        x.setDescription(text.str());
+        Dimension x(Dimension::Id_X_i32);
         x.setNumericScale(xyz_scale);
         x.setNumericOffset(m_header->OrgX);
-        schema.addDimension(x);
-        text.str("");
+        schema.appendDimension(x);
 
-        Dimension y(Dimension::Field_Y, Dimension::Int32);
-        text << "Northing";
-        y.setDescription(text.str());
+        Dimension y(Dimension::Id_Y_i32);
         y.setNumericScale(xyz_scale);
         y.setNumericOffset(m_header->OrgY);
-        schema.addDimension(y);
-        text.str("");
+        schema.appendDimension(y);
 
-        Dimension z(Dimension::Field_Z, Dimension::Int32);
-        text << "Elevation";
-        z.setDescription(text.str());
+        Dimension z(Dimension::Id_Z_i32);
         z.setNumericScale(xyz_scale);
         z.setNumericOffset(m_header->OrgZ);
-        schema.addDimension(z);
-        text.str("");
+        schema.appendDimension(z);
 
-        Dimension classification(Dimension::Field_Classification, Dimension::Uint8);
-        text << "Classification code 0-255";
-        classification.setDescription(text.str());
-        schema.addDimension(classification);
-        text.str("");
+        Dimension classification(Dimension::Id_TerraSolid_Classification);
+        schema.appendDimension(classification);
 
-        Dimension return_no(Dimension::Field_ReturnNumber, Dimension::Uint8); 
-        text << "Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo.";
-        return_no.setDescription(text.str());
-        schema.addDimension(return_no);
-        text.str("");        
+        Dimension return_no(Dimension::Id_TerraSolid_ReturnNumber_u8); 
+        schema.appendDimension(return_no);
 
-        Dimension flag(Dimension::Field_User1, Dimension::Uint8);
-        text << "Runtime flag (view visibility)";
-        flag.setDescription(text.str());
-        schema.addDimension(flag);
-        text.str("");
+        Dimension flag(Dimension::Id_TerraSolid_Flag);
+        schema.appendDimension(flag);
 
-        Dimension mark(Dimension::Field_User2, Dimension::Uint8);
-        text << "Runtime flag";
-        mark.setDescription(text.str());
-        schema.addDimension(mark);
-        text.str("");
+        Dimension mark(Dimension::Id_TerraSolid_Mark);
+        schema.appendDimension(mark);
 
-        Dimension flight_line(Dimension::Field_PointSourceId, Dimension::Uint16);
-        text << "Flightline number 0-255";
-        flight_line.setDescription(text.str());
-        schema.addDimension(flight_line);
-        text.str("");
+        Dimension flight_line(Dimension::Id_TerraSolid_PointSourceId_u16);
+        schema.appendDimension(flight_line);
 
-        Dimension intensity(Dimension::Field_Intensity, Dimension::Uint16);
-        text << "The intensity value is the integer representation of the pulse "
-             "return magnitude. This value is optional and system specific. "
-             "However, it should always be included if available.";
-        intensity.setDescription(text.str());
-        schema.addDimension(intensity);
-        text.str("");
-        
+        Dimension intensity(Dimension::Id_TerraSolid_Intensity);
+        schema.appendDimension(intensity);
     }
-    
     
     if (m_haveTime)
     {
-        Dimension time(Dimension::Field_Time, Dimension::Uint32);
-        text << "32 bit integer time stamps. Time stamps are assumed to be GPS week seconds. The storage format is a 32 bit unsigned integer where each integer step is 0.0002 seconds.";
-        time.setDescription(text.str());
+        Dimension time(Dimension::Id_TerraSolid_Time);
         time.setNumericScale(0.0002);
         time.setNumericOffset(0.0);
-        schema.addDimension(time);
-        text.str("");
+        schema.appendDimension(time);
     }
 
     if (m_haveColor)
     {
-        Dimension red(Dimension::Field_Red, Dimension::Uint8);
-        text << "The red image channel value associated with this point";
-        red.setDescription(text.str());
-        schema.addDimension(red);
-        text.str("");
+        Dimension red(Dimension::Id_Red_u8);
+        schema.appendDimension(red);
 
-        Dimension green(Dimension::Field_Green, Dimension::Uint8);
-        text << "The green image channel value associated with this point";
-        green.setDescription(text.str());
-        schema.addDimension(green);
-        text.str("");
+        Dimension green(Dimension::Id_Green_u8);
+        schema.appendDimension(green);
 
-        Dimension blue(Dimension::Field_Blue, Dimension::Uint8);
-        text << "The blue image channel value associated with this point";
-        blue.setDescription(text.str());
-        schema.addDimension(blue);
-        text.str("");    
+        Dimension blue(Dimension::Id_Blue_u8);
+        schema.appendDimension(blue);
 
-        Dimension alpha(Dimension::Field_Alpha, Dimension::Uint8);
-        text << "The alpha image channel value associated with this point";
-        alpha.setDescription(text.str());
-        schema.addDimension(alpha);
-        text.str("");
-
+        Dimension alpha(Dimension::Id_TerraSolid_Alpha);
+        schema.appendDimension(alpha);
     }
 
     return;

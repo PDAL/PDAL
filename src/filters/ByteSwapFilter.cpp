@@ -141,9 +141,9 @@ boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointB
 
 
     // 
-    //  int fieldX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-    //  int fieldY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-    //  int fieldZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+    //  int fieldX = schema.getDimensionIndex(Dimension_X, Dimension::Double);
+    //  int fieldY = schema.getDimensionIndex(Dimension_Y, Dimension::Double);
+    //  int fieldZ = schema.getDimensionIndex(Dimension_Z, Dimension::Double);
     // 
     //  const Bounds<double>& bounds = this->getBounds();
     // 

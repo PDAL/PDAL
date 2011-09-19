@@ -65,8 +65,6 @@
 namespace pdal
 {
 
-typedef boost::tuple<Dimension::Field, Dimension::DataType> tpl_t;
-
 /// Schema definition
 class PDAL_DLL Schema
 {
@@ -84,25 +82,22 @@ public:
     bool operator==(const Schema& other) const;
     bool operator!=(const Schema& other) const;
 
-    void addDimension(Dimension const& dim);
-    void addDimensions(const std::vector<Dimension>& dims);
-
-    void removeDimension(Dimension const& dim);
+    void appendDimension(Dimension const& dim);
+    void appendDimensions(const std::vector<Dimension>& dim);
 
     const Dimension& getDimension(std::size_t index) const;
     Dimension& getDimension(std::size_t index);
     const Dimensions& getDimensions() const;
-    // Dimensions& getDimensions();
 
     // returns the index of the field
     //
     // This function assumes the field is present and valid.  If not, it will throw.
     // (This behaviour is okay because looking up the diemsnion index is not expected 
     // to be on the critical path anywhere.)
-    int getDimensionIndex(Dimension::Field field, Dimension::DataType datatype) const;
+    int getDimensionIndex(const Dimension::Id& id) const;
     int getDimensionIndex(const Dimension& dim) const;
 
-    bool hasDimension(Dimension::Field field, Dimension::DataType datatype) const;
+    bool hasDimension(const Dimension::Id& id) const;
     bool hasDimension(const Dimension& dim) const;
 
     // returns a ptree reprsenting the Schema
@@ -125,10 +120,7 @@ public:
 private:
     std::vector<Dimension> m_dimensions;
 
-    std::map<tpl_t, std::size_t> m_dimensions_map;
-    // this is a mapping from field name to index position in the
-    // m_dimensions array (or -1 if field not present)
-    // int m_indexTable[Dimension::Field_LAST];
+    std::map<Dimension::Id, std::size_t> m_dimensions_map;
 };
 
 

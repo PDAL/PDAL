@@ -66,6 +66,9 @@ public:
         return m_dimension;
     }
 
+    bool isValid() const { return m_isValid; }
+    void setIsValid(bool v) { m_isValid = v; }
+
     /// The byte location to start reading/writing
     /// point data from in a composited schema.  liblas::Schema
     /// will set these values for you when liblas::Dimension are
@@ -118,6 +121,7 @@ private:
     Dimension m_dimension;
     std::size_t m_byteOffset;
     std::size_t m_position;
+    bool m_isValid;
 };
 
 

@@ -75,28 +75,28 @@ void ColorFilter::checkImpedance()
 {
     Schema& schema = getSchemaRef();
 
-    Dimension dimZ(Dimension::Field_Z, Dimension::Int32);
+    Dimension dimZ(Dimension::Id_Z_i32);
     if (schema.hasDimension(dimZ) == false)
     {
         throw impedance_invalid("color filter does not have Z/Int32 field");
     }
 
-    Dimension dimRed(Dimension::Field_Red, Dimension::Uint16);
-    Dimension dimGreen(Dimension::Field_Green, Dimension::Uint16);
-    Dimension dimBlue(Dimension::Field_Blue, Dimension::Uint16);
+    Dimension dimRed(Dimension::Id_Red_u16);
+    Dimension dimGreen(Dimension::Id_Green_u16);
+    Dimension dimBlue(Dimension::Id_Blue_u16);
 
     // are there already u16 fields for color?
     if (!schema.hasDimension(dimRed))
     {
-        schema.addDimension(dimRed);
+        schema.appendDimension(dimRed);
     }
     if (!schema.hasDimension(dimGreen))
     {
-        schema.addDimension(dimGreen);
+        schema.appendDimension(dimGreen);
     }
     if (!schema.hasDimension(dimBlue))
     {
-        schema.addDimension(dimBlue);
+        schema.appendDimension(dimBlue);
     }
 
     return;
@@ -110,10 +110,10 @@ void ColorFilter::processBuffer(PointBuffer& data) const
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
 
-    const int indexR = schema.getDimensionIndex(Dimension::Field_Red, Dimension::Uint16);
-    const int indexG = schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint16);
-    const int indexB = schema.getDimensionIndex(Dimension::Field_Blue, Dimension::Uint16);
-    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+    const int indexR = schema.getDimensionIndex(Dimension::Id_Red_u16);
+    const int indexG = schema.getDimensionIndex(Dimension::Id_Green_u16);
+    const int indexB = schema.getDimensionIndex(Dimension::Id_Blue_u16);
+    const int indexZ = schema.getDimensionIndex(Dimension::Id_Z_i32);
     const Dimension& zDim = schema.getDimension(indexZ);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)

@@ -873,8 +873,8 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
     pdal::Schema const& schema = buffer.getSchema();
     // std::vector<boost::uint32_t> ids = block.GetIDs();
 
-    bool hasTimeData = schema.hasDimension(Dimension::Field_Time, Dimension::Double);
-    bool hasColorData = schema.hasDimension(Dimension::Field_Red, Dimension::Uint16);
+    bool hasTimeData = schema.hasDimension(Dimension::Id_Las_Time);
+    bool hasColorData = schema.hasDimension(Dimension::Id_Red_u16);
     
     boost::uint64_t count = buffer.getNumPoints();
 
@@ -884,22 +884,22 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
     
     // assert(count*oracle_record_size == point_data.size());
 
-    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
-    const int indexClassification = schema.getDimensionIndex(Dimension::Field_Classification, Dimension::Uint8);
-    const int indexTime = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Double);
-    const int indexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity, Dimension::Uint16);
-    const int indexReturnNumber = schema.getDimensionIndex(Dimension::Field_ReturnNumber, Dimension::Uint8);
-    const int indexNumberOfReturns = schema.getDimensionIndex(Dimension::Field_NumberOfReturns, Dimension::Uint8);
-    const int indexScanDirectionFlag = schema.getDimensionIndex(Dimension::Field_ScanDirectionFlag, Dimension::Uint8);
-    const int indexEdgeOfFlightLine = schema.getDimensionIndex(Dimension::Field_EdgeOfFlightLine, Dimension::Uint8);
-    const int indexUserData = schema.getDimensionIndex(Dimension::Field_UserData, Dimension::Uint8);
-    const int indexPointSourceId = schema.getDimensionIndex(Dimension::Field_PointSourceId, Dimension::Uint16);
-    const int indexScanAngleRank = schema.getDimensionIndex(Dimension::Field_ScanAngleRank, Dimension::Int8);
-    const int indexRed = schema.getDimensionIndex(Dimension::Field_Red, Dimension::Uint16);
-    const int indexGreen = schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint16);
-    const int indexBlue = schema.getDimensionIndex(Dimension::Field_Blue, Dimension::Uint16);
+    const int indexX = schema.getDimensionIndex(Dimension::Id_X_i32);
+    const int indexY = schema.getDimensionIndex(Dimension::Id_Y_i32);
+    const int indexZ = schema.getDimensionIndex(Dimension::Id_Z_i32);
+    const int indexClassification = schema.getDimensionIndex(Dimension::Id_Las_Classification);
+    const int indexTime = schema.getDimensionIndex(Dimension::Id_Las_Time);
+    const int indexIntensity = schema.getDimensionIndex(Dimension::Id_Las_Intensity);
+    const int indexReturnNumber = schema.getDimensionIndex(Dimension::Id_Las_ReturnNumber);
+    const int indexNumberOfReturns = schema.getDimensionIndex(Dimension::Id_Las_NumberOfReturns);
+    const int indexScanDirectionFlag = schema.getDimensionIndex(Dimension::Id_Las_ScanDirectionFlag);
+    const int indexEdgeOfFlightLine = schema.getDimensionIndex(Dimension::Id_Las_EdgeOfFlightLine);
+    const int indexUserData = schema.getDimensionIndex(Dimension::Id_Las_UserData);
+    const int indexPointSourceId = schema.getDimensionIndex(Dimension::Id_Las_PointSourceId);
+    const int indexScanAngleRank = schema.getDimensionIndex(Dimension::Id_Las_ScanAngleRank);
+    const int indexRed = schema.getDimensionIndex(Dimension::Id_Red_u16);
+    const int indexGreen = schema.getDimensionIndex(Dimension::Id_Green_u16);
+    const int indexBlue = schema.getDimensionIndex(Dimension::Id_Blue_u16);
 
 
 
@@ -908,8 +908,8 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
 
     
     // "Global" ids from the chipper are also available here.
-    // const int indexId = schema.getDimensionIndex(Dimension::Field_User1, Dimension::Int32);
-    const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
+    // const int indexId = schema.getDimensionIndex(Dimension::Id_Chipper_1);
+    const int indexBlockId = schema.getDimensionIndex(Dimension::Id_Chipper_2);
     
     Dimension const& dimX = schema.getDimension(indexX);
     Dimension const& dimY = schema.getDimension(indexY);
@@ -1112,9 +1112,9 @@ pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
     pdal::Bounds<double> output;
     pdal::Schema const& schema = buffer.getSchemaLayout().getSchema();
     
-    const int indexXi = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-    const int indexYi = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-    const int indexZi = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+    const int indexXi = schema.getDimensionIndex(Dimension::Id_X_i32);
+    const int indexYi = schema.getDimensionIndex(Dimension::Id_Y_i32);
+    const int indexZi = schema.getDimensionIndex(Dimension::Id_Z_i32);
 
     const Dimension& dimXi = schema.getDimension(indexXi);
     const Dimension& dimYi = schema.getDimension(indexYi);
@@ -1162,7 +1162,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     
     // Pluck the block id out of the first point in the buffer
     pdal::Schema const& schema = buffer.getSchema();
-    const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
+    const int indexBlockId = schema.getDimensionIndex(Dimension::Id_Chipper_2);
     boost::int32_t block_id  = buffer.getField<boost::int32_t>(0, indexBlockId);
     
     // SWAP_ENDIANNESS(block_id); //We've already swapped these data, but we need to write a real number here.

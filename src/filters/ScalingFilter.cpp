@@ -137,30 +137,39 @@ void ScalingFilterBase::checkImpedance()
     {
         // doubles --> ints
 
-        const int indexXd = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-        const int indexYd = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-        const int indexZd = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+        // verify we have the doubles we need, and add the ints if we have to
+        if (!schema.hasDimension(Dimension::Id_X_f64) || !schema.hasDimension(Dimension::Id_Y_f64) || !schema.hasDimension(Dimension::Id_X_f64))
+        {
+            throw impedance_invalid("Descaling filter requires X,Y,Z dimensions as doubles");
+        }
+        if (!schema.hasDimension(Dimension::Id_X_i32))
+        {
+            schema.appendDimension(Dimension::Id_X_i32);
+        }
+        if (!schema.hasDimension(Dimension::Id_Y_i32))
+        {
+            schema.appendDimension(Dimension::Id_Y_i32);
+        }
+        if (!schema.hasDimension(Dimension::Id_Z_i32))
+        {
+            schema.appendDimension(Dimension::Id_Z_i32);
+        }
+
+        const int indexXd = schema.getDimensionIndex(Dimension::Id_X_f64);
+        const int indexYd = schema.getDimensionIndex(Dimension::Id_Y_f64);
+        const int indexZd = schema.getDimensionIndex(Dimension::Id_Z_f64);
+
+        const int indexXi = schema.getDimensionIndex(Dimension::Id_X_i32);
+        const int indexYi = schema.getDimensionIndex(Dimension::Id_Y_i32);
+        const int indexZi = schema.getDimensionIndex(Dimension::Id_Z_i32);
 
         const Dimension dimXd = schema.getDimension(indexXd);
         const Dimension dimYd = schema.getDimension(indexYd);
         const Dimension dimZd = schema.getDimension(indexZd);
 
-        Dimension dimXi(Dimension::Field_X, Dimension::Int32);
-        Dimension dimYi(Dimension::Field_Y, Dimension::Int32);
-        Dimension dimZi(Dimension::Field_Z, Dimension::Int32);
-
-        if (!schema.hasDimension(dimXd) || !schema.hasDimension(dimYd) || !schema.hasDimension(dimZd))
-        {
-            throw impedance_invalid("Descaling filter requires X,Y,Z dimensions as doubles");
-        }
-        if (schema.hasDimension(dimXi) || schema.hasDimension(dimYi) || schema.hasDimension(dimZi))
-        {
-            throw impedance_invalid("Descaling filter requires X,Y,Z dimensions as ints not be initially present");
-        }
-
-        schema.removeDimension(dimXd);
-        schema.removeDimension(dimYd);
-        schema.removeDimension(dimZd);
+        Dimension& dimXi = schema.getDimension(indexXi);
+        Dimension& dimYi = schema.getDimension(indexYi);
+        Dimension& dimZi = schema.getDimension(indexZi);
 
         if (m_customScaleOffset)
         {
@@ -181,33 +190,44 @@ void ScalingFilterBase::checkImpedance()
             dimZi.setNumericOffset(dimZd.getNumericOffset());
         }
 
-        schema.addDimension(dimXi);
-        schema.addDimension(dimYi);
-        schema.addDimension(dimZi);
     }
     else
     {
-        const int indexXi = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-        const int indexYi = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-        const int indexZi = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+        // ints --> doubles
+
+        // verify we have the ints we need, and add the doubles if we have to
+        if (!schema.hasDimension(Dimension::Id_X_i32) || !schema.hasDimension(Dimension::Id_X_i32) || !schema.hasDimension(Dimension::Id_X_i32))
+        {
+            throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as int32s");
+        }
+        if (!schema.hasDimension(Dimension::Id_X_f64))
+        {
+            schema.appendDimension(Dimension::Id_X_f64);
+        }
+        if (!schema.hasDimension(Dimension::Id_Y_f64))
+        {
+            schema.appendDimension(Dimension::Id_Y_f64);
+        }
+        if (!schema.hasDimension(Dimension::Id_Z_f64))
+        {
+            schema.appendDimension(Dimension::Id_Z_f64);
+        }
         
+        const int indexXi = schema.getDimensionIndex(Dimension::Id_X_i32);
+        const int indexYi = schema.getDimensionIndex(Dimension::Id_Y_i32);
+        const int indexZi = schema.getDimensionIndex(Dimension::Id_Z_i32);
+        
+        const int indexXd = schema.getDimensionIndex(Dimension::Id_X_f64);
+        const int indexYd = schema.getDimensionIndex(Dimension::Id_Y_f64);
+        const int indexZd = schema.getDimensionIndex(Dimension::Id_Z_f64);
+
         const Dimension dimXi = schema.getDimension(indexXi);
         const Dimension dimYi = schema.getDimension(indexYi);
         const Dimension dimZi = schema.getDimension(indexZi);
 
-        Dimension dimXd(Dimension::Field_X, Dimension::Double);
-        Dimension dimYd(Dimension::Field_Y, Dimension::Double);
-        Dimension dimZd(Dimension::Field_Z, Dimension::Double);
-
-        // ints --> doubles
-        if (!schema.hasDimension(dimXi) || !schema.hasDimension(dimYi) || !schema.hasDimension(dimZi))
-        {
-            throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as int32s");
-        }
-        if (schema.hasDimension(dimXd) || schema.hasDimension(dimYd) || schema.hasDimension(dimZd))
-        {
-            throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as int32s not be initially present");
-        }
+        Dimension& dimXd = schema.getDimension(indexXd);
+        Dimension& dimYd = schema.getDimension(indexYd);
+        Dimension& dimZd = schema.getDimension(indexZd);
 
         if (m_customScaleOffset)
         {
@@ -227,14 +247,6 @@ void ScalingFilterBase::checkImpedance()
             dimZd.setNumericScale(dimZi.getNumericScale());
             dimZd.setNumericOffset(dimZi.getNumericOffset());
         }
-
-        schema.removeDimension(dimXi);
-        schema.removeDimension(dimYi);
-        schema.removeDimension(dimZi);
-
-        schema.addDimension(dimXd);
-        schema.addDimension(dimYd);
-        schema.addDimension(dimZd);
     }
 
     return;
@@ -255,15 +267,15 @@ void ScalingFilterBase::processBuffer(const PointBuffer& srcData, PointBuffer& d
     const Schema& schemaD = (m_isDescaling ? srcSchema : dstSchema);
     const Schema& schemaI = (m_isDescaling ? dstSchema : srcSchema);
 
-    assert(schemaD.hasDimension(Dimension::Field_X, Dimension::Double));
-    assert(schemaI.hasDimension(Dimension::Field_X, Dimension::Int32));
+    assert(schemaD.hasDimension(Dimension::Id_X_f64));
+    assert(schemaI.hasDimension(Dimension::Id_X_i32));
 
-    const int indexXd = schemaD.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-    const int indexYd = schemaD.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-    const int indexZd = schemaD.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
-    const int indexXi = schemaI.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-    const int indexYi = schemaI.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-    const int indexZi = schemaI.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+    const int indexXd = schemaD.getDimensionIndex(Dimension::Id_X_f64);
+    const int indexYd = schemaD.getDimensionIndex(Dimension::Id_Y_f64);
+    const int indexZd = schemaD.getDimensionIndex(Dimension::Id_Z_f64);
+    const int indexXi = schemaI.getDimensionIndex(Dimension::Id_X_i32);
+    const int indexYi = schemaI.getDimensionIndex(Dimension::Id_Y_i32);
+    const int indexZi = schemaI.getDimensionIndex(Dimension::Id_Z_i32);
 
     const Dimension& dimXd = schemaD.getDimension(indexXd);
     const Dimension& dimYd = schemaD.getDimension(indexYd);
@@ -321,7 +333,6 @@ void ScalingFilterBase::processBuffer(const PointBuffer& srcData, PointBuffer& d
             const boost::int32_t yi = srcData.getField<boost::int32_t>(pointIndex, indexYi);
             const boost::int32_t zi = srcData.getField<boost::int32_t>(pointIndex, indexZi);    
 
-
             const double xd = dimXd.applyScaling(xi);
             const double yd = dimYd.applyScaling(yi);
             const double zd = dimZd.applyScaling(zi);
@@ -339,7 +350,6 @@ void ScalingFilterBase::processBuffer(const PointBuffer& srcData, PointBuffer& d
             dstData.setField<double>(pointIndex, indexXd, xd);
             dstData.setField<double>(pointIndex, indexYd, yd);
             dstData.setField<double>(pointIndex, indexZd, zd);
-
         }
 
         dstData.setNumPoints(pointIndex+1);

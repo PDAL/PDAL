@@ -46,19 +46,19 @@ BOOST_AUTO_TEST_SUITE(DimensionTest)
 
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
-    Dimension d1(Dimension::Field_X, Dimension::Uint32);
+    Dimension d1(Dimension::Id_X_i32);
 
-    BOOST_CHECK(d1.getField() == Dimension::Field_X);
-    BOOST_CHECK(d1.getFieldName() == "X");
-    BOOST_CHECK(d1.getDataType() == Dimension::Uint32);
+    BOOST_CHECK(d1.getId() == Dimension::Id_X_i32);
+    BOOST_CHECK(d1.getName() == "X");
+    BOOST_CHECK(d1.getDataType() == Dimension::Int32);
 
     Dimension d2(d1);
-    BOOST_CHECK(d1.getField() == Dimension::Field_X);
-    BOOST_CHECK(d1.getDataType() == Dimension::Uint32);
+    BOOST_CHECK(d1.getId() == Dimension::Id_X_i32);
+    BOOST_CHECK(d1.getDataType() == Dimension::Int32);
 
     Dimension d3 = d1;
-    BOOST_CHECK(d1.getField() == Dimension::Field_X);
-    BOOST_CHECK(d1.getDataType() == Dimension::Uint32);
+    BOOST_CHECK(d1.getId() == Dimension::Id_X_i32);
+    BOOST_CHECK(d1.getDataType() == Dimension::Int32);
 
     BOOST_CHECK(d1 == d1);
     BOOST_CHECK(d1 == d2);
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK(d1 == d3);
     BOOST_CHECK(d3 == d1);
 
-    Dimension d4(Dimension::Field_Y, Dimension::Uint32);
+    Dimension d4(Dimension::Id_Y_i32);
     d4.setEndianness(Endian_Big);
     BOOST_CHECK(d1 != d4);
     BOOST_CHECK(d4 != d1);
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 
 BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
 {
-    Dimension d1(Dimension::Field_X, Dimension::Uint32);
+    Dimension d1(Dimension::Id_X_i32);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
   
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
     std::string out1 = ss1.str();
 
     std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    std::string ref = xml_header + "<name>X</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale>";
+    std::string ref = xml_header + "<name>X</name><datatype>Int32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale>";
 
     boost::algorithm::erase_all(out1, "\n");
     boost::algorithm::erase_all(ref, "\n");
@@ -96,3 +96,4 @@ BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
 
 
 BOOST_AUTO_TEST_SUITE_END()
+

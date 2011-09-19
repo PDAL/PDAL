@@ -74,8 +74,8 @@ boost::uint32_t ChipperSequentialIterator::readBufferImpl(PointBuffer& buffer)
     }
     
     Schema const& schema = buffer.getSchemaLayout().getSchema();
-    const int indexId = schema.getDimensionIndex(Dimension::Field_User1, Dimension::Int32);
-    const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
+    const int indexId = schema.getDimensionIndex(Dimension::Id_Chipper_1);
+    const int indexBlockId = schema.getDimensionIndex(Dimension::Id_Chipper_2);
     block.GetBuffer(m_chipper.getPrevStage(), buffer, m_currentBlockId, indexId, indexBlockId);
 
     buffer.setSpatialBounds(block.GetBounds());

@@ -174,4 +174,3 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
 
 
 BOOST_AUTO_TEST_SUITE_END()
-

@@ -45,10 +45,10 @@ BOOST_AUTO_TEST_SUITE(DimensionLayoutTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
-    Dimension d1(Dimension::Field_X, Dimension::Uint32);
+    Dimension d1(Dimension::Id_X_i32);
     DimensionLayout l1(d1);
 
-    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
+    Dimension d2(Dimension::Id_Y_i32);
     DimensionLayout l2(d2);
 
     DimensionLayout l3(l1);
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
 BOOST_AUTO_TEST_CASE(DimensionLayoutTest_ptree)
 {
-    Dimension d1(Dimension::Field_X, Dimension::Uint32);
+    Dimension d1(Dimension::Id_X_i32);
     DimensionLayout l1(d1);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(DimensionLayoutTest_ptree)
     std::string out1 = ss1.str();
 
     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    std::string ref = xml_header + "<dimension><name>X</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>0</byteoffset><position>0</position>";
+    std::string ref = xml_header + "<dimension><name>X</name><datatype>Int32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>0</byteoffset><position>0</position><isValid>false</isValid>";
 
     boost::algorithm::erase_all(out1, "\n");
     boost::algorithm::erase_all(ref, "\n");

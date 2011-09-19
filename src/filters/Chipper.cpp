@@ -110,8 +110,8 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t 
     std::vector<boost::uint32_t>::const_iterator it;
     boost::uint32_t count = 0;
     
-    // const int indexId = schema.getDimensionIndex(Dimension::Field_User1, Dimension::Int32);
-    // const int indexBlockId = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
+    // const int indexId = schema.getDimensionIndex(Dimension_User1, Dimension::Int32);
+    // const int indexBlockId = schema.getDimensionIndex(Dimension_User2, Dimension::Int32);
     
     boost::uint8_t* p_block_id = reinterpret_cast<boost::uint8_t*>(&block_id);
     for (it = ids.begin(); it != ids.end(); it++)
@@ -194,8 +194,8 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
 
 
 
-    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
+    const int indexX = schema.getDimensionIndex(Dimension::Id_X_i32);
+    const int indexY = schema.getDimensionIndex(Dimension::Id_Y_i32);
 
     Dimension const& dimX = schema.getDimension(indexX);
     Dimension const& dimY = schema.getDimension(indexY);
@@ -488,16 +488,16 @@ void Chipper::checkImpedance()
     Schema& schema = getSchemaRef();
 
     
-    Dimension pointID(Dimension::Field_User1, Dimension::Int32);
-    Dimension blockID(Dimension::Field_User2, Dimension::Int32);
+    Dimension pointID(Dimension::Id_Chipper_1);
+    Dimension blockID(Dimension::Id_Chipper_2);
 
     if (!schema.hasDimension(pointID))
     {
-        schema.addDimension(pointID);
+        schema.appendDimension(pointID);
     }
     if (!schema.hasDimension(blockID))
     {
-        schema.addDimension(blockID);
+        schema.appendDimension(blockID);
     }
     
     return;

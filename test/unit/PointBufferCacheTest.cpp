@@ -30,8 +30,8 @@ BOOST_AUTO_TEST_SUITE(PointBufferCacheTest)
 BOOST_AUTO_TEST_CASE(test1)
 {
     Schema schema;
-    Dimension d1(Dimension::Field_X, Dimension::Uint32);
-    schema.addDimension(d1);
+    Dimension d1(Dimension::Id_X_i32);
+    schema.appendDimension(d1);
     SchemaLayout layout(schema);
 
     PointBuffer* item0 = new PointBuffer(layout, 10);

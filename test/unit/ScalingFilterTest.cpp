@@ -61,12 +61,12 @@ static void getDoublePoint(const pdal::PointBuffer& data, double& x, double& y, 
 
     const Schema& schema = data.getSchema();
 
-    const int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-    const int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-    const int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
-    const int indexIntensity = schema.getDimensionIndex(Dimension::Field_Intensity, Dimension::Uint8);
-    const int indexScanAngle = schema.getDimensionIndex(Dimension::Field_ScanAngleRank, Dimension::Int8);
-    const int indexGreen = schema.getDimensionIndex(Dimension::Field_Green, Dimension::Uint16);
+    const int indexX = schema.getDimensionIndex(Dimension::Id_X_f64);
+    const int indexY = schema.getDimensionIndex(Dimension::Id_Y_f64);
+    const int indexZ = schema.getDimensionIndex(Dimension::Id_Z_f64);
+    const int indexIntensity = schema.getDimensionIndex(Dimension::Id_Las_Intensity);
+    const int indexScanAngle = schema.getDimensionIndex(Dimension::Id_Las_ScanAngleRank);
+    const int indexGreen = schema.getDimensionIndex(Dimension::Id_Green_u16);
 
 
     x = data.getField<double>(0, indexX);

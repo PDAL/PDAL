@@ -36,6 +36,8 @@
 #include <boost/cstdint.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+#include <pdal/external/boost/uuid/uuid_io.hpp>
+
 #include <pdal/XMLSchema.hpp>
 
 
@@ -121,7 +123,7 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
         BOOST_CHECK_EQUAL(dim1.getDataType(), dim2.getDataType());
         BOOST_CHECK_EQUAL(dim1.getByteSize(), dim2.getByteSize());
 
-        BOOST_CHECK_EQUAL(dim1.getField(), dim2.getField());
+        BOOST_CHECK_EQUAL(dim1.getId(), dim2.getId());
         BOOST_CHECK_EQUAL(dim1.getDescription(), dim2.getDescription());
         
     }

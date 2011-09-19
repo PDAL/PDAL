@@ -91,22 +91,35 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
+    Schema& schema = getSchemaRef();
+
     if (m_dimensions.size() == 0)
     {
         // these are the default dimensions we use
-        const Dimension dimx(Dimension::Field_X, Dimension::Double);
-        const Dimension dimy(Dimension::Field_Y, Dimension::Double);
-        const Dimension dimz(Dimension::Field_Z, Dimension::Double);
-        const Dimension dimt(Dimension::Field_Time, Dimension::Uint64);
+        Dimension dimx(Dimension::Id_X_f64);
+        dimx.setFlags(Dimension::IsAdded & Dimension::IsWritten);
+        schema.appendDimension(dimx);
 
-        m_dimensions.push_back(dimx);
-        m_dimensions.push_back(dimy);
-        m_dimensions.push_back(dimz);
-        m_dimensions.push_back(dimt);
+        Dimension dimy(Dimension::Id_Y_f64);
+        dimy.setFlags(Dimension::IsAdded & Dimension::IsWritten);
+        schema.appendDimension(dimy);
+
+        Dimension dimz(Dimension::Id_Z_f64);
+        dimz.setFlags(Dimension::IsAdded & Dimension::IsWritten);
+        schema.appendDimension(dimz);
+
+        Dimension dimt(Dimension::Id_Time_u64);
+        dimt.setFlags(Dimension::IsAdded & Dimension::IsWritten);
+        schema.appendDimension(dimt);
     }
-
-    Schema& schema = getSchemaRef();
-    schema.addDimensions(m_dimensions);
+    else
+    {
+        for (boost::uint32_t i=0; i<m_dimensions.size(); i++)
+        {
+            const Dimension& dim = m_dimensions[i];
+            schema.appendDimension(dim);
+        }
+    }
 
     setNumPoints(m_numPoints);
     setPointCountType(PointCount_Fixed);
@@ -172,10 +185,10 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     const double delY = (maxY - minY) / numDeltas;
     const double delZ = (maxZ - minZ) / numDeltas;
 
-    const int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
-    const int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-    const int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-    const int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+    const int offsetT = schema.getDimensionIndex(Dimension::Id_Time_u64);
+    const int offsetX = schema.getDimensionIndex(Dimension::Id_X_f64);
+    const int offsetY = schema.getDimensionIndex(Dimension::Id_Y_f64);
+    const int offsetZ = schema.getDimensionIndex(Dimension::Id_Z_f64);
 
     boost::uint64_t time = index;
     

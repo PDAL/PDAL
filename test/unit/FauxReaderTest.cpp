@@ -35,6 +35,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
+#include <pdal/external/boost/uuid/uuid_io.hpp>
+
 #include <pdal/PointBuffer.hpp>
 #include <pdal/SchemaLayout.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
@@ -69,10 +71,10 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
-    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
+    int offsetX = schema.getDimensionIndex(Dimension::Id_X_f64);
+    int offsetY = schema.getDimensionIndex(Dimension::Id_Y_f64);
+    int offsetZ = schema.getDimensionIndex(Dimension::Id_Z_f64);
+    int offsetT = schema.getDimensionIndex(Dimension::Id_Time_u64);
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
@@ -121,10 +123,10 @@ BOOST_AUTO_TEST_CASE(FauxReaderTest_test_options)
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
-    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
+    int offsetX = schema.getDimensionIndex(Dimension::Id_X_f64);
+    int offsetY = schema.getDimensionIndex(Dimension::Id_Y_f64);
+    int offsetZ = schema.getDimensionIndex(Dimension::Id_Z_f64);
+    int offsetT = schema.getDimensionIndex(Dimension::Id_Time_u64);
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
@@ -158,10 +160,10 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
 
     PointBuffer data(layout, 10);
 
-    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
-    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
+    int offsetX = schema.getDimensionIndex(Dimension::Id_X_f64);
+    int offsetY = schema.getDimensionIndex(Dimension::Id_Y_f64);
+    int offsetZ = schema.getDimensionIndex(Dimension::Id_Z_f64);
+    int offsetT = schema.getDimensionIndex(Dimension::Id_Time_u64);
 
     StageRandomIterator* iter = reader.createRandomIterator();
 
@@ -265,10 +267,10 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
-    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
+    int offsetX = schema.getDimensionIndex(Dimension::Id_X_f64);
+    int offsetY = schema.getDimensionIndex(Dimension::Id_Y_f64);
+    int offsetZ = schema.getDimensionIndex(Dimension::Id_Z_f64);
+    int offsetT = schema.getDimensionIndex(Dimension::Id_Time_u64);
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
@@ -314,10 +316,10 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
 
     BOOST_CHECK_EQUAL(numRead, 2u);
 
-    const int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-    const int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-    const int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
-    const int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
+    const int offsetX = schema.getDimensionIndex(Dimension::Id_X_f64);
+    const int offsetY = schema.getDimensionIndex(Dimension::Id_Y_f64);
+    const int offsetZ = schema.getDimensionIndex(Dimension::Id_Z_f64);
+    const int offsetT = schema.getDimensionIndex(Dimension::Id_Time_u64);
 
     const double x0 = data.getField<double>(0, offsetX);
     const double y0 = data.getField<double>(0, offsetY);
@@ -362,10 +364,10 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
 
     BOOST_CHECK_EQUAL(numRead,750u);
 
-    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
-    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
+    int offsetX = schema.getDimensionIndex(Dimension::Id_X_f64);
+    int offsetY = schema.getDimensionIndex(Dimension::Id_Y_f64);
+    int offsetZ = schema.getDimensionIndex(Dimension::Id_Z_f64);
+    int offsetT = schema.getDimensionIndex(Dimension::Id_Time_u64);
 
     double delX = (101.0 - 1.0) / (750.0 - 1.0);
     double delY = (152.0 - 2.0) / (750.0 - 1.0);
@@ -395,8 +397,8 @@ BOOST_AUTO_TEST_CASE(test_custom_fields)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
 
-    Dimension dimY(Dimension::Field_Y, Dimension::Uint8);
-    Dimension dimX(Dimension::Field_X, Dimension::Uint8);
+    Dimension dimY(Dimension::Id_Red_u8);
+    Dimension dimX(Dimension::Id_Blue_u8);
     std::vector<Dimension> dims;
     dims.push_back(dimY);
     dims.push_back(dimX);
@@ -406,8 +408,8 @@ BOOST_AUTO_TEST_CASE(test_custom_fields)
 
     const Schema& schema = reader.getSchema();
     BOOST_CHECK_EQUAL(schema.getDimensions().size(), 2u);
-    BOOST_CHECK_EQUAL(schema.getDimension(0).getField(), Dimension::Field_Y);
-    BOOST_CHECK_EQUAL(schema.getDimension(1).getField(), Dimension::Field_X);
+    BOOST_CHECK_EQUAL(schema.getDimension(0).getId(), Dimension::Id_Red_u8);
+    BOOST_CHECK_EQUAL(schema.getDimension(1).getId(), Dimension::Id_Blue_u8);
 
     return;
 }

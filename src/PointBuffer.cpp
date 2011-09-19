@@ -148,7 +148,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
             const Dimension& dimension = dimensionLayout.getDimension();
             const std::size_t fieldIndex = dimensionLayout.getPosition();
 
-            const std::string key = pointstring + dimension.getFieldName();
+            const std::string key = pointstring + dimension.getName();
             
             std::string value = "";
             
@@ -220,7 +220,7 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& PointBuffer)
             const Dimension& dimension = dimensionLayout.getDimension();
             std::size_t fieldIndex = dimensionLayout.getPosition();
 
-            ostr << dimension.getFieldName() << " (" << dimension.getDataTypeName(dimension.getDataType()) << ") : ";
+            ostr << dimension.getName() << " (" << dimension.getDataTypeName(dimension.getDataType()) << ") : ";
 
             switch (dimension.getDataType())
             {

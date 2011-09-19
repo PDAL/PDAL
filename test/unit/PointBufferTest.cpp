@@ -44,11 +44,11 @@ BOOST_AUTO_TEST_SUITE(PointBufferTest)
 
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
-    Dimension d1(Dimension::Field_X, Dimension::Uint32);
-    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
+    Dimension d1(Dimension::Id_X_i32);
+    Dimension d2(Dimension::Id_Y_i32);
     Schema schema;
-    schema.addDimension(d1);
-    schema.addDimension(d2);
+    schema.appendDimension(d1);
+    schema.appendDimension(d2);
     SchemaLayout layout(schema);
 
     PointBuffer data(layout, 10);
@@ -62,13 +62,13 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 
 PointBuffer* makeTestBuffer()
 {
-    Dimension d1(Dimension::Field_X, Dimension::Uint8);
-    Dimension d2(Dimension::Field_Y, Dimension::Int32);
-    Dimension d3(Dimension::Field_Z, Dimension::Double);
+    Dimension d1(Dimension::Id_Las_Classification);
+    Dimension d2(Dimension::Id_X_i32);
+    Dimension d3(Dimension::Id_Y_f64);
     Schema schema;
-    schema.addDimension(d1);
-    schema.addDimension(d2);
-    schema.addDimension(d3);
+    schema.appendDimension(d1);
+    schema.appendDimension(d2);
+    schema.appendDimension(d3);
     SchemaLayout layout(schema);
 
     std::size_t offX = layout.getDimensionLayout(0).getByteOffset();
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(PointBufferTest_ptree)
     const std::string out1 = ss1.str();
 
     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    const std::string ref = xml_header + "<0><X>1</X><Y>0</Y><Z>0</Z></0><1><X>2</X><Y>10</Y><Z>100</Z></1>";
+    const std::string ref = xml_header + "<0><Classification>1</Classification><X>0</X><Y>0</Y></0><1><Classification>2</Classification><X>10</X><Y>100</Y></1>";
 
     BOOST_CHECK_EQUAL(ref, out1.substr(0, ref.length()));
 

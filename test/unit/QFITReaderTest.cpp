@@ -63,10 +63,10 @@ void Check_Point(const pdal::PointBuffer& data, const ::pdal::Schema& schema,
                        boost::int32_t tref)
 {
 
-    int offsetX = schema.getDimensionIndex(pdal::Dimension::Field_X, pdal::Dimension::Int32);
-    int offsetY = schema.getDimensionIndex(pdal::Dimension::Field_Y, pdal::Dimension::Int32);
-    int offsetZ = schema.getDimensionIndex(pdal::Dimension::Field_Z, pdal::Dimension::Int32);
-    int offsetTime = schema.getDimensionIndex(pdal::Dimension::Field_Time, pdal::Dimension::Int32);
+    int offsetX = schema.getDimensionIndex(pdal::Dimension::Id_X_i32);
+    int offsetY = schema.getDimensionIndex(pdal::Dimension::Id_Y_i32);
+    int offsetZ = schema.getDimensionIndex(pdal::Dimension::Id_Z_i32);
+    int offsetTime = schema.getDimensionIndex(pdal::Dimension::Id_Qfit_Time);
     
     boost::int32_t x = data.getField<boost::int32_t>(index, offsetX);
     boost::int32_t y = data.getField<boost::int32_t>(index, offsetY);

@@ -120,9 +120,9 @@ StatsFilter::~StatsFilter()
     for (Schema::DimensionsIter iter = dims.begin(); iter != dims.end(); ++iter)
     {
         const Dimension& dim = *iter;
-        StatsCollector* stats = m_stats[dim.getField()];
+        StatsCollector* stats = m_stats[dim.getId()];
         delete stats;
-        m_stats.erase(dim.getField());
+        m_stats.erase(dim.getId());
     }
 }
 
@@ -134,7 +134,7 @@ void StatsFilter::initialize()
     for (Schema::DimensionsCIter iter = dims.begin(); iter != dims.end(); ++iter)
     {
         const Dimension& dim = *iter;
-        m_stats[dim.getField()] = new StatsCollector();
+        m_stats[dim.getId()] = new StatsCollector();
     }
 
     return;
@@ -154,12 +154,12 @@ void StatsFilter::reset()
     for (Schema::DimensionsCIter iter = dims.begin(); iter != dims.end(); ++iter)
     {
         const Dimension& dim = *iter;
-        m_stats[dim.getField()]->reset();
+        m_stats[dim.getId()]->reset();
     }
 }
     
 
-const StatsCollector& StatsFilter::getStats(Dimension::Field field) const
+const StatsCollector& StatsFilter::getStats(Dimension::Id field) const
 {
     const StatsCollector* s = m_stats.find(field)->second;
     return *s;
@@ -174,16 +174,16 @@ void StatsFilter::processBuffer(PointBuffer& data) const
     const Schema& schema = schemaLayout.getSchema();
 
     // BUG: fix this!
-    const int indexXi = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-    const int indexYi = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-    const int indexZi = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
-    const int indexXd = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-    const int indexYd = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-    const int indexZd = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
+    const int indexXi = schema.getDimensionIndex(Dimension::Id_X_i32);
+    const int indexYi = schema.getDimensionIndex(Dimension::Id_Y_i32);
+    const int indexZi = schema.getDimensionIndex(Dimension::Id_Z_i32);
+    const int indexXd = schema.getDimensionIndex(Dimension::Id_X_f64);
+    const int indexYd = schema.getDimensionIndex(Dimension::Id_Y_f64);
+    const int indexZd = schema.getDimensionIndex(Dimension::Id_Z_f64);
 
-    StatsCollector& statsX = *(m_stats.find(Dimension::Field_X)->second);
-    StatsCollector& statsY = *(m_stats.find(Dimension::Field_Y)->second);
-    StatsCollector& statsZ = *(m_stats.find(Dimension::Field_Z)->second);
+    StatsCollector& statsX = (indexXi!=-1) ? *(m_stats.find(Dimension::Id_X_i32)->second) : *(m_stats.find(Dimension::Id_X_f64)->second);
+    StatsCollector& statsY = (indexYi!=-1) ? *(m_stats.find(Dimension::Id_Y_i32)->second) : *(m_stats.find(Dimension::Id_Y_f64)->second);
+    StatsCollector& statsZ = (indexZi!=-1) ? *(m_stats.find(Dimension::Id_Z_i32)->second) : *(m_stats.find(Dimension::Id_Z_f64)->second);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
@@ -212,7 +212,7 @@ boost::property_tree::ptree StatsFilter::toStatsPTree() const
 {
     boost::property_tree::ptree tree;
 
-    for (std::map<Dimension::Field, StatsCollector*>::const_iterator iter = m_stats.begin();
+    for (std::map<Dimension::Id, StatsCollector*>::const_iterator iter = m_stats.begin();
          iter != m_stats.end();
          ++iter)
     {
@@ -220,10 +220,17 @@ boost::property_tree::ptree StatsFilter::toStatsPTree() const
         boost::property_tree::ptree subtree = stat->toPTree();
 
         // BUG: make this work for all fields
-        if (iter->first == Dimension::Field_X || iter->first == Dimension::Field_Y ||iter->first == Dimension::Field_Z)
+        if (iter->first == Dimension::Id_X_i32 || iter->first == Dimension::Id_X_f64)
         {
-            const std::string key = Dimension::getFieldName(iter->first);
-            tree.add_child(key, subtree);
+            tree.add_child("X", subtree);
+        }
+        else if (iter->first == Dimension::Id_Y_i32 || iter->first == Dimension::Id_Y_f64)
+        {
+            tree.add_child("Y", subtree);
+        }
+        else if (iter->first == Dimension::Id_Z_i32 || iter->first == Dimension::Id_Z_f64)
+        {
+            tree.add_child("Z", subtree);
         }
     }
 

@@ -44,6 +44,7 @@
 
 #include <pdal/pdal.hpp>
 #include <pdal/Utils.hpp>
+#include <pdal/external/boost/uuid/uuid.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 
@@ -59,59 +60,79 @@ namespace pdal
 class PDAL_DLL Dimension
 {
 public:
-    /// \name Enumerations
-    enum Field
+    //typedef pdal::external::boost::uuids::uuid Id;
+
+    enum Id
     {
-        Field_INVALID = 0,
-        Field_X,
-        Field_Y,
-        Field_Z,
-        Field_Intensity,
-        Field_ReturnNumber,
-        Field_NumberOfReturns,
-        Field_ScanDirectionFlag,
-        Field_EdgeOfFlightLine,
-        Field_Classification,
-        Field_ScanAngleRank,
-        Field_UserData,
-        Field_PointSourceId,
-        Field_Time,
-        Field_Red,
-        Field_Green,
-        Field_Blue,
-        Field_WavePacketDescriptorIndex,
-        Field_WaveformDataOffset,
-        Field_ReturnPointWaveformLocation,
-        Field_WaveformXt,
-        Field_WaveformYt,
-        Field_WaveformZt,
-        Field_Alpha,
-        // ...
+        Id_X_i32 = 0,
+        Id_Y_i32,
+        Id_Z_i32,
+        Id_X_f64,
+        Id_Y_f64,
+        Id_Z_f64,
 
-        // add more here
-        Field_User1 = 512,
-        Field_User2,
-        Field_User3,
-        Field_User4,
-        Field_User5,
-        Field_User6,
-        Field_User7,
-        Field_User8,
-        Field_User9,
-        Field_User10,
-        Field_User11,
-        Field_User12,
-        Field_User13,
-        Field_User14,
-        Field_User15,
-        // ...
-        // feel free to use your own int here
+        Id_Red_u8,
+        Id_Green_u8,
+        Id_Blue_u8,
+        Id_Red_u16,
+        Id_Green_u16,
+        Id_Blue_u16,
+    
+        Id_Time_u64,
 
-        Field_LAST = 1023
+        Id_Las_Intensity = 100,
+        Id_Las_ReturnNumber,
+        Id_Las_NumberOfReturns,
+        Id_Las_ScanDirectionFlag,
+        Id_Las_EdgeOfFlightLine,
+        Id_Las_Classification,
+        Id_Las_ScanAngleRank,
+        Id_Las_UserData,
+        Id_Las_PointSourceId,
+        Id_Las_WavePacketDescriptorIndex,
+        Id_Las_WaveformDataOffset,
+        Id_Las_ReturnPointWaveformLocation,
+        Id_Las_WaveformXt,
+        Id_Las_WaveformYt,
+        Id_Las_WaveformZt,
+        Id_Las_Time,
+
+        // terrasolid
+        Id_TerraSolid_Alpha = 200,
+        Id_TerraSolid_Classification,
+        Id_TerraSolid_PointSourceId_u8,
+        Id_TerraSolid_PointSourceId_u16,
+        Id_TerraSolid_ReturnNumber_u8,
+        Id_TerraSolid_ReturnNumber_u16,
+        Id_TerraSolid_Flag,
+        Id_TerraSolid_Mark,
+        Id_TerraSolid_Intensity,
+        Id_TerraSolid_Time,
+
+        // chipper stuff
+        Id_Chipper_1 = 300,
+        Id_Chipper_2,
+
+        // qfit
+        Id_Qfit_StartPulse = 400,
+        Id_Qfit_ReflectedPulse,
+        Id_Qfit_ScanAngleRank,
+        Id_Qfit_Pitch,
+        Id_Qfit_Roll,
+        Id_Qfit_Time,
+        Id_Qfit_PassiveSignal,
+        Id_Qfit_PassiveX,
+        Id_Qfit_PassiveY,
+        Id_Qfit_PassiveZ,
+        Id_Qfit_GpsTime,
+        Id_Qfit_PDOP,
+        Id_Qfit_PulseWidth,
+
+        Id_Qfit_User1 = 10000,
+
+        Id_Undefined = 100000
     };
 
-    // Do not explicitly specify these enum values because they 
-    // are (probably wrongly) used to iterate through for Schema::getX, Schema::getY, Schema::getZ
     enum DataType
     {
         Int8,
@@ -122,32 +143,46 @@ public:
         Uint32,
         Int64,
         Uint64,
+        Pointer,    // stored as 64 bits, even on a 32-bit box
         Float,       // 32 bits
         Double,       // 64 bits
         Undefined
     };
 
+    enum Flags
+    {
+        IsAdded   = 0x1,
+        IsRead    = 0x2,
+        IsWritten = 0x4,
+    };
+
 /// \name Constructors
-    Dimension(Field field, DataType type);
-    Dimension& operator=(Dimension const& rhs);
+    Dimension(const Id& id); // will use table to lookup datatype, description, etc
+    Dimension(const Id& id, DataType datatype, std::string name); // for dimensions not in the master table
     Dimension(Dimension const& other);
+
+    Dimension& operator=(Dimension const& rhs);
 
 /// \name Equality
     bool operator==(const Dimension& other) const;
     bool operator!=(const Dimension& other) const;
 
 /// \name Data Access
-    std::string const& getFieldName() const;
+    std::string const& getName() const;
 
-    Field getField() const
+    Id getId() const
     {
-        return m_field;
+        return m_id;
     }
+
+    boost::uint32_t getFlags() const { return m_flags; }
+    void setFlags(boost::uint32_t flags) { m_flags = flags; }
 
     DataType getDataType() const
     {
         return m_dataType;
     }
+
 
     static std::string getDataTypeName(DataType);
     static DataType getDataTypeFromString(const std::string&);
@@ -155,7 +190,6 @@ public:
     static bool getDataTypeIsNumeric(DataType);
     static bool getDataTypeIsSigned(DataType);
     static bool getDataTypeIsInteger(DataType);
-    static std::string const& getFieldName(Field);
 
     /// \return Number of bytes required to serialize this dimension 
     std::size_t getByteSize() const
@@ -345,7 +379,9 @@ public:
 
 private:
     DataType m_dataType;
-    Field m_field;
+    Id m_id;
+    std::string m_name;
+    boost::uint32_t m_flags;
     EndianType m_endian;
     std::size_t m_byteSize;
     std::string m_description;
@@ -354,15 +390,10 @@ private:
     bool m_precise;
     double m_numericScale;
     double m_numericOffset;
-
-    static void initFieldNames();
-    static bool s_fieldNamesValid;
-    static std::string s_fieldNames[Field_LAST];
 };
 
 
 PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d);
-
 
 } // namespace pdal
 

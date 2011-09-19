@@ -182,34 +182,34 @@ namespace pdal { namespace drivers { namespace qfit {
 
 PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 {
-    Time = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Int32);
-    X = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-    Y = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-    Z = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+    Time = schema.getDimensionIndex(Dimension::Id_Qfit_Time);
+    X = schema.getDimensionIndex(Dimension::Id_X_i32);
+    Y = schema.getDimensionIndex(Dimension::Id_Y_i32);
+    Z = schema.getDimensionIndex(Dimension::Id_Z_i32);
     
-    StartPulse = schema.getDimensionIndex(Dimension::Field_User1, Dimension::Int32);
-    ReflectedPulse = schema.getDimensionIndex(Dimension::Field_User2, Dimension::Int32);
-    ScanAngleRank = schema.getDimensionIndex(Dimension::Field_User3, Dimension::Int32);
-    Pitch = schema.getDimensionIndex(Dimension::Field_User4, Dimension::Int32);
-    Roll = schema.getDimensionIndex(Dimension::Field_User5, Dimension::Int32);
+    StartPulse = schema.getDimensionIndex(Dimension::Id_Qfit_StartPulse);
+    ReflectedPulse = schema.getDimensionIndex(Dimension::Id_Qfit_ReflectedPulse);
+    ScanAngleRank = schema.getDimensionIndex(Dimension::Id_Qfit_ScanAngleRank);
+    Pitch = schema.getDimensionIndex(Dimension::Id_Qfit_Pitch);
+    Roll = schema.getDimensionIndex(Dimension::Id_Qfit_Roll);
 
     if (format == QFIT_Format_14) 
     {
-        PassiveSignal = schema.getDimensionIndex(Dimension::Field_User6, Dimension::Int32);
-        PassiveX = schema.getDimensionIndex(Dimension::Field_User7, Dimension::Int32);
-        PassiveY = schema.getDimensionIndex(Dimension::Field_User8, Dimension::Int32);
-        PassiveZ = schema.getDimensionIndex(Dimension::Field_User9, Dimension::Int32);
-        GPSTime = schema.getDimensionIndex(Dimension::Field_User10, Dimension::Int32);
+        PassiveSignal = schema.getDimensionIndex(Dimension::Id_Qfit_PassiveSignal);
+        PassiveX = schema.getDimensionIndex(Dimension::Id_Qfit_PassiveX);
+        PassiveY = schema.getDimensionIndex(Dimension::Id_Qfit_PassiveY);
+        PassiveZ = schema.getDimensionIndex(Dimension::Id_Qfit_PassiveZ);
+        GPSTime = schema.getDimensionIndex(Dimension::Id_Qfit_GpsTime);
         
     } else if (format == QFIT_Format_12)
     {
-        PDOP = schema.getDimensionIndex(Dimension::Field_User6, Dimension::Int32);
-        PulseWidth = schema.getDimensionIndex(Dimension::Field_User7, Dimension::Int32);
-        GPSTime = schema.getDimensionIndex(Dimension::Field_User8, Dimension::Int32);
+        PDOP = schema.getDimensionIndex(Dimension::Id_Qfit_PDOP);
+        PulseWidth = schema.getDimensionIndex(Dimension::Id_Qfit_PulseWidth);
+        GPSTime = schema.getDimensionIndex(Dimension::Id_Qfit_GpsTime);
 
     } else
     {
-        GPSTime = schema.getDimensionIndex(Dimension::Field_User6, Dimension::Int32);
+        GPSTime = schema.getDimensionIndex(Dimension::Id_Qfit_GpsTime);
 
     }
         
@@ -324,138 +324,75 @@ void Reader::registerFields()
 
     double xy_scale = 1/1000000.0;
 
-    std::ostringstream text;
+    Dimension time(Dimension::Id_Qfit_Time);
+    schema.appendDimension(time);
 
-    Dimension time(Dimension::Field_Time, Dimension::Int32);
-    text << "Relative Time (msec from start of data file)";
-    time.setDescription(text.str());
-    schema.addDimension(time);
-    text.str("");
-
-    Dimension y(Dimension::Field_Y, Dimension::Int32);
-    text << "Latitude coordinate with 1/1000000 decimals of precision";
-    y.setDescription(text.str());
+    Dimension y(Dimension::Id_Y_i32);
     y.setNumericScale(xy_scale);
-    schema.addDimension(y);
-    text.str("");
-    
+    schema.appendDimension(y);
 
-    Dimension x(Dimension::Field_X, Dimension::Int32);
-    text << "Longitude coordinate with 1/1000000 decimals of precision";
-    x.setDescription(text.str());
+    Dimension x(Dimension::Id_X_i32);
     x.setNumericScale(xy_scale);
-    schema.addDimension(x);
-    text.str("");
+    schema.appendDimension(x);
 
-    Dimension z(Dimension::Field_Z, Dimension::Int32);
-    text << "z coordinate as a long integer.  You must use the scale and "
-         << "offset information of the header to determine the double value.";
-    z.setDescription(text.str());
-    schema.addDimension(z);
-    text.str("");
+    Dimension z(Dimension::Id_Z_i32);
+    schema.appendDimension(z);
 
+    Dimension start_pulse(Dimension::Id_Qfit_StartPulse);
+    schema.appendDimension(start_pulse);
 
-    Dimension start_pulse(Dimension::Field_User1, Dimension::Int32);
-    text << "Start Pulse Signal Strength (relative)";
-    start_pulse.setDescription(text.str());
-    schema.addDimension(start_pulse);
-    text.str("");
+    Dimension reflected_pulse(Dimension::Id_Qfit_ReflectedPulse);
+    schema.appendDimension(reflected_pulse);
 
-    Dimension reflected_pulse(Dimension::Field_User2, Dimension::Int32);
-    text << "Reflected Laser Signal Strength (relative)";
-    reflected_pulse.setDescription(text.str());
-    schema.addDimension(reflected_pulse);
-    text.str("");
-
-
-    Dimension scan_angle(Dimension::Field_User3, Dimension::Int32);
-    text << "Scan Azimuth (degrees X 1,000)";
-    scan_angle.setDescription(text.str());
+    Dimension scan_angle(Dimension::Id_Qfit_ScanAngleRank);
     scan_angle.setNumericScale(1.0/1000.0);
-    schema.addDimension(scan_angle);
-    text.str("");
+    schema.appendDimension(scan_angle);
 
-    Dimension pitch(Dimension::Field_User4, Dimension::Int32);
-    text << "Pitch (degrees X 1,000)";
-    pitch.setDescription(text.str());
+    Dimension pitch(Dimension::Id_Qfit_Pitch);
     pitch.setNumericScale(1.0/1000.0);
-    schema.addDimension(pitch);
-    text.str("");
+    schema.appendDimension(pitch);
 
-    Dimension roll(Dimension::Field_User5, Dimension::Int32);
-    text << "Roll (degrees X 1,000)";
-    roll.setDescription(text.str());
+    Dimension roll(Dimension::Id_Qfit_Roll);
     roll.setNumericScale(1.0/1000.0);
-    schema.addDimension(roll);
-    text.str("");
+    schema.appendDimension(roll);
 
     if (m_format == QFIT_Format_12) 
     {
-        Dimension pdop(Dimension::Field_User6, Dimension::Int32);
-        text << "GPS PDOP (dilution of precision) (X 10) ";
-        pdop.setDescription(text.str());
+        Dimension pdop(Dimension::Id_Qfit_PDOP);
         pdop.setNumericScale(1.0/10.0);
-        schema.addDimension(pdop);
-        text.str("");
+        schema.appendDimension(pdop);
 
-        Dimension pulse_width(Dimension::Field_User7, Dimension::Int32);
-        text << "Laser received pulse width (digitizer samples)";
-        pulse_width.setDescription(text.str());
-        schema.addDimension(pulse_width);
-        text.str("");
+        Dimension pulse_width(Dimension::Id_Qfit_PulseWidth);
+        schema.appendDimension(pulse_width);
 
-        Dimension gpstime(Dimension::Field_User8, Dimension::Int32);
-        text << "GPS Time packed (example: 153320100 = 15h 33m 20s 100ms)";
-        gpstime.setDescription(text.str());
-        schema.addDimension(gpstime);
-        text.str("");
+        Dimension gpstime(Dimension::Id_Qfit_GpsTime);
+        schema.appendDimension(gpstime);
     
-    } else if (m_format == QFIT_Format_14)
+    } 
+    else if (m_format == QFIT_Format_14)
     {
+        Dimension passive_signal(Dimension::Id_Qfit_PassiveSignal);
+        schema.appendDimension(passive_signal);
 
-        Dimension passive_signal(Dimension::Field_User6, Dimension::Int32);
-        text << "Passive Signal (relative)";
-        passive_signal.setDescription(text.str());
-        schema.addDimension(passive_signal);
-        text.str("");
-
-        Dimension passive_y(Dimension::Field_User7, Dimension::Int32);
-        text << "Passive Footprint Latitude (degrees X 1,000,000)";
-        passive_y.setDescription(text.str());
+        Dimension passive_y(Dimension::Id_Qfit_PassiveY);
         passive_y.setNumericScale(xy_scale);
-        schema.addDimension(passive_y);
-        text.str("");
+        schema.appendDimension(passive_y);
 
-        Dimension passive_x(Dimension::Field_User8, Dimension::Int32);
-        text << "Passive Footprint Longitude (degrees X 1,000,000)";
-        passive_x.setDescription(text.str());
+        Dimension passive_x(Dimension::Id_Qfit_PassiveX);
         passive_x.setNumericScale(xy_scale);
-        schema.addDimension(passive_x);
-        text.str("");
+        schema.appendDimension(passive_x);
 
-        Dimension passive_z(Dimension::Field_User9, Dimension::Int32);
-        text << "Passive Footprint Synthesized Elevation (millimeters)";
-        passive_z.setDescription(text.str());
-        schema.addDimension(passive_z);
-        text.str("");
+        Dimension passive_z(Dimension::Id_Qfit_PassiveZ);
+        schema.appendDimension(passive_z);
 
-        Dimension gpstime(Dimension::Field_User10, Dimension::Int32);
-        text << "GPS Time packed (example: 153320100 = 15h 33m 20s 100ms)";
-        gpstime.setDescription(text.str());
-        schema.addDimension(gpstime);
-        text.str("");
-    
-    } else
-    {
-        Dimension gpstime(Dimension::Field_User6, Dimension::Int32);
-        text << "GPS Time packed (example: 153320100 = 15h 33m 20s 100ms)";
-        gpstime.setDescription(text.str());
-        schema.addDimension(gpstime);
-        text.str("");
-        
+        Dimension gpstime(Dimension::Id_Qfit_GpsTime);
+        schema.appendDimension(gpstime);
     }
-
-
+    else
+    {
+        Dimension gpstime(Dimension::Id_Qfit_GpsTime);
+        schema.appendDimension(gpstime);
+    }
     
     return;
 }

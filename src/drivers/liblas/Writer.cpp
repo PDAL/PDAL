@@ -114,9 +114,9 @@ void Writer::setupExternalHeader()
 
     const Schema& schema = getPrevStage().getSchema();
 
-    int indexX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Int32);
-    int indexY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Int32);
-    int indexZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Int32);
+    int indexX = schema.getDimensionIndex(Dimension::Id_X_i32);
+    int indexY = schema.getDimensionIndex(Dimension::Id_Y_i32);
+    int indexZ = schema.getDimensionIndex(Dimension::Id_Z_i32);
     const Dimension& dimX = schema.getDimension(indexX);
     const Dimension& dimY = schema.getDimension(indexY);
     const Dimension& dimZ = schema.getDimension(indexZ);

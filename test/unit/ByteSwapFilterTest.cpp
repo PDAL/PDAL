@@ -79,10 +79,10 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     BOOST_CHECK_EQUAL(unfliped_read, buffer_size);
     
 
-    int offsetX = schema.getDimensionIndex(Dimension::Field_X, Dimension::Double);
-    int offsetY = schema.getDimensionIndex(Dimension::Field_Y, Dimension::Double);
-    int offsetZ = schema.getDimensionIndex(Dimension::Field_Z, Dimension::Double);
-    int offsetT = schema.getDimensionIndex(Dimension::Field_Time, Dimension::Uint64);
+    int offsetX = schema.getDimensionIndex(Dimension::Id_X_f64);
+    int offsetY = schema.getDimensionIndex(Dimension::Id_Y_f64);
+    int offsetZ = schema.getDimensionIndex(Dimension::Id_Z_f64);
+    int offsetT = schema.getDimensionIndex(Dimension::Id_Time_u64);
     
     BOOST_CHECK_EQUAL(offsetX, 0);
     BOOST_CHECK_EQUAL(offsetY, 1);

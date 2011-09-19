@@ -47,12 +47,12 @@ BOOST_AUTO_TEST_SUITE(SchemaTest)
 
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
-    Dimension d1(Dimension::Field_X, Dimension::Uint32);
-    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
+    Dimension d1(Dimension::Id_X_i32);
+    Dimension d2(Dimension::Id_Y_i32);
 
     Schema s1;
-    s1.addDimension(d1);
-    s1.addDimension(d2);
+    s1.appendDimension(d1);
+    s1.appendDimension(d2);
 
     Schema s2(s1);
     Schema s3 = s1;
@@ -64,27 +64,27 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK(s3==s1);
 
     Schema s4;
-    s4.addDimension(d1);
+    s4.appendDimension(d1);
     BOOST_CHECK(s1!=s4);
     BOOST_CHECK(s4!=s1);
 
-    BOOST_CHECK(s1.hasDimension(Dimension::Field_X, Dimension::Uint32));
-    BOOST_CHECK(!s1.hasDimension(Dimension::Field_X, Dimension::Uint16));
-    Dimension dx32(Dimension::Field_X, Dimension::Uint32);
-    Dimension dx16(Dimension::Field_X, Dimension::Uint16);
+    BOOST_CHECK(s1.hasDimension(Dimension::Id_X_i32));
+    BOOST_CHECK(!s1.hasDimension(Dimension::Id_X_f64));
+    Dimension dx32(Dimension::Id_X_i32);
+    Dimension dx64(Dimension::Id_X_f64);
     BOOST_CHECK(s1.hasDimension(dx32));
-    BOOST_CHECK(!s1.hasDimension(dx16));
+    BOOST_CHECK(!s1.hasDimension(dx64));
 }
 
 
 BOOST_AUTO_TEST_CASE(SchemaTest_ptree)
 {
-    Dimension d1(Dimension::Field_X, Dimension::Uint32);
-    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
+    Dimension d1(Dimension::Id_X_i32);
+    Dimension d2(Dimension::Id_Y_i32);
 
     Schema s1;
-    s1.addDimension(d1);
-    s1.addDimension(d2);
+    s1.appendDimension(d1);
+    s1.appendDimension(d2);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
   
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(SchemaTest_ptree)
 
     boost::algorithm::erase_all(out1, "\n");
     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    std::string ref = xml_header + "<dimension><name>X</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><dimension><name>Y</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension>";
+    std::string ref = xml_header + "<dimension><name>X</name><datatype>Int32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><dimension><name>Y</name><datatype>Int32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension>";
 
     boost::algorithm::erase_all(ref, "\n");
     BOOST_CHECK_EQUAL(ref, out1);

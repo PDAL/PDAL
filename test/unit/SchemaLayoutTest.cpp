@@ -46,23 +46,23 @@ BOOST_AUTO_TEST_SUITE(SchemaLayoutTest)
 
 BOOST_AUTO_TEST_CASE(test_layout)
 {
-    Dimension d1(Dimension::Field_X, Dimension::Uint32);
-    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
+    Dimension d1(Dimension::Id_X_i32);
+    Dimension d2(Dimension::Id_Y_i32);
 
     Schema s1;
-    s1.addDimension(d1);
-    s1.addDimension(d2);
-    BOOST_CHECK(s1.getDimensionIndex(Dimension::Field_X, Dimension::Uint32) == 0);
-    BOOST_CHECK(s1.getDimensionIndex(Dimension::Field_Y, Dimension::Uint32) == 1);
+    s1.appendDimension(d1);
+    s1.appendDimension(d2);
+    BOOST_CHECK(s1.getDimensionIndex(Dimension::Id_X_i32) == 0);
+    BOOST_CHECK(s1.getDimensionIndex(Dimension::Id_Y_i32) == 1);
 
-    BOOST_CHECK(s1.hasDimension(Dimension::Field_X, Dimension::Uint8) == false);
-    BOOST_CHECK(s1.hasDimension(Dimension::Field_Y, Dimension::Uint8) == false);
+    BOOST_CHECK(s1.hasDimension(Dimension::Id_X_f64) == false);
+    BOOST_CHECK(s1.hasDimension(Dimension::Id_Y_f64) == false);
 
     Schema s2;
-    s2.addDimension(d1);
-    BOOST_CHECK(s2.hasDimension(Dimension::Field_X, Dimension::Uint32) == true);
-    BOOST_CHECK(s2.getDimensionIndex(Dimension::Field_X, Dimension::Uint32) == 0);
-    BOOST_CHECK(s2.hasDimension(Dimension::Field_Y, Dimension::Uint32) == false);
+    s2.appendDimension(d1);
+    BOOST_CHECK(s2.hasDimension(Dimension::Id_X_i32) == true);
+    BOOST_CHECK(s2.getDimensionIndex(Dimension::Id_X_i32) == 0);
+    BOOST_CHECK(s2.hasDimension(Dimension::Id_Y_i32) == false);
 
     SchemaLayout l1(s1);
     SchemaLayout l2(l1);
@@ -81,11 +81,11 @@ BOOST_AUTO_TEST_CASE(test_layout)
 
 BOOST_AUTO_TEST_CASE(test_layout_size)
 {
-    Dimension d1(Dimension::Field_X, Dimension::Uint32);
-    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
+    Dimension d1(Dimension::Id_X_i32);
+    Dimension d2(Dimension::Id_Y_i32);
     Schema s1;
-    s1.addDimension(d1);
-    s1.addDimension(d2);
+    s1.appendDimension(d1);
+    s1.appendDimension(d2);
     SchemaLayout sl1(s1);
 
     const DimensionLayout& dl1 = sl1.getDimensionLayout(0);
@@ -102,11 +102,11 @@ BOOST_AUTO_TEST_CASE(test_layout_size)
 
 BOOST_AUTO_TEST_CASE(SchemaLayoutTest_ptree)
 {
-    Dimension d1(Dimension::Field_X, Dimension::Uint32);
-    Dimension d2(Dimension::Field_Y, Dimension::Uint32);
+    Dimension d1(Dimension::Id_X_i32);
+    Dimension d2(Dimension::Id_Y_i32);
     Schema s1;
-    s1.addDimension(d1);
-    s1.addDimension(d2);
+    s1.appendDimension(d1);
+    s1.appendDimension(d2);
     SchemaLayout sl1(s1);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(SchemaLayoutTest_ptree)
     std::string out1 = ss1.str();
 
     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    std::string ref = xml_header + "<dimensionlayout><dimension><name>X</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>0</byteoffset><position>0</position></dimensionlayout><dimensionlayout><dimension><name>Y</name><datatype>Uint32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>4</byteoffset><position>1</position></dimensionlayout>";
+    std::string ref = xml_header + "<dimensionlayout><dimension><name>X</name><datatype>Int32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>0</byteoffset><position>0</position><isValid>false</isValid></dimensionlayout><dimensionlayout><dimension><name>Y</name><datatype>Int32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>4</byteoffset><position>1</position><isValid>false</isValid></dimensionlayout>";
 
     boost::algorithm::erase_all(out1, "\n");
     boost::algorithm::erase_all(ref, "\n");
