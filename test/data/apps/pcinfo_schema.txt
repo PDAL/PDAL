@@ -3,7 +3,7 @@
     {
         "name": "X",
         "datatype": "Int32",
-        "description": "x coordinate as a long integer.  You must use the scale and offset information of the header to determine the double value.",
+        "description": "x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.",
         "bytesize": "4",
         "endianness": "little",
         "scale": "0.01"
@@ -12,7 +12,7 @@
     {
         "name": "Y",
         "datatype": "Int32",
-        "description": "y coordinate as a long integer.  You must use the scale and offset information of the header to determine the double value.",
+        "description": "y coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.",
         "bytesize": "4",
         "endianness": "little",
         "scale": "0.01"
@@ -21,7 +21,7 @@
     {
         "name": "Z",
         "datatype": "Int32",
-        "description": "z coordinate as a long integer.  You must use the scale and offset information of the header to determine the double value.",
+        "description": "z coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.",
         "bytesize": "4",
         "endianness": "little",
         "scale": "0.01"
@@ -57,7 +57,7 @@
     {
         "name": "ScanDirectionFlag",
         "datatype": "Uint8",
-        "description": "The Scan Direction Flag denotes the direction at which the scanner mirror was traveling at the time of the output pulse. A bit value of 1 is a positive scan direction, and a bit value of 0 is a negative scan direction (where positive scan direction is a scan moving from the left side of the in-track direction to the right side and negative the opposite). ",
+        "description": "The Scan Direction Flag denotes the direction at which the scanner mirror was traveling at the time of the output pulse. A bit value of 1 is a positive scan direction, and a bit value of 0 is a negative scan direction (where positive scan direction is a scan moving from the left side of the in-track direction to the right side and negative the opposite).",
         "bytesize": "1",
         "endianness": "little",
         "scale": "0"

@@ -44,7 +44,7 @@
 
 #include <pdal/pdal.hpp>
 #include <pdal/Utils.hpp>
-#include <pdal/external/boost/uuid/uuid.hpp>
+
 #include <boost/property_tree/ptree.hpp>
 
 
@@ -60,10 +60,11 @@ namespace pdal
 class PDAL_DLL Dimension
 {
 public:
-    //typedef pdal::external::boost::uuids::uuid Id;
-
     enum Id
     {
+        //
+        // common field types: 0..999
+        // 
         Id_X_i32 = 0,
         Id_Y_i32,
         Id_Z_i32,
@@ -80,7 +81,10 @@ public:
     
         Id_Time_u64,
 
-        Id_Las_Intensity = 100,
+        //
+        // LAS: 1000..1999
+        //
+        Id_Las_Intensity = 1000,
         Id_Las_ReturnNumber,
         Id_Las_NumberOfReturns,
         Id_Las_ScanDirectionFlag,
@@ -97,8 +101,10 @@ public:
         Id_Las_WaveformZt,
         Id_Las_Time,
 
-        // terrasolid
-        Id_TerraSolid_Alpha = 200,
+        //
+        // terrasolid: 2000..2999
+        // 
+        Id_TerraSolid_Alpha = 2000,
         Id_TerraSolid_Classification,
         Id_TerraSolid_PointSourceId_u8,
         Id_TerraSolid_PointSourceId_u16,
@@ -109,12 +115,16 @@ public:
         Id_TerraSolid_Intensity,
         Id_TerraSolid_Time,
 
-        // chipper stuff
-        Id_Chipper_1 = 300,
+        //
+        // chipper stuff: 3000..3999
+        // 
+        Id_Chipper_1 = 3000,
         Id_Chipper_2,
 
-        // qfit
-        Id_Qfit_StartPulse = 400,
+        //
+        // qfit: 4000..4999
+        // 
+        Id_Qfit_StartPulse = 4000,
         Id_Qfit_ReflectedPulse,
         Id_Qfit_ScanAngleRank,
         Id_Qfit_Pitch,
@@ -128,9 +138,9 @@ public:
         Id_Qfit_PDOP,
         Id_Qfit_PulseWidth,
 
-        Id_Qfit_User1 = 10000,
+        // user fields are 100,000..199,999
 
-        Id_Undefined = 100000
+        Id_Undefined = 200000
     };
 
     enum DataType
@@ -157,8 +167,8 @@ public:
     };
 
 /// \name Constructors
-    Dimension(const Id& id); // will use table to lookup datatype, description, etc
-    Dimension(const Id& id, DataType datatype, std::string name); // for dimensions not in the master table
+    Dimension(Id id); // will use table to lookup datatype, description, etc
+    Dimension(Id id, DataType datatype, std::string name, std::string description=std::string("")); // for dimensions not in the master table
     Dimension(Dimension const& other);
 
     Dimension& operator=(Dimension const& rhs);

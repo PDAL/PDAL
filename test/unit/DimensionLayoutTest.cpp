@@ -77,7 +77,10 @@ BOOST_AUTO_TEST_CASE(DimensionLayoutTest_ptree)
     std::string out1 = ss1.str();
 
     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    std::string ref = xml_header + "<dimension><name>X</name><datatype>Int32</datatype><description/><bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>0</byteoffset><position>0</position><isValid>false</isValid>";
+    std::string ref = xml_header + 
+        "<dimension><name>X</name><datatype>Int32</datatype>"
+        "<description>x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</description>"
+        "<bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>0</byteoffset><position>0</position><isValid>false</isValid>";
 
     boost::algorithm::erase_all(out1, "\n");
     boost::algorithm::erase_all(ref, "\n");

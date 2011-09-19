@@ -48,184 +48,284 @@ namespace pdal
 {
 
 // --------------------------------------------------------------------------
-#if 0
-Dimension::Id Dimension_X_i32 =                           { 0xab, 0xca, 0x4c, 0x06, 0xef, 0x6c, 0x4c, 0x38, 0xbb, 0x30, 0x0c, 0x8c, 0x43, 0x58, 0x6f, 0xcc };
-Dimension::Id Dimension_Y_i32 =                           { 0x6E, 0xE5, 0xCA, 0xCB, 0x35, 0x68, 0x4F, 0x3F, 0x80, 0xAA, 0xE9, 0x96, 0x5B, 0x7E, 0x4A, 0x23 };
-Dimension::Id Dimension_Z_i32 =                           { 0x93, 0xE1, 0x61, 0x79, 0xC0, 0xC5, 0x43, 0x7E, 0xB9, 0x06, 0x60, 0x01, 0xC4, 0x96, 0xA3, 0x35 };
-Dimension::Id Dimension_X_f64 =                           { 0x14, 0x96, 0x0E, 0x7A, 0x11, 0xBD, 0x49, 0xD9, 0xB2, 0x4B, 0xE0, 0xBB, 0xB7, 0x59, 0xCE, 0x32 };
-Dimension::Id Dimension_Y_f64 =                           { 0xAD, 0xF4, 0xD3, 0x4F, 0x6B, 0x34, 0x47, 0x64, 0x9F, 0x35, 0xFC, 0x42, 0x28, 0x2D, 0x5A, 0x76 };
-Dimension::Id Dimension_Z_f64 =                           { 0x2D, 0xB0, 0x00, 0x14, 0x05, 0xFE, 0x4C, 0x0A, 0x83, 0xAC, 0xE5, 0xB9, 0x87, 0xC6, 0x0F, 0x6D };
-
-Dimension::Id Dimension_Red_u8 =                          { 0xD9, 0x2F, 0x5F, 0x32, 0xB7, 0x0E, 0x4E, 0x98, 0xB3, 0x97, 0xB6, 0xF0, 0xAA, 0x87, 0x73, 0x2A };
-Dimension::Id Dimension_Green_u8 =                        { 0xD7, 0x3D, 0xDA, 0x07, 0x83, 0x43, 0x44, 0x5C, 0xA1, 0x4F, 0xB0, 0x30, 0xB7, 0xB5, 0x00, 0x4E };
-Dimension::Id Dimension_Blue_u8 =                         { 0xBC, 0x2F, 0xEC, 0x3D, 0x69, 0xA7, 0x43, 0x10, 0xB5, 0xAF, 0xE7, 0xFF, 0xBF, 0xD4, 0x8C, 0x8F };
-Dimension::Id Dimension_Red_u16 =                         { 0xBB, 0xA4, 0xCF, 0x23, 0x28, 0xA4, 0x48, 0x07, 0x91, 0xAC, 0xC6, 0xF5, 0x9A, 0xE3, 0x5D, 0xDC };
-Dimension::Id Dimension_Green_u16 =                       { 0x55, 0xC7, 0x02, 0xC7, 0x14, 0xB6, 0x43, 0x94, 0x9F, 0xDB, 0x4D, 0x43, 0x24, 0x0A, 0x17, 0xE7 };
-Dimension::Id Dimension_Blue_u16 ;//=                        { 0xBA, 0xC2, 0x52, 0x5E, 0x43, 0x54, 0x4B, 0x1E, 0x98, 0x31, 0xDC, 0xE1, 0xBD, 0xEC, 0x58, 0x81 };
-
-Dimension::Id Dimension_Time_u64 =                        { 0xF0, 0xC1, 0x92, 0xFA, 0x60, 0x7D, 0x42, 0xD7, 0x96, 0xA2, 0x16, 0x0A, 0x63, 0x78, 0x6C, 0x45 };
-
-// f64, gps
-Dimension::Id Dimension_Las_Intensity =                   { 0xEF, 0x7C, 0x70, 0xC9, 0x2F, 0xCC, 0x4D, 0x8F, 0x82, 0x2C, 0x1C, 0x95, 0x73, 0xCF, 0x55, 0xEE };
-Dimension::Id Dimension_Las_ReturnNumber =                { 0xB7, 0xED, 0x85, 0x45, 0x49, 0xD0, 0x47, 0x2F, 0xBE, 0xF9, 0xAF, 0x10, 0x82, 0x2A, 0x3A, 0x27 };
-Dimension::Id Dimension_Las_NumberOfReturns =             { 0x50, 0x8E, 0x08, 0x60, 0x56, 0xF7, 0x4C, 0x67, 0xB5, 0xCE, 0xD1, 0x94, 0x2A, 0xCF, 0xBE, 0xC6 };
-Dimension::Id Dimension_Las_ScanDirectionFlag =           { 0x53, 0x52, 0x00, 0xF6, 0xBD, 0xE1, 0x49, 0x43, 0xB6, 0x32, 0x38, 0x7A, 0x4F, 0x09, 0x55, 0xFD };
-Dimension::Id Dimension_Las_EdgeOfFlightLine =            { 0x44, 0x50, 0x43, 0xD6, 0x43, 0xED, 0x44, 0x69, 0x9C, 0x53, 0x32, 0xCE, 0x65, 0x63, 0x60, 0x11 };
-Dimension::Id Dimension_Las_Classification =              { 0x88, 0x38, 0xCA, 0xBA, 0xCF, 0x54, 0x43, 0xED, 0x98, 0xD5, 0xE1, 0x66, 0x5C, 0x6B, 0xBB, 0xD6 };
-Dimension::Id Dimension_Las_ScanAngleRank =               { 0x79, 0x16, 0x19, 0xE1, 0x36, 0x3B, 0x40, 0x56, 0xAD, 0x4B, 0x20, 0x74, 0xD3, 0x62, 0x8C, 0x4B };
-Dimension::Id Dimension_Las_UserData =                    { 0x7F, 0x50, 0xAD, 0xCF, 0x09, 0x9D, 0x42, 0xFC, 0x8D, 0x1C, 0xF3, 0xFF, 0x68, 0x70, 0x42, 0xB3 };
-Dimension::Id Dimension_Las_PointSourceId =               { 0x0F, 0x8B, 0xDF, 0x1F, 0x78, 0x6E, 0x4B, 0xF9, 0xB2, 0x77, 0x47, 0x12, 0xE1, 0x22, 0x0D, 0x25 };
-Dimension::Id Dimension_Las_WavePacketDescriptorIndex =   { 0xB4, 0xC9, 0x39, 0x72, 0x3C, 0x19, 0x4C, 0x70, 0x86, 0x63, 0xA6, 0xC5, 0xF5, 0xF1, 0x10, 0x87 };
-Dimension::Id Dimension_Las_WaveformDataOffset =          { 0x9A, 0xDE, 0x88, 0xC0, 0xB8, 0x1E, 0x47, 0x2F, 0xAD, 0xF6, 0x3F, 0x4B, 0x85, 0xB1, 0xE0, 0xEC };
-Dimension::Id Dimension_Las_ReturnPointWaveformLocation = { 0xDB, 0x1D, 0x7F, 0x9E, 0x03, 0x23, 0x4B, 0x60, 0xB8, 0x4B, 0x09, 0x8C, 0x20, 0x1B, 0x3A, 0x8A };
-Dimension::Id Dimension_Las_WaveformXt =                  { 0xF4, 0x90, 0xF2, 0xAC, 0xCB, 0xAC, 0x41, 0x56, 0x93, 0x9D, 0x4E, 0xD6, 0x1C, 0x6A, 0x1C, 0x6B };
-Dimension::Id Dimension_Las_WaveformYt =                  { 0x90, 0x1F, 0x76, 0x27, 0xF5, 0xC3, 0x48, 0x8D, 0x99, 0xD8, 0xCF, 0x4B, 0x3E, 0xDA, 0x42, 0x87 };
-Dimension::Id Dimension_Las_WaveformZt =                  { 0x5F, 0xFC, 0x07, 0x62, 0x0B, 0xA2, 0x4A, 0x64, 0x91, 0xCF, 0x1C, 0x62, 0x85, 0x76, 0x21, 0x90 };
-Dimension::Id Dimension_Las_Time =                        { 0xE3, 0x32, 0xB3, 0x93, 0xC3, 0x44, 0x49, 0x25, 0xA1, 0x45, 0x3C, 0x72, 0xA9, 0x1D, 0xC5, 0xD1 };
-
-//
-// TerraSolid
-//
-// 
-// X: "Easting"
-// Y": "Northing"
-// Z: "Elevation"
-
-//u8 The alpha image channel value associated with this point";    //u8
-Dimension::Id Dimension_TerraSolid_Alpha =                { 0xEC, 0x91, 0x99, 0xEC, 0xC5, 0x4D, 0x40, 0x78, 0x84, 0x85, 0x72, 0xFC, 0x25, 0x73, 0x61, 0x8F };
-//"Classification code 0-255" //u8
-Dimension::Id Dimension_TerraSolid_Classification =       { 0xDB, 0x65, 0x44, 0xFC, 0x25, 0x8D, 0x46, 0x09, 0x8A, 0x59, 0x55, 0x13, 0x29, 0x3A, 0x9C, 0xCF };
-//"Flightline number 0-255"
-Dimension::Id Dimension_TerraSolid_PointSourceId_u8 =     { 0xB6, 0x66, 0xEF, 0x8B, 0xB6, 0x13, 0x4F, 0x61, 0xBD, 0xFB, 0x40, 0x1F, 0x4A, 0xC1, 0x40, 0xF9 };
-//"Flightline number 0-255"
-Dimension::Id Dimension_TerraSolid_PointSourceId_u16 =    { 0x7B, 0x56, 0x73, 0x4C, 0xC3, 0x9C, 0x49, 0xC3, 0x96, 0x1A, 0x71, 0x0A, 0x7C, 0x70, 0xE4, 0x81 };
-//"Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo."
-Dimension::Id Dimension_TerraSolid_ReturnNumber_u8 =      { 0x50, 0x23, 0x0B, 0x8D, 0x89, 0xAC, 0x4D, 0xEC, 0x95, 0x8A, 0x28, 0x45, 0x9C, 0x35, 0x78, 0xB9 };
-Dimension::Id Dimension_TerraSolid_ReturnNumber_u16 =     { 0xEA, 0x17, 0x26, 0x34, 0x72, 0xA5, 0x43, 0x34, 0x95, 0x1E, 0x58, 0x20, 0x13, 0x64, 0x8A, 0x19 };
-//"Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo."
-Dimension::Id Dimension_TerraSolid_Flag =                 { 0xA2, 0x9A, 0x22, 0xD2, 0xF0, 0x6E, 0x4E, 0x07, 0x9D, 0x41, 0x6F, 0x69, 0xBC, 0xBB, 0xE8, 0xCD };
-//"Runtime flag"//u8
-Dimension::Id Dimension_TerraSolid_Mark =                 { 0x95, 0xBA, 0xC8, 0x1D, 0x97, 0x4D, 0x42, 0x11, 0x84, 0xAD, 0xA9, 0x10, 0x03, 0x9E, 0x18, 0xDC };
-//"Intensity bits 0-13, echo bits 14-15" //u16
-Dimension::Id Dimension_TerraSolid_Intensity =            { 0xB5, 0x0A, 0x89, 0xFB, 0x14, 0x2D, 0x45, 0xC2, 0xBC, 0xDE, 0x29, 0x8F, 0x78, 0x3D, 0xE0, 0xED };
-//"32 bit integer time stamps. Time stamps are assumed to be GPS week seconds. The storage format is a 32 bit unsigned integer where each integer step is 0.0002 seconds.";//i32
-Dimension::Id Dimension_TerraSolid_Time =                 { 0xA1, 0x56, 0x63, 0xBB, 0xB4, 0xC2, 0x41, 0x92, 0xBB, 0xE8, 0x55, 0x91, 0x35, 0xDA, 0x5A, 0x3A };
-
-//
-// Chipper
-//
-Dimension::Id Dimension_Chipper_1 =                       { 0xF2, 0x52, 0xF1, 0x5A, 0x2F, 0x96, 0x48, 0x68, 0xA3, 0x5C, 0x9F, 0xDC, 0x6D, 0xA7, 0x6B, 0x22 };
-Dimension::Id Dimension_Chipper_2 =                       { 0x2E, 0xB2, 0x64, 0xCB, 0x9F, 0x18, 0x45, 0xB8, 0xA3, 0x4F, 0x16, 0x60, 0xD8, 0x6C, 0xDC, 0x74 };
-
-//
-// Qfit
-// 
-
-// //"Longitude coordinate with 1/1000000 decimals of precision"
-////"Latitude coordinate with 1/1000000 decimals of precision"
-////"z coordinate as a long integer.  You must use the scale and offset information of the header to determine the double value."
-//"Start Pulse Signal Strength (relative)"
-Dimension::Id Dimension_Qfit_StartPulse =                 { 0xAC, 0x04, 0x01, 0xA2, 0x45, 0xC5, 0x4F, 0x5A, 0x93, 0x70, 0x51, 0x91, 0xBD, 0x40, 0x33, 0x6A };
-//"Reflected Laser Signal Strength (relative)"
-Dimension::Id Dimension_Qfit_ReflectedPulse =             { 0xF6, 0x51, 0x99, 0x72, 0x8C, 0xF9, 0x40, 0xF0, 0x9A, 0x30, 0x16, 0x8A, 0x1E, 0x02, 0xB3, 0x40 };
-//"Scan Azimuth (degrees X 1,000)"
-Dimension::Id Dimension_Qfit_ScanAngleRank =              { 0xA2, 0xCD, 0x54, 0x4B, 0x63, 0x12, 0x46, 0x20, 0xB7, 0x19, 0x6A, 0xAF, 0x95, 0x4A, 0xAF, 0x00 };
-//"Pitch (degrees X 1,000)"
-Dimension::Id Dimension_Qfit_Pitch =                      { 0xAA, 0x8B, 0xE1, 0xA8, 0x34, 0xFA, 0x41, 0x8E, 0xA2, 0xEB, 0x11, 0x43, 0x16, 0xC2, 0x24, 0xC8 };
-//"Roll (degrees X 1,000)"
-Dimension::Id Dimension_Qfit_Roll =                       { 0xFC, 0xCE, 0x23, 0x04, 0xED, 0xED, 0x43, 0x4D, 0xA0, 0x41, 0x3B, 0xBA, 0x29, 0x75, 0xC7, 0x75 };
-// "Relative Time (msec from start of data file)";// i32
-Dimension::Id Dimension_Qfit_Time =                       { 0x5F, 0xFC, 0x07, 0x62, 0x0B, 0xA2, 0x4A, 0x64, 0x91, 0xCF, 0x1C, 0x62, 0x85, 0x76, 0x21, 0x90 };
-//"Passive Signal (relative)" // i32
-Dimension::Id Dimension_Qfit_PassiveSignal =              { 0xEA, 0x96, 0x37, 0x54, 0x6B, 0x9C, 0x4B, 0x5F, 0xB7, 0x5E, 0xD6, 0xF9, 0xCC, 0x55, 0x44, 0xD7 };
-//"Passive Footprint Longitude (degrees X 1,000,000)" // i32
-Dimension::Id Dimension_Qfit_PassiveX =                   { 0x01, 0x6A, 0x10, 0x07, 0xC3, 0x9D, 0x48, 0x6E, 0xAA, 0x91, 0x1A, 0x50, 0xBB, 0x62, 0xDF, 0x9D };
-//"Passive Footprint Latitude (degrees X 1,000,000)"  // i32
-Dimension::Id Dimension_Qfit_PassiveY =                   { 0x66, 0x6D, 0x81, 0x0B, 0xB7, 0xED, 0x41, 0xC8, 0x8E, 0xA2, 0xEA, 0x6E, 0x46, 0x3B, 0xAE, 0xCD };
-//"Passive Footprint Synthesized Elevation (millimeters)" // i32
-Dimension::Id Dimension_Qfit_PassiveZ =                   { 0x5D, 0xC5, 0xFB, 0x8F, 0xC4, 0x24, 0x4F, 0x2E, 0xA1, 0x93, 0xF9, 0xB1, 0x0B, 0xE8, 0x1C, 0xD7 };
-//"GPS Time packed (example: 153320100 = 15h 33m 20s 100ms)" // i32
-Dimension::Id Dimension_Qfit_GpsTime =                    { 0x4E, 0x87, 0x33, 0x04, 0xBB, 0x38, 0x4F, 0x26, 0x8E, 0x52, 0x68, 0x33, 0xDE, 0x59, 0xFB, 0xB9 };
-//"GPS PDOP (dilution of precision) (X 10)  // i32
-Dimension::Id Dimension_Qfit_PDOP =                       { 0x2A, 0x12, 0xC6, 0x49, 0xBC, 0xF0, 0x48, 0x47, 0x88, 0x83, 0xD5, 0x1E, 0xEC, 0xC5, 0x82, 0xB4 };
-//"Laser received pulse width (digitizer samples) // i32
-Dimension::Id Dimension_Qfit_PulseWidth =                 { 0x00, 0xD3, 0x7C, 0x5C, 0x6A, 0xAF, 0x44, 0x53, 0x97, 0xD2, 0xB6, 0x1E, 0xCE, 0xEB, 0x88, 0x05 };
-#endif
+    
 class KnownDimension
 {
 public:
     Dimension::Id id;
     Dimension::DataType datatype;
     std::string name;
+    std::string description;
 };
 
 KnownDimension s_knownDimensions[] =
 {
-    // common x,y,z
-    { Dimension::Id_X_i32, Dimension::Int32, "X" },
-    { Dimension::Id_Y_i32, Dimension::Int32, "Y" },
-    { Dimension::Id_Z_i32, Dimension::Int32, "Z" },
-    { Dimension::Id_X_f64, Dimension::Double, "X" },
-    { Dimension::Id_Y_f64, Dimension::Double, "Y" },
-    { Dimension::Id_Z_f64, Dimension::Double, "Z" },
+    //
+    // common stuff
+    //
+    { 
+        Dimension::Id_X_i32, Dimension::Int32, "X", 
+        "x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value." 
+    },
+    {
+        Dimension::Id_Y_i32, Dimension::Int32, "Y", 
+        "y coordinate as a long integer. You must use the scale and offset information of the header to determine the double value."
+    },
+    { 
+        Dimension::Id_Z_i32, Dimension::Int32, "Z",
+        "z coordinate as a long integer. You must use the scale and offset information of the header to determine the double value." 
+    },
+    { 
+        Dimension::Id_X_f64, Dimension::Double, "X",
+        "x coordinate as a double"
+    },
+    { 
+        Dimension::Id_Y_f64, Dimension::Double, "Y", 
+        "y coordinate as a double" 
+    },
+    { 
+        Dimension::Id_Z_f64, Dimension::Double, "Z",
+        "z coordinate as a double"
+    },
 
-    { Dimension::Id_Time_u64, Dimension::Uint64, "Time" },
+    {
+        Dimension::Id_Time_u64, Dimension::Uint64, "Time",
+        "Time value" 
+    },
 
-    { Dimension::Id_Red_u16, Dimension::Uint16, "Red" },
-    { Dimension::Id_Green_u16, Dimension::Uint16, "Green" },
-    { Dimension::Id_Blue_u16, Dimension::Uint16, "Blue" },
-    { Dimension::Id_Red_u8, Dimension::Uint8, "Red" },
-    { Dimension::Id_Green_u8, Dimension::Uint8, "Green" },
-    { Dimension::Id_Blue_u8, Dimension::Uint8, "Blue" },
+    { 
+        Dimension::Id_Red_u16, Dimension::Uint16, "Red",
+        "The red image channel value associated with this point" 
+    },
+    {
+        Dimension::Id_Green_u16, Dimension::Uint16, "Green", 
+        "The green image channel value associated with this point" 
+    },
+    {
+        Dimension::Id_Blue_u16, Dimension::Uint16, "Blue",
+        "The blue image channel value associated with this point"
+    },
+    {
+        Dimension::Id_Red_u8, Dimension::Uint8, "Red",
+        "The red image channel value associated with this point"
+    },
+    {
+        Dimension::Id_Green_u8, Dimension::Uint8, "Green",
+        "The green image channel value associated with this point"
+    },
+    {
+        Dimension::Id_Blue_u8, Dimension::Uint8, "Blue",
+        "The blue image channel value associated with this point"
+    },
 
+    //
     // las
-    { Dimension::Id_Las_Intensity, Dimension::Uint16, "Intensity" },
-    { Dimension::Id_Las_ReturnNumber, Dimension::Uint8, "ReturnNumber" },
-    { Dimension::Id_Las_NumberOfReturns, Dimension::Uint8, "NumberOfReturns" },
-    { Dimension::Id_Las_ScanDirectionFlag, Dimension::Uint8, "ScanDirectionFlag" },
-    { Dimension::Id_Las_EdgeOfFlightLine, Dimension::Uint8, "EdgeOfFlightLine" },
-    { Dimension::Id_Las_Classification, Dimension::Uint8, "Classification" },
-    { Dimension::Id_Las_ScanAngleRank, Dimension::Int8, "ScanAngleRank" },
-    { Dimension::Id_Las_UserData, Dimension::Uint8, "UserData" },
-    { Dimension::Id_Las_PointSourceId, Dimension::Uint16, "PointSourceId" },
-    { Dimension::Id_Las_WavePacketDescriptorIndex, Dimension::Uint8, "WavePacketDescriptorIndex" },
-    { Dimension::Id_Las_WaveformDataOffset, Dimension::Uint64, "WaveformDataOffset" },
-    { Dimension::Id_Las_ReturnPointWaveformLocation, Dimension::Uint32, "ReturnPointWaveformLocation" },
-    { Dimension::Id_Las_WaveformXt, Dimension::Float, "WaveformXt" },
-    { Dimension::Id_Las_WaveformYt, Dimension::Float, "WaveformYt" },
-    { Dimension::Id_Las_WaveformZt, Dimension::Float, "WaveformZt" },
-    { Dimension::Id_Las_Time, Dimension::Double, "Time" },
+    // 
+    { 
+        Dimension::Id_Las_Intensity, Dimension::Uint16, "Intensity", 
+        "The intensity value is the integer representation of the pulse "
+        "return magnitude. This value is optional and system specific. "
+        "However, it should always be included if available." 
+    },
+    {
+        Dimension::Id_Las_ReturnNumber, Dimension::Uint8, "ReturnNumber",
+        "Return Number: The Return Number is the pulse return number for "
+        "a given output pulse. A given output laser pulse can have many "
+        "returns, and they must be marked in sequence of return. The first "
+        "return will have a Return Number of one, the second a Return "
+        "Number of two, and so on up to five returns." 
+        },
+    { 
+        Dimension::Id_Las_NumberOfReturns, Dimension::Uint8, "NumberOfReturns",
+        "Number of Returns (for this emitted pulse): The Number of Returns "
+        "is the total number of returns for a given pulse. For example, "
+        "a laser data point may be return two (Return Number) within a "
+        "total number of five returns." 
+        },
+    { 
+        Dimension::Id_Las_ScanDirectionFlag, Dimension::Uint8, "ScanDirectionFlag",
+        "The Scan Direction Flag denotes the direction at which the "
+        "scanner mirror was traveling at the time of the output pulse. "
+        "A bit value of 1 is a positive scan direction, and a bit value "
+        "of 0 is a negative scan direction (where positive scan direction "
+        "is a scan moving from the left side of the in-track direction to "
+        "the right side and negative the opposite)." 
+    },
+    {
+        Dimension::Id_Las_EdgeOfFlightLine, Dimension::Uint8, "EdgeOfFlightLine",
+        "The Edge of Flight Line data bit has a value of 1 only when "
+        "the point is at the end of a scan. It is the last point on "
+        "a given scan line before it changes direction." 
+    },
+    {
+        Dimension::Id_Las_Classification, Dimension::Uint8, "Classification",
+        "Classification in LAS 1.0 was essentially user defined and optional. "
+        "LAS 1.1 defines a standard set of ASPRS classifications. In addition, "
+        "the field is now mandatory. If a point has never been classified, this "
+        "byte must be set to zero. There are no user defined classes since "
+        "both point format 0 and point format 1 supply 8 bits per point for "
+        "user defined operations. Note that the format for classification is a "
+        "bit encoded field with the lower five bits used for class and the "
+        "three high bits used for flags." 
+    },
+    {
+        Dimension::Id_Las_ScanAngleRank, Dimension::Int8, "ScanAngleRank",
+        "The Scan Angle Rank is a signed one-byte number with a "
+        "valid range from -90 to +90. The Scan Angle Rank is the "
+        "angle (rounded to the nearest integer in the absolute "
+        "value sense) at which the laser point was output from the "
+        "laser system including the roll of the aircraft. The scan "
+        "angle is within 1 degree of accuracy from +90 to –90 degrees. "
+        "The scan angle is an angle based on 0 degrees being nadir, "
+        "and –90 degrees to the left side of the aircraft in the "
+        "direction of flight." 
+    },
+    {
+        Dimension::Id_Las_UserData, Dimension::Uint8, "UserData", 
+        "This field may be used at the user’s discretion" 
+    },
+    {
+        Dimension::Id_Las_PointSourceId, Dimension::Uint16, "PointSourceId",
+        "This value indicates the file from which this point originated. "
+        "Valid values for this field are 1 to 65,535 inclusive with zero "
+        "being used for a special case discussed below. The numerical value "
+        "corresponds to the File Source ID from which this point originated. "
+        "Zero is reserved as a convenience to system implementers. A Point "
+        "Source ID of zero implies that this point originated in this file. "
+        "This implies that processing software should set the Point Source "
+        "ID equal to the File Source ID of the file containing this point "
+        "at some time during processing. " 
+    },
+    {
+        Dimension::Id_Las_WavePacketDescriptorIndex, Dimension::Uint8, "WavePacketDescriptorIndex",
+    },
+    { 
+        Dimension::Id_Las_WaveformDataOffset, Dimension::Uint64, "WaveformDataOffset",
+    },
+    { 
+        Dimension::Id_Las_ReturnPointWaveformLocation, Dimension::Uint32, "ReturnPointWaveformLocation",
+    },
+    { 
+        Dimension::Id_Las_WaveformXt, Dimension::Float, "WaveformXt" , ""
+    },
+    { 
+        Dimension::Id_Las_WaveformYt, Dimension::Float, "WaveformYt", ""
+    },
+    { 
+        Dimension::Id_Las_WaveformZt, Dimension::Float, "WaveformZt", ""
+    },
+    {
+        Dimension::Id_Las_Time, Dimension::Double, "Time",
+        "The GPS Time is the double floating point time tag value at "
+        "which the point was acquired. It is GPS Week Time if the "
+        "Global Encoding low bit is clear and Adjusted Standard GPS "
+        "Time if the Global Encoding low bit is set (see Global Encoding "
+        "in the Public Header Block description)." 
+    },
 
+    //
     // terrasolid
-    { Dimension::Id_TerraSolid_Alpha, Dimension::Uint8, "Alpha" },
-    { Dimension::Id_TerraSolid_Classification, Dimension::Uint8, "Classification" },
-    { Dimension::Id_TerraSolid_PointSourceId_u8, Dimension::Uint8, "PointSourceId_u8" },
-    { Dimension::Id_TerraSolid_PointSourceId_u16, Dimension::Uint16, "PointSourceId_u16" },
-    { Dimension::Id_TerraSolid_ReturnNumber_u8, Dimension::Uint8, "ReturnNumber" },
-    { Dimension::Id_TerraSolid_ReturnNumber_u16, Dimension::Uint16, "ReturnNumber" },
-    { Dimension::Id_TerraSolid_Flag, Dimension::Uint8, "Flag" },
-    { Dimension::Id_TerraSolid_Mark, Dimension::Uint8, "Mark" },
-    { Dimension::Id_TerraSolid_Intensity, Dimension::Uint16, "Intensity" },
-    { Dimension::Id_TerraSolid_Time, Dimension::Uint32, "TerraSolid Time" },
+    //
+    // X: "Easting"
+    // Y: "Northing"
+    // Z: "Elevation"
+    { 
+        Dimension::Id_TerraSolid_Alpha, Dimension::Uint8, "Alpha", 
+        "The alpha image channel value associated with this point" 
+    },
+    {
+        Dimension::Id_TerraSolid_Classification, Dimension::Uint8, "Classification", 
+        "Classification code 0-255"
+    },
+    {
+        Dimension::Id_TerraSolid_PointSourceId_u8, Dimension::Uint8, "PointSourceId_u8",
+        "Flightline number 0-255" 
+    },
+    {
+        Dimension::Id_TerraSolid_PointSourceId_u16, Dimension::Uint16, "PointSourceId_u16",
+        "Flightline number 0-255"
+    },
+    {
+        Dimension::Id_TerraSolid_ReturnNumber_u8, Dimension::Uint8, "ReturnNumber",
+        "Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo."
+    },
+    {
+        Dimension::Id_TerraSolid_ReturnNumber_u16, Dimension::Uint16, "ReturnNumber",
+        "Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo."
+    },
+    {
+        Dimension::Id_TerraSolid_Flag, Dimension::Uint8, "Flag",
+        "Runtime flag (view visibility)"
+    },
+    {
+        Dimension::Id_TerraSolid_Mark, Dimension::Uint8, "Mark",
+        "Runtime flag"
+    },
+    { 
+        Dimension::Id_TerraSolid_Intensity, Dimension::Uint16, "Intensity", 
+        "The intensity value is the integer representation of the pulse "
+        "return magnitude. This value is optional and system specific. "
+        "However, it should always be included if available."
+    },
+    {
+        Dimension::Id_TerraSolid_Time, Dimension::Uint32, "TerraSolid Time",
+        "32 bit integer time stamps. Time stamps are assumed to be GPS week seconds. The storage format is a 32 bit unsigned integer where each integer step is 0.0002 seconds."
+    },
 
+    //
     // chipper
-    { Dimension::Id_Chipper_1, Dimension::Int32, "Chipper1" },
-    { Dimension::Id_Chipper_2, Dimension::Int32, "Chipper2" },
+    //
+    {
+        Dimension::Id_Chipper_1, Dimension::Int32, "Chipper1", ""
+    },
+    {
+        Dimension::Id_Chipper_2, Dimension::Int32, "Chipper2", ""
+    },
 
+    //
     // qfit
-    { Dimension::Id_Qfit_StartPulse, Dimension::Int32, "StartPulse" },
-    { Dimension::Id_Qfit_ReflectedPulse, Dimension::Int32, "ReflectedPulse" },
-    { Dimension::Id_Qfit_ScanAngleRank, Dimension::Int32, "ScanAngleRank" },
-    { Dimension::Id_Qfit_Pitch, Dimension::Int32, "Pitch" },
-    { Dimension::Id_Qfit_Roll, Dimension::Int32, "Roll" },
-    { Dimension::Id_Qfit_Time, Dimension::Int32, "Qfit Time" },
-    { Dimension::Id_Qfit_PassiveSignal, Dimension::Int32, "PassiveSignal" },
-    { Dimension::Id_Qfit_PassiveX, Dimension::Int32, "PassiveX" },
-    { Dimension::Id_Qfit_PassiveY, Dimension::Int32, "PassiveY" },
-    { Dimension::Id_Qfit_PassiveZ, Dimension::Int32, "PassiveZ" },
-    { Dimension::Id_Qfit_GpsTime, Dimension::Int32, "GpsTime" },
-    { Dimension::Id_Qfit_PDOP, Dimension::Int32, "PDOP" },
-    { Dimension::Id_Qfit_PulseWidth, Dimension::Int32, "PulseWdith" },
+    //
+    // X: "Longitude coordinate with 1/1000000 decimals of precision"
+    // Y: "Latitude coordinate with 1/1000000 decimals of precision"
+    // Z: "z coordinate as a long integer.  You must use the scale and offset information of the header to determine the double value."
+    { Dimension::Id_Qfit_StartPulse, Dimension::Int32, "StartPulse", "Start Pulse Signal Strength (relative)" 
+        },
+    {
+        Dimension::Id_Qfit_ReflectedPulse, Dimension::Int32, "ReflectedPulse", "Reflected Laser Signal Strength (relative)" 
+    },
+    { 
+        Dimension::Id_Qfit_ScanAngleRank, Dimension::Int32, "ScanAngleRank", "Scan Azimuth (degrees X 1,000)" 
+    },
+    {
+        Dimension::Id_Qfit_Pitch, Dimension::Int32, "Pitch", "Pitch (degrees X 1,000)" 
+    },
+    { 
+        Dimension::Id_Qfit_Roll, Dimension::Int32, "Roll", "Roll (degrees X 1,000)" 
+    },
+    { 
+        Dimension::Id_Qfit_Time, Dimension::Int32, "Qfit Time", "Relative Time (msec from start of data file)" 
+    },
+    { 
+        Dimension::Id_Qfit_PassiveSignal, Dimension::Int32, "PassiveSignal", "Passive Signal (relative)" 
+    },
+    { 
+        Dimension::Id_Qfit_PassiveX, Dimension::Int32, "PassiveX", "Passive Footprint Longitude (degrees X 1,000,000)" 
+    },
+    { 
+        Dimension::Id_Qfit_PassiveY, Dimension::Int32, "PassiveY", "Passive Footprint Latitude (degrees X 1,000,000)"
+    },
+    { 
+        Dimension::Id_Qfit_PassiveZ, Dimension::Int32, "PassiveZ", "Passive Footprint Synthesized Elevation (millimeters)" 
+    },
+    { 
+        Dimension::Id_Qfit_GpsTime, Dimension::Int32, "GpsTime", "GPS Time packed (example: 153320100 = 15h 33m 20s 100ms)" 
+    },
+    { 
+        Dimension::Id_Qfit_PDOP, Dimension::Int32, "PDOP", "GPS PDOP (dilution of precision) (X 10)" 
+    },
+    { 
+        Dimension::Id_Qfit_PulseWidth, Dimension::Int32, "PulseWdith", "Laser received pulse width (digitizer samples)" 
+    },
 
     // eof
     { Dimension::Id_Undefined, Dimension::Undefined, "" }
@@ -276,7 +376,7 @@ static void validate()
 
 // --------------------------------------------------------------------------
 
-Dimension::Dimension(const Id& id)
+Dimension::Dimension(Id id)
     : m_dataType(Undefined)
     , m_id(id)
     , m_name(std::string(""))
@@ -293,20 +393,20 @@ Dimension::Dimension(const Id& id)
     const KnownDimension& kd = lookupKnownDimension(id);
     m_dataType = kd.datatype;
     m_name = kd.name;
-    m_description = "";
+    m_description = kd.description;
 
     m_byteSize = getDataTypeSize(m_dataType);
 }
 
 
-Dimension::Dimension(const Id& id, DataType dataType, std::string name)
+Dimension::Dimension(Id id, DataType dataType, std::string name, std::string description)
     : m_dataType(dataType)
     , m_id(id)
     , m_name(name)
     , m_flags(0)
     , m_endian(pdal::Endian_Little)
     , m_byteSize(0)
-    , m_description(std::string(""))
+    , m_description(description)
     , m_min(0.0)
     , m_max(0.0)
     , m_precise(false)
