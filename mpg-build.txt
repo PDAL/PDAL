@@ -1,0 +1,80 @@
+****************************************
+PDAL Windows 32bit Build and Installation
+
+Date: September 17, 2011  - FOSS4G 2011 Code Sprint
+*****************************************
+
+
+**Prerequisites**
+
+* Git for Windows - http://code.google.com/p/msysgit
+
+* Visual Studio 2010 Express C++ - http://www.microsoft.com/visualstudio/en-us/products/2010-editions/visual-cpp-express
+(You can also use a full version of Visual Studio 2010. The build process hasn't been tested on VS 2008 or older.)
+
+* CMake - http://www.cmake.org/ (Win32 Installer)
+
+* BOOST Pro - http://www.boostpro.com/download/ (boost.teeks99.com has prebuild binaries for 64bit)
+** Visual Studio 2010 C++
+** Check all Variants, click next
+** Use defaults
+** Install to C:\Utils\boost_1_47
+
+* OSGeo4W - http://trac.osgeo.org/osgeo4w/
+** Download and run installer with the Advanced install
+** enable liblas-devel in the lib tree
+** enable gdal-dev
+** enable libxml2
+** enable iconv
+
+**Get the PDAL source**
+https://github.com/PDAL/PDAL
+git clone https://github.com/PDAL/PDAL.git .
+
+**Build LASZip**
+
+* Website: https://github.com/LASzip/LASzip
+* Download source from Git: C:\dev\LASzip>git clone https://github.com/LASzip/LASzip.git
+* create a LASZIP mpg-config.bat to run CMake
+
+-----------
+@echo off 
+
+set G="Visual Studio 10 Win64" 
+set G="Visual Studio 10" 
+
+set BUILD_TYPE=Release 
+set BUILD_TYPE=Debug 
+
+cmake -G %G% -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_VERBOSE_MAKEFILE=OFF C:\dev\LASzip
+---------------
+
+* Run CMake using the mpg-config.bat  Note: On Vista/Win7+ you may need to run the windows CMD prompt as Administrator (Windows-key CMD Ctrl-Shift-Enter)
+* Open Visual Studio 2010 Express and open the LASZip.sln
+* Build (F7)
+
+**Build PDAL**
+* configure the variables in mpg-config.bat to match you installation paths (If you didn't use the standard C:\dev & C:\Utils etc.)
+* run the mpg-config.bat Note: On Vista/Win7+ you may need to run the windows CMD prompt as Administrator (Windows-key CMD Ctrl-Shift-Enter)
+* If you have path issue try deleting the CMakeCache.txt file
+
+* After a successful make, open the PDAL.sln in Visual Studio 2010 Express
+* Build (F7)
+* Copy the laszip.dll from the C:\dev\LASZIP\bin\Debug\Debug you built above to the C:\dev\PDAL\bin
+
+
+**Testing**
+Set pdal_test as the default/startup application in Visual Studio
+Run with debug (F5)
+
+**TroubleShooting**
+* Missing liblas.dll - double check that C:\OSGeo4W\bin is on your system PATH variable
+* libtiff.dll errors - double check that other versions of the lib are not on the path. For example, ArcGIS installs a version of libtiff that is not compatible.
+* "ERROR 4: Unable to open EPSG support file gcs.csv" or GDAL_DATA variable errors - Set GDAL_DATA system variable to C:\OSGeo4W\share\gdal
+* PROJ errors - Set PROJ_LIB system variable to C:\OSGeo4W\share\proj
+
+
+
+
+
+
