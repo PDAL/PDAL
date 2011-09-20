@@ -793,6 +793,9 @@ void Writer::writeSchema(TextWriterPtr writer)
             case pdal::Dimension::Double:
                 type << "double";
                 break;
+            case pdal::Dimension::Pointer:
+                type << "pointer";
+                break;
             case pdal::Dimension::Undefined:
                 type << "unknown";
                 break;
