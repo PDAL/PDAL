@@ -163,7 +163,7 @@ public:
     {
         IsAdded   = 0x1,
         IsRead    = 0x2,
-        IsWritten = 0x4,
+        IsWritten = 0x4
     };
 
 /// \name Constructors
