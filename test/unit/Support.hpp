@@ -123,7 +123,7 @@ public:
     // note: under windows, all "/" characrters in cmd will be converted to "\\" for you
     static int run_command(const std::string& cmd, std::string& output);
     
-    static std::string Support::replaceAll(std::string result, 
+    static std::string replaceAll(std::string result, 
                                            const std::string& replaceWhat, 
                                            const std::string& replaceWithWhat);
 };
