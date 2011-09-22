@@ -166,7 +166,7 @@ void PercentageCallback::callback()
 
     double currPerc = getPercentComplete();
     
-    if (currPerc == 100.0)
+    if (pdal::Utils::compare_distance<double>(currPerc, 100.0))
     {
         std::cout << "100\n";
         m_done = true;
