@@ -171,6 +171,8 @@ Word #       Content
 #include <pdal/drivers/qfit/Iterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
+#include <pdal/Utils.hpp>
+
 
 #include <map>
 
@@ -468,7 +470,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             
             if (m_convert_z)
             {
-                z = z/100;
+                z = Utils::sround(static_cast<double>(z)/100.0);
             }
             data.setField<boost::int32_t>(pointIndex, indexes.Z, z);
 
