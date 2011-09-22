@@ -95,7 +95,12 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     pdal::Options options;
     // std::string filename = Support::datapath("20050903_231839.qi");
 
-    pdal::Option filename("input", Support::datapath("qfit/10-word.qi"), "Input filename for reader to use" );
+    pdal::Option filename("filename", Support::datapath("qfit/10-word.qi"), "Input filename for reader to use" );
+    Option flip_coordinates("flip_coordinates", false, "Flip coordinates from 0-360 to -180-180");
+    Option convert_z_units("convert_z_units", false, "Convert Z units from mm to m");
+
+    options.add(convert_z_units);
+    options.add(flip_coordinates);
     options.add(filename);
     pdal::drivers::qfit::Reader reader(options);
     BOOST_CHECK(reader.getDescription() == "QFIT Reader");
@@ -128,8 +133,14 @@ BOOST_AUTO_TEST_CASE(test_14_word)
 {
     pdal::Options options;
 
-    pdal::Option filename("input", Support::datapath("qfit/14-word.qi"), "Input filename for reader to use" );
+    pdal::Option filename("filename", Support::datapath("qfit/14-word.qi"), "Input filename for reader to use" );
     options.add(filename);
+    Option flip_coordinates("flip_coordinates", false, "Flip coordinates from 0-360 to -180-180");
+    Option convert_z_units("convert_z_units", false, "Convert Z units from mm to m");
+
+    options.add(convert_z_units);
+    options.add(flip_coordinates);
+
     pdal::drivers::qfit::Reader reader(options);
     reader.initialize();    
 

@@ -168,6 +168,8 @@ private:
     QFIT_Format_Type m_format;
     std::size_t m_offset;
     boost::uint32_t m_size;
+    bool m_flip_x;
+    bool m_convert_z;
     
     void registerFields();
 
