@@ -52,16 +52,17 @@ SchemaLayout::SchemaLayout(const Schema& schema)
     , m_byteSize(0)
 {
     calculateSizes();
+
     return;
 }
 
 
 /// copy constructor
 SchemaLayout::SchemaLayout(SchemaLayout const& other) 
-    : 
-    m_schema(other.m_schema)
+    : m_schema(other.m_schema)
     , m_dimensionLayouts(other.m_dimensionLayouts)
     , m_byteSize(other.m_byteSize)
+    , m_dimensions_map(other.m_dimensions_map)
 {
 }
 
@@ -74,6 +75,7 @@ SchemaLayout& SchemaLayout::operator=(SchemaLayout const& rhs)
         m_dimensionLayouts = rhs.m_dimensionLayouts;
         m_byteSize = rhs.m_byteSize;
         m_schema = rhs.m_schema;
+        m_dimensions_map = rhs.m_dimensions_map;
     }
 
     return *this;
@@ -87,6 +89,8 @@ bool SchemaLayout::operator==(const SchemaLayout& other) const
     if (m_schema != other.m_schema)
         return false;
     if (m_dimensionLayouts != other.m_dimensionLayouts)
+        return false;
+    if (m_dimensions_map != other.m_dimensions_map)
         return false;
         
     return true;
@@ -121,14 +125,39 @@ void SchemaLayout::calculateSizes()
         offset += dim.getByteSize();
 
         layout.setPosition(i);
-        ++i;
 
         m_dimensionLayouts.push_back(layout);
+    
+        std::pair<Dimension::Id, std::size_t> p(dim.getId(), i);
+        m_dimensions_map.insert(p);
+
+        ++i;
     }
 
     m_byteSize = offset;
 
     return;
+}
+
+
+int SchemaLayout::getDimensionIndex(const Dimension::Id& id) const
+{
+    std::map<Dimension::Id, std::size_t>::const_iterator i = m_dimensions_map.find(id);
+    
+    int m = 0;
+    
+    if (i == m_dimensions_map.end()) 
+        m = -1;
+    else
+        m = i->second;
+
+    return m;
+}
+
+
+int SchemaLayout::getDimensionIndex(const Dimension& dim) const
+{
+    return getDimensionIndex(dim.getId());
 }
 
 

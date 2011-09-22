@@ -54,11 +54,11 @@ static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double
 {
     using namespace pdal;
 
-    const Schema& schema = data.getSchema();
+    const SchemaLayout& schemaLayout = data.getSchemaLayout();
 
-    const int indexX = schema.getDimensionIndex(Dimension::Id_X_i32);
-    const int indexY = schema.getDimensionIndex(Dimension::Id_Y_i32);
-    const int indexZ = schema.getDimensionIndex(Dimension::Id_Z_i32);
+    const int indexX = schemaLayout.getDimensionIndex(Dimension::Id_X_i32);
+    const int indexY = schemaLayout.getDimensionIndex(Dimension::Id_Y_i32);
+    const int indexZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_i32);
 
     const boost::int32_t xraw = data.getField<boost::int32_t>(0, indexX);
     const boost::int32_t yraw = data.getField<boost::int32_t>(0, indexY);

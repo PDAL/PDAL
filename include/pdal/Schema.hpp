@@ -85,20 +85,13 @@ public:
     void appendDimension(Dimension const& dim);
     void appendDimensions(const std::vector<Dimension>& dim);
 
-    const Dimension& getDimension(std::size_t index) const;
-    Dimension& getDimension(std::size_t index);
     const Dimensions& getDimensions() const;
 
-    // returns the index of the field
-    //
-    // This function assumes the field is present and valid.  If not, it will throw.
-    // (This behaviour is okay because looking up the diemsnion index is not expected 
-    // to be on the critical path anywhere.)
-    int getDimensionIndex(const Dimension::Id& id) const;
-    int getDimensionIndex(const Dimension& dim) const;
-
     bool hasDimension(const Dimension::Id& id) const;
-    bool hasDimension(const Dimension& dim) const;
+    //bool hasDimension(const Dimension& dim) const;
+
+    Dimension& getDimension(const Dimension::Id& id);
+    const Dimension& getDimension(const Dimension::Id& id) const;
 
     // returns a ptree reprsenting the Schema
     //
@@ -118,6 +111,11 @@ public:
     static std::string to_xml(Schema const& schema);
 
 private:
+    const Dimension& getDimension(std::size_t index) const;
+    Dimension& getDimension(std::size_t index);
+    int getDimensionIndex(const Dimension::Id& id) const;
+    int getDimensionIndex(const Dimension& dim) const;
+
     std::vector<Dimension> m_dimensions;
 
     std::map<Dimension::Id, std::size_t> m_dimensions_map;

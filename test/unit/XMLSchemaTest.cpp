@@ -117,8 +117,8 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     
     for (boost::uint32_t i = 0; i < dims2.size(); ++i)
     {
-        pdal::Dimension const& dim1 = schema.getDimension(i);
-        pdal::Dimension const& dim2 = schema2.getDimension(i);
+        pdal::Dimension const& dim1 = schema.getDimensions()[i];
+        pdal::Dimension const& dim2 = schema2.getDimensions()[i];
     
         BOOST_CHECK_EQUAL(dim1.getDataType(), dim2.getDataType());
         BOOST_CHECK_EQUAL(dim1.getByteSize(), dim2.getByteSize());

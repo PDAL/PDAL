@@ -58,26 +58,27 @@ BOOST_AUTO_TEST_SUITE(TerraSolidReaderTest)
 #define Compare(x,y)    BOOST_CHECK_CLOSE(x,y,0.00001);
 
 
-void Check_Point(const pdal::PointBuffer& data, const ::pdal::Schema& schema, 
+void Check_Point(const pdal::PointBuffer& data,
                        std::size_t index, 
                        double xref, double yref, double zref,
                        double tref)
 {
+    const ::pdal::SchemaLayout& schemaLayout = data.getSchemaLayout();
 
-    int offsetX = schema.getDimensionIndex(pdal::Dimension::Id_X_i32);
-    int offsetY = schema.getDimensionIndex(pdal::Dimension::Id_Y_i32);
-    int offsetZ = schema.getDimensionIndex(pdal::Dimension::Id_Z_i32);
-    int offsetTime = schema.getDimensionIndex(pdal::Dimension::Id_TerraSolid_Time);
+    int offsetX = schemaLayout.getDimensionIndex(pdal::Dimension::Id_X_i32);
+    int offsetY = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Y_i32);
+    int offsetZ = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Z_i32);
+    int offsetTime = schemaLayout.getDimensionIndex(pdal::Dimension::Id_TerraSolid_Time);
     
     boost::int32_t x = data.getField<boost::int32_t>(index, offsetX);
     boost::int32_t y = data.getField<boost::int32_t>(index, offsetY);
     boost::int32_t z = data.getField<boost::int32_t>(index, offsetZ);
     boost::uint32_t t = data.getField<boost::uint32_t>(index, offsetTime);
 
-    double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x);
-    double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y);
-    double z0 = schema.getDimension(offsetZ).applyScaling<boost::int32_t>(z);
-    double t0 = schema.getDimension(offsetTime).applyScaling<boost::uint32_t>(t);
+    double x0 = schemaLayout.getDimension(offsetX).applyScaling<boost::int32_t>(x);
+    double y0 = schemaLayout.getDimension(offsetY).applyScaling<boost::int32_t>(y);
+    double z0 = schemaLayout.getDimension(offsetZ).applyScaling<boost::int32_t>(z);
+    double t0 = schemaLayout.getDimension(offsetTime).applyScaling<boost::uint32_t>(t);
 
   
     // std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -123,9 +124,9 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     delete iter;
 
-    Check_Point(data, schema, 0, 363127.94, 3437612.33, 55.26, 580220.5528);
-    Check_Point(data, schema, 1, 363128.12, 3437613.01, 55.33, 580220.5530);
-    Check_Point(data, schema, 2, 363128.29, 3437613.66, 55.28, 580220.5530);
+    Check_Point(data, 0, 363127.94, 3437612.33, 55.26, 580220.5528);
+    Check_Point(data, 1, 363128.12, 3437613.01, 55.33, 580220.5530);
+    Check_Point(data, 2, 363128.29, 3437613.66, 55.28, 580220.5530);
 
 
     return;

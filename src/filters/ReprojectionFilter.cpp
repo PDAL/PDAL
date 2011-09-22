@@ -257,11 +257,10 @@ void ReprojectionFilter::processBuffer(PointBuffer& data) const
     const boost::uint32_t numPoints = data.getNumPoints();
 
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
 
-    const int indexX = schema.getDimensionIndex(Dimension::Id_X_f64);
-    const int indexY = schema.getDimensionIndex(Dimension::Id_Y_f64);
-    const int indexZ = schema.getDimensionIndex(Dimension::Id_Z_f64);
+    const int indexX = schemaLayout.getDimensionIndex(Dimension::Id_X_f64);
+    const int indexY = schemaLayout.getDimensionIndex(Dimension::Id_Y_f64);
+    const int indexZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_f64);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {

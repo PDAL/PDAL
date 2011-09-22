@@ -52,8 +52,8 @@ BOOST_AUTO_TEST_CASE(test_layout)
     Schema s1;
     s1.appendDimension(d1);
     s1.appendDimension(d2);
-    BOOST_CHECK(s1.getDimensionIndex(Dimension::Id_X_i32) == 0);
-    BOOST_CHECK(s1.getDimensionIndex(Dimension::Id_Y_i32) == 1);
+    BOOST_CHECK(s1.getDimensions()[0].getId() == Dimension::Id_X_i32);
+    BOOST_CHECK(s1.getDimensions()[1].getId() == Dimension::Id_Y_i32);
 
     BOOST_CHECK(s1.hasDimension(Dimension::Id_X_f64) == false);
     BOOST_CHECK(s1.hasDimension(Dimension::Id_Y_f64) == false);
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_layout)
     Schema s2;
     s2.appendDimension(d1);
     BOOST_CHECK(s2.hasDimension(Dimension::Id_X_i32) == true);
-    BOOST_CHECK(s2.getDimensionIndex(Dimension::Id_X_i32) == 0);
+    BOOST_CHECK(s2.getDimensions()[0].getId() == Dimension::Id_X_i32);
     BOOST_CHECK(s2.hasDimension(Dimension::Id_Y_i32) == false);
 
     SchemaLayout l1(s1);
@@ -120,11 +120,11 @@ BOOST_AUTO_TEST_CASE(SchemaLayoutTest_ptree)
     std::string ref = xml_header + "<dimensionlayout>"
         "<dimension><name>X</name><datatype>Int32</datatype>"
         "<description>x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</description>"
-        "<bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>0</byteoffset><position>0</position>"
-        "<isValid>false</isValid></dimensionlayout>"
+        "<bytesize>4</bytesize><endianness>little</endianness><scale>0</scale><isValid>false</isValid></dimension><byteoffset>0</byteoffset><position>0</position>"
+        "</dimensionlayout>"
         "<dimensionlayout><dimension><name>Y</name><datatype>Int32</datatype>"
         "<description>y coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</description>"
-        "<bytesize>4</bytesize><endianness>little</endianness><scale>0</scale></dimension><byteoffset>4</byteoffset><position>1</position><isValid>false</isValid></dimensionlayout>";
+        "<bytesize>4</bytesize><endianness>little</endianness><scale>0</scale><isValid>false</isValid></dimension><byteoffset>4</byteoffset><position>1</position></dimensionlayout>";
 
     boost::algorithm::erase_all(out1, "\n");
     boost::algorithm::erase_all(ref, "\n");

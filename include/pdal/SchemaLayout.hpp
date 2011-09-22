@@ -42,6 +42,8 @@
 #ifndef PDAL_SCHEMALAYOUT_HPP_INCLUDED
 #define PDAL_SCHEMALAYOUT_HPP_INCLUDED
 
+#include <map>
+
 #include <pdal/pdal.hpp>
 
 #include <pdal/Schema.hpp>
@@ -82,6 +84,19 @@ public:
     {
         return m_byteSize;
     }
+    
+    int getDimensionIndex(const Dimension::Id& id) const;
+    int getDimensionIndex(const Dimension& dim) const;
+
+    const Dimension& getDimension(std::size_t index) const
+    {
+        return getDimensionLayout(index).getDimension();
+    }
+
+    Dimension& getDimension(std::size_t index)
+    {
+        return getDimensionLayout(index).getDimension();
+    }
 
     const DimensionLayout& getDimensionLayout(std::size_t index) const
     {
@@ -115,6 +130,8 @@ private:
     Schema m_schema;
     std::vector<DimensionLayout> m_dimensionLayouts;
     std::size_t m_byteSize;
+
+    std::map<Dimension::Id, std::size_t> m_dimensions_map;
 };
 
 

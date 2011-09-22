@@ -389,6 +389,7 @@ Dimension::Dimension(Id id)
     , m_precise(false)
     , m_numericScale(0.0)
     , m_numericOffset(0.0)
+    , m_isValid(false)
 {
     const KnownDimension& kd = lookupKnownDimension(id);
     m_dataType = kd.datatype;
@@ -412,6 +413,7 @@ Dimension::Dimension(Id id, DataType dataType, std::string name, std::string des
     , m_precise(false)
     , m_numericScale(0.0)
     , m_numericOffset(0.0)
+    , m_isValid(false)
 {
     assert(!hasKnownDimension(id));
     
@@ -432,6 +434,7 @@ Dimension::Dimension(Dimension const& other)
     , m_precise(other.m_precise)
     , m_numericScale(other.m_numericScale)
     , m_numericOffset(other.m_numericOffset)
+    , m_isValid(other.m_isValid)
 {
     return;
 }
@@ -453,6 +456,7 @@ Dimension& Dimension::operator=(Dimension const& rhs)
         m_precise = rhs.m_precise;
         m_numericScale = rhs.m_numericScale;
         m_numericOffset = rhs.m_numericOffset;
+        m_isValid = rhs.m_isValid;
     }
 
     return *this;
@@ -471,7 +475,7 @@ bool Dimension::operator==(const Dimension& other) const
         Utils::compare_approx(m_min, other.m_min, (std::numeric_limits<double>::min)()) &&
         Utils::compare_approx(m_max, other.m_max, (std::numeric_limits<double>::min)()) &&
         m_precise == other.m_precise &&
-
+        m_isValid == other.m_isValid &&
         Utils::compare_approx(m_numericScale, other.m_numericScale, (std::numeric_limits<double>::min)()) &&
         Utils::compare_approx(m_numericOffset, other.m_numericOffset, (std::numeric_limits<double>::min)()) 
         
@@ -692,6 +696,9 @@ boost::property_tree::ptree Dimension::toPTree() const
     }
     
     dim.put("scale", getNumericScale());
+
+    dim.put("isValid", isValid());
+
     return dim;
 }
 

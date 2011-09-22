@@ -871,6 +871,7 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
 
 
     pdal::Schema const& schema = buffer.getSchema();
+    pdal::SchemaLayout const& schemaLayout = buffer.getSchemaLayout();
     // std::vector<boost::uint32_t> ids = block.GetIDs();
 
     bool hasTimeData = schema.hasDimension(Dimension::Id_Las_Time);
@@ -884,22 +885,22 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
     
     // assert(count*oracle_record_size == point_data.size());
 
-    const int indexX = schema.getDimensionIndex(Dimension::Id_X_i32);
-    const int indexY = schema.getDimensionIndex(Dimension::Id_Y_i32);
-    const int indexZ = schema.getDimensionIndex(Dimension::Id_Z_i32);
-    const int indexClassification = schema.getDimensionIndex(Dimension::Id_Las_Classification);
-    const int indexTime = schema.getDimensionIndex(Dimension::Id_Las_Time);
-    const int indexIntensity = schema.getDimensionIndex(Dimension::Id_Las_Intensity);
-    const int indexReturnNumber = schema.getDimensionIndex(Dimension::Id_Las_ReturnNumber);
-    const int indexNumberOfReturns = schema.getDimensionIndex(Dimension::Id_Las_NumberOfReturns);
-    const int indexScanDirectionFlag = schema.getDimensionIndex(Dimension::Id_Las_ScanDirectionFlag);
-    const int indexEdgeOfFlightLine = schema.getDimensionIndex(Dimension::Id_Las_EdgeOfFlightLine);
-    const int indexUserData = schema.getDimensionIndex(Dimension::Id_Las_UserData);
-    const int indexPointSourceId = schema.getDimensionIndex(Dimension::Id_Las_PointSourceId);
-    const int indexScanAngleRank = schema.getDimensionIndex(Dimension::Id_Las_ScanAngleRank);
-    const int indexRed = schema.getDimensionIndex(Dimension::Id_Red_u16);
-    const int indexGreen = schema.getDimensionIndex(Dimension::Id_Green_u16);
-    const int indexBlue = schema.getDimensionIndex(Dimension::Id_Blue_u16);
+    const int indexX = schemaLayout.getDimensionIndex(Dimension::Id_X_i32);
+    const int indexY = schemaLayout.getDimensionIndex(Dimension::Id_Y_i32);
+    const int indexZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_i32);
+    const int indexClassification = schemaLayout.getDimensionIndex(Dimension::Id_Las_Classification);
+    const int indexTime = schemaLayout.getDimensionIndex(Dimension::Id_Las_Time);
+    const int indexIntensity = schemaLayout.getDimensionIndex(Dimension::Id_Las_Intensity);
+    const int indexReturnNumber = schemaLayout.getDimensionIndex(Dimension::Id_Las_ReturnNumber);
+    const int indexNumberOfReturns = schemaLayout.getDimensionIndex(Dimension::Id_Las_NumberOfReturns);
+    const int indexScanDirectionFlag = schemaLayout.getDimensionIndex(Dimension::Id_Las_ScanDirectionFlag);
+    const int indexEdgeOfFlightLine = schemaLayout.getDimensionIndex(Dimension::Id_Las_EdgeOfFlightLine);
+    const int indexUserData = schemaLayout.getDimensionIndex(Dimension::Id_Las_UserData);
+    const int indexPointSourceId = schemaLayout.getDimensionIndex(Dimension::Id_Las_PointSourceId);
+    const int indexScanAngleRank = schemaLayout.getDimensionIndex(Dimension::Id_Las_ScanAngleRank);
+    const int indexRed = schemaLayout.getDimensionIndex(Dimension::Id_Red_u16);
+    const int indexGreen = schemaLayout.getDimensionIndex(Dimension::Id_Green_u16);
+    const int indexBlue = schemaLayout.getDimensionIndex(Dimension::Id_Blue_u16);
 
 
 
@@ -909,11 +910,11 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
     
     // "Global" ids from the chipper are also available here.
     // const int indexId = schema.getDimensionIndex(Dimension::Id_Chipper_1);
-    const int indexBlockId = schema.getDimensionIndex(Dimension::Id_Chipper_2);
+    const int indexBlockId = schemaLayout.getDimensionIndex(Dimension::Id_Chipper_2);
     
-    Dimension const& dimX = schema.getDimension(indexX);
-    Dimension const& dimY = schema.getDimension(indexY);
-    Dimension const& dimZ = schema.getDimension(indexZ);
+    Dimension const& dimX = schemaLayout.getDimension(indexX);
+    Dimension const& dimY = schemaLayout.getDimension(indexY);
+    Dimension const& dimZ = schemaLayout.getDimension(indexZ);
 
     double xscale = dimX.getNumericScale();
     double yscale = dimY.getNumericScale();
@@ -1108,17 +1109,17 @@ void Writer::SetOrdinates(Statement statement,
 
 pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
 {
+    pdal::SchemaLayout const& schemaLayout = buffer.getSchemaLayout();
     
     pdal::Bounds<double> output;
-    pdal::Schema const& schema = buffer.getSchemaLayout().getSchema();
     
-    const int indexXi = schema.getDimensionIndex(Dimension::Id_X_i32);
-    const int indexYi = schema.getDimensionIndex(Dimension::Id_Y_i32);
-    const int indexZi = schema.getDimensionIndex(Dimension::Id_Z_i32);
+    const int indexXi = schemaLayout.getDimensionIndex(Dimension::Id_X_i32);
+    const int indexYi = schemaLayout.getDimensionIndex(Dimension::Id_Y_i32);
+    const int indexZi = schemaLayout.getDimensionIndex(Dimension::Id_Z_i32);
 
-    const Dimension& dimXi = schema.getDimension(indexXi);
-    const Dimension& dimYi = schema.getDimension(indexYi);
-    const Dimension& dimZi = schema.getDimension(indexZi);
+    const Dimension& dimXi = schemaLayout.getDimension(indexXi);
+    const Dimension& dimYi = schemaLayout.getDimension(indexYi);
+    const Dimension& dimZi = schemaLayout.getDimension(indexZi);
     
     bool first = true;
     for (boost::uint32_t pointIndex=0; pointIndex<buffer.getNumPoints(); pointIndex++)
@@ -1161,8 +1162,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     // std::vector<boost::uint32_t> ids = block.GetIDs();
     
     // Pluck the block id out of the first point in the buffer
-    pdal::Schema const& schema = buffer.getSchema();
-    const int indexBlockId = schema.getDimensionIndex(Dimension::Id_Chipper_2);
+    pdal::SchemaLayout const& schemaLayout = buffer.getSchemaLayout();
+    const int indexBlockId = schemaLayout.getDimensionIndex(Dimension::Id_Chipper_2);
     boost::int32_t block_id  = buffer.getField<boost::int32_t>(0, indexBlockId);
     
     // SWAP_ENDIANNESS(block_id); //We've already swapped these data, but we need to write a real number here.

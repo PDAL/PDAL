@@ -75,28 +75,23 @@ void ColorFilter::checkImpedance()
 {
     Schema& schema = getSchemaRef();
 
-    Dimension dimZ(Dimension::Id_Z_i32);
-    if (schema.hasDimension(dimZ) == false)
+    if (schema.hasDimension(Dimension::Id_Z_i32) == false)
     {
         throw impedance_invalid("color filter does not have Z/Int32 field");
     }
 
-    Dimension dimRed(Dimension::Id_Red_u16);
-    Dimension dimGreen(Dimension::Id_Green_u16);
-    Dimension dimBlue(Dimension::Id_Blue_u16);
-
     // are there already u16 fields for color?
-    if (!schema.hasDimension(dimRed))
+    if (!schema.hasDimension(Dimension::Id_Red_u16))
     {
-        schema.appendDimension(dimRed);
+        schema.appendDimension(Dimension::Id_Red_u16);
     }
-    if (!schema.hasDimension(dimGreen))
+    if (!schema.hasDimension(Dimension::Id_Green_u16))
     {
-        schema.appendDimension(dimGreen);
+        schema.appendDimension(Dimension::Id_Green_u16);
     }
-    if (!schema.hasDimension(dimBlue))
+    if (!schema.hasDimension(Dimension::Id_Blue_u16))
     {
-        schema.appendDimension(dimBlue);
+        schema.appendDimension(Dimension::Id_Blue_u16);
     }
 
     return;
@@ -110,11 +105,11 @@ void ColorFilter::processBuffer(PointBuffer& data) const
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
 
-    const int indexR = schema.getDimensionIndex(Dimension::Id_Red_u16);
-    const int indexG = schema.getDimensionIndex(Dimension::Id_Green_u16);
-    const int indexB = schema.getDimensionIndex(Dimension::Id_Blue_u16);
-    const int indexZ = schema.getDimensionIndex(Dimension::Id_Z_i32);
-    const Dimension& zDim = schema.getDimension(indexZ);
+    const int indexR = schemaLayout.getDimensionIndex(Dimension::Id_Red_u16);
+    const int indexG = schemaLayout.getDimensionIndex(Dimension::Id_Green_u16);
+    const int indexB = schemaLayout.getDimensionIndex(Dimension::Id_Blue_u16);
+    const int indexZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_i32);
+    const Dimension& zDim = schema.getDimension(Dimension::Id_Z_i32);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {

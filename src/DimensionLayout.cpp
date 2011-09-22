@@ -52,7 +52,6 @@ DimensionLayout::DimensionLayout(const Dimension& dimension)
     : m_dimension(dimension)
     , m_byteOffset(0)
     , m_position(0)
-    , m_isValid(false)
 {
 }
 
@@ -61,7 +60,6 @@ DimensionLayout::DimensionLayout(DimensionLayout const& other)
     : m_dimension(other.m_dimension)
     , m_byteOffset(other.m_byteOffset)
     , m_position(other.m_position)
-    , m_isValid(other.m_isValid)
 {
 }
 
@@ -73,7 +71,6 @@ DimensionLayout& DimensionLayout::operator=(DimensionLayout const& rhs)
         m_dimension = rhs.m_dimension;
         m_position = rhs.m_position;
         m_byteOffset = rhs.m_byteOffset;
-        m_isValid = rhs.m_isValid;
     }
 
     return *this;
@@ -86,7 +83,6 @@ bool DimensionLayout::operator==(const DimensionLayout& other) const
     {
         assert(m_position == other.m_position);
         assert(m_byteOffset == other.m_byteOffset);
-        assert(m_isValid == other.m_isValid);
         return true;
     }
 
@@ -107,7 +103,6 @@ boost::property_tree::ptree DimensionLayout::toPTree() const
     tree.add_child("dimension", getDimension().toPTree());
     tree.add("byteoffset", getByteOffset());
     tree.add("position", getPosition());
-    tree.add("isValid", isValid());
 
     return tree;
 }

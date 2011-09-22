@@ -212,9 +212,11 @@ inline void PointBuffer::setField(std::size_t pointIndex, boost::int32_t fieldIn
 {
     if (fieldIndex == -1)
     {
-        return; // no-op in the case where fieldIndex is -1 and we don't actually have that field
+        // this is a little harsh, but we'll keep it for now as we shake things out
+        throw pdal_error("filedIndex is not valid at this point of access");
     }
-    std::size_t offset = (pointIndex * m_pointSize) + m_schemaLayout.getDimensionLayout(fieldIndex).getByteOffset();
+    const DimensionLayout& dimLayout = m_schemaLayout.getDimensionLayout(fieldIndex);
+    std::size_t offset = (pointIndex * m_pointSize) + dimLayout.getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
 
@@ -225,12 +227,13 @@ inline void PointBuffer::setFieldData(std::size_t pointIndex, boost::int32_t fie
 {
     if (fieldIndex == -1)
     {
-        return; // no-op in the case where fieldIndex is -1 and we don't actually have that field
+        // this is a little harsh, but we'll keep it for now as we shake things out
+        throw pdal_error("filedIndex is not valid at this point of access");
     }
-    DimensionLayout const& dl = m_schemaLayout.getDimensionLayout(fieldIndex);
-    Dimension const& d = dl.getDimension();
-    std::size_t offset = (pointIndex * m_pointSize) + dl.getByteOffset();
-    std::size_t size = d.getDataTypeSize(d.getDataType());
+    const DimensionLayout& dimLayout = m_schemaLayout.getDimensionLayout(fieldIndex);
+    const Dimension& dim = dimLayout.getDimension();
+    std::size_t offset = (pointIndex * m_pointSize) + dimLayout.getByteOffset();
+    std::size_t size = dim.getDataTypeSize(dim.getDataType());
     // std::cout << "copying field " << d.getFieldName() << " with index" << fieldIndex << " of size " << size << " at offset " << offset << std::endl;
     // assert(offset + sizeof(T) <= m_pointSize * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
@@ -244,10 +247,14 @@ inline T PointBuffer::getField(std::size_t pointIndex, boost::int32_t fieldIndex
 {
     if (fieldIndex == -1)
     {
-        return T(0);
+        // this is a little harsh, but we'll keep it for now as we shake things out
+        throw pdal_error("filedIndex is not valid at this point of access");
     }
         
-    std::size_t offset = (pointIndex * m_pointSize) + m_schemaLayout.getDimensionLayout(fieldIndex).getByteOffset();
+    const DimensionLayout& dimLayout = m_schemaLayout.getDimensionLayout(fieldIndex);
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////assert(dimLayout.getDimension().isValid());
+
+    std::size_t offset = (pointIndex * m_pointSize) + dimLayout.getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
 

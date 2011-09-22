@@ -66,19 +66,19 @@ BOOST_AUTO_TEST_CASE(test1)
     mosaic.initialize();
 
     const Schema& schema = mosaic.getSchema();
-    SchemaLayout layout(schema);
+    SchemaLayout schemaLayout(schema);
 
-    PointBuffer data(layout, 300);
+    PointBuffer data(schemaLayout, 300);
 
     StageSequentialIterator* iter = mosaic.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 300);
 
-    const int offsetT = schema.getDimensionIndex(Dimension::Id_Time_u64);
-    const int offsetX = schema.getDimensionIndex(Dimension::Id_X_f64);
-    const int offsetY = schema.getDimensionIndex(Dimension::Id_Y_f64);
-    const int offsetZ = schema.getDimensionIndex(Dimension::Id_Z_f64);
+    const int offsetT = schemaLayout.getDimensionIndex(Dimension::Id_Time_u64);
+    const int offsetX = schemaLayout.getDimensionIndex(Dimension::Id_X_f64);
+    const int offsetY = schemaLayout.getDimensionIndex(Dimension::Id_Y_f64);
+    const int offsetZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_f64);
 
     for (boost::uint32_t i=0; i<300; i++)
     {

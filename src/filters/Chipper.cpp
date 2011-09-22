@@ -121,8 +121,14 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t 
         iter->read(one_point);
         
         boost::uint8_t* p_id = reinterpret_cast<boost::uint8_t*>(&id);
-        one_point.setFieldData(0, indexId, p_id);
-        one_point.setFieldData(0, indexBlockId, p_block_id);
+        if (indexId != -1)
+        {
+            one_point.setFieldData(0, indexId, p_id);
+        }
+        if (indexBlockId != -1)
+        {
+            one_point.setFieldData(0, indexBlockId, p_block_id);
+        }
         // one_point.setField(0, indexId, *it);
         // one_point.setField(0, indexBlockId, block_id);
         
@@ -181,6 +187,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     vector<PtRef>::iterator it;
    
     pdal::Schema const& schema = getPrevStage().getSchema();
+    pdal::SchemaLayout const& schemaLayout(schema);
     
     boost::uint64_t count = getPrevStage().getNumPoints();
     if (count > std::numeric_limits<std::size_t>::max())
@@ -192,13 +199,11 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     
     // boost::uint32_t chunks = count/m_threshold;
 
+    const int indexX = schemaLayout.getDimensionIndex(Dimension::Id_X_i32);
+    const int indexY = schemaLayout.getDimensionIndex(Dimension::Id_Y_i32);
 
-
-    const int indexX = schema.getDimensionIndex(Dimension::Id_X_i32);
-    const int indexY = schema.getDimensionIndex(Dimension::Id_Y_i32);
-
-    Dimension const& dimX = schema.getDimension(indexX);
-    Dimension const& dimY = schema.getDimension(indexY);
+    Dimension const& dimX = schemaLayout.getDimension(indexX);
+    Dimension const& dimY = schemaLayout.getDimension(indexY);
     
     double xscale = dimX.getNumericScale();
     double yscale = dimY.getNumericScale();
@@ -487,17 +492,13 @@ void Chipper::checkImpedance()
 {
     Schema& schema = getSchemaRef();
 
-    
-    Dimension pointID(Dimension::Id_Chipper_1);
-    Dimension blockID(Dimension::Id_Chipper_2);
-
-    if (!schema.hasDimension(pointID))
+    if (!schema.hasDimension(Dimension::Id_Chipper_1)) // block id
     {
-        schema.appendDimension(pointID);
+        schema.appendDimension(Dimension::Id_Chipper_1);
     }
-    if (!schema.hasDimension(blockID))
+    if (!schema.hasDimension(Dimension::Id_Chipper_2)) // point id
     {
-        schema.appendDimension(blockID);
+        schema.appendDimension(Dimension::Id_Chipper_1);
     }
     
     return;

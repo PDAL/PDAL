@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
     std::string ref = xml_header + 
         "<name>X</name><datatype>Int32</datatype>"
         "<description>x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</description>"
-        "<bytesize>4</bytesize><endianness>little</endianness><scale>0</scale>";
+        "<bytesize>4</bytesize><endianness>little</endianness><scale>0</scale><isValid>false</isValid>";
 
     boost::algorithm::erase_all(out1, "\n");
     boost::algorithm::erase_all(ref, "\n");

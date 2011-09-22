@@ -339,20 +339,22 @@ bool Support::compare_text_files(const std::string& file1, const std::string& fi
 
 #define Compare(x,y)    BOOST_CHECK(pdal::Utils::compare_approx((x),(y),0.001));
 
-void Support::check_pN(const pdal::PointBuffer& data, const pdal::Schema& schema, 
+void Support::check_pN(const pdal::PointBuffer& data,
                        std::size_t index, 
                        double xref, double yref, double zref)
 {
-    int offsetX = schema.getDimensionIndex(pdal::Dimension::Id_X_i32);
-    int offsetY = schema.getDimensionIndex(pdal::Dimension::Id_Y_i32);
-    int offsetZ = schema.getDimensionIndex(pdal::Dimension::Id_Z_i32);
+    const pdal::SchemaLayout& schemaLayout = data.getSchemaLayout();
+
+    int offsetX = schemaLayout.getDimensionIndex(pdal::Dimension::Id_X_i32);
+    int offsetY = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Y_i32);
+    int offsetZ = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Z_i32);
 
     boost::int32_t x0raw = data.getField<boost::int32_t>(index, offsetX);
     boost::int32_t y0raw = data.getField<boost::int32_t>(index, offsetY);
     boost::int32_t z0raw = data.getField<boost::int32_t>(index, offsetZ);
-    double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x0raw);
-    double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y0raw);
-    double z0 = schema.getDimension(offsetZ).applyScaling<boost::int32_t>(z0raw);
+    double x0 = schemaLayout.getDimension(offsetX).applyScaling<boost::int32_t>(x0raw);
+    double y0 = schemaLayout.getDimension(offsetY).applyScaling<boost::int32_t>(y0raw);
+    double z0 = schemaLayout.getDimension(offsetZ).applyScaling<boost::int32_t>(z0raw);
     
     Compare(x0, xref);
     Compare(y0, yref);
@@ -360,59 +362,71 @@ void Support::check_pN(const pdal::PointBuffer& data, const pdal::Schema& schema
 }
 
 
-void Support::check_pN(const pdal::PointBuffer& data, const ::pdal::Schema& schema, 
+void Support::check_pN(const pdal::PointBuffer& data,
                        std::size_t index, 
                        double xref, double yref, double zref,
                        double tref,
                        boost::uint16_t rref, boost::uint16_t gref, boost::uint16_t bref)
 {
-    check_pN(data, schema, index, xref, yref, zref);
+    check_pN(data, index, xref, yref, zref);
 
-    int offsetT = schema.getDimensionIndex(pdal::Dimension::Id_Las_Time);
-    double t0 = data.getField<double>(index, offsetT);
-    BOOST_CHECK_EQUAL(t0, tref);
+    const ::pdal::SchemaLayout& schemaLayout = data.getSchemaLayout();
 
-    int offsetR = schema.getDimensionIndex(pdal::Dimension::Id_Red_u16);
-    int offsetG = schema.getDimensionIndex(pdal::Dimension::Id_Green_u16);
-    int offsetB = schema.getDimensionIndex(pdal::Dimension::Id_Blue_u16);
-    boost::uint16_t r0 = data.getField<boost::uint16_t>(index, offsetR);
-    boost::uint16_t g0 = data.getField<boost::uint16_t>(index, offsetG);
-    boost::uint16_t b0 = data.getField<boost::uint16_t>(index, offsetB);
-    BOOST_CHECK_EQUAL(r0, rref);
-    BOOST_CHECK_EQUAL(g0, gref);
-    BOOST_CHECK_EQUAL(b0, bref);
+    int offsetT = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Las_Time);
+    if (offsetT != -1)
+    {
+        double t0 = data.getField<double>(index, offsetT);
+        BOOST_CHECK_EQUAL(t0, tref);
+    }
+
+    int offsetR = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Red_u16);
+    int offsetG = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Green_u16);
+    int offsetB = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Blue_u16);
+    BOOST_CHECK((offsetR==-1 && offsetG==-1 && offsetB==-1) || 
+                (offsetR!=-1 && offsetG!=-1 && offsetB!=-1));
+    if (offsetR != -1)
+    {
+        boost::uint16_t r0 = data.getField<boost::uint16_t>(index, offsetR);
+        boost::uint16_t g0 = data.getField<boost::uint16_t>(index, offsetG);
+        boost::uint16_t b0 = data.getField<boost::uint16_t>(index, offsetB);
+        BOOST_CHECK_EQUAL(r0, rref);
+        BOOST_CHECK_EQUAL(g0, gref);
+        BOOST_CHECK_EQUAL(b0, bref);
+    }
+
+    return;
 }
 
 
-void Support::check_p0_p1_p2(const pdal::PointBuffer& data, const pdal::Schema& schema)
+void Support::check_p0_p1_p2(const pdal::PointBuffer& data)
 {
-    Support::check_pN(data, schema, 0, 637012.240000, 849028.310000, 431.660000);
-    Support::check_pN(data, schema, 1, 636896.330000, 849087.700000, 446.390000);
-    Support::check_pN(data, schema, 2, 636784.740000, 849106.660000, 426.710000);
+    Support::check_pN(data, 0, 637012.240000, 849028.310000, 431.660000);
+    Support::check_pN(data, 1, 636896.330000, 849087.700000, 446.390000);
+    Support::check_pN(data, 2, 636784.740000, 849106.660000, 426.710000);
 }
 
 
-void Support::check_p100_p101_p102(const pdal::PointBuffer& data, const pdal::Schema& schema)
+void Support::check_p100_p101_p102(const pdal::PointBuffer& data)
 {
-    Support::check_pN(data, schema, 0, 636661.060000, 849854.130000, 424.900000);
-    Support::check_pN(data, schema, 1, 636568.180000, 850179.490000, 441.800000);
-    Support::check_pN(data, schema, 2, 636554.630000, 850040.030000, 499.110000);
+    Support::check_pN(data, 0, 636661.060000, 849854.130000, 424.900000);
+    Support::check_pN(data, 1, 636568.180000, 850179.490000, 441.800000);
+    Support::check_pN(data, 2, 636554.630000, 850040.030000, 499.110000);
 }
 
 
-void Support::check_p355_p356_p357(const pdal::PointBuffer& data, const pdal::Schema& schema)
+void Support::check_p355_p356_p357(const pdal::PointBuffer& data)
 {
-    Support::check_pN(data, schema, 0, 636462.600000, 850566.110000, 432.610000);
-    Support::check_pN(data, schema, 1, 636356.140000, 850530.480000, 432.680000);
-    Support::check_pN(data, schema, 2, 636227.530000, 850592.060000, 428.670000);
+    Support::check_pN(data, 0, 636462.600000, 850566.110000, 432.610000);
+    Support::check_pN(data, 1, 636356.140000, 850530.480000, 432.680000);
+    Support::check_pN(data, 2, 636227.530000, 850592.060000, 428.670000);
 }
 
 
-void Support::check_p710_p711_p712(const pdal::PointBuffer& data, const pdal::Schema& schema)
+void Support::check_p710_p711_p712(const pdal::PointBuffer& data)
 {
-    Support::check_pN(data, schema, 0, 638720.670000, 850926.640000, 417.320000);
-    Support::check_pN(data, schema, 1, 638672.380000, 851081.660000, 420.670000);
-    Support::check_pN(data, schema, 2, 638598.880000, 851445.370000, 422.150000);
+    Support::check_pN(data, 0, 638720.670000, 850926.640000, 417.320000);
+    Support::check_pN(data, 1, 638672.380000, 851081.660000, 420.670000);
+    Support::check_pN(data, 2, 638598.880000, 851445.370000, 422.150000);
 }
 
 

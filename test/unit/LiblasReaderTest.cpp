@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_sequential)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
     }
 
     // Can we seek it? Yes, we can!
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_sequential)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        Support::check_p100_p101_p102(data, schema);
+        Support::check_p100_p101_p102(data);
     }
 
     delete iter;
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_options)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
     }
 
     delete iter;
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
     }
 
     // Can we seek it? Yes, we can!
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        Support::check_p100_p101_p102(data, schema);
+        Support::check_p100_p101_p102(data);
     }
 
     // Can we seek to beginning? Yes, we can!
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
     }
     
     delete iter;
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random_laz)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
     }
 
     // Can we seek it? Yes, we can!
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random_laz)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        Support::check_p100_p101_p102(data, schema);
+        Support::check_p100_p101_p102(data);
     }
 
     // Can we seek to beginning? Yes, we can!
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random_laz)
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 3);
 
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
     }
     
     delete iter;
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters)
         BOOST_CHECK(numRead == 1065);
         BOOST_CHECK(iter->getIndex() == 1065);
 
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
 
         delete iter;
     }
@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters)
         BOOST_CHECK(numRead == 1065);
         BOOST_CHECK(iter->getIndex() == 1065);
         
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
 
         delete iter;
     }
@@ -275,19 +275,19 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters_with_cache)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 355);
 
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
 
         numRead = iter->read(data);
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 710);
 
-        Support::check_p355_p356_p357(data, schema);
+        Support::check_p355_p356_p357(data);
 
         numRead = iter->read(data);
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 1065);
 
-        Support::check_p710_p711_p712(data, schema);
+        Support::check_p710_p711_p712(data);
 
         delete iter;
     }
@@ -303,7 +303,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters_with_cache)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 710);
 
-        Support::check_p355_p356_p357(data, schema);
+        Support::check_p355_p356_p357(data);
 
         // read the first third
         iter->seek(0);
@@ -312,7 +312,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters_with_cache)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 355);
 
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
 
         // read the first third again
         iter->seek(0);
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters_with_cache)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 355);
 
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
 
         // read the last third
         iter->seek(710);
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters_with_cache)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iter->getIndex() == 1065);
 
-        Support::check_p710_p711_p712(data, schema);
+        Support::check_p710_p711_p712(data);
 
         delete iter;
     }
@@ -372,7 +372,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterS1->getIndex() == 355);
 
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
     }
 
     {
@@ -382,7 +382,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterS2->getIndex() == 710);
 
-        Support::check_p355_p356_p357(data, schema);
+        Support::check_p355_p356_p357(data);
     }
 
     {
@@ -391,7 +391,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterR1->getIndex() == 710);
 
-        Support::check_p355_p356_p357(data, schema);
+        Support::check_p355_p356_p357(data);
     }
 
     {
@@ -400,7 +400,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterR2->getIndex() == 355);
 
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
     }
 
     {
@@ -409,7 +409,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterS1->getIndex() == 1065);
 
-        Support::check_p710_p711_p712(data, schema);
+        Support::check_p710_p711_p712(data);
     }
 
     {
@@ -419,7 +419,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterS2->getIndex() == 1065);
 
-        Support::check_p710_p711_p712(data, schema);
+        Support::check_p710_p711_p712(data);
     }
 
     {
@@ -428,7 +428,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterR1->getIndex() == 710);
 
-        Support::check_p355_p356_p357(data, schema);
+        Support::check_p355_p356_p357(data);
     }
 
     {
@@ -437,7 +437,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterR2->getIndex() == 1065);
 
-        Support::check_p710_p711_p712(data, schema);
+        Support::check_p710_p711_p712(data);
     }
 
     {
@@ -446,7 +446,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_simultaneous_iters)
         BOOST_CHECK(numRead == 355);
         BOOST_CHECK(iterR1->getIndex() == 355);
 
-        Support::check_p0_p1_p2(data, schema);
+        Support::check_p0_p1_p2(data);
     }
 
     delete iterS1;
@@ -489,7 +489,7 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
 
-        Support::check_pN(data, schema, 0, xref, yref, zref, tref, rref, gref, bref);
+        Support::check_pN(data, 0, xref, yref, zref, tref, rref, gref, bref);
     }
 
     delete iter;

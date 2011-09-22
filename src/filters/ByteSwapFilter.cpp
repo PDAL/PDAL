@@ -116,7 +116,7 @@ boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointB
         std::size_t position = 0;
         for (boost::uint32_t n = 0; n < dstDims.size(); ++n)
         {
-            Dimension const& d = dstSchema.getDimension(n);
+            const Dimension& d = dstSchemaLayout.getDimension(n);
             std::size_t size = d.getByteSize();
             
             boost::uint8_t* pos = data + position;
@@ -129,7 +129,7 @@ boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointB
 
     for (boost::uint32_t i = 0; i < dstDims.size(); ++i)
     {
-        Dimension& d = dstSchema.getDimension(i);
+        Dimension& d = dstSchemaLayout.getDimension(i);
         if (d.getEndianness() == Endian_Little)
             d.setEndianness(Endian_Big);
         if (d.getEndianness() == Endian_Big)

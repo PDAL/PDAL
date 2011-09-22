@@ -57,24 +57,25 @@ BOOST_AUTO_TEST_SUITE(QfitReaderTest)
 #define Compare(x,y)    BOOST_CHECK_CLOSE(x,y,0.00001);
 
 
-void Check_Point(const pdal::PointBuffer& data, const ::pdal::Schema& schema, 
+void Check_Point(const pdal::PointBuffer& data,
                        std::size_t index, 
                        double xref, double yref, double zref,
                        boost::int32_t tref)
 {
+    const ::pdal::SchemaLayout& schemaLayout = data.getSchemaLayout();
 
-    int offsetX = schema.getDimensionIndex(pdal::Dimension::Id_X_i32);
-    int offsetY = schema.getDimensionIndex(pdal::Dimension::Id_Y_i32);
-    int offsetZ = schema.getDimensionIndex(pdal::Dimension::Id_Z_i32);
-    int offsetTime = schema.getDimensionIndex(pdal::Dimension::Id_Qfit_Time);
+    int offsetX = schemaLayout.getDimensionIndex(pdal::Dimension::Id_X_i32);
+    int offsetY = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Y_i32);
+    int offsetZ = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Z_i32);
+    int offsetTime = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Qfit_Time);
     
     boost::int32_t x = data.getField<boost::int32_t>(index, offsetX);
     boost::int32_t y = data.getField<boost::int32_t>(index, offsetY);
     boost::int32_t z = data.getField<boost::int32_t>(index, offsetZ);
     boost::int32_t t = data.getField<boost::int32_t>(index, offsetTime);
 
-    double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x);
-    double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y);
+    double x0 = schemaLayout.getDimension(offsetX).applyScaling<boost::int32_t>(x);
+    double y0 = schemaLayout.getDimension(offsetY).applyScaling<boost::int32_t>(y);
     double z0 = static_cast<double>(z);
 
     //   
@@ -121,11 +122,10 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     delete iter;
 
-    Check_Point(data, schema, 0, 59.205160, 221.826822, 32090.0, 0);
-    Check_Point(data, schema, 1, 59.205161, 221.826740, 32019.0, 0);
-    Check_Point(data, schema, 2, 59.205164, 221.826658, 32000.0, 0);
-
-
+    Check_Point(data, 0, 59.205160, 221.826822, 32090.0, 0);
+    Check_Point(data, 1, 59.205161, 221.826740, 32019.0, 0);
+    Check_Point(data, 2, 59.205164, 221.826658, 32000.0, 0);
+    
     return;
 }
 
@@ -158,11 +158,10 @@ BOOST_AUTO_TEST_CASE(test_14_word)
 
     delete iter;
 
-    Check_Point(data, schema, 0, 35.623317, 244.306337, 1056830.000000, 903);
-    Check_Point(data, schema, 1, 35.623280, 244.306260, 1056409.000000, 903);
-    Check_Point(data, schema, 2, 35.623257, 244.306204, 1056483.000000, 903);
-
-
+    Check_Point(data, 0, 35.623317, 244.306337, 1056830.000000, 903);
+    Check_Point(data, 1, 35.623280, 244.306260, 1056409.000000, 903);
+    Check_Point(data, 2, 35.623257, 244.306204, 1056483.000000, 903);
+    
     return;
 }
 

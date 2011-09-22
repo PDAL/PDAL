@@ -185,6 +185,9 @@ public:
         return m_id;
     }
 
+    bool isValid() const { return m_isValid; }
+    void setIsValid(bool v) { m_isValid = v; }
+    
     boost::uint32_t getFlags() const { return m_flags; }
     void setFlags(boost::uint32_t flags) { m_flags = flags; }
 
@@ -400,6 +403,7 @@ private:
     bool m_precise;
     double m_numericScale;
     double m_numericOffset;
+    bool m_isValid;
 };
 
 

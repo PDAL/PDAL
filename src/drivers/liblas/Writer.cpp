@@ -114,12 +114,9 @@ void Writer::setupExternalHeader()
 
     const Schema& schema = getPrevStage().getSchema();
 
-    int indexX = schema.getDimensionIndex(Dimension::Id_X_i32);
-    int indexY = schema.getDimensionIndex(Dimension::Id_Y_i32);
-    int indexZ = schema.getDimensionIndex(Dimension::Id_Z_i32);
-    const Dimension& dimX = schema.getDimension(indexX);
-    const Dimension& dimY = schema.getDimension(indexY);
-    const Dimension& dimZ = schema.getDimension(indexZ);
+    const Dimension& dimX = schema.getDimension(Dimension::Id_X_i32);
+    const Dimension& dimY = schema.getDimension(Dimension::Id_Y_i32);
+    const Dimension& dimZ = schema.getDimension(Dimension::Id_Z_i32);
     m_externalHeader->SetScale(dimX.getNumericScale(), dimY.getNumericScale(), dimZ.getNumericScale());
     m_externalHeader->SetOffset(dimX.getNumericOffset(), dimY.getNumericOffset(), dimZ.getNumericOffset());
 
@@ -263,9 +260,9 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& PointBuffer)
         bool ok = m_externalWriter->WritePoint(pt);
         assert(ok); // BUG
 
-        const double xValue = schema.getDimension(indexes.X).applyScaling<boost::int32_t>(x);
-        const double yValue = schema.getDimension(indexes.Y).applyScaling<boost::int32_t>(y);
-        const double zValue = schema.getDimension(indexes.Z).applyScaling<boost::int32_t>(z);
+        const double xValue = schema.getDimension(Dimension::Id_X_i32).applyScaling<boost::int32_t>(x);
+        const double yValue = schema.getDimension(Dimension::Id_Y_i32).applyScaling<boost::int32_t>(y);
+        const double zValue = schema.getDimension(Dimension::Id_Z_i32).applyScaling<boost::int32_t>(z);
 
         m_summaryData.addPoint(xValue, yValue, zValue, returnNumber);
     }

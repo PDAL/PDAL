@@ -159,10 +159,24 @@ bool Schema::hasDimension(const Dimension::Id& field) const
 }
 
 
-bool Schema::hasDimension(const Dimension& dim) const
+const Dimension& Schema::getDimension(const Dimension::Id& field) const
 {
-    return hasDimension(dim.getId());
+    int t = getDimensionIndex(field);
+    return m_dimensions[t];
 }
+
+
+Dimension& Schema::getDimension(const Dimension::Id& field)
+{
+    int t = getDimensionIndex(field);
+    return m_dimensions[t];
+}
+
+
+//bool Schema::hasDimension(const Dimension& dim) const
+//{
+//    return hasDimension(dim.getId());
+//}
 
 
 

@@ -69,8 +69,9 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     boost::scoped_ptr<StageSequentialIterator> flipped_iter(filter.createSequentialIterator());
 
     const Schema& schema = reader.getSchema();
+    SchemaLayout schemaLayout(schema);
     
-    PointBuffer flipped(filter.getSchema(), buffer_size);
+    PointBuffer flipped(schemaLayout, buffer_size);
     const boost::uint32_t fliped_read = flipped_iter->read(flipped);
     BOOST_CHECK_EQUAL(fliped_read, buffer_size);
 
@@ -79,10 +80,10 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     BOOST_CHECK_EQUAL(unfliped_read, buffer_size);
     
 
-    int offsetX = schema.getDimensionIndex(Dimension::Id_X_f64);
-    int offsetY = schema.getDimensionIndex(Dimension::Id_Y_f64);
-    int offsetZ = schema.getDimensionIndex(Dimension::Id_Z_f64);
-    int offsetT = schema.getDimensionIndex(Dimension::Id_Time_u64);
+    int offsetX = schemaLayout.getDimensionIndex(Dimension::Id_X_f64);
+    int offsetY = schemaLayout.getDimensionIndex(Dimension::Id_Y_f64);
+    int offsetZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_f64);
+    int offsetT = schemaLayout.getDimensionIndex(Dimension::Id_Time_u64);
     
     BOOST_CHECK_EQUAL(offsetX, 0);
     BOOST_CHECK_EQUAL(offsetY, 1);

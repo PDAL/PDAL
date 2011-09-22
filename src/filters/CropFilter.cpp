@@ -90,11 +90,9 @@ const Bounds<double>& CropFilter::getBounds() const
 boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const
 {
     const SchemaLayout& schemaLayout = dstData.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
 
-    int fieldX = schema.getDimensionIndex(Dimension::Id_X_f64);
-    int fieldY = schema.getDimensionIndex(Dimension::Id_Y_f64);
-    int fieldZ = schema.getDimensionIndex(Dimension::Id_Z_f64);
+    bool isDouble = schemaLayout.getSchema().hasDimension(Dimension::Id_X_f64);
+    assert(isDouble || (!isDouble && schemaLayout.getSchema().hasDimension(Dimension::Id_X_i32)));
 
     const Bounds<double>& bounds = this->getBounds();
 
@@ -103,23 +101,62 @@ boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffe
 
     boost::uint32_t numPointsAdded = 0;
 
-    for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
+    if (isDouble)
     {
-    
-        double x = srcData.getField<double>(srcIndex, fieldX);
-        double y = srcData.getField<double>(srcIndex, fieldY);
-        double z = srcData.getField<double>(srcIndex, fieldZ);
-        Vector<double> point(x,y,z);
-        
-        if (bounds.contains(point))
+        const int fieldX = schemaLayout.getDimensionIndex(Dimension::Id_X_f64);
+        const int fieldY = schemaLayout.getDimensionIndex(Dimension::Id_Y_f64);
+        const int fieldZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_f64);
+
+        for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
         {
-            dstData.copyPointFast(dstIndex, srcIndex, srcData);
-            dstData.setNumPoints(dstIndex+1);
-            ++dstIndex;
-            ++numPointsAdded;
+            const double x = srcData.getField<double>(srcIndex, fieldX);
+            const double y = srcData.getField<double>(srcIndex, fieldY);
+            const double z = srcData.getField<double>(srcIndex, fieldZ);
+
+            Vector<double> point(x,y,z);
+        
+            if (bounds.contains(point))
+            {
+                dstData.copyPointFast(dstIndex, srcIndex, srcData);
+                dstData.setNumPoints(dstIndex+1);
+                ++dstIndex;
+                ++numPointsAdded;
+            }
         }
     }
-    
+    else
+    {
+        const int fieldX = schemaLayout.getDimensionIndex(Dimension::Id_X_i32);
+        const int fieldY = schemaLayout.getDimensionIndex(Dimension::Id_Y_i32);
+        const int fieldZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_i32);
+
+        const Dimension& xdim = schemaLayout.getSchema().getDimension(Dimension::Id_X_i32);
+        const Dimension& ydim = schemaLayout.getSchema().getDimension(Dimension::Id_X_i32);
+        const Dimension& zdim = schemaLayout.getSchema().getDimension(Dimension::Id_X_i32);
+
+        for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
+        {
+            // need to scale the values
+            boost::int32_t xi = srcData.getField<boost::int32_t>(srcIndex, fieldX);
+            boost::int32_t yi = srcData.getField<boost::int32_t>(srcIndex, fieldY);
+            boost::int32_t zi = srcData.getField<boost::int32_t>(srcIndex, fieldZ);
+
+            const double x = xdim.applyScaling(xi);
+            const double y = ydim.applyScaling(yi);
+            const double z = zdim.applyScaling(zi);
+        
+            Vector<double> point(x,y,z);
+        
+            if (bounds.contains(point))
+            {
+                dstData.copyPointFast(dstIndex, srcIndex, srcData);
+                dstData.setNumPoints(dstIndex+1);
+                ++dstIndex;
+                ++numPointsAdded;
+            }
+        }
+    }
+
     assert(dstIndex <= dstData.getCapacity());
 
     return numPointsAdded;
