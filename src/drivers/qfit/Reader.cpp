@@ -464,12 +464,12 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             data.setField<boost::int32_t>(pointIndex, indexes.Y, y);
 
             boost::int32_t z = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(z);
             
             if (m_convert_z)
             {
                 z = z/100;
             }
-            QFIT_SWAP_BE_TO_LE(z);
             data.setField<boost::int32_t>(pointIndex, indexes.Z, z);
 
             boost::int32_t start_pulse = Utils::read_field<boost::int32_t>(p);
