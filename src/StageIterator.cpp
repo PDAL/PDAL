@@ -175,7 +175,7 @@ void StageIterator::readBufferEnd(PointBuffer& buffer)
     }
 
     readBufferEndImpl(buffer);
-
+    
     m_readBufferBeginPerformed = false;
 
     return;
@@ -184,6 +184,11 @@ void StageIterator::readBufferEnd(PointBuffer& buffer)
 
 void StageIterator::readEnd()
 {
+    if (m_readBufferBeginPerformed)
+    {
+        throw pdal_error("readEnd called without corresponding readBufferEnd");
+    }
+
     if (!m_readBeginPerformed)
     {
         throw pdal_error("readEnd called without corresponding readBegin");
