@@ -161,24 +161,27 @@ int Pc2Pc::execute()
         }
     }
 
-    Stage& stage = AppSupport::makeReader(readerOptions);
+    Stage* stage = AppSupport::makeReader(readerOptions);
 
     // BUG: I don't know how we could do this...
     // writer.setPointFormat( reader.getPointFormat() );
 
-    Writer& writer = AppSupport::makeWriter(writerOptions, stage);
+    Writer* writer = AppSupport::makeWriter(writerOptions, *stage);
 
-    writer.initialize();
+    writer->initialize();
 
-    const boost::uint64_t numPointsToRead = stage.getNumPoints();
+    const boost::uint64_t numPointsToRead = stage->getNumPoints();
     boost::scoped_ptr<pdal::UserCallback> callback((numPointsToRead == 0) ? 
         (pdal::UserCallback*)(new HeartbeatCallback) :
         (pdal::UserCallback*)(new PercentageCallback));
-    writer.setUserCallback(callback.get());
+    writer->setUserCallback(callback.get());
 
-    const boost::uint64_t numPointsRead = writer.write(numPointsToRead);
+    const boost::uint64_t numPointsRead = writer->write(numPointsToRead);
 
     std::cout << "Wrote " << numPointsRead << " points\n";
+
+    delete writer;
+    delete stage;
 
     return 0;
 }

@@ -235,31 +235,34 @@ int PcInfo::execute()
         readerOptions.add<bool>("liblas", m_useLiblas);
     }
 
-    Stage& reader = AppSupport::makeReader(readerOptions);
+    Stage* reader = AppSupport::makeReader(readerOptions);
         
-    pdal::filters::StatsFilter filter(reader);
+    pdal::filters::StatsFilter* filter = new pdal::filters::StatsFilter(*reader);
 
-    filter.initialize();
+    filter->initialize();
 
     if (m_pointNumber != (std::numeric_limits<boost::uint64_t>::max)())
     {
-        dumpOnePoint(filter);
+        dumpOnePoint(*filter);
     }
 
     if (m_showStats)
     {
-        dumpStats(filter);
+        dumpStats(*filter);
     }
 
     if (m_showSchema)
     {
-        dumpSchema(reader);
+        dumpSchema(*reader);
     }
 
     if (m_showStage)
     {
-        dumpStage(reader);
+        dumpStage(*reader);
     }
+
+    delete filter;
+    delete reader;
 
     if (m_outputStream)
     {

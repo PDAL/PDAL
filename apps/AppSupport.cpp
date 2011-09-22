@@ -94,7 +94,7 @@ std::string AppSupport::inferWriterDriver(const std::string& filename, pdal::Opt
 }
 
 
-pdal::Stage& AppSupport::makeReader(pdal::Options& options)
+pdal::Stage* AppSupport::makeReader(pdal::Options& options)
 {
     const std::string inputFile = options.getValueOrThrow<std::string>("filename");
 
@@ -121,11 +121,11 @@ pdal::Stage& AppSupport::makeReader(pdal::Options& options)
         throw app_runtime_error("reader creation failed");
     }
 
-    return *stage;
+    return stage;
 }
 
 
-pdal::Writer& AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
+pdal::Writer* AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
 {
     const std::string outputFile = options.getValueOrThrow<std::string>("filename");
 
@@ -147,7 +147,7 @@ pdal::Writer& AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
         throw app_runtime_error("writer creation failed");
     }
 
-    return *writer;
+    return writer;
 }
 
 
