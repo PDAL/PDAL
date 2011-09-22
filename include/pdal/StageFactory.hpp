@@ -95,6 +95,7 @@ public:
     void registerWriter(const std::string& type, WriterCreator* f);
 
 private:
+    // callers take ownership of returned stages
     ReaderCreator* getReaderCreator(const std::string& type) const;
     FilterCreator* getFilterCreator(const std::string& type) const;
     MultiFilterCreator* getMultiFilterCreator(const std::string& type) const;
