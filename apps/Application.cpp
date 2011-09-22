@@ -53,6 +53,7 @@ Application::Application(int argc, char* argv[], const std::string& appName)
     , m_argc(argc)
     , m_argv(argv)
     , m_appName(appName)
+    , m_hardCoreDebug(false)
 {
     return;
 }
@@ -65,40 +66,63 @@ int Application::run()
 
     try
     {
-        status = innerRun();
-    }
-    catch (pdal::pdal_error e)
-    {
-        const std::string s("Caught PDAL exception: ");
-        printError(s + e.what());
-        status = 1;
+        // add -h, -v, etc
+        addBasicSwitchSet();
+
+        // add the options for the derived application
+        addSwitches();
+
+        // parse the command line
+        parseSwitches();
     }
     catch (std::exception e)
     {
-        const std::string s("Caught exception: ");
+        const std::string s("Caught exception handling switches: ");
         printError(s + e.what());
         status = 1;
     }
     catch (...)
     {
-        printError("Caught unknown exception");
+        printError("Caught unknown exception handling switches");
         status = 1;
     }
 
+    if (m_hardCoreDebug)
+    {
+        status = innerRun();        
+    }
+    else 
+    {
+        
+        try
+        {
+            status = innerRun();
+        }
+        catch (pdal::pdal_error e)
+        {
+            const std::string s("Caught PDAL exception: ");
+            printError(s + e.what());
+            status = 1;
+        }
+        catch (std::exception e)
+        {
+            const std::string s("Caught exception: ");
+            printError(s + e.what());
+            status = 1;
+        }
+        catch (...)
+        {
+            printError("Caught unknown exception");
+            status = 1;
+        }
+    }
     return status;
 }
 
 
 int Application::innerRun()
 {
-    // add -h, -v, etc
-    addBasicSwitchSet();
 
-    // add the options for the derived application
-    addSwitches();
-
-    // parse the command line
-    parseSwitches();
 
     // handle the well-known options
     if (m_showVersion) 
@@ -186,7 +210,7 @@ void Application::outputHelp()
 
     std::cout <<"\nFor more information, see the full documentation for PDAL at:\n";
     
-    std::cout << "  http://pdal.org/\n";
+    std::cout << "  http://pointcloud.org/\n";
     std::cout << "--------------------------------------------------------------------\n";
     std::cout << std::endl;
 
@@ -208,11 +232,12 @@ void Application::addBasicSwitchSet()
     po::options_description* basic_options = new po::options_description("basic options");
 
     basic_options->add_options()
-        ("help,h", po::value<bool>(&m_showHelp)->zero_tokens(), "produce help message")
-        ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens(), "Enable debug mode")
+        ("help,h", po::value<bool>(&m_showHelp)->zero_tokens()->implicit_value(true), "produce help message")
+        ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens()->implicit_value(true), "Enable debug mode")
+        ("developer-debug", po::value<bool>(&m_hardCoreDebug)->zero_tokens()->implicit_value(true), "Enable developer debug mode (don't trap segfaults)")
         ("verbose,v", po::value<boost::uint32_t>(&m_verboseLevel)->default_value(0), "Set verbose message level")
-        ("version", po::value<bool>(&m_showVersion)->zero_tokens(), "Show version info")
-        ("timer", po::value<bool>(&m_showTime)->zero_tokens(), "Show execution time")
+        ("version", po::value<bool>(&m_showVersion)->zero_tokens()->implicit_value(true), "Show version info")
+        ("timer", po::value<bool>(&m_showTime)->zero_tokens()->implicit_value(true), "Show execution time")
         ;
 
     addSwitchSet(basic_options);

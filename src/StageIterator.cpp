@@ -119,17 +119,11 @@ void StageIterator::readBegin()
     {
         throw pdal_error("readBegin called without corresponding readEnd");
     }
-    m_readBeginPerformed = true;
+    m_readBeginPerformed = false;
 
-    try
-    {
-        readBeginImpl();
-    }
-    catch (...)
-    {
-        m_readBeginPerformed = false;
-        throw;
-    }
+    readBeginImpl();
+
+    m_readBeginPerformed = true;
 
     return;
 }
@@ -145,18 +139,11 @@ void StageIterator::readBufferBegin(PointBuffer& buffer)
     {
         throw pdal_error("readBufferBegin called without corresponding readBufferEnd");
     }
-    m_readBufferBeginPerformed = true;
+    m_readBufferBeginPerformed = false;
 
-    try
-    {
-        readBufferBeginImpl(buffer);
-    }
-    catch (...)
-    {
-        m_readBeginPerformed = false;
-        m_readBufferBeginPerformed = false;
-        throw;
-    }
+    readBufferBeginImpl(buffer);
+
+    m_readBufferBeginPerformed = true;
 
     return;
 }
@@ -170,17 +157,9 @@ boost::uint32_t StageIterator::readBuffer(PointBuffer& buffer)
     }
 
     boost::uint32_t numRead = 0;
+
     
-    try
-    {
-        numRead = readBufferImpl(buffer);
-    }
-    catch (...)
-    {
-        m_readBeginPerformed = false;
-        m_readBufferBeginPerformed = false;
-        throw;
-    }
+    numRead = readBufferImpl(buffer);
 
     m_index += numRead;
 
@@ -195,16 +174,7 @@ void StageIterator::readBufferEnd(PointBuffer& buffer)
         throw pdal_error("readBufferEnd called without corresponding readBufferBegin");
     }
 
-    try
-    {
-        readBufferEndImpl(buffer);
-    }
-    catch (...)
-    {
-        m_readBeginPerformed = false;
-        m_readBufferBeginPerformed = false;
-        throw;
-    }
+    readBufferEndImpl(buffer);
     
     m_readBufferBeginPerformed = false;
 
@@ -214,20 +184,17 @@ void StageIterator::readBufferEnd(PointBuffer& buffer)
 
 void StageIterator::readEnd()
 {
+    if (m_readBufferBeginPerformed)
+    {
+        throw pdal_error("readEnd called without corresponding readBufferEnd");
+    }
+
     if (!m_readBeginPerformed)
     {
         throw pdal_error("readEnd called without corresponding readBegin");
     }
 
-    try
-    {
-        readEndImpl();
-    }
-    catch (...)
-    {
-        m_readBeginPerformed = false;
-        throw;
-    }
+    readEndImpl();
 
     m_readBeginPerformed = false;
 

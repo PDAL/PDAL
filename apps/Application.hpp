@@ -116,6 +116,7 @@ private:
     const int m_argc;
     char** m_argv;
     const std::string m_appName;
+    bool m_hardCoreDebug;
 
     std::vector<boost::program_options::options_description*> m_options;
     boost::program_options::positional_options_description m_positionalOptions;

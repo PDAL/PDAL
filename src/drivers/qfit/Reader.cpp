@@ -171,6 +171,8 @@ Word #       Content
 #include <pdal/drivers/qfit/Iterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
+#include <pdal/Utils.hpp>
+
 
 #include <map>
 
@@ -464,12 +466,12 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             data.setField<boost::int32_t>(pointIndex, indexes.Y, y);
 
             boost::int32_t z = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(z);
             
             if (m_convert_z)
             {
-                z = z/100;
+                z = Utils::sround(static_cast<double>(z)/100.0);
             }
-            QFIT_SWAP_BE_TO_LE(z);
             data.setField<boost::int32_t>(pointIndex, indexes.Z, z);
 
             boost::int32_t start_pulse = Utils::read_field<boost::int32_t>(p);
