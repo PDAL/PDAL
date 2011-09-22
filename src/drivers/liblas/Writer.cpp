@@ -34,7 +34,7 @@
 
 #include <pdal/drivers/liblas/Writer.hpp>
 
-#include <boost/uuid/uuid_io.hpp>
+#include <pdal/external/boost/uuid/uuid_io.hpp>
 
 #include <liblas/header.hpp>
 #include <liblas/writer.hpp>
@@ -157,7 +157,7 @@ void Writer::setDate(boost::uint16_t dayOfYear, boost::uint16_t year)
 }
 
 
-void Writer::setProjectId(const boost::uuids::uuid& uuid)
+void Writer::setProjectId(const pdal::external::boost::uuids::uuid& uuid)
 {
     std::string s = to_string(uuid);
     ::liblas::guid g(s);
