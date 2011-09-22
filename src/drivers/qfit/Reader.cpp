@@ -210,7 +210,6 @@ PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
     } else
     {
         GPSTime = schema.getDimensionIndex(Dimension::Id_Qfit_GpsTime);
-
     }
         
     return;
@@ -221,11 +220,22 @@ Reader::Reader(const Options& options)
     : pdal::Reader(options)
     , m_format(QFIT_Format_Unknown)
     , m_size(0)
+    , m_flip_x(true)
+    , m_convert_z(true)
 {
     std::string filename= getFileName();
     
+    m_flip_x = getOptions().getValueOrDefault("flip_coordinates", true);
+    m_convert_z = getOptions().getValueOrDefault("convert_z_units", true);
+    
     std::istream* str = FileUtils::openFile(filename);
     
+    if (str == 0) 
+    {
+        std::ostringstream oss;
+        oss << "Unable to open file '" << filename << "'";
+        throw qfit_error(oss.str());
+    }
     str->seekg(0);
     
     boost::int32_t int4(0);
@@ -296,7 +306,9 @@ Reader::Reader(const Options& options)
     setNumPoints(count);
     
     // getSchemaRef().dump();
-    delete str;
+    
+    if (str != 0)
+        delete str;
 }    
 
 
@@ -309,13 +321,19 @@ void Reader::initialize()
 const Options Reader::getDefaultOptions() const
 {
     Options options;
+    Option filename("filename", "", "file to read from");
+    Option flip_coordinates("flip_coordinates", true, "Flip coordinates from 0-360 to -180-180");
+    Option convert_z_units("convert_z_units", true, "Convert Z units from mm to m");
+    options.add(filename);
+    options.add(flip_coordinates);
+    options.add(convert_z_units);
     return options;
 }
 
 
 std::string Reader::getFileName() const
 {
-    return getOptions().getOption("input").getValue<std::string>();
+    return getOptions().getOption("filename").getValue<std::string>();
 }
 
 void Reader::registerFields()
@@ -432,6 +450,13 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
 
             boost::int32_t x = Utils::read_field<boost::int32_t>(p);
             QFIT_SWAP_BE_TO_LE(x);
+            
+            if (m_flip_x) {
+                if (x > 180) 
+                {
+                    x = x - 360;
+                }
+            }
             data.setField<boost::int32_t>(pointIndex, indexes.X, x);
 
             boost::int32_t y = Utils::read_field<boost::int32_t>(p);
@@ -439,6 +464,11 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             data.setField<boost::int32_t>(pointIndex, indexes.Y, y);
 
             boost::int32_t z = Utils::read_field<boost::int32_t>(p);
+            
+            if (m_convert_z)
+            {
+                z = z/100;
+            }
             QFIT_SWAP_BE_TO_LE(z);
             data.setField<boost::int32_t>(pointIndex, indexes.Z, z);
 

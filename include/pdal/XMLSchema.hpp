@@ -178,7 +178,7 @@ class PDAL_DLL Writer
 {
 public:
     Writer(pdal::Schema const& schema);
-    ~Writer() {};
+    ~Writer() {}
 
     std::string getXML();
 
