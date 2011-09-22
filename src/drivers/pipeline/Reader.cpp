@@ -72,6 +72,8 @@ void Reader::initialize()
     m_stage = m_manager->getStage();
     m_stage->initialize();
 
+    setSchema( m_stage->getSchema() );
+
     setNumPoints(m_stage->getNumPoints());
     setPointCountType(m_stage->getPointCountType());
     setBounds(m_stage->getBounds());
