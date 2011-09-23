@@ -281,7 +281,7 @@ Reader::Reader(const Options& options)
     // extra slop in there.
     std::ios::off_type count = point_bytes / length;
     std::ios::off_type remainder = point_bytes % length;    
-    // 
+
     // std::cout << "count: " << count << std::endl;
     // std::cout <<" point_bytes: " << point_bytes << std::endl;
     // std::cout <<" length: " << length << std::endl;
@@ -305,10 +305,9 @@ Reader::Reader(const Options& options)
         throw qfit_error(msg.str());
         
     }
+    setPointCountType(PointCount_Fixed);
     setNumPoints(count);
-    
-    // getSchemaRef().dump();
-    
+        
     if (str != 0)
         delete str;
 }    
@@ -437,6 +436,17 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     const PointIndexes indexes(schema, m_format);
     
     boost::uint8_t* buf = new boost::uint8_t[pointByteCount * numPoints];
+    
+    
+    if (!stream.good())
+    {
+        throw pdal_error("QFIT Reader::processBuffer stream is no good!");
+    }
+    if (stream.eof())
+    {
+        throw pdal_error("QFIT Reader::processBuffer stream is eof!");
+    }
+
     Utils::read_n(buf, stream, pointByteCount * numPoints);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
