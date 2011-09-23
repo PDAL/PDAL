@@ -102,15 +102,27 @@ RandomIterator::~RandomIterator()
 boost::uint64_t RandomIterator::seekImpl(boost::uint64_t count)
 {
 
-    m_istream->seekg( m_reader.getPointDataSize() * count + m_reader.getPointDataOffset(), std::ios::cur);
+    if (!m_istream->good())
+        throw pdal_error("QFIT RandomIterator::seekImpl stream is no good before seeking!");
     
+    m_istream->seekg( m_reader.getPointDataSize() * count + m_reader.getPointDataOffset(), std::ios::beg);
+
+    if (m_istream->eof())
+        throw pdal_error("Seek past the end of the file!");
+
+    if (!m_istream->good())
+        throw pdal_error("QFIT RandomIterator::seekImpl stream is no good!");
+        
     return count;
 }
 
 
 boost::uint32_t RandomIterator::readBufferImpl(PointBuffer& data)
 {
-    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex());
+    boost::uint64_t numpoints = getStage().getNumPoints();
+    boost::uint64_t index = this->getIndex();
+    
+    return m_reader.processBuffer(data, *m_istream, numpoints-index);
 }
 
 
