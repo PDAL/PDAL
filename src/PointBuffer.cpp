@@ -150,49 +150,116 @@ boost::property_tree::ptree PointBuffer::toPTree() const
 
             const std::string key = pointstring + dimension.getName();
             
-            std::string value = "";
+            std::string output = "";
+
+            double scale = dimension.getNumericScale();
+            double offset = dimension.getNumericOffset();
+            
+            bool applyScaling(false);
+            if (!Utils::compare_distance(scale, 0.0) ||
+                !Utils::compare_distance(offset, 0.0)
+                )
+                applyScaling = true;
+
             
             switch (dimension.getDataType())
             {
+                    
 #define GETFIELDAS(T) getField<T>(pointIndex, fieldIndex)
 #define STRINGIFY(x) boost::lexical_cast<std::string>(x)
                 // note we convert 8-bit fields to ints, so they aren't treated as chars
             case Dimension::Int8:
-                value += STRINGIFY((int)GETFIELDAS(boost::int8_t));
+                if (!applyScaling)
+                    output += STRINGIFY(static_cast<int>(GETFIELDAS(boost::int8_t)));
+                else
+                {
+                    boost::int8_t v = GETFIELDAS(boost::int8_t);
+                    double d = dimension.applyScaling<boost::int8_t>(v);
+                    output += STRINGIFY(static_cast<int>(d));
+                }
                 break;
             case Dimension::Uint8:
-                value += STRINGIFY((int)GETFIELDAS(boost::uint8_t));
+                if (!applyScaling)
+                    output += STRINGIFY((int)GETFIELDAS(boost::uint8_t));
+                else
+                {
+                    boost::uint8_t v = GETFIELDAS(boost::uint8_t);
+                    double d = dimension.applyScaling<boost::uint8_t>(v);
+                    output += STRINGIFY(static_cast<int>(d));
+                }
                 break;
             case Dimension::Int16:
-                value += STRINGIFY(GETFIELDAS(boost::int16_t));
+                if (!applyScaling)
+                    output += STRINGIFY(GETFIELDAS(boost::int16_t));
+                else
+                {
+                    boost::int16_t v = GETFIELDAS(boost::int16_t);
+                    double d = dimension.applyScaling<boost::int16_t>(v);
+                    output += STRINGIFY(d);
+                }
                 break;
             case Dimension::Uint16:
-                value += STRINGIFY(GETFIELDAS(boost::uint16_t));
+                if (!applyScaling)
+                    output += STRINGIFY(GETFIELDAS(boost::uint16_t));
+                else
+                {
+                    boost::uint16_t v = GETFIELDAS(boost::uint16_t);
+                    double d = dimension.applyScaling<boost::uint16_t>(v);
+                    output += STRINGIFY(d);
+                }
                 break;
             case Dimension::Int32:
-                value += STRINGIFY(GETFIELDAS(boost::int32_t));
+                if (!applyScaling)
+                    output += STRINGIFY(GETFIELDAS(boost::int32_t));
+                else
+                {
+                    boost::int32_t v = GETFIELDAS(boost::int32_t);
+                    double d = dimension.applyScaling<boost::int32_t>(v);
+                    output += STRINGIFY(d);
+                }
                 break;
             case Dimension::Uint32:
-                value += STRINGIFY(GETFIELDAS(boost::uint32_t));
+                if (!applyScaling)
+                    output += STRINGIFY(GETFIELDAS(boost::uint32_t));
+                else
+                {
+                    boost::uint32_t v = GETFIELDAS(boost::uint32_t);
+                    double d = dimension.applyScaling<boost::uint32_t>(v);
+                    output += STRINGIFY(d);
+                }
                 break;
             case Dimension::Int64:
-                value += STRINGIFY(GETFIELDAS(boost::int64_t));
+                if (!applyScaling)
+                    output += STRINGIFY(GETFIELDAS(boost::int64_t));
+                else
+                {
+                    boost::int64_t v = GETFIELDAS(boost::int64_t);
+                    double d = dimension.applyScaling<boost::int64_t>(v);
+                    output += STRINGIFY(d);
+                }
                 break;
             case Dimension::Uint64:
-                value += STRINGIFY(GETFIELDAS(boost::uint64_t));
+                if (!applyScaling)
+                    output += STRINGIFY(GETFIELDAS(boost::uint64_t));
+                else
+                {
+                    boost::uint64_t v = GETFIELDAS(boost::uint64_t);
+                    double d = dimension.applyScaling<boost::uint64_t>(v);
+                    output += STRINGIFY(d);
+                }
                 break;
             case Dimension::Float:
-                value += STRINGIFY(GETFIELDAS(float));
+                output += STRINGIFY(GETFIELDAS(float));
                 break;
             case Dimension::Double:
-                value += STRINGIFY(GETFIELDAS(double));
+                output += STRINGIFY(GETFIELDAS(double));
                 break;
             
             default:
                 throw pdal_error("unknown dimension data type");
             }
 
-            tree.add(key, value);
+            tree.add(key, output);
         }
     }
     return tree;
