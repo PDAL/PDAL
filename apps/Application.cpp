@@ -75,7 +75,7 @@ int Application::run()
         // parse the command line
         parseSwitches();
     }
-    catch (std::exception e)
+    catch (std::exception const& e)
     {
         const std::string s("Caught exception handling switches: ");
         printError(s + e.what());
@@ -98,13 +98,13 @@ int Application::run()
         {
             status = innerRun();
         }
-        catch (pdal::pdal_error e)
+        catch (pdal::pdal_error const& e)
         {
             const std::string s("Caught PDAL exception: ");
             printError(s + e.what());
             status = 1;
         }
-        catch (std::exception e)
+        catch (std::exception const& e)
         {
             const std::string s("Caught exception: ");
             printError(s + e.what());
