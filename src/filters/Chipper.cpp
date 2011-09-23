@@ -169,6 +169,8 @@ void Chipper::initialize()
 const Options Chipper::getDefaultOptions() const
 {
     Options options;
+    Option capacity("capacity", 5000, "Tile capacity");
+    options.add(capacity);
     return options;
 }
 
@@ -223,9 +225,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
         boost::uint32_t num_to_read = static_cast<boost::uint32_t>(std::min<boost::uint64_t>(num_remaining, m_threshold));
 
         PointBuffer buffer(schema, num_to_read);
-        
-        
-        
+
         boost::uint32_t num_read =  iter->read(buffer);
         
         assert(num_read <= num_to_read);
@@ -498,7 +498,7 @@ void Chipper::checkImpedance()
     }
     if (!schema.hasDimension(Dimension::Id_Chipper_2)) // point id
     {
-        schema.appendDimension(Dimension::Id_Chipper_1);
+        schema.appendDimension(Dimension::Id_Chipper_2);
     }
     
     return;
