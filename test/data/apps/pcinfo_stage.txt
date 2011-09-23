@@ -12,7 +12,7 @@
         "Option":
         {
             "Name": "filename",
-            "Value": "..\\..\\test\\data\\apps\\simple.las"
+            "Value": "test\/data\/apps\/simple.las"
         },
         "Option":
         {
