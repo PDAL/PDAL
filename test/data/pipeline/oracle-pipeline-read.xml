@@ -36,10 +36,10 @@
                     
                     <Reader type="drivers.oci.reader">
                         <Option name="query">
-                            SELECT CLOUD FROM HOBU where ID=1
+                            SELECT CLOUD FROM SIMPLE_CLOUD where ID=1
                         </Option>
                         <Option name="connection">
-                            lidar/lidar@lidar.hobu.biz/lidar
+                            lidar/lidar@oracle.hobu.biz/lidar
                         </Option>
                         <Option name="debug">
                             true
