@@ -128,6 +128,11 @@ const Schema::Dimensions& Schema::getDimensions() const
     return m_dimensions;
 }
 
+Schema::Dimensions& Schema::getDimensions() 
+{
+    return m_dimensions;
+}
+
 
 int Schema::getDimensionIndex(const Dimension::Id& id) const
 {

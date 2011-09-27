@@ -86,6 +86,7 @@ public:
     void appendDimensions(const std::vector<Dimension>& dim);
 
     const Dimensions& getDimensions() const;
+    Dimensions& getDimensions();
 
     bool hasDimension(const Dimension::Id& id) const;
     //bool hasDimension(const Dimension& dim) const;
