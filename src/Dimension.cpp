@@ -276,10 +276,10 @@ KnownDimension s_knownDimensions[] =
     // chipper
     //
     {
-        Dimension::Id_Chipper_1, Dimension::Int32, "Chipper1", ""
+        Dimension::Id_Chipper_1, Dimension::Int32, "Chipper Point ID", ""
     },
     {
-        Dimension::Id_Chipper_2, Dimension::Int32, "Chipper2", ""
+        Dimension::Id_Chipper_2, Dimension::Int32, "Chipper Block ID", ""
     },
 
     //
