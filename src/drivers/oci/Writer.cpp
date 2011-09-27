@@ -732,9 +732,9 @@ oss << "declare\n"
     std::string schema_data;
     schema_data = pdal::Schema::to_xml(m_stage.getSchema());
         // std::cout << m_stage.getSchema() << std::endl;
-        // std::ostream* output= Utils::createFile("oracle-write-schema.xml",true);
+        // std::ostream* output= FileUtils::createFile("oracle-write-schema.xml",true);
         // *output << schema_data <<std::endl;
-        // Utils::closeFile(output);
+        // FileUtils::closeFile(output);
 
     char* schema = (char*) malloc(schema_data.size() * sizeof(char) + 1);
     strncpy(schema, schema_data.c_str(), schema_data.size());
@@ -1143,7 +1143,6 @@ pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
     }
     
     m_pcExtent.grow(output);
-
     return output;
     
 }
