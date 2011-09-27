@@ -676,6 +676,12 @@ Dimension::Id Reader::GetDimensionField(std::string const& name, boost::uint32_t
 
     if (!Utils::compare_no_case(name, "Alpha"))
         return Dimension::Id_TerraSolid_Alpha;
+    
+    if (!Utils::compare_no_case(name, "Chipper Point ID"))
+        return Dimension::Id_Chipper_1;
+
+    if (!Utils::compare_no_case(name, "Chipper Block ID"))
+        return Dimension::Id_Chipper_2;
 
     // Yes, this is scary.  What else can we do?
     throw pdal_error("unknown field name: " + name);
