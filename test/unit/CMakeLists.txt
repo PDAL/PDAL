@@ -34,6 +34,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     FauxReaderTest.cpp
     FauxWriterTest.cpp
     FileUtilsTest.cpp
+    InPlaceReprojectionFilterTest.cpp
     LasReaderTest.cpp
     LasWriterTest.cpp
     ${LIBLAS_TESTS}
