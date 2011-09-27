@@ -38,6 +38,7 @@
 #include <pdal/drivers/oci/Reader.hpp>
 #include <pdal/Vector.hpp>
 
+#include <boost/property_tree/json_parser.hpp>
 #include <sstream>
 #include <map>
 #include <algorithm>
@@ -92,6 +93,7 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
 
 
     // std::cout << "m_block->num_points: " << m_block->num_points << std::endl;
+    // std::cout << "data.getCapacity(): " << data.getCapacity() << std::endl;
     if (!m_block->num_points) 
     {
         // We still have a block of data from the last readBuffer call
@@ -144,7 +146,7 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
             m_block->chunk->resize(blob_length);
         }
         
-        // std::cout << "blob_length: " << blob_length << std::endl;
+        // std::cout << "blob_length: " << blob_len// gth << std::endl;
 
         bool read_all_data = m_statement->ReadBlob( m_block->locator,
                                          (void*)(&(*m_block->chunk)[0]),
@@ -154,10 +156,14 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
 
         // std::cout << "nAmountRead: " << nAmountRead << std::endl;
         
-        data.setNumPoints(numPointsRead);
-        data.setAllData(&(*m_block->chunk)[0], m_block->chunk->size());
+        data.setDataStride(&(*m_block->chunk)[0], data.getNumPoints(), m_block->chunk->size());
+        // std::cout << "data.getNumPoints(): " << data.getNumPoints() << std::endl;
+        data.setNumPoints(data.getNumPoints() + numReadThisBlock);
+        // data.setAllData(&(*m_block->chunk)[0], m_block->chunk->size());
         // unpackOracleData(data);
         bDidRead = m_statement->Fetch();
+
+    // boost::property_tree::write_json(std::cout, data.toPTree());
         if (!bDidRead)
         {
             m_at_end = true;
@@ -165,8 +171,7 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
         }
     }    
     
-
-
+    
 
     double x, y, z;
     // 
