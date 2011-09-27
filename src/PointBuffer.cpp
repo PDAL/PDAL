@@ -116,6 +116,11 @@ void PointBuffer::setAllData(boost::uint8_t* data, boost::uint32_t byteCount)
     memcpy(m_data.get(), data, byteCount);
 }
 
+void PointBuffer::setDataStride(boost::uint8_t* data, std::size_t index, boost::uint32_t byteCount)
+{
+    memcpy(m_data.get() + m_pointSize * index, data, byteCount);
+}
+
 boost::uint32_t PointBuffer::getNumPoints() const
 {
     return m_numPoints;

@@ -174,6 +174,7 @@ public:
     void setData(boost::uint8_t* data, std::size_t pointIndex);
     
     void setAllData(boost::uint8_t* data, boost::uint32_t byteCount);
+    void setDataStride(boost::uint8_t* data, std::size_t index, boost::uint32_t byteCount);
 
     // access to the raw memory
     void getData(boost::uint8_t** data, std::size_t* array_size) const;
