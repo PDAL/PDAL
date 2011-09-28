@@ -480,7 +480,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             
             if (m_convert_z)
             {
-                z = Utils::sround(static_cast<double>(z)/100.0);
+                z = static_cast<boost::int32_t>(Utils::sround(static_cast<double>(z)/100.0));
             }
             data.setField<boost::int32_t>(pointIndex, indexes.Z, z);
 
