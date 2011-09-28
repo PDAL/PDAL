@@ -384,7 +384,7 @@ bool Writer::BlockTableExists()
     std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
     
     char szTable[OWNAME]= "";
-    oss << "select table_name from user_tables where table_name like upper('%%"<< block_table_name <<"%%') ";
+    oss << "select table_name from user_tables where table_name is upper('%%"<< block_table_name <<"%%') ";
 
 
     Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
