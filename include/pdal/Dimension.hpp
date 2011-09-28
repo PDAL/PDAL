@@ -47,6 +47,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include <limits>
 
 namespace pdal
 {
@@ -356,6 +357,22 @@ public:
     T removeScaling(double v) const
     {
         T output = static_cast<T>(Utils::sround((v - m_numericOffset)/ m_numericScale));
+
+        if (output >= (std::numeric_limits<T>::max)())
+        {
+            std::ostringstream oss;
+            oss << "removeScaling: scale and/or offset combination causes " 
+                   "de-scaled value to be greater than std::numeric_limits::max for this data type";
+            
+        } 
+        else if (output <= (std::numeric_limits<T>::min)() )
+        {
+            std::ostringstream oss;
+            oss << "removeScaling: scale and/or offset combination causes " 
+                   "de-scaled value to be less than std::numeric_limits::min for this data type";
+            throw std::out_of_range(oss.str());
+
+        }
         return output;
     }
 
