@@ -38,7 +38,6 @@
 #include <pdal/drivers/oci/Reader.hpp>
 #include <pdal/Vector.hpp>
 
-#include <boost/property_tree/json_parser.hpp>
 #include <sstream>
 #include <map>
 #include <algorithm>
