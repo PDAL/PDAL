@@ -161,10 +161,11 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     // dump stage info to json
     stat = Support::run_command(cmd + " --output=" + outputTxt + " --stage " + inputLas, output);
     BOOST_CHECK_EQUAL(stat, 0);
+
 #ifdef PDAL_HAVE_GDAL
-    BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_stage.txt")));
+    BOOST_CHECK_EQUAL(Support::diff_text_files(outputTxt, Support::datapath("apps/pcinfo_stage.txt"), 15), 0u);
 #else
-    BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_stage_nosrs.txt")));
+    BOOST_CHECK_EQUAL(Support::diff_text_files(outputTxt, Support::datapath("apps/pcinfo_stage_nosrs.txt"), 15), 0u);
 #endif
 
     pdal::FileUtils::deleteFile(outputTxt);
