@@ -308,22 +308,32 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& PointBuffer)
         Utils::write_field<boost::uint8_t>(p, userData);
         Utils::write_field<boost::uint16_t>(p, pointSourceId);
 
-        if (Support::hasTime(pointFormat))
+        if (Support::hasTime(pointFormat) && indexes.Time != -1)
         {
-            const double time = PointBuffer.getField<double>(pointIndex, indexes.Time);
+            double time(0.0);
+            
+            if (indexes.Time != -1) 
+                time = PointBuffer.getField<double>(pointIndex, indexes.Time);
 
             Utils::write_field<double>(p, time);
         }
 
         if (Support::hasColor(pointFormat))
         {
-            const boost::uint16_t red = PointBuffer.getField<boost::uint16_t>(pointIndex, indexes.Red);
-            const boost::uint16_t green = PointBuffer.getField<boost::uint16_t>(pointIndex, indexes.Green);
-            const boost::uint16_t blue = PointBuffer.getField<boost::uint16_t>(pointIndex, indexes.Blue);
-
+            boost::uint16_t red(0);
+            boost::uint16_t green(0);
+            boost::uint16_t blue(0);
+            
+            if (indexes.Red != -1)
+                red = PointBuffer.getField<boost::uint16_t>(pointIndex, indexes.Red);
+            if (indexes.Green != -1)
+                green = PointBuffer.getField<boost::uint16_t>(pointIndex, indexes.Green);
+            if (indexes.Blue != -1)
+                blue = PointBuffer.getField<boost::uint16_t>(pointIndex, indexes.Blue);
+            
             Utils::write_field<boost::uint16_t>(p, red);
             Utils::write_field<boost::uint16_t>(p, green);
-            Utils::write_field<boost::uint16_t>(p, blue);
+            Utils::write_field<boost::uint16_t>(p, blue);                
         }
 
 #ifdef PDAL_HAVE_LASZIP
