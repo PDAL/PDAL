@@ -167,7 +167,7 @@ std::string Support::exename(const std::string& name)
 
 
 // do a comparison by line of two (text) files, ignoring CRLF differences
-boost::uint32_t Support::diff_text_files(const std::string& file1, const std::string& file2)
+boost::uint32_t Support::diff_text_files(const std::string& file1, const std::string& file2, boost::int32_t ignoreLine1)
 {
     if (!pdal::FileUtils::fileExists(file1) ||
         !pdal::FileUtils::fileExists(file2))
@@ -179,12 +179,19 @@ boost::uint32_t Support::diff_text_files(const std::string& file1, const std::st
     BOOST_CHECK(str2);
 
     boost::uint32_t numdiffs = 0;
+    boost::int32_t currLine = 1;
     while (!str1->eof() && !str2->eof())
     {
         std::string buf1;
         std::string buf2;
         std::getline(*str1, buf1);
         std::getline(*str2, buf2);
+
+        if (currLine == ignoreLine1)
+        {
+            ++currLine;
+            continue;
+        }
 
         if (str1->eof() && str2->eof())
         {
@@ -216,6 +223,8 @@ boost::uint32_t Support::diff_text_files(const std::string& file1, const std::st
         {
             ++numdiffs;
         }
+
+        ++currLine;
     }
 
     assert(str1->eof());
@@ -334,7 +343,6 @@ bool Support::compare_text_files(const std::string& file1, const std::string& fi
     boost::uint32_t numdiffs = diff_text_files(file1, file2);
     return (numdiffs == 0);
 }
-
 
 
 #define Compare(x,y)    BOOST_CHECK(pdal::Utils::compare_approx((x),(y),0.001));

@@ -90,7 +90,8 @@ public:
                                       boost::uint32_t* ignorable_start, boost::uint32_t* ignorable_length, boost::uint32_t num_ignorables);
 
     // returns number of lines different for two text files (or maxint if a file doesn't exist)
-    static boost::uint32_t diff_text_files(const std::string& file1, const std::string& file2);
+    // if ignoreLine is not -1, that line will be "ignored" when comparing the two files
+    static boost::uint32_t diff_text_files(const std::string& file1, const std::string& file2, boost::int32_t ignoreLine1=-1);
 
     // returns true iff the two (binary or ascii) files are the same,
     // using the above diff_files/diff_text_files functions
