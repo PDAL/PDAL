@@ -69,23 +69,22 @@ void ByteSwapFilter::initialize()
     this->setNumPoints(stage.getNumPoints());
     this->setPointCountType(stage.getPointCountType());
 
-    //Schema& schema = this->getSchemaRef();
+    Schema& schema = this->getSchemaRef();
 
-    // FIXME:  this doesn't work anymore
-    // std::vector<Dimension>& dimensions = schema.getDimensions();
-    // for (std::vector<Dimension>::iterator i = dimensions.begin(); i != dimensions.end(); ++i)
-    // {
-    //     pdal::EndianType t = i->getEndianness();
-    //     if (t == Endian_Little)
-    //     {
-    //         i->setEndianness(Endian_Big);
-    //     } else if (t == Endian_Big)
-    //     {
-    //         i->setEndianness(Endian_Little);
-    //     } else {
-    //         throw pdal_error("ByteSwapFilter can only swap big/little endian dimensions");
-    //     }
-    // }
+    std::vector<Dimension>& dimensions = schema.getDimensions();
+    for (std::vector<Dimension>::iterator i = dimensions.begin(); i != dimensions.end(); ++i)
+    {
+        pdal::EndianType t = i->getEndianness();
+        if (t == Endian_Little)
+        {
+            i->setEndianness(Endian_Big);
+        } else if (t == Endian_Big)
+        {
+            i->setEndianness(Endian_Little);
+        } else {
+            throw pdal_error("ByteSwapFilter can only swap big/little endian dimensions");
+        }
+    }
 
     return;        
 }
@@ -125,52 +124,6 @@ boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointB
             
     }
     
-
-    for (boost::uint32_t i = 0; i < dstDims.size(); ++i)
-    {
-        Dimension& d = dstSchema.getDimension(i);
-        if (d.getEndianness() == Endian_Little)
-            d.setEndianness(Endian_Big);
-        if (d.getEndianness() == Endian_Big)
-            d.setEndianness(Endian_Little);
-    }
-            
-    
-    
-
-
-    // 
-    //  int fieldX = schema.getDimensionIndex(Dimension_X, Dimension::Double);
-    //  int fieldY = schema.getDimensionIndex(Dimension_Y, Dimension::Double);
-    //  int fieldZ = schema.getDimensionIndex(Dimension_Z, Dimension::Double);
-    // 
-    //  const Bounds<double>& bounds = this->getBounds();
-    // 
-    //  boost::uint32_t numSrcPoints = srcData.getNumPoints();
-    //  boost::uint32_t dstIndex = dstData.getNumPoints();
-    // 
-    //  boost::uint32_t numPointsAdded = 0;
-    // 
-    //  for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
-    //  {
-    //  
-    //      double x = srcData.getField<double>(srcIndex, fieldX);
-    //      double y = srcData.getField<double>(srcIndex, fieldY);
-    //      double z = srcData.getField<double>(srcIndex, fieldZ);
-    //      Vector<double> point(x,y,z);
-    //      
-    //      if (bounds.contains(point))
-    //      {
-    //          dstData.copyPointFast(dstIndex, srcIndex, srcData);
-    //          dstData.setNumPoints(dstIndex+1);
-    //          ++dstIndex;
-    //          ++numPointsAdded;
-    //      }
-    //  }
-    //  
-    //  assert(dstIndex <= dstData.getCapacity());
-
-    // dstData.setNumPoints(dstData.getCapacity());
     return dstData.getNumPoints();
 }
 

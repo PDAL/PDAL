@@ -65,10 +65,19 @@ BOOST_AUTO_TEST_CASE(test_swapping)
 
     filter.initialize();
 
+    BOOST_CHECK_EQUAL(reader.getSchema().getDimension(DimensionId::X_f64).getEndianness(), pdal::Endian_Little);
+    BOOST_CHECK_EQUAL(reader.getSchema().getDimension(DimensionId::Y_f64).getEndianness(), pdal::Endian_Little);
+    BOOST_CHECK_EQUAL(reader.getSchema().getDimension(DimensionId::Z_f64).getEndianness(), pdal::Endian_Little);
+    BOOST_CHECK_EQUAL(reader.getSchema().getDimension(DimensionId::Time_u64).getEndianness(), pdal::Endian_Little);
+    BOOST_CHECK_EQUAL(filter.getSchema().getDimension(DimensionId::X_f64).getEndianness(), pdal::Endian_Big);
+    BOOST_CHECK_EQUAL(filter.getSchema().getDimension(DimensionId::Y_f64).getEndianness(), pdal::Endian_Big);
+    BOOST_CHECK_EQUAL(filter.getSchema().getDimension(DimensionId::Z_f64).getEndianness(), pdal::Endian_Big);
+    BOOST_CHECK_EQUAL(filter.getSchema().getDimension(DimensionId::Time_u64).getEndianness(), pdal::Endian_Big);
+
     boost::scoped_ptr<StageSequentialIterator> unflipped_iter(reader.createSequentialIterator());
     boost::scoped_ptr<StageSequentialIterator> flipped_iter(filter.createSequentialIterator());
 
-    const Schema& schema = reader.getSchema();
+    const Schema& schema = filter.getSchema();
     
     PointBuffer flipped(schema, buffer_size);
     const boost::uint32_t fliped_read = flipped_iter->read(flipped);
@@ -119,33 +128,6 @@ BOOST_AUTO_TEST_CASE(test_swapping)
         SWAP_ENDIANNESS(reflipped_t);
         BOOST_CHECK_EQUAL(unflipped_t, reflipped_t);
     }
-    // 
-    // // 1000 * 1/3 = 333, plus or minus a bit for rounding
-    // BOOST_CHECK(Utils::compare_approx<double>(static_cast<double>(numWritten), 333, 6));
-    // 
-    // const double minX = writer.getMinX();
-    // const double minY = writer.getMinY();
-    // const double minZ = writer.getMinZ();
-    // const double maxX = writer.getMaxX();
-    // const double maxY = writer.getMaxY();
-    // const double maxZ = writer.getMaxZ();
-    // const double avgX = writer.getAvgX();
-    // const double avgY = writer.getAvgY();
-    // const double avgZ = writer.getAvgZ();
-    // 
-    // const double delX = 10.0 / 999.0;
-    // const double delY = 100.0 / 999.0;
-    // const double delZ = 1000.0 / 999.0;
-    // 
-    // BOOST_CHECK(Utils::compare_approx<double>(minX, 3.33333, delX));
-    // BOOST_CHECK(Utils::compare_approx<double>(minY, 33.33333, delY));
-    // BOOST_CHECK(Utils::compare_approx<double>(minZ, 333.33333, delZ));
-    // BOOST_CHECK(Utils::compare_approx<double>(maxX, 6.66666, delX));
-    // BOOST_CHECK(Utils::compare_approx<double>(maxY, 66.66666, delY));
-    // BOOST_CHECK(Utils::compare_approx<double>(maxZ, 666.66666, delZ));
-    // BOOST_CHECK(Utils::compare_approx<double>(avgX, 5.00000, delX));
-    // BOOST_CHECK(Utils::compare_approx<double>(avgY, 50.00000, delY));
-    // BOOST_CHECK(Utils::compare_approx<double>(avgZ, 500.00000, delZ));
 
     return;
 }
