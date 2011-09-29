@@ -68,14 +68,6 @@ BOOST_AUTO_TEST_CASE(test_layout)
     SchemaLayout l2(l1);
     SchemaLayout l3 = l1;
     SchemaLayout l4(s2);
-
-    BOOST_CHECK(l1==l1);
-    BOOST_CHECK(l1==l2);
-    BOOST_CHECK(l2==l1);
-    BOOST_CHECK(l1==l3);
-    BOOST_CHECK(l3==l1);
-    BOOST_CHECK(l1!=l4);
-    BOOST_CHECK(l4!=l1);
 }
 
 
@@ -100,6 +92,7 @@ BOOST_AUTO_TEST_CASE(test_layout_size)
 }
 
 
+#if 0
 BOOST_AUTO_TEST_CASE(SchemaLayoutTest_ptree)
 {
     Dimension d1(DimensionId::X_i32);
@@ -132,6 +125,7 @@ BOOST_AUTO_TEST_CASE(SchemaLayoutTest_ptree)
 
     return;
 }
+#endif
 
 
 BOOST_AUTO_TEST_SUITE_END()

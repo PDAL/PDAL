@@ -93,21 +93,15 @@ public:
     // convenience function
     const Schema& getSchema() const
     {
-        return m_schemaLayout.getSchema();
-    }
-
-    // schema (number and kinds of fields) for a point in this buffer
-    inline SchemaLayout& getSchemaLayout()
-    {
-        return m_schemaLayout;
+        return m_schema;
     }
 
     // convenience function
-    Schema& getSchema() 
+    Schema& getSchema()
     {
-        return m_schemaLayout.getSchema();
+        return m_schema;
     }
-    
+
     // accessors to a particular field of a particular point in this buffer
     template<class T> T getField(std::size_t pointIndex, boost::int32_t fieldIndex) const;
     template<class T> void setField(std::size_t pointIndex, boost::int32_t fieldIndex, T value);
@@ -197,6 +191,7 @@ public:
     boost::property_tree::ptree toPTree() const;
 
 private:
+    Schema m_schema;
     SchemaLayout m_schemaLayout;
     boost::scoped_array<boost::uint8_t> m_data;
     std::size_t m_pointSize;

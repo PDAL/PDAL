@@ -64,7 +64,6 @@ void Check_Point(const pdal::PointBuffer& data,
                        double tref)
 {
     const ::pdal::Schema& schema = data.getSchema();
-    const ::pdal::SchemaLayout& schemaLayout = data.getSchemaLayout();
 
     int offsetX = schema.getDimensionIndex(pdal::DimensionId::X_i32);
     int offsetY = schema.getDimensionIndex(pdal::DimensionId::Y_i32);

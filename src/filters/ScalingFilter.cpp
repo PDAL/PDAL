@@ -242,10 +242,9 @@ void ScalingFilterBase::processBuffer(const PointBuffer& srcData, PointBuffer& d
     const boost::uint32_t numPoints = srcData.getNumPoints();
 
     const SchemaLayout& srcSchemaLayout = srcData.getSchemaLayout();
-    const Schema& srcSchema = srcSchemaLayout.getSchema();
+    const Schema& srcSchema = srcData.getSchema();
 
-    const SchemaLayout& dstSchemaLayout = dstData.getSchemaLayout();
-    const Schema& dstSchema = dstSchemaLayout.getSchema();
+    const Schema& dstSchema = dstData.getSchema();
 
     // rather than think about "src/dst", we will think in terms of "doubles" and "ints"
     const Schema& schemaD = (m_isDescaling ? srcSchema : dstSchema);

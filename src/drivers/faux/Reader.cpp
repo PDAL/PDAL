@@ -155,8 +155,7 @@ pdal::StageRandomIterator* Reader::createRandomIterator() const
 
 boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) const
 {
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
+    const Schema& schema = data.getSchema();
 
     if (schema.getDimensions().size() != 4)
         throw not_yet_implemented("need to add ability to read from arbitrary fields");

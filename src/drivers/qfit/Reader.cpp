@@ -182,10 +182,8 @@ Word #       Content
 
 namespace pdal { namespace drivers { namespace qfit {
 
-PointIndexes::PointIndexes(const SchemaLayout& schemaLayout, QFIT_Format_Type format)
+PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 {
-    const Schema& schema = schemaLayout.getSchema();
-
     Time = schema.getDimensionIndex(DimensionId::Qfit_Time);
     X = schema.getDimensionIndex(DimensionId::X_i32);
     Y = schema.getDimensionIndex(DimensionId::Y_i32);
@@ -431,8 +429,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(), numPointsLeft);
     const boost::uint32_t numPoints = (boost::uint32_t)std::min<boost::uint64_t>(numPoints64, std::numeric_limits<boost::uint32_t>::max());
 
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
+    const Schema& schema = data.getSchema();
     
     const int pointByteCount = getPointDataSize();
     const PointIndexes indexes(schema, m_format);

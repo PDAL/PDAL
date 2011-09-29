@@ -266,8 +266,7 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 
 boost::uint32_t Writer::writeBuffer(const PointBuffer& PointBuffer)
 {
-    const SchemaLayout& schemaLayout = PointBuffer.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
+    const Schema& schema = PointBuffer.getSchema();
     PointFormat pointFormat = m_lasHeader.getPointFormat();
 
     const PointIndexes indexes(schema, pointFormat);

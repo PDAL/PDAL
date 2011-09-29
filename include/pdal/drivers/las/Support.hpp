@@ -62,7 +62,7 @@ enum PointFormat
 class PointIndexes
 {
 public:
-    PointIndexes(const SchemaLayout& schemaLayout, PointFormat format);
+    PointIndexes(const Schema& schema, PointFormat format);
     int X;
     int Y;
     int Z;

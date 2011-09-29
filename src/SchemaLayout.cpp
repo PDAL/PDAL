@@ -66,39 +66,6 @@ SchemaLayout::SchemaLayout(SchemaLayout const& other)
 }
 
 
-// assignment constructor
-SchemaLayout& SchemaLayout::operator=(SchemaLayout const& rhs)
-{
-    if (&rhs != this)
-    {
-        m_dimensionLayouts = rhs.m_dimensionLayouts;
-        m_byteSize = rhs.m_byteSize;
-        m_schema = rhs.m_schema;
-    }
-
-    return *this;
-}
-
-
-bool SchemaLayout::operator==(const SchemaLayout& other) const
-{
-    if (m_byteSize != other.m_byteSize )
-        return false;
-    if (m_schema != other.m_schema)
-        return false;
-    if (m_dimensionLayouts != other.m_dimensionLayouts)
-        return false;
-        
-    return true;
-}
-
-
-bool SchemaLayout::operator!=(const SchemaLayout& other) const
-{
-  return !(*this==other);
-}
-
-
 void SchemaLayout::calculateSizes()
 {
     // to make life easy, for now we are going to assume that each Dimension 
@@ -130,36 +97,6 @@ void SchemaLayout::calculateSizes()
     m_byteSize = offset;
 
     return;
-}
-
-
-boost::property_tree::ptree SchemaLayout::toPTree() const
-{
-    boost::property_tree::ptree tree;
-
-    for (std::vector<DimensionLayout>::const_iterator iter = m_dimensionLayouts.begin(); iter != m_dimensionLayouts.end(); ++iter)
-    {
-        const DimensionLayout& dim = *iter;
-        tree.add_child("dimensionlayout", dim.toPTree());
-    }
-
-    return tree;
-}
-
-
-void SchemaLayout::dump() const
-{
-    std::cout << *this;
-}
-
-
-std::ostream& operator<<(std::ostream& os, pdal::SchemaLayout const& layout)
-{
-    boost::property_tree::ptree tree = layout.toPTree();
-
-    boost::property_tree::write_json(os, tree);
-
-    return os;
 }
 
 

@@ -43,10 +43,8 @@
 
 namespace pdal { namespace drivers { namespace terrasolid {
 
-PointIndexes::PointIndexes(const SchemaLayout& schemaLayout, TERRASOLID_Format_Type format)
+PointIndexes::PointIndexes(const Schema& schema, TERRASOLID_Format_Type format)
 {
-    const ::pdal::Schema& schema = schemaLayout.getSchema();
-
     if (format == TERRASOLID_Format_1) 
     {
         Classification = schema.getDimensionIndex(DimensionId::TerraSolid_Classification);
@@ -278,8 +276,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(), numPointsLeft);
     const boost::uint32_t numPoints = (boost::uint32_t)std::min<boost::uint64_t>(numPoints64, std::numeric_limits<boost::uint32_t>::max());
 
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
+    const Schema& schema = data.getSchema();
     
     const int pointByteCount = getPointDataSize();
     const PointIndexes indexes(schema, m_format);

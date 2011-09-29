@@ -102,8 +102,7 @@ void ColorFilter::processBuffer(PointBuffer& data) const
 {
     const boost::uint32_t numPoints = data.getNumPoints();
 
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
+    const Schema& schema = data.getSchema();
 
     const int indexR = schema.getDimensionIndex(DimensionId::Red_u16);
     const int indexG = schema.getDimensionIndex(DimensionId::Green_u16);

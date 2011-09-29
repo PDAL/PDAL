@@ -166,10 +166,8 @@ boost::uint16_t Support::getPointDataSize(PointFormat pointFormat)
 // LasPointIndexes
 // --------------------------------------------------------------------------
 
-PointIndexes::PointIndexes(const SchemaLayout& schemaLayout, PointFormat format)
+PointIndexes::PointIndexes(const Schema& schema, PointFormat format)
 {
-    const Schema& schema = schemaLayout.getSchema();
-
     X = schema.getDimensionIndex(DimensionId::X_i32);
     Y = schema.getDimensionIndex(DimensionId::Y_i32);
     Z = schema.getDimensionIndex(DimensionId::Z_i32);

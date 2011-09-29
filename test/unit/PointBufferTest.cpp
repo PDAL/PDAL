@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     PointBuffer data(schema, 10);
 
     BOOST_CHECK(data.getCapacity() == 10);
-    BOOST_CHECK(data.getSchemaLayout() == layout);
+    BOOST_CHECK(data.getSchema() == schema);
 
     return;
 }

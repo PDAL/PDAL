@@ -100,8 +100,7 @@ const Options ByteSwapFilter::getDefaultOptions() const
 
 boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const
 {
-    SchemaLayout& dstSchemaLayout = dstData.getSchemaLayout();
-    Schema & dstSchema = dstSchemaLayout.getSchema();
+    Schema& dstSchema = dstData.getSchema();
     
     const std::vector<Dimension>& dstDims = dstSchema.getDimensions();
 

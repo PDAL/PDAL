@@ -103,7 +103,7 @@ public:
 class PointIndexes
 {
 public:
-    PointIndexes(const SchemaLayout& schemaLayout, TERRASOLID_Format_Type format);
+    PointIndexes(const Schema& schema, TERRASOLID_Format_Type format);
     int Time;
     int X;
     int Y;

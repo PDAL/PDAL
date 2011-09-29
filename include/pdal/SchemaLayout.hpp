@@ -60,21 +60,6 @@ public:
     SchemaLayout(const Schema&);
     SchemaLayout(SchemaLayout const& other);
 
-    SchemaLayout& operator=(SchemaLayout const& rhs);
-
-    bool operator==(const SchemaLayout& other) const;
-    bool operator!=(const SchemaLayout& other) const;
-
-    const Schema& getSchema() const 
-    {
-      return m_schema;
-    }
-
-    inline Schema& getSchema() 
-    {
-      return m_schema;
-    }
-    
     /// Fetch total byte size -- sum of all dimensions
     inline std::size_t getByteSize() const
     {
@@ -87,17 +72,6 @@ public:
     }
 
 
-    // returns a ptree containing the SchemaLayout
-    //
-    // looks like this:
-    //     [DimensionLayout ptree]
-    //     [DimensionLayout ptree]
-    //     ...
-    // 
-    boost::property_tree::ptree toPTree() const;
-
-    void dump() const;
-
 private:
     void calculateSizes();
 
@@ -105,9 +79,6 @@ private:
     std::vector<DimensionLayout> m_dimensionLayouts;
     std::size_t m_byteSize;
 };
-
-
-PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::SchemaLayout const& d);
 
 
 } // namespace liblas

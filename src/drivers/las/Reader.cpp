@@ -179,8 +179,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     const boost::uint32_t numPoints = (boost::uint32_t)std::min<boost::uint64_t>(numPoints64, std::numeric_limits<boost::uint32_t>::max());
 
     const LasHeader& lasHeader = getLasHeader();
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
+    const Schema& schema = data.getSchema();
     const PointFormat pointFormat = lasHeader.getPointFormat();
 
     const PointIndexes indexes(schema, pointFormat);

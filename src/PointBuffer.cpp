@@ -42,7 +42,8 @@ namespace pdal
 
 
 PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
-    : m_schemaLayout(SchemaLayout(schema))
+    : m_schema(schema)
+    , m_schemaLayout(SchemaLayout(schema))
     , m_data(new boost::uint8_t[m_schemaLayout.getByteSize() * capacity])
     , m_pointSize(m_schemaLayout.getByteSize())
     , m_numPoints(0)
@@ -54,7 +55,8 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
 }
 
 PointBuffer::PointBuffer(PointBuffer const& other) 
-    : m_schemaLayout(other.getSchemaLayout())
+    : m_schema(other.getSchema())
+    , m_schemaLayout(other.getSchemaLayout())
     , m_data(new boost::uint8_t[m_schemaLayout.getByteSize() * other.m_capacity])
     , m_pointSize(m_schemaLayout.getByteSize())
     , m_numPoints(other.m_numPoints)
@@ -73,6 +75,7 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
 {
     if (&rhs != this)
     {
+        m_schema = rhs.getSchema();
         m_schemaLayout = rhs.getSchemaLayout();
         m_pointSize = m_schemaLayout.getByteSize();
         m_numPoints = rhs.getNumPoints();
