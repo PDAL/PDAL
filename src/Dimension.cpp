@@ -332,52 +332,59 @@ KnownDimension s_knownDimensions[] =
 };
 
 
-static void validate();
+typedef std::map<DimensionId::Id, boost::uint32_t> Map;
+typedef std::pair<DimensionId::Id, boost::uint32_t> Pair;
+
+static Map map;
+
+static void buildMap()
+{
+    // only do this once
+    if (map.size() != 0)
+        return;
+
+    boost::uint32_t i=0;
+    while (s_knownDimensions[i].id != DimensionId::Undefined)
+    {
+        assert(map.find(s_knownDimensions[i].id) == map.end());
+        Pair pair(s_knownDimensions[i].id,i);
+        map.insert(pair);
+        ++i;
+    }
+
+    return;
+}
+
 
 // BUG: this is too slow
 static const KnownDimension& lookupKnownDimension(const DimensionId::Id& id)
 {
-    validate();
+    buildMap();
 
-    int i=0;
-    while (s_knownDimensions[i].id != DimensionId::Undefined)
+    Map::const_iterator iter = map.find(id);
+    if (iter == map.end())
     {
-        const KnownDimension& kd = s_knownDimensions[i];
-        if (kd.id == id) return kd;
-        ++i;
+        throw pdal_error("Dimension not found");
     }
-    throw pdal_error("Dimension not found");
+    assert(iter->first == id);
+    int index = iter->second;
+    const KnownDimension& kd = s_knownDimensions[index];
+    assert(kd.id == id);
+    return kd;
 }
 
 static bool hasKnownDimension(const DimensionId::Id& id)
 {
-    int i=0;
-    while (s_knownDimensions[i].id != DimensionId::Undefined)
+    buildMap();
+
+    Map::const_iterator iter = map.find(id);
+    if (iter == map.end())
     {
-        const KnownDimension& kd = s_knownDimensions[i];
-        if (kd.id == id) return true;
-        ++i;
+        return false;
     }
-    return false;
+    return true;
 }
 
-static void validate()
-{
-    static std::map<DimensionId::Id, int> map;
-
-    // only do this once
-    if (map.size() == 0)
-    {
-        int i=0;
-        while (s_knownDimensions[i].id != DimensionId::Undefined)
-        {
-            assert(map.find(s_knownDimensions[i].id) == map.end());
-            std::pair<DimensionId::Id,int> pair(s_knownDimensions[i].id,i);
-            map.insert(pair);
-            ++i;
-        }
-    }
-}
 
 // --------------------------------------------------------------------------
 
