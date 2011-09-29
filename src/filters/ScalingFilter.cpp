@@ -241,7 +241,6 @@ void ScalingFilterBase::processBuffer(const PointBuffer& srcData, PointBuffer& d
 {
     const boost::uint32_t numPoints = srcData.getNumPoints();
 
-    const SchemaLayout& srcSchemaLayout = srcData.getSchemaLayout();
     const Schema& srcSchema = srcData.getSchema();
 
     const Schema& dstSchema = dstData.getSchema();
@@ -278,7 +277,7 @@ void ScalingFilterBase::processBuffer(const PointBuffer& srcData, PointBuffer& d
     for (i=0; i<src_layouts.size(); i++)
     {
         Dimension const& d = src_layouts[i];
-        DimensionLayout const& dl = srcSchemaLayout.getDimensionLayout(i);
+        DimensionLayout const& dl = srcSchema.getDimensionLayout(i);
         std::size_t src_offset = dl.getByteOffset();
         dstFieldIndex = dstSchema.getDimensionIndex(d);
         dimensions_lookup[dstFieldIndex] = src_offset;

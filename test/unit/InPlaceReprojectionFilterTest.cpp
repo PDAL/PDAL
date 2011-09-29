@@ -126,7 +126,6 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
         reprojectionFilter.initialize();
 
         const pdal::Schema& schema = reprojectionFilter.getSchema();
-        const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data(schema, 1);
 
         pdal::StageSequentialIterator* iter = reprojectionFilter.createSequentialIterator();

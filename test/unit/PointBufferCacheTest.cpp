@@ -32,7 +32,6 @@ BOOST_AUTO_TEST_CASE(test1)
     Schema schema;
     Dimension d1(DimensionId::X_i32);
     schema.appendDimension(d1);
-    SchemaLayout layout(schema);
 
     PointBuffer* item0 = new PointBuffer(schema, 10);
     PointBuffer* item1 = new PointBuffer(schema, 10);

@@ -69,7 +69,6 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     boost::scoped_ptr<StageSequentialIterator> flipped_iter(filter.createSequentialIterator());
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout schemaLayout(schema);
     
     PointBuffer flipped(schema, buffer_size);
     const boost::uint32_t fliped_read = flipped_iter->read(flipped);

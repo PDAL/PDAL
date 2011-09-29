@@ -161,7 +161,6 @@ static void givePointsToEngine(ThreadArgs* threadArgs)
     boost::uint32_t numPoints = threadArgs->m_numPoints;
 
     const pdal::Schema& schema = stage.getSchema();
-    const pdal::SchemaLayout schemaLayout(schema);
 
     pdal::StageSequentialIterator* iter = stage.createSequentialIterator();
     pdal::PointBuffer buffer(schema, numPoints);

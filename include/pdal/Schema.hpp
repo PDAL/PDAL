@@ -48,6 +48,7 @@
 #include <map>
 
 #include <pdal/Dimension.hpp>
+#include <pdal/DimensionLayout.hpp>
 
 // boost
 #include <boost/cstdint.hpp>
@@ -78,7 +79,6 @@ public:
     bool operator!=(const Schema& other) const;
 
     void appendDimension(Dimension const& dim);
-    void appendDimensions(const std::vector<Dimension>& dim);
 
     const std::vector<Dimension>& getDimensions() const;
     std::vector<Dimension>& getDimensions();
@@ -94,6 +94,19 @@ public:
     
     int getDimensionIndex(const DimensionId::Id& id) const;
     int getDimensionIndex(const Dimension& dim) const;
+
+    void recalculateSizes();
+
+    /// Fetch total byte size -- sum of all dimensions
+    inline std::size_t getByteSize() const
+    {
+        return m_byteSize;
+    }
+
+    const DimensionLayout& getDimensionLayout(std::size_t index) const
+    {
+        return m_dimensionLayouts[index];
+    }
 
     // returns a ptree reprsenting the Schema
     //
@@ -113,7 +126,11 @@ public:
     static std::string to_xml(Schema const& schema);
 
 private:
+    void calculateSizes();
+
     std::vector<Dimension> m_dimensions;
+    std::vector<DimensionLayout> m_dimensionLayouts;
+    std::size_t m_byteSize;
 
     std::map<DimensionId::Id, std::size_t> m_dimensions_map;
 };

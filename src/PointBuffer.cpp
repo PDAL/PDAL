@@ -43,9 +43,8 @@ namespace pdal
 
 PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     : m_schema(schema)
-    , m_schemaLayout(SchemaLayout(schema))
-    , m_data(new boost::uint8_t[m_schemaLayout.getByteSize() * capacity])
-    , m_pointSize(m_schemaLayout.getByteSize())
+    , m_data(new boost::uint8_t[m_schema.getByteSize() * capacity])
+    , m_pointSize(m_schema.getByteSize())
     , m_numPoints(0)
     , m_capacity(capacity)
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
@@ -56,9 +55,8 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
 
 PointBuffer::PointBuffer(PointBuffer const& other) 
     : m_schema(other.getSchema())
-    , m_schemaLayout(other.getSchemaLayout())
-    , m_data(new boost::uint8_t[m_schemaLayout.getByteSize() * other.m_capacity])
-    , m_pointSize(m_schemaLayout.getByteSize())
+    , m_data(new boost::uint8_t[m_schema.getByteSize() * other.m_capacity])
+    , m_pointSize(m_schema.getByteSize())
     , m_numPoints(other.m_numPoints)
     , m_capacity(other.m_capacity)
     , m_bounds(other.m_bounds)
@@ -71,13 +69,11 @@ PointBuffer::PointBuffer(PointBuffer const& other)
 }
 
 PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
-
 {
     if (&rhs != this)
     {
         m_schema = rhs.getSchema();
-        m_schemaLayout = rhs.getSchemaLayout();
-        m_pointSize = m_schemaLayout.getByteSize();
+        m_pointSize = rhs.getSchema().getByteSize();
         m_numPoints = rhs.getNumPoints();
         m_capacity = rhs.getCapacity();
         m_bounds = rhs.getSpatialBounds();
@@ -111,7 +107,7 @@ void PointBuffer::setSpatialBounds(const Bounds<double>& bounds)
 
 void PointBuffer::setData(boost::uint8_t* data, std::size_t index)
 {
-    memcpy(m_data.get() + m_pointSize * index, data, getSchemaLayout().getByteSize());
+    memcpy(m_data.get() + m_pointSize * index, data, getSchema().getByteSize());
 }
 
 void PointBuffer::setAllData(boost::uint8_t* data, boost::uint32_t byteCount)
@@ -132,7 +128,7 @@ boost::uint32_t PointBuffer::getNumPoints() const
 
 void PointBuffer::getData(boost::uint8_t** data, std::size_t* array_size) const
 {
-    *array_size = getSchemaLayout().getByteSize();
+    *array_size = getSchema().getByteSize();
     *data = (boost::uint8_t*) malloc (*array_size);
     memcpy(*data, m_data.get(), *array_size);
 }
@@ -143,7 +139,6 @@ boost::property_tree::ptree PointBuffer::toPTree() const
     boost::property_tree::ptree tree;
 
     const Schema& schema = getSchema();
-    const SchemaLayout& schemaLayout = getSchemaLayout();
     const std::vector<Dimension>& dimensions = schema.getDimensions();
 
     const boost::uint32_t numPoints = getNumPoints();
@@ -156,7 +151,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
         for (i=0; i<dimensions.size(); i++)
         {
             const Dimension& dimension = dimensions[i];
-            const DimensionLayout& dimensionLayout = schemaLayout.getDimensionLayout(i);
+            const DimensionLayout& dimensionLayout = schema.getDimensionLayout(i);
             const std::size_t fieldIndex = dimensionLayout.getPosition();
 
             const std::string key = pointstring + dimension.getName();
@@ -282,7 +277,6 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
     using std::endl;
 
     const Schema& schema = pointBuffer.getSchema();
-    const SchemaLayout& schemaLayout = pointBuffer.getSchemaLayout();
     const std::vector<Dimension>& dimensions = schema.getDimensions();
 
     const std::size_t numPoints = pointBuffer.getNumPoints();
@@ -298,7 +292,7 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
         for (i=0; i<dimensions.size(); i++)
         {
             const Dimension& dimension = dimensions[i];
-            const DimensionLayout& dimensionLayout = schemaLayout.getDimensionLayout(i);
+            const DimensionLayout& dimensionLayout = schema.getDimensionLayout(i);
             std::size_t fieldIndex = dimensionLayout.getPosition();
 
             ostr << dimension.getName() << " (" << dimension.getDataTypeName(dimension.getDataType()) << ") : ";

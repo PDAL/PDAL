@@ -62,7 +62,6 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
     BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout schemaLayout(schema);
 
     PointBuffer data(schema, 750);
  
@@ -114,7 +113,6 @@ BOOST_AUTO_TEST_CASE(FauxReaderTest_test_options)
     BOOST_CHECK_EQUAL(reader.getId(), 90210u);
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout schemaLayout(schema);
 
     PointBuffer data(schema, 750);
  
@@ -156,7 +154,6 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout schemaLayout(schema);
 
     PointBuffer data(schema, 10);
 
@@ -258,7 +255,6 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
     reader.initialize();
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout schemaLayout(schema);
 
     PointBuffer data(schema, 750);
 
@@ -307,7 +303,6 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     reader.initialize();
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout schemaLayout(schema);
 
     PointBuffer data(schema, 2);
 
@@ -355,7 +350,6 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
     reader.initialize();
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout schemaLayout(schema);
 
     PointBuffer data(schema, 750);
 
@@ -423,7 +417,6 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
     reader.initialize();
     
     const Schema& schema = reader.getSchema();
-    SchemaLayout layout(schema);
 
     PointBuffer data(schema, 750);
     

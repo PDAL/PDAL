@@ -42,6 +42,8 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 
+#include <vector>
+
 // liblaszip
 class LASzip;
 

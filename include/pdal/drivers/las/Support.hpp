@@ -37,7 +37,7 @@
 
 #include <pdal/pdal.hpp>
 
-#include <pdal/SchemaLayout.hpp>
+#include <pdal/Schema.hpp>
 
 #include <iostream>
 

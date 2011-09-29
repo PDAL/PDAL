@@ -38,7 +38,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
-#include <pdal/SchemaLayout.hpp>
+#include <pdal/Schema.hpp>
 
 using namespace pdal;
 
@@ -64,10 +64,10 @@ BOOST_AUTO_TEST_CASE(test_layout)
     BOOST_CHECK(s2.getDimensions()[0].getId() == DimensionId::X_i32);
     BOOST_CHECK(s2.hasDimension(DimensionId::Y_i32) == false);
 
-    SchemaLayout l1(s1);
-    SchemaLayout l2(l1);
-    SchemaLayout l3 = l1;
-    SchemaLayout l4(s2);
+    Schema l1(s1);
+    Schema l2(l1);
+    Schema l3 = l1;
+    Schema l4(s2);
 }
 
 
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test_layout_size)
     Schema s1;
     s1.appendDimension(d1);
     s1.appendDimension(d2);
-    SchemaLayout sl1(s1);
+    Schema sl1(s1);
 
     const DimensionLayout& dl1 = sl1.getDimensionLayout(0);
     BOOST_CHECK(dl1.getDimension() == d1);

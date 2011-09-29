@@ -127,8 +127,8 @@ Reader::Reader(OptionsOld& optionsOld)
     registerFields();
     
     m_offset = 56;
-    SchemaLayout layout(getSchemaRef());
-    m_size = layout.getByteSize();
+    const Schema& schema = getSchema();
+    m_size = schema.getByteSize();
     
     // std::cout << "format: " << m_format << std::endl;
     // std::cout << "OrgX: " << m_header->OrgX << std::endl;

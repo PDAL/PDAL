@@ -261,7 +261,7 @@ Reader::Reader(const Options& options)
     
     registerFields();
     
-    SchemaLayout layout(getSchemaRef());
+    const Schema& schema = getSchema();
 
     // Seek to the beginning 
     str->seekg(0, std::ios::beg);
@@ -274,7 +274,7 @@ Reader::Reader(const Options& options)
 
     // First integer is the format of the file
     std::ios::off_type offset = static_cast<std::ios::off_type>(m_offset);  
-    std::ios::off_type length = static_cast<std::ios::off_type>(layout.getByteSize());
+    std::ios::off_type length = static_cast<std::ios::off_type>(schema.getByteSize());
     std::ios::off_type point_bytes = end - offset;
 
     // Figure out how many points we have and whether or not we have 
@@ -297,7 +297,7 @@ Reader::Reader(const Options& options)
                 "as determined by subtracting the data offset (" 
                 << m_offset << ") from the file length (" 
                 << size <<  ") and dividing by the point record length (" 
-                << layout.getByteSize() << ")."
+                << schema.getByteSize() << ")."
                 " It also does not perfectly contain an exact number of"
                 " point data and we cannot infer a point count."
                 " Calculated number of points: " << count << 

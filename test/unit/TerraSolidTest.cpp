@@ -111,7 +111,6 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     BOOST_CHECK_EQUAL(reader.getNumPoints(), 1000);
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout layout(schema);
 
     PointBuffer data(schema, 3);
     

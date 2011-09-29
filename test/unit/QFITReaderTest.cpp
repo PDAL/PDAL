@@ -109,7 +109,6 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     reader.initialize();
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout layout(schema);
 
     PointBuffer data(schema, 3);
     
@@ -145,7 +144,6 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     reader.initialize();    
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout layout(schema);
 
     PointBuffer data(schema, 3);
     

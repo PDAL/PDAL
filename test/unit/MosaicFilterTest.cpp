@@ -66,7 +66,6 @@ BOOST_AUTO_TEST_CASE(test1)
     mosaic.initialize();
 
     const Schema& schema = mosaic.getSchema();
-    SchemaLayout schemaLayout(schema);
 
     PointBuffer data(schema, 300);
 

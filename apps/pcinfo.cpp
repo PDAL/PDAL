@@ -138,7 +138,6 @@ void PcInfo::addSwitches()
 void PcInfo::dumpOnePoint(const Stage& stage) const
 {
     const Schema& schema = stage.getSchema();
-    SchemaLayout layout(schema);
 
     PointBuffer data(schema, 1);
     
@@ -167,7 +166,6 @@ void PcInfo::dumpStats(pdal::filters::StatsFilter& filter) const
 {
 
     const Schema& schema = filter.getSchema();
-    SchemaLayout layout(schema);
 
     boost::scoped_ptr<StageSequentialIterator> iter(filter.createSequentialIterator());
 

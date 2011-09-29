@@ -107,7 +107,6 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
         BOOST_CHECK(out_ref == out_ref_test);
 
         const pdal::Schema& schema = reader.getSchema();
-        const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data(schema, 1);
 
         pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
@@ -143,7 +142,6 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
         descalingFilter.initialize();
 
         const pdal::Schema& schema = descalingFilter.getSchema();
-        const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data(schema, 1);
 
         pdal::StageSequentialIterator* iter = descalingFilter.createSequentialIterator();
@@ -181,7 +179,6 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
         descalingFilter.initialize();
 
         const pdal::Schema& schema = descalingFilter.getSchema();
-        const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data(schema, 1);
 
         pdal::StageSequentialIterator* iter = descalingFilter.createSequentialIterator();
@@ -220,7 +217,6 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
         descalingFilter.initialize();
 
         const pdal::Schema& schema = descalingFilter.getSchema();
-        const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data2(schema, 1);
 
         pdal::StageSequentialIterator* iter = descalingFilter.createSequentialIterator();

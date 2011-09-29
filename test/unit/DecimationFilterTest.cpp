@@ -58,7 +58,6 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     filter.initialize();
 
     const Schema& schema = filter.getSchema();
-    SchemaLayout schemaLayout(schema);
 
     PointBuffer data(schema, 3);
 
@@ -95,7 +94,6 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
     filter.initialize();
 
     const Schema& schema = filter.getSchema();
-    SchemaLayout schemaLayout(schema);
 
     PointBuffer data(schema, 3);
 

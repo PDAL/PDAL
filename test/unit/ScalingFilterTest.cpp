@@ -94,7 +94,6 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
         scalingFilter.initialize();
 
         const pdal::Schema& schema = scalingFilter.getSchema();
-        const pdal::SchemaLayout layout(schema);
         pdal::PointBuffer data2(schema, 1);
 
         pdal::StageSequentialIterator* iter = scalingFilter.createSequentialIterator();

@@ -92,7 +92,6 @@ BOOST_AUTO_TEST_CASE(test_construction)
         BOOST_CHECK(ids[14] == 1050 );
         
         pdal::Schema const& schema = reader.getSchema();
-        pdal::SchemaLayout schemaLayout(schema);
         PointBuffer buffer(schema, 15);
         const int indexId = schema.getDimensionIndex(DimensionId::Chipper_1);
         const int indexBlockId = schema.getDimensionIndex(DimensionId::Chipper_2);        

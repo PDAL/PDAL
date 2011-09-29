@@ -1228,7 +1228,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     // bool gotdata = GetResultData(result, reader, data, 3);
     // if (! gotdata) throw std::runtime_error("unable to fetch point data byte array");
 
-    statement->Bind((char*)point_data,(long)(buffer.getSchemaLayout().getByteSize()*buffer.getNumPoints()));
+    statement->Bind((char*)point_data,(long)(buffer.getSchema().getByteSize()*buffer.getNumPoints()));
 
     // :5
     long* p_gtype = (long*) malloc (1 * sizeof(long));

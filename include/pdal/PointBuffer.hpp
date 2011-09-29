@@ -40,7 +40,7 @@
 #include <boost/scoped_array.hpp>
 
 #include <pdal/Bounds.hpp>
-#include <pdal/SchemaLayout.hpp>
+#include <pdal/Schema.hpp>
 
 namespace pdal
 {
@@ -84,12 +84,6 @@ public:
     // This is a fixed constant, set at ctor time by the person constructing the buffer.
     inline boost::uint32_t getCapacity() const { return m_capacity; }
 
-    // schema (number and kinds of fields) for a point in this buffer
-    inline const SchemaLayout& getSchemaLayout() const
-    {
-        return m_schemaLayout;
-    }
-
     // convenience function
     const Schema& getSchema() const
     {
@@ -116,7 +110,7 @@ public:
 
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
-        const std::size_t len = getSchemaLayout().getByteSize();
+        const std::size_t len = getSchema().getByteSize();
 
         memcpy(dest, src, len);
 
@@ -132,7 +126,7 @@ public:
 
         const boost::uint8_t* src = srcPointBuffer.getData(srcPointIndex);
         boost::uint8_t* dest = getData(destPointIndex);
-        const std::size_t len = getSchemaLayout().getByteSize();
+        const std::size_t len = getSchema().getByteSize();
 
         memcpy(dest, src, len * numPoints);
 
@@ -192,7 +186,6 @@ public:
 
 private:
     Schema m_schema;
-    SchemaLayout m_schemaLayout;
     boost::scoped_array<boost::uint8_t> m_data;
     std::size_t m_pointSize;
     boost::uint32_t m_numPoints;
@@ -209,7 +202,7 @@ inline void PointBuffer::setField(std::size_t pointIndex, boost::int32_t fieldIn
         // this is a little harsh, but we'll keep it for now as we shake things out
         throw pdal_error("filedIndex is not valid at this point of access");
     }
-    const DimensionLayout& dimLayout = m_schemaLayout.getDimensionLayout(fieldIndex);
+    const DimensionLayout& dimLayout = m_schema.getDimensionLayout(fieldIndex);
     std::size_t offset = (pointIndex * m_pointSize) + dimLayout.getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
@@ -224,7 +217,7 @@ inline void PointBuffer::setFieldData(std::size_t pointIndex, boost::int32_t fie
         // this is a little harsh, but we'll keep it for now as we shake things out
         throw pdal_error("filedIndex is not valid at this point of access");
     }
-    const DimensionLayout& dimLayout = m_schemaLayout.getDimensionLayout(fieldIndex);
+    const DimensionLayout& dimLayout = m_schema.getDimensionLayout(fieldIndex);
     const Dimension& dim = dimLayout.getDimension();
     std::size_t offset = (pointIndex * m_pointSize) + dimLayout.getByteOffset();
     std::size_t size = dim.getDataTypeSize(dim.getDataType());
@@ -245,8 +238,7 @@ inline T PointBuffer::getField(std::size_t pointIndex, boost::int32_t fieldIndex
         throw pdal_error("filedIndex is not valid at this point of access");
     }
         
-    const DimensionLayout& dimLayout = m_schemaLayout.getDimensionLayout(fieldIndex);
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////assert(dimLayout.getDimension().isValid());
+    const DimensionLayout& dimLayout = m_schema.getDimensionLayout(fieldIndex);
 
     std::size_t offset = (pointIndex * m_pointSize) + dimLayout.getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_capacity);

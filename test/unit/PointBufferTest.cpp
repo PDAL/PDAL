@@ -49,7 +49,6 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     Schema schema;
     schema.appendDimension(d1);
     schema.appendDimension(d2);
-    SchemaLayout layout(schema);
 
     PointBuffer data(schema, 10);
 
@@ -69,13 +68,12 @@ PointBuffer* makeTestBuffer()
     schema.appendDimension(d1);
     schema.appendDimension(d2);
     schema.appendDimension(d3);
-    SchemaLayout layout(schema);
 
-    std::size_t offX = layout.getDimensionLayout(0).getByteOffset();
+    std::size_t offX = schema.getDimensionLayout(0).getByteOffset();
     BOOST_CHECK(offX==0);
-    std::size_t offY = layout.getDimensionLayout(1).getByteOffset();
+    std::size_t offY = schema.getDimensionLayout(1).getByteOffset();
     BOOST_CHECK(offY==1);
-    std::size_t offZ = layout.getDimensionLayout(2).getByteOffset();
+    std::size_t offZ = schema.getDimensionLayout(2).getByteOffset();
     BOOST_CHECK(offZ==5);
 
     boost::uint32_t capacity = 17;
