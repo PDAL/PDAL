@@ -105,7 +105,7 @@ bool Schema::operator!=(const Schema& other) const
 void Schema::appendDimension(const Dimension& dim)
 {
     m_dimensions.push_back(dim);
-    std::pair<Dimension::Id, std::size_t> p(dim.getId(), m_dimensions.size()-1);
+    std::pair<DimensionId::Id, std::size_t> p(dim.getId(), m_dimensions.size()-1);
     m_dimensions_map.insert(p);
     return;
 }
@@ -134,9 +134,9 @@ std::vector<Dimension>& Schema::getDimensions()
 }
 
 
-int Schema::getDimensionIndex(const Dimension::Id& id) const
+int Schema::getDimensionIndex(const DimensionId::Id& id) const
 {
-    std::map<Dimension::Id, std::size_t>::const_iterator i = m_dimensions_map.find(id);
+    std::map<DimensionId::Id, std::size_t>::const_iterator i = m_dimensions_map.find(id);
     
     int m = 0;
     
@@ -155,7 +155,7 @@ int Schema::getDimensionIndex(const Dimension& dim) const
 }
 
 
-bool Schema::hasDimension(const Dimension::Id& field) const
+bool Schema::hasDimension(const DimensionId::Id& field) const
 {
     int t = getDimensionIndex(field);
     if (t == -1)
@@ -164,14 +164,14 @@ bool Schema::hasDimension(const Dimension::Id& field) const
 }
 
 
-const Dimension& Schema::getDimension(const Dimension::Id& field) const
+const Dimension& Schema::getDimension(const DimensionId::Id& field) const
 {
     int t = getDimensionIndex(field);
     return m_dimensions[t];
 }
 
 
-Dimension& Schema::getDimension(const Dimension::Id& field)
+Dimension& Schema::getDimension(const DimensionId::Id& field)
 {
     int t = getDimensionIndex(field);
     return m_dimensions[t];

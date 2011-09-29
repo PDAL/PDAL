@@ -184,34 +184,34 @@ namespace pdal { namespace drivers { namespace qfit {
 
 PointIndexes::PointIndexes(const SchemaLayout& schemaLayout, QFIT_Format_Type format)
 {
-    Time = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_Time);
-    X = schemaLayout.getDimensionIndex(Dimension::Id_X_i32);
-    Y = schemaLayout.getDimensionIndex(Dimension::Id_Y_i32);
-    Z = schemaLayout.getDimensionIndex(Dimension::Id_Z_i32);
+    Time = schemaLayout.getDimensionIndex(DimensionId::Qfit_Time);
+    X = schemaLayout.getDimensionIndex(DimensionId::X_i32);
+    Y = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
+    Z = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
     
-    StartPulse = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_StartPulse);
-    ReflectedPulse = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_ReflectedPulse);
-    ScanAngleRank = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_ScanAngleRank);
-    Pitch = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_Pitch);
-    Roll = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_Roll);
+    StartPulse = schemaLayout.getDimensionIndex(DimensionId::Qfit_StartPulse);
+    ReflectedPulse = schemaLayout.getDimensionIndex(DimensionId::Qfit_ReflectedPulse);
+    ScanAngleRank = schemaLayout.getDimensionIndex(DimensionId::Qfit_ScanAngleRank);
+    Pitch = schemaLayout.getDimensionIndex(DimensionId::Qfit_Pitch);
+    Roll = schemaLayout.getDimensionIndex(DimensionId::Qfit_Roll);
 
     if (format == QFIT_Format_14) 
     {
-        PassiveSignal = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_PassiveSignal);
-        PassiveX = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_PassiveX);
-        PassiveY = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_PassiveY);
-        PassiveZ = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_PassiveZ);
-        GPSTime = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_GpsTime);
+        PassiveSignal = schemaLayout.getDimensionIndex(DimensionId::Qfit_PassiveSignal);
+        PassiveX = schemaLayout.getDimensionIndex(DimensionId::Qfit_PassiveX);
+        PassiveY = schemaLayout.getDimensionIndex(DimensionId::Qfit_PassiveY);
+        PassiveZ = schemaLayout.getDimensionIndex(DimensionId::Qfit_PassiveZ);
+        GPSTime = schemaLayout.getDimensionIndex(DimensionId::Qfit_GpsTime);
         
     } else if (format == QFIT_Format_12)
     {
-        PDOP = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_PDOP);
-        PulseWidth = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_PulseWidth);
-        GPSTime = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_GpsTime);
+        PDOP = schemaLayout.getDimensionIndex(DimensionId::Qfit_PDOP);
+        PulseWidth = schemaLayout.getDimensionIndex(DimensionId::Qfit_PulseWidth);
+        GPSTime = schemaLayout.getDimensionIndex(DimensionId::Qfit_GpsTime);
 
     } else
     {
-        GPSTime = schemaLayout.getDimensionIndex(Dimension::Id_Qfit_GpsTime);
+        GPSTime = schemaLayout.getDimensionIndex(DimensionId::Qfit_GpsTime);
     }
         
     return;
@@ -343,73 +343,73 @@ void Reader::registerFields()
 
     double xy_scale = 1/1000000.0;
 
-    Dimension time(Dimension::Id_Qfit_Time);
+    Dimension time(DimensionId::Qfit_Time);
     schema.appendDimension(time);
 
-    Dimension y(Dimension::Id_Y_i32);
+    Dimension y(DimensionId::Y_i32);
     y.setNumericScale(xy_scale);
     schema.appendDimension(y);
 
-    Dimension x(Dimension::Id_X_i32);
+    Dimension x(DimensionId::X_i32);
     x.setNumericScale(xy_scale);
     schema.appendDimension(x);
 
-    Dimension z(Dimension::Id_Z_i32);
+    Dimension z(DimensionId::Z_i32);
     schema.appendDimension(z);
 
-    Dimension start_pulse(Dimension::Id_Qfit_StartPulse);
+    Dimension start_pulse(DimensionId::Qfit_StartPulse);
     schema.appendDimension(start_pulse);
 
-    Dimension reflected_pulse(Dimension::Id_Qfit_ReflectedPulse);
+    Dimension reflected_pulse(DimensionId::Qfit_ReflectedPulse);
     schema.appendDimension(reflected_pulse);
 
-    Dimension scan_angle(Dimension::Id_Qfit_ScanAngleRank);
+    Dimension scan_angle(DimensionId::Qfit_ScanAngleRank);
     scan_angle.setNumericScale(1.0/1000.0);
     schema.appendDimension(scan_angle);
 
-    Dimension pitch(Dimension::Id_Qfit_Pitch);
+    Dimension pitch(DimensionId::Qfit_Pitch);
     pitch.setNumericScale(1.0/1000.0);
     schema.appendDimension(pitch);
 
-    Dimension roll(Dimension::Id_Qfit_Roll);
+    Dimension roll(DimensionId::Qfit_Roll);
     roll.setNumericScale(1.0/1000.0);
     schema.appendDimension(roll);
 
     if (m_format == QFIT_Format_12) 
     {
-        Dimension pdop(Dimension::Id_Qfit_PDOP);
+        Dimension pdop(DimensionId::Qfit_PDOP);
         pdop.setNumericScale(1.0/10.0);
         schema.appendDimension(pdop);
 
-        Dimension pulse_width(Dimension::Id_Qfit_PulseWidth);
+        Dimension pulse_width(DimensionId::Qfit_PulseWidth);
         schema.appendDimension(pulse_width);
 
-        Dimension gpstime(Dimension::Id_Qfit_GpsTime);
+        Dimension gpstime(DimensionId::Qfit_GpsTime);
         schema.appendDimension(gpstime);
     
     } 
     else if (m_format == QFIT_Format_14)
     {
-        Dimension passive_signal(Dimension::Id_Qfit_PassiveSignal);
+        Dimension passive_signal(DimensionId::Qfit_PassiveSignal);
         schema.appendDimension(passive_signal);
 
-        Dimension passive_y(Dimension::Id_Qfit_PassiveY);
+        Dimension passive_y(DimensionId::Qfit_PassiveY);
         passive_y.setNumericScale(xy_scale);
         schema.appendDimension(passive_y);
 
-        Dimension passive_x(Dimension::Id_Qfit_PassiveX);
+        Dimension passive_x(DimensionId::Qfit_PassiveX);
         passive_x.setNumericScale(xy_scale);
         schema.appendDimension(passive_x);
 
-        Dimension passive_z(Dimension::Id_Qfit_PassiveZ);
+        Dimension passive_z(DimensionId::Qfit_PassiveZ);
         schema.appendDimension(passive_z);
 
-        Dimension gpstime(Dimension::Id_Qfit_GpsTime);
+        Dimension gpstime(DimensionId::Qfit_GpsTime);
         schema.appendDimension(gpstime);
     }
     else
     {
-        Dimension gpstime(Dimension::Id_Qfit_GpsTime);
+        Dimension gpstime(DimensionId::Qfit_GpsTime);
         schema.appendDimension(gpstime);
     }
     

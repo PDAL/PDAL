@@ -96,19 +96,19 @@ void Reader::initialize()
     if (m_dimensions.size() == 0)
     {
         // these are the default dimensions we use
-        Dimension dimx(Dimension::Id_X_f64);
+        Dimension dimx(DimensionId::X_f64);
         dimx.setFlags(Dimension::IsAdded & Dimension::IsWritten);
         schema.appendDimension(dimx);
 
-        Dimension dimy(Dimension::Id_Y_f64);
+        Dimension dimy(DimensionId::Y_f64);
         dimy.setFlags(Dimension::IsAdded & Dimension::IsWritten);
         schema.appendDimension(dimy);
 
-        Dimension dimz(Dimension::Id_Z_f64);
+        Dimension dimz(DimensionId::Z_f64);
         dimz.setFlags(Dimension::IsAdded & Dimension::IsWritten);
         schema.appendDimension(dimz);
 
-        Dimension dimt(Dimension::Id_Time_u64);
+        Dimension dimt(DimensionId::Time_u64);
         dimt.setFlags(Dimension::IsAdded & Dimension::IsWritten);
         schema.appendDimension(dimt);
     }
@@ -185,10 +185,10 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     const double delY = (maxY - minY) / numDeltas;
     const double delZ = (maxZ - minZ) / numDeltas;
 
-    const int offsetT = schemaLayout.getDimensionIndex(Dimension::Id_Time_u64);
-    const int offsetX = schemaLayout.getDimensionIndex(Dimension::Id_X_f64);
-    const int offsetY = schemaLayout.getDimensionIndex(Dimension::Id_Y_f64);
-    const int offsetZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_f64);
+    const int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    const int offsetX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
+    const int offsetY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
+    const int offsetZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
 
     boost::uint64_t time = index;
     

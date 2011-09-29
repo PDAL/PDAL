@@ -44,8 +44,8 @@ BOOST_AUTO_TEST_SUITE(PointBufferTest)
 
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
-    Dimension d1(Dimension::Id_X_i32);
-    Dimension d2(Dimension::Id_Y_i32);
+    Dimension d1(DimensionId::X_i32);
+    Dimension d2(DimensionId::Y_i32);
     Schema schema;
     schema.appendDimension(d1);
     schema.appendDimension(d2);
@@ -62,9 +62,9 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 
 PointBuffer* makeTestBuffer()
 {
-    Dimension d1(Dimension::Id_Las_Classification);
-    Dimension d2(Dimension::Id_X_i32);
-    Dimension d3(Dimension::Id_Y_f64);
+    Dimension d1(DimensionId::Las_Classification);
+    Dimension d2(DimensionId::X_i32);
+    Dimension d3(DimensionId::Y_f64);
     Schema schema;
     schema.appendDimension(d1);
     schema.appendDimension(d2);

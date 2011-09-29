@@ -32,64 +32,104 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/ChipperIterator.hpp>
+#ifndef PDAL_DIMENSIONID_HPP_INCLUDED
+#define PDAL_DIMENSIONID_HPP_INCLUDED
 
+#include <pdal/pdal.hpp>
 
-namespace pdal { namespace filters {
-
-
-ChipperSequentialIterator::ChipperSequentialIterator(Chipper const& filter)
-    : pdal::FilterSequentialIterator(filter)
-    , m_chipper(filter)
-    , m_currentBlockId(0)
-    , m_currentPointCount(0)
-{
-    const_cast<Chipper&>(m_chipper).Chip();
-    return;
-}
-
-boost::uint64_t ChipperSequentialIterator::skipImpl(boost::uint64_t count)
-{
-    return naiveSkipImpl(count);
-}
-
-
-boost::uint32_t ChipperSequentialIterator::readBufferImpl(PointBuffer& buffer)
+namespace pdal
 {
 
-    if (m_currentBlockId == m_chipper.GetBlockCount())
-        return 0; // we're done.
+class PDAL_DLL DimensionId
+{
+public:
 
-
-    buffer.setNumPoints(0);
-
-    filters::chipper::Block const& block = m_chipper.GetBlock(m_currentBlockId);
-    std::size_t numPointsThisBlock = block.GetIDs().size();
-    m_currentPointCount = m_currentPointCount + numPointsThisBlock;
-    
-    if (buffer.getCapacity() < numPointsThisBlock)
+    enum Id
     {
-        // FIXME: Expand the buffer?
-        throw pdal_error("Buffer not large enough to hold block!");
-    }
-    
-    SchemaLayout const& schemaLayout = buffer.getSchemaLayout().getSchema();
-    const int indexId = schemaLayout.getDimensionIndex(DimensionId::Chipper_1);
-    const int indexBlockId = schemaLayout.getDimensionIndex(DimensionId::Chipper_2);
-    block.GetBuffer(m_chipper.getPrevStage(), buffer, m_currentBlockId, indexId, indexBlockId);
+    //
+    // common field types: 0..999
+    // 
+    X_i32 = 0,
+    Y_i32,
+    Z_i32,
+    X_f64,
+    Y_f64,
+    Z_f64,
 
-    buffer.setSpatialBounds(block.GetBounds());
-    m_currentBlockId++;
-    return numPointsThisBlock;
+    Red_u8,
+    Green_u8,
+    Blue_u8,
+    Red_u16,
+    Green_u16,
+    Blue_u16,
 
-}
+    Time_u64,
 
-bool ChipperSequentialIterator::atEndImpl() const
-{
-    // we don't have a fixed point point --
-    // we are at the end only when our source is at the end
-    const StageSequentialIterator& iter = getPrevIterator();
-    return iter.atEnd();
-}
+    //
+    // LAS: 1000..1999
+    //
+    Las_Intensity = 1000,
+    Las_ReturnNumber,
+    Las_NumberOfReturns,
+    Las_ScanDirectionFlag,
+    Las_EdgeOfFlightLine,
+    Las_Classification,
+    Las_ScanAngleRank,
+    Las_UserData,
+    Las_PointSourceId,
+    Las_WavePacketDescriptorIndex,
+    Las_WaveformDataOffset,
+    Las_ReturnPointWaveformLocation,
+    Las_WaveformXt,
+    Las_WaveformYt,
+    Las_WaveformZt,
+    Las_Time,
 
-} } // namespaces
+    //
+    // terrasolid: 2000..2999
+    // 
+    TerraSolid_Alpha = 2000,
+    TerraSolid_Classification,
+    TerraSolid_PointSourceId_u8,
+    TerraSolid_PointSourceId_u16,
+    TerraSolid_ReturnNumber_u8,
+    TerraSolid_ReturnNumber_u16,
+    TerraSolid_Flag,
+    TerraSolid_Mark,
+    TerraSolid_Intensity,
+    TerraSolid_Time,
+
+    //
+    // chipper stuff: 3000..3999
+    // 
+    Chipper_1 = 3000,
+    Chipper_2,
+
+    //
+    // qfit: 4000..4999
+    // 
+    Qfit_StartPulse = 4000,
+    Qfit_ReflectedPulse,
+    Qfit_ScanAngleRank,
+    Qfit_Pitch,
+    Qfit_Roll,
+    Qfit_Time,
+    Qfit_PassiveSignal,
+    Qfit_PassiveX,
+    Qfit_PassiveY,
+    Qfit_PassiveZ,
+    Qfit_GpsTime,
+    Qfit_PDOP,
+    Qfit_PulseWidth,
+
+    // user fields are 100,000..199,999
+
+    Undefined = 200000
+    };
+
+};
+
+
+} // namespace pdal
+
+#endif // PDAL_DIMENSIONID_HPP_INCLUDED

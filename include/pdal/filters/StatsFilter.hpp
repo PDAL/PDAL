@@ -97,7 +97,7 @@ public:
     void processBuffer(PointBuffer& data) const;
 
     // returns the stats for field i
-    const StatsCollector& getStats(Dimension::Id id) const;
+    const StatsCollector& getStats(DimensionId::Id id) const;
 
     // clears the counters for all fields
     void reset();
@@ -117,7 +117,7 @@ public:
 private:
 // the stats are keyed by the field name
     // BUG: not threadsafe, these should maybe live in the iterator
-    std::map<Dimension::Id,StatsCollector*> m_stats; // one Stats item per field in the schema
+    std::map<DimensionId::Id,StatsCollector*> m_stats; // one Stats item per field in the schema
 
     StatsFilter& operator=(const StatsFilter&); // not implemented
     StatsFilter(const StatsFilter&); // not implemented

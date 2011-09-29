@@ -46,18 +46,18 @@ BOOST_AUTO_TEST_SUITE(DimensionTest)
 
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
-    Dimension d1(Dimension::Id_X_i32);
+    Dimension d1(DimensionId::X_i32);
 
-    BOOST_CHECK(d1.getId() == Dimension::Id_X_i32);
+    BOOST_CHECK(d1.getId() == DimensionId::X_i32);
     BOOST_CHECK(d1.getName() == "X");
     BOOST_CHECK(d1.getDataType() == Dimension::Int32);
 
     Dimension d2(d1);
-    BOOST_CHECK(d1.getId() == Dimension::Id_X_i32);
+    BOOST_CHECK(d1.getId() == DimensionId::X_i32);
     BOOST_CHECK(d1.getDataType() == Dimension::Int32);
 
     Dimension d3 = d1;
-    BOOST_CHECK(d1.getId() == Dimension::Id_X_i32);
+    BOOST_CHECK(d1.getId() == DimensionId::X_i32);
     BOOST_CHECK(d1.getDataType() == Dimension::Int32);
 
     BOOST_CHECK(d1 == d1);
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK(d1 == d3);
     BOOST_CHECK(d3 == d1);
 
-    Dimension d4(Dimension::Id_Y_i32);
+    Dimension d4(DimensionId::Y_i32);
     d4.setEndianness(Endian_Big);
     BOOST_CHECK(d1 != d4);
     BOOST_CHECK(d4 != d1);
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
 
 BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
 {
-    Dimension d1(Dimension::Id_X_i32);
+    Dimension d1(DimensionId::X_i32);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
   

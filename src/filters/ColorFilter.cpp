@@ -75,23 +75,23 @@ void ColorFilter::checkImpedance()
 {
     Schema& schema = getSchemaRef();
 
-    if (schema.hasDimension(Dimension::Id_Z_i32) == false)
+    if (schema.hasDimension(DimensionId::Z_i32) == false)
     {
         throw impedance_invalid("color filter does not have Z/Int32 field");
     }
 
     // are there already u16 fields for color?
-    if (!schema.hasDimension(Dimension::Id_Red_u16))
+    if (!schema.hasDimension(DimensionId::Red_u16))
     {
-        schema.appendDimension(Dimension::Id_Red_u16);
+        schema.appendDimension(DimensionId::Red_u16);
     }
-    if (!schema.hasDimension(Dimension::Id_Green_u16))
+    if (!schema.hasDimension(DimensionId::Green_u16))
     {
-        schema.appendDimension(Dimension::Id_Green_u16);
+        schema.appendDimension(DimensionId::Green_u16);
     }
-    if (!schema.hasDimension(Dimension::Id_Blue_u16))
+    if (!schema.hasDimension(DimensionId::Blue_u16))
     {
-        schema.appendDimension(Dimension::Id_Blue_u16);
+        schema.appendDimension(DimensionId::Blue_u16);
     }
 
     return;
@@ -105,11 +105,11 @@ void ColorFilter::processBuffer(PointBuffer& data) const
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
 
-    const int indexR = schemaLayout.getDimensionIndex(Dimension::Id_Red_u16);
-    const int indexG = schemaLayout.getDimensionIndex(Dimension::Id_Green_u16);
-    const int indexB = schemaLayout.getDimensionIndex(Dimension::Id_Blue_u16);
-    const int indexZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_i32);
-    const Dimension& zDim = schema.getDimension(Dimension::Id_Z_i32);
+    const int indexR = schemaLayout.getDimensionIndex(DimensionId::Red_u16);
+    const int indexG = schemaLayout.getDimensionIndex(DimensionId::Green_u16);
+    const int indexB = schemaLayout.getDimensionIndex(DimensionId::Blue_u16);
+    const int indexZ = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
+    const Dimension& zDim = schema.getDimension(DimensionId::Z_i32);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {

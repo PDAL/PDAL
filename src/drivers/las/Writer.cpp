@@ -193,9 +193,9 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 
     const Schema& schema = getPrevStage().getSchema();
 
-    const Dimension& dimX = schema.getDimension(Dimension::Id_X_i32);
-    const Dimension& dimY = schema.getDimension(Dimension::Id_Y_i32);
-    const Dimension& dimZ = schema.getDimension(Dimension::Id_Z_i32);
+    const Dimension& dimX = schema.getDimension(DimensionId::X_i32);
+    const Dimension& dimY = schema.getDimension(DimensionId::Y_i32);
+    const Dimension& dimZ = schema.getDimension(DimensionId::Z_i32);
 
     m_lasHeader.SetScale(dimX.getNumericScale(), dimY.getNumericScale(), dimZ.getNumericScale());
     m_lasHeader.SetOffset(dimX.getNumericOffset(), dimY.getNumericOffset(), dimZ.getNumericOffset());
@@ -364,9 +364,9 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& PointBuffer)
 #endif
         ++numValidPoints;
 
-        const double xValue = schema.getDimension(Dimension::Id_X_i32).applyScaling<boost::int32_t>(x);
-        const double yValue = schema.getDimension(Dimension::Id_Y_i32).applyScaling<boost::int32_t>(y);
-        const double zValue = schema.getDimension(Dimension::Id_Z_i32).applyScaling<boost::int32_t>(z);
+        const double xValue = schema.getDimension(DimensionId::X_i32).applyScaling<boost::int32_t>(x);
+        const double yValue = schema.getDimension(DimensionId::Y_i32).applyScaling<boost::int32_t>(y);
+        const double zValue = schema.getDimension(DimensionId::Z_i32).applyScaling<boost::int32_t>(z);
         m_summaryData.addPoint(xValue, yValue, zValue, returnNumber);
     }
 

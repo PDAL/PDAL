@@ -47,8 +47,8 @@ BOOST_AUTO_TEST_SUITE(SchemaTest)
 
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
-    Dimension d1(Dimension::Id_X_i32);
-    Dimension d2(Dimension::Id_Y_i32);
+    Dimension d1(DimensionId::X_i32);
+    Dimension d2(DimensionId::Y_i32);
 
     Schema s1;
     s1.appendDimension(d1);
@@ -68,17 +68,17 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK(s1!=s4);
     BOOST_CHECK(s4!=s1);
 
-    BOOST_CHECK(s1.hasDimension(Dimension::Id_X_i32));
-    BOOST_CHECK(!s1.hasDimension(Dimension::Id_X_f64));
-    BOOST_CHECK(s1.hasDimension(Dimension::Id_X_i32));
-    BOOST_CHECK(!s1.hasDimension(Dimension::Id_X_f64));
+    BOOST_CHECK(s1.hasDimension(DimensionId::X_i32));
+    BOOST_CHECK(!s1.hasDimension(DimensionId::X_f64));
+    BOOST_CHECK(s1.hasDimension(DimensionId::X_i32));
+    BOOST_CHECK(!s1.hasDimension(DimensionId::X_f64));
 }
 
 
 BOOST_AUTO_TEST_CASE(SchemaTest_ptree)
 {
-    Dimension d1(Dimension::Id_X_i32);
-    Dimension d2(Dimension::Id_Y_i32);
+    Dimension d1(DimensionId::X_i32);
+    Dimension d2(DimensionId::Y_i32);
 
     Schema s1;
     s1.appendDimension(d1);

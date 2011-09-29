@@ -138,30 +138,30 @@ void ScalingFilterBase::checkImpedance()
         // doubles --> ints
 
         // verify we have the doubles we need, and add the ints if we have to
-        if (!schema.hasDimension(Dimension::Id_X_f64) || !schema.hasDimension(Dimension::Id_Y_f64) || !schema.hasDimension(Dimension::Id_X_f64))
+        if (!schema.hasDimension(DimensionId::X_f64) || !schema.hasDimension(DimensionId::Y_f64) || !schema.hasDimension(DimensionId::X_f64))
         {
             throw impedance_invalid("Descaling filter requires X,Y,Z dimensions as doubles");
         }
-        if (!schema.hasDimension(Dimension::Id_X_i32))
+        if (!schema.hasDimension(DimensionId::X_i32))
         {
-            schema.appendDimension(Dimension::Id_X_i32);
+            schema.appendDimension(DimensionId::X_i32);
         }
-        if (!schema.hasDimension(Dimension::Id_Y_i32))
+        if (!schema.hasDimension(DimensionId::Y_i32))
         {
-            schema.appendDimension(Dimension::Id_Y_i32);
+            schema.appendDimension(DimensionId::Y_i32);
         }
-        if (!schema.hasDimension(Dimension::Id_Z_i32))
+        if (!schema.hasDimension(DimensionId::Z_i32))
         {
-            schema.appendDimension(Dimension::Id_Z_i32);
+            schema.appendDimension(DimensionId::Z_i32);
         }
 
-        const Dimension& dimXd = schema.getDimension(Dimension::Id_X_f64);
-        const Dimension& dimYd = schema.getDimension(Dimension::Id_Y_f64);
-        const Dimension& dimZd = schema.getDimension(Dimension::Id_Z_f64);
+        const Dimension& dimXd = schema.getDimension(DimensionId::X_f64);
+        const Dimension& dimYd = schema.getDimension(DimensionId::Y_f64);
+        const Dimension& dimZd = schema.getDimension(DimensionId::Z_f64);
 
-        Dimension& dimXi = schema.getDimension(Dimension::Id_X_i32);
-        Dimension& dimYi = schema.getDimension(Dimension::Id_Y_i32);
-        Dimension& dimZi = schema.getDimension(Dimension::Id_Z_i32);
+        Dimension& dimXi = schema.getDimension(DimensionId::X_i32);
+        Dimension& dimYi = schema.getDimension(DimensionId::Y_i32);
+        Dimension& dimZi = schema.getDimension(DimensionId::Z_i32);
 
         if (m_customScaleOffset)
         {
@@ -188,30 +188,30 @@ void ScalingFilterBase::checkImpedance()
         // ints --> doubles
 
         // verify we have the ints we need, and add the doubles if we have to
-        if (!schema.hasDimension(Dimension::Id_X_i32) || !schema.hasDimension(Dimension::Id_X_i32) || !schema.hasDimension(Dimension::Id_X_i32))
+        if (!schema.hasDimension(DimensionId::X_i32) || !schema.hasDimension(DimensionId::X_i32) || !schema.hasDimension(DimensionId::X_i32))
         {
             throw impedance_invalid("Scaling filter requires X,Y,Z dimensions as int32s");
         }
-        if (!schema.hasDimension(Dimension::Id_X_f64))
+        if (!schema.hasDimension(DimensionId::X_f64))
         {
-            schema.appendDimension(Dimension::Id_X_f64);
+            schema.appendDimension(DimensionId::X_f64);
         }
-        if (!schema.hasDimension(Dimension::Id_Y_f64))
+        if (!schema.hasDimension(DimensionId::Y_f64))
         {
-            schema.appendDimension(Dimension::Id_Y_f64);
+            schema.appendDimension(DimensionId::Y_f64);
         }
-        if (!schema.hasDimension(Dimension::Id_Z_f64))
+        if (!schema.hasDimension(DimensionId::Z_f64))
         {
-            schema.appendDimension(Dimension::Id_Z_f64);
+            schema.appendDimension(DimensionId::Z_f64);
         }
         
-        const Dimension& dimXi = schema.getDimension(Dimension::Id_X_i32);
-        const Dimension& dimYi = schema.getDimension(Dimension::Id_Y_i32);
-        const Dimension& dimZi = schema.getDimension(Dimension::Id_Z_i32);
+        const Dimension& dimXi = schema.getDimension(DimensionId::X_i32);
+        const Dimension& dimYi = schema.getDimension(DimensionId::Y_i32);
+        const Dimension& dimZi = schema.getDimension(DimensionId::Z_i32);
 
-        Dimension& dimXd = schema.getDimension(Dimension::Id_X_f64);
-        Dimension& dimYd = schema.getDimension(Dimension::Id_Y_f64);
-        Dimension& dimZd = schema.getDimension(Dimension::Id_Z_f64);
+        Dimension& dimXd = schema.getDimension(DimensionId::X_f64);
+        Dimension& dimYd = schema.getDimension(DimensionId::Y_f64);
+        Dimension& dimZd = schema.getDimension(DimensionId::Z_f64);
 
         if (m_customScaleOffset)
         {
@@ -253,22 +253,22 @@ void ScalingFilterBase::processBuffer(const PointBuffer& srcData, PointBuffer& d
     const Schema& schemaI = (m_isDescaling ? dstSchema : srcSchema);
     const SchemaLayout& schemaLayoutI = (m_isDescaling ? dstSchemaLayout : srcSchemaLayout);
 
-    assert(schemaD.hasDimension(Dimension::Id_X_f64));
-    assert(schemaI.hasDimension(Dimension::Id_X_i32));
+    assert(schemaD.hasDimension(DimensionId::X_f64));
+    assert(schemaI.hasDimension(DimensionId::X_i32));
 
-    const int indexXd = schemaLayoutD.getDimensionIndex(Dimension::Id_X_f64);
-    const int indexYd = schemaLayoutD.getDimensionIndex(Dimension::Id_Y_f64);
-    const int indexZd = schemaLayoutD.getDimensionIndex(Dimension::Id_Z_f64);
-    const int indexXi = schemaLayoutI.getDimensionIndex(Dimension::Id_X_i32);
-    const int indexYi = schemaLayoutI.getDimensionIndex(Dimension::Id_Y_i32);
-    const int indexZi = schemaLayoutI.getDimensionIndex(Dimension::Id_Z_i32);
+    const int indexXd = schemaLayoutD.getDimensionIndex(DimensionId::X_f64);
+    const int indexYd = schemaLayoutD.getDimensionIndex(DimensionId::Y_f64);
+    const int indexZd = schemaLayoutD.getDimensionIndex(DimensionId::Z_f64);
+    const int indexXi = schemaLayoutI.getDimensionIndex(DimensionId::X_i32);
+    const int indexYi = schemaLayoutI.getDimensionIndex(DimensionId::Y_i32);
+    const int indexZi = schemaLayoutI.getDimensionIndex(DimensionId::Z_i32);
 
-    const Dimension& dimXd = schemaD.getDimension(Dimension::Id_X_f64);
-    const Dimension& dimYd = schemaD.getDimension(Dimension::Id_Y_f64);
-    const Dimension& dimZd = schemaD.getDimension(Dimension::Id_Z_f64);
-    const Dimension& dimXi = schemaI.getDimension(Dimension::Id_X_i32);
-    const Dimension& dimYi = schemaI.getDimension(Dimension::Id_Y_i32);
-    const Dimension& dimZi = schemaI.getDimension(Dimension::Id_Z_i32);
+    const Dimension& dimXd = schemaD.getDimension(DimensionId::X_f64);
+    const Dimension& dimYd = schemaD.getDimension(DimensionId::Y_f64);
+    const Dimension& dimZd = schemaD.getDimension(DimensionId::Z_f64);
+    const Dimension& dimXi = schemaI.getDimension(DimensionId::X_i32);
+    const Dimension& dimYi = schemaI.getDimension(DimensionId::Y_i32);
+    const Dimension& dimZi = schemaI.getDimension(DimensionId::Z_i32);
     
     // For each dimension in the source layout, find its corresponding dimension 
     // in the destination layout, and put its byte offset in the map for it.  

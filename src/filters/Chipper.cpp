@@ -201,8 +201,8 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     
     // boost::uint32_t chunks = count/m_threshold;
 
-    const int indexX = schemaLayout.getDimensionIndex(Dimension::Id_X_i32);
-    const int indexY = schemaLayout.getDimensionIndex(Dimension::Id_Y_i32);
+    const int indexX = schemaLayout.getDimensionIndex(DimensionId::X_i32);
+    const int indexY = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
 
     Dimension const& dimX = schemaLayout.getDimension(indexX);
     Dimension const& dimY = schemaLayout.getDimension(indexY);
@@ -492,13 +492,13 @@ void Chipper::checkImpedance()
 {
     Schema& schema = getSchemaRef();
 
-    if (!schema.hasDimension(Dimension::Id_Chipper_1)) // block id
+    if (!schema.hasDimension(DimensionId::Chipper_1)) // block id
     {
-        schema.appendDimension(Dimension::Id_Chipper_1);
+        schema.appendDimension(DimensionId::Chipper_1);
     }
-    if (!schema.hasDimension(Dimension::Id_Chipper_2)) // point id
+    if (!schema.hasDimension(DimensionId::Chipper_2)) // point id
     {
-        schema.appendDimension(Dimension::Id_Chipper_2);
+        schema.appendDimension(DimensionId::Chipper_2);
     }
     
     return;

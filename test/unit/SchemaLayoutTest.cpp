@@ -46,23 +46,23 @@ BOOST_AUTO_TEST_SUITE(SchemaLayoutTest)
 
 BOOST_AUTO_TEST_CASE(test_layout)
 {
-    Dimension d1(Dimension::Id_X_i32);
-    Dimension d2(Dimension::Id_Y_i32);
+    Dimension d1(DimensionId::X_i32);
+    Dimension d2(DimensionId::Y_i32);
 
     Schema s1;
     s1.appendDimension(d1);
     s1.appendDimension(d2);
-    BOOST_CHECK(s1.getDimensions()[0].getId() == Dimension::Id_X_i32);
-    BOOST_CHECK(s1.getDimensions()[1].getId() == Dimension::Id_Y_i32);
+    BOOST_CHECK(s1.getDimensions()[0].getId() == DimensionId::X_i32);
+    BOOST_CHECK(s1.getDimensions()[1].getId() == DimensionId::Y_i32);
 
-    BOOST_CHECK(s1.hasDimension(Dimension::Id_X_f64) == false);
-    BOOST_CHECK(s1.hasDimension(Dimension::Id_Y_f64) == false);
+    BOOST_CHECK(s1.hasDimension(DimensionId::X_f64) == false);
+    BOOST_CHECK(s1.hasDimension(DimensionId::Y_f64) == false);
 
     Schema s2;
     s2.appendDimension(d1);
-    BOOST_CHECK(s2.hasDimension(Dimension::Id_X_i32) == true);
-    BOOST_CHECK(s2.getDimensions()[0].getId() == Dimension::Id_X_i32);
-    BOOST_CHECK(s2.hasDimension(Dimension::Id_Y_i32) == false);
+    BOOST_CHECK(s2.hasDimension(DimensionId::X_i32) == true);
+    BOOST_CHECK(s2.getDimensions()[0].getId() == DimensionId::X_i32);
+    BOOST_CHECK(s2.hasDimension(DimensionId::Y_i32) == false);
 
     SchemaLayout l1(s1);
     SchemaLayout l2(l1);
@@ -81,8 +81,8 @@ BOOST_AUTO_TEST_CASE(test_layout)
 
 BOOST_AUTO_TEST_CASE(test_layout_size)
 {
-    Dimension d1(Dimension::Id_X_i32);
-    Dimension d2(Dimension::Id_Y_i32);
+    Dimension d1(DimensionId::X_i32);
+    Dimension d2(DimensionId::Y_i32);
     Schema s1;
     s1.appendDimension(d1);
     s1.appendDimension(d2);
@@ -102,8 +102,8 @@ BOOST_AUTO_TEST_CASE(test_layout_size)
 
 BOOST_AUTO_TEST_CASE(SchemaLayoutTest_ptree)
 {
-    Dimension d1(Dimension::Id_X_i32);
-    Dimension d2(Dimension::Id_Y_i32);
+    Dimension d1(DimensionId::X_i32);
+    Dimension d2(DimensionId::Y_i32);
     Schema s1;
     s1.appendDimension(d1);
     s1.appendDimension(d2);

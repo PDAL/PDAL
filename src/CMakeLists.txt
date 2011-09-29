@@ -27,6 +27,7 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/types.hpp
   ${PDAL_HEADERS_DIR}/Bounds.hpp
   ${PDAL_HEADERS_DIR}/Dimension.hpp
+  ${PDAL_HEADERS_DIR}/DimensionId.hpp
   ${PDAL_HEADERS_DIR}/DimensionLayout.hpp
   ${PDAL_HEADERS_DIR}/FileUtils.hpp
   ${PDAL_HEADERS_DIR}/Filter.hpp
@@ -64,6 +65,7 @@ endif()
 set(PDAL_BASE_CPP
   Bounds.cpp
   Dimension.cpp
+  DimensionId.cpp
   DimensionLayout.cpp
   FileUtils.cpp
   Filter.cpp

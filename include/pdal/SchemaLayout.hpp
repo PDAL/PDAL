@@ -81,7 +81,7 @@ public:
         return m_byteSize;
     }
     
-    int getDimensionIndex(const Dimension::Id& id) const;
+    int getDimensionIndex(const DimensionId::Id& id) const;
     int getDimensionIndex(const Dimension& dim) const;
 
     const Dimension& getDimension(std::size_t index) const
@@ -127,7 +127,7 @@ private:
     std::vector<DimensionLayout> m_dimensionLayouts;
     std::size_t m_byteSize;
 
-    std::map<Dimension::Id, std::size_t> m_dimensions_map;
+    std::map<DimensionId::Id, std::size_t> m_dimensions_map;
 };
 
 

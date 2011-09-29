@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
     const Schema& schema = reader.getSchema();
     SchemaLayout schemaLayout(schema);
-    const int offsetT = schemaLayout.getDimensionIndex(Dimension::Id_Time_u64);
+    const int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
 
     PointBuffer dataBig(schemaLayout, 1024);
     PointBuffer dataSmall(schemaLayout, 1);
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
 
     const Schema& schema = reader.getSchema();
     SchemaLayout schemaLayout(schema);
-    const int offsetT = schemaLayout.getDimensionIndex(Dimension::Id_Time_u64);
+    const int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
 
     PointBuffer dataBig(schemaLayout, 1024);
     PointBuffer dataSmall(schemaLayout, 1);

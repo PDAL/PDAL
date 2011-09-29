@@ -218,9 +218,9 @@ void ReprojectionFilter::checkImpedance()
 {
     const Schema& schema = this->getSchema();
 
-    if (!schema.hasDimension(Dimension::Id_X_f64) ||
-        !schema.hasDimension(Dimension::Id_Y_f64) ||
-        !schema.hasDimension(Dimension::Id_Z_f64))
+    if (!schema.hasDimension(DimensionId::X_f64) ||
+        !schema.hasDimension(DimensionId::Y_f64) ||
+        !schema.hasDimension(DimensionId::Z_f64))
     {
         throw impedance_invalid("Reprojection filter requires X,Y,Z dimensions as doubles");
     }
@@ -258,9 +258,9 @@ void ReprojectionFilter::processBuffer(PointBuffer& data) const
 
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
 
-    const int indexX = schemaLayout.getDimensionIndex(Dimension::Id_X_f64);
-    const int indexY = schemaLayout.getDimensionIndex(Dimension::Id_Y_f64);
-    const int indexZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_f64);
+    const int indexX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
+    const int indexY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
+    const int indexZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {

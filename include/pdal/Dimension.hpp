@@ -44,6 +44,7 @@
 
 #include <pdal/pdal.hpp>
 #include <pdal/Utils.hpp>
+#include <pdal/DimensionId.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -61,89 +62,6 @@ namespace pdal
 class PDAL_DLL Dimension
 {
 public:
-    enum Id
-    {
-        //
-        // common field types: 0..999
-        // 
-        Id_X_i32 = 0,
-        Id_Y_i32,
-        Id_Z_i32,
-        Id_X_f64,
-        Id_Y_f64,
-        Id_Z_f64,
-
-        Id_Red_u8,
-        Id_Green_u8,
-        Id_Blue_u8,
-        Id_Red_u16,
-        Id_Green_u16,
-        Id_Blue_u16,
-    
-        Id_Time_u64,
-
-        //
-        // LAS: 1000..1999
-        //
-        Id_Las_Intensity = 1000,
-        Id_Las_ReturnNumber,
-        Id_Las_NumberOfReturns,
-        Id_Las_ScanDirectionFlag,
-        Id_Las_EdgeOfFlightLine,
-        Id_Las_Classification,
-        Id_Las_ScanAngleRank,
-        Id_Las_UserData,
-        Id_Las_PointSourceId,
-        Id_Las_WavePacketDescriptorIndex,
-        Id_Las_WaveformDataOffset,
-        Id_Las_ReturnPointWaveformLocation,
-        Id_Las_WaveformXt,
-        Id_Las_WaveformYt,
-        Id_Las_WaveformZt,
-        Id_Las_Time,
-
-        //
-        // terrasolid: 2000..2999
-        // 
-        Id_TerraSolid_Alpha = 2000,
-        Id_TerraSolid_Classification,
-        Id_TerraSolid_PointSourceId_u8,
-        Id_TerraSolid_PointSourceId_u16,
-        Id_TerraSolid_ReturnNumber_u8,
-        Id_TerraSolid_ReturnNumber_u16,
-        Id_TerraSolid_Flag,
-        Id_TerraSolid_Mark,
-        Id_TerraSolid_Intensity,
-        Id_TerraSolid_Time,
-
-        //
-        // chipper stuff: 3000..3999
-        // 
-        Id_Chipper_1 = 3000,
-        Id_Chipper_2,
-
-        //
-        // qfit: 4000..4999
-        // 
-        Id_Qfit_StartPulse = 4000,
-        Id_Qfit_ReflectedPulse,
-        Id_Qfit_ScanAngleRank,
-        Id_Qfit_Pitch,
-        Id_Qfit_Roll,
-        Id_Qfit_Time,
-        Id_Qfit_PassiveSignal,
-        Id_Qfit_PassiveX,
-        Id_Qfit_PassiveY,
-        Id_Qfit_PassiveZ,
-        Id_Qfit_GpsTime,
-        Id_Qfit_PDOP,
-        Id_Qfit_PulseWidth,
-
-        // user fields are 100,000..199,999
-
-        Id_Undefined = 200000
-    };
-
     enum DataType
     {
         Int8,
@@ -162,14 +80,16 @@ public:
 
     enum Flags
     {
+        Invalid   = 0x0,
         IsAdded   = 0x1,
         IsRead    = 0x2,
-        IsWritten = 0x4
+        IsWritten = 0x4,
+        IsIgnored = 0x8
     };
 
 /// \name Constructors
-    Dimension(Id id); // will use table to lookup datatype, description, etc
-    Dimension(Id id, DataType datatype, std::string name, std::string description=std::string("")); // for dimensions not in the master table
+    Dimension(DimensionId::Id id); // will use table to lookup datatype, description, etc
+    Dimension(DimensionId::Id id, DataType datatype, std::string name, std::string description=std::string("")); // for dimensions not in the master table
     Dimension(Dimension const& other);
 
     Dimension& operator=(Dimension const& rhs);
@@ -181,17 +101,19 @@ public:
 /// \name Data Access
     std::string const& getName() const;
 
-    Id getId() const
+    DimensionId::Id getId() const
     {
         return m_id;
     }
 
-    bool isValid() const { return m_isValid; }
-    void setIsValid(bool v) { m_isValid = v; }
-    
     boost::uint32_t getFlags() const { return m_flags; }
     void setFlags(boost::uint32_t flags) { m_flags = flags; }
 
+    bool isValid() const { return (m_flags != Invalid); }
+    bool isRead() const { return (m_flags & IsRead) == IsRead; }
+    bool isWritten() const { return (m_flags & IsWritten) == IsWritten; }
+    bool isIgnored() const { return (m_flags & IsIgnored) == IsIgnored; }
+    
     DataType getDataType() const
     {
         return m_dataType;
@@ -409,7 +331,7 @@ public:
 
 private:
     DataType m_dataType;
-    Id m_id;
+    DimensionId::Id m_id;
     std::string m_name;
     boost::uint32_t m_flags;
     EndianType m_endian;
@@ -420,7 +342,6 @@ private:
     bool m_precise;
     double m_numericScale;
     double m_numericOffset;
-    bool m_isValid;
 };
 
 

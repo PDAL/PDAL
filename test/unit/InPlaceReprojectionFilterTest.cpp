@@ -55,13 +55,13 @@ static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double
 
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
 
-    const int indexX = schemaLayout.getDimensionIndex(Dimension::Id_X_i32);
-    const int indexY = schemaLayout.getDimensionIndex(Dimension::Id_Y_i32);
-    const int indexZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_i32);
+    const int indexX = schemaLayout.getDimensionIndex(DimensionId::X_i32);
+    const int indexY = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
+    const int indexZ = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
 
-    Dimension const& dim_x = schemaLayout.getSchema().getDimension(Dimension::Id_X_i32);
-    Dimension const& dim_y = schemaLayout.getSchema().getDimension(Dimension::Id_Y_i32);
-    Dimension const& dim_z = schemaLayout.getSchema().getDimension(Dimension::Id_Z_i32);
+    Dimension const& dim_x = schemaLayout.getSchema().getDimension(DimensionId::X_i32);
+    Dimension const& dim_y = schemaLayout.getSchema().getDimension(DimensionId::Y_i32);
+    Dimension const& dim_z = schemaLayout.getSchema().getDimension(DimensionId::Z_i32);
     const boost::int32_t xraw = data.getField<boost::int32_t>(0, indexX);
     const boost::int32_t yraw = data.getField<boost::int32_t>(0, indexY);
     const boost::int32_t zraw = data.getField<boost::int32_t>(0, indexZ);

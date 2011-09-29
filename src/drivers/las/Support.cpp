@@ -43,68 +43,68 @@ void Support::registerFields(Schema& schema, PointFormat format)
 {
     std::ostringstream text;
 
-    Dimension x(Dimension::Id_X_i32);
+    Dimension x(DimensionId::X_i32);
     schema.appendDimension(x);
 
-    Dimension y(Dimension::Id_Y_i32);
+    Dimension y(DimensionId::Y_i32);
     schema.appendDimension(y);
 
-    Dimension z(Dimension::Id_Z_i32);
+    Dimension z(DimensionId::Z_i32);
     schema.appendDimension(z);
 
-    Dimension intensity(Dimension::Id_Las_Intensity);
+    Dimension intensity(DimensionId::Las_Intensity);
     schema.appendDimension(intensity);
 
-    Dimension return_no(Dimension::Id_Las_ReturnNumber); // 3 bits only
+    Dimension return_no(DimensionId::Las_ReturnNumber); // 3 bits only
     schema.appendDimension(return_no);
 
-    Dimension no_returns(Dimension::Id_Las_NumberOfReturns); // 3 bits only
+    Dimension no_returns(DimensionId::Las_NumberOfReturns); // 3 bits only
     schema.appendDimension(no_returns);
 
-    Dimension scan_dir(Dimension::Id_Las_ScanDirectionFlag); // 1 bit only
+    Dimension scan_dir(DimensionId::Las_ScanDirectionFlag); // 1 bit only
     schema.appendDimension(scan_dir);
 
-    Dimension edge(Dimension::Id_Las_EdgeOfFlightLine); // 1 bit only
+    Dimension edge(DimensionId::Las_EdgeOfFlightLine); // 1 bit only
     schema.appendDimension(edge);
 
-    Dimension classification(Dimension::Id_Las_Classification);
+    Dimension classification(DimensionId::Las_Classification);
     schema.appendDimension(classification);
 
-    Dimension scan_angle(Dimension::Id_Las_ScanAngleRank);
+    Dimension scan_angle(DimensionId::Las_ScanAngleRank);
     schema.appendDimension(scan_angle);
 
-    Dimension user_data(Dimension::Id_Las_UserData);
+    Dimension user_data(DimensionId::Las_UserData);
     schema.appendDimension(user_data);
 
-    Dimension point_source_id(Dimension::Id_Las_PointSourceId);
+    Dimension point_source_id(DimensionId::Las_PointSourceId);
     schema.appendDimension(point_source_id);
 
     if (hasTime(format))
     {
-        Dimension t(Dimension::Id_Las_Time);
+        Dimension t(DimensionId::Las_Time);
         schema.appendDimension(t);
     }
 
     if (hasColor(format))
     {
-        Dimension red(Dimension::Id_Red_u16);
+        Dimension red(DimensionId::Red_u16);
         schema.appendDimension(red);
 
-        Dimension green(Dimension::Id_Green_u16);
+        Dimension green(DimensionId::Green_u16);
         schema.appendDimension(green);
 
-        Dimension blue(Dimension::Id_Blue_u16);
+        Dimension blue(DimensionId::Blue_u16);
         schema.appendDimension(blue);
     }
 
     if (hasWave(format))
     {
-        schema.appendDimension(Dimension(Dimension::Id_Las_WavePacketDescriptorIndex));
-        schema.appendDimension(Dimension(Dimension::Id_Las_WaveformDataOffset));
-        schema.appendDimension(Dimension(Dimension::Id_Las_ReturnPointWaveformLocation));
-        schema.appendDimension(Dimension(Dimension::Id_Las_WaveformXt));
-        schema.appendDimension(Dimension(Dimension::Id_Las_WaveformYt));
-        schema.appendDimension(Dimension(Dimension::Id_Las_WaveformZt));
+        schema.appendDimension(Dimension(DimensionId::Las_WavePacketDescriptorIndex));
+        schema.appendDimension(Dimension(DimensionId::Las_WaveformDataOffset));
+        schema.appendDimension(Dimension(DimensionId::Las_ReturnPointWaveformLocation));
+        schema.appendDimension(Dimension(DimensionId::Las_WaveformXt));
+        schema.appendDimension(Dimension(DimensionId::Las_WaveformYt));
+        schema.appendDimension(Dimension(DimensionId::Las_WaveformZt));
     }
     
     return;
@@ -113,9 +113,9 @@ void Support::registerFields(Schema& schema, PointFormat format)
 
 void Support::setScaling(Schema& schema, double scaleX, double scaleY, double scaleZ, double offsetX, double offsetY, double offsetZ)
 {
-    Dimension& dimX = schema.getDimension(Dimension::Id_X_i32);
-    Dimension& dimY = schema.getDimension(Dimension::Id_Y_i32);
-    Dimension& dimZ = schema.getDimension(Dimension::Id_Z_i32);
+    Dimension& dimX = schema.getDimension(DimensionId::X_i32);
+    Dimension& dimY = schema.getDimension(DimensionId::Y_i32);
+    Dimension& dimZ = schema.getDimension(DimensionId::Z_i32);
 
     dimX.setNumericScale(scaleX);
     dimY.setNumericScale(scaleY);
@@ -168,32 +168,32 @@ boost::uint16_t Support::getPointDataSize(PointFormat pointFormat)
 
 PointIndexes::PointIndexes(const SchemaLayout& schemaLayout, PointFormat format)
 {
-    X = schemaLayout.getDimensionIndex(Dimension::Id_X_i32);
-    Y = schemaLayout.getDimensionIndex(Dimension::Id_Y_i32);
-    Z = schemaLayout.getDimensionIndex(Dimension::Id_Z_i32);
+    X = schemaLayout.getDimensionIndex(DimensionId::X_i32);
+    Y = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
+    Z = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
     
-    Intensity = schemaLayout.getDimensionIndex(Dimension::Id_Las_Intensity);
-    ReturnNumber = schemaLayout.getDimensionIndex(Dimension::Id_Las_ReturnNumber);
-    NumberOfReturns = schemaLayout.getDimensionIndex(Dimension::Id_Las_NumberOfReturns);
-    ScanDirectionFlag = schemaLayout.getDimensionIndex(Dimension::Id_Las_ScanDirectionFlag);
-    EdgeOfFlightLine = schemaLayout.getDimensionIndex(Dimension::Id_Las_EdgeOfFlightLine);
-    Classification = schemaLayout.getDimensionIndex(Dimension::Id_Las_Classification);
-    ScanAngleRank = schemaLayout.getDimensionIndex(Dimension::Id_Las_ScanAngleRank);
-    UserData = schemaLayout.getDimensionIndex(Dimension::Id_Las_UserData);
-    PointSourceId = schemaLayout.getDimensionIndex(Dimension::Id_Las_PointSourceId);
+    Intensity = schemaLayout.getDimensionIndex(DimensionId::Las_Intensity);
+    ReturnNumber = schemaLayout.getDimensionIndex(DimensionId::Las_ReturnNumber);
+    NumberOfReturns = schemaLayout.getDimensionIndex(DimensionId::Las_NumberOfReturns);
+    ScanDirectionFlag = schemaLayout.getDimensionIndex(DimensionId::Las_ScanDirectionFlag);
+    EdgeOfFlightLine = schemaLayout.getDimensionIndex(DimensionId::Las_EdgeOfFlightLine);
+    Classification = schemaLayout.getDimensionIndex(DimensionId::Las_Classification);
+    ScanAngleRank = schemaLayout.getDimensionIndex(DimensionId::Las_ScanAngleRank);
+    UserData = schemaLayout.getDimensionIndex(DimensionId::Las_UserData);
+    PointSourceId = schemaLayout.getDimensionIndex(DimensionId::Las_PointSourceId);
     
-    Time = (Support::hasTime(format) ? schemaLayout.getDimensionIndex(Dimension::Id_Las_Time) : 0);
+    Time = (Support::hasTime(format) ? schemaLayout.getDimensionIndex(DimensionId::Las_Time) : 0);
     
-    Red = (Support::hasColor(format) ? schemaLayout.getDimensionIndex(Dimension::Id_Red_u16) : 0);
-    Green = (Support::hasColor(format) ? schemaLayout.getDimensionIndex(Dimension::Id_Green_u16) : 0);
-    Blue = (Support::hasColor(format) ? schemaLayout.getDimensionIndex(Dimension::Id_Blue_u16) : 0);
+    Red = (Support::hasColor(format) ? schemaLayout.getDimensionIndex(DimensionId::Red_u16) : 0);
+    Green = (Support::hasColor(format) ? schemaLayout.getDimensionIndex(DimensionId::Green_u16) : 0);
+    Blue = (Support::hasColor(format) ? schemaLayout.getDimensionIndex(DimensionId::Blue_u16) : 0);
         
-    // WavePacketDescriptorIndex = (Support::hasWave(format) ? schemaLayout.getDimensionIndex(Dimension::Id_Las_WavePacketDescriptorIndex) : 0);
-    // WaveformDataOffset = (Support::hasWave(format) ? schemaLayout.getDimensionIndex(Dimension::Id_Las_WaveformDataOffset) : 0);
-    // ReturnPointWaveformLocation = (Support::hasWave(format) ? schemaLayout.getDimensionIndex(Dimension::Id_Las_ReturnPointWaveformLocation) : 0);
-    // WaveformXt = (Support::hasWave(format) ? schemaLayout.getDimensionIndex(Dimension::Id_Las_WaveformXt) : 0);
-    // WaveformYt = (Support::hasWave(format) ? schemaLayout.getDimensionIndex(Dimension::Id_Las_WaveformYt) : 0);
-    // WaveformZt = (Support::hasWave(format) ? schemaLayout.getDimensionIndex(Dimension::Id_Las_WaveformZt) : 0);
+    // WavePacketDescriptorIndex = (Support::hasWave(format) ? schemaLayout.getDimensionIndex(DimensionId::Las_WavePacketDescriptorIndex) : 0);
+    // WaveformDataOffset = (Support::hasWave(format) ? schemaLayout.getDimensionIndex(DimensionId::Las_WaveformDataOffset) : 0);
+    // ReturnPointWaveformLocation = (Support::hasWave(format) ? schemaLayout.getDimensionIndex(DimensionId::Las_ReturnPointWaveformLocation) : 0);
+    // WaveformXt = (Support::hasWave(format) ? schemaLayout.getDimensionIndex(DimensionId::Las_WaveformXt) : 0);
+    // WaveformYt = (Support::hasWave(format) ? schemaLayout.getDimensionIndex(DimensionId::Las_WaveformYt) : 0);
+    // WaveformZt = (Support::hasWave(format) ? schemaLayout.getDimensionIndex(DimensionId::Las_WaveformZt) : 0);
 
     return;
 }

@@ -91,8 +91,8 @@ boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffe
 {
     const SchemaLayout& schemaLayout = dstData.getSchemaLayout();
 
-    bool isDouble = schemaLayout.getSchema().hasDimension(Dimension::Id_X_f64);
-    assert(isDouble || (!isDouble && schemaLayout.getSchema().hasDimension(Dimension::Id_X_i32)));
+    bool isDouble = schemaLayout.getSchema().hasDimension(DimensionId::X_f64);
+    assert(isDouble || (!isDouble && schemaLayout.getSchema().hasDimension(DimensionId::X_i32)));
 
     const Bounds<double>& bounds = this->getBounds();
 
@@ -103,9 +103,9 @@ boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffe
 
     if (isDouble)
     {
-        const int fieldX = schemaLayout.getDimensionIndex(Dimension::Id_X_f64);
-        const int fieldY = schemaLayout.getDimensionIndex(Dimension::Id_Y_f64);
-        const int fieldZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_f64);
+        const int fieldX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
+        const int fieldY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
+        const int fieldZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
 
         for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
         {
@@ -126,13 +126,13 @@ boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffe
     }
     else
     {
-        const int fieldX = schemaLayout.getDimensionIndex(Dimension::Id_X_i32);
-        const int fieldY = schemaLayout.getDimensionIndex(Dimension::Id_Y_i32);
-        const int fieldZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_i32);
+        const int fieldX = schemaLayout.getDimensionIndex(DimensionId::X_i32);
+        const int fieldY = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
+        const int fieldZ = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
 
-        const Dimension& xdim = schemaLayout.getSchema().getDimension(Dimension::Id_X_i32);
-        const Dimension& ydim = schemaLayout.getSchema().getDimension(Dimension::Id_X_i32);
-        const Dimension& zdim = schemaLayout.getSchema().getDimension(Dimension::Id_X_i32);
+        const Dimension& xdim = schemaLayout.getSchema().getDimension(DimensionId::X_i32);
+        const Dimension& ydim = schemaLayout.getSchema().getDimension(DimensionId::X_i32);
+        const Dimension& zdim = schemaLayout.getSchema().getDimension(DimensionId::X_i32);
 
         for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
         {

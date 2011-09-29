@@ -141,7 +141,7 @@ protected:
     void Initialize();
     void Load();
     Dimension::DataType GetDimensionType(std::string const& interpretation);
-    Dimension::Id GetDimensionField(std::string const& name, boost::uint32_t position);
+    DimensionId::Id GetDimensionField(std::string const& name, boost::uint32_t position);
     
 private:
     

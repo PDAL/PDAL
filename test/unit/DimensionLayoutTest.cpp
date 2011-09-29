@@ -45,10 +45,10 @@ BOOST_AUTO_TEST_SUITE(DimensionLayoutTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
-    Dimension d1(Dimension::Id_X_i32);
+    Dimension d1(DimensionId::X_i32);
     DimensionLayout l1(d1);
 
-    Dimension d2(Dimension::Id_Y_i32);
+    Dimension d2(DimensionId::Y_i32);
     DimensionLayout l2(d2);
 
     DimensionLayout l3(l1);
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
 BOOST_AUTO_TEST_CASE(DimensionLayoutTest_ptree)
 {
-    Dimension d1(Dimension::Id_X_i32);
+    Dimension d1(DimensionId::X_i32);
     DimensionLayout l1(d1);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);

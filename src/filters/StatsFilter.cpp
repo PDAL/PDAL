@@ -159,7 +159,7 @@ void StatsFilter::reset()
 }
     
 
-const StatsCollector& StatsFilter::getStats(Dimension::Id field) const
+const StatsCollector& StatsFilter::getStats(DimensionId::Id field) const
 {
     const StatsCollector* s = m_stats.find(field)->second;
     return *s;
@@ -173,16 +173,16 @@ void StatsFilter::processBuffer(PointBuffer& data) const
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
 
     // BUG: fix this!
-    const int indexXi = schemaLayout.getDimensionIndex(Dimension::Id_X_i32);
-    const int indexYi = schemaLayout.getDimensionIndex(Dimension::Id_Y_i32);
-    const int indexZi = schemaLayout.getDimensionIndex(Dimension::Id_Z_i32);
-    const int indexXd = schemaLayout.getDimensionIndex(Dimension::Id_X_f64);
-    const int indexYd = schemaLayout.getDimensionIndex(Dimension::Id_Y_f64);
-    const int indexZd = schemaLayout.getDimensionIndex(Dimension::Id_Z_f64);
+    const int indexXi = schemaLayout.getDimensionIndex(DimensionId::X_i32);
+    const int indexYi = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
+    const int indexZi = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
+    const int indexXd = schemaLayout.getDimensionIndex(DimensionId::X_f64);
+    const int indexYd = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
+    const int indexZd = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
 
-    StatsCollector& statsX = (indexXi!=-1) ? *(m_stats.find(Dimension::Id_X_i32)->second) : *(m_stats.find(Dimension::Id_X_f64)->second);
-    StatsCollector& statsY = (indexYi!=-1) ? *(m_stats.find(Dimension::Id_Y_i32)->second) : *(m_stats.find(Dimension::Id_Y_f64)->second);
-    StatsCollector& statsZ = (indexZi!=-1) ? *(m_stats.find(Dimension::Id_Z_i32)->second) : *(m_stats.find(Dimension::Id_Z_f64)->second);
+    StatsCollector& statsX = (indexXi!=-1) ? *(m_stats.find(DimensionId::X_i32)->second) : *(m_stats.find(DimensionId::X_f64)->second);
+    StatsCollector& statsY = (indexYi!=-1) ? *(m_stats.find(DimensionId::Y_i32)->second) : *(m_stats.find(DimensionId::Y_f64)->second);
+    StatsCollector& statsZ = (indexZi!=-1) ? *(m_stats.find(DimensionId::Z_i32)->second) : *(m_stats.find(DimensionId::Z_f64)->second);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
@@ -211,7 +211,7 @@ boost::property_tree::ptree StatsFilter::toStatsPTree() const
 {
     boost::property_tree::ptree tree;
 
-    for (std::map<Dimension::Id, StatsCollector*>::const_iterator iter = m_stats.begin();
+    for (std::map<DimensionId::Id, StatsCollector*>::const_iterator iter = m_stats.begin();
          iter != m_stats.end();
          ++iter)
     {
@@ -219,15 +219,15 @@ boost::property_tree::ptree StatsFilter::toStatsPTree() const
         boost::property_tree::ptree subtree = stat->toPTree();
 
         // BUG: make this work for all fields
-        if (iter->first == Dimension::Id_X_i32 || iter->first == Dimension::Id_X_f64)
+        if (iter->first == DimensionId::X_i32 || iter->first == DimensionId::X_f64)
         {
             tree.add_child("X", subtree);
         }
-        else if (iter->first == Dimension::Id_Y_i32 || iter->first == Dimension::Id_Y_f64)
+        else if (iter->first == DimensionId::Y_i32 || iter->first == DimensionId::Y_f64)
         {
             tree.add_child("Y", subtree);
         }
-        else if (iter->first == Dimension::Id_Z_i32 || iter->first == Dimension::Id_Z_f64)
+        else if (iter->first == DimensionId::Z_i32 || iter->first == DimensionId::Z_f64)
         {
             tree.add_child("Z", subtree);
         }

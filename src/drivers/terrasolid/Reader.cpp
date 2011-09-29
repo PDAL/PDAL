@@ -47,32 +47,32 @@ PointIndexes::PointIndexes(const SchemaLayout& schemaLayout, TERRASOLID_Format_T
 {
     if (format == TERRASOLID_Format_1) 
     {
-        Classification = schemaLayout.getDimensionIndex(Dimension::Id_TerraSolid_Classification);
-        PointSourceId = schemaLayout.getDimensionIndex(Dimension::Id_TerraSolid_PointSourceId_u8);
-        EchoInt = schemaLayout.getDimensionIndex(Dimension::Id_TerraSolid_ReturnNumber_u16);
-        X = schemaLayout.getDimensionIndex(Dimension::Id_X_i32);
-        Y = schemaLayout.getDimensionIndex(Dimension::Id_Y_i32);
-        Z = schemaLayout.getDimensionIndex(Dimension::Id_Z_i32);
+        Classification = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Classification);
+        PointSourceId = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_PointSourceId_u8);
+        EchoInt = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_ReturnNumber_u16);
+        X = schemaLayout.getDimensionIndex(DimensionId::X_i32);
+        Y = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
+        Z = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
     } 
     else if (format == TERRASOLID_Format_2)
     {
-        X = schemaLayout.getDimensionIndex(Dimension::Id_X_i32);
-        Y = schemaLayout.getDimensionIndex(Dimension::Id_Y_i32);
-        Z = schemaLayout.getDimensionIndex(Dimension::Id_Z_i32);
-        Classification = schemaLayout.getDimensionIndex(Dimension::Id_TerraSolid_Classification);
-        ReturnNumber = schemaLayout.getDimensionIndex(Dimension::Id_TerraSolid_ReturnNumber_u8);
-        Flag = schemaLayout.getDimensionIndex(Dimension::Id_TerraSolid_Flag);
-        Mark = schemaLayout.getDimensionIndex(Dimension::Id_TerraSolid_Mark);
-        PointSourceId = schemaLayout.getDimensionIndex(Dimension::Id_TerraSolid_PointSourceId_u16);
-        Intensity = schemaLayout.getDimensionIndex(Dimension::Id_TerraSolid_Intensity);
+        X = schemaLayout.getDimensionIndex(DimensionId::X_i32);
+        Y = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
+        Z = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
+        Classification = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Classification);
+        ReturnNumber = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_ReturnNumber_u8);
+        Flag = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Flag);
+        Mark = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Mark);
+        PointSourceId = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_PointSourceId_u16);
+        Intensity = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Intensity);
     } 
 
-    Time = schemaLayout.getDimensionIndex(Dimension::Id_TerraSolid_Time);
+    Time = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Time);
 
-    Red = schemaLayout.getDimensionIndex(Dimension::Id_Red_u8);
-    Green = schemaLayout.getDimensionIndex(Dimension::Id_Green_u8);
-    Blue = schemaLayout.getDimensionIndex(Dimension::Id_Blue_u8);
-    Alpha = schemaLayout.getDimensionIndex(Dimension::Id_TerraSolid_Alpha);
+    Red = schemaLayout.getDimensionIndex(DimensionId::Red_u8);
+    Green = schemaLayout.getDimensionIndex(DimensionId::Green_u8);
+    Blue = schemaLayout.getDimensionIndex(DimensionId::Blue_u8);
+    Alpha = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Alpha);
     
     return;
 }
@@ -176,26 +176,26 @@ void Reader::registerFields()
     
     if (m_format == TERRASOLID_Format_1)
     {
-        Dimension classification(Dimension::Id_TerraSolid_Classification);
+        Dimension classification(DimensionId::TerraSolid_Classification);
         schema.appendDimension(classification);
 
-        Dimension flight_line(Dimension::Id_TerraSolid_PointSourceId_u8);
+        Dimension flight_line(DimensionId::TerraSolid_PointSourceId_u8);
         schema.appendDimension(flight_line);
 
-        Dimension echoint(Dimension::Id_TerraSolid_Intensity);
+        Dimension echoint(DimensionId::TerraSolid_Intensity);
         schema.appendDimension(echoint);
 
-        Dimension x(Dimension::Id_X_i32);
+        Dimension x(DimensionId::X_i32);
         x.setNumericScale(xyz_scale);
         x.setNumericOffset(m_header->OrgX);
         schema.appendDimension(x);
 
-        Dimension y(Dimension::Id_Y_i32);
+        Dimension y(DimensionId::Y_i32);
         y.setNumericScale(xyz_scale);
         y.setNumericOffset(m_header->OrgY);
         schema.appendDimension(y);
 
-        Dimension z(Dimension::Id_Z_i32);
+        Dimension z(DimensionId::Z_i32);
         z.setNumericScale(xyz_scale);
         z.setNumericOffset(m_header->OrgZ);
         schema.appendDimension(z);
@@ -203,43 +203,43 @@ void Reader::registerFields()
 
     if (m_format == TERRASOLID_Format_2)
     {
-        Dimension x(Dimension::Id_X_i32);
+        Dimension x(DimensionId::X_i32);
         x.setNumericScale(xyz_scale);
         x.setNumericOffset(m_header->OrgX);
         schema.appendDimension(x);
 
-        Dimension y(Dimension::Id_Y_i32);
+        Dimension y(DimensionId::Y_i32);
         y.setNumericScale(xyz_scale);
         y.setNumericOffset(m_header->OrgY);
         schema.appendDimension(y);
 
-        Dimension z(Dimension::Id_Z_i32);
+        Dimension z(DimensionId::Z_i32);
         z.setNumericScale(xyz_scale);
         z.setNumericOffset(m_header->OrgZ);
         schema.appendDimension(z);
 
-        Dimension classification(Dimension::Id_TerraSolid_Classification);
+        Dimension classification(DimensionId::TerraSolid_Classification);
         schema.appendDimension(classification);
 
-        Dimension return_no(Dimension::Id_TerraSolid_ReturnNumber_u8); 
+        Dimension return_no(DimensionId::TerraSolid_ReturnNumber_u8); 
         schema.appendDimension(return_no);
 
-        Dimension flag(Dimension::Id_TerraSolid_Flag);
+        Dimension flag(DimensionId::TerraSolid_Flag);
         schema.appendDimension(flag);
 
-        Dimension mark(Dimension::Id_TerraSolid_Mark);
+        Dimension mark(DimensionId::TerraSolid_Mark);
         schema.appendDimension(mark);
 
-        Dimension flight_line(Dimension::Id_TerraSolid_PointSourceId_u16);
+        Dimension flight_line(DimensionId::TerraSolid_PointSourceId_u16);
         schema.appendDimension(flight_line);
 
-        Dimension intensity(Dimension::Id_TerraSolid_Intensity);
+        Dimension intensity(DimensionId::TerraSolid_Intensity);
         schema.appendDimension(intensity);
     }
     
     if (m_haveTime)
     {
-        Dimension time(Dimension::Id_TerraSolid_Time);
+        Dimension time(DimensionId::TerraSolid_Time);
         time.setNumericScale(0.0002);
         time.setNumericOffset(0.0);
         schema.appendDimension(time);
@@ -247,16 +247,16 @@ void Reader::registerFields()
 
     if (m_haveColor)
     {
-        Dimension red(Dimension::Id_Red_u8);
+        Dimension red(DimensionId::Red_u8);
         schema.appendDimension(red);
 
-        Dimension green(Dimension::Id_Green_u8);
+        Dimension green(DimensionId::Green_u8);
         schema.appendDimension(green);
 
-        Dimension blue(Dimension::Id_Blue_u8);
+        Dimension blue(DimensionId::Blue_u8);
         schema.appendDimension(blue);
 
-        Dimension alpha(Dimension::Id_TerraSolid_Alpha);
+        Dimension alpha(DimensionId::TerraSolid_Alpha);
         schema.appendDimension(alpha);
     }
 

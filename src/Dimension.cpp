@@ -52,7 +52,7 @@ namespace pdal
 class KnownDimension
 {
 public:
-    Dimension::Id id;
+    DimensionId::Id id;
     Dimension::DataType datatype;
     std::string name;
     std::string description;
@@ -64,57 +64,57 @@ KnownDimension s_knownDimensions[] =
     // common stuff
     //
     { 
-        Dimension::Id_X_i32, Dimension::Int32, "X", 
+        DimensionId::X_i32, Dimension::Int32, "X", 
         "x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value." 
     },
     {
-        Dimension::Id_Y_i32, Dimension::Int32, "Y", 
+        DimensionId::Y_i32, Dimension::Int32, "Y", 
         "y coordinate as a long integer. You must use the scale and offset information of the header to determine the double value."
     },
     { 
-        Dimension::Id_Z_i32, Dimension::Int32, "Z",
+        DimensionId::Z_i32, Dimension::Int32, "Z",
         "z coordinate as a long integer. You must use the scale and offset information of the header to determine the double value." 
     },
     { 
-        Dimension::Id_X_f64, Dimension::Double, "X",
+        DimensionId::X_f64, Dimension::Double, "X",
         "x coordinate as a double"
     },
     { 
-        Dimension::Id_Y_f64, Dimension::Double, "Y", 
+        DimensionId::Y_f64, Dimension::Double, "Y", 
         "y coordinate as a double" 
     },
     { 
-        Dimension::Id_Z_f64, Dimension::Double, "Z",
+        DimensionId::Z_f64, Dimension::Double, "Z",
         "z coordinate as a double"
     },
 
     {
-        Dimension::Id_Time_u64, Dimension::Uint64, "Time",
+        DimensionId::Time_u64, Dimension::Uint64, "Time",
         "Time value" 
     },
 
     { 
-        Dimension::Id_Red_u16, Dimension::Uint16, "Red",
+        DimensionId::Red_u16, Dimension::Uint16, "Red",
         "The red image channel value associated with this point" 
     },
     {
-        Dimension::Id_Green_u16, Dimension::Uint16, "Green", 
+        DimensionId::Green_u16, Dimension::Uint16, "Green", 
         "The green image channel value associated with this point" 
     },
     {
-        Dimension::Id_Blue_u16, Dimension::Uint16, "Blue",
+        DimensionId::Blue_u16, Dimension::Uint16, "Blue",
         "The blue image channel value associated with this point"
     },
     {
-        Dimension::Id_Red_u8, Dimension::Uint8, "Red",
+        DimensionId::Red_u8, Dimension::Uint8, "Red",
         "The red image channel value associated with this point"
     },
     {
-        Dimension::Id_Green_u8, Dimension::Uint8, "Green",
+        DimensionId::Green_u8, Dimension::Uint8, "Green",
         "The green image channel value associated with this point"
     },
     {
-        Dimension::Id_Blue_u8, Dimension::Uint8, "Blue",
+        DimensionId::Blue_u8, Dimension::Uint8, "Blue",
         "The blue image channel value associated with this point"
     },
 
@@ -122,13 +122,13 @@ KnownDimension s_knownDimensions[] =
     // las
     // 
     { 
-        Dimension::Id_Las_Intensity, Dimension::Uint16, "Intensity", 
+        DimensionId::Las_Intensity, Dimension::Uint16, "Intensity", 
         "The intensity value is the integer representation of the pulse "
         "return magnitude. This value is optional and system specific. "
         "However, it should always be included if available." 
     },
     {
-        Dimension::Id_Las_ReturnNumber, Dimension::Uint8, "ReturnNumber",
+        DimensionId::Las_ReturnNumber, Dimension::Uint8, "ReturnNumber",
         "Return Number: The Return Number is the pulse return number for "
         "a given output pulse. A given output laser pulse can have many "
         "returns, and they must be marked in sequence of return. The first "
@@ -136,14 +136,14 @@ KnownDimension s_knownDimensions[] =
         "Number of two, and so on up to five returns." 
         },
     { 
-        Dimension::Id_Las_NumberOfReturns, Dimension::Uint8, "NumberOfReturns",
+        DimensionId::Las_NumberOfReturns, Dimension::Uint8, "NumberOfReturns",
         "Number of Returns (for this emitted pulse): The Number of Returns "
         "is the total number of returns for a given pulse. For example, "
         "a laser data point may be return two (Return Number) within a "
         "total number of five returns." 
         },
     { 
-        Dimension::Id_Las_ScanDirectionFlag, Dimension::Uint8, "ScanDirectionFlag",
+        DimensionId::Las_ScanDirectionFlag, Dimension::Uint8, "ScanDirectionFlag",
         "The Scan Direction Flag denotes the direction at which the "
         "scanner mirror was traveling at the time of the output pulse. "
         "A bit value of 1 is a positive scan direction, and a bit value "
@@ -152,13 +152,13 @@ KnownDimension s_knownDimensions[] =
         "the right side and negative the opposite)." 
     },
     {
-        Dimension::Id_Las_EdgeOfFlightLine, Dimension::Uint8, "EdgeOfFlightLine",
+        DimensionId::Las_EdgeOfFlightLine, Dimension::Uint8, "EdgeOfFlightLine",
         "The Edge of Flight Line data bit has a value of 1 only when "
         "the point is at the end of a scan. It is the last point on "
         "a given scan line before it changes direction." 
     },
     {
-        Dimension::Id_Las_Classification, Dimension::Uint8, "Classification",
+        DimensionId::Las_Classification, Dimension::Uint8, "Classification",
         "Classification in LAS 1.0 was essentially user defined and optional. "
         "LAS 1.1 defines a standard set of ASPRS classifications. In addition, "
         "the field is now mandatory. If a point has never been classified, this "
@@ -169,7 +169,7 @@ KnownDimension s_knownDimensions[] =
         "three high bits used for flags." 
     },
     {
-        Dimension::Id_Las_ScanAngleRank, Dimension::Int8, "ScanAngleRank",
+        DimensionId::Las_ScanAngleRank, Dimension::Int8, "ScanAngleRank",
         "The Scan Angle Rank is a signed one-byte number with a "
         "valid range from -90 to +90. The Scan Angle Rank is the "
         "angle (rounded to the nearest integer in the absolute "
@@ -181,11 +181,11 @@ KnownDimension s_knownDimensions[] =
         "direction of flight." 
     },
     {
-        Dimension::Id_Las_UserData, Dimension::Uint8, "UserData", 
+        DimensionId::Las_UserData, Dimension::Uint8, "UserData", 
         "This field may be used at the user’s discretion" 
     },
     {
-        Dimension::Id_Las_PointSourceId, Dimension::Uint16, "PointSourceId",
+        DimensionId::Las_PointSourceId, Dimension::Uint16, "PointSourceId",
         "This value indicates the file from which this point originated. "
         "Valid values for this field are 1 to 65,535 inclusive with zero "
         "being used for a special case discussed below. The numerical value "
@@ -197,25 +197,25 @@ KnownDimension s_knownDimensions[] =
         "at some time during processing. " 
     },
     {
-        Dimension::Id_Las_WavePacketDescriptorIndex, Dimension::Uint8, "WavePacketDescriptorIndex",
+        DimensionId::Las_WavePacketDescriptorIndex, Dimension::Uint8, "WavePacketDescriptorIndex",
     },
     { 
-        Dimension::Id_Las_WaveformDataOffset, Dimension::Uint64, "WaveformDataOffset",
+        DimensionId::Las_WaveformDataOffset, Dimension::Uint64, "WaveformDataOffset",
     },
     { 
-        Dimension::Id_Las_ReturnPointWaveformLocation, Dimension::Uint32, "ReturnPointWaveformLocation",
+        DimensionId::Las_ReturnPointWaveformLocation, Dimension::Uint32, "ReturnPointWaveformLocation",
     },
     { 
-        Dimension::Id_Las_WaveformXt, Dimension::Float, "WaveformXt" , ""
+        DimensionId::Las_WaveformXt, Dimension::Float, "WaveformXt" , ""
     },
     { 
-        Dimension::Id_Las_WaveformYt, Dimension::Float, "WaveformYt", ""
+        DimensionId::Las_WaveformYt, Dimension::Float, "WaveformYt", ""
     },
     { 
-        Dimension::Id_Las_WaveformZt, Dimension::Float, "WaveformZt", ""
+        DimensionId::Las_WaveformZt, Dimension::Float, "WaveformZt", ""
     },
     {
-        Dimension::Id_Las_Time, Dimension::Double, "Time",
+        DimensionId::Las_Time, Dimension::Double, "Time",
         "The GPS Time is the double floating point time tag value at "
         "which the point was acquired. It is GPS Week Time if the "
         "Global Encoding low bit is clear and Adjusted Standard GPS "
@@ -230,45 +230,45 @@ KnownDimension s_knownDimensions[] =
     // Y: "Northing"
     // Z: "Elevation"
     { 
-        Dimension::Id_TerraSolid_Alpha, Dimension::Uint8, "Alpha", 
+        DimensionId::TerraSolid_Alpha, Dimension::Uint8, "Alpha", 
         "The alpha image channel value associated with this point" 
     },
     {
-        Dimension::Id_TerraSolid_Classification, Dimension::Uint8, "Classification", 
+        DimensionId::TerraSolid_Classification, Dimension::Uint8, "Classification", 
         "Classification code 0-255"
     },
     {
-        Dimension::Id_TerraSolid_PointSourceId_u8, Dimension::Uint8, "PointSourceId_u8",
+        DimensionId::TerraSolid_PointSourceId_u8, Dimension::Uint8, "PointSourceId_u8",
         "Flightline number 0-255" 
     },
     {
-        Dimension::Id_TerraSolid_PointSourceId_u16, Dimension::Uint16, "PointSourceId_u16",
+        DimensionId::TerraSolid_PointSourceId_u16, Dimension::Uint16, "PointSourceId_u16",
         "Flightline number 0-255"
     },
     {
-        Dimension::Id_TerraSolid_ReturnNumber_u8, Dimension::Uint8, "ReturnNumber",
+        DimensionId::TerraSolid_ReturnNumber_u8, Dimension::Uint8, "ReturnNumber",
         "Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo."
     },
     {
-        Dimension::Id_TerraSolid_ReturnNumber_u16, Dimension::Uint16, "ReturnNumber",
+        DimensionId::TerraSolid_ReturnNumber_u16, Dimension::Uint16, "ReturnNumber",
         "Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo."
     },
     {
-        Dimension::Id_TerraSolid_Flag, Dimension::Uint8, "Flag",
+        DimensionId::TerraSolid_Flag, Dimension::Uint8, "Flag",
         "Runtime flag (view visibility)"
     },
     {
-        Dimension::Id_TerraSolid_Mark, Dimension::Uint8, "Mark",
+        DimensionId::TerraSolid_Mark, Dimension::Uint8, "Mark",
         "Runtime flag"
     },
     { 
-        Dimension::Id_TerraSolid_Intensity, Dimension::Uint16, "Intensity", 
+        DimensionId::TerraSolid_Intensity, Dimension::Uint16, "Intensity", 
         "The intensity value is the integer representation of the pulse "
         "return magnitude. This value is optional and system specific. "
         "However, it should always be included if available."
     },
     {
-        Dimension::Id_TerraSolid_Time, Dimension::Uint32, "TerraSolid Time",
+        DimensionId::TerraSolid_Time, Dimension::Uint32, "TerraSolid Time",
         "32 bit integer time stamps. Time stamps are assumed to be GPS week seconds. The storage format is a 32 bit unsigned integer where each integer step is 0.0002 seconds."
     },
 
@@ -276,10 +276,10 @@ KnownDimension s_knownDimensions[] =
     // chipper
     //
     {
-        Dimension::Id_Chipper_1, Dimension::Int32, "Chipper Point ID", ""
+        DimensionId::Chipper_1, Dimension::Int32, "Chipper Point ID", ""
     },
     {
-        Dimension::Id_Chipper_2, Dimension::Int32, "Chipper Block ID", ""
+        DimensionId::Chipper_2, Dimension::Int32, "Chipper Block ID", ""
     },
 
     //
@@ -288,59 +288,59 @@ KnownDimension s_knownDimensions[] =
     // X: "Longitude coordinate with 1/1000000 decimals of precision"
     // Y: "Latitude coordinate with 1/1000000 decimals of precision"
     // Z: "z coordinate as a long integer.  You must use the scale and offset information of the header to determine the double value."
-    { Dimension::Id_Qfit_StartPulse, Dimension::Int32, "StartPulse", "Start Pulse Signal Strength (relative)" 
+    { DimensionId::Qfit_StartPulse, Dimension::Int32, "StartPulse", "Start Pulse Signal Strength (relative)" 
         },
     {
-        Dimension::Id_Qfit_ReflectedPulse, Dimension::Int32, "ReflectedPulse", "Reflected Laser Signal Strength (relative)" 
+        DimensionId::Qfit_ReflectedPulse, Dimension::Int32, "ReflectedPulse", "Reflected Laser Signal Strength (relative)" 
     },
     { 
-        Dimension::Id_Qfit_ScanAngleRank, Dimension::Int32, "ScanAngleRank", "Scan Azimuth (degrees X 1,000)" 
+        DimensionId::Qfit_ScanAngleRank, Dimension::Int32, "ScanAngleRank", "Scan Azimuth (degrees X 1,000)" 
     },
     {
-        Dimension::Id_Qfit_Pitch, Dimension::Int32, "Pitch", "Pitch (degrees X 1,000)" 
+        DimensionId::Qfit_Pitch, Dimension::Int32, "Pitch", "Pitch (degrees X 1,000)" 
     },
     { 
-        Dimension::Id_Qfit_Roll, Dimension::Int32, "Roll", "Roll (degrees X 1,000)" 
+        DimensionId::Qfit_Roll, Dimension::Int32, "Roll", "Roll (degrees X 1,000)" 
     },
     { 
-        Dimension::Id_Qfit_Time, Dimension::Int32, "Qfit Time", "Relative Time (msec from start of data file)" 
+        DimensionId::Qfit_Time, Dimension::Int32, "Qfit Time", "Relative Time (msec from start of data file)" 
     },
     { 
-        Dimension::Id_Qfit_PassiveSignal, Dimension::Int32, "PassiveSignal", "Passive Signal (relative)" 
+        DimensionId::Qfit_PassiveSignal, Dimension::Int32, "PassiveSignal", "Passive Signal (relative)" 
     },
     { 
-        Dimension::Id_Qfit_PassiveX, Dimension::Int32, "PassiveX", "Passive Footprint Longitude (degrees X 1,000,000)" 
+        DimensionId::Qfit_PassiveX, Dimension::Int32, "PassiveX", "Passive Footprint Longitude (degrees X 1,000,000)" 
     },
     { 
-        Dimension::Id_Qfit_PassiveY, Dimension::Int32, "PassiveY", "Passive Footprint Latitude (degrees X 1,000,000)"
+        DimensionId::Qfit_PassiveY, Dimension::Int32, "PassiveY", "Passive Footprint Latitude (degrees X 1,000,000)"
     },
     { 
-        Dimension::Id_Qfit_PassiveZ, Dimension::Int32, "PassiveZ", "Passive Footprint Synthesized Elevation (millimeters)" 
+        DimensionId::Qfit_PassiveZ, Dimension::Int32, "PassiveZ", "Passive Footprint Synthesized Elevation (millimeters)" 
     },
     { 
-        Dimension::Id_Qfit_GpsTime, Dimension::Int32, "GpsTime", "GPS Time packed (example: 153320100 = 15h 33m 20s 100ms)" 
+        DimensionId::Qfit_GpsTime, Dimension::Int32, "GpsTime", "GPS Time packed (example: 153320100 = 15h 33m 20s 100ms)" 
     },
     { 
-        Dimension::Id_Qfit_PDOP, Dimension::Int32, "PDOP", "GPS PDOP (dilution of precision) (X 10)" 
+        DimensionId::Qfit_PDOP, Dimension::Int32, "PDOP", "GPS PDOP (dilution of precision) (X 10)" 
     },
     { 
-        Dimension::Id_Qfit_PulseWidth, Dimension::Int32, "PulseWdith", "Laser received pulse width (digitizer samples)" 
+        DimensionId::Qfit_PulseWidth, Dimension::Int32, "PulseWdith", "Laser received pulse width (digitizer samples)" 
     },
 
     // eof
-    { Dimension::Id_Undefined, Dimension::Undefined, "" }
+    { DimensionId::Undefined, Dimension::Undefined, "" }
 };
 
 
 static void validate();
 
 // BUG: this is too slow
-static const KnownDimension& lookupKnownDimension(const Dimension::Id& id)
+static const KnownDimension& lookupKnownDimension(const DimensionId::Id& id)
 {
     validate();
 
     int i=0;
-    while (s_knownDimensions[i].id != Dimension::Id_Undefined)
+    while (s_knownDimensions[i].id != DimensionId::Undefined)
     {
         const KnownDimension& kd = s_knownDimensions[i];
         if (kd.id == id) return kd;
@@ -349,10 +349,10 @@ static const KnownDimension& lookupKnownDimension(const Dimension::Id& id)
     throw pdal_error("Dimension not found");
 }
 
-static bool hasKnownDimension(const Dimension::Id& id)
+static bool hasKnownDimension(const DimensionId::Id& id)
 {
     int i=0;
-    while (s_knownDimensions[i].id != Dimension::Id_Undefined)
+    while (s_knownDimensions[i].id != DimensionId::Undefined)
     {
         const KnownDimension& kd = s_knownDimensions[i];
         if (kd.id == id) return true;
@@ -363,20 +363,20 @@ static bool hasKnownDimension(const Dimension::Id& id)
 
 static void validate()
 {
-    std::map<Dimension::Id, int> map;
+    std::map<DimensionId::Id, int> map;
 
     int i=0;
-    while (s_knownDimensions[i].id != Dimension::Id_Undefined)
+    while (s_knownDimensions[i].id != DimensionId::Undefined)
     {
         assert(map.find(s_knownDimensions[i].id) == map.end());
-        map.insert(std::pair<Dimension::Id,int>(s_knownDimensions[i].id,1) );
+        map.insert(std::pair<DimensionId::Id,int>(s_knownDimensions[i].id,1) );
         ++i;
     }
 }
 
 // --------------------------------------------------------------------------
 
-Dimension::Dimension(Id id)
+Dimension::Dimension(DimensionId::Id id)
     : m_dataType(Undefined)
     , m_id(id)
     , m_name(std::string(""))
@@ -389,7 +389,6 @@ Dimension::Dimension(Id id)
     , m_precise(false)
     , m_numericScale(0.0)
     , m_numericOffset(0.0)
-    , m_isValid(false)
 {
     const KnownDimension& kd = lookupKnownDimension(id);
     m_dataType = kd.datatype;
@@ -400,7 +399,7 @@ Dimension::Dimension(Id id)
 }
 
 
-Dimension::Dimension(Id id, DataType dataType, std::string name, std::string description)
+Dimension::Dimension(DimensionId::Id id, DataType dataType, std::string name, std::string description)
     : m_dataType(dataType)
     , m_id(id)
     , m_name(name)
@@ -413,7 +412,6 @@ Dimension::Dimension(Id id, DataType dataType, std::string name, std::string des
     , m_precise(false)
     , m_numericScale(0.0)
     , m_numericOffset(0.0)
-    , m_isValid(false)
 {
     assert(!hasKnownDimension(id));
     
@@ -434,7 +432,6 @@ Dimension::Dimension(Dimension const& other)
     , m_precise(other.m_precise)
     , m_numericScale(other.m_numericScale)
     , m_numericOffset(other.m_numericOffset)
-    , m_isValid(other.m_isValid)
 {
     return;
 }
@@ -456,7 +453,6 @@ Dimension& Dimension::operator=(Dimension const& rhs)
         m_precise = rhs.m_precise;
         m_numericScale = rhs.m_numericScale;
         m_numericOffset = rhs.m_numericOffset;
-        m_isValid = rhs.m_isValid;
     }
 
     return *this;
@@ -475,7 +471,6 @@ bool Dimension::operator==(const Dimension& other) const
         Utils::compare_approx(m_min, other.m_min, (std::numeric_limits<double>::min)()) &&
         Utils::compare_approx(m_max, other.m_max, (std::numeric_limits<double>::min)()) &&
         m_precise == other.m_precise &&
-        m_isValid == other.m_isValid &&
         Utils::compare_approx(m_numericScale, other.m_numericScale, (std::numeric_limits<double>::min)()) &&
         Utils::compare_approx(m_numericOffset, other.m_numericOffset, (std::numeric_limits<double>::min)()) 
         

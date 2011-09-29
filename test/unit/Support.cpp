@@ -353,9 +353,9 @@ void Support::check_pN(const pdal::PointBuffer& data,
 {
     const pdal::SchemaLayout& schemaLayout = data.getSchemaLayout();
 
-    int offsetX = schemaLayout.getDimensionIndex(pdal::Dimension::Id_X_i32);
-    int offsetY = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Y_i32);
-    int offsetZ = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Z_i32);
+    int offsetX = schemaLayout.getDimensionIndex(pdal::DimensionId::X_i32);
+    int offsetY = schemaLayout.getDimensionIndex(pdal::DimensionId::Y_i32);
+    int offsetZ = schemaLayout.getDimensionIndex(pdal::DimensionId::Z_i32);
 
     boost::int32_t x0raw = data.getField<boost::int32_t>(index, offsetX);
     boost::int32_t y0raw = data.getField<boost::int32_t>(index, offsetY);
@@ -380,16 +380,16 @@ void Support::check_pN(const pdal::PointBuffer& data,
 
     const ::pdal::SchemaLayout& schemaLayout = data.getSchemaLayout();
 
-    int offsetT = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Las_Time);
+    int offsetT = schemaLayout.getDimensionIndex(pdal::DimensionId::Las_Time);
     if (offsetT != -1)
     {
         double t0 = data.getField<double>(index, offsetT);
         BOOST_CHECK_EQUAL(t0, tref);
     }
 
-    int offsetR = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Red_u16);
-    int offsetG = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Green_u16);
-    int offsetB = schemaLayout.getDimensionIndex(pdal::Dimension::Id_Blue_u16);
+    int offsetR = schemaLayout.getDimensionIndex(pdal::DimensionId::Red_u16);
+    int offsetG = schemaLayout.getDimensionIndex(pdal::DimensionId::Green_u16);
+    int offsetB = schemaLayout.getDimensionIndex(pdal::DimensionId::Blue_u16);
     BOOST_CHECK((offsetR==-1 && offsetG==-1 && offsetB==-1) || 
                 (offsetR!=-1 && offsetG!=-1 && offsetB!=-1));
     if (offsetR != -1)

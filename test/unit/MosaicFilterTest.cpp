@@ -75,10 +75,10 @@ BOOST_AUTO_TEST_CASE(test1)
 
     BOOST_CHECK(numRead == 300);
 
-    const int offsetT = schemaLayout.getDimensionIndex(Dimension::Id_Time_u64);
-    const int offsetX = schemaLayout.getDimensionIndex(Dimension::Id_X_f64);
-    const int offsetY = schemaLayout.getDimensionIndex(Dimension::Id_Y_f64);
-    const int offsetZ = schemaLayout.getDimensionIndex(Dimension::Id_Z_f64);
+    const int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    const int offsetX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
+    const int offsetY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
+    const int offsetZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
 
     for (boost::uint32_t i=0; i<300; i++)
     {

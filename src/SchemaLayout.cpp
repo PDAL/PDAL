@@ -128,7 +128,7 @@ void SchemaLayout::calculateSizes()
 
         m_dimensionLayouts.push_back(layout);
     
-        std::pair<Dimension::Id, std::size_t> p(dim.getId(), i);
+        std::pair<DimensionId::Id, std::size_t> p(dim.getId(), i);
         m_dimensions_map.insert(p);
 
         ++i;
@@ -140,9 +140,9 @@ void SchemaLayout::calculateSizes()
 }
 
 
-int SchemaLayout::getDimensionIndex(const Dimension::Id& id) const
+int SchemaLayout::getDimensionIndex(const DimensionId::Id& id) const
 {
-    std::map<Dimension::Id, std::size_t>::const_iterator i = m_dimensions_map.find(id);
+    std::map<DimensionId::Id, std::size_t>::const_iterator i = m_dimensions_map.find(id);
     
     int m = 0;
     

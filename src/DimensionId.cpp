@@ -32,64 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/ChipperIterator.hpp>
+#include <pdal/DimensionId.hpp>
 
-
-namespace pdal { namespace filters {
-
-
-ChipperSequentialIterator::ChipperSequentialIterator(Chipper const& filter)
-    : pdal::FilterSequentialIterator(filter)
-    , m_chipper(filter)
-    , m_currentBlockId(0)
-    , m_currentPointCount(0)
-{
-    const_cast<Chipper&>(m_chipper).Chip();
-    return;
-}
-
-boost::uint64_t ChipperSequentialIterator::skipImpl(boost::uint64_t count)
-{
-    return naiveSkipImpl(count);
-}
-
-
-boost::uint32_t ChipperSequentialIterator::readBufferImpl(PointBuffer& buffer)
+namespace pdal
 {
 
-    if (m_currentBlockId == m_chipper.GetBlockCount())
-        return 0; // we're done.
+// no code yet
 
-
-    buffer.setNumPoints(0);
-
-    filters::chipper::Block const& block = m_chipper.GetBlock(m_currentBlockId);
-    std::size_t numPointsThisBlock = block.GetIDs().size();
-    m_currentPointCount = m_currentPointCount + numPointsThisBlock;
-    
-    if (buffer.getCapacity() < numPointsThisBlock)
-    {
-        // FIXME: Expand the buffer?
-        throw pdal_error("Buffer not large enough to hold block!");
-    }
-    
-    SchemaLayout const& schemaLayout = buffer.getSchemaLayout().getSchema();
-    const int indexId = schemaLayout.getDimensionIndex(DimensionId::Chipper_1);
-    const int indexBlockId = schemaLayout.getDimensionIndex(DimensionId::Chipper_2);
-    block.GetBuffer(m_chipper.getPrevStage(), buffer, m_currentBlockId, indexId, indexBlockId);
-
-    buffer.setSpatialBounds(block.GetBounds());
-    m_currentBlockId++;
-    return numPointsThisBlock;
-
-}
-
-bool ChipperSequentialIterator::atEndImpl() const
-{
-    // we don't have a fixed point point --
-    // we are at the end only when our source is at the end
-    const StageSequentialIterator& iter = getPrevIterator();
-    return iter.atEnd();
-}
-
-} } // namespaces
+} // namespace pdal

@@ -521,7 +521,7 @@ void Reader::Load()
             properties = properties->next;
         }
 
-        Dimension::Id f = GetDimensionField(name, position);
+        DimensionId::Id f = GetDimensionField(name, position);
 
         Dimension d(f);
         if (! Utils::compare_distance(scale, 0.0))
@@ -610,78 +610,78 @@ Dimension::DataType Reader::GetDimensionType(std::string const& interpretation)
     return Dimension::Undefined;
 }
 
-Dimension::Id Reader::GetDimensionField(std::string const& name, boost::uint32_t /*position*/)
+DimensionId::Id Reader::GetDimensionField(std::string const& name, boost::uint32_t /*position*/)
 {
     // BUG: should we be checking for the Double datatype version of X,Y,Z too?
     if (!Utils::compare_no_case(name, "X"))   
-        return Dimension::Id_X_i32;
+        return DimensionId::X_i32;
     
     if (!Utils::compare_no_case(name, "Y"))
-        return Dimension::Id_Y_i32;
+        return DimensionId::Y_i32;
 
     if (!Utils::compare_no_case(name, "Z"))
-        return Dimension::Id_Z_i32;
+        return DimensionId::Z_i32;
 
     if (!Utils::compare_no_case(name, "Intensity"))
-        return Dimension::Id_Las_Intensity;
+        return DimensionId::Las_Intensity;
 
     if (!Utils::compare_no_case(name, "Return Number") ||
         !Utils::compare_no_case(name, "ReturnNumber"))
-        return Dimension::Id_Las_ReturnNumber;
+        return DimensionId::Las_ReturnNumber;
 
     if (!Utils::compare_no_case(name, "Number of Returns") ||
         !Utils::compare_no_case(name, "NumberOfReturns"))
-        return Dimension::Id_Las_NumberOfReturns;
+        return DimensionId::Las_NumberOfReturns;
 
     if (!Utils::compare_no_case(name, "Number of Returns"))
-        return Dimension::Id_Las_NumberOfReturns;
+        return DimensionId::Las_NumberOfReturns;
 
     if (!Utils::compare_no_case(name, "Scan Direction") ||
         !Utils::compare_no_case(name, "ScanDirectionFlag") ||
         !Utils::compare_no_case(name, "ScanDirection"))
-        return Dimension::Id_Las_ScanDirectionFlag;
+        return DimensionId::Las_ScanDirectionFlag;
 
     if (!Utils::compare_no_case(name, "Flightline Edge") ||
         !Utils::compare_no_case(name, "EdgeOfFlightLine") ||
         !Utils::compare_no_case(name, "FlightlineEdge"))
-        return Dimension::Id_Las_EdgeOfFlightLine;
+        return DimensionId::Las_EdgeOfFlightLine;
 
     if (!Utils::compare_no_case(name, "Classification"))
-        return Dimension::Id_Las_Classification;
+        return DimensionId::Las_Classification;
 
     if (!Utils::compare_no_case(name, "Scan Angle Rank") ||
         !Utils::compare_no_case(name, "ScanAngle") ||
         !Utils::compare_no_case(name, "ScanAngleRank"))
-        return Dimension::Id_Las_ScanAngleRank;
+        return DimensionId::Las_ScanAngleRank;
 
     if (!Utils::compare_no_case(name, "User Data") ||
         !Utils::compare_no_case(name, "UserData"))
-        return Dimension::Id_Las_UserData;
+        return DimensionId::Las_UserData;
 
     if (!Utils::compare_no_case(name, "Point Source ID")||
         !Utils::compare_no_case(name, "PointSourceId"))
-        return Dimension::Id_Las_PointSourceId;
+        return DimensionId::Las_PointSourceId;
 
     if (!Utils::compare_no_case(name, "Time"))
-        return Dimension::Id_Las_Time;
+        return DimensionId::Las_Time;
 
     if (!Utils::compare_no_case(name, "Red"))
-        return Dimension::Id_Red_u16;
+        return DimensionId::Red_u16;
 
     if (!Utils::compare_no_case(name, "Green"))
-        return Dimension::Id_Green_u16;
+        return DimensionId::Green_u16;
 
     if (!Utils::compare_no_case(name, "Blue"))
-        return Dimension::Id_Blue_u16;
+        return DimensionId::Blue_u16;
 
     if (!Utils::compare_no_case(name, "Alpha"))
-        return Dimension::Id_TerraSolid_Alpha;
+        return DimensionId::TerraSolid_Alpha;
     
     if (!Utils::compare_no_case(name, "Chipper Point ID"))
-        return Dimension::Id_Chipper_1;
+        return DimensionId::Chipper_1;
 
     if (!Utils::compare_no_case(name, "Chipper Block ID"))
-        return Dimension::Id_Chipper_2;
+        return DimensionId::Chipper_2;
 
     // Yes, this is scary.  What else can we do?
     throw pdal_error("unknown field name: " + name);

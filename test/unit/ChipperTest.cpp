@@ -94,8 +94,8 @@ BOOST_AUTO_TEST_CASE(test_construction)
         pdal::Schema const& schema = reader.getSchema();
         pdal::SchemaLayout schemaLayout(schema);
         PointBuffer buffer(schemaLayout, 15);
-        const int indexId = schemaLayout.getDimensionIndex(Dimension::Id_Chipper_1);
-        const int indexBlockId = schemaLayout.getDimensionIndex(Dimension::Id_Chipper_2);        
+        const int indexId = schemaLayout.getDimensionIndex(DimensionId::Chipper_1);
+        const int indexBlockId = schemaLayout.getDimensionIndex(DimensionId::Chipper_2);        
         chipper.GetBlock(20).GetBuffer(reader, buffer, 70, indexId, indexBlockId);
 
         // 
