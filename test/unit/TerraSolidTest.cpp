@@ -38,7 +38,6 @@
 #include <pdal/StageIterator.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/drivers/terrasolid/Reader.hpp>
 #include <pdal/filters/CacheFilter.hpp>
 #include "Support.hpp"
@@ -144,9 +143,8 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 //     pdal::drivers::terrasolid::Reader reader(options);
 // 
 //     const Schema& schema = reader.getSchema();
-//     SchemaLayout layout(schema);
 // 
-//     PointBuffer data(layout, 3);
+//     PointBuffer data(schema, 3);
 //     
 //     pdal::SequentialIterator* iter = reader.createSequentialIterator();
 //     

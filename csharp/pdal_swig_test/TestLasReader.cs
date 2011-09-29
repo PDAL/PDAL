@@ -30,13 +30,12 @@ namespace pdal_swig_test
             // create the point buffer we'll read into
             // make it only hold 128 points a time, so we can show iterating
             Schema schema = reader.getSchema();
-            SchemaLayout layout = new SchemaLayout(schema);
-            PointBuffer data = new PointBuffer(layout, 128);
+            PointBuffer data = new PointBuffer(schema, 128);
 
             // get the dimensions (fields) of the point record for the X, Y, and Z values
-            int offsetX = schema.getDimensionIndex(Dimension.Field.Field_X, Dimension.DataType.Int32);
-            int offsetY = schema.getDimensionIndex(Dimension.Field.Field_Y, Dimension.DataType.Int32);
-            int offsetZ = schema.getDimensionIndex(Dimension.Field.Field_Z, Dimension.DataType.Int32);
+            int offsetX = schema.getDimensionIndex(DimensionId.Id.X_i32);
+            int offsetY = schema.getDimensionIndex(DimensionId.Id.Y_i32);
+            int offsetZ = schema.getDimensionIndex(DimensionId.Id.Z_i32);
             Dimension dimensionX = schema.getDimension((uint)offsetX);
             Dimension dimensionY = schema.getDimension((uint)offsetY);
             Dimension dimensionZ = schema.getDimension((uint)offsetZ);

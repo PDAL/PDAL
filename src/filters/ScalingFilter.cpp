@@ -36,7 +36,6 @@
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Schema.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/ScalingFilterIterator.hpp>
 
@@ -247,9 +246,7 @@ void ScalingFilterBase::processBuffer(const PointBuffer& srcData, PointBuffer& d
 
     // rather than think about "src/dst", we will think in terms of "doubles" and "ints"
     const Schema& schemaD = (m_isDescaling ? srcSchema : dstSchema);
-    //const SchemaLayout& schemaLayoutD = (m_isDescaling ? srcSchemaLayout : dstSchemaLayout);
     const Schema& schemaI = (m_isDescaling ? dstSchema : srcSchema);
-    //const SchemaLayout& schemaLayoutI = (m_isDescaling ? dstSchemaLayout : srcSchemaLayout);
 
     assert(schemaD.hasDimension(DimensionId::X_f64));
     assert(schemaI.hasDimension(DimensionId::X_i32));

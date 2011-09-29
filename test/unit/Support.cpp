@@ -49,7 +49,6 @@
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Stage.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include "TestConfig.hpp"
 
 #ifdef PDAL_COMPILER_GCC

@@ -35,7 +35,6 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageIterator.hpp>
 #include <pdal/drivers/faux/Reader.hpp>

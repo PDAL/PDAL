@@ -37,15 +37,17 @@
 %{
 #include <iostream>
 
+#include "pdal/external/boost/uuid/uuid.hpp"
+
 #include "pdal/pdal_config.hpp"
 
 #include "pdal/Bounds.hpp"
 #include "pdal/Range.hpp"
 
+#include "pdal/DimensionId.hpp"
 #include "pdal/Dimension.hpp"
 #include "pdal/DimensionLayout.hpp"
 #include "pdal/Schema.hpp"
-#include "pdal/SchemaLayout.hpp"
 #include "pdal/PointBuffer.hpp"
 #include "pdal/SpatialReference.hpp"
 
@@ -231,60 +233,97 @@ public:
 };
 
 
+class DimensionId
+{
+public:
+
+    enum Id
+    {
+    //
+    // common field types: 0..999
+    // 
+    X_i32 = 0,
+    Y_i32,
+    Z_i32,
+    X_f64,
+    Y_f64,
+    Z_f64,
+
+    Red_u8,
+    Green_u8,
+    Blue_u8,
+    Red_u16,
+    Green_u16,
+    Blue_u16,
+
+    Time_u64,
+
+    //
+    // LAS: 1000..1999
+    //
+    Las_Intensity = 1000,
+    Las_ReturnNumber,
+    Las_NumberOfReturns,
+    Las_ScanDirectionFlag,
+    Las_EdgeOfFlightLine,
+    Las_Classification,
+    Las_ScanAngleRank,
+    Las_UserData,
+    Las_PointSourceId,
+    Las_WavePacketDescriptorIndex,
+    Las_WaveformDataOffset,
+    Las_ReturnPointWaveformLocation,
+    Las_WaveformXt,
+    Las_WaveformYt,
+    Las_WaveformZt,
+    Las_Time,
+
+    //
+    // terrasolid: 2000..2999
+    // 
+    TerraSolid_Alpha = 2000,
+    TerraSolid_Classification,
+    TerraSolid_PointSourceId_u8,
+    TerraSolid_PointSourceId_u16,
+    TerraSolid_ReturnNumber_u8,
+    TerraSolid_ReturnNumber_u16,
+    TerraSolid_Flag,
+    TerraSolid_Mark,
+    TerraSolid_Intensity,
+    TerraSolid_Time,
+
+    //
+    // chipper stuff: 3000..3999
+    // 
+    Chipper_1 = 3000,
+    Chipper_2,
+
+    //
+    // qfit: 4000..4999
+    // 
+    Qfit_StartPulse = 4000,
+    Qfit_ReflectedPulse,
+    Qfit_ScanAngleRank,
+    Qfit_Pitch,
+    Qfit_Roll,
+    Qfit_Time,
+    Qfit_PassiveSignal,
+    Qfit_PassiveX,
+    Qfit_PassiveY,
+    Qfit_PassiveZ,
+    Qfit_GpsTime,
+    Qfit_PDOP,
+    Qfit_PulseWidth,
+
+    // user fields are 100,000..199,999
+
+    Undefined = 200000
+    };
+};
 
 class Dimension
 {
 public:
-   enum Field
-    {
-        Field_INVALID = 0,
-        Field_X,
-        Field_Y,
-        Field_Z,
-        Field_Intensity,
-        Field_ReturnNumber,
-        Field_NumberOfReturns,
-        Field_ScanDirectionFlag,
-        Field_EdgeOfFlightLine,
-        Field_Classification,
-        Field_ScanAngleRank,
-        Field_UserData,
-        Field_PointSourceId,
-        Field_Time,
-        Field_Red,
-        Field_Green,
-        Field_Blue,
-        Field_WavePacketDescriptorIndex,
-        Field_WaveformDataOffset,
-        Field_ReturnPointWaveformLocation,
-        Field_WaveformXt,
-        Field_WaveformYt,
-        Field_WaveformZt,
-        Field_Alpha,
-        // ...
-
-        // add more here
-        Field_User1 = 512,
-        Field_User2,
-        Field_User3,
-        Field_User4,
-        Field_User5,
-        Field_User6,
-        Field_User7,
-        Field_User8,
-        Field_User9,
-        Field_User10,
-        Field_User11,
-        Field_User12,
-        Field_User13,
-        Field_User14,
-        Field_User15,
-        // ...
-        // feel free to use your own int here
-
-        Field_LAST = 1023
-    };
-
     enum DataType
     {
         Int8,
@@ -295,16 +334,17 @@ public:
         Uint32,
         Int64,
         Uint64,
+        Pointer,    // stored as 64 bits, even on a 32-bit box
         Float,       // 32 bits
         Double,       // 64 bits
         Undefined
     };
 
 public:
-    Dimension(Field field, DataType type);
+    Dimension(DimensionId::Id id);
 
-    std::string const& getFieldName() const;
-    Field getField() const;
+    DimensionId::Id getId() const;
+    
     DataType getDataType() const;
     static std::string getDataTypeName(DataType);
     static DataType getDataTypeFromString(const std::string&);
@@ -312,7 +352,7 @@ public:
     static bool getDataTypeIsNumeric(DataType);
     static bool getDataTypeIsSigned(DataType);
     static bool getDataTypeIsInteger(DataType);
-    static std::string const& getFieldName(Field);
+    std::string const& getName();
     std::size_t getByteSize() const;
     inline std::string getDescription() const;
     inline void setDescription(std::string const& v);
@@ -358,17 +398,10 @@ public:
     Schema();
     const Dimension& getDimension(std::size_t index) const;
     const std::vector<Dimension>& getDimensions() const;
-    int getDimensionIndex(Dimension::Field field, Dimension::DataType datatype) const;
+    int getDimensionIndex(DimensionId::Id) const;
     int getDimensionIndex(const Dimension& dim) const;
-    bool hasDimension(Dimension::Field field, Dimension::DataType datatype) const;
-    bool hasDimension(const Dimension& dim) const;
-};
+    bool hasDimension(const DimensionId::Id&) const;
 
-class SchemaLayout
-{
-public:
-    SchemaLayout(const Schema&);
-    const Schema& getSchema() const;
     std::size_t getByteSize() const;
     const DimensionLayout& getDimensionLayout(std::size_t index) const;
 };
@@ -377,17 +410,13 @@ public:
 class PointBuffer
 {
 public:
-    PointBuffer(const SchemaLayout&, boost::uint32_t capacity);
+    PointBuffer(const Schema&, boost::uint32_t capacity);
     const Bounds<double>& getSpatialBounds() const;
     void setSpatialBounds(const Bounds<double>& bounds);
     boost::uint32_t getNumPoints() const;
     void setNumPoints(boost::uint32_t v);
-    boost::uint32_t& getNumPointsRef();
     boost::uint32_t getCapacity() const;
-    const SchemaLayout& getSchemaLayout() const;
     const Schema& getSchema() const;
-    //SchemaLayout& getSchemaLayout();
-    //Schema& getSchema();
     template<class T> T getField(std::size_t pointIndex, boost::int32_t fieldIndex) const;
     template<class T> void setField(std::size_t pointIndex, boost::int32_t fieldIndex, T value);
     void setFieldData(std::size_t pointIndex, boost::int32_t fieldIndex, const boost::uint8_t* data);
@@ -652,7 +681,7 @@ public:
     void setPointFormat(PointFormat);
     void setDate(boost::uint16_t dayOfYear, boost::uint16_t year);
     
-    void setProjectId(const boost::uuids::uuid&);
+    void setProjectId(const pdal::external::boost::uuids::uuid&);
 
     // up to 32 chars (default is "PDAL")
     void setSystemIdentifier(const std::string& systemId); 

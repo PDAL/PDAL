@@ -38,7 +38,6 @@
 #include <pdal/external/boost/uuid/uuid_io.hpp>
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Iterator.hpp>
 

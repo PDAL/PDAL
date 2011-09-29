@@ -35,7 +35,6 @@
 #include <pdal/filters/CropFilter.hpp>
 
 #include <pdal/filters/CropFilterIterator.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <sstream>
 

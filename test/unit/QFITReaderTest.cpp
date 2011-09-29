@@ -38,7 +38,6 @@
 #include <pdal/StageIterator.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/drivers/qfit/Reader.hpp>
 #include <pdal/filters/CacheFilter.hpp>
 #include "Support.hpp"

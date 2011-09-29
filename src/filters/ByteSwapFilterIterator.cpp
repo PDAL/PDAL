@@ -63,7 +63,7 @@ boost::uint32_t ByteSwapFilterSequentialIterator::readBufferImpl(PointBuffer& ds
     
     Stage const* prevStage = &(m_swapFilter.getPrevStage());
 
-        // std::cout << "Source: " << dstData.getSchemaLayout().getSchema() << std::endl;
+        // std::cout << "Source: " << dstData.getSchema() << std::endl;
         // std::cout << "prev stage: " << prevStage->getSchema() << std::endl;    
     Chipper const* chip = dynamic_cast<Chipper const*>(prevStage);
     

@@ -47,7 +47,6 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Schema.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/StageIterator.hpp>

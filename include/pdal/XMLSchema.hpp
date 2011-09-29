@@ -37,7 +37,6 @@
 
 #include <pdal/pdal.hpp>
 #include <pdal/Schema.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/DimensionLayout.hpp>
 

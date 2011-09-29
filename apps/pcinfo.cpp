@@ -39,7 +39,6 @@
 
 #include <pdal/Stage.hpp>
 #include <pdal/StageIterator.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/StatsFilter.hpp>

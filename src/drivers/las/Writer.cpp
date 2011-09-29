@@ -45,7 +45,6 @@
 #endif
 
 #include <pdal/Stage.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include <iostream>

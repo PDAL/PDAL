@@ -40,7 +40,6 @@
 #include <pdal/filters/ScalingFilter.hpp>
 #include <pdal/StageIterator.hpp>
 #include <pdal/Schema.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"

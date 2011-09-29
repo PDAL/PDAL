@@ -40,8 +40,6 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
 
-#include <pdal/SchemaLayout.hpp>
-
 #include <pdal/StageIterator.hpp>
 
 

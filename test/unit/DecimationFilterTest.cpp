@@ -38,7 +38,6 @@
 #include <pdal/StageIterator.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
 #include <pdal/filters/DecimationFilter.hpp>

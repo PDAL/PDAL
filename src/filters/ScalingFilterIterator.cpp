@@ -34,7 +34,6 @@
 
 #include <pdal/filters/ScalingFilterIterator.hpp>
 
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/ScalingFilter.hpp>
 
