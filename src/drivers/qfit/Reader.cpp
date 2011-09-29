@@ -182,36 +182,36 @@ Word #       Content
 
 namespace pdal { namespace drivers { namespace qfit {
 
-PointIndexes::PointIndexes(const SchemaLayout& schemaLayout, QFIT_Format_Type format)
+PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 {
-    Time = schemaLayout.getDimensionIndex(DimensionId::Qfit_Time);
-    X = schemaLayout.getDimensionIndex(DimensionId::X_i32);
-    Y = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
-    Z = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
+    Time = schema.getDimensionIndex(DimensionId::Qfit_Time);
+    X = schema.getDimensionIndex(DimensionId::X_i32);
+    Y = schema.getDimensionIndex(DimensionId::Y_i32);
+    Z = schema.getDimensionIndex(DimensionId::Z_i32);
     
-    StartPulse = schemaLayout.getDimensionIndex(DimensionId::Qfit_StartPulse);
-    ReflectedPulse = schemaLayout.getDimensionIndex(DimensionId::Qfit_ReflectedPulse);
-    ScanAngleRank = schemaLayout.getDimensionIndex(DimensionId::Qfit_ScanAngleRank);
-    Pitch = schemaLayout.getDimensionIndex(DimensionId::Qfit_Pitch);
-    Roll = schemaLayout.getDimensionIndex(DimensionId::Qfit_Roll);
+    StartPulse = schema.getDimensionIndex(DimensionId::Qfit_StartPulse);
+    ReflectedPulse = schema.getDimensionIndex(DimensionId::Qfit_ReflectedPulse);
+    ScanAngleRank = schema.getDimensionIndex(DimensionId::Qfit_ScanAngleRank);
+    Pitch = schema.getDimensionIndex(DimensionId::Qfit_Pitch);
+    Roll = schema.getDimensionIndex(DimensionId::Qfit_Roll);
 
     if (format == QFIT_Format_14) 
     {
-        PassiveSignal = schemaLayout.getDimensionIndex(DimensionId::Qfit_PassiveSignal);
-        PassiveX = schemaLayout.getDimensionIndex(DimensionId::Qfit_PassiveX);
-        PassiveY = schemaLayout.getDimensionIndex(DimensionId::Qfit_PassiveY);
-        PassiveZ = schemaLayout.getDimensionIndex(DimensionId::Qfit_PassiveZ);
-        GPSTime = schemaLayout.getDimensionIndex(DimensionId::Qfit_GpsTime);
+        PassiveSignal = schema.getDimensionIndex(DimensionId::Qfit_PassiveSignal);
+        PassiveX = schema.getDimensionIndex(DimensionId::Qfit_PassiveX);
+        PassiveY = schema.getDimensionIndex(DimensionId::Qfit_PassiveY);
+        PassiveZ = schema.getDimensionIndex(DimensionId::Qfit_PassiveZ);
+        GPSTime = schema.getDimensionIndex(DimensionId::Qfit_GpsTime);
         
     } else if (format == QFIT_Format_12)
     {
-        PDOP = schemaLayout.getDimensionIndex(DimensionId::Qfit_PDOP);
-        PulseWidth = schemaLayout.getDimensionIndex(DimensionId::Qfit_PulseWidth);
-        GPSTime = schemaLayout.getDimensionIndex(DimensionId::Qfit_GpsTime);
+        PDOP = schema.getDimensionIndex(DimensionId::Qfit_PDOP);
+        PulseWidth = schema.getDimensionIndex(DimensionId::Qfit_PulseWidth);
+        GPSTime = schema.getDimensionIndex(DimensionId::Qfit_GpsTime);
 
     } else
     {
-        GPSTime = schemaLayout.getDimensionIndex(DimensionId::Qfit_GpsTime);
+        GPSTime = schema.getDimensionIndex(DimensionId::Qfit_GpsTime);
     }
         
     return;
@@ -261,7 +261,7 @@ Reader::Reader(const Options& options)
     
     registerFields();
     
-    SchemaLayout layout(getSchemaRef());
+    const Schema& schema = getSchema();
 
     // Seek to the beginning 
     str->seekg(0, std::ios::beg);
@@ -274,7 +274,7 @@ Reader::Reader(const Options& options)
 
     // First integer is the format of the file
     std::ios::off_type offset = static_cast<std::ios::off_type>(m_offset);  
-    std::ios::off_type length = static_cast<std::ios::off_type>(layout.getByteSize());
+    std::ios::off_type length = static_cast<std::ios::off_type>(schema.getByteSize());
     std::ios::off_type point_bytes = end - offset;
 
     // Figure out how many points we have and whether or not we have 
@@ -297,7 +297,7 @@ Reader::Reader(const Options& options)
                 "as determined by subtracting the data offset (" 
                 << m_offset << ") from the file length (" 
                 << size <<  ") and dividing by the point record length (" 
-                << layout.getByteSize() << ")."
+                << schema.getByteSize() << ")."
                 " It also does not perfectly contain an exact number of"
                 " point data and we cannot infer a point count."
                 " Calculated number of points: " << count << 
@@ -429,8 +429,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(), numPointsLeft);
     const boost::uint32_t numPoints = (boost::uint32_t)std::min<boost::uint64_t>(numPoints64, std::numeric_limits<boost::uint32_t>::max());
 
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
+    const Schema& schema = data.getSchema();
     
     const int pointByteCount = getPointDataSize();
     const PointIndexes indexes(schema, m_format);

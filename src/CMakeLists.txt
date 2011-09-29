@@ -44,7 +44,6 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/Reader.hpp
   ${PDAL_HEADERS_DIR}/ReaderIterator.hpp
   ${PDAL_HEADERS_DIR}/Schema.hpp
-  ${PDAL_HEADERS_DIR}/SchemaLayout.hpp
   ${PDAL_HEADERS_DIR}/SpatialReference.hpp
   ${PDAL_HEADERS_DIR}/Stage.hpp
   ${PDAL_HEADERS_DIR}/StageBase.hpp
@@ -82,7 +81,6 @@ set(PDAL_BASE_CPP
   Reader.cpp
   ReaderIterator.cpp
   Schema.cpp
-  SchemaLayout.cpp
   SpatialReference.cpp
   Stage.cpp
   StageBase.cpp

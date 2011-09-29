@@ -20,7 +20,7 @@ namespace pdal_swig_test
          string s = Dimension.getDataTypeName(Dimension.DataType.Double);
          Assert(s == "Double");
 
-         Dimension d = new Dimension(Dimension.Field.Field_Blue, Dimension.DataType.Float);
+         Dimension d = new Dimension(DimensionId.Id.Blue_u16);
 
          return;
       }

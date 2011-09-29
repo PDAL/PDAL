@@ -885,7 +885,6 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
 
 
     pdal::Schema const& schema = buffer.getSchema();
-    pdal::SchemaLayout const& schemaLayout = buffer.getSchemaLayout();
     // std::vector<boost::uint32_t> ids = block.GetIDs();
 
     bool hasTimeData = schema.hasDimension(DimensionId::Las_Time);
@@ -899,22 +898,22 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
     
     // assert(count*oracle_record_size == point_data.size());
 
-    const int indexX = schemaLayout.getDimensionIndex(DimensionId::X_i32);
-    const int indexY = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
-    const int indexZ = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
-    const int indexClassification = schemaLayout.getDimensionIndex(DimensionId::Las_Classification);
-    const int indexTime = schemaLayout.getDimensionIndex(DimensionId::Las_Time);
-    const int indexIntensity = schemaLayout.getDimensionIndex(DimensionId::Las_Intensity);
-    const int indexReturnNumber = schemaLayout.getDimensionIndex(DimensionId::Las_ReturnNumber);
-    const int indexNumberOfReturns = schemaLayout.getDimensionIndex(DimensionId::Las_NumberOfReturns);
-    const int indexScanDirectionFlag = schemaLayout.getDimensionIndex(DimensionId::Las_ScanDirectionFlag);
-    const int indexEdgeOfFlightLine = schemaLayout.getDimensionIndex(DimensionId::Las_EdgeOfFlightLine);
-    const int indexUserData = schemaLayout.getDimensionIndex(DimensionId::Las_UserData);
-    const int indexPointSourceId = schemaLayout.getDimensionIndex(DimensionId::Las_PointSourceId);
-    const int indexScanAngleRank = schemaLayout.getDimensionIndex(DimensionId::Las_ScanAngleRank);
-    const int indexRed = schemaLayout.getDimensionIndex(DimensionId::Red_u16);
-    const int indexGreen = schemaLayout.getDimensionIndex(DimensionId::Green_u16);
-    const int indexBlue = schemaLayout.getDimensionIndex(DimensionId::Blue_u16);
+    const int indexX = schema.getDimensionIndex(DimensionId::X_i32);
+    const int indexY = schema.getDimensionIndex(DimensionId::Y_i32);
+    const int indexZ = schema.getDimensionIndex(DimensionId::Z_i32);
+    const int indexClassification = schema.getDimensionIndex(DimensionId::Las_Classification);
+    const int indexTime = schema.getDimensionIndex(DimensionId::Las_Time);
+    const int indexIntensity = schema.getDimensionIndex(DimensionId::Las_Intensity);
+    const int indexReturnNumber = schema.getDimensionIndex(DimensionId::Las_ReturnNumber);
+    const int indexNumberOfReturns = schema.getDimensionIndex(DimensionId::Las_NumberOfReturns);
+    const int indexScanDirectionFlag = schema.getDimensionIndex(DimensionId::Las_ScanDirectionFlag);
+    const int indexEdgeOfFlightLine = schema.getDimensionIndex(DimensionId::Las_EdgeOfFlightLine);
+    const int indexUserData = schema.getDimensionIndex(DimensionId::Las_UserData);
+    const int indexPointSourceId = schema.getDimensionIndex(DimensionId::Las_PointSourceId);
+    const int indexScanAngleRank = schema.getDimensionIndex(DimensionId::Las_ScanAngleRank);
+    const int indexRed = schema.getDimensionIndex(DimensionId::Red_u16);
+    const int indexGreen = schema.getDimensionIndex(DimensionId::Green_u16);
+    const int indexBlue = schema.getDimensionIndex(DimensionId::Blue_u16);
 
 
 
@@ -924,11 +923,11 @@ bool Writer::FillOraclePointBuffer(PointBuffer const& buffer,
     
     // "Global" ids from the chipper are also available here.
     // const int indexId = schema.getDimensionIndex(DimensionId::Chipper_1);
-    const int indexBlockId = schemaLayout.getDimensionIndex(DimensionId::Chipper_2);
+    const int indexBlockId = schema.getDimensionIndex(DimensionId::Chipper_2);
     
-    Dimension const& dimX = schemaLayout.getDimension(indexX);
-    Dimension const& dimY = schemaLayout.getDimension(indexY);
-    Dimension const& dimZ = schemaLayout.getDimension(indexZ);
+    Dimension const& dimX = schema.getDimension(indexX);
+    Dimension const& dimY = schema.getDimension(indexY);
+    Dimension const& dimZ = schema.getDimension(indexZ);
 
     double xscale = dimX.getNumericScale();
     double yscale = dimY.getNumericScale();
@@ -1122,17 +1121,17 @@ void Writer::SetOrdinates(Statement statement,
 
 pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
 {
-    pdal::SchemaLayout const& schemaLayout = buffer.getSchemaLayout();
+    pdal::Schema const& schema = buffer.getSchema();
     
     pdal::Bounds<double> output;
     
-    const int indexXi = schemaLayout.getDimensionIndex(DimensionId::X_i32);
-    const int indexYi = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
-    const int indexZi = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
+    const int indexXi = schema.getDimensionIndex(DimensionId::X_i32);
+    const int indexYi = schema.getDimensionIndex(DimensionId::Y_i32);
+    const int indexZi = schema.getDimensionIndex(DimensionId::Z_i32);
 
-    const Dimension& dimXi = schemaLayout.getDimension(indexXi);
-    const Dimension& dimYi = schemaLayout.getDimension(indexYi);
-    const Dimension& dimZi = schemaLayout.getDimension(indexZi);
+    const Dimension& dimXi = schema.getDimension(indexXi);
+    const Dimension& dimYi = schema.getDimension(indexYi);
+    const Dimension& dimZi = schema.getDimension(indexZi);
     
     bool first = true;
     for (boost::uint32_t pointIndex=0; pointIndex<buffer.getNumPoints(); pointIndex++)
@@ -1170,8 +1169,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     // std::vector<boost::uint32_t> ids = block.GetIDs();
     
     // Pluck the block id out of the first point in the buffer
-    pdal::SchemaLayout const& schemaLayout = buffer.getSchemaLayout();
-    const int indexBlockId = schemaLayout.getDimensionIndex(DimensionId::Chipper_2);
+    pdal::Schema const& schema = buffer.getSchema();
+    const int indexBlockId = schema.getDimensionIndex(DimensionId::Chipper_2);
     boost::int32_t block_id  = buffer.getField<boost::int32_t>(0, indexBlockId);
     
     // SWAP_ENDIANNESS(block_id); //We've already swapped these data, but we need to write a real number here.
@@ -1238,7 +1237,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     // bool gotdata = GetResultData(result, reader, data, 3);
     // if (! gotdata) throw std::runtime_error("unable to fetch point data byte array");
 
-    statement->Bind((char*)point_data,(long)(buffer.getSchemaLayout().getByteSize()*buffer.getNumPoints()));
+    statement->Bind((char*)point_data,(long)(buffer.getSchema().getByteSize()*buffer.getNumPoints()));
 
     // :5
     long* p_gtype = (long*) malloc (1 * sizeof(long));

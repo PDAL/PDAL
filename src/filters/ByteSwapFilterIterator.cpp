@@ -63,13 +63,13 @@ boost::uint32_t ByteSwapFilterSequentialIterator::readBufferImpl(PointBuffer& ds
     
     Stage const* prevStage = &(m_swapFilter.getPrevStage());
 
-        // std::cout << "Source: " << dstData.getSchemaLayout().getSchema() << std::endl;
+        // std::cout << "Source: " << dstData.getSchema() << std::endl;
         // std::cout << "prev stage: " << prevStage->getSchema() << std::endl;    
     Chipper const* chip = dynamic_cast<Chipper const*>(prevStage);
     
     if (chip)
     {
-        PointBuffer srcData(dstData.getSchemaLayout(), dstData.getCapacity());
+        PointBuffer srcData(dstData.getSchema(), dstData.getCapacity());
         const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
         const boost::uint32_t numPointsProcessed = m_swapFilter.processBuffer(dstData, srcData);
                         
@@ -85,7 +85,7 @@ boost::uint32_t ByteSwapFilterSequentialIterator::readBufferImpl(PointBuffer& ds
     while (numPointsNeeded > 0)
     {
         // set up buffer to be filled by prev stage
-        PointBuffer srcData(dstData.getSchemaLayout(), numPointsNeeded);
+        PointBuffer srcData(dstData.getSchema(), numPointsNeeded);
 
     
         // read from prev stage

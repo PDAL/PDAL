@@ -35,7 +35,6 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageIterator.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
@@ -55,11 +54,10 @@ BOOST_AUTO_TEST_CASE(test1)
     cache.initialize();
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout schemaLayout(schema);
-    const int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    const int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
-    PointBuffer dataBig(schemaLayout, 1024);
-    PointBuffer dataSmall(schemaLayout, 1);
+    PointBuffer dataBig(schema, 1024);
+    PointBuffer dataSmall(schema, 1);
 
     StageSequentialIterator* iter1 = cache.createSequentialIterator();
 
@@ -110,11 +108,10 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
     cache.initialize();
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout schemaLayout(schema);
-    const int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    const int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
-    PointBuffer dataBig(schemaLayout, 1024);
-    PointBuffer dataSmall(schemaLayout, 1);
+    PointBuffer dataBig(schema, 1024);
+    PointBuffer dataSmall(schema, 1);
 
     StageSequentialIterator* iter1 = cache.createSequentialIterator();
 

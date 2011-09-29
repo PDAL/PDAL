@@ -89,6 +89,7 @@
   <ItemGroup>
     <Compile Include="Bounds_double.cs" />
     <Compile Include="Dimension.cs" />
+    <Compile Include="DimensionId.cs" />
     <Compile Include="DimensionLayout.cs" />
     <Compile Include="EndianType.cs" />
     <Compile Include="Filter.cs" />
@@ -112,7 +113,6 @@
     <Compile Include="Reader.cs" />
     <Compile Include="ReaderBase.cs" />
     <Compile Include="Schema.cs" />
-    <Compile Include="SchemaLayout.cs" />
     <Compile Include="SpatialReference.cs" />
     <Compile Include="Stage.cs" />
     <Compile Include="StageBase.cs" />
@@ -126,10 +126,10 @@
     <Compile Include="std_vector_Range_double.cs" />
     <Compile Include="std_vector_u8.cs" />
     <Compile Include="SWIGTYPE_p_boost__property_tree__ptree.cs" />
-    <Compile Include="SWIGTYPE_p_boost__uuids__uuid.cs" />
     <Compile Include="SWIGTYPE_p_char.cs" />
     <Compile Include="SWIGTYPE_p_f_enum_std__ios_base__event_r_std__ios_base_int__void.cs" />
     <Compile Include="SWIGTYPE_p_long.cs" />
+    <Compile Include="SWIGTYPE_p_pdal__external__boost__uuids__uuid.cs" />
     <Compile Include="SWIGTYPE_p_p_unsigned_char.cs" />
     <Compile Include="SWIGTYPE_p_p_void.cs" />
     <Compile Include="SWIGTYPE_p_std__basic_streambufT_char_std__char_traitsT_char_t_t.cs" />

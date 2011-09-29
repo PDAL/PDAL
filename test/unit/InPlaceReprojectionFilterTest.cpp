@@ -39,7 +39,6 @@
 #include <pdal/filters/InPlaceReprojectionFilter.hpp>
 #include <pdal/StageIterator.hpp>
 #include <pdal/Schema.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
@@ -53,15 +52,15 @@ static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double
 {
     using namespace pdal;
 
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
+    const Schema& schema = data.getSchema();
 
-    const int indexX = schemaLayout.getDimensionIndex(DimensionId::X_i32);
-    const int indexY = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
-    const int indexZ = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
+    const int indexX = schema.getDimensionIndex(DimensionId::X_i32);
+    const int indexY = schema.getDimensionIndex(DimensionId::Y_i32);
+    const int indexZ = schema.getDimensionIndex(DimensionId::Z_i32);
 
-    Dimension const& dim_x = schemaLayout.getSchema().getDimension(DimensionId::X_i32);
-    Dimension const& dim_y = schemaLayout.getSchema().getDimension(DimensionId::Y_i32);
-    Dimension const& dim_z = schemaLayout.getSchema().getDimension(DimensionId::Z_i32);
+    Dimension const& dim_x = schema.getDimension(DimensionId::X_i32);
+    Dimension const& dim_y = schema.getDimension(DimensionId::Y_i32);
+    Dimension const& dim_z = schema.getDimension(DimensionId::Z_i32);
     const boost::int32_t xraw = data.getField<boost::int32_t>(0, indexX);
     const boost::int32_t yraw = data.getField<boost::int32_t>(0, indexY);
     const boost::int32_t zraw = data.getField<boost::int32_t>(0, indexZ);
@@ -126,8 +125,7 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
         reprojectionFilter.initialize();
 
         const pdal::Schema& schema = reprojectionFilter.getSchema();
-        const pdal::SchemaLayout layout(schema);
-        pdal::PointBuffer data(layout, 1);
+        pdal::PointBuffer data(schema, 1);
 
         pdal::StageSequentialIterator* iter = reprojectionFilter.createSequentialIterator();
         boost::uint32_t numRead = iter->read(data);

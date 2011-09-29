@@ -37,7 +37,7 @@
 
 #include <pdal/pdal.hpp>
 
-#include <pdal/SchemaLayout.hpp>
+#include <pdal/Schema.hpp>
 
 #include <iostream>
 
@@ -62,7 +62,7 @@ enum PointFormat
 class PointIndexes
 {
 public:
-    PointIndexes(const SchemaLayout& schemaLayout, PointFormat format);
+    PointIndexes(const Schema& schema, PointFormat format);
     int X;
     int Y;
     int Z;

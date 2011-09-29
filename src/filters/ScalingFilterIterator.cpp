@@ -34,7 +34,6 @@
 
 #include <pdal/filters/ScalingFilterIterator.hpp>
 
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/ScalingFilter.hpp>
 
@@ -51,8 +50,8 @@ ScalingFilterSequentialIterator::ScalingFilterSequentialIterator(const ScalingFi
 
 boost::uint32_t ScalingFilterSequentialIterator::readBufferImpl(PointBuffer& dstData)
 {
-    SchemaLayout srcLayout(m_scalingFilter.getPrevStage().getSchema());
-    PointBuffer srcData(srcLayout, dstData.getCapacity());
+    Schema srcSchema(m_scalingFilter.getPrevStage().getSchema());
+    PointBuffer srcData(srcSchema, dstData.getCapacity());
     const boost::uint32_t numRead = getPrevIterator().read(srcData);
 
     m_scalingFilter.processBuffer(srcData, dstData);

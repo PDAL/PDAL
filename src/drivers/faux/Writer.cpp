@@ -97,10 +97,11 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& PointBuffer)
 {
     const boost::uint32_t numPoints = PointBuffer.getNumPoints();
 
-    const SchemaLayout& schemaLayout = PointBuffer.getSchemaLayout();
-    const int fieldIndexX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
-    const int fieldIndexY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
-    const int fieldIndexZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
+    const Schema& schema = PointBuffer.getSchema();
+
+    const int fieldIndexX = schema.getDimensionIndex(DimensionId::X_f64);
+    const int fieldIndexY = schema.getDimensionIndex(DimensionId::Y_f64);
+    const int fieldIndexZ = schema.getDimensionIndex(DimensionId::Z_f64);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {

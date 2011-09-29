@@ -483,16 +483,15 @@ void InPlaceReprojectionFilter::processBuffer(PointBuffer& data) const
 {
     const boost::uint32_t numPoints = data.getNumPoints();
 
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    Schema const& stage_schema = this->getSchema();
+    const Schema& schema = this->getSchema();
     
-    Dimension const& d_x = stage_schema.getDimension(m_x.getId());
-    Dimension const& d_y = stage_schema.getDimension(m_y.getId());
-    Dimension const& d_z = stage_schema.getDimension(m_z.getId());
+    Dimension const& d_x = schema.getDimension(m_x.getId());
+    Dimension const& d_y = schema.getDimension(m_y.getId());
+    Dimension const& d_z = schema.getDimension(m_z.getId());
     
-    const int indexX = schemaLayout.getDimensionIndex(d_x);
-    const int indexY = schemaLayout.getDimensionIndex(d_y);
-    const int indexZ = schemaLayout.getDimensionIndex(d_z);
+    const int indexX = schema.getDimensionIndex(d_x);
+    const int indexY = schema.getDimensionIndex(d_y);
+    const int indexZ = schema.getDimensionIndex(d_z);
 
 std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
 std::cout.precision(8);

@@ -35,7 +35,6 @@
 #include <pdal/drivers/faux/Reader.hpp>
 
 #include <pdal/drivers/faux/Iterator.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/PointBuffer.hpp>
 
 
@@ -155,8 +154,7 @@ pdal::StageRandomIterator* Reader::createRandomIterator() const
 
 boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) const
 {
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
-    const Schema& schema = schemaLayout.getSchema();
+    const Schema& schema = data.getSchema();
 
     if (schema.getDimensions().size() != 4)
         throw not_yet_implemented("need to add ability to read from arbitrary fields");
@@ -185,10 +183,10 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     const double delY = (maxY - minY) / numDeltas;
     const double delZ = (maxZ - minZ) / numDeltas;
 
-    const int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
-    const int offsetX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
-    const int offsetY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
-    const int offsetZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
+    const int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
+    const int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
+    const int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
+    const int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
 
     boost::uint64_t time = index;
     

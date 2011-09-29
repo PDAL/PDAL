@@ -40,10 +40,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
 
-#include <pdal/SchemaLayout.hpp>
-
 #include <pdal/StageIterator.hpp>
-
 
 #include <vector>
 
@@ -103,7 +100,7 @@ public:
 class PointIndexes
 {
 public:
-    PointIndexes(const SchemaLayout& schemaLayout, TERRASOLID_Format_Type format);
+    PointIndexes(const Schema& schema, TERRASOLID_Format_Type format);
     int Time;
     int X;
     int Y;

@@ -37,7 +37,6 @@
 
 #include <pdal/StageIterator.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/SchemaLayout.hpp>
 #include <pdal/drivers/liblas/Reader.hpp>
 #include <pdal/filters/CacheFilter.hpp>
 #include "Support.hpp"
@@ -56,9 +55,8 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_sequential)
     reader.initialize();
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 3);
+    PointBuffer data(schema, 3);
     
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
 
@@ -94,9 +92,8 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_options)
     reader.initialize();
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 3);
+    PointBuffer data(schema, 3);
     
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
 
@@ -120,9 +117,8 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random)
     reader.initialize();
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 3);
+    PointBuffer data(schema, 3);
     
     pdal::StageRandomIterator* iter = reader.createRandomIterator();
 
@@ -166,9 +162,8 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_random_laz)
     reader.initialize();
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 3);
+    PointBuffer data(schema, 3);
     
     pdal::StageRandomIterator* iter = reader.createRandomIterator();
 
@@ -211,10 +206,9 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters)
     reader.initialize();
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout layout(schema);
 
     BOOST_CHECK(reader.getNumPoints() == 1065);
-    PointBuffer data(layout, 1065);
+    PointBuffer data(schema, 1065);
 
     {
         pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
@@ -261,9 +255,8 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters_with_cache)
     BOOST_CHECK(cache.getNumPoints() == 1065);
 
     const Schema& schema = cache.getSchema();
-    SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 355);
+    PointBuffer data(schema, 355);
 
     boost::uint32_t numRead;
 
@@ -349,9 +342,8 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_simultaneous_iters)
     BOOST_CHECK(355 * 3 == 1065);
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 355);
+    PointBuffer data(schema, 355);
 
     boost::uint32_t numRead;
 
@@ -479,9 +471,8 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
     BOOST_CHECK(reader.getVersionMinor() == minorVersion);
 
     const Schema& schema = reader.getSchema();
-    SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 1);
+    PointBuffer data(schema, 1);
     
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
 

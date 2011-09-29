@@ -56,6 +56,7 @@ namespace pdal
 
 
 Schema::Schema()
+    : m_byteSize(0)
 {
     return;
 }
@@ -64,6 +65,8 @@ Schema::Schema()
 /// copy constructor
 Schema::Schema(Schema const& other) 
     : m_dimensions(other.m_dimensions)
+    , m_dimensionLayouts(other.m_dimensionLayouts)
+    , m_byteSize(other.m_byteSize)
     , m_dimensions_map(other.m_dimensions_map)
 {
 
@@ -76,6 +79,8 @@ Schema& Schema::operator=(Schema const& rhs)
     if (&rhs != this)
     {
         m_dimensions = rhs.m_dimensions;
+        m_dimensionLayouts = rhs.m_dimensionLayouts;
+        m_byteSize = rhs.m_byteSize;
         m_dimensions_map = rhs.m_dimensions_map;
     }
 
@@ -86,6 +91,8 @@ Schema& Schema::operator=(Schema const& rhs)
 bool Schema::operator==(const Schema& other) const
 {
     if (m_dimensions == other.m_dimensions &&
+        m_dimensionLayouts == other.m_dimensionLayouts &&
+        m_byteSize == other.m_byteSize &&
         m_dimensions_map == other.m_dimensions_map)
     {
         return true;
@@ -100,6 +107,39 @@ bool Schema::operator!=(const Schema& other) const
   return !(*this==other);
 }
 
+    
+void Schema::recalculateSizes()
+{
+    // to make life easy, for now we are going to assume that each Dimension 
+    // is byte-aligned and occupies an integral number of bytes
+
+    std::size_t offset = 0;
+
+    std::vector<Dimension>& dims = getDimensions();
+
+    m_dimensionLayouts.clear();
+
+    int i=0;
+    for (std::vector<Dimension>::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
+    {
+        const Dimension& dim = *iter;
+
+        DimensionLayout layout(dim); 
+        layout.setByteOffset(offset);
+
+        offset += dim.getByteSize();
+
+        layout.setPosition(i);
+
+        m_dimensionLayouts.push_back(layout);
+    
+        ++i;
+    }
+
+    m_byteSize = offset;
+
+    return;
+}
 
 
 void Schema::appendDimension(const Dimension& dim)
@@ -107,6 +147,9 @@ void Schema::appendDimension(const Dimension& dim)
     m_dimensions.push_back(dim);
     std::pair<DimensionId::Id, std::size_t> p(dim.getId(), m_dimensions.size()-1);
     m_dimensions_map.insert(p);
+
+    recalculateSizes();
+
     return;
 }
 

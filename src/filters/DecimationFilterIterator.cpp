@@ -74,7 +74,7 @@ boost::uint32_t DecimationFilterSequentialIterator::readBufferImpl(PointBuffer& 
     assert(dstData.getNumPoints() == 0);
 
     // set up buffer to be filled by prev stage
-    PointBuffer srcData(dstData.getSchemaLayout(), numPointsNeeded);
+    PointBuffer srcData(dstData.getSchema(), numPointsNeeded);
 
     while (numPointsNeeded > 0)
     {

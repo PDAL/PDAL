@@ -189,7 +189,6 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     vector<PtRef>::iterator it;
    
     pdal::Schema const& schema = getPrevStage().getSchema();
-    pdal::SchemaLayout const& schemaLayout(schema);
     
     boost::uint64_t count = getPrevStage().getNumPoints();
     if (count > std::numeric_limits<std::size_t>::max())
@@ -201,11 +200,11 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     
     // boost::uint32_t chunks = count/m_threshold;
 
-    const int indexX = schemaLayout.getDimensionIndex(DimensionId::X_i32);
-    const int indexY = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
+    const int indexX = schema.getDimensionIndex(DimensionId::X_i32);
+    const int indexY = schema.getDimensionIndex(DimensionId::Y_i32);
 
-    Dimension const& dimX = schemaLayout.getDimension(indexX);
-    Dimension const& dimY = schemaLayout.getDimension(indexY);
+    Dimension const& dimX = schema.getDimension(indexX);
+    Dimension const& dimY = schema.getDimension(indexY);
     
     double xscale = dimX.getNumericScale();
     double yscale = dimY.getNumericScale();

@@ -49,12 +49,11 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     Schema schema;
     schema.appendDimension(d1);
     schema.appendDimension(d2);
-    SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 10);
+    PointBuffer data(schema, 10);
 
     BOOST_CHECK(data.getCapacity() == 10);
-    BOOST_CHECK(data.getSchemaLayout() == layout);
+    BOOST_CHECK(data.getSchema() == schema);
 
     return;
 }
@@ -69,17 +68,16 @@ PointBuffer* makeTestBuffer()
     schema.appendDimension(d1);
     schema.appendDimension(d2);
     schema.appendDimension(d3);
-    SchemaLayout layout(schema);
 
-    std::size_t offX = layout.getDimensionLayout(0).getByteOffset();
+    std::size_t offX = schema.getDimensionLayout(0).getByteOffset();
     BOOST_CHECK(offX==0);
-    std::size_t offY = layout.getDimensionLayout(1).getByteOffset();
+    std::size_t offY = schema.getDimensionLayout(1).getByteOffset();
     BOOST_CHECK(offY==1);
-    std::size_t offZ = layout.getDimensionLayout(2).getByteOffset();
+    std::size_t offZ = schema.getDimensionLayout(2).getByteOffset();
     BOOST_CHECK(offZ==5);
 
     boost::uint32_t capacity = 17;
-    PointBuffer* data = new PointBuffer(layout, capacity);
+    PointBuffer* data = new PointBuffer(schema, capacity);
 
     BOOST_CHECK(data->getCapacity() == capacity);
     // write the data into the buffer
@@ -130,7 +128,7 @@ BOOST_AUTO_TEST_CASE(test_copy)
 {
     PointBuffer* data = makeTestBuffer();
    
-    PointBuffer d2(data->getSchemaLayout(), 19);
+    PointBuffer d2(data->getSchema(), 19);
 
     d2.copyPointFast(0, 10, *data);
     d2.copyPointFast(18, 11, *data);

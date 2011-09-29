@@ -73,9 +73,9 @@ boost::uint32_t ChipperSequentialIterator::readBufferImpl(PointBuffer& buffer)
         throw pdal_error("Buffer not large enough to hold block!");
     }
     
-    SchemaLayout const& schemaLayout = buffer.getSchemaLayout().getSchema();
-    const int indexId = schemaLayout.getDimensionIndex(DimensionId::Chipper_1);
-    const int indexBlockId = schemaLayout.getDimensionIndex(DimensionId::Chipper_2);
+    Schema const& schema = buffer.getSchema();
+    const int indexId = schema.getDimensionIndex(DimensionId::Chipper_1);
+    const int indexBlockId = schema.getDimensionIndex(DimensionId::Chipper_2);
     block.GetBuffer(m_chipper.getPrevStage(), buffer, m_currentBlockId, indexId, indexBlockId);
 
     buffer.setSpatialBounds(block.GetBounds());
