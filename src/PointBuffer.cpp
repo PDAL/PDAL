@@ -271,13 +271,13 @@ boost::property_tree::ptree PointBuffer::toPTree() const
 }
 
 
-std::ostream& operator<<(std::ostream& ostr, const PointBuffer& PointBuffer)
+std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
 {
     using std::endl;
 
-    const SchemaLayout& schemaLayout = PointBuffer.getSchemaLayout();
+    const SchemaLayout& schemaLayout = pointBuffer.getSchemaLayout();
     const std::vector<DimensionLayout>& dimensionLayouts = schemaLayout.getDimensionLayouts();
-    const std::size_t numPoints = PointBuffer.getNumPoints();
+    const std::size_t numPoints = pointBuffer.getNumPoints();
 
     ostr << "Contains " << numPoints << "  points" << endl;
 
@@ -297,34 +297,34 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& PointBuffer)
             switch (dimension.getDataType())
             {
             case Dimension::Int8:
-                ostr << (int)(PointBuffer.getField<boost::int8_t>(pointIndex, fieldIndex));
+                ostr << (int)(pointBuffer.getField<boost::int8_t>(pointIndex, fieldIndex));
                 break;
             case Dimension::Uint8:
-                ostr << (int)(PointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndex));
+                ostr << (int)(pointBuffer.getField<boost::uint8_t>(pointIndex, fieldIndex));
                 break;
             case Dimension::Int16:
-                ostr << PointBuffer.getField<boost::int16_t>(pointIndex, fieldIndex);
+                ostr << pointBuffer.getField<boost::int16_t>(pointIndex, fieldIndex);
                 break;
             case Dimension::Uint16:
-                ostr << PointBuffer.getField<boost::uint16_t>(pointIndex, fieldIndex);
+                ostr << pointBuffer.getField<boost::uint16_t>(pointIndex, fieldIndex);
                 break;
             case Dimension::Int32:
-                ostr << PointBuffer.getField<boost::int32_t>(pointIndex, fieldIndex);
+                ostr << pointBuffer.getField<boost::int32_t>(pointIndex, fieldIndex);
                 break;
             case Dimension::Uint32:
-                ostr << PointBuffer.getField<boost::uint32_t>(pointIndex, fieldIndex);
+                ostr << pointBuffer.getField<boost::uint32_t>(pointIndex, fieldIndex);
                 break;
             case Dimension::Int64:
-                ostr << PointBuffer.getField<boost::int64_t>(pointIndex, fieldIndex);
+                ostr << pointBuffer.getField<boost::int64_t>(pointIndex, fieldIndex);
                 break;
             case Dimension::Uint64:
-                ostr << PointBuffer.getField<boost::uint64_t>(pointIndex, fieldIndex);
+                ostr << pointBuffer.getField<boost::uint64_t>(pointIndex, fieldIndex);
                 break;
             case Dimension::Float:
-                ostr << PointBuffer.getField<float>(pointIndex, fieldIndex);
+                ostr << pointBuffer.getField<float>(pointIndex, fieldIndex);
                 break;
             case Dimension::Double:
-                ostr << PointBuffer.getField<double>(pointIndex, fieldIndex);
+                ostr << pointBuffer.getField<double>(pointIndex, fieldIndex);
                 break;
             default:
                 throw;
