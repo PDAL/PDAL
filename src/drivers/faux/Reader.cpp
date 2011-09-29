@@ -194,8 +194,9 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     
     const Reader::Mode mode = getMode();
 
-    boost::uint32_t& cnt = data.getNumPointsRef();
-    cnt = 0;
+    boost::uint32_t cnt = 0;
+    data.setNumPoints(0);
+
     for (boost::uint32_t pointIndex=0; pointIndex<numPointsWanted; pointIndex++)
     {
         double x;
@@ -229,7 +230,9 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
         data.setField<boost::uint64_t>(pointIndex, offsetT, time);
 
         ++time;
+        
         ++cnt;
+        data.setNumPoints(cnt);
         assert(cnt <= data.getCapacity());
     }
     

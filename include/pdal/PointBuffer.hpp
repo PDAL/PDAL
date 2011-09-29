@@ -79,9 +79,7 @@ public:
     boost::uint32_t getNumPoints() const;
     
     inline void setNumPoints(boost::uint32_t v) { assert(v <= m_capacity);m_numPoints = v; } 
-
-    inline boost::uint32_t& getNumPointsRef() {assert(m_numPoints <= m_capacity);return m_numPoints; }
-    
+ 
     // This is the number of points that this buffer is allocated to be able to store.
     // This is a fixed constant, set at ctor time by the person constructing the buffer.
     inline boost::uint32_t getCapacity() const { return m_capacity; }
