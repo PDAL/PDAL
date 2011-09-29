@@ -84,14 +84,7 @@ public:
     // This is a fixed constant, set at ctor time by the person constructing the buffer.
     inline boost::uint32_t getCapacity() const { return m_capacity; }
 
-    // convenience function
     const Schema& getSchema() const
-    {
-        return m_schema;
-    }
-
-    // convenience function
-    Schema& getSchema()
     {
         return m_schema;
     }
