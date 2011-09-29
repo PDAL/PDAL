@@ -124,6 +124,22 @@ private:
     bool m_doCreateIndex;
     Bounds<double> m_pcExtent;
     int m_pc_id;
+    std::string m_block_table_name;
+    std::string m_block_table_partition_column;
+    boost::int32_t m_block_table_partition_value;
+    boost::uint32_t m_srid;
+    long m_gtype;
+    bool m_is3d;
+    bool m_issolid;
+
+    std::string m_base_table_name;
+    std::string m_cloud_column_name;
+    std::string m_base_table_aux_columns;
+    std::string m_base_table_aux_values;
+
+    std::string m_base_table_boundary_column;
+    std::string m_base_table_boundary_wkt;
+    
 };
 
 }}} // namespace pdal::driver::oci

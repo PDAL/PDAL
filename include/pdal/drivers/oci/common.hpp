@@ -61,8 +61,6 @@ typedef boost::shared_ptr<OWConnection> Connection ;
 typedef boost::shared_ptr<OWStatement> Statement ;
 
 
-extern OptionsOld PDAL_DLL GetDefaultOptions();
-
 class connection_failed : public pdal_error
 {
 public:
