@@ -164,7 +164,7 @@ static void givePointsToEngine(ThreadArgs* threadArgs)
     const pdal::SchemaLayout schemaLayout(schema);
 
     pdal::StageSequentialIterator* iter = stage.createSequentialIterator();
-    pdal::PointBuffer buffer(schemaLayout, numPoints);
+    pdal::PointBuffer buffer(schema, numPoints);
     iter->skip(startPoint);
     const boost::uint32_t numRead = iter->read(buffer);
 
@@ -175,12 +175,12 @@ static void givePointsToEngine(ThreadArgs* threadArgs)
         colors = new boost::uint16_t[numRead * 3];
     }
 
-    const int offsetX = schemaLayout.getDimensionIndex(pdal::DimensionId::X_i32);
-    const int offsetY = schemaLayout.getDimensionIndex(pdal::DimensionId::Y_i32);
-    const int offsetZ = schemaLayout.getDimensionIndex(pdal::DimensionId::Z_i32);
-    const int offsetR = schemaLayout.getDimensionIndex(pdal::DimensionId::Red_u16);
-    const int offsetG = schemaLayout.getDimensionIndex(pdal::DimensionId::Green_u16);
-    const int offsetB = schemaLayout.getDimensionIndex(pdal::DimensionId::Blue_u16);
+    const int offsetX = schema.getDimensionIndex(pdal::DimensionId::X_i32);
+    const int offsetY = schema.getDimensionIndex(pdal::DimensionId::Y_i32);
+    const int offsetZ = schema.getDimensionIndex(pdal::DimensionId::Z_i32);
+    const int offsetR = schema.getDimensionIndex(pdal::DimensionId::Red_u16);
+    const int offsetG = schema.getDimensionIndex(pdal::DimensionId::Green_u16);
+    const int offsetB = schema.getDimensionIndex(pdal::DimensionId::Blue_u16);
 
     const pdal::Dimension& xDim = schema.getDimension(pdal::DimensionId::X_i32);
     const pdal::Dimension& yDim = schema.getDimension(pdal::DimensionId::Y_i32);

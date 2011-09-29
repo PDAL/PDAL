@@ -89,6 +89,12 @@ public:
     Dimension& getDimension(const DimensionId::Id& id);
     const Dimension& getDimension(const DimensionId::Id& id) const;
 
+    const Dimension& getDimension(std::size_t index) const;
+    Dimension& getDimension(std::size_t index);
+    
+    int getDimensionIndex(const DimensionId::Id& id) const;
+    int getDimensionIndex(const Dimension& dim) const;
+
     // returns a ptree reprsenting the Schema
     //
     // looks like this:
@@ -107,11 +113,6 @@ public:
     static std::string to_xml(Schema const& schema);
 
 private:
-    const Dimension& getDimension(std::size_t index) const;
-    Dimension& getDimension(std::size_t index);
-    int getDimensionIndex(const DimensionId::Id& id) const;
-    int getDimensionIndex(const Dimension& dim) const;
-
     std::vector<Dimension> m_dimensions;
 
     std::map<DimensionId::Id, std::size_t> m_dimensions_map;

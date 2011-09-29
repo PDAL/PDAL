@@ -34,12 +34,12 @@ BOOST_AUTO_TEST_CASE(test1)
     schema.appendDimension(d1);
     SchemaLayout layout(schema);
 
-    PointBuffer* item0 = new PointBuffer(layout, 10);
-    PointBuffer* item1 = new PointBuffer(layout, 10);
-    PointBuffer* item2 = new PointBuffer(layout, 10);
-    //PointBuffer* item3 = new PointBuffer(layout, 10);
-    PointBuffer* item4 = new PointBuffer(layout, 10);
-    //PointBuffer* item5 = new PointBuffer(layout, 10);
+    PointBuffer* item0 = new PointBuffer(schema, 10);
+    PointBuffer* item1 = new PointBuffer(schema, 10);
+    PointBuffer* item2 = new PointBuffer(schema, 10);
+    //PointBuffer* item3 = new PointBuffer(schema, 10);
+    PointBuffer* item4 = new PointBuffer(schema, 10);
+    //PointBuffer* item5 = new PointBuffer(schema, 10);
 
     // write the data into the buffer
     for (int i=0; i<10; i++)

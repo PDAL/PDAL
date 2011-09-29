@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 3);
+    PointBuffer data(schema, 3);
     
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
 
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_random)
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 3);
+    PointBuffer data(schema, 3);
     
     pdal::StageRandomIterator* iter = reader.createRandomIterator();
 
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(test_random_laz)
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 3);
+    PointBuffer data(schema, 3);
     
     pdal::StageRandomIterator* iter = reader.createRandomIterator();
 
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters)
     SchemaLayout layout(schema);
 
     BOOST_CHECK(reader.getNumPoints() == 1065);
-    PointBuffer data(layout, 1065);
+    PointBuffer data(schema, 1065);
 
     {
         pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
@@ -282,7 +282,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     const Schema& schema = cache.getSchema();
     SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 355);
+    PointBuffer data(schema, 355);
 
     boost::uint32_t numRead;
 
@@ -370,7 +370,7 @@ BOOST_AUTO_TEST_CASE(test_simultaneous_iters)
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 355);
+    PointBuffer data(schema, 355);
 
     boost::uint32_t numRead;
 
@@ -500,7 +500,7 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 1);
+    PointBuffer data(schema, 1);
     
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
 

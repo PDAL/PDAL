@@ -56,10 +56,10 @@ BOOST_AUTO_TEST_CASE(test1)
 
     const Schema& schema = reader.getSchema();
     SchemaLayout schemaLayout(schema);
-    const int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    const int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
-    PointBuffer dataBig(schemaLayout, 1024);
-    PointBuffer dataSmall(schemaLayout, 1);
+    PointBuffer dataBig(schema, 1024);
+    PointBuffer dataSmall(schema, 1);
 
     StageSequentialIterator* iter1 = cache.createSequentialIterator();
 
@@ -111,10 +111,10 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
 
     const Schema& schema = reader.getSchema();
     SchemaLayout schemaLayout(schema);
-    const int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    const int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
-    PointBuffer dataBig(schemaLayout, 1024);
-    PointBuffer dataSmall(schemaLayout, 1);
+    PointBuffer dataBig(schema, 1024);
+    PointBuffer dataSmall(schema, 1);
 
     StageSequentialIterator* iter1 = cache.createSequentialIterator();
 

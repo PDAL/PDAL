@@ -41,8 +41,8 @@ namespace pdal
 {
 
 
-PointBuffer::PointBuffer(const SchemaLayout& schemaLayout, boost::uint32_t capacity)
-    : m_schemaLayout(schemaLayout)
+PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
+    : m_schemaLayout(SchemaLayout(schema))
     , m_data(new boost::uint8_t[m_schemaLayout.getByteSize() * capacity])
     , m_pointSize(m_schemaLayout.getByteSize())
     , m_numPoints(0)
@@ -139,18 +139,21 @@ boost::property_tree::ptree PointBuffer::toPTree() const
 {
     boost::property_tree::ptree tree;
 
+    const Schema& schema = getSchema();
     const SchemaLayout& schemaLayout = getSchemaLayout();
-    const std::vector<DimensionLayout>& dimensionLayouts = schemaLayout.getDimensionLayouts();
+    const std::vector<Dimension>& dimensions = schema.getDimensions();
+
     const boost::uint32_t numPoints = getNumPoints();
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         const std::string pointstring = boost::lexical_cast<std::string>(pointIndex) + ".";
         
-        for (std::vector<DimensionLayout>::const_iterator citer=dimensionLayouts.begin(); citer != dimensionLayouts.end(); ++citer)
+        boost::uint32_t i = 0;
+        for (i=0; i<dimensions.size(); i++)
         {
-            const DimensionLayout& dimensionLayout = *citer;
-            const Dimension& dimension = dimensionLayout.getDimension();
+            const Dimension& dimension = dimensions[i];
+            const DimensionLayout& dimensionLayout = schemaLayout.getDimensionLayout(i);
             const std::size_t fieldIndex = dimensionLayout.getPosition();
 
             const std::string key = pointstring + dimension.getName();
@@ -275,8 +278,10 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
 {
     using std::endl;
 
+    const Schema& schema = pointBuffer.getSchema();
     const SchemaLayout& schemaLayout = pointBuffer.getSchemaLayout();
-    const std::vector<DimensionLayout>& dimensionLayouts = schemaLayout.getDimensionLayouts();
+    const std::vector<Dimension>& dimensions = schema.getDimensions();
+
     const std::size_t numPoints = pointBuffer.getNumPoints();
 
     ostr << "Contains " << numPoints << "  points" << endl;
@@ -286,10 +291,11 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
        
         ostr << "Point: " << pointIndex << endl;
 
-        for (std::vector<DimensionLayout>::const_iterator citer=dimensionLayouts.begin(); citer != dimensionLayouts.end(); ++citer)
+        boost::uint32_t i = 0;
+        for (i=0; i<dimensions.size(); i++)
         {
-            const DimensionLayout& dimensionLayout = *citer;
-            const Dimension& dimension = dimensionLayout.getDimension();
+            const Dimension& dimension = dimensions[i];
+            const DimensionLayout& dimensionLayout = schemaLayout.getDimensionLayout(i);
             std::size_t fieldIndex = dimensionLayout.getPosition();
 
             ostr << dimension.getName() << " (" << dimension.getDataTypeName(dimension.getDataType()) << ") : ";

@@ -65,7 +65,7 @@ public:
     // regardless of what the passed-in schema says -- this is because the field object
     // represents the state within the owning object, which in this case is a completely
     // empty buffer (similarly, all the points in the buffer are marked "invalid")
-    PointBuffer(const SchemaLayout&, boost::uint32_t capacity);
+    PointBuffer(const Schema&, boost::uint32_t capacity);
     PointBuffer(const PointBuffer&); 
     PointBuffer& operator=(const PointBuffer&); 
 

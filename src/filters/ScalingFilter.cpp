@@ -249,19 +249,19 @@ void ScalingFilterBase::processBuffer(const PointBuffer& srcData, PointBuffer& d
 
     // rather than think about "src/dst", we will think in terms of "doubles" and "ints"
     const Schema& schemaD = (m_isDescaling ? srcSchema : dstSchema);
-    const SchemaLayout& schemaLayoutD = (m_isDescaling ? srcSchemaLayout : dstSchemaLayout);
+    //const SchemaLayout& schemaLayoutD = (m_isDescaling ? srcSchemaLayout : dstSchemaLayout);
     const Schema& schemaI = (m_isDescaling ? dstSchema : srcSchema);
-    const SchemaLayout& schemaLayoutI = (m_isDescaling ? dstSchemaLayout : srcSchemaLayout);
+    //const SchemaLayout& schemaLayoutI = (m_isDescaling ? dstSchemaLayout : srcSchemaLayout);
 
     assert(schemaD.hasDimension(DimensionId::X_f64));
     assert(schemaI.hasDimension(DimensionId::X_i32));
 
-    const int indexXd = schemaLayoutD.getDimensionIndex(DimensionId::X_f64);
-    const int indexYd = schemaLayoutD.getDimensionIndex(DimensionId::Y_f64);
-    const int indexZd = schemaLayoutD.getDimensionIndex(DimensionId::Z_f64);
-    const int indexXi = schemaLayoutI.getDimensionIndex(DimensionId::X_i32);
-    const int indexYi = schemaLayoutI.getDimensionIndex(DimensionId::Y_i32);
-    const int indexZi = schemaLayoutI.getDimensionIndex(DimensionId::Z_i32);
+    const int indexXd = schemaD.getDimensionIndex(DimensionId::X_f64);
+    const int indexYd = schemaD.getDimensionIndex(DimensionId::Y_f64);
+    const int indexZd = schemaD.getDimensionIndex(DimensionId::Z_f64);
+    const int indexXi = schemaI.getDimensionIndex(DimensionId::X_i32);
+    const int indexYi = schemaI.getDimensionIndex(DimensionId::Y_i32);
+    const int indexZi = schemaI.getDimensionIndex(DimensionId::Z_i32);
 
     const Dimension& dimXd = schemaD.getDimension(DimensionId::X_f64);
     const Dimension& dimYd = schemaD.getDimension(DimensionId::Y_f64);
@@ -272,14 +272,16 @@ void ScalingFilterBase::processBuffer(const PointBuffer& srcData, PointBuffer& d
     
     // For each dimension in the source layout, find its corresponding dimension 
     // in the destination layout, and put its byte offset in the map for it.  
-    std::vector<DimensionLayout> const& src_layouts = srcSchemaLayout.getDimensionLayouts();
+    std::vector<Dimension> const& src_layouts = srcSchema.getDimensions();
     std::map<boost::uint32_t, boost::uint32_t> dimensions_lookup;
     boost::uint32_t dstFieldIndex = 0;
-    for (std::vector<DimensionLayout>::const_iterator i = src_layouts.begin(); i != src_layouts.end(); ++i)
+    boost::uint32_t i = 0;
+    for (i=0; i<src_layouts.size(); i++)
     {
-        Dimension const& d = i->getDimension();
-        std::size_t src_offset = i->getByteOffset();
-        dstFieldIndex = dstSchemaLayout.getDimensionIndex(d);
+        Dimension const& d = src_layouts[i];
+        DimensionLayout const& dl = srcSchemaLayout.getDimensionLayout(i);
+        std::size_t src_offset = dl.getByteOffset();
+        dstFieldIndex = dstSchema.getDimensionIndex(d);
         dimensions_lookup[dstFieldIndex] = src_offset;
     }
     

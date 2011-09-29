@@ -59,14 +59,14 @@ static void getDoublePoint(const pdal::PointBuffer& data, double& x, double& y, 
 {
     using namespace pdal;
 
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
+    const ::pdal::Schema& schema = data.getSchema();
 
-    const int indexX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
-    const int indexY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
-    const int indexZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
-    const int indexIntensity = schemaLayout.getDimensionIndex(DimensionId::Las_Intensity);
-    const int indexScanAngle = schemaLayout.getDimensionIndex(DimensionId::Las_ScanAngleRank);
-    const int indexGreen = schemaLayout.getDimensionIndex(DimensionId::Green_u16);
+    const int indexX = schema.getDimensionIndex(DimensionId::X_f64);
+    const int indexY = schema.getDimensionIndex(DimensionId::Y_f64);
+    const int indexZ = schema.getDimensionIndex(DimensionId::Z_f64);
+    const int indexIntensity = schema.getDimensionIndex(DimensionId::Las_Intensity);
+    const int indexScanAngle = schema.getDimensionIndex(DimensionId::Las_ScanAngleRank);
+    const int indexGreen = schema.getDimensionIndex(DimensionId::Green_u16);
 
     x = data.getField<double>(0, indexX);
     y = data.getField<double>(0, indexY);
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
 
         const pdal::Schema& schema = scalingFilter.getSchema();
         const pdal::SchemaLayout layout(schema);
-        pdal::PointBuffer data2(layout, 1);
+        pdal::PointBuffer data2(schema, 1);
 
         pdal::StageSequentialIterator* iter = scalingFilter.createSequentialIterator();
         boost::uint32_t numRead = iter->read(data2);

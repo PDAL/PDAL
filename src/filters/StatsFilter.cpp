@@ -170,15 +170,15 @@ void StatsFilter::processBuffer(PointBuffer& data) const
 {
     const boost::uint32_t numPoints = data.getNumPoints();
 
-    const SchemaLayout& schemaLayout = data.getSchemaLayout();
+    const Schema& schema = data.getSchema();
 
     // BUG: fix this!
-    const int indexXi = schemaLayout.getDimensionIndex(DimensionId::X_i32);
-    const int indexYi = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
-    const int indexZi = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
-    const int indexXd = schemaLayout.getDimensionIndex(DimensionId::X_f64);
-    const int indexYd = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
-    const int indexZd = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
+    const int indexXi = schema.getDimensionIndex(DimensionId::X_i32);
+    const int indexYi = schema.getDimensionIndex(DimensionId::Y_i32);
+    const int indexZi = schema.getDimensionIndex(DimensionId::Z_i32);
+    const int indexXd = schema.getDimensionIndex(DimensionId::X_f64);
+    const int indexYd = schema.getDimensionIndex(DimensionId::Y_f64);
+    const int indexZd = schema.getDimensionIndex(DimensionId::Z_f64);
 
     StatsCollector& statsX = (indexXi!=-1) ? *(m_stats.find(DimensionId::X_i32)->second) : *(m_stats.find(DimensionId::X_f64)->second);
     StatsCollector& statsY = (indexYi!=-1) ? *(m_stats.find(DimensionId::Y_i32)->second) : *(m_stats.find(DimensionId::Y_f64)->second);

@@ -62,20 +62,20 @@ void Check_Point(const pdal::PointBuffer& data,
                        double xref, double yref, double zref,
                        boost::int32_t tref)
 {
-    const ::pdal::SchemaLayout& schemaLayout = data.getSchemaLayout();
+    const ::pdal::Schema& schema = data.getSchema();
 
-    int offsetX = schemaLayout.getDimensionIndex(pdal::DimensionId::X_i32);
-    int offsetY = schemaLayout.getDimensionIndex(pdal::DimensionId::Y_i32);
-    int offsetZ = schemaLayout.getDimensionIndex(pdal::DimensionId::Z_i32);
-    int offsetTime = schemaLayout.getDimensionIndex(pdal::DimensionId::Qfit_Time);
+    int offsetX = schema.getDimensionIndex(pdal::DimensionId::X_i32);
+    int offsetY = schema.getDimensionIndex(pdal::DimensionId::Y_i32);
+    int offsetZ = schema.getDimensionIndex(pdal::DimensionId::Z_i32);
+    int offsetTime = schema.getDimensionIndex(pdal::DimensionId::Qfit_Time);
     
     boost::int32_t x = data.getField<boost::int32_t>(index, offsetX);
     boost::int32_t y = data.getField<boost::int32_t>(index, offsetY);
     boost::int32_t z = data.getField<boost::int32_t>(index, offsetZ);
     boost::int32_t t = data.getField<boost::int32_t>(index, offsetTime);
 
-    double x0 = schemaLayout.getDimension(offsetX).applyScaling<boost::int32_t>(x);
-    double y0 = schemaLayout.getDimension(offsetY).applyScaling<boost::int32_t>(y);
+    double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x);
+    double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y);
     double z0 = static_cast<double>(z);
 
     //   
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 3);
+    PointBuffer data(schema, 3);
     
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
     
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 3);
+    PointBuffer data(schema, 3);
     
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
     

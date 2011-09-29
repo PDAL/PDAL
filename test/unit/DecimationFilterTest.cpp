@@ -60,14 +60,14 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     const Schema& schema = filter.getSchema();
     SchemaLayout schemaLayout(schema);
 
-    PointBuffer data(schemaLayout, 3);
+    PointBuffer data(schema, 3);
 
     StageSequentialIterator* iter = filter.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 3);
 
-    int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
     boost::uint64_t t0 = data.getField<boost::uint64_t>(0, offsetT);
     boost::uint64_t t1 = data.getField<boost::uint64_t>(1, offsetT);
@@ -97,14 +97,14 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
     const Schema& schema = filter.getSchema();
     SchemaLayout schemaLayout(schema);
 
-    PointBuffer data(schemaLayout, 3);
+    PointBuffer data(schema, 3);
 
     StageSequentialIterator* iter = filter.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 3);
 
-    int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
     boost::uint64_t t0 = data.getField<boost::uint64_t>(0, offsetT);
     boost::uint64_t t1 = data.getField<boost::uint64_t>(1, offsetT);

@@ -105,10 +105,10 @@ void ColorFilter::processBuffer(PointBuffer& data) const
     const SchemaLayout& schemaLayout = data.getSchemaLayout();
     const Schema& schema = schemaLayout.getSchema();
 
-    const int indexR = schemaLayout.getDimensionIndex(DimensionId::Red_u16);
-    const int indexG = schemaLayout.getDimensionIndex(DimensionId::Green_u16);
-    const int indexB = schemaLayout.getDimensionIndex(DimensionId::Blue_u16);
-    const int indexZ = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
+    const int indexR = schema.getDimensionIndex(DimensionId::Red_u16);
+    const int indexG = schema.getDimensionIndex(DimensionId::Green_u16);
+    const int indexB = schema.getDimensionIndex(DimensionId::Blue_u16);
+    const int indexZ = schema.getDimensionIndex(DimensionId::Z_i32);
     const Dimension& zDim = schema.getDimension(DimensionId::Z_i32);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)

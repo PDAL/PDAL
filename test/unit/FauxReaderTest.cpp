@@ -64,17 +64,17 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
     const Schema& schema = reader.getSchema();
     SchemaLayout schemaLayout(schema);
 
-    PointBuffer data(schemaLayout, 750);
+    PointBuffer data(schema, 750);
  
     StageSequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    int offsetX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
-    int offsetY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
-    int offsetZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
-    int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
+    int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
+    int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
+    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
@@ -116,17 +116,17 @@ BOOST_AUTO_TEST_CASE(FauxReaderTest_test_options)
     const Schema& schema = reader.getSchema();
     SchemaLayout schemaLayout(schema);
 
-    PointBuffer data(schemaLayout, 750);
+    PointBuffer data(schema, 750);
  
     StageSequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    int offsetX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
-    int offsetY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
-    int offsetZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
-    int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
+    int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
+    int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
+    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
@@ -158,12 +158,12 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     const Schema& schema = reader.getSchema();
     SchemaLayout schemaLayout(schema);
 
-    PointBuffer data(schemaLayout, 10);
+    PointBuffer data(schema, 10);
 
-    int offsetX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
-    int offsetY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
-    int offsetZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
-    int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
+    int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
+    int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
+    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
     StageRandomIterator* iter = reader.createRandomIterator();
 
@@ -260,17 +260,17 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
     const Schema& schema = reader.getSchema();
     SchemaLayout schemaLayout(schema);
 
-    PointBuffer data(schemaLayout, 750);
+    PointBuffer data(schema, 750);
 
     StageSequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    int offsetX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
-    int offsetY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
-    int offsetZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
-    int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
+    int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
+    int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
+    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
@@ -309,17 +309,17 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     const Schema& schema = reader.getSchema();
     SchemaLayout schemaLayout(schema);
 
-    PointBuffer data(schemaLayout, 2);
+    PointBuffer data(schema, 2);
 
     StageSequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead, 2u);
 
-    const int offsetX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
-    const int offsetY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
-    const int offsetZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
-    const int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    const int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
+    const int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
+    const int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
+    const int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
     const double x0 = data.getField<double>(0, offsetX);
     const double y0 = data.getField<double>(0, offsetY);
@@ -357,17 +357,17 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
     const Schema& schema = reader.getSchema();
     SchemaLayout schemaLayout(schema);
 
-    PointBuffer data(schemaLayout, 750);
+    PointBuffer data(schema, 750);
 
     StageSequentialIterator* iter = reader.createSequentialIterator();
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead,750u);
 
-    int offsetX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
-    int offsetY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
-    int offsetZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
-    int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
+    int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
+    int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
+    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
     double delX = (101.0 - 1.0) / (750.0 - 1.0);
     double delY = (152.0 - 2.0) / (750.0 - 1.0);
@@ -425,8 +425,7 @@ BOOST_AUTO_TEST_CASE(test_iterator_checks)
     const Schema& schema = reader.getSchema();
     SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 750);
-    
+    PointBuffer data(schema, 750);
     
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
     BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);

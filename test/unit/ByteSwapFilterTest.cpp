@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     const Schema& schema = reader.getSchema();
     SchemaLayout schemaLayout(schema);
     
-    PointBuffer flipped(schemaLayout, buffer_size);
+    PointBuffer flipped(schema, buffer_size);
     const boost::uint32_t fliped_read = flipped_iter->read(flipped);
     BOOST_CHECK_EQUAL(fliped_read, buffer_size);
 
@@ -80,10 +80,10 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     BOOST_CHECK_EQUAL(unfliped_read, buffer_size);
     
 
-    int offsetX = schemaLayout.getDimensionIndex(DimensionId::X_f64);
-    int offsetY = schemaLayout.getDimensionIndex(DimensionId::Y_f64);
-    int offsetZ = schemaLayout.getDimensionIndex(DimensionId::Z_f64);
-    int offsetT = schemaLayout.getDimensionIndex(DimensionId::Time_u64);
+    int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
+    int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
+    int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
+    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
     
     BOOST_CHECK_EQUAL(offsetX, 0);
     BOOST_CHECK_EQUAL(offsetY, 1);

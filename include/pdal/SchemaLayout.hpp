@@ -80,34 +80,12 @@ public:
     {
         return m_byteSize;
     }
-    
-    int getDimensionIndex(const DimensionId::Id& id) const;
-    int getDimensionIndex(const Dimension& dim) const;
-
-    const Dimension& getDimension(std::size_t index) const
-    {
-        return getDimensionLayout(index).getDimension();
-    }
-
-    Dimension& getDimension(std::size_t index)
-    {
-        return getDimensionLayout(index).getDimension();
-    }
 
     const DimensionLayout& getDimensionLayout(std::size_t index) const
     {
         return m_dimensionLayouts[index];
     }
 
-    DimensionLayout& getDimensionLayout(std::size_t index)
-    {
-        return m_dimensionLayouts[index];
-    }
-
-    const std::vector<DimensionLayout>& getDimensionLayouts() const
-    {
-        return m_dimensionLayouts;
-    }
 
     // returns a ptree containing the SchemaLayout
     //
@@ -126,8 +104,6 @@ private:
     Schema m_schema;
     std::vector<DimensionLayout> m_dimensionLayouts;
     std::size_t m_byteSize;
-
-    std::map<DimensionId::Id, std::size_t> m_dimensions_map;
 };
 
 

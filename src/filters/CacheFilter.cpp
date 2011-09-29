@@ -95,7 +95,7 @@ boost::uint32_t CacheFilter::getCacheBlockSize() const
 
 void CacheFilter::addToCache(boost::uint64_t pointIndex, const PointBuffer& data) const
 {
-    PointBuffer* block = new PointBuffer(data.getSchemaLayout(), m_cacheBlockSize);
+    PointBuffer* block = new PointBuffer(data.getSchema(), m_cacheBlockSize);
     block->copyPointsFast(0, 0, data, m_cacheBlockSize);
     
     m_cache->insert(pointIndex, block);

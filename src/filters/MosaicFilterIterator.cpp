@@ -103,7 +103,7 @@ boost::uint32_t MosaicFilterSequentialIterator::readBufferImpl(PointBuffer& dest
         m_prevIterator = m_prevIterators[m_iteratorIndex];
 
         // read as much as we can into temp buffer
-        PointBuffer tmp(destData.getSchemaLayout(), totalNumPointsToRead-totalNumPointsRead); 
+        PointBuffer tmp(destData.getSchema(), totalNumPointsToRead-totalNumPointsRead); 
         boost::uint32_t numRead = m_prevIterator->read(tmp);
         totalNumPointsRead += numRead;
 

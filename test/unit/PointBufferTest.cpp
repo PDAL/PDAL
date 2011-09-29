@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     schema.appendDimension(d2);
     SchemaLayout layout(schema);
 
-    PointBuffer data(layout, 10);
+    PointBuffer data(schema, 10);
 
     BOOST_CHECK(data.getCapacity() == 10);
     BOOST_CHECK(data.getSchemaLayout() == layout);
@@ -79,7 +79,7 @@ PointBuffer* makeTestBuffer()
     BOOST_CHECK(offZ==5);
 
     boost::uint32_t capacity = 17;
-    PointBuffer* data = new PointBuffer(layout, capacity);
+    PointBuffer* data = new PointBuffer(schema, capacity);
 
     BOOST_CHECK(data->getCapacity() == capacity);
     // write the data into the buffer
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(test_copy)
 {
     PointBuffer* data = makeTestBuffer();
    
-    PointBuffer d2(data->getSchemaLayout(), 19);
+    PointBuffer d2(data->getSchema(), 19);
 
     d2.copyPointFast(0, 10, *data);
     d2.copyPointFast(18, 11, *data);

@@ -45,34 +45,36 @@ namespace pdal { namespace drivers { namespace terrasolid {
 
 PointIndexes::PointIndexes(const SchemaLayout& schemaLayout, TERRASOLID_Format_Type format)
 {
+    const ::pdal::Schema& schema = schemaLayout.getSchema();
+
     if (format == TERRASOLID_Format_1) 
     {
-        Classification = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Classification);
-        PointSourceId = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_PointSourceId_u8);
-        EchoInt = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_ReturnNumber_u16);
-        X = schemaLayout.getDimensionIndex(DimensionId::X_i32);
-        Y = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
-        Z = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
+        Classification = schema.getDimensionIndex(DimensionId::TerraSolid_Classification);
+        PointSourceId = schema.getDimensionIndex(DimensionId::TerraSolid_PointSourceId_u8);
+        EchoInt = schema.getDimensionIndex(DimensionId::TerraSolid_ReturnNumber_u16);
+        X = schema.getDimensionIndex(DimensionId::X_i32);
+        Y = schema.getDimensionIndex(DimensionId::Y_i32);
+        Z = schema.getDimensionIndex(DimensionId::Z_i32);
     } 
     else if (format == TERRASOLID_Format_2)
     {
-        X = schemaLayout.getDimensionIndex(DimensionId::X_i32);
-        Y = schemaLayout.getDimensionIndex(DimensionId::Y_i32);
-        Z = schemaLayout.getDimensionIndex(DimensionId::Z_i32);
-        Classification = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Classification);
-        ReturnNumber = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_ReturnNumber_u8);
-        Flag = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Flag);
-        Mark = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Mark);
-        PointSourceId = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_PointSourceId_u16);
-        Intensity = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Intensity);
+        X = schema.getDimensionIndex(DimensionId::X_i32);
+        Y = schema.getDimensionIndex(DimensionId::Y_i32);
+        Z = schema.getDimensionIndex(DimensionId::Z_i32);
+        Classification = schema.getDimensionIndex(DimensionId::TerraSolid_Classification);
+        ReturnNumber = schema.getDimensionIndex(DimensionId::TerraSolid_ReturnNumber_u8);
+        Flag = schema.getDimensionIndex(DimensionId::TerraSolid_Flag);
+        Mark = schema.getDimensionIndex(DimensionId::TerraSolid_Mark);
+        PointSourceId = schema.getDimensionIndex(DimensionId::TerraSolid_PointSourceId_u16);
+        Intensity = schema.getDimensionIndex(DimensionId::TerraSolid_Intensity);
     } 
 
-    Time = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Time);
+    Time = schema.getDimensionIndex(DimensionId::TerraSolid_Time);
 
-    Red = schemaLayout.getDimensionIndex(DimensionId::Red_u8);
-    Green = schemaLayout.getDimensionIndex(DimensionId::Green_u8);
-    Blue = schemaLayout.getDimensionIndex(DimensionId::Blue_u8);
-    Alpha = schemaLayout.getDimensionIndex(DimensionId::TerraSolid_Alpha);
+    Red = schema.getDimensionIndex(DimensionId::Red_u8);
+    Green = schema.getDimensionIndex(DimensionId::Green_u8);
+    Blue = schema.getDimensionIndex(DimensionId::Blue_u8);
+    Alpha = schema.getDimensionIndex(DimensionId::TerraSolid_Alpha);
     
     return;
 }
