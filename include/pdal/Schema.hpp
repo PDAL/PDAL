@@ -48,7 +48,6 @@
 #include <map>
 
 #include <pdal/Dimension.hpp>
-#include <pdal/DimensionLayout.hpp>
 
 // boost
 #include <boost/cstdint.hpp>
