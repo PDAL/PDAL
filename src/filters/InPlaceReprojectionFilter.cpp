@@ -229,35 +229,10 @@ void InPlaceReprojectionFilter::checkImpedance()
     Schema& schema = this->getSchemaRef();
 
     std::vector<Dimension>& dims = schema.getDimensions();
-    
-    std::string x_name;
-    std::string y_name;
-    std::string z_name;
-    
-    try
-    {
-        x_name = getOptions().getValueOrThrow<std::string>("x_dim");
-    } catch (pdal::option_not_found const&)
-    {
-        x_name = "X";
-    }
-
-    try
-    {
-        y_name = getOptions().getValueOrThrow<std::string>("y_dim");
-    } catch (pdal::option_not_found const&)
-    {
-        y_name = "Y";
-    }
-
-    try
-    {
-        z_name = getOptions().getValueOrThrow<std::string>("z_dim");
-    } catch (pdal::option_not_found const&)
-    {
-        z_name = "Z";
-    }
-
+      
+    const std::string x_name = getOptions().getValueOrDefault<std::string>("x_dim", "X");
+    const std::string y_name = getOptions().getValueOrDefault<std::string>("y_dim", "Y");
+    const std::string z_name = getOptions().getValueOrDefault<std::string>("z_dim", "Z");
 
     std::vector<Dimension>::iterator i;
     for (i = dims.begin(); i != dims.end(); ++i)
@@ -265,61 +240,31 @@ void InPlaceReprojectionFilter::checkImpedance()
         if (i->getName() == x_name)
         {
             m_x = *i;
-            try
-            {
-                m_x_scale = getOptions().getValueOrThrow<double>("scale_x");
-            } catch (pdal::option_not_found const&)
-            {
-                m_x_scale = i->getNumericScale();
-            }
+
+            m_x_scale = getOptions().getValueOrDefault<double>("scale_x", i->getNumericScale());
             i->setNumericScale(m_x_scale);
-            try
-            {
-                m_x_offset = getOptions().getValueOrThrow<double>("offset_x");
-            } catch (pdal::option_not_found const&)
-            {
-                m_x_offset = i->getNumericOffset();
-            }
+
+            m_x_offset = getOptions().getValueOrDefault<double>("offset_x", i->getNumericOffset());
             i->setNumericOffset(m_x_offset);
         }
         if (i->getName() == y_name)
         {
             m_y = *i;
-            try
-            {
-                m_y_scale = getOptions().getValueOrThrow<double>("scale_y");
-            } catch (pdal::option_not_found const&)
-            {
-                m_y_scale = i->getNumericScale();
-            }
+
+            m_y_scale = getOptions().getValueOrDefault<double>("scale_y", i->getNumericScale());
             i->setNumericScale(m_y_scale);
-            try
-            {
-                m_y_offset = getOptions().getValueOrThrow<double>("offset_y");
-            } catch (pdal::option_not_found const&)
-            {
-                m_y_offset = i->getNumericOffset();
-            }
+
+            m_y_offset = getOptions().getValueOrDefault<double>("offset_y", i->getNumericOffset());
             i->setNumericOffset(m_y_offset);
         }
         if (i->getName() == z_name)
         {
             m_z = *i;
-            try
-            {
-                m_z_scale = getOptions().getValueOrThrow<double>("scale_z");
-            } catch (pdal::option_not_found const&)
-            {
-                m_z_scale = i->getNumericScale();
-            }
+
+            m_z_scale = getOptions().getValueOrDefault<double>("scale_z", i->getNumericScale());
             i->setNumericScale(m_z_scale);
-            try
-            {
-                m_z_offset = getOptions().getValueOrThrow<double>("offset_z");
-            } catch (pdal::option_not_found const&)
-            {
-                m_z_offset = i->getNumericOffset();
-            }
+
+            m_z_offset = getOptions().getValueOrDefault<double>("offset_z", i->getNumericOffset());
             i->setNumericOffset(m_z_offset);
         }        
     }
@@ -492,7 +437,6 @@ void InPlaceReprojectionFilter::processBuffer(PointBuffer& data) const
     const int indexX = schema.getDimensionIndex(d_x);
     const int indexY = schema.getDimensionIndex(d_y);
     const int indexZ = schema.getDimensionIndex(d_z);
-
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
