@@ -65,7 +65,6 @@ Schema::Schema()
 /// copy constructor
 Schema::Schema(Schema const& other) 
     : m_dimensions(other.m_dimensions)
-    , m_dimensionLayouts(other.m_dimensionLayouts)
     , m_byteSize(other.m_byteSize)
     , m_dimensions_map(other.m_dimensions_map)
 {
@@ -79,7 +78,6 @@ Schema& Schema::operator=(Schema const& rhs)
     if (&rhs != this)
     {
         m_dimensions = rhs.m_dimensions;
-        m_dimensionLayouts = rhs.m_dimensionLayouts;
         m_byteSize = rhs.m_byteSize;
         m_dimensions_map = rhs.m_dimensions_map;
     }
@@ -91,7 +89,6 @@ Schema& Schema::operator=(Schema const& rhs)
 bool Schema::operator==(const Schema& other) const
 {
     if (m_dimensions == other.m_dimensions &&
-        m_dimensionLayouts == other.m_dimensionLayouts &&
         m_byteSize == other.m_byteSize &&
         m_dimensions_map == other.m_dimensions_map)
     {
@@ -117,22 +114,17 @@ void Schema::recalculateSizes()
 
     std::vector<Dimension>& dims = getDimensions();
 
-    m_dimensionLayouts.clear();
-
     int i=0;
-    for (std::vector<Dimension>::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
+    for (std::vector<Dimension>::iterator iter = dims.begin(); iter != dims.end(); ++iter)
     {
-        const Dimension& dim = *iter;
+        Dimension& dim = *iter;
 
-        DimensionLayout layout(dim); 
-        layout.setByteOffset(offset);
+        dim.setByteOffset(offset);
 
         offset += dim.getByteSize();
 
-        layout.setPosition(i);
-
-        m_dimensionLayouts.push_back(layout);
-    
+        dim.setPosition(i);
+   
         ++i;
     }
 

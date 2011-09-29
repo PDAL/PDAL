@@ -191,8 +191,10 @@ inline void PointBuffer::setField(std::size_t pointIndex, boost::int32_t fieldIn
         // this is a little harsh, but we'll keep it for now as we shake things out
         throw pdal_error("filedIndex is not valid at this point of access");
     }
-    const DimensionLayout& dimLayout = m_schema.getDimensionLayout(fieldIndex);
-    std::size_t offset = (pointIndex * m_pointSize) + dimLayout.getByteOffset();
+
+    const Dimension& dim = m_schema.getDimension(fieldIndex);
+
+    std::size_t offset = (pointIndex * m_pointSize) + dim.getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
 
@@ -206,9 +208,10 @@ inline void PointBuffer::setFieldData(std::size_t pointIndex, boost::int32_t fie
         // this is a little harsh, but we'll keep it for now as we shake things out
         throw pdal_error("filedIndex is not valid at this point of access");
     }
-    const DimensionLayout& dimLayout = m_schema.getDimensionLayout(fieldIndex);
-    const Dimension& dim = dimLayout.getDimension();
-    std::size_t offset = (pointIndex * m_pointSize) + dimLayout.getByteOffset();
+    
+    const Dimension& dim = m_schema.getDimension(fieldIndex);
+
+    std::size_t offset = (pointIndex * m_pointSize) + dim.getByteOffset();
     std::size_t size = dim.getDataTypeSize(dim.getDataType());
     // std::cout << "copying field " << d.getFieldName() << " with index" << fieldIndex << " of size " << size << " at offset " << offset << std::endl;
     // assert(offset + sizeof(T) <= m_pointSize * m_capacity);
@@ -227,9 +230,9 @@ inline T PointBuffer::getField(std::size_t pointIndex, boost::int32_t fieldIndex
         throw pdal_error("filedIndex is not valid at this point of access");
     }
         
-    const DimensionLayout& dimLayout = m_schema.getDimensionLayout(fieldIndex);
+    const Dimension& dim = m_schema.getDimension(fieldIndex);
 
-    std::size_t offset = (pointIndex * m_pointSize) + dimLayout.getByteOffset();
+    std::size_t offset = (pointIndex * m_pointSize) + dim.getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
 
