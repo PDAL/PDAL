@@ -98,6 +98,16 @@ public:
     bool operator==(const Dimension& other) const;
     bool operator!=(const Dimension& other) const;
 
+    
+    inline bool operator < (Dimension const& dim) const 
+    {
+        return m_position < dim.m_position;
+    }
+    inline bool operator > (Dimension const& dim) const 
+    {
+        return m_position > dim.m_position;
+    }
+
 /// \name Data Access
     std::string const& getName() const;
 
@@ -321,6 +331,33 @@ public:
         m_endian = v;
     }
 
+    /// The byte location to start reading/writing
+    /// point data from in a composited schema.  liblas::Schema
+    /// will set these values for you when liblas::Dimension are
+    /// added to the liblas::Schema.
+    inline std::size_t getByteOffset() const
+    {
+        return m_byteOffset;
+    }
+
+    inline void setByteOffset(std::size_t v)
+    {
+        m_byteOffset = v;
+    }
+
+    /// The index position of the index.  In a standard ePointFormat0
+    /// data record, the X dimension would have a position of 0, while
+    /// the Y dimension would have a position of 1, for example.
+    inline std::size_t getPosition() const
+    {
+        return m_position;
+    }
+
+    inline void setPosition(std::size_t v)
+    {
+        m_position = v;
+    }
+
 /// \name Summary and serialization
     /// Outputs a string-based boost::property_tree::ptree representation 
     /// of the Dimension instance
@@ -342,6 +379,8 @@ private:
     bool m_precise;
     double m_numericScale;
     double m_numericOffset;
+    std::size_t m_byteOffset;
+    std::size_t m_position;
 };
 
 

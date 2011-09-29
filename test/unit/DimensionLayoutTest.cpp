@@ -37,33 +37,13 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <pdal/DimensionLayout.hpp>
+#include <pdal/Dimension.hpp>
 
 using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(DimensionLayoutTest)
 
-BOOST_AUTO_TEST_CASE(test1)
-{
-    Dimension d1(DimensionId::X_i32);
-    DimensionLayout l1(d1);
-
-    Dimension d2(DimensionId::Y_i32);
-    DimensionLayout l2(d2);
-
-    DimensionLayout l3(l1);
-    DimensionLayout l4 = l1;
-
-    BOOST_CHECK(l1==l1);
-    BOOST_CHECK(l1!=l2);
-    BOOST_CHECK(l2!=l1);
-    BOOST_CHECK(l1==l3);
-    BOOST_CHECK(l3==l1);
-    BOOST_CHECK(l1==l4);
-    BOOST_CHECK(l4==l1);
-}
-
-
+#if 0
 BOOST_AUTO_TEST_CASE(DimensionLayoutTest_ptree)
 {
     Dimension d1(DimensionId::X_i32);
@@ -88,5 +68,6 @@ BOOST_AUTO_TEST_CASE(DimensionLayoutTest_ptree)
 
     return;
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

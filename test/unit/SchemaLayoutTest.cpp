@@ -80,6 +80,7 @@ BOOST_AUTO_TEST_CASE(test_layout_size)
     s1.appendDimension(d2);
     Schema sl1(s1);
 
+#if 0
     const DimensionLayout& dl1 = sl1.getDimensionLayout(0);
     BOOST_CHECK(dl1.getDimension() == d1);
     BOOST_CHECK(dl1.getPosition() == 0);
@@ -89,6 +90,7 @@ BOOST_AUTO_TEST_CASE(test_layout_size)
     BOOST_CHECK(dl2.getDimension() == d2);
     BOOST_CHECK(dl2.getPosition() == 1);
     BOOST_CHECK(dl2.getByteOffset() == 4);
+#endif
 }
 
 

@@ -108,7 +108,7 @@ struct xmlCharDeleter
 };
 
 
-static bool sort_dimensions(pdal::DimensionLayout const& a, pdal::DimensionLayout const& b)
+static bool sort_dimensions(pdal::Dimension const& a, pdal::Dimension const& b)
 {
    return a < b;
 }
@@ -366,7 +366,7 @@ print_element_names(xmlNode * a_node)
 
 void Reader::Load()
 {
-    std::vector<pdal::DimensionLayout> layouts;
+    std::vector<pdal::Dimension> layouts;
 
     xmlDocPtr doc = static_cast<xmlDocPtr>(m_doc.get());
     xmlNode* root = xmlDocGetRootElement(doc);
@@ -547,19 +547,19 @@ void Reader::Load()
         }
         d.setEndianness(endianness);
 
-        DimensionLayout l(d);
-        l.setPosition(position);
-        layouts.push_back(l);
+        d.setPosition(position);
+        layouts.push_back(d);
 
         dimension = dimension->next;
     }
 
     std::sort(layouts.begin(), layouts.end(), sort_dimensions);
 
-    std::vector<DimensionLayout>::const_iterator i;
+    std::vector<Dimension>::const_iterator i;
     for (i = layouts.begin(); i!= layouts.end(); ++i)
     {
-        m_schema.appendDimension(i->getDimension());
+        const Dimension& dim = *i;
+        m_schema.appendDimension(dim);
     }
 
 }

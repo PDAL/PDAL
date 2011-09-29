@@ -48,7 +48,6 @@
 #include <map>
 
 #include <pdal/Dimension.hpp>
-#include <pdal/DimensionLayout.hpp>
 
 // boost
 #include <boost/cstdint.hpp>
@@ -103,11 +102,6 @@ public:
         return m_byteSize;
     }
 
-    const DimensionLayout& getDimensionLayout(std::size_t index) const
-    {
-        return m_dimensionLayouts[index];
-    }
-
     // returns a ptree reprsenting the Schema
     //
     // looks like this:
@@ -129,7 +123,6 @@ private:
     void calculateSizes();
 
     std::vector<Dimension> m_dimensions;
-    std::vector<DimensionLayout> m_dimensionLayouts;
     std::size_t m_byteSize;
 
     std::map<DimensionId::Id, std::size_t> m_dimensions_map;

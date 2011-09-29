@@ -69,11 +69,11 @@ PointBuffer* makeTestBuffer()
     schema.appendDimension(d2);
     schema.appendDimension(d3);
 
-    std::size_t offX = schema.getDimensionLayout(0).getByteOffset();
+    std::size_t offX = schema.getDimension(0).getByteOffset();
     BOOST_CHECK(offX==0);
-    std::size_t offY = schema.getDimensionLayout(1).getByteOffset();
+    std::size_t offY = schema.getDimension(1).getByteOffset();
     BOOST_CHECK(offY==1);
-    std::size_t offZ = schema.getDimensionLayout(2).getByteOffset();
+    std::size_t offZ = schema.getDimension(2).getByteOffset();
     BOOST_CHECK(offZ==5);
 
     boost::uint32_t capacity = 17;

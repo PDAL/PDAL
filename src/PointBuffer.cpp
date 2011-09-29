@@ -151,8 +151,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
         for (i=0; i<dimensions.size(); i++)
         {
             const Dimension& dimension = dimensions[i];
-            const DimensionLayout& dimensionLayout = schema.getDimensionLayout(i);
-            const std::size_t fieldIndex = dimensionLayout.getPosition();
+            const std::size_t fieldIndex = dimension.getPosition();
 
             const std::string key = pointstring + dimension.getName();
             
@@ -292,8 +291,7 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
         for (i=0; i<dimensions.size(); i++)
         {
             const Dimension& dimension = dimensions[i];
-            const DimensionLayout& dimensionLayout = schema.getDimensionLayout(i);
-            std::size_t fieldIndex = dimensionLayout.getPosition();
+            std::size_t fieldIndex = dimension.getPosition();
 
             ostr << dimension.getName() << " (" << dimension.getDataTypeName(dimension.getDataType()) << ") : ";
 
