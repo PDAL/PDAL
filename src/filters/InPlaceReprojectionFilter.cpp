@@ -228,7 +228,7 @@ void InPlaceReprojectionFilter::checkImpedance()
 {
     Schema& schema = this->getSchemaRef();
 
-    pdal::Schema::Dimensions & dims = schema.getDimensions();
+    std::vector<Dimension>& dims = schema.getDimensions();
     
     std::string x_name;
     std::string y_name;
@@ -259,7 +259,7 @@ void InPlaceReprojectionFilter::checkImpedance()
     }
 
 
-    Schema::DimensionsIter i;
+    std::vector<Dimension>::iterator i;
     for (i = dims.begin(); i != dims.end(); ++i)
     {
         if (i->getName() == x_name)

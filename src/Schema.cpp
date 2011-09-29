@@ -123,12 +123,12 @@ Dimension& Schema::getDimension(std::size_t index)
 }
 
 
-const Schema::Dimensions& Schema::getDimensions() const
+const std::vector<Dimension>& Schema::getDimensions() const
 {
     return m_dimensions;
 }
 
-Schema::Dimensions& Schema::getDimensions() 
+std::vector<Dimension>& Schema::getDimensions() 
 {
     return m_dimensions;
 }
@@ -233,7 +233,7 @@ boost::property_tree::ptree Schema::toPTree() const
 {
     boost::property_tree::ptree tree;
 
-    for (DimensionsCIter iter = m_dimensions.begin(); iter != m_dimensions.end(); ++iter)
+    for (std::vector<Dimension>::const_iterator iter = m_dimensions.begin(); iter != m_dimensions.end(); ++iter)
     {
         const Dimension& dim = *iter;
         tree.add_child("dimension", dim.toPTree());

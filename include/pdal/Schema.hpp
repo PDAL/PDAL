@@ -69,11 +69,6 @@ namespace pdal
 class PDAL_DLL Schema
 {
 public:
-    typedef std::vector<Dimension> Dimensions;
-    typedef std::vector<Dimension>::iterator DimensionsIter;
-    typedef std::vector<Dimension>::const_iterator DimensionsCIter;
-
-public:
     Schema();
     Schema(Schema const& other);
 
@@ -85,8 +80,8 @@ public:
     void appendDimension(Dimension const& dim);
     void appendDimensions(const std::vector<Dimension>& dim);
 
-    const Dimensions& getDimensions() const;
-    Dimensions& getDimensions();
+    const std::vector<Dimension>& getDimensions() const;
+    std::vector<Dimension>& getDimensions();
 
     bool hasDimension(const Dimension::Id& id) const;
     //bool hasDimension(const Dimension& dim) const;

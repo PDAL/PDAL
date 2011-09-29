@@ -57,10 +57,6 @@ namespace pdal
 class PDAL_DLL SchemaLayout
 {
 public:
-    typedef std::vector<DimensionLayout> DimensionLayouts;
-    typedef std::vector<DimensionLayout>::iterator DimensionLayoutsIter;
-    typedef std::vector<DimensionLayout>::const_iterator DimensionLayoutsCIter;
-
     SchemaLayout(const Schema&);
     SchemaLayout(SchemaLayout const& other);
 

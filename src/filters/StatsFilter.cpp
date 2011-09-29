@@ -116,8 +116,8 @@ StatsFilter::StatsFilter(Stage& prevStage)
 
 StatsFilter::~StatsFilter()
 {
-    Schema::Dimensions dims = getSchema().getDimensions();
-    for (Schema::DimensionsIter iter = dims.begin(); iter != dims.end(); ++iter)
+    const std::vector<Dimension>& dims = getSchema().getDimensions();
+    for (std::vector<Dimension>::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
     {
         const Dimension& dim = *iter;
         StatsCollector* stats = m_stats[dim.getId()];
@@ -130,8 +130,8 @@ void StatsFilter::initialize()
 {
     Filter::initialize();
 
-    const Schema::Dimensions dims = getSchema().getDimensions();
-    for (Schema::DimensionsCIter iter = dims.begin(); iter != dims.end(); ++iter)
+    const std::vector<Dimension>& dims = getSchema().getDimensions();
+    for (std::vector<Dimension>::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
     {
         const Dimension& dim = *iter;
         m_stats[dim.getId()] = new StatsCollector();
@@ -150,8 +150,8 @@ const Options StatsFilter::getDefaultOptions() const
 
 void StatsFilter::reset()
 {
-    const Schema::Dimensions dims = getSchema().getDimensions();
-    for (Schema::DimensionsCIter iter = dims.begin(); iter != dims.end(); ++iter)
+    const std::vector<Dimension>& dims = getSchema().getDimensions();
+    for (std::vector<Dimension>::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
     {
         const Dimension& dim = *iter;
         m_stats[dim.getId()]->reset();

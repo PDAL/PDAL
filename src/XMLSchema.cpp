@@ -739,7 +739,7 @@ void Writer::writeSchema(TextWriterPtr writer)
 
     xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get()); 
     
-    pdal::Schema::Dimensions const& dims = m_schema.getDimensions();
+    const std::vector<Dimension>& dims = m_schema.getDimensions();
     
     for (boost::uint32_t i = 0; i < dims.size(); i++)
     {

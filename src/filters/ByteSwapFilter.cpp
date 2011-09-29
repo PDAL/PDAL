@@ -103,7 +103,7 @@ boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointB
     SchemaLayout& dstSchemaLayout = dstData.getSchemaLayout();
     Schema & dstSchema = dstSchemaLayout.getSchema();
     
-    pdal::Schema::Dimensions const& dstDims = dstSchema.getDimensions();
+    const std::vector<Dimension>& dstDims = dstSchema.getDimensions();
 
     dstData.setSpatialBounds(srcData.getSpatialBounds());
     dstData.copyPointsFast(0, 0, srcData, srcData.getNumPoints());

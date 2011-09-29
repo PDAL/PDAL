@@ -147,7 +147,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
     {
         const std::string pointstring = boost::lexical_cast<std::string>(pointIndex) + ".";
         
-        for (SchemaLayout::DimensionLayoutsCIter citer=dimensionLayouts.begin(); citer != dimensionLayouts.end(); ++citer)
+        for (std::vector<DimensionLayout>::const_iterator citer=dimensionLayouts.begin(); citer != dimensionLayouts.end(); ++citer)
         {
             const DimensionLayout& dimensionLayout = *citer;
             const Dimension& dimension = dimensionLayout.getDimension();
@@ -286,7 +286,7 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& PointBuffer)
        
         ostr << "Point: " << pointIndex << endl;
 
-        for (SchemaLayout::DimensionLayoutsCIter citer=dimensionLayouts.begin(); citer != dimensionLayouts.end(); ++citer)
+        for (std::vector<DimensionLayout>::const_iterator citer=dimensionLayouts.begin(); citer != dimensionLayouts.end(); ++citer)
         {
             const DimensionLayout& dimensionLayout = *citer;
             const Dimension& dimension = dimensionLayout.getDimension();

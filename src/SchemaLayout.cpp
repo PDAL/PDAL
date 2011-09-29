@@ -110,12 +110,12 @@ void SchemaLayout::calculateSizes()
 
     std::size_t offset = 0;
 
-    Schema::Dimensions dims = m_schema.getDimensions();
+    std::vector<Dimension>& dims = m_schema.getDimensions();
 
     m_dimensionLayouts.clear();
 
     int i=0;
-    for (Schema::DimensionsCIter iter = dims.begin(); iter != dims.end(); ++iter)
+    for (std::vector<Dimension>::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
     {
         const Dimension& dim = *iter;
 
@@ -165,7 +165,7 @@ boost::property_tree::ptree SchemaLayout::toPTree() const
 {
     boost::property_tree::ptree tree;
 
-    for (DimensionLayoutsCIter iter = m_dimensionLayouts.begin(); iter != m_dimensionLayouts.end(); ++iter)
+    for (std::vector<DimensionLayout>::const_iterator iter = m_dimensionLayouts.begin(); iter != m_dimensionLayouts.end(); ++iter)
     {
         const DimensionLayout& dim = *iter;
         tree.add_child("dimensionlayout", dim.toPTree());
