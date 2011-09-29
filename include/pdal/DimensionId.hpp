@@ -127,6 +127,8 @@ public:
     Undefined = 200000
     };
 
+public:
+    static Id getIdFromName(std::string const& name);
 };
 
 

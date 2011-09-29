@@ -363,14 +363,19 @@ static bool hasKnownDimension(const DimensionId::Id& id)
 
 static void validate()
 {
-    std::map<DimensionId::Id, int> map;
+    static std::map<DimensionId::Id, int> map;
 
-    int i=0;
-    while (s_knownDimensions[i].id != DimensionId::Undefined)
+    // only do this once
+    if (map.size() == 0)
     {
-        assert(map.find(s_knownDimensions[i].id) == map.end());
-        map.insert(std::pair<DimensionId::Id,int>(s_knownDimensions[i].id,1) );
-        ++i;
+        int i=0;
+        while (s_knownDimensions[i].id != DimensionId::Undefined)
+        {
+            assert(map.find(s_knownDimensions[i].id) == map.end());
+            std::pair<DimensionId::Id,int> pair(s_knownDimensions[i].id,i);
+            map.insert(pair);
+            ++i;
+        }
     }
 }
 
