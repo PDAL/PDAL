@@ -493,9 +493,6 @@ void InPlaceReprojectionFilter::processBuffer(PointBuffer& data) const
     const int indexY = schema.getDimensionIndex(d_y);
     const int indexZ = schema.getDimensionIndex(d_z);
 
-std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
-std::cout.precision(8);
-
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         double x = getScaledValue(data, m_x, pointIndex, indexX);
