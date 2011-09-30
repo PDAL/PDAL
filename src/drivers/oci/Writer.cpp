@@ -404,7 +404,7 @@ bool Writer::BlockTableExists()
     oss << "select table_name from user_tables";
 
     if (isDebug())
-        std::cout << "checking for " << block_table_name << " existence" << std::endl;
+        std::cout << "checking for " << block_table_name << " existence ... " ;
         
     Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
     
@@ -416,18 +416,25 @@ bool Writer::BlockTableExists()
     statement->Execute();
     
     bool bDidRead = statement->Fetch();
+
+    if (isDebug())
+        std::cout << "checking ... " ;
+
+
     while (bDidRead)
     {
+        if (isDebug())
+            std::cout << ", " << szTable;
         if (Utils::compare_no_case(szTable, block_table_name) == 0)
         {
             if (isDebug())
-                std::cout << "found table " << block_table_name <<std::endl;
+                std::cout << " -- '" << block_table_name << "' found." <<std::endl;
             return true;
         }
         bDidRead = statement->Fetch();
     }
-            if (isDebug())
-                std::cout << "Block table " << block_table_name << " not found" << std::endl;
+    if (isDebug())
+        std::cout << " -- '" << block_table_name << "' not found." << std::endl;
     
     return false;
     
@@ -436,9 +443,8 @@ bool Writer::BlockTableExists()
 void Writer::CreateBlockTable()
 {
     std::ostringstream oss;
-    std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
     
-    oss << "CREATE TABLE " << block_table_name << " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
+    oss << "CREATE TABLE " << m_block_table_name << " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
     
     run(oss);
     m_connection->Commit();
