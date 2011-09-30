@@ -415,11 +415,11 @@ bool Writer::BlockTableExists()
 
     statement->Execute();
     
-    bool bDidRead = statement->Fetch();
 
     if (isDebug())
-        std::cout << "checking ... " ;
+        std::cout << "checking ... " << szTable ;
 
+    bool bDidRead = true;
 
     while (bDidRead)
     {
