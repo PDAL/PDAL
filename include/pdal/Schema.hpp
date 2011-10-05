@@ -94,7 +94,7 @@ public:
     int getDimensionIndex(const DimensionId::Id& id) const;
     int getDimensionIndex(const Dimension& dim) const;
 
-    void recalculateSizes();
+
 
     /// Fetch total byte size -- sum of all dimensions
     inline std::size_t getByteSize() const
@@ -121,7 +121,7 @@ public:
 
 private:
     void calculateSizes();
-
+    
     std::vector<Dimension> m_dimensions;
     std::size_t m_byteSize;
 

@@ -105,7 +105,7 @@ bool Schema::operator!=(const Schema& other) const
 }
 
     
-void Schema::recalculateSizes()
+void Schema::calculateSizes()
 {
     // to make life easy, for now we are going to assume that each Dimension 
     // is byte-aligned and occupies an integral number of bytes
@@ -140,7 +140,7 @@ void Schema::appendDimension(const Dimension& dim)
     std::pair<DimensionId::Id, std::size_t> p(dim.getId(), m_dimensions.size()-1);
     m_dimensions_map.insert(p);
 
-    recalculateSizes();
+    calculateSizes();
 
     return;
 }
