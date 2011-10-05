@@ -59,6 +59,15 @@ enum StageIteratorType
     StageIterator_Block = (1u << 2),
     StageIterator_Unknown = (1u << 8)
 };
+    
+
+
+enum StageOperationType
+{
+    StageOperation_All = (1u << 0),
+    StageOperation_Type = (1u << 1),
+    STageOperation_Id = (1u << 2)
+};
 
 } // namespace
 
