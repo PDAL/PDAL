@@ -349,16 +349,16 @@ void LasHeaderReader::readOneVLR()
         reserved = Utils::read_field<boost::uint16_t>(p1);
         boost::ignore_unused_variable_warning(reserved);
 
-        boost::uint8_t userId_data[16];
-        Utils::read_array_field(p1, userId_data, 16);
-        userId = VariableLengthRecord::bytes2string(userId_data, 16);
+        boost::uint8_t userId_data[VariableLengthRecord::eUserIdSize];
+        Utils::read_array_field(p1, userId_data, VariableLengthRecord::eUserIdSize);
+        userId = VariableLengthRecord::bytes2string(userId_data, VariableLengthRecord::eUserIdSize);
 
         recordId = Utils::read_field<boost::uint16_t>(p1);
         recordLenAfterHeader = Utils::read_field<boost::uint16_t>(p1);
 
-        boost::uint8_t description_data[32];
-        Utils::read_array_field(p1, description_data, 32);
-        description = VariableLengthRecord::bytes2string(description_data, 32);
+        boost::uint8_t description_data[VariableLengthRecord::eDescriptionSize];
+        Utils::read_array_field(p1, description_data, VariableLengthRecord::eDescriptionSize);
+        description = VariableLengthRecord::bytes2string(description_data, VariableLengthRecord::eDescriptionSize);
 
         delete[] buf1;
     }

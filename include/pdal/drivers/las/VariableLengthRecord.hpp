@@ -93,6 +93,12 @@ public:
     // len is the size of the array he wants, it will be padded with zeros if str.length() < len
     static boost::uint8_t* string2bytes(boost::uint32_t len, const std::string& str);
 
+    enum
+    {
+        eUserIdSize = 16,
+        eDescriptionSize = 32
+    };
+
 private:
     boost::uint16_t m_reserved;
     std::string m_userId; // always stored as 16 bytes (padded with 0's)
