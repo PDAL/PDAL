@@ -312,7 +312,6 @@ bool Writer::isSolid() const
 boost::int32_t Writer::getPCID() const 
 {
     return m_pc_id;
-    // return getOptions().getValueOrThrow<boost::int32_t>("cloud_id");
 }
 
 void Writer::CreateBlockIndex()
@@ -411,15 +410,13 @@ bool Writer::BlockTableExists()
     // Because of OCIGDALErrorHandler, this is going to throw if there is a 
     // problem.  When it does, the statement should go out of scope and 
     // be destroyed without leaking.
-    statement->Define(szTable);    
-
+    statement->Define(szTable);
     statement->Execute();
-    
 
     if (isDebug())
         std::cout << "checking ... " << szTable ;
 
-    bool bDidRead = true;
+    bool bDidRead(true);
 
     while (bDidRead)
     {
