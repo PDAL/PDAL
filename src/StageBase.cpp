@@ -77,6 +77,7 @@ StageBase::StageBase(const std::vector<StageBase*>& inputs, const Options& optio
     , m_verbose(options.getValueOrDefault<boost::uint32_t>("verbose", 0))
     , m_id(options.getValueOrDefault<boost::uint32_t>("id", 0))
     , m_inputs(inputs)
+    , m_dimensionsType(StageOperation_All)
 {
     BOOST_FOREACH(StageBase* input, m_inputs)
     {
