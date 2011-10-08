@@ -217,7 +217,8 @@ protected:
     /// @return The options.
     Options& getOptions();
 
-
+    inline StageOperationType getDimensionOperationType() const 
+        { return m_dimensionsType; }
     /// Makes an "empty" vector of StageBase pointers.
     ///
     /// This is used by the ctors of the derived classes, so they can call 
@@ -258,6 +259,7 @@ private:
 
     std::vector<StageBase*> m_inputs;
     std::vector<StageBase*> m_outputs;
+    StageOperationType m_dimensionsType;
 
     StageBase& operator=(const StageBase& rhs); // not implemented
     StageBase(const StageBase&); // not implemented
