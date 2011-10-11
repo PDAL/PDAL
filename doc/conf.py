@@ -295,3 +295,9 @@ breathe_domain_by_extension = {
         "h":"cpp"
         }
 
+breathe_diagram = {
+    'path': "./doxygen/html",
+    'html-path': '../../../doxygen/html',
+    'project' : 'api',
+    'no-link' : False
+}
