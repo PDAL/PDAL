@@ -64,24 +64,24 @@ bool ShouldRunTest()
     return TestConfig::g_oracle_connection.size() > 0;
 }
 
-OptionsOld GetOptions()
-{
-    OptionsOld options;
-    boost::property_tree::ptree& tree = options.GetPTree();
-
-    tree.put("capacity", 333);
-    tree.put("overwrite", false);
-    tree.put("connection", TestConfig::g_oracle_connection);
-    tree.put("debug", true);
-    tree.put("verbose", true);
-    tree.put("scale.x", 0.0000001);
-    tree.put("scale.y", 0.0000001);
-    tree.put("scale.z", 0.001);
-    tree.put("block_table_name", "PDAL_TEST_BLOCKS");
-    tree.put("base_table_name", "PDAL_TEST_BASE");
-    tree.put("select_sql", "SELECT CLOUD FROM PDAL_TEST_BASE where ID=1");
-    return options;
-}
+// OptionsOld GetOptions()
+// {
+//     OptionsOld options;
+//     boost::property_tree::ptree& tree = options.GetPTree();
+// 
+//     tree.put("capacity", 333);
+//     tree.put("overwrite", false);
+//     tree.put("connection", TestConfig::g_oracle_connection);
+//     tree.put("debug", true);
+//     tree.put("verbose", true);
+//     tree.put("scale.x", 0.0000001);
+//     tree.put("scale.y", 0.0000001);
+//     tree.put("scale.z", 0.001);
+//     tree.put("block_table_name", "PDAL_TEST_BLOCKS");
+//     tree.put("base_table_name", "PDAL_TEST_BASE");
+//     tree.put("select_sql", "SELECT CLOUD FROM PDAL_TEST_BASE where ID=1");
+//     return options;
+// }
 
 
 void RunSQL(Connection connection, std::string sql)

@@ -78,18 +78,10 @@ PointIndexes::PointIndexes(const Schema& schema, TERRASOLID_Format_Type format)
 }
 
 
-static OptionsOld dummy;
+
+
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
-    , m_optionsOld(dummy)
-{
-    throw not_yet_implemented("options ctor"); 
-}
-
-
-Reader::Reader(OptionsOld& optionsOld)
-    : pdal::Reader(Options::none())
-    , m_optionsOld(optionsOld)
     , m_format(TERRASOLID_Format_Unknown)
     , m_haveColor(false)
     , m_haveTime(false)
@@ -153,21 +145,16 @@ void Reader::initialize()
 const Options Reader::getDefaultOptions() const
 {
     Options options;
+    Option filename("filename", "", "file to read from");
     return options;
 }
 
 
 std::string Reader::getFileName() const
 {
-    try
-    {
-        return m_optionsOld.GetPTree().get<std::string>("input");
-        
-    } catch (boost::property_tree::ptree_bad_path const&)
-    {
-        return std::string("");
-    }
+    return getOptions().getValueOrThrow<std::string>("filename");
 }
+
 void Reader::registerFields()
 {
     Schema& schema = getSchemaRef();

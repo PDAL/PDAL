@@ -44,56 +44,6 @@
 
 namespace pdal { namespace drivers { namespace oci {
 
-
-OptionsOld GetDefaultOptions() 
-{
-    OptionsOld options;
-    boost::property_tree::ptree& tree = options.GetPTree();
-    tree.put("is3d", false);
-    tree.put("solid", false);
-    tree.put("overwrite", false);
-    tree.put("debug", false);
-    tree.put("verbose", false);
-    tree.put("srid", 4269);
-    tree.put("capacity", 8000);
-    tree.put("precision", 8);
-    tree.put("cloud_id", -1);
-    tree.put("connection", std::string(""));
-    tree.put("block_table_name", std::string("output"));
-    tree.put("block_table_partition_column", std::string(""));
-    tree.put("block_table_partition_value", boost::int32_t(0));
-    tree.put("base_table_name", std::string("hobu"));
-    tree.put("cloud_column_name", std::string("cloud"));
-    tree.put("header_blob_column_name", std::string(""));
-    tree.put("base_table_aux_columns", std::string(""));
-    tree.put("base_table_aux_values", std::string(""));
-    tree.put("base_table_boundary_column", std::string(""));
-    tree.put("base_table_boundary_wkt", std::string(""));
-    tree.put("pre_block_sql", std::string(""));
-    tree.put("pre_sql", std::string(""));
-    tree.put("post_block_sql", std::string(""));
-    tree.put("select_sql", std::string(""));
-    tree.put("base_table_bounds", pdal::Bounds<double>());
-    tree.put("blob_read_byte_size", boost::uint32_t(2000));
-    tree.put("point_schema_override", "");
-    
-    boost::property_tree::ptree scales;
-    scales.put("x", double(0.01));
-    scales.put("y", double(0.01));
-    scales.put("z", double(0.01));
-
-    boost::property_tree::ptree offsets;
-    offsets.put("x", double(0.0));
-    offsets.put("y", double(0.0));
-    offsets.put("z", double(0.0));
-    
-    tree.add_child("scale", scales);
-    tree.add_child("offset", offsets);
-    return options;
-}
-
-
-
 Block::Block(Connection connection)
     : num_points(0)
     , chunk(new std::vector<boost::uint8_t>)

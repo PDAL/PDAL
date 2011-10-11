@@ -94,14 +94,14 @@ void Check_Point(const pdal::PointBuffer& data,
 
 BOOST_AUTO_TEST_CASE(test_10_word)
 {
-    pdal::OptionsOld options;
     // std::string filename = Support::datapath("20050903_231839.qi");
 
     std::string filename = Support::datapath("terrasolid/20020715-time-color.bin");
 
     
-    boost::property_tree::ptree& tree = options.GetPTree();
-    tree.put<std::string>("input", filename);
+    pdal::Option fname("filename", filename, "filename to read");
+    pdal::Options options;
+    options.add(fname);
     pdal::drivers::terrasolid::Reader reader(options);
     reader.initialize();
 

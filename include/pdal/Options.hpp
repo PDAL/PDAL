@@ -44,23 +44,6 @@
 namespace pdal
 {
 
-    
-class PDAL_DLL OptionsOld
-{
-private:
-    boost::property_tree::ptree m_tree;
-
-public:
-    OptionsOld()
-    {
-        m_tree.put("is3d", false);
-    }
-    
-    OptionsOld(boost::property_tree::ptree const& tree) { m_tree = tree; }
-    boost::property_tree::ptree& GetPTree() { return m_tree; }
-    boost::property_tree::ptree const& GetPTree() const { return m_tree; }
-};
-
 
 // An Option is just a record with three fields: name, value, and description.
 //
