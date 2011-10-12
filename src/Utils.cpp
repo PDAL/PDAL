@@ -136,36 +136,5 @@ boost::uint32_t Utils::getStreamPrecision(double scale)
 }
 
 
-int Utils::compare_no_case_n(const char* a, const char* b, size_t n)
-{
-#ifdef PDAL_COMPILER_MSVC
-    return _strnicmp(a, b, n);
-#else
-    return strncasecmp(a, b, n);
-#endif 
-}
-
-
-int Utils::compare_no_case(const char* a, const char* b)
-{
-#ifdef PDAL_COMPILER_MSVC
-    return _stricmp(a, b);
-#else
-    return strcasecmp(a, b);
-#endif 
-}
-
-
-int Utils::compare_no_case_n(const std::string& a, const std::string& b, size_t n)
-{
-    return compare_no_case_n(a.c_str(), b.c_str(), n);
-}
-
-
-int Utils::compare_no_case(const std::string& a, const std::string& b)
-{
-    return compare_no_case(a.c_str(), b.c_str());
-}
-
 
 } // namespace pdal

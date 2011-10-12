@@ -38,6 +38,8 @@
 
 #include <map>
 
+#include <boost/algorithm/string.hpp>
+
 namespace pdal
 {
 
@@ -389,74 +391,74 @@ bool DimensionId::hasKnownDimension(const Id& id)
 DimensionId::Id DimensionId::getIdFromName(std::string const& name)
 {
     // BUG: should we be checking for the Double datatype version of X,Y,Z too?
-    if (!Utils::compare_no_case(name, "X"))   
+    if (boost::iequals(name, "X"))   
         return DimensionId::X_i32;
     
-    if (!Utils::compare_no_case(name, "Y"))
+    if (boost::iequals(name, "Y"))
         return DimensionId::Y_i32;
 
-    if (!Utils::compare_no_case(name, "Z"))
+    if (boost::iequals(name, "Z"))
         return DimensionId::Z_i32;
 
-    if (!Utils::compare_no_case(name, "Intensity"))
+    if (boost::iequals(name, "Intensity"))
         return DimensionId::Las_Intensity;
 
-    if (!Utils::compare_no_case(name, "Return Number") ||
-        !Utils::compare_no_case(name, "ReturnNumber"))
+    if (boost::iequals(name, "Return Number") ||
+        boost::iequals(name, "ReturnNumber"))
         return DimensionId::Las_ReturnNumber;
 
-    if (!Utils::compare_no_case(name, "Number of Returns") ||
-        !Utils::compare_no_case(name, "NumberOfReturns"))
+    if (boost::iequals(name, "Number of Returns") ||
+        boost::iequals(name, "NumberOfReturns"))
         return DimensionId::Las_NumberOfReturns;
 
-    if (!Utils::compare_no_case(name, "Number of Returns"))
+    if (boost::iequals(name, "Number of Returns"))
         return DimensionId::Las_NumberOfReturns;
 
-    if (!Utils::compare_no_case(name, "Scan Direction") ||
-        !Utils::compare_no_case(name, "ScanDirectionFlag") ||
-        !Utils::compare_no_case(name, "ScanDirection"))
+    if (boost::iequals(name, "Scan Direction") ||
+        boost::iequals(name, "ScanDirectionFlag") ||
+        boost::iequals(name, "ScanDirection"))
         return DimensionId::Las_ScanDirectionFlag;
 
-    if (!Utils::compare_no_case(name, "Flightline Edge") ||
-        !Utils::compare_no_case(name, "EdgeOfFlightLine") ||
-        !Utils::compare_no_case(name, "FlightlineEdge"))
+    if (boost::iequals(name, "Flightline Edge") ||
+        boost::iequals(name, "EdgeOfFlightLine") ||
+        boost::iequals(name, "FlightlineEdge"))
         return DimensionId::Las_EdgeOfFlightLine;
 
-    if (!Utils::compare_no_case(name, "Classification"))
+    if (boost::iequals(name, "Classification"))
         return DimensionId::Las_Classification;
 
-    if (!Utils::compare_no_case(name, "Scan Angle Rank") ||
-        !Utils::compare_no_case(name, "ScanAngle") ||
-        !Utils::compare_no_case(name, "ScanAngleRank"))
+    if (boost::iequals(name, "Scan Angle Rank") ||
+        boost::iequals(name, "ScanAngle") ||
+        boost::iequals(name, "ScanAngleRank"))
         return DimensionId::Las_ScanAngleRank;
 
-    if (!Utils::compare_no_case(name, "User Data") ||
-        !Utils::compare_no_case(name, "UserData"))
+    if (boost::iequals(name, "User Data") ||
+        boost::iequals(name, "UserData"))
         return DimensionId::Las_UserData;
 
-    if (!Utils::compare_no_case(name, "Point Source ID")||
-        !Utils::compare_no_case(name, "PointSourceId"))
+    if (boost::iequals(name, "Point Source ID")||
+        boost::iequals(name, "PointSourceId"))
         return DimensionId::Las_PointSourceId;
 
-    if (!Utils::compare_no_case(name, "Time"))
+    if (boost::iequals(name, "Time"))
         return DimensionId::Las_Time;
 
-    if (!Utils::compare_no_case(name, "Red"))
+    if (boost::iequals(name, "Red"))
         return DimensionId::Red_u16;
 
-    if (!Utils::compare_no_case(name, "Green"))
+    if (boost::iequals(name, "Green"))
         return DimensionId::Green_u16;
 
-    if (!Utils::compare_no_case(name, "Blue"))
+    if (boost::iequals(name, "Blue"))
         return DimensionId::Blue_u16;
 
-    if (!Utils::compare_no_case(name, "Alpha"))
+    if (boost::iequals(name, "Alpha"))
         return DimensionId::TerraSolid_Alpha;
     
-    if (!Utils::compare_no_case(name, "Chipper Point ID"))
+    if (boost::iequals(name, "Chipper Point ID"))
         return DimensionId::Chipper_1;
 
-    if (!Utils::compare_no_case(name, "Chipper Block ID"))
+    if (boost::iequals(name, "Chipper Block ID"))
         return DimensionId::Chipper_2;
 
     // Yes, this is scary.  What else can we do?

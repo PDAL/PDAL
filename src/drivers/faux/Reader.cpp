@@ -37,15 +37,17 @@
 #include <pdal/drivers/faux/Iterator.hpp>
 #include <pdal/PointBuffer.hpp>
 
+#include <boost/algorithm/string.hpp>
+
 
 namespace pdal { namespace drivers { namespace faux {
 
 
 static Reader::Mode string2mode(const std::string& str)
 {
-    if (Utils::compare_no_case(str, "constant")==0) return Reader::Constant;
-    if (Utils::compare_no_case(str, "random")==0) return Reader::Random;
-    if (Utils::compare_no_case(str, "ramp")==0) return Reader::Ramp;
+    if (boost::iequals(str, "constant")) return Reader::Constant;
+    if (boost::iequals(str, "random")) return Reader::Random;
+    if (boost::iequals(str, "ramp")) return Reader::Ramp;
     throw pdal_error("invalid Mode option: " + str);
 }
 

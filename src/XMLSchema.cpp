@@ -40,6 +40,8 @@
 #include <map>
 #include <algorithm>
 
+#include <boost/algorithm/string.hpp>
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -373,7 +375,7 @@ void Reader::Load()
     // print_element_names(root);
 
 
-    if (Utils::compare_no_case((const char*)root->name, "PointCloudSchema"))
+    if (!boost::iequals((const char*)root->name, "PointCloudSchema"))
         throw schema_loading_error("First node of document was not named 'PointCloudSchema'");
 
     xmlNode* dimension = root->children;
@@ -382,7 +384,7 @@ void Reader::Load()
     while(dimension != NULL)
     {
         // printf("node name: %s\n", (const char*)dimension->name);
-        if (dimension->type != XML_ELEMENT_NODE || Utils::compare_no_case((const char*)dimension->name, "dimension"))
+        if (dimension->type != XML_ELEMENT_NODE || !boost::iequals((const char*)dimension->name, "dimension"))
         {
             dimension = dimension->next;
             continue;
@@ -411,7 +413,7 @@ void Reader::Load()
                 continue;
             }
 
-            if (!Utils::compare_no_case((const char*)properties->name, "name"))
+            if (boost::iequals((const char*)properties->name, "name"))
             {
                 CharPtr n = CharPtr(
                                 xmlNodeListGetString(doc, properties->children, 1),
@@ -423,7 +425,7 @@ void Reader::Load()
                 // std::cout << "Dimension name: " << name << std::endl;
             }
 
-            if (!Utils::compare_no_case((const char*)properties->name, "size"))
+            if (boost::iequals((const char*)properties->name, "size"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch size!");
@@ -437,7 +439,7 @@ void Reader::Load()
                 // std::cout << "Dimension size: " << size << std::endl;
             }
 
-            if (!Utils::compare_no_case((const char*)properties->name, "position"))
+            if (boost::iequals((const char*)properties->name, "position"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch position!");
@@ -450,14 +452,14 @@ void Reader::Load()
                 position = static_cast<boost::uint32_t>(p);
                 // std::cout << "Dimension position: " << position << std::endl;
             }
-            if (!Utils::compare_no_case((const char*)properties->name, "description"))
+            if (boost::iequals((const char*)properties->name, "description"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch description!");
                 description = std::string((const char*)n);
                 xmlFree(n);
             }
-            if (!Utils::compare_no_case((const char*)properties->name, "interpretation"))
+            if (boost::iequals((const char*)properties->name, "interpretation"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch interpretation!");
@@ -465,7 +467,7 @@ void Reader::Load()
                 xmlFree(n);
             }
 
-            if (!Utils::compare_no_case((const char*)properties->name, "minimum"))
+            if (boost::iequals((const char*)properties->name, "minimum"))
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
                 if (!n) throw schema_loading_error("Unable to fetch minimum value!");
@@ -475,7 +477,7 @@ void Reader::Load()
                 // std::cout << "Dimension minimum: " << minimum << std::endl;
             }
 
-            if (!Utils::compare_no_case((const char*)properties->name, "maximum"))
+            if (boost::iequals((const char*)properties->name, "maximum"))
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
                 if (!n) throw schema_loading_error("Unable to fetch maximum value!");
@@ -485,7 +487,7 @@ void Reader::Load()
                 // std::cout << "Dimension maximum: " << maximum << std::endl;
             }
 
-            if (!Utils::compare_no_case((const char*)properties->name, "offset"))
+            if (boost::iequals((const char*)properties->name, "offset"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch offset value!");
@@ -494,7 +496,7 @@ void Reader::Load()
                 xmlFree(n);
                 // std::cout << "Dimension offset: " << offset << std::endl;
             }
-            if (!Utils::compare_no_case((const char*)properties->name, "scale"))
+            if (boost::iequals((const char*)properties->name, "scale"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch scale value!");
@@ -503,12 +505,12 @@ void Reader::Load()
                 xmlFree(n);
                 // std::cout << "Dimension scale: " << scale << std::endl;
             }
-            if (!Utils::compare_no_case((const char*)properties->name, "endianness"))
+            if (boost::iequals((const char*)properties->name, "endianness"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch endianness value!");
                 
-                if (!Utils::compare_no_case((const char*) n, "big"))
+                if (boost::iequals((const char*) n, "big"))
                     endianness = Endian_Big;
                 else
                     endianness = Endian_Little;
@@ -567,43 +569,43 @@ void Reader::Load()
 Dimension::DataType Reader::GetDimensionType(std::string const& interpretation)
 {
 
-    if (!Utils::compare_no_case(interpretation, "int8_t") ||
-        !Utils::compare_no_case(interpretation, "int8"))
+    if (boost::iequals(interpretation, "int8_t") ||
+        boost::iequals(interpretation, "int8"))
         return Dimension::Int8;
 
-    if (!Utils::compare_no_case(interpretation, "uint8_t") ||
-        !Utils::compare_no_case(interpretation, "uint8"))
+    if (boost::iequals(interpretation, "uint8_t") ||
+        boost::iequals(interpretation, "uint8"))
         return Dimension::Uint8;
 
-    if (!Utils::compare_no_case(interpretation, "int16_t") ||
-        !Utils::compare_no_case(interpretation, "int16"))
+    if (boost::iequals(interpretation, "int16_t") ||
+        boost::iequals(interpretation, "int16"))
         return Dimension::Int16;
 
-    if (!Utils::compare_no_case(interpretation, "uint16_t") ||
-        !Utils::compare_no_case(interpretation, "uint16"))
+    if (boost::iequals(interpretation, "uint16_t") ||
+        boost::iequals(interpretation, "uint16"))
         return Dimension::Uint16;
 
 
-    if (!Utils::compare_no_case(interpretation, "int32_t") ||
-        !Utils::compare_no_case(interpretation, "int32"))
+    if (boost::iequals(interpretation, "int32_t") ||
+        boost::iequals(interpretation, "int32"))
         return Dimension::Int32;
 
-    if (!Utils::compare_no_case(interpretation, "uint32_t") ||
-        !Utils::compare_no_case(interpretation, "uint32"))
+    if (boost::iequals(interpretation, "uint32_t") ||
+        boost::iequals(interpretation, "uint32"))
         return Dimension::Uint32;
 
-    if (!Utils::compare_no_case(interpretation, "int64_t") ||
-        !Utils::compare_no_case(interpretation, "int64"))
+    if (boost::iequals(interpretation, "int64_t") ||
+        boost::iequals(interpretation, "int64"))
         return Dimension::Int64;
 
-    if (!Utils::compare_no_case(interpretation, "uint64_t") ||
-        !Utils::compare_no_case(interpretation, "uint64"))
+    if (boost::iequals(interpretation, "uint64_t") ||
+        boost::iequals(interpretation, "uint64"))
         return Dimension::Uint64;
 
-    if (!Utils::compare_no_case(interpretation, "float"))
+    if (boost::iequals(interpretation, "float"))
         return Dimension::Float;
 
-    if (!Utils::compare_no_case(interpretation, "double"))
+    if (boost::iequals(interpretation, "double"))
         return Dimension::Double;
 
 

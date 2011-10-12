@@ -151,10 +151,6 @@ public:
 
     static boost::uint32_t getStreamPrecision(double scale);
 
-    static int compare_no_case_n(const char* a, const char* b, size_t n);
-    static int compare_no_case(const char* a, const char* b);
-    static int compare_no_case_n(const std::string& a, const std::string& b, size_t n);
-    static int compare_no_case(const std::string& a, const std::string& b);
 
 private:
     template<typename T>
