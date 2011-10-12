@@ -92,9 +92,8 @@ void Check_Point(const pdal::PointBuffer& data,
     Compare(t0, tref);
 }
 
-BOOST_AUTO_TEST_CASE(test_10_word)
+BOOST_AUTO_TEST_CASE(test_tsolid)
 {
-    // std::string filename = Support::datapath("20050903_231839.qi");
 
     std::string filename = Support::datapath("terrasolid/20020715-time-color.bin");
 
@@ -117,7 +116,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     
     {
         boost::uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead,3u);
+        BOOST_CHECK_EQUAL(numRead, 3u);
     }
 
     delete iter;
@@ -129,39 +128,5 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     return;
 }
-// 
-// BOOST_AUTO_TEST_CASE(test_14_word)
-// {
-//     pdal::Options options;
-//     // std::string filename = Support::datapath("20050903_231839.qi");
-// 
-//     std::string filename = Support::datapath("terrasolid/14-word.qi");
-// 
-//     
-//     boost::property_tree::ptree& tree = options.GetPTree();
-//     tree.put<std::string>("input", filename);
-//     pdal::drivers::terrasolid::Reader reader(options);
-// 
-//     const Schema& schema = reader.getSchema();
-// 
-//     PointBuffer data(schema, 3);
-//     
-//     pdal::SequentialIterator* iter = reader.createSequentialIterator();
-//     
-//     {
-//         boost::uint32_t numRead = iter->read(data);
-//         BOOST_CHECK_EQUAL(numRead,3);
-//     }
-// 
-// 
-//     Check_Point(data, schema, 0, 35.623317, 244.306337, 1056830.000000, 903);
-//     Check_Point(data, schema, 1, 35.623280, 244.306260, 1056409.000000, 903);
-//     Check_Point(data, schema, 2, 35.623257, 244.306204, 1056483.000000, 903);
-// 
-// 
-//     return;
-// }
-
-
 
 BOOST_AUTO_TEST_SUITE_END()
