@@ -56,7 +56,7 @@
 
 using namespace pdal;
 
-using namespace pdal::drivers::oci;
+// using namespace pdal::drivers::oci;
 
 
 bool ShouldRunTest()
@@ -64,29 +64,71 @@ bool ShouldRunTest()
     return TestConfig::g_oracle_connection.size() > 0;
 }
 
-// OptionsOld GetOptions()
-// {
-//     OptionsOld options;
-//     boost::property_tree::ptree& tree = options.GetPTree();
-// 
-//     tree.put("capacity", 333);
-//     tree.put("overwrite", false);
-//     tree.put("connection", TestConfig::g_oracle_connection);
-//     tree.put("debug", true);
-//     tree.put("verbose", true);
-//     tree.put("scale.x", 0.0000001);
-//     tree.put("scale.y", 0.0000001);
-//     tree.put("scale.z", 0.001);
-//     tree.put("block_table_name", "PDAL_TEST_BLOCKS");
-//     tree.put("base_table_name", "PDAL_TEST_BASE");
-//     tree.put("select_sql", "SELECT CLOUD FROM PDAL_TEST_BASE where ID=1");
-//     return options;
-// }
-
-
-void RunSQL(Connection connection, std::string sql)
+Options GetOptions()
 {
-    Statement statement = Statement(connection->CreateStatement(sql.c_str()));
+    Options options;
+    
+    Option capacity("capacity", 333,"capacity");
+    options.add(capacity);
+    
+    Option overwrite("overwrite", false,"overwrite");
+    options.add(overwrite);
+    
+    Option connection("connection",TestConfig::g_oracle_connection, "connection");
+    options.add(connection);
+    
+    Option debug("debug", true, "debug");
+    options.add(debug);
+    
+    Option verbose("verbose", 1, "verbose");
+    options.add(verbose);
+    
+    Option block_table_name("block_table_name", "PDAL_TEST_BLOCKS", "block_table_name");
+    options.add(block_table_name);
+    
+    Option base_table_name("base_table_name", "PDAL_TEST_BASE" , "");
+    options.add(base_table_name);
+    
+    Option cloud_column_name("cloud_column_name", "CLOUD" , "");
+    options.add(cloud_column_name);
+    
+    Option is3d("is3d", false,"");
+    options.add(is3d);
+    
+    Option solid("solid", false,"");
+    options.add(solid);
+    
+    Option srid("srid",4269,"");
+    options.add(srid);
+    
+    Option out_srs("out_srs", "EPSG:4269","");
+    options.add(out_srs);
+
+    Option scale_x("scale_x", 0.0000001, "");
+    options.add(scale_x);
+    
+    Option scale_y("scale_y", 0.0000001, "");
+    options.add(scale_y);
+    
+    Option max_cache_blocks("max_cache_blocks", 1, "");
+    options.add(max_cache_blocks);
+    
+    Option cache_block_size("cache_block_size", capacity.getValue<boost::uint32_t>(), "");
+    options.add(cache_block_size);
+    
+    Option filename("filename", Support::datapath("1.2-with-color.las"), "");
+    options.add(filename);
+    
+    Option query("query", "SELECT CLOUD FROM PDAL_TEST_BASE where ID=1", "");
+    options.add(query);
+    
+    return options;
+}
+
+
+void RunSQL(pdal::drivers::oci::Connection connection, std::string sql)
+{
+    pdal::drivers::oci::Statement statement = pdal::drivers::oci::Statement(connection->CreateStatement(sql.c_str()));
     statement->Execute();    
 }
 
@@ -95,22 +137,24 @@ BOOST_AUTO_TEST_SUITE(OCITest)
 
 
 
-// BOOST_AUTO_TEST_CASE(initialize)
-// {
-//     if (!ShouldRunTest()) return;
-//     
-//     Options options = GetOptions();
-//     
-//     Connection connection = Connect(options);
-//     
-//     std::string base_table_name = options.GetPTree().get<std::string>("base_table_name");
-//     std::string create_pc_table("CREATE TABLE " + base_table_name +" (id number, CLOUD SDO_PC, DESCRIPTION VARCHAR2(20), HEADER BLOB, BOUNDARY SDO_GEOMETRY)");
-//     RunSQL(connection, create_pc_table);
-//     
-//     std::string block_table_name = options.GetPTree().get<std::string>("block_table_name");
-//     std::string create_block_table = "CREATE TABLE " + block_table_name + " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
-//     RunSQL(connection, create_block_table);
-// }
+BOOST_AUTO_TEST_CASE(initialize)
+{
+    if (!ShouldRunTest()) return;
+    
+    Options options = GetOptions();
+    
+    pdal::drivers::oci::Connection connection = pdal::drivers::oci::Connect(options, 
+                                                options.getValueOrThrow<bool>("debug"),
+                                                options.getValueOrThrow<boost::uint32_t>("verbose"));
+    
+    std::string base_table_name = options.getValueOrThrow<std::string>("base_table_name");
+    std::string create_pc_table("CREATE TABLE " + base_table_name +" (id number, CLOUD SDO_PC, DESCRIPTION VARCHAR2(20), HEADER BLOB, BOUNDARY SDO_GEOMETRY)");
+    RunSQL(connection, create_pc_table);
+    
+    std::string block_table_name = options.getValueOrThrow<std::string>("block_table_name");
+    std::string create_block_table = "CREATE TABLE " + block_table_name + " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
+    RunSQL(connection, create_block_table);
+}
 // 
 // 
 // BOOST_AUTO_TEST_CASE(test_writer)
@@ -159,21 +203,23 @@ BOOST_AUTO_TEST_SUITE(OCITest)
 // }
 
 
-// BOOST_AUTO_TEST_CASE(clean_up)
-// {
-//     if (!ShouldRunTest()) return;
-//     
-//     pdal::drivers::oci::Options options = GetOptions();
-//     
-//     Connection connection = Connect(options);
-// 
-//     std::string base_table_name = options.GetPTree().get<std::string>("base_table_name");
-//     std::string block_table_name = options.GetPTree().get<std::string>("block_table_name");
-//     
-//     std::string drop_base_table = "DROP TABLE " + base_table_name;
-//     std::string drop_block_table = "DROP TABLE " + block_table_name;
-//     RunSQL(connection, drop_base_table);
-//     RunSQL(connection, drop_block_table);    
-// }
+BOOST_AUTO_TEST_CASE(clean_up)
+{
+    if (!ShouldRunTest()) return;
+    
+    Options options = GetOptions();
+    
+    pdal::drivers::oci::Connection connection = pdal::drivers::oci::Connect(options, 
+                                                options.getValueOrThrow<bool>("debug"),
+                                                options.getValueOrThrow<boost::uint32_t>("verbose"));
+
+    std::string base_table_name = options.getValueOrThrow<std::string>("base_table_name");
+    std::string block_table_name = options.getValueOrThrow<std::string>("block_table_name");
+    
+    std::string drop_base_table = "DROP TABLE " + base_table_name;
+    std::string drop_block_table = "DROP TABLE " + block_table_name;
+    RunSQL(connection, drop_base_table);
+    RunSQL(connection, drop_block_table);    
+}
 
 BOOST_AUTO_TEST_SUITE_END()
