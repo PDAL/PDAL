@@ -64,8 +64,6 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    Debug();
-    
     m_connection = Connect(getOptions(), isDebug(), getVerboseLevel());
 
 
@@ -144,30 +142,6 @@ std::string Reader::getQuery() const
     return getOptions().getValueOrThrow<std::string>("query");
 }
 
-void Reader::Debug()
-{
-    bool debug = isDebug();
-
-    CPLPopErrorHandler();
-
-    if (debug)
-    {
-        const char* gdal_debug = Utils::getenv("CPL_DEBUG");
-        if (gdal_debug == 0)
-        {
-            Utils::putenv("CPL_DEBUG=ON");
-        }
-        
-        // const char* gdal_debug2 = getenv("CPL_DEBUG");
-        // std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
-        CPLPushErrorHandler(OCIGDALDebugErrorHandler);
-        
-    }
-    else 
-    {
-        CPLPushErrorHandler(OCIGDALErrorHandler);        
-    }
-}
 
 Reader::~Reader()
 {

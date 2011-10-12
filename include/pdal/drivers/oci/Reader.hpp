@@ -84,7 +84,6 @@ private:
     Reader(const Reader&); // not implemented
     // 
     
-    void Debug();
     void registerFields();
     void fetchPCFields();
     QueryType describeQueryType() const;    

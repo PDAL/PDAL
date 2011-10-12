@@ -1451,11 +1451,6 @@ void Writer::Debug()
     
 
     
-    if (debug)
-    {
-        m_verbose = true;
-    }
-
     CPLPopErrorHandler();
 
     if (debug)

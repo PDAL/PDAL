@@ -41,6 +41,7 @@
 #include <boost/make_shared.hpp>
 
 #include <pdal/Bounds.hpp>
+#include <pdal/Utils.hpp>
 
 namespace pdal { namespace drivers { namespace oci {
 
@@ -104,6 +105,8 @@ pdal::drivers::oci::Connection Connect(Options const& options, bool debug, int v
     std::string password = connection.substr(slash_pos+1, at_pos-slash_pos-1);
     std::string instance = connection.substr(at_pos+1);
     
+    SetGDALDebug(debug);
+    
     Connection con = boost::make_shared<OWConnection>(username.c_str(),password.c_str(),instance.c_str());
     
     if (con->Succeeded())
@@ -118,9 +121,35 @@ pdal::drivers::oci::Connection Connect(Options const& options, bool debug, int v
     
 }
 
+void SetGDALDebug(bool doDebug)
+{
+    CPLPopErrorHandler();
 
+    if (doDebug)
+    {
+        const char* gdal_debug = pdal::Utils::getenv("CPL_DEBUG");
+        if (gdal_debug == 0)
+        {
+            pdal::Utils::putenv("CPL_DEBUG=ON");
+        }
+        
+        // const char* gdal_debug2 = getenv("CPL_DEBUG");
+        // std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
+        CPLPushErrorHandler(OCIGDALDebugErrorHandler);
+        
+    }
+    else 
+    {
+        CPLPushErrorHandler(OCIGDALErrorHandler);        
+    }
+    
+}
 
 }}} // namespace pdal::driver::oci
+
+
+
+
 
 void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
 {

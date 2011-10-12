@@ -171,7 +171,7 @@ typedef boost::shared_ptr<Block> BlockPtr;
 PDAL_DLL Connection Connect(pdal::Options const& options, bool debug, int verbosity);
 
 std::string to_upper(std::string const& input);
-
+void SetGDALDebug(bool doDebug);
 
 
 

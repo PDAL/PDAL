@@ -120,7 +120,6 @@ private:
     
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
-    bool m_verbose;
     bool m_doCreateIndex;
     Bounds<double> m_pcExtent;
     int m_pc_id;
