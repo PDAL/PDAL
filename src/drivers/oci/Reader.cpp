@@ -56,8 +56,6 @@ Reader::Reader(const Options& options)
     , m_capacity(0)
 {
 
-
-
 }
 
 
@@ -67,9 +65,8 @@ void Reader::initialize()
 
     m_connection = Connect(getOptions(), isDebug(), getVerboseLevel());
 
-
     if (getQuery().size() == 0 )
-        throw pdal_error("'select_sql' statement is empty. No data can be read from pdal::drivers::oci::Reader");
+        throw pdal_error("'query' statement is empty. No data can be read from pdal::drivers::oci::Reader");
 
     m_statement = Statement(m_connection->CreateStatement(getQuery().c_str()));
     
@@ -77,8 +74,6 @@ void Reader::initialize()
 
     m_querytype = describeQueryType();
 
-
-    
     if (m_querytype == QUERY_SDO_PC)
     {
         m_connection->CreateType(&m_pc);
@@ -116,22 +111,24 @@ const Options Reader::getDefaultOptions() const
     Options options;
     
     Option connection("connection",
-                                   "",
-                                   "Oracle connection string to connect to database");
+                      "",
+                      "Oracle connection string to connect to database");
     
     Option query("query",
-                              "",
-                              "SELECT statement that returns an SDO_PC object \
-                              as its first and only queried item.");
+                 "",
+                 "SELECT statement that returns an SDO_PC object \
+                 as its first and only queried item.");
 
     Option capacity("capacity",
-                                     0,
-                                     "Block capacity");
+                    0,
+                    "Block capacity");
 
-
+    Option xml_schema_dump("xml_schema_dump", std::string(""), "Filename to dump the XML schema to.");
+    
     options.add(connection);
     options.add(query);
     options.add(capacity);
+    options.add(xml_schema_dump);
     
     return options;
 }
@@ -143,18 +140,13 @@ std::string Reader::getQuery() const
     return getOptions().getValueOrThrow<std::string>("query");
 }
 
-
 Reader::~Reader()
 {
-
-    // m_connection->DestroyType(&m_pc);
     return;
 }
 
-
 QueryType Reader::describeQueryType() const
 {
-
 
     int   iCol = 0;
     char  szFieldName[OWNAME];
@@ -169,16 +161,16 @@ QueryType Reader::describeQueryType() const
 
         if ( hType == SQLT_NTY)
         {
-                // std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
-                if (boost::iequals(szTypeName, "SDO_PC"))
-                    return QUERY_SDO_PC;
-                if (boost::iequals(szTypeName, "SDO_PC_BLK_TYPE"))
-                    return QUERY_SDO_PC_BLK_TYPE;
+            // std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
+            if (boost::iequals(szTypeName, "SDO_PC"))
+                return QUERY_SDO_PC;
+            if (boost::iequals(szTypeName, "SDO_PC_BLK_TYPE"))
+                return QUERY_SDO_PC_BLK_TYPE;
         }
     }
 
     std::ostringstream oss;
-    oss << "Select statement '" << getQuery() << "' does not fetch an SDO_PC object" 
+    oss << "Select statement '" << getQuery() << "' does not fetch a SDO_PC object" 
           " or SDO_PC_BLK_TYPE";
     throw pdal_error(oss.str());
 }
@@ -231,13 +223,20 @@ pdal::Schema Reader::fetchSchema(sdo_pc* pc)
     
     char* pc_schema = get_schema->ReadCLob(metadata);
     
-    std::ostream* out = FileUtils::createFile("schema-xml.xml");
-    out->write(pc_schema, strlen(pc_schema));
-    delete out;
+    std::string write_schema_file = getOptions().getValueOrDefault<std::string>("xml_schema_dump", std::string(""));
+    if (write_schema_file.size() > 0)
+    {
+        std::ostream* out = FileUtils::createFile("schema-xml.xml");
+        out->write(pc_schema, strlen(pc_schema));
+        delete out;
+    }
     
-    
-    int block_capacity = 0;
 
+    // Fetch the block capacity from the point cloud object so we 
+    // can use it later.
+    // PTN_PARAMS is like:
+    // 'blk_capacity=1000,work_tablespace=my_work_ts'
+    int block_capacity = 0;
     boost::char_separator<char> sep_space(" ");
     boost::char_separator<char> sep_equal("=");
 
@@ -266,8 +265,12 @@ pdal::Schema Reader::fetchSchema(sdo_pc* pc)
     m_capacity = block_capacity;
     
     std::string pc_schema_xml(pc_schema);
-    CPLFree(pc_schema);
-    free(ptn_params);
+    if (pc_schema)
+        CPLFree(pc_schema);
+    
+    if (ptn_params)
+        free(ptn_params);
+
     Schema schema = Schema::from_xml(pc_schema_xml);
 
     return schema;
@@ -294,8 +297,6 @@ pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 boost::property_tree::ptree Reader::toPTree() const
 {
     boost::property_tree::ptree tree = pdal::Reader::toPTree();
-
-    // add stuff here specific to this stage type
 
     return tree;
 }

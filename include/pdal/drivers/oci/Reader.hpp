@@ -84,16 +84,13 @@ private:
     Reader(const Reader&); // not implemented
     // 
     
-    void registerFields();
-    void fetchPCFields();
     QueryType describeQueryType() const;
     Schema fetchSchema(sdo_pc* pc);
 
     Connection m_connection;
     Statement m_statement;
     QueryType m_querytype;
-    // BlockPtr m_block;
-    Schema m_schema;
+
     sdo_pc* m_pc;
     sdo_pc_blk* m_pc_block;
     boost::uint32_t m_capacity;
