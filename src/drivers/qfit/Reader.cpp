@@ -183,9 +183,11 @@ Word #       Content
 namespace pdal { namespace drivers { namespace qfit {
 
 PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
+: dimX(schema.getDimension(DimensionId::X_i32))
 {
     Time = schema.getDimensionIndex(DimensionId::Qfit_Time);
     X = schema.getDimensionIndex(DimensionId::X_i32);
+    
     Y = schema.getDimensionIndex(DimensionId::Y_i32);
     Z = schema.getDimensionIndex(DimensionId::Z_i32);
     
@@ -466,10 +468,13 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             boost::int32_t x = Utils::read_field<boost::int32_t>(p);
             QFIT_SWAP_BE_TO_LE(x);
             
+
             if (m_flip_x) {
-                if (x > 180) 
+                double xd = indexes.dimX.applyScaling(x);
+                if (xd > 180) 
                 {
-                    x = x - 360;
+                    xd = xd - 360;
+                    x = indexes.dimX.removeScaling<boost::int32_t>(xd);
                 }
             }
             data.setField<boost::int32_t>(pointIndex, indexes.X, x);
