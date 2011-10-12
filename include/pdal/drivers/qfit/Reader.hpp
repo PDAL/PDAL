@@ -162,7 +162,6 @@ private:
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 
-    // OptionsOld& m_optionsOld;
     QFIT_Format_Type m_format;
     std::size_t m_offset;
     boost::uint32_t m_size;
