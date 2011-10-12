@@ -58,7 +58,6 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_is3d(false)
     , m_issolid(false)
 {
-    Debug();
     
     m_connection = Connect(getOptions(), isDebug(), getVerboseLevel());
     
@@ -1443,33 +1442,6 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
     WriteBlock(buffer);
 
     return numPoints;
-}
-
-void Writer::Debug()
-{
-    bool debug = isDebug();
-    
-
-    
-    CPLPopErrorHandler();
-
-    if (debug)
-    {
-        const char* gdal_debug = Utils::getenv("CPL_DEBUG");
-        if (gdal_debug == 0)
-        {
-            Utils::putenv("CPL_DEBUG=ON");
-        }
-        
-        // const char* gdal_debug2 = getenv("CPL_DEBUG");
-        // std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
-        CPLPushErrorHandler(OCIGDALDebugErrorHandler);
-        
-    }
-    else 
-    {
-        CPLPushErrorHandler(OCIGDALErrorHandler);        
-    }
 }
 
 

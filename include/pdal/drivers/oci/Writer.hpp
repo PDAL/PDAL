@@ -79,7 +79,6 @@ private:
     Writer(const Writer&); // not implemented
     // 
 
-    void Debug();
     void WipeBlockTable();
     void CreateBlockIndex();
     void CreateBlockTable();
