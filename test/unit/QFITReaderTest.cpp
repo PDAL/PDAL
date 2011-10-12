@@ -120,9 +120,9 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     delete iter;
 
-    Check_Point(data, 0, 59.205160, 221.826822, 32090.0, 0);
-    Check_Point(data, 1, 59.205161, 221.826740, 32019.0, 0);
-    Check_Point(data, 2, 59.205164, 221.826658, 32000.0, 0);
+    Check_Point(data, 0, 221.826822, 59.205160, 32090.0, 0);
+    Check_Point(data, 1, 221.826740, 59.205161, 32019.0, 0);
+    Check_Point(data, 2, 221.826658, 59.205164, 32000.0, 0);
     
     return;
 }
@@ -155,9 +155,9 @@ BOOST_AUTO_TEST_CASE(test_14_word)
 
     delete iter;
 
-    Check_Point(data, 0, 35.623317, 244.306337, 1056830.000000, 903);
-    Check_Point(data, 1, 35.623280, 244.306260, 1056409.000000, 903);
-    Check_Point(data, 2, 35.623257, 244.306204, 1056483.000000, 903);
+    Check_Point(data, 0, 244.306337, 35.623317, 1056830.000000, 903);
+    Check_Point(data, 1, 244.306260, 35.623280, 1056409.000000, 903);
+    Check_Point(data, 2, 244.306204, 35.623257, 1056483.000000, 903);
     
     return;
 }

@@ -459,6 +459,10 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             QFIT_SWAP_BE_TO_LE(time);
             data.setField<boost::int32_t>(pointIndex, indexes.Time, time);
 
+            boost::int32_t y = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(y);
+            data.setField<boost::int32_t>(pointIndex, indexes.Y, y);
+
             boost::int32_t x = Utils::read_field<boost::int32_t>(p);
             QFIT_SWAP_BE_TO_LE(x);
             
@@ -469,10 +473,6 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
                 }
             }
             data.setField<boost::int32_t>(pointIndex, indexes.X, x);
-
-            boost::int32_t y = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(y);
-            data.setField<boost::int32_t>(pointIndex, indexes.Y, y);
 
             boost::int32_t z = Utils::read_field<boost::int32_t>(p);
             QFIT_SWAP_BE_TO_LE(z);
@@ -527,13 +527,13 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             QFIT_SWAP_BE_TO_LE(passive_signal);
             data.setField<boost::int32_t>(pointIndex, indexes.PassiveSignal, passive_signal);
 
-            boost::int32_t passive_x = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(passive_x);
-            data.setField<boost::int32_t>(pointIndex, indexes.PassiveX, passive_x);
-
             boost::int32_t passive_y = Utils::read_field<boost::int32_t>(p);
             QFIT_SWAP_BE_TO_LE(passive_y);
             data.setField<boost::int32_t>(pointIndex, indexes.PassiveY, passive_y);
+
+            boost::int32_t passive_x = Utils::read_field<boost::int32_t>(p);
+            QFIT_SWAP_BE_TO_LE(passive_x);
+            data.setField<boost::int32_t>(pointIndex, indexes.PassiveX, passive_x);
 
             boost::int32_t passive_z = Utils::read_field<boost::int32_t>(p);
             QFIT_SWAP_BE_TO_LE(passive_z);
