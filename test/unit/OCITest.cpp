@@ -44,6 +44,7 @@
 
 #include <pdal/filters/CacheFilter.hpp>
 #include <pdal/filters/Chipper.hpp>
+#include <pdal/filters/InPlaceReprojectionFilter.hpp>
 
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
@@ -64,7 +65,7 @@ bool ShouldRunTest()
     return TestConfig::g_oracle_connection.size() > 0;
 }
 
-Options GetOptions()
+Options getOptions()
 {
     Options options;
     
@@ -121,18 +122,69 @@ Options GetOptions()
     
     Option query("query", "SELECT CLOUD FROM PDAL_TEST_BASE where ID=1", "");
     options.add(query);
+
+    Option a_srs("spatialreference", "EPSG:2926", "");
+    options.add(a_srs);
     
     return options;
 }
 
-
-void RunSQL(pdal::drivers::oci::Connection connection, std::string sql)
+struct OracleTestFixture
 {
-    pdal::drivers::oci::Statement statement = pdal::drivers::oci::Statement(connection->CreateStatement(sql.c_str()));
-    statement->Execute();    
-}
+    OracleTestFixture() :
+    m_options(getOptions())
+    { 
+        if (!ShouldRunTest()) return;
+        pdal::drivers::oci::Connection connection = connect();
+    
+        std::string base_table_name = m_options.getValueOrThrow<std::string>("base_table_name");
+        std::string create_pc_table("CREATE TABLE " + base_table_name +" (id number, CLOUD SDO_PC, DESCRIPTION VARCHAR2(20), HEADER BLOB, BOUNDARY SDO_GEOMETRY)");
+        run(connection, create_pc_table);
+    
+        std::string block_table_name = m_options.getValueOrThrow<std::string>("block_table_name");
+        std::string create_block_table = "CREATE TABLE " + block_table_name + " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
+        run(connection, create_block_table);
 
-BOOST_AUTO_TEST_SUITE(OCITest)
+    }
+    
+    pdal::drivers::oci::Connection connect()
+    {
+        if (!m_connection.get() ) 
+        {
+            m_connection = pdal::drivers::oci::Connect(m_options, 
+                                                       m_options.getValueOrThrow<bool>("debug"),
+                                                       m_options.getValueOrThrow<boost::uint32_t>("verbose"));
+            
+        }
+        return m_connection;
+            
+    }
+    
+    void run(pdal::drivers::oci::Connection connection, std::string sql)
+    {
+        pdal::drivers::oci::Statement statement = pdal::drivers::oci::Statement(connection->CreateStatement(sql.c_str()));
+        statement->Execute();
+    }
+
+    pdal::Options m_options;
+    pdal::drivers::oci::Connection m_connection;
+    
+    ~OracleTestFixture() 
+    {
+        if (!ShouldRunTest()) return;    
+        pdal::drivers::oci::Connection connection = connect();
+
+        std::string base_table_name = m_options.getValueOrThrow<std::string>("base_table_name");
+        std::string block_table_name = m_options.getValueOrThrow<std::string>("block_table_name");
+    
+        std::string drop_base_table = "DROP TABLE " + base_table_name;
+        std::string drop_block_table = "DROP TABLE " + block_table_name;
+        run(connection, drop_base_table);
+        run(connection, drop_block_table);            
+    }
+};
+
+BOOST_FIXTURE_TEST_SUITE(OCITest, OracleTestFixture)
 
 
 
@@ -141,19 +193,18 @@ BOOST_AUTO_TEST_CASE(initialize)
 {
     if (!ShouldRunTest()) return;
     
-    Options options = GetOptions();
+    pdal::drivers::las::Reader reader(getOptions());
+    pdal::filters::CacheFilter cache(reader, getOptions());
+    pdal::filters::Chipper chipper(cache, getOptions());
+    pdal::filters::InPlaceReprojectionFilter reproj(chipper, getOptions());
+    pdal::drivers::oci::Writer writer(reproj, getOptions());
     
-    pdal::drivers::oci::Connection connection = pdal::drivers::oci::Connect(options, 
-                                                options.getValueOrThrow<bool>("debug"),
-                                                options.getValueOrThrow<boost::uint32_t>("verbose"));
+    writer.initialize();
+    boost::uint64_t numPointsToRead = reader.getNumPoints();
     
-    std::string base_table_name = options.getValueOrThrow<std::string>("base_table_name");
-    std::string create_pc_table("CREATE TABLE " + base_table_name +" (id number, CLOUD SDO_PC, DESCRIPTION VARCHAR2(20), HEADER BLOB, BOUNDARY SDO_GEOMETRY)");
-    RunSQL(connection, create_pc_table);
+    BOOST_CHECK_EQUAL(numPointsToRead, 1065);
     
-    std::string block_table_name = options.getValueOrThrow<std::string>("block_table_name");
-    std::string create_block_table = "CREATE TABLE " + block_table_name + " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
-    RunSQL(connection, create_block_table);
+    writer.write(0);
 }
 // 
 // 
@@ -203,23 +254,6 @@ BOOST_AUTO_TEST_CASE(initialize)
 // }
 
 
-BOOST_AUTO_TEST_CASE(clean_up)
-{
-    if (!ShouldRunTest()) return;
-    
-    Options options = GetOptions();
-    
-    pdal::drivers::oci::Connection connection = pdal::drivers::oci::Connect(options, 
-                                                options.getValueOrThrow<bool>("debug"),
-                                                options.getValueOrThrow<boost::uint32_t>("verbose"));
 
-    std::string base_table_name = options.getValueOrThrow<std::string>("base_table_name");
-    std::string block_table_name = options.getValueOrThrow<std::string>("block_table_name");
-    
-    std::string drop_base_table = "DROP TABLE " + base_table_name;
-    std::string drop_block_table = "DROP TABLE " + block_table_name;
-    RunSQL(connection, drop_base_table);
-    RunSQL(connection, drop_block_table);    
-}
 
 BOOST_AUTO_TEST_SUITE_END()
