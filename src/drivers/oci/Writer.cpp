@@ -51,7 +51,6 @@ namespace pdal { namespace drivers { namespace oci {
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
-    , m_stage((Stage&)prevStage)
     , m_doCreateIndex(false)
     , m_pc_id(0)
     , m_srid(0)
@@ -81,11 +80,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     m_base_table_boundary_column = getDefaultedOption<std::string>("base_table_boundary_column");
     m_base_table_boundary_wkt = getDefaultedOption<std::string>("base_table_boundary_wkt");
 
-    
 }
-
-
-
 
 Writer::~Writer()
 {
@@ -94,12 +89,10 @@ Writer::~Writer()
     return;
 }
 
-
 void Writer::initialize()
 {
     pdal::Writer::initialize();
 }
-
 
 const Options Writer::getDefaultOptions() const
 {
@@ -747,7 +740,7 @@ oss << "declare\n"
     OCILobLocator* boundary_locator ; 
 
     std::string schema_data;
-    schema_data = pdal::Schema::to_xml(m_stage.getSchema());
+    schema_data = pdal::Schema::to_xml(getPrevStage().getSchema());
         // std::cout << m_stage.getSchema() << std::endl;
         // std::ostream* output= FileUtils::createFile("oracle-write-schema.xml",true);
         // *output << schema_data <<std::endl;

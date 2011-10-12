@@ -45,8 +45,6 @@
 
 namespace pdal { namespace drivers { namespace oci {
 
-
-
 class PDAL_DLL Writer : public pdal::Writer
 {
 public:
@@ -77,7 +75,6 @@ private:
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
-    // 
 
     void WipeBlockTable();
     void CreateBlockIndex();
@@ -115,7 +112,6 @@ private:
     void TurnOn_SDO_PC_Trigger(std::string trigger_name);
     pdal::Bounds<double> CalculateBounds(PointBuffer const& buffer);
     bool IsValidWKT(std::string const& wkt);
-    Stage& m_stage;
     
     pdal::Bounds<double> m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
