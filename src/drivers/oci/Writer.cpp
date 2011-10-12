@@ -520,7 +520,7 @@ std::string Writer::LoadSQLData(std::string const& filename)
 void Writer::RunFileSQL(std::string const& filename)
 {
     std::ostringstream oss;
-    std::string sql = getOptions().getValueOrThrow<std::string>(filename);
+    std::string sql = getOptions().getValueOrDefault<std::string>(filename, "");
         
     if (!sql.size()) return;
 
