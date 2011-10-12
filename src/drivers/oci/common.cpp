@@ -80,16 +80,6 @@ Cloud::~Cloud()
 }
 
 
-std::string to_upper(const std::string& input)
-{
-    std::string inp = std::string(input);
-    std::string output = std::string(input);
-    
-    std::transform(inp.begin(), inp.end(), output.begin(), static_cast < int(*)(int) > (toupper));
-    
-    return output;
-}
-
 
 pdal::drivers::oci::Connection Connect(Options const& options, bool debug, int verbosity)
 {

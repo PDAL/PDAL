@@ -41,6 +41,7 @@
 
 #include <fstream>
 
+#include <boost/algorithm/string.hpp>
 #ifdef PDAL_HAVE_GDAL
 #include <ogr_api.h>
 #endif
@@ -65,15 +66,15 @@ Writer::Writer(Stage& prevStage, const Options& options)
     setChunkSize(capacity);
     
 
-    m_block_table_name = to_upper(getOptions().getValueOrThrow<std::string>("block_table_name"));
-    m_block_table_partition_column = to_upper(getDefaultedOption<std::string>("block_table_partition_column"));
+    m_block_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("block_table_name"));
+    m_block_table_partition_column = boost::to_upper_copy(getDefaultedOption<std::string>("block_table_partition_column"));
     m_block_table_partition_value = getDefaultedOption<boost::uint32_t>("block_table_partition_value");
     m_srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");
     m_gtype = GetGType();
     m_is3d = is3d();
     m_issolid = isSolid();
-    m_base_table_name = to_upper(getOptions().getValueOrThrow<std::string>("base_table_name"));
-    m_cloud_column_name = to_upper(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
+    m_base_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("base_table_name"));
+    m_cloud_column_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
     m_base_table_aux_columns = getDefaultedOption<std::string>("base_table_aux_columns");
     m_base_table_aux_values = getDefaultedOption<std::string>("base_table_aux_values");
 
@@ -272,8 +273,8 @@ void Writer::WipeBlockTable()
     oss.str("");
 
     // These need to be uppercase to satisfy the PLSQL function
-    cloud_column_name = to_upper(cloud_column_name);
-    base_table_name = to_upper(base_table_name);
+    cloud_column_name = boost::to_upper_copy(cloud_column_name);
+    base_table_name = boost::to_upper_copy(base_table_name);
     
     oss << "declare\n"
            "begin \n"
@@ -294,7 +295,7 @@ void Writer::WipeBlockTable()
     // See http://forums.devx.com/showthread.php?t=83058 for the 
     // technique
     
-    block_table_name = to_upper(block_table_name);
+    block_table_name = boost::to_upper_copy(block_table_name);
     oss << "DELETE FROM USER_SDO_GEOM_METADATA WHERE TABLE_NAME='" << block_table_name << "'" ;
     run(oss);
 }
@@ -421,7 +422,7 @@ bool Writer::BlockTableExists()
     {
         if (isDebug())
             std::cout << ", " << szTable;
-        if (Utils::compare_no_case(szTable, block_table_name) == 0)
+        if (boost::iequals(szTable, block_table_name))
         {
             if (isDebug())
                 std::cout << " -- '" << block_table_name << "' found." <<std::endl;
@@ -474,10 +475,10 @@ bool Writer::IsGeographic(boost::int32_t srid)
         throw std::runtime_error(oss.str());
     }  
     
-    if (Utils::compare_no_case(kind.get(), "GEOGRAPHIC2D") == 0) {
+    if (boost::iequals(kind.get(), "GEOGRAPHIC2D")) {
         return true;
     }
-    if (Utils::compare_no_case(kind.get(), "GEOGRAPHIC3D") == 0) {
+    if (boost::iequals(kind.get(), "GEOGRAPHIC3D")) {
         return true;
     }
 
@@ -1311,8 +1312,8 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
 std::string Writer::ShutOff_SDO_PC_Trigger()
 {
-    std::string base_table_name = to_upper(getOptions().getValueOrThrow<std::string>("base_table_name"));
-    std::string cloud_column_name = to_upper(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
+    std::string base_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("base_table_name"));
+    std::string cloud_column_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
 
     std::ostringstream oss;
 
@@ -1336,7 +1337,7 @@ std::string Writer::ShutOff_SDO_PC_Trigger()
     }
     
     
-    if (Utils::compare_no_case(szStatus, "ENABLED") == 0)
+    if (boost::iequals(szStatus, "ENABLED"))
     {
         oss.str("");
         oss << "ALTER TRIGGER " << szTrigger << " DISABLE ";
@@ -1361,7 +1362,7 @@ void Writer::TurnOn_SDO_PC_Trigger(std::string trigger_name)
     
     std::ostringstream oss;
     
-    std::string base_table_name = to_upper(getOptions().getValueOrThrow<std::string>("base_table_name"));
+    std::string base_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("base_table_name"));
 
     oss << "ALTER TRIGGER " << trigger_name << " ENABLE ";
     
@@ -1374,9 +1375,9 @@ void Writer::TurnOn_SDO_PC_Trigger(std::string trigger_name)
 void Writer::UpdatePCExtent()
 {
     
-    std::string block_table_name = to_upper(getOptions().getValueOrThrow<std::string>("block_table_name"));
-    std::string base_table_name = to_upper(getOptions().getValueOrThrow<std::string>("base_table_name"));
-    std::string cloud_column_name = to_upper(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
+    std::string block_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("block_table_name"));
+    std::string base_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("base_table_name"));
+    std::string cloud_column_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
     
     boost::uint32_t srid = getOptions().getValueOrThrow<boost::uint32_t>("srid");    
 

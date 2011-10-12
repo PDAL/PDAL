@@ -38,6 +38,9 @@
 #include <pdal/drivers/oci/Reader.hpp>
 #include <pdal/Vector.hpp>
 
+#include <boost/algorithm/string.hpp>
+
+
 #include <sstream>
 #include <map>
 #include <algorithm>
@@ -288,54 +291,54 @@ BlockPtr IteratorBase::defineBlock(Statement statement)
 
     while( statement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName) )
     {
-        std::string name = to_upper(std::string(szFieldName));
+        std::string name = boost::to_upper_copy(std::string(szFieldName));
 
-        if (Utils::compare_no_case(szFieldName, "OBJ_ID") == 0)
+        if (boost::iequals(szFieldName, "OBJ_ID"))
         {
             statement->Define(&(block->obj_id));
         }
 
-        if (Utils::compare_no_case(szFieldName, "BLK_ID") == 0)
+        if (boost::iequals(szFieldName, "BLK_ID"))
         {
             statement->Define(&(block->blk_id));
         }
 
-        if (Utils::compare_no_case(szFieldName, "BLK_EXTENT") == 0)
+        if (boost::iequals(szFieldName, "BLK_EXTENT"))
         {
             statement->Define(&(block->blk_extent));
         }
 
-        if (Utils::compare_no_case(szFieldName, "BLK_DOMAIN") == 0)
+        if (boost::iequals(szFieldName, "BLK_DOMAIN"))
         {
             statement->Define(&(block->blk_domain));
         }
         
-        if (Utils::compare_no_case(szFieldName, "PCBLK_MIN_RES") == 0)
+        if (boost::iequals(szFieldName, "PCBLK_MIN_RES"))
         {
             statement->Define(&(block->pcblk_min_res));
         }
 
-        if (Utils::compare_no_case(szFieldName, "PCBLK_MAX_RES") == 0)
+        if (boost::iequals(szFieldName, "PCBLK_MAX_RES"))
         {
             statement->Define(&(block->pcblk_max_res));
         }
 
-        if (Utils::compare_no_case(szFieldName, "NUM_POINTS") == 0)
+        if (boost::iequals(szFieldName, "NUM_POINTS"))
         {
             statement->Define(&(block->num_points));
         }
 
-        if (Utils::compare_no_case(szFieldName, "NUM_UNSORTED_POINTS") == 0)
+        if (boost::iequals(szFieldName, "NUM_UNSORTED_POINTS"))
         {
             statement->Define(&(block->num_unsorted_points));
         }
 
-        if (Utils::compare_no_case(szFieldName, "PT_SORT_DIM") == 0)
+        if (boost::iequals(szFieldName, "PT_SORT_DIM"))
         {
             statement->Define(&(block->pt_sort_dim));
         }
 
-        if (Utils::compare_no_case(szFieldName, "POINTS") == 0)
+        if (boost::iequals(szFieldName, "POINTS"))
         {
             statement->Define( &(block->locator) ); 
         }
