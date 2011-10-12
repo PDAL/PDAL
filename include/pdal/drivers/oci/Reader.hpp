@@ -86,8 +86,7 @@ private:
     
     void registerFields();
     void fetchPCFields();
-    QueryType describeQueryType() const;    
-    BlockPtr defineBlock() const;
+    QueryType describeQueryType() const;
     Schema fetchSchema(sdo_pc* pc);
 
     Connection m_connection;
