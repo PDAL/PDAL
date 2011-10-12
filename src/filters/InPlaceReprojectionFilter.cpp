@@ -129,7 +129,7 @@ void InPlaceReprojectionFilter::initialize()
     if (result != OGRERR_NONE) 
     {
         std::ostringstream msg; 
-        msg << "Could not import input spatial reference for ReprojectionFilter:: " 
+        msg << "Could not import input spatial reference for InPlaceReprojectionFilter:: " 
             << CPLGetLastErrorMsg() << " code: " << result 
             << " wkt: '" << m_inSRS.getWKT() << "'";
         throw std::runtime_error(msg.str());
@@ -139,7 +139,7 @@ void InPlaceReprojectionFilter::initialize()
     if (result != OGRERR_NONE) 
     {
         std::ostringstream msg; 
-        msg << "Could not import output spatial reference for ReprojectionFilter:: " 
+        msg << "Could not import output spatial reference for InPlaceReprojectionFilter:: " 
             << CPLGetLastErrorMsg() << " code: " << result 
             << " wkt: '" << m_outSRS.getWKT() << "'";
         std::string message(msg.str());
@@ -150,7 +150,7 @@ void InPlaceReprojectionFilter::initialize()
     if (!m_transform_ptr.get())
     {
         std::ostringstream msg; 
-        msg << "Could not construct CoordinateTransformation in ReprojectionFilter:: ";
+        msg << "Could not construct CoordinateTransformation in InPlaceReprojectionFilter:: ";
         std::string message(msg.str());
         throw std::runtime_error(message);
     }    
