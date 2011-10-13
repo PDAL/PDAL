@@ -285,43 +285,43 @@ KnownDimension s_knownDimensions[] =
     // Y: "Latitude coordinate with 1/1000000 decimals of precision"
     // Z: "z coordinate as a long integer.  You must use the scale and offset information of the header to determine the double value."
     {
-        DimensionId::Qfit_StartPulse, Dimension::Int32, "StartPulse", "Start Pulse Signal Strength (relative)" 
+        DimensionId::Qfit_StartPulse, Dimension::Int32, "QFIT:StartPulse", "Start Pulse Signal Strength (relative)" 
      },
     {
-        DimensionId::Qfit_ReflectedPulse, Dimension::Int32, "ReflectedPulse", "Reflected Laser Signal Strength (relative)" 
+        DimensionId::Qfit_ReflectedPulse, Dimension::Int32, "QFIT:ReflectedPulse", "Reflected Laser Signal Strength (relative)" 
     },
     { 
-        DimensionId::Qfit_ScanAngleRank, Dimension::Int32, "ScanAngleRank", "Scan Azimuth (degrees X 1,000)" 
+        DimensionId::Qfit_ScanAngleRank, Dimension::Int32, "QFIT:ScanAngleRank", "Scan Azimuth (degrees X 1,000)" 
     },
     {
-        DimensionId::Qfit_Pitch, Dimension::Int32, "Pitch", "Pitch (degrees X 1,000)" 
+        DimensionId::Qfit_Pitch, Dimension::Int32, "QFIT:Pitch", "Pitch (degrees X 1,000)" 
     },
     { 
-        DimensionId::Qfit_Roll, Dimension::Int32, "Roll", "Roll (degrees X 1,000)" 
+        DimensionId::Qfit_Roll, Dimension::Int32, "QFIT:Roll", "Roll (degrees X 1,000)" 
     },
     { 
-        DimensionId::Qfit_Time, Dimension::Int32, "Qfit Time", "Relative Time (msec from start of data file)" 
+        DimensionId::Qfit_Time, Dimension::Int32, "QFIT:Time", "Relative Time (msec from start of data file)" 
     },
     { 
-        DimensionId::Qfit_PassiveSignal, Dimension::Int32, "PassiveSignal", "Passive Signal (relative)" 
+        DimensionId::Qfit_PassiveSignal, Dimension::Int32, "QFIT:PassiveSignal", "Passive Signal (relative)" 
     },
     { 
-        DimensionId::Qfit_PassiveX, Dimension::Int32, "PassiveX", "Passive Footprint Longitude (degrees X 1,000,000)" 
+        DimensionId::Qfit_PassiveX, Dimension::Int32, "QFIT:PassiveX", "Passive Footprint Longitude (degrees X 1,000,000)" 
     },
     { 
-        DimensionId::Qfit_PassiveY, Dimension::Int32, "PassiveY", "Passive Footprint Latitude (degrees X 1,000,000)"
+        DimensionId::Qfit_PassiveY, Dimension::Int32, "QFIT:PassiveY", "Passive Footprint Latitude (degrees X 1,000,000)"
     },
     { 
-        DimensionId::Qfit_PassiveZ, Dimension::Int32, "PassiveZ", "Passive Footprint Synthesized Elevation (millimeters)" 
+        DimensionId::Qfit_PassiveZ, Dimension::Int32, "QFIT:PassiveZ", "Passive Footprint Synthesized Elevation (millimeters)" 
     },
     { 
-        DimensionId::Qfit_GpsTime, Dimension::Int32, "GpsTime", "GPS Time packed (example: 153320100 = 15h 33m 20s 100ms)" 
+        DimensionId::Qfit_GpsTime, Dimension::Int32, "QFIT:GpsTime", "GPS Time packed (example: 153320100 = 15h 33m 20s 100ms)" 
     },
     { 
-        DimensionId::Qfit_PDOP, Dimension::Int32, "PDOP", "GPS PDOP (dilution of precision) (X 10)" 
+        DimensionId::Qfit_PDOP, Dimension::Int32, "QFIT:PDOP", "GPS PDOP (dilution of precision) (X 10)" 
     },
     { 
-        DimensionId::Qfit_PulseWidth, Dimension::Int32, "PulseWdith", "Laser received pulse width (digitizer samples)" 
+        DimensionId::Qfit_PulseWidth, Dimension::Int32, "QFIT:PulseWdith", "Laser received pulse width (digitizer samples)" 
     },
 
     // eof
@@ -461,6 +461,45 @@ DimensionId::Id DimensionId::getIdFromName(std::string const& name)
     if (boost::iequals(name, "Chipper Block ID"))
         return DimensionId::Chipper_2;
 
+    if (boost::iequals(name, "QFIT:StartPulse"))
+        return DimensionId::Qfit_StartPulse;
+
+    if (boost::iequals(name, "QFIT:ReflectedPulse"))
+        return DimensionId::Qfit_ReflectedPulse;
+
+    if (boost::iequals(name, "QFIT:ScanAngleRank"))
+        return DimensionId::Qfit_ScanAngleRank;
+
+    if (boost::iequals(name, "QFIT:Pitch"))
+        return DimensionId::Qfit_Pitch;
+
+    if (boost::iequals(name, "QFIT:Roll"))
+        return DimensionId::Qfit_Roll;
+
+    if (boost::iequals(name, "QFIT:Time"))
+        return DimensionId::Qfit_Time;
+
+    if (boost::iequals(name, "QFIT:PassiveSignal"))
+        return DimensionId::Qfit_PassiveSignal;
+
+    if (boost::iequals(name, "QFIT:PassiveX"))
+        return DimensionId::Qfit_PassiveX;
+
+    if (boost::iequals(name, "QFIT:PassiveY"))
+        return DimensionId::Qfit_PassiveY;
+
+    if (boost::iequals(name, "QFIT:PassiveZ"))
+        return DimensionId::Qfit_PassiveZ;
+
+    if (boost::iequals(name, "QFIT:GpsTime"))
+        return DimensionId::Qfit_GpsTime;
+
+    if (boost::iequals(name, "QFIT:PDOP"))
+        return DimensionId::Qfit_PDOP;
+
+    if (boost::iequals(name, "QFIT:PulseWdith"))
+        return DimensionId::Qfit_PulseWidth;
+        
     // Yes, this is scary.  What else can we do?
     throw pdal_error("unknown field name: " + name);
 }
