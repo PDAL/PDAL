@@ -531,9 +531,6 @@ void Writer::RunFileSQL(std::string const& filename)
         oss << LoadSQLData(sql);  // Our "sql" is really the filename in the ptree
     }
 
-
-   
-
     if (isDebug())
         std::cout << "running "<< filename << " ..." <<std::endl;
 
