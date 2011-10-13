@@ -84,6 +84,36 @@ const Reader& IteratorBase::getReader() const
     return m_reader;
 }
 
+void IteratorBase::read(PointBuffer& data, 
+                        boost::uint32_t howMany, 
+                        boost::uint32_t whichPoint, 
+                        boost::uint32_t whichBlobPosition)
+{
+    boost::uint32_t nAmountRead = 0;
+    boost::uint32_t blob_length = m_statement->GetBlobLength(m_block->locator);
+
+    if (m_block->chunk->size() < blob_length)
+    {
+        m_block->chunk->resize(blob_length);
+    }
+    
+    // std::cout << "blob_length: " << blob_len// gth << std::endl;
+
+    bool read_all_data = m_statement->ReadBlob( m_block->locator,
+                                     (void*)(&(*m_block->chunk)[0]),
+                                     m_block->chunk->size() , 
+                                     &nAmountRead);
+    if (!read_all_data) throw pdal_error("Did not read all blob data!");
+
+    // std::cout << "nAmountRead: " << nAmountRead << std::endl;
+    
+    data.getSchema().getByteSize();
+    boost::uint32_t howMuchToRead = howMany * data.getSchema().getByteSize();
+    data.setDataStride(&(*m_block->chunk)[whichBlobPosition], whichPoint, howMuchToRead);
+
+    data.setNumPoints(data.getNumPoints() + howMany);
+
+}
 
 boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
 {
@@ -125,7 +155,9 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
     while (bDidRead)
     {
         boost::uint32_t numReadThisBlock = m_block->num_points;
-        if (numReadThisBlock > (data.getCapacity() - data.getNumPoints()))
+        boost::uint32_t numSpaceLeftThisBlock = data.getCapacity() - data.getNumPoints();
+        
+        if (numReadThisBlock > numSpaceLeftThisBlock)
         {
             // We're done.  We still have more data, but the 
             // user is going to have to request another buffer.
@@ -138,61 +170,19 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
         }
 
         numPointsRead = numPointsRead + numReadThisBlock;
-        boost::uint32_t nAmountRead = 0;
-    
-    
-        boost::uint32_t blob_length = m_statement->GetBlobLength(m_block->locator);
-    
-        if (m_block->chunk->size() < blob_length)
-        {
-            m_block->chunk->resize(blob_length);
-        }
         
-        // std::cout << "blob_length: " << blob_len// gth << std::endl;
+        read(data, numReadThisBlock, data.getNumPoints(), 0);
 
-        bool read_all_data = m_statement->ReadBlob( m_block->locator,
-                                         (void*)(&(*m_block->chunk)[0]),
-                                         m_block->chunk->size() , 
-                                         &nAmountRead);
-        if (!read_all_data) throw pdal_error("Did not read all blob data!");
-
-        // std::cout << "nAmountRead: " << nAmountRead << std::endl;
-        
-        data.setDataStride(&(*m_block->chunk)[0], data.getNumPoints(), m_block->chunk->size());
-        // std::cout << "data.getNumPoints(): " << data.getNumPoints() << std::endl;
-        data.setNumPoints(data.getNumPoints() + numReadThisBlock);
-        // data.setAllData(&(*m_block->chunk)[0], m_block->chunk->size());
-        // unpackOracleData(data);
         bDidRead = m_statement->Fetch();
 
-    // boost::property_tree::write_json(std::cout, data.toPTree());
         if (!bDidRead)
         {
             m_at_end = true;
             return numPointsRead;
         }
-    }    
-    
-    
+    }
 
     double x, y, z;
-    // 
-    // boost::int32_t elem1, elem2, elem3;
-    // m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 0, &elem1);
-    // m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 1, &elem2);
-    // m_statement->GetElement(&(m_block->blk_extent->sdo_elem_info), 2, &elem3);
-    // 
-    // boost::int32_t gtype, srid;
-    // gtype= m_statement->GetInteger(&(m_block->blk_extent->sdo_gtype));
-    // srid =m_statement->GetInteger(&(m_block->blk_extent->sdo_srid));
-
-    
-    // See http://download.oracle.com/docs/cd/B28359_01/appdev.111/b28400/sdo_objrelschema.htm#g1013735
-
-    // boost::uint32_t dimension = gtype / 1000;
-    // boost::uint32_t geom_type = gtype % 100;
-    // boost::uint32_t referencing= ((gtype % 1000) / 100);
-    // std::cout << "dimension: " << dimension << " geometry type: " << geom_type << " referencing " << referencing << std::endl;
     
     pdal::Vector<double> mins;
     pdal::Vector<double> maxs;
@@ -211,20 +201,6 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
     pdal::Bounds<double> block_bounds(mins, maxs);
     
     data.setSpatialBounds(block_bounds);
-    
-    // std::cout << "srid: " << srid << std::endl;
-    
-    // std::cout << "elem1, elem2, elem3 " << elem1 << " " << elem2 << " " << elem3 << std::endl;
-    
-    // std::cout << "elem_info size " << m_statement->GetArrayLength(&(m_block->blk_extent->sdo_elem_info)) << std::endl;
-    // std::cout << "sdo_ordinates size " << m_statement->GetArrayLength(&(m_block->blk_extent->sdo_ordinates)) << std::endl;
-
-    m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 0, &x);
-    m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 1, &y);
-    m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), 2, &z);
-
-    // std::cout << "x, y, z " << x << " " << y << " " << z << std::endl;
-
 
     return numPointsRead;
 }

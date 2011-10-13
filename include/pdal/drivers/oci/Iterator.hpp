@@ -70,6 +70,11 @@ protected:
 private:
     const Reader& m_reader;
     
+    void read(  PointBuffer& data, 
+                boost::uint32_t howMany, 
+                boost::uint32_t whichPoint, 
+                boost::uint32_t whichBlobPosition);
+    
     IteratorBase& operator=(const IteratorBase&); // not implemented
     IteratorBase(const IteratorBase&); // not implemented;
     
