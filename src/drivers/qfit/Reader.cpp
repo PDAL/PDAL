@@ -342,7 +342,7 @@ std::string Reader::getFileName() const
 void Reader::registerFields()
 {
     Schema& schema = getSchemaRef();
-
+    
     double xy_scale = 1/1000000.0;
 
     Dimension time(DimensionId::Qfit_Time);
@@ -542,6 +542,11 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
 
             boost::int32_t passive_z = Utils::read_field<boost::int32_t>(p);
             QFIT_SWAP_BE_TO_LE(passive_z);
+
+            if (m_convert_z)
+            {
+                passive_z = static_cast<boost::int32_t>(Utils::sround(static_cast<double>(passive_z)/100.0));
+            }            
             data.setField<boost::int32_t>(pointIndex, indexes.PassiveZ, passive_z);
 
             boost::int32_t gpstime = Utils::read_field<boost::int32_t>(p);
