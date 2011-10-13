@@ -265,7 +265,10 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 
 boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 {
-    const Schema& schema = pointBuffer.getSchema();
+    const Schema& schema = getPrevStage().getSchema();
+    const Dimension& xDim = schema.getDimension(DimensionId::X_i32);
+    const Dimension& yDim = schema.getDimension(DimensionId::Y_i32);
+    const Dimension& zDim = schema.getDimension(DimensionId::Z_i32);
     PointFormat pointFormat = m_lasHeader.getPointFormat();
 
     const PointIndexes indexes(schema, pointFormat);
@@ -279,22 +282,49 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
         boost::uint8_t* p = buf;
 
         // we always write the base fields
-        const boost::uint32_t x = pointBuffer.getField<boost::uint32_t>(pointIndex, indexes.X);
-        const boost::uint32_t y = pointBuffer.getField<boost::uint32_t>(pointIndex, indexes.Y);
-        const boost::uint32_t z = pointBuffer.getField<boost::uint32_t>(pointIndex, indexes.Z);
-        const boost::uint16_t intensity = pointBuffer.getField<boost::uint16_t>(pointIndex, indexes.Intensity);
-            
-        const boost::uint8_t returnNumber = pointBuffer.getField<boost::uint8_t>(pointIndex, indexes.ReturnNumber);
-        const boost::uint8_t numberOfReturns = pointBuffer.getField<boost::uint8_t>(pointIndex, indexes.NumberOfReturns);
-        const boost::uint8_t scanDirectionFlag = pointBuffer.getField<boost::uint8_t>(pointIndex, indexes.ScanDirectionFlag);
-        const boost::uint8_t edgeOfFlightLinet = pointBuffer.getField<boost::uint8_t>(pointIndex, indexes.EdgeOfFlightLine);
+        const boost::int32_t x = pointBuffer.getField<boost::int32_t>(pointIndex, indexes.X);
+        const boost::int32_t y = pointBuffer.getField<boost::int32_t>(pointIndex, indexes.Y);
+        const boost::int32_t z = pointBuffer.getField<boost::int32_t>(pointIndex, indexes.Z);
+        
+        // std::clog << "x: " << x << " y: " << y << " z: " << z << std::endl;
+        
+        boost::uint16_t intensity(0);
+        if (indexes.Intensity != -1)
+            intensity = pointBuffer.getField<boost::uint16_t>(pointIndex, indexes.Intensity);
+        
+        boost::uint8_t returnNumber(0); 
+        if (indexes.ReturnNumber != -1)
+            returnNumber = pointBuffer.getField<boost::uint8_t>(pointIndex, indexes.ReturnNumber);
+        
+        boost::uint8_t numberOfReturns(0);
+        if (indexes.NumberOfReturns != -1)
+            numberOfReturns = pointBuffer.getField<boost::uint8_t>(pointIndex, indexes.NumberOfReturns);
+        
+        boost::uint8_t scanDirectionFlag(0);
+        if (indexes.ScanDirectionFlag != -1)
+            scanDirectionFlag = pointBuffer.getField<boost::uint8_t>(pointIndex, indexes.ScanDirectionFlag);
+        
+        boost::uint8_t edgeOfFlightLine(0);
+        if (indexes.EdgeOfFlightLine != -1)
+            edgeOfFlightLine = pointBuffer.getField<boost::uint8_t>(pointIndex, indexes.EdgeOfFlightLine);
 
-        const boost::uint8_t bits = returnNumber | (numberOfReturns<<3) | (scanDirectionFlag << 6) | (edgeOfFlightLinet << 7);
+        boost::uint8_t bits = returnNumber | (numberOfReturns<<3) | (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
+        
+        boost::uint8_t classification(0);
+        if (indexes.Classification != -1)
+            classification = pointBuffer.getField<boost::uint8_t>(pointIndex, indexes.Classification);
+        
+        boost::int8_t scanAngleRank(0);
+        if (indexes.ScanAngleRank != -1)
+            scanAngleRank = pointBuffer.getField<boost::int8_t>(pointIndex, indexes.ScanAngleRank);
+        
+        boost::uint8_t userData(0);
+        if (indexes.UserData != -1)
+            userData = pointBuffer.getField<boost::uint8_t>(pointIndex, indexes.UserData);
 
-        const boost::uint8_t classification = pointBuffer.getField<boost::uint8_t>(pointIndex, indexes.Classification);
-        const boost::int8_t scanAngleRank = pointBuffer.getField<boost::int8_t>(pointIndex, indexes.ScanAngleRank);
-        const boost::uint8_t userData = pointBuffer.getField<boost::uint8_t>(pointIndex, indexes.UserData);
-        const boost::uint16_t pointSourceId = pointBuffer.getField<boost::uint16_t>(pointIndex, indexes.PointSourceId);
+        boost::uint16_t pointSourceId(0);
+        if (indexes.PointSourceId != -1)
+            pointSourceId = pointBuffer.getField<boost::uint16_t>(pointIndex, indexes.PointSourceId);
 
         Utils::write_field<boost::uint32_t>(p, x);
         Utils::write_field<boost::uint32_t>(p, y);
@@ -306,7 +336,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
         Utils::write_field<boost::uint8_t>(p, userData);
         Utils::write_field<boost::uint16_t>(p, pointSourceId);
 
-        if (Support::hasTime(pointFormat) && indexes.Time != -1)
+        if (Support::hasTime(pointFormat))
         {
             double time(0.0);
             
@@ -362,9 +392,9 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 #endif
         ++numValidPoints;
 
-        const double xValue = schema.getDimension(DimensionId::X_i32).applyScaling<boost::int32_t>(x);
-        const double yValue = schema.getDimension(DimensionId::Y_i32).applyScaling<boost::int32_t>(y);
-        const double zValue = schema.getDimension(DimensionId::Z_i32).applyScaling<boost::int32_t>(z);
+        const double xValue = xDim.applyScaling<boost::int32_t>(x);
+        const double yValue = yDim.applyScaling<boost::int32_t>(y);
+        const double zValue = zDim.applyScaling<boost::int32_t>(z);
         m_summaryData.addPoint(xValue, yValue, zValue, returnNumber);
     }
 
