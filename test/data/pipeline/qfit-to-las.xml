@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="drivers.las.writer">
+        <Option name="filename">
+            out2.las
+        </Option>
+        
+        <Reader type="drivers.qfit.reader">
+            <Option name="filename">
+                ../qfit/14-word.qi
+            </Option>
+            <Option name="debug">
+                true
+            </Option>
+            <Option name="verbose">
+                1
+            </Option>
+            <Option name="flip_coordinates">
+                true
+            </Option>
+            <Option name="convert_z_units">
+                true
+            </Option>
+            <Option name="spatialreference">
+                EPSG:4269+3855
+            </Option>
+        </Reader>
+    </Writer>
+</Pipeline>
