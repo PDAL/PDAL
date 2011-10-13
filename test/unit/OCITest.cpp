@@ -180,7 +180,10 @@ struct OracleTestFixture
         std::string drop_base_table = "DROP TABLE " + base_table_name;
         std::string drop_block_table = "DROP TABLE " + block_table_name;
         run(connection, drop_base_table);
-        run(connection, drop_block_table);            
+        run(connection, drop_block_table);
+        
+        std::string cleanup_metadata = "DELETE FROM USER_SDO_GEOM_METADATA WHERE TABLE_NAME ='" + block_table_name + "'";
+        run(connection, cleanup_metadata);
     }
 };
 
@@ -193,18 +196,47 @@ BOOST_AUTO_TEST_CASE(initialize)
 {
     if (!ShouldRunTest()) return;
     
-    pdal::drivers::las::Reader reader(getOptions());
-    pdal::filters::CacheFilter cache(reader, getOptions());
-    pdal::filters::Chipper chipper(cache, getOptions());
-    pdal::filters::InPlaceReprojectionFilter reproj(chipper, getOptions());
-    pdal::drivers::oci::Writer writer(reproj, getOptions());
+    pdal::drivers::las::Reader writer_reader(getOptions());
+    pdal::filters::CacheFilter writer_cache(writer_reader, getOptions());
+    pdal::filters::Chipper writer_chipper(writer_cache, getOptions());
+    pdal::filters::InPlaceReprojectionFilter writer_reproj(writer_chipper, getOptions());
+    pdal::drivers::oci::Writer writer_writer(writer_reproj, getOptions());
     
-    writer.initialize();
-    boost::uint64_t numPointsToRead = reader.getNumPoints();
+    writer_writer.initialize();
+    boost::uint64_t numPointsToRead = writer_reader.getNumPoints();
     
     BOOST_CHECK_EQUAL(numPointsToRead, 1065);
     
-    writer.write(0);
+    writer_writer.write(0);
+    
+    pdal::drivers::oci::Reader reader_reader(getOptions());
+    reader_reader.initialize();
+    
+    boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator());
+
+    pdal::PointBuffer data(reader_reader.getSchema(), 1000);
+ 
+    boost::uint32_t numRead = iter->read(data);
+
+    BOOST_CHECK_EQUAL(numRead, 799);
+
+    pdal::Schema const& schema = reader_reader.getSchema();
+    int offsetX = schema.getDimensionIndex(DimensionId::X_i32);
+    BOOST_CHECK_EQUAL(offsetX, 0);
+    int offsetY = schema.getDimensionIndex(DimensionId::Y_i32);
+    BOOST_CHECK_EQUAL(offsetY, 1);
+    int offsetZ = schema.getDimensionIndex(DimensionId::Z_i32);
+    BOOST_CHECK_EQUAL(offsetZ, 2);
+    
+    // data.getSchema().dump();
+    boost::int32_t x = data.getField<boost::int32_t>(0, offsetX);
+    boost::int32_t y = data.getField<boost::int32_t>(0, offsetY);
+    boost::int32_t z = data.getField<boost::int32_t>(0, offsetZ);
+
+    BOOST_CHECK_EQUAL(x, -1250418763);
+    BOOST_CHECK_EQUAL(y, 492548402); 
+    BOOST_CHECK_EQUAL(z, 13625); // the test case goes m -> ft.
+    
 }
 // 
 // 
