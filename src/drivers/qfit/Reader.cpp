@@ -484,7 +484,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             
             if (m_convert_z)
             {
-                z = static_cast<boost::int32_t>(Utils::sround(static_cast<double>(z)/100.0));
+                z = static_cast<boost::int32_t>(Utils::sround(static_cast<double>(z)/1000.0));
             }
             data.setField<boost::int32_t>(pointIndex, indexes.Z, z);
 
@@ -545,7 +545,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
 
             if (m_convert_z)
             {
-                passive_z = static_cast<boost::int32_t>(Utils::sround(static_cast<double>(passive_z)/100.0));
+                passive_z = static_cast<boost::int32_t>(Utils::sround(static_cast<double>(passive_z)/1000.0));
             }            
             data.setField<boost::int32_t>(pointIndex, indexes.PassiveZ, passive_z);
 
