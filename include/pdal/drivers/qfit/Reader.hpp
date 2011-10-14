@@ -111,6 +111,7 @@ public:
     int PassiveY;
     int PassiveZ;
     pdal::Dimension dimX;
+    pdal::Dimension dimZ;
     
 };
 

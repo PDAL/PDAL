@@ -184,6 +184,7 @@ namespace pdal { namespace drivers { namespace qfit {
 
 PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 : dimX(schema.getDimension(DimensionId::X_i32))
+, dimZ(schema.getDimension(DimensionId::Z_i32))
 {
     Time = schema.getDimensionIndex(DimensionId::Qfit_Time);
     X = schema.getDimensionIndex(DimensionId::X_i32);
@@ -357,6 +358,11 @@ void Reader::registerFields()
     schema.appendDimension(x);
 
     Dimension z(DimensionId::Z_i32);
+    if (m_convert_z)
+    {
+        double z_scale = 0.001;
+        z.setNumericScale(z_scale);
+    }
     schema.appendDimension(z);
 
     Dimension start_pulse(DimensionId::Qfit_StartPulse);
@@ -404,6 +410,11 @@ void Reader::registerFields()
         schema.appendDimension(passive_x);
 
         Dimension passive_z(DimensionId::Qfit_PassiveZ);
+        if (m_convert_z)
+        {
+            double z_scale = 0.001;
+            passive_z.setNumericScale(z_scale);
+        }
         schema.appendDimension(passive_z);
 
         Dimension gpstime(DimensionId::Qfit_GpsTime);
@@ -482,10 +493,6 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             boost::int32_t z = Utils::read_field<boost::int32_t>(p);
             QFIT_SWAP_BE_TO_LE(z);
             
-            if (m_convert_z)
-            {
-                z = static_cast<boost::int32_t>(Utils::sround(static_cast<double>(z)/1000.0));
-            }
             data.setField<boost::int32_t>(pointIndex, indexes.Z, z);
 
             boost::int32_t start_pulse = Utils::read_field<boost::int32_t>(p);
@@ -541,12 +548,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             data.setField<boost::int32_t>(pointIndex, indexes.PassiveX, passive_x);
 
             boost::int32_t passive_z = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(passive_z);
-
-            if (m_convert_z)
-            {
-                passive_z = static_cast<boost::int32_t>(Utils::sround(static_cast<double>(passive_z)/1000.0));
-            }            
+            QFIT_SWAP_BE_TO_LE(passive_z);         
             data.setField<boost::int32_t>(pointIndex, indexes.PassiveZ, passive_z);
 
             boost::int32_t gpstime = Utils::read_field<boost::int32_t>(p);
