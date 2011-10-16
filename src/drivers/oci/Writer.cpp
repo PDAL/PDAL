@@ -805,7 +805,9 @@ oss << "declare\n"
     }
     
     free(wkt);
-
+    
+	Option& pc_id = getOptions().getOptionByRef("pc_id");
+	pc_id.setValue(m_pc_id);
     // tree.put("cloud_id", pc_id);
     
 }
