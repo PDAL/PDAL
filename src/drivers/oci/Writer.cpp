@@ -199,6 +199,8 @@ const Options Writer::getDefaultOptions() const
                                                     to set on the PC_EXTENT object of the SDO_PC. If none is specified, \
                                                     the cumulated bounds of all of the block data are used.");
 
+    Option pc_id("pc_id", -1, "Point Cloud id");
+
     options.add(is3d);
     options.add(solid);
     options.add(overwrite);
@@ -221,6 +223,7 @@ const Options Writer::getDefaultOptions() const
     options.add(pre_sql);
     options.add(post_block_sql);
     options.add(base_table_bounds);
+    options.add(pc_id);
     return options;
 }
 
@@ -805,10 +808,17 @@ oss << "declare\n"
     }
     
     free(wkt);
-    
+   
+    try 
+    { 
 	Option& pc_id = getOptions().getOptionByRef("pc_id");
 	pc_id.setValue(m_pc_id);
-    // tree.put("cloud_id", pc_id);
+    }
+    catch (pdal::option_not_found&)
+    {
+         Option pc_id("pc_id", m_pc_id, "Point Cloud Id");
+         getOptions().add(pc_id);
+    }
     
 }
 
