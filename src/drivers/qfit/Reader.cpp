@@ -184,7 +184,6 @@ namespace pdal { namespace drivers { namespace qfit {
 
 PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
 : dimX(schema.getDimension(DimensionId::X_i32))
-, dimZ(schema.getDimension(DimensionId::Z_i32))
 {
     Time = schema.getDimensionIndex(DimensionId::Qfit_Time);
     X = schema.getDimensionIndex(DimensionId::X_i32);
@@ -226,12 +225,12 @@ Reader::Reader(const Options& options)
     , m_format(QFIT_Format_Unknown)
     , m_size(0)
     , m_flip_x(true)
-    , m_convert_z(true)
+    , m_scale_z(1.0)
 {
     std::string filename= getFileName();
     
     m_flip_x = getOptions().getValueOrDefault("flip_coordinates", true);
-    m_convert_z = getOptions().getValueOrDefault("convert_z_units", true);
+    m_scale_z = getOptions().getValueOrDefault("scale_z", 1.0);
     
     std::istream* str = FileUtils::openFile(filename);
     
@@ -327,7 +326,7 @@ const Options Reader::getDefaultOptions() const
     Options options;
     Option filename("filename", "", "file to read from");
     Option flip_coordinates("flip_coordinates", true, "Flip coordinates from 0-360 to -180-180");
-    Option convert_z_units("convert_z_units", true, "Convert Z units from mm to m");
+    Option convert_z_units("scale_z", 1.0, "Z scale. Use 0.001 to go from mm to m");
     options.add(filename);
     options.add(flip_coordinates);
     options.add(convert_z_units);
@@ -358,11 +357,7 @@ void Reader::registerFields()
     schema.appendDimension(x);
 
     Dimension z(DimensionId::Z_i32);
-    if (m_convert_z)
-    {
-        double z_scale = 0.001;
-        z.setNumericScale(z_scale);
-    }
+	z.setNumericScale(m_scale_z);
     schema.appendDimension(z);
 
     Dimension start_pulse(DimensionId::Qfit_StartPulse);
@@ -410,11 +405,7 @@ void Reader::registerFields()
         schema.appendDimension(passive_x);
 
         Dimension passive_z(DimensionId::Qfit_PassiveZ);
-        if (m_convert_z)
-        {
-            double z_scale = 0.001;
-            passive_z.setNumericScale(z_scale);
-        }
+		passive_z.setNumericScale(m_scale_z);
         schema.appendDimension(passive_z);
 
         Dimension gpstime(DimensionId::Qfit_GpsTime);
@@ -492,7 +483,6 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
 
             boost::int32_t z = Utils::read_field<boost::int32_t>(p);
             QFIT_SWAP_BE_TO_LE(z);
-            
             data.setField<boost::int32_t>(pointIndex, indexes.Z, z);
 
             boost::int32_t start_pulse = Utils::read_field<boost::int32_t>(p);

@@ -111,7 +111,6 @@ public:
     int PassiveY;
     int PassiveZ;
     pdal::Dimension dimX;
-    pdal::Dimension dimZ;
     
 };
 
@@ -168,7 +167,7 @@ private:
     std::size_t m_offset;
     boost::uint32_t m_size;
     bool m_flip_x;
-    bool m_convert_z;
+    double m_scale_z;
     
     void registerFields();
 

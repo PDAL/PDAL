@@ -75,7 +75,7 @@ void Check_Point(const pdal::PointBuffer& data,
 
     double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x);
     double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y);
-    double z0 = static_cast<double>(z);
+    double z0 = schema.getDimension(offsetZ).applyScaling<boost::int32_t>(z);
 
     //   
     // std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -97,9 +97,9 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     pdal::Option filename("filename", Support::datapath("qfit/10-word.qi"), "Input filename for reader to use" );
     Option flip_coordinates("flip_coordinates", false, "Flip coordinates from 0-360 to -180-180");
-    Option convert_z_units("convert_z_units", false, "Convert Z units from mm to m");
+    Option scale_z("scale_z", 0.001, "Z scale from mm to m");
 
-    options.add(convert_z_units);
+    options.add(scale_z);
     options.add(flip_coordinates);
     options.add(filename);
     pdal::drivers::qfit::Reader reader(options);
@@ -120,9 +120,9 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     delete iter;
 
-    Check_Point(data, 0, 221.826822, 59.205160, 32090.0, 0);
-    Check_Point(data, 1, 221.826740, 59.205161, 32019.0, 0);
-    Check_Point(data, 2, 221.826658, 59.205164, 32000.0, 0);
+    Check_Point(data, 0, 221.826822, 59.205160, 32.0900, 0);
+    Check_Point(data, 1, 221.826740, 59.205161, 32.0190, 0);
+    Check_Point(data, 2, 221.826658, 59.205164, 32.0000, 0);
     
     return;
 }
@@ -134,9 +134,9 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     pdal::Option filename("filename", Support::datapath("qfit/14-word.qi"), "Input filename for reader to use" );
     options.add(filename);
     Option flip_coordinates("flip_coordinates", false, "Flip coordinates from 0-360 to -180-180");
-    Option convert_z_units("convert_z_units", false, "Convert Z units from mm to m");
+    Option scale_z("scale_z", 0.001, "Z scale from mm to m");
 
-    options.add(convert_z_units);
+    options.add(scale_z);
     options.add(flip_coordinates);
 
     pdal::drivers::qfit::Reader reader(options);
@@ -155,9 +155,9 @@ BOOST_AUTO_TEST_CASE(test_14_word)
 
     delete iter;
 
-    Check_Point(data, 0, 244.306337, 35.623317, 1056830.000000, 903);
-    Check_Point(data, 1, 244.306260, 35.623280, 1056409.000000, 903);
-    Check_Point(data, 2, 244.306204, 35.623257, 1056483.000000, 903);
+    Check_Point(data, 0, 244.306337, 35.623317, 1056.830000000, 903);
+    Check_Point(data, 1, 244.306260, 35.623280, 1056.409000000, 903);
+    Check_Point(data, 2, 244.306204, 35.623257, 1056.483000000, 903);
     
     return;
 }
