@@ -40,7 +40,7 @@
 
 #include <string>
 #include <vector>
-
+#include <iosfwd>
 
 namespace pdal
 {
@@ -98,6 +98,13 @@ public:
     /// @return the ptree for the stage
     virtual boost::property_tree::ptree serializePipeline() const = 0;
 
+    /// Put data to the log
+    /// @param input a string to put into the Stage's log
+    virtual void log(std::ostringstream& input) const;
+
+    /// Put data to the log
+    /// @param input a string to put into the Stage's log
+    virtual void log(std::string const& input) const;
 
     /// Query if this object is debug.
     ///
@@ -250,6 +257,7 @@ protected:
     /// @return a vector of StageBase pointers
     static std::vector<StageBase*> makeVector(const std::vector<Stage*>& src);
 
+    std::ostream* getLogStream() { return m_log; }
 private:
     bool m_initialized;
     Options m_options;
@@ -260,6 +268,8 @@ private:
     std::vector<StageBase*> m_inputs;
     std::vector<StageBase*> m_outputs;
     StageOperationType m_dimensionsType;
+    std::ostream* m_log;
+    bool m_logWithFile;
 
     StageBase& operator=(const StageBase& rhs); // not implemented
     StageBase(const StageBase&); // not implemented

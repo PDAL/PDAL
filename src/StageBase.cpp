@@ -38,9 +38,10 @@
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <pdal/Stage.hpp>
-
+#include <pdal/FileUtils.hpp>
 
 namespace pdal
 {
@@ -78,6 +79,8 @@ StageBase::StageBase(const std::vector<StageBase*>& inputs, const Options& optio
     , m_id(options.getValueOrDefault<boost::uint32_t>("id", 0))
     , m_inputs(inputs)
     , m_dimensionsType(StageOperation_All)
+    , m_log(0)
+    , m_logWithFile(false)
 {
     BOOST_FOREACH(StageBase* input, m_inputs)
     {
@@ -90,9 +93,14 @@ StageBase::StageBase(const std::vector<StageBase*>& inputs, const Options& optio
 
 StageBase::~StageBase()
 {
-    return;
+    std::vector<StageBase*> const&  inputs = getInputs();
+    if (inputs.size() == 0)
+    { 
+        if (m_logWithFile)
+            delete m_log;
+    }
+    m_log = 0;
 }
-
 
 void StageBase::initialize()
 {
@@ -111,11 +119,50 @@ void StageBase::initialize()
     m_debug = m_options.getValueOrDefault<bool>("debug", false);
     m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
 
+    std::string logname = m_options.getValueOrDefault<std::string>("log", "stdlog");
+
+
+    std::vector<StageBase*> const&  inputs = getInputs();
+    if (inputs.size() == 0)
+    {
+        if (boost::iequals(logname, "stdlog"))
+        {
+            m_log = &std::clog;
+        } else if (boost::iequals(logname, "stderr"))
+        {
+            m_log = &std::cerr;
+        } else if (boost::iequals(logname, "stdout"))
+        {
+            m_log = &std::cout;
+        } else 
+        {
+            m_log = FileUtils::createFile(logname);
+            m_logWithFile = true;
+        }
+    } else {
+        m_log = getPrevStage().getLogStream();
+    }
+    
     m_initialized = true;
 
     return;
 }
 
+void StageBase::log(std::string const& input) const
+{
+    std::ostringstream oss;
+    oss << input;
+    StageBase::log(oss); 
+}
+void StageBase::log(std::ostringstream& output) const
+{
+    if (m_log)
+    {
+        *m_log << getName() << ": ";
+        *m_log << output.str();
+        *m_log << std::endl; 
+    }
+}
 
 bool StageBase::isInitialized() const
 {
