@@ -201,8 +201,16 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 
     std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
     std::cout.precision(8);
-
+    
     boost::uint32_t cnt = static_cast<boost::uint32_t>(targetNumPointsToWrite);
+    
+    if (isDebug())
+    {
+        std::ostringstream oss;
+        oss << "Writing " << cnt << " points to the LAS file";
+        log(oss);        
+    }
+    
     m_lasHeader.SetPointRecordsCount(cnt);
 
     m_lasHeader.setSpatialReference(getSpatialReference());

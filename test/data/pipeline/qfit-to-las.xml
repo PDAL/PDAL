@@ -4,7 +4,9 @@
         <Option name="filename">
             out2.las
         </Option>
-        
+        <Option name="debug">
+            true
+        </Option>
         <Reader type="drivers.qfit.reader">
             <Option name="filename">
                 ../qfit/14-word.qi
@@ -18,11 +20,14 @@
             <Option name="flip_coordinates">
                 true
             </Option>
-            <Option name="convert_z_units">
-                true
+            <Option name="scale_z">
+                0.001
             </Option>
             <Option name="spatialreference">
                 EPSG:4269+3855
+            </Option>
+            <Option name="log">
+                sometext.log
             </Option>
         </Reader>
     </Writer>

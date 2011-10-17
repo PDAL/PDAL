@@ -182,7 +182,6 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
         }
     }
 
-    double x, y, z;
     
     pdal::Vector<double> mins;
     pdal::Vector<double> maxs;
