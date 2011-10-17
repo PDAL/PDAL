@@ -319,17 +319,14 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    if (isDebug() && getVerboseLevel() > 0) 
-    {
-        std::ostringstream oss;
-        oss << "flipping coordinates?: " << m_flip_x;
-        log(oss);
-        oss.str("");
-        oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        oss.precision(Utils::getStreamPrecision(m_scale_z));
-        oss << "setting z scale to: " << m_scale_z;
-        log(oss);
-    }    
+    std::ostringstream oss;
+    oss << "flipping coordinates?: " << m_flip_x;
+    log(oss);
+    oss.str("");
+    oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    oss.precision(Utils::getStreamPrecision(m_scale_z));
+    oss << "setting z scale to: " << m_scale_z;
+    log(oss);
 }
 
 
