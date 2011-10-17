@@ -100,11 +100,11 @@ public:
 
     /// Put data to the log
     /// @param input a string to put into the Stage's log
-    virtual void log(std::ostringstream& input) const;
+    virtual void log(std::ostringstream& input, boost::uint32_t nVerbosity = 1) const;
 
     /// Put data to the log
     /// @param input a string to put into the Stage's log
-    virtual void log(std::string const& input) const;
+    virtual void log(std::string const& input, boost::uint32_t nVerbosity = 1) const;
 
     /// Query if this object is debug.
     ///

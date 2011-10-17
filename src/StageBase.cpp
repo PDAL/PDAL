@@ -87,6 +87,9 @@ StageBase::StageBase(const std::vector<StageBase*>& inputs, const Options& optio
         input->m_outputs.push_back(this);
     }
 
+    if (m_debug)
+        if (m_verbose == 0) m_verbose = 1;
+        
     return;
 }
 
@@ -118,9 +121,10 @@ void StageBase::initialize()
 
     m_debug = m_options.getValueOrDefault<bool>("debug", false);
     m_verbose = m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
-
+    if (m_debug)
+        if (m_verbose == 0) m_verbose = 1;
+        
     std::string logname = m_options.getValueOrDefault<std::string>("log", "stdlog");
-
 
     std::vector<StageBase*> const&  inputs = getInputs();
     if (inputs.size() == 0)
@@ -148,19 +152,25 @@ void StageBase::initialize()
     return;
 }
 
-void StageBase::log(std::string const& input) const
+void StageBase::log(std::string const& input, boost::uint32_t nVerbosity) const
 {
     std::ostringstream oss;
     oss << input;
-    StageBase::log(oss); 
+    StageBase::log(oss, nVerbosity); 
 }
-void StageBase::log(std::ostringstream& output) const
+
+void StageBase::log(std::ostringstream& output, boost::uint32_t nVerbosity) const
 {
     if (m_log)
     {
-        *m_log << getName() << ": ";
-        *m_log << output.str();
-        *m_log << std::endl; 
+        if (isDebug())
+        {
+            if (nVerbosity >= getVerboseLevel() ) {
+                *m_log << getName() << "(" << nVerbosity << "): ";
+                *m_log << output.str();
+                *m_log << std::endl;             
+            }
+        }
     }
 }
 
