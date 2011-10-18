@@ -364,6 +364,16 @@ print_element_names(xmlNode * a_node)
     }
 }
 
+std::string Reader::remapOldNames(std::string const& input)
+{
+    if (boost::iequals(input, "Unamed field 512") || boost::iequals(input, "Chipper Point ID"))
+        return std::string("Chipper:PointID");
+
+    if (boost::iequals(input, "Unamed field 513") || boost::iequals(input, "Chipper Block ID"))
+        return std::string("Chipper:BlockID");
+    
+    return input;
+}
 
 
 void Reader::Load()
@@ -421,6 +431,7 @@ void Reader::Load()
                             // xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n) throw schema_loading_error("Unable to fetch name!");
                 name = std::string((const char*)n.get());
+                name = remapOldNames(name);
                 // xmlFree(n);
                 // std::cout << "Dimension name: " << name << std::endl;
             }

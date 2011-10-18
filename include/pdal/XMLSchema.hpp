@@ -146,7 +146,7 @@ private:
     Reader(const Reader&); // not implemented;
 
 
-
+    std::string remapOldNames(std::string const& input);
 
     DocPtr m_doc;
     DocPtr m_schema_doc;
