@@ -101,14 +101,7 @@ int PcPipeline::execute()
     {
         throw app_runtime_error("file not found: " + m_inputFile);
     }
-	
-	if (m_pipelineFile.size() > 0)
-	{
-	    if (FileUtils::fileExists(m_pipelineFile))
-	    {
-	        throw app_runtime_error("pipeline serialization file already exists" + m_pipelineFile);
-	    }		
-	}
+
     pdal::PipelineManager manager;
 
     pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
@@ -119,12 +112,12 @@ int PcPipeline::execute()
     const boost::uint64_t np = manager.execute();
 
     std::cout << "Wrote " << np << " points.\n";
-	
-	if (m_pipelineFile.size() > 0)
-	{
-		pdal::PipelineWriter writer(manager);
-		writer.writePipeline(m_pipelineFile);
-	}
+    
+    if (m_pipelineFile.size() > 0)
+    {
+        pdal::PipelineWriter writer(manager);
+        writer.writePipeline(m_pipelineFile);
+    }
     return 0;
 }
 
