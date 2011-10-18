@@ -93,7 +93,7 @@ void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const
         const std::string& name = optionTree.get_child("Name").get_value<std::string>();
         const std::string& value = optionTree.get_child("Value").get_value<std::string>();
         
-        boost::property_tree::ptree& subtree = tree.put("Option", value);
+        boost::property_tree::ptree& subtree = tree.add("Option", value);
         subtree.put("<xmlattr>.name", name);
 
         ++iter;
