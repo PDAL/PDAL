@@ -366,10 +366,10 @@ print_element_names(xmlNode * a_node)
 
 std::string Reader::remapOldNames(std::string const& input)
 {
-    if (boost::iequals(input, "Unamed field 512") || boost::iequals(input, "Chipper Point ID"))
+    if (boost::iequals(input, "Unnamed field 512") || boost::iequals(input, "Chipper Point ID"))
         return std::string("Chipper:PointID");
 
-    if (boost::iequals(input, "Unamed field 513") || boost::iequals(input, "Chipper Block ID"))
+    if (boost::iequals(input, "Unnamed field 513") || boost::iequals(input, "Chipper Block ID"))
         return std::string("Chipper:BlockID");
     
     return input;
