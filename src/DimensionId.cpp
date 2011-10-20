@@ -455,10 +455,10 @@ DimensionId::Id DimensionId::getIdFromName(std::string const& name)
     if (boost::iequals(name, "Alpha"))
         return DimensionId::TerraSolid_Alpha;
     
-    if (boost::iequals(name, "Chipper Point ID"))
+    if (boost::iequals(name, "Chipper:PointID"))
         return DimensionId::Chipper_1;
 
-    if (boost::iequals(name, "Chipper Block ID"))
+    if (boost::iequals(name, "Chipper:BlockID"))
         return DimensionId::Chipper_2;
 
     if (boost::iequals(name, "QFIT:StartPulse"))
