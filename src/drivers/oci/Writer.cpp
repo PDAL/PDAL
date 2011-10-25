@@ -79,15 +79,52 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
     m_base_table_boundary_column = getDefaultedOption<std::string>("base_table_boundary_column");
     m_base_table_boundary_wkt = getDefaultedOption<std::string>("base_table_boundary_wkt");
+    
+    if (isDebug())
+        m_gdal_callback = boost::bind(&Writer::GDAL_log, this, _1, _2, _3);
+    else
+        m_gdal_callback = boost::bind(&Writer::GDAL_error, this, _1, _2, _3);
 
+#ifdef CPLPushErrorHandlerEx
+    CPLPushErrorHandlerEx(&Writer::trampoline, this);
+#else
+    CPLPushErrorHandler(&Writer::trampoline);
+#endif
 }
 
 Writer::~Writer()
 {
     m_connection->Commit();
+    CPLPopErrorHandler();
 
     return;
 }
+
+void Writer::GDAL_log(::CPLErr code, int num, char const* msg)
+{
+    std::ostringstream oss;
+
+    if (code == CE_Failure || code == CE_Fatal) {
+        oss <<"GDAL Failure number=" << num << ": " << msg;
+        throw gdal_error(oss.str());
+    } else if (code == CE_Debug) {
+        oss << "GDAL (code: "<<code<<" - num: " << num <<"): "<< msg;
+        log(oss);
+    } else {
+        return;
+    }
+
+    oss << "logging GDAL: " << msg << std::endl;
+    log(oss);
+}
+
+void Writer::GDAL_error(::CPLErr code, int num, char const* msg)
+{
+    std::ostringstream oss;
+    oss << "logging GDAL: " << msg << std::endl;
+    log(oss);
+}
+
 
 void Writer::initialize()
 {
@@ -1226,7 +1263,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     
     
     // :1
-    statement->Bind( p_pc_id );
+    statement->Bind( &m_pc_id );
     
     // :2
     statement->Bind( p_result_id );

@@ -27,7 +27,7 @@
                 EPSG:4269+3855
             </Option>
             <Option name="log">
-                sometext.log
+                stdlog
             </Option>
         </Reader>
     </Writer>

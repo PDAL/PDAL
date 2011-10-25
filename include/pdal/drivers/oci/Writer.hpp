@@ -41,6 +41,8 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/filters/Chipper.hpp>
 
+#include <boost/function.hpp>
+
 #include "common.hpp"
 
 namespace pdal { namespace drivers { namespace oci {
@@ -103,7 +105,29 @@ private:
         T default_value = getDefaultOptions().getOption(option_name).getValue<T>();
         return getOptions().getValueOrDefault<T>(option_name, default_value);
     }
+
+    boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
     
+    static void trampoline(::CPLErr code, int num, char const* msg)
+    {
+#ifdef CPLPushErrorHandlerEx
+        static_cast<Writer*>(CPLGetErrorHandlerUserData())->m_gdal_callback(code, num, msg);
+#else
+        if (code == CE_Failure || code == CE_Fatal) {
+            std::ostringstream oss;
+            oss <<"GDAL Failure number=" << num << ": " << msg;
+            throw gdal_error(oss.str());
+        } else if (code == CE_Debug) {
+            std::clog << "GDAL (code: "<<code<<" - num: " << num <<"): "<< msg;
+        } else {
+            return;
+        }
+#endif
+    }
+    
+    void GDAL_log(::CPLErr code, int num, char const* msg);
+    void GDAL_error(::CPLErr code, int num, char const* msg);
+
     bool is3d() const;
     bool isSolid() const;
     boost::int32_t getPCID() const;

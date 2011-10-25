@@ -44,6 +44,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/function.hpp>
+
 
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
@@ -61,6 +63,29 @@ typedef boost::shared_ptr<OWConnection> Connection ;
 typedef boost::shared_ptr<OWStatement> Statement ;
 
 
+class Writer;
+class Reader;
+
+class Oracle
+{
+public:
+    Oracle(const Options& options) 
+        : m_options(options)
+    {
+
+
+    }
+    
+
+    bool isDebug() const
+    {
+        return m_options.getValueOrDefault<bool>("debug", false);
+    }
+private:
+    Options const& m_options;
+
+};
+
 class connection_failed : public pdal_error
 {
 public:
@@ -76,6 +101,15 @@ public:
         : pdal_error(msg)
     {}
 };
+
+class gdal_error : public pdal_error
+{
+public:
+    gdal_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
 
 
 
