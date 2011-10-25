@@ -166,7 +166,7 @@ void StageBase::log(std::ostringstream& output, boost::uint32_t nVerbosity) cons
         if (isDebug())
         {
             if (nVerbosity >= getVerboseLevel() ) {
-                *m_log << getName() << "(" << nVerbosity << "): ";
+                *m_log << "((d: " << getName() << ") (v: " << nVerbosity << ")): ";
                 *m_log << output.str();
                 *m_log << std::endl;             
             }
