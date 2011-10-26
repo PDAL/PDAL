@@ -51,6 +51,7 @@ namespace pdal { namespace drivers { namespace oci {
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
+    , OracleDriver(options)
     , m_doCreateIndex(false)
     , m_pc_id(0)
     , m_srid(0)
@@ -59,7 +60,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_issolid(false)
 {
     
-    m_connection = Connect(getOptions(), isDebug(), getVerboseLevel());
+    m_connection = connect();
     
     boost::uint32_t capacity = getOptions().getValueOrThrow<boost::uint32_t>("capacity");
     setChunkSize(capacity);
@@ -81,11 +82,20 @@ Writer::Writer(Stage& prevStage, const Options& options)
     m_base_table_boundary_wkt = getDefaultedOption<std::string>("base_table_boundary_wkt");
     
     if (isDebug())
+    {
+        const char* gdal_debug = pdal::Utils::getenv("CPL_DEBUG");
+        if (gdal_debug == 0)
+        {
+            pdal::Utils::putenv("CPL_DEBUG=ON");
+        }        
         m_gdal_callback = boost::bind(&Writer::GDAL_log, this, _1, _2, _3);
+    }
     else
+    {
         m_gdal_callback = boost::bind(&Writer::GDAL_error, this, _1, _2, _3);
+    }
 
-#ifdef CPLPushErrorHandlerEx
+#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
     CPLPushErrorHandlerEx(&Writer::trampoline, this);
 #else
     CPLPushErrorHandler(&Writer::trampoline);
@@ -97,32 +107,37 @@ Writer::~Writer()
     m_connection->Commit();
     CPLPopErrorHandler();
 
+    pdal::Utils::putenv("CPL_DEBUG=OFF");
+
     return;
 }
 
 void Writer::GDAL_log(::CPLErr code, int num, char const* msg)
 {
     std::ostringstream oss;
-
+    
     if (code == CE_Failure || code == CE_Fatal) {
         oss <<"GDAL Failure number=" << num << ": " << msg;
         throw gdal_error(oss.str());
     } else if (code == CE_Debug) {
-        oss << "GDAL (code: "<<code<<" - num: " << num <<"): "<< msg;
+        oss << "GDAL debug: " << msg << std::endl;
         log(oss);
+        return;
     } else {
         return;
     }
-
-    oss << "logging GDAL: " << msg << std::endl;
-    log(oss);
+    
 }
 
 void Writer::GDAL_error(::CPLErr code, int num, char const* msg)
 {
     std::ostringstream oss;
-    oss << "logging GDAL: " << msg << std::endl;
-    log(oss);
+    if (code == CE_Failure || code == CE_Fatal) {
+        oss <<"GDAL Failure number=" << num << ": " << msg;
+        throw gdal_error(oss.str());
+    } else {
+        return;
+    }
 }
 
 
@@ -431,13 +446,15 @@ bool Writer::BlockTableExists()
 
     std::ostringstream oss;
     std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
-    
+
+
     char szTable[OWNAME]= "";
     oss << "select table_name from user_tables";
 
-    if (isDebug())
-        std::cout << "checking for " << block_table_name << " existence ... " ;
-        
+    std::ostringstream logs;
+    logs << "checking for " << block_table_name << " existence ... " ;
+    log(logs);
+
     Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
     
     // Because of OCIGDALErrorHandler, this is going to throw if there is a 
@@ -446,26 +463,28 @@ bool Writer::BlockTableExists()
     statement->Define(szTable);
     statement->Execute();
 
-    if (isDebug())
-        std::cout << "checking ... " << szTable ;
+    logs.str("");
+    logs << "checking ... " << szTable ;
 
     bool bDidRead(true);
 
     while (bDidRead)
     {
-        if (isDebug())
-            std::cout << ", " << szTable;
+        logs << ", " << szTable;
         if (boost::iequals(szTable, block_table_name))
         {
-            if (isDebug())
-                std::cout << " -- '" << block_table_name << "' found." <<std::endl;
+            log(logs);
+            logs.str("");
+            logs << " -- '" << block_table_name << "' found." <<std::endl;
+            log(logs);
             return true;
         }
         bDidRead = statement->Fetch();
     }
-    if (isDebug())
-        std::cout << " -- '" << block_table_name << "' not found." << std::endl;
-    
+
+    logs << " -- '" << block_table_name << "' not found." << std::endl;
+    log(logs);
+
     return false;
     
 }

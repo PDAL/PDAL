@@ -41,13 +41,13 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/filters/Chipper.hpp>
 
-#include <boost/function.hpp>
+
 
 #include "common.hpp"
 
 namespace pdal { namespace drivers { namespace oci {
 
-class PDAL_DLL Writer : public pdal::Writer
+class PDAL_DLL Writer : public pdal::Writer, pdal::drivers::oci::OracleDriver
 {
 public:
     SET_STAGE_NAME("drivers.oci.writer", "OCI Writer")
@@ -108,9 +108,9 @@ private:
 
     boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
     
-    static void trampoline(::CPLErr code, int num, char const* msg)
+    static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
     {
-#ifdef CPLPushErrorHandlerEx
+#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
         static_cast<Writer*>(CPLGetErrorHandlerUserData())->m_gdal_callback(code, num, msg);
 #else
         if (code == CE_Failure || code == CE_Fatal) {
@@ -118,15 +118,15 @@ private:
             oss <<"GDAL Failure number=" << num << ": " << msg;
             throw gdal_error(oss.str());
         } else if (code == CE_Debug) {
-            std::clog << "GDAL (code: "<<code<<" - num: " << num <<"): "<< msg;
+            std::clog << " (no log control stdlog) GDAL debug: " << msg << std::endl;
         } else {
             return;
         }
 #endif
     }
     
-    void GDAL_log(::CPLErr code, int num, char const* msg);
-    void GDAL_error(::CPLErr code, int num, char const* msg);
+    void CPL_STDCALL GDAL_log(::CPLErr code, int num, char const* msg);
+    void CPL_STDCALL GDAL_error(::CPLErr code, int num, char const* msg);
 
     bool is3d() const;
     bool isSolid() const;

@@ -52,18 +52,65 @@ namespace pdal { namespace drivers { namespace oci {
 
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
+    , OracleDriver(options)
     , m_querytype(QUERY_UNKNOWN)
     , m_capacity(0)
 {
 
+    if (isDebug())
+    {
+        const char* gdal_debug = pdal::Utils::getenv("CPL_DEBUG");
+        if (gdal_debug == 0)
+        {
+            pdal::Utils::putenv("CPL_DEBUG=ON");
+        }        
+        m_gdal_callback = boost::bind(&Reader::GDAL_log, this, _1, _2, _3);
+    }
+    else
+    {
+        m_gdal_callback = boost::bind(&Reader::GDAL_error, this, _1, _2, _3);
+    }
+
+
+#ifdef CPLPushErrorHandlerEx
+    CPLPushErrorHandlerEx(&Reader::trampoline, this);
+#else
+    CPLPushErrorHandler(&Reader::trampoline);
+#endif
 }
 
+void Reader::GDAL_log(::CPLErr code, int num, char const* msg)
+{
+    std::ostringstream oss;
+    
+    if (code == CE_Failure || code == CE_Fatal) {
+        oss <<"GDAL Failure number=" << num << ": " << msg;
+        throw gdal_error(oss.str());
+    } else if (code == CE_Debug) {
+        oss << "GDAL debug: " << msg << std::endl;
+        log(oss);
+        return;
+    } else {
+        return;
+    }
+}
+
+void Reader::GDAL_error(::CPLErr code, int num, char const* msg)
+{
+    std::ostringstream oss;
+    if (code == CE_Failure || code == CE_Fatal) {
+        oss <<"GDAL Failure number=" << num << ": " << msg;
+        throw gdal_error(oss.str());
+    } else {
+        return;
+    }
+}
 
 void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    m_connection = Connect(getOptions(), isDebug(), getVerboseLevel());
+    m_connection = connect();
 
     if (getQuery().size() == 0 )
         throw pdal_error("'query' statement is empty. No data can be read from pdal::drivers::oci::Reader");

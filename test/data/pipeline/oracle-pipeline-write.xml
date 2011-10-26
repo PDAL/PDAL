@@ -95,6 +95,9 @@
                                 <Option name="spatialreference">
                                     EPSG:2926
                                 </Option>
+                                <Option name="log">
+                                    oracle-pipeline-write.log
+                                </Option>                                
                             </Reader>
                         </Filter>
                     </Filter>

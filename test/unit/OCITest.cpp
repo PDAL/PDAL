@@ -133,6 +133,7 @@ struct OracleTestFixture
 {
     OracleTestFixture() :
     m_options(getOptions())
+    , m_driver(getOptions())
     { 
         if (!ShouldRunTest()) return;
         pdal::drivers::oci::Connection connection = connect();
@@ -151,9 +152,7 @@ struct OracleTestFixture
     {
         if (!m_connection.get() ) 
         {
-            m_connection = pdal::drivers::oci::Connect(m_options, 
-                                                       m_options.getValueOrThrow<bool>("debug"),
-                                                       m_options.getValueOrThrow<boost::uint32_t>("verbose"));
+            m_connection = m_driver.connect();
             
         }
         return m_connection;
@@ -168,6 +167,7 @@ struct OracleTestFixture
 
     pdal::Options m_options;
     pdal::drivers::oci::Connection m_connection;
+    pdal::drivers::oci::OracleDriver m_driver;
     
     ~OracleTestFixture() 
     {

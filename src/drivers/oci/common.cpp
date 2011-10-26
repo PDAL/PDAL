@@ -37,9 +37,6 @@
 
 #include <iostream>
 
-#include <boost/concept_check.hpp> // ignore_unused_variable_warning
-#include <boost/make_shared.hpp>
-
 #include <pdal/Bounds.hpp>
 #include <pdal/Utils.hpp>
 
@@ -67,102 +64,11 @@ Block::~Block()
     // m_connection->DestroyType(&blk_extent);
 }
 
-Cloud::Cloud(Connection con)
-    : connection(con)
-{
-
-
-}
-
-Cloud::~Cloud()
-{
-
-}
 
 
 
-pdal::drivers::oci::Connection Connect(Options const& options, bool debug, int verbosity)
-{
-    std::string connection  = options.getValueOrThrow<std::string>("connection");
-
-    if (connection.empty())
-        throw pdal_error("Oracle connection string empty! Unable to connect");
-
-    std::string::size_type slash_pos = connection.find("/",0);
-    std::string username = connection.substr(0,slash_pos);
-    std::string::size_type at_pos = connection.find("@",slash_pos);
-
-    std::string password = connection.substr(slash_pos+1, at_pos-slash_pos-1);
-    std::string instance = connection.substr(at_pos+1);
-    
-    SetGDALDebug(debug);
-    
-    Connection con = boost::make_shared<OWConnection>(username.c_str(),password.c_str(),instance.c_str());
-    
-    if (con->Succeeded())
-    {
-        if (verbosity > 0)
-            std::cout << "Oracle connection succeeded" << std::endl;        
-    }
-    else
-        throw connection_failed("Oracle connection failed");
-        
-    return con;
-    
-}
-
-void SetGDALDebug(bool doDebug)
-{
-    CPLPopErrorHandler();
-
-    if (doDebug)
-    {
-        const char* gdal_debug = pdal::Utils::getenv("CPL_DEBUG");
-        if (gdal_debug == 0)
-        {
-            pdal::Utils::putenv("CPL_DEBUG=ON");
-        }
-        
-        // const char* gdal_debug2 = getenv("CPL_DEBUG");
-        // std::cout << "Setting GDAL debug handler CPL_DEBUG=" << gdal_debug2 << std::endl;
-        CPLPushErrorHandler(OCIGDALDebugErrorHandler);
-        
-    }
-    else 
-    {
-        CPLPushErrorHandler(OCIGDALErrorHandler);        
-    }
-    
-}
 
 }}} // namespace pdal::driver::oci
 
 
 
-
-
-void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
-{
-    std::ostringstream oss;
-    
-    if (eErrClass == CE_Failure || eErrClass == CE_Fatal) {
-        oss <<"GDAL Failure number=" << err_no << ": " << msg;
-        throw pdal::pdal_error(oss.str());
-    } else {
-        return;
-    }
-}
-
-void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
-{
-    std::ostringstream oss;
-    
-    if (eErrClass == CE_Failure || eErrClass == CE_Fatal) {
-        oss <<"GDAL Failure number=" << err_no << ": " << msg;
-        throw pdal::pdal_error(oss.str());
-    } else if (eErrClass == CE_Debug) {
-        std::cout <<"GDAL Debug: " << msg << std::endl;
-    } else {
-        return;
-    }
-}
