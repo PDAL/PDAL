@@ -75,7 +75,7 @@ Options getOptions()
     Option overwrite("overwrite", false,"overwrite");
     options.add(overwrite);
     
-    Option connection("connection",TestConfig::g_oracle_connection, "connection");
+    Option connection("connection",std::string(TestConfig::g_oracle_connection), "connection");
     options.add(connection);
     
     Option debug("debug", true, "debug");
@@ -133,6 +133,7 @@ struct OracleTestFixture
 {
     OracleTestFixture() :
     m_options(getOptions())
+    , m_connection(pdal::drivers::oci::Connection())
     , m_driver(getOptions())
     { 
         if (!ShouldRunTest()) return;
