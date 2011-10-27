@@ -126,6 +126,8 @@ public:
 private:
     Options const& m_options;
 
+    OracleDriver& operator=(const OracleDriver&); // not implemented
+    OracleDriver(const OracleDriver&); // not implemented
 };
 
 

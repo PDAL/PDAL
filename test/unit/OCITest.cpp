@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(initialize)
  
     boost::uint32_t numRead = iter->read(data);
 
-    BOOST_CHECK_EQUAL(numRead, 799);
+    BOOST_CHECK_EQUAL(numRead, 799u);
 
     pdal::Schema const& schema = reader_reader.getSchema();
     int offsetX = schema.getDimensionIndex(DimensionId::X_i32);
