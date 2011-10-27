@@ -10,6 +10,11 @@ If questions, contact mpg@flaxen.com.
 
 The C# work does not use CMake, as CMake doesn't yet support C# builds.
 
+* For swig-2.0.1 (and possibly later), you need to modify one of SWIG's internal library files:
+    in ...\swigwin-2.0.1\Lib\std\std+_basic_string.i, comment out line 48 ("%fragment...")
+  I'm not sure why this is needed, but unless you do swig won't work.  Note this is not a PDAL
+  problem per se, it's something about swig itself.
+  
 * You need to set these environment variables:
   - set PDAL_SWIG_BOOST_HOME=C:\Utils\boost_1_46_1
 
