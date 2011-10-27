@@ -52,7 +52,7 @@ namespace pdal { namespace drivers { namespace oci {
 
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
-    , OracleDriver(options)
+    , OracleDriver(getOptions())
     , m_querytype(QUERY_UNKNOWN)
     , m_capacity(0)
 {
@@ -72,7 +72,7 @@ Reader::Reader(const Options& options)
     }
 
 
-#ifdef CPLPushErrorHandlerEx
+#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
     CPLPushErrorHandlerEx(&Reader::trampoline, this);
 #else
     CPLPushErrorHandler(&Reader::trampoline);
@@ -87,7 +87,7 @@ void Reader::GDAL_log(::CPLErr code, int num, char const* msg)
         oss <<"GDAL Failure number=" << num << ": " << msg;
         throw gdal_error(oss.str());
     } else if (code == CE_Debug) {
-        oss << "GDAL debug: " << msg << std::endl;
+        oss << "GDAL debug: " << msg;
         log(oss);
         return;
     } else {
@@ -189,6 +189,9 @@ std::string Reader::getQuery() const
 
 Reader::~Reader()
 {
+    CPLPopErrorHandler();
+
+    pdal::Utils::putenv("CPL_DEBUG=OFF");    
     return;
 }
 

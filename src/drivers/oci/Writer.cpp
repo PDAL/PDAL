@@ -51,7 +51,7 @@ namespace pdal { namespace drivers { namespace oci {
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
-    , OracleDriver(options)
+    , OracleDriver(getOptions())
     , m_doCreateIndex(false)
     , m_pc_id(0)
     , m_srid(0)
@@ -120,7 +120,7 @@ void Writer::GDAL_log(::CPLErr code, int num, char const* msg)
         oss <<"GDAL Failure number=" << num << ": " << msg;
         throw gdal_error(oss.str());
     } else if (code == CE_Debug) {
-        oss << "GDAL debug: " << msg << std::endl;
+        oss << "GDAL debug: " << msg;
         log(oss);
         return;
     } else {
