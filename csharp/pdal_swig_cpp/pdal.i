@@ -46,7 +46,6 @@
 
 #include "pdal/DimensionId.hpp"
 #include "pdal/Dimension.hpp"
-#include "pdal/DimensionLayout.hpp"
 #include "pdal/Schema.hpp"
 #include "pdal/PointBuffer.hpp"
 #include "pdal/SpatialReference.hpp"
@@ -381,7 +380,7 @@ public:
 };
 
 
-class DimensionLayout
+/*class DimensionLayout
 {
 public:
     DimensionLayout(const pdal::Dimension&);
@@ -390,7 +389,7 @@ public:
     inline void setByteOffset(std::size_t v);
     inline std::size_t getPosition() const;
     inline void setPosition(std::size_t v);
-};
+};*/
 
 class Schema
 {
@@ -403,7 +402,7 @@ public:
     bool hasDimension(const DimensionId::Id&) const;
 
     std::size_t getByteSize() const;
-    const DimensionLayout& getDimensionLayout(std::size_t index) const;
+    //const DimensionLayout& getDimensionLayout(std::size_t index) const;
 };
 
 

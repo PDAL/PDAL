@@ -90,7 +90,6 @@
     <Compile Include="Bounds_double.cs" />
     <Compile Include="Dimension.cs" />
     <Compile Include="DimensionId.cs" />
-    <Compile Include="DimensionLayout.cs" />
     <Compile Include="EndianType.cs" />
     <Compile Include="Filter.cs" />
     <Compile Include="ios.cs" />
