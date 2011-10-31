@@ -326,8 +326,7 @@ BlockPtr IteratorBase::defineBlock(Statement statement)
 
 bool SequentialIterator::atEndImpl() const
 {
-    return m_at_end; 
-    // return getIndex() >= getStage().getNumPoints();
+    return m_at_end;
 }
 
 
