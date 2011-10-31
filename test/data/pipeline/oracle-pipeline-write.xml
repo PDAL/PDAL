@@ -36,10 +36,8 @@
         <Option name="base_table_aux_values">
         </Option>
         <Option name="base_table_boundary_column">
-            BOUNDARY
         </Option>
         <Option name="base_table_boundary_wkt">
-            /Users/hobu/hg/pdal/test/data/mike.wkt
         </Option>
         <Option name="pre_block_sql">
         </Option>
@@ -53,42 +51,29 @@
         <Option name="stream_output_precision">
             8
         </Option>
-        <Filter type="filters.descaling">
-            <Option name="scale_x">
-                0.0000001
-            </Option>
-            <Option name="scale_y">
-                0.0000001
-            </Option>
-            <Option name="scale_z">
-                0.0001
-            </Option>
-            <Option name="offset_x">
-                0.0
-            </Option>            
-            <Option name="offset_y">
-                0.0
-            </Option>            
-            <Option name="offset_z">
-                0.0
-            </Option>
-            <Filter type="filters.reprojection">
+
+            <Filter type="filters.inplacereprojection">
                 <Option name="out_srs">
                     EPSG:4326
                 </Option>
-                <Filter type="filters.scaling">
-                    <Filter type="filters.chipper">
-                        <Option name="capacity">
+                <Option name="scale_x">
+                    0.0000001
+                </Option>
+                <Option name="scale_y">
+                    0.0000001
+                </Option>
+                <Filter type="filters.chipper">
+                    <Option name="capacity">
+                        50
+                    </Option>
+                    <Filter type="filters.cache">
+                        <Option name="max_cache_blocks">
+                            1
+                        </Option>
+                        <Option name="cache_block_size">
                             50
                         </Option>
-                        <Filter type="filters.cache">
-                            <Option name="max_cache_blocks">
-                                1
-                            </Option>
-                            <Option name="cache_block_size">
-                                50
-                            </Option>
-                            <Reader type="drivers.las.reader">
+                        <Reader type="drivers.las.reader">
                                 <Option name="filename">
                                     ../1.2-with-color.las
                                 </Option>
@@ -97,10 +82,8 @@
                                 </Option>
                                 <Option name="log">
                                     oracle-pipeline-write.log
-                                </Option>                                
-                            </Reader>
-                        </Filter>
-                    </Filter>
+                                </Option>    
+                        </Reader>
                 </Filter>
             </Filter>
         </Filter>
