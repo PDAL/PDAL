@@ -8,7 +8,7 @@
             1
         </Option>
         <Option name="connection">
-            lidar/lidar@oracle.hobu.biz/lidar
+            lidar/lidar@lidar.hobu.biz/lidar
         </Option>
         <Option name="base_table_name">
             SIMPLE_CLOUD
