@@ -206,7 +206,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& PointBuffer)
 
     const pdal::drivers::las::PointIndexes indexes(schema, pointFormat);
 
-    ::liblas::Point pt(m_externalHeader);
+    ::liblas::Point pt(m_externalHeader.get());
 
     boost::uint32_t numPoints = PointBuffer.getNumPoints();
     for (boost::uint32_t i=0; i<numPoints; i++)
