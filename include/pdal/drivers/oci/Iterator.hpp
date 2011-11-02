@@ -58,13 +58,13 @@ protected:
     
     boost::uint32_t myReadBuffer(PointBuffer& data);
     boost::uint32_t unpackOracleData(PointBuffer& data);
-    BlockPtr defineBlock(Statement statement);
 
     Statement m_statement;
     bool m_at_end;
     QueryType m_querytype;
     CloudPtr m_cloud;
     BlockPtr m_block;
+    boost::int32_t m_active_cloud_id;
 
 
 private:

@@ -73,8 +73,14 @@ public:
     Connection getConnection () const { return m_connection;}
     Statement getStatement () const { return m_statement;}
     CloudPtr getCloud() const;
+    BlockPtr getBlock() const { return m_block; }
     std::string getQuery() const;
-
+    void defineBlock(Statement statement, BlockPtr block) const;
+    
+        
+    QueryType getQueryType() const {return m_querytype; }
+    Schema fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity) const;
+    pdal::SpatialReference fetchSpatialReference(Statement statement, sdo_pc* pc) const;
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
@@ -105,16 +111,19 @@ private:
     Reader(const Reader&); // not implemented
     // 
     
-    QueryType describeQueryType() const;
-    Schema fetchSchema(sdo_pc* pc);
+    QueryType describeQueryType() ;
 
     Connection m_connection;
     Statement m_statement;
     QueryType m_querytype;
-
+    
     sdo_pc* m_pc;
+    BlockPtr m_block;
     sdo_pc_blk* m_pc_block;
     boost::uint32_t m_capacity;
+    
+    // Fields in the form of NAME:TYPE
+    std::map<std::string, int> m_fields;
 
     boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
   

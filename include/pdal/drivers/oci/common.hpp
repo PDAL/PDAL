@@ -136,9 +136,10 @@ private:
 
 enum QueryType
 {
-    QUERY_SDO_PC,
+    QUERY_SDO_PC = 0,
     QUERY_SDO_PC_BLK_TYPE,
-    QUERY_UNKNOWN
+    QUERY_SDO_BLK_PC_VIEW,
+    QUERY_UNKNOWN = 512
 };
 
 
@@ -179,10 +180,9 @@ public:
     boost::scoped_ptr<std::vector<uint8_t> > chunk;
     OCILobLocator           *locator;
     Connection              m_connection;
+    sdo_pc*                 pc;
 
 
-private:
-    boost::uint32_t m_capacity;
 };
 
 typedef boost::shared_ptr<Block> BlockPtr;

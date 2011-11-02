@@ -51,6 +51,7 @@ Block::Block(Connection connection)
     m_connection->CreateType(&blk_extent->sdo_ordinates, m_connection->GetOrdinateType());
     m_connection->CreateType(&blk_extent->sdo_elem_info, m_connection->GetElemInfoType());
     m_connection->CreateType(&blk_domain);
+    m_connection->CreateType(&pc);
 }
 
 Block::~Block()
@@ -58,7 +59,7 @@ Block::~Block()
     m_connection->DestroyType(&blk_domain);
     m_connection->DestroyType(&blk_extent->sdo_elem_info);
     m_connection->DestroyType(&blk_extent->sdo_ordinates);
-    
+    m_connection->DestroyType(&pc);
     // FIXME: For some reason having the dtor destroy this
     // causes a segfault
     // m_connection->DestroyType(&blk_extent);

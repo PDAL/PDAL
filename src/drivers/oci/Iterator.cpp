@@ -52,22 +52,38 @@ IteratorBase::IteratorBase(const Reader& reader)
     : m_statement(Statement())
     , m_at_end(false)
     , m_cloud(reader.getCloud())
+    , m_block(BlockPtr(new Block(m_cloud->connection)))
+    , m_active_cloud_id(0)
     , m_reader(reader)
 
 {
     
-    std::ostringstream select_blocks;
     
-    select_blocks
-        << "select T.OBJ_ID, T.BLK_ID, T.BLK_EXTENT, T.NUM_POINTS, T.POINTS from " 
-        << m_cloud->blk_table << " T WHERE T.OBJ_ID = " 
-        << m_cloud->pc_id;
+    m_querytype = reader.getQueryType();
+    
+    if (m_querytype == QUERY_SDO_PC)
+    {
+        std::ostringstream select_blocks;
+    
+        select_blocks
+            << "select T.OBJ_ID, T.BLK_ID, T.BLK_EXTENT, T.NUM_POINTS, T.POINTS from " 
+            << m_cloud->blk_table << " T WHERE T.OBJ_ID = " 
+            << m_cloud->pc_id;
 
 
-    m_statement = Statement(m_cloud->connection->CreateStatement(select_blocks.str().c_str()));
+        m_statement = Statement(m_cloud->connection->CreateStatement(select_blocks.str().c_str()));
 
-    m_statement->Execute(0);
-    m_block = defineBlock(m_statement);
+        m_statement->Execute(0);
+        reader.defineBlock(m_statement, m_block);
+        m_active_cloud_id = m_cloud->pc_id;
+        
+    } else if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
+    {
+        m_statement = reader.getStatement();
+        m_block = reader.getBlock();
+        
+        m_active_cloud_id = m_statement->GetInteger(&m_block->pc->pc_id);
+    }
     
     return;
 }
@@ -123,7 +139,18 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
     
     bool bDidRead = false;
 
-
+    boost::int32_t current_cloud_id = m_statement->GetInteger(&m_block->pc->pc_id);
+    
+    if (current_cloud_id != m_active_cloud_id)
+    {
+        std::ostringstream oss;
+        oss << "current_cloud_id: " << current_cloud_id << " m_active_cloud_id: " << m_active_cloud_id;
+        m_reader.log(oss);
+        
+        boost::uint32_t capacity(0);
+        Schema schema = m_reader.fetchSchema(m_statement, m_block->pc, capacity);        
+        
+    }
     // std::cout << "m_block->num_points: " << m_block->num_points << std::endl;
     // std::cout << "data.getCapacity(): " << data.getCapacity() << std::endl;
     if (!m_block->num_points) 
@@ -246,81 +273,6 @@ boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
     // getExternalReader().Seek(newPos);
 
     return 0;
-}
-
-
-BlockPtr IteratorBase::defineBlock(Statement statement)
-{
-
-    int   iCol = 0;
-    char  szFieldName[OWNAME];
-    int   hType = 0;
-    int   nSize = 0;
-    int   nPrecision = 0;
-    signed short nScale = 0;
-    char szTypeName[OWNAME];
-    
-    BlockPtr block = BlockPtr(new Block(m_cloud->connection));
-
-    m_cloud->connection->CreateType(&(block->blk_extent));    
-
-    while( statement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName) )
-    {
-        std::string name = boost::to_upper_copy(std::string(szFieldName));
-
-        if (boost::iequals(szFieldName, "OBJ_ID"))
-        {
-            statement->Define(&(block->obj_id));
-        }
-
-        if (boost::iequals(szFieldName, "BLK_ID"))
-        {
-            statement->Define(&(block->blk_id));
-        }
-
-        if (boost::iequals(szFieldName, "BLK_EXTENT"))
-        {
-            statement->Define(&(block->blk_extent));
-        }
-
-        if (boost::iequals(szFieldName, "BLK_DOMAIN"))
-        {
-            statement->Define(&(block->blk_domain));
-        }
-        
-        if (boost::iequals(szFieldName, "PCBLK_MIN_RES"))
-        {
-            statement->Define(&(block->pcblk_min_res));
-        }
-
-        if (boost::iequals(szFieldName, "PCBLK_MAX_RES"))
-        {
-            statement->Define(&(block->pcblk_max_res));
-        }
-
-        if (boost::iequals(szFieldName, "NUM_POINTS"))
-        {
-            statement->Define(&(block->num_points));
-        }
-
-        if (boost::iequals(szFieldName, "NUM_UNSORTED_POINTS"))
-        {
-            statement->Define(&(block->num_unsorted_points));
-        }
-
-        if (boost::iequals(szFieldName, "PT_SORT_DIM"))
-        {
-            statement->Define(&(block->pt_sort_dim));
-        }
-
-        if (boost::iequals(szFieldName, "POINTS"))
-        {
-            statement->Define( &(block->locator) ); 
-        }
-        iCol++;
-    }
-    
-    return block;
 }
 
 
