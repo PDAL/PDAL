@@ -117,9 +117,7 @@ private:
     Statement m_statement;
     QueryType m_querytype;
     
-    sdo_pc* m_pc;
     BlockPtr m_block;
-    sdo_pc_blk* m_pc_block;
     boost::uint32_t m_capacity;
     
     // Fields in the form of NAME:TYPE

@@ -38,14 +38,17 @@
 #include <pdal/pdal.hpp>
 
 #include <pdal/StageIterator.hpp>
-
+#include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/oci/common.hpp>
 #include <pdal/drivers/oci/Reader.hpp>
 
 #include <string>
-
+#include <map>
 namespace pdal { namespace drivers { namespace oci {
 
+
+typedef boost::shared_ptr<PointBuffer> BufferPtr;
+typedef std::map<int, BufferPtr> BufferMap;
 
 class IteratorBase
 {
@@ -65,6 +68,9 @@ protected:
     CloudPtr m_cloud;
     BlockPtr m_block;
     boost::int32_t m_active_cloud_id;
+    BufferPtr m_new_buffer;
+    bool bGetNewBuffer;
+    BufferMap m_buffers;
 
 
 private:

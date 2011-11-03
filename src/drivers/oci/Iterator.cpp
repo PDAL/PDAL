@@ -54,10 +54,11 @@ IteratorBase::IteratorBase(const Reader& reader)
     , m_cloud(reader.getCloud())
     , m_block(BlockPtr(new Block(m_cloud->connection)))
     , m_active_cloud_id(0)
+    , m_new_buffer(BufferPtr())
+    , bGetNewBuffer(false)
     , m_reader(reader)
 
 {
-    
     
     m_querytype = reader.getQueryType();
     
@@ -75,6 +76,7 @@ IteratorBase::IteratorBase(const Reader& reader)
 
         m_statement->Execute(0);
         reader.defineBlock(m_statement, m_block);
+        // m_active_cloud_id = m_statement->GetInteger(&m_block->pc->pc_id);        
         m_active_cloud_id = m_cloud->pc_id;
         
     } else if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
@@ -134,23 +136,16 @@ void IteratorBase::read(PointBuffer& data,
 boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
 {
     boost::uint32_t numPointsRead = 0;
-
+    
+    if (bGetNewBuffer)
+    {
+        data = *m_new_buffer;
+    }
     data.setNumPoints(0);
     
     bool bDidRead = false;
 
-    boost::int32_t current_cloud_id = m_statement->GetInteger(&m_block->pc->pc_id);
-    
-    if (current_cloud_id != m_active_cloud_id)
-    {
-        std::ostringstream oss;
-        oss << "current_cloud_id: " << current_cloud_id << " m_active_cloud_id: " << m_active_cloud_id;
-        m_reader.log(oss);
-        
-        boost::uint32_t capacity(0);
-        Schema schema = m_reader.fetchSchema(m_statement, m_block->pc, capacity);        
-        
-    }
+
     // std::cout << "m_block->num_points: " << m_block->num_points << std::endl;
     // std::cout << "data.getCapacity(): " << data.getCapacity() << std::endl;
     if (!m_block->num_points) 
@@ -183,7 +178,9 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
     {
         boost::uint32_t numReadThisBlock = m_block->num_points;
         boost::uint32_t numSpaceLeftThisBlock = data.getCapacity() - data.getNumPoints();
-        
+
+        // std::cout << "numReadThisBlock: " << numReadThisBlock << " numSpaceLeftThisBlock: " << numSpaceLeftThisBlock<< std::endl;
+        // std::cout << "numPointsRead: " << numPointsRead << std::endl;
         if (numReadThisBlock > numSpaceLeftThisBlock)
         {
             // We're done.  We still have more data, but the 
@@ -194,13 +191,53 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
             // an oracle block, they're just not going to get anything 
             // back right now (FIXME)
             break;
+            
         }
 
         numPointsRead = numPointsRead + numReadThisBlock;
         
         read(data, numReadThisBlock, data.getNumPoints(), 0);
-
+        
         bDidRead = m_statement->Fetch();
+        boost::int32_t current_cloud_id(0);
+        if (m_querytype == QUERY_SDO_PC)
+            current_cloud_id = m_block->obj_id;
+        else if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
+        {
+            current_cloud_id = m_statement->GetInteger(&m_block->pc->pc_id);
+        }
+        // std::cout << "current_cloud_id: " << current_cloud_id << " m_active_cloud_id: " << m_active_cloud_id;
+    
+        if (current_cloud_id != m_active_cloud_id)
+        {
+            std::ostringstream oss;
+            oss << "The clould id for this block, " << current_cloud_id << ", is different than the active cloud id: " << m_active_cloud_id << ". Fetching new schema for PointBuffer";
+            m_reader.log(oss);
+            
+            BufferMap::const_iterator i = m_buffers.find(current_cloud_id);
+            if (i != m_buffers.end())
+            {
+                oss.str("");
+                oss << "found existing PointBuffer with id " << current_cloud_id;
+                m_reader.log(oss);
+                m_new_buffer = i->second;
+            } else {
+                boost::uint32_t capacity(0);
+                Schema schema = m_reader.fetchSchema(m_statement, m_block->pc, capacity);
+                
+                m_new_buffer = BufferPtr(new PointBuffer(schema, capacity));
+                std::pair<int, BufferPtr> p(current_cloud_id, m_new_buffer);
+                m_buffers.insert(p);
+                oss.str("");
+                oss << "creating new PointBuffer with id " << current_cloud_id;
+                m_reader.log(oss);
+                
+            }
+
+            bGetNewBuffer = true;
+            m_active_cloud_id = current_cloud_id;
+            return numPointsRead;
+        }
 
         if (!bDidRead)
         {
