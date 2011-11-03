@@ -188,11 +188,12 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
             const boost::uint64_t numPointsToReadThisChunk64 = std::min<boost::uint64_t>(numRemainingPointsToRead, m_chunkSize);
             // this case is safe because m_chunkSize is a uint32
             const boost::uint32_t numPointsToReadThisChunk = static_cast<boost::uint32_t>(numPointsToReadThisChunk64);
-
+            
             // we are reusing the buffer, so we may need to adjust the capacity for the last (and likely undersized) chunk
             if (buffer.getCapacity() != numPointsToReadThisChunk)
             {
-                buffer = PointBuffer(schema, numPointsToReadThisChunk);
+                // Use the PointBuffer's schema in case the schema changed
+                buffer = PointBuffer(buffer.getSchema(), numPointsToReadThisChunk);
             }
         }
 
