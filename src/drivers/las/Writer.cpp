@@ -270,7 +270,7 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 
 boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 {
-    const Schema& schema = getPrevStage().getSchema();
+    const Schema& schema = pointBuffer.getSchema();
     const Dimension& xDim = schema.getDimension(DimensionId::X_i32);
     const Dimension& yDim = schema.getDimension(DimensionId::Y_i32);
     const Dimension& zDim = schema.getDimension(DimensionId::Z_i32);
