@@ -143,22 +143,6 @@ enum QueryType
 };
 
 
-class Cloud
-{
-public:
-    Cloud(Connection connection);
-    ~Cloud();
-    
-    std::string base_table;
-    std::string base_column;
-    boost::int32_t pc_id;
-    std::string blk_table;
-    sdo_geometry* pc_geometry;
-    Connection              connection;
-        
-};
-typedef boost::shared_ptr<Cloud> CloudPtr;
-
 class Block
 {
     

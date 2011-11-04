@@ -72,7 +72,6 @@ public:
     
     Connection getConnection () const { return m_connection;}
     Statement getStatement () const { return m_statement;}
-    CloudPtr getCloud() const;
     BlockPtr getBlock() const { return m_block; }
     std::string getQuery() const;
     void defineBlock(Statement statement, BlockPtr block) const;

@@ -505,17 +505,6 @@ pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_
     return schema;
 }
 
-CloudPtr Reader::getCloud() const
-{
-
-    CloudPtr output(new Cloud(getConnection()));
-    output->base_table = m_statement->GetString(m_block->pc->base_table);
-    output->base_column = m_statement->GetString(m_block->pc->base_column);
-    output->pc_id = m_statement->GetInteger(&(m_block->pc->pc_id));
-    output->blk_table = m_statement->GetString(m_block->pc->blk_table);
-    return output;
-
-}
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {

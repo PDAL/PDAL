@@ -66,13 +66,13 @@ protected:
     Statement m_statement;
     bool m_at_end;
     QueryType m_querytype;
-    CloudPtr m_cloud;
     BlockPtr m_block;
     BlockPtr m_cloud_block;
     boost::int32_t m_active_cloud_id;
     BufferPtr m_new_buffer;
     bool bGetNewBuffer;
     BufferMap m_buffers;
+    std::string m_active_cloud_table;
 
 
 private:

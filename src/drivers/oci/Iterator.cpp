@@ -51,8 +51,7 @@ namespace pdal { namespace drivers { namespace oci {
 IteratorBase::IteratorBase(const Reader& reader)
     : m_statement(Statement())
     , m_at_end(false)
-    , m_cloud(reader.getCloud())
-    , m_block(BlockPtr(new Block(m_cloud->connection)))
+    , m_block(BlockPtr(new Block(reader.getConnection())))
     , m_active_cloud_id(0)
     , m_new_buffer(BufferPtr())
     , bGetNewBuffer(false)
@@ -65,19 +64,22 @@ IteratorBase::IteratorBase(const Reader& reader)
     if (m_querytype == QUERY_SDO_PC)
     {
         std::ostringstream select_blocks;
-    
+        BlockPtr cloud_block = reader.getBlock();
+        Statement cloud_statement = reader.getStatement();
+        
+        m_active_cloud_id = cloud_statement->GetInteger(&cloud_block->pc->pc_id);
+        m_active_cloud_table = std::string(cloud_statement->GetString(cloud_block->pc->blk_table));
         select_blocks
             << "select T.OBJ_ID, T.BLK_ID, T.BLK_EXTENT, T.NUM_POINTS, T.POINTS from " 
-            << m_cloud->blk_table << " T WHERE T.OBJ_ID = " 
-            << m_cloud->pc_id;
+            << m_active_cloud_table << " T WHERE T.OBJ_ID = " 
+            << m_active_cloud_id;
 
 
-        m_statement = Statement(m_cloud->connection->CreateStatement(select_blocks.str().c_str()));
+        m_statement = Statement(reader.getConnection()->CreateStatement(select_blocks.str().c_str()));
 
         m_statement->Execute(0);
         reader.defineBlock(m_statement, m_block);
-        // m_active_cloud_id = m_statement->GetInteger(&m_block->pc->pc_id);        
-        m_active_cloud_id = m_cloud->pc_id;
+
         
     } else if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
     {

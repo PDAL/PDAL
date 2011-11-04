@@ -65,19 +65,6 @@ Block::~Block()
     // m_connection->DestroyType(&blk_extent);
 }
 
-Cloud::Cloud(Connection con)
-    : connection(con)
-{
-
-
-}
-
-Cloud::~Cloud()
-{
-
-}
-
-
 
 
 }}} // namespace pdal::driver::oci
