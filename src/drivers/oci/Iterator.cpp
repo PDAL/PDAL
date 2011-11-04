@@ -102,24 +102,26 @@ const Reader& IteratorBase::getReader() const
     return m_reader;
 }
 
-void IteratorBase::read(PointBuffer& data, 
+void IteratorBase::read(PointBuffer& data,
+                        Statement statement,
+                        BlockPtr block,
                         boost::uint32_t howMany, 
                         boost::uint32_t whichPoint, 
                         boost::uint32_t whichBlobPosition)
 {
     boost::uint32_t nAmountRead = 0;
-    boost::uint32_t blob_length = m_statement->GetBlobLength(m_block->locator);
+    boost::uint32_t blob_length = statement->GetBlobLength(block->locator);
 
-    if (m_block->chunk->size() < blob_length)
+    if (block->chunk->size() < blob_length)
     {
-        m_block->chunk->resize(blob_length);
+        block->chunk->resize(blob_length);
     }
     
     // std::cout << "blob_length: " << blob_len// gth << std::endl;
 
-    bool read_all_data = m_statement->ReadBlob( m_block->locator,
-                                     (void*)(&(*m_block->chunk)[0]),
-                                     m_block->chunk->size() , 
+    bool read_all_data = statement->ReadBlob( block->locator,
+                                     (void*)(&(*block->chunk)[0]),
+                                     block->chunk->size() , 
                                      &nAmountRead);
     if (!read_all_data) throw pdal_error("Did not read all blob data!");
 
@@ -127,7 +129,7 @@ void IteratorBase::read(PointBuffer& data,
     
     data.getSchema().getByteSize();
     boost::uint32_t howMuchToRead = howMany * data.getSchema().getByteSize();
-    data.setDataStride(&(*m_block->chunk)[whichBlobPosition], whichPoint, howMuchToRead);
+    data.setDataStride(&(*block->chunk)[whichBlobPosition], whichPoint, howMuchToRead);
 
     data.setNumPoints(data.getNumPoints() + howMany);
 
@@ -196,7 +198,7 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
 
         numPointsRead = numPointsRead + numReadThisBlock;
         
-        read(data, numReadThisBlock, data.getNumPoints(), 0);
+        read(data, m_statement, m_block, numReadThisBlock, data.getNumPoints(), 0);
         
         bDidRead = m_statement->Fetch();
         boost::int32_t current_cloud_id(0);
@@ -247,28 +249,31 @@ boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
     }
 
     
+    data.setSpatialBounds(getBounds(m_statement, m_block));
+
+    return numPointsRead;
+}
+
+pdal::Bounds<double> IteratorBase::getBounds(Statement statement, BlockPtr block)
+{
     pdal::Vector<double> mins;
     pdal::Vector<double> maxs;
     
-    boost::int32_t bounds_length = m_statement->GetArrayLength(&(m_block->blk_extent->sdo_ordinates));
+    boost::int32_t bounds_length = statement->GetArrayLength(&(block->blk_extent->sdo_ordinates));
     
     for (boost::int32_t i = 0; i < bounds_length; i = i + 2)
     {
         double v;
-        m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), i, &v);
+        statement->GetElement(&(block->blk_extent->sdo_ordinates), i, &v);
         mins.add(v);
-        m_statement->GetElement(&(m_block->blk_extent->sdo_ordinates), i+1, &v);
+        statement->GetElement(&(block->blk_extent->sdo_ordinates), i+1, &v);
         maxs.add(v);
     }
     
     pdal::Bounds<double> block_bounds(mins, maxs);
     
-    data.setSpatialBounds(block_bounds);
-
-    return numPointsRead;
+    return block_bounds;    
 }
-
-
 
 
 

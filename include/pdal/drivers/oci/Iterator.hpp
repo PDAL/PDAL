@@ -62,11 +62,13 @@ protected:
     boost::uint32_t myReadBuffer(PointBuffer& data);
     boost::uint32_t unpackOracleData(PointBuffer& data);
 
+    Statement m_block_statement;
     Statement m_statement;
     bool m_at_end;
     QueryType m_querytype;
     CloudPtr m_cloud;
     BlockPtr m_block;
+    BlockPtr m_cloud_block;
     boost::int32_t m_active_cloud_id;
     BufferPtr m_new_buffer;
     bool bGetNewBuffer;
@@ -76,11 +78,15 @@ protected:
 private:
     const Reader& m_reader;
     
+    Statement getNextCloud();
     void read(  PointBuffer& data, 
+                Statement statement,
+                BlockPtr block,
                 boost::uint32_t howMany, 
                 boost::uint32_t whichPoint, 
                 boost::uint32_t whichBlobPosition);
     
+    pdal::Bounds<double> getBounds(Statement statement, BlockPtr block);
     IteratorBase& operator=(const IteratorBase&); // not implemented
     IteratorBase(const IteratorBase&); // not implemented;
     
