@@ -63,25 +63,9 @@ IteratorBase::IteratorBase(const Reader& reader)
     
     if (m_querytype == QUERY_SDO_PC)
     {
-        std::ostringstream select_blocks;
-        BlockPtr cloud_block = reader.getBlock();
-        Statement cloud_statement = reader.getStatement();
-        
-        m_active_cloud_id = cloud_statement->GetInteger(&cloud_block->pc->pc_id);
-        m_active_cloud_table = std::string(cloud_statement->GetString(cloud_block->pc->blk_table));
-        select_blocks
-            << "select T.OBJ_ID, T.BLK_ID, T.BLK_EXTENT, T.NUM_POINTS, T.POINTS from " 
-            << m_active_cloud_table << " T WHERE T.OBJ_ID = " 
-            << m_active_cloud_id;
-
-
-        m_statement = Statement(reader.getConnection()->CreateStatement(select_blocks.str().c_str()));
-
-        m_statement->Execute(0);
-        reader.defineBlock(m_statement, m_block);
-
-        
-    } else if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
+        m_statement = getNextCloud(m_block, m_active_cloud_id);
+    } 
+    else if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
     {
         m_statement = reader.getStatement();
         m_block = reader.getBlock();
@@ -92,6 +76,28 @@ IteratorBase::IteratorBase(const Reader& reader)
     return;
 }
 
+Statement IteratorBase::getNextCloud(BlockPtr block, boost::int32_t& cloud_id)
+{
+
+    std::ostringstream select_blocks;
+    BlockPtr cloud_block = m_reader.getBlock();
+    Statement cloud_statement = m_reader.getStatement();
+    
+    cloud_id = cloud_statement->GetInteger(&cloud_block->pc->pc_id);
+    std::string cloud_table = std::string(cloud_statement->GetString(cloud_block->pc->blk_table));
+    select_blocks
+        << "select T.OBJ_ID, T.BLK_ID, T.BLK_EXTENT, T.NUM_POINTS, T.POINTS from " 
+        << cloud_table << " T WHERE T.OBJ_ID = " 
+        << m_active_cloud_id;
+
+
+    Statement output = Statement(m_reader.getConnection()->CreateStatement(select_blocks.str().c_str()));
+
+    output->Execute(0);
+    m_reader.defineBlock(output, block);
+    return output;
+    
+}
 
 IteratorBase::~IteratorBase()
 {

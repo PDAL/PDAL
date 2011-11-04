@@ -72,13 +72,12 @@ protected:
     BufferPtr m_new_buffer;
     bool bGetNewBuffer;
     BufferMap m_buffers;
-    std::string m_active_cloud_table;
 
 
 private:
     const Reader& m_reader;
     
-    Statement getNextCloud();
+    Statement getNextCloud(BlockPtr block, boost::int32_t& cloud_id);
     void read(  PointBuffer& data, 
                 Statement statement,
                 BlockPtr block,
