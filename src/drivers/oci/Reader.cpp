@@ -122,10 +122,6 @@ void Reader::initialize()
 
     m_querytype = describeQueryType();
 
-    std::ostringstream oss;
-    oss << "Query type is: " << m_querytype;
-    log(oss);
-    
     if (m_querytype == QUERY_SDO_PC)
     {
         defineBlock(m_statement, m_block);
@@ -379,17 +375,27 @@ QueryType Reader::describeQueryType()
         if (q->second == false)
         {
             bHasBlockFields = false;
-            std::ostringstream oss;
-            oss << "Unable to find block field " << q->first << "in describeQueryType()";
-            log(oss);
             break;
         }
         bHasBlockFields = true;
     }
     
-    if (bHaveSDO_PC && bHasBlockFields) return QUERY_SDO_BLK_PC_VIEW;
-    if (bHaveSDO_PC) return QUERY_SDO_PC;
-    
+    oss.str("");
+    if (bHaveSDO_PC && bHasBlockFields) 
+    {
+        oss << "Query type is QUERY_SDO_BLK_PC_VIEW";
+        log(oss);
+        return QUERY_SDO_BLK_PC_VIEW;
+    }
+    if (bHaveSDO_PC) 
+    {
+        oss << "Query type is QUERY_SDO_PC";
+        log(oss);        
+        return QUERY_SDO_PC;
+    }
+
+    oss << "Query type is QUERY_UNKNOWN";
+    log(oss);
     return QUERY_UNKNOWN;
     
 }
