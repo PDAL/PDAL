@@ -87,6 +87,14 @@ public:
     {}
 };
 
+class read_error : public pdal_error
+{
+public:
+    read_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
 
 class OracleDriver
 {
