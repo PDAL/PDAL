@@ -61,6 +61,11 @@ protected:
     
     boost::uint32_t myReadBuffer(PointBuffer& data);
     boost::uint32_t unpackOracleData(PointBuffer& data);
+    
+    boost::uint32_t myReadClouds(PointBuffer& data);
+    boost::uint32_t myReadBlocks(PointBuffer& data);
+
+    BufferPtr fetchPointBuffer(Statement statment, sdo_pc* pc, boost::uint32_t capacity);
 
     Statement m_block_statement;
     Statement m_statement;
@@ -71,6 +76,7 @@ protected:
     boost::int32_t m_active_cloud_id;
     BufferPtr m_new_buffer;
     bool bGetNewBuffer;
+    bool bReadFirstCloud;
     BufferMap m_buffers;
 
 
