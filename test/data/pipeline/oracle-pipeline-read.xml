@@ -7,36 +7,11 @@
         <Option name="compression">
             false
         </Option>
-        
-        <Filter type="filters.descaling">
-            <Option name="scale_x">
-                0.01
-            </Option>
-            <Option name="scale_y">
-                0.01
-            </Option>
-            <Option name="scale_z">
-                0.0001
-            </Option>
-            <Option name="offset_x">
-                0.0
-            </Option>            
-            <Option name="offset_y">
-                0.0
-            </Option>            
-            <Option name="offset_z">
-                0.0
-            </Option>            
-            <Filter type="filters.reprojection">
-                <Option name="out_srs">
-                    EPSG:26917
-                </Option>
-                
-                <Filter type="filters.scaling">
+
                     
                     <Reader type="drivers.oci.reader">
                         <Option name="query">
-                            SELECT CLOUD FROM SIMPLE_CLOUD where ID=1
+                            SELECT CLOUD FROM SIMPLE_CLOUD
                         </Option>
                         <Option name="connection">
                             lidar/lidar@oracle.hobu.biz/lidar
@@ -44,10 +19,10 @@
                         <Option name="debug">
                             true
                         </Option>
+                        <Option name="verbose">
+                            3
+                        </Option>
                     </Reader>
-                </Filter>
-				
-            </Filter>
-        </Filter>
+
     </Writer>
 </Pipeline>
