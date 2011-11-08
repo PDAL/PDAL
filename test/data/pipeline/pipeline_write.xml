@@ -2,7 +2,10 @@
 <Pipeline version="1.0">
     <Writer type="drivers.las.writer">
         <Option name="filename">
-            out.las
+            pdal-compressed.laz
+        </Option>
+        <Option name="compression">
+            true
         </Option>
         <Filter type="filters.crop">
             <Option name="bounds">

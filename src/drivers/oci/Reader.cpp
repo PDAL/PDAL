@@ -88,7 +88,7 @@ void Reader::GDAL_log(::CPLErr code, int num, char const* msg)
         throw gdal_error(oss.str());
     } else if (code == CE_Debug) {
         oss << "GDAL debug: " << msg;
-        log(oss);
+        log()->get(logDEBUG) << oss;
         return;
     } else {
         return;
@@ -324,7 +324,7 @@ QueryType Reader::describeQueryType()
         }
         iCol++;
     }
-    log(oss);
+    log()->get(logDEBUG)  << oss;
         // if ( hType == SQLT_NTY)
         // {
         //     std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
@@ -380,22 +380,18 @@ QueryType Reader::describeQueryType()
         bHasBlockFields = true;
     }
     
-    oss.str("");
     if (bHaveSDO_PC && bHasBlockFields) 
     {
-        oss << "Query type is QUERY_SDO_BLK_PC_VIEW";
-        log(oss);
+        log()->get(logDEBUG) << "Query type is QUERY_SDO_BLK_PC_VIEW";
         return QUERY_SDO_BLK_PC_VIEW;
     }
     if (bHaveSDO_PC) 
     {
-        oss << "Query type is QUERY_SDO_PC";
-        log(oss);        
+        log()->get(logDEBUG) << "Query type is QUERY_SDO_PC";
         return QUERY_SDO_PC;
     }
 
-    oss << "Query type is QUERY_UNKNOWN";
-    log(oss);
+    log()->get(logDEBUG) << "Query type is QUERY_UNKNOWN";
     return QUERY_UNKNOWN;
     
 }
@@ -422,9 +418,7 @@ pdal::SpatialReference Reader::fetchSpatialReference(Statement statement, sdo_pc
 
 pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity) const
 {
-    std::ostringstream oss;
-    oss << "Fetching schema from SDO_PC object";
-    log(oss);
+    log()->get(logDEBUG) << "Fetching schema from SDO_PC object";
     
     // Fetch the XML that defines the schema for this point cloud
     std::ostringstream select_schema;

@@ -321,12 +321,12 @@ void Reader::initialize()
 
     std::ostringstream oss;
     oss << "flipping coordinates?: " << m_flip_x;
-    log(oss);
+    log()->get(logDEBUG) << oss << std::endl;
     oss.str("");
     oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
     oss.precision(Utils::getStreamPrecision(m_scale_z));
     oss << "setting z scale to: " << m_scale_z;
-    log(oss);
+    log()->get(logDEBUG) << oss << std::endl;
 }
 
 
@@ -566,8 +566,6 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     }
 
     delete[] buf;
-
-    // data.setSpatialBounds( lasHeader.getBounds() );
 
     return numPoints;
 }

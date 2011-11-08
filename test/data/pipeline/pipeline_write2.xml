@@ -17,7 +17,7 @@
                     <Reader type="drivers.las.reader">
                         <Option name="filename">
 							utm15.las
-                        </Option>
+                        </Option>              
                     </Reader>
                 </Filter>
 				

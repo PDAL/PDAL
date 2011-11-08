@@ -120,8 +120,7 @@ void Writer::GDAL_log(::CPLErr code, int num, char const* msg)
         oss <<"GDAL Failure number=" << num << ": " << msg;
         throw gdal_error(oss.str());
     } else if (code == CE_Debug) {
-        oss << "GDAL debug: " << msg;
-        log(oss);
+        log()->get(logDEBUG) << "GDAL debug: " << msg;
         return;
     } else {
         return;
@@ -451,9 +450,7 @@ bool Writer::BlockTableExists()
     char szTable[OWNAME]= "";
     oss << "select table_name from user_tables";
 
-    std::ostringstream logs;
-    logs << "checking for " << block_table_name << " existence ... " ;
-    log(logs);
+    log()->get(logDEBUG) << "checking for " << block_table_name << " existence ... " ;
 
     Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
     
@@ -463,27 +460,22 @@ bool Writer::BlockTableExists()
     statement->Define(szTable);
     statement->Execute();
 
-    logs.str("");
-    logs << "checking ... " << szTable ;
+    log()->get(logDEBUG) << "checking ... " << szTable ;
 
     bool bDidRead(true);
 
     while (bDidRead)
     {
-        logs << ", " << szTable;
+        log()->get(logDEBUG) << ", " << szTable;
         if (boost::iequals(szTable, block_table_name))
         {
-            log(logs);
-            logs.str("");
-            logs << " -- '" << block_table_name << "' found." <<std::endl;
-            log(logs);
+            log()->get(logDEBUG) << " -- '" << block_table_name << "' found." <<std::endl;
             return true;
         }
         bDidRead = statement->Fetch();
     }
 
-    logs << " -- '" << block_table_name << "' not found." << std::endl;
-    log(logs);
+    log()->get(logDEBUG) << " -- '" << block_table_name << "' not found." << std::endl;
 
     return false;
     

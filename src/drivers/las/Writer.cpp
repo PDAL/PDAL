@@ -204,9 +204,7 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
     
     boost::uint32_t cnt = static_cast<boost::uint32_t>(targetNumPointsToWrite);
     
-    std::ostringstream oss;
-    oss << "Writing " << cnt << " points to the LAS file";
-    log(oss);
+    log()->get(logDEBUG) << "Writing " << cnt << " points to the LAS file" << std::endl;
     
     m_lasHeader.SetPointRecordsCount(cnt);
 
