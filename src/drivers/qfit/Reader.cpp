@@ -321,12 +321,12 @@ void Reader::initialize()
 
     std::ostringstream oss;
     oss << "flipping coordinates?: " << m_flip_x;
-    log()->get(logDEBUG) << oss << std::endl;
+    log()->get(logDEBUG) << oss.str() << std::endl;
     oss.str("");
     oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
     oss.precision(Utils::getStreamPrecision(m_scale_z));
     oss << "setting z scale to: " << m_scale_z;
-    log()->get(logDEBUG) << oss << std::endl;
+    log()->get(logDEBUG) << oss.str() << std::endl;
 }
 
 

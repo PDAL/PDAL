@@ -120,7 +120,7 @@ void Writer::GDAL_log(::CPLErr code, int num, char const* msg)
         oss <<"GDAL Failure number=" << num << ": " << msg;
         throw gdal_error(oss.str());
     } else if (code == CE_Debug) {
-        log()->get(logDEBUG) << "GDAL debug: " << msg;
+        log()->get(logDEBUG) << "GDAL debug: " << msg << std::endl;
         return;
     } else {
         return;

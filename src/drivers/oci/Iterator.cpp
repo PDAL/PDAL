@@ -242,11 +242,12 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& data)
 
 
 
-
+#ifdef DEBUG
     getReader().log()->get(logDEBUG4) << "IteratorBase::myReadBlocks: m_block->num_points: " << m_block->num_points << std::endl;
 
     getReader().log()->get(logDEBUG4) << "IteratorBase::myReadBlocks: data.getCapacity(): " << data.getCapacity() << std::endl;
-        
+#endif
+
     if (!m_block->num_points) 
     {
         // We still have a block of data from the last readBuffer call
@@ -389,20 +390,6 @@ SequentialIterator::~SequentialIterator()
 
 boost::uint64_t SequentialIterator::skipImpl(boost::uint64_t count)
 {
-    // const boost::uint64_t newPos64 = getIndex() + count;
-    // 
-    // // The liblas reader's seek() call only supports size_t, so we might
-    // // not be able to satisfy this request...
-    // 
-    // if (newPos64 > std::numeric_limits<size_t>::max())
-    // {
-    //     throw pdal_error("cannot support seek offsets greater than 32-bits");
-    // }
-    // 
-    // // safe cast, since we just handled the overflow case
-    // size_t newPos = static_cast<size_t>(newPos64);
-    // 
-    // getExternalReader().Seek(newPos);
 
     return 0;
 }
