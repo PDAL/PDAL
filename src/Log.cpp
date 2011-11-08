@@ -42,25 +42,31 @@ namespace pdal
 {
 
 
-Log::Log(pdal::StageBase const& stage, std::string const& outputName) 
+Log::Log(pdal::StageBase const& stage, std::string const& outputName, std::ostream* v) 
     : m_stage(stage)
     , m_level(logERROR)
     , m_deleteStreamOnCleanup(false)
 {
-
-    if (boost::iequals(outputName, "stdlog"))
+    // If we were handed a log stream, we're going to use that.
+    if (v == 0)
     {
-        m_log = &std::clog;
-    } else if (boost::iequals(outputName, "stderr"))
+        if (boost::iequals(outputName, "stdlog"))
+        {
+            m_log = &std::clog;
+        } else if (boost::iequals(outputName, "stderr"))
+        {
+            m_log = &std::cerr;
+        } else if (boost::iequals(outputName, "stdout"))
+        {
+            m_log = &std::cout;
+        } else 
+        {
+            m_log = FileUtils::createFile(outputName);
+            m_deleteStreamOnCleanup = true;
+        }
+    } else
     {
-        m_log = &std::cerr;
-    } else if (boost::iequals(outputName, "stdout"))
-    {
-        m_log = &std::cout;
-    } else 
-    {
-        m_log = FileUtils::createFile(outputName);
-        m_deleteStreamOnCleanup = true;
+        m_log = v;
     }
     m_null_stream.open(sink());
 }
@@ -79,7 +85,7 @@ std::ostream& Log::get(eLogLevel level)
 {
     if (level <= m_level)
     {
-        *m_log << "((d: " << m_stage.getName() << ") (v: " << level << ")): ";
+        *m_log << "((d: " << m_stage.getName() << ") ("<<getLevelString(level)<<": " << level << ")): ";
         *m_log << std::string(level > logDEBUG ? 0 : level - logDEBUG, '\t');
         return *m_log;
     } else
@@ -89,4 +95,26 @@ std::ostream& Log::get(eLogLevel level)
 
 }
 
+std::string Log::getLevelString(eLogLevel level) const
+{
+    std::ostringstream output;
+    
+    switch (level)
+    {
+        case logERROR:
+            output << "ERROR";
+            break;
+        case logWARNING:
+            output << "WARNING";
+            break;
+        case logINFO:
+            output << "INFO";
+            break;
+
+        default:
+            output << "DEBUG";
+    }
+    
+    return output.str();
+}
 } // namespace

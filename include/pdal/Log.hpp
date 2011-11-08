@@ -72,11 +72,15 @@ enum eLogLevel {
 class PDAL_DLL Log
 {
 public:
-    Log(StageBase const& stage, std::string const& outputName);
+    Log(StageBase const& stage, std::string const& outputName, std::ostream* v);
     virtual ~Log();
     std::ostream& get(eLogLevel level = logINFO);
     eLogLevel getLevel() { return m_level; }
     void setLevel(eLogLevel v) { m_level = v; }
+    
+    std::ostream* getLogStream() { return m_log; }
+    std::string getLevelString(eLogLevel v) const;
+    
 protected:
     std::ostream* m_log;
     null_stream m_null_stream;
