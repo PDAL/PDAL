@@ -130,26 +130,22 @@ void Reader::initialize()
     
         if (!bDidRead) throw pdal_error("Unable to fetch a point cloud entry entry!");
         
-        setSpatialReference(fetchSpatialReference(m_statement, m_block->pc));
+        try 
+        {
+            setSpatialReference(getOptions().getValueOrThrow<pdal::SpatialReference>("spatialreference"));
+        
+        }
+        catch (pdal_error const&) 
+        {
+            // If one wasn't set on the options, we'll ignore at this 
+            setSpatialReference(fetchSpatialReference(m_statement, m_block->pc));
+
+        }
 
         Schema& schema = getSchemaRef(); 
         schema = fetchSchema(m_statement, m_block->pc, m_capacity);
     }
-    // else if (m_querytype == QUERY_SDO_PC_BLK_TYPE)
-    // {
-    //     m_connection->CreateType(&m_pc_block);
-    //     // m_connection->CreateType(&(m_pc_block->inp));
-    //     m_statement->Define(&m_pc_block);
-    // 
-    //     bool bDidRead = m_statement->Fetch(); 
-    // 
-    //     if (!bDidRead) throw pdal_error("Unable to fetch a point cloud entry entry!");
-    //     setSpatialReference(fetchSpatialReference(m_statement, m_block->pc));
-    //     
-    //     Schema& schema = getSchemaRef(); 
-    //     schema = fetchSchema(m_statement, m_block->pc, m_capacity);
-    //     
-    // }
+
     else if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
     {
         
@@ -158,7 +154,18 @@ void Reader::initialize()
     
         if (!bDidRead) throw pdal_error("Unable to fetch a point cloud entry entry!");
         Schema& schema = getSchemaRef(); 
-        setSpatialReference(fetchSpatialReference(m_statement, m_block->pc));
+
+        try 
+        {
+            setSpatialReference(getOptions().getValueOrThrow<pdal::SpatialReference>("spatialreference"));
+        
+        }
+        catch (pdal_error const&) 
+        {
+            // If one wasn't set on the options, we'll ignore at this 
+            setSpatialReference(fetchSpatialReference(m_statement, m_block->pc));
+
+        }
 
         schema = fetchSchema(m_statement, m_block->pc, m_capacity);
         
