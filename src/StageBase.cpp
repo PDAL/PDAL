@@ -122,13 +122,13 @@ void StageBase::initialize()
     std::vector<StageBase*> const&  inputs = getInputs();
     if (inputs.size() == 0)
     {
-        m_log = boost::shared_ptr<pdal::Log>(new Log(*this, logname, 0));
+        m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname, 0));
     } else {
         std::ostream* v= getPrevStage().log()->getLogStream();
-        m_log = boost::shared_ptr<pdal::Log>(new Log(*this, logname, v));
+        m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname, v));
 
     }
-        m_log->setLevel(static_cast<eLogLevel>(m_verbose));
+        m_log->setLevel(static_cast<LogLevel>(m_verbose));
     
     m_initialized = true;
 

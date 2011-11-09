@@ -69,6 +69,20 @@ enum StageOperationType
     STageOperation_Id = (1u << 2)
 };
 
+enum LogLevel 
+{
+    logERROR = 0, 
+    logWARNING, 
+    logINFO, 
+    logDEBUG, 
+    logDEBUG1,
+    logDEBUG2, 
+    logDEBUG3, 
+    logDEBUG4,
+    logDEBUG5
+};
+
+
 } // namespace
 
 #endif

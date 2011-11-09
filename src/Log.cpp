@@ -34,18 +34,20 @@
 
 #include <pdal/Log.hpp>
 #include <boost/algorithm/string.hpp>
-#include <pdal/StageBase.hpp>
 
 #include <ostream>
+#include <sstream>
 
 namespace pdal 
 {
 
 
-Log::Log(pdal::StageBase const& stage, std::string const& outputName, std::ostream* v) 
-    : m_stage(stage)
-    , m_level(logERROR)
+Log::Log(std::string const& leaderString, 
+         std::string const& outputName, 
+         std::ostream* v) 
+    : m_level(logERROR)
     , m_deleteStreamOnCleanup(false)
+    , m_leader(leaderString)
 {
     // If we were handed a log stream, we're going to use that.
     if (v == 0)
@@ -77,15 +79,13 @@ Log::~Log()
         delete m_log;
     
     m_log = 0;
-
-
 }
 
-std::ostream& Log::get(eLogLevel level)
+std::ostream& Log::get(LogLevel level)
 {
     if (level <= m_level)
     {
-        *m_log << "((d: " << m_stage.getName() << ") ("<<getLevelString(level)<<": " << level << ")): ";
+        *m_log << "((d: " << m_leader << ") ("<< getLevelString(level) <<": " << level << ")): ";
         *m_log << std::string(level > logDEBUG ? 0 : level - logDEBUG, '\t');
         return *m_log;
     } else
@@ -95,7 +95,7 @@ std::ostream& Log::get(eLogLevel level)
 
 }
 
-std::string Log::getLevelString(eLogLevel level) const
+std::string Log::getLevelString(LogLevel level) const
 {
     std::ostringstream output;
     
