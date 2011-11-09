@@ -96,7 +96,6 @@ Reader::Reader(const Options& options)
     m_header.swap(h);
     Utils::read_n(*m_header, *stream, sizeof(TerraSolidHeader));
 
-    // std::cout << "RecogVal: " << m_header->RecogVal << std::endl;
     if ( m_header->RecogVal != 970401)
         throw terrasolid_error("Header identifier was not '970401', is this a TerraSolid .bin file?");
 
@@ -121,8 +120,6 @@ Reader::Reader(const Options& options)
     m_offset = 56;
     const Schema& schema = getSchema();
     m_size = schema.getByteSize();
-    
-    
 
     delete stream;
 }    
@@ -140,7 +137,8 @@ void Reader::initialize()
     log()->get(logDEBUG3) << "Time: " << m_header->Time << std::endl;
     log()->get(logDEBUG3) << "Color: " << m_header->Color << std::endl;
     log()->get(logDEBUG3) << "Count: " << m_header->PntCnt << std::endl;
-   
+    log()->get(logDEBUG3) << "RecogVal: " << m_header->RecogVal << std::endl;
+
     
 }
 
