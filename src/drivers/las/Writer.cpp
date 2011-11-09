@@ -329,7 +329,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 
         boost::uint16_t pointSourceId(0);
         if (indexes.PointSourceId != -1)
-            pointSourceId = pointBuffer.getRawField<boost::uint16_t>(pointIndex, indexes.PointSourceId);
+            pointSourceId = pointBuffer.getRawField<boost::uint16_t>(pointIndex, positions.PointSourceId);
 
         Utils::write_field<boost::uint32_t>(p, x);
         Utils::write_field<boost::uint32_t>(p, y);
