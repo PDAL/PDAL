@@ -75,6 +75,8 @@ Log::Log(std::string const& leaderString,
 
 Log::~Log()
 {
+    m_log->flush();
+    
     if (m_deleteStreamOnCleanup)
         delete m_log;
     
