@@ -53,11 +53,12 @@ BOOST_AUTO_TEST_SUITE(LasWriterTest)
 BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
 {
     // remove file from earlier run, if needed
-    FileUtils::deleteFile("temp.las");
+    std::string temp_filename("temp-LasWriterTest_test_simple_las.las");
+    FileUtils::deleteFile(temp_filename);
 
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     
-    std::ostream* ofs = FileUtils::createFile(Support::temppath("temp.las"));
+    std::ostream* ofs = FileUtils::createFile(Support::temppath(temp_filename));
 
     {
         // need to scope the writer, so that's it dtor can use the stream
@@ -78,12 +79,12 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
 
     FileUtils::closeFile(ofs);
 
-    bool filesSame = Support::compare_files(Support::temppath("temp.las"), Support::datapath("simple.las"));
+    bool filesSame = Support::compare_files(Support::temppath(temp_filename), Support::datapath("simple.las"));
     BOOST_CHECK(filesSame);
 
     if (filesSame)
     {
-        FileUtils::deleteFile(Support::temppath("temp.las"));
+        FileUtils::deleteFile(Support::temppath(temp_filename));
     }
 
     return;
@@ -122,10 +123,11 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
         pdal::drivers::las::Reader reader(Support::temppath("LasWriterTest_test_simple_laz.laz"));
     }
 
-    // these two files only differ by the description string in the VLR
+    // these two files only differ by the description string in the VLR.
+    // This now skips the entire LASzip VLR for comparison.
     const boost::uint32_t numdiffs = Support::diff_files(Support::temppath("LasWriterTest_test_simple_laz.laz"),
                                                          Support::datapath("laszip/laszip-generated.laz"),
-                                                         249, 32);
+                                                         227, 106);
     BOOST_CHECK(numdiffs==0);
 
     if (numdiffs==0)
