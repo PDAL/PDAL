@@ -44,6 +44,7 @@
 #ifdef PDAL_HAVE_GDAL
 #include <gdal.h>
 #include <ogr_spatialref.h>
+#include <pdal/GDALUtils.hpp>
 #endif
 
 namespace pdal { namespace filters {
@@ -112,6 +113,7 @@ InPlaceReprojectionFilter::InPlaceReprojectionFilter(Stage& prevStage, const Opt
 void InPlaceReprojectionFilter::initialize()
 {
     Filter::initialize();
+    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>( new pdal::gdal::Debug(isDebug(), log()));
 
     checkImpedance();
 

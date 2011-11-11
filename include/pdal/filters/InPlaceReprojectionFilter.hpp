@@ -44,6 +44,11 @@
 namespace pdal
 {
     class PointBuffer;
+    namespace gdal
+    {
+        class Debug;
+
+    }
 }
 
 namespace pdal { namespace filters {
@@ -111,6 +116,7 @@ private:
     double m_x_offset;
     double m_y_offset;
     double m_z_offset;
+    boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
     
     InPlaceReprojectionFilter& operator=(const InPlaceReprojectionFilter&); // not implemented
     InPlaceReprojectionFilter(const InPlaceReprojectionFilter&); // not implemented
