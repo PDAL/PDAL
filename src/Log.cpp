@@ -75,10 +75,12 @@ Log::Log(std::string const& leaderString,
 
 Log::~Log()
 {
-    m_log->flush();
     
     if (m_deleteStreamOnCleanup)
+    {
+        m_log->flush();
         delete m_log;
+    }
     
     m_log = 0;
 }
