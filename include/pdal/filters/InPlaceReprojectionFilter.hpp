@@ -47,7 +47,6 @@ namespace pdal
     namespace gdal
     {
         class Debug;
-
     }
 }
 

@@ -44,6 +44,10 @@
 namespace pdal
 {
     class PointBuffer;
+    namespace gdal
+    {
+        class Debug;
+    }
 }
 
 namespace pdal { namespace filters {
@@ -91,6 +95,7 @@ private:
     ReferencePtr m_in_ref_ptr;
     ReferencePtr m_out_ref_ptr;
     TransformPtr m_transform_ptr;
+    boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
 
     ReprojectionFilter& operator=(const ReprojectionFilter&); // not implemented
     ReprojectionFilter(const ReprojectionFilter&); // not implemented
