@@ -69,7 +69,6 @@ set(PDAL_BASE_CPP
   FileUtils.cpp
   Filter.cpp
   FilterIterator.cpp
-  GDALUtils.cpp
   Log.cpp
   MetadataRecord.cpp
   MultiFilter.cpp
@@ -95,6 +94,10 @@ set(PDAL_BASE_CPP
   Writer.cpp
   ${PDAL_XML_SRC}
 )
+
+if (GDAL_FOUND)
+    set (PDAL_BASE_CPP  GDALUtils.cpp ${PDAL_BASE_CPP})
+endif(GDAL_FOUND)
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )

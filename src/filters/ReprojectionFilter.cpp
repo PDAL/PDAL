@@ -126,7 +126,6 @@ ReprojectionFilter::ReprojectionFilter(Stage& prevStage,
 void ReprojectionFilter::initialize()
 {
     Filter::initialize();
-    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>( new pdal::gdal::Debug(isDebug(), log()));
 
     checkImpedance();
 
@@ -136,7 +135,9 @@ void ReprojectionFilter::initialize()
     }
 
 #ifdef PDAL_HAVE_GDAL
-    
+
+    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>( new pdal::gdal::Debug(isDebug(), log()));
+
     m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
     m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0), OGRSpatialReferenceDeleter());
     
