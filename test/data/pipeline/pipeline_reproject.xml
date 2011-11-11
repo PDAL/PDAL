@@ -14,13 +14,25 @@
                 <Option name="scale_y">
                     0.0000001
                 </Option>
+                <Option name="debug">
+                    true
+                </Option>
+                <Option name="verbose">
+                    6
+                </Option>
                 <Reader type="drivers.las.reader">
                     <Option name="filename">
                         ../1.2-with-color.las
                     </Option>
                     <Option name="spatialreference">
                         ../1.2-with-color.las.wkt
-                    </Option>                         
+                    </Option>
+                    <Option name="debug">
+                        true
+                    </Option>
+                    <Option name="verbose">
+                        6
+                    </Option>
                 </Reader>
         </Filter>
     </Writer>
