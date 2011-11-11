@@ -52,8 +52,6 @@ namespace pdal
 
 class Stage;
 
-typedef boost::shared_ptr<Log> LogPtr;
-
 //
 // supported options:
 //   <uint32>id

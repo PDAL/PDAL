@@ -39,7 +39,7 @@
 
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/null.hpp>
-
+#include <boost/shared_ptr.hpp>
 #include <pdal/FileUtils.hpp>
 #include <iosfwd>
 
@@ -51,9 +51,6 @@ typedef boost::iostreams::stream<sink> null_stream;
 
 namespace pdal
 {
-
-
-class StageBase;
 
 
 /// pdal::Log is a logging object that is provided by pdal::StageBase to 
@@ -117,6 +114,7 @@ private:
     std::string m_leader;
 };
 
+typedef boost::shared_ptr<Log> LogPtr;
 
 
 } // namespace pdal
