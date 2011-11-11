@@ -88,9 +88,6 @@ Writer::Writer(Stage& prevStage, const Options& options)
 Writer::~Writer()
 {
     m_connection->Commit();
-    CPLPopErrorHandler();
-
-    pdal::Utils::putenv("CPL_DEBUG=OFF");
 
     return;
 }

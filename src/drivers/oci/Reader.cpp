@@ -245,9 +245,6 @@ std::string Reader::getQuery() const
 
 Reader::~Reader()
 {
-    CPLPopErrorHandler();
-
-    pdal::Utils::putenv("CPL_DEBUG=OFF");    
     return;
 }
 
