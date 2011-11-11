@@ -98,5 +98,10 @@ void Debug::error(::CPLErr code, int num, char const* msg)
     }
 }
 
+Debug::~Debug()
+{
+    CPLPopErrorHandler();
+
+}
 
 }} // namespace pdal::gdal

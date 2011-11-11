@@ -61,7 +61,7 @@ class PDAL_DLL Debug
 public:
 
     Debug(bool isDebug, pdal::LogPtr log);
-    ~Debug() {}
+    ~Debug();
 
     static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
     {
