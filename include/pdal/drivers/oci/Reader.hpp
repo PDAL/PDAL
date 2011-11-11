@@ -38,6 +38,8 @@
 #include <pdal/pdal.hpp>
 
 #include <pdal/Reader.hpp>
+#include <pdal/GDALUtils.hpp>
+
 #include <pdal/drivers/oci/common.hpp>
 
 #include <boost/scoped_ptr.hpp>
@@ -83,26 +85,6 @@ public:
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
-  
-    static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
-    {
-#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
-        static_cast<Reader*>(CPLGetErrorHandlerUserData())->m_gdal_callback(code, num, msg);
-#else
-        if (code == CE_Failure || code == CE_Fatal) {
-            std::ostringstream oss;
-            oss <<"GDAL Failure number=" << num << ": " << msg;
-            throw gdal_error(oss.str());
-        } else if (code == CE_Debug) {
-            std::clog << " (no log control stdlog) GDAL debug: " << msg << std::endl;
-        } else {
-            return;
-        }
-#endif
-    }
-    
-    void CPL_STDCALL GDAL_log(::CPLErr code, int num, char const* msg);
-    void CPL_STDCALL GDAL_error(::CPLErr code, int num, char const* msg);
     
 private:
 
@@ -121,8 +103,10 @@ private:
     
     // Fields in the form of NAME:TYPE
     std::map<std::string, int> m_fields;
+    
+    boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
 
-    boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
+    // boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
   
 
 };

@@ -57,59 +57,13 @@ Reader::Reader(const Options& options)
     , m_capacity(0)
 {
 
-    if (isDebug())
-    {
-        const char* gdal_debug = pdal::Utils::getenv("CPL_DEBUG");
-        if (gdal_debug == 0)
-        {
-            pdal::Utils::putenv("CPL_DEBUG=ON");
-        }        
-        m_gdal_callback = boost::bind(&Reader::GDAL_log, this, _1, _2, _3);
-    }
-    else
-    {
-        m_gdal_callback = boost::bind(&Reader::GDAL_error, this, _1, _2, _3);
-    }
-
-
-#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
-    CPLPushErrorHandlerEx(&Reader::trampoline, this);
-#else
-    CPLPushErrorHandler(&Reader::trampoline);
-#endif
-}
-
-void Reader::GDAL_log(::CPLErr code, int num, char const* msg)
-{
-    std::ostringstream oss;
-    
-    if (code == CE_Failure || code == CE_Fatal) {
-        oss <<"GDAL Failure number=" << num << ": " << msg;
-        throw gdal_error(oss.str());
-    } else if (code == CE_Debug) {
-        oss << "GDAL debug: " << msg;
-        log()->get(logDEBUG) << oss.str() << std::endl;
-        return;
-    } else {
-        return;
-    }
-}
-
-void Reader::GDAL_error(::CPLErr code, int num, char const* msg)
-{
-    std::ostringstream oss;
-    if (code == CE_Failure || code == CE_Fatal) {
-        oss <<"GDAL Failure number=" << num << ": " << msg;
-        throw gdal_error(oss.str());
-    } else {
-        return;
-    }
 }
 
 void Reader::initialize()
 {
     pdal::Reader::initialize();
 
+    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>( new pdal::gdal::Debug(isDebug(), log()));
     m_connection = connect();
     m_block = BlockPtr(new Block(m_connection));
 

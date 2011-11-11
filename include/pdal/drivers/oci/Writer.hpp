@@ -39,7 +39,7 @@
 
 #include <pdal/Writer.hpp>
 #include <pdal/Bounds.hpp>
-#include <pdal/filters/Chipper.hpp>
+#include <pdal/GDALUtils.hpp>
 
 
 
@@ -106,27 +106,7 @@ private:
         return getOptions().getValueOrDefault<T>(option_name, default_value);
     }
 
-    boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
-    
-    static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
-    {
-#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
-        static_cast<Writer*>(CPLGetErrorHandlerUserData())->m_gdal_callback(code, num, msg);
-#else
-        if (code == CE_Failure || code == CE_Fatal) {
-            std::ostringstream oss;
-            oss <<"GDAL Failure number=" << num << ": " << msg;
-            throw gdal_error(oss.str());
-        } else if (code == CE_Debug) {
-            std::clog << " (no log control stdlog) GDAL debug: " << msg << std::endl;
-        } else {
-            return;
-        }
-#endif
-    }
-    
-    void CPL_STDCALL GDAL_log(::CPLErr code, int num, char const* msg);
-    void CPL_STDCALL GDAL_error(::CPLErr code, int num, char const* msg);
+
 
     bool is3d() const;
     bool isSolid() const;
@@ -157,6 +137,7 @@ private:
 
     std::string m_base_table_boundary_column;
     std::string m_base_table_boundary_wkt;
+    boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
     
 };
 

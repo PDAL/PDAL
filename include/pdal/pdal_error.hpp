@@ -204,6 +204,14 @@ public:
     {}
 };
 
+class gdal_error : public pdal_error
+{
+public:
+    gdal_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
 
 } // namespace pdal
 

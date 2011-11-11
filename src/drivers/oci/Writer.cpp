@@ -36,6 +36,7 @@
 #include <pdal/Vector.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/FileUtils.hpp>
+#include <pdal/PointBuffer.hpp>
 
 #include <pdal/drivers/oci/Writer.hpp>
 
@@ -81,25 +82,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     m_base_table_boundary_column = getDefaultedOption<std::string>("base_table_boundary_column");
     m_base_table_boundary_wkt = getDefaultedOption<std::string>("base_table_boundary_wkt");
     
-    if (isDebug())
-    {
-        const char* gdal_debug = pdal::Utils::getenv("CPL_DEBUG");
-        if (gdal_debug == 0)
-        {
-            pdal::Utils::putenv("CPL_DEBUG=ON");
-        }        
-        m_gdal_callback = boost::bind(&Writer::GDAL_log, this, _1, _2, _3);
-    }
-    else
-    {
-        m_gdal_callback = boost::bind(&Writer::GDAL_error, this, _1, _2, _3);
-    }
 
-#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
-    CPLPushErrorHandlerEx(&Writer::trampoline, this);
-#else
-    CPLPushErrorHandler(&Writer::trampoline);
-#endif
 }
 
 Writer::~Writer()
@@ -112,37 +95,13 @@ Writer::~Writer()
     return;
 }
 
-void Writer::GDAL_log(::CPLErr code, int num, char const* msg)
-{
-    std::ostringstream oss;
-    
-    if (code == CE_Failure || code == CE_Fatal) {
-        oss <<"GDAL Failure number=" << num << ": " << msg;
-        throw gdal_error(oss.str());
-    } else if (code == CE_Debug) {
-        log()->get(logDEBUG) << "GDAL debug: " << msg << std::endl;
-        return;
-    } else {
-        return;
-    }
-    
-}
-
-void Writer::GDAL_error(::CPLErr code, int num, char const* msg)
-{
-    std::ostringstream oss;
-    if (code == CE_Failure || code == CE_Fatal) {
-        oss <<"GDAL Failure number=" << num << ": " << msg;
-        throw gdal_error(oss.str());
-    } else {
-        return;
-    }
-}
 
 
 void Writer::initialize()
 {
     pdal::Writer::initialize();
+    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>( new pdal::gdal::Debug(isDebug(), log()));
+
 }
 
 const Options Writer::getDefaultOptions() const
