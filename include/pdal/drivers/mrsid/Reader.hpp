@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Kirk McKelvey <kirkoman@gmail.com>
+* Copyright (c) 2011, Michael S. Rosen (michael.rosen@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,55 +32,68 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_MRSID_READER_HPP
-#define INCLUDED_DRIVERS_MRSID_READER_HPP
+#ifndef INCLUDED_DRIVERS_MrSID_READER_HPP
+#define INCLUDED_DRIVERS_MrSID_READER_HPP
 
-#include <string>
-#include <pdal/Stage.hpp>
-#include "lidar/MG4PointReader.h"
+#include <pdal/pdal.hpp>
 
-namespace LizardTech
-{
-class MG4PointReader;
-}
+#include <pdal/Reader.hpp>
+#include <pdal/Bounds.hpp>
+#include <pdal/Dimension.hpp>
 
+#include <lidar/PointSource.h>
 namespace pdal
 {
-namespace drivers
+    class PointBuffer;
+}
+namespace LizardTech
 {
-namespace mrsid
+    class PointSource;
+}
+
+namespace pdal { namespace drivers { namespace MrSID {
+
+
+// The MrSIDReader wraps LT's PointSource abstraction
+//
+class PDAL_DLL Reader : public pdal::Reader
 {
 
-class PDAL_DLL Reader : public pdal::Stage
-{
 public:
-    Reader(const char *);
-
-    const std::string& getDescription() const;
-    const std::string& getName() const;
-
-    void seekToPoint(boost::uint64_t pointNum);
-
-    bool supportsIterator (StageIteratorType t) 
+    SET_STAGE_NAME("drivers.MrSID.reader", "MrSID Reader")
+    virtual ~Reader();
+    Reader(const Options& options);
+    Reader(LizardTech::PointSource *ps);
+    
+    virtual void initialize();
+    virtual const Options getDefaultOptions() const;
+    
+    bool supportsIterator (StageIteratorType t) const
     {   
         if (t == StageIterator_Sequential ) return true;
-        if (t == StageIterator_Random ) return true;
-        if (t == StageIterator_Block ) return true;
+        
         return false;
     }
 
-    
-protected:
-    boost::uint32_t readBuffer(PointBuffer&);
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+
+    // this is called by the stage's iterator
+    boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;
+
+    // for dumping
+    virtual boost::property_tree::ptree toPTree() const;
 
 private:
+    LizardTech::PointSource *m_PS;
+    LizardTech::PointIterator *m_iter; 
+    int SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const;
+    Dimension LTChannelToPDalDimension(const LizardTech::ChannelInfo & channel) const;
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
-    LizardTech::MG4PointReader *m_reader;
 };
 
-}
-}
-} // end namespaces
 
-#endif // INCLUDED_DRIVERS_MRSID_READER_HPP
+} } } // namespaces
+
+
+#endif

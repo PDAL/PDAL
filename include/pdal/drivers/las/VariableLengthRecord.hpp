@@ -82,7 +82,7 @@ public:
     std::size_t getLength() const;
     std::size_t getTotalSize() const;
     
-    static const int s_headerLength;
+    static const int s_headerLength = 54;
 
     static void setSRSFromVLRs(const std::vector<VariableLengthRecord>& vlrs, SpatialReference& srs);
     static void setVLRsFromSRS(const SpatialReference& srs, std::vector<VariableLengthRecord>& vlrs, SpatialReference::WKTModeFlag modeFlag);

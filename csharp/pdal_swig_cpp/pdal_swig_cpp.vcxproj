@@ -22,19 +22,23 @@
     <CustomBuild Include="pdal.i">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">del ..\pdal_swig_cs\*.cs
-swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../pdal_swig_cs -namespace Pdal -o pdal_wrap.cpp "%(FullPath)"</Command>
+swig.exe   -w503 -w516 -c++ -Fmicrosoft -dirprot -csharp -outdir ../pdal_swig_cs -namespace Pdal -o pdal_wrap.cpp -I../../include  "%(FullPath)"
+rem   -debug-tmsearch (To help debug failed typemaps)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">del ..\pdal_swig_cs\*.cs
-swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../pdal_swig_cs -namespace Pdal -o pdal_wrap.cpp "%(FullPath)"</Command>
+swig.exe   -w503 -w516 -c++ -Fmicrosoft -dirprot -csharp -outdir ../pdal_swig_cs -namespace Pdal -o pdal_wrap.cpp -I../../include  "%(FullPath)"
+rem   -debug-tmsearch (To help debug failed typemaps)</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </AdditionalInputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">del ..\pdal_swig_cs\*.cs
-swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../pdal_swig_cs -namespace Pdal -o pdal_wrap.cpp "%(FullPath)"</Command>
+swig.exe   -w503 -w516 -c++ -Fmicrosoft -dirprot -csharp -outdir ../pdal_swig_cs -namespace Pdal -o pdal_wrap.cpp -I../../include  "%(FullPath)"
+rem   -debug-tmsearch (To help debug failed typemaps)</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </AdditionalInputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">del ..\pdal_swig_cs\*.cs
-swig.exe -w503 -w314 -w833 -c++ -Fmicrosoft -csharp -outdir ../pdal_swig_cs -namespace Pdal -o pdal_wrap.cpp "%(FullPath)"</Command>
+swig.exe   -w503 -w516 -c++ -Fmicrosoft -dirprot -csharp -outdir ../pdal_swig_cs -namespace Pdal -o pdal_wrap.cpp -I../../include  "%(FullPath)"
+rem   -debug-tmsearch (To help debug failed typemaps)</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename)_wrap.cpp;%(Outputs)</Outputs>

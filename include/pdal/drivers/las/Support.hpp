@@ -59,7 +59,7 @@ enum PointFormat
 
 
 // this struct is used as a means to hold all the las field dimension indexes from a schema
-class PointIndexes
+class PDAL_DLL PointIndexes
 {
 public:
     PointIndexes(const Schema& schema, PointFormat format);

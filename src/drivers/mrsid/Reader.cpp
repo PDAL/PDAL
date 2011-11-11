@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Kirk McKelvey <kirkoman@gmail.com>
+* Copyright (c) 2011, Michael S. Rosen (michael.rosen@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,159 +32,359 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/mrsid/Reader.hpp>
-#include <pdal/exceptions.hpp>
-#include "lidar/MG4PointReader.h"
+#include <pdal/drivers/MrSID/Reader.hpp>
 
-namespace pdal
-{
-namespace drivers
-{
-namespace mrsid
-{
+#include <pdal/drivers/MrSID/Iterator.hpp>
+#include <pdal/PointBuffer.hpp>
 
-LT_USE_LIDAR_NAMESPACE
+#include <boost/algorithm/string.hpp>
 
-static pdal::Dimension::Field FieldEnumOf(const char *);
-static pdal::Dimension::DataType TypeEnumOf(LizardTech::DataType);
 
-Reader::Reader(const char * filepath)
-    : pdal::Stage(), m_reader(NULL)
-{
-    try
-    {
-        // open a MG4 file
-        m_reader = MG4PointReader::create();
-        m_reader->init(filepath);
-    }
-    catch(...)
-    {
-        RELEASE(m_reader);
-        throw;
-    }
+namespace pdal { namespace drivers { namespace MrSID {
 
-    Header* header = new Header;
-    Schema& schema = header->getSchema();
 
-    header->setNumPoints(m_reader->getNumPoints());
-    Bounds<double> bounds(m_reader->getBounds().x.min,
-                          m_reader->getBounds().y.min,
-                          m_reader->getBounds().z.min,
-                          m_reader->getBounds().x.max,
-                          m_reader->getBounds().y.max,
-                          m_reader->getBounds().z.max);
-
-    header->setBounds(bounds);
-
-    size_t numChannels = m_reader->getNumChannels();
-    const PointInfo &pointInfo = m_reader->getPointInfo();
-    for(size_t i = 0; i < numChannels; i += 1)
-        schema.addDimension(Dimension(FieldEnumOf(pointInfo.getChannel(i).getName()), TypeEnumOf(pointInfo.getChannel(i).getDataType())));
-
-    setHeader(header);
-
-    return;
-}
-
-pdal::Dimension::Field
-FieldEnumOf(const char * fieldname)
-{
-    if (!strcmp(CHANNEL_NAME_X, fieldname))
-        return Dimension::Field_X;
-    if (!strcmp(CHANNEL_NAME_Y, fieldname))
-        return Dimension::Field_Y;
-    if (!strcmp(CHANNEL_NAME_Z, fieldname))
-        return Dimension::Field_Z;
-    if (!strcmp(CHANNEL_NAME_Intensity, fieldname))
-        return Dimension::Field_Intensity;
-    if (!strcmp(CHANNEL_NAME_ReturnNum, fieldname))
-        return Dimension::Field_ReturnNumber;
-    if (!strcmp(CHANNEL_NAME_NumReturns, fieldname))
-        return Dimension::Field_NumberOfReturns;
-    if (!strcmp(CHANNEL_NAME_ScanDir, fieldname))
-        return Dimension::Field_ScanDirectionFlag;
-    if (!strcmp(CHANNEL_NAME_EdgeFlightLine, fieldname))
-        return Dimension::Field_EdgeOfFlightLine;
-    if (!strcmp(CHANNEL_NAME_ClassId, fieldname))
-        return Dimension::Field_Classification;
-    if (!strcmp(CHANNEL_NAME_ScanAngle, fieldname))
-        return Dimension::Field_ScanAngleRank;
-    if (!strcmp(CHANNEL_NAME_UserData, fieldname))
-        return Dimension::Field_UserData;
-    if (!strcmp(CHANNEL_NAME_SourceId, fieldname))
-        return Dimension::Field_PointSourceId;
-    if (!strcmp(CHANNEL_NAME_GPSTime, fieldname))
-        return Dimension::Field_Time;
-    if (!strcmp(CHANNEL_NAME_Red, fieldname))
-        return Dimension::Field_Red;
-    if (!strcmp(CHANNEL_NAME_Green, fieldname))
-        return Dimension::Field_Green;
-    if (!strcmp(CHANNEL_NAME_Blue, fieldname))
-        return Dimension::Field_Blue;
-    // @todo
-    // Field_WavePacketDescriptorIndex
-    // Field_WaveformDataOffset
-    // Field_ReturnPointWaveformLocation
-    // Field_WaveformXt
-    // Field_WaveformYt
-    // Field_WaveformZt
-    // ...
-    return Dimension::Field_X;
-}
-
-pdal::Dimension::DataType
-TypeEnumOf(LizardTech::DataType ldt)
-{
-    switch (ldt)
-    {
-    case DATATYPE_UINT8:
-        return Dimension::Uint8;
-    case DATATYPE_SINT8:
-        return Dimension::Int8;
-    case DATATYPE_UINT16:
-        return Dimension::Uint16;
-    case DATATYPE_SINT16:
-        return Dimension::Int16;
-    case DATATYPE_UINT32:
-        return Dimension::Uint32;
-    case DATATYPE_SINT32:
-        return Dimension::Int32;
-    case DATATYPE_UINT64:
-        return Dimension::Uint64;
-    case DATATYPE_SINT64:
-        return Dimension::Int64;
-    case DATATYPE_FLOAT32:
-        return Dimension::Float;
-    case DATATYPE_FLOAT64:
-        return Dimension::Double;
-    case DATATYPE_INVALID:
-    default:
-        return Dimension::Uint8;
-    }
-}
-
-const std::string& Reader::getDescription() const
-{
-    static std::string name("MrSID/LiDAR Reader");
-    return name;
-}
-
-const std::string& Reader::getName() const
-{
-    static std::string name("drivers.mrsid.reader");
-    return name;
-}
-
-boost::uint32_t Reader::readBuffer(PointBuffer& PointBuffer)
-{
-    return 0;
-}
-
-void Reader::seekToPoint(boost::uint64_t)
+Reader::Reader(const Options& options)
+    : pdal::Reader(options)
 {
     return;
 }
 
+
+Reader::Reader(LizardTech::PointSource *ps)
+    : pdal::Reader(Options::none())
+    , m_PS(ps), m_iter(NULL)
+{
+    m_PS->retain();
+    return;
 }
+
+Reader::~Reader()
+{
+    m_iter->release();
+    m_PS->release();
 }
-} // namespaces
+Dimension Reader::LTChannelToPDalDimension(const LizardTech::ChannelInfo & channel) const
+{
+    Dimension retval(DimensionId::X_f64);
+    if (!strcmp(CHANNEL_NAME_X, channel.getName()))
+    {
+        Dimension dim(DimensionId::X_f64);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_Y, channel.getName()))
+    {
+        Dimension dim(DimensionId::Y_f64);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_Z, channel.getName()))
+    {
+        Dimension dim(DimensionId::Z_f64);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_GPSTime, channel.getName()))
+    {
+        Dimension dim(DimensionId::Time_u64);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_Blue, channel.getName()))
+    {
+        Dimension dim(DimensionId::Blue_u16);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_Red, channel.getName()))
+    {
+        Dimension dim(DimensionId::Red_u16);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_Green, channel.getName()))
+    {
+        Dimension dim(DimensionId::Green_u16);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_ClassId, channel.getName()))
+    {
+        Dimension dim(DimensionId::Las_Classification);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_EdgeFlightLine, channel.getName()))
+    {
+        Dimension dim(DimensionId::Las_EdgeOfFlightLine);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_Intensity, channel.getName()))
+    {
+        Dimension dim(DimensionId::Las_Intensity);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_NumReturns, channel.getName()))
+    {
+        Dimension dim(DimensionId::Las_NumberOfReturns);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_ReturnNum, channel.getName()))
+    {
+        Dimension dim(DimensionId::Las_ReturnNumber);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_ScanAngle, channel.getName()))
+    {
+        Dimension dim(DimensionId::Las_ScanAngleRank);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_ScanDir, channel.getName()))
+    {
+        Dimension dim(DimensionId::Las_ScanDirectionFlag);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_SourceId, channel.getName()))
+    {
+        Dimension dim(DimensionId::Las_PointSourceId);
+        retval = dim;
+    }
+    else if (!strcmp(CHANNEL_NAME_UserData, channel.getName()))
+    {
+        Dimension dim(DimensionId::Las_UserData);
+        retval = dim;
+    }
+    else
+    {
+        Dimension dim(DimensionId::Undefined); // throws
+        retval = dim;
+    }
+
+    return retval;
+}
+void Reader::initialize()
+{
+    pdal::Reader::initialize();
+
+    Schema& schema = getSchemaRef();
+    const LizardTech::PointInfo& pointinfo = m_PS->getPointInfo();
+    for (unsigned int i=0; i<pointinfo.getNumChannels(); i++)
+    {
+        const LizardTech::ChannelInfo &channel = pointinfo.getChannel(i);
+        Dimension dim = LTChannelToPDalDimension(channel);
+        schema.appendDimension(dim);
+    }
+
+    setNumPoints(m_PS->getNumPoints());
+    setPointCountType(PointCount_Fixed);
+    pdal::Bounds<double> b(m_PS->getBounds().x.min, m_PS->getBounds().x.max, m_PS->getBounds().y.min, m_PS->getBounds().y.max, m_PS->getBounds().z.min,m_PS->getBounds().z.max);
+    setBounds(b);
+    m_iter = m_PS->createIterator(m_PS->getBounds(), 1.0, m_PS->getPointInfo(), NULL);
+}
+
+
+const Options Reader::getDefaultOptions() const
+{
+    Options options;
+    return options;
+}
+
+pdal::StageSequentialIterator* Reader::createSequentialIterator() const
+{
+    return new SequentialIterator(*this);
+}
+
+int Reader::SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const
+{
+    pointInfo.init(schema.getDimensions().size());
+    for (unsigned int idx=0; idx<schema.getDimensions().size(); idx++)
+    {
+       switch (schema.getDimensions()[idx].getId())
+       {
+         case (DimensionId::X_f64):
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_X, LizardTech::DATATYPE_FLOAT64, 64);
+            break;
+         case (DimensionId::X_i32):
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_X, LizardTech::DATATYPE_SINT32, 32);
+            break;
+         case (DimensionId::Y_f64):
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_Y, LizardTech::DATATYPE_FLOAT64, 64);
+            break;
+         case (DimensionId::Y_i32):
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_Y, LizardTech::DATATYPE_SINT32, 32);
+            break;
+         case (DimensionId::Z_f64):
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_Z, LizardTech::DATATYPE_FLOAT64, 64);
+            break;
+         case (DimensionId::Z_i32):
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_Z, LizardTech::DATATYPE_SINT32, 32);
+            break;
+         case (DimensionId::Blue_u8):
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_Blue, LizardTech::DATATYPE_UINT8, 8);
+            break;
+         case (DimensionId::Blue_u16):
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_Blue, LizardTech::DATATYPE_UINT16, 16);
+            break;
+         case (DimensionId::Red_u8):
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_Red, LizardTech::DATATYPE_UINT8, 8);
+            break;
+         case (DimensionId::Red_u16):
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_Red, LizardTech::DATATYPE_UINT16, 16);
+            break;
+         case (DimensionId::Green_u8):
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_Green, LizardTech::DATATYPE_UINT8, 8);
+            break;
+         case (DimensionId::Green_u16):
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_Green, LizardTech::DATATYPE_UINT16, 16);
+            break;
+         case (DimensionId::Las_Classification): /// BUG!  Adjust # of bits per las spec
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_ClassId, LizardTech::DATATYPE_UINT8, 8);
+            break;
+         case (DimensionId::Las_EdgeOfFlightLine):
+            pointInfo.getChannel(idx).init(CHANNEL_NAME_EdgeFlightLine, LizardTech::DATATYPE_UINT8, 8);
+            break;
+         // bug.  finish this.
+       }
+    }
+    return 0; //bug, do error checking
+}
+
+
+boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) const
+{
+    const Schema& schema = data.getSchema();
+
+    // how many are they asking for?
+    boost::uint64_t numPointsWanted = data.getCapacity();
+
+    // we can only give them as many as we have left
+    boost::uint64_t numPointsAvailable = getNumPoints() - index;
+    if (numPointsAvailable < numPointsWanted)
+        numPointsWanted = numPointsAvailable;
+
+
+    LizardTech::PointData points;
+    // to do:  specify a PointInfo structure that reads only the channels we will output.
+    points.init(m_PS->getPointInfo(), (size_t)numPointsWanted);
+    size_t count = m_iter->getNextPoints(points);
+
+    boost::uint32_t cnt = 0;
+    data.setNumPoints(0);
+
+    for (boost::uint32_t pointIndex=0; pointIndex<count; pointIndex++)
+    {
+        ++cnt;
+        for (unsigned int i=0; i < schema.getDimensions().size(); i++)
+        {
+            Dimension d = schema.getDimensions()[i];
+
+            if (d.getId() == DimensionId::X_f64 && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_X))
+            {
+                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_X)->getData());
+                double value = static_cast<double>(pData[pointIndex]);
+                data.setField<double>(pointIndex, schema.getDimensionIndex(d), value);
+            }            
+            else if (d.getId() == DimensionId::X_i32 && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_X))
+            {
+                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_X)->getData());
+                boost::int32_t value = static_cast<boost::int32_t>(pData[pointIndex]);
+                data.setField<boost::int32_t>(pointIndex, schema.getDimensionIndex(d), value);
+            }
+            else if (d.getId() == DimensionId::Y_f64 && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Y))
+            {
+                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Y)->getData());
+                double value = static_cast<double>(pData[pointIndex]);
+                data.setField<double>(pointIndex, schema.getDimensionIndex(d), value);
+            }            
+            else if (d.getId() == DimensionId::Y_i32 && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Y))
+            {
+                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Y)->getData());
+                boost::int32_t value = static_cast<boost::int32_t>(pData[pointIndex]);
+                data.setField<boost::int32_t>(pointIndex, schema.getDimensionIndex(d), value);
+            }
+            else if (d.getId() == DimensionId::Z_f64 && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Z))
+            {
+                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Z)->getData());
+                double value = static_cast<double>(pData[pointIndex]);
+                data.setField<double>(pointIndex, schema.getDimensionIndex(d), value);
+            }            
+            else if (d.getId() == DimensionId::Z_i32 && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Z))
+            {
+                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Z)->getData());
+                boost::int32_t value = static_cast<boost::int32_t>(pData[pointIndex]);
+                data.setField<boost::int32_t>(pointIndex, schema.getDimensionIndex(d), value);
+            }
+            else if (d.getId() == DimensionId::Time_u64 && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_GPSTime))
+            {
+                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_GPSTime)->getData());
+                boost::uint64_t  value = static_cast<boost::uint64_t>(pData[pointIndex]);
+                data.setField<boost::uint64_t>(pointIndex, schema.getDimensionIndex(d), value);
+            }            
+            else if (d.getId() == DimensionId::Las_Intensity && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Intensity))
+            {
+                uint16_t *pData = static_cast<uint16_t*>(points.getChannel(CHANNEL_NAME_Intensity)->getData());
+                boost::uint16_t value = static_cast<boost::uint16_t>(pData[pointIndex]);
+                data.setField<boost::uint16_t>(pointIndex, schema.getDimensionIndex(d), value);
+            }            
+            else if (d.getId() == DimensionId::Las_ReturnNumber && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_ReturnNum))
+            {
+                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_ReturnNum)->getData());
+                boost::uint8_t value = static_cast<boost::uint8_t>(pData[pointIndex]);
+                data.setField<boost::uint8_t>(pointIndex, schema.getDimensionIndex(d), value);
+            }            
+            else if (d.getId() == DimensionId::Las_NumberOfReturns && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_NumReturns))
+            {
+                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                boost::uint8_t value = static_cast<boost::uint8_t>(pData[pointIndex]);
+                data.setField<boost::uint8_t>(pointIndex, schema.getDimensionIndex(d), value);
+            }            
+            else if (d.getId() == DimensionId::Las_ScanDirectionFlag && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_ScanDir))
+            {
+                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                boost::uint8_t value = static_cast<boost::uint8_t>(pData[pointIndex]);
+                data.setField<boost::uint8_t>(pointIndex, schema.getDimensionIndex(d), value);
+            }            
+            else if (d.getId() == DimensionId::Las_ScanAngleRank && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_ScanAngle))
+            {
+                boost::int8_t *pData = static_cast<int8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                boost::int8_t value = static_cast<boost::int8_t>(pData[pointIndex]);
+                data.setField<boost::int8_t>(pointIndex, schema.getDimensionIndex(d), value);
+            }   
+            else if (d.getId() == DimensionId::Las_EdgeOfFlightLine && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_EdgeFlightLine))
+            {
+                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                boost::uint8_t value = static_cast<boost::uint8_t>(pData[pointIndex]);
+                data.setField<boost::uint8_t>(pointIndex, schema.getDimensionIndex(d), value);
+            }            
+            else if (d.getId() == DimensionId::Las_Classification && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_ClassId))
+            {
+                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                boost::uint8_t value = static_cast<boost::uint8_t>(pData[pointIndex]);
+                data.setField<boost::uint8_t>(pointIndex, schema.getDimensionIndex(d), value);
+            }            
+            else if (d.getId() == DimensionId::Las_UserData && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_UserData))
+            {
+                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                boost::uint8_t value = static_cast<boost::uint8_t>(pData[pointIndex]);
+                data.setField<boost::uint8_t>(pointIndex, schema.getDimensionIndex(d), value);
+            }    
+            else if (d.getId() == DimensionId::Las_PointSourceId && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_SourceId))
+            {
+                uint16_t *pData = static_cast<uint16_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                boost::uint16_t value = static_cast<boost::uint16_t>(pData[pointIndex]);
+                data.setField<boost::uint16_t>(pointIndex, schema.getDimensionIndex(d), value);
+            }    
+
+
+        }        
+    }
+    data.setNumPoints(cnt);
+    assert(cnt <= data.getCapacity());
+    
+    return cnt;
+}
+
+
+boost::property_tree::ptree Reader::toPTree() const
+{
+    boost::property_tree::ptree tree = pdal::Reader::toPTree();
+
+    // add stuff here specific to this stage type
+
+    return tree;
+}
+
+
+} } } // namespaces
