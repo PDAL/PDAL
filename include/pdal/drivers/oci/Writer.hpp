@@ -39,13 +39,15 @@
 
 #include <pdal/Writer.hpp>
 #include <pdal/Bounds.hpp>
-#include <pdal/filters/Chipper.hpp>
+#include <pdal/GDALUtils.hpp>
+
+
 
 #include "common.hpp"
 
 namespace pdal { namespace drivers { namespace oci {
 
-class PDAL_DLL Writer : public pdal::Writer
+class PDAL_DLL Writer : public pdal::Writer, pdal::drivers::oci::OracleDriver
 {
 public:
     SET_STAGE_NAME("drivers.oci.writer", "OCI Writer")
@@ -103,7 +105,9 @@ private:
         T default_value = getDefaultOptions().getOption(option_name).getValue<T>();
         return getOptions().getValueOrDefault<T>(option_name, default_value);
     }
-    
+
+
+
     bool is3d() const;
     bool isSolid() const;
     boost::int32_t getPCID() const;
@@ -133,6 +137,7 @@ private:
 
     std::string m_base_table_boundary_column;
     std::string m_base_table_boundary_wkt;
+    boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
     
 };
 

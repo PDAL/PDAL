@@ -36,6 +36,7 @@
 #include <pdal/Vector.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/FileUtils.hpp>
+#include <pdal/PointBuffer.hpp>
 
 #include <pdal/drivers/oci/Writer.hpp>
 
@@ -51,6 +52,7 @@ namespace pdal { namespace drivers { namespace oci {
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
+    , OracleDriver(getOptions())
     , m_doCreateIndex(false)
     , m_pc_id(0)
     , m_srid(0)
@@ -59,7 +61,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_issolid(false)
 {
     
-    m_connection = Connect(getOptions(), isDebug(), getVerboseLevel());
+    m_connection = connect();
     
     boost::uint32_t capacity = getOptions().getValueOrThrow<boost::uint32_t>("capacity");
     setChunkSize(capacity);
@@ -79,6 +81,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
     m_base_table_boundary_column = getDefaultedOption<std::string>("base_table_boundary_column");
     m_base_table_boundary_wkt = getDefaultedOption<std::string>("base_table_boundary_wkt");
+    
 
 }
 
@@ -89,9 +92,13 @@ Writer::~Writer()
     return;
 }
 
+
+
 void Writer::initialize()
 {
     pdal::Writer::initialize();
+    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>( new pdal::gdal::Debug(isDebug(), log()));
+
 }
 
 const Options Writer::getDefaultOptions() const
@@ -394,13 +401,13 @@ bool Writer::BlockTableExists()
 
     std::ostringstream oss;
     std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
-    
+
+
     char szTable[OWNAME]= "";
     oss << "select table_name from user_tables";
 
-    if (isDebug())
-        std::cout << "checking for " << block_table_name << " existence ... " ;
-        
+    log()->get(logDEBUG) << "checking for " << block_table_name << " existence ... " ;
+
     Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
     
     // Because of OCIGDALErrorHandler, this is going to throw if there is a 
@@ -409,26 +416,23 @@ bool Writer::BlockTableExists()
     statement->Define(szTable);
     statement->Execute();
 
-    if (isDebug())
-        std::cout << "checking ... " << szTable ;
+    log()->get(logDEBUG) << "checking ... " << szTable ;
 
     bool bDidRead(true);
 
     while (bDidRead)
     {
-        if (isDebug())
-            std::cout << ", " << szTable;
+        log()->get(logDEBUG) << ", " << szTable;
         if (boost::iequals(szTable, block_table_name))
         {
-            if (isDebug())
-                std::cout << " -- '" << block_table_name << "' found." <<std::endl;
+            log()->get(logDEBUG) << " -- '" << block_table_name << "' found." <<std::endl;
             return true;
         }
         bDidRead = statement->Fetch();
     }
-    if (isDebug())
-        std::cout << " -- '" << block_table_name << "' not found." << std::endl;
-    
+
+    log()->get(logDEBUG) << " -- '" << block_table_name << "' not found." << std::endl;
+
     return false;
     
 }
@@ -883,210 +887,6 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
     return;
 }
 
-bool Writer::FillOraclePointBuffer(PointBuffer const& buffer, 
-                                 std::vector<boost::uint8_t>& point_data
-)
-{
-
-
-    pdal::Schema const& schema = buffer.getSchema();
-    // std::vector<boost::uint32_t> ids = block.GetIDs();
-
-    bool hasTimeData = schema.hasDimension(DimensionId::Las_Time);
-    bool hasColorData = schema.hasDimension(DimensionId::Red_u16);
-    
-    boost::uint64_t count = buffer.getNumPoints();
-
-    point_data.clear(); // wipe whatever was there    
-    boost::uint32_t oracle_record_size = (8*8)+4+4;
-    // point_data.resize(count*oracle_record_size);
-    
-    // assert(count*oracle_record_size == point_data.size());
-
-    const int indexX = schema.getDimensionIndex(DimensionId::X_i32);
-    const int indexY = schema.getDimensionIndex(DimensionId::Y_i32);
-    const int indexZ = schema.getDimensionIndex(DimensionId::Z_i32);
-    const int indexClassification = schema.getDimensionIndex(DimensionId::Las_Classification);
-    const int indexTime = schema.getDimensionIndex(DimensionId::Las_Time);
-    const int indexIntensity = schema.getDimensionIndex(DimensionId::Las_Intensity);
-    const int indexReturnNumber = schema.getDimensionIndex(DimensionId::Las_ReturnNumber);
-    const int indexNumberOfReturns = schema.getDimensionIndex(DimensionId::Las_NumberOfReturns);
-    const int indexScanDirectionFlag = schema.getDimensionIndex(DimensionId::Las_ScanDirectionFlag);
-    const int indexEdgeOfFlightLine = schema.getDimensionIndex(DimensionId::Las_EdgeOfFlightLine);
-    const int indexUserData = schema.getDimensionIndex(DimensionId::Las_UserData);
-    const int indexPointSourceId = schema.getDimensionIndex(DimensionId::Las_PointSourceId);
-    const int indexScanAngleRank = schema.getDimensionIndex(DimensionId::Las_ScanAngleRank);
-    const int indexRed = schema.getDimensionIndex(DimensionId::Red_u16);
-    const int indexGreen = schema.getDimensionIndex(DimensionId::Green_u16);
-    const int indexBlue = schema.getDimensionIndex(DimensionId::Blue_u16);
-
-
-
-
-
-
-    
-    // "Global" ids from the chipper are also available here.
-    // const int indexId = schema.getDimensionIndex(DimensionId::Chipper_1);
-    const int indexBlockId = schema.getDimensionIndex(DimensionId::Chipper_2);
-    
-    Dimension const& dimX = schema.getDimension(indexX);
-    Dimension const& dimY = schema.getDimension(indexY);
-    Dimension const& dimZ = schema.getDimension(indexZ);
-
-    double xscale = dimX.getNumericScale();
-    double yscale = dimY.getNumericScale();
-    double zscale = dimY.getNumericScale();
-        
-    double xoffset = dimX.getNumericOffset();
-    double yoffset = dimY.getNumericOffset();
-    double zoffset = dimZ.getNumericOffset();
-    
-    boost::uint32_t counter = 0;
-    // std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    // std::cout.precision(6);
-
-    while (counter < count)
-    {
-
-        double x = (buffer.getField<boost::int32_t>(counter, indexX) * xscale) + xoffset;
-        double y = (buffer.getField<boost::int32_t>(counter, indexY) * yscale) + yoffset;
-        double z = (buffer.getField<boost::int32_t>(counter, indexZ) * zscale) + zoffset;
-        boost::uint8_t classification = buffer.getField<boost::uint8_t>(counter, indexClassification);
-        double c = static_cast<double>(classification);
-        
-        boost::uint16_t i = buffer.getField<boost::uint16_t>(counter, indexIntensity);
-        double intensity = static_cast<double>(i);
-        
-        // boost::uint32_t id = buffer.getField<boost::uint32_t>(counter, indexId);
-        boost::uint32_t block_id = buffer.getField<boost::uint32_t>(counter, indexBlockId);
-        // boost::uint32_t id = ids[counter];
-        // std::cout << x <<" "<< y  <<" "<< z << " "<< id << " " << block_id <<" " << c <<std::endl;
-
-        boost::uint8_t returnNumber = buffer.getField<boost::uint8_t>(counter, indexReturnNumber);
-        boost::uint8_t numberOfReturns = buffer.getField<boost::uint8_t>(counter, indexNumberOfReturns);
-        boost::uint8_t scanDirFlag = buffer.getField<boost::uint8_t>(counter, indexScanDirectionFlag);
-        boost::uint8_t edgeOfFlightLine = buffer.getField<boost::uint8_t>(counter, indexEdgeOfFlightLine);
-        boost::int8_t scanAngleRank = buffer.getField<boost::int8_t>(counter, indexScanAngleRank);
-
-        boost::uint8_t userData = buffer.getField<boost::uint8_t>(counter, indexUserData);
-        boost::uint16_t pointSourceId = buffer.getField<boost::uint16_t>(counter, indexPointSourceId);
-
-        
-        double t = 0.0;
-        if (hasTimeData)
-            t = buffer.getField<double>(counter, indexTime);
-
-        boost::uint16_t red(0), green(0), blue(0), alpha(0);
-        if (hasColorData)
-        {
-            red = buffer.getField<boost::uint16_t>(counter, indexRed);
-            green = buffer.getField<boost::uint16_t>(counter, indexGreen);
-            blue = buffer.getField<boost::uint16_t>(counter, indexBlue);
-            
-        }
-
-        boost::uint8_t* x_b =  reinterpret_cast<boost::uint8_t*>(&x);
-        boost::uint8_t* y_b =  reinterpret_cast<boost::uint8_t*>(&y);
-        boost::uint8_t* z_b =  reinterpret_cast<boost::uint8_t*>(&z);
-        boost::uint8_t* t_b =  reinterpret_cast<boost::uint8_t*>(&t);
-        boost::uint8_t* c_b =  reinterpret_cast<boost::uint8_t*>(&c);
-
-        boost::uint8_t* intensity_b =  reinterpret_cast<boost::uint8_t*>(&intensity);
-    
-        boost::uint8_t* returnNumber_b =  reinterpret_cast<boost::uint8_t*>(&returnNumber);
-        boost::uint8_t* numberOfReturns_b =  reinterpret_cast<boost::uint8_t*>(&numberOfReturns);
-        boost::uint8_t* scanDirFlag_b =  reinterpret_cast<boost::uint8_t*>(&scanDirFlag);
-        boost::uint8_t* edgeOfFlightLine_b =  reinterpret_cast<boost::uint8_t*>(&edgeOfFlightLine);
-        boost::uint8_t* scanAngleRank_b =  reinterpret_cast<boost::uint8_t*>(&scanAngleRank);
-        boost::uint8_t* userData_b =  reinterpret_cast<boost::uint8_t*>(&userData);
-        boost::uint8_t* pointSourceId_b =  reinterpret_cast<boost::uint8_t*>(&pointSourceId);
-
-
-        boost::uint8_t* red_b =  reinterpret_cast<boost::uint8_t*>(&red);
-        boost::uint8_t* green_b =  reinterpret_cast<boost::uint8_t*>(&green);
-        boost::uint8_t* blue_b =  reinterpret_cast<boost::uint8_t*>(&blue);
-        boost::uint8_t* alpha_b =  reinterpret_cast<boost::uint8_t*>(&alpha);
- 
-
-    // big-endian
-        for (int i = sizeof(double) - 1; i >= 0; i--) {
-            point_data.push_back(x_b[i]);
-        }
-
-        for (int i = sizeof(double) - 1; i >= 0; i--) {
-            point_data.push_back(y_b[i]);
-        }   
-
-        for (int i = sizeof(double) - 1; i >= 0; i--) {
-            point_data.push_back(z_b[i]);
-        }
-    
-        for (int i = sizeof(double) - 1; i >= 0; i--) {
-            point_data.push_back(t_b[i]);
-        }
-
-        // Classification is only a single byte, but 
-        // we need to store it in an 8 byte big-endian 
-        // double to satisfy OPC
-        for (int i = sizeof(double) - 1; i >= 0; i--) {
-            point_data.push_back(c_b[i]);
-        }
-
-        // Intensity is only two bytes, but 
-        // we need to store it in an 8 byte big-endian 
-        // double to satisfy OPC
-        for (int i = sizeof(double) - 1; i >= 0; i--) {
-            point_data.push_back(intensity_b[i]);
-        }
-
-
-        // Pack dimension with a number of fields totalling 8 bytes
-        point_data.push_back(returnNumber_b[0]);
-        point_data.push_back(numberOfReturns_b[0]);
-        point_data.push_back(scanDirFlag_b[0]);
-        point_data.push_back(edgeOfFlightLine_b[0]);
-        point_data.push_back(scanAngleRank_b[0]);
-        point_data.push_back(userData_b[0]);
-        for (int i = sizeof(uint16_t) - 1; i >= 0; i--) {
-            point_data.push_back(pointSourceId_b[i]);
-        }
-
-        // Pack dimension with RGBA for a total of 8 bytes
-        for (int i = sizeof(uint16_t) - 1; i >= 0; i--) {
-            point_data.push_back(red_b[i]);
-        }    
-        for (int i = sizeof(uint16_t) - 1; i >= 0; i--) {
-            point_data.push_back(green_b[i]);
-        }    
-        for (int i = sizeof(uint16_t) - 1; i >= 0; i--) {
-            point_data.push_back(blue_b[i]);
-        }    
-        for (int i = sizeof(uint16_t) - 1; i >= 0; i--) {
-            point_data.push_back(alpha_b[i]);
-        }    
-
-
-        boost::uint8_t* id_b = reinterpret_cast<boost::uint8_t*>(&counter); 
-        boost::uint8_t* block_b = reinterpret_cast<boost::uint8_t*>(&block_id); 
-        
-        // 4-byte big-endian integer for the BLK_ID value
-        for (int i =  sizeof(boost::uint32_t) - 1; i >= 0; i--) {
-            point_data.push_back(block_b[i]);
-        }
-        
-        // 4-byte big-endian integer for the PT_ID value
-        for (int i =  sizeof(boost::uint32_t) - 1; i >= 0; i--) {
-            point_data.push_back(id_b[i]);
-        }
-
-        counter++;
-    }
-
-    assert(count*oracle_record_size == point_data.size());
-    
-    return true;
-}
 
 void Writer::SetElements(   Statement statement,
                             OCIArray* elem_info)
@@ -1226,7 +1026,7 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     
     
     // :1
-    statement->Bind( p_pc_id );
+    statement->Bind( &m_pc_id );
     
     // :2
     statement->Bind( p_result_id );

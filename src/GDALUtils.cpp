@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -32,42 +32,76 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-
-#include <pdal/drivers/oci/common.hpp>
-
-#include <iostream>
-
-#include <pdal/Bounds.hpp>
+#include <pdal/GDALUtils.hpp>
 #include <pdal/Utils.hpp>
 
-namespace pdal { namespace drivers { namespace oci {
 
-Block::Block(Connection connection)
-    : num_points(0)
-    , chunk(new std::vector<boost::uint8_t>)
-    , m_connection(connection)
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(disable: 4127)  // conditional expression is constant
+#endif
+
+namespace pdal
 {
-    m_connection->CreateType(&blk_extent);
-    m_connection->CreateType(&blk_extent->sdo_ordinates, m_connection->GetOrdinateType());
-    m_connection->CreateType(&blk_extent->sdo_elem_info, m_connection->GetElemInfoType());
-    m_connection->CreateType(&blk_domain);
-    m_connection->CreateType(&pc);
+namespace gdal
+{
+
+Debug::Debug(bool isDebug, pdal::LogPtr log)
+: m_isDebug(isDebug)
+, m_log(log)
+{
+    if (m_isDebug)
+    {
+        const char* gdal_debug = ::pdal::Utils::getenv("CPL_DEBUG");
+        if (gdal_debug == 0)
+        {
+            pdal::Utils::putenv("CPL_DEBUG=ON");
+        }        
+        m_gdal_callback = boost::bind(&Debug::log, this, _1, _2, _3);
+    }
+    else
+    {
+        m_gdal_callback = boost::bind(&Debug::error, this, _1, _2, _3);
+    }
+
+
+#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
+    CPLPushErrorHandlerEx(&Debug::trampoline, this);
+#else
+    CPLPushErrorHandler(&Debug::trampoline);
+#endif    
 }
 
-Block::~Block()
+void Debug::log(::CPLErr code, int num, char const* msg)
 {
-    m_connection->DestroyType(&blk_domain);
-    m_connection->DestroyType(&blk_extent->sdo_elem_info);
-    m_connection->DestroyType(&blk_extent->sdo_ordinates);
-    m_connection->DestroyType(&pc);
-    // FIXME: For some reason having the dtor destroy this
-    // causes a segfault
-    // m_connection->DestroyType(&blk_extent);
+    std::ostringstream oss;
+    
+    if (code == CE_Failure || code == CE_Fatal) {
+        oss <<"GDAL Failure number=" << num << ": " << msg;
+        throw pdal::gdal_error(oss.str());
+    } else if (code == CE_Debug) {
+        oss << "GDAL debug: " << msg;
+        m_log->get(logDEBUG) << oss.str() << std::endl;
+        return;
+    } else {
+        return;
+    }
 }
 
+void Debug::error(::CPLErr code, int num, char const* msg)
+{
+    std::ostringstream oss;
+    if (code == CE_Failure || code == CE_Fatal) {
+        oss <<"GDAL Failure number=" << num << ": " << msg;
+        throw pdal::gdal_error(oss.str());
+    } else {
+        return;
+    }
+}
 
+Debug::~Debug()
+{
+    CPLPopErrorHandler();
 
-}}} // namespace pdal::driver::oci
+}
 
-
-
+}} // namespace pdal::gdal

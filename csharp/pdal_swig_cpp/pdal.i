@@ -123,7 +123,6 @@ namespace boost
 {
     %template(applyScaling_Int32) applyScaling<boost::int32_t>;
 };
-
 %include "pdal/Schema.hpp"
 %include "pdal/MetadataRecord.hpp"
 %include "pdal/StageBase.hpp"

@@ -38,14 +38,17 @@
 #include <pdal/pdal.hpp>
 
 #include <pdal/StageIterator.hpp>
-
+#include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/oci/common.hpp>
 #include <pdal/drivers/oci/Reader.hpp>
 
 #include <string>
-
+#include <map>
 namespace pdal { namespace drivers { namespace oci {
 
+
+typedef boost::shared_ptr<PointBuffer> BufferPtr;
+typedef std::map<int, BufferPtr> BufferMap;
 
 class IteratorBase
 {
@@ -58,23 +61,37 @@ protected:
     
     boost::uint32_t myReadBuffer(PointBuffer& data);
     boost::uint32_t unpackOracleData(PointBuffer& data);
-    BlockPtr defineBlock(Statement statement);
+    
+    boost::uint32_t myReadClouds(PointBuffer& data);
+    boost::uint32_t myReadBlocks(PointBuffer& data);
 
+    BufferPtr fetchPointBuffer(Statement statment, sdo_pc* pc, boost::uint32_t capacity);
+
+    Statement m_block_statement;
     Statement m_statement;
     bool m_at_end;
     QueryType m_querytype;
-    CloudPtr m_cloud;
     BlockPtr m_block;
+    BlockPtr m_cloud_block;
+    boost::int32_t m_active_cloud_id;
+    BufferPtr m_new_buffer;
+    bool bGetNewBuffer;
+    bool bReadFirstCloud;
+    BufferMap m_buffers;
 
 
 private:
     const Reader& m_reader;
     
+    Statement getNextCloud(BlockPtr block, boost::int32_t& cloud_id);
     void read(  PointBuffer& data, 
+                Statement statement,
+                BlockPtr block,
                 boost::uint32_t howMany, 
                 boost::uint32_t whichPoint, 
                 boost::uint32_t whichBlobPosition);
     
+    pdal::Bounds<double> getBounds(Statement statement, BlockPtr block);
     IteratorBase& operator=(const IteratorBase&); // not implemented
     IteratorBase(const IteratorBase&); // not implemented;
     

@@ -31,6 +31,8 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/FileUtils.hpp
   ${PDAL_HEADERS_DIR}/Filter.hpp
   ${PDAL_HEADERS_DIR}/FilterIterator.hpp
+  ${PDAL_HEADERS_DIR}/GDALUtils.hpp
+  ${PDAL_HEADERS_DIR}/Log.hpp
   ${PDAL_HEADERS_DIR}/MetadataRecord.hpp
   ${PDAL_HEADERS_DIR}/MultiFilter.hpp
   ${PDAL_HEADERS_DIR}/MultiFilterIterator.hpp
@@ -67,6 +69,7 @@ set(PDAL_BASE_CPP
   FileUtils.cpp
   Filter.cpp
   FilterIterator.cpp
+  Log.cpp
   MetadataRecord.cpp
   MultiFilter.cpp
   MultiFilterIterator.cpp
@@ -91,6 +94,10 @@ set(PDAL_BASE_CPP
   Writer.cpp
   ${PDAL_XML_SRC}
 )
+
+if (GDAL_FOUND)
+    set (PDAL_BASE_CPP  GDALUtils.cpp ${PDAL_BASE_CPP})
+endif(GDAL_FOUND)
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )

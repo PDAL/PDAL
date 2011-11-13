@@ -32,57 +32,93 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_TYPES_HPP
-#define INCLUDED_TYPES_HPP
+#include <pdal/Log.hpp>
+#include <boost/algorithm/string.hpp>
 
-#include <pdal/pdal.hpp>
+#include <ostream>
+#include <sstream>
 
-namespace pdal {
-
-enum EndianType
+namespace pdal 
 {
-    Endian_Little,
-    Endian_Big,
-    Endian_Unknown = 128
-};
 
-enum PointCountType
-{
-    PointCount_Fixed,       // getNumPoints will return value (which might be zero, though)
-    PointCount_Unknown      // the stage has an unknown count, and getNumPoints will return 0
-};
 
-enum StageIteratorType
+Log::Log(std::string const& leaderString, 
+         std::string const& outputName, 
+         std::ostream* v) 
+    : m_level(logERROR)
+    , m_deleteStreamOnCleanup(false)
+    , m_leader(leaderString)
 {
-    StageIterator_Sequential = (1u << 0),
-    StageIterator_Random = (1u << 1),
-    StageIterator_Block = (1u << 2),
-    StageIterator_Unknown = (1u << 8)
-};
+    // If we were handed a log stream, we're going to use that.
+    if (v == 0)
+    {
+        if (boost::iequals(outputName, "stdlog"))
+        {
+            m_log = &std::clog;
+        } else if (boost::iequals(outputName, "stderr"))
+        {
+            m_log = &std::cerr;
+        } else if (boost::iequals(outputName, "stdout"))
+        {
+            m_log = &std::cout;
+        } else 
+        {
+            m_log = FileUtils::createFile(outputName);
+            m_deleteStreamOnCleanup = true;
+        }
+    } else
+    {
+        m_log = v;
+    }
+    m_null_stream.open(sink());
+}
+
+Log::~Log()
+{
     
+    if (m_deleteStreamOnCleanup)
+    {
+        m_log->flush();
+        delete m_log;
+    }
+    
+    m_log = 0;
+}
 
-
-enum StageOperationType
+std::ostream& Log::get(LogLevel level)
 {
-    StageOperation_All = (1u << 0),
-    StageOperation_Type = (1u << 1),
-    STageOperation_Id = (1u << 2)
-};
+    if (level <= m_level)
+    {
+        *m_log << "(" << m_leader << " "<< getLevelString(level) <<": " << level << "): ";
+        *m_log << std::string(level > logDEBUG ? 0 : level - logDEBUG, '\t');
+        return *m_log;
+    } else
+    {
+        return m_null_stream;
+    }
 
-enum LogLevel 
+}
+
+std::string Log::getLevelString(LogLevel level) const
 {
-    logERROR = 0, 
-    logWARNING, 
-    logINFO, 
-    logDEBUG, 
-    logDEBUG1,
-    logDEBUG2, 
-    logDEBUG3, 
-    logDEBUG4,
-    logDEBUG5
-};
+    std::ostringstream output;
+    
+    switch (level)
+    {
+        case logERROR:
+            output << "ERROR";
+            break;
+        case logWARNING:
+            output << "WARNING";
+            break;
+        case logINFO:
+            output << "INFO";
+            break;
 
-
+        default:
+            output << "DEBUG";
+    }
+    
+    return output.str();
+}
 } // namespace
-
-#endif

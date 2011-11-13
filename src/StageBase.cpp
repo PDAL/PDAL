@@ -79,8 +79,7 @@ StageBase::StageBase(const std::vector<StageBase*>& inputs, const Options& optio
     , m_id(options.getValueOrDefault<boost::uint32_t>("id", 0))
     , m_inputs(inputs)
     , m_dimensionsType(StageOperation_All)
-    , m_log(0)
-    , m_logWithFile(false)
+    , m_log(LogPtr())
 {
     BOOST_FOREACH(StageBase* input, m_inputs)
     {
@@ -96,13 +95,7 @@ StageBase::StageBase(const std::vector<StageBase*>& inputs, const Options& optio
 
 StageBase::~StageBase()
 {
-    std::vector<StageBase*> const&  inputs = getInputs();
-    if (inputs.size() == 0)
-    { 
-        if (m_logWithFile)
-            delete m_log;
-    }
-    m_log = 0;
+
 }
 
 void StageBase::initialize()
@@ -129,49 +122,17 @@ void StageBase::initialize()
     std::vector<StageBase*> const&  inputs = getInputs();
     if (inputs.size() == 0)
     {
-        if (boost::iequals(logname, "stdlog"))
-        {
-            m_log = &std::clog;
-        } else if (boost::iequals(logname, "stderr"))
-        {
-            m_log = &std::cerr;
-        } else if (boost::iequals(logname, "stdout"))
-        {
-            m_log = &std::cout;
-        } else 
-        {
-            m_log = FileUtils::createFile(logname);
-            m_logWithFile = true;
-        }
+        m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname, 0));
     } else {
-        m_log = getPrevStage().getLogStream();
+        std::ostream* v= getPrevStage().log()->getLogStream();
+        m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname, v));
+
     }
+        m_log->setLevel(static_cast<LogLevel>(m_verbose));
     
     m_initialized = true;
 
     return;
-}
-
-void StageBase::log(std::string const& input, boost::uint32_t nVerbosity) const
-{
-    std::ostringstream oss;
-    oss << input;
-    StageBase::log(oss, nVerbosity); 
-}
-
-void StageBase::log(std::ostringstream& output, boost::uint32_t nVerbosity) const
-{
-    if (m_log)
-    {
-        if (isDebug())
-        {
-            if (nVerbosity >= getVerboseLevel() ) {
-                *m_log << getName() << "(" << nVerbosity << "): ";
-                *m_log << output.str();
-                *m_log << std::endl;             
-            }
-        }
-    }
 }
 
 bool StageBase::isInitialized() const
@@ -200,7 +161,7 @@ bool StageBase::isDebug() const
 
 bool StageBase::isVerbose() const
 {   
-    return m_verbose>0;
+    return m_verbose > 0;
 }
 
 
@@ -262,7 +223,7 @@ boost::property_tree::ptree StageBase::toPTree() const
 
 void StageBase::dump() const
 {
-    std::cout << *this;
+    m_log->get(logDEBUG) << *this;
 }
 
 

@@ -52,18 +52,20 @@ namespace pdal { namespace drivers { namespace oci {
 
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
+    , OracleDriver(getOptions())
     , m_querytype(QUERY_UNKNOWN)
     , m_capacity(0)
 {
 
 }
 
-
 void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    m_connection = Connect(getOptions(), isDebug(), getVerboseLevel());
+    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>( new pdal::gdal::Debug(isDebug(), log()));
+    m_connection = connect();
+    m_block = BlockPtr(new Block(m_connection));
 
     if (getQuery().size() == 0 )
         throw pdal_error("'query' statement is empty. No data can be read from pdal::drivers::oci::Reader");
@@ -76,27 +78,50 @@ void Reader::initialize()
 
     if (m_querytype == QUERY_SDO_PC)
     {
-        m_connection->CreateType(&m_pc);
-
-        m_statement->Define(&(m_pc));
+        defineBlock(m_statement, m_block);
     
         bool bDidRead = m_statement->Fetch(); 
     
         if (!bDidRead) throw pdal_error("Unable to fetch a point cloud entry entry!");
+        
+        try 
+        {
+            setSpatialReference(getOptions().getValueOrThrow<pdal::SpatialReference>("spatialreference"));
+        
+        }
+        catch (pdal_error const&) 
+        {
+            // If one wasn't set on the options, we'll ignore at this 
+            setSpatialReference(fetchSpatialReference(m_statement, m_block->pc));
+
+        }
+
         Schema& schema = getSchemaRef(); 
-        schema = fetchSchema(m_pc);
+        schema = fetchSchema(m_statement, m_block->pc, m_capacity);
     }
-    else if (m_querytype == QUERY_SDO_PC_BLK_TYPE)
-    {
-        m_connection->CreateType(&m_pc_block);
-        // m_connection->CreateType(&(m_pc_block->inp));
-        m_statement->Define(&m_pc_block);
 
+    else if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
+    {
+        
+        defineBlock(m_statement, m_block);
         bool bDidRead = m_statement->Fetch(); 
     
         if (!bDidRead) throw pdal_error("Unable to fetch a point cloud entry entry!");
         Schema& schema = getSchemaRef(); 
-        schema = fetchSchema(m_pc);
+
+        try 
+        {
+            setSpatialReference(getOptions().getValueOrThrow<pdal::SpatialReference>("spatialreference"));
+        
+        }
+        catch (pdal_error const&) 
+        {
+            // If one wasn't set on the options, we'll ignore at this 
+            setSpatialReference(fetchSpatialReference(m_statement, m_block->pc));
+
+        }
+
+        schema = fetchSchema(m_statement, m_block->pc, m_capacity);
         
     }
     
@@ -105,6 +130,84 @@ void Reader::initialize()
 
 }
 
+
+
+void Reader::defineBlock(Statement statement, BlockPtr block) const
+{
+
+    int   iCol = 0;
+    char  szFieldName[OWNAME];
+    int   hType = 0;
+    int   nSize = 0;
+    int   nPrecision = 0;
+    signed short nScale = 0;
+    char szTypeName[OWNAME];
+    
+
+    while( statement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName) )
+    {
+        std::string name = boost::to_upper_copy(std::string(szFieldName));
+
+        if ( hType == SQLT_NTY)
+        {
+            if (boost::iequals(szTypeName, "SDO_PC"))
+            {
+                statement->Define(&(block->pc));
+            }
+        }
+        if (boost::iequals(szFieldName, "OBJ_ID"))
+        {
+            statement->Define(&(block->obj_id));
+        }
+
+        if (boost::iequals(szFieldName, "BLK_ID"))
+        {
+            statement->Define(&(block->blk_id));
+        }
+
+        if (boost::iequals(szFieldName, "BLK_EXTENT"))
+        {
+            statement->Define(&(block->blk_extent));
+        }
+
+        if (boost::iequals(szFieldName, "BLK_DOMAIN"))
+        {
+            statement->Define(&(block->blk_domain));
+        }
+        
+        if (boost::iequals(szFieldName, "PCBLK_MIN_RES"))
+        {
+            statement->Define(&(block->pcblk_min_res));
+        }
+
+        if (boost::iequals(szFieldName, "PCBLK_MAX_RES"))
+        {
+            statement->Define(&(block->pcblk_max_res));
+        }
+
+        if (boost::iequals(szFieldName, "NUM_POINTS"))
+        {
+            statement->Define(&(block->num_points));
+        }
+
+        if (boost::iequals(szFieldName, "NUM_UNSORTED_POINTS"))
+        {
+            statement->Define(&(block->num_unsorted_points));
+        }
+
+        if (boost::iequals(szFieldName, "PT_SORT_DIM"))
+        {
+            statement->Define(&(block->pt_sort_dim));
+        }
+
+        if (boost::iequals(szFieldName, "POINTS"))
+        {
+            statement->Define( &(block->locator) ); 
+        }
+        iCol++;
+    }
+    
+}
 
 const Options Reader::getDefaultOptions() const
 {
@@ -145,7 +248,7 @@ Reader::~Reader()
     return;
 }
 
-QueryType Reader::describeQueryType() const
+QueryType Reader::describeQueryType()
 {
 
     int   iCol = 0;
@@ -155,32 +258,106 @@ QueryType Reader::describeQueryType() const
     int   nPrecision = 0;
     signed short nScale = 0;
     char szTypeName[OWNAME];
+    
 
+    std::ostringstream oss;
+
+    std::map<std::string, std::string> objects;
     while( m_statement->GetNextField(iCol, szFieldName, &hType, &nSize, &nPrecision, &nScale, szTypeName) )
     {
+        
+        std::pair<std::string, int> p(szFieldName, hType);
+        m_fields.insert(p);
 
         if ( hType == SQLT_NTY)
         {
-            // std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
-            if (boost::iequals(szTypeName, "SDO_PC"))
-                return QUERY_SDO_PC;
-            if (boost::iequals(szTypeName, "SDO_PC_BLK_TYPE"))
-                return QUERY_SDO_PC_BLK_TYPE;
+            std::pair<std::string, std::string> p(szTypeName, szFieldName);
+            oss << "Typed Field " << std::string(szFieldName) << " with type " << hType << " and typename " << std::string(szTypeName) << std::endl;
+
+            objects.insert(p);
+        } else
+        {
+            oss << "Field " << std::string(szFieldName) << " with type " << hType << std::endl;
+            
         }
+        iCol++;
+    }
+    log()->get(logDEBUG)  << oss.str() << std::endl;
+        // if ( hType == SQLT_NTY)
+        // {
+        //     std::cout << "Field " << szFieldName << " is SQLT_NTY with type name " << szTypeName  << std::endl;
+        //     if (boost::iequals(szTypeName, "SDO_PC"))
+        //         return QUERY_SDO_PC;
+        //     if (boost::iequals(szTypeName, "SDO_PC_BLK_TYPE"))
+        //         return QUERY_SDO_PC_BLK_TYPE;
+        // }
+    bool bHaveSDO_PC(false);
+    if (objects.find("SDO_PC") != objects.end()) bHaveSDO_PC = true;
+    bool bHaveSDO_PC_BLK_TYPE(false);
+    if (objects.find("SDO_PC_BLK_TYPE") != objects.end()) bHaveSDO_PC_BLK_TYPE = true;
+    if ( !bHaveSDO_PC && !bHaveSDO_PC_BLK_TYPE)
+    {
+        std::ostringstream oss;
+        oss << "Select statement '" << getQuery() << "' does not fetch a SDO_PC object" 
+              " or SDO_PC_BLK_TYPE";
+        throw pdal_error(oss.str());
+        
+    }
+    
+    typedef std::pair<std::string, bool> SB;
+    std::map<std::string, bool> block_fields;
+    
+    // We must have all of these field names present to be considered block 
+    // data.
+    block_fields.insert(SB("OBJ_ID", false));
+    block_fields.insert(SB("BLK_ID", false));
+    block_fields.insert(SB("BLK_EXTENT", false)); block_fields.insert(SB("BLK_DOMAIN", false));
+    block_fields.insert(SB("PCBLK_MIN_RES", false)); block_fields.insert(SB("PCBLK_MAX_RES", false));
+    block_fields.insert(SB("NUM_POINTS", false)); block_fields.insert(SB("NUM_UNSORTED_POINTS", false));
+    block_fields.insert(SB("PT_SORT_DIM", false)); block_fields.insert(SB("POINTS", false));
+    
+    std::map<std::string, int>::const_iterator i = m_fields.begin();
+    
+    bool bHasBlockFields(false);
+    for (i = m_fields.begin(); i != m_fields.end(); ++i)
+    {
+        std::map<std::string, bool>::iterator t = block_fields.find(i->first);
+        if (t != block_fields.end())
+            t->second = true;
+    }
+    
+    std::map<std::string, bool>::const_iterator q;
+    
+    for (q = block_fields.begin(); q != block_fields.end(); ++q)
+    {
+        if (q->second == false)
+        {
+            bHasBlockFields = false;
+            break;
+        }
+        bHasBlockFields = true;
+    }
+    
+    if (bHaveSDO_PC && bHasBlockFields) 
+    {
+        log()->get(logDEBUG) << "Query type is QUERY_SDO_BLK_PC_VIEW" << std::endl;
+        return QUERY_SDO_BLK_PC_VIEW;
+    }
+    if (bHaveSDO_PC) 
+    {
+        log()->get(logDEBUG) << "Query type is QUERY_SDO_PC" << std::endl;
+        return QUERY_SDO_PC;
     }
 
-    std::ostringstream oss;
-    oss << "Select statement '" << getQuery() << "' does not fetch a SDO_PC object" 
-          " or SDO_PC_BLK_TYPE";
-    throw pdal_error(oss.str());
+    log()->get(logDEBUG) << "Query type is QUERY_UNKNOWN" << std::endl;
+    return QUERY_UNKNOWN;
+    
 }
 
-
-pdal::Schema Reader::fetchSchema(sdo_pc* pc) 
+pdal::SpatialReference Reader::fetchSpatialReference(Statement statement, sdo_pc* pc) const
 {
-    
     // Fetch the WKT for the SRID to set the coordinate system of this stage
-    int srid = m_statement->GetInteger(&(pc->pc_geometry.sdo_srid));
+    int srid = statement->GetInteger(&(pc->pc_geometry.sdo_srid));
     
     std::ostringstream select_wkt;
     select_wkt
@@ -194,8 +371,12 @@ pdal::Schema Reader::fetchSchema(sdo_pc* pc)
     std::string s_wkt(wkt);
     free(wkt);
     
-    setSpatialReference(pdal::SpatialReference(s_wkt));
-    
+    return pdal::SpatialReference(s_wkt);
+}
+
+pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity) const
+{
+    log()->get(logDEBUG) << "Fetching schema from SDO_PC object" << std::endl;
     
     // Fetch the XML that defines the schema for this point cloud
     std::ostringstream select_schema;
@@ -262,7 +443,7 @@ pdal::Schema Reader::fetchSchema(sdo_pc* pc)
         throw pdal_error(oss.str());
     }
     
-    m_capacity = block_capacity;
+    capacity = block_capacity;
     
     std::string pc_schema_xml(pc_schema);
     if (pc_schema)
@@ -276,17 +457,6 @@ pdal::Schema Reader::fetchSchema(sdo_pc* pc)
     return schema;
 }
 
-CloudPtr Reader::getCloud() const
-{
-
-    CloudPtr output(new Cloud(getConnection()));
-    output->base_table = m_statement->GetString(m_pc->base_table);
-    output->base_column = m_statement->GetString(m_pc->base_column);
-    output->pc_id = m_statement->GetInteger(&(m_pc->pc_id));
-    output->blk_table = m_statement->GetString(m_pc->blk_table);
-    return output;
-
-}
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {

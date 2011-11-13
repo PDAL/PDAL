@@ -198,6 +198,39 @@ PointIndexes::PointIndexes(const Schema& schema, PointFormat format)
     return;
 }
 
+PointPositions::PointPositions(const Schema& schema, PointFormat format)
+{
+
+    X = schema.getDimension(DimensionId::X_i32).getByteOffset();
+    Y = schema.getDimension(DimensionId::Y_i32).getByteOffset();
+    Z = schema.getDimension(DimensionId::Z_i32).getByteOffset();
+    
+    Intensity = schema.getDimension(DimensionId::Las_Intensity).getByteOffset();
+    ReturnNumber = schema.getDimension(DimensionId::Las_ReturnNumber).getByteOffset();
+    NumberOfReturns = schema.getDimension(DimensionId::Las_NumberOfReturns).getByteOffset();
+    ScanDirectionFlag = schema.getDimension(DimensionId::Las_ScanDirectionFlag).getByteOffset();
+    EdgeOfFlightLine = schema.getDimension(DimensionId::Las_EdgeOfFlightLine).getByteOffset();
+    Classification = schema.getDimension(DimensionId::Las_Classification).getByteOffset();
+    ScanAngleRank = schema.getDimension(DimensionId::Las_ScanAngleRank).getByteOffset();
+    UserData = schema.getDimension(DimensionId::Las_UserData).getByteOffset();
+    PointSourceId = schema.getDimension(DimensionId::Las_PointSourceId).getByteOffset();
+    
+    Time = (Support::hasTime(format) ? schema.getDimension(DimensionId::Las_Time).getByteOffset() : 0);
+    
+    Red = (Support::hasColor(format) ? schema.getDimension(DimensionId::Red_u16).getByteOffset() : 0);
+    Green = (Support::hasColor(format) ? schema.getDimension(DimensionId::Green_u16).getByteOffset() : 0);
+    Blue = (Support::hasColor(format) ? schema.getDimension(DimensionId::Blue_u16).getByteOffset() : 0);
+        
+    // WavePacketDescriptorIndex = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WavePacketDescriptorIndex) : 0);
+    // WaveformDataOffset = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformDataOffset) : 0);
+    // ReturnPointWaveformLocation = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_ReturnPointWaveformLocation) : 0);
+    // WaveformXt = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformXt) : 0);
+    // WaveformYt = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformYt) : 0);
+    // WaveformZt = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformZt) : 0);
+
+    return;
+}
+
 
 void Support::rewriteHeader(std::ostream& stream, const SummaryData& data)
 {

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -32,42 +32,64 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#ifndef INCLUDED_GDALUTILS_HPP
+#define INCLUDED_GDALUTILS_HPP
 
-#include <pdal/drivers/oci/common.hpp>
+#include <pdal/pdal.hpp>
+#include <pdal/pdal_error.hpp>
 
-#include <iostream>
+#include <pdal/Log.hpp>
 
-#include <pdal/Bounds.hpp>
-#include <pdal/Utils.hpp>
+#include <sstream>
 
-namespace pdal { namespace drivers { namespace oci {
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 
-Block::Block(Connection connection)
-    : num_points(0)
-    , chunk(new std::vector<boost::uint8_t>)
-    , m_connection(connection)
+#ifdef PDAL_HAVE_GDAL
+#include <cpl_port.h>
+#include "gdal.h"
+// #include "gdal_priv.h"
+#endif
+
+namespace pdal
 {
-    m_connection->CreateType(&blk_extent);
-    m_connection->CreateType(&blk_extent->sdo_ordinates, m_connection->GetOrdinateType());
-    m_connection->CreateType(&blk_extent->sdo_elem_info, m_connection->GetElemInfoType());
-    m_connection->CreateType(&blk_domain);
-    m_connection->CreateType(&pc);
-}
+namespace gdal {
 
-Block::~Block()
+
+class PDAL_DLL Debug
 {
-    m_connection->DestroyType(&blk_domain);
-    m_connection->DestroyType(&blk_extent->sdo_elem_info);
-    m_connection->DestroyType(&blk_extent->sdo_ordinates);
-    m_connection->DestroyType(&pc);
-    // FIXME: For some reason having the dtor destroy this
-    // causes a segfault
-    // m_connection->DestroyType(&blk_extent);
-}
+public:
+
+    Debug(bool isDebug, pdal::LogPtr log);
+    ~Debug();
+
+    static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
+    {
+#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
+        static_cast<Debug*>(CPLGetErrorHandlerUserData())->m_gdal_callback(code, num, msg);
+#else
+        if (code == CE_Failure || code == CE_Fatal) {
+            std::ostringstream oss;
+            oss <<"GDAL Failure number=" << num << ": " << msg;
+            throw gdal_error(oss.str());
+        } else if (code == CE_Debug) {
+            std::clog << " (no log control stdlog) GDAL debug: " << msg << std::endl;
+        } else {
+            return;
+        }
+#endif
+    }
+    
+    void CPL_STDCALL log(::CPLErr code, int num, char const* msg);
+    void CPL_STDCALL error(::CPLErr code, int num, char const* msg);
 
 
+private:
+    boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
+    bool m_isDebug;
+    pdal::LogPtr m_log;
+};
 
-}}} // namespace pdal::driver::oci
+}} // namespace pdal::gdal
 
-
-
+#endif

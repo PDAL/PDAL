@@ -91,6 +91,7 @@ public:
 
     // accessors to a particular field of a particular point in this buffer
     template<class T> T getField(std::size_t pointIndex, boost::int32_t fieldIndex) const;
+    template<class T> T getRawField(std::size_t pointIndex, std::size_t pointBytePosition) const;
     template<class T> void setField(std::size_t pointIndex, boost::int32_t fieldIndex, T value);
     void setFieldData(std::size_t pointIndex, boost::int32_t fieldIndex, const boost::uint8_t* data);
     
@@ -239,6 +240,14 @@ inline T PointBuffer::getField(std::size_t pointIndex, boost::int32_t fieldIndex
     return *(T*)p;
 }
 
+template <class T>
+inline T PointBuffer::getRawField(std::size_t pointIndex, std::size_t pointBytePosition) const
+{
+    std::size_t offset = (pointIndex * m_pointSize) + pointBytePosition;
+    boost::uint8_t* p = m_data.get() + offset;
+
+    return *(T*)p;
+}
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);
 

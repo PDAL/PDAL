@@ -75,7 +75,7 @@ Options getOptions()
     Option overwrite("overwrite", false,"overwrite");
     options.add(overwrite);
     
-    Option connection("connection",TestConfig::g_oracle_connection, "connection");
+    Option connection("connection",std::string(TestConfig::g_oracle_connection), "connection");
     options.add(connection);
     
     Option debug("debug", true, "debug");
@@ -133,6 +133,8 @@ struct OracleTestFixture
 {
     OracleTestFixture() :
     m_options(getOptions())
+    , m_connection(pdal::drivers::oci::Connection())
+    , m_driver(getOptions())
     { 
         if (!ShouldRunTest()) return;
         pdal::drivers::oci::Connection connection = connect();
@@ -151,9 +153,7 @@ struct OracleTestFixture
     {
         if (!m_connection.get() ) 
         {
-            m_connection = pdal::drivers::oci::Connect(m_options, 
-                                                       m_options.getValueOrThrow<bool>("debug"),
-                                                       m_options.getValueOrThrow<boost::uint32_t>("verbose"));
+            m_connection = m_driver.connect();
             
         }
         return m_connection;
@@ -168,6 +168,7 @@ struct OracleTestFixture
 
     pdal::Options m_options;
     pdal::drivers::oci::Connection m_connection;
+    pdal::drivers::oci::OracleDriver m_driver;
     
     ~OracleTestFixture() 
     {
@@ -218,7 +219,7 @@ BOOST_AUTO_TEST_CASE(initialize)
  
     boost::uint32_t numRead = iter->read(data);
 
-    BOOST_CHECK_EQUAL(numRead, 799);
+    BOOST_CHECK_EQUAL(numRead, 799u);
 
     pdal::Schema const& schema = reader_reader.getSchema();
     int offsetX = schema.getDimensionIndex(DimensionId::X_i32);

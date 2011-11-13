@@ -75,6 +75,11 @@ Run with debug (F5)
 
 
 
+TO BUILD THE SWIG BINDINGS
+==========================
 
+Follow the instructions in csharp/README.txt.  Be sure and follow the note
+about modifying std_basic_string.i and setting the PDAL_SWIG_BOOST_HOME
+env var.
 
 

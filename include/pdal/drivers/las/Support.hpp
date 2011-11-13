@@ -84,6 +84,31 @@ public:
     int Blue;
 };
 
+class PointPositions
+{
+public:
+    PointPositions(const Schema& schema, PointFormat format);
+    
+    std::size_t X;
+    std::size_t Y;
+    std::size_t Z;
+    
+    std::size_t Intensity;
+    std::size_t ReturnNumber;
+    std::size_t NumberOfReturns;
+    std::size_t ScanDirectionFlag;
+    std::size_t EdgeOfFlightLine;
+    std::size_t Classification;
+    std::size_t ScanAngleRank;
+    std::size_t UserData;
+    std::size_t PointSourceId;
+    
+    std::size_t Time;
+    
+    std::size_t Red;
+    std::size_t Green;
+    std::size_t Blue;
+};
 
 class PDAL_DLL Support
 {

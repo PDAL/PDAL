@@ -113,11 +113,11 @@ void LasHeaderReader::read(Schema& schema)
 
     // 10. System ID
     Utils::read_n(buff, m_istream, 32);
-    m_header.SetSystemId(buff);
+    m_header.SetSystemId(std::string(buff, 32));
 
     // 11. Generating Software ID
     Utils::read_n(buff, m_istream, 32);
-    m_header.SetSoftwareId(buff);
+    m_header.SetSoftwareId(std::string(buff, 32));
 
     // 12. File Creation Day of Year
     Utils::read_n(n2, m_istream, sizeof(n2));

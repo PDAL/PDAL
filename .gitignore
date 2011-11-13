@@ -19,6 +19,11 @@ cmake_install.cmake
 CTestTestfile.cmake
 Testing/
 apps/pdal-config
+src/CMakeScripts/
+apps/CMakeScripts/
+CMakeScripts/
+_CPack_Packages/
+install_manifest.txt
 
 #
 # visual studio cruft
@@ -55,3 +60,4 @@ doc/doxygen/xml
 Makefile
 doc/build
 bin/
+test/unit/CMakeScripts/

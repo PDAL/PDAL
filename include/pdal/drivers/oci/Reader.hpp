@@ -38,6 +38,8 @@
 #include <pdal/pdal.hpp>
 
 #include <pdal/Reader.hpp>
+#include <pdal/GDALUtils.hpp>
+
 #include <pdal/drivers/oci/common.hpp>
 
 #include <boost/scoped_ptr.hpp>
@@ -49,7 +51,7 @@ namespace pdal { namespace drivers { namespace oci {
 
 
 
-class PDAL_DLL Reader : public pdal::Reader
+class PDAL_DLL Reader : public pdal::Reader, pdal::drivers::oci::OracleDriver
 {
 public:
     SET_STAGE_NAME("drivers.oci.reader", "OCI Reader")
@@ -72,28 +74,40 @@ public:
     
     Connection getConnection () const { return m_connection;}
     Statement getStatement () const { return m_statement;}
-    CloudPtr getCloud() const;
+    BlockPtr getBlock() const { return m_block; }
     std::string getQuery() const;
-
+    void defineBlock(Statement statement, BlockPtr block) const;
+    
+        
+    QueryType getQueryType() const {return m_querytype; }
+    Schema fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity) const;
+    pdal::SpatialReference fetchSpatialReference(Statement statement, sdo_pc* pc) const;
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
+    
 private:
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
     // 
     
-    QueryType describeQueryType() const;
-    Schema fetchSchema(sdo_pc* pc);
+    QueryType describeQueryType() ;
 
     Connection m_connection;
     Statement m_statement;
     QueryType m_querytype;
-
-    sdo_pc* m_pc;
-    sdo_pc_blk* m_pc_block;
+    
+    BlockPtr m_block;
     boost::uint32_t m_capacity;
+    
+    // Fields in the form of NAME:TYPE
+    std::map<std::string, int> m_fields;
+    
+    boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
+
+    // boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
+  
 
 };
 

@@ -53,8 +53,9 @@ set PDAL_DIR=%DEV_DIR%\pdal
 rem set ORACLE_HOME=%OSGEO4W_DIR%
 
 
-:: (not needed?)
-rem set PDAL_SWIG_BOOST_HOME=%BOOST_DIR%
+:: Set this if you are building SWIG bindings for C#.  Visual Studio
+:: needs to use this env var to find where boost lives.
+set PDAL_SWIG_BOOST_HOME=%BOOST_DIR%
 
 
 :: If you set the above stuff correctly, then you should only need to

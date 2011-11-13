@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This file is Mississippi data that has different vertical units (ft) -->
+<Pipeline version="1.0">
+    <Writer type="drivers.las.writer">
+        <Option name="filename">
+            out3.las
+        </Option>
+            <Filter type="filters.inplacereprojection">
+                <Option name="out_srs">
+                    ../mvk-thin.las.wkt
+                </Option>
+                <Option name="scale_x">
+                    0.001
+                </Option>
+                <Option name="scale_y">
+                    0.001
+                </Option>
+                <Reader type="drivers.las.reader">
+                    <Option name="filename">
+                        out2.las
+                    </Option>
+                </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>

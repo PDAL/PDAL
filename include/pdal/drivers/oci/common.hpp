@@ -44,22 +44,24 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/function.hpp>
+#include <boost/concept_check.hpp> // ignore_unused_variable_warning
+#include <boost/make_shared.hpp>
 
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
 #include <cpl_port.h>
 
-
-
-void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
-void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
+// 
+// 
+// void CPL_STDCALL OCIGDALErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
+// void CPL_STDCALL OCIGDALDebugErrorHandler(CPLErr eErrClass, int err_no, const char *msg);
 
 
 namespace pdal { namespace drivers { namespace oci {
 
 typedef boost::shared_ptr<OWConnection> Connection ;
 typedef boost::shared_ptr<OWStatement> Statement ;
-
 
 class connection_failed : public pdal_error
 {
@@ -78,65 +80,69 @@ public:
 };
 
 
-
-struct FiveDimensionOCI
+class read_error : public pdal_error
 {
-    double x;
-    double y;
-    double z;
-    double t;
-    double c;
-    boost::uint32_t blk_id;
-    boost::uint32_t pc_id;
+public:
+    read_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
 };
 
-struct EightDimensionOCI
+
+class OracleDriver
 {
-    double x;
-    double y;
-    double z;
-    double time;
-    double cls;
-    double intensity;
-    boost::int8_t returnNumber;
-    boost::int8_t numberOfReturns;
-    boost::int8_t scanDirFlag;
-    boost::int8_t edgeOfFlightLine;
-    boost::int8_t scanAngleRank;
-    boost::int8_t userData;
-    boost::uint16_t pointSourceId;
-    boost::uint16_t red;
-    boost::uint16_t green;
-    boost::uint16_t blue;
-    boost::uint16_t alpha;
-    boost::uint32_t blk_id;
-    boost::uint32_t pc_id;
+public:
+    OracleDriver(const Options& options) 
+        : m_options(options)
+    {
+
+
+    }
+
+    pdal::drivers::oci::Connection connect()
+    {
+        std::string connection  = m_options.getValueOrThrow<std::string>("connection");
+
+        if (connection.empty())
+            throw pdal_error("Oracle connection string empty! Unable to connect");
+
+        std::string::size_type slash_pos = connection.find("/",0);
+        std::string username = connection.substr(0,slash_pos);
+        std::string::size_type at_pos = connection.find("@",slash_pos);
+
+        std::string password = connection.substr(slash_pos+1, at_pos-slash_pos-1);
+        std::string instance = connection.substr(at_pos+1);
+    
+        Connection con = boost::make_shared<OWConnection>(username.c_str(),password.c_str(),instance.c_str());
+    
+        if (!con->Succeeded())
+        {
+            throw connection_failed("Oracle connection failed");
+        }
+        
+        return con;
+    
+    }
+    
+private:
+    Options const& m_options;
+
+    OracleDriver& operator=(const OracleDriver&); // not implemented
+    OracleDriver(const OracleDriver&); // not implemented
 };
+
+
+
 
 
 enum QueryType
 {
-    QUERY_SDO_PC,
+    QUERY_SDO_PC = 0,
     QUERY_SDO_PC_BLK_TYPE,
-    QUERY_UNKNOWN
+    QUERY_SDO_BLK_PC_VIEW,
+    QUERY_UNKNOWN = 512
 };
 
-
-class Cloud
-{
-public:
-    Cloud(Connection connection);
-    ~Cloud();
-    
-    std::string base_table;
-    std::string base_column;
-    boost::int32_t pc_id;
-    std::string blk_table;
-    sdo_geometry* pc_geometry;
-    Connection              connection;
-        
-};
-typedef boost::shared_ptr<Cloud> CloudPtr;
 
 class Block
 {
@@ -159,18 +165,13 @@ public:
     boost::scoped_ptr<std::vector<uint8_t> > chunk;
     OCILobLocator           *locator;
     Connection              m_connection;
+    sdo_pc*                 pc;
 
 
-private:
-    boost::uint32_t m_capacity;
 };
 
 typedef boost::shared_ptr<Block> BlockPtr;
 
-
-PDAL_DLL Connection Connect(pdal::Options const& options, bool debug, int verbosity);
-
-void SetGDALDebug(bool doDebug);
 
 
 

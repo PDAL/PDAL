@@ -35,6 +35,10 @@
 #ifndef INCLUDED_STAGEBASE_HPP
 #define INCLUDED_STAGEBASE_HPP
 
+#include <boost/shared_ptr.hpp>
+
+#include <pdal/Log.hpp>
+
 #include <pdal/pdal.hpp>
 #include <pdal/Options.hpp>
 
@@ -45,8 +49,9 @@
 namespace pdal
 {
 
+
 class Stage;
-    
+
 //
 // supported options:
 //   <uint32>id
@@ -100,11 +105,14 @@ public:
 
     /// Put data to the log
     /// @param input a string to put into the Stage's log
-    virtual void log(std::ostringstream& input, boost::uint32_t nVerbosity = 1) const;
+    // virtual void log(std::ostringstream& input, boost::uint32_t nVerbosity = 1) const;
+    
+    virtual LogPtr log(void) const { return m_log; }
 
+    
     /// Put data to the log
     /// @param input a string to put into the Stage's log
-    virtual void log(std::string const& input, boost::uint32_t nVerbosity = 1) const;
+    // virtual void log(std::string const& input, boost::uint32_t nVerbosity = 1) const;
 
     /// Query if this object is debug.
     ///
@@ -257,7 +265,7 @@ protected:
     /// @return a vector of StageBase pointers
     static std::vector<StageBase*> makeVector(const std::vector<Stage*>& src);
 
-    std::ostream* getLogStream() { return m_log; }
+
 private:
     bool m_initialized;
     Options m_options;
@@ -268,8 +276,7 @@ private:
     std::vector<StageBase*> m_inputs;
     std::vector<StageBase*> m_outputs;
     StageOperationType m_dimensionsType;
-    std::ostream* m_log;
-    bool m_logWithFile;
+    LogPtr m_log;
 
     StageBase& operator=(const StageBase& rhs); // not implemented
     StageBase(const StageBase&); // not implemented

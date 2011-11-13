@@ -96,15 +96,14 @@ Reader::Reader(const Options& options)
     m_header.swap(h);
     Utils::read_n(*m_header, *stream, sizeof(TerraSolidHeader));
 
-    // std::cout << "RecogVal: " << m_header->RecogVal << std::endl;
     if ( m_header->RecogVal != 970401)
         throw terrasolid_error("Header identifier was not '970401', is this a TerraSolid .bin file?");
 
 
     setNumPoints(m_header->PntCnt);
 
-    m_haveColor = (m_header->Color==1);
-    m_haveTime = (m_header->Time==1);
+    m_haveColor = (m_header->Color != 0);
+    m_haveTime = (m_header->Time != 0);
     m_format = static_cast<TERRASOLID_Format_Type>(m_header->HdrVersion);
     
     
@@ -121,17 +120,7 @@ Reader::Reader(const Options& options)
     m_offset = 56;
     const Schema& schema = getSchema();
     m_size = schema.getByteSize();
-    
-    // std::cout << "format: " << m_format << std::endl;
-    // std::cout << "OrgX: " << m_header->OrgX << std::endl;
-    // std::cout << "OrgY: " << m_header->OrgY << std::endl;
-    // std::cout << "OrgZ: " << m_header->OrgZ << std::endl;
-    // std::cout << "Units: " << m_header->Units << std::endl;
-    // std::cout << "Time: " << m_header->Time << std::endl;
-    // std::cout << "Color: " << m_header->Color << std::endl;
-    // std::cout << "Count: " << m_header->PntCnt << std::endl;
-   
-    // getSchemaRef().dump();
+
     delete stream;
 }    
 
@@ -139,6 +128,18 @@ Reader::Reader(const Options& options)
 void Reader::initialize()
 {
     pdal::Reader::initialize();
+
+    log()->get(logDEBUG3) << "TerraSolid Reader::initialize format: " << m_format << std::endl;
+    log()->get(logDEBUG3) << "OrgX: " << m_header->OrgX << std::endl;
+    log()->get(logDEBUG3) << "OrgY: " << m_header->OrgY << std::endl;
+    log()->get(logDEBUG3) << "OrgZ: " << m_header->OrgZ << std::endl;
+    log()->get(logDEBUG3) << "Units: " << m_header->Units << std::endl;
+    log()->get(logDEBUG3) << "Time: " << m_header->Time << std::endl;
+    log()->get(logDEBUG3) << "Color: " << m_header->Color << std::endl;
+    log()->get(logDEBUG3) << "Count: " << m_header->PntCnt << std::endl;
+    log()->get(logDEBUG3) << "RecogVal: " << m_header->RecogVal << std::endl;
+
+    
 }
 
 
@@ -380,8 +381,6 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     }
 
     delete[] buf;
-
-    // data.setSpatialBounds( lasHeader.getBounds() );
 
     return numPoints;
 }
