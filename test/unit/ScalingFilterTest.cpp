@@ -37,7 +37,7 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/ReprojectionFilter.hpp>
-#include <pdal/filters/ScalingFilter.hpp>
+#include <pdal/filters/Scaling.hpp>
 #include <pdal/StageIterator.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
         pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
 
         // convert to doubles, use internal scale factor
-        pdal::filters::ScalingFilter scalingFilter(reader);
+        pdal::filters::Scaling scalingFilter(reader);
         scalingFilter.initialize();
 
         const pdal::Schema& schema = scalingFilter.getSchema();

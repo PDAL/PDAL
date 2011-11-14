@@ -32,12 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/ScalingFilter.hpp>
+#include <pdal/filters/Scaling.hpp>
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/filters/ScalingFilterIterator.hpp>
 
 #include <iostream>
 #include <map>
@@ -343,33 +342,33 @@ void ScalingFilterBase::processBuffer(const PointBuffer& srcData, PointBuffer& d
 
 pdal::StageSequentialIterator* ScalingFilterBase::createSequentialIterator() const
 {
-    return new ScalingFilterSequentialIterator(*this);
+    return new pdal::filters::iterators::sequential::Scaling(*this);
 }
 
 
 // ------------------------------------------------------------------------
 
 
-ScalingFilter::ScalingFilter(Stage& prevStage, const Options& options)
+Scaling::Scaling(Stage& prevStage, const Options& options)
     : ScalingFilterBase(prevStage, false, options)
 {
 }
 
 
-ScalingFilter::ScalingFilter(Stage& prevStage)
+Scaling::Scaling(Stage& prevStage)
     : ScalingFilterBase(prevStage, false)
 {
 }
 
 
-ScalingFilter::ScalingFilter(Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ)
+Scaling::Scaling(Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ)
     : ScalingFilterBase(prevStage, false, scaleX, offsetX, scaleY, offsetY, scaleZ, offsetZ)
 {
     return;
 }
 
 
-const Options ScalingFilter::getDefaultOptions() const
+const Options Scaling::getDefaultOptions() const
 {
     Options options;
     return options;
@@ -378,29 +377,68 @@ const Options ScalingFilter::getDefaultOptions() const
 // ------------------------------------------------------------------------
 
 
-DescalingFilter::DescalingFilter(Stage& prevStage, const Options& options)
+Descaling::Descaling(Stage& prevStage, const Options& options)
     : ScalingFilterBase(prevStage, true, options)
 {
 }
 
 
-DescalingFilter::DescalingFilter(Stage& prevStage)
+Descaling::Descaling(Stage& prevStage)
     : ScalingFilterBase(prevStage, true)
 {
 }
 
 
-DescalingFilter::DescalingFilter(Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ)
+Descaling::Descaling(Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ)
     : ScalingFilterBase(prevStage, true, scaleX, offsetX, scaleY, offsetY, scaleZ, offsetZ)
 {
     return;
 }
 
 
-const Options DescalingFilter::getDefaultOptions() const
+const Options Descaling::getDefaultOptions() const
 {
     static Options options;
     return options;
 }
+
+
+namespace iterators { namespace sequential {
+
+
+Scaling::Scaling(const pdal::filters::ScalingFilterBase& filter)
+    : pdal::FilterSequentialIterator(filter)
+    , m_scalingFilter(filter)
+{
+    return;
+}
+
+
+boost::uint32_t Scaling::readBufferImpl(PointBuffer& dstData)
+{
+    Schema srcSchema(m_scalingFilter.getPrevStage().getSchema());
+    PointBuffer srcData(srcSchema, dstData.getCapacity());
+    const boost::uint32_t numRead = getPrevIterator().read(srcData);
+
+    m_scalingFilter.processBuffer(srcData, dstData);
+
+    return numRead;
+}
+
+
+boost::uint64_t Scaling::skipImpl(boost::uint64_t count)
+{
+    getPrevIterator().skip(count);
+    return count;
+}
+
+
+bool Scaling::atEndImpl() const
+{
+    return getPrevIterator().atEnd();
+}
+
+} } // iterators::sequential
+
 
 } } // namespaces

@@ -37,7 +37,7 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/ReprojectionFilter.hpp>
-#include <pdal/filters/ScalingFilter.hpp>
+#include <pdal/filters/Scaling.hpp>
 #include <pdal/StageIterator.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -134,9 +134,9 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
 
         pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
 
-        pdal::filters::ScalingFilter scalingFilter(reader);
+        pdal::filters::Scaling scalingFilter(reader);
         pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, out_ref);
-        pdal::filters::DescalingFilter descalingFilter(reprojectionFilter);
+        pdal::filters::Descaling descalingFilter(reprojectionFilter);
         
         descalingFilter.initialize();
 
@@ -171,9 +171,9 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
         pdal::Option opt2("out_srs", out_ref.getWKT());
         pdal::Options opts(opt2);
 
-        pdal::filters::ScalingFilter scalingFilter(reader);
+        pdal::filters::Scaling scalingFilter(reader);
         pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, opts);
-        pdal::filters::DescalingFilter descalingFilter(reprojectionFilter);
+        pdal::filters::Descaling descalingFilter(reprojectionFilter);
         
         descalingFilter.initialize();
 
@@ -206,12 +206,12 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
         pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
             
         // convert to doubles, use internal scale factor
-        pdal::filters::ScalingFilter scalingFilter(reader);
+        pdal::filters::Scaling scalingFilter(reader);
 
         pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, out_ref);
     
         // convert to ints, using custom scale factor
-        pdal::filters::DescalingFilter descalingFilter(reprojectionFilter, 0.000001, 0.0, 0.000001, 0.0, 0.01, 0.0);
+        pdal::filters::Descaling descalingFilter(reprojectionFilter, 0.000001, 0.0, 0.000001, 0.0, 0.01, 0.0);
         
         descalingFilter.initialize();
 
