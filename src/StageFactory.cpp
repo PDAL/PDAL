@@ -67,7 +67,7 @@
 #include <pdal/filters/Color.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Decimation.hpp>
-#include <pdal/filters/ReprojectionFilter.hpp>
+#include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
 #include <pdal/filters/Scaling.hpp>
 #include <pdal/filters/StatsFilter.hpp>
@@ -135,7 +135,7 @@ namespace pdal
     MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
     MAKE_FILTER_CREATOR(Descaling, pdal::filters::Descaling)
     MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
-    MAKE_FILTER_CREATOR(ReprojectionFilter, pdal::filters::ReprojectionFilter)
+    MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
     MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
     MAKE_FILTER_CREATOR(StatsFilter, pdal::filters::StatsFilter)
 
@@ -311,7 +311,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
     REGISTER_FILTER(Descaling, pdal::filters::Descaling);
-    REGISTER_FILTER(ReprojectionFilter, pdal::filters::ReprojectionFilter);
+    REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
     REGISTER_FILTER(Scaling, pdal::filters::Scaling);
     REGISTER_FILTER(StatsFilter, pdal::filters::StatsFilter);

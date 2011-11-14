@@ -37,6 +37,7 @@
 
 #include <pdal/pdal.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/FilterIterator.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -54,15 +55,15 @@ namespace pdal { namespace filters {
 
 class ReprojectionFilterSequentialIterator;
 
-class PDAL_DLL ReprojectionFilter : public Filter
+class PDAL_DLL Reprojection : public Filter
 {
 public:
     SET_STAGE_NAME("filters.reprojection", "Reprojection Filter")
 
-    ReprojectionFilter(Stage& prevStage, const Options&);
-    ReprojectionFilter(Stage& prevStage,
+    Reprojection(Stage& prevStage, const Options&);
+    Reprojection(Stage& prevStage,
                        const SpatialReference& outSRS);
-    ReprojectionFilter(Stage& prevStage,
+    Reprojection(Stage& prevStage,
                        const SpatialReference& inSRS,
                        const SpatialReference& outSRS);
 
@@ -97,10 +98,29 @@ private:
     TransformPtr m_transform_ptr;
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
 
-    ReprojectionFilter& operator=(const ReprojectionFilter&); // not implemented
-    ReprojectionFilter(const ReprojectionFilter&); // not implemented
+    Reprojection& operator=(const Reprojection&); // not implemented
+    Reprojection(const Reprojection&); // not implemented
 };
 
+
+namespace iterators { namespace sequential {
+
+
+class Reprojection : public pdal::FilterSequentialIterator
+{
+public:
+    Reprojection(const pdal::filters::Reprojection& filter);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+
+    const pdal::filters::Reprojection& m_reprojectionFilter;
+};
+
+
+} } // iterators::sequential
 
 } } // namespaces
 

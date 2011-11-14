@@ -324,8 +324,7 @@ set(PDAL_FILTERS_HPP
   ${PDAL_FILTERS_HEADERS}/MosaicFilter.hpp
   ${PDAL_FILTERS_HEADERS}/MosaicFilterIterator.hpp
   ${PDAL_FILTERS_HEADERS}/PointBufferCache.hpp
-  ${PDAL_FILTERS_HEADERS}/ReprojectionFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/ReprojectionFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/Reprojection.hpp
   ${PDAL_FILTERS_HEADERS}/Scaling.hpp
   ${PDAL_FILTERS_HEADERS}/StatsFilter.hpp
   ${PDAL_FILTERS_HEADERS}/StatsFilterIterator.hpp
@@ -343,8 +342,7 @@ set (PDAL_FILTERS_CPP
   ${PDAL_FILTERS_SRC}/MosaicFilter.cpp
   ${PDAL_FILTERS_SRC}/MosaicFilterIterator.cpp
   ${PDAL_FILTERS_SRC}/PointBufferCache.cpp
-  ${PDAL_FILTERS_SRC}/ReprojectionFilter.cpp
-  ${PDAL_FILTERS_SRC}/ReprojectionFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/Reprojection.cpp
   ${PDAL_FILTERS_SRC}/Scaling.cpp
   ${PDAL_FILTERS_SRC}/StatsFilter.cpp
   ${PDAL_FILTERS_SRC}/StatsFilterIterator.cpp

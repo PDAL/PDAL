@@ -32,14 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/ReprojectionFilter.hpp>
+#include <pdal/filters/Reprojection.hpp>
 
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/filters/ReprojectionFilterIterator.hpp>
+
 
 #ifdef PDAL_HAVE_GDAL
 #include <gdal.h>
@@ -82,7 +82,7 @@ namespace pdal { namespace filters {
 
 
 
-ReprojectionFilter::ReprojectionFilter(Stage& prevStage, const Options& options)
+Reprojection::Reprojection(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
     , m_outSRS(options.getValueOrThrow<pdal::SpatialReference>("out_srs"))
     , m_inferInputSRS(false)
@@ -101,8 +101,8 @@ ReprojectionFilter::ReprojectionFilter(Stage& prevStage, const Options& options)
 }
 
 
-ReprojectionFilter::ReprojectionFilter(Stage& prevStage,
-                                       const SpatialReference& outSRS)
+Reprojection::Reprojection(Stage& prevStage,
+                           const SpatialReference& outSRS)
     : Filter(prevStage, Options::none())
     , m_outSRS(outSRS)
     , m_inferInputSRS(true)
@@ -111,9 +111,9 @@ ReprojectionFilter::ReprojectionFilter(Stage& prevStage,
 }
 
 
-ReprojectionFilter::ReprojectionFilter(Stage& prevStage,
-                                       const SpatialReference& inSRS,
-                                       const SpatialReference& outSRS)
+Reprojection::Reprojection(Stage& prevStage,
+                           const SpatialReference& inSRS,
+                           const SpatialReference& outSRS)
     : Filter(prevStage, Options::none())
     , m_inSRS(inSRS)
     , m_outSRS(outSRS)
@@ -123,7 +123,7 @@ ReprojectionFilter::ReprojectionFilter(Stage& prevStage,
 }
 
 
-void ReprojectionFilter::initialize()
+void Reprojection::initialize()
 {
     Filter::initialize();
 
@@ -181,14 +181,14 @@ void ReprojectionFilter::initialize()
 }
 
 
-const Options ReprojectionFilter::getDefaultOptions() const
+const Options Reprojection::getDefaultOptions() const
 {
     Options options;
     return options;
 }
 
 
-void ReprojectionFilter::updateBounds()
+void Reprojection::updateBounds()
 {
     const Bounds<double>& oldBounds = getBounds();
 
@@ -217,7 +217,7 @@ void ReprojectionFilter::updateBounds()
 }
 
 
-void ReprojectionFilter::checkImpedance()
+void Reprojection::checkImpedance()
 {
     const Schema& schema = this->getSchema();
 
@@ -232,7 +232,7 @@ void ReprojectionFilter::checkImpedance()
 }
 
 
-void ReprojectionFilter::transform(double& x, double& y, double& z) const
+void Reprojection::transform(double& x, double& y, double& z) const
 {
 
 #ifdef PDAL_HAVE_GDAL
@@ -255,7 +255,7 @@ void ReprojectionFilter::transform(double& x, double& y, double& z) const
 }
 
 
-void ReprojectionFilter::processBuffer(PointBuffer& data) const
+void Reprojection::processBuffer(PointBuffer& data) const
 {
     const boost::uint32_t numPoints = data.getNumPoints();
 
@@ -284,9 +284,45 @@ void ReprojectionFilter::processBuffer(PointBuffer& data) const
 }
 
 
-pdal::StageSequentialIterator* ReprojectionFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* Reprojection::createSequentialIterator() const
 {
-    return new ReprojectionFilterSequentialIterator(*this);
+    return new pdal::filters::iterators::sequential::Reprojection(*this);
 }
+
+
+namespace iterators { namespace sequential {
+
+
+Reprojection::Reprojection(const pdal::filters::Reprojection& filter)
+    : pdal::FilterSequentialIterator(filter)
+    , m_reprojectionFilter(filter)
+{
+    return;
+}
+
+
+boost::uint32_t Reprojection::readBufferImpl(PointBuffer& data)
+{
+    const boost::uint32_t numRead = getPrevIterator().read(data);
+
+    m_reprojectionFilter.processBuffer(data);
+
+    return numRead;
+}
+
+
+boost::uint64_t Reprojection::skipImpl(boost::uint64_t count)
+{
+    getPrevIterator().skip(count);
+    return count;
+}
+
+
+bool Reprojection::atEndImpl() const
+{
+    return getPrevIterator().atEnd();
+}
+
+} } // namespaces
 
 } } // namespaces

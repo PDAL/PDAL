@@ -36,7 +36,7 @@
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/filters/ReprojectionFilter.hpp>
+#include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/Scaling.hpp>
 #include <pdal/StageIterator.hpp>
 #include <pdal/Schema.hpp>
@@ -44,7 +44,7 @@
 
 #include "Support.hpp"
 
-BOOST_AUTO_TEST_SUITE(ReprojectionFilterTest)
+BOOST_AUTO_TEST_SUITE(ReprojectionTest)
 
 
 #ifdef PDAL_SRS_ENABLED
@@ -72,7 +72,7 @@ static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double
 
 
 // Test reprojecting UTM 15 to DD with a filter
-BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
+BOOST_AUTO_TEST_CASE(ReprojectionTest_test_1)
 {
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
     const char* utm15_wkt = "PROJCS[\"NAD83 / UTM zone 15N\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.2572221010002,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-93],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"26915\"]]";
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
         pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
 
         pdal::filters::Scaling scalingFilter(reader);
-        pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, out_ref);
+        pdal::filters::Reprojection reprojectionFilter(scalingFilter, out_ref);
         pdal::filters::Descaling descalingFilter(reprojectionFilter);
         
         descalingFilter.initialize();
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
         pdal::Options opts(opt2);
 
         pdal::filters::Scaling scalingFilter(reader);
-        pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, opts);
+        pdal::filters::Reprojection reprojectionFilter(scalingFilter, opts);
         pdal::filters::Descaling descalingFilter(reprojectionFilter);
         
         descalingFilter.initialize();
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
         // convert to doubles, use internal scale factor
         pdal::filters::Scaling scalingFilter(reader);
 
-        pdal::filters::ReprojectionFilter reprojectionFilter(scalingFilter, out_ref);
+        pdal::filters::Reprojection reprojectionFilter(scalingFilter, out_ref);
     
         // convert to ints, using custom scale factor
         pdal::filters::Descaling descalingFilter(reprojectionFilter, 0.000001, 0.0, 0.000001, 0.0, 0.01, 0.0);
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(test_impedence_mismatch)
     bool ok = false;
     try
     {
-        pdal::filters::ReprojectionFilter filter(reader, out_ref);
+        pdal::filters::Reprojection filter(reader, out_ref);
         filter.initialize();
         ok = false;
     }
