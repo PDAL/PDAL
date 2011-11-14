@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(test_two_iters_with_cache)
     pdal::drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
 
-    pdal::filters::CacheFilter cache(reader, 1, 355);
+    pdal::filters::Cache cache(reader, 1, 355);
 
     cache.initialize();
 

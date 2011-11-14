@@ -38,7 +38,7 @@
 #include <pdal/pdal.hpp>
 
 #include <pdal/Filter.hpp>
-//#include <pdal/FilterIterator.hpp>
+#include <pdal/FilterIterator.hpp>
 
 namespace pdal {
 
@@ -55,14 +55,14 @@ namespace filters {
 //   - we only cache on 'blockSize' boundaries
 //   - we only look into the cache if 1 point is being requested
 //
-class PDAL_DLL CacheFilter : public Filter
+class PDAL_DLL Cache : public Filter
 {
 public:
     SET_STAGE_NAME("filters.cache", "Cache Filter")
 
-    CacheFilter(Stage& prevStage, const Options&);
-    CacheFilter(Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
-    ~CacheFilter();
+    Cache(Stage& prevStage, const Options&);
+    Cache(Stage& prevStage, boost::uint32_t numBlocks, boost::uint32_t blockSize);
+    ~Cache();
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -117,10 +117,44 @@ private:
     boost::uint32_t m_maxCacheBlocks;
     boost::uint32_t m_cacheBlockSize;
 
-    CacheFilter& operator=(const CacheFilter&); // not implemented
-    CacheFilter(const CacheFilter&); // not implemented
+    Cache& operator=(const Cache&); // not implemented
+    Cache(const Cache&); // not implemented
 };
 
+namespace iterators { namespace sequential {
+
+class Cache : public pdal::FilterSequentialIterator
+{
+public:
+    Cache(const pdal::filters::Cache& filter);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+
+    const pdal::filters::Cache& m_filter;
+};
+
+} } // iterators::sequential
+
+
+namespace iterators { namespace random {
+
+class Cache : public pdal::FilterRandomIterator
+{
+public:
+    Cache(const pdal::filters::Cache& filter);
+
+private:
+    boost::uint64_t seekImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+
+    const pdal::filters::Cache& m_filter;
+};
+
+
+} } // iterators::random
 
 } } // namespaces
 

@@ -128,7 +128,7 @@ namespace pdal
     //
     MAKE_FILTER_CREATOR(Attribute, pdal::filters::Attribute)
     MAKE_FILTER_CREATOR(ByteSwap, pdal::filters::ByteSwap)
-    MAKE_FILTER_CREATOR(CacheFilter, pdal::filters::CacheFilter)
+    MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
     MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
     MAKE_FILTER_CREATOR(ColorFilter, pdal::filters::ColorFilter)
     MAKE_FILTER_CREATOR(CropFilter, pdal::filters::CropFilter)
@@ -305,7 +305,7 @@ void StageFactory::registerKnownFilters()
 {
     REGISTER_FILTER(Attribute, pdal::filters::Attribute);
     REGISTER_FILTER(ByteSwap, pdal::filters::ByteSwap);
-    REGISTER_FILTER(CacheFilter, pdal::filters::CacheFilter);
+    REGISTER_FILTER(Cache, pdal::filters::Cache);
     REGISTER_FILTER(Chipper, pdal::filters::Chipper);
     REGISTER_FILTER(ColorFilter, pdal::filters::ColorFilter);
     REGISTER_FILTER(CropFilter, pdal::filters::CropFilter);

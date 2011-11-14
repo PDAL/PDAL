@@ -35,12 +35,11 @@
 #include <pdal/filters/CacheFilter.hpp>
 
 #include <pdal/filters/PointBufferCache.hpp>
-#include <pdal/filters/CacheFilterIterator.hpp>
 
 namespace pdal { namespace filters {
 
 
-CacheFilter::CacheFilter(Stage& prevStage, const Options& options)
+Cache::Cache(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
     , m_numPointsRequested(0)
     , m_numPointsRead(0)
@@ -53,7 +52,7 @@ CacheFilter::CacheFilter(Stage& prevStage, const Options& options)
 
 
 // cache block size is measured in Points, not bytes
-CacheFilter::CacheFilter(Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
+Cache::Cache(Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
     : Filter(prevStage, Options::none())
     , m_numPointsRequested(0)
     , m_numPointsRead(0)
@@ -65,13 +64,13 @@ CacheFilter::CacheFilter(Stage& prevStage, boost::uint32_t maxCacheBlocks, boost
 }
 
 
-CacheFilter::~CacheFilter()
+Cache::~Cache()
 {
     delete m_cache;
 }
 
 
-void CacheFilter::initialize()
+void Cache::initialize()
 {
     Filter::initialize();
 
@@ -80,7 +79,7 @@ void CacheFilter::initialize()
 }
 
 
-const Options CacheFilter::getDefaultOptions() const
+const Options Cache::getDefaultOptions() const
 {
     Options options;
     Option max_cache_blocks("max_cache_blocks", 1);
@@ -91,13 +90,13 @@ const Options CacheFilter::getDefaultOptions() const
 }
 
 
-boost::uint32_t CacheFilter::getCacheBlockSize() const
+boost::uint32_t Cache::getCacheBlockSize() const
 {
     return m_cacheBlockSize;
 }
 
 
-void CacheFilter::addToCache(boost::uint64_t pointIndex, const PointBuffer& data) const
+void Cache::addToCache(boost::uint64_t pointIndex, const PointBuffer& data) const
 {
     PointBuffer* block = new PointBuffer(data.getSchema(), m_cacheBlockSize);
     block->copyPointsFast(0, 0, data, m_cacheBlockSize);
@@ -108,7 +107,7 @@ void CacheFilter::addToCache(boost::uint64_t pointIndex, const PointBuffer& data
 }
 
 
-const PointBuffer* CacheFilter::lookupInCache(boost::uint64_t pointIndex) const
+const PointBuffer* Cache::lookupInCache(boost::uint64_t pointIndex) const
 {
     const boost::uint64_t blockNum = pointIndex / m_cacheBlockSize;
 
@@ -118,7 +117,7 @@ const PointBuffer* CacheFilter::lookupInCache(boost::uint64_t pointIndex) const
 }
 
 
-void CacheFilter::getCacheStats(boost::uint64_t& numCacheLookupMisses,
+void Cache::getCacheStats(boost::uint64_t& numCacheLookupMisses,
                                 boost::uint64_t& numCacheLookupHits,
                                 boost::uint64_t& numCacheInsertMisses,
                                 boost::uint64_t& numCacheInsertHits) const
@@ -130,7 +129,7 @@ void CacheFilter::getCacheStats(boost::uint64_t& numCacheLookupMisses,
 }
 
 
-void CacheFilter::resetCache(boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
+void Cache::resetCache(boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
 {
     m_maxCacheBlocks = maxCacheBlocks;
     m_cacheBlockSize = cacheBlockSize;
@@ -138,41 +137,189 @@ void CacheFilter::resetCache(boost::uint32_t maxCacheBlocks, boost::uint32_t cac
 }
 
 
-void CacheFilter::resetCache()
+void Cache::resetCache()
 {
     delete m_cache;
     m_cache = new PointBufferCache(m_maxCacheBlocks);
 }
 
 
-boost::uint64_t CacheFilter::getNumPointsRequested() const
+boost::uint64_t Cache::getNumPointsRequested() const
 {
     return m_numPointsRequested;
 }
 
 
-boost::uint64_t CacheFilter::getNumPointsRead() const
+boost::uint64_t Cache::getNumPointsRead() const
 {
     return m_numPointsRead;
 }
 
 
-void CacheFilter::updateStats(boost::uint64_t numRead, boost::uint64_t numRequested) const
+void Cache::updateStats(boost::uint64_t numRead, boost::uint64_t numRequested) const
 {
     m_numPointsRead += numRead;
     m_numPointsRequested += numRequested;
 }
 
 
-pdal::StageSequentialIterator* CacheFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* Cache::createSequentialIterator() const
 {
-    return new CacheFilterSequentialIterator(*this);
+    return new pdal::filters::iterators::sequential::Cache(*this);
 }
 
 
-pdal::StageRandomIterator* CacheFilter::createRandomIterator() const
+pdal::StageRandomIterator* Cache::createRandomIterator() const
 {
-    return new CacheFilterRandomIterator(*this);
+    return new pdal::filters::iterators::random::Cache(*this);
 }
 
+
+namespace iterators { namespace sequential {
+
+
+Cache::Cache(const pdal::filters::Cache& filter)
+    : pdal::FilterSequentialIterator(filter)
+    , m_filter(filter)
+{
+    return;
+}
+
+
+boost::uint64_t Cache::skipImpl(boost::uint64_t count)
+{
+    getPrevIterator().skip(count);
+    return count;
+}
+
+
+bool Cache::atEndImpl() const
+{
+    return getPrevIterator().atEnd();
+}
+
+
+boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
+{
+    const boost::uint32_t cacheBlockSize = m_filter.getCacheBlockSize();
+
+    const boost::uint64_t currentPointIndex = getIndex();
+
+    // for now, we only read from the cache if they are asking for one point
+    // (this avoids the problem of an N-point request needing more than one
+    // cached block to satisfy it)
+    if (data.getCapacity() != 1)
+    {
+        const boost::uint32_t numRead = getPrevIterator().read(data);
+
+        // if they asked for a full block and we got a full block,
+        // and the block we got is properly aligned and not already cached,
+        // then let's cache it!
+        const bool isCacheable = (data.getCapacity() == cacheBlockSize) && 
+                                 (numRead == cacheBlockSize) && 
+                                 (currentPointIndex % cacheBlockSize == 0);
+        if (isCacheable && (m_filter.lookupInCache(currentPointIndex) == NULL))
+        {
+            m_filter.addToCache(currentPointIndex, data);
+        }
+
+        m_filter.updateStats(numRead, data.getCapacity());
+
+        return numRead;
+    }
+
+    // they asked for just one point -- first, check Mister Cache
+    const PointBuffer* block = m_filter.lookupInCache(currentPointIndex);
+    if (block != NULL)
+    {
+        // A hit! A palpable hit!
+        data.copyPointFast(0,  currentPointIndex % cacheBlockSize, *block);
+        
+        m_filter.updateStats(0, 1);
+
+        return 1;
+    }
+
+    // Not in the cache, so do a normal read :-(
+    const boost::uint32_t numRead = getPrevIterator().read(data);
+    m_filter.updateStats(numRead, numRead);
+
+    return numRead;
+}
+} } // iterators::sequential
+
+
+namespace iterators { namespace random {
+
+
+
+Cache::Cache(const pdal::filters::Cache& filter)
+    : pdal::FilterRandomIterator(filter)
+    , m_filter(filter)
+{
+    return;
+}
+
+
+boost::uint64_t Cache::seekImpl(boost::uint64_t count)
+{
+    return getPrevIterator().seek(count);
+}
+
+
+// BUG: this duplicates the code above
+boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
+{
+    const boost::uint32_t cacheBlockSize = m_filter.getCacheBlockSize();
+
+    const boost::uint64_t currentPointIndex = getIndex();
+
+    // for now, we only read from the cache if they are asking for one point
+    // (this avoids the problem of an N-point request needing more than one
+    // cached block to satisfy it)
+    if (data.getCapacity() != 1)
+    {
+        const boost::uint32_t numRead = getPrevIterator().read(data);
+
+        // if they asked for a full block and we got a full block,
+        // and the block we got is properly aligned and not already cached,
+        // then let's cache it!
+        const bool isCacheable = (data.getCapacity() == cacheBlockSize) && 
+                                 (numRead == cacheBlockSize) && 
+                                 (currentPointIndex % cacheBlockSize == 0);
+        if (isCacheable && (m_filter.lookupInCache(currentPointIndex) == NULL))
+        {
+            m_filter.addToCache(currentPointIndex, data);
+        }
+
+        m_filter.updateStats(numRead, data.getCapacity());
+
+        return numRead;
+    }
+
+    // they asked for just one point -- first, check Mister Cache
+    const PointBuffer* block = m_filter.lookupInCache(currentPointIndex);
+    if (block != NULL)
+    {
+        // A hit! A palpable hit!
+        data.copyPointFast(0,  currentPointIndex % cacheBlockSize, *block);
+        
+        m_filter.updateStats(0, 1);
+
+        return 1;
+    }
+
+    // Not in the cache, so do a normal read :-(
+    const boost::uint32_t numRead = getPrevIterator().read(data);
+    m_filter.updateStats(numRead, numRead);
+
+    return numRead;
+}
+
+
+} } // iterators::random
+
+
+
+    
 } } // namespaces
