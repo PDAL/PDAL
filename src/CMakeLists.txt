@@ -341,7 +341,6 @@ set(PDAL_FILTERS_HPP
 
 set (PDAL_FILTERS_CPP 
   ${PDAL_FILTERS_SRC}/AttributeFilter.cpp
-  ${PDAL_FILTERS_SRC}/AttributeFilterIterator.cpp
   ${PDAL_FILTERS_SRC}/ByteSwapFilter.cpp
   ${PDAL_FILTERS_SRC}/ByteSwapFilterIterator.cpp
   ${PDAL_FILTERS_SRC}/CacheFilter.cpp

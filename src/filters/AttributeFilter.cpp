@@ -111,4 +111,38 @@ pdal::StageSequentialIterator* Attribute::createSequentialIterator() const
     return new pdal::filters::iterators::sequential::Attribute(*this);
 }
 
-} } // namespaces
+namespace iterators { namespace sequential {
+
+Attribute::Attribute(const pdal::filters::Attribute& filter)
+    : pdal::FilterSequentialIterator(filter)
+    , m_attributeFilter(filter)
+{
+    return;
+}
+
+
+boost::uint32_t Attribute::readBufferImpl(PointBuffer& data)
+{
+    const boost::uint32_t numRead = getPrevIterator().read(data);
+
+    m_attributeFilter.processBuffer(data);
+
+    return numRead;
+}
+
+
+boost::uint64_t Attribute::skipImpl(boost::uint64_t count)
+{
+    getPrevIterator().skip(count);
+    return count;
+}
+
+
+bool Attribute::atEndImpl() const
+{
+    return getPrevIterator().atEnd();
+}
+
+} } // iterators::sequential
+
+} } // pdal::filters
