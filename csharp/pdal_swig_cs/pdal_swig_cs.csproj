@@ -95,6 +95,7 @@
     <Compile Include="Filter.cs" />
     <Compile Include="LasReader.cs" />
     <Compile Include="LasWriter.cs" />
+    <Compile Include="LogLevel.cs" />
     <Compile Include="MetadataRecord.cs" />
     <Compile Include="MultiFilter.cs" />
     <Compile Include="Option.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="PointCountType.cs" />
     <Compile Include="PointFormat.cs" />
     <Compile Include="PointIndexes.cs" />
+    <Compile Include="PointPositions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Range_double.cs" />
     <Compile Include="Reader.cs" />
@@ -135,9 +137,9 @@
     <Compile Include="SWIGTYPE_p_p_unsigned_char.cs" />
     <Compile Include="SWIGTYPE_p_std__istream.cs" />
     <Compile Include="SWIGTYPE_p_std__ostream.cs" />
-    <Compile Include="SWIGTYPE_p_std__ostringstream.cs" />
     <Compile Include="SWIGTYPE_p_std__string.cs" />
     <Compile Include="SWIGTYPE_p_std__vectorT_pdal__drivers__las__VariableLengthRecord_t.cs" />
+    <Compile Include="SWIGTYPE_p_std__vectorT_pdal__Option_t.cs" />
     <Compile Include="SWIGTYPE_p_std__vectorT_pdal__StageBase_p_t.cs" />
     <Compile Include="SWIGTYPE_p_std__vectorT_pdal__Stage_p_t.cs" />
     <Compile Include="SWIGTYPE_p_std__vectorT_RangeT_double_t_t.cs" />
