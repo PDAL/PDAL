@@ -32,14 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/InPlaceReprojectionFilter.hpp>
+#include <pdal/filters/InPlaceReprojection.hpp>
 
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/filters/InPlaceReprojectionFilterIterator.hpp>
 
 #ifdef PDAL_HAVE_GDAL
 #include <gdal.h>
@@ -82,7 +81,7 @@ namespace pdal { namespace filters {
 
 
 
-InPlaceReprojectionFilter::InPlaceReprojectionFilter(Stage& prevStage, const Options& options)
+InPlaceReprojection::InPlaceReprojection(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
     , m_outSRS(options.getValueOrThrow<pdal::SpatialReference>("out_srs"))
     , m_inferInputSRS(false)
@@ -110,7 +109,7 @@ InPlaceReprojectionFilter::InPlaceReprojectionFilter(Stage& prevStage, const Opt
 }
 
 
-void InPlaceReprojectionFilter::initialize()
+void InPlaceReprojection::initialize()
 {
     Filter::initialize();
 
@@ -132,7 +131,7 @@ void InPlaceReprojectionFilter::initialize()
     if (result != OGRERR_NONE) 
     {
         std::ostringstream msg; 
-        msg << "Could not import input spatial reference for InPlaceReprojectionFilter:: " 
+        msg << "Could not import input spatial reference for InPlaceReprojection:: " 
             << CPLGetLastErrorMsg() << " code: " << result 
             << " wkt: '" << m_inSRS.getWKT() << "'";
         throw std::runtime_error(msg.str());
@@ -142,7 +141,7 @@ void InPlaceReprojectionFilter::initialize()
     if (result != OGRERR_NONE) 
     {
         std::ostringstream msg; 
-        msg << "Could not import output spatial reference for InPlaceReprojectionFilter:: " 
+        msg << "Could not import output spatial reference for InPlaceReprojection:: " 
             << CPLGetLastErrorMsg() << " code: " << result 
             << " wkt: '" << m_outSRS.getWKT() << "'";
         std::string message(msg.str());
@@ -153,7 +152,7 @@ void InPlaceReprojectionFilter::initialize()
     if (!m_transform_ptr.get())
     {
         std::ostringstream msg; 
-        msg << "Could not construct CoordinateTransformation in InPlaceReprojectionFilter:: ";
+        msg << "Could not construct CoordinateTransformation in InPlaceReprojection:: ";
         std::string message(msg.str());
         throw std::runtime_error(message);
     }    
@@ -168,7 +167,7 @@ void InPlaceReprojectionFilter::initialize()
 }
 
 
-const Options InPlaceReprojectionFilter::getDefaultOptions() const
+const Options InPlaceReprojection::getDefaultOptions() const
 {
     Options options;
     Option in_srs("in_srs", std::string(""),"Input SRS to use to override -- fetched from previous stage if not present");
@@ -198,7 +197,7 @@ const Options InPlaceReprojectionFilter::getDefaultOptions() const
 }
 
 
-void InPlaceReprojectionFilter::updateBounds()
+void InPlaceReprojection::updateBounds()
 {
     const Bounds<double>& oldBounds = getBounds();
 
@@ -227,7 +226,7 @@ void InPlaceReprojectionFilter::updateBounds()
 }
 
 
-void InPlaceReprojectionFilter::checkImpedance()
+void InPlaceReprojection::checkImpedance()
 {
     Schema& schema = this->getSchemaRef();
 
@@ -276,7 +275,7 @@ void InPlaceReprojectionFilter::checkImpedance()
 }
 
 
-void InPlaceReprojectionFilter::transform(double& x, double& y, double& z) const
+void InPlaceReprojection::transform(double& x, double& y, double& z) const
 {
 
 #ifdef PDAL_HAVE_GDAL
@@ -298,7 +297,7 @@ void InPlaceReprojectionFilter::transform(double& x, double& y, double& z) const
     return;
 }
 
-double InPlaceReprojectionFilter::getScaledValue(PointBuffer& data, Dimension const& d, std::size_t pointIndex, boost::int32_t fieldIndex) const
+double InPlaceReprojection::getScaledValue(PointBuffer& data, Dimension const& d, std::size_t pointIndex, boost::int32_t fieldIndex) const
 {
     double output(0.0);
         
@@ -361,7 +360,7 @@ double InPlaceReprojectionFilter::getScaledValue(PointBuffer& data, Dimension co
     
     return output;
 }
-void InPlaceReprojectionFilter::setScaledValue(PointBuffer& data, 
+void InPlaceReprojection::setScaledValue(PointBuffer& data, 
                                                double value, 
                                                Dimension const& d, 
                                                std::size_t pointIndex, 
@@ -427,7 +426,7 @@ void InPlaceReprojectionFilter::setScaledValue(PointBuffer& data,
     
 }
 
-void InPlaceReprojectionFilter::processBuffer(PointBuffer& data) const
+void InPlaceReprojection::processBuffer(PointBuffer& data) const
 {
     const boost::uint32_t numPoints = data.getNumPoints();
 
@@ -466,9 +465,46 @@ void InPlaceReprojectionFilter::processBuffer(PointBuffer& data) const
 }
 
 
-pdal::StageSequentialIterator* InPlaceReprojectionFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* InPlaceReprojection::createSequentialIterator() const
 {
-    return new InPlaceReprojectionFilterSequentialIterator(*this);
+    return new pdal::filters::iterators::sequential::InPlaceReprojection(*this);
 }
+
+
+namespace iterators { namespace sequential {
+
+
+InPlaceReprojection::InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter)
+    : pdal::FilterSequentialIterator(filter)
+    , m_reprojectionFilter(filter)
+{
+    return;
+}
+
+
+boost::uint32_t InPlaceReprojection::readBufferImpl(PointBuffer& data)
+{
+    const boost::uint32_t numRead = getPrevIterator().read(data);
+
+    m_reprojectionFilter.processBuffer(data);
+
+    return numRead;
+}
+
+
+boost::uint64_t InPlaceReprojection::skipImpl(boost::uint64_t count)
+{
+    getPrevIterator().skip(count);
+    return count;
+}
+
+
+bool InPlaceReprojection::atEndImpl() const
+{
+    return getPrevIterator().atEnd();
+}
+
+} } // iterators::sequential
+
 
 } } // namespaces

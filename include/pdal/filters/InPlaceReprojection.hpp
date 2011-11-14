@@ -35,8 +35,8 @@
 #ifndef INCLUDED_FILTERS_INPLACEREPROJECTIONFILTER_HPP
 #define INCLUDED_FILTERS_INPLACEREPROJECTIONFILTER_HPP
 
-#include <pdal/pdal.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/FilterIterator.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -52,17 +52,16 @@ namespace pdal
 
 namespace pdal { namespace filters {
 
-class InPlaceReprojectionFilterSequentialIterator;
 
-class PDAL_DLL InPlaceReprojectionFilter : public Filter
+class PDAL_DLL InPlaceReprojection : public Filter
 {
 public:
     SET_STAGE_NAME("filters.inplacereprojection", "In place Reprojection Filter")
 
-    InPlaceReprojectionFilter(Stage& prevStage, const Options&);
-    InPlaceReprojectionFilter(Stage& prevStage,
+    InPlaceReprojection(Stage& prevStage, const Options&);
+    InPlaceReprojection(Stage& prevStage,
                        const SpatialReference& outSRS);
-    InPlaceReprojectionFilter(Stage& prevStage,
+    InPlaceReprojection(Stage& prevStage,
                        const SpatialReference& inSRS,
                        const SpatialReference& outSRS);
 
@@ -117,9 +116,28 @@ private:
     double m_z_offset;
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
     
-    InPlaceReprojectionFilter& operator=(const InPlaceReprojectionFilter&); // not implemented
-    InPlaceReprojectionFilter(const InPlaceReprojectionFilter&); // not implemented
+    InPlaceReprojection& operator=(const InPlaceReprojection&); // not implemented
+    InPlaceReprojection(const InPlaceReprojection&); // not implemented
 };
+
+namespace iterators { namespace sequential {
+
+
+class InPlaceReprojection : public pdal::FilterSequentialIterator
+{
+public:
+    InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+
+    const pdal::filters::InPlaceReprojection& m_reprojectionFilter;
+};
+
+
+} } // iterators::sequential
 
 
 } } // namespaces

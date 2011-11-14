@@ -320,8 +320,7 @@ set(PDAL_FILTERS_HPP
   ${PDAL_FILTERS_HEADERS}/Color.hpp
   ${PDAL_FILTERS_HEADERS}/Crop.hpp
   ${PDAL_FILTERS_HEADERS}/Decimation.hpp
-  ${PDAL_FILTERS_HEADERS}/InPlaceReprojectionFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/InPlaceReprojectionFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp
   ${PDAL_FILTERS_HEADERS}/MosaicFilter.hpp
   ${PDAL_FILTERS_HEADERS}/MosaicFilterIterator.hpp
   ${PDAL_FILTERS_HEADERS}/PointBufferCache.hpp
@@ -341,8 +340,7 @@ set (PDAL_FILTERS_CPP
   ${PDAL_FILTERS_SRC}/Color.cpp
   ${PDAL_FILTERS_SRC}/Crop.cpp
   ${PDAL_FILTERS_SRC}/Decimation.cpp
-  ${PDAL_FILTERS_SRC}/InPlaceReprojectionFilter.cpp
-  ${PDAL_FILTERS_SRC}/InPlaceReprojectionFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/InPlaceReprojection.cpp
   ${PDAL_FILTERS_SRC}/MosaicFilter.cpp
   ${PDAL_FILTERS_SRC}/MosaicFilterIterator.cpp
   ${PDAL_FILTERS_SRC}/PointBufferCache.cpp

@@ -36,7 +36,7 @@
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/filters/InPlaceReprojectionFilter.hpp>
+#include <pdal/filters/InPlaceReprojection.hpp>
 #include <pdal/StageIterator.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
     // options.add(y_offset);
     // options.add(z_offset);
 
-        pdal::filters::InPlaceReprojectionFilter reprojectionFilter(reader, options);
+        pdal::filters::InPlaceReprojection reprojectionFilter(reader, options);
         
         reprojectionFilter.initialize();
 
