@@ -32,16 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/CropFilter.hpp>
+#include <pdal/filters/Crop.hpp>
 
-#include <pdal/filters/CropFilterIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <sstream>
 
 namespace pdal { namespace filters {
 
 
-CropFilter::CropFilter(Stage& prevStage, const Options& options)
+Crop::Crop(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
     , m_bounds(options.getValueOrThrow<Bounds<double> >("bounds"))
 {
@@ -49,7 +48,7 @@ CropFilter::CropFilter(Stage& prevStage, const Options& options)
 }
 
 
-CropFilter::CropFilter(Stage& prevStage, Bounds<double> const& bounds)
+Crop::Crop(Stage& prevStage, Bounds<double> const& bounds)
     : Filter(prevStage, Options::none())
     , m_bounds(bounds)
 {
@@ -57,7 +56,7 @@ CropFilter::CropFilter(Stage& prevStage, Bounds<double> const& bounds)
 }
 
 
-void CropFilter::initialize()
+void Crop::initialize()
 {
     Filter::initialize();
 
@@ -70,7 +69,7 @@ void CropFilter::initialize()
 }
 
 
-const Options CropFilter::getDefaultOptions() const
+const Options Crop::getDefaultOptions() const
 {
     Options options;
     Option bounds("bounds",Bounds<double>(),"bounds to crop to");
@@ -79,14 +78,14 @@ const Options CropFilter::getDefaultOptions() const
 }
 
 
-const Bounds<double>& CropFilter::getBounds() const
+const Bounds<double>& Crop::getBounds() const
 {
     return m_bounds;
 }
 
 
 // append all points from src buffer to end of dst buffer, based on the our bounds
-boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const
+boost::uint32_t Crop::processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const
 {
     const Schema& schema = dstData.getSchema();
 
@@ -162,10 +161,75 @@ boost::uint32_t CropFilter::processBuffer(PointBuffer& dstData, const PointBuffe
 }
 
 
-pdal::StageSequentialIterator* CropFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* Crop::createSequentialIterator() const
 {
-    return new CropFilterSequentialIterator(*this);
+    return new pdal::filters::iterators::sequential::Crop(*this);
 }
 
+
+namespace iterators { namespace sequential {
+
+
+Crop::Crop(const pdal::filters::Crop& filter)
+    : pdal::FilterSequentialIterator(filter)
+    , m_cropFilter(filter)
+{
+    return;
+}
+
+
+boost::uint64_t Crop::skipImpl(boost::uint64_t count)
+{
+    return naiveSkipImpl(count);
+}
+
+
+boost::uint32_t Crop::readBufferImpl(PointBuffer& dstData)
+{
+    // The client has asked us for dstData.getCapacity() points.
+    // We will read from our previous stage until we get that amount (or
+    // until the previous stage runs out of points).
+
+    boost::uint32_t numPointsNeeded = dstData.getCapacity();
+    assert(dstData.getNumPoints() == 0);
+
+    while (numPointsNeeded > 0)
+    {
+        if (getPrevIterator().atEnd()) break;
+
+        // set up buffer to be filled by prev stage
+        PointBuffer srcData(dstData.getSchema(), numPointsNeeded);
+
+        // read from prev stage
+        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+        assert(numSrcPointsRead == srcData.getNumPoints());
+        assert(numSrcPointsRead <= numPointsNeeded);
+
+        // we got no data, and there is no more to get -- exit the loop
+        if (numSrcPointsRead == 0) break;
+
+        // copy points from src (prev stage) into dst (our stage), 
+        // based on the CropFilter's rules (i.e. its bounds)
+        const boost::uint32_t numPointsProcessed = m_cropFilter.processBuffer(dstData, srcData);
+
+        numPointsNeeded -= numPointsProcessed;
+    }
+
+    const boost::uint32_t numPointsAchieved = dstData.getNumPoints();
+
+    return numPointsAchieved;
+}
+
+
+bool Crop::atEndImpl() const
+{
+    // we don't have a fixed point point --
+    // we are at the end only when our source is at the end
+    const StageSequentialIterator& iter = getPrevIterator();
+    return iter.atEnd();
+}
+
+
+} } // iterators::sequential
 
 } } // namespaces

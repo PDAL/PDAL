@@ -48,17 +48,15 @@ namespace pdal
 
 namespace pdal { namespace filters {
 
-class CropFilterSequentialIterator;
-
 // removes any points outside of the given range
 // updates the header accordingly
-class PDAL_DLL CropFilter : public Filter
+class PDAL_DLL Crop : public Filter
 {
 public:
     SET_STAGE_NAME("filters.crop", "Crop Filter")
 
-    CropFilter(Stage& prevStage, const Options&);
-    CropFilter(Stage& prevStage, Bounds<double> const& bounds);
+    Crop(Stage& prevStage, const Options&);
+    Crop(Stage& prevStage, Bounds<double> const& bounds);
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -82,10 +80,29 @@ public:
 private:
     Bounds<double> m_bounds;
 
-    CropFilter& operator=(const CropFilter&); // not implemented
-    CropFilter(const CropFilter&); // not implemented
+    Crop& operator=(const Crop&); // not implemented
+    Crop(const Crop&); // not implemented
 };
 
+
+namespace iterators { namespace sequential {
+
+
+class Crop : public pdal::FilterSequentialIterator
+{
+public:
+    Crop(const pdal::filters::Crop& filter);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+
+    const pdal::filters::Crop& m_cropFilter;
+};
+
+
+} } // namespaces
 
 } } // namespaces
 

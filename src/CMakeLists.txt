@@ -318,8 +318,7 @@ set(PDAL_FILTERS_HPP
   ${PDAL_FILTERS_HEADERS}/Cache.hpp
   ${PDAL_FILTERS_HEADERS}/Chipper.hpp
   ${PDAL_FILTERS_HEADERS}/Color.hpp
-  ${PDAL_FILTERS_HEADERS}/CropFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/CropFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/Crop.hpp
   ${PDAL_FILTERS_HEADERS}/DecimationFilter.hpp
   ${PDAL_FILTERS_HEADERS}/DecimationFilterIterator.hpp
   ${PDAL_FILTERS_HEADERS}/InPlaceReprojectionFilter.hpp
@@ -341,8 +340,7 @@ set (PDAL_FILTERS_CPP
   ${PDAL_FILTERS_SRC}/Cache.cpp
   ${PDAL_FILTERS_SRC}/Chipper.cpp
   ${PDAL_FILTERS_SRC}/Color.cpp
-  ${PDAL_FILTERS_SRC}/CropFilter.cpp
-  ${PDAL_FILTERS_SRC}/CropFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/Crop.cpp
   ${PDAL_FILTERS_SRC}/DecimationFilter.cpp
   ${PDAL_FILTERS_SRC}/DecimationFilterIterator.cpp
   ${PDAL_FILTERS_SRC}/InPlaceReprojectionFilter.cpp
