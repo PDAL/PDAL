@@ -32,22 +32,72 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
-#include <boost/cstdint.hpp>
+#ifndef INCLUDED_FILTERS_DECIMATIONFILTER_HPP
+#define INCLUDED_FILTERS_DECIMATIONFILTER_HPP
 
-#include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/faux/Writer.hpp>
-#include <pdal/filters/Color.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/FilterIterator.hpp>
 
-using namespace pdal;
-
-BOOST_AUTO_TEST_SUITE(ColorFilterTest)
-
-BOOST_AUTO_TEST_CASE(test1)
-{
-    // BUG: tbd
-
-    return;
+namespace pdal { 
+    class PointBuffer;
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+namespace pdal { namespace filters {
+
+
+// we keep only 1 out of every step points; if step=100, we get 1% of the file
+class PDAL_DLL Decimation : public Filter
+{
+public:
+    SET_STAGE_NAME("filters.decimation", "Decimation Filter")
+
+    Decimation(Stage& prevStage, const Options&);
+    Decimation(Stage& prevStage, boost::uint32_t step);
+
+    virtual void initialize();
+    virtual const Options getDefaultOptions() const;
+
+    bool supportsIterator (StageIteratorType t) const
+    {   
+        if (t == StageIterator_Sequential ) return true;
+
+        return false;
+    }
+    
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+
+    boost::uint32_t getStep() const;
+
+    boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData, boost::uint64_t srcStartIndex) const;
+
+private:
+    boost::uint32_t m_step;
+
+    Decimation& operator=(const Decimation&); // not implemented
+    Decimation(const Decimation&); // not implemented
+};
+
+
+namespace iterators { namespace sequential {
+
+
+class Decimation : public pdal::FilterSequentialIterator
+{
+public:
+    Decimation(const pdal::filters::Decimation& filter);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+
+    const pdal::filters::Decimation& m_filter;
+};
+
+
+} } // namespaces
+
+} } // namespaces
+
+#endif

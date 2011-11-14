@@ -32,22 +32,69 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/test/unit_test.hpp>
-#include <boost/cstdint.hpp>
+#ifndef INCLUDED_FILTERS_MOSAICFILTER_HPP
+#define INCLUDED_FILTERS_MOSAICFILTER_HPP
 
-#include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/faux/Writer.hpp>
-#include <pdal/filters/Color.hpp>
+#include <pdal/pdal.hpp>
 
-using namespace pdal;
+#include <vector>
 
-BOOST_AUTO_TEST_SUITE(ColorFilterTest)
+#include <pdal/MultiFilter.hpp>
+#include <pdal/MultiFilterIterator.hpp>
+#include <pdal/StageIterator.hpp>
 
-BOOST_AUTO_TEST_CASE(test1)
+
+namespace pdal { namespace filters {
+
+
+// this doesn't derive from Stage since it takes more than one stage as input
+class PDAL_DLL Mosaic : public MultiFilter
 {
-    // BUG: tbd
+public:
+    SET_STAGE_NAME("filters.mosaic", "Mosaic Filter")
 
-    return;
-}
+    // entries may not be null
+    // vector.size() must be > 0
+    Mosaic(const std::vector<Stage*>& prevStages, const Options&);
 
-BOOST_AUTO_TEST_SUITE_END()
+    virtual void initialize();
+    virtual const Options getDefaultOptions() const;
+    
+    bool supportsIterator (StageIteratorType t) const
+    {   
+        if (t == StageIterator_Sequential ) return true;
+        if (t == StageIterator_Random) return false; // BUG: could be true
+
+        return false;
+    }
+    
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+
+private:
+    Mosaic& operator=(const Mosaic&); // not implemented
+    Mosaic(const Mosaic&); // not implemented
+};
+
+
+
+namespace iterators { namespace sequential {
+
+class Mosaic : public pdal::MultiFilterSequentialIterator
+{
+public:
+    Mosaic(const pdal::filters::Mosaic& filter);
+    ~Mosaic();
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+};
+
+
+} } // iterators::sequential
+
+} } // namespaces
+
+#endif

@@ -60,19 +60,19 @@
 #include <pdal/drivers/oci/Writer.hpp>
 #endif
 
-#include <pdal/filters/AttributeFilter.hpp>
-#include <pdal/filters/ByteSwapFilter.hpp>
-#include <pdal/filters/CacheFilter.hpp>
+#include <pdal/filters/Attribute.hpp>
+#include <pdal/filters/ByteSwap.hpp>
+#include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
-#include <pdal/filters/ColorFilter.hpp>
-#include <pdal/filters/CropFilter.hpp>
-#include <pdal/filters/DecimationFilter.hpp>
-#include <pdal/filters/ReprojectionFilter.hpp>
-#include <pdal/filters/InPlaceReprojectionFilter.hpp>
-#include <pdal/filters/ScalingFilter.hpp>
-#include <pdal/filters/StatsFilter.hpp>
+#include <pdal/filters/Color.hpp>
+#include <pdal/filters/Crop.hpp>
+#include <pdal/filters/Decimation.hpp>
+#include <pdal/filters/Reprojection.hpp>
+#include <pdal/filters/InPlaceReprojection.hpp>
+#include <pdal/filters/Scaling.hpp>
+#include <pdal/filters/Stats.hpp>
 
-#include <pdal/filters/MosaicFilter.hpp>
+#include <pdal/filters/Mosaic.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -126,23 +126,23 @@ namespace pdal
     //
     // define the functions to create the filters
     //
-    MAKE_FILTER_CREATOR(AttributeFilter, pdal::filters::AttributeFilter)
-    MAKE_FILTER_CREATOR(ByteSwapFilter, pdal::filters::ByteSwapFilter)
-    MAKE_FILTER_CREATOR(CacheFilter, pdal::filters::CacheFilter)
+    MAKE_FILTER_CREATOR(Attribute, pdal::filters::Attribute)
+    MAKE_FILTER_CREATOR(ByteSwap, pdal::filters::ByteSwap)
+    MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
     MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
-    MAKE_FILTER_CREATOR(ColorFilter, pdal::filters::ColorFilter)
-    MAKE_FILTER_CREATOR(CropFilter, pdal::filters::CropFilter)
-    MAKE_FILTER_CREATOR(DecimationFilter, pdal::filters::DecimationFilter)
-    MAKE_FILTER_CREATOR(DescalingFilter, pdal::filters::DescalingFilter)
-    MAKE_FILTER_CREATOR(InPlaceReprojectionFilter, pdal::filters::InPlaceReprojectionFilter)
-    MAKE_FILTER_CREATOR(ReprojectionFilter, pdal::filters::ReprojectionFilter)
-    MAKE_FILTER_CREATOR(ScalingFilter, pdal::filters::ScalingFilter)
-    MAKE_FILTER_CREATOR(StatsFilter, pdal::filters::StatsFilter)
+    MAKE_FILTER_CREATOR(Color, pdal::filters::Color)
+    MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
+    MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
+    MAKE_FILTER_CREATOR(Descaling, pdal::filters::Descaling)
+    MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
+    MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
+    MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
+    MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
 
     //
     // define the functions to create the multifilters
     //
-    MAKE_MULTIFILTER_CREATOR(MosaicFilter, pdal::filters::MosaicFilter)
+    MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
 
     //
     // define the functions to create the writers
@@ -303,24 +303,24 @@ void StageFactory::registerKnownReaders()
 
 void StageFactory::registerKnownFilters()
 {
-    REGISTER_FILTER(AttributeFilter, pdal::filters::AttributeFilter);
-    REGISTER_FILTER(ByteSwapFilter, pdal::filters::ByteSwapFilter);
-    REGISTER_FILTER(CacheFilter, pdal::filters::CacheFilter);
+    REGISTER_FILTER(Attribute, pdal::filters::Attribute);
+    REGISTER_FILTER(ByteSwap, pdal::filters::ByteSwap);
+    REGISTER_FILTER(Cache, pdal::filters::Cache);
     REGISTER_FILTER(Chipper, pdal::filters::Chipper);
-    REGISTER_FILTER(ColorFilter, pdal::filters::ColorFilter);
-    REGISTER_FILTER(CropFilter, pdal::filters::CropFilter);
-    REGISTER_FILTER(DecimationFilter, pdal::filters::DecimationFilter);
-    REGISTER_FILTER(DescalingFilter, pdal::filters::DescalingFilter);
-    REGISTER_FILTER(ReprojectionFilter, pdal::filters::ReprojectionFilter);
-    REGISTER_FILTER(InPlaceReprojectionFilter, pdal::filters::InPlaceReprojectionFilter);
-    REGISTER_FILTER(ScalingFilter, pdal::filters::ScalingFilter);
-    REGISTER_FILTER(StatsFilter, pdal::filters::StatsFilter);
+    REGISTER_FILTER(Color, pdal::filters::Color);
+    REGISTER_FILTER(Crop, pdal::filters::Crop);
+    REGISTER_FILTER(Decimation, pdal::filters::Decimation);
+    REGISTER_FILTER(Descaling, pdal::filters::Descaling);
+    REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
+    REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
+    REGISTER_FILTER(Scaling, pdal::filters::Scaling);
+    REGISTER_FILTER(Stats, pdal::filters::Stats);
 }
 
 
 void StageFactory::registerKnownMultiFilters()
 {   
-    REGISTER_MULTIFILTER(MosaicFilter, pdal::filters::MosaicFilter);
+    REGISTER_MULTIFILTER(Mosaic, pdal::filters::Mosaic);
 }
 
 

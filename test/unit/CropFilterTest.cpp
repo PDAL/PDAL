@@ -37,7 +37,7 @@
 
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
-#include <pdal/filters/CropFilter.hpp>
+#include <pdal/filters/Crop.hpp>
 
 using namespace pdal;
 
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_crop)
     
     pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
-    pdal::filters::CropFilter filter(reader, dstBounds);
+    pdal::filters::Crop filter(reader, dstBounds);
     BOOST_CHECK(filter.getDescription() == "Crop Filter");
     pdal::drivers::faux::Writer writer(filter, Options::none());
     writer.initialize();

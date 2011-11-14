@@ -37,8 +37,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/filters/StatsFilter.hpp>
-#include <pdal/filters/StatsFilterIterator.hpp>
+#include <pdal/filters/Stats.hpp>
 
 #ifdef PDAL_COMPILER_GCC
 #pragma GCC diagnostic ignored "-Wfloat-equal"
@@ -53,7 +52,7 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Constant);
 
-    pdal::filters::StatsFilter filter(reader, Options::none());
+    pdal::filters::Stats filter(reader, Options::none());
     BOOST_CHECK_EQUAL(filter.getName(), "filters.stats");
     BOOST_CHECK_EQUAL(filter.getDescription(), "Statistics Filter");
     filter.initialize();

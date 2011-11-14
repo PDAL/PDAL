@@ -46,11 +46,10 @@
 #include <pdal/drivers/oci/Reader.hpp>
 #endif
 
-#include <pdal/filters/ByteSwapFilter.hpp>
-#include <pdal/filters/CacheFilter.hpp>
+#include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
-#include <pdal/filters/ReprojectionFilter.hpp>
-#include <pdal/filters/ScalingFilter.hpp>
+#include <pdal/filters/Reprojection.hpp>
+#include <pdal/filters/Scaling.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 

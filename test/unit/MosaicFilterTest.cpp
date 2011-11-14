@@ -38,7 +38,7 @@
 #include <pdal/StageIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/filters/MosaicFilter.hpp>
+#include <pdal/filters/Mosaic.hpp>
 
 using namespace pdal;
 
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test1)
     vec.push_back(&reader2);
     vec.push_back(&reader3);
 
-    pdal::filters::MosaicFilter mosaic(vec, Options::none());
+    pdal::filters::Mosaic mosaic(vec, Options::none());
     BOOST_CHECK(mosaic.getDescription() == "Mosaic Filter");
     mosaic.initialize();
 

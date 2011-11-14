@@ -40,8 +40,6 @@
 
 #include <pdal/filters/Chipper.hpp>
 
-#include <pdal/filters/ChipperIterator.hpp>
-
 #include <boost/scoped_ptr.hpp>
 
 #include <iostream>
@@ -484,7 +482,7 @@ pdal::StageRandomIterator* Chipper::createRandomIterator() const
 
 pdal::StageSequentialIterator* Chipper::createSequentialIterator() const
 {
-    return new ChipperSequentialIterator(*this);
+    return new pdal::filters::iterators::sequential::Chipper(*this);
 }
 
 void Chipper::checkImpedance()
@@ -502,6 +500,67 @@ void Chipper::checkImpedance()
     
     return;
 }
+
+namespace iterators { namespace sequential {
+
+
+
+Chipper::Chipper(pdal::filters::Chipper const& filter)
+    : pdal::FilterSequentialIterator(filter)
+    , m_chipper(filter)
+    , m_currentBlockId(0)
+    , m_currentPointCount(0)
+{
+    const_cast<pdal::filters::Chipper&>(m_chipper).Chip();
+    return;
+}
+
+boost::uint64_t Chipper::skipImpl(boost::uint64_t count)
+{
+    return naiveSkipImpl(count);
+}
+
+
+boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
+{
+
+    if (m_currentBlockId == m_chipper.GetBlockCount())
+        return 0; // we're done.
+
+
+    buffer.setNumPoints(0);
+
+    filters::chipper::Block const& block = m_chipper.GetBlock(m_currentBlockId);
+    std::size_t numPointsThisBlock = block.GetIDs().size();
+    m_currentPointCount = m_currentPointCount + numPointsThisBlock;
+    
+    if (buffer.getCapacity() < numPointsThisBlock)
+    {
+        // FIXME: Expand the buffer?
+        throw pdal_error("Buffer not large enough to hold block!");
+    }
+    
+    Schema const& schema = buffer.getSchema();
+    const int indexId = schema.getDimensionIndex(DimensionId::Chipper_1);
+    const int indexBlockId = schema.getDimensionIndex(DimensionId::Chipper_2);
+    block.GetBuffer(m_chipper.getPrevStage(), buffer, m_currentBlockId, indexId, indexBlockId);
+
+    buffer.setSpatialBounds(block.GetBounds());
+    m_currentBlockId++;
+    return numPointsThisBlock;
+
+}
+
+bool Chipper::atEndImpl() const
+{
+    // we don't have a fixed point point --
+    // we are at the end only when our source is at the end
+    const StageSequentialIterator& iter = getPrevIterator();
+    return iter.atEnd();
+}
+
+} } // iterators::sequential
+
 
 
 }} // namespace liblas::chipper

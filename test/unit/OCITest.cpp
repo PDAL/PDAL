@@ -42,9 +42,9 @@
 
 #include <pdal/drivers/las/Reader.hpp>
 
-#include <pdal/filters/CacheFilter.hpp>
+#include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
-#include <pdal/filters/InPlaceReprojectionFilter.hpp>
+#include <pdal/filters/InPlaceReprojection.hpp>
 
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
@@ -198,9 +198,9 @@ BOOST_AUTO_TEST_CASE(initialize)
     if (!ShouldRunTest()) return;
     
     pdal::drivers::las::Reader writer_reader(getOptions());
-    pdal::filters::CacheFilter writer_cache(writer_reader, getOptions());
+    pdal::filters::Cache writer_cache(writer_reader, getOptions());
     pdal::filters::Chipper writer_chipper(writer_cache, getOptions());
-    pdal::filters::InPlaceReprojectionFilter writer_reproj(writer_chipper, getOptions());
+    pdal::filters::InPlaceReprojection writer_reproj(writer_chipper, getOptions());
     pdal::drivers::oci::Writer writer_writer(writer_reproj, getOptions());
     
     writer_writer.initialize();

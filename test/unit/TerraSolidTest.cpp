@@ -39,7 +39,6 @@
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/terrasolid/Reader.hpp>
-#include <pdal/filters/CacheFilter.hpp>
 #include "Support.hpp"
 
 #include <iostream>

@@ -41,7 +41,7 @@
 #include <pdal/StageIterator.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/filters/StatsFilter.hpp>
+#include <pdal/filters/Stats.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
@@ -62,7 +62,7 @@ private:
     void validateSwitches(); // overrride
 
     void dumpOnePoint(const Stage&) const;
-    void dumpStats(pdal::filters::StatsFilter& filter) const;
+    void dumpStats(pdal::filters::Stats& filter) const;
     void dumpSchema(const Stage&) const;
     void dumpStage(const Stage&) const;
 
@@ -161,7 +161,7 @@ void PcInfo::dumpOnePoint(const Stage& stage) const
 }
 
 
-void PcInfo::dumpStats(pdal::filters::StatsFilter& filter) const
+void PcInfo::dumpStats(pdal::filters::Stats& filter) const
 {
 
     const Schema& schema = filter.getSchema();
@@ -234,7 +234,7 @@ int PcInfo::execute()
 
     Stage* reader = AppSupport::makeReader(readerOptions);
         
-    pdal::filters::StatsFilter* filter = new pdal::filters::StatsFilter(*reader);
+    pdal::filters::Stats* filter = new pdal::filters::Stats(*reader);
 
     filter->initialize();
 

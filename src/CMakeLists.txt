@@ -313,59 +313,35 @@ set(PDAL_FILTERS_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_FILTERS_PATH})
 set(PDAL_FILTERS_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH})
 
 set(PDAL_FILTERS_HPP
-  ${PDAL_FILTERS_HEADERS}/AttributeFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/AttributeFilterIterator.hpp
-  ${PDAL_FILTERS_HEADERS}/ByteSwapFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/ByteSwapFilterIterator.hpp
-  ${PDAL_FILTERS_HEADERS}/CacheFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/CacheFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/Attribute.hpp
+  ${PDAL_FILTERS_HEADERS}/ByteSwap.hpp
+  ${PDAL_FILTERS_HEADERS}/Cache.hpp
   ${PDAL_FILTERS_HEADERS}/Chipper.hpp
-  ${PDAL_FILTERS_HEADERS}/ChipperIterator.hpp
-  ${PDAL_FILTERS_HEADERS}/ColorFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/ColorFilterIterator.hpp
-  ${PDAL_FILTERS_HEADERS}/CropFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/CropFilterIterator.hpp
-  ${PDAL_FILTERS_HEADERS}/DecimationFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/DecimationFilterIterator.hpp
-  ${PDAL_FILTERS_HEADERS}/InPlaceReprojectionFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/InPlaceReprojectionFilterIterator.hpp
-  ${PDAL_FILTERS_HEADERS}/MosaicFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/MosaicFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/Color.hpp
+  ${PDAL_FILTERS_HEADERS}/Crop.hpp
+  ${PDAL_FILTERS_HEADERS}/Decimation.hpp
+  ${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp
+  ${PDAL_FILTERS_HEADERS}/Mosaic.hpp
   ${PDAL_FILTERS_HEADERS}/PointBufferCache.hpp
-  ${PDAL_FILTERS_HEADERS}/ReprojectionFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/ReprojectionFilterIterator.hpp
-  ${PDAL_FILTERS_HEADERS}/ScalingFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/ScalingFilterIterator.hpp
-  ${PDAL_FILTERS_HEADERS}/StatsFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/StatsFilterIterator.hpp
+  ${PDAL_FILTERS_HEADERS}/Reprojection.hpp
+  ${PDAL_FILTERS_HEADERS}/Scaling.hpp
+  ${PDAL_FILTERS_HEADERS}/Stats.hpp
 )
 
 set (PDAL_FILTERS_CPP 
-  ${PDAL_FILTERS_SRC}/AttributeFilter.cpp
-  ${PDAL_FILTERS_SRC}/AttributeFilterIterator.cpp
-  ${PDAL_FILTERS_SRC}/ByteSwapFilter.cpp
-  ${PDAL_FILTERS_SRC}/ByteSwapFilterIterator.cpp
-  ${PDAL_FILTERS_SRC}/CacheFilter.cpp
-  ${PDAL_FILTERS_SRC}/CacheFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/Attribute.cpp
+  ${PDAL_FILTERS_SRC}/ByteSwap.cpp
+  ${PDAL_FILTERS_SRC}/Cache.cpp
   ${PDAL_FILTERS_SRC}/Chipper.cpp
-  ${PDAL_FILTERS_SRC}/ChipperIterator.cpp
-  ${PDAL_FILTERS_SRC}/ColorFilter.cpp
-  ${PDAL_FILTERS_SRC}/ColorFilterIterator.cpp
-  ${PDAL_FILTERS_SRC}/CropFilter.cpp
-  ${PDAL_FILTERS_SRC}/CropFilterIterator.cpp
-  ${PDAL_FILTERS_SRC}/DecimationFilter.cpp
-  ${PDAL_FILTERS_SRC}/DecimationFilterIterator.cpp
-  ${PDAL_FILTERS_SRC}/InPlaceReprojectionFilter.cpp
-  ${PDAL_FILTERS_SRC}/InPlaceReprojectionFilterIterator.cpp
-  ${PDAL_FILTERS_SRC}/MosaicFilter.cpp
-  ${PDAL_FILTERS_SRC}/MosaicFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/Color.cpp
+  ${PDAL_FILTERS_SRC}/Crop.cpp
+  ${PDAL_FILTERS_SRC}/Decimation.cpp
+  ${PDAL_FILTERS_SRC}/InPlaceReprojection.cpp
+  ${PDAL_FILTERS_SRC}/Mosaic.cpp
   ${PDAL_FILTERS_SRC}/PointBufferCache.cpp
-  ${PDAL_FILTERS_SRC}/ReprojectionFilter.cpp
-  ${PDAL_FILTERS_SRC}/ReprojectionFilterIterator.cpp
-  ${PDAL_FILTERS_SRC}/ScalingFilter.cpp
-  ${PDAL_FILTERS_SRC}/ScalingFilterIterator.cpp
-  ${PDAL_FILTERS_SRC}/StatsFilter.cpp
-  ${PDAL_FILTERS_SRC}/StatsFilterIterator.cpp
+  ${PDAL_FILTERS_SRC}/Reprojection.cpp
+  ${PDAL_FILTERS_SRC}/Scaling.cpp
+  ${PDAL_FILTERS_SRC}/Stats.cpp
 )
 
 list (APPEND PDAL_CPP ${PDAL_FILTERS_CPP} )

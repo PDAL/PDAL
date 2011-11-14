@@ -38,7 +38,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageIterator.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/filters/CacheFilter.hpp>
+#include <pdal/filters/Cache.hpp>
 
 using namespace pdal;
 
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test1)
     Bounds<double> srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
     pdal::drivers::faux::Reader reader(srcBounds, 10000, pdal::drivers::faux::Reader::Constant);
 
-    pdal::filters::CacheFilter cache(reader, 2, 1024);
+    pdal::filters::Cache cache(reader, 2, 1024);
     BOOST_CHECK(cache.getDescription() == "Cache Filter");
     cache.initialize();
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
     Options opts;
     opts.add(opt1);
     opts.add(opt2);
-    pdal::filters::CacheFilter cache(reader, opts);
+    pdal::filters::Cache cache(reader, opts);
     BOOST_CHECK(cache.getDescription() == "Cache Filter");
     cache.initialize();
 

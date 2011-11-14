@@ -38,7 +38,7 @@
 
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
-#include <pdal/filters/ByteSwapFilter.hpp>
+#include <pdal/filters/ByteSwap.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     boost::uint32_t buffer_size = 20;
     pdal::drivers::faux::Reader reader(srcBounds, buffer_size, pdal::drivers::faux::Reader::Ramp);
 
-    pdal::filters::ByteSwapFilter filter(reader);
+    pdal::filters::ByteSwap filter(reader);
     BOOST_CHECK_EQUAL(filter.getName(), "filters.byteswap");
 
     filter.initialize();

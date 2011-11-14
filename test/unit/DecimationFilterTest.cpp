@@ -40,7 +40,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
-#include <pdal/filters/DecimationFilter.hpp>
+#include <pdal/filters/Decimation.hpp>
 
 using namespace pdal;
 
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
 
     pdal::drivers::faux::Reader reader(srcBounds, 1000, pdal::drivers::faux::Reader::Random);
 
-    pdal::filters::DecimationFilter filter(reader, 10);
+    pdal::filters::Decimation filter(reader, 10);
     BOOST_CHECK(filter.getDescription() == "Decimation Filter");
     filter.initialize();
 
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
 
     pdal::Option opt("step", "10");
     pdal::Options opts(opt);
-    pdal::filters::DecimationFilter filter(reader, opts);
+    pdal::filters::Decimation filter(reader, opts);
     BOOST_CHECK(filter.getDescription() == "Decimation Filter");
     filter.initialize();
 
