@@ -97,6 +97,7 @@
     <Compile Include="LasWriter.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="MetadataRecord.cs" />
+    <Compile Include="MosaicFilter.cs" />
     <Compile Include="MultiFilter.cs" />
     <Compile Include="Option.cs" />
     <Compile Include="Options.cs" />
@@ -126,6 +127,7 @@
     <Compile Include="std_vector_Dimension.cs" />
     <Compile Include="std_vector_double.cs" />
     <Compile Include="std_vector_Range_double.cs" />
+    <Compile Include="std_vector_Stage.cs" />
     <Compile Include="std_vector_u8.cs" />
     <Compile Include="Support.cs" />
     <Compile Include="SWIGTYPE_p_boost__property_tree__ptree.cs" />
@@ -141,7 +143,6 @@
     <Compile Include="SWIGTYPE_p_std__vectorT_pdal__drivers__las__VariableLengthRecord_t.cs" />
     <Compile Include="SWIGTYPE_p_std__vectorT_pdal__Option_t.cs" />
     <Compile Include="SWIGTYPE_p_std__vectorT_pdal__StageBase_p_t.cs" />
-    <Compile Include="SWIGTYPE_p_std__vectorT_pdal__Stage_p_t.cs" />
     <Compile Include="SWIGTYPE_p_std__vectorT_RangeT_double_t_t.cs" />
     <Compile Include="SWIGTYPE_p_unsigned_char.cs" />
     <Compile Include="SWIGTYPE_p_unsigned_int.cs" />

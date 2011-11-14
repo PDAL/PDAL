@@ -53,6 +53,8 @@ namespace pdal_swig_test
 
          TestLasWriter w = new TestLasWriter();
 
+         TestMosaicker m = new TestMosaicker();
+
          return 0;
       }
    }
@@ -63,7 +65,13 @@ namespace pdal_swig_test
       {
       }
 
-      public static void Assert(bool b)
+      protected bool closeTo(double a, double b)
+      {
+          double delta = Math.Abs(a - b);
+          return (delta / b <= 0.01);
+      }
+
+      protected static void userAssert(bool b)
       {
          if (!b)
          {

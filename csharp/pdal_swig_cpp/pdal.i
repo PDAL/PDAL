@@ -58,6 +58,7 @@
 #include "pdal/Vector.hpp"
 
 #include "pdal/filters/DecimationFilter.hpp"
+#include "pdal/filters/MosaicFilter.hpp"
 #include "pdal/filters/ScalingFilter.hpp"
 #include "pdal/drivers/las/Support.hpp"
 #include "pdal/drivers/las/VariableLengthRecord.hpp"
@@ -71,6 +72,7 @@ namespace std
    %template(std_vector_double) vector<double>;
    %template(std_vector_Dimension) vector<pdal::Dimension>;
    %template(std_vector_Range_double) vector<pdal::Range<double> >;
+   %template(std_vector_Stage) vector<pdal::Stage*>;
 
    typedef unsigned int size_t;
 };
@@ -155,6 +157,10 @@ namespace boost
 HOLD_REFERENCE(pdal::filters::DescalingFilter, Stage)
 PASS_REFERENCE_CTOR(pdal::filters::DescalingFilter, Stage, prevStage)
 %include "pdal/filters/ScalingFilter.hpp"
+
+HOLD_REFERENCE(pdal::filters::MosaicFilter, Stage)
+PASS_REFERENCE_CTOR(pdal::filters::MosiacFilter, Stage, prevStage)
+%include "pdal/filters/MosaicFilter.hpp"
 
 HOLD_REFERENCE( pdal::drivers::las::Writer, Stage)
 PASS_REFERENCE_CTOR(pdal::drivers::las::Writer, Stage, prevStage)

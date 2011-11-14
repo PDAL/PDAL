@@ -80,6 +80,7 @@
     <Compile Include="TestDimension.cs" />
     <Compile Include="TestLasReader.cs" />
     <Compile Include="TestLasWriter.cs" />
+    <Compile Include="TestMosaicker.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\pdal_swig_cs\pdal_swig_cs.csproj">
