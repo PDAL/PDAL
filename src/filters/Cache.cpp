@@ -32,15 +32,153 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/CacheFilterIterator.hpp>
+#include <pdal/filters/Cache.hpp>
 
-#include <pdal/filters/CacheFilter.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/filters/PointBufferCache.hpp>
 
 namespace pdal { namespace filters {
 
 
-CacheFilterSequentialIterator::CacheFilterSequentialIterator(const CacheFilter& filter)
+Cache::Cache(Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+    , m_numPointsRequested(0)
+    , m_numPointsRead(0)
+    , m_cache(NULL)
+    , m_maxCacheBlocks(options.getValueOrThrow<boost::uint32_t>("max_cache_blocks"))
+    , m_cacheBlockSize(options.getValueOrThrow<boost::uint32_t>("cache_block_size"))
+{
+    return;
+}
+
+
+// cache block size is measured in Points, not bytes
+Cache::Cache(Stage& prevStage, boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
+    : Filter(prevStage, Options::none())
+    , m_numPointsRequested(0)
+    , m_numPointsRead(0)
+    , m_cache(NULL)
+    , m_maxCacheBlocks(maxCacheBlocks)
+    , m_cacheBlockSize(cacheBlockSize)
+{
+    return;
+}
+
+
+Cache::~Cache()
+{
+    delete m_cache;
+}
+
+
+void Cache::initialize()
+{
+    Filter::initialize();
+
+    resetCache();
+    return;
+}
+
+
+const Options Cache::getDefaultOptions() const
+{
+    Options options;
+    Option max_cache_blocks("max_cache_blocks", 1);
+    Option cache_block_size("cache_block_size", 32768);
+    options.add(max_cache_blocks);
+    options.add(cache_block_size);
+    return options;
+}
+
+
+boost::uint32_t Cache::getCacheBlockSize() const
+{
+    return m_cacheBlockSize;
+}
+
+
+void Cache::addToCache(boost::uint64_t pointIndex, const PointBuffer& data) const
+{
+    PointBuffer* block = new PointBuffer(data.getSchema(), m_cacheBlockSize);
+    block->copyPointsFast(0, 0, data, m_cacheBlockSize);
+    
+    m_cache->insert(pointIndex, block);
+
+    return;
+}
+
+
+const PointBuffer* Cache::lookupInCache(boost::uint64_t pointIndex) const
+{
+    const boost::uint64_t blockNum = pointIndex / m_cacheBlockSize;
+
+    const PointBuffer* block = m_cache->lookup(blockNum);
+
+    return block;
+}
+
+
+void Cache::getCacheStats(boost::uint64_t& numCacheLookupMisses,
+                                boost::uint64_t& numCacheLookupHits,
+                                boost::uint64_t& numCacheInsertMisses,
+                                boost::uint64_t& numCacheInsertHits) const
+{
+    m_cache->getCacheStats(numCacheLookupMisses,
+                           numCacheLookupHits,
+                           numCacheInsertMisses,
+                           numCacheInsertHits);
+}
+
+
+void Cache::resetCache(boost::uint32_t maxCacheBlocks, boost::uint32_t cacheBlockSize)
+{
+    m_maxCacheBlocks = maxCacheBlocks;
+    m_cacheBlockSize = cacheBlockSize;
+    resetCache();
+}
+
+
+void Cache::resetCache()
+{
+    delete m_cache;
+    m_cache = new PointBufferCache(m_maxCacheBlocks);
+}
+
+
+boost::uint64_t Cache::getNumPointsRequested() const
+{
+    return m_numPointsRequested;
+}
+
+
+boost::uint64_t Cache::getNumPointsRead() const
+{
+    return m_numPointsRead;
+}
+
+
+void Cache::updateStats(boost::uint64_t numRead, boost::uint64_t numRequested) const
+{
+    m_numPointsRead += numRead;
+    m_numPointsRequested += numRequested;
+}
+
+
+pdal::StageSequentialIterator* Cache::createSequentialIterator() const
+{
+    return new pdal::filters::iterators::sequential::Cache(*this);
+}
+
+
+pdal::StageRandomIterator* Cache::createRandomIterator() const
+{
+    return new pdal::filters::iterators::random::Cache(*this);
+}
+
+
+namespace iterators { namespace sequential {
+
+
+Cache::Cache(const pdal::filters::Cache& filter)
     : pdal::FilterSequentialIterator(filter)
     , m_filter(filter)
 {
@@ -48,20 +186,20 @@ CacheFilterSequentialIterator::CacheFilterSequentialIterator(const CacheFilter& 
 }
 
 
-boost::uint64_t CacheFilterSequentialIterator::skipImpl(boost::uint64_t count)
+boost::uint64_t Cache::skipImpl(boost::uint64_t count)
 {
     getPrevIterator().skip(count);
     return count;
 }
 
 
-bool CacheFilterSequentialIterator::atEndImpl() const
+bool Cache::atEndImpl() const
 {
     return getPrevIterator().atEnd();
 }
 
 
-boost::uint32_t CacheFilterSequentialIterator::readBufferImpl(PointBuffer& data)
+boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
 {
     const boost::uint32_t cacheBlockSize = m_filter.getCacheBlockSize();
 
@@ -108,10 +246,14 @@ boost::uint32_t CacheFilterSequentialIterator::readBufferImpl(PointBuffer& data)
 
     return numRead;
 }
+} } // iterators::sequential
+
+
+namespace iterators { namespace random {
 
 
 
-CacheFilterRandomIterator::CacheFilterRandomIterator(const CacheFilter& filter)
+Cache::Cache(const pdal::filters::Cache& filter)
     : pdal::FilterRandomIterator(filter)
     , m_filter(filter)
 {
@@ -119,14 +261,14 @@ CacheFilterRandomIterator::CacheFilterRandomIterator(const CacheFilter& filter)
 }
 
 
-boost::uint64_t CacheFilterRandomIterator::seekImpl(boost::uint64_t count)
+boost::uint64_t Cache::seekImpl(boost::uint64_t count)
 {
     return getPrevIterator().seek(count);
 }
 
 
 // BUG: this duplicates the code above
-boost::uint32_t CacheFilterRandomIterator::readBufferImpl(PointBuffer& data)
+boost::uint32_t Cache::readBufferImpl(PointBuffer& data)
 {
     const boost::uint32_t cacheBlockSize = m_filter.getCacheBlockSize();
 
@@ -174,4 +316,10 @@ boost::uint32_t CacheFilterRandomIterator::readBufferImpl(PointBuffer& data)
     return numRead;
 }
 
+
+} } // iterators::random
+
+
+
+    
 } } // namespaces

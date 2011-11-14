@@ -62,7 +62,7 @@
 
 #include <pdal/filters/Attribute.hpp>
 #include <pdal/filters/ByteSwap.hpp>
-#include <pdal/filters/CacheFilter.hpp>
+#include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
 #include <pdal/filters/ColorFilter.hpp>
 #include <pdal/filters/CropFilter.hpp>

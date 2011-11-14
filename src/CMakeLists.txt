@@ -315,7 +315,7 @@ set(PDAL_FILTERS_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH})
 set(PDAL_FILTERS_HPP
   ${PDAL_FILTERS_HEADERS}/Attribute.hpp
   ${PDAL_FILTERS_HEADERS}/ByteSwap.hpp
-  ${PDAL_FILTERS_HEADERS}/CacheFilter.hpp
+  ${PDAL_FILTERS_HEADERS}/Cache.hpp
   ${PDAL_FILTERS_HEADERS}/Chipper.hpp
   ${PDAL_FILTERS_HEADERS}/ChipperIterator.hpp
   ${PDAL_FILTERS_HEADERS}/ColorFilter.hpp
@@ -340,7 +340,7 @@ set(PDAL_FILTERS_HPP
 set (PDAL_FILTERS_CPP 
   ${PDAL_FILTERS_SRC}/Attribute.cpp
   ${PDAL_FILTERS_SRC}/ByteSwap.cpp
-  ${PDAL_FILTERS_SRC}/CacheFilter.cpp
+  ${PDAL_FILTERS_SRC}/Cache.cpp
   ${PDAL_FILTERS_SRC}/Chipper.cpp
   ${PDAL_FILTERS_SRC}/ChipperIterator.cpp
   ${PDAL_FILTERS_SRC}/ColorFilter.cpp

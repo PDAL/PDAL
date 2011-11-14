@@ -38,7 +38,7 @@
 #include <pdal/StageIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/filters/CacheFilter.hpp>
+#include <pdal/filters/Cache.hpp>
 #include "Support.hpp"
 
 using namespace pdal;

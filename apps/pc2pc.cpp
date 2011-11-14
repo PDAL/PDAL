@@ -46,7 +46,7 @@
 #include <pdal/drivers/oci/Reader.hpp>
 #endif
 
-#include <pdal/filters/CacheFilter.hpp>
+#include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
 #include <pdal/filters/ReprojectionFilter.hpp>
 #include <pdal/filters/ScalingFilter.hpp>
