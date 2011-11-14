@@ -47,6 +47,7 @@
 #include <vector>
 
 #include <pdal/Filter.hpp>
+#include <pdal/FilterIterator.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/PointBuffer.hpp>
 
@@ -200,6 +201,28 @@ private:
     Chipper& operator=(const Chipper&); // not implemented
     Chipper(const Chipper&); // not implemented
 };
+
+namespace iterators { namespace sequential {
+
+class Chipper : public pdal::FilterSequentialIterator
+{
+public:
+    Chipper(pdal::filters::Chipper const& filter);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+
+    pdal::filters::Chipper const& m_chipper;
+    std::size_t m_currentBlockId;
+    boost::uint64_t m_currentPointCount;
+    
+};
+
+} } // iterators::sequential
+    
+
 
 } // namespace filters
 
