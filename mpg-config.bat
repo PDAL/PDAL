@@ -14,8 +14,8 @@ set BUILD_TYPE=Debug
 :: Set some useful path variables
 ::    "utils" is where you might have libraries installed, like Boost
 ::    "dev" is where you build things yourself, like PDAL and laszip
-set UTILS_DIR=c:\utils
-set DEV_DIR=c:\dev
+set UTILS_DIR=d:\utils
+set DEV_DIR=d:\dev
 
 
 :: Where is your OSGeo4W installed?
@@ -34,15 +34,15 @@ set GLUT_DIR=%DEV_DIR%\freeglut-2.6.0-3.mp
 :: Where is LASZIP?  (can be either from OSGeo4W or your own build tree)
 rem  set LASZIP_LIBRARY=%OSGEO4W_DIR%\laszip\laszip.lib
 rem  set LASZIP_INCLUDE_DIR=%OSGEO4W_DIR%\laszip\include
-set LASZIP_LIBRARY=%DEV_DIR%\laszip\bin\Debug\laszip.lib
+set LASZIP_LIBRARY=%DEV_DIR%\laszip\bin\Debug\Debug\laszip.lib
 set LASZIP_INCLUDE_DIR=%DEV_DIR%\laszip\include
 
 
 :: Where is LIBLAS?  (can be either from OSGeo4W or your own build tree)
 rem  set LIBLAS_LIBRARY=%OSGEO4W_DIR%\lib\liblas.lib
 rem  set LIBLAS_INCLUDE_DIR=%OSGEO4W_DIR%\include
-rem set LIBLAS_LIBRARY=%DEV_DIR%\liblas\bin\Debug\Debug\liblas.lib
-rem set LIBLAS_INCLUDE_DIR=%DEV_DIR%\liblas\include
+set LIBLAS_LIBRARY=%DEV_DIR%\liblas\bin\Debug\Debug\liblas.lib
+set LIBLAS_INCLUDE_DIR=%DEV_DIR%\liblas\include
 
 
 :: Where is your PDAL build tree?
@@ -50,7 +50,7 @@ set PDAL_DIR=%DEV_DIR%\pdal
 
 
 :: Where are the OCI libraries installed?
-rem set ORACLE_HOME=%OSGEO4W_DIR%
+set ORACLE_HOME=%OSGEO4W_DIR%
 
 
 :: Set this if you are building SWIG bindings for C#.  Visual Studio
@@ -73,12 +73,12 @@ set PDAL_SWIG_BOOST_HOME=%BOOST_DIR%
 ::    SWIG_CSHARP
 cmake -G %COMPILER% ^
     -DBOOST_INCLUDEDIR=%BOOST_DIR% ^
-    -DWITH_GDAL=OFF ^
-    -DWITH_GEOTIFF=OFF ^
-    -DWITH_ORACLE=OFF ^
+    -DWITH_GDAL=ON ^
+    -DWITH_GEOTIFF=ON ^
+    -DWITH_ORACLE=ON ^
     -DWITH_LASZIP=ON ^
-    -DWITH_LIBLAS=OFF ^
-    -DWITH_FREEGLUT=OFF ^
+    -DWITH_LIBLAS=ON ^
+    -DWITH_FREEGLUT=ON ^
     -DWITH_LIBXML2=ON ^
     -DWITH_SWIG_CSHARP=ON ^
     -DFREEGLUT_LIBRARY=%FREEGLUT_DIR%\lib\freeglut.lib ^
