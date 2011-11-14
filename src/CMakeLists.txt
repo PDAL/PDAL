@@ -313,6 +313,8 @@ set(PDAL_FILTERS_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_FILTERS_PATH})
 set(PDAL_FILTERS_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH})
 
 set(PDAL_FILTERS_HPP
+  ${PDAL_FILTERS_HEADERS}/AttributeFilter.hpp
+  ${PDAL_FILTERS_HEADERS}/AttributeFilterIterator.hpp
   ${PDAL_FILTERS_HEADERS}/ByteSwapFilter.hpp
   ${PDAL_FILTERS_HEADERS}/ByteSwapFilterIterator.hpp
   ${PDAL_FILTERS_HEADERS}/CacheFilter.hpp
@@ -339,6 +341,8 @@ set(PDAL_FILTERS_HPP
 )
 
 set (PDAL_FILTERS_CPP 
+  ${PDAL_FILTERS_SRC}/AttributeFilter.cpp
+  ${PDAL_FILTERS_SRC}/AttributeFilterIterator.cpp
   ${PDAL_FILTERS_SRC}/ByteSwapFilter.cpp
   ${PDAL_FILTERS_SRC}/ByteSwapFilterIterator.cpp
   ${PDAL_FILTERS_SRC}/CacheFilter.cpp
