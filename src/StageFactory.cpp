@@ -70,7 +70,7 @@
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
 #include <pdal/filters/Scaling.hpp>
-#include <pdal/filters/StatsFilter.hpp>
+#include <pdal/filters/Stats.hpp>
 
 #include <pdal/filters/MosaicFilter.hpp>
 
@@ -137,7 +137,7 @@ namespace pdal
     MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
     MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
     MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
-    MAKE_FILTER_CREATOR(StatsFilter, pdal::filters::StatsFilter)
+    MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
 
     //
     // define the functions to create the multifilters
@@ -314,7 +314,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
     REGISTER_FILTER(Scaling, pdal::filters::Scaling);
-    REGISTER_FILTER(StatsFilter, pdal::filters::StatsFilter);
+    REGISTER_FILTER(Stats, pdal::filters::Stats);
 }
 
 

@@ -32,12 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/StatsFilter.hpp>
+#include <pdal/filters/Stats.hpp>
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/filters/StatsFilterIterator.hpp>
 
 namespace pdal { namespace filters {
 
@@ -100,21 +99,21 @@ boost::property_tree::ptree StatsCollector::toPTree() const
 //---------------------------------------------------------------------------
 
 
-StatsFilter::StatsFilter(Stage& prevStage, const Options& options)
+Stats::Stats(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
     return;
 }
 
 
-StatsFilter::StatsFilter(Stage& prevStage)
+Stats::Stats(Stage& prevStage)
     : Filter(prevStage, Options::none())
 {
     return;
 }
 
 
-StatsFilter::~StatsFilter()
+Stats::~Stats()
 {
     const std::vector<Dimension>& dims = getSchema().getDimensions();
     for (std::vector<Dimension>::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
@@ -126,7 +125,7 @@ StatsFilter::~StatsFilter()
     }
 }
 
-void StatsFilter::initialize()
+void Stats::initialize()
 {
     Filter::initialize();
 
@@ -141,14 +140,14 @@ void StatsFilter::initialize()
 }
 
 
-const Options StatsFilter::getDefaultOptions() const
+const Options Stats::getDefaultOptions() const
 {
     Options options;
     return options;
 }
 
 
-void StatsFilter::reset()
+void Stats::reset()
 {
     const std::vector<Dimension>& dims = getSchema().getDimensions();
     for (std::vector<Dimension>::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
@@ -159,14 +158,14 @@ void StatsFilter::reset()
 }
     
 
-const StatsCollector& StatsFilter::getStats(DimensionId::Id field) const
+const StatsCollector& Stats::getStats(DimensionId::Id field) const
 {
     const StatsCollector* s = m_stats.find(field)->second;
     return *s;
 }
 
 
-void StatsFilter::processBuffer(PointBuffer& data) const
+void Stats::processBuffer(PointBuffer& data) const
 {
     const boost::uint32_t numPoints = data.getNumPoints();
 
@@ -201,13 +200,13 @@ void StatsFilter::processBuffer(PointBuffer& data) const
 }
 
 
-pdal::StageSequentialIterator* StatsFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* Stats::createSequentialIterator() const
 {
-    return new StatsFilterSequentialIterator(*this);
+    return new pdal::filters::iterators::sequential::Stats(*this);
 }
 
 
-boost::property_tree::ptree StatsFilter::toStatsPTree() const
+boost::property_tree::ptree Stats::toStatsPTree() const
 {
     boost::property_tree::ptree tree;
 
@@ -236,5 +235,40 @@ boost::property_tree::ptree StatsFilter::toStatsPTree() const
     return tree;
 }
 
+
+namespace iterators { namespace sequential {
+
+
+Stats::Stats(const pdal::filters::Stats& filter)
+    : pdal::FilterSequentialIterator(filter)
+    , m_statsFilter(filter)
+{
+    return;
+}
+
+
+boost::uint32_t Stats::readBufferImpl(PointBuffer& data)
+{
+    const boost::uint32_t numRead = getPrevIterator().read(data);
+
+    m_statsFilter.processBuffer(data);
+
+    return numRead;
+}
+
+
+boost::uint64_t Stats::skipImpl(boost::uint64_t count)
+{
+    getPrevIterator().skip(count);
+    return count;
+}
+
+
+bool Stats::atEndImpl() const
+{
+    return getPrevIterator().atEnd();
+}
+
+} } // iterators::sequential
 
 } } // namespaces

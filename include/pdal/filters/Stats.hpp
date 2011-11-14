@@ -35,8 +35,9 @@
 #ifndef INCLUDED_FILTERS_STATSFILTER_HPP
 #define INCLUDED_FILTERS_STATSFILTER_HPP
 
-#include <pdal/pdal.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/FilterIterator.hpp>
+
 #include <pdal/Range.hpp>
 #include <pdal/PointBuffer.hpp>
 
@@ -70,14 +71,14 @@ private:
 
 // this is just a pass-thorugh filter, which collects some stats about the points
 // that are fed through it
-class PDAL_DLL StatsFilter : public Filter
+class PDAL_DLL Stats : public Filter
 {
 public:
     SET_STAGE_NAME("filters.stats", "Statistics Filter")
 
-    StatsFilter(Stage& prevStage, const Options&);
-    StatsFilter(Stage& prevStage);
-    ~StatsFilter();
+    Stats(Stage& prevStage, const Options&);
+    Stats(Stage& prevStage);
+    ~Stats();
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -119,10 +120,30 @@ private:
     // BUG: not threadsafe, these should maybe live in the iterator
     std::map<DimensionId::Id,StatsCollector*> m_stats; // one Stats item per field in the schema
 
-    StatsFilter& operator=(const StatsFilter&); // not implemented
-    StatsFilter(const StatsFilter&); // not implemented
+    Stats& operator=(const Stats&); // not implemented
+    Stats(const Stats&); // not implemented
 };
 
+
+
+namespace iterators { namespace sequential {
+
+
+class Stats : public pdal::FilterSequentialIterator
+{
+public:
+    Stats(const pdal::filters::Stats& filter);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+
+    const pdal::filters::Stats& m_statsFilter;
+};
+
+
+} } // iterators::sequential
 
 } } // namespaces
 
