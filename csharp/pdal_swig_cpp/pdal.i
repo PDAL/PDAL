@@ -108,6 +108,7 @@ namespace boost
 %template(Range_double) pdal::Range<double>;
 
 # not yet implemented in pdal.lib
+%ignore   pdal::StageBase::log;
 %ignore   pdal::SpatialReference::getDescription;
 %ignore   pdal::Options::remove;
 %include "pdal/SpatialReference.hpp"
