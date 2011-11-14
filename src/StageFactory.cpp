@@ -64,7 +64,7 @@
 #include <pdal/filters/ByteSwap.hpp>
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
-#include <pdal/filters/ColorFilter.hpp>
+#include <pdal/filters/Color.hpp>
 #include <pdal/filters/CropFilter.hpp>
 #include <pdal/filters/DecimationFilter.hpp>
 #include <pdal/filters/ReprojectionFilter.hpp>
@@ -130,7 +130,7 @@ namespace pdal
     MAKE_FILTER_CREATOR(ByteSwap, pdal::filters::ByteSwap)
     MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
     MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
-    MAKE_FILTER_CREATOR(ColorFilter, pdal::filters::ColorFilter)
+    MAKE_FILTER_CREATOR(Color, pdal::filters::Color)
     MAKE_FILTER_CREATOR(CropFilter, pdal::filters::CropFilter)
     MAKE_FILTER_CREATOR(DecimationFilter, pdal::filters::DecimationFilter)
     MAKE_FILTER_CREATOR(DescalingFilter, pdal::filters::DescalingFilter)
@@ -307,7 +307,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(ByteSwap, pdal::filters::ByteSwap);
     REGISTER_FILTER(Cache, pdal::filters::Cache);
     REGISTER_FILTER(Chipper, pdal::filters::Chipper);
-    REGISTER_FILTER(ColorFilter, pdal::filters::ColorFilter);
+    REGISTER_FILTER(Color, pdal::filters::Color);
     REGISTER_FILTER(CropFilter, pdal::filters::CropFilter);
     REGISTER_FILTER(DecimationFilter, pdal::filters::DecimationFilter);
     REGISTER_FILTER(DescalingFilter, pdal::filters::DescalingFilter);

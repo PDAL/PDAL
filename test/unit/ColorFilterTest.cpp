@@ -37,7 +37,7 @@
 
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
-#include <pdal/filters/ColorFilter.hpp>
+#include <pdal/filters/Color.hpp>
 
 using namespace pdal;
 

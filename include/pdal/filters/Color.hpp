@@ -32,30 +32,76 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_COLORFILTERITERATOR_HPP
-#define INCLUDED_FILTERS_COLORFILTERITERATOR_HPP
+#ifndef INCLUDED_FILTERS_COLORFILTER_HPP
+#define INCLUDED_FILTERS_COLORFILTER_HPP
 
-#include <pdal/pdal.hpp>
-
-#include <pdal/filters/ColorFilter.hpp>
+#include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
+
+namespace pdal
+{
+    class PointBuffer;
+}
 
 namespace pdal { namespace filters {
 
-
-class ColorFilterSequentialIterator : public pdal::FilterSequentialIterator
+// adds three new u8 fields (R,G,B) for the colourization of the Z axis
+// the color is done as a ramp from the declared Z min/max values in the header
+class PDAL_DLL Color : public Filter
 {
 public:
-    ColorFilterSequentialIterator(const ColorFilter& filter);
+    SET_STAGE_NAME("filters.color", "Color Filter")
+
+    Color(Stage& prevStage, const Options&);
+    Color(Stage& prevStage);
+
+    virtual void initialize();
+    virtual const Options getDefaultOptions() const;
+
+    void getColor_F32_U8(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const;
+    void getColor_F64_U16(double value, boost::uint16_t& red, boost::uint16_t& green, boost::uint16_t& blue) const;
+
+    bool supportsIterator (StageIteratorType t) const
+    {   
+        if (t == StageIterator_Sequential ) return true;
+
+        return false;
+    }
+
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+
+    void processBuffer(PointBuffer& data) const;
+
+    static void interpolateColor(double value, double minValue, double maxValue, double& red, double& green, double& blue);
+
+private:
+    void checkImpedance();
+
+    Color& operator=(const Color&); // not implemented
+    Color(const Color&); // not implemented
+};
+
+
+
+namespace iterators { namespace sequential {
+
+
+class Color : public pdal::FilterSequentialIterator
+{
+public:
+    Color(const pdal::filters::Color& filter);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const ColorFilter& m_colorFilter;
+    const pdal::filters::Color& m_colorFilter;
 };
 
+
+} } // namespaces
 
 } } // namespaces
 

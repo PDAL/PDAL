@@ -32,15 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/ColorFilter.hpp>
+#include <pdal/filters/Color.hpp>
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/filters/ColorFilterIterator.hpp>
 
 namespace pdal { namespace filters {
 
 
-ColorFilter::ColorFilter(Stage& prevStage, const Options& options)
+Color::Color(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
     checkImpedance();
@@ -49,7 +48,7 @@ ColorFilter::ColorFilter(Stage& prevStage, const Options& options)
 }
 
 
-ColorFilter::ColorFilter(Stage& prevStage)
+Color::Color(Stage& prevStage)
     : Filter(prevStage, Options::none())
 {
     checkImpedance();
@@ -58,20 +57,20 @@ ColorFilter::ColorFilter(Stage& prevStage)
 }
 
 
-void ColorFilter::initialize()
+void Color::initialize()
 {
     Filter::initialize();
 }
 
 
-const Options ColorFilter::getDefaultOptions() const
+const Options Color::getDefaultOptions() const
 {
     Options options;
     return options;
 }
 
 
-void ColorFilter::checkImpedance()
+void Color::checkImpedance()
 {
     Schema& schema = getSchemaRef();
 
@@ -98,7 +97,7 @@ void ColorFilter::checkImpedance()
 }
 
 
-void ColorFilter::processBuffer(PointBuffer& data) const
+void Color::processBuffer(PointBuffer& data) const
 {
     const boost::uint32_t numPoints = data.getNumPoints();
 
@@ -131,7 +130,7 @@ void ColorFilter::processBuffer(PointBuffer& data) const
 
 
 // static function to impute a color from within a range
-void ColorFilter::interpolateColor(double value, double minValue, double maxValue, double& red, double& green, double& blue)
+void Color::interpolateColor(double value, double minValue, double maxValue, double& red, double& green, double& blue)
 {
     // initialize to white
     red = 1.0;
@@ -176,7 +175,7 @@ void ColorFilter::interpolateColor(double value, double minValue, double maxValu
 
 
 
-void ColorFilter::getColor_F32_U8(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const
+void Color::getColor_F32_U8(float value, boost::uint8_t& red, boost::uint8_t& green, boost::uint8_t& blue) const
 {
     double fred, fgreen, fblue;
 
@@ -192,7 +191,7 @@ void ColorFilter::getColor_F32_U8(float value, boost::uint8_t& red, boost::uint8
 }
 
 
-void ColorFilter::getColor_F64_U16(double value, boost::uint16_t& red, boost::uint16_t& green, boost::uint16_t& blue) const
+void Color::getColor_F64_U16(double value, boost::uint16_t& red, boost::uint16_t& green, boost::uint16_t& blue) const
 {
     double fred, fgreen, fblue;
 
@@ -208,9 +207,45 @@ void ColorFilter::getColor_F64_U16(double value, boost::uint16_t& red, boost::ui
 }
 
 
-pdal::StageSequentialIterator* ColorFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* Color::createSequentialIterator() const
 {
-    return new ColorFilterSequentialIterator(*this);
+    return new pdal::filters::iterators::sequential::Color(*this);
 }
 
-} } // namespaces
+
+namespace iterators { namespace sequential {
+
+
+Color::Color(const pdal::filters::Color& filter)
+    : pdal::FilterSequentialIterator(filter)
+    , m_colorFilter(filter)
+{
+    return;
+}
+
+
+boost::uint32_t Color::readBufferImpl(PointBuffer& data)
+{
+    const boost::uint32_t numRead = getPrevIterator().read(data);
+
+    m_colorFilter.processBuffer(data);
+
+    return numRead;
+}
+
+
+boost::uint64_t Color::skipImpl(boost::uint64_t count)
+{
+    getPrevIterator().skip(count);
+    return count;
+}
+
+
+bool Color::atEndImpl() const
+{
+    return getPrevIterator().atEnd();
+}
+
+} } // iterators::sequential
+
+} } // pdal::filters
