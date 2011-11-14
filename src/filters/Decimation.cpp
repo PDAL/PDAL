@@ -32,15 +32,97 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/DecimationFilterIterator.hpp>
+#include <pdal/filters/Decimation.hpp>
 
-#include <pdal/filters/DecimationFilter.hpp>
 #include <pdal/PointBuffer.hpp>
 
 namespace pdal { namespace filters {
 
 
-DecimationFilterSequentialIterator::DecimationFilterSequentialIterator(const DecimationFilter& filter)
+Decimation::Decimation(Stage& prevStage, const Options& options)
+    : pdal::Filter(prevStage, options)
+    , m_step(options.getValueOrThrow<boost::uint32_t>("step"))
+{
+    return;
+}
+
+
+Decimation::Decimation(Stage& prevStage, boost::uint32_t step)
+    : Filter(prevStage, Options::none())
+    , m_step(step)
+{
+    return;
+}
+
+
+void Decimation::initialize()
+{
+    Filter::initialize();
+
+    this->setNumPoints( this->getNumPoints() / m_step );
+
+    return;
+}
+
+
+const Options Decimation::getDefaultOptions() const
+{
+    Options options;
+    return options;
+}
+
+
+boost::uint32_t Decimation::getStep() const
+{
+    return m_step;
+}
+
+
+boost::uint32_t Decimation::processBuffer(PointBuffer& dstData, const PointBuffer& srcData, boost::uint64_t srcStartIndex) const
+{
+    const boost::uint32_t numSrcPoints = srcData.getNumPoints();
+    boost::uint32_t dstIndex = dstData.getNumPoints();
+
+    boost::uint32_t numPointsAdded = 0;
+
+    boost::uint32_t srcIndex = 0;
+
+    // find start point
+    if ((srcStartIndex+srcIndex) % m_step != 0)
+    {
+        srcIndex += m_step - ( (srcStartIndex+srcIndex) % m_step ) ;
+        assert((srcStartIndex+srcIndex) % m_step == 0);
+    }
+
+    while (srcIndex < numSrcPoints)
+    {
+        assert((srcStartIndex+srcIndex) % m_step == 0);
+        
+        dstData.copyPointFast(dstIndex, srcIndex, srcData);
+        dstData.setNumPoints(dstIndex+1);
+        ++dstIndex;
+        ++numPointsAdded;
+        
+        srcIndex += m_step;
+    }
+    
+    assert(dstIndex <= dstData.getCapacity());
+
+    return numPointsAdded;
+}
+
+
+pdal::StageSequentialIterator* Decimation::createSequentialIterator() const
+{
+    return new pdal::filters::iterators::sequential::Decimation(*this);
+}
+
+
+
+namespace iterators { namespace sequential {
+
+
+Decimation::Decimation(const pdal::filters::Decimation& filter)
     : pdal::FilterSequentialIterator(filter)
     , m_filter(filter)
 {
@@ -48,7 +130,7 @@ DecimationFilterSequentialIterator::DecimationFilterSequentialIterator(const Dec
 }
 
 
-boost::uint64_t DecimationFilterSequentialIterator::skipImpl(boost::uint64_t count)
+boost::uint64_t Decimation::skipImpl(boost::uint64_t count)
 {
     //return naiveSkipImpl(count);
 
@@ -57,14 +139,14 @@ boost::uint64_t DecimationFilterSequentialIterator::skipImpl(boost::uint64_t cou
 }
 
 
-bool DecimationFilterSequentialIterator::atEndImpl() const
+bool Decimation::atEndImpl() const
 {
     const StageSequentialIterator& iter = getPrevIterator();
     return iter.atEnd();
 }
 
 
-boost::uint32_t DecimationFilterSequentialIterator::readBufferImpl(PointBuffer& dstData)
+boost::uint32_t Decimation::readBufferImpl(PointBuffer& dstData)
 {
     // The client has asked us for dstData.getCapacity() points.
     // We will read from our previous stage until we get that amount (or
@@ -101,4 +183,5 @@ boost::uint32_t DecimationFilterSequentialIterator::readBufferImpl(PointBuffer& 
 
 
 
+} } // iterators::sequential
 } } // namespaces

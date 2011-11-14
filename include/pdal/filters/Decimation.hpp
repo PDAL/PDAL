@@ -35,11 +35,8 @@
 #ifndef INCLUDED_FILTERS_DECIMATIONFILTER_HPP
 #define INCLUDED_FILTERS_DECIMATIONFILTER_HPP
 
-#include <pdal/pdal.hpp>
-//#include <pdal/export.hpp>
 #include <pdal/Filter.hpp>
-//#include <pdal/FilterIterator.hpp>
-//#include <pdal/Bounds.hpp>
+#include <pdal/FilterIterator.hpp>
 
 namespace pdal { 
     class PointBuffer;
@@ -47,16 +44,15 @@ namespace pdal {
 
 namespace pdal { namespace filters {
 
-class DecimationFilterSequentialIterator;
 
 // we keep only 1 out of every step points; if step=100, we get 1% of the file
-class PDAL_DLL DecimationFilter : public Filter
+class PDAL_DLL Decimation : public Filter
 {
 public:
     SET_STAGE_NAME("filters.decimation", "Decimation Filter")
 
-    DecimationFilter(Stage& prevStage, const Options&);
-    DecimationFilter(Stage& prevStage, boost::uint32_t step);
+    Decimation(Stage& prevStage, const Options&);
+    Decimation(Stage& prevStage, boost::uint32_t step);
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -78,10 +74,29 @@ public:
 private:
     boost::uint32_t m_step;
 
-    DecimationFilter& operator=(const DecimationFilter&); // not implemented
-    DecimationFilter(const DecimationFilter&); // not implemented
+    Decimation& operator=(const Decimation&); // not implemented
+    Decimation(const Decimation&); // not implemented
 };
 
+
+namespace iterators { namespace sequential {
+
+
+class Decimation : public pdal::FilterSequentialIterator
+{
+public:
+    Decimation(const pdal::filters::Decimation& filter);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+
+    const pdal::filters::Decimation& m_filter;
+};
+
+
+} } // namespaces
 
 } } // namespaces
 
