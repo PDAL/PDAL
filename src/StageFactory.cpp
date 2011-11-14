@@ -126,7 +126,7 @@ namespace pdal
     //
     // define the functions to create the filters
     //
-    MAKE_FILTER_CREATOR(AttributeFilter, pdal::filters::AttributeFilter)
+    MAKE_FILTER_CREATOR(Attribute, pdal::filters::Attribute)
     MAKE_FILTER_CREATOR(ByteSwapFilter, pdal::filters::ByteSwapFilter)
     MAKE_FILTER_CREATOR(CacheFilter, pdal::filters::CacheFilter)
     MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
@@ -303,7 +303,7 @@ void StageFactory::registerKnownReaders()
 
 void StageFactory::registerKnownFilters()
 {
-    REGISTER_FILTER(AttributeFilter, pdal::filters::AttributeFilter);
+    REGISTER_FILTER(Attribute, pdal::filters::Attribute);
     REGISTER_FILTER(ByteSwapFilter, pdal::filters::ByteSwapFilter);
     REGISTER_FILTER(CacheFilter, pdal::filters::CacheFilter);
     REGISTER_FILTER(Chipper, pdal::filters::Chipper);

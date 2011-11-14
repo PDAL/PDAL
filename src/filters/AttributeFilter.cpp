@@ -35,26 +35,17 @@
 #include <pdal/filters/AttributeFilter.hpp>
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/filters/AttributeFilterIterator.hpp>
 
 namespace pdal { namespace filters {
 
 
-AttributeFilter::AttributeFilter(Stage& prevStage, const Options& options)
+Attribute::Attribute(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
     return;
 }
 
-
-// AttributeFilter::AttributeFilter(Stage& prevStage)
-//     : Filter(prevStage, Options::none())
-// {
-//     return;
-// }
-
-
-void AttributeFilter::initialize()
+void Attribute::initialize()
 {
     Filter::initialize();
     
@@ -71,7 +62,7 @@ void AttributeFilter::initialize()
 }
 
 
-const Options AttributeFilter::getDefaultOptions() const
+const Options Attribute::getDefaultOptions() const
 {
     Options options;
     Option expression("expression", "");
@@ -82,7 +73,7 @@ const Options AttributeFilter::getDefaultOptions() const
 
 
 
-void AttributeFilter::processBuffer(PointBuffer& data) const
+void Attribute::processBuffer(PointBuffer& data) const
 {
     const boost::uint32_t numPoints = data.getNumPoints();
 
@@ -115,9 +106,9 @@ void AttributeFilter::processBuffer(PointBuffer& data) const
 
 
 
-pdal::StageSequentialIterator* AttributeFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* Attribute::createSequentialIterator() const
 {
-    return new AttributeFilterSequentialIterator(*this);
+    return new pdal::filters::iterators::sequential::Attribute(*this);
 }
 
 } } // namespaces

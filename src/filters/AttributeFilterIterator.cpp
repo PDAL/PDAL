@@ -32,14 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/AttributeFilterIterator.hpp>
-
 #include <pdal/filters/AttributeFilter.hpp>
 
-namespace pdal { namespace filters {
+namespace pdal { namespace filters { namespace iterators { namespace sequential {
 
 
-AttributeFilterSequentialIterator::AttributeFilterSequentialIterator(const AttributeFilter& filter)
+
+Attribute::Attribute(const pdal::filters::Attribute& filter)
     : pdal::FilterSequentialIterator(filter)
     , m_attributeFilter(filter)
 {
@@ -47,7 +46,7 @@ AttributeFilterSequentialIterator::AttributeFilterSequentialIterator(const Attri
 }
 
 
-boost::uint32_t AttributeFilterSequentialIterator::readBufferImpl(PointBuffer& data)
+boost::uint32_t Attribute::readBufferImpl(PointBuffer& data)
 {
     const boost::uint32_t numRead = getPrevIterator().read(data);
 
@@ -57,16 +56,16 @@ boost::uint32_t AttributeFilterSequentialIterator::readBufferImpl(PointBuffer& d
 }
 
 
-boost::uint64_t AttributeFilterSequentialIterator::skipImpl(boost::uint64_t count)
+boost::uint64_t Attribute::skipImpl(boost::uint64_t count)
 {
     getPrevIterator().skip(count);
     return count;
 }
 
 
-bool AttributeFilterSequentialIterator::atEndImpl() const
+bool Attribute::atEndImpl() const
 {
     return getPrevIterator().atEnd();
 }
 
-} } // namespaces
+} } } } // namespaces

@@ -36,6 +36,8 @@
 #define INCLUDED_FILTERS_ATTRIBUTEFILTER_HPP
 
 #include <pdal/Filter.hpp>
+#include <pdal/FilterIterator.hpp>
+
 
 namespace pdal
 {
@@ -79,13 +81,12 @@ namespace pdal { namespace filters {
 
 class AttributeFilterSequentialIterator;
 
-class PDAL_DLL AttributeFilter : public Filter
+class PDAL_DLL Attribute : public Filter
 {
 public:
     SET_STAGE_NAME("filters.attribute", "Attribute Filter")
 
-    AttributeFilter(Stage& prevStage, const Options&);
-    // AttributeFilter(Stage& prevStage);
+    Attribute(Stage& prevStage, const Options&);
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -104,11 +105,31 @@ public:
 
 private:
 
-    AttributeFilter& operator=(const AttributeFilter&); // not implemented
-    AttributeFilter(const AttributeFilter&); // not implemented
+    Attribute& operator=(const Attribute&); // not implemented
+    Attribute(const Attribute&); // not implemented
 };
 
 
-} } // namespaces
+namespace iterators { namespace sequential {
+    
+
+class Attribute : public pdal::FilterSequentialIterator
+{
+public:
+    Attribute(const pdal::filters::Attribute& filter);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+
+    const pdal::filters::Attribute& m_attributeFilter;
+};
+
+} } // iterators::sequential
+
+
+
+} } // pdal::filteers
 
 #endif

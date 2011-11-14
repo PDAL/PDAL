@@ -314,7 +314,6 @@ set(PDAL_FILTERS_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH})
 
 set(PDAL_FILTERS_HPP
   ${PDAL_FILTERS_HEADERS}/AttributeFilter.hpp
-  ${PDAL_FILTERS_HEADERS}/AttributeFilterIterator.hpp
   ${PDAL_FILTERS_HEADERS}/ByteSwapFilter.hpp
   ${PDAL_FILTERS_HEADERS}/ByteSwapFilterIterator.hpp
   ${PDAL_FILTERS_HEADERS}/CacheFilter.hpp
