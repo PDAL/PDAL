@@ -45,7 +45,7 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 #include <pdal/filters/Crop.hpp>
-#include <pdal/filters/MosaicFilter.hpp>
+#include <pdal/filters/Mosaic.hpp>
 
 using namespace pdal;
 
@@ -126,7 +126,7 @@ MultiFilter* demoMultiFilterCreator(const std::vector<Stage*>& prevs, const Opti
     s_demoflag = options.getOption("flag").getValue<int>();
 
     const Options optsM;
-    MultiFilter* multifilter = new pdal::filters::MosaicFilter(prevs, optsM);
+    MultiFilter* multifilter = new pdal::filters::Mosaic(prevs, optsM);
     return multifilter;
 }
 

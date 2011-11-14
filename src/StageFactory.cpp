@@ -72,7 +72,7 @@
 #include <pdal/filters/Scaling.hpp>
 #include <pdal/filters/Stats.hpp>
 
-#include <pdal/filters/MosaicFilter.hpp>
+#include <pdal/filters/Mosaic.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -142,7 +142,7 @@ namespace pdal
     //
     // define the functions to create the multifilters
     //
-    MAKE_MULTIFILTER_CREATOR(MosaicFilter, pdal::filters::MosaicFilter)
+    MAKE_MULTIFILTER_CREATOR(Mosaic, pdal::filters::Mosaic)
 
     //
     // define the functions to create the writers
@@ -320,7 +320,7 @@ void StageFactory::registerKnownFilters()
 
 void StageFactory::registerKnownMultiFilters()
 {   
-    REGISTER_MULTIFILTER(MosaicFilter, pdal::filters::MosaicFilter);
+    REGISTER_MULTIFILTER(Mosaic, pdal::filters::Mosaic);
 }
 
 

@@ -40,6 +40,7 @@
 #include <vector>
 
 #include <pdal/MultiFilter.hpp>
+#include <pdal/MultiFilterIterator.hpp>
 #include <pdal/StageIterator.hpp>
 
 
@@ -47,14 +48,14 @@ namespace pdal { namespace filters {
 
 
 // this doesn't derive from Stage since it takes more than one stage as input
-class PDAL_DLL MosaicFilter : public MultiFilter
+class PDAL_DLL Mosaic : public MultiFilter
 {
 public:
     SET_STAGE_NAME("filters.mosaic", "Mosaic Filter")
 
     // entries may not be null
     // vector.size() must be > 0
-    MosaicFilter(const std::vector<Stage*>& prevStages, const Options&);
+    Mosaic(const std::vector<Stage*>& prevStages, const Options&);
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -71,10 +72,28 @@ public:
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
 private:
-    MosaicFilter& operator=(const MosaicFilter&); // not implemented
-    MosaicFilter(const MosaicFilter&); // not implemented
+    Mosaic& operator=(const Mosaic&); // not implemented
+    Mosaic(const Mosaic&); // not implemented
 };
 
+
+
+namespace iterators { namespace sequential {
+
+class Mosaic : public pdal::MultiFilterSequentialIterator
+{
+public:
+    Mosaic(const pdal::filters::Mosaic& filter);
+    ~Mosaic();
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+};
+
+
+} } // iterators::sequential
 
 } } // namespaces
 

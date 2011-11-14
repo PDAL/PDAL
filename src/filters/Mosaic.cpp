@@ -32,28 +32,92 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/MosaicFilterIterator.hpp>
+#include <pdal/filters/Mosaic.hpp>
 
+#include <pdal/Bounds.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/filters/MosaicFilter.hpp>
 
 namespace pdal { namespace filters {
 
 
-MosaicFilterSequentialIterator::MosaicFilterSequentialIterator(const MosaicFilter& filter)
+
+Mosaic::Mosaic(const std::vector<Stage*>& prevStages, const Options& options)
+    : MultiFilter(prevStages, options)
+{
+    return;
+}
+
+
+void Mosaic::initialize()
+{
+    MultiFilter::initialize();
+
+    const std::vector<Stage*>& stages = getPrevStages();
+
+    const Stage& stage0 = *stages[0];
+    const SpatialReference& srs0 = stage0.getSpatialReference();
+    const Schema& schema0 = stage0.getSchema();
+    PointCountType pointCountType0 = stage0.getPointCountType();
+    boost::uint64_t totalPoints = stage0.getNumPoints();
+    Bounds<double> bigbox(stage0.getBounds());
+
+    // we will only mosaic if all the stages have the same core properties: SRS, schema, etc
+    for (boost::uint32_t i=1; i<stages.size(); i++)
+    {
+        Stage& stage = *(stages[i]);
+        if (stage.getSpatialReference() != srs0)
+            throw impedance_invalid("mosaicked stages must have same srs");
+        if (stage.getSchema() != schema0)
+            throw impedance_invalid("mosaicked stages must have same schema");
+        if (stage.getPointCountType() == PointCount_Unknown)
+            pointCountType0 = PointCount_Unknown;
+        
+        totalPoints += stage.getNumPoints();
+
+        bigbox.grow(stage.getBounds());
+    }
+
+    if (pointCountType0 == PointCount_Unknown)
+        totalPoints = 0;
+    
+    setCoreProperties(stage0);
+    setPointCountType(pointCountType0);
+    setNumPoints(totalPoints);
+
+    return;
+}
+
+
+const Options Mosaic::getDefaultOptions() const
+{
+    Options options;
+    return options;
+}
+
+
+pdal::StageSequentialIterator* Mosaic::createSequentialIterator() const
+{
+    return new pdal::filters::iterators::sequential::Mosaic(*this);
+}
+
+
+namespace iterators { namespace sequential {
+
+
+Mosaic::Mosaic(const pdal::filters::Mosaic& filter)
     : MultiFilterSequentialIterator(filter)
 {
     return;
 }
 
 
-MosaicFilterSequentialIterator::~MosaicFilterSequentialIterator()
+Mosaic::~Mosaic()
 {
     return;
 }
 
 
-boost::uint64_t MosaicFilterSequentialIterator::skipImpl(boost::uint64_t targetCount)
+boost::uint64_t Mosaic::skipImpl(boost::uint64_t targetCount)
 {
     boost::uint64_t count = 0;
 
@@ -80,7 +144,7 @@ boost::uint64_t MosaicFilterSequentialIterator::skipImpl(boost::uint64_t targetC
 }
 
 
-bool MosaicFilterSequentialIterator::atEndImpl() const
+bool Mosaic::atEndImpl() const
 {
     if (m_iteratorIndex == m_prevIterators.size())
         return true;
@@ -90,7 +154,7 @@ bool MosaicFilterSequentialIterator::atEndImpl() const
 }
 
 
-boost::uint32_t MosaicFilterSequentialIterator::readBufferImpl(PointBuffer& destData)
+boost::uint32_t Mosaic::readBufferImpl(PointBuffer& destData)
 {
     boost::uint32_t totalNumPointsToRead = destData.getCapacity();
     boost::uint32_t totalNumPointsRead = 0;
@@ -125,5 +189,7 @@ boost::uint32_t MosaicFilterSequentialIterator::readBufferImpl(PointBuffer& dest
     return totalNumPointsRead;
 }
 
+
+} } // iterators::sequential
 
 } } // namespaces
