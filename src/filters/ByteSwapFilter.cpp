@@ -33,8 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/filters/ByteSwapFilter.hpp>
+#include <pdal/filters/Chipper.hpp>
 
-#include <pdal/filters/ByteSwapFilterIterator.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Endian.hpp>
@@ -44,24 +44,26 @@
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
+using namespace pdal::filters::chipper;
+
 namespace pdal { namespace filters {
 
 
-ByteSwapFilter::ByteSwapFilter(Stage& prevStage, const Options& options)
+ByteSwap::ByteSwap(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
     return;
 }
 
 
-ByteSwapFilter::ByteSwapFilter(Stage& prevStage)
+ByteSwap::ByteSwap(Stage& prevStage)
     : Filter(prevStage, Options::none())
 {
     return;
 }
 
 
-void ByteSwapFilter::initialize()
+void ByteSwap::initialize()
 {
     Filter::initialize();
 
@@ -90,14 +92,14 @@ void ByteSwapFilter::initialize()
 }
 
 
-const Options ByteSwapFilter::getDefaultOptions() const
+const Options ByteSwap::getDefaultOptions() const
 {
     Options options;
     return options;
 }
 
 
-boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const
+boost::uint32_t ByteSwap::processBuffer(PointBuffer& dstData, const PointBuffer& srcData) const
 {
     const Schema& dstSchema = dstData.getSchema();
     
@@ -128,10 +130,95 @@ boost::uint32_t ByteSwapFilter::processBuffer(PointBuffer& dstData, const PointB
 }
 
 
-pdal::StageSequentialIterator* ByteSwapFilter::createSequentialIterator() const
+pdal::StageSequentialIterator* ByteSwap::createSequentialIterator() const
 {
-    return new ByteSwapFilterSequentialIterator(*this);
+    return new pdal::filters::iterators::sequential::ByteSwap(*this);
+}
+
+namespace iterators { namespace sequential {
+
+
+
+ByteSwap::ByteSwap(const pdal::filters::ByteSwap& filter)
+    : pdal::FilterSequentialIterator(filter)
+    , m_swapFilter(filter)
+{
+    return;
 }
 
 
-} } // namespaces
+boost::uint64_t ByteSwap::skipImpl(boost::uint64_t count)
+{
+    return naiveSkipImpl(count);
+}
+
+
+boost::uint32_t ByteSwap::readBufferImpl(PointBuffer& dstData)
+{
+    // The client has asked us for dstData.getCapacity() points.
+    // We will read from our previous stage until we get that amount (or
+    // until the previous stage runs out of points).
+    
+    Stage const* prevStage = &(m_swapFilter.getPrevStage());
+
+        // std::cout << "Source: " << dstData.getSchema() << std::endl;
+        // std::cout << "prev stage: " << prevStage->getSchema() << std::endl;    
+    Chipper const* chip = dynamic_cast<Chipper const*>(prevStage);
+    
+    if (chip)
+    {
+        PointBuffer srcData(dstData.getSchema(), dstData.getCapacity());
+        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+        const boost::uint32_t numPointsProcessed = m_swapFilter.processBuffer(dstData, srcData);
+                        
+        assert (numSrcPointsRead == numPointsProcessed);
+        // std::cout << "Prev stage was a chipper!" << std::endl;
+        return numPointsProcessed;
+    }
+
+    boost::uint32_t numPointsNeeded = dstData.getCapacity();
+    boost::uint32_t numPointsAchieved = 0;
+    // assert(dstData.getNumPoints() == 0);
+    
+    while (numPointsNeeded > 0)
+    {
+        // set up buffer to be filled by prev stage
+        PointBuffer srcData(dstData.getSchema(), numPointsNeeded);
+
+    
+        // read from prev stage
+        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+        assert(numSrcPointsRead == srcData.getNumPoints());
+        assert(numSrcPointsRead <= numPointsNeeded);
+
+        numPointsAchieved += numSrcPointsRead;
+            
+        // we got no data, and there is no more to get -- exit the loop
+        if (numSrcPointsRead == 0) return numPointsAchieved;
+    
+        // copy points from src (prev stage) into dst (our stage), 
+        // based on the CropFilter's rules (i.e. its bounds)
+        const boost::uint32_t numPointsProcessed = m_swapFilter.processBuffer(dstData, srcData);
+    
+        numPointsNeeded -= numPointsProcessed;
+
+    }
+    
+
+
+
+    return numPointsAchieved;
+}
+
+
+bool ByteSwap::atEndImpl() const
+{
+    // we don't have a fixed point point --
+    // we are at the end only when our source is at the end
+    const StageSequentialIterator& iter = getPrevIterator();
+    return iter.atEnd();
+}
+
+} } // iterators::sequential
+
+} } // pdal::filters

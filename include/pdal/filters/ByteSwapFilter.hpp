@@ -52,13 +52,13 @@ class ByteSwapFilterSequentialIterator;
 
 // removes any points outside of the given range
 // updates the header accordingly
-class PDAL_DLL ByteSwapFilter : public Filter
+class PDAL_DLL ByteSwap : public Filter
 {
 public:
     SET_STAGE_NAME("filters.byteswap", "Crop Filter")
 
-    ByteSwapFilter(Stage& prevStage, const Options&);
-    ByteSwapFilter(Stage& prevStage);
+    ByteSwap(Stage& prevStage, const Options&);
+    ByteSwap(Stage& prevStage);
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -79,10 +79,27 @@ public:
 
 
 private:
-    ByteSwapFilter& operator=(const ByteSwapFilter&); // not implemented
-    ByteSwapFilter(const ByteSwapFilter&); // not implemented
+    ByteSwap& operator=(const ByteSwap&); // not implemented
+    ByteSwap(const ByteSwap&); // not implemented
 };
 
+
+namespace iterators { namespace sequential {
+  
+class ByteSwap : public pdal::FilterSequentialIterator
+{
+public:
+    ByteSwap(const pdal::filters::ByteSwap& filter);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+
+    const pdal::filters::ByteSwap& m_swapFilter;
+};
+
+} } // iterators::sequential
 
 } } // namespaces
 
