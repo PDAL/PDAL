@@ -225,9 +225,17 @@ BOOST_AUTO_TEST_CASE(test_valid_options)
         optI.add("foo", "nineteen", "foo as a string");
         ok = optI.hasOption("foo");
         BOOST_CHECK(ok);
-
-        const std::string s1 = optI.getValueOrThrow<std::string>("foo");
-        BOOST_CHECK(s1 == "nineteen");
+        
+        
+        // Options is backed by a std::multimap, 
+        // Adding new options will mean the first will 
+        // continue to be returned.
+        const int i2 = optI.getValueOrThrow<int>("foo");
+        BOOST_CHECK(i2 == 19);
+        
+        std::vector<pdal::Option> options = optI.getOptions("foo");
+        
+        BOOST_CHECK(options[1].getValue<std::string>() == "nineteen");
     }
 
     return;
@@ -242,8 +250,11 @@ BOOST_AUTO_TEST_CASE(Options_test_add_vs_put)
     opts.add<int>("a",2);
     opts.add<int>("a",3);
 
+    std::vector<pdal::Option> options = opts.getOptions("a");
     BOOST_CHECK(opts.hasOption("a"));
-    BOOST_CHECK_EQUAL(opts.getValueOrThrow<int>("a"), 3);
+    BOOST_CHECK_EQUAL(options[0].getValue<int>(), 1);
+    BOOST_CHECK_EQUAL(options[1].getValue<int>(), 2);
+    BOOST_CHECK_EQUAL(options[2].getValue<int>(), 3);
 }
 
 

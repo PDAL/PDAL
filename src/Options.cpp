@@ -146,7 +146,8 @@ Options::Options(const boost::property_tree::ptree& tree)
 
 void Options::add(const Option& option)
 {
-    m_options[option.getName()] = option;
+    m_options.insert(std::pair<std::string, Option>(option.getName(), option));
+    // m_options[option.getName()] = option;
 }
 
 
@@ -177,6 +178,19 @@ const Option& Options::getOption(const std::string& name) const
     return option;
 }
 
+std::vector<Option> Options::getOptions(std::string const& name) const
+{
+    std::pair<std::multimap<std::string,Option>::const_iterator,std::multimap<std::string,Option>::const_iterator> ret;
+    std::vector<Option> output;
+    ret = m_options.equal_range(name);
+    std::multimap<std::string, Option>::const_iterator it;    
+    for (it = ret.first; it != ret.second; ++it)
+    {
+        output.push_back((*it).second);
+    }
+    return output;
+    
+}
 
 // the empty options set
 static const Options s_none;

@@ -39,7 +39,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>
 #include <map>
-
+#include <vector>
 
 namespace pdal
 {
@@ -301,8 +301,9 @@ public:
 
     void dump() const;
 
+    std::vector<Option> getOptions(std::string const& name) const;
 private:
-    typedef std::map<std::string, Option> map_t;
+    typedef std::multimap<std::string, Option> map_t;
     map_t m_options;
 };
 
