@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/AttributeFilter.hpp>
+#include <pdal/filters/Attribute.hpp>
 
 #include <pdal/PointBuffer.hpp>
 

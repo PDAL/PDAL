@@ -38,7 +38,7 @@
 
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
-#include <pdal/filters/ByteSwapFilter.hpp>
+#include <pdal/filters/ByteSwap.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <pdal/PointBuffer.hpp>

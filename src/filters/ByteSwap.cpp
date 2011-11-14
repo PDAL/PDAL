@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/ByteSwapFilter.hpp>
+#include <pdal/filters/ByteSwap.hpp>
 #include <pdal/filters/Chipper.hpp>
 
 #include <pdal/Schema.hpp>

@@ -60,8 +60,8 @@
 #include <pdal/drivers/oci/Writer.hpp>
 #endif
 
-#include <pdal/filters/AttributeFilter.hpp>
-#include <pdal/filters/ByteSwapFilter.hpp>
+#include <pdal/filters/Attribute.hpp>
+#include <pdal/filters/ByteSwap.hpp>
 #include <pdal/filters/CacheFilter.hpp>
 #include <pdal/filters/Chipper.hpp>
 #include <pdal/filters/ColorFilter.hpp>
