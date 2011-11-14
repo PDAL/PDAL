@@ -82,7 +82,11 @@ void CacheFilter::initialize()
 
 const Options CacheFilter::getDefaultOptions() const
 {
-    static Options options;
+    Options options;
+    Option max_cache_blocks("max_cache_blocks", 1);
+    Option cache_block_size("cache_block_size", 32768);
+    options.add(max_cache_blocks);
+    options.add(cache_block_size);
     return options;
 }
 

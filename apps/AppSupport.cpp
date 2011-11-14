@@ -53,7 +53,8 @@ std::string AppSupport::inferReaderDriver(const std::string& filename, pdal::Opt
 
     boost::to_lower(ext);
 
-    options.add<std::string>("filename", filename);
+    pdal::Option& fn = options.getOptionByRef("filename");
+    fn.setValue<std::string>(filename);
 
     // maybe this should live in StageFactory?
     std::map<std::string, std::string> drivers;
