@@ -84,7 +84,7 @@ public:
     int Blue;
 };
 
-class PointPositions
+class PDAL_DLL PointPositions
 {
 public:
     PointPositions(const Schema& schema, PointFormat format);
