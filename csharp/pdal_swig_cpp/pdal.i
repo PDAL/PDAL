@@ -158,8 +158,9 @@ namespace boost
 %enddef
 
 %rename(ScalingFilter) pdal::filters::Scaling;
-//%rename(ScalingFilterIter) pdal::filters::iterator::sequential::Scaling;
+%rename(ScalingFilterSeqIter) pdal::filters::iterators::sequential::Scaling;
 %rename(MosaicFilter) pdal::filters::Mosaic;
+%rename(MosaicFilterSeqIter) pdal::filters::iterators::sequential::Mosaic;
 
 HOLD_REFERENCE(pdal::filters::Descaling, Stage)
 PASS_REFERENCE_CTOR(pdal::filters::Descaling, Stage, prevStage)

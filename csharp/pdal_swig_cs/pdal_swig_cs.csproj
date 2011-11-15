@@ -100,8 +100,8 @@
     <Compile Include="LasWriter.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="MetadataRecord.cs" />
-    <Compile Include="Mosaic.cs" />
     <Compile Include="MosaicFilter.cs" />
+    <Compile Include="MosaicFilterSeqIter.cs" />
     <Compile Include="MultiFilter.cs" />
     <Compile Include="MultiFilterSequentialIterator.cs" />
     <Compile Include="Option.cs" />
@@ -117,9 +117,9 @@
     <Compile Include="Range_double.cs" />
     <Compile Include="Reader.cs" />
     <Compile Include="ReaderBase.cs" />
-    <Compile Include="Scaling.cs" />
     <Compile Include="ScalingFilter.cs" />
     <Compile Include="ScalingFilterBase.cs" />
+    <Compile Include="ScalingFilterSeqIter.cs" />
     <Compile Include="Schema.cs" />
     <Compile Include="SpatialReference.cs" />
     <Compile Include="Stage.cs" />
