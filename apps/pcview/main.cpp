@@ -40,8 +40,8 @@
 #include "Engine.hpp"
 #include "Controller.hpp"
 
-#include <pdal/filters/DecimationFilter.hpp>
-#include <pdal/filters/ColorFilter.hpp>
+#include <pdal/filters/Decimation.hpp>
+#include <pdal/filters/Color.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/liblas/Reader.hpp>
 #include <pdal/drivers/las/Reader.hpp>
@@ -103,7 +103,7 @@ static void readFakeFile(Controller& controller)
         points[i+2] = (float)z;
 
         double red,green,blue;
-        pdal::filters::ColorFilter::interpolateColor(z,minz,maxz,red,green,blue);
+        pdal::filters::Color::interpolateColor(z,minz,maxz,red,green,blue);
         
         const double vmax = (std::numeric_limits<boost::uint16_t>::max)();
         boost::uint16_t r16 = (boost::uint16_t)(red * vmax);
@@ -231,9 +231,9 @@ static void readFileSimple(Controller& controller, const string& file)
 
     pdal::Stage* reader = new pdal::drivers::las::Reader(file);
     
-    pdal::Stage* decimator = new pdal::filters::DecimationFilter(*reader, factor);
+    pdal::Stage* decimator = new pdal::filters::Decimation(*reader, factor);
 
-    pdal::Stage* colorizer = new pdal::filters::ColorFilter(*decimator);
+    pdal::Stage* colorizer = new pdal::filters::Color(*decimator);
 
     colorizer->initialize();
 
