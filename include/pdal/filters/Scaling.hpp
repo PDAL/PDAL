@@ -123,7 +123,7 @@ public:
 namespace iterators { namespace sequential {
 
 
-class Scaling : public pdal::FilterSequentialIterator
+class PDAL_DLL Scaling : public pdal::FilterSequentialIterator
 {
 public:
     Scaling(const ScalingFilterBase& filter);

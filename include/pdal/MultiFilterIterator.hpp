@@ -45,7 +45,7 @@ namespace pdal
 {
 class MultiFilter;
 
-class MultiFilterSequentialIterator : public StageSequentialIterator
+class PDAL_DLL MultiFilterSequentialIterator : public StageSequentialIterator
 {
 public:
     MultiFilterSequentialIterator(const MultiFilter&);
