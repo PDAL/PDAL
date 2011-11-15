@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test1)
 
 BOOST_AUTO_TEST_CASE(PipelineReaderTest_test2)
 {
-    FileUtils::deleteFile("pipeline/out.las");
+    FileUtils::deleteFile("pipeline/pdal-compressed.laz");
 
     {
         PipelineManager manager;
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test2)
         BOOST_CHECK(np == 1065);
     }
 
-    FileUtils::deleteFile(Support::datapath("pipeline/out.las"));
+    FileUtils::deleteFile(Support::datapath("pipeline/pdal-compressed.laz"));
 
     return;
 }
