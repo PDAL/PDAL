@@ -88,17 +88,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bounds_double.cs" />
-    <Compile Include="DescalingFilter.cs" />
+    <Compile Include="Descaling.cs" />
     <Compile Include="Dimension.cs" />
     <Compile Include="DimensionId.cs" />
     <Compile Include="EndianType.cs" />
     <Compile Include="Filter.cs" />
+    <Compile Include="FilterBlockIterator.cs" />
+    <Compile Include="FilterRandomIterator.cs" />
+    <Compile Include="FilterSequentialIterator.cs" />
     <Compile Include="LasReader.cs" />
     <Compile Include="LasWriter.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="MetadataRecord.cs" />
+    <Compile Include="Mosaic.cs" />
     <Compile Include="MosaicFilter.cs" />
     <Compile Include="MultiFilter.cs" />
+    <Compile Include="MultiFilterSequentialIterator.cs" />
     <Compile Include="Option.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="pdal_swig_cpp.cs" />
@@ -112,6 +117,7 @@
     <Compile Include="Range_double.cs" />
     <Compile Include="Reader.cs" />
     <Compile Include="ReaderBase.cs" />
+    <Compile Include="Scaling.cs" />
     <Compile Include="ScalingFilter.cs" />
     <Compile Include="ScalingFilterBase.cs" />
     <Compile Include="Schema.cs" />
