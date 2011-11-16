@@ -19,3 +19,7 @@ if(ORACLE_FOUND AND GDAL_FOUND)
     add_subdirectory(oci)
 endif()
 
+if (P2G_FOUND)
+    add_subdirectory(p2g)
+endif()
+

@@ -18,7 +18,7 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 ###############################################################################
-MESSAGE(STATUS "Searching for Points2Grid ${Points2Grid_FIND_VERSION}+ library")
+MESSAGE(STATUS "Searching for Points2Grid ${P2G_FIND_VERSION}+ library")
 
 IF(P2G_INCLUDE_DIR)
   # Already in cache, be silent
@@ -39,10 +39,11 @@ ENDIF()
 
 FIND_FILE(P2G_INCLUDE_DIR
   config.h
-  PATH_PREFIXES points2grid
+  PATH_PREFIX include
   PATHS
-  /tmp/lasjunk/include
+  /tmp/lasjunk
   ${OSGEO4W_ROOT_DIR}/include
+  PATH_SUFFIXES points2grid
   NO_DEFAULT_PATH
   )
 
@@ -64,12 +65,16 @@ IF(P2G_FOUND)
   SET(P2G_LIBRARIES ${P2G_LIBRARY})
 ENDIF()
 
+IF (NOT P2G_INCLUDE_DIR)
+  MESSAGE(FATAL_ERROR "Unable to find Points2Grid include directory")
+endif()
+
 IF(P2G_INCLUDE_DIR)
   SET(P2G_VERSION 0)
   
-  SET(P2G_VERSION_H "${P2G_INCLUDE_DIR}/config.h")
+  SET(P2G_VERSION_H "${P2G_INCLUDE_DIR}/points2grid/config.h")
   FILE(READ ${P2G_VERSION_H} P2G_VERSION_H_CONTENTS)
-
+  
   IF (DEFINED P2G_VERSION_H_CONTENTS)
   
     string(REGEX REPLACE ".*#define[ \t]P2G_VERSION_MAJOR[ \t]+([0-9]+).*" "\\1" P2G_VERSION_MAJOR "${P2G_VERSION_H_CONTENTS}")
@@ -106,4 +111,4 @@ ENDIF()
 # Handle the QUIETLY and REQUIRED arguments and set P2G_FOUND to TRUE
 # if all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Points2Grid DEFAULT_MSG P2G_LIBRARY P2G_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(P2G DEFAULT_MSG P2G_LIBRARY P2G_INCLUDE_DIR)
