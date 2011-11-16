@@ -415,21 +415,20 @@ public:
     }
     
     /// Verifies that the minimums and maximums of each dimension within the 
-    /// bounds are not inverted (also works in the case where the bounds is 
-    /// at infinity or when the bounds is empty).
+    /// bounds are not inverted (allows min == +inf and max == -inf, however).
     bool verify()
     {
         for (std::size_t d = 0; d < size(); ++d)
         {
             if (getMinimum(d) > getMaximum(d) )
             {
-                // Check that we're not infinity either way
-                if (Utils::compare_distance<T>(getMinimum(d), (std::numeric_limits<T>::max)()) ||
-                    Utils::compare_distance<T>(getMaximum(d), -(std::numeric_limits<T>::max)()))
+                // Allow infinity bounds
+                if (!Utils::compare_distance<T>(getMinimum(d), (std::numeric_limits<T>::max)()) &&
+                    !Utils::compare_distance<T>(getMaximum(d), -(std::numeric_limits<T>::min)()))
                 {
                     std::ostringstream msg;
                     msg << "pdal::Bounds::verify: Minimum point at dimension " << d
-                        << "is greater than maximum point.  Neither point is infinity.";
+                        << " is greater than maximum point.  Neither point is infinity.";
                     throw pdal::bounds_error(msg.str());
                 }
             }
