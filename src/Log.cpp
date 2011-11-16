@@ -85,6 +85,17 @@ Log::~Log()
     m_log = 0;
 }
 
+void Log::floatPrecision(int level)
+{
+    m_log->setf(std::ios_base::fixed, std::ios_base::floatfield);
+    m_log->precision(level);
+}
+
+void Log::clearFloat()
+{
+    m_log->unsetf(std::ios_base::fixed);
+    m_log->unsetf(std::ios_base::floatfield);
+}
 std::ostream& Log::get(LogLevel level)
 {
     if (level <= m_level)

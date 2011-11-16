@@ -100,6 +100,10 @@ public:
     /// an ostream with a boost::iostreams::null_sink is returned.    
     std::ostream& get(LogLevel level = logINFO);
 
+    /// Sets the floating point precision
+    void floatPrecision(int level);
+    
+    void clearFloat();
     
 protected:
     std::ostream* m_log;
