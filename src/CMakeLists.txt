@@ -478,7 +478,8 @@ target_link_libraries(${APPS_CPP_DEPENDENCIES}
   ${GDAL_LIBRARY}
   ${LASZIP_LIBRARY}
   ${Boost_LIBRARIES}
-  ${LIBXML2_LIBRARIES})
+  ${LIBXML2_LIBRARIES}
+  ${P2G_LIBRARY})
 
 
 set_target_properties(${PDAL_LIB_NAME}
