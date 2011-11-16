@@ -60,6 +60,10 @@
 #include <pdal/drivers/oci/Writer.hpp>
 #endif
 
+#ifdef PDAL_HAVE_P2G
+#include <pdal/drivers/p2g/Writer.hpp>
+#endif
+
 #include <pdal/filters/Attribute.hpp>
 #include <pdal/filters/ByteSwap.hpp>
 #include <pdal/filters/Cache.hpp>
@@ -154,6 +158,10 @@ namespace pdal
 #endif
 #ifdef PDAL_HAVE_ORACLE
     MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
+#endif
+
+#ifdef PDAL_HAVE_P2G
+    MAKE_WRITER_CREATOR(P2GWriter, pdal::drivers::p2g::Writer)
 #endif
 
 
@@ -334,6 +342,11 @@ void StageFactory::registerKnownWriters()
 #ifdef PDAL_HAVE_ORACLE
     REGISTER_WRITER(OciWriter, pdal::drivers::oci::Writer);
 #endif
+
+#ifdef PDAL_HAVE_P2G
+    REGISTER_WRITER(P2GWriter, pdal::drivers::p2g::Writer);
+#endif
+
 }
 
 

@@ -34,7 +34,12 @@
 
 #include <pdal/drivers/p2g/Writer.hpp>
 #include <pdal/PointBuffer.hpp>
+
 #include <iostream>
+#include <algorithm>
+
+#include <points2grid/Interpolation.hpp>
+
 
 namespace pdal { namespace drivers { namespace p2g {
 
@@ -56,6 +61,18 @@ Writer::~Writer()
 void Writer::initialize()
 {
     pdal::Writer::initialize();
+    
+    m_GRID_DIST_X = getOptions().getValueOrDefault<double>("grid_dist_x", 6.0);
+    m_GRID_DIST_Y = getOptions().getValueOrDefault<double>("grid_dist_y", 6.0);
+    m_RADIUS_SQ = getOptions().getValueOrDefault<double>("radius", 8.4852813742385713);
+    
+    double min_x = (std::numeric_limits<double>::max)();
+    double max_x = (std::numeric_limits<double>::min)();
+    double min_y = (std::numeric_limits<double>::max)();
+    double max_y = (std::numeric_limits<double>::min)();
+
+    setBounds(pdal::Bounds<double>(min_x, min_y, max_x, max_y));
+    
     return;
 }
 
@@ -63,6 +80,12 @@ void Writer::initialize()
 const Options Writer::getDefaultOptions() const
 {
     Options options;
+    
+    Option grid_x("grid_dist_x", 6.0, "X grid distance");
+    Option grid_y("grid_dist_y", 6.0, "Y grid distance");
+    
+    double default_radius = (double) sqrt(2.0) * grid_x.getValue<double>();
+    Option radius("radius", default_radius);
 
     // Option filename("filename", "", "file to read from");
     // Option compression("compression", false, "Do we LASzip-compress the data?");
@@ -91,10 +114,6 @@ const Options Writer::getDefaultOptions() const
 
 void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 {
-    // need to set properties of the header here, based on prev->getHeader() and on the user's preferences
-    // m_lasHeader.setBounds( getPrevStage().getBounds() );
-
-    const Schema& schema = getPrevStage().getSchema();
 
     return;
 }
@@ -102,39 +121,56 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 
 void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
+
+    calculateGridSizes();
+    log()->get(logDEBUG) << "m_GRID_SIZE_X: " << m_GRID_SIZE_X << std::endl;
+    log()->get(logDEBUG) << "m_GRID_SIZE_Y: " << m_GRID_SIZE_Y << std::endl;
     return;
 }
 
 
-boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
+boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 {
-    const Schema& schema = pointBuffer.getSchema();
-    const Dimension& xDim = schema.getDimension(DimensionId::X_i32);
-    const Dimension& yDim = schema.getDimension(DimensionId::Y_i32);
-    const Dimension& zDim = schema.getDimension(DimensionId::Z_i32);
+    const Schema& schema = data.getSchema();
+
+    int xPos = schema.getDimensionIndex(pdal::DimensionId::X_i32);
+    pdal::Dimension const& xDim = schema.getDimension(xPos);
+
+    int yPos = schema.getDimensionIndex(pdal::DimensionId::Y_i32);
+    pdal::Dimension const& yDim = schema.getDimension(yPos);
+    
+    int zPos = schema.getDimensionIndex(pdal::DimensionId::Z_i32);
+    pdal::Dimension const& zDim = schema.getDimension(zPos);
 
 
-    boost::uint32_t numValidPoints = 0;
+    boost::uint32_t numPoints = 0;
 
-    boost::uint8_t buf[1024]; // BUG: fixed size
-
-    for (boost::uint32_t pointIndex=0; pointIndex<pointBuffer.getNumPoints(); pointIndex++)
+    
+    double xd(0.0);
+    double yd(0.0);
+    double zd(0.0);
+    
+    for (boost::uint32_t pointIndex=0; pointIndex < data.getNumPoints(); pointIndex++)
     {
-        boost::uint8_t* p = buf;
-
-        // // we always write the base fields
-        // const boost::int32_t x = pointBuffer.getRawField<boost::int32_t>(pointIndex, positions.X);
-        // const boost::int32_t y = pointBuffer.getRawField<boost::int32_t>(pointIndex, positions.Y);
-        // const boost::int32_t z = pointBuffer.getRawField<boost::int32_t>(pointIndex, positions.Z);
+            boost::int32_t x = data.getField<boost::int32_t>(pointIndex, xPos);
+            boost::int32_t y = data.getField<boost::int32_t>(pointIndex, yPos);
+            boost::int32_t z = data.getField<boost::int32_t>(pointIndex, zPos);
         
-        // std::clog << "x: " << x << " y: " << y << " z: " << z << std::endl;
-        // std::clog << "positions.X: " << positions.X << " positions.Y: " << positions.Y << " positions.Z: " << positions.Z << std::endl;
-        
-
+            xd = xDim.applyScaling<boost::int32_t>(x);
+            yd = yDim.applyScaling<boost::int32_t>(y);
+            zd = zDim.applyScaling<boost::int32_t>(z);
+            
+            m_bounds.setMinimum(0, (std::min)(xd, m_bounds.getMinimum(0)));
+            m_bounds.setMinimum(1, (std::min)(yd, m_bounds.getMinimum(1)));
+            m_bounds.setMaximum(0, (std::max)(xd, m_bounds.getMaximum(0)));
+            m_bounds.setMaximum(1, (std::max)(yd, m_bounds.getMaximum(1)));
+            xd -= getBounds().getMinimum(0);
+            yd -= getBounds().getMinimum(1);
+            m_coordinates.push_back(boost::tuple<double, double, double>(xd, yd, zd));
+            numPoints++;
     }
 
-    // m_numPointsWritten = m_numPointsWritten+numValidPoints;
-    return numValidPoints;
+    return numPoints;
 }
 
 
@@ -145,6 +181,14 @@ boost::property_tree::ptree Writer::toPTree() const
     // add stuff here specific to this stage type
 
     return tree;
+}
+
+void Writer::calculateGridSizes() 
+{
+    pdal::Bounds<double>& extent = getBounds();
+    
+    m_GRID_SIZE_X = (int)(ceil((extent.getMaximum(0) - extent.getMinimum(0))/m_GRID_DIST_X)) + 1;
+    m_GRID_SIZE_Y = (int)(ceil((extent.getMaximum(1) - extent.getMinimum(1))/m_GRID_DIST_Y)) + 1;
 }
 
 } } } // namespaces
