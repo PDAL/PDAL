@@ -38,6 +38,7 @@
 #include <iostream>
 #include <algorithm>
 
+#include <boost/algorithm/string.hpp>
 #include <points2grid/Interpolation.hpp>
 
 
@@ -46,6 +47,8 @@ namespace pdal { namespace drivers { namespace p2g {
 
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
+    , m_outputTypes(0)
+    , m_outputFormat(OUTPUT_FORMAT_ARC_ASCII)
 {
 
     return;
@@ -65,13 +68,61 @@ void Writer::initialize()
     m_GRID_DIST_X = getOptions().getValueOrDefault<double>("grid_dist_x", 6.0);
     m_GRID_DIST_Y = getOptions().getValueOrDefault<double>("grid_dist_y", 6.0);
     m_RADIUS_SQ = getOptions().getValueOrDefault<double>("radius", 8.4852813742385713);
-    
+    m_fill_window_size = getOptions().getValueOrDefault<boost::uint32_t>("fill_window_size", 3);
+    m_filename = getOptions().getValueOrThrow<std::string>("filename");
+    std::string output_format = getOptions().getValueOrDefault<std::string>("output_format", "grid");
+        
     double min_x = (std::numeric_limits<double>::max)();
     double max_x = (std::numeric_limits<double>::min)();
     double min_y = (std::numeric_limits<double>::max)();
     double max_y = (std::numeric_limits<double>::min)();
 
     setBounds(pdal::Bounds<double>(min_x, min_y, max_x, max_y));
+    
+    std::vector<Option> types = getOptions().getOptions("output_type");
+    
+    if (!types.size())
+        m_outputTypes = OUTPUT_TYPE_ALL;
+    else
+    {
+        for (std::vector<Option>::const_iterator i = types.begin(); i != types.end(); ++i)
+        {
+            if(boost::iequals(i->getValue<std::string>(), "min")) {
+                m_outputTypes |= OUTPUT_TYPE_MIN;
+            }
+
+            if(boost::iequals(i->getValue<std::string>(), "max")) {
+                m_outputTypes |= OUTPUT_TYPE_MAX;
+            }
+
+            if(boost::iequals(i->getValue<std::string>(), "mean")) {
+                m_outputTypes |= OUTPUT_TYPE_MEAN;
+            }
+
+            if(boost::iequals(i->getValue<std::string>(), "idw")) {
+                m_outputTypes |= OUTPUT_TYPE_IDW;
+            }
+
+            if(boost::iequals(i->getValue<std::string>(), "den")) {
+                m_outputTypes |= OUTPUT_TYPE_DEN;
+            }
+
+            if(boost::iequals(i->getValue<std::string>(), "all")) {
+                m_outputTypes = OUTPUT_TYPE_ALL;
+            }            
+        }
+    }
+    
+    if (boost::iequals(output_format, "grid"))
+        m_outputFormat = OUTPUT_FORMAT_GRID_ASCII;
+    else if (boost::iequals(output_format, "asc"))
+        m_outputFormat = OUTPUT_FORMAT_ARC_ASCII;
+    else
+    {
+        std::ostringstream oss;
+        oss << "Unrecognized output format " << output_format;
+        throw p2g_error("Unrecognized output format");
+    }
     
     return;
 }
@@ -87,27 +138,12 @@ const Options Writer::getDefaultOptions() const
     double default_radius = (double) sqrt(2.0) * grid_x.getValue<double>();
     Option radius("radius", default_radius);
 
-    // Option filename("filename", "", "file to read from");
-    // Option compression("compression", false, "Do we LASzip-compress the data?");
-    // Option format("format", PointFormat3, "Point format to write");
-    // Option major_version("major_version", 1, "LAS Major version");
-    // Option minor_version("minor_version", 2, "LAS Minor version");
-    // Option day_of_year("day_of_year", 0, "Day of Year for file");
-    // Option year("year", 2011, "4-digit year value for file");
-    // Option system_id("system_id", LasHeader::SystemIdentifier, "System ID for this file");
-    // Option software_id("software_id", LasHeader::SoftwareIdentifier, "Software ID for this file");
-    // Option header_padding("header_padding", 0, "Header padding (space between end of VLRs and beginning of point data)");
-    // 
-    // options.add(major_version);
-    // options.add(minor_version);
-    // options.add(day_of_year);
-    // options.add(year);
-    // options.add(system_id);
-    // options.add(software_id);
-    // options.add(header_padding);
-    // options.add(format);
-    // options.add(filename);
-    // options.add(compression);
+    Option fill_window_size("fill_window_size", 3);
+    
+    options.add(grid_x);
+    options.add(grid_y);
+    options.add(radius);
+    options.add(fill_window_size);
     return options;
 }
 
@@ -123,8 +159,54 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
 
     calculateGridSizes();
-    log()->get(logDEBUG) << "m_GRID_SIZE_X: " << m_GRID_SIZE_X << std::endl;
-    log()->get(logDEBUG) << "m_GRID_SIZE_Y: " << m_GRID_SIZE_Y << std::endl;
+    log()->get(logDEBUG) << "X grid size: " << m_GRID_SIZE_X << std::endl;
+    log()->get(logDEBUG) << "Y grid size: " << m_GRID_SIZE_Y << std::endl;
+    
+    log()->floatPrecision(6);
+    log()->get(logDEBUG) << "X grid distance: " << m_GRID_DIST_X << std::endl;
+    log()->get(logDEBUG) << "Y grid distance: " << m_GRID_DIST_Y << std::endl;
+    log()->clearFloat();
+
+    boost::scoped_ptr<OutCoreInterp> p(new OutCoreInterp(m_GRID_DIST_X, 
+                                              m_GRID_DIST_Y, 
+                                              m_GRID_SIZE_X, 
+                                              m_GRID_SIZE_Y, 
+                                              m_RADIUS_SQ, 
+                                              m_bounds.getMinimum(0), 
+                                              m_bounds.getMaximum(0),
+                                              m_bounds.getMinimum(1),
+                                              m_bounds.getMaximum(1),
+                                              m_fill_window_size));
+    m_interpolator.swap(p);
+
+    if(m_interpolator->init() < 0)
+    {
+        throw p2g_error("unable to initialize interpolator");
+    }
+    
+    int rc(0);
+    
+    std::vector<boost::tuple<double, double, double> >::const_iterator i;
+    for (i = m_coordinates.begin(); i!= m_coordinates.end(); ++i)
+    {
+        double x = i->get<0>();
+        double y = i->get<1>();
+        x = x - m_bounds.getMinimum(0);
+        y = y - m_bounds.getMinimum(1);
+        
+        rc = m_interpolator->update(x, y, i->get<2>());
+        if(rc < 0)
+        {
+            throw p2g_error("interp->update() error while processing ");
+        }
+    }
+
+    if((rc = m_interpolator->finish(const_cast<char*>(m_filename.c_str()), m_outputFormat, m_outputTypes)) < 0)
+    {
+        throw p2g_error("interp->finish() error" );
+    }
+
+    
     return;
 }
 
@@ -164,8 +246,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
             m_bounds.setMinimum(1, (std::min)(yd, m_bounds.getMinimum(1)));
             m_bounds.setMaximum(0, (std::max)(xd, m_bounds.getMaximum(0)));
             m_bounds.setMaximum(1, (std::max)(yd, m_bounds.getMaximum(1)));
-            xd -= getBounds().getMinimum(0);
-            yd -= getBounds().getMinimum(1);
+
             m_coordinates.push_back(boost::tuple<double, double, double>(xd, yd, zd));
             numPoints++;
     }
@@ -189,6 +270,8 @@ void Writer::calculateGridSizes()
     
     m_GRID_SIZE_X = (int)(ceil((extent.getMaximum(0) - extent.getMinimum(0))/m_GRID_DIST_X)) + 1;
     m_GRID_SIZE_Y = (int)(ceil((extent.getMaximum(1) - extent.getMinimum(1))/m_GRID_DIST_Y)) + 1;
+
+
 }
 
 } } } // namespaces
