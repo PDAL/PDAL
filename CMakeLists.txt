@@ -367,6 +367,21 @@ if(WITH_MRSID)
     endif()
 endif()
 
+# Points2Grid
+# Points2Grid support - optional, default=OFF
+set(WITH_P2G FALSE CACHE BOOL "Choose if Points2Grid support should be built")
+
+if(WITH_P2G)
+    find_package(Points2Grid)
+    if(P2G_FOUND)
+        set(CMAKE_REQUIRED_LIBRARIES ${P2G_LIBRARY})
+        include_directories(${P2G_INCLUDE_DIR})
+        add_definitions(-DHAVE_P2G=1)
+        set(PDAL_HAVE_P2G 1)
+    endif()
+endif()
+
+
 if(WITH_FREEGLUT)
   find_package(FreeGLUT)
   if(FREEGLUT_FOUND)

@@ -31,6 +31,7 @@
 #cmakedefine PDAL_HAVE_LIBXML2
 #cmakedefine PDAL_HAVE_LIBGEOTIFF
 #cmakedefine PDAL_HAVE_MRSID
+#cmakedefine PDAL_HAVE_P2G
 
 
 /*
