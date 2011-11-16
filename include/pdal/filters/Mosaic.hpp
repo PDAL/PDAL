@@ -78,7 +78,7 @@ private:
 
 namespace iterators { namespace sequential {
 
-class Mosaic : public pdal::MultiFilterSequentialIterator
+class PDAL_DLL Mosaic : public pdal::MultiFilterSequentialIterator
 {
 public:
     Mosaic(const pdal::filters::Mosaic& filter);

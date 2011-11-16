@@ -52,13 +52,15 @@
 #include "pdal/Reader.hpp"
 #include "pdal/Writer.hpp"
 #include "pdal/Filter.hpp"
+#include "pdal/FilterIterator.hpp"
 #include "pdal/MultiFilter.hpp"
 #include "pdal/Options.hpp"
 #include "pdal/UserCallback.hpp"
 #include "pdal/Vector.hpp"
 
-#include "pdal/filters/DecimationFilter.hpp"
-#include "pdal/filters/ScalingFilter.hpp"
+#include "pdal/filters/Decimation.hpp"
+#include "pdal/filters/Mosaic.hpp"
+#include "pdal/filters/Scaling.hpp"
 #include "pdal/drivers/las/Support.hpp"
 #include "pdal/drivers/las/VariableLengthRecord.hpp"
 #include "pdal/drivers/las/Reader.hpp"
@@ -71,6 +73,7 @@ namespace std
    %template(std_vector_double) vector<double>;
    %template(std_vector_Dimension) vector<pdal::Dimension>;
    %template(std_vector_Range_double) vector<pdal::Range<double> >;
+   %template(std_vector_Stage) vector<pdal::Stage*>;
 
    typedef unsigned int size_t;
 };
@@ -130,6 +133,8 @@ namespace boost
 %include "pdal/Stage.hpp"
 %include "pdal/StageIterator.hpp"
 %include "pdal/Filter.hpp"
+%include "pdal/FilterIterator.hpp"
+%include "pdal/MultiFilterIterator.hpp"
 %include "pdal/MultiFilter.hpp"
 %include "pdal/Reader.hpp"
 %include "pdal/Writer.hpp"
@@ -152,13 +157,23 @@ namespace boost
    %}
 %enddef
 
-HOLD_REFERENCE(pdal::filters::DescalingFilter, Stage)
-PASS_REFERENCE_CTOR(pdal::filters::DescalingFilter, Stage, prevStage)
-%include "pdal/filters/ScalingFilter.hpp"
+%rename(ScalingFilter) pdal::filters::Scaling;
+%rename(ScalingFilterSeqIter) pdal::filters::iterators::sequential::Scaling;
+%rename(MosaicFilter) pdal::filters::Mosaic;
+%rename(MosaicFilterSeqIter) pdal::filters::iterators::sequential::Mosaic;
+
+HOLD_REFERENCE(pdal::filters::Descaling, Stage)
+PASS_REFERENCE_CTOR(pdal::filters::Descaling, Stage, prevStage)
+%include "pdal/filters/Scaling.hpp"
+
+HOLD_REFERENCE(pdal::filters::MosaicFilter, Stage)
+PASS_REFERENCE_CTOR(pdal::filters::MosiacFilter, Stage, prevStage)
+%include "pdal/filters/Mosaic.hpp"
 
 HOLD_REFERENCE( pdal::drivers::las::Writer, Stage)
 PASS_REFERENCE_CTOR(pdal::drivers::las::Writer, Stage, prevStage)
 %rename(LasWriter) pdal::drivers::las::Writer;
+
 
 %rename(LasReader) pdal::drivers::las::Reader;
 %include "pdal/drivers/las/ReaderBase.hpp"

@@ -18,7 +18,7 @@ namespace pdal_swig_test
       private void Test1()
       {
          string s = Dimension.getDataTypeName(Dimension.DataType.Double);
-         Assert(s == "Double");
+         Debug.Assert(s == "Double");
 
          Dimension d = new Dimension(DimensionId.Id.Blue_u16);
 

@@ -38,7 +38,7 @@
 #include <pdal/StageIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/liblas/Reader.hpp>
-#include <pdal/filters/CacheFilter.hpp>
+#include <pdal/filters/Cache.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -246,7 +246,7 @@ BOOST_AUTO_TEST_CASE(LiblasReaderTest_test_two_iters_with_cache)
     BOOST_CHECK(reader.getDescription() == "Liblas Reader");
 
 
-    CacheFilter cache(reader, 1, 355);
+    Cache cache(reader, 1, 355);
     cache.initialize();
 
     BOOST_CHECK(reader.getNumPoints() == 1065);

@@ -88,16 +88,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bounds_double.cs" />
-    <Compile Include="DescalingFilter.cs" />
+    <Compile Include="Descaling.cs" />
     <Compile Include="Dimension.cs" />
     <Compile Include="DimensionId.cs" />
     <Compile Include="EndianType.cs" />
     <Compile Include="Filter.cs" />
+    <Compile Include="FilterBlockIterator.cs" />
+    <Compile Include="FilterRandomIterator.cs" />
+    <Compile Include="FilterSequentialIterator.cs" />
     <Compile Include="LasReader.cs" />
     <Compile Include="LasWriter.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="MetadataRecord.cs" />
+    <Compile Include="MosaicFilter.cs" />
+    <Compile Include="MosaicFilterSeqIter.cs" />
     <Compile Include="MultiFilter.cs" />
+    <Compile Include="MultiFilterSequentialIterator.cs" />
     <Compile Include="Option.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="pdal_swig_cpp.cs" />
@@ -113,6 +119,7 @@
     <Compile Include="ReaderBase.cs" />
     <Compile Include="ScalingFilter.cs" />
     <Compile Include="ScalingFilterBase.cs" />
+    <Compile Include="ScalingFilterSeqIter.cs" />
     <Compile Include="Schema.cs" />
     <Compile Include="SpatialReference.cs" />
     <Compile Include="Stage.cs" />
@@ -126,6 +133,7 @@
     <Compile Include="std_vector_Dimension.cs" />
     <Compile Include="std_vector_double.cs" />
     <Compile Include="std_vector_Range_double.cs" />
+    <Compile Include="std_vector_Stage.cs" />
     <Compile Include="std_vector_u8.cs" />
     <Compile Include="Support.cs" />
     <Compile Include="SWIGTYPE_p_boost__property_tree__ptree.cs" />
@@ -141,7 +149,6 @@
     <Compile Include="SWIGTYPE_p_std__vectorT_pdal__drivers__las__VariableLengthRecord_t.cs" />
     <Compile Include="SWIGTYPE_p_std__vectorT_pdal__Option_t.cs" />
     <Compile Include="SWIGTYPE_p_std__vectorT_pdal__StageBase_p_t.cs" />
-    <Compile Include="SWIGTYPE_p_std__vectorT_pdal__Stage_p_t.cs" />
     <Compile Include="SWIGTYPE_p_std__vectorT_RangeT_double_t_t.cs" />
     <Compile Include="SWIGTYPE_p_unsigned_char.cs" />
     <Compile Include="SWIGTYPE_p_unsigned_int.cs" />

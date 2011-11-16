@@ -43,7 +43,7 @@ namespace pdal
 {
 class Filter;
 
-class FilterSequentialIterator : public StageSequentialIterator
+class PDAL_DLL FilterSequentialIterator : public StageSequentialIterator
 {
 public:
     FilterSequentialIterator(const Filter&);
@@ -64,7 +64,7 @@ private:
 };
 
 
-class FilterRandomIterator : public StageRandomIterator
+class PDAL_DLL FilterRandomIterator : public StageRandomIterator
 {
 public:
     FilterRandomIterator(const Filter&);
@@ -83,7 +83,7 @@ private:
     StageRandomIterator* m_prevIterator;
 };
 
-class FilterBlockIterator : public StageBlockIterator
+class PDAL_DLL FilterBlockIterator : public StageBlockIterator
 {
 public:
     FilterBlockIterator(const Filter&);

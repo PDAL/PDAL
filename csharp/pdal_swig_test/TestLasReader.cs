@@ -27,6 +27,14 @@ namespace pdal_swig_test
             ulong numPoints = reader.getNumPoints();
             Debug.Assert(numPoints == 1065);
 
+            Bounds_double bounds = reader.getBounds();
+            Debug.Assert(closeTo(bounds.getMinimum().get(0), 635619.85));
+            Debug.Assert(closeTo(bounds.getMinimum().get(1), 848899.70000000007));
+            Debug.Assert(closeTo(bounds.getMinimum().get(2), 406.59000000000003));
+            Debug.Assert(closeTo(bounds.getMaximum().get(0), 638982.55));
+            Debug.Assert(closeTo(bounds.getMaximum().get(1), 853535.43));
+            Debug.Assert(closeTo(bounds.getMaximum().get(2), 586.38));
+
             // create the point buffer we'll read into
             // make it only hold 128 points a time, so we can show iterating
             Schema schema = reader.getSchema();
