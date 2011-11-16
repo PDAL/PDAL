@@ -35,8 +35,6 @@
 #ifndef INCLUDED_DRIVERS_OCI_ITERATOR_HPP
 #define INCLUDED_DRIVERS_OCI_ITERATOR_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <pdal/StageIterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/oci/common.hpp>

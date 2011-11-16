@@ -42,7 +42,7 @@
 #ifndef PDAL_DIMENSION_HPP_INCLUDED
 #define PDAL_DIMENSION_HPP_INCLUDED
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 #include <pdal/Utils.hpp>
 #include <pdal/DimensionId.hpp>
 

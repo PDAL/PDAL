@@ -35,7 +35,7 @@
 #ifndef INCLUDED_DRIVERS_LAS_GEOTIFFSUPPORT_HPP
 #define INCLUDED_DRIVERS_LAS_GEOTIFFSUPPORT_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 #ifdef PDAL_HAVE_LIBGEOTIFF
 #include <geo_simpletags.h>

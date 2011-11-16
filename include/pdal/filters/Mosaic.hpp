@@ -35,8 +35,6 @@
 #ifndef INCLUDED_FILTERS_MOSAICFILTER_HPP
 #define INCLUDED_FILTERS_MOSAICFILTER_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <vector>
 
 #include <pdal/MultiFilter.hpp>

@@ -35,8 +35,6 @@
 #ifndef INCLUDED_FILTERS_CROPFILTER_HPP
 #define INCLUDED_FILTERS_CROPFILTER_HPP
 
-#include <pdal/pdal.hpp>
-//#include <pdal/export.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
 #include <pdal/Bounds.hpp>

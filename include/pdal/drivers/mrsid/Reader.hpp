@@ -35,8 +35,6 @@
 #ifndef INCLUDED_DRIVERS_MrSID_READER_HPP
 #define INCLUDED_DRIVERS_MrSID_READER_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <pdal/Reader.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/Dimension.hpp>

@@ -35,8 +35,6 @@
 #ifndef INCLUDED_DRIVERS_PIPELINE_READER_HPP
 #define INCLUDED_DRIVERS_PIPELINE_READER_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <pdal/Reader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <boost/scoped_ptr.hpp>

@@ -35,7 +35,7 @@
 #ifndef INCLUDED_UTILS_HPP
 #define INCLUDED_UTILS_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 #include <string>
 #include <cassert>

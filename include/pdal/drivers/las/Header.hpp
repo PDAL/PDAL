@@ -43,8 +43,6 @@
 #ifndef INCLUDED_DRIVERS_LAS_HEADER_HPP
 #define INCLUDED_DRIVERS_LAS_HEADER_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <vector>
 
 #include <pdal/external/boost/uuid/uuid.hpp>

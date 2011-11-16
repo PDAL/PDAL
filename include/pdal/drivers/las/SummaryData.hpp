@@ -35,8 +35,10 @@
 #ifndef INCLUDED_DRIVERS_LAS_SUMMARYDATA_HPP
 #define INCLUDED_DRIVERS_LAS_SUMMARYDATA_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
+
 #include <ostream>
+
 namespace pdal {
 namespace drivers {
 namespace las {

@@ -35,11 +35,10 @@
 #ifndef INCLUDED_RANGE_HPP
 #define INCLUDED_RANGE_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+#include <pdal/pdal_internal.hpp>
 #include <pdal/Utils.hpp>
 
 namespace pdal

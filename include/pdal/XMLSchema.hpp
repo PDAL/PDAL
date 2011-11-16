@@ -35,7 +35,7 @@
 #ifndef INCLUDED_XMLSCHEMA_HPP
 #define INCLUDED_XMLSCHEMA_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 #include <pdal/Schema.hpp>
 #include <pdal/Dimension.hpp>
 

@@ -35,7 +35,9 @@
 #ifndef INCLUDED_APPLICATION_HPP
 #define INCLUDED_APPLICATION_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_error.hpp>
+#include <boost/cstdint.hpp>
+
 
 
 #ifdef PDAL_COMPILER_MSVC

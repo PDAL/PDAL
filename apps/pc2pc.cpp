@@ -32,7 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal.hpp>
 #include <pdal/FileUtils.hpp>
 
 #include <pdal/drivers/las/Reader.hpp>

@@ -35,8 +35,6 @@
 #ifndef INCLUDED_PDAL_DRIVER_TERRASOLID_READER_HPP
 #define INCLUDED_PDAL_DRIVER_TERRASOLID_READER_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
 

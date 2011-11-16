@@ -35,7 +35,6 @@
 #ifndef INCLUDED_DRIVER_OCI_COMMON_HPP
 #define INCLUDED_DRIVER_OCI_COMMON_HPP
 
-#include <pdal/pdal.hpp>
 #include <pdal/Options.hpp>
 
 #include "oci_wrapper.h"

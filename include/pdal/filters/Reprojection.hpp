@@ -35,7 +35,6 @@
 #ifndef INCLUDED_FILTERS_REPROJECTIONFILTER_HPP
 #define INCLUDED_FILTERS_REPROJECTIONFILTER_HPP
 
-#include <pdal/pdal.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
 

@@ -35,13 +35,13 @@
 #ifndef INCLUDED_VECTOR_HPP
 #define INCLUDED_VECTOR_HPP
 
-#include <pdal/pdal.hpp>
 
 #include <vector>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <pdal/pdal_internal.hpp>
 #include <pdal/Utils.hpp>
 
 namespace pdal

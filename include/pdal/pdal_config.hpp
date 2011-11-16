@@ -44,7 +44,7 @@
 #ifndef INCLUDED_PDAL_CONFIG_HPP
 #define INCLUDED_PDAL_CONFIG_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 #include <string>
 

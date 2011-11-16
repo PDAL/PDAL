@@ -42,8 +42,6 @@
 #ifndef PDAL_CHIPPER_H
 #define PDAL_CHIPPER_H
 
-#include <pdal/pdal.hpp>
-
 #include <vector>
 
 #include <pdal/Filter.hpp>

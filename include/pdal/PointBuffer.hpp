@@ -35,10 +35,10 @@
 #ifndef INCLUDED_POINTBUFFER_HPP
 #define INCLUDED_POINTBUFFER_HPP
 
-#include <pdal/pdal.hpp>
 
 #include <boost/scoped_array.hpp>
 
+#include <pdal/pdal_internal.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/Schema.hpp>
 

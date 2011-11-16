@@ -35,7 +35,7 @@
 #ifndef INCLUDED_METADATARECORD_HPP
 #define INCLUDED_METADATARECORD_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 #include <boost/shared_array.hpp>
 

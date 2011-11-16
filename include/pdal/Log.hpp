@@ -35,7 +35,7 @@
 #ifndef INCLUDED_LOG_HPP
 #define INCLUDED_LOG_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/null.hpp>

@@ -35,7 +35,7 @@
 #ifndef INCLUDED_STAGEITERATOR_HPP
 #define INCLUDED_STAGEITERATOR_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 namespace pdal
 {

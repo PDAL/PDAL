@@ -35,8 +35,6 @@
 #ifndef INCLUDED_DRIVERS_LAS_READERBASE_HPP
 #define INCLUDED_DRIVERS_LAS_READERBASE_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <pdal/Reader.hpp>
 
 

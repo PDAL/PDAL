@@ -35,8 +35,6 @@
 #ifndef INCLUDED_PDAL_DRIVER_OCI_WRITER_HPP
 #define INCLUDED_PDAL_DRIVER_OCI_WRITER_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <pdal/Writer.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/GDALUtils.hpp>

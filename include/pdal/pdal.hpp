@@ -31,29 +31,29 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-
-#ifndef INCLUDED_PDAL_HPP
-#define INCLUDED_PDAL_HPP
-
-// This file is for all the things that basically everybody has to include.
-
-#include <iostream>
-
-#include <pdal/export.hpp>
-#include <pdal/pdal_defines.h>
-#include <pdal/types.hpp>
-#include <pdal/pdal_error.hpp>
-
-
-// we use explicitly-sized types everywhere, so include this here
-#include <boost/cstdint.hpp>
-
-#ifdef __cplusplus
-#  define PDAL_C_START           extern "C" {
-#  define PDAL_C_END             }
-#else
-#  define PDAL_C_START
-#  define PDAL_C_END
-#endif
-
-#endif
+// 
+// #ifndef INCLUDED_PDAL_HPP
+// #define INCLUDED_PDAL_HPP
+// 
+// // This file is for all the things that basically everybody has to include.
+// 
+// #include <iostream>
+// 
+// #include <pdal/export.hpp>
+// #include <pdal/pdal_defines.h>
+// #include <pdal/types.hpp>
+// #include <pdal/pdal_error.hpp>
+// 
+// 
+// // we use explicitly-sized types everywhere, so include this here
+// #include <boost/cstdint.hpp>
+// 
+// #ifdef __cplusplus
+// #  define PDAL_C_START           extern "C" {
+// #  define PDAL_C_END             }
+// #else
+// #  define PDAL_C_START
+// #  define PDAL_C_END
+// #endif
+// 
+// #endif

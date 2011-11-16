@@ -35,8 +35,6 @@
 #ifndef INCLUDED_DRIVERS_LIBLAS_LIBLASWRITER_HPP
 #define INCLUDED_DRIVERS_LIBLAS_LIBLASWRITER_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <pdal/Writer.hpp>
 #include <pdal/StreamManager.hpp>
 #include <pdal/drivers/las/Support.hpp>

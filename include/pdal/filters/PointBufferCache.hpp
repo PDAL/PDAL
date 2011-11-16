@@ -22,7 +22,7 @@
 #ifndef INCLUDED_PDAL_POINTBUFFERCACHE_HPP
 #define INCLUDED_PDAL_POINTBUFFERCACHE_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 
 #ifdef PDAL_COMPILER_MSVC

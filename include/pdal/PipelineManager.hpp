@@ -35,7 +35,7 @@
 #ifndef INCLUDED_PIPELINEMANAGER_HPP
 #define INCLUDED_PIPELINEMANAGER_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include <boost/shared_ptr.hpp>

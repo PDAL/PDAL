@@ -42,11 +42,10 @@
 #ifndef PDAL_SCHEMA_HPP_INCLUDED
 #define PDAL_SCHEMA_HPP_INCLUDED
 
-#include <pdal/pdal.hpp>
-
 #include <vector>
 #include <map>
 
+#include <pdal/pdal_internal.hpp>
 #include <pdal/Dimension.hpp>
 
 // boost

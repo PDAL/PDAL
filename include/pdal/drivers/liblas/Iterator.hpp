@@ -35,8 +35,6 @@
 #ifndef INCLUDED_DRIVERS_LIBLAS_ITERATOR_HPP
 #define INCLUDED_DRIVERS_LIBLAS_ITERATOR_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <pdal/ReaderIterator.hpp>
 
 

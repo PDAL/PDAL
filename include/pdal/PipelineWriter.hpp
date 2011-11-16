@@ -35,11 +35,12 @@
 #ifndef INCLUDED_PIPELINEWRITER_HPP
 #define INCLUDED_PIPELINEWRITER_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
+#include <pdal/Options.hpp>
+
 #include <string>
 
 #include <boost/property_tree/ptree.hpp>
-#include <pdal/Options.hpp>
 
 namespace pdal
 {

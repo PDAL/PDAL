@@ -35,7 +35,7 @@
 #ifndef INCLUDED_SPATIALREFERENCE_HPP
 #define INCLUDED_SPATIALREFERENCE_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 

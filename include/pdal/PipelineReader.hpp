@@ -35,7 +35,7 @@
 #ifndef INCLUDED_PIPELINEREADER_HPP
 #define INCLUDED_PIPELINEREADER_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include <vector>

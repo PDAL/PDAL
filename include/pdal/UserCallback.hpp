@@ -35,7 +35,7 @@
 #ifndef INCLUDED_USERCALLBACK_HPP
 #define INCLUDED_USERCALLBACK_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 namespace pdal
 {

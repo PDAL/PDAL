@@ -35,8 +35,6 @@
 #ifndef INCLUDED_DRIVERS_LIBLAS_LIBLASREADER_HPP
 #define INCLUDED_DRIVERS_LIBLAS_LIBLASREADER_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <vector>
 
 #include <pdal/Stage.hpp>

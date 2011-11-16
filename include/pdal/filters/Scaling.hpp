@@ -35,8 +35,6 @@
 #ifndef INCLUDED_FILTERS_SCALINGFILTER_HPP
 #define INCLUDED_FILTERS_SCALINGFILTER_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <boost/shared_ptr.hpp>
 
 #include <pdal/Filter.hpp>

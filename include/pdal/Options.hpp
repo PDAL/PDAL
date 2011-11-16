@@ -35,9 +35,11 @@
 #ifndef INCLUDED_OPTIONS_HPP
 #define INCLUDED_OPTIONS_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>
+
 #include <map>
 #include <vector>
 

@@ -43,7 +43,7 @@
 #ifndef INCLUDED_DRIVERS_LAS_LASHEADERREADER_HPP
 #define INCLUDED_DRIVERS_LAS_LASHEADERREADER_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 #include <iosfwd>
 

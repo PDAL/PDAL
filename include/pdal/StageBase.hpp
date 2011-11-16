@@ -37,9 +37,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <pdal/pdal_internal.hpp>
 #include <pdal/Log.hpp>
-
-#include <pdal/pdal.hpp>
 #include <pdal/Options.hpp>
 
 #include <string>

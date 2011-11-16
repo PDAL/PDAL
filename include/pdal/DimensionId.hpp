@@ -35,7 +35,7 @@
 #ifndef PDAL_DIMENSIONID_HPP_INCLUDED
 #define PDAL_DIMENSIONID_HPP_INCLUDED
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 namespace pdal
 {

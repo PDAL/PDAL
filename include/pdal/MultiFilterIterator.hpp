@@ -35,7 +35,7 @@
 #ifndef INCLUDED_MULTIFILTERITERATOR_HPP
 #define INCLUDED_MULTIFILTERITERATOR_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 #include <vector>
 

@@ -32,41 +32,28 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTER_HPP
-#define INCLUDED_FILTER_HPP
+#ifndef INCLUDED_PDALINTERNAL_HPP
+#define INCLUDED_PDALINTERNAL_HPP
 
-#include <pdal/pdal_internal.hpp>
+// This file is for all the things that basically everybody has to include.
 
-#include <pdal/Stage.hpp>
+#include <iostream>
 
-namespace pdal
-{
+#include <pdal/export.hpp>
+#include <pdal/pdal_defines.h>
+#include <pdal/types.hpp>
+#include <pdal/pdal_error.hpp>
 
-//
-// supported options:
-//   <uint32>id
-//   <bool>debug
-//   <uint32>verbose
-//
 
-class PDAL_DLL Filter : public Stage
-{
-public:
-    Filter(Stage& prevStage, const Options& options);
+// we use explicitly-sized types everywhere, so include this here
+#include <boost/cstdint.hpp>
 
-    virtual void initialize();
-
-    // for xml serializion of pipelines
-    virtual boost::property_tree::ptree serializePipeline() const;
-
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
-
-private:
-    Filter& operator=(const Filter&); // not implemented
-    Filter(const Filter&); // not implemented
-};
-
-}  // namespace pdal
+#ifdef __cplusplus
+#  define PDAL_C_START           extern "C" {
+#  define PDAL_C_END             }
+#else
+#  define PDAL_C_START
+#  define PDAL_C_END
+#endif
 
 #endif

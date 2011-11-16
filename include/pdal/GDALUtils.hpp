@@ -35,8 +35,7 @@
 #ifndef INCLUDED_GDALUTILS_HPP
 #define INCLUDED_GDALUTILS_HPP
 
-#include <pdal/pdal.hpp>
-#include <pdal/pdal_error.hpp>
+#include <pdal/pdal_internal.hpp>
 
 #include <pdal/Log.hpp>
 

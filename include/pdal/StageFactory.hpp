@@ -35,7 +35,7 @@
 #ifndef INCLUDED_STAGEFACTORY_HPP
 #define INCLUDED_STAGEFACTORY_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/Filter.hpp>

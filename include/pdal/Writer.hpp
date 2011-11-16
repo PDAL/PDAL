@@ -35,7 +35,7 @@
 #ifndef INCLUDED_WRITER_HPP
 #define INCLUDED_WRITER_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/Stage.hpp>
 

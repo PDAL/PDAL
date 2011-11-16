@@ -35,8 +35,6 @@
 #ifndef INCLUDED_FILTER_CACHEFILTER_HPP
 #define INCLUDED_FILTER_CACHEFILTER_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
 

@@ -35,7 +35,7 @@
 #ifndef INCLUDED_MULTIFILTER_HPP
 #define INCLUDED_MULTIFILTER_HPP
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 #include <pdal/Stage.hpp>
 
