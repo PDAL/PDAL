@@ -34,7 +34,7 @@
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/Utils.hpp>
-
+#include <boost/bind/placeholders.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant

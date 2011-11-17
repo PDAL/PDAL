@@ -79,8 +79,8 @@ public:
 #endif
     }
     
-    void CPL_STDCALL log(::CPLErr code, int num, char const* msg);
-    void CPL_STDCALL error(::CPLErr code, int num, char const* msg);
+    void log(::CPLErr code, int num, char const* msg);
+    void error(::CPLErr code, int num, char const* msg);
 
 
 private:
