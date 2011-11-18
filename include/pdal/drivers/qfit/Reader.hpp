@@ -166,6 +166,7 @@ private:
     boost::uint32_t m_size;
     bool m_flip_x;
     double m_scale_z;
+    bool m_littleEndian;
     
     void registerFields();
 

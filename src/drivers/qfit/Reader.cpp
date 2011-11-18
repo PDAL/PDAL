@@ -226,12 +226,15 @@ Reader::Reader(const Options& options)
     , m_size(0)
     , m_flip_x(true)
     , m_scale_z(1.0)
+    , m_littleEndian(false)
 {
     std::string filename= getFileName();
     
     m_flip_x = getOptions().getValueOrDefault("flip_coordinates", true);
     m_scale_z = getOptions().getValueOrDefault("scale_z", 1.0);
-    
+
+    m_littleEndian = getOptions().getValueOrDefault("little_endian", false);
+        
     std::istream* str = FileUtils::openFile(filename);
     
     if (str == 0) 
@@ -245,7 +248,9 @@ Reader::Reader(const Options& options)
     boost::int32_t int4(0);
     
     Utils::read_n(int4, *str, sizeof(int4));
-    QFIT_SWAP_BE_TO_LE(int4);
+    
+    if (!m_littleEndian)
+        QFIT_SWAP_BE_TO_LE(int4);
     
     if ( int4 % 4 != 0)
         throw qfit_error("Base QFIT format is not a multiple of 4, unrecognized format!");
@@ -258,7 +263,9 @@ Reader::Reader(const Options& options)
     str->seekg(m_size+sizeof(int4));
 
     Utils::read_n(int4, *str, sizeof(int4));
-    QFIT_SWAP_BE_TO_LE(int4);
+    if (!m_littleEndian)
+        QFIT_SWAP_BE_TO_LE(int4);
+
     m_offset = static_cast<std::size_t>(int4);
     
     registerFields();
@@ -336,9 +343,11 @@ const Options Reader::getDefaultOptions() const
     Option filename("filename", "", "file to read from");
     Option flip_coordinates("flip_coordinates", true, "Flip coordinates from 0-360 to -180-180");
     Option convert_z_units("scale_z", 1.0, "Z scale. Use 0.001 to go from mm to m");
+    Option little_endian("little_endian", false, "Are data in little endian format?");
     options.add(filename);
     options.add(flip_coordinates);
     options.add(convert_z_units);
+    options.add(little_endian);
     return options;
 }
 
@@ -469,15 +478,18 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
         {
 
             boost::int32_t time = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(time);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(time);
             data.setField<boost::int32_t>(pointIndex, indexes.Time, time);
 
             boost::int32_t y = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(y);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(y);
             data.setField<boost::int32_t>(pointIndex, indexes.Y, y);
 
             boost::int32_t x = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(x);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(x);
             
 
             if (m_flip_x) {
@@ -491,27 +503,33 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             data.setField<boost::int32_t>(pointIndex, indexes.X, x);
 
             boost::int32_t z = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(z);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(z);
             data.setField<boost::int32_t>(pointIndex, indexes.Z, z);
 
             boost::int32_t start_pulse = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(start_pulse);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(start_pulse);
             data.setField<boost::int32_t>(pointIndex, indexes.StartPulse, start_pulse);
 
             boost::int32_t reflected_pulse = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(reflected_pulse);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(reflected_pulse);
             data.setField<boost::int32_t>(pointIndex, indexes.ReflectedPulse, reflected_pulse);
 
             boost::int32_t scan_angle = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(scan_angle);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(scan_angle);
             data.setField<boost::int32_t>(pointIndex, indexes.ScanAngleRank, scan_angle);
 
             boost::int32_t pitch = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(pitch);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(pitch);
             data.setField<boost::int32_t>(pointIndex, indexes.Pitch, pitch);
 
             boost::int32_t roll = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(roll);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(roll);
             data.setField<boost::int32_t>(pointIndex, indexes.Roll, roll);
 
         }
@@ -519,15 +537,18 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
         if (m_format == QFIT_Format_12) 
         {
             boost::int32_t pdop = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(pdop);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(pdop);
             data.setField<boost::int32_t>(pointIndex, indexes.PDOP, pdop);
 
             boost::int32_t pulse_width = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(pulse_width);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(pulse_width);
             data.setField<boost::int32_t>(pointIndex, indexes.PulseWidth, pulse_width);
 
             boost::int32_t gpstime = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(gpstime);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(gpstime);
             data.setField<boost::int32_t>(pointIndex, indexes.GPSTime, gpstime);
 
         }
@@ -535,30 +556,36 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
         else if (m_format == QFIT_Format_14)
         {
             boost::int32_t passive_signal = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(passive_signal);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(passive_signal);
             data.setField<boost::int32_t>(pointIndex, indexes.PassiveSignal, passive_signal);
 
             boost::int32_t passive_y = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(passive_y);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(passive_y);
             data.setField<boost::int32_t>(pointIndex, indexes.PassiveY, passive_y);
 
             boost::int32_t passive_x = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(passive_x);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(passive_x);
             data.setField<boost::int32_t>(pointIndex, indexes.PassiveX, passive_x);
 
             boost::int32_t passive_z = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(passive_z);         
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(passive_z);         
             data.setField<boost::int32_t>(pointIndex, indexes.PassiveZ, passive_z);
 
             boost::int32_t gpstime = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(gpstime);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(gpstime);
             data.setField<boost::int32_t>(pointIndex, indexes.GPSTime, gpstime);
 
      
         }
         else {
             boost::int32_t gpstime = Utils::read_field<boost::int32_t>(p);
-            QFIT_SWAP_BE_TO_LE(gpstime);
+            if (!m_littleEndian)
+                QFIT_SWAP_BE_TO_LE(gpstime);
             data.setField<boost::int32_t>(pointIndex, indexes.GPSTime, gpstime);
             
         }
