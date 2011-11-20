@@ -259,7 +259,7 @@ endif()
 
 # swig support
 if (WIN32)
-  set(WITH_SWIG_CSHARP TRUE CACHE BOOL "Choose if you want to make C# bindings via Swig")
+  set(WITH_SWIG_CSHARP FALSE CACHE BOOL "Choose if you want to make C# bindings via Swig")
 else()
   set(WITH_SWIG_CSHARP FALSE CACHE BOOL "Choose if you want to make C# bindings via Swig")
 endif()
