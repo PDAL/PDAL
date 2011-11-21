@@ -1191,7 +1191,10 @@ void Writer::UpdatePCExtent()
     std::string eleminfo = CreatePCElemInfo();
 
 
-    std::string trigger = ShutOff_SDO_PC_Trigger();
+    std::string trigger;
+    
+    if (! getOptions().getValueOrDefault<bool>("base_trigger_reenable", false))
+        trigger = ShutOff_SDO_PC_Trigger();
     
     std::ostringstream s_geom;
     boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("stream_output_precision");
@@ -1233,7 +1236,9 @@ void Writer::UpdatePCExtent()
     }
     m_connection->Commit();    
 
-    TurnOn_SDO_PC_Trigger(trigger);
+    if (! getOptions().getValueOrDefault<bool>("base_trigger_reenable", false))
+        TurnOn_SDO_PC_Trigger(trigger);
+        
     m_connection->Commit();    
     
 }
