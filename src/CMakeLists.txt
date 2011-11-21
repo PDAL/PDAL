@@ -376,6 +376,7 @@ list (APPEND PDAL_HPP ${PDAL_FILTERS_HPP} )
 set(PDAL_CONFIG_HPP
   ${PDAL_HEADERS_DIR}/export.hpp
   ${PDAL_HEADERS_DIR}/pdal.hpp
+  ${PDAL_HEADERS_DIR}/pdal_internal.hpp
   ${PDAL_HEADERS_DIR}/pdal_config.hpp
   ${PDAL_HEADERS_DIR}/pdal_defines.h
 )

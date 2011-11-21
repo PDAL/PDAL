@@ -14,7 +14,7 @@
 // http://nehe.gamedev.net/data/lessons/lesson.asp?lesson=48
 //
 
-#include <pdal/pdal.hpp>
+#include <pdal/pdal_internal.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
 #include <windows.h>
