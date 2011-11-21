@@ -422,13 +422,15 @@ public:
         {
             if (getMinimum(d) > getMaximum(d) )
             {
+
                 // Allow infinity bounds
                 if (!Utils::compare_distance<T>(getMinimum(d), (std::numeric_limits<T>::max)()) &&
                     !Utils::compare_distance<T>(getMaximum(d), -(std::numeric_limits<T>::min)()))
                 {
                     std::ostringstream msg;
                     msg << "pdal::Bounds::verify: Minimum point at dimension " << d
-                        << " is greater than maximum point.  Neither point is infinity.";
+                        << " is greater than maximum point.  Neither point is infinity."
+                        << " min: " << getMinimum(d) << " max: " << getMaximum(d);
                     throw pdal::bounds_error(msg.str());
                 }
             }
