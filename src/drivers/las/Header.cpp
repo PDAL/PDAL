@@ -373,20 +373,6 @@ void LasHeader::SetHeaderPadding( boost::uint32_t v)
     m_headerPadding = v;
 }
 
-void LasHeader::SetMax(double x, double y, double z)
-{
-    // m_extent = Bounds(m_extent.min(0), m_extent.min(1), m_extent.max(0), m_extent.max(1), m_extent.min(2), m_extent.max(2));
-    // Bounds(minx, miny, minz, maxx, maxy, maxz)
-    Bounds<double> temp(m_bounds.getMinimum(0), m_bounds.getMinimum(1), m_bounds.getMinimum(2), x, y, z);
-    m_bounds = temp;
-}
-
-void LasHeader::SetMin(double x, double y, double z)
-{
-    Bounds<double> temp(x, y, z, m_bounds.getMaximum(0), m_bounds.getMaximum(1), m_bounds.getMaximum(2));
-    m_bounds = temp;
-}
-
 void LasHeader::initialize()
 {
     // Initialize public header block with default

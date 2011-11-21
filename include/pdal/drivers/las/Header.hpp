@@ -291,12 +291,6 @@ public:
     /// Get maximum value of extent of Z coordinate.
     double GetMinZ() const;
 
-    /// Set maximum values of extent of X, Y and Z coordinates.
-    void SetMax(double x, double y, double z);
-
-    /// Set minimum values of extent of X, Y and Z coordinates.
-    void SetMin(double x, double y, double z);
-
     const Bounds<double>& getBounds() const { return m_bounds; }
     void setBounds(const Bounds<double>& bounds) { m_bounds = bounds; }
 

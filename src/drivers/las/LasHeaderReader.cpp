@@ -245,8 +245,10 @@ void LasHeaderReader::read(Schema& schema)
     Utils::read_n(z1, m_istream, sizeof(z1));
     Utils::read_n(z2, m_istream, sizeof(z2));
 
-    m_header.SetMax(x1, y1, z1);
-    m_header.SetMin(x2, y2, z2);
+    pdal::Bounds<double> b = pdal::Bounds<double>(x2, y2, z2, x1, y1, z1);
+    m_header.setBounds(b);
+    // m_header.SetMax(x1, y1, z1);
+    // m_header.SetMin(x2, y2, z2);
 
     {
         // We're going to check the two bytes off the end of the header to 
