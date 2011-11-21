@@ -165,8 +165,13 @@ BOOST_AUTO_TEST_CASE(test_clip)
     r1.clip(r5);
  
     // BUG: seems wrong -- need to better define semantics of clip, etc
-    Bounds<int> r6(20,40,6,8);
-    BOOST_CHECK(r1==r6);
+    // .clip() can make an invalid bounds, this should be fixed.
+    Bounds<int> r6(20,6, 40,8);
+    
+    BOOST_CHECK(r1.getMinimum(0) == 20);
+    BOOST_CHECK(r1.getMaximum(0) == 6);
+    BOOST_CHECK(r1.getMinimum(1) == 40);
+    BOOST_CHECK(r1.getMaximum(1) == 8);
 }
 
 BOOST_AUTO_TEST_CASE(test_intersect)
