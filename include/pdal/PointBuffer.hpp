@@ -199,7 +199,7 @@ inline void PointBuffer::setField(std::size_t pointIndex, boost::int32_t fieldIn
     assert(offset + sizeof(T) <= m_pointSize * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
 
-    *(T*)p = value;
+    *(T*)(void*)p = value;
 }
 
 inline void PointBuffer::setFieldData(std::size_t pointIndex, boost::int32_t fieldIndex, const boost::uint8_t* data)
@@ -237,7 +237,7 @@ inline T PointBuffer::getField(std::size_t pointIndex, boost::int32_t fieldIndex
     assert(offset + sizeof(T) <= m_pointSize * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
 
-    return *(T*)p;
+    return *(T*)(void*)p;
 }
 
 template <class T>
@@ -246,7 +246,7 @@ inline T PointBuffer::getRawField(std::size_t pointIndex, std::size_t pointByteP
     std::size_t offset = (pointIndex * m_pointSize) + pointBytePosition;
     boost::uint8_t* p = m_data.get() + offset;
 
-    return *(T*)p;
+    return *(T*)(void*)p;
 }
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);

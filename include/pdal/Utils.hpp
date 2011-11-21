@@ -81,7 +81,7 @@ public:
     template<class T>
     static inline void write_field(boost::uint8_t*& dest, T v)
     {
-        *(T*)dest = v;
+        *(T*)(void*)dest = v;
         dest += sizeof(T);
         return;
     }
@@ -89,7 +89,7 @@ public:
     template<class T>
     static inline T read_field(boost::uint8_t*& src)
     {
-        T tmp = *(T*)src;
+        T tmp = *(T*)(void*)src;
         src += sizeof(T);
         return tmp;
     }
