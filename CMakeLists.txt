@@ -261,9 +261,11 @@ endif()
 
 # swig support
 if (WIN32)
-  set(WITH_SWIG_CSHARP FALSE CACHE BOOL "Choose if you want to make C# bindings via Swig")
+    # keep C# bindings it off by default, even on windows, since not everyone wants it
+    set(WITH_SWIG_CSHARP FALSE CACHE BOOL "Choose if you want to make C# bindings via Swig")
 else()
-  set(WITH_SWIG_CSHARP FALSE CACHE BOOL "Choose if you want to make C# bindings via Swig")
+    # swig/C# not likely to be supported anytime soon
+    set(WITH_SWIG_CSHARP FALSE CACHE BOOL "Choose if you want to make C# bindings via Swig")
 endif()
 
 set(WITH_SWIG_PYTHON FALSE CACHE BOOL "Choose if you want to make Python bindings via Swig")
