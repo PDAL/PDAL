@@ -66,7 +66,7 @@ public:
         return false;
     }
 
-    boost::uint64_t getNumPoints() { return 0; }
+    boost::uint64_t getNumPoints() const { return 0; }
     
     pdal::StageSequentialIterator* createSequentialIterator() const;
     
