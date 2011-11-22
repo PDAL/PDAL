@@ -75,7 +75,7 @@ boost::property_tree::ptree Option::toPTree() const
     return t;
 }
 
-#if !defined(PDAL_COMPILER_VC10)
+#if !defined(PDAL_COMPILER_MSVC)
 // explicit specialization:
 //   boost::lexical_cast only understands "0" and "1" for bools,
 //   so we handle those situations explicitly
