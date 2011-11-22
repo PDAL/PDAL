@@ -177,6 +177,10 @@ void Stage::setCoreProperties(const Stage& stage)
     return;
 }
 
+void Stage::addDefaultDimension(Dimension const& dim)
+{
+    m_defaultDimensions.push_back(dim);
+}
 
 boost::property_tree::ptree Stage::toPTree() const
 {

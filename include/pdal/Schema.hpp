@@ -64,6 +64,7 @@ class PDAL_DLL Schema
 {
 public:
     Schema();
+    Schema(std::vector<Dimension> const& dimensions);
     Schema(Schema const& other);
 
     Schema& operator=(Schema const& rhs);

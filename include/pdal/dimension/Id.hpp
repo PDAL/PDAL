@@ -40,6 +40,8 @@
 namespace pdal
 {
 
+class Dimension;
+
 class PDAL_DLL DimensionId
 {
 public:
@@ -131,6 +133,8 @@ public:
     static Id getIdFromName(std::string const& name);
     static void lookupKnownDimension(const Id& id, boost::uint32_t/*Dimension::DataType*/& datatype, std::string& name, std::string& description);
     static bool hasKnownDimension(const Id& id);
+    static Id getIdForDimension(Dimension const& d);
+
 };
 
 

@@ -58,6 +58,7 @@ Reader::Reader(const Options& options)
     , m_numPoints(options.getValueOrThrow<boost::uint64_t>("num_points"))
     , m_mode(string2mode(options.getValueOrThrow<std::string>("mode")))
 {
+    addDefaultDimensions();
     return;
 }
 
@@ -68,6 +69,7 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
     , m_numPoints(numPoints)
     , m_mode(mode)
 {
+    addDefaultDimensions();
     return;
 }
 
@@ -82,46 +84,33 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
         throw; // BUG
     }
 
-    m_dimensions = dimensions;
-
+    for (boost::uint32_t i=0; i < dimensions.size(); i++)
+    {
+        const Dimension& dim = dimensions[i];
+        addDefaultDimension(dim);
+    }
     return;
 }
 
+void Reader::addDefaultDimensions()
+{
+    Dimension x("X", dimension::Float, 8);
+    Dimension y("Y", dimension::Float, 8);
+    Dimension z("Z", dimension::Float, 8);
+    Dimension t("Time", dimension::UnsignedInteger, 8);
+    addDefaultDimension(x);
+    addDefaultDimension(y);
+    addDefaultDimension(z);
+    addDefaultDimension(t);
+}
 
 void Reader::initialize()
 {
     pdal::Reader::initialize();
 
     Schema& schema = getSchemaRef();
-
-    if (m_dimensions.size() == 0)
-    {
-        // these are the default dimensions we use
-        Dimension dimx(DimensionId::X_f64);
-        dimx.setFlags(pdal::dimension::IsAdded & pdal::dimension::IsWritten);
-        schema.appendDimension(dimx);
-
-        Dimension dimy(DimensionId::Y_f64);
-        dimy.setFlags(pdal::dimension::IsAdded & pdal::dimension::IsWritten);
-        schema.appendDimension(dimy);
-
-        Dimension dimz(DimensionId::Z_f64);
-        dimz.setFlags(pdal::dimension::IsAdded & pdal::dimension::IsWritten);
-        schema.appendDimension(dimz);
-
-        Dimension dimt(DimensionId::Time_u64);
-        dimt.setFlags(pdal::dimension::IsAdded & pdal::dimension::IsWritten);
-        schema.appendDimension(dimt);
-    }
-    else
-    {
-        for (boost::uint32_t i=0; i<m_dimensions.size(); i++)
-        {
-            const Dimension& dim = m_dimensions[i];
-            schema.appendDimension(dim);
-        }
-    }
-
+    schema = Schema(getDefaultDimensions());
+    
     setNumPoints(m_numPoints);
     setPointCountType(PointCount_Fixed);
 

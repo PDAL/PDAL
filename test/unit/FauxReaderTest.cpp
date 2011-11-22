@@ -390,8 +390,8 @@ BOOST_AUTO_TEST_CASE(test_custom_fields)
 {
     Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
 
-    Dimension dimY(DimensionId::Red_u8);
-    Dimension dimX(DimensionId::Blue_u8);
+    Dimension dimY("Red", dimension::UnsignedInteger, 1);//DimensionId::Red_u8);
+    Dimension dimX("Blue", dimension::UnsignedInteger, 1);//::Blue_u8);
     std::vector<Dimension> dims;
     dims.push_back(dimY);
     dims.push_back(dimX);

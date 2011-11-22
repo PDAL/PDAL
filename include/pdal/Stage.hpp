@@ -89,11 +89,12 @@ public:
 protected:
     // setters for the core properties
     Schema& getSchemaRef();
-    void setSchema(const Schema&);
+    void setSchema(Schema const&);
     void setNumPoints(boost::uint64_t);
     void setPointCountType(PointCountType);
-    void setBounds(const Bounds<double>&);
-    void setSpatialReference(const SpatialReference&);
+    void setBounds(Bounds<double> const&);
+    void setSpatialReference(SpatialReference const&);
+    void addDefaultDimension(Dimension const&);
     
     virtual MetadataRecord& getMetadataRecordRef(int index);
 

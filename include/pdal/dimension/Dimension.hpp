@@ -73,7 +73,7 @@ namespace dimension {
     {
         SignedByte,
         UnsignedByte,
-        Integer,
+        SignedInteger,
         UnsignedInteger,
         Pointer,
         Float,
@@ -136,6 +136,8 @@ public:
     {
         return m_id;
     }
+    
+    inline dimension::Interpretation getInterpretation() const { return m_interpretation; }
 
     boost::uint32_t getFlags() const { return m_flags; }
     void setFlags(boost::uint32_t flags) { m_flags = flags; }

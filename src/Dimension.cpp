@@ -106,7 +106,38 @@ Dimension::Dimension(   std::string const& name,
     , m_position(0)    
     , m_interpretation(interpretation)
 {
-    
+    m_id = DimensionId::getIdForDimension(*this);
+    if (interpretation == dimension::UnsignedInteger)
+    {
+        if (sizeInBytes == 1)
+            m_dataType = Uint8;
+        if (sizeInBytes == 2)
+            m_dataType = Uint16;
+        if (sizeInBytes == 4)
+            m_dataType = Uint32;
+        if (sizeInBytes == 8)
+            m_dataType = Uint64;
+    }
+    if (interpretation == dimension::SignedInteger)
+    {
+        if (sizeInBytes == 1)
+            m_dataType = Int8;
+        if (sizeInBytes == 2)
+            m_dataType = Int16;
+        if (sizeInBytes == 4)
+            m_dataType == Int32;
+        if (sizeInBytes == 8)
+            m_dataType == Int64;
+        
+    }
+    if (interpretation == dimension::Float)
+    {
+        if (sizeInBytes == 4)
+            m_dataType = Float;
+        if (sizeInBytes == 8)
+            m_dataType = Double;
+        
+    }
 }
 
 /// copy constructor

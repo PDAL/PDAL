@@ -503,5 +503,166 @@ DimensionId::Id DimensionId::getIdFromName(std::string const& name)
     throw pdal_error("unknown field name: " + name);
 }
 
+DimensionId::Id DimensionId::getIdForDimension(Dimension const& d)
+{
+    // BUG: should we be checking for the Double datatype version of X,Y,Z too?
+    if (boost::iequals(d.getName(), "X"))
+    {
+        switch (d.getInterpretation())
+        {
+            case dimension::SignedInteger:
+                if (d.getByteSize() == 4)
+                {
+                    return DimensionId::X_i32;
+                } 
+                break;
+            case dimension::Float:
+                return DimensionId::X_f64;
+                break;
+            default:
+                return DimensionId::X_i32;
+        }
+    }   
+
+    if (boost::iequals(d.getName(), "Y"))
+    {
+        switch (d.getInterpretation())
+        {
+            case dimension::SignedInteger:
+                if (d.getByteSize() == 4)
+                {
+                    return DimensionId::Y_i32;
+                } 
+                break;
+            case dimension::Float:
+                return DimensionId::Y_f64;
+                break;
+            default:
+                return DimensionId::Y_i32;
+        }
+    }   
+
+    if (boost::iequals(d.getName(), "Z"))
+    {
+        switch (d.getInterpretation())
+        {
+            case dimension::SignedInteger:
+                if (d.getByteSize() == 4)
+                {
+                    return DimensionId::Z_i32;
+                } 
+                break;
+            case dimension::Float:
+                return DimensionId::Z_f64;
+                break;
+            default:
+                return DimensionId::Z_i32;
+        }
+    }   
+
+
+    if (boost::iequals(d.getName(), "Intensity"))
+        return DimensionId::Las_Intensity;
+
+    if (boost::iequals(d.getName(), "Return Number") ||
+        boost::iequals(d.getName(), "ReturnNumber"))
+        return DimensionId::Las_ReturnNumber;
+
+    if (boost::iequals(d.getName(), "Number of Returns") ||
+        boost::iequals(d.getName(), "NumberOfReturns"))
+        return DimensionId::Las_NumberOfReturns;
+
+    if (boost::iequals(d.getName(), "Number of Returns"))
+        return DimensionId::Las_NumberOfReturns;
+
+    if (boost::iequals(d.getName(), "Scan Direction") ||
+        boost::iequals(d.getName(), "ScanDirectionFlag") ||
+        boost::iequals(d.getName(), "ScanDirection"))
+        return DimensionId::Las_ScanDirectionFlag;
+
+    if (boost::iequals(d.getName(), "Flightline Edge") ||
+        boost::iequals(d.getName(), "EdgeOfFlightLine") ||
+        boost::iequals(d.getName(), "FlightlineEdge"))
+        return DimensionId::Las_EdgeOfFlightLine;
+
+    if (boost::iequals(d.getName(), "Classification"))
+        return DimensionId::Las_Classification;
+
+    if (boost::iequals(d.getName(), "Scan Angle Rank") ||
+        boost::iequals(d.getName(), "ScanAngle") ||
+        boost::iequals(d.getName(), "ScanAngleRank"))
+        return DimensionId::Las_ScanAngleRank;
+
+    if (boost::iequals(d.getName(), "User Data") ||
+        boost::iequals(d.getName(), "UserData"))
+        return DimensionId::Las_UserData;
+
+    if (boost::iequals(d.getName(), "Point Source ID")||
+        boost::iequals(d.getName(), "PointSourceId"))
+        return DimensionId::Las_PointSourceId;
+
+    if (boost::iequals(d.getName(), "Time"))
+        return DimensionId::Time_u64;
+
+    if (boost::iequals(d.getName(), "Red"))
+        return DimensionId::Red_u8;
+
+    if (boost::iequals(d.getName(), "Green"))
+        return DimensionId::Green_u8;
+
+    if (boost::iequals(d.getName(), "Blue"))
+        return DimensionId::Blue_u8;
+
+    if (boost::iequals(d.getName(), "Alpha"))
+        return DimensionId::TerraSolid_Alpha;
+    
+    if (boost::iequals(d.getName(), "Chipper:PointID"))
+        return DimensionId::Chipper_1;
+
+    if (boost::iequals(d.getName(), "Chipper:BlockID"))
+        return DimensionId::Chipper_2;
+
+    if (boost::iequals(d.getName(), "QFIT:StartPulse"))
+        return DimensionId::Qfit_StartPulse;
+
+    if (boost::iequals(d.getName(), "QFIT:ReflectedPulse"))
+        return DimensionId::Qfit_ReflectedPulse;
+
+    if (boost::iequals(d.getName(), "QFIT:ScanAngleRank"))
+        return DimensionId::Qfit_ScanAngleRank;
+
+    if (boost::iequals(d.getName(), "QFIT:Pitch"))
+        return DimensionId::Qfit_Pitch;
+
+    if (boost::iequals(d.getName(), "QFIT:Roll"))
+        return DimensionId::Qfit_Roll;
+
+    if (boost::iequals(d.getName(), "QFIT:Time"))
+        return DimensionId::Qfit_Time;
+
+    if (boost::iequals(d.getName(), "QFIT:PassiveSignal"))
+        return DimensionId::Qfit_PassiveSignal;
+
+    if (boost::iequals(d.getName(), "QFIT:PassiveX"))
+        return DimensionId::Qfit_PassiveX;
+
+    if (boost::iequals(d.getName(), "QFIT:PassiveY"))
+        return DimensionId::Qfit_PassiveY;
+
+    if (boost::iequals(d.getName(), "QFIT:PassiveZ"))
+        return DimensionId::Qfit_PassiveZ;
+
+    if (boost::iequals(d.getName(), "QFIT:GpsTime"))
+        return DimensionId::Qfit_GpsTime;
+
+    if (boost::iequals(d.getName(), "QFIT:PDOP"))
+        return DimensionId::Qfit_PDOP;
+
+    if (boost::iequals(d.getName(), "QFIT:PulseWdith"))
+        return DimensionId::Qfit_PulseWidth;
+        
+    // Yes, this is scary.  What else can we do?
+    throw pdal_error("unknown field name: " + d.getName());
+}
 
 } // namespace pdal

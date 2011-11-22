@@ -61,6 +61,16 @@ Schema::Schema()
     return;
 }
 
+Schema::Schema(std::vector<Dimension> const& dimensions)
+    : m_byteSize(0)
+{
+    
+    for (   std::vector<Dimension>::const_iterator i = dimensions.begin(); 
+            i != dimensions.end(); ++i)
+    {
+        appendDimension(*i);
+    }
+}
 
 /// copy constructor
 Schema::Schema(Schema const& other) 
@@ -88,14 +98,21 @@ Schema& Schema::operator=(Schema const& rhs)
 
 bool Schema::operator==(const Schema& other) const
 {
-    if (m_dimensions == other.m_dimensions &&
-        m_byteSize == other.m_byteSize &&
-        m_dimensions_map == other.m_dimensions_map)
+    if (m_byteSize != other.m_byteSize) return false;
+    if (m_dimensions.size() != other.m_dimensions.size()) return false;
+    std::vector<Dimension>::size_type i(0);
+    for (i = 0; i < m_dimensions.size(); ++i)
     {
-        return true;
+        if (!(m_dimensions[i] == other.m_dimensions[i])) 
+        {
+            std::cout << m_dimensions[i] << std::endl;
+            std::cout << other.m_dimensions[i] << std::endl;
+            std::cout << "dimensions !=" << std::endl;
+            return false;
+        }
     }
 
-    return false;
+    return true;
 }
 
 

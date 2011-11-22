@@ -108,6 +108,7 @@ private:
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
+    void addDefaultDimensions();
 };
 
 
