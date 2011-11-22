@@ -260,8 +260,8 @@ BOOST_AUTO_TEST_CASE(Options_test_add_vs_put)
 
 BOOST_AUTO_TEST_CASE(Options_test_bool)
 {
-    pdal::Option a("a","true");
-    pdal::Option b("b","false");
+    pdal::Option a("a","true", "");
+    pdal::Option b("b","false", "");
     pdal::Option c("c",true);
     pdal::Option d("d",false);
 
