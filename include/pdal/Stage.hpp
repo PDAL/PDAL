@@ -68,6 +68,7 @@ public:
 
     // core properties of all stages
     const Schema& getSchema() const;
+    virtual std::vector<Dimension> const& getDefaultDimensions() const {return m_defaultDimensions;}
     virtual boost::uint64_t getNumPoints() const;
     PointCountType getPointCountType() const;
     const Bounds<double>& getBounds() const;
@@ -106,6 +107,7 @@ private:
     PointCountType m_pointCountType;
     Bounds<double> m_bounds;
     SpatialReference m_spatialReference;
+    std::vector<Dimension> m_defaultDimensions;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented

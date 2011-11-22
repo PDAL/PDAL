@@ -98,19 +98,19 @@ void Reader::initialize()
     {
         // these are the default dimensions we use
         Dimension dimx(DimensionId::X_f64);
-        dimx.setFlags(Dimension::IsAdded & Dimension::IsWritten);
+        dimx.setFlags(pdal::dimension::IsAdded & pdal::dimension::IsWritten);
         schema.appendDimension(dimx);
 
         Dimension dimy(DimensionId::Y_f64);
-        dimy.setFlags(Dimension::IsAdded & Dimension::IsWritten);
+        dimy.setFlags(pdal::dimension::IsAdded & pdal::dimension::IsWritten);
         schema.appendDimension(dimy);
 
         Dimension dimz(DimensionId::Z_f64);
-        dimz.setFlags(Dimension::IsAdded & Dimension::IsWritten);
+        dimz.setFlags(pdal::dimension::IsAdded & pdal::dimension::IsWritten);
         schema.appendDimension(dimz);
 
         Dimension dimt(DimensionId::Time_u64);
-        dimt.setFlags(Dimension::IsAdded & Dimension::IsWritten);
+        dimt.setFlags(pdal::dimension::IsAdded & pdal::dimension::IsWritten);
         schema.appendDimension(dimt);
     }
     else
