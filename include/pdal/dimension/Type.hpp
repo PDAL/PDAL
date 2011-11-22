@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2011, Howard Butler (hobu.inc@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,96 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PDAL_DIMENSIONTYPE_HPP_INCLUDED
-#define PDAL_DIMENSIONTYPE_HPP_INCLUDED
+#ifndef PDAL_DIMENSION_TYPE_HPP_INCLUDED
+#define PDAL_DIMENSION_TYPE_HPP_INCLUDED
 
-#include <pdal/pdal_internal.hpp>
-
-namespace pdal
-{
-
-namespace dimension
-{
-    
-class PDAL_DLL DimensionType
-{
-public:
-
-    enum Type
-    {
-    //
-    // common field types: 0..999
-    // 
-    X = 0,
-    Y,
-    Z,
-
-    Red,
-    Green,
-    Blue,
-    Alpha,
-    Time,
-
-    //
-    // LAS: 1000..1999
-    //
-    Intensity = 1000,
-    ReturnNumber,
-    NumberOfReturns,
-    ScanDirectionFlag,
-    EdgeOfFlightLine,
-    Classification,
-    ScanAngleRank,
-    UserData,
-    PointSourceId,
-    WavePacketDescriptorIndex,
-    WaveformDataOffset,
-    ReturnPointWaveformLocation,
-    WaveformXt,
-    WaveformYt,
-    WaveformZt,
-
-    //
-    // terrasolid: 2000..2999
-    // 
-    TerraSolid_Alpha = 2000,
-    TerraSolid_Classification,
-    TerraSolid_PointSourceId_u8,
-    TerraSolid_PointSourceId_u16,
-    TerraSolid_ReturnNumber_u8,
-    TerraSolid_ReturnNumber_u16,
-    TerraSolid_Flag,
-    TerraSolid_Mark,
-    TerraSolid_Intensity,
-    TerraSolid_Time,
-
-    //
-    // chipper stuff: 3000..3999
-    // 
-    Chipper_1 = 3000,
-    Chipper_2,
-
-    //
-    // qfit: 4000..4999
-    // 
-    StartPulse = 4000,
-    ReflectedPulse,
-    Pitch,
-    Roll,
-    PassiveSignal,
-    PassiveX,
-    PassiveY,
-    PassiveZ,
-    GpsTime,
-    PDOP,
-    PulseWidth
-
-
-    };
-
-};
-
-
-}} // namespace pdal::dimension
 
 #endif // PDAL_DIMENSIONID_HPP_INCLUDED

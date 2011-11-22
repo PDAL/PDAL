@@ -58,7 +58,6 @@ Dimension::Dimension(DimensionId::Id id)
     , m_description(std::string(""))
     , m_min(0.0)
     , m_max(0.0)
-    , m_precise(false)
     , m_numericScale(1.0)
     , m_numericOffset(0.0)
     , m_byteOffset(0)
@@ -82,7 +81,6 @@ Dimension::Dimension(DimensionId::Id id, DataType dataType, std::string name, st
     , m_description(description)
     , m_min(0.0)
     , m_max(0.0)
-    , m_precise(false)
     , m_numericScale(1.0)
     , m_numericOffset(0.0)
     , m_byteOffset(0)
@@ -91,6 +89,24 @@ Dimension::Dimension(DimensionId::Id id, DataType dataType, std::string name, st
     assert(!DimensionId::hasKnownDimension(id));
     
     m_byteSize = getDataTypeSize(m_dataType);
+}
+
+Dimension::Dimension(   std::string const& name, 
+                        dimension::Interpretation interpretation,
+                        dimension::size_type sizeInBytes)
+    : m_name(name)
+    , m_flags(0)
+    , m_endian(pdal::Endian_Little)    
+    , m_byteSize(sizeInBytes)
+    , m_min(0.0)
+    , m_max(0.0)
+    , m_numericScale(1.0)
+    , m_numericOffset(0.0)
+    , m_byteOffset(0)
+    , m_position(0)    
+    , m_interpretation(interpretation)
+{
+    
 }
 
 /// copy constructor
@@ -104,7 +120,6 @@ Dimension::Dimension(Dimension const& other)
     , m_description(other.m_description)
     , m_min(other.m_min)
     , m_max(other.m_max)
-    , m_precise(other.m_precise)
     , m_numericScale(other.m_numericScale)
     , m_numericOffset(other.m_numericOffset)
     , m_byteOffset(other.m_byteOffset)
@@ -127,7 +142,6 @@ Dimension& Dimension::operator=(Dimension const& rhs)
         m_description = rhs.m_description;
         m_min = rhs.m_min;
         m_max = rhs.m_max;
-        m_precise = rhs.m_precise;
         m_numericScale = rhs.m_numericScale;
         m_numericOffset = rhs.m_numericOffset;
         m_byteOffset = rhs.m_byteOffset;
@@ -149,7 +163,6 @@ bool Dimension::operator==(const Dimension& other) const
         m_description == other.m_description &&
         Utils::compare_approx(m_min, other.m_min, (std::numeric_limits<double>::min)()) &&
         Utils::compare_approx(m_max, other.m_max, (std::numeric_limits<double>::min)()) &&
-        m_precise == other.m_precise &&
         Utils::compare_approx(m_numericScale, other.m_numericScale, (std::numeric_limits<double>::min)()) &&
         Utils::compare_approx(m_numericOffset, other.m_numericOffset, (std::numeric_limits<double>::min)()) &&
         m_byteOffset == other.m_byteOffset &&

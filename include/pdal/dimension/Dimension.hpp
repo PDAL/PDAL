@@ -54,6 +54,33 @@
 namespace pdal
 {
 
+namespace dimension {
+
+
+
+    enum Flags
+    {
+        Invalid   = 0x0,
+        IsAdded   = 0x1,
+        IsRead    = 0x2,
+        IsWritten = 0x4,
+        IsIgnored = 0x8
+    };
+
+    typedef std::size_t size_type;
+    
+    enum Interpretation
+    {
+        SignedByte,
+        UnsignedByte,
+        Integer,
+        UnsignedInteger,
+        Pointer,
+        Float,
+        Undefined
+    };
+    
+} // dimension
 
 /// A Dimension consists of a name and a datatype.
 ///
@@ -79,16 +106,10 @@ public:
         Undefined
     };
 
-    enum Flags
-    {
-        Invalid   = 0x0,
-        IsAdded   = 0x1,
-        IsRead    = 0x2,
-        IsWritten = 0x4,
-        IsIgnored = 0x8
-    };
-
 /// \name Constructors
+    Dimension(  std::string const& name, 
+                dimension::Interpretation interpretation,
+                dimension::size_type sizeInBytes);
     Dimension(DimensionId::Id id); // will use table to lookup datatype, description, etc
     Dimension(DimensionId::Id id, DataType datatype, std::string name, std::string description=std::string("")); // for dimensions not in the master table
     Dimension(Dimension const& other);
@@ -99,7 +120,6 @@ public:
     bool operator==(const Dimension& other) const;
     bool operator!=(const Dimension& other) const;
 
-    
     inline bool operator < (Dimension const& dim) const 
     {
         return m_position < dim.m_position;
@@ -120,26 +140,25 @@ public:
     boost::uint32_t getFlags() const { return m_flags; }
     void setFlags(boost::uint32_t flags) { m_flags = flags; }
 
-    bool isValid() const { return (m_flags != Invalid); }
-    bool isRead() const { return (m_flags & IsRead) == IsRead; }
-    bool isWritten() const { return (m_flags & IsWritten) == IsWritten; }
-    bool isIgnored() const { return (m_flags & IsIgnored) == IsIgnored; }
+    bool isValid() const { return (m_flags != dimension::Invalid); }
+    bool isRead() const { return (m_flags & dimension::IsRead) == dimension::IsRead; }
+    bool isWritten() const { return (m_flags & dimension::IsWritten) == dimension::IsWritten; }
+    bool isIgnored() const { return (m_flags & dimension::IsIgnored) == dimension::IsIgnored; }
     
     DataType getDataType() const
     {
         return m_dataType;
     }
 
-
     static std::string getDataTypeName(DataType);
     static DataType getDataTypeFromString(const std::string&);
-    static std::size_t getDataTypeSize(DataType);
+    static dimension::size_type getDataTypeSize(DataType);
     static bool getDataTypeIsNumeric(DataType);
     static bool getDataTypeIsSigned(DataType);
     static bool getDataTypeIsInteger(DataType);
 
     /// \return Number of bytes required to serialize this dimension 
-    std::size_t getByteSize() const
+    dimension::size_type getByteSize() const
     {
        return m_byteSize;
     }
@@ -244,13 +263,6 @@ public:
     /// be true.
     inline void setNumericScale(double v)
     {
-        // If you set a scale that isn't 0, you just made the dimension 
-        // finite precision by default.
-        if ( !Utils::compare_approx(v, 0.0, (std::numeric_limits<double>::min)()))
-        {
-            m_precise = true;
-        }        
-
         m_numericScale = v;
     }
 
@@ -267,10 +279,6 @@ public:
     /// be true.
     inline void setNumericOffset(double v)
     {
-        if ( !Utils::compare_approx(v, 0.0, (std::numeric_limits<double>::min)()))
-        {
-            m_precise = true;
-        }       
         m_numericOffset = v;
     }
 
@@ -307,17 +315,6 @@ public:
 
         }
         return output;
-    }
-
-    /// Gets whether this Dimension uses the numeric scale/offset values
-    inline bool isFinitePrecision() const
-    {
-        return m_precise;
-    }
-    /// Sets whether or not this Dimension uses numerica scale/offset values
-    inline void isFinitePrecision(bool v)
-    {
-        m_precise = v;
     }
 
     /// Gets the endianness of this Dimension (defaults to little)
@@ -373,15 +370,15 @@ private:
     std::string m_name;
     boost::uint32_t m_flags;
     EndianType m_endian;
-    std::size_t m_byteSize;
+    dimension::size_type m_byteSize;
     std::string m_description;
     double m_min;
     double m_max;
-    bool m_precise;
     double m_numericScale;
     double m_numericOffset;
-    std::size_t m_byteOffset;
-    std::size_t m_position;
+    dimension::size_type m_byteOffset;
+    dimension::size_type m_position;
+    dimension::Interpretation m_interpretation;
 };
 
 
