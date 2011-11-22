@@ -41,8 +41,8 @@ set LASZIP_INCLUDE_DIR=%DEV_DIR%\laszip\include
 :: Where is LIBLAS?  (can be either from OSGeo4W or your own build tree)
 rem  set LIBLAS_LIBRARY=%OSGEO4W_DIR%\lib\liblas.lib
 rem  set LIBLAS_INCLUDE_DIR=%OSGEO4W_DIR%\include
-set LIBLAS_LIBRARY=%DEV_DIR%\liblas\bin\Debug\Debug\liblas.lib
-set LIBLAS_INCLUDE_DIR=%DEV_DIR%\liblas\include
+rem set LIBLAS_LIBRARY=%DEV_DIR%\liblas\bin\Debug\Debug\liblas.lib
+rem set LIBLAS_INCLUDE_DIR=%DEV_DIR%\liblas\include
 
 
 :: Where is your PDAL build tree?
@@ -77,7 +77,7 @@ cmake -G %COMPILER% ^
     -DWITH_GEOTIFF=ON ^
     -DWITH_ORACLE=ON ^
     -DWITH_LASZIP=ON ^
-    -DWITH_LIBLAS=ON ^
+    -DWITH_LIBLAS=OFF ^
     -DWITH_FREEGLUT=ON ^
     -DWITH_LIBXML2=ON ^
     -DWITH_SWIG_CSHARP=ON ^
@@ -95,8 +95,6 @@ cmake -G %COMPILER% ^
     -DORACLE_OCI_LIBRARY=%OSGEO4W_DIR%\lib\oci.lib ^
     -DLASZIP_INCLUDE_DIR=%LASZIP_INCLUDE_DIR% ^
     -DLASZIP_LIBRARY=%LASZIP_LIBRARY% ^
-    -DLIBLAS_INCLUDE_DIR=%LIBLAS_INCLUDE_DIR% ^
-    -DLIBLAS_LIBRARY=%LIBLAS_LIBRARY% ^
     -DLIBXML2_LIBRARIES=%OSGEO4W_DIR%\lib\libxml2.lib ^
     -DLIBXML2_INCLUDE_DIR=%OSGEO4W_DIR%\include ^
 	-DICONV_LIBRARY=%OSGEO4W_DIR%\lib\iconv.lib ^
@@ -104,3 +102,6 @@ cmake -G %COMPILER% ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
     %PDAL_DIR%
+
+rem     -DLIBLAS_INCLUDE_DIR=%LIBLAS_INCLUDE_DIR% ^
+rem     -DLIBLAS_LIBRARY=%LIBLAS_LIBRARY% ^
