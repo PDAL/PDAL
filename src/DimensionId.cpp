@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/DimensionId.hpp>
-#include <pdal/Dimension.hpp>
+#include <pdal/dimension/Dimension.hpp>
 #include <pdal/Utils.hpp>
 
 #include <map>

@@ -32,66 +32,96 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_FAUX_WRITER_HPP
-#define INCLUDED_DRIVERS_FAUX_WRITER_HPP
+#ifndef PDAL_DIMENSIONTYPE_HPP_INCLUDED
+#define PDAL_DIMENSIONTYPE_HPP_INCLUDED
 
-#include <pdal/Writer.hpp>
+#include <pdal/pdal_internal.hpp>
 
+namespace pdal
+{
 
-namespace pdal { namespace drivers { namespace faux {
-
-
-//
-// The FauxWriter doesn't actually write to disk -- instead, it just
-// record some summary stats about the data it is given.
-//
-// This writer knows only about three dimensions: X,Y,Z (as doubles).
-//
-class PDAL_DLL Writer : public pdal::Writer
+namespace dimension
+{
+    
+class PDAL_DLL DimensionType
 {
 public:
-    SET_STAGE_NAME("drivers.faux.writer", "Faux Writer")
 
-    Writer(Stage& prevStage, const Options&);
-    
-    virtual void initialize();
-    virtual const Options getDefaultOptions() const;
+    enum Type
+    {
+    //
+    // common field types: 0..999
+    // 
+    X = 0,
+    Y,
+    Z,
 
-    // retrieve the summary info
-    double getMinX() const { return m_minimumX; }
-    double getMinY() const { return m_minimumY; }
-    double getMinZ() const { return m_minimumZ; }
-    double getMaxX() const { return m_maximumX; }
-    double getMaxY() const { return m_maximumY; }
-    double getMaxZ() const { return m_maximumZ; }
-    double getAvgX() const { return m_averageX; }
-    double getAvgY() const { return m_averageY; }
-    double getAvgZ() const { return m_averageZ; }
+    Red,
+    Green,
+    Blue,
+    Alpha,
+    Time,
 
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
+    //
+    // LAS: 1000..1999
+    //
+    Intensity = 1000,
+    ReturnNumber,
+    NumberOfReturns,
+    ScanDirectionFlag,
+    EdgeOfFlightLine,
+    Classification,
+    ScanAngleRank,
+    UserData,
+    PointSourceId,
+    WavePacketDescriptorIndex,
+    WaveformDataOffset,
+    ReturnPointWaveformLocation,
+    WaveformXt,
+    WaveformYt,
+    WaveformZt,
 
-private:
-    double m_minimumX;
-    double m_minimumY;
-    double m_minimumZ;
-    double m_maximumX;
-    double m_maximumY;
-    double m_maximumZ;
-    double m_averageX;
-    double m_averageY;
-    double m_averageZ;
+    //
+    // terrasolid: 2000..2999
+    // 
+    TerraSolid_Alpha = 2000,
+    TerraSolid_Classification,
+    TerraSolid_PointSourceId_u8,
+    TerraSolid_PointSourceId_u16,
+    TerraSolid_ReturnNumber_u8,
+    TerraSolid_ReturnNumber_u16,
+    TerraSolid_Flag,
+    TerraSolid_Mark,
+    TerraSolid_Intensity,
+    TerraSolid_Time,
 
-    void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    boost::uint32_t writeBuffer(const PointBuffer&);
-    void writeEnd(boost::uint64_t actualNumPointsWritten);
+    //
+    // chipper stuff: 3000..3999
+    // 
+    Chipper_1 = 3000,
+    Chipper_2,
 
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
+    //
+    // qfit: 4000..4999
+    // 
+    StartPulse = 4000,
+    ReflectedPulse,
+    Pitch,
+    Roll,
+    PassiveSignal,
+    PassiveX,
+    PassiveY,
+    PassiveZ,
+    GpsTime,
+    PDOP,
+    PulseWidth
+
+
+    };
+
 };
 
 
-} } } // namespaces
+}} // namespace pdal::dimension
 
-
-#endif
+#endif // PDAL_DIMENSIONID_HPP_INCLUDED

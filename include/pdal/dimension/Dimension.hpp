@@ -44,7 +44,8 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Utils.hpp>
-#include <pdal/DimensionId.hpp>
+#include <pdal/dimension/Id.hpp>
+#include <pdal/dimension/Type.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 

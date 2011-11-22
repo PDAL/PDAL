@@ -37,7 +37,7 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/Bounds.hpp>
-#include <pdal/Dimension.hpp>
+#include <pdal/dimension/Dimension.hpp>
 
 #include <lidar/PointSource.h>
 namespace pdal

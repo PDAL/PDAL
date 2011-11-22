@@ -36,8 +36,6 @@
 
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
-#include <pdal/Dimension.hpp>
-#include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
 
 

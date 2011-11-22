@@ -34,8 +34,6 @@
 
 #include <pdal/filters/Stats.hpp>
 
-#include <pdal/Dimension.hpp>
-#include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
 
 namespace pdal { namespace filters {

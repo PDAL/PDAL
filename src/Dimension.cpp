@@ -39,7 +39,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <pdal/Dimension.hpp>
+#include <pdal/dimension/Dimension.hpp>
 #include <pdal/external/boost/uuid/nil_generator.hpp>
 
 #include <map>

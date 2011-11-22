@@ -42,8 +42,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include <pdal/FileUtils.hpp>
-#include <pdal/Schema.hpp>
-#include <pdal/Dimension.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageIterator.hpp>
 #include <pdal/Options.hpp>

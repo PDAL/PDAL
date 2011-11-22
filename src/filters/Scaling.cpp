@@ -34,8 +34,6 @@
 
 #include <pdal/filters/Scaling.hpp>
 
-#include <pdal/Dimension.hpp>
-#include <pdal/Schema.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include <iostream>

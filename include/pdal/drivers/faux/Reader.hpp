@@ -35,11 +35,9 @@
 #ifndef INCLUDED_DRIVERS_FAUX_READER_HPP
 #define INCLUDED_DRIVERS_FAUX_READER_HPP
 
-#include <pdal/pdal.hpp>
-
 #include <pdal/Reader.hpp>
 #include <pdal/Bounds.hpp>
-#include <pdal/Dimension.hpp>
+#include <pdal/dimension/Dimension.hpp>
 
 namespace pdal
 {
