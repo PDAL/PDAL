@@ -136,6 +136,7 @@ private:
     std::string m_base_table_boundary_column;
     std::string m_base_table_boundary_wkt;
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
+    std::string m_trigger_name;
     
 };
 

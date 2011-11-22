@@ -864,7 +864,7 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
     }
         
     CreatePCEntry();
-    
+    m_trigger_name = ShutOff_SDO_PC_Trigger();
     return;
 }
 
@@ -882,6 +882,10 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
         
     // Update extent of SDO_PC entry
     UpdatePCExtent();
+    
+    if (getOptions().getValueOrDefault<bool>("reenable_cloud_trigger", true))
+        TurnOn_SDO_PC_Trigger(m_trigger_name);
+    m_connection->Commit();   
 
     RunFileSQL("post_block_sql");
     return;
@@ -1190,8 +1194,6 @@ void Writer::UpdatePCExtent()
     
     std::string eleminfo = CreatePCElemInfo();
 
-
-    std::string trigger = ShutOff_SDO_PC_Trigger();
     
     std::ostringstream s_geom;
     boost::uint32_t precision = getDefaultedOption<boost::uint32_t>("stream_output_precision");
@@ -1233,9 +1235,6 @@ void Writer::UpdatePCExtent()
     }
     m_connection->Commit();    
 
-    TurnOn_SDO_PC_Trigger(trigger);
-    m_connection->Commit();    
-    
 }
 
 boost::uint32_t Writer::writeBuffer(const PointBuffer& buffer)
