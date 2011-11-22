@@ -76,27 +76,27 @@ const Options Attribute::getDefaultOptions() const
 void Attribute::processBuffer(PointBuffer& data) const
 {
     const boost::uint32_t numPoints = data.getNumPoints();
-
-    const Schema& schema = data.getSchema();
-
-    const int indexR = schema.getDimensionIndex(DimensionId::Red_u16);
-    const int indexG = schema.getDimensionIndex(DimensionId::Green_u16);
-    const int indexB = schema.getDimensionIndex(DimensionId::Blue_u16);
-    const int indexZ = schema.getDimensionIndex(DimensionId::Z_i32);
-    const Dimension& zDim = schema.getDimension(DimensionId::Z_i32);
+    // 
+    // const Schema& schema = data.getSchema();
+    // 
+    // const int indexR = schema.getDimensionIndex(DimensionId::Red_u16);
+    // const int indexG = schema.getDimensionIndex(DimensionId::Green_u16);
+    // const int indexB = schema.getDimensionIndex(DimensionId::Blue_u16);
+    // const int indexZ = schema.getDimensionIndex(DimensionId::Z_i32);
+    // const Dimension& zDim = schema.getDimension(DimensionId::Z_i32);
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        const boost::int32_t zraw = data.getField<boost::int32_t>(pointIndex, indexZ);
-        const double z = zDim.applyScaling(zraw);
-
-        boost::uint16_t red, green, blue;
-        // this->getAttribute_F64_U16(z, red, green, blue);
-
-        // now we store the 3 u16's in the point data...
-        data.setField<boost::uint16_t>(pointIndex, indexR, red);
-        data.setField<boost::uint16_t>(pointIndex, indexG, green);
-        data.setField<boost::uint16_t>(pointIndex, indexB, blue);
+        // const boost::int32_t zraw = data.getField<boost::int32_t>(pointIndex, indexZ);
+        // const double z = zDim.applyScaling(zraw);
+        // 
+        // boost::uint16_t red, green, blue;
+        // // this->getAttribute_F64_U16(z, red, green, blue);
+        // 
+        // // now we store the 3 u16's in the point data...
+        // data.setField<boost::uint16_t>(pointIndex, indexR, red);
+        // data.setField<boost::uint16_t>(pointIndex, indexG, green);
+        // data.setField<boost::uint16_t>(pointIndex, indexB, blue);
 
         data.setNumPoints(pointIndex+1);
     }
