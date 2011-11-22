@@ -59,6 +59,7 @@ namespace external {
 namespace boost {
 namespace uuids {
 
+using namespace ::boost;
 struct uuid
 {
 public:
