@@ -110,13 +110,13 @@ void LasHeaderWriter::write()
 
     {
         boost::uint32_t padding_before_calculations = m_header.GetHeaderPadding();
-        int32_t existing_padding = m_header.GetDataOffset() - 
+        boost::int32_t existing_padding = m_header.GetDataOffset() - 
                                   (m_header.getVLRBlockSize() + 
                                    m_header.GetHeaderSize());
 
         if (existing_padding < 0) 
         {
-            int32_t d = abs(existing_padding);
+            boost::int32_t d = abs(existing_padding);
             
             // If our required VLR space is larger than we have 
             // room for, we have no padding.  AddVLRs will take care 
@@ -129,7 +129,7 @@ void LasHeaderWriter::write()
             }
         } else {
             // cast is safe, we've already checked for < 0
-            if (static_cast<uint32_t>(existing_padding) >= m_header.GetHeaderPadding())
+            if (static_cast<boost::uint32_t>(existing_padding) >= m_header.GetHeaderPadding())
             {
                 m_header.SetHeaderPadding(existing_padding);
             }

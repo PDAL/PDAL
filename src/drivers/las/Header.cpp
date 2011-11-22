@@ -439,10 +439,10 @@ std::size_t LasHeader::getVLRBlockSize() const
 
     VLRList const& vlrs = m_vlrList;
     
-    for (uint32_t i = 0; i < m_vlrList.count(); ++i)
+    for (boost::uint32_t i = 0; i < m_vlrList.count(); ++i)
     {
         VariableLengthRecord const & vlr = vlrs.get(i);
-        vlr_total_size += static_cast<uint32_t>(vlr.getTotalSize());
+        vlr_total_size += static_cast<boost::uint32_t>(vlr.getTotalSize());
     }
 
     return vlr_total_size;

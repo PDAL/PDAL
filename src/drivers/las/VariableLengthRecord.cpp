@@ -182,7 +182,7 @@ std::size_t VariableLengthRecord::getTotalSize() const
     // RecordLength after Header 2 bytes
     // Description 32 bytes
     // Data length -- size of the data's vector * the size of uint8_t
-    std::size_t const sum = 2 + 16 + 2 + 2 + 32 + m_length * sizeof(uint8_t);
+    std::size_t const sum = 2 + 16 + 2 + 2 + 32 + m_length * sizeof(boost::uint8_t);
     return sum;
 }
 
