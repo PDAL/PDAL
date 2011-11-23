@@ -77,12 +77,12 @@ typedef boost::multi_index::multi_index_container<
   Dimension,
   boost::multi_index::indexed_by<
     // sort by Dimension::operator<
-    boost::multi_index::ordered_unique<boost::multi_index::tag<position>, boost::multi_index::identity<Dimension> >,
+    boost::multi_index::ordered_non_unique<boost::multi_index::tag<position>, boost::multi_index::identity<Dimension> >,
     
     // Random access
     boost::multi_index::random_access<boost::multi_index::tag<index> >,
     // sort by less<string> on GetName
-    boost::multi_index::hashed_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >
+    boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >
       >
 > Map;
 
