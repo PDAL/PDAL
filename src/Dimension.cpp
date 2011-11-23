@@ -68,6 +68,7 @@ Dimension::Dimension(DimensionId::Id id)
     m_dataType = (DataType)dt;
 
     m_byteSize = getDataTypeSize(m_dataType);
+    m_interpretation = getInterpretation(m_dataType);
 }
 
 
@@ -89,6 +90,7 @@ Dimension::Dimension(DimensionId::Id id, DataType dataType, std::string name, st
     assert(!DimensionId::hasKnownDimension(id));
     
     m_byteSize = getDataTypeSize(m_dataType);
+    m_interpretation = getInterpretation(dataType);
 }
 
 Dimension::Dimension(   std::string const& name, 
@@ -125,9 +127,9 @@ Dimension::Dimension(   std::string const& name,
         if (sizeInBytes == 2)
             m_dataType = Int16;
         if (sizeInBytes == 4)
-            m_dataType == Int32;
+            m_dataType = Int32;
         if (sizeInBytes == 8)
-            m_dataType == Int64;
+            m_dataType = Int64;
         
     }
     if (interpretation == dimension::Float)
@@ -155,6 +157,7 @@ Dimension::Dimension(Dimension const& other)
     , m_numericOffset(other.m_numericOffset)
     , m_byteOffset(other.m_byteOffset)
     , m_position(other.m_position)
+    , m_interpretation(other.m_interpretation)
 {
     return;
 }
@@ -177,6 +180,7 @@ Dimension& Dimension::operator=(Dimension const& rhs)
         m_numericOffset = rhs.m_numericOffset;
         m_byteOffset = rhs.m_byteOffset;
         m_position = rhs.m_position;
+        m_interpretation = rhs.m_interpretation;
     }
 
     return *this;
@@ -197,7 +201,8 @@ bool Dimension::operator==(const Dimension& other) const
         Utils::compare_approx(m_numericScale, other.m_numericScale, (std::numeric_limits<double>::min)()) &&
         Utils::compare_approx(m_numericOffset, other.m_numericOffset, (std::numeric_limits<double>::min)()) &&
         m_byteOffset == other.m_byteOffset &&
-        m_position == other.m_position
+        m_position == other.m_position &&
+        m_interpretation == other.m_interpretation
         )
     {
         return true;
@@ -245,6 +250,32 @@ std::string Dimension::getDataTypeName(DataType type)
     throw;
 }
 
+dimension::Interpretation Dimension::getInterpretation(DataType type)
+{
+    switch (type)
+    {
+    case Int8:
+        return dimension::SignedByte;
+    case Uint8:
+        return dimension::UnsignedByte;
+    case Uint16:
+    case Uint32:
+    case Uint64:
+        return dimension::UnsignedInteger;
+    case Pointer:
+        return dimension::Pointer;
+    case Int16:
+    case Int32:
+    case Int64:
+        return dimension::SignedInteger;
+    case Float:
+    case Double:
+        return dimension::Float;
+    case Undefined:
+        return dimension::Undefined;
+    }
+    throw;
+}
 
 std::size_t Dimension::getDataTypeSize(DataType type)
 {

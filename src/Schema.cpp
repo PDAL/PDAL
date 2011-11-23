@@ -76,6 +76,7 @@ Schema::Schema(std::vector<Dimension> const& dimensions)
 Schema::Schema(Schema const& other) 
     : m_dimensions(other.m_dimensions)
     , m_byteSize(other.m_byteSize)
+    , m_index(other.m_index)
     , m_dimensions_map(other.m_dimensions_map)
 {
 
@@ -90,6 +91,7 @@ Schema& Schema::operator=(Schema const& rhs)
         m_dimensions = rhs.m_dimensions;
         m_byteSize = rhs.m_byteSize;
         m_dimensions_map = rhs.m_dimensions_map;
+        m_index = rhs.m_index;
     }
 
     return *this;
@@ -105,9 +107,6 @@ bool Schema::operator==(const Schema& other) const
     {
         if (!(m_dimensions[i] == other.m_dimensions[i])) 
         {
-            std::cout << m_dimensions[i] << std::endl;
-            std::cout << other.m_dimensions[i] << std::endl;
-            std::cout << "dimensions !=" << std::endl;
             return false;
         }
     }
@@ -143,9 +142,32 @@ void Schema::calculateSizes()
         dim.setPosition(i);
    
         ++i;
+        
+        // std::cout << "vector: "  << dim.getName() << " " << dim.getByteSize() << " offset: " << offset << std::endl;
     }
+    // m_byteSize = offset;
+    // offset = 0;
+    // 
+    // index_by_position& position_index = m_index.get<position>();
+    // 
+    // index_by_position::const_reverse_iterator r = position_index.rbegin();
+    // 
+    // Dimension const& t = *r;
+    
+    
+    // 
+    // for (index_by_position::iterator i = position_index.begin();
+    //      i != position_index.end(); 
+    //      i++)
+    // {
+    //     Dimension t = (*i);
+    //     t.setByteOffset(offset);
+    //     offset += t.getByteSize();
+    //     position_index.replace(i, t);
+    //     std::cout << "index_map: " << t.getName() << " " << t.getByteSize() << " offset: " << offset << std::endl;
+    // }    
 
-    m_byteSize = offset;
+    // m_byteSize = offset;
 
     return;
 }
@@ -156,6 +178,42 @@ void Schema::appendDimension(const Dimension& dim)
     m_dimensions.push_back(dim);
     std::pair<DimensionId::Id, std::size_t> p(dim.getId(), m_dimensions.size()-1);
     m_dimensions_map.insert(p);
+
+    // Add/reset the dimension ptr on the dimensions map
+    Dimension d(dim);
+    
+    index_by_position& position_index = m_index.get<position>();
+
+    index_by_position::const_reverse_iterator r = position_index.rbegin();
+    
+    // If we do not have anything in the index, set our current values.
+    // Otherwise, use the values from the last entry in the index as our 
+    // starting point
+    if (r != position_index.rend()) 
+    {
+        Dimension const& t = *r;
+    
+        m_byteSize = m_byteSize + d.getByteSize();
+        
+        d.setByteOffset( t.getByteOffset() + t.getByteSize());
+    } 
+    else
+    {
+        m_byteSize = d.getByteSize();
+        d.setByteOffset(0);
+    }
+
+    d.setPosition(m_index.size());
+
+    std::pair<index_by_position::iterator, bool> q = position_index.insert(d);
+    if (! q.second) 
+    {
+        std::ostringstream oss;
+        oss << "Could not insert into schema index because of " << q.first->getName();
+        throw schema_error(oss.str());
+    }
+
+    assert(m_index.size() == m_dimensions.size());
 
     calculateSizes();
 

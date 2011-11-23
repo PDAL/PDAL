@@ -212,6 +212,14 @@ public:
     {}
 };
 
+class schema_error : public pdal_error
+{
+public:
+    schema_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
 
 } // namespace pdal
 

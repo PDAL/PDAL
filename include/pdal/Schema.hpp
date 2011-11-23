@@ -56,8 +56,38 @@
 #include <boost/array.hpp>
 #include <boost/optional.hpp>
 
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/member.hpp>
+#include <boost/multi_index/ordered_index.hpp>
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/sequenced_index.hpp>
+#include <boost/multi_index/mem_fun.hpp>
+#include <boost/multi_index/random_access_index.hpp>
+
 namespace pdal
 {
+
+struct name{};
+struct position{};
+struct index{};
+
+
+typedef boost::multi_index::multi_index_container<
+  Dimension,
+  boost::multi_index::indexed_by<
+    // sort by Dimension::operator<
+    boost::multi_index::ordered_unique<boost::multi_index::tag<position>, boost::multi_index::identity<Dimension> >,
+    
+    // Random access
+    boost::multi_index::random_access<boost::multi_index::tag<index> >,
+    // sort by less<string> on GetName
+    boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >
+      >
+> IndexMap;
+
+typedef IndexMap::index<name>::type index_by_name;
+typedef IndexMap::index<position>::type index_by_position;
+typedef IndexMap::index<index>::type index_by_index;
 
 /// Schema definition
 class PDAL_DLL Schema
@@ -119,6 +149,8 @@ private:
     
     std::vector<Dimension> m_dimensions;
     std::size_t m_byteSize;
+
+    IndexMap m_index;
 
     std::map<DimensionId::Id, std::size_t> m_dimensions_map;
 };

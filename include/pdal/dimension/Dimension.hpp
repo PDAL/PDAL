@@ -155,6 +155,8 @@ public:
     static std::string getDataTypeName(DataType);
     static DataType getDataTypeFromString(const std::string&);
     static dimension::size_type getDataTypeSize(DataType);
+
+    static dimension::Interpretation getInterpretation(DataType type);    
     static bool getDataTypeIsNumeric(DataType);
     static bool getDataTypeIsSigned(DataType);
     static bool getDataTypeIsInteger(DataType);
@@ -348,12 +350,12 @@ public:
     /// The index position of the index.  In a standard ePointFormat0
     /// data record, the X dimension would have a position of 0, while
     /// the Y dimension would have a position of 1, for example.
-    inline std::size_t getPosition() const
+    inline boost::uint32_t getPosition() const
     {
         return m_position;
     }
 
-    inline void setPosition(std::size_t v)
+    inline void setPosition(boost::uint32_t v)
     {
         m_position = v;
     }
