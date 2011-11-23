@@ -52,16 +52,19 @@ BOOST_AUTO_TEST_CASE(test_layout)
     Schema s1;
     s1.appendDimension(d1);
     s1.appendDimension(d2);
-    BOOST_CHECK(s1.getDimensions()[0].getId() == DimensionId::X_i32);
-    BOOST_CHECK(s1.getDimensions()[1].getId() == DimensionId::Y_i32);
+
+    schema::index_by_index const& dims = s1.getDimensions().get<schema::index>();
+    BOOST_CHECK(dims[0].getId() == DimensionId::X_i32);
+    BOOST_CHECK(dims[1].getId() == DimensionId::Y_i32);
 
     BOOST_CHECK(s1.hasDimension(DimensionId::X_f64) == false);
     BOOST_CHECK(s1.hasDimension(DimensionId::Y_f64) == false);
 
     Schema s2;
     s2.appendDimension(d1);
+    schema::index_by_index const& dims2 = s1.getDimensions().get<schema::index>();
     BOOST_CHECK(s2.hasDimension(DimensionId::X_i32) == true);
-    BOOST_CHECK(s2.getDimensions()[0].getId() == DimensionId::X_i32);
+    BOOST_CHECK(dims2[0].getId() == DimensionId::X_i32);
     BOOST_CHECK(s2.hasDimension(DimensionId::Y_i32) == false);
 
     Schema l1(s1);

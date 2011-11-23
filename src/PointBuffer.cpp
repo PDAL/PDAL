@@ -139,7 +139,7 @@ boost::property_tree::ptree PointBuffer::toPTree() const
     boost::property_tree::ptree tree;
 
     const Schema& schema = getSchema();
-    const std::vector<Dimension>& dimensions = schema.getDimensions();
+    schema::index_by_index const& dimensions = schema.getDimensions().get<schema::index>();
 
     const boost::uint32_t numPoints = getNumPoints();
 
@@ -276,7 +276,7 @@ std::ostream& operator<<(std::ostream& ostr, const PointBuffer& pointBuffer)
     using std::endl;
 
     const Schema& schema = pointBuffer.getSchema();
-    const std::vector<Dimension>& dimensions = schema.getDimensions();
+    schema::index_by_index const& dimensions = schema.getDimensions().get<schema::index>();
 
     const std::size_t numPoints = pointBuffer.getNumPoints();
 

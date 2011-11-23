@@ -73,21 +73,26 @@ void ByteSwap::initialize()
 
     Schema& schema = this->getSchemaRef();
 
-    std::vector<Dimension>& dimensions = schema.getDimensions();
-    for (std::vector<Dimension>::iterator i = dimensions.begin(); i != dimensions.end(); ++i)
+    schema::index_by_index const& dimensions = schema.getDimensions().get<schema::index>();
+    
+    std::vector<Dimension> new_dimensions;
+    for (schema::index_by_index::const_iterator i = dimensions.begin(); i != dimensions.end(); ++i)
     {
+        pdal::Dimension d(*i);
         pdal::EndianType t = i->getEndianness();
         if (t == Endian_Little)
         {
-            i->setEndianness(Endian_Big);
+            d.setEndianness(Endian_Big);
         } else if (t == Endian_Big)
         {
-            i->setEndianness(Endian_Little);
+            d.setEndianness(Endian_Little);
         } else {
             throw pdal_error("ByteSwapFilter can only swap big/little endian dimensions");
         }
+        new_dimensions.push_back(d);
     }
 
+    schema = Schema(new_dimensions);
     return;        
 }
 
@@ -103,8 +108,8 @@ boost::uint32_t ByteSwap::processBuffer(PointBuffer& dstData, const PointBuffer&
 {
     const Schema& dstSchema = dstData.getSchema();
     
-    const std::vector<Dimension>& dstDims = dstSchema.getDimensions();
-
+    schema::index_by_index const& dstDims = dstSchema.getDimensions().get<schema::index>();
+    
     dstData.setSpatialBounds(srcData.getSpatialBounds());
     dstData.copyPointsFast(0, 0, srcData, srcData.getNumPoints());
     

@@ -228,47 +228,51 @@ void InPlaceReprojection::checkImpedance()
 {
     Schema& schema = this->getSchemaRef();
 
-    std::vector<Dimension>& dims = schema.getDimensions();
-      
+    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
+          
     const std::string x_name = getOptions().getValueOrDefault<std::string>("x_dim", "X");
     const std::string y_name = getOptions().getValueOrDefault<std::string>("y_dim", "Y");
     const std::string z_name = getOptions().getValueOrDefault<std::string>("z_dim", "Z");
 
-    std::vector<Dimension>::iterator i;
+    schema::index_by_index::const_iterator i;
+    std::vector<Dimension> new_dimensions;
     for (i = dims.begin(); i != dims.end(); ++i)
     {
+        Dimension d(*i);
         if (i->getName() == x_name)
         {
             m_x = *i;
 
             m_x_scale = getOptions().getValueOrDefault<double>("scale_x", i->getNumericScale());
-            i->setNumericScale(m_x_scale);
+            d.setNumericScale(m_x_scale);
 
             m_x_offset = getOptions().getValueOrDefault<double>("offset_x", i->getNumericOffset());
-            i->setNumericOffset(m_x_offset);
+            d.setNumericOffset(m_x_offset);
         }
         if (i->getName() == y_name)
         {
             m_y = *i;
 
             m_y_scale = getOptions().getValueOrDefault<double>("scale_y", i->getNumericScale());
-            i->setNumericScale(m_y_scale);
+            d.setNumericScale(m_y_scale);
 
             m_y_offset = getOptions().getValueOrDefault<double>("offset_y", i->getNumericOffset());
-            i->setNumericOffset(m_y_offset);
+            d.setNumericOffset(m_y_offset);
         }
         if (i->getName() == z_name)
         {
             m_z = *i;
 
             m_z_scale = getOptions().getValueOrDefault<double>("scale_z", i->getNumericScale());
-            i->setNumericScale(m_z_scale);
+            d.setNumericScale(m_z_scale);
 
             m_z_offset = getOptions().getValueOrDefault<double>("offset_z", i->getNumericOffset());
-            i->setNumericOffset(m_z_offset);
-        }        
+            d.setNumericOffset(m_z_offset);
+        }
+        new_dimensions.push_back(d);
     }
-
+    
+    schema = Schema(new_dimensions);
     return;
 }
 

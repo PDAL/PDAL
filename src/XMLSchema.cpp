@@ -676,8 +676,10 @@ void Writer::writeSchema(TextWriterPtr writer)
 
     xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get()); 
     
-    const std::vector<Dimension>& dims = m_schema.getDimensions();
-    
+    // const std::vector<Dimension>& dims = m_schema.getDimensions();
+
+    schema::index_by_index const& dims = m_schema.getDimensions().get<schema::index>();
+        
     for (boost::uint32_t i = 0; i < dims.size(); i++)
     {
         Dimension const& dim = dims[i];

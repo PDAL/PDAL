@@ -128,10 +128,8 @@ void Schema::calculateSizes()
 
     std::size_t offset = 0;
 
-    std::vector<Dimension>& dims = getDimensions();
-
     int i=0;
-    for (std::vector<Dimension>::iterator iter = dims.begin(); iter != dims.end(); ++iter)
+    for (std::vector<Dimension>::iterator iter = m_dimensions.begin(); iter != m_dimensions.end(); ++iter)
     {
         Dimension& dim = *iter;
 
@@ -143,31 +141,7 @@ void Schema::calculateSizes()
    
         ++i;
         
-        // std::cout << "vector: "  << dim.getName() << " " << dim.getByteSize() << " offset: " << offset << std::endl;
     }
-    // m_byteSize = offset;
-    // offset = 0;
-    // 
-    // index_by_position& position_index = m_index.get<position>();
-    // 
-    // index_by_position::const_reverse_iterator r = position_index.rbegin();
-    // 
-    // Dimension const& t = *r;
-    
-    
-    // 
-    // for (index_by_position::iterator i = position_index.begin();
-    //      i != position_index.end(); 
-    //      i++)
-    // {
-    //     Dimension t = (*i);
-    //     t.setByteOffset(offset);
-    //     offset += t.getByteSize();
-    //     position_index.replace(i, t);
-    //     std::cout << "index_map: " << t.getName() << " " << t.getByteSize() << " offset: " << offset << std::endl;
-    // }    
-
-    // m_byteSize = offset;
 
     return;
 }
@@ -182,9 +156,9 @@ void Schema::appendDimension(const Dimension& dim)
     // Add/reset the dimension ptr on the dimensions map
     Dimension d(dim);
     
-    index_by_position& position_index = m_index.get<position>();
+    schema::index_by_position& position_index = m_index.get<schema::position>();
 
-    index_by_position::const_reverse_iterator r = position_index.rbegin();
+    schema::index_by_position::const_reverse_iterator r = position_index.rbegin();
     
     // If we do not have anything in the index, set our current values.
     // Otherwise, use the values from the last entry in the index as our 
@@ -205,7 +179,7 @@ void Schema::appendDimension(const Dimension& dim)
 
     d.setPosition(m_index.size());
 
-    std::pair<index_by_position::iterator, bool> q = position_index.insert(d);
+    std::pair<schema::index_by_position::iterator, bool> q = position_index.insert(d);
     if (! q.second) 
     {
         std::ostringstream oss;
@@ -221,26 +195,38 @@ void Schema::appendDimension(const Dimension& dim)
 }
 
 
-const Dimension& Schema::getDimension(std::size_t index) const
+const Dimension& Schema::getDimension(std::size_t t) const
 {
-    return m_dimensions[index];
+    schema::index_by_index const& idx = m_index.get<schema::index>();
+    
+    if (t >= idx.size())
+        throw schema_error("Index position is not valid");
+    
+    // return idx.at(t);
+    return m_dimensions[t];
 }
 
-
-Dimension& Schema::getDimension(std::size_t index)
+bool Schema::setDimension(Dimension const& dim)
 {
-    return m_dimensions[index];
-}
-
-
-const std::vector<Dimension>& Schema::getDimensions() const
-{
-    return m_dimensions;
-}
-
-std::vector<Dimension>& Schema::getDimensions() 
-{
-    return m_dimensions;
+    schema::index_by_name& name_index = m_index.get<schema::name>();
+    schema::index_by_name::iterator it = name_index.find(dim.getName());
+    
+    // FIXME: If there are two dimensions with the same name here, we're 
+    // scrwed
+    if (it != name_index.end()) {
+        name_index.replace(it, dim);
+    } else {
+        std::ostringstream oss;
+        oss << "Dimension with name '" << dim.getName() << "' not found, unable to Schema::setDimension";
+        throw schema_error(oss.str());
+    }
+    
+    for(std::vector<Dimension>::iterator i = m_dimensions.begin(); i != m_dimensions.end(); ++i)
+    {
+        if (i->getName() == dim.getName())
+            *i = dim;
+    }
+    return true;
 }
 
 
@@ -281,17 +267,6 @@ const Dimension& Schema::getDimension(const DimensionId::Id& field) const
 }
 
 
-Dimension& Schema::getDimension(const DimensionId::Id& field)
-{
-    int t = getDimensionIndex(field);
-    return m_dimensions[t];
-}
-
-
-//bool Schema::hasDimension(const Dimension& dim) const
-//{
-//    return hasDimension(dim.getId());
-//}
 
 
 

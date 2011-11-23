@@ -111,11 +111,17 @@ void Support::registerFields(Schema& schema, PointFormat format)
 }
 
 
-void Support::setScaling(Schema& schema, double scaleX, double scaleY, double scaleZ, double offsetX, double offsetY, double offsetZ)
+void Support::setScaling(   Schema& schema, 
+                            double scaleX, 
+                            double scaleY, 
+                            double scaleZ, 
+                            double offsetX, 
+                            double offsetY, 
+                            double offsetZ)
 {
-    Dimension& dimX = schema.getDimension(DimensionId::X_i32);
-    Dimension& dimY = schema.getDimension(DimensionId::Y_i32);
-    Dimension& dimZ = schema.getDimension(DimensionId::Z_i32);
+    Dimension dimX = schema.getDimension(DimensionId::X_i32);
+    Dimension dimY = schema.getDimension(DimensionId::Y_i32);
+    Dimension dimZ = schema.getDimension(DimensionId::Z_i32);
 
     dimX.setNumericScale(scaleX);
     dimY.setNumericScale(scaleY);
@@ -124,6 +130,10 @@ void Support::setScaling(Schema& schema, double scaleX, double scaleY, double sc
     dimX.setNumericOffset(offsetX);
     dimY.setNumericOffset(offsetY);
     dimZ.setNumericOffset(offsetZ);
+    
+    schema.setDimension(dimX);
+    schema.setDimension(dimY);
+    schema.setDimension(dimZ);
 
     return;
 }

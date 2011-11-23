@@ -155,9 +155,9 @@ void ScalingFilterBase::checkImpedance()
         const Dimension& dimYd = schema.getDimension(DimensionId::Y_f64);
         const Dimension& dimZd = schema.getDimension(DimensionId::Z_f64);
 
-        Dimension& dimXi = schema.getDimension(DimensionId::X_i32);
-        Dimension& dimYi = schema.getDimension(DimensionId::Y_i32);
-        Dimension& dimZi = schema.getDimension(DimensionId::Z_i32);
+        Dimension dimXi = schema.getDimension(DimensionId::X_i32);
+        Dimension dimYi = schema.getDimension(DimensionId::Y_i32);
+        Dimension dimZi = schema.getDimension(DimensionId::Z_i32);
 
         if (m_customScaleOffset)
         {
@@ -177,7 +177,10 @@ void ScalingFilterBase::checkImpedance()
             dimZi.setNumericScale(dimZd.getNumericScale());
             dimZi.setNumericOffset(dimZd.getNumericOffset());
         }
-
+        
+        schema.setDimension(dimXi);
+        schema.setDimension(dimYi);
+        schema.setDimension(dimZi);
     }
     else
     {
@@ -205,9 +208,9 @@ void ScalingFilterBase::checkImpedance()
         const Dimension& dimYi = schema.getDimension(DimensionId::Y_i32);
         const Dimension& dimZi = schema.getDimension(DimensionId::Z_i32);
 
-        Dimension& dimXd = schema.getDimension(DimensionId::X_f64);
-        Dimension& dimYd = schema.getDimension(DimensionId::Y_f64);
-        Dimension& dimZd = schema.getDimension(DimensionId::Z_f64);
+        Dimension dimXd = schema.getDimension(DimensionId::X_f64);
+        Dimension dimYd = schema.getDimension(DimensionId::Y_f64);
+        Dimension dimZd = schema.getDimension(DimensionId::Z_f64);
 
         if (m_customScaleOffset)
         {
@@ -227,6 +230,9 @@ void ScalingFilterBase::checkImpedance()
             dimZd.setNumericScale(dimZi.getNumericScale());
             dimZd.setNumericOffset(dimZi.getNumericOffset());
         }
+        schema.setDimension(dimXd);
+        schema.setDimension(dimYd);
+        schema.setDimension(dimZd);
     }
 
     return;
@@ -264,13 +270,14 @@ void ScalingFilterBase::processBuffer(const PointBuffer& srcData, PointBuffer& d
     
     // For each dimension in the source layout, find its corresponding dimension 
     // in the destination layout, and put its byte offset in the map for it.  
-    std::vector<Dimension> const& src_layouts = srcSchema.getDimensions();
+    
+    schema::index_by_index const& dims = srcSchema.getDimensions().get<schema::index>();
     std::map<boost::uint32_t, boost::uint32_t> dimensions_lookup;
     boost::uint32_t dstFieldIndex = 0;
     boost::uint32_t i = 0;
-    for (i=0; i<src_layouts.size(); i++)
+    for (i=0; i<dims.size(); i++)
     {
-        Dimension const& dim = src_layouts[i];
+        Dimension const& dim = dims[i];
         std::size_t src_offset = dim.getByteOffset();
         dstFieldIndex = dstSchema.getDimensionIndex(dim);
         dimensions_lookup[dstFieldIndex] = src_offset;

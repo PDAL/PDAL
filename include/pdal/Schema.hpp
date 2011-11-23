@@ -67,6 +67,7 @@
 namespace pdal
 {
 
+namespace schema {
 struct name{};
 struct position{};
 struct index{};
@@ -81,13 +82,15 @@ typedef boost::multi_index::multi_index_container<
     // Random access
     boost::multi_index::random_access<boost::multi_index::tag<index> >,
     // sort by less<string> on GetName
-    boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >
+    boost::multi_index::hashed_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >
       >
-> IndexMap;
+> Map;
 
-typedef IndexMap::index<name>::type index_by_name;
-typedef IndexMap::index<position>::type index_by_position;
-typedef IndexMap::index<index>::type index_by_index;
+typedef Map::index<name>::type index_by_name;
+typedef Map::index<position>::type index_by_position;
+typedef Map::index<index>::type index_by_index;
+
+}
 
 /// Schema definition
 class PDAL_DLL Schema
@@ -104,17 +107,20 @@ public:
 
     void appendDimension(Dimension const& dim);
 
-    const std::vector<Dimension>& getDimensions() const;
-    std::vector<Dimension>& getDimensions();
-
+    // const std::vector<Dimension>& getDimensions() const;
+    // std::vector<Dimension>& getDimensions();
+    
+    schema::Map const& getDimensions() const { return m_index; }
+    
     bool hasDimension(const DimensionId::Id& id) const;
     //bool hasDimension(const Dimension& dim) const;
 
-    Dimension& getDimension(const DimensionId::Id& id);
+    // Dimension& getDimension(const DimensionId::Id& id);
     const Dimension& getDimension(const DimensionId::Id& id) const;
 
     const Dimension& getDimension(std::size_t index) const;
-    Dimension& getDimension(std::size_t index);
+    bool setDimension(Dimension const& );
+    // Dimension& getDimension(std::size_t index);
     
     int getDimensionIndex(const DimensionId::Id& id) const;
     int getDimensionIndex(const Dimension& dim) const;
@@ -150,7 +156,7 @@ private:
     std::vector<Dimension> m_dimensions;
     std::size_t m_byteSize;
 
-    IndexMap m_index;
+    schema::Map m_index;
 
     std::map<DimensionId::Id, std::size_t> m_dimensions_map;
 };
