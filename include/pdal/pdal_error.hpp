@@ -212,11 +212,11 @@ public:
     {}
 };
 
-class schema_error : public pdal_error
+class schema_error : public std::runtime_error
 {
 public:
     schema_error(std::string const& msg)
-        : pdal_error(msg)
+        : std::runtime_error(msg)
     {}
 };
 

@@ -71,7 +71,8 @@ namespace schema {
 struct name{};
 struct position{};
 struct index{};
-
+struct type{};
+struct id{};
 
 typedef boost::multi_index::multi_index_container<
   Dimension,
@@ -82,13 +83,17 @@ typedef boost::multi_index::multi_index_container<
     // Random access
     boost::multi_index::random_access<boost::multi_index::tag<index> >,
     // sort by less<string> on GetName
-    boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >
+    boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >,
+    boost::multi_index::hashed_non_unique<boost::multi_index::tag<id>, boost::multi_index::const_mem_fun<Dimension,DimensionId::Id,&Dimension::getId> >,
+    boost::multi_index::hashed_non_unique<boost::multi_index::tag<type>, boost::multi_index::const_mem_fun<Dimension,Dimension::DataType ,&Dimension::getDataType> >
       >
 > Map;
 
 typedef Map::index<name>::type index_by_name;
 typedef Map::index<position>::type index_by_position;
 typedef Map::index<index>::type index_by_index;
+typedef Map::index<type>::type index_by_type;
+typedef Map::index<id>::type index_by_id;
 
 }
 
@@ -151,14 +156,11 @@ public:
     static std::string to_xml(Schema const& schema);
 
 private:
-    void calculateSizes();
     
-    std::vector<Dimension> m_dimensions;
     std::size_t m_byteSize;
 
     schema::Map m_index;
 
-    std::map<DimensionId::Id, std::size_t> m_dimensions_map;
 };
 
 

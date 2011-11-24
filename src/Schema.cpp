@@ -74,10 +74,8 @@ Schema::Schema(std::vector<Dimension> const& dimensions)
 
 /// copy constructor
 Schema::Schema(Schema const& other) 
-    : m_dimensions(other.m_dimensions)
-    , m_byteSize(other.m_byteSize)
+    : m_byteSize(other.m_byteSize)
     , m_index(other.m_index)
-    , m_dimensions_map(other.m_dimensions_map)
 {
 
 }
@@ -88,9 +86,7 @@ Schema& Schema::operator=(Schema const& rhs)
 {
     if (&rhs != this)
     {
-        m_dimensions = rhs.m_dimensions;
         m_byteSize = rhs.m_byteSize;
-        m_dimensions_map = rhs.m_dimensions_map;
         m_index = rhs.m_index;
     }
 
@@ -101,11 +97,16 @@ Schema& Schema::operator=(Schema const& rhs)
 bool Schema::operator==(const Schema& other) const
 {
     if (m_byteSize != other.m_byteSize) return false;
-    if (m_dimensions.size() != other.m_dimensions.size()) return false;
-    std::vector<Dimension>::size_type i(0);
-    for (i = 0; i < m_dimensions.size(); ++i)
+    
+    if (m_index.size() != other.m_index.size()) return false;
+
+    schema::index_by_index const& idx = m_index.get<schema::index>();
+    schema::index_by_index const& idx2 = m_index.get<schema::index>();
+
+    schema::index_by_index::size_type i(0);
+    for (i = 0; i < idx.size(); ++i)
     {
-        if (!(m_dimensions[i] == other.m_dimensions[i])) 
+        if (!(idx[i] == idx2[i])) 
         {
             return false;
         }
@@ -120,38 +121,12 @@ bool Schema::operator!=(const Schema& other) const
   return !(*this==other);
 }
 
-    
-void Schema::calculateSizes()
-{
-    // to make life easy, for now we are going to assume that each Dimension 
-    // is byte-aligned and occupies an integral number of bytes
-
-    std::size_t offset = 0;
-
-    int i=0;
-    for (std::vector<Dimension>::iterator iter = m_dimensions.begin(); iter != m_dimensions.end(); ++iter)
-    {
-        Dimension& dim = *iter;
-
-        dim.setByteOffset(offset);
-
-        offset += dim.getByteSize();
-
-        dim.setPosition(i);
-   
-        ++i;
-        
-    }
-
-    return;
-}
-
 
 void Schema::appendDimension(const Dimension& dim)
 {
-    m_dimensions.push_back(dim);
-    std::pair<DimensionId::Id, std::size_t> p(dim.getId(), m_dimensions.size()-1);
-    m_dimensions_map.insert(p);
+    // m_dimensions.push_back(dim);
+    // std::pair<DimensionId::Id, std::size_t> p(dim.getId(), m_dimensions.size()-1);
+    // m_dimensions_map.insert(p);
 
     // Add/reset the dimension ptr on the dimensions map
     Dimension d(dim);
@@ -187,10 +162,6 @@ void Schema::appendDimension(const Dimension& dim)
         throw schema_error(oss.str());
     }
 
-    assert(m_index.size() == m_dimensions.size());
-
-    calculateSizes();
-
     return;
 }
 
@@ -202,8 +173,7 @@ const Dimension& Schema::getDimension(std::size_t t) const
     if (t >= idx.size())
         throw schema_error("Index position is not valid");
     
-    // return idx.at(t);
-    return m_dimensions[t];
+    return idx.at(t);
 }
 
 bool Schema::setDimension(Dimension const& dim)
@@ -221,49 +191,68 @@ bool Schema::setDimension(Dimension const& dim)
         throw schema_error(oss.str());
     }
     
-    for(std::vector<Dimension>::iterator i = m_dimensions.begin(); i != m_dimensions.end(); ++i)
-    {
-        if (i->getName() == dim.getName())
-            *i = dim;
-    }
+
     return true;
 }
 
 
-int Schema::getDimensionIndex(const DimensionId::Id& id) const
+int Schema::getDimensionIndex(const DimensionId::Id& t) const
 {
-    std::map<DimensionId::Id, std::size_t>::const_iterator i = m_dimensions_map.find(id);
-    
-    int m = 0;
-    
-    if (i == m_dimensions_map.end()) 
-        m = -1;
-    else
-        m = i->second;
 
-    return m;
+    schema::index_by_id::const_iterator it = m_index.get<schema::id>().find(t);
+
+    if (it != m_index.get<schema::id>().end())
+    {
+        return it->getPosition();
+    } else
+    {
+        return -1;
+    }
 }
 
 
 int Schema::getDimensionIndex(const Dimension& dim) const
 {
-    return getDimensionIndex(dim.getId());
+    schema::index_by_name::const_iterator it = m_index.get<schema::name>().find(dim.getName());
+
+    if (it != m_index.get<schema::name>().end())
+    {
+        return it->getPosition();
+    }    
+    
+    std::ostringstream oss;
+    oss << "getDimensionIndex: dimension not found with name " << dim.getName();
+    throw schema_error(oss.str());
 }
 
 
 bool Schema::hasDimension(const DimensionId::Id& field) const
 {
-    int t = getDimensionIndex(field);
-    if (t == -1)
-        return false;
-    return true;
+
+    schema::index_by_id::const_iterator it = m_index.get<schema::id>().find(field);
+
+    if (it != m_index.get<schema::id>().end())
+    {
+        return true;
+    }    
+    
+    return false;
 }
 
 
 const Dimension& Schema::getDimension(const DimensionId::Id& field) const
 {
-    int t = getDimensionIndex(field);
-    return m_dimensions[t];
+
+    schema::index_by_id::const_iterator it = m_index.get<schema::id>().find(field);
+
+    if (it != m_index.get<schema::id>().end())
+    {
+        return *it;
+    }    
+    
+    std::ostringstream oss;
+    oss << "getDimension: dimension not found with field " << field;
+    throw schema_error(oss.str());
 }
 
 
@@ -318,7 +307,12 @@ boost::property_tree::ptree Schema::toPTree() const
 {
     boost::property_tree::ptree tree;
 
-    for (std::vector<Dimension>::const_iterator iter = m_dimensions.begin(); iter != m_dimensions.end(); ++iter)
+    schema::index_by_index const& idx = m_index.get<schema::index>();
+
+    schema::index_by_index::size_type i(0);
+
+
+    for (schema::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
     {
         const Dimension& dim = *iter;
         tree.add_child("dimension", dim.toPTree());
