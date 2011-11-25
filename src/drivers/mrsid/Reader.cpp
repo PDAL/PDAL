@@ -376,6 +376,11 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     return cnt;
 }
 
+void Reader::addDefaultDimensions()
+{
+
+}
+
 
 boost::property_tree::ptree Reader::toPTree() const
 {

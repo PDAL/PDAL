@@ -176,6 +176,23 @@ const Dimension& Schema::getDimension(std::size_t t) const
     return idx.at(t);
 }
 
+const Dimension& Schema::getDimension(std::string const& t) const
+{
+    schema::index_by_name const& name_index = m_index.get<schema::name>();
+    schema::index_by_name::const_iterator it = name_index.find(t);
+    
+    // FIXME: If there are two dimensions with the same name here, we're 
+    // scrwed
+    if (it != name_index.end()) {
+        return *it;
+    } else {
+        std::ostringstream oss;
+        oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
+        throw dimension_not_found(oss.str());
+    }
+
+}
+
 bool Schema::setDimension(Dimension const& dim)
 {
     schema::index_by_name& name_index = m_index.get<schema::name>();
@@ -188,9 +205,8 @@ bool Schema::setDimension(Dimension const& dim)
     } else {
         std::ostringstream oss;
         oss << "Dimension with name '" << dim.getName() << "' not found, unable to Schema::setDimension";
-        throw schema_error(oss.str());
+        throw dimension_not_found(oss.str());
     }
-    
 
     return true;
 }
@@ -222,7 +238,7 @@ int Schema::getDimensionIndex(const Dimension& dim) const
     
     std::ostringstream oss;
     oss << "getDimensionIndex: dimension not found with name " << dim.getName();
-    throw schema_error(oss.str());
+    throw dimension_not_found(oss.str());
 }
 
 
@@ -252,7 +268,7 @@ const Dimension& Schema::getDimension(const DimensionId::Id& field) const
     
     std::ostringstream oss;
     oss << "getDimension: dimension not found with field " << field;
-    throw schema_error(oss.str());
+    throw dimension_not_found(oss.str());
 }
 
 
@@ -308,9 +324,6 @@ boost::property_tree::ptree Schema::toPTree() const
     boost::property_tree::ptree tree;
 
     schema::index_by_index const& idx = m_index.get<schema::index>();
-
-    schema::index_by_index::size_type i(0);
-
 
     for (schema::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
     {

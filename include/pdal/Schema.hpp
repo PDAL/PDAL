@@ -55,6 +55,7 @@
 #include <boost/foreach.hpp>
 #include <boost/array.hpp>
 #include <boost/optional.hpp>
+#include <boost/uuid/uuid.hpp>
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
@@ -64,6 +65,7 @@
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/random_access_index.hpp>
 
+#include <boost/functional/hash.hpp>
 namespace pdal
 {
 
@@ -73,6 +75,7 @@ struct position{};
 struct index{};
 struct type{};
 struct id{};
+struct uid{};
 
 typedef boost::multi_index::multi_index_container<
   Dimension,
@@ -84,7 +87,8 @@ typedef boost::multi_index::multi_index_container<
     boost::multi_index::random_access<boost::multi_index::tag<index> >,
     // sort by less<string> on GetName
     boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >,
-    boost::multi_index::hashed_non_unique<boost::multi_index::tag<id>, boost::multi_index::const_mem_fun<Dimension,DimensionId::Id,&Dimension::getId> >,
+    boost::multi_index::hashed_non_unique<boost::multi_index::tag<id>, boost::multi_index::const_mem_fun<Dimension,DimensionId::Id ,&Dimension::getId> >,
+    boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<Dimension,boost::uuids::uuid const&,&Dimension::getUUID> >,
     boost::multi_index::hashed_non_unique<boost::multi_index::tag<type>, boost::multi_index::const_mem_fun<Dimension,Dimension::DataType ,&Dimension::getDataType> >
       >
 > Map;
@@ -94,6 +98,8 @@ typedef Map::index<position>::type index_by_position;
 typedef Map::index<index>::type index_by_index;
 typedef Map::index<type>::type index_by_type;
 typedef Map::index<id>::type index_by_id;
+typedef Map::index<uid>::type index_by_uid;
+
 
 }
 
@@ -122,6 +128,7 @@ public:
 
     // Dimension& getDimension(const DimensionId::Id& id);
     const Dimension& getDimension(const DimensionId::Id& id) const;
+    const Dimension& getDimension(std::string const& type) const;
 
     const Dimension& getDimension(std::size_t index) const;
     bool setDimension(Dimension const& );

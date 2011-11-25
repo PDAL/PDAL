@@ -106,6 +106,11 @@ pdal::StageRandomIterator* Reader::createRandomIterator() const
     return m_stage->createRandomIterator();
 }
 
+void Reader::addDefaultDimensions()
+{
+
+}
+
 
 boost::property_tree::ptree Reader::toPTree() const
 {

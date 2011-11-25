@@ -60,6 +60,7 @@ public:
     virtual ~Reader();
 
     virtual void initialize();
+    virtual void addDefaultDimensions();
 
     // for xml serializion of pipelines
     virtual boost::property_tree::ptree serializePipeline() const;

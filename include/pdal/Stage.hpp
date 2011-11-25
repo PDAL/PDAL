@@ -94,8 +94,8 @@ protected:
     void setPointCountType(PointCountType);
     void setBounds(Bounds<double> const&);
     void setSpatialReference(SpatialReference const&);
-    void addDefaultDimension(Dimension const&);
-    
+    void addDefaultDimension(Dimension const&, std::string const&);
+    virtual void addDefaultDimensions();
     virtual MetadataRecord& getMetadataRecordRef(int index);
 
     // convenience function, for doing a "copy ctor" on all the core props

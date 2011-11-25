@@ -62,6 +62,7 @@ public:
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
+    virtual void addDefaultDimensions();
 
     const std::string& getFileName() const;
 

@@ -87,7 +87,7 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
     for (boost::uint32_t i=0; i < dimensions.size(); i++)
     {
         const Dimension& dim = dimensions[i];
-        addDefaultDimension(dim);
+        addDefaultDimension(dim, getName());
     }
     return;
 }
@@ -98,10 +98,10 @@ void Reader::addDefaultDimensions()
     Dimension y("Y", dimension::Float, 8);
     Dimension z("Z", dimension::Float, 8);
     Dimension t("Time", dimension::UnsignedInteger, 8);
-    addDefaultDimension(x);
-    addDefaultDimension(y);
-    addDefaultDimension(z);
-    addDefaultDimension(t);
+    addDefaultDimension(x, getName());
+    addDefaultDimension(y, getName());
+    addDefaultDimension(z, getName());
+    addDefaultDimension(t, getName());
 }
 
 void Reader::initialize()

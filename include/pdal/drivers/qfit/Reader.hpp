@@ -130,7 +130,8 @@ public:
     
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
-
+    virtual void addDefaultDimensions();
+    
     std::string getFileName() const;
 
     bool supportsIterator (StageIteratorType t) const

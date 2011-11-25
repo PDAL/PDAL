@@ -80,6 +80,7 @@ public:
     
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
+    virtual void addDefaultDimensions();
     
     Mode getMode() const;
     
@@ -108,7 +109,7 @@ private:
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
-    void addDefaultDimensions();
+
 };
 
 

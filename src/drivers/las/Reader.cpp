@@ -282,6 +282,159 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     return numPoints;
 }
 
+void Reader::addDefaultDimensions()
+{
+    Dimension x("X", dimension::SignedInteger, 4,  
+                "X coordinate as a long integer. You must use the scale "
+                "and offset information of the header to determine the double value." );
+    x.setUUID("2ee118d1-119e-4906-99c3-42934203f872");
+    addDefaultDimension(x, getName());
+
+    Dimension y("Y", dimension::SignedInteger, 4,  
+                "Y coordinate as a long integer. You must use the scale "
+                "and offset information of the header to determine the double value." );
+    y.setUUID("87707eee-2f30-4979-9987-8ef747e30275");
+    addDefaultDimension(y, getName());
+
+    Dimension z("Z", dimension::SignedInteger, 4,  
+                "x coordinate as a long integer. You must use the scale and "
+                "offset information of the header to determine the double value." );
+    z.setUUID("e74b5e41-95e6-4cf2-86ad-e3f5a996da5d");
+    addDefaultDimension(z, getName());
+
+    Dimension time("Time", dimension::Float, 8, 
+                    "The GPS Time is the double floating point time tag value at "
+                    "which the point was acquired. It is GPS Week Time if the "
+                    "Global Encoding low bit is clear and Adjusted Standard GPS "
+                    "Time if the Global Encoding low bit is set (see Global Encoding "
+                    "in the Public Header Block description)." );
+    time.setUUID("aec43586-2711-4e59-9df0-65aca78a4ffc");
+    addDefaultDimension(time, getName());
+
+    Dimension intensity("Intensity", dimension::UnsignedInteger, 2,
+                        "The intensity value is the integer representation of the pulse "
+                        "return magnitude. This value is optional and system specific. "
+                        "However, it should always be included if available." );
+    intensity.setUUID("61e90c9a-42fc-46c7-acd3-20d67bd5626f");
+    addDefaultDimension(intensity, getName());
+    
+    Dimension return_number("ReturnNumber", dimension::UnsignedInteger, 1,
+                            "Return Number: The Return Number is the pulse return number for "
+                            "a given output pulse. A given output laser pulse can have many "
+                            "returns, and they must be marked in sequence of return. The first "
+                            "return will have a Return Number of one, the second a Return "
+                            "Number of two, and so on up to five returns." );
+    return_number.setUUID("ffe5e5f8-4cec-4560-abf0-448008f7b89e");
+    addDefaultDimension(return_number, getName());
+
+    Dimension number_of_returns("NumberOfReturns", dimension::UnsignedInteger, 1, 
+                                "Number of Returns (for this emitted pulse): The Number of Returns "
+                                "is the total number of returns for a given pulse. For example, "
+                                "a laser data point may be return two (Return Number) within a "
+                                "total number of five returns." );
+    number_of_returns.setUUID("7c28bfd4-a9ed-4fb2-b07f-931c076fbaf0");
+    addDefaultDimension(number_of_returns, getName());
+    
+    Dimension scan_direction(   "ScanDirectionFlag", dimension::UnsignedInteger, 1,
+                                "The Scan Direction Flag denotes the direction at which the "
+                                "scanner mirror was traveling at the time of the output pulse. "
+                                "A bit value of 1 is a positive scan direction, and a bit value "
+                                "of 0 is a negative scan direction (where positive scan direction "
+                                "is a scan moving from the left side of the in-track direction to "
+                                "the right side and negative the opposite)." );
+    scan_direction.setUUID("13019a2c-cf88-480d-a995-0162055fe5f9");
+    addDefaultDimension(scan_direction, getName());
+
+    Dimension edge( "EdgeOfFlightLine", dimension::UnsignedInteger, 1,
+                    "The Edge of Flight Line data bit has a value of 1 only when "
+                    "the point is at the end of a scan. It is the last point on "
+                    "a given scan line before it changes direction." );
+    edge.setUUID("108c18f2-5cc0-4669-ae9a-f41eb4006ea5");
+    addDefaultDimension(edge, getName());
+    
+    Dimension classification(   "Classification", dimension::UnsignedInteger, 1,
+                                "Classification in LAS 1.0 was essentially user defined and optional. "
+                                "LAS 1.1 defines a standard set of ASPRS classifications. In addition, "
+                                "the field is now mandatory. If a point has never been classified, this "
+                                "byte must be set to zero. There are no user defined classes since "
+                                "both point format 0 and point format 1 supply 8 bits per point for "
+                                "user defined operations. Note that the format for classification is a "
+                                "bit encoded field with the lower five bits used for class and the "
+                                "three high bits used for flags." );
+    classification.setUUID("b4c67de9-cef1-432c-8909-7c751b2a4e0b");
+    addDefaultDimension(classification, getName());
+    
+    Dimension scan_angle(   "ScanAngleRank", dimension::SignedInteger, 1,
+                            "The Scan Angle Rank is a signed one-byte number with a "
+                            "valid range from -90 to +90. The Scan Angle Rank is the "
+                            "angle (rounded to the nearest integer in the absolute "
+                            "value sense) at which the laser point was output from the "
+                            "laser system including the roll of the aircraft. The scan "
+                            "angle is within 1 degree of accuracy from +90 to ñ90 degrees. "
+                            "The scan angle is an angle based on 0 degrees being nadir, "
+                            "and ñ90 degrees to the left side of the aircraft in the "
+                            "direction of flight." );
+    scan_angle.setUUID("aaadaf77-e0c9-4df0-81a7-27060794cd69");
+    addDefaultDimension(scan_angle, getName());
+
+    Dimension user_data("UserData", dimension::UnsignedInteger, 1,
+                        "This field may be used at the users discretion");
+    user_data.setUUID("70eb558e-63d4-4804-b1db-fc2fd716927c");
+    addDefaultDimension(user_data, getName());
+
+    Dimension point_source( "PointSourceId", dimension::UnsignedInteger, 2,
+                            "This value indicates the file from which this point originated. "
+                            "Valid values for this field are 1 to 65,535 inclusive with zero "
+                            "being used for a special case discussed below. The numerical value "
+                            "corresponds to the File Source ID from which this point originated. "
+                            "Zero is reserved as a convenience to system implementers. A Point "
+                            "Source ID of zero implies that this point originated in this file. "
+                            "This implies that processing software should set the Point Source "
+                            "ID equal to the File Source ID of the file containing this point "
+                            "at some time during processing. " );
+    point_source.setUUID("4e42e96a-6af0-4fdd-81cb-6216ff47bf6b");
+    addDefaultDimension(point_source, getName());
+    
+    Dimension packet_descriptor("WavePacketDescriptorIndex", dimension::UnsignedInteger, 1);
+    packet_descriptor.setUUID("1d095eb0-099f-4800-abb6-2272be486f81");
+    addDefaultDimension(packet_descriptor, getName());
+    
+    Dimension packet_offset("WaveformDataOffset", dimension::UnsignedInteger, 8);
+    packet_offset.setUUID("6dee8edf-0c2a-4554-b999-20c9d5f0e7b9");
+    addDefaultDimension(packet_offset, getName());
+    
+    Dimension return_point("ReturnPointWaveformLocation", dimension::UnsignedInteger, 4);
+    return_point.setUUID("f0f37962-2563-4c3e-858d-28ec15a1103f");
+    addDefaultDimension(return_point, getName());
+    
+    Dimension wave_x("WaveformXt", dimension::Float, 4);
+    wave_x.setUUID("c0ec76eb-9121-4127-b3d7-af92ef871a2d");
+    addDefaultDimension(wave_x, getName());
+
+    Dimension wave_y("WaveformYt", dimension::Float, 4);
+    wave_y.setUUID("b3f5bb56-3c25-42eb-9476-186bb6b78e3c");
+    addDefaultDimension(wave_y, getName());
+
+    Dimension wave_z("WaveformZt", dimension::Float, 4);
+    wave_z.setUUID("7499ae66-462f-4d0b-a449-6e5c721fb087");
+    addDefaultDimension(wave_z, getName());
+    
+    Dimension red(  "Red", dimension::UnsignedInteger, 2,
+                    "The red image channel value associated with this point");
+    red.setUUID("a42ce297-6aa2-4a62-bd29-2db19ba862d5");
+    addDefaultDimension(red, getName());
+
+    Dimension blue(  "Blue", dimension::UnsignedInteger, 2,
+                    "The blue image channel value associated with this point");
+    blue.setUUID("5c1a99c8-1829-4d5b-8735-4f6f393a7970");
+    addDefaultDimension(blue, getName());
+
+    Dimension green(  "Green", dimension::UnsignedInteger, 2,
+                    "The green image channel value associated with this point");
+    green.setUUID("7752759d-5713-48cd-9842-51db350cc979");
+    addDefaultDimension(green, getName());
+
+}
 
 boost::property_tree::ptree Reader::toPTree() const
 {
