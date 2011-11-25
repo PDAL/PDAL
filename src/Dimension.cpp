@@ -40,8 +40,9 @@
  ****************************************************************************/
 
 #include <pdal/dimension/Dimension.hpp>
-#include <pdal/external/boost/uuid/nil_generator.hpp>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/uuid/string_generator.hpp>
 #include <map>
 
 namespace pdal
@@ -62,6 +63,8 @@ Dimension::Dimension(DimensionId::Id id)
     , m_numericOffset(0.0)
     , m_byteOffset(0)
     , m_position(0)
+    , m_uuid(boost::uuids::random_generator()())
+    , m_namespace(std::string(""))
 {
     boost::uint32_t dt;
     DimensionId::lookupKnownDimension(id, dt, m_name, m_description);
@@ -85,7 +88,9 @@ Dimension::Dimension(DimensionId::Id id, DataType dataType, std::string name, st
     , m_numericScale(1.0)
     , m_numericOffset(0.0)
     , m_byteOffset(0)
-    , m_position(0)
+    , m_position(-1)
+    , m_uuid(boost::uuids::random_generator()())
+    , m_namespace(std::string(""))
 {
     assert(!DimensionId::hasKnownDimension(id));
     
@@ -95,18 +100,23 @@ Dimension::Dimension(DimensionId::Id id, DataType dataType, std::string name, st
 
 Dimension::Dimension(   std::string const& name, 
                         dimension::Interpretation interpretation,
-                        dimension::size_type sizeInBytes)
+                        dimension::size_type sizeInBytes,
+                        std::string description)
     : m_name(name)
     , m_flags(0)
     , m_endian(pdal::Endian_Little)    
     , m_byteSize(sizeInBytes)
+    , m_description(description)
     , m_min(0.0)
     , m_max(0.0)
     , m_numericScale(1.0)
     , m_numericOffset(0.0)
     , m_byteOffset(0)
-    , m_position(0)    
+    , m_position(-1)    
     , m_interpretation(interpretation)
+    , m_uuid(boost::uuids::random_generator()())
+    , m_namespace(std::string(""))
+    
 {
     m_id = DimensionId::getIdForDimension(*this);
     if (interpretation == dimension::UnsignedInteger)
@@ -158,6 +168,8 @@ Dimension::Dimension(Dimension const& other)
     , m_byteOffset(other.m_byteOffset)
     , m_position(other.m_position)
     , m_interpretation(other.m_interpretation)
+    , m_uuid(other.m_uuid)
+    , m_namespace(other.m_namespace)
 {
     return;
 }
@@ -181,6 +193,8 @@ Dimension& Dimension::operator=(Dimension const& rhs)
         m_byteOffset = rhs.m_byteOffset;
         m_position = rhs.m_position;
         m_interpretation = rhs.m_interpretation;
+        m_uuid = rhs.m_uuid;
+        m_namespace = rhs.m_namespace;
     }
 
     return *this;
@@ -191,7 +205,7 @@ bool Dimension::operator==(const Dimension& other) const
 {
     if (m_dataType == other.m_dataType &&
         m_id == other.m_id &&
-        m_name == other.m_name &&
+        boost::iequals(m_name, other.m_name) &&
         m_flags == other.m_flags &&
         m_endian == other.m_endian &&
         m_byteSize == other.m_byteSize &&
@@ -202,7 +216,8 @@ bool Dimension::operator==(const Dimension& other) const
         Utils::compare_approx(m_numericOffset, other.m_numericOffset, (std::numeric_limits<double>::min)()) &&
         m_byteOffset == other.m_byteOffset &&
         m_position == other.m_position &&
-        m_interpretation == other.m_interpretation
+        m_interpretation == other.m_interpretation && 
+        m_uuid == other.m_uuid
         )
     {
         return true;
@@ -310,85 +325,6 @@ std::size_t Dimension::getDataTypeSize(DataType type)
 }
 
 
-bool Dimension::getDataTypeIsNumeric(DataType type)
-{
-    switch (type)
-    {
-    case Int8:
-    case Uint8:
-    case Int16:
-    case Uint16:
-    case Int32:
-    case Uint32:
-    case Int64:
-    case Uint64:
-        return true;
-    case Pointer:
-        return false;
-    case Float:
-    case Double:
-        return true;
-    case Undefined:
-        throw;
-    }
-    throw;
-}
-
-
-bool Dimension::getDataTypeIsSigned(DataType type)
-{
-    switch (type)
-    {
-    case Uint8:
-    case Uint16:
-    case Uint32:
-    case Uint64:
-        return false;
-    case Int8:
-    case Int16:
-    case Int32:
-    case Int64:
-        return true;
-    case Pointer:
-        return false;
-    case Float:
-    case Double:
-        return true;
-    case Undefined:
-        throw;
-        
-    }
-    throw;
-}
-
-
-bool Dimension::getDataTypeIsInteger(DataType type)
-{
-    switch (type)
-    {
-    case Uint8:
-    case Uint16:
-    case Uint32:
-    case Uint64:
-        return true;
-    case Int8:
-    case Int16:
-    case Int32:
-    case Int64:
-        return true;
-    case Pointer:
-        return false;
-    case Float:
-    case Double:
-        return false;
-    case Undefined:
-        throw;
-
-    }
-    throw;
-}
-
-
 Dimension::DataType Dimension::getDataTypeFromString(const std::string& s)
 {
     if (s == "Int8") return Int8;
@@ -452,6 +388,11 @@ boost::property_tree::ptree Dimension::toPTree() const
     return dim;
 }
 
+void Dimension::setUUID(std::string const& id)
+{
+    boost::uuids::string_generator gen;
+    m_uuid = gen(id);
+}
 
 void Dimension::dump() const
 {

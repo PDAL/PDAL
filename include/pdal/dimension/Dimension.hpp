@@ -49,6 +49,9 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+
 #include <limits>
 
 namespace pdal
@@ -109,7 +112,8 @@ public:
 /// \name Constructors
     Dimension(  std::string const& name, 
                 dimension::Interpretation interpretation,
-                dimension::size_type sizeInBytes);
+                dimension::size_type sizeInBytes,
+                std::string description=std::string(""));
     Dimension(DimensionId::Id id); // will use table to lookup datatype, description, etc
     Dimension(DimensionId::Id id, DataType datatype, std::string name, std::string description=std::string("")); // for dimensions not in the master table
     Dimension(Dimension const& other);
@@ -157,9 +161,6 @@ public:
     static dimension::size_type getDataTypeSize(DataType);
 
     static dimension::Interpretation getInterpretation(DataType type);    
-    static bool getDataTypeIsNumeric(DataType);
-    static bool getDataTypeIsSigned(DataType);
-    static bool getDataTypeIsInteger(DataType);
 
     /// \return Number of bytes required to serialize this dimension 
     dimension::size_type getByteSize() const
@@ -174,45 +175,6 @@ public:
     inline void setDescription(std::string const& v)
     {
         m_description = v;
-    }
-
-    /*!
-        \return Is this dimension a numeric dimension?  
-        \verbatim embed:rst 
-        .. note::
-            
-            Dimensions with isNumeric == false are considered generic byte fields.
-        \endverbatim
-    */
-    inline bool isNumeric() const
-    {
-        return getDataTypeIsNumeric(m_dataType);
-    }
-
-    /*!
-        \return Does this dimension a sign?  
-        \verbatim embed:rst 
-        .. note::
-            
-            Only applicable to dimensions with isNumeric() == true.
-        \endverbatim
-    */    
-    inline bool isSigned() const
-    {
-        return getDataTypeIsSigned(m_dataType);
-    }
-
-    /*!
-        \return Does this dimension interpret to an integer?
-        \verbatim embed:rst 
-        .. note::
-            
-            Only applicable to dimensions with isNumeric() == true.
-        \endverbatim
-    */      
-    inline bool isInteger() const
-    {
-        return getDataTypeIsInteger(m_dataType);
     }
 
     /// The minimum value of this dimension as a double
@@ -368,6 +330,10 @@ public:
     /// Outputs a string representation of the Dimension instance to std::cout
     void dump() const;
 
+    boost::uuids::uuid const& getUUID() const { return m_uuid; }
+    void setUUID( std::string const& id);
+    
+    void setNamespace( std::string const& name) { m_namespace = name; }
 private:
     DataType m_dataType;
     DimensionId::Id m_id;
@@ -383,6 +349,8 @@ private:
     dimension::size_type m_byteOffset;
     dimension::size_type m_position;
     dimension::Interpretation m_interpretation;
+    boost::uuids::uuid m_uuid;
+    std::string m_namespace;
 };
 
 
