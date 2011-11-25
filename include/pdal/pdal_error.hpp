@@ -220,6 +220,13 @@ public:
     {}
 };
 
+class buffer_error : public std::runtime_error
+{
+public:
+    buffer_error(std::string const& msg)
+        : std::runtime_error(msg)
+    {}
+};
 
 } // namespace pdal
 
