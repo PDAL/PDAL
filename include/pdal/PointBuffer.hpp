@@ -37,6 +37,7 @@
 
 
 #include <boost/scoped_array.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Bounds.hpp>
@@ -91,6 +92,7 @@ public:
 
     // accessors to a particular field of a particular point in this buffer
     template<class T> T getField(std::size_t pointIndex, boost::int32_t fieldIndex) const;
+    template<class T> T getField(pdal::Dimension const& dim, std::size_t pointIndex) const;    
     template<class T> T getRawField(std::size_t pointIndex, std::size_t pointBytePosition) const;
     template<class T> void setField(std::size_t pointIndex, boost::int32_t fieldIndex, T value);
     void setFieldData(std::size_t pointIndex, boost::int32_t fieldIndex, const boost::uint8_t* data);
@@ -184,6 +186,7 @@ private:
 };
 
 
+
 template <class T>
 inline void PointBuffer::setField(std::size_t pointIndex, boost::int32_t fieldIndex, T value)
 {
@@ -198,7 +201,7 @@ inline void PointBuffer::setField(std::size_t pointIndex, boost::int32_t fieldIn
     std::size_t offset = (pointIndex * m_pointSize) + dim.getByteOffset();
     assert(offset + sizeof(T) <= m_pointSize * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
-
+    
     *(T*)(void*)p = value;
 }
 
@@ -238,6 +241,134 @@ inline T PointBuffer::getField(std::size_t pointIndex, boost::int32_t fieldIndex
     boost::uint8_t* p = m_data.get() + offset;
 
     return *(T*)(void*)p;
+}
+
+
+template <class T>
+inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointIndex) const
+{
+    if (dim.getPosition() == -1)
+    {
+        // this is a little harsh, but we'll keep it for now as we shake things out
+        throw buffer_error("This dimension has no identified position in a schema. Use the getRawField method to access an arbitrary byte position.");
+    }
+        
+    std::size_t offset = (pointIndex * m_pointSize) + dim.getByteOffset();
+    
+    if (offset + sizeof(T) > m_pointSize * m_capacity)
+    {
+        std::ostringstream oss;
+        oss << "Offset for given dimension is off the end of the buffer!";
+        throw buffer_error(oss.str());
+    }
+    
+    assert(offset + sizeof(T) <= m_pointSize * m_capacity);
+    boost::uint8_t* p = m_data.get() + offset;
+    
+    // If the byte size of what was requested is the same as our dimension's 
+    // We're just going to give it back to you.  If not, we're going to try to do 
+    // some magic below to try to give you what you asked for.
+    if (sizeof(T) == dim.getByteSize())
+    {
+        // Winner, winner, chicken dinner. We're not going to try to 
+        // do anything magical. It's up to you to get the interpretation right.
+        return *(T*)(void*)p;
+    }
+    
+    T output(0);
+
+    float flt(0.0);
+    double dbl(0.0);
+    boost::int8_t i8(0);
+    boost::uint8_t u8(0);
+    boost::int16_t i16(0);
+    boost::uint16_t u16(0);
+    boost::int32_t i32(0);
+    boost::uint32_t u32(0);
+    boost::int64_t i64(0);
+    boost::uint64_t u64(0);
+    
+    switch (dim.getInterpretation())
+    {
+        case dimension::SignedByte:
+            i8 = *(boost::int8_t*)(void*)p;
+            output = boost::lexical_cast<T>(i8);
+            break;
+        case dimension::UnsignedByte:
+            u8 = *(boost::uint8_t*)(void*)p;
+            output = boost::lexical_cast<T>(u8);
+            break;
+
+        case dimension::SignedInteger:
+            if (dim.getByteSize() == 1 )
+            {
+                i8 = *(boost::int8_t*)(void*)p;
+                output = boost::lexical_cast<T>(i8);
+            } else if (dim.getByteSize() == 2) 
+            {
+                i16 = *(boost::int16_t*)(void*)p;
+                output = boost::lexical_cast<T>(i16);
+                
+            } else if (dim.getByteSize() == 4)
+            {
+                i32 = *(boost::int32_t*)(void*)p;
+                output = boost::lexical_cast<T>(i32);
+            } else if (dim.getByteSize() == 8)
+            {
+                i64 = *(boost::int64_t*)(void*)p;
+                output = boost::lexical_cast<T>(i64);
+            } else
+            {
+                throw buffer_error("getField::Unhandled datatype size for SignedInteger");
+            }
+            break;
+        case dimension::UnsignedInteger:
+            if (dim.getByteSize() == 1 )
+            {
+                u8 = *(boost::uint8_t*)(void*)p;
+                output = boost::lexical_cast<T>(u8);
+            } else if (dim.getByteSize() == 2) 
+            {
+                u16 = *(boost::uint16_t*)(void*)p;
+                output = boost::lexical_cast<T>(u16);
+                
+            } else if (dim.getByteSize() == 4)
+            {
+                u32 = *(boost::uint32_t*)(void*)p;
+                output = boost::lexical_cast<T>(u32);
+            } else if (dim.getByteSize() == 8)
+            {
+                u64 = *(boost::uint64_t*)(void*)p;
+                output = boost::lexical_cast<T>(u64);
+            } else
+            {
+                throw buffer_error("getField::Unhandled datatype size for UnsignedInteger");
+            }
+        
+            break;
+        case dimension::Float:
+            if (dim.getByteSize() == 4)
+            {
+                flt = *(float*)(void*)p;
+                output = boost::lexical_cast<T>(flt);
+            } else if (dim.getByteSize() == 8)
+            {
+                dbl = *(double*)(void*)p;
+                output = boost::lexical_cast<T>(dbl);
+            } else
+            {
+                throw buffer_error("getField::Unhandled datatype size for Float");
+            }
+            break;
+        
+        case dimension::Pointer:
+            break;
+        default:
+            throw buffer_error("Undefined interpretation for getField");
+    }
+
+    return output;
+    
 }
 
 template <class T>
