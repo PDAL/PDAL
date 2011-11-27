@@ -63,7 +63,6 @@ Dimension::Dimension(DimensionId::Id id)
     , m_numericOffset(0.0)
     , m_byteOffset(0)
     , m_position(0)
-    , m_uuid(boost::uuids::random_generator()())
     , m_namespace(std::string(""))
 {
     boost::uint32_t dt;
@@ -89,7 +88,6 @@ Dimension::Dimension(DimensionId::Id id, DataType dataType, std::string name, st
     , m_numericOffset(0.0)
     , m_byteOffset(0)
     , m_position(-1)
-    , m_uuid(boost::uuids::random_generator()())
     , m_namespace(std::string(""))
 {
     assert(!DimensionId::hasKnownDimension(id));
@@ -114,7 +112,6 @@ Dimension::Dimension(   std::string const& name,
     , m_byteOffset(0)
     , m_position(-1)    
     , m_interpretation(interpretation)
-    , m_uuid(boost::uuids::random_generator()())
     , m_namespace(std::string(""))
     
 {
