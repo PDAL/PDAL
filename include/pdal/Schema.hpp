@@ -100,6 +100,7 @@ typedef Map::index<type>::type index_by_type;
 typedef Map::index<id>::type index_by_id;
 typedef Map::index<uid>::type index_by_uid;
 
+typedef boost::uint32_t size_type;
 
 }
 
@@ -140,7 +141,7 @@ public:
 
 
     /// Fetch total byte size -- sum of all dimensions
-    inline std::size_t getByteSize() const
+    inline schema::size_type const& getByteSize() const
     {
         return m_byteSize;
     }
@@ -164,7 +165,7 @@ public:
 
 private:
     
-    std::size_t m_byteSize;
+	schema::size_type m_byteSize;
 
     schema::Map m_index;
 
