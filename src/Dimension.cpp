@@ -43,6 +43,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/random_generator.hpp>
 #include <map>
 
 namespace pdal
@@ -289,7 +290,7 @@ dimension::Interpretation Dimension::getInterpretation(DataType type)
     throw;
 }
 
-std::size_t Dimension::getDataTypeSize(DataType type)
+dimension::size_type Dimension::getDataTypeSize(DataType type)
 {
     switch (type)
     {
@@ -391,6 +392,10 @@ void Dimension::setUUID(std::string const& id)
     m_uuid = gen(id);
 }
 
+void Dimension::createUUID()
+{
+	m_uuid = boost::uuids::random_generator()();
+}
 void Dimension::dump() const
 {
     std::cout << *this;

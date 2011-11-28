@@ -70,7 +70,7 @@ namespace dimension {
         IsIgnored = 0x8
     };
 
-    typedef std::size_t size_type;
+    typedef boost::int32_t size_type;
     
     enum Interpretation
     {
@@ -312,12 +312,12 @@ public:
     /// The index position of the index.  In a standard ePointFormat0
     /// data record, the X dimension would have a position of 0, while
     /// the Y dimension would have a position of 1, for example.
-    inline boost::uint32_t getPosition() const
+    inline dimension::size_type getPosition() const
     {
         return m_position;
     }
 
-    inline void setPosition(boost::uint32_t v)
+    inline void setPosition(dimension::size_type v)
     {
         m_position = v;
     }
@@ -332,7 +332,9 @@ public:
 
     boost::uuids::uuid const& getUUID() const { return m_uuid; }
     void setUUID( std::string const& id);
-    
+    void setUUID( boost::uuids::uuid& id) { m_uuid = id; }
+    void createUUID();
+
     void setNamespace( std::string const& name) { m_namespace = name; }
 private:
     DataType m_dataType;
