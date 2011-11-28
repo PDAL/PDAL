@@ -129,23 +129,23 @@ public:
     
     inline boost::uint64_t getBufferByteLength() const
     {
-        return m_pointSize*m_numPoints;
+        return m_schema.getByteSize() * m_numPoints;
     }
     inline boost::uint64_t getBufferByteCapacity() const
     {
-        return m_pointSize*m_capacity;
+        return m_schema.getByteSize() * m_capacity;
     }
 
 
     // access to the raw memory
     inline boost::uint8_t* getData(std::size_t pointIndex) const
     {
-        return m_data.get() + m_pointSize * pointIndex;
+        return m_data.get() + m_schema.getByteSize() * pointIndex;
     }
 
     inline boost::uint8_t* getData(std::size_t pointIndex)
     {
-        return m_data.get() + m_pointSize * pointIndex;
+        return m_data.get() + m_schema.getByteSize() * pointIndex;
     }
     
     // copy in raw data
@@ -179,7 +179,6 @@ public:
 private:
     Schema m_schema;
     boost::scoped_array<boost::uint8_t> m_data;
-    std::size_t m_pointSize;
     boost::uint32_t m_numPoints;
     boost::uint32_t m_capacity;    
     Bounds<double> m_bounds;
@@ -198,8 +197,8 @@ inline void PointBuffer::setField(std::size_t pointIndex, boost::int32_t fieldIn
 
     const Dimension& dim = m_schema.getDimension(fieldIndex);
 
-    std::size_t offset = (pointIndex * m_pointSize) + dim.getByteOffset();
-    assert(offset + sizeof(T) <= m_pointSize * m_capacity);
+    std::size_t offset = (pointIndex * m_schema.getByteSize() ) + dim.getByteOffset();
+    assert(offset + sizeof(T) <= m_schema.getByteSize() * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
     
     *(T*)(void*)p = value;
@@ -215,10 +214,10 @@ inline void PointBuffer::setFieldData(std::size_t pointIndex, boost::int32_t fie
     
     const Dimension& dim = m_schema.getDimension(fieldIndex);
 
-    std::size_t offset = (pointIndex * m_pointSize) + dim.getByteOffset();
+    std::size_t offset = (pointIndex * m_schema.getByteSize()) + dim.getByteOffset();
     std::size_t size = dim.getDataTypeSize(dim.getDataType());
     // std::cout << "copying field " << d.getFieldName() << " with index" << fieldIndex << " of size " << size << " at offset " << offset << std::endl;
-    // assert(offset + sizeof(T) <= m_pointSize * m_capacity);
+    // assert(offset + sizeof(T) <= m_schema.getByteSize() * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
     
     memcpy(p, data, size);
@@ -236,8 +235,8 @@ inline T PointBuffer::getField(std::size_t pointIndex, boost::int32_t fieldIndex
         
     const Dimension& dim = m_schema.getDimension(fieldIndex);
 
-    std::size_t offset = (pointIndex * m_pointSize) + dim.getByteOffset();
-    assert(offset + sizeof(T) <= m_pointSize * m_capacity);
+    std::size_t offset = (pointIndex * m_schema.getByteSize()) + dim.getByteOffset();
+    assert(offset + sizeof(T) <= m_schema.getByteSize() * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
 
     return *(T*)(void*)p;
@@ -253,16 +252,16 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
         throw buffer_error("This dimension has no identified position in a schema. Use the getRawField method to access an arbitrary byte position.");
     }
         
-    std::size_t offset = (pointIndex * m_pointSize) + dim.getByteOffset();
+    std::size_t offset = (pointIndex * m_schema.getByteSize()) + dim.getByteOffset();
     
-    if (offset + sizeof(T) > m_pointSize * m_capacity)
+    if (offset + sizeof(T) > m_schema.getByteSize() * m_capacity)
     {
         std::ostringstream oss;
         oss << "Offset for given dimension is off the end of the buffer!";
         throw buffer_error(oss.str());
     }
     
-    assert(offset + sizeof(T) <= m_pointSize * m_capacity);
+    assert(offset + sizeof(T) <= m_schema.getByteSize() * m_capacity);
     boost::uint8_t* p = m_data.get() + offset;
     
     // If the byte size of what was requested is the same as our dimension's 
@@ -374,7 +373,7 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
 template <class T>
 inline T PointBuffer::getRawField(std::size_t pointIndex, std::size_t pointBytePosition) const
 {
-    std::size_t offset = (pointIndex * m_pointSize) + pointBytePosition;
+    std::size_t offset = (pointIndex * m_schema.getByteSize() ) + pointBytePosition;
     boost::uint8_t* p = m_data.get() + offset;
 
     return *(T*)(void*)p;

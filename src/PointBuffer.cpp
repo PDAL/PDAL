@@ -44,7 +44,6 @@ namespace pdal
 PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     : m_schema(schema)
     , m_data(new boost::uint8_t[m_schema.getByteSize() * capacity])
-    , m_pointSize(m_schema.getByteSize())
     , m_numPoints(0)
     , m_capacity(capacity)
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
@@ -56,14 +55,13 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
 PointBuffer::PointBuffer(PointBuffer const& other) 
     : m_schema(other.getSchema())
     , m_data(new boost::uint8_t[m_schema.getByteSize() * other.m_capacity])
-    , m_pointSize(m_schema.getByteSize())
     , m_numPoints(other.m_numPoints)
     , m_capacity(other.m_capacity)
     , m_bounds(other.m_bounds)
 {
     if (other.m_data)
     {
-        memcpy(m_data.get(), other.m_data.get(), m_pointSize*m_capacity);
+        memcpy(m_data.get(), other.m_data.get(), m_schema.getByteSize()*m_capacity);
     }
 
 }
@@ -73,15 +71,14 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
     if (&rhs != this)
     {
         m_schema = rhs.getSchema();
-        m_pointSize = rhs.getSchema().getByteSize();
         m_numPoints = rhs.getNumPoints();
         m_capacity = rhs.getCapacity();
         m_bounds = rhs.getSpatialBounds();
-        boost::scoped_array<boost::uint8_t> data( new boost::uint8_t[ m_pointSize*m_capacity ] );
+        boost::scoped_array<boost::uint8_t> data( new boost::uint8_t[ m_schema.getByteSize()*m_capacity ] );
         m_data.swap(data);
         
         if (rhs.m_data.get())
-            memcpy(m_data.get(), rhs.m_data.get(), m_pointSize*m_capacity);
+            memcpy(m_data.get(), rhs.m_data.get(), m_schema.getByteSize()*m_capacity);
         
         
     }
@@ -107,7 +104,7 @@ void PointBuffer::setSpatialBounds(const Bounds<double>& bounds)
 
 void PointBuffer::setData(boost::uint8_t* data, std::size_t index)
 {
-    memcpy(m_data.get() + m_pointSize * index, data, getSchema().getByteSize());
+    memcpy(m_data.get() + m_schema.getByteSize() * index, data, getSchema().getByteSize());
 }
 
 void PointBuffer::setAllData(boost::uint8_t* data, boost::uint32_t byteCount)
@@ -117,7 +114,7 @@ void PointBuffer::setAllData(boost::uint8_t* data, boost::uint32_t byteCount)
 
 void PointBuffer::setDataStride(boost::uint8_t* data, std::size_t index, boost::uint32_t byteCount)
 {
-    memcpy(m_data.get() + m_pointSize * index, data, byteCount);
+    memcpy(m_data.get() + m_schema.getByteSize() * index, data, byteCount);
 }
 
 boost::uint32_t PointBuffer::getNumPoints() const
