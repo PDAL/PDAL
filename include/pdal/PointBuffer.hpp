@@ -92,9 +92,10 @@ public:
 
     // accessors to a particular field of a particular point in this buffer
     template<class T> T getField(std::size_t pointIndex, boost::int32_t fieldIndex) const;
-    template<class T> T getField(pdal::Dimension const& dim, std::size_t pointIndex) const;    
+    template<class T> T getField(Dimension const& dim, std::size_t pointIndex) const;    
     template<class T> T getRawField(std::size_t pointIndex, std::size_t pointBytePosition) const;
     template<class T> void setField(std::size_t pointIndex, boost::int32_t fieldIndex, T value);
+	template<class T> void setField(Dimension const& dim, std::size_t pointIndex, T value);
     void setFieldData(std::size_t pointIndex, boost::int32_t fieldIndex, const boost::uint8_t* data);
     
     // bulk copy all the fields from the given point into this object
@@ -202,6 +203,33 @@ inline void PointBuffer::setField(std::size_t pointIndex, boost::int32_t fieldIn
     boost::uint8_t* p = m_data.get() + offset;
     
     *(T*)(void*)p = value;
+}
+
+template <class T>
+inline void PointBuffer::setField(pdal::Dimension const& dim, std::size_t pointIndex, T value)
+{
+    if (dim.getPosition() == -1)
+    {
+        // this is a little harsh, but we'll keep it for now as we shake things out
+        throw buffer_error("This dimension has no identified position in a schema. Use the setRawField method to access an arbitrary byte position.");
+    }
+
+    std::size_t offset = (pointIndex * m_schema.getByteSize() ) + dim.getByteOffset();
+    assert(offset + sizeof(T) <= m_schema.getByteSize() * m_capacity);
+    boost::uint8_t* p = m_data.get() + offset;
+
+    if (sizeof(T) == dim.getByteSize())
+    {
+        // Winner, winner, chicken dinner. We're not going to try to 
+        // do anything magical. It's up to you to get the interpretation right.
+        *(T*)(void*)p = value;
+    }
+	
+	T output(0);
+    output = boost::lexical_cast<T>(value);
+	*(T*)(void*)p = output;
+
+
 }
 
 inline void PointBuffer::setFieldData(std::size_t pointIndex, boost::int32_t fieldIndex, const boost::uint8_t* data)
