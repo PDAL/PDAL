@@ -59,55 +59,55 @@ enum PointFormat
 
 
 // this struct is used as a means to hold all the las field dimension indexes from a schema
-class PDAL_DLL PointIndexes
-{
-public:
-    PointIndexes(const Schema& schema, PointFormat format);
-    int X;
-    int Y;
-    int Z;
-    
-    int Intensity;
-    int ReturnNumber;
-    int NumberOfReturns;
-    int ScanDirectionFlag;
-    int EdgeOfFlightLine;
-    int Classification;
-    int ScanAngleRank;
-    int UserData;
-    int PointSourceId;
-    
-    int Time;
-    
-    int Red;
-    int Green;
-    int Blue;
-};
+// class PDAL_DLL PointIndexes
+// {
+// public:
+//     PointIndexes(const Schema& schema, PointFormat format);
+//     int X;
+//     int Y;
+//     int Z;
+//     
+//     int Intensity;
+//     int ReturnNumber;
+//     int NumberOfReturns;
+//     int ScanDirectionFlag;
+//     int EdgeOfFlightLine;
+//     int Classification;
+//     int ScanAngleRank;
+//     int UserData;
+//     int PointSourceId;
+//     
+//     int Time;
+//     
+//     int Red;
+//     int Green;
+//     int Blue;
+// };
 
-class PDAL_DLL PointPositions
+class PDAL_DLL PointDimensions
 {
 public:
-    PointPositions(const Schema& schema, PointFormat format);
+    PointDimensions(const Schema& schema);
     
-    std::size_t X;
-    std::size_t Y;
-    std::size_t Z;
+    pdal::Dimension const* X;
+    pdal::Dimension const* Y;
+    pdal::Dimension const* Z;
     
-    std::size_t Intensity;
-    std::size_t ReturnNumber;
-    std::size_t NumberOfReturns;
-    std::size_t ScanDirectionFlag;
-    std::size_t EdgeOfFlightLine;
-    std::size_t Classification;
-    std::size_t ScanAngleRank;
-    std::size_t UserData;
-    std::size_t PointSourceId;
+    pdal::Dimension const* Intensity;
+    pdal::Dimension const* ReturnNumber;
+    pdal::Dimension const* NumberOfReturns;
+    pdal::Dimension const* ScanDirectionFlag;
+    pdal::Dimension const* EdgeOfFlightLine;
+    pdal::Dimension const* Classification;
+    pdal::Dimension const* ScanAngleRank;
+    pdal::Dimension const* UserData;
+    pdal::Dimension const* PointSourceId;
     
-    std::size_t Time;
+    pdal::Dimension const* Time;
     
-    std::size_t Red;
-    std::size_t Green;
-    std::size_t Blue;
+    pdal::Dimension const* Red;
+    pdal::Dimension const* Green;
+    pdal::Dimension const* Blue;
 };
 
 class PDAL_DLL Support
