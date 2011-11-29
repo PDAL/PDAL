@@ -47,6 +47,7 @@ PointBuffer::PointBuffer(const Schema& schema, boost::uint32_t capacity)
     , m_numPoints(0)
     , m_capacity(capacity)
     , m_bounds(Bounds<double>::getDefaultSpatialExtent())
+	, m_byteSize(schema.getByteSize())
 {
 
     return;
@@ -58,6 +59,7 @@ PointBuffer::PointBuffer(PointBuffer const& other)
     , m_numPoints(other.m_numPoints)
     , m_capacity(other.m_capacity)
     , m_bounds(other.m_bounds)
+	, m_byteSize(other.m_byteSize)
 {
     if (other.m_data)
     {
@@ -76,9 +78,10 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
         m_bounds = rhs.getSpatialBounds();
         boost::scoped_array<boost::uint8_t> data( new boost::uint8_t[ m_schema.getByteSize()*m_capacity ] );
         m_data.swap(data);
+		m_byteSize = rhs.m_byteSize;
         
         if (rhs.m_data.get())
-            memcpy(m_data.get(), rhs.m_data.get(), m_schema.getByteSize()*m_capacity);
+            memcpy(m_data.get(), rhs.m_data.get(), m_byteSize*m_capacity);
         
         
     }
@@ -104,7 +107,7 @@ void PointBuffer::setSpatialBounds(const Bounds<double>& bounds)
 
 void PointBuffer::setData(boost::uint8_t* data, std::size_t index)
 {
-    memcpy(m_data.get() + m_schema.getByteSize() * index, data, getSchema().getByteSize());
+    memcpy(m_data.get() + m_byteSize * index, data, m_byteSize);
 }
 
 void PointBuffer::setAllData(boost::uint8_t* data, boost::uint32_t byteCount)
@@ -114,7 +117,7 @@ void PointBuffer::setAllData(boost::uint8_t* data, boost::uint32_t byteCount)
 
 void PointBuffer::setDataStride(boost::uint8_t* data, std::size_t index, boost::uint32_t byteCount)
 {
-    memcpy(m_data.get() + m_schema.getByteSize() * index, data, byteCount);
+    memcpy(m_data.get() + m_byteSize * index, data, byteCount);
 }
 
 boost::uint32_t PointBuffer::getNumPoints() const
@@ -125,7 +128,7 @@ boost::uint32_t PointBuffer::getNumPoints() const
 
 void PointBuffer::getData(boost::uint8_t** data, std::size_t* array_size) const
 {
-    *array_size = getSchema().getByteSize();
+    *array_size = m_byteSize;
     *data = (boost::uint8_t*) malloc (*array_size);
     memcpy(*data, m_data.get(), *array_size);
 }
