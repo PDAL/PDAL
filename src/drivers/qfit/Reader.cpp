@@ -233,7 +233,6 @@ Reader::Reader(const Options& options)
     m_flip_x = getOptions().getValueOrDefault("flip_coordinates", true);
     m_scale_z = getOptions().getValueOrDefault("scale_z", 1.0);
 
-    m_littleEndian = getOptions().getValueOrDefault("little_endian", false);
         
     std::istream* str = FileUtils::openFile(filename);
     
@@ -249,13 +248,40 @@ Reader::Reader(const Options& options)
     
     Utils::read_n(int4, *str, sizeof(int4));
     
+
+
+	// They started writting little-endian data.
+	
+	/* For years we produced ATM data in big-endian format. With changes in
+	computer hardware, we reluctantly changed our standard output to
+	little-endian. The transition occurred between the two 2010 campaigns. The
+	format of the binary ( .qi, for example) files can be identified by
+	examining the first four bytes of the file. Read as a long integer (one
+	4-byte word), the value will contain the record length (in bytes) of the
+	data records. For example, a .qi file containing 14 words per record will
+	have a value 56 (=4*14). If the format of the file matches the format of
+	your processor, the value will be reasonable without byte-swapping. If the
+	format of the file differs from your processor, then the value is
+	interpreted as some very large number, unless you swap the byte order. If
+	you use Intel or equivalent processors, then you had to byte-swap files
+	from spring 2010 and earlier, you do not swap the ones from fall 2010 and
+	later. */
+	
+	// If the size comes back something other than 4*no_dimensions, we assume 
+	// The data were flipped 
+	if (int4 < 100)
+	{
+		m_littleEndian = true;
+	}
+
     if (!m_littleEndian)
         QFIT_SWAP_BE_TO_LE(int4);
     
     if ( int4 % 4 != 0)
         throw qfit_error("Base QFIT format is not a multiple of 4, unrecognized format!");
     
-    m_size = int4;
+    m_size = int4;	
+
     m_format = static_cast<QFIT_Format_Type>(m_size/sizeof(m_size));
     // std::cout << "QFIT Point format " << m_format << " with size: " << m_size << std::endl;
     
