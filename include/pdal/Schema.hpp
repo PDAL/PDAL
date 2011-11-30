@@ -130,6 +130,8 @@ public:
     // Dimension& getDimension(const DimensionId::Id& id);
     const Dimension& getDimension(const DimensionId::Id& id) const;
     const Dimension& getDimension(std::string const& type) const;
+	
+	const Dimension& getDimension(boost::uuids::uuid const& id) const;
 
     const Dimension& getDimension(std::size_t index) const;
     bool setDimension(Dimension const& );

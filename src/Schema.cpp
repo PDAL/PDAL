@@ -45,7 +45,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
-
+#include <boost/uuid/uuid_io.hpp>
 
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
@@ -271,6 +271,20 @@ const Dimension& Schema::getDimension(const DimensionId::Id& field) const
     throw dimension_not_found(oss.str());
 }
 
+const Dimension& Schema::getDimension(boost::uuids::uuid const& t) const
+{
+	schema::index_by_uid::const_iterator it = m_index.get<schema::uid>().find(t);
+
+    if (it != m_index.get<schema::uid>().end())
+    {
+        return *it;
+    }    
+    
+    std::ostringstream oss;
+    oss << "getDimension: dimension not found with uuid '" << boost::lexical_cast<std::string>(t) << "'";
+    throw dimension_not_found(oss.str());
+	
+}
 
 
 
