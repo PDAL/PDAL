@@ -44,45 +44,8 @@
 
 namespace pdal { namespace drivers { namespace terrasolid {
 
-PointIndexes::PointIndexes(const Schema& schema, TERRASOLID_Format_Type format)
-{
-    if (format == TERRASOLID_Format_1) 
-    {
-        Classification = schema.getDimensionIndex(DimensionId::TerraSolid_Classification);
-        PointSourceId = schema.getDimensionIndex(DimensionId::TerraSolid_PointSourceId_u8);
-        EchoInt = schema.getDimensionIndex(DimensionId::TerraSolid_ReturnNumber_u16);
-        X = schema.getDimensionIndex(DimensionId::X_i32);
-        Y = schema.getDimensionIndex(DimensionId::Y_i32);
-        Z = schema.getDimensionIndex(DimensionId::Z_i32);
-    } 
-    else if (format == TERRASOLID_Format_2)
-    {
-        X = schema.getDimensionIndex(DimensionId::X_i32);
-        Y = schema.getDimensionIndex(DimensionId::Y_i32);
-        Z = schema.getDimensionIndex(DimensionId::Z_i32);
-        Classification = schema.getDimensionIndex(DimensionId::TerraSolid_Classification);
-        ReturnNumber = schema.getDimensionIndex(DimensionId::TerraSolid_ReturnNumber_u8);
-        Flag = schema.getDimensionIndex(DimensionId::TerraSolid_Flag);
-        Mark = schema.getDimensionIndex(DimensionId::TerraSolid_Mark);
-        PointSourceId = schema.getDimensionIndex(DimensionId::TerraSolid_PointSourceId_u16);
-        Intensity = schema.getDimensionIndex(DimensionId::TerraSolid_Intensity);
-    } 
-
-    Time = schema.getDimensionIndex(DimensionId::TerraSolid_Time);
-
-    Red = schema.getDimensionIndex(DimensionId::Red_u8);
-    Green = schema.getDimensionIndex(DimensionId::Green_u8);
-    Blue = schema.getDimensionIndex(DimensionId::Blue_u8);
-    Alpha = schema.getDimensionIndex(DimensionId::TerraSolid_Alpha);
-    
-    return;
-}
-
-
 PointDimensions::PointDimensions(const Schema& schema)
 {
-
-    Time = &schema.getDimension("Time");
 
     X = &schema.getDimension("X");
     Y = &schema.getDimension("Y");
@@ -220,15 +183,15 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    log()->get(logDEBUG3) << "TerraSolid Reader::initialize format: " << m_format << std::endl;
-    log()->get(logDEBUG3) << "OrgX: " << m_header->OrgX << std::endl;
-    log()->get(logDEBUG3) << "OrgY: " << m_header->OrgY << std::endl;
-    log()->get(logDEBUG3) << "OrgZ: " << m_header->OrgZ << std::endl;
-    log()->get(logDEBUG3) << "Units: " << m_header->Units << std::endl;
-    log()->get(logDEBUG3) << "Time: " << m_header->Time << std::endl;
-    log()->get(logDEBUG3) << "Color: " << m_header->Color << std::endl;
-    log()->get(logDEBUG3) << "Count: " << m_header->PntCnt << std::endl;
-    log()->get(logDEBUG3) << "RecogVal: " << m_header->RecogVal << std::endl;
+    log()->get(logDEBUG) << "TerraSolid Reader::initialize format: " << m_format << std::endl;
+    log()->get(logDEBUG) << "OrgX: " << m_header->OrgX << std::endl;
+    log()->get(logDEBUG) << "OrgY: " << m_header->OrgY << std::endl;
+    log()->get(logDEBUG) << "OrgZ: " << m_header->OrgZ << std::endl;
+    log()->get(logDEBUG) << "Units: " << m_header->Units << std::endl;
+    log()->get(logDEBUG) << "Time: " << m_header->Time << std::endl;
+    log()->get(logDEBUG) << "Color: " << m_header->Color << std::endl;
+    log()->get(logDEBUG) << "Count: " << m_header->PntCnt << std::endl;
+    log()->get(logDEBUG) << "RecogVal: " << m_header->RecogVal << std::endl;
 
     
 }
@@ -255,7 +218,6 @@ void Reader::registerFields()
     
     if (m_format == TERRASOLID_Format_1)
     {
-        Dimension classification(DimensionId::TerraSolid_Classification);
         schema.appendDimension(dimensions.getDimension("Classification"));
 
         // Fetch PointSource ID Uint8 dimension by UUID because dimensions
@@ -279,7 +241,6 @@ void Reader::registerFields()
 
         schema.appendDimension(dimensions.getDimension("Classification"));
 
-        Dimension return_no(DimensionId::TerraSolid_ReturnNumber_u8);
 		boost::uuids::string_generator gen2;
 		boost::uuids::uuid r1 = gen2("465a9a7e-1e04-47b0-97b6-4f826411bc71"); 
 
@@ -309,7 +270,7 @@ void Reader::registerFields()
         schema.appendDimension(dimensions.getDimension("Blue"));
         schema.appendDimension(dimensions.getDimension("Alpha"));
     }
-
+	
     return;
 }
 
@@ -329,7 +290,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     const Schema& schema = data.getSchema();
     
     const int pointByteCount = getPointDataSize();
-    const PointIndexes indexes(schema, m_format);
+
 	const PointDimensions dimensions(schema);
     
     boost::uint8_t* buf = new boost::uint8_t[pointByteCount * numPoints];
@@ -359,13 +320,13 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             boost::int32_t z = Utils::read_field<boost::int32_t>(p);
             data.setField<boost::int32_t>(*dimensions.Z, pointIndex, z);
             
-            if (indexes.Time != -1)
+            if (dimensions.Time)
             {
                 boost::uint32_t time = Utils::read_field<boost::uint32_t>(p);
                 data.setField<boost::uint32_t>(*dimensions.Time, pointIndex, time);
             }
             
-            if (indexes.Red != -1)
+            if (dimensions.Red)
             {
                 boost::uint8_t red = Utils::read_field<boost::uint8_t>(p);
                 data.setField<boost::uint8_t>(*dimensions.Red, pointIndex, red);
@@ -415,14 +376,14 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
 
 
             
-            if (indexes.Time != -1)
+            if (dimensions.Time)
             {
                 boost::uint32_t time = Utils::read_field<boost::uint32_t>(p);
                 data.setField<boost::uint32_t>(*dimensions.Time, pointIndex, time);
                 // std::cout << "We have time " << time << std::endl;
             }
             
-            if (indexes.Red != -1)
+            if (dimensions.Red)
             {
                 boost::uint8_t red = Utils::read_field<boost::uint8_t>(p);
                 data.setField<boost::uint8_t>(*dimensions.Red, pointIndex, red);
@@ -540,18 +501,18 @@ void Reader::addDefaultDimensions()
     z.setNumericOffset(m_header->OrgZ);
     addDefaultDimension(z, getName());
 
-	Dimension red("Red", dimension::UnsignedInteger, 2,  
-                			 "Red color value 0 - 65536 " );
+	Dimension red("Red", dimension::UnsignedInteger, 1,  
+                			 "Red color value 0 - 256 " );
     red.setUUID("2157fd43-a492-40e4-a27c-7c37b48bd55c");
     addDefaultDimension(red, getName());
 
-	Dimension green("Green", dimension::UnsignedInteger, 2,  
-                			 "Green color value 0 - 65536 " );
+	Dimension green("Green", dimension::UnsignedInteger, 1,  
+                			 "Green color value 0 - 256 " );
     green.setUUID("c9cd71ef-1ce0-48c2-99f8-5b283e598eac");
     addDefaultDimension(green, getName());
 
-	Dimension blue("Blue", dimension::UnsignedInteger, 2,  
-                			 "Blue color value 0 - 65536 " );
+	Dimension blue("Blue", dimension::UnsignedInteger, 1,  
+                			 "Blue color value 0 - 256 " );
     blue.setUUID("c9cd71ef-1ce0-48c2-99f8-5b283e598eac");
     addDefaultDimension(blue, getName());
 	

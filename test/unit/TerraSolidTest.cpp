@@ -63,20 +63,20 @@ void Check_Point(const pdal::PointBuffer& data,
 {
     const ::pdal::Schema& schema = data.getSchema();
 
-    int offsetX = schema.getDimensionIndex(pdal::DimensionId::X_i32);
-    int offsetY = schema.getDimensionIndex(pdal::DimensionId::Y_i32);
-    int offsetZ = schema.getDimensionIndex(pdal::DimensionId::Z_i32);
-    int offsetTime = schema.getDimensionIndex(pdal::DimensionId::TerraSolid_Time);
+	pdal::Dimension const& dimX = schema.getDimension("X");
+	pdal::Dimension const& dimY = schema.getDimension("Y");
+	pdal::Dimension const& dimZ = schema.getDimension("Z");
+	pdal::Dimension const& dimTime = schema.getDimension("Time");
     
-    boost::int32_t x = data.getField<boost::int32_t>(index, offsetX);
-    boost::int32_t y = data.getField<boost::int32_t>(index, offsetY);
-    boost::int32_t z = data.getField<boost::int32_t>(index, offsetZ);
-    boost::uint32_t t = data.getField<boost::uint32_t>(index, offsetTime);
+    boost::int32_t x = data.getField<boost::int32_t>(dimX, index);
+    boost::int32_t y = data.getField<boost::int32_t>(dimY, index);
+    boost::int32_t z = data.getField<boost::int32_t>(dimZ, index);
+    boost::uint32_t t = data.getField<boost::uint32_t>(dimTime, index);
 
-    double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x);
-    double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y);
-    double z0 = schema.getDimension(offsetZ).applyScaling<boost::int32_t>(z);
-    double t0 = schema.getDimension(offsetTime).applyScaling<boost::uint32_t>(t);
+    double x0 = dimX.applyScaling<boost::int32_t>(x);
+    double y0 = dimY.applyScaling<boost::int32_t>(y);
+    double z0 = dimZ.applyScaling<boost::int32_t>(z);
+    double t0 = dimTime.applyScaling<boost::uint32_t>(t);
 
   
     // std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -99,6 +99,12 @@ BOOST_AUTO_TEST_CASE(test_tsolid)
     
     pdal::Option fname("filename", filename, "filename to read");
     pdal::Options options;
+	// pdal::Option debug("debug", true, "");
+	// pdal::Option verbose("verbose", 4);
+	// pdal::Option log("log", "tsolid.log");
+	// options.add(log);
+	// options.add(debug);
+	// options.add(verbose);
     options.add(fname);
     pdal::drivers::terrasolid::Reader reader(options);
     reader.initialize();

@@ -95,28 +95,6 @@ public:
     {}
 };
 
-class PointIndexes
-{
-public:
-    PointIndexes(const Schema& schema, TERRASOLID_Format_Type format);
-    int Time;
-    int X;
-    int Y;
-    int Z;
-    
-    int Classification;
-    int PointSourceId;
-    int EchoInt;
-    int ReturnNumber;
-    int Intensity;
-    int Mark;
-    int Flag;
-    int Red;
-    int Green;
-    int Blue;
-    int Alpha;
-    
-};
 
 class PointDimensions
 {
