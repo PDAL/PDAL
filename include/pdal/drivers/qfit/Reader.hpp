@@ -112,6 +112,33 @@ public:
     
 };
 
+
+class PointDimensions
+{
+public:
+    PointDimensions(const Schema& schema);
+    
+    pdal::Dimension const* Time;
+    pdal::Dimension const* X;
+    pdal::Dimension const* Y;
+    pdal::Dimension const* Z;
+    
+    pdal::Dimension const* StartPulse;
+    pdal::Dimension const* ReflectedPulse;
+    pdal::Dimension const* ScanAngleRank;
+    pdal::Dimension const* Pitch;
+    pdal::Dimension const* Roll;
+    pdal::Dimension const* PDOP;
+    pdal::Dimension const* PulseWidth;
+    pdal::Dimension const* GPSTime;
+    
+    pdal::Dimension const* PassiveSignal;
+    
+    pdal::Dimension const* PassiveX;
+    pdal::Dimension const* PassiveY;
+    pdal::Dimension const* PassiveZ;
+};
+
 //
 // supported options:
 //   <uint32>id

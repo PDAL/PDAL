@@ -61,20 +61,21 @@ void Check_Point(const pdal::PointBuffer& data,
                        boost::int32_t tref)
 {
     const ::pdal::Schema& schema = data.getSchema();
-
-    int offsetX = schema.getDimensionIndex(pdal::DimensionId::X_i32);
-    int offsetY = schema.getDimensionIndex(pdal::DimensionId::Y_i32);
-    int offsetZ = schema.getDimensionIndex(pdal::DimensionId::Z_i32);
-    int offsetTime = schema.getDimensionIndex(pdal::DimensionId::Qfit_Time);
+	
+	Dimension const& dimX = schema.getDimension("X");
+	Dimension const& dimY = schema.getDimension("Y");
+	Dimension const& dimZ = schema.getDimension("Z");
+	Dimension const& dimTime = schema.getDimension("Time");
+	
     
-    boost::int32_t x = data.getField<boost::int32_t>(index, offsetX);
-    boost::int32_t y = data.getField<boost::int32_t>(index, offsetY);
-    boost::int32_t z = data.getField<boost::int32_t>(index, offsetZ);
-    boost::int32_t t = data.getField<boost::int32_t>(index, offsetTime);
+    boost::int32_t x = data.getField<boost::int32_t>(dimX, index);
+    boost::int32_t y = data.getField<boost::int32_t>(dimY, index);
+    boost::int32_t z = data.getField<boost::int32_t>(dimZ, index);
+    boost::int32_t t = data.getField<boost::int32_t>(dimTime, index);
 
-    double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x);
-    double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y);
-    double z0 = schema.getDimension(offsetZ).applyScaling<boost::int32_t>(z);
+    double x0 = dimX.applyScaling<boost::int32_t>(x);
+    double y0 = dimY.applyScaling<boost::int32_t>(y);
+    double z0 = dimZ.applyScaling<boost::int32_t>(z);
 
     //   
     // std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
