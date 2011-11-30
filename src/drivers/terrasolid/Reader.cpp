@@ -39,6 +39,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 
+#include <boost/uuid/string_generator.hpp>
 #include <map>
 
 namespace pdal { namespace drivers { namespace terrasolid {
@@ -78,6 +79,94 @@ PointIndexes::PointIndexes(const Schema& schema, TERRASOLID_Format_Type format)
 }
 
 
+PointDimensions::PointDimensions(const Schema& schema)
+{
+
+    Time = &schema.getDimension("Time");
+
+    X = &schema.getDimension("X");
+    Y = &schema.getDimension("Y");
+    Z = &schema.getDimension("Z");
+    
+	Classification = &schema.getDimension("Classification");
+	PointSourceId = &schema.getDimension("PointSourceId");
+	ReturnNumber = &schema.getDimension("ReturnNumber");
+	
+	try
+	{
+	    Intensity = &schema.getDimension("Intensity");
+	}
+	catch (pdal::dimension_not_found&)
+	{
+		Intensity = 0;
+	}
+	
+	try
+	{
+		Mark = &schema.getDimension("Mark");
+	}
+	catch (pdal::dimension_not_found&)
+	{
+		Mark = 0;
+	}
+
+	try
+	{
+		Flag = &schema.getDimension("Flag");
+	}
+	catch (pdal::dimension_not_found&)
+	{
+		Flag = 0;
+	}
+
+	try
+	{
+	    Time = &schema.getDimension("Time");
+	}
+	catch (pdal::dimension_not_found&)
+	{
+		Time = 0;
+	}
+
+	try
+	{
+	  	Red = &schema.getDimension("Red");
+	}
+	catch (pdal::dimension_not_found&)
+	{
+		Red = 0;
+	}
+
+	try
+	{
+		Green = &schema.getDimension("Green");
+	}
+	catch (pdal::dimension_not_found&)
+	{
+		Green = 0;
+	}
+
+	try
+	{
+		Blue = &schema.getDimension("Blue");
+	}
+	catch (pdal::dimension_not_found&)
+	{
+		Blue = 0;
+	}
+
+	try
+	{
+		Alpha = &schema.getDimension("Alpha");
+	}
+	catch (pdal::dimension_not_found&)
+	{
+		Alpha = 0;
+	}
+
+
+    return;
+}
 
 
 Reader::Reader(const Options& options)
@@ -115,6 +204,8 @@ Reader::Reader(const Options& options)
         
     }
 
+	addDefaultDimensions();
+	
     registerFields();
     
     m_offset = 56;
@@ -160,92 +251,63 @@ void Reader::registerFields()
 {
     Schema& schema = getSchemaRef();
     
-    double xyz_scale = 1/static_cast<double>(m_header->Units);
+	Schema dimensions(getDefaultDimensions());
     
     if (m_format == TERRASOLID_Format_1)
     {
         Dimension classification(DimensionId::TerraSolid_Classification);
-        schema.appendDimension(classification);
+        schema.appendDimension(dimensions.getDimension("Classification"));
 
-        Dimension flight_line(DimensionId::TerraSolid_PointSourceId_u8);
-        schema.appendDimension(flight_line);
+        // Fetch PointSource ID Uint8 dimension by UUID because dimensions
+		// has two "PointSourceId" dimensions added.
+		boost::uuids::string_generator gen;
+		boost::uuids::uuid ps1 = gen("68c03b56-4248-4cca-ade5-33e90d5c5563");
+        schema.appendDimension(dimensions.getDimension(ps1));
 
-        Dimension echoint(DimensionId::TerraSolid_Intensity);
-        schema.appendDimension(echoint);
+        schema.appendDimension(dimensions.getDimension("Intensity"));
 
-        Dimension x(DimensionId::X_i32);
-        x.setNumericScale(xyz_scale);
-        x.setNumericOffset(m_header->OrgX);
-        schema.appendDimension(x);
-
-        Dimension y(DimensionId::Y_i32);
-        y.setNumericScale(xyz_scale);
-        y.setNumericOffset(m_header->OrgY);
-        schema.appendDimension(y);
-
-        Dimension z(DimensionId::Z_i32);
-        z.setNumericScale(xyz_scale);
-        z.setNumericOffset(m_header->OrgZ);
-        schema.appendDimension(z);
+        schema.appendDimension(dimensions.getDimension("X"));
+        schema.appendDimension(dimensions.getDimension("Y"));
+        schema.appendDimension(dimensions.getDimension("Z"));
     }
 
     if (m_format == TERRASOLID_Format_2)
     {
-        Dimension x(DimensionId::X_i32);
-        x.setNumericScale(xyz_scale);
-        x.setNumericOffset(m_header->OrgX);
-        schema.appendDimension(x);
+        schema.appendDimension(dimensions.getDimension("X"));
+        schema.appendDimension(dimensions.getDimension("Y"));
+        schema.appendDimension(dimensions.getDimension("Z"));
 
-        Dimension y(DimensionId::Y_i32);
-        y.setNumericScale(xyz_scale);
-        y.setNumericOffset(m_header->OrgY);
-        schema.appendDimension(y);
+        schema.appendDimension(dimensions.getDimension("Classification"));
 
-        Dimension z(DimensionId::Z_i32);
-        z.setNumericScale(xyz_scale);
-        z.setNumericOffset(m_header->OrgZ);
-        schema.appendDimension(z);
+        Dimension return_no(DimensionId::TerraSolid_ReturnNumber_u8);
+		boost::uuids::string_generator gen2;
+		boost::uuids::uuid r1 = gen2("465a9a7e-1e04-47b0-97b6-4f826411bc71"); 
 
-        Dimension classification(DimensionId::TerraSolid_Classification);
-        schema.appendDimension(classification);
+        schema.appendDimension(dimensions.getDimension(r1));
 
-        Dimension return_no(DimensionId::TerraSolid_ReturnNumber_u8); 
-        schema.appendDimension(return_no);
+        schema.appendDimension(dimensions.getDimension("Flag"));
+        schema.appendDimension(dimensions.getDimension("Mark"));
 
-        Dimension flag(DimensionId::TerraSolid_Flag);
-        schema.appendDimension(flag);
+        // Fetch PointSource ID Uint16 dimension by UUID because dimensions
+		// has two "PointSourceId" dimensions added.
+		boost::uuids::string_generator gen;
+		boost::uuids::uuid ps2 = gen("7193bb9f-3ca2-491f-ba18-594321493789");
+        schema.appendDimension(dimensions.getDimension(ps2));
 
-        Dimension mark(DimensionId::TerraSolid_Mark);
-        schema.appendDimension(mark);
-
-        Dimension flight_line(DimensionId::TerraSolid_PointSourceId_u16);
-        schema.appendDimension(flight_line);
-
-        Dimension intensity(DimensionId::TerraSolid_Intensity);
-        schema.appendDimension(intensity);
+        schema.appendDimension(dimensions.getDimension("Intensity"));
     }
     
     if (m_haveTime)
     {
-        Dimension time(DimensionId::TerraSolid_Time);
-        time.setNumericScale(0.0002);
-        time.setNumericOffset(0.0);
-        schema.appendDimension(time);
+        schema.appendDimension(dimensions.getDimension("Time"));
     }
 
     if (m_haveColor)
     {
-        Dimension red(DimensionId::Red_u8);
-        schema.appendDimension(red);
-
-        Dimension green(DimensionId::Green_u8);
-        schema.appendDimension(green);
-
-        Dimension blue(DimensionId::Blue_u8);
-        schema.appendDimension(blue);
-
-        Dimension alpha(DimensionId::TerraSolid_Alpha);
-        schema.appendDimension(alpha);
+        schema.appendDimension(dimensions.getDimension("Red"));
+        schema.appendDimension(dimensions.getDimension("Green"));
+        schema.appendDimension(dimensions.getDimension("Blue"));
+        schema.appendDimension(dimensions.getDimension("Alpha"));
     }
 
     return;
@@ -268,6 +330,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     
     const int pointByteCount = getPointDataSize();
     const PointIndexes indexes(schema, m_format);
+	const PointDimensions dimensions(schema);
     
     boost::uint8_t* buf = new boost::uint8_t[pointByteCount * numPoints];
     Utils::read_n(buf, stream, pointByteCount * numPoints);
@@ -279,42 +342,42 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
         if (m_format == TERRASOLID_Format_1) 
         {
             boost::uint8_t classification = Utils::read_field<boost::uint8_t>(p);
-            data.setField<boost::uint8_t>(pointIndex, indexes.Classification, classification);
+            data.setField<boost::uint8_t>(*dimensions.Classification, pointIndex, classification);
 
             boost::uint8_t flight_line = Utils::read_field<boost::uint8_t>(p);
-            data.setField<boost::uint8_t>(pointIndex, indexes.PointSourceId, flight_line);            
+            data.setField<boost::uint8_t>(*dimensions.PointSourceId, pointIndex, flight_line);            
 
             boost::uint16_t echo_int = Utils::read_field<boost::uint16_t>(p);
-            data.setField<boost::uint16_t>(pointIndex, indexes.EchoInt, echo_int);
+            data.setField<boost::uint16_t>(*dimensions.ReturnNumber, pointIndex, echo_int);
 
             boost::int32_t x = Utils::read_field<boost::int32_t>(p);
-            data.setField<boost::int32_t>(pointIndex, indexes.X, x);
+            data.setField<boost::int32_t>(*dimensions.X, pointIndex, x);
             
             boost::int32_t y = Utils::read_field<boost::int32_t>(p);
-            data.setField<boost::int32_t>(pointIndex, indexes.Y, y);
+            data.setField<boost::int32_t>(*dimensions.Y, pointIndex, y);
             
             boost::int32_t z = Utils::read_field<boost::int32_t>(p);
-            data.setField<boost::int32_t>(pointIndex, indexes.Z, z);
+            data.setField<boost::int32_t>(*dimensions.Z, pointIndex, z);
             
             if (indexes.Time != -1)
             {
                 boost::uint32_t time = Utils::read_field<boost::uint32_t>(p);
-                data.setField<boost::uint32_t>(pointIndex, indexes.Time, time);
+                data.setField<boost::uint32_t>(*dimensions.Time, pointIndex, time);
             }
             
             if (indexes.Red != -1)
             {
                 boost::uint8_t red = Utils::read_field<boost::uint8_t>(p);
-                data.setField<boost::uint8_t>(pointIndex, indexes.Red, red);
+                data.setField<boost::uint8_t>(*dimensions.Red, pointIndex, red);
 
                 boost::uint8_t green = Utils::read_field<boost::uint8_t>(p);
-                data.setField<boost::uint8_t>(pointIndex, indexes.Green, green);
+                data.setField<boost::uint8_t>(*dimensions.Green, pointIndex, green);
 
                 boost::uint8_t blue = Utils::read_field<boost::uint8_t>(p);
-                data.setField<boost::uint8_t>(pointIndex, indexes.Blue, blue);
+                data.setField<boost::uint8_t>(*dimensions.Blue, pointIndex,  blue);
 
                 boost::uint8_t alpha = Utils::read_field<boost::uint8_t>(p);
-                data.setField<boost::uint8_t>(pointIndex, indexes.Alpha, alpha);
+                data.setField<boost::uint8_t>(*dimensions.Alpha, pointIndex,  alpha);
             }
         }
 
@@ -322,56 +385,56 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
         {
             // std::cout << "Reading TERRASOLID_Format_2" << std::endl;
             boost::int32_t x = Utils::read_field<boost::int32_t>(p);
-            data.setField<boost::int32_t>(pointIndex, indexes.X, x);
+            data.setField<boost::int32_t>(*dimensions.X, pointIndex, x);
             
             boost::int32_t y = Utils::read_field<boost::int32_t>(p);
-            data.setField<boost::int32_t>(pointIndex, indexes.Y, y);
+            data.setField<boost::int32_t>(*dimensions.Y, pointIndex, y);
             
             boost::int32_t z = Utils::read_field<boost::int32_t>(p);
-            data.setField<boost::int32_t>(pointIndex, indexes.Z, z);
+            data.setField<boost::int32_t>(*dimensions.Z, pointIndex, z);
             
             // std::cout << "x: " << x << " y: " << y << " z: " << z << std::endl;
             
             boost::uint8_t classification = Utils::read_field<boost::uint8_t>(p);
-            data.setField<boost::uint8_t>(pointIndex, indexes.Classification, classification);
+            data.setField<boost::uint8_t>(*dimensions.Classification, pointIndex, classification);
             
             boost::uint8_t return_number = Utils::read_field<boost::uint8_t>(p);
-            data.setField<boost::uint8_t>(pointIndex, indexes.ReturnNumber, return_number);
+            data.setField<boost::uint8_t>(*dimensions.ReturnNumber, pointIndex, return_number);
 
             boost::uint8_t flag = Utils::read_field<boost::uint8_t>(p);
-            data.setField<boost::uint8_t>(pointIndex, indexes.Flag, flag);
+            data.setField<boost::uint8_t>(*dimensions.Flag, pointIndex, flag);
 
             boost::uint8_t mark = Utils::read_field<boost::uint8_t>(p);
-            data.setField<boost::uint8_t>(pointIndex, indexes.Mark, mark);
+            data.setField<boost::uint8_t>(*dimensions.Mark, pointIndex, mark);
 
             boost::uint16_t flight_line = Utils::read_field<boost::uint16_t>(p);
-            data.setField<boost::uint16_t>(pointIndex, indexes.PointSourceId, flight_line);            
+            data.setField<boost::uint16_t>(*dimensions.PointSourceId, pointIndex, flight_line);            
 
             boost::uint16_t intensity = Utils::read_field<boost::uint16_t>(p);
-            data.setField<boost::uint16_t>(pointIndex, indexes.Intensity, intensity);
+            data.setField<boost::uint16_t>(*dimensions.Intensity, pointIndex, intensity);
 
 
             
             if (indexes.Time != -1)
             {
                 boost::uint32_t time = Utils::read_field<boost::uint32_t>(p);
-                data.setField<boost::uint32_t>(pointIndex, indexes.Time, time);
+                data.setField<boost::uint32_t>(*dimensions.Time, pointIndex, time);
                 // std::cout << "We have time " << time << std::endl;
             }
             
             if (indexes.Red != -1)
             {
                 boost::uint8_t red = Utils::read_field<boost::uint8_t>(p);
-                data.setField<boost::uint8_t>(pointIndex, indexes.Red, red);
+                data.setField<boost::uint8_t>(*dimensions.Red, pointIndex, red);
 
                 boost::uint8_t green = Utils::read_field<boost::uint8_t>(p);
-                data.setField<boost::uint8_t>(pointIndex, indexes.Green, green);
+                data.setField<boost::uint8_t>(*dimensions.Green, pointIndex,  green);
 
                 boost::uint8_t blue = Utils::read_field<boost::uint8_t>(p);
-                data.setField<boost::uint8_t>(pointIndex, indexes.Blue, blue);
+                data.setField<boost::uint8_t>(*dimensions.Blue, pointIndex, blue);
 
                 boost::uint8_t alpha = Utils::read_field<boost::uint8_t>(p);
-                data.setField<boost::uint8_t>(pointIndex, indexes.Alpha, alpha);
+                data.setField<boost::uint8_t>(*dimensions.Alpha, pointIndex, alpha);
                 // std::cout << "Red: " << (int)red << " Green: " << (int)green << " Blue: " << (int)blue << std::endl;
 
             }
@@ -409,6 +472,97 @@ boost::property_tree::ptree Reader::toPTree() const
 void Reader::addDefaultDimensions()
 {
 
+    double xyz_scale = 1/static_cast<double>(m_header->Units);
+
+	Dimension alpha("Alpha", dimension::UnsignedInteger, 1,  
+                			 "The alpha image channel value associated with this point" );
+    alpha.setUUID("f3806ee6-e82e-45af-89bd-59b20cda8ffa");
+    addDefaultDimension(alpha, getName());
+
+	Dimension classification("Classification", dimension::UnsignedInteger, 1,  
+                			 "Classification code 0-255" );
+    classification.setUUID("845e23ca-fc4b-4dfc-aa71-a40cc2927421");
+    addDefaultDimension(classification, getName());
+
+	Dimension point_source("PointSourceId", dimension::UnsignedInteger, 1,  
+                			 "Flightline number 0-255" );
+    point_source.setUUID("68c03b56-4248-4cca-ade5-33e90d5c5563");
+    addDefaultDimension(point_source, getName());
+
+	Dimension point_source2("PointSourceId", dimension::UnsignedInteger, 2,  
+                			 "Flightline number 0-65536" );
+    point_source2.setUUID("7193bb9f-3ca2-491f-ba18-594321493789");
+    addDefaultDimension(point_source2, getName());
+
+	Dimension return_number("ReturnNumber", dimension::UnsignedInteger, 1,  
+                			 "Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo." );
+    return_number.setUUID("465a9a7e-1e04-47b0-97b6-4f826411bc71");
+    addDefaultDimension(return_number, getName());
+
+	Dimension return_number2("ReturnNumber", dimension::UnsignedInteger, 2,  
+                			 "Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo." );
+    return_number2.setUUID("43a1c59d-02ae-4a05-85af-526fae890eb9");
+    addDefaultDimension(return_number2, getName());
+
+	Dimension flag("Flag", dimension::UnsignedInteger, 1,  
+                			 "Runtime flag (view visibility)" );
+    flag.setUUID("583a5904-ee67-47a7-9fba-2f46daf11441");
+    addDefaultDimension(flag, getName());
+
+	Dimension mark("Mark", dimension::UnsignedInteger, 1,  
+                			 "Runtime flag" );
+    mark.setUUID("e889747c-2f19-4244-b282-b0b223868401");
+    addDefaultDimension(mark, getName());
+
+	Dimension intensity("Intensity", dimension::UnsignedInteger, 2,  
+                			 "Runtime flag" );
+    intensity.setUUID("beaa015b-20dd-4922-bf1d-da6972596fe6");
+    addDefaultDimension(intensity, getName());
+
+	Dimension x("X", dimension::SignedInteger, 4,  
+                			 "X dimension as a scaled integer" );
+    x.setUUID("64e530ee-7304-4d6a-9fe4-231b6c960e69");
+	x.setNumericScale(xyz_scale);
+    x.setNumericOffset(m_header->OrgX);
+    addDefaultDimension(x, getName());
+
+	Dimension y("Y", dimension::SignedInteger, 4,  
+                			 "Y dimension as a scaled integer" );
+    y.setUUID("9b4fce29-2846-45fa-be0c-f50228407f05");
+	y.setNumericScale(xyz_scale);
+    y.setNumericOffset(m_header->OrgY);
+    addDefaultDimension(y, getName());
+
+	Dimension z("Z", dimension::SignedInteger, 4,  
+                			 "Z dimension as a scaled integer" );
+    z.setUUID("464cd1f6-5bec-4610-9f25-79e839ee39a6");
+	z.setNumericScale(xyz_scale);
+    z.setNumericOffset(m_header->OrgZ);
+    addDefaultDimension(z, getName());
+
+	Dimension red("Red", dimension::UnsignedInteger, 2,  
+                			 "Red color value 0 - 65536 " );
+    red.setUUID("2157fd43-a492-40e4-a27c-7c37b48bd55c");
+    addDefaultDimension(red, getName());
+
+	Dimension green("Green", dimension::UnsignedInteger, 2,  
+                			 "Green color value 0 - 65536 " );
+    green.setUUID("c9cd71ef-1ce0-48c2-99f8-5b283e598eac");
+    addDefaultDimension(green, getName());
+
+	Dimension blue("Blue", dimension::UnsignedInteger, 2,  
+                			 "Blue color value 0 - 65536 " );
+    blue.setUUID("c9cd71ef-1ce0-48c2-99f8-5b283e598eac");
+    addDefaultDimension(blue, getName());
+	
+	Dimension time("Time", dimension::UnsignedInteger, 4,
+				   "32 bit integer time stamps. Time stamps are assumed to be "
+				   "GPS week seconds. The storage format is a 32 bit unsigned "
+    				"integer where each integer step is 0.0002 seconds.");
+    time.setNumericScale(0.0002);
+    time.setNumericOffset(0.0);
+	time.setUUID("0dcda772-56da-47f6-b04a-edad72361da9");
+	addDefaultDimension(time, getName());
 }
 
 

@@ -118,6 +118,29 @@ public:
     
 };
 
+class PointDimensions
+{
+public:
+    PointDimensions(const Schema& schema);
+    
+    pdal::Dimension const* Time;
+    pdal::Dimension const* X;
+    pdal::Dimension const* Y;
+    pdal::Dimension const* Z;
+    
+    pdal::Dimension const* Classification;
+    pdal::Dimension const* PointSourceId;
+    pdal::Dimension const* ReturnNumber;
+    pdal::Dimension const* Intensity;
+    pdal::Dimension const* Mark;
+    pdal::Dimension const* Flag;
+
+    pdal::Dimension const* Red;
+    pdal::Dimension const* Green;
+    pdal::Dimension const* Blue;
+    pdal::Dimension const* Alpha;
+
+};
 //
 // supported options:
 //   <uint32>id
