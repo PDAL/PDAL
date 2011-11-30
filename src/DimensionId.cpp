@@ -660,7 +660,8 @@ DimensionId::Id DimensionId::getIdForDimension(Dimension const& d)
 
     if (boost::iequals(d.getName(), "QFIT:PulseWdith"))
         return DimensionId::Qfit_PulseWidth;
-        
+       
+	return DimensionId::Undefined;
     // Yes, this is scary.  What else can we do?
     throw pdal_error("unknown field name: " + d.getName());
 }
