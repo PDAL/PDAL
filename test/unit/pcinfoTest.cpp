@@ -142,24 +142,33 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     std::string output;
 
     int stat = 0;
+
+	std::ostringstream command;
     
     // dump a single point to json
-    stat = Support::run_command(cmd + " --output=" + outputTxt + " --point=1 " + inputLas, output);
+	
+	command << cmd + " --output=" + outputTxt + " --point=1 " + inputLas;
+    stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_point.txt")));
 
     // dump summary of all points to json
-    stat = Support::run_command(cmd + " --output=" + outputTxt + " --stats " + inputLas, output);
+	command.str("");
+	command << cmd + " --output=" + outputTxt + " --stats " + inputLas;
+    stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_stats.txt")));
 
     // dump schema to json
-    stat = Support::run_command(cmd + " --output=" + outputTxt + " --schema " + inputLas, output);
+	command.str("");
+	command << cmd + " --output=" + outputTxt + " --schema " + inputLas;
+    stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_schema.txt")));
 
     // dump stage info to json
-    stat = Support::run_command(cmd + " --output=" + outputTxt + " --stage " + inputLas, output);
+	command.str("");
+    stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
 
 #ifdef PDAL_HAVE_GDAL
