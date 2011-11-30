@@ -33,79 +33,57 @@
 ****************************************************************************/
 
 #include <pdal/drivers/las/Support.hpp>
-
 #include <pdal/drivers/las/SummaryData.hpp>
 
 
 namespace pdal { namespace drivers { namespace las {
 
-void Support::registerFields(Schema& schema, PointFormat format)
+void Support::registerFields(Stage& stage, Schema& schema, PointFormat format)
 {
     std::ostringstream text;
+	
+	std::vector<pdal::Dimension> const& d = stage.getDefaultDimensions();
+	
+	Schema dimensions(d);
+	
+    schema.appendDimension(dimensions.getDimension("X"));
+    schema.appendDimension(dimensions.getDimension("Y"));
+    schema.appendDimension(dimensions.getDimension("Z"));
 
-    Dimension x(DimensionId::X_i32);
-    schema.appendDimension(x);
+    schema.appendDimension(dimensions.getDimension("Intensity"));
+    schema.appendDimension(dimensions.getDimension("ReturnNumber")); // 3 bits only
+    schema.appendDimension(dimensions.getDimension("NumberOfReturns")); // 3 bits only
+    schema.appendDimension(dimensions.getDimension("ScanDirectionFlag"));  // 1 bit only
+    schema.appendDimension(dimensions.getDimension("EdgeOfFlightLine")); // 1 bit only
 
-    Dimension y(DimensionId::Y_i32);
-    schema.appendDimension(y);
+    schema.appendDimension(dimensions.getDimension("Classification"));
+    schema.appendDimension(dimensions.getDimension("ScanAngleRank"));
 
-    Dimension z(DimensionId::Z_i32);
-    schema.appendDimension(z);
-
-    Dimension intensity(DimensionId::Las_Intensity);
-    schema.appendDimension(intensity);
-
-    Dimension return_no(DimensionId::Las_ReturnNumber); // 3 bits only
-    schema.appendDimension(return_no);
-
-    Dimension no_returns(DimensionId::Las_NumberOfReturns); // 3 bits only
-    schema.appendDimension(no_returns);
-
-    Dimension scan_dir(DimensionId::Las_ScanDirectionFlag); // 1 bit only
-    schema.appendDimension(scan_dir);
-
-    Dimension edge(DimensionId::Las_EdgeOfFlightLine); // 1 bit only
-    schema.appendDimension(edge);
-
-    Dimension classification(DimensionId::Las_Classification);
-    schema.appendDimension(classification);
-
-    Dimension scan_angle(DimensionId::Las_ScanAngleRank);
-    schema.appendDimension(scan_angle);
-
-    Dimension user_data(DimensionId::Las_UserData);
-    schema.appendDimension(user_data);
-
-    Dimension point_source_id(DimensionId::Las_PointSourceId);
-    schema.appendDimension(point_source_id);
+    schema.appendDimension(dimensions.getDimension("UserData"));
+    schema.appendDimension(dimensions.getDimension("PointSourceId"));
 
     if (hasTime(format))
     {
-        Dimension t(DimensionId::Las_Time);
-        schema.appendDimension(t);
+        schema.appendDimension(dimensions.getDimension("Time"));
     }
 
     if (hasColor(format))
     {
-        Dimension red(DimensionId::Red_u16);
-        schema.appendDimension(red);
-
-        Dimension green(DimensionId::Green_u16);
-        schema.appendDimension(green);
-
-        Dimension blue(DimensionId::Blue_u16);
-        schema.appendDimension(blue);
+        schema.appendDimension(dimensions.getDimension("Red"));
+        schema.appendDimension(dimensions.getDimension("Green"));
+        schema.appendDimension(dimensions.getDimension("Blue"));
     }
 
-    if (hasWave(format))
-    {
-        schema.appendDimension(Dimension(DimensionId::Las_WavePacketDescriptorIndex));
-        schema.appendDimension(Dimension(DimensionId::Las_WaveformDataOffset));
-        schema.appendDimension(Dimension(DimensionId::Las_ReturnPointWaveformLocation));
-        schema.appendDimension(Dimension(DimensionId::Las_WaveformXt));
-        schema.appendDimension(Dimension(DimensionId::Las_WaveformYt));
-        schema.appendDimension(Dimension(DimensionId::Las_WaveformZt));
-    }
+    // if (hasWave(format))
+    // {
+    // 		
+    //     schema.appendDimension(Dimension(DimensionId::Las_WavePacketDescriptorIndex));
+    //     schema.appendDimension(Dimension(DimensionId::Las_WaveformDataOffset));
+    //     schema.appendDimension(Dimension(DimensionId::Las_ReturnPointWaveformLocation));
+    //     schema.appendDimension(Dimension(DimensionId::Las_WaveformXt));
+    //     schema.appendDimension(Dimension(DimensionId::Las_WaveformYt));
+    //     schema.appendDimension(Dimension(DimensionId::Las_WaveformZt));
+    // }
     
     return;
 }
@@ -171,53 +149,16 @@ boost::uint16_t Support::getPointDataSize(PointFormat pointFormat)
 
 }
 
-
-// --------------------------------------------------------------------------
-// LasPointIndexes
-// --------------------------------------------------------------------------
-
-// PointIndexes::PointIndexes(const Schema& schema, PointFormat format)
-// {
-//     X = schema.getDimensionIndex(DimensionId::X_i32);
-//     Y = schema.getDimensionIndex(DimensionId::Y_i32);
-//     Z = schema.getDimensionIndex(DimensionId::Z_i32);
-//     
-//     Intensity = schema.getDimensionIndex(DimensionId::Las_Intensity);
-//     ReturnNumber = schema.getDimensionIndex(DimensionId::Las_ReturnNumber);
-//     NumberOfReturns = schema.getDimensionIndex(DimensionId::Las_NumberOfReturns);
-//     ScanDirectionFlag = schema.getDimensionIndex(DimensionId::Las_ScanDirectionFlag);
-//     EdgeOfFlightLine = schema.getDimensionIndex(DimensionId::Las_EdgeOfFlightLine);
-//     Classification = schema.getDimensionIndex(DimensionId::Las_Classification);
-//     ScanAngleRank = schema.getDimensionIndex(DimensionId::Las_ScanAngleRank);
-//     UserData = schema.getDimensionIndex(DimensionId::Las_UserData);
-//     PointSourceId = schema.getDimensionIndex(DimensionId::Las_PointSourceId);
-//     
-//     Time = (Support::hasTime(format) ? schema.getDimensionIndex(DimensionId::Las_Time) : 0);
-//     
-//     Red = (Support::hasColor(format) ? schema.getDimensionIndex(DimensionId::Red_u16) : 0);
-//     Green = (Support::hasColor(format) ? schema.getDimensionIndex(DimensionId::Green_u16) : 0);
-//     Blue = (Support::hasColor(format) ? schema.getDimensionIndex(DimensionId::Blue_u16) : 0);
-//         
-//     // WavePacketDescriptorIndex = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WavePacketDescriptorIndex) : 0);
-//     // WaveformDataOffset = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformDataOffset) : 0);
-//     // ReturnPointWaveformLocation = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_ReturnPointWaveformLocation) : 0);
-//     // WaveformXt = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformXt) : 0);
-//     // WaveformYt = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformYt) : 0);
-//     // WaveformZt = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WaveformZt) : 0);
-// 
-//     return;
-// }
-
 PointDimensions::PointDimensions(const Schema& schema)
 {
 
-    X = &schema.getDimension(DimensionId::X_i32);
-    Y = &schema.getDimension(DimensionId::Y_i32);
-    Z = &schema.getDimension(DimensionId::Z_i32);
+    X = &schema.getDimension("X");
+    Y = &schema.getDimension("Y");
+    Z = &schema.getDimension("Z");
     
 	try
 	{
-	    Intensity = &schema.getDimension(DimensionId::Las_Intensity);
+	    Intensity = &schema.getDimension("Intensity");
 	}
 	catch (pdal::dimension_not_found&)
 	{
@@ -226,7 +167,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 	
 	try
 	{
-		ReturnNumber = &schema.getDimension(DimensionId::Las_ReturnNumber);
+		ReturnNumber = &schema.getDimension("ReturnNumber");
 	}
 	catch (pdal::dimension_not_found&)
 	{
@@ -235,7 +176,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
 	try
 	{
-		NumberOfReturns = &schema.getDimension(DimensionId::Las_NumberOfReturns);
+		NumberOfReturns = &schema.getDimension("NumberOfReturns");
 	}
 	catch (pdal::dimension_not_found&)
 	{
@@ -244,7 +185,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
 	try
 	{
-	    ScanDirectionFlag = &schema.getDimension(DimensionId::Las_ScanDirectionFlag);
+	    ScanDirectionFlag = &schema.getDimension("ScanDirectionFlag");
 	}
 	catch (pdal::dimension_not_found&)
 	{
@@ -253,7 +194,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
 	try
 	{
-	  	EdgeOfFlightLine = &schema.getDimension(DimensionId::Las_EdgeOfFlightLine);
+	  	EdgeOfFlightLine = &schema.getDimension("EdgeOfFlightLine");
 	}
 	catch (pdal::dimension_not_found&)
 	{
@@ -262,7 +203,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
 	try
 	{
-		Classification = &schema.getDimension(DimensionId::Las_Classification);
+		Classification = &schema.getDimension("Classification");
 	}
 	catch (pdal::dimension_not_found&)
 	{
@@ -271,7 +212,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
 	try
 	{
-		ScanAngleRank = &schema.getDimension(DimensionId::Las_ScanAngleRank);
+		ScanAngleRank = &schema.getDimension("ScanAngleRank");
 	}
 	catch (pdal::dimension_not_found&)
 	{
@@ -280,7 +221,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
 	try
 	{
-		UserData = &schema.getDimension(DimensionId::Las_UserData);
+		UserData = &schema.getDimension("UserData");
 	}
 	catch (pdal::dimension_not_found&)
 	{
@@ -289,7 +230,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
 	try
 	{
-		PointSourceId = &schema.getDimension(DimensionId::Las_PointSourceId);
+		PointSourceId = &schema.getDimension("PointSourceId");
 	}
 	catch (pdal::dimension_not_found&)
 	{
@@ -298,7 +239,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
 	try
 	{
-		Time = &schema.getDimension(DimensionId::Las_Time);
+		Time = &schema.getDimension("Time");
 	}
 	catch (pdal::dimension_not_found&)
 	{
@@ -306,7 +247,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 	}
 	try
 	{
-		Red = &schema.getDimension(DimensionId::Red_u16);
+		Red = &schema.getDimension("Red");
 	}
 	catch (pdal::dimension_not_found&)
 	{
@@ -315,7 +256,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
 	try
 	{
-		Green = &schema.getDimension(DimensionId::Green_u16);
+		Green = &schema.getDimension("Green");
 	}
 	catch (pdal::dimension_not_found&)
 	{
@@ -324,7 +265,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
 	try
 	{
-		Blue = &schema.getDimension(DimensionId::Blue_u16);
+		Blue = &schema.getDimension("Blue");
 	}
 	catch (pdal::dimension_not_found&)
 	{

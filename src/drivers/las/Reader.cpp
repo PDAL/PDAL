@@ -53,6 +53,7 @@ Reader::Reader(const Options& options)
     : ReaderBase(options)
     , m_filename(options.getValueOrThrow<std::string>("filename"))
 {
+	addDefaultDimensions();
     return;
 }
 
@@ -61,6 +62,7 @@ Reader::Reader(const std::string& filename)
     : ReaderBase(Options::none())
     , m_filename(filename)
 {
+	addDefaultDimensions();
     return;
 }
 
@@ -72,7 +74,7 @@ void Reader::initialize()
     std::istream* stream = FileUtils::openFile(m_filename);
 
     LasHeaderReader lasHeaderReader(m_lasHeader, *stream);
-    lasHeaderReader.read( getSchemaRef() );
+    lasHeaderReader.read( *this, getSchemaRef() );
 
     this->setBounds(m_lasHeader.getBounds());
     this->setNumPoints(m_lasHeader.GetPointRecordsCount());
@@ -371,9 +373,9 @@ void Reader::addDefaultDimensions()
                             "angle (rounded to the nearest integer in the absolute "
                             "value sense) at which the laser point was output from the "
                             "laser system including the roll of the aircraft. The scan "
-                            "angle is within 1 degree of accuracy from +90 to ñ90 degrees. "
+                            "angle is within 1 degree of accuracy from +90 to 90 degrees. "
                             "The scan angle is an angle based on 0 degrees being nadir, "
-                            "and ñ90 degrees to the left side of the aircraft in the "
+                            "and 90 degrees to the left side of the aircraft in the "
                             "direction of flight." );
     scan_angle.setUUID("aaadaf77-e0c9-4df0-81a7-27060794cd69");
     addDefaultDimension(scan_angle, getName());

@@ -40,7 +40,9 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+
 #include "LasHeaderReader.hpp"
+#include <pdal/Stage.hpp>
 
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
@@ -62,7 +64,7 @@ LasHeaderReader::LasHeaderReader(LasHeader& header, std::istream& istream)
 }
 
 
-void LasHeaderReader::read(Schema& schema)
+void LasHeaderReader::read(Stage& stage, Schema& schema)
 {
     // Helper variables
     boost::uint8_t n1 = 0;
@@ -184,7 +186,7 @@ void LasHeaderReader::read(Schema& schema)
     {
         const pdal::drivers::las::PointFormat format = (pdal::drivers::las::PointFormat)n1;
         m_header.setPointFormat(format);
-        pdal::drivers::las::Support::registerFields(schema, format);
+        pdal::drivers::las::Support::registerFields(stage, schema, format);
     } 
     else
     {

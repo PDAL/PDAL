@@ -38,6 +38,7 @@
 #include <pdal/export.hpp>
 
 #include <pdal/Schema.hpp>
+#include <pdal/Stage.hpp>
 
 #include <iostream>
 
@@ -56,33 +57,6 @@ enum PointFormat
     PointFormat5 = 5,         // base + time + color + wave  (NOT SUPPORTED)
     PointFormatUnknown = 99
 };
-
-
-// this struct is used as a means to hold all the las field dimension indexes from a schema
-// class PDAL_DLL PointIndexes
-// {
-// public:
-//     PointIndexes(const Schema& schema, PointFormat format);
-//     int X;
-//     int Y;
-//     int Z;
-//     
-//     int Intensity;
-//     int ReturnNumber;
-//     int NumberOfReturns;
-//     int ScanDirectionFlag;
-//     int EdgeOfFlightLine;
-//     int Classification;
-//     int ScanAngleRank;
-//     int UserData;
-//     int PointSourceId;
-//     
-//     int Time;
-//     
-//     int Red;
-//     int Green;
-//     int Blue;
-// };
 
 class PDAL_DLL PointDimensions
 {
@@ -113,7 +87,7 @@ public:
 class PDAL_DLL Support
 {
 public:
-    static void registerFields(Schema& schema, PointFormat pointFormat);
+    static void registerFields(Stage& stage, Schema& schema, PointFormat pointFormat);
     static void setScaling(Schema& schema, double scaleX, double scaleY, double scaleZ, double offsetX, double offsetY, double offsetZ);
 
     static bool hasTime(PointFormat);
