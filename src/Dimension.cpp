@@ -62,7 +62,7 @@ Dimension::Dimension(DimensionId::Id id)
     , m_max(0.0)
     , m_numericScale(1.0)
     , m_numericOffset(0.0)
-    , m_byteOffset(0)
+    , m_byteOffset(-1)
     , m_position(0)
     , m_namespace(std::string(""))
 {
