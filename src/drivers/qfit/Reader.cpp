@@ -182,42 +182,42 @@ Word #       Content
 
 namespace pdal { namespace drivers { namespace qfit {
 
-PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
-: dimX(schema.getDimension(DimensionId::X_i32))
-{
-    Time = schema.getDimensionIndex(DimensionId::Qfit_Time);
-    X = schema.getDimensionIndex(DimensionId::X_i32);
-    
-    Y = schema.getDimensionIndex(DimensionId::Y_i32);
-    Z = schema.getDimensionIndex(DimensionId::Z_i32);
-    
-    StartPulse = schema.getDimensionIndex(DimensionId::Qfit_StartPulse);
-    ReflectedPulse = schema.getDimensionIndex(DimensionId::Qfit_ReflectedPulse);
-    ScanAngleRank = schema.getDimensionIndex(DimensionId::Qfit_ScanAngleRank);
-    Pitch = schema.getDimensionIndex(DimensionId::Qfit_Pitch);
-    Roll = schema.getDimensionIndex(DimensionId::Qfit_Roll);
-
-    if (format == QFIT_Format_14) 
-    {
-        PassiveSignal = schema.getDimensionIndex(DimensionId::Qfit_PassiveSignal);
-        PassiveX = schema.getDimensionIndex(DimensionId::Qfit_PassiveX);
-        PassiveY = schema.getDimensionIndex(DimensionId::Qfit_PassiveY);
-        PassiveZ = schema.getDimensionIndex(DimensionId::Qfit_PassiveZ);
-        GPSTime = schema.getDimensionIndex(DimensionId::Qfit_GpsTime);
-        
-    } else if (format == QFIT_Format_12)
-    {
-        PDOP = schema.getDimensionIndex(DimensionId::Qfit_PDOP);
-        PulseWidth = schema.getDimensionIndex(DimensionId::Qfit_PulseWidth);
-        GPSTime = schema.getDimensionIndex(DimensionId::Qfit_GpsTime);
-
-    } else
-    {
-        GPSTime = schema.getDimensionIndex(DimensionId::Qfit_GpsTime);
-    }
-        
-    return;
-}
+// PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
+// : dimX(schema.getDimension(DimensionId::X_i32))
+// {
+//     Time = schema.getDimensionIndex(DimensionId::Qfit_Time);
+//     X = schema.getDimensionIndex(DimensionId::X_i32);
+//     
+//     Y = schema.getDimensionIndex(DimensionId::Y_i32);
+//     Z = schema.getDimensionIndex(DimensionId::Z_i32);
+//     
+//     StartPulse = schema.getDimensionIndex(DimensionId::Qfit_StartPulse);
+//     ReflectedPulse = schema.getDimensionIndex(DimensionId::Qfit_ReflectedPulse);
+//     ScanAngleRank = schema.getDimensionIndex(DimensionId::Qfit_ScanAngleRank);
+//     Pitch = schema.getDimensionIndex(DimensionId::Qfit_Pitch);
+//     Roll = schema.getDimensionIndex(DimensionId::Qfit_Roll);
+// 
+//     if (format == QFIT_Format_14) 
+//     {
+//         PassiveSignal = schema.getDimensionIndex(DimensionId::Qfit_PassiveSignal);
+//         PassiveX = schema.getDimensionIndex(DimensionId::Qfit_PassiveX);
+//         PassiveY = schema.getDimensionIndex(DimensionId::Qfit_PassiveY);
+//         PassiveZ = schema.getDimensionIndex(DimensionId::Qfit_PassiveZ);
+//         GPSTime = schema.getDimensionIndex(DimensionId::Qfit_GpsTime);
+//         
+//     } else if (format == QFIT_Format_12)
+//     {
+//         PDOP = schema.getDimensionIndex(DimensionId::Qfit_PDOP);
+//         PulseWidth = schema.getDimensionIndex(DimensionId::Qfit_PulseWidth);
+//         GPSTime = schema.getDimensionIndex(DimensionId::Qfit_GpsTime);
+// 
+//     } else
+//     {
+//         GPSTime = schema.getDimensionIndex(DimensionId::Qfit_GpsTime);
+//     }
+//         
+//     return;
+// }
 
 
 PointDimensions::PointDimensions(const Schema& schema)
@@ -229,74 +229,74 @@ PointDimensions::PointDimensions(const Schema& schema)
     Y = &schema.getDimension("Y");
     Z = &schema.getDimension("Z");
     
-	StartPulse = &schema.getDimension("StartPulse");
-	ReflectedPulse = &schema.getDimension("ReflectedPulse");
-	ScanAngleRank = &schema.getDimension("ScanAngleRank");
-	Pitch = &schema.getDimension("Pitch");
-	Roll = &schema.getDimension("Roll");
-	
-	try
-	{
-	    GPSTime = &schema.getDimension("GPSTime");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		GPSTime = 0;
-	}
-	
-	try
-	{
-		PulseWidth = &schema.getDimension("PulseWidth");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		PulseWidth = 0;
-	}
+    StartPulse = &schema.getDimension("StartPulse");
+    ReflectedPulse = &schema.getDimension("ReflectedPulse");
+    ScanAngleRank = &schema.getDimension("ScanAngleRank");
+    Pitch = &schema.getDimension("Pitch");
+    Roll = &schema.getDimension("Roll");
+    
+    try
+    {
+        GPSTime = &schema.getDimension("GPSTime");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        GPSTime = 0;
+    }
+    
+    try
+    {
+        PulseWidth = &schema.getDimension("PulseWidth");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        PulseWidth = 0;
+    }
 
-	try
-	{
-		PDOP = &schema.getDimension("PDOP");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		PDOP = 0;
-	}
+    try
+    {
+        PDOP = &schema.getDimension("PDOP");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        PDOP = 0;
+    }
 
-	try
-	{
-	    PassiveSignal = &schema.getDimension("PassiveSignal");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		PassiveSignal = 0;
-	}
+    try
+    {
+        PassiveSignal = &schema.getDimension("PassiveSignal");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        PassiveSignal = 0;
+    }
 
-	try
-	{
-	  	PassiveY = &schema.getDimension("PassiveY");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		PassiveY = 0;
-	}
+    try
+    {
+        PassiveY = &schema.getDimension("PassiveY");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        PassiveY = 0;
+    }
 
-	try
-	{
-		PassiveX = &schema.getDimension("PassiveX");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		PassiveX = 0;
-	}
+    try
+    {
+        PassiveX = &schema.getDimension("PassiveX");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        PassiveX = 0;
+    }
 
-	try
-	{
-		PassiveZ = &schema.getDimension("PassiveZ");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		PassiveZ = 0;
-	}
+    try
+    {
+        PassiveZ = &schema.getDimension("PassiveZ");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        PassiveZ = 0;
+    }
 
 
     return;
@@ -310,13 +310,13 @@ Reader::Reader(const Options& options)
     , m_scale_z(1.0)
     , m_littleEndian(false)
 {
-	
+    
     std::string filename= getFileName();
     
     m_flip_x = getOptions().getValueOrDefault("flip_coordinates", true);
     m_scale_z = getOptions().getValueOrDefault("scale_z", 1.0);
 
-	addDefaultDimensions();
+    addDefaultDimensions();
 
         
     std::istream* str = FileUtils::openFile(filename);
@@ -335,29 +335,29 @@ Reader::Reader(const Options& options)
     
 
 
-	// They started writting little-endian data.
-	
-	/* For years we produced ATM data in big-endian format. With changes in
-	computer hardware, we reluctantly changed our standard output to
-	little-endian. The transition occurred between the two 2010 campaigns. The
-	format of the binary ( .qi, for example) files can be identified by
-	examining the first four bytes of the file. Read as a long integer (one
-	4-byte word), the value will contain the record length (in bytes) of the
-	data records. For example, a .qi file containing 14 words per record will
-	have a value 56 (=4*14). If the format of the file matches the format of
-	your processor, the value will be reasonable without byte-swapping. If the
-	format of the file differs from your processor, then the value is
-	interpreted as some very large number, unless you swap the byte order. If
-	you use Intel or equivalent processors, then you had to byte-swap files
-	from spring 2010 and earlier, you do not swap the ones from fall 2010 and
-	later. */
-	
-	// If the size comes back something other than 4*no_dimensions, we assume 
-	// The data were flipped 
-	if (int4 < 100)
-	{
-		m_littleEndian = true;
-	}
+    // They started writting little-endian data.
+    
+    /* For years we produced ATM data in big-endian format. With changes in
+    computer hardware, we reluctantly changed our standard output to
+    little-endian. The transition occurred between the two 2010 campaigns. The
+    format of the binary ( .qi, for example) files can be identified by
+    examining the first four bytes of the file. Read as a long integer (one
+    4-byte word), the value will contain the record length (in bytes) of the
+    data records. For example, a .qi file containing 14 words per record will
+    have a value 56 (=4*14). If the format of the file matches the format of
+    your processor, the value will be reasonable without byte-swapping. If the
+    format of the file differs from your processor, then the value is
+    interpreted as some very large number, unless you swap the byte order. If
+    you use Intel or equivalent processors, then you had to byte-swap files
+    from spring 2010 and earlier, you do not swap the ones from fall 2010 and
+    later. */
+    
+    // If the size comes back something other than 4*no_dimensions, we assume 
+    // The data were flipped 
+    if (int4 < 100)
+    {
+        m_littleEndian = true;
+    }
 
     if (!m_littleEndian)
         QFIT_SWAP_BE_TO_LE(int4);
@@ -365,7 +365,7 @@ Reader::Reader(const Options& options)
     if ( int4 % 4 != 0)
         throw qfit_error("Base QFIT format is not a multiple of 4, unrecognized format!");
     
-    m_size = int4;	
+    m_size = int4;  
 
     m_format = static_cast<QFIT_Format_Type>(m_size/sizeof(m_size));
     // std::cout << "QFIT Point format " << m_format << " with size: " << m_size << std::endl;
@@ -472,12 +472,15 @@ void Reader::registerFields()
 {
     Schema& schema = getSchemaRef();
     
-	Schema dimensions(getDefaultDimensions());
-	
+    Schema dimensions(getDefaultDimensions());
+    
     schema.appendDimension(dimensions.getDimension("Time"));
     schema.appendDimension(dimensions.getDimension("Y"));
     schema.appendDimension(dimensions.getDimension("X"));
-    schema.appendDimension(dimensions.getDimension("Z"));
+    
+    Dimension z = dimensions.getDimension("Z");
+    z.setNumericScale(m_scale_z);
+    schema.appendDimension(z);
 
     schema.appendDimension(dimensions.getDimension("StartPulse"));
     schema.appendDimension(dimensions.getDimension("ReflectedPulse"));
@@ -497,7 +500,9 @@ void Reader::registerFields()
         schema.appendDimension(dimensions.getDimension("PassiveSignal"));
         schema.appendDimension(dimensions.getDimension("PassiveY"));
         schema.appendDimension(dimensions.getDimension("PassiveX"));
-        schema.appendDimension(dimensions.getDimension("PassiveZ"));
+        Dimension z = dimensions.getDimension("PassiveZ");
+        z.setNumericScale(m_scale_z);
+        schema.appendDimension(z);
         schema.appendDimension(dimensions.getDimension("GPSTime"));
     }
     else
@@ -524,17 +529,17 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     const Schema& schema = data.getSchema();
     
     const int pointByteCount = getPointDataSize();
-	const PointDimensions dimensions(schema);
+    const PointDimensions dimensions(schema);
     
-	Dimension const* dimX = &schema.getDimension("X");
-	Dimension const* dimPassiveX(0);
-	try
-	{	
-		dimPassiveX = &schema.getDimension("PassiveX");
-	} catch (pdal::dimension_not_found&)
-	{
-		dimPassiveX = 0;
-	}
+    Dimension const* dimX = &schema.getDimension("X");
+    Dimension const* dimPassiveX(0);
+    try
+    {   
+        dimPassiveX = &schema.getDimension("PassiveX");
+    } catch (pdal::dimension_not_found&)
+    {
+        dimPassiveX = 0;
+    }
     boost::uint8_t* buf = new boost::uint8_t[pointByteCount * numPoints];
     
     
@@ -712,26 +717,25 @@ void Reader::addDefaultDimensions()
     Dimension time("Time", dimension::SignedInteger, 4,  
                 "Relative Time (msec from start of data file)" );
     time.setUUID("adfc310a-111d-437b-b76b-5a1805eab8ad");
-	addDefaultDimension(time, getName());
+    addDefaultDimension(time, getName());
 
     double xy_scale = 1/1000000.0;
 
     Dimension y("Y", dimension::SignedInteger, 4,  
                 "Laser Spot Latitude (degrees X 1,000,000)." );
     y.setUUID("bf8e431c-86a6-4b6e-90d8-c23c3ad1fb90");
-	y.setNumericScale(xy_scale);
+    y.setNumericScale(xy_scale);
     addDefaultDimension(y, getName());
 
     Dimension x("X", dimension::SignedInteger, 4,  
                 "Laser Spot Longitude (degrees X 1,000,000)." );
     x.setUUID("1e524a69-e239-4e7a-aea1-ef697895a3c0");
-	x.setNumericScale(xy_scale);
+    x.setNumericScale(xy_scale);
     addDefaultDimension(x, getName());
 
     Dimension z("Z", dimension::SignedInteger, 4,  
                 "Elevation (millimeters)" );
     z.setUUID("cadb2807-c14f-4ce3-8b7a-b393a91a9f10");
-	z.setNumericScale(m_scale_z);
     addDefaultDimension(z, getName());
 
     Dimension start_pulse("StartPulse", dimension::SignedInteger, 4,  
@@ -747,7 +751,7 @@ void Reader::addDefaultDimensions()
     Dimension scan_angle("ScanAngleRank", dimension::SignedInteger, 4,  
                 "Scan Azimuth (degrees X 1,000)" );
     scan_angle.setUUID("81e73eec-d342-471c-bcb2-6a534a7334ec");
-	scan_angle.setNumericScale(1.0/1000.0);
+    scan_angle.setNumericScale(1.0/1000.0);
     addDefaultDimension(scan_angle, getName());
 
     Dimension pitch("Pitch", dimension::SignedInteger, 4,  
@@ -786,20 +790,19 @@ void Reader::addDefaultDimensions()
     Dimension passive_y("PassiveY", dimension::SignedInteger, 4,  
                 "Passive Footprint Latitude (degrees X 1,000,000)" );
     passive_y.setUUID("b2a4863b-b580-40a5-b5e7-117d80221240");
-	passive_y.setNumericScale(xy_scale);
+    passive_y.setNumericScale(xy_scale);
     addDefaultDimension(passive_y, getName());
 
     Dimension passive_x("PassiveX", dimension::SignedInteger, 4,  
                 "Passive Footprint Longitude (degrees X 1,000,000)" );
     passive_x.setUUID("6884be08-c9ee-4d7f-83a7-cb4c9cad4745");
-	passive_x.setNumericScale(xy_scale);
+    passive_x.setNumericScale(xy_scale);
     addDefaultDimension(passive_x, getName());
 
     Dimension passive_z("PassiveZ", dimension::SignedInteger, 4,  
                 "Passive Footprint Synthesized Elevation (millimeters)" );
     passive_z.setUUID("0d3dec08-188d-4c2e-84d2-bb6881d40c7e");
-	passive_z.setNumericScale(m_scale_z);
-    addDefaultDimension(passive_z, getName());	
+    addDefaultDimension(passive_z, getName());  
 }
 
 

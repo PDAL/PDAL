@@ -53,7 +53,7 @@ Reader::Reader(const Options& options)
     : ReaderBase(options)
     , m_filename(options.getValueOrThrow<std::string>("filename"))
 {
-	addDefaultDimensions();
+    addDefaultDimensions();
     return;
 }
 
@@ -62,7 +62,7 @@ Reader::Reader(const std::string& filename)
     : ReaderBase(Options::none())
     , m_filename(filename)
 {
-	addDefaultDimensions();
+    addDefaultDimensions();
     return;
 }
 

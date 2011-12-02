@@ -51,81 +51,81 @@ PointDimensions::PointDimensions(const Schema& schema)
     Y = &schema.getDimension("Y");
     Z = &schema.getDimension("Z");
     
-	Classification = &schema.getDimension("Classification");
-	PointSourceId = &schema.getDimension("PointSourceId");
-	ReturnNumber = &schema.getDimension("ReturnNumber");
-	
-	try
-	{
-	    Intensity = &schema.getDimension("Intensity");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Intensity = 0;
-	}
-	
-	try
-	{
-		Mark = &schema.getDimension("Mark");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Mark = 0;
-	}
+    Classification = &schema.getDimension("Classification");
+    PointSourceId = &schema.getDimension("PointSourceId");
+    ReturnNumber = &schema.getDimension("ReturnNumber");
+    
+    try
+    {
+        Intensity = &schema.getDimension("Intensity");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Intensity = 0;
+    }
+    
+    try
+    {
+        Mark = &schema.getDimension("Mark");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Mark = 0;
+    }
 
-	try
-	{
-		Flag = &schema.getDimension("Flag");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Flag = 0;
-	}
+    try
+    {
+        Flag = &schema.getDimension("Flag");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Flag = 0;
+    }
 
-	try
-	{
-	    Time = &schema.getDimension("Time");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Time = 0;
-	}
+    try
+    {
+        Time = &schema.getDimension("Time");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Time = 0;
+    }
 
-	try
-	{
-	  	Red = &schema.getDimension("Red");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Red = 0;
-	}
+    try
+    {
+        Red = &schema.getDimension("Red");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Red = 0;
+    }
 
-	try
-	{
-		Green = &schema.getDimension("Green");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Green = 0;
-	}
+    try
+    {
+        Green = &schema.getDimension("Green");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Green = 0;
+    }
 
-	try
-	{
-		Blue = &schema.getDimension("Blue");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Blue = 0;
-	}
+    try
+    {
+        Blue = &schema.getDimension("Blue");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Blue = 0;
+    }
 
-	try
-	{
-		Alpha = &schema.getDimension("Alpha");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Alpha = 0;
-	}
+    try
+    {
+        Alpha = &schema.getDimension("Alpha");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Alpha = 0;
+    }
 
 
     return;
@@ -167,8 +167,8 @@ Reader::Reader(const Options& options)
         
     }
 
-	addDefaultDimensions();
-	
+    addDefaultDimensions();
+    
     registerFields();
     
     m_offset = 56;
@@ -214,35 +214,48 @@ void Reader::registerFields()
 {
     Schema& schema = getSchemaRef();
     
-	Schema dimensions(getDefaultDimensions());
+    Schema dimensions(getDefaultDimensions());
+
+    double xyz_scale = 1/static_cast<double>(m_header->Units);    
+    Dimension x = dimensions.getDimension("X");
+    x.setNumericScale(xyz_scale);
+    x.setNumericOffset(m_header->OrgX);
+
+    Dimension y = dimensions.getDimension("Y");
+    y.setNumericScale(xyz_scale);
+    y.setNumericOffset(m_header->OrgY);
+
+    Dimension z = dimensions.getDimension("Z");
+    z.setNumericScale(xyz_scale);
+    z.setNumericOffset(m_header->OrgZ);
     
     if (m_format == TERRASOLID_Format_1)
     {
         schema.appendDimension(dimensions.getDimension("Classification"));
 
         // Fetch PointSource ID Uint8 dimension by UUID because dimensions
-		// has two "PointSourceId" dimensions added.
-		boost::uuids::string_generator gen;
-		boost::uuids::uuid ps1 = gen("68c03b56-4248-4cca-ade5-33e90d5c5563");
+        // has two "PointSourceId" dimensions added.
+        boost::uuids::string_generator gen;
+        boost::uuids::uuid ps1 = gen("68c03b56-4248-4cca-ade5-33e90d5c5563");
         schema.appendDimension(dimensions.getDimension(ps1));
 
         schema.appendDimension(dimensions.getDimension("Intensity"));
 
-        schema.appendDimension(dimensions.getDimension("X"));
-        schema.appendDimension(dimensions.getDimension("Y"));
-        schema.appendDimension(dimensions.getDimension("Z"));
+        schema.appendDimension(x);
+        schema.appendDimension(y);
+        schema.appendDimension(z);
     }
 
     if (m_format == TERRASOLID_Format_2)
     {
-        schema.appendDimension(dimensions.getDimension("X"));
-        schema.appendDimension(dimensions.getDimension("Y"));
-        schema.appendDimension(dimensions.getDimension("Z"));
+        schema.appendDimension(x);
+        schema.appendDimension(y);
+        schema.appendDimension(z);
 
         schema.appendDimension(dimensions.getDimension("Classification"));
 
-		boost::uuids::string_generator gen2;
-		boost::uuids::uuid r1 = gen2("465a9a7e-1e04-47b0-97b6-4f826411bc71"); 
+        boost::uuids::string_generator gen2;
+        boost::uuids::uuid r1 = gen2("465a9a7e-1e04-47b0-97b6-4f826411bc71"); 
 
         schema.appendDimension(dimensions.getDimension(r1));
 
@@ -250,9 +263,9 @@ void Reader::registerFields()
         schema.appendDimension(dimensions.getDimension("Mark"));
 
         // Fetch PointSource ID Uint16 dimension by UUID because dimensions
-		// has two "PointSourceId" dimensions added.
-		boost::uuids::string_generator gen;
-		boost::uuids::uuid ps2 = gen("7193bb9f-3ca2-491f-ba18-594321493789");
+        // has two "PointSourceId" dimensions added.
+        boost::uuids::string_generator gen;
+        boost::uuids::uuid ps2 = gen("7193bb9f-3ca2-491f-ba18-594321493789");
         schema.appendDimension(dimensions.getDimension(ps2));
 
         schema.appendDimension(dimensions.getDimension("Intensity"));
@@ -270,7 +283,7 @@ void Reader::registerFields()
         schema.appendDimension(dimensions.getDimension("Blue"));
         schema.appendDimension(dimensions.getDimension("Alpha"));
     }
-	
+    
     return;
 }
 
@@ -291,7 +304,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     
     const int pointByteCount = getPointDataSize();
 
-	const PointDimensions dimensions(schema);
+    const PointDimensions dimensions(schema);
     
     boost::uint8_t* buf = new boost::uint8_t[pointByteCount * numPoints];
     Utils::read_n(buf, stream, pointByteCount * numPoints);
@@ -433,97 +446,91 @@ boost::property_tree::ptree Reader::toPTree() const
 void Reader::addDefaultDimensions()
 {
 
-    double xyz_scale = 1/static_cast<double>(m_header->Units);
 
-	Dimension alpha("Alpha", dimension::UnsignedInteger, 1,  
-                			 "The alpha image channel value associated with this point" );
+
+    Dimension alpha("Alpha", dimension::UnsignedInteger, 1,  
+                             "The alpha image channel value associated with this point" );
     alpha.setUUID("f3806ee6-e82e-45af-89bd-59b20cda8ffa");
     addDefaultDimension(alpha, getName());
 
-	Dimension classification("Classification", dimension::UnsignedInteger, 1,  
-                			 "Classification code 0-255" );
+    Dimension classification("Classification", dimension::UnsignedInteger, 1,  
+                             "Classification code 0-255" );
     classification.setUUID("845e23ca-fc4b-4dfc-aa71-a40cc2927421");
     addDefaultDimension(classification, getName());
 
-	Dimension point_source("PointSourceId", dimension::UnsignedInteger, 1,  
-                			 "Flightline number 0-255" );
+    Dimension point_source("PointSourceId", dimension::UnsignedInteger, 1,  
+                             "Flightline number 0-255" );
     point_source.setUUID("68c03b56-4248-4cca-ade5-33e90d5c5563");
     addDefaultDimension(point_source, getName());
 
-	Dimension point_source2("PointSourceId", dimension::UnsignedInteger, 2,  
-                			 "Flightline number 0-65536" );
+    Dimension point_source2("PointSourceId", dimension::UnsignedInteger, 2,  
+                             "Flightline number 0-65536" );
     point_source2.setUUID("7193bb9f-3ca2-491f-ba18-594321493789");
     addDefaultDimension(point_source2, getName());
 
-	Dimension return_number("ReturnNumber", dimension::UnsignedInteger, 1,  
-                			 "Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo." );
+    Dimension return_number("ReturnNumber", dimension::UnsignedInteger, 1,  
+                             "Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo." );
     return_number.setUUID("465a9a7e-1e04-47b0-97b6-4f826411bc71");
     addDefaultDimension(return_number, getName());
 
-	Dimension return_number2("ReturnNumber", dimension::UnsignedInteger, 2,  
-                			 "Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo." );
+    Dimension return_number2("ReturnNumber", dimension::UnsignedInteger, 2,  
+                             "Echo/Return Number.  0 - Only echo. 1 - First of many echo. 2 - Intermediate echo. 3 - Last of many echo." );
     return_number2.setUUID("43a1c59d-02ae-4a05-85af-526fae890eb9");
     addDefaultDimension(return_number2, getName());
 
-	Dimension flag("Flag", dimension::UnsignedInteger, 1,  
-                			 "Runtime flag (view visibility)" );
+    Dimension flag("Flag", dimension::UnsignedInteger, 1,  
+                             "Runtime flag (view visibility)" );
     flag.setUUID("583a5904-ee67-47a7-9fba-2f46daf11441");
     addDefaultDimension(flag, getName());
 
-	Dimension mark("Mark", dimension::UnsignedInteger, 1,  
-                			 "Runtime flag" );
+    Dimension mark("Mark", dimension::UnsignedInteger, 1,  
+                             "Runtime flag" );
     mark.setUUID("e889747c-2f19-4244-b282-b0b223868401");
     addDefaultDimension(mark, getName());
 
-	Dimension intensity("Intensity", dimension::UnsignedInteger, 2,  
-                			 "Runtime flag" );
+    Dimension intensity("Intensity", dimension::UnsignedInteger, 2,  
+                             "Runtime flag" );
     intensity.setUUID("beaa015b-20dd-4922-bf1d-da6972596fe6");
     addDefaultDimension(intensity, getName());
 
-	Dimension x("X", dimension::SignedInteger, 4,  
-                			 "X dimension as a scaled integer" );
+    Dimension x("X", dimension::SignedInteger, 4,  
+                             "X dimension as a scaled integer" );
     x.setUUID("64e530ee-7304-4d6a-9fe4-231b6c960e69");
-	x.setNumericScale(xyz_scale);
-    x.setNumericOffset(m_header->OrgX);
     addDefaultDimension(x, getName());
 
-	Dimension y("Y", dimension::SignedInteger, 4,  
-                			 "Y dimension as a scaled integer" );
+    Dimension y("Y", dimension::SignedInteger, 4,  
+                             "Y dimension as a scaled integer" );
     y.setUUID("9b4fce29-2846-45fa-be0c-f50228407f05");
-	y.setNumericScale(xyz_scale);
-    y.setNumericOffset(m_header->OrgY);
     addDefaultDimension(y, getName());
 
-	Dimension z("Z", dimension::SignedInteger, 4,  
-                			 "Z dimension as a scaled integer" );
+    Dimension z("Z", dimension::SignedInteger, 4,  
+                             "Z dimension as a scaled integer" );
     z.setUUID("464cd1f6-5bec-4610-9f25-79e839ee39a6");
-	z.setNumericScale(xyz_scale);
-    z.setNumericOffset(m_header->OrgZ);
     addDefaultDimension(z, getName());
 
-	Dimension red("Red", dimension::UnsignedInteger, 1,  
-                			 "Red color value 0 - 256 " );
+    Dimension red("Red", dimension::UnsignedInteger, 1,  
+                             "Red color value 0 - 256 " );
     red.setUUID("2157fd43-a492-40e4-a27c-7c37b48bd55c");
     addDefaultDimension(red, getName());
 
-	Dimension green("Green", dimension::UnsignedInteger, 1,  
-                			 "Green color value 0 - 256 " );
+    Dimension green("Green", dimension::UnsignedInteger, 1,  
+                             "Green color value 0 - 256 " );
     green.setUUID("c9cd71ef-1ce0-48c2-99f8-5b283e598eac");
     addDefaultDimension(green, getName());
 
-	Dimension blue("Blue", dimension::UnsignedInteger, 1,  
-                			 "Blue color value 0 - 256 " );
+    Dimension blue("Blue", dimension::UnsignedInteger, 1,  
+                             "Blue color value 0 - 256 " );
     blue.setUUID("c9cd71ef-1ce0-48c2-99f8-5b283e598eac");
     addDefaultDimension(blue, getName());
-	
-	Dimension time("Time", dimension::UnsignedInteger, 4,
-				   "32 bit integer time stamps. Time stamps are assumed to be "
-				   "GPS week seconds. The storage format is a 32 bit unsigned "
-    				"integer where each integer step is 0.0002 seconds.");
+    
+    Dimension time("Time", dimension::UnsignedInteger, 4,
+                   "32 bit integer time stamps. Time stamps are assumed to be "
+                   "GPS week seconds. The storage format is a 32 bit unsigned "
+                    "integer where each integer step is 0.0002 seconds.");
     time.setNumericScale(0.0002);
     time.setNumericOffset(0.0);
-	time.setUUID("0dcda772-56da-47f6-b04a-edad72361da9");
-	addDefaultDimension(time, getName());
+    time.setUUID("0dcda772-56da-47f6-b04a-edad72361da9");
+    addDefaultDimension(time, getName());
 }
 
 
