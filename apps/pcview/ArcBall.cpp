@@ -16,7 +16,7 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#ifdef PDAL_COMPILER_MSVC
+#ifdef PDAL_PLATFORM_WIN32
 #include <windows.h>
 #endif
 

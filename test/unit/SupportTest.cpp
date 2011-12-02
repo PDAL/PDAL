@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_paths)
 
     // does binpath (and exename) work?
     std::string this_bin = Support::exename("pdal_test");
-#ifdef PDAL_COMPILER_MSVC
+#ifdef PDAL_PLATFORM_WIN32
     BOOST_CHECK_EQUAL(this_bin, "pdal_test.exe");
 #else
     BOOST_CHECK_EQUAL(this_bin, "pdal_test");

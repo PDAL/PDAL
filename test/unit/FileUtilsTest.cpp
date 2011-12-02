@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(test_getcwd)
 }
 
 
-#ifdef PDAL_COMPILER_MSVC
+#ifdef PDAL_PLATFORM_WIN32
 static const std::string drive = "A:";
 #else
 static const std::string drive = "";
