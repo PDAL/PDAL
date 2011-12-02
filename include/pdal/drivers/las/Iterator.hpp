@@ -45,20 +45,22 @@ namespace pdal { namespace drivers { namespace las {
 
 class Reader;
 class ZipPoint;
-
+class PointDimensions;
 
 class IteratorBase
 {
 public:
     IteratorBase(const Reader& reader);
     ~IteratorBase();
-
 private:
     void initializeZip();
 
 protected:
     const Reader& m_reader;
     std::istream* m_istream;
+    boost::scoped_ptr<PointDimensions> m_pointDimensions;
+
+
 
 public:
 #ifdef PDAL_HAVE_LASZIP
@@ -80,6 +82,8 @@ public:
     SequentialIterator(const Reader& reader);
     ~SequentialIterator();
 
+protected:
+    void readBufferBeginImpl(PointBuffer&);
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
@@ -92,6 +96,9 @@ class RandomIterator : public IteratorBase, public pdal::ReaderRandomIterator
 public:
     RandomIterator(const Reader& reader);
     ~RandomIterator();
+
+protected:
+    void readBufferBeginImpl(PointBuffer&);
 
 private:
     boost::uint64_t seekImpl(boost::uint64_t);

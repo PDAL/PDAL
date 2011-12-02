@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/las/Support.hpp>
 
 #ifdef PDAL_HAVE_LASZIP
 #include <laszip/lasunzipper.hpp>
@@ -174,14 +175,18 @@ pdal::StageRandomIterator* Reader::createRandomIterator() const
 }
 
 
-boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, boost::uint64_t numPointsLeft, LASunzipper* unzipper, ZipPoint* zipPoint) const
+boost::uint32_t Reader::processBuffer(  PointBuffer& data, 
+                                        std::istream& stream, 
+                                        boost::uint64_t numPointsLeft, 
+                                        LASunzipper* unzipper, 
+                                        ZipPoint* zipPoint,
+                                        PointDimensions* dimensions) const
 {
     // we must not read more points than are left in the file
     const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(), numPointsLeft);
     const boost::uint32_t numPoints = (boost::uint32_t)std::min<boost::uint64_t>(numPoints64, std::numeric_limits<boost::uint32_t>::max());
 
     const LasHeader& lasHeader = getLasHeader();
-    const Schema& schema = data.getSchema();
     const PointFormat pointFormat = lasHeader.getPointFormat();
 
 
@@ -221,8 +226,6 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
         Utils::read_n(buf, stream, pointByteCount * numPoints);
     }
 
-    const PointDimensions dimensions(schema);
-
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         boost::uint8_t* p = buf + pointByteCount * pointIndex;
@@ -244,24 +247,24 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             const boost::uint8_t scanDirFlag = (flags >> 6) & 0x01;
             const boost::uint8_t flight = (flags >> 7) & 0x01;
 
-            data.setField<boost::uint32_t>(*dimensions.X, pointIndex, x);
-            data.setField<boost::uint32_t>(*dimensions.Y, pointIndex, y);
-            data.setField<boost::uint32_t>(*dimensions.Z, pointIndex, z);
-            data.setField<boost::uint16_t>(*dimensions.Intensity, pointIndex, intensity);
-            data.setField<boost::uint8_t>(*dimensions.ReturnNumber, pointIndex, returnNum);
-            data.setField<boost::uint8_t>(*dimensions.NumberOfReturns, pointIndex, numReturns);
-            data.setField<boost::uint8_t>(*dimensions.ScanDirectionFlag, pointIndex, scanDirFlag);
-            data.setField<boost::uint8_t>(*dimensions.EdgeOfFlightLine, pointIndex, flight);
-            data.setField<boost::uint8_t>(*dimensions.Classification, pointIndex, classification);
-            data.setField<boost::int8_t>(*dimensions.ScanAngleRank, pointIndex, scanAngleRank);
-            data.setField<boost::uint8_t>(*dimensions.UserData, pointIndex, user);
-            data.setField<boost::uint16_t>(*dimensions.PointSourceId, pointIndex, pointSourceId);
+            data.setField<boost::uint32_t>(*(dimensions->X), pointIndex, x);
+            data.setField<boost::uint32_t>(*(dimensions->Y), pointIndex, y);
+            data.setField<boost::uint32_t>(*(dimensions->Z), pointIndex, z);
+            data.setField<boost::uint16_t>(*(dimensions->Intensity), pointIndex, intensity);
+            data.setField<boost::uint8_t>(*(dimensions->ReturnNumber), pointIndex, returnNum);
+            data.setField<boost::uint8_t>(*(dimensions->NumberOfReturns), pointIndex, numReturns);
+            data.setField<boost::uint8_t>(*(dimensions->ScanDirectionFlag), pointIndex, scanDirFlag);
+            data.setField<boost::uint8_t>(*(dimensions->EdgeOfFlightLine), pointIndex, flight);
+            data.setField<boost::uint8_t>(*(dimensions->Classification), pointIndex, classification);
+            data.setField<boost::int8_t>(*(dimensions->ScanAngleRank), pointIndex, scanAngleRank);
+            data.setField<boost::uint8_t>(*(dimensions->UserData), pointIndex, user);
+            data.setField<boost::uint16_t>(*(dimensions->PointSourceId), pointIndex, pointSourceId);
         }
 
         if (hasTime)
         {
             const double time = Utils::read_field<double>(p);
-            data.setField<double>(*dimensions.Time, pointIndex, time);
+            data.setField<double>(*(dimensions->Time), pointIndex, time);
         }
 
         if (hasColor)
@@ -270,9 +273,9 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
             const boost::uint16_t green = Utils::read_field<boost::uint16_t>(p);
             const boost::uint16_t blue = Utils::read_field<boost::uint16_t>(p);
 
-            data.setField<boost::uint16_t>(*dimensions.Red, pointIndex, red);
-            data.setField<boost::uint16_t>(*dimensions.Green, pointIndex, green);
-            data.setField<boost::uint16_t>(*dimensions.Blue, pointIndex, blue);       
+            data.setField<boost::uint16_t>(*(dimensions->Red), pointIndex, red);
+            data.setField<boost::uint16_t>(*(dimensions->Green), pointIndex, green);
+            data.setField<boost::uint16_t>(*(dimensions->Blue), pointIndex, blue);       
         }
         
         data.setNumPoints(pointIndex+1);

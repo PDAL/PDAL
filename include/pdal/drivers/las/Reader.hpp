@@ -50,6 +50,7 @@ namespace pdal { namespace drivers { namespace las {
 
 class LasHeader;
 class ZipPoint;
+class PointDimensions;
 
 class PDAL_DLL Reader : public ReaderBase
 {
@@ -77,7 +78,12 @@ public:
     pdal::StageRandomIterator* createRandomIterator() const;
 
     // this is called by the stage's iterator
-    boost::uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream, boost::uint64_t numPointsLeft, LASunzipper* unzipper, ZipPoint* zipPoint) const;
+    boost::uint32_t processBuffer(  PointBuffer& PointBuffer, 
+                                    std::istream& stream, 
+                                    boost::uint64_t numPointsLeft, 
+                                    LASunzipper* unzipper, 
+                                    ZipPoint* zipPoint,
+                                    PointDimensions* dimensions) const;
 
     int getMetadataRecordCount() const;
     const MetadataRecord& getMetadataRecord(int index) const;

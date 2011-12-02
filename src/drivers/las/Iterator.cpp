@@ -42,6 +42,7 @@
 #endif
 
 #include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/las/Support.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 
@@ -76,6 +77,7 @@ IteratorBase::~IteratorBase()
 #endif
     FileUtils::closeFile(m_istream);
 }
+
 
 
 void IteratorBase::initializeZip()
@@ -126,6 +128,16 @@ SequentialIterator::~SequentialIterator()
     return;
 }
 
+void SequentialIterator::readBufferBeginImpl(PointBuffer& buffer)
+{
+    // We'll assume you're not changing the schema per-read call
+    if (! m_pointDimensions.get())
+    {
+        boost::scoped_ptr<PointDimensions> p(new PointDimensions(buffer.getSchema()));
+        m_pointDimensions.swap(p);        
+    }
+
+} 
 
 static inline boost::uint32_t safeconvert64to32(boost::uint64_t x64) // BUG: move this to Utils header?
 {
@@ -169,9 +181,19 @@ bool SequentialIterator::atEndImpl() const
 boost::uint32_t SequentialIterator::readBufferImpl(PointBuffer& data)
 {
 #ifdef PDAL_HAVE_LASZIP
-    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), m_unzipper.get(), m_zipPoint.get());
+    return m_reader.processBuffer(  data, 
+                                    *m_istream, 
+                                    getStage().getNumPoints()-this->getIndex(), 
+                                    m_unzipper.get(), 
+                                    m_zipPoint.get(),
+                                    m_pointDimensions.get());
 #else
-    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), NULL, NULL);
+    return m_reader.processBuffer(  data, 
+                                    *m_istream, 
+                                    getStage().getNumPoints()-this->getIndex(), 
+                                    NULL, 
+                                    NULL,
+                                    m_pointDimensions.get());
 
 #endif
 }
@@ -190,6 +212,16 @@ RandomIterator::~RandomIterator()
 {
     return;
 }
+
+void RandomIterator::readBufferBeginImpl(PointBuffer& buffer)
+{
+    // We'll assume you're not changing the schema per-read call
+    if (! m_pointDimensions.get())
+    {
+        boost::scoped_ptr<PointDimensions> p(new PointDimensions(buffer.getSchema()));
+        m_pointDimensions.swap(p);        
+    }
+} 
 
 
 boost::uint64_t RandomIterator::seekImpl(boost::uint64_t count)
@@ -219,9 +251,19 @@ boost::uint64_t RandomIterator::seekImpl(boost::uint64_t count)
 boost::uint32_t RandomIterator::readBufferImpl(PointBuffer& data)
 {
 #ifdef PDAL_HAVE_LASZIP
-    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), m_unzipper.get(), m_zipPoint.get());
+    return m_reader.processBuffer(  data, 
+                                    *m_istream, 
+                                    getStage().getNumPoints()-this->getIndex(), 
+                                    m_unzipper.get(), 
+                                    m_zipPoint.get(),
+                                    m_pointDimensions.get());
 #else
-    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex(), NULL, NULL);
+    return m_reader.processBuffer(  data, 
+                                    *m_istream, 
+                                    getStage().getNumPoints()-this->getIndex(), 
+                                    NULL, 
+                                    NULL,
+                                    m_pointDimensions.get());
 
 #endif
 }
