@@ -41,11 +41,11 @@ namespace pdal { namespace drivers { namespace las {
 void Support::registerFields(Stage& stage, Schema& schema, PointFormat format)
 {
     std::ostringstream text;
-	
-	std::vector<pdal::Dimension> const& d = stage.getDefaultDimensions();
-	
-	Schema dimensions(d);
-	
+    
+    std::vector<pdal::Dimension> const& d = stage.getDefaultDimensions();
+    
+    Schema dimensions(d);
+    
     schema.appendDimension(dimensions.getDimension("X"));
     schema.appendDimension(dimensions.getDimension("Y"));
     schema.appendDimension(dimensions.getDimension("Z"));
@@ -76,7 +76,7 @@ void Support::registerFields(Stage& stage, Schema& schema, PointFormat format)
 
     // if (hasWave(format))
     // {
-    // 		
+    //      
     //     schema.appendDimension(Dimension(DimensionId::Las_WavePacketDescriptorIndex));
     //     schema.appendDimension(Dimension(DimensionId::Las_WaveformDataOffset));
     //     schema.appendDimension(Dimension(DimensionId::Las_ReturnPointWaveformLocation));
@@ -156,121 +156,121 @@ PointDimensions::PointDimensions(const Schema& schema)
     Y = &schema.getDimension("Y");
     Z = &schema.getDimension("Z");
     
-	try
-	{
-	    Intensity = &schema.getDimension("Intensity");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Intensity = 0;
-	}
-	
-	try
-	{
-		ReturnNumber = &schema.getDimension("ReturnNumber");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		ReturnNumber = 0;
-	}
+    try
+    {
+        Intensity = &schema.getDimension("Intensity");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Intensity = 0;
+    }
+    
+    try
+    {
+        ReturnNumber = &schema.getDimension("ReturnNumber");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        ReturnNumber = 0;
+    }
 
-	try
-	{
-		NumberOfReturns = &schema.getDimension("NumberOfReturns");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		NumberOfReturns = 0;
-	}
+    try
+    {
+        NumberOfReturns = &schema.getDimension("NumberOfReturns");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        NumberOfReturns = 0;
+    }
 
-	try
-	{
-	    ScanDirectionFlag = &schema.getDimension("ScanDirectionFlag");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		ScanDirectionFlag = 0;
-	}
+    try
+    {
+        ScanDirectionFlag = &schema.getDimension("ScanDirectionFlag");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        ScanDirectionFlag = 0;
+    }
 
-	try
-	{
-	  	EdgeOfFlightLine = &schema.getDimension("EdgeOfFlightLine");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		EdgeOfFlightLine = 0;
-	}
+    try
+    {
+        EdgeOfFlightLine = &schema.getDimension("EdgeOfFlightLine");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        EdgeOfFlightLine = 0;
+    }
 
-	try
-	{
-		Classification = &schema.getDimension("Classification");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Classification = 0;
-	}
+    try
+    {
+        Classification = &schema.getDimension("Classification");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Classification = 0;
+    }
 
-	try
-	{
-		ScanAngleRank = &schema.getDimension("ScanAngleRank");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		ScanAngleRank = 0;
-	}
+    try
+    {
+        ScanAngleRank = &schema.getDimension("ScanAngleRank");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        ScanAngleRank = 0;
+    }
 
-	try
-	{
-		UserData = &schema.getDimension("UserData");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		UserData = 0;
-	}
+    try
+    {
+        UserData = &schema.getDimension("UserData");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        UserData = 0;
+    }
 
-	try
-	{
-		PointSourceId = &schema.getDimension("PointSourceId");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		PointSourceId = 0;
-	}	
+    try
+    {
+        PointSourceId = &schema.getDimension("PointSourceId");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        PointSourceId = 0;
+    }   
 
-	try
-	{
-		Time = &schema.getDimension("Time");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Time = 0;
-	}
-	try
-	{
-		Red = &schema.getDimension("Red");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Red = 0;
-	}  
+    try
+    {
+        Time = &schema.getDimension("Time");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Time = 0;
+    }
+    try
+    {
+        Red = &schema.getDimension("Red");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Red = 0;
+    }  
 
-	try
-	{
-		Green = &schema.getDimension("Green");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Green = 0;
-	}   
+    try
+    {
+        Green = &schema.getDimension("Green");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Green = 0;
+    }   
 
-	try
-	{
-		Blue = &schema.getDimension("Blue");
-	}
-	catch (pdal::dimension_not_found&)
-	{
-		Blue = 0;
-	}    
+    try
+    {
+        Blue = &schema.getDimension("Blue");
+    }
+    catch (pdal::dimension_not_found&)
+    {
+        Blue = 0;
+    }    
 
         
     // WavePacketDescriptorIndex = (Support::hasWave(format) ? schema.getDimensionIndex(DimensionId::Las_WavePacketDescriptorIndex) : 0);
