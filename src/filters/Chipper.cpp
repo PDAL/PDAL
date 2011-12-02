@@ -89,7 +89,8 @@ vector<boost::uint32_t> Block::GetIDs() const
     return ids;
 }
 
-void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t block_id, boost::int32_t indexId, boost::int32_t indexBlockId) const
+void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, 
+                       boost::uint32_t block_id, Dimension const& dimPoint, Dimension const& dimBlock) const
 {
     pdal::Schema const& schema = buffer.getSchema();
 
@@ -108,25 +109,15 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t 
     std::vector<boost::uint32_t>::const_iterator it;
     boost::uint32_t count = 0;
     
-    // const int indexId = schema.getDimensionIndex(Dimension_User1, Dimension::Int32);
-    // const int indexBlockId = schema.getDimensionIndex(Dimension_User2, Dimension::Int32);
-    
-    boost::uint8_t* p_block_id = reinterpret_cast<boost::uint8_t*>(&block_id);
     for (it = ids.begin(); it != ids.end(); it++)
     {
         boost::uint32_t id = *it;
         iter->seek(id);
         iter->read(one_point);
-        
-        boost::uint8_t* p_id = reinterpret_cast<boost::uint8_t*>(&id);
-        if (indexId != -1)
-        {
-            one_point.setFieldData(0, indexId, p_id);
-        }
-        if (indexBlockId != -1)
-        {
-            one_point.setFieldData(0, indexBlockId, p_block_id);
-        }
+
+        one_point.setField(dimPoint, 0, id);
+        one_point.setField(dimBlock, 0, block_id);
+
         // one_point.setField(0, indexId, *it);
         // one_point.setField(0, indexBlockId, block_id);
         
@@ -190,26 +181,17 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
     pdal::Schema const& schema = getPrevStage().getSchema();
     
     boost::uint64_t count = getPrevStage().getNumPoints();
-    if (count > std::numeric_limits<std::size_t>::max())
+    if (count > std::numeric_limits<boost::uint32_t>::max())
         throw pdal_error("numPoints too large for Chipper");
-    boost::uint32_t count32 = (boost::uint32_t)count;
+    boost::uint32_t count32 = static_cast<boost::uint32_t>(count);
+    
     xvec.reserve(count32);
     yvec.reserve(count32);
     spare.resize(count32);
     
-    // boost::uint32_t chunks = count/m_threshold;
 
-    const int indexX = schema.getDimensionIndex(DimensionId::X_i32);
-    const int indexY = schema.getDimensionIndex(DimensionId::Y_i32);
-
-    Dimension const& dimX = schema.getDimension(indexX);
-    Dimension const& dimY = schema.getDimension(indexY);
-    
-    double xscale = dimX.getNumericScale();
-    double yscale = dimY.getNumericScale();
-    
-    double xoffset = dimX.getNumericOffset();
-    double yoffset = dimY.getNumericOffset();
+    Dimension const& dimX = schema.getDimension("X");
+    Dimension const& dimY = schema.getDimension("Y");
 
     std::size_t num_points_loaded = 0;
     std::size_t num_points_to_load = count32;
@@ -231,10 +213,12 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
         for (boost::uint32_t j = 0; j < num_read; j++)
         {
 
-            // (v * m_header->GetScaleX()) + m_header->GetOffsetX();
-            const double x = (buffer.getField<boost::int32_t>(j, indexX) * xscale) + xoffset;
-            const double y = (buffer.getField<boost::int32_t>(j, indexY) * yscale) + yoffset;
-            // const double z = (buffer.getField<boost::int32_t>(j, indexZ) * zscale) + zoffset;
+            boost::int32_t xi = buffer.getField<boost::int32_t>(dimX, j);
+            boost::int32_t yi = buffer.getField<boost::int32_t>(dimY, j);
+            
+            double x = dimX.applyScaling(xi);
+            double y = dimY.applyScaling(yi);
+
             ref.m_pos = x;
             ref.m_ptindex = counter;
             xvec.push_back(ref);
@@ -254,17 +238,7 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
         }
     }
     
-    // while (m_reader->ReadNextPoint()) {
-    //     const liblas::Point& pt = m_reader->GetPoint();
-    // 
-    //     ref.m_pos = pt.GetX();
-    //     ref.m_ptindex = count;
-    //     xvec.push_back(ref);
-    // 
-    //     ref.m_pos = pt.GetY();
-    //     yvec.push_back(ref);
-    //     count++;
-    // }
+
     // Sort xvec and assign other index in yvec to sorted indices in xvec.
     sort(xvec.begin(), xvec.end());
     for (boost::uint32_t i = 0; i < xvec.size(); ++i) {
@@ -551,9 +525,10 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
     }
     
     Schema const& schema = buffer.getSchema();
-    const int indexId = schema.getDimensionIndex(DimensionId::Chipper_1);
-    const int indexBlockId = schema.getDimensionIndex(DimensionId::Chipper_2);
-    block.GetBuffer(m_chipper.getPrevStage(), buffer, m_currentBlockId, indexId, indexBlockId);
+    Dimension const& pointID = schema.getDimension("PointID");
+    Dimension const& blockID = schema.getDimension("BlockID");
+
+    block.GetBuffer(m_chipper.getPrevStage(), buffer, m_currentBlockId, pointID, blockID);
 
     buffer.setSpatialBounds(block.GetBounds());
     m_currentBlockId++;
