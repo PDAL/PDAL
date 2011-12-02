@@ -35,6 +35,7 @@
 #include <pdal/Utils.hpp>
 
 #include <cassert>
+#include <cstdlib>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
@@ -72,7 +73,7 @@ char* Utils::getenv(const char* env)
 
 int Utils::putenv(const char* env)
 {
-#ifdef PDAL_COMPILER_MSVC
+#ifdef PDAL_PLATFORM_WIN32
     return ::_putenv(env);
 #else
     return ::putenv(const_cast<char*>(env));

@@ -155,7 +155,7 @@ std::string Support::binpath(const std::string& file)
 
 std::string Support::exename(const std::string& name)
 {
-#ifdef PDAL_COMPILER_MSVC
+#ifdef PDAL_PLATFORM_WIN32
     return name + ".exe";
 #else
     return name;
@@ -467,7 +467,7 @@ static FILE* portable_popen(const std::string& command, const std::string& mode)
 {
     FILE* fp = 0;
     
-#ifdef PDAL_COMPILER_MSVC
+#ifdef PDAL_PLATFORM_WIN32
     const std::string dos_command = Support::replaceAll(command, "/", "\\");
     fp = _popen(dos_command.c_str(), mode.c_str());
 #else
@@ -482,7 +482,7 @@ static int portable_pclose(FILE* fp)
 {
     int status = 0;
 
-#ifdef PDAL_COMPILER_MSVC
+#ifdef PDAL_PLATFORM_WIN32
     status = _pclose(fp);
 #else
     status = pclose(fp);

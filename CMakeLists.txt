@@ -138,7 +138,7 @@ if(WIN32)
   set(CMAKE_INCLUDE_PATH c:/osgeo4w/include;$ENV{CMAKE_INCLUDE_PATH})
   set(CMAKE_LIBRARY_PATH c:/osgeo4w/lib;$ENV{CMAKE_LIBRARY_PATH})
 
-  set(PDAL_OS_WIN32 1)
+  set(PDAL_PLATFORM_WIN32 1)
 
 else()
   # not WIN32
