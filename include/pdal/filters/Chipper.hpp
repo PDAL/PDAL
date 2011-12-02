@@ -157,7 +157,8 @@ public:
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
-
+    virtual void addDefaultDimensions();
+    
     void Chip();
     std::vector<chipper::Block>::size_type GetBlockCount() const
         { return m_blocks.size(); }

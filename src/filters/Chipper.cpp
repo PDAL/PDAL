@@ -155,7 +155,8 @@ Chipper::Chipper(Stage& prevStage, const Options& options)
 void Chipper::initialize()
 {
     Filter::initialize();
-
+    
+    addDefaultDimensions();
     checkImpedance();
     setPointCountType(PointCount_Fixed);
     setNumPoints(0);
@@ -488,22 +489,31 @@ pdal::StageSequentialIterator* Chipper::createSequentialIterator() const
 void Chipper::checkImpedance()
 {
     Schema& schema = getSchemaRef();
-
-    if (!schema.hasDimension(DimensionId::Chipper_1)) // block id
-    {
-        schema.appendDimension(DimensionId::Chipper_1);
-    }
-    if (!schema.hasDimension(DimensionId::Chipper_2)) // point id
-    {
-        schema.appendDimension(DimensionId::Chipper_2);
-    }
     
+    Schema dimensions(getDefaultDimensions());
+    
+    schema.appendDimension(dimensions.getDimension("PointID"));
+    schema.appendDimension(dimensions.getDimension("BlockID"));
+
     return;
 }
 
+void Chipper::addDefaultDimensions()
+{
+    Dimension pid("PointID", dimension::UnsignedInteger, 4,  
+                "Point ID within the chipper block for this point" );
+    pid.setUUID("a5e90806-b12d-431f-8a26-584672853375");
+    addDefaultDimension(pid, getName());
+
+    Dimension bid("BlockID", dimension::UnsignedInteger, 4,  
+                "Block ID of the chipper block for this point" );
+    bid.setUUID("289657d3-3193-42da-b9a8-2c6dba73facf");
+    addDefaultDimension(bid, getName());    
+}
+
+
+
 namespace iterators { namespace sequential {
-
-
 
 Chipper::Chipper(pdal::filters::Chipper const& filter)
     : pdal::FilterSequentialIterator(filter)
