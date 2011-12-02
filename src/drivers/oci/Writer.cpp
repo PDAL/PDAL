@@ -979,8 +979,9 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
     
     // Pluck the block id out of the first point in the buffer
     pdal::Schema const& schema = buffer.getSchema();
-    const int indexBlockId = schema.getDimensionIndex(DimensionId::Chipper_2);
-    boost::int32_t block_id  = buffer.getField<boost::int32_t>(0, indexBlockId);
+    Dimension const& blockDim = schema.getDimension("BlockID");
+
+    boost::int32_t block_id  = buffer.getField<boost::int32_t>(blockDim, 0);
     
     // SWAP_ENDIANNESS(block_id); //We've already swapped these data, but we need to write a real number here.
     std::ostringstream oss;
