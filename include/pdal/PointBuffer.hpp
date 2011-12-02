@@ -95,7 +95,7 @@ public:
     template<class T> T getField(Dimension const& dim, std::size_t pointIndex) const;    
     template<class T> T getRawField(std::size_t pointIndex, std::size_t pointBytePosition) const;
     template<class T> void setField(std::size_t pointIndex, boost::int32_t fieldIndex, T value);
-	template<class T> void setField(Dimension const& dim, std::size_t pointIndex, T value);
+    template<class T> void setField(Dimension const& dim, std::size_t pointIndex, T value);
     void setFieldData(std::size_t pointIndex, boost::int32_t fieldIndex, const boost::uint8_t* data);
     
     // bulk copy all the fields from the given point into this object
@@ -181,7 +181,7 @@ private:
     boost::uint32_t m_numPoints;
     boost::uint32_t m_capacity;    
     Bounds<double> m_bounds;
-	schema::size_type m_byteSize;
+    schema::size_type m_byteSize;
 };
 
 
@@ -223,10 +223,10 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, std::size_t pointI
         // do anything magical. It's up to you to get the interpretation right.
         *(T*)(void*)p = value;
     }
-	
-	T output(0);
+    
+    T output(0);
     output = boost::lexical_cast<T>(value);
-	*(T*)(void*)p = output;
+    *(T*)(void*)p = output;
 
 
 }
