@@ -41,6 +41,10 @@
 class LASzip;
 class LASunzipper;
 
+namespace pdal {
+    class Schema;
+}
+
 namespace pdal { namespace drivers { namespace las {
 
 class Reader;
@@ -58,7 +62,7 @@ private:
 protected:
     const Reader& m_reader;
     std::istream* m_istream;
-    boost::scoped_ptr<PointDimensions> m_pointDimensions;
+
 
 
 
@@ -68,6 +72,10 @@ public:
     boost::scoped_ptr<LASunzipper> m_unzipper;
     std::streampos m_zipReadStartPosition;
 
+#else
+    void* m_zipPoint;
+    void* m_unzipper;
+    std::streampos m_zipReadStartPosition;
 #endif
 
 private:
@@ -83,11 +91,15 @@ public:
     ~SequentialIterator();
 
 protected:
-    void readBufferBeginImpl(PointBuffer&);
+    virtual void readBufferBeginImpl(PointBuffer&);
+
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
+    PointDimensions* m_pointDimensions;
+    Schema const* m_schema;
+    PointBuffer const* m_buffer;    
 };
 
 
@@ -98,11 +110,14 @@ public:
     ~RandomIterator();
 
 protected:
-    void readBufferBeginImpl(PointBuffer&);
+    virtual void readBufferBeginImpl(PointBuffer&);
 
 private:
     boost::uint64_t seekImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
+    PointDimensions* m_pointDimensions;
+    Schema const* m_schema;
+    PointBuffer const* m_buffer;    
 };
 
 } } } // namespaces

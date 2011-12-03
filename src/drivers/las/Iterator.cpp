@@ -52,6 +52,7 @@ namespace pdal { namespace drivers { namespace las {
 IteratorBase::IteratorBase(const Reader& reader)
     : m_reader(reader)
     , m_istream(NULL)
+
 {
     m_istream = FileUtils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());
@@ -75,6 +76,7 @@ IteratorBase::~IteratorBase()
     m_zipPoint.reset();
     m_unzipper.reset();
 #endif
+    
     FileUtils::closeFile(m_istream);
 }
 
@@ -118,6 +120,8 @@ void IteratorBase::initializeZip()
 SequentialIterator::SequentialIterator(const Reader& reader)
     : IteratorBase(reader)
     , pdal::ReaderSequentialIterator(reader)
+    , m_pointDimensions(NULL)
+    , m_schema(0)
 {
     return;
 }
@@ -125,16 +129,20 @@ SequentialIterator::SequentialIterator(const Reader& reader)
 
 SequentialIterator::~SequentialIterator()
 {
+    if (m_pointDimensions) delete m_pointDimensions;
+
     return;
 }
 
 void SequentialIterator::readBufferBeginImpl(PointBuffer& buffer)
 {
     // We'll assume you're not changing the schema per-read call
-    if (! m_pointDimensions.get())
+    
+    if (m_schema != &buffer.getSchema())
     {
-        boost::scoped_ptr<PointDimensions> p(new PointDimensions(buffer.getSchema()));
-        m_pointDimensions.swap(p);        
+        if (m_pointDimensions)
+            delete m_pointDimensions;
+        m_pointDimensions = new PointDimensions(buffer.getSchema());
     }
 
 } 
@@ -186,14 +194,14 @@ boost::uint32_t SequentialIterator::readBufferImpl(PointBuffer& data)
                                     getStage().getNumPoints()-this->getIndex(), 
                                     m_unzipper.get(), 
                                     m_zipPoint.get(),
-                                    m_pointDimensions.get());
+                                    m_pointDimensions);
 #else
     return m_reader.processBuffer(  data, 
                                     *m_istream, 
                                     getStage().getNumPoints()-this->getIndex(), 
                                     NULL, 
                                     NULL,
-                                    m_pointDimensions.get());
+                                    m_pointDimensions);
 
 #endif
 }
@@ -203,6 +211,8 @@ boost::uint32_t SequentialIterator::readBufferImpl(PointBuffer& data)
 RandomIterator::RandomIterator(const Reader& reader)
     : IteratorBase(reader)
     , pdal::ReaderRandomIterator(reader)
+    , m_pointDimensions(NULL)
+    , m_schema(0)
 {
     return;
 }
@@ -210,17 +220,21 @@ RandomIterator::RandomIterator(const Reader& reader)
 
 RandomIterator::~RandomIterator()
 {
+    if (m_pointDimensions) delete m_pointDimensions;
     return;
 }
 
 void RandomIterator::readBufferBeginImpl(PointBuffer& buffer)
 {
     // We'll assume you're not changing the schema per-read call
-    if (! m_pointDimensions.get())
+    
+    if (m_schema != &buffer.getSchema())
     {
-        boost::scoped_ptr<PointDimensions> p(new PointDimensions(buffer.getSchema()));
-        m_pointDimensions.swap(p);        
+        if (m_pointDimensions)
+            delete m_pointDimensions;
+        m_pointDimensions = new PointDimensions(buffer.getSchema());
     }
+
 } 
 
 
@@ -256,14 +270,14 @@ boost::uint32_t RandomIterator::readBufferImpl(PointBuffer& data)
                                     getStage().getNumPoints()-this->getIndex(), 
                                     m_unzipper.get(), 
                                     m_zipPoint.get(),
-                                    m_pointDimensions.get());
+                                    m_pointDimensions);
 #else
     return m_reader.processBuffer(  data, 
                                     *m_istream, 
                                     getStage().getNumPoints()-this->getIndex(), 
                                     NULL, 
                                     NULL,
-                                    m_pointDimensions.get());
+                                    m_pointDimensions);
 
 #endif
 }
