@@ -66,9 +66,11 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
         BOOST_CHECK(numRead == 1000);
     }
     
-    const pdal::filters::StatsCollector& statsX = filter.getStats(DimensionId::X_f64);
-    const pdal::filters::StatsCollector& statsY = filter.getStats(DimensionId::Y_f64);
-    const pdal::filters::StatsCollector& statsZ = filter.getStats(DimensionId::Z_f64);
+    pdal::filters::iterators::sequential::Stats* iterator = static_cast<pdal::filters::iterators::sequential::Stats*>(iter.get());
+    
+    const pdal::filters::stats::Collector& statsX = iterator->getStats(schema.getDimension("X"));
+    const pdal::filters::stats::Collector& statsY = iterator->getStats(schema.getDimension("Y"));
+    const pdal::filters::stats::Collector& statsZ = iterator->getStats(schema.getDimension("Z"));
 
     BOOST_CHECK_EQUAL(statsX.count(), 1000u);
     BOOST_CHECK_EQUAL(statsY.count(), 1000u);

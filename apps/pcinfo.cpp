@@ -177,7 +177,7 @@ void PcInfo::dumpStats(pdal::filters::Stats& filter) const
         totRead += numRead;
     }
 
-    boost::property_tree::ptree tree = filter.toStatsPTree();
+    boost::property_tree::ptree tree = static_cast<pdal::filters::iterators::sequential::Stats*>(iter.get())->toPTree();
 
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 

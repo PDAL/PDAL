@@ -40,19 +40,16 @@
 
 #include <pdal/Range.hpp>
 #include <pdal/PointBuffer.hpp>
-
+#include <pdal/Schema.hpp>
 
 namespace pdal { namespace filters {
 
-class StatsFilterSequentialIterator;
+namespace stats
+{
 
-class StatsCollector
+class Collector
 {
 public:
-    StatsCollector();
-
-    void insert(double value);
-    void reset();
 
     double minimum() const { return m_minimum; }
     double maximum() const { return m_maximum; }
@@ -66,8 +63,52 @@ private:
     double m_minimum;
     double m_maximum;
     double m_sum;
+
+public:
+    
+    Collector()
+    : m_count(0)
+    , m_minimum(0.0)
+    , m_maximum(0.0)
+    , m_sum(0)
+    {
+        return;
+    }
+    
+    void reset()
+    {
+        m_count = 0;
+        m_minimum = 0.0;
+        m_maximum = 0.0;
+        m_sum = 0.0;
+        return;
+    }
+
+    template<class T> inline void insert(T value)
+    {
+        if (m_count == 0)
+        {
+            m_minimum = static_cast<double>(value);
+            m_maximum = static_cast<double>(value);
+            m_sum = value;
+        }
+        else
+        {
+            m_minimum = std::min(m_minimum, static_cast<double>(value));
+            m_maximum = std::max(m_maximum, static_cast<double>(value));
+            m_sum += value;
+        }
+
+        ++m_count;
+
+        return;
+    }
+
 };
 
+typedef boost::shared_ptr<Collector> CollectorPtr; 
+
+} // namespace stats
 
 // this is just a pass-thorugh filter, which collects some stats about the points
 // that are fed through it
@@ -97,11 +138,7 @@ public:
 
     void processBuffer(PointBuffer& data) const;
 
-    // returns the stats for field i
-    const StatsCollector& getStats(DimensionId::Id id) const;
 
-    // clears the counters for all fields
-    void reset();
 
     // return a tree like this:
     //    X:
@@ -113,12 +150,9 @@ public:
     //        min: 11.0
     //        max: 110.0
     //
-    boost::property_tree::ptree toStatsPTree() const;
+    // boost::property_tree::ptree toStatsPTree() const;
 
 private:
-// the stats are keyed by the field name
-    // BUG: not threadsafe, these should maybe live in the iterator
-    std::map<DimensionId::Id,StatsCollector*> m_stats; // one Stats item per field in the schema
 
     Stats& operator=(const Stats&); // not implemented
     Stats(const Stats&); // not implemented
@@ -128,11 +162,18 @@ private:
 
 namespace iterators { namespace sequential {
 
+typedef boost::shared_ptr<Dimension> DimensionPtr;
 
 class Stats : public pdal::FilterSequentialIterator
 {
 public:
     Stats(const pdal::filters::Stats& filter);
+    boost::property_tree::ptree toPTree() const;
+    stats::Collector const& getStats(Dimension const& dim) const;
+    void reset();
+
+protected:
+    virtual void readBufferBeginImpl(PointBuffer&);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
@@ -140,6 +181,10 @@ private:
     bool atEndImpl() const;
 
     const pdal::filters::Stats& m_statsFilter;
+
+    double getValue(PointBuffer& data, Dimension& dim, boost::uint32_t pointIndex);
+
+    std::multimap<DimensionPtr,stats::CollectorPtr> m_stats; // one Stats item per field in the schema
 };
 
 

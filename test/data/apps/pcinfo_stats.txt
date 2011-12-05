@@ -1,23 +1,114 @@
 {
-    "X":
-    {
-        "count": "1065",
-        "minimum": "63561985",
-        "maximum": "63898255",
-        "average": "63729673.51830986"
-    },
     "Y":
     {
         "count": "1065",
-        "minimum": "84889970",
-        "maximum": "85353543",
-        "average": "85124953.84882629"
+        "minimum": "848899.7000000001",
+        "maximum": "853535.4300000001",
+        "average": "851249.5384882618"
+    },
+    "X":
+    {
+        "count": "1065",
+        "minimum": "635619.85",
+        "maximum": "638982.55",
+        "average": "637296.7351830986"
     },
     "Z":
     {
         "count": "1065",
-        "minimum": "40659",
-        "maximum": "58638",
-        "average": "43409.78403755868"
+        "minimum": "406.59",
+        "maximum": "586.38",
+        "average": "434.0978403755871"
+    },
+    "Intensity":
+    {
+        "count": "1065",
+        "minimum": "0",
+        "maximum": "254",
+        "average": "76.39530516431925"
+    },
+    "ReturnNumber":
+    {
+        "count": "1065",
+        "minimum": "1",
+        "maximum": "4",
+        "average": "1.16056338028169"
+    },
+    "NumberOfReturns":
+    {
+        "count": "1065",
+        "minimum": "1",
+        "maximum": "4",
+        "average": "1.344600938967136"
+    },
+    "ScanDirectionFlag":
+    {
+        "count": "1065",
+        "minimum": "0",
+        "maximum": "1",
+        "average": "0.5323943661971831"
+    },
+    "EdgeOfFlightLine":
+    {
+        "count": "1065",
+        "minimum": "0",
+        "maximum": "0",
+        "average": "0"
+    },
+    "Classification":
+    {
+        "count": "1065",
+        "minimum": "1",
+        "maximum": "2",
+        "average": "1.259154929577465"
+    },
+    "ScanAngleRank":
+    {
+        "count": "1065",
+        "minimum": "-19",
+        "maximum": "18",
+        "average": "-0.7577464788732394"
+    },
+    "UserData":
+    {
+        "count": "1065",
+        "minimum": "117",
+        "maximum": "149",
+        "average": "126.4441314553991"
+    },
+    "PointSourceId":
+    {
+        "count": "1065",
+        "minimum": "7326",
+        "maximum": "7334",
+        "average": "7329.906103286385"
+    },
+    "Time":
+    {
+        "count": "1065",
+        "minimum": "245370.4170645598",
+        "maximum": "249783.1621583719",
+        "average": "247610.149662709"
+    },
+    "Red":
+    {
+        "count": "1065",
+        "minimum": "39",
+        "maximum": "249",
+        "average": "121.6591549295775"
+    },
+    "Green":
+    {
+        "count": "1065",
+        "minimum": "57",
+        "maximum": "239",
+        "average": "111.3446009389671"
+    },
+    "Blue":
+    {
+        "count": "1065",
+        "minimum": "56",
+        "maximum": "249",
+        "average": "126.5389671361502"
     }
 }
