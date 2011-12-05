@@ -51,9 +51,6 @@
         <Option name="stream_output_precision">
             8
         </Option>
-        <Option name="reenable_cloud_trigger">
-            false
-        </Option>
             <Filter type="filters.inplacereprojection">
                 <Option name="out_srs">
                     EPSG:4326
