@@ -99,7 +99,6 @@ private:
     bool atEndImpl() const;
     PointDimensions* m_pointDimensions;
     Schema const* m_schema;
-    PointBuffer const* m_buffer;    
 };
 
 
@@ -117,7 +116,6 @@ private:
     boost::uint32_t readBufferImpl(PointBuffer&);
     PointDimensions* m_pointDimensions;
     Schema const* m_schema;
-    PointBuffer const* m_buffer;    
 };
 
 } } } // namespaces

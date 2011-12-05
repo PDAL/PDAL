@@ -136,14 +136,11 @@ SequentialIterator::~SequentialIterator()
 
 void SequentialIterator::readBufferBeginImpl(PointBuffer& buffer)
 {
-    // We'll assume you're not changing the schema per-read call
-    
-    if (m_schema != &buffer.getSchema())
-    {
-        if (m_pointDimensions)
-            delete m_pointDimensions;
-        m_pointDimensions = new PointDimensions(buffer.getSchema());
-    }
+    // Cache dimension positions
+    Schema const& schema = buffer.getSchema();
+    if (m_pointDimensions)
+        delete m_pointDimensions;
+    m_pointDimensions = new PointDimensions(schema);
 
 } 
 
@@ -227,16 +224,16 @@ RandomIterator::~RandomIterator()
 void RandomIterator::readBufferBeginImpl(PointBuffer& buffer)
 {
     // We'll assume you're not changing the schema per-read call
-    
-    if (m_schema != &buffer.getSchema())
+    Schema const& schema = buffer.getSchema();
+    if (m_schema != &schema)
     {
+        m_schema = &schema;
         if (m_pointDimensions)
             delete m_pointDimensions;
-        m_pointDimensions = new PointDimensions(buffer.getSchema());
-    }
+        m_pointDimensions = new PointDimensions(schema);
+    } 
 
 } 
-
 
 boost::uint64_t RandomIterator::seekImpl(boost::uint64_t count)
 {
