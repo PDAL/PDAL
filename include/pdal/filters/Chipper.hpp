@@ -49,6 +49,8 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/PointBuffer.hpp>
 
+#include <boost/scoped_ptr.hpp>
+
 namespace pdal
 {
 
@@ -126,6 +128,7 @@ private:
     boost::uint32_t m_left;
     boost::uint32_t m_right;
     pdal::Bounds<double> m_bounds;
+    
     // double m_xmin;
     // double m_ymin;
     // double m_xmax;
@@ -135,7 +138,7 @@ public:
     std::vector<boost::uint32_t> GetIDs() const; 
     pdal::Bounds<double> const& GetBounds() const {return m_bounds;} 
     void SetBounds(pdal::Bounds<double> const& bounds) {m_bounds = bounds;}
-    void GetBuffer( Stage const& stage, PointBuffer& buffer, boost::uint32_t block_id, Dimension const& dimPoint, Dimension const& dimBlock) const;    
+    void GetBuffer( boost::scoped_ptr<StageRandomIterator>& iterator, PointBuffer& buffer, boost::uint32_t block_id, Dimension const& dimPoint, Dimension const& dimBlock) const;    
     // double GetXmin() const
     //     { return m_xmin; }
     // double GetYmin() const
@@ -216,6 +219,9 @@ private:
     pdal::filters::Chipper const& m_chipper;
     std::size_t m_currentBlockId;
     boost::uint64_t m_currentPointCount;
+
+    boost::scoped_ptr<StageRandomIterator> m_random_iterator;
+    
     
 };
 

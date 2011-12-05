@@ -89,7 +89,7 @@ vector<boost::uint32_t> Block::GetIDs() const
     return ids;
 }
 
-void Block::GetBuffer( Stage const& stage, PointBuffer& buffer, 
+void Block::GetBuffer( boost::scoped_ptr<StageRandomIterator>& iterator, PointBuffer& buffer, 
                        boost::uint32_t block_id, Dimension const& dimPoint, Dimension const& dimBlock) const
 {
     pdal::Schema const& schema = buffer.getSchema();
@@ -97,12 +97,6 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer,
     boost::int32_t size = m_right - m_left + 1;
     if (size < 0)
         throw pdal_error("m_right - m_left + 1 was less than 0 in Block::GetBuffer()!");
-
-    if (!stage.supportsIterator(StageIterator_Random))
-        throw pdal_error("Chipper GetBuffer is unable to read data source randomly!");
-    
-    // FIXME: Don't create this every GetBuffer call 
-    boost::scoped_ptr<StageRandomIterator> iter(stage.createRandomIterator());
 
     std::vector<boost::uint32_t> ids = GetIDs();
     pdal::PointBuffer one_point(schema, 1);
@@ -113,14 +107,11 @@ void Block::GetBuffer( Stage const& stage, PointBuffer& buffer,
     for (it = ids.begin(); it != ids.end(); it++)
     {
         boost::uint32_t id = *it;
-        iter->seek(id);
-        iter->read(one_point);
+        iterator->seek(id);
+        iterator->read(one_point);
 
         one_point.setField(dimPoint, 0, id);
         one_point.setField(dimBlock, 0, block_id);
-
-        // one_point.setField(0, indexId, *it);
-        // one_point.setField(0, indexBlockId, block_id);
         
         // put single point onto our block
         buffer.copyPointsFast(static_cast<std::size_t>(count), static_cast<std::size_t>(0), one_point, 1); 
@@ -531,7 +522,11 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
     Dimension const& pointID = schema.getDimension("PointID");
     Dimension const& blockID = schema.getDimension("BlockID");
 
-    block.GetBuffer(m_chipper.getPrevStage(), buffer, m_currentBlockId, pointID, blockID);
+    // Don't create this every GetBuffer call
+    boost::scoped_ptr<StageRandomIterator> iter(m_chipper.getPrevStage().createRandomIterator());
+    m_random_iterator.swap(iter);
+
+    block.GetBuffer(m_random_iterator, buffer, m_currentBlockId, pointID, blockID);
 
     buffer.setSpatialBounds(block.GetBounds());
     m_currentBlockId++;
