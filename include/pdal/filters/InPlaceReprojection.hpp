@@ -86,13 +86,11 @@ private:
     void transform(double& x, double& y, double& z) const;
     double getScaledValue(  PointBuffer& data, 
                             Dimension const& d, 
-                            std::size_t pointIndex, 
-                            boost::int32_t fieldIndex) const;
+                            std::size_t pointIndex) const;
     void setScaledValue(PointBuffer& data, 
                           double value, 
                           Dimension const& d, 
-                          std::size_t pointIndex, 
-                          boost::int32_t fieldIndex) const;
+                          std::size_t pointIndex) const;
 
     SpatialReference m_inSRS;
     SpatialReference m_outSRS;

@@ -299,7 +299,9 @@ void InPlaceReprojection::transform(double& x, double& y, double& z) const
     return;
 }
 
-double InPlaceReprojection::getScaledValue(PointBuffer& data, Dimension const& d, std::size_t pointIndex, boost::int32_t fieldIndex) const
+double InPlaceReprojection::getScaledValue( PointBuffer& data, 
+                                            Dimension const& d, 
+                                            std::size_t pointIndex) const
 {
     double output(0.0);
         
@@ -316,43 +318,43 @@ double InPlaceReprojection::getScaledValue(PointBuffer& data, Dimension const& d
     switch (d.getDataType())
     {
         case Dimension::Float:
-            flt = data.getField<float>(pointIndex, fieldIndex);
+            flt = data.getField<float>(d, pointIndex);
             output = static_cast<double>(flt);
             break;
         case Dimension::Double:
-            output = data.getField<double>(pointIndex, fieldIndex);
+            output = data.getField<double>(d, pointIndex);
             break;
         
         case Dimension::Int8:
-            i8 = data.getField<boost::int8_t>(pointIndex, fieldIndex);
+            i8 = data.getField<boost::int8_t>(d, pointIndex);
             output = d.applyScaling<boost::int8_t>(i8);
             break;
         case Dimension::Uint8:
-            u8 = data.getField<boost::uint8_t>(pointIndex, fieldIndex);
+            u8 = data.getField<boost::uint8_t>(d, pointIndex);
             output = d.applyScaling<boost::uint8_t>(u8);
             break;
         case Dimension::Int16:
-            i16 = data.getField<boost::int16_t>(pointIndex, fieldIndex);
+            i16 = data.getField<boost::int16_t>(d, pointIndex);
             output = d.applyScaling<boost::int16_t>(i16);
             break;
         case Dimension::Uint16:
-            u16 = data.getField<boost::uint16_t>(pointIndex, fieldIndex);
+            u16 = data.getField<boost::uint16_t>(d, pointIndex);
             output = d.applyScaling<boost::uint16_t>(u16);
             break;
         case Dimension::Int32:
-            i32 = data.getField<boost::int32_t>(pointIndex, fieldIndex);
+            i32 = data.getField<boost::int32_t>(d, pointIndex);
             output = d.applyScaling<boost::int32_t>(i32);
             break;
         case Dimension::Uint32:
-            u32 = data.getField<boost::uint32_t>(pointIndex, fieldIndex);
+            u32 = data.getField<boost::uint32_t>(d, pointIndex);
             output = d.applyScaling<boost::uint32_t>(u32);
             break;
         case Dimension::Int64:
-            i64 = data.getField<boost::int64_t>(pointIndex, fieldIndex);
+            i64 = data.getField<boost::int64_t>(d, pointIndex);
             output = d.applyScaling<boost::int64_t>(i64);
             break;
         case Dimension::Uint64:
-            u64 = data.getField<boost::uint64_t>(pointIndex, fieldIndex);
+            u64 = data.getField<boost::uint64_t>(d, pointIndex);
             output = d.applyScaling<boost::uint64_t>(u64);
             break;
         case Dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
@@ -365,8 +367,7 @@ double InPlaceReprojection::getScaledValue(PointBuffer& data, Dimension const& d
 void InPlaceReprojection::setScaledValue(PointBuffer& data, 
                                                double value, 
                                                Dimension const& d, 
-                                               std::size_t pointIndex, 
-                                               boost::int32_t fieldIndex) const
+                                               std::size_t pointIndex) const
 {
 
     float flt(0.0);
@@ -383,42 +384,42 @@ void InPlaceReprojection::setScaledValue(PointBuffer& data,
     {
         case Dimension::Float:
             flt = static_cast<float>(value);
-            data.setField<float>(pointIndex, fieldIndex, flt);
+            data.setField<float>(d, pointIndex, flt);
             break;
         case Dimension::Double:
-            data.setField<double>(pointIndex, fieldIndex, value);
+            data.setField<double>(d, pointIndex, value);
             break;
         case Dimension::Int8:
             i8 = d.removeScaling<boost::int8_t>(value);
-            data.setField<boost::int8_t>(pointIndex, fieldIndex, i8);
+            data.setField<boost::int8_t>(d, pointIndex, i8);
             break;
         case Dimension::Uint8:
             u8 = d.removeScaling<boost::uint8_t>(value);
-            data.setField<boost::uint8_t>(pointIndex, fieldIndex, u8);
+            data.setField<boost::uint8_t>(d, pointIndex, u8);
             break;
         case Dimension::Int16:
             i16 = d.removeScaling<boost::int16_t>(value);
-            data.setField<boost::int16_t>(pointIndex, fieldIndex, i16);
+            data.setField<boost::int16_t>(d, pointIndex, i16);
             break;
         case Dimension::Uint16:
             u16 = d.removeScaling<boost::uint16_t>(value);
-            data.setField<boost::uint16_t>(pointIndex, fieldIndex, u16);
+            data.setField<boost::uint16_t>(d, pointIndex, u16);
             break;
         case Dimension::Int32:
             i32 = d.removeScaling<boost::int32_t>(value);
-            data.setField<boost::int32_t>(pointIndex, fieldIndex, i32);
+            data.setField<boost::int32_t>(d, pointIndex, i32);
             break;
         case Dimension::Uint32:
             u32 = d.removeScaling<boost::uint32_t>(value);
-            data.setField<boost::uint32_t>(pointIndex, fieldIndex, u32);
+            data.setField<boost::uint32_t>(d, pointIndex, u32);
             break;
         case Dimension::Int64:
             i64 = d.removeScaling<boost::int64_t>(value);
-            data.setField<boost::int64_t>(pointIndex, fieldIndex, i64);
+            data.setField<boost::int64_t>(d, pointIndex, i64);
             break;
         case Dimension::Uint64:
             u64 = d.removeScaling<boost::uint64_t>(value);
-            data.setField<boost::uint64_t>(pointIndex, fieldIndex, u64);
+            data.setField<boost::uint64_t>(d, pointIndex, u64);
             break;
         case Dimension::Pointer:
         case Dimension::Undefined:
@@ -434,9 +435,9 @@ void InPlaceReprojection::processBuffer(PointBuffer& data) const
 
     const Schema& schema = this->getSchema();
     
-    Dimension const& d_x = schema.getDimension(m_x.getId());
-    Dimension const& d_y = schema.getDimension(m_y.getId());
-    Dimension const& d_z = schema.getDimension(m_z.getId());
+    Dimension const& d_x = schema.getDimension(getOptions().getValueOrDefault<std::string>("x_dim", "X"));
+    Dimension const& d_y = schema.getDimension(getOptions().getValueOrDefault<std::string>("y_dim", "Y"));
+    Dimension const& d_z = schema.getDimension(getOptions().getValueOrDefault<std::string>("z_dim", "Z"));
     
     const int indexX = schema.getDimensionIndex(d_x);
     const int indexY = schema.getDimensionIndex(d_y);
@@ -444,17 +445,17 @@ void InPlaceReprojection::processBuffer(PointBuffer& data) const
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        double x = getScaledValue(data, m_x, pointIndex, indexX);
-        double y = getScaledValue(data, m_y, pointIndex, indexY);
-        double z = getScaledValue(data, m_z, pointIndex, indexZ);
+        double x = getScaledValue(data, m_x, pointIndex);
+        double y = getScaledValue(data, m_y, pointIndex);
+        double z = getScaledValue(data, m_z, pointIndex);
         
         // std::cout << "input: " << x << " y: " << y << " z: " << z << std::endl;
         this->transform(x,y,z);
         // std::cout << "output: " << x << " y: " << y << " z: " << z << std::endl;
         
-        setScaledValue(data, x, d_x, pointIndex, indexX);
-        setScaledValue(data, y, d_y, pointIndex, indexY);
-        setScaledValue(data, z, d_z, pointIndex, indexZ);
+        setScaledValue(data, x, d_x, pointIndex);
+        setScaledValue(data, y, d_y, pointIndex);
+        setScaledValue(data, z, d_z, pointIndex);
 
         // std::cout << "set: " << getScaledValue(data, d_x, pointIndex, indexX) 
         //           << " y: " << getScaledValue(data, d_y, pointIndex, indexY) 
