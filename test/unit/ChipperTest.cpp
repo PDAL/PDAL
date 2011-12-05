@@ -95,7 +95,9 @@ BOOST_AUTO_TEST_CASE(test_construction)
         PointBuffer buffer(schema, 15);
         Dimension const& dimPoint = schema.getDimension("PointID");
         Dimension const& dimBlock = schema.getDimension("BlockID");
-        chipper.GetBlock(20).GetBuffer(reader, buffer, 70, dimPoint, dimBlock);
+        
+        boost::scoped_ptr<StageRandomIterator> iter(reader.createRandomIterator());
+        chipper.GetBlock(20).GetBuffer(iter, buffer, 70, dimPoint, dimBlock);
 
         // 
         // std::cout << buffer.getField<boost::int32_t>(0, 0) << std::endl;
