@@ -143,31 +143,32 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
 
     int stat = 0;
 
-	std::ostringstream command;
+    std::ostringstream command;
     
     // dump a single point to json
-	
-	command << cmd + " --output=" + outputTxt + " --point=1 " + inputLas;
+    
+    command << cmd + " --output=" + outputTxt + " --point=1 " + inputLas;
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_point.txt")));
 
     // dump summary of all points to json
-	command.str("");
-	command << cmd + " --output=" + outputTxt + " --stats " + inputLas;
+    command.str("");
+    command << cmd + " --output=" + outputTxt + " --stats " + inputLas;
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_stats.txt")));
 
     // dump schema to json
-	command.str("");
-	command << cmd + " --output=" + outputTxt + " --schema " + inputLas;
+    command.str("");
+    command << cmd + " --output=" + outputTxt + " --schema " + inputLas;
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
     BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_schema.txt")));
 
     // dump stage info to json
-	command.str("");
+    command.str("");
+    command << cmd + " --output=" + outputTxt + " --stage " + inputLas;
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
 
