@@ -45,6 +45,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
 
 #ifdef PDAL_HAVE_LIBXML2
@@ -230,6 +231,8 @@ Schema Schema::from_xml(std::string const& xml, std::string const& xsd)
     return schema;
 
 #else
+    boost::ignore_unused_variable_warning(xml);
+    boost::ignore_unused_variable_warning(xsd);
     return Schema();
 #endif
 }
@@ -246,6 +249,7 @@ Schema Schema::from_xml(std::string const& xml)
     return schema;
 
 #else
+    boost::ignore_unused_variable_warning(xml);
     return Schema();
 #endif
 }
@@ -259,6 +263,7 @@ std::string Schema::to_xml(Schema const& schema)
     return writer.getXML();
 
 #else
+    boost::ignore_unused_variable_warning(schema);
     return std::string("");
 #endif
 }
