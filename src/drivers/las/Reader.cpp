@@ -222,7 +222,8 @@ boost::uint32_t Reader::processBuffer(  PointBuffer& data,
             p +=  zipPoint->m_lz_point_size;
         }
 #else
-                throw pdal_error("LASzip is not enabled for this pdal::drivers::las::Reader::processBuffer");
+        boost::ignore_unused_variable_warning(unzipper);
+        throw pdal_error("LASzip is not enabled for this pdal::drivers::las::Reader::processBuffer");
 #endif
     }
     else

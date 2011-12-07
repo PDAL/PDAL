@@ -76,6 +76,10 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test1)
 
 BOOST_AUTO_TEST_CASE(PipelineReaderTest_test2)
 {
+#ifndef PDAL_HAVE_LASZIP
+    return;
+#endif
+
     FileUtils::deleteFile("pipeline/pdal-compressed.laz");
 
     {

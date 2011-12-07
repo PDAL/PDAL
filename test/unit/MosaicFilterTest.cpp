@@ -46,6 +46,11 @@ BOOST_AUTO_TEST_SUITE(MosaicFilterTest)
 
 BOOST_AUTO_TEST_CASE(test1)
 {
+#ifndef PDAL_SRS_ENABLED
+    // because mosaicking needs to compare SRSs
+    return;
+#endif
+
     Bounds<double> bounds1(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
     pdal::drivers::faux::Reader reader1(bounds1, 100, pdal::drivers::faux::Reader::Constant);
 

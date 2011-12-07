@@ -110,8 +110,6 @@ private:
     bool isSolid() const;
     boost::int32_t getPCID() const;
     void UpdatePCExtent();
-    std::string ShutOff_SDO_PC_Trigger();
-    void TurnOn_SDO_PC_Trigger(std::string trigger_name);
     pdal::Bounds<double> CalculateBounds(PointBuffer const& buffer);
     bool IsValidWKT(std::string const& wkt);
     
@@ -136,7 +134,6 @@ private:
     std::string m_base_table_boundary_column;
     std::string m_base_table_boundary_wkt;
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
-    std::string m_trigger_name;
     
 };
 

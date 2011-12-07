@@ -69,6 +69,8 @@ VariableLengthRecord::VariableLengthRecord(boost::uint16_t reserved,
     , m_bytes(0)
     , m_length(length)
 {
+    boost::ignore_unused_variable_warning(reserved);
+
     m_bytes = new boost::uint8_t[m_length];
     memcpy(m_bytes, bytes, m_length);
 
