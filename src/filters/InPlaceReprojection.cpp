@@ -439,10 +439,6 @@ void InPlaceReprojection::processBuffer(PointBuffer& data) const
     Dimension const& d_y = schema.getDimension(getOptions().getValueOrDefault<std::string>("y_dim", "Y"));
     Dimension const& d_z = schema.getDimension(getOptions().getValueOrDefault<std::string>("z_dim", "Z"));
     
-    const int indexX = schema.getDimensionIndex(d_x);
-    const int indexY = schema.getDimensionIndex(d_y);
-    const int indexZ = schema.getDimensionIndex(d_z);
-
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
         double x = getScaledValue(data, m_x, pointIndex);
