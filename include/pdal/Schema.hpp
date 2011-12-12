@@ -55,7 +55,7 @@
 #include <boost/foreach.hpp>
 #include <boost/array.hpp>
 #include <boost/optional.hpp>
-#include <boost/uuid/uuid.hpp>
+
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
@@ -88,7 +88,7 @@ typedef boost::multi_index::multi_index_container<
     // sort by less<string> on GetName
     boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >,
     boost::multi_index::hashed_non_unique<boost::multi_index::tag<id>, boost::multi_index::const_mem_fun<Dimension,DimensionId::Id ,&Dimension::getId> >,
-    boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<Dimension,boost::uuids::uuid const&,&Dimension::getUUID> >,
+    boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<Dimension,dimension::id const&,&Dimension::getUUID> >,
     boost::multi_index::hashed_non_unique<boost::multi_index::tag<type>, boost::multi_index::const_mem_fun<Dimension,Dimension::DataType ,&Dimension::getDataType> >
       >
 > Map;
@@ -130,8 +130,7 @@ public:
     // Dimension& getDimension(const DimensionId::Id& id);
     const Dimension& getDimension(const DimensionId::Id& id) const;
     const Dimension& getDimension(std::string const& type) const;
-	
-	const Dimension& getDimension(boost::uuids::uuid const& id) const;
+    const Dimension& getDimension(dimension::id const& id) const;
 
     const Dimension& getDimension(std::size_t index) const;
     bool setDimension(Dimension const& );

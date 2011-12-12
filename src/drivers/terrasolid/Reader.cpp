@@ -39,7 +39,6 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 
-#include <boost/uuid/string_generator.hpp>
 #include <map>
 
 namespace pdal { namespace drivers { namespace terrasolid {
@@ -235,9 +234,8 @@ void Reader::registerFields()
 
         // Fetch PointSource ID Uint8 dimension by UUID because dimensions
         // has two "PointSourceId" dimensions added.
-        boost::uuids::string_generator gen;
-        boost::uuids::uuid ps1 = gen("68c03b56-4248-4cca-ade5-33e90d5c5563");
-        schema.appendDimension(dimensions.getDimension(ps1));
+
+        schema.appendDimension(dimensions.getDimension("68c03b56-4248-4cca-ade5-33e90d5c5563"));
 
         schema.appendDimension(dimensions.getDimension("Intensity"));
 
@@ -254,19 +252,12 @@ void Reader::registerFields()
 
         schema.appendDimension(dimensions.getDimension("Classification"));
 
-        boost::uuids::string_generator gen2;
-        boost::uuids::uuid r1 = gen2("465a9a7e-1e04-47b0-97b6-4f826411bc71"); 
-
-        schema.appendDimension(dimensions.getDimension(r1));
+        schema.appendDimension(dimensions.getDimension("465a9a7e-1e04-47b0-97b6-4f826411bc71"));
 
         schema.appendDimension(dimensions.getDimension("Flag"));
         schema.appendDimension(dimensions.getDimension("Mark"));
 
-        // Fetch PointSource ID Uint16 dimension by UUID because dimensions
-        // has two "PointSourceId" dimensions added.
-        boost::uuids::string_generator gen;
-        boost::uuids::uuid ps2 = gen("7193bb9f-3ca2-491f-ba18-594321493789");
-        schema.appendDimension(dimensions.getDimension(ps2));
+        schema.appendDimension(dimensions.getDimension("7193bb9f-3ca2-491f-ba18-594321493789"));
 
         schema.appendDimension(dimensions.getDimension("Intensity"));
     }

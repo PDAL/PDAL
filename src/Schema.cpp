@@ -46,7 +46,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#include <boost/uuid/uuid_io.hpp>
+#include <pdal/external/boost/uuid/uuid_io.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
 #ifdef PDAL_HAVE_LIBXML2
@@ -182,16 +182,37 @@ const Dimension& Schema::getDimension(std::string const& t) const
 {
     schema::index_by_name const& name_index = m_index.get<schema::name>();
     schema::index_by_name::const_iterator it = name_index.find(t);
+
+
     
     // FIXME: If there are two dimensions with the same name here, we're 
     // scrwed
     if (it != name_index.end()) {
         return *it;
     } else {
-        std::ostringstream oss;
-        oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
-        throw dimension_not_found(oss.str());
+        
+        pdal::external::boost::uuids::string_generator gen;
+        
+        try
+        {
+            pdal::external::boost::uuids::uuid ps1 = gen(t);
+            schema::index_by_uid::const_iterator it = m_index.get<schema::uid>().find(ps1);
+
+            if (it != m_index.get<schema::uid>().end())
+            {
+                return *it;
+            }    
+        } catch (std::runtime_error&)
+        {
+            // invalid string for uuid
+        }
+        
+
     }
+
+    std::ostringstream oss;
+    oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
+    throw dimension_not_found(oss.str());
 
 }
 
@@ -273,7 +294,7 @@ const Dimension& Schema::getDimension(const DimensionId::Id& field) const
     throw dimension_not_found(oss.str());
 }
 
-const Dimension& Schema::getDimension(boost::uuids::uuid const& t) const
+const Dimension& Schema::getDimension(dimension::id const& t) const
 {
 	schema::index_by_uid::const_iterator it = m_index.get<schema::uid>().find(t);
 

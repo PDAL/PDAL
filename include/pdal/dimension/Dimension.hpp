@@ -49,8 +49,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
+#include <pdal/external/boost/uuid/uuid.hpp>
+#include <pdal/external/boost/uuid/uuid_generators.hpp>
 
 #include <limits>
 
@@ -59,7 +59,8 @@ namespace pdal
 
 namespace dimension {
 
-
+    
+    typedef pdal::external::boost::uuids::uuid id;
 
     enum Flags
     {
@@ -330,9 +331,9 @@ public:
     /// Outputs a string representation of the Dimension instance to std::cout
     void dump() const;
 
-    boost::uuids::uuid const& getUUID() const { return m_uuid; }
+    dimension::id const& getUUID() const { return m_uuid; }
     void setUUID( std::string const& id);
-    void setUUID( boost::uuids::uuid& id) { m_uuid = id; }
+    void setUUID( dimension::id& id) { m_uuid = id; }
     void createUUID();
 
     void setNamespace( std::string const& name) { m_namespace = name; }
@@ -351,7 +352,7 @@ private:
     dimension::size_type m_byteOffset;
     dimension::size_type m_position;
     dimension::Interpretation m_interpretation;
-    boost::uuids::uuid m_uuid;
+    dimension::id m_uuid;
     std::string m_namespace;
 };
 
