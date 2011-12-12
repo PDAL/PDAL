@@ -184,34 +184,39 @@ const Dimension& Schema::getDimension(std::string const& t) const
     schema::index_by_name::const_iterator it = name_index.find(t);
 
 
-    
+    std::ostringstream oss;
+    oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
+
     // FIXME: If there are two dimensions with the same name here, we're 
     // scrwed
     if (it != name_index.end()) {
         return *it;
     } else {
-        
-        pdal::external::boost::uuids::string_generator gen;
-        
+        pdal::external::boost::uuids::uuid ps1;
         try
         {
-            pdal::external::boost::uuids::uuid ps1 = gen(t);
-            schema::index_by_uid::const_iterator it = m_index.get<schema::uid>().find(ps1);
-
-            if (it != m_index.get<schema::uid>().end())
-            {
-                return *it;
-            }    
+            pdal::external::boost::uuids::string_generator gen;
+            ps1 = gen(t);
         } catch (std::runtime_error&)
         {
             // invalid string for uuid
+            throw dimension_not_found(oss.str());
         }
-        
+
+        schema::index_by_uid::const_iterator i = m_index.get<schema::uid>().find(ps1);
+
+        if (i != m_index.get<schema::uid>().end())
+        {
+            return *i;
+        } else 
+        {
+            oss.str("");
+            oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
+            throw dimension_not_found(oss.str());
+        }
 
     }
 
-    std::ostringstream oss;
-    oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
     throw dimension_not_found(oss.str());
 
 }
