@@ -224,6 +224,11 @@ public:
     /// @return null if it fails, else the previous stages.
     std::vector<Stage*> getPrevStages() const;
 
+    /// Gets the options.
+    ///
+    /// @return The options.
+    inline Options getCurrentOptions() { return m_options; }
+
 protected:
 
     /// Gets the options.
