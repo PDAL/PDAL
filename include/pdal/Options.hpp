@@ -52,7 +52,6 @@ class Options;
 class Option;
 
 typedef std::multimap<std::string, Option> map_t;
-// typedef std::vector<Options> vector_t;
 typedef boost::shared_ptr<Options> OptionsPtr;
 
 inline const boost::property_tree::ptree &empty_ptree()

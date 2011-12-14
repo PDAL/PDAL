@@ -200,9 +200,7 @@ Option PipelineReader::parseElement_Option(const boost::property_tree::ptree& tr
             const std::string absdir = FileUtils::getDirectory(abspath);
             const std::string newpath = FileUtils::toAbsolutePath(oldpath, absdir);
             assert(FileUtils::isAbsolutePath(newpath));
-            // const Option option2(option.getName(), newpath, option.getDescription());
             option.setValue(newpath);
-            // option = option2;
         }
     }
 

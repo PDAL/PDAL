@@ -98,6 +98,7 @@ void Option::setOptions(Options const& options)
     OptionsPtr p = OptionsPtr(new Options(options));
     m_options = p;
 }
+
 #if !defined(PDAL_COMPILER_MSVC)
 // explicit specialization:
 //   boost::lexical_cast only understands "0" and "1" for bools,
