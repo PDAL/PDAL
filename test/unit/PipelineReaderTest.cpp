@@ -243,4 +243,28 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_Reader)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(PipelineReaderTest_MultiOptions)
+{
+    Option option("filename", Support::datapath("pipeline/pipeline_multioptions.xml"));
+    Options options(option);
+
+    pdal::drivers::pipeline::Reader reader(options);
+
+    reader.initialize();
+    
+    // .getStage gets us the filter stage.  .getPrevStage gets us the reader
+    // we wrote our extra options on the reader stage.
+    Options opt = reader.getManager().getStage()->getPrevStage().getCurrentOptions();
+
+    Option fname = opt.getOption("filename");
+
+    boost::optional<Options const&> more = fname.getOptions();
+    
+    Option meaning_of_life = more->getOption("somemore");
+    
+    BOOST_CHECK_EQUAL(meaning_of_life.getValue<int>(), 42);
+
+    return;
+}
+
 BOOST_AUTO_TEST_SUITE_END()

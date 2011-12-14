@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(test_option_reading)
 
 BOOST_AUTO_TEST_CASE(test_options_copy_ctor)
 {
-    const pdal::Option opt_i("my_int", 17, "This is my integral option.");
+    pdal::Option opt_i("my_int", 17, "This is my integral option.");
     const pdal::Option opt_s("my_string", "Yow.", "This is my stringy option.");
 
     pdal::Options opts;
@@ -136,6 +136,8 @@ BOOST_AUTO_TEST_CASE(test_options_copy_ctor)
     opts.add(opt_s);
 
     pdal::Options copy(opts);
+    
+    opt_i.setOptions(copy);
 
     BOOST_CHECK(copy.hasOption("my_int"));
     BOOST_CHECK(copy.hasOption("my_string"));
@@ -143,6 +145,28 @@ BOOST_AUTO_TEST_CASE(test_options_copy_ctor)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(test_options_multi)
+{
+    pdal::Option opt_i("a", 1, "This is my integral option.");
+    const pdal::Option opt_s("b", "2", "This is my stringy option.");
+
+    pdal::Options opts;
+    opts.add(opt_i);
+    opts.add(opt_s);
+
+    pdal::Option opt;
+    opt.setOptions(opts);
+
+    boost::optional<pdal::Options const&> o = opt.getOptions();
+
+    pdal::Option const& i = o->getOption("a");
+    BOOST_CHECK_EQUAL(i.getValue<int>(), 1);
+    
+    pdal::Option const& s = o->getOption("b");
+    BOOST_CHECK_EQUAL(s.getValue<std::string>(), "2");
+
+    return;
+}
 
 BOOST_AUTO_TEST_CASE(test_options_writing)
 {

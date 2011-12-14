@@ -79,6 +79,7 @@ void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const
     boost::property_tree::ptree m_tree = opts.toPTree();
 
     boost::property_tree::ptree::const_iterator iter = m_tree.begin();
+    
     while (iter != m_tree.end())
     {
         if (iter->first != "Option")
@@ -95,7 +96,18 @@ void PipelineWriter::write_option_ptree(boost::property_tree::ptree& tree, const
         
         boost::property_tree::ptree& subtree = tree.add("Option", value);
         subtree.put("<xmlattr>.name", name);
+        
+        using namespace boost::property_tree;
+        using namespace boost;
+        
+        optional<ptree const&> moreOptions = optionTree.get_child_optional("Options");
 
+        if (moreOptions)
+        {
+            ptree newOpts;
+            write_option_ptree(newOpts, moreOptions.get());
+            subtree.put_child("Options", newOpts);
+        } 
         ++iter;
     }
 

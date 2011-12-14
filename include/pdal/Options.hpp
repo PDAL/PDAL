@@ -37,8 +37,10 @@
 
 #include <pdal/pdal_internal.hpp>
 
+#include <boost/shared_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/optional.hpp>
 
 #include <map>
 #include <vector>
@@ -46,6 +48,18 @@
 namespace pdal
 {
 
+class Options;
+class Option;
+
+typedef std::multimap<std::string, Option> map_t;
+// typedef std::vector<Options> vector_t;
+typedef boost::shared_ptr<Options> OptionsPtr;
+
+inline const boost::property_tree::ptree &empty_ptree()
+{
+    static boost::property_tree::ptree pt;
+    return pt;
+}
 
 // An Option is just a record with three fields: name, value, and description.
 //
@@ -93,6 +107,7 @@ public:
         : m_name(rhs.m_name)
         , m_value(rhs.m_value)
         , m_description(rhs.m_description)
+        , m_options(rhs.m_options)
     {
         return;
     }
@@ -108,6 +123,7 @@ public:
             m_name = rhs.m_name;
             m_value = rhs.m_value;
             m_description = rhs.m_description;
+            m_options = rhs.m_options;
         }
         return *this;
     }
@@ -116,7 +132,7 @@ public:
     {
         if (m_name == rhs.getName() && 
             m_value == rhs.getValue<std::string>() && 
-            m_description == rhs.getDescription())
+            m_description == rhs.getDescription() && m_options == rhs.m_options)
         {
             return true;
         }
@@ -150,7 +166,10 @@ public:
     { 
         m_value = boost::lexical_cast<std::string>(value);
     }
-
+    
+    boost::optional<Options const&> getOptions() const;
+    void setOptions(Options const& op);
+    
 #if defined(PDAL_COMPILER_MSVC)
     // explicit specialization:
     //   boost::lexical_cast only understands "0" and "1" for bools,
@@ -195,6 +214,7 @@ private:
     std::string m_name;
     std::string m_value;
     std::string m_description; // optional field
+    OptionsPtr m_options; // any other Option instances this field may contain
 };
 
 
@@ -243,6 +263,35 @@ public:
 
     // copy ctor
     Options(const Options&);
+
+    // assignment operator
+    Options& operator=(const Options& rhs)
+    {
+        if (&rhs != this)
+        {
+            m_options = rhs.m_options;
+        }
+        return *this;
+    }
+
+    bool equals(const Options& rhs) const
+    {
+        if (m_options== rhs.m_options)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    bool operator==(const Options& rhs) const
+    {
+        return equals(rhs);
+    }
+
+    bool operator!=(const Options& rhs) const
+    {
+        return (!equals(rhs));
+    }
 
     Options(const Option&);
 
@@ -305,7 +354,6 @@ public:
 
     std::vector<Option> getOptions(std::string const& name) const;
 private:
-    typedef std::multimap<std::string, Option> map_t;
     map_t m_options;
 };
 

@@ -34,6 +34,7 @@
 
 #include <pdal/Options.hpp>
 
+#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
@@ -56,9 +57,14 @@ Option::Option(const boost::property_tree::ptree& tree)
     , m_value("")
     , m_description("")
 {
+    using namespace boost::property_tree;
+    
     m_name = tree.get<std::string>("Name");
     m_value = tree.get<std::string>("Value");
     m_description = tree.count("Description") ? tree.get<std::string>("Description") : "";
+    ptree const& options = tree.get_child("Options", empty_ptree());
+    if (options.size())
+        m_options = OptionsPtr(new Options(options));
     return;
 }
 
@@ -72,9 +78,26 @@ boost::property_tree::ptree Option::toPTree() const
     {
         t.put("Description", getDescription());
     }
+    if (m_options.get())
+    {
+        t.add_child("Options", m_options->toPTree());
+    }
     return t;
 }
 
+boost::optional<Options const&> Option::getOptions() const
+{
+    if (m_options.get())
+        return boost::optional<Options const&>(*m_options.get());
+    else
+        return boost::optional<Options const&>();
+}
+
+void Option::setOptions(Options const& options) 
+{
+    OptionsPtr p = OptionsPtr(new Options(options));
+    m_options = p;
+}
 #if !defined(PDAL_COMPILER_MSVC)
 // explicit specialization:
 //   boost::lexical_cast only understands "0" and "1" for bools,
@@ -157,7 +180,7 @@ Option& Options::getOptionByRef(const std::string& name)
     if (iter == m_options.end())
     {
         std::ostringstream oss;
-        oss << "Required option '" << name << "' was not found on this stage";
+        oss << "Options::getOptionByRef: Required option '" << name << "' was not found on this stage";
         throw option_not_found(oss.str());
     }
     Option& option = iter->second;
@@ -171,7 +194,7 @@ const Option& Options::getOption(const std::string& name) const
     if (iter == m_options.end())
     {
         std::ostringstream oss;
-        oss << "Required option '" << name << "' was not found on this stage";
+        oss << "Options::getOption: Required option '" << name << "' was not found on this stage";
         throw option_not_found(oss.str());
     }
     const Option& option = iter->second;

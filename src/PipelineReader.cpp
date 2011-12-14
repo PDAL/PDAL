@@ -152,7 +152,8 @@ Option PipelineReader::parseElement_Option(const boost::property_tree::ptree& tr
     //       <value>17</value>
     //     </option>
     // this function will process the element and return an Option from it
-    
+
+    // boost::property_tree::xml_parser::write_xml(std::cout, tree);    
     map_t attrs;
     collect_attributes(attrs, tree);
 
@@ -160,6 +161,31 @@ Option PipelineReader::parseElement_Option(const boost::property_tree::ptree& tr
     std::string value = tree.get_value<std::string>();
     value = Utils::trim(value);
     Option option(name, value);
+
+    using namespace boost::property_tree;
+    using namespace boost;
+
+
+    optional<ptree const&> moreOptions = tree.get_child_optional("Options");
+    
+    if (moreOptions) {
+        ptree::const_iterator iter = moreOptions->begin();
+        
+        Options options;
+        while (iter != moreOptions->end())
+        {
+
+            if (iter->first == "Option")
+            {
+                Option o2 = parseElement_Option(iter->second);
+                options.add(o2);
+            }
+
+            ++iter;
+        }
+        option.setOptions(options);
+    }
+
 
     // filenames in the XML are fixed up as follows:
     //   - if absolute path, leave it alone
@@ -174,8 +200,9 @@ Option PipelineReader::parseElement_Option(const boost::property_tree::ptree& tr
             const std::string absdir = FileUtils::getDirectory(abspath);
             const std::string newpath = FileUtils::toAbsolutePath(oldpath, absdir);
             assert(FileUtils::isAbsolutePath(newpath));
-            const Option option2(option.getName(), newpath, option.getDescription());
-            option = option2;
+            // const Option option2(option.getName(), newpath, option.getDescription());
+            option.setValue(newpath);
+            // option = option2;
         }
     }
 

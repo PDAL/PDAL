@@ -120,4 +120,38 @@ BOOST_AUTO_TEST_CASE(PipelineWriterTest_attr_test)
 }
 
 
+BOOST_AUTO_TEST_CASE(PipelineWriterTest_multioptions)
+{
+
+    {
+        PipelineManager manager;
+        PipelineReader reader(manager);
+        PipelineWriter writer(manager);
+
+        reader.readPipeline(Support::datapath("pipeline/pipeline_multioptions.xml"));
+        writer.writePipeline(Support::temppath("test-multi.xml"));
+    }
+
+    {
+        PipelineManager manager;
+        PipelineReader reader(manager);
+
+        reader.readPipeline(Support::temppath("test-multi.xml"));
+        manager.getStage()->initialize();
+
+        Options opt = manager.getStage()->getPrevStage().getCurrentOptions();
+        
+        Option fname = opt.getOption("filename");
+
+        boost::optional<Options const&> more = fname.getOptions();
+    
+        Option meaning_of_life = more->getOption("somemore");
+    
+        BOOST_CHECK_EQUAL(meaning_of_life.getValue<int>(), 42);
+    }    
+    
+    FileUtils::deleteFile(Support::temppath("test-multi.xml"));
+    return;
+}
+
 BOOST_AUTO_TEST_SUITE_END()

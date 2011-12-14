@@ -64,6 +64,8 @@ public:
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
+    
+    PipelineManager const& getManager() { return *m_manager.get(); }
 
 private:
     std::string m_filename;
