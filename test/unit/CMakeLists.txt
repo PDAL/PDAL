@@ -43,6 +43,8 @@ SET(PDAL_UNITTEST_TEST_SRC
     PipelineManagerTest.cpp
     PipelineReaderTest.cpp
     PipelineWriterTest.cpp
+    PLangParserTest.cpp
+    PLangInternalTest.cpp
     PointBufferCacheTest.cpp
     PointBufferTest.cpp
     QFITReaderTest.cpp
