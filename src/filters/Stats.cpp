@@ -78,28 +78,12 @@ Stats::Stats(Stage& prevStage)
 
 Stats::~Stats()
 {
-    // const std::vector<Dimension>& dims = getSchema().getDimensions();
-    // schema::index_by_index const& dims = getSchema().getDimensions().get<schema::index>();    
-    // for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
-    // {
-    //     const Dimension& dim = *iter;
-    //     StatsCollector* stats = m_stats[dim.getId()];
-    //     delete stats;
-    //     m_stats.erase(dim.getId());
-    // }
+
 }
 
 void Stats::initialize()
 {
     Filter::initialize();
-
-    // schema::index_by_index const& dims = getSchema().getDimensions().get<schema::index>();  
-    // for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
-    // {
-    //     const Dimension& dim = *iter;
-    //     m_stats[dim.getId()] = new StatsCollector();
-    // }
-
     return;
 }
 
@@ -110,63 +94,18 @@ const Options Stats::getDefaultOptions() const
     return options;
 }
 
-
-
-    
-
-// const StatsCollector& Stats::getStats(DimensionId::Id field) const
-// {
-//     const StatsCollector* s = m_stats.find(field)->second;
-//     return *s;
-// }
-
-
 void Stats::processBuffer(PointBuffer& data) const
 {
-    // const boost::uint32_t numPoints = data.getNumPoints();
-    // 
-    // const Schema& schema = data.getSchema();
-    // 
-    // // BUG: fix this!
-    // const int indexXi = schema.getDimensionIndex(DimensionId::X_i32);
-    // const int indexYi = schema.getDimensionIndex(DimensionId::Y_i32);
-    // const int indexZi = schema.getDimensionIndex(DimensionId::Z_i32);
-    // const int indexXd = schema.getDimensionIndex(DimensionId::X_f64);
-    // const int indexYd = schema.getDimensionIndex(DimensionId::Y_f64);
-    // const int indexZd = schema.getDimensionIndex(DimensionId::Z_f64);
-    // 
-    // StatsCollector& statsX = (indexXi!=-1) ? *(m_stats.find(DimensionId::X_i32)->second) : *(m_stats.find(DimensionId::X_f64)->second);
-    // StatsCollector& statsY = (indexYi!=-1) ? *(m_stats.find(DimensionId::Y_i32)->second) : *(m_stats.find(DimensionId::Y_f64)->second);
-    // StatsCollector& statsZ = (indexZi!=-1) ? *(m_stats.find(DimensionId::Z_i32)->second) : *(m_stats.find(DimensionId::Z_f64)->second);
-    // 
-    // for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
-    // {
-    //     const double x = (indexXi!=-1) ? data.getField<boost::int32_t>(pointIndex, indexXi) : data.getField<double>(pointIndex, indexXd);
-    //     const double y = (indexYi!=-1) ? data.getField<boost::int32_t>(pointIndex, indexYi) : data.getField<double>(pointIndex, indexYd);
-    //     const double z = (indexZi!=-1) ? data.getField<boost::int32_t>(pointIndex, indexZi) : data.getField<double>(pointIndex, indexZd);
-    // 
-    //     statsX.insert(x);
-    //     statsY.insert(y);
-    //     statsZ.insert(z);
-    // 
-    //     data.setNumPoints(pointIndex+1);
-    // }
 
     return;
 }
-
 
 pdal::StageSequentialIterator* Stats::createSequentialIterator() const
 {
     return new pdal::filters::iterators::sequential::Stats(*this);
 }
 
-
-
-
-
 namespace iterators { namespace sequential {
-
 
 Stats::Stats(const pdal::filters::Stats& filter)
     : pdal::FilterSequentialIterator(filter)
@@ -183,22 +122,6 @@ boost::uint32_t Stats::readBufferImpl(PointBuffer& data)
     m_statsFilter.processBuffer(data);
 
     const boost::uint32_t numPoints = data.getNumPoints();
-    
-    
-    
-    // 
-    // // BUG: fix this!
-    // const int indexXi = schema.getDimensionIndex(DimensionId::X_i32);
-    // const int indexYi = schema.getDimensionIndex(DimensionId::Y_i32);
-    // const int indexZi = schema.getDimensionIndex(DimensionId::Z_i32);
-    // const int indexXd = schema.getDimensionIndex(DimensionId::X_f64);
-    // const int indexYd = schema.getDimensionIndex(DimensionId::Y_f64);
-    // const int indexZd = schema.getDimensionIndex(DimensionId::Z_f64);
-    // 
-    // StatsCollector& statsX = (indexXi!=-1) ? *(m_stats.find(DimensionId::X_i32)->second) : *(m_stats.find(DimensionId::X_f64)->second);
-    // StatsCollector& statsY = (indexYi!=-1) ? *(m_stats.find(DimensionId::Y_i32)->second) : *(m_stats.find(DimensionId::Y_f64)->second);
-    // StatsCollector& statsZ = (indexZi!=-1) ? *(m_stats.find(DimensionId::Z_i32)->second) : *(m_stats.find(DimensionId::Z_f64)->second);
-    
 
     for (boost::uint32_t pointIndex=0; pointIndex < numPoints; pointIndex++)
     {
@@ -211,21 +134,8 @@ boost::uint32_t Stats::readBufferImpl(PointBuffer& data)
             
             double output = getValue(data, *d, pointIndex);
             c->insert(output);
-            
         }
-    //     const double x = (indexXi!=-1) ? data.getField<boost::int32_t>(pointIndex, indexXi) : data.getField<double>(pointIndex, indexXd);
-    //     const double y = (indexYi!=-1) ? data.getField<boost::int32_t>(pointIndex, indexYi) : data.getField<double>(pointIndex, indexYd);
-    //     const double z = (indexZi!=-1) ? data.getField<boost::int32_t>(pointIndex, indexZi) : data.getField<double>(pointIndex, indexZd);
-    // 
-    //     statsX.insert(x);
-    //     statsY.insert(y);
-    //     statsZ.insert(z);
-    // 
-    //     data.setNumPoints(pointIndex+1);
     }
-
-
-
     return numRead;
 }
 
