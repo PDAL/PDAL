@@ -4,24 +4,15 @@
         <Option name="filename">
             out2.las
         </Option>
-        
-        <Filter type="filters.descaling">
-            
-            <Filter type="filters.reprojection">
-                <Option name="out_srs">
-                    EPSG:4326
-                </Option>
-                
-                <Filter type="filters.scaling">
-                    
-                    <Reader type="drivers.las.reader">
-                        <Option name="filename">
-							utm15.las
-                        </Option>              
-                    </Reader>
-                </Filter>
-				
-            </Filter>
+        <Filter type="filters.inplacereprojection">
+            <Option name="out_srs">
+                EPSG:4326
+            </Option>
+            <Reader type="drivers.las.reader">
+                <Option name="filename">
+                    utm15.las
+                </Option>              
+            </Reader>
         </Filter>
     </Writer>
 </Pipeline>
