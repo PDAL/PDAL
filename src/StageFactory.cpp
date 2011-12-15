@@ -64,15 +64,16 @@
 #include <pdal/drivers/p2g/Writer.hpp>
 #endif
 
-#include <pdal/filters/Attribute.hpp>
 #include <pdal/filters/ByteSwap.hpp>
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
 #include <pdal/filters/Color.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Decimation.hpp>
-#include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
+#include <pdal/filters/Reprojection.hpp>
+#include <pdal/filters/Predicate.hpp>
+#include <pdal/filters/Programmable.hpp>
 #include <pdal/filters/Scaling.hpp>
 #include <pdal/filters/Stats.hpp>
 
@@ -130,7 +131,6 @@ namespace pdal
     //
     // define the functions to create the filters
     //
-    MAKE_FILTER_CREATOR(Attribute, pdal::filters::Attribute)
     MAKE_FILTER_CREATOR(ByteSwap, pdal::filters::ByteSwap)
     MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
     MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
@@ -139,6 +139,8 @@ namespace pdal
     MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
     MAKE_FILTER_CREATOR(Descaling, pdal::filters::Descaling)
     MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
+    MAKE_FILTER_CREATOR(Predicate, pdal::filters::Predicate)
+    MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
     MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
     MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
     MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
@@ -311,7 +313,6 @@ void StageFactory::registerKnownReaders()
 
 void StageFactory::registerKnownFilters()
 {
-    REGISTER_FILTER(Attribute, pdal::filters::Attribute);
     REGISTER_FILTER(ByteSwap, pdal::filters::ByteSwap);
     REGISTER_FILTER(Cache, pdal::filters::Cache);
     REGISTER_FILTER(Chipper, pdal::filters::Chipper);
@@ -319,8 +320,10 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
     REGISTER_FILTER(Descaling, pdal::filters::Descaling);
-    REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
+    REGISTER_FILTER(Predicate, pdal::filters::Predicate);
+    REGISTER_FILTER(Programmable, pdal::filters::Programmable);
+    REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(Scaling, pdal::filters::Scaling);
     REGISTER_FILTER(Stats, pdal::filters::Stats);
 }

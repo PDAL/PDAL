@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_ATTRIBUTEFILTER_HPP
-#define INCLUDED_FILTERS_ATTRIBUTEFILTER_HPP
+#ifndef INCLUDED_FILTERS_PREDICATEFILTER_HPP
+#define INCLUDED_FILTERS_PREDICATEFILTER_HPP
 
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
@@ -44,49 +44,16 @@ namespace pdal
     class PointBuffer;
 }
 
-// #include <boost/config/warning_disable.hpp>
-// #include <boost/spirit/include/qi.hpp>
-// 
-// namespace parser
-// {
-//     namespace qi = boost::spirit::qi;
-//     namespace ascii = boost::spirit::ascii;
-// 
-//     ///////////////////////////////////////////////////////////////////////////
-//     //  Our number list parser
-//     ///////////////////////////////////////////////////////////////////////////
-//     //[tutorial_numlist1
-//     template <typename Iterator>
-//     bool parse_doubles(Iterator first, Iterator last)
-//     {
-//         using qi::double_;
-//         using qi::phrase_parse;
-//         using ascii::space;
-// 
-//         bool r = phrase_parse(
-//             first,                          /*< start iterator >*/
-//             last,                           /*< end iterator >*/
-//             double_ >> *(',' >> double_),   /*< the parser >*/
-//             space                           /*< the skip-parser >*/
-//         );
-//         if (first != last) // fail if we did not get a full match
-//             return false;
-//         return r;
-//     }
-//     //]
-// }
-
-
 namespace pdal { namespace filters {
 
-class AttributeFilterSequentialIterator;
+class PredicateFilterSequentialIterator;
 
-class PDAL_DLL Attribute : public Filter
+class PDAL_DLL Predicate : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.attribute", "Attribute Filter")
+    SET_STAGE_NAME("filters.predicate", "Predicate Filter")
 
-    Attribute(Stage& prevStage, const Options&);
+    Predicate(Stage& prevStage, const Options&);
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -105,25 +72,25 @@ public:
 
 private:
 
-    Attribute& operator=(const Attribute&); // not implemented
-    Attribute(const Attribute&); // not implemented
+    Predicate& operator=(const Predicate&); // not implemented
+    Predicate(const Predicate&); // not implemented
 };
 
 
 namespace iterators { namespace sequential {
     
 
-class Attribute : public pdal::FilterSequentialIterator
+class Predicate : public pdal::FilterSequentialIterator
 {
 public:
-    Attribute(const pdal::filters::Attribute& filter);
+    Predicate(const pdal::filters::Predicate& filter);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const pdal::filters::Attribute& m_attributeFilter;
+    const pdal::filters::Predicate& m_predicateFilter;
 };
 
 } } // iterators::sequential

@@ -32,20 +32,20 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/Attribute.hpp>
+#include <pdal/filters/Programmable.hpp>
 
 #include <pdal/PointBuffer.hpp>
 
 namespace pdal { namespace filters {
 
 
-Attribute::Attribute(Stage& prevStage, const Options& options)
+Programmable::Programmable(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
     return;
 }
 
-void Attribute::initialize()
+void Programmable::initialize()
 {
     Filter::initialize();
     
@@ -62,7 +62,7 @@ void Attribute::initialize()
 }
 
 
-const Options Attribute::getDefaultOptions() const
+const Options Programmable::getDefaultOptions() const
 {
     Options options;
     Option expression("expression", "");
@@ -73,7 +73,7 @@ const Options Attribute::getDefaultOptions() const
 
 
 
-void Attribute::processBuffer(PointBuffer& data) const
+void Programmable::processBuffer(PointBuffer& data) const
 {
     const boost::uint32_t numPoints = data.getNumPoints();
 
@@ -106,39 +106,39 @@ void Attribute::processBuffer(PointBuffer& data) const
 
 
 
-pdal::StageSequentialIterator* Attribute::createSequentialIterator() const
+pdal::StageSequentialIterator* Programmable::createSequentialIterator() const
 {
-    return new pdal::filters::iterators::sequential::Attribute(*this);
+    return new pdal::filters::iterators::sequential::Programmable(*this);
 }
 
 namespace iterators { namespace sequential {
 
-Attribute::Attribute(const pdal::filters::Attribute& filter)
+Programmable::Programmable(const pdal::filters::Programmable& filter)
     : pdal::FilterSequentialIterator(filter)
-    , m_attributeFilter(filter)
+    , m_programmableFilter(filter)
 {
     return;
 }
 
 
-boost::uint32_t Attribute::readBufferImpl(PointBuffer& data)
+boost::uint32_t Programmable::readBufferImpl(PointBuffer& data)
 {
     const boost::uint32_t numRead = getPrevIterator().read(data);
 
-    m_attributeFilter.processBuffer(data);
+    m_programmableFilter.processBuffer(data);
 
     return numRead;
 }
 
 
-boost::uint64_t Attribute::skipImpl(boost::uint64_t count)
+boost::uint64_t Programmable::skipImpl(boost::uint64_t count)
 {
     getPrevIterator().skip(count);
     return count;
 }
 
 
-bool Attribute::atEndImpl() const
+bool Programmable::atEndImpl() const
 {
     return getPrevIterator().atEnd();
 }
