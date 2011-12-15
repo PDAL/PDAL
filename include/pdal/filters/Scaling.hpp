@@ -40,6 +40,8 @@
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
 
+#include <map>
+
 namespace pdal
 {
     class PointBuffer;
@@ -47,24 +49,30 @@ namespace pdal
 
 namespace pdal { namespace filters {
 
-class ScalingFilterSequentialIterator;
+namespace scaling {
 
-class PDAL_DLL ScalingFilterBase : public Filter
+struct PDAL_DLL Scaler
 {
-protected: // the ctors are protected, since we want people to use the two derived classes below
 
-    // for now...
-    //   - we only support scaling of the X,Y,Z fields
-    //   - we only support scaling doubles <--> int32s
-    // notes:
-    //   - "forward=true" means doubles --> ints
-    //   - "forward=false" means ints --> doubles
-    //   - 1st version uses the scale/offset values already present
-    ScalingFilterBase(Stage& prevStage, bool isDescaling, const Options&);
-    ScalingFilterBase(Stage& prevStage, bool isDescaling);
-    ScalingFilterBase(Stage& prevStage, bool isDescaling, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
+    std::string name;
+    std::string type;
+    bool inplace;
+    double scale;
+    double offset;
+    
+};
 
+}
+
+class PDAL_DLL Scaling: public Filter
+{
 public:
+    SET_STAGE_NAME("filters.scaling", "Scaling Filter")
+
+
+    Scaling(Stage& prevStage, const Options&);
+
+    virtual const Options getDefaultOptions() const;
     virtual void initialize();
 
     bool supportsIterator (StageIteratorType t) const
@@ -78,43 +86,17 @@ public:
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     void processBuffer(const PointBuffer& srcData, PointBuffer& dstData) const;
+    
+    std::vector<scaling::Scaler> const& getScalers() const { return m_scalers; }
 
 private:
     void checkImpedance();
     
-    bool m_customScaleOffset;
-    double m_scaleX, m_scaleY, m_scaleZ;
-    double m_offsetX, m_offsetY, m_offsetZ;
-    bool m_isDescaling;
 
-    ScalingFilterBase& operator=(const ScalingFilterBase&); // not implemented
-    ScalingFilterBase(const ScalingFilterBase&); // not implemented
-};
-
-
-class PDAL_DLL Scaling: public ScalingFilterBase
-{
-public:
-    SET_STAGE_NAME("filters.scaling", "Scaling Filter")
-
-    Scaling(Stage& prevStage);
-    Scaling(Stage& prevStage, const Options&);
-    Scaling(Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
-
-    virtual const Options getDefaultOptions() const;
-};
-
-
-class PDAL_DLL Descaling: public ScalingFilterBase
-{
-public:
-    SET_STAGE_NAME("filters.descaling", "Descaling Filter")
-
-    Descaling(Stage& prevStage);
-    Descaling(Stage& prevStage, const Options&);
-    Descaling(Stage& prevStage, double scaleX, double offsetX, double scaleY, double offsetY, double scaleZ, double offsetZ);
-
-    virtual const Options getDefaultOptions() const;
+    Scaling& operator=(const Scaling&); // not implemented
+    Scaling(const Scaling&); // not implemented
+    
+    std::vector<scaling::Scaler> m_scalers;
 };
 
 
@@ -124,14 +106,17 @@ namespace iterators { namespace sequential {
 class PDAL_DLL Scaling : public pdal::FilterSequentialIterator
 {
 public:
-    Scaling(const ScalingFilterBase& filter);
+    Scaling(const pdal::filters::Scaling& filter);
+
+protected:
+    virtual void readBufferBeginImpl(PointBuffer&);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
 
-    const pdal::filters::ScalingFilterBase& m_scalingFilter;
+    const pdal::filters::Scaling& m_scalingFilter;
 };
 
 

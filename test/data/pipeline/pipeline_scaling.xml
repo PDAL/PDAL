@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Filter type="filters.scaling">
+        <Option name="dimension">
+            X
+            <Options>
+                <Option name="scale">0.0001</Option>
+                <Option name="offset">1.0</Option>
+            </Options>
+        </Option>
+        <Option name="dimension">
+            Y
+            <Options>
+                <Option name="scale">0.0001</Option>
+                <Option name="offset">2.0</Option>
+            </Options>
+        </Option>        
+        <Reader type="drivers.las.reader">
+            <Option name="filename">
+                1.2-with-color.las
+            </Option>
+        </Reader>
+    </Filter>
+</Pipeline>

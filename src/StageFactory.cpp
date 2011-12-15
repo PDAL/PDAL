@@ -137,7 +137,6 @@ namespace pdal
     MAKE_FILTER_CREATOR(Color, pdal::filters::Color)
     MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
     MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
-    MAKE_FILTER_CREATOR(Descaling, pdal::filters::Descaling)
     MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
     MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
     MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
@@ -318,7 +317,6 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Color, pdal::filters::Color);
     REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
-    REGISTER_FILTER(Descaling, pdal::filters::Descaling);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(InPlaceReprojection, pdal::filters::InPlaceReprojection);
     REGISTER_FILTER(Scaling, pdal::filters::Scaling);

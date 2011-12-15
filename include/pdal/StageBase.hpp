@@ -227,7 +227,7 @@ public:
     /// Gets the options.
     ///
     /// @return The options.
-    inline Options getCurrentOptions() { return m_options; }
+    inline Options getCurrentOptions() const { return m_options; }
 
 protected:
 
