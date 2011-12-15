@@ -63,6 +63,8 @@ class PDAL_DLL SymbolName
 public:
     SymbolName(const std::string&);
     SymbolName(char, std::vector<char>); // special hacky ctor used by the parser
+    ~SymbolName();
+
     const std::string& getName() const { return m_name; }
 
 private:

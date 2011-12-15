@@ -136,10 +136,11 @@ static void check_out1(const std::string& text,
 
 BOOST_AUTO_TEST_CASE(PLangParserTest_test1)
 {
-    //check_out1("int32 x ; x = 1;", 
-    //          "x", 1);
-    //check_out1("int32 x ; x = 1; x = 2;", 
-    //          "x", 2);
+    check_out1("int32 x ; x = 1;", 
+              "x", 1);
+    
+    check_out1("int32 x ; x = 1; x = 2;", 
+              "x", 2);
 
     check_in1_out1("int32 x ; x = x + 1; ", 
                    "x", (boost::int32_t)88, 

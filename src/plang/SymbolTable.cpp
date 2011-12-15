@@ -62,6 +62,12 @@ SymbolName::SymbolName(char c, std::vector<char> cc)
 }
 
 
+SymbolName::~SymbolName()
+{
+    return;
+}
+
+
 //---------------------------------------------------------------------------
 
 
@@ -73,6 +79,7 @@ Symbol::Symbol(const SymbolName* name, DataType datatype)
     , m_isUsed(false)
     , m_isDefined(false)
 {
+    delete name;
     return;
 }
 
