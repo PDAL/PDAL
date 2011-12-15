@@ -38,6 +38,9 @@
 
 #include <iostream>
 #include <map>
+
+#include <boost/algorithm/string.hpp>
+
 namespace pdal { namespace filters {
 
 
@@ -77,8 +80,8 @@ void Scaling::checkImpedance()
         {
             scaler.scale = dimensionOptions->getValueOrDefault<double>("scale", 1.0);
             scaler.offset = dimensionOptions->getValueOrDefault<double>("offset", 0.0);
-            scaler.inplace = dimensionOptions->getValueOrDefault<bool>("inplace", false);
-            scaler.type = dimensionOptions->getValueOrDefault<std::string>("type", "Int32");
+            scaler.type = dimensionOptions->getValueOrDefault<std::string>("type", "Integer");
+            scaler.size = dimensionOptions->getValueOrDefault<boost::uint32_t>("size", 4);
         }
         
         m_scalers.push_back(scaler);
@@ -194,9 +197,9 @@ void Scaling::processBuffer(const PointBuffer& srcData, PointBuffer& dstData) co
 }
 
 
-pdal::StageSequentialIterator* Scaling::createSequentialIterator() const
+pdal::StageSequentialIterator* Scaling::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Scaling(*this);
+    return new pdal::filters::iterators::sequential::Scaling(*this, buffer);
 }
 
 
@@ -210,33 +213,75 @@ const Options Scaling::getDefaultOptions() const
 namespace iterators { namespace sequential {
 
 
-Scaling::Scaling(const pdal::filters::Scaling& filter)
+Scaling::Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter)
     , m_scalingFilter(filter)
 {
+    alterSchema(buffer);
     return;
 }
 
-void Scaling::readBufferBeginImpl(PointBuffer& buffer)
+void Scaling::alterSchema(PointBuffer& buffer)
 {
     std::vector<scaling::Scaler> const& scalers = m_scalingFilter.getScalers();
     
     std::vector<scaling::Scaler>::const_iterator i;
     
-    Schema const& schema = buffer.getSchema();
+    Schema schema = buffer.getSchema();
     
+    
+    // Loop through the options that the filter.Scaler collected. For each 
+    // dimension described, create a new dimension with the given parameters.
+    // Create a map with the uuid of the new dimension that maps to the old 
+    // dimension to be scaled
     for (i = scalers.begin(); i != scalers.end(); ++i)
     {
-        try
+        boost::optional<Dimension const&> dim = schema.getDimensionOptional(i->name);
+        if (dim)
         {
-            Dimension const& dim = schema.getDimension(i->name);
-        } catch (pdal::dimension_not_found&)
-        {
-            
+            dimension::Interpretation interp = getInterpretation(i->type);
+            Dimension d2(i->name, interp, i->size, dim->getDescription());
+            d2.setNumericScale(i->scale);
+            d2.setNumericOffset(i->offset);
+            d2.createUUID();
+            std::pair<dimension::id, Dimension> p(d2.getUUID(), dim.get());
+            schema.appendDimension(d2);
         }
     }
+    
+    buffer = PointBuffer(schema, buffer.getCapacity());
 } 
 
+dimension::Interpretation Scaling::getInterpretation(std::string const& t) const
+{
+    if (boost::iequals(t, "SignedInteger"))
+    {
+        return dimension::SignedInteger;
+    }
+    if (boost::iequals(t, "UnsignedInteger"))
+    {
+        return dimension::UnsignedInteger;
+    }
+    if (boost::iequals(t, "SignedByte"))
+    {
+        return dimension::SignedByte;
+    }
+    if (boost::iequals(t, "UnsignedByte"))
+    {
+        return dimension::UnsignedByte;
+    }
+    if (boost::iequals(t, "Float"))
+    {
+        return dimension::Float;
+    }
+    if (boost::iequals(t, "Pointer"))
+    {
+        return dimension::Pointer;
+    }
+    
+    return dimension::Undefined;
+    
+}
 boost::uint32_t Scaling::readBufferImpl(PointBuffer& dstData)
 {
     Schema srcSchema(m_scalingFilter.getPrevStage().getSchema());

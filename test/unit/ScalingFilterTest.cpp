@@ -81,14 +81,14 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
     pdal::drivers::pipeline::Reader reader(options);
     reader.initialize();
     
-    pdal::Stage const* filter = reader.getManager().getStage();
+    pdal::filters::Scaling const* filter = static_cast<pdal::filters::Scaling const*>(reader.getManager().getStage());
     pdal::Options opt = filter->getCurrentOptions();
     // std::cout << "filter ops: " << opt << std::endl;
 
     const pdal::Schema& schema = filter->getSchema();
     pdal::PointBuffer data2(schema, 1);
 
-    pdal::StageSequentialIterator* iter = filter->createSequentialIterator();
+    pdal::StageSequentialIterator* iter = filter->createSequentialIterator(data2);
     boost::uint32_t numRead = iter->read(data2);
     BOOST_CHECK(numRead == 1);
     delete iter;

@@ -56,10 +56,9 @@ struct PDAL_DLL Scaler
 
     std::string name;
     std::string type;
-    bool inplace;
     double scale;
     double offset;
-    
+    boost::uint32_t size;
 };
 
 }
@@ -82,7 +81,7 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     void processBuffer(const PointBuffer& srcData, PointBuffer& dstData) const;
@@ -106,17 +105,18 @@ namespace iterators { namespace sequential {
 class PDAL_DLL Scaling : public pdal::FilterSequentialIterator
 {
 public:
-    Scaling(const pdal::filters::Scaling& filter);
+    Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer);
 
-protected:
-    virtual void readBufferBeginImpl(PointBuffer&);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-
+    void alterSchema(pdal::PointBuffer&);
+    dimension::Interpretation getInterpretation(std::string const& t) const;
     const pdal::filters::Scaling& m_scalingFilter;
+    
+    std::map<dimension::id, Dimension> m_scale_map;
 };
 
 
