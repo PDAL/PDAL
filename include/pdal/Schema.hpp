@@ -118,9 +118,6 @@ public:
     bool operator!=(const Schema& other) const;
 
     void appendDimension(Dimension const& dim);
-
-    // const std::vector<Dimension>& getDimensions() const;
-    // std::vector<Dimension>& getDimensions();
     
     schema::Map const& getDimensions() const { return m_index; }
     
@@ -131,14 +128,16 @@ public:
     const Dimension& getDimension(const DimensionId::Id& id) const;
     const Dimension& getDimension(std::string const& type) const;
     const Dimension& getDimension(dimension::id const& id) const;
-
     const Dimension& getDimension(std::size_t index) const;
+
+    boost::optional<Dimension const&> getDimensionOptional(std::string const& t) const;
+    boost::optional<Dimension const&> getDimensionOptional(dimension::id const& id) const;
+    boost::optional<Dimension const&> getDimensionOptional(std::size_t index) const;
+
     bool setDimension(Dimension const& );
-    // Dimension& getDimension(std::size_t index);
     
     int getDimensionIndex(const DimensionId::Id& id) const;
     int getDimensionIndex(const Dimension& dim) const;
-
 
 
     /// Fetch total byte size -- sum of all dimensions

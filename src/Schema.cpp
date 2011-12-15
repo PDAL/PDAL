@@ -173,9 +173,21 @@ const Dimension& Schema::getDimension(std::size_t t) const
     schema::index_by_index const& idx = m_index.get<schema::index>();
     
     if (t >= idx.size())
-        throw schema_error("Index position is not valid");
+        throw dimension_not_found("Index position is not valid");
     
     return idx.at(t);
+}
+
+boost::optional<Dimension const&> Schema::getDimensionOptional(std::size_t t) const
+{
+    try
+    {
+        Dimension const& dim = getDimension(t);
+        return boost::optional<Dimension const&>(dim);
+    } catch (pdal::dimension_not_found&)
+    {
+        return boost::optional<Dimension const&>();
+    }
 }
 
 const Dimension& Schema::getDimension(std::string const& t) const
@@ -220,6 +232,19 @@ const Dimension& Schema::getDimension(std::string const& t) const
     throw dimension_not_found(oss.str());
 
 }
+
+boost::optional<Dimension const&> Schema::getDimensionOptional(std::string const& t) const
+{
+    try
+    {
+        Dimension const& dim = getDimension(t);
+        return boost::optional<Dimension const&>(dim);
+    } catch (pdal::dimension_not_found&)
+    {
+        return boost::optional<Dimension const&>();
+    }
+}
+
 
 bool Schema::setDimension(Dimension const& dim)
 {
@@ -311,7 +336,19 @@ const Dimension& Schema::getDimension(dimension::id const& t) const
     std::ostringstream oss;
     oss << "getDimension: dimension not found with uuid '" << boost::lexical_cast<std::string>(t) << "'";
     throw dimension_not_found(oss.str());
-	
+
+}
+
+boost::optional<Dimension const&> Schema::getDimensionOptional(dimension::id const& t) const
+{
+    try
+    {
+        Dimension const& dim = getDimension(t);
+        return boost::optional<Dimension const&>(dim);
+    } catch (pdal::dimension_not_found&)
+    {
+        return boost::optional<Dimension const&>();
+    }
 }
 
 
