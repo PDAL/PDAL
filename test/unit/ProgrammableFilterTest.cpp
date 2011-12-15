@@ -44,11 +44,10 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
 {
-return;
-    Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
+    Bounds<double> bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
-    const pdal::Option opt("program", "");
+    const pdal::Option opt("program", "float64 X; float64 Y; float64 Z; X = X + 10.0; Y = Y + Z; Z = 99.99;");
     pdal::Options opts;
     opts.add(opt);
 
@@ -57,9 +56,9 @@ return;
     pdal::drivers::faux::Writer writer(filter, Options::none());
     writer.initialize();
 
-    boost::uint64_t numWritten = writer.write(100);
+    boost::uint64_t numWritten = writer.write(1000);
 
-    BOOST_CHECK(numWritten == 100);
+    BOOST_CHECK(numWritten == 1000);
 
     const double minX = writer.getMinX();
     const double minY = writer.getMinY();
@@ -68,12 +67,12 @@ return;
     const double maxY = writer.getMaxY();
     const double maxZ = writer.getMaxZ();
 
-    BOOST_CHECK(Utils::compare_approx<double>(minX, 0.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(minX, 10.0, 0.01));
     BOOST_CHECK(Utils::compare_approx<double>(minY, 0.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(minZ, 0.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxX, 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxY, 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 1.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(minZ, 99.99, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(maxX, 11.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(maxY, 2.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 99.99, 0.01));
 
     return;
 }

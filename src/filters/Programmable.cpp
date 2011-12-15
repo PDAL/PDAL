@@ -35,12 +35,14 @@
 #include <pdal/filters/Programmable.hpp>
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/plang/Parser.hpp>
 
 namespace pdal { namespace filters {
 
 
 Programmable::Programmable(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
+    , m_program("")
 {
     return;
 }
@@ -49,61 +51,58 @@ void Programmable::initialize()
 {
     Filter::initialize();
     
-    std::string expression = getOptions().getValueOrDefault<std::string>("expression", "empty") ;
-    log()->get(logDEBUG)  << "expression " << expression << std::endl;
+    m_program = getOptions().getValueOrDefault<std::string>("program", "") ;
+    log()->get(logDEBUG)  << "program " << m_program << std::endl;
 
-    // if (parser::parse_doubles(expression.begin(), expression.end()))
-    // {
-    //     log()->get(logDEBUG)  << "parsed expression: " << expression << std::endl;
-    // } else
-    // {
-    //     log()->get(logDEBUG)  << "unable to parse expression: " << expression << std::endl;
-    // }
+    assert(m_program != "");
+
+    return;
 }
 
 
 const Options Programmable::getDefaultOptions() const
 {
     Options options;
-    Option expression("expression", "");
-    options.add(expression);
+    Option program("program", "");
+    options.add(program);
     return options;
 }
 
 
-
-
-void Programmable::processBuffer(PointBuffer& data) const
+void Programmable::processBuffer(PointBuffer& data, pdal::plang::Parser& parser) const
 {
-    const boost::uint32_t numPoints = data.getNumPoints();
-
     const Schema& schema = data.getSchema();
+    boost::uint32_t numSrcPoints = data.getNumPoints();
+    const int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
+    const int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
+    const int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
 
-    const int indexR = schema.getDimensionIndex(DimensionId::Red_u16);
-    const int indexG = schema.getDimensionIndex(DimensionId::Green_u16);
-    const int indexB = schema.getDimensionIndex(DimensionId::Blue_u16);
-    const int indexZ = schema.getDimensionIndex(DimensionId::Z_i32);
-    const Dimension& zDim = schema.getDimension(DimensionId::Z_i32);
-
-    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
+    for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
     {
-        const boost::int32_t zraw = data.getField<boost::int32_t>(pointIndex, indexZ);
-        const double z = zDim.applyScaling(zraw);
+        const double x = data.getField<double>(srcIndex, offsetX);
+        const double y = data.getField<double>(srcIndex, offsetY);
+        const double z = data.getField<double>(srcIndex, offsetZ);
 
-        boost::uint16_t red, green, blue;
-        // this->getAttribute_F64_U16(z, red, green, blue);
+        parser.setVariable<double>("X", x);
+        parser.setVariable<double>("Y", y);
+        parser.setVariable<double>("Z", z);
 
-        // now we store the 3 u16's in the point data...
-        data.setField<boost::uint16_t>(pointIndex, indexR, red);
-        data.setField<boost::uint16_t>(pointIndex, indexG, green);
-        data.setField<boost::uint16_t>(pointIndex, indexB, blue);
+        bool ok = parser.evaluate();
+        assert(ok);
 
-        data.setNumPoints(pointIndex+1);
+        const double xx = parser.getVariable<double>("X");
+        const double yy = parser.getVariable<double>("Y");
+        const double zz = parser.getVariable<double>("Z");
+
+        data.setField<double>(srcIndex, offsetX, xx);
+        data.setField<double>(srcIndex, offsetY, yy);
+        data.setField<double>(srcIndex, offsetZ, zz);
+
+        data.setNumPoints(srcIndex+1);
     }
 
     return;
 }
-
 
 
 pdal::StageSequentialIterator* Programmable::createSequentialIterator() const
@@ -111,21 +110,51 @@ pdal::StageSequentialIterator* Programmable::createSequentialIterator() const
     return new pdal::filters::iterators::sequential::Programmable(*this);
 }
 
+
+//---------------------------------------------------------------------------
+
+
 namespace iterators { namespace sequential {
+
 
 Programmable::Programmable(const pdal::filters::Programmable& filter)
     : pdal::FilterSequentialIterator(filter)
     , m_programmableFilter(filter)
+    , m_parser(NULL)
 {
+    return;
+}
+
+
+Programmable::~Programmable()
+{
+    delete m_parser;
+}
+
+
+void Programmable::createParser()
+{
+    const std::string program = m_programmableFilter.getProgram();
+
+    m_parser = new pdal::plang::Parser(program);
+
+    bool ok = m_parser->parse();
+    assert(ok);
+
     return;
 }
 
 
 boost::uint32_t Programmable::readBufferImpl(PointBuffer& data)
 {
+    if (!m_parser)
+    {
+        createParser();
+    }
+
     const boost::uint32_t numRead = getPrevIterator().read(data);
 
-    m_programmableFilter.processBuffer(data);
+    m_programmableFilter.processBuffer(data, *m_parser);
 
     return numRead;
 }

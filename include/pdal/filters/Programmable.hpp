@@ -42,6 +42,10 @@
 namespace pdal
 {
     class PointBuffer;
+    namespace plang
+    {
+        class Parser;
+    }
 }
 
 
@@ -69,9 +73,12 @@ public:
     pdal::StageSequentialIterator* createSequentialIterator() const;
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
-    void processBuffer(PointBuffer& data) const;
+    void processBuffer(PointBuffer& data, pdal::plang::Parser& parser) const;
+
+    const std::string& getProgram() const { return m_program; }
 
 private:
+    std::string m_program;
 
     Programmable& operator=(const Programmable&); // not implemented
     Programmable(const Programmable&); // not implemented
@@ -85,13 +92,17 @@ class Programmable : public pdal::FilterSequentialIterator
 {
 public:
     Programmable(const pdal::filters::Programmable& filter);
+    ~Programmable();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
 
+    void createParser();
+
     const pdal::filters::Programmable& m_programmableFilter;
+    pdal::plang::Parser* m_parser;
 };
 
 } } // iterators::sequential
