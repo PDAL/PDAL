@@ -42,7 +42,13 @@
 namespace pdal
 {
     class PointBuffer;
+
+    namespace plang
+    {
+        class Parser;
+    }
 }
+
 
 namespace pdal { namespace filters {
 
@@ -68,9 +74,12 @@ public:
     pdal::StageSequentialIterator* createSequentialIterator() const;
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
-    void processBuffer(PointBuffer& data) const;
+    boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData, pdal::plang::Parser& parser) const;
+
+    const std::string& getExpression() const { return m_expression; }
 
 private:
+    std::string m_expression;
 
     Predicate& operator=(const Predicate&); // not implemented
     Predicate(const Predicate&); // not implemented
@@ -84,13 +93,19 @@ class Predicate : public pdal::FilterSequentialIterator
 {
 public:
     Predicate(const pdal::filters::Predicate& filter);
+    ~Predicate();
+
+    void read();
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
 
+    void createParser();
+
     const pdal::filters::Predicate& m_predicateFilter;
+    pdal::plang::Parser* m_parser;
 };
 
 } } // iterators::sequential

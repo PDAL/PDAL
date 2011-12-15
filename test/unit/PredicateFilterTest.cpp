@@ -44,11 +44,11 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
 {
-return;
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
-    const pdal::Option opt("expression", "a");
+    // keep all points where x less than 1.0
+    const pdal::Option opt("expression", "X < 1.0");
     pdal::Options opts;
     opts.add(opt);
 
@@ -77,5 +77,44 @@ return;
 
     return;
 }
+
+
+BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
+{
+    // same as above, but with 'Y >' instead of 'X <'
+
+    Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
+    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
+
+    const pdal::Option opt("expression", "Y > 1.0");
+    pdal::Options opts;
+    opts.add(opt);
+
+    pdal::filters::Predicate filter(reader, opts);
+    BOOST_CHECK(filter.getDescription() == "Predicate Filter");
+    pdal::drivers::faux::Writer writer(filter, Options::none());
+    writer.initialize();
+
+    boost::uint64_t numWritten = writer.write(1000);
+
+    BOOST_CHECK(numWritten == 500);
+
+    const double minX = writer.getMinX();
+    const double minY = writer.getMinY();
+    const double minZ = writer.getMinZ();
+    const double maxX = writer.getMaxX();
+    const double maxY = writer.getMaxY();
+    const double maxZ = writer.getMaxZ();
+
+    BOOST_CHECK(Utils::compare_approx<double>(minX, 1.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(minY, 1.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(minZ, 1.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(maxX, 2.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(maxY, 2.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 2.0, 0.01));
+
+    return;
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

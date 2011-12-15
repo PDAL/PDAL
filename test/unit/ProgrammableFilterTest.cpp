@@ -48,18 +48,18 @@ return;
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
-    const pdal::Option opt("expression", "a");
+    const pdal::Option opt("program", "");
     pdal::Options opts;
     opts.add(opt);
 
     pdal::filters::Programmable filter(reader, opts);
-    BOOST_CHECK(filter.getDescription() == "Predicate Filter");
+    BOOST_CHECK(filter.getDescription() == "Programmable Filter");
     pdal::drivers::faux::Writer writer(filter, Options::none());
     writer.initialize();
 
-    boost::uint64_t numWritten = writer.write(1000);
+    boost::uint64_t numWritten = writer.write(100);
 
-    BOOST_CHECK(numWritten == 500);
+    BOOST_CHECK(numWritten == 100);
 
     const double minX = writer.getMinX();
     const double minY = writer.getMinY();

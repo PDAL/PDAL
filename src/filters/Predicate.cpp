@@ -35,6 +35,7 @@
 #include <pdal/filters/Predicate.hpp>
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/plang/Parser.hpp>
 
 namespace pdal { namespace filters {
 
@@ -49,16 +50,12 @@ void Predicate::initialize()
 {
     Filter::initialize();
     
-    std::string expression = getOptions().getValueOrDefault<std::string>("expression", "empty") ;
-    log()->get(logDEBUG)  << "expression " << expression << std::endl;
+    m_expression = getOptions().getValueOrDefault<std::string>("expression", "") ;
+    log()->get(logDEBUG)  << "expression " << m_expression << std::endl;
 
-    // if (parser::parse_doubles(expression.begin(), expression.end()))
-    // {
-    //     log()->get(logDEBUG)  << "parsed expression: " << expression << std::endl;
-    // } else
-    // {
-    //     log()->get(logDEBUG)  << "unable to parse expression: " << expression << std::endl;
-    // }
+    assert(m_expression != "");
+
+    return;
 }
 
 
@@ -71,39 +68,45 @@ const Options Predicate::getDefaultOptions() const
 }
 
 
-
-
-void Predicate::processBuffer(PointBuffer& data) const
+boost::uint32_t Predicate::processBuffer(PointBuffer& dstData, const PointBuffer& srcData, pdal::plang::Parser& parser) const
 {
-    const boost::uint32_t numPoints = data.getNumPoints();
+    const Schema& schema = dstData.getSchema();
+    boost::uint32_t numSrcPoints = srcData.getNumPoints();
+    boost::uint32_t dstIndex = dstData.getNumPoints();
+    boost::uint32_t numPointsAdded = 0;
 
-    const Schema& schema = data.getSchema();
+    const int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
+    const int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
+    const int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
+    const int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
-    const int indexR = schema.getDimensionIndex(DimensionId::Red_u16);
-    const int indexG = schema.getDimensionIndex(DimensionId::Green_u16);
-    const int indexB = schema.getDimensionIndex(DimensionId::Blue_u16);
-    const int indexZ = schema.getDimensionIndex(DimensionId::Z_i32);
-    const Dimension& zDim = schema.getDimension(DimensionId::Z_i32);
-
-    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
+    for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
     {
-        const boost::int32_t zraw = data.getField<boost::int32_t>(pointIndex, indexZ);
-        const double z = zDim.applyScaling(zraw);
+        const double x = srcData.getField<double>(srcIndex, offsetX);
+        const double y = srcData.getField<double>(srcIndex, offsetY);
+        const double z = srcData.getField<double>(srcIndex, offsetZ);
+        const boost::uint64_t t = srcData.getField<boost::uint64_t>(srcIndex, offsetT);
+        parser.setVariable("X", x);
+        parser.setVariable("Y", y);
+        parser.setVariable("Z", z);
+        parser.setVariable("Time", t);
+        bool ok = parser.evaluate();
+        assert(ok);
+        const bool predicate = parser.getVariable<bool>("result");
 
-        boost::uint16_t red, green, blue;
-        // this->getAttribute_F64_U16(z, red, green, blue);
-
-        // now we store the 3 u16's in the point data...
-        data.setField<boost::uint16_t>(pointIndex, indexR, red);
-        data.setField<boost::uint16_t>(pointIndex, indexG, green);
-        data.setField<boost::uint16_t>(pointIndex, indexB, blue);
-
-        data.setNumPoints(pointIndex+1);
+        if (predicate)
+        {
+            dstData.copyPointFast(dstIndex, srcIndex, srcData);
+            dstData.setNumPoints(dstIndex+1);
+            ++dstIndex;
+            ++numPointsAdded;
+        }
     }
 
-    return;
-}
+    assert(dstIndex <= dstData.getCapacity());
 
+    return numPointsAdded;
+}
 
 
 pdal::StageSequentialIterator* Predicate::createSequentialIterator() const
@@ -111,23 +114,79 @@ pdal::StageSequentialIterator* Predicate::createSequentialIterator() const
     return new pdal::filters::iterators::sequential::Predicate(*this);
 }
 
+
+//---------------------------------------------------------------------------
+
+
 namespace iterators { namespace sequential {
 
 Predicate::Predicate(const pdal::filters::Predicate& filter)
     : pdal::FilterSequentialIterator(filter)
     , m_predicateFilter(filter)
+    , m_parser(NULL)
 {
     return;
 }
 
 
-boost::uint32_t Predicate::readBufferImpl(PointBuffer& data)
+Predicate::~Predicate()
 {
-    const boost::uint32_t numRead = getPrevIterator().read(data);
+    delete m_parser;
+}
 
-    m_predicateFilter.processBuffer(data);
 
-    return numRead;
+void Predicate::createParser()
+{
+    const std::string expression = m_predicateFilter.getExpression();
+
+    const std::string program = "float64 X; float64 Y; float64 Z; uint64 Time; bool result; result = " + expression + ";";
+
+    m_parser = new pdal::plang::Parser(program);
+
+    bool ok = m_parser->parse();
+    assert(ok);
+
+    return;
+}
+
+
+boost::uint32_t Predicate::readBufferImpl(PointBuffer& dstData)
+{
+    if (!m_parser)
+    {
+        createParser();
+    }
+
+    // the following code taken from the Crop filter
+
+    boost::uint32_t numPointsNeeded = dstData.getCapacity();
+    assert(dstData.getNumPoints() == 0);
+
+    while (numPointsNeeded > 0)
+    {
+        if (getPrevIterator().atEnd()) break;
+
+        // set up buffer to be filled by prev stage
+        PointBuffer srcData(dstData.getSchema(), numPointsNeeded);
+
+        // read from prev stage
+        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+        assert(numSrcPointsRead == srcData.getNumPoints());
+        assert(numSrcPointsRead <= numPointsNeeded);
+
+        // we got no data, and there is no more to get -- exit the loop
+        if (numSrcPointsRead == 0) break;
+
+        // copy points from src (prev stage) into dst (our stage), 
+        // based on the CropFilter's rules (i.e. its bounds)
+        const boost::uint32_t numPointsProcessed = m_predicateFilter.processBuffer(dstData, srcData, *m_parser);
+
+        numPointsNeeded -= numPointsProcessed;
+    }
+
+    const boost::uint32_t numPointsAchieved = dstData.getNumPoints();
+
+    return numPointsAchieved;
 }
 
 
