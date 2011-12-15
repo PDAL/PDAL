@@ -371,6 +371,35 @@ list (APPEND PDAL_HPP ${PDAL_FILTERS_HPP} )
 
 
 #
+# plag parser
+#
+
+set(PDAL_PLANG_PATH plang)
+set(PDAL_PLANG_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_PLANG_PATH})
+set(PDAL_PLANG_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_PLANG_PATH})
+
+set(PDAL_PLANG_HPP
+  ${PDAL_PLANG_HEADERS}/AstNode.hpp
+  ${PDAL_PLANG_HEADERS}/AstUtils.hpp
+  ${PDAL_PLANG_HEADERS}/Parser.hpp
+  ${PDAL_PLANG_HEADERS}/Program.hpp
+  ${PDAL_PLANG_HEADERS}/SymbolTable.hpp
+)
+
+set (PDAL_PLANG_CPP 
+  ${PDAL_PLANG_SRC}/AstNode.cpp
+  ${PDAL_PLANG_SRC}/AstUtils.cpp
+  ${PDAL_PLANG_SRC}/Parser.cpp
+  ${PDAL_PLANG_SRC}/Parser_qi.cpp
+  ${PDAL_PLANG_SRC}/Program.cpp
+  ${PDAL_PLANG_SRC}/SymbolTable.cpp
+)
+
+list (APPEND PDAL_CPP ${PDAL_PLANG_CPP} )
+list (APPEND PDAL_HPP ${PDAL_PLANG_HPP} )
+
+
+#
 # config
 #
 
@@ -428,6 +457,7 @@ source_group("Header Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_HPP
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
+source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
 
 source_group("Source Files" FILES ${PDAL_BASE_CPP})
 source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
@@ -439,6 +469,7 @@ source_group("Source Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_CPP
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
+source_group("Source Files\\plang" FILES ${PDAL_PLANG_CPP})
 
 
 # Standard include directory of PDAL library
