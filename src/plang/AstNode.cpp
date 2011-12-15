@@ -676,8 +676,21 @@ AstNode* AstBinaryOp::simplify(SymbolTable& symbolTable)
 
     assert(left->getDataType() == right->getDataType());
 
-    setDataType(left->getDataType());
-
+    switch (getNodeType())
+    {
+    case NodeType_Greater:
+    case NodeType_GreaterEq:
+    case NodeType_Less:
+    case NodeType_LessEq:
+    case NodeType_Equal:
+    case NodeType_NotEqual:
+        setDataType(DataType_Bool);
+        break;
+    default:
+        setDataType(left->getDataType());
+        break;
+    }
+    
     if (left->getNodeType() != NodeType_Constant || right->getNodeType() != NodeType_Constant)
     {
         // we can only simplify constants
@@ -719,8 +732,6 @@ bool AstBinaryOp::evaluate(SymbolTable& symbolTable, variant_t& value)
     }
     
     assert(m_left->getDataType() == m_right->getDataType());
-    assert(getDataType() == m_left->getDataType());
-
 
     // we have two two constants of the same type
     variant_t dstValue;
