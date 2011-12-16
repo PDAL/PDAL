@@ -47,6 +47,8 @@ SET(PDAL_UNITTEST_TEST_SRC
     PLangInternalTest.cpp
     PointBufferCacheTest.cpp
     PointBufferTest.cpp
+    PredicateFilterTest.cpp
+    ProgrammableFilterTest.cpp
     QFITReaderTest.cpp
     RangeTest.cpp
     ReprojectionFilterTest.cpp

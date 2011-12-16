@@ -335,7 +335,6 @@ set(PDAL_FILTERS_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_FILTERS_PATH})
 set(PDAL_FILTERS_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH})
 
 set(PDAL_FILTERS_HPP
-  ${PDAL_FILTERS_HEADERS}/Attribute.hpp
   ${PDAL_FILTERS_HEADERS}/ByteSwap.hpp
   ${PDAL_FILTERS_HEADERS}/Cache.hpp
   ${PDAL_FILTERS_HEADERS}/Chipper.hpp
@@ -345,13 +344,14 @@ set(PDAL_FILTERS_HPP
   ${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp
   ${PDAL_FILTERS_HEADERS}/Mosaic.hpp
   ${PDAL_FILTERS_HEADERS}/PointBufferCache.hpp
+  ${PDAL_FILTERS_HEADERS}/Predicate.hpp
+  ${PDAL_FILTERS_HEADERS}/Programmable.hpp
   ${PDAL_FILTERS_HEADERS}/Reprojection.hpp
   ${PDAL_FILTERS_HEADERS}/Scaling.hpp
   ${PDAL_FILTERS_HEADERS}/Stats.hpp
 )
 
 set (PDAL_FILTERS_CPP 
-  ${PDAL_FILTERS_SRC}/Attribute.cpp
   ${PDAL_FILTERS_SRC}/ByteSwap.cpp
   ${PDAL_FILTERS_SRC}/Cache.cpp
   ${PDAL_FILTERS_SRC}/Chipper.cpp
@@ -361,6 +361,8 @@ set (PDAL_FILTERS_CPP
   ${PDAL_FILTERS_SRC}/InPlaceReprojection.cpp
   ${PDAL_FILTERS_SRC}/Mosaic.cpp
   ${PDAL_FILTERS_SRC}/PointBufferCache.cpp
+  ${PDAL_FILTERS_SRC}/Predicate.cpp
+  ${PDAL_FILTERS_SRC}/Programmable.cpp
   ${PDAL_FILTERS_SRC}/Reprojection.cpp
   ${PDAL_FILTERS_SRC}/Scaling.cpp
   ${PDAL_FILTERS_SRC}/Stats.cpp
