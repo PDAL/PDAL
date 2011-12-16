@@ -115,7 +115,11 @@ private:
     void alterSchema(pdal::PointBuffer&);
     dimension::Interpretation getInterpretation(std::string const& t) const;
     const pdal::filters::Scaling& m_scalingFilter;
-    
+
+    void writeScaledData(   PointBuffer& buffer, 
+                            Dimension const* from_dimension, 
+                            Dimension const* to_dimension, 
+                            boost::uint32_t pointIndex);
     std::map<dimension::id, Dimension> m_scale_map;
 };
 

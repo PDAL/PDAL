@@ -245,6 +245,7 @@ void Scaling::alterSchema(PointBuffer& buffer)
             d2.setNumericOffset(i->offset);
             d2.createUUID();
             std::pair<dimension::id, Dimension> p(d2.getUUID(), dim.get());
+            m_scale_map.insert(p);
             schema.appendDimension(d2);
         }
     }
@@ -282,17 +283,50 @@ dimension::Interpretation Scaling::getInterpretation(std::string const& t) const
     return dimension::Undefined;
     
 }
-boost::uint32_t Scaling::readBufferImpl(PointBuffer& dstData)
-{
-    Schema srcSchema(m_scalingFilter.getPrevStage().getSchema());
-    PointBuffer srcData(srcSchema, dstData.getCapacity());
-    const boost::uint32_t numRead = getPrevIterator().read(srcData);
 
-    m_scalingFilter.processBuffer(srcData, dstData);
+boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
+{
+    const Schema& schema = buffer.getSchema();
+
+
+    std::vector<Dimension const*> from_dimensions;
+    
+    std::map<dimension::id, Dimension>::const_iterator d;
+    for (d = m_scale_map.begin(); d != m_scale_map.end(); ++d)
+    {
+        from_dimensions.push_back(&schema.getDimension(d->first));
+    }
+
+    const boost::uint32_t numRead = getPrevIterator().read(buffer);
+    
+    for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
+    {
+        std::vector<Dimension const*>::const_iterator i;
+        for (i = from_dimensions.begin(); i != from_dimensions.end(); ++i)
+        {
+            Dimension const* from_dimension = *i;
+            d = m_scale_map.find(from_dimension->getUUID());
+            if (d != m_scale_map.end())
+            {
+                Dimension const* to_dimension = &(d->second);
+                writeScaledData(buffer, from_dimension, to_dimension, pointIndex);
+            }
+        }
+
+    }
 
     return numRead;
 }
 
+void Scaling::writeScaledData(  PointBuffer& buffer, 
+                                Dimension const* from_dimension, 
+                                Dimension const* to_dimension, 
+                                boost::uint32_t pointIndex)
+{
+    
+    
+    return;
+}
 
 boost::uint64_t Scaling::skipImpl(boost::uint64_t count)
 {

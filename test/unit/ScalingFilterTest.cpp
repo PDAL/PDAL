@@ -89,6 +89,7 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
     pdal::PointBuffer data2(schema, 1);
 
     pdal::StageSequentialIterator* iter = filter->createSequentialIterator(data2);
+    
     boost::uint32_t numRead = iter->read(data2);
     BOOST_CHECK(numRead == 1);
     delete iter;
