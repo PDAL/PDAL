@@ -44,6 +44,7 @@
 #include <boost/algorithm/string.hpp>
 #include <pdal/external/boost/uuid/string_generator.hpp>
 #include <pdal/external/boost/uuid/random_generator.hpp>
+#include <pdal/external/boost/uuid/uuid_io.hpp>
 #include <map>
 
 namespace pdal
@@ -364,26 +365,21 @@ boost::property_tree::ptree Dimension::toPTree() const
         e = std::string("big");
     dim.put("endianness", e);
 
-
-    if (! (Utils::compare_distance(getMinimum(), getMaximum()) && 
-           Utils::compare_distance(0.0, getMaximum())))
-    {
-        dim.put("minimum", getMinimum());
-        dim.put("maximum", getMaximum());
-    }
-    if (! (Utils::compare_distance(getNumericScale(), 0.0)))
-    {
-        dim.put("scale", getNumericScale());
-    }
-    if (! (Utils::compare_distance(getNumericOffset(), 0.0)))
-    {
-        dim.put("offset", getNumericOffset());
-    }
+    dim.put("minimum", getMinimum());
+    dim.put("maximum", getMaximum());
+    dim.put("scale", getNumericScale());
+    dim.put("offset", getNumericOffset());
     
     dim.put("scale", getNumericScale());
 
     dim.put("isValid", isValid());
+    
+    std::stringstream oss;
+    
+    dimension::id t =  getUUID();
+    oss << t;
 
+    dim.put("uuid", oss.str());
     return dim;
 }
 
@@ -427,25 +423,14 @@ std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
     }
     os << quoted_name.str() << pad.str() <<" -- "<< " size: " << tree.get<boost::uint32_t>("bytesize");
 
-    try {
-        double value = tree.get<double>("scale");
-        boost::uint32_t precision = Utils::getStreamPrecision(value);
-        os.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        os.precision(precision);
-        os << " scale: " << value;
-    }
-    catch (boost::property_tree::ptree_bad_path const& ) {
-    }    
+    double scale = tree.get<double>("scale");
+    boost::uint32_t precision = Utils::getStreamPrecision(scale);
+    os.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    os.precision(precision);
+    os << " scale: " << scale;
 
-    try {
-        double value = tree.get<double>("offset");
-        boost::uint32_t precision = Utils::getStreamPrecision(value);
-        os.setf(std::ios_base::fixed, std::ios_base::floatfield);
-        os.precision(precision);
-        os << " offset: " << value;
-    }
-    catch (boost::property_tree::ptree_bad_path const& ) {
-    }    
+    double offset = tree.get<double>("offset");
+    os << " offset: " << offset;
     
     //os << " offset: " << tree.get<boost::uint32_t>("byteoffset");
     os << std::endl;
