@@ -354,6 +354,7 @@ boost::property_tree::ptree Dimension::toPTree() const
     using boost::property_tree::ptree;
     ptree dim;
     dim.put("name", getName());
+    dim.put("namespace", getNamespace());
     dim.put("datatype", getDataTypeName(getDataType()));
     dim.put("description", getDescription());
     dim.put("bytesize", getByteSize());
@@ -408,9 +409,13 @@ std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
     ptree tree = d.toPTree();
 
     std::string const name = tree.get<std::string>("name");
+    std::string const ns = tree.get<std::string>("namespace");
 
     std::ostringstream quoted_name;
-    quoted_name << "'" << name << "'";
+    if (ns.size())
+        quoted_name << "'" << ns << "." << name << "'";
+    else
+        quoted_name << "'" << name << "'";
     std::ostringstream pad;
     std::string const& cur = quoted_name.str();
     std::string::size_type size = cur.size();
