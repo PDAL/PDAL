@@ -153,50 +153,93 @@ double Stats::getValue(PointBuffer& data, Dimension& d, boost::uint32_t pointInd
     boost::int64_t i64(0);
     boost::uint64_t u64(0);
     
-    switch (d.getDataType())
+    switch (d.getInterpretation())
     {
-        case Dimension::Float:
-            flt = data.getField<float>(d, pointIndex);
-            output = static_cast<double>(flt);
-            break;
-        case Dimension::Double:
-            output = data.getField<double>(d, pointIndex);
-            break;
-        
-        case Dimension::Int8:
+        case dimension::SignedByte:
             i8 = data.getField<boost::int8_t>(d, pointIndex);
             output = d.applyScaling<boost::int8_t>(i8);
             break;
-        case Dimension::Uint8:
+        case dimension::UnsignedByte:
             u8 = data.getField<boost::uint8_t>(d, pointIndex);
             output = d.applyScaling<boost::uint8_t>(u8);
             break;
-        case Dimension::Int16:
-            i16 = data.getField<boost::int16_t>(d, pointIndex);
-            output = d.applyScaling<boost::int16_t>(i16);
-            break;
-        case Dimension::Uint16:
-            u16 = data.getField<boost::uint16_t>(d, pointIndex);
-            output = d.applyScaling<boost::uint16_t>(u16);
-            break;
-        case Dimension::Int32:
-            i32 = data.getField<boost::int32_t>(d, pointIndex);
-            output = d.applyScaling<boost::int32_t>(i32);
-            break;
-        case Dimension::Uint32:
-            u32 = data.getField<boost::uint32_t>(d, pointIndex);
-            output = d.applyScaling<boost::uint32_t>(u32);
-            break;
-        case Dimension::Int64:
-            i64 = data.getField<boost::int64_t>(d, pointIndex);
-            output = d.applyScaling<boost::int64_t>(i64);
-            break;
-        case Dimension::Uint64:
-            u64 = data.getField<boost::uint64_t>(d, pointIndex);
-            output = d.applyScaling<boost::uint64_t>(u64);
-            break;
-        case Dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
-        case Dimension::Undefined:
+        case dimension::Float:
+            if (d.getByteSize() == 4)
+            {
+                flt = data.getField<float>(d, pointIndex);
+                output = static_cast<double>(flt);
+                break;
+            } else if (d.getByteSize() == 8)
+            {
+                output = data.getField<double>(d, pointIndex);
+                break;
+            }
+            else 
+            {
+                std::ostringstream oss;
+                oss << "Unable to interpret Float of size '" << d.getByteSize() <<"'";
+                throw pdal_error(oss.str());
+            }
+            
+        case dimension::SignedInteger:
+            if (d.getByteSize() == 1)
+            {
+                i8 = data.getField<boost::int8_t>(d, pointIndex);
+                output = d.applyScaling<boost::int8_t>(i8);
+                break;
+            } else if (d.getByteSize() == 2)
+            {
+                i16 = data.getField<boost::int16_t>(d, pointIndex);
+                output = d.applyScaling<boost::int16_t>(i16);
+                break;
+            } else if (d.getByteSize() == 4)
+            {
+                i32 = data.getField<boost::int32_t>(d, pointIndex);
+                output = d.applyScaling<boost::int32_t>(i32);
+                break;
+            } else if (d.getByteSize() == 8)
+            {
+                i64 = data.getField<boost::int64_t>(d, pointIndex);
+                output = d.applyScaling<boost::int64_t>(i64);
+                break;
+            }
+            else 
+            {
+                std::ostringstream oss;
+                oss << "Unable to interpret SignedInteger of size '" << d.getByteSize() <<"'";
+                throw pdal_error(oss.str());
+            }
+        case dimension::UnsignedInteger:
+            if (d.getByteSize() == 1)
+            {
+                u8 = data.getField<boost::uint8_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint8_t>(u8);
+                break;
+            } else if (d.getByteSize() == 2)
+            {
+                u16 = data.getField<boost::uint16_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint16_t>(u16);
+                break;
+            } else if (d.getByteSize() == 4)
+            {
+                u32 = data.getField<boost::uint32_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint32_t>(u32);
+                break;
+            } else if (d.getByteSize() == 8)
+            {
+                u64 = data.getField<boost::uint64_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint64_t>(u64);
+                break;
+            }
+            else 
+            {
+                std::ostringstream oss;
+                oss << "Unable to interpret UnsignedInteger of size '" << d.getByteSize() <<"'";
+                throw pdal_error(oss.str());
+            }
+
+        case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
+        case dimension::Undefined:
             throw pdal_error("Dimension data type unable to be summarized");
     }    
     
