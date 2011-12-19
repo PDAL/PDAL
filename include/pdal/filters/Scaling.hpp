@@ -39,6 +39,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
+#include <pdal/Utils.hpp>
 
 #include <map>
 
@@ -117,12 +118,46 @@ private:
     const pdal::filters::Scaling& m_scalingFilter;
 
     void writeScaledData(   PointBuffer& buffer, 
-                            Dimension const* from_dimension, 
-                            Dimension const* to_dimension, 
+                            Dimension const& from_dimension, 
+                            Dimension const& to_dimension, 
                             boost::uint32_t pointIndex);
-    std::map<dimension::id, Dimension> m_scale_map;
+    template<class T> void scale(   Dimension const& from_dimension,
+                                    Dimension const& to_dimension, 
+                                    T& value) const;
+    std::map<dimension::id, dimension::id> m_scale_map;
 };
 
+template <class T>
+inline void Scaling::scale( Dimension const& from_dimension,
+                            Dimension const& to_dimension,
+                            T& value) const
+{
+    
+    double v = static_cast<double>(value);
+    double out = (v*from_dimension.getNumericScale() + from_dimension.getNumericOffset() - to_dimension.getNumericOffset())/to_dimension.getNumericScale();
+
+    T output = static_cast<T>(out);
+
+    if (output >= (std::numeric_limits<T>::max)())
+    {
+        std::ostringstream oss;
+        oss << "filter.Scaling: scale and/or offset combination causes " 
+               "re-scaled value to be greater than std::numeric_limits::max for dimension '" << to_dimension.getName() << "'";
+        
+    } 
+    else if (output <= (std::numeric_limits<T>::min)() )
+    {
+        std::ostringstream oss;
+        oss << "filter.Scaling: scale and/or offset combination causes " 
+               "re-scaled value to be less than std::numeric_limits::min for dimension '" << to_dimension.getName() << "'";
+        throw std::out_of_range(oss.str());
+
+    }
+    
+    value = output;
+    
+    return ;
+}
 
 } } // namespaces
 

@@ -4,14 +4,14 @@
         <Option name="dimension">
             X
             <Options>
-                <Option name="scale">0.0001</Option>
+                <Option name="scale">0.1</Option>
                 <Option name="offset">1.0</Option>
             </Options>
         </Option>
         <Option name="dimension">
             Y
             <Options>
-                <Option name="scale">0.0001</Option>
+                <Option name="scale">0.1</Option>
                 <Option name="offset">2.0</Option>
             </Options>
         </Option>        

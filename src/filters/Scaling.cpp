@@ -80,7 +80,7 @@ void Scaling::checkImpedance()
         {
             scaler.scale = dimensionOptions->getValueOrDefault<double>("scale", 1.0);
             scaler.offset = dimensionOptions->getValueOrDefault<double>("offset", 0.0);
-            scaler.type = dimensionOptions->getValueOrDefault<std::string>("type", "Integer");
+            scaler.type = dimensionOptions->getValueOrDefault<std::string>("type", "SignedInteger");
             scaler.size = dimensionOptions->getValueOrDefault<boost::uint32_t>("size", 4);
         }
         
@@ -236,17 +236,19 @@ void Scaling::alterSchema(PointBuffer& buffer)
     // dimension to be scaled
     for (i = scalers.begin(); i != scalers.end(); ++i)
     {
-        boost::optional<Dimension const&> dim = schema.getDimensionOptional(i->name);
-        if (dim)
+        boost::optional<Dimension const&> from_dimension = schema.getDimensionOptional(i->name);
+        if (from_dimension)
         {
             dimension::Interpretation interp = getInterpretation(i->type);
-            Dimension d2(i->name, interp, i->size, dim->getDescription());
-            d2.setNumericScale(i->scale);
-            d2.setNumericOffset(i->offset);
-            d2.createUUID();
-            std::pair<dimension::id, Dimension> p(d2.getUUID(), dim.get());
+
+            Dimension to_dimension(i->name, interp, i->size, from_dimension->getDescription());
+            to_dimension.setNumericScale(i->scale);
+            to_dimension.setNumericOffset(i->offset);
+            to_dimension.createUUID();
+            to_dimension.setNamespace(m_scalingFilter.getName());
+            std::pair<dimension::id, dimension::id> p(from_dimension->getUUID(), to_dimension.getUUID());
             m_scale_map.insert(p);
-            schema.appendDimension(d2);
+            schema.appendDimension(to_dimension);
         }
     }
     
@@ -288,43 +290,176 @@ boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
 {
     const Schema& schema = buffer.getSchema();
 
-
-    std::vector<Dimension const*> from_dimensions;
-    
-    std::map<dimension::id, Dimension>::const_iterator d;
-    for (d = m_scale_map.begin(); d != m_scale_map.end(); ++d)
-    {
-        from_dimensions.push_back(&schema.getDimension(d->first));
-    }
-
     const boost::uint32_t numRead = getPrevIterator().read(buffer);
     
     for (boost::uint32_t pointIndex=0; pointIndex<numRead; pointIndex++)
     {
-        std::vector<Dimension const*>::const_iterator i;
-        for (i = from_dimensions.begin(); i != from_dimensions.end(); ++i)
+        std::map<dimension::id, dimension::id>::const_iterator d;
+        for (d = m_scale_map.begin(); d != m_scale_map.end(); ++d)
         {
-            Dimension const* from_dimension = *i;
-            d = m_scale_map.find(from_dimension->getUUID());
-            if (d != m_scale_map.end())
-            {
-                Dimension const* to_dimension = &(d->second);
-                writeScaledData(buffer, from_dimension, to_dimension, pointIndex);
-            }
+            Dimension const& from_dimension = schema.getDimension(d->first);
+            
+            Dimension const& to_dimension = schema.getDimension(d->second);
+            writeScaledData(buffer, from_dimension, to_dimension, pointIndex);
         }
-
     }
 
     return numRead;
 }
 
 void Scaling::writeScaledData(  PointBuffer& buffer, 
-                                Dimension const* from_dimension, 
-                                Dimension const* to_dimension, 
+                                Dimension const& from_dimension, 
+                                Dimension const& to_dimension, 
                                 boost::uint32_t pointIndex)
 {
     
+    double dbl(0.0);
+    float flt(0.0);
+    boost::int8_t i8(0);
+    boost::uint8_t u8(0);
+    boost::int16_t i16(0);
+    boost::uint16_t u16(0);
+    boost::int32_t i32(0);
+    boost::uint32_t u32(0);
+    boost::int64_t i64(0);
+    boost::uint64_t u64(0);
+
+    switch (to_dimension.getInterpretation())
+    {
+        case dimension::SignedByte:
+            i8 = buffer.getField<boost::int8_t>(from_dimension, pointIndex);
+            scale(  from_dimension,
+                    to_dimension,
+                    i8);
+            buffer.setField<boost::int8_t>(to_dimension, pointIndex, i8);
+            
+            break;
+        case dimension::UnsignedByte:
+            u8 = buffer.getField<boost::uint8_t>(from_dimension, pointIndex);
+            scale(  from_dimension,
+                    to_dimension,
+                    u8);
+            buffer.setField<boost::uint8_t>(to_dimension, pointIndex, u8);            
+            break;
+        case dimension::Float:
+            if (from_dimension.getByteSize() == 4)
+            {
+                flt = buffer.getField<float>(from_dimension, pointIndex);
+                scale(  from_dimension,
+                        to_dimension,
+                        flt);
+                buffer.setField<float>(to_dimension, pointIndex, flt);
+                break;
+            } 
+            else if (from_dimension.getByteSize() == 8)
+            {
+                dbl = buffer.getField<double>(from_dimension, pointIndex);
+                scale(  from_dimension,
+                        to_dimension,
+                        dbl);
+                buffer.setField<double>(to_dimension, pointIndex, dbl);
+                break;
+            }
+            else 
+            {
+                std::ostringstream oss;
+                oss << "Unable to interpret Float of size '" << from_dimension.getByteSize() <<"'";
+                throw pdal_error(oss.str());
+            }
+            
+        case dimension::SignedInteger:
+            if (from_dimension.getByteSize() == 1)
+            {
+                i8 = buffer.getField<boost::int8_t>(from_dimension, pointIndex);
+                scale(  from_dimension,
+                        to_dimension,
+                        i8);
+                buffer.setField<boost::int8_t>(to_dimension, pointIndex, i8);                
+                break;
+            } 
+            else if (from_dimension.getByteSize() == 2)
+            {
+                i16 = buffer.getField<boost::int16_t>(from_dimension, pointIndex);
+                scale(  from_dimension,
+                        to_dimension,
+                        i16);
+                buffer.setField<boost::int16_t>(to_dimension, pointIndex, i16);
+                break;
+            } else if (from_dimension.getByteSize() == 4)
+            {
+                i32 = buffer.getField<boost::int32_t>(from_dimension, pointIndex);
+                scale(  from_dimension,
+                        to_dimension,
+                        i32);
+                buffer.setField<boost::int32_t>(to_dimension, pointIndex, i32);
+                break;
+            } 
+            else if (from_dimension.getByteSize() == 8)
+            {
+                i64 = buffer.getField<boost::int64_t>(from_dimension, pointIndex);
+                scale(  from_dimension,
+                        to_dimension,
+                        i64);
+                buffer.setField<boost::int64_t>(to_dimension, pointIndex, i64);
+                break;
+            }
+            else 
+            {
+                std::ostringstream oss;
+                oss << "Unable to interpret SignedInteger of size '" << from_dimension.getByteSize() <<"'";
+                throw pdal_error(oss.str());
+            }
+        case dimension::UnsignedInteger:
+            if (from_dimension.getByteSize() == 1)
+            {
+                u8 = buffer.getField<boost::uint8_t>(from_dimension, pointIndex);
+                scale(  from_dimension,
+                        to_dimension,
+                        u8);
+                buffer.setField<boost::uint8_t>(to_dimension, pointIndex, u8);
+                break;
+            } 
+            else if (from_dimension.getByteSize() == 2)
+            {
+                u16 = buffer.getField<boost::uint16_t>(from_dimension, pointIndex);
+                scale(  from_dimension,
+                        to_dimension,
+                        u16);
+                buffer.setField<boost::uint16_t>(to_dimension, pointIndex, u16);
+                break;
+            } else if (from_dimension.getByteSize() == 4)
+            {
+                u32 = buffer.getField<boost::uint32_t>(from_dimension, pointIndex);
+                scale(  from_dimension,
+                        to_dimension,
+                        u32);
+                buffer.setField<boost::uint32_t>(to_dimension, pointIndex, u32);
+                break;
+            } 
+            else if (from_dimension.getByteSize() == 8)
+            {
+                u64 = buffer.getField<boost::uint64_t>(from_dimension, pointIndex);
+                scale(  from_dimension,
+                        to_dimension,
+                        u64);
+                buffer.setField<boost::uint64_t>(to_dimension, pointIndex, u64);
+                break;
+            }
+            else 
+            {
+                std::ostringstream oss;
+                oss << "Unable to interpret UnsignedInteger of size '" << from_dimension.getByteSize() <<"'";
+                throw pdal_error(oss.str());
+            }
+
+        case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
+            throw pdal_error("Dimension data type unable to be scaled because it is of interpretation Pointer");
+        case dimension::Undefined:
+            throw pdal_error("Dimension data type unable to be scaled because it is Undefined");
+    }    
     
+    
+
     return;
 }
 
