@@ -192,9 +192,9 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
 
     const Schema& schema = getPrevStage().getSchema();
 
-    const Dimension& dimX = schema.getDimension(DimensionId::X_i32);
-    const Dimension& dimY = schema.getDimension(DimensionId::Y_i32);
-    const Dimension& dimZ = schema.getDimension(DimensionId::Z_i32);
+    const Dimension& dimX = schema.getDimension("X");
+    const Dimension& dimY = schema.getDimension("Y");
+    const Dimension& dimZ = schema.getDimension("Z");
 
     m_lasHeader.SetScale(dimX.getNumericScale(), dimY.getNumericScale(), dimZ.getNumericScale());
     m_lasHeader.SetOffset(dimX.getNumericOffset(), dimY.getNumericOffset(), dimZ.getNumericOffset());
@@ -269,12 +269,10 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 {
     const Schema& schema = pointBuffer.getSchema();
-    const Dimension& xDim = schema.getDimension(DimensionId::X_i32);
-    const Dimension& yDim = schema.getDimension(DimensionId::Y_i32);
-    const Dimension& zDim = schema.getDimension(DimensionId::Z_i32);
+
     PointFormat pointFormat = m_lasHeader.getPointFormat();
 
-    const PointDimensions dimensions(schema);
+    const PointDimensions dimensions(schema,"");
 
     boost::uint32_t numValidPoints = 0;
 
@@ -396,9 +394,9 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& pointBuffer)
 #endif
         ++numValidPoints;
 
-        const double xValue = xDim.applyScaling<boost::int32_t>(x);
-        const double yValue = yDim.applyScaling<boost::int32_t>(y);
-        const double zValue = zDim.applyScaling<boost::int32_t>(z);
+        const double xValue = (*dimensions.X).applyScaling<boost::int32_t>(x);
+        const double yValue = (*dimensions.Y).applyScaling<boost::int32_t>(y);
+        const double zValue = (*dimensions.Z).applyScaling<boost::int32_t>(z);
         m_summaryData.addPoint(xValue, yValue, zValue, returnNumber);
     }
 
