@@ -48,6 +48,7 @@
 
 #include <pdal/external/boost/uuid/uuid_io.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
+#include <boost/algorithm/string.hpp>
 
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
@@ -190,11 +191,10 @@ boost::optional<Dimension const&> Schema::getDimensionOptional(std::size_t t) co
     }
 }
 
-const Dimension& Schema::getDimension(std::string const& t) const
+const Dimension& Schema::getDimension(std::string const& t, std::string const& ns) const
 {
     schema::index_by_name const& name_index = m_index.get<schema::name>();
     schema::index_by_name::const_iterator it = name_index.find(t);
-
 
     std::ostringstream oss;
     oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
@@ -202,6 +202,18 @@ const Dimension& Schema::getDimension(std::string const& t) const
     // FIXME: If there are two dimensions with the same name here, we're 
     // scrwed
     if (it != name_index.end()) {
+        
+        if (ns.size())
+        {
+            while (it != name_index.end())
+            {
+                if (boost::equals(ns, it->getNamespace()))
+                    return *it;
+                ++it;
+            }
+            
+        }
+        
         return *it;
     } else {
         pdal::external::boost::uuids::uuid ps1;
@@ -219,6 +231,17 @@ const Dimension& Schema::getDimension(std::string const& t) const
 
         if (i != m_index.get<schema::uid>().end())
         {
+            if (ns.size())
+            {
+                while (i != m_index.get<schema::uid>().end())
+                {
+                    if (boost::equals(ns, i->getNamespace()))
+                        return *i;
+                    ++i;
+                }
+            
+            }
+            
             return *i;
         } else 
         {
@@ -233,18 +256,21 @@ const Dimension& Schema::getDimension(std::string const& t) const
 
 }
 
-boost::optional<Dimension const&> Schema::getDimensionOptional(std::string const& t) const
+
+
+boost::optional<Dimension const&> Schema::getDimensionOptional(std::string const& t, std::string const& ns) const
 {
+
     try
     {
-        Dimension const& dim = getDimension(t);
+        Dimension const& dim = getDimension(t, ns);
         return boost::optional<Dimension const&>(dim);
     } catch (pdal::dimension_not_found&)
     {
         return boost::optional<Dimension const&>();
     }
-}
 
+}
 
 bool Schema::setDimension(Dimension const& dim)
 {
@@ -252,9 +278,17 @@ bool Schema::setDimension(Dimension const& dim)
     schema::index_by_name::iterator it = name_index.find(dim.getName());
     
     // FIXME: If there are two dimensions with the same name here, we're 
-    // scrwed
+    // screwed if they both have the same namespace too
     if (it != name_index.end()) {
-        name_index.replace(it, dim);
+        while (it != name_index.end())
+        {
+            if (boost::equals(dim.getNamespace(), it->getNamespace()))
+            {
+                name_index.replace(it, dim);
+                return true;
+            }
+            ++it;
+        }
     } else {
         std::ostringstream oss;
         oss << "Dimension with name '" << dim.getName() << "' not found, unable to Schema::setDimension";

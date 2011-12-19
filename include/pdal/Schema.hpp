@@ -126,11 +126,13 @@ public:
 
     // Dimension& getDimension(const DimensionId::Id& id);
     const Dimension& getDimension(const DimensionId::Id& id) const;
-    const Dimension& getDimension(std::string const& type) const;
+    // const Dimension& getDimension(std::string const& name) const;
+    const Dimension& getDimension(std::string const& name, std::string const& ns="") const;
     const Dimension& getDimension(dimension::id const& id) const;
     const Dimension& getDimension(std::size_t index) const;
 
-    boost::optional<Dimension const&> getDimensionOptional(std::string const& t) const;
+    // boost::optional<Dimension const&> getDimensionOptional(std::string const& t) const;
+    boost::optional<Dimension const&> getDimensionOptional(std::string const& name, std::string const& ns="") const;
     boost::optional<Dimension const&> getDimensionOptional(dimension::id const& id) const;
     boost::optional<Dimension const&> getDimensionOptional(std::size_t index) const;
 
