@@ -46,9 +46,9 @@ void Support::registerFields(Stage& stage, Schema& schema, PointFormat format)
     
     Schema dimensions(d);
     
-    schema.appendDimension(dimensions.getDimension("X"));
-    schema.appendDimension(dimensions.getDimension("Y"));
-    schema.appendDimension(dimensions.getDimension("Z"));
+    schema.appendDimension(dimensions.getDimension("X", stage.getName()));
+    schema.appendDimension(dimensions.getDimension("Y", stage.getName()));
+    schema.appendDimension(dimensions.getDimension("Z", stage.getName()));
 
     schema.appendDimension(dimensions.getDimension("Intensity"));
     schema.appendDimension(dimensions.getDimension("ReturnNumber")); // 3 bits only
@@ -97,9 +97,9 @@ void Support::setScaling(   Schema& schema,
                             double offsetY, 
                             double offsetZ)
 {
-    Dimension dimX = schema.getDimension(DimensionId::X_i32);
-    Dimension dimY = schema.getDimension(DimensionId::Y_i32);
-    Dimension dimZ = schema.getDimension(DimensionId::Z_i32);
+    Dimension dimX = schema.getDimension("X");
+    Dimension dimY = schema.getDimension("Y");
+    Dimension dimZ = schema.getDimension("Z");
 
     dimX.setNumericScale(scaleX);
     dimY.setNumericScale(scaleY);
@@ -149,12 +149,12 @@ boost::uint16_t Support::getPointDataSize(PointFormat pointFormat)
 
 }
 
-PointDimensions::PointDimensions(const Schema& schema)
+PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 {
 
-    X = &schema.getDimension("X");
-    Y = &schema.getDimension("Y");
-    Z = &schema.getDimension("Z");
+    X = &schema.getDimension("X", ns);
+    Y = &schema.getDimension("Y", ns);
+    Z = &schema.getDimension("Z", ns);
     
     try
     {

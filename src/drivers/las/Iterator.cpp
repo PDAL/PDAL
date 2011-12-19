@@ -140,7 +140,7 @@ void SequentialIterator::readBufferBeginImpl(PointBuffer& buffer)
     Schema const& schema = buffer.getSchema();
     if (m_pointDimensions)
         delete m_pointDimensions;
-    m_pointDimensions = new PointDimensions(schema);
+    m_pointDimensions = new PointDimensions(schema, m_reader.getName());
 
 } 
 
@@ -230,7 +230,7 @@ void RandomIterator::readBufferBeginImpl(PointBuffer& buffer)
         m_schema = &schema;
         if (m_pointDimensions)
             delete m_pointDimensions;
-        m_pointDimensions = new PointDimensions(schema);
+        m_pointDimensions = new PointDimensions(schema, m_reader.getName());
     } 
 
 } 

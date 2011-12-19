@@ -61,7 +61,7 @@ enum PointFormat
 class PDAL_DLL PointDimensions
 {
 public:
-    PointDimensions(const Schema& schema);
+    PointDimensions(const Schema& schema, std::string const& ns);
     
     pdal::Dimension const* X;
     pdal::Dimension const* Y;
