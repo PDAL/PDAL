@@ -337,6 +337,8 @@ public:
     void createUUID();
 
     void setNamespace( std::string const& name) { m_namespace = name; }
+    std::string const& getNamespace( ) const { return m_namespace; }
+
 private:
     DataType m_dataType;
     DimensionId::Id m_id;
