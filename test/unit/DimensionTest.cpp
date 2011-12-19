@@ -39,6 +39,7 @@
 #include <boost/algorithm/string/replace.hpp>
 
 #include <pdal/dimension/Dimension.hpp>
+#include <pdal/external/boost/uuid/string_generator.hpp>
 
 using namespace pdal;
 
@@ -46,19 +47,21 @@ BOOST_AUTO_TEST_SUITE(DimensionTest)
 
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
-    Dimension d1(DimensionId::X_i32);
+    Dimension d1("X", dimension::SignedInteger, 4);
 
-    BOOST_CHECK(d1.getId() == DimensionId::X_i32);
-    BOOST_CHECK(d1.getName() == "X");
-    BOOST_CHECK(d1.getDataType() == Dimension::Int32);
+    BOOST_CHECK_EQUAL(d1.getName(), "X");
+    BOOST_CHECK_EQUAL(d1.getNamespace(), "");
+    BOOST_CHECK_EQUAL(d1.getInterpretation(), dimension::SignedInteger);
 
     Dimension d2(d1);
-    BOOST_CHECK(d1.getId() == DimensionId::X_i32);
-    BOOST_CHECK(d1.getDataType() == Dimension::Int32);
-
+    BOOST_CHECK_EQUAL(d1.getId(), d2.getId());
+    BOOST_CHECK_EQUAL(d1.getInterpretation(), d2.getInterpretation());
+    BOOST_CHECK_EQUAL(d1.getNamespace(), d2.getNamespace());
+    
     Dimension d3 = d1;
-    BOOST_CHECK(d1.getId() == DimensionId::X_i32);
-    BOOST_CHECK(d1.getDataType() == Dimension::Int32);
+    BOOST_CHECK_EQUAL(d1.getId(), d3.getId());
+    BOOST_CHECK_EQUAL(d1.getInterpretation(), d3.getInterpretation());
+    BOOST_CHECK_EQUAL(d1.getNamespace(), d3.getNamespace());
 
     BOOST_CHECK(d1 == d1);
     BOOST_CHECK(d1 == d2);
@@ -66,33 +69,43 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK(d1 == d3);
     BOOST_CHECK(d3 == d1);
 
-    Dimension d4(DimensionId::Y_i32);
+    Dimension d4("Y", dimension::SignedInteger, 4);
     d4.setEndianness(Endian_Big);
     BOOST_CHECK(d1 != d4);
     BOOST_CHECK(d4 != d1);
+
+    
 }
 
 
 BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
 {
-    Dimension d1(DimensionId::X_i32);
+    Dimension d1("X", dimension::SignedInteger, 4);
 
-    std::stringstream ss1(std::stringstream::in | std::stringstream::out);
-  
+    pdal::external::boost::uuids::string_generator gen;
+    std::string id("9bf8d966-0c0d-4c94-a14e-bce97e860bde");
+    dimension::id uuid = gen(id);
+    
+    d1.setUUID(uuid);
+    
+    
     boost::property_tree::ptree tree = d1.toPTree();
-    boost::property_tree::write_xml(ss1, tree);
+    
+    boost::uint32_t size = tree.get<boost::uint32_t>("bytesize");
+    BOOST_CHECK_EQUAL(size, 4);
+    
+    std::string name = tree.get<std::string>("name");
+    BOOST_CHECK_EQUAL(name, "X");
+    
+    BOOST_CHECK_CLOSE(tree.get<double>("scale"), 1.0, 0.00001);
+    BOOST_CHECK_CLOSE(tree.get<double>("offset"), 0.0, 0.00001);
+    BOOST_CHECK_CLOSE(tree.get<double>("maximum"), 0.0, 0.00001);
+    BOOST_CHECK_CLOSE(tree.get<double>("minimum"), 0.0, 0.00001);
+    
+    BOOST_CHECK_EQUAL(tree.get<std::string>("namespace"), "");
 
-    std::string out1 = ss1.str();
+    BOOST_CHECK_EQUAL(tree.get<std::string>("uuid"), "9bf8d966-0c0d-4c94-a14e-bce97e860bde");
 
-    std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    std::string ref = xml_header + 
-        "<name>X</name><datatype>Int32</datatype>"
-        "<description>x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</description>"
-        "<bytesize>4</bytesize><endianness>little</endianness><scale>1</scale><isValid>false</isValid>";
-
-    boost::algorithm::erase_all(out1, "\n");
-    boost::algorithm::erase_all(ref, "\n");
-    BOOST_CHECK_EQUAL(ref, out1);
 
     return;
 }
