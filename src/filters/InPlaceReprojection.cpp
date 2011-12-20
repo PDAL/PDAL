@@ -83,9 +83,9 @@ InPlaceReprojection::InPlaceReprojection(Stage& prevStage, const Options& option
     : pdal::Filter(prevStage, options)
     , m_outSRS(options.getValueOrThrow<pdal::SpatialReference>("out_srs"))
     , m_inferInputSRS(false)
-    , m_x(DimensionId::X_i32)
-    , m_y(DimensionId::Y_i32)
-    , m_z(DimensionId::Z_i32)
+    , m_x("X", dimension::SignedInteger, 4)
+    , m_y("Y", dimension::SignedInteger, 4)
+    , m_z("Z", dimension::SignedInteger, 4)
     , m_x_scale(1.0)
     , m_y_scale(1.0)
     , m_z_scale(1.0)
@@ -315,50 +315,71 @@ double InPlaceReprojection::getScaledValue( PointBuffer& data,
     boost::int64_t i64(0);
     boost::uint64_t u64(0);
     
-    switch (d.getDataType())
+    boost::uint32_t size = d.getByteSize();
+    switch (d.getInterpretation())
     {
-        case Dimension::Float:
-            flt = data.getField<float>(d, pointIndex);
-            output = static_cast<double>(flt);
+        case dimension::Float:
+            if (size == 4)
+            {
+                flt = data.getField<float>(d, pointIndex);
+                output = static_cast<double>(flt);                
+            }
+            if (size == 8)
+            {
+                output = data.getField<double>(d, pointIndex);
+            }
             break;
-        case Dimension::Double:
-            output = data.getField<double>(d, pointIndex);
+
+        case dimension::SignedInteger:
+        case dimension::SignedByte:
+            if (size == 1)
+            {
+                i8 = data.getField<boost::int8_t>(d, pointIndex);
+                output = d.applyScaling<boost::int8_t>(i8);
+            }
+            if (size == 2)
+            {
+                i16 = data.getField<boost::int16_t>(d, pointIndex);
+                output = d.applyScaling<boost::int16_t>(i16);
+            }
+            if (size == 4)
+            {
+                i32 = data.getField<boost::int32_t>(d, pointIndex);
+                output = d.applyScaling<boost::int32_t>(i32);
+            }
+            if (size == 8)
+            {
+                i64 = data.getField<boost::int64_t>(d, pointIndex);
+                output = d.applyScaling<boost::int64_t>(i64);
+            }
             break;
-        
-        case Dimension::Int8:
-            i8 = data.getField<boost::int8_t>(d, pointIndex);
-            output = d.applyScaling<boost::int8_t>(i8);
+            
+        case dimension::UnsignedInteger:
+        case dimension::UnsignedByte:
+            if (size == 1)
+            {
+                u8 = data.getField<boost::uint8_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint8_t>(u8);
+            }
+            if (size == 2)
+            {
+                u16 = data.getField<boost::uint16_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint16_t>(u16);
+            }
+            if (size == 4)
+            {
+                u32 = data.getField<boost::uint32_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint32_t>(u32);
+            }
+            if (size == 8)
+            {
+                u64 = data.getField<boost::uint64_t>(d, pointIndex);
+                output = d.applyScaling<boost::uint64_t>(u64);
+            }
             break;
-        case Dimension::Uint8:
-            u8 = data.getField<boost::uint8_t>(d, pointIndex);
-            output = d.applyScaling<boost::uint8_t>(u8);
-            break;
-        case Dimension::Int16:
-            i16 = data.getField<boost::int16_t>(d, pointIndex);
-            output = d.applyScaling<boost::int16_t>(i16);
-            break;
-        case Dimension::Uint16:
-            u16 = data.getField<boost::uint16_t>(d, pointIndex);
-            output = d.applyScaling<boost::uint16_t>(u16);
-            break;
-        case Dimension::Int32:
-            i32 = data.getField<boost::int32_t>(d, pointIndex);
-            output = d.applyScaling<boost::int32_t>(i32);
-            break;
-        case Dimension::Uint32:
-            u32 = data.getField<boost::uint32_t>(d, pointIndex);
-            output = d.applyScaling<boost::uint32_t>(u32);
-            break;
-        case Dimension::Int64:
-            i64 = data.getField<boost::int64_t>(d, pointIndex);
-            output = d.applyScaling<boost::int64_t>(i64);
-            break;
-        case Dimension::Uint64:
-            u64 = data.getField<boost::uint64_t>(d, pointIndex);
-            output = d.applyScaling<boost::uint64_t>(u64);
-            break;
-        case Dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
-        case Dimension::Undefined:
+
+        case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
+        case dimension::Undefined:
             throw pdal_error("Dimension data type unable to be reprojected");
     }    
     
@@ -380,50 +401,74 @@ void InPlaceReprojection::setScaledValue(PointBuffer& data,
     boost::int64_t i64(0);
     boost::uint64_t u64(0);
     
-    switch (d.getDataType())
+
+    boost::uint32_t size = d.getByteSize();
+    switch (d.getInterpretation())
     {
-        case Dimension::Float:
-            flt = static_cast<float>(value);
-            data.setField<float>(d, pointIndex, flt);
+        case dimension::Float:
+            if (size == 4)
+            {
+                flt = static_cast<float>(value);
+                data.setField<float>(d, pointIndex, flt);
+            }
+            if (size == 8)
+            {
+                data.setField<double>(d, pointIndex, value);
+            }
             break;
-        case Dimension::Double:
-            data.setField<double>(d, pointIndex, value);
+
+        case dimension::SignedInteger:
+        case dimension::SignedByte:
+            if (size == 1)
+            {
+                i8 = d.removeScaling<boost::int8_t>(value);
+                data.setField<boost::int8_t>(d, pointIndex, i8);
+            }
+            if (size == 2)
+            {
+                i16 = d.removeScaling<boost::int16_t>(value);
+                data.setField<boost::int16_t>(d, pointIndex, i16);
+            }
+            if (size == 4)
+            {
+                i32 = d.removeScaling<boost::int32_t>(value);
+                data.setField<boost::int32_t>(d, pointIndex, i32);
+            }
+            if (size == 8)
+            {
+                i64 = d.removeScaling<boost::int64_t>(value);
+                data.setField<boost::int64_t>(d, pointIndex, i64);
+            }
             break;
-        case Dimension::Int8:
-            i8 = d.removeScaling<boost::int8_t>(value);
-            data.setField<boost::int8_t>(d, pointIndex, i8);
+            
+        case dimension::UnsignedInteger:
+        case dimension::UnsignedByte:
+            if (size == 1)
+            {
+                u8 = d.removeScaling<boost::uint8_t>(value);
+                data.setField<boost::uint8_t>(d, pointIndex, u8);
+            }
+            if (size == 2)
+            {
+                u16 = d.removeScaling<boost::uint16_t>(value);
+                data.setField<boost::uint16_t>(d, pointIndex, u16);
+            }
+            if (size == 4)
+            {
+                u32 = d.removeScaling<boost::uint32_t>(value);
+                data.setField<boost::uint32_t>(d, pointIndex, u32);
+            }
+            if (size == 8)
+            {
+                u64 = d.removeScaling<boost::uint64_t>(value);
+                data.setField<boost::uint64_t>(d, pointIndex, u64);
+            }
             break;
-        case Dimension::Uint8:
-            u8 = d.removeScaling<boost::uint8_t>(value);
-            data.setField<boost::uint8_t>(d, pointIndex, u8);
-            break;
-        case Dimension::Int16:
-            i16 = d.removeScaling<boost::int16_t>(value);
-            data.setField<boost::int16_t>(d, pointIndex, i16);
-            break;
-        case Dimension::Uint16:
-            u16 = d.removeScaling<boost::uint16_t>(value);
-            data.setField<boost::uint16_t>(d, pointIndex, u16);
-            break;
-        case Dimension::Int32:
-            i32 = d.removeScaling<boost::int32_t>(value);
-            data.setField<boost::int32_t>(d, pointIndex, i32);
-            break;
-        case Dimension::Uint32:
-            u32 = d.removeScaling<boost::uint32_t>(value);
-            data.setField<boost::uint32_t>(d, pointIndex, u32);
-            break;
-        case Dimension::Int64:
-            i64 = d.removeScaling<boost::int64_t>(value);
-            data.setField<boost::int64_t>(d, pointIndex, i64);
-            break;
-        case Dimension::Uint64:
-            u64 = d.removeScaling<boost::uint64_t>(value);
-            data.setField<boost::uint64_t>(d, pointIndex, u64);
-            break;
-        case Dimension::Pointer:
-        case Dimension::Undefined:
+
+        case dimension::Pointer:    // stored as 64 bits, even on a 32-bit box
+        case dimension::Undefined:
             throw pdal_error("Dimension data type unable to be reprojected");
+
     }    
         
     

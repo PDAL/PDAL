@@ -75,17 +75,17 @@ boost::uint32_t Predicate::processBuffer(PointBuffer& dstData, const PointBuffer
     boost::uint32_t dstIndex = dstData.getNumPoints();
     boost::uint32_t numPointsAdded = 0;
 
-    const int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
-    const int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
-    const int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
-    const int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
+    Dimension const& dimX = schema.getDimension("X");
+    Dimension const& dimY = schema.getDimension("Y");
+    Dimension const& dimZ = schema.getDimension("Z");
+    Dimension const& dimTime = schema.getDimension("Time");
 
     for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
     {
-        const double x = srcData.getField<double>(srcIndex, offsetX);
-        const double y = srcData.getField<double>(srcIndex, offsetY);
-        const double z = srcData.getField<double>(srcIndex, offsetZ);
-        const boost::uint64_t t = srcData.getField<boost::uint64_t>(srcIndex, offsetT);
+        const double x = srcData.getField<double>(dimX, srcIndex);
+        const double y = srcData.getField<double>(dimY, srcIndex);
+        const double z = srcData.getField<double>(dimZ, srcIndex);
+        const boost::uint64_t t = srcData.getField<boost::uint64_t>(dimTime, srcIndex);
         parser.setVariable("X", x);
         parser.setVariable("Y", y);
         parser.setVariable("Z", z);

@@ -218,10 +218,14 @@ void Reprojection::updateBounds()
 void Reprojection::checkImpedance()
 {
     const Schema& schema = this->getSchema();
-
-    if (!schema.hasDimension(DimensionId::X_f64) ||
-        !schema.hasDimension(DimensionId::Y_f64) ||
-        !schema.hasDimension(DimensionId::Z_f64))
+    
+    boost::optional<Dimension const&> x = schema.getDimension("X");
+    boost::optional<Dimension const&> y = schema.getDimension("Y");
+    boost::optional<Dimension const&> z = schema.getDimension("Z");
+    
+    if (!(x->getByteSize() != 8) ||
+        !(y->getByteSize() != 8) ||
+        !(z->getByteSize() != 8) )
     {
         throw impedance_invalid("Reprojection filter requires X,Y,Z dimensions as doubles");
     }
@@ -258,22 +262,23 @@ void Reprojection::processBuffer(PointBuffer& data) const
     const boost::uint32_t numPoints = data.getNumPoints();
 
     const Schema& schema = data.getSchema();
-
-    const int indexX = schema.getDimensionIndex(DimensionId::X_f64);
-    const int indexY = schema.getDimensionIndex(DimensionId::Y_f64);
-    const int indexZ = schema.getDimensionIndex(DimensionId::Z_f64);
+    
+    Dimension const& dimX = schema.getDimension("X");
+    Dimension const& dimY = schema.getDimension("Y");
+    Dimension const& dimZ = schema.getDimension("Z");
+    
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        double x = data.getField<double>(pointIndex, indexX);
-        double y = data.getField<double>(pointIndex, indexY);
-        double z = data.getField<double>(pointIndex, indexZ);
+        double x = data.getField<double>(dimX, pointIndex);
+        double y = data.getField<double>(dimY, pointIndex);
+        double z = data.getField<double>(dimZ, pointIndex);
 
         this->transform(x,y,z);
 
-        data.setField<double>(pointIndex, indexX, x);
-        data.setField<double>(pointIndex, indexY, y);
-        data.setField<double>(pointIndex, indexZ, z);
+        data.setField<double>(dimX, pointIndex, x);
+        data.setField<double>(dimY, pointIndex, y);
+        data.setField<double>(dimZ, pointIndex, z);
 
         data.setNumPoints(pointIndex+1);
     }

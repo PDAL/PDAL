@@ -89,9 +89,6 @@ boost::uint32_t Crop::processBuffer(PointBuffer& dstData, const PointBuffer& src
 {
     const Schema& schema = dstData.getSchema();
 
-    bool isDouble = schema.hasDimension(DimensionId::X_f64);
-    assert(isDouble || (!isDouble && schema.hasDimension(DimensionId::X_i32)));
-
     const Bounds<double>& bounds = this->getBounds();
 
     boost::uint32_t numSrcPoints = srcData.getNumPoints();
@@ -99,59 +96,54 @@ boost::uint32_t Crop::processBuffer(PointBuffer& dstData, const PointBuffer& src
 
     boost::uint32_t numPointsAdded = 0;
 
-    if (isDouble)
+    boost::optional<Dimension const&> dimX = schema.getDimension("X");
+    boost::optional<Dimension const&> dimY = schema.getDimension("Y");
+    boost::optional<Dimension const&> dimZ = schema.getDimension("Z");
+
+    for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
     {
-        const int fieldX = schema.getDimensionIndex(DimensionId::X_f64);
-        const int fieldY = schema.getDimensionIndex(DimensionId::Y_f64);
-        const int fieldZ = schema.getDimensionIndex(DimensionId::Z_f64);
-
-        for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
-        {
-            const double x = srcData.getField<double>(srcIndex, fieldX);
-            const double y = srcData.getField<double>(srcIndex, fieldY);
-            const double z = srcData.getField<double>(srcIndex, fieldZ);
-
-            Vector<double> point(x,y,z);
+        // need to scale the values
+        double x(0.0);
+        double y(0.0);
+        double z(0.0);
         
-            if (bounds.contains(point))
-            {
-                dstData.copyPointFast(dstIndex, srcIndex, srcData);
-                dstData.setNumPoints(dstIndex+1);
-                ++dstIndex;
-                ++numPointsAdded;
-            }
+        if (dimX->getInterpretation() == dimension::SignedInteger )
+        {
+            boost::int32_t xi = srcData.getField<boost::int32_t>(*dimX, srcIndex);
+            boost::int32_t yi = srcData.getField<boost::int32_t>(*dimY, srcIndex);
+            boost::int32_t zi = srcData.getField<boost::int32_t>(*dimZ, srcIndex);
+
+            x = dimX->applyScaling(xi);
+            y = dimY->applyScaling(yi);
+            z = dimZ->applyScaling(zi);
+            
         }
-    }
-    else
-    {
-        const int fieldX = schema.getDimensionIndex(DimensionId::X_i32);
-        const int fieldY = schema.getDimensionIndex(DimensionId::Y_i32);
-        const int fieldZ = schema.getDimensionIndex(DimensionId::Z_i32);
-
-        const Dimension& xdim = schema.getDimension(DimensionId::X_i32);
-        const Dimension& ydim = schema.getDimension(DimensionId::X_i32);
-        const Dimension& zdim = schema.getDimension(DimensionId::X_i32);
-
-        for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
+        else if (dimX->getInterpretation() == dimension::UnsignedInteger)
         {
-            // need to scale the values
-            boost::int32_t xi = srcData.getField<boost::int32_t>(srcIndex, fieldX);
-            boost::int32_t yi = srcData.getField<boost::int32_t>(srcIndex, fieldY);
-            boost::int32_t zi = srcData.getField<boost::int32_t>(srcIndex, fieldZ);
+            boost::uint32_t xi = srcData.getField<boost::uint32_t>(*dimX, srcIndex);
+            boost::uint32_t yi = srcData.getField<boost::uint32_t>(*dimY, srcIndex);
+            boost::uint32_t zi = srcData.getField<boost::uint32_t>(*dimZ, srcIndex);
 
-            const double x = xdim.applyScaling(xi);
-            const double y = ydim.applyScaling(yi);
-            const double z = zdim.applyScaling(zi);
-        
-            Vector<double> point(x,y,z);
-        
-            if (bounds.contains(point))
-            {
-                dstData.copyPointFast(dstIndex, srcIndex, srcData);
-                dstData.setNumPoints(dstIndex+1);
-                ++dstIndex;
-                ++numPointsAdded;
-            }
+            x = dimX->applyScaling(xi);
+            y = dimY->applyScaling(yi);
+            z = dimZ->applyScaling(zi);
+            
+        } else
+        {
+            x = srcData.getField<double>(*dimX, srcIndex);
+            y = srcData.getField<double>(*dimY, srcIndex);
+            z = srcData.getField<double>(*dimZ, srcIndex);
+
+        }
+     
+        Vector<double> point(x,y,z);
+    
+        if (bounds.contains(point))
+        {
+            dstData.copyPointFast(dstIndex, srcIndex, srcData);
+            dstData.setNumPoints(dstIndex+1);
+            ++dstIndex;
+            ++numPointsAdded;
         }
     }
 

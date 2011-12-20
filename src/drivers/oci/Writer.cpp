@@ -930,25 +930,22 @@ pdal::Bounds<double> Writer::CalculateBounds(PointBuffer const& buffer)
     pdal::Schema const& schema = buffer.getSchema();
     
     pdal::Bounds<double> output;
-    
-    const int indexXi = schema.getDimensionIndex(DimensionId::X_i32);
-    const int indexYi = schema.getDimensionIndex(DimensionId::Y_i32);
-    const int indexZi = schema.getDimensionIndex(DimensionId::Z_i32);
 
-    const Dimension& dimXi = schema.getDimension(indexXi);
-    const Dimension& dimYi = schema.getDimension(indexYi);
-    const Dimension& dimZi = schema.getDimension(indexZi);
+    boost::optional<Dimension const&> dimX = schema.getDimension("X");
+    boost::optional<Dimension const&> dimY = schema.getDimension("Y");
+    boost::optional<Dimension const&> dimZ = schema.getDimension("Z");
+
     
     bool first = true;
     for (boost::uint32_t pointIndex=0; pointIndex<buffer.getNumPoints(); pointIndex++)
     {
-        const boost::int32_t xi = buffer.getField<boost::int32_t>(pointIndex, indexXi);
-        const boost::int32_t yi = buffer.getField<boost::int32_t>(pointIndex, indexYi);
-        const boost::int32_t zi = buffer.getField<boost::int32_t>(pointIndex, indexZi);
+        const boost::int32_t xi = buffer.getField<boost::int32_t>(*dimX, pointIndex);
+        const boost::int32_t yi = buffer.getField<boost::int32_t>(*dimY, pointIndex);
+        const boost::int32_t zi = buffer.getField<boost::int32_t>(*dimZ, pointIndex);
         
-        const double xd = dimXi.applyScaling(xi);
-        const double yd = dimYi.applyScaling(yi);
-        const double zd = dimZi.applyScaling(zi);
+        const double xd = dimX->applyScaling(xi);
+        const double yd = dimY->applyScaling(yi);
+        const double zd = dimZ->applyScaling(zi);
         
         Vector<double> v(xd, yd, zd);
         if (first){

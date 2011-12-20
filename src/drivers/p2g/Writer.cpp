@@ -215,14 +215,9 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 {
     const Schema& schema = data.getSchema();
 
-    int xPos = schema.getDimensionIndex(pdal::DimensionId::X_i32);
-    pdal::Dimension const& xDim = schema.getDimension(xPos);
-
-    int yPos = schema.getDimensionIndex(pdal::DimensionId::Y_i32);
-    pdal::Dimension const& yDim = schema.getDimension(yPos);
-    
-    int zPos = schema.getDimensionIndex(pdal::DimensionId::Z_i32);
-    pdal::Dimension const& zDim = schema.getDimension(zPos);
+    pdal::Dimension const& dimX = schema.getDimension("X");
+    pdal::Dimension const& dimY = schema.getDimension("Y");
+    pdal::Dimension const& dimZ = schema.getDimension("Z");
 
 
     boost::uint32_t numPoints = 0;
@@ -234,13 +229,13 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
     
     for (boost::uint32_t pointIndex=0; pointIndex < data.getNumPoints(); pointIndex++)
     {
-            boost::int32_t x = data.getField<boost::int32_t>(pointIndex, xPos);
-            boost::int32_t y = data.getField<boost::int32_t>(pointIndex, yPos);
-            boost::int32_t z = data.getField<boost::int32_t>(pointIndex, zPos);
+            boost::int32_t x = data.getField<boost::int32_t>(dimX, pointIndex);
+            boost::int32_t y = data.getField<boost::int32_t>(dimY, pointIndex);
+            boost::int32_t z = data.getField<boost::int32_t>(dimZ, pointIndex);
         
-            xd = xDim.applyScaling<boost::int32_t>(x);
-            yd = yDim.applyScaling<boost::int32_t>(y);
-            zd = zDim.applyScaling<boost::int32_t>(z);
+            xd = dimX.applyScaling<boost::int32_t>(x);
+            yd = dimY.applyScaling<boost::int32_t>(y);
+            zd = dimZ.applyScaling<boost::int32_t>(z);
             
             m_bounds.setMinimum(0, (std::min)(xd, m_bounds.getMinimum(0)));
             m_bounds.setMinimum(1, (std::min)(yd, m_bounds.getMinimum(1)));
