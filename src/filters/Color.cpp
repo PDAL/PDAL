@@ -42,8 +42,7 @@ namespace pdal { namespace filters {
 Color::Color(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
 {
-    checkImpedance();
-
+    addDefaultDimensions();
     return;
 }
 
@@ -51,9 +50,25 @@ Color::Color(Stage& prevStage, const Options& options)
 Color::Color(Stage& prevStage)
     : Filter(prevStage, Options::none())
 {
-    checkImpedance();
-
+    addDefaultDimensions();
     return;
+}
+
+void Color::addDefaultDimensions()
+{
+
+    Dimension red("Red", dimension::UnsignedInteger, 2);
+    red.setUUID("de62488f-5559-440f-bb60-d74db2c78c63");
+    addDefaultDimension(red, getName());
+    
+    Dimension green("Green", dimension::UnsignedInteger, 2);
+    green.setUUID("6c3ebeb4-ffc0-4b57-9b4a-479939631599");
+    addDefaultDimension(green, getName());
+
+    Dimension blue("Blue", dimension::UnsignedInteger, 2);
+    blue.setUUID("7cdd9ec4-a209-4f14-ad55-1eda94aec750");
+    addDefaultDimension(blue, getName());
+
 }
 
 
@@ -70,57 +85,31 @@ const Options Color::getDefaultOptions() const
 }
 
 
-void Color::checkImpedance()
-{
-    Schema& schema = getSchemaRef();
-
-    if (schema.hasDimension(DimensionId::Z_i32) == false)
-    {
-        throw impedance_invalid("color filter does not have Z/Int32 field");
-    }
-
-    // are there already u16 fields for color?
-    if (!schema.hasDimension(DimensionId::Red_u16))
-    {
-        schema.appendDimension(DimensionId::Red_u16);
-    }
-    if (!schema.hasDimension(DimensionId::Green_u16))
-    {
-        schema.appendDimension(DimensionId::Green_u16);
-    }
-    if (!schema.hasDimension(DimensionId::Blue_u16))
-    {
-        schema.appendDimension(DimensionId::Blue_u16);
-    }
-
-    return;
-}
-
-
 void Color::processBuffer(PointBuffer& data) const
 {
     const boost::uint32_t numPoints = data.getNumPoints();
 
     const Schema& schema = data.getSchema();
-
-    const int indexR = schema.getDimensionIndex(DimensionId::Red_u16);
-    const int indexG = schema.getDimensionIndex(DimensionId::Green_u16);
-    const int indexB = schema.getDimensionIndex(DimensionId::Blue_u16);
-    const int indexZ = schema.getDimensionIndex(DimensionId::Z_i32);
-    const Dimension& zDim = schema.getDimension(DimensionId::Z_i32);
+    
+    boost::optional<Dimension const&> dimZ = schema.getDimensionOptional("Z");
+    boost::optional<Dimension const&> dimRed = schema.getDimensionOptional("Red");
+    boost::optional<Dimension const&> dimGreen = schema.getDimensionOptional("Green");
+    boost::optional<Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
+    
+    if (!dimZ) throw pdal_error("Unable to get 'Z' dimension for colorization!");
 
     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
     {
-        const boost::int32_t zraw = data.getField<boost::int32_t>(pointIndex, indexZ);
-        const double z = zDim.applyScaling(zraw);
+        const boost::int32_t zraw = data.getField<boost::int32_t>(*dimZ, pointIndex);
+        const double z = dimZ->applyScaling(zraw);
 
         boost::uint16_t red, green, blue;
         this->getColor_F64_U16(z, red, green, blue);
 
         // now we store the 3 u16's in the point data...
-        data.setField<boost::uint16_t>(pointIndex, indexR, red);
-        data.setField<boost::uint16_t>(pointIndex, indexG, green);
-        data.setField<boost::uint16_t>(pointIndex, indexB, blue);
+        data.setField<boost::uint16_t>(*dimRed, pointIndex, red);
+        data.setField<boost::uint16_t>(*dimGreen, pointIndex, green);
+        data.setField<boost::uint16_t>(*dimBlue, pointIndex, blue);
 
         data.setNumPoints(pointIndex+1);
     }
