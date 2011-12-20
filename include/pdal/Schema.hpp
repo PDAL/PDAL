@@ -73,8 +73,6 @@ namespace schema {
 struct name{};
 struct position{};
 struct index{};
-struct type{};
-struct id{};
 struct uid{};
 
 typedef boost::multi_index::multi_index_container<
@@ -87,17 +85,13 @@ typedef boost::multi_index::multi_index_container<
     boost::multi_index::random_access<boost::multi_index::tag<index> >,
     // sort by less<string> on GetName
     boost::multi_index::hashed_non_unique<boost::multi_index::tag<name>, boost::multi_index::const_mem_fun<Dimension,std::string const&,&Dimension::getName> >,
-    boost::multi_index::hashed_non_unique<boost::multi_index::tag<id>, boost::multi_index::const_mem_fun<Dimension,DimensionId::Id ,&Dimension::getId> >,
-    boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<Dimension,dimension::id const&,&Dimension::getUUID> >,
-    boost::multi_index::hashed_non_unique<boost::multi_index::tag<type>, boost::multi_index::const_mem_fun<Dimension,Dimension::DataType ,&Dimension::getDataType> >
+    boost::multi_index::hashed_non_unique<boost::multi_index::tag<uid>, boost::multi_index::const_mem_fun<Dimension,dimension::id const&,&Dimension::getUUID> >
       >
 > Map;
 
 typedef Map::index<name>::type index_by_name;
 typedef Map::index<position>::type index_by_position;
 typedef Map::index<index>::type index_by_index;
-typedef Map::index<type>::type index_by_type;
-typedef Map::index<id>::type index_by_id;
 typedef Map::index<uid>::type index_by_uid;
 
 typedef boost::uint32_t size_type;
@@ -121,24 +115,16 @@ public:
     
     schema::Map const& getDimensions() const { return m_index; }
     
-    bool hasDimension(const DimensionId::Id& id) const;
-    //bool hasDimension(const Dimension& dim) const;
-
-    // Dimension& getDimension(const DimensionId::Id& id);
-    const Dimension& getDimension(const DimensionId::Id& id) const;
-    // const Dimension& getDimension(std::string const& name) const;
     const Dimension& getDimension(std::string const& name, std::string const& ns="") const;
     const Dimension& getDimension(dimension::id const& id) const;
     const Dimension& getDimension(std::size_t index) const;
 
-    // boost::optional<Dimension const&> getDimensionOptional(std::string const& t) const;
     boost::optional<Dimension const&> getDimensionOptional(std::string const& name, std::string const& ns="") const;
     boost::optional<Dimension const&> getDimensionOptional(dimension::id const& id) const;
     boost::optional<Dimension const&> getDimensionOptional(std::size_t index) const;
 
     bool setDimension(Dimension const& );
     
-    int getDimensionIndex(const DimensionId::Id& id) const;
     int getDimensionIndex(const Dimension& dim) const;
 
 
@@ -167,7 +153,7 @@ public:
 
 private:
     
-	schema::size_type m_byteSize;
+    schema::size_type m_byteSize;
 
     schema::Map m_index;
 

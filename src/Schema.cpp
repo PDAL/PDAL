@@ -299,21 +299,6 @@ bool Schema::setDimension(Dimension const& dim)
 }
 
 
-int Schema::getDimensionIndex(const DimensionId::Id& t) const
-{
-
-    schema::index_by_id::const_iterator it = m_index.get<schema::id>().find(t);
-
-    if (it != m_index.get<schema::id>().end())
-    {
-        return it->getPosition();
-    } else
-    {
-        return -1;
-    }
-}
-
-
 int Schema::getDimensionIndex(const Dimension& dim) const
 {
     schema::index_by_name::const_iterator it = m_index.get<schema::name>().find(dim.getName());
@@ -325,36 +310,6 @@ int Schema::getDimensionIndex(const Dimension& dim) const
     
     std::ostringstream oss;
     oss << "getDimensionIndex: dimension not found with name " << dim.getName();
-    throw dimension_not_found(oss.str());
-}
-
-
-bool Schema::hasDimension(const DimensionId::Id& field) const
-{
-
-    schema::index_by_id::const_iterator it = m_index.get<schema::id>().find(field);
-
-    if (it != m_index.get<schema::id>().end())
-    {
-        return true;
-    }    
-    
-    return false;
-}
-
-
-const Dimension& Schema::getDimension(const DimensionId::Id& field) const
-{
-
-    schema::index_by_id::const_iterator it = m_index.get<schema::id>().find(field);
-
-    if (it != m_index.get<schema::id>().end())
-    {
-        return *it;
-    }    
-    
-    std::ostringstream oss;
-    oss << "getDimension: dimension not found with field " << field;
     throw dimension_not_found(oss.str());
 }
 
