@@ -91,12 +91,9 @@ public:
     }
 
     // accessors to a particular field of a particular point in this buffer
-    template<class T> T getField(std::size_t pointIndex, boost::int32_t fieldIndex) const;
     template<class T> T getField(Dimension const& dim, std::size_t pointIndex) const;    
     template<class T> T getRawField(std::size_t pointIndex, std::size_t pointBytePosition) const;
-    template<class T> void setField(std::size_t pointIndex, boost::int32_t fieldIndex, T value);
     template<class T> void setField(Dimension const& dim, std::size_t pointIndex, T value);
-    void setFieldData(std::size_t pointIndex, boost::int32_t fieldIndex, const boost::uint8_t* data);
     
     // bulk copy all the fields from the given point into this object
     // NOTE: this is only legal if the src and dest schemas are exactly the same
@@ -187,24 +184,6 @@ private:
 
 
 template <class T>
-inline void PointBuffer::setField(std::size_t pointIndex, boost::int32_t fieldIndex, T value)
-{
-    if (fieldIndex == -1)
-    {
-        // this is a little harsh, but we'll keep it for now as we shake things out
-        throw pdal_error("filedIndex is not valid at this point of access");
-    }
-
-    const Dimension& dim = m_schema.getDimension(fieldIndex);
-
-    std::size_t offset = (pointIndex * m_byteSize ) + dim.getByteOffset();
-    assert(offset + sizeof(T) <= m_byteSize * m_capacity);
-    boost::uint8_t* p = m_data.get() + offset;
-    
-    *(T*)(void*)p = value;
-}
-
-template <class T>
 inline void PointBuffer::setField(pdal::Dimension const& dim, std::size_t pointIndex, T value)
 {
     if (dim.getPosition() == -1)
@@ -231,43 +210,6 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, std::size_t pointI
 
 }
 
-inline void PointBuffer::setFieldData(std::size_t pointIndex, boost::int32_t fieldIndex, const boost::uint8_t* data)
-{
-    if (fieldIndex == -1)
-    {
-        // this is a little harsh, but we'll keep it for now as we shake things out
-        throw pdal_error("filedIndex is not valid at this point of access");
-    }
-    
-    const Dimension& dim = m_schema.getDimension(fieldIndex);
-
-    std::size_t offset = (pointIndex * m_byteSize) + dim.getByteOffset();
-    std::size_t size = dim.getDataTypeSize(dim.getDataType());
-    // std::cout << "copying field " << d.getFieldName() << " with index" << fieldIndex << " of size " << size << " at offset " << offset << std::endl;
-    // assert(offset + sizeof(T) <= m_schema.getByteSize() * m_capacity);
-    boost::uint8_t* p = m_data.get() + offset;
-    
-    memcpy(p, data, size);
-}
-
-
-template <class T>
-inline T PointBuffer::getField(std::size_t pointIndex, boost::int32_t fieldIndex) const
-{
-    if (fieldIndex == -1)
-    {
-        // this is a little harsh, but we'll keep it for now as we shake things out
-        throw pdal_error("filedIndex is not valid at this point of access");
-    }
-        
-    const Dimension& dim = m_schema.getDimension(fieldIndex);
-
-    std::size_t offset = (pointIndex * m_byteSize) + dim.getByteOffset();
-    assert(offset + sizeof(T) <= m_byteSize * m_capacity);
-    boost::uint8_t* p = m_data.get() + offset;
-
-    return *(T*)(void*)p;
-}
 
 
 template <class T>
