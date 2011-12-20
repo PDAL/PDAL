@@ -534,9 +534,9 @@ void Reader::Load()
             properties = properties->next;
         }
 
-        DimensionId::Id f = DimensionId::getIdFromName(name);
-
-        Dimension d(f);
+        dimension::Interpretation interp = GetDimensionType(interpretation);
+        
+        Dimension d(name, interp, size, description);
         if (! Utils::compare_distance(scale, 0.0))
         {
             d.setNumericScale(scale);
@@ -554,10 +554,6 @@ void Reader::Load()
             d.setMaximum(maximum);
         }
         
-        if (description.size())
-        {
-            d.setDescription(description);
-        }
         d.setEndianness(endianness);
 
         d.setPosition(position);
@@ -577,50 +573,50 @@ void Reader::Load()
 
 }
 
-Dimension::DataType Reader::GetDimensionType(std::string const& interpretation)
+dimension::Interpretation Reader::GetDimensionType(std::string const& interpretation)
 {
 
     if (boost::iequals(interpretation, "int8_t") ||
         boost::iequals(interpretation, "int8"))
-        return Dimension::Int8;
+        return dimension::SignedInteger;
 
     if (boost::iequals(interpretation, "uint8_t") ||
         boost::iequals(interpretation, "uint8"))
-        return Dimension::Uint8;
+        return dimension::UnsignedInteger;
 
     if (boost::iequals(interpretation, "int16_t") ||
         boost::iequals(interpretation, "int16"))
-        return Dimension::Int16;
+        return dimension::SignedInteger;
 
     if (boost::iequals(interpretation, "uint16_t") ||
         boost::iequals(interpretation, "uint16"))
-        return Dimension::Uint16;
+        return dimension::UnsignedInteger;
 
 
     if (boost::iequals(interpretation, "int32_t") ||
         boost::iequals(interpretation, "int32"))
-        return Dimension::Int32;
+        return dimension::SignedInteger;
 
     if (boost::iequals(interpretation, "uint32_t") ||
         boost::iequals(interpretation, "uint32"))
-        return Dimension::Uint32;
+        return dimension::UnsignedInteger;
 
     if (boost::iequals(interpretation, "int64_t") ||
         boost::iequals(interpretation, "int64"))
-        return Dimension::Int64;
+        return dimension::SignedInteger;
 
     if (boost::iequals(interpretation, "uint64_t") ||
         boost::iequals(interpretation, "uint64"))
-        return Dimension::Uint64;
+        return dimension::UnsignedInteger;
 
     if (boost::iequals(interpretation, "float"))
-        return Dimension::Float;
+        return dimension::Float;
 
     if (boost::iequals(interpretation, "double"))
-        return Dimension::Double;
+        return dimension::Float;
 
 
-    return Dimension::Undefined;
+    return dimension::Undefined;
 }
 
 
@@ -703,51 +699,7 @@ void Writer::writeSchema(TextWriterPtr writer)
         if (name.str().size())
             xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "name", NULL, BAD_CAST name.str().c_str());
         
-        std::ostringstream type;
-        pdal::Dimension::DataType t = dim.getDataType();
-    
-        switch (t)
-        {
-            case pdal::Dimension::Int8:
-                type << "int8_t";
-                break;
-            case pdal::Dimension::Uint8:
-                type << "uint8_t";
-                break;
-            case pdal::Dimension::Int16:
-                type << "int16_t";
-                break;
-            case pdal::Dimension::Uint16:
-                type << "uint16_t";
-                break;
-            case pdal::Dimension::Int32:
-                type << "int32_t";
-                break;
-            case pdal::Dimension::Uint32:
-                type << "uint32_t";
-                break;
-            case pdal::Dimension::Int64:
-                type << "int64_t";
-                break;
-            case pdal::Dimension::Uint64:
-                type << "uint64_t";
-                break;
-            case pdal::Dimension::Float:
-                type << "float";
-                break;
-            case pdal::Dimension::Double:
-                type << "double";
-                break;
-            case pdal::Dimension::Pointer:
-                type << "pointer";
-                break;
-            case pdal::Dimension::Undefined:
-                type << "unknown";
-                break;
-
-   
-        }
-        xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "interpretation", NULL, BAD_CAST type.str().c_str());
+        xmlTextWriterWriteElementNS(w, BAD_CAST "pc", BAD_CAST "interpretation", NULL, BAD_CAST dim.getInterpretationName().c_str());
         
         double minimum = dim.getMinimum();
         if (!Utils::compare_distance<double>(minimum, 0.0))

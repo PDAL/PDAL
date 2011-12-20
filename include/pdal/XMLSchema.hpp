@@ -138,7 +138,7 @@ protected:
 
     void Initialize();
     void Load();
-    Dimension::DataType GetDimensionType(std::string const& interpretation);
+    dimension::Interpretation GetDimensionType(std::string const& interpretation);
     
 private:
     
