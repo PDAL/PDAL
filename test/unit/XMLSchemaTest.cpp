@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     
     pdal::schema::Writer writer(schema);
     std::string xml_output = writer.getXML();
-
+    
     pdal::schema::Reader reader2(xml_output, xsd);
     pdal::Schema schema2 = reader2.getSchema();
 
@@ -122,11 +122,11 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     {
         pdal::Dimension const& dim1 = dims1[i];
         pdal::Dimension const& dim2 = dims2[i];
-    
-        BOOST_CHECK_EQUAL(dim1.getDataType(), dim2.getDataType());
+        
+        BOOST_CHECK_EQUAL(dim1.getName(), dim2.getName());
+        BOOST_CHECK_EQUAL(dim1.getInterpretation(), dim2.getInterpretation());
         BOOST_CHECK_EQUAL(dim1.getByteSize(), dim2.getByteSize());
-
-        BOOST_CHECK_EQUAL(dim1.getId(), dim2.getId());
+    
         BOOST_CHECK_EQUAL(dim1.getDescription(), dim2.getDescription());
         
     }

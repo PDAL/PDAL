@@ -68,18 +68,19 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead, 750u);
-
-    int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
-    int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
-    int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
-    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
-
+    
+    Schema const& buffer_schema = data.getSchema();
+    Dimension const& dimX = buffer_schema.getDimension("X");
+    Dimension const& dimY = buffer_schema.getDimension("Y");
+    Dimension const& dimZ = buffer_schema.getDimension("Z");
+    Dimension const& dimTime = buffer_schema.getDimension("Time");
+    
     for (boost::uint32_t i=0; i<numRead; i++)
     {
-        double x = data.getField<double>(i, offsetX);
-        double y = data.getField<double>(i, offsetY);
-        double z = data.getField<double>(i, offsetZ);
-        boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+        double x = data.getField<double>(dimX, i);
+        double y = data.getField<double>(dimY, i);
+        double z = data.getField<double>(dimZ, i);
+        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
 
         BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
         BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
@@ -120,17 +121,18 @@ BOOST_AUTO_TEST_CASE(FauxReaderTest_test_options)
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
-    int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
-    int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
-    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
+    Schema const& buffer_schema = data.getSchema();
+    Dimension const& dimX = buffer_schema.getDimension("X");
+    Dimension const& dimY = buffer_schema.getDimension("Y");
+    Dimension const& dimZ = buffer_schema.getDimension("Z");
+    Dimension const& dimTime = buffer_schema.getDimension("Time");
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
-        double x = data.getField<double>(i, offsetX);
-        double y = data.getField<double>(i, offsetY);
-        double z = data.getField<double>(i, offsetZ);
-        boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+        double x = data.getField<double>(dimX, i);
+        double y = data.getField<double>(dimY, i);
+        double z = data.getField<double>(dimZ, i);
+        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
 
         BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
         BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
@@ -156,23 +158,25 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
 
     PointBuffer data(schema, 10);
 
-    int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
-    int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
-    int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
-    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
-
     StageRandomIterator* iter = reader.createRandomIterator();
 
     boost::uint32_t numRead = iter->read(data);
     BOOST_CHECK_EQUAL(numRead, 10u);
 
+    Schema const& buffer_schema = data.getSchema();
+    Dimension const& dimX = buffer_schema.getDimension("X");
+    Dimension const& dimY = buffer_schema.getDimension("Y");
+    Dimension const& dimZ = buffer_schema.getDimension("Z");
+    Dimension const& dimTime = buffer_schema.getDimension("Time");
+
+
     {
         for (boost::uint32_t i=0; i<numRead; i++)
         {
-            double x = data.getField<double>(i, offsetX);
-            double y = data.getField<double>(i, offsetY);
-            double z = data.getField<double>(i, offsetZ);
-            boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+            double x = data.getField<double>(dimX, i);
+            double y = data.getField<double>(dimY, i);
+            double z = data.getField<double>(dimZ, i);
+            boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
 
             BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
             BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
@@ -187,10 +191,11 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     {
         for (boost::uint32_t i=0; i<numRead; i++)
         {
-            double x = data.getField<double>(i, offsetX);
-            double y = data.getField<double>(i, offsetY);
-            double z = data.getField<double>(i, offsetZ);
-            boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+            double x = data.getField<double>(dimX, i);
+            double y = data.getField<double>(dimY, i);
+            double z = data.getField<double>(dimZ, i);
+            boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
+
 
             BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
             BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
@@ -207,10 +212,10 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     {
         for (boost::uint32_t i=0; i<numRead; i++)
         {
-            double x = data.getField<double>(i, offsetX);
-            double y = data.getField<double>(i, offsetY);
-            double z = data.getField<double>(i, offsetZ);
-            boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+            double x = data.getField<double>(dimX, i);
+            double y = data.getField<double>(dimY, i);
+            double z = data.getField<double>(dimZ, i);
+            boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
 
             BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
             BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
@@ -228,10 +233,11 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     {
         for (boost::uint32_t i=0; i<numRead; i++)
         {
-            double x = data.getField<double>(i, offsetX);
-            double y = data.getField<double>(i, offsetY);
-            double z = data.getField<double>(i, offsetZ);
-            boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+            double x = data.getField<double>(dimX, i);
+            double y = data.getField<double>(dimY, i);
+            double z = data.getField<double>(dimZ, i);
+            boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
+
 
             BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
             BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
@@ -262,18 +268,20 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
 
     BOOST_CHECK_EQUAL(numRead, 750u);
 
-    int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
-    int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
-    int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
-    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
+    Schema const& buffer_schema = data.getSchema();
+    Dimension const& dimX = buffer_schema.getDimension("X");
+    Dimension const& dimY = buffer_schema.getDimension("Y");
+    Dimension const& dimZ = buffer_schema.getDimension("Z");
+    Dimension const& dimTime = buffer_schema.getDimension("Time");
+
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
-        double x = data.getField<double>(i, offsetX);
-        double y = data.getField<double>(i, offsetY);
-        double z = data.getField<double>(i, offsetZ);
-        boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
-        
+        double x = data.getField<double>(dimX, i);
+        double y = data.getField<double>(dimY, i);
+        double z = data.getField<double>(dimZ, i);
+        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
+            
         BOOST_CHECK_GE(x, 1.0);
         BOOST_CHECK_LE(x, 101.0);
         
@@ -310,20 +318,21 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
 
     BOOST_CHECK_EQUAL(numRead, 2u);
 
-    const int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
-    const int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
-    const int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
-    const int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
+    Schema const& buffer_schema = data.getSchema();
+    Dimension const& dimX = buffer_schema.getDimension("X");
+    Dimension const& dimY = buffer_schema.getDimension("Y");
+    Dimension const& dimZ = buffer_schema.getDimension("Z");
+    Dimension const& dimTime = buffer_schema.getDimension("Time");
 
-    const double x0 = data.getField<double>(0, offsetX);
-    const double y0 = data.getField<double>(0, offsetY);
-    const double z0 = data.getField<double>(0, offsetZ);
-    const boost::uint64_t t0 = data.getField<boost::uint64_t>(0, offsetT);
+    const double x0 = data.getField<double>(dimX, 0);
+    const double y0 = data.getField<double>(dimY, 0);
+    const double z0 = data.getField<double>(dimZ, 0);
+    const boost::uint64_t t0 = data.getField<boost::uint64_t>(dimTime, 0);
 
-    const double x1 = data.getField<double>(1, offsetX);
-    const double y1 = data.getField<double>(1, offsetY);
-    const double z1 = data.getField<double>(1, offsetZ);
-    const boost::uint64_t t1 = data.getField<boost::uint64_t>(1, offsetT);
+    const double x1 = data.getField<double>(dimX, 1);
+    const double y1 = data.getField<double>(dimY, 1);
+    const double z1 = data.getField<double>(dimZ, 1);
+    const boost::uint64_t t1 = data.getField<boost::uint64_t>(dimTime, 1);
 
     BOOST_CHECK_CLOSE(x0, 0.0, 0.00001);
     BOOST_CHECK_CLOSE(y0, 0.0, 0.00001);
@@ -357,10 +366,11 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
 
     BOOST_CHECK_EQUAL(numRead,750u);
 
-    int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
-    int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
-    int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
-    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
+    Schema const& buffer_schema = data.getSchema();
+    Dimension const& dimX = buffer_schema.getDimension("X");
+    Dimension const& dimY = buffer_schema.getDimension("Y");
+    Dimension const& dimZ = buffer_schema.getDimension("Z");
+    Dimension const& dimTime = buffer_schema.getDimension("Time");
 
     double delX = (101.0 - 1.0) / (750.0 - 1.0);
     double delY = (152.0 - 2.0) / (750.0 - 1.0);
@@ -368,10 +378,10 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
 
     for (boost::uint32_t i=0; i<numRead; i++)
     {
-        double x = data.getField<double>(i, offsetX);
-        double y = data.getField<double>(i, offsetY);
-        double z = data.getField<double>(i, offsetZ);
-        boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+        double x = data.getField<double>(dimX, i);
+        double y = data.getField<double>(dimY, i);
+        double z = data.getField<double>(dimZ, i);
+        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
 
         BOOST_CHECK_CLOSE(x, 1.0 + delX*i, 0.00001);
         BOOST_CHECK_CLOSE(y, 2.0 + delY*i, 0.00001);

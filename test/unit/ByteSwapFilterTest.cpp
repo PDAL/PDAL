@@ -64,15 +64,29 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     BOOST_CHECK_EQUAL(filter.getName(), "filters.byteswap");
 
     filter.initialize();
+    
+    Schema const& readerSchema = reader.getSchema();
+    boost::optional<Dimension const&> readerdimX = readerSchema.getDimension("X");
+    boost::optional<Dimension const&> readerdimY = readerSchema.getDimension("Y");
+    boost::optional<Dimension const&> readerdimZ = readerSchema.getDimension("Z");
+    boost::optional<Dimension const&> readerdimTime = readerSchema.getDimension("Time");
 
-    BOOST_CHECK_EQUAL(reader.getSchema().getDimension(DimensionId::X_f64).getEndianness(), pdal::Endian_Little);
-    BOOST_CHECK_EQUAL(reader.getSchema().getDimension(DimensionId::Y_f64).getEndianness(), pdal::Endian_Little);
-    BOOST_CHECK_EQUAL(reader.getSchema().getDimension(DimensionId::Z_f64).getEndianness(), pdal::Endian_Little);
-    BOOST_CHECK_EQUAL(reader.getSchema().getDimension(DimensionId::Time_u64).getEndianness(), pdal::Endian_Little);
-    BOOST_CHECK_EQUAL(filter.getSchema().getDimension(DimensionId::X_f64).getEndianness(), pdal::Endian_Big);
-    BOOST_CHECK_EQUAL(filter.getSchema().getDimension(DimensionId::Y_f64).getEndianness(), pdal::Endian_Big);
-    BOOST_CHECK_EQUAL(filter.getSchema().getDimension(DimensionId::Z_f64).getEndianness(), pdal::Endian_Big);
-    BOOST_CHECK_EQUAL(filter.getSchema().getDimension(DimensionId::Time_u64).getEndianness(), pdal::Endian_Big);
+    BOOST_CHECK_EQUAL(readerdimX->getEndianness(), pdal::Endian_Little);
+    BOOST_CHECK_EQUAL(readerdimY->getEndianness(), pdal::Endian_Little);
+    BOOST_CHECK_EQUAL(readerdimZ->getEndianness(), pdal::Endian_Little);
+    BOOST_CHECK_EQUAL(readerdimTime->getEndianness(), pdal::Endian_Little);
+    
+
+    Schema const& filterSchema = filter.getSchema();
+    boost::optional<Dimension const&> filterdimX = filterSchema.getDimension("X");
+    boost::optional<Dimension const&> filterdimY = filterSchema.getDimension("Y");
+    boost::optional<Dimension const&> filterdimZ = filterSchema.getDimension("Z");
+    boost::optional<Dimension const&> filterdimTime = filterSchema.getDimension("Time");
+    
+    BOOST_CHECK_EQUAL(filterdimX->getEndianness(), pdal::Endian_Big);
+    BOOST_CHECK_EQUAL(filterdimY->getEndianness(), pdal::Endian_Big);
+    BOOST_CHECK_EQUAL(filterdimZ->getEndianness(), pdal::Endian_Big);
+    BOOST_CHECK_EQUAL(filterdimTime->getEndianness(), pdal::Endian_Big);
 
     boost::scoped_ptr<StageSequentialIterator> unflipped_iter(reader.createSequentialIterator());
     boost::scoped_ptr<StageSequentialIterator> flipped_iter(filter.createSequentialIterator());
@@ -88,29 +102,29 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     BOOST_CHECK_EQUAL(unfliped_read, buffer_size);
     
 
-    int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
-    int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
-    int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
-    int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
-    
-    BOOST_CHECK_EQUAL(offsetX, 0);
-    BOOST_CHECK_EQUAL(offsetY, 1);
-    BOOST_CHECK_EQUAL(offsetZ, 2);
-    BOOST_CHECK_EQUAL(offsetT, 3);
+    boost::optional<Dimension const&> unflippeddimX = unflipped.getSchema().getDimension("X");
+    boost::optional<Dimension const&> unflippeddimY = unflipped.getSchema().getDimension("Y");
+    boost::optional<Dimension const&> unflippeddimZ = unflipped.getSchema().getDimension("Z");
+    boost::optional<Dimension const&> unflippeddimTime = unflipped.getSchema().getDimension("Time");
+
+    boost::optional<Dimension const&> flippeddimX = flipped.getSchema().getDimension("X");
+    boost::optional<Dimension const&> flippeddimY = flipped.getSchema().getDimension("Y");
+    boost::optional<Dimension const&> flippeddimZ = flipped.getSchema().getDimension("Z");
+    boost::optional<Dimension const&> flippeddimTime = flipped.getSchema().getDimension("Time");
     
     for (boost::uint32_t i = 0 ; i < buffer_size; ++i)
     {
 
-        double unflipped_x = unflipped.getField<double>(i, offsetX);
-        double unflipped_y = unflipped.getField<double>(i, offsetY);
-        double unflipped_z = unflipped.getField<double>(i, offsetZ);
-        boost::uint64_t unflipped_t = unflipped.getField<boost::uint64_t>(i, offsetT);
+        double unflipped_x = unflipped.getField<double>(*unflippeddimX, i);
+        double unflipped_y = unflipped.getField<double>(*unflippeddimY, i);
+        double unflipped_z = unflipped.getField<double>(*unflippeddimZ, i);
+        boost::uint64_t unflipped_t = unflipped.getField<boost::uint64_t>(*unflippeddimTime, i);
         
 
-        double flipped_x = flipped.getField<double>(i, offsetX);
-        double flipped_y = flipped.getField<double>(i, offsetY);
-        double flipped_z = flipped.getField<double>(i, offsetZ);
-        boost::uint64_t flipped_t = flipped.getField<boost::uint64_t>(i, offsetT);
+        double flipped_x = flipped.getField<double>(*flippeddimX, i);
+        double flipped_y = flipped.getField<double>(*flippeddimY, i);
+        double flipped_z = flipped.getField<double>(*flippeddimZ, i);
+        boost::uint64_t flipped_t = flipped.getField<boost::uint64_t>(*flippeddimTime, i);
 
         double reflipped_x = flipped_x;
         SWAP_ENDIANNESS(reflipped_x);

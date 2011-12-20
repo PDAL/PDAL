@@ -2,161 +2,225 @@
     "dimension":
     {
         "name": "X",
-        "datatype": "Int32",
+        "namespace": "drivers.las.reader",
         "description": "X coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.",
         "bytesize": "4",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "0.01",
-        "isValid": "false"
+        "offset": "-0",
+        "isValid": "false",
+        "uuid": "2ee118d1-119e-4906-99c3-42934203f872"
     },
     "dimension":
     {
         "name": "Y",
-        "datatype": "Int32",
+        "namespace": "drivers.las.reader",
         "description": "Y coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.",
         "bytesize": "4",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "0.01",
-        "isValid": "false"
+        "offset": "-0",
+        "isValid": "false",
+        "uuid": "87707eee-2f30-4979-9987-8ef747e30275"
     },
     "dimension":
     {
         "name": "Z",
-        "datatype": "Int32",
+        "namespace": "drivers.las.reader",
         "description": "x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.",
         "bytesize": "4",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "0.01",
-        "isValid": "false"
+        "offset": "-0",
+        "isValid": "false",
+        "uuid": "e74b5e41-95e6-4cf2-86ad-e3f5a996da5d"
     },
     "dimension":
     {
         "name": "Intensity",
-        "datatype": "Uint16",
+        "namespace": "drivers.las.reader",
         "description": "The intensity value is the integer representation of the pulse return magnitude. This value is optional and system specific. However, it should always be included if available.",
         "bytesize": "2",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "1",
-        "isValid": "false"
+        "offset": "0",
+        "isValid": "false",
+        "uuid": "61e90c9a-42fc-46c7-acd3-20d67bd5626f"
     },
     "dimension":
     {
         "name": "ReturnNumber",
-        "datatype": "Uint8",
+        "namespace": "drivers.las.reader",
         "description": "Return Number: The Return Number is the pulse return number for a given output pulse. A given output laser pulse can have many returns, and they must be marked in sequence of return. The first return will have a Return Number of one, the second a Return Number of two, and so on up to five returns.",
         "bytesize": "1",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "1",
-        "isValid": "false"
+        "offset": "0",
+        "isValid": "false",
+        "uuid": "ffe5e5f8-4cec-4560-abf0-448008f7b89e"
     },
     "dimension":
     {
         "name": "NumberOfReturns",
-        "datatype": "Uint8",
+        "namespace": "drivers.las.reader",
         "description": "Number of Returns (for this emitted pulse): The Number of Returns is the total number of returns for a given pulse. For example, a laser data point may be return two (Return Number) within a total number of five returns.",
         "bytesize": "1",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "1",
-        "isValid": "false"
+        "offset": "0",
+        "isValid": "false",
+        "uuid": "7c28bfd4-a9ed-4fb2-b07f-931c076fbaf0"
     },
     "dimension":
     {
         "name": "ScanDirectionFlag",
-        "datatype": "Uint8",
+        "namespace": "drivers.las.reader",
         "description": "The Scan Direction Flag denotes the direction at which the scanner mirror was traveling at the time of the output pulse. A bit value of 1 is a positive scan direction, and a bit value of 0 is a negative scan direction (where positive scan direction is a scan moving from the left side of the in-track direction to the right side and negative the opposite).",
         "bytesize": "1",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "1",
-        "isValid": "false"
+        "offset": "0",
+        "isValid": "false",
+        "uuid": "13019a2c-cf88-480d-a995-0162055fe5f9"
     },
     "dimension":
     {
         "name": "EdgeOfFlightLine",
-        "datatype": "Uint8",
+        "namespace": "drivers.las.reader",
         "description": "The Edge of Flight Line data bit has a value of 1 only when the point is at the end of a scan. It is the last point on a given scan line before it changes direction.",
         "bytesize": "1",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "1",
-        "isValid": "false"
+        "offset": "0",
+        "isValid": "false",
+        "uuid": "108c18f2-5cc0-4669-ae9a-f41eb4006ea5"
     },
     "dimension":
     {
         "name": "Classification",
-        "datatype": "Uint8",
+        "namespace": "drivers.las.reader",
         "description": "Classification in LAS 1.0 was essentially user defined and optional. LAS 1.1 defines a standard set of ASPRS classifications. In addition, the field is now mandatory. If a point has never been classified, this byte must be set to zero. There are no user defined classes since both point format 0 and point format 1 supply 8 bits per point for user defined operations. Note that the format for classification is a bit encoded field with the lower five bits used for class and the three high bits used for flags.",
         "bytesize": "1",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "1",
-        "isValid": "false"
+        "offset": "0",
+        "isValid": "false",
+        "uuid": "b4c67de9-cef1-432c-8909-7c751b2a4e0b"
     },
     "dimension":
     {
         "name": "ScanAngleRank",
-        "datatype": "Int8",
+        "namespace": "drivers.las.reader",
         "description": "The Scan Angle Rank is a signed one-byte number with a valid range from -90 to +90. The Scan Angle Rank is the angle (rounded to the nearest integer in the absolute value sense) at which the laser point was output from the laser system including the roll of the aircraft. The scan angle is within 1 degree of accuracy from +90 to 90 degrees. The scan angle is an angle based on 0 degrees being nadir, and 90 degrees to the left side of the aircraft in the direction of flight.",
         "bytesize": "1",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "1",
-        "isValid": "false"
+        "offset": "0",
+        "isValid": "false",
+        "uuid": "aaadaf77-e0c9-4df0-81a7-27060794cd69"
     },
     "dimension":
     {
         "name": "UserData",
-        "datatype": "Uint8",
+        "namespace": "drivers.las.reader",
         "description": "This field may be used at the users discretion",
         "bytesize": "1",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "1",
-        "isValid": "false"
+        "offset": "0",
+        "isValid": "false",
+        "uuid": "70eb558e-63d4-4804-b1db-fc2fd716927c"
     },
     "dimension":
     {
         "name": "PointSourceId",
-        "datatype": "Uint16",
+        "namespace": "drivers.las.reader",
         "description": "This value indicates the file from which this point originated. Valid values for this field are 1 to 65,535 inclusive with zero being used for a special case discussed below. The numerical value corresponds to the File Source ID from which this point originated. Zero is reserved as a convenience to system implementers. A Point Source ID of zero implies that this point originated in this file. This implies that processing software should set the Point Source ID equal to the File Source ID of the file containing this point at some time during processing. ",
         "bytesize": "2",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "1",
-        "isValid": "false"
+        "offset": "0",
+        "isValid": "false",
+        "uuid": "4e42e96a-6af0-4fdd-81cb-6216ff47bf6b"
     },
     "dimension":
     {
         "name": "Time",
-        "datatype": "Double",
+        "namespace": "drivers.las.reader",
         "description": "The GPS Time is the double floating point time tag value at which the point was acquired. It is GPS Week Time if the Global Encoding low bit is clear and Adjusted Standard GPS Time if the Global Encoding low bit is set (see Global Encoding in the Public Header Block description).",
         "bytesize": "8",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "1",
-        "isValid": "false"
+        "offset": "0",
+        "isValid": "false",
+        "uuid": "aec43586-2711-4e59-9df0-65aca78a4ffc"
     },
     "dimension":
     {
         "name": "Red",
-        "datatype": "Uint16",
+        "namespace": "drivers.las.reader",
         "description": "The red image channel value associated with this point",
         "bytesize": "2",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "1",
-        "isValid": "false"
+        "offset": "0",
+        "isValid": "false",
+        "uuid": "a42ce297-6aa2-4a62-bd29-2db19ba862d5"
     },
     "dimension":
     {
         "name": "Green",
-        "datatype": "Uint16",
+        "namespace": "drivers.las.reader",
         "description": "The green image channel value associated with this point",
         "bytesize": "2",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "1",
-        "isValid": "false"
+        "offset": "0",
+        "isValid": "false",
+        "uuid": "7752759d-5713-48cd-9842-51db350cc979"
     },
     "dimension":
     {
         "name": "Blue",
-        "datatype": "Uint16",
+        "namespace": "drivers.las.reader",
         "description": "The blue image channel value associated with this point",
         "bytesize": "2",
         "endianness": "little",
+        "minimum": "0",
+        "maximum": "0",
         "scale": "1",
-        "isValid": "false"
+        "offset": "0",
+        "isValid": "false",
+        "uuid": "5c1a99c8-1829-4d5b-8735-4f6f393a7970"
     }
 }

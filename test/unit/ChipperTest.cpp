@@ -91,10 +91,13 @@ BOOST_AUTO_TEST_CASE(test_construction)
         BOOST_CHECK(ids.size() == 15);
         BOOST_CHECK(ids[14] == 1050 );
         
-        pdal::Schema const& schema = chipper.getSchema();
-        PointBuffer buffer(schema, 15);
+        PointBuffer buffer(chipper.getSchema(), 15);
+        pdal::Schema const& schema = buffer.getSchema();
         Dimension const& dimPoint = schema.getDimension("PointID");
         Dimension const& dimBlock = schema.getDimension("BlockID");
+        Dimension const& dimX = schema.getDimension("X");
+        Dimension const& dimY = schema.getDimension("Y");
+        Dimension const& dimZ = schema.getDimension("Z");
         
         boost::scoped_ptr<StageRandomIterator> iter(reader.createRandomIterator());
         chipper.GetBlock(20).GetBuffer(iter, buffer, 70, dimPoint, dimBlock);
@@ -113,19 +116,19 @@ BOOST_AUTO_TEST_CASE(test_construction)
         // std::cout << buffer.getField<boost::int32_t>(2, 2) << std::endl;
 
         // Check X's of first three points in block 20
-        BOOST_CHECK(buffer.getField<boost::int32_t>(0, 0) == 63763550);
-        BOOST_CHECK(buffer.getField<boost::int32_t>(1, 0) == 63765279);
-        BOOST_CHECK(buffer.getField<boost::int32_t>(2, 0) == 63771207);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(dimX, 0) == 63763550);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(dimX, 1) == 63765279);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(dimX, 2) == 63771207);
         
         // Check Y's of first three points in block 20
-        BOOST_CHECK(buffer.getField<boost::int32_t>(0, 1) == 84992418);
-        BOOST_CHECK(buffer.getField<boost::int32_t>(1, 1) == 85005705);
-        BOOST_CHECK(buffer.getField<boost::int32_t>(2, 1) == 85005840);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(dimY, 0) == 84992418);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(dimY, 1) == 85005705);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(dimY, 2) == 85005840);
         
         // Check Z's of first three points in block 20
-        BOOST_CHECK(buffer.getField<boost::int32_t>(0, 2) == 42664);
-        BOOST_CHECK(buffer.getField<boost::int32_t>(1, 2) == 43579);
-        BOOST_CHECK(buffer.getField<boost::int32_t>(2, 2) == 42651);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(dimZ, 0) == 42664);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(dimZ, 1) == 43579);
+        BOOST_CHECK(buffer.getField<boost::int32_t>(dimZ, 2) == 42651);
 
     }
 

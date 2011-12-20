@@ -47,8 +47,8 @@ BOOST_AUTO_TEST_SUITE(SchemaTest)
 
 BOOST_AUTO_TEST_CASE(test_ctor)
 {
-    Dimension d1(DimensionId::X_i32);
-    Dimension d2(DimensionId::Y_i32);
+    Dimension d1("X", dimension::SignedInteger, 4);
+    Dimension d2("Y", dimension::SignedInteger, 4);
 
     Schema s1;
     s1.appendDimension(d1);
@@ -68,18 +68,15 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK(s1!=s4);
     BOOST_CHECK(s4!=s1);
 
-    BOOST_CHECK(s1.hasDimension(DimensionId::X_i32));
-    BOOST_CHECK(!s1.hasDimension(DimensionId::X_f64));
-    BOOST_CHECK(s1.hasDimension(DimensionId::X_i32));
-    BOOST_CHECK(!s1.hasDimension(DimensionId::X_f64));
 }
 
 
 BOOST_AUTO_TEST_CASE(SchemaTest_ptree)
 {
-    Dimension d1(DimensionId::X_i32);
-    Dimension d2(DimensionId::Y_i32);
-
+    Dimension d1("X", dimension::SignedInteger, 4);
+    d1.setUUID("ff7f0000-a896-c109-0000-000026d09d81");
+    Dimension d2("Y", dimension::SignedInteger, 4);
+    d2.setUUID("ff7f0000-a896-c109-0000-000026d09d81");
     Schema s1;
     s1.appendDimension(d1);
     s1.appendDimension(d2);
@@ -93,11 +90,7 @@ BOOST_AUTO_TEST_CASE(SchemaTest_ptree)
 
     boost::algorithm::erase_all(out1, "\n");
     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    std::string ref = xml_header + "<dimension><name>X</name><datatype>Int32</datatype>"
-        "<description>x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</description>"
-        "<bytesize>4</bytesize><endianness>little</endianness><scale>1</scale><isValid>false</isValid></dimension><dimension><name>Y</name><datatype>Int32</datatype>"
-        "<description>y coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</description>"
-        "<bytesize>4</bytesize><endianness>little</endianness><scale>1</scale><isValid>false</isValid></dimension>";
+    std::string ref = xml_header + "<dimension><name>X</name><namespace/><description/><bytesize>4</bytesize><endianness>little</endianness><minimum>0</minimum><maximum>0</maximum><scale>1</scale><offset>0</offset><isValid>false</isValid><uuid>ff7f0000-a896-c109-0000-000026d09d81</uuid></dimension><dimension><name>Y</name><namespace/><description/><bytesize>4</bytesize><endianness>little</endianness><minimum>0</minimum><maximum>0</maximum><scale>1</scale><offset>0</offset><isValid>false</isValid><uuid>ff7f0000-a896-c109-0000-000026d09d81</uuid></dimension>";
 
     boost::algorithm::erase_all(ref, "\n");
     BOOST_CHECK_EQUAL(ref, out1);

@@ -78,17 +78,19 @@ BOOST_AUTO_TEST_CASE(test1)
 
     BOOST_CHECK(numRead == 300);
 
-    const int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
-    const int offsetX = schema.getDimensionIndex(DimensionId::X_f64);
-    const int offsetY = schema.getDimensionIndex(DimensionId::Y_f64);
-    const int offsetZ = schema.getDimensionIndex(DimensionId::Z_f64);
+
+    Schema const& buffer_schema = data.getSchema();
+    Dimension const& dimX = buffer_schema.getDimension("X");
+    Dimension const& dimY = buffer_schema.getDimension("Y");
+    Dimension const& dimZ = buffer_schema.getDimension("Z");
+    Dimension const& dimTime = buffer_schema.getDimension("Time");
 
     for (boost::uint32_t i=0; i<300; i++)
     {
-        double x = data.getField<double>(i, offsetX);
-        double y = data.getField<double>(i, offsetY);
-        double z = data.getField<double>(i, offsetZ);
-        boost::uint64_t t = data.getField<boost::uint64_t>(i, offsetT);
+        double x = data.getField<double>(dimX, i);
+        double y = data.getField<double>(dimY, i);
+        double z = data.getField<double>(dimZ, i);
+        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
 
         if (i<100)
         {

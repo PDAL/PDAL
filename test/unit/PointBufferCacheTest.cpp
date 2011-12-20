@@ -30,24 +30,30 @@ BOOST_AUTO_TEST_SUITE(PointBufferCacheTest)
 BOOST_AUTO_TEST_CASE(test1)
 {
     Schema schema;
-    Dimension d1(DimensionId::X_i32);
+    
+    Dimension d1("X", dimension::SignedInteger, 4);
     schema.appendDimension(d1);
 
     PointBuffer* item0 = new PointBuffer(schema, 10);
+    pdal::Dimension const& dimX0 = item0->getSchema().getDimension("X");
     PointBuffer* item1 = new PointBuffer(schema, 10);
+    pdal::Dimension const& dimX1 = item1->getSchema().getDimension("X");
+
     PointBuffer* item2 = new PointBuffer(schema, 10);
+    pdal::Dimension const& dimX2 = item2->getSchema().getDimension("X");
     //PointBuffer* item3 = new PointBuffer(schema, 10);
     PointBuffer* item4 = new PointBuffer(schema, 10);
+    pdal::Dimension const& dimX4 = item4->getSchema().getDimension("X");
     //PointBuffer* item5 = new PointBuffer(schema, 10);
 
     // write the data into the buffer
     for (int i=0; i<10; i++)
     {
-      item0->setField(i, 0, i);
-      item1->setField(i, 0, i+10);
-      item2->setField(i, 0, i+20);
+      item0->setField(dimX0, i, i);
+      item1->setField(dimX1, i, i+10);
+      item2->setField(dimX2, i, i+20);
       //item3->setField(i, 0, i+30);
-      item4->setField(i, 0, i+40);
+      item4->setField(dimX4, i, i+40);
       //item5->setField(i, 0, i+50);
     }
 

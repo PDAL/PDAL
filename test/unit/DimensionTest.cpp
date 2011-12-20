@@ -54,12 +54,10 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK_EQUAL(d1.getInterpretation(), dimension::SignedInteger);
 
     Dimension d2(d1);
-    BOOST_CHECK_EQUAL(d1.getId(), d2.getId());
     BOOST_CHECK_EQUAL(d1.getInterpretation(), d2.getInterpretation());
     BOOST_CHECK_EQUAL(d1.getNamespace(), d2.getNamespace());
     
     Dimension d3 = d1;
-    BOOST_CHECK_EQUAL(d1.getId(), d3.getId());
     BOOST_CHECK_EQUAL(d1.getInterpretation(), d3.getInterpretation());
     BOOST_CHECK_EQUAL(d1.getNamespace(), d3.getNamespace());
 

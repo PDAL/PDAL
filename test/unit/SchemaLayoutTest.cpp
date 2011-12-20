@@ -46,42 +46,26 @@ BOOST_AUTO_TEST_SUITE(SchemaLayoutTest)
 
 BOOST_AUTO_TEST_CASE(test_layout)
 {
-    Dimension d1(DimensionId::X_i32);
-    Dimension d2(DimensionId::Y_i32);
+    Dimension d1("X", dimension::SignedInteger, 4);
+    Dimension d2("Y", dimension::SignedInteger, 4);
 
     Schema s1;
     s1.appendDimension(d1);
     s1.appendDimension(d2);
 
     schema::index_by_index const& dims = s1.getDimensions().get<schema::index>();
-    BOOST_CHECK(dims[0].getId() == DimensionId::X_i32);
-    BOOST_CHECK(dims[1].getId() == DimensionId::Y_i32);
+    BOOST_CHECK_EQUAL(dims.size(), 2);
+    BOOST_CHECK_EQUAL(dims[0].getByteSize(), 4);
 
-    BOOST_CHECK(s1.hasDimension(DimensionId::X_f64) == false);
-    BOOST_CHECK(s1.hasDimension(DimensionId::Y_f64) == false);
+    boost::optional<Dimension const&> z = s1.getDimensionOptional("Z");
+    BOOST_CHECK(!z);
 
-    Schema s2;
-    s2.appendDimension(d1);
-    schema::index_by_index const& dims2 = s1.getDimensions().get<schema::index>();
-    BOOST_CHECK(s2.hasDimension(DimensionId::X_i32) == true);
-    BOOST_CHECK(dims2[0].getId() == DimensionId::X_i32);
-    BOOST_CHECK(s2.hasDimension(DimensionId::Y_i32) == false);
-
-    Schema l1(s1);
-    Schema l2(l1);
-    Schema l3 = l1;
-    Schema l4(s2);
 }
 
 
 BOOST_AUTO_TEST_CASE(test_layout_size)
 {
-    Dimension d1(DimensionId::X_i32);
-    Dimension d2(DimensionId::Y_i32);
-    Schema s1;
-    s1.appendDimension(d1);
-    s1.appendDimension(d2);
-    Schema sl1(s1);
+
 
 #if 0
     const DimensionLayout& dl1 = sl1.getDimensionLayout(0);

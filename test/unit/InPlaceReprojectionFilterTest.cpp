@@ -54,16 +54,13 @@ static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double
 
     const Schema& schema = data.getSchema();
 
-    const int indexX = schema.getDimensionIndex(DimensionId::X_i32);
-    const int indexY = schema.getDimensionIndex(DimensionId::Y_i32);
-    const int indexZ = schema.getDimensionIndex(DimensionId::Z_i32);
-
-    Dimension const& dim_x = schema.getDimension(DimensionId::X_i32);
-    Dimension const& dim_y = schema.getDimension(DimensionId::Y_i32);
-    Dimension const& dim_z = schema.getDimension(DimensionId::Z_i32);
-    const boost::int32_t xraw = data.getField<boost::int32_t>(0, indexX);
-    const boost::int32_t yraw = data.getField<boost::int32_t>(0, indexY);
-    const boost::int32_t zraw = data.getField<boost::int32_t>(0, indexZ);
+    Dimension const& dim_x = schema.getDimension("X");
+    Dimension const& dim_y = schema.getDimension("Y");
+    Dimension const& dim_z = schema.getDimension("Z");
+    
+    const boost::int32_t xraw = data.getField<boost::int32_t>(dim_x, 0);
+    const boost::int32_t yraw = data.getField<boost::int32_t>(dim_y, 0);
+    const boost::int32_t zraw = data.getField<boost::int32_t>(dim_z, 0);
     
     x = dim_x.applyScaling<boost::int32_t>(xraw);
     y = dim_y.applyScaling<boost::int32_t>(yraw);

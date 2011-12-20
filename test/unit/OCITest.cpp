@@ -220,19 +220,16 @@ BOOST_AUTO_TEST_CASE(initialize)
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK_EQUAL(numRead, 799u);
-
-    pdal::Schema const& schema = reader_reader.getSchema();
-    int offsetX = schema.getDimensionIndex(DimensionId::X_i32);
-    BOOST_CHECK_EQUAL(offsetX, 0);
-    int offsetY = schema.getDimensionIndex(DimensionId::Y_i32);
-    BOOST_CHECK_EQUAL(offsetY, 1);
-    int offsetZ = schema.getDimensionIndex(DimensionId::Z_i32);
-    BOOST_CHECK_EQUAL(offsetZ, 2);
     
+    pdal::Schema const& schema = data.getSchema();
+    pdal::Dimension const& dimX = schema.getDimension("X");
+    pdal::Dimension const& dimY = schema.getDimension("Y");
+    pdal::Dimension const& dimZ = schema.getDimension("Z");
+
     // data.getSchema().dump();
-    boost::int32_t x = data.getField<boost::int32_t>(0, offsetX);
-    boost::int32_t y = data.getField<boost::int32_t>(0, offsetY);
-    boost::int32_t z = data.getField<boost::int32_t>(0, offsetZ);
+    boost::int32_t x = data.getField<boost::int32_t>(dimX, 0);
+    boost::int32_t y = data.getField<boost::int32_t>(dimY, 0);
+    boost::int32_t z = data.getField<boost::int32_t>(dimZ, 0);
 
     BOOST_CHECK_EQUAL(x, -1250418763);
     BOOST_CHECK_EQUAL(y, 492548402); 

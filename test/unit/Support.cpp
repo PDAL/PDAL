@@ -349,17 +349,18 @@ void Support::check_pN(const pdal::PointBuffer& data,
                        double xref, double yref, double zref)
 {
     const ::pdal::Schema& schema = data.getSchema();
+    
+    pdal::Dimension const& dimX = schema.getDimension("X");
+    pdal::Dimension const& dimY = schema.getDimension("Y");
+    pdal::Dimension const& dimZ = schema.getDimension("Z");
 
-    int offsetX = schema.getDimensionIndex(pdal::DimensionId::X_i32);
-    int offsetY = schema.getDimensionIndex(pdal::DimensionId::Y_i32);
-    int offsetZ = schema.getDimensionIndex(pdal::DimensionId::Z_i32);
+    boost::int32_t x0raw = data.getField<boost::int32_t>(dimX, index);
+    boost::int32_t y0raw = data.getField<boost::int32_t>(dimY, index);
+    boost::int32_t z0raw = data.getField<boost::int32_t>(dimZ, index);
 
-    boost::int32_t x0raw = data.getField<boost::int32_t>(index, offsetX);
-    boost::int32_t y0raw = data.getField<boost::int32_t>(index, offsetY);
-    boost::int32_t z0raw = data.getField<boost::int32_t>(index, offsetZ);
-    double x0 = schema.getDimension(offsetX).applyScaling<boost::int32_t>(x0raw);
-    double y0 = schema.getDimension(offsetY).applyScaling<boost::int32_t>(y0raw);
-    double z0 = schema.getDimension(offsetZ).applyScaling<boost::int32_t>(z0raw);
+    double x0 = dimX.applyScaling<boost::int32_t>(x0raw);
+    double y0 = dimY.applyScaling<boost::int32_t>(y0raw);
+    double z0 = dimZ.applyScaling<boost::int32_t>(z0raw);
     
     Compare(x0, xref);
     Compare(y0, yref);
@@ -376,24 +377,26 @@ void Support::check_pN(const pdal::PointBuffer& data,
     check_pN(data, index, xref, yref, zref);
 
     const ::pdal::Schema& schema = data.getSchema();
+    
+    
+    boost::optional<pdal::Dimension const&> dimTime = schema.getDimensionOptional("Time");
 
-    int offsetT = schema.getDimensionIndex(pdal::DimensionId::Las_Time);
-    if (offsetT != -1)
+    if (dimTime)
     {
-        double t0 = data.getField<double>(index, offsetT);
+        double t0 = data.getField<double>(*dimTime, index);
         BOOST_CHECK_EQUAL(t0, tref);
+        
     }
 
-    int offsetR = schema.getDimensionIndex(pdal::DimensionId::Red_u16);
-    int offsetG = schema.getDimensionIndex(pdal::DimensionId::Green_u16);
-    int offsetB = schema.getDimensionIndex(pdal::DimensionId::Blue_u16);
-    BOOST_CHECK((offsetR==-1 && offsetG==-1 && offsetB==-1) || 
-                (offsetR!=-1 && offsetG!=-1 && offsetB!=-1));
-    if (offsetR != -1)
+    boost::optional<pdal::Dimension const&> dimRed = schema.getDimensionOptional("Red");
+    boost::optional<pdal::Dimension const&> dimGreen = schema.getDimensionOptional("Green");
+    boost::optional<pdal::Dimension const&> dimBlue = schema.getDimensionOptional("Blue");
+    
+    if (dimRed)
     {
-        boost::uint16_t r0 = data.getField<boost::uint16_t>(index, offsetR);
-        boost::uint16_t g0 = data.getField<boost::uint16_t>(index, offsetG);
-        boost::uint16_t b0 = data.getField<boost::uint16_t>(index, offsetB);
+        boost::uint16_t r0 = data.getField<boost::uint16_t>(*dimRed, index);
+        boost::uint16_t g0 = data.getField<boost::uint16_t>(*dimGreen, index);
+        boost::uint16_t b0 = data.getField<boost::uint16_t>(*dimBlue, index);
         BOOST_CHECK_EQUAL(r0, rref);
         BOOST_CHECK_EQUAL(g0, gref);
         BOOST_CHECK_EQUAL(b0, bref);

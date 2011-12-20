@@ -54,7 +54,6 @@ BOOST_AUTO_TEST_CASE(test1)
     cache.initialize();
 
     const Schema& schema = reader.getSchema();
-    const int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
     PointBuffer dataBig(schema, 1024);
     PointBuffer dataSmall(schema, 1);
@@ -66,13 +65,13 @@ BOOST_AUTO_TEST_CASE(test1)
     BOOST_CHECK(cache.getNumPointsRead() == 0);
 
     iter1->read(dataBig);
-    BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 0);
+    BOOST_CHECK(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0) == 0);
     //BOOST_CHECK(cache.getIndex() == 1024);
     BOOST_CHECK(cache.getNumPointsRequested() == 1024);
     BOOST_CHECK(cache.getNumPointsRead() == 1024);
 
     iter1->read(dataBig);
-    BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 1024);
+    BOOST_CHECK(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0) == 1024);
    // BOOST_CHECK(cache.getIndex() == 2048);
     BOOST_CHECK(cache.getNumPointsRequested() == 2048);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
@@ -81,7 +80,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
     iter2->skip(42);
     iter2->read(dataSmall);
-    BOOST_CHECK(dataSmall.getField<boost::uint64_t>(0, offsetT) == 42);
+    BOOST_CHECK(dataSmall.getField<boost::uint64_t>(dataSmall.getSchema().getDimension("Time"), 0) == 42);
     //BOOST_CHECK(cache.getIndex() == 43);
     BOOST_CHECK(cache.getNumPointsRequested() == 2048+1);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
@@ -108,7 +107,6 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
     cache.initialize();
 
     const Schema& schema = reader.getSchema();
-    const int offsetT = schema.getDimensionIndex(DimensionId::Time_u64);
 
     PointBuffer dataBig(schema, 1024);
     PointBuffer dataSmall(schema, 1);
@@ -120,13 +118,13 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
     BOOST_CHECK(cache.getNumPointsRead() == 0);
 
     iter1->read(dataBig);
-    BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 0);
+    BOOST_CHECK(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0) == 0);
     //BOOST_CHECK(cache.getIndex() == 1024);
     BOOST_CHECK(cache.getNumPointsRequested() == 1024);
     BOOST_CHECK(cache.getNumPointsRead() == 1024);
 
     iter1->read(dataBig);
-    BOOST_CHECK(dataBig.getField<boost::uint64_t>(0, offsetT) == 1024);
+    BOOST_CHECK(dataBig.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0) == 1024);
    // BOOST_CHECK(cache.getIndex() == 2048);
     BOOST_CHECK(cache.getNumPointsRequested() == 2048);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
@@ -135,7 +133,7 @@ BOOST_AUTO_TEST_CASE(CacheFilterTest_test_options)
 
     iter2->skip(42);
     iter2->read(dataSmall);
-    BOOST_CHECK(dataSmall.getField<boost::uint64_t>(0, offsetT) == 42);
+    BOOST_CHECK(dataSmall.getField<boost::uint64_t>(dataBig.getSchema().getDimension("Time"), 0) == 42);
     //BOOST_CHECK(cache.getIndex() == 43);
     BOOST_CHECK(cache.getNumPointsRequested() == 2048+1);
     BOOST_CHECK(cache.getNumPointsRead() == 2048);
