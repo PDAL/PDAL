@@ -44,8 +44,6 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Utils.hpp>
-#include <pdal/dimension/Id.hpp>
-#include <pdal/dimension/Type.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -94,29 +92,12 @@ namespace dimension {
 class PDAL_DLL Dimension
 {
 public:
-    enum DataType
-    {
-        Int8,
-        Uint8,
-        Int16,
-        Uint16,
-        Int32,
-        Uint32,
-        Int64,
-        Uint64,
-        Pointer,    // stored as 64 bits, even on a 32-bit box
-        Float,       // 32 bits
-        Double,       // 64 bits
-        Undefined
-    };
 
 /// \name Constructors
     Dimension(  std::string const& name, 
                 dimension::Interpretation interpretation,
                 dimension::size_type sizeInBytes,
                 std::string description=std::string(""));
-    Dimension(DimensionId::Id id); // will use table to lookup datatype, description, etc
-    Dimension(DimensionId::Id id, DataType datatype, std::string name, std::string description=std::string("")); // for dimensions not in the master table
     Dimension(Dimension const& other);
 
     Dimension& operator=(Dimension const& rhs);
@@ -137,10 +118,10 @@ public:
 /// \name Data Access
     std::string const& getName() const;
 
-    DimensionId::Id getId() const
-    {
-        return m_id;
-    }
+    // DimensionId::Id getId() const
+    // {
+    //     return m_id;
+    // }
     
     inline dimension::Interpretation getInterpretation() const { return m_interpretation; }
 
@@ -152,16 +133,6 @@ public:
     bool isWritten() const { return (m_flags & dimension::IsWritten) == dimension::IsWritten; }
     bool isIgnored() const { return (m_flags & dimension::IsIgnored) == dimension::IsIgnored; }
     
-    DataType getDataType() const
-    {
-        return m_dataType;
-    }
-
-    static std::string getDataTypeName(DataType);
-    static DataType getDataTypeFromString(const std::string&);
-    static dimension::size_type getDataTypeSize(DataType);
-
-    static dimension::Interpretation getInterpretation(DataType type);    
 
     /// \return Number of bytes required to serialize this dimension 
     dimension::size_type getByteSize() const
@@ -330,6 +301,8 @@ public:
 
     /// Outputs a string representation of the Dimension instance to std::cout
     void dump() const;
+    
+    std::string getInterpretationName() const;
 
     dimension::id const& getUUID() const { return m_uuid; }
     void setUUID( std::string const& id);
@@ -340,8 +313,6 @@ public:
     std::string const& getNamespace( ) const { return m_namespace; }
 
 private:
-    DataType m_dataType;
-    DimensionId::Id m_id;
     std::string m_name;
     boost::uint32_t m_flags;
     EndianType m_endian;

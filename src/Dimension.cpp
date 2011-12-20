@@ -51,52 +51,6 @@ namespace pdal
 {
 
 
-Dimension::Dimension(DimensionId::Id id)
-    : m_dataType(Undefined)
-    , m_id(id)
-    , m_name(std::string(""))
-    , m_flags(0)
-    , m_endian(pdal::Endian_Little)
-    , m_byteSize(0)
-    , m_description(std::string(""))
-    , m_min(0.0)
-    , m_max(0.0)
-    , m_numericScale(1.0)
-    , m_numericOffset(0.0)
-    , m_byteOffset(-1)
-    , m_position(0)
-    , m_namespace(std::string(""))
-{
-    boost::uint32_t dt;
-    DimensionId::lookupKnownDimension(id, dt, m_name, m_description);
-    m_dataType = (DataType)dt;
-
-    m_byteSize = getDataTypeSize(m_dataType);
-    m_interpretation = getInterpretation(m_dataType);
-}
-
-
-Dimension::Dimension(DimensionId::Id id, DataType dataType, std::string name, std::string description)
-    : m_dataType(dataType)
-    , m_id(id)
-    , m_name(name)
-    , m_flags(0)
-    , m_endian(pdal::Endian_Little)
-    , m_byteSize(0)
-    , m_description(description)
-    , m_min(0.0)
-    , m_max(0.0)
-    , m_numericScale(1.0)
-    , m_numericOffset(0.0)
-    , m_byteOffset(0)
-    , m_position(-1)
-    , m_namespace(std::string(""))
-{
-    assert(!DimensionId::hasKnownDimension(id));
-    
-    m_byteSize = getDataTypeSize(m_dataType);
-    m_interpretation = getInterpretation(dataType);
-}
 
 Dimension::Dimension(   std::string const& name, 
                         dimension::Interpretation interpretation,
@@ -117,45 +71,12 @@ Dimension::Dimension(   std::string const& name,
     , m_namespace(std::string(""))
     
 {
-    m_id = DimensionId::getIdForDimension(*this);
-    if (interpretation == dimension::UnsignedInteger)
-    {
-        if (sizeInBytes == 1)
-            m_dataType = Uint8;
-        if (sizeInBytes == 2)
-            m_dataType = Uint16;
-        if (sizeInBytes == 4)
-            m_dataType = Uint32;
-        if (sizeInBytes == 8)
-            m_dataType = Uint64;
-    }
-    if (interpretation == dimension::SignedInteger)
-    {
-        if (sizeInBytes == 1)
-            m_dataType = Int8;
-        if (sizeInBytes == 2)
-            m_dataType = Int16;
-        if (sizeInBytes == 4)
-            m_dataType = Int32;
-        if (sizeInBytes == 8)
-            m_dataType = Int64;
-        
-    }
-    if (interpretation == dimension::Float)
-    {
-        if (sizeInBytes == 4)
-            m_dataType = Float;
-        if (sizeInBytes == 8)
-            m_dataType = Double;
-        
-    }
+
 }
 
 /// copy constructor
 Dimension::Dimension(Dimension const& other) 
-    : m_dataType(other.m_dataType)
-    , m_id(other.m_id)
-    , m_name(other.m_name)
+    : m_name(other.m_name)
     , m_flags(other.m_flags)
     , m_endian(other.m_endian)
     , m_byteSize(other.m_byteSize)
@@ -178,8 +99,6 @@ Dimension& Dimension::operator=(Dimension const& rhs)
 {
     if (&rhs != this)
     {
-        m_dataType = rhs.m_dataType;
-        m_id = rhs.m_id;
         m_name = rhs.m_name;
         m_flags = rhs.m_flags;
         m_endian = rhs.m_endian;
@@ -202,9 +121,7 @@ Dimension& Dimension::operator=(Dimension const& rhs)
 
 bool Dimension::operator==(const Dimension& other) const
 {
-    if (m_dataType == other.m_dataType &&
-        m_id == other.m_id &&
-        boost::iequals(m_name, other.m_name) &&
+    if (boost::iequals(m_name, other.m_name) &&
         m_flags == other.m_flags &&
         m_endian == other.m_endian &&
         m_byteSize == other.m_byteSize &&
@@ -232,113 +149,7 @@ bool Dimension::operator!=(const Dimension& other) const
 }
 
 
-std::string Dimension::getDataTypeName(DataType type)
-{
-    switch (type)
-    {
-    case Int8:
-        return "Int8";
-    case Uint8:
-        return "Uint8";
-    case Int16:
-        return "Int16";
-    case Uint16:
-        return "Uint16";
-    case Int32:
-        return "Int32";
-    case Uint32:
-        return "Uint32";
-    case Pointer:
-        return "Pointer";
-    case Int64:
-        return "Int64";
-    case Uint64:
-        return "Uint64";
-    case Float:
-        return "Float";
-    case Double:
-        return "Double";
-    case Undefined:
-        return "Undefined";
-    }
-    throw;
-}
 
-dimension::Interpretation Dimension::getInterpretation(DataType type)
-{
-    switch (type)
-    {
-    case Int8:
-        return dimension::SignedByte;
-    case Uint8:
-        return dimension::UnsignedByte;
-    case Uint16:
-    case Uint32:
-    case Uint64:
-        return dimension::UnsignedInteger;
-    case Pointer:
-        return dimension::Pointer;
-    case Int16:
-    case Int32:
-    case Int64:
-        return dimension::SignedInteger;
-    case Float:
-    case Double:
-        return dimension::Float;
-    case Undefined:
-        return dimension::Undefined;
-    }
-    throw;
-}
-
-dimension::size_type Dimension::getDataTypeSize(DataType type)
-{
-    switch (type)
-    {
-    case Int8:
-        return 1;
-    case Uint8:
-        return 1;
-    case Int16:
-        return 2;
-    case Uint16:
-        return 2;
-    case Int32:
-        return 4;
-    case Uint32:
-        return 4;
-    case Pointer:
-        return sizeof(void*);
-    case Int64:
-        return 8;
-    case Uint64:
-        return 8;
-    case Float:
-        return 4;
-    case Double:
-        return 8;
-    case Undefined:
-        throw;
-    }
-    throw;
-}
-
-
-Dimension::DataType Dimension::getDataTypeFromString(const std::string& s)
-{
-    if (s == "Int8") return Int8;
-    if (s == "Uint8") return Uint8;
-    if (s == "Int16") return Int16;
-    if (s == "Uint16") return Uint16;
-    if (s == "Int32") return Int32;
-    if (s == "Uint32") return Uint32;
-    if (s == "Int64") return Int64;
-    if (s == "Uint64") return Uint64;
-    if (s == "Pointer") return Pointer;
-    if (s == "Float") return Float;
-    if (s == "Double") return Double;
-    throw;
-}
 
 
 std::string const& Dimension::getName() const
@@ -356,7 +167,6 @@ boost::property_tree::ptree Dimension::toPTree() const
     ptree dim;
     dim.put("name", getName());
     dim.put("namespace", getNamespace());
-    dim.put("datatype", getDataTypeName(getDataType()));
     dim.put("description", getDescription());
     dim.put("bytesize", getByteSize());
     
@@ -398,6 +208,68 @@ void Dimension::dump() const
     std::cout << *this;
 }
 
+std::string Dimension::getInterpretationName() const
+{
+    std::ostringstream type;
+    dimension::Interpretation t = getInterpretation();
+    boost::uint32_t bytesize = getByteSize();
+
+    switch (t)
+    {
+        case dimension::SignedByte:
+            if (bytesize == 1)
+                type << "int8_t";
+            break;
+        case dimension::UnsignedByte:
+            if (bytesize == 1)
+                type << "uint8_t";
+            break;
+        
+
+        case dimension::SignedInteger:
+            if (bytesize == 1)
+                type << "int8_t";
+            else if (bytesize == 2)
+                type << "int16_t";
+            else if (bytesize == 4)
+                type << "int32_t";
+            else if (bytesize == 8)
+                type << "int64_t";
+            else
+                type << "unknown";
+            break;
+        case dimension::UnsignedInteger:
+            if (bytesize == 1)
+               type << "uint8_t";
+            else if (bytesize == 2)
+               type << "uint16_t";
+            else if (bytesize == 4)
+               type << "uint32_t";
+            else if (bytesize == 8)
+               type << "uint64_t";
+            else
+               type << "unknown";
+            break;
+    
+       case dimension::Float:
+           if (bytesize == 4)
+               type << "float";
+           else if (bytesize == 8)
+               type << "double";
+           else
+               type << "unknown";
+           break;
+    
+        case dimension::Pointer:
+           type << "pointer";
+           break;
+        case dimension::Undefined:
+           type << "unknown";
+           break;
+    }    
+    
+    return type.str();
+}
 
 std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d)
 {
