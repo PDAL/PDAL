@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
     boost::property_tree::ptree tree = d1.toPTree();
     
     boost::uint32_t size = tree.get<boost::uint32_t>("bytesize");
-    BOOST_CHECK_EQUAL(size, 4);
+    BOOST_CHECK_EQUAL(size, 4u);
     
     std::string name = tree.get<std::string>("name");
     BOOST_CHECK_EQUAL(name, "X");
