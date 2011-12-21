@@ -91,7 +91,7 @@ void Scaling::checkImpedance()
 }
 
 
-void Scaling::processBuffer(const PointBuffer& srcData, PointBuffer& dstData) const
+void Scaling::processBuffer(const PointBuffer& /*srcData*/, PointBuffer& /*dstData*/) const
 {
     // const boost::uint32_t numPoints = srcData.getNumPoints();
     // 
