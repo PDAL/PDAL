@@ -131,7 +131,6 @@ set (PDAL_DRIVERS_LAS_HPP
   ${PDAL_LAS_SRC}/LasHeaderWriter.hpp
   ${PDAL_LAS_SRC}/ZipPoint.hpp
   ${PDAL_LAS_HEADERS}/Header.hpp
-  ${PDAL_LAS_HEADERS}/Iterator.hpp
   ${PDAL_LAS_HEADERS}/Reader.hpp
   ${PDAL_LAS_HEADERS}/ReaderBase.hpp
   ${PDAL_LAS_HEADERS}/SummaryData.hpp
@@ -152,7 +151,6 @@ set (PDAL_DRIVERS_LAS_CPP
   ${PDAL_DRIVERS_LAS_GTIFF}
   ${PDAL_DRIVERS_LAS_LASZIP}
   ${PDAL_LAS_SRC}/Header.cpp
-  ${PDAL_LAS_SRC}/Iterator.cpp
   ${PDAL_LAS_SRC}/LasHeaderReader.cpp
   ${PDAL_LAS_SRC}/LasHeaderWriter.cpp
   ${PDAL_LAS_SRC}/Reader.cpp

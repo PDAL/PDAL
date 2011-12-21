@@ -165,21 +165,21 @@ bool Reader::isCompressed() const
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return new SequentialIterator(*this);
+    return new pdal::drivers::las::iterators::sequential::Reader(*this);
 }
 
 
 pdal::StageRandomIterator* Reader::createRandomIterator() const
 {
-    return new RandomIterator(*this);
+    return new pdal::drivers::las::iterators::random::Reader(*this);
 }
 
 
 boost::uint32_t Reader::processBuffer(  PointBuffer& data, 
                                         std::istream& stream, 
                                         boost::uint64_t numPointsLeft, 
-                                        LASunzipper* unzipper, 
-                                        ZipPoint* zipPoint,
+                                        boost::scoped_ptr<LASunzipper>& unzipper, 
+                                        boost::scoped_ptr<ZipPoint>& zipPoint,
                                         PointDimensions* dimensions) const
 {
     // we must not read more points than are left in the file
@@ -457,4 +457,217 @@ boost::property_tree::ptree Reader::toPTree() const
     return tree;
 }
 
+
+namespace iterators {
+
+
+Base::Base(pdal::drivers::las::Reader const& reader)
+    : m_reader(reader)
+    , m_istream(NULL)
+    , m_zipPoint(NULL)
+    , m_unzipper(NULL)
+
+{
+    m_istream = FileUtils::openFile(m_reader.getFileName());
+    m_istream->seekg(m_reader.getPointDataOffset());
+
+    if (m_reader.isCompressed())
+    {
+#ifdef PDAL_HAVE_LASZIP
+        initialize();
+#else
+        throw pdal_error("LASzip is not enabled for this pdal::drivers::las::IteratorBase!");
+#endif
+    }
+
+    return;
+}
+
+
+Base::~Base()
+{
+#ifdef PDAL_HAVE_LASZIP
+    m_zipPoint.reset();
+    m_unzipper.reset();
+#endif
+    
+    FileUtils::closeFile(m_istream);
+}
+
+
+void Base::initialize()
+{
+#ifdef PDAL_HAVE_LASZIP
+    if (!m_zipPoint)
+    {
+        PointFormat format = m_reader.getPointFormat();
+        boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_reader.getVLRs()));
+        m_zipPoint.swap(z);
+    }
+
+    if (!m_unzipper)
+    {
+        boost::scoped_ptr<LASunzipper> z(new LASunzipper());
+        m_unzipper.swap(z);
+
+        bool stat(false);
+        m_istream->seekg(m_reader.getPointDataOffset(), std::ios::beg);
+        stat = m_unzipper->open(*m_istream, m_zipPoint->GetZipper());
+
+        // Martin moves the stream on us 
+        m_zipReadStartPosition = m_istream->tellg();
+        if (!stat)
+        {
+            std::ostringstream oss;
+            const char* err = m_unzipper->get_error();
+            if (err==NULL) err="(unknown error)";
+            oss << "Failed to open LASzip stream: " << std::string(err);
+            throw pdal_error(oss.str());
+        }
+    }
+#endif
+    return;
+}
+
+namespace sequential {
+
+
+Reader::Reader(pdal::drivers::las::Reader const& reader)
+    : Base(reader)
+    , pdal::ReaderSequentialIterator(reader)
+    , m_pointDimensions(NULL)
+    , m_schema(0)
+{
+    return;
+}
+
+
+Reader::~Reader()
+{
+    if (m_pointDimensions) 
+        delete m_pointDimensions;
+
+    return;
+}
+
+void Reader::readBufferBeginImpl(PointBuffer& buffer)
+{
+    // Cache dimension positions
+    Schema const& schema = buffer.getSchema();
+    if (m_pointDimensions)
+        delete m_pointDimensions;
+    m_pointDimensions = new PointDimensions(schema, m_reader.getName());
+
+} 
+
+
+boost::uint64_t Reader::skipImpl(boost::uint64_t count)
+{
+#ifdef PDAL_HAVE_LASZIP
+    if (m_unzipper)
+    {
+        const boost::uint32_t pos32 = Utils::safeconvert64to32(getIndex() + count);
+        m_unzipper->seek(pos32);
+    }
+    else
+    {
+        boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+        m_istream->seekg(delta * count, std::ios::cur);
+    }
+#else
+        boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+        m_istream->seekg(delta * count, std::ios::cur);
+#endif
+    return count;
+}
+
+
+bool Reader::atEndImpl() const
+{
+    return getIndex() >= getStage().getNumPoints();
+}
+
+
+boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+{
+    return m_reader.processBuffer(  data, 
+                                    *m_istream, 
+                                    getStage().getNumPoints()-this->getIndex(), 
+                                    m_unzipper, 
+                                    m_zipPoint,
+                                    m_pointDimensions);
+}
+
+    
+} // sequential
+
+namespace random {
+
+
+Reader::Reader(const pdal::drivers::las::Reader& reader)
+    : Base(reader)
+    , pdal::ReaderRandomIterator(reader)
+    , m_pointDimensions(NULL)
+    , m_schema(0)
+{
+    return;
+}
+
+
+Reader::~Reader()
+{
+    if (m_pointDimensions) delete m_pointDimensions;
+    return;
+}
+
+void Reader::readBufferBeginImpl(PointBuffer& buffer)
+{
+    // We'll assume you're not changing the schema per-read call
+    Schema const& schema = buffer.getSchema();
+    if (m_schema != &schema)
+    {
+        m_schema = &schema;
+        if (m_pointDimensions)
+            delete m_pointDimensions;
+        m_pointDimensions = new PointDimensions(schema, m_reader.getName());
+    } 
+
+} 
+
+boost::uint64_t Reader::seekImpl(boost::uint64_t count)
+{
+#ifdef PDAL_HAVE_LASZIP
+    if (m_unzipper)
+    {
+        const boost::uint32_t pos32 = Utils::safeconvert64to32(count);
+        m_unzipper->seek(pos32);
+    }
+    else
+    {
+        boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+        m_istream->seekg(m_reader.getPointDataOffset() + delta * count);
+    }
+#else
+
+    boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+    m_istream->seekg(m_reader.getPointDataOffset() + delta * count);
+
+#endif
+
+    return count;
+}
+
+
+boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+{
+    return m_reader.processBuffer(  data, 
+                                    *m_istream, 
+                                    getStage().getNumPoints()-this->getIndex(), 
+                                    m_unzipper, 
+                                    m_zipPoint,
+                                    m_pointDimensions);
+}
+    
+} // random
+} // iterators
 } } } // namespaces

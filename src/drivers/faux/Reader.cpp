@@ -34,9 +34,13 @@
 
 #include <pdal/drivers/faux/Reader.hpp>
 
+#include <pdal/PointBuffer.hpp>
+
 #include <boost/algorithm/string.hpp>
 
+
 namespace pdal { namespace drivers { namespace faux {
+
 
 static Reader::Mode string2mode(const std::string& str)
 {
@@ -45,6 +49,7 @@ static Reader::Mode string2mode(const std::string& str)
     if (boost::iequals(str, "ramp")) return Reader::Ramp;
     throw pdal_error("invalid Mode option: " + str);
 }
+
 
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
@@ -55,6 +60,7 @@ Reader::Reader(const Options& options)
     addDefaultDimensions();
     return;
 }
+
 
 Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mode)
     : pdal::Reader(Options::none())
@@ -166,11 +172,11 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     const double delX = (maxX - minX) / numDeltas;
     const double delY = (maxY - minY) / numDeltas;
     const double delZ = (maxZ - minZ) / numDeltas;
-    
-    const Dimension& dimX = schema.getDimension("X");
-    const Dimension& dimY = schema.getDimension("Y");
-    const Dimension& dimZ = schema.getDimension("Z");
-    const Dimension& dimTime = schema.getDimension("Time");
+	
+	const Dimension& dimX = schema.getDimension("X");
+	const Dimension& dimY = schema.getDimension("Y");
+	const Dimension& dimZ = schema.getDimension("Z");
+	const Dimension& dimTime = schema.getDimension("Time");
 
     boost::uint64_t time = index;
     

@@ -36,9 +36,14 @@
 #define INCLUDED_DRIVERS_LAS_READER_HPP
 
 #include <pdal/Reader.hpp>
+#include <pdal/ReaderIterator.hpp>
+
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/ReaderBase.hpp>
 
+#include <boost/scoped_ptr.hpp>
+
+class LASzip;
 class LASunzipper;
 
 namespace pdal
@@ -81,8 +86,8 @@ public:
     boost::uint32_t processBuffer(  PointBuffer& PointBuffer, 
                                     std::istream& stream, 
                                     boost::uint64_t numPointsLeft, 
-                                    LASunzipper* unzipper, 
-                                    ZipPoint* zipPoint,
+                                    boost::scoped_ptr<LASunzipper>& unzipper, 
+                                    boost::scoped_ptr<ZipPoint>& zipPoint,
                                     PointDimensions* dimensions) const;
 
     int getMetadataRecordCount() const;
@@ -117,6 +122,83 @@ private:
     Reader(const Reader&); // not implemented
 };
 
+
+namespace iterators {
+
+class Base
+{
+public:
+    Base(pdal::drivers::las::Reader const& reader);
+    ~Base();
+private:
+    void initialize();
+
+protected:
+    const pdal::drivers::las::Reader& m_reader;
+    std::istream* m_istream;
+
+public:
+
+#ifdef PDAL_HAVE_LASZIP
+    boost::scoped_ptr<ZipPoint> m_zipPoint;
+    boost::scoped_ptr<LASunzipper> m_unzipper;
+#else
+    void* m_zipPoint;
+    void* m_unzipper;
+#endif
+
+    std::streampos m_zipReadStartPosition;
+
+private:
+    Base& operator=(Base const&); // not implemented
+    Base(Base const&); // not implemented
+};
+
+namespace sequential {
+
+class Reader : public Base, public pdal::ReaderSequentialIterator
+{
+public:
+    Reader(const pdal::drivers::las::Reader& reader);
+    ~Reader();
+
+protected:
+    virtual void readBufferBeginImpl(PointBuffer&);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+    PointDimensions* m_pointDimensions;
+    Schema const* m_schema;
+};
+
+
+} // sequential
+
+namespace random {
+
+
+class Reader : public Base, public pdal::ReaderRandomIterator
+{
+public:
+    Reader(const pdal::drivers::las::Reader& reader);
+    ~Reader();
+
+protected:
+    virtual void readBufferBeginImpl(PointBuffer&);
+
+private:
+    boost::uint64_t seekImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    PointDimensions* m_pointDimensions;
+    Schema const* m_schema;
+};
+
+} // random
+
+
+} // iterators
 
 } } } // namespaces
 
