@@ -39,43 +39,22 @@ if(WIN32)
     add_definitions("-DPDAL_DLL_EXPORT=1")
 endif()
 
-if(WITH_LIBLAS)
-	set(APPS_CPP_DEPENDENCIES
-		${PDAL_LIB_NAME}
-		${LIBLAS_LIBRARY}
-		${TIFF_LIBRARY}
-		${GEOTIFF_LIBRARY}
-		${GDAL_LIBRARY}
-		${SPATIALINDEX_LIBRARY}
-		${LASZIP_LIBRARY}
-		${Boost_LIBRARIES})
-else()	
-	set(APPS_CPP_DEPENDENCIES
-		${PDAL_LIB_NAME}
-		${TIFF_LIBRARY}
-		${GEOTIFF_LIBRARY}
-		${GDAL_LIBRARY}
-		${SPATIALINDEX_LIBRARY}
-		${LASZIP_LIBRARY}
-		${Boost_LIBRARIES})
-endif()
-
 link_directories(${Boost_LIBRARY_DIRS})
 
 # Build pcinfo
 if(PCINFO)
     add_executable(${PCINFO} pcinfo.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PCINFO} ${APPS_CPP_DEPENDENCIES} )
+    target_link_libraries(${PCINFO} ${PDAL_LIB_NAME} )
 endif()
 
 if(PC2PC)
     add_executable(${PC2PC} pc2pc.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PC2PC} ${APPS_CPP_DEPENDENCIES} )
+    target_link_libraries(${PC2PC} ${PDAL_LIB_NAME} )
 endif()
 
 if(PCPIPELINE)
     add_executable(${PCPIPELINE} pcpipeline.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PCPIPELINE} ${APPS_CPP_DEPENDENCIES} )
+    target_link_libraries(${PCPIPELINE} ${PDAL_LIB_NAME} )
 endif()
 
 #------------------------------------------------------------------------------
