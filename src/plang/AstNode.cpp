@@ -47,9 +47,9 @@ static unsigned int s_id = 0;
 
 
 AstNode::AstNode(DataType datatype, NodeType nodetype)
-    : m_datatype(datatype)
+    : m_id(s_id)
+    , m_datatype(datatype)
     , m_nodetype(nodetype)
-    , m_id(s_id)
 {
     ++s_id;
     return;

@@ -74,10 +74,10 @@ SymbolName::~SymbolName()
 Symbol::Symbol(const SymbolName* name, DataType datatype)
     : m_name(name->getName())
     , m_datatype(datatype)
-    , m_hasValue(false)
     , m_isFree(false)
-    , m_isUsed(false)
     , m_isDefined(false)
+    , m_isUsed(false)
+    , m_hasValue(false)
 {
     delete name;
     return;
@@ -110,6 +110,7 @@ SymbolTable::~SymbolTable()
 {
     for (unsigned int i=0; i<m_symbols.size(); i++)
     {
+        // FIXME: warning: delete called on 'pdal::plang::Symbol' that has virtual functions but non-virtual destructor   [-Wdelete-non-virtual-dtor]
         delete m_symbols[i];
     }
     return;
