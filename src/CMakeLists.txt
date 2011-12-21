@@ -26,7 +26,7 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/pdal_error.hpp
   ${PDAL_HEADERS_DIR}/types.hpp
   ${PDAL_HEADERS_DIR}/Bounds.hpp
-  ${PDAL_HEADERS_DIR}/dimension/Dimension.hpp
+  ${PDAL_HEADERS_DIR}/Dimension.hpp
   ${PDAL_HEADERS_DIR}/FileUtils.hpp
   ${PDAL_HEADERS_DIR}/Filter.hpp
   ${PDAL_HEADERS_DIR}/FilterIterator.hpp
@@ -107,13 +107,11 @@ set(PDAL_FAUX_PATH drivers/faux)
 set(PDAL_FAUX_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_FAUX_PATH})
 set(PDAL_FAUX_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_FAUX_PATH})
 set(PDAL_DRIVERS_FAUX_HPP 
-  ${PDAL_FAUX_HEADERS}/Iterator.hpp
   ${PDAL_FAUX_HEADERS}/Reader.hpp
   ${PDAL_FAUX_HEADERS}/Writer.hpp
 )
 
 set (PDAL_DRIVERS_FAUX_CPP
-  ${PDAL_FAUX_SRC}/Iterator.cpp
   ${PDAL_FAUX_SRC}/Reader.cpp
   ${PDAL_FAUX_SRC}/Writer.cpp 
 )
