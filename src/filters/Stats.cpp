@@ -94,12 +94,6 @@ const Options Stats::getDefaultOptions() const
     return options;
 }
 
-void Stats::processBuffer(PointBuffer& data) const
-{
-
-    return;
-}
-
 pdal::StageSequentialIterator* Stats::createSequentialIterator() const
 {
     return new pdal::filters::iterators::sequential::Stats(*this);
@@ -118,8 +112,6 @@ Stats::Stats(const pdal::filters::Stats& filter)
 boost::uint32_t Stats::readBufferImpl(PointBuffer& data)
 {
     const boost::uint32_t numRead = getPrevIterator().read(data);
-
-    m_statsFilter.processBuffer(data);
 
     const boost::uint32_t numPoints = data.getNumPoints();
 
