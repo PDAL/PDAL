@@ -252,8 +252,6 @@ const Dimension& Schema::getDimension(std::string const& t, std::string const& n
 
     }
 
-    throw dimension_not_found(oss.str());
-
 }
 
 
