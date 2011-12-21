@@ -121,7 +121,7 @@ private:
 namespace iterators { namespace sequential {
 
 
-class InPlaceReprojection : public pdal::FilterSequentialIterator
+class PDAL_DLL InPlaceReprojection : public pdal::FilterSequentialIterator
 {
 public:
     InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter);

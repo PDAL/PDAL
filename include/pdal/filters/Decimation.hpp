@@ -82,7 +82,7 @@ private:
 namespace iterators { namespace sequential {
 
 
-class Decimation : public pdal::FilterSequentialIterator
+class PDAL_DLL Decimation : public pdal::FilterSequentialIterator
 {
 public:
     Decimation(const pdal::filters::Decimation& filter);

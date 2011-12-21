@@ -206,7 +206,7 @@ private:
 
 namespace iterators { namespace sequential {
 
-class Chipper : public pdal::FilterSequentialIterator
+class PDAL_DLL Chipper : public pdal::FilterSequentialIterator
 {
 public:
     Chipper(pdal::filters::Chipper const& filter);
