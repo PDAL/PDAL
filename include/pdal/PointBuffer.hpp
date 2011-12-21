@@ -201,6 +201,7 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, std::size_t pointI
         // Winner, winner, chicken dinner. We're not going to try to 
         // do anything magical. It's up to you to get the interpretation right.
         *(T*)(void*)p = value;
+        return;
     }
     
     T output(0);
