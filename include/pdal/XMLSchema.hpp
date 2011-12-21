@@ -37,7 +37,6 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Schema.hpp>
-#include <pdal/dimension/Dimension.hpp>
 
 #include <string>
 #include <stdarg.h>

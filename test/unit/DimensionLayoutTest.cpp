@@ -37,7 +37,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <pdal/dimension/Dimension.hpp>
+#include <pdal/Dimension.hpp>
 
 using namespace pdal;
 

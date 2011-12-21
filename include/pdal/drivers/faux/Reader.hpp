@@ -37,7 +37,6 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/Bounds.hpp>
-#include <pdal/dimension/Dimension.hpp>
 
 namespace pdal
 {

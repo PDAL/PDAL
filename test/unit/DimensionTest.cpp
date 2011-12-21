@@ -38,7 +38,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
-#include <pdal/dimension/Dimension.hpp>
+#include <pdal/Dimension.hpp>
 #include <pdal/external/boost/uuid/string_generator.hpp>
 
 using namespace pdal;
