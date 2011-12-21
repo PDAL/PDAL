@@ -47,7 +47,7 @@ namespace pdal { namespace filters {
 namespace stats
 {
 
-class Collector
+class PDAL_DLL Collector
 {
 public:
 
