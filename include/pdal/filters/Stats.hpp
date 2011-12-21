@@ -164,7 +164,7 @@ namespace iterators { namespace sequential {
 
 typedef boost::shared_ptr<Dimension> DimensionPtr;
 
-class Stats : public pdal::FilterSequentialIterator
+class PDAL_DLL Stats : public pdal::FilterSequentialIterator
 {
 public:
     Stats(const pdal::filters::Stats& filter);
