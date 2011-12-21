@@ -150,7 +150,8 @@ public:
     static std::string trim(const std::string& str);
 
     static boost::uint32_t getStreamPrecision(double scale);
-
+    
+    static boost::uint32_t safeconvert64to32(boost::uint64_t x64);
 
 private:
     template<typename T>
