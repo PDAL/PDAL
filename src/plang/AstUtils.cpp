@@ -40,26 +40,27 @@
 
 namespace pdal { namespace plang {
 
+class my_visitor : public ::boost::static_visitor<DataType>
+{
+public:
+    DataType operator()(boost::uint8_t) const  { return DataType_Uint8; }
+    DataType operator()(boost::uint16_t) const { return DataType_Uint16; }
+    DataType operator()(boost::uint32_t) const { return DataType_Uint32; }
+    DataType operator()(boost::uint64_t) const { return DataType_Uint64; }
+    DataType operator()(boost::int8_t) const   { return DataType_Int8; }
+    DataType operator()(boost::int16_t) const  { return DataType_Int16; }
+    DataType operator()(boost::int32_t) const  { return DataType_Int32; }
+    DataType operator()(boost::int64_t) const  { return DataType_Int64; }
+    DataType operator()(float) const           { return DataType_Float32; }
+    DataType operator()(double) const          { return DataType_Float64; }
+    DataType operator()(bool) const            { return DataType_Bool; }
+};
 
 DataType AstUtils::inferType(variant_t value)
 {
-    class my_visitor : public boost::static_visitor<DataType>
-    {
-    public:
-        DataType operator()(boost::uint8_t) const  { return DataType_Uint8; }
-        DataType operator()(boost::uint16_t) const { return DataType_Uint16; }
-        DataType operator()(boost::uint32_t) const { return DataType_Uint32; }
-        DataType operator()(boost::uint64_t) const { return DataType_Uint64; }
-        DataType operator()(boost::int8_t) const   { return DataType_Int8; }
-        DataType operator()(boost::int16_t) const  { return DataType_Int16; }
-        DataType operator()(boost::int32_t) const  { return DataType_Int32; }
-        DataType operator()(boost::int64_t) const  { return DataType_Int64; }
-        DataType operator()(float) const           { return DataType_Float32; }
-        DataType operator()(double) const          { return DataType_Float64; }
-        DataType operator()(bool) const            { return DataType_Bool; }
-    };
 
-    return boost::apply_visitor(my_visitor(), value);
+
+    return ::boost::apply_visitor(my_visitor(), value);
 }
 
 
