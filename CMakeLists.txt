@@ -343,6 +343,9 @@ endif()
 set(WITH_MRSID FALSE CACHE BOOL "Choose if MrSID/LiDAR support should be built")
 
 if(WITH_MRSID)
+
+    set(MRSID_ROOT "/Users/hobu/installs/mrsid/Lidar_DSDK" CACHE STRING "Root directory of MrSID install")
+
     find_package(MrSID)
     if(MRSID_FOUND)
         set(CMAKE_REQUIRED_LIBRARIES ${MRSID_LIBRARY})

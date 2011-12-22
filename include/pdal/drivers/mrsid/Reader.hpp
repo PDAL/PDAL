@@ -36,10 +36,12 @@
 #define INCLUDED_DRIVERS_MrSID_READER_HPP
 
 #include <pdal/Reader.hpp>
+#include <pdal/ReaderIterator.hpp>
+
 #include <pdal/Bounds.hpp>
-#include <pdal/dimension/Dimension.hpp>
 
 #include <lidar/PointSource.h>
+
 namespace pdal
 {
     class PointBuffer;
@@ -49,7 +51,7 @@ namespace LizardTech
     class PointSource;
 }
 
-namespace pdal { namespace drivers { namespace MrSID {
+namespace pdal { namespace drivers { namespace mrsid {
 
 
 // The MrSIDReader wraps LT's PointSource abstraction
@@ -58,7 +60,7 @@ class PDAL_DLL Reader : public pdal::Reader
 {
 
 public:
-    SET_STAGE_NAME("drivers.MrSID.reader", "MrSID Reader")
+    SET_STAGE_NAME("drivers.mrsid.reader", "MrSID Reader")
     virtual ~Reader();
     Reader(const Options& options);
     Reader(LizardTech::PointSource *ps);
@@ -86,10 +88,47 @@ private:
     LizardTech::PointSource *m_PS;
     LizardTech::PointIterator *m_iter; 
     int SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const;
-    Dimension LTChannelToPDalDimension(const LizardTech::ChannelInfo & channel) const;
+    Dimension LTChannelToPDalDimension(const LizardTech::ChannelInfo & channel, pdal::Schema const& dimensions) const;
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
 };
+
+namespace iterators {
+
+namespace sequential {
+
+class Reader : public pdal::ReaderSequentialIterator
+{
+public:
+    Reader(const pdal::drivers::mrsid::Reader& reader);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+
+    const pdal::drivers::mrsid::Reader& m_reader;
+};
+
+} // sequential
+    
+namespace random {
+
+class Reader : public pdal::ReaderRandomIterator
+{
+public:
+    Reader(const pdal::drivers::mrsid::Reader& reader);
+
+private:
+    boost::uint64_t seekImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+
+    const pdal::drivers::mrsid::Reader& m_reader;
+};
+
+
+} // random
+} // iterators
 
 
 } } } // namespaces
