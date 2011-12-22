@@ -38,23 +38,23 @@
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
 
+#include <pdal/drivers/las/Support.hpp>
+
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/ReaderBase.hpp>
 
 #include <boost/scoped_ptr.hpp>
-
-class LASzip;
-class LASunzipper;
 
 namespace pdal
 {
     class PointBuffer;
 }
 
+
+
 namespace pdal { namespace drivers { namespace las {
 
 class LasHeader;
-class ZipPoint;
 class PointDimensions;
 
 class PDAL_DLL Reader : public ReaderBase
@@ -86,8 +86,8 @@ public:
     boost::uint32_t processBuffer(  PointBuffer& PointBuffer, 
                                     std::istream& stream, 
                                     boost::uint64_t numPointsLeft, 
-                                    boost::scoped_ptr<LASunzipper>& unzipper, 
-                                    boost::scoped_ptr<ZipPoint>& zipPoint,
+                                    LASunzipper* unzipper, 
+                                    ZipPoint* zipPoint,
                                     PointDimensions* dimensions) const;
 
     int getMetadataRecordCount() const;
@@ -130,6 +130,7 @@ class Base
 public:
     Base(pdal::drivers::las::Reader const& reader);
     ~Base();
+    void read(PointBuffer&);
 private:
     void initialize();
 
@@ -178,7 +179,6 @@ private:
 
 namespace random {
 
-
 class Reader : public Base, public pdal::ReaderRandomIterator
 {
 public:
@@ -194,6 +194,7 @@ private:
     PointDimensions* m_pointDimensions;
     Schema const* m_schema;
 };
+
 
 } // random
 

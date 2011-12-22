@@ -36,18 +36,15 @@
 #define INCLUDED_DRIVERS_LAS_WRITER_HPP
 
 #include <pdal/Writer.hpp>
+#include <pdal/drivers/las/Support.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/SummaryData.hpp>
 #include <pdal/StreamManager.hpp>
 #include <boost/scoped_ptr.hpp>
 
-// liblaszip
-class LASzip;
-class LASzipper;
 
 namespace pdal { namespace drivers { namespace las {
 
-class ZipPoint;
 
 //
 // supported options:
