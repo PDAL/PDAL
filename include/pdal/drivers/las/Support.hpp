@@ -46,12 +46,10 @@
 class LASzip;
 class LASunzipper;
 class LASzipper;
-// namespace pdal { namespace drivers { namespace las {}}}
 
 #else
 typedef struct LASzipH *LASzip;
 typedef struct LASunzipperH *LASunzipper;
-// namespace pdal { namespace drivers { namespace las {typedef struct ZipPointH *ZipPoint;}}}
 #endif
 
 namespace pdal { namespace drivers { namespace las {
