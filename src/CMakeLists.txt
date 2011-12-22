@@ -194,7 +194,6 @@ set(PDAL_ORACLE_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_ORACLE_PATH})
 set(PDAL_DRIVERS_OCI_HPP
   ${PDAL_ORACLE_HEADERS}/Writer.hpp
   ${PDAL_ORACLE_HEADERS}/Reader.hpp
-  ${PDAL_ORACLE_HEADERS}/Iterator.hpp
   ${PDAL_ORACLE_HEADERS}/oci_wrapper.h
   ${PDAL_ORACLE_HEADERS}/common.hpp
 )
@@ -203,7 +202,6 @@ set (PDAL_DRIVERS_OCI_CPP
   ${PDAL_ORACLE_SRC}/oci_wrapper.cpp
   ${PDAL_ORACLE_SRC}/common.cpp
   ${PDAL_ORACLE_SRC}/Reader.cpp
-  ${PDAL_ORACLE_SRC}/Iterator.cpp
   ${PDAL_ORACLE_SRC}/Writer.cpp
 )
    
