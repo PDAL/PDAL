@@ -168,7 +168,6 @@ Word #       Content
 
 
 #include <pdal/drivers/qfit/Reader.hpp>
-#include <pdal/drivers/qfit/Iterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/Utils.hpp>
@@ -691,13 +690,13 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return new pdal::drivers::qfit::SequentialIterator(*this);
+    return new pdal::drivers::qfit::iterators::sequential::Reader(*this);
 }
 
 
 pdal::StageRandomIterator* Reader::createRandomIterator() const
 {
-    return new pdal::drivers::qfit::RandomIterator(*this);
+    return new pdal::drivers::qfit::iterators::random::Reader(*this);
 }
 
 
@@ -804,5 +803,99 @@ void Reader::addDefaultDimensions()
     addDefaultDimension(passive_z, getName());  
 }
 
+
+namespace iterators {
+    
+namespace sequential {
+
+
+Reader::Reader(const pdal::drivers::qfit::Reader& reader)
+    : pdal::ReaderSequentialIterator(reader)
+    , m_reader(reader)
+    , m_istream(NULL)
+{
+    m_istream = FileUtils::openFile(m_reader.getFileName());
+    m_istream->seekg(m_reader.getPointDataOffset());
+    return;
+}
+
+
+Reader::~Reader()
+{
+    FileUtils::closeFile(m_istream);
+    return;
+}
+
+
+boost::uint64_t Reader::skipImpl(boost::uint64_t count)
+{
+    m_istream->seekg( m_reader.getPointDataSize() * count, std::ios::cur);
+    return count;
+}
+
+
+bool Reader::atEndImpl() const
+{
+    return getIndex() >= getStage().getNumPoints();
+}
+
+
+boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+{
+    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex());
+}
+
+} // sequential
+
+namespace random {
+
+
+Reader::Reader(const pdal::drivers::qfit::Reader& reader)
+    : pdal::ReaderRandomIterator(reader)
+    , m_reader(reader)
+    , m_istream(NULL)
+{
+    m_istream = FileUtils::openFile(m_reader.getFileName());
+    m_istream->seekg(m_reader.getPointDataOffset());
+    return;
+}
+
+
+Reader::~Reader()
+{
+    FileUtils::closeFile(m_istream);
+    return;
+}
+
+
+boost::uint64_t Reader::seekImpl(boost::uint64_t count)
+{
+
+    if (!m_istream->good())
+        throw pdal_error("QFIT RandomIterator::seekImpl stream is no good before seeking!");
+    
+    m_istream->seekg( m_reader.getPointDataSize() * count + m_reader.getPointDataOffset(), std::ios::beg);
+
+    if (m_istream->eof())
+        throw pdal_error("Seek past the end of the file!");
+
+    if (!m_istream->good())
+        throw pdal_error("QFIT RandomIterator::seekImpl stream is no good!");
+        
+    return count;
+}
+
+
+boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+{
+    boost::uint64_t numpoints = getStage().getNumPoints();
+    boost::uint64_t index = this->getIndex();
+    
+    return m_reader.processBuffer(data, *m_istream, numpoints-index);
+}
+
+
+} // random
+} // iterators
 
 }}} // namespace pdal::driver::oci
