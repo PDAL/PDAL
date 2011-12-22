@@ -242,7 +242,7 @@ private:
 
 } // random
 } // iterators
-}}} // namespace pdal::driver::oci
+}}} // namespace pdal::driver::qfit
 
 
-#endif // INCLUDED_PDAL_DRIVER_OCI_READER_HPP
+#endif // INCLUDED_PDAL_DRIVER_QFIT_READER_HPP
