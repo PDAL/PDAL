@@ -46,10 +46,6 @@
 #include <sstream>
 #include <pdal/pdal_defines.h>
 
-#ifdef PDAL_HAVE_LIBLAS
-#include <liblas/version.hpp>
-#endif
-
 #ifdef PDAL_HAVE_LIBGEOTIFF
 #include <geotiff.h>
 #endif
@@ -64,16 +60,6 @@
 
 namespace pdal
 {
-
-/// Check if libLAS support has been built in to PDAL
-bool IsLibLASEnabled()
-{
-#ifdef PDAL_HAVE_LIBLAS
-    return true;
-#else
-    return false;
-#endif
-}
 
 /// Check if GDAL support has been built in to PDAL
 bool IsGDALEnabled()
@@ -136,13 +122,6 @@ int GetVersionInteger()
 std::string GetFullVersionString()
 {
     std::ostringstream os;
-
-#ifdef PDAL_HAVE_LIBLAS
-    os << " libLAS "
-       << (LIBLAS_VERSION / 100000) << '.'
-       << (LIBLAS_VERSION / 100 % 1000) << '.'
-       << (LIBLAS_VERSION % 100);
-#endif
 
 #ifdef PDAL_HAVE_LIBGEOTIFF
     os << " GeoTIFF "

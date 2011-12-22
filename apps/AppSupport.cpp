@@ -110,11 +110,6 @@ pdal::Stage* AppSupport::makeReader(pdal::Options& options)
         throw app_runtime_error("Cannot determine file type of " + inputFile);
     }
 
-    if (options.getValueOrDefault<bool>("liblas", false) && driver == "drivers.las.reader")
-    {
-        driver = "drivers.liblas.reader";
-    }
-
     pdal::StageFactory factory;
     pdal::Stage* stage = factory.createReader(driver, options);
     if (!stage)
@@ -134,11 +129,6 @@ pdal::Writer* AppSupport::makeWriter(pdal::Options& options, pdal::Stage& stage)
     if (driver == "")
     {
         throw app_runtime_error("Cannot determine file type of " + outputFile);
-    }
-
-    if (options.getValueOrDefault<bool>("liblas", false) && driver == "drivers.las.writer")
-    {
-        driver = "drivers.liblas.writer";
     }
         
     pdal::StageFactory factory;

@@ -68,7 +68,6 @@ private:
 
     std::string m_inputFile;
     std::string m_outputFile;
-    bool m_useLiblas;
     bool m_showStats;
     bool m_showSchema;
     bool m_showStage;
@@ -81,7 +80,6 @@ PcInfo::PcInfo(int argc, char* argv[])
     : Application(argc, argv, "pcinfo")
     , m_inputFile("")
     , m_outputFile("")
-    , m_useLiblas(false)
     , m_showStats(false)
     , m_showSchema(false)
     , m_showStage(false)
@@ -112,7 +110,6 @@ void PcInfo::addSwitches()
     file_options->add_options()
         ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
         ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
-        ("liblas", po::value<bool>(&m_useLiblas)->zero_tokens()->implicit_value(true), "use libLAS driver (not PDAL native driver)")
         ;
 
     addSwitchSet(file_options);
@@ -229,7 +226,6 @@ int PcInfo::execute()
         readerOptions.add<std::string>("filename", m_inputFile);
         readerOptions.add<bool>("debug", isDebug());
         readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
-        readerOptions.add<bool>("liblas", m_useLiblas);
     }
 
     Stage* reader = AppSupport::makeReader(readerOptions);
@@ -276,193 +272,3 @@ int main(int argc, char* argv[])
     return app.run();
 }
 
-
-#if 0
-
-
-
-liblas::Summary check_points(   liblas::Reader& reader,
-                                std::vector<liblas::FilterPtr>& filters,
-                                std::vector<liblas::TransformPtr>& transforms,
-                                bool verbose)
-{
-
-    liblas::Summary summary;
-    
-    reader.SetFilters(filters);
-    reader.SetTransforms(transforms);
-
-
-
-    if (verbose)
-    std::cout << "Scanning points:" 
-        << "\n - : "
-        << std::endl;
-
-    //
-    // Translation of points cloud to features set
-    //
-    boost::uint32_t i = 0;
-    boost::uint32_t const size = reader.GetHeader().GetPointRecordsCount();
-    
-
-    while (reader.ReadNextPoint())
-    {
-        liblas::Point const& p = reader.GetPoint();
-        summary.AddPoint(p);
-        if (verbose)
-            term_progress(std::cout, (i + 1) / static_cast<double>(size));
-        i++;
-
-    }
-    if (verbose)
-        std::cout << std::endl;
-    
-    return summary;
-    
-}
-
-
-
-void PrintVLRs(std::ostream& os, liblas::Header const& header)
-{
-    if (!header.GetRecordsCount())
-        return ;
-        
-    os << "---------------------------------------------------------" << std::endl;
-    os << "  VLR Summary" << std::endl;
-    os << "---------------------------------------------------------" << std::endl;
-    
-    typedef std::vector<VariableRecord>::size_type size_type;
-    for(size_type i = 0; i < header.GetRecordsCount(); i++) {
-        liblas::VariableRecord const& v = header.GetVLR(i);
-        os << v;
-    }
-    
-}
-
-
-int main(int argc, char* argv[])
-{
-
-    std::string input;
-
-    bool verbose = false;
-    bool check = true;
-    bool show_vlrs = true;
-    bool show_schema = true;
-    bool output_xml = false;
-    bool output_json = false;
-    bool show_point = false;
-    bool use_locale = false;
-    boost::uint32_t point = 0;
-    
-
-
-        file_options.add_options()
-            ("no-vlrs", po::value<bool>(&show_vlrs)->zero_tokens()->implicit_value(false), "Don't show VLRs")
-            ("no-schema", po::value<bool>(&show_schema)->zero_tokens()->implicit_value(false), "Don't show schema")
-            ("no-check", po::value<bool>(&check)->zero_tokens()->implicit_value(false), "Don't scan points")
-            ("xml", po::value<bool>(&output_xml)->zero_tokens()->implicit_value(true), "Output as XML")
-            ("point,p", po::value<boost::uint32_t>(&point), "Display a point with a given id.  --point 44")
-
-            ("locale", po::value<bool>(&use_locale)->zero_tokens()->implicit_value(true), "Use the environment's locale for output")
-
-// --xml
-// --json
-// --restructured text output
-
-
-
-        if (vm.count("point")) 
-        {
-            show_point = true;
-        }
-
-
-
-
-        if (show_point)
-        {
-            try 
-            {
-                reader.ReadPointAt(point);
-                liblas::Point const& p = reader.GetPoint();
-                if (output_xml) {
-                    liblas::property_tree::ptree tree;
-                    tree = p.GetPTree();
-                    liblas::property_tree::write_xml(std::cout, tree);
-                    exit(0);
-                } 
-                else 
-                {
-                    if (use_locale)
-                    {
-                        std::locale l("");
-                        std::cout.imbue(l);
-                    }
-                    std::cout <<  p << std::endl;
-                    exit(0);    
-                }
-                
-            } catch (std::out_of_range const& e)
-            {
-                std::cerr << "Unable to read point at index " << point << ": " << e.what() << std::endl;
-                exit(1);
-                
-            }
-
-        }
-
-        liblas::Summary summary;
-        if (check)
-            summary = check_points(  reader, 
-                            filters,
-                            transforms,
-                            verbose
-                            );
-
-        liblas::Header const& header = reader.GetHeader();
-
-        // Add the header to the summary so we can get more detailed 
-        // info
-        summary.SetHeader(header);
-        
-        if (output_xml && output_json) {
-            std::cerr << "both JSON and XML output cannot be chosen";
-            return 1;
-        }
-        if (output_xml) {
-            liblas::property_tree::ptree tree;
-            if (check)
-                tree = summary.GetPTree();
-            else 
-            {
-                tree.add_child("summary.header", header.GetPTree());
-            }
-            
-            liblas::property_tree::write_xml(std::cout, tree);
-            return 0;
-        }
-
-        if (use_locale)
-        {
-            std::locale l("");
-            std::cout.imbue(l);
-        }
-
-        std::cout << header << std::endl;        
-        if (show_vlrs)
-            PrintVLRs(std::cout, header);
-
-        if (show_schema)
-            std::cout << header.GetSchema();
-                    
-        if (check) {
-            std::cout << summary << std::endl;
-            
-        }
-    }
-
-
-#endif

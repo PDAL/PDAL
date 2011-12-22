@@ -163,31 +163,6 @@ list (APPEND PDAL_CPP ${PDAL_DRIVERS_LAS_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_LAS_HPP} )
 
 #
-# drivers/liblas
-#
-
-set(PDAL_LIBLAS_PATH drivers/liblas)
-set(PDAL_LIBLAS_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_LIBLAS_PATH})
-set(PDAL_LIBLAS_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_LIBLAS_PATH})
-
-if (LIBLAS_FOUND)
-set (PDAL_DRIVERS_LIBLAS_HPP
-  ${PDAL_LIBLAS_HEADERS}/Iterator.hpp
-  ${PDAL_LIBLAS_HEADERS}/Reader.hpp
-  ${PDAL_LIBLAS_HEADERS}/Writer.hpp
-)
-
-set (PDAL_DRIVERS_LIBLAS_CPP 
-  ${PDAL_LIBLAS_SRC}/Iterator.cpp
-  ${PDAL_LIBLAS_SRC}/Reader.cpp
-  ${PDAL_LIBLAS_SRC}/Writer.cpp
-)
-endif()
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_LIBLAS_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_LIBLAS_HPP} )
-
-
-#
 # drivers/mrsid
 #
 set(PDAL_MRSID_PATH drivers/mrsid)
@@ -446,7 +421,6 @@ source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
 source_group("Header Files\\external\\boost\\uuid" FILES ${PDAL_EXTERNAL_BOOST_UUID_HPP})
 source_group("Header Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
-source_group("Header Files\\drivers\\liblas" FILES ${PDAL_DRIVERS_LIBLAS_HPP})
 source_group("Header Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_HPP})
 source_group("Header Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
@@ -458,7 +432,6 @@ source_group("Source Files" FILES ${PDAL_BASE_CPP})
 source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
 source_group("Source Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_CPP})
 source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
-source_group("Source Files\\drivers\\liblas" FILES ${PDAL_DRIVERS_LIBLAS_CPP})
 source_group("Source Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_CPP})
 source_group("Source Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
@@ -498,7 +471,6 @@ add_library(${PDAL_LIB_NAME} SHARED ${PDAL_SOURCES})
 
 target_link_libraries(${APPS_CPP_DEPENDENCIES}
   ${PDAL_LIB_NAME}
-  ${LIBLAS_LIBRARY}
   ${TIFF_LIBRARY}
   ${ORACLE_LIBRARY}
   ${MRSID_LIBRARY}

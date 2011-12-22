@@ -55,11 +55,6 @@ set(WITH_TESTS TRUE CACHE BOOL "Choose if PDAL unit tests should be built")
 set(WITH_PKGCONFIG FALSE CACHE BOOL
   "Choose whether a pkgconfig file (PDAL.pc) should be installed")
 
-set(WITH_ENDIANAWARE FALSE CACHE BOOL "Choose whether or not PDAL should do runtime endianness switching.  Note that this can slow things down considerably if enabled by default")
-if (WITH_ENDIANAWARE)
-    set(PDAL_ENDIAN_AWARE 1)
-endif()
-
 
 #------------------------------------------------------------------------------
 # test harness settings
@@ -343,22 +338,6 @@ if(WITH_LASZIP)
     endif()
 endif()
 
-# LIBLAS support - optional, default=OFF
-set(WITH_LIBLAS FALSE CACHE BOOL "Choose if libLAS support should be built")
-set(WITH_STATIC_LIBLAS FALSE CACHE BOOL "Choose if libLAS should be statically linked")
-mark_as_advanced(WITH_STATIC_LIBLAS)
-
-if(WITH_LIBLAS)
-    find_package(LibLAS 1.6.0)
-    if(LIBLAS_FOUND)
-        set(CMAKE_REQUIRED_LIBRARIES ${LIBLAS_LIBRARY})
-        include_directories(${LIBLAS_INCLUDE_DIR})
-        mark_as_advanced(CLEAR LIBLAS_INCLUDE_DIR) 
-        mark_as_advanced(CLEAR LIBLAS_LIBRARY) 
-        mark_as_advanced(CLEAR LIBLAS_VERSION) 
-        set(PDAL_HAVE_LIBLAS 1)
-    endif()
-endif()
 
 # MrSID/LiDAR support - optiona, default=OFF
 set(WITH_MRSID FALSE CACHE BOOL "Choose if MrSID/LiDAR support should be built")

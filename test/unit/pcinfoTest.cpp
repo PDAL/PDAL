@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     BOOST_CHECK_EQUAL(Support::diff_text_files(outputTxt, Support::datapath("apps/pcinfo_stage_nosrs.txt"), 15), 0u);
 #endif
 
-    pdal::FileUtils::deleteFile(outputTxt);
+    // pdal::FileUtils::deleteFile(outputTxt);
 
     return;
 }
