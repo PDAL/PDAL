@@ -864,6 +864,7 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
     }
         
     CreatePCEntry();
+    m_trigger_name = ShutOff_SDO_PC_Trigger();
     return;
 }
 
@@ -881,7 +882,10 @@ void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
         
     // Update extent of SDO_PC entry
     UpdatePCExtent();
-    
+
+    if (getOptions().getValueOrDefault<bool>("reenable_cloud_trigger", false))
+        TurnOn_SDO_PC_Trigger(m_trigger_name);
+            
     m_connection->Commit();   
 
     RunFileSQL("post_block_sql");
@@ -1109,6 +1113,72 @@ bool Writer::WriteBlock(PointBuffer const& buffer)
 
     
     return true;
+}
+
+std::string Writer::ShutOff_SDO_PC_Trigger()
+{
+    std::string base_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("base_table_name"));
+    std::string cloud_column_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
+
+    // Don't monkey with the trigger unless the user says to.
+    if (getOptions().getValueOrDefault<bool>("disable_cloud_trigger", false))
+        return std::string("");
+
+    std::ostringstream oss;
+
+    char szTrigger[OWNAME] = "";
+    char szStatus[OWNAME] = "";
+
+    oss << "select trigger_name, status from all_triggers where table_name = '" << base_table_name << "' AND TRIGGER_NAME like upper('%%MDTNPC_%%') ";
+    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+    
+    statement->Define(szTrigger);
+    statement->Define(szStatus);
+    
+    statement->Execute();
+
+    // Yes, we're assuming there's only one trigger that met these criteria.
+    
+    if (!strlen(szStatus))
+    {
+        // No rows returned, no trigger exists
+        return std::string("");
+    }
+    
+    
+    if (boost::iequals(szStatus, "ENABLED"))
+    {
+        oss.str("");
+        oss << "ALTER TRIGGER " << szTrigger << " DISABLE ";
+    
+        statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+        statement->Execute();
+    
+        return std::string(szTrigger);
+    } else
+    {
+        return std::string("");
+    }
+
+
+    
+}
+
+void Writer::TurnOn_SDO_PC_Trigger(std::string trigger_name)
+{
+    
+    if (!trigger_name.size()) return;
+    
+    std::ostringstream oss;
+    
+    std::string base_table_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("base_table_name"));
+
+    oss << "ALTER TRIGGER " << trigger_name << " ENABLE ";
+    
+    Statement statement = Statement(m_connection->CreateStatement(oss.str().c_str()));
+    statement->Execute();
+
+        
 }
 
 void Writer::UpdatePCExtent()
