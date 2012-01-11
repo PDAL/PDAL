@@ -613,19 +613,25 @@ boost::uint32_t IteratorBase::myReadClouds(PointBuffer& data)
         bReadCloud = getReader().getStatement()->Fetch();
         m_block = BlockPtr(new Block(getReader().getConnection()));
         m_statement = getNextCloud(m_block, m_active_cloud_id);
-        if (m_at_end == true && bReadCloud) 
+        if (m_at_end == true) 
         {
-            getReader().log()->get(logDEBUG2) << "At end of current block and have another cloud to fetch" << std::endl;
-            m_at_end = false;
+            getReader().log()->get(logDEBUG2) << "At end of current block and trying to fetch another cloud " << std::endl;
+            bReadCloud = getReader().getStatement()->Fetch();
+            
+            if (bReadCloud) 
+            {
+                getReader().log()->get(logDEBUG2) << "Fetched another cloud " << std::endl;
+                m_block = BlockPtr(new Block(getReader().getConnection()));
+                m_statement = getNextCloud(m_block, m_active_cloud_id);
+                m_at_end = false;
+
+            } 
             return numRead;
         }
-        else if (m_at_end == true && !bReadCloud)
+        else
         {
             getReader().log()->get(logDEBUG2) << "At end of current block and have no more blocks to fetch" << std::endl;
             return numRead;
-        }
-        else {
-            throw pdal_error("don't know WTF!");
         }
 
     }
