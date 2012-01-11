@@ -306,8 +306,6 @@ set(PDAL_FILTERS_HPP
   ${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp
   ${PDAL_FILTERS_HEADERS}/Mosaic.hpp
   ${PDAL_FILTERS_HEADERS}/PointBufferCache.hpp
-  ${PDAL_FILTERS_HEADERS}/Predicate.hpp
-  ${PDAL_FILTERS_HEADERS}/Programmable.hpp
   ${PDAL_FILTERS_HEADERS}/Reprojection.hpp
   ${PDAL_FILTERS_HEADERS}/Scaling.hpp
   ${PDAL_FILTERS_HEADERS}/Stats.hpp
@@ -323,8 +321,6 @@ set (PDAL_FILTERS_CPP
   ${PDAL_FILTERS_SRC}/InPlaceReprojection.cpp
   ${PDAL_FILTERS_SRC}/Mosaic.cpp
   ${PDAL_FILTERS_SRC}/PointBufferCache.cpp
-  ${PDAL_FILTERS_SRC}/Predicate.cpp
-  ${PDAL_FILTERS_SRC}/Programmable.cpp
   ${PDAL_FILTERS_SRC}/Reprojection.cpp
   ${PDAL_FILTERS_SRC}/Scaling.cpp
   ${PDAL_FILTERS_SRC}/Stats.cpp
@@ -348,6 +344,9 @@ set(PDAL_PLANG_HPP
   ${PDAL_PLANG_HEADERS}/Parser.hpp
   ${PDAL_PLANG_HEADERS}/Program.hpp
   ${PDAL_PLANG_HEADERS}/SymbolTable.hpp
+  ${PDAL_FILTERS_HEADERS}/Predicate.hpp
+  ${PDAL_FILTERS_HEADERS}/Programmable.hpp
+  
 )
 
 set (PDAL_PLANG_CPP 
@@ -357,11 +356,14 @@ set (PDAL_PLANG_CPP
   ${PDAL_PLANG_SRC}/Parser_qi.cpp
   ${PDAL_PLANG_SRC}/Program.cpp
   ${PDAL_PLANG_SRC}/SymbolTable.cpp
+  ${PDAL_FILTERS_SRC}/Predicate.cpp
+  ${PDAL_FILTERS_SRC}/Programmable.cpp  
 )
 
+if(PDAL_HAVE_PLANG)
 list (APPEND PDAL_CPP ${PDAL_PLANG_CPP} )
 list (APPEND PDAL_HPP ${PDAL_PLANG_HPP} )
-
+endif()
 
 #
 # config

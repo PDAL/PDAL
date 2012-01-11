@@ -196,7 +196,10 @@ mark_as_advanced(CLEAR Boost_INCLUDE_DIR)
 mark_as_advanced(CLEAR Boost_LIBRARY_DIRS) 
 link_directories(${Boost_LIBRARY_DIRS}) 
 
-
+# plang requires boost > 1.45 or so for spirit/qi
+if(Boost_MINOR_VERSION GREATER 45)
+set(PDAL_HAVE_PLANG 1)
+endif()
 
 #------------------------------------------------------------------------------
 # settings for GDAL & related dependencies

@@ -47,7 +47,9 @@
 
 // we use explicitly-sized types everywhere, so include this here
 #include <boost/cstdint.hpp>
+#include <boost/version.hpp>
 
+#define PDAL_CURRENT_BOOST_MINOR_VERSION BOOST_VERSION/100%1000
 #ifdef __cplusplus
 #  define PDAL_C_START           extern "C" {
 #  define PDAL_C_END             }
