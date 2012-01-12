@@ -39,6 +39,9 @@
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/qfit/Reader.hpp>
+#include <pdal/drivers/pipeline/Reader.hpp>
+#include <pdal/PipelineReader.hpp>
+#include <pdal/PipelineManager.hpp>
 #include "Support.hpp"
 
 #include <iostream>
@@ -162,6 +165,21 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(test_pipeline)
+{
+    PipelineManager manager;
+    PipelineReader reader(manager);
+
+
+    bool isWriter = reader.readPipeline(Support::datapath("qfit/pipeline.xml"));
+    BOOST_CHECK_EQUAL(isWriter, true);
+
+    const boost::uint64_t np = manager.execute();
+
+    BOOST_CHECK_EQUAL(np, 3432);
+
+    return;
+}
 
 
 BOOST_AUTO_TEST_SUITE_END()
