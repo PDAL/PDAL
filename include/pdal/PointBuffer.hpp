@@ -38,6 +38,7 @@
 
 #include <boost/scoped_array.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Bounds.hpp>
@@ -95,6 +96,7 @@ public:
     template<class T> T getRawField(std::size_t pointIndex, std::size_t pointBytePosition) const;
     template<class T> void setField(Dimension const& dim, std::size_t pointIndex, T value);
     
+    template<typename Target, typename Source> static Target saturation_cast(Source const& src);
     // bulk copy all the fields from the given point into this object
     // NOTE: this is only legal if the src and dest schemas are exactly the same
     // (later, this will be implemented properly, to handle the general cases slowly and the best case quickly)
@@ -181,7 +183,20 @@ private:
     schema::size_type m_byteSize;
 };
 
+template<typename Target, typename Source>
+inline Target PointBuffer::saturation_cast(Source const& src) {
 
+    try {
+        return boost::numeric_cast<Target>(src);
+    }
+    catch (boost::numeric::negative_overflow const&) {
+        return std::numeric_limits<Target>::min();
+    }
+    catch (boost::numeric::positive_overflow const&) {
+        return std::numeric_limits<Target>::max();
+    }
+
+}
 
 template <class T>
 inline void PointBuffer::setField(pdal::Dimension const& dim, std::size_t pointIndex, T value)
@@ -261,31 +276,31 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
     {
         case dimension::SignedByte:
             i8 = *(boost::int8_t*)(void*)p;
-            output = boost::lexical_cast<T>(i8);
+            output = saturation_cast<T, int8_t>(i8);
             break;
         case dimension::UnsignedByte:
             u8 = *(boost::uint8_t*)(void*)p;
-            output = boost::lexical_cast<T>(u8);
+            output = saturation_cast<T, uint8_t>(u8);
             break;
 
         case dimension::SignedInteger:
             if (dim.getByteSize() == 1 )
             {
                 i8 = *(boost::int8_t*)(void*)p;
-                output = boost::lexical_cast<T>(i8);
+                output = saturation_cast<T, int8_t>(i8);
             } else if (dim.getByteSize() == 2) 
             {
                 i16 = *(boost::int16_t*)(void*)p;
-                output = boost::lexical_cast<T>(i16);
+                output = saturation_cast<T, int16_t>(i16);
                 
             } else if (dim.getByteSize() == 4)
             {
                 i32 = *(boost::int32_t*)(void*)p;
-                output = boost::lexical_cast<T>(i32);
+                output = saturation_cast<T, int32_t>(i32);
             } else if (dim.getByteSize() == 8)
             {
                 i64 = *(boost::int64_t*)(void*)p;
-                output = boost::lexical_cast<T>(i64);
+                output = saturation_cast<T, int64_t>(i64);
             } else
             {
                 throw buffer_error("getField::Unhandled datatype size for SignedInteger");
@@ -295,20 +310,20 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
             if (dim.getByteSize() == 1 )
             {
                 u8 = *(boost::uint8_t*)(void*)p;
-                output = boost::lexical_cast<T>(u8);
+                output = saturation_cast<T, uint8_t>(u8);
             } else if (dim.getByteSize() == 2) 
             {
                 u16 = *(boost::uint16_t*)(void*)p;
-                output = boost::lexical_cast<T>(u16);
+                output = saturation_cast<T, uint16_t>(u16);
                 
             } else if (dim.getByteSize() == 4)
             {
                 u32 = *(boost::uint32_t*)(void*)p;
-                output = boost::lexical_cast<T>(u32);
+                output = saturation_cast<T, uint32_t>(u32);
             } else if (dim.getByteSize() == 8)
             {
                 u64 = *(boost::uint64_t*)(void*)p;
-                output = boost::lexical_cast<T>(u64);
+                output = saturation_cast<T, uint64_t>(u64);
             } else
             {
                 throw buffer_error("getField::Unhandled datatype size for UnsignedInteger");
@@ -319,11 +334,11 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
             if (dim.getByteSize() == 4)
             {
                 flt = *(float*)(void*)p;
-                output = boost::lexical_cast<T>(flt);
+                output = saturation_cast<T, float>(flt);
             } else if (dim.getByteSize() == 8)
             {
                 dbl = *(double*)(void*)p;
-                output = boost::lexical_cast<T>(dbl);
+                output = saturation_cast<T, double>(dbl);
             } else
             {
                 throw buffer_error("getField::Unhandled datatype size for Float");
