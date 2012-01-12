@@ -43,12 +43,8 @@ SET(PDAL_UNITTEST_TEST_SRC
     PipelineManagerTest.cpp
     PipelineReaderTest.cpp
     PipelineWriterTest.cpp
-    PLangParserTest.cpp
-    PLangInternalTest.cpp
     PointBufferCacheTest.cpp
     PointBufferTest.cpp
-    PredicateFilterTest.cpp
-    ProgrammableFilterTest.cpp
     QFITReaderTest.cpp
     RangeTest.cpp
     ReprojectionFilterTest.cpp
@@ -66,6 +62,13 @@ SET(PDAL_UNITTEST_TEST_SRC
     VectorTest.cpp
     ${PDAL_UNITTEST_XMLSCHEMA_TEST}
     )
+
+set(PDAL_PLANG_TEST_SRC
+    PLangParserTest.cpp
+    PLangInternalTest.cpp
+    PredicateFilterTest.cpp
+    ProgrammableFilterTest.cpp
+)
 
 SET(PDAL_UNITTEST_TEST_INC
     )
@@ -96,9 +99,16 @@ set(PDAL_UNITTEST_SOURCES "")
 FOREACH(file ${PDAL_UNITTEST_TEST_SRC})
         SET(PDAL_UNITTEST_SOURCES "${PDAL_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
 ENDFOREACH(file)
-FOREACH(file ${PDAL_UNITTEST_TEST_INC})
+
+FOREACH(file ${PDAL_UNITTEST_TEST_SRC})
         SET(PDAL_UNITTEST_SOURCES "${PDAL_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
 ENDFOREACH(file)
+
+if(WITH_PLANG)
+FOREACH(file ${PDAL_PLANG_TEST_SRC})
+        SET(PDAL_UNITTEST_SOURCES "${PDAL_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
+ENDFOREACH(file)
+endif()
 FOREACH(file ${PDAL_UNITTEST_CONFIG_SRC})
         SET(PDAL_UNITTEST_SOURCES "${PDAL_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
 ENDFOREACH(file)

@@ -202,8 +202,12 @@ mark_as_advanced(CLEAR Boost_LIBRARY_DIRS)
 link_directories(${Boost_LIBRARY_DIRS}) 
 
 # plang requires boost > 1.45 or so for spirit/qi
+set(WITH_PLANG FALSE CACHE BOOL "Choose if PLANG should be build")
+
+if (WITH_PLANG)
 if(Boost_MINOR_VERSION GREATER 45)
 set(PDAL_HAVE_PLANG 1)
+endif()
 endif()
 
 #------------------------------------------------------------------------------
