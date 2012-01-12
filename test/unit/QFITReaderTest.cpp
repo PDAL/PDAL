@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(test_pipeline)
 
     const boost::uint64_t np = manager.execute();
 
-    BOOST_CHECK_EQUAL(np, 3432);
+    BOOST_CHECK_EQUAL(np, 10314);
 
     return;
 }
