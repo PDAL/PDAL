@@ -50,6 +50,7 @@
 #include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/count.hpp>
+#include <boost/accumulators/statistics/density.hpp>
 
 
 namespace pdal { namespace filters {
@@ -57,52 +58,51 @@ namespace pdal { namespace filters {
 namespace stats
 {
 
-class PDAL_DLL Collector
+
+
+typedef boost::iterator_range<std::vector<std::pair<double, double> >::iterator > histogram_type;
+typedef boost::accumulators::accumulator_set<double, boost::accumulators::features< boost::accumulators::droppable<boost::accumulators::tag::density> > > density_accumulator;
+typedef boost::accumulators::accumulator_set<double, boost::accumulators::features< 	boost::accumulators::droppable<boost::accumulators::tag::mean>, 
+																						boost::accumulators::droppable<boost::accumulators::tag::max>, 
+																						boost::accumulators::droppable<boost::accumulators::tag::min>,
+																						boost::accumulators::droppable<boost::accumulators::tag::count> > > summary_accumulator;
+class PDAL_DLL Summary
 {
 public:
-	Collector() : m_count(0) {};
 
-protected:
-    boost::uint64_t m_count;	
-
-};
-
-class PDAL_DLL Summary : public Collector
-{
-public:
-
-    double minimum() const { return boost::accumulators::min(acc); }
-    double maximum() const { return boost::accumulators::max(acc); }
-    double average() const { return boost::accumulators::mean(acc); }
-    boost::uint64_t count() const { return boost::accumulators::count(acc); }
+    double minimum() const { return boost::accumulators::min(summary); }
+    double maximum() const { return boost::accumulators::max(summary); }
+    double average() const { return boost::accumulators::mean(summary); }
+    boost::uint64_t count() const { return boost::accumulators::count(summary); }
     
     boost::property_tree::ptree toPTree() const;
 
 private:
- 	boost::accumulators::accumulator_set<double, boost::accumulators::features< 	boost::accumulators::droppable<boost::accumulators::tag::mean>, 
-															boost::accumulators::droppable<boost::accumulators::tag::max>, 
-															boost::accumulators::droppable<boost::accumulators::tag::min>, 
-															boost::accumulators::droppable<boost::accumulators::tag::count> > > acc;
+ 	summary_accumulator summary;
+    density_accumulator histogram;																				
+
 public:
     
     Summary()
-    : Collector()
+    : histogram(boost::accumulators::tag::density::num_bins = 20, boost::accumulators::tag::density::cache_size = 10)
     {
         return;
     }
     
     void reset()
     {
-		acc.drop<boost::accumulators::tag::mean>();
-		acc.drop<boost::accumulators::tag::count>();
-		acc.drop<boost::accumulators::tag::max>();
-		acc.drop<boost::accumulators::tag::min>();
+		summary.drop<boost::accumulators::tag::mean>();
+		summary.drop<boost::accumulators::tag::count>();
+		summary.drop<boost::accumulators::tag::max>();
+		summary.drop<boost::accumulators::tag::min>();
+		histogram.drop<boost::accumulators::tag::density>();
         return;
     }
 
     template<class T> inline void insert(T value)
     {
-		acc(static_cast<double>(value));
+		summary(static_cast<double>(value));
+		histogram(static_cast<double>(value));
 
         return;
     }
