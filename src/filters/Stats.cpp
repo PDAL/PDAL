@@ -43,7 +43,7 @@ namespace pdal { namespace filters {
 namespace stats {
     
 
-boost::property_tree::ptree Collector::toPTree() const
+boost::property_tree::ptree Summary::toPTree() const
 {
     boost::property_tree::ptree tree;
 
@@ -117,12 +117,12 @@ boost::uint32_t Stats::readBufferImpl(PointBuffer& data)
 
     for (boost::uint32_t pointIndex=0; pointIndex < numPoints; pointIndex++)
     {
-        std::multimap<DimensionPtr, stats::CollectorPtr>::const_iterator p;
+        std::multimap<DimensionPtr, stats::SummaryPtr>::const_iterator p;
         for (p = m_stats.begin(); p != m_stats.end(); ++p)
         {
             
             DimensionPtr d = p->first;
-            stats::CollectorPtr c = p->second;
+            stats::SummaryPtr c = p->second;
             
             double output = getValue(data, *d, pointIndex);
             c->insert(output);
@@ -260,9 +260,9 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
         for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
         {
             DimensionPtr d = boost::shared_ptr<Dimension>(new Dimension( *iter));
-            stats::CollectorPtr c = boost::shared_ptr<stats::Collector>(new stats::Collector);
+            stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary);
         
-            std::pair<DimensionPtr, stats::CollectorPtr> p(d,c);
+            std::pair<DimensionPtr, stats::SummaryPtr> p(d,c);
             m_stats.insert(p);
         }
         
@@ -274,11 +274,11 @@ boost::property_tree::ptree Stats::toPTree() const
 {
     boost::property_tree::ptree tree;
 
-    std::multimap<DimensionPtr, stats::CollectorPtr>::const_iterator p;
+    std::multimap<DimensionPtr, stats::SummaryPtr>::const_iterator p;
     for (p = m_stats.begin(); p != m_stats.end(); ++p)
     {
         
-        const stats::CollectorPtr stat = p->second;
+        const stats::SummaryPtr stat = p->second;
         boost::property_tree::ptree subtree = stat->toPTree();
     
         tree.add_child(p->first->getName(), subtree);
@@ -288,10 +288,10 @@ boost::property_tree::ptree Stats::toPTree() const
     return tree;
 }
 
-stats::Collector const& Stats::getStats(Dimension const& dim) const
+stats::Summary const& Stats::getStats(Dimension const& dim) const
 {
     // FIXME: do this smarter
-    std::multimap<DimensionPtr, stats::CollectorPtr>::const_iterator p;
+    std::multimap<DimensionPtr, stats::SummaryPtr>::const_iterator p;
     for (p = m_stats.begin(); p != m_stats.end(); ++p)
     {
         if (dim == *p->first)

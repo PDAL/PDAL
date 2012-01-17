@@ -42,6 +42,16 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Schema.hpp>
 
+#include <iostream>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/moment.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/count.hpp>
+
+
 namespace pdal { namespace filters {
 
 namespace stats
@@ -50,63 +60,56 @@ namespace stats
 class PDAL_DLL Collector
 {
 public:
+	Collector() : m_count(0) {};
 
-    double minimum() const { return m_minimum; }
-    double maximum() const { return m_maximum; }
-    double average() const { return m_sum / (double)m_count; }
-    boost::uint64_t count() const { return m_count; }
+protected:
+    boost::uint64_t m_count;	
+
+};
+
+class PDAL_DLL Summary : public Collector
+{
+public:
+
+    double minimum() const { return boost::accumulators::min(acc); }
+    double maximum() const { return boost::accumulators::max(acc); }
+    double average() const { return boost::accumulators::mean(acc); }
+    boost::uint64_t count() const { return boost::accumulators::count(acc); }
     
     boost::property_tree::ptree toPTree() const;
 
 private:
-    boost::uint64_t m_count;
-    double m_minimum;
-    double m_maximum;
-    double m_sum;
-
+ 	boost::accumulators::accumulator_set<double, boost::accumulators::features< 	boost::accumulators::droppable<boost::accumulators::tag::mean>, 
+															boost::accumulators::droppable<boost::accumulators::tag::max>, 
+															boost::accumulators::droppable<boost::accumulators::tag::min>, 
+															boost::accumulators::droppable<boost::accumulators::tag::count> > > acc;
 public:
     
-    Collector()
-    : m_count(0)
-    , m_minimum(0.0)
-    , m_maximum(0.0)
-    , m_sum(0)
+    Summary()
+    : Collector()
     {
         return;
     }
     
     void reset()
     {
-        m_count = 0;
-        m_minimum = 0.0;
-        m_maximum = 0.0;
-        m_sum = 0.0;
+		acc.drop<boost::accumulators::tag::mean>();
+		acc.drop<boost::accumulators::tag::count>();
+		acc.drop<boost::accumulators::tag::max>();
+		acc.drop<boost::accumulators::tag::min>();
         return;
     }
 
     template<class T> inline void insert(T value)
     {
-        if (m_count == 0)
-        {
-            m_minimum = static_cast<double>(value);
-            m_maximum = static_cast<double>(value);
-            m_sum = value;
-        }
-        else
-        {
-            m_minimum = std::min(m_minimum, static_cast<double>(value));
-            m_maximum = std::max(m_maximum, static_cast<double>(value));
-            m_sum += value;
-        }
-
-        ++m_count;
+		acc(static_cast<double>(value));
 
         return;
     }
 
 };
 
-typedef boost::shared_ptr<Collector> CollectorPtr; 
+typedef boost::shared_ptr<Summary> SummaryPtr; 
 
 } // namespace stats
 
@@ -169,7 +172,7 @@ class PDAL_DLL Stats : public pdal::FilterSequentialIterator
 public:
     Stats(const pdal::filters::Stats& filter);
     boost::property_tree::ptree toPTree() const;
-    stats::Collector const& getStats(Dimension const& dim) const;
+    stats::Summary const& getStats(Dimension const& dim) const;
     void reset();
 
 protected:
@@ -184,7 +187,7 @@ private:
 
     double getValue(PointBuffer& data, Dimension& dim, boost::uint32_t pointIndex);
 
-    std::multimap<DimensionPtr,stats::CollectorPtr> m_stats; // one Stats item per field in the schema
+    std::multimap<DimensionPtr,stats::SummaryPtr> m_stats; // one Stats item per field in the schema
 };
 
 

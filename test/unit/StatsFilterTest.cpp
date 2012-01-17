@@ -68,9 +68,9 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
     
     pdal::filters::iterators::sequential::Stats* iterator = static_cast<pdal::filters::iterators::sequential::Stats*>(iter.get());
     
-    const pdal::filters::stats::Collector& statsX = iterator->getStats(schema.getDimension("X"));
-    const pdal::filters::stats::Collector& statsY = iterator->getStats(schema.getDimension("Y"));
-    const pdal::filters::stats::Collector& statsZ = iterator->getStats(schema.getDimension("Z"));
+    const pdal::filters::stats::Summary& statsX = iterator->getStats(schema.getDimension("X"));
+    const pdal::filters::stats::Summary& statsY = iterator->getStats(schema.getDimension("Y"));
+    const pdal::filters::stats::Summary& statsZ = iterator->getStats(schema.getDimension("Z"));
 
     BOOST_CHECK_EQUAL(statsX.count(), 1000u);
     BOOST_CHECK_EQUAL(statsY.count(), 1000u);
