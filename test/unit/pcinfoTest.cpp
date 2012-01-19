@@ -137,8 +137,7 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
 
     const std::string inputLas = Support::datapath("apps/simple.las");
     const std::string inputLaz = Support::datapath("apps/simple.laz");
-    const std::string outputTxt = Support::temppath("pcinfo.txt");
-
+    bool were_equal(false);
     std::string output;
 
     int stat = 0;
@@ -147,38 +146,56 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     
     // dump a single point to json
     
-    command << cmd + " --output=" + outputTxt + " --point=1 " + inputLas;
+    std::string pt_test = Support::temppath("pcinfo_point.txt");
+    command << cmd + " --output=" + pt_test + " --point=1 " + inputLas;
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
-    BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_point.txt")));
+    were_equal = Support::compare_text_files(pt_test, Support::datapath("apps/pcinfo_point.txt"));
+    BOOST_CHECK(were_equal);
+    if (were_equal)
+        pdal::FileUtils::deleteFile(pt_test);
 
     // dump summary of all points to json
     command.str("");
-    command << cmd + " --output=" + outputTxt + " --stats " + inputLas;
+    
+    std::string stats_test = Support::temppath("pcinfo_stats.txt");
+    command << cmd + " --output=" + stats_test + " --stats " + inputLas;
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
-    BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_stats.txt")));
-
+    were_equal = Support::compare_text_files(stats_test, Support::datapath("apps/pcinfo_stats.txt"));
+    BOOST_CHECK(were_equal);
+    if (were_equal)
+        pdal::FileUtils::deleteFile(stats_test);
+        
     // dump schema to json
     command.str("");
-    command << cmd + " --output=" + outputTxt + " --schema " + inputLas;
+    
+    std::string schema_test = Support::temppath("pcinfo_schema.txt");
+    command << cmd + " --output=" + schema_test + " --schema " + inputLas;
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
-    BOOST_CHECK(Support::compare_text_files(outputTxt, Support::datapath("apps/pcinfo_schema.txt")));
+    were_equal = Support::compare_text_files(schema_test, Support::datapath("apps/pcinfo_schema.txt"));
+    BOOST_CHECK(were_equal);
+    if (were_equal)
+        pdal::FileUtils::deleteFile(schema_test);
 
     // dump stage info to json
     command.str("");
-    command << cmd + " --output=" + outputTxt + " --stage " + inputLas;
+    
+    std::string stage_test = Support::temppath("pcinfo_stage.txt");
+    command << cmd + " --output=" + stage_test + " --stage " + inputLas;
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
 
 #ifdef PDAL_HAVE_GDAL
-    BOOST_CHECK_EQUAL(Support::diff_text_files(outputTxt, Support::datapath("apps/pcinfo_stage.txt"), 15), 0u);
+    unsigned int check = Support::diff_text_files(stage_test, Support::datapath("apps/pcinfo_stage.txt"), 15);
+    BOOST_CHECK_EQUAL(check, 0u);
 #else
-    BOOST_CHECK_EQUAL(Support::diff_text_files(outputTxt, Support::datapath("apps/pcinfo_stage_nosrs.txt"), 15), 0u);
+    unsigned int check = Support::diff_text_files(stage_test, Support::datapath("apps/pcinfo_stage_nosrs.txt"), 15);
+    BOOST_CHECK_EQUAL(check, 0u);
 #endif
-
-    pdal::FileUtils::deleteFile(outputTxt);
+    if (check == 0u)
+        pdal::FileUtils::deleteFile(stage_test);
 
     return;
 }
