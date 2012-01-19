@@ -39,7 +39,6 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/faux/Iterator.hpp>
 
 #include <iostream>
 

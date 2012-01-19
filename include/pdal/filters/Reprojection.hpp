@@ -52,8 +52,6 @@ namespace pdal
 
 namespace pdal { namespace filters {
 
-class ReprojectionFilterSequentialIterator;
-
 class PDAL_DLL Reprojection : public Filter
 {
 public:
@@ -105,7 +103,7 @@ private:
 namespace iterators { namespace sequential {
 
 
-class Reprojection : public pdal::FilterSequentialIterator
+class PDAL_DLL Reprojection : public pdal::FilterSequentialIterator
 {
 public:
     Reprojection(const pdal::filters::Reprojection& filter);

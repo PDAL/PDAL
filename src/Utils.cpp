@@ -136,6 +136,17 @@ boost::uint32_t Utils::getStreamPrecision(double scale)
     return output;
 }
 
+boost::uint32_t Utils::safeconvert64to32(boost::uint64_t x64) 
+{
+    if (x64 > std::numeric_limits<boost::uint32_t>::max())
+    {
+        throw pdal_error("cannot support seek offsets greater than 32-bits");
+    }
+
+    const boost::uint32_t x32 = static_cast<boost::uint32_t>(x64);
+    return x32;
+}
+
 
 
 } // namespace pdal

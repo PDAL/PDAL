@@ -16,11 +16,6 @@
         },
         "Option":
         {
-            "Name": "liblas",
-            "Value": "false"
-        },
-        "Option":
-        {
             "Name": "verbose",
             "Value": "0"
         }

@@ -52,8 +52,6 @@ namespace pdal
 
 namespace pdal { namespace filters {
 
-class PredicateFilterSequentialIterator;
-
 class PDAL_DLL Predicate : public Filter
 {
 public:
@@ -89,7 +87,7 @@ private:
 namespace iterators { namespace sequential {
     
 
-class Predicate : public pdal::FilterSequentialIterator
+class PDAL_DLL Predicate : public pdal::FilterSequentialIterator
 {
 public:
     Predicate(const pdal::filters::Predicate& filter);

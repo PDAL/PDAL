@@ -36,20 +36,25 @@
 #define INCLUDED_DRIVERS_LAS_READER_HPP
 
 #include <pdal/Reader.hpp>
+#include <pdal/ReaderIterator.hpp>
+
+#include <pdal/drivers/las/Support.hpp>
+
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/ReaderBase.hpp>
 
-class LASunzipper;
+#include <boost/scoped_ptr.hpp>
 
 namespace pdal
 {
     class PointBuffer;
 }
 
+
+
 namespace pdal { namespace drivers { namespace las {
 
 class LasHeader;
-class ZipPoint;
 class PointDimensions;
 
 class PDAL_DLL Reader : public ReaderBase
@@ -117,6 +122,84 @@ private:
     Reader(const Reader&); // not implemented
 };
 
+
+namespace iterators {
+
+class Base
+{
+public:
+    Base(pdal::drivers::las::Reader const& reader);
+    ~Base();
+    void read(PointBuffer&);
+private:
+    void initialize();
+
+protected:
+    const pdal::drivers::las::Reader& m_reader;
+    std::istream* m_istream;
+
+public:
+
+#ifdef PDAL_HAVE_LASZIP
+    boost::scoped_ptr<ZipPoint> m_zipPoint;
+    boost::scoped_ptr<LASunzipper> m_unzipper;
+#else
+    void* m_zipPoint;
+    void* m_unzipper;
+#endif
+
+    std::streampos m_zipReadStartPosition;
+
+private:
+    Base& operator=(Base const&); // not implemented
+    Base(Base const&); // not implemented
+};
+
+namespace sequential {
+
+class Reader : public Base, public pdal::ReaderSequentialIterator
+{
+public:
+    Reader(const pdal::drivers::las::Reader& reader);
+    ~Reader();
+
+protected:
+    virtual void readBufferBeginImpl(PointBuffer&);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+    PointDimensions* m_pointDimensions;
+    Schema const* m_schema;
+};
+
+
+} // sequential
+
+namespace random {
+
+class Reader : public Base, public pdal::ReaderRandomIterator
+{
+public:
+    Reader(const pdal::drivers::las::Reader& reader);
+    ~Reader();
+
+protected:
+    virtual void readBufferBeginImpl(PointBuffer&);
+
+private:
+    boost::uint64_t seekImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    PointDimensions* m_pointDimensions;
+    Schema const* m_schema;
+};
+
+
+} // random
+
+
+} // iterators
 
 } } } // namespaces
 

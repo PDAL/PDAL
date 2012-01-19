@@ -88,7 +88,7 @@ private:
 namespace iterators { namespace sequential {
     
 
-class Programmable : public pdal::FilterSequentialIterator
+class PDAL_DLL Programmable : public pdal::FilterSequentialIterator
 {
 public:
     Programmable(const pdal::filters::Programmable& filter);

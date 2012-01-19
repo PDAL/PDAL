@@ -44,7 +44,7 @@ namespace pdal
 {
 
 
-class PointBufferCache
+class PDAL_DLL PointBufferCache
 {
 public:
 

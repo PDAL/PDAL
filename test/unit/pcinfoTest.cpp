@@ -194,8 +194,13 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     unsigned int check = Support::diff_text_files(stage_test, Support::datapath("apps/pcinfo_stage_nosrs.txt"), 15);
     BOOST_CHECK_EQUAL(check, 0u);
 #endif
+<<<<<<< HEAD
     if (check == 0u)
         pdal::FileUtils::deleteFile(stage_test);
+=======
+
+    // pdal::FileUtils::deleteFile(outputTxt);
+>>>>>>> f9de48b69c30f6a571cf101cc2f8fec5ac76a43e
 
     return;
 }

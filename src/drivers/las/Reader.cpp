@@ -41,7 +41,6 @@
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/drivers/las/Header.hpp>
-#include <pdal/drivers/las/Iterator.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include "LasHeaderReader.hpp"
 #include <pdal/PointBuffer.hpp>
@@ -165,13 +164,13 @@ bool Reader::isCompressed() const
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return new SequentialIterator(*this);
+    return new pdal::drivers::las::iterators::sequential::Reader(*this);
 }
 
 
 pdal::StageRandomIterator* Reader::createRandomIterator() const
 {
-    return new RandomIterator(*this);
+    return new pdal::drivers::las::iterators::random::Reader(*this);
 }
 
 
@@ -457,4 +456,350 @@ boost::property_tree::ptree Reader::toPTree() const
     return tree;
 }
 
+
+namespace iterators {
+
+
+Base::Base(pdal::drivers::las::Reader const& reader)
+    : m_reader(reader)
+    , m_istream(NULL)
+    , m_zipPoint(NULL)
+    , m_unzipper(NULL)
+
+{
+    m_istream = FileUtils::openFile(m_reader.getFileName());
+    m_istream->seekg(m_reader.getPointDataOffset());
+
+    if (m_reader.isCompressed())
+    {
+#ifdef PDAL_HAVE_LASZIP
+        initialize();
+#else
+        throw pdal_error("LASzip is not enabled for this pdal::drivers::las::IteratorBase!");
+#endif
+    }
+
+    return;
+}
+
+
+Base::~Base()
+{
+#ifdef PDAL_HAVE_LASZIP
+    m_zipPoint.reset();
+    m_unzipper.reset();
+#endif
+    
+    FileUtils::closeFile(m_istream);
+}
+
+
+void Base::initialize()
+{
+#ifdef PDAL_HAVE_LASZIP
+    if (!m_zipPoint)
+    {
+        PointFormat format = m_reader.getPointFormat();
+        boost::scoped_ptr<ZipPoint> z(new ZipPoint(format, m_reader.getVLRs()));
+        m_zipPoint.swap(z);
+    }
+
+    if (!m_unzipper)
+    {
+        boost::scoped_ptr<LASunzipper> z(new LASunzipper());
+        m_unzipper.swap(z);
+
+        bool stat(false);
+        m_istream->seekg(m_reader.getPointDataOffset(), std::ios::beg);
+        stat = m_unzipper->open(*m_istream, m_zipPoint->GetZipper());
+
+        // Martin moves the stream on us 
+        m_zipReadStartPosition = m_istream->tellg();
+        if (!stat)
+        {
+            std::ostringstream oss;
+            const char* err = m_unzipper->get_error();
+            if (err==NULL) err="(unknown error)";
+            oss << "Failed to open LASzip stream: " << std::string(err);
+            throw pdal_error(oss.str());
+        }
+    }
+#endif
+    return;
+}
+
+void Base::read(PointBuffer& data)
+{
+ //    // we must not read more points than are left in the file
+ //     const boost::uint64_t numPoints64 = std::min<boost::uint64_t>(data.getCapacity(), getStage().getNumPoints()-this->getIndex());
+ //     const boost::uint32_t numPoints = (boost::uint32_t)std::min<boost::uint64_t>(numPoints64, std::numeric_limits<boost::uint32_t>::max());
+ // 
+ //     const LasHeader& lasHeader = getLasHeader();
+ //     const PointFormat pointFormat = lasHeader.getPointFormat();
+ // 
+ // 
+ //     const bool hasTime = Support::hasTime(pointFormat);
+ //     const bool hasColor = Support::hasColor(pointFormat);
+ //     const int pointByteCount = Support::getPointDataSize(pointFormat);
+ // 
+ //     boost::uint8_t* buf = new boost::uint8_t[pointByteCount * numPoints];
+ //     
+ //     if (!dimensions)
+ //     {
+ //         throw pdal_error("No dimension positions are available!");
+ //     }
+ //     if (zipPoint)
+ //     {
+ // #ifdef PDAL_HAVE_LASZIP
+ //         boost::uint8_t* p = buf;
+ // 
+ //         bool ok = false;
+ //         for (boost::uint32_t i=0; i<numPoints; i++)
+ //         {
+ //             ok = unzipper->read(zipPoint->m_lz_point);
+ //             if (!ok)
+ //             {
+ //                 std::ostringstream oss;
+ //                 const char* err = unzipper->get_error();
+ //                 if (err==NULL) err="(unknown error)";
+ //                 oss << "Error reading compressed point data: " << std::string(err);
+ //                 throw pdal_error(oss.str());
+ //             }
+ // 
+ //             memcpy(p, zipPoint->m_lz_point_data.get(), zipPoint->m_lz_point_size);
+ //             p +=  zipPoint->m_lz_point_size;
+ //         }
+ // #else
+ //         boost::ignore_unused_variable_warning(unzipper);
+ //         throw pdal_error("LASzip is not enabled for this pdal::drivers::las::Reader::processBuffer");
+ // #endif
+ //     }
+ //     else
+ //     {
+ //         Utils::read_n(buf, stream, pointByteCount * numPoints);
+ //     }
+ // 
+ //     for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
+ //     {
+ //         boost::uint8_t* p = buf + pointByteCount * pointIndex;
+ // 
+ //         // always read the base fields
+ //         {
+ //             const boost::int32_t x = Utils::read_field<boost::int32_t>(p);
+ //             const boost::int32_t y = Utils::read_field<boost::int32_t>(p);
+ //             const boost::int32_t z = Utils::read_field<boost::int32_t>(p);
+ //             const boost::uint16_t intensity = Utils::read_field<boost::uint16_t>(p);
+ //             const boost::uint8_t flags = Utils::read_field<boost::uint8_t>(p);
+ //             const boost::uint8_t classification = Utils::read_field<boost::uint8_t>(p);
+ //             const boost::int8_t scanAngleRank = Utils::read_field<boost::int8_t>(p);
+ //             const boost::uint8_t user = Utils::read_field<boost::uint8_t>(p);
+ //             const boost::uint16_t pointSourceId = Utils::read_field<boost::uint16_t>(p);
+ // 
+ //             const boost::uint8_t returnNum = flags & 0x07;
+ //             const boost::uint8_t numReturns = (flags >> 3) & 0x07;
+ //             const boost::uint8_t scanDirFlag = (flags >> 6) & 0x01;
+ //             const boost::uint8_t flight = (flags >> 7) & 0x01;
+ // 
+ //             data.setField<boost::uint32_t>(*dimensions->X, pointIndex, x);
+ //             data.setField<boost::uint32_t>(*dimensions->Y, pointIndex, y);
+ //             data.setField<boost::uint32_t>(*dimensions->Z, pointIndex, z);
+ //             data.setField<boost::uint16_t>(*dimensions->Intensity, pointIndex, intensity);
+ //             data.setField<boost::uint8_t>(*dimensions->ReturnNumber, pointIndex, returnNum);
+ //             data.setField<boost::uint8_t>(*dimensions->NumberOfReturns, pointIndex, numReturns);
+ //             data.setField<boost::uint8_t>(*dimensions->ScanDirectionFlag, pointIndex, scanDirFlag);
+ //             data.setField<boost::uint8_t>(*dimensions->EdgeOfFlightLine, pointIndex, flight);
+ //             data.setField<boost::uint8_t>(*dimensions->Classification, pointIndex, classification);
+ //             data.setField<boost::int8_t>(*dimensions->ScanAngleRank, pointIndex, scanAngleRank);
+ //             data.setField<boost::uint8_t>(*dimensions->UserData, pointIndex, user);
+ //             data.setField<boost::uint16_t>(*dimensions->PointSourceId, pointIndex, pointSourceId);
+ //         }
+ // 
+ //         if (hasTime)
+ //         {
+ //             const double time = Utils::read_field<double>(p);
+ //             data.setField<double>(*dimensions->Time, pointIndex, time);
+ //         }
+ // 
+ //         if (hasColor)
+ //         {
+ //             const boost::uint16_t red = Utils::read_field<boost::uint16_t>(p);
+ //             const boost::uint16_t green = Utils::read_field<boost::uint16_t>(p);
+ //             const boost::uint16_t blue = Utils::read_field<boost::uint16_t>(p);
+ // 
+ //             data.setField<boost::uint16_t>(*dimensions->Red, pointIndex, red);
+ //             data.setField<boost::uint16_t>(*dimensions->Green, pointIndex, green);
+ //             data.setField<boost::uint16_t>(*dimensions->Blue, pointIndex, blue);       
+ //         }
+ //         
+ //         data.setNumPoints(pointIndex+1);
+ //     }
+ // 
+ //     delete[] buf;
+ // 
+ //     data.setSpatialBounds( lasHeader.getBounds() );
+ // 
+ //     return numPoints;    
+}
+
+namespace sequential {
+
+
+Reader::Reader(pdal::drivers::las::Reader const& reader)
+    : Base(reader)
+    , pdal::ReaderSequentialIterator(reader)
+    , m_pointDimensions(NULL)
+    , m_schema(0)
+{
+    return;
+}
+
+
+Reader::~Reader()
+{
+    if (m_pointDimensions) 
+        delete m_pointDimensions;
+
+    return;
+}
+
+void Reader::readBufferBeginImpl(PointBuffer& buffer)
+{
+    // Cache dimension positions
+    Schema const& schema = buffer.getSchema();
+    if (m_pointDimensions)
+        delete m_pointDimensions;
+    m_pointDimensions = new PointDimensions(schema, m_reader.getName());
+
+} 
+
+
+boost::uint64_t Reader::skipImpl(boost::uint64_t count)
+{
+#ifdef PDAL_HAVE_LASZIP
+    if (m_unzipper)
+    {
+        const boost::uint32_t pos32 = Utils::safeconvert64to32(getIndex() + count);
+        m_unzipper->seek(pos32);
+    }
+    else
+    {
+        boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+        m_istream->seekg(delta * count, std::ios::cur);
+    }
+#else
+        boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+        m_istream->seekg(delta * count, std::ios::cur);
+#endif
+    return count;
+}
+
+
+bool Reader::atEndImpl() const
+{
+    return getIndex() >= getStage().getNumPoints();
+}
+
+
+boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+{
+#ifdef PDAL_HAVE_LASZIP
+    return m_reader.processBuffer(  data, 
+                                    *m_istream, 
+                                    getStage().getNumPoints()-this->getIndex(), 
+                                    m_unzipper.get(), 
+                                    m_zipPoint.get(),
+                                    m_pointDimensions);
+#else
+    return m_reader.processBuffer(  data, 
+                                    *m_istream, 
+                                    getStage().getNumPoints()-this->getIndex(), 
+                                    NULL, 
+                                    NULL,
+                                    m_pointDimensions);
+
+#endif
+}
+
+    
+} // sequential
+
+namespace random {
+    
+Reader::Reader(const pdal::drivers::las::Reader& reader)
+    : Base(reader)
+    , pdal::ReaderRandomIterator(reader)
+    , m_pointDimensions(NULL)
+    , m_schema(0)
+{
+    return;
+}
+
+
+Reader::~Reader()
+{
+    if (m_pointDimensions) delete m_pointDimensions;
+    return;
+}
+
+void Reader::readBufferBeginImpl(PointBuffer& buffer)
+{
+    // We'll assume you're not changing the schema per-read call
+    Schema const& schema = buffer.getSchema();
+    if (m_schema != &schema)
+    {
+        m_schema = &schema;
+        if (m_pointDimensions)
+            delete m_pointDimensions;
+        m_pointDimensions = new PointDimensions(schema, m_reader.getName());
+    } 
+
+} 
+
+boost::uint64_t Reader::seekImpl(boost::uint64_t count)
+{
+#ifdef PDAL_HAVE_LASZIP
+    if (m_unzipper)
+    {
+        const boost::uint32_t pos32 = Utils::safeconvert64to32(count);
+        m_unzipper->seek(pos32);
+    }
+    else
+    {
+        boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+        m_istream->seekg(m_reader.getPointDataOffset() + delta * count);
+    }
+#else
+
+    boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
+    m_istream->seekg(m_reader.getPointDataOffset() + delta * count);
+
+#endif
+
+    return count;
+}
+
+
+boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+{
+#ifdef PDAL_HAVE_LASZIP
+    return m_reader.processBuffer(  data, 
+                                    *m_istream, 
+                                    getStage().getNumPoints()-this->getIndex(), 
+                                    m_unzipper.get(), 
+                                    m_zipPoint.get(),
+                                    m_pointDimensions);
+#else
+    return m_reader.processBuffer(  data, 
+                                    *m_istream, 
+                                    getStage().getNumPoints()-this->getIndex(), 
+                                    NULL, 
+                                    NULL,
+                                    m_pointDimensions);
+
+#endif
+}
+
+
+} // random
+} // iterators
 } } } // namespaces

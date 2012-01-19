@@ -121,7 +121,7 @@ private:
 
 namespace iterators { namespace sequential {
 
-class Cache : public pdal::FilterSequentialIterator
+class PDAL_DLL Cache : public pdal::FilterSequentialIterator
 {
 public:
     Cache(const pdal::filters::Cache& filter);
@@ -139,7 +139,7 @@ private:
 
 namespace iterators { namespace random {
 
-class Cache : public pdal::FilterRandomIterator
+class PDAL_DLL Cache : public pdal::FilterRandomIterator
 {
 public:
     Cache(const pdal::filters::Cache& filter);

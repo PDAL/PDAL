@@ -84,7 +84,7 @@ private:
 
 namespace iterators { namespace sequential {
   
-class ByteSwap : public pdal::FilterSequentialIterator
+class PDAL_DLL ByteSwap : public pdal::FilterSequentialIterator
 {
 public:
     ByteSwap(const pdal::filters::ByteSwap& filter);

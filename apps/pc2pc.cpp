@@ -36,10 +36,6 @@
 
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
-#ifdef PDAL_HAVE_LIBLAS
-#include <pdal/drivers/liblas/Writer.hpp>
-#include <pdal/drivers/liblas/Reader.hpp>
-#endif
 #ifdef PDAL_HAVE_ORACLE
 #include <pdal/drivers/oci/Writer.hpp>
 #include <pdal/drivers/oci/Reader.hpp>
@@ -71,7 +67,6 @@ private:
 
     std::string m_inputFile;
     std::string m_outputFile;
-    bool m_useLiblas;
     std::string m_srs;
     bool m_bCompress;
     boost::uint32_t m_chunkSize;
@@ -82,7 +77,6 @@ Pc2Pc::Pc2Pc(int argc, char* argv[])
     : Application(argc, argv, "pc2pc")
     , m_inputFile("")
     , m_outputFile("")
-    , m_useLiblas(false)
     , m_srs("")
     , m_bCompress(false)
     , m_chunkSize(0)
@@ -116,7 +110,6 @@ void Pc2Pc::addSwitches()
     file_options->add_options()
         ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
         ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
-        ("liblas", po::value<bool>(&m_useLiblas)->zero_tokens()->implicit_value(true), "use libLAS driver (not PDAL native driver)")
         ("a_srs", po::value<std::string>(&m_srs)->default_value(""), "Assign output coordinate system (if supported by output format)")
         ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true), "Compress output data (if supported by output format)")
         ("chunk_size", po::value<boost::uint32_t>(&m_chunkSize), "Size of buffer, for blocked/chunked/tiled transfers")
@@ -133,7 +126,6 @@ int Pc2Pc::execute()
         readerOptions.add<std::string>("filename", m_inputFile);
         readerOptions.add<bool>("debug", isDebug());
         readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
-        readerOptions.add<bool>("liblas", m_useLiblas);
     }
 
     Options writerOptions;
@@ -151,7 +143,6 @@ int Pc2Pc::execute()
         {
             writerOptions.add<bool>("compression", true);
         }
-        writerOptions.add<bool>("liblas", m_useLiblas);
 
         if (m_chunkSize != 0)
         {

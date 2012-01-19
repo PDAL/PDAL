@@ -35,7 +35,6 @@
 
 
 #include <pdal/drivers/terrasolid/Reader.hpp>
-#include <pdal/drivers/terrasolid/Iterator.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 
@@ -415,13 +414,13 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
 
 pdal::StageSequentialIterator* Reader::createSequentialIterator() const
 {
-    return new pdal::drivers::terrasolid::SequentialIterator(*this);
+    return new pdal::drivers::terrasolid::iterators::sequential::Reader(*this);
 }
 
 
 pdal::StageRandomIterator* Reader::createRandomIterator() const
 {
-    return new pdal::drivers::terrasolid::RandomIterator(*this);
+    return new pdal::drivers::terrasolid::iterators::random::Reader(*this);
 }
 
 
@@ -523,6 +522,90 @@ void Reader::addDefaultDimensions()
     time.setUUID("0dcda772-56da-47f6-b04a-edad72361da9");
     addDefaultDimension(time, getName());
 }
+
+
+namespace iterators {
+
+namespace sequential {
+
+
+Reader::Reader(const terrasolid::Reader& reader)
+    : pdal::ReaderSequentialIterator(reader)
+    , m_reader(reader)
+    , m_istream(NULL)
+{
+    m_istream = FileUtils::openFile(m_reader.getFileName());
+    m_istream->seekg(m_reader.getPointDataOffset());
+    return;
+}
+
+
+Reader::~Reader()
+{
+    FileUtils::closeFile(m_istream);
+    return;
+}
+
+
+boost::uint64_t Reader::skipImpl(boost::uint64_t count)
+{
+    m_istream->seekg( m_reader.getPointDataSize() * count, std::ios::cur);
+    return count;
+}
+
+
+bool Reader::atEndImpl() const
+{
+    return getIndex() >= getStage().getNumPoints();
+}
+
+
+boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+{
+    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex());
+}
+
+    
+} // sequential
+
+namespace random {
+
+
+
+Reader::Reader(const terrasolid::Reader& reader)
+    : pdal::ReaderRandomIterator(reader)
+    , m_reader(reader)
+    , m_istream(NULL)
+{
+    m_istream = FileUtils::openFile(m_reader.getFileName());
+    m_istream->seekg(m_reader.getPointDataOffset());
+    return;
+}
+
+
+Reader::~Reader()
+{
+    FileUtils::closeFile(m_istream);
+    return;
+}
+
+
+boost::uint64_t Reader::seekImpl(boost::uint64_t count)
+{
+
+    m_istream->seekg( m_reader.getPointDataSize() * count + m_reader.getPointDataOffset(), std::ios::cur);
+    
+    return count;
+}
+
+
+boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
+{
+    return m_reader.processBuffer(data, *m_istream, getStage().getNumPoints()-this->getIndex());
+}
+
+} // random
+} // iterators
 
 
 }}} // namespace pdal::driver::oci

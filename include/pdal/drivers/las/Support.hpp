@@ -42,10 +42,20 @@
 
 #include <iostream>
 
+#ifdef PDAL_HAVE_LASZIP
+class LASzip;
+class LASunzipper;
+class LASzipper;
+
+#else
+typedef struct LASzipH *LASzip;
+typedef struct LASunzipperH *LASunzipper;
+#endif
+
 namespace pdal { namespace drivers { namespace las {
     
 class SummaryData;
-
+class ZipPoint;
 
 enum PointFormat
 {

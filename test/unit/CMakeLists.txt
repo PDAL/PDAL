@@ -11,12 +11,6 @@ if (LIBXML2_FOUND)
 SET (PDAL_UNITTEST_XMLSCHEMA_TEST XMLSchemaTest.cpp)
 endif()
 
-if (LIBLAS_FOUND)
-    SET(LIBLAS_TESTS LiblasReaderTest.cpp
-                        LiblasWriterTest.cpp 
-                        )
-endif()
-
 SET(PDAL_UNITTEST_TEST_SRC
     pc2pcTest.cpp
     pcinfoTest.cpp
@@ -37,7 +31,6 @@ SET(PDAL_UNITTEST_TEST_SRC
     InPlaceReprojectionFilterTest.cpp
     LasReaderTest.cpp
     LasWriterTest.cpp
-    ${LIBLAS_TESTS}
     MosaicFilterTest.cpp
     OptionsTest.cpp
     PipelineManagerTest.cpp
@@ -109,6 +102,7 @@ FOREACH(file ${PDAL_PLANG_TEST_SRC})
         SET(PDAL_UNITTEST_SOURCES "${PDAL_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
 ENDFOREACH(file)
 endif()
+
 FOREACH(file ${PDAL_UNITTEST_CONFIG_SRC})
         SET(PDAL_UNITTEST_SOURCES "${PDAL_UNITTEST_SOURCES};${file}" CACHE INTERNAL "source files for test")
 ENDFOREACH(file)

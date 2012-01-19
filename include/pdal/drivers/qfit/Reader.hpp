@@ -36,6 +36,7 @@
 #define INCLUDED_PDAL_DRIVER_QFIT_READER_HPP
 
 #include <pdal/Reader.hpp>
+#include <pdal/ReaderIterator.hpp>
 #include <pdal/Options.hpp>
 
 #include <pdal/StageIterator.hpp>
@@ -201,7 +202,47 @@ private:
 
 };
 
-}}} // namespace pdal::driver::oci
+namespace iterators {
+
+namespace sequential {
+
+class Reader : public pdal::ReaderSequentialIterator
+{
+public:
+    Reader(const pdal::drivers::qfit::Reader& reader);
+    ~Reader();
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+
+    const pdal::drivers::qfit::Reader& m_reader;
+    std::istream* m_istream;
+};
+
+    
+} // sequential
+
+namespace random {
+
+class Reader : public pdal::ReaderRandomIterator
+{
+public:
+    Reader(const pdal::drivers::qfit::Reader& reader);
+    ~Reader();
+
+private:
+    boost::uint64_t seekImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+
+    const pdal::drivers::qfit::Reader& m_reader;
+    std::istream* m_istream;
+};
+
+} // random
+} // iterators
+}}} // namespace pdal::driver::qfit
 
 
-#endif // INCLUDED_PDAL_DRIVER_OCI_READER_HPP
+#endif // INCLUDED_PDAL_DRIVER_QFIT_READER_HPP

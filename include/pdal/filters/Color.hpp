@@ -87,7 +87,7 @@ private:
 namespace iterators { namespace sequential {
 
 
-class Color : public pdal::FilterSequentialIterator
+class PDAL_DLL Color : public pdal::FilterSequentialIterator
 {
 public:
     Color(const pdal::filters::Color& filter);

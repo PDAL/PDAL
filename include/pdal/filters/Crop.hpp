@@ -86,7 +86,7 @@ private:
 namespace iterators { namespace sequential {
 
 
-class Crop : public pdal::FilterSequentialIterator
+class PDAL_DLL Crop : public pdal::FilterSequentialIterator
 {
 public:
     Crop(const pdal::filters::Crop& filter);

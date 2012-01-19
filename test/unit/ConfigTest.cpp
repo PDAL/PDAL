@@ -44,16 +44,9 @@ BOOST_AUTO_TEST_SUITE(ConfigTest)
 
 BOOST_AUTO_TEST_CASE(test_3rdparty_libs)
 {
-    bool liblas = IsLibLASEnabled();
     bool gdal = IsGDALEnabled();
     bool geotiff = IsLibGeoTIFFEnabled();
     bool laszip = IsLasZipEnabled();
-
-#ifdef PDAL_HAVE_LIBLAS
-    BOOST_CHECK(liblas);
-#else
-    BOOST_CHECK(!liblas);
-#endif
 
 #ifdef PDAL_HAVE_GDAL
     BOOST_CHECK(gdal);

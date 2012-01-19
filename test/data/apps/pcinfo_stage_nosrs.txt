@@ -12,12 +12,7 @@
         "Option":
         {
             "Name": "filename",
-            "Value": "test\/data\/apps\/simple.las"
-        },
-        "Option":
-        {
-            "Name": "liblas",
-            "Value": "false"
+            "Value": "..\/..\/test\/data\/apps\/simple.las"
         },
         "Option":
         {

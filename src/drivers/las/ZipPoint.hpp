@@ -44,9 +44,6 @@
 
 #include <vector>
 
-// liblaszip
-class LASzip;
-
 namespace pdal { namespace drivers { namespace las {
 
 class VariableLengthRecord;

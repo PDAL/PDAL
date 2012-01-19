@@ -36,8 +36,8 @@
 #define INCLUDED_DRIVERS_FAUX_READER_HPP
 
 #include <pdal/Reader.hpp>
+#include <pdal/ReaderIterator.hpp>
 #include <pdal/Bounds.hpp>
-#include <pdal/dimension/Dimension.hpp>
 
 namespace pdal
 {
@@ -112,6 +112,39 @@ private:
 
 };
 
+
+namespace iterators { namespace sequential {
+
+class PDAL_DLL Reader : public pdal::ReaderSequentialIterator
+{
+public:
+    Reader(pdal::drivers::faux::Reader const& reader);
+
+private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+
+    pdal::drivers::faux::Reader const& m_reader;
+};
+
+} } // iterators::sequential
+
+namespace iterators { namespace random {
+    
+class PDAL_DLL Reader : public pdal::ReaderRandomIterator
+{
+public:
+    Reader(pdal::drivers::faux::Reader const& reader);
+
+private:
+    boost::uint64_t seekImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+
+    pdal::drivers::faux::Reader const& m_reader;
+};
+
+} } // iterators::random
 
 } } } // namespaces
 
