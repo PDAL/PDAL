@@ -59,7 +59,7 @@ using namespace pdal;
 
 // using namespace pdal::drivers::oci;
 
-
+static unsigned chunk_size = 12;
 bool ShouldRunTest()
 {
     return TestConfig::g_oracle_connection.size() > 0;
@@ -69,8 +69,12 @@ Options getOptions()
 {
     Options options;
     
-    Option capacity("capacity", 333,"capacity");
+
+    Option capacity("capacity", chunk_size,"capacity");
     options.add(capacity);
+
+    Option chunk("chunk_size", capacity.getValue<boost::uint32_t>(),"chunk_size");
+    options.add(chunk);
     
     Option overwrite("overwrite", false,"overwrite");
     options.add(overwrite);
@@ -81,7 +85,7 @@ Options getOptions()
     Option debug("debug", true, "debug");
     options.add(debug);
     
-    Option verbose("verbose", 1, "verbose");
+    Option verbose("verbose", 7, "verbose");
     options.add(verbose);
     
     Option block_table_name("block_table_name", "PDAL_TEST_BLOCKS", "block_table_name");
@@ -111,6 +115,9 @@ Options getOptions()
     Option scale_y("scale_y", 0.0000001, "");
     options.add(scale_y);
     
+    Option disable_cloud_trigger("disable_cloud_trigger", true, "");
+    options.add(disable_cloud_trigger);
+    
     Option max_cache_blocks("max_cache_blocks", 1, "");
     options.add(max_cache_blocks);
     
@@ -134,7 +141,7 @@ struct OracleTestFixture
     OracleTestFixture() :
     m_options(getOptions())
     , m_connection(pdal::drivers::oci::Connection())
-    , m_driver(getOptions())
+    , m_driver(m_options)
     { 
         if (!ShouldRunTest()) return;
         pdal::drivers::oci::Connection connection = connect();
