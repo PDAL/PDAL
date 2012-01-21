@@ -616,7 +616,6 @@ boost::uint32_t IteratorBase::myReadClouds(PointBuffer& data)
         if (m_at_end == true) 
         {
             getReader().log()->get(logDEBUG2) << "At end of current block and trying to fetch another cloud " << std::endl;
-            bReadCloud = getReader().getStatement()->Fetch();
             
             if (bReadCloud) 
             {
