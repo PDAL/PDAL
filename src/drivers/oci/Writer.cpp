@@ -322,7 +322,12 @@ void Writer::CreateBlockIndex()
     std::ostringstream oss;
     std::string block_table_name = getOptions().getValueOrThrow<std::string>("block_table_name");
     
-    oss << "CREATE INDEX "<< block_table_name << "_cloud_idx on "
+    std::ostringstream index_name;
+    index_name << block_table_name << "_cloud_idx";
+    std::string name;
+    name = index_name.str().substr(0,29);
+    
+    oss << "CREATE INDEX "<< name << " on "
         << block_table_name << "(blk_extent) INDEXTYPE IS MDSYS.SPATIAL_INDEX";
     
     if (m_is3d)
@@ -332,8 +337,11 @@ void Writer::CreateBlockIndex()
     
     run(oss);
     oss.str("");
-
-    oss << "CREATE INDEX " << block_table_name <<"_objectid_idx on " 
+    
+    index_name.str("");
+    index_name <<  block_table_name <<"_objectid_idx";
+    name = index_name.str().substr(0,29);
+    oss << "CREATE INDEX " << name <<" on " 
         << block_table_name << "(OBJ_ID,BLK_ID) COMPRESS 2" ;
     run(oss);
     oss.str("");
@@ -1121,7 +1129,7 @@ std::string Writer::ShutOff_SDO_PC_Trigger()
     std::string cloud_column_name = boost::to_upper_copy(getOptions().getValueOrThrow<std::string>("cloud_column_name"));
 
     // Don't monkey with the trigger unless the user says to.
-    if (getOptions().getValueOrDefault<bool>("disable_cloud_trigger", false))
+    if (!getOptions().getValueOrDefault<bool>("disable_cloud_trigger", false))
         return std::string("");
 
     std::ostringstream oss;
