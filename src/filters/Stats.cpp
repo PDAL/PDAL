@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/filters/Stats.hpp>
+#include <pdal/Utils.hpp>
 
 #include <pdal/PointBuffer.hpp>
 #include <boost/algorithm/string.hpp>
@@ -46,12 +47,23 @@ namespace stats {
 boost::property_tree::ptree Summary::toPTree() const
 {
     boost::property_tree::ptree tree;
-
-    tree.put("count", count());
+    
+    boost::uint32_t cnt = static_cast<boost::uint32_t>(count());
+    tree.put("count", cnt);
     tree.put("minimum", minimum());
     tree.put("maximum", maximum());
     tree.put("average", average());
-
+    
+    boost::property_tree::ptree bins;
+    histogram_type hist = histogram();
+    for(std::size_t i = 0; i < hist.size(); ++i)
+    {
+        boost::property_tree::ptree bin;
+        bin.add("lower_bound", hist[i].first);
+        bin.add("count", Utils::sround(hist[i].second*cnt));
+        bins.add_child("bin", bin );
+    }
+    tree.add_child("histogram", bins);
     return tree;
 }
 
@@ -114,7 +126,7 @@ boost::uint32_t Stats::readBufferImpl(PointBuffer& data)
     const boost::uint32_t numRead = getPrevIterator().read(data);
 
     const boost::uint32_t numPoints = data.getNumPoints();
-
+    
     for (boost::uint32_t pointIndex=0; pointIndex < numPoints; pointIndex++)
     {
         std::multimap<DimensionPtr, stats::SummaryPtr>::const_iterator p;
@@ -254,13 +266,22 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
     // We'll assume you're not changing the schema per-read call
     Schema const& schema = buffer.getSchema();
     
+    boost::uint64_t numPoints = getStage().getPrevStage().getNumPoints(); 
+    boost::uint32_t stats_cache_size = 1000;
+    if (numPoints != 0)
+    {
+        stats_cache_size = numPoints;
+    }
+    getStage().log()->get(logDEBUG2) << "Using " << stats_cache_size << "for histogram cache size" << std::endl;
+    
+    boost::uint32_t bin_count = 20;
     if (m_stats.size() == 0)
     {
         schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();  
         for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
         {
             DimensionPtr d = boost::shared_ptr<Dimension>(new Dimension( *iter));
-            stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary);
+            stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, stats_cache_size));
         
             std::pair<DimensionPtr, stats::SummaryPtr> p(d,c);
             m_stats.insert(p);

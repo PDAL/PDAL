@@ -166,7 +166,9 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     BOOST_CHECK(were_equal);
     if (were_equal)
         pdal::FileUtils::deleteFile(stats_test);
-        
+    else
+        std::cout << command.str() << std::endl;
+
     // dump schema to json
     command.str("");
     

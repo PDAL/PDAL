@@ -4,111 +4,1919 @@
         "count": "1065",
         "minimum": "635619.85",
         "maximum": "638982.55",
-        "average": "637296.7351830986"
+        "average": "637296.7351830986",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "635451.715",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "635619.85",
+                "count": "41"
+            },
+            "bin":
+            {
+                "lower_bound": "635787.985",
+                "count": "48"
+            },
+            "bin":
+            {
+                "lower_bound": "635956.12",
+                "count": "62"
+            },
+            "bin":
+            {
+                "lower_bound": "636124.255",
+                "count": "54"
+            },
+            "bin":
+            {
+                "lower_bound": "636292.39",
+                "count": "58"
+            },
+            "bin":
+            {
+                "lower_bound": "636460.525",
+                "count": "55"
+            },
+            "bin":
+            {
+                "lower_bound": "636628.66",
+                "count": "57"
+            },
+            "bin":
+            {
+                "lower_bound": "636796.795",
+                "count": "54"
+            },
+            "bin":
+            {
+                "lower_bound": "636964.9300000001",
+                "count": "50"
+            },
+            "bin":
+            {
+                "lower_bound": "637133.0650000001",
+                "count": "49"
+            },
+            "bin":
+            {
+                "lower_bound": "637301.2",
+                "count": "60"
+            },
+            "bin":
+            {
+                "lower_bound": "637469.335",
+                "count": "61"
+            },
+            "bin":
+            {
+                "lower_bound": "637637.47",
+                "count": "50"
+            },
+            "bin":
+            {
+                "lower_bound": "637805.605",
+                "count": "56"
+            },
+            "bin":
+            {
+                "lower_bound": "637973.74",
+                "count": "60"
+            },
+            "bin":
+            {
+                "lower_bound": "638141.875",
+                "count": "52"
+            },
+            "bin":
+            {
+                "lower_bound": "638310.01",
+                "count": "46"
+            },
+            "bin":
+            {
+                "lower_bound": "638478.145",
+                "count": "51"
+            },
+            "bin":
+            {
+                "lower_bound": "638646.28",
+                "count": "53"
+            },
+            "bin":
+            {
+                "lower_bound": "638814.415",
+                "count": "47"
+            },
+            "bin":
+            {
+                "lower_bound": "638982.55",
+                "count": "1"
+            }
+        }
     },
     "Y":
     {
         "count": "1065",
         "minimum": "848899.7000000001",
         "maximum": "853535.4300000001",
-        "average": "851249.5384882618"
+        "average": "851249.5384882618",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "848667.9135",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "848899.7000000001",
+                "count": "38"
+            },
+            "bin":
+            {
+                "lower_bound": "849131.4865000001",
+                "count": "54"
+            },
+            "bin":
+            {
+                "lower_bound": "849363.273",
+                "count": "41"
+            },
+            "bin":
+            {
+                "lower_bound": "849595.0595000001",
+                "count": "41"
+            },
+            "bin":
+            {
+                "lower_bound": "849826.846",
+                "count": "73"
+            },
+            "bin":
+            {
+                "lower_bound": "850058.6325000001",
+                "count": "70"
+            },
+            "bin":
+            {
+                "lower_bound": "850290.4190000001",
+                "count": "45"
+            },
+            "bin":
+            {
+                "lower_bound": "850522.2055",
+                "count": "73"
+            },
+            "bin":
+            {
+                "lower_bound": "850753.9920000001",
+                "count": "41"
+            },
+            "bin":
+            {
+                "lower_bound": "850985.7785",
+                "count": "44"
+            },
+            "bin":
+            {
+                "lower_bound": "851217.5650000001",
+                "count": "60"
+            },
+            "bin":
+            {
+                "lower_bound": "851449.3515000001",
+                "count": "56"
+            },
+            "bin":
+            {
+                "lower_bound": "851681.138",
+                "count": "44"
+            },
+            "bin":
+            {
+                "lower_bound": "851912.9245000001",
+                "count": "65"
+            },
+            "bin":
+            {
+                "lower_bound": "852144.711",
+                "count": "53"
+            },
+            "bin":
+            {
+                "lower_bound": "852376.4975000001",
+                "count": "59"
+            },
+            "bin":
+            {
+                "lower_bound": "852608.2840000001",
+                "count": "47"
+            },
+            "bin":
+            {
+                "lower_bound": "852840.0705",
+                "count": "50"
+            },
+            "bin":
+            {
+                "lower_bound": "853071.8570000001",
+                "count": "71"
+            },
+            "bin":
+            {
+                "lower_bound": "853303.6435",
+                "count": "39"
+            },
+            "bin":
+            {
+                "lower_bound": "853535.4300000001",
+                "count": "1"
+            }
+        }
     },
     "Z":
     {
         "count": "1065",
         "minimum": "406.59",
         "maximum": "586.38",
-        "average": "434.0978403755871"
+        "average": "434.0978403755871",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "397.6005",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "406.59",
+                "count": "59"
+            },
+            "bin":
+            {
+                "lower_bound": "415.5795000000001",
+                "count": "443"
+            },
+            "bin":
+            {
+                "lower_bound": "424.569",
+                "count": "255"
+            },
+            "bin":
+            {
+                "lower_bound": "433.5585",
+                "count": "78"
+            },
+            "bin":
+            {
+                "lower_bound": "442.548",
+                "count": "62"
+            },
+            "bin":
+            {
+                "lower_bound": "451.5375",
+                "count": "37"
+            },
+            "bin":
+            {
+                "lower_bound": "460.527",
+                "count": "34"
+            },
+            "bin":
+            {
+                "lower_bound": "469.5165",
+                "count": "28"
+            },
+            "bin":
+            {
+                "lower_bound": "478.506",
+                "count": "18"
+            },
+            "bin":
+            {
+                "lower_bound": "487.4955",
+                "count": "15"
+            },
+            "bin":
+            {
+                "lower_bound": "496.485",
+                "count": "9"
+            },
+            "bin":
+            {
+                "lower_bound": "505.4745",
+                "count": "4"
+            },
+            "bin":
+            {
+                "lower_bound": "514.4639999999999",
+                "count": "7"
+            },
+            "bin":
+            {
+                "lower_bound": "523.4535",
+                "count": "7"
+            },
+            "bin":
+            {
+                "lower_bound": "532.443",
+                "count": "5"
+            },
+            "bin":
+            {
+                "lower_bound": "541.4325",
+                "count": "1"
+            },
+            "bin":
+            {
+                "lower_bound": "550.422",
+                "count": "1"
+            },
+            "bin":
+            {
+                "lower_bound": "559.4114999999999",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "568.401",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "577.3905",
+                "count": "1"
+            },
+            "bin":
+            {
+                "lower_bound": "586.38",
+                "count": "1"
+            }
+        }
     },
     "Intensity":
     {
         "count": "1065",
         "minimum": "0",
         "maximum": "254",
-        "average": "76.39530516431925"
+        "average": "76.39530516431925",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "-12.7",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "186"
+            },
+            "bin":
+            {
+                "lower_bound": "12.7",
+                "count": "131"
+            },
+            "bin":
+            {
+                "lower_bound": "25.4",
+                "count": "106"
+            },
+            "bin":
+            {
+                "lower_bound": "38.09999999999999",
+                "count": "56"
+            },
+            "bin":
+            {
+                "lower_bound": "50.8",
+                "count": "64"
+            },
+            "bin":
+            {
+                "lower_bound": "63.5",
+                "count": "52"
+            },
+            "bin":
+            {
+                "lower_bound": "76.19999999999999",
+                "count": "39"
+            },
+            "bin":
+            {
+                "lower_bound": "88.89999999999999",
+                "count": "48"
+            },
+            "bin":
+            {
+                "lower_bound": "101.6",
+                "count": "48"
+            },
+            "bin":
+            {
+                "lower_bound": "114.3",
+                "count": "48"
+            },
+            "bin":
+            {
+                "lower_bound": "127",
+                "count": "66"
+            },
+            "bin":
+            {
+                "lower_bound": "139.7",
+                "count": "64"
+            },
+            "bin":
+            {
+                "lower_bound": "152.4",
+                "count": "52"
+            },
+            "bin":
+            {
+                "lower_bound": "165.1",
+                "count": "37"
+            },
+            "bin":
+            {
+                "lower_bound": "177.8",
+                "count": "30"
+            },
+            "bin":
+            {
+                "lower_bound": "190.5",
+                "count": "12"
+            },
+            "bin":
+            {
+                "lower_bound": "203.2",
+                "count": "9"
+            },
+            "bin":
+            {
+                "lower_bound": "215.9",
+                "count": "9"
+            },
+            "bin":
+            {
+                "lower_bound": "228.6",
+                "count": "5"
+            },
+            "bin":
+            {
+                "lower_bound": "241.3",
+                "count": "2"
+            },
+            "bin":
+            {
+                "lower_bound": "254",
+                "count": "1"
+            }
+        }
     },
     "ReturnNumber":
     {
         "count": "1065",
         "minimum": "1",
         "maximum": "4",
-        "average": "1.16056338028169"
+        "average": "1.16056338028169",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "0.85",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1",
+                "count": "925"
+            },
+            "bin":
+            {
+                "lower_bound": "1.15",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.3",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.45",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.6",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.75",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.9",
+                "count": "114"
+            },
+            "bin":
+            {
+                "lower_bound": "2.05",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "2.2",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "2.35",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "2.5",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "2.65",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "2.8",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "2.95",
+                "count": "21"
+            },
+            "bin":
+            {
+                "lower_bound": "3.1",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "3.25",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "3.4",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "3.55",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "3.7",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "3.85",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "4",
+                "count": "5"
+            }
+        }
     },
     "NumberOfReturns":
     {
         "count": "1065",
         "minimum": "1",
         "maximum": "4",
-        "average": "1.344600938967136"
+        "average": "1.344600938967136",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "0.85",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1",
+                "count": "789"
+            },
+            "bin":
+            {
+                "lower_bound": "1.15",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.3",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.45",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.6",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.75",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.9",
+                "count": "195"
+            },
+            "bin":
+            {
+                "lower_bound": "2.05",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "2.2",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "2.35",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "2.5",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "2.65",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "2.8",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "2.95",
+                "count": "71"
+            },
+            "bin":
+            {
+                "lower_bound": "3.1",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "3.25",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "3.4",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "3.55",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "3.7",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "3.85",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "4",
+                "count": "10"
+            }
+        }
     },
     "ScanDirectionFlag":
     {
         "count": "1065",
         "minimum": "0",
         "maximum": "1",
-        "average": "0.5323943661971831"
+        "average": "0.5323943661971831",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "-0.05",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "498"
+            },
+            "bin":
+            {
+                "lower_bound": "0.05",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.1",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.15",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.2",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.25",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.3",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.35",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.4",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.45",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.5",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.55",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.6000000000000001",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.65",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.7000000000000001",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.75",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.8",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.8500000000000001",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.9",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0.9500000000000001",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1",
+                "count": "567"
+            }
+        }
     },
     "EdgeOfFlightLine":
     {
         "count": "1065",
         "minimum": "0",
         "maximum": "0",
-        "average": "0"
+        "average": "0",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "0",
+                "count": "1065"
+            }
+        }
     },
     "Classification":
     {
         "count": "1065",
         "minimum": "1",
         "maximum": "2",
-        "average": "1.259154929577465"
+        "average": "1.259154929577465",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "0.95",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1",
+                "count": "789"
+            },
+            "bin":
+            {
+                "lower_bound": "1.05",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.1",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.15",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.2",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.25",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.3",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.35",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.4",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.45",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.5",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.55",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.6",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.65",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.7",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.75",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.8",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.85",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.9",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "1.95",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "2",
+                "count": "276"
+            }
+        }
     },
     "ScanAngleRank":
     {
         "count": "1065",
         "minimum": "-19",
         "maximum": "18",
-        "average": "-0.7577464788732394"
+        "average": "-0.7577464788732394",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "-20.85",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "-19",
+                "count": "6"
+            },
+            "bin":
+            {
+                "lower_bound": "-17.15",
+                "count": "12"
+            },
+            "bin":
+            {
+                "lower_bound": "-15.3",
+                "count": "36"
+            },
+            "bin":
+            {
+                "lower_bound": "-13.45",
+                "count": "67"
+            },
+            "bin":
+            {
+                "lower_bound": "-11.6",
+                "count": "94"
+            },
+            "bin":
+            {
+                "lower_bound": "-9.75",
+                "count": "78"
+            },
+            "bin":
+            {
+                "lower_bound": "-7.899999999999999",
+                "count": "41"
+            },
+            "bin":
+            {
+                "lower_bound": "-6.049999999999999",
+                "count": "66"
+            },
+            "bin":
+            {
+                "lower_bound": "-4.199999999999999",
+                "count": "70"
+            },
+            "bin":
+            {
+                "lower_bound": "-2.349999999999998",
+                "count": "57"
+            },
+            "bin":
+            {
+                "lower_bound": "-0.5",
+                "count": "106"
+            },
+            "bin":
+            {
+                "lower_bound": "1.350000000000001",
+                "count": "57"
+            },
+            "bin":
+            {
+                "lower_bound": "3.200000000000003",
+                "count": "82"
+            },
+            "bin":
+            {
+                "lower_bound": "5.050000000000001",
+                "count": "41"
+            },
+            "bin":
+            {
+                "lower_bound": "6.900000000000002",
+                "count": "59"
+            },
+            "bin":
+            {
+                "lower_bound": "8.75",
+                "count": "67"
+            },
+            "bin":
+            {
+                "lower_bound": "10.6",
+                "count": "64"
+            },
+            "bin":
+            {
+                "lower_bound": "12.45",
+                "count": "40"
+            },
+            "bin":
+            {
+                "lower_bound": "14.3",
+                "count": "17"
+            },
+            "bin":
+            {
+                "lower_bound": "16.15",
+                "count": "2"
+            },
+            "bin":
+            {
+                "lower_bound": "18",
+                "count": "3"
+            }
+        }
     },
     "UserData":
     {
         "count": "1065",
         "minimum": "117",
         "maximum": "149",
-        "average": "126.4441314553991"
+        "average": "126.4441314553991",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "115.4",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "117",
+                "count": "5"
+            },
+            "bin":
+            {
+                "lower_bound": "118.6",
+                "count": "15"
+            },
+            "bin":
+            {
+                "lower_bound": "120.2",
+                "count": "2"
+            },
+            "bin":
+            {
+                "lower_bound": "121.8",
+                "count": "94"
+            },
+            "bin":
+            {
+                "lower_bound": "123.4",
+                "count": "301"
+            },
+            "bin":
+            {
+                "lower_bound": "125",
+                "count": "299"
+            },
+            "bin":
+            {
+                "lower_bound": "126.6",
+                "count": "168"
+            },
+            "bin":
+            {
+                "lower_bound": "128.2",
+                "count": "12"
+            },
+            "bin":
+            {
+                "lower_bound": "129.8",
+                "count": "69"
+            },
+            "bin":
+            {
+                "lower_bound": "131.4",
+                "count": "24"
+            },
+            "bin":
+            {
+                "lower_bound": "133",
+                "count": "30"
+            },
+            "bin":
+            {
+                "lower_bound": "134.6",
+                "count": "20"
+            },
+            "bin":
+            {
+                "lower_bound": "136.2",
+                "count": "6"
+            },
+            "bin":
+            {
+                "lower_bound": "137.8",
+                "count": "6"
+            },
+            "bin":
+            {
+                "lower_bound": "139.4",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "141",
+                "count": "2"
+            },
+            "bin":
+            {
+                "lower_bound": "142.6",
+                "count": "4"
+            },
+            "bin":
+            {
+                "lower_bound": "144.2",
+                "count": "3"
+            },
+            "bin":
+            {
+                "lower_bound": "145.8",
+                "count": "3"
+            },
+            "bin":
+            {
+                "lower_bound": "147.4",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "149",
+                "count": "2"
+            }
+        }
     },
     "PointSourceId":
     {
         "count": "1065",
         "minimum": "7326",
         "maximum": "7334",
-        "average": "7329.906103286385"
+        "average": "7329.906103286385",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "7325.6",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "7326",
+                "count": "44"
+            },
+            "bin":
+            {
+                "lower_bound": "7326.4",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "7326.8",
+                "count": "128"
+            },
+            "bin":
+            {
+                "lower_bound": "7327.2",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "7327.6",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "7328",
+                "count": "147"
+            },
+            "bin":
+            {
+                "lower_bound": "7328.4",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "7328.8",
+                "count": "165"
+            },
+            "bin":
+            {
+                "lower_bound": "7329.2",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "7329.6",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "7330",
+                "count": "135"
+            },
+            "bin":
+            {
+                "lower_bound": "7330.4",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "7330.8",
+                "count": "150"
+            },
+            "bin":
+            {
+                "lower_bound": "7331.2",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "7331.6",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "7332",
+                "count": "161"
+            },
+            "bin":
+            {
+                "lower_bound": "7332.4",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "7332.8",
+                "count": "93"
+            },
+            "bin":
+            {
+                "lower_bound": "7333.2",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "7333.6",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "7334",
+                "count": "42"
+            }
+        }
     },
     "Time":
     {
         "count": "1065",
         "minimum": "245370.4170645598",
         "maximum": "249783.1621583719",
-        "average": "247610.149662709"
+        "average": "247610.149662709",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "245149.7798098692",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "245370.4170645598",
+                "count": "44"
+            },
+            "bin":
+            {
+                "lower_bound": "245591.0543192504",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "245811.691573941",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "246032.3288286316",
+                "count": "128"
+            },
+            "bin":
+            {
+                "lower_bound": "246252.9660833222",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "246473.6033380128",
+                "count": "147"
+            },
+            "bin":
+            {
+                "lower_bound": "246694.2405927034",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "246914.877847394",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "247135.5151020846",
+                "count": "165"
+            },
+            "bin":
+            {
+                "lower_bound": "247356.1523567752",
+                "count": "135"
+            },
+            "bin":
+            {
+                "lower_bound": "247576.7896114659",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "247797.4268661565",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "248018.0641208471",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "248238.7013755377",
+                "count": "150"
+            },
+            "bin":
+            {
+                "lower_bound": "248459.3386302283",
+                "count": "89"
+            },
+            "bin":
+            {
+                "lower_bound": "248679.9758849189",
+                "count": "72"
+            },
+            "bin":
+            {
+                "lower_bound": "248900.6131396095",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "249121.2503943001",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "249341.8876489907",
+                "count": "93"
+            },
+            "bin":
+            {
+                "lower_bound": "249562.5249036813",
+                "count": "41"
+            },
+            "bin":
+            {
+                "lower_bound": "249783.1621583719",
+                "count": "1"
+            }
+        }
     },
     "Red":
     {
         "count": "1065",
         "minimum": "39",
         "maximum": "249",
-        "average": "121.6591549295775"
+        "average": "121.6591549295775",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "28.5",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "39",
+                "count": "10"
+            },
+            "bin":
+            {
+                "lower_bound": "49.5",
+                "count": "56"
+            },
+            "bin":
+            {
+                "lower_bound": "60",
+                "count": "82"
+            },
+            "bin":
+            {
+                "lower_bound": "70.5",
+                "count": "98"
+            },
+            "bin":
+            {
+                "lower_bound": "81",
+                "count": "72"
+            },
+            "bin":
+            {
+                "lower_bound": "91.5",
+                "count": "95"
+            },
+            "bin":
+            {
+                "lower_bound": "102",
+                "count": "97"
+            },
+            "bin":
+            {
+                "lower_bound": "112.5",
+                "count": "72"
+            },
+            "bin":
+            {
+                "lower_bound": "123",
+                "count": "56"
+            },
+            "bin":
+            {
+                "lower_bound": "133.5",
+                "count": "69"
+            },
+            "bin":
+            {
+                "lower_bound": "144",
+                "count": "71"
+            },
+            "bin":
+            {
+                "lower_bound": "154.5",
+                "count": "58"
+            },
+            "bin":
+            {
+                "lower_bound": "165",
+                "count": "67"
+            },
+            "bin":
+            {
+                "lower_bound": "175.5",
+                "count": "85"
+            },
+            "bin":
+            {
+                "lower_bound": "186",
+                "count": "30"
+            },
+            "bin":
+            {
+                "lower_bound": "196.5",
+                "count": "11"
+            },
+            "bin":
+            {
+                "lower_bound": "207",
+                "count": "13"
+            },
+            "bin":
+            {
+                "lower_bound": "217.5",
+                "count": "13"
+            },
+            "bin":
+            {
+                "lower_bound": "228",
+                "count": "8"
+            },
+            "bin":
+            {
+                "lower_bound": "238.5",
+                "count": "1"
+            },
+            "bin":
+            {
+                "lower_bound": "249",
+                "count": "1"
+            }
+        }
     },
     "Green":
     {
         "count": "1065",
         "minimum": "57",
         "maximum": "239",
-        "average": "111.3446009389671"
+        "average": "111.3446009389671",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "47.9",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "57",
+                "count": "38"
+            },
+            "bin":
+            {
+                "lower_bound": "66.09999999999999",
+                "count": "63"
+            },
+            "bin":
+            {
+                "lower_bound": "75.2",
+                "count": "112"
+            },
+            "bin":
+            {
+                "lower_bound": "84.3",
+                "count": "117"
+            },
+            "bin":
+            {
+                "lower_bound": "93.40000000000001",
+                "count": "140"
+            },
+            "bin":
+            {
+                "lower_bound": "102.5",
+                "count": "146"
+            },
+            "bin":
+            {
+                "lower_bound": "111.6",
+                "count": "105"
+            },
+            "bin":
+            {
+                "lower_bound": "120.7",
+                "count": "74"
+            },
+            "bin":
+            {
+                "lower_bound": "129.8",
+                "count": "86"
+            },
+            "bin":
+            {
+                "lower_bound": "138.9",
+                "count": "51"
+            },
+            "bin":
+            {
+                "lower_bound": "148",
+                "count": "65"
+            },
+            "bin":
+            {
+                "lower_bound": "157.1",
+                "count": "17"
+            },
+            "bin":
+            {
+                "lower_bound": "166.2",
+                "count": "11"
+            },
+            "bin":
+            {
+                "lower_bound": "175.3",
+                "count": "6"
+            },
+            "bin":
+            {
+                "lower_bound": "184.4",
+                "count": "3"
+            },
+            "bin":
+            {
+                "lower_bound": "193.5",
+                "count": "6"
+            },
+            "bin":
+            {
+                "lower_bound": "202.6",
+                "count": "10"
+            },
+            "bin":
+            {
+                "lower_bound": "211.7",
+                "count": "7"
+            },
+            "bin":
+            {
+                "lower_bound": "220.8",
+                "count": "6"
+            },
+            "bin":
+            {
+                "lower_bound": "229.9",
+                "count": "1"
+            },
+            "bin":
+            {
+                "lower_bound": "239",
+                "count": "1"
+            }
+        }
     },
     "Blue":
     {
         "count": "1065",
         "minimum": "56",
         "maximum": "249",
-        "average": "126.5389671361502"
+        "average": "126.5389671361502",
+        "histogram":
+        {
+            "bin":
+            {
+                "lower_bound": "46.35",
+                "count": "-0"
+            },
+            "bin":
+            {
+                "lower_bound": "56",
+                "count": "21"
+            },
+            "bin":
+            {
+                "lower_bound": "65.65000000000001",
+                "count": "68"
+            },
+            "bin":
+            {
+                "lower_bound": "75.3",
+                "count": "71"
+            },
+            "bin":
+            {
+                "lower_bound": "84.95",
+                "count": "87"
+            },
+            "bin":
+            {
+                "lower_bound": "94.59999999999999",
+                "count": "69"
+            },
+            "bin":
+            {
+                "lower_bound": "104.25",
+                "count": "60"
+            },
+            "bin":
+            {
+                "lower_bound": "113.9",
+                "count": "111"
+            },
+            "bin":
+            {
+                "lower_bound": "123.55",
+                "count": "112"
+            },
+            "bin":
+            {
+                "lower_bound": "133.2",
+                "count": "113"
+            },
+            "bin":
+            {
+                "lower_bound": "142.85",
+                "count": "97"
+            },
+            "bin":
+            {
+                "lower_bound": "152.5",
+                "count": "91"
+            },
+            "bin":
+            {
+                "lower_bound": "162.15",
+                "count": "77"
+            },
+            "bin":
+            {
+                "lower_bound": "171.8",
+                "count": "35"
+            },
+            "bin":
+            {
+                "lower_bound": "181.45",
+                "count": "12"
+            },
+            "bin":
+            {
+                "lower_bound": "191.1",
+                "count": "7"
+            },
+            "bin":
+            {
+                "lower_bound": "200.75",
+                "count": "5"
+            },
+            "bin":
+            {
+                "lower_bound": "210.4",
+                "count": "12"
+            },
+            "bin":
+            {
+                "lower_bound": "220.05",
+                "count": "12"
+            },
+            "bin":
+            {
+                "lower_bound": "229.7",
+                "count": "3"
+            },
+            "bin":
+            {
+                "lower_bound": "239.35",
+                "count": "1"
+            },
+            "bin":
+            {
+                "lower_bound": "249",
+                "count": "1"
+            }
+        }
     }
 }
