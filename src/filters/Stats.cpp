@@ -61,9 +61,19 @@ boost::property_tree::ptree Summary::toPTree() const
         boost::property_tree::ptree bin;
         bin.add("lower_bound", hist[i].first);
         bin.add("count", Utils::sround(hist[i].second*cnt));
-        bins.add_child("bin", bin );
+        std::ostringstream binname;
+        binname << "bin-" <<i;
+        bins.add_child(binname.str(), bin );
     }
     tree.add_child("histogram", bins);
+    
+    std::ostringstream sample;
+    for(std::vector<double>::size_type i =0; i < m_sample.size(); ++i)
+    {
+        sample << m_sample[i] << " ";
+    };
+    
+    tree.add("sample", sample.str());
     return tree;
 }
 
@@ -103,6 +113,13 @@ void Stats::initialize()
 const Options Stats::getDefaultOptions() const
 {
     Options options;
+    Option sample_size("sample_size", 1000, "Number of points to return for uniform random 'sample'");
+    Option num_bins("num_bins", 20, "Number of bins to use for histogram");
+    Option stats_cache_size("stats_cache_size", 1000, "Number of points to use for histogram bin determination. Defaults to total number of points read if no option is specified.");
+    
+    options.add(sample_size);
+    options.add(num_bins);
+    options.add(stats_cache_size);
     return options;
 }
 
@@ -267,21 +284,39 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
     Schema const& schema = buffer.getSchema();
     
     boost::uint64_t numPoints = getStage().getPrevStage().getNumPoints(); 
-    boost::uint32_t stats_cache_size = 1000;
-    if (numPoints != 0)
+    boost::uint32_t stats_cache_size(1000);
+   
+
+    try 
     {
-        stats_cache_size = numPoints;
+        stats_cache_size = getStage().getOptions().getValueOrThrow<boost::uint32_t>("stats_cache_size");
+        getStage().log()->get(logDEBUG2) << "Using " << stats_cache_size << "for histogram cache size set from option" << std::endl;
+
     }
-    getStage().log()->get(logDEBUG2) << "Using " << stats_cache_size << "for histogram cache size" << std::endl;
+    catch (pdal::option_not_found const&) 
+    {
+        if (numPoints != 0)
+        {
+            stats_cache_size = numPoints;
+            getStage().log()->get(logDEBUG2) << "Using point count, " << numPoints << ", for histogram cache size" << std::endl;
+
+        }
+    }
+
     
-    boost::uint32_t bin_count = 20;
+    boost::uint32_t sample_size = getStage().getOptions().getValueOrDefault<boost::uint32_t>("sample_size", 1000);
+
+    getStage().log()->get(logDEBUG2) << "Using " << sample_size << "for sample size" << std::endl;
+    
+    
+    boost::uint32_t bin_count = getStage().getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20);
     if (m_stats.size() == 0)
     {
         schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();  
         for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
         {
             DimensionPtr d = boost::shared_ptr<Dimension>(new Dimension( *iter));
-            stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, stats_cache_size));
+            stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, sample_size, stats_cache_size));
         
             std::pair<DimensionPtr, stats::SummaryPtr> p(d,c);
             m_stats.insert(p);

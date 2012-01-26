@@ -56,9 +56,9 @@ namespace std {
 #endif
 
 // forward declare random number generators
-namespace boost {
+namespace boost { namespace random {
 class random_device;
-} //namespace boost
+}} //namespace boost
 
 namespace pdal {
 namespace external {
@@ -248,7 +248,7 @@ inline void seed(UniformRandomNumberGenerator& rng)
 
 // random_device does not / can not be seeded
 template <>
-inline void seed< ::boost::random_device >( ::boost::random_device& ) {}
+inline void seed< ::boost::random::random_device >( ::boost::random::random_device& ) {}
 
 // random_device does not / can not be seeded
 template <>

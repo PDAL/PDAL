@@ -52,6 +52,8 @@
 #include <boost/accumulators/statistics/count.hpp>
 #include <boost/accumulators/statistics/density.hpp>
 
+#include <boost/random/random_device.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
 
 namespace pdal { namespace filters {
 
@@ -81,13 +83,21 @@ public:
 private:
     summary_accumulator m_summary;
     density_accumulator m_histogram;                                                                              
-
+    std::vector<double> m_sample;
+    boost::uint32_t m_sample_size;
+    boost::random::random_device m_rng;
+    boost::random::uniform_int_distribution<> m_distribution;
 public:
     
-    Summary( boost::uint32_t num_bins=20, boost::uint32_t cache_size=1000)
+    Summary(    boost::uint32_t num_bins=20,
+                boost::uint32_t sample_size=1000,
+                boost::uint32_t cache_size=1000)
     : m_histogram(  boost::accumulators::tag::density::num_bins = num_bins, 
                     boost::accumulators::tag::density::cache_size = cache_size)
+    , m_sample_size(sample_size)
+    , m_distribution(0, cache_size)
     {
+        
         return;
     }
     
@@ -105,7 +115,10 @@ public:
     {
         m_summary(static_cast<double>(value));
         m_histogram(static_cast<double>(value));
-
+        
+        int sample = m_distribution(m_rng);
+        if (sample < m_sample_size)
+            m_sample.push_back(static_cast<double>(value));
         return;
     }
 
