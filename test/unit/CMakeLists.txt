@@ -20,6 +20,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     CacheFilterTest.cpp
     ChipperTest.cpp
     ColorFilterTest.cpp
+    ColorizationFilterTest.cpp
     ConfigTest.cpp
     CropFilterTest.cpp
     DecimationFilterTest.cpp

@@ -68,6 +68,7 @@
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
 #include <pdal/filters/Color.hpp>
+#include <pdal/filters/Colorization.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Decimation.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
@@ -139,6 +140,7 @@ namespace pdal
     MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
     MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
     MAKE_FILTER_CREATOR(Color, pdal::filters::Color)
+    MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
     MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
     MAKE_FILTER_CREATOR(Decimation, pdal::filters::Decimation)
     MAKE_FILTER_CREATOR(InPlaceReprojection, pdal::filters::InPlaceReprojection)
@@ -324,6 +326,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Cache, pdal::filters::Cache);
     REGISTER_FILTER(Chipper, pdal::filters::Chipper);
     REGISTER_FILTER(Color, pdal::filters::Color);
+    REGISTER_FILTER(Colorization, pdal::filters::Colorization);
     REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::filters::Decimation);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
