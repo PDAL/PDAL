@@ -41,6 +41,7 @@
 #include <pdal/drivers/oci/common.hpp>
 
 #include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/las/Writer.hpp>
 
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
@@ -73,7 +74,7 @@ Options getOptions()
     Option capacity("capacity", chunk_size,"capacity");
     options.add(capacity);
 
-    Option chunk("chunk_size", capacity.getValue<boost::uint32_t>(),"chunk_size");
+    Option chunk("chunk_size", capacity.getValue<boost::uint32_t>() +30,"chunk_size");
     options.add(chunk);
     
     Option overwrite("overwrite", false,"overwrite");
@@ -124,7 +125,7 @@ Options getOptions()
     Option cache_block_size("cache_block_size", capacity.getValue<boost::uint32_t>(), "");
     options.add(cache_block_size);
     
-    Option filename("filename", Support::datapath("1.2-with-color.las"), "");
+    Option filename("filename", "./1.2-with-color.las", "");
     options.add(filename);
     
     Option query("query", "SELECT CLOUD FROM PDAL_TEST_BASE where ID=1", "");
@@ -217,46 +218,127 @@ bool WriteDefaultData()
 }
 
 
-BOOST_AUTO_TEST_CASE(read_basic)
-{
-    if (!ShouldRunTest()) return;
-    
-    WriteDefaultData();
-    
-    Options options = getOptions();
-    Option query = options.getOption("query");
-    query.setValue<std::string>("SELECT CLOUD FROM PDAL_TEST_BASE where ID=1");
-    pdal::drivers::oci::Reader reader_reader(options);
-    reader_reader.initialize();
-    
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator());
+// BOOST_AUTO_TEST_CASE(read_basic_smaller_block_view)
+// {
+//     if (!ShouldRunTest()) return;
+//     
+//     WriteDefaultData();
+//     
+//     std::ostringstream oss;
+//     
+//     oss << "SELECT  l.\"OBJ_ID\", l.\"BLK_ID\", l.\"BLK_EXTENT\", l.\"BLK_DOMAIN\","
+//            "        l.\"PCBLK_MIN_RES\", l.\"PCBLK_MAX_RES\", l.\"NUM_POINTS\","
+//            "        l.\"NUM_UNSORTED_POINTS\", l.\"PT_SORT_DIM\", l.\"POINTS\", b.cloud"
+//            "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
+//         "WHERE b.id=1 and l.obj_id = b.id "
+//         "ORDER BY l.obj_id ";
+//     Options options = getOptions();
+    // Option& query = options.getOptionByRef("query");
+    // query.setValue<std::string>(oss.str());
+//     pdal::drivers::oci::Reader reader_reader(options);
+//     
+//     Options writerOpts;
+//     Option filename("filename", "read_basic_smaller_block_view-write.las","");
+//     Option chunk_size("chunk_size", 50,"");
+//     writerOpts.add(filename);
+//     writerOpts.add(chunk_size);
+//     
+//     pdal::drivers::las::Writer writer(reader_reader, writerOpts);
+//     writer.initialize();
+//     writer.write(0);
+// 
+//     
+//     
+// }
 
-    pdal::PointBuffer data(reader_reader.getSchema(), 1500);
- 
-    boost::uint32_t numRead = iter->read(data);
+// BOOST_AUTO_TEST_CASE(read_basic_small_block)
+// {
+//     if (!ShouldRunTest()) return;
+//     
+//     WriteDefaultData();
+//     
+//     Options options = getOptions();
+    // Option& query = options.getOptionByRef("query");
+    // query.setValue<std::string>(oss.str());
+//     query.setValue<std::string>("SELECT CLOUD FROM PDAL_TEST_BASE where ID=1");
+//     pdal::drivers::oci::Reader reader_reader(options);
+//     reader_reader.initialize();
+//     
+//     boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator());
+//     
+//     pdal::PointBuffer data(reader_reader.getSchema(), chunk_size-30);
+//      
+//     boost::uint32_t numRead = iter->read(data);
+//     
+//     BOOST_CHECK_EQUAL(numRead, chunk_size-30);
+//     
+//     pdal::Schema const& schema = data.getSchema();
+//     pdal::Dimension const& dimX = schema.getDimension("X");
+//     pdal::Dimension const& dimY = schema.getDimension("Y");
+//     pdal::Dimension const& dimZ = schema.getDimension("Z");
+//     pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
+//     pdal::Dimension const& dimRed = schema.getDimension("Red");
+//     
+//     boost::int32_t x = data.getField<boost::int32_t>(dimX, 0);
+//     boost::int32_t y = data.getField<boost::int32_t>(dimY, 0);
+//     boost::int32_t z = data.getField<boost::int32_t>(dimZ, 0);
+//     boost::uint16_t intensity = data.getField<boost::uint16_t>(dimIntensity, 6);
+//     boost::uint16_t red = data.getField<boost::uint16_t>(dimRed, 6);
+//     
+//     BOOST_CHECK_EQUAL(x, -1250315280);
+//     BOOST_CHECK_EQUAL(y, 492608545); 
+//     BOOST_CHECK_EQUAL(z, 12811); 
+//     BOOST_CHECK_EQUAL(intensity, 60); 
+//     BOOST_CHECK_EQUAL(red, 179); 
+//     
+// 
+//     
+//     
+// }
+// 
+// BOOST_AUTO_TEST_CASE(read_basic_big_block)
+// {
+//     if (!ShouldRunTest()) return;
+//     
+//     WriteDefaultData();
+//     
+//     Options options = getOptions();
+    // Option& query = options.getOptionByRef("query");
+    // query.setValue<std::string>(oss.str());
+//     query.setValue<std::string>("SELECT CLOUD FROM PDAL_TEST_BASE where ID=1");
+//     pdal::drivers::oci::Reader reader_reader(options);
+//     reader_reader.initialize();
+//     
+//     boost::scoped_ptr<pdal::StageSequentialIterator> iter2(reader_reader.createSequentialIterator());
+//     
+//     pdal::PointBuffer data2(reader_reader.getSchema(), 1500);
+//      
+//     boost::uint32_t numRead2 = iter2->read(data2);
+//     
+//     BOOST_CHECK_EQUAL(numRead2, 1065);
+//     
+//     pdal::Schema const& schema2 = data2.getSchema();
+//     pdal::Dimension const& dimX2 = schema2.getDimension("X");
+//     pdal::Dimension const& dimY2 = schema2.getDimension("Y");
+//     pdal::Dimension const& dimZ2 = schema2.getDimension("Z");
+//     pdal::Dimension const& dimIntensity2 = schema2.getDimension("Intensity");
+//     pdal::Dimension const& dimRed2 = schema2.getDimension("Red");
+//     
+//     boost::int32_t x2 = data2.getField<boost::int32_t>(dimX2, 0);
+//     boost::int32_t y2 = data2.getField<boost::int32_t>(dimY2, 0);
+//     boost::int32_t z2 = data2.getField<boost::int32_t>(dimZ2, 0);
+//     boost::uint16_t intensity2 = data2.getField<boost::uint16_t>(dimIntensity2, 6);
+//     boost::uint16_t red2 = data2.getField<boost::uint16_t>(dimRed2, 6);
+//     
+//     BOOST_CHECK_EQUAL(x2, -1250367506);
+//     BOOST_CHECK_EQUAL(y2, 492519663); 
+//     BOOST_CHECK_EQUAL(z2, 12931); 
+//     BOOST_CHECK_EQUAL(intensity2, 67); 
+//     BOOST_CHECK_EQUAL(red2, 113); 
+//     
+//     
+// }
 
-    BOOST_CHECK_EQUAL(numRead, 1065);
-    
-    pdal::Schema const& schema = data.getSchema();
-    pdal::Dimension const& dimX = schema.getDimension("X");
-    pdal::Dimension const& dimY = schema.getDimension("Y");
-    pdal::Dimension const& dimZ = schema.getDimension("Z");
-    pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
-    pdal::Dimension const& dimRed = schema.getDimension("Red");
-
-    boost::int32_t x = data.getField<boost::int32_t>(dimX, 0);
-    boost::int32_t y = data.getField<boost::int32_t>(dimY, 0);
-    boost::int32_t z = data.getField<boost::int32_t>(dimZ, 0);
-    boost::uint16_t intensity = data.getField<boost::uint16_t>(dimIntensity, 6);
-    boost::uint16_t red = data.getField<boost::uint16_t>(dimRed, 6);
-
-    BOOST_CHECK_EQUAL(x, -1250367506);
-    BOOST_CHECK_EQUAL(y, 492519663); 
-    BOOST_CHECK_EQUAL(z, 12931); 
-    BOOST_CHECK_EQUAL(intensity, 67); 
-    BOOST_CHECK_EQUAL(red, 113); 
-    
-}
 
 BOOST_AUTO_TEST_CASE(read_view)
 {
@@ -268,136 +350,114 @@ BOOST_AUTO_TEST_CASE(read_view)
     
     oss << "SELECT  l.\"OBJ_ID\", l.\"BLK_ID\", l.\"BLK_EXTENT\", l.\"BLK_DOMAIN\","
            "        l.\"PCBLK_MIN_RES\", l.\"PCBLK_MAX_RES\", l.\"NUM_POINTS\","
-           "        l.\"NUM_UNSORTED_POINTS\", l.\"PT_SORT_DIM\", l.\"POINTS\", b.cloud"
+           "        l.\"NUM_UNSORTED_POINTS\", l.\"PT_SORT_DIM\", l.\"POINTS\", b.cloud "
            "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
         "WHERE b.id=1 and l.obj_id = b.id "
         "ORDER BY l.obj_id ";
     Options options = getOptions();
-    Option query = options.getOption("query");
+    Option& query = options.getOptionByRef("query");
     query.setValue<std::string>(oss.str());
     pdal::drivers::oci::Reader reader_reader(options);
     reader_reader.initialize();
     
     boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator());
 
-    pdal::PointBuffer data(reader_reader.getSchema(), 1500);
- 
-    boost::uint32_t numRead = iter->read(data);
+    pdal::PointBuffer data(reader_reader.getSchema(), chunk_size+30);
+    
+    boost::uint32_t numTotal(0);
+    boost::uint32_t numRead(0);
+    // numRead = iter->read(data);
+    // 
+    // numTotal = numRead + numTotal;
+    // BOOST_CHECK_EQUAL(numRead, chunk_size+30);
+    // 
+    // pdal::Schema const& schema = data.getSchema();
+    // pdal::Dimension const& dimX = schema.getDimension("X");
+    // pdal::Dimension const& dimY = schema.getDimension("Y");
+    // pdal::Dimension const& dimZ = schema.getDimension("Z");
+    // pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
+    // pdal::Dimension const& dimRed = schema.getDimension("Red");
+    // 
+    // boost::int32_t x = data.getField<boost::int32_t>(dimX, 0);
+    // boost::int32_t y = data.getField<boost::int32_t>(dimY, 0);
+    // boost::int32_t z = data.getField<boost::int32_t>(dimZ, 0);
+    // boost::uint16_t intensity = data.getField<boost::uint16_t>(dimIntensity, 6);
+    // boost::uint16_t red = data.getField<boost::uint16_t>(dimRed, 6);
+    // 
+    // BOOST_CHECK_EQUAL(x, -1250367506);
+    // BOOST_CHECK_EQUAL(y, 492519663); 
+    // BOOST_CHECK_EQUAL(z, 12931); 
+    // BOOST_CHECK_EQUAL(intensity, 67); 
+    // BOOST_CHECK_EQUAL(red, 113);
+    // 
+    // 
+    // pdal::PointBuffer data2(reader_reader.getSchema(), 30);
+    // numRead = iter->read(data2);
+    // numTotal = numRead + numTotal;
+    // 
+    // BOOST_CHECK_EQUAL(numRead, 30);
 
-    BOOST_CHECK_EQUAL(numRead, 1065);
+    pdal::PointBuffer data3(reader_reader.getSchema(), 100);
+    numRead = iter->read(data3);
+    BOOST_CHECK_EQUAL(numRead, 100);
+    numTotal = numRead + numTotal;
     
-    pdal::Schema const& schema = data.getSchema();
-    pdal::Dimension const& dimX = schema.getDimension("X");
-    pdal::Dimension const& dimY = schema.getDimension("Y");
-    pdal::Dimension const& dimZ = schema.getDimension("Z");
-    pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
-    pdal::Dimension const& dimRed = schema.getDimension("Red");
-    
-    boost::int32_t x = data.getField<boost::int32_t>(dimX, 0);
-    boost::int32_t y = data.getField<boost::int32_t>(dimY, 0);
-    boost::int32_t z = data.getField<boost::int32_t>(dimZ, 0);
-    boost::uint16_t intensity = data.getField<boost::uint16_t>(dimIntensity, 6);
-    boost::uint16_t red = data.getField<boost::uint16_t>(dimRed, 6);
+    while (numRead !=0)
+    {
+        numRead = iter->read(data3);
+        numTotal = numRead + numTotal;
+        
+    }
 
-    BOOST_CHECK_EQUAL(x, -1250367506);
-    BOOST_CHECK_EQUAL(y, 492519663); 
-    BOOST_CHECK_EQUAL(z, 12931); 
-    BOOST_CHECK_EQUAL(intensity, 67); 
-    BOOST_CHECK_EQUAL(red, 113); 
-    
-}
-
-
-BOOST_AUTO_TEST_CASE(read_all)
-{
-    if (!ShouldRunTest()) return;
-    
-    WriteDefaultData();
-    
-    std::ostringstream oss;
-    
-    oss << "SELECT CLOUD FROM PDAL_TEST_BASE where ID=1";
-    Options options = getOptions();
-    Option query = options.getOption("query");
-    query.setValue<std::string>(oss.str());
-    pdal::drivers::oci::Reader reader_reader(options);
-    reader_reader.initialize();
-    
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator());
-
-    pdal::PointBuffer data(reader_reader.getSchema(), 1500);
- 
-    boost::uint32_t numRead = iter->read(data);
-
-    BOOST_CHECK_EQUAL(numRead, 1065);
-    
-    pdal::Schema const& schema = data.getSchema();
-    pdal::Dimension const& dimX = schema.getDimension("X");
-    pdal::Dimension const& dimY = schema.getDimension("Y");
-    pdal::Dimension const& dimZ = schema.getDimension("Z");
-    pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
-    pdal::Dimension const& dimRed = schema.getDimension("Red");
-    
-    boost::int32_t x = data.getField<boost::int32_t>(dimX, 0);
-    boost::int32_t y = data.getField<boost::int32_t>(dimY, 0);
-    boost::int32_t z = data.getField<boost::int32_t>(dimZ, 0);
-    boost::uint16_t intensity = data.getField<boost::uint16_t>(dimIntensity, 6);
-    boost::uint16_t red = data.getField<boost::uint16_t>(dimRed, 6);
-
-    BOOST_CHECK_EQUAL(x, -1250367506);
-    BOOST_CHECK_EQUAL(y, 492519663); 
-    BOOST_CHECK_EQUAL(z, 12931); 
-    BOOST_CHECK_EQUAL(intensity, 67); 
-    BOOST_CHECK_EQUAL(red, 113); 
+    BOOST_CHECK_EQUAL(numRead, 0);
+    BOOST_CHECK_EQUAL(numTotal, 1065);
     
 }
 // 
 // 
-// BOOST_AUTO_TEST_CASE(test_writer)
+// BOOST_AUTO_TEST_CASE(read_all)
 // {
 //     if (!ShouldRunTest()) return;
-// 
-//     Options options = GetOptions();
-//     pdal::drivers::liblas::LiblasReader reader(Support::datapath("1.2-with-color.las"));
-// 
-//     boost::uint32_t capacity = GetOptions().GetPTree().get<boost::uint32_t>("capacity");
-//     pdal::filters::CacheFilter cache(reader, 1, 1024);
-//     pdal::filters::Chipper chipper(cache, capacity);
-//     pdal::drivers::oci::Writer writer(chipper, options);
 //     
-//     BOOST_CHECK_MESSAGE(writer.getConnection().get(), "Unable to connect to Oracle" );
+//     WriteDefaultData();
 //     
-//     writer.write(0);
+//     std::ostringstream oss;
+//     
+//     oss << "SELECT CLOUD FROM PDAL_TEST_BASE where ID=1";
+    // Option& query = options.getOptionByRef("query");
+    // query.setValue<std::string>(oss.str());
+//     query.setValue<std::string>(oss.str());
+//     pdal::drivers::oci::Reader reader_reader(options);
+//     reader_reader.initialize();
+//     
+//     boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator());
+// 
+//     pdal::PointBuffer data(reader_reader.getSchema(), chunk_size+30);
+//  
+//     boost::uint32_t numRead = iter->read(data);
+// 
+//     BOOST_CHECK_EQUAL(numRead, 1065);
+//     
+//     pdal::Schema const& schema = data.getSchema();
+//     pdal::Dimension const& dimX = schema.getDimension("X");
+//     pdal::Dimension const& dimY = schema.getDimension("Y");
+//     pdal::Dimension const& dimZ = schema.getDimension("Z");
+//     pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
+//     pdal::Dimension const& dimRed = schema.getDimension("Red");
+//     
+//     boost::int32_t x = data.getField<boost::int32_t>(dimX, 0);
+//     boost::int32_t y = data.getField<boost::int32_t>(dimY, 0);
+//     boost::int32_t z = data.getField<boost::int32_t>(dimZ, 0);
+//     boost::uint16_t intensity = data.getField<boost::uint16_t>(dimIntensity, 6);
+//     boost::uint16_t red = data.getField<boost::uint16_t>(dimRed, 6);
+// 
+//     BOOST_CHECK_EQUAL(x, -1250367506);
+//     BOOST_CHECK_EQUAL(y, 492519663); 
+//     BOOST_CHECK_EQUAL(z, 12931); 
+//     BOOST_CHECK_EQUAL(intensity, 67); 
+//     BOOST_CHECK_EQUAL(red, 113); 
 //     
 // }
-// 
-// BOOST_AUTO_TEST_CASE(test_reader)
-// {
-//     if (!ShouldRunTest()) return;
-// 
-//     Options options = GetOptions();
-// 
-//     pdal::drivers::oci::Reader reader(options);
-//     const boost::uint64_t numPoints = reader.getNumPoints();
-//     BOOST_CHECK_EQUAL(numPoints, 0);
-//     
-//     boost::scoped_ptr<SequentialIterator> iter(reader.createSequentialIterator());
-//     
-//     PointBuffer buffer(reader.getSchema(), 1065);
-//     
-//     const boost::uint32_t numPointsReadThisChunk = iter->read(buffer);
-//     
-//     BOOST_CHECK_EQUAL(numPointsReadThisChunk, 1065);
-//     // std::ostream* ofs = Utils::createFile("temp.las");
-//     // 
-//     // pdal::drivers::liblas::LiblasWriter writer(reader, *ofs);
-//     // writer.write(0);
-//     // 
-//     // Utils::closeFile(ofs);
-// 
-//     
-// }
-
 
 
 
