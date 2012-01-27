@@ -479,15 +479,13 @@ namespace iterators { namespace sequential {
 
 
 IteratorBase::IteratorBase(const pdal::drivers::oci::Reader& reader)
-    : bBlockStatementComplete(false)
-    , bCloudStatementComplete(false)
+    : m_statement(Statement())
+    , m_at_end(false)
     , m_block(BlockPtr(new Block(reader.getConnection())))
     , m_active_cloud_id(0)
-    , m_active_buffer(BufferPtr())
-    , bBufferHasNewSchema(false)
+    , m_new_buffer(BufferPtr())
+    , bGetNewBuffer(false)
     , bReadFirstCloud(true)
-    , m_current_blob_position(0)
-    , m_current_point_position(0)
     , m_reader(reader)
 
 {
@@ -496,15 +494,15 @@ IteratorBase::IteratorBase(const pdal::drivers::oci::Reader& reader)
     
     if (m_querytype == QUERY_SDO_PC)
     {
-        m_block_statement = getNextCloud(m_block, m_active_cloud_id);
+        m_statement = getNextCloud(m_block, m_active_cloud_id);
     }
 
     if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
     {
-        m_block_statement = reader.getStatement();
+        m_statement = reader.getStatement();
         m_block = reader.getBlock();
         
-        m_active_cloud_id = m_block_statement->GetInteger(&m_block->pc->pc_id);
+        m_active_cloud_id = m_statement->GetInteger(&m_block->pc->pc_id);
     }
     
     return;
@@ -516,6 +514,12 @@ Statement IteratorBase::getNextCloud(BlockPtr block, boost::int32_t& cloud_id)
     std::ostringstream select_blocks;
     BlockPtr cloud_block = m_reader.getBlock();
     Statement cloud_statement = m_reader.getStatement();
+    
+    // bool bDidRead(true);
+    // if(!bReadFirstCloud)
+    //     bDidRead = cloud_statement->Fetch();
+    // bReadFirstCloud = false;
+    // if (!bDidRead) return Statement();
     
     cloud_id = cloud_statement->GetInteger(&cloud_block->pc->pc_id);
     std::string cloud_table = std::string(cloud_statement->GetString(cloud_block->pc->blk_table));
@@ -544,11 +548,11 @@ const pdal::drivers::oci::Reader& IteratorBase::getReader() const
     return m_reader;
 }
 
-void IteratorBase::fillBufferWithSDO_PC_BlockData(PointBuffer& data,
+void IteratorBase::read(PointBuffer& data,
                         Statement statement,
                         BlockPtr block,
                         boost::uint32_t howMany, 
-                        boost::uint32_t whichPointPosition, 
+                        boost::uint32_t whichPoint, 
                         boost::uint32_t whichBlobPosition)
 {
     
@@ -570,8 +574,9 @@ void IteratorBase::fillBufferWithSDO_PC_BlockData(PointBuffer& data,
 
     getReader().log()->get(logDEBUG4) << "IteratorBase::read actual nAmountRead: " << nAmountRead  << std::endl;
     
+    data.getSchema().getByteSize();
     boost::uint32_t howMuchToRead = howMany * data.getSchema().getByteSize();
-    data.setDataStride(&(*block->chunk)[whichBlobPosition], whichPointPosition, howMuchToRead);
+    data.setDataStride(&(*block->chunk)[whichBlobPosition], whichPoint, howMuchToRead);
 
     data.setNumPoints(data.getNumPoints() + howMany);
 
@@ -579,76 +584,63 @@ void IteratorBase::fillBufferWithSDO_PC_BlockData(PointBuffer& data,
 
 boost::uint32_t IteratorBase::myReadBuffer(PointBuffer& data)
 {
-    // if (m_querytype == QUERY_SDO_PC)
-    //     return myReadClouds(data);
+    if (m_querytype == QUERY_SDO_PC)
+        return myReadClouds(data);
     if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
         return myReadBlocks(data);
     
     return 0;
 }
 
-// boost::uint32_t IteratorBase::myReadClouds(PointBuffer& data)
-// {
-//     boost::uint32_t numReadThisCloud(0);
-//     boost::uint32_t numToRead = data.getCapacity();
-//     
-//     getReader().log()->get(logDEBUG2) << "Fetched buffer with cloud id: " << m_active_cloud_id << " for myReadClouds" << std::endl;
-//     getReader().log()->get(logDEBUG2) << "Initial read request size: " << numToRead << std::endl;
-//     
-//     bool bReadCloud(true);
-//     while( bReadCloud) 
-//     {
-//         m_active_buffer = createPointBufferFromSDO_PC(m_statement, getReader().getBlock()->pc, data.getCapacity());
-//         
-//         bBufferHasNewSchema = true;
-//             
-//         boost::uint32_t numRead = myReadBlocks(data);
-//         
-//         numReadThisCloud = numRead + numReadThisCloud;
-// 
-//         
-//         if (!m_have_more_blocks)
-//         {
-// 
-//             getReader().log()->get(logDEBUG2) << "Read " << numReadThisCloud << " points from myReadBlocks. Total read this cloud " << numRead << std::endl;
-//         
-//             bReadCloud = getReader().getStatement()->Fetch();
-//             m_block = BlockPtr(new Block(getReader().getConnection()));
-//             m_statement = getNextCloud(m_block, m_active_cloud_id);
-//             if (m_at_end == true) 
-//             {
-//                 getReader().log()->get(logDEBUG2) << "At end of current block and trying to fetch another cloud " << std::endl;
-//             
-//                 if (bReadCloud) 
-//                 {
-//                     getReader().log()->get(logDEBUG2) << "Fetched another cloud " << std::endl;
-//                     m_block = BlockPtr(new Block(getReader().getConnection()));
-//                     m_statement = getNextCloud(m_block, m_active_cloud_id);
-//                     m_at_end = false;
-// 
-//                 } else
-//                 {
-//                     getReader().log()->get(logDEBUG2) << "Another cloud not found " << std::endl;
-//                     
-//                 }
-//                 return numReadThisCloud;
-//             }
-//             else
-//             {
-// 
-//                 getReader().log()->get(logDEBUG2) << "At end of current block and have more blocks to fetch" << std::endl;                
-//                 return numReadThisCloud;
-//             }
-// 
-//         } 
-//     }
-// 
-//     return numReadThisCloud;
-// }
-
-BufferPtr IteratorBase::createPointBufferFromSDO_PC(Statement statement, sdo_pc* pc, boost::uint32_t capacity)
+boost::uint32_t IteratorBase::myReadClouds(PointBuffer& data)
 {
-    boost::int32_t id = m_block_statement->GetInteger(&pc->pc_id);
+    boost::uint32_t numRead(0);
+    
+    getReader().log()->get(logDEBUG2) << "Fetched buffer with cloud id: " << m_active_cloud_id << " for myReadClouds" << std::endl;
+    
+    bool bReadCloud(true);
+    while( bReadCloud) 
+    {
+        m_new_buffer = fetchPointBuffer(m_statement, getReader().getBlock()->pc, data.getCapacity());
+
+        bGetNewBuffer = true;
+            
+        boost::uint32_t numReadThisCloud = myReadBlocks(data);
+        numRead = numRead + numReadThisCloud;
+        
+        getReader().log()->get(logDEBUG2) << "Read " << numReadThisCloud << " points from myReadBlocks" << std::endl;
+        
+        bReadCloud = getReader().getStatement()->Fetch();
+        m_block = BlockPtr(new Block(getReader().getConnection()));
+        m_statement = getNextCloud(m_block, m_active_cloud_id);
+        if (m_at_end == true) 
+        {
+            getReader().log()->get(logDEBUG2) << "At end of current block and trying to fetch another cloud " << std::endl;
+            
+            if (bReadCloud) 
+            {
+                getReader().log()->get(logDEBUG2) << "Fetched another cloud " << std::endl;
+                m_block = BlockPtr(new Block(getReader().getConnection()));
+                m_statement = getNextCloud(m_block, m_active_cloud_id);
+                m_at_end = false;
+
+            } 
+            return numRead;
+        }
+        else
+        {
+            getReader().log()->get(logDEBUG2) << "At end of current block and have no more blocks to fetch" << std::endl;
+            return numRead;
+        }
+
+    }
+
+    return numRead;
+}
+
+BufferPtr IteratorBase::fetchPointBuffer(Statement statement, sdo_pc* pc, boost::uint32_t capacity)
+{
+    boost::int32_t id = m_statement->GetInteger(&pc->pc_id);
     BufferMap::const_iterator i = m_buffers.find(id);
     
     if (i != m_buffers.end())
@@ -662,10 +654,12 @@ BufferPtr IteratorBase::createPointBufferFromSDO_PC(Statement statement, sdo_pc*
         if (block_capacity > capacity)
         {
             std::ostringstream oss;
-            oss << "Block size is larger, " << block_capacity << ", than buffer capacity, " << capacity << ". Try increasing your 'chunk_size' writer option or increasing the size of the buffer being requested";
-            throw pdal_error(oss.str());
+            oss << "Block capacity, " << block_capacity <<", is too large to fit in "
+                << "buffer of size " << capacity<<". Increase buffer capacity with writer's \"chunk_size\" option "
+                << "or increase the read buffer size";
+            throw buffer_too_small(oss.str());
         }
-        
+
         BufferPtr output  = BufferPtr(new PointBuffer(schema, capacity));
         std::pair<int, BufferPtr> p(id, output);
         m_buffers.insert(p);
@@ -674,81 +668,78 @@ BufferPtr IteratorBase::createPointBufferFromSDO_PC(Statement statement, sdo_pc*
         return p.second;
     }    
 }
-
-
-
 boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& data)
 {
     boost::uint32_t numPointsRead = 0;
-    if (bBufferHasNewSchema)
+
+    
+    if (bGetNewBuffer)
     {
-        getReader().log()->get(logDEBUG2) << "IteratorBase::myReadBlocks: Switching buffer with id " << m_active_cloud_id << std::endl;
-        data = *m_active_buffer;
-        bBufferHasNewSchema = false;
+        
+        getReader().log()->get(logDEBUG2) << "IteratorBase::myReadBlocks: Switching buffer to m_new_buffer with id " << m_active_cloud_id << std::endl;
+        data = *m_new_buffer;
+        bGetNewBuffer = false;
     }
     data.setNumPoints(0);
+    
+    bool bDidRead = false;
 
+
+
+#ifdef DEBUG
+    getReader().log()->get(logDEBUG4) << "IteratorBase::myReadBlocks: m_block->num_points: " << m_block->num_points << std::endl;
+
+    getReader().log()->get(logDEBUG4) << "IteratorBase::myReadBlocks: data.getCapacity(): " << data.getCapacity() << std::endl;
+#endif
+
+    if (m_block->num_points > static_cast<boost::int32_t>(data.getCapacity()))
+    {
+        std::ostringstream oss;
+        oss << "Block size, " << m_block->num_points <<", is too large to fit in "
+            << "buffer of size " << data.getCapacity() <<". Increase buffer capacity with writer's \"chunk_size\" option "
+            << "or increase the read buffer size";
+        throw buffer_too_small(oss.str());
+    }
 
     if (!m_block->num_points) 
     {
-
+        // We still have a block of data from the last readBuffer call
+        // that was partially read. 
         getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: fetching first block" << std::endl;
-        bBlockStatementComplete = !m_block_statement->Fetch();        
-        if (bBlockStatementComplete)
+        bDidRead = m_statement->Fetch();        
+        if (!bDidRead)
         {
+            m_at_end = true;
             return 0;
         }
         
-    } 
-    else 
+        data.setSpatialBounds(getBounds(m_statement, m_block));
+ 
+        if (m_block->num_points > static_cast<boost::int32_t>(data.getCapacity()))
+        {
+            throw buffer_too_small("The PointBuffer is too small to contain this block.");
+        }
+    
+    } else 
     {
         // Our read was already "done" last readBuffer call, but if we're done,
         // we're done
-        getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: we have points left to read on this block" << std::endl;
-
-
-        if (bBlockStatementComplete)
+        if (m_at_end)
             getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: we are at end of the blocks;" << std::endl;
         else
-        {
-
-            getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: Reading leftover data at blob position " << m_current_blob_position << " and point position " << m_current_point_position <<std::endl;
-            
-            bool bDoneWithOldBlock(false);
-            boost::uint32_t howMany = (std::min)(m_current_point_position, data.getCapacity());
-            if (howMany < data.getCapacity() )
-                bDoneWithOldBlock = true;
-            fillBufferWithSDO_PC_BlockData( data, m_block_statement, 
-                                        m_block, howMany, 
-                                        data.getNumPoints(), m_current_blob_position);
-            if (bDoneWithOldBlock)
-            {
-                m_current_blob_position = 0;
-                m_current_point_position = 0;
-            } else
-            {
-                m_current_blob_position = howMany * data.getSchema().getByteSize();
-                m_current_point_position = howMany;
-                return howMany;
-            }
-
-        }
+            getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: we have points left to read on this block" << std::endl;
         
-        if (bBlockStatementComplete) return 0;
-    
-    }
+        if (m_at_end) return 0;
+        bDidRead = true;
 
-    pdal::Bounds<double> old_bounds = data.getSpatialBounds();
-    pdal::Bounds<double> new_bounds = getBounds(m_block_statement, m_block);
-    new_bounds.grow(old_bounds);
-    data.setSpatialBounds(new_bounds);
+    }
     
-    while (!bBlockStatementComplete)
+    while (bDidRead)
     {
         boost::uint32_t numReadThisBlock = m_block->num_points;
         boost::uint32_t numSpaceLeftThisBlock = data.getCapacity() - data.getNumPoints();
-        
-        getReader().log()->get(logDEBUG4) << "IteratorBase::myReadBlocks:" " numReadThisBlock: " 
+
+        getReader().log()->get(logDEBUG4) << "IteratorBase::myReadBlocks:" "numReadThisBlock: " 
                                           << numReadThisBlock << " numSpaceLeftThisBlock: " 
                                           << numSpaceLeftThisBlock << " total numPointsRead: " 
                                           << numPointsRead << std::endl;
@@ -762,29 +753,20 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& data)
             // If the buffer's capacity isn't large enough to hold 
             // an oracle block, they're just not going to get anything 
             // back right now (FIXME)
-            // 
-            m_current_point_position = numSpaceLeftThisBlock;
-            fillBufferWithSDO_PC_BlockData( data, m_block_statement, 
-                                        m_block, m_current_point_position, 
-                                        data.getNumPoints(), 0);
-            m_current_blob_position = numSpaceLeftThisBlock * data.getSchema().getByteSize();
-                                        
-            getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: numReadThisBlock > numSpaceLeftThisBlock. Filling to end of buffer and storing block position " << m_current_blob_position << std::endl;
-            return data.getNumPoints();
+            getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: numReadThisBlock > numSpaceLeftThisBlock. Coming back around." << std::endl;
+            break;
             
         }
 
         numPointsRead = numPointsRead + numReadThisBlock;
         
-        fillBufferWithSDO_PC_BlockData( data, m_block_statement, 
-                                        m_block, (std::min)(numReadThisBlock, data.getCapacity()), 
-                                        data.getNumPoints(), 0);
+        read(data, m_statement, m_block, numReadThisBlock, data.getNumPoints(), 0);
         
-        bBlockStatementComplete = !m_block_statement->Fetch();
-        if (bBlockStatementComplete)
+        bDidRead = m_statement->Fetch();
+        if (!bDidRead)
         {
             getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: done reading block. Read " << numPointsRead << " points" << std::endl;
-            m_current_blob_position = 0;
+            m_at_end = true;
             return numPointsRead;
         }
 
@@ -792,7 +774,7 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& data)
         if (m_querytype == QUERY_SDO_BLK_PC_VIEW)
         {
             boost::int32_t current_cloud_id(0);
-            current_cloud_id  = m_block_statement->GetInteger(&m_block->pc->pc_id);
+            current_cloud_id  = m_statement->GetInteger(&m_block->pc->pc_id);
 
             getReader().log()->get(logDEBUG3) << "IteratorBase::myReadBlocks: current_cloud_id: " 
                                               << current_cloud_id << " m_active_cloud_id: " 
@@ -800,11 +782,10 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& data)
             
             if (current_cloud_id != m_active_cloud_id)
             {
-                m_active_buffer = createPointBufferFromSDO_PC(m_block_statement, m_block->pc, data.getCapacity());
+                m_new_buffer = fetchPointBuffer(m_statement, m_block->pc, data.getCapacity());
 
-                bBufferHasNewSchema = true;
+                bGetNewBuffer = true;
                 m_active_cloud_id = current_cloud_id;
-                m_current_blob_position = 0;
                 return numPointsRead;
             }
         }
@@ -869,7 +850,7 @@ boost::uint64_t Reader::skipImpl(boost::uint64_t count)
 
 bool Reader::atEndImpl() const
 {
-    return bCloudStatementComplete;
+    return m_at_end;
 }
 
 

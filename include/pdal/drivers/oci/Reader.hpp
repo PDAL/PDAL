@@ -129,29 +129,29 @@ protected:
     boost::uint32_t myReadBuffer(PointBuffer& data);
     boost::uint32_t unpackOracleData(PointBuffer& data);
     
-    // boost::uint32_t myReadClouds(PointBuffer& data);
+    boost::uint32_t myReadClouds(PointBuffer& data);
     boost::uint32_t myReadBlocks(PointBuffer& data);
 
-    BufferPtr createPointBufferFromSDO_PC(Statement statment, sdo_pc* pc, boost::uint32_t capacity);
+    BufferPtr fetchPointBuffer(Statement statment, sdo_pc* pc, boost::uint32_t capacity);
 
     Statement m_block_statement;
-    bool bBlockStatementComplete;
-    bool bCloudStatementComplete;
+    Statement m_statement;
+    bool m_at_end;
     QueryType m_querytype;
     BlockPtr m_block;
+    BlockPtr m_cloud_block;
     boost::int32_t m_active_cloud_id;
-    BufferPtr m_active_buffer;
-    bool bBufferHasNewSchema;
+    BufferPtr m_new_buffer;
+    bool bGetNewBuffer;
     bool bReadFirstCloud;
     BufferMap m_buffers;
-    boost::uint32_t m_current_blob_position;
-    boost::uint32_t m_current_point_position;
+
 
 private:
     const pdal::drivers::oci::Reader& m_reader;
     
     Statement getNextCloud(BlockPtr block, boost::int32_t& cloud_id);
-    void fillBufferWithSDO_PC_BlockData(  PointBuffer& data, 
+    void read(  PointBuffer& data, 
                 Statement statement,
                 BlockPtr block,
                 boost::uint32_t howMany, 
