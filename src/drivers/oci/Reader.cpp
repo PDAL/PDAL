@@ -610,12 +610,11 @@ boost::uint32_t IteratorBase::myReadClouds(PointBuffer& data)
         
         getReader().log()->get(logDEBUG2) << "Read " << numReadThisCloud << " points from myReadBlocks" << std::endl;
         
-        bReadCloud = getReader().getStatement()->Fetch();
-        m_block = BlockPtr(new Block(getReader().getConnection()));
-        m_statement = getNextCloud(m_block, m_active_cloud_id);
         if (m_at_end == true) 
         {
             getReader().log()->get(logDEBUG2) << "At end of current block and trying to fetch another cloud " << std::endl;
+
+            bReadCloud = getReader().getStatement()->Fetch();
             
             if (bReadCloud) 
             {
@@ -632,6 +631,7 @@ boost::uint32_t IteratorBase::myReadClouds(PointBuffer& data)
             getReader().log()->get(logDEBUG2) << "At end of current block and have no more blocks to fetch" << std::endl;
             return numRead;
         }
+
 
     }
 
@@ -685,13 +685,6 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& data)
     bool bDidRead = false;
 
 
-
-#ifdef DEBUG
-    getReader().log()->get(logDEBUG4) << "IteratorBase::myReadBlocks: m_block->num_points: " << m_block->num_points << std::endl;
-
-    getReader().log()->get(logDEBUG4) << "IteratorBase::myReadBlocks: data.getCapacity(): " << data.getCapacity() << std::endl;
-#endif
-
     if (m_block->num_points > static_cast<boost::int32_t>(data.getCapacity()))
     {
         std::ostringstream oss;
@@ -714,11 +707,6 @@ boost::uint32_t IteratorBase::myReadBlocks(PointBuffer& data)
         }
         
         data.setSpatialBounds(getBounds(m_statement, m_block));
- 
-        if (m_block->num_points > static_cast<boost::int32_t>(data.getCapacity()))
-        {
-            throw buffer_too_small("The PointBuffer is too small to contain this block.");
-        }
     
     } else 
     {
