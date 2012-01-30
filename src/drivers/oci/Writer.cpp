@@ -87,7 +87,13 @@ Writer::Writer(Stage& prevStage, const Options& options)
 
 Writer::~Writer()
 {
-    m_connection->Commit();
+    try{
+        m_connection->Commit();
+        
+    } catch (...)
+    {
+        // destructors shouldn't throw
+    }
 
     return;
 }
