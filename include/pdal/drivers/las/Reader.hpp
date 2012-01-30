@@ -57,6 +57,7 @@ namespace pdal { namespace drivers { namespace las {
 class LasHeader;
 class PointDimensions;
 
+
 class PDAL_DLL Reader : public ReaderBase
 {
 public:
@@ -117,6 +118,7 @@ private:
     std::string m_filename;
     LasHeader m_lasHeader;
     std::vector<MetadataRecord> m_metadataRecords;
+    void ExtractNITF();
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented

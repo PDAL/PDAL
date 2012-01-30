@@ -34,6 +34,7 @@
 
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Support.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #ifdef PDAL_HAVE_LASZIP
 #include <laszip/lasunzipper.hpp>
@@ -45,6 +46,14 @@
 #include "LasHeaderReader.hpp"
 #include <pdal/PointBuffer.hpp>
 #include "ZipPoint.hpp"
+
+#ifdef PDAL_HAVE_GDAL
+#include "gdal.h"
+#include "nitflib.h"
+#include "cpl_vsi.h"
+#include "cpl_conv.h"
+#include "cpl_string.h"
+#endif
 
 namespace pdal { namespace drivers { namespace las {
 
@@ -71,6 +80,13 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
+    if (boost::algorithm::iends_with(m_filename,".ntf"))
+    {
+        log()->get(logDEBUG) << "Extracting NITF file " << getOptions().getValueOrThrow<std::string>("filename") << " for LAS access" << std::endl;
+        
+        ExtractNITF();
+    }   
+    
     std::istream* stream = FileUtils::openFile(m_filename);
 
     LasHeaderReader lasHeaderReader(m_lasHeader, *stream);
@@ -457,6 +473,101 @@ boost::property_tree::ptree Reader::toPTree() const
 }
 
 
+#ifdef PDAL_HAVE_GDAL
+int ExtractLASFromNITF(NITFDES* psDES, const char* pszLASName)
+{
+    NITFSegmentInfo* psSegInfo;
+
+
+    if ( CSLFetchNameValue(psDES->papszMetadata, "NITF_DESDATA") == NULL )
+        return FALSE;
+
+    psSegInfo = psDES->psFile->pasSegmentInfo + psDES->iSegment;
+
+    GByte* pabyBuffer;
+
+    pabyBuffer = (GByte*) VSIMalloc(psSegInfo->nSegmentSize);
+    if (pabyBuffer == NULL)
+    {
+        throw pdal_error("Unable to allocate buffer large enough to extract NITF data!");
+    }
+
+    VSIFSeekL(psDES->psFile->fp, psSegInfo->nSegmentStart, SEEK_SET);
+    if (VSIFReadL(pabyBuffer, 1, psSegInfo->nSegmentSize, psDES->psFile->fp) != psSegInfo->nSegmentSize)
+    {
+        VSIFree(pabyBuffer);
+        throw pdal_error("Unable to allocate extract NITF data!");
+    }
+
+    VSILFILE* fp = NULL;
+    fp = VSIFOpenL(pszLASName, "wb");
+    if (fp == NULL)
+    {
+        VSIFree(pabyBuffer);
+        throw pdal_error("Unable to open filename to write!");
+    }
+
+    VSIFWriteL(pabyBuffer, 1, psSegInfo->nSegmentSize, fp);
+    VSIFCloseL(fp);
+    VSIFree(pabyBuffer);
+
+
+    return TRUE;
+}
+#endif
+
+
+void Reader::ExtractNITF() 
+{
+#ifdef PDAL_HAVE_GDAL
+    NITFFile    *psFile;
+    std::string nitf_filename = m_filename;
+    psFile = NITFOpen( nitf_filename.c_str(), FALSE );
+    if( psFile == NULL )
+    {
+        log()->get(logDEBUG) << "Unable to open " << getOptions().getValueOrThrow<std::string>("filename") << " for NITF access" << std::endl;
+    }
+    
+    int iSegment(0);
+    NITFSegmentInfo *psSegInfo = NULL;
+    for(iSegment = 0;  iSegment < psFile->nSegmentCount; iSegment++ )
+    {
+        psSegInfo = psFile->pasSegmentInfo + iSegment;
+        if( EQUAL(psSegInfo->szSegmentType,"DE")) 
+        {
+            break;
+        }
+    }    
+    
+    if (!psSegInfo)
+    {
+        throw pdal_error("Unable to get LAS DE segment from NITF file!");
+    }
+
+    log()->get(logDEBUG) << "NITF Segment DataStart: " << psSegInfo->nSegmentStart 
+                         << " DataSize: " << psSegInfo->nSegmentSize << std::endl;
+
+    NITFDES *psDES = NULL;
+    psDES = NITFDESAccess( psFile, iSegment );
+    if( psDES == NULL )
+    {
+        std::string msg("NITFDESAccess(%d) failed!");
+        throw pdal_error(msg);
+    }
+
+    
+    std::string tempfile(Utils::generate_temp_filename());
+    log()->get(logDEBUG) << "Using " << tempfile << " for NITF->LAS filename" << std::endl;
+    
+    if (ExtractLASFromNITF(psDES, tempfile.c_str()))
+    {
+        m_filename = std::string(tempfile);
+    }
+
+
+#endif
+}
+
 namespace iterators {
 
 
@@ -467,6 +578,7 @@ Base::Base(pdal::drivers::las::Reader const& reader)
     , m_unzipper(NULL)
 
 {
+    
     m_istream = FileUtils::openFile(m_reader.getFileName());
     m_istream->seekg(m_reader.getPointDataOffset());
 
