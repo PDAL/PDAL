@@ -331,14 +331,15 @@ boost::property_tree::ptree Stats::toPTree() const
     boost::property_tree::ptree tree;
 
     std::multimap<DimensionPtr, stats::SummaryPtr>::const_iterator p;
+    boost::uint32_t position(0);
     for (p = m_stats.begin(); p != m_stats.end(); ++p)
     {
         
         const stats::SummaryPtr stat = p->second;
         boost::property_tree::ptree subtree = stat->toPTree();
-    
+        subtree.add("position", position);
         tree.add_child(p->first->getName(), subtree);
-
+        position++;
     }
 
     return tree;
