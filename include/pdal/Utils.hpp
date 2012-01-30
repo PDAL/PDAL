@@ -45,6 +45,10 @@
 #include <istream>
 #include <limits>
 #include <cstring>
+#include <sstream>
+
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string/erase.hpp>
 
 namespace pdal
 {
@@ -54,7 +58,7 @@ class PDAL_DLL Utils
 public:
     static void random_seed(unsigned int seed);
     static double random(double minimum, double maximum);
-
+    
     // compares two values to within the datatype's epsilon
     template<class T>
     static bool compare_distance(const T& actual, const T& expected)
@@ -152,6 +156,22 @@ public:
     static boost::uint32_t getStreamPrecision(double scale);
     
     static boost::uint32_t safeconvert64to32(boost::uint64_t x64);
+
+    // Generates a random temporary filename
+    static std::string generate_temp_filename()
+    {
+        boost::filesystem::path path = boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
+        boost::filesystem::path tempdir = boost::filesystem::temp_directory_path();
+        
+        std::ostringstream oss;
+        boost::filesystem::path fullpath = tempdir/path;
+        oss << fullpath;
+        std::string output(oss.str());
+        
+        boost::algorithm::erase_all(output, "\"");
+        return output;
+    }
+
 
 private:
     template<typename T>
