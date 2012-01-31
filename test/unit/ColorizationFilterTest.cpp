@@ -46,99 +46,77 @@
 BOOST_AUTO_TEST_SUITE(ColorizationFilterTest)
 
 
-#ifdef PDAL_SRS_ENABLED
-
-static void getPoint(const pdal::PointBuffer& data, double& x, double& y, double& z)
-{
-    using namespace pdal;
-
-    const Schema& schema = data.getSchema();
-
-    Dimension const& dim_x = schema.getDimension("X");
-    Dimension const& dim_y = schema.getDimension("Y");
-    Dimension const& dim_z = schema.getDimension("Z");
-    
-    const boost::int32_t xraw = data.getField<boost::int32_t>(dim_x, 0);
-    const boost::int32_t yraw = data.getField<boost::int32_t>(dim_y, 0);
-    const boost::int32_t zraw = data.getField<boost::int32_t>(dim_z, 0);
-    
-    x = dim_x.applyScaling<boost::int32_t>(xraw);
-    y = dim_y.applyScaling<boost::int32_t>(yraw);
-    z = dim_z.applyScaling<boost::int32_t>(zraw);
-
-    return;
-}
+#ifdef PDAL_HAVE_GDAL
 
 
-// Test reprojecting UTM 15 to DD with a filter
 BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
 {
-    const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
-    // const char* utm15_wkt = "PROJCS[\"NAD83 / UTM zone 15N\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.2572221010002,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-93],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"26915\"]]";
-
-    // const double preX = 470692.447538;
-    // const double preY = 4602888.904642;
-    // const double preZ = 16.000000;
-    const double postX = -93.351563;
-    const double postY = 41.577148;
-    const double postZ = 16.000000;
-
-    // we compute three answers:
-    //   (1) w/out reprojection
-    //   (2) with scaling and reproj
-    //   (3) with custom scaling and reproj
 
     {
-        const pdal::SpatialReference out_ref(epsg4326_wkt);
 
-        pdal::drivers::las::Reader reader(Support::datapath("utm15.las"));
-
+        pdal::drivers::las::Reader reader(Support::datapath("autzen-point-format-3.las"));
+        
         pdal::Options options;
 
-        pdal::Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
-        pdal::Option x_dim("x_dim", std::string("X"), "Dimension name to use for 'X' data");
-        pdal::Option y_dim("y_dim", std::string("Y"), "Dimension name to use for 'Y' data");
-        pdal::Option z_dim("z_dim", std::string("Z"), "Dimension name to use for 'Z' data");
-        pdal::Option x_scale("scale_x", 0.0000001, "Scale for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-        pdal::Option y_scale("scale_y", 0.0000001, "Scale for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-    // pdal::Option z_scale("scale_z", 1.0, "Scale for output Z data in the case when 'Z' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-    // pdal::Option x_offset("offset_x", 0.0, "Offset for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
-    // pdal::Option y_offset("offset_y", 0.0, "Offset for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
-    // pdal::Option z_offset("offset_z", 0.0, "Offset for output Z data in the case when 'Z' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
-    // options.add(in_srs);
-    options.add(out_srs);
-    options.add(x_dim);
-    options.add(y_dim);
-    options.add(z_dim);
-    options.add(x_scale);
-    options.add(y_scale);
-    // options.add(z_scale);
-    // options.add(x_offset);
-    // options.add(y_offset);
-    // options.add(z_offset);
+        pdal::Option red("dimension", "Red", "");
+        pdal::Option b0("band",1, "");
+        pdal::Option s0("scale", 1.0, "scale factor for this dimension");
+        pdal::Options redO;
+        redO.add(b0); redO.add(s0);
+        red.setOptions(redO);
+    
+        pdal::Option green("dimension", "Green", "");
+        pdal::Option b1("band",2, "");
+        pdal::Option s1("scale", 1.0, "scale factor for this dimension");
+        pdal::Options greenO;
+        greenO.add(b1); greenO.add(s1);
+        green.setOptions(greenO);
 
-        pdal::filters::Colorization reprojectionFilter(reader, options);
+        pdal::Option blue("dimension", "Blue", "");
+        pdal::Option b2("band",3, "");
+        pdal::Option s2("scale", 255.0, "scale factor for this dimension");
+        pdal::Options blueO;
+        blueO.add(b2); blueO.add(s2);
+        blue.setOptions(blueO);
         
-        reprojectionFilter.initialize();
-
-        const pdal::Schema& schema = reprojectionFilter.getSchema();
+        pdal::Option datasource("raster", Support::datapath("autzen.jpg"), "raster to read");
+        // pdal::Option verbose("verbose", 7, "");
+        // pdal::Option debug("debug", true, "");
+        
+        pdal::Options reader_options;
+        reader_options.add(red);
+        reader_options.add(green);
+        reader_options.add(blue);
+        reader_options.add(datasource);
+        // reader_options.add(debug);
+        // reader_options.add(verbose);
+        
+        pdal::filters::Colorization filter(reader, reader_options);
+        
+        filter.initialize();
+        
+        const pdal::Schema& schema = filter.getSchema();
         pdal::PointBuffer data(schema, 1);
 
-        pdal::StageSequentialIterator* iter = reprojectionFilter.createSequentialIterator();
+        pdal::StageSequentialIterator* iter = filter.createSequentialIterator();
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
         delete iter;
 
-        const pdal::Bounds<double> newBounds_ref(postX, postY, postZ, postX, postY, postZ);
-        const pdal::Bounds<double>& newBounds = reprojectionFilter.getBounds();
-        Support::compareBounds(newBounds_ref, newBounds);
+        const pdal::Schema& s = data.getSchema();
 
-        double x=0, y=0, z=0;
-        getPoint(data, x, y, z);
+        pdal::Dimension const& dimRed = s.getDimension("Red");
+        pdal::Dimension const& dimGreen = s.getDimension("Green");
+        pdal::Dimension const& dimBlue = s.getDimension("Blue");
+    
+        boost::uint16_t r = data.getField<boost::uint16_t>(dimRed, 0);
+        boost::uint16_t g = data.getField<boost::uint16_t>(dimGreen, 0);
+        boost::uint16_t b = data.getField<boost::uint16_t>(dimBlue, 0);
+    
+        BOOST_CHECK_EQUAL(r, 210);
+        BOOST_CHECK_EQUAL(g, 205);
+        BOOST_CHECK_EQUAL(b, 47175); // We scaled this up to 16bit by multiplying by 255
 
-        BOOST_CHECK_CLOSE(x, postX, 1);
-        BOOST_CHECK_CLOSE(y, postY, 1);
-        BOOST_CHECK_CLOSE(z, postZ, 1);
     }
 
 

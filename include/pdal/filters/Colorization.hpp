@@ -38,7 +38,9 @@
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
 
+#include <map>
 #include <boost/shared_ptr.hpp>
+#include <boost/array.hpp>
 
 
 namespace pdal
@@ -52,18 +54,21 @@ namespace pdal
 
 namespace pdal { namespace filters {
 
+namespace colorization {
+    
+typedef boost::shared_ptr<void> DataSourcePtr;
 
+} // colorization
+
+// Provides GDAL-based raster overlay that places output data in 
+// specified dimensions. It also supports scaling the data by a multiplier 
+// on a per-dimension basis.
 class PDAL_DLL Colorization : public Filter
 {
 public:
     SET_STAGE_NAME("filters.colorization", "Fetch color information from a GDAL datasource")
 
     Colorization(Stage& prevStage, const Options&);
-    Colorization(Stage& prevStage,
-                       const SpatialReference& outSRS);
-    Colorization(Stage& prevStage,
-                       const SpatialReference& inSRS,
-                       const SpatialReference& outSRS);
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -79,40 +84,25 @@ public:
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     void processBuffer(PointBuffer& data) const;
+    
+    boost::array<double, 6> getForwardTransform() const { return m_forward_transform; }
+    boost::array<double, 6> getInverseTransform() const { return m_inverse_transform; }
+    colorization::DataSourcePtr getDataSource() const { return m_ds; }
+    std::map<std::string, boost::uint32_t> getBandMap() const { return m_band_map; }
+    std::map<std::string, double> getScaleMap() const { return m_scale_map; }
 
 private:
-    void updateBounds();
-    void checkImpedance();
-    void transform(double& x, double& y, double& z) const;
-    double getScaledValue(  PointBuffer& data, 
-                            Dimension const& d, 
-                            std::size_t pointIndex) const;
-    void setScaledValue(PointBuffer& data, 
-                          double value, 
-                          Dimension const& d, 
-                          std::size_t pointIndex) const;
+    void collectOptions();
 
-    SpatialReference m_inSRS;
-    SpatialReference m_outSRS;
-    bool m_inferInputSRS;
-
-    typedef boost::shared_ptr<void> ReferencePtr;
-    typedef boost::shared_ptr<void> TransformPtr;
-    ReferencePtr m_in_ref_ptr;
-    ReferencePtr m_out_ref_ptr;
-    TransformPtr m_transform_ptr;
-    
-    Dimension m_x;
-    Dimension m_y;
-    Dimension m_z;
-    
-    double m_x_scale;
-    double m_y_scale;
-    double m_z_scale;
-    double m_x_offset;
-    double m_y_offset;
-    double m_z_offset;
+    colorization::DataSourcePtr m_ds; 
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
+    
+    std::map<std::string, boost::uint32_t> m_band_map;
+    std::map<std::string, double> m_scale_map;
+    boost::array<double, 6> m_forward_transform;
+    boost::array<double, 6> m_inverse_transform;
+    boost::uint32_t m_scale;
+
     
     Colorization& operator=(const Colorization&); // not implemented
     Colorization(const Colorization&); // not implemented
@@ -126,12 +116,34 @@ class PDAL_DLL Colorization : public pdal::FilterSequentialIterator
 public:
     Colorization(const pdal::filters::Colorization& filter);
 
+protected:
+    virtual void readBufferBeginImpl(PointBuffer&);
+    
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
+    double getScaledValue(  PointBuffer& data, 
+                            Dimension const& d, 
+                            std::size_t pointIndex) const;
+    void setScaledValue(PointBuffer& data, 
+                          double value, 
+                          Dimension const& d, 
+                          std::size_t pointIndex) const;
+    bool getPixelAndLinePosition(double x,
+                                 double y,
+                                 boost::array<double, 6> const& inverse,
+                                 boost::int32_t& pixel,
+                                 boost::int32_t& line,
+                                 colorization::DataSourcePtr ds);
+                            
+    Dimension const* m_dimX;
+    Dimension const* m_dimY;
 
-    const pdal::filters::Colorization& m_reprojectionFilter;
+    std::vector<Dimension const*> m_dimensions;
+    std::vector<boost::uint32_t> m_bands;
+    std::vector<double> m_scales;
+    const pdal::filters::Colorization& m_stage;
 };
 
 
