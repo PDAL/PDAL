@@ -80,7 +80,7 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    if (boost::algorithm::iends_with(m_filename,".ntf"))
+    if (boost::algorithm::iends_with(m_filename,".ntf") || boost::algorithm::iends_with(m_filename,".nitf"))
     {
         log()->get(logDEBUG) << "Extracting NITF file " << getOptions().getValueOrThrow<std::string>("filename") << " for LAS access" << std::endl;
         
