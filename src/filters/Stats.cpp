@@ -56,7 +56,7 @@ boost::property_tree::ptree Summary::toPTree() const
     
     boost::property_tree::ptree bins;
     histogram_type hist = histogram();
-    for(std::size_t i = 0; i < hist.size(); ++i)
+    for(boost::uint32_t i = 0; i < hist.size(); ++i)
     {
         boost::property_tree::ptree bin;
         bin.add("lower_bound", hist[i].first);

@@ -117,7 +117,7 @@ public:
         m_histogram(static_cast<double>(value));
         
         int sample = m_distribution(m_rng);
-        if (sample < m_sample_size)
+        if (static_cast<boost::uint32_t>(sample) < m_sample_size)
             m_sample.push_back(static_cast<double>(value));
         return;
     }
