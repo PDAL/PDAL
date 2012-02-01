@@ -1,0 +1,388 @@
+=================================
+PLang: a little language for PDAL
+=================================
+
+| Michael P. Gerlek
+| Flaxen Consulting
+| mpg@flaxen.com
+| 14 December 2011
+
+
+Overview
+--------
+
+PLang is a small language that allows users of the PDAL library and tools to
+perform custom filtering and transforming of points in a point cloud.
+
+For example, a user may wish to use the pc2pc tool to filter out (remove)
+any points in a point cloud for which the ScanAngle field is greater than
+20 degrees or the ReturnNumber is not zero::
+
+    ScanAngle > 20 || ReturnNumber != 0
+
+As another example, a user may wish to add a new field “Gray” to each point
+in a cloud, where the value of that new field is computed from other fields
+in the point::
+
+    Gray = (Red + Green + Blue) / 255.0
+
+PDAL’s PLang support allows for these two pieces of code to be written by the
+user and executed on the fly for each point being processed through PDAL’s
+pipeline. 
+
+This document covers:
+* the PLang language itself
+* the PDAL API used to parse and evaluate PLang code
+* the PDAL filters
+* implementation notes
+* bugs, issues, to-do items
+
+
+The PLang Language
+------------------
+
+The PLang language can be considered a very restricted subset of C.  PLang
+supports variables, constants, expressions, type conversions, and assignments.
+It supports integer, floating point, and boolean types.
+
+PLang does not support control flow, functions, pointers, or structs. 
+
+No control flow is provided; a PLang program is only a basic block.
+
+This is an example of a complete PLang program, showing most of the interesting
+features::
+
+    uint8 ScanAngle;
+    uint8 ReturnNumber;
+    bool result;
+    float32 temp;
+    float32 Red;
+    float32 Green;
+    float32 Blue;
+    uint8 Gray;
+
+    result = ScanAngle > 20 || ReturnNumber != 0;
+    temp = (Red + Green + Blue) / 255.0;
+    Gray = uint8(temp);
+
+Note that several variables in this program have “upwards exposed uses” –-
+they are used before being defined (also known as “free” or “unbound”
+variables, or think of them as function arguments).  The values for these
+free variables are presumed to be set in the PLang interpreter’s environment
+before evaluating the program.  In the context of PDAL, this means that
+those variables are set from the corresponding fields of each point.
+Likewise, variables that have “downward exposed definitions” are used
+to set the corresponding point fields after the PLang program has been “run”.
+
+*I’ve played with a couple different syntactic styles for representing the
+idea of the “field” variables, e.g. marking the data type declaration with
+an “in” or “out” keyword or presenting the program as a “function” with
+“parameters”, but nothing has really struck me yet.  So for now, there is
+no syntactic distinguishing marker.*
+
+Data Types
+
+PLang supports these data types:
+
+* int8, int16, int32, int64
+* uint8, uint16, uint32, uint64
+* float32, float64
+* bool
+
+Constants
+
+PLang supports a C-like syntax for expressing constant values.
+
+Numbers are assumed to be of type int32 unless they contain a decimal point,
+in which they are assumed to be of type float64. *do we support scientific
+notation?* The following suffixes may be used to modify the default type:
+
+* f: indicates float32
+* u: indicates uint32
+* l: indicates int64
+* ul: indicates uint64
+
+No suffixes are provided to express int8, uint8, int16, or uint16 types;
+for these types, explicit conversion operators must be used.  *might be a bad
+choice on my part*
+
+Hexadecimal constants are indicated by the prefix ``0x``.  Hex constants are
+typed as uint32.  Hex constants with the suffix ``ul`` are typed as uint64.
+
+Boolean constants are ``true`` and ``false``.
+
+Variables
+
+Variable names are made up of alphanumeric characters plus the underscore
+character (``_``), with the condition that the first character must not be
+a number.  Variable names are case sensitive.
+
+By convention, variables names with a leading underscore are reserved for
+use by the PLang interpreter.
+
+A variable must be declared with its data type before it is used.  The
+syntax for a declaration is::
+
+    datatype variable-name
+
+The datatype is one of the types listed above (uint8, float32, etc).
+
+It is illegal to declare a variable twice, even if the data type matches.
+
+Expressions
+
+Expressions are made up of variables, constants, and operators in the
+usual way.  Parentheses are supported.
+
+Declaration Statements
+
+The syntax for a declaration statement takes this form::
+
+    declaration variable-name;
+
+Note the required trailing semicolon.
+
+Assignment Statements
+
+The syntax for an assignment statement takes this form::
+
+	variable-name = expression;
+	
+Note the required trailing semicolon.
+
+Program
+
+A program consists of zero or more declaration statements followed by zero
+or more assignment statements.
+
+*We really should be more flexible and allow for combined
+declaration/assignment statements, like “uint8 x = 9;”.*
+
+Operators
+
+The following operators are supported (for the given data types):
+
+* arithmetic: +, -, \*, /
+
+  * all int, uint, and float types
+
+* bitwise: \&, \|, \^
+
+  * all unit types
+
+* logical: &&, ||
+
+  * only bool
+
+* equality: ==, !=
+
+  * all types
+
+* inequality: <, <=, >, >=
+
+  * all int, uint, and float types
+
+* type conversions
+
+  * (described below)
+
+* unary minus
+
+  * all int and float types
+
+*need to turn the above into a table, add operator precedence*
+
+Conversions
+
+All type conversion operations must be explicit; there is no support 
+for implicit type conversion.  For example, this assignment statement::
+
+    float32 x;
+    x = 4 + 5u;
+
+is illegal.  The correct form would be::
+
+    x = float32(4 + int32(5u))
+	
+or perhaps::
+
+    x = float32(uint32(4) + 5u)
+
+The conversion functions are:
+
+* uint8(), uint16(), uint32(), uint64()
+* int8(), int16(), int32(), int64()
+* float32, float64()
+
+The behavior of the conversion functions are the same as those of explicit C casts.
+
+No conversions to or from bool are supported.
+
+*Disallowing all implicit conversions makes life very hard for the user.
+Probably should loosen that up a bit.*
+
+Statement Examples
+
+::
+
+    // a predicate expression
+    bool result;
+    result = ScanAngle > 0 && ReturnNumber == 1;
+
+    // an assignment to a Field
+    float32 Gray;
+    float32 Red;
+    float32 Green;
+    float32 Blue;
+    Gray = (Red + Green + Blue) / 255.0f;
+
+    // use of a variable
+    uint16 Flags;
+    uint16 NewFlags;
+    uint16 temp;
+    temp = (Flags & 0x0111);
+    NewFlag = (temp == 0x0100) | (temp == 0x0010);
+
+    // example of type conversion
+    int32 Elevation;
+    float64 Z;
+    Elevation = int32(Z);
+
+    // bit selection: turn 3 bits into a uint32
+    uint32 Flags
+    uint32 ScanNumber
+    ScanNumber = bitselect(Flags, 3, 5)
+
+*Note biselect not yet implemented*
+
+
+The PDAL PLang API
+------------------
+
+Public API
+
+The Parser class looks like this::
+
+    class Parser
+    {
+        Parser(const std::string& programText);
+        bool parse();
+        bool evaluate();
+        const std::vector<std::string>& getErrors() const;
+        template<T> void setVariable(const std::string& name, T value)
+        template<T> T getVariable(const std::string& name);
+    }
+
+The parser is constructed with a string containing the PLang program.
+The user then calls parse(), which will return true if successful or
+false if there is a syntax error (and the getErrors() call can be used
+to get diagnostic info).
+
+The user then performs the following steps for each point he needs to process.
+First, call setVariable() to set any free variables with the value of the
+current point’s fields.  Second, call evaluate () to run the PLang interpreter.
+If false is returned, something went wrong (probably an internal error/bug).
+Then, call getVariable() to retrieve values from the interpreter and use
+them to set the fields of the current point.
+
+The complete implementation of a filter that modifies the fields of a set of
+points would therefore be something like this::
+
+	Parser parser(userProgram)
+	bool ok = parser.parse();
+	assert(ok);
+	for each Point p in PointBuffer do
+		for each Dimension d in p do
+			parser.setVariable(d.name(), p.getFieldValue(d))
+		endfor
+		parser.evaluate()
+		for each Dimension d in p do
+			p.setField(parser.getVariable(d.name()))
+		endfor
+	endfor
+
+*Might be useful to have the parser expose a list of the upwards-exposed and
+downwards-exposed variables, so we need not iterate through all the dimensions,
+since only the user’s PLang program is likely to only refer to a couple of them.*
+
+Internals
+
+tbd – could talk about the AST nodes and the SymbolTable
+
+
+The PDAL Filters
+----------------
+
+* what are the actual names of the filters?*
+
+The Field Attribute Filter
+
+The FieldAttribute filter takes a PLang expression as its input and uses the
+result of the program to determine if a point should be sent to the output stream.
+
+The user’s input expression is not a complete PLang program, since the user
+only wants to express a condition (predicate).  The PDAL filter modifies
+the expression string to become a proper program, by assigning the
+expression to a boolean variable.  For example, given the user expression::
+
+    ReturnNumber > 0
+
+the actual program used by the PDAL filter would be::
+
+    uint8 ReturnNumber;
+    bool result;
+    result = (ReturnNumber > 0);
+
+The value of “result” is evaluated to determine the predicate for each point.
+
+The Field Setting Filter
+
+The FieldEvaluatingFilter takes a PLang program as its input.  For each point
+from the input stage, the PLang program is evaluated with respect to the
+field values of the point.  The PLang program will set values of certain
+fields, and the output stage will be written with the values of those fields.
+
+This example assumes the input stage has a field named “Degrees” and assumes 
+the output stage has a field named “Radians”::
+
+	float32 pi;
+	float32 Degrees;
+	float32 Radians;
+	pi = 22.0f/7.0f;
+	Radians = Degrees * pi / 180.0f
+
+
+Implementation Notes
+--------------------
+
+* The expression typing system does not respect overflow conditions and such. 
+  That is, the type inferred for the expression “uint8(255) * uint8(255)” is
+  uint8; the numerical result is undefined.
+* The unary minus operator (negate) may not be applied to unsigned values.  
+  There is no unary plus operator.
+
+
+Bugs, Issues, To-Dos
+--------------------
+* implement bit-select
+* Ternary operator (p?x:y)
+* Comment support
+* Bit shift <<,>> operators
+* Document the AstTempVec hack
+* Document the “char, vector<char>” hack
+* Implement error checking
+* Add test case for each part of spec
+* Do these parse?  “0x ff”   “var i able”   “123 u”
+* Implement the predicate filter
+* Implement the filed-setter filter
+* add support for scoped variable names (Las.Reader.X)
+* add support for GUIDs (“{…}”)
+
+
+Out of Scope
+------------
+
+* CSE – in a predicate expression like::
+    predicate = ((Flags & 0x0111) == 0x0100) || ((Flags & 0x0111) == 0x0010
+  we can use common subexpression elimination (CSE) to reduce the expression to::
+    t = (Flags & 0x0111) ; predicate = (t == 0x0100) || (t == 0x0010)
