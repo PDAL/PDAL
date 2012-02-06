@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     command.str("");
     
     std::string stats_test = Support::temppath("pcinfo_stats.txt");
-    command << cmd + " --output=" + stats_test + " --stats " + inputLas;
+    command << cmd + " --output=" + stats_test + " --stats " + inputLas + " --seed 1234";
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
     were_equal = Support::compare_text_files(stats_test, Support::datapath("apps/pcinfo_stats.txt"));

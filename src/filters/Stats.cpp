@@ -116,10 +116,12 @@ const Options Stats::getDefaultOptions() const
     Option sample_size("sample_size", 1000, "Number of points to return for uniform random 'sample'");
     Option num_bins("num_bins", 20, "Number of bins to use for histogram");
     Option stats_cache_size("stats_cache_size", 1000, "Number of points to use for histogram bin determination. Defaults to total number of points read if no option is specified.");
+    Option seed("seed", 0, "Seed to use for repeatable random sample. A seed value of 0 means no seed is used");
     
     options.add(sample_size);
     options.add(num_bins);
     options.add(stats_cache_size);
+	options.add(seed);
     return options;
 }
 
@@ -305,8 +307,10 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
 
     
     boost::uint32_t sample_size = getStage().getOptions().getValueOrDefault<boost::uint32_t>("sample_size", 1000);
+	boost::uint32_t seed = getStage().getOptions().getValueOrDefault<boost::uint32_t>("seed", 0);
 
     getStage().log()->get(logDEBUG2) << "Using " << sample_size << "for sample size" << std::endl;
+    getStage().log()->get(logDEBUG2) << "Using " << seed << "for sample seed" << std::endl;
     
     
     boost::uint32_t bin_count = getStage().getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20);
