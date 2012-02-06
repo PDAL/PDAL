@@ -64,7 +64,8 @@ public:
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
-    
+    const SpatialReference& getSpatialReference() const;
+
     PipelineManager const& getManager() { return *m_manager.get(); }
 
 private:

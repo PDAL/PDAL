@@ -88,6 +88,11 @@ const Options Reader::getDefaultOptions() const
     return options;
 }
 
+const SpatialReference& Reader::getSpatialReference() const
+{
+    return m_stage->getSpatialReference();
+}
+
 
 bool Reader::supportsIterator (StageIteratorType t) const
 {   
