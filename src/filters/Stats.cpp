@@ -316,10 +316,12 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
     boost::uint32_t bin_count = getStage().getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20);
     if (m_stats.size() == 0)
     {
-        schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();  
+        schema::index_by_index const& dims = schema.getDimensions().get<schema::index>(); 
+ 		
         for (schema::index_by_index::const_iterator iter = dims.begin(); iter != dims.end(); ++iter)
         {
             DimensionPtr d = boost::shared_ptr<Dimension>(new Dimension( *iter));
+		    getStage().log()->get(logDEBUG2) << "Cumulating stats for dimension " << d->getName() << std::endl;
             stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, sample_size, stats_cache_size));
         
             std::pair<DimensionPtr, stats::SummaryPtr> p(d,c);
