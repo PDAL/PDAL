@@ -71,8 +71,10 @@ private:
     bool m_showStats;
     bool m_showSchema;
     bool m_showStage;
+	pdal::Options m_options;
     boost::uint64_t m_pointNumber;
     std::ostream* m_outputStream;
+	boost::uint32_t m_seed;
 };
 
 
@@ -115,14 +117,15 @@ void PcInfo::addSwitches()
     addSwitchSet(file_options);
 
     po::options_description* processing_options = new po::options_description("processing options");
-
+	
     processing_options->add_options()
         ("point,p", po::value<boost::uint64_t>(&m_pointNumber)->implicit_value(0), "point to dump")
         ("stats,a", po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true), "dump stats on all points (reads entire dataset)")
         ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
         ("stage,r", po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true), "dump the stage info")
+        ("seed", po::value<boost::uint32_t>(&m_seed)->default_value(0), "Seed value for random sample")
         ;
-
+	
     addSwitchSet(processing_options);
 
     addPositionalSwitch("input", 1);
@@ -229,8 +232,15 @@ int PcInfo::execute()
     }
 
     Stage* reader = AppSupport::makeReader(readerOptions);
-        
-    pdal::filters::Stats* filter = new pdal::filters::Stats(*reader);
+
+	if (m_seed != 0)
+	{
+		Option seed_option("seed", m_seed, "seed value");
+		m_options.add(seed_option);
+	}    
+	pdal::Options options = m_options + readerOptions;
+	
+    pdal::filters::Stats* filter = new pdal::filters::Stats(*reader, options);
 
     filter->initialize();
 
