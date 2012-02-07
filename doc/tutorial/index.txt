@@ -1,17 +1,16 @@
-.. _building:
+.. _tutorial:
 
 ******************************************************************************
-Building and Installing
+Tutorial: Getting Started
 ******************************************************************************
 
-This section describes how to build and install PDAL under Windows, Linux, and Mac.
+This section provides tutorial-level information on how to get started with PDAL.
 
 Contents:
 
 .. toctree::
    :maxdepth: 1
    
-   windows
-   linux
-   mac
-   
+   reading
+   writing
+ 
