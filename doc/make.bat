@@ -6,7 +6,7 @@ if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
 set BUILDDIR=build
-set ALLSPHINXOPTS=-d %BUILDDIR%/doctrees %SPHINXOPTS% source
+set ALLSPHINXOPTS=-d %BUILDDIR%/doctrees %SPHINXOPTS% .
 if NOT "%PAPER%" == "" (
 	set ALLSPHINXOPTS=-D latex_paper_size=%PAPER% %ALLSPHINXOPTS%
 )
@@ -27,6 +27,7 @@ if "%1" == "help" (
 	echo.  epub       to make an epub
 	echo.  latex      to make LaTeX files, you can set PAPER=a4 or PAPER=letter
 	echo.  text       to make text files
+	echo.  pdf        to make PDF files
 	echo.  man        to make manual pages
 	echo.  changes    to make an overview over all changed/added/deprecated items
 	echo.  linkcheck  to check all external links for integrity
@@ -130,6 +131,14 @@ if "%1" == "text" (
 	if errorlevel 1 exit /b 1
 	echo.
 	echo.Build finished. The text files are in %BUILDDIR%/text.
+	goto end
+)
+
+if "%1" == "pdf" (
+	%SPHINXBUILD% -b pdf %ALLSPHINXOPTS% %BUILDDIR%/pdf
+	if errorlevel 1 exit /b 1
+	echo.
+	echo.Build finished. The text files are in %BUILDDIR%/pdf.
 	goto end
 )
 
