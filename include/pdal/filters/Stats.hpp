@@ -205,6 +205,8 @@ private:
     bool atEndImpl() const;
 
     const pdal::filters::Stats& m_statsFilter;
+	
+	std::vector<DimensionPtr> m_dimensions;
 
     double getValue(PointBuffer& data, Dimension& dim, boost::uint32_t pointIndex);
 

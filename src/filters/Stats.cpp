@@ -326,6 +326,7 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
             stats::SummaryPtr c = boost::shared_ptr<stats::Summary>(new stats::Summary(bin_count, sample_size, stats_cache_size));
         
             std::pair<DimensionPtr, stats::SummaryPtr> p(d,c);
+			m_dimensions.push_back(d);
             m_stats.insert(p);
         }
         
@@ -337,15 +338,20 @@ boost::property_tree::ptree Stats::toPTree() const
 {
     boost::property_tree::ptree tree;
 
-    std::multimap<DimensionPtr, stats::SummaryPtr>::const_iterator p;
+    std::vector<DimensionPtr>::const_iterator p;
     boost::uint32_t position(0);
-    for (p = m_stats.begin(); p != m_stats.end(); ++p)
+    for (p = m_dimensions.begin(); p != m_dimensions.end(); ++p)
     {
-        
-        const stats::SummaryPtr stat = p->second;
+		std::multimap<DimensionPtr, stats::SummaryPtr>::const_iterator i;
+		DimensionPtr d = *p;
+		i = m_stats.find(d);
+		if (i == m_stats.end())
+			throw pdal_error("unable to find dimension in summary!");
+        const stats::SummaryPtr stat = i->second;
+		
         boost::property_tree::ptree subtree = stat->toPTree();
         subtree.add("position", position);
-        tree.add_child(p->first->getName(), subtree);
+        tree.add_child(d->getName(), subtree);
         position++;
     }
 
