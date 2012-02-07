@@ -1,0 +1,7 @@
+.. _writing:
+
+=====================
+Writing with PDAL
+=====================
+
+to be written

@@ -1,0 +1,7 @@
+.. _windows:
+
+=====================
+Bulding under Windows
+=====================
+
+to be written
