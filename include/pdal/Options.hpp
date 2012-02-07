@@ -273,6 +273,27 @@ public:
         return *this;
     }
 
+    // assignment operator
+    Options& operator+=(const Options& rhs)
+    {
+
+        if (&rhs != this)
+        {
+			map_t::const_iterator i;
+			for (i = rhs.m_options.begin(); i != rhs.m_options.end(); ++i)
+			{
+			    m_options.insert(std::pair<std::string, Option>(i->first, i->second));
+			}
+
+        }
+        return *this;
+    }
+
+    Options const operator+(const Options& rhs)
+    {
+        return Options(*this) += rhs;
+    }
+
     bool equals(const Options& rhs) const
     {
         if (m_options== rhs.m_options)
