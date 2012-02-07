@@ -388,27 +388,6 @@ list (APPEND PDAL_HPP ${PDAL_CONFIG_HPP} )
 
 
 #
-# external/boost/uuid
-#
-
-set(PDAL_EXTERNAL_BOOST_UUID_HPP
-  ${PDAL_HEADERS_DIR}/external/boost/uuid/uuid.hpp
-  ${PDAL_HEADERS_DIR}/external/boost/uuid/name_generator.hpp
-  ${PDAL_HEADERS_DIR}/external/boost/uuid/nil_generator.hpp
-  ${PDAL_HEADERS_DIR}/external/boost/uuid/random_generator.hpp
-  ${PDAL_HEADERS_DIR}/external/boost/uuid/seed_rng.hpp
-  ${PDAL_HEADERS_DIR}/external/boost/uuid/sha1.hpp
-  ${PDAL_HEADERS_DIR}/external/boost/uuid/string_generator.hpp
-  ${PDAL_HEADERS_DIR}/external/boost/uuid/uuid.hpp
-  ${PDAL_HEADERS_DIR}/external/boost/uuid/uuid_generators.hpp
-  ${PDAL_HEADERS_DIR}/external/boost/uuid/uuid_io.hpp
-  ${PDAL_HEADERS_DIR}/external/boost/uuid/uuid_serialize.hpp
-)
-
-list (APPEND PDAL_HPP ${PDAL_EXTERNAL_BOOST_UUID_HPP} )
-
-
-#
 # Group source files for IDE source explorers (e.g. Visual Studio)
 #
 

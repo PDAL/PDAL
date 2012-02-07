@@ -173,6 +173,14 @@ endif(APPLE)
 # settings for Boost dependencies
 #------------------------------------------------------------------------------
 
+if(NOT BOOST_ROOT)
+  add_subdirectory(boost)
+  set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/boost)
+  find_package(Boost 1.48)
+  set(Boost_LIBRARIES ${PROJECT_SOURCE_DIR}/bin/libpdalboost.a)
+  include_directories(${Boost_INCLUDE_DIRS})
+else()
+
 # Default to using static, multithreaded libraries for 
 # linking under MSVC.  This is because we show users how to 
 # use boostpro.com installer and install those options when linking 
@@ -204,6 +212,7 @@ if(Boost_MINOR_VERSION GREATER 45)
 set(PDAL_HAVE_PLANG 1)
 endif()
 endif()
+endif(NOT BOOST_ROOT)
 
 #------------------------------------------------------------------------------
 # settings for GDAL & related dependencies
