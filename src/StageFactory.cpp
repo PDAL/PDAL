@@ -59,6 +59,8 @@
 #include <pdal/drivers/p2g/Writer.hpp>
 #endif
 
+#include <pdal/drivers/text/Writer.hpp>
+
 #include <pdal/filters/ByteSwap.hpp>
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
@@ -156,6 +158,7 @@ namespace pdal
     //
     MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
     MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
+    MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
 #ifdef PDAL_HAVE_ORACLE
     MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 #endif
@@ -339,6 +342,7 @@ void StageFactory::registerKnownWriters()
 {
     REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
+    REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
 #ifdef PDAL_HAVE_ORACLE
     REGISTER_WRITER(OciWriter, pdal::drivers::oci::Writer);
 #endif
