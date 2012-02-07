@@ -305,12 +305,11 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
         }
     }
 
-    
     boost::uint32_t sample_size = getStage().getOptions().getValueOrDefault<boost::uint32_t>("sample_size", 1000);
 	boost::uint32_t seed = getStage().getOptions().getValueOrDefault<boost::uint32_t>("seed", 0);
 
-    getStage().log()->get(logDEBUG2) << "Using " << sample_size << "for sample size" << std::endl;
-    getStage().log()->get(logDEBUG2) << "Using " << seed << "for sample seed" << std::endl;
+    getStage().log()->get(logDEBUG2) << "Using " << sample_size << " for sample size" << std::endl;
+    getStage().log()->get(logDEBUG2) << "Using " << seed << " for sample seed" << std::endl;
     
     
     boost::uint32_t bin_count = getStage().getOptions().getValueOrDefault<boost::uint32_t>("num_bins", 20);
