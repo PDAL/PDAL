@@ -1,11 +1,9 @@
 .. _other:
 
 ******************************************************************************
-API documentation for PDAL
+Other PDAL documentation
 ******************************************************************************
 
-PDAL's primary API is its C++ API, however, more `SWIG-based`_ are expected to 
-be developed.
     
 .. toctree::
    :maxdepth: 2
