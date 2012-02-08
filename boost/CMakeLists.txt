@@ -1,11 +1,14 @@
-# DATE_TIME_INLINE
-# BOOST_THREAD_POSIX
+# These defines are conditionally set in the Jamfiles but I did nothing to try
+# to perpetuate them in this build:
+#   DATE_TIME_INLINE
+#   BOOST_THREAD_POSIX
 #
-#   ./libs/thread/src/win32/thread.cpp
-#   ./libs/thread/src/win32/tss_dll.cpp
-#   ./libs/thread/src/win32/tss_pe.cpp
+
 include_directories(".")
+
 set(PDALBOOST_LIB_NAME pdalboost)
+
+add_definitions(-DBOOST_TEST_DYN_LINK)
 
 set(PDALBOOST_SOURCES
     ./libs/date_time/src/gregorian/date_generators.cpp
