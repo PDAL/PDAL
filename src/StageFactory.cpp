@@ -77,6 +77,7 @@
 #endif
 
 #include <pdal/filters/Scaling.hpp>
+#include <pdal/filters/Selector.hpp>
 #include <pdal/filters/Stats.hpp>
 
 #include <pdal/filters/Mosaic.hpp>
@@ -146,6 +147,7 @@ namespace pdal
 
     MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
     MAKE_FILTER_CREATOR(Scaling, pdal::filters::Scaling)
+    MAKE_FILTER_CREATOR(Selector, pdal::filters::Selector)
     MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
 
     //
@@ -328,6 +330,7 @@ void StageFactory::registerKnownFilters()
 
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(Scaling, pdal::filters::Scaling);
+    REGISTER_FILTER(Selector, pdal::filters::Selector);
     REGISTER_FILTER(Stats, pdal::filters::Stats);
 }
 
