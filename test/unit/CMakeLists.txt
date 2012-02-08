@@ -43,6 +43,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     RangeTest.cpp
     ReprojectionFilterTest.cpp
     ScalingFilterTest.cpp
+    SelectorFilterTest.cpp
     SchemaLayoutTest.cpp
     SchemaTest.cpp
     SpatialReferenceTest.cpp

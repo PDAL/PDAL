@@ -35,6 +35,7 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Support.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/filesystem.hpp>
 
 #ifdef PDAL_HAVE_LASZIP
 #include <laszip/lasunzipper.hpp>
@@ -554,9 +555,8 @@ void Reader::ExtractNITF()
         std::string msg("NITFDESAccess(%d) failed!");
         throw pdal_error(msg);
     }
-
     
-    std::string tempfile(Utils::generate_temp_filename());
+    std::string tempfile = Utils::generate_tempfile();
     log()->get(logDEBUG) << "Using " << tempfile << " for NITF->LAS filename" << std::endl;
     
     if (ExtractLASFromNITF(psDES, tempfile.c_str()))
