@@ -13,7 +13,7 @@ be developed.
    community
    faq
    download
-   
+   features
    
 
 .. _`SWIG-based`: http://www.swig.org
