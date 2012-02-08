@@ -53,11 +53,11 @@ We satisfy all dependencies using OSGeo4W and use the Boost subset that is inclu
   There are some other required dependencies (libtiff, libgeotiff, oci) but they are installed by default.
 
 2.  Get the source code for PDAL:
-##
+::
    c:\dev> git clone https://github.com/PDAL/PDAL.git .
 
 3. *From the root of your PDAL tree*, run "config.bat". This will create the VStudio solution file and .vcxproj files.
-##
+::
    c:\dev\PDAL> config.bat
 
 4.  Start Visual Studio and open PDAL.sln.
@@ -77,8 +77,8 @@ PDAL depends on the following external libraries.  You'll need to get them and b
 - libtiff (optional)
 - libgeotiff (optional)
 
-   Options for Boost include BoostPro (free win32 installer, no x64) or the internal "BCP'ed" extract in PDAL.
-   One option for all the other dependencies is OSGeo4W (free, win32 installer, no x4 -- see "Basic Build Steps" above).
+Options for Boost include BoostPro (free win32 installer, no x64) or the internal "BCP'ed" extract in PDAL.
+One option for all the other dependencies is OSGeo4W (free, win32 installer, no x4 -- see "Basic Build Steps" above).
 
 2.  Having staged the above libs, you  need to specify where they are by editing the appropriate lines in the "config.bat" file.
     Each optional library has a switch (e.g. "-DWITH_LASZIP=ON"), and definitions for an include directory and a library directory
@@ -111,7 +111,7 @@ Troubleshooting
 * libtiff.dll errors - double check that other versions of the lib are not on the path. For example, ArcGIS installs a version of libtiff that is not compatible.
 * "ERROR 4: Unable to open EPSG support file gcs.csv" or GDAL_DATA variable errors - Set GDAL_DATA system variable to ``C:\OSGeo4W\share\gdal``
 * PROJ errors - Set PROJ_LIB system variable to ``C:\OSGeo4W\share\proj``
-
+* if you need to re-run config.bat, you probably also need to delete your "CMakeCache.txt" first.
 
 
 To Build the SWIG Bindings
