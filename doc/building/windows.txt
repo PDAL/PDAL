@@ -1,0 +1,121 @@
+.. _windows:
+
+======================
+Building Under Windows
+======================
+
+Most Users
+----------
+If you just want to build PDAL so you can 
+(a) use the utilities or 
+(b) investigate PDAL integration 
+(c) test / fix / extend the library and 
+you are OK with doing all this with a 32 bit compiler, check the "Prequisites" and follow the "Basic Build Steps" below. 
+
+
+Advanced Users
+--------------
+If your needs go beyond this, then use check the "Prequisites" and use the "Advanced Build Steps" below as a guide to configuring the library.
+
+
+Prerequisites
+-------------
+- Ensure you have git.  We used version 1.7.3.1.msysgit.0 from http://code.google.com/p/msysgit
+- Ensure you have a Visual Studio 2010 environment setup.  We used VStudio 2010 Premium.
+- Ensure you have cmake.  We used version 2.8.4 from http://www.cmake.org
+
+The steps below assume that these tools are available from your command line.  For Git and CMake, that's just adding them to your %PATH%.  For VStudio, 
+you need to run "vsvars32.bat" ("Microsoft Visual Studio 10.0\Common7\Tools\vsvars32.bat")
+
+
+Basic Build Steps
+-----------------
+Most users can use this procedure to build PDAL on Windows.  
+We satisfy all dependencies using OSGeo4W and use the Boost subset that is included with the library.
+
+1.  Install OSGeo4W (http://trac.osgeo.org/osgeo4w/) using the "Advanced Install" option and include the following:  gdal-dev, laszip, libxml2, iconv.
+
+   .. figure::  media/OSGeo4WInstallAdvanced.png
+
+  Install from Internet
+   .. figure::  media/OSGeo4WInstallFromInternet.png
+  Leave the "Root Directory" for the installation unchanged.  
+   .. figure::  media/OSGeo4WInstallRootDirectory.png
+  Select "gdal-dev".  
+   .. figure::  media/OSGeo4WInstallGDALDev.png
+  Select "laszip".  
+   .. figure::  media/OSGeo4WInstallLASZip.png
+  Select "libxml2".  
+  .. figure::  media/OSGeo4WInstallLibXML2.png
+  Select "iconv".  
+  .. figure::  media/OSGeo4WInstallIconv.png
+
+  There are some other required dependencies (libtiff, libgeotiff, oci) but they are installed by default.
+
+2.  Get the source code for PDAL:
+##
+   c:\dev> git clone https://github.com/PDAL/PDAL.git .
+
+3. *From the root of your PDAL tree*, run "config.bat". This will create the VStudio solution file and .vcxproj files.
+##
+   c:\dev\PDAL> config.bat
+
+4.  Start Visual Studio and open PDAL.sln.
+5.  Note that you'll need to include the OSGeo4W directory in your %PATH% so that the dependent DLLs are available at run time.
+
+Advanced Build Steps
+--------------------
+1.  Aquire and stage the required dependent libraries.
+PDAL depends on the following external libraries.  You'll need to get them and build them (or, where possible, download prebuilt binary packages).
+
+- Boost (get version 1.4.8 or better from http://boost.org) [ required ]
+- GDAL (get version 1.6 or later from http://gdal.org) [ optional ]
+- LASZip (get version 1.0.1 or later from http://laszip.org) [ optional ]
+- libxml2 (http://libxml2.org) [ optional ]
+- iconv (http://www.gnu.org/software/libiconv/) [ optional (required by libxml2) ]
+- oci (optional, http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html)
+- libtiff (optional)
+- libgeotiff (optional)
+
+   Options for Boost include BoostPro (free win32 installer, no x64) or the internal "BCP'ed" extract in PDAL.
+   One option for all the other dependencies is OSGeo4W (free, win32 installer, no x4 -- see "Basic Build Steps" above).
+
+2.  Having staged the above libs, you  need to specify where they are by editing the appropriate lines in the "config.bat" file.
+    Each optional library has a switch (e.g. "-DWITH_LASZIP=ON"), and definitions for an include directory and a library directory
+    (e.g. LASZIP_INCLUDE_DIR and LASZIP_LIBRARY).  Check these are specified correctly.
+
+3.  While you're still in config.bat, configure the "Generator" for CMake. 
+:: 
+   :: Pick your Generator.  NMake will pick up architecture (x32, x64) from your environment
+   rem set GENERATOR="NMake Makefiles"
+   rem set GENERATOR="Visual Studio 10 Win64"
+   set GENERATOR="Visual Studio 10"
+
+   set BUILD_TYPE=Release 
+   rem set BUILD_TYPE=Debug 
+
+3.  Run "config.bat" in the PDAL directory. This will create the VStudio solution file and .vcxproj files.
+::
+   c:\dev\PDAL> config.bat
+
+4.  Start Visual Studio and open PDAL.sln (or if you picked "NMake Makefiles", run NMake).
+
+Testing
+-------
+Set pdal_test as the default/startup application in Visual Studio
+Run with debug (F5)
+
+Troubleshooting
+---------------
+* Missing liblas.dll - double check that ``C:\OSGeo4W\bin`` is on your system PATH variable
+* libtiff.dll errors - double check that other versions of the lib are not on the path. For example, ArcGIS installs a version of libtiff that is not compatible.
+* "ERROR 4: Unable to open EPSG support file gcs.csv" or GDAL_DATA variable errors - Set GDAL_DATA system variable to ``C:\OSGeo4W\share\gdal``
+* PROJ errors - Set PROJ_LIB system variable to ``C:\OSGeo4W\share\proj``
+
+
+
+To Build the SWIG Bindings
+--------------------------
+Follow the instructions in csharp/README.txt.  Be sure and follow the note
+about modifying std_basic_string.i and setting the PDAL_SWIG_BOOST_HOME
+env var.

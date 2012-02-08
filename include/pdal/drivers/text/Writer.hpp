@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -32,93 +32,63 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/pipeline/Reader.hpp>
+#ifndef INCLUDED_DRIVERS_TEXT_WRITER_HPP
+#define INCLUDED_DRIVERS_TEXT_WRITER_HPP
 
-#include <pdal/PipelineReader.hpp>
+#include <pdal/Writer.hpp>
+#include <pdal/FileUtils.hpp>
+
+#include <boost/scoped_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
+
+namespace pdal { namespace drivers { namespace text {
 
 
-namespace pdal { namespace drivers { namespace pipeline {
-
-
-Reader::Reader(const Options& options)
-    : pdal::Reader(options)
-    , m_filename(options.getValueOrThrow<std::string>("filename"))
-    , m_manager(NULL)
+class text_driver_error : public pdal_error
 {
-    return;
-}
+public:
+    text_driver_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
 
 
-Reader::~Reader()
+typedef boost::shared_ptr<std::ostream> FileStreamPtr;
+
+class PDAL_DLL Writer : public pdal::Writer
 {
-    m_manager.reset();
-    return;
-}
+public:
+    SET_STAGE_NAME("drivers.text.writer", "Text Writer")
+
+    Writer(Stage& prevStage, const Options&);
+    ~Writer();
+
+    virtual void initialize();
+    virtual const Options getDefaultOptions() const;
+
+    // for dumping
+    virtual boost::property_tree::ptree toPTree() const;
 
 
-void Reader::initialize()
-{
-    pdal::Reader::initialize();
+protected:
+    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
+    virtual boost::uint32_t writeBuffer(const PointBuffer&);
+    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
-    boost::scoped_ptr<PipelineManager> tmp(new PipelineManager());
-    m_manager.swap(tmp);
+private:
 
-    PipelineReader xmlreader(*m_manager);
-    bool isWriter = xmlreader.readPipeline(m_filename);
-    if (isWriter)
-    {
-        throw pdal_error("pipeline file is not a Reader");
-    }
-    m_stage = m_manager->getStage();
-    m_stage->initialize();
+    Writer& operator=(const Writer&); // not implemented
+    Writer(const Writer&); // not implemented
 
-    setSchema( m_stage->getSchema() );
-
-    setNumPoints(m_stage->getNumPoints());
-    setPointCountType(m_stage->getPointCountType());
-    setBounds(m_stage->getBounds());
-	setSpatialReference(m_stage->getSpatialReference());
-
-    return;
-}
-
-
-const Options Reader::getDefaultOptions() const
-{
-    Options options;
-    return options;
-}
-
-bool Reader::supportsIterator (StageIteratorType t) const
-{   
-    return m_stage->supportsIterator(t);
-}
-
-
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
-{
-    return m_stage->createSequentialIterator();
-}
-
-
-pdal::StageRandomIterator* Reader::createRandomIterator() const
-{
-    return m_stage->createRandomIterator();
-}
-
-void Reader::addDefaultDimensions()
-{
-
-}
-
-
-boost::property_tree::ptree Reader::toPTree() const
-{
-    boost::property_tree::ptree tree = pdal::Reader::toPTree();
-
-    tree.add("filename", m_filename);
-
-    return tree;
-}
+	std::string getStringRepresentation( PointBuffer const& data, 
+	                                     Dimension const& d, 
+										 std::size_t pointIndex) const;
+	
+	void WriteHeader(pdal::Schema const& schema);
+	FileStreamPtr m_stream;
+	bool m_wrote_header;
+};
 
 } } } // namespaces
+
+#endif

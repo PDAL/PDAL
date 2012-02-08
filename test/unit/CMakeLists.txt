@@ -51,6 +51,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     StreamManagerTest.cpp
     SupportTest.cpp
     TerraSolidTest.cpp
+    TextWriterTest.cpp
     UserCallbackTest.cpp
     UtilsTest.cpp
     VectorTest.cpp

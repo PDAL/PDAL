@@ -289,6 +289,24 @@ if (P2G_FOUND)
 endif()
 
 #
+# drivers/text
+#
+set(PDAL_TEXT_PATH drivers/text)
+set(PDAL_TEXT_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_TEXT_PATH})
+set(PDAL_TEXT_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_TEXT_PATH})
+
+set(PDAL_DRIVERS_TEXT_HPP
+  ${PDAL_TEXT_HEADERS}/Writer.hpp
+)
+
+set (PDAL_DRIVERS_TEXT_CPP 
+  ${PDAL_TEXT_SRC}/Writer.cpp
+)
+
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_TEXT_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_TEXT_HPP} )
+
+#
 # filters
 #
 

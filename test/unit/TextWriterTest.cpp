@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2012, Howard Butler (hobu@hobu.net)
 *
 * All rights reserved.
 *
@@ -32,93 +32,47 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/pipeline/Reader.hpp>
+#include <boost/test/unit_test.hpp>
 
-#include <pdal/PipelineReader.hpp>
-
-
-namespace pdal { namespace drivers { namespace pipeline {
+#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/text/Writer.hpp>
 
 
-Reader::Reader(const Options& options)
-    : pdal::Reader(options)
-    , m_filename(options.getValueOrThrow<std::string>("filename"))
-    , m_manager(NULL)
+#include "Support.hpp"
+
+using namespace pdal;
+
+BOOST_AUTO_TEST_SUITE(TextWriterTest)
+
+BOOST_AUTO_TEST_CASE(TextWriterTest_test_1)
 {
-    return;
-}
+
+    pdal::drivers::las::Reader reader(Support::datapath("autzen-point-format-3.las"));
+    
+    pdal::Options options;
+
+    pdal::Option quote("quote_header", true, "");
+	
+	std::string output_file(Support::temppath("autzen-point-format-3.txt"));
+	pdal::Option filename("filename", output_file, "");
+	options.add(quote);
+	options.add(filename);
+	
+	pdal::drivers::text::Writer writer(reader, options);
+	writer.initialize();
+	writer.write(reader.getNumPoints());
 
 
-Reader::~Reader()
-{
-    m_manager.reset();
-    return;
-}
+    bool were_equal = Support::compare_text_files(output_file, Support::datapath("autzen-point-format-3.txt"));
+    BOOST_CHECK(were_equal);
+    if (were_equal)
+        pdal::FileUtils::deleteFile(output_file);
+	else
+		std::cout << "comparison of " << Support::datapath("autzen-point-format-3.txt") << " and " << output_file << " failed.";
 
-
-void Reader::initialize()
-{
-    pdal::Reader::initialize();
-
-    boost::scoped_ptr<PipelineManager> tmp(new PipelineManager());
-    m_manager.swap(tmp);
-
-    PipelineReader xmlreader(*m_manager);
-    bool isWriter = xmlreader.readPipeline(m_filename);
-    if (isWriter)
-    {
-        throw pdal_error("pipeline file is not a Reader");
-    }
-    m_stage = m_manager->getStage();
-    m_stage->initialize();
-
-    setSchema( m_stage->getSchema() );
-
-    setNumPoints(m_stage->getNumPoints());
-    setPointCountType(m_stage->getPointCountType());
-    setBounds(m_stage->getBounds());
-	setSpatialReference(m_stage->getSpatialReference());
 
     return;
 }
 
 
-const Options Reader::getDefaultOptions() const
-{
-    Options options;
-    return options;
-}
-
-bool Reader::supportsIterator (StageIteratorType t) const
-{   
-    return m_stage->supportsIterator(t);
-}
-
-
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
-{
-    return m_stage->createSequentialIterator();
-}
-
-
-pdal::StageRandomIterator* Reader::createRandomIterator() const
-{
-    return m_stage->createRandomIterator();
-}
-
-void Reader::addDefaultDimensions()
-{
-
-}
-
-
-boost::property_tree::ptree Reader::toPTree() const
-{
-    boost::property_tree::ptree tree = pdal::Reader::toPTree();
-
-    tree.add("filename", m_filename);
-
-    return tree;
-}
-
-} } } // namespaces
+BOOST_AUTO_TEST_SUITE_END()

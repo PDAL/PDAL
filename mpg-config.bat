@@ -13,9 +13,9 @@ set BUILD_TYPE=Debug
 
 :: Set some useful path variables
 ::    "utils" is where you might have libraries installed, like Boost
-::    "dev" is where you build things yourself, like PDAL and laszip
-set UTILS_DIR=d:\utils
-set DEV_DIR=d:\dev
+::    "dev" is where you build things yourself, like PDAL and LASzip
+set UTILS_DIR=c:\utils
+set DEV_DIR=c:\dev
 
 
 :: Where is your OSGeo4W installed?
@@ -31,11 +31,11 @@ set BOOST_DIR=%UTILS_DIR%\boost_1_47
 set FREEGLUT_DIR=%DEV_DIR%\freeglut-2.6.0-3.mp
 set GLUT_DIR=%DEV_DIR%\freeglut-2.6.0-3.mp
 
-:: Where is LASZIP?  (can be either from OSGeo4W or your own build tree)
-rem  set LASZIP_LIBRARY=%OSGEO4W_DIR%\laszip\laszip.lib
-rem  set LASZIP_INCLUDE_DIR=%OSGEO4W_DIR%\laszip\include
-set LASZIP_LIBRARY=%DEV_DIR%\laszip\bin\Debug\Debug\laszip.lib
-set LASZIP_INCLUDE_DIR=%DEV_DIR%\laszip\include
+:: Where is LASzip?  (can be either from OSGeo4W or your own build tree)
+rem  set LASZIP_LIBRARY=%OSGEO4W_DIR%\LASzip\laszip.lib
+rem  set LASZIP_INCLUDE_DIR=%OSGEO4W_DIR%\LASzip\include
+set LASZIP_LIBRARY=%DEV_DIR%\LASzip\bin\Debug\Debug\laszip.lib
+set LASZIP_INCLUDE_DIR=%DEV_DIR%\LASzip\include
 
 
 :: Where is LIBLAS?  (can be either from OSGeo4W or your own build tree)
