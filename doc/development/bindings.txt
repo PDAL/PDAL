@@ -1,4 +1,4 @@
-.. _bindings:
+.. _development_bindings:
 
 ========
 Bindings

@@ -1,4 +1,4 @@
-.. _stages:
+.. _development_stages:
 
 ===========================
 PDAL Project Notes: Stages

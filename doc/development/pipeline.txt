@@ -1,4 +1,4 @@
-.. _pipeline:
+.. _development_pipeline:
 
 =============================
 PDAL Project Notes: Pipeline

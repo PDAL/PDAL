@@ -1,4 +1,4 @@
-.. _windows:
+.. _building_windows:
 
 =====================
 Bulding under Windows

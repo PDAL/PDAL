@@ -1,4 +1,4 @@
-.. _core-classes:
+.. _development_coreclasses:
 
 ============
 Core Classes

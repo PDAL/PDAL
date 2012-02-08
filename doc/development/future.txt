@@ -1,4 +1,4 @@
-.. _future:
+.. _development_future:
 
 ===========================
 PDAL Project Notes: Future
@@ -9,4 +9,4 @@ This Note is just a dumping ground for things that have yet to be discussed.
 * SSE?
 
 * Use case (9b): same as (9a), but as an in-place operation.  This is a
-tricky one, if we want to do it, because it doesn't fit the pipeline model.
+  tricky one, if we want to do it, because it doesn't fit the pipeline model.

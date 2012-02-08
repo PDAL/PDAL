@@ -1,4 +1,4 @@
-.. _project_management:
+.. _development_projectmanagement:
 
 ==================
 Project Management
@@ -7,7 +7,7 @@ Project Management
 We holds these truths to be self-evident:
 
 * We recognize there are often trade-offs to be made
-between features, performance, and maintainability.
+  between features, performance, and maintainability.
 
 * We strive for consensus in all decisions.
 

@@ -1,4 +1,4 @@
-.. _apps:
+.. _development_apps:
 
 =========================
 PDAL Project Notes: Apps

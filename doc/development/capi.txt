@@ -1,4 +1,4 @@
-.. _capi:
+.. _development_capi:
 
 =======
 C API

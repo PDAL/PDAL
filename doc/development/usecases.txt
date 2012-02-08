@@ -1,4 +1,4 @@
-.. _use-cases:
+.. _development_usecases:
 
 ================================
 PDAL Project Notes: Use Cases

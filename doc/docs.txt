@@ -10,10 +10,11 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
+   index
    building/index
    tutorial/index
    development/index
-   download
+   other/index
    api/index
   
 Indices and tables

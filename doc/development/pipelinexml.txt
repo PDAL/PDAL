@@ -1,4 +1,4 @@
-.. _pipeline_xml:
+.. _development_pipelinexml:
 
 ============
 Pipeline XML
@@ -18,10 +18,10 @@ We have two use cases specifically in mind:
     * a user can provide XML for a reader
       pipeline, construct it via a simple call to the PipelineManager API,
       and then use the Stage read() function to perform the read and and
-	  then do any processing of the points.  This style of operation
-	  is very appropriate for using PDAL from within environments
-	  like Python where the focus is on just getting the points,
-	  as opposed to complex pipeline construction.
+      then do any processing of the points.  This style of operation
+      is very appropriate for using PDAL from within environments
+      like Python where the focus is on just getting the points,
+      as opposed to complex pipeline construction.
 
 
 Examples
@@ -143,8 +143,9 @@ Syntax Specification
 
     * attributes:
 	
-		* the "name" attribute must appear exactly once; the value of this
-          attribute shall be the name of the option, e.g. "filename" 
+        * the "name" attribute must appear exactly once; the value of this
+          attribute shall be the name of the option, e.g. "filename"
+ 
     * no child elements
 	
     * content:

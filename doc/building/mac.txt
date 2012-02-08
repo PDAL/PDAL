@@ -1,4 +1,4 @@
-.. _mac:
+.. _building_mac:
 
 =====================
 Bulding under Mac
