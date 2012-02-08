@@ -382,10 +382,8 @@ set (PDAL_PLANG_CPP
   ${PDAL_FILTERS_SRC}/Programmable.cpp  
 )
 
-if(PDAL_HAVE_PLANG)
 list (APPEND PDAL_CPP ${PDAL_PLANG_CPP} )
 list (APPEND PDAL_HPP ${PDAL_PLANG_HPP} )
-endif()
 
 #
 # config

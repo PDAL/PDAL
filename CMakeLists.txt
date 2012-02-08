@@ -174,46 +174,38 @@ endif(APPLE)
 #------------------------------------------------------------------------------
 
 if(NOT BOOST_ROOT)
-  add_subdirectory(boost)
-  set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/boost)
-  find_package(Boost 1.48)
-  set(Boost_LIBRARIES ${PROJECT_SOURCE_DIR}/bin/libpdalboost.a)
-  include_directories(${Boost_INCLUDE_DIRS})
-else()
+  
+  if (NOT BOOST_EMBED)
+  find_package(Boost 1.48 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
+  endif()
+  
+  if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
 
-# Default to using static, multithreaded libraries for 
-# linking under MSVC.  This is because we show users how to 
-# use boostpro.com installer and install those options when linking 
-# on windows in the compilation documentation.
-if(WIN32)
-  if (MSVC)
-    set(Boost_USE_STATIC_LIBS   ON)
-    set(Boost_USE_MULTITHREADED ON)
-  endif(MSVC)
-endif(WIN32)
+    # make these available for the user to set.
+    mark_as_advanced(CLEAR Boost_INCLUDE_DIR) 
+    mark_as_advanced(CLEAR Boost_LIBRARY_DIRS) 
+    link_directories(${Boost_LIBRARY_DIRS})
 
-# BUG: are there other Boost components we're using?
-find_package(Boost 1.41 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random REQUIRED)
-
-if(Boost_FOUND AND Boost_PROGRAM_OPTIONS_FOUND)
-  include_directories(${Boost_INCLUDE_DIRS})
-endif()
-
-# make these available for the user to set.
-mark_as_advanced(CLEAR Boost_INCLUDE_DIR) 
-mark_as_advanced(CLEAR Boost_LIBRARY_DIRS) 
-link_directories(${Boost_LIBRARY_DIRS}) 
-
-# plang requires boost > 1.45 or so for spirit/qi
-set(WITH_PLANG FALSE CACHE BOOL "Choose if PLANG should be build")
-
-if (WITH_PLANG)
-if(Boost_MINOR_VERSION GREATER 45)
-set(PDAL_HAVE_PLANG 1)
-endif()
-endif()
+  # Default to using static, multithreaded libraries for 
+  # linking under MSVC.  This is because we show users how to 
+  # use boostpro.com installer and install those options when linking 
+  # on windows in the compilation documentation.
+  if(WIN32)
+    if (MSVC)
+      set(Boost_USE_STATIC_LIBS   ON)
+      set(Boost_USE_MULTITHREADED ON)
+    endif(MSVC)
+  endif(WIN32)
+  
+  else()
+    add_subdirectory(boost)
+    set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/boost)
+    find_package(Boost 1.48)
+    set(Boost_LIBRARIES ${PROJECT_SOURCE_DIR}/bin/libpdalboost.a)
+    include_directories(${Boost_INCLUDE_DIRS})
+  endif()
 endif(NOT BOOST_ROOT)
-
 #------------------------------------------------------------------------------
 # settings for GDAL & related dependencies
 #------------------------------------------------------------------------------
