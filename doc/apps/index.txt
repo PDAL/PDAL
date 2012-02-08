@@ -1,23 +1,18 @@
-.. _docs:
+.. _apps_index:
 
 ******************************************************************************
-PDAL Documentation
+Applications 
 ******************************************************************************
 
+This section describes the command line apps that come with PDAL.
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
    
-   index
-   building/index
-   tutorial/index
-   apps/index
-   development/index
-   other/index
-   api/index
-  
+   cmdline  
+ 
 Indices and tables
 ==================
 

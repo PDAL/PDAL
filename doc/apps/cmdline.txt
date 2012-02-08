@@ -1,4 +1,4 @@
-.. _development_apps:
+.. _apps_cmdline:
 
 =========================
 Apps
