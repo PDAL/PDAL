@@ -1,7 +1,7 @@
 .. _development_pipeline:
 
 =============================
-PDAL Project Notes: Pipeline
+Pipeline
 =============================
 
 A common design pattern for projects like PDAL is to provide a set of base

@@ -1,7 +1,7 @@
 .. _development_future:
 
 ===========================
-PDAL Project Notes: Future
+Future
 ===========================
 
 This Note is just a dumping ground for things that have yet to be discussed.

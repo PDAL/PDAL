@@ -1,7 +1,7 @@
 .. _development_usecases:
 
 ================================
-PDAL Project Notes: Use Cases
+Use Cases
 ================================
 
 This document lists some use cases that we would like PDAL to be able to
