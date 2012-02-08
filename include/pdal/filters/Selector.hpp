@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -32,63 +32,77 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_TEXT_WRITER_HPP
-#define INCLUDED_DRIVERS_TEXT_WRITER_HPP
+#ifndef INCLUDED_FILTERS_SELECTORFILTER_HPP
+#define INCLUDED_FILTERS_SELECTORFILTER_HPP
 
-#include <pdal/Writer.hpp>
-#include <pdal/FileUtils.hpp>
+#include <boost/shared_ptr.hpp>
 
-#include <boost/scoped_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/FilterIterator.hpp>
+#include <pdal/Utils.hpp>
 
-namespace pdal { namespace drivers { namespace text {
+#include <map>
 
+namespace pdal
+{
+    class PointBuffer;
+}
 
-class text_driver_error : public pdal_error
+namespace pdal { namespace filters {
+
+class PDAL_DLL Selector: public Filter
 {
 public:
-    text_driver_error(std::string const& msg)
-        : pdal_error(msg)
-    {}
+    SET_STAGE_NAME("filters.selector", "Dimension Selection Filter")
+
+
+    Selector(Stage& prevStage, const Options&);
+
+    virtual const Options getDefaultOptions() const;
+    virtual void initialize();
+
+    bool supportsIterator (StageIteratorType t) const
+    {   
+        if (t == StageIterator_Sequential ) return true;
+
+        return false;
+    }
+
+    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+
+    void processBuffer(const PointBuffer& srcData, PointBuffer& dstData) const;
+    
+private:
+    void checkImpedance();
+    
+
+    Selector& operator=(const Selector&); // not implemented
+    Selector(const Selector&); // not implemented
 };
 
 
-typedef boost::shared_ptr<std::ostream> FileStreamPtr;
+namespace iterators { namespace sequential {
 
-class PDAL_DLL Writer : public pdal::Writer
+
+class PDAL_DLL Selector : public pdal::FilterSequentialIterator
 {
 public:
-    SET_STAGE_NAME("drivers.text.writer", "Text Writer")
+    Selector(const pdal::filters::Selector& filter);
 
-    Writer(Stage& prevStage, const Options&);
-    ~Writer();
-
-    virtual void initialize();
-    virtual const Options getDefaultOptions() const;
-
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
-
-
-protected:
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
 
 private:
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
+    void alterSchema(pdal::PointBuffer&);
+    const pdal::filters::Selector& m_scalingFilter;
 
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
-
-	std::string getStringRepresentation( PointBuffer const& data, 
-	                                     Dimension const& d, 
-										 std::size_t pointIndex) const;
-	
-	void WriteHeader(pdal::Schema const& schema);
-	FileStreamPtr m_stream;
-	bool m_wrote_header;
 };
 
-} } } // namespaces
+
+} } // namespaces
+
+} } // namespaces
 
 #endif

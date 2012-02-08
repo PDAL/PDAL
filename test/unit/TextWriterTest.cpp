@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2012, Howard Butler (hobu@hobu.net)
 *
 * All rights reserved.
 *
@@ -32,63 +32,47 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_DRIVERS_TEXT_WRITER_HPP
-#define INCLUDED_DRIVERS_TEXT_WRITER_HPP
+#include <boost/test/unit_test.hpp>
 
-#include <pdal/Writer.hpp>
-#include <pdal/FileUtils.hpp>
-
-#include <boost/scoped_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
-
-namespace pdal { namespace drivers { namespace text {
+#include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/text/Writer.hpp>
 
 
-class text_driver_error : public pdal_error
+#include "Support.hpp"
+
+using namespace pdal;
+
+BOOST_AUTO_TEST_SUITE(TextWriterTest)
+
+BOOST_AUTO_TEST_CASE(TextWriterTest_test_1)
 {
-public:
-    text_driver_error(std::string const& msg)
-        : pdal_error(msg)
-    {}
-};
 
+    pdal::drivers::las::Reader reader(Support::datapath("autzen-point-format-3.las"));
+    
+    pdal::Options options;
 
-typedef boost::shared_ptr<std::ostream> FileStreamPtr;
-
-class PDAL_DLL Writer : public pdal::Writer
-{
-public:
-    SET_STAGE_NAME("drivers.text.writer", "Text Writer")
-
-    Writer(Stage& prevStage, const Options&);
-    ~Writer();
-
-    virtual void initialize();
-    virtual const Options getDefaultOptions() const;
-
-    // for dumping
-    virtual boost::property_tree::ptree toPTree() const;
-
-
-protected:
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
-    virtual boost::uint32_t writeBuffer(const PointBuffer&);
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
-
-private:
-
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
-
-	std::string getStringRepresentation( PointBuffer const& data, 
-	                                     Dimension const& d, 
-										 std::size_t pointIndex) const;
+    pdal::Option quote("quote_header", true, "");
 	
-	void WriteHeader(pdal::Schema const& schema);
-	FileStreamPtr m_stream;
-	bool m_wrote_header;
-};
+	std::string output_file(Support::temppath("autzen-point-format-3.txt"));
+	pdal::Option filename("filename", output_file, "");
+	options.add(quote);
+	options.add(filename);
+	
+	pdal::drivers::text::Writer writer(reader, options);
+	writer.initialize();
+	writer.write(reader.getNumPoints());
 
-} } } // namespaces
 
-#endif
+    bool were_equal = Support::compare_text_files(output_file, Support::datapath("autzen-point-format-3.txt"));
+    BOOST_CHECK(were_equal);
+    if (were_equal)
+        pdal::FileUtils::deleteFile(output_file);
+	else
+		std::cout << "comparison of " << Support::datapath("autzen-point-format-3.txt") << " and " << output_file << " failed.";
+
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()

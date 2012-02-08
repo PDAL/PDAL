@@ -43,6 +43,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     RangeTest.cpp
     ReprojectionFilterTest.cpp
     ScalingFilterTest.cpp
+    SelectorFilterTest.cpp
     SchemaLayoutTest.cpp
     SchemaTest.cpp
     SpatialReferenceTest.cpp
@@ -51,6 +52,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     StreamManagerTest.cpp
     SupportTest.cpp
     TerraSolidTest.cpp
+    TextWriterTest.cpp
     UserCallbackTest.cpp
     UtilsTest.cpp
     VectorTest.cpp
