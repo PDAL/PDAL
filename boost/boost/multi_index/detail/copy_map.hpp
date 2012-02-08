@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <functional>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -70,7 +70,7 @@ public:
   {
     if(!released){
       for(std::size_t i=0;i<n;++i){
-        boost::detail::allocator::destroy(&(spc.data()+i)->second->value());
+        pdalboost::detail::allocator::destroy(&(spc.data()+i)->second->value());
         deallocate((spc.data()+i)->second);
       }
     }
@@ -84,7 +84,7 @@ public:
     (spc.data()+n)->first=node;
     (spc.data()+n)->second=&*al_.allocate(1);
     BOOST_TRY{
-      boost::detail::allocator::construct(
+      pdalboost::detail::allocator::construct(
         &(spc.data()+n)->second->value(),node->value());
     }
     BOOST_CATCH(...){
@@ -112,7 +112,7 @@ public:
 private:
   typedef typename prevent_eti<
     Allocator,
-    typename boost::detail::allocator::rebind_to<
+    typename pdalboost::detail::allocator::rebind_to<
       Allocator,Node>::type
   >::type                                         allocator_type;
   typedef typename allocator_type::pointer        allocator_pointer;
@@ -135,6 +135,6 @@ private:
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

@@ -25,7 +25,7 @@
 #include <boost/mpl/contains.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace spirit { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace detail
 {
     template <int size>
     struct as_variant_impl;

@@ -24,7 +24,7 @@
 
 #include <boost/random/detail/disable_warnings.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace random {
 
 template<class IntType, IntType m>
@@ -84,7 +84,7 @@ public:
       return add(mult(a, x), c);
   }
 
-  static IntType pow(IntType a, boost::uintmax_t exponent)
+  static IntType pow(IntType a, pdalboost::uintmax_t exponent)
   {
       IntType result = 1;
       while(exponent != 0) {
@@ -129,10 +129,10 @@ private:
     BOOST_ASSERT(suppress_warnings == 0);
     IntType modulus = m + suppress_warnings;
     BOOST_ASSERT(modulus == m);
-    if(::boost::uintmax_t(modulus) <=
-        (::std::numeric_limits< ::boost::uintmax_t>::max)() / modulus)
+    if(::pdalboost::uintmax_t(modulus) <=
+        (::std::numeric_limits< ::pdalboost::uintmax_t>::max)() / modulus)
     {
-      return static_cast<IntType>(boost::uintmax_t(a) * b % modulus);
+      return static_cast<IntType>(pdalboost::uintmax_t(a) * b % modulus);
     } else {
       return static_cast<IntType>(detail::mulmod(a, b, modulus));
     }
@@ -209,7 +209,7 @@ private:
 };
 
 } // namespace random
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/random/detail/enable_warnings.hpp>
 

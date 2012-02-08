@@ -18,7 +18,7 @@
 #include <boost/mpl/apply_wrap.hpp>
 #include <boost/mpl/aux_/config/forwarding.hpp>
 
-namespace boost { namespace mpl { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { namespace aux {
 
 template<
       typename F

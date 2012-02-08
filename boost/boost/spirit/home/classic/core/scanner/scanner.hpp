@@ -13,11 +13,11 @@
 #include <boost/spirit/home/classic/namespace.hpp>
 #include <boost/spirit/home/classic/core/match.hpp>
 #include <boost/spirit/home/classic/core/non_terminal/parser_id.hpp>
-#include <boost/detail/iterator.hpp> // for boost::detail::iterator_traits
+#include <boost/detail/iterator.hpp> // for pdalboost::detail::iterator_traits
 
 #include <boost/spirit/home/classic/core/scanner/scanner_fwd.hpp>
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -219,11 +219,11 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
         typedef IteratorT iterator_t;
         typedef PoliciesT policies_t;
 
-        typedef typename boost::detail::
+        typedef typename pdalboost::detail::
             iterator_traits<IteratorT>::value_type value_t;
-        typedef typename boost::detail::
+        typedef typename pdalboost::detail::
             iterator_traits<IteratorT>::reference ref_t;
-        typedef typename boost::
+        typedef typename pdalboost::
             call_traits<IteratorT>::param_type iter_param_t;
 
         scanner(

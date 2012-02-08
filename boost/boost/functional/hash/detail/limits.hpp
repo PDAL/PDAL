@@ -23,8 +23,7 @@
 #include <float.h>
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace hash_detail
     {
         template <class T>

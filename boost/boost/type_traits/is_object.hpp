@@ -19,7 +19,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail {
 
@@ -28,25 +28,25 @@ struct is_object_impl
 {
 #ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
    BOOST_STATIC_CONSTANT(bool, value =
-      (::boost::type_traits::ice_and<
-         ::boost::type_traits::ice_not< ::boost::is_reference<T>::value>::value,
-         ::boost::type_traits::ice_not< ::boost::is_void<T>::value>::value,
-         ::boost::type_traits::ice_not< ::boost::is_function<T>::value>::value
+      (::pdalboost::type_traits::ice_and<
+         ::pdalboost::type_traits::ice_not< ::pdalboost::is_reference<T>::value>::value,
+         ::pdalboost::type_traits::ice_not< ::pdalboost::is_void<T>::value>::value,
+         ::pdalboost::type_traits::ice_not< ::pdalboost::is_function<T>::value>::value
       >::value));
 #else
    BOOST_STATIC_CONSTANT(bool, value =
-      (::boost::type_traits::ice_and<
-         ::boost::type_traits::ice_not< ::boost::is_reference<T>::value>::value,
-         ::boost::type_traits::ice_not< ::boost::is_void<T>::value>::value
+      (::pdalboost::type_traits::ice_and<
+         ::pdalboost::type_traits::ice_not< ::pdalboost::is_reference<T>::value>::value,
+         ::pdalboost::type_traits::ice_not< ::pdalboost::is_void<T>::value>::value
       >::value));
 #endif
 };
 
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_object,T,::boost::detail::is_object_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_object,T,::pdalboost::detail::is_object_impl<T>::value)
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

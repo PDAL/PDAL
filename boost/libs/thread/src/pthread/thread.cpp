@@ -25,8 +25,7 @@
 
 #include "timeconv.inl"
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         thread_data_base::~thread_data_base()
@@ -34,10 +33,10 @@ namespace boost
 
         struct thread_exit_callback_node
         {
-            boost::detail::thread_exit_function_base* func;
+            pdalboost::detail::thread_exit_function_base* func;
             thread_exit_callback_node* next;
 
-            thread_exit_callback_node(boost::detail::thread_exit_function_base* func_,
+            thread_exit_callback_node(pdalboost::detail::thread_exit_function_base* func_,
                                       thread_exit_callback_node* next_):
                 func(func_),next(next_)
             {}
@@ -45,14 +44,14 @@ namespace boost
 
         namespace
         {
-            boost::once_flag current_thread_tls_init_flag=BOOST_ONCE_INIT;
+            pdalboost::once_flag current_thread_tls_init_flag=BOOST_ONCE_INIT;
             pthread_key_t current_thread_tls_key;
 
             extern "C"
             {
                 static void tls_destructor(void* data)
                 {
-                    boost::detail::thread_data_base* thread_info=static_cast<boost::detail::thread_data_base*>(data);
+                    pdalboost::detail::thread_data_base* thread_info=static_cast<pdalboost::detail::thread_data_base*>(data);
                     if(thread_info)
                     {
                         while(!thread_info->tss_data.empty() || thread_info->thread_exit_callbacks)
@@ -94,15 +93,15 @@ namespace boost
             }
         }
         
-        boost::detail::thread_data_base* get_current_thread_data()
+        pdalboost::detail::thread_data_base* get_current_thread_data()
         {
-            boost::call_once(current_thread_tls_init_flag,create_current_thread_tls_key);
-            return (boost::detail::thread_data_base*)pthread_getspecific(current_thread_tls_key);
+            pdalboost::call_once(current_thread_tls_init_flag,create_current_thread_tls_key);
+            return (pdalboost::detail::thread_data_base*)pthread_getspecific(current_thread_tls_key);
         }
 
         void set_current_thread_data(detail::thread_data_base* new_data)
         {
-            boost::call_once(current_thread_tls_init_flag,create_current_thread_tls_key);
+            pdalboost::call_once(current_thread_tls_init_flag,create_current_thread_tls_key);
             BOOST_VERIFY(!pthread_setspecific(current_thread_tls_key,new_data));
         }
     }
@@ -113,7 +112,7 @@ namespace boost
         {
             static void* thread_proxy(void* param)
             {
-                boost::detail::thread_data_ptr thread_info = static_cast<boost::detail::thread_data_base*>(param)->self;
+                pdalboost::detail::thread_data_ptr thread_info = static_cast<pdalboost::detail::thread_data_base*>(param)->self;
                 thread_info->self.reset();
                 detail::set_current_thread_data(thread_info.get());
                 try
@@ -132,7 +131,7 @@ namespace boost
 
                 detail::tls_destructor(thread_info.get());
                 detail::set_current_thread_data(0);
-                boost::lock_guard<boost::mutex> lock(thread_info->data_mutex);
+                pdalboost::lock_guard<pdalboost::mutex> lock(thread_info->data_mutex);
                 thread_info->done=true;
                 thread_info->done_condition.notify_all();
                 return 0;
@@ -187,7 +186,7 @@ namespace boost
         if (res != 0)
         {
             thread_info->self.reset();
-            boost::throw_exception(thread_resource_error());
+            pdalboost::throw_exception(thread_resource_error());
         }
     }
 
@@ -411,7 +410,7 @@ namespace boost
             local_thread_info->interrupt_requested=true;
             if(local_thread_info->current_cond)
             {
-                boost::pthread::pthread_mutex_scoped_lock internal_lock(local_thread_info->cond_mutex);
+                pdalboost::pthread::pthread_mutex_scoped_lock internal_lock(local_thread_info->cond_mutex);
                 BOOST_VERIFY(!pthread_cond_broadcast(local_thread_info->current_cond));
             }
         }
@@ -451,13 +450,13 @@ namespace boost
     {
         thread::id get_id()
         {
-            boost::detail::thread_data_base* const thread_info=get_or_make_current_thread_data();
+            pdalboost::detail::thread_data_base* const thread_info=get_or_make_current_thread_data();
             return thread::id(thread_info?thread_info->shared_from_this():detail::thread_data_ptr());
         }
 
         void interruption_point()
         {
-            boost::detail::thread_data_base* const thread_info=detail::get_current_thread_data();
+            pdalboost::detail::thread_data_base* const thread_info=detail::get_current_thread_data();
             if(thread_info && thread_info->interrupt_enabled)
             {
                 lock_guard<mutex> lg(thread_info->data_mutex);
@@ -471,13 +470,13 @@ namespace boost
         
         bool interruption_enabled()
         {
-            boost::detail::thread_data_base* const thread_info=detail::get_current_thread_data();
+            pdalboost::detail::thread_data_base* const thread_info=detail::get_current_thread_data();
             return thread_info && thread_info->interrupt_enabled;
         }
         
         bool interruption_requested()
         {
-            boost::detail::thread_data_base* const thread_info=detail::get_current_thread_data();
+            pdalboost::detail::thread_data_base* const thread_info=detail::get_current_thread_data();
             if(!thread_info)
             {
                 return false;
@@ -558,7 +557,7 @@ namespace boost
         }
 
         void add_new_tss_node(void const* key,
-                              boost::shared_ptr<tss_cleanup_function> func,
+                              pdalboost::shared_ptr<tss_cleanup_function> func,
                               void* tss_data)
         {
             detail::thread_data_base* const current_thread_data(get_or_make_current_thread_data());
@@ -572,7 +571,7 @@ namespace boost
         }
         
         void set_tss_data(void const* key,
-                          boost::shared_ptr<tss_cleanup_function> func,
+                          pdalboost::shared_ptr<tss_cleanup_function> func,
                           void* tss_data,bool cleanup_existing)
         {
             if(tss_data_node* const current_node=find_tss_data(key))

@@ -50,7 +50,7 @@
 #include <ios>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     // This file deals with attribute related functions and meta-functions
@@ -207,13 +207,13 @@ namespace boost { namespace spirit { namespace traits
 
     // make sure unused variant parameters do not affect the outcome
     template <typename Expected>
-    struct is_weak_substitute<boost::detail::variant::void_, Expected>
+    struct is_weak_substitute<pdalboost::detail::variant::void_, Expected>
       : mpl::true_
     {};
 
     template <BOOST_VARIANT_ENUM_PARAMS(typename T), typename Expected>
     struct is_weak_substitute<
-            boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Expected>
+            pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Expected>
       : mpl::bool_<BOOST_PP_REPEAT(BOOST_VARIANT_LIMIT_TYPES
           , BOOST_SPIRIT_IS_WEAK_SUBSTITUTE, _) true>
     {};
@@ -260,12 +260,12 @@ namespace boost { namespace spirit { namespace traits
     {};
 
     template <BOOST_VARIANT_ENUM_PARAMS(typename T), typename Domain>
-    struct not_is_variant<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Domain>
+    struct not_is_variant<pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Domain>
       : mpl::false_
     {};
 
     template <typename T, typename Domain>
-    struct not_is_variant<boost::optional<T>, Domain>
+    struct not_is_variant<pdalboost::optional<T>, Domain>
       : not_is_variant<T, Domain>
     {};
 
@@ -277,7 +277,7 @@ namespace boost { namespace spirit { namespace traits
     {};
 
     template <typename T>
-    struct variant_type<boost::optional<T> >
+    struct variant_type<pdalboost::optional<T> >
       : variant_type<T>
     {};
 
@@ -295,7 +295,7 @@ namespace boost { namespace spirit { namespace traits
         {};
 
         template <typename Expected, typename Attribute>
-        struct attribute_is_compatible<Expected, boost::optional<Attribute> >
+        struct attribute_is_compatible<Expected, pdalboost::optional<Attribute> >
           : is_convertible<Attribute, Expected>
         {};
 
@@ -374,9 +374,9 @@ namespace boost { namespace spirit { namespace traits
     ///////////////////////////////////////////////////////////////////////////
     // return the type currently stored in the given variant
     template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
-    struct variant_which<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
+    struct variant_which<pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
     {
-        static int call(boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& v)
+        static int call(pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& v)
         {
             return v.which();
         }
@@ -395,7 +395,7 @@ namespace boost { namespace spirit { namespace traits
     {};
 
     template <typename T, typename Domain>
-    struct not_is_optional<boost::optional<T>, Domain>
+    struct not_is_optional<pdalboost::optional<T>, Domain>
       : mpl::false_
     {};
 
@@ -522,12 +522,12 @@ namespace boost { namespace spirit { namespace traits
     template <typename Iterator>
     struct attribute_size<iterator_range<Iterator> >
     {
-        typedef typename boost::detail::iterator_traits<Iterator>::
+        typedef typename pdalboost::detail::iterator_traits<Iterator>::
             difference_type type;
 
         static type call(iterator_range<Iterator> const& r)
         {
-            return boost::detail::distance(r.begin(), r.end());
+            return pdalboost::detail::distance(r.begin(), r.end());
         }
     };
 
@@ -596,18 +596,18 @@ namespace boost { namespace spirit { namespace traits
     ///////////////////////////////////////////////////////////////////////////
     // build_optional
     //
-    // Build a boost::optional from T. Return unused_type if T is unused_type.
+    // Build a pdalboost::optional from T. Return unused_type if T is unused_type.
     ///////////////////////////////////////////////////////////////////////////
     template <typename T>
     struct build_optional
     {
-        typedef boost::optional<T> type;
+        typedef pdalboost::optional<T> type;
     };
 
     template <typename T>
-    struct build_optional<boost::optional<T> >
+    struct build_optional<pdalboost::optional<T> >
     {
-        typedef boost::optional<T> type;
+        typedef pdalboost::optional<T> type;
     };
 
     template <>
@@ -785,7 +785,7 @@ namespace boost { namespace spirit { namespace traits
         template <typename Sequence, int size>
         struct build_collapsed_variant<Sequence, false, size>
         {
-            typedef boost::optional<
+            typedef pdalboost::optional<
                 typename spirit::detail::as_variant<
                     typename fusion::result_of::pop_front<Sequence>::type
                 >::type
@@ -811,7 +811,7 @@ namespace boost { namespace spirit { namespace traits
         template <typename Sequence>
         struct build_collapsed_variant<Sequence, false, 2>
         {
-            typedef boost::optional<
+            typedef pdalboost::optional<
                 typename mpl::deref<
                     typename mpl::next<
                         typename mpl::begin<Sequence>::type
@@ -837,7 +837,7 @@ namespace boost { namespace spirit { namespace traits
     ///////////////////////////////////////////////////////////////////////////
     // build_variant
     //
-    // Build a boost::variant from a fusion sequence. build_variant makes sure
+    // Build a pdalboost::variant from a fusion sequence. build_variant makes sure
     // that 1) all attributes in the variant are unique 2) puts the unused
     // attribute, if there is any, to the front and 3) collapses single element
     // variants, variant<T> to T.
@@ -945,7 +945,7 @@ namespace boost { namespace spirit { namespace traits
         static Attribute call(unused_type)
         {
              // synthesize the attribute/parameter
-            return boost::get(value_initialized<attribute_type>());
+            return pdalboost::get(value_initialized<attribute_type>());
         }
 
         template <typename T>
@@ -1108,9 +1108,9 @@ namespace boost { namespace spirit { namespace traits
 
     // optionals
     template <typename T>
-    struct clear_value<boost::optional<T> >
+    struct clear_value<pdalboost::optional<T> >
     {
-        static void call(boost::optional<T>& val)
+        static void call(pdalboost::optional<T>& val)
         {
             if (val)
                 val = none_t();   // leave optional uninitialized
@@ -1259,9 +1259,9 @@ namespace boost { namespace spirit { namespace traits
     };
 
     template <typename Out, typename T>
-    struct print_attribute_debug<Out, boost::optional<T> >
+    struct print_attribute_debug<Out, pdalboost::optional<T> >
     {
-        static void call(Out& out, boost::optional<T> const& val)
+        static void call(Out& out, pdalboost::optional<T> const& val)
         {
             if (val)
                 spirit::traits::print_attribute(out, *val);
@@ -1343,7 +1343,7 @@ namespace boost { namespace spirit { namespace traits
 }}}
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace result_of
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace result_of
 {
     template <typename Exposed, typename Transformed, typename Domain>
     struct pre_transform

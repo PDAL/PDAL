@@ -21,7 +21,7 @@
 
 # include <boost/static_assert.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //
 // Traversal Categories
@@ -150,7 +150,7 @@ struct iterator_category_to_traversal
   : mpl::eval_if< // if already convertible to a traversal tag, we're done.
         is_convertible<Cat,incrementable_traversal_tag>
       , mpl::identity<Cat>
-      , boost::detail::old_category_to_traversal<Cat>
+      , pdalboost::detail::old_category_to_traversal<Cat>
     >
 {};
 
@@ -158,7 +158,7 @@ struct iterator_category_to_traversal
 template <class Iterator = mpl::_1>
 struct iterator_traversal
   : iterator_category_to_traversal<
-        typename boost::detail::iterator_traits<Iterator>::iterator_category
+        typename pdalboost::detail::iterator_traits<Iterator>::iterator_category
     >
 {};
 
@@ -181,7 +181,7 @@ struct iterator_traversal<mpl::_>
 {};
 # endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/iterator/detail/config_undef.hpp>
 

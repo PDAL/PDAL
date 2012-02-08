@@ -32,8 +32,7 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     class recursive_mutex
     {
     private:
@@ -55,33 +54,33 @@ namespace boost
             int const init_attr_res=pthread_mutexattr_init(&attr);
             if(init_attr_res)
             {
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
             int const set_attr_res=pthread_mutexattr_settype(&attr,PTHREAD_MUTEX_RECURSIVE);
             if(set_attr_res)
             {
                 BOOST_VERIFY(!pthread_mutexattr_destroy(&attr));
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
             
             int const res=pthread_mutex_init(&m,&attr);
             if(res)
             {
                 BOOST_VERIFY(!pthread_mutexattr_destroy(&attr));
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
             BOOST_VERIFY(!pthread_mutexattr_destroy(&attr));
 #else
             int const res=pthread_mutex_init(&m,NULL);
             if(res)
             {
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
             int const res2=pthread_cond_init(&cond,NULL);
             if(res2)
             {
                 BOOST_VERIFY(!pthread_mutex_destroy(&m));
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
             is_locked=false;
             count=0;
@@ -121,7 +120,7 @@ namespace boost
 #else
         void lock()
         {
-            boost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
+            pdalboost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
             if(is_locked && pthread_equal(owner,pthread_self()))
             {
                 ++count;
@@ -139,7 +138,7 @@ namespace boost
 
         void unlock()
         {
-            boost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
+            pdalboost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
             if(!--count)
             {
                 is_locked=false;
@@ -149,7 +148,7 @@ namespace boost
         
         bool try_lock()
         {
-            boost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
+            pdalboost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
             if(is_locked && !pthread_equal(owner,pthread_self()))
             {
                 return false;
@@ -190,32 +189,32 @@ namespace boost
             int const init_attr_res=pthread_mutexattr_init(&attr);
             if(init_attr_res)
             {
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
             int const set_attr_res=pthread_mutexattr_settype(&attr,PTHREAD_MUTEX_RECURSIVE);
             if(set_attr_res)
             {
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
             
             int const res=pthread_mutex_init(&m,&attr);
             if(res)
             {
                 BOOST_VERIFY(!pthread_mutexattr_destroy(&attr));
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
             BOOST_VERIFY(!pthread_mutexattr_destroy(&attr));
 #else
             int const res=pthread_mutex_init(&m,NULL);
             if(res)
             {
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
             int const res2=pthread_cond_init(&cond,NULL);
             if(res2)
             {
                 BOOST_VERIFY(!pthread_mutex_destroy(&m));
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
             is_locked=false;
             count=0;
@@ -269,7 +268,7 @@ namespace boost
 #else
         void lock()
         {
-            boost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
+            pdalboost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
             if(is_locked && pthread_equal(owner,pthread_self()))
             {
                 ++count;
@@ -287,7 +286,7 @@ namespace boost
 
         void unlock()
         {
-            boost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
+            pdalboost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
             if(!--count)
             {
                 is_locked=false;
@@ -297,7 +296,7 @@ namespace boost
         
         bool try_lock()
         {
-            boost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
+            pdalboost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
             if(is_locked && !pthread_equal(owner,pthread_self()))
             {
                 return false;
@@ -311,7 +310,7 @@ namespace boost
         bool timed_lock(system_time const & abs_time)
         {
             struct timespec const timeout=detail::get_timespec(abs_time);
-            boost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
+            pdalboost::pthread::pthread_mutex_scoped_lock const local_lock(&m);
             if(is_locked && pthread_equal(owner,pthread_self()))
             {
                 ++count;

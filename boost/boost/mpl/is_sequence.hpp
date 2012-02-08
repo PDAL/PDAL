@@ -37,7 +37,7 @@
 
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 #if BOOST_WORKAROUND(BOOST_MSVC, <= 1300)
 
@@ -66,7 +66,7 @@ struct is_sequence
 #if BOOST_WORKAROUND(BOOST_MSVC, < 1300)
           aux::msvc_is_class<T> 
 #else
-          boost::is_class<T> 
+          pdalboost::is_class<T> 
 #endif
         , aux::is_sequence_impl<T>
         , bool_<false>

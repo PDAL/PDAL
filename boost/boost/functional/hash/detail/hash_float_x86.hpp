@@ -18,8 +18,7 @@
 # pragma once
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace hash_detail
     {
         inline void hash_float_combine(std::size_t& seed, std::size_t value)
@@ -29,14 +28,14 @@ namespace boost
 
         inline std::size_t float_hash_impl(float v)
         {
-            boost::uint32_t* ptr = (boost::uint32_t*)&v;
+            pdalboost::uint32_t* ptr = (pdalboost::uint32_t*)&v;
             std::size_t seed = *ptr;
             return seed;
         }
 
         inline std::size_t float_hash_impl(double v)
         {
-            boost::uint32_t* ptr = (boost::uint32_t*)&v;
+            pdalboost::uint32_t* ptr = (pdalboost::uint32_t*)&v;
             std::size_t seed = *ptr++;
             hash_float_combine(seed, *ptr);
             return seed;
@@ -44,10 +43,10 @@ namespace boost
 
         inline std::size_t float_hash_impl(long double v)
         {
-            boost::uint32_t* ptr = (boost::uint32_t*)&v;
+            pdalboost::uint32_t* ptr = (pdalboost::uint32_t*)&v;
             std::size_t seed = *ptr++;
             hash_float_combine(seed, *ptr++);
-            hash_float_combine(seed, *(boost::uint16_t*)ptr);
+            hash_float_combine(seed, *(pdalboost::uint16_t*)ptr);
             return seed;
         }
     }

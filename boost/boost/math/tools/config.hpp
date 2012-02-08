@@ -10,7 +10,7 @@
 #pragma once
 #endif
 
-#include <boost/cstdint.hpp> // for boost::uintmax_t
+#include <boost/cstdint.hpp> // for pdalboost::uintmax_t
 #include <boost/config.hpp>
 #include <boost/detail/workaround.hpp>
 #include <algorithm>  // for min and max
@@ -101,10 +101,10 @@
 #  include "boost/type.hpp"
 #  include "boost/non_type.hpp"
 
-#  define BOOST_MATH_EXPLICIT_TEMPLATE_TYPE(t)         boost::type<t>* = 0
-#  define BOOST_MATH_EXPLICIT_TEMPLATE_TYPE_SPEC(t)    boost::type<t>*
-#  define BOOST_MATH_EXPLICIT_TEMPLATE_NON_TYPE(t, v)  boost::non_type<t, v>* = 0
-#  define BOOST_MATH_EXPLICIT_TEMPLATE_NON_TYPE_SPEC(t, v)  boost::non_type<t, v>*
+#  define BOOST_MATH_EXPLICIT_TEMPLATE_TYPE(t)         pdalboost::type<t>* = 0
+#  define BOOST_MATH_EXPLICIT_TEMPLATE_TYPE_SPEC(t)    pdalboost::type<t>*
+#  define BOOST_MATH_EXPLICIT_TEMPLATE_NON_TYPE(t, v)  pdalboost::non_type<t, v>* = 0
+#  define BOOST_MATH_EXPLICIT_TEMPLATE_NON_TYPE_SPEC(t, v)  pdalboost::non_type<t, v>*
 
 #  define BOOST_MATH_APPEND_EXPLICIT_TEMPLATE_TYPE(t)         \
              , BOOST_MATH_EXPLICIT_TEMPLATE_TYPE(t)
@@ -228,16 +228,16 @@
    using std::floor;\
    using std::log10;\
    using std::sqrt;\
-   using boost::math::round;\
-   using boost::math::iround;\
-   using boost::math::lround;\
-   using boost::math::trunc;\
-   using boost::math::itrunc;\
-   using boost::math::ltrunc;\
-   using boost::math::modf;
+   using pdalboost::math::round;\
+   using pdalboost::math::iround;\
+   using pdalboost::math::lround;\
+   using pdalboost::math::trunc;\
+   using pdalboost::math::itrunc;\
+   using pdalboost::math::ltrunc;\
+   using pdalboost::math::modf;
 
 
-namespace boost{ namespace math{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace math{
 namespace tools
 {
 
@@ -259,13 +259,13 @@ void suppress_unused_variable_warning(const T&)
 {
 }
 
-}} // namespace boost namespace math
+}} // namespace pdalboost namespace math
 
 #if ((defined(__linux__) && !defined(__UCLIBC__)) || defined(__QNX__) || defined(__IBMCPP__)) && !defined(BOOST_NO_FENV_H)
 
    #include <boost/detail/fenv.hpp>
 
-   namespace boost{ namespace math{
+   namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace math{
    namespace detail
    {
    struct fpu_guard
@@ -286,7 +286,7 @@ void suppress_unused_variable_warning(const T&)
    } // namespace detail
    }} // namespaces
 
-#  define BOOST_FPU_EXCEPTION_GUARD boost::math::detail::fpu_guard local_guard_object;
+#  define BOOST_FPU_EXCEPTION_GUARD pdalboost::math::detail::fpu_guard local_guard_object;
 #  define BOOST_MATH_INSTRUMENT_FPU do{ fexcept_t cpu_flags; fegetexceptflag(&cpu_flags, FE_ALL_EXCEPT); BOOST_MATH_INSTRUMENT_VARIABLE(cpu_flags); } while(0); 
 #else // All other platforms.
 #  define BOOST_FPU_EXCEPTION_GUARD

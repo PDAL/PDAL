@@ -12,7 +12,7 @@
 #include <boost/spirit/home/classic/phoenix/tuples.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace phoenix {
+namespace pdalboostphoenix {
 
 //  These are forward declared here because we cannot include impl.hpp
 //  or operators.hpp yet but the actor's assignment operator and index
@@ -599,6 +599,6 @@ actor<BaseT>::operator()(unpack_tuple<TupleT> const &t) const
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}   //  namespace phoenix
+}   //  namespace pdalboostphoenix
 
 #endif

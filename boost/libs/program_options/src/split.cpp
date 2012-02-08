@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-namespace boost { namespace program_options { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options { namespace detail {
 
    template< class charT >
    std::vector<std::basic_string<charT> > 
@@ -21,12 +21,12 @@ namespace boost { namespace program_options { namespace detail {
          const std::basic_string<charT>& quote, 
          const std::basic_string<charT>& escape)
    {   
-      typedef boost::tokenizer< boost::escaped_list_separator<charT>, 
+      typedef pdalboost::tokenizer< pdalboost::escaped_list_separator<charT>, 
             typename std::basic_string<charT>::const_iterator, 
             std::basic_string<charT> >  tokenizerT;
          
       tokenizerT tok(cmdline.begin(), cmdline.end(), 
-                boost::escaped_list_separator< charT >(escape, seperator, quote));
+                pdalboost::escaped_list_separator< charT >(escape, seperator, quote));
          
       std::vector< std::basic_string<charT> > result;
       for (typename tokenizerT::iterator cur_token(tok.begin()), end_token(tok.end()); cur_token != end_token; ++cur_token) {
@@ -38,7 +38,7 @@ namespace boost { namespace program_options { namespace detail {
    
 }}}   // namespace
 
-namespace boost { namespace program_options {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
 
    // Take a command line string and splits in into tokens, according
    // to the given collection of seperators chars.

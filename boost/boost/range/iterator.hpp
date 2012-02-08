@@ -22,8 +22,7 @@
 #include <boost/type_traits/remove_const.hpp>
 #include <boost/mpl/eval_if.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #if BOOST_WORKAROUND(BOOST_MSVC, == 1310)
 
@@ -65,7 +64,7 @@ namespace boost
 #endif
     };
 
-} // namespace boost
+} // namespace pdalboost
 
 //#endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 

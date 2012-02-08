@@ -19,7 +19,7 @@
 #include <boost/mpl/aux_/config/workaround.hpp>
 #include <boost/mpl/aux_/config/msvc.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 // no default implementation; the definition is needed to make MSVC happy
 

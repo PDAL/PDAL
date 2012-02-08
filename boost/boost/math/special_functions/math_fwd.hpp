@@ -31,8 +31,7 @@
 
 #define BOOST_NO_MACRO_EXPAND /**/
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
    namespace math
    { // Math functions (in roughly alphabetic order).
 
@@ -710,19 +709,19 @@ namespace boost
    T float_distance(const T&, const T&);
 
     } // namespace math
-} // namespace boost
+} // namespace pdalboost
 
 #ifdef BOOST_HAS_LONG_LONG
 #define BOOST_MATH_DETAIL_LL_FUNC(Policy)\
    \
    template <class T>\
-   inline T modf(const T& v, boost::long_long_type* ipart){ using boost::math::modf; return modf(v, ipart, Policy()); }\
+   inline T modf(const T& v, pdalboost::long_long_type* ipart){ using pdalboost::math::modf; return modf(v, ipart, Policy()); }\
    \
    template <class T>\
-   inline boost::long_long_type lltrunc(const T& v){ using boost::math::lltrunc; return lltrunc(v, Policy()); }\
+   inline pdalboost::long_long_type lltrunc(const T& v){ using pdalboost::math::lltrunc; return lltrunc(v, Policy()); }\
    \
    template <class T>\
-   inline boost::long_long_type llround(const T& v){ using boost::math::llround; return llround(v, Policy()); }\
+   inline pdalboost::long_long_type llround(const T& v){ using pdalboost::math::llround; return llround(v, Policy()); }\
 
 #else
 #define BOOST_MATH_DETAIL_LL_FUNC(Policy)
@@ -733,336 +732,336 @@ namespace boost
    BOOST_MATH_DETAIL_LL_FUNC(Policy)\
    \
    template <class RT1, class RT2>\
-   inline typename boost::math::tools::promote_args<RT1, RT2>::type \
-   beta(RT1 a, RT2 b) { return ::boost::math::beta(a, b, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2>::type \
+   beta(RT1 a, RT2 b) { return ::pdalboost::math::beta(a, b, Policy()); }\
 \
    template <class RT1, class RT2, class A>\
-   inline typename boost::math::tools::promote_args<RT1, RT2, A>::type \
-   beta(RT1 a, RT2 b, A x){ return ::boost::math::beta(a, b, x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2, A>::type \
+   beta(RT1 a, RT2 b, A x){ return ::pdalboost::math::beta(a, b, x, Policy()); }\
 \
    template <class RT1, class RT2, class RT3>\
-   inline typename boost::math::tools::promote_args<RT1, RT2, RT3>::type \
-   betac(RT1 a, RT2 b, RT3 x) { return ::boost::math::betac(a, b, x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2, RT3>::type \
+   betac(RT1 a, RT2 b, RT3 x) { return ::pdalboost::math::betac(a, b, x, Policy()); }\
 \
    template <class RT1, class RT2, class RT3>\
-   inline typename boost::math::tools::promote_args<RT1, RT2, RT3>::type \
-   ibeta(RT1 a, RT2 b, RT3 x){ return ::boost::math::ibeta(a, b, x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2, RT3>::type \
+   ibeta(RT1 a, RT2 b, RT3 x){ return ::pdalboost::math::ibeta(a, b, x, Policy()); }\
 \
    template <class RT1, class RT2, class RT3>\
-   inline typename boost::math::tools::promote_args<RT1, RT2, RT3>::type \
-   ibetac(RT1 a, RT2 b, RT3 x){ return ::boost::math::ibetac(a, b, x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2, RT3>::type \
+   ibetac(RT1 a, RT2 b, RT3 x){ return ::pdalboost::math::ibetac(a, b, x, Policy()); }\
 \
    template <class T1, class T2, class T3, class T4>\
-   inline typename boost::math::tools::promote_args<T1, T2, T3, T4>::type  \
-   ibeta_inv(T1 a, T2 b, T3 p, T4* py){ return ::boost::math::ibeta_inv(a, b, p, py, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2, T3, T4>::type  \
+   ibeta_inv(T1 a, T2 b, T3 p, T4* py){ return ::pdalboost::math::ibeta_inv(a, b, p, py, Policy()); }\
 \
    template <class RT1, class RT2, class RT3>\
-   inline typename boost::math::tools::promote_args<RT1, RT2, RT3>::type \
-   ibeta_inv(RT1 a, RT2 b, RT3 p){ return ::boost::math::ibeta_inv(a, b, p, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2, RT3>::type \
+   ibeta_inv(RT1 a, RT2 b, RT3 p){ return ::pdalboost::math::ibeta_inv(a, b, p, Policy()); }\
 \
    template <class T1, class T2, class T3, class T4>\
-   inline typename boost::math::tools::promote_args<T1, T2, T3, T4>::type \
-   ibetac_inv(T1 a, T2 b, T3 q, T4* py){ return ::boost::math::ibetac_inv(a, b, q, py, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2, T3, T4>::type \
+   ibetac_inv(T1 a, T2 b, T3 q, T4* py){ return ::pdalboost::math::ibetac_inv(a, b, q, py, Policy()); }\
 \
    template <class RT1, class RT2, class RT3>\
-   inline typename boost::math::tools::promote_args<RT1, RT2, RT3>::type \
-   ibeta_inva(RT1 a, RT2 b, RT3 p){ return ::boost::math::ibeta_inva(a, b, p, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2, RT3>::type \
+   ibeta_inva(RT1 a, RT2 b, RT3 p){ return ::pdalboost::math::ibeta_inva(a, b, p, Policy()); }\
 \
    template <class T1, class T2, class T3>\
-   inline typename boost::math::tools::promote_args<T1, T2, T3>::type \
-   ibetac_inva(T1 a, T2 b, T3 q){ return ::boost::math::ibetac_inva(a, b, q, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2, T3>::type \
+   ibetac_inva(T1 a, T2 b, T3 q){ return ::pdalboost::math::ibetac_inva(a, b, q, Policy()); }\
 \
    template <class RT1, class RT2, class RT3>\
-   inline typename boost::math::tools::promote_args<RT1, RT2, RT3>::type \
-   ibeta_invb(RT1 a, RT2 b, RT3 p){ return ::boost::math::ibeta_invb(a, b, p, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2, RT3>::type \
+   ibeta_invb(RT1 a, RT2 b, RT3 p){ return ::pdalboost::math::ibeta_invb(a, b, p, Policy()); }\
 \
    template <class T1, class T2, class T3>\
-   inline typename boost::math::tools::promote_args<T1, T2, T3>::type \
-   ibetac_invb(T1 a, T2 b, T3 q){ return ::boost::math::ibetac_invb(a, b, q, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2, T3>::type \
+   ibetac_invb(T1 a, T2 b, T3 q){ return ::pdalboost::math::ibetac_invb(a, b, q, Policy()); }\
 \
    template <class RT1, class RT2, class RT3>\
-   inline typename boost::math::tools::promote_args<RT1, RT2, RT3>::type \
-   ibetac_inv(RT1 a, RT2 b, RT3 q){ return ::boost::math::ibetac_inv(a, b, q, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2, RT3>::type \
+   ibetac_inv(RT1 a, RT2 b, RT3 q){ return ::pdalboost::math::ibetac_inv(a, b, q, Policy()); }\
 \
    template <class RT1, class RT2, class RT3>\
-   inline typename boost::math::tools::promote_args<RT1, RT2, RT3>::type \
-   ibeta_derivative(RT1 a, RT2 b, RT3 x){ return ::boost::math::ibeta_derivative(a, b, x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2, RT3>::type \
+   ibeta_derivative(RT1 a, RT2 b, RT3 x){ return ::pdalboost::math::ibeta_derivative(a, b, x, Policy()); }\
 \
    template <class RT>\
-   inline typename boost::math::tools::promote_args<RT>::type erf(RT z) { return ::boost::math::erf(z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT>::type erf(RT z) { return ::pdalboost::math::erf(z, Policy()); }\
 \
    template <class RT>\
-   inline typename boost::math::tools::promote_args<RT>::type erfc(RT z){ return ::boost::math::erfc(z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT>::type erfc(RT z){ return ::pdalboost::math::erfc(z, Policy()); }\
 \
    template <class RT>\
-   inline typename boost::math::tools::promote_args<RT>::type erf_inv(RT z) { return ::boost::math::erf_inv(z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT>::type erf_inv(RT z) { return ::pdalboost::math::erf_inv(z, Policy()); }\
 \
    template <class RT>\
-   inline typename boost::math::tools::promote_args<RT>::type erfc_inv(RT z){ return ::boost::math::erfc_inv(z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT>::type erfc_inv(RT z){ return ::pdalboost::math::erfc_inv(z, Policy()); }\
 \
-   using boost::math::legendre_next;\
-\
-   template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type \
-   legendre_p(int l, T x){ return ::boost::math::legendre_p(l, x, Policy()); }\
+   using pdalboost::math::legendre_next;\
 \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type \
-   legendre_q(unsigned l, T x){ return ::boost::math::legendre_q(l, x, Policy()); }\
-\
-   using ::boost::math::legendre_next;\
+   inline typename pdalboost::math::tools::promote_args<T>::type \
+   legendre_p(int l, T x){ return ::pdalboost::math::legendre_p(l, x, Policy()); }\
 \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type \
-   legendre_p(int l, int m, T x){ return ::boost::math::legendre_p(l, m, x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type \
+   legendre_q(unsigned l, T x){ return ::pdalboost::math::legendre_q(l, x, Policy()); }\
 \
-   using ::boost::math::laguerre_next;\
+   using ::pdalboost::math::legendre_next;\
 \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type \
-   laguerre(unsigned n, T x){ return ::boost::math::laguerre(n, x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type \
+   legendre_p(int l, int m, T x){ return ::pdalboost::math::legendre_p(l, m, x, Policy()); }\
+\
+   using ::pdalboost::math::laguerre_next;\
+\
+   template <class T>\
+   inline typename pdalboost::math::tools::promote_args<T>::type \
+   laguerre(unsigned n, T x){ return ::pdalboost::math::laguerre(n, x, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::laguerre_result<T1, T2>::type \
-   laguerre(unsigned n, T1 m, T2 x) { return ::boost::math::laguerre(n, m, x, Policy()); }\
+   inline typename pdalboost::math::laguerre_result<T1, T2>::type \
+   laguerre(unsigned n, T1 m, T2 x) { return ::pdalboost::math::laguerre(n, m, x, Policy()); }\
 \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type \
-   hermite(unsigned n, T x){ return ::boost::math::hermite(n, x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type \
+   hermite(unsigned n, T x){ return ::pdalboost::math::hermite(n, x, Policy()); }\
 \
-   using boost::math::hermite_next;\
-\
-   template <class T1, class T2>\
-   inline std::complex<typename boost::math::tools::promote_args<T1, T2>::type> \
-   spherical_harmonic(unsigned n, int m, T1 theta, T2 phi){ return boost::math::spherical_harmonic(n, m, theta, phi, Policy()); }\
+   using pdalboost::math::hermite_next;\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type \
-   spherical_harmonic_r(unsigned n, int m, T1 theta, T2 phi){ return ::boost::math::spherical_harmonic_r(n, m, theta, phi, Policy()); }\
+   inline std::complex<typename pdalboost::math::tools::promote_args<T1, T2>::type> \
+   spherical_harmonic(unsigned n, int m, T1 theta, T2 phi){ return pdalboost::math::spherical_harmonic(n, m, theta, phi, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type \
-   spherical_harmonic_i(unsigned n, int m, T1 theta, T2 phi){ return boost::math::spherical_harmonic_i(n, m, theta, phi, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type \
+   spherical_harmonic_r(unsigned n, int m, T1 theta, T2 phi){ return ::pdalboost::math::spherical_harmonic_r(n, m, theta, phi, Policy()); }\
+\
+   template <class T1, class T2>\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type \
+   spherical_harmonic_i(unsigned n, int m, T1 theta, T2 phi){ return pdalboost::math::spherical_harmonic_i(n, m, theta, phi, Policy()); }\
 \
    template <class T1, class T2, class Policy>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type \
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type \
       spherical_harmonic_i(unsigned n, int m, T1 theta, T2 phi, const Policy& pol);\
 \
    template <class T1, class T2, class T3>\
-   inline typename boost::math::tools::promote_args<T1, T2, T3>::type \
-   ellint_rf(T1 x, T2 y, T3 z){ return ::boost::math::ellint_rf(x, y, z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2, T3>::type \
+   ellint_rf(T1 x, T2 y, T3 z){ return ::pdalboost::math::ellint_rf(x, y, z, Policy()); }\
 \
    template <class T1, class T2, class T3>\
-   inline typename boost::math::tools::promote_args<T1, T2, T3>::type \
-   ellint_rd(T1 x, T2 y, T3 z){ return ::boost::math::ellint_rd(x, y, z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2, T3>::type \
+   ellint_rd(T1 x, T2 y, T3 z){ return ::pdalboost::math::ellint_rd(x, y, z, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type \
-   ellint_rc(T1 x, T2 y){ return ::boost::math::ellint_rc(x, y, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type \
+   ellint_rc(T1 x, T2 y){ return ::pdalboost::math::ellint_rc(x, y, Policy()); }\
 \
    template <class T1, class T2, class T3, class T4>\
-   inline typename boost::math::tools::promote_args<T1, T2, T3, T4>::type \
-   ellint_rj(T1 x, T2 y, T3 z, T4 p){ return boost::math::ellint_rj(x, y, z, p, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2, T3, T4>::type \
+   ellint_rj(T1 x, T2 y, T3 z, T4 p){ return pdalboost::math::ellint_rj(x, y, z, p, Policy()); }\
 \
    template <typename T>\
-   inline typename boost::math::tools::promote_args<T>::type ellint_2(T k){ return boost::math::ellint_2(k, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type ellint_2(T k){ return pdalboost::math::ellint_2(k, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type ellint_2(T1 k, T2 phi){ return boost::math::ellint_2(k, phi, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type ellint_2(T1 k, T2 phi){ return pdalboost::math::ellint_2(k, phi, Policy()); }\
 \
    template <typename T>\
-   inline typename boost::math::tools::promote_args<T>::type ellint_1(T k){ return boost::math::ellint_1(k, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type ellint_1(T k){ return pdalboost::math::ellint_1(k, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type ellint_1(T1 k, T2 phi){ return boost::math::ellint_1(k, phi, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type ellint_1(T1 k, T2 phi){ return pdalboost::math::ellint_1(k, phi, Policy()); }\
 \
    template <class T1, class T2, class T3>\
-   inline typename boost::math::tools::promote_args<T1, T2, T3>::type ellint_3(T1 k, T2 v, T3 phi){ return boost::math::ellint_3(k, v, phi, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2, T3>::type ellint_3(T1 k, T2 v, T3 phi){ return pdalboost::math::ellint_3(k, v, phi, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type ellint_3(T1 k, T2 v){ return boost::math::ellint_3(k, v, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type ellint_3(T1 k, T2 v){ return pdalboost::math::ellint_3(k, v, Policy()); }\
 \
-   using boost::math::max_factorial;\
+   using pdalboost::math::max_factorial;\
    template <class RT>\
-   inline RT factorial(unsigned int i) { return boost::math::factorial<RT>(i, Policy()); }\
-   using boost::math::unchecked_factorial;\
+   inline RT factorial(unsigned int i) { return pdalboost::math::factorial<RT>(i, Policy()); }\
+   using pdalboost::math::unchecked_factorial;\
    template <class RT>\
-   inline RT double_factorial(unsigned i){ return boost::math::double_factorial<RT>(i, Policy()); }\
+   inline RT double_factorial(unsigned i){ return pdalboost::math::double_factorial<RT>(i, Policy()); }\
    template <class RT>\
-   inline typename boost::math::tools::promote_args<RT>::type falling_factorial(RT x, unsigned n){ return boost::math::falling_factorial(x, n, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT>::type falling_factorial(RT x, unsigned n){ return pdalboost::math::falling_factorial(x, n, Policy()); }\
    template <class RT>\
-   inline typename boost::math::tools::promote_args<RT>::type rising_factorial(RT x, unsigned n){ return boost::math::rising_factorial(x, n, Policy()); }\
-\
-   template <class RT>\
-   inline typename boost::math::tools::promote_args<RT>::type tgamma(RT z){ return boost::math::tgamma(z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT>::type rising_factorial(RT x, unsigned n){ return pdalboost::math::rising_factorial(x, n, Policy()); }\
 \
    template <class RT>\
-   inline typename boost::math::tools::promote_args<RT>::type tgamma1pm1(RT z){ return boost::math::tgamma1pm1(z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT>::type tgamma(RT z){ return pdalboost::math::tgamma(z, Policy()); }\
+\
+   template <class RT>\
+   inline typename pdalboost::math::tools::promote_args<RT>::type tgamma1pm1(RT z){ return pdalboost::math::tgamma1pm1(z, Policy()); }\
 \
    template <class RT1, class RT2>\
-   inline typename boost::math::tools::promote_args<RT1, RT2>::type tgamma(RT1 a, RT2 z){ return boost::math::tgamma(a, z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2>::type tgamma(RT1 a, RT2 z){ return pdalboost::math::tgamma(a, z, Policy()); }\
 \
    template <class RT>\
-   inline typename boost::math::tools::promote_args<RT>::type lgamma(RT z, int* sign){ return boost::math::lgamma(z, sign, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT>::type lgamma(RT z, int* sign){ return pdalboost::math::lgamma(z, sign, Policy()); }\
 \
    template <class RT>\
-   inline typename boost::math::tools::promote_args<RT>::type lgamma(RT x){ return boost::math::lgamma(x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT>::type lgamma(RT x){ return pdalboost::math::lgamma(x, Policy()); }\
 \
    template <class RT1, class RT2>\
-   inline typename boost::math::tools::promote_args<RT1, RT2>::type tgamma_lower(RT1 a, RT2 z){ return boost::math::tgamma_lower(a, z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2>::type tgamma_lower(RT1 a, RT2 z){ return pdalboost::math::tgamma_lower(a, z, Policy()); }\
 \
    template <class RT1, class RT2>\
-   inline typename boost::math::tools::promote_args<RT1, RT2>::type gamma_q(RT1 a, RT2 z){ return boost::math::gamma_q(a, z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2>::type gamma_q(RT1 a, RT2 z){ return pdalboost::math::gamma_q(a, z, Policy()); }\
 \
    template <class RT1, class RT2>\
-   inline typename boost::math::tools::promote_args<RT1, RT2>::type gamma_p(RT1 a, RT2 z){ return boost::math::gamma_p(a, z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT1, RT2>::type gamma_p(RT1 a, RT2 z){ return pdalboost::math::gamma_p(a, z, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type tgamma_delta_ratio(T1 z, T2 delta){ return boost::math::tgamma_delta_ratio(z, delta, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type tgamma_delta_ratio(T1 z, T2 delta){ return pdalboost::math::tgamma_delta_ratio(z, delta, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type tgamma_ratio(T1 a, T2 b) { return boost::math::tgamma_ratio(a, b, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type tgamma_ratio(T1 a, T2 b) { return pdalboost::math::tgamma_ratio(a, b, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type gamma_p_derivative(T1 a, T2 x){ return boost::math::gamma_p_derivative(a, x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type gamma_p_derivative(T1 a, T2 x){ return pdalboost::math::gamma_p_derivative(a, x, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type gamma_p_inv(T1 a, T2 p){ return boost::math::gamma_p_inv(a, p, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type gamma_p_inv(T1 a, T2 p){ return pdalboost::math::gamma_p_inv(a, p, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type gamma_p_inva(T1 a, T2 p){ return boost::math::gamma_p_inva(a, p, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type gamma_p_inva(T1 a, T2 p){ return pdalboost::math::gamma_p_inva(a, p, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type gamma_q_inv(T1 a, T2 q){ return boost::math::gamma_q_inv(a, q, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type gamma_q_inv(T1 a, T2 q){ return pdalboost::math::gamma_q_inv(a, q, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type gamma_q_inva(T1 a, T2 q){ return boost::math::gamma_q_inva(a, q, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type gamma_q_inva(T1 a, T2 q){ return pdalboost::math::gamma_q_inva(a, q, Policy()); }\
 \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type digamma(T x){ return boost::math::digamma(x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type digamma(T x){ return pdalboost::math::digamma(x, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type \
-   hypot(T1 x, T2 y){ return boost::math::hypot(x, y, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type \
+   hypot(T1 x, T2 y){ return pdalboost::math::hypot(x, y, Policy()); }\
 \
    template <class RT>\
-   inline typename boost::math::tools::promote_args<RT>::type cbrt(RT z){ return boost::math::cbrt(z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<RT>::type cbrt(RT z){ return pdalboost::math::cbrt(z, Policy()); }\
 \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type log1p(T x){ return boost::math::log1p(x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type log1p(T x){ return pdalboost::math::log1p(x, Policy()); }\
 \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type log1pmx(T x){ return boost::math::log1pmx(x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type log1pmx(T x){ return pdalboost::math::log1pmx(x, Policy()); }\
 \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type expm1(T x){ return boost::math::expm1(x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type expm1(T x){ return pdalboost::math::expm1(x, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::tools::promote_args<T1, T2>::type \
-   powm1(const T1 a, const T2 z){ return boost::math::powm1(a, z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T1, T2>::type \
+   powm1(const T1 a, const T2 z){ return pdalboost::math::powm1(a, z, Policy()); }\
 \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type sqrt1pm1(const T& val){ return boost::math::sqrt1pm1(val, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type sqrt1pm1(const T& val){ return pdalboost::math::sqrt1pm1(val, Policy()); }\
 \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type sinc_pi(T x){ return boost::math::sinc_pi(x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type sinc_pi(T x){ return pdalboost::math::sinc_pi(x, Policy()); }\
 \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type sinhc_pi(T x){ return boost::math::sinhc_pi(x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type sinhc_pi(T x){ return pdalboost::math::sinhc_pi(x, Policy()); }\
 \
    template<typename T>\
-   inline typename boost::math::tools::promote_args<T>::type asinh(const T x){ return boost::math::asinh(x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type asinh(const T x){ return pdalboost::math::asinh(x, Policy()); }\
 \
    template<typename T>\
-   inline typename boost::math::tools::promote_args<T>::type acosh(const T x){ return boost::math::acosh(x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type acosh(const T x){ return pdalboost::math::acosh(x, Policy()); }\
 \
    template<typename T>\
-   inline typename boost::math::tools::promote_args<T>::type atanh(const T x){ return boost::math::atanh(x, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type atanh(const T x){ return pdalboost::math::atanh(x, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::detail::bessel_traits<T1, T2, Policy >::result_type cyl_bessel_j(T1 v, T2 x)\
-   { return boost::math::cyl_bessel_j(v, x, Policy()); }\
+   inline typename pdalboost::math::detail::bessel_traits<T1, T2, Policy >::result_type cyl_bessel_j(T1 v, T2 x)\
+   { return pdalboost::math::cyl_bessel_j(v, x, Policy()); }\
 \
    template <class T>\
-   inline typename boost::math::detail::bessel_traits<T, T, Policy >::result_type sph_bessel(unsigned v, T x)\
-   { return boost::math::sph_bessel(v, x, Policy()); }\
+   inline typename pdalboost::math::detail::bessel_traits<T, T, Policy >::result_type sph_bessel(unsigned v, T x)\
+   { return pdalboost::math::sph_bessel(v, x, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::detail::bessel_traits<T1, T2, Policy >::result_type \
-   cyl_bessel_i(T1 v, T2 x) { return boost::math::cyl_bessel_i(v, x, Policy()); }\
+   inline typename pdalboost::math::detail::bessel_traits<T1, T2, Policy >::result_type \
+   cyl_bessel_i(T1 v, T2 x) { return pdalboost::math::cyl_bessel_i(v, x, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::detail::bessel_traits<T1, T2, Policy >::result_type \
-   cyl_bessel_k(T1 v, T2 x) { return boost::math::cyl_bessel_k(v, x, Policy()); }\
+   inline typename pdalboost::math::detail::bessel_traits<T1, T2, Policy >::result_type \
+   cyl_bessel_k(T1 v, T2 x) { return pdalboost::math::cyl_bessel_k(v, x, Policy()); }\
 \
    template <class T1, class T2>\
-   inline typename boost::math::detail::bessel_traits<T1, T2, Policy >::result_type \
-   cyl_neumann(T1 v, T2 x){ return boost::math::cyl_neumann(v, x, Policy()); }\
+   inline typename pdalboost::math::detail::bessel_traits<T1, T2, Policy >::result_type \
+   cyl_neumann(T1 v, T2 x){ return pdalboost::math::cyl_neumann(v, x, Policy()); }\
 \
    template <class T>\
-   inline typename boost::math::detail::bessel_traits<T, T, Policy >::result_type \
-   sph_neumann(unsigned v, T x){ return boost::math::sph_neumann(v, x, Policy()); }\
+   inline typename pdalboost::math::detail::bessel_traits<T, T, Policy >::result_type \
+   sph_neumann(unsigned v, T x){ return pdalboost::math::sph_neumann(v, x, Policy()); }\
 \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type sin_pi(T x){ return boost::math::sin_pi(x); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type sin_pi(T x){ return pdalboost::math::sin_pi(x); }\
 \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type cos_pi(T x){ return boost::math::cos_pi(x); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type cos_pi(T x){ return pdalboost::math::cos_pi(x); }\
 \
-   using boost::math::fpclassify;\
-   using boost::math::isfinite;\
-   using boost::math::isinf;\
-   using boost::math::isnan;\
-   using boost::math::isnormal;\
-   using boost::math::signbit;\
-   using boost::math::sign;\
-   using boost::math::copysign;\
-   using boost::math::changesign;\
+   using pdalboost::math::fpclassify;\
+   using pdalboost::math::isfinite;\
+   using pdalboost::math::isinf;\
+   using pdalboost::math::isnan;\
+   using pdalboost::math::isnormal;\
+   using pdalboost::math::signbit;\
+   using pdalboost::math::sign;\
+   using pdalboost::math::copysign;\
+   using pdalboost::math::changesign;\
    \
    template <class T, class U>\
-   inline typename boost::math::tools::promote_args<T,U>::type expint(T const& z, U const& u)\
-   { return boost::math::expint(z, u, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T,U>::type expint(T const& z, U const& u)\
+   { return pdalboost::math::expint(z, u, Policy()); }\
    \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type expint(T z){ return boost::math::expint(z, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type expint(T z){ return pdalboost::math::expint(z, Policy()); }\
    \
    template <class T>\
-   inline typename boost::math::tools::promote_args<T>::type zeta(T s){ return boost::math::zeta(s, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type zeta(T s){ return pdalboost::math::zeta(s, Policy()); }\
    \
    template <class T>\
-   inline T round(const T& v){ using boost::math::round; return round(v, Policy()); }\
+   inline T round(const T& v){ using pdalboost::math::round; return round(v, Policy()); }\
    \
    template <class T>\
-   inline int iround(const T& v){ using boost::math::iround; return iround(v, Policy()); }\
+   inline int iround(const T& v){ using pdalboost::math::iround; return iround(v, Policy()); }\
    \
    template <class T>\
-   inline long lround(const T& v){ using boost::math::lround; return lround(v, Policy()); }\
+   inline long lround(const T& v){ using pdalboost::math::lround; return lround(v, Policy()); }\
    \
    template <class T>\
-   inline T trunc(const T& v){ using boost::math::trunc; return trunc(v, Policy()); }\
+   inline T trunc(const T& v){ using pdalboost::math::trunc; return trunc(v, Policy()); }\
    \
    template <class T>\
-   inline int itrunc(const T& v){ using boost::math::itrunc; return itrunc(v, Policy()); }\
+   inline int itrunc(const T& v){ using pdalboost::math::itrunc; return itrunc(v, Policy()); }\
    \
    template <class T>\
-   inline long ltrunc(const T& v){ using boost::math::ltrunc; return ltrunc(v, Policy()); }\
+   inline long ltrunc(const T& v){ using pdalboost::math::ltrunc; return ltrunc(v, Policy()); }\
    \
    template <class T>\
-   inline T modf(const T& v, T* ipart){ using boost::math::modf; return modf(v, ipart, Policy()); }\
+   inline T modf(const T& v, T* ipart){ using pdalboost::math::modf; return modf(v, ipart, Policy()); }\
    \
    template <class T>\
-   inline T modf(const T& v, int* ipart){ using boost::math::modf; return modf(v, ipart, Policy()); }\
+   inline T modf(const T& v, int* ipart){ using pdalboost::math::modf; return modf(v, ipart, Policy()); }\
    \
    template <class T>\
-   inline T modf(const T& v, long* ipart){ using boost::math::modf; return modf(v, ipart, Policy()); }\
+   inline T modf(const T& v, long* ipart){ using pdalboost::math::modf; return modf(v, ipart, Policy()); }\
    \
    template <int N, class T>\
-   inline typename boost::math::tools::promote_args<T>::type pow(T v){ return boost::math::pow<N>(v, Policy()); }\
+   inline typename pdalboost::math::tools::promote_args<T>::type pow(T v){ return pdalboost::math::pow<N>(v, Policy()); }\
    \
-   template <class T> T nextafter(const T& a, const T& b){ return boost::math::nextafter(a, b, Policy()); }\
-   template <class T> T float_next(const T& a){ return boost::math::float_next(a, Policy()); }\
-   template <class T> T float_prior(const T& a){ return boost::math::float_prior(a, Policy()); }\
-   template <class T> T float_distance(const T& a, const T& b){ return boost::math::float_distance(a, b, Policy()); }\
+   template <class T> T nextafter(const T& a, const T& b){ return pdalboost::math::nextafter(a, b, Policy()); }\
+   template <class T> T float_next(const T& a){ return pdalboost::math::float_next(a, Policy()); }\
+   template <class T> T float_prior(const T& a){ return pdalboost::math::float_prior(a, Policy()); }\
+   template <class T> T float_distance(const T& a, const T& b){ return pdalboost::math::float_distance(a, b, Policy()); }\
 
 
 #endif // BOOST_MATH_SPECIAL_MATH_FWD_HPP

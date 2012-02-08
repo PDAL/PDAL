@@ -27,7 +27,7 @@
 
 #if !defined(BOOST_ALL_NO_LIB) && !defined(BOOST_TEST_NO_LIB) && \
     !defined(BOOST_TEST_SOURCE) && !defined(BOOST_TEST_INCLUDED)
-#  define BOOST_LIB_NAME boost_unit_test_framework
+#  define BOOST_LIB_NAME pdalboost_unit_test_framework
 
 #  if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_TEST_DYN_LINK)
 #    define BOOST_DYN_LINK
@@ -41,7 +41,7 @@
 // **************                  unit_test_main              ************** //
 // ************************************************************************** //
 
-namespace boost { namespace unit_test {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace unit_test {
 
 int BOOST_TEST_DECL unit_test_main( init_unit_test_func init_func, int argc, char* argv[] );
 
@@ -56,7 +56,7 @@ int BOOST_TEST_DECL unit_test_main( init_unit_test_func init_func, int argc, cha
 int BOOST_TEST_CALL_DECL
 main( int argc, char* argv[] )
 {
-    return ::boost::unit_test::unit_test_main( &init_unit_test, argc, argv );
+    return ::pdalboost::unit_test::unit_test_main( &init_unit_test, argc, argv );
 }
 
 //____________________________________________________________________________//

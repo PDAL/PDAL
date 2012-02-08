@@ -18,8 +18,7 @@
 // 23/02/03 thw
 //
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
   namespace iterators
   {
@@ -79,7 +78,7 @@ namespace boost
 
   } // namespace iterators
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/iterator/detail/config_undef.hpp>
 

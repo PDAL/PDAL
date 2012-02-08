@@ -17,7 +17,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail {
 
@@ -26,14 +26,14 @@ struct has_trivial_ctor_impl
 {
 #ifdef BOOST_HAS_TRIVIAL_CONSTRUCTOR
    BOOST_STATIC_CONSTANT(bool, value =
-      (::boost::type_traits::ice_or<
-         ::boost::is_pod<T>::value,
+      (::pdalboost::type_traits::ice_or<
+         ::pdalboost::is_pod<T>::value,
          BOOST_HAS_TRIVIAL_CONSTRUCTOR(T)
       >::value));
 #else
    BOOST_STATIC_CONSTANT(bool, value =
-      (::boost::type_traits::ice_or<
-         ::boost::is_pod<T>::value,
+      (::pdalboost::type_traits::ice_or<
+         ::pdalboost::is_pod<T>::value,
          false
       >::value));
 #endif
@@ -41,10 +41,10 @@ struct has_trivial_ctor_impl
 
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_trivial_constructor,T,::boost::detail::has_trivial_ctor_impl<T>::value)
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_trivial_default_constructor,T,::boost::detail::has_trivial_ctor_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_trivial_constructor,T,::pdalboost::detail::has_trivial_ctor_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_trivial_default_constructor,T,::pdalboost::detail::has_trivial_ctor_impl<T>::value)
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

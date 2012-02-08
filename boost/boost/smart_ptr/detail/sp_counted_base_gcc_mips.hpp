@@ -22,8 +22,7 @@
 
 #include <boost/detail/sp_typeinfo.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -176,6 +175,6 @@ public:
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // #ifndef BOOST_DETAIL_SP_COUNTED_BASE_GCC_MIPS_HPP_INCLUDED

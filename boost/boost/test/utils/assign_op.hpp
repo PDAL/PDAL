@@ -15,7 +15,7 @@
 #ifndef BOOST_TEST_ASSIGN_OP_033005GER
 #define BOOST_TEST_ASSIGN_OP_033005GER
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -35,7 +35,7 @@ assign_op( T& t, S const& s, long )
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_TEST_ASSIGN_OP_033005GER
 

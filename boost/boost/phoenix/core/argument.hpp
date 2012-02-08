@@ -15,7 +15,7 @@
 #include <boost/phoenix/core/terminal.hpp>
 #include <boost/mpl/int.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     ////////////////////////////////////////////////////////////////////////////
     //
@@ -45,22 +45,22 @@ namespace boost { namespace phoenix
     };
 }}
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     template <int I>
-    struct is_placeholder<phoenix::argument<I> >
+    struct is_placeholder<pdalboostphoenix::argument<I> >
         : mpl::int_<I>
     {};
 }
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     namespace expression
     {
         template <int I>
         struct argument
-            : expression::terminal<phoenix::argument<I> >
+            : expression::terminal<pdalboostphoenix::argument<I> >
         {
-            typedef typename expression::terminal<phoenix::argument<I> >::type type;
+            typedef typename expression::terminal<pdalboostphoenix::argument<I> >::type type;
             static const type make()
             {
                 type const e = {{{}}};

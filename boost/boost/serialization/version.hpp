@@ -25,7 +25,7 @@
 
 #include <boost/type_traits/is_base_and_derived.hpp>
 
-namespace boost { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
 namespace serialization {
 
 struct basic_traits;
@@ -45,7 +45,7 @@ struct version
     // on basic traits below
     typedef
         BOOST_DEDUCED_TYPENAME mpl::eval_if<
-            is_base_and_derived<boost::serialization::basic_traits,T>,
+            is_base_and_derived<pdalboost::serialization::basic_traits,T>,
             traits_class_version< T >,
             mpl::int_<0>
         >::type type;
@@ -58,7 +58,7 @@ const int version<T>::value;
 #endif
 
 } // namespace serialization
-} // namespace boost
+} // namespace pdalboost
 
 /* note: at first it seemed that this would be a good place to trap
  * as an error an attempt to set a version # for a class which doesn't
@@ -78,7 +78,7 @@ const int version<T>::value;
 // specify the current version number for the class
 // version numbers limited to 8 bits !!!
 #define BOOST_CLASS_VERSION(T, N)                                      \
-namespace boost {                                                      \
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{                                                      \
 namespace serialization {                                              \
 template<>                                                             \
 struct version<T >                                                     \
@@ -87,9 +87,9 @@ struct version<T >                                                     \
     typedef mpl::integral_c_tag tag;                                   \
     BOOST_STATIC_CONSTANT(int, value = version::type::value);          \
     BOOST_MPL_ASSERT((                                                 \
-        boost::mpl::less<                                              \
-            boost::mpl::int_<N>,                                       \
-            boost::mpl::int_<256>                                      \
+        pdalboost::mpl::less<                                              \
+            pdalboost::mpl::int_<N>,                                       \
+            pdalboost::mpl::int_<256>                                      \
         >                                                              \
     ));                                                                \
     /*                                                                 \

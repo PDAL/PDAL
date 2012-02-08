@@ -19,7 +19,7 @@
 
 #include <boost/spirit/home/classic/utility/distinct_fwd.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace spirit {
     BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -224,6 +224,6 @@ public:
 //-----------------------------------------------------------------------------
     BOOST_SPIRIT_CLASSIC_NAMESPACE_END
     } // namespace spirit
-} // namespace boost
+} // namespace pdalboost
 
 #endif // !defined(BOOST_SPIRIT_DISTINCT_HPP)

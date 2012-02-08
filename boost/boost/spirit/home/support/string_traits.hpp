@@ -24,7 +24,7 @@
 #include <boost/type_traits/add_const.hpp>
 #endif
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     // Determine if T is a character type

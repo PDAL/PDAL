@@ -30,7 +30,7 @@
     match depending on the iterator used.
 */
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm { 
 
 //  find_iterator -----------------------------------------------//
@@ -56,7 +56,7 @@ namespace boost {
         {
         private:
             // facade support
-            friend class ::boost::iterator_core_access;
+            friend class ::pdalboost::iterator_core_access;
 
         private:
         // typedefs
@@ -113,9 +113,9 @@ namespace boost {
                     FinderT Finder ) :
                 detail::find_iterator_base<IteratorT>(Finder,0)
             {
-                iterator_range<BOOST_STRING_TYPENAME range_iterator<RangeT>::type> lit_col(::boost::as_literal(Col));
-                m_Match=::boost::make_iterator_range(::boost::begin(lit_col), ::boost::begin(lit_col));
-                m_End=::boost::end(lit_col);
+                iterator_range<BOOST_STRING_TYPENAME range_iterator<RangeT>::type> lit_col(::pdalboost::as_literal(Col));
+                m_Match=::pdalboost::make_iterator_range(::pdalboost::begin(lit_col), ::pdalboost::begin(lit_col));
+                m_End=::pdalboost::end(lit_col);
 
                 increment();
             }
@@ -212,7 +212,7 @@ namespace boost {
         {
         private:
             // facade support
-            friend class ::boost::iterator_core_access;
+            friend class ::pdalboost::iterator_core_access;
 
         private:
         // typedefs
@@ -277,10 +277,10 @@ namespace boost {
                 detail::find_iterator_base<IteratorT>(Finder,0),
                 m_bEof(false)
             {
-                iterator_range<BOOST_STRING_TYPENAME range_iterator<RangeT>::type> lit_col(::boost::as_literal(Col));
-                m_Match=make_iterator_range(::boost::begin(lit_col), ::boost::begin(lit_col));
-                m_Next=::boost::begin(lit_col);
-                m_End=::boost::end(lit_col);
+                iterator_range<BOOST_STRING_TYPENAME range_iterator<RangeT>::type> lit_col(::pdalboost::as_literal(Col));
+                m_Match=make_iterator_range(::pdalboost::begin(lit_col), ::pdalboost::begin(lit_col));
+                m_Next=::pdalboost::begin(lit_col);
+                m_End=::pdalboost::end(lit_col);
 
                 // force the correct behavior for empty sequences and yield at least one token
                 if(m_Next!=m_End)
@@ -377,7 +377,7 @@ namespace boost {
     using algorithm::split_iterator;
     using algorithm::make_split_iterator;
 
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_FIND_ITERATOR_HPP

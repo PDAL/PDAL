@@ -47,7 +47,7 @@
 #define BOOST_MULTI_INDEX_TAG_SIZE BOOST_MPL_LIMIT_VECTOR_SIZE
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -85,7 +85,7 @@ struct tag:private detail::tag_marker
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #undef BOOST_MULTI_INDEX_TAG_SIZE
 

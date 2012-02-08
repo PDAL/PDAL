@@ -21,7 +21,7 @@
 #include <boost/mpl/aux_/config/gcc.hpp>
 #include <boost/mpl/aux_/config/workaround.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<
       typename BOOST_MPL_AUX_NA_PARAM(C)

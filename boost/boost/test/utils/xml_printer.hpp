@@ -32,7 +32,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -109,7 +109,7 @@ operator<<( custom_printer<cdata> const& p, const_string value )
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

@@ -16,7 +16,7 @@
 
 #include <boost/mpl/int.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 struct forward_iterator_tag       : int_<0> { typedef forward_iterator_tag type; };
 struct bidirectional_iterator_tag : int_<1> { typedef bidirectional_iterator_tag type; };

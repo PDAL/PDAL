@@ -19,10 +19,10 @@
 #if !defined(BOOST_NO_SFINAE) && \
     !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x592))
 # define BOOST_IOSTREAMS_ENABLE_IF_STREAM(T) \
-    , typename boost::enable_if< boost::iostreams::is_std_io<T> >::type* = 0 \
+    , typename pdalboost::enable_if< pdalboost::iostreams::is_std_io<T> >::type* = 0 \
     /**/
 # define BOOST_IOSTREAMS_DISABLE_IF_STREAM(T) \
-    , typename boost::disable_if< boost::iostreams::is_std_io<T> >::type* = 0 \
+    , typename pdalboost::disable_if< pdalboost::iostreams::is_std_io<T> >::type* = 0 \
     /**/
 #else 
 # define BOOST_IOSTREAMS_ENABLE_IF_STREAM(T)

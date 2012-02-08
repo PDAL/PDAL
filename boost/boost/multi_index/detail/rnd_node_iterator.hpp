@@ -21,7 +21,7 @@
 #include <boost/serialization/split_member.hpp>
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -134,6 +134,6 @@ std::ptrdiff_t operator-(
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

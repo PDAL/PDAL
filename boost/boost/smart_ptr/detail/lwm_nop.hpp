@@ -17,8 +17,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -32,6 +31,6 @@ public:
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // #ifndef BOOST_SMART_PTR_DETAIL_LWM_NOP_HPP_INCLUDED

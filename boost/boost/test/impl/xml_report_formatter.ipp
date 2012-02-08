@@ -27,7 +27,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -106,7 +106,7 @@ xml_report_formatter::do_confirmation_report( test_unit const& tu, std::ostream&
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

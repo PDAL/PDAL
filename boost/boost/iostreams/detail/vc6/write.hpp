@@ -5,7 +5,7 @@
 
 // See http://www.boost.org/libs/iostreams for documentation.
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 namespace detail {
 

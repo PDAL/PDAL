@@ -18,7 +18,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail {
     template <class U, U x> 
     struct test;
@@ -119,7 +119,7 @@ namespace detail {
             #endif
         #endif
         BOOST_STATIC_CONSTANT(bool, value = 
-           (::boost::type_traits::ice_or<
+           (::pdalboost::type_traits::ice_or<
             (s1 == sizeof(type_traits::yes_type)),
             (s2 == sizeof(type_traits::yes_type)),
             (s3 == sizeof(type_traits::yes_type)),
@@ -131,9 +131,9 @@ namespace detail {
     };
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_new_operator,T,::boost::detail::has_new_operator_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_new_operator,T,::pdalboost::detail::has_new_operator_impl<T>::value)
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

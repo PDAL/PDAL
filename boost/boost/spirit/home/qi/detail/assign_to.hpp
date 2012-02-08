@@ -21,7 +21,7 @@
 #include <boost/ref.hpp>
 #include <boost/range/iterator_range.hpp>
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     //  This file contains assignment utilities. The utilities provided also
@@ -62,11 +62,11 @@ namespace boost { namespace spirit { namespace traits
 
     template <typename Attribute, typename Iterator>
     struct assign_to_attribute_from_iterators<
-        boost::optional<Attribute>, Iterator>
+        pdalboost::optional<Attribute>, Iterator>
     {
         static void
         call(Iterator const& first, Iterator const& last
-          , boost::optional<Attribute>& attr)
+          , pdalboost::optional<Attribute>& attr)
         {
             Attribute val;
             assign_to(first, last, val);
@@ -164,11 +164,11 @@ namespace boost { namespace spirit { namespace traits
     };
 
     template <typename Attribute, typename T>
-    struct assign_to_attribute_from_value<Attribute, boost::optional<T>
-      , typename disable_if<is_same<Attribute, boost::optional<T> > >::type>
+    struct assign_to_attribute_from_value<Attribute, pdalboost::optional<T>
+      , typename disable_if<is_same<Attribute, pdalboost::optional<T> > >::type>
     {
         static void
-        call(boost::optional<T> const& val, Attribute& attr)
+        call(pdalboost::optional<T> const& val, Attribute& attr)
         {
             assign_to(val.get(), attr);
         }
@@ -298,11 +298,11 @@ namespace boost { namespace spirit { namespace traits
     };
 
     template <typename Attribute, typename T>
-    struct assign_to_container_from_value<Attribute, boost::optional<T>
-      , typename disable_if<is_same<Attribute, boost::optional<T> > >::type>
+    struct assign_to_container_from_value<Attribute, pdalboost::optional<T>
+      , typename disable_if<is_same<Attribute, pdalboost::optional<T> > >::type>
     {
         static void
-        call(boost::optional<T> const& val, Attribute& attr)
+        call(pdalboost::optional<T> const& val, Attribute& attr)
         {
             assign_to(val.get(), attr);
         }

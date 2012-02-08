@@ -7,7 +7,7 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-    The class boost::spirit::hold_any is built based on the any class
+    The class pdalboost::spirit::hold_any is built based on the any class
     published here: http://www.codeproject.com/cpp/dynamic_typing.asp. It adds
     support for std streaming operator<<() and operator>>().
 ==============================================================================*/
@@ -40,12 +40,12 @@
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     struct bad_any_cast
       : std::bad_cast
     {
-        bad_any_cast(boost::detail::sp_typeinfo const& src, boost::detail::sp_typeinfo const& dest)
+        bad_any_cast(pdalboost::detail::sp_typeinfo const& src, pdalboost::detail::sp_typeinfo const& dest)
           : from(src.name()), to(dest.name())
         {}
 
@@ -61,7 +61,7 @@ namespace boost { namespace spirit
         template <typename Char>
         struct fxn_ptr_table
         {
-            boost::detail::sp_typeinfo const& (*get_type)();
+            pdalboost::detail::sp_typeinfo const& (*get_type)();
             void (*static_delete)(void**);
             void (*destruct)(void**);
             void (*clone)(void* const*, void**);
@@ -80,7 +80,7 @@ namespace boost { namespace spirit
             template<typename T, typename Char>
             struct type
             {
-                static boost::detail::sp_typeinfo const& get_type()
+                static pdalboost::detail::sp_typeinfo const& get_type()
                 {
                     return BOOST_SP_TYPEID(T);
                 }
@@ -124,7 +124,7 @@ namespace boost { namespace spirit
             template<typename T, typename Char>
             struct type
             {
-                static boost::detail::sp_typeinfo const& get_type()
+                static pdalboost::detail::sp_typeinfo const& get_type()
                 {
                     return BOOST_SP_TYPEID(T);
                 }
@@ -314,7 +314,7 @@ namespace boost { namespace spirit
             return *this;
         }
 
-        boost::detail::sp_typeinfo const& type() const
+        pdalboost::detail::sp_typeinfo const& type() const
         {
             return table->get_type();
         }
@@ -330,7 +330,7 @@ namespace boost { namespace spirit
                 *reinterpret_cast<T const*>(object);
         }
 
-// implicit casting is disabled by default for compatibility with boost::any
+// implicit casting is disabled by default for compatibility with pdalboost::any
 #ifdef BOOST_SPIRIT_ANY_IMPLICIT_CASTING
         // automatic casting operator
         template <typename T>
@@ -382,7 +382,7 @@ namespace boost { namespace spirit
         void* object;
     };
 
-    // boost::any-like casting
+    // pdalboost::any-like casting
     template <typename T, typename Char>
     inline T* any_cast (basic_hold_any<Char>* operand)
     {
@@ -417,7 +417,7 @@ namespace boost { namespace spirit
 
         nonref* result = any_cast<nonref>(&operand);
         if(!result)
-            boost::throw_exception(bad_any_cast(operand.type(), BOOST_SP_TYPEID(T)));
+            pdalboost::throw_exception(bad_any_cast(operand.type(), BOOST_SP_TYPEID(T)));
         return *result;
     }
 
@@ -449,7 +449,7 @@ namespace boost { namespace spirit
         struct is_hold_any<basic_hold_any<Char> > : mpl::true_ {};
     }
 
-}}    // namespace boost::spirit
+}}    // namespace pdalboost::spirit
 
 ///////////////////////////////////////////////////////////////////////////////
 #if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)

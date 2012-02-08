@@ -20,7 +20,7 @@
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/void.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<>
 struct at_impl< aux::set_tag >

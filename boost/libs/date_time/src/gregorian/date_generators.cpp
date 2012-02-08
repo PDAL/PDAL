@@ -13,7 +13,7 @@
 #endif
 #include "boost/date_time/date_generators.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace date_time {
 
   const char* const _nth_as_str[] = {"out of range", "first", "second",

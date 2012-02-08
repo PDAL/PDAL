@@ -13,7 +13,7 @@
 #include <boost/config.hpp>
 #include <boost/mpl/bool.hpp>
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     // Determine if T is a boolean type
@@ -47,7 +47,7 @@ namespace boost { namespace spirit { namespace traits
 
 #ifdef BOOST_HAS_LONG_LONG
     template <>
-    struct is_int<boost::long_long_type> : mpl::true_ {};
+    struct is_int<pdalboost::long_long_type> : mpl::true_ {};
 #endif
 
     ///////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ namespace boost { namespace spirit { namespace traits
 
 #ifdef BOOST_HAS_LONG_LONG
     template <>
-    struct is_uint<boost::ulong_long_type> : mpl::true_ {};
+    struct is_uint<pdalboost::ulong_long_type> : mpl::true_ {};
 #endif
 
     ///////////////////////////////////////////////////////////////////////////

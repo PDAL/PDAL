@@ -21,7 +21,7 @@
 #include "boost/mpl/if.hpp"
 #include "boost/mpl/integral_c.hpp"
 
-namespace boost { namespace numeric
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric
 {
 
 template<class S>
@@ -181,6 +181,6 @@ struct raw_converter
 
 struct UseInternalRangeChecker {} ;
 
-} } // namespace boost::numeric
+} } // namespace pdalboost::numeric
 
 #endif

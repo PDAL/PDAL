@@ -19,7 +19,7 @@
 #include <boost/spirit/home/qi/skip_over.hpp>
 #include <boost/spirit/home/support/common_terminals.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // Enablers
@@ -29,7 +29,7 @@ namespace boost { namespace spirit
       : mpl::true_ {};
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
 #ifndef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
     using spirit::eoi;

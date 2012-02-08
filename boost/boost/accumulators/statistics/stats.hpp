@@ -13,7 +13,7 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/accumulators/statistics_fwd.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,6 @@ struct stats
 {
 };
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

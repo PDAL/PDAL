@@ -31,7 +31,7 @@
     actor<argument<n> > const                                                 \
         BOOST_PP_CAT(_, BOOST_PP_INC(n)) = argument<n>();
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     namespace detail
     {

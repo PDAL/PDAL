@@ -9,21 +9,21 @@
 // no include guards, this file is guarded externally
 
 // this file has been generated from the master.hpp file in the same directory
-namespace boost { namespace function_types {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace function_types {
 namespace detail
 {
 template<class Tag, class RefTag> struct selector_bits
 {
 BOOST_STATIC_CONSTANT(bits_t, value = (
-(::boost::function_types::detail::bits<Tag> ::value & 0x00008000) 
-| (::boost::function_types::detail::bits<RefTag> ::value & 802)
+(::pdalboost::function_types::detail::bits<Tag> ::value & 0x00008000) 
+| (::pdalboost::function_types::detail::bits<RefTag> ::value & 802)
 ));
 };
 template<bits_t SelectorBits> struct default_cc_tag; 
 template<class Tag, class RefTag> struct retag_default_cc
 : detail::compound_tag
 < Tag, detail::default_cc_tag< 
-::boost::function_types::detail::selector_bits<Tag,RefTag> ::value > >
+::pdalboost::function_types::detail::selector_bits<Tag,RefTag> ::value > >
 { };
 template<bits_t SelectorBits> struct default_cc_tag
 {

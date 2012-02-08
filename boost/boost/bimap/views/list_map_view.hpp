@@ -25,7 +25,7 @@
 #include <boost/bimap/relation/support/data_extractor.hpp>
 #include <boost/bimap/relation/detail/to_mutable_relation_functor.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace views {
 
@@ -34,33 +34,33 @@ namespace views {
 template< class Tag, class BimapType >
 struct list_map_view_base
 {
-    typedef ::boost::bimaps::container_adaptor::list_map_adaptor
+    typedef ::pdalboost::bimaps::container_adaptor::list_map_adaptor
     <
         BOOST_DEDUCED_TYPENAME BimapType::core_type::BOOST_NESTED_TEMPLATE index<Tag>::type,
-        BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
+        BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::support::
                     iterator_type_by<Tag,BimapType>::type,
-        BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
+        BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::support::
                     const_iterator_type_by<Tag,BimapType>::type,
-        BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
+        BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::support::
                    reverse_iterator_type_by<Tag,BimapType>::type,
-        BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
+        BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::support::
                    const_reverse_iterator_type_by<Tag,BimapType>::type,
-        ::boost::bimaps::container_adaptor::support::iterator_facade_to_base
+        ::pdalboost::bimaps::container_adaptor::support::iterator_facade_to_base
         <
-            BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
+            BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::support::
                 iterator_type_by<Tag,BimapType>::type,
-            BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
+            BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::support::
                 const_iterator_type_by<Tag,BimapType>::type
 
         >,
-        ::boost::mpl::na,
-        ::boost::mpl::na,
-        ::boost::bimaps::relation::detail::
+        ::pdalboost::mpl::na,
+        ::pdalboost::mpl::na,
+        ::pdalboost::bimaps::relation::detail::
             pair_to_relation_functor<Tag, BOOST_DEDUCED_TYPENAME BimapType::relation >,
-        ::boost::bimaps::relation::support::
+        ::pdalboost::bimaps::relation::support::
             get_pair_functor<Tag, BOOST_DEDUCED_TYPENAME BimapType::relation >,
 
-        BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::support::data_extractor
+        BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::support::data_extractor
         <
             Tag,
             BOOST_DEDUCED_TYPENAME BimapType::relation
@@ -84,7 +84,7 @@ template< class Tag, class BimapType >
 class list_map_view
 :
     public list_map_view_base<Tag,BimapType>::type,
-    public ::boost::bimaps::detail::
+    public ::pdalboost::bimaps::detail::
             map_view_base< list_map_view<Tag,BimapType>,Tag,BimapType >
 
 {
@@ -155,16 +155,16 @@ typedef BOOST_DEDUCED_TYPENAME MAP_VIEW::TYPENAME                             \
 namespace detail {
 
 template< class Tag, class BimapType >
-struct left_map_view_extra_typedefs< ::boost::bimaps::views::list_map_view<Tag,BimapType> >
+struct left_map_view_extra_typedefs< ::pdalboost::bimaps::views::list_map_view<Tag,BimapType> >
 {
-    private: typedef ::boost::bimaps::views::list_map_view<Tag,BimapType> map_view_;
+    private: typedef ::pdalboost::bimaps::views::list_map_view<Tag,BimapType> map_view_;
     public : BOOST_BIMAP_MAP_VIEW_EXTRA_TYPEDEFS_BODY(map_view_,left)
 };
 
 template< class Tag, class BimapType >
-struct right_map_view_extra_typedefs< ::boost::bimaps::views::list_map_view<Tag,BimapType> >
+struct right_map_view_extra_typedefs< ::pdalboost::bimaps::views::list_map_view<Tag,BimapType> >
 {
-    private: typedef ::boost::bimaps::views::list_map_view<Tag,BimapType> map_view_;
+    private: typedef ::pdalboost::bimaps::views::list_map_view<Tag,BimapType> map_view_;
     public : BOOST_BIMAP_MAP_VIEW_EXTRA_TYPEDEFS_BODY(map_view_,right)
 };
 
@@ -176,7 +176,7 @@ struct right_map_view_extra_typedefs< ::boost::bimaps::views::list_map_view<Tag,
 /*===========================================================================*/
 
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_VIEWS_LIST_MAP_VIEW_HPP
 

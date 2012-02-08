@@ -24,7 +24,7 @@
 
 #define BOOST_SPIRIT_ASSERT_MATCH(Domain, Expr)                               \
         BOOST_SPIRIT_ASSERT_MSG((                                             \
-            boost::spirit::traits::matches<Domain, Expr>::value               \
+            pdalboost::spirit::traits::matches<Domain, Expr>::value               \
         ), error_invalid_expression, (Expr))
 
 #endif

@@ -16,7 +16,7 @@
 #include <boost/optional.hpp>
 #include <string>
 
-namespace boost { namespace property_tree
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
 {
 
     /// Simple implementation of the Translator concept. It does no translation.
@@ -26,8 +26,8 @@ namespace boost { namespace property_tree
         typedef T internal_type;
         typedef T external_type;
 
-        boost::optional<T> get_value(const T &v) { return v; }
-        boost::optional<T> put_value(const T &v) { return v; }
+        pdalboost::optional<T> get_value(const T &v) { return v; }
+        pdalboost::optional<T> put_value(const T &v) { return v; }
     };
 
     // This is the default translator whenever you get two equal types.

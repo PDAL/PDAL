@@ -17,8 +17,7 @@
 
 #include <boost/range/iterator.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     //
     // This interface is deprecated, use range_iterator<T>
     //
@@ -27,7 +26,7 @@ namespace boost
     struct range_result_iterator : range_iterator<C>
     { };
     
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif

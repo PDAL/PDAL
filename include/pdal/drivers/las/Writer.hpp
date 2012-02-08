@@ -71,7 +71,7 @@ public:
     void setPointFormat(PointFormat);
     void setDate(boost::uint16_t dayOfYear, boost::uint16_t year);
     
-    void setProjectId(const pdal::external::boost::uuids::uuid&);
+    void setProjectId(const boost::uuids::uuid&);
 
     // up to 32 chars (default is "PDAL")
     void setSystemIdentifier(const std::string& systemId); 

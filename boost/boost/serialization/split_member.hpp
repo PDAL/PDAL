@@ -22,7 +22,7 @@
 
 #include <boost/serialization/access.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace archive {
     namespace detail {
         template<class Archive> class interface_oarchive;
@@ -70,7 +70,7 @@ inline void split_member(
 }
 
 } // namespace serialization
-} // namespace boost
+} // namespace pdalboost
 
 // split member function serialize funcition into save/load
 #define BOOST_SERIALIZATION_SPLIT_MEMBER()                       \
@@ -79,7 +79,7 @@ void serialize(                                                  \
     Archive &ar,                                                 \
     const unsigned int file_version                              \
 ){                                                               \
-    boost::serialization::split_member(ar, *this, file_version); \
+    pdalboost::serialization::split_member(ar, *this, file_version); \
 }                                                                \
 /**/
 

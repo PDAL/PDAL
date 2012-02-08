@@ -18,11 +18,11 @@
 #include "boost/progress.hpp"
 #include <iostream>
 
-namespace fs = boost::filesystem;
+namespace fs = pdalboost::filesystem;
 
 int main( int argc, char* argv[] )
 {
-  boost::progress_timer t( std::clog );
+  pdalboost::progress_timer t( std::clog );
 
   fs::path full_path( fs::initial_path<fs::path>() );
 

@@ -36,7 +36,7 @@
 #define BOOST_SPIRIT_DEBUG_INDENT 2
 #endif
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     namespace detail
     {

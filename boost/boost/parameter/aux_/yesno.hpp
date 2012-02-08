@@ -8,7 +8,7 @@
 
 #include <boost/mpl/bool.hpp>
 
-namespace boost { namespace parameter { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { namespace aux {
 
 // types used with the "sizeof trick" to capture the results of
 // overload resolution at compile-time.
@@ -20,7 +20,7 @@ typedef char (&no_tag)[2];
 yes_tag to_yesno(mpl::true_);
 no_tag to_yesno(mpl::false_);
 
-}}} // namespace boost::parameter::aux
+}}} // namespace pdalboost::parameter::aux
 
 #endif // YESNO_050328_HPP
 

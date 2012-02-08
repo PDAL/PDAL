@@ -17,7 +17,7 @@
 #include <boost/spirit/home/classic/meta/impl/refactoring.ipp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -61,7 +61,7 @@ public:
     //  the parser to refactor has to be at least a binary_parser_category
     //  parser
     BOOST_STATIC_ASSERT((
-        boost::is_convertible<typename BinaryT::parser_category_t,
+        pdalboost::is_convertible<typename BinaryT::parser_category_t,
             binary_parser_category>::value
     ));
 
@@ -144,7 +144,7 @@ public:
     //  the parser to refactor has to be at least a binary_parser_category
     //  parser
     BOOST_STATIC_ASSERT((
-        boost::is_convertible<typename BinaryT::parser_category_t,
+        pdalboost::is_convertible<typename BinaryT::parser_category_t,
             binary_parser_category>::value
     ));
 
@@ -226,7 +226,7 @@ public:
     //  the parser to refactor has to be at least a action_parser_category
     //  parser
     BOOST_STATIC_ASSERT((
-        boost::is_convertible<typename ActionT::parser_category_t,
+        pdalboost::is_convertible<typename ActionT::parser_category_t,
             action_parser_category>::value
     ));
 

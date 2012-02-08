@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <cctype>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace gregorian {
 
   typedef date_time::months_of_year months_of_year;
@@ -56,7 +56,7 @@ namespace gregorian {
   public:
     typedef date_time::months_of_year month_enum;
     typedef std::map<std::string, unsigned short> month_map_type;
-    typedef boost::shared_ptr<month_map_type> month_map_ptr_type;
+    typedef pdalboost::shared_ptr<month_map_type> month_map_ptr_type;
     //! Construct a month from the months_of_year enumeration
     greg_month(month_enum theMonth) : 
       greg_month_rep(static_cast<greg_month_rep::value_type>(theMonth)) {}

@@ -10,7 +10,7 @@
 
 #include <boost/iostreams/detail/broken_overload_resolution/forward.hpp>
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 template< typename Device,
           typename Tr =

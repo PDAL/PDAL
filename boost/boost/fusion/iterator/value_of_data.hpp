@@ -10,7 +10,7 @@
 
 #include <boost/fusion/support/tag_of.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct iterator_facade_tag;
 

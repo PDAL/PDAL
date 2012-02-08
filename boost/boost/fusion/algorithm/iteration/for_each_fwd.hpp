@@ -7,7 +7,7 @@
 #if !defined(BOOST_FUSION_FOR_EACH_FWD_HPP_INCLUDED)
 #define BOOST_FUSION_FOR_EACH_FWD_HPP_INCLUDED
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     namespace result_of
     {

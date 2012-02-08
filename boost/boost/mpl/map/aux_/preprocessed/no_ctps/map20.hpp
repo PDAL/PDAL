@@ -10,7 +10,7 @@
 // Preprocessed version of "boost/mpl/map/map20.hpp" header
 // -- DO NOT modify by hand!
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<>
 struct m_at_impl<10>

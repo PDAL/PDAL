@@ -10,7 +10,7 @@
 #ifndef BOOST_NUMERIC_CONVERSION_INT_FLOAT_MIXTURE_ENUM_FLC_12NOV2002_HPP
 #define BOOST_NUMERIC_CONVERSION_INT_FLOAT_MIXTURE_ENUM_FLC_12NOV2002_HPP
 
-namespace boost { namespace numeric
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric
 {
   enum int_float_mixture_enum
   {
@@ -20,7 +20,7 @@ namespace boost { namespace numeric
     ,float_to_float
   } ;
 
-} } // namespace boost::numeric
+} } // namespace pdalboost::numeric
 
 #endif
 //

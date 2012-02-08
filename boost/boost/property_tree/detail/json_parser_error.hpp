@@ -13,7 +13,7 @@
 #include <boost/property_tree/detail/file_parser_error.hpp>
 #include <string>
 
-namespace boost { namespace property_tree { namespace json_parser
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace json_parser
 {
 
     //! Json parser error

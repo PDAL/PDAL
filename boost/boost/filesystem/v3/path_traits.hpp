@@ -32,7 +32,7 @@
 
 #include <boost/config/abi_prefix.hpp> // must be the last #include
 
-namespace boost { namespace filesystem3 {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace filesystem3 {
 
   BOOST_FILESYSTEM_DECL const system::error_category& codecvt_error_category();
   //  uses std::codecvt_base::result used for error codes:
@@ -73,7 +73,7 @@ namespace path_traits {
   template <class Container> inline
     // disable_if aids broken compilers (IBM, old GCC, etc.) and is harmless for
     // conforming compilers. Replace by plain "bool" at some future date (2012?) 
-    typename boost::disable_if<boost::is_array<Container>, bool>::type
+    typename pdalboost::disable_if<pdalboost::is_array<Container>, bool>::type
       empty(const Container & c)
         { return c.begin() == c.end(); }
 
@@ -196,7 +196,7 @@ namespace path_traits {
   template <class Container, class U> inline
     // disable_if aids broken compilers (IBM, old GCC, etc.) and is harmless for
     // conforming compilers. Replace by plain "void" at some future date (2012?) 
-    typename boost::disable_if<boost::is_array<Container>, void>::type
+    typename pdalboost::disable_if<pdalboost::is_array<Container>, void>::type
       dispatch(const Container & c, U& to, const codecvt_type& cvt)
   {
     if (c.size())
@@ -228,12 +228,11 @@ namespace path_traits {
                  const codecvt_type&);
 
 
-}}} // namespace boost::filesystem::path_traits
+}}} // namespace pdalboost::filesystem::path_traits
 
 //----------------------------------------------------------------------------//
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem
   {
     using filesystem3::codecvt_error_category;

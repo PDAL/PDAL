@@ -19,7 +19,7 @@
 #include <boost/mpl/next_prior.hpp>
 #include <boost/mpl/map/aux_/iterator.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<>
 struct begin_impl< aux::map_tag >

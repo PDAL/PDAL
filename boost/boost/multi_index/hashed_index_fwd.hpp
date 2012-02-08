@@ -15,7 +15,7 @@
 
 #include <boost/multi_index/detail/hash_index_args.hpp>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -53,6 +53,6 @@ struct hashed_non_unique;
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

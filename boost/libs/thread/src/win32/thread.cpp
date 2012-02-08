@@ -21,16 +21,15 @@
 #include <boost/date_time/posix_time/conversion.hpp>
 #include <windows.h>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace
     {
-        boost::once_flag current_thread_tls_init_flag=BOOST_ONCE_INIT;
+        pdalboost::once_flag current_thread_tls_init_flag=BOOST_ONCE_INIT;
         DWORD current_thread_tls_key=0;
 
         void create_current_thread_tls_key()
         {
-            tss_cleanup_implemented(); // if anyone uses TSS, we need the cleanup linked in
+            pdalboosttss_cleanup_implemented(); // if anyone uses TSS, we need the cleanup linked in
             current_thread_tls_key=TlsAlloc();
 			#if defined(UNDER_CE)
 				// Windows CE does not define the TLS_OUT_OF_INDEXES constant.
@@ -60,11 +59,11 @@ namespace boost
 
         void set_current_thread_data(detail::thread_data_base* new_data)
         {
-            boost::call_once(current_thread_tls_init_flag,create_current_thread_tls_key);
+            pdalboost::call_once(current_thread_tls_init_flag,create_current_thread_tls_key);
             if(current_thread_tls_key)
                 BOOST_VERIFY(TlsSetValue(current_thread_tls_key,new_data));
             else
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
         }
 
 #ifndef BOOST_HAS_THREADEX
@@ -107,10 +106,10 @@ namespace boost
     {
         struct thread_exit_callback_node
         {
-            boost::detail::thread_exit_function_base* func;
+            pdalboost::detail::thread_exit_function_base* func;
             thread_exit_callback_node* next;
 
-            thread_exit_callback_node(boost::detail::thread_exit_function_base* func_,
+            thread_exit_callback_node(pdalboost::detail::thread_exit_function_base* func_,
                                       thread_exit_callback_node* next_):
                 func(func_),next(next_)
             {}
@@ -119,11 +118,11 @@ namespace boost
         struct tss_data_node
         {
             void const* key;
-            boost::shared_ptr<boost::detail::tss_cleanup_function> func;
+            pdalboost::shared_ptr<pdalboost::detail::tss_cleanup_function> func;
             void* value;
             tss_data_node* next;
 
-            tss_data_node(void const* key_,boost::shared_ptr<boost::detail::tss_cleanup_function> func_,void* value_,
+            tss_data_node(void const* key_,pdalboost::shared_ptr<pdalboost::detail::tss_cleanup_function> func_,void* value_,
                           tss_data_node* next_):
                 key(key_),func(func_),value(value_),next(next_)
             {}
@@ -147,9 +146,9 @@ namespace boost
                         if(current_node->func)
                         {
                             (*current_node->func)();
-                            boost::detail::heap_delete(current_node->func);
+                            pdalboost::detail::heap_delete(current_node->func);
                         }
-                        boost::detail::heap_delete(current_node);
+                        pdalboost::detail::heap_delete(current_node);
                     }
                     while(current_thread_data->tss_data)
                     {
@@ -159,7 +158,7 @@ namespace boost
                         {
                             (*current_node->func)(current_node->value);
                         }
-                        boost::detail::heap_delete(current_node);
+                        pdalboost::detail::heap_delete(current_node);
                     }
                 }
                 
@@ -197,7 +196,7 @@ namespace boost
         uintptr_t const new_thread=_beginthreadex(0,0,&thread_start_function,thread_info.get(),CREATE_SUSPENDED,&thread_info->id);
         if(!new_thread)
         {
-            boost::throw_exception(thread_resource_error());
+            pdalboost::throw_exception(thread_resource_error());
         }
         intrusive_ptr_add_ref(thread_info.get());
         thread_info->thread_handle=(detail::win32::handle)(new_thread);
@@ -278,7 +277,7 @@ namespace boost
         }
     }
 
-    bool thread::timed_join(boost::system_time const& wait_until)
+    bool thread::timed_join(pdalboost::system_time const& wait_until)
     {
         detail::thread_data_ptr local_thread_info=(get_thread_info)();
         if(local_thread_info)
@@ -588,7 +587,7 @@ namespace boost
             return NULL;
         }
         
-        void set_tss_data(void const* key,boost::shared_ptr<tss_cleanup_function> func,void* tss_data,bool cleanup_existing)
+        void set_tss_data(void const* key,pdalboost::shared_ptr<tss_cleanup_function> func,void* tss_data,bool cleanup_existing)
         {
             if(tss_data_node* const current_node=find_tss_data(key))
             {
@@ -608,20 +607,20 @@ namespace boost
             }
         }
     }
-    BOOST_THREAD_DECL void __cdecl on_process_enter()
+    BOOST_THREAD_DECL void __cdecl pdalbooston_process_enter()
     {}
 
-    BOOST_THREAD_DECL void __cdecl on_thread_enter()
+    BOOST_THREAD_DECL void __cdecl pdalbooston_thread_enter()
     {}
 
-    BOOST_THREAD_DECL void __cdecl on_process_exit()
+    BOOST_THREAD_DECL void __cdecl pdalbooston_process_exit()
     {
-        boost::cleanup_tls_key();
+        pdalboost::cleanup_tls_key();
     }
 
-    BOOST_THREAD_DECL void __cdecl on_thread_exit()
+    BOOST_THREAD_DECL void __cdecl pdalbooston_thread_exit()
     {
-        boost::run_thread_exit_callbacks();
+        pdalboost::run_thread_exit_callbacks();
     }
 
 }

@@ -15,7 +15,7 @@
 #include <boost/fusion/iterator/next.hpp>
 #include <boost/fusion/iterator/equal_to.hpp>
 
-namespace boost { namespace fusion { namespace distance_detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace distance_detail
 {
     // Default distance implementation, linear
     // search for the Last iterator.

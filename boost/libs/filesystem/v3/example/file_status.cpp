@@ -14,7 +14,7 @@
 #include <boost/detail/lightweight_main.hpp>
 
 using std::cout; using std::endl;
-using namespace boost::filesystem;
+using namespace pdalboost::filesystem;
 
 namespace
 {
@@ -47,9 +47,9 @@ namespace
     return file_type_tab[t];
   }
 
-  void show_status(file_status s, boost::system::error_code ec)
+  void show_status(file_status s, pdalboost::system::error_code ec)
   {
-    boost::system::error_condition econd;
+    pdalboost::system::error_condition econd;
 
     if (ec)
     {
@@ -102,7 +102,7 @@ int cpp_main(int argc, char* argv[])
   else
     p = argv[1];
 
-  boost::system::error_code ec;
+  pdalboost::system::error_code ec;
   file_status s = status(p, ec);
   cout << "\nfile_status s = status(" << p << ", ec) ";
   show_status(s, ec);

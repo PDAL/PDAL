@@ -23,7 +23,7 @@
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/identity.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     namespace meta
     {

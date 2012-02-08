@@ -31,7 +31,7 @@
 // !! could we eliminate these includes?
 #include <list>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -43,7 +43,7 @@ namespace BOOST_RT_PARAM_NAMESPACE {
 // generic case
 template<typename T>
 struct interpret_argument_value_impl {
-    static bool _( cstring source, boost::optional<T>& res )
+    static bool _( cstring source, pdalboost::optional<T>& res )
     {
         BOOST_RT_PARAM_TRACE( "In interpret_argument_value_impl<" << typeid(T).name() << ">" );
 
@@ -60,7 +60,7 @@ struct interpret_argument_value_impl {
 // dstring case
 template<>
 struct interpret_argument_value_impl<dstring> {
-    static bool _( cstring source, boost::optional<dstring>& res )
+    static bool _( cstring source, pdalboost::optional<dstring>& res )
     {
         BOOST_RT_PARAM_TRACE( "In interpret_argument_value_impl<dstring>" );
 
@@ -76,7 +76,7 @@ struct interpret_argument_value_impl<dstring> {
 // cstring case
 template<>
 struct interpret_argument_value_impl<cstring> {
-    static bool _( cstring source, boost::optional<cstring>& res )
+    static bool _( cstring source, pdalboost::optional<cstring>& res )
     {
         BOOST_RT_PARAM_TRACE( "In interpret_argument_value_impl<cstring>" );
 
@@ -91,7 +91,7 @@ struct interpret_argument_value_impl<cstring> {
 // specialization for type bool
 template<>
 struct interpret_argument_value_impl<bool> {
-    static bool _( cstring source, boost::optional<bool>& res )
+    static bool _( cstring source, pdalboost::optional<bool>& res )
     {
         BOOST_RT_PARAM_TRACE( "In interpret_argument_value_impl<bool>" );
 
@@ -123,7 +123,7 @@ struct interpret_argument_value_impl<bool> {
 
 template<typename T>
 inline bool
-interpret_argument_value( cstring source, boost::optional<T>& res, long )
+interpret_argument_value( cstring source, pdalboost::optional<T>& res, long )
 {
     return interpret_argument_value_impl<T>::_( source, res );
 }
@@ -133,7 +133,7 @@ interpret_argument_value( cstring source, boost::optional<T>& res, long )
 // specialization for list of values
 template<typename T>
 inline bool
-interpret_argument_value( cstring source, boost::optional<std::list<T> >& res, int )
+interpret_argument_value( cstring source, pdalboost::optional<std::list<T> >& res, int )
 {
     BOOST_RT_PARAM_TRACE( "In interpret_argument_value<std::list<T>>" );
 
@@ -143,7 +143,7 @@ interpret_argument_value( cstring source, boost::optional<std::list<T> >& res, i
         // !! should we use token_iterator
         cstring::iterator single_value_end = std::find( source.begin(), source.end(), BOOST_RT_PARAM_LITERAL( ',' ) );
 
-        boost::optional<T> value;
+        pdalboost::optional<T> value;
         interpret_argument_value( cstring( source.begin(), single_value_end ), value, 0 );
 
         res->push_back( *value );
@@ -158,6 +158,6 @@ interpret_argument_value( cstring source, boost::optional<std::list<T> >& res, i
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_INTERPRET_ARGUMENT_VALUE_HPP_062604GER

@@ -28,7 +28,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/type_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail {
 
@@ -36,28 +36,28 @@ template <class T>
 struct make_signed_imp
 {
    BOOST_STATIC_ASSERT(
-      (::boost::type_traits::ice_or< ::boost::is_integral<T>::value, ::boost::is_enum<T>::value>::value));
+      (::pdalboost::type_traits::ice_or< ::pdalboost::is_integral<T>::value, ::pdalboost::is_enum<T>::value>::value));
 #if !BOOST_WORKAROUND(BOOST_MSVC, <=1300)
    BOOST_STATIC_ASSERT(
-      (::boost::type_traits::ice_not< ::boost::is_same<
+      (::pdalboost::type_traits::ice_not< ::pdalboost::is_same<
          typename remove_cv<T>::type, bool>::value>::value));
 #endif
 
    typedef typename remove_cv<T>::type t_no_cv;
    typedef typename mpl::if_c<
-      (::boost::type_traits::ice_and< 
-         ::boost::is_signed<T>::value,
-         ::boost::is_integral<T>::value,
-         ::boost::type_traits::ice_not< ::boost::is_same<t_no_cv, char>::value>::value,
-         ::boost::type_traits::ice_not< ::boost::is_same<t_no_cv, wchar_t>::value>::value,
-         ::boost::type_traits::ice_not< ::boost::is_same<t_no_cv, bool>::value>::value >::value),
+      (::pdalboost::type_traits::ice_and< 
+         ::pdalboost::is_signed<T>::value,
+         ::pdalboost::is_integral<T>::value,
+         ::pdalboost::type_traits::ice_not< ::pdalboost::is_same<t_no_cv, char>::value>::value,
+         ::pdalboost::type_traits::ice_not< ::pdalboost::is_same<t_no_cv, wchar_t>::value>::value,
+         ::pdalboost::type_traits::ice_not< ::pdalboost::is_same<t_no_cv, bool>::value>::value >::value),
       T,
       typename mpl::if_c<
-         (::boost::type_traits::ice_and< 
-            ::boost::is_integral<T>::value,
-            ::boost::type_traits::ice_not< ::boost::is_same<t_no_cv, char>::value>::value,
-            ::boost::type_traits::ice_not< ::boost::is_same<t_no_cv, wchar_t>::value>::value,
-            ::boost::type_traits::ice_not< ::boost::is_same<t_no_cv, bool>::value>::value>
+         (::pdalboost::type_traits::ice_and< 
+            ::pdalboost::is_integral<T>::value,
+            ::pdalboost::type_traits::ice_not< ::pdalboost::is_same<t_no_cv, char>::value>::value,
+            ::pdalboost::type_traits::ice_not< ::pdalboost::is_same<t_no_cv, wchar_t>::value>::value,
+            ::pdalboost::type_traits::ice_not< ::pdalboost::is_same<t_no_cv, bool>::value>::value>
          ::value),
          typename mpl::if_<
             is_same<t_no_cv, unsigned char>,
@@ -72,7 +72,7 @@ struct make_signed_imp
                      is_same<t_no_cv, unsigned long>,
                      long,
 #if defined(BOOST_HAS_LONG_LONG)
-                     boost::long_long_type
+                     pdalboost::long_long_type
 #elif defined(BOOST_HAS_MS_INT64)
                      __int64
 #else
@@ -96,7 +96,7 @@ struct make_signed_imp
                      sizeof(t_no_cv) == sizeof(unsigned long),
                      long,
 #if defined(BOOST_HAS_LONG_LONG)
-                     boost::long_long_type
+                     pdalboost::long_long_type
 #elif defined(BOOST_HAS_MS_INT64)
                      __int64
 #else
@@ -127,9 +127,9 @@ struct make_signed_imp
 
 } // namespace detail
 
-BOOST_TT_AUX_TYPE_TRAIT_DEF1(make_signed,T,typename boost::detail::make_signed_imp<T>::type)
+BOOST_TT_AUX_TYPE_TRAIT_DEF1(make_signed,T,typename pdalboost::detail::make_signed_imp<T>::type)
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/type_trait_undef.hpp>
 

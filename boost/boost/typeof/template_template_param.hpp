@@ -23,12 +23,12 @@
 
 //Encode / decode this
 #define BOOST_TYPEOF_TEMPLATE_PARAM_ENCODE(This, n)\
-   typedef typename boost::type_of::encode_template<BOOST_PP_CAT(V, n),\
+   typedef typename pdalboost::type_of::encode_template<BOOST_PP_CAT(V, n),\
        BOOST_PP_CAT(P, n)<BOOST_TYPEOF_SEQ_ENUM(BOOST_TYPEOF_MAKE_OBJS(BOOST_TYPEOF_TEMPLATE_PARAM_GETPARAMS(This)),BOOST_TYPEOF_PLACEHOLDER) >\
    >::type BOOST_PP_CAT(V, BOOST_PP_INC(n));
 
 #define BOOST_TYPEOF_TEMPLATE_PARAM_DECODE(This, n)\
-   typedef boost::type_of::decode_template< BOOST_PP_CAT(iter, n) > BOOST_PP_CAT(d, n);\
+   typedef pdalboost::type_of::decode_template< BOOST_PP_CAT(iter, n) > BOOST_PP_CAT(d, n);\
    typedef typename BOOST_PP_CAT(d, n)::type BOOST_PP_CAT(P, n);\
    typedef typename BOOST_PP_CAT(d, n)::iter BOOST_PP_CAT(iter,BOOST_PP_INC(n));
 
@@ -58,7 +58,7 @@ template<class T, class Iter> struct decode_template_impl;
 
 BOOST_TYPEOF_END_ENCODE_NS
 
-namespace boost { namespace type_of {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
 
     template<class V, class T> struct encode_template
         : BOOST_TYPEOF_ENCODE_NS_QUALIFIER::encode_template_impl<V, T>
@@ -81,10 +81,10 @@ namespace boost { namespace type_of {
         BOOST_PP_ENUM_PARAMS(\
         BOOST_PP_SEQ_SIZE(Params),\
         P)> >\
-        : boost::type_of::push_back<V, boost::mpl::size_t<ID> >\
+        : pdalboost::type_of::push_back<V, pdalboost::mpl::size_t<ID> >\
     {\
     };\
-    template<class Iter> struct decode_template_impl<boost::mpl::size_t<ID>, Iter>\
+    template<class Iter> struct decode_template_impl<pdalboost::mpl::size_t<ID>, Iter>\
     {\
         BOOST_PP_REPEAT(BOOST_PP_SEQ_SIZE(Params),BOOST_TYPEOF_TYPEDEF_INT_PN,_)\
         typedef Name<BOOST_TYPEOF_SEQ_ENUM(Params,BOOST_TYPEOF_PLACEHOLDER) > type;\

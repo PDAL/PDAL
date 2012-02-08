@@ -18,7 +18,7 @@
 #include <boost/mpl/begin_end_fwd.hpp>
 #include <boost/mpl/set/aux_/iterator.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<>
 struct begin_impl< aux::set_tag >

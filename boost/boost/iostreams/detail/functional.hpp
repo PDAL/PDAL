@@ -24,10 +24,10 @@
 #include <boost/iostreams/close.hpp>
 #include <boost/iostreams/detail/ios.hpp> // BOOST_IOS
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
     // Function objects and object generators for invoking
-    // boost::iostreams::close
+    // pdalboost::iostreams::close
 
 template<typename T>
 class device_close_operation {
@@ -36,7 +36,7 @@ public:
     device_close_operation(T& t, BOOST_IOS::openmode which) 
         : t_(t), which_(which) 
         { }
-    void operator()() const { boost::iostreams::close(t_, which_); }
+    void operator()() const { pdalboost::iostreams::close(t_, which_); }
 private:
     device_close_operation& operator=(const device_close_operation&);
     T&                   t_;
@@ -50,7 +50,7 @@ public:
     filter_close_operation(T& t, Sink& snk, BOOST_IOS::openmode which)
         : t_(t), snk_(snk), which_(which)
         { }
-    void operator()() const { boost::iostreams::close(t_, snk_, which_); }
+    void operator()() const { pdalboost::iostreams::close(t_, snk_, which_); }
 private:
     filter_close_operation& operator=(const filter_close_operation&);
     T&                   t_;
@@ -69,7 +69,7 @@ call_close(T& t, Sink& snk, BOOST_IOS::openmode which)
 { return filter_close_operation<T, Sink>(t, snk, which); }
 
     // Function objects and object generators for invoking
-    // boost::iostreams::detail::close_all
+    // pdalboost::iostreams::detail::close_all
 
 template<typename T>
 class device_close_all_operation {

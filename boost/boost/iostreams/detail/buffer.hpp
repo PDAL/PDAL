@@ -23,7 +23,7 @@
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 //----------------Buffers-----------------------------------------------------//
 

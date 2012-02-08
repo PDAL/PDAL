@@ -16,7 +16,7 @@
 
 #include <boost/mpl/has_xxx.hpp>
 
-namespace boost { namespace mpl { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { namespace aux {
 BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(has_tag, tag, false)
 }}}
 

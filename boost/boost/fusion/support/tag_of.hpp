@@ -18,8 +18,7 @@
 #include <boost/mpl/if.hpp>
 #include <boost/config/no_tr1/utility.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     template <typename T, std::size_t N>
     class array; // forward
 
@@ -38,7 +37,7 @@ namespace boost
     }
 }
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct non_fusion_tag;
     struct mpl_sequence_tag;
@@ -64,7 +63,7 @@ namespace boost { namespace fusion
         {};
 
         template <typename Sequence>
-        struct tag_of<Sequence, typename boost::enable_if<detail::has_fusion_tag<Sequence> >::type>
+        struct tag_of<Sequence, typename pdalboost::enable_if<detail::has_fusion_tag<Sequence> >::type>
         {
             typedef typename Sequence::fusion_tag type;
         };

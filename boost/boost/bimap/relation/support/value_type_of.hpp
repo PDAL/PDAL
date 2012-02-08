@@ -20,7 +20,7 @@
 
 #include <boost/bimap/relation/detail/metadata_access_builder.hpp>
 
-/** \struct boost::bimaps::relation::support::value_type_of
+/** \struct pdalboost::bimaps::relation::support::value_type_of
 
 \brief Metafunction to obtain the value type of one of the sides.
 
@@ -38,7 +38,7 @@ See also member_at, get().
 \ingroup relation_group
                                                                     **/
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 namespace support {
@@ -69,7 +69,7 @@ struct value_type_of
     Tag, SymmetricType,
     BOOST_DEDUCED_TYPENAME enable_if
     <
-        ::boost::bimaps::relation::support::is_tag_of_member_at_info
+        ::pdalboost::bimaps::relation::support::is_tag_of_member_at_info
         <
             Tag,
             SymmetricType
@@ -84,7 +84,7 @@ struct value_type_of
 } // namespace support
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_RELATION_SUPPORT_VALUE_TYPE_OF_HPP

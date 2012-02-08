@@ -18,7 +18,7 @@
 
 #include <boost/config.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 
 /// \brief A light non-invasive idiom to tag a type.
@@ -86,9 +86,9 @@ struct tagged
 
 } // namespace tags
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
-/** \namespace boost::bimaps::tags::support
+/** \namespace pdalboost::bimaps::tags::support
 \brief Metafunctions to work with tagged types.
 
 This metafunctions aims to make easier the manage of tagged types. They are all mpl

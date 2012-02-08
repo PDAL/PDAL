@@ -24,7 +24,7 @@
 // Revision History
 // 04 Mar 2001 - More attempted fixes for Intel C++ (David Abrahams)
 // 03 Mar 2001 - Put all implementation into namespace
-//               boost::detail::iterator_traits_. Some progress made on fixes
+//               pdalboost::detail::iterator_traits_. Some progress made on fixes
 //               for Intel compiler. (David Abrahams)
 // 02 Mar 2001 - Changed BOOST_MSVC to BOOST_MSVC_STD_ITERATOR in a few
 //               places. (Jeremy Siek)
@@ -35,7 +35,7 @@
 // 13 Feb 2001 - Make it work with nearly all standard-conforming iterators
 //               under raw VC6. The one category remaining which will fail is
 //               that of iterators derived from std::iterator but not
-//               boost::iterator and which redefine difference_type.
+//               pdalboost::iterator and which redefine difference_type.
 // 11 Feb 2001 - Clean away code which can never be used (David Abrahams)
 // 09 Feb 2001 - Always have a definition for each traits member, even if it
 //               can't be properly deduced. These will be incomplete types in
@@ -74,7 +74,7 @@
   && !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION) \
   && !defined(BOOST_MSVC_STD_ITERATOR)
     
-namespace boost { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
 
 // Define a new template so it can be specialized
 template <class Iterator>
@@ -83,7 +83,7 @@ struct iterator_traits
 {};
 using std::distance;
 
-}} // namespace boost::detail
+}} // namespace pdalboost::detail
 
 # else
 
@@ -92,7 +92,7 @@ using std::distance;
 
 // This is the case where everything conforms except BOOST_NO_STD_ITERATOR_TRAITS
 
-namespace boost { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
 
 // Rogue Wave Standard Library fools itself into thinking partial
 // specialization is missing on some platforms (e.g. Sun), so fails to
@@ -127,7 +127,7 @@ struct iterator_traits<T const*>
     typedef std::random_access_iterator_tag iterator_category;
 };
 
-}} // namespace boost::detail
+}} // namespace pdalboost::detail
 
 #  else
 
@@ -150,7 +150,7 @@ struct iterator_traits<T const*>
 // should be the last #include
 # include "boost/type_traits/detail/bool_trait_def.hpp"
 
-namespace boost { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
 
 BOOST_MPL_HAS_XXX_TRAIT_DEF(value_type)
 BOOST_MPL_HAS_XXX_TRAIT_DEF(reference)
@@ -202,7 +202,7 @@ struct is_mutable_iterator_impl
 };
 
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(
-    is_mutable_iterator,T,::boost::detail::is_mutable_iterator_impl<T>::value)
+    is_mutable_iterator,T,::pdalboost::detail::is_mutable_iterator_impl<T>::value)
 
 
 // is_full_iterator_traits --
@@ -223,7 +223,7 @@ struct is_full_iterator_traits_impl
 };
 
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(
-    is_full_iterator_traits,T,::boost::detail::is_full_iterator_traits_impl<T>::value)
+    is_full_iterator_traits,T,::pdalboost::detail::is_full_iterator_traits_impl<T>::value)
 
 
 #   ifdef BOOST_BAD_CONTAINER_ITERATOR_CATEGORY_TYPEDEF
@@ -247,7 +247,7 @@ struct is_stlport_40_debug_iterator_impl
 };
 
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(
-    is_stlport_40_debug_iterator,T,::boost::detail::is_stlport_40_debug_iterator_impl<T>::value)
+    is_stlport_40_debug_iterator,T,::pdalboost::detail::is_stlport_40_debug_iterator_impl<T>::value)
 
 template <class T>
 struct stlport_40_debug_iterator_traits
@@ -443,11 +443,11 @@ template <> struct iterator_traits<int>
     typedef int iterator_category;
 };
 
-}} // namespace boost::detail
+}} // namespace pdalboost::detail
 
 #  endif // workarounds
 
-namespace boost { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
 
 namespace iterator_traits_
 {
@@ -470,14 +470,14 @@ namespace iterator_traits_
           return i2 - i1;
       }
   };
-} // namespace boost::detail::iterator_traits_
+} // namespace pdalboost::detail::iterator_traits_
 
 template <class Iterator>
 inline typename iterator_traits<Iterator>::difference_type
 distance(Iterator first, Iterator last)
 {
     typedef typename iterator_traits<Iterator>::difference_type diff_t;
-    typedef typename ::boost::detail::iterator_traits<Iterator>::iterator_category iterator_category;
+    typedef typename ::pdalboost::detail::iterator_traits<Iterator>::iterator_category iterator_category;
     
     return iterator_traits_::distance_select<Iterator,diff_t>::execute(
         first, last, (iterator_category*)0);

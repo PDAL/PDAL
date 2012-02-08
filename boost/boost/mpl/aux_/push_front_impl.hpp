@@ -23,7 +23,7 @@
 
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 struct has_push_front_arg {};
 
@@ -39,7 +39,7 @@ struct push_front_impl
         // if you've got an assert here, you are requesting a 'push_front' 
         // specialization that doesn't exist.
         BOOST_MPL_ASSERT_MSG(
-              ( boost::is_same< T, has_push_front_arg >::value )
+              ( pdalboost::is_same< T, has_push_front_arg >::value )
             , REQUESTED_PUSH_FRONT_SPECIALIZATION_FOR_SEQUENCE_DOES_NOT_EXIST
             , ( Sequence )
             );

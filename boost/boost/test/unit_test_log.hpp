@@ -38,7 +38,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -135,27 +135,27 @@ BOOST_TEST_SINGLETON_INST( unit_test_log )
 
 // helper macros
 #define BOOST_TEST_LOG_ENTRY( ll )                                                  \
-    (::boost::unit_test::unit_test_log                                              \
-        << ::boost::unit_test::log::begin( BOOST_TEST_L(__FILE__), __LINE__ ))(ll)  \
+    (::pdalboost::unit_test::unit_test_log                                              \
+        << ::pdalboost::unit_test::log::begin( BOOST_TEST_L(__FILE__), __LINE__ ))(ll)  \
 /**/
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 // ************************************************************************** //
 // **************       Unit test log interface helpers        ************** //
 // ************************************************************************** //
 
 #define BOOST_TEST_MESSAGE( M )                                 \
-    BOOST_TEST_LOG_ENTRY( ::boost::unit_test::log_messages )    \
-    << (::boost::unit_test::lazy_ostream::instance() << M)      \
+    BOOST_TEST_LOG_ENTRY( ::pdalboost::unit_test::log_messages )    \
+    << (::pdalboost::unit_test::lazy_ostream::instance() << M)      \
 /**/
 
 //____________________________________________________________________________//
 
 #define BOOST_TEST_PASSPOINT()                                  \
-    ::boost::unit_test::unit_test_log.set_checkpoint(           \
+    ::pdalboost::unit_test::unit_test_log.set_checkpoint(           \
         BOOST_TEST_L(__FILE__),                                 \
         static_cast<std::size_t>(__LINE__) )                    \
 /**/
@@ -163,10 +163,10 @@ BOOST_TEST_SINGLETON_INST( unit_test_log )
 //____________________________________________________________________________//
 
 #define BOOST_TEST_CHECKPOINT( M )                              \
-    ::boost::unit_test::unit_test_log.set_checkpoint(           \
+    ::pdalboost::unit_test::unit_test_log.set_checkpoint(           \
         BOOST_TEST_L(__FILE__),                                 \
         static_cast<std::size_t>(__LINE__),                     \
-        (::boost::wrap_stringstream().ref() << M).str() )       \
+        (::pdalboost::wrap_stringstream().ref() << M).str() )       \
 /**/
 
 //____________________________________________________________________________//

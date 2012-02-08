@@ -15,7 +15,7 @@
 #ifndef BOOST_TEST_LOG_LEVEL_HPP_011605GER
 #define BOOST_TEST_LOG_LEVEL_HPP_011605GER
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace unit_test {
 
 // ************************************************************************** //
@@ -38,6 +38,6 @@ enum            log_level {
 };
 
 } // namespace unit_test
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_TEST_LOG_LEVEL_HPP_011605GER

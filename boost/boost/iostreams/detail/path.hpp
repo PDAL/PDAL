@@ -10,7 +10,7 @@
  * Author:      Jonathan Turkanis
  * Contact:     turkanis at coderage dot com
  *
- * Defines the class boost::iostreams::detail::path, for storing a 
+ * Defines the class pdalboost::iostreams::detail::path, for storing a 
  * a std::string or std::wstring.
  *
  * This class allows interoperability with Boost.Filesystem without
@@ -30,7 +30,7 @@
 #include <boost/type.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 #ifndef BOOST_IOSTREAMS_NO_WIDE_STREAMS //------------------------------------//
 
@@ -51,15 +51,15 @@ public:
     // Constructor taking a C-style string
     path(const char* p) : narrow_(p), wide_(), is_wide_(false) { }
 
-    // Constructor taking a boost::filesystem2::path or
-    // boost::filesystem2::wpath
+    // Constructor taking a pdalboost::filesystem2::path or
+    // pdalboost::filesystem2::wpath
     template<typename Path>
     explicit path(const Path& p, typename Path::external_string_type* = 0)
     {
         init(p.external_file_string());
     }
 
-    // Constructor taking a boost::filesystem3::path (boost filesystem v3)
+    // Constructor taking a pdalboost::filesystem3::path (boost filesystem v3)
     template<typename Path>
     explicit path(const Path& p, typename Path::codecvt_type* = 0)
     {
@@ -99,8 +99,8 @@ public:
     }
 
 #if !BOOST_WORKAROUND(BOOST_MSVC, <= 1400)
-    // Assignment operator taking a boost::filesystem2::path or
-    // boost::filesystem2::wpath
+    // Assignment operator taking a pdalboost::filesystem2::path or
+    // pdalboost::filesystem2::wpath
     // (not on Visual C++ 7.1/8.0, as it seems to have problems with
     // SFINAE functions with the same parameters, doesn't seem
     // worth working around).
@@ -113,7 +113,7 @@ public:
     }
 #endif
 
-    // Assignment operator taking a boost::filesystem3::path
+    // Assignment operator taking a pdalboost::filesystem3::path
     template<typename Path>
     typename sfinae<typename Path::codecvt_type, path&>::type
     	operator=(const Path& p)
@@ -133,7 +133,7 @@ public:
     const wchar_t* c_wstr() const { return wide_.c_str(); }
 private:
     
-    // For wide-character paths, use a boost::filesystem::wpath instead of a
+    // For wide-character paths, use a pdalboost::filesystem::wpath instead of a
     // std::wstring
     path(const std::wstring&);
     path& operator=(const std::wstring&);

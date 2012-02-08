@@ -15,7 +15,7 @@
 #include <boost/date_time/gregorian/greg_calendar.hpp>
 #include <boost/date_time/gregorian/greg_duration.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace gregorian {
 
   //bring special enum values into the namespace
@@ -56,7 +56,7 @@ namespace gregorian {
       : date_time::date<date, gregorian_calendar, date_duration>(y, m, d)
     {
       if (gregorian_calendar::end_of_month_day(y, m) < d) {
-        boost::throw_exception(bad_day_of_month(std::string("Day of month is not valid for year")));
+        pdalboost::throw_exception(bad_day_of_month(std::string("Day of month is not valid for year")));
       }
     }
     //! Constructor from a ymd_type structure

@@ -17,14 +17,14 @@
 #include <boost/property_tree/detail/rapidxml.hpp>
 #include <vector>
 
-namespace boost { namespace property_tree { namespace xml_parser
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace xml_parser
 {
 
     template<class Ptree, class Ch>
-    void read_xml_node(detail::rapidxml::xml_node<Ch> *node,
+    void read_xml_node(detail::pdalboostrapidxml::xml_node<Ch> *node,
                        Ptree &pt, int flags)
     {
-        using namespace detail::rapidxml;
+        using namespace detail::pdalboostrapidxml;
         switch (node->type())
         {
             // Element nodes
@@ -90,7 +90,7 @@ namespace boost { namespace property_tree { namespace xml_parser
                            const std::string &filename)
     {
         typedef typename Ptree::key_type::value_type Ch;
-        using namespace detail::rapidxml;
+        using namespace detail::pdalboostrapidxml;
 
         // Load data into vector
         stream.unsetf(std::ios::skipws);

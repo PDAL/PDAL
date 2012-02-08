@@ -12,7 +12,7 @@
 #include <boost/phoenix/core/expression.hpp>
 #include <boost/proto/operators.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     BOOST_PHOENIX_UNARY_OPERATORS(
         (complement)

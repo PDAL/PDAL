@@ -15,8 +15,7 @@
 # include <boost/config.hpp>
 # include <boost/detail/workaround.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -52,11 +51,11 @@ template<class T> T * addressof( T & v )
 {
 #if defined( __BORLANDC__ ) && BOOST_WORKAROUND( __BORLANDC__, BOOST_TESTED_AT( 0x610 ) )
 
-    return boost::detail::addressof_impl<T>::f( v, 0 );
+    return pdalboost::detail::addressof_impl<T>::f( v, 0 );
 
 #else
 
-    return boost::detail::addressof_impl<T>::f( boost::detail::addr_impl_ref<T>( v ), 0 );
+    return pdalboost::detail::addressof_impl<T>::f( pdalboost::detail::addr_impl_ref<T>( v ), 0 );
 
 #endif
 }
@@ -97,6 +96,6 @@ const T (*addressof(const T (&t)[N]))[N]
 }
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_UTILITY_ADDRESSOF_HPP

@@ -15,7 +15,7 @@
 #   define BOOST_SPIRIT_CLOSURE_LIMIT PHOENIX_LIMIT
 #endif
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -30,29 +30,29 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
     template <
             typename DerivedT
-        ,   typename T0 = ::phoenix::nil_t
-        ,   typename T1 = ::phoenix::nil_t
-        ,   typename T2 = ::phoenix::nil_t
+        ,   typename T0 = ::pdalboostphoenix::nil_t
+        ,   typename T1 = ::pdalboostphoenix::nil_t
+        ,   typename T2 = ::pdalboostphoenix::nil_t
 
     #if BOOST_SPIRIT_CLOSURE_LIMIT > 3
-        ,   typename T3 = ::phoenix::nil_t
-        ,   typename T4 = ::phoenix::nil_t
-        ,   typename T5 = ::phoenix::nil_t
+        ,   typename T3 = ::pdalboostphoenix::nil_t
+        ,   typename T4 = ::pdalboostphoenix::nil_t
+        ,   typename T5 = ::pdalboostphoenix::nil_t
 
     #if BOOST_SPIRIT_CLOSURE_LIMIT > 6
-        ,   typename T6 = ::phoenix::nil_t
-        ,   typename T7 = ::phoenix::nil_t
-        ,   typename T8 = ::phoenix::nil_t
+        ,   typename T6 = ::pdalboostphoenix::nil_t
+        ,   typename T7 = ::pdalboostphoenix::nil_t
+        ,   typename T8 = ::pdalboostphoenix::nil_t
 
     #if BOOST_SPIRIT_CLOSURE_LIMIT > 9
-        ,   typename T9 = ::phoenix::nil_t
-        ,   typename T10 = ::phoenix::nil_t
-        ,   typename T11 = ::phoenix::nil_t
+        ,   typename T9 = ::pdalboostphoenix::nil_t
+        ,   typename T10 = ::pdalboostphoenix::nil_t
+        ,   typename T11 = ::pdalboostphoenix::nil_t
 
     #if BOOST_SPIRIT_CLOSURE_LIMIT > 12
-        ,   typename T12 = ::phoenix::nil_t
-        ,   typename T13 = ::phoenix::nil_t
-        ,   typename T14 = ::phoenix::nil_t
+        ,   typename T12 = ::pdalboostphoenix::nil_t
+        ,   typename T13 = ::pdalboostphoenix::nil_t
+        ,   typename T14 = ::pdalboostphoenix::nil_t
 
     #endif
     #endif

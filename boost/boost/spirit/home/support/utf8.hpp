@@ -17,9 +17,9 @@
 #include <boost/type_traits/make_unsigned.hpp>
 #include <string>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
-    typedef ::boost::uint32_t ucs4_char;
+    typedef ::pdalboost::uint32_t ucs4_char;
     typedef char utf8_char;
     typedef std::basic_string<ucs4_char> ucs4_string;
     typedef std::basic_string<utf8_char> utf8_string;

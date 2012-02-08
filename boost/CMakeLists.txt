@@ -42,7 +42,6 @@ set(PDALBOOST_SOURCES
     ./libs/program_options/src/value_semantic.cpp
     ./libs/program_options/src/variables_map.cpp
     ./libs/program_options/src/winmain.cpp
-    ./libs/random/src/random_device.cpp
     ./libs/system/src/error_code.cpp
     ./libs/test/src/compiler_log_formatter.cpp
     ./libs/test/src/cpp_main.cpp

@@ -12,7 +12,7 @@
 #include <boost/assert.hpp>
 #include <vector>
 
-namespace boost { namespace spirit { namespace iterator_policies
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace iterator_policies
 {
     ///////////////////////////////////////////////////////////////////////////
     //  class split_std_deque
@@ -42,7 +42,7 @@ namespace boost { namespace spirit { namespace iterator_policies
 
             void swap(unique& x)
             {
-                boost::swap(queued_position, x.queued_position);
+                pdalboost::swap(queued_position, x.queued_position);
             }
 
             // This is called when the iterator is dereferenced.  It's a 

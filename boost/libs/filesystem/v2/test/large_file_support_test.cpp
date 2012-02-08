@@ -18,7 +18,7 @@
 #endif
 
 #include <boost/filesystem/operations.hpp>
-namespace fs = boost::filesystem;
+namespace fs = pdalboost::filesystem;
 
 #include <iostream>
 

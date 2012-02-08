@@ -7,7 +7,7 @@
 #if !defined(FUSION_END_IMPL_05062005_1226)
 #define FUSION_END_IMPL_05062005_1226
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct iterator_range_tag;
 

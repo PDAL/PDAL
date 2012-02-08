@@ -20,7 +20,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/type_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 
@@ -44,7 +44,7 @@ struct remove_rvalue_ref<T&&>
 
 } // namespace detail
 
-BOOST_TT_AUX_TYPE_TRAIT_DEF1(remove_reference,T,typename boost::detail::remove_rvalue_ref<T>::type)
+BOOST_TT_AUX_TYPE_TRAIT_DEF1(remove_reference,T,typename pdalboost::detail::remove_rvalue_ref<T>::type)
 BOOST_TT_AUX_TYPE_TRAIT_PARTIAL_SPEC1_1(typename T,remove_reference,T&,T)
 
 #if defined(BOOST_ILLEGAL_CV_REFERENCES)
@@ -59,11 +59,11 @@ BOOST_TT_AUX_TYPE_TRAIT_PARTIAL_SPEC1_1(typename T,remove_reference,T& const vol
 
 #elif !BOOST_WORKAROUND(BOOST_MSVC,<=1300)
 
-BOOST_TT_AUX_TYPE_TRAIT_DEF1(remove_reference,T,typename boost::detail::remove_reference_impl<T>::type)
+BOOST_TT_AUX_TYPE_TRAIT_DEF1(remove_reference,T,typename pdalboost::detail::remove_reference_impl<T>::type)
 
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/type_trait_undef.hpp>
 

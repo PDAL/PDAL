@@ -45,7 +45,7 @@
 #   include <boost/preprocessor/dec.hpp>
 #   include <boost/preprocessor/cat.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 // 'inherit<T1,T2,..,Tn>' metafunction; returns an unspecified class type
 // produced by public derivation from all metafunction's parameters 

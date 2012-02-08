@@ -20,7 +20,7 @@
 #include <boost/type_traits/remove_pointer.hpp>
 
 #define BOOST_PHOENIX_DEFINE_CUSTOM_TERMINAL(Template, Terminal, IsNullary, EvalFun)\
-    namespace boost { namespace phoenix                                         \
+    namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix                                         \
     {                                                                           \
         namespace result_of                                                     \
         {                                                                       \
@@ -41,7 +41,7 @@
     }}                                                                          \
 /**/
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename T, typename Dummy>
     struct is_custom_terminal
@@ -78,11 +78,11 @@ namespace boost { namespace phoenix
     namespace rule
     {
         struct argument
-            : proto::if_<boost::is_placeholder<proto::_value>()>
+            : proto::if_<pdalboost::is_placeholder<proto::_value>()>
         {};
 
         struct custom_terminal
-            : proto::if_<boost::phoenix::is_custom_terminal<proto::_value>()>
+            : proto::if_<pdalboost::pdalboostphoenix::is_custom_terminal<proto::_value>()>
         {};
         
         struct terminal
@@ -125,7 +125,7 @@ namespace boost { namespace phoenix
               , proto::make<
                     detail::placeholder_idx<
                         proto::make<
-                            boost::is_placeholder<proto::_value>()
+                            pdalboost::is_placeholder<proto::_value>()
                         >
                     >()
                 >

@@ -112,7 +112,7 @@ namespace std { using ::memset; using ::sprintf; }
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace debug {
 
@@ -960,7 +960,7 @@ break_memory_alloc( long mem_alloc_order_num )
 
 } // namespace debug
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

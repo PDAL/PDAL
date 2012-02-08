@@ -13,7 +13,7 @@
 #include <iostream>
 #include <fstream>
 
-using boost::filesystem::path;
+using pdalboost::filesystem::path;
 using std::string;
 using std::cout;
 

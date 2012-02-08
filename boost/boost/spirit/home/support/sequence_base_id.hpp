@@ -15,7 +15,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/spirit/home/support/attributes.hpp>
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     namespace detail
     {

@@ -68,7 +68,7 @@ struct NAME
         Tag, SYMMETRIC_TYPE,                                                  \
         BOOST_DEDUCED_TYPENAME enable_if                                      \
         <                                                                     \
-            ::boost::bimaps::relation::support::is_tag_of_member_at_left      \
+            ::pdalboost::bimaps::relation::support::is_tag_of_member_at_left      \
             <                                                                 \
                 Tag,                                                          \
                 SYMMETRIC_TYPE                                                \
@@ -86,7 +86,7 @@ struct NAME
         Tag, SYMMETRIC_TYPE,                                                  \
         BOOST_DEDUCED_TYPENAME enable_if                                      \
         <                                                                     \
-            ::boost::bimaps::relation::support::is_tag_of_member_at_right     \
+            ::pdalboost::bimaps::relation::support::is_tag_of_member_at_right     \
             <                                                                 \
                 Tag,                                                          \
                 SYMMETRIC_TYPE                                                \

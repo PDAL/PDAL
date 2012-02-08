@@ -18,7 +18,7 @@
 #include <boost/mpl/aux_/config/workaround.hpp>
 
 // agurt 21/sep/04: portability macro for the sake of MSVC 6.x-7.0;
-// resolves conflicts with 'boost::numeric_cast' function template.
+// resolves conflicts with 'pdalboost::numeric_cast' function template.
 // use it in your own code _only_ if you care about compatibility with
 // these outdated compilers!
 #if BOOST_WORKAROUND(BOOST_MSVC, <= 1300) || BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x570) )
@@ -27,7 +27,7 @@
 #   define BOOST_MPL_AUX_NUMERIC_CAST numeric_cast
 #endif
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 // no default implementation; the definition is needed to make MSVC happy
 

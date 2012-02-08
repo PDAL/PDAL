@@ -17,9 +17,9 @@
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/spirit/home/classic/core/nil.hpp>  // for nil_t
-#include <boost/detail/iterator.hpp> // for boost::detail::iterator_traits
+#include <boost/detail/iterator.hpp> // for pdalboost::detail::iterator_traits
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -89,13 +89,13 @@ private:
     unsigned int m_CharsPerTab;
 };
 
-/* namespace boost::spirit { */ namespace iterator_ { namespace impl {
+/* namespace pdalboost::spirit { */ namespace iterator_ { namespace impl {
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  position_iterator_base_generator
 //
-//  Metafunction to generate the iterator type using boost::iterator_adaptors,
+//  Metafunction to generate the iterator type using pdalboost::iterator_adaptors,
 //  hiding all the metaprogramming thunking code in it. It is used
 //  mainly to keep the public interface (position_iterator) cleanear.
 //
@@ -104,28 +104,28 @@ template <typename MainIterT, typename ForwardIterT, typename PositionT>
 struct position_iterator_base_generator
 {
 private:
-    typedef boost::detail::iterator_traits<ForwardIterT> traits;
+    typedef pdalboost::detail::iterator_traits<ForwardIterT> traits;
     typedef typename traits::value_type value_type;
     typedef typename traits::iterator_category iter_category_t;
 
     // Position iterator is always a non-mutable iterator
-    typedef typename boost::add_const<value_type>::type const_value_type;
+    typedef typename pdalboost::add_const<value_type>::type const_value_type;
 
 public:
     // Check if the MainIterT is nil. If it's nil, it means that the actual
     //  self type is position_iterator. Otherwise, it's a real type we
     //  must use
-    typedef typename boost::mpl::if_<
-        typename boost::is_same<MainIterT, nil_t>::type,
+    typedef typename pdalboost::mpl::if_<
+        typename pdalboost::is_same<MainIterT, nil_t>::type,
         position_iterator<ForwardIterT, PositionT, nil_t>,
         MainIterT
     >::type main_iter_t;
 
-    typedef boost::iterator_adaptor<
+    typedef pdalboost::iterator_adaptor<
         main_iter_t,
         ForwardIterT,
         const_value_type,
-        boost::forward_traversal_tag
+        pdalboost::forward_traversal_tag
     > type;
 };
 
@@ -133,6 +133,6 @@ public:
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 
-}} /* namespace boost::spirit::iterator_::impl */
+}} /* namespace pdalboost::spirit::iterator_::impl */
 
 #endif

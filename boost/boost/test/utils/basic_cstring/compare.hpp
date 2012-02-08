@@ -30,7 +30,7 @@
 namespace std { using ::toupper; }
 # endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -95,10 +95,10 @@ public:
 
 template<class CharT>
 inline bool
-operator <( boost::unit_test::basic_cstring<CharT> const& x,
-            boost::unit_test::basic_cstring<CharT> const& y )
+operator <( pdalboost::unit_test::basic_cstring<CharT> const& x,
+            pdalboost::unit_test::basic_cstring<CharT> const& y )
 {
-    typedef typename boost::unit_test::basic_cstring<CharT>::traits_type traits_type;
+    typedef typename pdalboost::unit_test::basic_cstring<CharT>::traits_type traits_type;
     return x.size() != y.size() 
             ? x.size() < y.size() 
             : traits_type::compare( x.begin(), y.begin(), x.size() ) < 0;
@@ -106,7 +106,7 @@ operator <( boost::unit_test::basic_cstring<CharT> const& x,
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

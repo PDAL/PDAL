@@ -14,7 +14,7 @@
 #include <boost/mpl/not.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 
-namespace boost { namespace fusion { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
 {
     template <typename T>
     struct is_mpl_sequence

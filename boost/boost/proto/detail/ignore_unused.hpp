@@ -10,7 +10,7 @@
 #ifndef BOOST_PROTO_DETAIL_IGNORE_UNUSED_HPP_EAN_03_03_2008
 #define BOOST_PROTO_DETAIL_IGNORE_UNUSED_HPP_EAN_03_03_2008
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace detail
     {

@@ -24,7 +24,7 @@
 # include <boost/spirit/home/support/char_encoding/unicode.hpp>
 #endif
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     typedef mpl::vector<
             spirit::char_encoding::ascii
@@ -198,11 +198,11 @@ namespace boost { namespace spirit
 #endif
 
 #define BOOST_SPIRIT_DEFINE_CHAR_CODES(charset)                                 \
-    namespace boost { namespace spirit { namespace tag { namespace charset      \
+    namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace tag { namespace charset      \
     {                                                                           \
         BOOST_SPIRIT_TAG_CHAR_SPEC(spirit::char_encoding::charset)              \
     }}}}                                                                        \
-    namespace boost { namespace spirit { namespace charset                      \
+    namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace charset                      \
     {                                                                           \
         BOOST_SPIRIT_CHAR_SPEC(charset)                                         \
                                                                                 \
@@ -230,7 +230,7 @@ BOOST_SPIRIT_DEFINE_CHAR_CODES(iso8859_1)
 BOOST_SPIRIT_DEFINE_CHAR_CODES(standard)
 BOOST_SPIRIT_DEFINE_CHAR_CODES(standard_wide)
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     template <typename Char>
     struct char_encoding_from_char;
@@ -254,12 +254,12 @@ namespace boost { namespace spirit { namespace traits
 #if defined(BOOST_SPIRIT_UNICODE)
 BOOST_SPIRIT_DEFINE_CHAR_CODES(unicode)
 
-    namespace boost { namespace spirit { namespace tag { namespace unicode
+    namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace tag { namespace unicode
     {
         BOOST_SPIRIT_TAG_CHAR_SPEC(spirit::char_encoding::unicode)
     }}}}
 
-    namespace boost { namespace spirit { namespace unicode
+    namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace unicode
     {
 #define BOOST_SPIRIT_UNICODE_CHAR_CODE(name)                                    \
     BOOST_SPIRIT_CHAR_CODE(name, spirit::char_encoding::unicode)                \

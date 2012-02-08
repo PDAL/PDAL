@@ -202,17 +202,17 @@ local rule explicit-alias ( id : targets + )
 
 # First, the complicated libraries: where the target name in Jamfile is
 # different from its directory name.
-explicit-alias prg_exec_monitor : libs/test/build//_prg_exec_monitor ;
-explicit-alias test_exec_monitor : libs/test/build//_test_exec_monitor ;
-explicit-alias unit_test_framework : libs/test/build//_unit_test_framework ;
+explicit-alias prg_exec_monitor : libs/test/build//pdalboost_prg_exec_monitor ;
+explicit-alias test_exec_monitor : libs/test/build//pdalboost_test_exec_monitor ;
+explicit-alias unit_test_framework : libs/test/build//pdalboost_unit_test_framework ;
 explicit-alias bgl-vis : libs/graps/build//bgl-vis ;
-explicit-alias serialization : libs/serialization/build//_serialization ;
-explicit-alias wserialization : libs/serialization/build//_wserialization ;
+explicit-alias serialization : libs/serialization/build//pdalboost_serialization ;
+explicit-alias wserialization : libs/serialization/build//pdalboost_wserialization ;
 for local l in $(all-libraries)
 {
     if ! $(l) in test graph serialization
     {
-        explicit-alias $(l) : libs/$(l)/build//_$(l) ;
+        explicit-alias $(l) : libs/$(l)/build//pdalboost_$(l) ;
     }
 }
 

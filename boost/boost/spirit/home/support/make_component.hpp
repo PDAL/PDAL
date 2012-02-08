@@ -17,7 +17,7 @@
 #include <boost/spirit/home/support/detail/make_cons.hpp>
 #include <boost/spirit/home/support/modify.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     // There is no real "component" class. Each domain is responsible
     // for creating its own components. You need to specialize this for
@@ -52,7 +52,7 @@ namespace boost { namespace spirit
     struct flatten_tree;
 }}
 
-namespace boost { namespace spirit { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace detail
 {
     template <typename Expr, typename State, typename Data, typename Domain>
     struct make_terminal_impl
@@ -87,10 +87,10 @@ namespace boost { namespace spirit { namespace detail
     };
 
     template <typename Expr, typename State, typename Data, typename Domain>
-    struct make_terminal_impl<phoenix::actor<Expr>, State, Data, Domain>
-      : proto::transform_impl<phoenix::actor<Expr>, State, Data>
+    struct make_terminal_impl<pdalboostphoenix::actor<Expr>, State, Data, Domain>
+      : proto::transform_impl<pdalboostphoenix::actor<Expr>, State, Data>
     {
-        typedef phoenix::actor<Expr> value;
+        typedef pdalboostphoenix::actor<Expr> value;
         typedef typename result_of::make_cons<value>::type elements;
         typedef make_component<Domain, proto::tag::terminal> make_component_;
 
@@ -113,13 +113,13 @@ namespace boost { namespace spirit { namespace detail
     };
 
     template <typename Expr, typename State, typename Data, typename Domain>
-    struct make_terminal_impl<phoenix::actor<Expr> &, State, Data, Domain>
-        : make_terminal_impl<phoenix::actor<Expr>, State, Data, Domain>
+    struct make_terminal_impl<pdalboostphoenix::actor<Expr> &, State, Data, Domain>
+        : make_terminal_impl<pdalboostphoenix::actor<Expr>, State, Data, Domain>
     {};
 
     template <typename Expr, typename State, typename Data, typename Domain>
-    struct make_terminal_impl<phoenix::actor<Expr> const &, State, Data, Domain>
-        : make_terminal_impl<phoenix::actor<Expr>, State, Data, Domain>
+    struct make_terminal_impl<pdalboostphoenix::actor<Expr> const &, State, Data, Domain>
+        : make_terminal_impl<pdalboostphoenix::actor<Expr>, State, Data, Domain>
     {};
 
     template <typename Domain>
@@ -371,7 +371,7 @@ namespace boost { namespace spirit { namespace detail
 #else
             typedef
                 typename mpl::eval_if_c<
-                    phoenix::is_actor<
+                    pdalboostphoenix::is_actor<
                         typename proto::result_of::child_c<Expr, 1>::type
                     >::type::value
                   , proto::result_of::child_c<Expr, 1>
@@ -425,7 +425,7 @@ namespace boost { namespace spirit { namespace detail
                         expr
                       , state
                       , data
-                      , typename phoenix::is_actor<
+                      , typename pdalboostphoenix::is_actor<
                             typename proto::result_of::child_c<Expr, 1>::type
                         >::type()
                     );

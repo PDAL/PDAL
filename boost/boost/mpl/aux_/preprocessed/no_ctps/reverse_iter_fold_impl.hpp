@@ -9,7 +9,7 @@
 // Preprocessed version of "boost/mpl/aux_/reverse_iter_fold_impl.hpp" header
 // -- DO NOT modify by hand!
 
-namespace boost { namespace mpl { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { namespace aux {
 
 /// forward declaration
 

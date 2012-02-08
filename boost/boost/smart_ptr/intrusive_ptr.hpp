@@ -30,8 +30,7 @@
 #endif
 
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //
 //  intrusive_ptr
@@ -72,7 +71,7 @@ public:
     template<class U>
 #if !defined( BOOST_SP_NO_SP_CONVERTIBLE )
 
-    intrusive_ptr( intrusive_ptr<U> const & rhs, typename boost::detail::sp_enable_if_convertible<U,T>::type = boost::detail::sp_empty() )
+    intrusive_ptr( intrusive_ptr<U> const & rhs, typename pdalboost::detail::sp_enable_if_convertible<U,T>::type = pdalboost::detail::sp_empty() )
 
 #else
 
@@ -285,6 +284,6 @@ template<class E, class T, class Y> std::basic_ostream<E, T> & operator<< (std::
 
 #endif // !defined(BOOST_NO_IOSTREAM)
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // #ifndef BOOST_SMART_PTR_INTRUSIVE_PTR_HPP_INCLUDED

@@ -17,7 +17,7 @@
 #include <boost/accumulators/framework/depends_on.hpp>
 #include <boost/accumulators/statistics_fwd.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 namespace impl
@@ -28,7 +28,7 @@ namespace impl
     struct max_impl
       : accumulator_base
     {
-        // for boost::result_of
+        // for pdalboost::result_of
         typedef Sample result_type;
 
         template<typename Args>
@@ -80,6 +80,6 @@ namespace extract
 
 using extract::max;
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

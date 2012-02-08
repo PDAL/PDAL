@@ -15,16 +15,16 @@
 #include <boost/detail/iterator.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace qi { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi { namespace detail
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Iterator>
     struct iterator_source
     {
         typedef typename
-            boost::detail::iterator_traits<Iterator>::value_type
+            pdalboost::detail::iterator_traits<Iterator>::value_type
         char_type;
-        typedef boost::iostreams::seekable_device_tag category;
+        typedef pdalboost::iostreams::seekable_device_tag category;
 
         iterator_source (Iterator const& first_, Iterator const& last_)
           : first(first_), last(last_), pos(0)
@@ -51,7 +51,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
         }
 
         // Write is implemented only to satisfy the requirements of a 
-        // boost::iostreams::seekable_device. We need to have see support to
+        // pdalboost::iostreams::seekable_device. We need to have see support to
         // be able to figure out how many characters have been actually 
         // consumed by the stream.
         std::streamsize write(const char*, std::streamsize) 
@@ -60,7 +60,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
             return -1;
         }
 
-        std::streampos seek(boost::iostreams::stream_offset, std::ios_base::seekdir way) 
+        std::streampos seek(pdalboost::iostreams::stream_offset, std::ios_base::seekdir way) 
         {
             BOOST_ASSERT(way == std::ios_base::cur);    // only support queries
             return pos;                              // return current position

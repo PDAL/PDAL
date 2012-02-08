@@ -36,7 +36,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail {
 
@@ -55,17 +55,17 @@ namespace detail {
 // http://groups.google.com/groups?hl=en&selm=000001c1cc83%24e154d5e0%247772e50c%40c161550a&rnum=1
 #if defined(__GNUC__)  && !defined(__EDG_VERSION__)
 
-template <class U> ::boost::type_traits::yes_type is_class_tester(void(U::*)(void));
-template <class U> ::boost::type_traits::no_type is_class_tester(...);
+template <class U> ::pdalboost::type_traits::yes_type is_class_tester(void(U::*)(void));
+template <class U> ::pdalboost::type_traits::no_type is_class_tester(...);
 
 template <typename T>
 struct is_class_impl
 {
 
     BOOST_STATIC_CONSTANT(bool, value =
-        (::boost::type_traits::ice_and<
-            sizeof(is_class_tester<T>(0)) == sizeof(::boost::type_traits::yes_type),
-            ::boost::type_traits::ice_not< ::boost::is_union<T>::value >::value
+        (::pdalboost::type_traits::ice_and<
+            sizeof(is_class_tester<T>(0)) == sizeof(::pdalboost::type_traits::yes_type),
+            ::pdalboost::type_traits::ice_not< ::pdalboost::is_union<T>::value >::value
         >::value)
         );
 };
@@ -75,13 +75,13 @@ struct is_class_impl
 template <typename T>
 struct is_class_impl
 {
-    template <class U> static ::boost::type_traits::yes_type is_class_tester(void(U::*)(void));
-    template <class U> static ::boost::type_traits::no_type is_class_tester(...);
+    template <class U> static ::pdalboost::type_traits::yes_type is_class_tester(void(U::*)(void));
+    template <class U> static ::pdalboost::type_traits::no_type is_class_tester(...);
 
     BOOST_STATIC_CONSTANT(bool, value =
-        (::boost::type_traits::ice_and<
-            sizeof(is_class_tester<T>(0)) == sizeof(::boost::type_traits::yes_type),
-            ::boost::type_traits::ice_not< ::boost::is_union<T>::value >::value
+        (::pdalboost::type_traits::ice_and<
+            sizeof(is_class_tester<T>(0)) == sizeof(::pdalboost::type_traits::yes_type),
+            ::pdalboost::type_traits::ice_not< ::pdalboost::is_union<T>::value >::value
         >::value)
         );
 };
@@ -95,22 +95,22 @@ struct is_class_impl
 {
 #   ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
     BOOST_STATIC_CONSTANT(bool, value =
-    (::boost::type_traits::ice_and<
-        ::boost::type_traits::ice_not< ::boost::is_union<T>::value >::value,
-        ::boost::type_traits::ice_not< ::boost::is_scalar<T>::value >::value,
-        ::boost::type_traits::ice_not< ::boost::is_array<T>::value >::value,
-        ::boost::type_traits::ice_not< ::boost::is_reference<T>::value>::value,
-        ::boost::type_traits::ice_not< ::boost::is_void<T>::value >::value,
-        ::boost::type_traits::ice_not< ::boost::is_function<T>::value >::value
+    (::pdalboost::type_traits::ice_and<
+        ::pdalboost::type_traits::ice_not< ::pdalboost::is_union<T>::value >::value,
+        ::pdalboost::type_traits::ice_not< ::pdalboost::is_scalar<T>::value >::value,
+        ::pdalboost::type_traits::ice_not< ::pdalboost::is_array<T>::value >::value,
+        ::pdalboost::type_traits::ice_not< ::pdalboost::is_reference<T>::value>::value,
+        ::pdalboost::type_traits::ice_not< ::pdalboost::is_void<T>::value >::value,
+        ::pdalboost::type_traits::ice_not< ::pdalboost::is_function<T>::value >::value
         >::value));
 #   else
     BOOST_STATIC_CONSTANT(bool, value =
-    (::boost::type_traits::ice_and<
-        ::boost::type_traits::ice_not< ::boost::is_union<T>::value >::value,
-        ::boost::type_traits::ice_not< ::boost::is_scalar<T>::value >::value,
-        ::boost::type_traits::ice_not< ::boost::is_array<T>::value >::value,
-        ::boost::type_traits::ice_not< ::boost::is_reference<T>::value>::value,
-        ::boost::type_traits::ice_not< ::boost::is_void<T>::value >::value
+    (::pdalboost::type_traits::ice_and<
+        ::pdalboost::type_traits::ice_not< ::pdalboost::is_union<T>::value >::value,
+        ::pdalboost::type_traits::ice_not< ::pdalboost::is_scalar<T>::value >::value,
+        ::pdalboost::type_traits::ice_not< ::pdalboost::is_array<T>::value >::value,
+        ::pdalboost::type_traits::ice_not< ::pdalboost::is_reference<T>::value>::value,
+        ::pdalboost::type_traits::ice_not< ::pdalboost::is_void<T>::value >::value
         >::value));
 #   endif
 };
@@ -128,12 +128,12 @@ struct is_class_impl
 
 # ifdef __EDG_VERSION__
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(
-   is_class,T, boost::detail::is_class_impl<typename boost::remove_cv<T>::type>::value)
+   is_class,T, pdalboost::detail::is_class_impl<typename pdalboost::remove_cv<T>::type>::value)
 # else 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_class,T,::boost::detail::is_class_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_class,T,::pdalboost::detail::is_class_impl<T>::value)
 # endif
     
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

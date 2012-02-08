@@ -17,7 +17,7 @@
 #include <boost/mpl/fold.hpp>
 #include <boost/mpl/set/set0.hpp>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -92,6 +92,6 @@ struct no_duplicate_tags_in_index_list
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

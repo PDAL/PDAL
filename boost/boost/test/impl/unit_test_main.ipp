@@ -40,7 +40,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -132,7 +132,7 @@ public:
         std::vector<single_filter> const& filters = m_filters[m_depth-2];
 
         tu.p_enabled.value =
-            std::find_if( filters.begin(), filters.end(), bind( &single_filter::pass, _1, boost::ref(tu) ) ) != filters.end();
+            std::find_if( filters.begin(), filters.end(), bind( &single_filter::pass, _1, pdalboost::ref(tu) ) ) != filters.end();
     }
 
     // test tree visitor interface
@@ -187,32 +187,32 @@ unit_test_main( init_unit_test_func init_func, int argc, char* argv[] )
         results_reporter::make_report();
 
         return runtime_config::no_result_code() 
-                    ? boost::exit_success
+                    ? pdalboost::exit_success
                     : results_collector.results( framework::master_test_suite().p_id ).result_code();
     }
     catch( framework::nothing_to_test const& ) {
-        return boost::exit_success;
+        return pdalboost::exit_success;
     }
     catch( framework::internal_error const& ex ) {
         results_reporter::get_stream() << "Boost.Test framework internal error: " << ex.what() << std::endl;
         
-        return boost::exit_exception_failure;
+        return pdalboost::exit_exception_failure;
     }
     catch( framework::setup_error const& ex ) {
         results_reporter::get_stream() << "Test setup error: " << ex.what() << std::endl;
         
-        return boost::exit_exception_failure;
+        return pdalboost::exit_exception_failure;
     }
     catch( ... ) {
         results_reporter::get_stream() << "Boost.Test framework internal error: unknown reason" << std::endl;
         
-        return boost::exit_exception_failure;
+        return pdalboost::exit_exception_failure;
     }
 }
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 #if !defined(BOOST_TEST_DYN_LINK) && !defined(BOOST_TEST_NO_MAIN)
 
@@ -227,14 +227,14 @@ main( int argc, char* argv[] )
 #ifdef BOOST_TEST_ALTERNATIVE_INIT_API
     extern bool init_unit_test();
 
-    boost::unit_test::init_unit_test_func init_func = &init_unit_test;
+    pdalboost::unit_test::init_unit_test_func init_func = &init_unit_test;
 #else
-    extern ::boost::unit_test::test_suite* init_unit_test_suite( int argc, char* argv[] );
+    extern ::pdalboost::unit_test::test_suite* init_unit_test_suite( int argc, char* argv[] );
 
-    boost::unit_test::init_unit_test_func init_func = &init_unit_test_suite;
+    pdalboost::unit_test::init_unit_test_func init_func = &init_unit_test_suite;
 #endif
 
-    return ::boost::unit_test::unit_test_main( init_func, argc, argv );
+    return ::pdalboost::unit_test::unit_test_main( init_func, argc, argv );
 }
 
 #endif // !BOOST_TEST_DYN_LINK && !BOOST_TEST_NO_MAIN

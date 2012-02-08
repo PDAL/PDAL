@@ -22,7 +22,7 @@
 
 #include <boost/spirit/home/phoenix/operator/detail/mem_fun_ptr_eval.hpp>
 
-namespace boost { namespace phoenix {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix {
     template<typename Actor, typename MemFunPtr>
     struct mem_fun_ptr_gen
     {

@@ -8,7 +8,7 @@
 
 #include <boost/type_traits/is_base_and_derived.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace parameter {
 namespace aux {
 
@@ -21,6 +21,6 @@ struct is_maybe
 
 } // namespace aux
 } // namespace parameter
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_PARAMETER_IS_MAYBE_050329_HPP

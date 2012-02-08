@@ -13,7 +13,7 @@
 #include <boost/spirit/home/support/multi_pass_wrapper.hpp>
 #include <boost/swap.hpp>
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
     namespace iterator_policies
     {
@@ -61,9 +61,9 @@ namespace boost { namespace spirit {
     template <typename T, typename Policies>
     void swap(multi_pass<T, Policies> &x, multi_pass<T, Policies> &y);
 
-}} // namespace boost::spirit
+}} // namespace pdalboost::spirit
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     // declare special functions allowing to integrate any multi_pass iterator
     // with expectation points

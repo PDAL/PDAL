@@ -20,7 +20,7 @@
 #include <boost/assert.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 /**
  * The distribution function uniform_int models a \random_distribution.
@@ -94,6 +94,6 @@ public:
     }
 };
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RANDOM_UNIFORM_INT_HPP

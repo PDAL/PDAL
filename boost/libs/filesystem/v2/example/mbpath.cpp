@@ -19,7 +19,7 @@
 #include <boost/system/system_error.hpp>
 #include <boost/scoped_array.hpp>
 
-namespace fs = boost::filesystem;
+namespace fs = pdalboost::filesystem;
 
 namespace
 {
@@ -38,17 +38,17 @@ namespace user
     const internal_string_type & src )
   {
     std::size_t work_size( cvt->max_length() * (src.size()+1) );
-    boost::scoped_array<char> work( new char[ work_size ] );
+    pdalboost::scoped_array<char> work( new char[ work_size ] );
     std::mbstate_t state;
     const internal_string_type::value_type * from_next;
     external_string_type::value_type * to_next;
     if ( cvt->out( 
       state, src.c_str(), src.c_str()+src.size(), from_next, work.get(),
       work.get()+work_size, to_next ) != std::codecvt_base::ok )
-      boost::throw_exception<fs::basic_filesystem_error<mbpath> >(
+      pdalboost::throw_exception<fs::basic_filesystem_error<mbpath> >(
         fs::basic_filesystem_error<mbpath>(
           "user::mbpath::to_external conversion error",
-          ph, boost::system::error_code( EINVAL, boost::system::errno_ecat ) ) );
+          ph, pdalboost::system::error_code( EINVAL, pdalboost::system::errno_ecat ) ) );
     *to_next = '\0';
     return external_string_type( work.get() );
   }
@@ -57,17 +57,17 @@ namespace user
   mbpath_traits::to_internal( const external_string_type & src )
   {
       std::size_t work_size( src.size()+1 );
-      boost::scoped_array<wchar_t> work( new wchar_t[ work_size ] );
+      pdalboost::scoped_array<wchar_t> work( new wchar_t[ work_size ] );
       std::mbstate_t state;
       const external_string_type::value_type * from_next;
       internal_string_type::value_type * to_next;
       if ( cvt->in( 
         state, src.c_str(), src.c_str()+src.size(), from_next, work.get(),
         work.get()+work_size, to_next ) != std::codecvt_base::ok )
-        boost::throw_exception<fs::basic_filesystem_error<mbpath> >(
+        pdalboost::throw_exception<fs::basic_filesystem_error<mbpath> >(
           fs::basic_filesystem_error<mbpath>(
             "user::mbpath::to_internal conversion error",
-            boost::system::error_code( EINVAL, boost::system::errno_ecat ) ) );
+            pdalboost::system::error_code( EINVAL, pdalboost::system::errno_ecat ) ) );
       *to_next = L'\0';
       return internal_string_type( work.get() );
   }

@@ -31,7 +31,7 @@
 // reference. -end note ]
 //----------------------------------------------------------------------------//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace type_traits_detail {
 
@@ -50,15 +50,15 @@ namespace type_traits_detail {
     template <typename T>
     struct add_rvalue_reference_imp
     { 
-       typedef typename boost::type_traits_detail::add_rvalue_reference_helper
+       typedef typename pdalboost::type_traits_detail::add_rvalue_reference_helper
                   <T, (!is_void<T>::value && !is_reference<T>::value) >::type type; 
     };
 
 }
 
-BOOST_TT_AUX_TYPE_TRAIT_DEF1(add_rvalue_reference,T,typename boost::type_traits_detail::add_rvalue_reference_imp<T>::type)
+BOOST_TT_AUX_TYPE_TRAIT_DEF1(add_rvalue_reference,T,typename pdalboost::type_traits_detail::add_rvalue_reference_imp<T>::type)
 
-}  // namespace boost
+}  // namespace pdalboost
 
 #include <boost/type_traits/detail/type_trait_undef.hpp>
 

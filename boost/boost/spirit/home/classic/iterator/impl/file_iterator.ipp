@@ -32,7 +32,7 @@
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -140,7 +140,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<std::FILE> m_file;
+    pdalboost::shared_ptr<std::FILE> m_file;
     std::size_t m_pos;
     CharT m_curChar;
     bool m_eof;
@@ -286,12 +286,12 @@ public:
 
 private:
 #ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
-    typedef boost::remove_pointer<HANDLE>::type handle_t;
+    typedef pdalboost::remove_pointer<HANDLE>::type handle_t;
 #else
     typedef void handle_t;
 #endif
 
-    boost::shared_ptr<CharT> m_mem;
+    pdalboost::shared_ptr<CharT> m_mem;
     std::size_t m_filesize;
     CharT* m_curChar;
 };
@@ -432,14 +432,14 @@ public:
 
 private:
 
-    boost::shared_ptr<mapping> m_mem;
+    pdalboost::shared_ptr<mapping> m_mem;
     CharT const* m_curChar;
 };
 
 #endif // BOOST_SPIRIT_FILEITERATOR_POSIX
 
 ///////////////////////////////////////////////////////////////////////////////
-} /* namespace boost::spirit::fileiter_impl */
+} /* namespace pdalboost::spirit::fileiter_impl */
 
 template <typename CharT, typename BaseIteratorT>
 file_iterator<CharT,BaseIteratorT>
@@ -461,7 +461,7 @@ file_iterator<CharT,BaseIteratorT>::operator=(const base_t& iter)
 ///////////////////////////////////////////////////////////////////////////////
 BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 
-}} /* namespace boost::spirit */
+}} /* namespace pdalboost::spirit */
 
 
 #endif /* BOOST_SPIRIT_FILE_ITERATOR_IPP */

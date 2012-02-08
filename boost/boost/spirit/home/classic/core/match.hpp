@@ -19,7 +19,7 @@
 #include <boost/type_traits/add_const.hpp>
 #include <boost/type_traits/is_reference.hpp>
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -65,7 +65,7 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
     public:
 
-        typedef typename boost::optional<T> optional_type;
+        typedef typename pdalboost::optional<T> optional_type;
         typedef typename optional_type::argument_type ctor_param_t;
         typedef typename optional_type::reference_const_type return_t;
         typedef T attr_t;

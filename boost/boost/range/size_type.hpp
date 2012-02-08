@@ -25,8 +25,7 @@
 #include <cstddef>
 #include <utility>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
 
@@ -71,7 +70,7 @@ namespace boost
         : detail::range_size<T>
     { };
     
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 

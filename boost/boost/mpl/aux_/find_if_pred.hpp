@@ -14,7 +14,7 @@
 #include <boost/mpl/aux_/iter_apply.hpp>
 #include <boost/mpl/not.hpp>
 
-namespace boost { namespace mpl { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { namespace aux {
 
 template< typename Predicate >
 struct find_if_pred

@@ -26,7 +26,7 @@
 #include <boost/mpl/inherit.hpp>
 #include <boost/mpl/identity.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct reverse_view_tag;
     struct fusion_sequence_tag;

@@ -22,8 +22,8 @@
 #include <cstdlib>
 #include <cassert>
 
-using namespace boost::system;
-using namespace boost::system::errc;
+using namespace pdalboost::system;
+using namespace pdalboost::system::errc;
 
 #include <cstring> // for strerror/strerror_r
 
@@ -40,7 +40,7 @@ using namespace boost::system::errc;
 namespace
 {
 #if defined(__PGI)
-  using boost::system::errc::invalid_argument;
+  using pdalboost::system::errc::invalid_argument;
 #endif
   //  standard error categories  ---------------------------------------------//
 
@@ -400,8 +400,7 @@ namespace
 
 } // unnamed namespace
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace system
   {
 
@@ -426,4 +425,4 @@ namespace boost
     }
 
   } // namespace system
-} // namespace boost
+} // namespace pdalboost

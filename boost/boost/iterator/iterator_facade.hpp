@@ -36,8 +36,7 @@
 
 #include <boost/iterator/detail/config_def.hpp> // this goes last
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   // This forward declaration is required for the friend declaration
   // in iterator_core_access
   template <class I, class V, class TC, class R, class D> class iterator_facade;
@@ -77,7 +76,7 @@ namespace boost
         >::type type;
     };        
 #else
-      : ::boost::iterators::enable_if<
+      : ::pdalboost::iterators::enable_if<
            mpl::or_<
                is_convertible<Facade1, Facade2>
              , is_convertible<Facade2, Facade1>
@@ -107,7 +106,7 @@ namespace boost
         
         // Not the real associated pointer type
         typedef typename mpl::eval_if<
-            boost::detail::iterator_writability_disabled<ValueParam,Reference>
+            pdalboost::detail::iterator_writability_disabled<ValueParam,Reference>
           , add_pointer<const value_type>
           , add_pointer<value_type>
         >::type pointer;
@@ -324,7 +323,7 @@ namespace boost
 
         static type make(Reference x)
         {
-            return boost::implicit_cast<type>(&x);
+            return pdalboost::implicit_cast<type>(&x);
         }
     };
 
@@ -376,7 +375,7 @@ namespace boost
             mpl::and_<
                 // Really we want an is_copy_constructible trait here,
                 // but is_POD will have to suffice in the meantime.
-                boost::is_POD<ValueType>
+                pdalboost::is_POD<ValueType>
               , iterator_writability_disabled<ValueType,Reference>
             >
         >
@@ -447,7 +446,7 @@ namespace boost
         class Derived1, class V1, class TC1, class Reference1, class Difference1 \
       , class Derived2, class V2, class TC2, class Reference2, class Difference2 \
     >                                                                   \
-    prefix typename boost::detail::enable_if_interoperable<             \
+    prefix typename pdalboost::detail::enable_if_interoperable<             \
         Derived1, Derived2                                              \
       , typename mpl::apply2<result_type,Derived1,Derived2>::type       \
     >::type                                                             \
@@ -480,7 +479,7 @@ namespace boost
       template <class I, class V, class TC, class R, class D> friend class iterator_facade;
 
 #  define BOOST_ITERATOR_FACADE_RELATION(op)                                \
-      BOOST_ITERATOR_FACADE_INTEROP_HEAD(friend,op, boost::detail::always_bool2);
+      BOOST_ITERATOR_FACADE_INTEROP_HEAD(friend,op, pdalboost::detail::always_bool2);
 
       BOOST_ITERATOR_FACADE_RELATION(==)
       BOOST_ITERATOR_FACADE_RELATION(!=)
@@ -492,7 +491,7 @@ namespace boost
 #  undef BOOST_ITERATOR_FACADE_RELATION
 
       BOOST_ITERATOR_FACADE_INTEROP_HEAD(
-          friend, -, boost::detail::choose_difference_type)
+          friend, -, pdalboost::detail::choose_difference_type)
       ;
 
       BOOST_ITERATOR_FACADE_PLUS_HEAD(
@@ -594,7 +593,7 @@ namespace boost
   >
   class iterator_facade
 # ifdef BOOST_ITERATOR_FACADE_NEEDS_ITERATOR_BASE
-    : public boost::detail::iterator_facade_types<
+    : public pdalboost::detail::iterator_facade_types<
          Value, CategoryOrTraversal, Reference, Difference
       >::base
 #  undef BOOST_ITERATOR_FACADE_NEEDS_ITERATOR_BASE
@@ -614,11 +613,11 @@ namespace boost
           return *static_cast<Derived const*>(this);
       }
 
-      typedef boost::detail::iterator_facade_types<
+      typedef pdalboost::detail::iterator_facade_types<
          Value, CategoryOrTraversal, Reference, Difference
       > associated_types;
 
-      typedef boost::detail::operator_arrow_result<
+      typedef pdalboost::detail::operator_arrow_result<
         typename associated_types::value_type
         , Reference
         , typename associated_types::pointer
@@ -648,12 +647,12 @@ namespace boost
           return pointer_::make(*this->derived());
       }
         
-      typename boost::detail::operator_brackets_result<Derived,Value,reference>::type
+      typename pdalboost::detail::operator_brackets_result<Derived,Value,reference>::type
       operator[](difference_type n) const
       {
-          typedef boost::detail::use_operator_brackets_proxy<Value,Reference> use_proxy;
+          typedef pdalboost::detail::use_operator_brackets_proxy<Value,Reference> use_proxy;
           
-          return boost::detail::make_operator_brackets_result<Derived>(
+          return pdalboost::detail::make_operator_brackets_result<Derived>(
               this->derived() + n
             , use_proxy()
           );
@@ -666,10 +665,10 @@ namespace boost
       }
 
 # if BOOST_WORKAROUND(BOOST_MSVC, < 1300)
-      typename boost::detail::postfix_increment_result<Derived,Value,Reference,CategoryOrTraversal>::type
+      typename pdalboost::detail::postfix_increment_result<Derived,Value,Reference,CategoryOrTraversal>::type
       operator++(int)
       {
-          typename boost::detail::postfix_increment_result<Derived,Value,Reference,CategoryOrTraversal>::type
+          typename pdalboost::detail::postfix_increment_result<Derived,Value,Reference,CategoryOrTraversal>::type
           tmp(this->derived());
           ++*this;
           return tmp;
@@ -722,13 +721,13 @@ namespace boost
 
 # if !BOOST_WORKAROUND(BOOST_MSVC, < 1300)
   template <class I, class V, class TC, class R, class D>
-  inline typename boost::detail::postfix_increment_result<I,V,R,TC>::type
+  inline typename pdalboost::detail::postfix_increment_result<I,V,R,TC>::type
   operator++(
       iterator_facade<I,V,TC,R,D>& i
     , int
   )
   {
-      typename boost::detail::postfix_increment_result<I,V,R,TC>::type
+      typename pdalboost::detail::postfix_increment_result<I,V,R,TC>::type
           tmp(*static_cast<I*>(&i));
       
       ++i;
@@ -772,7 +771,7 @@ namespace boost
   // error messages, functionality is not affected.
   //
   // For full operation compiler support for "Substitution Failure Is Not An Error"
-  // (aka. enable_if) and boost::is_convertible is required.
+  // (aka. enable_if) and pdalboost::is_convertible is required.
   //
   // The following problems occur if support is lacking.
   //
@@ -828,7 +827,7 @@ namespace boost
 # define BOOST_ITERATOR_FACADE_RELATION(op, return_prefix, base_op) \
   BOOST_ITERATOR_FACADE_INTEROP(                                    \
       op                                                            \
-    , boost::detail::always_bool2                                   \
+    , pdalboost::detail::always_bool2                                   \
     , return_prefix                                                 \
     , base_op                                                       \
   )
@@ -845,7 +844,7 @@ namespace boost
   // operator- requires an additional part in the static assertion
   BOOST_ITERATOR_FACADE_INTEROP(
       -
-    , boost::detail::choose_difference_type
+    , pdalboost::detail::choose_difference_type
     , return
     , distance_from
   )
@@ -871,7 +870,7 @@ BOOST_ITERATOR_FACADE_PLUS((
 # undef BOOST_ITERATOR_FACADE_PLUS
 # undef BOOST_ITERATOR_FACADE_PLUS_HEAD
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/iterator/detail/config_undef.hpp>
 

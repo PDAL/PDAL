@@ -53,12 +53,12 @@ namespace parameter_
   template <class T>
   struct unmatched_argument
   {
-      BOOST_MPL_ASSERT((boost::is_same<T,void>));
+      BOOST_MPL_ASSERT((pdalboost::is_same<T,void>));
       typedef int type;
   }; 
 } // namespace parameter_
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 template<class T> class reference_wrapper;
 
@@ -925,7 +925,7 @@ struct parameters
 
 } // namespace parameter
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_PARAMETERS_031014_HPP
 

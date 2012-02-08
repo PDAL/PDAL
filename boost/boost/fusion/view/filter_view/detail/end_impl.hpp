@@ -7,7 +7,7 @@
 #if !defined(FUSION_END_IMPL_05062005_0906)
 #define FUSION_END_IMPL_05062005_0906
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct filter_view_tag;
 

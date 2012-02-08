@@ -14,7 +14,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //* is a type T an [cv-qualified-] integral type described in the standard (3.9.1p3)
 // as an extention we include long long, as this is likely to be added to the
@@ -62,8 +62,8 @@ BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_integral,__int64,true)
 #endif
 
 # if defined(BOOST_HAS_LONG_LONG)
-BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_integral, ::boost::ulong_long_type,true)
-BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_integral, ::boost::long_long_type,true)
+BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_integral, ::pdalboost::ulong_long_type,true)
+BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_integral, ::pdalboost::long_long_type,true)
 #elif defined(BOOST_HAS_MS_INT64)
 BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_integral,unsigned __int64,true)
 BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_integral,__int64,true)
@@ -71,7 +71,7 @@ BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1(is_integral,__int64,true)
 
 #endif  // non-CodeGear implementation
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

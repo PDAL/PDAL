@@ -18,7 +18,7 @@
 #include <boost/assert.hpp>
 #include <boost/mpl/assert.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     ///////////////////////////////////////////////////////////////////////////
     //  Extract the prefix sign (- or +), return true if a '-' was found

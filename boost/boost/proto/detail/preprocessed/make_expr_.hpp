@@ -34,7 +34,7 @@
     {
         typedef
             list1<
-                typename boost::proto::detail::protoify< A0 , Domain >::result_type
+                typename pdalboost::proto::detail::protoify< A0 , Domain >::result_type
             >
         proto_args;
         typedef typename base_expr<Domain, Tag, proto_args>::type expr_type;
@@ -43,7 +43,7 @@
         result_type operator()(typename add_reference<A0 >::type a0) const
         {
             expr_type const that = {
-                boost::proto::detail::protoify< A0 , Domain >()(a0)
+                pdalboost::proto::detail::protoify< A0 , Domain >()(a0)
             };
             return proto_generator()(that);
         }
@@ -63,7 +63,7 @@
     {
         typedef
             list2<
-                typename boost::proto::detail::protoify< A0 , Domain >::result_type , typename boost::proto::detail::protoify< A1 , Domain >::result_type
+                typename pdalboost::proto::detail::protoify< A0 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A1 , Domain >::result_type
             >
         proto_args;
         typedef typename base_expr<Domain, Tag, proto_args>::type expr_type;
@@ -72,7 +72,7 @@
         result_type operator()(typename add_reference<A0 >::type a0 , typename add_reference<A1 >::type a1) const
         {
             expr_type const that = {
-                boost::proto::detail::protoify< A0 , Domain >()(a0) , boost::proto::detail::protoify< A1 , Domain >()(a1)
+                pdalboost::proto::detail::protoify< A0 , Domain >()(a0) , pdalboost::proto::detail::protoify< A1 , Domain >()(a1)
             };
             return proto_generator()(that);
         }
@@ -92,7 +92,7 @@
     {
         typedef
             list3<
-                typename boost::proto::detail::protoify< A0 , Domain >::result_type , typename boost::proto::detail::protoify< A1 , Domain >::result_type , typename boost::proto::detail::protoify< A2 , Domain >::result_type
+                typename pdalboost::proto::detail::protoify< A0 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A1 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A2 , Domain >::result_type
             >
         proto_args;
         typedef typename base_expr<Domain, Tag, proto_args>::type expr_type;
@@ -101,7 +101,7 @@
         result_type operator()(typename add_reference<A0 >::type a0 , typename add_reference<A1 >::type a1 , typename add_reference<A2 >::type a2) const
         {
             expr_type const that = {
-                boost::proto::detail::protoify< A0 , Domain >()(a0) , boost::proto::detail::protoify< A1 , Domain >()(a1) , boost::proto::detail::protoify< A2 , Domain >()(a2)
+                pdalboost::proto::detail::protoify< A0 , Domain >()(a0) , pdalboost::proto::detail::protoify< A1 , Domain >()(a1) , pdalboost::proto::detail::protoify< A2 , Domain >()(a2)
             };
             return proto_generator()(that);
         }
@@ -121,7 +121,7 @@
     {
         typedef
             list4<
-                typename boost::proto::detail::protoify< A0 , Domain >::result_type , typename boost::proto::detail::protoify< A1 , Domain >::result_type , typename boost::proto::detail::protoify< A2 , Domain >::result_type , typename boost::proto::detail::protoify< A3 , Domain >::result_type
+                typename pdalboost::proto::detail::protoify< A0 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A1 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A2 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A3 , Domain >::result_type
             >
         proto_args;
         typedef typename base_expr<Domain, Tag, proto_args>::type expr_type;
@@ -130,7 +130,7 @@
         result_type operator()(typename add_reference<A0 >::type a0 , typename add_reference<A1 >::type a1 , typename add_reference<A2 >::type a2 , typename add_reference<A3 >::type a3) const
         {
             expr_type const that = {
-                boost::proto::detail::protoify< A0 , Domain >()(a0) , boost::proto::detail::protoify< A1 , Domain >()(a1) , boost::proto::detail::protoify< A2 , Domain >()(a2) , boost::proto::detail::protoify< A3 , Domain >()(a3)
+                pdalboost::proto::detail::protoify< A0 , Domain >()(a0) , pdalboost::proto::detail::protoify< A1 , Domain >()(a1) , pdalboost::proto::detail::protoify< A2 , Domain >()(a2) , pdalboost::proto::detail::protoify< A3 , Domain >()(a3)
             };
             return proto_generator()(that);
         }
@@ -150,7 +150,7 @@
     {
         typedef
             list5<
-                typename boost::proto::detail::protoify< A0 , Domain >::result_type , typename boost::proto::detail::protoify< A1 , Domain >::result_type , typename boost::proto::detail::protoify< A2 , Domain >::result_type , typename boost::proto::detail::protoify< A3 , Domain >::result_type , typename boost::proto::detail::protoify< A4 , Domain >::result_type
+                typename pdalboost::proto::detail::protoify< A0 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A1 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A2 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A3 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A4 , Domain >::result_type
             >
         proto_args;
         typedef typename base_expr<Domain, Tag, proto_args>::type expr_type;
@@ -159,7 +159,7 @@
         result_type operator()(typename add_reference<A0 >::type a0 , typename add_reference<A1 >::type a1 , typename add_reference<A2 >::type a2 , typename add_reference<A3 >::type a3 , typename add_reference<A4 >::type a4) const
         {
             expr_type const that = {
-                boost::proto::detail::protoify< A0 , Domain >()(a0) , boost::proto::detail::protoify< A1 , Domain >()(a1) , boost::proto::detail::protoify< A2 , Domain >()(a2) , boost::proto::detail::protoify< A3 , Domain >()(a3) , boost::proto::detail::protoify< A4 , Domain >()(a4)
+                pdalboost::proto::detail::protoify< A0 , Domain >()(a0) , pdalboost::proto::detail::protoify< A1 , Domain >()(a1) , pdalboost::proto::detail::protoify< A2 , Domain >()(a2) , pdalboost::proto::detail::protoify< A3 , Domain >()(a3) , pdalboost::proto::detail::protoify< A4 , Domain >()(a4)
             };
             return proto_generator()(that);
         }
@@ -179,7 +179,7 @@
     {
         typedef
             list6<
-                typename boost::proto::detail::protoify< A0 , Domain >::result_type , typename boost::proto::detail::protoify< A1 , Domain >::result_type , typename boost::proto::detail::protoify< A2 , Domain >::result_type , typename boost::proto::detail::protoify< A3 , Domain >::result_type , typename boost::proto::detail::protoify< A4 , Domain >::result_type , typename boost::proto::detail::protoify< A5 , Domain >::result_type
+                typename pdalboost::proto::detail::protoify< A0 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A1 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A2 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A3 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A4 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A5 , Domain >::result_type
             >
         proto_args;
         typedef typename base_expr<Domain, Tag, proto_args>::type expr_type;
@@ -188,7 +188,7 @@
         result_type operator()(typename add_reference<A0 >::type a0 , typename add_reference<A1 >::type a1 , typename add_reference<A2 >::type a2 , typename add_reference<A3 >::type a3 , typename add_reference<A4 >::type a4 , typename add_reference<A5 >::type a5) const
         {
             expr_type const that = {
-                boost::proto::detail::protoify< A0 , Domain >()(a0) , boost::proto::detail::protoify< A1 , Domain >()(a1) , boost::proto::detail::protoify< A2 , Domain >()(a2) , boost::proto::detail::protoify< A3 , Domain >()(a3) , boost::proto::detail::protoify< A4 , Domain >()(a4) , boost::proto::detail::protoify< A5 , Domain >()(a5)
+                pdalboost::proto::detail::protoify< A0 , Domain >()(a0) , pdalboost::proto::detail::protoify< A1 , Domain >()(a1) , pdalboost::proto::detail::protoify< A2 , Domain >()(a2) , pdalboost::proto::detail::protoify< A3 , Domain >()(a3) , pdalboost::proto::detail::protoify< A4 , Domain >()(a4) , pdalboost::proto::detail::protoify< A5 , Domain >()(a5)
             };
             return proto_generator()(that);
         }
@@ -208,7 +208,7 @@
     {
         typedef
             list7<
-                typename boost::proto::detail::protoify< A0 , Domain >::result_type , typename boost::proto::detail::protoify< A1 , Domain >::result_type , typename boost::proto::detail::protoify< A2 , Domain >::result_type , typename boost::proto::detail::protoify< A3 , Domain >::result_type , typename boost::proto::detail::protoify< A4 , Domain >::result_type , typename boost::proto::detail::protoify< A5 , Domain >::result_type , typename boost::proto::detail::protoify< A6 , Domain >::result_type
+                typename pdalboost::proto::detail::protoify< A0 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A1 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A2 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A3 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A4 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A5 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A6 , Domain >::result_type
             >
         proto_args;
         typedef typename base_expr<Domain, Tag, proto_args>::type expr_type;
@@ -217,7 +217,7 @@
         result_type operator()(typename add_reference<A0 >::type a0 , typename add_reference<A1 >::type a1 , typename add_reference<A2 >::type a2 , typename add_reference<A3 >::type a3 , typename add_reference<A4 >::type a4 , typename add_reference<A5 >::type a5 , typename add_reference<A6 >::type a6) const
         {
             expr_type const that = {
-                boost::proto::detail::protoify< A0 , Domain >()(a0) , boost::proto::detail::protoify< A1 , Domain >()(a1) , boost::proto::detail::protoify< A2 , Domain >()(a2) , boost::proto::detail::protoify< A3 , Domain >()(a3) , boost::proto::detail::protoify< A4 , Domain >()(a4) , boost::proto::detail::protoify< A5 , Domain >()(a5) , boost::proto::detail::protoify< A6 , Domain >()(a6)
+                pdalboost::proto::detail::protoify< A0 , Domain >()(a0) , pdalboost::proto::detail::protoify< A1 , Domain >()(a1) , pdalboost::proto::detail::protoify< A2 , Domain >()(a2) , pdalboost::proto::detail::protoify< A3 , Domain >()(a3) , pdalboost::proto::detail::protoify< A4 , Domain >()(a4) , pdalboost::proto::detail::protoify< A5 , Domain >()(a5) , pdalboost::proto::detail::protoify< A6 , Domain >()(a6)
             };
             return proto_generator()(that);
         }
@@ -237,7 +237,7 @@
     {
         typedef
             list8<
-                typename boost::proto::detail::protoify< A0 , Domain >::result_type , typename boost::proto::detail::protoify< A1 , Domain >::result_type , typename boost::proto::detail::protoify< A2 , Domain >::result_type , typename boost::proto::detail::protoify< A3 , Domain >::result_type , typename boost::proto::detail::protoify< A4 , Domain >::result_type , typename boost::proto::detail::protoify< A5 , Domain >::result_type , typename boost::proto::detail::protoify< A6 , Domain >::result_type , typename boost::proto::detail::protoify< A7 , Domain >::result_type
+                typename pdalboost::proto::detail::protoify< A0 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A1 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A2 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A3 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A4 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A5 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A6 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A7 , Domain >::result_type
             >
         proto_args;
         typedef typename base_expr<Domain, Tag, proto_args>::type expr_type;
@@ -246,7 +246,7 @@
         result_type operator()(typename add_reference<A0 >::type a0 , typename add_reference<A1 >::type a1 , typename add_reference<A2 >::type a2 , typename add_reference<A3 >::type a3 , typename add_reference<A4 >::type a4 , typename add_reference<A5 >::type a5 , typename add_reference<A6 >::type a6 , typename add_reference<A7 >::type a7) const
         {
             expr_type const that = {
-                boost::proto::detail::protoify< A0 , Domain >()(a0) , boost::proto::detail::protoify< A1 , Domain >()(a1) , boost::proto::detail::protoify< A2 , Domain >()(a2) , boost::proto::detail::protoify< A3 , Domain >()(a3) , boost::proto::detail::protoify< A4 , Domain >()(a4) , boost::proto::detail::protoify< A5 , Domain >()(a5) , boost::proto::detail::protoify< A6 , Domain >()(a6) , boost::proto::detail::protoify< A7 , Domain >()(a7)
+                pdalboost::proto::detail::protoify< A0 , Domain >()(a0) , pdalboost::proto::detail::protoify< A1 , Domain >()(a1) , pdalboost::proto::detail::protoify< A2 , Domain >()(a2) , pdalboost::proto::detail::protoify< A3 , Domain >()(a3) , pdalboost::proto::detail::protoify< A4 , Domain >()(a4) , pdalboost::proto::detail::protoify< A5 , Domain >()(a5) , pdalboost::proto::detail::protoify< A6 , Domain >()(a6) , pdalboost::proto::detail::protoify< A7 , Domain >()(a7)
             };
             return proto_generator()(that);
         }
@@ -266,7 +266,7 @@
     {
         typedef
             list9<
-                typename boost::proto::detail::protoify< A0 , Domain >::result_type , typename boost::proto::detail::protoify< A1 , Domain >::result_type , typename boost::proto::detail::protoify< A2 , Domain >::result_type , typename boost::proto::detail::protoify< A3 , Domain >::result_type , typename boost::proto::detail::protoify< A4 , Domain >::result_type , typename boost::proto::detail::protoify< A5 , Domain >::result_type , typename boost::proto::detail::protoify< A6 , Domain >::result_type , typename boost::proto::detail::protoify< A7 , Domain >::result_type , typename boost::proto::detail::protoify< A8 , Domain >::result_type
+                typename pdalboost::proto::detail::protoify< A0 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A1 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A2 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A3 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A4 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A5 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A6 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A7 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A8 , Domain >::result_type
             >
         proto_args;
         typedef typename base_expr<Domain, Tag, proto_args>::type expr_type;
@@ -275,7 +275,7 @@
         result_type operator()(typename add_reference<A0 >::type a0 , typename add_reference<A1 >::type a1 , typename add_reference<A2 >::type a2 , typename add_reference<A3 >::type a3 , typename add_reference<A4 >::type a4 , typename add_reference<A5 >::type a5 , typename add_reference<A6 >::type a6 , typename add_reference<A7 >::type a7 , typename add_reference<A8 >::type a8) const
         {
             expr_type const that = {
-                boost::proto::detail::protoify< A0 , Domain >()(a0) , boost::proto::detail::protoify< A1 , Domain >()(a1) , boost::proto::detail::protoify< A2 , Domain >()(a2) , boost::proto::detail::protoify< A3 , Domain >()(a3) , boost::proto::detail::protoify< A4 , Domain >()(a4) , boost::proto::detail::protoify< A5 , Domain >()(a5) , boost::proto::detail::protoify< A6 , Domain >()(a6) , boost::proto::detail::protoify< A7 , Domain >()(a7) , boost::proto::detail::protoify< A8 , Domain >()(a8)
+                pdalboost::proto::detail::protoify< A0 , Domain >()(a0) , pdalboost::proto::detail::protoify< A1 , Domain >()(a1) , pdalboost::proto::detail::protoify< A2 , Domain >()(a2) , pdalboost::proto::detail::protoify< A3 , Domain >()(a3) , pdalboost::proto::detail::protoify< A4 , Domain >()(a4) , pdalboost::proto::detail::protoify< A5 , Domain >()(a5) , pdalboost::proto::detail::protoify< A6 , Domain >()(a6) , pdalboost::proto::detail::protoify< A7 , Domain >()(a7) , pdalboost::proto::detail::protoify< A8 , Domain >()(a8)
             };
             return proto_generator()(that);
         }
@@ -295,7 +295,7 @@
     {
         typedef
             list10<
-                typename boost::proto::detail::protoify< A0 , Domain >::result_type , typename boost::proto::detail::protoify< A1 , Domain >::result_type , typename boost::proto::detail::protoify< A2 , Domain >::result_type , typename boost::proto::detail::protoify< A3 , Domain >::result_type , typename boost::proto::detail::protoify< A4 , Domain >::result_type , typename boost::proto::detail::protoify< A5 , Domain >::result_type , typename boost::proto::detail::protoify< A6 , Domain >::result_type , typename boost::proto::detail::protoify< A7 , Domain >::result_type , typename boost::proto::detail::protoify< A8 , Domain >::result_type , typename boost::proto::detail::protoify< A9 , Domain >::result_type
+                typename pdalboost::proto::detail::protoify< A0 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A1 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A2 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A3 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A4 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A5 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A6 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A7 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A8 , Domain >::result_type , typename pdalboost::proto::detail::protoify< A9 , Domain >::result_type
             >
         proto_args;
         typedef typename base_expr<Domain, Tag, proto_args>::type expr_type;
@@ -304,7 +304,7 @@
         result_type operator()(typename add_reference<A0 >::type a0 , typename add_reference<A1 >::type a1 , typename add_reference<A2 >::type a2 , typename add_reference<A3 >::type a3 , typename add_reference<A4 >::type a4 , typename add_reference<A5 >::type a5 , typename add_reference<A6 >::type a6 , typename add_reference<A7 >::type a7 , typename add_reference<A8 >::type a8 , typename add_reference<A9 >::type a9) const
         {
             expr_type const that = {
-                boost::proto::detail::protoify< A0 , Domain >()(a0) , boost::proto::detail::protoify< A1 , Domain >()(a1) , boost::proto::detail::protoify< A2 , Domain >()(a2) , boost::proto::detail::protoify< A3 , Domain >()(a3) , boost::proto::detail::protoify< A4 , Domain >()(a4) , boost::proto::detail::protoify< A5 , Domain >()(a5) , boost::proto::detail::protoify< A6 , Domain >()(a6) , boost::proto::detail::protoify< A7 , Domain >()(a7) , boost::proto::detail::protoify< A8 , Domain >()(a8) , boost::proto::detail::protoify< A9 , Domain >()(a9)
+                pdalboost::proto::detail::protoify< A0 , Domain >()(a0) , pdalboost::proto::detail::protoify< A1 , Domain >()(a1) , pdalboost::proto::detail::protoify< A2 , Domain >()(a2) , pdalboost::proto::detail::protoify< A3 , Domain >()(a3) , pdalboost::proto::detail::protoify< A4 , Domain >()(a4) , pdalboost::proto::detail::protoify< A5 , Domain >()(a5) , pdalboost::proto::detail::protoify< A6 , Domain >()(a6) , pdalboost::proto::detail::protoify< A7 , Domain >()(a7) , pdalboost::proto::detail::protoify< A8 , Domain >()(a8) , pdalboost::proto::detail::protoify< A9 , Domain >()(a9)
             };
             return proto_generator()(that);
         }

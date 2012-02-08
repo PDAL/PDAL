@@ -14,8 +14,7 @@
 
 #include <boost/function_types/components.hpp>
 
-namespace boost 
-{ 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
   namespace function_types 
   {
     template< typename T, typename Tag = null_tag > 

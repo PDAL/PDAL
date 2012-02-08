@@ -42,9 +42,9 @@
 #include <pdal/Dimension.hpp>
 
 #include <boost/algorithm/string.hpp>
-#include <pdal/external/boost/uuid/string_generator.hpp>
-#include <pdal/external/boost/uuid/random_generator.hpp>
-#include <pdal/external/boost/uuid/uuid_io.hpp>
+#include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <map>
 
 namespace pdal
@@ -195,13 +195,13 @@ boost::property_tree::ptree Dimension::toPTree() const
 
 void Dimension::setUUID(std::string const& id)
 {
-    pdal::external::boost::uuids::string_generator gen;
+    boost::uuids::string_generator gen;
     m_uuid = gen(id);
 }
 
 void Dimension::createUUID()
 {
-    m_uuid = pdal::external::boost::uuids::random_generator()();
+    m_uuid = boost::uuids::random_generator()();
 }
 void Dimension::dump() const
 {

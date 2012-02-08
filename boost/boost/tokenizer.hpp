@@ -19,7 +19,7 @@
 
 #include <boost/token_iterator.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
   
   //===========================================================================
@@ -93,6 +93,6 @@ namespace boost {
   };
 
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif

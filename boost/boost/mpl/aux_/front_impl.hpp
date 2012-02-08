@@ -19,7 +19,7 @@
 #include <boost/mpl/deref.hpp>
 #include <boost/mpl/aux_/traits_lambda_spec.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 // default implementation; conrete sequences might override it by 
 // specializing either the 'front_impl' or the primary 'front' template

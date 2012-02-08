@@ -24,7 +24,7 @@
 #include <boost/optional.hpp>
 #include <vector>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // Enablers
@@ -34,7 +34,7 @@ namespace boost { namespace spirit
       : mpl::true_ {};
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     template <typename Subject>
     struct optional : unary_parser<optional<Subject> >
@@ -44,8 +44,8 @@ namespace boost { namespace spirit { namespace qi
         template <typename Context, typename Iterator>
         struct attribute
         {
-            // Build a boost::optional from the subject's attribute. Note
-            // that boost::optional may return unused_type if the
+            // Build a pdalboost::optional from the subject's attribute. Note
+            // that pdalboost::optional may return unused_type if the
             // subject's attribute is an unused_type.
             typedef typename
                 traits::build_optional<
@@ -117,7 +117,7 @@ namespace boost { namespace spirit { namespace qi
     {};
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Subject>

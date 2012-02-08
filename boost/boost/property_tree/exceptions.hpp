@@ -18,7 +18,7 @@
 #include <string>
 #include <stdexcept>
 
-namespace boost { namespace property_tree
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
 {
 
     /// Base class for all property tree errors. Derives from
@@ -54,7 +54,7 @@ namespace boost { namespace property_tree
         /// value that failed to be translated.
         template<class T> T data();
     private:
-        boost::any m_data;
+        pdalboost::any m_data;
     };
 
 
@@ -74,7 +74,7 @@ namespace boost { namespace property_tree
         /// Retrieve the invalid path.
         template<class T> T path();
     private:
-        boost::any m_path;
+        pdalboost::any m_path;
     };
 
 }}

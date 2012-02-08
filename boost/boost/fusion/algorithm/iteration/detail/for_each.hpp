@@ -16,7 +16,7 @@
 #include <boost/fusion/support/category_of.hpp>
 #include <boost/mpl/bool.hpp>
 
-namespace boost { namespace fusion {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion {
 namespace detail
 {
     template <typename First, typename Last, typename F>

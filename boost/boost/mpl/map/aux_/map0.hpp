@@ -25,7 +25,7 @@
 
 #include <boost/preprocessor/cat.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 #if defined(BOOST_MPL_CFG_USE_OPERATORS_OVERLOADING)
 

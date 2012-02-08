@@ -11,8 +11,7 @@
 
 #include <boost/cstdint.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace math
 {
 
@@ -82,7 +81,7 @@ template < >
 #ifdef BOOST_NO_INTEGRAL_INT64_T
      typedef unsigned long static_gcd_type;
 #else
-     typedef boost::uintmax_t static_gcd_type;
+     typedef pdalboost::uintmax_t static_gcd_type;
 #endif
 
 template < static_gcd_type Value1, static_gcd_type Value2 >
@@ -102,7 +101,7 @@ template < typename IntegerType >
 
 
 }  // namespace math
-}  // namespace boost
+}  // namespace pdalboost
 
 
 #endif  // BOOST_MATH_FWD_HPP

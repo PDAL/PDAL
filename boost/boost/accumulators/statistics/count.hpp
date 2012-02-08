@@ -14,7 +14,7 @@
 #include <boost/accumulators/framework/depends_on.hpp>
 #include <boost/accumulators/statistics_fwd.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 namespace impl
@@ -25,7 +25,7 @@ namespace impl
     struct count_impl
       : accumulator_base
     {
-        // for boost::result_of
+        // for pdalboost::result_of
         typedef std::size_t result_type;
 
         count_impl(dont_care)
@@ -75,6 +75,6 @@ namespace extract
 
 using extract::count;
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

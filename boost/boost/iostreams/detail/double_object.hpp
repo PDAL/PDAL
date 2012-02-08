@@ -6,7 +6,7 @@
 // See http://www.boost.org/libs/iostreams for documentation.
 
 // Contains the definition of the class template 
-// boost::iostreams::detail::double_object, which is similar to compressed pair
+// pdalboost::iostreams::detail::double_object, which is similar to compressed pair
 // except that both members of the pair have the same type, and 
 // compression occurs only if requested using a boolean template
 // parameter.
@@ -27,7 +27,7 @@
 # include <boost/call_traits.hpp>
 #endif
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 template<typename T>
 class single_object_holder {
@@ -35,7 +35,7 @@ public:
 #if BOOST_WORKAROUND(__MWERKS__, > 0x3003)
     typedef Metrowerks::call_traits<T>             traits_type;
 #else
-    typedef boost::call_traits<T>                  traits_type;
+    typedef pdalboost::call_traits<T>                  traits_type;
 #endif
     typedef typename traits_type::param_type       param_type;
     typedef typename traits_type::reference        reference;
@@ -58,7 +58,7 @@ public:
 #if BOOST_WORKAROUND(__MWERKS__, > 0x3003)
     typedef Metrowerks::call_traits<T>             traits_type;
 #else
-    typedef boost::call_traits<T>                  traits_type;
+    typedef pdalboost::call_traits<T>                  traits_type;
 #endif
     typedef typename traits_type::param_type       param_type;
     typedef typename traits_type::reference        reference;
@@ -98,7 +98,7 @@ public:
 #if BOOST_WORKAROUND(__MWERKS__, > 0x3003)
     typedef Metrowerks::call_traits<T>             traits_type;
 #else
-    typedef boost::call_traits<T>                  traits_type;
+    typedef pdalboost::call_traits<T>                  traits_type;
 #endif
     typedef typename traits_type::param_type       param_type;
     typedef typename traits_type::reference        reference;

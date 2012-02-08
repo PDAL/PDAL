@@ -15,14 +15,14 @@
 #include <boost/cstdint.hpp>
 #include <boost/spirit/home/support/char_encoding/unicode/query.hpp>
 
-namespace boost { namespace spirit { namespace char_encoding
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace char_encoding
 {
     ///////////////////////////////////////////////////////////////////////////
     //  Test characters for specified conditions (using iso8859-1)
     ///////////////////////////////////////////////////////////////////////////
     struct unicode
     {
-        typedef ::boost::uint32_t char_type;
+        typedef ::pdalboost::uint32_t char_type;
 
     ///////////////////////////////////////////////////////////////////////////
     //  Posix stuff
@@ -128,7 +128,7 @@ namespace boost { namespace spirit { namespace char_encoding
             return ucd::to_uppercase(ch);
         }
 
-        static ::boost::uint32_t
+        static ::pdalboost::uint32_t
         toucs4(char_type ch)
         {
             return ch;

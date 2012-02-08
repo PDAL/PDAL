@@ -24,7 +24,7 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace units {
 
@@ -47,7 +47,7 @@ demangle(const char* name)
         
         std::free(realname);
         
-        boost::replace_all(out,"boost::units::","");
+        pdalboost::replace_all(out,"pdalboost::units::","");
         
         return out;
     }
@@ -67,11 +67,11 @@ std::string simplify_typename(const L& /*source*/)
 
 } // namespace units
 
-} // namespace boost
+} // namespace pdalboost
 
 #else // BOOST_UNITS_USE_DEMANGLING
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace units {
 
@@ -94,7 +94,7 @@ std::string simplify_typename(const L& /*source*/)
 
 } // namespace units
 
-} // namespace boost
+} // namespace pdalboost
 
 // To get system-specific predefined macros:
 // gcc -arch ppc -dM -E - < /dev/null | sort 

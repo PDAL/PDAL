@@ -36,7 +36,7 @@ namespace std { using ::log10; }
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -189,7 +189,7 @@ plain_report_formatter::do_confirmation_report( test_unit const& tu, std::ostrea
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

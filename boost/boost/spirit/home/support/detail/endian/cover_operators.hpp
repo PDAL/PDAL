@@ -29,7 +29,7 @@
 
 #include <iosfwd>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
   namespace endian
   {
@@ -39,7 +39,7 @@ namespace boost { namespace spirit
     template <typename T, typename IntegerType>
     class cover_operators
 #    ifndef BOOST_MINIMAL_INTEGER_COVER_OPERATORS
-      : boost::operators<T>
+      : pdalboost::operators<T>
 #    endif
     {
       // The other operations take advantage of the type conversion that's
@@ -110,6 +110,6 @@ namespace boost { namespace spirit
 #   endif
     };
   } // namespace endian
-}} // namespace boost::spirit
+}} // namespace pdalboost::spirit
 
 #endif // BOOST_SPIRIT_INTEGER_COVER_OPERATORS_HPP

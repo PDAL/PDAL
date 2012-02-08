@@ -21,17 +21,16 @@
 #include <boost/range/difference_type.hpp>
 #include <boost/assert.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace range_detail
     {
         template<class SinglePassRange>
         inline BOOST_DEDUCED_TYPENAME range_difference<SinglePassRange>::type
         range_calculate_size(const SinglePassRange& rng)
         {
-            BOOST_ASSERT( (boost::end(rng) - boost::begin(rng)) >= 0 &&
+            BOOST_ASSERT( (pdalboost::end(rng) - pdalboost::begin(rng)) >= 0 &&
                           "reachability invariant broken!" );
-            return boost::end(rng) - boost::begin(rng);
+            return pdalboost::end(rng) - pdalboost::begin(rng);
         }
     }
 

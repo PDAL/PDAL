@@ -17,7 +17,7 @@
 #include <boost/spirit/home/classic/namespace.hpp>
 #include <boost/spirit/home/classic/iterator/position_iterator_fwd.hpp>
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -98,7 +98,7 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 #include "boost/spirit/home/classic/iterator/impl/position_iterator.ipp"
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -247,7 +247,7 @@ public:
     }
 
 private:
-    friend class boost::iterator_core_access;
+    friend class pdalboost::iterator_core_access;
 
     void increment()
     {

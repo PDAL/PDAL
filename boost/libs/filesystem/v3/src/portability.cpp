@@ -27,7 +27,7 @@
 #include <boost/filesystem/v3/config.hpp>
 #include <boost/filesystem/v3/path.hpp>
 
-namespace fs = boost::filesystem3;
+namespace fs = pdalboost::filesystem3;
 
 #include <cstring> // SGI MIPSpro compilers need this
 
@@ -52,8 +52,7 @@ namespace
 
 } // unnamed namespace
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem3
   {
 
@@ -123,6 +122,6 @@ namespace boost
     }
 
   } // namespace filesystem3
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // no wide character support

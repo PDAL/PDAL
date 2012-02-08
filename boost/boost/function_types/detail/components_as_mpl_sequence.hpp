@@ -21,7 +21,7 @@
 #include <boost/mpl/push_back_fwd.hpp>
 #include <boost/mpl/pop_back_fwd.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<> struct size_impl
 < function_types::detail::components_mpl_sequence_tag >
@@ -132,7 +132,7 @@ struct pop_back_impl
   };
 };
 
-} } // namespace ::boost::mpl
+} } // namespace ::pdalboost::mpl
 
 #endif
 

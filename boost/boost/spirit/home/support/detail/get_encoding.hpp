@@ -14,7 +14,7 @@
 #include <boost/mpl/identity.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace spirit { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace detail
 {
     template <typename Modifiers, typename Encoding>
     struct get_implicit_encoding

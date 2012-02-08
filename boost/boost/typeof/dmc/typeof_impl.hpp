@@ -10,8 +10,7 @@
 # include <boost/detail/workaround.hpp>
 # include <boost/mpl/int.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace type_of
     {
 
@@ -20,7 +19,7 @@ namespace boost
 
         char (*encode_index(...))[1];
 
-# define BOOST_TYPEOF_INDEX(T) (sizeof(*boost::type_of::encode_index((boost::type_of::encode_counter<1000>*)0)))
+# define BOOST_TYPEOF_INDEX(T) (sizeof(*pdalboost::type_of::encode_index((pdalboost::type_of::encode_counter<1000>*)0)))
 # define BOOST_TYPEOF_NEXT_INDEX(next) friend char (*encode_index(encode_counter<next>*))[next];
 
 
@@ -76,21 +75,21 @@ namespace boost
         msvc_register_type<T,Organizer> typeof_register_type(const T&,Organizer* =0);
 
 # define BOOST_TYPEOF(expr) \
-    boost::type_of::msvc_typeid_wrapper<sizeof(*boost::type_of::encode_start(expr))>::type
+    pdalboost::type_of::msvc_typeid_wrapper<sizeof(*pdalboost::type_of::encode_start(expr))>::type
 
 # define BOOST_TYPEOF_TPL(expr) typename BOOST_TYPEOF(expr)
 
 # define BOOST_TYPEOF_NESTED_TYPEDEF_TPL(name,expr) \
     struct name {\
-        BOOST_STATIC_CONSTANT(int,_typeof_register_value=sizeof(boost::type_of::typeof_register_type<name>(expr)));\
-        typedef typename boost::type_of::msvc_extract_type<name>::id2type id2type;\
+        BOOST_STATIC_CONSTANT(int,_typeof_register_value=sizeof(pdalboost::type_of::typeof_register_type<name>(expr)));\
+        typedef typename pdalboost::type_of::msvc_extract_type<name>::id2type id2type;\
         typedef typename id2type::type type;\
     };
 
 # define BOOST_TYPEOF_NESTED_TYPEDEF(name,expr) \
     struct name {\
-        BOOST_STATIC_CONSTANT(int,_typeof_register_value=sizeof(boost::type_of::typeof_register_type<name>(expr)));\
-        typedef boost::type_of::msvc_extract_type<name>::id2type id2type;\
+        BOOST_STATIC_CONSTANT(int,_typeof_register_value=sizeof(pdalboost::type_of::typeof_register_type<name>(expr)));\
+        typedef pdalboost::type_of::msvc_extract_type<name>::id2type id2type;\
         typedef id2type::type type;\
     };
 

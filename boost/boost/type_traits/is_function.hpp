@@ -31,7 +31,7 @@
 // except that some compilers erroneously allow conversions from
 // function pointers to void*.
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #if !defined( __CODEGEARC__ )
 
@@ -40,7 +40,7 @@ namespace detail {
 #if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION) && !defined(BOOST_TT_TEST_MS_FUNC_SIGS)
 template<bool is_ref = true>
 struct is_function_chooser
-    : public ::boost::type_traits::false_result
+    : public ::pdalboost::type_traits::false_result
 {
 };
 
@@ -48,14 +48,14 @@ template <>
 struct is_function_chooser<false>
 {
     template< typename T > struct result_
-        : public ::boost::type_traits::is_function_ptr_helper<T*>
+        : public ::pdalboost::type_traits::is_function_ptr_helper<T*>
     {
     };
 };
 
 template <typename T>
 struct is_function_impl
-    : public is_function_chooser< ::boost::is_reference<T>::value >
+    : public is_function_chooser< ::pdalboost::is_reference<T>::value >
         ::BOOST_NESTED_TEMPLATE result_<T>
 {
 };
@@ -71,8 +71,8 @@ struct is_function_impl
 #endif
     static T* t;
     BOOST_STATIC_CONSTANT(
-        bool, value = sizeof(::boost::type_traits::is_function_ptr_tester(t))
-        == sizeof(::boost::type_traits::yes_type)
+        bool, value = sizeof(::pdalboost::type_traits::is_function_ptr_tester(t))
+        == sizeof(::pdalboost::type_traits::yes_type)
         );
 #if BOOST_WORKAROUND(BOOST_MSVC_FULL_VER, >= 140050000)
 #pragma warning(pop)
@@ -94,12 +94,12 @@ struct is_function_impl<T&> : public false_type
 #if defined( __CODEGEARC__ )
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_function,T,__is_function(T))
 #else
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_function,T,::boost::detail::is_function_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_function,T,::pdalboost::detail::is_function_impl<T>::value)
 #ifndef BOOST_NO_RVALUE_REFERENCES
 BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC1_1(typename T,is_function,T&&,false)
 #endif
 #endif
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

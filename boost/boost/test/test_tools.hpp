@@ -74,13 +74,13 @@
 // ARGS - arguments list
 
 #define BOOST_TEST_TOOL_IMPL( func, P, check_descr, TL, CT )            \
-    ::boost::test_tools::tt_detail::func(                               \
+    ::pdalboost::test_tools::tt_detail::func(                               \
         P,                                                              \
-        ::boost::unit_test::lazy_ostream::instance() << check_descr,    \
+        ::pdalboost::unit_test::lazy_ostream::instance() << check_descr,    \
         BOOST_TEST_L(__FILE__),                                         \
         static_cast<std::size_t>(__LINE__),                             \
-        ::boost::test_tools::tt_detail::TL,                             \
-        ::boost::test_tools::tt_detail::CT                              \
+        ::pdalboost::test_tools::tt_detail::TL,                             \
+        ::pdalboost::test_tools::tt_detail::CT                              \
 /**/
 
 //____________________________________________________________________________//
@@ -89,7 +89,7 @@
 do {                                                                \
     BOOST_TEST_PASSPOINT();                                         \
     BOOST_TEST_TOOL_IMPL( check_impl, P, check_descr, TL, CT ), 0 );\
-} while( ::boost::test_tools::dummy_cond )                          \
+} while( ::pdalboost::test_tools::dummy_cond )                          \
 /**/
 
 //____________________________________________________________________________//
@@ -101,7 +101,7 @@ do {                                                                \
     BOOST_TEST_PASSPOINT();                                         \
     BOOST_TEST_TOOL_IMPL( check_frwd, P, check_descr, TL, CT )      \
     BOOST_PP_SEQ_FOR_EACH( BOOST_TEST_PASS_ARG_INFO, '_', ARGS ) ); \
-} while( ::boost::test_tools::dummy_cond )                          \
+} while( ::pdalboost::test_tools::dummy_cond )                          \
 /**/
 
 //____________________________________________________________________________//
@@ -129,7 +129,7 @@ do {                                                                \
         S;                                                                                              \
         BOOST_CHECK_IMPL( false, "exception " BOOST_STRINGIZE( E ) " is expected", TL, CHECK_MSG ); }   \
     catch( E const& ex ) {                                                                              \
-        ::boost::unit_test::ut_detail::ignore_unused_variable_warning( ex );                            \
+        ::pdalboost::unit_test::ut_detail::ignore_unused_variable_warning( ex );                            \
         BOOST_CHECK_IMPL( P, prefix BOOST_STRINGIZE( E ) " is caught", TL, CHECK_MSG );                 \
     }                                                                                                   \
 /**/
@@ -164,89 +164,89 @@ do {                                                                \
 //____________________________________________________________________________//
 
 #define BOOST_WARN_EQUAL( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::equal_impl_frwd(), "", WARN, CHECK_EQUAL, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::equal_impl_frwd(), "", WARN, CHECK_EQUAL, (L)(R) )
 #define BOOST_CHECK_EQUAL( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::equal_impl_frwd(), "", CHECK, CHECK_EQUAL, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::equal_impl_frwd(), "", CHECK, CHECK_EQUAL, (L)(R) )
 #define BOOST_REQUIRE_EQUAL( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::equal_impl_frwd(), "", REQUIRE, CHECK_EQUAL, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::equal_impl_frwd(), "", REQUIRE, CHECK_EQUAL, (L)(R) )
 
 //____________________________________________________________________________//
 
 #define BOOST_WARN_NE( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::ne_impl(), "", WARN, CHECK_NE, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::ne_impl(), "", WARN, CHECK_NE, (L)(R) )
 #define BOOST_CHECK_NE( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::ne_impl(), "", CHECK, CHECK_NE, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::ne_impl(), "", CHECK, CHECK_NE, (L)(R) )
 #define BOOST_REQUIRE_NE( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::ne_impl(), "", REQUIRE, CHECK_NE, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::ne_impl(), "", REQUIRE, CHECK_NE, (L)(R) )
 
 //____________________________________________________________________________//
 
 #define BOOST_WARN_LT( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::lt_impl(), "", WARN, CHECK_LT, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::lt_impl(), "", WARN, CHECK_LT, (L)(R) )
 #define BOOST_CHECK_LT( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::lt_impl(), "", CHECK, CHECK_LT, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::lt_impl(), "", CHECK, CHECK_LT, (L)(R) )
 #define BOOST_REQUIRE_LT( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::lt_impl(), "", REQUIRE, CHECK_LT, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::lt_impl(), "", REQUIRE, CHECK_LT, (L)(R) )
 
 //____________________________________________________________________________//
 
 #define BOOST_WARN_LE( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::le_impl(), "", WARN, CHECK_LE, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::le_impl(), "", WARN, CHECK_LE, (L)(R) )
 #define BOOST_CHECK_LE( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::le_impl(), "", CHECK, CHECK_LE, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::le_impl(), "", CHECK, CHECK_LE, (L)(R) )
 #define BOOST_REQUIRE_LE( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::le_impl(), "", REQUIRE, CHECK_LE, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::le_impl(), "", REQUIRE, CHECK_LE, (L)(R) )
 
 //____________________________________________________________________________//
 
 #define BOOST_WARN_GT( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::gt_impl(), "", WARN, CHECK_GT, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::gt_impl(), "", WARN, CHECK_GT, (L)(R) )
 #define BOOST_CHECK_GT( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::gt_impl(), "", CHECK, CHECK_GT, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::gt_impl(), "", CHECK, CHECK_GT, (L)(R) )
 #define BOOST_REQUIRE_GT( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::gt_impl(), "", REQUIRE, CHECK_GT, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::gt_impl(), "", REQUIRE, CHECK_GT, (L)(R) )
 
 //____________________________________________________________________________//
 
 #define BOOST_WARN_GE( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::ge_impl(), "", WARN, CHECK_GE, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::ge_impl(), "", WARN, CHECK_GE, (L)(R) )
 #define BOOST_CHECK_GE( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::ge_impl(), "", CHECK, CHECK_GE, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::ge_impl(), "", CHECK, CHECK_GE, (L)(R) )
 #define BOOST_REQUIRE_GE( L, R ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::tt_detail::ge_impl(), "", REQUIRE, CHECK_GE, (L)(R) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::tt_detail::ge_impl(), "", REQUIRE, CHECK_GE, (L)(R) )
 
 //____________________________________________________________________________//
 
 #define BOOST_WARN_CLOSE( L, R, T ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::check_is_close, "", WARN, CHECK_CLOSE, \
-        (L)(R)(::boost::test_tools::percent_tolerance(T)) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::check_is_close, "", WARN, CHECK_CLOSE, \
+        (L)(R)(::pdalboost::test_tools::percent_tolerance(T)) )
 #define BOOST_CHECK_CLOSE( L, R, T ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::check_is_close, "", CHECK, CHECK_CLOSE, \
-        (L)(R)(::boost::test_tools::percent_tolerance(T)) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::check_is_close, "", CHECK, CHECK_CLOSE, \
+        (L)(R)(::pdalboost::test_tools::percent_tolerance(T)) )
 #define BOOST_REQUIRE_CLOSE( L, R, T ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::check_is_close, "", REQUIRE, CHECK_CLOSE, \
-        (L)(R)(::boost::test_tools::percent_tolerance(T)) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::check_is_close, "", REQUIRE, CHECK_CLOSE, \
+        (L)(R)(::pdalboost::test_tools::percent_tolerance(T)) )
 
 //____________________________________________________________________________//
 
 #define BOOST_WARN_CLOSE_FRACTION( L, R, T ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::check_is_close, "", WARN, CHECK_CLOSE_FRACTION, \
-    (L)(R)(::boost::test_tools::fraction_tolerance(T)) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::check_is_close, "", WARN, CHECK_CLOSE_FRACTION, \
+    (L)(R)(::pdalboost::test_tools::fraction_tolerance(T)) )
 #define BOOST_CHECK_CLOSE_FRACTION( L, R, T ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::check_is_close, "", CHECK, CHECK_CLOSE_FRACTION, \
-    (L)(R)(::boost::test_tools::fraction_tolerance(T)) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::check_is_close, "", CHECK, CHECK_CLOSE_FRACTION, \
+    (L)(R)(::pdalboost::test_tools::fraction_tolerance(T)) )
 #define BOOST_REQUIRE_CLOSE_FRACTION( L, R, T ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::check_is_close, "", REQUIRE, CHECK_CLOSE_FRACTION, \
-    (L)(R)(::boost::test_tools::fraction_tolerance(T)) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::check_is_close, "", REQUIRE, CHECK_CLOSE_FRACTION, \
+    (L)(R)(::pdalboost::test_tools::fraction_tolerance(T)) )
 
 //____________________________________________________________________________//
 
 #define BOOST_WARN_SMALL( FPV, T ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::check_is_small, "", WARN, CHECK_SMALL, (FPV)(T) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::check_is_small, "", WARN, CHECK_SMALL, (FPV)(T) )
 #define BOOST_CHECK_SMALL( FPV, T ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::check_is_small, "", CHECK, CHECK_SMALL, (FPV)(T) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::check_is_small, "", CHECK, CHECK_SMALL, (FPV)(T) )
 #define BOOST_REQUIRE_SMALL( FPV, T ) \
-    BOOST_CHECK_WITH_ARGS_IMPL( ::boost::test_tools::check_is_small, "", REQUIRE, CHECK_SMALL, (FPV)(T) )
+    BOOST_CHECK_WITH_ARGS_IMPL( ::pdalboost::test_tools::check_is_small, "", REQUIRE, CHECK_SMALL, (FPV)(T) )
 
 //____________________________________________________________________________//
 
@@ -260,7 +260,7 @@ do {                                                                \
 //____________________________________________________________________________//
 
 #define BOOST_EQUAL_COLLECTIONS_IMPL( L_begin, L_end, R_begin, R_end, TL )      \
-    BOOST_TEST_TOOL_IMPL( check_impl, ::boost::test_tools::tt_detail::equal_coll_impl( \
+    BOOST_TEST_TOOL_IMPL( check_impl, ::pdalboost::test_tools::tt_detail::equal_coll_impl( \
         (L_begin), (L_end), (R_begin), (R_end) ), "", TL, CHECK_EQUAL_COLL ),   \
     4,                                                                          \
     BOOST_STRINGIZE( L_begin ), BOOST_STRINGIZE( L_end ),                       \
@@ -278,7 +278,7 @@ do {                                                                \
 
 #define BOOST_BITWISE_EQUAL_IMPL( L, R, TL )                                    \
     BOOST_TEST_TOOL_IMPL( check_impl,                                           \
-      ::boost::test_tools::tt_detail::bitwise_equal_impl( (L), (R) ),           \
+      ::pdalboost::test_tools::tt_detail::bitwise_equal_impl( (L), (R) ),           \
       "", TL, CHECK_BITWISE_EQUAL ),                                            \
     2, BOOST_STRINGIZE( L ), BOOST_STRINGIZE( R ) )                             \
 /**/
@@ -289,7 +289,7 @@ do {                                                                \
 
 //____________________________________________________________________________//
 
-#define BOOST_IS_DEFINED( symb )            ::boost::test_tools::tt_detail::is_defined_impl( #symb, BOOST_STRINGIZE(= symb) )
+#define BOOST_IS_DEFINED( symb )            ::pdalboost::test_tools::tt_detail::is_defined_impl( #symb, BOOST_STRINGIZE(= symb) )
 
 //____________________________________________________________________________//
 
@@ -300,7 +300,7 @@ do {                                                                \
 #define BOOST_MESSAGE( M )                  BOOST_TEST_MESSAGE( M )
 #define BOOST_CHECKPOINT( M )               BOOST_TEST_CHECKPOINT( M )
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace test_tools {
 
@@ -316,8 +316,8 @@ template<typename T>
 struct print_log_value {
     void    operator()( std::ostream& ostr, T const& t )
     {
-        // avoid warning: 'boost::test_tools::<unnamed>::dummy_cond' defined but not used 
-        if (::boost::test_tools::dummy_cond) {}
+        // avoid warning: 'pdalboost::test_tools::<unnamed>::dummy_cond' defined but not used 
+        if (::pdalboost::test_tools::dummy_cond) {}
 
         typedef typename mpl::or_<is_array<T>,is_function<T>,is_abstract<T> >::type cant_use_nl;
 
@@ -338,7 +338,7 @@ struct print_log_value {
 //____________________________________________________________________________//
 
 #define BOOST_TEST_DONT_PRINT_LOG_VALUE( the_type )         \
-namespace boost { namespace test_tools {                    \
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace test_tools {                    \
 template<>                                                  \
 struct print_log_value<the_type > {                         \
     void operator()( std::ostream&, the_type const& ) {}    \
@@ -476,7 +476,7 @@ operator<<( std::ostream& ostr, print_helper_t<T> const& ph )
 // ************************************************************************** //
 
 BOOST_TEST_DECL 
-bool check_impl( predicate_result const& pr, ::boost::unit_test::lazy_ostream const& check_descr,
+bool check_impl( predicate_result const& pr, ::pdalboost::unit_test::lazy_ostream const& check_descr,
                  const_string file_name, std::size_t line_num,
                  tool_level tl, check_type ct,
                  std::size_t num_args, ... );
@@ -494,7 +494,7 @@ bool check_impl( predicate_result const& pr, ::boost::unit_test::lazy_ostream co
 #define ARG_INFO( z, m, dummy )                                                     \
  , BOOST_JOIN( BOOST_JOIN( arg, m ), _descr )                                       \
  , &static_cast<const unit_test::lazy_ostream&>(unit_test::lazy_ostream::instance() \
-        << ::boost::test_tools::tt_detail::print_helper( BOOST_JOIN( arg, m ) ))    \
+        << ::pdalboost::test_tools::tt_detail::print_helper( BOOST_JOIN( arg, m ) ))    \
 /**/
 
 #define IMPL_FRWD( z, n, dummy )                                                    \
@@ -710,7 +710,7 @@ bool BOOST_TEST_DECL is_defined_impl( const_string symbol_name, const_string sym
 
 namespace test_toolbox = test_tools;
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

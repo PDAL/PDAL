@@ -74,11 +74,11 @@
 #  define BOOST_FUNCTION_VOID_RETURN_TYPE void
 #  define BOOST_FUNCTION_RETURN(X) X
 #else
-#  define BOOST_FUNCTION_VOID_RETURN_TYPE boost::detail::function::unusable
+#  define BOOST_FUNCTION_VOID_RETURN_TYPE pdalboost::detail::function::unusable
 #  define BOOST_FUNCTION_RETURN(X) X; return BOOST_FUNCTION_VOID_RETURN_TYPE ()
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace detail {
     namespace function {
       template<
@@ -204,7 +204,7 @@ namespace boost {
         {
           MemberPtr* f = 
             reinterpret_cast<MemberPtr*>(&function_obj_ptr.data);
-          return boost::mem_fn(*f)(BOOST_FUNCTION_ARGS);
+          return pdalboost::mem_fn(*f)(BOOST_FUNCTION_ARGS);
         }
       };
 
@@ -222,7 +222,7 @@ namespace boost {
         {
           MemberPtr* f = 
             reinterpret_cast<MemberPtr*>(&function_obj_ptr.data);
-          BOOST_FUNCTION_RETURN(boost::mem_fn(*f)(BOOST_FUNCTION_ARGS));
+          BOOST_FUNCTION_RETURN(pdalboost::mem_fn(*f)(BOOST_FUNCTION_ARGS));
         }
       };
 #endif
@@ -466,9 +466,9 @@ namespace boost {
 
 
       /**
-       * vtable for a specific boost::function instance. This
+       * vtable for a specific pdalboost::function instance. This
        * structure must be an aggregate so that we can use static
-       * initialization in boost::function's assign_to and assign_to_a
+       * initialization in pdalboost::function's assign_to and assign_to_a
        * members. It therefore cannot have any constructors,
        * destructors, base classes, etc.
        */
@@ -536,7 +536,7 @@ namespace boost {
           // objects, so we invoke through mem_fn() but we retain the
           // right target_type() values.
           if (f) {
-            this->assign_to(boost::mem_fn(f), functor);
+            this->assign_to(pdalboost::mem_fn(f), functor);
             return true;
           } else {
             return false;
@@ -549,7 +549,7 @@ namespace boost {
           // objects, so we invoke through mem_fn() but we retain the
           // right target_type() values.
           if (f) {
-            this->assign_to_a(boost::mem_fn(f), functor, a);
+            this->assign_to_a(pdalboost::mem_fn(f), functor, a);
             return true;
           } else {
             return false;
@@ -598,7 +598,7 @@ namespace boost {
         bool 
         assign_to(FunctionObj f, function_buffer& functor, function_obj_tag) const
         {
-          if (!boost::detail::function::has_empty_target(boost::addressof(f))) {
+          if (!pdalboost::detail::function::has_empty_target(pdalboost::addressof(f))) {
             assign_functor(f, functor, 
                            mpl::bool_<(function_allows_small_object_optimization<FunctionObj>::value)>());
             return true;
@@ -610,7 +610,7 @@ namespace boost {
         bool 
         assign_to_a(FunctionObj f, function_buffer& functor, Allocator a, function_obj_tag) const
         {
-          if (!boost::detail::function::has_empty_target(boost::addressof(f))) {
+          if (!pdalboost::detail::function::has_empty_target(pdalboost::addressof(f))) {
             assign_functor_a(f, functor, a,
                            mpl::bool_<(function_allows_small_object_optimization<FunctionObj>::value)>());
             return true;
@@ -666,12 +666,12 @@ namespace boost {
 #ifndef BOOST_NO_VOID_RETURNS
     typedef R         result_type;
 #else
-    typedef  typename boost::detail::function::function_return_type<R>::type
+    typedef  typename pdalboost::detail::function::function_return_type<R>::type
       result_type;
 #endif // BOOST_NO_VOID_RETURNS
 
   private:
-    typedef boost::detail::function::BOOST_FUNCTION_VTABLE<
+    typedef pdalboost::detail::function::BOOST_FUNCTION_VTABLE<
               R BOOST_FUNCTION_COMMA BOOST_FUNCTION_TEMPLATE_ARGS>
       vtable_type;
 
@@ -685,7 +685,7 @@ namespace boost {
   public:
     BOOST_STATIC_CONSTANT(int, args = BOOST_FUNCTION_NUM_ARGS);
 
-    // add signature for boost::lambda
+    // add signature for pdalboost::lambda
     template<typename Args>
     struct sig
     {
@@ -712,7 +712,7 @@ namespace boost {
     BOOST_FUNCTION_FUNCTION(Functor BOOST_FUNCTION_TARGET_FIX(const &) f
 #ifndef BOOST_NO_SFINAE
                             ,typename enable_if_c<
-                            (boost::type_traits::ice_not<
+                            (pdalboost::type_traits::ice_not<
                              (is_integral<Functor>::value)>::value),
                                         int>::type = 0
 #endif // BOOST_NO_SFINAE
@@ -725,7 +725,7 @@ namespace boost {
     BOOST_FUNCTION_FUNCTION(Functor BOOST_FUNCTION_TARGET_FIX(const &) f, Allocator a
 #ifndef BOOST_NO_SFINAE
                             ,typename enable_if_c<
-                            (boost::type_traits::ice_not<
+                            (pdalboost::type_traits::ice_not<
                              (is_integral<Functor>::value)>::value),
                                         int>::type = 0
 #endif // BOOST_NO_SFINAE
@@ -754,7 +754,7 @@ namespace boost {
     result_type operator()(BOOST_FUNCTION_PARMS) const
     {
       if (this->empty())
-        boost::throw_exception(bad_function_call());
+        pdalboost::throw_exception(bad_function_call());
 
       return get_vtable()->invoker
                (this->functor BOOST_FUNCTION_COMMA BOOST_FUNCTION_ARGS);
@@ -768,7 +768,7 @@ namespace boost {
     template<typename Functor>
 #ifndef BOOST_NO_SFINAE
     typename enable_if_c<
-               (boost::type_traits::ice_not<
+               (pdalboost::type_traits::ice_not<
                  (is_integral<Functor>::value)>::value),
                BOOST_FUNCTION_FUNCTION&>::type
 #else
@@ -880,7 +880,7 @@ namespace boost {
           this->functor = f.functor;
         else
           get_vtable()->base.manager(f.functor, this->functor,
-                                     boost::detail::function::clone_functor_tag);
+                                     pdalboost::detail::function::clone_functor_tag);
       }
     }
 
@@ -908,8 +908,8 @@ namespace boost {
 
       if (stored_vtable.assign_to(f, functor)) {
         std::size_t value = reinterpret_cast<std::size_t>(&stored_vtable.base);
-        if (boost::has_trivial_copy_constructor<Functor>::value &&
-            boost::has_trivial_destructor<Functor>::value &&
+        if (pdalboost::has_trivial_copy_constructor<Functor>::value &&
+            pdalboost::has_trivial_destructor<Functor>::value &&
             detail::function::function_allows_small_object_optimization<Functor>::value)
           value |= static_cast<size_t>(0x01);
         vtable = reinterpret_cast<detail::function::vtable_base *>(value);
@@ -942,8 +942,8 @@ namespace boost {
 
       if (stored_vtable.assign_to_a(f, functor, a)) { 
         std::size_t value = reinterpret_cast<std::size_t>(&stored_vtable.base);
-        if (boost::has_trivial_copy_constructor<Functor>::value &&
-            boost::has_trivial_destructor<Functor>::value &&
+        if (pdalboost::has_trivial_copy_constructor<Functor>::value &&
+            pdalboost::has_trivial_destructor<Functor>::value &&
             detail::function::function_allows_small_object_optimization<Functor>::value)
           value |= static_cast<std::size_t>(0x01);
         vtable = reinterpret_cast<detail::function::vtable_base *>(value);
@@ -966,7 +966,7 @@ namespace boost {
             this->functor = f.functor;
           else
             get_vtable()->base.manager(f.functor, this->functor,
-                                     boost::detail::function::move_functor_tag);
+                                     pdalboost::detail::function::move_functor_tag);
           f.vtable = 0;
         } else {
           clear();
@@ -992,7 +992,7 @@ namespace boost {
     f1.swap(f2);
   }
 
-// Poison comparisons between boost::function objects of the same type.
+// Poison comparisons between pdalboost::function objects of the same type.
 template<typename R BOOST_FUNCTION_COMMA BOOST_FUNCTION_TEMPLATE_PARMS>
   void operator==(const BOOST_FUNCTION_FUNCTION<
                           R BOOST_FUNCTION_COMMA
@@ -1034,7 +1034,7 @@ public:
   function(Functor f
 #ifndef BOOST_NO_SFINAE
            ,typename enable_if_c<
-                            (boost::type_traits::ice_not<
+                            (pdalboost::type_traits::ice_not<
                           (is_integral<Functor>::value)>::value),
                        int>::type = 0
 #endif
@@ -1046,7 +1046,7 @@ public:
   function(Functor f, Allocator a
 #ifndef BOOST_NO_SFINAE
            ,typename enable_if_c<
-                            (boost::type_traits::ice_not<
+                            (pdalboost::type_traits::ice_not<
                           (is_integral<Functor>::value)>::value),
                        int>::type = 0
 #endif
@@ -1072,7 +1072,7 @@ public:
   template<typename Functor>
 #ifndef BOOST_NO_SFINAE
   typename enable_if_c<
-                            (boost::type_traits::ice_not<
+                            (pdalboost::type_traits::ice_not<
                          (is_integral<Functor>::value)>::value),
                       self_type&>::type
 #else
@@ -1102,7 +1102,7 @@ public:
 #undef BOOST_FUNCTION_PARTIAL_SPEC
 #endif // have partial specialization
 
-} // end namespace boost
+} // end namespace pdalboost
 
 // Cleanup after ourselves...
 #undef BOOST_FUNCTION_VTABLE

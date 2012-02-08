@@ -36,7 +36,7 @@
 #include <boost/mpl/assert.hpp>
 #include <boost/mpl/bool.hpp>
 #define BOOST_COMMON_TYPE_STATIC_ASSERT(CND, MSG, TYPES)                                 \
-    BOOST_MPL_ASSERT_MSG(boost::mpl::bool_< (CND) >::type::value, MSG, TYPES)
+    BOOST_MPL_ASSERT_MSG(pdalboost::mpl::bool_< (CND) >::type::value, MSG, TYPES)
 #else
 #include <boost/static_assert.hpp>
 #define BOOST_COMMON_TYPE_STATIC_ASSERT(CND, MSG, TYPES) BOOST_STATIC_ASSERT(CND)
@@ -63,7 +63,7 @@
 //                                                                            //
 //----------------------------------------------------------------------------//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 // prototype
 #if !defined(BOOST_NO_VARIADIC_TEMPLATES)
@@ -153,6 +153,6 @@ namespace type_traits_detail {
         typedef typename common_type<typename common_type<T, U>::type, V...>::type type;
     };
 #endif
-}  // namespace boost
+}  // namespace pdalboost
 
 #endif  // BOOST_TYPE_TRAITS_COMMON_TYPE_HPP

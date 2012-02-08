@@ -3,7 +3,7 @@
 #ifndef BOOST_ANY_INCLUDED
 #define BOOST_ANY_INCLUDED
 
-// what:  variant type boost::any
+// what:  variant type pdalboost::any
 // who:   contributed by Kevlin Henney,
 //        with features contributed and bugs found by
 //        Ed Brey, Mark Rodgers, Peter Dimov, and James Curran
@@ -30,8 +30,7 @@
 #include <cstring>
 # endif 
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     class any
     {
     public: // structors
@@ -167,8 +166,8 @@ namespace boost
     public:
         virtual const char * what() const throw()
         {
-            return "boost::bad_any_cast: "
-                   "failed conversion using boost::any_cast";
+            return "pdalboost::bad_any_cast: "
+                   "failed conversion using pdalboost::any_cast";
         }
     };
 
@@ -208,7 +207,7 @@ namespace boost
 
         nonref * result = any_cast<nonref>(&operand);
         if(!result)
-            boost::throw_exception(bad_any_cast());
+            pdalboost::throw_exception(bad_any_cast());
         return *result;
     }
 

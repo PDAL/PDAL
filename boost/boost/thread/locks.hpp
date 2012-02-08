@@ -15,8 +15,7 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     struct xtime;
 
 #if defined(BOOST_NO_SFINAE) ||                           \
@@ -29,7 +28,7 @@ namespace boost
     namespace detail
     {
 #define BOOST_DEFINE_HAS_MEMBER_CALLED(member_name)                     \
-        template<typename T, bool=boost::is_class<T>::value>            \
+        template<typename T, bool=pdalboost::is_class<T>::value>            \
         struct has_member_called_##member_name                          \
         {                                                               \
             BOOST_STATIC_CONSTANT(bool, value=false);                   \
@@ -407,7 +406,7 @@ namespace boost
         {
             if(owns_lock())
             {
-                boost::throw_exception(boost::lock_error());
+                pdalboost::throw_exception(pdalboost::lock_error());
             }
             m->lock();
             is_locked=true;
@@ -416,7 +415,7 @@ namespace boost
         {
             if(owns_lock())
             {
-                boost::throw_exception(boost::lock_error());
+                pdalboost::throw_exception(pdalboost::lock_error());
             }
             is_locked=m->try_lock();
             return is_locked;
@@ -428,12 +427,12 @@ namespace boost
             return is_locked;
         }
         
-        bool timed_lock(::boost::system_time const& absolute_time)
+        bool timed_lock(::pdalboost::system_time const& absolute_time)
         {
             is_locked=m->timed_lock(absolute_time);
             return is_locked;
         }
-        bool timed_lock(::boost::xtime const& absolute_time)
+        bool timed_lock(::pdalboost::xtime const& absolute_time)
         {
             is_locked=m->timed_lock(absolute_time);
             return is_locked;
@@ -442,7 +441,7 @@ namespace boost
         {
             if(!owns_lock())
             {
-                boost::throw_exception(boost::lock_error());
+                pdalboost::throw_exception(pdalboost::lock_error());
             }
             m->unlock();
             is_locked=false;
@@ -622,7 +621,7 @@ namespace boost
             std::swap(is_locked,other.is_locked);
         }
 #else
-        void swap(boost::detail::thread_move_t<shared_lock<Mutex> > other)
+        void swap(pdalboost::detail::thread_move_t<shared_lock<Mutex> > other)
         {
             std::swap(m,other->m);
             std::swap(is_locked,other->is_locked);
@@ -650,7 +649,7 @@ namespace boost
         {
             if(owns_lock())
             {
-                boost::throw_exception(boost::lock_error());
+                pdalboost::throw_exception(pdalboost::lock_error());
             }
             m->lock_shared();
             is_locked=true;
@@ -659,16 +658,16 @@ namespace boost
         {
             if(owns_lock())
             {
-                boost::throw_exception(boost::lock_error());
+                pdalboost::throw_exception(pdalboost::lock_error());
             }
             is_locked=m->try_lock_shared();
             return is_locked;
         }
-        bool timed_lock(boost::system_time const& target_time)
+        bool timed_lock(pdalboost::system_time const& target_time)
         {
             if(owns_lock())
             {
-                boost::throw_exception(boost::lock_error());
+                pdalboost::throw_exception(pdalboost::lock_error());
             }
             is_locked=m->timed_lock_shared(target_time);
             return is_locked;
@@ -678,7 +677,7 @@ namespace boost
         {
             if(owns_lock())
             {
-                boost::throw_exception(boost::lock_error());
+                pdalboost::throw_exception(pdalboost::lock_error());
             }
             is_locked=m->timed_lock_shared(target_time);
             return is_locked;
@@ -687,7 +686,7 @@ namespace boost
         {
             if(!owns_lock())
             {
-                boost::throw_exception(boost::lock_error());
+                pdalboost::throw_exception(pdalboost::lock_error());
             }
             m->unlock_shared();
             is_locked=false;
@@ -847,7 +846,7 @@ namespace boost
         {
             if(owns_lock())
             {
-                boost::throw_exception(boost::lock_error());
+                pdalboost::throw_exception(pdalboost::lock_error());
             }
             m->lock_upgrade();
             is_locked=true;
@@ -856,7 +855,7 @@ namespace boost
         {
             if(owns_lock())
             {
-                boost::throw_exception(boost::lock_error());
+                pdalboost::throw_exception(pdalboost::lock_error());
             }
             is_locked=m->try_lock_upgrade();
             return is_locked;
@@ -865,7 +864,7 @@ namespace boost
         {
             if(!owns_lock())
             {
-                boost::throw_exception(boost::lock_error());
+                pdalboost::throw_exception(pdalboost::lock_error());
             }
             m->unlock_upgrade();
             is_locked=false;
@@ -1109,7 +1108,7 @@ namespace boost
         template<typename MutexType1,typename MutexType2>
         unsigned try_lock_internal(MutexType1& m1,MutexType2& m2)
         {
-            boost::unique_lock<MutexType1> l1(m1,boost::try_to_lock);
+            pdalboost::unique_lock<MutexType1> l1(m1,pdalboost::try_to_lock);
             if(!l1)
             {
                 return 1;
@@ -1125,7 +1124,7 @@ namespace boost
         template<typename MutexType1,typename MutexType2,typename MutexType3>
         unsigned try_lock_internal(MutexType1& m1,MutexType2& m2,MutexType3& m3)
         {
-            boost::unique_lock<MutexType1> l1(m1,boost::try_to_lock);
+            pdalboost::unique_lock<MutexType1> l1(m1,pdalboost::try_to_lock);
             if(!l1)
             {
                 return 1;
@@ -1144,7 +1143,7 @@ namespace boost
         unsigned try_lock_internal(MutexType1& m1,MutexType2& m2,MutexType3& m3,
                                    MutexType4& m4)
         {
-            boost::unique_lock<MutexType1> l1(m1,boost::try_to_lock);
+            pdalboost::unique_lock<MutexType1> l1(m1,pdalboost::try_to_lock);
             if(!l1)
             {
                 return 1;
@@ -1162,7 +1161,7 @@ namespace boost
         unsigned try_lock_internal(MutexType1& m1,MutexType2& m2,MutexType3& m3,
                                    MutexType4& m4,MutexType5& m5)
         {
-            boost::unique_lock<MutexType1> l1(m1,boost::try_to_lock);
+            pdalboost::unique_lock<MutexType1> l1(m1,pdalboost::try_to_lock);
             if(!l1)
             {
                 return 1;
@@ -1179,7 +1178,7 @@ namespace boost
         template<typename MutexType1,typename MutexType2>
         unsigned lock_helper(MutexType1& m1,MutexType2& m2)
         {
-            boost::unique_lock<MutexType1> l1(m1);
+            pdalboost::unique_lock<MutexType1> l1(m1);
             if(!m2.try_lock())
             {
                 return 1;
@@ -1191,7 +1190,7 @@ namespace boost
         template<typename MutexType1,typename MutexType2,typename MutexType3>
         unsigned lock_helper(MutexType1& m1,MutexType2& m2,MutexType3& m3)
         {
-            boost::unique_lock<MutexType1> l1(m1);
+            pdalboost::unique_lock<MutexType1> l1(m1);
             if(unsigned const failed_lock=try_lock_internal(m2,m3))
             {
                 return failed_lock;
@@ -1205,7 +1204,7 @@ namespace boost
         unsigned lock_helper(MutexType1& m1,MutexType2& m2,MutexType3& m3,
                              MutexType4& m4)
         {
-            boost::unique_lock<MutexType1> l1(m1);
+            pdalboost::unique_lock<MutexType1> l1(m1);
             if(unsigned const failed_lock=try_lock_internal(m2,m3,m4))
             {
                 return failed_lock;
@@ -1219,7 +1218,7 @@ namespace boost
         unsigned lock_helper(MutexType1& m1,MutexType2& m2,MutexType3& m3,
                              MutexType4& m4,MutexType5& m5)
         {
-            boost::unique_lock<MutexType1> l1(m1);
+            pdalboost::unique_lock<MutexType1> l1(m1);
             if(unsigned const failed_lock=try_lock_internal(m2,m3,m4,m5))
             {
                 return failed_lock;

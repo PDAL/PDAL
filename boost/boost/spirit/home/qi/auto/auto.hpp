@@ -22,7 +22,7 @@
 #include <boost/mpl/bool.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // Enablers
@@ -33,7 +33,7 @@ namespace boost { namespace spirit
 }}
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
 #ifndef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
     using spirit::auto_;

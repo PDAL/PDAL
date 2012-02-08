@@ -12,7 +12,7 @@
 #include "boost/date_time/gregorian/greg_duration_types.hpp"
 #include "boost/date_time/posix_time/ptime.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace posix_time {
   
   /*!@file date_duration_operators.hpp Operators for ptime and 
@@ -28,7 +28,7 @@ namespace posix_time {
    * see date_time::months_duration for more details */
   inline
   ptime 
-  operator+(const ptime& t, const boost::gregorian::months& m)
+  operator+(const ptime& t, const pdalboost::gregorian::months& m)
   {
     return t + m.get_offset(t.date());
   }
@@ -38,7 +38,7 @@ namespace posix_time {
    * see date_time::months_duration for more details */
   inline
   ptime 
-  operator+=(ptime& t, const boost::gregorian::months& m)
+  operator+=(ptime& t, const pdalboost::gregorian::months& m)
   {
     // get_neg_offset returns a negative duration, so we add
     return t += m.get_offset(t.date());
@@ -49,7 +49,7 @@ namespace posix_time {
    * see date_time::months_duration for more details */
   inline
   ptime 
-  operator-(const ptime& t, const boost::gregorian::months& m)
+  operator-(const ptime& t, const pdalboost::gregorian::months& m)
   {
     // get_neg_offset returns a negative duration, so we add
     return t + m.get_neg_offset(t.date());
@@ -60,7 +60,7 @@ namespace posix_time {
    * see date_time::months_duration for more details */
   inline
   ptime 
-  operator-=(ptime& t, const boost::gregorian::months& m)
+  operator-=(ptime& t, const pdalboost::gregorian::months& m)
   {
     return t += m.get_neg_offset(t.date());
   }
@@ -72,7 +72,7 @@ namespace posix_time {
    * last day of month. see date_time::years_duration for more details */
   inline
   ptime 
-  operator+(const ptime& t, const boost::gregorian::years& y)
+  operator+(const ptime& t, const pdalboost::gregorian::years& y)
   {
     return t + y.get_offset(t.date());
   }
@@ -82,7 +82,7 @@ namespace posix_time {
    * last day of month. see date_time::years_duration for more details */
   inline
   ptime 
-  operator+=(ptime& t, const boost::gregorian::years& y)
+  operator+=(ptime& t, const pdalboost::gregorian::years& y)
   {
     return t += y.get_offset(t.date());
   }
@@ -92,7 +92,7 @@ namespace posix_time {
    * last day of month. see date_time::years_duration for more details */
   inline
   ptime 
-  operator-(const ptime& t, const boost::gregorian::years& y)
+  operator-(const ptime& t, const pdalboost::gregorian::years& y)
   {
     // get_neg_offset returns a negative duration, so we add
     return t + y.get_neg_offset(t.date());
@@ -103,7 +103,7 @@ namespace posix_time {
    * last day of month. see date_time::years_duration for more details */
   inline
   ptime 
-  operator-=(ptime& t, const boost::gregorian::years& y)
+  operator-=(ptime& t, const pdalboost::gregorian::years& y)
   {
     // get_neg_offset returns a negative duration, so we add
     return t += y.get_neg_offset(t.date());

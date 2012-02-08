@@ -17,7 +17,7 @@
 #include <boost/proto/tags.hpp>
 #include <boost/proto/operators.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     namespace detail
     {

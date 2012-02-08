@@ -38,7 +38,7 @@
 
 namespace
 {
-  class codecvt_error_cat : public boost::system::error_category
+  class codecvt_error_cat : public pdalboost::system::error_category
   {
   public:
     codecvt_error_cat(){}
@@ -76,18 +76,17 @@ namespace
 
 } // unnamed namespace
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem3
   {
 
-    BOOST_FILESYSTEM_DECL const boost::system::error_category& codecvt_error_category()
+    BOOST_FILESYSTEM_DECL const pdalboost::system::error_category& codecvt_error_category()
     {
       static const codecvt_error_cat  codecvt_error_cat_const;
       return codecvt_error_cat_const;
     }
 
   } // namespace filesystem3
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // no wide character support

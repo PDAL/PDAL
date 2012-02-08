@@ -13,7 +13,7 @@
 #include <boost/preprocessor/iteration/iterate.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     template <typename Dummy = void>
     struct vector0;
@@ -39,7 +39,7 @@ namespace boost { namespace fusion
 #pragma wave option(preserve: 1)
 #endif
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     // expand vector1 to vector10
     #define BOOST_PP_FILENAME_1 <boost/fusion/container/vector/vector10_fwd.hpp>

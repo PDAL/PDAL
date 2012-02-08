@@ -12,7 +12,7 @@
 
 #include <boost/spirit/home/support/unused.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     // forward declaration only
     template <

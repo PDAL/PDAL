@@ -51,8 +51,8 @@
 #include <cstring>
 #include <cassert>
 
-namespace fs = boost::filesystem;
-using boost::filesystem::path;
+namespace fs = pdalboost::filesystem;
+using pdalboost::filesystem::path;
 
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/detail/lightweight_main.hpp>
@@ -75,7 +75,7 @@ namespace
               << "\" != expected: \"" << expected
               << "\"" << std::endl;
 
-    ++::boost::detail::test_errors();
+    ++::pdalboost::detail::test_errors();
   }
 
   void check_equal(const fs::path & source,
@@ -83,7 +83,7 @@ namespace
   {
     if (source == expected) return;
 
-    ++::boost::detail::test_errors();
+    ++::pdalboost::detail::test_errors();
 
     std::cout << file << '(' << line << "): source: \"" << source
               << "\" != expected: \"" << expected
@@ -102,7 +102,7 @@ namespace
   {
     std::cout << "exception_tests..." << std::endl;
     const std::string str_1("string-1");
-    boost::system::error_code ec(12345, boost::system::system_category());
+    pdalboost::system::error_code ec(12345, pdalboost::system::system_category());
     try { throw fs::filesystem_error(str_1, ec); }
     catch (const fs::filesystem_error & ex)
     {
@@ -167,18 +167,18 @@ namespace
 
     itr_ck = "foo";
     BOOST_TEST(*itr_ck.begin() == std::string("foo"));
-    BOOST_TEST(boost::next(itr_ck.begin()) == itr_ck.end());
-    BOOST_TEST(*boost::prior(itr_ck.end()) == std::string("foo"));
-    BOOST_TEST(boost::prior(itr_ck.end()) == itr_ck.begin());
+    BOOST_TEST(pdalboost::next(itr_ck.begin()) == itr_ck.end());
+    BOOST_TEST(*pdalboost::prior(itr_ck.end()) == std::string("foo"));
+    BOOST_TEST(pdalboost::prior(itr_ck.end()) == itr_ck.begin());
 
     itr_ck = path("/foo");
     BOOST_TEST(*itr_ck.begin() == std::string("/"));
-    BOOST_TEST(*boost::next(itr_ck.begin()) == std::string("foo"));
-    BOOST_TEST(boost::next(boost::next(itr_ck.begin())) == itr_ck.end());
-    BOOST_TEST(boost::next(itr_ck.begin()) == boost::prior(itr_ck.end()));
-    BOOST_TEST(*boost::prior(itr_ck.end()) == std::string("foo"));
-    BOOST_TEST(*boost::prior(boost::prior(itr_ck.end())) == std::string("/"));
-    BOOST_TEST(boost::prior(boost::prior(itr_ck.end())) == itr_ck.begin());
+    BOOST_TEST(*pdalboost::next(itr_ck.begin()) == std::string("foo"));
+    BOOST_TEST(pdalboost::next(pdalboost::next(itr_ck.begin())) == itr_ck.end());
+    BOOST_TEST(pdalboost::next(itr_ck.begin()) == pdalboost::prior(itr_ck.end()));
+    BOOST_TEST(*pdalboost::prior(itr_ck.end()) == std::string("foo"));
+    BOOST_TEST(*pdalboost::prior(pdalboost::prior(itr_ck.end())) == std::string("/"));
+    BOOST_TEST(pdalboost::prior(pdalboost::prior(itr_ck.end())) == itr_ck.begin());
 
     itr_ck = "/foo/bar";
     itr = itr_ck.begin();
@@ -1738,5 +1738,5 @@ int cpp_main(int, char*[])
   std::cout << round_trip.string() << "..." << round_trip << " complete\n";
 # endif
 
-  return ::boost::report_errors();
+  return ::pdalboost::report_errors();
 }

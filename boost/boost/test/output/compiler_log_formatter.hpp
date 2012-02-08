@@ -23,7 +23,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -59,7 +59,7 @@ protected:
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

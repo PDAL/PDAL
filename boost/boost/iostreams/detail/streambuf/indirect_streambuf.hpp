@@ -41,7 +41,7 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp>  // MSVC, BCC 5.x
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 //
 // Description: The implementation of basic_streambuf used by chains.
@@ -276,7 +276,7 @@ indirect_streambuf<T, Tr, Alloc, Mode>::pbackfail(int_type c)
             *gptr() = traits_type::to_char_type(c);
         return traits_type::not_eof(c);
     } else {
-        boost::throw_exception(bad_putback());
+        pdalboost::throw_exception(bad_putback());
     }
 }
 

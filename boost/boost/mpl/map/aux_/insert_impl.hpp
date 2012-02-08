@@ -23,7 +23,7 @@
 #include <boost/mpl/aux_/na.hpp>
 #include <boost/mpl/aux_/config/typeof.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 namespace aux {
 template< typename Map, typename Pair > 

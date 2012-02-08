@@ -10,7 +10,7 @@
 
 #include <boost/config.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace type_traits {
 
 template <bool b1, bool b2, bool b3 = false, bool b4 = false, bool b5 = false, bool b6 = false, bool b7 = false>
@@ -29,6 +29,6 @@ struct ice_or<false, false, false, false, false, false, false>
 };
 
 } // namespace type_traits
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_TT_DETAIL_ICE_OR_HPP_INCLUDED

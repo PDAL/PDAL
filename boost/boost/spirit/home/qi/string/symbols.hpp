@@ -34,7 +34,7 @@
 # pragma warning(disable: 4355) // 'this' : used in base member initializer list warning
 #endif
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     template <
         typename Char = char
@@ -99,8 +99,8 @@ namespace boost { namespace spirit { namespace qi
           , lookup(new Lookup())
           , name_(name)
         {
-            typename range_const_iterator<Symbols>::type si = boost::begin(syms);
-            while (si != boost::end(syms))
+            typename range_const_iterator<Symbols>::type si = pdalboost::begin(syms);
+            while (si != pdalboost::end(syms))
                 add(*si++);
         }
 
@@ -113,9 +113,9 @@ namespace boost { namespace spirit { namespace qi
           , lookup(new Lookup())
           , name_(name)
         {
-            typename range_const_iterator<Symbols>::type si = boost::begin(syms);
-            typename range_const_iterator<Data>::type di = boost::begin(data);
-            while (si != boost::end(syms))
+            typename range_const_iterator<Symbols>::type si = pdalboost::begin(syms);
+            typename range_const_iterator<Data>::type di = pdalboost::begin(data);
+            while (si != pdalboost::end(syms))
                 add(*si++, *di++);
         }
 
@@ -415,7 +415,7 @@ public:
     };
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Char, typename T, typename Lookup, typename Filter

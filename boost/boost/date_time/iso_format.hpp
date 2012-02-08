@@ -11,7 +11,7 @@
 
 #include "boost/date_time/parse_format_base.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace date_time {
 
 //! Class to provide common iso formatting spec

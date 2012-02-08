@@ -18,8 +18,7 @@
 // missing partial specialization  workaround.
 //////////////////////////////////////////////////////////////////////////////
 
-namespace boost 
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace range_detail 
     {      
         template< typename T >

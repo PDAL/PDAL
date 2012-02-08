@@ -6,7 +6,7 @@
 
     This is an auto-generated file. Do not edit!
 ==============================================================================*/
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct vector_tag;
     struct fusion_sequence_tag;

@@ -14,7 +14,7 @@
 
 #include<functional>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 // template<class OP> bool equal_pointees(OP const& x, OP const& y);
 // template<class OP> struct equal_pointees_t;
@@ -62,7 +62,7 @@ struct less_pointees_t : std::binary_function<OptionalPointee,OptionalPointee,bo
     { return less_pointees(x,y) ; }
 } ;
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif
 

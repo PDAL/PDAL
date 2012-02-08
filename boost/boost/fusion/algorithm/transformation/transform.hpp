@@ -9,7 +9,7 @@
 
 #include <boost/fusion/view/transform_view/transform_view.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct void_;
 

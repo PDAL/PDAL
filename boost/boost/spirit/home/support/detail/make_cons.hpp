@@ -22,7 +22,7 @@
 #include <boost/type_traits/add_reference.hpp>
 #include <boost/utility/enable_if.hpp>
 
-namespace boost { namespace spirit { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace detail
 {
     template <typename T>
     struct as_meta_element

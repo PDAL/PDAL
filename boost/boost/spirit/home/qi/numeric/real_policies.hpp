@@ -15,7 +15,7 @@
 #include <boost/spirit/home/qi/numeric/numeric_utils.hpp>
 #include <boost/spirit/home/qi/detail/string_parse.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     ///////////////////////////////////////////////////////////////////////////
     //  Default (unsigned) real number policies

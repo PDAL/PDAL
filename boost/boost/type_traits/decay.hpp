@@ -18,8 +18,7 @@
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/identity.hpp>
 
-namespace boost 
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
     template< class T >
     struct decay
@@ -38,7 +37,7 @@ namespace boost
         >::type type;
     };
     
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_TT_DECAY_HPP_INCLUDED

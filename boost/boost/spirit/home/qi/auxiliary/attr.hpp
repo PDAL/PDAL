@@ -23,7 +23,7 @@
 #include <boost/type_traits/add_const.hpp>
 #include <boost/type_traits/remove_const.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // Enablers
@@ -39,7 +39,7 @@ namespace boost { namespace spirit
 
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
 #ifndef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
     using spirit::attr;
@@ -97,7 +97,7 @@ namespace boost { namespace spirit { namespace qi
     };
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename T, typename Attr, typename Context, typename Iterator>

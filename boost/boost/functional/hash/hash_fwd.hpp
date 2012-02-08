@@ -18,8 +18,7 @@
 #include <cstddef>
 #include <boost/detail/workaround.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     template <class T> struct hash;
 
 #if BOOST_WORKAROUND(BOOST_MSVC, < 1300)

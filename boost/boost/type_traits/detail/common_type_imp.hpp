@@ -5,7 +5,7 @@
  * Distributed under the Boost Software License, Version 1.0.  (See accompanying
  * file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  *
- * struct boost::common_type<T,U>
+ * struct pdalboost::common_type<T,U>
  *
  * common_type<T,U>::type is the type of the expression
  *     b() ? x() : y()
@@ -46,8 +46,7 @@
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/utility/declval.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail_type_traits_common_type
 {
@@ -272,7 +271,7 @@ struct nominal_candidates
 template< class T, class U, class V, class W >
 struct nominal_candidates< T, U, V, W, true >
 {
-    typedef boost::mpl::vector8<
+    typedef pdalboost::mpl::vector8<
         typename make_unsigned_soft<V>::type,
         typename make_unsigned_soft<W>::type,
         typename make_signed_soft<V>::type,
@@ -316,7 +315,7 @@ public:
 
 template< class T, class U >
 struct common_type_impl
-    : public common_type_dispatch_on_rvalueness<T,U, sizeof( ::boost::detail_type_traits_common_type::rvalue_test(
+    : public common_type_dispatch_on_rvalueness<T,U, sizeof( ::pdalboost::detail_type_traits_common_type::rvalue_test(
         declval< bool >() ? declval<T>() : declval<U>() ) ) == sizeof( yes_type ) >
 { };
 
@@ -327,7 +326,7 @@ template<> struct common_type_impl< void, void > { typedef void type; };
 } // namespace detail_type_traits_common_type
 
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_TYPE_TRAITS_DETAIL_COMMON_TYPE_HPP
 

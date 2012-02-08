@@ -49,9 +49,9 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
-using namespace ::boost::unit_test;
+using namespace ::pdalboost::unit_test;
  
 namespace itest {
 
@@ -526,7 +526,7 @@ exception_safety( callback0<> const& F, const_string test_name )
 
 }  // namespace itest
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

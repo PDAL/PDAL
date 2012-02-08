@@ -27,7 +27,7 @@
 #include <boost/mpl/aux_/config/static_constant.hpp>
 #include <boost/mpl/aux_/config/workaround.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 // default implementation; requires 'Seq' to provide corresponding overloads 
 // of BOOST_MPL_AUX_OVERLOAD_ORDER_BY_KEY

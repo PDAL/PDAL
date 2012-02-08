@@ -56,7 +56,7 @@
 
 #if !defined(BOOST_MPL_CFG_NO_QUOTE_TEMPLATE)
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 #if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 

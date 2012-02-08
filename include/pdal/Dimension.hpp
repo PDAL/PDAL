@@ -47,8 +47,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include <pdal/external/boost/uuid/uuid.hpp>
-#include <pdal/external/boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 
 #include <limits>
 
@@ -58,7 +58,7 @@ namespace pdal
 namespace dimension {
 
     
-    typedef pdal::external::boost::uuids::uuid id;
+    typedef boost::uuids::uuid id;
 
     enum Flags
     {

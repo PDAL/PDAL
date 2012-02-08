@@ -29,7 +29,7 @@
 # pragma warning(disable: 4800) // 'int' : forcing value to bool 'true' or 'false' warning
 #endif
 
-namespace boost { namespace spirit { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace detail
 {
     // Here's the thing... typical encodings (except ASCII) deal with unsigned
     // integers > 127. ASCII uses only 127. Yet, most char and wchar_t are signed.
@@ -66,7 +66,7 @@ namespace boost { namespace spirit { namespace detail
     }
 }}}
 
-namespace boost { namespace spirit { namespace tag
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace tag
 {
     struct char_ { BOOST_SPIRIT_IS_TAG() };
     struct string { BOOST_SPIRIT_IS_TAG() };
@@ -277,7 +277,7 @@ namespace boost { namespace spirit { namespace tag
     };
 }}}
 
-namespace boost { namespace spirit { namespace char_class
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace char_class
 {
     ///////////////////////////////////////////////////////////////////////////
     // Test characters for classification
@@ -750,7 +750,7 @@ namespace boost { namespace spirit { namespace char_class
     };
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     // This meta-function evaluates to mpl::true_ if the function

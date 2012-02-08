@@ -18,7 +18,7 @@
 #include <boost/mpl/not.hpp>
 #include <boost/mpl/map/aux_/tag.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<>
 struct empty_impl< aux::map_tag >

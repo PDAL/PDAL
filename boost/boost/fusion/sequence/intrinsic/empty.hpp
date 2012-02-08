@@ -12,7 +12,7 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/fusion/support/tag_of.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     // Special tags:
     struct sequence_facade_tag;

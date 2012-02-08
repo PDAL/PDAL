@@ -95,8 +95,7 @@
 # include <boost/type_traits/remove_const.hpp>
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 // forward declarations for iterator_range
 template<typename T>
@@ -118,45 +117,45 @@ namespace foreach
     }
 
     ///////////////////////////////////////////////////////////////////////////////
-    // boost::foreach::is_lightweight_proxy
+    // pdalboost::foreach::is_lightweight_proxy
     //   Specialize this for user-defined collection types if they are inexpensive to copy.
     //   This tells BOOST_FOREACH it can avoid the rvalue/lvalue detection stuff.
     template<typename T>
     struct is_lightweight_proxy
-      : boost::mpl::false_
+      : pdalboost::mpl::false_
     {
     };
 
     ///////////////////////////////////////////////////////////////////////////////
-    // boost::foreach::is_noncopyable
+    // pdalboost::foreach::is_noncopyable
     //   Specialize this for user-defined collection types if they cannot be copied.
     //   This also tells BOOST_FOREACH to avoid the rvalue/lvalue detection stuff.
     template<typename T>
     struct is_noncopyable
     #if !defined(BOOST_BROKEN_IS_BASE_AND_DERIVED) && !defined(BOOST_NO_IS_ABSTRACT)
-      : boost::mpl::or_<
-            boost::is_abstract<T>
-          , boost::is_base_and_derived<boost::noncopyable, T>
+      : pdalboost::mpl::or_<
+            pdalboost::is_abstract<T>
+          , pdalboost::is_base_and_derived<pdalboost::noncopyable, T>
         >
     #elif !defined(BOOST_BROKEN_IS_BASE_AND_DERIVED)
-      : boost::is_base_and_derived<boost::noncopyable, T>
+      : pdalboost::is_base_and_derived<pdalboost::noncopyable, T>
     #elif !defined(BOOST_NO_IS_ABSTRACT)
-      : boost::is_abstract<T>
+      : pdalboost::is_abstract<T>
     #else
-      : boost::mpl::false_
+      : pdalboost::mpl::false_
     #endif
     {
     };
 
 } // namespace foreach
 
-} // namespace boost
+} // namespace pdalboost
 
 // vc6/7 needs help ordering the following overloads
 #ifdef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
 # define BOOST_FOREACH_TAG_DEFAULT ...
 #else
-# define BOOST_FOREACH_TAG_DEFAULT boost::foreach::tag
+# define BOOST_FOREACH_TAG_DEFAULT pdalboost::foreach::tag
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -165,24 +164,24 @@ namespace foreach
 //   this one works on legacy compilers. Overload boost_foreach_is_lightweight_proxy
 //   at the global namespace for your type.
 template<typename T>
-inline boost::foreach::is_lightweight_proxy<T> *
+inline pdalboost::foreach::is_lightweight_proxy<T> *
 boost_foreach_is_lightweight_proxy(T *&, BOOST_FOREACH_TAG_DEFAULT) { return 0; }
 
 template<typename T>
-inline boost::mpl::true_ *
-boost_foreach_is_lightweight_proxy(std::pair<T, T> *&, boost::foreach::tag) { return 0; }
+inline pdalboost::mpl::true_ *
+boost_foreach_is_lightweight_proxy(std::pair<T, T> *&, pdalboost::foreach::tag) { return 0; }
 
 template<typename T>
-inline boost::mpl::true_ *
-boost_foreach_is_lightweight_proxy(boost::iterator_range<T> *&, boost::foreach::tag) { return 0; }
+inline pdalboost::mpl::true_ *
+boost_foreach_is_lightweight_proxy(pdalboost::iterator_range<T> *&, pdalboost::foreach::tag) { return 0; }
 
 template<typename T>
-inline boost::mpl::true_ *
-boost_foreach_is_lightweight_proxy(boost::sub_range<T> *&, boost::foreach::tag) { return 0; }
+inline pdalboost::mpl::true_ *
+boost_foreach_is_lightweight_proxy(pdalboost::sub_range<T> *&, pdalboost::foreach::tag) { return 0; }
 
 template<typename T>
-inline boost::mpl::true_ *
-boost_foreach_is_lightweight_proxy(T **&, boost::foreach::tag) { return 0; }
+inline pdalboost::mpl::true_ *
+boost_foreach_is_lightweight_proxy(T **&, pdalboost::foreach::tag) { return 0; }
 
 ///////////////////////////////////////////////////////////////////////////////
 // boost_foreach_is_noncopyable
@@ -190,11 +189,10 @@ boost_foreach_is_lightweight_proxy(T **&, boost::foreach::tag) { return 0; }
 //   this one works on legacy compilers. Overload boost_foreach_is_noncopyable
 //   at the global namespace for your type.
 template<typename T>
-inline boost::foreach::is_noncopyable<T> *
+inline pdalboost::foreach::is_noncopyable<T> *
 boost_foreach_is_noncopyable(T *&, BOOST_FOREACH_TAG_DEFAULT) { return 0; }
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace foreach_detail_
 {
@@ -203,40 +201,40 @@ namespace foreach_detail_
 // Define some utilities for assessing the properties of expressions
 //
 template<typename Bool1, typename Bool2>
-inline boost::mpl::and_<Bool1, Bool2> *and_(Bool1 *, Bool2 *) { return 0; }
+inline pdalboost::mpl::and_<Bool1, Bool2> *and_(Bool1 *, Bool2 *) { return 0; }
 
 template<typename Bool1, typename Bool2, typename Bool3>
-inline boost::mpl::and_<Bool1, Bool2, Bool3> *and_(Bool1 *, Bool2 *, Bool3 *) { return 0; }
+inline pdalboost::mpl::and_<Bool1, Bool2, Bool3> *and_(Bool1 *, Bool2 *, Bool3 *) { return 0; }
 
 template<typename Bool1, typename Bool2>
-inline boost::mpl::or_<Bool1, Bool2> *or_(Bool1 *, Bool2 *) { return 0; }
+inline pdalboost::mpl::or_<Bool1, Bool2> *or_(Bool1 *, Bool2 *) { return 0; }
 
 template<typename Bool1, typename Bool2, typename Bool3>
-inline boost::mpl::or_<Bool1, Bool2, Bool3> *or_(Bool1 *, Bool2 *, Bool3 *) { return 0; }
+inline pdalboost::mpl::or_<Bool1, Bool2, Bool3> *or_(Bool1 *, Bool2 *, Bool3 *) { return 0; }
 
 template<typename Bool1>
-inline boost::mpl::not_<Bool1> *not_(Bool1 *) { return 0; }
+inline pdalboost::mpl::not_<Bool1> *not_(Bool1 *) { return 0; }
 
 template<typename T>
-inline boost::is_array<T> *is_array_(T const &) { return 0; }
+inline pdalboost::is_array<T> *is_array_(T const &) { return 0; }
 
 template<typename T>
-inline boost::is_const<T> *is_const_(T &) { return 0; }
+inline pdalboost::is_const<T> *is_const_(T &) { return 0; }
 
 #ifndef BOOST_FOREACH_NO_RVALUE_DETECTION
 template<typename T>
-inline boost::mpl::true_ *is_const_(T const &) { return 0; }
+inline pdalboost::mpl::true_ *is_const_(T const &) { return 0; }
 #endif
 
 #ifdef BOOST_NO_RVALUE_REFERENCES
 template<typename T>
-inline boost::mpl::false_ *is_rvalue_(T &, int) { return 0; }
+inline pdalboost::mpl::false_ *is_rvalue_(T &, int) { return 0; }
 
 template<typename T>
-inline boost::mpl::true_ *is_rvalue_(T const &, ...) { return 0; }
+inline pdalboost::mpl::true_ *is_rvalue_(T const &, ...) { return 0; }
 #else
 template<typename T>
-inline boost::is_rvalue_reference<T &&> *is_rvalue_(T &&, int) { return 0; }
+inline pdalboost::is_rvalue_reference<T &&> *is_rvalue_(T &&, int) { return 0; }
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -269,19 +267,19 @@ struct auto_any : auto_any_base
 typedef auto_any_base const &auto_any_t;
 
 template<typename T, typename C>
-inline BOOST_DEDUCED_TYPENAME boost::mpl::if_<C, T const, T>::type &auto_any_cast(auto_any_t a)
+inline BOOST_DEDUCED_TYPENAME pdalboost::mpl::if_<C, T const, T>::type &auto_any_cast(auto_any_t a)
 {
     return static_cast<auto_any<T> const &>(a).item;
 }
 
-typedef boost::mpl::true_ const_;
+typedef pdalboost::mpl::true_ const_;
 
 ///////////////////////////////////////////////////////////////////////////////
 // type2type
 //
-template<typename T, typename C = boost::mpl::false_>
+template<typename T, typename C = pdalboost::mpl::false_>
 struct type2type
-  : boost::mpl::if_<C, T const, T>
+  : pdalboost::mpl::if_<C, T const, T>
 {
 };
 
@@ -334,7 +332,7 @@ struct is_char_array
     >
 {};
 
-template<typename T, typename C = boost::mpl::false_>
+template<typename T, typename C = pdalboost::mpl::false_>
 struct foreach_iterator
 {
     // **** READ THIS IF YOUR COMPILE BREAKS HERE ****
@@ -347,8 +345,8 @@ struct foreach_iterator
     // To treat the container as a null-terminated string, merely cast it to a
     // char const *, as in BOOST_FOREACH( char ch, (char const *)"hello" ) ...
     //
-    // To treat the container as an array, use boost::as_array() in <boost/range/as_array.hpp>,
-    // as in BOOST_FOREACH( char ch, boost::as_array("hello") ) ...
+    // To treat the container as an array, use pdalboost::as_array() in <boost/range/as_array.hpp>,
+    // as in BOOST_FOREACH( char ch, pdalboost::as_array("hello") ) ...
     #if !defined(BOOST_MSVC) || BOOST_MSVC > 1300
     BOOST_MPL_ASSERT_MSG( (!is_char_array<T>::value), IS_THIS_AN_ARRAY_OR_A_NULL_TERMINATED_STRING, (T&) );
     #endif
@@ -357,7 +355,7 @@ struct foreach_iterator
     // to an array type), there is no ambiguity.
     typedef BOOST_DEDUCED_TYPENAME wrap_cstr<T>::type container;
 
-    typedef BOOST_DEDUCED_TYPENAME boost::mpl::eval_if<
+    typedef BOOST_DEDUCED_TYPENAME pdalboost::mpl::eval_if<
         C
       , range_const_iterator<container>
       , range_mutable_iterator<container>
@@ -365,7 +363,7 @@ struct foreach_iterator
 };
 
 
-template<typename T, typename C = boost::mpl::false_>
+template<typename T, typename C = pdalboost::mpl::false_>
 struct foreach_reverse_iterator
 {
     // **** READ THIS IF YOUR COMPILE BREAKS HERE ****
@@ -378,8 +376,8 @@ struct foreach_reverse_iterator
     // To treat the container as a null-terminated string, merely cast it to a
     // char const *, as in BOOST_FOREACH( char ch, (char const *)"hello" ) ...
     //
-    // To treat the container as an array, use boost::as_array() in <boost/range/as_array.hpp>,
-    // as in BOOST_FOREACH( char ch, boost::as_array("hello") ) ...
+    // To treat the container as an array, use pdalboost::as_array() in <boost/range/as_array.hpp>,
+    // as in BOOST_FOREACH( char ch, pdalboost::as_array("hello") ) ...
     #if !defined(BOOST_MSVC) || BOOST_MSVC > 1300
     BOOST_MPL_ASSERT_MSG( (!is_char_array<T>::value), IS_THIS_AN_ARRAY_OR_A_NULL_TERMINATED_STRING, (T&) );
     #endif
@@ -388,14 +386,14 @@ struct foreach_reverse_iterator
     // to an array type), there is no ambiguity.
     typedef BOOST_DEDUCED_TYPENAME wrap_cstr<T>::type container;
 
-    typedef BOOST_DEDUCED_TYPENAME boost::mpl::eval_if<
+    typedef BOOST_DEDUCED_TYPENAME pdalboost::mpl::eval_if<
         C
       , range_reverse_iterator<container const>
       , range_reverse_iterator<container>
     >::type type;
 };
 
-template<typename T, typename C = boost::mpl::false_>
+template<typename T, typename C = pdalboost::mpl::false_>
 struct foreach_reference
   : iterator_reference<BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type>
 {
@@ -405,10 +403,10 @@ struct foreach_reference
 // encode_type
 //
 template<typename T>
-inline type2type<T> *encode_type(T &, boost::mpl::false_ *) { return 0; }
+inline type2type<T> *encode_type(T &, pdalboost::mpl::false_ *) { return 0; }
 
 template<typename T>
-inline type2type<T, const_> *encode_type(T const &, boost::mpl::true_ *) { return 0; }
+inline type2type<T, const_> *encode_type(T const &, pdalboost::mpl::true_ *) { return 0; }
 
 ///////////////////////////////////////////////////////////////////////////////
 // set_false
@@ -462,7 +460,7 @@ inline T &derefof(T *t)
 ///////////////////////////////////////////////////////////////////////////////
 
 # define BOOST_FOREACH_IS_RVALUE(COL)                                                           \
-    boost::foreach_detail_::is_rvalue_((COL), 0)
+    pdalboost::foreach_detail_::is_rvalue_((COL), 0)
 
 #elif defined(BOOST_FOREACH_COMPILE_TIME_CONST_RVALUE_DETECTION)                                \
  && defined(BOOST_NO_RVALUE_REFERENCES)
@@ -480,8 +478,8 @@ struct rvalue_probe
 {
     struct private_type_ {};
     // can't ever return an array by value
-    typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_<
-        boost::mpl::or_<boost::is_abstract<T>, boost::is_array<T> >, private_type_, T
+    typedef BOOST_DEDUCED_TYPENAME pdalboost::mpl::if_<
+        pdalboost::mpl::or_<pdalboost::is_abstract<T>, pdalboost::is_array<T> >, private_type_, T
     >::type value_type;
     operator value_type() { return *reinterpret_cast<value_type *>(this); } // never called
     operator T &() const { return *reinterpret_cast<T *>(const_cast<rvalue_probe *>(this)); } // never called
@@ -494,10 +492,10 @@ rvalue_probe<T> const make_probe(T const &)
 }
 
 # define BOOST_FOREACH_IS_RVALUE(COL)                                                           \
-    boost::foreach_detail_::and_(                                                               \
-        boost::foreach_detail_::not_(boost::foreach_detail_::is_array_(COL))                    \
-      , (true ? 0 : boost::foreach_detail_::is_rvalue_(                                         \
-            (true ? boost::foreach_detail_::make_probe(COL) : (COL)), 0)))
+    pdalboost::foreach_detail_::and_(                                                               \
+        pdalboost::foreach_detail_::not_(pdalboost::foreach_detail_::is_array_(COL))                    \
+      , (true ? 0 : pdalboost::foreach_detail_::is_rvalue_(                                         \
+            (true ? pdalboost::foreach_detail_::make_probe(COL) : (COL)), 0)))
 
 #elif defined(BOOST_FOREACH_RUN_TIME_CONST_RVALUE_DETECTION)
 ///////////////////////////////////////////////////////////////////////////////
@@ -522,12 +520,12 @@ struct rvalue_probe
     struct private_type_ {};
     // can't ever return an array or an abstract type by value
     #ifdef BOOST_NO_IS_ABSTRACT
-    typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_<
-        boost::is_array<T>, private_type_, T
+    typedef BOOST_DEDUCED_TYPENAME pdalboost::mpl::if_<
+        pdalboost::is_array<T>, private_type_, T
     >::type value_type;
     #else
-    typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_<
-        boost::mpl::or_<boost::is_abstract<T>, boost::is_array<T> >, private_type_, T
+    typedef BOOST_DEDUCED_TYPENAME pdalboost::mpl::if_<
+        pdalboost::mpl::or_<pdalboost::is_abstract<T>, pdalboost::is_array<T> >, private_type_, T
     >::type value_type;
     #endif
     
@@ -605,7 +603,7 @@ private:
 // If the collection is a lightweight proxy, treat it as an rvalue
 // BUGBUG what about a noncopyable proxy?
 template<typename LValue, typename IsProxy>
-inline BOOST_DEDUCED_TYPENAME boost::enable_if<boost::mpl::or_<LValue, IsProxy>, IsProxy>::type *
+inline BOOST_DEDUCED_TYPENAME pdalboost::enable_if<pdalboost::mpl::or_<LValue, IsProxy>, IsProxy>::type *
 should_copy_impl(LValue *, IsProxy *, bool *)
 {
     return 0;
@@ -613,7 +611,7 @@ should_copy_impl(LValue *, IsProxy *, bool *)
 
 // Otherwise, we must determine at runtime whether it's an lvalue or rvalue
 inline bool *
-should_copy_impl(boost::mpl::false_ *, boost::mpl::false_ *, bool *is_rvalue)
+should_copy_impl(pdalboost::mpl::false_ *, pdalboost::mpl::false_ *, bool *is_rvalue)
 {
     return is_rvalue;
 }
@@ -624,19 +622,19 @@ should_copy_impl(boost::mpl::false_ *, boost::mpl::false_ *, bool *is_rvalue)
 // contain
 //
 template<typename T>
-inline auto_any<T> contain(T const &t, boost::mpl::true_ *) // rvalue
+inline auto_any<T> contain(T const &t, pdalboost::mpl::true_ *) // rvalue
 {
     return auto_any<T>(t);
 }
 
 template<typename T>
-inline auto_any<T *> contain(T &t, boost::mpl::false_ *) // lvalue
+inline auto_any<T *> contain(T &t, pdalboost::mpl::false_ *) // lvalue
 {
     // Cannot seem to get sunpro to handle addressof() with array types.
     #if BOOST_WORKAROUND(__SUNPRO_CC, BOOST_TESTED_AT(0x570))
     return auto_any<T *>(&t);
     #else
-    return auto_any<T *>(boost::addressof(t));
+    return auto_any<T *>(pdalboost::addressof(t));
     #endif
 }
 
@@ -654,20 +652,20 @@ contain(T const &t, bool *rvalue)
 //
 template<typename T, typename C>
 inline auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type>
-begin(auto_any_t col, type2type<T, C> *, boost::mpl::true_ *) // rvalue
+begin(auto_any_t col, type2type<T, C> *, pdalboost::mpl::true_ *) // rvalue
 {
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type>(
-        boost::begin(auto_any_cast<T, C>(col)));
+        pdalboost::begin(auto_any_cast<T, C>(col)));
 }
 
 template<typename T, typename C>
 inline auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type>
-begin(auto_any_t col, type2type<T, C> *, boost::mpl::false_ *) // lvalue
+begin(auto_any_t col, type2type<T, C> *, pdalboost::mpl::false_ *) // lvalue
 {
     typedef BOOST_DEDUCED_TYPENAME type2type<T, C>::type type;
     typedef BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type iterator;
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type>(
-        iterator(boost::begin(derefof(auto_any_cast<type *, boost::mpl::false_>(col)))));
+        iterator(pdalboost::begin(derefof(auto_any_cast<type *, pdalboost::mpl::false_>(col)))));
 }
 
 #ifdef BOOST_FOREACH_RUN_TIME_CONST_RVALUE_DETECTION
@@ -676,16 +674,16 @@ inline auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, const_>::type>
 begin(auto_any_t col, type2type<T, const_> *, bool *)
 {
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, const_>::type>(
-        boost::begin(*auto_any_cast<simple_variant<T>, boost::mpl::false_>(col).get()));
+        pdalboost::begin(*auto_any_cast<simple_variant<T>, pdalboost::mpl::false_>(col).get()));
 }
 #endif
 
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
 template<typename T, typename C>
 inline auto_any<T *>
-begin(auto_any_t col, type2type<T *, C> *, boost::mpl::true_ *) // null-terminated C-style strings
+begin(auto_any_t col, type2type<T *, C> *, pdalboost::mpl::true_ *) // null-terminated C-style strings
 {
-    return auto_any<T *>(auto_any_cast<T *, boost::mpl::false_>(col));
+    return auto_any<T *>(auto_any_cast<T *, pdalboost::mpl::false_>(col));
 }
 #endif
 
@@ -694,20 +692,20 @@ begin(auto_any_t col, type2type<T *, C> *, boost::mpl::true_ *) // null-terminat
 //
 template<typename T, typename C>
 inline auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type>
-end(auto_any_t col, type2type<T, C> *, boost::mpl::true_ *) // rvalue
+end(auto_any_t col, type2type<T, C> *, pdalboost::mpl::true_ *) // rvalue
 {
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type>(
-        boost::end(auto_any_cast<T, C>(col)));
+        pdalboost::end(auto_any_cast<T, C>(col)));
 }
 
 template<typename T, typename C>
 inline auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type>
-end(auto_any_t col, type2type<T, C> *, boost::mpl::false_ *) // lvalue
+end(auto_any_t col, type2type<T, C> *, pdalboost::mpl::false_ *) // lvalue
 {
     typedef BOOST_DEDUCED_TYPENAME type2type<T, C>::type type;
     typedef BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type iterator;
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type>(
-        iterator(boost::end(derefof(auto_any_cast<type *, boost::mpl::false_>(col)))));
+        iterator(pdalboost::end(derefof(auto_any_cast<type *, pdalboost::mpl::false_>(col)))));
 }
 
 #ifdef BOOST_FOREACH_RUN_TIME_CONST_RVALUE_DETECTION
@@ -716,14 +714,14 @@ inline auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, const_>::type>
 end(auto_any_t col, type2type<T, const_> *, bool *)
 {
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_iterator<T, const_>::type>(
-        boost::end(*auto_any_cast<simple_variant<T>, boost::mpl::false_>(col).get()));
+        pdalboost::end(*auto_any_cast<simple_variant<T>, pdalboost::mpl::false_>(col).get()));
 }
 #endif
 
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
 template<typename T, typename C>
 inline auto_any<int>
-end(auto_any_t, type2type<T *, C> *, boost::mpl::true_ *) // null-terminated C-style strings
+end(auto_any_t, type2type<T *, C> *, pdalboost::mpl::true_ *) // null-terminated C-style strings
 {
     return auto_any<int>(0); // not used
 }
@@ -736,14 +734,14 @@ template<typename T, typename C>
 inline bool done(auto_any_t cur, auto_any_t end, type2type<T, C> *)
 {
     typedef BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type iter_t;
-    return auto_any_cast<iter_t, boost::mpl::false_>(cur) == auto_any_cast<iter_t, boost::mpl::false_>(end);
+    return auto_any_cast<iter_t, pdalboost::mpl::false_>(cur) == auto_any_cast<iter_t, pdalboost::mpl::false_>(end);
 }
 
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
 template<typename T, typename C>
 inline bool done(auto_any_t cur, auto_any_t, type2type<T *, C> *) // null-terminated C-style strings
 {
-    return ! *auto_any_cast<T *, boost::mpl::false_>(cur);
+    return ! *auto_any_cast<T *, pdalboost::mpl::false_>(cur);
 }
 #endif
 
@@ -754,7 +752,7 @@ template<typename T, typename C>
 inline void next(auto_any_t cur, type2type<T, C> *)
 {
     typedef BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type iter_t;
-    ++auto_any_cast<iter_t, boost::mpl::false_>(cur);
+    ++auto_any_cast<iter_t, pdalboost::mpl::false_>(cur);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -765,7 +763,7 @@ inline BOOST_DEDUCED_TYPENAME foreach_reference<T, C>::type
 deref(auto_any_t cur, type2type<T, C> *)
 {
     typedef BOOST_DEDUCED_TYPENAME foreach_iterator<T, C>::type iter_t;
-    return *auto_any_cast<iter_t, boost::mpl::false_>(cur);
+    return *auto_any_cast<iter_t, pdalboost::mpl::false_>(cur);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -773,20 +771,20 @@ deref(auto_any_t cur, type2type<T, C> *)
 //
 template<typename T, typename C>
 inline auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type>
-rbegin(auto_any_t col, type2type<T, C> *, boost::mpl::true_ *) // rvalue
+rbegin(auto_any_t col, type2type<T, C> *, pdalboost::mpl::true_ *) // rvalue
 {
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type>(
-        boost::rbegin(auto_any_cast<T, C>(col)));
+        pdalboost::rbegin(auto_any_cast<T, C>(col)));
 }
 
 template<typename T, typename C>
 inline auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type>
-rbegin(auto_any_t col, type2type<T, C> *, boost::mpl::false_ *) // lvalue
+rbegin(auto_any_t col, type2type<T, C> *, pdalboost::mpl::false_ *) // lvalue
 {
     typedef BOOST_DEDUCED_TYPENAME type2type<T, C>::type type;
     typedef BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type iterator;
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type>(
-        iterator(boost::rbegin(derefof(auto_any_cast<type *, boost::mpl::false_>(col)))));
+        iterator(pdalboost::rbegin(derefof(auto_any_cast<type *, pdalboost::mpl::false_>(col)))));
 }
 
 #ifdef BOOST_FOREACH_RUN_TIME_CONST_RVALUE_DETECTION
@@ -795,16 +793,16 @@ inline auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, const_>::type
 rbegin(auto_any_t col, type2type<T, const_> *, bool *)
 {
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, const_>::type>(
-        boost::rbegin(*auto_any_cast<simple_variant<T>, boost::mpl::false_>(col).get()));
+        pdalboost::rbegin(*auto_any_cast<simple_variant<T>, pdalboost::mpl::false_>(col).get()));
 }
 #endif
 
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
 template<typename T, typename C>
 inline auto_any<reverse_iterator<T *> >
-rbegin(auto_any_t col, type2type<T *, C> *, boost::mpl::true_ *) // null-terminated C-style strings
+rbegin(auto_any_t col, type2type<T *, C> *, pdalboost::mpl::true_ *) // null-terminated C-style strings
 {
-    T *p = auto_any_cast<T *, boost::mpl::false_>(col);
+    T *p = auto_any_cast<T *, pdalboost::mpl::false_>(col);
     while(0 != *p)
         ++p;
     return auto_any<reverse_iterator<T *> >(reverse_iterator<T *>(p));
@@ -816,20 +814,20 @@ rbegin(auto_any_t col, type2type<T *, C> *, boost::mpl::true_ *) // null-termina
 //
 template<typename T, typename C>
 inline auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type>
-rend(auto_any_t col, type2type<T, C> *, boost::mpl::true_ *) // rvalue
+rend(auto_any_t col, type2type<T, C> *, pdalboost::mpl::true_ *) // rvalue
 {
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type>(
-        boost::rend(auto_any_cast<T, C>(col)));
+        pdalboost::rend(auto_any_cast<T, C>(col)));
 }
 
 template<typename T, typename C>
 inline auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type>
-rend(auto_any_t col, type2type<T, C> *, boost::mpl::false_ *) // lvalue
+rend(auto_any_t col, type2type<T, C> *, pdalboost::mpl::false_ *) // lvalue
 {
     typedef BOOST_DEDUCED_TYPENAME type2type<T, C>::type type;
     typedef BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type iterator;
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type>(
-        iterator(boost::rend(derefof(auto_any_cast<type *, boost::mpl::false_>(col)))));
+        iterator(pdalboost::rend(derefof(auto_any_cast<type *, pdalboost::mpl::false_>(col)))));
 }
 
 #ifdef BOOST_FOREACH_RUN_TIME_CONST_RVALUE_DETECTION
@@ -838,17 +836,17 @@ inline auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, const_>::type
 rend(auto_any_t col, type2type<T, const_> *, bool *)
 {
     return auto_any<BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, const_>::type>(
-        boost::rend(*auto_any_cast<simple_variant<T>, boost::mpl::false_>(col).get()));
+        pdalboost::rend(*auto_any_cast<simple_variant<T>, pdalboost::mpl::false_>(col).get()));
 }
 #endif
 
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
 template<typename T, typename C>
 inline auto_any<reverse_iterator<T *> >
-rend(auto_any_t col, type2type<T *, C> *, boost::mpl::true_ *) // null-terminated C-style strings
+rend(auto_any_t col, type2type<T *, C> *, pdalboost::mpl::true_ *) // null-terminated C-style strings
 {
     return auto_any<reverse_iterator<T *> >(
-        reverse_iterator<T *>(auto_any_cast<T *, boost::mpl::false_>(col)));
+        reverse_iterator<T *>(auto_any_cast<T *, pdalboost::mpl::false_>(col)));
 }
 #endif
 
@@ -859,7 +857,7 @@ template<typename T, typename C>
 inline bool rdone(auto_any_t cur, auto_any_t end, type2type<T, C> *)
 {
     typedef BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type iter_t;
-    return auto_any_cast<iter_t, boost::mpl::false_>(cur) == auto_any_cast<iter_t, boost::mpl::false_>(end);
+    return auto_any_cast<iter_t, pdalboost::mpl::false_>(cur) == auto_any_cast<iter_t, pdalboost::mpl::false_>(end);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -869,7 +867,7 @@ template<typename T, typename C>
 inline void rnext(auto_any_t cur, type2type<T, C> *)
 {
     typedef BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type iter_t;
-    ++auto_any_cast<iter_t, boost::mpl::false_>(cur);
+    ++auto_any_cast<iter_t, pdalboost::mpl::false_>(cur);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -880,11 +878,11 @@ inline BOOST_DEDUCED_TYPENAME foreach_reference<T, C>::type
 rderef(auto_any_t cur, type2type<T, C> *)
 {
     typedef BOOST_DEDUCED_TYPENAME foreach_reverse_iterator<T, C>::type iter_t;
-    return *auto_any_cast<iter_t, boost::mpl::false_>(cur);
+    return *auto_any_cast<iter_t, pdalboost::mpl::false_>(cur);
 }
 
 } // namespace foreach_detail_
-} // namespace boost
+} // namespace pdalboost
 
 // Suppress a bogus code analysis warning on vc8+
 #if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)
@@ -906,20 +904,20 @@ rderef(auto_any_t cur, type2type<T, C> *)
 
 // A sneaky way to get the type of the collection without evaluating the expression
 #define BOOST_FOREACH_TYPEOF(COL)                                                               \
-    (true ? 0 : boost::foreach_detail_::encode_type(COL, boost::foreach_detail_::is_const_(COL)))
+    (true ? 0 : pdalboost::foreach_detail_::encode_type(COL, pdalboost::foreach_detail_::is_const_(COL)))
 
 // returns true_* if the type is noncopyable
 #define BOOST_FOREACH_IS_NONCOPYABLE(COL)                                                       \
     boost_foreach_is_noncopyable(                                                               \
-        boost::foreach_detail_::to_ptr(COL)                                                     \
+        pdalboost::foreach_detail_::to_ptr(COL)                                                     \
       , boost_foreach_argument_dependent_lookup_hack_value)
 
 // returns true_* if the type is a lightweight proxy (and is not noncopyable)
 #define BOOST_FOREACH_IS_LIGHTWEIGHT_PROXY(COL)                                                 \
-    boost::foreach_detail_::and_(                                                               \
-        boost::foreach_detail_::not_(BOOST_FOREACH_IS_NONCOPYABLE(COL))                         \
+    pdalboost::foreach_detail_::and_(                                                               \
+        pdalboost::foreach_detail_::not_(BOOST_FOREACH_IS_NONCOPYABLE(COL))                         \
       , boost_foreach_is_lightweight_proxy(                                                     \
-            boost::foreach_detail_::to_ptr(COL)                                                 \
+            pdalboost::foreach_detail_::to_ptr(COL)                                                 \
           , boost_foreach_argument_dependent_lookup_hack_value))
 
 #if defined(BOOST_FOREACH_COMPILE_TIME_CONST_RVALUE_DETECTION)
@@ -936,7 +934,7 @@ rderef(auto_any_t cur, type2type<T, C> *)
     (COL)
 
 # define BOOST_FOREACH_SHOULD_COPY(COL)                                                         \
-    (true ? 0 : boost::foreach_detail_::or_(                                                    \
+    (true ? 0 : pdalboost::foreach_detail_::or_(                                                    \
         BOOST_FOREACH_IS_RVALUE(COL)                                                            \
       , BOOST_FOREACH_IS_LIGHTWEIGHT_PROXY(COL)))
 
@@ -952,17 +950,17 @@ rderef(auto_any_t cur, type2type<T, C> *)
 
 // Evaluate the collection expression, and detect if it is an lvalue or and rvalue
 # define BOOST_FOREACH_EVALUATE(COL)                                                            \
-    (true ? boost::foreach_detail_::make_probe((COL), BOOST_FOREACH_ID(_foreach_is_rvalue)) : (COL))
+    (true ? pdalboost::foreach_detail_::make_probe((COL), BOOST_FOREACH_ID(_foreach_is_rvalue)) : (COL))
 
 // The rvalue/lvalue-ness of the collection expression is determined dynamically, unless
 // type type is an array or is noncopyable or is non-const, in which case we know it's an lvalue.
 // If the type happens to be a lightweight proxy, always make a copy.
 # define BOOST_FOREACH_SHOULD_COPY(COL)                                                         \
-    (boost::foreach_detail_::should_copy_impl(                                                  \
-        true ? 0 : boost::foreach_detail_::or_(                                                 \
-            boost::foreach_detail_::is_array_(COL)                                              \
+    (pdalboost::foreach_detail_::should_copy_impl(                                                  \
+        true ? 0 : pdalboost::foreach_detail_::or_(                                                 \
+            pdalboost::foreach_detail_::is_array_(COL)                                              \
           , BOOST_FOREACH_IS_NONCOPYABLE(COL)                                                   \
-          , boost::foreach_detail_::not_(boost::foreach_detail_::is_const_(COL)))               \
+          , pdalboost::foreach_detail_::not_(pdalboost::foreach_detail_::is_const_(COL)))               \
       , true ? 0 : BOOST_FOREACH_IS_LIGHTWEIGHT_PROXY(COL)                                      \
       , &BOOST_FOREACH_ID(_foreach_is_rvalue)))
 
@@ -982,8 +980,8 @@ rderef(auto_any_t cur, type2type<T, C> *)
 // Determine whether the collection expression is an lvalue or an rvalue.
 // NOTE: this gets the answer wrong for const rvalues.
 # define BOOST_FOREACH_SHOULD_COPY(COL)                                                         \
-    (true ? 0 : boost::foreach_detail_::or_(                                                    \
-        boost::foreach_detail_::is_rvalue_((COL), 0)                                            \
+    (true ? 0 : pdalboost::foreach_detail_::or_(                                                    \
+        pdalboost::foreach_detail_::is_rvalue_((COL), 0)                                            \
       , BOOST_FOREACH_IS_LIGHTWEIGHT_PROXY(COL)))
 
 #else
@@ -1006,63 +1004,63 @@ rderef(auto_any_t cur, type2type<T, C> *)
 #endif
 
 #define BOOST_FOREACH_CONTAIN(COL)                                                              \
-    boost::foreach_detail_::contain(                                                            \
+    pdalboost::foreach_detail_::contain(                                                            \
         BOOST_FOREACH_EVALUATE(COL)                                                             \
       , BOOST_FOREACH_SHOULD_COPY(COL))
 
 #define BOOST_FOREACH_BEGIN(COL)                                                                \
-    boost::foreach_detail_::begin(                                                              \
+    pdalboost::foreach_detail_::begin(                                                              \
         BOOST_FOREACH_ID(_foreach_col)                                                          \
       , BOOST_FOREACH_TYPEOF(COL)                                                               \
       , BOOST_FOREACH_SHOULD_COPY(COL))
 
 #define BOOST_FOREACH_END(COL)                                                                  \
-    boost::foreach_detail_::end(                                                                \
+    pdalboost::foreach_detail_::end(                                                                \
         BOOST_FOREACH_ID(_foreach_col)                                                          \
       , BOOST_FOREACH_TYPEOF(COL)                                                               \
       , BOOST_FOREACH_SHOULD_COPY(COL))
 
 #define BOOST_FOREACH_DONE(COL)                                                                 \
-    boost::foreach_detail_::done(                                                               \
+    pdalboost::foreach_detail_::done(                                                               \
         BOOST_FOREACH_ID(_foreach_cur)                                                          \
       , BOOST_FOREACH_ID(_foreach_end)                                                          \
       , BOOST_FOREACH_TYPEOF(COL))
 
 #define BOOST_FOREACH_NEXT(COL)                                                                 \
-    boost::foreach_detail_::next(                                                               \
+    pdalboost::foreach_detail_::next(                                                               \
         BOOST_FOREACH_ID(_foreach_cur)                                                          \
       , BOOST_FOREACH_TYPEOF(COL))
 
 #define BOOST_FOREACH_DEREF(COL)                                                                \
-    boost::foreach_detail_::deref(                                                              \
+    pdalboost::foreach_detail_::deref(                                                              \
         BOOST_FOREACH_ID(_foreach_cur)                                                          \
       , BOOST_FOREACH_TYPEOF(COL))
 
 #define BOOST_FOREACH_RBEGIN(COL)                                                               \
-    boost::foreach_detail_::rbegin(                                                             \
+    pdalboost::foreach_detail_::rbegin(                                                             \
         BOOST_FOREACH_ID(_foreach_col)                                                          \
       , BOOST_FOREACH_TYPEOF(COL)                                                               \
       , BOOST_FOREACH_SHOULD_COPY(COL))
 
 #define BOOST_FOREACH_REND(COL)                                                                 \
-    boost::foreach_detail_::rend(                                                               \
+    pdalboost::foreach_detail_::rend(                                                               \
         BOOST_FOREACH_ID(_foreach_col)                                                          \
       , BOOST_FOREACH_TYPEOF(COL)                                                               \
       , BOOST_FOREACH_SHOULD_COPY(COL))
 
 #define BOOST_FOREACH_RDONE(COL)                                                                \
-    boost::foreach_detail_::rdone(                                                              \
+    pdalboost::foreach_detail_::rdone(                                                              \
         BOOST_FOREACH_ID(_foreach_cur)                                                          \
       , BOOST_FOREACH_ID(_foreach_end)                                                          \
       , BOOST_FOREACH_TYPEOF(COL))
 
 #define BOOST_FOREACH_RNEXT(COL)                                                                \
-    boost::foreach_detail_::rnext(                                                              \
+    pdalboost::foreach_detail_::rnext(                                                              \
         BOOST_FOREACH_ID(_foreach_cur)                                                          \
       , BOOST_FOREACH_TYPEOF(COL))
 
 #define BOOST_FOREACH_RDEREF(COL)                                                               \
-    boost::foreach_detail_::rderef(                                                             \
+    pdalboost::foreach_detail_::rderef(                                                             \
         BOOST_FOREACH_ID(_foreach_cur)                                                          \
       , BOOST_FOREACH_TYPEOF(COL))
 
@@ -1094,13 +1092,13 @@ rderef(auto_any_t cur, type2type<T, C> *)
 //
 #define BOOST_FOREACH(VAR, COL)                                                                                   \
     BOOST_FOREACH_PREAMBLE()                                                                                      \
-    if (boost::foreach_detail_::auto_any_t BOOST_FOREACH_ID(_foreach_col) = BOOST_FOREACH_CONTAIN(COL)) {} else   \
-    if (boost::foreach_detail_::auto_any_t BOOST_FOREACH_ID(_foreach_cur) = BOOST_FOREACH_BEGIN(COL)) {} else     \
-    if (boost::foreach_detail_::auto_any_t BOOST_FOREACH_ID(_foreach_end) = BOOST_FOREACH_END(COL)) {} else       \
+    if (pdalboost::foreach_detail_::auto_any_t BOOST_FOREACH_ID(_foreach_col) = BOOST_FOREACH_CONTAIN(COL)) {} else   \
+    if (pdalboost::foreach_detail_::auto_any_t BOOST_FOREACH_ID(_foreach_cur) = BOOST_FOREACH_BEGIN(COL)) {} else     \
+    if (pdalboost::foreach_detail_::auto_any_t BOOST_FOREACH_ID(_foreach_end) = BOOST_FOREACH_END(COL)) {} else       \
     for (bool BOOST_FOREACH_ID(_foreach_continue) = true;                                                         \
               BOOST_FOREACH_ID(_foreach_continue) && !BOOST_FOREACH_DONE(COL);                                    \
               BOOST_FOREACH_ID(_foreach_continue) ? BOOST_FOREACH_NEXT(COL) : (void)0)                            \
-        if  (boost::foreach_detail_::set_false(BOOST_FOREACH_ID(_foreach_continue))) {} else                      \
+        if  (pdalboost::foreach_detail_::set_false(BOOST_FOREACH_ID(_foreach_continue))) {} else                      \
         for (VAR = BOOST_FOREACH_DEREF(COL); !BOOST_FOREACH_ID(_foreach_continue); BOOST_FOREACH_ID(_foreach_continue) = true)
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1112,13 +1110,13 @@ rderef(auto_any_t cur, type2type<T, C> *)
 //
 #define BOOST_REVERSE_FOREACH(VAR, COL)                                                                           \
     BOOST_FOREACH_PREAMBLE()                                                                                      \
-    if (boost::foreach_detail_::auto_any_t BOOST_FOREACH_ID(_foreach_col) = BOOST_FOREACH_CONTAIN(COL)) {} else   \
-    if (boost::foreach_detail_::auto_any_t BOOST_FOREACH_ID(_foreach_cur) = BOOST_FOREACH_RBEGIN(COL)) {} else    \
-    if (boost::foreach_detail_::auto_any_t BOOST_FOREACH_ID(_foreach_end) = BOOST_FOREACH_REND(COL)) {} else      \
+    if (pdalboost::foreach_detail_::auto_any_t BOOST_FOREACH_ID(_foreach_col) = BOOST_FOREACH_CONTAIN(COL)) {} else   \
+    if (pdalboost::foreach_detail_::auto_any_t BOOST_FOREACH_ID(_foreach_cur) = BOOST_FOREACH_RBEGIN(COL)) {} else    \
+    if (pdalboost::foreach_detail_::auto_any_t BOOST_FOREACH_ID(_foreach_end) = BOOST_FOREACH_REND(COL)) {} else      \
     for (bool BOOST_FOREACH_ID(_foreach_continue) = true;                                                         \
               BOOST_FOREACH_ID(_foreach_continue) && !BOOST_FOREACH_RDONE(COL);                                   \
               BOOST_FOREACH_ID(_foreach_continue) ? BOOST_FOREACH_RNEXT(COL) : (void)0)                           \
-        if  (boost::foreach_detail_::set_false(BOOST_FOREACH_ID(_foreach_continue))) {} else                      \
+        if  (pdalboost::foreach_detail_::set_false(BOOST_FOREACH_ID(_foreach_continue))) {} else                      \
         for (VAR = BOOST_FOREACH_RDEREF(COL); !BOOST_FOREACH_ID(_foreach_continue); BOOST_FOREACH_ID(_foreach_continue) = true)
 
 #endif

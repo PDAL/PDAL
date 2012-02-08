@@ -8,7 +8,7 @@
 #ifndef BOOST_PHOENIX_CORE_TERMINAL_FWD_HPP
 #define BOOST_PHOENIX_CORE_TERMINAL_FWD_HPP
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     namespace rule
     {

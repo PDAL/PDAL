@@ -18,7 +18,7 @@
 #include <boost/proto/detail/as_expr.hpp>
 #include <boost/proto/detail/deduce_domain.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
 
     namespace detail
@@ -286,7 +286,7 @@ namespace boost { namespace proto
     /// INTERNAL ONLY
     ///
     template<typename T>
-    struct domain_of<boost::reference_wrapper<T>, void>
+    struct domain_of<pdalboost::reference_wrapper<T>, void>
     {
         typedef typename domain_of<T>::type type;
     };
@@ -294,7 +294,7 @@ namespace boost { namespace proto
     /// INTERNAL ONLY
     ///
     template<typename T>
-    struct domain_of<boost::reference_wrapper<T> const, void>
+    struct domain_of<pdalboost::reference_wrapper<T> const, void>
     {
         typedef typename domain_of<T>::type type;
     };

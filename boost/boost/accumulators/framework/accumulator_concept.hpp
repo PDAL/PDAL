@@ -10,7 +10,7 @@
 
 #include <boost/concept_check.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 template<typename Stat>
@@ -24,6 +24,6 @@ struct accumulator_concept
     Stat stat;
 };
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

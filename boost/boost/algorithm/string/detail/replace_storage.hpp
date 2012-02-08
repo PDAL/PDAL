@@ -17,7 +17,7 @@
 #include <boost/algorithm/string/sequence_traits.hpp>
 #include <boost/algorithm/string/detail/sequence.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
         namespace detail {
 
@@ -46,7 +46,7 @@ namespace boost {
                 StorageT& Storage,
                 const WhatT& What )
             {
-                Storage.insert( Storage.end(), ::boost::begin(What), ::boost::end(What) );
+                Storage.insert( Storage.end(), ::pdalboost::begin(What), ::pdalboost::end(What) );
             }
 
 
@@ -68,7 +68,7 @@ namespace boost {
                     ForwardIteratorT SegmentEnd )
                 {
                     // Copy data from the storage until the beginning of the segment
-                    ForwardIteratorT It=::boost::algorithm::detail::move_from_storage( Storage, InsertIt, SegmentBegin );
+                    ForwardIteratorT It=::pdalboost::algorithm::detail::move_from_storage( Storage, InsertIt, SegmentBegin );
 
                     // 3 cases are possible :
                     //   a) Storage is empty, It==SegmentBegin
@@ -125,7 +125,7 @@ namespace boost {
 
                 {
                     // Call replace to do the job
-                    ::boost::algorithm::detail::replace( Input, InsertIt, SegmentBegin, Storage );
+                    ::pdalboost::algorithm::detail::replace( Input, InsertIt, SegmentBegin, Storage );
                     // Empty the storage
                     Storage.clear();
                     // Iterators were not changed, simply return the end of segment
@@ -154,6 +154,6 @@ namespace boost {
 
         } // namespace detail
     } // namespace algorithm
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // BOOST_STRING_REPLACE_STORAGE_DETAIL_HPP

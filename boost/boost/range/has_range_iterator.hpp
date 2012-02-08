@@ -15,33 +15,32 @@
 #include <boost/range/iterator.hpp>
 #include <boost/utility.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace range_detail
     {
         BOOST_MPL_HAS_XXX_TRAIT_DEF(type)
 
         template<class T, class Enabler = void>
         struct has_range_iterator_impl
-            : boost::mpl::false_
+            : pdalboost::mpl::false_
         {
         };
 
         template<class T>
         struct has_range_iterator_impl<T, BOOST_DEDUCED_TYPENAME enable_if< has_type< range_mutable_iterator<T> > >::type>
-            : boost::mpl::true_
+            : pdalboost::mpl::true_
         {
         };
 
         template<class T, class Enabler = void>
         struct has_range_const_iterator_impl
-            : boost::mpl::false_
+            : pdalboost::mpl::false_
         {
         };
 
         template<class T>
         struct has_range_const_iterator_impl<T, BOOST_DEDUCED_TYPENAME enable_if< has_type< range_const_iterator<T> > >::type>
-            : boost::mpl::true_
+            : pdalboost::mpl::true_
         {
         };
 
@@ -56,7 +55,7 @@ namespace boost
     struct has_range_const_iterator
         : range_detail::has_range_const_iterator_impl<T>
     {};
-} // namespace boost
+} // namespace pdalboost
 
 #endif // include guard
 

@@ -33,7 +33,7 @@
 
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 
 /// \brief Container Adaptor toolbox, easy way to build new containers from existing ones.
@@ -49,10 +49,10 @@ template
     class Iterator,
     class ConstIterator,
 
-    class IteratorToBaseConverter   = ::boost::mpl::na,
-    class IteratorFromBaseConverter = ::boost::mpl::na,
-    class ValueToBaseConverter      = ::boost::mpl::na,
-    class ValueFromBaseConverter    = ::boost::mpl::na,
+    class IteratorToBaseConverter   = ::pdalboost::mpl::na,
+    class IteratorFromBaseConverter = ::pdalboost::mpl::na,
+    class ValueToBaseConverter      = ::pdalboost::mpl::na,
+    class ValueFromBaseConverter    = ::pdalboost::mpl::na,
 
     class FunctorsFromDerivedClasses = mpl::vector<>
 >
@@ -73,9 +73,9 @@ class container_adaptor
     typedef BOOST_DEDUCED_TYPENAME Base::size_type size_type;
     typedef BOOST_DEDUCED_TYPENAME Base::difference_type difference_type;
 
-    typedef BOOST_DEDUCED_TYPENAME mpl::if_< ::boost::mpl::is_na<IteratorToBaseConverter>,
+    typedef BOOST_DEDUCED_TYPENAME mpl::if_< ::pdalboost::mpl::is_na<IteratorToBaseConverter>,
         // {
-                ::boost::bimaps::container_adaptor::detail::
+                ::pdalboost::bimaps::container_adaptor::detail::
                     iterator_to_base_identity
                 <
                     BOOST_DEDUCED_TYPENAME Base::iterator                , iterator,
@@ -89,9 +89,9 @@ class container_adaptor
 
         >::type iterator_to_base;
 
-    typedef BOOST_DEDUCED_TYPENAME mpl::if_< ::boost::mpl::is_na<IteratorFromBaseConverter>,
+    typedef BOOST_DEDUCED_TYPENAME mpl::if_< ::pdalboost::mpl::is_na<IteratorFromBaseConverter>,
         // {
-                ::boost::bimaps::container_adaptor::detail::
+                ::pdalboost::bimaps::container_adaptor::detail::
                     iterator_from_base_identity
                 <
                     BOOST_DEDUCED_TYPENAME Base::iterator                , iterator,
@@ -105,9 +105,9 @@ class container_adaptor
 
         >::type iterator_from_base;
 
-    typedef BOOST_DEDUCED_TYPENAME mpl::if_< ::boost::mpl::is_na<ValueToBaseConverter>,
+    typedef BOOST_DEDUCED_TYPENAME mpl::if_< ::pdalboost::mpl::is_na<ValueToBaseConverter>,
         // {
-                ::boost::bimaps::container_adaptor::detail::
+                ::pdalboost::bimaps::container_adaptor::detail::
                     value_to_base_identity
                 <
                     BOOST_DEDUCED_TYPENAME Base::value_type,
@@ -121,9 +121,9 @@ class container_adaptor
 
         >::type value_to_base;
 
-    typedef BOOST_DEDUCED_TYPENAME mpl::if_< ::boost::mpl::is_na<ValueFromBaseConverter>,
+    typedef BOOST_DEDUCED_TYPENAME mpl::if_< ::pdalboost::mpl::is_na<ValueFromBaseConverter>,
         // {
-                ::boost::bimaps::container_adaptor::detail::
+                ::pdalboost::bimaps::container_adaptor::detail::
                     value_from_base_identity
                 <
                     BOOST_DEDUCED_TYPENAME Base::value_type,
@@ -215,7 +215,7 @@ class container_adaptor
     }
 
     std::pair<iterator, bool> insert(
-        BOOST_DEDUCED_TYPENAME ::boost::call_traits< value_type >::param_type x)
+        BOOST_DEDUCED_TYPENAME ::pdalboost::call_traits< value_type >::param_type x)
     {
         std::pair< BOOST_DEDUCED_TYPENAME Base::iterator, bool > r(
             base().insert( this->template functor<value_to_base>()(x) )
@@ -227,7 +227,7 @@ class container_adaptor
     }
 
     iterator insert(iterator pos,
-                    BOOST_DEDUCED_TYPENAME ::boost::call_traits< value_type >::param_type x)
+                    BOOST_DEDUCED_TYPENAME ::pdalboost::call_traits< value_type >::param_type x)
     {
         return this->template functor<iterator_from_base>()(
             base().insert(
@@ -261,7 +261,7 @@ class container_adaptor
 
     private:
 
-    ::boost::bimaps::container_adaptor::detail::data_with_functor_bag
+    ::pdalboost::bimaps::container_adaptor::detail::data_with_functor_bag
     <
         Base &,
 
@@ -285,7 +285,7 @@ class container_adaptor
 
 } // namespace container_adaptor
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_CONTAINER_ADAPTOR_CONTAINER_ADAPTOR_HPP

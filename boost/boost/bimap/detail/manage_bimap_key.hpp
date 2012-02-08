@@ -25,11 +25,11 @@
 
 #include <boost/bimap/set_of.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace detail {
 
-/** \struct boost::bimaps::detail::manage_bimap_key
+/** \struct pdalboost::bimaps::detail::manage_bimap_key
 \brief Metafunction to manage the set types of a bimap.
 
 \code
@@ -76,7 +76,7 @@ typedef BOOST_DEDUCED_TYPENAME
 
 } // namespace detail
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_DETAIL_MANAGE_BIMAP_KEY_HPP

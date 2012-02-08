@@ -17,7 +17,7 @@
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/version.hpp>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -33,14 +33,14 @@ template<typename T>
 struct serialization_version
 {
   serialization_version():
-    value(boost::serialization::version<serialization_version>::value){}
+    value(pdalboost::serialization::version<serialization_version>::value){}
 
   serialization_version& operator=(unsigned int x){value=x;return *this;};
 
   operator unsigned int()const{return value;}
 
 private:
-  friend class boost::serialization::access;
+  friend class pdalboost::serialization::access;
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
@@ -63,13 +63,13 @@ private:
 #if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 namespace serialization {
 template<typename T>
-struct version<boost::multi_index::detail::serialization_version<T> >
+struct version<pdalboost::multi_index::detail::serialization_version<T> >
 {
   BOOST_STATIC_CONSTANT(int,value=version<T>::value);
 };
 } /* namespace serialization */
 #endif
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

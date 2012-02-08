@@ -13,7 +13,7 @@
 #include <boost/date_time/special_defs.hpp>
 #include <boost/date_time/date_duration.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace date_time {
 
 
@@ -264,6 +264,6 @@ namespace date_time {
       int_rep _y;
   };
 
-}} // namespace boost::date_time
+}} // namespace pdalboost::date_time
 
 #endif // DATE_DURATION_TYPES_HPP___

@@ -16,7 +16,7 @@
 //   12 Nov 00  Merged <boost/stdint.h> (Jens Maurer)
 //   23 Sep 00  Added INTXX_C macro support (John Maddock).
 //   22 Sep 00  Better 64-bit support (John Maddock)
-//   29 Jun 00  Reimplement to avoid including stdint.h within namespace boost
+//   29 Jun 00  Reimplement to avoid including stdint.h within namespace pdalboost
 //    8 Aug 99  Initial version (Beman Dawes)
 
 
@@ -97,8 +97,7 @@ typedef ::uintfast64_t uint_fast64_t;
 
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
   using ::int8_t;             
   using ::int_least8_t;       
@@ -135,13 +134,13 @@ namespace boost
   using ::intmax_t;      
   using ::uintmax_t;     
 
-} // namespace boost
+} // namespace pdalboost
 
 #elif defined(__FreeBSD__) && (__FreeBSD__ <= 4) || defined(__osf__) || defined(__VMS)
 // FreeBSD and Tru64 have an <inttypes.h> that contains much of what we need.
 # include <inttypes.h>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
   using ::int8_t;             
   typedef int8_t int_least8_t;       
@@ -183,7 +182,7 @@ namespace boost {
 
 # endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #else  // BOOST_HAS_STDINT_H
 
@@ -191,8 +190,7 @@ namespace boost {
 # include <limits.h>         // needed for limits macros
 
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //  These are fairly safe guesses for some 16-bit, and most 32-bit and 64-bit
 //  platforms.  For other systems, they will have to be hand tailored.
@@ -303,14 +301,14 @@ namespace boost
 #       error defaults not correct; you must hand modify boost/cstdint.hpp
 #    endif
 
-     typedef  ::boost::long_long_type            intmax_t;
-     typedef  ::boost::ulong_long_type   uintmax_t;
-     typedef  ::boost::long_long_type            int64_t;
-     typedef  ::boost::long_long_type            int_least64_t;
-     typedef  ::boost::long_long_type            int_fast64_t;
-     typedef  ::boost::ulong_long_type   uint64_t;
-     typedef  ::boost::ulong_long_type   uint_least64_t;
-     typedef  ::boost::ulong_long_type   uint_fast64_t;
+     typedef  ::pdalboost::long_long_type            intmax_t;
+     typedef  ::pdalboost::ulong_long_type   uintmax_t;
+     typedef  ::pdalboost::long_long_type            int64_t;
+     typedef  ::pdalboost::long_long_type            int_least64_t;
+     typedef  ::pdalboost::long_long_type            int_fast64_t;
+     typedef  ::pdalboost::ulong_long_type   uint64_t;
+     typedef  ::pdalboost::ulong_long_type   uint_least64_t;
+     typedef  ::pdalboost::ulong_long_type   uint_fast64_t;
 
 # elif ULONG_MAX != 0xffffffff
 
@@ -353,7 +351,7 @@ namespace boost
      typedef uint32_t             uintmax_t;
 # endif
 
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_HAS_STDINT_H
@@ -430,15 +428,15 @@ INT#_C macros if they're not already defined (John Maddock).
 //  8-bit types  ------------------------------------------------------------//
 
 #  if (UCHAR_MAX == 0xff) && !defined(INT8_C)
-#   define INT8_C(value) static_cast<boost::int8_t>(value)
-#   define UINT8_C(value) static_cast<boost::uint8_t>(value##u)
+#   define INT8_C(value) static_cast<pdalboost::int8_t>(value)
+#   define UINT8_C(value) static_cast<pdalboost::uint8_t>(value##u)
 #  endif
 
 //  16-bit types  -----------------------------------------------------------//
 
 #  if (USHRT_MAX == 0xffff) && !defined(INT16_C)
-#   define INT16_C(value) static_cast<boost::int16_t>(value)
-#   define UINT16_C(value) static_cast<boost::uint16_t>(value##u)
+#   define INT16_C(value) static_cast<pdalboost::int16_t>(value)
+#   define UINT16_C(value) static_cast<pdalboost::uint16_t>(value##u)
 #  endif
 
 //  32-bit types  -----------------------------------------------------------//

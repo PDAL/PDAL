@@ -21,7 +21,7 @@
 
 #include <boost/test/utils/runtime/cla/fwd.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -42,7 +42,7 @@ protected:
     BOOST_TEST_PROTECTED_VIRTUAL ~argument_factory() {}
 };
 
-} // namespace boost
+} // namespace pdalboost
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 

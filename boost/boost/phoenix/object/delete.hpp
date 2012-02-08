@@ -14,11 +14,11 @@
 #include <boost/phoenix/core/call.hpp>
 
 BOOST_PHOENIX_DEFINE_EXPRESSION(
-    (boost)(phoenix)(delete_)
+    (pdalboost)(phoenix)(delete_)
   , (meta_grammar)
 )
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     struct delete_eval
     {
@@ -28,7 +28,7 @@ namespace boost { namespace phoenix
         result_type
         operator()(P const& p, Context &ctx) const
         {
-            delete boost::phoenix::eval(p, ctx);
+            delete pdalboost::pdalboostphoenix::eval(p, ctx);
         }
     };
 

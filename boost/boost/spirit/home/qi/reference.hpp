@@ -18,7 +18,7 @@
 #include <boost/type_traits/remove_const.hpp>
 #include <boost/ref.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     ///////////////////////////////////////////////////////////////////////////
     // reference is a parser that references another parser (its Subject)
@@ -50,11 +50,11 @@ namespace boost { namespace spirit { namespace qi
             return ref.get().what(context);
         }
 
-        boost::reference_wrapper<Subject> ref;
+        pdalboost::reference_wrapper<Subject> ref;
     };
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Subject, typename Attribute, typename Context

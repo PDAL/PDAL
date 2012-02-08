@@ -20,7 +20,7 @@
 
 // Set the name of our library, this will get undef'ed by auto_link.hpp
 // once it's done with it:
-#define BOOST_LIB_NAME boost_program_options
+#define BOOST_LIB_NAME pdalboost_program_options
 // tell the auto-link code to select a dll when required:
 #if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_PROGRAM_OPTIONS_DYN_LINK)
 #  define BOOST_DYN_LINK

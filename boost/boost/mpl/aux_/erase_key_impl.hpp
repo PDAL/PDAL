@@ -17,7 +17,7 @@
 #include <boost/mpl/erase_key_fwd.hpp>
 #include <boost/mpl/aux_/traits_lambda_spec.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template< typename Tag >
 struct erase_key_impl

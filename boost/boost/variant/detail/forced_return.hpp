@@ -21,7 +21,7 @@
 #   include "boost/type_traits/remove_reference.hpp"
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail { namespace variant {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ inline T forced_return( BOOST_EXPLICIT_TEMPLATE_TYPE(T) )
     // logical error: should never be here! (see above)
     BOOST_ASSERT(false);
 
-    typedef typename boost::remove_reference<T>::type basic_type;
+    typedef typename pdalboost::remove_reference<T>::type basic_type;
     basic_type* dummy = 0;
     return *static_cast< basic_type* >(dummy);
 }
@@ -99,6 +99,6 @@ forced_return( BOOST_EXPLICIT_TEMPLATE_TYPE(T) )
 #endif // BOOST_MSVC optimization
 
 }} // namespace detail::variant
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_DETAIL_FORCED_RETURN_HPP

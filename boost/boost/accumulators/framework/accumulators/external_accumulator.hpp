@@ -15,7 +15,7 @@
 #include <boost/accumulators/framework/accumulator_base.hpp>
 #include <boost/accumulators/framework/accumulators/reference_accumulator.hpp>
 
-namespace boost { namespace accumulators { namespace impl
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators { namespace impl
 {
 
     //////////////////////////////////////////////////////////////////////////
@@ -103,6 +103,6 @@ struct feature_of<tag::external<Feature, Tag, AccumulatorSet> >
 // without fear of a name conflict.
 using tag::external;
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

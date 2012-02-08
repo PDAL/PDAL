@@ -21,8 +21,7 @@
 //  See http://www.boost.org/libs/utility/checked_delete.html for documentation.
 //
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 // verify that types are complete for increased safety
 
@@ -48,8 +47,8 @@ template<class T> struct checked_deleter
 
     void operator()(T * x) const
     {
-        // boost:: disables ADL
-        boost::checked_delete(x);
+        // pdalboost:: disables ADL
+        pdalboost::checked_delete(x);
     }
 };
 
@@ -60,10 +59,10 @@ template<class T> struct checked_array_deleter
 
     void operator()(T * x) const
     {
-        boost::checked_array_delete(x);
+        pdalboost::checked_array_delete(x);
     }
 };
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // #ifndef BOOST_CHECKED_DELETE_HPP_INCLUDED

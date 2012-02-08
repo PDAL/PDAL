@@ -19,7 +19,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail{
 
@@ -27,19 +27,19 @@ template <typename T>
 struct is_member_object_pointer_impl
 {
    BOOST_STATIC_CONSTANT(
-      bool, value = (::boost::type_traits::ice_and<
-         ::boost::is_member_pointer<T>::value,
-         ::boost::type_traits::ice_not<
-            ::boost::is_member_function_pointer<T>::value
+      bool, value = (::pdalboost::type_traits::ice_and<
+         ::pdalboost::is_member_pointer<T>::value,
+         ::pdalboost::type_traits::ice_not<
+            ::pdalboost::is_member_function_pointer<T>::value
          >::value
       >::value ));
 };
 
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_member_object_pointer,T,::boost::detail::is_member_object_pointer_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_member_object_pointer,T,::pdalboost::detail::is_member_object_pointer_impl<T>::value)
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

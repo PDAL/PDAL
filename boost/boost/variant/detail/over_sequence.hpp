@@ -24,7 +24,7 @@
 #endif
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail { namespace variant {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@ no_over_sequence_t is_over_sequence_test(...);
 
 template<typename T>
 yes_over_sequence_t is_over_sequence_test(
-      type< ::boost::detail::variant::over_sequence<T> >
+      type< ::pdalboost::detail::variant::over_sequence<T> >
     );
 
 template<typename T>
@@ -82,7 +82,7 @@ struct is_over_sequence_impl
 template <typename T>
 struct is_over_sequence
     : mpl::bool_<
-          ::boost::detail::variant::is_over_sequence_impl<T>::value
+          ::pdalboost::detail::variant::is_over_sequence_impl<T>::value
         >
 {
 };
@@ -90,6 +90,6 @@ struct is_over_sequence
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION workaround
 
 }} // namespace detail::variant
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_DETAIL_OVER_SEQUENCE_HPP

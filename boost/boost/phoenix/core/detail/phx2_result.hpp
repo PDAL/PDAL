@@ -11,7 +11,7 @@
 #include <boost/phoenix/support/iterate.hpp>
 #include <boost/mpl/has_xxx.hpp>
 
-namespace boost { namespace phoenix {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix {
     namespace detail
     {
         BOOST_MPL_HAS_XXX_TRAIT_DEF(result_type)
@@ -30,7 +30,7 @@ namespace boost { namespace phoenix {
             static no check(...);
 
             static bool const value = (sizeof(yes) == sizeof(check<Result>(0)));
-            typedef boost::mpl::bool_<value> type;
+            typedef pdalboost::mpl::bool_<value> type;
         };
 
         template <typename F, BOOST_PHOENIX_typename_A_void(BOOST_PP_DEC(BOOST_PHOENIX_COMPOSITE_LIMIT)), typename Dummy = void>

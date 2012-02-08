@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 
-#include <pdal/external/boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/faux/Reader.hpp>

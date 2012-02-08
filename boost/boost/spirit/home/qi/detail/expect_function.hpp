@@ -15,7 +15,7 @@
 #include <boost/spirit/home/support/multi_pass_wrapper.hpp>
 #include <boost/throw_exception.hpp>
 
-namespace boost { namespace spirit { namespace qi { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi { namespace detail
 {
     template <
         typename Iterator, typename Context
@@ -54,7 +54,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
                     is_first = false;
                     return true;        // true means the match failed
                 }
-                boost::throw_exception(Exception(first, last, component.what(context)));
+                pdalboost::throw_exception(Exception(first, last, component.what(context)));
 #if defined(BOOST_NO_EXCEPTIONS)
                 return true;            // for systems not supporting exceptions
 #endif
@@ -81,7 +81,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
                     is_first = false;
                     return true;
                 }
-                boost::throw_exception(Exception(first, last, component.what(context)));
+                pdalboost::throw_exception(Exception(first, last, component.what(context)));
 #if defined(BOOST_NO_EXCEPTIONS)
                 return false;   // for systems not supporting exceptions
 #endif

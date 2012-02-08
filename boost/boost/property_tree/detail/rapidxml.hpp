@@ -30,7 +30,7 @@
 
 #define BOOST_PROPERTY_TREE_RAPIDXML_PARSE_ERROR(what, where) throw parse_error(what, where)
 
-namespace boost { namespace property_tree { namespace detail {namespace rapidxml
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace detail {namespace pdalboostrapidxml
 {
 
     //! Parse error exception. 
@@ -40,7 +40,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
     //! <br><br>
     //! If throwing exceptions by the parser is undesirable, 
     //! it can be disabled by defining RAPIDXML_NO_EXCEPTIONS macro before rapidxml.hpp is included.
-    //! This will cause the parser to call rapidxml::parse_error_handler() function instead of throwing an exception.
+    //! This will cause the parser to call pdalboostrapidxml::parse_error_handler() function instead of throwing an exception.
     //! This function must be defined by the user.
     //! <br><br>
     //! This class derives from <code>std::exception</code> class.
@@ -105,7 +105,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
     #define BOOST_PROPERTY_TREE_RAPIDXML_ALIGNMENT sizeof(void *)
 #endif
 
-namespace boost { namespace property_tree { namespace detail {namespace rapidxml
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace detail {namespace pdalboostrapidxml
 {
     // Forward declarations
     template<class Ch> class xml_node;
@@ -130,7 +130,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
     // Parsing flags
 
     //! Parse flag instructing the parser to not create data nodes. 
-    //! Text of first data node will still be placed in value of parent element, unless rapidxml::parse_no_element_values flag is also specified.
+    //! Text of first data node will still be placed in value of parent element, unless pdalboostrapidxml::parse_no_element_values flag is also specified.
     //! Can be combined with other flags by use of | operator.
     //! <br><br>
     //! See xml_document::parse() function.
@@ -140,7 +140,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
     //! Can be combined with other flags by use of | operator.
     //! Note that child data nodes of element node take precendence over its value when printing. 
     //! That is, if element has one or more child data nodes <em>and</em> a value, the value will be ignored.
-    //! Use rapidxml::parse_no_data_nodes flag to prevent creation of data nodes if you want to manipulate data using values of elements.
+    //! Use pdalboostrapidxml::parse_no_data_nodes flag to prevent creation of data nodes if you want to manipulate data using values of elements.
     //! <br><br>
     //! See xml_document::parse() function.
     const int parse_no_element_values = 0x2;
@@ -212,7 +212,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
     const int parse_trim_whitespace = 0x400;
 
     //! Parse flag instructing the parser to condense all whitespace runs of data nodes to a single space character.
-    //! Trimming of leading and trailing whitespace of data is controlled by rapidxml::parse_trim_whitespace flag.
+    //! Trimming of leading and trailing whitespace of data is controlled by pdalboostrapidxml::parse_trim_whitespace flag.
     //! By default, whitespace is not normalized. 
     //! If this flag is specified, source text will be modified.
     //! Can be combined with other flags by use of | operator.
@@ -226,7 +226,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
     //! This is always equal to 0, so that all other flags can be simply ored together.
     //! Normally there is no need to inconveniently disable flags by anding with their negated (~) values.
     //! This also means that meaning of each flag is a <i>negation</i> of the default setting. 
-    //! For example, if flag name is rapidxml::parse_no_utf8, it means that utf-8 is <i>enabled</i> by default,
+    //! For example, if flag name is pdalboostrapidxml::parse_no_utf8, it means that utf-8 is <i>enabled</i> by default,
     //! and using the flag will disable it.
     //! <br><br>
     //! See xml_document::parse() function.
@@ -392,7 +392,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! Allocates a new node from the pool, and optionally assigns name and value to it. 
         //! If the allocation request cannot be accomodated, this function will throw <code>std::bad_alloc</code>.
         //! If exceptions are disabled by defining RAPIDXML_NO_EXCEPTIONS, this function
-        //! will call rapidxml::parse_error_handler() function.
+        //! will call pdalboostrapidxml::parse_error_handler() function.
         //! \param type Type of node to create.
         //! \param name Name to assign to the node, or 0 to assign no name.
         //! \param value Value to assign to the node, or 0 to assign no value.
@@ -425,7 +425,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! Allocates a new attribute from the pool, and optionally assigns name and value to it.
         //! If the allocation request cannot be accomodated, this function will throw <code>std::bad_alloc</code>.
         //! If exceptions are disabled by defining RAPIDXML_NO_EXCEPTIONS, this function
-        //! will call rapidxml::parse_error_handler() function.
+        //! will call pdalboostrapidxml::parse_error_handler() function.
         //! \param name Name to assign to the attribute, or 0 to assign no name.
         //! \param value Value to assign to the attribute, or 0 to assign no value.
         //! \param name_size Size of name to assign, or 0 to automatically calculate size from name string.
@@ -456,7 +456,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! Allocates a char array of given size from the pool, and optionally copies a given string to it.
         //! If the allocation request cannot be accomodated, this function will throw <code>std::bad_alloc</code>.
         //! If exceptions are disabled by defining RAPIDXML_NO_EXCEPTIONS, this function
-        //! will call rapidxml::parse_error_handler() function.
+        //! will call pdalboostrapidxml::parse_error_handler() function.
         //! \param source String to initialize the allocated memory with, or 0 to not initialize it.
         //! \param size Number of characters to allocate, or zero to calculate it automatically from source string length; if size is 0, source string must be specified and null terminated.
         //! \return Pointer to allocated char array. This pointer will never be NULL.
@@ -649,7 +649,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
     
         //! Gets name of the node. 
         //! Interpretation of name depends on type of node.
-        //! Note that name will not be zero-terminated if rapidxml::parse_no_string_terminators option was selected during parse.
+        //! Note that name will not be zero-terminated if pdalboostrapidxml::parse_no_string_terminators option was selected during parse.
         //! <br><br>
         //! Use name_size() function to determine length of the name.
         //! \return Name of node, or empty string if node has no name.
@@ -668,7 +668,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
 
         //! Gets value of node. 
         //! Interpretation of value depends on type of node.
-        //! Note that value will not be zero-terminated if rapidxml::parse_no_string_terminators option was selected during parse.
+        //! Note that value will not be zero-terminated if pdalboostrapidxml::parse_no_string_terminators option was selected during parse.
         //! <br><br>
         //! Use value_size() function to determine length of the value.
         //! \return Value of node, or empty string if node has no value.
@@ -728,7 +728,7 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         //! Use value(const Ch *) function to have the length automatically calculated (string must be zero terminated).
         //! <br><br>
         //! If an element has a child node of type node_data, it will take precedence over element value when printing.
-        //! If you want to manipulate data of elements using values, use parser flag rapidxml::parse_no_data_nodes to prevent creation of data nodes by the parser.
+        //! If you want to manipulate data of elements using values, use parser flag pdalboostrapidxml::parse_no_data_nodes to prevent creation of data nodes by the parser.
         //! \param val value of node to set. Does not have to be zero terminated.
         //! \param size Size of value, in characters. This does not include zero terminator, if one is present.
         void value(const Ch *val, std::size_t size)
@@ -1350,9 +1350,9 @@ namespace boost { namespace property_tree { namespace detail {namespace rapidxml
         }
 
         //! Parses zero-terminated XML string according to given flags.
-        //! Passed string will be modified by the parser, unless rapidxml::parse_non_destructive flag is used.
+        //! Passed string will be modified by the parser, unless pdalboostrapidxml::parse_non_destructive flag is used.
         //! The string must persist for the lifetime of the document.
-        //! In case of error, rapidxml::parse_error exception will be thrown.
+        //! In case of error, pdalboostrapidxml::parse_error exception will be thrown.
         //! <br><br>
         //! If you want to parse contents of a file, you must first load the file into the memory, and pass pointer to its beginning.
         //! Make sure that data is zero-terminated.

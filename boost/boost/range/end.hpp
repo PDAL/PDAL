@@ -25,8 +25,7 @@
 #include <boost/range/iterator.hpp>
 #include <boost/range/const_iterator.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #if !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564)) && \
     !BOOST_WORKAROUND(__GNUC__, < 3) \
@@ -118,19 +117,18 @@ inline BOOST_DEDUCED_TYPENAME range_iterator<const T>::type end( const T& r )
 
 #endif // BOOST_NO_FUNCTION_TEMPLATE_ORDERING
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace range_adl_barrier
     {
         template< class T >
         inline BOOST_DEDUCED_TYPENAME range_iterator<const T>::type
         const_end( const T& r )
         {
-            return boost::range_adl_barrier::end( r );
+            return pdalboost::range_adl_barrier::end( r );
         }
     } // namespace range_adl_barrier
     using namespace range_adl_barrier;
-} // namespace boost
+} // namespace pdalboost
 
 #endif
 

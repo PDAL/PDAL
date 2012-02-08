@@ -11,7 +11,7 @@
 
 #include <boost/config.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace type_traits {
 
 template <bool b1, bool b2, bool b3 = true, bool b4 = true, bool b5 = true, bool b6 = true, bool b7 = true>
@@ -30,6 +30,6 @@ struct ice_and<true, true, true, true, true, true, true>
 };
 
 } // namespace type_traits
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_TT_DETAIL_ICE_AND_HPP_INCLUDED

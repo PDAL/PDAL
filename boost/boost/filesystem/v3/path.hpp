@@ -41,8 +41,7 @@
 
 #include <boost/config/abi_prefix.hpp> // must be the last #include
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace filesystem3
 {
   //------------------------------------------------------------------------------------//
@@ -129,8 +128,8 @@ namespace filesystem3
 
     template <class Source>
     path(Source const& source,
-      typename boost::enable_if<path_traits::is_pathable<
-        typename boost::decay<Source>::type> >::type* =0)
+      typename pdalboost::enable_if<path_traits::is_pathable<
+        typename pdalboost::decay<Source>::type> >::type* =0)
     {
       path_traits::dispatch(source, m_pathname, codecvt());
     }
@@ -184,8 +183,8 @@ namespace filesystem3
     }
 
     template <class Source>
-      typename boost::enable_if<path_traits::is_pathable<
-        typename boost::decay<Source>::type>, path&>::type
+      typename pdalboost::enable_if<path_traits::is_pathable<
+        typename pdalboost::decay<Source>::type>, path&>::type
     operator=(Source const& source)
     {
       m_pathname.clear();
@@ -228,8 +227,8 @@ namespace filesystem3
     path& operator/=(const path& p);
 
     template <class Source>
-      typename boost::enable_if<path_traits::is_pathable<
-        typename boost::decay<Source>::type>, path&>::type
+      typename pdalboost::enable_if<path_traits::is_pathable<
+        typename pdalboost::decay<Source>::type>, path&>::type
     operator/=(Source const& source)
     {
       return append(source, codecvt());
@@ -489,14 +488,14 @@ namespace filesystem3
   //------------------------------------------------------------------------------------//
  
   class path::iterator
-    : public boost::iterator_facade<
+    : public pdalboost::iterator_facade<
       path::iterator,
       path const,
-      boost::bidirectional_traversal_tag >
+      pdalboost::bidirectional_traversal_tag >
   {
   private:
-    friend class boost::iterator_core_access;
-    friend class boost::filesystem3::path;
+    friend class pdalboost::iterator_core_access;
+    friend class pdalboost::filesystem3::path;
     friend void m_path_iterator_increment(path::iterator & it);
     friend void m_path_iterator_decrement(path::iterator & it);
 
@@ -598,7 +597,7 @@ namespace filesystem3
   inline path operator/(const path& lhs, const path& rhs)  { return path(lhs) /= rhs; }
 
   //  inserters and extractors
-  //    use boost::io::quoted() to handle spaces in paths
+  //    use pdalboost::io::quoted() to handle spaces in paths
   //    use '&' as escape character to ease use for Windows paths
 
   template <class Char, class Traits>
@@ -606,7 +605,7 @@ namespace filesystem3
   operator<<(std::basic_ostream<Char, Traits>& os, const path& p)
   {
     return os
-      << boost::io::quoted(p.template string<std::basic_string<Char> >(), static_cast<Char>('&'));
+      << pdalboost::io::quoted(p.template string<std::basic_string<Char> >(), static_cast<Char>('&'));
   }
   
   template <class Char, class Traits>
@@ -614,7 +613,7 @@ namespace filesystem3
   operator>>(std::basic_istream<Char, Traits>& is, path& p)
   {
     std::basic_string<Char> str;
-    is >> boost::io::quoted(str, static_cast<Char>('&'));
+    is >> pdalboost::io::quoted(str, static_cast<Char>('&'));
     p = str;
     return is;
   }
@@ -699,12 +698,11 @@ namespace filesystem3
 
 
 }  // namespace filesystem3
-}  // namespace boost
+}  // namespace pdalboost
 
 //----------------------------------------------------------------------------//
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem
   {
     using filesystem3::path;

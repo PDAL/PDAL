@@ -10,7 +10,7 @@
 
 #include <boost/fusion/iterator/distance.hpp>
 
-namespace boost { namespace fusion {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion {
     
     struct transform_view_iterator_tag;
     struct transform_view_iterator2_tag;
@@ -32,7 +32,7 @@ namespace boost { namespace fusion {
                 typename result_of::distance<typename First::first_type, typename Last::first_type>::type
                 call(First const& first, Last const& last)
                 {
-                    return boost::fusion::distance(first.first, last.first);
+                    return pdalboost::fusion::distance(first.first, last.first);
                 }
             };
         };
@@ -49,7 +49,7 @@ namespace boost { namespace fusion {
                 typename result_of::distance<typename First::first1_type, typename Last::first1_type>::type
                 call(First const& first, Last const& last)
                 {
-                    return boost::fusion::distance(first.first1, last.first1);
+                    return pdalboost::fusion::distance(first.first1, last.first1);
                 }
             };
         };

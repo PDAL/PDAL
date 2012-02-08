@@ -8,7 +8,7 @@
 
 # include <boost/detail/workaround.hpp>
 
-namespace boost { namespace parameter { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { namespace aux {
 
 // A wrapper for the default value passed by the user when resolving
 // the value of the parameter with the given Keyword
@@ -63,7 +63,7 @@ struct lazy_default
 #  define BOOST_PARAMETER_lazy_default_fallback lazy_default
 # endif 
 
-}}} // namespace boost::parameter::aux
+}}} // namespace pdalboost::parameter::aux
 
 #endif // DEFAULT_050329_HPP
 

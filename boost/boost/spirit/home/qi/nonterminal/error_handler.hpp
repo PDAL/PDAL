@@ -17,7 +17,7 @@
 #include <boost/function.hpp>
 #include <boost/assert.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     enum error_handler_result
     {
@@ -133,7 +133,7 @@ namespace boost { namespace spirit { namespace qi
                                     action == retry || action == fail);
                             continue;
                         case accept: return true;
-                        case rethrow: boost::throw_exception(x);
+                        case rethrow: pdalboost::throw_exception(x);
                     }
                 }
             }

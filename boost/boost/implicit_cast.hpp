@@ -7,7 +7,7 @@
 
 # include <boost/mpl/identity.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 // implementation originally suggested by C. Green in
 // http://lists.boost.org/MailArchives/boost/msg00886.php
@@ -23,7 +23,7 @@ inline T implicit_cast (typename mpl::identity<T>::type x) {
 //template <typename T>
 //void implicit_cast (...);
 
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // IMPLICIT_CAST_DWA200356_HPP

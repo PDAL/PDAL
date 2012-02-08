@@ -23,19 +23,18 @@
 
 # ifndef BOOST_FILESYSTEM2_NARROW_ONLY
 #   define BOOST_FS_FUNC(BOOST_FS_TYPE) \
-      template<class Path> typename boost::enable_if<is_basic_path<Path>, \
+      template<class Path> typename pdalboost::enable_if<is_basic_path<Path>, \
       BOOST_FS_TYPE>::type
 #   define BOOST_FS_FUNC_STRING BOOST_FS_FUNC(typename Path::string_type)
 #   define BOOST_FS_TYPENAME typename
 # else
 #   define BOOST_FS_FUNC(BOOST_FS_TYPE) inline BOOST_FS_TYPE 
-    typedef boost::filesystem::path Path;
+    typedef pdalboost::filesystem::path Path;
 #   define BOOST_FS_FUNC_STRING inline std::string
 #   define BOOST_FS_TYPENAME
 # endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem2
   {
 
@@ -44,9 +43,9 @@ namespace boost
          if (ph.empty() || exists(ph))
          {
            if ( !ph.empty() && !is_directory(ph) )
-               boost::throw_exception( basic_filesystem_error<Path>(
-                 "boost::filesystem::create_directories", ph,
-                 make_error_code( boost::system::errc::file_exists ) ) );
+               pdalboost::throw_exception( basic_filesystem_error<Path>(
+                 "pdalboost::filesystem::create_directories", ph,
+                 make_error_code( pdalboost::system::errc::file_exists ) ) );
            return false;
          }
 
@@ -144,10 +143,10 @@ namespace boost
 
     template< class Path >
     class basic_recursive_directory_iterator
-      : public boost::iterator_facade<
+      : public pdalboost::iterator_facade<
           basic_recursive_directory_iterator<Path>,
           basic_directory_entry<Path>,
-          boost::single_pass_traversal_tag >
+          pdalboost::single_pass_traversal_tag >
     {
     public:
       typedef Path path_type;
@@ -185,14 +184,14 @@ namespace boost
 
       // shared_ptr provides shallow-copy semantics required for InputIterators.
       // m_imp.get()==0 indicates the end iterator.
-      boost::shared_ptr< detail::recur_dir_itr_imp< Path > >  m_imp;
+      pdalboost::shared_ptr< detail::recur_dir_itr_imp< Path > >  m_imp;
 
-      friend class boost::iterator_core_access;
+      friend class pdalboost::iterator_core_access;
 
-      typename boost::iterator_facade< 
+      typename pdalboost::iterator_facade< 
         basic_recursive_directory_iterator<Path>,
         basic_directory_entry<Path>,
-        boost::single_pass_traversal_tag >::reference
+        pdalboost::single_pass_traversal_tag >::reference
       dereference() const 
       {
         BOOST_ASSERT( m_imp.get() && "attempt to dereference end iterator" );
@@ -305,15 +304,14 @@ namespace boost
     }
 
   } // namespace filesystem2
-} // namespace boost
+} // namespace pdalboost
 
 #undef BOOST_FS_FUNC_STRING
 #undef BOOST_FS_FUNC
 
 //----------------------------------------------------------------------------//
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem
   {
     using filesystem2::create_directories;

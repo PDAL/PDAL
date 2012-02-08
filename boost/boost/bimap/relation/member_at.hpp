@@ -18,7 +18,7 @@
 
 #include <boost/config.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 
@@ -67,6 +67,6 @@ namespace member_at {
 
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_RELATION_MEMBER_AT_HPP

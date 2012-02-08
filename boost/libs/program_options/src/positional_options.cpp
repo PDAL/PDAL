@@ -12,7 +12,7 @@
 
 #include <cassert>
 
-namespace boost { namespace program_options {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
 
     positional_options_description::positional_options_description()
     {}

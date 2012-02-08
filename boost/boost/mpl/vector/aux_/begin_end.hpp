@@ -22,7 +22,7 @@
 #   include <boost/mpl/vector/aux_/iterator.hpp>
 #   include <boost/mpl/vector/aux_/tag.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<>
 struct begin_impl< aux::vector_tag >

@@ -18,7 +18,7 @@
 #include <boost/mpl/push_front.hpp>
 #include <boost/mpl/inserter.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<
       typename Sequence

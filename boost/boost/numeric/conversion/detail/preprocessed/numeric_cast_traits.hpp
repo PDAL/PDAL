@@ -7,7 +7,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
     
-namespace boost { namespace numeric {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric {
 
     template <>
     struct numeric_cast_traits
@@ -25,96 +25,96 @@ namespace boost { namespace numeric {
     struct numeric_cast_traits
         <
             char
-          , boost::int8_t
+          , pdalboost::int8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int8_t> rounding_policy;
+        typedef Trunc<pdalboost::int8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             char
-          , boost::uint8_t
+          , pdalboost::uint8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint8_t> rounding_policy;
+        typedef Trunc<pdalboost::uint8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             char
-          , boost::int16_t
+          , pdalboost::int16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int16_t> rounding_policy;
+        typedef Trunc<pdalboost::int16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             char
-          , boost::uint16_t
+          , pdalboost::uint16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint16_t> rounding_policy;
+        typedef Trunc<pdalboost::uint16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             char
-          , boost::int32_t
+          , pdalboost::int32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int32_t> rounding_policy;
+        typedef Trunc<pdalboost::int32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             char
-          , boost::uint32_t
+          , pdalboost::uint32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint32_t> rounding_policy;
+        typedef Trunc<pdalboost::uint32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             char
-          , boost::int64_t
+          , pdalboost::int64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int64_t> rounding_policy;
+        typedef Trunc<pdalboost::int64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             char
-          , boost::uint64_t
+          , pdalboost::uint64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint64_t> rounding_policy;
+        typedef Trunc<pdalboost::uint64_t> rounding_policy;
     }; 
     
     template <>
@@ -157,7 +157,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int8_t
+            pdalboost::int8_t
           , char
         >
     {
@@ -169,103 +169,103 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int8_t
-          , boost::int8_t
+            pdalboost::int8_t
+          , pdalboost::int8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int8_t> rounding_policy;
+        typedef Trunc<pdalboost::int8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int8_t
-          , boost::uint8_t
+            pdalboost::int8_t
+          , pdalboost::uint8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint8_t> rounding_policy;
+        typedef Trunc<pdalboost::uint8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int8_t
-          , boost::int16_t
+            pdalboost::int8_t
+          , pdalboost::int16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int16_t> rounding_policy;
+        typedef Trunc<pdalboost::int16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int8_t
-          , boost::uint16_t
+            pdalboost::int8_t
+          , pdalboost::uint16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint16_t> rounding_policy;
+        typedef Trunc<pdalboost::uint16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int8_t
-          , boost::int32_t
+            pdalboost::int8_t
+          , pdalboost::int32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int32_t> rounding_policy;
+        typedef Trunc<pdalboost::int32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int8_t
-          , boost::uint32_t
+            pdalboost::int8_t
+          , pdalboost::uint32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint32_t> rounding_policy;
+        typedef Trunc<pdalboost::uint32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int8_t
-          , boost::int64_t
+            pdalboost::int8_t
+          , pdalboost::int64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int64_t> rounding_policy;
+        typedef Trunc<pdalboost::int64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int8_t
-          , boost::uint64_t
+            pdalboost::int8_t
+          , pdalboost::uint64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint64_t> rounding_policy;
+        typedef Trunc<pdalboost::uint64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int8_t
+            pdalboost::int8_t
           , float
         >
     {
@@ -277,7 +277,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int8_t
+            pdalboost::int8_t
           , double
         >
     {
@@ -289,7 +289,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int8_t
+            pdalboost::int8_t
           , long double
         >
     {
@@ -302,7 +302,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint8_t
+            pdalboost::uint8_t
           , char
         >
     {
@@ -314,103 +314,103 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint8_t
-          , boost::int8_t
+            pdalboost::uint8_t
+          , pdalboost::int8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int8_t> rounding_policy;
+        typedef Trunc<pdalboost::int8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint8_t
-          , boost::uint8_t
+            pdalboost::uint8_t
+          , pdalboost::uint8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint8_t> rounding_policy;
+        typedef Trunc<pdalboost::uint8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint8_t
-          , boost::int16_t
+            pdalboost::uint8_t
+          , pdalboost::int16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int16_t> rounding_policy;
+        typedef Trunc<pdalboost::int16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint8_t
-          , boost::uint16_t
+            pdalboost::uint8_t
+          , pdalboost::uint16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint16_t> rounding_policy;
+        typedef Trunc<pdalboost::uint16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint8_t
-          , boost::int32_t
+            pdalboost::uint8_t
+          , pdalboost::int32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int32_t> rounding_policy;
+        typedef Trunc<pdalboost::int32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint8_t
-          , boost::uint32_t
+            pdalboost::uint8_t
+          , pdalboost::uint32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint32_t> rounding_policy;
+        typedef Trunc<pdalboost::uint32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint8_t
-          , boost::int64_t
+            pdalboost::uint8_t
+          , pdalboost::int64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int64_t> rounding_policy;
+        typedef Trunc<pdalboost::int64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint8_t
-          , boost::uint64_t
+            pdalboost::uint8_t
+          , pdalboost::uint64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint64_t> rounding_policy;
+        typedef Trunc<pdalboost::uint64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint8_t
+            pdalboost::uint8_t
           , float
         >
     {
@@ -422,7 +422,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint8_t
+            pdalboost::uint8_t
           , double
         >
     {
@@ -434,7 +434,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint8_t
+            pdalboost::uint8_t
           , long double
         >
     {
@@ -447,7 +447,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int16_t
+            pdalboost::int16_t
           , char
         >
     {
@@ -459,103 +459,103 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int16_t
-          , boost::int8_t
+            pdalboost::int16_t
+          , pdalboost::int8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int8_t> rounding_policy;
+        typedef Trunc<pdalboost::int8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int16_t
-          , boost::uint8_t
+            pdalboost::int16_t
+          , pdalboost::uint8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint8_t> rounding_policy;
+        typedef Trunc<pdalboost::uint8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int16_t
-          , boost::int16_t
+            pdalboost::int16_t
+          , pdalboost::int16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int16_t> rounding_policy;
+        typedef Trunc<pdalboost::int16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int16_t
-          , boost::uint16_t
+            pdalboost::int16_t
+          , pdalboost::uint16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint16_t> rounding_policy;
+        typedef Trunc<pdalboost::uint16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int16_t
-          , boost::int32_t
+            pdalboost::int16_t
+          , pdalboost::int32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int32_t> rounding_policy;
+        typedef Trunc<pdalboost::int32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int16_t
-          , boost::uint32_t
+            pdalboost::int16_t
+          , pdalboost::uint32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint32_t> rounding_policy;
+        typedef Trunc<pdalboost::uint32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int16_t
-          , boost::int64_t
+            pdalboost::int16_t
+          , pdalboost::int64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int64_t> rounding_policy;
+        typedef Trunc<pdalboost::int64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int16_t
-          , boost::uint64_t
+            pdalboost::int16_t
+          , pdalboost::uint64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint64_t> rounding_policy;
+        typedef Trunc<pdalboost::uint64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int16_t
+            pdalboost::int16_t
           , float
         >
     {
@@ -567,7 +567,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int16_t
+            pdalboost::int16_t
           , double
         >
     {
@@ -579,7 +579,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int16_t
+            pdalboost::int16_t
           , long double
         >
     {
@@ -592,7 +592,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint16_t
+            pdalboost::uint16_t
           , char
         >
     {
@@ -604,103 +604,103 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint16_t
-          , boost::int8_t
+            pdalboost::uint16_t
+          , pdalboost::int8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int8_t> rounding_policy;
+        typedef Trunc<pdalboost::int8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint16_t
-          , boost::uint8_t
+            pdalboost::uint16_t
+          , pdalboost::uint8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint8_t> rounding_policy;
+        typedef Trunc<pdalboost::uint8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint16_t
-          , boost::int16_t
+            pdalboost::uint16_t
+          , pdalboost::int16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int16_t> rounding_policy;
+        typedef Trunc<pdalboost::int16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint16_t
-          , boost::uint16_t
+            pdalboost::uint16_t
+          , pdalboost::uint16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint16_t> rounding_policy;
+        typedef Trunc<pdalboost::uint16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint16_t
-          , boost::int32_t
+            pdalboost::uint16_t
+          , pdalboost::int32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int32_t> rounding_policy;
+        typedef Trunc<pdalboost::int32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint16_t
-          , boost::uint32_t
+            pdalboost::uint16_t
+          , pdalboost::uint32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint32_t> rounding_policy;
+        typedef Trunc<pdalboost::uint32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint16_t
-          , boost::int64_t
+            pdalboost::uint16_t
+          , pdalboost::int64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int64_t> rounding_policy;
+        typedef Trunc<pdalboost::int64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint16_t
-          , boost::uint64_t
+            pdalboost::uint16_t
+          , pdalboost::uint64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint64_t> rounding_policy;
+        typedef Trunc<pdalboost::uint64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint16_t
+            pdalboost::uint16_t
           , float
         >
     {
@@ -712,7 +712,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint16_t
+            pdalboost::uint16_t
           , double
         >
     {
@@ -724,7 +724,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint16_t
+            pdalboost::uint16_t
           , long double
         >
     {
@@ -737,7 +737,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int32_t
+            pdalboost::int32_t
           , char
         >
     {
@@ -749,103 +749,103 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int32_t
-          , boost::int8_t
+            pdalboost::int32_t
+          , pdalboost::int8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int8_t> rounding_policy;
+        typedef Trunc<pdalboost::int8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int32_t
-          , boost::uint8_t
+            pdalboost::int32_t
+          , pdalboost::uint8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint8_t> rounding_policy;
+        typedef Trunc<pdalboost::uint8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int32_t
-          , boost::int16_t
+            pdalboost::int32_t
+          , pdalboost::int16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int16_t> rounding_policy;
+        typedef Trunc<pdalboost::int16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int32_t
-          , boost::uint16_t
+            pdalboost::int32_t
+          , pdalboost::uint16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint16_t> rounding_policy;
+        typedef Trunc<pdalboost::uint16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int32_t
-          , boost::int32_t
+            pdalboost::int32_t
+          , pdalboost::int32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int32_t> rounding_policy;
+        typedef Trunc<pdalboost::int32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int32_t
-          , boost::uint32_t
+            pdalboost::int32_t
+          , pdalboost::uint32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint32_t> rounding_policy;
+        typedef Trunc<pdalboost::uint32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int32_t
-          , boost::int64_t
+            pdalboost::int32_t
+          , pdalboost::int64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int64_t> rounding_policy;
+        typedef Trunc<pdalboost::int64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int32_t
-          , boost::uint64_t
+            pdalboost::int32_t
+          , pdalboost::uint64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint64_t> rounding_policy;
+        typedef Trunc<pdalboost::uint64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int32_t
+            pdalboost::int32_t
           , float
         >
     {
@@ -857,7 +857,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int32_t
+            pdalboost::int32_t
           , double
         >
     {
@@ -869,7 +869,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int32_t
+            pdalboost::int32_t
           , long double
         >
     {
@@ -882,7 +882,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint32_t
+            pdalboost::uint32_t
           , char
         >
     {
@@ -894,103 +894,103 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint32_t
-          , boost::int8_t
+            pdalboost::uint32_t
+          , pdalboost::int8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int8_t> rounding_policy;
+        typedef Trunc<pdalboost::int8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint32_t
-          , boost::uint8_t
+            pdalboost::uint32_t
+          , pdalboost::uint8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint8_t> rounding_policy;
+        typedef Trunc<pdalboost::uint8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint32_t
-          , boost::int16_t
+            pdalboost::uint32_t
+          , pdalboost::int16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int16_t> rounding_policy;
+        typedef Trunc<pdalboost::int16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint32_t
-          , boost::uint16_t
+            pdalboost::uint32_t
+          , pdalboost::uint16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint16_t> rounding_policy;
+        typedef Trunc<pdalboost::uint16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint32_t
-          , boost::int32_t
+            pdalboost::uint32_t
+          , pdalboost::int32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int32_t> rounding_policy;
+        typedef Trunc<pdalboost::int32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint32_t
-          , boost::uint32_t
+            pdalboost::uint32_t
+          , pdalboost::uint32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint32_t> rounding_policy;
+        typedef Trunc<pdalboost::uint32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint32_t
-          , boost::int64_t
+            pdalboost::uint32_t
+          , pdalboost::int64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int64_t> rounding_policy;
+        typedef Trunc<pdalboost::int64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint32_t
-          , boost::uint64_t
+            pdalboost::uint32_t
+          , pdalboost::uint64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint64_t> rounding_policy;
+        typedef Trunc<pdalboost::uint64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint32_t
+            pdalboost::uint32_t
           , float
         >
     {
@@ -1002,7 +1002,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint32_t
+            pdalboost::uint32_t
           , double
         >
     {
@@ -1014,7 +1014,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint32_t
+            pdalboost::uint32_t
           , long double
         >
     {
@@ -1027,7 +1027,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int64_t
+            pdalboost::int64_t
           , char
         >
     {
@@ -1039,103 +1039,103 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int64_t
-          , boost::int8_t
+            pdalboost::int64_t
+          , pdalboost::int8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int8_t> rounding_policy;
+        typedef Trunc<pdalboost::int8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int64_t
-          , boost::uint8_t
+            pdalboost::int64_t
+          , pdalboost::uint8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint8_t> rounding_policy;
+        typedef Trunc<pdalboost::uint8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int64_t
-          , boost::int16_t
+            pdalboost::int64_t
+          , pdalboost::int16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int16_t> rounding_policy;
+        typedef Trunc<pdalboost::int16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int64_t
-          , boost::uint16_t
+            pdalboost::int64_t
+          , pdalboost::uint16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint16_t> rounding_policy;
+        typedef Trunc<pdalboost::uint16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int64_t
-          , boost::int32_t
+            pdalboost::int64_t
+          , pdalboost::int32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int32_t> rounding_policy;
+        typedef Trunc<pdalboost::int32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int64_t
-          , boost::uint32_t
+            pdalboost::int64_t
+          , pdalboost::uint32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint32_t> rounding_policy;
+        typedef Trunc<pdalboost::uint32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int64_t
-          , boost::int64_t
+            pdalboost::int64_t
+          , pdalboost::int64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int64_t> rounding_policy;
+        typedef Trunc<pdalboost::int64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int64_t
-          , boost::uint64_t
+            pdalboost::int64_t
+          , pdalboost::uint64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint64_t> rounding_policy;
+        typedef Trunc<pdalboost::uint64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::int64_t
+            pdalboost::int64_t
           , float
         >
     {
@@ -1147,7 +1147,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int64_t
+            pdalboost::int64_t
           , double
         >
     {
@@ -1159,7 +1159,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::int64_t
+            pdalboost::int64_t
           , long double
         >
     {
@@ -1172,7 +1172,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint64_t
+            pdalboost::uint64_t
           , char
         >
     {
@@ -1184,103 +1184,103 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint64_t
-          , boost::int8_t
+            pdalboost::uint64_t
+          , pdalboost::int8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int8_t> rounding_policy;
+        typedef Trunc<pdalboost::int8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint64_t
-          , boost::uint8_t
+            pdalboost::uint64_t
+          , pdalboost::uint8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint8_t> rounding_policy;
+        typedef Trunc<pdalboost::uint8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint64_t
-          , boost::int16_t
+            pdalboost::uint64_t
+          , pdalboost::int16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int16_t> rounding_policy;
+        typedef Trunc<pdalboost::int16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint64_t
-          , boost::uint16_t
+            pdalboost::uint64_t
+          , pdalboost::uint16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint16_t> rounding_policy;
+        typedef Trunc<pdalboost::uint16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint64_t
-          , boost::int32_t
+            pdalboost::uint64_t
+          , pdalboost::int32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int32_t> rounding_policy;
+        typedef Trunc<pdalboost::int32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint64_t
-          , boost::uint32_t
+            pdalboost::uint64_t
+          , pdalboost::uint32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint32_t> rounding_policy;
+        typedef Trunc<pdalboost::uint32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint64_t
-          , boost::int64_t
+            pdalboost::uint64_t
+          , pdalboost::int64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int64_t> rounding_policy;
+        typedef Trunc<pdalboost::int64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint64_t
-          , boost::uint64_t
+            pdalboost::uint64_t
+          , pdalboost::uint64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint64_t> rounding_policy;
+        typedef Trunc<pdalboost::uint64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
-            boost::uint64_t
+            pdalboost::uint64_t
           , float
         >
     {
@@ -1292,7 +1292,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint64_t
+            pdalboost::uint64_t
           , double
         >
     {
@@ -1304,7 +1304,7 @@ namespace boost { namespace numeric {
     template <>
     struct numeric_cast_traits
         <
-            boost::uint64_t
+            pdalboost::uint64_t
           , long double
         >
     {
@@ -1330,96 +1330,96 @@ namespace boost { namespace numeric {
     struct numeric_cast_traits
         <
             float
-          , boost::int8_t
+          , pdalboost::int8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int8_t> rounding_policy;
+        typedef Trunc<pdalboost::int8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             float
-          , boost::uint8_t
+          , pdalboost::uint8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint8_t> rounding_policy;
+        typedef Trunc<pdalboost::uint8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             float
-          , boost::int16_t
+          , pdalboost::int16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int16_t> rounding_policy;
+        typedef Trunc<pdalboost::int16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             float
-          , boost::uint16_t
+          , pdalboost::uint16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint16_t> rounding_policy;
+        typedef Trunc<pdalboost::uint16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             float
-          , boost::int32_t
+          , pdalboost::int32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int32_t> rounding_policy;
+        typedef Trunc<pdalboost::int32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             float
-          , boost::uint32_t
+          , pdalboost::uint32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint32_t> rounding_policy;
+        typedef Trunc<pdalboost::uint32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             float
-          , boost::int64_t
+          , pdalboost::int64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int64_t> rounding_policy;
+        typedef Trunc<pdalboost::int64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             float
-          , boost::uint64_t
+          , pdalboost::uint64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint64_t> rounding_policy;
+        typedef Trunc<pdalboost::uint64_t> rounding_policy;
     }; 
     
     template <>
@@ -1475,96 +1475,96 @@ namespace boost { namespace numeric {
     struct numeric_cast_traits
         <
             double
-          , boost::int8_t
+          , pdalboost::int8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int8_t> rounding_policy;
+        typedef Trunc<pdalboost::int8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             double
-          , boost::uint8_t
+          , pdalboost::uint8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint8_t> rounding_policy;
+        typedef Trunc<pdalboost::uint8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             double
-          , boost::int16_t
+          , pdalboost::int16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int16_t> rounding_policy;
+        typedef Trunc<pdalboost::int16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             double
-          , boost::uint16_t
+          , pdalboost::uint16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint16_t> rounding_policy;
+        typedef Trunc<pdalboost::uint16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             double
-          , boost::int32_t
+          , pdalboost::int32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int32_t> rounding_policy;
+        typedef Trunc<pdalboost::int32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             double
-          , boost::uint32_t
+          , pdalboost::uint32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint32_t> rounding_policy;
+        typedef Trunc<pdalboost::uint32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             double
-          , boost::int64_t
+          , pdalboost::int64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int64_t> rounding_policy;
+        typedef Trunc<pdalboost::int64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             double
-          , boost::uint64_t
+          , pdalboost::uint64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint64_t> rounding_policy;
+        typedef Trunc<pdalboost::uint64_t> rounding_policy;
     }; 
     
     template <>
@@ -1620,96 +1620,96 @@ namespace boost { namespace numeric {
     struct numeric_cast_traits
         <
             long double
-          , boost::int8_t
+          , pdalboost::int8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int8_t> rounding_policy;
+        typedef Trunc<pdalboost::int8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             long double
-          , boost::uint8_t
+          , pdalboost::uint8_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint8_t> rounding_policy;
+        typedef Trunc<pdalboost::uint8_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             long double
-          , boost::int16_t
+          , pdalboost::int16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int16_t> rounding_policy;
+        typedef Trunc<pdalboost::int16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             long double
-          , boost::uint16_t
+          , pdalboost::uint16_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint16_t> rounding_policy;
+        typedef Trunc<pdalboost::uint16_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             long double
-          , boost::int32_t
+          , pdalboost::int32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int32_t> rounding_policy;
+        typedef Trunc<pdalboost::int32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             long double
-          , boost::uint32_t
+          , pdalboost::uint32_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint32_t> rounding_policy;
+        typedef Trunc<pdalboost::uint32_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             long double
-          , boost::int64_t
+          , pdalboost::int64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::int64_t> rounding_policy;
+        typedef Trunc<pdalboost::int64_t> rounding_policy;
     }; 
     
     template <>
     struct numeric_cast_traits
         <
             long double
-          , boost::uint64_t
+          , pdalboost::uint64_t
         >
     {
         typedef def_overflow_handler overflow_policy;
         typedef UseInternalRangeChecker range_checking_policy;
-        typedef Trunc<boost::uint64_t> rounding_policy;
+        typedef Trunc<pdalboost::uint64_t> rounding_policy;
     }; 
     
     template <>

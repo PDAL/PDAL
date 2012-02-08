@@ -29,7 +29,7 @@
 #   include "boost/type_traits/is_same.hpp"
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //////////////////////////////////////////////////////////////////////////
 // class bad_get
@@ -43,8 +43,8 @@ public: // std::exception implementation
 
     virtual const char * what() const throw()
     {
-        return "boost::bad_get: "
-               "failed value get using boost::get";
+        return "pdalboost::bad_get: "
+               "failed value get using pdalboost::get";
     }
 
 };
@@ -81,7 +81,7 @@ public: // visitor interfaces
 
     pointer operator()(reference operand) const
     {
-        return boost::addressof(operand);
+        return pdalboost::addressof(operand);
     }
 
     template <typename U>
@@ -96,7 +96,7 @@ private: // helpers, for visitor interfaces (below)
 
     pointer execute_impl(reference operand, mpl::true_) const
     {
-        return boost::addressof(operand);
+        return pdalboost::addressof(operand);
     }
 
     template <typename U>
@@ -139,7 +139,7 @@ template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_pointer<U>::type
 get(
-      boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >* operand
+      pdalboost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >* operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
@@ -154,7 +154,7 @@ template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_pointer<const U>::type
 get(
-      const boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >* operand
+      const pdalboost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >* operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
@@ -169,7 +169,7 @@ template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_reference<U>::type
 get(
-      boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >& operand
+      pdalboost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >& operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
@@ -185,7 +185,7 @@ template <typename U, BOOST_VARIANT_ENUM_PARAMS(typename T) >
 inline
     typename add_reference<const U>::type
 get(
-      const boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >& operand
+      const pdalboost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >& operand
       BOOST_VARIANT_AUX_GET_EXPLICIT_TEMPLATE_TYPE(U)
     )
 {
@@ -197,6 +197,6 @@ get(
     return *result;
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_GET_HPP

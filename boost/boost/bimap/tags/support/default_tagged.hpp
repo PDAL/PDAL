@@ -20,7 +20,7 @@
 
 #include <boost/bimap/tags/tagged.hpp>
 
-/** \struct boost::bimaps::tags::support::default_tagged
+/** \struct pdalboost::bimaps::tags::support::default_tagged
 \brief Weak tagging metafunction
 
 \code
@@ -39,7 +39,7 @@ See also tagged, overwrite_tagged.
 
 #ifndef BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace tags {
 namespace support {
@@ -63,7 +63,7 @@ struct default_tagged< tagged< Type, OldTag >, NewTag >
 } // namespace support
 } // namespace tags
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 

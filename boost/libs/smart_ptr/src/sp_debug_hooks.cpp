@@ -106,8 +106,7 @@ void * operator new[](size_t n, nothrow_t const &) throw()
 
 // debug hooks
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 void sp_scalar_constructor_hook(void * p)
 {
@@ -184,7 +183,7 @@ void sp_array_destructor_hook(void * /* p */)
 */
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 // operator delete
 

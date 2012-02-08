@@ -591,7 +591,7 @@
         
         operator address_of_hack_type_() const
         {
-            return boost::addressof(this->child0);
+            return pdalboost::addressof(this->child0);
         }
         
         

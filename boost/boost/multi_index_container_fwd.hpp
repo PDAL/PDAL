@@ -19,7 +19,7 @@
 #include <boost/multi_index/ordered_index_fwd.hpp>
 #include <memory>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -111,11 +111,11 @@ void swap(
 } /* namespace multi_index */
 
 /* multi_index_container, being the main type of this library, is promoted to
- * namespace boost.
+ * namespace pdalboost.
  */
 
 using multi_index::multi_index_container;
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

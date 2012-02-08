@@ -17,7 +17,7 @@
 #include <boost/spirit/home/support/iterators/detail/combine_policies.hpp>
 #include <boost/spirit/home/support/iterators/multi_pass.hpp>
 
-namespace boost { namespace spirit 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit 
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Elem, typename Traits = std::char_traits<Elem> >

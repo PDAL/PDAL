@@ -68,8 +68,7 @@
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-namespace boost 
-{ 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
   namespace function_types 
   {
 
@@ -276,7 +275,7 @@ namespace boost
     template<typename T, typename C, typename L>
     struct components_impl<T C::*, L>
       : detail::retagged_if
-        < detail::components_impl<typename boost::remove_cv<T>::type *, L>
+        < detail::components_impl<typename pdalboost::remove_cv<T>::type *, L>
         , pointer_tag, /* --> */ member_function_pointer_tag
         , member_obj_ptr_components<T,C,L> >
     { };
@@ -313,7 +312,7 @@ namespace boost
 
     template<typename T> struct cv_tag_mfp
       : detail::cv_tag_mfp_impl
-        < ::boost::function_types::detail::encode_mfp_cv<T>::value >
+        < ::pdalboost::function_types::detail::encode_mfp_cv<T>::value >
     { };
 
     template<> struct cv_tag_mfp_impl<1> : non_cv              { };
@@ -342,7 +341,7 @@ namespace boost
       : bcc_class_transform_impl
         < typename decode_cv
           < T
-          , ::boost::function_types::detail::encode_mfp_cv<D>::value 
+          , ::pdalboost::function_types::detail::encode_mfp_cv<D>::value 
           >::type
         , L
         > 

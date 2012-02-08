@@ -20,7 +20,7 @@
 #include <boost/fusion/include/any.hpp>
 #include <boost/spirit/home/support/unused.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     // A non-short circuiting (ns) version of the any algorithm (uses
     // | instead of ||.

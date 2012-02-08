@@ -23,7 +23,7 @@
 
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 struct has_push_back_arg {};
 
@@ -38,7 +38,7 @@ struct push_back_impl
         // if you've got an assert here, you are requesting a 'push_back' 
         // specialization that doesn't exist.
         BOOST_MPL_ASSERT_MSG(
-              ( boost::is_same< T, has_push_back_arg >::value )
+              ( pdalboost::is_same< T, has_push_back_arg >::value )
             , REQUESTED_PUSH_BACK_SPECIALIZATION_FOR_SEQUENCE_DOES_NOT_EXIST
             , ( Sequence )
             );

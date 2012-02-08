@@ -15,7 +15,7 @@
 #include <boost/date_time/special_defs.hpp>
 #include <boost/date_time/compiler_config.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace date_time {
 
 
@@ -31,8 +31,8 @@ namespace date_time {
   */
   template<class T, typename rep_type>
   class time_duration : private
-      boost::less_than_comparable<T
-    , boost::equality_comparable<T
+      pdalboost::less_than_comparable<T
+    , pdalboost::equality_comparable<T
     > >
   /* dividable, addable, and subtractable operator templates
    * won't work with this class (MSVC++ 6.0). return type
@@ -261,12 +261,12 @@ namespace date_time {
   /* These templates are designed to work with multiples of
    * 10 for frac_of_second and resoultion adjustment
    */
-  template<class base_duration, boost::int64_t frac_of_second>
+  template<class base_duration, pdalboost::int64_t frac_of_second>
   class subsecond_duration : public base_duration
   {
   public:
     typedef typename base_duration::traits_type traits_type;
-    explicit subsecond_duration(boost::int64_t ss) :
+    explicit subsecond_duration(pdalboost::int64_t ss) :
       base_duration(0,0,0,ss*traits_type::res_adjust()/frac_of_second)
     {}
   };

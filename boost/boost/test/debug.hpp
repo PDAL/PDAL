@@ -27,7 +27,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace debug {
 
@@ -94,7 +94,7 @@ void BOOST_TEST_DECL break_memory_alloc( long mem_alloc_order_num );
 
 } // namespace debug
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/test/detail/enable_warnings.hpp>
 

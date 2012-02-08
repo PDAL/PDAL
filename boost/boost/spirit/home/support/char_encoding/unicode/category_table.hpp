@@ -8,9 +8,9 @@
 ==============================================================================*/
 #include <boost/cstdint.hpp>
 
-namespace boost { namespace spirit { namespace ucd { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace ucd { namespace detail
 {
-    static const ::boost::uint8_t category_stage1[] = {
+    static const ::pdalboost::uint8_t category_stage1[] = {
 
       0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15, 
      16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31, 
@@ -286,7 +286,7 @@ namespace boost { namespace spirit { namespace ucd { namespace detail
      62,  62,  62,  62,  62,  62,  62,  62,  62,  62,  62,  62,  62,  62,  62, 100
     };
 
-    static const ::boost::uint16_t category_stage2[] = {
+    static const ::pdalboost::uint16_t category_stage2[] = {
 
     // block 0
       32,   32,   32,   32,   32,   32,   32,   32,   32,  544,  544,  544,  544,  544,   32,   32, 
@@ -2207,10 +2207,10 @@ namespace boost { namespace spirit { namespace ucd { namespace detail
       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,   34,   34,   34,   34, 2048, 2048
     };
 
-    inline ::boost::uint16_t category_lookup(::boost::uint32_t ch)
+    inline ::pdalboost::uint16_t category_lookup(::pdalboost::uint32_t ch)
     {
-        ::boost::uint32_t block_offset = category_stage1[ch / 256] * 256;
+        ::pdalboost::uint32_t block_offset = category_stage1[ch / 256] * 256;
         return category_stage2[block_offset + ch % 256];
     }
 
-}}}} // namespace boost::spirit::unicode::detail
+}}}} // namespace pdalboost::spirit::unicode::detail

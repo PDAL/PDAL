@@ -22,7 +22,7 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/aux_/na.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace container_adaptor {
 
@@ -37,18 +37,18 @@ template
     class ReverseIterator,
     class ConstReverseIterator,
 
-    class IteratorToBaseConverter          = ::boost::mpl::na,
-    class IteratorFromBaseConverter        = ::boost::mpl::na,
-    class ReverseIteratorFromBaseConverter = ::boost::mpl::na,
-    class ValueToBaseConverter             = ::boost::mpl::na,
-    class ValueFromBaseConverter           = ::boost::mpl::na,
-    class KeyToBaseConverter               = ::boost::mpl::na,
+    class IteratorToBaseConverter          = ::pdalboost::mpl::na,
+    class IteratorFromBaseConverter        = ::pdalboost::mpl::na,
+    class ReverseIteratorFromBaseConverter = ::pdalboost::mpl::na,
+    class ValueToBaseConverter             = ::pdalboost::mpl::na,
+    class ValueFromBaseConverter           = ::pdalboost::mpl::na,
+    class KeyToBaseConverter               = ::pdalboost::mpl::na,
 
     class FunctorsFromDerivedClasses = mpl::vector<>
 >
 class set_adaptor :
 
-    public ::boost::bimaps::container_adaptor::
+    public ::pdalboost::bimaps::container_adaptor::
                 ordered_associative_container_adaptor
     <
         Base,
@@ -62,7 +62,7 @@ class set_adaptor :
     >
 {
 
-    typedef ::boost::bimaps::container_adaptor::
+    typedef ::pdalboost::bimaps::container_adaptor::
                 ordered_associative_container_adaptor
     <
         Base,
@@ -92,7 +92,7 @@ class set_adaptor :
 
 } // namespace container_adaptor
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_CONTAINER_ADAPTOR_SET_ADAPTOR_HPP

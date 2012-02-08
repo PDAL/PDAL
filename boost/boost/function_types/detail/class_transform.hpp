@@ -18,7 +18,7 @@
 #include <boost/type_traits/add_pointer.hpp>
 #include <boost/type_traits/add_reference.hpp>
 
-namespace boost { namespace function_types { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace function_types { namespace detail {
 
 using mpl::placeholders::_;
 
@@ -43,20 +43,20 @@ template<typename T> struct class_transform< T, add_pointer<_> >
 { typedef T * type; };
 
 template<typename T> struct class_transform< T, remove_cv<_> >
-{ typedef typename boost::remove_cv<T>::type type; };
+{ typedef typename pdalboost::remove_cv<T>::type type; };
 
 template<typename T> struct class_transform< T, add_reference< remove_cv<_> > >
-{ typedef typename boost::remove_cv<T>::type & type; };
+{ typedef typename pdalboost::remove_cv<T>::type & type; };
 
 template<typename T> struct class_transform< T, add_pointer< remove_cv<_> > >
-{ typedef typename boost::remove_cv<T>::type * type; };
+{ typedef typename pdalboost::remove_cv<T>::type * type; };
 
 template<typename T, typename U> struct class_transform< T, mpl::always<U> >
 { typedef U type; };
 #endif
 
 
-} } } // namespace ::boost::function_types::detail
+} } } // namespace ::pdalboost::function_types::detail
 
 #endif
 

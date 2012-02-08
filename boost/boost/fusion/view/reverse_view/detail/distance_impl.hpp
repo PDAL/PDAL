@@ -10,7 +10,7 @@
 
 #include <boost/fusion/iterator/distance.hpp>
 
-namespace boost { namespace fusion {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion {
 
     struct reverse_view_iterator_tag;
 
@@ -35,7 +35,7 @@ namespace boost { namespace fusion {
                 static type
                 call(First const& first, Last const& last)
                 {
-                    return boost::fusion::distance(last.first, first.first);
+                    return pdalboost::fusion::distance(last.first, first.first);
                 }
             };
         };

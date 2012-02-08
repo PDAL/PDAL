@@ -20,7 +20,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail {
 
@@ -28,16 +28,16 @@ template <typename T>
 struct is_reference_impl
 {
    BOOST_STATIC_CONSTANT(bool, value =
-      (::boost::type_traits::ice_or<
-         ::boost::is_lvalue_reference<T>::value, ::boost::is_rvalue_reference<T>::value
+      (::pdalboost::type_traits::ice_or<
+         ::pdalboost::is_lvalue_reference<T>::value, ::pdalboost::is_rvalue_reference<T>::value
        >::value));
 };
 
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_reference,T,::boost::detail::is_reference_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_reference,T,::pdalboost::detail::is_reference_impl<T>::value)
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

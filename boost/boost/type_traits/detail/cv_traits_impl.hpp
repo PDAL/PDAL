@@ -20,11 +20,11 @@
 
 
 #if !(BOOST_WORKAROUND(__GNUC__,== 3) && BOOST_WORKAROUND(__GNUC_MINOR__, <= 2))
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail {
 #else
 #include <boost/type_traits/detail/yes_no_type.hpp>
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace type_traits {
 namespace gcc8503 {
 #endif
@@ -76,8 +76,8 @@ namespace detail {
 
 // Use the implementation above for non function pointers
 template <typename T, unsigned Select 
-  = (unsigned)sizeof(::boost::type_traits::gcc8503::mini_funcptr_tester((T)0)) >
-struct cv_traits_imp : public ::boost::type_traits::gcc8503::cv_traits_imp<T> { };
+  = (unsigned)sizeof(::pdalboost::type_traits::gcc8503::mini_funcptr_tester((T)0)) >
+struct cv_traits_imp : public ::pdalboost::type_traits::gcc8503::cv_traits_imp<T> { };
 
 // Functions are never cv-qualified
 template <typename T> struct cv_traits_imp<T*,1>
@@ -90,7 +90,7 @@ template <typename T> struct cv_traits_imp<T*,1>
 #endif
 
 } // namespace detail
-} // namespace boost 
+} // namespace pdalboost 
 
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 

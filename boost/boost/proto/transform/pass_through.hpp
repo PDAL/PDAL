@@ -22,7 +22,7 @@
 #include <boost/proto/transform/impl.hpp>
 #include <boost/proto/detail/ignore_unused.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace detail
     {
@@ -131,6 +131,6 @@ namespace boost { namespace proto
       : mpl::true_
     {};
 
-}} // namespace boost::proto
+}} // namespace pdalboost::proto
 
 #endif

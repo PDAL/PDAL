@@ -11,7 +11,7 @@
 #pragma once
 #endif
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     enum debug_handler_state
     {

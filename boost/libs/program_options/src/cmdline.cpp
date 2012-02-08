@@ -29,10 +29,10 @@
 
 #include <iostream>
 
-namespace boost { namespace program_options {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
 
     using namespace std;
-    using namespace boost::program_options::command_line_style;
+    using namespace pdalboost::program_options::command_line_style;
     
     invalid_syntax::
     invalid_syntax(const string& tokens, kind_t kind)
@@ -96,7 +96,7 @@ namespace boost { namespace program_options {
 }}
 
 
-namespace boost { namespace program_options { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options { namespace detail {
 
     // vc6 needs this, but borland chokes when this is added.
 #if BOOST_WORKAROUND(_MSC_VER, < 1300)
@@ -167,7 +167,7 @@ namespace boost { namespace program_options { namespace detail {
             error = "style disallows all characters for short options";
 
         if (error)
-            boost::throw_exception(invalid_command_line_style(error));
+            pdalboost::throw_exception(invalid_command_line_style(error));
 
         // Need to check that if guessing and long disguise are enabled
         // -f will mean the same as -foo
@@ -217,24 +217,24 @@ namespace boost { namespace program_options { namespace detail {
 
         if (m_additional_parser)
             style_parsers.push_back(
-                boost::bind(&cmdline::handle_additional_parser, this, _1));
+                pdalboost::bind(&cmdline::handle_additional_parser, this, _1));
 
         if (m_style & allow_long)
             style_parsers.push_back(
-                boost::bind(&cmdline::parse_long_option, this, _1));
+                pdalboost::bind(&cmdline::parse_long_option, this, _1));
 
         if ((m_style & allow_long_disguise))
             style_parsers.push_back(
-                boost::bind(&cmdline::parse_disguised_long_option, this, _1));
+                pdalboost::bind(&cmdline::parse_disguised_long_option, this, _1));
 
         if ((m_style & allow_short) && (m_style & allow_dash_for_short))
             style_parsers.push_back(
-                boost::bind(&cmdline::parse_short_option, this, _1));
+                pdalboost::bind(&cmdline::parse_short_option, this, _1));
 
         if ((m_style & allow_short) && (m_style & allow_slash_for_short))
-            style_parsers.push_back(boost::bind(&cmdline::parse_dos_option, this, _1));
+            style_parsers.push_back(pdalboost::bind(&cmdline::parse_dos_option, this, _1));
 
-        style_parsers.push_back(boost::bind(&cmdline::parse_terminator, this, _1));
+        style_parsers.push_back(pdalboost::bind(&cmdline::parse_terminator, this, _1));
 
         vector<option> result;
         while(!args.empty())
@@ -349,7 +349,7 @@ namespace boost { namespace program_options { namespace detail {
                 if (opt.position_key != -1) {
                     if (position >= m_positional->max_total_count())
                     {
-                        boost::throw_exception(too_many_positional_options_error());
+                        pdalboost::throw_exception(too_many_positional_options_error());
                     }
                     opt.string_key = m_positional->name_for_position(position);
                     ++position;
@@ -395,7 +395,7 @@ namespace boost { namespace program_options { namespace detail {
                 opt.unregistered = true;
                 return;
             } else {
-                boost::throw_exception(unknown_option(opt.string_key));
+                pdalboost::throw_exception(unknown_option(opt.string_key));
             }                
         }
         const option_description& d = *xd;
@@ -420,7 +420,7 @@ namespace boost { namespace program_options { namespace detail {
         {
             if (!opt.value.empty() && max_tokens == 0) 
             {
-                boost::throw_exception(invalid_command_line_syntax(opt.string_key,
+                pdalboost::throw_exception(invalid_command_line_syntax(opt.string_key,
                                              invalid_command_line_syntax::extra_parameter));
             }
             
@@ -455,7 +455,7 @@ namespace boost { namespace program_options { namespace detail {
                               is_style_active(long_case_insensitive),
                               is_style_active(short_case_insensitive));
                     if (od) 
-                        boost::throw_exception(invalid_command_line_syntax(opt.string_key,
+                        pdalboost::throw_exception(invalid_command_line_syntax(opt.string_key,
                                                     invalid_command_line_syntax::missing_parameter));
                 }
                 opt.value.push_back(other_tokens[0]);
@@ -465,7 +465,7 @@ namespace boost { namespace program_options { namespace detail {
         }
         else
         {
-            boost::throw_exception(invalid_command_line_syntax(opt.string_key,
+            pdalboost::throw_exception(invalid_command_line_syntax(opt.string_key,
                                             invalid_command_line_syntax::missing_parameter)); 
 
         }
@@ -486,7 +486,7 @@ namespace boost { namespace program_options { namespace detail {
                 name = tok.substr(2, p-2);
                 adjacent = tok.substr(p+1);
                 if (adjacent.empty())
-                    boost::throw_exception( invalid_command_line_syntax(name,
+                    pdalboost::throw_exception( invalid_command_line_syntax(name,
                                                       invalid_command_line_syntax::empty_adjacent_parameter) );
             }
             else

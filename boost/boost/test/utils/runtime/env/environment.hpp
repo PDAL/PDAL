@@ -35,7 +35,7 @@
 // Boost
 #include <boost/optional.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -57,7 +57,7 @@ init_new_var( cstring var_name, Modifiers m = nfp::no_params )
 
     if( !str_value.is_empty() ) {
         try {
-            boost::optional<T> value;
+            pdalboost::optional<T> value;
 
             if( m.has( interpreter ) )
                 m[interpreter]( str_value, value );
@@ -146,7 +146,7 @@ namespace environment {
 
     template<typename T>
     inline void
-    get( cstring var_name, boost::optional<T>& res )
+    get( cstring var_name, pdalboost::optional<T>& res )
     {
         variable<T> const& v = environment::var<T>( var_name );
         v.value( res );
@@ -160,7 +160,7 @@ namespace env = environment;
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #ifndef BOOST_RT_PARAM_OFFLINE
 

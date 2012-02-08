@@ -35,7 +35,7 @@
 #pragma warning(disable : 4610) // can never be instantiated - user defined constructor required
 #endif
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace detail
     {
@@ -245,7 +245,7 @@ namespace boost { namespace proto
     {};
 }}
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     namespace extension
     {
@@ -642,7 +642,7 @@ namespace boost { namespace fusion
 
 }}
 
-namespace boost { namespace mpl
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl
 {
     template<typename Tag, typename Args, long Arity>
     struct sequence_tag< proto::expr<Tag, Args, Arity> >

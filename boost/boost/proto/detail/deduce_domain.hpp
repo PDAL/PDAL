@@ -28,11 +28,10 @@
 #include <boost/proto/proto_fwd.hpp>
 
 #ifndef BOOST_PROTO_ASSERT_VALID_DOMAIN
-# define BOOST_PROTO_ASSERT_VALID_DOMAIN(DOM) BOOST_MPL_ASSERT_NOT((boost::is_same<DOM, boost::proto::detail::not_a_domain>))
+# define BOOST_PROTO_ASSERT_VALID_DOMAIN(DOM) BOOST_MPL_ASSERT_NOT((pdalboost::is_same<DOM, pdalboost::proto::detail::not_a_domain>))
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace proto
     {
         namespace detail

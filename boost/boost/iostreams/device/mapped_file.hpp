@@ -34,7 +34,7 @@
 // Must come last.
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 //------------------Definition of mapped_file_base and mapped_file_params-----//
 
@@ -102,8 +102,8 @@ public:
 // This template allows Boost.Filesystem paths to be specified when creating or
 // reopening a memory mapped file, without creating a dependence on
 // Boost.Filesystem. Possible values of Path include std::string,
-// boost::filesystem::path, boost::filesystem::wpath, 
-// and boost::iostreams::detail::path (used to store either a std::string or a
+// pdalboost::filesystem::path, pdalboost::filesystem::wpath, 
+// and pdalboost::iostreams::detail::path (used to store either a std::string or a
 // std::wstring).
 template<typename Path>
 struct basic_mapped_file_params 
@@ -112,7 +112,7 @@ struct basic_mapped_file_params
     typedef detail::mapped_file_params_base base_type;
 
     // For wide paths, instantiate basic_mapped_file_params 
-    // with boost::filesystem::wpath
+    // with pdalboost::filesystem::wpath
 #ifndef BOOST_IOSTREAMS_NO_WIDE_STREAMS
     BOOST_STATIC_ASSERT((!is_same<Path, std::wstring>::value));
 #endif
@@ -154,7 +154,7 @@ private:
     typedef basic_mapped_file_params<detail::path>  param_type;
     friend class mapped_file;
     friend class detail::mapped_file_impl;
-    friend struct boost::iostreams::operations<mapped_file_source>;
+    friend struct pdalboost::iostreams::operations<mapped_file_source>;
 public:
     typedef char                                    char_type;
     struct category
@@ -177,7 +177,7 @@ public:
     template<typename Path>
     explicit mapped_file_source( const Path& path,
                                  size_type length = max_length,
-                                 boost::intmax_t offset = 0 );
+                                 pdalboost::intmax_t offset = 0 );
 
     // Copy Constructor
     mapped_file_source(const mapped_file_source& other);
@@ -190,7 +190,7 @@ public:
     template<typename Path>
     void open( const Path& path,
                size_type length = max_length,
-               boost::intmax_t offset = 0 );
+               pdalboost::intmax_t offset = 0 );
 
     bool is_open() const;
     void close();
@@ -215,7 +215,7 @@ private:
     void init();
     void open_impl(const param_type& p);
 
-    boost::shared_ptr<impl_type> pimpl_;
+    pdalboost::shared_ptr<impl_type> pimpl_;
 };
 
 //------------------Definition of mapped_file---------------------------------//
@@ -225,7 +225,7 @@ private:
     typedef mapped_file_source                      delegate_type;
     typedef delegate_type::safe_bool                safe_bool;
     typedef basic_mapped_file_params<detail::path>  param_type;
-    friend struct boost::iostreams::operations<mapped_file >;
+    friend struct pdalboost::iostreams::operations<mapped_file >;
     friend class mapped_file_sink;
 public:
     typedef char                                    char_type;
@@ -325,7 +325,7 @@ private:
 
 class BOOST_IOSTREAMS_DECL mapped_file_sink : private mapped_file {
 public:
-    friend struct boost::iostreams::operations<mapped_file_sink>;
+    friend struct pdalboost::iostreams::operations<mapped_file_sink>;
     using mapped_file::mapmode;
     using mapped_file::readonly;
     using mapped_file::readwrite;
@@ -362,7 +362,7 @@ public:
     template<typename Path>
     explicit mapped_file_sink( const Path& path,
                                size_type length = max_length,
-                               boost::intmax_t offset = 0,
+                               pdalboost::intmax_t offset = 0,
                                mapmode flags = readwrite );
 
     // Copy Constructor
@@ -376,7 +376,7 @@ public:
     template<typename Path>
     void open( const Path& path,
                size_type length = max_length,
-               boost::intmax_t offset = 0,
+               pdalboost::intmax_t offset = 0,
                mapmode flags = readwrite );
 };
 
@@ -388,7 +388,7 @@ mapped_file_source::mapped_file_source(const basic_mapped_file_params<Path>& p)
 
 template<typename Path>
 mapped_file_source::mapped_file_source( 
-    const Path& path, size_type length, boost::intmax_t offset)
+    const Path& path, size_type length, pdalboost::intmax_t offset)
 { init(); open(path, length, offset); }
 
 template<typename Path>
@@ -397,10 +397,10 @@ void mapped_file_source::open(const basic_mapped_file_params<Path>& p)
     param_type params(p);
     if (params.flags) {
         if (params.flags != mapped_file::readonly)
-            boost::throw_exception(BOOST_IOSTREAMS_FAILURE("invalid flags"));
+            pdalboost::throw_exception(BOOST_IOSTREAMS_FAILURE("invalid flags"));
     } else {
         if (params.mode & BOOST_IOS::out)
-            boost::throw_exception(BOOST_IOSTREAMS_FAILURE("invalid mode"));
+            pdalboost::throw_exception(BOOST_IOSTREAMS_FAILURE("invalid mode"));
         params.mode |= BOOST_IOS::in;
     }
     open_impl(params);
@@ -408,7 +408,7 @@ void mapped_file_source::open(const basic_mapped_file_params<Path>& p)
 
 template<typename Path>
 void mapped_file_source::open(
-    const Path& path, size_type length, boost::intmax_t offset)
+    const Path& path, size_type length, pdalboost::intmax_t offset)
 {
     param_type p(path);
     p.length = length;
@@ -474,7 +474,7 @@ mapped_file_sink::mapped_file_sink(const basic_mapped_file_params<Path>& p)
 template<typename Path>
 mapped_file_sink::mapped_file_sink(
     const Path& path, size_type length,
-    boost::intmax_t offset, mapmode flags )
+    pdalboost::intmax_t offset, mapmode flags )
 { open(path, length, offset, flags); }
 
 template<typename Path>
@@ -483,10 +483,10 @@ void mapped_file_sink::open(const basic_mapped_file_params<Path>& p)
     param_type params(p);
     if (params.flags) {
         if (params.flags & mapped_file::readonly)
-            boost::throw_exception(BOOST_IOSTREAMS_FAILURE("invalid flags"));
+            pdalboost::throw_exception(BOOST_IOSTREAMS_FAILURE("invalid flags"));
     } else {
         if (params.mode & BOOST_IOS::in)
-            boost::throw_exception(BOOST_IOSTREAMS_FAILURE("invalid mode"));
+            pdalboost::throw_exception(BOOST_IOSTREAMS_FAILURE("invalid mode"));
         params.mode |= BOOST_IOS::out;
     }
     mapped_file::open(params);
@@ -495,7 +495,7 @@ void mapped_file_sink::open(const basic_mapped_file_params<Path>& p)
 template<typename Path>
 void mapped_file_sink::open(
     const Path& path, size_type length,
-    boost::intmax_t offset, mapmode flags )
+    pdalboost::intmax_t offset, mapmode flags )
 {
     param_type p(path);
     p.flags = flags;
@@ -508,7 +508,7 @@ void mapped_file_sink::open(
 
 template<>
 struct operations<mapped_file_source>
-    : boost::iostreams::detail::close_impl<closable_tag>
+    : pdalboost::iostreams::detail::close_impl<closable_tag>
 {
     static std::pair<char*, char*>
     input_sequence(mapped_file_source& src)
@@ -520,7 +520,7 @@ struct operations<mapped_file_source>
 
 template<>
 struct operations<mapped_file>
-    : boost::iostreams::detail::close_impl<closable_tag>
+    : pdalboost::iostreams::detail::close_impl<closable_tag>
 {
     static std::pair<char*, char*>
     input_sequence(mapped_file& file)
@@ -536,7 +536,7 @@ struct operations<mapped_file>
 
 template<>
 struct operations<mapped_file_sink>
-    : boost::iostreams::detail::close_impl<closable_tag>
+    : pdalboost::iostreams::detail::close_impl<closable_tag>
 {
     static std::pair<char*, char*>
     output_sequence(mapped_file_sink& sink)

@@ -34,8 +34,7 @@
 # define BOOST_FILESYSTEM_C_STR c_str()
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace filesystem3
 {
 
@@ -176,12 +175,11 @@ namespace filesystem3
   typedef basic_fstream<wchar_t> wfstream;
   
 } // namespace filesystem3
-} // namespace boost
+} // namespace pdalboost
 
 //----------------------------------------------------------------------------//
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem
   {
     using filesystem3::filebuf;

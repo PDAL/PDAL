@@ -17,9 +17,9 @@
 
 #include <boost/integer_fwd.hpp>  // self include
 
-#include <boost/integer_traits.hpp>  // for boost::::boost::integer_traits
+#include <boost/integer_traits.hpp>  // for pdalboost::::pdalboost::integer_traits
 #include <boost/limits.hpp>          // for ::std::numeric_limits
-#include <boost/cstdint.hpp>         // for boost::int64_t and BOOST_NO_INTEGRAL_INT64_T
+#include <boost/cstdint.hpp>         // for pdalboost::int64_t and BOOST_NO_INTEGRAL_INT64_T
 
 //
 // We simply cannot include this header on gcc without getting copious warnings of the kind:
@@ -33,8 +33,7 @@
 #pragma GCC system_header
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
   //  Helper templates  ------------------------------------------------------//
 
@@ -56,7 +55,7 @@ namespace boost
   //     6=unsigned long, 7=unsigned int, 8=unsigned short, 9=unsigned char
   //  no specializations for 0 and 5: requests for a type > long are in error
 #ifdef BOOST_HAS_LONG_LONG
-  template<> struct int_least_helper<1> { typedef boost::long_long_type least; };
+  template<> struct int_least_helper<1> { typedef pdalboost::long_long_type least; };
 #elif defined(BOOST_HAS_MS_INT64)
   template<> struct int_least_helper<1> { typedef __int64 least; };
 #endif
@@ -65,7 +64,7 @@ namespace boost
   template<> struct int_least_helper<4> { typedef short least; };
   template<> struct int_least_helper<5> { typedef signed char least; };
 #ifdef BOOST_HAS_LONG_LONG
-  template<> struct int_least_helper<6> { typedef boost::ulong_long_type least; };
+  template<> struct int_least_helper<6> { typedef pdalboost::ulong_long_type least; };
 #elif defined(BOOST_HAS_MS_INT64)
   template<> struct int_least_helper<6> { typedef unsigned __int64 least; };
 #endif
@@ -98,8 +97,8 @@ namespace boost
     (defined(ULONG_LONG_MAX) && (ULONG_LONG_MAX != ULONG_MAX)) ||\
     (defined(ULONGLONG_MAX) && (ULONGLONG_MAX != ULONG_MAX)) ||\
     (defined(_ULLONG_MAX) && (_ULLONG_MAX != ULONG_MAX)))
-  template <> struct exact_signed_base_helper<sizeof(boost::long_long_type)* CHAR_BIT> { typedef boost::long_long_type exact; };
-  template <> struct exact_unsigned_base_helper<sizeof(boost::ulong_long_type)* CHAR_BIT> { typedef boost::ulong_long_type exact; };
+  template <> struct exact_signed_base_helper<sizeof(pdalboost::long_long_type)* CHAR_BIT> { typedef pdalboost::long_long_type exact; };
+  template <> struct exact_unsigned_base_helper<sizeof(pdalboost::ulong_long_type)* CHAR_BIT> { typedef pdalboost::ulong_long_type exact; };
 #endif
 
 
@@ -114,7 +113,7 @@ namespace boost
       typedef typename detail::int_least_helper
         <
 #ifdef BOOST_HAS_LONG_LONG
-          (Bits-1 <= (int)(sizeof(boost::long_long_type) * CHAR_BIT)) +
+          (Bits-1 <= (int)(sizeof(pdalboost::long_long_type) * CHAR_BIT)) +
 #else
            1 +
 #endif
@@ -138,13 +137,13 @@ namespace boost
           (Bits <= ::std::numeric_limits<unsigned int>::digits) +
           (Bits <= ::std::numeric_limits<unsigned short>::digits) +
           (Bits <= ::std::numeric_limits<unsigned char>::digits));
-     typedef typename detail::int_least_helper< ::boost::uint_t<Bits>::s>::least least;
+     typedef typename detail::int_least_helper< ::pdalboost::uint_t<Bits>::s>::least least;
 #else
       typedef typename detail::int_least_helper
         < 
           5 +
 #ifdef BOOST_HAS_LONG_LONG
-          (Bits-1 <= (int)(sizeof(boost::long_long_type) * CHAR_BIT)) +
+          (Bits-1 <= (int)(sizeof(pdalboost::long_long_type) * CHAR_BIT)) +
 #else
            1 +
 #endif
@@ -162,7 +161,7 @@ namespace boost
 
   //  signed
 #if !defined(BOOST_NO_INTEGRAL_INT64_T) && defined(BOOST_HAS_LONG_LONG)
-  template< boost::long_long_type MaxValue >   // maximum value to require support
+  template< pdalboost::long_long_type MaxValue >   // maximum value to require support
 #else
   template< long MaxValue >   // maximum value to require support
 #endif
@@ -171,20 +170,20 @@ namespace boost
       typedef typename detail::int_least_helper
         <
 #if !defined(BOOST_NO_INTEGRAL_INT64_T) && defined(BOOST_HAS_LONG_LONG)
-          (MaxValue <= ::boost::integer_traits<boost::long_long_type>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<pdalboost::long_long_type>::const_max) +
 #else
            1 +
 #endif
-          (MaxValue <= ::boost::integer_traits<long>::const_max) +
-          (MaxValue <= ::boost::integer_traits<int>::const_max) +
-          (MaxValue <= ::boost::integer_traits<short>::const_max) +
-          (MaxValue <= ::boost::integer_traits<signed char>::const_max)
+          (MaxValue <= ::pdalboost::integer_traits<long>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<int>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<short>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<signed char>::const_max)
         >::least  least;
       typedef typename int_fast_t<least>::type  fast;
   };
 
 #if !defined(BOOST_NO_INTEGRAL_INT64_T) && defined(BOOST_HAS_LONG_LONG)
-  template< boost::long_long_type MinValue >   // minimum value to require support
+  template< pdalboost::long_long_type MinValue >   // minimum value to require support
 #else
   template< long MinValue >   // minimum value to require support
 #endif
@@ -193,21 +192,21 @@ namespace boost
       typedef typename detail::int_least_helper
         <
 #if !defined(BOOST_NO_INTEGRAL_INT64_T) && defined(BOOST_HAS_LONG_LONG)
-          (MinValue >= ::boost::integer_traits<boost::long_long_type>::const_min) +
+          (MinValue >= ::pdalboost::integer_traits<pdalboost::long_long_type>::const_min) +
 #else
            1 +
 #endif
-          (MinValue >= ::boost::integer_traits<long>::const_min) +
-          (MinValue >= ::boost::integer_traits<int>::const_min) +
-          (MinValue >= ::boost::integer_traits<short>::const_min) +
-          (MinValue >= ::boost::integer_traits<signed char>::const_min)
+          (MinValue >= ::pdalboost::integer_traits<long>::const_min) +
+          (MinValue >= ::pdalboost::integer_traits<int>::const_min) +
+          (MinValue >= ::pdalboost::integer_traits<short>::const_min) +
+          (MinValue >= ::pdalboost::integer_traits<signed char>::const_min)
         >::least  least;
       typedef typename int_fast_t<least>::type  fast;
   };
 
   //  unsigned
 #if !defined(BOOST_NO_INTEGRAL_INT64_T) && defined(BOOST_HAS_LONG_LONG)
-  template< boost::ulong_long_type MaxValue >   // minimum value to require support
+  template< pdalboost::ulong_long_type MaxValue >   // minimum value to require support
 #else
   template< unsigned long MaxValue >   // minimum value to require support
 #endif
@@ -218,40 +217,40 @@ namespace boost
 #if defined(BOOST_NO_INTEGRAL_INT64_T)
       BOOST_STATIC_CONSTANT(unsigned, which = 
            6 +
-          (MaxValue <= ::boost::integer_traits<unsigned long>::const_max) +
-          (MaxValue <= ::boost::integer_traits<unsigned int>::const_max) +
-          (MaxValue <= ::boost::integer_traits<unsigned short>::const_max) +
-          (MaxValue <= ::boost::integer_traits<unsigned char>::const_max));
-      typedef typename detail::int_least_helper< ::boost::uint_value_t<MaxValue>::which>::least least;
+          (MaxValue <= ::pdalboost::integer_traits<unsigned long>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<unsigned int>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<unsigned short>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<unsigned char>::const_max));
+      typedef typename detail::int_least_helper< ::pdalboost::uint_value_t<MaxValue>::which>::least least;
 #else // BOOST_NO_INTEGRAL_INT64_T
       BOOST_STATIC_CONSTANT(unsigned, which = 
            5 +
-          (MaxValue <= ::boost::integer_traits<boost::ulong_long_type>::const_max) +
-          (MaxValue <= ::boost::integer_traits<unsigned long>::const_max) +
-          (MaxValue <= ::boost::integer_traits<unsigned int>::const_max) +
-          (MaxValue <= ::boost::integer_traits<unsigned short>::const_max) +
-          (MaxValue <= ::boost::integer_traits<unsigned char>::const_max));
-      typedef typename detail::int_least_helper< ::boost::uint_value_t<MaxValue>::which>::least least;
+          (MaxValue <= ::pdalboost::integer_traits<pdalboost::ulong_long_type>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<unsigned long>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<unsigned int>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<unsigned short>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<unsigned char>::const_max));
+      typedef typename detail::int_least_helper< ::pdalboost::uint_value_t<MaxValue>::which>::least least;
 #endif // BOOST_NO_INTEGRAL_INT64_T
 #else
       typedef typename detail::int_least_helper
         < 
           5 +
 #if !defined(BOOST_NO_INTEGRAL_INT64_T) && defined(BOOST_HAS_LONG_LONG)
-          (MaxValue <= ::boost::integer_traits<boost::ulong_long_type>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<pdalboost::ulong_long_type>::const_max) +
 #else
            1 +
 #endif
-          (MaxValue <= ::boost::integer_traits<unsigned long>::const_max) +
-          (MaxValue <= ::boost::integer_traits<unsigned int>::const_max) +
-          (MaxValue <= ::boost::integer_traits<unsigned short>::const_max) +
-          (MaxValue <= ::boost::integer_traits<unsigned char>::const_max)
+          (MaxValue <= ::pdalboost::integer_traits<unsigned long>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<unsigned int>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<unsigned short>::const_max) +
+          (MaxValue <= ::pdalboost::integer_traits<unsigned char>::const_max)
         >::least  least;
 #endif
       typedef typename int_fast_t<least>::type  fast;
   };
 
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // BOOST_INTEGER_HPP

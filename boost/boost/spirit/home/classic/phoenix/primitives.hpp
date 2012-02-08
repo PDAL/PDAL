@@ -12,7 +12,7 @@
 #include <boost/spirit/home/classic/phoenix/actor.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace phoenix {
+namespace pdalboostphoenix {
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -113,7 +113,7 @@ actor<argument<14> > const arg15 = argument<14>();
 template <typename T>
 struct value {
 
-    typedef typename boost::remove_reference<T>::type plain_t;
+    typedef typename pdalboost::remove_reference<T>::type plain_t;
 
     template <typename TupleT>
     struct result { typedef plain_t const type; };
@@ -251,6 +251,6 @@ void
 const_(actor<BaseT> const& v);  //  This is undefined and not allowed.
 
 ///////////////////////////////////////////////////////////////////////////////
-}   //  namespace phoenix
+}   //  namespace pdalboostphoenix
 
 #endif

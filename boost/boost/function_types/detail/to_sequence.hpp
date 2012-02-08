@@ -17,7 +17,7 @@
 
 #include <boost/function_types/is_callable_builtin.hpp>
 
-namespace boost { namespace function_types { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace function_types { namespace detail {
 
 // wrap first arguments in components, if callable builtin type
 template<typename T>
@@ -41,7 +41,7 @@ struct to_sequence< components<T,U> >
 };
 #endif
 
-} } } // namespace ::boost::function_types::detail
+} } } // namespace ::pdalboost::function_types::detail
 
 #endif
 

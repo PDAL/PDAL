@@ -17,8 +17,7 @@
 #include <utility>
 
 
-namespace boost 
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace range_detail
     {          
         using type_traits::yes_type;

@@ -40,12 +40,12 @@
 #define BOOST_PROTO_DISABLE_MSVC_C4522 
 #endif
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     #ifdef __GNUC__
     /// INTERNAL ONLY
     ///
-    # define BOOST_PROTO_ADDROF(x) ((char const volatile*)boost::addressof(x))
+    # define BOOST_PROTO_ADDROF(x) ((char const volatile*)pdalboost::addressof(x))
     /// INTERNAL ONLY
     ///
     # define BOOST_PROTO_OFFSETOF(s,m) (BOOST_PROTO_ADDROF((((s *)this)->m)) - BOOST_PROTO_ADDROF(*((s *)this)))
@@ -77,7 +77,7 @@ namespace boost { namespace proto
         BOOST_PP_IF(N, BOOST_PROTO_TEMPLATE_YES_, BOOST_PROTO_TEMPLATE_NO_)(Z, N)                   \
         typename BOOST_PROTO_RESULT_OF<                                                             \
             proto_generator(                                                                        \
-                typename boost::proto::result_of::BOOST_PP_CAT(funop, N)<                           \
+                typename pdalboost::proto::result_of::BOOST_PP_CAT(funop, N)<                           \
                     proto_derived_expr Const()                                                      \
                   , proto_domain                                                                    \
                     BOOST_PP_ENUM_TRAILING_PARAMS_Z(Z, N, const A)                                  \
@@ -86,7 +86,7 @@ namespace boost { namespace proto
         >::type const                                                                               \
         operator ()(BOOST_PP_ENUM_BINARY_PARAMS_Z(Z, N, A, const &a)) Const()                       \
         {                                                                                           \
-            typedef boost::proto::result_of::BOOST_PP_CAT(funop, N)<                                \
+            typedef pdalboost::proto::result_of::BOOST_PP_CAT(funop, N)<                                \
                 proto_derived_expr Const()                                                          \
               , proto_domain                                                                        \
                 BOOST_PP_ENUM_TRAILING_PARAMS_Z(Z, N, const A)                                      \
@@ -106,7 +106,7 @@ namespace boost { namespace proto
         template<typename... A>                                                                     \
         typename BOOST_PROTO_RESULT_OF<                                                             \
             proto_generator(                                                                        \
-                typename boost::proto::result_of::funop<                                            \
+                typename pdalboost::proto::result_of::funop<                                            \
                     proto_derived_expr Const()(A const &...)                                        \
                   , proto_derived_expr                                                              \
                   , proto_domain                                                                    \
@@ -115,7 +115,7 @@ namespace boost { namespace proto
         >::type const                                                                               \
         operator ()(A const &...a) Const()                                                          \
         {                                                                                           \
-            typedef boost::proto::result_of::funop<                                                 \
+            typedef pdalboost::proto::result_of::funop<                                                 \
                 proto_derived_expr Const()(A const &...)                                            \
               , proto_derived_expr                                                                  \
               , proto_domain                                                                        \
@@ -171,7 +171,7 @@ namespace boost { namespace proto
         typedef typename proto_base_expr::address_of_hack_type_ proto_address_of_hack_type_;        \
         typedef void proto_is_expr_; /**< INTERNAL ONLY */                                          \
         static const long proto_arity_c = proto_base_expr::proto_arity_c;                           \
-        typedef boost::proto::tag::proto_expr fusion_tag;                                           \
+        typedef pdalboost::proto::tag::proto_expr fusion_tag;                                           \
         BOOST_PP_REPEAT(BOOST_PROTO_MAX_ARITY, BOOST_PROTO_EXTENDS_CHILD, ~)                        \
                                                                                                     \
         static proto_derived_expr const make(Expr const &e)                                         \
@@ -192,7 +192,7 @@ namespace boost { namespace proto
                                                                                                     \
         operator proto_address_of_hack_type_() const                                                \
         {                                                                                           \
-            return boost::addressof(this->proto_base().child0);                                     \
+            return pdalboost::addressof(this->proto_base().child0);                                     \
         }                                                                                           \
         /**/
 
@@ -205,10 +205,10 @@ namespace boost { namespace proto
         BOOST_PROTO_DISABLE_MSVC_C4522                                                              \
         Typename() BOOST_PROTO_RESULT_OF<                                                           \
             Typename() This::proto_generator(                                                       \
-                Typename() boost::proto::base_expr<                                                 \
+                Typename() pdalboost::proto::base_expr<                                                 \
                     Typename() This::proto_domain                                                   \
-                  , boost::proto::tag::assign                                                       \
-                  , boost::proto::list2<                                                            \
+                  , pdalboost::proto::tag::assign                                                       \
+                  , pdalboost::proto::list2<                                                            \
                         This &                                                                      \
                       , This Const() &                                                              \
                     >                                                                               \
@@ -218,10 +218,10 @@ namespace boost { namespace proto
         operator =(This Const() &a)                                                                 \
         {                                                                                           \
             typedef                                                                                 \
-                Typename() boost::proto::base_expr<                                                 \
+                Typename() pdalboost::proto::base_expr<                                                 \
                     Typename() This::proto_domain                                                   \
-                  , boost::proto::tag::assign                                                       \
-                  , boost::proto::list2<                                                            \
+                  , pdalboost::proto::tag::assign                                                       \
+                  , pdalboost::proto::list2<                                                            \
                         This &                                                                      \
                       , This Const() &                                                              \
                     >                                                                               \
@@ -254,12 +254,12 @@ namespace boost { namespace proto
         template<typename A>                                                                        \
         typename BOOST_PROTO_RESULT_OF<                                                             \
             proto_generator(                                                                        \
-                typename boost::proto::base_expr<                                                   \
+                typename pdalboost::proto::base_expr<                                                   \
                     proto_domain                                                                    \
-                  , boost::proto::tag::assign                                                       \
-                  , boost::proto::list2<                                                            \
+                  , pdalboost::proto::tag::assign                                                       \
+                  , pdalboost::proto::list2<                                                            \
                         proto_derived_expr ThisConst() &                                            \
-                      , typename boost::proto::result_of::as_child<A ThatConst(), proto_domain>::type \
+                      , typename pdalboost::proto::result_of::as_child<A ThatConst(), proto_domain>::type \
                     >                                                                               \
                 >::type                                                                             \
             )                                                                                       \
@@ -267,18 +267,18 @@ namespace boost { namespace proto
         operator =(A ThatConst() &a) ThisConst()                                                    \
         {                                                                                           \
             typedef                                                                                 \
-                typename boost::proto::base_expr<                                                   \
+                typename pdalboost::proto::base_expr<                                                   \
                     proto_domain                                                                    \
-                  , boost::proto::tag::assign                                                       \
-                  , boost::proto::list2<                                                            \
+                  , pdalboost::proto::tag::assign                                                       \
+                  , pdalboost::proto::list2<                                                            \
                         proto_derived_expr ThisConst() &                                            \
-                      , typename boost::proto::result_of::as_child<A ThatConst(), proto_domain>::type \
+                      , typename pdalboost::proto::result_of::as_child<A ThatConst(), proto_domain>::type \
                     >                                                                               \
                 >::type                                                                             \
             that_type;                                                                              \
             that_type const that = {                                                                \
                 *static_cast<proto_derived_expr ThisConst() *>(this)                                \
-              , boost::proto::as_child<proto_domain>(a)                                             \
+              , pdalboost::proto::as_child<proto_domain>(a)                                             \
             };                                                                                      \
             return proto_generator()(that);                                                         \
         }                                                                                           \
@@ -320,12 +320,12 @@ namespace boost { namespace proto
         template<typename A>                                                                        \
         typename BOOST_PROTO_RESULT_OF<                                                             \
             proto_generator(                                                                        \
-                typename boost::proto::base_expr<                                                   \
+                typename pdalboost::proto::base_expr<                                                   \
                     proto_domain                                                                    \
-                  , boost::proto::tag::subscript                                                    \
-                  , boost::proto::list2<                                                            \
+                  , pdalboost::proto::tag::subscript                                                    \
+                  , pdalboost::proto::list2<                                                            \
                         proto_derived_expr ThisConst() &                                            \
-                      , typename boost::proto::result_of::as_child<A ThatConst(), proto_domain>::type \
+                      , typename pdalboost::proto::result_of::as_child<A ThatConst(), proto_domain>::type \
                     >                                                                               \
                 >::type                                                                             \
             )                                                                                       \
@@ -333,18 +333,18 @@ namespace boost { namespace proto
         operator [](A ThatConst() &a) ThisConst()                                                   \
         {                                                                                           \
             typedef                                                                                 \
-                typename boost::proto::base_expr<                                                   \
+                typename pdalboost::proto::base_expr<                                                   \
                     proto_domain                                                                    \
-                  , boost::proto::tag::subscript                                                    \
-                  , boost::proto::list2<                                                            \
+                  , pdalboost::proto::tag::subscript                                                    \
+                  , pdalboost::proto::list2<                                                            \
                         proto_derived_expr ThisConst() &                                            \
-                      , typename boost::proto::result_of::as_child<A ThatConst(), proto_domain>::type \
+                      , typename pdalboost::proto::result_of::as_child<A ThatConst(), proto_domain>::type \
                     >                                                                               \
                 >::type                                                                             \
             that_type;                                                                              \
             that_type const that = {                                                                \
                 *static_cast<proto_derived_expr ThisConst() *>(this)                                \
-              , boost::proto::as_child<proto_domain>(a)                                             \
+              , pdalboost::proto::as_child<proto_domain>(a)                                             \
             };                                                                                      \
             return proto_generator()(that);                                                         \
         }                                                                                           \
@@ -374,7 +374,7 @@ namespace boost { namespace proto
             typedef                                                                                 \
                 typename BOOST_PROTO_RESULT_OF<                                                     \
                     proto_generator(                                                                \
-                        typename boost::proto::result_of::funop<                                    \
+                        typename pdalboost::proto::result_of::funop<                                    \
                             Sig                                                                     \
                           , proto_derived_expr                                                      \
                           , proto_domain                                                            \
@@ -557,7 +557,7 @@ namespace boost { namespace proto
             typedef detail::not_a_valid_type proto_address_of_hack_type_;
             typedef void proto_is_expr_; /**< INTERNAL ONLY */
             static const long proto_arity_c = 2;
-            typedef boost::proto::tag::proto_expr fusion_tag;
+            typedef pdalboost::proto::tag::proto_expr fusion_tag;
             typedef This &proto_child0;
             typedef expr<tag::terminal, term<Fun> > const &proto_child1;
             typedef expr<proto_tag, proto_args, proto_arity_c> proto_base_expr;
@@ -596,7 +596,7 @@ namespace boost { namespace proto
         /// INTERNAL ONLY
         ///
         #define BOOST_PROTO_EXTENDS_MEMBER_(R, DOMAIN, ELEM)                                            \
-            boost::proto::exprns_::virtual_member<                                                      \
+            pdalboost::proto::exprns_::virtual_member<                                                      \
                 proto_derived_expr                                                                      \
               , BOOST_PP_TUPLE_ELEM(2, 0, ELEM)                                                         \
               , DOMAIN                                                                                  \

@@ -31,7 +31,7 @@
 #  include "lpath.hpp"
 #endif
 
-namespace fs = boost::filesystem;
+namespace fs = pdalboost::filesystem;
 
 #include <boost/config.hpp>
 #ifdef BOOST_NO_STDC_NAMESPACE
@@ -65,7 +65,7 @@ namespace
 #  else
     std::cout << "<note>\n";
     std::cout <<
-      "VC++6.0 does not support boost::filesystem open()\n";
+      "VC++6.0 does not support pdalboost::filesystem open()\n";
 #  endif
     {
       std::cout << " in test 3\n";
@@ -180,5 +180,5 @@ int cpp_main( int argc, char*[] )
 
 #endif
 
-  return ::boost::report_errors();
+  return ::pdalboost::report_errors();
 }

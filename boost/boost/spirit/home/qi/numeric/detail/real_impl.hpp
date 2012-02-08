@@ -28,7 +28,7 @@
 # pragma warning(disable: 4127)   // conditional expression is constant
 #endif
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     using spirit::traits::pow10;
 
@@ -123,7 +123,7 @@ namespace boost { namespace spirit { namespace traits
     }
 }}}
 
-namespace boost { namespace spirit { namespace qi  { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi  { namespace detail
 {
     template <typename T, typename RealPolicies>
     struct real_impl

@@ -5,7 +5,7 @@
 
 // Provides std::char_traits for libraries without templated streams. Should not
 // be confused with <boost/iostreams/char_traits.hpp>, which defines the
-// template boost::iostreams::char_traits.
+// template pdalboost::iostreams::char_traits.
 
 // See http://www.boost.org/libs/iostreams for documentation.
 
@@ -28,9 +28,9 @@
 #ifndef BOOST_IOSTREAMS_NO_STREAM_TEMPLATES //--------------------------------//
 # define BOOST_IOSTREAMS_CHAR_TRAITS(ch) std::char_traits< ch >
 #else
-# define BOOST_IOSTREAMS_CHAR_TRAITS(ch) boost::iostreams::detail::char_traits
+# define BOOST_IOSTREAMS_CHAR_TRAITS(ch) pdalboost::iostreams::detail::char_traits
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 struct char_traits  {
     typedef char            char_type;

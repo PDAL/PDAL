@@ -65,13 +65,13 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
 
             BOOST_PP_REPEAT(BOOST_PHOENIX_ITERATION, M0, _)
 
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(BOOST_PHOENIX_A, context_type)
                 >::type
                 result_type;
@@ -85,7 +85,7 @@
                 return
                     Fun()(
                         BOOST_PP_REPEAT(BOOST_PHOENIX_ITERATION, M1, _)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };

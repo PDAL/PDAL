@@ -24,22 +24,22 @@
 #   define BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE_OPEN namespace mpl_ {
 #   define BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE_CLOSE }
 #   define BOOST_MPL_AUX_ADL_BARRIER_DECL(type) \
-    namespace boost { namespace mpl { \
+    namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { \
     using ::BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE::type; \
     } } \
 /**/
 
 #if !defined(BOOST_MPL_PREPROCESSING_MODE)
 namespace BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE { namespace aux {} }
-namespace boost { namespace mpl { using namespace BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE; 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { using namespace BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE; 
 namespace aux { using namespace BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE::aux; }
 }}
 #endif
 
 #else // BOOST_MPL_CFG_NO_ADL_BARRIER_NAMESPACE
 
-#   define BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE boost::mpl
-#   define BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE_OPEN namespace boost { namespace mpl {
+#   define BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE pdalboost::mpl
+#   define BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE_OPEN namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 #   define BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE_CLOSE }}
 #   define BOOST_MPL_AUX_ADL_BARRIER_DECL(type) /**/
 

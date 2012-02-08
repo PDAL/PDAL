@@ -25,7 +25,7 @@
 #pragma warning(disable : 4996) // Disable deprecated std::ctype<char>::widen, std::copy
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace uuids {
 
 template <typename ch, typename char_traits>
@@ -189,7 +189,7 @@ inline std::wstring to_wstring(uuid const& u)
 
 #endif
 
-}} //namespace boost::uuids
+}} //namespace pdalboost::uuids
 
 #if defined(_MSC_VER)
 #pragma warning(pop) // Restore warnings to previous state.

@@ -21,7 +21,7 @@
 // Boost
 #include <boost/shared_ptr.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -50,6 +50,6 @@ class positional_parameter_base;
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_CLA_FWD_HPP_062604GER

@@ -18,7 +18,7 @@
 #include <boost/multi_index/detail/prevent_eti.hpp>
 #include <functional>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -31,13 +31,13 @@ struct hashed_index_node_impl
 {
   typedef typename prevent_eti<
     Allocator,
-    typename boost::detail::allocator::rebind_to<
+    typename pdalboost::detail::allocator::rebind_to<
       Allocator,hashed_index_node_impl
     >::type
   >::type::pointer                                pointer;
   typedef typename prevent_eti<
     Allocator,
-    typename boost::detail::allocator::rebind_to<
+    typename pdalboost::detail::allocator::rebind_to<
       Allocator,hashed_index_node_impl
     >::type
   >::type::const_pointer                          const_pointer;
@@ -94,7 +94,7 @@ struct hashed_index_node_trampoline:
   prevent_eti<
     Super,
     hashed_index_node_impl<
-      typename boost::detail::allocator::rebind_to<
+      typename pdalboost::detail::allocator::rebind_to<
         typename Super::allocator_type,
         char
       >::type
@@ -104,7 +104,7 @@ struct hashed_index_node_trampoline:
   typedef typename prevent_eti<
     Super,
     hashed_index_node_impl<
-      typename boost::detail::allocator::rebind_to<
+      typename pdalboost::detail::allocator::rebind_to<
         typename Super::allocator_type,
         char
       >::type
@@ -160,6 +160,6 @@ public:
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

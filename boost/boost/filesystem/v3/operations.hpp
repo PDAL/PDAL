@@ -49,8 +49,7 @@
 
 //--------------------------------------------------------------------------------------//
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem3
   {
 
@@ -118,9 +117,9 @@ namespace boost
   struct space_info
   {
     // all values are byte counts
-    boost::uintmax_t capacity;
-    boost::uintmax_t free;      // <= capacity
-    boost::uintmax_t available; // <= free
+    pdalboost::uintmax_t capacity;
+    pdalboost::uintmax_t free;      // <= capacity
+    pdalboost::uintmax_t available; // <= free
   };
 
   BOOST_SCOPED_ENUM_START(copy_option)
@@ -171,9 +170,9 @@ namespace boost
     BOOST_FILESYSTEM_DECL
     bool equivalent(const path& p1, const path& p2, system::error_code* ec=0);
     BOOST_FILESYSTEM_DECL
-    boost::uintmax_t file_size(const path& p, system::error_code* ec=0);
+    pdalboost::uintmax_t file_size(const path& p, system::error_code* ec=0);
     BOOST_FILESYSTEM_DECL
-    boost::uintmax_t hard_link_count(const path& p, system::error_code* ec=0);
+    pdalboost::uintmax_t hard_link_count(const path& p, system::error_code* ec=0);
     BOOST_FILESYSTEM_DECL
     std::time_t last_write_time(const path& p, system::error_code* ec=0);
     BOOST_FILESYSTEM_DECL
@@ -185,7 +184,7 @@ namespace boost
       // For standardization, if the committee doesn't like "remove", consider "eliminate"
     bool remove(const path& p, system::error_code* ec=0);
     BOOST_FILESYSTEM_DECL
-    boost::uintmax_t remove_all(const path& p, system::error_code* ec=0);
+    pdalboost::uintmax_t remove_all(const path& p, system::error_code* ec=0);
     BOOST_FILESYSTEM_DECL
     void rename(const path& old_p, const path& new_p, system::error_code* ec=0);
     BOOST_FILESYSTEM_DECL
@@ -375,16 +374,16 @@ namespace boost
   bool equivalent(const path& p1, const path& p2, system::error_code& ec)
                                        {return detail::equivalent(p1, p2, &ec);}
   inline
-  boost::uintmax_t file_size(const path& p) {return detail::file_size(p);}
+  pdalboost::uintmax_t file_size(const path& p) {return detail::file_size(p);}
 
   inline
-  boost::uintmax_t file_size(const path& p, system::error_code& ec)
+  pdalboost::uintmax_t file_size(const path& p, system::error_code& ec)
                                        {return detail::file_size(p, &ec);}
   inline
-  boost::uintmax_t hard_link_count(const path& p) {return detail::hard_link_count(p);}
+  pdalboost::uintmax_t hard_link_count(const path& p) {return detail::hard_link_count(p);}
 
   inline
-  boost::uintmax_t hard_link_count(const path& p, system::error_code& ec)
+  pdalboost::uintmax_t hard_link_count(const path& p, system::error_code& ec)
                                        {return detail::hard_link_count(p, &ec);}
   inline
   path initial_path()                  {return detail::initial_path();}
@@ -423,10 +422,10 @@ namespace boost
   bool remove(const path& p, system::error_code& ec) {return detail::remove(p, &ec);}
 
   inline
-  boost::uintmax_t remove_all(const path& p) {return detail::remove_all(p);}
+  pdalboost::uintmax_t remove_all(const path& p) {return detail::remove_all(p);}
     
   inline
-  boost::uintmax_t remove_all(const path& p, system::error_code& ec)
+  pdalboost::uintmax_t remove_all(const path& p, system::error_code& ec)
                                        {return detail::remove_all(p, &ec);}
   inline
   void rename(const path& old_p, const path& new_p) {detail::rename(old_p, new_p);}
@@ -487,16 +486,16 @@ public:
   // compiler generated copy constructor, copy assignment, and destructor apply
 
   directory_entry() {}
-  explicit directory_entry(const boost::filesystem::path& p,
+  explicit directory_entry(const pdalboost::filesystem::path& p,
     file_status st = file_status(), file_status symlink_st=file_status())
     : m_path(p), m_status(st), m_symlink_status(symlink_st)
     {}
 
-  void assign(const boost::filesystem::path& p,
+  void assign(const pdalboost::filesystem::path& p,
     file_status st = file_status(), file_status symlink_st = file_status())
     { m_path = p; m_status = st; m_symlink_status = symlink_st; }
 
-  void replace_filename(const boost::filesystem::path& p,
+  void replace_filename(const pdalboost::filesystem::path& p,
     file_status st = file_status(), file_status symlink_st = file_status())
   {
     m_path.remove_filename();
@@ -506,12 +505,12 @@ public:
   }
 
 # ifndef BOOST_FILESYSTEM_NO_DEPRECATED
-  void replace_leaf(const boost::filesystem::path& p,
+  void replace_leaf(const pdalboost::filesystem::path& p,
     file_status st, file_status symlink_st)
       { replace_filename(p, st, symlink_st); }
 # endif
 
-  const boost::filesystem::path&  path() const               {return m_path;}
+  const pdalboost::filesystem::path&  path() const               {return m_path;}
   file_status   status() const                               {return m_get_status();}
   file_status   status(system::error_code& ec) const         {return m_get_status(&ec);}
   file_status   symlink_status() const                       {return m_get_symlink_status();}
@@ -525,7 +524,7 @@ public:
   bool operator>=(const directory_entry& rhs) {return m_path >= rhs.m_path;} 
 
 private:
-  boost::filesystem::path   m_path;
+  pdalboost::filesystem::path   m_path;
   mutable file_status       m_status;           // stat()-like
   mutable file_status       m_symlink_status;   // lstat()-like
 
@@ -591,9 +590,9 @@ namespace detail
 //--------------------------------------------------------------------------------------//
 
   class directory_iterator
-    : public boost::iterator_facade< directory_iterator,
+    : public pdalboost::iterator_facade< directory_iterator,
                                      directory_entry,
-                                     boost::single_pass_traversal_tag >
+                                     pdalboost::single_pass_traversal_tag >
   {
   public:
 
@@ -626,14 +625,14 @@ namespace detail
 
     // shared_ptr provides shallow-copy semantics required for InputIterators.
     // m_imp.get()==0 indicates the end iterator.
-    boost::shared_ptr< detail::dir_itr_imp >  m_imp;
+    pdalboost::shared_ptr< detail::dir_itr_imp >  m_imp;
 
-    friend class boost::iterator_core_access;
+    friend class pdalboost::iterator_core_access;
 
-    boost::iterator_facade<
+    pdalboost::iterator_facade<
       directory_iterator,
       directory_entry,
-      boost::single_pass_traversal_tag >::reference dereference() const 
+      pdalboost::single_pass_traversal_tag >::reference dereference() const 
     {
       BOOST_ASSERT_MSG(m_imp.get(), "attempt to dereference end iterator");
       return m_imp->dir_entry;
@@ -681,7 +680,7 @@ namespace detail
 
     //  Implementation is inline to avoid dynamic linking difficulties with m_stack:
     //  Microsoft warning C4251, m_stack needs to have dll-interface to be used by
-    //  clients of struct 'boost::filesystem::detail::recur_dir_itr_imp'
+    //  clients of struct 'pdalboost::filesystem::detail::recur_dir_itr_imp'
 
     inline
     void recur_dir_itr_imp::increment(system::error_code* ec)
@@ -737,10 +736,10 @@ namespace detail
 //--------------------------------------------------------------------------------------//
 
   class recursive_directory_iterator
-    : public boost::iterator_facade<
+    : public pdalboost::iterator_facade<
         recursive_directory_iterator,
         directory_entry,
-        boost::single_pass_traversal_tag >
+        pdalboost::single_pass_traversal_tag >
   {
   public:
 
@@ -840,14 +839,14 @@ namespace detail
 
     // shared_ptr provides shallow-copy semantics required for InputIterators.
     // m_imp.get()==0 indicates the end iterator.
-    boost::shared_ptr< detail::recur_dir_itr_imp >  m_imp;
+    pdalboost::shared_ptr< detail::recur_dir_itr_imp >  m_imp;
 
-    friend class boost::iterator_core_access;
+    friend class pdalboost::iterator_core_access;
 
-    boost::iterator_facade< 
+    pdalboost::iterator_facade< 
       recursive_directory_iterator,
       directory_entry,
-      boost::single_pass_traversal_tag >::reference
+      pdalboost::single_pass_traversal_tag >::reference
     dereference() const 
     {
       BOOST_ASSERT_MSG(m_imp.get(),
@@ -977,7 +976,7 @@ namespace detail
       path         m_path2; // may be empty()
       std::string  m_what;  // not built until needed
     };
-    boost::shared_ptr<m_imp> m_imp_ptr;
+    pdalboost::shared_ptr<m_imp> m_imp_ptr;
   };
 
 //  test helper  -----------------------------------------------------------------------//
@@ -992,12 +991,11 @@ namespace detail
   }
 
   } // namespace filesystem3
-} // namespace boost
+} // namespace pdalboost
 
 //----------------------------------------------------------------------------//
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem
   {
     using filesystem3::absolute;

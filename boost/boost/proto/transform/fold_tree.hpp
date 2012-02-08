@@ -16,7 +16,7 @@
 #include <boost/proto/transform/fold.hpp>
 #include <boost/proto/transform/impl.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace detail
     {

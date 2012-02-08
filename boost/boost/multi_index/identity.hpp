@@ -24,7 +24,7 @@
 #include <boost/type_traits/is_convertible.hpp>
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 template<class Type> class reference_wrapper; /* fwd decl. */
 
@@ -142,6 +142,6 @@ struct identity:
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

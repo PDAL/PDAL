@@ -14,7 +14,7 @@
 #include <boost/algorithm/string/config.hpp>
 #include <boost/detail/iterator.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
         namespace detail {
 
@@ -80,16 +80,16 @@ namespace boost {
                 ForwardIteratorT InEnd, 
                 PredicateT IsSpace )
             {
-                typedef BOOST_STRING_TYPENAME boost::detail::
+                typedef BOOST_STRING_TYPENAME pdalboost::detail::
                     iterator_traits<ForwardIteratorT>::iterator_category category;
 
-                return ::boost::algorithm::detail::trim_end_iter_select( InBegin, InEnd, IsSpace, category() );
+                return ::pdalboost::algorithm::detail::trim_end_iter_select( InBegin, InEnd, IsSpace, category() );
             }
 
 
         } // namespace detail
     } // namespace algorithm
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_TRIM_DETAIL_HPP

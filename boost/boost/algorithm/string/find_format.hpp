@@ -29,7 +29,7 @@
     Result of finding is then used by a Formatter object to generate the replacement.
 */
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
 
 // generic replace  -----------------------------------------------------------------//
@@ -73,13 +73,13 @@ namespace boost {
                     FinderT,BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type>
                 ));
 
-            iterator_range<BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type> lit_input(::boost::as_literal(Input));
+            iterator_range<BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type> lit_input(::pdalboost::as_literal(Input));
 
             return detail::find_format_copy_impl(
                 Output,
                 lit_input,
                 Formatter,
-                Finder( ::boost::begin(lit_input), ::boost::end(lit_input) ) );
+                Finder( ::pdalboost::begin(lit_input), ::pdalboost::end(lit_input) ) );
         }
 
         //! Generic replace algorithm
@@ -110,7 +110,7 @@ namespace boost {
             return detail::find_format_copy_impl(
                 Input,
                 Formatter,
-                Finder(::boost::begin(Input), ::boost::end(Input)));
+                Finder(::pdalboost::begin(Input), ::pdalboost::end(Input)));
         }
 
         //! Generic replace algorithm
@@ -146,7 +146,7 @@ namespace boost {
             detail::find_format_impl(
                 Input,
                 Formatter,
-                Finder(::boost::begin(Input), ::boost::end(Input)));
+                Finder(::pdalboost::begin(Input), ::pdalboost::end(Input)));
         }
 
 
@@ -192,14 +192,14 @@ namespace boost {
                     FinderT,BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type>
                 ));
 
-            iterator_range<BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type> lit_input(::boost::as_literal(Input));
+            iterator_range<BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type> lit_input(::pdalboost::as_literal(Input));
 
             return detail::find_format_all_copy_impl(
                 Output,
                 lit_input,
                 Finder,
                 Formatter,
-                Finder(::boost::begin(lit_input), ::boost::end(lit_input)));
+                Finder(::pdalboost::begin(lit_input), ::pdalboost::end(lit_input)));
         }
 
         //! Generic replace all algorithm
@@ -231,7 +231,7 @@ namespace boost {
                 Input,
                 Finder,
                 Formatter,
-                Finder( ::boost::begin(Input), ::boost::end(Input) ) );
+                Finder( ::pdalboost::begin(Input), ::pdalboost::end(Input) ) );
         }
 
         //! Generic replace all algorithm
@@ -269,7 +269,7 @@ namespace boost {
                 Input,
                 Finder,
                 Formatter,
-                Finder(::boost::begin(Input), ::boost::end(Input)));
+                Finder(::pdalboost::begin(Input), ::pdalboost::end(Input)));
 
         }
 
@@ -281,7 +281,7 @@ namespace boost {
     using algorithm::find_format_all_copy;
     using algorithm::find_format_all;
 
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_FIND_FORMAT_HPP

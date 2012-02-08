@@ -21,7 +21,7 @@
 #pragma warning(disable : 4512)
 #endif
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -194,7 +194,7 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
         typename parser_result<self_t, ScannerT>::type
         parse(ScannerT const& scan) const
         {
-            typedef typename boost::unwrap_reference<IteratorT>::type striter_t;
+            typedef typename pdalboost::unwrap_reference<IteratorT>::type striter_t;
             typedef typename parser_result<self_t, ScannerT>::type result_t;
             return impl::string_parser_parse<result_t>(
                 striter_t(first),

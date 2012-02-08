@@ -22,7 +22,7 @@
 #include <boost/spirit/home/support/handles_container.hpp>
 #include <boost/spirit/home/support/info.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // Enablers
@@ -32,7 +32,7 @@ namespace boost { namespace spirit
       : mpl::true_ {};
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     template <typename Subject>
     struct plus : unary_parser<plus<Subject> >
@@ -107,7 +107,7 @@ namespace boost { namespace spirit { namespace qi
     {};
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Subject>

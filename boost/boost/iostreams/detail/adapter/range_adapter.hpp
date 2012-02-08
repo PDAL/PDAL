@@ -16,7 +16,7 @@
 #include <boost/assert.hpp>
 #include <cstddef>                               // ptrdiff_t.
 #include <iosfwd>                                // streamsize, streamoff.
-#include <boost/detail/iterator.hpp>             // boost::iterator_traits.
+#include <boost/detail/iterator.hpp>             // pdalboost::iterator_traits.
 #include <boost/iostreams/categories.hpp>
 #include <boost/iostreams/detail/error.hpp>
 #include <boost/iostreams/positioning.hpp>
@@ -28,14 +28,14 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp>  // MSVC.
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 // Used for simulated tag dispatch.
 template<typename Traversal> struct range_adapter_impl;
 
 //
 // Template name: range_adapter
-// Description: Device based on an instance of boost::iterator_range.
+// Description: Device based on an instance of pdalboost::iterator_range.
 // Template paramters:
 //     Mode - A mode tag.
 //     Range - An instance of iterator_range.
@@ -44,7 +44,7 @@ template<typename Mode, typename Range>
 class range_adapter {
 private:
     typedef typename Range::iterator                  iterator;
-    typedef boost::detail::iterator_traits<iterator>  iter_traits;
+    typedef pdalboost::detail::iterator_traits<iterator>  iter_traits;
     typedef typename iter_traits::iterator_category   iter_cat;
 public:
     typedef typename Range::value_type                char_type;
@@ -117,7 +117,7 @@ struct range_adapter_impl<std::forward_iterator_tag> {
     {
         while (cur != last && n-- > 0) *cur++ = *s++;
         if (cur == last && n > 0)
-            boost::throw_exception(write_area_exhausted());
+            pdalboost::throw_exception(write_area_exhausted());
         return n;
     }
 };
@@ -145,7 +145,7 @@ struct range_adapter_impl<std::random_access_iterator_tag> {
         std::copy(s, s + count, cur);
         cur += count;
         if (count < n) 
-            boost::throw_exception(write_area_exhausted());
+            pdalboost::throw_exception(write_area_exhausted());
         return n;
     }
 
@@ -158,20 +158,20 @@ struct range_adapter_impl<std::random_access_iterator_tag> {
         switch (way) {
         case BOOST_IOS::beg:
             if (off > last - first || off < 0)
-                boost::throw_exception(bad_seek());
+                pdalboost::throw_exception(bad_seek());
             cur = first + off;
             break;
         case BOOST_IOS::cur:
             {
                 std::ptrdiff_t newoff = cur - first + off;
                 if (newoff > last - first || newoff < 0)
-                    boost::throw_exception(bad_seek());
+                    pdalboost::throw_exception(bad_seek());
                 cur += off;
                 break;
             }
         case BOOST_IOS::end:
             if (last - first + off < 0 || off > 0)
-                boost::throw_exception(bad_seek());
+                pdalboost::throw_exception(bad_seek());
             cur = last + off;
             break;
         default:

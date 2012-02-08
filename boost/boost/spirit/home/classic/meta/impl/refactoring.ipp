@@ -10,7 +10,7 @@
 #define BOOST_SPIRIT_REFACTORING_IPP
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -445,7 +445,7 @@ namespace impl {
 ///////////////////////////////////////////////////////////////////////////////
 BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 
-}} // namespace boost::spirit
+}} // namespace pdalboost::spirit
 
 #endif
 

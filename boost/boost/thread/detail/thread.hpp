@@ -32,8 +32,7 @@
 #pragma warning(disable:4251)
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         template<typename F>
@@ -68,7 +67,7 @@ namespace boost
         };
 
         template<typename F>
-        class thread_data<boost::reference_wrapper<F> >:
+        class thread_data<pdalboost::reference_wrapper<F> >:
             public detail::thread_data_base
         {
         private:
@@ -77,7 +76,7 @@ namespace boost
             void operator=(thread_data&);
             thread_data(thread_data&);
         public:
-            thread_data(boost::reference_wrapper<F> f_):
+            thread_data(pdalboost::reference_wrapper<F> f_):
                 f(f_)
             {}
             
@@ -88,7 +87,7 @@ namespace boost
         };
 
         template<typename F>
-        class thread_data<const boost::reference_wrapper<F> >:
+        class thread_data<const pdalboost::reference_wrapper<F> >:
             public detail::thread_data_base
         {
         private:
@@ -96,7 +95,7 @@ namespace boost
             void operator=(thread_data&);
             thread_data(thread_data&);
         public:
-            thread_data(const boost::reference_wrapper<F> f_):
+            thread_data(const pdalboost::reference_wrapper<F> f_):
                 f(f_)
             {}
             
@@ -127,7 +126,7 @@ namespace boost
         template<typename F>
         static inline detail::thread_data_ptr make_thread_info(F&& f)
         {
-            return detail::thread_data_ptr(detail::heap_new<detail::thread_data<typename boost::remove_reference<F>::type> >(static_cast<F&&>(f)));
+            return detail::thread_data_ptr(detail::heap_new<detail::thread_data<typename pdalboost::remove_reference<F>::type> >(static_cast<F&&>(f)));
         }
         static inline detail::thread_data_ptr make_thread_info(void (*f)())
         {
@@ -140,7 +139,7 @@ namespace boost
             return detail::thread_data_ptr(detail::heap_new<detail::thread_data<F> >(f));
         }
         template<typename F>
-        static inline detail::thread_data_ptr make_thread_info(boost::detail::thread_move_t<F> f)
+        static inline detail::thread_data_ptr make_thread_info(pdalboost::detail::thread_move_t<F> f)
         {
             return detail::thread_data_ptr(detail::heap_new<detail::thread_data<F> >(f));
         }
@@ -157,7 +156,7 @@ namespace boost
 #ifndef BOOST_NO_RVALUE_REFERENCES
 #ifdef BOOST_MSVC
         template <class F>
-        explicit thread(F f,typename disable_if<boost::is_convertible<F&,detail::thread_move_t<F> >, dummy* >::type=0):
+        explicit thread(F f,typename disable_if<pdalboost::is_convertible<F&,detail::thread_move_t<F> >, dummy* >::type=0):
             thread_info(make_thread_info(static_cast<F&&>(f)))
         {
             start_thread();
@@ -198,7 +197,7 @@ namespace boost
         }
 #else
         template <class F>
-        explicit thread(F f,typename disable_if<boost::is_convertible<F&,detail::thread_move_t<F> >, dummy* >::type=0):
+        explicit thread(F f,typename disable_if<pdalboost::is_convertible<F&,detail::thread_move_t<F> >, dummy* >::type=0):
             thread_info(make_thread_info(f))
         {
             start_thread();
@@ -247,62 +246,62 @@ namespace boost
 
         template <class F,class A1>
         thread(F f,A1 a1):
-            thread_info(make_thread_info(boost::bind(boost::type<void>(),f,a1)))
+            thread_info(make_thread_info(pdalboost::bind(pdalboost::type<void>(),f,a1)))
         {
             start_thread();
         }
         template <class F,class A1,class A2>
         thread(F f,A1 a1,A2 a2):
-            thread_info(make_thread_info(boost::bind(boost::type<void>(),f,a1,a2)))
+            thread_info(make_thread_info(pdalboost::bind(pdalboost::type<void>(),f,a1,a2)))
         {
             start_thread();
         }
 
         template <class F,class A1,class A2,class A3>
         thread(F f,A1 a1,A2 a2,A3 a3):
-            thread_info(make_thread_info(boost::bind(boost::type<void>(),f,a1,a2,a3)))
+            thread_info(make_thread_info(pdalboost::bind(pdalboost::type<void>(),f,a1,a2,a3)))
         {
             start_thread();
         }
 
         template <class F,class A1,class A2,class A3,class A4>
         thread(F f,A1 a1,A2 a2,A3 a3,A4 a4):
-            thread_info(make_thread_info(boost::bind(boost::type<void>(),f,a1,a2,a3,a4)))
+            thread_info(make_thread_info(pdalboost::bind(pdalboost::type<void>(),f,a1,a2,a3,a4)))
         {
             start_thread();
         }
 
         template <class F,class A1,class A2,class A3,class A4,class A5>
         thread(F f,A1 a1,A2 a2,A3 a3,A4 a4,A5 a5):
-            thread_info(make_thread_info(boost::bind(boost::type<void>(),f,a1,a2,a3,a4,a5)))
+            thread_info(make_thread_info(pdalboost::bind(pdalboost::type<void>(),f,a1,a2,a3,a4,a5)))
         {
             start_thread();
         }
 
         template <class F,class A1,class A2,class A3,class A4,class A5,class A6>
         thread(F f,A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6):
-            thread_info(make_thread_info(boost::bind(boost::type<void>(),f,a1,a2,a3,a4,a5,a6)))
+            thread_info(make_thread_info(pdalboost::bind(pdalboost::type<void>(),f,a1,a2,a3,a4,a5,a6)))
         {
             start_thread();
         }
 
         template <class F,class A1,class A2,class A3,class A4,class A5,class A6,class A7>
         thread(F f,A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7):
-            thread_info(make_thread_info(boost::bind(boost::type<void>(),f,a1,a2,a3,a4,a5,a6,a7)))
+            thread_info(make_thread_info(pdalboost::bind(pdalboost::type<void>(),f,a1,a2,a3,a4,a5,a6,a7)))
         {
             start_thread();
         }
 
         template <class F,class A1,class A2,class A3,class A4,class A5,class A6,class A7,class A8>
         thread(F f,A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8):
-            thread_info(make_thread_info(boost::bind(boost::type<void>(),f,a1,a2,a3,a4,a5,a6,a7,a8)))
+            thread_info(make_thread_info(pdalboost::bind(pdalboost::type<void>(),f,a1,a2,a3,a4,a5,a6,a7,a8)))
         {
             start_thread();
         }
 
         template <class F,class A1,class A2,class A3,class A4,class A5,class A6,class A7,class A8,class A9>
         thread(F f,A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9):
-            thread_info(make_thread_info(boost::bind(boost::type<void>(),f,a1,a2,a3,a4,a5,a6,a7,a8,a9)))
+            thread_info(make_thread_info(pdalboost::bind(pdalboost::type<void>(),f,a1,a2,a3,a4,a5,a6,a7,a8,a9)))
         {
             start_thread();
         }
@@ -515,7 +514,7 @@ namespace boost
     namespace this_thread
     {
         template<typename F>
-        void at_thread_exit(F f)
+        void pdalboostat_thread_exit(F f)
         {
             detail::thread_exit_function_base* const thread_exit_func=detail::heap_new<detail::thread_exit_function<F> >(f);
             detail::add_thread_exit_function(thread_exit_func);

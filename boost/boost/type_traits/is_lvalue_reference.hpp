@@ -31,7 +31,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #if defined( __CODEGEARC__ )
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_lvalue_reference,T,__is_reference(T))
@@ -53,9 +53,9 @@ BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC1_1(typename T,is_lvalue_reference,T& const 
 #if defined(__GNUC__) && (__GNUC__ < 3)
 // these allow us to work around illegally cv-qualified reference
 // types.
-BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC1_1(typename T,is_lvalue_reference,T const ,::boost::is_lvalue_reference<T>::value)
-BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC1_1(typename T,is_lvalue_reference,T volatile ,::boost::is_lvalue_reference<T>::value)
-BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC1_1(typename T,is_lvalue_reference,T const volatile ,::boost::is_lvalue_reference<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC1_1(typename T,is_lvalue_reference,T const ,::pdalboost::is_lvalue_reference<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC1_1(typename T,is_lvalue_reference,T volatile ,::pdalboost::is_lvalue_reference<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC1_1(typename T,is_lvalue_reference,T const volatile ,::pdalboost::is_lvalue_reference<T>::value)
 // However, the above specializations confuse gcc 2.96 unless we also
 // supply these specializations for array types
 BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC1_2(typename T,unsigned long N,is_lvalue_reference,T[N],false)
@@ -73,9 +73,9 @@ BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC1_2(typename T,unsigned long N,is_lvalue_ref
 
 namespace detail {
 
-using ::boost::type_traits::yes_type;
-using ::boost::type_traits::no_type;
-using ::boost::type_traits::wrap;
+using ::pdalboost::type_traits::yes_type;
+using ::pdalboost::type_traits::no_type;
+using ::pdalboost::type_traits::wrap;
 
 template <class T> T&(* is_lvalue_reference_helper1(wrap<T>) )(wrap<T>);
 char is_lvalue_reference_helper1(...);
@@ -88,8 +88,8 @@ struct is_lvalue_reference_impl
 {
     BOOST_STATIC_CONSTANT(
         bool, value = sizeof(
-            ::boost::detail::is_lvalue_reference_helper2(
-                ::boost::detail::is_lvalue_reference_helper1(::boost::type_traits::wrap<T>()))) == 1
+            ::pdalboost::detail::is_lvalue_reference_helper2(
+                ::pdalboost::detail::is_lvalue_reference_helper1(::pdalboost::type_traits::wrap<T>()))) == 1
         );
 };
 
@@ -102,7 +102,7 @@ BOOST_TT_AUX_BOOL_TRAIT_IMPL_SPEC1(is_lvalue_reference,void const volatile,false
 
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_lvalue_reference,T,::boost::detail::is_lvalue_reference_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_lvalue_reference,T,::pdalboost::detail::is_lvalue_reference_impl<T>::value)
 
 #ifdef BOOST_MSVC
 #   pragma warning(pop)
@@ -110,7 +110,7 @@ BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_lvalue_reference,T,::boost::detail::is_lvalue_re
 
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

@@ -31,7 +31,7 @@
 #include <boost/test/utils/runtime/cla/dual_name_parameter.hpp>
 #include <boost/test/utils/runtime/cla/parser.hpp>
 
-namespace rt  = boost::runtime;
+namespace rt  = pdalboost::runtime;
 namespace cla = rt::cla;
 
 
@@ -62,7 +62,7 @@ namespace env = rt::env;
 namespace std { using ::getenv; using ::strncmp; using ::strcmp; }
 # endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -226,7 +226,7 @@ retrieve_parameter( const_string parameter_name, cla::parser const& s_cla_parser
             return optional_value;
     }
 
-    boost::optional<T> v;
+    pdalboost::optional<T> v;
 
 #ifndef UNDER_CE
     env::get( parameter_2_env_var[parameter_name], v );
@@ -518,7 +518,7 @@ random_seed()
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

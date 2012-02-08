@@ -18,7 +18,7 @@
 
 #include <typeinfo>
 
-namespace boost { namespace phoenix 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix 
 {
     struct unused {};
 
@@ -40,7 +40,7 @@ namespace boost { namespace phoenix
         {
             typedef
                 typename fusion::result_of::at_c<
-                    typename boost::remove_reference<Context>::type
+                    typename pdalboost::remove_reference<Context>::type
                   , 0
                 >::type
                 type;
@@ -51,7 +51,7 @@ namespace boost { namespace phoenix
         {
             typedef
                 typename fusion::result_of::at_c<
-                    typename boost::remove_reference<Context>::type
+                    typename pdalboost::remove_reference<Context>::type
                   , 1
                 >::type
                 type;
@@ -297,7 +297,7 @@ namespace boost { namespace phoenix
     {
             typedef
                 typename fusion::result_of::at_c<
-                    typename boost::remove_reference<State>::type
+                    typename pdalboost::remove_reference<State>::type
                   , 0
                 >::type
                 result_type;
@@ -357,7 +357,7 @@ namespace boost { namespace phoenix
     {
             typedef
                 typename fusion::result_of::at_c<
-                    typename boost::remove_reference<State>::type
+                    typename pdalboost::remove_reference<State>::type
                   , 1
                 >::type
                 result_type;

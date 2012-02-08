@@ -24,10 +24,10 @@
 
 #if defined(BOOST_MSVC)
 #   pragma warning (push)
-#   pragma warning (disable:4251) // class 'std::vector<_Ty>' needs to have dll-interface to be used by clients of class 'boost::program_options::positional_options_description'
+#   pragma warning (disable:4251) // class 'std::vector<_Ty>' needs to have dll-interface to be used by clients of class 'pdalboost::program_options::positional_options_description'
 #endif
 
-namespace boost { namespace program_options { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options { namespace detail {
 
     /** Command line parser class. Main requirements were:
         - Powerful enough to support all common uses.
@@ -59,7 +59,7 @@ namespace boost { namespace program_options { namespace detail {
     class BOOST_PROGRAM_OPTIONS_DECL cmdline {
     public:
 
-        typedef ::boost::program_options::command_line_style::style_t style_t;
+        typedef ::pdalboost::program_options::command_line_style::style_t style_t;
 
         typedef function1<std::pair<std::string, std::string>, 
                           const std::string&> 

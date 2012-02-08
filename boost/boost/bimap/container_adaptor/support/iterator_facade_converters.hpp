@@ -18,7 +18,7 @@
 
 #include <boost/config.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace container_adaptor {
 
@@ -71,7 +71,7 @@ struct iterator_facade_to_base<Iterator,Iterator>
 } // namespace support
 } // namespace container_adaptor
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_CONTAINER_ADAPTOR_DETAIL_ITERATOR_FACADE_CONVERTERS_HPP

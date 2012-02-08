@@ -13,7 +13,7 @@
 
 #include <boost/spirit/home/qi/detail/assign_to.hpp>
 
-namespace boost { namespace spirit { namespace qi { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi { namespace detail
 {
     template <typename Char, typename Iterator, typename Attribute>
     inline bool string_parse(

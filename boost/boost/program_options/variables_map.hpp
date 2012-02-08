@@ -18,10 +18,10 @@
 
 #if defined(BOOST_MSVC)
 #   pragma warning (push)
-#   pragma warning (disable:4251) // 'boost::program_options::variable_value::v' : class 'boost::any' needs to have dll-interface to be used by clients of class 'boost::program_options::variable_value
+#   pragma warning (disable:4251) // 'pdalboost::program_options::variable_value::v' : class 'pdalboost::any' needs to have dll-interface to be used by clients of class 'pdalboost::program_options::variable_value
 #endif
 
-namespace boost { namespace program_options {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
 
     template<class charT>
     class basic_parsed_options;
@@ -58,20 +58,20 @@ namespace boost { namespace program_options {
     class BOOST_PROGRAM_OPTIONS_DECL variable_value {
     public:
         variable_value() : m_defaulted(false) {}
-        variable_value(const boost::any& xv, bool xdefaulted) 
+        variable_value(const pdalboost::any& xv, bool xdefaulted) 
         : v(xv), m_defaulted(xdefaulted) 
         {}
 
         /** If stored value if of type T, returns that value. Otherwise,
-            throws boost::bad_any_cast exception. */
+            throws pdalboost::bad_any_cast exception. */
        template<class T>
        const T& as() const {
-           return boost::any_cast<const T&>(v);
+           return pdalboost::any_cast<const T&>(v);
        }
        /** @overload */
        template<class T>
        T& as() {
-           return boost::any_cast<T&>(v);
+           return pdalboost::any_cast<T&>(v);
        }
 
         /// Returns true if no value is stored.
@@ -80,12 +80,12 @@ namespace boost { namespace program_options {
             given, but has default value. */
         bool defaulted() const;
         /** Returns the contained value. */
-        const boost::any& value() const;
+        const pdalboost::any& value() const;
 
         /** Returns the contained value. */
-        boost::any& value();
+        pdalboost::any& value();
     private:
-        boost::any v;
+        pdalboost::any v;
         bool m_defaulted;
         // Internal reference to value semantic. We need to run
         // notifications when *final* values of options are known, and
@@ -193,14 +193,14 @@ namespace boost { namespace program_options {
     }
 
     inline
-    const boost::any&
+    const pdalboost::any&
     variable_value::value() const
     {
         return v;
     }
 
     inline
-    boost::any&
+    pdalboost::any&
     variable_value::value()
     {
         return v;

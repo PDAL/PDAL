@@ -21,7 +21,7 @@
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/bimap/detail/concept_tags.hpp>
 
-/** \struct boost::bimaps::detail::is_set_type_of
+/** \struct pdalboost::bimaps::detail::is_set_type_of
 
 \brief Type trait to check if a class is a set_type_of specification
 
@@ -31,7 +31,7 @@ struct is_set_type_of : {true_|false_} {};
 \endcode
                                                                         **/
 
-/** \struct boost::bimaps::detail::is_set_type_of_relation
+/** \struct pdalboost::bimaps::detail::is_set_type_of_relation
 
 \brief Type trait to check if a class is a set_type_of_relation specification
 
@@ -44,7 +44,7 @@ struct is_set_type_of_relation : {true_|false_} {};
 
 #ifndef BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace detail {
 
@@ -58,7 +58,7 @@ struct is_set_type_of_relation :
 
 } // namespace detail
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 

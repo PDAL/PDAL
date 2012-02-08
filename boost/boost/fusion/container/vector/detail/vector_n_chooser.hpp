@@ -32,7 +32,7 @@
 #include <boost/preprocessor/repetition/enum_params.hpp>
 #include <boost/preprocessor/repetition/enum_trailing_params.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct void_;
 }}
@@ -57,7 +57,7 @@ namespace boost { namespace fusion
 #pragma wave option(preserve: 1)
 #endif
 
-namespace boost { namespace fusion { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
 {
     template <BOOST_PP_ENUM_PARAMS(FUSION_MAX_VECTOR_SIZE, typename T)>
     struct vector_n_chooser

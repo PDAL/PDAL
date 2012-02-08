@@ -21,7 +21,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     template <
         typename Iterator, typename T1, typename T2, typename T3
@@ -113,7 +113,7 @@ namespace boost { namespace spirit { namespace qi
     };
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     template <

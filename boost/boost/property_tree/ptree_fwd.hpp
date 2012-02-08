@@ -18,7 +18,7 @@
 #include <memory>               // for std::allocator
 #include <string>
 
-namespace boost { namespace property_tree
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
 {
     namespace detail {
         template <typename T> struct less_nocase;
@@ -61,8 +61,8 @@ namespace boost { namespace property_tree
         typename internal_type;
         typename external_type;
 
-        boost::optional<external_type> Tr::get_value(internal_type);
-        boost::optional<internal_type> Tr::put_value(external_type);
+        pdalboost::optional<external_type> Tr::get_value(internal_type);
+        pdalboost::optional<internal_type> Tr::put_value(external_type);
     }
 #endif
     /// If you want to use a custom key type, specialize this struct for it

@@ -106,7 +106,7 @@
 #endif
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail { namespace variant {
 
@@ -137,9 +137,9 @@ struct add_alignment
     template <typename State, typename Item>
     struct apply
         : mpl::size_t<
-              ::boost::math::static_lcm<
+              ::pdalboost::math::static_lcm<
                   BOOST_MPL_AUX_VALUE_WKND(State)::value
-                , ::boost::alignment_of<Item>::value
+                , ::pdalboost::alignment_of<Item>::value
                 >::value
             >
     {};
@@ -151,7 +151,7 @@ struct add_alignment
 // Provides a fallback (i.e., nothrow default-constructible) type from the
 // specified sequence, or no_fallback_type if not found.
 //
-// This implementation is designed to prefer boost::blank over other potential
+// This implementation is designed to prefer pdalboost::blank over other potential
 // fallback types, regardless of its position in the specified sequence.
 //
 
@@ -188,12 +188,12 @@ private: // helpers, for metafunction result (below)
     typedef typename first_result_::first first_result_index;
     typedef typename first_result_::second first_result_it;
 
-    // [...now search the rest of the sequence for boost::blank...]
+    // [...now search the rest of the sequence for pdalboost::blank...]
 
     typedef typename mpl::iter_fold_if<
           mpl::iterator_range< first_result_it,end_it >
         , first_result_index, mpl::protect< mpl::next<> >
-        , mpl::protect< mpl::not_same_as<boost::blank> >
+        , mpl::protect< mpl::not_same_as<pdalboost::blank> >
         >::type second_result_;
 
     typedef typename second_result_::second second_result_it;
@@ -266,7 +266,7 @@ public: // metafunction result
 
 #if !BOOST_WORKAROUND(BOOST_MSVC, <= 1300)
 
-    typedef ::boost::aligned_storage<
+    typedef ::pdalboost::aligned_storage<
           BOOST_MPL_AUX_VALUE_WKND(max_size)::value
         , BOOST_MPL_AUX_VALUE_WKND(max_alignment)::value
         > type;
@@ -276,7 +276,7 @@ public: // metafunction result
     BOOST_STATIC_CONSTANT(std::size_t, msvc_max_size_c = max_size::value);
     BOOST_STATIC_CONSTANT(std::size_t, msvc_max_alignment_c = max_alignment::value);
 
-    typedef ::boost::aligned_storage<
+    typedef ::pdalboost::aligned_storage<
           msvc_max_size_c
         , msvc_max_alignment_c
         > type;
@@ -347,7 +347,7 @@ public: // visitor interface
     {
         // logical error to be here: see precondition above
         BOOST_ASSERT(false);
-        return ::boost::detail::variant::forced_return< T& >();
+        return ::pdalboost::detail::variant::forced_return< T& >();
     }
 
 #else // MSVC6
@@ -364,7 +364,7 @@ private: // helpers, for visitor interface (below)
     {
         // logical error to be here: see precondition above
         BOOST_ASSERT(false);
-        return ::boost::detail::variant::forced_return< T& >();
+        return ::pdalboost::detail::variant::forced_return< T& >();
     }
 
 public: // visitor interface
@@ -405,7 +405,7 @@ public: // internal visitor interface
 
     template <typename T>
         BOOST_VARIANT_AUX_RETURN_VOID_TYPE
-    internal_visit(boost::detail::variant::backup_holder<T>& operand, long) const
+    internal_visit(pdalboost::detail::variant::backup_holder<T>& operand, long) const
     {
         new(storage_) T( operand.get() );
         BOOST_VARIANT_AUX_RETURN_VOID;
@@ -413,7 +413,7 @@ public: // internal visitor interface
 
     template <typename T>
         BOOST_VARIANT_AUX_RETURN_VOID_TYPE
-    internal_visit(const boost::detail::variant::backup_holder<T>& operand, long) const
+    internal_visit(const pdalboost::detail::variant::backup_holder<T>& operand, long) const
     {
         new(storage_) T( operand.get() );
         BOOST_VARIANT_AUX_RETURN_VOID;
@@ -605,7 +605,7 @@ private: // helpers, for visitor interface (below)
     {
         // Move lhs content to backup...
         LhsT backup_lhs_content(
-              ::boost::detail::variant::move(lhs_content)
+              ::pdalboost::detail::variant::move(lhs_content)
             ); // nothrow
 
         // ...destroy lhs content...
@@ -621,7 +621,7 @@ private: // helpers, for visitor interface (below)
             // In case of failure, restore backup content to lhs storage...
             new(lhs_.storage_.address())
                 LhsT(
-                      ::boost::detail::variant::move(backup_lhs_content)
+                      ::pdalboost::detail::variant::move(backup_lhs_content)
                     ); // nothrow
 
             // ...and rethrow:
@@ -722,7 +722,7 @@ public: // internal visitor interfaces
         T& other = toswap_.apply_visitor(getter);
 
         // ...and swap:
-        ::boost::detail::variant::move_swap( operand, other );
+        ::pdalboost::detail::variant::move_swap( operand, other );
     }
 
 private:
@@ -903,42 +903,42 @@ public: // internal visitor interfaces, cont.
 
     template <typename T>
         BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type)
-    internal_visit(boost::recursive_wrapper<T>& operand, long)
+    internal_visit(pdalboost::recursive_wrapper<T>& operand, long)
     {
         return internal_visit( operand.get(), 1L );
     }
 
     template <typename T>
         BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type)
-    internal_visit(const boost::recursive_wrapper<T>& operand, long)
+    internal_visit(const pdalboost::recursive_wrapper<T>& operand, long)
     {
         return internal_visit( operand.get(), 1L );
     }
 
     template <typename T>
         BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type)
-    internal_visit(boost::detail::reference_content<T>& operand, long)
+    internal_visit(pdalboost::detail::reference_content<T>& operand, long)
     {
         return internal_visit( operand.get(), 1L );
     }
 
     template <typename T>
         BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type)
-    internal_visit(const boost::detail::reference_content<T>& operand, long)
+    internal_visit(const pdalboost::detail::reference_content<T>& operand, long)
     {
         return internal_visit( operand.get(), 1L );
     }
 
     template <typename T>
         BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type)
-    internal_visit(boost::detail::variant::backup_holder<T>& operand, long)
+    internal_visit(pdalboost::detail::variant::backup_holder<T>& operand, long)
     {
         return internal_visit( operand.get(), 1L );
     }
 
     template <typename T>
         BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(result_type)
-    internal_visit(const boost::detail::variant::backup_holder<T>& operand, long)
+    internal_visit(const pdalboost::detail::variant::backup_holder<T>& operand, long)
     {
         return internal_visit( operand.get(), 1L );
     }
@@ -997,7 +997,7 @@ private: // helpers, for typedefs (below)
         >::type specified_types;
 
     BOOST_STATIC_ASSERT((
-          ::boost::mpl::not_< mpl::empty<specified_types> >::value
+          ::pdalboost::mpl::not_< mpl::empty<specified_types> >::value
         ));
 
     typedef typename mpl::eval_if<
@@ -1270,37 +1270,37 @@ private: // helpers, for structors, cont. (below)
 #   endif
 
         template <typename T>
-        int internal_visit(boost::detail::reference_content<T>& operand, long) const
+        int internal_visit(pdalboost::detail::reference_content<T>& operand, long) const
         {
             return internal_visit( operand.get(), 1L );
         }
 
         template <typename T>
-        int internal_visit(const boost::detail::reference_content<T>& operand, long) const
+        int internal_visit(const pdalboost::detail::reference_content<T>& operand, long) const
         {
             return internal_visit( operand.get(), 1L );
         }
 
         template <typename T>
-        int internal_visit(boost::detail::variant::backup_holder<T>& operand, long) const
+        int internal_visit(pdalboost::detail::variant::backup_holder<T>& operand, long) const
         {
             return internal_visit( operand.get(), 1L );
         }
 
         template <typename T>
-        int internal_visit(const boost::detail::variant::backup_holder<T>& operand, long) const
+        int internal_visit(const pdalboost::detail::variant::backup_holder<T>& operand, long) const
         {
             return internal_visit( operand.get(), 1L );
         }
 
         template <typename T>
-        int internal_visit(boost::recursive_wrapper<T>& operand, long) const
+        int internal_visit(pdalboost::recursive_wrapper<T>& operand, long) const
         {
             return internal_visit( operand.get(), 1L );
         }
 
         template <typename T>
-        int internal_visit(const boost::recursive_wrapper<T>& operand, long) const
+        int internal_visit(const pdalboost::recursive_wrapper<T>& operand, long) const
         {
             return internal_visit( operand.get(), 1L );
         }
@@ -1373,7 +1373,7 @@ private: // helpers, for structors, below
 
     template <BOOST_VARIANT_ENUM_PARAMS(typename U)>
     void convert_construct(
-          boost::variant<BOOST_VARIANT_ENUM_PARAMS(U)>& operand
+          pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(U)>& operand
         , long
         )
     {
@@ -1382,7 +1382,7 @@ private: // helpers, for structors, below
 
     template <BOOST_VARIANT_ENUM_PARAMS(typename U)>
     void convert_construct(
-          const boost::variant<BOOST_VARIANT_ENUM_PARAMS(U)>& operand
+          const pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(U)>& operand
         , long
         )
     {
@@ -1859,7 +1859,7 @@ struct make_variant_over
 private: // precondition assertions
 
 #if !BOOST_WORKAROUND(BOOST_MSVC, <= 1300)
-    BOOST_STATIC_ASSERT(( ::boost::mpl::is_sequence<Types>::value ));
+    BOOST_STATIC_ASSERT(( ::pdalboost::mpl::is_sequence<Types>::value ));
 #endif
 
 public: // metafunction result
@@ -1884,7 +1884,7 @@ inline void swap(
     lhs.swap(rhs);
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 // implementation additions
 

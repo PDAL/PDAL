@@ -29,8 +29,7 @@
 #include <cwchar>
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace range_detail
     {
         inline std::size_t length( const char* s )
@@ -90,7 +89,7 @@ namespace boost
         inline iterator_range<BOOST_DEDUCED_TYPENAME range_iterator<T>::type>
         make_range( T& r, long )
         {
-            return boost::make_iterator_range( r );
+            return pdalboost::make_iterator_range( r );
         }
 
     }

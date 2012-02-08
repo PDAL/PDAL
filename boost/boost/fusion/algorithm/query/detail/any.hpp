@@ -18,7 +18,7 @@
 #include <boost/fusion/iterator/deref.hpp>
 #include <boost/fusion/iterator/distance.hpp>
 
-namespace boost { namespace fusion { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { 
     struct random_access_traversal_tag;
 namespace detail
 {

@@ -44,14 +44,14 @@
 # include <iomanip>
 #endif
 
-namespace fs = boost::filesystem3;
+namespace fs = pdalboost::filesystem3;
 
-using boost::filesystem3::path;
+using pdalboost::filesystem3::path;
 
 using std::string;
 using std::wstring;
 
-using boost::system::error_code;
+using pdalboost::system::error_code;
 
 #ifndef BOOST_FILESYSTEM_CODECVT_BUF_SIZE
 # define BOOST_FILESYSTEM_CODECVT_BUF_SIZE 256
@@ -140,8 +140,7 @@ namespace
 //                                                                                      //
 //--------------------------------------------------------------------------------------//
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace filesystem3
 {
 
@@ -412,7 +411,7 @@ namespace filesystem3
   }
 
 }  // namespace filesystem3
-}  // namespace boost
+}  // namespace pdalboost
   
 //--------------------------------------------------------------------------------------//
 //                                                                                      //
@@ -594,8 +593,7 @@ namespace
 //                                                                                      //
 //--------------------------------------------------------------------------------------//
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace filesystem3
 {
 
@@ -712,7 +710,7 @@ namespace filesystem3
   }
 
 }  // namespace filesystem3
-}  // namespace boost
+}  // namespace pdalboost
 
 //--------------------------------------------------------------------------------------//
 //                                                                                      //
@@ -755,7 +753,7 @@ namespace
     // Many thanks to Peter Dimov for digging out the above references!
 
     std::locale global_loc = std::locale();
-    std::locale loc(global_loc, new boost::filesystem::detail::utf8_codecvt_facet);
+    std::locale loc(global_loc, new pdalboost::filesystem::detail::utf8_codecvt_facet);
     return loc;
 
 #   else  // Other POSIX
@@ -784,8 +782,7 @@ namespace
 //                           path::imbue implementation                                 //
 //--------------------------------------------------------------------------------------//
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace filesystem3
 {
 
@@ -808,6 +805,6 @@ namespace filesystem3
   }
 
 }  // namespace filesystem3
-}  // namespace boost
+}  // namespace pdalboost
 
 #endif  // has wide character support

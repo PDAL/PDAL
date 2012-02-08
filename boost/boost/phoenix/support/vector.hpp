@@ -56,7 +56,7 @@
     (BOOST_PP_CAT(A, N), BOOST_PP_CAT(a, N))                                    \
 /**/
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename Dummy = void>
     struct vector0
@@ -85,7 +85,7 @@ namespace boost { namespace phoenix
 
 #else
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <BOOST_PHOENIX_typename_A>
     struct BOOST_PP_CAT(vector, BOOST_PHOENIX_ITERATION)
@@ -113,7 +113,7 @@ namespace boost { namespace phoenix
 #define BOOST_PHOENIX_SUPPORT_VECTOR_ADAT_PARAM1                                \
    (                                                                            \
         BOOST_PP_CAT(                                                           \
-            boost::phoenix::vector                                              \
+            pdalboost::pdalboostphoenix::vector                                              \
           , BOOST_PHOENIX_ITERATION                                             \
         )                                                                       \
     )                                                                           \

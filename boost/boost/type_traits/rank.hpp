@@ -13,7 +13,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/size_t_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #if !defined( __CODEGEARC__ )
 
@@ -28,47 +28,47 @@ struct rank_imp
 template <class T, std::size_t R, std::size_t N>
 struct rank_imp<T[R], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::rank_imp<T, N+1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::rank_imp<T, N+1>::value));
 };
 
 template <class T, std::size_t R, std::size_t N>
 struct rank_imp<T const[R], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::rank_imp<T, N+1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::rank_imp<T, N+1>::value));
 };
 
 template <class T, std::size_t R, std::size_t N>
 struct rank_imp<T volatile[R], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::rank_imp<T, N+1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::rank_imp<T, N+1>::value));
 };
 
 template <class T, std::size_t R, std::size_t N>
 struct rank_imp<T const volatile[R], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::rank_imp<T, N+1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::rank_imp<T, N+1>::value));
 };
 
 #if !BOOST_WORKAROUND(__BORLANDC__, < 0x600) && !defined(__IBMCPP__) &&  !BOOST_WORKAROUND(__DMC__, BOOST_TESTED_AT(0x840))
 template <class T, std::size_t N>
 struct rank_imp<T[], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::rank_imp<T, N+1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::rank_imp<T, N+1>::value));
 };
 template <class T, std::size_t N>
 struct rank_imp<T const[], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::rank_imp<T, N+1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::rank_imp<T, N+1>::value));
 };
 template <class T, std::size_t N>
 struct rank_imp<T volatile[], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::rank_imp<T, N+1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::rank_imp<T, N+1>::value));
 };
 template <class T, std::size_t N>
 struct rank_imp<T const volatile[], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::rank_imp<T, N+1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::rank_imp<T, N+1>::value));
 };
 #endif
 #endif
@@ -79,10 +79,10 @@ struct rank_imp<T const volatile[], N>
 #if defined( __CODEGEARC__ )
 BOOST_TT_AUX_SIZE_T_TRAIT_DEF1(rank,T,__array_rank(T))
 #else
-BOOST_TT_AUX_SIZE_T_TRAIT_DEF1(rank,T,(::boost::detail::rank_imp<T,0>::value))
+BOOST_TT_AUX_SIZE_T_TRAIT_DEF1(rank,T,(::pdalboost::detail::rank_imp<T,0>::value))
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/size_t_trait_undef.hpp>
 

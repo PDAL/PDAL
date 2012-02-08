@@ -17,7 +17,7 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/or.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     namespace detail
     {

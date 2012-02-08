@@ -18,13 +18,13 @@
 #include <boost/multi_index/detail/prevent_eti.hpp>
 #include <boost/operators.hpp>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
 namespace detail{
 
-/* Poor man's version of boost::iterator_adaptor. Used instead of the
+/* Poor man's version of pdalboost::iterator_adaptor. Used instead of the
  * original as compile times for the latter are significantly higher.
  * The interface is not replicated exactly, only to the extent necessary
  * for internal consumption.
@@ -320,6 +320,6 @@ private:
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

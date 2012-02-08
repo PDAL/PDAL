@@ -21,7 +21,7 @@
 #include <cstddef>
 #include <functional>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -32,19 +32,19 @@ struct random_access_index_node_impl
 {
   typedef typename prevent_eti<
     Allocator,
-    typename boost::detail::allocator::rebind_to<
+    typename pdalboost::detail::allocator::rebind_to<
       Allocator,random_access_index_node_impl
     >::type
   >::type::pointer                                pointer;
   typedef typename prevent_eti<
     Allocator,
-    typename boost::detail::allocator::rebind_to<
+    typename pdalboost::detail::allocator::rebind_to<
       Allocator,random_access_index_node_impl
     >::type
   >::type::const_pointer                          const_pointer;
   typedef typename prevent_eti<
     Allocator,
-    typename boost::detail::allocator::rebind_to<
+    typename pdalboost::detail::allocator::rebind_to<
       Allocator,pointer
     >::type
   >::type::pointer                                ptr_pointer;
@@ -184,7 +184,7 @@ struct random_access_index_node_trampoline:
   prevent_eti<
     Super,
     random_access_index_node_impl<
-      typename boost::detail::allocator::rebind_to<
+      typename pdalboost::detail::allocator::rebind_to<
         typename Super::allocator_type,
         char
       >::type
@@ -194,7 +194,7 @@ struct random_access_index_node_trampoline:
   typedef typename prevent_eti<
     Super,
     random_access_index_node_impl<
-      typename boost::detail::allocator::rebind_to<
+      typename pdalboost::detail::allocator::rebind_to<
         typename Super::allocator_type,
         char
       >::type
@@ -276,6 +276,6 @@ public:
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

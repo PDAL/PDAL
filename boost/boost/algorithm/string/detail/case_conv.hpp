@@ -15,7 +15,7 @@
 #include <locale>
 #include <functional>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
         namespace detail {
 
@@ -80,8 +80,8 @@ namespace boost {
                 FunctorT Functor)
             {
                 return std::transform( 
-                    ::boost::begin(Input), 
-                    ::boost::end(Input), 
+                    ::pdalboost::begin(Input), 
+                    ::pdalboost::end(Input), 
                     Output,
                     Functor);
             }
@@ -93,9 +93,9 @@ namespace boost {
                 FunctorT Functor)
             {
                 std::transform( 
-                    ::boost::begin(Input), 
-                    ::boost::end(Input), 
-                    ::boost::begin(Input),
+                    ::pdalboost::begin(Input), 
+                    ::pdalboost::end(Input), 
+                    ::pdalboost::begin(Input),
                     Functor);
             }
 
@@ -105,17 +105,17 @@ namespace boost {
                 FunctorT Functor)
             {
                 return SequenceT(
-                    ::boost::make_transform_iterator(
-                        ::boost::begin(Input),
+                    ::pdalboost::make_transform_iterator(
+                        ::pdalboost::begin(Input),
                         Functor),
-                    ::boost::make_transform_iterator(
-                        ::boost::end(Input), 
+                    ::pdalboost::make_transform_iterator(
+                        ::pdalboost::end(Input), 
                         Functor));
             }
 
         } // namespace detail
     } // namespace algorithm
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_CASE_CONV_DETAIL_HPP

@@ -13,7 +13,7 @@
 // Must be the last include
 # include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost { namespace detail { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail { 
 
 // is_incrementable<T> metafunction
 //
@@ -79,7 +79,7 @@ namespace is_incrementable_
   template <class T>
   struct impl
   {
-      static typename boost::remove_cv<T>::type& x;
+      static typename pdalboost::remove_cv<T>::type& x;
 
       BOOST_STATIC_CONSTANT(
           bool
@@ -90,7 +90,7 @@ namespace is_incrementable_
   template <class T>
   struct postfix_impl
   {
-      static typename boost::remove_cv<T>::type& x;
+      static typename pdalboost::remove_cv<T>::type& x;
 
       BOOST_STATIC_CONSTANT(
           bool
@@ -108,26 +108,26 @@ namespace is_incrementable_
 
 template<typename T> 
 struct is_incrementable 
-BOOST_TT_AUX_BOOL_C_BASE(::boost::detail::is_incrementable_::impl<T>::value)
+BOOST_TT_AUX_BOOL_C_BASE(::pdalboost::detail::is_incrementable_::impl<T>::value)
 { 
-    BOOST_TT_AUX_BOOL_TRAIT_VALUE_DECL(::boost::detail::is_incrementable_::impl<T>::value)
+    BOOST_TT_AUX_BOOL_TRAIT_VALUE_DECL(::pdalboost::detail::is_incrementable_::impl<T>::value)
     BOOST_MPL_AUX_LAMBDA_SUPPORT(1,is_incrementable,(T))
 };
 
 template<typename T> 
 struct is_postfix_incrementable 
-BOOST_TT_AUX_BOOL_C_BASE(::boost::detail::is_incrementable_::impl<T>::value)
+BOOST_TT_AUX_BOOL_C_BASE(::pdalboost::detail::is_incrementable_::impl<T>::value)
 { 
-    BOOST_TT_AUX_BOOL_TRAIT_VALUE_DECL(::boost::detail::is_incrementable_::postfix_impl<T>::value)
+    BOOST_TT_AUX_BOOL_TRAIT_VALUE_DECL(::pdalboost::detail::is_incrementable_::postfix_impl<T>::value)
     BOOST_MPL_AUX_LAMBDA_SUPPORT(1,is_postfix_incrementable,(T))
 };
 
 } // namespace detail
 
-BOOST_TT_AUX_TEMPLATE_ARITY_SPEC(1, ::boost::detail::is_incrementable)
-BOOST_TT_AUX_TEMPLATE_ARITY_SPEC(1, ::boost::detail::is_postfix_incrementable)
+BOOST_TT_AUX_TEMPLATE_ARITY_SPEC(1, ::pdalboost::detail::is_incrementable)
+BOOST_TT_AUX_TEMPLATE_ARITY_SPEC(1, ::pdalboost::detail::is_postfix_incrementable)
 
-} // namespace boost
+} // namespace pdalboost
 
 # include <boost/type_traits/detail/bool_trait_undef.hpp>
 

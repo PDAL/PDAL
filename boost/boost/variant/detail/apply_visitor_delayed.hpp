@@ -18,7 +18,7 @@
 #include "boost/variant/detail/apply_visitor_unary.hpp"
 #include "boost/variant/detail/apply_visitor_binary.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //////////////////////////////////////////////////////////////////////////
 // function template apply_visitor(visitor)
@@ -83,6 +83,6 @@ inline apply_visitor_delayed_t<Visitor> apply_visitor(Visitor& visitor)
     return apply_visitor_delayed_t<Visitor>(visitor);
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_DETAIL_APPLY_VISITOR_DELAYED_HPP

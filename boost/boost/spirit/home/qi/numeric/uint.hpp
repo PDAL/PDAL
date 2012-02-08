@@ -24,7 +24,7 @@
 #include <boost/mpl/assert.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     namespace tag
     {
@@ -112,7 +112,7 @@ namespace boost { namespace spirit
     template <typename A0> // enables lit(n)
     struct use_terminal<qi::domain
         , terminal_ex<tag::lit, fusion::vector1<A0> >
-        , typename enable_if<is_same<A0, boost::ulong_long_type> >::type>
+        , typename enable_if<is_same<A0, pdalboost::ulong_long_type> >::type>
       : mpl::true_ {};
 
     template <typename A0> // enables ulong_long(n)
@@ -184,7 +184,7 @@ namespace boost { namespace spirit
     > : mpl::true_ {};
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
 #ifndef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
     using spirit::bin;
@@ -362,8 +362,8 @@ namespace boost { namespace spirit { namespace qi
     template <typename Modifiers, typename A0>
     struct make_primitive<
           terminal_ex<tag::lit, fusion::vector1<A0> >
-        , Modifiers, typename enable_if<is_same<A0, boost::ulong_long_type> >::type>
-      : make_literal_uint<boost::ulong_long_type> {};
+        , Modifiers, typename enable_if<is_same<A0, pdalboost::ulong_long_type> >::type>
+      : make_literal_uint<pdalboost::ulong_long_type> {};
 #endif
 
     ///////////////////////////////////////////////////////////////////////////
@@ -451,13 +451,13 @@ namespace boost { namespace spirit { namespace qi
 #ifdef BOOST_HAS_LONG_LONG
     template <typename Modifiers>
     struct make_primitive<tag::ulong_long, Modifiers>
-      : make_uint<boost::ulong_long_type> {};
+      : make_uint<pdalboost::ulong_long_type> {};
 
     template <typename Modifiers, typename A0>
     struct make_primitive<
         terminal_ex<tag::ulong_long
       , fusion::vector1<A0> > , Modifiers>
-      : make_direct_uint<boost::ulong_long_type> {};
+      : make_direct_uint<pdalboost::ulong_long_type> {};
 #endif
 }}}
 

@@ -42,7 +42,7 @@
 
 #include <pdal/drivers/las/Header.hpp>
 
-#include <pdal/external/boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <pdal/Stage.hpp>
 
@@ -102,12 +102,12 @@ void LasHeader::SetReserved(boost::uint16_t v)
     m_reserved = v;
 }
 
-pdal::external::boost::uuids::uuid LasHeader::GetProjectId() const
+boost::uuids::uuid LasHeader::GetProjectId() const
 {
     return m_projectGuid;
 }
 
-void LasHeader::SetProjectId(pdal::external::boost::uuids::uuid const& v)
+void LasHeader::SetProjectId(boost::uuids::uuid const& v)
 {
     m_projectGuid = v;
 }

@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <locale>
 
-namespace boost { namespace property_tree { namespace xml_parser
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace xml_parser
 {
 
     template<class Ch>

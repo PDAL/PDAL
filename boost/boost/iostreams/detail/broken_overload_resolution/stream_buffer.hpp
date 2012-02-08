@@ -11,7 +11,7 @@
 #include <boost/iostreams/detail/broken_overload_resolution/forward.hpp>
 #include <boost/throw_exception.hpp>
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 template< typename T, 
           typename Tr = 
@@ -180,7 +180,7 @@ private:
     void check_open()
     {
         if (this->is_open()) 
-            boost::throw_exception(BOOST_IOSTREAMS_FAILURE("already open"));
+            pdalboost::throw_exception(BOOST_IOSTREAMS_FAILURE("already open"));
     }
 };
 

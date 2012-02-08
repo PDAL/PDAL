@@ -14,8 +14,7 @@
 #include <boost/range/size_type.hpp>
 #include <boost/range/iterator.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     template< class T >
     struct range_mutable_iterator<T*>
     {

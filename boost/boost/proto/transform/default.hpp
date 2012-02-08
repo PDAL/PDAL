@@ -29,7 +29,7 @@
 #include <boost/proto/transform/arg.hpp>
 #include <boost/proto/detail/decltype.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace detail
     {

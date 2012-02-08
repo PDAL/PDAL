@@ -20,7 +20,7 @@
 
 #include <boost/bimap/relation/detail/metadata_access_builder.hpp>
 
-/** \struct boost::bimaps::support::key_type_by
+/** \struct pdalboost::bimaps::support::key_type_by
 
 \brief Metafunction to obtain the key type of one of the sides in a bimap
 
@@ -42,7 +42,7 @@ See also member_at.
                                                                     **/
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace support {
 
@@ -58,7 +58,7 @@ BOOST_BIMAP_SYMMETRIC_METADATA_ACCESS_BUILDER
 
 } // namespace support
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_SUPPORT_KEY_TYPE_BY_HPP
 

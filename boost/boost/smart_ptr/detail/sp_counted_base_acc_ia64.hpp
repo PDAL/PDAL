@@ -18,8 +18,7 @@
 #include <boost/detail/sp_typeinfo.hpp>
 #include <machine/sys/inline.h>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -145,6 +144,6 @@ public:
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // #ifndef BOOST_SMART_PTR_DETAIL_SP_COUNTED_BASE_ACC_IA64_HPP_INCLUDED

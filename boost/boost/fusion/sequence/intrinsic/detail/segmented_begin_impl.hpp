@@ -14,13 +14,13 @@
 #include <boost/fusion/sequence/intrinsic/detail/segmented_end_impl.hpp>
 #include <boost/fusion/support/detail/segmented_fold_until_impl.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     template <typename First, typename Last>
     struct iterator_range;
 }}
 
-namespace boost { namespace fusion { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
 {
     struct segmented_begin_fun
     {

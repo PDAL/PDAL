@@ -18,8 +18,7 @@
 extern "C" void _ReadWriteBarrier(void);
 #pragma intrinsic(_ReadWriteBarrier)
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         inline long interlocked_read_acquire(long volatile* x)
@@ -50,8 +49,7 @@ namespace boost
 
 #else
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         inline long interlocked_read_acquire(long volatile* x)

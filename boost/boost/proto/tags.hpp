@@ -11,7 +11,7 @@
 
 #include <boost/proto/proto_fwd.hpp>
 
-namespace boost { namespace proto { namespace tagns_ { namespace tag
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto { namespace tagns_ { namespace tag
 {
 
     /// Tag type for terminals; aka, leaves in the expression tree.

@@ -9,7 +9,7 @@
 // no include guards, this file is guarded externally
 
 // this file has been generated from the master.hpp file in the same directory
-namespace boost { namespace function_types {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace function_types {
 typedef detail::property_tag<0x00000200,0x00000300> non_variadic;
 typedef detail::property_tag<0x00000100,0x00000300> variadic;
 typedef detail::property_tag<0,0x00000400> non_const;

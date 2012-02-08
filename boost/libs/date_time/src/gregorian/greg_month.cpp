@@ -24,7 +24,7 @@
 #include "boost/date_time/gregorian/parsers.hpp"
 
 #include "greg_names.hpp"
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace gregorian {
 
   /*! Returns a shared pointer to a map of Month strings & numbers.
@@ -107,11 +107,11 @@ namespace gregorian {
    * unreachable.
    */
   BOOST_DATE_TIME_DECL 
-  boost::date_time::all_date_names_put<greg_facet_config, char>* 
+  pdalboost::date_time::all_date_names_put<greg_facet_config, char>* 
   create_facet_def(char type)
   {
     typedef 
-      boost::date_time::all_date_names_put<greg_facet_config, char> facet_def;
+      pdalboost::date_time::all_date_names_put<greg_facet_config, char> facet_def;
     
     return new facet_def(short_month_names,
                          long_month_names,
@@ -122,7 +122,7 @@ namespace gregorian {
   
   //! generates a locale with the set of gregorian name-strings of type char*
   BOOST_DATE_TIME_DECL std::locale generate_locale(std::locale& loc, char type){
-    typedef boost::date_time::all_date_names_put<greg_facet_config, char> facet_def;
+    typedef pdalboost::date_time::all_date_names_put<greg_facet_config, char> facet_def;
     return std::locale(loc, new facet_def(short_month_names,
                                           long_month_names,
                                           special_value_names,
@@ -138,11 +138,11 @@ namespace gregorian {
    * unreachable.
    */
   BOOST_DATE_TIME_DECL 
-  boost::date_time::all_date_names_put<greg_facet_config, wchar_t>* 
+  pdalboost::date_time::all_date_names_put<greg_facet_config, wchar_t>* 
   create_facet_def(wchar_t type)
   {
     typedef 
-      boost::date_time::all_date_names_put<greg_facet_config,wchar_t> facet_def;
+      pdalboost::date_time::all_date_names_put<greg_facet_config,wchar_t> facet_def;
     
     return new facet_def(w_short_month_names,
                          w_long_month_names,
@@ -153,7 +153,7 @@ namespace gregorian {
 
   //! generates a locale with the set of gregorian name-strings of type wchar_t*
   BOOST_DATE_TIME_DECL std::locale generate_locale(std::locale& loc, wchar_t type){
-    typedef boost::date_time::all_date_names_put<greg_facet_config, wchar_t> facet_def;
+    typedef pdalboost::date_time::all_date_names_put<greg_facet_config, wchar_t> facet_def;
     return std::locale(loc, new facet_def(w_short_month_names,
                                           w_long_month_names,
                                           w_special_value_names,

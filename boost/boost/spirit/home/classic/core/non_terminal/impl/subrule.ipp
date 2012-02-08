@@ -10,7 +10,7 @@
 #if !defined(BOOST_SPIRIT_SUBRULE_IPP)
 #define BOOST_SPIRIT_SUBRULE_IPP
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -133,7 +133,7 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
         //  otherwise it is equal to the dictated return value.
 
             typedef typename mpl::if_<
-                boost::is_same<T1, nil_t>, T2, T1
+                pdalboost::is_same<T1, nil_t>, T2, T1
             >::type type;
         };
 
@@ -205,7 +205,7 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 
-}} // namespace boost::spirit::impl
+}} // namespace pdalboost::spirit::impl
 
 #endif
 

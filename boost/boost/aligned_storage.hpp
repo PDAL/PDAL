@@ -26,13 +26,13 @@
 
 #include "boost/type_traits/detail/bool_trait_def.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail { namespace aligned_storage {
 
 BOOST_STATIC_CONSTANT(
       std::size_t
-    , alignment_of_max_align = ::boost::alignment_of<max_align>::value
+    , alignment_of_max_align = ::pdalboost::alignment_of<max_align>::value
     );
 
 //
@@ -91,7 +91,7 @@ public: // constants
           std::size_t
         , alignment = (
               alignment_ == std::size_t(-1)
-            ? ::boost::detail::aligned_storage::alignment_of_max_align
+            ? ::pdalboost::detail::aligned_storage::alignment_of_max_align
             : alignment_
             )
         );
@@ -166,7 +166,7 @@ const void* aligned_storage<S,A>::address() const
 // as a POD (Note that aligned_storage<> itself is not a POD):
 //
 template <std::size_t size_, std::size_t alignment_>
-struct is_pod<boost::detail::aligned_storage::aligned_storage_imp<size_,alignment_> >
+struct is_pod<pdalboost::detail::aligned_storage::aligned_storage_imp<size_,alignment_> >
    BOOST_TT_AUX_BOOL_C_BASE(true)
 { 
     BOOST_TT_AUX_BOOL_TRAIT_VALUE_DECL(true)
@@ -174,7 +174,7 @@ struct is_pod<boost::detail::aligned_storage::aligned_storage_imp<size_,alignmen
 #endif
 
 
-} // namespace boost
+} // namespace pdalboost
 
 #include "boost/type_traits/detail/bool_trait_undef.hpp"
 

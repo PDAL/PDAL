@@ -13,7 +13,7 @@
 #include <boost/spirit/home/classic/core/composite/composite.hpp>
 #include <boost/spirit/home/classic/core/non_terminal/rule.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace spirit {
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -160,6 +160,6 @@ const no_actions_parser_gen no_actions_d = no_actions_parser_gen();
 //-----------------------------------------------------------------------------
 BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 } // namespace spirit
-} // namespace boost
+} // namespace pdalboost
 
 #endif // !defined(BOOST_SPIRIT_NO_ACTIONS_HPP)

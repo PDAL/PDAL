@@ -10,7 +10,7 @@
 # include <boost/type_traits/is_convertible.hpp>
 # include <boost/type_traits/is_reference.hpp>
 
-namespace boost { namespace parameter { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { 
 
 namespace aux 
 {
@@ -41,7 +41,7 @@ struct template_keyword
     typedef value_type reference;
 };
 
-}} // namespace boost::parameter
+}} // namespace pdalboost::parameter
 
 #endif // BOOST_PARAMETER_TEMPLATE_KEYWORD_060203_HPP
 

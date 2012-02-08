@@ -14,7 +14,7 @@
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail{
 
 struct is_convertible_from_tester
@@ -25,9 +25,9 @@ struct is_convertible_from_tester
 
 }
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_complex,T,(::boost::is_convertible<T, boost::detail::is_convertible_from_tester>::value))
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_complex,T,(::pdalboost::is_convertible<T, pdalboost::detail::is_convertible_from_tester>::value))
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

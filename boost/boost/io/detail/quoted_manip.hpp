@@ -18,8 +18,7 @@
 #include <iterator>
 #include <boost/io/ios_state.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace io
   {
     namespace detail { template <class String, class Char> struct quoted_proxy; }
@@ -135,7 +134,7 @@ namespace boost
           return is;
         }
         {
-          boost::io::ios_flags_saver ifs(is);
+          pdalboost::io::ios_flags_saver ifs(is);
           is >> std::noskipws;
           for (;;)  
           {
@@ -185,6 +184,6 @@ namespace boost
     }
 
   }  // namespace io
-}  // namespace boost
+}  // namespace pdalboost
 
 #endif // BOOST_IO_QUOTED_MANIP

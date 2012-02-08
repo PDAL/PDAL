@@ -11,7 +11,7 @@
 #include <boost/fusion/iterator/advance.hpp>
 #include <boost/fusion/iterator/value_of.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct iterator_range_tag;
 

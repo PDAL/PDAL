@@ -15,7 +15,7 @@
 
 #include <boost/spirit/home/support/detail/math/detail/fp_traits.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace spirit {
 namespace math {
 
@@ -87,6 +87,6 @@ template<class T> T (changesign)(T x)
 
 }   // namespace math
 }   // namespace spirit
-}   // namespace boost
+}   // namespace pdalboost
 
 #endif

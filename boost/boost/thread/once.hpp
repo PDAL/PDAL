@@ -20,8 +20,7 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     inline void call_once(void (*func)(),once_flag& flag)
     {
         call_once(flag,func);

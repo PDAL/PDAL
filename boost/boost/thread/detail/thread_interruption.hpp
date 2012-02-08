@@ -5,8 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 // (C) Copyright 2007-9 Anthony Williams
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace this_thread
     {
         class BOOST_THREAD_DECL disable_interruption

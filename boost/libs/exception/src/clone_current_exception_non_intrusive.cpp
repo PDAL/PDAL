@@ -158,7 +158,7 @@ namespace
             memmove(dst,src,ti.size);
         }
 
-    boost::shared_ptr<void>
+    pdalboost::shared_ptr<void>
     clone_msvc_exception( void * src, cpp_exception_type const & et )
         {
         assert(src!=0);
@@ -175,7 +175,7 @@ namespace
                 free(dst);
                 throw;
                 }
-            return boost::shared_ptr<void>(dst,exception_object_deleter(et));
+            return pdalboost::shared_ptr<void>(dst,exception_object_deleter(et));
             }
         else
             throw std::bad_alloc();
@@ -183,13 +183,13 @@ namespace
 
     class
     cloned_exception:
-        public boost::exception_detail::clone_base
+        public pdalboost::exception_detail::clone_base
         {
         cloned_exception( cloned_exception const & );
         cloned_exception & operator=( cloned_exception const & );
 
         cpp_exception_type const & et_;
-        boost::shared_ptr<void> exc_;
+        pdalboost::shared_ptr<void> exc_;
 
         public:
 
@@ -203,7 +203,7 @@ namespace
             {
             }
 
-        boost::exception_detail::clone_base const *
+        pdalboost::exception_detail::clone_base const *
         clone() const
             {
             return new cloned_exception(exc_.get(),et_);
@@ -233,7 +233,7 @@ namespace
         }
 
     unsigned long
-    exception_cloning_filter( int & result, boost::exception_detail::clone_base const * & ptr, void * info_ )
+    exception_cloning_filter( int & result, pdalboost::exception_detail::clone_base const * & ptr, void * info_ )
         {
         BOOST_ASSERT(exception_info_offset>=0);
         BOOST_ASSERT(info_!=0);
@@ -249,26 +249,24 @@ namespace
                     ptr = new cloned_exception(
                             reinterpret_cast<void *>(record->ExceptionInformation[1]),
                             *reinterpret_cast<cpp_exception_type const *>(record->ExceptionInformation[2]));
-                    result = boost::exception_detail::clone_current_exception_result::success;
+                    result = pdalboost::exception_detail::clone_current_exception_result::success;
                     }
                 catch(
                 std::bad_alloc & )
                     {
-                    result = boost::exception_detail::clone_current_exception_result::bad_alloc;
+                    result = pdalboost::exception_detail::clone_current_exception_result::bad_alloc;
                     }
                 catch(
                 ... )
                     {
-                    result = boost::exception_detail::clone_current_exception_result::bad_exception;
+                    result = pdalboost::exception_detail::clone_current_exception_result::bad_exception;
                     }
             }
         return EXCEPTION_EXECUTE_HANDLER;
         }
     }
 
-namespace
-boost
-    {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace
     exception_detail
         {
@@ -303,9 +301,7 @@ boost
 
 #include <boost/config.hpp>
 
-namespace
-boost
-    {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace
     exception_detail
         {

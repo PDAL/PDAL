@@ -15,14 +15,14 @@
 #include <boost/mpl/bitxor.hpp>
 
 
-namespace boost { namespace function_types { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace function_types { 
 
 namespace detail 
 {
   typedef long bits_t;
 
   template<bits_t Value> struct constant 
-    : boost::integral_constant<bits_t,Value> 
+    : pdalboost::integral_constant<bits_t,Value> 
   { };
 
   template<bits_t Bits, bits_t Mask> struct property_tag 
@@ -47,27 +47,27 @@ namespace detail
  
   template<bits_t Bits, bits_t CCID> struct encode_bits
     : constant< 
-        ::boost::function_types::detail::encode_bits_impl<Bits,CCID>::value 
+        ::pdalboost::function_types::detail::encode_bits_impl<Bits,CCID>::value 
       >
   { };
 
   template<class LHS, class RHS> struct compound_tag
   {
     typedef constant<
-      ::boost::function_types::detail::tag_ice
-        < ::boost::function_types::detail::bits<LHS>::value
-        , ::boost::function_types::detail::mask<LHS>::value
-        , ::boost::function_types::detail::bits<RHS>::value
-        , ::boost::function_types::detail::mask<RHS>::value
+      ::pdalboost::function_types::detail::tag_ice
+        < ::pdalboost::function_types::detail::bits<LHS>::value
+        , ::pdalboost::function_types::detail::mask<LHS>::value
+        , ::pdalboost::function_types::detail::bits<RHS>::value
+        , ::pdalboost::function_types::detail::mask<RHS>::value
         >::combined_bits 
     > bits;
 
     typedef constant< 
-      ::boost::function_types::detail::tag_ice
-        < ::boost::function_types::detail::bits<LHS>::value
-        , ::boost::function_types::detail::mask<LHS>::value
-        , ::boost::function_types::detail::bits<RHS>::value
-        , ::boost::function_types::detail::mask<RHS>::value
+      ::pdalboost::function_types::detail::tag_ice
+        < ::pdalboost::function_types::detail::bits<LHS>::value
+        , ::pdalboost::function_types::detail::mask<LHS>::value
+        , ::pdalboost::function_types::detail::bits<RHS>::value
+        , ::pdalboost::function_types::detail::mask<RHS>::value
         >::combined_mask 
     > mask; 
   };
@@ -82,12 +82,12 @@ namespace detail
   };
 
   template<class Tag, class QueryTag> struct represents_impl
-    : boost::integral_constant<bool,
-        ::boost::function_types::detail::tag_ice
-          < ::boost::function_types::detail::bits<Tag>::value
-          , ::boost::function_types::detail::mask<Tag>::value
-          , ::boost::function_types::detail::bits<QueryTag>::value
-          , ::boost::function_types::detail::mask<QueryTag>::value
+    : pdalboost::integral_constant<bool,
+        ::pdalboost::function_types::detail::tag_ice
+          < ::pdalboost::function_types::detail::bits<Tag>::value
+          , ::pdalboost::function_types::detail::mask<Tag>::value
+          , ::pdalboost::function_types::detail::bits<QueryTag>::value
+          , ::pdalboost::function_types::detail::mask<QueryTag>::value
           >::match
       >
   { };
@@ -123,27 +123,27 @@ template<class Tag, class QueryTag> struct represents
 template<class Tag, class QueryTag> struct extract
 { 
   typedef detail::constant<
-    ::boost::function_types::detail::tag_ice
-      < ::boost::function_types::detail::bits<Tag>::value
-      , ::boost::function_types::detail::mask<Tag>::value
-      , ::boost::function_types::detail::bits<QueryTag>::value
-      , ::boost::function_types::detail::mask<QueryTag>::value
+    ::pdalboost::function_types::detail::tag_ice
+      < ::pdalboost::function_types::detail::bits<Tag>::value
+      , ::pdalboost::function_types::detail::mask<Tag>::value
+      , ::pdalboost::function_types::detail::bits<QueryTag>::value
+      , ::pdalboost::function_types::detail::mask<QueryTag>::value
       >::extracted_bits 
   > bits;
 
   typedef detail::constant< 
-    ::boost::function_types::detail::mask<QueryTag>::value
+    ::pdalboost::function_types::detail::mask<QueryTag>::value
   > mask; 
 };
 
-} } // namespace ::boost::function_types
+} } // namespace ::pdalboost::function_types
 
 #include <boost/function_types/detail/pp_tags/preprocessed.hpp>
 
-namespace boost { namespace function_types {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace function_types {
 #define BOOST_FT_cc_file <boost/function_types/detail/pp_tags/cc_tag.hpp>
 #include <boost/function_types/detail/pp_loop.hpp>
-} } // namespace boost::function_types
+} } // namespace pdalboost::function_types
 
 #endif
 

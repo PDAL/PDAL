@@ -31,7 +31,7 @@
 #include <boost/mpl/less.hpp>
 #include <boost/mpl/aux_/na.hpp>
 
-namespace boost { namespace mpl { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { namespace aux {
 
 template< typename Seq, typename Pred >
 struct quick_sort;

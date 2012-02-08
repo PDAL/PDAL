@@ -18,7 +18,7 @@
 
 #include <boost/config.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace views {
 
@@ -37,6 +37,6 @@ class unconstrained_set_view
 
 } // namespace views
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_VIEWS_UNCONSTRAINED_SET_VIEW_HPP

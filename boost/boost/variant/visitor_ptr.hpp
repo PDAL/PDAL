@@ -22,7 +22,7 @@
 #include "boost/type_traits/is_reference.hpp"
 #include "boost/type_traits/is_void.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //////////////////////////////////////////////////////////////////////////
 // function template visitor_ptr
@@ -111,6 +111,6 @@ inline visitor_ptr_t<T,R> visitor_ptr(R (*visitor)(T))
     return visitor_ptr_t<T,R>(visitor);
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif// BOOST_VISITOR_VISITOR_PTR_HPP

@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <boost/filesystem.hpp>
 using namespace std;
-using namespace boost::filesystem;
+using namespace pdalboost::filesystem;
 
 int main(int argc, char* argv[])
 {

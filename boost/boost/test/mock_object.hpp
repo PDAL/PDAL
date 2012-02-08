@@ -26,7 +26,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace itest {
 
@@ -321,7 +321,7 @@ MO_BINARY_OP( >>, "Right shift" )
 
 } // namespace itest
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/test/detail/enable_warnings.hpp>
 

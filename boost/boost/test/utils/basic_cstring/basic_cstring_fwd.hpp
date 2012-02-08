@@ -18,7 +18,7 @@
 
 #include <boost/detail/workaround.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -34,7 +34,7 @@ typedef char const* const           c_literal_string;
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_TEST_BASIC_CSTRING_FWD_HPP_071894GER
 

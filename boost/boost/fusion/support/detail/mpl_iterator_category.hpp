@@ -7,21 +7,21 @@
 #if !defined(FUSION_MPL_ITERATOR_CATEGORY_07212005_0923)
 #define FUSION_MPL_ITERATOR_CATEGORY_07212005_0923
 
-namespace boost { namespace mpl 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl 
 {
     struct forward_iterator_tag;
     struct bidirectional_iterator_tag;
     struct random_access_iterator_tag;
 }}
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct forward_traversal_tag;
     struct bidirectional_traversal_tag;
     struct random_access_traversal_tag;
 }}
 
-namespace boost { namespace fusion { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
 {
     template <typename Category>
     struct mpl_iterator_category;

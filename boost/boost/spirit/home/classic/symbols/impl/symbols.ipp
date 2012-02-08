@@ -20,7 +20,7 @@
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -109,7 +109,7 @@ add(symbols<T, CharT, SetT>& table, CharT const* sym, T const& data)
 ///////////////////////////////////////////////////////////////////////////////
 BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 
-}} // namespace boost::spirit
+}} // namespace pdalboost::spirit
 
 #if defined(BOOST_MSVC)
 #pragma warning(pop)

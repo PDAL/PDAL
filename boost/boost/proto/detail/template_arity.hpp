@@ -30,7 +30,7 @@
 #undef BOOST_PROTO_TEMPLATE_ARITY_PARAM2
 #define BOOST_PROTO_TEMPLATE_ARITY_PARAM2(param) , param
 
-namespace boost { namespace proto { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto { namespace detail
 {
     sized_type<1>::type template_arity_helper(...);
 

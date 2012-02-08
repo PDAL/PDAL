@@ -24,7 +24,7 @@
 #include <boost/iostreams/operations.hpp> 
 #include <boost/mpl/if.hpp> 
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 template<typename Mode, typename T>
 class mode_adapter {
@@ -96,17 +96,17 @@ private:
 template<typename Mode, typename T>
 std::streamsize mode_adapter<Mode, T>::read
     (char_type* s, std::streamsize n)
-{ return boost::iostreams::read(t_, s, n); }
+{ return pdalboost::iostreams::read(t_, s, n); }
 
 template<typename Mode, typename T>
 std::streamsize mode_adapter<Mode, T>::write
     (const char_type* s, std::streamsize n)
-{ return boost::iostreams::write(t_, s, n); }
+{ return pdalboost::iostreams::write(t_, s, n); }
 
 template<typename Mode, typename T>
 std::streampos mode_adapter<Mode, T>::seek
     (stream_offset off, BOOST_IOS::seekdir way, BOOST_IOS::openmode which)
-{ return boost::iostreams::seek(t_, off, way, which); }
+{ return pdalboost::iostreams::seek(t_, off, way, which); }
 
 #if !BOOST_WORKAROUND(BOOST_MSVC, < 1300)
     template<typename Mode, typename T>

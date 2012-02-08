@@ -26,16 +26,16 @@
 // ************************************************************************** //
 
 #define BOOST_TEST_CASE( test_function ) \
-boost::unit_test::make_test_case( boost::unit_test::callback0<>(test_function), BOOST_TEST_STRINGIZE( test_function ) )
+pdalboost::unit_test::make_test_case( pdalboost::unit_test::callback0<>(test_function), BOOST_TEST_STRINGIZE( test_function ) )
 #define BOOST_CLASS_TEST_CASE( test_function, tc_instance ) \
-boost::unit_test::make_test_case((test_function), BOOST_TEST_STRINGIZE( test_function ), tc_instance )
+pdalboost::unit_test::make_test_case((test_function), BOOST_TEST_STRINGIZE( test_function ), tc_instance )
 
 // ************************************************************************** //
 // **************               BOOST_TEST_SUITE               ************** //
 // ************************************************************************** //
 
 #define BOOST_TEST_SUITE( testsuite_name ) \
-( new boost::unit_test::test_suite( testsuite_name ) )
+( new pdalboost::unit_test::test_suite( testsuite_name ) )
 
 // ************************************************************************** //
 // **************             BOOST_AUTO_TEST_SUITE            ************** //
@@ -72,11 +72,11 @@ BOOST_AUTO_TU_REGISTRAR( BOOST_JOIN( end_suite, __LINE__ ) )( 1 );      \
 struct BOOST_AUTO_TC_UNIQUE_ID( test_name );                            \
                                                                         \
 static struct BOOST_JOIN( test_name, _exp_fail_num_spec )               \
-: boost::unit_test::ut_detail::                                         \
+: pdalboost::unit_test::ut_detail::                                         \
   auto_tc_exp_fail<BOOST_AUTO_TC_UNIQUE_ID( test_name ) >               \
 {                                                                       \
     BOOST_JOIN( test_name, _exp_fail_num_spec )()                       \
-    : boost::unit_test::ut_detail::                                     \
+    : pdalboost::unit_test::ut_detail::                                     \
       auto_tc_exp_fail<BOOST_AUTO_TC_UNIQUE_ID( test_name ) >( n )      \
     {}                                                                  \
 } BOOST_JOIN( test_name, _exp_fail_num_spec_inst );                     \
@@ -99,9 +99,9 @@ static void BOOST_AUTO_TC_INVOKER( test_name )()                        \
 struct BOOST_AUTO_TC_UNIQUE_ID( test_name ) {};                         \
                                                                         \
 BOOST_AUTO_TU_REGISTRAR( test_name )(                                   \
-    boost::unit_test::make_test_case(                                   \
+    pdalboost::unit_test::make_test_case(                                   \
         &BOOST_AUTO_TC_INVOKER( test_name ), #test_name ),              \
-    boost::unit_test::ut_detail::auto_tc_exp_fail<                      \
+    pdalboost::unit_test::ut_detail::auto_tc_exp_fail<                      \
         BOOST_AUTO_TC_UNIQUE_ID( test_name )>::instance()->value() );   \
                                                                         \
 void test_name::test_method()                                           \
@@ -126,7 +126,7 @@ struct test_name : public F                                             \
                                                                         \
 struct BOOST_AUTO_TC_INVOKER( test_name ) {                             \
     template<typename TestType>                                         \
-    static void run( boost::type<TestType>* = 0 )                       \
+    static void run( pdalboost::type<TestType>* = 0 )                       \
     {                                                                   \
         test_name<TestType> t;                                          \
         t.test_method();                                                \
@@ -134,7 +134,7 @@ struct BOOST_AUTO_TC_INVOKER( test_name ) {                             \
 };                                                                      \
                                                                         \
 BOOST_AUTO_TU_REGISTRAR( test_name )(                                   \
-    boost::unit_test::ut_detail::template_test_case_gen<                \
+    pdalboost::unit_test::ut_detail::template_test_case_gen<                \
         BOOST_AUTO_TC_INVOKER( test_name ),TL >(                        \
           BOOST_STRINGIZE( test_name ) ) );                             \
                                                                         \
@@ -154,7 +154,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_name, type_name, TL, BOOST_AUTO_TEST_CASE
 // ************************************************************************** //
 
 #define BOOST_TEST_CASE_TEMPLATE( name, typelist )                          \
-    boost::unit_test::ut_detail::template_test_case_gen<name,typelist >(    \
+    pdalboost::unit_test::ut_detail::template_test_case_gen<name,typelist >(    \
         BOOST_TEST_STRINGIZE( name ) )                                      \
 /**/
 
@@ -164,18 +164,18 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_name, type_name, TL, BOOST_AUTO_TEST_CASE
 
 #define BOOST_TEST_CASE_TEMPLATE_FUNCTION( name, type_name )    \
 template<typename type_name>                                    \
-void BOOST_JOIN( name, _impl )( boost::type<type_name>* );      \
+void BOOST_JOIN( name, _impl )( pdalboost::type<type_name>* );      \
                                                                 \
 struct name {                                                   \
     template<typename TestType>                                 \
-    static void run( boost::type<TestType>* frwrd = 0 )         \
+    static void run( pdalboost::type<TestType>* frwrd = 0 )         \
     {                                                           \
        BOOST_JOIN( name, _impl )( frwrd );                      \
     }                                                           \
 };                                                              \
                                                                 \
 template<typename type_name>                                    \
-void BOOST_JOIN( name, _impl )( boost::type<type_name>* )       \
+void BOOST_JOIN( name, _impl )( pdalboost::type<type_name>* )       \
 /**/
 
 // ************************************************************************** //
@@ -183,30 +183,30 @@ void BOOST_JOIN( name, _impl )( boost::type<type_name>* )       \
 // ************************************************************************** //
 
 #define BOOST_GLOBAL_FIXTURE( F ) \
-static boost::unit_test::ut_detail::global_fixture_impl<F> BOOST_JOIN( gf_, F ) ; \
+static pdalboost::unit_test::ut_detail::global_fixture_impl<F> BOOST_JOIN( gf_, F ) ; \
 /**/
 
 // ************************************************************************** //
 // **************         BOOST_AUTO_TEST_CASE_FIXTURE         ************** //
 // ************************************************************************** //
 
-namespace boost { namespace unit_test { namespace ut_detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace unit_test { namespace ut_detail {
 
 struct nil_t {};
 
 } // namespace ut_detail
 } // unit_test
-} // namespace boost
+} // namespace pdalboost
 
 // Intentionally is in global namespace, so that FIXURE_TEST_SUITE can reset it in user code.
-typedef ::boost::unit_test::ut_detail::nil_t BOOST_AUTO_TEST_CASE_FIXTURE;
+typedef ::pdalboost::unit_test::ut_detail::nil_t BOOST_AUTO_TEST_CASE_FIXTURE;
 
 // ************************************************************************** //
 // **************   Auto registration facility helper macros   ************** //
 // ************************************************************************** //
 
 #define BOOST_AUTO_TU_REGISTRAR( test_name )    \
-static boost::unit_test::ut_detail::auto_test_unit_registrar BOOST_JOIN( BOOST_JOIN( test_name, _registrar ), __LINE__ )
+static pdalboost::unit_test::ut_detail::auto_test_unit_registrar BOOST_JOIN( BOOST_JOIN( test_name, _registrar ), __LINE__ )
 #define BOOST_AUTO_TC_INVOKER( test_name )      BOOST_JOIN( test_name, _invoker )
 #define BOOST_AUTO_TC_UNIQUE_ID( test_name )    BOOST_JOIN( test_name, _id )
 
@@ -219,12 +219,12 @@ static boost::unit_test::ut_detail::auto_test_unit_registrar BOOST_JOIN( BOOST_J
 #ifdef BOOST_TEST_ALTERNATIVE_INIT_API
 bool init_unit_test()                   {
 #else
-::boost::unit_test::test_suite*
+::pdalboost::unit_test::test_suite*
 init_unit_test_suite( int, char* [] )   {
 #endif
 
 #ifdef BOOST_TEST_MODULE
-    using namespace ::boost::unit_test;
+    using namespace ::pdalboost::unit_test;
     assign_op( framework::master_test_suite().p_name.value, BOOST_TEST_STRINGIZE( BOOST_TEST_MODULE ).trim( "\"" ), 0 );
     
 #endif

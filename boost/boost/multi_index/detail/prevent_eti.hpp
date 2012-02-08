@@ -22,7 +22,7 @@
 #include <boost/mpl/aux_/msvc_never_true.hpp>
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -55,6 +55,6 @@ struct prevent_eti
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

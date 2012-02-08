@@ -27,7 +27,7 @@
 # include <iosfwd>
 #endif 
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 #ifndef BOOST_IOSTREAMS_NO_STREAM_TEMPLATES //--------------------------------//
 # define BOOST_IOSTREAMS_BASIC_IOS(ch, tr)  std::basic_ios< ch, tr >
@@ -49,7 +49,7 @@ namespace boost { namespace iostreams { namespace detail {
 
 #define BOOST_IOS                          std::ios
 #define BOOST_IOSTREAMS_BASIC_IOS(ch, tr)  std::ios
-#define BOOST_IOSTREAMS_FAILURE            boost::iostreams::detail::failure
+#define BOOST_IOSTREAMS_FAILURE            pdalboost::iostreams::detail::failure
 
 class failure : std::exception {    
 public:

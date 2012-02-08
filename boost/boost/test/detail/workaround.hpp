@@ -25,7 +25,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -56,7 +56,7 @@ template <class T> inline void ignore_unused_variable_warning(const T&) {}
 
 namespace unit_test_framework = unit_test;
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

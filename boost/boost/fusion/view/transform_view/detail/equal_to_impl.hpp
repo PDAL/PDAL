@@ -9,7 +9,7 @@
 
 #include <boost/fusion/iterator/equal_to.hpp>
 
-namespace boost { namespace fusion {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion {
 
     struct transform_view_iterator_tag;
     struct transform_view_iterator2_tag;

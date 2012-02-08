@@ -12,7 +12,7 @@
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/visit_each.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename> struct actor;
 
@@ -27,7 +27,7 @@ namespace boost { namespace phoenix
             template <typename T>
             void operator()(T const& t) const
             {
-                using boost::visit_each;
+                using pdalboost::visit_each;
                 visit_each(visitor, t);
             }
         };

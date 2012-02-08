@@ -17,7 +17,7 @@
 #include <cstddef>
 #include <iterator>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -115,6 +115,6 @@ bool operator!=(
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

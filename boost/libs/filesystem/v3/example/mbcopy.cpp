@@ -23,11 +23,11 @@
 #include <boost/filesystem/fstream.hpp>
 #include "../src/utf8_codecvt_facet.hpp"
 
-namespace fs = boost::filesystem;
+namespace fs = pdalboost::filesystem;
 
 namespace
 {
-  // we can't use boost::filesystem::copy_file() because the argument types
+  // we can't use pdalboost::filesystem::copy_file() because the argument types
   // differ, so provide a not-very-smart replacement.
 
   void copy_file( const fs::wpath & from, const user::mbpath & to )

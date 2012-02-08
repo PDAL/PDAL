@@ -33,7 +33,7 @@
 
 #include "boost/variant/recursive_wrapper.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail { namespace variant {
 
 #if !defined(BOOST_VARIANT_DETAIL_NO_SUBSTITUTE)
@@ -83,7 +83,7 @@ public:
 template <typename T, typename RecursiveVariant, typename NoWrapper>
 struct enable_recursive
     : BOOST_VARIANT_AUX_ENABLE_RECURSIVE_IMPL(
-          T, RecursiveVariant, ::boost::recursive_variant_
+          T, RecursiveVariant, ::pdalboost::recursive_variant_
         )
 {
 };
@@ -94,7 +94,7 @@ struct enable_recursive< T,RecursiveVariant,mpl::false_ >
 private: // helpers, for metafunction result (below)
 
     typedef typename BOOST_VARIANT_AUX_ENABLE_RECURSIVE_IMPL(
-          T, RecursiveVariant, ::boost::recursive_variant_
+          T, RecursiveVariant, ::pdalboost::recursive_variant_
         )::type t_;
 
 public: // metafunction result
@@ -107,7 +107,7 @@ public: // metafunction result
             , is_pointer<t_>
             >
         , t_
-        , boost::recursive_wrapper<t_>
+        , pdalboost::recursive_wrapper<t_>
         >::type type;
 
 };
@@ -120,7 +120,7 @@ struct enable_recursive
 private: // helpers, for metafunction result (below)
 
     typedef typename BOOST_VARIANT_AUX_ENABLE_RECURSIVE_IMPL(
-          T, RecursiveVariant, ::boost::recursive_variant_
+          T, RecursiveVariant, ::pdalboost::recursive_variant_
         )::type t_;
 
 public: // metafunction result
@@ -134,7 +134,7 @@ public: // metafunction result
             , is_pointer<t_>
             >
         , t_
-        , boost::recursive_wrapper<t_>
+        , pdalboost::recursive_wrapper<t_>
         >::type type;
 
 };
@@ -157,6 +157,6 @@ struct quoted_enable_recursive
 };
 
 }} // namespace detail::variant
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_DETAIL_ENABLE_RECURSIVE_HPP

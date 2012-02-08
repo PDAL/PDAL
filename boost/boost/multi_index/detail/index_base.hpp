@@ -28,7 +28,7 @@
 #include <boost/multi_index/detail/index_saver.hpp>
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -53,7 +53,7 @@ protected:
     Value,IndexSpecifierList,Allocator>       final_type;
   typedef tuples::null_type                   ctor_args_list;
   typedef typename 
-    boost::detail::allocator::rebind_to<
+    pdalboost::detail::allocator::rebind_to<
       Allocator,
       typename Allocator::value_type>::type   final_allocator_type;
   typedef mpl::vector0<>                      index_type_list;
@@ -85,24 +85,24 @@ protected:
 
   node_type* insert_(value_param_type v,node_type* x)
   {
-    boost::detail::allocator::construct(&x->value(),v);
+    pdalboost::detail::allocator::construct(&x->value(),v);
     return x;
   }
 
   node_type* insert_(value_param_type v,node_type*,node_type* x)
   {
-    boost::detail::allocator::construct(&x->value(),v);
+    pdalboost::detail::allocator::construct(&x->value(),v);
     return x;
   }
 
   void erase_(node_type* x)
   {
-    boost::detail::allocator::destroy(&x->value());
+    pdalboost::detail::allocator::destroy(&x->value());
   }
 
   void delete_node_(node_type* x)
   {
-    boost::detail::allocator::destroy(&x->value());
+    pdalboost::detail::allocator::destroy(&x->value());
   }
 
   void clear_(){}
@@ -180,6 +180,6 @@ protected:
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

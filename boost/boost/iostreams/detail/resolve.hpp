@@ -40,7 +40,7 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp> // VC7.1 C4224.
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 //------------------Definition of resolve-------------------------------------//
 
@@ -50,7 +50,7 @@ template<typename Mode, typename Ch, typename T>
 struct resolve_traits {
     typedef typename 
             mpl::if_<
-                boost::detail::is_incrementable<T>,
+                pdalboost::detail::is_incrementable<T>,
                 output_iterator_adapter<Mode, Ch, T>,
                 const T&
             >::type type;
@@ -104,9 +104,9 @@ array_adapter<Mode, Ch> resolve(Ch (&array)[N])
 
 #  if !BOOST_WORKAROUND(BOOST_MSVC, <= 1300)
     template<typename Mode, typename Ch, typename Iter>
-    range_adapter< Mode, boost::iterator_range<Iter> > 
-    resolve(const boost::iterator_range<Iter>& rng)
-    { return range_adapter< Mode, boost::iterator_range<Iter> >(rng); }
+    range_adapter< Mode, pdalboost::iterator_range<Iter> > 
+    resolve(const pdalboost::iterator_range<Iter>& rng)
+    { return range_adapter< Mode, pdalboost::iterator_range<Iter> >(rng); }
 #  endif // #if BOOST_WORKAROUND(BOOST_MSVC, <= 1300)
 
 # else // # ifndef BOOST_IOSTREAMS_NO_STREAM_TEMPLATES //---------------------//
@@ -149,9 +149,9 @@ array_adapter<Mode, Ch> resolve(Ch (&array)[N])
 { return array_adapter<Mode, Ch>(array); }
 
 template<typename Mode, typename Ch, typename Iter>
-range_adapter< Mode, boost::iterator_range<Iter> > 
-resolve(const boost::iterator_range<Iter>& rng)
-{ return range_adapter< Mode, boost::iterator_range<Iter> >(rng); }
+range_adapter< Mode, pdalboost::iterator_range<Iter> > 
+resolve(const pdalboost::iterator_range<Iter>& rng)
+{ return range_adapter< Mode, pdalboost::iterator_range<Iter> >(rng); }
 
 # endif // # ifndef BOOST_IOSTREAMS_NO_STREAM_TEMPLATES //--------------------//
 #else // #ifndef BOOST_IOSTREAMS_BROKEN_OVERLOAD_RESOLUTION //----------------//

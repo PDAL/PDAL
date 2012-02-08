@@ -10,7 +10,7 @@
 #include <boost/type_traits/add_const.hpp>
 #include <boost/type_traits/add_reference.hpp>
 
-namespace boost { namespace fusion { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
 {
     template <typename T>
     struct ref_result

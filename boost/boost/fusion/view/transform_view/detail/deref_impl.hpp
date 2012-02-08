@@ -12,7 +12,7 @@
 #include <boost/fusion/iterator/value_of.hpp>
 #include <boost/fusion/view/transform_view/detail/apply_transform_result.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct transform_view_iterator_tag;
     struct transform_view_iterator2_tag;

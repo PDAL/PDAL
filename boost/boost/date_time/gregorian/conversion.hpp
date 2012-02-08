@@ -17,7 +17,7 @@
 #include <boost/date_time/special_defs.hpp>
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace gregorian {
 
@@ -39,12 +39,12 @@ namespace gregorian {
         default:
             s += "a special date value"; break;
         }
-        boost::throw_exception(std::out_of_range(s));
+        pdalboost::throw_exception(std::out_of_range(s));
     }
 
     std::tm datetm;
     std::memset(&datetm, 0, sizeof(datetm));
-    boost::gregorian::date::ymd_type ymd = d.year_month_day();
+    pdalboost::gregorian::date::ymd_type ymd = d.year_month_day();
     datetm.tm_year = ymd.year - 1900;
     datetm.tm_mon = ymd.month - 1;
     datetm.tm_mday = ymd.day;
@@ -63,6 +63,6 @@ namespace gregorian {
                 static_cast<unsigned short>(datetm.tm_mday));
   }
 
-} } //namespace boost::gregorian
+} } //namespace pdalboost::gregorian
 
 #endif

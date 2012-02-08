@@ -8,7 +8,7 @@
 # include <boost/detail/workaround.hpp>
 # include <boost/concept/detail/backward_compatibility.hpp>
 
-namespace boost { namespace concepts {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace concepts {
 
 namespace detail
 { 
@@ -45,6 +45,6 @@ struct not_satisfied
     typedef mpl::bool_<value> type;
 };
 
-}} // namespace boost::concepts::detail
+}} // namespace pdalboost::concepts::detail
 
 #endif // BOOST_CONCEPT_DETAIL_HAS_CONSTRAINTS_DWA2006429_HPP

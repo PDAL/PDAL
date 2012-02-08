@@ -15,7 +15,7 @@
 
 #include "greg_names.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace gregorian {
   
   //! Return a 3 digit english string of the day of week (eg: Sun)

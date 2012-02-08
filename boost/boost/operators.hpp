@@ -94,7 +94,7 @@
 #   pragma warning( disable : 4284 ) // complaint about return type of 
 #endif                               // operator-> not begin a UDT
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail {
 
 template <typename T> class empty_base {
@@ -107,7 +107,7 @@ template <typename T> class empty_base {
 };
 
 } // namespace detail
-} // namespace boost
+} // namespace pdalboost
 
 // In this section we supply the xxxx1 and xxxx2 forms of the operator
 // templates, which are explicitly targeted at the 1-type-argument and
@@ -117,8 +117,7 @@ template <typename T> class empty_base {
 // these templates must go in the global namespace.
 
 #ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 #endif
 
 //  Basic operator classes (contributed by Dave Abrahams) ------------------//
@@ -126,7 +125,7 @@ namespace boost
 //  Note that friend functions defined in a class are implicitly inline.
 //  See the C++ std, 11.4 [class.friend] paragraph 5
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct less_than_comparable2 : B
 {
      friend bool operator<=(const T& x, const U& y) { return !static_cast<bool>(x > y); }
@@ -137,7 +136,7 @@ struct less_than_comparable2 : B
      friend bool operator>=(const U& x, const T& y) { return !static_cast<bool>(y > x); }
 };
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct less_than_comparable1 : B
 {
      friend bool operator>(const T& x, const T& y)  { return y < x; }
@@ -145,7 +144,7 @@ struct less_than_comparable1 : B
      friend bool operator>=(const T& x, const T& y) { return !static_cast<bool>(x < y); }
 };
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct equality_comparable2 : B
 {
      friend bool operator==(const U& y, const T& x) { return x == y; }
@@ -153,7 +152,7 @@ struct equality_comparable2 : B
      friend bool operator!=(const T& y, const U& x) { return !static_cast<bool>(y == x); }
 };
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct equality_comparable1 : B
 {
      friend bool operator!=(const T& x, const T& y) { return !static_cast<bool>(x == y); }
@@ -172,7 +171,7 @@ struct equality_comparable1 : B
 // implementation available.
 
 #define BOOST_BINARY_OPERATOR_COMMUTATIVE( NAME, OP )                         \
-template <class T, class U, class B = ::boost::detail::empty_base<T> >        \
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >        \
 struct NAME##2 : B                                                            \
 {                                                                             \
   friend T operator OP( const T& lhs, const U& rhs )                          \
@@ -181,7 +180,7 @@ struct NAME##2 : B                                                            \
     { T nrv( rhs ); nrv OP##= lhs; return nrv; }                              \
 };                                                                            \
                                                                               \
-template <class T, class B = ::boost::detail::empty_base<T> >                 \
+template <class T, class B = ::pdalboost::detail::empty_base<T> >                 \
 struct NAME##1 : B                                                            \
 {                                                                             \
   friend T operator OP( const T& lhs, const T& rhs )                          \
@@ -189,21 +188,21 @@ struct NAME##1 : B                                                            \
 };
 
 #define BOOST_BINARY_OPERATOR_NON_COMMUTATIVE( NAME, OP )               \
-template <class T, class U, class B = ::boost::detail::empty_base<T> >  \
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >  \
 struct NAME##2 : B                                                      \
 {                                                                       \
   friend T operator OP( const T& lhs, const U& rhs )                    \
     { T nrv( lhs ); nrv OP##= rhs; return nrv; }                        \
 };                                                                      \
                                                                         \
-template <class T, class U, class B = ::boost::detail::empty_base<T> >  \
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >  \
 struct BOOST_OPERATOR2_LEFT(NAME) : B                                   \
 {                                                                       \
   friend T operator OP( const U& lhs, const T& rhs )                    \
     { T nrv( lhs ); nrv OP##= rhs; return nrv; }                        \
 };                                                                      \
                                                                         \
-template <class T, class B = ::boost::detail::empty_base<T> >           \
+template <class T, class B = ::pdalboost::detail::empty_base<T> >           \
 struct NAME##1 : B                                                      \
 {                                                                       \
   friend T operator OP( const T& lhs, const T& rhs )                    \
@@ -218,34 +217,34 @@ struct NAME##1 : B                                                      \
 // optimization opportunities to the compiler :)
 
 #define BOOST_BINARY_OPERATOR_COMMUTATIVE( NAME, OP )                   \
-template <class T, class U, class B = ::boost::detail::empty_base<T> >  \
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >  \
 struct NAME##2 : B                                                      \
 {                                                                       \
   friend T operator OP( T lhs, const U& rhs ) { return lhs OP##= rhs; } \
   friend T operator OP( const U& lhs, T rhs ) { return rhs OP##= lhs; } \
 };                                                                      \
                                                                         \
-template <class T, class B = ::boost::detail::empty_base<T> >           \
+template <class T, class B = ::pdalboost::detail::empty_base<T> >           \
 struct NAME##1 : B                                                      \
 {                                                                       \
   friend T operator OP( T lhs, const T& rhs ) { return lhs OP##= rhs; } \
 };
 
 #define BOOST_BINARY_OPERATOR_NON_COMMUTATIVE( NAME, OP )               \
-template <class T, class U, class B = ::boost::detail::empty_base<T> >  \
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >  \
 struct NAME##2 : B                                                      \
 {                                                                       \
   friend T operator OP( T lhs, const U& rhs ) { return lhs OP##= rhs; } \
 };                                                                      \
                                                                         \
-template <class T, class U, class B = ::boost::detail::empty_base<T> >  \
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >  \
 struct BOOST_OPERATOR2_LEFT(NAME) : B                                   \
 {                                                                       \
   friend T operator OP( const U& lhs, const T& rhs )                    \
     { return T( lhs ) OP##= rhs; }                                      \
 };                                                                      \
                                                                         \
-template <class T, class B = ::boost::detail::empty_base<T> >           \
+template <class T, class B = ::pdalboost::detail::empty_base<T> >           \
 struct NAME##1 : B                                                      \
 {                                                                       \
   friend T operator OP( T lhs, const T& rhs ) { return lhs OP##= rhs; } \
@@ -268,7 +267,7 @@ BOOST_BINARY_OPERATOR_COMMUTATIVE( orable, | )
 
 //  incrementable and decrementable contributed by Jeremy Siek
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct incrementable : B
 {
   friend T operator++(T& x, int)
@@ -281,7 +280,7 @@ private: // The use of this typedef works around a Borland bug
   typedef T incrementable_type;
 };
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct decrementable : B
 {
   friend T operator--(T& x, int)
@@ -296,7 +295,7 @@ private: // The use of this typedef works around a Borland bug
 
 //  Iterator operator classes (contributed by Jeremy Siek) ------------------//
 
-template <class T, class P, class B = ::boost::detail::empty_base<T> >
+template <class T, class P, class B = ::pdalboost::detail::empty_base<T> >
 struct dereferenceable : B
 {
   P operator->() const
@@ -305,7 +304,7 @@ struct dereferenceable : B
   }
 };
 
-template <class T, class I, class R, class B = ::boost::detail::empty_base<T> >
+template <class T, class I, class R, class B = ::pdalboost::detail::empty_base<T> >
 struct indexable : B
 {
   R operator[](I n) const
@@ -320,14 +319,14 @@ struct indexable : B
 #if defined(BOOST_HAS_NRVO) || defined(BOOST_FORCE_SYMMETRIC_OPERATORS)
 
 #define BOOST_BINARY_OPERATOR( NAME, OP )                                     \
-template <class T, class U, class B = ::boost::detail::empty_base<T> >        \
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >        \
 struct NAME##2 : B                                                            \
 {                                                                             \
   friend T operator OP( const T& lhs, const U& rhs )                          \
     { T nrv( lhs ); nrv OP##= rhs; return nrv; }                              \
 };                                                                            \
                                                                               \
-template <class T, class B = ::boost::detail::empty_base<T> >                 \
+template <class T, class B = ::pdalboost::detail::empty_base<T> >                 \
 struct NAME##1 : B                                                            \
 {                                                                             \
   friend T operator OP( const T& lhs, const T& rhs )                          \
@@ -337,13 +336,13 @@ struct NAME##1 : B                                                            \
 #else // defined(BOOST_HAS_NRVO) || defined(BOOST_FORCE_SYMMETRIC_OPERATORS)
 
 #define BOOST_BINARY_OPERATOR( NAME, OP )                                     \
-template <class T, class U, class B = ::boost::detail::empty_base<T> >        \
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >        \
 struct NAME##2 : B                                                            \
 {                                                                             \
   friend T operator OP( T lhs, const U& rhs ) { return lhs OP##= rhs; }       \
 };                                                                            \
                                                                               \
-template <class T, class B = ::boost::detail::empty_base<T> >                 \
+template <class T, class B = ::pdalboost::detail::empty_base<T> >                 \
 struct NAME##1 : B                                                            \
 {                                                                             \
   friend T operator OP( T lhs, const T& rhs ) { return lhs OP##= rhs; }       \
@@ -356,7 +355,7 @@ BOOST_BINARY_OPERATOR( right_shiftable, >> )
 
 #undef BOOST_BINARY_OPERATOR
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct equivalent2 : B
 {
   friend bool operator==(const T& x, const U& y)
@@ -365,7 +364,7 @@ struct equivalent2 : B
   }
 };
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct equivalent1 : B
 {
   friend bool operator==(const T&x, const T&y)
@@ -374,7 +373,7 @@ struct equivalent1 : B
   }
 };
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct partially_ordered2 : B
 {
   friend bool operator<=(const T& x, const U& y)
@@ -391,7 +390,7 @@ struct partially_ordered2 : B
     { return static_cast<bool>(y < x) || static_cast<bool>(y == x); }
 };
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct partially_ordered1 : B
 {
   friend bool operator>(const T& x, const T& y)
@@ -404,161 +403,161 @@ struct partially_ordered1 : B
 
 //  Combined operator classes (contributed by Daryle Walker) ----------------//
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct totally_ordered2
     : less_than_comparable2<T, U
     , equality_comparable2<T, U, B
       > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct totally_ordered1
     : less_than_comparable1<T
     , equality_comparable1<T, B
       > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct additive2
     : addable2<T, U
     , subtractable2<T, U, B
       > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct additive1
     : addable1<T
     , subtractable1<T, B
       > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct multiplicative2
     : multipliable2<T, U
     , dividable2<T, U, B
       > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct multiplicative1
     : multipliable1<T
     , dividable1<T, B
       > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct integer_multiplicative2
     : multiplicative2<T, U
     , modable2<T, U, B
       > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct integer_multiplicative1
     : multiplicative1<T
     , modable1<T, B
       > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct arithmetic2
     : additive2<T, U
     , multiplicative2<T, U, B
       > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct arithmetic1
     : additive1<T
     , multiplicative1<T, B
       > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct integer_arithmetic2
     : additive2<T, U
     , integer_multiplicative2<T, U, B
       > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct integer_arithmetic1
     : additive1<T
     , integer_multiplicative1<T, B
       > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct bitwise2
     : xorable2<T, U
     , andable2<T, U
     , orable2<T, U, B
       > > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct bitwise1
     : xorable1<T
     , andable1<T
     , orable1<T, B
       > > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct unit_steppable
     : incrementable<T
     , decrementable<T, B
       > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct shiftable2
     : left_shiftable2<T, U
     , right_shiftable2<T, U, B
       > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct shiftable1
     : left_shiftable1<T
     , right_shiftable1<T, B
       > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct ring_operators2
     : additive2<T, U
     , subtractable2_left<T, U
     , multipliable2<T, U, B
       > > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct ring_operators1
     : additive1<T
     , multipliable1<T, B
       > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct ordered_ring_operators2
     : ring_operators2<T, U
     , totally_ordered2<T, U, B
       > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct ordered_ring_operators1
     : ring_operators1<T
     , totally_ordered1<T, B
       > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct field_operators2
     : ring_operators2<T, U
     , dividable2<T, U
     , dividable2_left<T, U, B
       > > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct field_operators1
     : ring_operators1<T
     , dividable1<T, B
       > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct ordered_field_operators2
     : field_operators2<T, U
     , totally_ordered2<T, U, B
       > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct ordered_field_operators1
     : field_operators1<T
     , totally_ordered1<T, B
       > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct euclidian_ring_operators2
     : ring_operators2<T, U
     , dividable2<T, U
@@ -567,26 +566,26 @@ struct euclidian_ring_operators2
     , modable2_left<T, U, B
       > > > > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct euclidian_ring_operators1
     : ring_operators1<T
     , dividable1<T
     , modable1<T, B
       > > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct ordered_euclidian_ring_operators2
     : totally_ordered2<T, U
     , euclidian_ring_operators2<T, U, B
       > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct ordered_euclidian_ring_operators1
     : totally_ordered1<T
     , euclidian_ring_operators1<T, B
       > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct euclidean_ring_operators2
     : ring_operators2<T, U
     , dividable2<T, U
@@ -595,43 +594,43 @@ struct euclidean_ring_operators2
     , modable2_left<T, U, B
       > > > > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct euclidean_ring_operators1
     : ring_operators1<T
     , dividable1<T
     , modable1<T, B
       > > > {};
 
-template <class T, class U, class B = ::boost::detail::empty_base<T> >
+template <class T, class U, class B = ::pdalboost::detail::empty_base<T> >
 struct ordered_euclidean_ring_operators2
     : totally_ordered2<T, U
     , euclidean_ring_operators2<T, U, B
       > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct ordered_euclidean_ring_operators1
     : totally_ordered1<T
     , euclidean_ring_operators1<T, B
       > > {};
 
-template <class T, class P, class B = ::boost::detail::empty_base<T> >
+template <class T, class P, class B = ::pdalboost::detail::empty_base<T> >
 struct input_iteratable
     : equality_comparable1<T
     , incrementable<T
     , dereferenceable<T, P, B
       > > > {};
 
-template <class T, class B = ::boost::detail::empty_base<T> >
+template <class T, class B = ::pdalboost::detail::empty_base<T> >
 struct output_iteratable
     : incrementable<T, B
       > {};
 
-template <class T, class P, class B = ::boost::detail::empty_base<T> >
+template <class T, class P, class B = ::pdalboost::detail::empty_base<T> >
 struct forward_iteratable
     : input_iteratable<T, P, B
       > {};
 
-template <class T, class P, class B = ::boost::detail::empty_base<T> >
+template <class T, class P, class B = ::pdalboost::detail::empty_base<T> >
 struct bidirectional_iteratable
     : forward_iteratable<T, P
     , decrementable<T, B
@@ -641,7 +640,7 @@ struct bidirectional_iteratable
 //  which is an indirect base class of bidirectional_iterable,
 //  random_access_iteratable must not be derived from totally_ordered1
 //  but from less_than_comparable1 only. (Helmut Zeisel, 02-Dec-2001)
-template <class T, class P, class D, class R, class B = ::boost::detail::empty_base<T> >
+template <class T, class P, class D, class R, class B = ::pdalboost::detail::empty_base<T> >
 struct random_access_iteratable
     : bidirectional_iteratable<T, P
     , less_than_comparable1<T
@@ -650,7 +649,7 @@ struct random_access_iteratable
       > > > > {};
 
 #ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
-} // namespace boost
+} // namespace pdalboost
 #endif // BOOST_NO_OPERATORS_IN_NAMESPACE
 
 
@@ -686,19 +685,19 @@ struct random_access_iteratable
      // Otherwise, because a Borland C++ 5.5 bug prevents a using declaration
      // from working, we are forced to use inheritance for that compiler.
 #    define BOOST_IMPORT_TEMPLATE4(template_name)                                             \
-     template <class T, class U, class V, class W, class B = ::boost::detail::empty_base<T> > \
+     template <class T, class U, class V, class W, class B = ::pdalboost::detail::empty_base<T> > \
      struct template_name : ::template_name<T, U, V, W, B> {};
 
 #    define BOOST_IMPORT_TEMPLATE3(template_name)                                    \
-     template <class T, class U, class V, class B = ::boost::detail::empty_base<T> > \
+     template <class T, class U, class V, class B = ::pdalboost::detail::empty_base<T> > \
      struct template_name : ::template_name<T, U, V, B> {};
 
 #    define BOOST_IMPORT_TEMPLATE2(template_name)                           \
-     template <class T, class U, class B = ::boost::detail::empty_base<T> > \
+     template <class T, class U, class B = ::pdalboost::detail::empty_base<T> > \
      struct template_name : ::template_name<T, U, B> {};
 
 #    define BOOST_IMPORT_TEMPLATE1(template_name)                  \
-     template <class T, class B = ::boost::detail::empty_base<T> > \
+     template <class T, class B = ::pdalboost::detail::empty_base<T> > \
      struct template_name : ::template_name<T, B> {};
 
 #  endif // BOOST_NO_USING_TEMPLATE
@@ -707,8 +706,8 @@ struct random_access_iteratable
 
 //
 // Here's where we put it all together, defining the xxxx forms of the templates
-// in namespace boost. We also define specializations of is_chained_base<> for
-// the xxxx, xxxx1, and xxxx2 templates, importing them into boost:: as
+// in namespace pdalboost. We also define specializations of is_chained_base<> for
+// the xxxx, xxxx1, and xxxx2 templates, importing them into pdalboost:: as
 // necessary.
 //
 #ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
@@ -717,7 +716,7 @@ struct random_access_iteratable
 // template argument is being used for base class chaining, or is specifying a
 // 2nd argument type.
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 // A type parameter is used instead of a plain bool because Borland's compiler
 // didn't cope well with the more obvious non-type template parameter.
 namespace detail {
@@ -729,18 +728,18 @@ namespace detail {
 // class chaining. We specialize for the operator templates defined in this
 // library.
 template<class T> struct is_chained_base {
-  typedef ::boost::detail::false_t value;
+  typedef ::pdalboost::detail::false_t value;
 };
 
-} // namespace boost
+} // namespace pdalboost
 
 // Import a 4-type-argument operator template into boost (if necessary) and
 // provide a specialization of 'is_chained_base<>' for it.
 # define BOOST_OPERATOR_TEMPLATE4(template_name4)                     \
   BOOST_IMPORT_TEMPLATE4(template_name4)                              \
   template<class T, class U, class V, class W, class B>               \
-  struct is_chained_base< ::boost::template_name4<T, U, V, W, B> > {  \
-    typedef ::boost::detail::true_t value;                            \
+  struct is_chained_base< ::pdalboost::template_name4<T, U, V, W, B> > {  \
+    typedef ::pdalboost::detail::true_t value;                            \
   };
 
 // Import a 3-type-argument operator template into boost (if necessary) and
@@ -748,8 +747,8 @@ template<class T> struct is_chained_base {
 # define BOOST_OPERATOR_TEMPLATE3(template_name3)                     \
   BOOST_IMPORT_TEMPLATE3(template_name3)                              \
   template<class T, class U, class V, class B>                        \
-  struct is_chained_base< ::boost::template_name3<T, U, V, B> > {     \
-    typedef ::boost::detail::true_t value;                            \
+  struct is_chained_base< ::pdalboost::template_name3<T, U, V, B> > {     \
+    typedef ::pdalboost::detail::true_t value;                            \
   };
 
 // Import a 2-type-argument operator template into boost (if necessary) and
@@ -757,8 +756,8 @@ template<class T> struct is_chained_base {
 # define BOOST_OPERATOR_TEMPLATE2(template_name2)                  \
   BOOST_IMPORT_TEMPLATE2(template_name2)                           \
   template<class T, class U, class B>                              \
-  struct is_chained_base< ::boost::template_name2<T, U, B> > {     \
-    typedef ::boost::detail::true_t value;                         \
+  struct is_chained_base< ::pdalboost::template_name2<T, U, B> > {     \
+    typedef ::pdalboost::detail::true_t value;                         \
   };
 
 // Import a 1-type-argument operator template into boost (if necessary) and
@@ -766,8 +765,8 @@ template<class T> struct is_chained_base {
 # define BOOST_OPERATOR_TEMPLATE1(template_name1)                  \
   BOOST_IMPORT_TEMPLATE1(template_name1)                           \
   template<class T, class B>                                       \
-  struct is_chained_base< ::boost::template_name1<T, B> > {        \
-    typedef ::boost::detail::true_t value;                         \
+  struct is_chained_base< ::pdalboost::template_name1<T, B> > {        \
+    typedef ::pdalboost::detail::true_t value;                         \
   };
 
 // BOOST_OPERATOR_TEMPLATE(template_name) defines template_name<> such that it
@@ -787,22 +786,22 @@ template<class T> struct is_chained_base {
 # define BOOST_OPERATOR_TEMPLATE(template_name)                    \
 template <class T                                                  \
          ,class U = T                                              \
-         ,class B = ::boost::detail::empty_base<T>                 \
+         ,class B = ::pdalboost::detail::empty_base<T>                 \
          ,class O = typename is_chained_base<U>::value             \
          >                                                         \
 struct template_name : template_name##2<T, U, B> {};               \
                                                                    \
 template<class T, class U, class B>                                \
-struct template_name<T, U, B, ::boost::detail::true_t>             \
+struct template_name<T, U, B, ::pdalboost::detail::true_t>             \
   : template_name##1<T, U> {};                                     \
                                                                    \
 template <class T, class B>                                        \
-struct template_name<T, T, B, ::boost::detail::false_t>            \
+struct template_name<T, T, B, ::pdalboost::detail::false_t>            \
   : template_name##1<T, B> {};                                     \
                                                                    \
 template<class T, class U, class B, class O>                       \
-struct is_chained_base< ::boost::template_name<T, U, B, O> > {     \
-  typedef ::boost::detail::true_t value;                           \
+struct is_chained_base< ::pdalboost::template_name<T, U, B, O> > {     \
+  typedef ::pdalboost::detail::true_t value;                           \
 };                                                                 \
                                                                    \
 BOOST_OPERATOR_TEMPLATE2(template_name##2)                         \
@@ -823,12 +822,12 @@ BOOST_OPERATOR_TEMPLATE1(template_name##1)
    // In this case we can only assume that template_name<> is equivalent to the
    // more commonly needed template_name1<> form.
 #  define BOOST_OPERATOR_TEMPLATE(template_name)                   \
-   template <class T, class B = ::boost::detail::empty_base<T> >   \
+   template <class T, class B = ::pdalboost::detail::empty_base<T> >   \
    struct template_name : template_name##1<T, B> {};
 
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     
 BOOST_OPERATOR_TEMPLATE(less_than_comparable)
 BOOST_OPERATOR_TEMPLATE(equality_comparable)
@@ -921,13 +920,13 @@ template <class T,
           class R = V const &>
 struct input_iterator_helper
   : input_iteratable<T, P
-  , boost::iterator<std::input_iterator_tag, V, D, P, R
+  , pdalboost::iterator<std::input_iterator_tag, V, D, P, R
     > > {};
 
 template<class T>
 struct output_iterator_helper
   : output_iteratable<T
-  , boost::iterator<std::output_iterator_tag, void, void, void, void
+  , pdalboost::iterator<std::output_iterator_tag, void, void, void, void
   > >
 {
   T& operator*()  { return static_cast<T&>(*this); }
@@ -941,7 +940,7 @@ template <class T,
           class R = V&>
 struct forward_iterator_helper
   : forward_iteratable<T, P
-  , boost::iterator<std::forward_iterator_tag, V, D, P, R
+  , pdalboost::iterator<std::forward_iterator_tag, V, D, P, R
     > > {};
 
 template <class T,
@@ -951,7 +950,7 @@ template <class T,
           class R = V&>
 struct bidirectional_iterator_helper
   : bidirectional_iteratable<T, P
-  , boost::iterator<std::bidirectional_iterator_tag, V, D, P, R
+  , pdalboost::iterator<std::bidirectional_iterator_tag, V, D, P, R
     > > {};
 
 template <class T,
@@ -961,7 +960,7 @@ template <class T,
           class R = V&>
 struct random_access_iterator_helper
   : random_access_iteratable<T, P, D, R
-  , boost::iterator<std::random_access_iterator_tag, V, D, P, R
+  , pdalboost::iterator<std::random_access_iterator_tag, V, D, P, R
     > >
 {
   friend D requires_difference_operator(const T& x, const T& y) {
@@ -969,7 +968,7 @@ struct random_access_iterator_helper
   }
 }; // random_access_iterator_helper
 
-} // namespace boost
+} // namespace pdalboost
 
 #if defined(__sgi) && !defined(__GNUC__)
 #pragma reset woff 1234

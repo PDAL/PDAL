@@ -16,7 +16,7 @@
 #include <boost/config.hpp> /* keep it first to prevent nasty warns in MSVC */
 #include <boost/mpl/bool.hpp>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -39,7 +39,7 @@ template<>struct uintptr_candidates<1> {typedef unsigned short         type;};
 template<>struct uintptr_candidates<2> {typedef unsigned long          type;};
 
 #if defined(BOOST_HAS_LONG_LONG)
-template<>struct uintptr_candidates<3> {typedef boost::ulong_long_type type;};
+template<>struct uintptr_candidates<3> {typedef pdalboost::ulong_long_type type;};
 #else
 template<>struct uintptr_candidates<3> {typedef unsigned int           type;};
 #endif
@@ -71,6 +71,6 @@ typedef uintptr_aux::type                         uintptr_type;
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

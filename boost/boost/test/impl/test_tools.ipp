@@ -49,7 +49,7 @@ namespace std { using ::wcscmp; }
 #endif
 # endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace test_tools {
 
@@ -111,7 +111,7 @@ namespace tt_detail {
 // **************            TOOL BOX Implementation           ************** //
 // ************************************************************************** //
 
-using ::boost::unit_test::lazy_ostream;
+using ::pdalboost::unit_test::lazy_ostream;
 
 bool
 check_impl( predicate_result const& pr, lazy_ostream const& check_descr,
@@ -619,7 +619,7 @@ output_test_stream::sync()
 
 } // namespace test_tools
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

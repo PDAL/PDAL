@@ -30,7 +30,7 @@
 # include <unistd.h>        // sysconf.
 #endif
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 namespace detail {
 
@@ -85,7 +85,7 @@ mapped_file_impl::~mapped_file_impl()
 void mapped_file_impl::open(param_type p)
 {
     if (is_open())
-        boost::throw_exception(BOOST_IOSTREAMS_FAILURE("file already open"));
+        pdalboost::throw_exception(BOOST_IOSTREAMS_FAILURE("file already open"));
     p.normalize();
     open_file(p);
     map_file(p);  // May modify p.hint
@@ -113,17 +113,17 @@ void mapped_file_impl::close()
 void mapped_file_impl::resize(stream_offset new_size)
 {
     if (!is_open())
-        boost::throw_exception(BOOST_IOSTREAMS_FAILURE("file is closed"));
+        pdalboost::throw_exception(BOOST_IOSTREAMS_FAILURE("file is closed"));
     if (flags() & mapped_file::priv)
-        boost::throw_exception(
+        pdalboost::throw_exception(
             BOOST_IOSTREAMS_FAILURE("can't resize private mapped file")
         );
     if (!(flags() & mapped_file::readwrite))
-        boost::throw_exception(
+        pdalboost::throw_exception(
             BOOST_IOSTREAMS_FAILURE("can't resize readonly mapped file")
         );
     if (params_.offset >= new_size)
-        boost::throw_exception(
+        pdalboost::throw_exception(
             BOOST_IOSTREAMS_FAILURE("can't resize below mapped offset")
         );
     if (!unmap_file())
@@ -218,13 +218,13 @@ void mapped_file_impl::open_file(param_type p)
     if (get_size) {
         LARGE_INTEGER info;
         if (get_size(handle_, &info)) {
-            boost::intmax_t size =
-                ( (static_cast<boost::intmax_t>(info.HighPart) << 32) |
+            pdalboost::intmax_t size =
+                ( (static_cast<pdalboost::intmax_t>(info.HighPart) << 32) |
                   info.LowPart );
             size_ =
                 static_cast<std::size_t>(
                     p.length != max_length ?
-                        std::min<boost::intmax_t>(p.length, size) :
+                        std::min<pdalboost::intmax_t>(p.length, size) :
                         size
                 );
         } else {
@@ -238,12 +238,12 @@ void mapped_file_impl::open_file(param_type p)
                  !=
              INVALID_FILE_SIZE )
         {
-            boost::intmax_t size =
-                (static_cast<boost::intmax_t>(hi) << 32) | low;
+            pdalboost::intmax_t size =
+                (static_cast<pdalboost::intmax_t>(hi) << 32) | low;
             size_ =
                 static_cast<std::size_t>(
                     p.length != max_length ?
-                        std::min<boost::intmax_t>(p.length, size) :
+                        std::min<pdalboost::intmax_t>(p.length, size) :
                         size
                 );
         } else {
@@ -349,7 +349,7 @@ void mapped_file_impl::map_file(param_type& p)
             p.hint = 0;
             try_map_file(p);
         } else {
-            boost::throw_exception(e);
+            pdalboost::throw_exception(e);
         }
     }
 }
@@ -399,7 +399,7 @@ void mapped_file_impl::cleanup_and_throw(const char* msg)
     errno = error;
 #endif
     clear(true);
-    boost::iostreams::detail::throw_system_failure(msg);
+    pdalboost::iostreams::detail::throw_system_failure(msg);
 }
 
 //------------------Implementation of mapped_file_params_base-----------------//
@@ -407,7 +407,7 @@ void mapped_file_impl::cleanup_and_throw(const char* msg)
 void mapped_file_params_base::normalize()
 {
     if (mode && flags)
-        boost::throw_exception(BOOST_IOSTREAMS_FAILURE(
+        pdalboost::throw_exception(BOOST_IOSTREAMS_FAILURE(
             "at most one of 'mode' and 'flags' may be specified"
         ));
     if (flags) {
@@ -417,7 +417,7 @@ void mapped_file_params_base::normalize()
         case mapped_file::priv:
             break;
         default:
-            boost::throw_exception(BOOST_IOSTREAMS_FAILURE("invalid flags"));
+            pdalboost::throw_exception(BOOST_IOSTREAMS_FAILURE("invalid flags"));
         }
     } else {
         flags = (mode & BOOST_IOS::out) ? 
@@ -426,9 +426,9 @@ void mapped_file_params_base::normalize()
         mode = BOOST_IOS::openmode();
     }
     if (offset < 0)
-        boost::throw_exception(BOOST_IOSTREAMS_FAILURE("invalid offset"));
+        pdalboost::throw_exception(BOOST_IOSTREAMS_FAILURE("invalid offset"));
     if (new_file_size < 0)
-        boost::throw_exception(
+        pdalboost::throw_exception(
             BOOST_IOSTREAMS_FAILURE("invalid new file size")
         );
 }

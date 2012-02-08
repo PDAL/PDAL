@@ -41,7 +41,7 @@
 #   include <boost/preprocessor/cat.hpp>
 #   include <boost/preprocessor/inc.hpp>
 
-namespace boost { namespace mpl { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { namespace aux {
 
 // forward declaration
 template< BOOST_MPL_AUX_NTTP_DECL(long, N) > struct advance_backward;

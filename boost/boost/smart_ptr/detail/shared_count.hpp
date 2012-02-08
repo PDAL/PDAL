@@ -37,8 +37,7 @@
 #include <functional>       // std::less
 #include <new>              // std::bad_alloc
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -92,7 +91,7 @@ public:
         }
         catch(...)
         {
-            boost::checked_delete( p );
+            pdalboost::checked_delete( p );
             throw;
         }
 
@@ -102,8 +101,8 @@ public:
 
         if( pi_ == 0 )
         {
-            boost::checked_delete( p );
-            boost::throw_exception( std::bad_alloc() );
+            pdalboost::checked_delete( p );
+            pdalboost::throw_exception( std::bad_alloc() );
         }
 
 #endif
@@ -140,7 +139,7 @@ public:
         if(pi_ == 0)
         {
             d(p); // delete p
-            boost::throw_exception(std::bad_alloc());
+            pdalboost::throw_exception(std::bad_alloc());
         }
 
 #endif
@@ -172,7 +171,7 @@ public:
         if( pi_ == 0 )
         {
             D()( p ); // delete p
-            boost::throw_exception( std::bad_alloc() );
+            pdalboost::throw_exception( std::bad_alloc() );
         }
 
 #endif // #ifndef BOOST_NO_EXCEPTIONS
@@ -220,7 +219,7 @@ public:
         else
         {
             d( p );
-            boost::throw_exception( std::bad_alloc() );
+            pdalboost::throw_exception( std::bad_alloc() );
         }
 
 #endif
@@ -268,7 +267,7 @@ public:
         else
         {
             D()( p );
-            boost::throw_exception( std::bad_alloc() );
+            pdalboost::throw_exception( std::bad_alloc() );
         }
 
 #endif // #ifndef BOOST_NO_EXCEPTIONS
@@ -290,7 +289,7 @@ public:
 
         if( pi_ == 0 )
         {
-            boost::throw_exception(std::bad_alloc());
+            pdalboost::throw_exception(std::bad_alloc());
         }
 
 #endif
@@ -506,7 +505,7 @@ inline shared_count::shared_count( weak_count const & r ): pi_( r.pi_ )
 {
     if( pi_ == 0 || !pi_->add_ref_lock() )
     {
-        boost::throw_exception( boost::bad_weak_ptr() );
+        pdalboost::throw_exception( pdalboost::bad_weak_ptr() );
     }
 }
 
@@ -523,7 +522,7 @@ inline shared_count::shared_count( weak_count const & r, sp_nothrow_tag ): pi_( 
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
 #ifdef __BORLANDC__
 # pragma warn .8027     // Functions containing try are not expanded inline

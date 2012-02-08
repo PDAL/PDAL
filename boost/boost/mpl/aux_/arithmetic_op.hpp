@@ -39,7 +39,7 @@
 #   include <boost/preprocessor/cat.hpp>
 
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 #if defined(BOOST_MPL_CFG_NO_NESTED_VALUE_ARITHMETIC)
 namespace aux {

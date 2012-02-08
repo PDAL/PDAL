@@ -39,7 +39,7 @@
 #include <boost/algorithm/string/replace.hpp>
 
 #include <pdal/Dimension.hpp>
-#include <pdal/external/boost/uuid/string_generator.hpp>
+#include <boost/uuid/string_generator.hpp>
 
 using namespace pdal;
 
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
 {
     Dimension d1("X", dimension::SignedInteger, 4);
 
-    pdal::external::boost::uuids::string_generator gen;
+    boost::uuids::string_generator gen;
     std::string id("9bf8d966-0c0d-4c94-a14e-bce97e860bde");
     dimension::id uuid = gen(id);
     

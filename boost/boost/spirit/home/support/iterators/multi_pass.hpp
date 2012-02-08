@@ -16,14 +16,14 @@
 #include <boost/detail/workaround.hpp>
 #include <boost/utility/base_from_member.hpp>
 
-namespace boost { namespace spirit 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit 
 {
     ///////////////////////////////////////////////////////////////////////////
     // The default multi_pass instantiation uses a ref-counted std_deque scheme.
     ///////////////////////////////////////////////////////////////////////////
     template<typename T, typename Policies>
     class multi_pass 
-      : private boost::base_from_member<
+      : private pdalboost::base_from_member<
             typename Policies::BOOST_NESTED_TEMPLATE shared<T>*>
       , public Policies::BOOST_NESTED_TEMPLATE unique<T>
 #if defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
@@ -37,7 +37,7 @@ namespace boost { namespace spirit
         typedef typename Policies::BOOST_NESTED_TEMPLATE shared<T> 
             shared_data_type;
 
-        typedef boost::base_from_member<shared_data_type*> member_base;
+        typedef pdalboost::base_from_member<shared_data_type*> member_base;
 
         // define the types the standard embedded iterator typedefs are taken 
         // from
@@ -99,7 +99,7 @@ namespace boost { namespace spirit
 
         void swap(multi_pass& x)
         {
-            boost::swap(this->member, x.member);
+            pdalboost::swap(this->member, x.member);
             this->policies_base_type::swap(x);
         }
 
@@ -245,7 +245,7 @@ namespace boost { namespace spirit
         }
     }
 
-}} // namespace boost::spirit
+}} // namespace pdalboost::spirit
 
 #endif 
 

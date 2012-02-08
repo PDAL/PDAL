@@ -202,7 +202,7 @@ namespace { void _set_se_translator( void* ) {} }
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 // ************************************************************************** //
 // **************                  report_error                ************** //
@@ -222,12 +222,12 @@ namespace detail {
 
 template <typename ErrorInfo>
 typename ErrorInfo::value_type
-extract( boost::exception const* ex )
+extract( pdalboost::exception const* ex )
 {
     if( !ex )
         return 0;
 
-    typename ErrorInfo::value_type const * val = boost::get_error_info<ErrorInfo>( *ex );
+    typename ErrorInfo::value_type const * val = pdalboost::get_error_info<ErrorInfo>( *ex );
 
     return val ? *val : 0;
 }
@@ -235,7 +235,7 @@ extract( boost::exception const* ex )
 //____________________________________________________________________________//
 
 static void
-report_error( execution_exception::error_code ec, boost::exception const* be, char const* format, va_list* args )
+report_error( execution_exception::error_code ec, pdalboost::exception const* be, char const* format, va_list* args )
 {
     static const int REPORT_ERROR_BUFFER_SIZE = 512;
     static char buf[REPORT_ERROR_BUFFER_SIZE];
@@ -264,7 +264,7 @@ report_error( execution_exception::error_code ec, char const* format, ... )
 //____________________________________________________________________________//
 
 static void
-report_error( execution_exception::error_code ec, boost::exception const* be, char const* format, ... )
+report_error( execution_exception::error_code ec, pdalboost::exception const* be, char const* format, ... )
 {
     va_list args;
     va_start( args, format );
@@ -294,7 +294,7 @@ do_invoke( Tr const& tr, Functor const& F )
 namespace detail {
 
 // ************************************************************************** //
-// **************    boost::detail::system_signal_exception    ************** //
+// **************    pdalboost::detail::system_signal_exception    ************** //
 // ************************************************************************** //
 
 class system_signal_exception {
@@ -613,7 +613,7 @@ system_signal_exception::report() const
 //____________________________________________________________________________//
 
 // ************************************************************************** //
-// **************         boost::detail::signal_action         ************** //
+// **************         pdalboost::detail::signal_action         ************** //
 // ************************************************************************** //
 
 // Forward declaration
@@ -686,7 +686,7 @@ signal_action::~signal_action()
 //____________________________________________________________________________//
 
 // ************************************************************************** //
-// **************        boost::detail::signal_handler         ************** //
+// **************        pdalboost::detail::signal_handler         ************** //
 // ************************************************************************** //
 
 class signal_handler {
@@ -902,7 +902,7 @@ namespace { void _set_se_translator( void* ) {} }
 namespace detail {
 
 // ************************************************************************** //
-// **************    boost::detail::system_signal_exception    ************** //
+// **************    pdalboost::detail::system_signal_exception    ************** //
 // ************************************************************************** //
 
 class system_signal_exception {
@@ -1227,78 +1227,78 @@ execution_monitor::execute( unit_test::callback0<int> const& F )
 
     catch( std::bad_alloc const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::bad_alloc: %s", ex.what() ); }
 
 #if BOOST_WORKAROUND(__BORLANDC__, <= 0x0551)
     catch( std::bad_cast const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::bad_cast" ); }
     catch( std::bad_typeid const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::bad_typeid" ); }
 #else
     catch( std::bad_cast const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::bad_cast: %s", ex.what() ); }
     catch( std::bad_typeid const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::bad_typeid: %s", ex.what() ); }
 #endif
 
     catch( std::bad_exception const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::bad_exception: %s", ex.what() ); }
     catch( std::domain_error const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::domain_error: %s", ex.what() ); }
     catch( std::invalid_argument const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::invalid_argument: %s", ex.what() ); }
     catch( std::length_error const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::length_error: %s", ex.what() ); }
     catch( std::out_of_range const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::out_of_range: %s", ex.what() ); }
     catch( std::range_error const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::range_error: %s", ex.what() ); }
     catch( std::overflow_error const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::overflow_error: %s", ex.what() ); }
     catch( std::underflow_error const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::underflow_error: %s", ex.what() ); }
     catch( std::logic_error const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::logic_error: %s", ex.what() ); }
     catch( std::runtime_error const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::runtime_error: %s", ex.what() ); }
     catch( std::exception const& ex )
       { detail::report_error( execution_exception::cpp_exception_error, 
-                              current_exception_cast<boost::exception const>(),
+                              current_exception_cast<pdalboost::exception const>(),
                               "std::exception: %s", ex.what() ); }
 
-    catch( boost::exception const& ex )
+    catch( pdalboost::exception const& ex )
     { detail::report_error( execution_exception::cpp_exception_error, 
                             &ex,
-                            "unknown boost::exception" ); }
+                            "unknown pdalboost::exception" ); }
 
     // system errors
     catch( system_error const& ex )
@@ -1359,7 +1359,7 @@ execution_exception::location::location( char const* file_name, size_t line_num,
 
 //____________________________________________________________________________//
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/test/detail/enable_warnings.hpp>
 

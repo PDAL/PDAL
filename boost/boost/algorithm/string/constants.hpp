@@ -11,7 +11,7 @@
 #ifndef BOOST_STRING_CONSTANTS_HPP
 #define BOOST_STRING_CONSTANTS_HPP
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
 
     //! Token compression mode 
@@ -30,7 +30,7 @@ namespace boost {
     using algorithm::token_compress_on;
     using algorithm::token_compress_off;
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // BOOST_STRING_CONSTANTS_HPP
 

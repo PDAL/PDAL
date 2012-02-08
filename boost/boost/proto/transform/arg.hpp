@@ -14,7 +14,7 @@
 #include <boost/proto/transform/impl.hpp>
 #include <boost/type_traits/is_array.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
 
     /// \brief A PrimitiveTransform that returns the current expression
@@ -25,7 +25,7 @@ namespace boost { namespace proto
     /// \code
     /// proto::terminal<int>::type i = {42};
     /// proto::terminal<int>::type & j = proto::_expr()(i);
-    /// assert( boost::addressof(i) == boost::addressof(j) );
+    /// assert( pdalboost::addressof(i) == pdalboost::addressof(j) );
     /// \endcode
     struct _expr : transform<_expr>
     {
@@ -137,7 +137,7 @@ namespace boost { namespace proto
     /// \code
     /// proto::terminal<int>::type i = {42};
     /// proto::terminal<int>::type & j = proto::_child_c<0>()(-i);
-    /// assert( boost::addressof(i) == boost::addressof(j) );
+    /// assert( pdalboost::addressof(i) == pdalboost::addressof(j) );
     /// \endcode
     template<int N>
     struct _child_c : transform<_child_c<N> >
@@ -230,15 +230,15 @@ namespace boost { namespace proto
     };
 
     /// \brief A unary CallableTransform that wraps its argument
-    /// in a \c boost::reference_wrapper\<\>.
+    /// in a \c pdalboost::reference_wrapper\<\>.
     ///
     /// Example:
     ///
     /// \code
     /// proto::terminal<int>::type i = {42};
-    /// boost::reference_wrapper<proto::terminal<int>::type> j
+    /// pdalboost::reference_wrapper<proto::terminal<int>::type> j
     ///     = proto::when<_, proto::_byref(_)>()(i);
-    /// assert( boost::addressof(i) == boost::addressof(j.get()) );
+    /// assert( pdalboost::addressof(i) == pdalboost::addressof(j.get()) );
     /// \endcode
     struct _byref : callable
     {
@@ -248,43 +248,43 @@ namespace boost { namespace proto
         template<typename This, typename T>
         struct result<This(T)>
         {
-            typedef boost::reference_wrapper<T const> const type;
+            typedef pdalboost::reference_wrapper<T const> const type;
         };
 
         template<typename This, typename T>
         struct result<This(T &)>
         {
-            typedef boost::reference_wrapper<T> const type;
+            typedef pdalboost::reference_wrapper<T> const type;
         };
 
-        /// Wrap the parameter \c t in a \c boost::reference_wrapper\<\>
+        /// Wrap the parameter \c t in a \c pdalboost::reference_wrapper\<\>
         /// \param t The object to wrap
-        /// \return <tt>boost::ref(t)</tt>
+        /// \return <tt>pdalboost::ref(t)</tt>
         /// \throw nothrow
         template<typename T>
-        boost::reference_wrapper<T> const operator ()(T &t) const
+        pdalboost::reference_wrapper<T> const operator ()(T &t) const
         {
-            return boost::reference_wrapper<T>(t);
+            return pdalboost::reference_wrapper<T>(t);
         }
 
         /// \overload
         ///
         template<typename T>
-        boost::reference_wrapper<T const> const operator ()(T const &t) const
+        pdalboost::reference_wrapper<T const> const operator ()(T const &t) const
         {
-            return boost::reference_wrapper<T const>(t);
+            return pdalboost::reference_wrapper<T const>(t);
         }
     };
 
     /// \brief A unary CallableTransform that strips references
-    /// and \c boost::reference_wrapper\<\> from its argument.
+    /// and \c pdalboost::reference_wrapper\<\> from its argument.
     ///
     /// Example:
     ///
     /// \code
     /// proto::terminal<int>::type i = {42};
     /// int j = 67;
-    /// int k = proto::when<_, proto::_byval(proto::_state)>()(i, boost::ref(j));
+    /// int k = proto::when<_, proto::_byval(proto::_state)>()(i, pdalboost::ref(j));
     /// assert( 67 == k );
     /// \endcode
     struct _byval : callable
@@ -304,7 +304,7 @@ namespace boost { namespace proto
         {};
 
         template<typename This, typename T>
-        struct result<This(boost::reference_wrapper<T>)>
+        struct result<This(pdalboost::reference_wrapper<T>)>
           : result<This(T)>
         {};
 
@@ -320,7 +320,7 @@ namespace boost { namespace proto
         /// \overload
         ///
         template<typename T>
-        T operator ()(boost::reference_wrapper<T> const &t) const
+        T operator ()(pdalboost::reference_wrapper<T> const &t) const
         {
             return t;
         }

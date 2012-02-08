@@ -21,7 +21,7 @@
 //  BOOST_ERROR(message)
 //  BOOST_TEST_EQ(expr1, expr2)
 //
-//  int boost::report_errors()
+//  int pdalboost::report_errors()
 //
 
 #include <iostream>
@@ -34,8 +34,7 @@
 # define BOOST_LIGHTWEIGHT_TEST_OSTREAM std::cerr
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -133,11 +132,11 @@ inline int report_errors()
     }
 }
 
-} // namespace boost
+} // namespace pdalboost
 
-#define BOOST_TEST(expr) ((expr)? (void)0: ::boost::detail::test_failed_impl(#expr, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION))
-#define BOOST_ERROR(msg) ::boost::detail::error_impl(msg, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION)
-#define BOOST_TEST_EQ(expr1,expr2) ( ::boost::detail::test_eq_impl(#expr1, #expr2, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION, expr1, expr2) )
-#define BOOST_TEST_NE(expr1,expr2) ( ::boost::detail::test_ne_impl(#expr1, #expr2, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION, expr1, expr2) )
+#define BOOST_TEST(expr) ((expr)? (void)0: ::pdalboost::detail::test_failed_impl(#expr, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION))
+#define BOOST_ERROR(msg) ::pdalboost::detail::error_impl(msg, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION)
+#define BOOST_TEST_EQ(expr1,expr2) ( ::pdalboost::detail::test_eq_impl(#expr1, #expr2, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION, expr1, expr2) )
+#define BOOST_TEST_NE(expr1,expr2) ( ::pdalboost::detail::test_ne_impl(#expr1, #expr2, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION, expr1, expr2) )
 
 #endif // #ifndef BOOST_DETAIL_LIGHTWEIGHT_TEST_HPP_INCLUDED

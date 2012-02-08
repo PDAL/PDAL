@@ -34,11 +34,11 @@
 //                                                                            //
 //----------------------------------------------------------------------------//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
     template <typename T>
     typename add_rvalue_reference<T>::type declval(); //noexcept; // as unevaluated operand
 
-}  // namespace boost
+}  // namespace pdalboost
 
 #endif  // BOOST_TYPE_TRAITS_EXT_DECLVAL__HPP

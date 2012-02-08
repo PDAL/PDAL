@@ -20,7 +20,7 @@
 #include <iterator>
 #include <utility>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     // info provides information about a component. Each component
     // has a what member function that returns an info object.
@@ -31,7 +31,7 @@ namespace boost { namespace spirit
         struct nil {};
 
         typedef
-            boost::variant<
+            pdalboost::variant<
                 nil
               , utf8_string
               , recursive_wrapper<info>
@@ -90,16 +90,16 @@ namespace boost { namespace spirit
 
         void operator()(info const& what) const
         {
-            boost::apply_visitor(
+            pdalboost::apply_visitor(
                 this_type(callback, what.tag, depth+1), what.value);
         }
 
         void operator()(std::pair<info, info> const& pair) const
         {
             callback.element(tag, "", depth);
-            boost::apply_visitor(
+            pdalboost::apply_visitor(
                 this_type(callback, pair.first.tag, depth+1), pair.first.value);
-            boost::apply_visitor(
+            pdalboost::apply_visitor(
                 this_type(callback, pair.second.tag, depth+1), pair.second.value);
         }
 
@@ -108,7 +108,7 @@ namespace boost { namespace spirit
             callback.element(tag, "", depth);
             BOOST_FOREACH(info const& what, l)
             {
-                boost::apply_visitor(
+                pdalboost::apply_visitor(
                     this_type(callback, what.tag, depth+1), what.value);
             }
         }
@@ -151,7 +151,7 @@ namespace boost { namespace spirit
     {
         simple_printer<Out> pr(out);
         basic_info_walker<simple_printer<Out> > walker(pr, what.tag, 0);
-        boost::apply_visitor(walker, what.value);
+        pdalboost::apply_visitor(walker, what.value);
         return out;
     }
 }}

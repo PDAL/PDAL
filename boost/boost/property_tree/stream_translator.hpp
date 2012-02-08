@@ -23,7 +23,7 @@
 #include <locale>
 #include <limits>
 
-namespace boost { namespace property_tree
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
 {
 
     template <typename Ch, typename Traits, typename E, typename Enabler = void>
@@ -63,7 +63,7 @@ namespace boost { namespace property_tree
             template <typename T>
             struct test
             {
-                typedef boost::false_type type;
+                typedef pdalboost::false_type type;
             };
         };
         template <>
@@ -72,7 +72,7 @@ namespace boost { namespace property_tree
             template <typename T>
             struct test
             {
-              typedef boost::integral_constant<bool,
+              typedef pdalboost::integral_constant<bool,
                   !std::numeric_limits<T>::is_exact> type;
             };
         };
@@ -80,7 +80,7 @@ namespace boost { namespace property_tree
         template <typename F>
         struct is_inexact
         {
-            typedef typename boost::decay<F>::type decayed;
+            typedef typename pdalboost::decay<F>::type decayed;
             typedef typename is_inexact_impl<
                 std::numeric_limits<decayed>::is_specialized
             >::BOOST_NESTED_TEMPLATE test<decayed>::type type;
@@ -90,7 +90,7 @@ namespace boost { namespace property_tree
 
     template <typename Ch, typename Traits, typename F>
     struct customize_stream<Ch, Traits, F,
-        typename boost::enable_if< detail::is_inexact<F> >::type
+        typename pdalboost::enable_if< detail::is_inexact<F> >::type
     >
     {
         static void insert(std::basic_ostream<Ch, Traits>& s, const F& e) {
@@ -183,24 +183,24 @@ namespace boost { namespace property_tree
             : m_loc(loc)
         {}
 
-        boost::optional<E> get_value(const internal_type &v) {
+        pdalboost::optional<E> get_value(const internal_type &v) {
             std::basic_istringstream<Ch, Traits, Alloc> iss(v);
             iss.imbue(m_loc);
             E e;
             customized::extract(iss, e);
             if(iss.fail() || iss.bad() || iss.get() != Traits::eof()) {
-                return boost::optional<E>();
+                return pdalboost::optional<E>();
             }
             return e;
         }
-        boost::optional<internal_type> put_value(const E &v) {
+        pdalboost::optional<internal_type> put_value(const E &v) {
             std::basic_ostringstream<Ch, Traits, Alloc> oss;
             oss.imbue(m_loc);
             customized::insert(oss, v);
             if(oss) {
                 return oss.str();
             }
-            return boost::optional<internal_type>();
+            return pdalboost::optional<internal_type>();
         }
 
     private:

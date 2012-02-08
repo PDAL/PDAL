@@ -24,7 +24,7 @@
 
 #include <boost/mpl/aux_/msvc_never_true.hpp>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -62,7 +62,7 @@ struct msvc_index_specifier
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif /* workaround */
 

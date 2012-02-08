@@ -15,7 +15,7 @@
 #include <boost/mpl/not.hpp>
 #include <boost/type_traits/is_base_and_derived.hpp>
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 template<typename T>
 struct operations;

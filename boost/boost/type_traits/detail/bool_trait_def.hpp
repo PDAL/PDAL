@@ -41,7 +41,7 @@
 
 #if defined(__SUNPRO_CC) && (__SUNPRO_CC < 0x570)
 #   define BOOST_TT_AUX_BOOL_TRAIT_VALUE_DECL(C) \
-    typedef ::boost::integral_constant<bool,C> type; \
+    typedef ::pdalboost::integral_constant<bool,C> type; \
     enum { value = type::value }; \
     /**/
 #   define BOOST_TT_AUX_BOOL_C_BASE(C)
@@ -49,7 +49,7 @@
 #elif defined(BOOST_MSVC) && BOOST_MSVC < 1300
 
 #   define BOOST_TT_AUX_BOOL_TRAIT_VALUE_DECL(C) \
-    typedef ::boost::integral_constant<bool,C> base_; \
+    typedef ::pdalboost::integral_constant<bool,C> base_; \
     using base_::value; \
     /**/
 
@@ -60,7 +60,7 @@
 #endif
 
 #ifndef BOOST_TT_AUX_BOOL_C_BASE
-#   define BOOST_TT_AUX_BOOL_C_BASE(C) : public ::boost::integral_constant<bool,C>
+#   define BOOST_TT_AUX_BOOL_C_BASE(C) : public ::pdalboost::integral_constant<bool,C>
 #endif 
 
 

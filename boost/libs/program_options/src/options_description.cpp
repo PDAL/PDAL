@@ -26,7 +26,7 @@
 #include <iterator>
 using namespace std;
 
-namespace boost { namespace program_options {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
 
    namespace {
 
@@ -289,7 +289,7 @@ namespace boost { namespace program_options {
         const option_description* d = find_nothrow(name, approx, 
                                        long_ignore_case, short_ignore_case);
         if (!d)
-            boost::throw_exception(unknown_option(name));
+            pdalboost::throw_exception(unknown_option(name));
         return *d;
     }
 
@@ -337,7 +337,7 @@ namespace boost { namespace program_options {
             }
         }
         if (full_matches.size() > 1) 
-            boost::throw_exception(
+            pdalboost::throw_exception(
                 ambiguous_option(name, full_matches));
         
         // If we have a full match, and an approximate match,
@@ -346,7 +346,7 @@ namespace boost { namespace program_options {
         // "--all" on the command line should select the first one,
         // without ambiguity.
         if (full_matches.empty() && approximate_matches.size() > 1)
-            boost::throw_exception(
+            pdalboost::throw_exception(
                 ambiguous_option(name, approximate_matches));
 
         return found.get();
@@ -395,7 +395,7 @@ namespace boost { namespace program_options {
                 // only one tab per paragraph allowed
                 if (count(par.begin(), par.end(), '\t') > 1)
                 {
-                    boost::throw_exception(program_options::error(
+                    pdalboost::throw_exception(program_options::error(
                         "Only one tab per paragraph is allowed"));
                 }
           
@@ -517,12 +517,12 @@ namespace boost { namespace program_options {
 
             // Note: can't use 'tokenizer' as name of typedef -- borland
             // will consider uses of 'tokenizer' below as uses of
-            // boost::tokenizer, not typedef.
-            typedef boost::tokenizer<boost::char_separator<char> > tok;
+            // pdalboost::tokenizer, not typedef.
+            typedef pdalboost::tokenizer<pdalboost::char_separator<char> > tok;
           
             tok paragraphs(
                 desc,
-                char_separator<char>("\n", "", boost::keep_empty_tokens));
+                char_separator<char>("\n", "", pdalboost::keep_empty_tokens));
           
             tok::const_iterator       par_iter = paragraphs.begin();                
             const tok::const_iterator par_end = paragraphs.end();

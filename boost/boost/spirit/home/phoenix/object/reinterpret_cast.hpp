@@ -9,7 +9,7 @@
 
 #include <boost/spirit/home/phoenix/core/compose.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     namespace impl
     {

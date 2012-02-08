@@ -34,7 +34,7 @@
 #   undef LONG_MAX
 #endif
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 #if !defined(AUX778076_SEQUENCE_BASE_NAME)
 #   define AUX778076_SEQUENCE_BASE_NAME AUX778076_SEQUENCE_NAME

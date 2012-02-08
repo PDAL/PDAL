@@ -24,7 +24,7 @@
 #include <boost/foreach.hpp>
 #include <boost/array.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // Enablers
@@ -38,7 +38,7 @@ namespace boost { namespace spirit
       : mpl::true_ {};
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     template <typename Elements>
     struct permutation : nary_parser<permutation<Elements> >
@@ -47,7 +47,7 @@ namespace boost { namespace spirit { namespace qi
         struct attribute
         {
             // Put all the element attributes in a tuple,
-            // wrapping each element in a boost::optional
+            // wrapping each element in a pdalboost::optional
             typedef typename traits::build_attribute_sequence<
                 Elements, Context, traits::permutation_attribute_transform
               , Iterator, qi::domain
@@ -75,7 +75,7 @@ namespace boost { namespace spirit { namespace qi
             detail::permute_function<Iterator, Context, Skipper>
                 f(first, last, context, skipper);
 
-            boost::array<bool, fusion::result_of::size<Elements>::value> flags;
+            pdalboost::array<bool, fusion::result_of::size<Elements>::value> flags;
             BOOST_FOREACH(bool& taken, flags)
             {
                 taken = false;
@@ -120,7 +120,7 @@ namespace boost { namespace spirit { namespace qi
     {};
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     // We specialize this for permutation (see support/attributes.hpp).

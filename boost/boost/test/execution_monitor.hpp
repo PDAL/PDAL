@@ -48,7 +48,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail {
 
@@ -59,7 +59,7 @@ namespace detail {
 class BOOST_TEST_DECL translate_exception_base {
 public:
     // Constructor
-    explicit    translate_exception_base( boost::scoped_ptr<translate_exception_base>& next )
+    explicit    translate_exception_base( pdalboost::scoped_ptr<translate_exception_base>& next )
     {
         next.swap( m_next );
     }
@@ -71,7 +71,7 @@ public:
 
 protected:
     // Data members
-    boost::scoped_ptr<translate_exception_base> m_next;
+    pdalboost::scoped_ptr<translate_exception_base> m_next;
 };
 
 } // namespace detail
@@ -83,7 +83,7 @@ protected:
 //  design rationale: fear of being out (or nearly out) of memory.
     
 class BOOST_TEST_DECL execution_exception {
-    typedef boost::unit_test::const_string const_string;
+    typedef pdalboost::unit_test::const_string const_string;
 public:
     enum error_code {
         //  These values are sometimes used as program return codes.
@@ -183,15 +183,15 @@ public:
     
     // register custom (user supplied) exception translator
     template<typename Exception, typename ExceptionTranslator>
-    void        register_exception_translator( ExceptionTranslator const& tr, boost::type<Exception>* = 0 );
+    void        register_exception_translator( ExceptionTranslator const& tr, pdalboost::type<Exception>* = 0 );
 
 private:
     // implementation helpers
     int         catch_signals( unit_test::callback0<int> const& F );
 
     // Data members
-    boost::scoped_ptr<detail::translate_exception_base> m_custom_translators;
-    boost::scoped_array<char>                           m_alt_stack;
+    pdalboost::scoped_ptr<detail::translate_exception_base> m_custom_translators;
+    pdalboost::scoped_array<char>                           m_alt_stack;
 }; // execution_monitor
 
 namespace detail {
@@ -203,7 +203,7 @@ namespace detail {
 template<typename Exception, typename ExceptionTranslator>
 class translate_exception : public translate_exception_base
 {
-    typedef boost::scoped_ptr<translate_exception_base> base_ptr;
+    typedef pdalboost::scoped_ptr<translate_exception_base> base_ptr;
 public:
     explicit    translate_exception( ExceptionTranslator const& tr, base_ptr& next )
     : translate_exception_base( next ), m_translator( tr ) {}
@@ -214,7 +214,7 @@ public:
             return m_next ? (*m_next)( F ) : F();
         } catch( Exception const& e ) {
             m_translator( e );
-            return boost::exit_exception_failure;
+            return pdalboost::exit_exception_failure;
         }
     }
 
@@ -227,7 +227,7 @@ private:
 
 template<typename Exception, typename ExceptionTranslator>
 void
-execution_monitor::register_exception_translator( ExceptionTranslator const& tr, boost::type<Exception>* )
+execution_monitor::register_exception_translator( ExceptionTranslator const& tr, pdalboost::type<Exception>* )
 {
     m_custom_translators.reset( 
         new detail::translate_exception<Exception,ExceptionTranslator>( tr,m_custom_translators ) );
@@ -252,9 +252,9 @@ public:
     unit_test::readonly_property<char const*>   p_failed_exp; 
 };
 
-#define BOOST_TEST_SYS_ASSERT( exp ) if( (exp) ) ; else throw ::boost::system_error( BOOST_STRINGIZE( exp ) )
+#define BOOST_TEST_SYS_ASSERT( exp ) if( (exp) ) ; else throw ::pdalboost::system_error( BOOST_STRINGIZE( exp ) )
 
-}  // namespace boost
+}  // namespace pdalboost
 
 //____________________________________________________________________________//
 

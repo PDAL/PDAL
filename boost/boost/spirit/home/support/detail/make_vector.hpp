@@ -13,7 +13,7 @@
 
 #include <boost/fusion/include/make_vector.hpp>
 
-namespace boost { namespace spirit { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace detail
 {
     namespace result_of
     {
@@ -36,12 +36,12 @@ namespace boost { namespace spirit { namespace detail
 #include <boost/fusion/container/vector/vector.hpp>
 #include <boost/fusion/support/detail/as_fusion_element.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct void_;
 }}
 
-namespace boost { namespace spirit { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace detail
 {
     namespace result_of
     {

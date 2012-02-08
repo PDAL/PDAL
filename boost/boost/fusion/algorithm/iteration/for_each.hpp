@@ -12,7 +12,7 @@
 #include <boost/fusion/algorithm/iteration/detail/segmented_for_each.hpp>
 #include <boost/fusion/support/is_segmented.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     namespace result_of
     {

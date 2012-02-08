@@ -172,7 +172,7 @@
     ATTRIBUTES_SEQ,                                                             \
     ATTRIBUTES_CALLBACK)                                                        \
                                                                                 \
-namespace boost                                                                 \
+namespace pdalboost                                                                 \
 {                                                                               \
     namespace fusion                                                            \
     {                                                                           \

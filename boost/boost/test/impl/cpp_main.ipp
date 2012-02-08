@@ -61,7 +61,7 @@ private:
 // **************             prg_exec_monitor_main            ************** //
 // ************************************************************************** //
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 int BOOST_TEST_DECL
 prg_exec_monitor_main( int (*cpp_main)( int argc, char* argv[] ), int argc, char* argv[] )
@@ -69,33 +69,33 @@ prg_exec_monitor_main( int (*cpp_main)( int argc, char* argv[] ), int argc, char
     int result = 0;
 
     try {
-        boost::unit_test::const_string p( std::getenv( "BOOST_TEST_CATCH_SYSTEM_ERRORS" ) );
-        ::boost::execution_monitor ex_mon;
+        pdalboost::unit_test::const_string p( std::getenv( "BOOST_TEST_CATCH_SYSTEM_ERRORS" ) );
+        ::pdalboost::execution_monitor ex_mon;
 
         ex_mon.p_catch_system_errors.value = p != "no";
         
         result = ex_mon.execute( 
-            ::boost::unit_test::callback0<int>( cpp_main_caller( cpp_main, argc, argv ) ) );
+            ::pdalboost::unit_test::callback0<int>( cpp_main_caller( cpp_main, argc, argv ) ) );
         
         if( result == 0 )
-            result = ::boost::exit_success;
-        else if( result != ::boost::exit_success ) {
+            result = ::pdalboost::exit_success;
+        else if( result != ::pdalboost::exit_success ) {
             std::cout << "\n**** error return code: " << result << std::endl;
-            result = ::boost::exit_failure;
+            result = ::pdalboost::exit_failure;
         }
     }
-    catch( ::boost::execution_exception const& exex ) {
+    catch( ::pdalboost::execution_exception const& exex ) {
         std::cout << "\n**** exception(" << exex.code() << "): " << exex.what() << std::endl;
-        result = ::boost::exit_exception_failure;
+        result = ::pdalboost::exit_exception_failure;
     }
-    catch( ::boost::system_error const& ex ) {
+    catch( ::pdalboost::system_error const& ex ) {
         std::cout << "\n**** failed to initialize execution monitor."
                   << "\n**** expression at fault: " << ex.p_failed_exp 
                   << "\n**** error(" << ex.p_errno << "): " << std::strerror( ex.p_errno ) << std::endl;
-        result = ::boost::exit_exception_failure;
+        result = ::pdalboost::exit_exception_failure;
     }
 
-    if( result != ::boost::exit_success ) {
+    if( result != ::pdalboost::exit_success ) {
         std::cerr << "******** errors detected; see standard output for details ********" << std::endl;
     }
     else {
@@ -103,7 +103,7 @@ prg_exec_monitor_main( int (*cpp_main)( int argc, char* argv[] ), int argc, char
         //  like the clutter.  Use an environment variable to avoid command
         //  line argument modifications; for use in production programs
         //  that's a no-no in some organizations.
-        ::boost::unit_test::const_string p( std::getenv( "BOOST_PRG_MON_CONFIRM" ) );
+        ::pdalboost::unit_test::const_string p( std::getenv( "BOOST_PRG_MON_CONFIRM" ) );
         if( p != "no" ) { 
             std::cerr << std::flush << "no errors detected" << std::endl; 
         }
@@ -112,7 +112,7 @@ prg_exec_monitor_main( int (*cpp_main)( int argc, char* argv[] ), int argc, char
     return result;
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #if !defined(BOOST_TEST_DYN_LINK) && !defined(BOOST_TEST_NO_MAIN)
 
@@ -125,7 +125,7 @@ int cpp_main( int argc, char* argv[] );  // prototype for user's cpp_main()
 int BOOST_TEST_CALL_DECL
 main( int argc, char* argv[] )
 {
-    return ::boost::prg_exec_monitor_main( &cpp_main, argc, argv );
+    return ::pdalboost::prg_exec_monitor_main( &cpp_main, argc, argv );
 }
 
 //____________________________________________________________________________//

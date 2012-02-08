@@ -7,8 +7,7 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         template<typename T>

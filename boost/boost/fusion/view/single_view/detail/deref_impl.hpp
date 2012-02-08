@@ -12,7 +12,7 @@
 #include <boost/mpl/assert.hpp>
 #include <boost/mpl/equal_to.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct single_view_iterator_tag;
 

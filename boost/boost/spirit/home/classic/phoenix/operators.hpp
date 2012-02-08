@@ -26,7 +26,7 @@
 #include <boost/mpl/if.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace phoenix {
+namespace pdalboostphoenix {
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -374,8 +374,8 @@ template <> struct rank<long>               { static int const value = 90; };
 template <> struct rank<unsigned long>      { static int const value = 100; };
 
 #ifdef BOOST_HAS_LONG_LONG
-template <> struct rank< ::boost::long_long_type>          { static int const value = 110; };
-template <> struct rank< ::boost::ulong_long_type> { static int const value = 120; };
+template <> struct rank< ::pdalboost::long_long_type>          { static int const value = 110; };
+template <> struct rank< ::pdalboost::ulong_long_type> { static int const value = 120; };
 #endif
 
 template <> struct rank<float>              { static int const value = 130; };
@@ -400,7 +400,7 @@ template <typename T, int N> struct rank<T[N]>
 ///////////////////////////////////////////////////////////////////////////////
 template <typename T0, typename T1>
 struct higher_rank {
-    typedef typename boost::mpl::if_c<
+    typedef typename pdalboost::mpl::if_c<
         rank<T0>::value < rank<T1>::value,
         T1, T0>::type type;
 };
@@ -2197,7 +2197,7 @@ operator||(actor<BaseT0> const& _0, actor<BaseT1> const& _1)
         (_0, _1);
 }
 
-}   //  namespace phoenix
+}   //  namespace pdalboostphoenix
 
 #undef CREF
 #endif

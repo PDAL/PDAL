@@ -11,7 +11,7 @@
 #include <boost/fusion/iterator/advance.hpp>
 #include <boost/mpl/negate.hpp>
 
-namespace boost { namespace fusion {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion {
 
     struct reverse_view_iterator_tag;
 
@@ -37,7 +37,7 @@ namespace boost { namespace fusion {
                 static type
                 call(Iterator const& i)
                 {
-                    return type(boost::fusion::advance<negative_dist>(i.first));
+                    return type(pdalboost::fusion::advance<negative_dist>(i.first));
                 }
             };
         };

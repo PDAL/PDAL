@@ -23,14 +23,14 @@ template<typename F BOOST_PP_COMMA_IF(BOOST_PP_ITERATION())
 struct tr1_result_of<F(BOOST_RESULT_OF_ARGS)>
     : mpl::if_<
           mpl::or_< is_pointer<F>, is_member_function_pointer<F> >
-        , boost::detail::tr1_result_of_impl<
+        , pdalboost::detail::tr1_result_of_impl<
             typename remove_cv<F>::type, 
             typename remove_cv<F>::type(BOOST_RESULT_OF_ARGS), 
-            (boost::detail::has_result_type<F>::value)>
-        , boost::detail::tr1_result_of_impl<
+            (pdalboost::detail::has_result_type<F>::value)>
+        , pdalboost::detail::tr1_result_of_impl<
             F,
             F(BOOST_RESULT_OF_ARGS), 
-            (boost::detail::has_result_type<F>::value)> >::type { };
+            (pdalboost::detail::has_result_type<F>::value)> >::type { };
 #endif
 
 #if !defined(BOOST_NO_DECLTYPE) && defined(BOOST_RESULT_OF_USE_DECLTYPE)

@@ -29,7 +29,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace test_tools {
 
@@ -277,7 +277,7 @@ check_is_small_t const& check_is_small = unit_test::ut_detail::static_constant<c
 
 } // namespace test_tools
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

@@ -14,7 +14,7 @@
 #endif
 #include <cstdlib>
 
-namespace boost { namespace spirit { namespace iterator_policies
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace iterator_policies
 {
     ///////////////////////////////////////////////////////////////////////////
     //  class ref_counted
@@ -66,7 +66,7 @@ namespace boost { namespace spirit { namespace iterator_policies
             shared() : count(1) {}
 
 #if defined(BOOST_HAS_THREADS)
-            boost::detail::atomic_count count;
+            pdalboost::detail::atomic_count count;
 #else
             std::size_t count;
 #endif

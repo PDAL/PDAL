@@ -48,7 +48,7 @@
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include "ZipPoint.hpp"
 
-#include <pdal/external/boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
@@ -99,7 +99,7 @@ void LasHeaderReader::read(Stage& stage, Schema& schema)
     {
         boost::uint8_t d[16];
         Utils::read_n(d, m_istream, 16);
-		pdal::external::boost::uuids::uuid u;
+        boost::uuids::uuid u;
         for (int i=0; i<16; i++)
             u.data[i] = d[i];
         m_header.SetProjectId(u);

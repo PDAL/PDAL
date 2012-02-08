@@ -16,7 +16,7 @@
 #include <boost/fusion/container/list/detail/equal_to_impl.hpp>
 #include <boost/fusion/container/list/list_fwd.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct nil;
     struct cons_iterator_tag;

@@ -20,7 +20,7 @@
 #include <sstream>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // Enablers
@@ -35,7 +35,7 @@ namespace boost { namespace spirit
 }}
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
 #ifndef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
     using spirit::stream;
@@ -61,7 +61,7 @@ namespace boost { namespace spirit { namespace qi
           , Attribute& attr) const
         {
             typedef qi::detail::iterator_source<Iterator> source_device;
-            typedef boost::iostreams::stream<source_device> instream;
+            typedef pdalboost::iostreams::stream<source_device> instream;
 
             qi::skip_over(first, last, skipper);
 

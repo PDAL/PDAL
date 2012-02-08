@@ -19,7 +19,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #if !defined(__CODEGEARC__)
 namespace detail {
@@ -28,9 +28,9 @@ template< typename T >
 struct is_arithmetic_impl
 { 
     BOOST_STATIC_CONSTANT(bool, value = 
-        (::boost::type_traits::ice_or< 
-            ::boost::is_integral<T>::value,
-            ::boost::is_float<T>::value
+        (::pdalboost::type_traits::ice_or< 
+            ::pdalboost::is_integral<T>::value,
+            ::pdalboost::is_float<T>::value
         >::value)); 
 };
 
@@ -41,10 +41,10 @@ struct is_arithmetic_impl
 #if defined(__CODEGEARC__)
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_arithmetic,T,__is_arithmetic(T))
 #else
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_arithmetic,T,::boost::detail::is_arithmetic_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_arithmetic,T,::pdalboost::detail::is_arithmetic_impl<T>::value)
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

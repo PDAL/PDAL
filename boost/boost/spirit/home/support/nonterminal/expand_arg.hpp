@@ -19,7 +19,7 @@
 #include <boost/type_traits/is_scalar.hpp>
 #include <boost/spirit/home/support/string_traits.hpp>
 
-namespace boost { namespace spirit { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace detail
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Context>
@@ -34,7 +34,7 @@ namespace boost { namespace spirit { namespace detail
                 mpl::eval_if<
                     mpl::or_<is_scalar<T>, traits::is_string<T> >
                   , mpl::identity<T const &>
-                  , boost::result_of<T(unused_type, Context)>
+                  , pdalboost::result_of<T(unused_type, Context)>
                 >::type
             type;
         };

@@ -55,7 +55,7 @@ BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE_OPEN
 typedef arg<-1> _;
 BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE_CLOSE
 
-namespace boost { namespace mpl { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { 
 
 BOOST_MPL_AUX_ARG_ADL_BARRIER_DECL(_)
 
@@ -86,7 +86,7 @@ typedef arg<i_> BOOST_PP_CAT(_,i_);
 
 BOOST_MPL_AUX_ADL_BARRIER_NAMESPACE_CLOSE
 
-namespace boost { namespace mpl { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { 
 
 BOOST_MPL_AUX_ARG_ADL_BARRIER_DECL(BOOST_PP_CAT(_,i_))
 

@@ -27,7 +27,7 @@
 #include "boost/date_time/date_iterator.hpp"
 #include "boost/date_time/adjust_functors.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //! Gregorian date system based on date_time components
 /*! This date system defines a full complement of types including

@@ -83,7 +83,7 @@
 #define BOOST_MULTI_INDEX_ORD_INDEX_CHECK_INVARIANT
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -175,9 +175,9 @@ public:
   typedef typename allocator_type::pointer           pointer;
   typedef typename allocator_type::const_pointer     const_pointer;
   typedef typename
-    boost::reverse_iterator<iterator>                reverse_iterator;
+    pdalboost::reverse_iterator<iterator>                reverse_iterator;
   typedef typename
-    boost::reverse_iterator<const_iterator>          const_reverse_iterator;
+    pdalboost::reverse_iterator<const_iterator>          const_reverse_iterator;
   typedef TagList                                    tag_list;
 
 protected:
@@ -868,7 +868,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
   }
 
   
-  /* This forwarding function eases things for the boost::mem_fn construct
+  /* This forwarding function eases things for the pdalboost::mem_fn construct
    * in BOOST_MULTI_INDEX_ORD_INDEX_CHECK_INVARIANT. Actually,
    * final_check_invariant is already an inherited member function of
    * ordered_index.
@@ -1202,7 +1202,7 @@ private:
     ordered_non_unique_tag)
   {
     lm.load(
-      ::boost::bind(&ordered_index::rearranger,this,_1,_2),
+      ::pdalboost::bind(&ordered_index::rearranger,this,_1,_2),
       ar,version);
     super::load_(ar,version,lm);
   }
@@ -1385,7 +1385,7 @@ struct ordered_non_unique
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 /* Boost.Foreach compatibility */
 
@@ -1393,10 +1393,10 @@ template<
   typename KeyFromValue,typename Compare,
   typename SuperMeta,typename TagList,typename Category
 >
-inline boost::mpl::true_* boost_foreach_is_noncopyable(
-  boost::multi_index::detail::ordered_index<
+inline pdalboost::mpl::true_* boost_foreach_is_noncopyable(
+  pdalboost::multi_index::detail::ordered_index<
     KeyFromValue,Compare,SuperMeta,TagList,Category>*&,
-  boost::foreach::tag)
+  pdalboost::foreach::tag)
 {
   return 0;
 }

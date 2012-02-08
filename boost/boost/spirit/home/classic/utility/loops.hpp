@@ -16,7 +16,7 @@
 #include <boost/spirit/home/classic/core/composite/composite.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -267,7 +267,7 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
         struct loop_traits
         {
             typedef typename mpl::if_<
-                boost::is_same<MaxT, more_t>,
+                pdalboost::is_same<MaxT, more_t>,
                 infinite_loop<ParserT, MinT>,
                 finite_loop<ParserT, MinT, MaxT>
             >::type type;

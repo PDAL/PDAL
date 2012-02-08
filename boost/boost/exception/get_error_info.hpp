@@ -17,9 +17,7 @@
 #include <boost/exception/detail/type_info.hpp>
 #include <boost/shared_ptr.hpp>
 
-namespace
-boost
-    {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace
     exception_detail
         {
@@ -99,14 +97,14 @@ boost
     template <class ErrorInfo>
     inline
     typename ErrorInfo::value_type const *
-    get_error_info( boost::exception const & x )
+    get_error_info( pdalboost::exception const & x )
         {
         return exception_detail::get_info<ErrorInfo>::get(x);
         }
     template <class ErrorInfo>
     inline
     typename ErrorInfo::value_type *
-    get_error_info( boost::exception & x )
+    get_error_info( pdalboost::exception & x )
         {
         return exception_detail::get_info<ErrorInfo>::get(x);
         }

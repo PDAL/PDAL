@@ -16,7 +16,7 @@
 #include <boost/fusion/sequence/intrinsic/empty.hpp>
 #include <boost/fusion/container/list/cons.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     //auto segmented_fold_until(seq, state, fun)
     //{

@@ -9,7 +9,7 @@
 
 #include <boost/mpl/bool.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
 ///////////////////////////////////////////////////////////////////////////////
 //

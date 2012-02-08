@@ -7,7 +7,7 @@
 
 // Revision History
 //  09 Nov 2007 - Initial Revision
-//  25 Feb 2008 - moved to namespace boost::uuids::detail
+//  25 Feb 2008 - moved to namespace pdalboost::uuids::detail
 //  28 Nov 2009 - disabled deprecated warnings for MSVC
 
 // seed_rng models a UniformRandomNumberGenerator (see Boost.Random).
@@ -28,9 +28,9 @@
 #include <cstdlib> // for rand
 #include <cstdio> // for FILE, fopen, fread, fclose
 #include <boost/uuid/sha1.hpp>
-//#include <boost/nondet_random.hpp> //forward declare boost::random::random_device
+//#include <boost/nondet_random.hpp> //forward declare pdalboost::random::random_device
 
-// can't use boost::generator_iterator since boost::random number seed(Iter&, Iter)
+// can't use pdalboost::generator_iterator since pdalboost::random number seed(Iter&, Iter)
 // functions need a last iterator
 //#include <boost/generator_iterator.hpp>
 # include <boost/iterator/iterator_facade.hpp>
@@ -56,11 +56,11 @@ namespace std {
 #endif
 
 // forward declare random number generators
-namespace boost { namespace random {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace random {
 class random_device;
-}} //namespace boost::random
+}} //namespace pdalboost::random
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace uuids {
 namespace detail {
 
@@ -118,7 +118,7 @@ private:
 
     void sha1_random_digest_()
     {
-        boost::uuids::detail::sha1 sha;
+        pdalboost::uuids::detail::sha1 sha;
 
         unsigned int * ps = sha1_random_digest_state_();
 
@@ -190,7 +190,7 @@ private: // make seed_rng noncopyable
     seed_rng& operator=(seed_rng const&);
 };
 
-// almost a copy of boost::generator_iterator
+// almost a copy of pdalboost::generator_iterator
 // but default constructor sets m_g to NULL
 template <class Generator>
 class generator_iterator
@@ -246,13 +246,13 @@ inline void seed(UniformRandomNumberGenerator& rng)
 
 // random_device does not / can not be seeded
 template <>
-inline void seed<boost::random::random_device>(boost::random::random_device&) {}
+inline void seed<pdalboost::random::random_device>(pdalboost::random::random_device&) {}
 
 // random_device does not / can not be seeded
 template <>
 inline void seed<seed_rng>(seed_rng&) {}
 
-}}} //namespace boost::uuids::detail
+}}} //namespace pdalboost::uuids::detail
 
 #if defined(_MSC_VER)
 #pragma warning(pop) // Restore warnings to previous state.

@@ -28,8 +28,7 @@ namespace std
 }
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     struct once_flag
     {
         long status;
@@ -89,12 +88,12 @@ namespace boost
             }
             
 #ifdef BOOST_NO_ANSI_APIS                        
-            return ::boost::detail::win32::OpenEventW(
+            return ::pdalboost::detail::win32::OpenEventW(
 #else
-            return ::boost::detail::win32::OpenEventA(
+            return ::pdalboost::detail::win32::OpenEventA(
 #endif
-                ::boost::detail::win32::synchronize | 
-                ::boost::detail::win32::event_modify_state,
+                ::pdalboost::detail::win32::synchronize | 
+                ::pdalboost::detail::win32::event_modify_state,
                 false,
                 mutex_name);
         }
@@ -106,12 +105,12 @@ namespace boost
                 name_once_mutex(mutex_name,flag_address);
             }
 #ifdef BOOST_NO_ANSI_APIS                        
-            return ::boost::detail::win32::CreateEventW(
+            return ::pdalboost::detail::win32::CreateEventW(
 #else
-            return ::boost::detail::win32::CreateEventA(
+            return ::pdalboost::detail::win32::CreateEventA(
 #endif
-                0,::boost::detail::win32::manual_reset_event,
-                ::boost::detail::win32::event_initially_reset,
+                0,::pdalboost::detail::win32::manual_reset_event,
+                ::pdalboost::detail::win32::event_initially_reset,
                 mutex_name);
         }
     }
@@ -130,7 +129,7 @@ namespace boost
         detail::once_char_type mutex_name[detail::once_mutex_name_length];
         mutex_name[0]=0;
 
-        while((status=::boost::detail::interlocked_read_acquire(&flag.status))
+        while((status=::pdalboost::detail::interlocked_read_acquire(&flag.status))
               !=function_complete_flag_value)
         {
             status=BOOST_INTERLOCKED_COMPARE_EXCHANGE(&flag.status,running_value,0);
@@ -144,7 +143,7 @@ namespace boost
                     }
                     if(event_handle)
                     {
-                        ::boost::detail::win32::ResetEvent(event_handle);
+                        ::pdalboost::detail::win32::ResetEvent(event_handle);
                     }
                     f();
                     if(!counted)
@@ -154,13 +153,13 @@ namespace boost
                     }
                     BOOST_INTERLOCKED_EXCHANGE(&flag.status,function_complete_flag_value);
                     if(!event_handle && 
-                       (::boost::detail::interlocked_read_acquire(&flag.count)>1))
+                       (::pdalboost::detail::interlocked_read_acquire(&flag.count)>1))
                     {
                         event_handle=detail::create_once_event(mutex_name,&flag);
                     }
                     if(event_handle)
                     {
-                        ::boost::detail::win32::SetEvent(event_handle);
+                        ::pdalboost::detail::win32::SetEvent(event_handle);
                     }
                     break;
                 }
@@ -173,7 +172,7 @@ namespace boost
                     }
                     if(event_handle)
                     {
-                        ::boost::detail::win32::SetEvent(event_handle);
+                        ::pdalboost::detail::win32::SetEvent(event_handle);
                     }
                     throw;
                 }
@@ -183,7 +182,7 @@ namespace boost
             {
                 BOOST_INTERLOCKED_INCREMENT(&flag.count);
                 counted=true;
-                status=::boost::detail::interlocked_read_acquire(&flag.status);
+                status=::pdalboost::detail::interlocked_read_acquire(&flag.status);
                 if(status==function_complete_flag_value)
                 {
                     break;
@@ -194,8 +193,8 @@ namespace boost
                     continue;
                 }
             }
-            BOOST_VERIFY(!::boost::detail::win32::WaitForSingleObject(
-                             event_handle,::boost::detail::win32::infinite));
+            BOOST_VERIFY(!::pdalboost::detail::win32::WaitForSingleObject(
+                             event_handle,::pdalboost::detail::win32::infinite));
         }
     }
 }

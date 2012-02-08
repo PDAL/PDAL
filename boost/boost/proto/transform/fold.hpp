@@ -21,7 +21,7 @@
 #include <boost/proto/transform/impl.hpp>
 #include <boost/proto/transform/when.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace detail
     {

@@ -10,7 +10,7 @@
 
 #include <boost/fusion/iterator/distance.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct iterator_range_tag;
 

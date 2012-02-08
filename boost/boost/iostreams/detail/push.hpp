@@ -49,7 +49,7 @@
 //--------------------Definition of BOOST_IOSTREAMS_DEFINE_PUSH_IMPL----------//
           
 #define BOOST_IOSTREAMS_ADAPT_STREAM(mode, ch, arg, helper, has_return) \
-    this->helper( ::boost::iostreams::detail::resolve<mode, ch>(arg) \
+    this->helper( ::pdalboost::iostreams::detail::resolve<mode, ch>(arg) \
                   BOOST_IOSTREAMS_PUSH_ARGS() ); \
     /**/
 
@@ -80,18 +80,18 @@
     BOOST_PP_IIF(has_return, result, explicit) \
     name(const iterator_range<Iter>& rng BOOST_IOSTREAMS_PUSH_PARAMS()) \
     { BOOST_PP_EXPR_IF(has_return, return) \
-    this->helper( ::boost::iostreams::detail::range_adapter< \
+    this->helper( ::pdalboost::iostreams::detail::range_adapter< \
                       mode, iterator_range<Iter> \
                   >(rng) \
                   BOOST_IOSTREAMS_PUSH_ARGS() ); } \
     template<typename Pipeline, typename Concept> \
     BOOST_PP_IIF(has_return, result, explicit) \
-    name(const ::boost::iostreams::pipeline<Pipeline, Concept>& p) \
+    name(const ::pdalboost::iostreams::pipeline<Pipeline, Concept>& p) \
     { p.push(*this); } \
     template<typename T> \
     BOOST_PP_IIF(has_return, result, explicit) \
     name(const T& t BOOST_IOSTREAMS_PUSH_PARAMS() BOOST_IOSTREAMS_DISABLE_IF_STREAM(T)) \
-    { this->helper( ::boost::iostreams::detail::resolve<mode, ch>(t) \
+    { this->helper( ::pdalboost::iostreams::detail::resolve<mode, ch>(t) \
                     BOOST_IOSTREAMS_PUSH_ARGS() ); } \
     /**/
 # else // # ifndef BOOST_IOSTREAMS_NO_STREAM_TEMPLATES
@@ -114,18 +114,18 @@
     BOOST_PP_IF(has_return, result, explicit) \
     name(const iterator_range<Iter>& rng BOOST_IOSTREAMS_PUSH_PARAMS()) \
     { BOOST_PP_EXPR_IF(has_return, return) \
-    this->helper( ::boost::iostreams::detail::range_adapter< \
+    this->helper( ::pdalboost::iostreams::detail::range_adapter< \
                       mode, iterator_range<Iter> \
                   >(rng) \
                   BOOST_IOSTREAMS_PUSH_ARGS() ); } \
     template<typename Pipeline, typename Concept> \
     BOOST_PP_IF(has_return, result, explicit) \
-    name(const ::boost::iostreams::pipeline<Pipeline, Concept>& p) \
+    name(const ::pdalboost::iostreams::pipeline<Pipeline, Concept>& p) \
     { p.push(*this); } \
     template<typename T> \
     BOOST_PP_EXPR_IF(has_return, result) \
     name(const T& t BOOST_IOSTREAMS_PUSH_PARAMS() BOOST_IOSTREAMS_DISABLE_IF_STREAM(T)) \
-    { this->helper( ::boost::iostreams::detail::resolve<mode, ch>(t) \
+    { this->helper( ::pdalboost::iostreams::detail::resolve<mode, ch>(t) \
                     BOOST_IOSTREAMS_PUSH_ARGS() ); } \
     /**/
 # endif // # ifndef BOOST_IOSTREAMS_NO_STREAM_TEMPLATES
@@ -133,19 +133,19 @@
 # define BOOST_IOSTREAMS_DEFINE_PUSH_IMPL(name, mode, ch, helper, has_return, result) \
     template<typename T> \
     void BOOST_PP_CAT(name, _msvc_impl) \
-    ( ::boost::mpl::true_, const T& t BOOST_IOSTREAMS_PUSH_PARAMS() ) \
+    ( ::pdalboost::mpl::true_, const T& t BOOST_IOSTREAMS_PUSH_PARAMS() ) \
     { t.push(*this); } \
     template<typename T> \
     void BOOST_PP_CAT(name, _msvc_impl) \
-    ( ::boost::mpl::false_, const T& t BOOST_IOSTREAMS_PUSH_PARAMS() ) \
-    { this->helper( ::boost::iostreams::detail::resolve<mode, ch>(t) \
+    ( ::pdalboost::mpl::false_, const T& t BOOST_IOSTREAMS_PUSH_PARAMS() ) \
+    { this->helper( ::pdalboost::iostreams::detail::resolve<mode, ch>(t) \
                     BOOST_IOSTREAMS_PUSH_ARGS() ); } \
     template<typename T> \
     BOOST_PP_IF(has_return, result, explicit) \
     name(const T& t BOOST_IOSTREAMS_PUSH_PARAMS()) \
     { \
         this->BOOST_PP_CAT(name, _msvc_impl) \
-              ( ::boost::iostreams::detail::is_pipeline<T>(), \
+              ( ::pdalboost::iostreams::detail::is_pipeline<T>(), \
                 t BOOST_IOSTREAMS_PUSH_ARGS() ); \
     } \
     /**/

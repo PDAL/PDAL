@@ -13,7 +13,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/size_t_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail{
 
@@ -35,25 +35,25 @@ struct extent_imp
 template <class T, std::size_t R, std::size_t N>
 struct extent_imp<T[R], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::extent_imp<T, N-1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::extent_imp<T, N-1>::value));
 };
 
 template <class T, std::size_t R, std::size_t N>
 struct extent_imp<T const[R], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::extent_imp<T, N-1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::extent_imp<T, N-1>::value));
 };
 
 template <class T, std::size_t R, std::size_t N>
 struct extent_imp<T volatile[R], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::extent_imp<T, N-1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::extent_imp<T, N-1>::value));
 };
 
 template <class T, std::size_t R, std::size_t N>
 struct extent_imp<T const volatile[R], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::extent_imp<T, N-1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::extent_imp<T, N-1>::value));
 };
 
 template <class T, std::size_t R>
@@ -84,22 +84,22 @@ struct extent_imp<T const volatile[R], 0>
 template <class T, std::size_t N>
 struct extent_imp<T[], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::extent_imp<T, N-1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::extent_imp<T, N-1>::value));
 };
 template <class T, std::size_t N>
 struct extent_imp<T const[], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::extent_imp<T, N-1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::extent_imp<T, N-1>::value));
 };
 template <class T, std::size_t N>
 struct extent_imp<T volatile[], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::extent_imp<T, N-1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::extent_imp<T, N-1>::value));
 };
 template <class T, std::size_t N>
 struct extent_imp<T const volatile[], N>
 {
-   BOOST_STATIC_CONSTANT(std::size_t, value = (::boost::detail::extent_imp<T, N-1>::value));
+   BOOST_STATIC_CONSTANT(std::size_t, value = (::pdalboost::detail::extent_imp<T, N-1>::value));
 };
 template <class T>
 struct extent_imp<T[], 0>
@@ -125,20 +125,20 @@ struct extent_imp<T const volatile[], 0>
 #endif
 
 #endif  // non-CodeGear implementation
-}   // ::boost::detail
+}   // ::pdalboost::detail
 
 template <class T, std::size_t N = 0>
 struct extent
-   : public ::boost::integral_constant<std::size_t, ::boost::detail::extent_imp<T,N>::value>
+   : public ::pdalboost::integral_constant<std::size_t, ::pdalboost::detail::extent_imp<T,N>::value>
 {
 #if BOOST_WORKAROUND(BOOST_MSVC, < 1300) 
-   typedef ::boost::integral_constant<std::size_t, ::boost::detail::extent_imp<T,N>::value> base_; 
+   typedef ::pdalboost::integral_constant<std::size_t, ::pdalboost::detail::extent_imp<T,N>::value> base_; 
    using base_::value;
 #endif
     BOOST_MPL_AUX_LAMBDA_SUPPORT(1,extent,(T))
 };
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/size_t_trait_undef.hpp>
 

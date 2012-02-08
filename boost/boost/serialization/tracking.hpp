@@ -31,7 +31,7 @@
 #include <boost/serialization/tracking_enum.hpp>
 #include <boost/serialization/type_info_implementation.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace serialization {
 
 struct basic_traits;
@@ -48,7 +48,7 @@ struct tracking_level_impl {
     // on basic traits below
     typedef
         BOOST_DEDUCED_TYPENAME mpl::eval_if<
-            is_base_and_derived<boost::serialization::basic_traits, T>,
+            is_base_and_derived<pdalboost::serialization::basic_traits, T>,
             traits_class_tracking< T >,
         //else
         BOOST_DEDUCED_TYPENAME mpl::eval_if<
@@ -83,7 +83,7 @@ inline bool operator>=(tracking_level< T > t, enum tracking_type l)
 }
 
 } // namespace serialization
-} // namespace boost
+} // namespace pdalboost
 
 
 // The STATIC_ASSERT is prevents one from setting tracking for a primitive type.  
@@ -93,7 +93,7 @@ inline bool operator>=(tracking_level< T > t, enum tracking_type l)
 // wrap it in your own type so its not a primitive anymore.  Then it will compile
 // without problem.
 #define BOOST_CLASS_TRACKING(T, E)           \
-namespace boost {                            \
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{                            \
 namespace serialization {                    \
 template<>                                   \
 struct tracking_level< T >                   \

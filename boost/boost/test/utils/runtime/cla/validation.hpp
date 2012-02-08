@@ -20,7 +20,7 @@
 
 #include <boost/test/utils/runtime/cla/fwd.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -35,7 +35,7 @@ void report_input_error( argv_traverser const& tr, format_stream& msg );
 //____________________________________________________________________________//
 
 #define BOOST_RT_CLA_VALIDATE_INPUT( b, tr, msg ) \
-    if( b ) ; else ::boost::BOOST_RT_PARAM_NAMESPACE::cla::report_input_error( tr, format_stream().ref() << msg )
+    if( b ) ; else ::pdalboost::BOOST_RT_PARAM_NAMESPACE::cla::report_input_error( tr, format_stream().ref() << msg )
 
 //____________________________________________________________________________//
 
@@ -43,7 +43,7 @@ void report_input_error( argv_traverser const& tr, format_stream& msg );
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #ifndef BOOST_RT_PARAM_OFFLINE
 

@@ -31,13 +31,13 @@
 #endif
 
 BOOST_PHOENIX_DEFINE_EXPRESSION_VARARG(
-    (boost)(phoenix)(mem_fun_ptr)
+    (pdalboost)(phoenix)(mem_fun_ptr)
   , (meta_grammar)
     (meta_grammar)
   , BOOST_PHOENIX_LIMIT
 )
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     namespace detail {
         template <typename Object, typename MemPtr>
@@ -48,10 +48,10 @@ namespace boost { namespace phoenix
               , ptr(ptr)
             {}
 
-            typename phoenix::expression::mem_fun_ptr<Object, MemPtr>::type const
+            typename pdalboostphoenix::expression::mem_fun_ptr<Object, MemPtr>::type const
             operator()() const
             {
-                return phoenix::expression::mem_fun_ptr<Object, MemPtr>::make(obj, ptr);
+                return pdalboostphoenix::expression::mem_fun_ptr<Object, MemPtr>::make(obj, ptr);
             }
 
 #define BOOST_PHOENIX_ITERATION_PARAMS                                          \
@@ -78,14 +78,14 @@ namespace boost { namespace phoenix
 
 #else
             template <BOOST_PHOENIX_typename_A>
-            typename phoenix::expression::mem_fun_ptr<
+            typename pdalboostphoenix::expression::mem_fun_ptr<
                 Object
               , MemPtr
               , BOOST_PHOENIX_A
             >::type const
             operator()(BOOST_PHOENIX_A_const_ref_a) const
             {
-                return phoenix::expression::mem_fun_ptr<
+                return pdalboostphoenix::expression::mem_fun_ptr<
                     Object
                   , MemPtr
                   , BOOST_PHOENIX_A

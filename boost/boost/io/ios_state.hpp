@@ -21,8 +21,7 @@
 #include <string>     // for std::char_traits
 
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace io
 {
 
@@ -433,7 +432,7 @@ private:
 
 
 }  // namespace io
-}  // namespace boost
+}  // namespace pdalboost
 
 
 #endif  // BOOST_IO_IOS_STATE_HPP

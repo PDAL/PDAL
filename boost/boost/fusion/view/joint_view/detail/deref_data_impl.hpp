@@ -10,7 +10,7 @@
 
 #include <boost/fusion/iterator/deref_data.hpp>
 
-namespace boost { namespace fusion { namespace extension
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace extension
 {
     template <typename>
     struct deref_data_impl;

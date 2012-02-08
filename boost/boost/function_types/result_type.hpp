@@ -20,8 +20,7 @@
 #include <boost/function_types/is_callable_builtin.hpp>
 #include <boost/function_types/components.hpp>
 
-namespace boost 
-{ 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
   namespace function_types 
   {
     template< typename T > struct result_type;
@@ -37,7 +36,7 @@ namespace boost
     template<typename T> struct result_type
       : mpl::if_
         < function_types::is_callable_builtin<T>
-        , detail::result_type_impl<T>, boost::blank
+        , detail::result_type_impl<T>, pdalboost::blank
         >::type
     { 
       BOOST_MPL_AUX_LAMBDA_SUPPORT(1,result_type,(T)) 

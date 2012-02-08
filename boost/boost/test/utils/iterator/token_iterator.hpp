@@ -39,7 +39,7 @@
 namespace std{ using ::ispunct; using ::isspace; }
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -408,7 +408,7 @@ make_range_token_iterator( Iter begin, Iter end, Modifier const& m )
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

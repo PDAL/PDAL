@@ -17,7 +17,7 @@
 #include <boost/mpl/not.hpp>
 #include <boost/mpl/and.hpp>
 
-namespace boost { namespace spirit { namespace qi { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi { namespace detail
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Expr>
@@ -147,7 +147,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
     };
 }}}}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Iterator, typename Expr>

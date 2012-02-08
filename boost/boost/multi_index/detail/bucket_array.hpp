@@ -28,7 +28,7 @@
 #include <boost/throw_exception.hpp> 
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -88,7 +88,7 @@ class bucket_array:public bucket_array_base
   typedef typename prevent_eti<
     Allocator,
     hashed_index_node_impl<
-      typename boost::detail::allocator::rebind_to<
+      typename pdalboost::detail::allocator::rebind_to<
         Allocator,
         char
       >::type
@@ -150,7 +150,7 @@ private:
   }
 
 #if !defined(BOOST_MULTI_INDEX_DISABLE_SERIALIZATION)
-  friend class boost::serialization::access;
+  friend class pdalboost::serialization::access;
   
   /* bucket_arrays do not emit any kind of serialization info. They are
    * fed to Boost.Serialization as hashed index iterators need to track
@@ -190,7 +190,7 @@ namespace detail{
 
 template<class Archive,typename Allocator>
 inline void load_construct_data(
-  Archive&,boost::multi_index::detail::bucket_array<Allocator>*,
+  Archive&,pdalboost::multi_index::detail::bucket_array<Allocator>*,
   const unsigned int)
 {
   throw_exception(
@@ -206,6 +206,6 @@ inline void load_construct_data(
 
 #endif
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

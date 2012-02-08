@@ -12,7 +12,7 @@
 #include <boost/proto/proto_fwd.hpp>
 #include <boost/proto/transform/impl.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
 
     /// \brief A PrimitiveTransform that returns a specified

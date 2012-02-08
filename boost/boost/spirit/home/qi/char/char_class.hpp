@@ -20,7 +20,7 @@
 #include <boost/spirit/home/support/detail/get_encoding.hpp>
 #include <boost/mpl/eval_if.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // Enablers
@@ -31,22 +31,22 @@ namespace boost { namespace spirit
       : mpl::true_ {};
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     // hoist the char classification namespaces into qi sub-namespaces of the
     // same name
-    namespace ascii { using namespace boost::spirit::ascii; }
-    namespace iso8859_1 { using namespace boost::spirit::iso8859_1; }
-    namespace standard { using namespace boost::spirit::standard; }
-    namespace standard_wide { using namespace boost::spirit::standard_wide; }
+    namespace ascii { using namespace pdalboost::spirit::ascii; }
+    namespace iso8859_1 { using namespace pdalboost::spirit::iso8859_1; }
+    namespace standard { using namespace pdalboost::spirit::standard; }
+    namespace standard_wide { using namespace pdalboost::spirit::standard_wide; }
 #if defined(BOOST_SPIRIT_UNICODE)
-    namespace unicode { using namespace boost::spirit::unicode; }
+    namespace unicode { using namespace pdalboost::spirit::unicode; }
 #endif
 
     // Import the standard namespace into the qi namespace. This allows
     // for default handling of all character/string related operations if not
     // prefixed with a character set namespace.
-    using namespace boost::spirit::standard;
+    using namespace pdalboost::spirit::standard;
 
     // Import encoding
     using spirit::encoding;

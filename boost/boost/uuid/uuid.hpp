@@ -23,7 +23,7 @@
 //  01 Jun 2007 - removed using namespace directives
 //  09 Nov 2007 - moved implementation to uuid.ipp file
 //  12 Nov 2007 - moved serialize code to uuid_serialize.hpp file
-//  25 Feb 2008 - moved to namespace boost::uuids
+//  25 Feb 2008 - moved to namespace pdalboost::uuids
 //  19 Mar 2009 - changed to a POD, reorganized files
 //  28 Nov 2009 - disabled deprecated warnings for MSVC
 //  30 Nov 2009 - used BOOST_STATIC_CONSTANT
@@ -54,7 +54,7 @@ namespace std {
 } //namespace std
 #endif //BOOST_NO_STDC_NAMESPACE
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace uuids {
 
 struct uuid
@@ -190,7 +190,7 @@ inline void swap(uuid& lhs, uuid& rhs) /* throw() */
     lhs.swap(rhs);
 }
 
-// This is equivalent to boost::hash_range(u.begin(), u.end());
+// This is equivalent to pdalboost::hash_range(u.begin(), u.end());
 inline std::size_t hash_value(uuid const& u) /* throw() */
 {
     std::size_t seed = 0;
@@ -202,16 +202,16 @@ inline std::size_t hash_value(uuid const& u) /* throw() */
     return seed;
 }
 
-}} //namespace boost::uuids
+}} //namespace pdalboost::uuids
 
 #ifndef BOOST_UUID_NO_TYPE_TRAITS
 // type traits specializations
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 template <>
 struct is_pod<uuids::uuid> : true_type {};
 
-} // namespace boost
+} // namespace pdalboost
 #endif
 
 #if defined(_MSC_VER)

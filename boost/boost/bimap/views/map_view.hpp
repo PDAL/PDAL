@@ -21,7 +21,7 @@
 #include <boost/bimap/container_adaptor/map_adaptor.hpp>
 #include <boost/bimap/detail/map_view_base.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace views {
 
@@ -42,9 +42,9 @@ class map_view
         Tag,BimapType,
         reverse_iterator_type_by,const_reverse_iterator_type_by
     ),
-    public ::boost::bimaps::detail::
+    public ::pdalboost::bimaps::detail::
         map_view_base< map_view<Tag,BimapType>,Tag,BimapType >,
-    public ::boost::bimaps::detail::
+    public ::pdalboost::bimaps::detail::
         unique_map_view_access< map_view<Tag,BimapType>, Tag,  BimapType>::type
 {
     typedef BOOST_BIMAP_MAP_VIEW_CONTAINER_ADAPTOR(
@@ -56,7 +56,7 @@ class map_view
 
     BOOST_BIMAP_MAP_VIEW_BASE_FRIEND(map_view,Tag,BimapType)
 
-    typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::detail::
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::detail::
         unique_map_view_access<
             map_view<Tag,BimapType>, Tag,  BimapType
 
@@ -88,7 +88,7 @@ class map_view
         BOOST_DEDUCED_TYPENAME base_::const_iterator iter = this->find(k);
         if( iter == this->end() )
         {
-            ::boost::throw_exception(
+            ::pdalboost::throw_exception(
                 std::out_of_range("bimap<>: invalid key")
             );
         }
@@ -101,7 +101,7 @@ class map_view
         BOOST_DEDUCED_TYPENAME base_::iterator iter = this->find(k);
         if( iter == this->end() )
         {
-            ::boost::throw_exception(
+            ::pdalboost::throw_exception(
                 std::out_of_range("bimap<>: invalid key")
             );
         }
@@ -129,16 +129,16 @@ typedef BOOST_DEDUCED_TYPENAME MAP_VIEW::TYPENAME                             \
 namespace detail {
 
 template< class Tag, class BimapType >
-struct left_map_view_extra_typedefs< ::boost::bimaps::views::map_view<Tag,BimapType> >
+struct left_map_view_extra_typedefs< ::pdalboost::bimaps::views::map_view<Tag,BimapType> >
 {
-    private: typedef ::boost::bimaps::views::map_view<Tag,BimapType> map_view_;
+    private: typedef ::pdalboost::bimaps::views::map_view<Tag,BimapType> map_view_;
     public : BOOST_BIMAP_MAP_VIEW_EXTRA_TYPEDEFS_BODY(map_view_,left)
 };
 
 template< class Tag, class BimapType >
-struct right_map_view_extra_typedefs< ::boost::bimaps::views::map_view<Tag,BimapType> >
+struct right_map_view_extra_typedefs< ::pdalboost::bimaps::views::map_view<Tag,BimapType> >
 {
-    private: typedef ::boost::bimaps::views::map_view<Tag,BimapType> map_view_;
+    private: typedef ::pdalboost::bimaps::views::map_view<Tag,BimapType> map_view_;
     public : BOOST_BIMAP_MAP_VIEW_EXTRA_TYPEDEFS_BODY(map_view_,right)
 };
 
@@ -150,7 +150,7 @@ struct right_map_view_extra_typedefs< ::boost::bimaps::views::map_view<Tag,Bimap
 /*===========================================================================*/
 
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_VIEWS_MAP_VIEW_HPP
 

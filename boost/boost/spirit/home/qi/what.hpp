@@ -15,7 +15,7 @@
 #include <boost/spirit/home/support/info.hpp>
 #include <boost/spirit/home/qi/meta_compiler.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     template <typename Expr>
     inline info what(Expr const& expr)

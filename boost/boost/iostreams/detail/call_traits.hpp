@@ -15,7 +15,7 @@
 #include <boost/iostreams/traits.hpp>
 #include <boost/mpl/if.hpp>
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 template<typename T>
 struct param_type {

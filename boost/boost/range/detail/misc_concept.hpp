@@ -10,8 +10,7 @@
 
 #include <boost/concept_check.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace range_detail
     {
         template<typename T1, typename T2>

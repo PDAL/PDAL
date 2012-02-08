@@ -35,7 +35,7 @@
 
 // Set the name of our library, this will get undef'ed by auto_link.hpp
 // once it's done with it.
-# define BOOST_LIB_NAME boost_iostreams
+# define BOOST_LIB_NAME pdalboost_iostreams
 
 // If we're importing code from a dll, then tell auto_link.hpp about it.
 # if defined(BOOST_ALL_DYN_LINK) || defined(BOOST_IOSTREAMS_DYN_LINK)

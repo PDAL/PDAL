@@ -12,7 +12,7 @@
 #include <boost/type_traits/is_reference.hpp>
 #include <boost/mpl/bool.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename T>
     struct reference

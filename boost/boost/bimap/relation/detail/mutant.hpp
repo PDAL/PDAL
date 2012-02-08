@@ -27,7 +27,7 @@
 #include <boost/mpl/not.hpp>
 #include <boost/utility/enable_if.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 
@@ -54,9 +54,9 @@ View&
 >::type mutate( Type & m )
 {
     BOOST_MPL_ASSERT((
-        ::boost::mpl::contains<BOOST_DEDUCED_TYPENAME Type::mutant_views,View>
+        ::pdalboost::mpl::contains<BOOST_DEDUCED_TYPENAME Type::mutant_views,View>
     ));
-    return *reinterpret_cast< View* >(boost::addressof(m));
+    return *reinterpret_cast< View* >(pdalboost::addressof(m));
 }
 
 template< class View, class Type >
@@ -67,9 +67,9 @@ const View&
 >::type mutate( Type & m )
 {
     BOOST_MPL_ASSERT((
-        ::boost::mpl::contains<BOOST_DEDUCED_TYPENAME Type::mutant_views,View> 
+        ::pdalboost::mpl::contains<BOOST_DEDUCED_TYPENAME Type::mutant_views,View> 
     ));
-    return *reinterpret_cast< const View* >(boost::addressof(m));
+    return *reinterpret_cast< const View* >(pdalboost::addressof(m));
 }
 
 //@}
@@ -77,7 +77,7 @@ const View&
 } // namespace detail
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_RELATION_DETAIL_MUTANT_HPP
 

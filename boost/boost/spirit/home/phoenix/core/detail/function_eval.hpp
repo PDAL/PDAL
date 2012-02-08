@@ -21,7 +21,7 @@
 // we assume that mpl::vectorN, where N = PHOENIX_COMPOSITE_LIMIT
 // is included already.
 
-namespace boost { namespace phoenix { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix { namespace detail
 {
     template <int N>
     struct function_eval;
@@ -78,7 +78,7 @@ namespace boost { namespace phoenix { namespace detail
     "boost/spirit/home/phoenix/core/detail/function_eval.hpp"))
 #include BOOST_PP_ITERATE()
 
-}}} // namespace boost::phoenix::detail
+}}} // namespace pdalboost::pdalboostphoenix::detail
 
 #undef PHOENIX_GET_ARG
 #undef PHOENIX_EVAL_ARG

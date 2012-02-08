@@ -165,7 +165,7 @@
             BOOST_PP_REPEAT_ ## Z(N, BOOST_PROTO_VARARG_AS_PARAM_, typename A)                  \
         )                                                                                       \
     >                                                                                           \
-    typename boost::proto::result_of::make_expr<                                                \
+    typename pdalboost::proto::result_of::make_expr<                                                \
         BOOST_PP_SEQ_FOR_EACH_I(                                                                \
             BOOST_PROTO_VARARG_TYPE_, ~                                                         \
           , BOOST_PP_SEQ_PUSH_FRONT(                                                            \
@@ -180,7 +180,7 @@
     >::type const                                                                               \
     BOOST_PP_TUPLE_ELEM(4, 0, DATA)(BOOST_PP_ENUM_BINARY_PARAMS_Z(Z, N, A, const &a))           \
     {                                                                                           \
-        return boost::proto::detail::make_expr_<                                                \
+        return pdalboost::proto::detail::make_expr_<                                                \
             BOOST_PP_SEQ_FOR_EACH_I(                                                            \
                 BOOST_PROTO_VARARG_TYPE_, ~                                                     \
               , BOOST_PP_SEQ_PUSH_FRONT(                                                        \
@@ -214,8 +214,8 @@
 /// BOOST_PROTO_DEFINE_FUNCTION_TEMPLATE(
 ///     1
 ///   , construct
-///   , boost::proto::default_domain
-///   , (boost::proto::tag::function)
+///   , pdalboost::proto::default_domain
+///   , (pdalboost::proto::tag::function)
 ///   , ((op::construct)(typename)(int))
 /// )
 /// \endcode
@@ -231,8 +231,8 @@
 /// \code
 /// BOOST_PROTO_DEFINE_VARARG_FUNCTION_TEMPLATE(
 ///     construct
-///   , boost::proto::default_domain
-///   , (boost::proto::tag::function)
+///   , pdalboost::proto::default_domain
+///   , (pdalboost::proto::tag::function)
 ///   , ((op::construct)(typename)(int))
 /// )
 /// \endcode

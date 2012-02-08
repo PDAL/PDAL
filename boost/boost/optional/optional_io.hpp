@@ -30,8 +30,7 @@
 #include "boost/optional/optional.hpp"
 #include "boost/utility/value_init.hpp"
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #if defined (BOOST_NO_TEMPLATED_STREAMS)
 template<class T>
@@ -92,7 +91,7 @@ operator>>(std::basic_istream<CharType, CharTrait>& in, optional<T>& v)
   return in;
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif
 

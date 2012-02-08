@@ -27,40 +27,40 @@ namespace
 
 #if defined(__BORLANDC__) || defined(__GNUC__) && (__GNUC__ < 4)
 
-static inline boost::arg<1> _1() { return boost::arg<1>(); }
-static inline boost::arg<2> _2() { return boost::arg<2>(); }
-static inline boost::arg<3> _3() { return boost::arg<3>(); }
-static inline boost::arg<4> _4() { return boost::arg<4>(); }
-static inline boost::arg<5> _5() { return boost::arg<5>(); }
-static inline boost::arg<6> _6() { return boost::arg<6>(); }
-static inline boost::arg<7> _7() { return boost::arg<7>(); }
-static inline boost::arg<8> _8() { return boost::arg<8>(); }
-static inline boost::arg<9> _9() { return boost::arg<9>(); }
+static inline pdalboost::arg<1> _1() { return pdalboost::arg<1>(); }
+static inline pdalboost::arg<2> _2() { return pdalboost::arg<2>(); }
+static inline pdalboost::arg<3> _3() { return pdalboost::arg<3>(); }
+static inline pdalboost::arg<4> _4() { return pdalboost::arg<4>(); }
+static inline pdalboost::arg<5> _5() { return pdalboost::arg<5>(); }
+static inline pdalboost::arg<6> _6() { return pdalboost::arg<6>(); }
+static inline pdalboost::arg<7> _7() { return pdalboost::arg<7>(); }
+static inline pdalboost::arg<8> _8() { return pdalboost::arg<8>(); }
+static inline pdalboost::arg<9> _9() { return pdalboost::arg<9>(); }
 
 #elif defined(BOOST_MSVC) || (defined(__DECCXX_VER) && __DECCXX_VER <= 60590031) || defined(__MWERKS__) || \
     defined(__GNUC__) && (__GNUC__ == 4 && __GNUC_MINOR__ < 2)  
 
-static boost::arg<1> _1;
-static boost::arg<2> _2;
-static boost::arg<3> _3;
-static boost::arg<4> _4;
-static boost::arg<5> _5;
-static boost::arg<6> _6;
-static boost::arg<7> _7;
-static boost::arg<8> _8;
-static boost::arg<9> _9;
+static pdalboost::arg<1> _1;
+static pdalboost::arg<2> _2;
+static pdalboost::arg<3> _3;
+static pdalboost::arg<4> _4;
+static pdalboost::arg<5> _5;
+static pdalboost::arg<6> _6;
+static pdalboost::arg<7> _7;
+static pdalboost::arg<8> _8;
+static pdalboost::arg<9> _9;
 
 #else
 
-boost::arg<1> _1;
-boost::arg<2> _2;
-boost::arg<3> _3;
-boost::arg<4> _4;
-boost::arg<5> _5;
-boost::arg<6> _6;
-boost::arg<7> _7;
-boost::arg<8> _8;
-boost::arg<9> _9;
+pdalboost::arg<1> _1;
+pdalboost::arg<2> _2;
+pdalboost::arg<3> _3;
+pdalboost::arg<4> _4;
+pdalboost::arg<5> _5;
+pdalboost::arg<6> _6;
+pdalboost::arg<7> _7;
+pdalboost::arg<8> _8;
+pdalboost::arg<9> _9;
 
 #endif
 

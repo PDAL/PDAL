@@ -15,7 +15,7 @@
 #include <boost/fusion/include/at.hpp>
 #include <boost/proto/proto_fwd.hpp>
 
-namespace boost { namespace proto { namespace functional
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto { namespace functional
 {
     /// \brief A PolymorphicFunctionObject type that invokes the
     /// \c fusion::at() accessor on its argument.
@@ -32,8 +32,8 @@ namespace boost { namespace proto { namespace functional
         template<typename This, typename Seq, typename N>
         struct result<This(Seq, N)>
           : fusion::result_of::at<
-                typename boost::remove_reference<Seq>::type
-              , typename boost::remove_const<typename boost::remove_reference<N>::type>::type
+                typename pdalboost::remove_reference<Seq>::type
+              , typename pdalboost::remove_const<typename pdalboost::remove_reference<N>::type>::type
             >
         {};
 

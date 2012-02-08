@@ -19,7 +19,7 @@
 #include <boost/fusion/view/joint_view/detail/key_of_impl.hpp>
 #include <boost/static_assert.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct joint_view_iterator_tag;
     struct forward_traversal_tag;

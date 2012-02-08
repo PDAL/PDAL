@@ -16,15 +16,15 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail {
 
 template <typename T> 
 struct is_fundamental_impl
-    : public ::boost::type_traits::ice_or< 
-          ::boost::is_arithmetic<T>::value
-        , ::boost::is_void<T>::value
+    : public ::pdalboost::type_traits::ice_or< 
+          ::pdalboost::is_arithmetic<T>::value
+        , ::pdalboost::is_void<T>::value
         >
 { 
 };
@@ -35,10 +35,10 @@ struct is_fundamental_impl
 #if defined( __CODEGEARC__ )
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_fundamental,T,__is_fundamental(T))
 #else
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_fundamental,T,::boost::detail::is_fundamental_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_fundamental,T,::pdalboost::detail::is_fundamental_impl<T>::value)
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

@@ -22,7 +22,7 @@
                     // installation instructions here:
                     // http://boost.org/libs/iostreams/doc/index.html?path=7
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 namespace zlib {
 
@@ -79,9 +79,9 @@ void zlib_error::check BOOST_PREVENT_MACRO_SUBSTITUTION(int error)
     //case Z_BUF_ERROR: 
         return;
     case Z_MEM_ERROR: 
-        boost::throw_exception(std::bad_alloc());
+        pdalboost::throw_exception(std::bad_alloc());
     default:
-        boost::throw_exception(zlib_error(error));
+        pdalboost::throw_exception(zlib_error(error));
         ;
     }
 }

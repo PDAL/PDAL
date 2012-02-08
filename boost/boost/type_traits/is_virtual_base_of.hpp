@@ -16,7 +16,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail {
 
 
@@ -88,7 +88,7 @@ BOOST_TT_AUX_BOOL_TRAIT_DEF2(
       is_virtual_base_of
        , Base
        , Derived
-       , (::boost::detail::is_virtual_base_of_impl2<Base,Derived>::value) 
+       , (::pdalboost::detail::is_virtual_base_of_impl2<Base,Derived>::value) 
 )
 
 #ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
@@ -97,7 +97,7 @@ BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC2_2(typename Base,typename Derived,is_virtua
 BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC2_2(typename Base,typename Derived,is_virtual_base_of,Base&,Derived&,false)
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

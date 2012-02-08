@@ -41,7 +41,7 @@
 
 #else // defined(BOOST_NO_VOID_RETURNS)
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail { namespace variant {
 
 struct fake_return_void
@@ -69,19 +69,19 @@ struct no_void_returns_helper<void>
 };
 
 }} // namespace detail::variant
-} // namespace boost
+} // namespace pdalboost
 
 #define BOOST_VARIANT_AUX_GENERIC_RESULT_TYPE(T) \
     BOOST_DEDUCED_TYPENAME                                           \
-        ::boost::detail::variant::no_void_returns_helper< T >::type  \
+        ::pdalboost::detail::variant::no_void_returns_helper< T >::type  \
     /**/
 
 #define BOOST_VARIANT_AUX_RETURN_VOID  \
-    return ::boost::detail::variant::fake_return_void()     \
+    return ::pdalboost::detail::variant::fake_return_void()     \
     /**/
 
 #define BOOST_VARIANT_AUX_RETURN_VOID_TYPE  \
-    ::boost::detail::variant::fake_return_void
+    ::pdalboost::detail::variant::fake_return_void
 
 #endif // BOOST_NO_VOID_RETURNS workaround
 

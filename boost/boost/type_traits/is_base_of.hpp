@@ -18,7 +18,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
    namespace detail{
       template <class B, class D>
@@ -26,9 +26,9 @@ namespace boost {
       {
           typedef typename remove_cv<B>::type ncvB;
           typedef typename remove_cv<D>::type ncvD;
-          BOOST_STATIC_CONSTANT(bool, value = (::boost::type_traits::ice_or<      
-            (::boost::detail::is_base_and_derived_impl<ncvB,ncvD>::value),
-            (::boost::type_traits::ice_and< ::boost::is_same<ncvB,ncvD>::value, ::boost::is_class<ncvB>::value>::value)>::value));
+          BOOST_STATIC_CONSTANT(bool, value = (::pdalboost::type_traits::ice_or<      
+            (::pdalboost::detail::is_base_and_derived_impl<ncvB,ncvD>::value),
+            (::pdalboost::type_traits::ice_and< ::pdalboost::is_same<ncvB,ncvD>::value, ::pdalboost::is_class<ncvB>::value>::value)>::value));
       };
    }
 
@@ -36,7 +36,7 @@ BOOST_TT_AUX_BOOL_TRAIT_DEF2(
       is_base_of
     , Base
     , Derived
-    , (::boost::detail::is_base_of_imp<Base, Derived>::value))
+    , (::pdalboost::detail::is_base_of_imp<Base, Derived>::value))
 
 #ifndef BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC2_2(typename Base,typename Derived,is_base_of,Base&,Derived,false)
@@ -44,7 +44,7 @@ BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC2_2(typename Base,typename Derived,is_base_o
 BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC2_2(typename Base,typename Derived,is_base_of,Base&,Derived&,false)
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

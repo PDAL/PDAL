@@ -36,7 +36,7 @@
     {                                                                           \
         template <typename Operand>                                             \
         struct BOOST_PP_CAT(make_, name)                                        \
-            : boost::result_of<                                                 \
+            : pdalboost::result_of<                                                 \
                 functional:: BOOST_PP_CAT(make_, name)(                         \
                     Operand                                                     \
                 )                                                               \
@@ -75,7 +75,7 @@
     {                                                                           \
         template <typename Lhs, typename Rhs>                                   \
         struct BOOST_PP_CAT(make_, name)                                        \
-            : boost::result_of<                                                 \
+            : pdalboost::result_of<                                                 \
                 functional:: BOOST_PP_CAT(make_, name)(                         \
                     Lhs, Rhs                                                    \
                 )                                                               \

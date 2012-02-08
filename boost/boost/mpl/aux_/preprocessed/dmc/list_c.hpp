@@ -9,7 +9,7 @@
 // Preprocessed version of "boost/mpl/list_c.hpp" header
 // -- DO NOT modify by hand!
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<
       typename T, long C0 = LONG_MAX, long C1 = LONG_MAX, long C2 = LONG_MAX

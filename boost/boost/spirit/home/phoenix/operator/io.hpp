@@ -9,7 +9,7 @@
 
 #include <boost/spirit/home/phoenix/operator/detail/io.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -20,14 +20,14 @@ namespace boost { namespace phoenix
     inline typename detail::enable_if_ostream<T0, T1>::type
     operator<<(T0& a0, actor<T1> const& a1)
     {
-        return compose<shift_left_eval>(phoenix::ref(a0), a1);
+        return compose<shift_left_eval>(pdalboostphoenix::ref(a0), a1);
     }
 
     template <typename T0, typename T1>
     inline typename detail::enable_if_istream<T0, T1>::type
     operator>>(T0& a0, actor<T1> const& a1)
     {
-        return compose<shift_right_eval>(phoenix::ref(a0), a1);
+        return compose<shift_right_eval>(pdalboostphoenix::ref(a0), a1);
     }
 
     // resolve ambiguities with fusion.
@@ -35,14 +35,14 @@ namespace boost { namespace phoenix
     inline typename detail::enable_if_ostream<std::ostream, T1>::type
     operator<<(std::ostream& a0, actor<T1> const& a1)
     {
-        return compose<shift_left_eval>(phoenix::ref(a0), a1);
+        return compose<shift_left_eval>(pdalboostphoenix::ref(a0), a1);
     }
 
     template <typename T1>
     inline typename detail::enable_if_istream<std::istream, T1>::type
         operator>>(std::istream& a0, actor<T1> const& a1)
     {
-        return compose<shift_right_eval>(phoenix::ref(a0), a1);
+        return compose<shift_right_eval>(pdalboostphoenix::ref(a0), a1);
     }
 
 ///////////////////////////////////////////////////////////////////////////////

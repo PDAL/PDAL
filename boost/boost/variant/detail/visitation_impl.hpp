@@ -51,7 +51,7 @@
         BOOST_VARIANT_LIMIT_TYPES
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail { namespace variant {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -181,7 +181,7 @@ visitation_impl_invoke(int, Visitor&, VoidPtrCV, apply_visitor_unrolled*, NBF, l
     // should never be here at runtime:
     BOOST_ASSERT(false);
     typedef typename Visitor::result_type result_type;
-    return ::boost::detail::variant::forced_return< result_type >();
+    return ::pdalboost::detail::variant::forced_return< result_type >();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -206,7 +206,7 @@ visitation_impl(
     // should never be here at runtime:
     BOOST_ASSERT(false);
     typedef typename Visitor::result_type result_type;
-    return ::boost::detail::variant::forced_return< result_type >();
+    return ::pdalboost::detail::variant::forced_return< result_type >();
 }
 
 template <
@@ -286,7 +286,7 @@ visitation_impl(
 }
 
 }} // namespace detail::variant
-} // namespace boost
+} // namespace pdalboost
 
 #if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)  
 # pragma warning(pop)  

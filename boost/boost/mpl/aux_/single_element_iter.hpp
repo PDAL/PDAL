@@ -24,7 +24,7 @@
 #include <boost/mpl/aux_/value_wknd.hpp>
 #include <boost/mpl/aux_/config/ctps.hpp>
 
-namespace boost { namespace mpl { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { 
 
 #if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 

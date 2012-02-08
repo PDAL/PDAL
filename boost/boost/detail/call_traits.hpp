@@ -27,7 +27,7 @@
 #include <boost/type_traits/is_pointer.hpp>
 #include <boost/detail/workaround.hpp>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail{
 
@@ -76,10 +76,10 @@ public:
    // however compiler bugs prevent this - instead pass three bool's to
    // ct_imp<T,bool,bool,bool> and add an extra partial specialisation
    // of ct_imp to handle the logic. (JM)
-   typedef typename boost::detail::ct_imp<
+   typedef typename pdalboost::detail::ct_imp<
       T,
-      ::boost::is_pointer<T>::value,
-      ::boost::is_arithmetic<T>::value
+      ::pdalboost::is_pointer<T>::value,
+      ::pdalboost::is_arithmetic<T>::value
    >::param_type param_type;
 };
 

@@ -29,7 +29,7 @@
 #include <boost/random/detail/seed_impl.hpp>
 #include <boost/random/detail/generator_seed_seq.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace random {
 
 /**
@@ -187,7 +187,7 @@ public:
     { return 0; }
     /** Returns the largest value that the generator can produce. */
     static result_type max BOOST_PREVENT_MACRO_SUBSTITUTION ()
-    { return boost::low_bits_mask_t<w>::sig_bits; }
+    { return pdalboost::low_bits_mask_t<w>::sig_bits; }
     
     /** Produces the next value of the generator. */
     result_type operator()();
@@ -206,9 +206,9 @@ public:
      * }
      * @endcode
      */
-    void discard(boost::uintmax_t z)
+    void discard(pdalboost::uintmax_t z)
     {
-        for(boost::uintmax_t j = 0; j < z; ++j) {
+        for(pdalboost::uintmax_t j = 0; j < z; ++j) {
             (*this)();
         }
     }
@@ -536,10 +536,10 @@ using random::mt11213b;
 using random::mt19937;
 using random::mt19937_64;
 
-} // namespace boost
+} // namespace pdalboost
 
-BOOST_RANDOM_PTR_HELPER_SPEC(boost::mt11213b)
-BOOST_RANDOM_PTR_HELPER_SPEC(boost::mt19937)
-BOOST_RANDOM_PTR_HELPER_SPEC(boost::mt19937_64)
+BOOST_RANDOM_PTR_HELPER_SPEC(pdalboost::mt11213b)
+BOOST_RANDOM_PTR_HELPER_SPEC(pdalboost::mt19937)
+BOOST_RANDOM_PTR_HELPER_SPEC(pdalboost::mt19937_64)
 
 #endif // BOOST_RANDOM_MERSENNE_TWISTER_HPP

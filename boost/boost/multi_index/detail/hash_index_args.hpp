@@ -24,7 +24,7 @@
 #include <boost/type_traits/is_same.hpp>
 #include <functional>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -34,12 +34,12 @@ namespace detail{
  *
  *   (hashed_unique|hashed_non_unique)<
  *     KeyFromValue,
- *     Hash=boost::hash<KeyFromValue::result_type>,
+ *     Hash=pdalboost::hash<KeyFromValue::result_type>,
  *     Pred=std::equal_to<KeyFromValue::result_type> >
  *   (hashed_unique|hashed_non_unique)<
  *     TagList,
  *     KeyFromValue,
- *     Hash=boost::hash<KeyFromValue::result_type>,
+ *     Hash=pdalboost::hash<KeyFromValue::result_type>,
  *     Pred=std::equal_to<KeyFromValue::result_type> >
  *
  * hashed_index_args implements the machinery to accept this
@@ -49,7 +49,7 @@ namespace detail{
 template<typename KeyFromValue>
 struct index_args_default_hash
 {
-  typedef ::boost::hash<typename KeyFromValue::result_type> type;
+  typedef ::pdalboost::hash<typename KeyFromValue::result_type> type;
 };
 
 template<typename KeyFromValue>
@@ -100,6 +100,6 @@ struct hashed_index_args
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

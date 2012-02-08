@@ -21,7 +21,7 @@
 #include <boost/bimap/container_adaptor/set_adaptor.hpp>
 #include <boost/bimap/detail/set_view_base.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace views {
 
@@ -43,7 +43,7 @@ class set_view
         reverse_iterator, const_reverse_iterator
     ),
 
-    public ::boost::bimaps::detail::
+    public ::pdalboost::bimaps::detail::
                 set_view_base< set_view< CoreIndex >, CoreIndex >
 {
     typedef BOOST_BIMAP_SET_VIEW_CONTAINER_ADAPTOR(
@@ -67,7 +67,7 @@ class set_view
     {
         return this->base().range(
 
-            ::boost::bimaps::container_adaptor::detail::unary_check_adaptor
+            ::pdalboost::bimaps::container_adaptor::detail::unary_check_adaptor
             <
                 LowerBounder,
                 BOOST_DEDUCED_TYPENAME base_::base_type::value_type,
@@ -76,7 +76,7 @@ class set_view
             >( lower, this->template functor<
                             BOOST_DEDUCED_TYPENAME base_::value_from_base>() ),
 
-            ::boost::bimaps::container_adaptor::detail::unary_check_adaptor
+            ::pdalboost::bimaps::container_adaptor::detail::unary_check_adaptor
             <
                 UpperBounder,
                 BOOST_DEDUCED_TYPENAME base_::base_type::value_type,
@@ -99,7 +99,7 @@ class set_view
 
 } // namespace views
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_VIEWS_SET_VIEW_HPP
 

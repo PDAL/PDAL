@@ -20,7 +20,7 @@
 
 #include <functional>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace detail {
 
@@ -83,7 +83,7 @@ struct unary_modifier_adaptor :
 
 } // namespace detail
 } // namespace bimap
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_DETAIL_MODIFIER_ADAPTOR_HPP

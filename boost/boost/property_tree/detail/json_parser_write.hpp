@@ -17,7 +17,7 @@
 #include <ostream>
 #include <iomanip>
 
-namespace boost { namespace property_tree { namespace json_parser
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace json_parser
 {
 
     // Create necessary escape sequences from illegal characters
@@ -89,7 +89,7 @@ namespace boost { namespace property_tree { namespace json_parser
             {
                 if (pretty) stream << Str(4 * (indent + 1), Ch(' '));
                 write_json_helper(stream, it->second, indent + 1, pretty);
-                if (boost::next(it) != pt.end())
+                if (pdalboost::next(it) != pt.end())
                     stream << Ch(',');
                 if (pretty) stream << Ch('\n');
             }
@@ -113,7 +113,7 @@ namespace boost { namespace property_tree { namespace json_parser
                         stream << Ch('\n') << Str(4 * (indent + 1), Ch(' '));
                 }
                 write_json_helper(stream, it->second, indent + 1, pretty);
-                if (boost::next(it) != pt.end())
+                if (pdalboost::next(it) != pt.end())
                     stream << Ch(',');
                 if (pretty) stream << Ch('\n');
             }

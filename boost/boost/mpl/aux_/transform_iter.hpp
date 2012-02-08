@@ -22,7 +22,7 @@
 #include <boost/mpl/aux_/config/ctps.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace mpl { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { 
 
 namespace aux {
 
@@ -107,7 +107,7 @@ template<
     >
 struct transform_iter
     : transform_iter_impl<
-          ::boost::is_same<Iterator,LastIterator>::value
+          ::pdalboost::is_same<Iterator,LastIterator>::value
         >::template result_< Iterator,LastIterator,F >
 {
 };

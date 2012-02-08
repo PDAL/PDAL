@@ -27,15 +27,14 @@
 #include <new>              // ::operator new, ::operator delete
 #include <cstddef>          // std::size_t
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
 
 template<unsigned size, unsigned align_> union freeblock
 {
-    typedef typename boost::type_with_alignment<align_>::type aligner_type;
+    typedef typename pdalboost::type_with_alignment<align_>::type aligner_type;
     aligner_type aligner;
     char bytes[size];
     freeblock * next;
@@ -74,7 +73,7 @@ template<unsigned size, unsigned align_> struct allocator_impl
 
     static lightweight_mutex & mutex()
     {
-        static freeblock< sizeof( lightweight_mutex ), boost::alignment_of< lightweight_mutex >::value > fbm;
+        static freeblock< sizeof( lightweight_mutex ), pdalboost::alignment_of< lightweight_mutex >::value > fbm;
         static lightweight_mutex * pm = new( &fbm ) lightweight_mutex;
         return *pm;
     }
@@ -188,12 +187,12 @@ template<unsigned size, unsigned align_>
   unsigned allocator_impl<size, align_>::last = allocator_impl<size, align_>::items_per_page;
 
 template<class T>
-struct quick_allocator: public allocator_impl< sizeof(T), boost::alignment_of<T>::value >
+struct quick_allocator: public allocator_impl< sizeof(T), pdalboost::alignment_of<T>::value >
 {
 };
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // #ifndef BOOST_SMART_PTR_DETAIL_QUICK_ALLOCATOR_HPP_INCLUDED

@@ -17,7 +17,7 @@
 #include <boost/proto/eval.hpp>
 #include <boost/proto/traits.hpp>
 
-namespace boost { namespace proto { namespace context
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto { namespace context
 {
 
     template<

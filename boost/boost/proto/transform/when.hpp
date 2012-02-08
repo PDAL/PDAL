@@ -22,7 +22,7 @@
 #include <boost/proto/transform/make.hpp>
 #include <boost/proto/transform/impl.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     /// \brief A grammar element and a PrimitiveTransform that associates
     /// a transform with the grammar.
@@ -47,8 +47,8 @@ namespace boost { namespace proto
     /// In <tt>when\<G, T\></tt>, when \c T is a class type it is a
     /// PrimitiveTransform and the following equivalencies hold:
     ///
-    /// <tt>boost::result_of\<when\<G,T\>(E,S,V)\>::type</tt> is the same as
-    /// <tt>boost::result_of\<T(E,S,V)\>::type</tt>.
+    /// <tt>pdalboost::result_of\<when\<G,T\>(E,S,V)\>::type</tt> is the same as
+    /// <tt>pdalboost::result_of\<T(E,S,V)\>::type</tt>.
     ///
     /// <tt>when\<G,T\>()(e,s,d)</tt> is the same as
     /// <tt>T()(e,s,d)</tt>.
@@ -192,6 +192,6 @@ namespace boost { namespace proto
       : mpl::true_
     {};
 
-}} // namespace boost::proto
+}} // namespace pdalboost::proto
 
 #endif

@@ -32,7 +32,7 @@
 #include <boost/mpl/placeholders.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace spirit { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace detail
 {
     ///////////////////////////////////////////////////////////////////////////
     // Helpers to extract params (locals, attributes, ...) from nonterminal

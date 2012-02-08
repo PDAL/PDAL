@@ -7,7 +7,7 @@
 
 // Revision History
 //  29 May 2007 - Initial Revision
-//  25 Feb 2008 - moved to namespace boost::uuids::detail
+//  25 Feb 2008 - moved to namespace pdalboost::uuids::detail
 
 // This is a byte oriented implementation
 // Note: this implementation does not handle message longer than
@@ -25,7 +25,7 @@ namespace std {
 } // namespace std
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace uuids {
 namespace detail {
 
@@ -203,6 +203,6 @@ inline void sha1::get_digest(digest_type digest)
     digest[4] = h_[4];
 }
 
-}}} // namespace boost::uuids::detail
+}}} // namespace pdalboost::uuids::detail
 
 #endif

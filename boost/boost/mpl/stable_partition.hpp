@@ -22,7 +22,7 @@
 #include <boost/mpl/aux_/inserter_algorithm.hpp>
 #include <boost/mpl/aux_/na.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 namespace aux {
  

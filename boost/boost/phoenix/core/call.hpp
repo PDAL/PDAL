@@ -14,7 +14,7 @@
 #include <boost/proto/traits.hpp>
 #include <boost/proto/transform/impl.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     namespace detail
     {
@@ -32,11 +32,11 @@ namespace boost { namespace phoenix
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(Expr, context_type)
                 >::type
                 result_type;
@@ -47,7 +47,7 @@ namespace boost { namespace phoenix
               , typename call_impl::data_param d
             ) const
             {
-                return Fun()(e, boost::phoenix::context(s, d));
+                return Fun()(e, pdalboost::pdalboostphoenix::context(s, d));
             }
         };
     }
@@ -68,7 +68,7 @@ namespace boost { namespace phoenix
     namespace proto
     {
         template <typename Fun, typename Dummy>
-        struct is_callable<phoenix::call<Fun, Dummy> > : mpl::true_ {};
+        struct is_callable<pdalboostphoenix::call<Fun, Dummy> > : mpl::true_ {};
     }
 }
 

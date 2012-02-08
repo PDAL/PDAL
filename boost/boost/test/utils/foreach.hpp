@@ -34,7 +34,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -183,7 +183,7 @@ next( static_any_t cur, C const&, mpl::true_ )
 
 template<class RefType,typename C>
 inline RefType
-deref( static_any_t cur, C&, ::boost::type<RefType>, mpl::false_ )
+deref( static_any_t cur, C&, ::pdalboost::type<RefType>, mpl::false_ )
 {
     return *static_any_cast<BOOST_DEDUCED_TYPENAME C::iterator>( cur );
 }
@@ -192,7 +192,7 @@ deref( static_any_t cur, C&, ::boost::type<RefType>, mpl::false_ )
 
 template<class RefType,typename C>
 inline RefType
-deref( static_any_t cur, C const&, ::boost::type<RefType>, mpl::true_ )
+deref( static_any_t cur, C const&, ::pdalboost::type<RefType>, mpl::true_ )
 {
     return *static_any_cast<BOOST_DEDUCED_TYPENAME C::const_iterator>( cur );
 }
@@ -203,23 +203,23 @@ deref( static_any_t cur, C const&, ::boost::type<RefType>, mpl::true_ )
 // **************              BOOST_TEST_FOREACH              ************** //
 // ************************************************************************** //
 
-#define BOOST_TEST_FE_ANY                   ::boost::unit_test::for_each::static_any_t
-#define BOOST_TEST_FE_IS_CONST( COL )       ::boost::unit_test::for_each::is_const_coll( COL )
+#define BOOST_TEST_FE_ANY                   ::pdalboost::unit_test::for_each::static_any_t
+#define BOOST_TEST_FE_IS_CONST( COL )       ::pdalboost::unit_test::for_each::is_const_coll( COL )
 
 #define BOOST_TEST_FE_BEG( COL )            \
-    ::boost::unit_test::for_each::begin(    \
+    ::pdalboost::unit_test::for_each::begin(    \
         COL,                                \
         BOOST_TEST_FE_IS_CONST( COL ) )     \
 /**/
 
 #define BOOST_TEST_FE_END( COL )            \
-    ::boost::unit_test::for_each::end(      \
+    ::pdalboost::unit_test::for_each::end(      \
         COL,                                \
         BOOST_TEST_FE_IS_CONST( COL ) )     \
 /**/
 
 #define BOOST_TEST_FE_DONE( COL )           \
-    ::boost::unit_test::for_each::done(     \
+    ::pdalboost::unit_test::for_each::done(     \
         BOOST_TEST_FE_CUR_VAR,              \
         BOOST_TEST_FE_END_VAR,              \
         COL,                                \
@@ -227,7 +227,7 @@ deref( static_any_t cur, C const&, ::boost::type<RefType>, mpl::true_ )
 /**/
 
 #define BOOST_TEST_FE_NEXT( COL )           \
-    ::boost::unit_test::for_each::next(     \
+    ::pdalboost::unit_test::for_each::next(     \
         BOOST_TEST_FE_CUR_VAR,              \
         COL,                                \
         BOOST_TEST_FE_IS_CONST( COL ) )     \
@@ -237,10 +237,10 @@ deref( static_any_t cur, C const&, ::boost::type<RefType>, mpl::true_ )
     ((void)&(COL))
 
 #define BOOST_TEST_FE_DEREF( COL, RefType ) \
-    ::boost::unit_test::for_each::deref(    \
+    ::pdalboost::unit_test::for_each::deref(    \
         BOOST_TEST_FE_CUR_VAR,              \
         COL,                                \
-        ::boost::type<RefType >(),          \
+        ::pdalboost::type<RefType >(),          \
         BOOST_TEST_FE_IS_CONST( COL ) )     \
 /**/
 
@@ -272,7 +272,7 @@ for( bool BOOST_TEST_FE_CON_VAR = true;                                         
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

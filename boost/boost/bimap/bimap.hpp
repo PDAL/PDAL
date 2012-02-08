@@ -20,11 +20,11 @@ This is the complete reference of Boost.Bimap.
 After getting a good understanding of the library from a user perspective
 the next step will be:
 
-    - Understand the tagged idiom. (boost::bimaps::tags)
-    - Understand the internals of the relation class (boost::bimaps::relation)
-    - Read the container_adaptor toolbox docs (boost::bimaps::container_adaptor)
-    - Understand the internals of the bimap class. (boost::bimaps, boost::bimaps::views
-      and boost::bimaps::detail)
+    - Understand the tagged idiom. (pdalboost::bimaps::tags)
+    - Understand the internals of the relation class (pdalboost::bimaps::relation)
+    - Read the container_adaptor toolbox docs (pdalboost::bimaps::container_adaptor)
+    - Understand the internals of the bimap class. (pdalboost::bimaps, pdalboost::bimaps::views
+      and pdalboost::bimaps::detail)
 
 
                                                                         **/
@@ -70,7 +70,7 @@ the next step will be:
 
 /// \brief The namespace where all the boost libraries lives.
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 /// \brief Boost.Bimap library namespace
 /**
@@ -126,35 +126,35 @@ ones.
 template
 <
     class KeyTypeA, class KeyTypeB,
-    class AP1 = ::boost::mpl::na,
-    class AP2 = ::boost::mpl::na,
-    class AP3 = ::boost::mpl::na
+    class AP1 = ::pdalboost::mpl::na,
+    class AP2 = ::pdalboost::mpl::na,
+    class AP3 = ::pdalboost::mpl::na
 >
 class bimap
 :
     // Bimap Core, use mpl magic to find the desired bimap type
 
-    public ::boost::bimaps::detail::bimap_core<KeyTypeA,KeyTypeB,AP1,AP2,AP3>,
+    public ::pdalboost::bimaps::detail::bimap_core<KeyTypeA,KeyTypeB,AP1,AP2,AP3>,
 
     // You can use bimap as a collection of relations
 
-    public ::boost::bimaps::detail::bimap_core<KeyTypeA,KeyTypeB,AP1,AP2,AP3>
+    public ::pdalboost::bimaps::detail::bimap_core<KeyTypeA,KeyTypeB,AP1,AP2,AP3>
                 ::relation_set,
 
     // Include extra typedefs (i.e. left_local_iterator for unordered_map)
 
-    public ::boost::bimaps::detail:: left_map_view_extra_typedefs<
-        BOOST_DEDUCED_TYPENAME ::boost::bimaps::detail::left_map_view_type<
-            ::boost::bimaps::detail::bimap_core<KeyTypeA,KeyTypeB,AP1,AP2,AP3>
+    public ::pdalboost::bimaps::detail:: left_map_view_extra_typedefs<
+        BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::detail::left_map_view_type<
+            ::pdalboost::bimaps::detail::bimap_core<KeyTypeA,KeyTypeB,AP1,AP2,AP3>
         >::type
     >,
-    public ::boost::bimaps::detail::right_map_view_extra_typedefs< 
-        BOOST_DEDUCED_TYPENAME ::boost::bimaps::detail::right_map_view_type<
-            ::boost::bimaps::detail::bimap_core<KeyTypeA,KeyTypeB,AP1,AP2,AP3>
+    public ::pdalboost::bimaps::detail::right_map_view_extra_typedefs< 
+        BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::detail::right_map_view_type<
+            ::pdalboost::bimaps::detail::bimap_core<KeyTypeA,KeyTypeB,AP1,AP2,AP3>
         >::type
     >
 {
-    typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::detail::
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::detail::
         bimap_core<KeyTypeA,KeyTypeB,AP1,AP2,AP3> base_;
 
     BOOST_DEDUCED_TYPENAME base_::core_type core;
@@ -179,9 +179,9 @@ class bimap
 
     ------------------------------------------------------------------*/
 
-    typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::detail::
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::detail::
           left_map_view_type<base_>::type  left_map;
-    typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::detail::
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::detail::
          right_map_view_type<base_>::type right_map;
 
     typedef BOOST_DEDUCED_TYPENAME
@@ -214,7 +214,7 @@ class bimap
    bimap(const allocator_type& al = allocator_type()) :
 
        base_::relation_set(
-           ::boost::multi_index::get<
+           ::pdalboost::multi_index::get<
                logic_relation_set_tag
            >(core)
        ),
@@ -222,12 +222,12 @@ class bimap
        core(al),
 
        left (
-           ::boost::multi_index::get<
+           ::pdalboost::multi_index::get<
                logic_left_tag
            >(core)
        ),
        right (
-           ::boost::multi_index::get<
+           ::pdalboost::multi_index::get<
                logic_right_tag
            >(core)
        )
@@ -239,16 +239,16 @@ class bimap
          const allocator_type& al = allocator_type()) :
 
        base_::relation_set(
-           ::boost::multi_index::get<logic_relation_set_tag>(core)
+           ::pdalboost::multi_index::get<logic_relation_set_tag>(core)
        ),
 
        core(first,last,ctor_args_list(),al),
 
        left (
-           ::boost::multi_index::get<logic_left_tag>(core)
+           ::pdalboost::multi_index::get<logic_left_tag>(core)
        ),
        right (
-           ::boost::multi_index::get<logic_right_tag>(core)
+           ::pdalboost::multi_index::get<logic_right_tag>(core)
        )
 
    {}
@@ -256,16 +256,16 @@ class bimap
    bimap(const bimap& x) :
 
        base_::relation_set(
-           ::boost::multi_index::get<logic_relation_set_tag>(core)
+           ::pdalboost::multi_index::get<logic_relation_set_tag>(core)
        ),
 
        core(x.core),
 
        left (
-           ::boost::multi_index::get<logic_left_tag>(core)
+           ::pdalboost::multi_index::get<logic_left_tag>(core)
        ),
        right (
-           ::boost::multi_index::get<logic_right_tag>(core)
+           ::pdalboost::multi_index::get<logic_right_tag>(core)
        )
 
    {}
@@ -329,7 +329,7 @@ class bimap
     // Support for tags
 
     template< class Tag, class IteratorType >
-    BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
+    BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::support::
     iterator_type_by<Tag,bimap>::type
         project(IteratorType iter
                 BOOST_APPEND_EXPLICIT_TEMPLATE_TYPE(Tag))
@@ -338,7 +338,7 @@ class bimap
     }
 
     template< class Tag, class IteratorType >
-    BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
+    BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::support::
     const_iterator_type_by<Tag,bimap>::type
         project(IteratorType iter
                 BOOST_APPEND_EXPLICIT_TEMPLATE_TYPE(Tag)) const
@@ -348,28 +348,28 @@ class bimap
 
     template< class Tag >
     struct map_by :
-        public ::boost::bimaps::support::map_type_by<Tag,bimap>::type
+        public ::pdalboost::bimaps::support::map_type_by<Tag,bimap>::type
     {
-        typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
+        typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::support::
             map_type_by<Tag,bimap>::type type;
 
         private: map_by() {}
     };
 
     template< class Tag >
-    BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
+    BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::support::
     map_type_by<Tag,bimap>::type &
         by(BOOST_EXPLICIT_TEMPLATE_TYPE(Tag))
     {
-        return ::boost::bimaps::support::map_by<Tag>(*this);
+        return ::pdalboost::bimaps::support::map_by<Tag>(*this);
     }
 
     template< class Tag >
-    const BOOST_DEDUCED_TYPENAME ::boost::bimaps::support::
+    const BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::support::
     map_type_by<Tag,bimap>::type &
         by(BOOST_EXPLICIT_TEMPLATE_TYPE(Tag)) const
     {
-        return ::boost::bimaps::support::map_by<Tag>(*this);
+        return ::pdalboost::bimaps::support::map_by<Tag>(*this);
     }
 
 
@@ -379,7 +379,7 @@ class bimap
 
     private:
 
-    friend class boost::serialization::access;
+    friend class pdalboost::serialization::access;
 
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version)
@@ -391,18 +391,18 @@ class bimap
 };
 
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
-/** \namespace boost::bimaps::support
+/** \namespace pdalboost::bimaps::support
 \brief Metafunctions to help working with bimaps.
                                                             **/
 
-/** \namespace boost::bimaps::views
+/** \namespace pdalboost::bimaps::views
 \brief Bimap views.
                                                             **/
 
-/** \namespace boost::bimaps::views::detail
+/** \namespace pdalboost::bimaps::views::detail
 \brief Bimap views details.
                                                             **/
 
@@ -415,17 +415,17 @@ class bimap
 #include <boost/multi_index/detail/unbounded.hpp>
 
 // Bring the most used namespaces directly to the user main namespace
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 
-using ::boost::bimaps::tags::tagged;
+using ::pdalboost::bimaps::tags::tagged;
 
-namespace member_at = ::boost::bimaps::relation::member_at;
+namespace member_at = ::pdalboost::bimaps::relation::member_at;
 
-using ::boost::multi_index::unbounded;
+using ::pdalboost::multi_index::unbounded;
 
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_BIMAP_HPP

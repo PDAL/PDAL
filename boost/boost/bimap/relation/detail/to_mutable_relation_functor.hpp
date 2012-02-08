@@ -22,7 +22,7 @@
 #include <boost/bimap/relation/detail/mutant.hpp>
 #include <boost/bimap/relation/mutant_relation.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 namespace detail {
@@ -33,7 +33,7 @@ template< class Tag, class Relation >
 struct pair_to_relation_functor
 {
     const Relation
-        operator()(const BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::support::
+        operator()(const BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::support::
                             pair_type_by<Tag,Relation>::type & p) const
     {
         return Relation(p);
@@ -42,22 +42,22 @@ struct pair_to_relation_functor
 
 template< class Tag, class TA, class TB, class Info >
 struct pair_to_relation_functor<
-    Tag,::boost::bimaps::relation::mutant_relation<TA,TB,Info,true> >
+    Tag,::pdalboost::bimaps::relation::mutant_relation<TA,TB,Info,true> >
 {
-    typedef ::boost::bimaps::relation::mutant_relation<TA,TB,Info,true> Relation;
+    typedef ::pdalboost::bimaps::relation::mutant_relation<TA,TB,Info,true> Relation;
 
     Relation &
-        operator()( BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::support::
+        operator()( BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::support::
             pair_type_by<Tag,Relation>::type & p ) const
     {
-        return ::boost::bimaps::relation::detail::mutate<Relation>(p);
+        return ::pdalboost::bimaps::relation::detail::mutate<Relation>(p);
     }
 
     const Relation &
-        operator()( const BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::support::
+        operator()( const BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::support::
             pair_type_by<Tag,Relation>::type & p) const
     {
-        return ::boost::bimaps::relation::detail::mutate<Relation>(p);
+        return ::pdalboost::bimaps::relation::detail::mutate<Relation>(p);
     }
 };
 
@@ -75,27 +75,27 @@ struct get_mutable_relation_functor
 };
 
 template< class TA, class TB, class Info >
-struct get_mutable_relation_functor< ::boost::bimaps::relation::mutant_relation<TA,TB,Info,true> >
+struct get_mutable_relation_functor< ::pdalboost::bimaps::relation::mutant_relation<TA,TB,Info,true> >
 {
-    typedef ::boost::bimaps::relation::mutant_relation<TA,TB,Info,true> Relation;
+    typedef ::pdalboost::bimaps::relation::mutant_relation<TA,TB,Info,true> Relation;
 
     Relation &
     operator()( BOOST_DEDUCED_TYPENAME Relation::above_view & r ) const
     {
-        return ::boost::bimaps::relation::detail::mutate<Relation>(r);
+        return ::pdalboost::bimaps::relation::detail::mutate<Relation>(r);
     }
 
     const Relation &
     operator()( const BOOST_DEDUCED_TYPENAME Relation::above_view & r ) const
     {
-        return ::boost::bimaps::relation::detail::mutate<Relation>(r);
+        return ::pdalboost::bimaps::relation::detail::mutate<Relation>(r);
     }
 };
 
 } // namespace detail
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_RELATION_DETAIL_TO_MUTABLE_RELATION_FUNCTOR_HPP

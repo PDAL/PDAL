@@ -22,8 +22,7 @@
 # include <ia64intrin.h>
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -150,6 +149,6 @@ public:
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // #ifndef BOOST_SMART_PTR_DETAIL_SP_COUNTED_BASE_SYNC_HPP_INCLUDED

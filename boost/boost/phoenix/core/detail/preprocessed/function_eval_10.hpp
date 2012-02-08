@@ -4,8 +4,8 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 ==============================================================================*/
-namespace boost { namespace phoenix { namespace detail { namespace tag { struct function_eval {}; template <typename Ostream> inline Ostream &operator<<( Ostream & os , function_eval) { os << "function_eval"; return os; } } namespace expression { template < typename A0 = void , typename A1 = void , typename A2 = void , typename A3 = void , typename A4 = void , typename A5 = void , typename A6 = void , typename A7 = void , typename A8 = void , typename A9 = void , typename Dummy = void > struct function_eval; template < typename A0 , typename A1 > struct function_eval< A0 , A1 > : boost::phoenix::expr< tag:: function_eval , A0 , A1 > {}; template < typename A0 , typename A1 , typename A2 > struct function_eval< A0 , A1 , A2 > : boost::phoenix::expr< tag:: function_eval , A0 , A1 , A2 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 > struct function_eval< A0 , A1 , A2 , A3 > : boost::phoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 , typename A4 > struct function_eval< A0 , A1 , A2 , A3 , A4 > : boost::phoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 , A4 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 > struct function_eval< A0 , A1 , A2 , A3 , A4 , A5 > : boost::phoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 , A4 , A5 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 > struct function_eval< A0 , A1 , A2 , A3 , A4 , A5 , A6 > : boost::phoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 , A4 , A5 , A6 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 , typename A7 > struct function_eval< A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 > : boost::phoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 , typename A7 , typename A8 > struct function_eval< A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 > : boost::phoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 , typename A7 , typename A8 , typename A9 > struct function_eval< A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 > : boost::phoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 > {}; typedef proto::functional::make_expr< tag:: function_eval > make_function_eval; } namespace rule { struct function_eval : expression:: function_eval < meta_grammar , proto::vararg< meta_grammar > > {}; } } } } namespace boost { namespace phoenix { template <typename Dummy> struct meta_grammar::case_< :: boost :: phoenix :: detail :: tag:: function_eval , Dummy > : enable_rule< :: boost :: phoenix :: detail :: rule:: function_eval , Dummy > {}; } }
-namespace boost { namespace phoenix {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix { namespace detail { namespace tag { struct function_eval {}; template <typename Ostream> inline Ostream &operator<<( Ostream & os , function_eval) { os << "function_eval"; return os; } } namespace expression { template < typename A0 = void , typename A1 = void , typename A2 = void , typename A3 = void , typename A4 = void , typename A5 = void , typename A6 = void , typename A7 = void , typename A8 = void , typename A9 = void , typename Dummy = void > struct function_eval; template < typename A0 , typename A1 > struct function_eval< A0 , A1 > : pdalboost::pdalboostphoenix::expr< tag:: function_eval , A0 , A1 > {}; template < typename A0 , typename A1 , typename A2 > struct function_eval< A0 , A1 , A2 > : pdalboost::pdalboostphoenix::expr< tag:: function_eval , A0 , A1 , A2 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 > struct function_eval< A0 , A1 , A2 , A3 > : pdalboost::pdalboostphoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 , typename A4 > struct function_eval< A0 , A1 , A2 , A3 , A4 > : pdalboost::pdalboostphoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 , A4 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 > struct function_eval< A0 , A1 , A2 , A3 , A4 , A5 > : pdalboost::pdalboostphoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 , A4 , A5 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 > struct function_eval< A0 , A1 , A2 , A3 , A4 , A5 , A6 > : pdalboost::pdalboostphoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 , A4 , A5 , A6 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 , typename A7 > struct function_eval< A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 > : pdalboost::pdalboostphoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 , typename A7 , typename A8 > struct function_eval< A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 > : pdalboost::pdalboostphoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 > {}; template < typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 , typename A7 , typename A8 , typename A9 > struct function_eval< A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 > : pdalboost::pdalboostphoenix::expr< tag:: function_eval , A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 > {}; typedef proto::functional::make_expr< tag:: function_eval > make_function_eval; } namespace rule { struct function_eval : expression:: function_eval < meta_grammar , proto::vararg< meta_grammar > > {}; } } } } namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix { template <typename Dummy> struct meta_grammar::case_< :: pdalboost :: pdalboostphoenix :: detail :: tag:: function_eval , Dummy > : enable_rule< :: pdalboost :: pdalboostphoenix :: detail :: rule:: function_eval , Dummy > {}; } }
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix {
     namespace detail
     {
         template <typename T>
@@ -28,22 +28,22 @@ namespace boost { namespace phoenix {
             {
                 typedef typename
                     remove_reference<
-                        typename boost::result_of<evaluator(F, Context)>::type
+                        typename pdalboost::result_of<evaluator(F, Context)>::type
                     >::type
                     fn;
-                typedef typename boost::result_of<fn()>::type type;
+                typedef typename pdalboost::result_of<fn()>::type type;
             };
             template <typename F, typename Context>
             typename result<function_eval(F const&, Context const&)>::type
             operator()(F const & f, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)();
+                return pdalboost::pdalboostphoenix::eval(f, ctx)();
             }
             template <typename F, typename Context>
             typename result<function_eval(F &, Context const&)>::type
             operator()(F & f, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)();
+                return pdalboost::pdalboostphoenix::eval(f, ctx)();
             }
         
     
@@ -63,12 +63,12 @@ namespace boost { namespace phoenix {
             {
                 typedef typename
                     remove_reference<
-                        typename boost::result_of<evaluator(F, Context)>::type
+                        typename pdalboost::result_of<evaluator(F, Context)>::type
                     >::type
                     fn;
-                typedef typename boost::result_of< boost::phoenix::evaluator( A0 , Context ) >::type a0;
+                typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A0 , Context ) >::type a0;
                 typedef typename
-                    boost::result_of<fn(a0)>::type
+                    pdalboost::result_of<fn(a0)>::type
                     type;
                 
             };
@@ -82,7 +82,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F const & f, A0 & a0, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)));
             }
             template <typename F, typename A0, typename Context>
             typename result<
@@ -94,7 +94,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F & f, A0 & a0, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)));
             }
     
     
@@ -113,12 +113,12 @@ namespace boost { namespace phoenix {
             {
                 typedef typename
                     remove_reference<
-                        typename boost::result_of<evaluator(F, Context)>::type
+                        typename pdalboost::result_of<evaluator(F, Context)>::type
                     >::type
                     fn;
-                typedef typename boost::result_of< boost::phoenix::evaluator( A0 , Context ) >::type a0; typedef typename boost::result_of< boost::phoenix::evaluator( A1 , Context ) >::type a1;
+                typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A0 , Context ) >::type a0; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A1 , Context ) >::type a1;
                 typedef typename
-                    boost::result_of<fn(a0 , a1)>::type
+                    pdalboost::result_of<fn(a0 , a1)>::type
                     type;
                 
             };
@@ -132,7 +132,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F const & f, A0 & a0 , A1 & a1, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)));
             }
             template <typename F, typename A0 , typename A1, typename Context>
             typename result<
@@ -144,7 +144,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F & f, A0 & a0 , A1 & a1, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)));
             }
     
     
@@ -163,12 +163,12 @@ namespace boost { namespace phoenix {
             {
                 typedef typename
                     remove_reference<
-                        typename boost::result_of<evaluator(F, Context)>::type
+                        typename pdalboost::result_of<evaluator(F, Context)>::type
                     >::type
                     fn;
-                typedef typename boost::result_of< boost::phoenix::evaluator( A0 , Context ) >::type a0; typedef typename boost::result_of< boost::phoenix::evaluator( A1 , Context ) >::type a1; typedef typename boost::result_of< boost::phoenix::evaluator( A2 , Context ) >::type a2;
+                typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A0 , Context ) >::type a0; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A1 , Context ) >::type a1; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A2 , Context ) >::type a2;
                 typedef typename
-                    boost::result_of<fn(a0 , a1 , a2)>::type
+                    pdalboost::result_of<fn(a0 , a1 , a2)>::type
                     type;
                 
             };
@@ -182,7 +182,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F const & f, A0 & a0 , A1 & a1 , A2 & a2, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)));
             }
             template <typename F, typename A0 , typename A1 , typename A2, typename Context>
             typename result<
@@ -194,7 +194,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F & f, A0 & a0 , A1 & a1 , A2 & a2, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)));
             }
     
     
@@ -213,12 +213,12 @@ namespace boost { namespace phoenix {
             {
                 typedef typename
                     remove_reference<
-                        typename boost::result_of<evaluator(F, Context)>::type
+                        typename pdalboost::result_of<evaluator(F, Context)>::type
                     >::type
                     fn;
-                typedef typename boost::result_of< boost::phoenix::evaluator( A0 , Context ) >::type a0; typedef typename boost::result_of< boost::phoenix::evaluator( A1 , Context ) >::type a1; typedef typename boost::result_of< boost::phoenix::evaluator( A2 , Context ) >::type a2; typedef typename boost::result_of< boost::phoenix::evaluator( A3 , Context ) >::type a3;
+                typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A0 , Context ) >::type a0; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A1 , Context ) >::type a1; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A2 , Context ) >::type a2; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A3 , Context ) >::type a3;
                 typedef typename
-                    boost::result_of<fn(a0 , a1 , a2 , a3)>::type
+                    pdalboost::result_of<fn(a0 , a1 , a2 , a3)>::type
                     type;
                 
             };
@@ -232,7 +232,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F const & f, A0 & a0 , A1 & a1 , A2 & a2 , A3 & a3, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a3, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a3, ctx)));
             }
             template <typename F, typename A0 , typename A1 , typename A2 , typename A3, typename Context>
             typename result<
@@ -244,7 +244,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F & f, A0 & a0 , A1 & a1 , A2 & a2 , A3 & a3, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a3, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a3, ctx)));
             }
     
     
@@ -263,12 +263,12 @@ namespace boost { namespace phoenix {
             {
                 typedef typename
                     remove_reference<
-                        typename boost::result_of<evaluator(F, Context)>::type
+                        typename pdalboost::result_of<evaluator(F, Context)>::type
                     >::type
                     fn;
-                typedef typename boost::result_of< boost::phoenix::evaluator( A0 , Context ) >::type a0; typedef typename boost::result_of< boost::phoenix::evaluator( A1 , Context ) >::type a1; typedef typename boost::result_of< boost::phoenix::evaluator( A2 , Context ) >::type a2; typedef typename boost::result_of< boost::phoenix::evaluator( A3 , Context ) >::type a3; typedef typename boost::result_of< boost::phoenix::evaluator( A4 , Context ) >::type a4;
+                typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A0 , Context ) >::type a0; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A1 , Context ) >::type a1; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A2 , Context ) >::type a2; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A3 , Context ) >::type a3; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A4 , Context ) >::type a4;
                 typedef typename
-                    boost::result_of<fn(a0 , a1 , a2 , a3 , a4)>::type
+                    pdalboost::result_of<fn(a0 , a1 , a2 , a3 , a4)>::type
                     type;
                 
             };
@@ -282,7 +282,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F const & f, A0 & a0 , A1 & a1 , A2 & a2 , A3 & a3 , A4 & a4, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a3, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a4, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a3, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a4, ctx)));
             }
             template <typename F, typename A0 , typename A1 , typename A2 , typename A3 , typename A4, typename Context>
             typename result<
@@ -294,7 +294,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F & f, A0 & a0 , A1 & a1 , A2 & a2 , A3 & a3 , A4 & a4, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a3, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a4, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a3, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a4, ctx)));
             }
     
     
@@ -313,12 +313,12 @@ namespace boost { namespace phoenix {
             {
                 typedef typename
                     remove_reference<
-                        typename boost::result_of<evaluator(F, Context)>::type
+                        typename pdalboost::result_of<evaluator(F, Context)>::type
                     >::type
                     fn;
-                typedef typename boost::result_of< boost::phoenix::evaluator( A0 , Context ) >::type a0; typedef typename boost::result_of< boost::phoenix::evaluator( A1 , Context ) >::type a1; typedef typename boost::result_of< boost::phoenix::evaluator( A2 , Context ) >::type a2; typedef typename boost::result_of< boost::phoenix::evaluator( A3 , Context ) >::type a3; typedef typename boost::result_of< boost::phoenix::evaluator( A4 , Context ) >::type a4; typedef typename boost::result_of< boost::phoenix::evaluator( A5 , Context ) >::type a5;
+                typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A0 , Context ) >::type a0; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A1 , Context ) >::type a1; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A2 , Context ) >::type a2; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A3 , Context ) >::type a3; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A4 , Context ) >::type a4; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A5 , Context ) >::type a5;
                 typedef typename
-                    boost::result_of<fn(a0 , a1 , a2 , a3 , a4 , a5)>::type
+                    pdalboost::result_of<fn(a0 , a1 , a2 , a3 , a4 , a5)>::type
                     type;
                 
             };
@@ -332,7 +332,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F const & f, A0 & a0 , A1 & a1 , A2 & a2 , A3 & a3 , A4 & a4 , A5 & a5, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a3, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a4, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a5, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a3, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a4, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a5, ctx)));
             }
             template <typename F, typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5, typename Context>
             typename result<
@@ -344,7 +344,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F & f, A0 & a0 , A1 & a1 , A2 & a2 , A3 & a3 , A4 & a4 , A5 & a5, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a3, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a4, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a5, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a3, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a4, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a5, ctx)));
             }
     
     
@@ -363,12 +363,12 @@ namespace boost { namespace phoenix {
             {
                 typedef typename
                     remove_reference<
-                        typename boost::result_of<evaluator(F, Context)>::type
+                        typename pdalboost::result_of<evaluator(F, Context)>::type
                     >::type
                     fn;
-                typedef typename boost::result_of< boost::phoenix::evaluator( A0 , Context ) >::type a0; typedef typename boost::result_of< boost::phoenix::evaluator( A1 , Context ) >::type a1; typedef typename boost::result_of< boost::phoenix::evaluator( A2 , Context ) >::type a2; typedef typename boost::result_of< boost::phoenix::evaluator( A3 , Context ) >::type a3; typedef typename boost::result_of< boost::phoenix::evaluator( A4 , Context ) >::type a4; typedef typename boost::result_of< boost::phoenix::evaluator( A5 , Context ) >::type a5; typedef typename boost::result_of< boost::phoenix::evaluator( A6 , Context ) >::type a6;
+                typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A0 , Context ) >::type a0; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A1 , Context ) >::type a1; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A2 , Context ) >::type a2; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A3 , Context ) >::type a3; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A4 , Context ) >::type a4; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A5 , Context ) >::type a5; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A6 , Context ) >::type a6;
                 typedef typename
-                    boost::result_of<fn(a0 , a1 , a2 , a3 , a4 , a5 , a6)>::type
+                    pdalboost::result_of<fn(a0 , a1 , a2 , a3 , a4 , a5 , a6)>::type
                     type;
                 
             };
@@ -382,7 +382,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F const & f, A0 & a0 , A1 & a1 , A2 & a2 , A3 & a3 , A4 & a4 , A5 & a5 , A6 & a6, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a3, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a4, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a5, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a6, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a3, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a4, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a5, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a6, ctx)));
             }
             template <typename F, typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6, typename Context>
             typename result<
@@ -394,7 +394,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F & f, A0 & a0 , A1 & a1 , A2 & a2 , A3 & a3 , A4 & a4 , A5 & a5 , A6 & a6, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a3, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a4, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a5, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a6, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a3, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a4, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a5, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a6, ctx)));
             }
     
     
@@ -413,12 +413,12 @@ namespace boost { namespace phoenix {
             {
                 typedef typename
                     remove_reference<
-                        typename boost::result_of<evaluator(F, Context)>::type
+                        typename pdalboost::result_of<evaluator(F, Context)>::type
                     >::type
                     fn;
-                typedef typename boost::result_of< boost::phoenix::evaluator( A0 , Context ) >::type a0; typedef typename boost::result_of< boost::phoenix::evaluator( A1 , Context ) >::type a1; typedef typename boost::result_of< boost::phoenix::evaluator( A2 , Context ) >::type a2; typedef typename boost::result_of< boost::phoenix::evaluator( A3 , Context ) >::type a3; typedef typename boost::result_of< boost::phoenix::evaluator( A4 , Context ) >::type a4; typedef typename boost::result_of< boost::phoenix::evaluator( A5 , Context ) >::type a5; typedef typename boost::result_of< boost::phoenix::evaluator( A6 , Context ) >::type a6; typedef typename boost::result_of< boost::phoenix::evaluator( A7 , Context ) >::type a7;
+                typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A0 , Context ) >::type a0; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A1 , Context ) >::type a1; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A2 , Context ) >::type a2; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A3 , Context ) >::type a3; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A4 , Context ) >::type a4; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A5 , Context ) >::type a5; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A6 , Context ) >::type a6; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A7 , Context ) >::type a7;
                 typedef typename
-                    boost::result_of<fn(a0 , a1 , a2 , a3 , a4 , a5 , a6 , a7)>::type
+                    pdalboost::result_of<fn(a0 , a1 , a2 , a3 , a4 , a5 , a6 , a7)>::type
                     type;
                 
             };
@@ -432,7 +432,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F const & f, A0 & a0 , A1 & a1 , A2 & a2 , A3 & a3 , A4 & a4 , A5 & a5 , A6 & a6 , A7 & a7, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a3, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a4, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a5, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a6, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a7, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a3, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a4, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a5, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a6, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a7, ctx)));
             }
             template <typename F, typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 , typename A7, typename Context>
             typename result<
@@ -444,7 +444,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F & f, A0 & a0 , A1 & a1 , A2 & a2 , A3 & a3 , A4 & a4 , A5 & a5 , A6 & a6 , A7 & a7, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a3, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a4, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a5, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a6, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a7, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a3, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a4, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a5, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a6, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a7, ctx)));
             }
     
     
@@ -463,12 +463,12 @@ namespace boost { namespace phoenix {
             {
                 typedef typename
                     remove_reference<
-                        typename boost::result_of<evaluator(F, Context)>::type
+                        typename pdalboost::result_of<evaluator(F, Context)>::type
                     >::type
                     fn;
-                typedef typename boost::result_of< boost::phoenix::evaluator( A0 , Context ) >::type a0; typedef typename boost::result_of< boost::phoenix::evaluator( A1 , Context ) >::type a1; typedef typename boost::result_of< boost::phoenix::evaluator( A2 , Context ) >::type a2; typedef typename boost::result_of< boost::phoenix::evaluator( A3 , Context ) >::type a3; typedef typename boost::result_of< boost::phoenix::evaluator( A4 , Context ) >::type a4; typedef typename boost::result_of< boost::phoenix::evaluator( A5 , Context ) >::type a5; typedef typename boost::result_of< boost::phoenix::evaluator( A6 , Context ) >::type a6; typedef typename boost::result_of< boost::phoenix::evaluator( A7 , Context ) >::type a7; typedef typename boost::result_of< boost::phoenix::evaluator( A8 , Context ) >::type a8;
+                typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A0 , Context ) >::type a0; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A1 , Context ) >::type a1; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A2 , Context ) >::type a2; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A3 , Context ) >::type a3; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A4 , Context ) >::type a4; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A5 , Context ) >::type a5; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A6 , Context ) >::type a6; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A7 , Context ) >::type a7; typedef typename pdalboost::result_of< pdalboost::pdalboostphoenix::evaluator( A8 , Context ) >::type a8;
                 typedef typename
-                    boost::result_of<fn(a0 , a1 , a2 , a3 , a4 , a5 , a6 , a7 , a8)>::type
+                    pdalboost::result_of<fn(a0 , a1 , a2 , a3 , a4 , a5 , a6 , a7 , a8)>::type
                     type;
                 
             };
@@ -482,7 +482,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F const & f, A0 & a0 , A1 & a1 , A2 & a2 , A3 & a3 , A4 & a4 , A5 & a5 , A6 & a6 , A7 & a7 , A8 & a8, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a3, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a4, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a5, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a6, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a7, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a8, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a3, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a4, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a5, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a6, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a7, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a8, ctx)));
             }
             template <typename F, typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 , typename A7 , typename A8, typename Context>
             typename result<
@@ -494,7 +494,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F & f, A0 & a0 , A1 & a1 , A2 & a2 , A3 & a3 , A4 & a4 , A5 & a5 , A6 & a6 , A7 & a7 , A8 & a8, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(help_rvalue_deduction(boost::phoenix::eval(a0, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a1, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a2, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a3, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a4, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a5, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a6, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a7, ctx)) , help_rvalue_deduction(boost::phoenix::eval(a8, ctx)));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a0, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a1, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a2, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a3, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a4, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a5, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a6, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a7, ctx)) , help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(a8, ctx)));
             }
         
         };
@@ -502,6 +502,6 @@ namespace boost { namespace phoenix {
     }
     template <typename Dummy>
     struct default_actions::when<detail::rule::function_eval, Dummy>
-        : phoenix::call<detail::function_eval>
+        : pdalboostphoenix::call<detail::function_eval>
     {};
 }}

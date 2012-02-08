@@ -10,7 +10,7 @@
 // Preprocessed version of "boost/mpl/bind.hpp" header
 // -- DO NOT modify by hand!
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 namespace aux {
 template< bool >
@@ -110,7 +110,7 @@ struct is_bind_template_impl<false>
 };
 
 template< typename T > struct is_bind_template
-    : is_bind_template_impl< ::boost::detail::is_reference_impl<T>::value >
+    : is_bind_template_impl< ::pdalboost::detail::is_reference_impl<T>::value >
         ::template result_<T>
 {
 };

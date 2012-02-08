@@ -11,7 +11,7 @@
 #include <boost/mpl/apply.hpp>
 #include <boost/accumulators/framework/accumulators/external_accumulator.hpp>
 
-//namespace boost { namespace accumulators
+//namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 //{
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -22,6 +22,6 @@
 //{
 //};
 //
-//}} // namespace boost::accumulators
+//}} // namespace pdalboost::accumulators
 
 #endif

@@ -39,7 +39,7 @@
 // Boost
 #include <boost/optional.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -53,7 +53,7 @@ namespace rt_cla_detail {
 
 struct default_value_interpreter {
     template<typename T>
-    void operator()( argv_traverser& tr, boost::optional<T>& value )
+    void operator()( argv_traverser& tr, pdalboost::optional<T>& value )
     {
         if( interpret_argument_value( tr.token(), value, 0 ) )
             tr.next_token();
@@ -113,8 +113,8 @@ struct typed_argument_factory : public argument_factory {
 // !! private?
     // Data members
     unit_test::callback2<parameter const&,T&>                   m_value_handler;
-    unit_test::callback2<parser const&,boost::optional<T>&>     m_value_generator;
-    unit_test::callback2<argv_traverser&,boost::optional<T>&>   m_value_interpreter;
+    unit_test::callback2<parser const&,pdalboost::optional<T>&>     m_value_generator;
+    unit_test::callback2<argv_traverser&,pdalboost::optional<T>&>   m_value_interpreter;
 };
 
 //____________________________________________________________________________//
@@ -123,7 +123,7 @@ template<typename T>
 inline argument_ptr
 typed_argument_factory<T>::produce_using( parameter& p, argv_traverser& tr )
 {
-    boost::optional<T> value;
+    pdalboost::optional<T> value;
 
     try {
         m_value_interpreter( tr, value );
@@ -148,10 +148,10 @@ typed_argument_factory<T>::produce_using( parameter& p, argv_traverser& tr )
 
     if( !p.p_multiplicable )
         actual_arg.reset( p.p_optional_value && (rtti::type_id<T>() != rtti::type_id<bool>())
-            ? static_cast<argument*>(new typed_argument<boost::optional<T> >( p, value ))
+            ? static_cast<argument*>(new typed_argument<pdalboost::optional<T> >( p, value ))
             : static_cast<argument*>(new typed_argument<T>( p, *value )) );
     else {
-        typedef std::list<boost::optional<T> > optional_list;
+        typedef std::list<pdalboost::optional<T> > optional_list;
 
         if( !actual_arg )
             actual_arg.reset( p.p_optional_value 
@@ -184,7 +184,7 @@ typed_argument_factory<T>::produce_using( parameter& p, parser const& pa )
     if( !m_value_generator )
         return actual_arg;
 
-    boost::optional<T> value;
+    pdalboost::optional<T> value;
     m_value_generator( pa, value );
 
     if( !value )
@@ -209,7 +209,7 @@ typed_argument_factory<T>::argument_usage_info( format_stream& fs )
 
 //____________________________________________________________________________//
 
-} // namespace boost
+} // namespace pdalboost
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 

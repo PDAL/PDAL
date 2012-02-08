@@ -16,13 +16,13 @@
 
 #include <boost/fusion/support/tag_of.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct random_access_traversal_tag;
 
     // Special tags:
     struct iterator_facade_tag; // iterator facade tag
-    struct boost_array_iterator_tag; // boost::array iterator tag
+    struct boost_array_iterator_tag; // pdalboost::array iterator tag
     struct mpl_iterator_tag; // mpl sequence iterator tag
     struct std_pair_iterator_tag; // std::pair iterator tag
 

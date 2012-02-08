@@ -44,10 +44,10 @@
         struct nullary_actor_result
         {
             typedef
-                typename boost::phoenix::evaluator::impl<
+                typename pdalboost::pdalboostphoenix::evaluator::impl<
                     Expr const&
                   , vector2<
-                        vector1<const ::boost::phoenix::actor<Expr> *> &
+                        vector1<const ::pdalboost::pdalboostphoenix::actor<Expr> *> &
                       , default_actions
                     > const &
                   , int
@@ -87,14 +87,14 @@
         struct actor<Expr, BOOST_PHOENIX_A>
         {
             typedef
-                typename phoenix::evaluator::
+                typename pdalboostphoenix::evaluator::
                     impl<
                         Expr const&
                       , vector2<
                             BOOST_PP_CAT(
                                 vector
                               , BOOST_PP_INC(BOOST_PHOENIX_ITERATION)
-                            )<const ::boost::phoenix::actor<Expr> *, BOOST_PHOENIX_A> &
+                            )<const ::pdalboost::pdalboostphoenix::actor<Expr> *, BOOST_PHOENIX_A> &
                           , default_actions
                         > const &
                       , int

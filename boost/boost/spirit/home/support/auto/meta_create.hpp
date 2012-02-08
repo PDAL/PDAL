@@ -29,7 +29,7 @@
 #include <boost/type_traits/is_same.hpp>
 #endif
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     // This is the main dispatch point for meta_create to the correct domain
@@ -43,7 +43,7 @@ namespace boost { namespace spirit { namespace traits
     struct meta_create_exists : mpl::false_ {};
 }}}
 
-namespace boost { namespace spirit 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit 
 {
     ///////////////////////////////////////////////////////////////////////////
     namespace detail

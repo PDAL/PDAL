@@ -10,7 +10,7 @@
 
 #include <boost/config.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace type_traits {
 
 template <bool b>
@@ -26,6 +26,6 @@ struct ice_not<true>
 };
 
 } // namespace type_traits
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_TT_DETAIL_ICE_NOT_HPP_INCLUDED

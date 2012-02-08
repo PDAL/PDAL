@@ -25,7 +25,7 @@
     /**/
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -39,7 +39,7 @@ namespace impl {
 
 template <typename QueueT, typename T, typename PointerT>
 class fsq_iterator
-:   public boost::iterator_adaptor<
+:   public pdalboost::iterator_adaptor<
         fsq_iterator<QueueT, T, PointerT>, 
         PointerT,
         T,
@@ -48,7 +48,7 @@ class fsq_iterator
 {
 public:
     typedef typename QueueT::position_t position;
-    typedef boost::iterator_adaptor<
+    typedef pdalboost::iterator_adaptor<
             fsq_iterator<QueueT, T, PointerT>, PointerT, T,
             std::random_access_iterator_tag
         > base_t;
@@ -59,7 +59,7 @@ public:
     position const &get_position() const { return p; }
     
 private:
-    friend class boost::iterator_core_access;
+    friend class pdalboost::iterator_core_access;
     
     typename base_t::reference dereference() const
     {

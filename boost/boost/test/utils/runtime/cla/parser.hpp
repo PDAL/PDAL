@@ -30,7 +30,7 @@
 // STL
 #include <list>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -112,7 +112,7 @@ public:
     }
 
     template<typename T>
-    void                get( cstring string_id, boost::optional<T>& res ) const
+    void                get( cstring string_id, pdalboost::optional<T>& res ) const
     {
         const_argument_ptr actual_arg = (*this)[string_id];
 
@@ -141,7 +141,7 @@ private:
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #ifndef BOOST_RT_PARAM_OFFLINE
 

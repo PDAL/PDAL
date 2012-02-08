@@ -48,9 +48,9 @@
 #include <boost/detail/workaround.hpp>
 #include <cstdlib>  // for malloc, free
 
-namespace fs = boost::filesystem2;
-using boost::system::error_code;
-using boost::system::system_category;
+namespace fs = pdalboost::filesystem2;
+using pdalboost::system::error_code;
+using pdalboost::system::system_category;
 
 # if defined(BOOST_WINDOWS_API)
 #   include <windows.h>
@@ -68,7 +68,7 @@ using boost::system::system_category;
 #endif
 #     include <sys/mount.h>
 #     define BOOST_STATVFS statfs
-#     define BOOST_STATVFS_F_FRSIZE static_cast<boost::uintmax_t>( vfs.f_bsize )
+#     define BOOST_STATVFS_F_FRSIZE static_cast<pdalboost::uintmax_t>( vfs.f_bsize )
 #   endif
 #   include <dirent.h>
 #   include <unistd.h>
@@ -220,7 +220,7 @@ namespace
   { return ::GetFileAttributesExA( ph, ::GetFileExInfoStandard, &fad ); }
 
   template< class String >
-  boost::filesystem2::detail::query_pair
+  pdalboost::filesystem2::detail::query_pair
   is_empty_template( const String & ph )
   {
     WIN32_FILE_ATTRIBUTE_DATA fad;
@@ -258,7 +258,7 @@ namespace
   };
 
   template< class String >
-  boost::filesystem2::detail::query_pair
+  pdalboost::filesystem2::detail::query_pair
   equivalent_template( const String & ph1, const String & ph2 )
   {
     // Note well: Physical location on external media is part of the
@@ -319,7 +319,7 @@ namespace
   }
 
   template< class String >
-  boost::filesystem2::detail::uintmax_pair
+  pdalboost::filesystem2::detail::uintmax_pair
   file_size_template( const String & ph )
   {
     WIN32_FILE_ATTRIBUTE_DATA fad;
@@ -329,7 +329,7 @@ namespace
     if ( (fad.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) !=0 )
       return std::make_pair( error_code( ERROR_FILE_NOT_FOUND, system_category()), 0 );
     return std::make_pair( ok,
-      (static_cast<boost::uintmax_t>(fad.nFileSizeHigh)
+      (static_cast<pdalboost::uintmax_t>(fad.nFileSizeHigh)
         << (sizeof(fad.nFileSizeLow)*8))
       + fad.nFileSizeLow );
   }
@@ -339,22 +339,22 @@ namespace
     { return ::GetDiskFreeSpaceExA( ph.c_str(), avail, total, free ) != 0; }
 
   template< class String >
-  boost::filesystem2::detail::space_pair
+  pdalboost::filesystem2::detail::space_pair
   space_template( String & ph )
   {
     ULARGE_INTEGER avail, total, free;
-    boost::filesystem2::detail::space_pair result;
+    pdalboost::filesystem2::detail::space_pair result;
     if ( get_free_disk_space( ph, &avail, &total, &free ) )
     {
       result.first = ok;
       result.second.capacity
-        = (static_cast<boost::uintmax_t>(total.HighPart) << 32)
+        = (static_cast<pdalboost::uintmax_t>(total.HighPart) << 32)
           + total.LowPart;
       result.second.free
-        = (static_cast<boost::uintmax_t>(free.HighPart) << 32)
+        = (static_cast<pdalboost::uintmax_t>(free.HighPart) << 32)
           + free.LowPart;
       result.second.available
-        = (static_cast<boost::uintmax_t>(avail.HighPart) << 32)
+        = (static_cast<pdalboost::uintmax_t>(avail.HighPart) << 32)
           + avail.LowPart;
     }
     else
@@ -378,7 +378,7 @@ namespace
       static_cast<typename String::value_type*>(0) )) == 0 )
       { sz = 1; }
     typedef typename String::value_type value_type;
-    boost::scoped_array<value_type> buf( new value_type[sz] );
+    pdalboost::scoped_array<value_type> buf( new value_type[sz] );
     if ( get_current_directory( sz, buf.get() ) == 0 )
       return error_code( ::GetLastError(), system_category() );
     ph = buf.get();
@@ -418,7 +418,7 @@ namespace
     if ( len > buf_size )
     {
       typedef typename String::value_type value_type;
-      boost::scoped_array<value_type> big_buf( new value_type[len] );
+      pdalboost::scoped_array<value_type> big_buf( new value_type[len] );
       if ( (len=get_full_path_name( ph, len , big_buf.get(), &pfn ))
         == 0 ) return error_code( ::GetLastError(), system_category() );
       big_buf[len] = '\0';
@@ -486,7 +486,7 @@ namespace
   }
 
   template<class String>
-  boost::filesystem2::detail::time_pair
+  pdalboost::filesystem2::detail::time_pair
   last_write_time_template( const String & ph )
   {
     FILETIME lwt;
@@ -538,7 +538,7 @@ namespace
     {  return ::CreateDirectoryA( dir.c_str(), 0 ) != 0; }
          
   template<class String>
-  boost::filesystem2::detail::query_pair
+  pdalboost::filesystem2::detail::query_pair
   create_directory_template( const String & dir_ph )
   {
     error_code error, dummy;
@@ -589,8 +589,7 @@ namespace
 #endif
 } // unnamed namespace
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem2
   {
     namespace detail
@@ -741,7 +740,7 @@ namespace boost
         std::wstring short_form;
         for ( DWORD buf_sz( static_cast<DWORD>( ph.size()+1 ));; )
         {
-          boost::scoped_array<wchar_t> buf( new wchar_t[buf_sz] );
+          pdalboost::scoped_array<wchar_t> buf( new wchar_t[buf_sz] );
           DWORD sz( ::GetShortPathNameW( ph.c_str(), buf.get(), buf_sz ) );
           if ( sz == 0 ) return narrow_short_form;
           if ( sz <= buf_sz )
@@ -754,7 +753,7 @@ namespace boost
         // contributed by Takeshi Mouri:
         int narrow_sz( ::WideCharToMultiByte( CP_ACP, 0,
           short_form.c_str(), static_cast<int>(short_form.size()), 0, 0, 0, 0 ) );
-        boost::scoped_array<char> narrow_buf( new char[narrow_sz] );
+        pdalboost::scoped_array<char> narrow_buf( new char[narrow_sz] );
         ::WideCharToMultiByte( CP_ACP, 0,
           short_form.c_str(), static_cast<int>(short_form.size()),
           narrow_buf.get(), narrow_sz, 0, 0 );
@@ -1058,7 +1057,7 @@ namespace boost
         if ( !S_ISREG( path_stat.st_mode ) )
           return std::make_pair( error_code( EPERM, system_category() ), 0 ); 
         return std::make_pair( ok,
-          static_cast<boost::uintmax_t>(path_stat.st_size) );
+          static_cast<pdalboost::uintmax_t>(path_stat.st_size) );
       }
 
       BOOST_FILESYSTEM_DECL space_pair
@@ -1076,11 +1075,11 @@ namespace boost
         {
           result.first = ok;
           result.second.capacity 
-            = static_cast<boost::uintmax_t>(vfs.f_blocks) * BOOST_STATVFS_F_FRSIZE;
+            = static_cast<pdalboost::uintmax_t>(vfs.f_blocks) * BOOST_STATVFS_F_FRSIZE;
           result.second.free 
-            = static_cast<boost::uintmax_t>(vfs.f_bfree) * BOOST_STATVFS_F_FRSIZE;
+            = static_cast<pdalboost::uintmax_t>(vfs.f_bfree) * BOOST_STATVFS_F_FRSIZE;
           result.second.available
-            = static_cast<boost::uintmax_t>(vfs.f_bavail) * BOOST_STATVFS_F_FRSIZE;
+            = static_cast<pdalboost::uintmax_t>(vfs.f_bavail) * BOOST_STATVFS_F_FRSIZE;
         }
         return result;
       }
@@ -1111,7 +1110,7 @@ namespace boost
       {
         for ( long path_max = 32;; path_max *=2 ) // loop 'til buffer large enough
         {
-          boost::scoped_array<char>
+          pdalboost::scoped_array<char>
             buf( new char[static_cast<std::size_t>(path_max)] );
           if ( ::getcwd( buf.get(), static_cast<std::size_t>(path_max) ) == 0 )
           {
@@ -1201,7 +1200,7 @@ namespace boost
         const std::string & to_file_ph, bool fail_if_exists )
       {
         const std::size_t buf_sz = 32768;
-        boost::scoped_array<char> buf( new char [buf_sz] );
+        pdalboost::scoped_array<char> buf( new char [buf_sz] );
         int infile=-1, outfile=-1;  // -1 means not open
 
         // bug fixed: code previously did a stat() on the from_file first, but that
@@ -1372,4 +1371,4 @@ namespace boost
 #   endif
     } // namespace detail
   } // namespace filesystem2
-} // namespace boost
+} // namespace pdalboost

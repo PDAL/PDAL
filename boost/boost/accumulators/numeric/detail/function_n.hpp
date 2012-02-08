@@ -24,7 +24,7 @@
 #include <boost/type_traits/add_const.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 
-namespace boost { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
 
 # define BOOST_DETAIL_default_arg(z, n, _)                                      \
     typedef mpl::void_ BOOST_PP_CAT(arg, n);
@@ -143,6 +143,6 @@ struct function_name
 # undef args
 };
 
-}} // namespace boost::detail
+}} // namespace pdalboost::detail
 
 //#endif // BOOST_DETAIL_FUNCTION_N_DWA2006514_HPP

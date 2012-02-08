@@ -30,9 +30,9 @@
 #ifndef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
 
 #define SPIRIT_DECLARE_ATTRIBUTE(z, n, data)                                   \
-    typedef phoenix::actor<attribute<n> >                                      \
+    typedef pdalboostphoenix::actor<attribute<n> >                                      \
         BOOST_PP_CAT(BOOST_PP_CAT(_r, n), _type);                              \
-    phoenix::actor<attribute<n> > const                                        \
+    pdalboostphoenix::actor<attribute<n> > const                                        \
         BOOST_PP_CAT(_r, n) = BOOST_PP_CAT(BOOST_PP_CAT(_r, n), _type)();
     /***/
 #define SPIRIT_USING_ATTRIBUTE(z, n, data)                                     \
@@ -43,7 +43,7 @@
 #else
 
 #define SPIRIT_DECLARE_ATTRIBUTE(z, n, data)                                   \
-    typedef phoenix::actor<attribute<n> >                                      \
+    typedef pdalboostphoenix::actor<attribute<n> >                                      \
         BOOST_PP_CAT(BOOST_PP_CAT(_r, n), _type);                              \
     /***/
 #define SPIRIT_USING_ATTRIBUTE(z, n, data)                                     \
@@ -52,7 +52,7 @@
 
 #endif
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     template <int>
     struct attribute;
@@ -63,11 +63,11 @@ namespace boost { namespace spirit
 
 BOOST_PHOENIX_DEFINE_CUSTOM_TERMINAL(
     template <int N>
-  , boost::spirit::attribute<N>
+  , pdalboost::spirit::attribute<N>
   , mpl::false_                 // is not nullary
   , v2_eval(
         proto::make<
-            boost::spirit::attribute<N>()
+            pdalboost::spirit::attribute<N>()
         >
       , proto::call<
             functional::env(proto::_state)
@@ -77,11 +77,11 @@ BOOST_PHOENIX_DEFINE_CUSTOM_TERMINAL(
 
 BOOST_PHOENIX_DEFINE_CUSTOM_TERMINAL(
     template <int N>
-  , boost::spirit::local_variable<N>
+  , pdalboost::spirit::local_variable<N>
   , mpl::false_                 // is not nullary
   , v2_eval(
         proto::make<
-            boost::spirit::local_variable<N>()
+            pdalboost::spirit::local_variable<N>()
         >
       , proto::call<
             functional::env(proto::_state)
@@ -89,7 +89,7 @@ BOOST_PHOENIX_DEFINE_CUSTOM_TERMINAL(
     )
 )
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     template <typename Attributes, typename Locals>
     struct context
@@ -230,10 +230,10 @@ namespace boost { namespace spirit
         }
     };
     
-    typedef phoenix::actor<attribute<0> > _val_type;
-    typedef phoenix::actor<attribute<0> > _r0_type;
-    typedef phoenix::actor<attribute<1> > _r1_type;
-    typedef phoenix::actor<attribute<2> > _r2_type;
+    typedef pdalboostphoenix::actor<attribute<0> > _val_type;
+    typedef pdalboostphoenix::actor<attribute<0> > _r0_type;
+    typedef pdalboostphoenix::actor<attribute<1> > _r1_type;
+    typedef pdalboostphoenix::actor<attribute<2> > _r2_type;
 
 #ifndef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
     // _val refers to the 'return' value of a rule (same as _r0)
@@ -248,16 +248,16 @@ namespace boost { namespace spirit
     BOOST_PP_REPEAT_FROM_TO(
         3, SPIRIT_ATTRIBUTES_LIMIT, SPIRIT_DECLARE_ATTRIBUTE, _)
 
-    typedef phoenix::actor<local_variable<0> > _a_type;
-    typedef phoenix::actor<local_variable<1> > _b_type;
-    typedef phoenix::actor<local_variable<2> > _c_type;
-    typedef phoenix::actor<local_variable<3> > _d_type;
-    typedef phoenix::actor<local_variable<4> > _e_type;
-    typedef phoenix::actor<local_variable<5> > _f_type;
-    typedef phoenix::actor<local_variable<6> > _g_type;
-    typedef phoenix::actor<local_variable<7> > _h_type;
-    typedef phoenix::actor<local_variable<8> > _i_type;
-    typedef phoenix::actor<local_variable<9> > _j_type;
+    typedef pdalboostphoenix::actor<local_variable<0> > _a_type;
+    typedef pdalboostphoenix::actor<local_variable<1> > _b_type;
+    typedef pdalboostphoenix::actor<local_variable<2> > _c_type;
+    typedef pdalboostphoenix::actor<local_variable<3> > _d_type;
+    typedef pdalboostphoenix::actor<local_variable<4> > _e_type;
+    typedef pdalboostphoenix::actor<local_variable<5> > _f_type;
+    typedef pdalboostphoenix::actor<local_variable<6> > _g_type;
+    typedef pdalboostphoenix::actor<local_variable<7> > _h_type;
+    typedef pdalboostphoenix::actor<local_variable<8> > _i_type;
+    typedef pdalboostphoenix::actor<local_variable<9> > _j_type;
 
 #ifndef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
     // _a, _b, ... refer to the local variables of a rule

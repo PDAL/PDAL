@@ -22,8 +22,7 @@
 #include <boost/config.hpp>
 #include <boost/is_placeholder.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 template< int I > struct arg
 {
@@ -57,6 +56,6 @@ template< int I > struct is_placeholder< arg<I> (*) () >
 
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // #ifndef BOOST_BIND_ARG_HPP_INCLUDED

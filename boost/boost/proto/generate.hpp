@@ -24,7 +24,7 @@
 #include <boost/proto/proto_fwd.hpp>
 #include <boost/proto/args.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
 
     namespace detail
@@ -378,10 +378,9 @@ namespace boost { namespace proto
 
 }}
 
-// Specializations of boost::result_of and boost::tr1_result_of to eliminate
+// Specializations of pdalboost::result_of and pdalboost::tr1_result_of to eliminate
 // some unnecessary template instantiations
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     template<typename Expr>
     struct result_of<proto::default_domain(Expr)>
     {

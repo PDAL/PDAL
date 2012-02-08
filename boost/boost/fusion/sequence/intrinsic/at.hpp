@@ -13,12 +13,12 @@
 #include <boost/fusion/support/tag_of.hpp>
 #include <boost/fusion/support/detail/access.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     // Special tags:
     struct sequence_facade_tag;
-    struct boost_tuple_tag; // boost::tuples::tuple tag
-    struct boost_array_tag; // boost::array tag
+    struct boost_tuple_tag; // pdalboost::tuples::tuple tag
+    struct boost_array_tag; // pdalboost::array tag
     struct mpl_sequence_tag; // mpl sequence tag
     struct std_pair_tag; // std::pair tag
     struct std_tuple_tag; // std::tuple tag

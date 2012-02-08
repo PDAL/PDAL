@@ -53,7 +53,7 @@
 #include <boost/type_traits/is_same.hpp>
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -72,14 +72,14 @@ struct ordered_index_node_std_base
 {
   typedef typename prevent_eti<
     Allocator,
-    typename boost::detail::allocator::rebind_to<
+    typename pdalboost::detail::allocator::rebind_to<
       Allocator,
       ordered_index_node_impl<Allocator>
     >::type
   >::type::pointer                                pointer;
   typedef typename prevent_eti<
     Allocator,
-    typename boost::detail::allocator::rebind_to<
+    typename pdalboost::detail::allocator::rebind_to<
       Allocator,
       ordered_index_node_impl<Allocator>
     >::type
@@ -218,7 +218,7 @@ struct ordered_index_node_impl_base:
     !(is_same<
       typename prevent_eti<
         Allocator,
-        typename boost::detail::allocator::rebind_to<
+        typename pdalboost::detail::allocator::rebind_to<
           Allocator,
           ordered_index_node_impl<Allocator>
         >::type
@@ -560,7 +560,7 @@ struct ordered_index_node_trampoline:
   prevent_eti<
     Super,
     ordered_index_node_impl<
-      typename boost::detail::allocator::rebind_to<
+      typename pdalboost::detail::allocator::rebind_to<
         typename Super::allocator_type,
         char
       >::type
@@ -570,7 +570,7 @@ struct ordered_index_node_trampoline:
   typedef typename prevent_eti<
     Super,
     ordered_index_node_impl<
-      typename boost::detail::allocator::rebind_to<
+      typename pdalboost::detail::allocator::rebind_to<
         typename Super::allocator_type,
         char
       >::type
@@ -645,6 +645,6 @@ public:
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

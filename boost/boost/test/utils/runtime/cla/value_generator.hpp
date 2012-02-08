@@ -21,7 +21,7 @@
 #include <boost/test/utils/runtime/cla/fwd.hpp>
 #include <boost/test/utils/runtime/cla/parser.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -40,7 +40,7 @@ public:
     explicit    const_generator( T const& t ) : m_const_value( t ) {}
 
     // generator interface
-    void        operator()( parser const&, boost::optional<T>& t ) const   { t = m_const_value; }
+    void        operator()( parser const&, pdalboost::optional<T>& t ) const   { t = m_const_value; }
 
 private:
     // Data members
@@ -58,7 +58,7 @@ public:
     explicit    ref_generator( cstring ref_id ) : m_ref_id( ref_id ) {}
 
     // generator interface
-    void        operator()( parser const& p, boost::optional<T>& t ) const
+    void        operator()( parser const& p, pdalboost::optional<T>& t ) const
     {
         p.get( m_ref_id, t );
     }
@@ -76,6 +76,6 @@ private:
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_CLA_VALUE_GENERATOR_HPP_062604GER

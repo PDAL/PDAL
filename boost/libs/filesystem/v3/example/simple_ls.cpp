@@ -23,7 +23,7 @@
 #include "boost/progress.hpp"
 #include <iostream>
 
-namespace fs = boost::filesystem;
+namespace fs = pdalboost::filesystem;
 
 int main(int argc, char* argv[])
 {

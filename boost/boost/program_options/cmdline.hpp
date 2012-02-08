@@ -6,7 +6,7 @@
 #ifndef BOOST_CMDLINE_HPP_VP_2004_03_13
 #define BOOST_CMDLINE_HPP_VP_2004_03_13
 
-namespace boost { namespace program_options { namespace command_line_style {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options { namespace command_line_style {
     /** Various possible styles of options.
         
     There are "long" options, which start with "--" and "short",

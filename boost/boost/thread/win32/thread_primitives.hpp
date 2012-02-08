@@ -20,8 +20,7 @@
 #if defined( BOOST_USE_WINDOWS_H )
 # include <windows.h>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         namespace win32
@@ -88,8 +87,7 @@ typedef void* HANDLE;
 #  endif
 # endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         namespace win32
@@ -159,8 +157,7 @@ namespace boost
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         namespace win32
@@ -186,7 +183,7 @@ namespace boost
 #endif                
                 if(!res)
                 {
-                    boost::throw_exception(thread_resource_error());
+                    pdalboost::throw_exception(thread_resource_error());
                 }
                 return res;
             }
@@ -200,7 +197,7 @@ namespace boost
 #endif               
                 if(!res)
                 {
-                    boost::throw_exception(thread_resource_error());
+                    pdalboost::throw_exception(thread_resource_error());
                 }
                 return res;
             }
@@ -213,7 +210,7 @@ namespace boost
                 bool const success=DuplicateHandle(current_process,source,current_process,&new_handle,0,false,same_access_flag)!=0;
                 if(!success)
                 {
-                    boost::throw_exception(thread_resource_error());
+                    pdalboost::throw_exception(thread_resource_error());
                 }
                 return new_handle;
             }
@@ -292,8 +289,7 @@ namespace boost
 
 #if defined(BOOST_MSVC) && (_MSC_VER>=1400)  && !defined(UNDER_CE)
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         namespace win32
@@ -324,8 +320,7 @@ namespace boost
 }
 #define BOOST_THREAD_BTS_DEFINED
 #elif (defined(BOOST_MSVC) || defined(BOOST_INTEL_WIN)) && defined(_M_IX86)
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         namespace win32
@@ -358,8 +353,7 @@ namespace boost
 
 #ifndef BOOST_THREAD_BTS_DEFINED
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         namespace win32

@@ -17,7 +17,7 @@
 #include <boost/proto/proto_fwd.hpp>
 #include <boost/proto/args.hpp>
 
-namespace boost { namespace proto { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto { namespace detail
 {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

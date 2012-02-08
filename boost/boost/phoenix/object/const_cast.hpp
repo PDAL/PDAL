@@ -16,12 +16,12 @@
 #include <boost/proto/transform/lazy.hpp>
 
 BOOST_PHOENIX_DEFINE_EXPRESSION(
-    (boost)(phoenix)(const_cast_)
+    (pdalboost)(phoenix)(const_cast_)
   , (proto::terminal<detail::target<proto::_> >)
     (meta_grammar)
 )
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     struct const_cast_eval
     {
@@ -40,7 +40,7 @@ namespace boost { namespace phoenix
             return
                 const_cast<
                     typename detail::result_of::target<Target>::type
-                >(boost::phoenix::eval(u, ctx));
+                >(pdalboost::pdalboostphoenix::eval(u, ctx));
         }
     };
 

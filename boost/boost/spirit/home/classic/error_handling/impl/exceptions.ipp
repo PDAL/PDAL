@@ -9,7 +9,7 @@
 #ifndef BOOST_SPIRIT_EXCEPTIONS_IPP
 #define BOOST_SPIRIT_EXCEPTIONS_IPP
 
-namespace boost { namespace spirit { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { 
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -55,7 +55,7 @@ namespace impl {
                         return scan.create_match
                             (std::size_t(hr.length), hr.value, save, scan.first);
                     case error_status_t::rethrow:
-                         boost::throw_exception(error);
+                         pdalboost::throw_exception(error);
                     default:
                         continue;
                 }
@@ -86,7 +86,7 @@ namespace impl {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 
-}} // namespace boost::spirit::impl
+}} // namespace pdalboost::spirit::impl
 
 ///////////////////////////////////////////////////////////////////////////////
 #endif

@@ -171,7 +171,7 @@
 
     The same basic scheme can be used to detect more argument-dependent
     return types where the sizeof the test(T) return type is used to index
-    through a boost::mpl vector which holds each of the corresponding
+    through a pdalboost::mpl vector which holds each of the corresponding
     result types.
 
 ==============================================================================*/
@@ -194,12 +194,11 @@
 #include <boost/preprocessor/cat.hpp>
 #include <boost/spirit/home/phoenix/detail/local_reference.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     struct error_cant_deduce_type {};
 }
 
-namespace boost { namespace type_deduction_detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_deduction_detail
 {
     typedef char(&bool_value_type)[1];
     typedef char(&int_value_type)[2];
@@ -427,8 +426,8 @@ namespace boost { namespace type_deduction_detail
     template <typename X, typename Y>
     struct base_result_of
     {
-        typedef typename phoenix::detail::unwrap_local_reference<X>::type x_type_;
-        typedef typename phoenix::detail::unwrap_local_reference<Y>::type y_type_;
+        typedef typename pdalboostphoenix::detail::unwrap_local_reference<X>::type x_type_;
+        typedef typename pdalboostphoenix::detail::unwrap_local_reference<Y>::type y_type_;
         typedef typename remove_reference<x_type_>::type x_type;
         typedef typename remove_reference<y_type_>::type y_type;
 
@@ -457,7 +456,7 @@ namespace boost { namespace type_deduction_detail
         types;
     };
 
-}} // namespace boost::type_deduction_detail
+}} // namespace pdalboost::type_deduction_detail
 
 #define BOOST_RESULT_OF_COMMON(expr, name, Y, SYMMETRY)                         \
     struct name                                                                 \

@@ -20,8 +20,7 @@
 #include <boost/iterator/reverse_iterator.hpp>
 
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     //////////////////////////////////////////////////////////////////////////
     // default
     //////////////////////////////////////////////////////////////////////////
@@ -34,7 +33,7 @@ namespace boost
     };
     
 
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif

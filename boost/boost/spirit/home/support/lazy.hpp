@@ -16,13 +16,13 @@
 #include <boost/spirit/home/support/modify.hpp>
 #include <boost/spirit/home/support/detail/is_spirit_tag.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     template <typename Eval>
-    typename proto::terminal<phoenix::actor<Eval> >::type
-    lazy(phoenix::actor<Eval> const& f)
+    typename proto::terminal<pdalboostphoenix::actor<Eval> >::type
+    lazy(pdalboostphoenix::actor<Eval> const& f)
     {
-        return proto::terminal<phoenix::actor<Eval> >::type::make(f);
+        return proto::terminal<pdalboostphoenix::actor<Eval> >::type::make(f);
     }
 
     namespace tag

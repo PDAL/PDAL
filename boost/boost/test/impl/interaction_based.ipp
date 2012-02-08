@@ -35,7 +35,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace itest { // interaction-based testing
 
@@ -79,7 +79,7 @@ manager::instance_ptr( bool reset, manager* new_ptr )
     
 }  // namespace itest
 
-}  // namespace boost
+}  // namespace pdalboost
 
 //____________________________________________________________________________//
 

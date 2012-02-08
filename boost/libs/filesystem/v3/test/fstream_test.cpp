@@ -33,7 +33,7 @@
 
 #include <boost/filesystem/detail/utf8_codecvt_facet.hpp>
 
-namespace fs = boost::filesystem;
+namespace fs = pdalboost::filesystem;
 
 #include <boost/config.hpp>
 #ifdef BOOST_NO_STDC_NAMESPACE
@@ -169,5 +169,5 @@ int cpp_main(int argc, char*[])
   std::cout << "\nwide character tests:\n";
   test(L"fstream_test_\u2780\u263A");
 
-  return ::boost::report_errors();
+  return ::pdalboost::report_errors();
 }

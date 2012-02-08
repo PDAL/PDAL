@@ -31,8 +31,7 @@
 
 #if !defined( BOOST_SP_NO_SP_CONVERTIBLE )
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -69,7 +68,7 @@ template< class Y, class T > struct sp_enable_if_convertible: public sp_enable_i
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // !defined( BOOST_SP_NO_SP_CONVERTIBLE )
 

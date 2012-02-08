@@ -17,14 +17,14 @@
 // because some compilers (including MSVC 7.1, Borland 5.9.3, and
 // Intel 8.1) don't do argument-dependent lookup when it has a
 // using-declaration instead.
-// - boost::swap has two template arguments, instead of one, to
+// - pdalboost::swap has two template arguments, instead of one, to
 // avoid ambiguity when swapping objects of a Boost type that does
-// not have its own boost::swap overload.
+// not have its own pdalboost::swap overload.
 
 #include <algorithm> //for std::swap
 #include <cstddef> //for std::size_t
 
-namespace boost_swap_impl
+namespace pdalboost_swap_impl
 {
   template<class T>
   void swap_impl(T& left, T& right)
@@ -38,17 +38,16 @@ namespace boost_swap_impl
   {
     for (std::size_t i = 0; i < N; ++i)
     {
-      ::boost_swap_impl::swap_impl(left[i], right[i]);
+      ::pdalboost_swap_impl::swap_impl(left[i], right[i]);
     }
   }
 }
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   template<class T1, class T2>
   void swap(T1& left, T2& right)
   {
-    ::boost_swap_impl::swap_impl(left, right);
+    ::pdalboost_swap_impl::swap_impl(left, right);
   }
 }
 

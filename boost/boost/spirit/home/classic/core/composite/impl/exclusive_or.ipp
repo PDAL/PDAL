@@ -11,7 +11,7 @@
 #if !defined(BOOST_SPIRIT_EXCLUSIVE_OR_IPP)
 #define BOOST_SPIRIT_EXCLUSIVE_OR_IPP
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -85,6 +85,6 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 
-}} // namespace boost::spirit
+}} // namespace pdalboost::spirit
 
 #endif

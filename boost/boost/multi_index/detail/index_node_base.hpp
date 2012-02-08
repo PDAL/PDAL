@@ -23,7 +23,7 @@
 #include <boost/throw_exception.hpp> 
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -70,7 +70,7 @@ struct index_node_base:private pod_value_holder<Value>
 
 private:
 #if !defined(BOOST_MULTI_INDEX_DISABLE_SERIALIZATION)
-  friend class boost::serialization::access;
+  friend class pdalboost::serialization::access;
   
   /* nodes do not emit any kind of serialization info. They are
    * fed to Boost.Serialization so that pointers to nodes are
@@ -114,7 +114,7 @@ namespace detail{
 
 template<class Archive,typename Value,typename Allocator>
 inline void load_construct_data(
-  Archive&,boost::multi_index::detail::index_node_base<Value,Allocator>*,
+  Archive&,pdalboost::multi_index::detail::index_node_base<Value,Allocator>*,
   const unsigned int)
 {
   throw_exception(
@@ -130,6 +130,6 @@ inline void load_construct_data(
 
 #endif
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

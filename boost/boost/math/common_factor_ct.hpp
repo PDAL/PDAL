@@ -14,8 +14,7 @@
 #include <boost/config.hpp>  // for BOOST_STATIC_CONSTANT, etc.
 #include <boost/mpl/integral_c.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace math
 {
 
@@ -162,7 +161,7 @@ namespace detail
 template < static_gcd_type Value1, static_gcd_type Value2 >
 struct static_gcd : public mpl::integral_c<static_gcd_type, (detail::static_gcd_helper_t<Value1, Value2>::value) >
 {
-};  // boost::math::static_gcd
+};  // pdalboost::math::static_gcd
 
 
 //  Compile-time least common multiple evaluator class declaration  ----------//
@@ -170,11 +169,11 @@ struct static_gcd : public mpl::integral_c<static_gcd_type, (detail::static_gcd_
 template < static_gcd_type Value1, static_gcd_type Value2 >
 struct static_lcm : public mpl::integral_c<static_gcd_type, (detail::static_lcm_helper_t<Value1, Value2>::value) >
 {
-};  // boost::math::static_lcm
+};  // pdalboost::math::static_lcm
 
 
 }  // namespace math
-}  // namespace boost
+}  // namespace pdalboost
 
 
 #endif  // BOOST_MATH_COMMON_FACTOR_CT_HPP

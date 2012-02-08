@@ -35,7 +35,7 @@
 #include <boost/bimap/views/unconstrained_map_view.hpp>
 #include <boost/bimap/views/unconstrained_set_view.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 
 /// \brief Set Type Specification
@@ -61,19 +61,19 @@ template
 <
     class KeyType
 >
-struct unconstrained_set_of : public ::boost::bimaps::detail::set_type_of_tag
+struct unconstrained_set_of : public ::pdalboost::bimaps::detail::set_type_of_tag
 {
     /// User type, can be tagged
     typedef KeyType user_type;
 
     /// Type of the object that will be stored in the container
-    typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::tags::support::
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::tags::support::
         value_type_of<user_type>::type value_type;
 
     struct lazy_concept_checked
     {
         BOOST_CLASS_REQUIRE ( value_type,
-                              boost, AssignableConcept );
+                              pdalboost, AssignableConcept );
 
         typedef unconstrained_set_of type;
     };
@@ -104,7 +104,7 @@ specify the desired type of the main view.
 See also unconstrained_set_of, is_set_type_of_relation.
                                                                 **/
 
-struct unconstrained_set_of_relation : public ::boost::bimaps::detail::set_type_of_relation_tag
+struct unconstrained_set_of_relation : public ::pdalboost::bimaps::detail::set_type_of_relation_tag
 {
 
     BOOST_BIMAP_GENERATE_RELATION_BINDER_0CP(
@@ -123,21 +123,21 @@ namespace detail {
 
 template<class T>
 struct is_unconstrained_set_of :
-    ::boost::mpl::false_ {};
+    ::pdalboost::mpl::false_ {};
 
 template<class T>
 struct is_unconstrained_set_of< unconstrained_set_of<T> > :
-    ::boost::mpl::true_ {};
+    ::pdalboost::mpl::true_ {};
 
 } // namespace detail
 
 #endif // BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
-/** \struct boost::bimaps::detail::is_unconstrained_set_of
+/** \struct pdalboost::bimaps::detail::is_unconstrained_set_of
 \brief Trait to check if a type is unconstrained_set_of.
 \code
 template< class T >

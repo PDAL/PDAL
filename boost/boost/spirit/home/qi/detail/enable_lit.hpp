@@ -18,7 +18,7 @@
 #include <boost/spirit/home/support/string_traits.hpp>
 #include <boost/spirit/home/support/common_terminals.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     // enables lazy lit(...) for qi
     template <>

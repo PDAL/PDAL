@@ -15,7 +15,7 @@
 #ifndef BOOST_OPTIONAL_OPTIONAL_FWD_FLC_19NOV2002_HPP
 #define BOOST_OPTIONAL_OPTIONAL_FWD_FLC_19NOV2002_HPP
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 template<class T> class optional ;
 
@@ -23,7 +23,7 @@ template<class T> void swap ( optional<T>& , optional<T>& ) ;
 
 template<class T> struct optional_swap_should_use_default_constructor ;
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif
 

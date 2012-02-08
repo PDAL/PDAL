@@ -23,7 +23,7 @@
 #include <boost/math/special_functions/sign.hpp>
 #endif
 
-namespace boost { namespace spirit { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace detail
 {
 #if BOOST_VERSION < 104000
     // signbit(-NAN) is broken for versions of Boost earlier than 1.40.0
@@ -32,19 +32,19 @@ namespace boost { namespace spirit { namespace detail
     template<typename T> 
     inline bool (signbit)(T x)
     {
-        return (boost::spirit::math::signbit)(x);
+        return (pdalboost::spirit::math::signbit)(x);
     }
 
     template<typename T> 
     inline T (changesign)(T x)
     {
-        return (boost::spirit::math::changesign)(x);
+        return (pdalboost::spirit::math::changesign)(x);
     }
 #else
     template<typename T> 
     inline bool (signbit)(T x)
     {
-        return (boost::math::signbit)(x) ? true : false;
+        return (pdalboost::math::signbit)(x) ? true : false;
     }
 
     // This routine has been taken and adapted from Johan Rade's fp_traits 

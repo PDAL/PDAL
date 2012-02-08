@@ -18,7 +18,7 @@
 #include <boost/algorithm/string/detail/find_format_store.hpp>
 #include <boost/algorithm/string/detail/replace_storage.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
         namespace detail {
 
@@ -49,17 +49,17 @@ namespace boost {
                 if ( !M )
                 {
                     // Match not found - return original sequence
-                    Output = std::copy( ::boost::begin(Input), ::boost::end(Input), Output );
+                    Output = std::copy( ::pdalboost::begin(Input), ::pdalboost::end(Input), Output );
                     return Output;
                 }
 
                 // Copy the beginning of the sequence
-                Output = std::copy( ::boost::begin(Input), ::boost::begin(M), Output );
+                Output = std::copy( ::pdalboost::begin(Input), ::pdalboost::begin(M), Output );
                 // Format find result
                 // Copy formated result
-                Output = std::copy( ::boost::begin(M.format_result()), ::boost::end(M.format_result()), Output );
+                Output = std::copy( ::pdalboost::begin(M.format_result()), ::pdalboost::end(M.format_result()), Output );
                 // Copy the rest of the sequence
-                Output = std::copy( M.end(), ::boost::end(Input), Output );
+                Output = std::copy( M.end(), ::pdalboost::end(Input), Output );
 
                 return Output;
             }
@@ -75,15 +75,15 @@ namespace boost {
                 FormatterT Formatter,
                 const FindResultT& FindResult )
             {   
-                if( ::boost::algorithm::detail::check_find_result(Input, FindResult) ) {
-                    return ::boost::algorithm::detail::find_format_copy_impl2( 
+                if( ::pdalboost::algorithm::detail::check_find_result(Input, FindResult) ) {
+                    return ::pdalboost::algorithm::detail::find_format_copy_impl2( 
                         Output,
                         Input,
                         Formatter,
                         FindResult,
                         Formatter(FindResult) );
                 } else {
-                    return std::copy( ::boost::begin(Input), ::boost::end(Input), Output );
+                    return std::copy( ::pdalboost::begin(Input), ::pdalboost::end(Input), Output );
                 }
             }
 
@@ -118,11 +118,11 @@ namespace boost {
 
                 InputT Output;
                 // Copy the beginning of the sequence
-                insert( Output, ::boost::end(Output), ::boost::begin(Input), M.begin() );
+                insert( Output, ::pdalboost::end(Output), ::pdalboost::begin(Input), M.begin() );
                 // Copy formated result
-                insert( Output, ::boost::end(Output), M.format_result() );
+                insert( Output, ::pdalboost::end(Output), M.format_result() );
                 // Copy the rest of the sequence
-                insert( Output, ::boost::end(Output), M.end(), ::boost::end(Input) );
+                insert( Output, ::pdalboost::end(Output), M.end(), ::pdalboost::end(Input) );
 
                 return Output;
             }
@@ -136,8 +136,8 @@ namespace boost {
                 FormatterT Formatter,
                 const FindResultT& FindResult)
             {
-                if( ::boost::algorithm::detail::check_find_result(Input, FindResult) ) {
-                    return ::boost::algorithm::detail::find_format_copy_impl2(
+                if( ::pdalboost::algorithm::detail::check_find_result(Input, FindResult) ) {
+                    return ::pdalboost::algorithm::detail::find_format_copy_impl2(
                         Input,
                         Formatter,
                         FindResult,
@@ -176,7 +176,7 @@ namespace boost {
                 }
 
                 // Replace match
-                ::boost::algorithm::detail::replace( Input, M.begin(), M.end(), M.format_result() );
+                ::pdalboost::algorithm::detail::replace( Input, M.begin(), M.end(), M.format_result() );
             }
 
             template<
@@ -188,8 +188,8 @@ namespace boost {
                 FormatterT Formatter,
                 const FindResultT& FindResult)
             {
-                if( ::boost::algorithm::detail::check_find_result(Input, FindResult) ) {
-                    ::boost::algorithm::detail::find_format_impl2(
+                if( ::pdalboost::algorithm::detail::check_find_result(Input, FindResult) ) {
+                    ::pdalboost::algorithm::detail::find_format_impl2(
                         Input,
                         Formatter,
                         FindResult,
@@ -199,6 +199,6 @@ namespace boost {
 
         } // namespace detail
     } // namespace algorithm
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // BOOST_STRING_FIND_FORMAT_DETAIL_HPP

@@ -25,7 +25,7 @@
 #include <boost/call_traits.hpp>
 #include <functional>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace container_adaptor {
 
@@ -40,17 +40,17 @@ template
     class ReverseIterator,
     class ConstReverseIterator,
 
-    class IteratorToBaseConverter          = ::boost::mpl::na,
-    class IteratorFromBaseConverter        = ::boost::mpl::na,
-    class ReverseIteratorFromBaseConverter = ::boost::mpl::na,
-    class ValueToBaseConverter             = ::boost::mpl::na,
-    class ValueFromBaseConverter           = ::boost::mpl::na,
+    class IteratorToBaseConverter          = ::pdalboost::mpl::na,
+    class IteratorFromBaseConverter        = ::pdalboost::mpl::na,
+    class ReverseIteratorFromBaseConverter = ::pdalboost::mpl::na,
+    class ValueToBaseConverter             = ::pdalboost::mpl::na,
+    class ValueFromBaseConverter           = ::pdalboost::mpl::na,
 
     class FunctorsFromDerivedClasses = mpl::vector<>
 >
 class list_adaptor :
 
-    public ::boost::bimaps::container_adaptor::sequence_container_adaptor
+    public ::pdalboost::bimaps::container_adaptor::sequence_container_adaptor
     <
         Base, Iterator, ConstIterator, ReverseIterator, ConstReverseIterator,
         IteratorToBaseConverter, IteratorFromBaseConverter,
@@ -59,7 +59,7 @@ class list_adaptor :
         FunctorsFromDerivedClasses
     >
 {
-    typedef ::boost::bimaps::container_adaptor::sequence_container_adaptor
+    typedef ::pdalboost::bimaps::container_adaptor::sequence_container_adaptor
     <
         Base, Iterator, ConstIterator, ReverseIterator, ConstReverseIterator,
         IteratorToBaseConverter, IteratorFromBaseConverter,
@@ -116,7 +116,7 @@ class list_adaptor :
     }
 
     void remove(
-        BOOST_DEDUCED_TYPENAME ::boost::call_traits<
+        BOOST_DEDUCED_TYPENAME ::pdalboost::call_traits<
             BOOST_DEDUCED_TYPENAME base_::value_type
         >::param_type value
     )
@@ -130,7 +130,7 @@ class list_adaptor :
     void remove_if(Predicate pred)
     {
         this->base().remove_if(
-            ::boost::bimaps::container_adaptor::detail::unary_check_adaptor
+            ::pdalboost::bimaps::container_adaptor::detail::unary_check_adaptor
             <
                 Predicate,
                 BOOST_DEDUCED_TYPENAME Base::value_type,
@@ -143,7 +143,7 @@ class list_adaptor :
     void unique()
     {
         this->base().unique(
-            ::boost::bimaps::container_adaptor::detail::comparison_adaptor
+            ::pdalboost::bimaps::container_adaptor::detail::comparison_adaptor
             <
                 std::equal_to<BOOST_DEDUCED_TYPENAME base_::value_type>,
                 BOOST_DEDUCED_TYPENAME Base::value_type,
@@ -160,7 +160,7 @@ class list_adaptor :
     void unique(BinaryPredicate binary_pred)
     {
         this->base().unique(
-            ::boost::bimaps::container_adaptor::detail::comparison_adaptor
+            ::pdalboost::bimaps::container_adaptor::detail::comparison_adaptor
             <
                 BinaryPredicate,
                 BOOST_DEDUCED_TYPENAME Base::value_type,
@@ -174,7 +174,7 @@ class list_adaptor :
     void merge(list_adaptor & x)
     {
         this->base().merge(x.base(),
-            ::boost::bimaps::container_adaptor::detail::comparison_adaptor
+            ::pdalboost::bimaps::container_adaptor::detail::comparison_adaptor
             <
                 std::less<BOOST_DEDUCED_TYPENAME base_::value_type>,
                 BOOST_DEDUCED_TYPENAME Base::value_type,
@@ -191,7 +191,7 @@ class list_adaptor :
     void merge(list_adaptor & x, Compare comp)
     {
         this->base().merge(x.base(),
-            ::boost::bimaps::container_adaptor::detail::comparison_adaptor
+            ::pdalboost::bimaps::container_adaptor::detail::comparison_adaptor
             <
                 Compare,
                 BOOST_DEDUCED_TYPENAME Base::value_type,
@@ -204,7 +204,7 @@ class list_adaptor :
     void sort()
     {
         this->base().sort(
-            ::boost::bimaps::container_adaptor::detail::comparison_adaptor
+            ::pdalboost::bimaps::container_adaptor::detail::comparison_adaptor
             <
                 std::less<BOOST_DEDUCED_TYPENAME base_::value_type>,
                 BOOST_DEDUCED_TYPENAME Base::value_type,
@@ -221,7 +221,7 @@ class list_adaptor :
     void sort(Compare comp)
     {
         this->base().sort(
-            ::boost::bimaps::container_adaptor::detail::comparison_adaptor
+            ::pdalboost::bimaps::container_adaptor::detail::comparison_adaptor
             <
                 Compare,
                 BOOST_DEDUCED_TYPENAME Base::value_type,
@@ -241,7 +241,7 @@ class list_adaptor :
 
 } // namespace container_adaptor
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_CONTAINER_ADAPTOR_SET_ADAPTOR_HPP

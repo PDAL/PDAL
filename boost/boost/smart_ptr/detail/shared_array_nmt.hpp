@@ -24,8 +24,7 @@
 #include <functional>       // for std::less
 #include <new>              // for std::bad_alloc
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 template<class T> class shared_array
 {
@@ -47,7 +46,7 @@ public:
         }
         catch(...)
         {
-            boost::checked_array_delete(p);
+            pdalboost::checked_array_delete(p);
             throw;
         }
 
@@ -57,8 +56,8 @@ public:
 
         if(pn == 0)
         {
-            boost::checked_array_delete(p);
-            boost::throw_exception(std::bad_alloc());
+            pdalboost::checked_array_delete(p);
+            pdalboost::throw_exception(std::bad_alloc());
         }
 
 #endif
@@ -68,7 +67,7 @@ public:
     {
         if(--*pn == 0)
         {
-            boost::checked_array_delete(px);
+            pdalboost::checked_array_delete(px);
             delete pn;
         }
     }
@@ -146,6 +145,6 @@ template<class T> void swap(shared_array<T> & a, shared_array<T> & b)
     a.swap(b);
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // #ifndef BOOST_SMART_PTR_DETAIL_SHARED_ARRAY_NMT_HPP_INCLUDED

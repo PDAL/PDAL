@@ -27,7 +27,7 @@
 #include <boost/bimap/container_adaptor/container_adaptor.hpp>
 #include <boost/call_traits.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace container_adaptor {
 
@@ -55,7 +55,7 @@ struct associative_container_adaptor_base
 
             FunctorsFromDerivedClasses,
 
-            BOOST_DEDUCED_TYPENAME mpl::if_< ::boost::mpl::is_na<KeyToBaseConverter>,
+            BOOST_DEDUCED_TYPENAME mpl::if_< ::pdalboost::mpl::is_na<KeyToBaseConverter>,
             // {
                     detail::key_to_base_identity
                     <
@@ -88,11 +88,11 @@ template
 
     class KeyType,
 
-    class IteratorToBaseConverter   = ::boost::mpl::na,
-    class IteratorFromBaseConverter = ::boost::mpl::na,
-    class ValueToBaseConverter      = ::boost::mpl::na,
-    class ValueFromBaseConverter    = ::boost::mpl::na,
-    class KeyToBaseConverter        = ::boost::mpl::na,
+    class IteratorToBaseConverter   = ::pdalboost::mpl::na,
+    class IteratorFromBaseConverter = ::pdalboost::mpl::na,
+    class ValueToBaseConverter      = ::pdalboost::mpl::na,
+    class ValueFromBaseConverter    = ::pdalboost::mpl::na,
+    class KeyToBaseConverter        = ::pdalboost::mpl::na,
 
     class FunctorsFromDerivedClasses = mpl::vector<>
 >
@@ -125,7 +125,7 @@ class associative_container_adaptor :
 
     protected:
 
-    typedef BOOST_DEDUCED_TYPENAME mpl::if_< ::boost::mpl::is_na<KeyToBaseConverter>,
+    typedef BOOST_DEDUCED_TYPENAME mpl::if_< ::pdalboost::mpl::is_na<KeyToBaseConverter>,
     // {
             detail::key_to_base_identity
             <
@@ -278,7 +278,7 @@ class associative_container_adaptor :
 
 } // namespace container_adaptor
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_CONTAINER_ADAPTOR_ASSOCIATIVE_CONTAINER_ADAPTOR_HPP

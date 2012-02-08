@@ -95,8 +95,8 @@
 // Daniel Wallin discovered that bind/apply.hpp badly interacts with the apply<>
 // member template of a factory as used in the optional<> implementation.
 // He proposed this simple fix which is to move the call to apply<> outside
-// namespace boost.
-namespace boost_optional_detail
+// namespace pdalboost.
+namespace pdalboost_optional_detail
 {
   template <class T, class Factory>
   inline void construct(Factory const& factory, void* address)
@@ -106,7 +106,7 @@ namespace boost_optional_detail
 }
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 class in_place_factory_base ;
 class typed_in_place_factory_base ;
@@ -133,7 +133,7 @@ class aligned_storage
     {
         char data[ sizeof(T) ];
         BOOST_DEDUCED_TYPENAME type_with_alignment<
-          ::boost::alignment_of<T>::value >::type aligner_;
+          ::pdalboost::alignment_of<T>::value >::type aligner_;
     } dummy_ ;
 
   public:
@@ -179,7 +179,7 @@ class optional_base : public optional_tag
 #if !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))
     BOOST_DEDUCED_TYPENAME
 #endif
-    ::boost::detail::make_reference_content<T>::type internal_type ;
+    ::pdalboost::detail::make_reference_content<T>::type internal_type ;
 
     typedef aligned_storage<internal_type> storage_type ;
 
@@ -352,8 +352,8 @@ class optional_base : public optional_tag
     template<class Expr>
     void construct ( Expr const& factory, in_place_factory_base const* )
      {
-       BOOST_STATIC_ASSERT ( ::boost::mpl::not_<is_reference_predicate>::value ) ;
-       boost_optional_detail::construct<value_type>(factory, m_storage.address());
+       BOOST_STATIC_ASSERT ( ::pdalboost::mpl::not_<is_reference_predicate>::value ) ;
+       pdalboost_optional_detail::construct<value_type>(factory, m_storage.address());
        m_initialized = true ;
      }
 
@@ -361,7 +361,7 @@ class optional_base : public optional_tag
     template<class Expr>
     void construct ( Expr const& factory, typed_in_place_factory_base const* )
      {
-       BOOST_STATIC_ASSERT ( ::boost::mpl::not_<is_reference_predicate>::value ) ;
+       BOOST_STATIC_ASSERT ( ::pdalboost::mpl::not_<is_reference_predicate>::value ) ;
        factory.apply(m_storage.address()) ;
        m_initialized = true ;
      }
@@ -556,7 +556,7 @@ class optional : public optional_detail::optional_base<T>
     // Depending on the above some T ctor is called.
     // Can throw is the resolved T ctor throws.
     template<class Expr>
-    explicit optional ( Expr const& expr ) : base(expr,boost::addressof(expr)) {}
+    explicit optional ( Expr const& expr ) : base(expr,pdalboost::addressof(expr)) {}
 #endif
 
     // Creates a deep copy of another optional<T>
@@ -572,7 +572,7 @@ class optional : public optional_detail::optional_base<T>
     template<class Expr>
     optional& operator= ( Expr const& expr )
       {
-        this->assign_expr(expr,boost::addressof(expr));
+        this->assign_expr(expr,pdalboost::addressof(expr));
         return *this ;
       }
 #endif
@@ -619,7 +619,7 @@ class optional : public optional_detail::optional_base<T>
     void swap( optional & arg )
       {
         // allow for Koenig lookup
-        using boost::swap;
+        using pdalboost::swap;
         swap(*this, arg);
       }
 
@@ -935,17 +935,17 @@ struct swap_selector<true>
             return;
 
         if( !hasX )
-            x = boost::in_place();
+            x = pdalboost::in_place();
         else if ( !hasY )
-            y = boost::in_place();
+            y = pdalboost::in_place();
 
         // Boost.Utility.Swap will take care of ADL and workarounds for broken compilers
-        boost::swap(x.get(),y.get());
+        pdalboost::swap(x.get(),y.get());
 
         if( !hasX )
-            y = boost::none ;
+            y = pdalboost::none ;
         else if( !hasY )
-            x = boost::none ;
+            x = pdalboost::none ;
     }
 };
 
@@ -961,17 +961,17 @@ struct swap_selector<false>
         if ( !hasX && hasY )
         {
             x = y.get();
-            y = boost::none ;
+            y = pdalboost::none ;
         }
         else if ( hasX && !hasY )
         {
             y = x.get();
-            x = boost::none ;
+            x = pdalboost::none ;
         }
         else if ( hasX && hasY )
         {
             // Boost.Utility.Swap will take care of ADL and workarounds for broken compilers
-            boost::swap(x.get(),y.get());
+            pdalboost::swap(x.get(),y.get());
         }
     }
 };
@@ -986,6 +986,6 @@ template<class T> inline void swap ( optional<T>& x, optional<T>& y )
     optional_detail::swap_selector<optional_swap_should_use_default_constructor<T>::value>::optional_swap(x, y);
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif

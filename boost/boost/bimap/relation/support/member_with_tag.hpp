@@ -26,7 +26,7 @@
 #include <boost/mpl/not.hpp>
 #include <boost/mpl/and.hpp>
 
-/** \struct boost::bimaps::relation::support::member_with_tag
+/** \struct pdalboost::bimaps::relation::support::member_with_tag
 
 \brief Metafunction to convert user tags to the member_at idiom.
 
@@ -57,7 +57,7 @@ See also member_at, is_tag_of_member_at_left, is_tag_of_member_at_right.
 
 #ifndef BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 namespace support {
@@ -171,7 +171,7 @@ struct member_with_tag
 } // namespace support
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 

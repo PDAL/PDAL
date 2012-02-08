@@ -28,7 +28,7 @@
 #include <boost/bimap/relation/member_at.hpp>
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 
@@ -62,17 +62,17 @@ class symmetrical_base
     //@{
         /// The type stored in the relation
 
-        typedef BOOST_DEDUCED_TYPENAME ::boost::mpl::if_c< force_mutable,
+        typedef BOOST_DEDUCED_TYPENAME ::pdalboost::mpl::if_c< force_mutable,
 
-            BOOST_DEDUCED_TYPENAME ::boost::remove_const<
+            BOOST_DEDUCED_TYPENAME ::pdalboost::remove_const<
                 BOOST_DEDUCED_TYPENAME tagged_left_type::value_type >::type,
             BOOST_DEDUCED_TYPENAME tagged_left_type::value_type
 
         >::type left_value_type;
 
-        typedef BOOST_DEDUCED_TYPENAME ::boost::mpl::if_c< force_mutable,
+        typedef BOOST_DEDUCED_TYPENAME ::pdalboost::mpl::if_c< force_mutable,
 
-            BOOST_DEDUCED_TYPENAME ::boost::remove_const<
+            BOOST_DEDUCED_TYPENAME ::pdalboost::remove_const<
                 BOOST_DEDUCED_TYPENAME tagged_right_type::value_type >::type,
             BOOST_DEDUCED_TYPENAME tagged_right_type::value_type
 
@@ -90,7 +90,7 @@ class symmetrical_base
 
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_RELATION_SYMMETRICAL_BASE_HPP

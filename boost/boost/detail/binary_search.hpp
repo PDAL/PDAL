@@ -31,7 +31,7 @@
 # include <boost/detail/iterator.hpp>
 # include <utility>
 
-namespace boost { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
 
 template <class ForwardIter, class Tp>
 ForwardIter lower_bound(ForwardIter first, ForwardIter last,
@@ -39,7 +39,7 @@ ForwardIter lower_bound(ForwardIter first, ForwardIter last,
 {
     typedef detail::iterator_traits<ForwardIter> traits;
     
-    typename traits::difference_type len = boost::detail::distance(first, last);
+    typename traits::difference_type len = pdalboost::detail::distance(first, last);
     typename traits::difference_type half;
     ForwardIter middle;
 
@@ -64,7 +64,7 @@ ForwardIter lower_bound(ForwardIter first, ForwardIter last,
 {
   typedef detail::iterator_traits<ForwardIter> traits;
 
-  typename traits::difference_type len = boost::detail::distance(first, last);
+  typename traits::difference_type len = pdalboost::detail::distance(first, last);
   typename traits::difference_type half;
   ForwardIter middle;
 
@@ -89,7 +89,7 @@ ForwardIter upper_bound(ForwardIter first, ForwardIter last,
 {
   typedef detail::iterator_traits<ForwardIter> traits;
 
-  typename traits::difference_type len = boost::detail::distance(first, last);
+  typename traits::difference_type len = pdalboost::detail::distance(first, last);
   typename traits::difference_type half;
   ForwardIter middle;
 
@@ -114,7 +114,7 @@ ForwardIter upper_bound(ForwardIter first, ForwardIter last,
 {
   typedef detail::iterator_traits<ForwardIter> traits;
 
-  typename traits::difference_type len = boost::detail::distance(first, last);
+  typename traits::difference_type len = pdalboost::detail::distance(first, last);
   typename traits::difference_type half;
   ForwardIter middle;
 
@@ -139,7 +139,7 @@ equal_range(ForwardIter first, ForwardIter last, const Tp& val)
 {
   typedef detail::iterator_traits<ForwardIter> traits;
 
-  typename traits::difference_type len = boost::detail::distance(first, last);
+  typename traits::difference_type len = pdalboost::detail::distance(first, last);
   typename traits::difference_type half;
   ForwardIter middle, left, right;
 
@@ -155,9 +155,9 @@ equal_range(ForwardIter first, ForwardIter last, const Tp& val)
     else if (val < *middle)
       len = half;
     else {
-      left = boost::detail::lower_bound(first, middle, val);
+      left = pdalboost::detail::lower_bound(first, middle, val);
       std::advance(first, len);
-      right = boost::detail::upper_bound(++middle, first, val);
+      right = pdalboost::detail::upper_bound(++middle, first, val);
       return std::pair<ForwardIter, ForwardIter>(left, right);
     }
   }
@@ -171,7 +171,7 @@ equal_range(ForwardIter first, ForwardIter last, const Tp& val,
 {
   typedef detail::iterator_traits<ForwardIter> traits;
 
-  typename traits::difference_type len = boost::detail::distance(first, last);
+  typename traits::difference_type len = pdalboost::detail::distance(first, last);
   typename traits::difference_type half;
   ForwardIter middle, left, right;
 
@@ -187,9 +187,9 @@ equal_range(ForwardIter first, ForwardIter last, const Tp& val,
     else if (comp(val, *middle))
       len = half;
     else {
-      left = boost::detail::lower_bound(first, middle, val, comp);
+      left = pdalboost::detail::lower_bound(first, middle, val, comp);
       std::advance(first, len);
-      right = boost::detail::upper_bound(++middle, first, val, comp);
+      right = pdalboost::detail::upper_bound(++middle, first, val, comp);
       return std::pair<ForwardIter, ForwardIter>(left, right);
     }
   }
@@ -199,7 +199,7 @@ equal_range(ForwardIter first, ForwardIter last, const Tp& val,
 template <class ForwardIter, class Tp>
 bool binary_search(ForwardIter first, ForwardIter last,
                    const Tp& val) {
-  ForwardIter i = boost::detail::lower_bound(first, last, val);
+  ForwardIter i = pdalboost::detail::lower_bound(first, last, val);
   return i != last && !(val < *i);
 }
 
@@ -207,10 +207,10 @@ template <class ForwardIter, class Tp, class Compare>
 bool binary_search(ForwardIter first, ForwardIter last,
                    const Tp& val,
                    Compare comp) {
-  ForwardIter i = boost::detail::lower_bound(first, last, val, comp);
+  ForwardIter i = pdalboost::detail::lower_bound(first, last, val, comp);
   return i != last && !comp(val, *i);
 }
 
-}} // namespace boost::detail
+}} // namespace pdalboost::detail
 
 #endif // BINARY_SEARCH_DWA_122600_H_

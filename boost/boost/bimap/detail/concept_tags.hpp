@@ -22,7 +22,7 @@
 #include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/bool.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace detail {
 
@@ -45,7 +45,7 @@ struct side_based_tag : set_type_of_relation_tag {};
 } // namespace detail
 
 
-/** \struct boost::bimaps::left_based
+/** \struct pdalboost::bimaps::left_based
     \brief Tag to indicate that the main view will be based on the left side.
 
 This is convenient because the multi-index core will be more efficient.
@@ -54,7 +54,7 @@ If possible use this options or the right based one.
 See also right_based.
                                                                             **/
 
-/** \struct boost::bimaps::right_based
+/** \struct pdalboost::bimaps::right_based
     \brief Tag to indicate that the main view will be based on the right side.
 
 This is convenient because the multi-index core will be more efficient.
@@ -65,7 +65,7 @@ See also left_based.
 
 #ifndef BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 
-struct left_based : ::boost::bimaps::detail::side_based_tag
+struct left_based : ::pdalboost::bimaps::detail::side_based_tag
 {
     // I run into troubles if I do not define bind for side based tags.
     // Maybe a more coherent way of binding the relation can be developped.
@@ -75,7 +75,7 @@ struct left_based : ::boost::bimaps::detail::side_based_tag
     typedef mpl::bool_<true> right_mutable_key;
 };
 
-struct right_based : ::boost::bimaps::detail::side_based_tag
+struct right_based : ::pdalboost::bimaps::detail::side_based_tag
 {
     // I run into troubles if I do not define bind for side based tags.
     // Maybe a more coherent way of binding the relation can be developped.
@@ -90,7 +90,7 @@ struct right_based : ::boost::bimaps::detail::side_based_tag
 typedef mpl::_ _relation;
 
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_DETAIL_CONCEPT_TAGS_HPP

@@ -17,7 +17,7 @@
 #include <boost/spirit/home/qi/detail/parse.hpp>
 #include <boost/concept_check.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Iterator, typename Expr>

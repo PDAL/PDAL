@@ -20,7 +20,7 @@
 
 #include <boost/bimap/relation/detail/metadata_access_builder.hpp>
 
-/** \struct boost::bimaps::support::data_type_by
+/** \struct pdalboost::bimaps::support::data_type_by
 
 \brief Metafunction to obtain the data type of one of the sides in a bimap
 
@@ -51,7 +51,7 @@ See also member_at.
 \ingroup bimap_group
                                                                     **/
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace support {
 
@@ -66,7 +66,7 @@ BOOST_BIMAP_SYMMETRIC_METADATA_ACCESS_BUILDER
 
 } // namespace support
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_SUPPORT_DATA_TYPE_BY_HPP

@@ -20,7 +20,7 @@
 #   include <boost/function_types/detail/encoding/def.hpp>
 #   include <boost/function_types/detail/encoding/aliases_def.hpp>
 
-namespace boost { namespace function_types {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace function_types {
 
 namespace detail
 {
@@ -30,8 +30,8 @@ namespace detail
 #   include BOOST_PP_ASSIGN_SLOT(1)
 
     BOOST_STATIC_CONSTANT(bits_t, value = (
-        (::boost::function_types::detail::bits<Tag>::value & BOOST_FT_default_cc) 
-      | (::boost::function_types::detail::bits<RefTag>::value & BOOST_PP_SLOT(1))
+        (::pdalboost::function_types::detail::bits<Tag>::value & BOOST_FT_default_cc) 
+      | (::pdalboost::function_types::detail::bits<RefTag>::value & BOOST_PP_SLOT(1))
     ));
   };
 
@@ -40,7 +40,7 @@ namespace detail
   template<class Tag, class RefTag> struct retag_default_cc
     : detail::compound_tag
       < Tag, detail::default_cc_tag< 
-          ::boost::function_types::detail::selector_bits<Tag,RefTag>::value > >
+          ::pdalboost::function_types::detail::selector_bits<Tag,RefTag>::value > >
   { };
 
   template<bits_t SelectorBits> struct default_cc_tag
@@ -81,7 +81,7 @@ namespace detail
 
 #   undef BOOST_FT_self
 
-} } } // namespace ::boost::function_types::detail
+} } } // namespace ::pdalboost::function_types::detail
 
 #   include <boost/function_types/detail/encoding/aliases_undef.hpp>
 #   include <boost/function_types/detail/encoding/undef.hpp>

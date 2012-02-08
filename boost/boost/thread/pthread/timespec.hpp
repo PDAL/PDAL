@@ -15,14 +15,13 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
-        inline struct timespec get_timespec(boost::system_time const& abs_time)
+        inline struct timespec get_timespec(pdalboost::system_time const& abs_time)
         {
             struct timespec timeout={0,0};
-            boost::posix_time::time_duration const time_since_epoch=abs_time-boost::posix_time::from_time_t(0);
+            pdalboost::posix_time::time_duration const time_since_epoch=abs_time-pdalboost::posix_time::from_time_t(0);
             
             timeout.tv_sec=time_since_epoch.total_seconds();
             timeout.tv_nsec=(long)(time_since_epoch.fractional_seconds()*(1000000000l/time_since_epoch.ticks_per_second()));

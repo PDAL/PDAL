@@ -28,7 +28,7 @@
 
 // Container traits implementation ---------------------------------------------------------
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
         namespace detail {
 
@@ -45,7 +45,7 @@ namespace boost {
                 typedef BOOST_STRING_TYPENAME ContainerT::iterator iterator;
                 typedef BOOST_STRING_TYPENAME ContainerT::const_iterator const_iterator;
                 typedef BOOST_STRING_TYPENAME 
-                    ::boost::mpl::if_< ::boost::is_const<ContainerT>,
+                    ::pdalboost::mpl::if_< ::pdalboost::is_const<ContainerT>,
                         const_iterator,
                         iterator 
                     >::type result_iterator;
@@ -137,10 +137,10 @@ namespace boost {
             {
                 typedef BOOST_STRING_TYPENAME PairT::first_type element_type;
 
-                typedef BOOST_STRING_TYPENAME ::boost::detail::
+                typedef BOOST_STRING_TYPENAME ::pdalboost::detail::
                     iterator_traits<element_type>::value_type value_type;
                 typedef std::size_t size_type;
-                typedef BOOST_STRING_TYPENAME ::boost::detail::
+                typedef BOOST_STRING_TYPENAME ::pdalboost::detail::
                     iterator_traits<element_type>::difference_type difference_type;
 
                 typedef element_type iterator;
@@ -241,14 +241,14 @@ namespace boost {
             struct array_traits_cv_selector
             {
                 typedef BOOST_STRING_TYPENAME 
-                    ::boost::mpl::eval_if< 
-                        ::boost::is_convertible<T,BaseT*>,
+                    ::pdalboost::mpl::eval_if< 
+                        ::pdalboost::is_convertible<T,BaseT*>,
                         array_traits_impl_selector<T,BaseT>,
-                        ::boost::mpl::eval_if< 
-                            ::boost::is_convertible<T,const BaseT*>,
+                        ::pdalboost::mpl::eval_if< 
+                            ::pdalboost::is_convertible<T,const BaseT*>,
                                 array_traits_impl_selector<T, const BaseT>,
-                                ::boost::mpl::eval_if< 
-                                    ::boost::is_convertible<T, volatile BaseT*>,
+                                ::pdalboost::mpl::eval_if< 
+                                    ::pdalboost::is_convertible<T, volatile BaseT*>,
                                     array_traits_impl_selector<T, volatile BaseT>,
                                     array_traits_impl_selector<T, const volatile BaseT>
                                 >
@@ -263,10 +263,10 @@ namespace boost {
                 struct apply
                 {
                     typedef BOOST_STRING_TYPENAME
-                        ::boost::mpl::eval_if< 
-                            ::boost::is_convertible<T,const volatile T2*>,
+                        ::pdalboost::mpl::eval_if< 
+                            ::pdalboost::is_convertible<T,const volatile T2*>,
                             array_traits_cv_selector<T,T2>,
-                            ::boost::mpl::identity<T1> >::type type;
+                            ::pdalboost::mpl::identity<T1> >::type type;
                 };
             };
 
@@ -277,11 +277,11 @@ namespace boost {
                 // supported array base types
 #ifndef BOOST_NO_INTRINSIC_WCHAR_T
                 typedef BOOST_STRING_TYPENAME
-                    ::boost::mpl::vector10<
+                    ::pdalboost::mpl::vector10<
                         wchar_t,
 #else // BOOST_NO_INTRINSIC_WCHAR_T
                 typedef BOOST_STRING_TYPENAME
-                    ::boost::mpl::vector9<
+                    ::pdalboost::mpl::vector9<
 #endif // BOOST_NO_INTRINSIC_WCHAR_T
                         char,
                         signed char,
@@ -296,10 +296,10 @@ namespace boost {
 
             public:
                 typedef BOOST_STRING_TYPENAME
-                    ::boost::mpl::fold<
+                    ::pdalboost::mpl::fold<
                         array_base_types,
-                        ::boost::algorithm::detail::array_traits_void,
-                        ::boost::algorithm::detail::array_traits_select<T> >::type type;
+                        ::pdalboost::algorithm::detail::array_traits_void,
+                        ::pdalboost::algorithm::detail::array_traits_select<T> >::type type;
             };
 
             template< typename T >
@@ -436,7 +436,7 @@ namespace boost {
                     traits_type::difference_type difference_type;
 
                 typedef BOOST_STRING_TYPENAME
-                    ::boost::mpl::if_< ::boost::is_const<T>,
+                    ::pdalboost::mpl::if_< ::pdalboost::is_const<T>,
                         const_iterator,
                         iterator 
                     >::type result_iterator;
@@ -444,7 +444,7 @@ namespace boost {
             private:
                 // resolve array size
                 typedef BOOST_STRING_TYPENAME
-                    ::boost::remove_cv<value_type>::type char_type;
+                    ::pdalboost::remove_cv<value_type>::type char_type;
                 typedef BOOST_STRING_TYPENAME
                     array_length_selector<char_type>::
                         BOOST_NESTED_TEMPLATE array_length<traits_type> array_length_type;
@@ -522,10 +522,10 @@ namespace boost {
             struct pointer_container_traits
             {
                 typedef BOOST_STRING_TYPENAME
-                    ::boost::remove_pointer<T>::type value_type;
+                    ::pdalboost::remove_pointer<T>::type value_type;
 
                 typedef BOOST_STRING_TYPENAME
-                    ::boost::remove_cv<value_type>::type char_type;
+                    ::pdalboost::remove_cv<value_type>::type char_type;
                 typedef ::std::char_traits<char_type> char_traits;
 
                 typedef value_type* iterator;
@@ -534,7 +534,7 @@ namespace boost {
                 typedef std::size_t size_type;
 
                 typedef BOOST_STRING_TYPENAME
-                    ::boost::mpl::if_< ::boost::is_const<T>,
+                    ::pdalboost::mpl::if_< ::pdalboost::is_const<T>,
                         const_iterator,
                         iterator 
                     >::type result_iterator;
@@ -615,7 +615,7 @@ namespace boost {
 
         } // namespace detail
     } // namespace algorithm
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_DETAIL_COLLECTION_HPP

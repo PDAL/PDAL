@@ -21,7 +21,7 @@
 
 #include <boost/test/utils/runtime/cla/dual_name_parameter.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -85,6 +85,6 @@ dual_name_policy::set_separator( cstring src )
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_CLA_DUAL_NAME_PARAMETER_IPP_062904GER

@@ -113,8 +113,7 @@ extern "C" void* __cdecl _InterlockedExchangePointer( void* volatile *, void* );
 #endif
 
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -132,17 +131,17 @@ extern "C"BOOST_INTERLOCKED_IMPORT void* __stdcall InterlockedExchangePointer( v
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
-# define BOOST_INTERLOCKED_INCREMENT ::boost::detail::InterlockedIncrement
-# define BOOST_INTERLOCKED_DECREMENT ::boost::detail::InterlockedDecrement
-# define BOOST_INTERLOCKED_COMPARE_EXCHANGE ::boost::detail::InterlockedCompareExchange
-# define BOOST_INTERLOCKED_EXCHANGE ::boost::detail::InterlockedExchange
-# define BOOST_INTERLOCKED_EXCHANGE_ADD ::boost::detail::InterlockedExchangeAdd
+# define BOOST_INTERLOCKED_INCREMENT ::pdalboost::detail::InterlockedIncrement
+# define BOOST_INTERLOCKED_DECREMENT ::pdalboost::detail::InterlockedDecrement
+# define BOOST_INTERLOCKED_COMPARE_EXCHANGE ::pdalboost::detail::InterlockedCompareExchange
+# define BOOST_INTERLOCKED_EXCHANGE ::pdalboost::detail::InterlockedExchange
+# define BOOST_INTERLOCKED_EXCHANGE_ADD ::pdalboost::detail::InterlockedExchangeAdd
 
 # if defined(_M_IA64) || defined(_M_AMD64)
-#  define BOOST_INTERLOCKED_COMPARE_EXCHANGE_POINTER ::boost::detail::InterlockedCompareExchangePointer
-#  define BOOST_INTERLOCKED_EXCHANGE_POINTER ::boost::detail::InterlockedExchangePointer
+#  define BOOST_INTERLOCKED_COMPARE_EXCHANGE_POINTER ::pdalboost::detail::InterlockedCompareExchangePointer
+#  define BOOST_INTERLOCKED_EXCHANGE_POINTER ::pdalboost::detail::InterlockedExchangePointer
 # else
 #  define BOOST_INTERLOCKED_COMPARE_EXCHANGE_POINTER(dest,exchange,compare) \
     ((void*)BOOST_INTERLOCKED_COMPARE_EXCHANGE((long volatile*)(dest),(long)(exchange),(long)(compare)))

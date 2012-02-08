@@ -106,7 +106,7 @@
         T p;
     };
 
-    bool x = boost::is_convertible<foo<int const*>, foo<int*> >::value;
+    bool x = pdalboost::is_convertible<foo<int const*>, foo<int*> >::value;
 #  endif
 
 #endif

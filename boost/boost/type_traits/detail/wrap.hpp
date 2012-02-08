@@ -8,11 +8,11 @@
 #ifndef BOOST_TT_DETAIL_WRAP_HPP_INCLUDED
 #define BOOST_TT_DETAIL_WRAP_HPP_INCLUDED
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace type_traits {
 
 template <class T> struct wrap {};
 
-}} // namespace boost::type_traits
+}} // namespace pdalboost::type_traits
 
 #endif // BOOST_TT_DETAIL_WRAP_HPP_INCLUDED

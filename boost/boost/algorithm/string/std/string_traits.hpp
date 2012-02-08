@@ -15,7 +15,7 @@
 #include <string>
 #include <boost/algorithm/string/sequence_traits.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
 
 //  std::basic_string<> traits  -----------------------------------------------//
@@ -46,7 +46,7 @@ namespace boost {
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 
     } // namespace algorithm
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_LIST_TRAITS_HPP

@@ -34,7 +34,7 @@
 //    open, close and delimeter and add these synonyms to the
 //    TR1 tuple module.
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     namespace detail
     {

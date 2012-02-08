@@ -22,7 +22,7 @@
 #include <boost/noncopyable.hpp>
 #include <cstddef>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -36,7 +36,7 @@ class random_access_index_ptr_array:private noncopyable
   typedef typename prevent_eti<
     Allocator,
     random_access_index_node_impl<
-      typename boost::detail::allocator::rebind_to<
+      typename pdalboost::detail::allocator::rebind_to<
         Allocator,
         char
       >::type
@@ -47,7 +47,7 @@ public:
   typedef typename node_impl_type::pointer          value_type;
   typedef typename prevent_eti<
     Allocator,
-    typename boost::detail::allocator::rebind_to<
+    typename pdalboost::detail::allocator::rebind_to<
       Allocator,value_type
     >::type
   >::type::pointer                                  pointer;
@@ -138,6 +138,6 @@ void swap(
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

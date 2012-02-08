@@ -51,7 +51,7 @@
 #define BOOST_PROTO_LOGICAL_typename_G  BOOST_PP_ENUM_PARAMS(BOOST_PROTO_MAX_LOGICAL_ARITY, typename G)
 #define BOOST_PROTO_LOGICAL_G           BOOST_PP_ENUM_PARAMS(BOOST_PROTO_MAX_LOGICAL_ARITY, G)
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
 
     namespace detail
@@ -458,15 +458,15 @@ namespace boost { namespace proto
     /// \li An expression \c E matches <tt>and_\<B0,B1,...Bn\></tt> if \c E
     ///     matches all \c Bx for \c x in <tt>[0,n)</tt>.
     /// \li An expression \c E matches <tt>if_\<T,U,V\></tt> if
-    ///     <tt>boost::result_of\<when\<_,T\>(E,int,int)\>::type::value</tt>
+    ///     <tt>pdalboost::result_of\<when\<_,T\>(E,int,int)\>::type::value</tt>
     ///     is \c true and \c E matches \c U; or, if
-    ///     <tt>boost::result_of\<when\<_,T\>(E,int,int)\>::type::value</tt>
+    ///     <tt>pdalboost::result_of\<when\<_,T\>(E,int,int)\>::type::value</tt>
     ///     is \c false and \c E matches \c V. (Note: \c U defaults to \c _
     ///     and \c V defaults to \c not_\<_\>.)
     /// \li An expression \c E matches <tt>not_\<T\></tt> if \c E does
     ///     not match \c T.
     /// \li An expression \c E matches <tt>switch_\<C,T\></tt> if
-    ///     \c E matches <tt>C::case_\<boost::result_of\<T(E)\>::type\></tt>.
+    ///     \c E matches <tt>C::case_\<pdalboost::result_of\<T(E)\>::type\></tt>.
     ///     (Note: T defaults to <tt>tag_of\<_\>()</tt>.)
     ///
     /// A terminal expression <tt>expr\<AT,term\<A\> \></tt> matches
@@ -639,15 +639,15 @@ namespace boost { namespace proto
     /// When <tt>if_\<If,Then,Else\></tt> is used as a grammar, \c If
     /// must be a Proto transform and \c Then and \c Else must be grammars.
     /// An expression type \c E matches <tt>if_\<If,Then,Else\></tt> if
-    /// <tt>boost::result_of\<when\<_,If\>(E,int,int)\>::type::value</tt>
+    /// <tt>pdalboost::result_of\<when\<_,If\>(E,int,int)\>::type::value</tt>
     /// is \c true and \c E matches \c U; or, if
-    /// <tt>boost::result_of\<when\<_,If\>(E,int,int)\>::type::value</tt>
+    /// <tt>pdalboost::result_of\<when\<_,If\>(E,int,int)\>::type::value</tt>
     /// is \c false and \c E matches \c V.
     ///
     /// The template parameter \c Then defaults to \c _
     /// and \c Else defaults to \c not\<_\>, so an expression type \c E
     /// will match <tt>if_\<If\></tt> if and only if
-    /// <tt>boost::result_of\<when\<_,If\>(E,int,int)\>::type::value</tt>
+    /// <tt>pdalboost::result_of\<when\<_,If\>(E,int,int)\>::type::value</tt>
     /// is \c true.
     ///
     /// \code
@@ -664,7 +664,7 @@ namespace boost { namespace proto
     /// When <tt>if_\<If,Then,Else\></tt> is used as a transform, \c If,
     /// \c Then and \c Else must be Proto transforms. When applying
     /// the transform to an expression \c E, state \c S and data \c V,
-    /// if <tt>boost::result_of\<when\<_,If\>(E,S,V)\>::type::value</tt>
+    /// if <tt>pdalboost::result_of\<when\<_,If\>(E,S,V)\>::type::value</tt>
     /// is \c true then the \c Then transform is applied; otherwise
     /// the \c Else transform is applied.
     ///
@@ -803,12 +803,12 @@ namespace boost { namespace proto
     /// potentially match the expression.
     ///
     /// An expression type \c E matches <tt>switch_\<C,T\></tt> if \c E
-    /// matches <tt>C::case_\<boost::result_of\<T(E)\>::type\></tt>.
+    /// matches <tt>C::case_\<pdalboost::result_of\<T(E)\>::type\></tt>.
     ///
     /// When applying <tt>switch_\<C,T\></tt> as a transform with an
     /// expression \c e of type \c E, state \c s of type \S and data
     /// \c d of type \c D, it is equivalent to
-    /// <tt>C::case_\<boost::result_of\<T(E,S,D)\>::type\>()(e, s, d)</tt>.
+    /// <tt>C::case_\<pdalboost::result_of\<T(E,S,D)\>::type\>()(e, s, d)</tt>.
     template<typename Cases, typename Transform>
     struct switch_ : transform<switch_<Cases, Transform> >
     {

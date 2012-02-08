@@ -40,7 +40,7 @@
 // Temporary fix.
 #undef small
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 namespace bzip2 {
 

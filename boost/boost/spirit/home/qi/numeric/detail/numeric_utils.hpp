@@ -35,7 +35,7 @@
 # define SPIRIT_NUMERICS_LOOP_UNROLL 3
 #endif
 
-namespace boost { namespace spirit { namespace qi { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi { namespace detail
 {
     ///////////////////////////////////////////////////////////////////////////
     //
@@ -293,7 +293,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
             typedef radix_traits<Radix> radix_check;
             typedef int_extractor<Radix, Accumulator, MaxDigits> extractor;
             typedef typename
-                boost::detail::iterator_traits<Iterator>::value_type
+                pdalboost::detail::iterator_traits<Iterator>::value_type
             char_type;
 
             Iterator it = first;
@@ -391,7 +391,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
             typedef radix_traits<Radix> radix_check;
             typedef int_extractor<Radix, Accumulator, -1> extractor;
             typedef typename
-                boost::detail::iterator_traits<Iterator>::value_type
+                pdalboost::detail::iterator_traits<Iterator>::value_type
             char_type;
 
             Iterator it = first;

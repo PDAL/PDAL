@@ -16,7 +16,7 @@
 #include <boost/spirit/home/phoenix/core/compose.hpp>
 #include <boost/spirit/home/phoenix/detail/type_deduction.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     BOOST_BINARY_RESULT_OF(true ? x : y, result_of_if_else)
 

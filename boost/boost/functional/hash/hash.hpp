@@ -35,8 +35,7 @@
 #define BOOST_HASH_CHAR_TRAITS char_traits
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 #if defined(BOOST_HASH_NO_IMPLICIT_CASTS)
 
     // If you get a static assertion here, it's because hash_value
@@ -65,8 +64,8 @@ namespace boost
 #endif
     
 #if !defined(BOOST_NO_LONG_LONG)
-    std::size_t hash_value(boost::long_long_type);
-    std::size_t hash_value(boost::ulong_long_type);
+    std::size_t hash_value(pdalboost::long_long_type);
+    std::size_t hash_value(pdalboost::ulong_long_type);
 #endif
 
 #if !BOOST_WORKAROUND(__DMC__, <= 0x848)
@@ -199,12 +198,12 @@ namespace boost
 #endif
 
 #if !defined(BOOST_NO_LONG_LONG)
-    inline std::size_t hash_value(boost::long_long_type v)
+    inline std::size_t hash_value(pdalboost::long_long_type v)
     {
         return hash_detail::hash_value_signed(v);
     }
 
-    inline std::size_t hash_value(boost::ulong_long_type v)
+    inline std::size_t hash_value(pdalboost::ulong_long_type v)
     {
         return hash_detail::hash_value_unsigned(v);
     }
@@ -247,7 +246,7 @@ namespace boost
     inline void hash_combine(std::size_t& seed, T const& v)
 #endif
     {
-        boost::hash<T> hasher;
+        pdalboost::hash<T> hasher;
         seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
     }
 
@@ -285,7 +284,7 @@ namespace boost
 
         for(; first != last; ++first)
         {
-            boost::hash<T> hasher;
+            pdalboost::hash<T> hasher;
             seed ^= hasher(*first) + 0x9e3779b9 + (seed<<6) + (seed>>2);
         }
 
@@ -297,7 +296,7 @@ namespace boost
     {
         for(; first != last; ++first)
         {
-            boost::hash<T> hasher;
+            pdalboost::hash<T> hasher;
             seed ^= hasher(*first) + 0x9e3779b9 + (seed<<6) + (seed>>2);
         }
     }
@@ -326,17 +325,17 @@ namespace boost
 
     inline std::size_t hash_value(float v)
     {
-        return boost::hash_detail::float_hash_value(v);
+        return pdalboost::hash_detail::float_hash_value(v);
     }
 
     inline std::size_t hash_value(double v)
     {
-        return boost::hash_detail::float_hash_value(v);
+        return pdalboost::hash_detail::float_hash_value(v);
     }
 
     inline std::size_t hash_value(long double v)
     {
-        return boost::hash_detail::float_hash_value(v);
+        return pdalboost::hash_detail::float_hash_value(v);
     }
 
 #if !defined(BOOST_NO_0X_HDR_TYPEINDEX)
@@ -347,11 +346,11 @@ namespace boost
 #endif
 
     //
-    // boost::hash
+    // pdalboost::hash
     //
     
     // Define the specializations required by the standard. The general purpose
-    // boost::hash is defined later in extensions.hpp if
+    // pdalboost::hash is defined later in extensions.hpp if
     // BOOST_HASH_NO_EXTENSIONS is not defined.
     
     // BOOST_HASH_SPECIALIZE - define a specialization for a type which is
@@ -369,7 +368,7 @@ namespace boost
     { \
         std::size_t operator()(type v) const \
         { \
-            return boost::hash_value(v); \
+            return pdalboost::hash_value(v); \
         } \
     };
 
@@ -379,7 +378,7 @@ namespace boost
     { \
         std::size_t operator()(type const& v) const \
         { \
-            return boost::hash_value(v); \
+            return pdalboost::hash_value(v); \
         } \
     };
 #else
@@ -389,7 +388,7 @@ namespace boost
     { \
         std::size_t operator()(type v) const \
         { \
-            return boost::hash_value(v); \
+            return pdalboost::hash_value(v); \
         } \
     }; \
     \
@@ -398,7 +397,7 @@ namespace boost
     { \
         std::size_t operator()(const type v) const \
         { \
-            return boost::hash_value(v); \
+            return pdalboost::hash_value(v); \
         } \
     };
 
@@ -408,7 +407,7 @@ namespace boost
     { \
         std::size_t operator()(type const& v) const \
         { \
-            return boost::hash_value(v); \
+            return pdalboost::hash_value(v); \
         } \
     }; \
     \
@@ -417,7 +416,7 @@ namespace boost
     { \
         std::size_t operator()(type const& v) const \
         { \
-            return boost::hash_value(v); \
+            return pdalboost::hash_value(v); \
         } \
     };
 #endif
@@ -446,8 +445,8 @@ namespace boost
 #endif
 
 #if !defined(BOOST_NO_LONG_LONG)
-    BOOST_HASH_SPECIALIZE(boost::long_long_type)
-    BOOST_HASH_SPECIALIZE(boost::ulong_long_type)
+    BOOST_HASH_SPECIALIZE(pdalboost::long_long_type)
+    BOOST_HASH_SPECIALIZE(pdalboost::ulong_long_type)
 #endif
 
 #if !defined(BOOST_NO_0X_HDR_TYPEINDEX)
@@ -457,7 +456,7 @@ namespace boost
 #undef BOOST_HASH_SPECIALIZE
 #undef BOOST_HASH_SPECIALIZE_REF
 
-// Specializing boost::hash for pointers.
+// Specializing pdalboost::hash for pointers.
 
 #if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 
@@ -468,7 +467,7 @@ namespace boost
         std::size_t operator()(T* v) const
         {
 #if !BOOST_WORKAROUND(__SUNPRO_CC, <= 0x590)
-            return boost::hash_value(v);
+            return pdalboost::hash_value(v);
 #else
             std::size_t x = static_cast<std::size_t>(
                 reinterpret_cast<std::ptrdiff_t>(v));
@@ -481,7 +480,7 @@ namespace boost
 #else
 
     // For compilers without partial specialization, we define a
-    // boost::hash for all remaining types. But hash_impl is only defined
+    // pdalboost::hash for all remaining types. But hash_impl is only defined
     // for pointers in 'extensions.hpp' - so when BOOST_HASH_NO_EXTENSIONS
     // is defined there will still be a compile error for types not supported
     // in the standard.
@@ -501,7 +500,7 @@ namespace boost
                 std::size_t operator()(T val) const
                 {
 #if !BOOST_WORKAROUND(__SUNPRO_CC, <= 590)
-                    return boost::hash_value(val);
+                    return pdalboost::hash_value(val);
 #else
                     std::size_t x = static_cast<std::size_t>(
                         reinterpret_cast<std::ptrdiff_t>(val));
@@ -514,7 +513,7 @@ namespace boost
     }
 
     template <class T> struct hash
-        : public boost::hash_detail::hash_impl<boost::is_pointer<T>::value>
+        : public pdalboost::hash_detail::hash_impl<pdalboost::is_pointer<T>::value>
             ::BOOST_NESTED_TEMPLATE inner<T>
     {
     };

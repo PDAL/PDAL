@@ -33,7 +33,7 @@
 
 #include <boost/filesystem/detail/utf8_codecvt_facet.hpp>
 
-namespace fs = boost::filesystem;
+namespace fs = pdalboost::filesystem;
 
 #include <iostream>
 #include <iomanip>
@@ -59,7 +59,7 @@ namespace
     if ( !f )
       BOOST_FILESYSTEM_THROW( fs::basic_filesystem_error<Path>( "wide_test create_file",
         ph,
-        boost::system::error_code( errno, boost::system::generic_category() ) ) );
+        pdalboost::system::error_code( errno, pdalboost::system::generic_category() ) ) );
     if ( !contents.empty() ) f << contents;
   }
 
@@ -106,20 +106,20 @@ namespace
     }
   }
 
-  // test boost::detail::utf8_codecvt_facet - even though it is not used by
+  // test pdalboost::detail::utf8_codecvt_facet - even though it is not used by
   // Boost.Filesystem on Windows, early detection of problems is worthwhile.
   std::string to_external( const std::wstring & src )
   {
     fs::detail::utf8_codecvt_facet convertor;
     std::size_t work_size( convertor.max_length() * (src.size()+1) );
-    boost::scoped_array<char> work( new char[ work_size ] );
+    pdalboost::scoped_array<char> work( new char[ work_size ] );
     std::mbstate_t state;
     const wchar_t * from_next;
     char * to_next;
     if ( convertor.out( 
       state, src.c_str(), src.c_str()+src.size(), from_next, work.get(),
       work.get()+work_size, to_next ) != std::codecvt_base::ok )
-      boost::throw_exception( std::runtime_error("to_external conversion error") );
+      pdalboost::throw_exception( std::runtime_error("to_external conversion error") );
     *to_next = '\0';
     return std::string( work.get() );
   }
@@ -165,5 +165,5 @@ int cpp_main( int argc, char * /*argv*/[] )
   test( ::user::lpath( dir ), ::user::lpath( file ), ::user::lpath( dot ) );
   std::cout << "complete\n\n";
 
-  return ::boost::report_errors();
+  return ::pdalboost::report_errors();
 }

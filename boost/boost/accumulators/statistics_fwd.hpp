@@ -15,7 +15,7 @@
 #include <boost/accumulators/framework/depends_on.hpp>
 #include <boost/accumulators/framework/extractor.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -427,6 +427,6 @@ struct for_median {};
 // modifier for sum_kahan, sum_of_weights_kahan, sum_of_variates_kahan, weighted_sum_kahan
 struct kahan {};
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

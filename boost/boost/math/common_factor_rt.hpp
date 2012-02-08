@@ -27,8 +27,7 @@
 #pragma warning(disable:4127 4244)  // Conditional expression is constant
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace math
 {
 
@@ -55,7 +54,7 @@ public:
     result_type  operator ()( first_argument_type const &a,
      second_argument_type const &b ) const;
 
-};  // boost::math::gcd_evaluator
+};  // pdalboost::math::gcd_evaluator
 
 
 //  Least common multiple evaluator class declaration  -----------------------//
@@ -71,7 +70,7 @@ public:
     result_type  operator ()( first_argument_type const &a,
      second_argument_type const &b ) const;
 
-};  // boost::math::lcm_evaluator
+};  // pdalboost::math::lcm_evaluator
 
 
 //  Implementation details  --------------------------------------------------//
@@ -312,7 +311,7 @@ namespace detail
     BOOST_PRIVATE_GCD_UF( unsigned long );
 
 #ifdef BOOST_HAS_LONG_LONG
-    BOOST_PRIVATE_GCD_UF( boost::ulong_long_type );
+    BOOST_PRIVATE_GCD_UF( pdalboost::ulong_long_type );
 #elif defined(BOOST_HAS_MS_INT64)
     BOOST_PRIVATE_GCD_UF( unsigned __int64 );
 #endif
@@ -340,7 +339,7 @@ namespace detail
 #endif
 
 #ifdef BOOST_HAS_LONG_LONG
-    BOOST_PRIVATE_GCD_SF( boost::long_long_type, boost::ulong_long_type );
+    BOOST_PRIVATE_GCD_SF( pdalboost::long_long_type, pdalboost::ulong_long_type );
 #elif defined(BOOST_HAS_MS_INT64)
     BOOST_PRIVATE_GCD_SF( __int64, unsigned __int64 );
 #endif
@@ -521,7 +520,7 @@ lcm
 
 
 }  // namespace math
-}  // namespace boost
+}  // namespace pdalboost
 
 #ifdef BOOST_MSVC
 #pragma warning(pop)

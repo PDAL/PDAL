@@ -18,7 +18,7 @@
 #include <boost/cstdint.hpp>
 #include <boost/spirit/home/support/assert_msg.hpp>
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     template <std::size_t N>
     struct wchar_t_size
@@ -33,7 +33,7 @@ namespace boost { namespace spirit { namespace traits
 
 }}}
 
-namespace boost { namespace spirit { namespace char_encoding
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace char_encoding
 {
     ///////////////////////////////////////////////////////////////////////////
     //  Test characters for specified conditions (using std wchar_t functions)
@@ -170,7 +170,7 @@ namespace boost { namespace spirit { namespace char_encoding
                 to_char_type<wchar_t>(towupper(to_int_type(ch))) : ch;
         }
 
-        static ::boost::uint32_t
+        static ::pdalboost::uint32_t
         toucs4(int ch)
         {
             return ch;

@@ -29,11 +29,11 @@
 namespace std { using ::fpos_t; }
 #endif
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
                     
 //------------------Definition of stream_offset-------------------------------//
 
-typedef boost::intmax_t stream_offset;
+typedef pdalboost::intmax_t stream_offset;
 
 //------------------Definition of stream_offset_to_streamoff------------------//
 
@@ -69,7 +69,7 @@ inline stream_offset position_to_offset(std::streampos pos) { return pos; }
 // In the Dinkumware standard library, a std::streampos consists of two stream
 // offsets -- _Fpos, of type std::fpos_t, and _Myoff, of type std::streamoff --
 // together with a conversion state. A std::streampos is converted to a 
-// boost::iostreams::stream_offset by extracting the two stream offsets and
+// pdalboost::iostreams::stream_offset by extracting the two stream offsets and
 // summing them. The value of _Fpos can be extracted using the implementation-
 // defined member functions seekpos() or get_fpos_t(), depending on the 
 // Dinkumware version. The value of _Myoff cannot be extracted directly, but can

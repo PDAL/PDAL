@@ -13,8 +13,7 @@
 #include <boost/config.hpp>
 #include <boost/range/config.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace range_detail
     {
 
@@ -67,6 +66,6 @@ private:
 };
 
     } // namespace range_detail
-} // namespace boost
+} // namespace pdalboost
 
 #endif // include guard

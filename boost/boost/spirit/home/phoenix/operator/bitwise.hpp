@@ -20,7 +20,7 @@
 # pragma warning(disable : 4800)
 #endif
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     struct invert_eval;
 

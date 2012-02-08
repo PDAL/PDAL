@@ -62,7 +62,7 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp>  // MSVC.
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 template< typename SymmetricFilter,
           typename Alloc =
@@ -227,7 +227,7 @@ private:
         std::streamsize amt =
             static_cast<std::streamsize>(buf().ptr() - buf().data());
         std::streamsize result =
-            boost::iostreams::write(snk, buf().data(), amt);
+            pdalboost::iostreams::write(snk, buf().data(), amt);
         if (result < amt && result > 0)
             traits_type::move(buf().data(), buf().data() + result, amt - result);
         buf().set(amt - result, buf().size());

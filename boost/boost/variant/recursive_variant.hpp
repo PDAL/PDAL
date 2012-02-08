@@ -35,7 +35,7 @@
 #include "boost/mpl/is_sequence.hpp"
 #include "boost/variant/variant.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail { namespace variant {
 
@@ -53,16 +53,16 @@ template <
       BOOST_MPL_AUX_LAMBDA_ARITY_PARAM(typename Arity)
     >
 struct substitute<
-      ::boost::variant<
+      ::pdalboost::variant<
           recursive_flag< T0 >
         , BOOST_VARIANT_ENUM_SHIFTED_PARAMS(T)
         >
     , RecursiveVariant
-    , ::boost::recursive_variant_
+    , ::pdalboost::recursive_variant_
       BOOST_MPL_AUX_LAMBDA_ARITY_PARAM(Arity)
     >
 {
-    typedef ::boost::variant<
+    typedef ::pdalboost::variant<
           recursive_flag< T0 >
         , BOOST_VARIANT_ENUM_SHIFTED_PARAMS(T)
         > type;
@@ -74,12 +74,12 @@ template <
       BOOST_MPL_AUX_LAMBDA_ARITY_PARAM(typename Arity)
     >
 struct substitute<
-      ::boost::variant<
-          ::boost::detail::variant::over_sequence< T0 >
+      ::pdalboost::variant<
+          ::pdalboost::detail::variant::over_sequence< T0 >
         , BOOST_VARIANT_ENUM_SHIFTED_PARAMS(T)
         >
     , RecursiveVariant
-    , ::boost::recursive_variant_
+    , ::pdalboost::recursive_variant_
       BOOST_MPL_AUX_LAMBDA_ARITY_PARAM(Arity)
     >
 {
@@ -95,12 +95,12 @@ private:
 public:
 
     typedef typename mpl::if_<
-          mpl::equal<initial_types, types, ::boost::is_same<mpl::_1, mpl::_2> >
-        , ::boost::variant<
-              ::boost::detail::variant::over_sequence< T0 >
+          mpl::equal<initial_types, types, ::pdalboost::is_same<mpl::_1, mpl::_2> >
+        , ::pdalboost::variant<
+              ::pdalboost::detail::variant::over_sequence< T0 >
             , BOOST_VARIANT_ENUM_SHIFTED_PARAMS(T)
             >
-        , ::boost::variant< over_sequence<types> >
+        , ::pdalboost::variant< over_sequence<types> >
         >::type type;
 };
 
@@ -110,9 +110,9 @@ template <
       BOOST_MPL_AUX_LAMBDA_ARITY_PARAM(typename Arity)
     >
 struct substitute<
-      ::boost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >
+      ::pdalboost::variant< BOOST_VARIANT_ENUM_PARAMS(T) >
     , RecursiveVariant
-    , ::boost::recursive_variant_
+    , ::pdalboost::recursive_variant_
       BOOST_MPL_AUX_LAMBDA_ARITY_PARAM(Arity)
     >
 {
@@ -136,7 +136,7 @@ private: // helpers, for metafunction result (below)
 
 public: // metafunction result
 
-    typedef ::boost::variant< BOOST_VARIANT_ENUM_PARAMS(wknd_T) > type;
+    typedef ::pdalboost::variant< BOOST_VARIANT_ENUM_PARAMS(wknd_T) > type;
 };
 
 #else // defined(BOOST_VARIANT_DETAIL_NO_SUBSTITUTE)
@@ -159,7 +159,7 @@ struct make_recursive_variant
 {
 public: // metafunction result
 
-    typedef boost::variant<
+    typedef pdalboost::variant<
           detail::variant::recursive_flag< T0 >
         , BOOST_VARIANT_ENUM_SHIFTED_PARAMS(T)
         > type;
@@ -177,7 +177,7 @@ struct make_recursive_variant_over
 private: // precondition assertions
 
 #if !BOOST_WORKAROUND(BOOST_MSVC, <= 1300)
-    BOOST_STATIC_ASSERT(( ::boost::mpl::is_sequence<Types>::value ));
+    BOOST_STATIC_ASSERT(( ::pdalboost::mpl::is_sequence<Types>::value ));
 #endif
 
 public: // metafunction result
@@ -188,6 +188,6 @@ public: // metafunction result
 
 };
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_RECURSIVE_VARIANT_HPP

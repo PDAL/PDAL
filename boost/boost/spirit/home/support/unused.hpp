@@ -21,13 +21,13 @@
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
-    // We do not import fusion ::unused_type anymore to avoid boost::fusion
-    // being turned into an associate namespace for boost::spirit, as this
+    // We do not import fusion ::unused_type anymore to avoid pdalboost::fusion
+    // being turned into an associate namespace for pdalboost::spirit, as this
     // interferes with ADL in unexpected ways. We rather copy the full 
-    // unused_type implementation from boost::fusion.
+    // unused_type implementation from pdalboost::fusion.
     ///////////////////////////////////////////////////////////////////////////
     struct unused_type
     {

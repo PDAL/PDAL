@@ -48,7 +48,7 @@
 #include <boost/bimap/set_of.hpp>
 #include <boost/bimap/unconstrained_set_of.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 
 /// \brief Library details
@@ -98,17 +98,17 @@ class bimap_core
 
     private:
 
-    typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::tags::support::default_tagged
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::tags::support::default_tagged
     <
         BOOST_DEDUCED_TYPENAME left_set_type::user_type,
-        ::boost::bimaps::relation::member_at::left
+        ::pdalboost::bimaps::relation::member_at::left
 
     >::type left_tagged_type;
 
-    typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::tags::support::default_tagged
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::tags::support::default_tagged
     <
         BOOST_DEDUCED_TYPENAME right_set_type::user_type,
-        ::boost::bimaps::relation::member_at::right
+        ::pdalboost::bimaps::relation::member_at::right
 
     >::type right_tagged_type;
 
@@ -145,10 +145,10 @@ class bimap_core
     // --------------------------------------------------------------------
     public:
 
-    typedef ::boost::bimaps::relation::mutant_relation
+    typedef ::pdalboost::bimaps::relation::mutant_relation
     <
 
-        ::boost::bimaps::tags::tagged<
+        ::pdalboost::bimaps::tags::tagged<
             BOOST_DEDUCED_TYPENAME mpl::if_<
                 mpl::and_
                 <
@@ -160,14 +160,14 @@ class bimap_core
             // }
             // else
             // {
-                    BOOST_DEDUCED_TYPENAME ::boost::add_const< left_key_type >::type
+                    BOOST_DEDUCED_TYPENAME ::pdalboost::add_const< left_key_type >::type
             // }
 
             >::type,
             left_tag
         >,
 
-        ::boost::bimaps::tags::tagged<
+        ::pdalboost::bimaps::tags::tagged<
             BOOST_DEDUCED_TYPENAME mpl::if_<
                 mpl::and_
                 <
@@ -179,14 +179,14 @@ class bimap_core
             // }
             // else
             // {
-                    BOOST_DEDUCED_TYPENAME ::boost::add_const< right_key_type >::type
+                    BOOST_DEDUCED_TYPENAME ::pdalboost::add_const< right_key_type >::type
             // }
 
             >::type,
             right_tag
         >,
 
-        // It is ::boost::mpl::na if no info_hook was included
+        // It is ::pdalboost::mpl::na if no info_hook was included
         BOOST_DEDUCED_TYPENAME parameters::additional_info,
 
         // Force mutable keys
@@ -219,7 +219,7 @@ class bimap_core
     // unconstrained_set_of_relation specifications.
 
     typedef BOOST_DEDUCED_TYPENAME mpl::if_<
-        ::boost::bimaps::detail::is_unconstrained_set_of< left_set_type >,
+        ::pdalboost::bimaps::detail::is_unconstrained_set_of< left_set_type >,
     // {
             mpl::vector<>,
     // }
@@ -239,7 +239,7 @@ class bimap_core
     >::type left_core_indices;
 
     typedef BOOST_DEDUCED_TYPENAME mpl::if_<
-        ::boost::bimaps::detail::is_unconstrained_set_of< right_set_type >,
+        ::pdalboost::bimaps::detail::is_unconstrained_set_of< right_set_type >,
     // {
             left_core_indices,
     // }
@@ -274,12 +274,12 @@ class bimap_core
 
         is_same< BOOST_DEDUCED_TYPENAME parameters::set_type_of_relation, left_based >,
     // {
-            ::boost::bimaps::tags::tagged< left_set_type, left_tag >,
+            ::pdalboost::bimaps::tags::tagged< left_set_type, left_tag >,
     // }
     /* else */ BOOST_DEDUCED_TYPENAME mpl::if_<
             is_same< BOOST_DEDUCED_TYPENAME parameters::set_type_of_relation, right_based >,
     // {
-            ::boost::bimaps::tags::tagged< right_set_type, right_tag >,
+            ::pdalboost::bimaps::tags::tagged< right_set_type, right_tag >,
     // }
     // else
     // {
@@ -311,10 +311,10 @@ class bimap_core
     // tags.
 
     typedef BOOST_DEDUCED_TYPENAME mpl::if_<
-        ::boost::bimaps::detail::is_unconstrained_set_of< left_set_type >,
+        ::pdalboost::bimaps::detail::is_unconstrained_set_of< left_set_type >,
 
         BOOST_DEDUCED_TYPENAME mpl::if_<
-            ::boost::bimaps::detail::is_unconstrained_set_of< right_set_type >,
+            ::pdalboost::bimaps::detail::is_unconstrained_set_of< right_set_type >,
 
             independent_index_tag,
             right_tag
@@ -326,10 +326,10 @@ class bimap_core
     >::type logic_left_tag;
 
     typedef BOOST_DEDUCED_TYPENAME mpl::if_<
-        ::boost::bimaps::detail::is_unconstrained_set_of< right_set_type >,
+        ::pdalboost::bimaps::detail::is_unconstrained_set_of< right_set_type >,
 
         BOOST_DEDUCED_TYPENAME mpl::if_< 
-            ::boost::bimaps::detail::is_unconstrained_set_of< left_set_type >,
+            ::pdalboost::bimaps::detail::is_unconstrained_set_of< left_set_type >,
 
             independent_index_tag,
             left_tag
@@ -344,7 +344,7 @@ class bimap_core
         is_same< relation_set_tag, independent_index_tag >,
 
         BOOST_DEDUCED_TYPENAME mpl::if_< 
-            ::boost::bimaps::detail::
+            ::pdalboost::bimaps::detail::
                 is_unconstrained_set_of< relation_set_type_of >,
 
             logic_left_tag,
@@ -367,7 +367,7 @@ class bimap_core
     typedef BOOST_DEDUCED_TYPENAME mpl::if_<
         mpl::and_< is_same< relation_set_tag, independent_index_tag >,
                    mpl::not_<
-                       ::boost::bimaps::detail::
+                       ::pdalboost::bimaps::detail::
                             is_unconstrained_set_of< relation_set_type_of > 
                    >
         >,
@@ -379,7 +379,7 @@ class bimap_core
                 BOOST_DEDUCED_TYPENAME relation_set_type_of::
                 BOOST_NESTED_TEMPLATE index_bind
                 <
-                    ::boost::bimaps::relation::support::both_keys_extractor<relation>,
+                    ::pdalboost::bimaps::relation::support::both_keys_extractor<relation>,
                     independent_index_tag
 
                 >::type
@@ -413,10 +413,10 @@ class bimap_core
     // --------------------------------------------------------------------
     public:
 
-    typedef BOOST_DEDUCED_TYPENAME ::boost::multi_index::
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::multi_index::
         index<core_type, logic_left_tag>::type  left_index;
 
-    typedef BOOST_DEDUCED_TYPENAME ::boost::multi_index::
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::multi_index::
         index<core_type,logic_right_tag>::type right_index;
 
     typedef BOOST_DEDUCED_TYPENAME  left_index::iterator        left_core_iterator;
@@ -431,7 +431,7 @@ class bimap_core
 
     //@{
 
-        typedef ::boost::bimaps::detail::map_view_iterator
+        typedef ::pdalboost::bimaps::detail::map_view_iterator
         <
             left_tag,
             relation,
@@ -439,7 +439,7 @@ class bimap_core
 
         > left_iterator;
 
-        typedef ::boost::bimaps::detail::map_view_iterator
+        typedef ::pdalboost::bimaps::detail::map_view_iterator
         <
             right_tag,
             relation,
@@ -451,7 +451,7 @@ class bimap_core
 
     //@{
 
-        typedef ::boost::bimaps::detail::const_map_view_iterator
+        typedef ::pdalboost::bimaps::detail::const_map_view_iterator
         <
             left_tag,
             relation,
@@ -459,7 +459,7 @@ class bimap_core
 
         > left_const_iterator;
 
-        typedef ::boost::bimaps::detail::const_map_view_iterator
+        typedef ::pdalboost::bimaps::detail::const_map_view_iterator
         <
             right_tag,
             relation,
@@ -471,7 +471,7 @@ class bimap_core
 
     // Relation set view
 
-    typedef BOOST_DEDUCED_TYPENAME ::boost::multi_index::index
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::multi_index::index
     <
         core_type, logic_relation_set_tag
 
@@ -515,6 +515,6 @@ struct right_map_view_type
 
 } // namespace detail
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_DETAIL_BIMAP_CORE_HPP

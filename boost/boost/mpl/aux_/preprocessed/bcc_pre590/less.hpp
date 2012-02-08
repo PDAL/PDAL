@@ -9,7 +9,7 @@
 // *Preprocessed* version of the main "less.hpp" header
 // -- DO NOT modify by hand!
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<
       typename Tag1
@@ -79,7 +79,7 @@ BOOST_MPL_AUX_NA_SPEC2(2, 2, less)
 
 }}
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<>
 struct less_impl< integral_c_tag,integral_c_tag >

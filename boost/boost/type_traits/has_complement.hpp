@@ -12,13 +12,13 @@
 #define BOOST_TT_TRAIT_NAME has_complement
 #define BOOST_TT_TRAIT_OP ~
 #define BOOST_TT_FORBIDDEN_IF\
-   ::boost::type_traits::ice_or<\
+   ::pdalboost::type_traits::ice_or<\
       /* pointer */\
-      ::boost::is_pointer< Rhs_noref >::value,\
+      ::pdalboost::is_pointer< Rhs_noref >::value,\
       /* fundamental non integral */\
-      ::boost::type_traits::ice_and<\
-         ::boost::is_fundamental< Rhs_noref >::value,\
-         ::boost::type_traits::ice_not< ::boost::is_integral< Rhs_noref >::value >::value\
+      ::pdalboost::type_traits::ice_and<\
+         ::pdalboost::is_fundamental< Rhs_noref >::value,\
+         ::pdalboost::type_traits::ice_not< ::pdalboost::is_integral< Rhs_noref >::value >::value\
       >::value\
    >::value
 

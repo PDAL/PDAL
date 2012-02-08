@@ -15,7 +15,7 @@
 #include <boost/spirit/home/classic/utility/chset.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -27,16 +27,16 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 namespace utility { namespace impl {
     template <typename CharT>
     inline void
-    detach(boost::shared_ptr<basic_chset<CharT> >& ptr)
+    detach(pdalboost::shared_ptr<basic_chset<CharT> >& ptr)
     {
         if (!ptr.unique())
-            ptr = boost::shared_ptr<basic_chset<CharT> >
+            ptr = pdalboost::shared_ptr<basic_chset<CharT> >
                 (new basic_chset<CharT>(*ptr));
     }
 
     template <typename CharT>
     inline void
-    detach_clear(boost::shared_ptr<basic_chset<CharT> >& ptr)
+    detach_clear(pdalboost::shared_ptr<basic_chset<CharT> >& ptr)
     {
         if (ptr.unique())
             ptr->clear();
@@ -45,7 +45,7 @@ namespace utility { namespace impl {
     }
 
     template <typename CharT, typename CharT2>
-    void construct_chset(boost::shared_ptr<basic_chset<CharT> >& ptr,
+    void construct_chset(pdalboost::shared_ptr<basic_chset<CharT> >& ptr,
             CharT2 const* definition)
     {
         CharT2 ch = *definition++;
@@ -76,7 +76,7 @@ namespace utility { namespace impl {
 #if BOOST_WORKAROUND(BOOST_MSVC, < 1300)
 
     template <typename CharT, typename FakeT>
-    void chset_negated_set(boost::shared_ptr<basic_chset<CharT> > &ptr, chlit<CharT> const &ch,
+    void chset_negated_set(pdalboost::shared_ptr<basic_chset<CharT> > &ptr, chlit<CharT> const &ch,
             FakeT)
     {
         if(ch.ch != (std::numeric_limits<CharT>::min)()) {
@@ -88,7 +88,7 @@ namespace utility { namespace impl {
     }
     
     template <typename CharT, typename FakeT>
-    void chset_negated_set(boost::shared_ptr<basic_chset<CharT> > &ptr,
+    void chset_negated_set(pdalboost::shared_ptr<basic_chset<CharT> > &ptr,
             spirit::range<CharT> const &rng, FakeT)
     {
         if(rng.first != (std::numeric_limits<CharT>::min)()) {
@@ -360,7 +360,7 @@ chset<CharT>::operator^=(chset const& x)
 ///////////////////////////////////////////////////////////////////////////////
 BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 
-}} // namespace boost::spirit
+}} // namespace pdalboost::spirit
 
 #endif
 

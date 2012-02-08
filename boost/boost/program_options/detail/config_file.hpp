@@ -31,7 +31,7 @@
 
 
 
-namespace boost { namespace program_options { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options { namespace detail {
 
     /** Standalone parser for config files in ini-line format.
         The parser is a model of single-pass lvalue iterator, and

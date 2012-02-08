@@ -11,7 +11,7 @@
 #pragma once
 #endif
 
-namespace boost { namespace spirit { namespace support { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace support { namespace detail
 {
     ///////////////////////////////////////////////////////////////////////////
     //  A closed range (first, last)

@@ -13,7 +13,7 @@
 #include <boost/spirit/home/support/utree/utree_traits_fwd.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     template <typename Exposed, typename Transformed>
     struct default_transform_attribute
@@ -77,18 +77,18 @@ namespace boost { namespace spirit { namespace qi
     {};
 
     template <typename Exposed, typename Transformed>
-    struct transform_attribute<boost::optional<Exposed>, Transformed
-      , typename disable_if<is_same<boost::optional<Exposed>, Transformed> >::type>
+    struct transform_attribute<pdalboost::optional<Exposed>, Transformed
+      , typename disable_if<is_same<pdalboost::optional<Exposed>, Transformed> >::type>
     {
         typedef Transformed& type;
-        static Transformed& pre(boost::optional<Exposed>& val)
+        static Transformed& pre(pdalboost::optional<Exposed>& val)
         {
             if (!val)
                 val = Transformed();
-            return boost::get<Transformed>(val);
+            return pdalboost::get<Transformed>(val);
         }
-        static void post(boost::optional<Exposed>&, Transformed const&) {}
-        static void fail(boost::optional<Exposed>& val)
+        static void post(pdalboost::optional<Exposed>&, Transformed const&) {}
+        static void fail(pdalboost::optional<Exposed>& val)
         {
              val = none_t();    // leave optional uninitialized if rhs failed
         }
@@ -141,7 +141,7 @@ namespace boost { namespace spirit { namespace qi
 }}}
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     template <typename Exposed, typename Transformed>
     struct transform_attribute<Exposed, Transformed, qi::domain>

@@ -16,9 +16,7 @@
 #include <boost/exception/detail/object_hex_dump.hpp>
 #include <boost/assert.hpp>
 
-namespace
-boost
-    {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace
     exception_detail
         {

@@ -22,7 +22,7 @@
 #include <string>
 
 using std::make_pair;
-namespace fs = boost::filesystem;
+namespace fs = pdalboost::filesystem;
 
 int cpp_main( int argc, char* argv[])
 {
@@ -102,7 +102,7 @@ int cpp_main( int argc, char* argv[])
     "_detail_directory_symlink"  // internal use only; never exposed to users
   };
 
-  std::cout << "boost::filesystem::status().type() is " << types[stat.type()] << std::endl;
+  std::cout << "pdalboost::filesystem::status().type() is " << types[stat.type()] << std::endl;
 
   return 0;
 }

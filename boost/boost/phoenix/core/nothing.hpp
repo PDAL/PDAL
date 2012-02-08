@@ -14,7 +14,7 @@
 #include <boost/phoenix/core/expression.hpp>
 #include <boost/phoenix/core/value.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     /////////////////////////////////////////////////////////////////////////////
     //

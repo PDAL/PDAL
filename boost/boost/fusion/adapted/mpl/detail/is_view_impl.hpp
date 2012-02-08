@@ -10,7 +10,7 @@
 
 #include <boost/mpl/bool.hpp>
 
-namespace boost { namespace fusion 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion 
 {
     struct mpl_sequence_tag;
 

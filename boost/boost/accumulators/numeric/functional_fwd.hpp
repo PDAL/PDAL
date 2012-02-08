@@ -14,7 +14,7 @@
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/is_const.hpp>
 
-namespace boost { namespace numeric
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric
 {
     // For using directives -- this namespace may be re-opened elsewhere
     namespace operators
@@ -216,6 +216,6 @@ namespace boost { namespace numeric
     template<typename T>
     struct zero_or_default;
 
-}} // namespace boost::numeric
+}} // namespace pdalboost::numeric
 
 #endif

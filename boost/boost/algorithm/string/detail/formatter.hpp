@@ -21,7 +21,7 @@
 
 //  generic replace functors -----------------------------------------------//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
         namespace detail {
 
@@ -39,7 +39,7 @@ namespace boost {
             public:
                 // Construction
                 const_formatF(const RangeT& Format) :
-                    m_Format(::boost::begin(Format), ::boost::end(Format)) {}
+                    m_Format(::pdalboost::begin(Format), ::pdalboost::end(Format)) {}
 
                 // Operation
 #if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))
@@ -70,7 +70,7 @@ namespace boost {
                 template< typename Range2T >
                 const RangeT& operator()(const Range2T& Replace) const
                 {
-                    return RangeT(::boost::begin(Replace), ::boost::end(Replace));
+                    return RangeT(::pdalboost::begin(Replace), ::pdalboost::end(Replace));
                 }
             };
 
@@ -104,7 +104,7 @@ namespace boost {
                       BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type>
                   operator()(const RangeT& Replace) const
                   {
-                      return m_Finder(::boost::begin(Replace), ::boost::end(Replace));
+                      return m_Finder(::pdalboost::begin(Replace), ::pdalboost::end(Replace));
                   }
 
             private:
@@ -114,6 +114,6 @@ namespace boost {
 
         } // namespace detail
     } // namespace algorithm
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // BOOST_STRING_FORMATTER_DETAIL_HPP

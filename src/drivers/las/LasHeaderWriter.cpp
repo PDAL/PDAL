@@ -45,7 +45,7 @@
 #include "ZipPoint.hpp"
 
 #include <pdal/drivers/las/Header.hpp>
-#include <pdal/external/boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <boost/scoped_ptr.hpp>
 
 
@@ -166,7 +166,7 @@ void LasHeaderWriter::write()
     // 3-6. GUID data
     {
         boost::uint8_t d[16];
-		pdal::external::boost::uuids::uuid u = m_header.GetProjectId();
+        boost::uuids::uuid u = m_header.GetProjectId();
         // BUG: this following is to maintain compatability with the liblas driver
         // I have no idea why I need to do this.
         d[0] = u.data[3];

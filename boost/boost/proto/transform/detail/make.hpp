@@ -145,7 +145,7 @@
         template<typename Expr, typename State, typename Data>
         struct impl : transform_impl<Expr, State, Data>
         {
-            /// \brief <tt>boost::result_of\<make\<Object\>(Expr, State, Data)\>::type</tt>
+            /// \brief <tt>pdalboost::result_of\<make\<Object\>(Expr, State, Data)\>::type</tt>
             typedef typename detail::make_if_<Object, Expr, State, Data>::type result_type;
 
             /// Let \c ax be <tt>when\<_, Ax\>()(e, s, d)</tt>

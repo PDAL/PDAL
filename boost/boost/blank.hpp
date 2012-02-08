@@ -25,7 +25,7 @@
 #include "boost/type_traits/is_pod.hpp"
 #include "boost/type_traits/is_stateless.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 struct blank
 {
@@ -101,6 +101,6 @@ inline BOOST_TEMPLATED_STREAM(ostream, E,T)& operator<<(
 
 #endif // BOOST_NO_IOSTREAM
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BLANK_HPP

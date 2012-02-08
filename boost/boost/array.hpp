@@ -34,8 +34,8 @@
 #if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)  
 # pragma warning(push)  
 # pragma warning(disable:4996) // 'std::equal': Function call with parameters that may be unsafe
-# pragma warning(disable:4510) // boost::array<T,N>' : default constructor could not be generated 
-# pragma warning(disable:4610) // warning C4610: class 'boost::array<T,N>' can never be instantiated - user defined constructor required 
+# pragma warning(disable:4510) // pdalboost::array<T,N>' : default constructor could not be generated 
+# pragma warning(disable:4610) // warning C4610: class 'pdalboost::array<T,N>' can never be instantiated - user defined constructor required 
 #endif
 
 #include <cstddef>
@@ -52,7 +52,7 @@
 #include <boost/config.hpp>
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
     template<class T, std::size_t N>
     class array {
@@ -162,7 +162,7 @@ namespace boost {
         // swap (note: linear complexity)
         void swap (array<T,N>& y) {
             for (size_type i = 0; i < N; ++i)
-                boost::swap(elems[i],y.elems[i]);
+                pdalboost::swap(elems[i],y.elems[i]);
         }
 
         // direct access to data (read-only)
@@ -190,7 +190,7 @@ namespace boost {
         static void rangecheck (size_type i) {
             if (i >= size()) {
                 std::out_of_range e("array<>: index out of range");
-                boost::throw_exception(e);
+                pdalboost::throw_exception(e);
             }
         }
 
@@ -321,7 +321,7 @@ namespace boost {
         // check range (may be private because it is static)
         static reference failed_rangecheck () {
                 std::out_of_range e("attempt to access element of an empty array");
-                boost::throw_exception(e);
+                pdalboost::throw_exception(e);
 #if defined(BOOST_NO_EXCEPTIONS) || (!defined(BOOST_MSVC) && !defined(__PATHSCALE__))
                 //
                 // We need to return something here to keep
@@ -369,7 +369,7 @@ namespace boost {
 
 #if defined(__SUNPRO_CC)
 //  Trac ticket #4757; the Sun Solaris compiler can't handle
-//  syntax like 'T(&get_c_array(boost::array<T,N>& arg))[N]'
+//  syntax like 'T(&get_c_array(pdalboost::array<T,N>& arg))[N]'
 //  
 //  We can't just use this for all compilers, because the 
 //      borland compilers can't handle this form. 
@@ -380,30 +380,30 @@ namespace boost {
        };
     }
     
-   // Specific for boost::array: simply returns its elems data member.
+   // Specific for pdalboost::array: simply returns its elems data member.
    template <typename T, std::size_t N>
-   typename detail::c_array<T,N>::type& get_c_array(boost::array<T,N>& arg)
+   typename detail::c_array<T,N>::type& get_c_array(pdalboost::array<T,N>& arg)
    {
        return arg.elems;
    }
 
-   // Specific for boost::array: simply returns its elems data member.
+   // Specific for pdalboost::array: simply returns its elems data member.
    template <typename T, std::size_t N>
-   typename const detail::c_array<T,N>::type& get_c_array(const boost::array<T,N>& arg)
+   typename const detail::c_array<T,N>::type& get_c_array(const pdalboost::array<T,N>& arg)
    {
        return arg.elems;
    }
 #else
-// Specific for boost::array: simply returns its elems data member.
+// Specific for pdalboost::array: simply returns its elems data member.
     template <typename T, std::size_t N>
-    T(&get_c_array(boost::array<T,N>& arg))[N]
+    T(&get_c_array(pdalboost::array<T,N>& arg))[N]
     {
         return arg.elems;
     }
     
     // Const version.
     template <typename T, std::size_t N>
-    const T(&get_c_array(const boost::array<T,N>& arg))[N]
+    const T(&get_c_array(const pdalboost::array<T,N>& arg))[N]
     {
         return arg.elems;
     }
@@ -427,7 +427,7 @@ namespace boost {
     }
 #endif
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 
 #if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)  

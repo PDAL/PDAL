@@ -18,7 +18,7 @@
 #  include <ostream>
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace date_time {
 
 

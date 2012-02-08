@@ -39,7 +39,7 @@
 #pragma wave option(preserve: 1)
 #endif
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename Expr> struct actor;
     

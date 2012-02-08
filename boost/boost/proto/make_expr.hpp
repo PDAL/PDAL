@@ -50,12 +50,12 @@
 # pragma warning(disable: 4180) // qualifier applied to function type has no meaning; ignored
 #endif
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
 /// INTERNAL ONLY
 ///
 #define BOOST_PROTO_AS_CHILD_TYPE(Z, N, DATA)                                                   \
-    typename boost::proto::detail::protoify<                                                    \
+    typename pdalboost::proto::detail::protoify<                                                    \
         BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3, 0, DATA), N)                                        \
       , BOOST_PP_TUPLE_ELEM(3, 2, DATA)                                                         \
     >::result_type                                                                              \
@@ -64,7 +64,7 @@ namespace boost { namespace proto
 /// INTERNAL ONLY
 ///
 #define BOOST_PROTO_AS_CHILD(Z, N, DATA)                                                        \
-    boost::proto::detail::protoify<                                                             \
+    pdalboost::proto::detail::protoify<                                                             \
         BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3, 0, DATA), N)                                        \
       , BOOST_PP_TUPLE_ELEM(3, 2, DATA)                                                         \
     >()(BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3, 1, DATA), N))                                       \
@@ -83,12 +83,12 @@ namespace boost { namespace proto
         {};
 
         template<typename T, typename Domain>
-        struct protoify<boost::reference_wrapper<T>, Domain>
+        struct protoify<pdalboost::reference_wrapper<T>, Domain>
           : Domain::template as_child<T>
         {};
 
         template<typename T, typename Domain>
-        struct protoify<boost::reference_wrapper<T> const, Domain>
+        struct protoify<pdalboost::reference_wrapper<T> const, Domain>
           : Domain::template as_child<T>
         {};
 
@@ -154,10 +154,10 @@ namespace boost { namespace proto
         >
         {
             /// If \c Tag is <tt>tag::terminal</tt>, then \c type is a
-            /// typedef for <tt>boost::result_of\<Domain(expr\<tag::terminal,
+            /// typedef for <tt>pdalboost::result_of\<Domain(expr\<tag::terminal,
             /// term\<A0\> \>)\>::type</tt>.
             ///
-            /// Otherwise, \c type is a typedef for <tt>boost::result_of\<Domain(expr\<Tag,
+            /// Otherwise, \c type is a typedef for <tt>pdalboost::result_of\<Domain(expr\<Tag,
             /// listN\< as_child\<A0\>::type, ... as_child\<AN\>::type\>)
             /// \>::type</tt>, where \c N is the number of non-void template
             /// arguments, and <tt>as_child\<A\>::type</tt> is evaluated as
@@ -165,15 +165,15 @@ namespace boost { namespace proto
             ///
             /// \li If <tt>is_expr\<A\>::value</tt> is \c true, then the
             /// child type is \c A.
-            /// \li If \c A is <tt>B &</tt> or <tt>cv boost::reference_wrapper\<B\></tt>,
+            /// \li If \c A is <tt>B &</tt> or <tt>cv pdalboost::reference_wrapper\<B\></tt>,
             /// and <tt>is_expr\<B\>::value</tt> is \c true, then the
             /// child type is <tt>B &</tt>.
             /// \li If <tt>is_expr\<A\>::value</tt> is \c false, then the
-            /// child type is <tt>boost::result_of\<Domain(expr\<tag::terminal, term\<A\> \>
+            /// child type is <tt>pdalboost::result_of\<Domain(expr\<tag::terminal, term\<A\> \>
             /// )\>::type</tt>.
-            /// \li If \c A is <tt>B &</tt> or <tt>cv boost::reference_wrapper\<B\></tt>,
+            /// \li If \c A is <tt>B &</tt> or <tt>cv pdalboost::reference_wrapper\<B\></tt>,
             /// and <tt>is_expr\<B\>::value</tt> is \c false, then the
-            /// child type is <tt>boost::result_of\<Domain(expr\<tag::terminal, term\<B &\> \>
+            /// child type is <tt>pdalboost::result_of\<Domain(expr\<tag::terminal, term\<B &\> \>
             /// )\>::type</tt>.
             typedef
                 typename detail::make_expr_<
@@ -376,7 +376,7 @@ namespace boost { namespace proto
     /// \c default_domain otherwise.
     ///
     /// Let \c wrap_(x) be defined such that:
-    /// \li If \c x is a <tt>boost::reference_wrapper\<\></tt>,
+    /// \li If \c x is a <tt>pdalboost::reference_wrapper\<\></tt>,
     /// \c wrap_(x) is equivalent to <tt>as_child\<Domain\>(x.get())</tt>.
     /// \li Otherwise, \c wrap_(x) is equivalent to
     /// <tt>as_expr\<Domain\>(x)</tt>.

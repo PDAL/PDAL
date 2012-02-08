@@ -18,7 +18,7 @@
 #include <memory>
 #include <new>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail{
 
@@ -203,10 +203,10 @@ void destroy(const Type* p)
 #pragma warning(pop)
 #endif
 
-} /* namespace boost::detail::allocator */
+} /* namespace pdalboost::detail::allocator */
 
-} /* namespace boost::detail */
+} /* namespace pdalboost::detail */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

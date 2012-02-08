@@ -11,7 +11,7 @@
 
 #include <iterator>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace date_time {
   //! An iterator over dates with varying resolution (day, week, month, year, etc)
   enum date_resolutions {day, week, months, year, decade, century, NumDateResolutions};

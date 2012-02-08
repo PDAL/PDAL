@@ -15,7 +15,7 @@
 
 #include "boost/config.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail { namespace variant {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,6 +43,6 @@ inline const T& cast_storage(
 }
 
 }} // namespace detail::variant
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_DETAIL_CAST_STORAGE_HPP

@@ -36,7 +36,7 @@
 #   include "boost/preprocessor/repeat.hpp"
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail { namespace variant {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,7 +88,7 @@ struct make_initializer_node
 
             static int initialize(void* dest, param_T operand)
             {
-                typedef typename boost::detail::make_reference_content<
+                typedef typename pdalboost::detail::make_reference_content<
                       recursive_enabled_T
                     >::type internal_T;
 
@@ -164,7 +164,7 @@ public: // static functions
             , BOOST_PP_CAT(param_T,N) operand \
             ) \
         { \
-            typedef typename boost::detail::make_reference_content< \
+            typedef typename pdalboost::detail::make_reference_content< \
                   BOOST_PP_CAT(recursive_enabled_T,N) \
                 >::type internal_T; \
             \
@@ -202,7 +202,7 @@ struct preprocessor_list_initializer<
 #endif // BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE workaround
 
 }} // namespace detail::variant
-} // namespace boost
+} // namespace pdalboost
 
 ///////////////////////////////////////////////////////////////////////////////
 // macro BOOST_VARIANT_AUX_INITIALIZER_T
@@ -215,14 +215,14 @@ struct preprocessor_list_initializer<
 #if !defined(BOOST_NO_USING_DECLARATION_OVERLOADS_FROM_TYPENAME_BASE)
 
 #define BOOST_VARIANT_AUX_INITIALIZER_T( mpl_seq, typename_base ) \
-    ::boost::mpl::iter_fold< \
+    ::pdalboost::mpl::iter_fold< \
           mpl_seq \
-        , ::boost::mpl::pair< \
-              ::boost::detail::variant::initializer_root \
-            , ::boost::mpl::int_<0> \
+        , ::pdalboost::mpl::pair< \
+              ::pdalboost::detail::variant::initializer_root \
+            , ::pdalboost::mpl::int_<0> \
             > \
-        , ::boost::mpl::protect< \
-              ::boost::detail::variant::make_initializer_node \
+        , ::pdalboost::mpl::protect< \
+              ::pdalboost::detail::variant::make_initializer_node \
             > \
         >::type::first \
     /**/
@@ -238,8 +238,8 @@ struct preprocessor_list_initializer<
 #   else // MSVC7 and below
 
     #define BOOST_VARIANT_AUX_PP_INITIALIZER_ENUM_PARAM_TYPE(z,N,T) \
-        ::boost::call_traits< \
-              ::boost::unwrap_recursive<BOOST_PP_CAT(T,N)>::type \
+        ::pdalboost::call_traits< \
+              ::pdalboost::unwrap_recursive<BOOST_PP_CAT(T,N)>::type \
             >::param_type \
         /**/
 
@@ -255,7 +255,7 @@ struct preprocessor_list_initializer<
 #   endif // MSVC7 workaround
 
 #define BOOST_VARIANT_AUX_INITIALIZER_T( mpl_seq, typename_base ) \
-    ::boost::detail::variant::preprocessor_list_initializer< \
+    ::pdalboost::detail::variant::preprocessor_list_initializer< \
           BOOST_VARIANT_AUX_PP_INITIALIZER_TEMPLATE_ARGS(typename_base) \
         > \
     /**/

@@ -30,7 +30,7 @@
 // Must come last.
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 // Forward declarations
 class file_descriptor_source;

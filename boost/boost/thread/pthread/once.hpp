@@ -20,18 +20,17 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
     struct once_flag
     {
-        boost::uintmax_t epoch;
+        pdalboost::uintmax_t epoch;
     };
 
     namespace detail
     {
-        BOOST_THREAD_DECL boost::uintmax_t& get_once_per_thread_epoch();
-        BOOST_THREAD_DECL extern boost::uintmax_t once_global_epoch;
+        BOOST_THREAD_DECL pdalboost::uintmax_t& get_once_per_thread_epoch();
+        BOOST_THREAD_DECL extern pdalboost::uintmax_t once_global_epoch;
         BOOST_THREAD_DECL extern pthread_mutex_t once_epoch_mutex;
         BOOST_THREAD_DECL extern pthread_cond_t once_epoch_cv;
     }
@@ -45,10 +44,10 @@ namespace boost
     template<typename Function>
     void call_once(once_flag& flag,Function f)
     {
-        static boost::uintmax_t const uninitialized_flag=BOOST_ONCE_INITIAL_FLAG_VALUE;
-        static boost::uintmax_t const being_initialized=uninitialized_flag+1;
-        boost::uintmax_t const epoch=flag.epoch;
-        boost::uintmax_t& this_thread_epoch=detail::get_once_per_thread_epoch();
+        static pdalboost::uintmax_t const uninitialized_flag=BOOST_ONCE_INITIAL_FLAG_VALUE;
+        static pdalboost::uintmax_t const being_initialized=uninitialized_flag+1;
+        pdalboost::uintmax_t const epoch=flag.epoch;
+        pdalboost::uintmax_t& this_thread_epoch=detail::get_once_per_thread_epoch();
         
         if(epoch<this_thread_epoch)
         {

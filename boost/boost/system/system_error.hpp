@@ -13,8 +13,7 @@
 #include <cassert>
 #include <boost/system/error_code.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace system
   {
     //  class system_error  ------------------------------------------------------------//
@@ -73,7 +72,7 @@ namespace boost
     }
 
   } // namespace system
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_SYSTEM_ERROR_HPP
 

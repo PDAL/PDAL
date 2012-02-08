@@ -19,7 +19,7 @@
 #include "boost/preprocessor/cat.hpp"
 #include "boost/preprocessor/enum.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail { namespace variant {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -55,6 +55,6 @@ public: // metafunction result
 };
 
 }} // namespace detail::variant
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_DETAIL_MAKE_VARIANT_LIST_HPP

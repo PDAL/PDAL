@@ -10,7 +10,7 @@
 #include <boost/spirit/home/phoenix/core/actor.hpp>
 #include <boost/mpl/bool.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
 ///////////////////////////////////////////////////////////////////////////////
 //

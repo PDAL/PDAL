@@ -25,7 +25,7 @@
 #include <boost/proto/detail/as_lvalue.hpp>
 #include <boost/proto/detail/poly_function.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     /// \brief Wrap \c PrimitiveTransform so that <tt>when\<\></tt> knows
     /// it is callable. Requires that the parameter is actually a
@@ -120,8 +120,8 @@ namespace boost { namespace proto
         /// \param d An arbitrary data
 
         /// If \c Fun is a nullary PolymorphicFunctionObject, \c type is a typedef
-        /// for <tt>boost::result_of\<Fun()\>::type</tt>. Otherwise, it is
-        /// a typedef for <tt>boost::result_of\<Fun(Expr, State, Data)\>::type</tt>.
+        /// for <tt>pdalboost::result_of\<Fun()\>::type</tt>. Otherwise, it is
+        /// a typedef for <tt>pdalboost::result_of\<Fun(Expr, State, Data)\>::type</tt>.
         template<typename Expr, typename State, typename Data>
         struct impl
           : impl2<Expr, State, Data, detail::is_transform_<Fun>::value>
@@ -174,8 +174,8 @@ namespace boost { namespace proto
         /// Let \c x be <tt>when\<_, A0\>()(e, s, d)</tt> and \c X
         /// be the type of \c x.
         /// If \c Fun is a unary PolymorphicFunctionObject that accepts \c x,
-        /// then \c type is a typedef for <tt>boost::result_of\<Fun(X)\>::type</tt>.
-        /// Otherwise, it is a typedef for <tt>boost::result_of\<Fun(X, State, Data)\>::type</tt>.
+        /// then \c type is a typedef for <tt>pdalboost::result_of\<Fun(X)\>::type</tt>.
+        /// Otherwise, it is a typedef for <tt>pdalboost::result_of\<Fun(X, State, Data)\>::type</tt>.
 
         /// Either call the PolymorphicFunctionObject with 1 argument:
         /// the result of applying the \c A0 transform; or
@@ -250,8 +250,8 @@ namespace boost { namespace proto
             /// be the type of \c y.
             /// If \c Fun is a binary PolymorphicFunction object that accepts \c x
             /// and \c y, then \c type is a typedef for
-            /// <tt>boost::result_of\<Fun(X, Y)\>::type</tt>. Otherwise, it is
-            /// a typedef for <tt>boost::result_of\<Fun(X, Y, Data)\>::type</tt>.
+            /// <tt>pdalboost::result_of\<Fun(X, Y)\>::type</tt>. Otherwise, it is
+            /// a typedef for <tt>pdalboost::result_of\<Fun(X, Y, Data)\>::type</tt>.
 
         /// Either call the PolymorphicFunctionObject with 2 arguments:
         /// the result of applying the \c A0 transform, and the
@@ -350,6 +350,6 @@ namespace boost { namespace proto
       : mpl::true_
     {};
 
-}} // namespace boost::proto
+}} // namespace pdalboost::proto
 
 #endif

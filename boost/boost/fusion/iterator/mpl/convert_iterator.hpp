@@ -11,7 +11,7 @@
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/bool.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     template <typename Iterator>
     struct mpl_iterator; // forward declaration

@@ -10,7 +10,7 @@
 #include <boost/phoenix/core/actor.hpp>
 #include <boost/fusion/support/void.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename T, typename U = typename is_actor<T>::type >
     struct as_actor

@@ -54,9 +54,9 @@
 #include <locale>
 #include <list>
 
-namespace fs = boost::filesystem;
-namespace bs = boost::system;
-using boost::filesystem::path;
+namespace fs = pdalboost::filesystem;
+namespace bs = pdalboost::system;
+using pdalboost::filesystem::path;
 using std::cout;
 using std::endl;
 using std::string;
@@ -75,9 +75,9 @@ using std::wstring;
 namespace
 {
 
-  boost::system::error_code ec;
-  const boost::system::error_code ok;
-  const boost::system::error_code ng(-1, boost::system::system_category());
+  pdalboost::system::error_code ec;
+  const pdalboost::system::error_code ok;
+  const pdalboost::system::error_code ng(-1, pdalboost::system::system_category());
 
   std::string platform(BOOST_PLATFORM);
 
@@ -86,7 +86,7 @@ namespace
   {
     if (source == expected) return;
 
-    ++::boost::detail::test_errors();
+    ++::pdalboost::detail::test_errors();
 
     std::cout << file;
     std::wcout << L'(' << line << L"): source.wstring(): \""
@@ -105,7 +105,7 @@ namespace
   {
     if (p.native() == expected) return;
 
-    ++::boost::detail::test_errors();
+    ++::pdalboost::detail::test_errors();
 
     std::cout << file  << '(' << line << "): native() is not equal expected\n"
       "  native---: " << std::hex;
@@ -124,7 +124,7 @@ namespace
   {
     if (value == expected) return;
 
-    ++::boost::detail::test_errors();
+    ++::pdalboost::detail::test_errors();
 
     std::cout << file;
 
@@ -137,7 +137,7 @@ namespace
   {
     if (ok) return;
 
-    ++::boost::detail::test_errors();
+    ++::pdalboost::detail::test_errors();
 
     std::cout << file << '(' << line << "): test failed\n";
   }
@@ -151,8 +151,8 @@ namespace
 
   class Base {};
   class Derived : public Base {};
-  void fun(const boost::filesystem::path&) {}
-  void fun(const boost::shared_ptr< Base >&) {}
+  void fun(const pdalboost::filesystem::path&) {}
+  void fun(const pdalboost::shared_ptr< Base >&) {}
 
   //  test_constructors  ---------------------------------------------------------------//
 
@@ -233,7 +233,7 @@ namespace
     // easy-to-make coding errors
     // path e1(x0, path::codecvt());  // fails to compile, and that is OK
 
-    boost::shared_ptr< Derived > pDerived( new Derived() ); 
+    pdalboost::shared_ptr< Derived > pDerived( new Derived() ); 
     fun( pDerived );  // tests constructor member template enable_if working correctly;
                       // will fail to compile if enable_if not taking path off the table
   }
@@ -400,7 +400,7 @@ namespace
   {
     std::cout << "testing relationals..." << std::endl;
 
-    boost::hash<path> hash;
+    pdalboost::hash<path> hash;
 
 # ifdef BOOST_WINDOWS_API
     // this is a critical use case to meet user expectations
@@ -898,8 +898,7 @@ namespace
 
 }  // unnamed namespace
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace filesystem
 {
   namespace path_traits
@@ -942,7 +941,7 @@ namespace filesystem
     }
   }  // namespace path_traits
 }  // namespace filesystem
-}  // namespace boost
+}  // namespace pdalboost
 
 namespace
 {
@@ -1033,5 +1032,5 @@ int cpp_main(int, char*[])
   if (foo == bar)
     cout << "unintended consequence\n";
 
-  return ::boost::report_errors();
+  return ::pdalboost::report_errors();
 }

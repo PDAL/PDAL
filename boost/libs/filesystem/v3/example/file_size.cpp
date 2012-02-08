@@ -11,7 +11,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
 
-namespace fs = boost::filesystem;
+namespace fs = pdalboost::filesystem;
 
 int main( int argc, char* argv[] )
 {
@@ -22,7 +22,7 @@ int main( int argc, char* argv[] )
     return 1;
   }
 
-  std::cout << "sizeof(intmax_t) is " << sizeof(boost::intmax_t) << '\n';
+  std::cout << "sizeof(intmax_t) is " << sizeof(pdalboost::intmax_t) << '\n';
 
   fs::path p( argv[1] );
 

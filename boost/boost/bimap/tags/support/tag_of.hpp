@@ -21,7 +21,7 @@
 #include <boost/bimap/tags/tagged.hpp>
 #include <boost/bimap/detail/debug/static_error.hpp>
 
-/** \struct boost::bimaps::tags::support::tag_of
+/** \struct pdalboost::bimaps::tags::support::tag_of
 \brief Metafunction to obtain the tag of a type.
 
 \code
@@ -43,7 +43,7 @@ See also tagged, value_type_of.
 
 #ifndef BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace tags {
 namespace support {
@@ -67,7 +67,7 @@ struct tag_of< tagged< Type, Tag > >
 } // namespace support
 } // namespace tags
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 

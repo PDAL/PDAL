@@ -18,7 +18,7 @@
 #include <boost/mpl/find_if.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     // Finds out whether a component handles container attributes intrinsically
     // (or whether container attributes need to be split up separately).

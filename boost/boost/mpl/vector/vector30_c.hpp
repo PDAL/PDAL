@@ -34,7 +34,7 @@
 #   include <boost/preprocessor/iterate.hpp>
 #   include <boost/config.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 #   define BOOST_PP_ITERATION_PARAMS_1 \
     (3,(21, 30, <boost/mpl/vector/aux_/numbered_c.hpp>))

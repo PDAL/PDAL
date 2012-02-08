@@ -23,7 +23,7 @@
 #include <boost/multi_index/detail/msvc_index_specifier.hpp>
 #include <boost/static_assert.hpp>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -82,6 +82,6 @@ struct multi_index_base_type:nth_layer<0,Value,IndexSpecifierList,Allocator>
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

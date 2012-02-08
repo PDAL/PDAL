@@ -21,11 +21,11 @@
 #include <boost/spirit/home/classic/namespace.hpp>
 #include <boost/spirit/home/classic/core/assert.hpp> // for BOOST_SPIRIT_ASSERT
 #include <boost/spirit/home/classic/iterator/fixed_size_queue.hpp>
-#include <boost/detail/iterator.hpp> // for boost::detail::iterator_traits
+#include <boost/detail/iterator.hpp> // for pdalboost::detail::iterator_traits
 
 #include <boost/spirit/home/classic/iterator/multi_pass_fwd.hpp>
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -198,7 +198,7 @@ class buf_id_check
         {
             if (buf_id != *shared_buf_id)
             {
-                boost::throw_exception(illegal_backtracking());
+                pdalboost::throw_exception(illegal_backtracking());
             }
         }
 
@@ -492,7 +492,7 @@ class inner
 {
     private:
         typedef
-            typename boost::detail::iterator_traits<InputT>::value_type
+            typename pdalboost::detail::iterator_traits<InputT>::value_type
             result_type;
 
     public:
@@ -517,13 +517,13 @@ class inner
 
     public:
         typedef
-            typename boost::detail::iterator_traits<InputT>::difference_type
+            typename pdalboost::detail::iterator_traits<InputT>::difference_type
             difference_type;
         typedef
-            typename boost::detail::iterator_traits<InputT>::pointer
+            typename pdalboost::detail::iterator_traits<InputT>::pointer
             pointer;
         typedef
-            typename boost::detail::iterator_traits<InputT>::reference
+            typename pdalboost::detail::iterator_traits<InputT>::reference
             reference;
 
     protected:
@@ -551,7 +551,7 @@ class inner
         }
 
         typedef
-            typename boost::detail::iterator_traits<InputT>::value_type
+            typename pdalboost::detail::iterator_traits<InputT>::value_type
             value_t;
         void swap(inner& x)
         {
@@ -763,14 +763,14 @@ namespace iterator_ { namespace impl {
 // Meta-function to generate a std::iterator<> base class for multi_pass. This
 //  is used mainly to improve conformance of compilers not supporting PTS
 //  and thus relying on inheritance to recognize an iterator.
-// We are using boost::iterator<> because it offers an automatic workaround
+// We are using pdalboost::iterator<> because it offers an automatic workaround
 //  for broken std::iterator<> implementations.
 template <typename InputPolicyT, typename InputT>
 struct iterator_base_creator
 {
     typedef typename InputPolicyT::BOOST_NESTED_TEMPLATE inner<InputT> input_t;
 
-    typedef boost::iterator
+    typedef pdalboost::iterator
     <
         std::forward_iterator_tag,
         typename input_t::value_type,

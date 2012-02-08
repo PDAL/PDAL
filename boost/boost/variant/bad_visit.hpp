@@ -15,7 +15,7 @@
 
 #include <exception>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //////////////////////////////////////////////////////////////////////////
 // class bad_visit
@@ -30,12 +30,12 @@ public: // std::exception interface
 
     virtual const char * what() const throw()
     {
-        return "boost::bad_visit: "
-               "failed visitation using boost::apply_visitor";
+        return "pdalboost::bad_visit: "
+               "failed visitation using pdalboost::apply_visitor";
     }
 
 };
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_BAD_VISIT_HPP

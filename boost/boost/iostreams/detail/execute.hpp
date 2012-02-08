@@ -11,8 +11,8 @@
  * Contact:     turkanis at coderage dot com
 
  * Defines the overloaded function template 
- * boost::iostreams::detail::execute_all() and the function template 
- * boost::iostreams::detail::execute_foreach().
+ * pdalboost::iostreams::detail::execute_all() and the function template 
+ * pdalboost::iostreams::detail::execute_foreach().
  *
  * execute_all() invokes a primary operation and performs a sequence of cleanup 
  * operations, returning the result of the primary operation if no exceptions
@@ -43,7 +43,7 @@
 #include <boost/preprocessor/punctuation/comma_if.hpp>
 #include <boost/utility/result_of.hpp>
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 // Helper for class template execute_traits.
 template<typename Result>
@@ -68,7 +68,7 @@ template< typename Op,
           typename Result = // VC6.5 workaround.
               #if !defined(BOOST_NO_RESULT_OF) && \
                   !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x592))
-                  typename boost::result_of<Op()>::type
+                  typename pdalboost::result_of<Op()>::type
               #else
                   BOOST_DEDUCED_TYPENAME Op::result_type
               #endif
@@ -93,7 +93,7 @@ execute_all(Op op)
    { \
        typename execute_traits<Op>::result_type r; \
        try { \
-           r = boost::iostreams::detail::execute_all( \
+           r = pdalboost::iostreams::detail::execute_all( \
                    op BOOST_PP_COMMA_IF(BOOST_PP_DEC(n)) \
                    BOOST_PP_ENUM_PARAMS(BOOST_PP_DEC(n), c) \
                ); \
@@ -122,12 +122,12 @@ Op execute_foreach(InIt first, InIt last, Op op)
     } catch (...) {
         try {
             ++first;
-            boost::iostreams::detail::execute_foreach(first, last, op);
+            pdalboost::iostreams::detail::execute_foreach(first, last, op);
         } catch (...) { }
         throw;
     }
     ++first;
-    return boost::iostreams::detail::execute_foreach(first, last, op);
+    return pdalboost::iostreams::detail::execute_foreach(first, last, op);
 }
 
 } } } // End namespaces detail, iostreams, boost.

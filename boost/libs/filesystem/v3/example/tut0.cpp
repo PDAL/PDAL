@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
+namespace fs = pdalboost::filesystem;
 
 int main(int argc, char* argv[])
 {

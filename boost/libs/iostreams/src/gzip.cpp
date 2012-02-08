@@ -18,7 +18,7 @@
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/throw_exception.hpp>
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 //------------------Implementation of gzip_header-----------------------------//
 
@@ -30,17 +30,17 @@ void gzip_header::process(char c)
     switch (state_) {
     case s_id1:
         if (value != gzip::magic::id1)
-            boost::throw_exception(gzip_error(gzip::bad_header));
+            pdalboost::throw_exception(gzip_error(gzip::bad_header));
         state_ = s_id2;
         break;
     case s_id2:
         if (value != gzip::magic::id2)
-            boost::throw_exception(gzip_error(gzip::bad_header));
+            pdalboost::throw_exception(gzip_error(gzip::bad_header));
         state_ = s_cm;
         break;
     case s_cm:
         if (value != gzip::method::deflate)
-            boost::throw_exception(gzip_error(gzip::bad_method));
+            pdalboost::throw_exception(gzip_error(gzip::bad_method));
         state_ = s_flg;
         break;
     case s_flg:
@@ -169,6 +169,6 @@ void gzip_footer::reset()
     state_ = s_crc;
 }
 
-} // End namespace boost::iostreams::detail.
+} // End namespace pdalboost::iostreams::detail.
 
 } } // End namespaces iostreams, boost.

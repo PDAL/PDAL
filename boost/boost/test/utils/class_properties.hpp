@@ -35,7 +35,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -154,14 +154,14 @@ public:
     explicit        readonly_property( write_param_t init_value ) : base_prop( init_value ) {}
 
     // access methods
-    arrow_res_t     operator->() const      { return boost::addressof( base_prop::value ); }
+    arrow_res_t     operator->() const      { return pdalboost::addressof( base_prop::value ); }
 };
 
 //____________________________________________________________________________//
 
 #if BOOST_WORKAROUND(__IBMCPP__, BOOST_TESTED_AT(600))
 
-#define BOOST_READONLY_PROPERTY( property_type, friends ) boost::unit_test::readwrite_property<property_type >
+#define BOOST_READONLY_PROPERTY( property_type, friends ) pdalboost::unit_test::readwrite_property<property_type >
 
 #else
 
@@ -169,8 +169,8 @@ public:
 
 #define BOOST_READONLY_PROPERTY( property_type, friends )                           \
 class BOOST_JOIN( readonly_property, __LINE__ )                                     \
-: public boost::unit_test::readonly_property<property_type > {                      \
-    typedef boost::unit_test::readonly_property<property_type > base_prop;          \
+: public pdalboost::unit_test::readonly_property<property_type > {                      \
+    typedef pdalboost::unit_test::readonly_property<property_type > base_prop;          \
     BOOST_PP_SEQ_FOR_EACH( BOOST_READONLY_PROPERTY_DECLARE_FRIEND, ' ', friends )   \
     typedef base_prop::write_param_t  write_param_t;                                \
 public:                                                                             \
@@ -198,8 +198,8 @@ public:
 
     // access methods
     void            set( write_param_t v )  { base_prop::value = v; }
-    arrow_res_t     operator->()            { return boost::addressof( base_prop::value ); }
-    const_arrow_res_t operator->() const    { return boost::addressof( base_prop::value ); }
+    arrow_res_t     operator->()            { return pdalboost::addressof( base_prop::value ); }
+    const_arrow_res_t operator->() const    { return pdalboost::addressof( base_prop::value ); }
 
 #ifndef BOOST_TEST_NO_PROTECTED_USING
     using           base_prop::value;
@@ -210,7 +210,7 @@ public:
 
 } // unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

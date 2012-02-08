@@ -25,20 +25,18 @@
 
 #ifndef BOOST_NO_EXCEPTIONS
 #include <boost/exception/current_exception_cast.hpp>
-namespace
-boost
-    {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace
     exception_detail
         {
-        std::string diagnostic_information_impl( boost::exception const *, std::exception const *, bool );
+        std::string diagnostic_information_impl( pdalboost::exception const *, std::exception const *, bool );
         }
 
     inline
     std::string
     current_exception_diagnostic_information()
         {
-        boost::exception const * be=current_exception_cast<boost::exception const>();
+        pdalboost::exception const * be=current_exception_cast<pdalboost::exception const>();
         std::exception const * se=current_exception_cast<std::exception const>();
         if( be || se )
             return exception_detail::diagnostic_information_impl(be,se,true);
@@ -48,9 +46,7 @@ boost
     }
 #endif
 
-namespace
-boost
-    {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace
     exception_detail
         {
@@ -107,13 +103,13 @@ boost
 
         inline
         std::string
-        diagnostic_information_impl( boost::exception const * be, std::exception const * se, bool with_what )
+        diagnostic_information_impl( pdalboost::exception const * be, std::exception const * se, bool with_what )
             {
             if( !be && !se )
                 return "Unknown exception.";
 #ifndef BOOST_NO_RTTI
             if( !be )
-                be=dynamic_cast<boost::exception const *>(se);
+                be=dynamic_cast<pdalboost::exception const *>(se);
             if( !se )
                 se=dynamic_cast<std::exception const *>(be);
 #endif
@@ -182,7 +178,7 @@ boost
             if( char const * di=exception_detail::get_diagnostic_information(e,0) )
                 return di;
             else
-                return "Failed to produce boost::diagnostic_information_what()";
+                return "Failed to produce pdalboost::diagnostic_information_what()";
 #ifndef BOOST_NO_EXCEPTIONS
             }
         catch(

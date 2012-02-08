@@ -19,8 +19,7 @@
 #include <boost/range/iterator.hpp>
 #include <boost/iterator/iterator_traits.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     template< class T >
     struct range_reference : iterator_reference< typename range_iterator<T>::type >
     { };

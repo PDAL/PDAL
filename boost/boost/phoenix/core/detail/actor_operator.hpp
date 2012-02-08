@@ -74,7 +74,7 @@
                 env_type;
             env_type env = {this, BOOST_PHOENIX_a};
             
-            return phoenix::eval(*this, phoenix::context(env, default_actions()));
+            return pdalboostphoenix::eval(*this, pdalboostphoenix::context(env, default_actions()));
         }
 
         template <BOOST_PHOENIX_typename_A>
@@ -88,7 +88,7 @@
                 env_type;
             env_type env = {this, BOOST_PHOENIX_a};
             
-            return phoenix::eval(*this, phoenix::context(env, default_actions()));
+            return pdalboostphoenix::eval(*this, pdalboostphoenix::context(env, default_actions()));
         }
 
         template <BOOST_PHOENIX_typename_A>
@@ -102,7 +102,7 @@
                 env_type;
             env_type env = {this, BOOST_PHOENIX_a};
             
-            return phoenix::eval(*this, phoenix::context(env, default_actions()));
+            return pdalboostphoenix::eval(*this, pdalboostphoenix::context(env, default_actions()));
         }
 
         template <BOOST_PHOENIX_typename_A>
@@ -116,7 +116,7 @@
                 env_type;
             env_type env = {this, BOOST_PHOENIX_a};
             
-            return phoenix::eval(*this, phoenix::context(env, default_actions()));
+            return pdalboostphoenix::eval(*this, pdalboostphoenix::context(env, default_actions()));
         }
 
 #else
@@ -145,7 +145,7 @@
                 env_type;                                                       \
             env_type env = {this, BOOST_PHOENIX_a};                             \
                                                                                 \
-            return phoenix::eval(*this, phoenix::context(env, default_actions()));\
+            return pdalboostphoenix::eval(*this, pdalboostphoenix::context(env, default_actions()));\
         }                                                                       \
                                                                                 \
         template <BOOST_PHOENIX_typename_A>                                     \
@@ -159,7 +159,7 @@
                 env_type;                                                       \
             env_type env = {this, BOOST_PHOENIX_a};                             \
                                                                                 \
-            return phoenix::eval(*this, phoenix::context(env, default_actions()));\
+            return pdalboostphoenix::eval(*this, pdalboostphoenix::context(env, default_actions()));\
         }                                                                       \
         /**/
 

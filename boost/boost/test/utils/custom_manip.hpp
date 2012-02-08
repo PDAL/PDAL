@@ -22,7 +22,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -54,7 +54,7 @@ operator<<( std::ostream& ostr, custom_manip<Uniq> const& ) { return custom_prin
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

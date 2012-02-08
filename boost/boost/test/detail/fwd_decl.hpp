@@ -15,7 +15,7 @@
 #ifndef BOOST_TEST_FWD_DECL_HPP_011605GER
 #define BOOST_TEST_FWD_DECL_HPP_011605GER
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 class  execution_monitor;
 class  execution_exception;
@@ -42,7 +42,7 @@ class lazy_ostream;
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_TEST_FWD_DECL_HPP_011605GER
 

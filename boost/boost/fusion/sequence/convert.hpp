@@ -7,7 +7,7 @@
 #if !defined(FUSION_CONVERT_10022005_1442)
 #define FUSION_CONVERT_10022005_1442
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     namespace extension
     {

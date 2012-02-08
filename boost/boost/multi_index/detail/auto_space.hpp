@@ -21,7 +21,7 @@
 #include <boost/noncopyable.hpp>
 #include <memory>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -48,7 +48,7 @@ struct auto_space:private noncopyable
 {
   typedef typename prevent_eti<
     Allocator,
-    typename boost::detail::allocator::rebind_to<
+    typename pdalboost::detail::allocator::rebind_to<
       Allocator,T
     >::type
   >::type::pointer pointer;
@@ -74,7 +74,7 @@ struct auto_space:private noncopyable
   }
     
 private:
-  typename boost::detail::allocator::rebind_to<
+  typename pdalboost::detail::allocator::rebind_to<
     Allocator,T>::type                          al_;
   std::size_t                                   n_;
   pointer                                       data_;
@@ -90,6 +90,6 @@ void swap(auto_space<T,Allocator>& x,auto_space<T,Allocator>& y)
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

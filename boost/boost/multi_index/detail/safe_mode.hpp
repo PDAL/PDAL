@@ -122,7 +122,7 @@
 #include <boost/detail/lightweight_mutex.hpp>
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -239,7 +239,7 @@ inline void detach_equivalent_iterators(Iterator& it)
   if(it.valid()){
     {
 #if defined(BOOST_HAS_THREADS)
-      boost::detail::lightweight_mutex::scoped_lock lock(it.cont->mutex);
+      pdalboost::detail::lightweight_mutex::scoped_lock lock(it.cont->mutex);
 #endif
 
       Iterator *prev_,*next_;
@@ -362,7 +362,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
   safe_iterator_base header;
 
 #if defined(BOOST_HAS_THREADS)
-  boost::detail::lightweight_mutex mutex;
+  pdalboost::detail::lightweight_mutex mutex;
 #endif
 };
 
@@ -371,7 +371,7 @@ void safe_iterator_base::attach(safe_container_base* cont_)
   cont=cont_;
   if(cont){
 #if defined(BOOST_HAS_THREADS)
-    boost::detail::lightweight_mutex::scoped_lock lock(cont->mutex);
+    pdalboost::detail::lightweight_mutex::scoped_lock lock(cont->mutex);
 #endif
 
     next=cont->header.next;
@@ -383,7 +383,7 @@ void safe_iterator_base::detach()
 {
   if(cont){
 #if defined(BOOST_HAS_THREADS)
-    boost::detail::lightweight_mutex::scoped_lock lock(cont->mutex);
+    pdalboost::detail::lightweight_mutex::scoped_lock lock(cont->mutex);
 #endif
 
     safe_iterator_base *prev_,*next_;
@@ -453,7 +453,7 @@ public:
   node_type* get_node()const{return this->base_reference().get_node();}
 
 private:
-  friend class boost::multi_index::detail::iter_adaptor_access;
+  friend class pdalboost::multi_index::detail::iter_adaptor_access;
 
   reference dereference()const
   {
@@ -514,7 +514,7 @@ private:
    * facility for use by adaptor classes.
    */ 
 
-  friend class boost::serialization::access;
+  friend class pdalboost::serialization::access;
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
@@ -567,7 +567,7 @@ public:
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif /* BOOST_MULTI_INDEX_ENABLE_SAFE_MODE */
 

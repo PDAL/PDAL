@@ -10,7 +10,7 @@
 #pragma once
 #endif
 
-namespace boost{ namespace math
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace math
 {
   namespace tools
   {
@@ -21,7 +21,7 @@ namespace boost{ namespace math
     }
   } // namespace tools
 } // namespace math
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_MATH_TOOLS_REAL_CAST_HPP
 

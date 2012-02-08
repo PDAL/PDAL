@@ -28,7 +28,7 @@
 #include <boost/test/detail/config.hpp>
 #include <boost/test/utils/basic_cstring/basic_cstring.hpp>
 #include <boost/test/utils/wrap_stringstream.hpp>
-#include <boost/test/utils/basic_cstring/io.hpp> // operator<<(boost::runtime::cstring)
+#include <boost/test/utils/basic_cstring/io.hpp> // operator<<(pdalboost::runtime::cstring)
 
 // STL
 #include <string>
@@ -48,7 +48,7 @@
 extern int putenv(char*);
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -104,7 +104,7 @@ putenv_impl( cstring name, cstring value )
 #define BOOST_RT_PARAM_LITERAL( l ) l
 #define BOOST_RT_PARAM_CSTRING_LITERAL( l ) cstring( l, sizeof( l ) - 1 )
 #define BOOST_RT_PARAM_GETENV getenv
-#define BOOST_RT_PARAM_PUTENV ::boost::BOOST_RT_PARAM_NAMESPACE::putenv_impl
+#define BOOST_RT_PARAM_PUTENV ::pdalboost::BOOST_RT_PARAM_NAMESPACE::putenv_impl
 #define BOOST_RT_PARAM_EXCEPTION_INHERIT_STD
 
 //____________________________________________________________________________//
@@ -151,6 +151,6 @@ putenv_impl( cstring name, cstring value )
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_CONFIG_HPP_062604GER

@@ -31,7 +31,7 @@
 #  pragma warning(disable:4800)
 #endif
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -467,7 +467,7 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 
-}} // namespace boost::spirit::impl
+}} // namespace pdalboost::spirit::impl
 
 #ifdef BOOST_MSVC
 #pragma warning (pop)

@@ -31,8 +31,7 @@
 
 #include <boost/config/abi_prefix.hpp> // must be the last #include
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace system
   {
 
@@ -230,7 +229,7 @@ namespace boost
 
       template <class ErrorConditionEnum>
         error_condition(ErrorConditionEnum e,
-          typename boost::enable_if<is_error_condition_enum<ErrorConditionEnum> >::type* = 0)
+          typename pdalboost::enable_if<is_error_condition_enum<ErrorConditionEnum> >::type* = 0)
       {
         *this = make_error_condition(e);
       }
@@ -244,7 +243,7 @@ namespace boost
       }
                                              
       template<typename ErrorConditionEnum>
-        typename boost::enable_if<is_error_condition_enum<ErrorConditionEnum>, error_condition>::type &
+        typename pdalboost::enable_if<is_error_condition_enum<ErrorConditionEnum>, error_condition>::type &
           operator=( ErrorConditionEnum val )
       { 
         *this = make_error_condition(val);
@@ -317,7 +316,7 @@ namespace boost
 
       template <class ErrorCodeEnum>
         error_code(ErrorCodeEnum e,
-          typename boost::enable_if<is_error_code_enum<ErrorCodeEnum> >::type* = 0)
+          typename pdalboost::enable_if<is_error_code_enum<ErrorCodeEnum> >::type* = 0)
       {
         *this = make_error_code(e);
       }
@@ -330,7 +329,7 @@ namespace boost
       }
                                              
       template<typename ErrorCodeEnum>
-        typename boost::enable_if<is_error_code_enum<ErrorCodeEnum>, error_code>::type &
+        typename pdalboost::enable_if<is_error_code_enum<ErrorCodeEnum>, error_code>::type &
           operator=( ErrorCodeEnum val )
       { 
         *this = make_error_code(val);
@@ -393,7 +392,7 @@ namespace boost
 
     //  Moving from a "throws" object to a "throws" function without breaking
     //  existing code is a bit of a problem. The workaround is to place the
-    //  "throws" function in namespace boost rather than namespace boost::system.
+    //  "throws" function in namespace pdalboost rather than namespace pdalboost::system.
 
   }  // namespace system
 
@@ -500,7 +499,7 @@ namespace boost
     }
 
   } // namespace system
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/config/abi_suffix.hpp> // pops abi_prefix.hpp pragmas
 

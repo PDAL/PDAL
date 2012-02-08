@@ -25,8 +25,8 @@
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/detail/lightweight_main.hpp>
 
-namespace fs = boost::filesystem;
-using boost::filesystem::path;
+namespace fs = pdalboost::filesystem;
+using pdalboost::filesystem::path;
 
 #define PATH_CHECK(a, b) check(a, b, __LINE__)
 
@@ -39,7 +39,7 @@ namespace
   {
     if (source.generic_string()== expected) return;
 
-    ++::boost::detail::test_errors();
+    ++::pdalboost::detail::test_errors();
 
     std::cout << '(' << line << ") source.string(): \"" << source.string()
               << "\" != expected: \"" << expected
@@ -247,5 +247,5 @@ int cpp_main(int /*argc*/, char* /*argv*/[])
   // see the rationale in html docs for explanation why this works
   BOOST_TEST(fs::change_extension("", ".png").string() == ".png");
 
-  return ::boost::report_errors();
+  return ::pdalboost::report_errors();
 }

@@ -5,7 +5,7 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 ==============================================================================*/
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename Dummy = void>
     struct vector0
@@ -21,7 +21,7 @@ namespace boost { namespace phoenix
     
     
     
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename A0>
     struct vector1
@@ -42,7 +42,7 @@ namespace boost { namespace phoenix
 }}
 BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     (A0)
-  , ( boost::phoenix::vector1 ) (A0)
+  , ( pdalboost::pdalboostphoenix::vector1 ) (A0)
   , (A0, a0)
 )
     
@@ -52,7 +52,7 @@ BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     
     
     
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename A0 , typename A1>
     struct vector2
@@ -73,7 +73,7 @@ namespace boost { namespace phoenix
 }}
 BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     (A0) (A1)
-  , ( boost::phoenix::vector2 ) (A0) (A1)
+  , ( pdalboost::pdalboostphoenix::vector2 ) (A0) (A1)
   , (A0, a0) (A1, a1)
 )
     
@@ -83,7 +83,7 @@ BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     
     
     
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename A0 , typename A1 , typename A2>
     struct vector3
@@ -104,7 +104,7 @@ namespace boost { namespace phoenix
 }}
 BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     (A0) (A1) (A2)
-  , ( boost::phoenix::vector3 ) (A0) (A1) (A2)
+  , ( pdalboost::pdalboostphoenix::vector3 ) (A0) (A1) (A2)
   , (A0, a0) (A1, a1) (A2, a2)
 )
     
@@ -114,7 +114,7 @@ BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     
     
     
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename A0 , typename A1 , typename A2 , typename A3>
     struct vector4
@@ -135,7 +135,7 @@ namespace boost { namespace phoenix
 }}
 BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     (A0) (A1) (A2) (A3)
-  , ( boost::phoenix::vector4 ) (A0) (A1) (A2) (A3)
+  , ( pdalboost::pdalboostphoenix::vector4 ) (A0) (A1) (A2) (A3)
   , (A0, a0) (A1, a1) (A2, a2) (A3, a3)
 )
     
@@ -145,7 +145,7 @@ BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     
     
     
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename A0 , typename A1 , typename A2 , typename A3 , typename A4>
     struct vector5
@@ -166,7 +166,7 @@ namespace boost { namespace phoenix
 }}
 BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     (A0) (A1) (A2) (A3) (A4)
-  , ( boost::phoenix::vector5 ) (A0) (A1) (A2) (A3) (A4)
+  , ( pdalboost::pdalboostphoenix::vector5 ) (A0) (A1) (A2) (A3) (A4)
   , (A0, a0) (A1, a1) (A2, a2) (A3, a3) (A4, a4)
 )
     
@@ -176,7 +176,7 @@ BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     
     
     
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5>
     struct vector6
@@ -197,7 +197,7 @@ namespace boost { namespace phoenix
 }}
 BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     (A0) (A1) (A2) (A3) (A4) (A5)
-  , ( boost::phoenix::vector6 ) (A0) (A1) (A2) (A3) (A4) (A5)
+  , ( pdalboost::pdalboostphoenix::vector6 ) (A0) (A1) (A2) (A3) (A4) (A5)
   , (A0, a0) (A1, a1) (A2, a2) (A3, a3) (A4, a4) (A5, a5)
 )
     
@@ -207,7 +207,7 @@ BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     
     
     
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6>
     struct vector7
@@ -228,7 +228,7 @@ namespace boost { namespace phoenix
 }}
 BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     (A0) (A1) (A2) (A3) (A4) (A5) (A6)
-  , ( boost::phoenix::vector7 ) (A0) (A1) (A2) (A3) (A4) (A5) (A6)
+  , ( pdalboost::pdalboostphoenix::vector7 ) (A0) (A1) (A2) (A3) (A4) (A5) (A6)
   , (A0, a0) (A1, a1) (A2, a2) (A3, a3) (A4, a4) (A5, a5) (A6, a6)
 )
     
@@ -238,7 +238,7 @@ BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     
     
     
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 , typename A7>
     struct vector8
@@ -259,7 +259,7 @@ namespace boost { namespace phoenix
 }}
 BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     (A0) (A1) (A2) (A3) (A4) (A5) (A6) (A7)
-  , ( boost::phoenix::vector8 ) (A0) (A1) (A2) (A3) (A4) (A5) (A6) (A7)
+  , ( pdalboost::pdalboostphoenix::vector8 ) (A0) (A1) (A2) (A3) (A4) (A5) (A6) (A7)
   , (A0, a0) (A1, a1) (A2, a2) (A3, a3) (A4, a4) (A5, a5) (A6, a6) (A7, a7)
 )
     
@@ -269,7 +269,7 @@ BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     
     
     
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 , typename A7 , typename A8>
     struct vector9
@@ -290,7 +290,7 @@ namespace boost { namespace phoenix
 }}
 BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     (A0) (A1) (A2) (A3) (A4) (A5) (A6) (A7) (A8)
-  , ( boost::phoenix::vector9 ) (A0) (A1) (A2) (A3) (A4) (A5) (A6) (A7) (A8)
+  , ( pdalboost::pdalboostphoenix::vector9 ) (A0) (A1) (A2) (A3) (A4) (A5) (A6) (A7) (A8)
   , (A0, a0) (A1, a1) (A2, a2) (A3, a3) (A4, a4) (A5, a5) (A6, a6) (A7, a7) (A8, a8)
 )
     
@@ -300,7 +300,7 @@ BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     
     
     
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 , typename A7 , typename A8 , typename A9>
     struct vector10
@@ -321,7 +321,7 @@ namespace boost { namespace phoenix
 }}
 BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     (A0) (A1) (A2) (A3) (A4) (A5) (A6) (A7) (A8) (A9)
-  , ( boost::phoenix::vector10 ) (A0) (A1) (A2) (A3) (A4) (A5) (A6) (A7) (A8) (A9)
+  , ( pdalboost::pdalboostphoenix::vector10 ) (A0) (A1) (A2) (A3) (A4) (A5) (A6) (A7) (A8) (A9)
   , (A0, a0) (A1, a1) (A2, a2) (A3, a3) (A4, a4) (A5, a5) (A6, a6) (A7, a7) (A8, a8) (A9, a9)
 )
     
@@ -331,7 +331,7 @@ BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     
     
     
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename A0 , typename A1 , typename A2 , typename A3 , typename A4 , typename A5 , typename A6 , typename A7 , typename A8 , typename A9 , typename A10>
     struct vector11
@@ -352,6 +352,6 @@ namespace boost { namespace phoenix
 }}
 BOOST_FUSION_ADAPT_TPL_STRUCT_NO_PARTIAL(
     (A0) (A1) (A2) (A3) (A4) (A5) (A6) (A7) (A8) (A9) (A10)
-  , ( boost::phoenix::vector11 ) (A0) (A1) (A2) (A3) (A4) (A5) (A6) (A7) (A8) (A9) (A10)
+  , ( pdalboost::pdalboostphoenix::vector11 ) (A0) (A1) (A2) (A3) (A4) (A5) (A6) (A7) (A8) (A9) (A10)
   , (A0, a0) (A1, a1) (A2, a2) (A3, a3) (A4, a4) (A5, a5) (A6, a6) (A7, a7) (A8, a8) (A9, a9) (A10, a10)
 )

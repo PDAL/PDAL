@@ -30,8 +30,7 @@
 #include <boost/iterator/detail/config_def.hpp>
 
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   template <class UnaryFunction, class Iterator, class Reference = use_default, class Value = use_default>
   class transform_iterator;
 
@@ -72,10 +71,10 @@ namespace boost
 
   template <class UnaryFunc, class Iterator, class Reference, class Value>
   class transform_iterator
-    : public boost::detail::transform_iterator_base<UnaryFunc, Iterator, Reference, Value>::type
+    : public pdalboost::detail::transform_iterator_base<UnaryFunc, Iterator, Reference, Value>::type
   {
     typedef typename
-    boost::detail::transform_iterator_base<UnaryFunc, Iterator, Reference, Value>::type
+    pdalboost::detail::transform_iterator_base<UnaryFunc, Iterator, Reference, Value>::type
     super_t;
 
     friend class iterator_core_access;
@@ -165,7 +164,7 @@ namespace boost
   }
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/iterator/detail/config_undef.hpp>
 

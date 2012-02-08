@@ -16,7 +16,7 @@
 
 #include <boost/limits.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace random {
 namespace detail {
 
@@ -31,6 +31,6 @@ struct generator_bits {
 
 } // namespace detail
 } // namespace random
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RANDOM_DETAIL_GENERATOR_BITS_HPP

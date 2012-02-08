@@ -31,7 +31,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace test_tools {
 
@@ -79,7 +79,7 @@ private:
 
 } // namespace test_tools
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

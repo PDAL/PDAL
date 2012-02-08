@@ -23,7 +23,7 @@
 #include <boost/type_traits/is_same.hpp>
 #include <functional>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -78,6 +78,6 @@ struct ordered_index_args
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

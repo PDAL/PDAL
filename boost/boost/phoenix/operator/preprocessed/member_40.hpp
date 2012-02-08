@@ -5,7 +5,7 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 ==============================================================================*/
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     namespace expression { template <typename Lhs, typename Rhs> struct mem_ptr : expr<proto::tag:: mem_ptr, Lhs, Rhs> {}; typedef proto::functional::make_expr<proto::tag:: mem_ptr> make_mem_ptr; } namespace rule { struct mem_ptr : expression:: mem_ptr<meta_grammar, meta_grammar> {}; } template <typename Dummy> struct meta_grammar::case_<proto::tag:: mem_ptr, Dummy> : enable_rule<rule:: mem_ptr, Dummy> {};
     template <typename Object, typename MemPtr>
@@ -39,7 +39,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1
                     )
@@ -58,7 +58,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2
                     )
@@ -77,7 +77,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3
                     )
@@ -96,7 +96,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4
                     )
@@ -115,7 +115,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5
                     )
@@ -134,7 +134,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6
                     )
@@ -153,7 +153,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7
                     )
@@ -172,7 +172,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8
                     )
@@ -191,7 +191,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9
                     )
@@ -210,7 +210,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10
                     )
@@ -229,7 +229,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11
                     )
@@ -248,7 +248,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12
                     )
@@ -267,7 +267,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13
                     )
@@ -286,7 +286,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14
                     )
@@ -305,7 +305,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15
                     )
@@ -324,7 +324,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16
                     )
@@ -343,7 +343,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17
                     )
@@ -362,7 +362,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18
                     )
@@ -381,7 +381,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19
                     )
@@ -400,7 +400,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20
                     )
@@ -419,7 +419,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21
                     )
@@ -438,7 +438,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22
                     )
@@ -457,7 +457,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23
                     )
@@ -476,7 +476,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24
                     )
@@ -495,7 +495,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25
                     )
@@ -514,7 +514,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26
                     )
@@ -533,7 +533,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26; typedef typename evaluator::impl< A27 , Context , int >::result_type child27;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26 , child27
                     )
@@ -552,7 +552,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26; typedef typename evaluator::impl< A27 , Context , int >::result_type child27; typedef typename evaluator::impl< A28 , Context , int >::result_type child28;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26 , child27 , child28
                     )
@@ -571,7 +571,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26; typedef typename evaluator::impl< A27 , Context , int >::result_type child27; typedef typename evaluator::impl< A28 , Context , int >::result_type child28; typedef typename evaluator::impl< A29 , Context , int >::result_type child29;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26 , child27 , child28 , child29
                     )
@@ -590,7 +590,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26; typedef typename evaluator::impl< A27 , Context , int >::result_type child27; typedef typename evaluator::impl< A28 , Context , int >::result_type child28; typedef typename evaluator::impl< A29 , Context , int >::result_type child29; typedef typename evaluator::impl< A30 , Context , int >::result_type child30;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26 , child27 , child28 , child29 , child30
                     )
@@ -609,7 +609,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26; typedef typename evaluator::impl< A27 , Context , int >::result_type child27; typedef typename evaluator::impl< A28 , Context , int >::result_type child28; typedef typename evaluator::impl< A29 , Context , int >::result_type child29; typedef typename evaluator::impl< A30 , Context , int >::result_type child30; typedef typename evaluator::impl< A31 , Context , int >::result_type child31;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26 , child27 , child28 , child29 , child30 , child31
                     )
@@ -628,7 +628,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26; typedef typename evaluator::impl< A27 , Context , int >::result_type child27; typedef typename evaluator::impl< A28 , Context , int >::result_type child28; typedef typename evaluator::impl< A29 , Context , int >::result_type child29; typedef typename evaluator::impl< A30 , Context , int >::result_type child30; typedef typename evaluator::impl< A31 , Context , int >::result_type child31; typedef typename evaluator::impl< A32 , Context , int >::result_type child32;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26 , child27 , child28 , child29 , child30 , child31 , child32
                     )
@@ -647,7 +647,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26; typedef typename evaluator::impl< A27 , Context , int >::result_type child27; typedef typename evaluator::impl< A28 , Context , int >::result_type child28; typedef typename evaluator::impl< A29 , Context , int >::result_type child29; typedef typename evaluator::impl< A30 , Context , int >::result_type child30; typedef typename evaluator::impl< A31 , Context , int >::result_type child31; typedef typename evaluator::impl< A32 , Context , int >::result_type child32; typedef typename evaluator::impl< A33 , Context , int >::result_type child33;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26 , child27 , child28 , child29 , child30 , child31 , child32 , child33
                     )
@@ -666,7 +666,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26; typedef typename evaluator::impl< A27 , Context , int >::result_type child27; typedef typename evaluator::impl< A28 , Context , int >::result_type child28; typedef typename evaluator::impl< A29 , Context , int >::result_type child29; typedef typename evaluator::impl< A30 , Context , int >::result_type child30; typedef typename evaluator::impl< A31 , Context , int >::result_type child31; typedef typename evaluator::impl< A32 , Context , int >::result_type child32; typedef typename evaluator::impl< A33 , Context , int >::result_type child33; typedef typename evaluator::impl< A34 , Context , int >::result_type child34;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26 , child27 , child28 , child29 , child30 , child31 , child32 , child33 , child34
                     )
@@ -685,7 +685,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26; typedef typename evaluator::impl< A27 , Context , int >::result_type child27; typedef typename evaluator::impl< A28 , Context , int >::result_type child28; typedef typename evaluator::impl< A29 , Context , int >::result_type child29; typedef typename evaluator::impl< A30 , Context , int >::result_type child30; typedef typename evaluator::impl< A31 , Context , int >::result_type child31; typedef typename evaluator::impl< A32 , Context , int >::result_type child32; typedef typename evaluator::impl< A33 , Context , int >::result_type child33; typedef typename evaluator::impl< A34 , Context , int >::result_type child34; typedef typename evaluator::impl< A35 , Context , int >::result_type child35;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26 , child27 , child28 , child29 , child30 , child31 , child32 , child33 , child34 , child35
                     )
@@ -704,7 +704,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26; typedef typename evaluator::impl< A27 , Context , int >::result_type child27; typedef typename evaluator::impl< A28 , Context , int >::result_type child28; typedef typename evaluator::impl< A29 , Context , int >::result_type child29; typedef typename evaluator::impl< A30 , Context , int >::result_type child30; typedef typename evaluator::impl< A31 , Context , int >::result_type child31; typedef typename evaluator::impl< A32 , Context , int >::result_type child32; typedef typename evaluator::impl< A33 , Context , int >::result_type child33; typedef typename evaluator::impl< A34 , Context , int >::result_type child34; typedef typename evaluator::impl< A35 , Context , int >::result_type child35; typedef typename evaluator::impl< A36 , Context , int >::result_type child36;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26 , child27 , child28 , child29 , child30 , child31 , child32 , child33 , child34 , child35 , child36
                     )
@@ -723,7 +723,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26; typedef typename evaluator::impl< A27 , Context , int >::result_type child27; typedef typename evaluator::impl< A28 , Context , int >::result_type child28; typedef typename evaluator::impl< A29 , Context , int >::result_type child29; typedef typename evaluator::impl< A30 , Context , int >::result_type child30; typedef typename evaluator::impl< A31 , Context , int >::result_type child31; typedef typename evaluator::impl< A32 , Context , int >::result_type child32; typedef typename evaluator::impl< A33 , Context , int >::result_type child33; typedef typename evaluator::impl< A34 , Context , int >::result_type child34; typedef typename evaluator::impl< A35 , Context , int >::result_type child35; typedef typename evaluator::impl< A36 , Context , int >::result_type child36; typedef typename evaluator::impl< A37 , Context , int >::result_type child37;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26 , child27 , child28 , child29 , child30 , child31 , child32 , child33 , child34 , child35 , child36 , child37
                     )
@@ -742,7 +742,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26; typedef typename evaluator::impl< A27 , Context , int >::result_type child27; typedef typename evaluator::impl< A28 , Context , int >::result_type child28; typedef typename evaluator::impl< A29 , Context , int >::result_type child29; typedef typename evaluator::impl< A30 , Context , int >::result_type child30; typedef typename evaluator::impl< A31 , Context , int >::result_type child31; typedef typename evaluator::impl< A32 , Context , int >::result_type child32; typedef typename evaluator::impl< A33 , Context , int >::result_type child33; typedef typename evaluator::impl< A34 , Context , int >::result_type child34; typedef typename evaluator::impl< A35 , Context , int >::result_type child35; typedef typename evaluator::impl< A36 , Context , int >::result_type child36; typedef typename evaluator::impl< A37 , Context , int >::result_type child37; typedef typename evaluator::impl< A38 , Context , int >::result_type child38;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26 , child27 , child28 , child29 , child30 , child31 , child32 , child33 , child34 , child35 , child36 , child37 , child38
                     )
@@ -761,7 +761,7 @@ namespace boost { namespace phoenix
         {
             typedef typename evaluator::impl< A0 , Context , int >::result_type child0; typedef typename evaluator::impl< A1 , Context , int >::result_type child1; typedef typename evaluator::impl< A2 , Context , int >::result_type child2; typedef typename evaluator::impl< A3 , Context , int >::result_type child3; typedef typename evaluator::impl< A4 , Context , int >::result_type child4; typedef typename evaluator::impl< A5 , Context , int >::result_type child5; typedef typename evaluator::impl< A6 , Context , int >::result_type child6; typedef typename evaluator::impl< A7 , Context , int >::result_type child7; typedef typename evaluator::impl< A8 , Context , int >::result_type child8; typedef typename evaluator::impl< A9 , Context , int >::result_type child9; typedef typename evaluator::impl< A10 , Context , int >::result_type child10; typedef typename evaluator::impl< A11 , Context , int >::result_type child11; typedef typename evaluator::impl< A12 , Context , int >::result_type child12; typedef typename evaluator::impl< A13 , Context , int >::result_type child13; typedef typename evaluator::impl< A14 , Context , int >::result_type child14; typedef typename evaluator::impl< A15 , Context , int >::result_type child15; typedef typename evaluator::impl< A16 , Context , int >::result_type child16; typedef typename evaluator::impl< A17 , Context , int >::result_type child17; typedef typename evaluator::impl< A18 , Context , int >::result_type child18; typedef typename evaluator::impl< A19 , Context , int >::result_type child19; typedef typename evaluator::impl< A20 , Context , int >::result_type child20; typedef typename evaluator::impl< A21 , Context , int >::result_type child21; typedef typename evaluator::impl< A22 , Context , int >::result_type child22; typedef typename evaluator::impl< A23 , Context , int >::result_type child23; typedef typename evaluator::impl< A24 , Context , int >::result_type child24; typedef typename evaluator::impl< A25 , Context , int >::result_type child25; typedef typename evaluator::impl< A26 , Context , int >::result_type child26; typedef typename evaluator::impl< A27 , Context , int >::result_type child27; typedef typename evaluator::impl< A28 , Context , int >::result_type child28; typedef typename evaluator::impl< A29 , Context , int >::result_type child29; typedef typename evaluator::impl< A30 , Context , int >::result_type child30; typedef typename evaluator::impl< A31 , Context , int >::result_type child31; typedef typename evaluator::impl< A32 , Context , int >::result_type child32; typedef typename evaluator::impl< A33 , Context , int >::result_type child33; typedef typename evaluator::impl< A34 , Context , int >::result_type child34; typedef typename evaluator::impl< A35 , Context , int >::result_type child35; typedef typename evaluator::impl< A36 , Context , int >::result_type child36; typedef typename evaluator::impl< A37 , Context , int >::result_type child37; typedef typename evaluator::impl< A38 , Context , int >::result_type child38; typedef typename evaluator::impl< A39 , Context , int >::result_type child39;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         child1 , child2 , child3 , child4 , child5 , child6 , child7 , child8 , child9 , child10 , child11 , child12 , child13 , child14 , child15 , child16 , child17 , child18 , child19 , child20 , child21 , child22 , child23 , child24 , child25 , child26 , child27 , child28 , child29 , child30 , child31 , child32 , child33 , child34 , child35 , child36 , child37 , child38 , child39
                     )
@@ -797,8 +797,8 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
                     
                 );
@@ -828,10 +828,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx)
                 );
         }
         
@@ -859,10 +859,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx)
                 );
         }
         
@@ -890,10 +890,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx)
                 );
         }
         
@@ -921,10 +921,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx)
                 );
         }
         
@@ -952,10 +952,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx)
                 );
         }
         
@@ -983,10 +983,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx)
                 );
         }
         
@@ -1014,10 +1014,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx)
                 );
         }
         
@@ -1045,10 +1045,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx)
                 );
         }
         
@@ -1076,10 +1076,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx)
                 );
         }
         
@@ -1107,10 +1107,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx)
                 );
         }
         
@@ -1138,10 +1138,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx)
                 );
         }
         
@@ -1169,10 +1169,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx)
                 );
         }
         
@@ -1200,10 +1200,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx)
                 );
         }
         
@@ -1231,10 +1231,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx)
                 );
         }
         
@@ -1262,10 +1262,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx)
                 );
         }
         
@@ -1293,10 +1293,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx)
                 );
         }
         
@@ -1324,10 +1324,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx)
                 );
         }
         
@@ -1355,10 +1355,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx)
                 );
         }
         
@@ -1386,10 +1386,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx)
                 );
         }
         
@@ -1417,10 +1417,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx)
                 );
         }
         
@@ -1448,10 +1448,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx)
                 );
         }
         
@@ -1479,10 +1479,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx)
                 );
         }
         
@@ -1510,10 +1510,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx)
                 );
         }
         
@@ -1541,10 +1541,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx)
                 );
         }
         
@@ -1572,10 +1572,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx)
                 );
         }
         
@@ -1603,10 +1603,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx) , boost::phoenix::eval(a27, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx) , pdalboost::pdalboostphoenix::eval(a27, ctx)
                 );
         }
         
@@ -1634,10 +1634,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx) , boost::phoenix::eval(a27, ctx) , boost::phoenix::eval(a28, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx) , pdalboost::pdalboostphoenix::eval(a27, ctx) , pdalboost::pdalboostphoenix::eval(a28, ctx)
                 );
         }
         
@@ -1665,10 +1665,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx) , boost::phoenix::eval(a27, ctx) , boost::phoenix::eval(a28, ctx) , boost::phoenix::eval(a29, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx) , pdalboost::pdalboostphoenix::eval(a27, ctx) , pdalboost::pdalboostphoenix::eval(a28, ctx) , pdalboost::pdalboostphoenix::eval(a29, ctx)
                 );
         }
         
@@ -1696,10 +1696,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx) , boost::phoenix::eval(a27, ctx) , boost::phoenix::eval(a28, ctx) , boost::phoenix::eval(a29, ctx) , boost::phoenix::eval(a30, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx) , pdalboost::pdalboostphoenix::eval(a27, ctx) , pdalboost::pdalboostphoenix::eval(a28, ctx) , pdalboost::pdalboostphoenix::eval(a29, ctx) , pdalboost::pdalboostphoenix::eval(a30, ctx)
                 );
         }
         
@@ -1727,10 +1727,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx) , boost::phoenix::eval(a27, ctx) , boost::phoenix::eval(a28, ctx) , boost::phoenix::eval(a29, ctx) , boost::phoenix::eval(a30, ctx) , boost::phoenix::eval(a31, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx) , pdalboost::pdalboostphoenix::eval(a27, ctx) , pdalboost::pdalboostphoenix::eval(a28, ctx) , pdalboost::pdalboostphoenix::eval(a29, ctx) , pdalboost::pdalboostphoenix::eval(a30, ctx) , pdalboost::pdalboostphoenix::eval(a31, ctx)
                 );
         }
         
@@ -1758,10 +1758,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx) , boost::phoenix::eval(a27, ctx) , boost::phoenix::eval(a28, ctx) , boost::phoenix::eval(a29, ctx) , boost::phoenix::eval(a30, ctx) , boost::phoenix::eval(a31, ctx) , boost::phoenix::eval(a32, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx) , pdalboost::pdalboostphoenix::eval(a27, ctx) , pdalboost::pdalboostphoenix::eval(a28, ctx) , pdalboost::pdalboostphoenix::eval(a29, ctx) , pdalboost::pdalboostphoenix::eval(a30, ctx) , pdalboost::pdalboostphoenix::eval(a31, ctx) , pdalboost::pdalboostphoenix::eval(a32, ctx)
                 );
         }
         
@@ -1789,10 +1789,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx) , boost::phoenix::eval(a27, ctx) , boost::phoenix::eval(a28, ctx) , boost::phoenix::eval(a29, ctx) , boost::phoenix::eval(a30, ctx) , boost::phoenix::eval(a31, ctx) , boost::phoenix::eval(a32, ctx) , boost::phoenix::eval(a33, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx) , pdalboost::pdalboostphoenix::eval(a27, ctx) , pdalboost::pdalboostphoenix::eval(a28, ctx) , pdalboost::pdalboostphoenix::eval(a29, ctx) , pdalboost::pdalboostphoenix::eval(a30, ctx) , pdalboost::pdalboostphoenix::eval(a31, ctx) , pdalboost::pdalboostphoenix::eval(a32, ctx) , pdalboost::pdalboostphoenix::eval(a33, ctx)
                 );
         }
         
@@ -1820,10 +1820,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx) , boost::phoenix::eval(a27, ctx) , boost::phoenix::eval(a28, ctx) , boost::phoenix::eval(a29, ctx) , boost::phoenix::eval(a30, ctx) , boost::phoenix::eval(a31, ctx) , boost::phoenix::eval(a32, ctx) , boost::phoenix::eval(a33, ctx) , boost::phoenix::eval(a34, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx) , pdalboost::pdalboostphoenix::eval(a27, ctx) , pdalboost::pdalboostphoenix::eval(a28, ctx) , pdalboost::pdalboostphoenix::eval(a29, ctx) , pdalboost::pdalboostphoenix::eval(a30, ctx) , pdalboost::pdalboostphoenix::eval(a31, ctx) , pdalboost::pdalboostphoenix::eval(a32, ctx) , pdalboost::pdalboostphoenix::eval(a33, ctx) , pdalboost::pdalboostphoenix::eval(a34, ctx)
                 );
         }
         
@@ -1851,10 +1851,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx) , boost::phoenix::eval(a27, ctx) , boost::phoenix::eval(a28, ctx) , boost::phoenix::eval(a29, ctx) , boost::phoenix::eval(a30, ctx) , boost::phoenix::eval(a31, ctx) , boost::phoenix::eval(a32, ctx) , boost::phoenix::eval(a33, ctx) , boost::phoenix::eval(a34, ctx) , boost::phoenix::eval(a35, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx) , pdalboost::pdalboostphoenix::eval(a27, ctx) , pdalboost::pdalboostphoenix::eval(a28, ctx) , pdalboost::pdalboostphoenix::eval(a29, ctx) , pdalboost::pdalboostphoenix::eval(a30, ctx) , pdalboost::pdalboostphoenix::eval(a31, ctx) , pdalboost::pdalboostphoenix::eval(a32, ctx) , pdalboost::pdalboostphoenix::eval(a33, ctx) , pdalboost::pdalboostphoenix::eval(a34, ctx) , pdalboost::pdalboostphoenix::eval(a35, ctx)
                 );
         }
         
@@ -1882,10 +1882,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx) , boost::phoenix::eval(a27, ctx) , boost::phoenix::eval(a28, ctx) , boost::phoenix::eval(a29, ctx) , boost::phoenix::eval(a30, ctx) , boost::phoenix::eval(a31, ctx) , boost::phoenix::eval(a32, ctx) , boost::phoenix::eval(a33, ctx) , boost::phoenix::eval(a34, ctx) , boost::phoenix::eval(a35, ctx) , boost::phoenix::eval(a36, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx) , pdalboost::pdalboostphoenix::eval(a27, ctx) , pdalboost::pdalboostphoenix::eval(a28, ctx) , pdalboost::pdalboostphoenix::eval(a29, ctx) , pdalboost::pdalboostphoenix::eval(a30, ctx) , pdalboost::pdalboostphoenix::eval(a31, ctx) , pdalboost::pdalboostphoenix::eval(a32, ctx) , pdalboost::pdalboostphoenix::eval(a33, ctx) , pdalboost::pdalboostphoenix::eval(a34, ctx) , pdalboost::pdalboostphoenix::eval(a35, ctx) , pdalboost::pdalboostphoenix::eval(a36, ctx)
                 );
         }
         
@@ -1913,10 +1913,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx) , boost::phoenix::eval(a27, ctx) , boost::phoenix::eval(a28, ctx) , boost::phoenix::eval(a29, ctx) , boost::phoenix::eval(a30, ctx) , boost::phoenix::eval(a31, ctx) , boost::phoenix::eval(a32, ctx) , boost::phoenix::eval(a33, ctx) , boost::phoenix::eval(a34, ctx) , boost::phoenix::eval(a35, ctx) , boost::phoenix::eval(a36, ctx) , boost::phoenix::eval(a37, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx) , pdalboost::pdalboostphoenix::eval(a27, ctx) , pdalboost::pdalboostphoenix::eval(a28, ctx) , pdalboost::pdalboostphoenix::eval(a29, ctx) , pdalboost::pdalboostphoenix::eval(a30, ctx) , pdalboost::pdalboostphoenix::eval(a31, ctx) , pdalboost::pdalboostphoenix::eval(a32, ctx) , pdalboost::pdalboostphoenix::eval(a33, ctx) , pdalboost::pdalboostphoenix::eval(a34, ctx) , pdalboost::pdalboostphoenix::eval(a35, ctx) , pdalboost::pdalboostphoenix::eval(a36, ctx) , pdalboost::pdalboostphoenix::eval(a37, ctx)
                 );
         }
         
@@ -1944,10 +1944,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx) , boost::phoenix::eval(a27, ctx) , boost::phoenix::eval(a28, ctx) , boost::phoenix::eval(a29, ctx) , boost::phoenix::eval(a30, ctx) , boost::phoenix::eval(a31, ctx) , boost::phoenix::eval(a32, ctx) , boost::phoenix::eval(a33, ctx) , boost::phoenix::eval(a34, ctx) , boost::phoenix::eval(a35, ctx) , boost::phoenix::eval(a36, ctx) , boost::phoenix::eval(a37, ctx) , boost::phoenix::eval(a38, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx) , pdalboost::pdalboostphoenix::eval(a27, ctx) , pdalboost::pdalboostphoenix::eval(a28, ctx) , pdalboost::pdalboostphoenix::eval(a29, ctx) , pdalboost::pdalboostphoenix::eval(a30, ctx) , pdalboost::pdalboostphoenix::eval(a31, ctx) , pdalboost::pdalboostphoenix::eval(a32, ctx) , pdalboost::pdalboostphoenix::eval(a33, ctx) , pdalboost::pdalboostphoenix::eval(a34, ctx) , pdalboost::pdalboostphoenix::eval(a35, ctx) , pdalboost::pdalboostphoenix::eval(a36, ctx) , pdalboost::pdalboostphoenix::eval(a37, ctx) , pdalboost::pdalboostphoenix::eval(a38, ctx)
                 );
         }
         
@@ -1975,10 +1975,10 @@ namespace boost { namespace phoenix
         {
             return
                 (
-                    get_pointer(boost::phoenix::eval(a0, ctx))
-                    ->*boost::phoenix::eval(a1, ctx)
+                    get_pointer(pdalboost::pdalboostphoenix::eval(a0, ctx))
+                    ->*pdalboost::pdalboostphoenix::eval(a1, ctx)
                 )(
-                    boost::phoenix::eval(a2, ctx) , boost::phoenix::eval(a3, ctx) , boost::phoenix::eval(a4, ctx) , boost::phoenix::eval(a5, ctx) , boost::phoenix::eval(a6, ctx) , boost::phoenix::eval(a7, ctx) , boost::phoenix::eval(a8, ctx) , boost::phoenix::eval(a9, ctx) , boost::phoenix::eval(a10, ctx) , boost::phoenix::eval(a11, ctx) , boost::phoenix::eval(a12, ctx) , boost::phoenix::eval(a13, ctx) , boost::phoenix::eval(a14, ctx) , boost::phoenix::eval(a15, ctx) , boost::phoenix::eval(a16, ctx) , boost::phoenix::eval(a17, ctx) , boost::phoenix::eval(a18, ctx) , boost::phoenix::eval(a19, ctx) , boost::phoenix::eval(a20, ctx) , boost::phoenix::eval(a21, ctx) , boost::phoenix::eval(a22, ctx) , boost::phoenix::eval(a23, ctx) , boost::phoenix::eval(a24, ctx) , boost::phoenix::eval(a25, ctx) , boost::phoenix::eval(a26, ctx) , boost::phoenix::eval(a27, ctx) , boost::phoenix::eval(a28, ctx) , boost::phoenix::eval(a29, ctx) , boost::phoenix::eval(a30, ctx) , boost::phoenix::eval(a31, ctx) , boost::phoenix::eval(a32, ctx) , boost::phoenix::eval(a33, ctx) , boost::phoenix::eval(a34, ctx) , boost::phoenix::eval(a35, ctx) , boost::phoenix::eval(a36, ctx) , boost::phoenix::eval(a37, ctx) , boost::phoenix::eval(a38, ctx) , boost::phoenix::eval(a39, ctx)
+                    pdalboost::pdalboostphoenix::eval(a2, ctx) , pdalboost::pdalboostphoenix::eval(a3, ctx) , pdalboost::pdalboostphoenix::eval(a4, ctx) , pdalboost::pdalboostphoenix::eval(a5, ctx) , pdalboost::pdalboostphoenix::eval(a6, ctx) , pdalboost::pdalboostphoenix::eval(a7, ctx) , pdalboost::pdalboostphoenix::eval(a8, ctx) , pdalboost::pdalboostphoenix::eval(a9, ctx) , pdalboost::pdalboostphoenix::eval(a10, ctx) , pdalboost::pdalboostphoenix::eval(a11, ctx) , pdalboost::pdalboostphoenix::eval(a12, ctx) , pdalboost::pdalboostphoenix::eval(a13, ctx) , pdalboost::pdalboostphoenix::eval(a14, ctx) , pdalboost::pdalboostphoenix::eval(a15, ctx) , pdalboost::pdalboostphoenix::eval(a16, ctx) , pdalboost::pdalboostphoenix::eval(a17, ctx) , pdalboost::pdalboostphoenix::eval(a18, ctx) , pdalboost::pdalboostphoenix::eval(a19, ctx) , pdalboost::pdalboostphoenix::eval(a20, ctx) , pdalboost::pdalboostphoenix::eval(a21, ctx) , pdalboost::pdalboostphoenix::eval(a22, ctx) , pdalboost::pdalboostphoenix::eval(a23, ctx) , pdalboost::pdalboostphoenix::eval(a24, ctx) , pdalboost::pdalboostphoenix::eval(a25, ctx) , pdalboost::pdalboostphoenix::eval(a26, ctx) , pdalboost::pdalboostphoenix::eval(a27, ctx) , pdalboost::pdalboostphoenix::eval(a28, ctx) , pdalboost::pdalboostphoenix::eval(a29, ctx) , pdalboost::pdalboostphoenix::eval(a30, ctx) , pdalboost::pdalboostphoenix::eval(a31, ctx) , pdalboost::pdalboostphoenix::eval(a32, ctx) , pdalboost::pdalboostphoenix::eval(a33, ctx) , pdalboost::pdalboostphoenix::eval(a34, ctx) , pdalboost::pdalboostphoenix::eval(a35, ctx) , pdalboost::pdalboostphoenix::eval(a36, ctx) , pdalboost::pdalboostphoenix::eval(a37, ctx) , pdalboost::pdalboostphoenix::eval(a38, ctx) , pdalboost::pdalboostphoenix::eval(a39, ctx)
                 );
         }
         

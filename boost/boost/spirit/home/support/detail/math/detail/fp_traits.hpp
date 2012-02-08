@@ -27,7 +27,7 @@
 
 //------------------------------------------------------------------------------
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace spirit {
 namespace math {
 namespace detail {
@@ -567,7 +567,7 @@ template<> struct size_to_precision<16>
 
 template<class T> struct fp_traits
 {
-    BOOST_STATIC_ASSERT(boost::is_floating_point<T>::value);
+    BOOST_STATIC_ASSERT(pdalboost::is_floating_point<T>::value);
     typedef BOOST_DEDUCED_TYPENAME size_to_precision<sizeof(T)>::type precision;
     typedef fp_traits_impl<T, precision> type;
 };
@@ -578,6 +578,6 @@ template<class T> struct fp_traits
 }   // namespace detail
 }   // namespace math
 }   // namespace spirit
-}   // namespace boost
+}   // namespace pdalboost
 
 #endif

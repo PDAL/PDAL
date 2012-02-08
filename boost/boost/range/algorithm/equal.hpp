@@ -14,8 +14,7 @@
 #include <boost/range/concepts.hpp>
 #include <iterator>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace range_detail
     {
         // An implementation of equality comparison that is optimized for iterator
@@ -162,9 +161,9 @@ namespace boost
             BOOST_RANGE_CONCEPT_ASSERT(( SinglePassRangeConcept<const SinglePassRange1> ));
             BOOST_RANGE_CONCEPT_ASSERT(( SinglePassRangeConcept<const SinglePassRange2> ));
 
-            return ::boost::range_detail::equal(
-                ::boost::begin(rng1), ::boost::end(rng1),
-                ::boost::begin(rng2), ::boost::end(rng2) );
+            return ::pdalboost::range_detail::equal(
+                ::pdalboost::begin(rng1), ::pdalboost::end(rng1),
+                ::pdalboost::begin(rng2), ::pdalboost::end(rng2) );
         }
 
         /// \overload
@@ -175,14 +174,14 @@ namespace boost
             BOOST_RANGE_CONCEPT_ASSERT(( SinglePassRangeConcept<const SinglePassRange1> ));
             BOOST_RANGE_CONCEPT_ASSERT(( SinglePassRangeConcept<const SinglePassRange2> ));
 
-            return ::boost::range_detail::equal(
-                ::boost::begin(rng1), ::boost::end(rng1),
-                ::boost::begin(rng2), ::boost::end(rng2),
+            return ::pdalboost::range_detail::equal(
+                ::pdalboost::begin(rng1), ::pdalboost::end(rng1),
+                ::pdalboost::begin(rng2), ::pdalboost::end(rng2),
                 pred);
         }
 
     } // namespace range
     using range::equal;
-} // namespace boost
+} // namespace pdalboost
 
 #endif // include guard

@@ -17,10 +17,9 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     class recursive_mutex:
-        public ::boost::detail::basic_recursive_mutex
+        public ::pdalboost::detail::basic_recursive_mutex
     {
     private:
         recursive_mutex(recursive_mutex const&);
@@ -28,11 +27,11 @@ namespace boost
     public:
         recursive_mutex()
         {
-            ::boost::detail::basic_recursive_mutex::initialize();
+            ::pdalboost::detail::basic_recursive_mutex::initialize();
         }
         ~recursive_mutex()
         {
-            ::boost::detail::basic_recursive_mutex::destroy();
+            ::pdalboost::detail::basic_recursive_mutex::destroy();
         }
 
         typedef unique_lock<recursive_mutex> scoped_lock;
@@ -42,7 +41,7 @@ namespace boost
     typedef recursive_mutex recursive_try_mutex;
 
     class recursive_timed_mutex:
-        public ::boost::detail::basic_recursive_timed_mutex
+        public ::pdalboost::detail::basic_recursive_timed_mutex
     {
     private:
         recursive_timed_mutex(recursive_timed_mutex const&);
@@ -50,11 +49,11 @@ namespace boost
     public:
         recursive_timed_mutex()
         {
-            ::boost::detail::basic_recursive_timed_mutex::initialize();
+            ::pdalboost::detail::basic_recursive_timed_mutex::initialize();
         }
         ~recursive_timed_mutex()
         {
-            ::boost::detail::basic_recursive_timed_mutex::destroy();
+            ::pdalboost::detail::basic_recursive_timed_mutex::destroy();
         }
 
         typedef unique_lock<recursive_timed_mutex> scoped_timed_lock;

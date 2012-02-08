@@ -19,7 +19,7 @@
 #include <boost/mpl/pair.hpp>
 #include <boost/mpl/map/aux_/tag.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace mpl {
 
 template<>

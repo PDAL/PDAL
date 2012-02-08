@@ -28,7 +28,7 @@
 // should be the last #include
 #include "boost/type_traits/detail/bool_trait_def.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //////////////////////////////////////////////////////////////////////////
 // class template recursive_wrapper
@@ -79,7 +79,7 @@ no_recursive_wrapper_t is_recursive_wrapper_test(...);
 
 template<typename T>
 yes_recursive_wrapper_t is_recursive_wrapper_test(
-      type< ::boost::recursive_wrapper<T> >
+      type< ::pdalboost::recursive_wrapper<T> >
     );
 
 template<typename T>
@@ -98,7 +98,7 @@ struct is_recursive_wrapper_impl
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(
       is_recursive_wrapper
     , T
-    , (::boost::detail::is_recursive_wrapper_impl<T>::value)
+    , (::pdalboost::detail::is_recursive_wrapper_impl<T>::value)
     )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,7 +140,7 @@ struct unwrap_recursive
 
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION workaround
 
-} // namespace boost
+} // namespace pdalboost
 
 #include "boost/type_traits/detail/bool_trait_undef.hpp"
 

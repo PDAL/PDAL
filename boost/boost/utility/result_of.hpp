@@ -27,7 +27,7 @@
 #  define BOOST_RESULT_OF_NUM_ARGS 10
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 template<typename F> struct result_of;
 template<typename F> struct tr1_result_of; // a TR1-style implementation of result_of

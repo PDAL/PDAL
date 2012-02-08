@@ -28,7 +28,7 @@
 #include <boost/test/utils/class_properties.hpp>
 #include <boost/test/utils/rtti.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -133,7 +133,7 @@ protected:
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #ifndef BOOST_RT_PARAM_OFFLINE
 

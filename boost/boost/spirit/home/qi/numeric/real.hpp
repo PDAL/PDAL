@@ -22,7 +22,7 @@
 #include <boost/spirit/home/support/common_terminals.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     namespace qi
     {
@@ -131,7 +131,7 @@ namespace boost { namespace spirit
     > : mpl::true_ {};
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
 #ifndef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
     using spirit::float_;

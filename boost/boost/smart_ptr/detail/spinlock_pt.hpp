@@ -17,8 +17,7 @@
 
 #include <pthread.h>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -72,7 +71,7 @@ public:
 };
 
 } // namespace detail
-} // namespace boost
+} // namespace pdalboost
 
 #define BOOST_DETAIL_SPINLOCK_INIT { PTHREAD_MUTEX_INITIALIZER }
 

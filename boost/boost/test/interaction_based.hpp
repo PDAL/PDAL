@@ -33,7 +33,7 @@
 // ************************************************************************** //
 
 #define BOOST_ITEST_EPOINT( description ) \
-    ::boost::itest::manager::instance().exception_point( BOOST_TEST_L(__FILE__), __LINE__, description )
+    ::pdalboost::itest::manager::instance().exception_point( BOOST_TEST_L(__FILE__), __LINE__, description )
 /**/
 
 // ************************************************************************** //
@@ -41,7 +41,7 @@
 // ************************************************************************** //
 
 #define BOOST_ITEST_DPOINT() \
-    ::boost::itest::manager::instance().decision_point( BOOST_TEST_L(__FILE__), __LINE__ )
+    ::pdalboost::itest::manager::instance().decision_point( BOOST_TEST_L(__FILE__), __LINE__ )
 /**/
 
 // ************************************************************************** //
@@ -49,7 +49,7 @@
 // ************************************************************************** //
 
 #define BOOST_ITEST_SCOPE( scope_name ) \
-    ::boost::itest::scope_guard itest_scope_guard ## __LINE__( BOOST_TEST_L(__FILE__), __LINE__, BOOST_STRINGIZE(scope_name) )
+    ::pdalboost::itest::scope_guard itest_scope_guard ## __LINE__( BOOST_TEST_L(__FILE__), __LINE__, BOOST_STRINGIZE(scope_name) )
 /**/
 
 // ************************************************************************** //
@@ -57,7 +57,7 @@
 // ************************************************************************** //
 
 #define BOOST_ITEST_NEW( type_name ) \
-    new ( ::boost::itest::location( BOOST_TEST_L(__FILE__), __LINE__ ) ) type_name
+    new ( ::pdalboost::itest::location( BOOST_TEST_L(__FILE__), __LINE__ ) ) type_name
 /**/
 
 // ************************************************************************** //
@@ -65,7 +65,7 @@
 // ************************************************************************** //
 
 #define BOOST_ITEST_DATA_FLOW( v ) \
-    ::boost::itest::manager::instance().generic_data_flow( v )
+    ::pdalboost::itest::manager::instance().generic_data_flow( v )
 /**/
 
 // ************************************************************************** //
@@ -73,7 +73,7 @@
 // ************************************************************************** //
 
 #define BOOST_ITEST_RETURN( type, default_value ) \
-    ::boost::itest::manager::instance().generic_return<type>( default_value )
+    ::pdalboost::itest::manager::instance().generic_return<type>( default_value )
 /**/
 
 // ************************************************************************** //
@@ -83,10 +83,10 @@
 #define BOOST_ITEST_MOCK_FUNC( function_name )          \
     BOOST_ITEST_SCOPE( function_name );                 \
     BOOST_ITEST_EPOINT( 0 );                            \
-    return ::boost::itest::mock_object<>::prototype();  \
+    return ::pdalboost::itest::mock_object<>::prototype();  \
 /**/
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace itest { // interaction-based testing
 
@@ -187,7 +187,7 @@ struct location {
 
 }  // namespace itest
 
-} // namespace boost
+} // namespace pdalboost
 
 // ************************************************************************** //
 // **************              operator new overload           ************** //
@@ -206,12 +206,12 @@ namespace std { using ::_malloc_dbg; using ::_free_dbg; }
 # endif
 
 inline void*
-operator new( std::size_t s, ::boost::itest::location const& l )
+operator new( std::size_t s, ::pdalboost::itest::location const& l )
 {
     void* res = std::malloc(s ? s : 1);
 
     if( res )
-        ::boost::itest::manager::instance().allocated( l.m_file_name, l.m_line_num, res, s );
+        ::pdalboost::itest::manager::instance().allocated( l.m_file_name, l.m_line_num, res, s );
     else
         throw std::bad_alloc();
         
@@ -221,12 +221,12 @@ operator new( std::size_t s, ::boost::itest::location const& l )
 //____________________________________________________________________________//
 
 inline void*
-operator new[]( std::size_t s, ::boost::itest::location const& l )
+operator new[]( std::size_t s, ::pdalboost::itest::location const& l )
 {
     void* res = std::malloc(s ? s : 1);
 
     if( res )
-        ::boost::itest::manager::instance().allocated( l.m_file_name, l.m_line_num, res, s );
+        ::pdalboost::itest::manager::instance().allocated( l.m_file_name, l.m_line_num, res, s );
     else
         throw std::bad_alloc();
         
@@ -236,9 +236,9 @@ operator new[]( std::size_t s, ::boost::itest::location const& l )
 //____________________________________________________________________________//
 
 inline void
-operator delete( void* p, ::boost::itest::location const& )
+operator delete( void* p, ::pdalboost::itest::location const& )
 {
-    ::boost::itest::manager::instance().freed( p );
+    ::pdalboost::itest::manager::instance().freed( p );
 
     std::free( p );
 }
@@ -246,9 +246,9 @@ operator delete( void* p, ::boost::itest::location const& )
 //____________________________________________________________________________//
 
 inline void
-operator delete[]( void* p, ::boost::itest::location const& )
+operator delete[]( void* p, ::pdalboost::itest::location const& )
 {
-    ::boost::itest::manager::instance().freed( p );
+    ::pdalboost::itest::manager::instance().freed( p );
 
     std::free( p );
 }

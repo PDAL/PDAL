@@ -15,7 +15,7 @@
 #include "boost/date_time/gregorian/greg_year.hpp"
 #include "boost/date_time/gregorian/greg_month.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace gregorian {
   
   typedef date_time::year_month_day_base<greg_year, 

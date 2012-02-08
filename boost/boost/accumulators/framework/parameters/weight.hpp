@@ -10,12 +10,12 @@
 
 #include <boost/parameter/keyword.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 // The weight of a single sample
 BOOST_PARAMETER_KEYWORD(tag, weight)
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

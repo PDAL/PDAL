@@ -16,7 +16,7 @@
 #include <boost/proto/transform/fold.hpp>
 #include <boost/proto/transform/lazy.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     struct v2_eval
         : proto::callable

@@ -14,7 +14,7 @@
 
 // This implementation works on Comeau and GCC, all the way back to
 // 2.95
-namespace boost { namespace concepts {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace concepts {
 
 template <class ModelFn>
 struct requirement_;
@@ -66,8 +66,8 @@ struct requirement_<void(*)(Model)>
 # endif
 
 #  define BOOST_CONCEPT_ASSERT_FN( ModelFnPtr )             \
-    typedef ::boost::concepts::detail::instantiate<          \
-    &::boost::concepts::requirement_<ModelFnPtr>::failed>    \
+    typedef ::pdalboost::concepts::detail::instantiate<          \
+    &::pdalboost::concepts::requirement_<ModelFnPtr>::failed>    \
       BOOST_PP_CAT(boost_concept_check,__LINE__)
 
 }}

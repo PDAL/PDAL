@@ -18,7 +18,7 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/list/aux_/tag.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template< typename Tag > struct has_push_back_impl;
 

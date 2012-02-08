@@ -10,7 +10,7 @@
  */
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace date_time {
 
 //! A wrapping integer used to support time durations (WARNING: only instantiate with a signed type)

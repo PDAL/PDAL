@@ -15,9 +15,9 @@
 
 #if defined(__sgi) && defined(_COMPILER_VERSION) && _COMPILER_VERSION <= 730
 // Work around a compiler bug.
-// boost::python::tuple has to be seen by the compiler before the
-// boost::tuple class template.
-namespace boost { namespace python { class tuple; }}
+// pdalboost::python::tuple has to be seen by the compiler before the
+// pdalboost::tuple class template.
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace python { class tuple; }}
 #endif
 
 #include "boost/config.hpp"
@@ -34,7 +34,7 @@ namespace boost { namespace python { class tuple; }}
 
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 
-namespace boost {    
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{    
 
 using tuples::tuple;
 using tuples::make_tuple;
@@ -84,7 +84,7 @@ get(const tuples::cons<Head, Tail>& t, tuples::detail::workaround_holder<N>* = 0
 }
 #endif // BOOST_NO_USING_TEMPLATE
    
-} // end namespace boost
+} // end namespace pdalboost
 
 
 #endif // BOOST_TUPLE_HPP

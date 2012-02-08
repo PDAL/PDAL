@@ -21,11 +21,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0, context_type)
                 >::type
                 result_type;
@@ -38,7 +38,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -55,11 +55,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1, context_type)
                 >::type
                 result_type;
@@ -72,7 +72,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -89,11 +89,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2, context_type)
                 >::type
                 result_type;
@@ -106,7 +106,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -123,11 +123,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3, context_type)
                 >::type
                 result_type;
@@ -140,7 +140,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -157,11 +157,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4, context_type)
                 >::type
                 result_type;
@@ -174,7 +174,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -191,11 +191,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5, context_type)
                 >::type
                 result_type;
@@ -208,7 +208,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -225,11 +225,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6, context_type)
                 >::type
                 result_type;
@@ -242,7 +242,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -259,11 +259,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7, context_type)
                 >::type
                 result_type;
@@ -276,7 +276,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -293,11 +293,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8, context_type)
                 >::type
                 result_type;
@@ -310,7 +310,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -327,11 +327,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9, context_type)
                 >::type
                 result_type;
@@ -344,7 +344,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -361,11 +361,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10, context_type)
                 >::type
                 result_type;
@@ -378,7 +378,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -395,11 +395,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11, context_type)
                 >::type
                 result_type;
@@ -412,7 +412,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -429,11 +429,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12, context_type)
                 >::type
                 result_type;
@@ -446,7 +446,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -463,11 +463,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13, context_type)
                 >::type
                 result_type;
@@ -480,7 +480,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -497,11 +497,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14, context_type)
                 >::type
                 result_type;
@@ -514,7 +514,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -531,11 +531,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15, context_type)
                 >::type
                 result_type;
@@ -548,7 +548,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -565,11 +565,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16, context_type)
                 >::type
                 result_type;
@@ -582,7 +582,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -599,11 +599,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17, context_type)
                 >::type
                 result_type;
@@ -616,7 +616,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -633,11 +633,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18, context_type)
                 >::type
                 result_type;
@@ -650,7 +650,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -667,11 +667,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19, context_type)
                 >::type
                 result_type;
@@ -684,7 +684,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -701,11 +701,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20, context_type)
                 >::type
                 result_type;
@@ -718,7 +718,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -735,11 +735,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21, context_type)
                 >::type
                 result_type;
@@ -752,7 +752,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -769,11 +769,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22, context_type)
                 >::type
                 result_type;
@@ -786,7 +786,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -803,11 +803,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23, context_type)
                 >::type
                 result_type;
@@ -820,7 +820,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -837,11 +837,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24, context_type)
                 >::type
                 result_type;
@@ -854,7 +854,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -871,11 +871,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25, context_type)
                 >::type
                 result_type;
@@ -888,7 +888,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -905,11 +905,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26, context_type)
                 >::type
                 result_type;
@@ -922,7 +922,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -939,11 +939,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27, context_type)
                 >::type
                 result_type;
@@ -956,7 +956,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -973,11 +973,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28, context_type)
                 >::type
                 result_type;
@@ -990,7 +990,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1007,11 +1007,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29, context_type)
                 >::type
                 result_type;
@@ -1024,7 +1024,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1041,11 +1041,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30, context_type)
                 >::type
                 result_type;
@@ -1058,7 +1058,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1075,11 +1075,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31, context_type)
                 >::type
                 result_type;
@@ -1092,7 +1092,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1109,11 +1109,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32, context_type)
                 >::type
                 result_type;
@@ -1126,7 +1126,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1143,11 +1143,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33, context_type)
                 >::type
                 result_type;
@@ -1160,7 +1160,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1177,11 +1177,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34, context_type)
                 >::type
                 result_type;
@@ -1194,7 +1194,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1211,11 +1211,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35, context_type)
                 >::type
                 result_type;
@@ -1228,7 +1228,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1245,11 +1245,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36, context_type)
                 >::type
                 result_type;
@@ -1262,7 +1262,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1279,11 +1279,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36; typedef typename proto::result_of::child_c<Expr, 37>::type A37;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36 , A37, context_type)
                 >::type
                 result_type;
@@ -1296,7 +1296,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e) , proto::child_c< 37>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1313,11 +1313,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36; typedef typename proto::result_of::child_c<Expr, 37>::type A37; typedef typename proto::result_of::child_c<Expr, 38>::type A38;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36 , A37 , A38, context_type)
                 >::type
                 result_type;
@@ -1330,7 +1330,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e) , proto::child_c< 37>(e) , proto::child_c< 38>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1347,11 +1347,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36; typedef typename proto::result_of::child_c<Expr, 37>::type A37; typedef typename proto::result_of::child_c<Expr, 38>::type A38; typedef typename proto::result_of::child_c<Expr, 39>::type A39;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36 , A37 , A38 , A39, context_type)
                 >::type
                 result_type;
@@ -1364,7 +1364,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e) , proto::child_c< 37>(e) , proto::child_c< 38>(e) , proto::child_c< 39>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1381,11 +1381,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36; typedef typename proto::result_of::child_c<Expr, 37>::type A37; typedef typename proto::result_of::child_c<Expr, 38>::type A38; typedef typename proto::result_of::child_c<Expr, 39>::type A39; typedef typename proto::result_of::child_c<Expr, 40>::type A40;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36 , A37 , A38 , A39 , A40, context_type)
                 >::type
                 result_type;
@@ -1398,7 +1398,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e) , proto::child_c< 37>(e) , proto::child_c< 38>(e) , proto::child_c< 39>(e) , proto::child_c< 40>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1415,11 +1415,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36; typedef typename proto::result_of::child_c<Expr, 37>::type A37; typedef typename proto::result_of::child_c<Expr, 38>::type A38; typedef typename proto::result_of::child_c<Expr, 39>::type A39; typedef typename proto::result_of::child_c<Expr, 40>::type A40; typedef typename proto::result_of::child_c<Expr, 41>::type A41;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36 , A37 , A38 , A39 , A40 , A41, context_type)
                 >::type
                 result_type;
@@ -1432,7 +1432,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e) , proto::child_c< 37>(e) , proto::child_c< 38>(e) , proto::child_c< 39>(e) , proto::child_c< 40>(e) , proto::child_c< 41>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1449,11 +1449,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36; typedef typename proto::result_of::child_c<Expr, 37>::type A37; typedef typename proto::result_of::child_c<Expr, 38>::type A38; typedef typename proto::result_of::child_c<Expr, 39>::type A39; typedef typename proto::result_of::child_c<Expr, 40>::type A40; typedef typename proto::result_of::child_c<Expr, 41>::type A41; typedef typename proto::result_of::child_c<Expr, 42>::type A42;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36 , A37 , A38 , A39 , A40 , A41 , A42, context_type)
                 >::type
                 result_type;
@@ -1466,7 +1466,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e) , proto::child_c< 37>(e) , proto::child_c< 38>(e) , proto::child_c< 39>(e) , proto::child_c< 40>(e) , proto::child_c< 41>(e) , proto::child_c< 42>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1483,11 +1483,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36; typedef typename proto::result_of::child_c<Expr, 37>::type A37; typedef typename proto::result_of::child_c<Expr, 38>::type A38; typedef typename proto::result_of::child_c<Expr, 39>::type A39; typedef typename proto::result_of::child_c<Expr, 40>::type A40; typedef typename proto::result_of::child_c<Expr, 41>::type A41; typedef typename proto::result_of::child_c<Expr, 42>::type A42; typedef typename proto::result_of::child_c<Expr, 43>::type A43;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36 , A37 , A38 , A39 , A40 , A41 , A42 , A43, context_type)
                 >::type
                 result_type;
@@ -1500,7 +1500,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e) , proto::child_c< 37>(e) , proto::child_c< 38>(e) , proto::child_c< 39>(e) , proto::child_c< 40>(e) , proto::child_c< 41>(e) , proto::child_c< 42>(e) , proto::child_c< 43>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1517,11 +1517,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36; typedef typename proto::result_of::child_c<Expr, 37>::type A37; typedef typename proto::result_of::child_c<Expr, 38>::type A38; typedef typename proto::result_of::child_c<Expr, 39>::type A39; typedef typename proto::result_of::child_c<Expr, 40>::type A40; typedef typename proto::result_of::child_c<Expr, 41>::type A41; typedef typename proto::result_of::child_c<Expr, 42>::type A42; typedef typename proto::result_of::child_c<Expr, 43>::type A43; typedef typename proto::result_of::child_c<Expr, 44>::type A44;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36 , A37 , A38 , A39 , A40 , A41 , A42 , A43 , A44, context_type)
                 >::type
                 result_type;
@@ -1534,7 +1534,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e) , proto::child_c< 37>(e) , proto::child_c< 38>(e) , proto::child_c< 39>(e) , proto::child_c< 40>(e) , proto::child_c< 41>(e) , proto::child_c< 42>(e) , proto::child_c< 43>(e) , proto::child_c< 44>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1551,11 +1551,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36; typedef typename proto::result_of::child_c<Expr, 37>::type A37; typedef typename proto::result_of::child_c<Expr, 38>::type A38; typedef typename proto::result_of::child_c<Expr, 39>::type A39; typedef typename proto::result_of::child_c<Expr, 40>::type A40; typedef typename proto::result_of::child_c<Expr, 41>::type A41; typedef typename proto::result_of::child_c<Expr, 42>::type A42; typedef typename proto::result_of::child_c<Expr, 43>::type A43; typedef typename proto::result_of::child_c<Expr, 44>::type A44; typedef typename proto::result_of::child_c<Expr, 45>::type A45;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36 , A37 , A38 , A39 , A40 , A41 , A42 , A43 , A44 , A45, context_type)
                 >::type
                 result_type;
@@ -1568,7 +1568,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e) , proto::child_c< 37>(e) , proto::child_c< 38>(e) , proto::child_c< 39>(e) , proto::child_c< 40>(e) , proto::child_c< 41>(e) , proto::child_c< 42>(e) , proto::child_c< 43>(e) , proto::child_c< 44>(e) , proto::child_c< 45>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1585,11 +1585,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36; typedef typename proto::result_of::child_c<Expr, 37>::type A37; typedef typename proto::result_of::child_c<Expr, 38>::type A38; typedef typename proto::result_of::child_c<Expr, 39>::type A39; typedef typename proto::result_of::child_c<Expr, 40>::type A40; typedef typename proto::result_of::child_c<Expr, 41>::type A41; typedef typename proto::result_of::child_c<Expr, 42>::type A42; typedef typename proto::result_of::child_c<Expr, 43>::type A43; typedef typename proto::result_of::child_c<Expr, 44>::type A44; typedef typename proto::result_of::child_c<Expr, 45>::type A45; typedef typename proto::result_of::child_c<Expr, 46>::type A46;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36 , A37 , A38 , A39 , A40 , A41 , A42 , A43 , A44 , A45 , A46, context_type)
                 >::type
                 result_type;
@@ -1602,7 +1602,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e) , proto::child_c< 37>(e) , proto::child_c< 38>(e) , proto::child_c< 39>(e) , proto::child_c< 40>(e) , proto::child_c< 41>(e) , proto::child_c< 42>(e) , proto::child_c< 43>(e) , proto::child_c< 44>(e) , proto::child_c< 45>(e) , proto::child_c< 46>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1619,11 +1619,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36; typedef typename proto::result_of::child_c<Expr, 37>::type A37; typedef typename proto::result_of::child_c<Expr, 38>::type A38; typedef typename proto::result_of::child_c<Expr, 39>::type A39; typedef typename proto::result_of::child_c<Expr, 40>::type A40; typedef typename proto::result_of::child_c<Expr, 41>::type A41; typedef typename proto::result_of::child_c<Expr, 42>::type A42; typedef typename proto::result_of::child_c<Expr, 43>::type A43; typedef typename proto::result_of::child_c<Expr, 44>::type A44; typedef typename proto::result_of::child_c<Expr, 45>::type A45; typedef typename proto::result_of::child_c<Expr, 46>::type A46; typedef typename proto::result_of::child_c<Expr, 47>::type A47;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36 , A37 , A38 , A39 , A40 , A41 , A42 , A43 , A44 , A45 , A46 , A47, context_type)
                 >::type
                 result_type;
@@ -1636,7 +1636,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e) , proto::child_c< 37>(e) , proto::child_c< 38>(e) , proto::child_c< 39>(e) , proto::child_c< 40>(e) , proto::child_c< 41>(e) , proto::child_c< 42>(e) , proto::child_c< 43>(e) , proto::child_c< 44>(e) , proto::child_c< 45>(e) , proto::child_c< 46>(e) , proto::child_c< 47>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1653,11 +1653,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36; typedef typename proto::result_of::child_c<Expr, 37>::type A37; typedef typename proto::result_of::child_c<Expr, 38>::type A38; typedef typename proto::result_of::child_c<Expr, 39>::type A39; typedef typename proto::result_of::child_c<Expr, 40>::type A40; typedef typename proto::result_of::child_c<Expr, 41>::type A41; typedef typename proto::result_of::child_c<Expr, 42>::type A42; typedef typename proto::result_of::child_c<Expr, 43>::type A43; typedef typename proto::result_of::child_c<Expr, 44>::type A44; typedef typename proto::result_of::child_c<Expr, 45>::type A45; typedef typename proto::result_of::child_c<Expr, 46>::type A46; typedef typename proto::result_of::child_c<Expr, 47>::type A47; typedef typename proto::result_of::child_c<Expr, 48>::type A48;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36 , A37 , A38 , A39 , A40 , A41 , A42 , A43 , A44 , A45 , A46 , A47 , A48, context_type)
                 >::type
                 result_type;
@@ -1670,7 +1670,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e) , proto::child_c< 37>(e) , proto::child_c< 38>(e) , proto::child_c< 39>(e) , proto::child_c< 40>(e) , proto::child_c< 41>(e) , proto::child_c< 42>(e) , proto::child_c< 43>(e) , proto::child_c< 44>(e) , proto::child_c< 45>(e) , proto::child_c< 46>(e) , proto::child_c< 47>(e) , proto::child_c< 48>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };
@@ -1687,11 +1687,11 @@
             : proto::transform_impl<Expr, State, Data>
         {
             typedef
-                typename boost::phoenix::result_of::context<State, Data>::type
+                typename pdalboost::pdalboostphoenix::result_of::context<State, Data>::type
                 context_type;
             typedef typename proto::result_of::child_c<Expr, 0>::type A0; typedef typename proto::result_of::child_c<Expr, 1>::type A1; typedef typename proto::result_of::child_c<Expr, 2>::type A2; typedef typename proto::result_of::child_c<Expr, 3>::type A3; typedef typename proto::result_of::child_c<Expr, 4>::type A4; typedef typename proto::result_of::child_c<Expr, 5>::type A5; typedef typename proto::result_of::child_c<Expr, 6>::type A6; typedef typename proto::result_of::child_c<Expr, 7>::type A7; typedef typename proto::result_of::child_c<Expr, 8>::type A8; typedef typename proto::result_of::child_c<Expr, 9>::type A9; typedef typename proto::result_of::child_c<Expr, 10>::type A10; typedef typename proto::result_of::child_c<Expr, 11>::type A11; typedef typename proto::result_of::child_c<Expr, 12>::type A12; typedef typename proto::result_of::child_c<Expr, 13>::type A13; typedef typename proto::result_of::child_c<Expr, 14>::type A14; typedef typename proto::result_of::child_c<Expr, 15>::type A15; typedef typename proto::result_of::child_c<Expr, 16>::type A16; typedef typename proto::result_of::child_c<Expr, 17>::type A17; typedef typename proto::result_of::child_c<Expr, 18>::type A18; typedef typename proto::result_of::child_c<Expr, 19>::type A19; typedef typename proto::result_of::child_c<Expr, 20>::type A20; typedef typename proto::result_of::child_c<Expr, 21>::type A21; typedef typename proto::result_of::child_c<Expr, 22>::type A22; typedef typename proto::result_of::child_c<Expr, 23>::type A23; typedef typename proto::result_of::child_c<Expr, 24>::type A24; typedef typename proto::result_of::child_c<Expr, 25>::type A25; typedef typename proto::result_of::child_c<Expr, 26>::type A26; typedef typename proto::result_of::child_c<Expr, 27>::type A27; typedef typename proto::result_of::child_c<Expr, 28>::type A28; typedef typename proto::result_of::child_c<Expr, 29>::type A29; typedef typename proto::result_of::child_c<Expr, 30>::type A30; typedef typename proto::result_of::child_c<Expr, 31>::type A31; typedef typename proto::result_of::child_c<Expr, 32>::type A32; typedef typename proto::result_of::child_c<Expr, 33>::type A33; typedef typename proto::result_of::child_c<Expr, 34>::type A34; typedef typename proto::result_of::child_c<Expr, 35>::type A35; typedef typename proto::result_of::child_c<Expr, 36>::type A36; typedef typename proto::result_of::child_c<Expr, 37>::type A37; typedef typename proto::result_of::child_c<Expr, 38>::type A38; typedef typename proto::result_of::child_c<Expr, 39>::type A39; typedef typename proto::result_of::child_c<Expr, 40>::type A40; typedef typename proto::result_of::child_c<Expr, 41>::type A41; typedef typename proto::result_of::child_c<Expr, 42>::type A42; typedef typename proto::result_of::child_c<Expr, 43>::type A43; typedef typename proto::result_of::child_c<Expr, 44>::type A44; typedef typename proto::result_of::child_c<Expr, 45>::type A45; typedef typename proto::result_of::child_c<Expr, 46>::type A46; typedef typename proto::result_of::child_c<Expr, 47>::type A47; typedef typename proto::result_of::child_c<Expr, 48>::type A48; typedef typename proto::result_of::child_c<Expr, 49>::type A49;
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     Fun(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22 , A23 , A24 , A25 , A26 , A27 , A28 , A29 , A30 , A31 , A32 , A33 , A34 , A35 , A36 , A37 , A38 , A39 , A40 , A41 , A42 , A43 , A44 , A45 , A46 , A47 , A48 , A49, context_type)
                 >::type
                 result_type;
@@ -1704,7 +1704,7 @@
                 return
                     Fun()(
                         proto::child_c< 0>(e) , proto::child_c< 1>(e) , proto::child_c< 2>(e) , proto::child_c< 3>(e) , proto::child_c< 4>(e) , proto::child_c< 5>(e) , proto::child_c< 6>(e) , proto::child_c< 7>(e) , proto::child_c< 8>(e) , proto::child_c< 9>(e) , proto::child_c< 10>(e) , proto::child_c< 11>(e) , proto::child_c< 12>(e) , proto::child_c< 13>(e) , proto::child_c< 14>(e) , proto::child_c< 15>(e) , proto::child_c< 16>(e) , proto::child_c< 17>(e) , proto::child_c< 18>(e) , proto::child_c< 19>(e) , proto::child_c< 20>(e) , proto::child_c< 21>(e) , proto::child_c< 22>(e) , proto::child_c< 23>(e) , proto::child_c< 24>(e) , proto::child_c< 25>(e) , proto::child_c< 26>(e) , proto::child_c< 27>(e) , proto::child_c< 28>(e) , proto::child_c< 29>(e) , proto::child_c< 30>(e) , proto::child_c< 31>(e) , proto::child_c< 32>(e) , proto::child_c< 33>(e) , proto::child_c< 34>(e) , proto::child_c< 35>(e) , proto::child_c< 36>(e) , proto::child_c< 37>(e) , proto::child_c< 38>(e) , proto::child_c< 39>(e) , proto::child_c< 40>(e) , proto::child_c< 41>(e) , proto::child_c< 42>(e) , proto::child_c< 43>(e) , proto::child_c< 44>(e) , proto::child_c< 45>(e) , proto::child_c< 46>(e) , proto::child_c< 47>(e) , proto::child_c< 48>(e) , proto::child_c< 49>(e)
-                      , boost::phoenix::context(s, d)
+                      , pdalboost::pdalboostphoenix::context(s, d)
                     );
             }
         };

@@ -10,7 +10,7 @@
 // Preprocessed version of "boost/mpl/shift_right.hpp" header
 // -- DO NOT modify by hand!
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<
       typename Tag1
@@ -80,7 +80,7 @@ BOOST_MPL_AUX_NA_SPEC2(2, 2, shift_right)
 
 }}
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 namespace aux {
 template< typename T, typename Shift, T n, Shift s >

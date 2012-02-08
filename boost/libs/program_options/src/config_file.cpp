@@ -16,7 +16,7 @@
 #include <fstream>
 #include <cassert>
 
-namespace boost { namespace program_options { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options { namespace detail {
 
     using namespace std;
 
@@ -57,7 +57,7 @@ namespace boost { namespace program_options { namespace detail {
                     bad_prefixes = true;
             }
             if (bad_prefixes)
-                boost::throw_exception(error("bad prefixes"));
+                pdalboost::throw_exception(error("bad prefixes"));
             allowed_prefixes.insert(s);
         }
     }
@@ -104,7 +104,7 @@ namespace boost { namespace program_options { namespace detail {
 
                     bool registered = allowed_option(name);
                     if (!registered && !m_allow_unregistered)
-                        boost::throw_exception(unknown_option(name));
+                        pdalboost::throw_exception(unknown_option(name));
 
                     found = true;
                     this->value().string_key = name;
@@ -117,7 +117,7 @@ namespace boost { namespace program_options { namespace detail {
                     break;
 
                 } else {
-                    boost::throw_exception(invalid_syntax(s, invalid_syntax::unrecognized_line));
+                    pdalboost::throw_exception(invalid_syntax(s, invalid_syntax::unrecognized_line));
                 }
             }
         }
@@ -164,7 +164,7 @@ namespace boost { namespace program_options { namespace detail {
 }}}
 
 #if 0
-using boost::program_options::config_file;
+using pdalboost::program_options::config_file;
 
 #include <sstream>
 #include <cassert>

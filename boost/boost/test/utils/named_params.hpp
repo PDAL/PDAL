@@ -29,7 +29,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace nfp { // named function parameters
 
@@ -321,7 +321,7 @@ optionally_assign( T& target, Params const& p, Keyword k )
 
 } // namespace nfp
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/test/detail/enable_warnings.hpp>
 

@@ -55,7 +55,7 @@
 #define BOOST_MULTI_INDEX_RND_INDEX_CHECK_INVARIANT
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -135,9 +135,9 @@ public:
   typedef typename allocator_type::pointer         pointer;
   typedef typename allocator_type::const_pointer   const_pointer;
   typedef typename
-    boost::reverse_iterator<iterator>              reverse_iterator;
+    pdalboost::reverse_iterator<iterator>              reverse_iterator;
   typedef typename
-    boost::reverse_iterator<const_iterator>        const_reverse_iterator;
+    pdalboost::reverse_iterator<const_iterator>        const_reverse_iterator;
   typedef TagList                                  tag_list;
 
 protected:
@@ -781,7 +781,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
       typedef random_access_index_loader<node_type,allocator_type> loader;
 
       loader ld(get_allocator(),ptrs);
-      lm.load(::boost::bind(&loader::rearrange,&ld,_1,_2),ar,version);
+      lm.load(::pdalboost::bind(&loader::rearrange,&ld,_1,_2),ar,version);
     } /* exit scope so that ld frees its resources */
     super::load_(ar,version,lm);
   }
@@ -808,7 +808,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
     return super::invariant_();
   }
 
-  /* This forwarding function eases things for the boost::mem_fn construct
+  /* This forwarding function eases things for the pdalboost::mem_fn construct
    * in BOOST_MULTI_INDEX_RND_INDEX_CHECK_INVARIANT. Actually,
    * final_check_invariant is already an inherited member function of index.
    */
@@ -1002,14 +1002,14 @@ struct random_access
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 /* Boost.Foreach compatibility */
 
 template<typename SuperMeta,typename TagList>
-inline boost::mpl::true_* boost_foreach_is_noncopyable(
-  boost::multi_index::detail::random_access_index<SuperMeta,TagList>*&,
-  boost::foreach::tag)
+inline pdalboost::mpl::true_* boost_foreach_is_noncopyable(
+  pdalboost::multi_index::detail::random_access_index<SuperMeta,TagList>*&,
+  pdalboost::foreach::tag)
 {
   return 0;
 }

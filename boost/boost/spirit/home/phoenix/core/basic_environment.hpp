@@ -17,7 +17,7 @@
 #include <boost/fusion/include/as_vector.hpp>
 #include <boost/fusion/include/mpl.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <
         BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT(
@@ -40,7 +40,7 @@ namespace boost { namespace phoenix
         typedef typename
             fusion::result_of::as_vector<
                 typename mpl::transform<
-                    args_type, boost::add_reference<mpl::_1> 
+                    args_type, pdalboost::add_reference<mpl::_1> 
                 >::type
             >::type
         tie_type;

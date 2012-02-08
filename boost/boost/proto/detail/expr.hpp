@@ -92,7 +92,7 @@
     ///
     /// \c Tag is type that represents the operation encoded by
     ///             this expression. It is typically one of the structs
-    ///             in the \c boost::proto::tag namespace, but it doesn't
+    ///             in the \c pdalboost::proto::tag namespace, but it doesn't
     ///             have to be.
     ///
     /// \c Args is a type list representing the type of the children
@@ -182,13 +182,13 @@
     #endif
 
     #if 1 == BOOST_PP_ITERATION()
-        /// If \c Tag is \c boost::proto::tag::address_of and \c proto_child0 is
+        /// If \c Tag is \c pdalboost::proto::tag::address_of and \c proto_child0 is
         /// <tt>T&</tt>, then \c address_of_hack_type_ is <tt>T*</tt>.
         /// Otherwise, it is some undefined type.
         typedef typename detail::address_of_hack<Tag, proto_child0>::type address_of_hack_type_;
 
         /// \return The address of <tt>this->child0</tt> if \c Tag is
-        /// \c boost::proto::tag::address_of. Otherwise, this function will
+        /// \c pdalboost::proto::tag::address_of. Otherwise, this function will
         /// fail to compile.
         ///
         /// \attention Proto overloads <tt>operator&</tt>, which means that
@@ -196,7 +196,7 @@
         /// the following hack to make \c &x implicitly convertible to \c X*.
         operator address_of_hack_type_() const
         {
-            return boost::addressof(this->child0);
+            return pdalboost::addressof(this->child0);
         }
     #else
         /// INTERNAL ONLY
@@ -375,7 +375,7 @@
         }
     #endif
 
-        /// Encodes the return type of \c expr\<\>::operator(), for use with \c boost::result_of\<\>
+        /// Encodes the return type of \c expr\<\>::operator(), for use with \c pdalboost::result_of\<\>
         ///
         template<typename Sig>
         struct result

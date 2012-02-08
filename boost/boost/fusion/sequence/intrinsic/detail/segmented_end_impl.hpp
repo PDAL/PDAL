@@ -14,13 +14,13 @@
 #include <boost/fusion/container/list/cons_fwd.hpp>
 #include <boost/fusion/support/is_segmented.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     template <typename First, typename Last>
     struct iterator_range;
 }}
 
-namespace boost { namespace fusion { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
 {
     //auto segmented_end_impl( seq, stack )
     //{

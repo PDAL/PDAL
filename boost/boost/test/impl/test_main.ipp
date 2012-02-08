@@ -37,7 +37,7 @@ struct test_main_caller {
         int test_main_result = test_main( m_argc, m_argv );
 
         // translate a test_main non-success return into a test error
-        BOOST_CHECK( test_main_result == 0 || test_main_result == boost::exit_success );
+        BOOST_CHECK( test_main_result == 0 || test_main_result == pdalboost::exit_success );
     }
   
 private:
@@ -50,9 +50,9 @@ private:
 // **************                   test main                  ************** //
 // ************************************************************************** //
 
-::boost::unit_test::test_suite*
+::pdalboost::unit_test::test_suite*
 init_unit_test_suite( int argc, char* argv[] ) {
-    using namespace ::boost::unit_test;
+    using namespace ::pdalboost::unit_test;
     
     framework::master_test_suite().p_name.value = "Test Program";
     

@@ -23,7 +23,7 @@
 # pragma warning(disable: 4244)   // conversion from 'double' to 'float', possible loss of data
 #endif
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     template <typename T, typename Enable/* = void*/>
     struct pow10_helper

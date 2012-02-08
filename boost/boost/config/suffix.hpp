@@ -517,7 +517,7 @@ namespace std {
 // (with -pedantic -ansi) unless it's use is prefixed by __extension__
 //
 #if defined(BOOST_HAS_LONG_LONG) && defined(__cplusplus)
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 #  ifdef __GNUC__
    __extension__ typedef long long long_long_type;
    __extension__ typedef unsigned long long ulong_long_type;
@@ -575,10 +575,10 @@ namespace boost{
 #  include "boost/type.hpp"
 #  include "boost/non_type.hpp"
 
-#  define BOOST_EXPLICIT_TEMPLATE_TYPE(t)              boost::type<t>* = 0
-#  define BOOST_EXPLICIT_TEMPLATE_TYPE_SPEC(t)         boost::type<t>*
-#  define BOOST_EXPLICIT_TEMPLATE_NON_TYPE(t, v)       boost::non_type<t, v>* = 0
-#  define BOOST_EXPLICIT_TEMPLATE_NON_TYPE_SPEC(t, v)  boost::non_type<t, v>*
+#  define BOOST_EXPLICIT_TEMPLATE_TYPE(t)              pdalboost::type<t>* = 0
+#  define BOOST_EXPLICIT_TEMPLATE_TYPE_SPEC(t)         pdalboost::type<t>*
+#  define BOOST_EXPLICIT_TEMPLATE_NON_TYPE(t, v)       pdalboost::non_type<t, v>* = 0
+#  define BOOST_EXPLICIT_TEMPLATE_NON_TYPE_SPEC(t, v)  pdalboost::non_type<t, v>*
 
 #  define BOOST_APPEND_EXPLICIT_TEMPLATE_TYPE(t)        \
              , BOOST_EXPLICIT_TEMPLATE_TYPE(t)

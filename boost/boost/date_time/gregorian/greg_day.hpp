@@ -13,7 +13,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace gregorian {
 
   //! Exception type for gregorian day of month (1..31)

@@ -15,7 +15,7 @@
 
 #include <boost/spirit/home/support/unused.hpp>
 #include <boost/spirit/home/support/attributes_fwd.hpp>
-#include <boost/detail/iterator.hpp> // for boost::detail::iterator_traits
+#include <boost/detail/iterator.hpp> // for pdalboost::detail::iterator_traits
 #include <boost/mpl/has_xxx.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/optional.hpp>
@@ -24,7 +24,7 @@
 #include <boost/preprocessor/repeat.hpp>
 #include <boost/range/iterator_range.hpp>
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     //  This file contains some container utils for stl containers. The
@@ -55,7 +55,7 @@ namespace boost { namespace spirit { namespace traits
     {};
 
     template <typename T>
-    struct is_container<boost::optional<T> >
+    struct is_container<pdalboost::optional<T> >
       : is_container<T>
     {};
 
@@ -65,7 +65,7 @@ namespace boost { namespace spirit { namespace traits
 
     // make sure unused variant parameters do not affect the outcome
     template <>
-    struct is_container<boost::detail::variant::void_>
+    struct is_container<pdalboost::detail::variant::void_>
       : mpl::false_
     {};
 
@@ -125,7 +125,7 @@ namespace boost { namespace spirit { namespace traits
 
     // this will be instantiated if the optional holds a container
     template <typename T>
-    struct container_value<boost::optional<T> >
+    struct container_value<pdalboost::optional<T> >
       : container_value<T>
     {};
 
@@ -227,16 +227,16 @@ namespace boost { namespace spirit { namespace traits
     };
 
     template <typename T>
-    struct optional_attribute<boost::optional<T> >
+    struct optional_attribute<pdalboost::optional<T> >
     {
         typedef T const& type;
 
-        static type call(boost::optional<T> const& val)
+        static type call(pdalboost::optional<T> const& val)
         {
-            return boost::get<T>(val);
+            return pdalboost::get<T>(val);
         }
 
-        static bool is_valid(boost::optional<T> const& val)
+        static bool is_valid(pdalboost::optional<T> const& val)
         {
             return val;
         }
@@ -284,11 +284,11 @@ namespace boost { namespace spirit { namespace traits
     template <typename Container, typename T>
     struct push_back_container<optional<Container>, T>
     {
-        static bool call(boost::optional<Container>& c, T const& val)
+        static bool call(pdalboost::optional<Container>& c, T const& val)
         {
             if (!c)
                 c = Container();
-            return push_back(boost::get<Container>(c), val);
+            return push_back(pdalboost::get<Container>(c), val);
         }
     };
 
@@ -451,7 +451,7 @@ namespace boost { namespace spirit { namespace traits
     template <typename Iterator, typename Enable/* = void*/>
     struct deref_iterator
     {
-        typedef typename boost::detail::iterator_traits<Iterator>::reference type;
+        typedef typename pdalboost::detail::iterator_traits<Iterator>::reference type;
         static type call(Iterator& it)
         {
             return *it;
@@ -515,7 +515,7 @@ namespace boost { namespace spirit { namespace traits
 }}}
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace result_of
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace result_of
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename T>
@@ -525,13 +525,13 @@ namespace boost { namespace spirit { namespace result_of
     };
 
     template <typename T>
-    struct optional_value<boost::optional<T> >
+    struct optional_value<pdalboost::optional<T> >
     {
         typedef T type;
     };
 
     template <typename T>
-    struct optional_value<boost::optional<T> const>
+    struct optional_value<pdalboost::optional<T> const>
     {
         typedef T const type;
     };

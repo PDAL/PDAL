@@ -13,7 +13,7 @@
 
 #include <boost/spirit/home/qi/string/detail/tst.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     struct tst_pass_through
     {
@@ -68,7 +68,7 @@ namespace boost { namespace spirit { namespace qi
         T* add(
             Iterator first
           , Iterator last
-          , typename boost::call_traits<T>::param_type val)
+          , typename pdalboost::call_traits<T>::param_type val)
         {
             return node::add(root, first, last, val, this);
         }
@@ -117,7 +117,7 @@ namespace boost { namespace spirit { namespace qi
             return new node(id);
         }
 
-        T* new_data(typename boost::call_traits<T>::param_type val)
+        T* new_data(typename pdalboost::call_traits<T>::param_type val)
         {
             return new T(val);
         }

@@ -22,21 +22,21 @@
 #include <iostream>
 #include <exception>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace gregorian {
   
   //! Configuration of the output facet template
   struct greg_facet_config
   {
-    typedef boost::gregorian::greg_month month_type;
-    typedef boost::date_time::special_values special_value_enum;
-    typedef boost::gregorian::months_of_year month_enum;
-    typedef boost::date_time::weekdays weekday_enum;
+    typedef pdalboost::gregorian::greg_month month_type;
+    typedef pdalboost::date_time::special_values special_value_enum;
+    typedef pdalboost::gregorian::months_of_year month_enum;
+    typedef pdalboost::date_time::weekdays weekday_enum;
   };
 
 #if defined(USE_DATE_TIME_PRE_1_33_FACET_IO)
   //! Create the base facet type for gregorian::date
-  typedef boost::date_time::date_names_put<greg_facet_config> greg_base_facet;
+  typedef pdalboost::date_time::date_names_put<greg_facet_config> greg_base_facet;
 
   //! ostream operator for gregorian::date
   /*! Uses the date facet to determine various output parameters including:
@@ -50,8 +50,8 @@ namespace gregorian {
   std::basic_ostream<charT, traits>&
   operator<<(std::basic_ostream<charT, traits>& os, const date& d)
   {
-    typedef boost::date_time::date_names_put<greg_facet_config, charT> facet_def;
-    typedef boost::date_time::ostream_date_formatter<date, facet_def, charT> greg_ostream_formatter;
+    typedef pdalboost::date_time::date_names_put<greg_facet_config, charT> facet_def;
+    typedef pdalboost::date_time::ostream_date_formatter<date, facet_def, charT> greg_ostream_formatter;
     greg_ostream_formatter::date_put(d, os);
     return os;
   }
@@ -66,8 +66,8 @@ namespace gregorian {
   std::basic_ostream<charT, traits>&
   operator<<(std::basic_ostream<charT, traits>& os, const greg_month& m)
   {
-    typedef boost::date_time::date_names_put<greg_facet_config, charT> facet_def;
-    typedef boost::date_time::ostream_month_formatter<facet_def, charT> greg_month_formatter;
+    typedef pdalboost::date_time::date_names_put<greg_facet_config, charT> facet_def;
+    typedef pdalboost::date_time::ostream_month_formatter<facet_def, charT> greg_month_formatter;
     std::locale locale = os.getloc();
     if (std::has_facet<facet_def>(locale)) {
       const facet_def& f = std::use_facet<facet_def>(locale);
@@ -92,8 +92,8 @@ namespace gregorian {
   std::basic_ostream<charT, traits>&
   operator<<(std::basic_ostream<charT, traits>& os, const greg_weekday& wd)
   {
-    typedef boost::date_time::date_names_put<greg_facet_config, charT> facet_def;
-    typedef boost::date_time::ostream_weekday_formatter<greg_weekday, facet_def, charT> greg_weekday_formatter;
+    typedef pdalboost::date_time::date_names_put<greg_facet_config, charT> facet_def;
+    typedef pdalboost::date_time::ostream_weekday_formatter<greg_weekday, facet_def, charT> greg_weekday_formatter;
     std::locale locale = os.getloc();
     if (std::has_facet<facet_def>(locale)) {
       const facet_def& f = std::use_facet<facet_def>(locale);
@@ -215,7 +215,7 @@ namespace gregorian {
   {
     std::istream_iterator<std::basic_string<charT>, charT> beg(is), eos;
     
-    typedef boost::date_time::all_date_names_put<greg_facet_config, charT> facet_def;
+    typedef pdalboost::date_time::all_date_names_put<greg_facet_config, charT> facet_def;
     d = from_stream(beg, eos);
     return is;
   }
@@ -251,7 +251,7 @@ namespace gregorian {
   //! Returns a pointer to a facet with a default set of names (English)
   /* Necessary in the event an exception is thrown from op>> for 
    * weekday or month. See comments in those functions for more info */
-  BOOST_DATE_TIME_DECL boost::date_time::all_date_names_put<greg_facet_config, char>* create_facet_def(char type);
+  BOOST_DATE_TIME_DECL pdalboost::date_time::all_date_names_put<greg_facet_config, char>* create_facet_def(char type);
 
 #ifndef BOOST_NO_STD_WSTRING
   //! generates a locale with the set of gregorian name-strings of type wchar_t*
@@ -259,7 +259,7 @@ namespace gregorian {
   //! Returns a pointer to a facet with a default set of names (English)
   /* Necessary in the event an exception is thrown from op>> for 
    * weekday or month. See comments in those functions for more info */
-  BOOST_DATE_TIME_DECL boost::date_time::all_date_names_put<greg_facet_config, wchar_t>* create_facet_def(wchar_t type);
+  BOOST_DATE_TIME_DECL pdalboost::date_time::all_date_names_put<greg_facet_config, wchar_t>* create_facet_def(wchar_t type);
 #endif // BOOST_NO_STD_WSTRING
 
   //! operator>> for gregorian::greg_month - throws exception if invalid month given
@@ -267,7 +267,7 @@ namespace gregorian {
   inline
   std::basic_istream<charT>& operator>>(std::basic_istream<charT>& is,greg_month& m) 
   {
-    typedef boost::date_time::all_date_names_put<greg_facet_config, charT> facet_def;
+    typedef pdalboost::date_time::all_date_names_put<greg_facet_config, charT> facet_def;
 
     std::basic_string<charT> s;
     is >> s;
@@ -310,7 +310,7 @@ namespace gregorian {
   inline
   std::basic_istream<charT>& operator>>(std::basic_istream<charT>& is,greg_weekday& wd) 
   {
-    typedef boost::date_time::all_date_names_put<greg_facet_config, charT> facet_def;
+    typedef pdalboost::date_time::all_date_names_put<greg_facet_config, charT> facet_def;
 
     std::basic_string<charT> s;
     is >> s;

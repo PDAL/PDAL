@@ -14,7 +14,7 @@
                  
 #include <boost/iostreams/detail/ios.hpp>  // failure.
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 inline BOOST_IOSTREAMS_FAILURE cant_read() 
 { return BOOST_IOSTREAMS_FAILURE("no read access"); }

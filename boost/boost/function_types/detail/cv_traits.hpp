@@ -21,7 +21,7 @@
 
 #include <boost/function_types/property_tags.hpp>
 
-namespace boost { namespace function_types { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace function_types { namespace detail {
 
 #if ! (defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION) \
     || BOOST_WORKAROUND(__BORLANDC__, <= 0x582))
@@ -108,27 +108,27 @@ struct cv_code
 {
   static T _t;
   BOOST_STATIC_CONSTANT(std::size_t, value = 
-      sizeof(::boost::function_types::detail::switch_cv(
-         ::boost::function_types::detail::ref_to_ptr(_t) ) ));
+      sizeof(::pdalboost::function_types::detail::switch_cv(
+         ::pdalboost::function_types::detail::ref_to_ptr(_t) ) ));
 };
 
 template<typename T> struct cv_traits 
 {
-  typedef typename boost::function_types::detail::cv_tag_impl< 
-    ::boost::function_types::detail::cv_code<T>::value >::type
+  typedef typename pdalboost::function_types::detail::cv_tag_impl< 
+    ::pdalboost::function_types::detail::cv_code<T>::value >::type
   tag;
 
   // may require Boost.TypeTraits broken compiler specializations
   // to work
-  typedef typename boost::remove_cv<
-              typename boost::remove_pointer<
-                  typename boost::remove_reference<T>::type 
+  typedef typename pdalboost::remove_cv<
+              typename pdalboost::remove_pointer<
+                  typename pdalboost::remove_reference<T>::type 
               >::type 
           >::type type; 
 };
 #endif
 
-} } } // namespace boost::function_types::detail
+} } } // namespace pdalboost::function_types::detail
 
 #endif
  

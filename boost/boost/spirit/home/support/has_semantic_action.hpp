@@ -17,7 +17,7 @@
 #include <boost/mpl/find_if.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     // finding out, whether a component contains a semantic action
     template <typename T, typename Enable = void>

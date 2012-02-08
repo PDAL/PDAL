@@ -18,7 +18,7 @@
 #include <vector>
 #include <typeinfo>
 
-namespace boost { namespace program_options {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
 
     /** Class which specifies how the option's value is to be parsed
         and converted into C++ types.
@@ -54,7 +54,7 @@ namespace boost { namespace program_options {
             is desired. May be be called several times if value of the same
             option is specified more than once.
         */
-        virtual void parse(boost::any& value_store, 
+        virtual void parse(pdalboost::any& value_store, 
                            const std::vector<std::string>& new_tokens,
                            bool utf8) const 
             = 0;
@@ -62,11 +62,11 @@ namespace boost { namespace program_options {
         /** Called to assign default value to 'value_store'. Returns
             true if default value is assigned, and false if no default
             value exists. */
-        virtual bool apply_default(boost::any& value_store) const = 0;
+        virtual bool apply_default(pdalboost::any& value_store) const = 0;
                                    
         /** Called when final value of an option is determined. 
         */
-        virtual void notify(const boost::any& value_store) const = 0;
+        virtual void notify(const pdalboost::any& value_store) const = 0;
         
         virtual ~value_semantic() {}
     };
@@ -90,11 +90,11 @@ namespace boost { namespace program_options {
     class BOOST_PROGRAM_OPTIONS_DECL 
     value_semantic_codecvt_helper<char> : public value_semantic {
     private: // base overrides
-        void parse(boost::any& value_store, 
+        void parse(pdalboost::any& value_store, 
                    const std::vector<std::string>& new_tokens,
                    bool utf8) const;
     protected: // interface for derived classes.
-        virtual void xparse(boost::any& value_store, 
+        virtual void xparse(pdalboost::any& value_store, 
                             const std::vector<std::string>& new_tokens) 
             const = 0;
     };
@@ -110,12 +110,12 @@ namespace boost { namespace program_options {
     class BOOST_PROGRAM_OPTIONS_DECL
     value_semantic_codecvt_helper<wchar_t> : public value_semantic {
     private: // base overrides
-        void parse(boost::any& value_store, 
+        void parse(pdalboost::any& value_store, 
                    const std::vector<std::string>& new_tokens,
                    bool utf8) const;
     protected: // interface for derived classes.
 #if !defined(BOOST_NO_STD_WSTRING)
-        virtual void xparse(boost::any& value_store, 
+        virtual void xparse(pdalboost::any& value_store, 
                             const std::vector<std::wstring>& new_tokens) 
             const = 0;
 #endif
@@ -144,14 +144,14 @@ namespace boost { namespace program_options {
             the first string from 'new_tokens' to 'value_store', without
             any modifications.
          */
-        void xparse(boost::any& value_store,
+        void xparse(pdalboost::any& value_store,
                     const std::vector<std::string>& new_tokens) const;
 
         /** Does nothing. */
-        bool apply_default(boost::any&) const { return false; }
+        bool apply_default(pdalboost::any&) const { return false; }
 
         /** Does nothing. */
-        void notify(const boost::any&) const {}        
+        void notify(const pdalboost::any&) const {}        
     private:
         bool m_zero_tokens;
     };
@@ -194,8 +194,8 @@ namespace boost { namespace program_options {
         */
         typed_value* default_value(const T& v)
         {
-            m_default_value = boost::any(v);
-            m_default_value_as_text = boost::lexical_cast<std::string>(v);
+            m_default_value = pdalboost::any(v);
+            m_default_value_as_text = pdalboost::lexical_cast<std::string>(v);
             return this;
         }
 
@@ -207,7 +207,7 @@ namespace boost { namespace program_options {
         */
         typed_value* default_value(const T& v, const std::string& textual)
         {
-            m_default_value = boost::any(v);
+            m_default_value = pdalboost::any(v);
             m_default_value_as_text = textual;
             return this;
         }
@@ -221,9 +221,9 @@ namespace boost { namespace program_options {
         */
         typed_value* implicit_value(const T &v)
         {
-            m_implicit_value = boost::any(v);
+            m_implicit_value = pdalboost::any(v);
             m_implicit_value_as_text =
-                boost::lexical_cast<std::string>(v);
+                pdalboost::lexical_cast<std::string>(v);
             return this;
         }
 
@@ -239,7 +239,7 @@ namespace boost { namespace program_options {
         */
         typed_value* implicit_value(const T &v, const std::string& textual)
         {
-            m_implicit_value = boost::any(v);
+            m_implicit_value = pdalboost::any(v);
             m_implicit_value_as_text = textual;
             return this;
         }
@@ -310,7 +310,7 @@ namespace boost { namespace program_options {
 
         /** Creates an instance of the 'validator' class and calls
             its operator() to perform the actual conversion. */
-        void xparse(boost::any& value_store, 
+        void xparse(pdalboost::any& value_store, 
                     const std::vector< std::basic_string<charT> >& new_tokens) 
             const;
 
@@ -318,7 +318,7 @@ namespace boost { namespace program_options {
             'default_value', stores that value into 'value_store'.
             Returns true if default value was stored.
         */
-        virtual bool apply_default(boost::any& value_store) const
+        virtual bool apply_default(pdalboost::any& value_store) const
         {
             if (m_default_value.empty()) {
                 return false;
@@ -331,7 +331,7 @@ namespace boost { namespace program_options {
         /** If an address of variable to store value was specified
             when creating *this, stores the value there. Otherwise,
             does nothing. */
-        void notify(const boost::any& value_store) const;
+        void notify(const pdalboost::any& value_store) const;
 
     public: // typed_value_base overrides
         
@@ -344,14 +344,14 @@ namespace boost { namespace program_options {
     private:
         T* m_store_to;
         
-        // Default value is stored as boost::any and not
-        // as boost::optional to avoid unnecessary instantiations.
-        boost::any m_default_value;
+        // Default value is stored as pdalboost::any and not
+        // as pdalboost::optional to avoid unnecessary instantiations.
+        pdalboost::any m_default_value;
         std::string m_default_value_as_text;
-        boost::any m_implicit_value;
+        pdalboost::any m_implicit_value;
         std::string m_implicit_value_as_text;
         bool m_composing, m_implicit, m_multitoken, m_zero_tokens, m_required;
-        boost::function1<void, const T&> m_notifier;
+        pdalboost::function1<void, const T&> m_notifier;
     };
 
 

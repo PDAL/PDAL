@@ -36,18 +36,18 @@
 
 namespace {
 
-void fail(int err, boost::system::error_code* ec)
+void fail(int err, pdalboost::system::error_code* ec)
 {
   if (ec == 0)
-    BOOST_FILESYSTEM_THROW( boost::system::system_error(err,
-      boost::system::system_category(),
-      "boost::filesystem::unique_path"));
+    BOOST_FILESYSTEM_THROW( pdalboost::system::system_error(err,
+      pdalboost::system::system_category(),
+      "pdalboost::filesystem::unique_path"));
 
-  ec->assign(err, boost::system::system_category());
+  ec->assign(err, pdalboost::system::system_category());
   return;
 }
 
-void system_crypt_random(void* buf, std::size_t len, boost::system::error_code* ec)
+void system_crypt_random(void* buf, std::size_t len, pdalboost::system::error_code* ec)
 {
 # ifdef BOOST_POSIX_API
 
@@ -112,7 +112,7 @@ void system_crypt_random(void* buf, std::size_t len, boost::system::error_code* 
 
 }  // unnamed namespace
 
-namespace boost { namespace filesystem3 { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace filesystem3 { namespace detail {
 
 BOOST_FILESYSTEM_DECL
 path unique_path(const path& model, system::error_code* ec)

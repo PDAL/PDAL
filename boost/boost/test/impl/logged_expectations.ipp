@@ -38,9 +38,9 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
-using namespace ::boost::unit_test;
+using namespace ::pdalboost::unit_test;
 
 namespace itest {
 
@@ -235,7 +235,7 @@ logged_expectations( callback0<> const& F, const_string log_file_name, bool test
 
 }  // namespace itest
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

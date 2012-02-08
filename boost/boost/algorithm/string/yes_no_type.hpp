@@ -11,7 +11,7 @@
 #ifndef BOOST_STRING_YES_NO_TYPE_DETAIL_HPP
 #define BOOST_STRING_YES_NO_TYPE_DETAIL_HPP
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
 
         // taken from boost mailing-list
@@ -27,7 +27,7 @@ namespace boost {
         typedef size_descriptor<2>::type no_type;
 
     } // namespace algorithm
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_YES_NO_TYPE_DETAIL_HPP

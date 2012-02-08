@@ -18,7 +18,7 @@
 #include <boost/proto/transform/fold.hpp>
 #include <boost/proto/transform/lazy.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     namespace result_of
     {
@@ -113,11 +113,11 @@ namespace boost { namespace phoenix
     {
         template <typename Expr, typename Enable>
         struct is_nullary
-            : boost::phoenix::evaluator::impl<
+            : pdalboost::pdalboostphoenix::evaluator::impl<
                 Expr const &
               , vector2<
                     mpl::true_
-                  , boost::phoenix::is_nullary
+                  , pdalboost::pdalboostphoenix::is_nullary
                 >
               , int
             >::result_type
@@ -149,9 +149,9 @@ namespace boost { namespace phoenix
         {};
         
         template <typename T>
-        struct is_nullary<custom_terminal<boost::reference_wrapper<actor<T> > > >
+        struct is_nullary<custom_terminal<pdalboost::reference_wrapper<actor<T> > > >
         {
-            BOOST_PROTO_TRANSFORM(is_nullary<custom_terminal<boost::reference_wrapper<actor<T> > > >)
+            BOOST_PROTO_TRANSFORM(is_nullary<custom_terminal<pdalboost::reference_wrapper<actor<T> > > >)
             template <typename Expr, typename State, typename Data>
             struct impl
             {
@@ -160,9 +160,9 @@ namespace boost { namespace phoenix
         };
         
         template <typename T>
-        struct is_nullary<custom_terminal<boost::reference_wrapper<actor<T> const> > >
+        struct is_nullary<custom_terminal<pdalboost::reference_wrapper<actor<T> const> > >
         {
-            BOOST_PROTO_TRANSFORM(is_nullary<custom_terminal<boost::reference_wrapper<actor<T> const> > >)
+            BOOST_PROTO_TRANSFORM(is_nullary<custom_terminal<pdalboost::reference_wrapper<actor<T> const> > >)
             template <typename Expr, typename State, typename Data>
             struct impl
             {

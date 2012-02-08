@@ -9,7 +9,7 @@
 
 #include <boost/spirit/home/phoenix/core/actor.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename T>
     struct as_actor_base; // defined in value.hpp

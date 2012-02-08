@@ -10,7 +10,7 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
 using namespace std;
-using namespace boost::filesystem;
+using namespace pdalboost::filesystem;
 
 const char * say_what(bool b) { return b ? "true" : "false"; }
 

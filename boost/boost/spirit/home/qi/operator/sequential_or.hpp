@@ -19,7 +19,7 @@
 #include <boost/fusion/include/as_vector.hpp>
 #include <boost/fusion/include/for_each.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // Enablers
@@ -33,7 +33,7 @@ namespace boost { namespace spirit
       : mpl::true_ {};
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     template <typename Elements>
     struct sequential_or : nary_parser<sequential_or<Elements> >
@@ -42,7 +42,7 @@ namespace boost { namespace spirit { namespace qi
         struct attribute
         {
             // Put all the element attributes in a tuple,
-            // wrapping each element in a boost::optional
+            // wrapping each element in a pdalboost::optional
             typedef typename traits::build_attribute_sequence<
                 Elements, Context, traits::sequential_or_attribute_transform
               , Iterator, qi::domain
@@ -100,7 +100,7 @@ namespace boost { namespace spirit { namespace qi
     {};
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     // We specialize this for sequential_or (see support/attributes.hpp).

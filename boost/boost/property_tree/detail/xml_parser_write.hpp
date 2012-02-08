@@ -16,7 +16,7 @@
 #include <ostream>
 #include <iomanip>
 
-namespace boost { namespace property_tree { namespace xml_parser
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace xml_parser
 {
     template<class Ch>
     void write_xml_indent(std::basic_ostream<Ch> &stream,

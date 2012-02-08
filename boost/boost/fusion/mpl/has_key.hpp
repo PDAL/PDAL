@@ -10,7 +10,7 @@
 #include <boost/mpl/has_key.hpp>
 #include <boost/fusion/sequence/intrinsic/has_key.hpp>
 
-namespace boost { namespace mpl
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl
 {
     template <typename Tag>
     struct has_key_impl;

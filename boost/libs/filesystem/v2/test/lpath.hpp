@@ -61,7 +61,7 @@ namespace user
 {
   typedef std::basic_string<long> lstring;
   struct lpath_traits;
-  typedef boost::filesystem::basic_path<lstring, lpath_traits> lpath;
+  typedef pdalboost::filesystem::basic_path<lstring, lpath_traits> lpath;
 
   struct lpath_traits
   {
@@ -91,8 +91,7 @@ namespace user
 
 } // namespace user
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem2
   {
     template<> struct is_basic_path<user::lpath>

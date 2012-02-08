@@ -27,9 +27,7 @@
 #include <ios>
 #include <cstdlib>
 
-namespace
-boost
-    {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     class exception_ptr;
     BOOST_ATTRIBUTE_NORETURN void rethrow_exception( exception_ptr const & );
     exception_ptr current_exception();
@@ -37,7 +35,7 @@ boost
     class
     exception_ptr
         {
-        typedef boost::shared_ptr<exception_detail::clone_base const> impl;
+        typedef pdalboost::shared_ptr<exception_detail::clone_base const> impl;
         impl ptr_;
         friend void rethrow_exception( exception_ptr const & );
         typedef exception_detail::clone_base const * (impl::*unspecified_bool_type)() const;
@@ -98,7 +96,7 @@ boost
         {
         struct
         bad_alloc_:
-            boost::exception,
+            pdalboost::exception,
             std::bad_alloc
                 {
                 ~bad_alloc_() throw() { }
@@ -106,7 +104,7 @@ boost
 
         struct
         bad_exception_:
-            boost::exception,
+            pdalboost::exception,
             std::bad_exception
                 {
                 ~bad_exception_() throw() { }
@@ -146,7 +144,7 @@ boost
 #endif
     class
     unknown_exception:
-        public boost::exception,
+        public pdalboost::exception,
         public std::exception
         {
         public:
@@ -162,8 +160,8 @@ boost
             }
 
         explicit
-        unknown_exception( boost::exception const & e ):
-            boost::exception(e)
+        unknown_exception( pdalboost::exception const & e ):
+            pdalboost::exception(e)
             {
             add_original_type(e);
             }
@@ -196,7 +194,7 @@ boost
         class
         current_exception_std_exception_wrapper:
             public T,
-            public boost::exception
+            public pdalboost::exception
             {
             public:
 
@@ -207,9 +205,9 @@ boost
                 add_original_type(e1);
                 }
 
-            current_exception_std_exception_wrapper( T const & e1, boost::exception const & e2 ):
+            current_exception_std_exception_wrapper( T const & e1, pdalboost::exception const & e2 ):
                 T(e1),
-                boost::exception(e2)
+                pdalboost::exception(e2)
                 {
                 add_original_type(e1);
                 }
@@ -232,7 +230,7 @@ boost
 
 #ifdef BOOST_NO_RTTI
         template <class T>
-        boost::exception const *
+        pdalboost::exception const *
         get_boost_exception( T const * )
             {
             try
@@ -240,7 +238,7 @@ boost
                 throw;
                 }
             catch(
-            boost::exception & x )
+            pdalboost::exception & x )
                 {
                 return &x;
                 }
@@ -251,10 +249,10 @@ boost
             }
 #else
         template <class T>
-        boost::exception const *
+        pdalboost::exception const *
         get_boost_exception( T const * x )
             {
-            return dynamic_cast<boost::exception const *>(x);
+            return dynamic_cast<pdalboost::exception const *>(x);
             }
 #endif
 
@@ -263,34 +261,34 @@ boost
         exception_ptr
         current_exception_std_exception( T const & e1 )
             {
-            if( boost::exception const * e2 = get_boost_exception(&e1) )
-                return boost::copy_exception(current_exception_std_exception_wrapper<T>(e1,*e2));
+            if( pdalboost::exception const * e2 = get_boost_exception(&e1) )
+                return pdalboost::copy_exception(current_exception_std_exception_wrapper<T>(e1,*e2));
             else
-                return boost::copy_exception(current_exception_std_exception_wrapper<T>(e1));
+                return pdalboost::copy_exception(current_exception_std_exception_wrapper<T>(e1));
             }
 
         inline
         exception_ptr
         current_exception_unknown_exception()
             {
-            return boost::copy_exception(unknown_exception());
+            return pdalboost::copy_exception(unknown_exception());
             }
 
         inline
         exception_ptr
-        current_exception_unknown_boost_exception( boost::exception const & e )
+        current_exception_unknown_boost_exception( pdalboost::exception const & e )
             {
-            return boost::copy_exception(unknown_exception(e));
+            return pdalboost::copy_exception(unknown_exception(e));
             }
 
         inline
         exception_ptr
         current_exception_unknown_std_exception( std::exception const & e )
             {
-            if( boost::exception const * be = get_boost_exception(&e) )
+            if( pdalboost::exception const * be = get_boost_exception(&e) )
                 return current_exception_unknown_boost_exception(*be);
             else
-                return boost::copy_exception(unknown_exception(e));
+                return pdalboost::copy_exception(unknown_exception(e));
             }
 
         inline
@@ -412,7 +410,7 @@ boost
                         return exception_detail::current_exception_unknown_std_exception(e);
                         }
                     catch(
-                    boost::exception & e )
+                    pdalboost::exception & e )
                         {
                         return exception_detail::current_exception_unknown_boost_exception(e);
                         }

@@ -22,7 +22,7 @@
 #include <boost/bimap/detail/set_view_base.hpp>
 #include <boost/bimap/detail/map_view_base.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace views {
 
@@ -44,7 +44,7 @@ class list_set_view
         reverse_iterator, const_reverse_iterator
     ),
 
-    public ::boost::bimaps::detail::
+    public ::pdalboost::bimaps::detail::
         set_view_base< list_set_view< CoreIndex >, CoreIndex >
 {
     BOOST_BIMAP_SET_VIEW_BASE_FRIEND(list_set_view,CoreIndex)
@@ -102,7 +102,7 @@ class list_set_view
 
 } // namespace views
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_VIEWS_LIST_SET_VIEW_HPP

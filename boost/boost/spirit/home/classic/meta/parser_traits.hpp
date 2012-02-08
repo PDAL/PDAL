@@ -18,7 +18,7 @@
 #include <boost/spirit/home/classic/meta/impl/parser_traits.ipp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -41,10 +41,10 @@ template <typename T>
 struct is_parser
 {
     BOOST_STATIC_CONSTANT(bool, value =
-        (::boost::is_base_and_derived<parser<T>, T>::value));
+        (::pdalboost::is_base_and_derived<parser<T>, T>::value));
 
 //  [JDG 2/3/03] simplified implementation by
-//  using boost::is_base_and_derived
+//  using pdalboost::is_base_and_derived
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ struct is_parser
 template <typename UnaryT>
 struct is_unary_composite {
 
-    BOOST_STATIC_CONSTANT(bool, value = (::boost::is_convertible<
+    BOOST_STATIC_CONSTANT(bool, value = (::pdalboost::is_convertible<
         typename UnaryT::parser_category_t, unary_parser_category>::value));
 };
 
@@ -70,7 +70,7 @@ struct is_unary_composite {
 template <typename ActionT>
 struct is_action_parser {
 
-    BOOST_STATIC_CONSTANT(bool, value = (::boost::is_convertible<
+    BOOST_STATIC_CONSTANT(bool, value = (::pdalboost::is_convertible<
         typename ActionT::parser_category_t, action_parser_category>::value));
 };
 
@@ -83,7 +83,7 @@ struct is_action_parser {
 template <typename BinaryT>
 struct is_binary_composite {
 
-    BOOST_STATIC_CONSTANT(bool, value = (::boost::is_convertible<
+    BOOST_STATIC_CONSTANT(bool, value = (::pdalboost::is_convertible<
         typename BinaryT::parser_category_t, binary_parser_category>::value));
 };
 

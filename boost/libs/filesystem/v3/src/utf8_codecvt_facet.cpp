@@ -15,7 +15,7 @@
 #include <boost/filesystem/config.hpp>
 
 #define BOOST_UTF8_BEGIN_NAMESPACE \
-     namespace boost { namespace filesystem { namespace detail {
+     namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace filesystem { namespace detail {
 
 #define BOOST_UTF8_END_NAMESPACE }}}
 #define BOOST_UTF8_DECL BOOST_FILESYSTEM_DECL

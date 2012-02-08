@@ -15,7 +15,7 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp>
 
-namespace boost { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
 
 # if !BOOST_WORKAROUND(BOOST_MSVC, <= 1300) //---------------------------------//
 
@@ -25,7 +25,7 @@ class iterator_range;
     
 namespace iostreams {
 
-BOOST_IOSTREAMS_BOOL_TRAIT_DEF(is_iterator_range, boost::iterator_range, 1)
+BOOST_IOSTREAMS_BOOL_TRAIT_DEF(is_iterator_range, pdalboost::iterator_range, 1)
 
 } // End namespace iostreams.
 
@@ -42,7 +42,7 @@ namespace iostreams {
 
 # endif // # if !BOOST_WORKAROUND(BOOST_MSVC, < 1300) //----------------------//
 
-} // End namespace boost.
+} // End namespace pdalboost.
 
 #include <boost/iostreams/detail/config/enable_warnings.hpp>
 

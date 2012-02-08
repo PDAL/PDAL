@@ -14,7 +14,7 @@
 #include "boost/detail/workaround.hpp"
 #include "boost/config.hpp"
 
-namespace boost { namespace numeric
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric
 {
 
 template<class T, class S>
@@ -30,7 +30,7 @@ struct conversion_traits
 #endif
 } ;
 
-} } // namespace boost::numeric
+} } // namespace pdalboost::numeric
 
 #endif
 //

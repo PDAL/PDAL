@@ -19,7 +19,7 @@
 #include <boost/fusion/view/transform_view/detail/distance_impl.hpp>
 #include <boost/fusion/view/transform_view/detail/equal_to_impl.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     // Unary Version
     struct transform_view_iterator_tag;

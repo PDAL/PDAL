@@ -21,7 +21,7 @@
 #include <boost/mpl/next.hpp>
 #include <boost/mpl/aux_/na.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 // default implementation; conrete sequences might override it by 
 // specializing either the 'erase_impl' or the primary 'erase' template

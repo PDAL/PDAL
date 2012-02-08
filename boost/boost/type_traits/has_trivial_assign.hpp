@@ -21,7 +21,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail {
 
@@ -32,17 +32,17 @@ struct has_trivial_assign_impl
    BOOST_STATIC_CONSTANT(bool, value = BOOST_HAS_TRIVIAL_ASSIGN(T));
 #else
    BOOST_STATIC_CONSTANT(bool, value =
-      (::boost::type_traits::ice_and<
-        ::boost::is_pod<T>::value,
-        ::boost::type_traits::ice_not< ::boost::is_const<T>::value >::value,
-      ::boost::type_traits::ice_not< ::boost::is_volatile<T>::value >::value
+      (::pdalboost::type_traits::ice_and<
+        ::pdalboost::is_pod<T>::value,
+        ::pdalboost::type_traits::ice_not< ::pdalboost::is_const<T>::value >::value,
+      ::pdalboost::type_traits::ice_not< ::pdalboost::is_volatile<T>::value >::value
       >::value));
 #endif
 };
 
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_trivial_assign,T,::boost::detail::has_trivial_assign_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_trivial_assign,T,::pdalboost::detail::has_trivial_assign_impl<T>::value)
 BOOST_TT_AUX_BOOL_TRAIT_SPEC1(has_trivial_assign,void,false)
 #ifndef BOOST_NO_CV_VOID_SPECIALIZATIONS
 BOOST_TT_AUX_BOOL_TRAIT_SPEC1(has_trivial_assign,void const,false)
@@ -50,7 +50,7 @@ BOOST_TT_AUX_BOOL_TRAIT_SPEC1(has_trivial_assign,void const volatile,false)
 BOOST_TT_AUX_BOOL_TRAIT_SPEC1(has_trivial_assign,void volatile,false)
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

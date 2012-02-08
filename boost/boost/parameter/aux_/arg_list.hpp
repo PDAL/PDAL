@@ -26,7 +26,7 @@
 #include <boost/preprocessor/repetition/enum_binary_params.hpp>
 #include <boost/preprocessor/facilities/intercept.hpp>
 
-namespace boost { namespace parameter {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter {
 
 // Forward declaration for aux::arg_list, below.
 template<class T> struct keyword;
@@ -220,7 +220,7 @@ struct arg_list : Next
         struct apply
         {
           typedef typename mpl::eval_if<
-                boost::is_same<KW, key_type>
+                pdalboost::is_same<KW, key_type>
               , mpl::if_<Reference, reference, value_type>
               , mpl::apply_wrap3<typename Next::binding, KW, Default, Reference>
           >::type type;
@@ -282,7 +282,7 @@ struct arg_list : Next
         struct apply
         {
           typedef typename mpl::eval_if<
-                boost::is_same<KW, key_type>
+                pdalboost::is_same<KW, key_type>
               , mpl::identity<arg_list<TaggedArg,Next> >
               , mpl::apply_wrap1<typename Next::key_owner,KW>
           >::type type;
@@ -453,7 +453,7 @@ namespace mpl
   };
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // ARG_LIST_050329_HPP
 

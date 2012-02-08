@@ -17,7 +17,7 @@
 #include <boost/proto/transform/call.hpp>
 #include <boost/proto/transform/impl.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     /// \brief A PrimitiveTransform that uses <tt>make\<\></tt> to build
     /// a CallableTransform, and then uses <tt>call\<\></tt> to apply it.

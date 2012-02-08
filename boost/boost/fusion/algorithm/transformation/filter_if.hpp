@@ -9,7 +9,7 @@
 
 #include <boost/fusion/view/filter_view/filter_view.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     namespace result_of
     {

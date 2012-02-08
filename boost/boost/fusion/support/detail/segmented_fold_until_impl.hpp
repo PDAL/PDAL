@@ -30,7 +30,7 @@
 //
 // returns: (state', fcontinue)
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     template <typename First, typename Last>
     struct iterator_range;

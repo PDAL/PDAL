@@ -81,7 +81,7 @@
 #if defined(BOOST_THREAD_LIB_NAME)
 #    define BOOST_LIB_NAME BOOST_THREAD_LIB_NAME
 #else
-#    define BOOST_LIB_NAME boost_thread
+#    define BOOST_LIB_NAME pdalboost_thread
 #endif
 //
 // If we're importing code from a dll, then tell auto_link.hpp about it:

@@ -19,9 +19,7 @@
 #include <boost/config.hpp>
 #include <map>
 
-namespace
-boost
-    {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     template <class Tag,class T>
     inline
     typename enable_if<has_to_string<T>,std::string>::type
@@ -123,7 +121,7 @@ boost
 
             private:
 
-            friend class boost::exception;
+            friend class pdalboost::exception;
 
             typedef std::map< type_info_, shared_ptr<error_info_base> > error_info_map;
             error_info_map info_;

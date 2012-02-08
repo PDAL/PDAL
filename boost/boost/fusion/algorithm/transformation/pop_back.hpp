@@ -17,7 +17,7 @@
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/if.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     template <typename Iterator_, bool IsLast>
     struct pop_back_iterator

@@ -14,7 +14,7 @@
 #include <boost/spirit/home/support/char_set/range.hpp>
 #include <vector>
 
-namespace boost { namespace spirit { namespace support { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace support { namespace detail
 {
     ///////////////////////////////////////////////////////////////////////////
     //  range_run

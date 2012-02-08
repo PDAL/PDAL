@@ -23,7 +23,7 @@
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/utility/base_from_member.hpp>
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 template<typename Device, typename Tr>
 struct stream_traits {
@@ -90,7 +90,7 @@ public:
 # include <boost/iostreams/detail/broken_overload_resolution/stream.hpp>
 #else
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 //
 // Template name: stream.

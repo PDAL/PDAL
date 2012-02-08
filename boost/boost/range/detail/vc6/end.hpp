@@ -17,8 +17,7 @@
 #include <boost/range/detail/common.hpp>
 #include <boost/range/detail/remove_extent.hpp>
 
-namespace boost 
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace range_detail
     {
         template< typename T >
@@ -113,7 +112,7 @@ namespace boost
             struct inner {
                 static char* fun( char* s )
                 {
-                    return boost::range_detail::str_end( s );
+                    return pdalboost::range_detail::str_end( s );
                 }
             };
         };
@@ -125,7 +124,7 @@ namespace boost
             struct inner {
                 static const char* fun( const char* s )
                 {
-                    return boost::range_detail::str_end( s );
+                    return pdalboost::range_detail::str_end( s );
                 }
             };
         };
@@ -137,7 +136,7 @@ namespace boost
             struct inner {
                 static wchar_t* fun( wchar_t* s )
                 {
-                    return boost::range_detail::str_end( s );
+                    return pdalboost::range_detail::str_end( s );
                 }
             };
         };
@@ -150,7 +149,7 @@ namespace boost
             struct inner {
                 static const wchar_t* fun( const wchar_t* s )
                 {
-                    return boost::range_detail::str_end( s );
+                    return pdalboost::range_detail::str_end( s );
                 }
             };
         };

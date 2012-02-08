@@ -27,7 +27,7 @@
 #include <boost/operators.hpp>
 #include <boost/call_traits.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace container_adaptor {
 
@@ -55,7 +55,7 @@ struct ordered_associative_container_adaptor_base
             FunctorsFromDerivedClasses,
 
             BOOST_DEDUCED_TYPENAME mpl::if_<
-                ::boost::mpl::is_na<ReverseIteratorFromBaseConverter>,
+                ::pdalboost::mpl::is_na<ReverseIteratorFromBaseConverter>,
             // {
                     detail::iterator_from_base_identity
                     <
@@ -92,12 +92,12 @@ template
 
     class KeyType,
 
-    class IteratorToBaseConverter          = ::boost::mpl::na,
-    class IteratorFromBaseConverter        = ::boost::mpl::na,
-    class ReverseIteratorFromBaseConverter = ::boost::mpl::na,
-    class ValueToBaseConverter             = ::boost::mpl::na,
-    class ValueFromBaseConverter           = ::boost::mpl::na,
-    class KeyToBaseConverter               = ::boost::mpl::na,
+    class IteratorToBaseConverter          = ::pdalboost::mpl::na,
+    class IteratorFromBaseConverter        = ::pdalboost::mpl::na,
+    class ReverseIteratorFromBaseConverter = ::pdalboost::mpl::na,
+    class ValueToBaseConverter             = ::pdalboost::mpl::na,
+    class ValueFromBaseConverter           = ::pdalboost::mpl::na,
+    class KeyToBaseConverter               = ::pdalboost::mpl::na,
 
     class FunctorsFromDerivedClasses = mpl::vector<>
 >
@@ -114,7 +114,7 @@ class ordered_associative_container_adaptor :
 
     >::type,
 
-    ::boost::totally_ordered
+    ::pdalboost::totally_ordered
     <
         ordered_associative_container_adaptor
         <
@@ -164,7 +164,7 @@ class ordered_associative_container_adaptor :
     protected:
 
     typedef BOOST_DEDUCED_TYPENAME mpl::if_<
-        ::boost::mpl::is_na<ReverseIteratorFromBaseConverter>,
+        ::pdalboost::mpl::is_na<ReverseIteratorFromBaseConverter>,
         // {
                 detail::iterator_from_base_identity
                 <
@@ -306,7 +306,7 @@ class ordered_associative_container_adaptor :
 
 } // namespace container_adaptor
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_CONTAINER_ADAPTOR_ORDERED_ASSOCIATIVE_CONTAINER_ADAPTOR_HPP

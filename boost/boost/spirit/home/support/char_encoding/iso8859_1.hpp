@@ -28,7 +28,7 @@
 #define BOOST_CC_SPACE    0x0040
 #define BOOST_CC_PUNCT    0x0080
 
-namespace boost { namespace spirit { namespace char_encoding
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace char_encoding
 {
     // The detection of isgraph(), isprint() and isblank() is done programmatically
     // to keep the character type table small. Additionally, these functions are
@@ -684,7 +684,7 @@ namespace boost { namespace spirit { namespace char_encoding
                 iso8859_1_char_conversion[ch] : ch;
         }
 
-        static ::boost::uint32_t
+        static ::pdalboost::uint32_t
         toucs4(int ch)
         {
             // The first 256 characters in Unicode and the UCS are

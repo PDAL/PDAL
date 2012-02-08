@@ -21,7 +21,7 @@
 #include <boost/test/utils/runtime/cla/named_parameter.hpp>
 #include <boost/test/utils/runtime/cla/char_parameter.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -84,7 +84,7 @@ BOOST_RT_CLA_NAMED_PARAM_GENERATORS( dual_name_parameter )
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #ifndef BOOST_RT_PARAM_OFFLINE
 

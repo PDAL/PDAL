@@ -45,13 +45,13 @@
 #endif
 
 BOOST_PHOENIX_DEFINE_EXPRESSION_VARARG(
-    (boost)(phoenix)(detail)(function_eval)
+    (pdalboost)(phoenix)(detail)(function_eval)
   , (meta_grammar)
     (meta_grammar)
   , BOOST_PP_DEC(BOOST_PHOENIX_COMPOSITE_LIMIT)
 )
 
-namespace boost { namespace phoenix {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix {
     namespace detail
     {
         template <typename T>
@@ -76,31 +76,31 @@ namespace boost { namespace phoenix {
             {
                 typedef typename
                     remove_reference<
-                        typename boost::result_of<evaluator(F, Context)>::type
+                        typename pdalboost::result_of<evaluator(F, Context)>::type
                     >::type
                     fn;
 
-                typedef typename boost::result_of<fn()>::type type;
+                typedef typename pdalboost::result_of<fn()>::type type;
             };
 
             template <typename F, typename Context>
             typename result<function_eval(F const&, Context const&)>::type
             operator()(F const & f, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)();
+                return pdalboost::pdalboostphoenix::eval(f, ctx)();
             }
 
             template <typename F, typename Context>
             typename result<function_eval(F &, Context const&)>::type
             operator()(F & f, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)();
+                return pdalboost::pdalboostphoenix::eval(f, ctx)();
             }
 
         #define PHOENIX_GET_ARG(z, n, data)                                     \
             typedef                                                             \
-                typename boost::result_of<                                      \
-                    boost::phoenix::evaluator(                                                  \
+                typename pdalboost::result_of<                                      \
+                    pdalboost::pdalboostphoenix::evaluator(                                                  \
                         BOOST_PP_CAT(A, n)                                      \
                       , Context                                                 \
                     )                                                           \
@@ -108,7 +108,7 @@ namespace boost { namespace phoenix {
                 BOOST_PP_CAT(a, n);
 
         #define PHOENIX_EVAL_ARG(z, n, data)                                    \
-            help_rvalue_deduction(boost::phoenix::eval(BOOST_PP_CAT(a, n), ctx))
+            help_rvalue_deduction(pdalboost::pdalboostphoenix::eval(BOOST_PP_CAT(a, n), ctx))
         
         #define M0(z, n, data)                                     \
             typename proto::detail::uncvref<BOOST_PP_CAT(a, n)>::type
@@ -128,7 +128,7 @@ namespace boost { namespace phoenix {
 
     template <typename Dummy>
     struct default_actions::when<detail::rule::function_eval, Dummy>
-        : phoenix::call<detail::function_eval>
+        : pdalboostphoenix::call<detail::function_eval>
     {};
 }}
 
@@ -150,14 +150,14 @@ namespace boost { namespace phoenix {
             {
                 typedef typename
                     remove_reference<
-                        typename boost::result_of<evaluator(F, Context)>::type
+                        typename pdalboost::result_of<evaluator(F, Context)>::type
                     >::type
                     fn;
 
                 BOOST_PP_REPEAT(BOOST_PHOENIX_ITERATION, PHOENIX_GET_ARG, _)
 
                 typedef typename
-                    boost::result_of<fn(BOOST_PHOENIX_a)>::type
+                    pdalboost::result_of<fn(BOOST_PHOENIX_a)>::type
                     type;
                 /*
                 typedef typename
@@ -166,7 +166,7 @@ namespace boost { namespace phoenix {
                             fn
                           , BOOST_PP_ENUM(BOOST_PHOENIX_ITERATION, M0, _)
                         >::value
-                      , boost::result_of<
+                      , pdalboost::result_of<
                             fn(
                                 BOOST_PHOENIX_a
                             )
@@ -190,7 +190,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F const & f, BOOST_PHOENIX_A_ref_a, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(BOOST_PP_ENUM(BOOST_PHOENIX_ITERATION, PHOENIX_EVAL_ARG, _));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(BOOST_PP_ENUM(BOOST_PHOENIX_ITERATION, PHOENIX_EVAL_ARG, _));
             }
 
             template <typename F, BOOST_PHOENIX_typename_A, typename Context>
@@ -203,7 +203,7 @@ namespace boost { namespace phoenix {
             >::type
             operator()(F & f, BOOST_PHOENIX_A_ref_a, Context const & ctx) const
             {
-                return boost::phoenix::eval(f, ctx)(BOOST_PP_ENUM(BOOST_PHOENIX_ITERATION, PHOENIX_EVAL_ARG, _));
+                return pdalboost::pdalboostphoenix::eval(f, ctx)(BOOST_PP_ENUM(BOOST_PHOENIX_ITERATION, PHOENIX_EVAL_ARG, _));
             }
 #endif
 

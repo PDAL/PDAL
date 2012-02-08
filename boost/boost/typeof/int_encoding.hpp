@@ -9,7 +9,7 @@
 #include <boost/mpl/size_t.hpp>
 #include <boost/config.hpp>
 
-namespace boost { namespace type_of {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
 
     template<class T> struct get_unsigned
     {
@@ -56,15 +56,15 @@ namespace boost { namespace type_of {
     template<class V, std::size_t n, bool overflow = (n >= 0x3fffffff)>
     struct encode_size_t : push_back<
         V,
-        boost::mpl::size_t<pack<n, false>::value>
+        pdalboost::mpl::size_t<pack<n, false>::value>
     >
     {};
 
     template<class V, std::size_t n>
     struct encode_size_t<V, n, true> : push_back<typename push_back<
         V,
-        boost::mpl::size_t<pack<n % 0x3ffffffe, true>::value> >::type,
-        boost::mpl::size_t<n / 0x3ffffffe>
+        pdalboost::mpl::size_t<pack<n % 0x3ffffffe, true>::value> >::type,
+        pdalboost::mpl::size_t<n / 0x3ffffffe>
     >
     {};
 

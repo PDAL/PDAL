@@ -24,7 +24,7 @@
 
 #ifdef BOOST_DATE_TIME_HAS_HIGH_PRECISION_CLOCK
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace date_time {
 
   //! A clock providing microsecond level resolution
@@ -83,7 +83,7 @@ namespace date_time {
       timeval tv;
       gettimeofday(&tv, 0); //gettimeofday does not support TZ adjust on Linux.
       std::time_t t = tv.tv_sec;
-      boost::uint32_t sub_sec = tv.tv_usec;
+      pdalboost::uint32_t sub_sec = tv.tv_usec;
 #elif defined(BOOST_HAS_FTIME)
       winapi::file_time ft;
       winapi::get_system_time_as_file_time(ft);
@@ -91,7 +91,7 @@ namespace date_time {
                                                                // and cannot be before 1970-Jan-01
       std::time_t t = static_cast<std::time_t>(micros / 1000000UL); // seconds since epoch
       // microseconds -- static casts supress warnings
-      boost::uint32_t sub_sec = static_cast<boost::uint32_t>(micros % 1000000UL);
+      pdalboost::uint32_t sub_sec = static_cast<pdalboost::uint32_t>(micros % 1000000UL);
 #else
 #error Internal Boost.DateTime error: BOOST_DATE_TIME_HAS_HIGH_PRECISION_CLOCK is defined, however neither gettimeofday nor FILETIME support is detected.
 #endif

@@ -20,7 +20,7 @@
 #include <boost/accumulators/statistics_fwd.hpp>
 #include <boost/accumulators/statistics/count.hpp>
 
-namespace boost { namespace numeric
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric
 {
     /// INTERNAL ONLY
     ///
@@ -42,7 +42,7 @@ namespace boost { namespace numeric
     }
 }}
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 namespace impl
@@ -54,7 +54,7 @@ namespace impl
       : accumulator_base // TODO: also depends_on sum of powers
     {
         BOOST_MPL_ASSERT_RELATION(N::value, >, 0);
-        // for boost::result_of
+        // for pdalboost::result_of
         typedef typename numeric::functional::average<Sample, std::size_t>::result_type result_type;
 
         template<typename Args>
@@ -120,6 +120,6 @@ struct feature_of<tag::weighted_moment<N> >
 {
 };
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

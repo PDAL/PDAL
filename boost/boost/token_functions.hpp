@@ -74,7 +74,7 @@ namespace std{
 }
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   //===========================================================================
   // The escaped_list_separator class. Which is a model of TokenizerFunction
   // An escaped list is a super-set of what is commonly known as a comma 
@@ -660,6 +660,6 @@ namespace boost{
   };
 
 
-} //namespace boost
+} //namespace pdalboost
 
 #endif

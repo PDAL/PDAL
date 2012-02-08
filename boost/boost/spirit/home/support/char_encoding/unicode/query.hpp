@@ -17,7 +17,7 @@
 # include "lowercase_table.hpp"
 # include "uppercase_table.hpp"
 
-namespace boost { namespace spirit { namespace ucd
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace ucd
 {
     // This header provides Basic (Level 1) Unicode Support
     // See http://unicode.org/reports/tr18/ for details
@@ -189,62 +189,62 @@ namespace boost { namespace spirit { namespace ucd
         };
     };
 
-    inline properties::category get_category(::boost::uint32_t ch)
+    inline properties::category get_category(::pdalboost::uint32_t ch)
     {
         return static_cast<properties::category>(detail::category_lookup(ch) & 0x3F);
     }
 
-    inline properties::major_category get_major_category(::boost::uint32_t ch)
+    inline properties::major_category get_major_category(::pdalboost::uint32_t ch)
     {
         return static_cast<properties::major_category>(get_category(ch) >> 3);
     }
 
-    inline bool is_punctuation(::boost::uint32_t ch)
+    inline bool is_punctuation(::pdalboost::uint32_t ch)
     {
         return get_major_category(ch) == properties::punctuation;
     }
 
-    inline bool is_decimal_number(::boost::uint32_t ch)
+    inline bool is_decimal_number(::pdalboost::uint32_t ch)
     {
         return get_category(ch) == properties::decimal_number;
     }
 
-    inline bool is_hex_digit(::boost::uint32_t ch)
+    inline bool is_hex_digit(::pdalboost::uint32_t ch)
     {
         return (detail::category_lookup(ch) & properties::hex_digit) != 0;
     }
 
-    inline bool is_control(::boost::uint32_t ch)
+    inline bool is_control(::pdalboost::uint32_t ch)
     {
         return get_category(ch) == properties::control;
     }
 
-    inline bool is_alphabetic(::boost::uint32_t ch)
+    inline bool is_alphabetic(::pdalboost::uint32_t ch)
     {
         return (detail::category_lookup(ch) & properties::alphabetic) != 0;
     }
 
-    inline bool is_alphanumeric(::boost::uint32_t ch)
+    inline bool is_alphanumeric(::pdalboost::uint32_t ch)
     {
         return is_decimal_number(ch) || is_alphabetic(ch);
     }
 
-    inline bool is_uppercase(::boost::uint32_t ch)
+    inline bool is_uppercase(::pdalboost::uint32_t ch)
     {
         return (detail::category_lookup(ch) & properties::uppercase) != 0;
     }
 
-    inline bool is_lowercase(::boost::uint32_t ch)
+    inline bool is_lowercase(::pdalboost::uint32_t ch)
     {
         return (detail::category_lookup(ch) & properties::lowercase) != 0;
     }
 
-    inline bool is_white_space(::boost::uint32_t ch)
+    inline bool is_white_space(::pdalboost::uint32_t ch)
     {
         return (detail::category_lookup(ch) & properties::white_space) != 0;
     }
 
-    inline bool is_blank(::boost::uint32_t ch)
+    inline bool is_blank(::pdalboost::uint32_t ch)
     {
         switch (ch)
         {
@@ -258,7 +258,7 @@ namespace boost { namespace spirit { namespace ucd
         }
     }
 
-    inline bool is_graph(::boost::uint32_t ch)
+    inline bool is_graph(::pdalboost::uint32_t ch)
     {
         return !(   is_white_space(ch)
                 ||  get_category(ch) == properties::control
@@ -267,37 +267,37 @@ namespace boost { namespace spirit { namespace ucd
                 );
     }
 
-    inline bool is_print(::boost::uint32_t ch)
+    inline bool is_print(::pdalboost::uint32_t ch)
     {
         return (is_graph(ch) || is_blank(ch)) && !is_control(ch);
     }
 
-    inline bool is_noncharacter_code_point(::boost::uint32_t ch)
+    inline bool is_noncharacter_code_point(::pdalboost::uint32_t ch)
     {
         return (detail::category_lookup(ch) & properties::noncharacter_code_point) != 0;
     }
 
-    inline bool is_default_ignorable_code_point(::boost::uint32_t ch)
+    inline bool is_default_ignorable_code_point(::pdalboost::uint32_t ch)
     {
         return (detail::category_lookup(ch) & properties::default_ignorable_code_point) != 0;
     }
 
-    inline properties::script get_script(::boost::uint32_t ch)
+    inline properties::script get_script(::pdalboost::uint32_t ch)
     {
         return static_cast<properties::script>(detail::script_lookup(ch) & 0x3F);
     }
 
-    inline ::boost::uint32_t to_lowercase(::boost::uint32_t ch)
+    inline ::pdalboost::uint32_t to_lowercase(::pdalboost::uint32_t ch)
     {
         // The table returns 0 to signal that this code maps to itself
-        ::boost::uint32_t r = detail::lowercase_lookup(ch);
+        ::pdalboost::uint32_t r = detail::lowercase_lookup(ch);
         return (r == 0)? ch : r;
     }
 
-    inline ::boost::uint32_t to_uppercase(::boost::uint32_t ch)
+    inline ::pdalboost::uint32_t to_uppercase(::pdalboost::uint32_t ch)
     {
         // The table returns 0 to signal that this code maps to itself
-        ::boost::uint32_t r = detail::uppercase_lookup(ch);
+        ::pdalboost::uint32_t r = detail::uppercase_lookup(ch);
         return (r == 0)? ch : r;
     }
 }}}

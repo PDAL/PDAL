@@ -20,7 +20,7 @@
 
 #include <boost/bimap/relation/support/pair_by.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 namespace support {
@@ -78,7 +78,7 @@ struct get_above_view_functor
 } // namespace support
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_RELATION_SUPPORT_GET_PAIR_FUNCTOR_HPP

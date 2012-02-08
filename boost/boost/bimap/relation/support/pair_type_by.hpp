@@ -20,7 +20,7 @@
 
 #include <boost/bimap/relation/detail/metadata_access_builder.hpp>
 
-/** \struct boost::bimaps::relation::support::pair_type_by
+/** \struct pdalboost::bimaps::relation::support::pair_type_by
 
 \brief Metafunction to obtain the view type indexed by one of the sides.
 
@@ -38,7 +38,7 @@ See also member_at, pair_by().
 \ingroup relation_group
                                                                     **/
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 namespace support {
@@ -55,7 +55,7 @@ BOOST_BIMAP_SYMMETRIC_METADATA_ACCESS_BUILDER
 } // namespace support
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_RELATION_SUPPORT_PAIR_BY_TYPE_HPP

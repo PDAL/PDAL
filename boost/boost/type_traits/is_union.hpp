@@ -18,7 +18,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail {
 #ifndef __GNUC__
@@ -48,9 +48,9 @@ template <typename T> struct is_union_impl
 #endif
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_union,T,::boost::detail::is_union_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_union,T,::pdalboost::detail::is_union_impl<T>::value)
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

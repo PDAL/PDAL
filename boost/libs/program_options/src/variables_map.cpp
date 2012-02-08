@@ -13,7 +13,7 @@
 
 #include <cassert>
 
-namespace boost { namespace program_options {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
 
     using namespace std;
 
@@ -118,7 +118,7 @@ namespace boost { namespace program_options {
             }
             if (m.count(key) == 0) {
             
-                boost::any def;
+                pdalboost::any def;
                 if (d.semantic()->apply_default(def)) {
                     m[key] = variable_value(def, true);
                     m[key].m_value_semantic = d.semantic();
@@ -205,7 +205,7 @@ namespace boost { namespace program_options {
             map<string, variable_value>::const_iterator iter = find(opt);
             if (iter == end() || iter->second.empty()) 
             {
-                boost::throw_exception(required_option(opt));
+                pdalboost::throw_exception(required_option(opt));
             
             }
         }

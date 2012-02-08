@@ -22,7 +22,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -75,7 +75,7 @@ protected: // provide access to the Derived
     ValueType           m_value;
 
 private:
-    friend class boost::iterator_core_access;
+    friend class pdalboost::iterator_core_access;
 
     // iterator facade interface implementation
     void                increment()
@@ -99,7 +99,7 @@ private:
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

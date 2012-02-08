@@ -12,7 +12,7 @@
 
 #include <boost/config.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   template<typename Visitor, typename T>
   inline void visit_each(Visitor& visitor, const T& t, long)
   {

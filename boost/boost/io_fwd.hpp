@@ -12,8 +12,7 @@
 #include <iosfwd>  // for std::char_traits (declaration)
 
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace io
 {
 
@@ -61,7 +60,7 @@ class ios_all_word_saver;
 
 
 }  // namespace io
-}  // namespace boost
+}  // namespace pdalboost
 
 
 #endif  // BOOST_IO_FWD_HPP

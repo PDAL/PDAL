@@ -23,7 +23,7 @@
 #include <boost/mpl/void.hpp>
 #include <boost/proto/proto_fwd.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace detail
     {

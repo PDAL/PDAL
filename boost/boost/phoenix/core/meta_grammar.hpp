@@ -16,7 +16,7 @@
 #include <boost/proto/transform/call.hpp>
 #include <boost/proto/transform/default.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     /////////////////////////////////////////////////////////////////////////////
     // The grammar defining valid phoenix expressions
@@ -120,7 +120,7 @@ namespace boost { namespace phoenix
     {
         template <typename Expr, typename Context>
         struct eval
-            : boost::result_of< ::boost::phoenix::evaluator(Expr, Context)>
+            : pdalboost::result_of< ::pdalboost::pdalboostphoenix::evaluator(Expr, Context)>
         {};
     }
 

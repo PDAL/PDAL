@@ -31,7 +31,7 @@
 #pragma warning(disable: 4522) // 'this' used in base member initializer list
 #endif
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename Expr>
     struct actor;
@@ -242,7 +242,7 @@ namespace boost { namespace phoenix
             typedef vector1<const actor<Expr> *> env_type;
             env_type env = {this};
             
-            return phoenix::eval(*this, phoenix::context(env, default_actions()));
+            return pdalboostphoenix::eval(*this, pdalboostphoenix::context(env, default_actions()));
         }
 
         typename result_of::actor<proto_base_expr>::type
@@ -251,7 +251,7 @@ namespace boost { namespace phoenix
             typedef vector1<const actor<Expr> *> env_type;
             env_type env = {this};
             
-            return phoenix::eval(*this, phoenix::context(env, default_actions()));
+            return pdalboostphoenix::eval(*this, pdalboostphoenix::context(env, default_actions()));
         }
 
         template <typename Env>
@@ -265,7 +265,7 @@ namespace boost { namespace phoenix
         >::result_type
         eval(Env const & env) const
         {
-            return phoenix::eval(*this, phoenix::context(env, default_actions()));
+            return pdalboostphoenix::eval(*this, pdalboostphoenix::context(env, default_actions()));
         }
         
         // Bring in the rest
@@ -274,17 +274,16 @@ namespace boost { namespace phoenix
 
 }}
 
-namespace boost
-{
-    // specialize boost::result_of to return the proper result type
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+    // specialize pdalboost::result_of to return the proper result type
     template <typename Expr>
-    struct result_of<phoenix::actor<Expr>()>
-        : phoenix::result_of::actor<typename phoenix::actor<Expr>::proto_base_expr>
+    struct result_of<pdalboostphoenix::actor<Expr>()>
+        : pdalboostphoenix::result_of::actor<typename pdalboostphoenix::actor<Expr>::proto_base_expr>
     {};
     
     template <typename Expr>
-    struct result_of<phoenix::actor<Expr> const()>
-        : phoenix::result_of::actor<typename phoenix::actor<Expr>::proto_base_expr>
+    struct result_of<pdalboostphoenix::actor<Expr> const()>
+        : pdalboostphoenix::result_of::actor<typename pdalboostphoenix::actor<Expr>::proto_base_expr>
     {};
 }
 

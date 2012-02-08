@@ -11,8 +11,7 @@
 #include <boost/utility.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
   //
   //
@@ -40,7 +39,7 @@ namespace boost
       {}
 
    private:
-      typename super_t::reference dereference() const { return *boost::prior(this->base()); }
+      typename super_t::reference dereference() const { return *pdalboost::prior(this->base()); }
     
       void increment() { --this->base_reference(); }
       void decrement() { ++this->base_reference(); }
@@ -64,6 +63,6 @@ namespace boost
       return reverse_iterator<BidirectionalIterator>(x);
   }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_REVERSE_ITERATOR_23022003THW_HPP

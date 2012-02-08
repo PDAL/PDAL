@@ -42,16 +42,16 @@
 //
 #define BOOST_IOSTREAMS_FORWARD(class, impl, device, params, args) \
     class(const device& t params()) \
-    { this->impl(::boost::iostreams::detail::wrap(t) args()); } \
+    { this->impl(::pdalboost::iostreams::detail::wrap(t) args()); } \
     class(device& t params()) \
-    { this->impl(::boost::iostreams::detail::wrap(t) args()); } \
-    class(const ::boost::reference_wrapper<device>& ref params()) \
+    { this->impl(::pdalboost::iostreams::detail::wrap(t) args()); } \
+    class(const ::pdalboost::reference_wrapper<device>& ref params()) \
     { this->impl(ref args()); } \
     void open(const device& t params()) \
-    { this->impl(::boost::iostreams::detail::wrap(t) args()); } \
+    { this->impl(::pdalboost::iostreams::detail::wrap(t) args()); } \
     void open(device& t params()) \
-    { this->impl(::boost::iostreams::detail::wrap(t) args()); } \
-    void open(const ::boost::reference_wrapper<device>& ref params()) \
+    { this->impl(::pdalboost::iostreams::detail::wrap(t) args()); } \
+    void open(const ::pdalboost::reference_wrapper<device>& ref params()) \
     { this->impl(ref args()); } \
     BOOST_PP_REPEAT_FROM_TO( \
         1, BOOST_PP_INC(BOOST_IOSTREAMS_MAX_FORWARDING_ARITY), \
@@ -115,7 +115,7 @@
 #if !defined(BOOST_NO_SFINAE) && \
     !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x592))
 # define BOOST_IOSTREAMS_DISABLE_IF_SAME(device, param) \
-    , typename boost::disable_if< boost::is_same<device, param> >::type* = 0 \
+    , typename pdalboost::disable_if< pdalboost::is_same<device, param> >::type* = 0 \
     /**/
 #else 
 # define BOOST_IOSTREAMS_DISABLE_IF_SAME(device, param)

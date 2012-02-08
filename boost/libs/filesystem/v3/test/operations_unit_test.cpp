@@ -37,8 +37,8 @@
 #include <boost/detail/lightweight_main.hpp>
 #include <iostream>
 
-using namespace boost::filesystem;
-using namespace boost::system;
+using namespace pdalboost::filesystem;
+using namespace pdalboost::system;
 using std::cout;
 using std::string;
 
@@ -51,7 +51,7 @@ namespace
   {
     if (ok) return;
 
-    ++::boost::detail::test_errors();
+    ++::pdalboost::detail::test_errors();
 
     std::cout << file << '(' << line << "): test failed\n";
   }
@@ -64,7 +64,7 @@ namespace
 
     error_code ec;
 
-    CHECK(file_size("no-such-file", ec) == static_cast<boost::uintmax_t>(-1));
+    CHECK(file_size("no-such-file", ec) == static_cast<pdalboost::uintmax_t>(-1));
     CHECK(ec == errc::no_such_file_or_directory);
 
     CHECK(status("no-such-file") == file_status(file_not_found));
@@ -84,7 +84,7 @@ namespace
     CHECK(exists("/"));
     CHECK(is_directory("/"));
     CHECK(!is_regular_file("/"));
-    CHECK(!boost::filesystem::is_empty("/"));
+    CHECK(!pdalboost::filesystem::is_empty("/"));
     CHECK(!is_other("/"));
   }
 
@@ -136,7 +136,7 @@ namespace
 
     CHECK(!create_directory("/", ec));
 
-    CHECK(!boost::filesystem::remove("no-such-file-or-directory"));
+    CHECK(!pdalboost::filesystem::remove("no-such-file-or-directory"));
     CHECK(!remove_all("no-such-file-or-directory"));
 
     space_info info = space("/");
@@ -190,7 +190,7 @@ namespace
     { 
       file_size("no-such-file");
     }
-    catch (const boost::filesystem::filesystem_error & ex)
+    catch (const pdalboost::filesystem::filesystem_error & ex)
     {
       threw = true;
       cout << "\nas expected, attempt to get size of non-existent file threw a filesystem_error\n"
@@ -239,5 +239,5 @@ int cpp_main(int, char*[])
   std::cout << unique_path() << std::endl;
   std::cout << unique_path("foo-%%%%%-%%%%%-bar") << std::endl;
   
-  return ::boost::report_errors();
+  return ::pdalboost::report_errors();
 }

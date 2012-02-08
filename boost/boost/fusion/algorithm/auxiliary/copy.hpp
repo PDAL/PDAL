@@ -19,7 +19,7 @@
 #  pragma warning (disable: 4100) // unreferenced formal parameter
 #endif
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     namespace detail
     {

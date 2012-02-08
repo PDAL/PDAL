@@ -21,7 +21,7 @@
 #include <boost/bimap/relation/detail/metadata_access_builder.hpp>
 #include <functional>
 
-/** \struct boost::bimaps::relation::support::data_extractor
+/** \struct pdalboost::bimaps::relation::support::data_extractor
 
 \brief Data extraction functor.
 
@@ -30,7 +30,7 @@
 
 #ifndef BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 namespace support {
@@ -102,7 +102,7 @@ struct both_keys_extractor
 } // namespace support
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 

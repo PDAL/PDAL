@@ -23,7 +23,7 @@ namespace std {
 } //namespace std
 #endif //BOOST_NO_STDC_NAMESPACE
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace uuids {
 
 // generate a uuid from a string
@@ -179,7 +179,7 @@ private:
     }
 };
 
-}} // namespace boost::uuids
+}} // namespace pdalboost::uuids
 
 #endif //BOOST_UUID_STRING_GENERATOR_HPP
 

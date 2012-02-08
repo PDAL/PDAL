@@ -9,7 +9,7 @@
 #include <boost/config.hpp>
 #include <boost/type_traits/is_empty.hpp>
 
-namespace boost { namespace spirit { namespace iterator_policies
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace iterator_policies
 {
     ///////////////////////////////////////////////////////////////////////////
     //  The purpose of the multi_pass_unique template is to eliminate 
@@ -54,9 +54,9 @@ namespace boost { namespace spirit { namespace iterator_policies
     // select the correct derived classes based on if a policy is empty
     template <typename T
       , typename Ownership, typename Checking, typename Input, typename Storage
-      , bool OwnershipIsEmpty = boost::is_empty<Ownership>::value
-      , bool CheckingIsEmpty = boost::is_empty<Checking>::value
-      , bool InputIsEmpty = boost::is_empty<Input>::value>
+      , bool OwnershipIsEmpty = pdalboost::is_empty<Ownership>::value
+      , bool CheckingIsEmpty = pdalboost::is_empty<Checking>::value
+      , bool InputIsEmpty = pdalboost::is_empty<Input>::value>
     struct multi_pass_unique;
 
     ///////////////////////////////////////////////////////////////////////////

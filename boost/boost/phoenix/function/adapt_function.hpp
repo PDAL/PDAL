@@ -27,12 +27,12 @@
         };                                                                      \
     }                                                                           \
                                                                                 \
-    boost::phoenix::detail::expression::function_eval<                          \
+    pdalboost::pdalboostphoenix::detail::expression::function_eval<                          \
         detail:: BOOST_PP_CAT(NAME, _impl_nullary)                              \
     >::type const                                                               \
     inline NAME()                                                               \
     {                                                                           \
-        return boost::phoenix::detail::expression::                             \
+        return pdalboost::pdalboostphoenix::detail::expression::                             \
                 function_eval<detail:: BOOST_PP_CAT(NAME, _impl_nullary)>       \
                     ::make(detail:: BOOST_PP_CAT(NAME, _impl_nullary)());       \
     }                                                                           \
@@ -61,12 +61,12 @@
                                                                                 \
     template <BOOST_PHOENIX_typename_A(N)>                                      \
     typename                                                                    \
-        boost::phoenix::detail::expression::function_eval<                      \
+        pdalboost::pdalboostphoenix::detail::expression::function_eval<                      \
         detail:: BOOST_PP_CAT(BOOST_PP_CAT(NAME, _impl_), N)                    \
           , BOOST_PHOENIX_A(N)>::type const                                     \
     inline NAME(BOOST_PHOENIX_A_const_ref_a(N))                                 \
     {                                                                           \
-        return boost::phoenix::detail::expression::                             \
+        return pdalboost::pdalboostphoenix::detail::expression::                             \
             function_eval<                                                      \
                 detail:: BOOST_PP_CAT(BOOST_PP_CAT(NAME, _impl_), N)            \
               , BOOST_PHOENIX_A(N)                                              \

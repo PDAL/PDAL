@@ -8,7 +8,7 @@
 #include <cctype>
 
 #ifdef _WIN32
-namespace boost { namespace program_options {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
 
     // Take a command line string and splits in into tokens, according
     // to the rules windows command line processor uses.

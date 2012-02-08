@@ -61,7 +61,7 @@
 
 #   define AUX778076_ARITY BOOST_PP_INC(BOOST_MPL_LIMIT_METAFUNCTION_ARITY)
 
-namespace boost { namespace mpl { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { namespace aux {
 
 template< BOOST_MPL_AUX_NTTP_DECL(int, N) > struct arity_tag
 {
@@ -98,7 +98,7 @@ template< typename F, BOOST_MPL_AUX_NTTP_DECL(int, N) >
 struct template_arity_impl
 {
     BOOST_STATIC_CONSTANT(int, value = 
-          sizeof(::boost::mpl::aux::arity_helper(type_wrapper<F>(),arity_tag<N>())) - 1
+          sizeof(::pdalboost::mpl::aux::arity_helper(type_wrapper<F>(),arity_tag<N>())) - 1
         );
 };
 
@@ -131,7 +131,7 @@ struct template_arity
 
 #   include <boost/mpl/aux_/config/eti.hpp>
 
-namespace boost { namespace mpl { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { namespace aux {
 
 template< bool >
 struct template_arity_impl
@@ -153,7 +153,7 @@ struct template_arity_impl<true>
 
 template< typename F >
 struct template_arity
-    : template_arity_impl< ::boost::mpl::aux::has_rebind<F>::value >
+    : template_arity_impl< ::pdalboost::mpl::aux::has_rebind<F>::value >
         ::template result_<F>
 {
 };

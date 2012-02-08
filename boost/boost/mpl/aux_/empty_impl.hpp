@@ -19,7 +19,7 @@
 #include <boost/mpl/aux_/traits_lambda_spec.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 // default implementation; conrete sequences might override it by 
 // specializing either the 'empty_impl' or the primary 'empty' template

@@ -31,7 +31,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -91,7 +91,7 @@ public:
     // key -> value access
     value_ref_type  operator[]( key_param_type key ) const
     {
-        iterator it = boost::detail::lower_bound( m_map.begin(), m_map.end(), key, p1() );
+        iterator it = pdalboost::detail::lower_bound( m_map.begin(), m_map.end(), key, p1() );
 
         return (it == m_map.end() || Compare()( key, it->first ) ) ? m_invalid_value : it->second;
     }
@@ -108,7 +108,7 @@ private:
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

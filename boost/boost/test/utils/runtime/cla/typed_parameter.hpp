@@ -27,7 +27,7 @@
 // Boost.Test
 #include <boost/test/utils/rtti.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -65,6 +65,6 @@ private:
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_CLA_TYPED_PARAMETER_HPP_062604GER

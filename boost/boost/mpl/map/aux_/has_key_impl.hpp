@@ -21,7 +21,7 @@
 #include <boost/mpl/void.hpp>
 #include <boost/mpl/aux_/config/typeof.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<>
 struct has_key_impl< aux::map_tag >

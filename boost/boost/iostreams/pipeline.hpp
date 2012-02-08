@@ -27,23 +27,23 @@
 #define BOOST_IOSTREAMS_PIPABLE(filter, arity) \
     template< BOOST_PP_ENUM_PARAMS(arity, typename T) \
               BOOST_PP_COMMA_IF(arity) typename Component> \
-    ::boost::iostreams::pipeline< \
-        ::boost::iostreams::detail::pipeline_segment< \
+    ::pdalboost::iostreams::pipeline< \
+        ::pdalboost::iostreams::detail::pipeline_segment< \
             filter BOOST_IOSTREAMS_TEMPLATE_ARGS(arity, T) \
         >, \
         Component \
     > operator|( const filter BOOST_IOSTREAMS_TEMPLATE_ARGS(arity, T)& f, \
                  const Component& c ) \
     { \
-        typedef ::boost::iostreams::detail::pipeline_segment< \
+        typedef ::pdalboost::iostreams::detail::pipeline_segment< \
                     filter BOOST_IOSTREAMS_TEMPLATE_ARGS(arity, T) \
                 > segment; \
-        return ::boost::iostreams::pipeline<segment, Component> \
+        return ::pdalboost::iostreams::pipeline<segment, Component> \
                    (segment(f), c); \
     } \
     /**/
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 template<typename Pipeline, typename Component>
 struct pipeline;

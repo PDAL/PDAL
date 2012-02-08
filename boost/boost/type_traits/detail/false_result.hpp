@@ -11,7 +11,7 @@
 
 #include <boost/config.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace type_traits {
 
 // Utility class which always "returns" false
@@ -23,6 +23,6 @@ struct false_result
     };
 };
 
-}} // namespace boost::type_traits
+}} // namespace pdalboost::type_traits
 
 #endif // BOOST_TT_DETAIL_FALSE_RESULT_HPP_INCLUDED

@@ -12,7 +12,7 @@
 #include <boost/fusion/view/transform_view/detail/apply_transform_result.hpp>
 #include <boost/fusion/sequence/intrinsic/at.hpp>
 
-namespace boost { namespace fusion {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion {
     struct transform_view_tag;
     struct transform_view2_tag;
 
@@ -29,12 +29,12 @@ namespace boost { namespace fusion {
             {
                 typedef typename Seq::transform_type F;
                 typedef detail::apply_transform_result<F> transform_type;
-                typedef typename boost::fusion::result_of::at<typename Seq::sequence_type, N>::type value_type;
+                typedef typename pdalboost::fusion::result_of::at<typename Seq::sequence_type, N>::type value_type;
                 typedef typename mpl::apply<transform_type, value_type>::type type;
 
                 static type call(Seq& seq)
                 {
-                    return seq.f(boost::fusion::at<N>(seq.seq));
+                    return seq.f(pdalboost::fusion::at<N>(seq.seq));
                 }
             };
         };
@@ -47,13 +47,13 @@ namespace boost { namespace fusion {
             {
                 typedef typename Seq::transform_type F;
                 typedef detail::apply_transform_result<F> transform_type;
-                typedef typename boost::fusion::result_of::at<typename Seq::sequence1_type, N>::type value1_type;
-                typedef typename boost::fusion::result_of::at<typename Seq::sequence2_type, N>::type value2_type;
+                typedef typename pdalboost::fusion::result_of::at<typename Seq::sequence1_type, N>::type value1_type;
+                typedef typename pdalboost::fusion::result_of::at<typename Seq::sequence2_type, N>::type value2_type;
                 typedef typename mpl::apply<transform_type, value1_type, value2_type>::type type;
 
                 static type call(Seq& seq)
                 {
-                    return seq.f(boost::fusion::at<N>(seq.seq1), boost::fusion::at<N>(seq.seq2));
+                    return seq.f(pdalboost::fusion::at<N>(seq.seq1), pdalboost::fusion::at<N>(seq.seq2));
                 }
             };
         };

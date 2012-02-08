@@ -31,7 +31,7 @@
 #include <boost/proto/proto_fwd.hpp>
 #include <boost/proto/traits.hpp> // for child_c
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace detail
     {

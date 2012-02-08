@@ -10,7 +10,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include <string>
 #include <list>
-namespace fs = boost::filesystem;
+namespace fs = pdalboost::filesystem;
 
 int main()
 {

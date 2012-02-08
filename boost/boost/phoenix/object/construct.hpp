@@ -17,13 +17,13 @@
 #include <boost/preprocessor/repetition/repeat_from_to.hpp>
 
 BOOST_PHOENIX_DEFINE_EXPRESSION_VARARG(
-    (boost)(phoenix)(construct)
+    (pdalboost)(phoenix)(construct)
   , (proto::terminal<detail::target<proto::_> >)
     (meta_grammar)
   , BOOST_PHOENIX_COMPOSITE_LIMIT
 )
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     struct construct_eval
     {

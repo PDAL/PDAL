@@ -8,7 +8,7 @@
 #ifndef BOOST_PHOENIX_OBJECT_DETAIL_CAST_TARGET_HPP
 #define BOOST_PHOENIX_OBJECT_DETAIL_CAST_TARGET_HPP
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     namespace detail
     {

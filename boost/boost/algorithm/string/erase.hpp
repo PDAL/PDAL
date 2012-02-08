@@ -28,7 +28,7 @@
     part(s) of the input according to a searching criteria.
 */
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
 
 //  erase_range -------------------------------------------------------//
@@ -54,11 +54,11 @@ namespace boost {
                 BOOST_STRING_TYPENAME 
                     range_const_iterator<RangeT>::type>& SearchRange )
         {
-            return ::boost::algorithm::find_format_copy(
+            return ::pdalboost::algorithm::find_format_copy(
                 Output,
                 Input,
-                ::boost::algorithm::range_finder(SearchRange),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::range_finder(SearchRange),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase range algorithm
@@ -72,10 +72,10 @@ namespace boost {
                 BOOST_STRING_TYPENAME 
                     range_const_iterator<SequenceT>::type>& SearchRange )
         {
-            return ::boost::algorithm::find_format_copy( 
+            return ::pdalboost::algorithm::find_format_copy( 
                 Input,
-                ::boost::algorithm::range_finder(SearchRange),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::range_finder(SearchRange),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase range algorithm
@@ -93,10 +93,10 @@ namespace boost {
                 BOOST_STRING_TYPENAME 
                     range_iterator<SequenceT>::type>& SearchRange )
         {
-            ::boost::algorithm::find_format( 
+            ::pdalboost::algorithm::find_format( 
                 Input, 
-                ::boost::algorithm::range_finder(SearchRange),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::range_finder(SearchRange),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
 //  erase_first  --------------------------------------------------------//
@@ -124,11 +124,11 @@ namespace boost {
             const Range1T& Input,
             const Range2T& Search )
         {
-            return ::boost::algorithm::find_format_copy(
+            return ::pdalboost::algorithm::find_format_copy(
                 Output,
                 Input,
-                ::boost::algorithm::first_finder(Search),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::first_finder(Search),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase first algorithm
@@ -140,10 +140,10 @@ namespace boost {
             const SequenceT& Input,
             const RangeT& Search )
         {
-            return ::boost::algorithm::find_format_copy( 
+            return ::pdalboost::algorithm::find_format_copy( 
                 Input, 
-                ::boost::algorithm::first_finder(Search),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::first_finder(Search),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase first algorithm
@@ -159,10 +159,10 @@ namespace boost {
             SequenceT& Input,
             const RangeT& Search )
         {
-            ::boost::algorithm::find_format( 
+            ::pdalboost::algorithm::find_format( 
                 Input, 
-                ::boost::algorithm::first_finder(Search),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::first_finder(Search),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
 //  erase_first ( case insensitive ) ------------------------------------//
@@ -193,11 +193,11 @@ namespace boost {
             const Range2T& Search,
             const std::locale& Loc=std::locale() )
         {
-            return ::boost::algorithm::find_format_copy(
+            return ::pdalboost::algorithm::find_format_copy(
                 Output,
                 Input,
-                ::boost::algorithm::first_finder(Search, is_iequal(Loc)),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::first_finder(Search, is_iequal(Loc)),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase first algorithm ( case insensitive )
@@ -210,10 +210,10 @@ namespace boost {
             const RangeT& Search,
             const std::locale& Loc=std::locale() )
         {
-            return ::boost::algorithm::find_format_copy( 
+            return ::pdalboost::algorithm::find_format_copy( 
                 Input, 
-                ::boost::algorithm::first_finder(Search, is_iequal(Loc)),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::first_finder(Search, is_iequal(Loc)),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase first algorithm ( case insensitive )
@@ -231,10 +231,10 @@ namespace boost {
             const RangeT& Search,
             const std::locale& Loc=std::locale() )
         {
-            ::boost::algorithm::find_format( 
+            ::pdalboost::algorithm::find_format( 
                 Input, 
-                ::boost::algorithm::first_finder(Search, is_iequal(Loc)),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::first_finder(Search, is_iequal(Loc)),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
 //  erase_last  --------------------------------------------------------//
@@ -262,11 +262,11 @@ namespace boost {
             const Range1T& Input,
             const Range2T& Search )
         {
-            return ::boost::algorithm::find_format_copy(
+            return ::pdalboost::algorithm::find_format_copy(
                 Output,
                 Input,
-                ::boost::algorithm::last_finder(Search),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::last_finder(Search),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase last algorithm
@@ -278,10 +278,10 @@ namespace boost {
             const SequenceT& Input,
             const RangeT& Search )
         {
-            return ::boost::algorithm::find_format_copy( 
+            return ::pdalboost::algorithm::find_format_copy( 
                 Input, 
-                ::boost::algorithm::last_finder(Search),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::last_finder(Search),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase last algorithm
@@ -297,10 +297,10 @@ namespace boost {
             SequenceT& Input,
             const RangeT& Search )
         {
-            ::boost::algorithm::find_format( 
+            ::pdalboost::algorithm::find_format( 
                 Input, 
-                ::boost::algorithm::last_finder(Search),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::last_finder(Search),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
 //  erase_last ( case insensitive ) ------------------------------------//
@@ -331,11 +331,11 @@ namespace boost {
             const Range2T& Search,
             const std::locale& Loc=std::locale() )
         {
-            return ::boost::algorithm::find_format_copy(
+            return ::pdalboost::algorithm::find_format_copy(
                 Output,
                 Input,
-                ::boost::algorithm::last_finder(Search, is_iequal(Loc)),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::last_finder(Search, is_iequal(Loc)),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase last algorithm ( case insensitive )
@@ -348,10 +348,10 @@ namespace boost {
             const RangeT& Search,
             const std::locale& Loc=std::locale() )
         {
-            return ::boost::algorithm::find_format_copy( 
+            return ::pdalboost::algorithm::find_format_copy( 
                 Input, 
-                ::boost::algorithm::last_finder(Search, is_iequal(Loc)),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::last_finder(Search, is_iequal(Loc)),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase last algorithm ( case insensitive )
@@ -369,10 +369,10 @@ namespace boost {
             const RangeT& Search,
             const std::locale& Loc=std::locale() )
         {
-            ::boost::algorithm::find_format( 
+            ::pdalboost::algorithm::find_format( 
                 Input, 
-                ::boost::algorithm::last_finder(Search, is_iequal(Loc)),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::last_finder(Search, is_iequal(Loc)),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
 //  erase_nth --------------------------------------------------------------------//
@@ -404,11 +404,11 @@ namespace boost {
             const Range2T& Search,
             int Nth )
         {
-            return ::boost::algorithm::find_format_copy(
+            return ::pdalboost::algorithm::find_format_copy(
                 Output,
                 Input,
-                ::boost::algorithm::nth_finder(Search, Nth),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::nth_finder(Search, Nth),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase nth algorithm
@@ -421,10 +421,10 @@ namespace boost {
             const RangeT& Search,
             int Nth )
         {
-            return ::boost::algorithm::find_format_copy( 
+            return ::pdalboost::algorithm::find_format_copy( 
                 Input, 
-                ::boost::algorithm::nth_finder(Search, Nth),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::nth_finder(Search, Nth),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase nth algorithm
@@ -443,10 +443,10 @@ namespace boost {
             const RangeT& Search,
             int Nth )
         {
-            ::boost::algorithm::find_format( 
+            ::pdalboost::algorithm::find_format( 
                 Input, 
-                ::boost::algorithm::nth_finder(Search, Nth),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::nth_finder(Search, Nth),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
 //  erase_nth ( case insensitive ) ---------------------------------------------//
@@ -480,11 +480,11 @@ namespace boost {
             int Nth,
             const std::locale& Loc=std::locale() )
         {
-            return ::boost::algorithm::find_format_copy(
+            return ::pdalboost::algorithm::find_format_copy(
                 Output,
                 Input,
-                ::boost::algorithm::nth_finder(Search, Nth, is_iequal(Loc)),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::nth_finder(Search, Nth, is_iequal(Loc)),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase nth algorithm
@@ -498,9 +498,9 @@ namespace boost {
             int Nth,
             const std::locale& Loc=std::locale() )
         {
-            return ::boost::algorithm::find_format_copy( 
+            return ::pdalboost::algorithm::find_format_copy( 
                 Input, 
-                ::boost::algorithm::nth_finder(Search, Nth, is_iequal(Loc)),
+                ::pdalboost::algorithm::nth_finder(Search, Nth, is_iequal(Loc)),
                 empty_formatter(Input) );
         }
 
@@ -522,10 +522,10 @@ namespace boost {
             int Nth,
             const std::locale& Loc=std::locale() )
         {
-            ::boost::algorithm::find_format( 
+            ::pdalboost::algorithm::find_format( 
                 Input, 
-                ::boost::algorithm::nth_finder(Search, Nth, is_iequal(Loc)),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::nth_finder(Search, Nth, is_iequal(Loc)),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
 
@@ -555,11 +555,11 @@ namespace boost {
             const Range1T& Input,
             const Range2T& Search )
         {
-            return ::boost::algorithm::find_format_all_copy(
+            return ::pdalboost::algorithm::find_format_all_copy(
                 Output,
                 Input,
-                ::boost::algorithm::first_finder(Search),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::first_finder(Search),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase all algorithm
@@ -571,10 +571,10 @@ namespace boost {
             const SequenceT& Input,
             const RangeT& Search )
         {
-            return ::boost::algorithm::find_format_all_copy( 
+            return ::pdalboost::algorithm::find_format_all_copy( 
                 Input, 
-                ::boost::algorithm::first_finder(Search),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::first_finder(Search),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase all algorithm
@@ -590,10 +590,10 @@ namespace boost {
             SequenceT& Input,
             const RangeT& Search )
         {
-            ::boost::algorithm::find_format_all( 
+            ::pdalboost::algorithm::find_format_all( 
                 Input, 
-                ::boost::algorithm::first_finder(Search),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::first_finder(Search),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
 //  erase_all ( case insensitive ) ------------------------------------//
@@ -624,11 +624,11 @@ namespace boost {
             const Range2T& Search,
             const std::locale& Loc=std::locale() )
         {
-            return ::boost::algorithm::find_format_all_copy(
+            return ::pdalboost::algorithm::find_format_all_copy(
                 Output,
                 Input,
-                ::boost::algorithm::first_finder(Search, is_iequal(Loc)),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::first_finder(Search, is_iequal(Loc)),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase all algorithm ( case insensitive )
@@ -641,10 +641,10 @@ namespace boost {
             const RangeT& Search,
             const std::locale& Loc=std::locale() )
         {
-            return ::boost::algorithm::find_format_all_copy( 
+            return ::pdalboost::algorithm::find_format_all_copy( 
                 Input, 
-                ::boost::algorithm::first_finder(Search, is_iequal(Loc)),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::first_finder(Search, is_iequal(Loc)),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
         //! Erase all algorithm ( case insensitive )
@@ -662,10 +662,10 @@ namespace boost {
             const RangeT& Search,
             const std::locale& Loc=std::locale() )
         {
-            ::boost::algorithm::find_format_all( 
+            ::pdalboost::algorithm::find_format_all( 
                 Input, 
-                ::boost::algorithm::first_finder(Search, is_iequal(Loc)),
-                ::boost::algorithm::empty_formatter(Input) );
+                ::pdalboost::algorithm::first_finder(Search, is_iequal(Loc)),
+                ::pdalboost::algorithm::empty_formatter(Input) );
         }
 
 //  erase_head --------------------------------------------------------------------//
@@ -696,11 +696,11 @@ namespace boost {
             const RangeT& Input,
             int N )
         {
-            return ::boost::algorithm::find_format_copy(
+            return ::pdalboost::algorithm::find_format_copy(
                 Output,
                 Input,
-                ::boost::algorithm::head_finder(N),
-                ::boost::algorithm::empty_formatter( Input ) );
+                ::pdalboost::algorithm::head_finder(N),
+                ::pdalboost::algorithm::empty_formatter( Input ) );
         }
 
         //! Erase head algorithm
@@ -712,10 +712,10 @@ namespace boost {
             const SequenceT& Input,
             int N )
         {
-            return ::boost::algorithm::find_format_copy( 
+            return ::pdalboost::algorithm::find_format_copy( 
                 Input,
-                ::boost::algorithm::head_finder(N),
-                ::boost::algorithm::empty_formatter( Input ) );
+                ::pdalboost::algorithm::head_finder(N),
+                ::pdalboost::algorithm::empty_formatter( Input ) );
         }
 
         //! Erase head algorithm
@@ -734,10 +734,10 @@ namespace boost {
             SequenceT& Input,
             int N )
         {
-            ::boost::algorithm::find_format( 
+            ::pdalboost::algorithm::find_format( 
                 Input, 
-                ::boost::algorithm::head_finder(N),
-                ::boost::algorithm::empty_formatter( Input ) );
+                ::pdalboost::algorithm::head_finder(N),
+                ::pdalboost::algorithm::empty_formatter( Input ) );
         }
 
 //  erase_tail --------------------------------------------------------------------//
@@ -768,11 +768,11 @@ namespace boost {
             const RangeT& Input,
             int N )
         {
-            return ::boost::algorithm::find_format_copy(
+            return ::pdalboost::algorithm::find_format_copy(
                 Output,
                 Input,
-                ::boost::algorithm::tail_finder(N),
-                ::boost::algorithm::empty_formatter( Input ) );
+                ::pdalboost::algorithm::tail_finder(N),
+                ::pdalboost::algorithm::empty_formatter( Input ) );
         }
 
         //! Erase tail algorithm
@@ -784,10 +784,10 @@ namespace boost {
             const SequenceT& Input,
             int N )
         {
-            return ::boost::algorithm::find_format_copy( 
+            return ::pdalboost::algorithm::find_format_copy( 
                 Input,
-                ::boost::algorithm::tail_finder(N),
-                ::boost::algorithm::empty_formatter( Input ) );
+                ::pdalboost::algorithm::tail_finder(N),
+                ::pdalboost::algorithm::empty_formatter( Input ) );
         }
 
         //! Erase tail algorithm
@@ -806,10 +806,10 @@ namespace boost {
             SequenceT& Input,
             int N )
         {
-            ::boost::algorithm::find_format( 
+            ::pdalboost::algorithm::find_format( 
                 Input, 
-                ::boost::algorithm::tail_finder(N),
-                ::boost::algorithm::empty_formatter( Input ) );
+                ::pdalboost::algorithm::tail_finder(N),
+                ::pdalboost::algorithm::empty_formatter( Input ) );
         }
 
     } // namespace algorithm
@@ -838,7 +838,7 @@ namespace boost {
     using algorithm::erase_tail_copy;
     using algorithm::erase_tail;
 
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_ERASE_HPP

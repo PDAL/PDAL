@@ -113,7 +113,7 @@ BOOST_PP_SEQ_FOR_EACH(                                                          
     namespace functional                                                        \
     {                                                                           \
         typedef                                                                 \
-            boost::proto::functional::make_expr<                                \
+            pdalboost::proto::functional::make_expr<                                \
                     tag:: BOOST_PP_SEQ_HEAD(BOOST_PP_SEQ_REVERSE(NAME_SEQ))     \
             >                                                                   \
             BOOST_PP_CAT(                                                       \
@@ -132,7 +132,7 @@ BOOST_PP_SEQ_FOR_EACH(                                                          
   , _                                                                           \
   , BOOST_PP_SEQ_POP_BACK(NAME_SEQ)                                             \
 )                                                                               \
-namespace boost { namespace phoenix                                             \
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix                                             \
 {                                                                               \
     template <typename Dummy>                                                   \
     struct meta_grammar::case_<                                                 \
@@ -158,7 +158,7 @@ namespace boost { namespace phoenix                                             
 #define BOOST_PHOENIX_DEFINE_EXPRESSION_EXPRESSION_DEFAULT(NAME_SEQ, GRAMMAR_SEQ, D) \
         template <BOOST_PHOENIX_typename_A(BOOST_PP_SEQ_SIZE(GRAMMAR_SEQ))>     \
         struct BOOST_PP_SEQ_HEAD(BOOST_PP_SEQ_REVERSE(NAME_SEQ))                \
-            : boost::phoenix::expr<                                             \
+            : pdalboost::pdalboostphoenix::expr<                                             \
                 :: BOOST_PP_SEQ_FOR_EACH(                                       \
                     BOOST_PHOENIX_DEFINE_EXPRESSION_NS                          \
                   , _                                                           \
@@ -178,7 +178,7 @@ namespace boost { namespace phoenix                                             
 #define BOOST_PHOENIX_DEFINE_EXPRESSION_RESULT_OF_MAKE_DEFAULT(NAME_SEQ, GRAMMAR_SEQ, D) \
     template <BOOST_PHOENIX_typename_A(BOOST_PP_SEQ_SIZE(GRAMMAR_SEQ))>         \
     struct BOOST_PP_CAT(make_, BOOST_PP_SEQ_HEAD(BOOST_PP_SEQ_REVERSE(NAME_SEQ))) \
-        : boost::result_of<                                                     \
+        : pdalboost::result_of<                                                     \
             functional::                                                        \
                 BOOST_PP_CAT(                                                   \
                     make_                                                       \
@@ -228,7 +228,7 @@ namespace boost { namespace phoenix                                             
             BOOST_PP_ADD(N, BOOST_PP_SEQ_SIZE(BOOST_PP_TUPLE_ELEM(2, 1, NAME))) \
         )                                                                       \
     >                                                                           \
-        : boost::phoenix::expr<                                                 \
+        : pdalboost::pdalboostphoenix::expr<                                                 \
             tag:: BOOST_PP_TUPLE_ELEM(2, 0, NAME)                               \
           , BOOST_PHOENIX_A(                                                    \
                 BOOST_PP_ADD(                                                   \
@@ -272,7 +272,7 @@ namespace boost { namespace phoenix                                             
                     )                                                           \
                 )()                                                             \
                 BOOST_PP_COMMA_IF(BOOST_PP_DEC(BOOST_PP_SEQ_SIZE(GRAMMAR_SEQ))) \
-                boost::proto::vararg<                                           \
+                pdalboost::proto::vararg<                                           \
                     BOOST_PP_SEQ_ELEM(                                          \
                         BOOST_PP_DEC(BOOST_PP_SEQ_SIZE(GRAMMAR_SEQ))            \
                       , GRAMMAR_SEQ                                             \
@@ -285,7 +285,7 @@ namespace boost { namespace phoenix                                             
 #define BOOST_PHOENIX_DEFINE_EXPRESSION_RESULT_OF_MAKE_VARARG_R(Z, N, NAME)     \
     template <BOOST_PHOENIX_typename_A(N)>                                      \
     struct BOOST_PP_CAT(make_, NAME) <BOOST_PHOENIX_A(N)>                        \
-        : boost::result_of<                                                     \
+        : pdalboost::result_of<                                                     \
             functional:: BOOST_PP_CAT(make_, NAME)(                              \
                 BOOST_PHOENIX_A(N)                                              \
             )                                                                   \
@@ -330,7 +330,7 @@ namespace boost { namespace phoenix                                             
 #define BOOST_PHOENIX_DEFINE_EXPRESSION_EXPRESSION_EXT(NAME_SEQ, GRAMMAR_SEQ, ACTOR) \
         template <BOOST_PHOENIX_typename_A(BOOST_PP_SEQ_SIZE(GRAMMAR_SEQ))>     \
         struct BOOST_PP_SEQ_HEAD(BOOST_PP_SEQ_REVERSE(NAME_SEQ))                \
-            : ::boost::phoenix::expr_ext<                                       \
+            : ::pdalboost::pdalboostphoenix::expr_ext<                                       \
                 ACTOR                                                           \
               , tag:: BOOST_PP_SEQ_HEAD(BOOST_PP_SEQ_REVERSE(NAME_SEQ))         \
               , BOOST_PHOENIX_A(BOOST_PP_SEQ_SIZE(GRAMMAR_SEQ))>                \

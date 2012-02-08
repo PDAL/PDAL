@@ -53,7 +53,7 @@
 #   include <locale>
 #else
 #   ifndef BOOST_LEXICAL_CAST_ASSUME_C_LOCALE
-#       warning "Unable to use <locale> header. boost::lexical_cast will use the 'C' locale."
+#       warning "Unable to use <locale> header. pdalboost::lexical_cast will use the 'C' locale."
 #       define BOOST_LEXICAL_CAST_ASSUME_C_LOCALE
 #   endif
 #endif
@@ -75,8 +75,7 @@
     throw_exception(bad_lexical_cast(typeid(Source), typeid(Target)))
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     // exception used to indicate runtime lexical_cast failure
     class bad_lexical_cast :
     // workaround MSVC bug with std::bad_cast when _HAS_EXCEPTIONS == 0 
@@ -225,7 +224,7 @@ namespace boost
         template<typename TargetChar, typename SourceChar>
         struct widest_char
         {
-            typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_c<
+            typedef BOOST_DEDUCED_TYPENAME pdalboost::mpl::if_c<
                 (sizeof(TargetChar) > sizeof(SourceChar))
                 , TargetChar
                 , SourceChar >::type type;
@@ -323,8 +322,8 @@ namespace boost
         BOOST_LCAST_DEF(long)
         BOOST_LCAST_DEF(unsigned long)
 #if defined(BOOST_HAS_LONG_LONG)
-        BOOST_LCAST_DEF(boost::ulong_long_type)
-        BOOST_LCAST_DEF(boost::long_long_type )
+        BOOST_LCAST_DEF(pdalboost::ulong_long_type)
+        BOOST_LCAST_DEF(pdalboost::long_long_type )
 #elif defined(BOOST_HAS_MS_INT64)
         BOOST_LCAST_DEF(unsigned __int64)
         BOOST_LCAST_DEF(         __int64)
@@ -470,7 +469,7 @@ namespace boost
             typedef typename Traits::int_type int_type;
             CharT const czero = lcast_char_constants<CharT>::zero;
             int_type const zero = Traits::to_int_type(czero);
-            BOOST_DEDUCED_TYPENAME boost::mpl::if_c<
+            BOOST_DEDUCED_TYPENAME pdalboost::mpl::if_c<
                     (sizeof(int_type) > sizeof(T))
                     , int_type
                     , T
@@ -673,7 +672,7 @@ namespace boost
                 }
 
                 if( !has_minus ) value = std::numeric_limits<T>::quiet_NaN();
-                else value = (boost::math::changesign) (std::numeric_limits<T>::quiet_NaN());
+                else value = (pdalboost::math::changesign) (std::numeric_limits<T>::quiet_NaN());
                 return true;
             } else
             if (( /* 'INF' or 'inf' */
@@ -690,7 +689,7 @@ namespace boost
              )
             {
                 if( !has_minus ) value = std::numeric_limits<T>::infinity();
-                else value = (boost::math::changesign) (std::numeric_limits<T>::infinity());
+                else value = (pdalboost::math::changesign) (std::numeric_limits<T>::infinity());
                 return true;
             }
 
@@ -721,9 +720,9 @@ namespace boost
         bool put_inf_nan(wchar_t* begin, wchar_t*& end, const T& value)
         {
             using namespace std;
-            if ( (boost::math::isnan)(value) )
+            if ( (pdalboost::math::isnan)(value) )
             {
-                if ( (boost::math::signbit)(value) )
+                if ( (pdalboost::math::signbit)(value) )
                 {
                     memcpy(begin,L"-nan", sizeof(L"-nan"));
                     end = begin + 4;
@@ -733,9 +732,9 @@ namespace boost
                     end = begin + 3;
                 }
                 return true;
-            } else if ( (boost::math::isinf)(value) )
+            } else if ( (pdalboost::math::isinf)(value) )
             {
-                if ( (boost::math::signbit)(value) )
+                if ( (pdalboost::math::signbit)(value) )
                 {
                     memcpy(begin,L"-inf", sizeof(L"-inf"));
                     end = begin + 4;
@@ -754,9 +753,9 @@ namespace boost
         bool put_inf_nan(CharT* begin, CharT*& end, const T& value)
         {
             using namespace std;
-            if ( (boost::math::isnan)(value) )
+            if ( (pdalboost::math::isnan)(value) )
             {
-                if ( (boost::math::signbit)(value) )
+                if ( (pdalboost::math::signbit)(value) )
                 {
                     memcpy(begin,"-nan", sizeof("-nan"));
                     end = begin + 4;
@@ -766,9 +765,9 @@ namespace boost
                     end = begin + 3;
                 }
                 return true;
-            } else if ( (boost::math::isinf)(value) )
+            } else if ( (pdalboost::math::isinf)(value) )
             {
-                if ( (boost::math::signbit)(value) )
+                if ( (pdalboost::math::signbit)(value) )
                 {
                     memcpy(begin,"-inf", sizeof("-inf"));
                     end = begin + 4;
@@ -804,7 +803,7 @@ namespace boost
         struct mantissa_holder_type<double>
         {
 #if defined(BOOST_HAS_LONG_LONG)
-            typedef boost::ulong_long_type type;
+            typedef pdalboost::ulong_long_type type;
 #elif defined(BOOST_HAS_MS_INT64)
             typedef unsigned __int64 type;
 #endif
@@ -1022,9 +1021,9 @@ namespace boost
              * with long doubles (and with doubles if sizeof(double)==sizeof(long double)).
              */
             long double result = std::pow(10.0L, pow_of_10) * mantissa;
-            value = static_cast<T>( has_minus ? (boost::math::changesign)(result) : result);
+            value = static_cast<T>( has_minus ? (pdalboost::math::changesign)(result) : result);
 
-            if ( (boost::math::isinf)(value) || (boost::math::isnan)(value) ) return false;
+            if ( (pdalboost::math::isinf)(value) || (pdalboost::math::isnan)(value) ) return false;
 
             return true;
         }
@@ -1073,7 +1072,7 @@ namespace boost
 #else
             typedef stl_buf_unlocker<std::basic_stringbuf<CharT, Traits>, CharT > local_stringbuffer_t;
 #endif
-            typedef BOOST_DEDUCED_TYPENAME ::boost::mpl::if_c<
+            typedef BOOST_DEDUCED_TYPENAME ::pdalboost::mpl::if_c<
                 RequiresStringbuffer,
                 local_stringbuffer_t,
                 do_not_construct_stringbuffer_t
@@ -1108,8 +1107,8 @@ namespace boost
             bool shl_char(T ch)
             {
                 BOOST_STATIC_ASSERT_MSG(( sizeof(T) <= sizeof(CharT)) ,
-                    "boost::lexical_cast does not support conversions from whar_t to char types."
-                    "Use boost::locale instead" );
+                    "pdalboost::lexical_cast does not support conversions from whar_t to char types."
+                    "Use pdalboost::locale instead" );
 #ifndef BOOST_LEXICAL_CAST_ASSUME_C_LOCALE
                 std::locale loc;
                 wchar_t w = BOOST_USE_FACET(std::ctype<wchar_t>, loc).widen(ch);
@@ -1134,8 +1133,8 @@ namespace boost
             bool shl_char_array(T const* str)
             {
                 BOOST_STATIC_ASSERT_MSG(( sizeof(T) <= sizeof(CharT)),
-                    "boost::lexical_cast does not support conversions from wchar_t to char types."
-                    "Use boost::locale instead" );
+                    "pdalboost::lexical_cast does not support conversions from wchar_t to char types."
+                    "Use pdalboost::locale instead" );
                 return shl_input_streamable(str);
             }
 #endif
@@ -1173,7 +1172,7 @@ namespace boost
             bool shl_float(float val,T* out)
             {   using namespace std;
                 if (put_inf_nan(start,finish,val)) return true;
-                finish = start + sprintf(out,"%.*g", static_cast<int>(boost::detail::lcast_get_precision<float >()), val );
+                finish = start + sprintf(out,"%.*g", static_cast<int>(pdalboost::detail::lcast_get_precision<float >()), val );
                 return finish > start;
             }
 
@@ -1181,7 +1180,7 @@ namespace boost
             bool shl_double(double val,T* out)
             {   using namespace std;
                 if (put_inf_nan(start,finish,val)) return true;
-                finish = start + sprintf(out,"%.*lg", static_cast<int>(boost::detail::lcast_get_precision<double >()), val );
+                finish = start + sprintf(out,"%.*lg", static_cast<int>(pdalboost::detail::lcast_get_precision<double >()), val );
                 return finish > start;
             }
 #ifndef __MINGW32__
@@ -1189,7 +1188,7 @@ namespace boost
             bool shl_long_double(long double val,T* out)
             {   using namespace std;
                 if (put_inf_nan(start,finish,val)) return true;
-                finish = start + sprintf(out,"%.*Lg", static_cast<int>(boost::detail::lcast_get_precision<long double >()), val );
+                finish = start + sprintf(out,"%.*Lg", static_cast<int>(pdalboost::detail::lcast_get_precision<long double >()), val );
                 return finish > start;
             }
 #endif
@@ -1207,7 +1206,7 @@ namespace boost
 #if !defined(__MINGW32__) && !defined(UNDER_CE)
                                           finish-start,
 #endif
-                                          L"%.*g", static_cast<int>(boost::detail::lcast_get_precision<float >()), val );
+                                          L"%.*g", static_cast<int>(pdalboost::detail::lcast_get_precision<float >()), val );
 
                 return finish > start;
             }
@@ -1228,7 +1227,7 @@ namespace boost
 #if !defined(__MINGW32__) && !defined(UNDER_CE)
                                           finish-start,
 #endif
-                                          L"%.*lg", static_cast<int>(boost::detail::lcast_get_precision<double >()), val );
+                                          L"%.*lg", static_cast<int>(pdalboost::detail::lcast_get_precision<double >()), val );
                 return finish > start;
             }
 
@@ -1240,7 +1239,7 @@ namespace boost
 #if !defined(UNDER_CE)
                                           finish-start,
 #endif
-                                          L"%.*Lg", static_cast<int>(boost::detail::lcast_get_precision<long double >()), val );
+                                          L"%.*Lg", static_cast<int>(pdalboost::detail::lcast_get_precision<long double >()), val );
                 return finish > start;
             }
 #endif
@@ -1289,8 +1288,8 @@ namespace boost
             bool operator<<(unsigned long n)            { start = lcast_put_unsigned<Traits>(n, finish); return true; }
 
 #if defined(BOOST_HAS_LONG_LONG)
-            bool operator<<(boost::ulong_long_type n)   { start = lcast_put_unsigned<Traits>(n, finish); return true; }
-            bool operator<<(boost::long_long_type n)    { return shl_signed(n); }
+            bool operator<<(pdalboost::ulong_long_type n)   { start = lcast_put_unsigned<Traits>(n, finish); return true; }
+            bool operator<<(pdalboost::long_long_type n)    { return shl_signed(n); }
 #elif defined(BOOST_HAS_MS_INT64)
             bool operator<<(unsigned __int64 n)         { start = lcast_put_unsigned<Traits>(n, finish); return true; }
             bool operator<<(         __int64 n)         { return shl_signed(n); }
@@ -1424,8 +1423,8 @@ namespace boost
             inline bool shr_xchar(T& output)
             {
                 BOOST_STATIC_ASSERT_MSG(( sizeof(CharT) == sizeof(T) ),
-                    "boost::lexical_cast does not support conversions from whar_t to char types."
-                    "Use boost::locale instead" );
+                    "pdalboost::lexical_cast does not support conversions from whar_t to char types."
+                    "Use pdalboost::locale instead" );
                 bool const ok = (finish - start == 1);
                 if(ok) {
                     CharT out;
@@ -1444,8 +1443,8 @@ namespace boost
             bool operator>>(int& output)                        { return shr_signed(output); }
             bool operator>>(long int& output)                   { return shr_signed(output); }
 #if defined(BOOST_HAS_LONG_LONG)
-            bool operator>>(boost::ulong_long_type& output)     { return shr_unsigned(output); }
-            bool operator>>(boost::long_long_type& output)      { return shr_signed(output); }
+            bool operator>>(pdalboost::ulong_long_type& output)     { return shr_unsigned(output); }
+            bool operator>>(pdalboost::long_long_type& output)      { return shr_signed(output); }
 #elif defined(BOOST_HAS_MS_INT64)
             bool operator>>(unsigned __int64& output)           { return shr_unsigned(output); }
             bool operator>>(__int64& output)                    { return shr_signed(output); }
@@ -1542,9 +1541,9 @@ namespace boost
                  * that current implementation of lcast_ret_float cannot be used for type
                  * double, because it will give a big precision loss.
                  * */
-                boost::mpl::if_c<
+                pdalboost::mpl::if_c<
 #if defined(BOOST_HAS_LONG_LONG) || defined(BOOST_HAS_MS_INT64)
-                    ::boost::type_traits::ice_eq< sizeof(double), sizeof(long double) >::value,
+                    ::pdalboost::type_traits::ice_eq< sizeof(double), sizeof(long double) >::value,
 #else
                      0
 #endif
@@ -1623,7 +1622,7 @@ namespace boost
 
             BOOST_STATIC_CONSTANT(bool, value =
                     (
-                    ::boost::type_traits::ice_or<
+                    ::pdalboost::type_traits::ice_or<
                          is_same< T, char >::value,
                          is_same< T, wchar_t_if_supported >::value,
                          is_same< T, char16_t_if_supported >::value,
@@ -1640,13 +1639,13 @@ namespace boost
         {
             BOOST_STATIC_CONSTANT(bool, value =
                (
-                   ::boost::type_traits::ice_and<
+                   ::pdalboost::type_traits::ice_and<
                            is_arithmetic<Source>::value,
                            is_arithmetic<Target>::value,
-                           ::boost::type_traits::ice_not<
+                           ::pdalboost::type_traits::ice_not<
                                 detail::is_char_or_wchar<Target>::value
                            >::value,
-                           ::boost::type_traits::ice_not<
+                           ::pdalboost::type_traits::ice_not<
                                 detail::is_char_or_wchar<Source>::value
                            >::value
                    >::value
@@ -1664,14 +1663,14 @@ namespace boost
         {
             BOOST_STATIC_CONSTANT(bool, value =
                 (
-                    ::boost::type_traits::ice_or<
-                        ::boost::type_traits::ice_and<
+                    ::pdalboost::type_traits::ice_or<
+                        ::pdalboost::type_traits::ice_and<
                              is_same<Source,Target>::value,
                              is_char_or_wchar<Target>::value
                         >::value,
-                        ::boost::type_traits::ice_and<
-                             ::boost::type_traits::ice_eq< sizeof(char),sizeof(Target)>::value,
-                             ::boost::type_traits::ice_eq< sizeof(char),sizeof(Source)>::value,
+                        ::pdalboost::type_traits::ice_and<
+                             ::pdalboost::type_traits::ice_eq< sizeof(char),sizeof(Target)>::value,
+                             ::pdalboost::type_traits::ice_eq< sizeof(char),sizeof(Source)>::value,
                              is_char_or_wchar<Target>::value,
                              is_char_or_wchar<Source>::value
                         >::value
@@ -1727,13 +1726,13 @@ namespace boost
                 typedef BOOST_DEDUCED_TYPENAME remove_pointer<src >::type removed_ptr_t;
                 const bool requires_stringbuf =
                         !(
-                             ::boost::type_traits::ice_or<
+                             ::pdalboost::type_traits::ice_or<
                                  is_stdstring<src >::value,
                                  is_arithmetic<src >::value,
-                                 ::boost::type_traits::ice_and<
+                                 ::pdalboost::type_traits::ice_and<
                                      is_pointer<src >::value,
                                      is_char_or_wchar<removed_ptr_t >::value,
-                                     ::boost::type_traits::ice_eq<
+                                     ::pdalboost::type_traits::ice_eq<
                                         sizeof(char_type),
                                         sizeof(removed_ptr_t)
                                      >::value
@@ -1764,7 +1763,7 @@ namespace boost
             }
         };
 
-        class precision_loss_error : public boost::numeric::bad_numeric_cast
+        class precision_loss_error : public pdalboost::numeric::bad_numeric_cast
         {
          public:
             virtual const char * what() const throw()
@@ -1774,7 +1773,7 @@ namespace boost
         template<class S >
         struct throw_on_precision_loss
         {
-         typedef boost::numeric::Trunc<S> Rounder;
+         typedef pdalboost::numeric::Trunc<S> Rounder;
          typedef S source_type ;
 
          typedef typename mpl::if_< is_arithmetic<S>,S,S const&>::type argument_type ;
@@ -1797,16 +1796,16 @@ namespace boost
             static inline Target lexical_cast_impl(const Source &arg)
             {
                 try{
-                    typedef boost::numeric::converter<
+                    typedef pdalboost::numeric::converter<
                             Target,
                             Source,
-                            boost::numeric::conversion_traits<Target,Source>,
-                            boost::numeric::def_overflow_handler,
+                            pdalboost::numeric::conversion_traits<Target,Source>,
+                            pdalboost::numeric::def_overflow_handler,
                             throw_on_precision_loss<Source>
                     > Converter ;
 
                     return Converter::convert(arg);
-                } catch( ::boost::numeric::bad_numeric_cast const& ) {
+                } catch( ::pdalboost::numeric::bad_numeric_cast const& ) {
                     BOOST_LCAST_THROW_BAD_CAST(Source, Target);
                 }
                 BOOST_UNREACHABLE_RETURN(static_cast<Target>(0));
@@ -1819,11 +1818,11 @@ namespace boost
             static inline Target lexical_cast_impl(const Source &arg)
             {
                 try{
-                    typedef boost::numeric::converter<
+                    typedef pdalboost::numeric::converter<
                             Target,
                             Source,
-                            boost::numeric::conversion_traits<Target,Source>,
-                            boost::numeric::def_overflow_handler,
+                            pdalboost::numeric::conversion_traits<Target,Source>,
+                            pdalboost::numeric::def_overflow_handler,
                             throw_on_precision_loss<Source>
                     > Converter ;
 
@@ -1833,7 +1832,7 @@ namespace boost
                     } else {
                         return Converter::convert(arg);
                     }
-                } catch( ::boost::numeric::bad_numeric_cast const& ) {
+                } catch( ::pdalboost::numeric::bad_numeric_cast const& ) {
                     BOOST_LCAST_THROW_BAD_CAST(Source, Target);
                 }
                 BOOST_UNREACHABLE_RETURN(static_cast<Target>(0));
@@ -1852,7 +1851,7 @@ namespace boost
          * 3) Otherwise throw a bad_lexical_cast exception
          *
          *
-         * Rule 2) required because boost::lexical_cast has the behavior of
+         * Rule 2) required because pdalboost::lexical_cast has the behavior of
          * stringstream, which uses the rules of scanf for conversions. And
          * in the C99 standard for unsigned input value minus sign is
          * optional, so if a negative number is read, no errors will arise
@@ -1863,19 +1862,19 @@ namespace boost
         {
             static inline Target lexical_cast_impl(const Source &arg)
             {
-                typedef BOOST_DEDUCED_TYPENAME ::boost::mpl::if_c<
-                    ::boost::type_traits::ice_and<
-                        ::boost::type_traits::ice_or<
-                            ::boost::is_signed<Source>::value,
-                            ::boost::is_float<Source>::value
+                typedef BOOST_DEDUCED_TYPENAME ::pdalboost::mpl::if_c<
+                    ::pdalboost::type_traits::ice_and<
+                        ::pdalboost::type_traits::ice_or<
+                            ::pdalboost::is_signed<Source>::value,
+                            ::pdalboost::is_float<Source>::value
                         >::value,
-                        ::boost::type_traits::ice_not<
+                        ::pdalboost::type_traits::ice_not<
                             is_same<Source, bool>::value
                         >::value,
-                        ::boost::type_traits::ice_not<
+                        ::pdalboost::type_traits::ice_not<
                             is_same<Target, bool>::value
                         >::value,
-                        ::boost::is_unsigned<Target>::value
+                        ::pdalboost::is_unsigned<Target>::value
                     >::value,
                     lexical_cast_dynamic_num_ignoring_minus<Target, Source>,
                     lexical_cast_dynamic_num_not_ignoring_minus<Target, Source>
@@ -1891,10 +1890,10 @@ namespace boost
     {
         typedef BOOST_DEDUCED_TYPENAME detail::array_to_pointer_decay<Source>::type src;
 
-        typedef BOOST_DEDUCED_TYPENAME ::boost::type_traits::ice_or<
+        typedef BOOST_DEDUCED_TYPENAME ::pdalboost::type_traits::ice_or<
                 detail::is_xchar_to_xchar<Target, src>::value,
                 detail::is_char_array_to_stdstring<Target,src>::value,
-                ::boost::type_traits::ice_and<
+                ::pdalboost::type_traits::ice_and<
                      is_same<Target, src>::value,
                      detail::is_stdstring<Target>::value
                 >::value
@@ -1903,10 +1902,10 @@ namespace boost
         typedef BOOST_DEDUCED_TYPENAME
                 detail::is_arithmetic_and_not_xchars<Target, src> do_copy_with_dynamic_check_type;
 
-        typedef BOOST_DEDUCED_TYPENAME ::boost::mpl::if_c<
+        typedef BOOST_DEDUCED_TYPENAME ::pdalboost::mpl::if_c<
             do_copy_type::value,
             detail::lexical_cast_copy<src>,
-            BOOST_DEDUCED_TYPENAME ::boost::mpl::if_c<
+            BOOST_DEDUCED_TYPENAME ::pdalboost::mpl::if_c<
                  do_copy_with_dynamic_check_type::value,
                  detail::lexical_cast_dynamic_num<Target, src>,
                  detail::lexical_cast_do_cast<Target, src>

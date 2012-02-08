@@ -30,11 +30,11 @@
 #include <boost/proto/traits.hpp> // for proto::child_c()
 #include <boost/proto/detail/decltype.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
 /// INTERNAL ONLY
 ///
-#define UNREF(x) typename boost::remove_reference<x>::type
+#define UNREF(x) typename pdalboost::remove_reference<x>::type
 
     namespace context
     {
@@ -402,7 +402,7 @@ namespace boost { namespace proto
 
     } // namespace context
 
-}} // namespace boost::proto
+}} // namespace pdalboost::proto
 
 #undef UNREF
 

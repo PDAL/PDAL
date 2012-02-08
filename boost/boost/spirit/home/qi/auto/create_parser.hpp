@@ -13,7 +13,7 @@
 #include <boost/spirit/home/qi/auto/meta_create.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace result_of
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace result_of
 {
     template <typename T>
     struct create_parser
@@ -21,7 +21,7 @@ namespace boost { namespace spirit { namespace result_of
 }}}
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     // Main API function for parser creation from data type
     template <typename T>
@@ -33,7 +33,7 @@ namespace boost { namespace spirit { namespace qi
 }}}
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     // Meta function returning true if create_parser does return a valid
     // parser for the given type T.

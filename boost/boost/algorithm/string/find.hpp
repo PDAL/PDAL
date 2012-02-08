@@ -29,7 +29,7 @@
     delimiting the substring.
 */
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
 
 //  Generic find -----------------------------------------------//
@@ -53,9 +53,9 @@ namespace boost {
             RangeT& Input, 
             const FinderT& Finder)
         {
-            iterator_range<BOOST_STRING_TYPENAME range_iterator<RangeT>::type> lit_input(::boost::as_literal(Input));
+            iterator_range<BOOST_STRING_TYPENAME range_iterator<RangeT>::type> lit_input(::pdalboost::as_literal(Input));
 
-            return Finder(::boost::begin(lit_input),::boost::end(lit_input));
+            return Finder(::pdalboost::begin(lit_input),::pdalboost::end(lit_input));
         }
 
 //  find_first  -----------------------------------------------//
@@ -81,7 +81,7 @@ namespace boost {
             Range1T& Input, 
             const Range2T& Search)
         {
-            return ::boost::algorithm::find(Input, ::boost::algorithm::first_finder(Search));
+            return ::pdalboost::algorithm::find(Input, ::pdalboost::algorithm::first_finder(Search));
         }
 
         //! Find first algorithm ( case insensitive )
@@ -108,7 +108,7 @@ namespace boost {
             const Range2T& Search,
             const std::locale& Loc=std::locale())
         {
-            return ::boost::algorithm::find(Input, ::boost::algorithm::first_finder(Search,is_iequal(Loc)));
+            return ::pdalboost::algorithm::find(Input, ::pdalboost::algorithm::first_finder(Search,is_iequal(Loc)));
         }
 
 //  find_last  -----------------------------------------------//
@@ -134,7 +134,7 @@ namespace boost {
             Range1T& Input, 
             const Range2T& Search)
         {
-            return ::boost::algorithm::find(Input, ::boost::algorithm::last_finder(Search));
+            return ::pdalboost::algorithm::find(Input, ::pdalboost::algorithm::last_finder(Search));
         }
 
         //! Find last algorithm ( case insensitive )
@@ -161,7 +161,7 @@ namespace boost {
             const Range2T& Search,
             const std::locale& Loc=std::locale())
         {
-            return ::boost::algorithm::find(Input, ::boost::algorithm::last_finder(Search, is_iequal(Loc)));
+            return ::pdalboost::algorithm::find(Input, ::pdalboost::algorithm::last_finder(Search, is_iequal(Loc)));
         }
 
 //  find_nth ----------------------------------------------------------------------//
@@ -189,7 +189,7 @@ namespace boost {
             const Range2T& Search,
             int Nth)
         {
-            return ::boost::algorithm::find(Input, ::boost::algorithm::nth_finder(Search,Nth));
+            return ::pdalboost::algorithm::find(Input, ::pdalboost::algorithm::nth_finder(Search,Nth));
         }
 
         //! Find n-th algorithm ( case insensitive ).
@@ -220,7 +220,7 @@ namespace boost {
             int Nth,
             const std::locale& Loc=std::locale())
         {
-            return ::boost::algorithm::find(Input, ::boost::algorithm::nth_finder(Search,Nth,is_iequal(Loc)));
+            return ::pdalboost::algorithm::find(Input, ::pdalboost::algorithm::nth_finder(Search,Nth,is_iequal(Loc)));
         }
 
 //  find_head ----------------------------------------------------------------------//
@@ -250,7 +250,7 @@ namespace boost {
             RangeT& Input, 
             int N)
         {
-            return ::boost::algorithm::find(Input, ::boost::algorithm::head_finder(N));
+            return ::pdalboost::algorithm::find(Input, ::pdalboost::algorithm::head_finder(N));
         }
 
 //  find_tail ----------------------------------------------------------------------//
@@ -281,7 +281,7 @@ namespace boost {
             RangeT& Input, 
             int N)
         {
-            return ::boost::algorithm::find(Input, ::boost::algorithm::tail_finder(N));
+            return ::pdalboost::algorithm::find(Input, ::pdalboost::algorithm::tail_finder(N));
         }
 
 //  find_token --------------------------------------------------------------------//
@@ -311,7 +311,7 @@ namespace boost {
             PredicateT Pred,
             token_compress_mode_type eCompress=token_compress_off)
         {
-            return ::boost::algorithm::find(Input, ::boost::algorithm::token_finder(Pred, eCompress));
+            return ::pdalboost::algorithm::find(Input, ::pdalboost::algorithm::token_finder(Pred, eCompress));
         }
 
     } // namespace algorithm
@@ -328,7 +328,7 @@ namespace boost {
     using algorithm::find_tail;
     using algorithm::find_token;
 
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_FIND_HPP

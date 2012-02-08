@@ -16,7 +16,7 @@
 #include <boost/spirit/home/classic/utility/impl/chset/basic_chset.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -26,7 +26,7 @@ namespace utility { namespace impl {
     // template functions.  And we don't want to put the whole algorithm
     // in the chset constructor in the class definition.
     template <typename CharT, typename CharT2>
-    void construct_chset(boost::shared_ptr<basic_chset<CharT> >& ptr,
+    void construct_chset(pdalboost::shared_ptr<basic_chset<CharT> >& ptr,
             CharT2 const* definition);
 
 }} // namespace utility::impl
@@ -84,7 +84,7 @@ public:
 
 private:
 
-    boost::shared_ptr<basic_chset<CharT> > ptr;
+    pdalboost::shared_ptr<basic_chset<CharT> > ptr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -166,14 +166,14 @@ chset_p(unsigned long ch)
 
 #ifdef BOOST_HAS_LONG_LONG
 //////////////////////////////////
-inline chset< ::boost::long_long_type>
-chset_p( ::boost::long_long_type ch)
-{ return chset< ::boost::long_long_type>(ch); }
+inline chset< ::pdalboost::long_long_type>
+chset_p( ::pdalboost::long_long_type ch)
+{ return chset< ::pdalboost::long_long_type>(ch); }
 
 //////////////////////////////////
-inline chset< ::boost::ulong_long_type>
-chset_p( ::boost::ulong_long_type ch)
-{ return chset< ::boost::ulong_long_type>(ch); }
+inline chset< ::pdalboost::ulong_long_type>
+chset_p( ::pdalboost::ulong_long_type ch)
+{ return chset< ::pdalboost::ulong_long_type>(ch); }
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

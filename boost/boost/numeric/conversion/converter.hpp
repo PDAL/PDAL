@@ -15,7 +15,7 @@
 
 #include "boost/numeric/conversion/detail/converter.hpp"
 
-namespace boost { namespace numeric 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric 
 {
 
 template<class T,
@@ -61,7 +61,7 @@ struct make_converter_from
 
 } ;
 
-} } // namespace boost::numeric
+} } // namespace pdalboost::numeric
 
 #endif
 

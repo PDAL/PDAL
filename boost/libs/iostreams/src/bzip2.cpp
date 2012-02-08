@@ -22,7 +22,7 @@
                     // installation instructions here:
                     // http://boost.org/libs/iostreams/doc/index.html?path=7
                     
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 namespace bzip2 {
 
@@ -66,9 +66,9 @@ void bzip2_error::check BOOST_PREVENT_MACRO_SUBSTITUTION(int error)
     case BZ_STREAM_END:
         return;
     case BZ_MEM_ERROR: 
-        boost::throw_exception(std::bad_alloc());
+        pdalboost::throw_exception(std::bad_alloc());
     default:
-        boost::throw_exception(bzip2_error(error));
+        pdalboost::throw_exception(bzip2_error(error));
     }
 }
 

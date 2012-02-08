@@ -19,7 +19,7 @@
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace phoenix {
+namespace pdalboostphoenix {
 
 #if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)
 #pragma warning(push)
@@ -202,14 +202,14 @@ namespace impl
         }
 
     private:
-        boost::thread_specific_ptr<frame_ptr> tsp_frame;
+        pdalboost::thread_specific_ptr<frame_ptr> tsp_frame;
 
         // no copies, no assignments
         closure_frame_holder(closure_frame_holder const &);
         closure_frame_holder &operator=(closure_frame_holder const &);
     };
 #endif
-} // namespace phoenix::impl
+} // namespace pdalboostphoenix::impl
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -401,10 +401,10 @@ private:
     typedef impl::closure_frame_holder<closure_frame_t> holder_t;
 
 #ifdef PHOENIX_THREADSAFE
-    static boost::thread_specific_ptr<holder_t*> &
+    static pdalboost::thread_specific_ptr<holder_t*> &
     tsp_frame_instance()
     {
-        static boost::thread_specific_ptr<holder_t*> the_instance;
+        static pdalboost::thread_specific_ptr<holder_t*> the_instance;
         return the_instance;
     }
 
@@ -419,9 +419,9 @@ private:
     closure_frame_holder_ref(holder_t* holder_ = 0)
     {
 #ifdef PHOENIX_THREADSAFE
-        static boost::once_flag been_here = BOOST_ONCE_INIT;
-        boost::call_once(been_here, tsp_frame_instance_init);
-        boost::thread_specific_ptr<holder_t*> &tsp_frame = tsp_frame_instance();
+        static pdalboost::once_flag been_here = BOOST_ONCE_INIT;
+        pdalboost::call_once(been_here, tsp_frame_instance_init);
+        pdalboost::thread_specific_ptr<holder_t*> &tsp_frame = tsp_frame_instance();
         if (!tsp_frame.get())
             tsp_frame.reset(new holder_t *(0));
         holder_t *& holder = *tsp_frame;
@@ -441,6 +441,6 @@ private:
 #endif
 
 }
-   //  namespace phoenix
+   //  namespace pdalboostphoenix
 
 #endif

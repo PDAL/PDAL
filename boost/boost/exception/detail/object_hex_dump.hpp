@@ -19,9 +19,7 @@
 #include <sstream>
 #include <cstdlib>
 
-namespace
-boost
-    {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace
     exception_detail
         {

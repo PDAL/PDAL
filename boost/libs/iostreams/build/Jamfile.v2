@@ -152,7 +152,7 @@ if $(bz2)
     sources += boost_bzip2 bzip2.cpp ;
 }
 
-lib boost_iostreams 
+lib pdalboost_iostreams 
     : $(sources) 
     : <link>shared:<define>BOOST_IOSTREAMS_DYN_LINK=1 
       <define>BOOST_IOSTREAMS_USE_DEPRECATED
@@ -160,7 +160,7 @@ lib boost_iostreams
     : <link>shared:<define>BOOST_IOSTREAMS_DYN_LINK=1
     ;
 
-boost-install boost_iostreams ;
+boost-install pdalboost_iostreams ;
 
 
 

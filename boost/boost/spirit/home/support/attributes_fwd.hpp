@@ -21,7 +21,7 @@
 #include <boost/spirit/home/support/unused.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace result_of
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace result_of
 {
     // forward declaration only
     template <typename Exposed, typename Attribute>
@@ -47,7 +47,7 @@ namespace boost { namespace spirit { namespace result_of
 }}}
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     // Find out if T can be a strong substitute for Expected attribute

@@ -40,7 +40,7 @@
 // have a "wrapped" argument type.  This solves a problem with VC 6.0
 // (and perhaps others) while implementing templated constructors.
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace serialization {
 
 template<class T>
@@ -63,13 +63,13 @@ pfto_wrapper< T > make_pfto_wrapper(const pfto_wrapper< T > & t, int){
 }
 
 } // namespace serialization
-} // namespace boost
+} // namespace pdalboost
 
 #ifdef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
     #define BOOST_PFTO_WRAPPER(T) \
-        boost::serialization::pfto_wrapper< T >
+        pdalboost::serialization::pfto_wrapper< T >
     #define BOOST_MAKE_PFTO_WRAPPER(t) \
-        boost::serialization::make_pfto_wrapper(t, 0)
+        pdalboost::serialization::make_pfto_wrapper(t, 0)
 #else
     #define BOOST_PFTO_WRAPPER(T) T
     #define BOOST_MAKE_PFTO_WRAPPER(t) t

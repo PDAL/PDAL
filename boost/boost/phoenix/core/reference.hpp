@@ -14,7 +14,7 @@
 #include <boost/phoenix/core/terminal.hpp>
 #include <boost/utility/result_of.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -35,7 +35,7 @@ namespace boost { namespace phoenix
 
             static const type make(T & t)
             {
-                typename reference<T>::type const e = {{boost::ref(t)}};
+                typename reference<T>::type const e = {{pdalboost::ref(t)}};
                 return e;
             }
         };
@@ -50,7 +50,7 @@ namespace boost { namespace phoenix
 
             static const type make(T const & t)
             {
-                typename reference<T const>::type const e = {{boost::cref(t)}};
+                typename reference<T const>::type const e = {{pdalboost::cref(t)}};
                 return e;
             }
         };
@@ -77,70 +77,70 @@ namespace boost { namespace phoenix
         return expression::reference<T const>::make(t);
     }
 
-    // Call out boost::reference_wrapper for special handling
+    // Call out pdalboost::reference_wrapper for special handling
     template<typename T>
-    struct is_custom_terminal<boost::reference_wrapper<T> >
+    struct is_custom_terminal<pdalboost::reference_wrapper<T> >
       : mpl::true_
     {};
 
-    // Special handling for boost::reference_wrapper
+    // Special handling for pdalboost::reference_wrapper
     template<typename T>
-    struct custom_terminal<boost::reference_wrapper<T> >
+    struct custom_terminal<pdalboost::reference_wrapper<T> >
     {
         typedef T &result_type;
 
         template <typename Context>
-        T &operator()(boost::reference_wrapper<T> r, Context &) const
+        T &operator()(pdalboost::reference_wrapper<T> r, Context &) const
         {
             return r;
         }
     };
     
     template<typename Expr>
-    struct custom_terminal<boost::reference_wrapper<actor<Expr> > >
+    struct custom_terminal<pdalboost::reference_wrapper<actor<Expr> > >
     {
         template <typename Sig>
         struct result;
 
         template <typename This, typename Context>
-        struct result<This(boost::reference_wrapper<actor<Expr> > const &, Context)>
-            : boost::result_of<evaluator(actor<Expr> &, Context)>
+        struct result<This(pdalboost::reference_wrapper<actor<Expr> > const &, Context)>
+            : pdalboost::result_of<evaluator(actor<Expr> &, Context)>
         {};
 
         template <typename This, typename Context>
-        struct result<This(boost::reference_wrapper<actor<Expr> > &, Context)>
-            : boost::result_of<evaluator(actor<Expr> &, Context)>
+        struct result<This(pdalboost::reference_wrapper<actor<Expr> > &, Context)>
+            : pdalboost::result_of<evaluator(actor<Expr> &, Context)>
         {};
 
         template <typename Context>
-        typename boost::result_of<evaluator(actor<Expr> &, Context const &)>::type
-        operator()(boost::reference_wrapper<actor<Expr> > & r, Context const & ctx) const
+        typename pdalboost::result_of<evaluator(actor<Expr> &, Context const &)>::type
+        operator()(pdalboost::reference_wrapper<actor<Expr> > & r, Context const & ctx) const
         {
-            return boost::phoenix::eval(r, ctx);
+            return pdalboost::pdalboostphoenix::eval(r, ctx);
         }
     };
     
     template<typename Expr>
-    struct custom_terminal<boost::reference_wrapper<actor<Expr> const> >
+    struct custom_terminal<pdalboost::reference_wrapper<actor<Expr> const> >
     {
         template <typename Sig>
         struct result;
 
         template <typename This, typename Context>
-        struct result<This(boost::reference_wrapper<actor<Expr> const> const &, Context)>
-            : boost::result_of<evaluator(actor<Expr> const&, Context)>
+        struct result<This(pdalboost::reference_wrapper<actor<Expr> const> const &, Context)>
+            : pdalboost::result_of<evaluator(actor<Expr> const&, Context)>
         {};
 
         template <typename This, typename Context>
-        struct result<This(boost::reference_wrapper<actor<Expr> const> &, Context)>
-            : boost::result_of<evaluator(actor<Expr> const&, Context)>
+        struct result<This(pdalboost::reference_wrapper<actor<Expr> const> &, Context)>
+            : pdalboost::result_of<evaluator(actor<Expr> const&, Context)>
         {};
 
         template <typename Context>
-        typename boost::result_of<evaluator(actor<Expr> const&, Context const &)>::type
-        operator()(boost::reference_wrapper<actor<Expr> const> const & r, Context & ctx) const
+        typename pdalboost::result_of<evaluator(actor<Expr> const&, Context const &)>::type
+        operator()(pdalboost::reference_wrapper<actor<Expr> const> const & r, Context & ctx) const
         {
-            return boost::phoenix::eval(unwrap_ref(r), ctx);
+            return pdalboost::pdalboostphoenix::eval(unwrap_ref(r), ctx);
         }
     };
 }}

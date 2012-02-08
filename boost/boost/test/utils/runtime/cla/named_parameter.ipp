@@ -24,7 +24,7 @@
 // Boost.Test
 #include <boost/test/utils/algorithm.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -124,6 +124,6 @@ string_name_policy::match_name( argv_traverser& tr ) const
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_CLA_NAMED_PARAMETER_IPP_062904GER

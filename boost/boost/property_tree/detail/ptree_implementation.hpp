@@ -21,7 +21,7 @@
 #define BOOST_PROPERTY_TREE_PAIR_BUG
 #endif
 
-namespace boost { namespace property_tree
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
 {
     template <class K, class D, class C>
     struct basic_ptree<K, D, C>::subs
@@ -74,11 +74,11 @@ namespace boost { namespace property_tree
         }
     };
     template <class K, class D, class C>
-    class basic_ptree<K, D, C>::iterator : public boost::iterator_adaptor<
+    class basic_ptree<K, D, C>::iterator : public pdalboost::iterator_adaptor<
         iterator, typename subs::base_container::iterator, value_type>
     {
-        friend class boost::iterator_core_access;
-        typedef boost::iterator_adaptor<
+        friend class pdalboost::iterator_core_access;
+        typedef pdalboost::iterator_adaptor<
             iterator, typename subs::base_container::iterator, value_type>
             baset;
     public:
@@ -97,7 +97,7 @@ namespace boost { namespace property_tree
         }
     };
     template <class K, class D, class C>
-    class basic_ptree<K, D, C>::const_iterator : public boost::iterator_adaptor<
+    class basic_ptree<K, D, C>::const_iterator : public pdalboost::iterator_adaptor<
         const_iterator, typename subs::base_container::const_iterator>
     {
     public:
@@ -111,36 +111,36 @@ namespace boost { namespace property_tree
     };
     template <class K, class D, class C>
     class basic_ptree<K, D, C>::reverse_iterator
-        : public boost::reverse_iterator<iterator>
+        : public pdalboost::reverse_iterator<iterator>
     {
     public:
         reverse_iterator() {}
         explicit reverse_iterator(iterator b)
-            : boost::reverse_iterator<iterator>(b)
+            : pdalboost::reverse_iterator<iterator>(b)
         {}
     };
     template <class K, class D, class C>
     class basic_ptree<K, D, C>::const_reverse_iterator
-        : public boost::reverse_iterator<const_iterator>
+        : public pdalboost::reverse_iterator<const_iterator>
     {
     public:
         const_reverse_iterator() {}
         explicit const_reverse_iterator(const_iterator b)
-            : boost::reverse_iterator<const_iterator>(b)
+            : pdalboost::reverse_iterator<const_iterator>(b)
         {}
         const_reverse_iterator(
             typename basic_ptree<K, D, C>::reverse_iterator b)
-            : boost::reverse_iterator<const_iterator>(b)
+            : pdalboost::reverse_iterator<const_iterator>(b)
         {}
     };
     template <class K, class D, class C>
     class basic_ptree<K, D, C>::assoc_iterator
-        : public boost::iterator_adaptor<assoc_iterator,
+        : public pdalboost::iterator_adaptor<assoc_iterator,
                                          typename subs::by_name_index::iterator,
                                          value_type>
     {
-        friend class boost::iterator_core_access;
-        typedef boost::iterator_adaptor<assoc_iterator,
+        friend class pdalboost::iterator_core_access;
+        typedef pdalboost::iterator_adaptor<assoc_iterator,
                                          typename subs::by_name_index::iterator,
                                          value_type>
             baset;
@@ -157,7 +157,7 @@ namespace boost { namespace property_tree
     };
     template <class K, class D, class C>
     class basic_ptree<K, D, C>::const_assoc_iterator
-        : public boost::iterator_adaptor<const_assoc_iterator,
+        : public pdalboost::iterator_adaptor<const_assoc_iterator,
                                    typename subs::by_name_index::const_iterator>
     {
     public:
@@ -633,10 +633,10 @@ namespace boost { namespace property_tree
 
     template<class K, class D, class C>
     template<class Type, class Translator>
-    typename boost::enable_if<detail::is_translator<Translator>, Type>::type
+    typename pdalboost::enable_if<detail::is_translator<Translator>, Type>::type
     basic_ptree<K, D, C>::get_value(Translator tr) const
     {
-        if(boost::optional<Type> o = get_value_optional<Type>(tr)) {
+        if(pdalboost::optional<Type> o = get_value_optional<Type>(tr)) {
             return *o;
         }
         BOOST_PROPERTY_TREE_THROW(ptree_bad_data(
@@ -662,7 +662,7 @@ namespace boost { namespace property_tree
 
     template<class K, class D, class C>
     template <class Ch, class Translator>
-    typename boost::enable_if<
+    typename pdalboost::enable_if<
         detail::is_character<Ch>,
         std::basic_string<Ch>
     >::type
@@ -673,7 +673,7 @@ namespace boost { namespace property_tree
 
     template<class K, class D, class C>
     template<class Type> inline
-    typename boost::disable_if<detail::is_translator<Type>, Type>::type
+    typename pdalboost::disable_if<detail::is_translator<Type>, Type>::type
     basic_ptree<K, D, C>::get_value(const Type &default_value) const
     {
         return get_value(default_value,
@@ -682,7 +682,7 @@ namespace boost { namespace property_tree
 
     template<class K, class D, class C>
     template <class Ch>
-    typename boost::enable_if<
+    typename pdalboost::enable_if<
         detail::is_character<Ch>,
         std::basic_string<Ch>
     >::type
@@ -709,7 +709,7 @@ namespace boost { namespace property_tree
 
     template<class K, class D, class C>
     template<class Type, class Translator> inline
-    typename boost::enable_if<detail::is_translator<Translator>, Type>::type
+    typename pdalboost::enable_if<detail::is_translator<Translator>, Type>::type
     basic_ptree<K, D, C>::get(const path_type &path,
                               Translator tr) const
     {
@@ -734,7 +734,7 @@ namespace boost { namespace property_tree
 
     template<class K, class D, class C>
     template <class Ch, class Translator>
-    typename boost::enable_if<
+    typename pdalboost::enable_if<
         detail::is_character<Ch>,
         std::basic_string<Ch>
     >::type
@@ -746,7 +746,7 @@ namespace boost { namespace property_tree
 
     template<class K, class D, class C>
     template<class Type> inline
-    typename boost::disable_if<detail::is_translator<Type>, Type>::type
+    typename pdalboost::disable_if<detail::is_translator<Type>, Type>::type
     basic_ptree<K, D, C>::get(const path_type &path,
                               const Type &default_value) const
     {
@@ -755,7 +755,7 @@ namespace boost { namespace property_tree
 
     template<class K, class D, class C>
     template <class Ch>
-    typename boost::enable_if<
+    typename pdalboost::enable_if<
         detail::is_character<Ch>,
         std::basic_string<Ch>
     >::type
@@ -797,7 +797,7 @@ namespace boost { namespace property_tree
         } else {
             BOOST_PROPERTY_TREE_THROW(ptree_bad_data(
                 std::string("conversion of type \"") + typeid(Type).name() +
-                "\" to data failed", boost::any()));
+                "\" to data failed", pdalboost::any()));
         }
     }
 

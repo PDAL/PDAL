@@ -45,7 +45,7 @@
 
 #include <vector>
 
-#include <pdal/external/boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include <pdal/Schema.hpp>
@@ -137,10 +137,10 @@ public:
 
     /// Get project identifier.
     /// \return Global Unique Identifier as an instance of liblas::guid class.
-	pdal::external::boost::uuids::uuid GetProjectId() const;
+	boost::uuids::uuid GetProjectId() const;
 
     /// Set project identifier.
-    void SetProjectId(pdal::external::boost::uuids::uuid const& v);
+    void SetProjectId(boost::uuids::uuid const& v);
 
     /// Get major component of version of LAS format.
     /// \return Always 1 is returned as the only valid value.
@@ -345,7 +345,7 @@ private:
     char m_signature[eFileSignatureSize]; // TODO: replace with boost::array --mloskot
     boost::uint16_t m_sourceId;
     boost::uint16_t m_reserved;
-	pdal::external::boost::uuids::uuid m_projectGuid;
+    boost::uuids::uuid m_projectGuid;
     boost::uint8_t m_versionMajor;
     boost::uint8_t m_versionMinor;
     char m_systemId[eSystemIdSize]; // TODO: replace with boost::array --mloskot

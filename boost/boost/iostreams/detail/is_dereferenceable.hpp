@@ -16,7 +16,7 @@
 # include <boost/mpl/bool.hpp>
 # include <boost/detail/workaround.hpp>
 
-namespace boost { namespace iostreams { namespace detail { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail { 
 
 // is_dereferenceable<T> metafunction
 //
@@ -57,7 +57,7 @@ namespace is_dereferenceable_
   template <class T>
   struct impl
   {
-      static typename boost::remove_cv<T>::type& x;
+      static typename pdalboost::remove_cv<T>::type& x;
 
       BOOST_STATIC_CONSTANT(
           bool
@@ -78,7 +78,7 @@ struct is_dereferenceable
 
 } } 
 
-BOOST_TT_AUX_TEMPLATE_ARITY_SPEC(1, ::boost::iostreams::detail::is_dereferenceable)
+BOOST_TT_AUX_TEMPLATE_ARITY_SPEC(1, ::pdalboost::iostreams::detail::is_dereferenceable)
 
 } // End namespaces detail, iostreams, boost.
 

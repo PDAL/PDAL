@@ -26,7 +26,7 @@ static map_type & get_map()
     return m;
 }
 
-typedef boost::detail::lightweight_mutex mutex_type;
+typedef pdalboost::detail::lightweight_mutex mutex_type;
 
 static mutex_type & get_mutex()
 {
@@ -42,7 +42,7 @@ namespace
 
     struct count_layout
     {
-        boost::detail::sp_counted_base * pi;
+        pdalboost::detail::sp_counted_base * pi;
         int id;
     };
 
@@ -66,7 +66,7 @@ static void scan_and_count(void const * area, size_t size, map_type const & m, m
     {
         shared_ptr_layout const * q = reinterpret_cast<shared_ptr_layout const *>(p);
 
-        if(q->pn.id == boost::detail::shared_count_id && q->pn.pi != 0 && m.count(q->pn.pi) != 0)
+        if(q->pn.id == pdalboost::detail::shared_count_id && q->pn.pi != 0 && m.count(q->pn.pi) != 0)
         {
             ++m2[q->pn.pi];
         }
@@ -83,7 +83,7 @@ static void scan_and_mark(void const * area, size_t size, map2_type & m2, open_t
     {
         shared_ptr_layout const * q = reinterpret_cast<shared_ptr_layout const *>(p);
 
-        if(q->pn.id == boost::detail::shared_count_id && q->pn.pi != 0 && m2.count(q->pn.pi) != 0)
+        if(q->pn.id == pdalboost::detail::shared_count_id && q->pn.pi != 0 && m2.count(q->pn.pi) != 0)
         {
             open.push_back(q->pn.pi);
             m2.erase(q->pn.pi);
@@ -100,7 +100,7 @@ static void find_unreachable_objects_impl(map_type const & m, map2_type & m2)
 
         for(map_type::const_iterator i = m.begin(); i != m.end(); ++i)
         {
-            boost::detail::sp_counted_base const * p = static_cast<boost::detail::sp_counted_base const *>(i->first);
+            pdalboost::detail::sp_counted_base const * p = static_cast<pdalboost::detail::sp_counted_base const *>(i->first);
 
             BOOST_ASSERT(p->use_count() != 0); // there should be no inactive counts in the map
 
@@ -119,7 +119,7 @@ static void find_unreachable_objects_impl(map_type const & m, map2_type & m2)
 
         for(map2_type::iterator i = m2.begin(); i != m2.end(); ++i)
         {
-            boost::detail::sp_counted_base const * p = static_cast<boost::detail::sp_counted_base const *>(i->first);
+            pdalboost::detail::sp_counted_base const * p = static_cast<pdalboost::detail::sp_counted_base const *>(i->first);
             if(p->use_count() != i->second) open.push_back(p);
         }
 
@@ -175,7 +175,7 @@ std::size_t find_unreachable_objects(bool report)
     return m2.size();
 }
 
-typedef std::deque< boost::shared_ptr<X> > free_list_type;
+typedef std::deque< pdalboost::shared_ptr<X> > free_list_type;
 
 static void scan_and_free(void * area, size_t size, map2_type const & m2, free_list_type & free)
 {
@@ -185,9 +185,9 @@ static void scan_and_free(void * area, size_t size, map2_type const & m2, free_l
     {
         shared_ptr_layout * q = reinterpret_cast<shared_ptr_layout *>(p);
 
-        if(q->pn.id == boost::detail::shared_count_id && q->pn.pi != 0 && m2.count(q->pn.pi) != 0 && q->px != 0)
+        if(q->pn.id == pdalboost::detail::shared_count_id && q->pn.pi != 0 && m2.count(q->pn.pi) != 0 && q->px != 0)
         {
-            boost::shared_ptr<X> * ppx = reinterpret_cast< boost::shared_ptr<X> * >(p);
+            pdalboost::shared_ptr<X> * ppx = reinterpret_cast< pdalboost::shared_ptr<X> * >(p);
             free.push_back(*ppx);
             ppx->reset();
         }
@@ -224,8 +224,7 @@ void free_unreachable_objects()
 
 // debug hooks
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 void sp_scalar_constructor_hook(void *)
 {
@@ -265,6 +264,6 @@ void sp_array_destructor_hook(void *)
 {
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // defined(BOOST_SP_ENABLE_DEBUG_HOOKS)

@@ -35,7 +35,7 @@
 
 */
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
 
     //  left trim  -----------------------------------------------//
@@ -63,14 +63,14 @@ namespace boost {
             const RangeT& Input,
             PredicateT IsSpace)
         {
-            iterator_range<BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type> lit_range(::boost::as_literal(Input));
+            iterator_range<BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type> lit_range(::pdalboost::as_literal(Input));
 
             std::copy( 
-                ::boost::algorithm::detail::trim_begin( 
-                    ::boost::begin(lit_range), 
-                    ::boost::end(lit_range), 
+                ::pdalboost::algorithm::detail::trim_begin( 
+                    ::pdalboost::begin(lit_range), 
+                    ::pdalboost::end(lit_range), 
                     IsSpace ),
-                ::boost::end(lit_range),
+                ::pdalboost::end(lit_range),
                 Output);
 
             return Output;
@@ -84,11 +84,11 @@ namespace boost {
         inline SequenceT trim_left_copy_if(const SequenceT& Input, PredicateT IsSpace)
         {
             return SequenceT( 
-                ::boost::algorithm::detail::trim_begin( 
-                    ::boost::begin(Input), 
-                    ::boost::end(Input), 
+                ::pdalboost::algorithm::detail::trim_begin( 
+                    ::pdalboost::begin(Input), 
+                    ::pdalboost::end(Input), 
                     IsSpace ),
-                ::boost::end(Input));
+                ::pdalboost::end(Input));
         }
 
         //! Left trim - parametric
@@ -106,7 +106,7 @@ namespace boost {
         inline SequenceT trim_left_copy(const SequenceT& Input, const std::locale& Loc=std::locale())
         {
             return            
-                ::boost::algorithm::trim_left_copy_if(
+                ::pdalboost::algorithm::trim_left_copy_if(
                     Input, 
                     is_space(Loc));
         }
@@ -124,10 +124,10 @@ namespace boost {
         inline void trim_left_if(SequenceT& Input, PredicateT IsSpace)
         {
             Input.erase( 
-                ::boost::begin(Input),
-                ::boost::algorithm::detail::trim_begin( 
-                    ::boost::begin(Input), 
-                    ::boost::end(Input), 
+                ::pdalboost::begin(Input),
+                ::pdalboost::algorithm::detail::trim_begin( 
+                    ::pdalboost::begin(Input), 
+                    ::pdalboost::end(Input), 
                     IsSpace));
         }
 
@@ -142,7 +142,7 @@ namespace boost {
         template<typename SequenceT>
         inline void trim_left(SequenceT& Input, const std::locale& Loc=std::locale())
         {
-            ::boost::algorithm::trim_left_if( 
+            ::pdalboost::algorithm::trim_left_if( 
                 Input, 
                 is_space(Loc));
         }
@@ -171,13 +171,13 @@ namespace boost {
             const RangeT& Input,
             PredicateT IsSpace )
         {
-            iterator_range<BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type> lit_range(::boost::as_literal(Input));
+            iterator_range<BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type> lit_range(::pdalboost::as_literal(Input));
          
             std::copy( 
-                ::boost::begin(lit_range),
-                ::boost::algorithm::detail::trim_end( 
-                    ::boost::begin(lit_range), 
-                    ::boost::end(lit_range), 
+                ::pdalboost::begin(lit_range),
+                ::pdalboost::algorithm::detail::trim_end( 
+                    ::pdalboost::begin(lit_range), 
+                    ::pdalboost::end(lit_range), 
                     IsSpace ),
                 Output );
 
@@ -192,10 +192,10 @@ namespace boost {
         inline SequenceT trim_right_copy_if(const SequenceT& Input, PredicateT IsSpace)
         {
             return SequenceT( 
-                ::boost::begin(Input),
-                ::boost::algorithm::detail::trim_end( 
-                    ::boost::begin(Input), 
-                    ::boost::end(Input), 
+                ::pdalboost::begin(Input),
+                ::pdalboost::algorithm::detail::trim_end( 
+                    ::pdalboost::begin(Input), 
+                    ::pdalboost::end(Input), 
                     IsSpace)
                 );
         }
@@ -215,7 +215,7 @@ namespace boost {
         inline SequenceT trim_right_copy(const SequenceT& Input, const std::locale& Loc=std::locale())
         {
             return 
-                ::boost::algorithm::trim_right_copy_if( 
+                ::pdalboost::algorithm::trim_right_copy_if( 
                     Input, 
                     is_space(Loc));
         }
@@ -234,11 +234,11 @@ namespace boost {
         inline void trim_right_if(SequenceT& Input, PredicateT IsSpace)
         {
             Input.erase(
-                ::boost::algorithm::detail::trim_end( 
-                    ::boost::begin(Input), 
-                    ::boost::end(Input), 
+                ::pdalboost::algorithm::detail::trim_end( 
+                    ::pdalboost::begin(Input), 
+                    ::pdalboost::end(Input), 
                     IsSpace ),
-                ::boost::end(Input)
+                ::pdalboost::end(Input)
                 );
         }
 
@@ -254,7 +254,7 @@ namespace boost {
         template<typename SequenceT>
         inline void trim_right(SequenceT& Input, const std::locale& Loc=std::locale())
         {
-            ::boost::algorithm::trim_right_if(
+            ::pdalboost::algorithm::trim_right_if(
                 Input, 
                 is_space(Loc) );
         }
@@ -283,18 +283,18 @@ namespace boost {
             const RangeT& Input,
             PredicateT IsSpace)
         {
-            iterator_range<BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type> lit_range(::boost::as_literal(Input));
+            iterator_range<BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type> lit_range(::pdalboost::as_literal(Input));
 
             BOOST_STRING_TYPENAME 
                 range_const_iterator<RangeT>::type TrimEnd=
-                ::boost::algorithm::detail::trim_end( 
-                    ::boost::begin(lit_range), 
-                    ::boost::end(lit_range), 
+                ::pdalboost::algorithm::detail::trim_end( 
+                    ::pdalboost::begin(lit_range), 
+                    ::pdalboost::end(lit_range), 
                     IsSpace);
 
             std::copy( 
                 detail::trim_begin( 
-                    ::boost::begin(lit_range), TrimEnd, IsSpace),
+                    ::pdalboost::begin(lit_range), TrimEnd, IsSpace),
                 TrimEnd,
                 Output
                 );
@@ -311,14 +311,14 @@ namespace boost {
         {
             BOOST_STRING_TYPENAME 
                 range_const_iterator<SequenceT>::type TrimEnd=
-                    ::boost::algorithm::detail::trim_end( 
-                        ::boost::begin(Input), 
-                        ::boost::end(Input), 
+                    ::pdalboost::algorithm::detail::trim_end( 
+                        ::pdalboost::begin(Input), 
+                        ::pdalboost::end(Input), 
                         IsSpace);
 
             return SequenceT( 
                 detail::trim_begin( 
-                    ::boost::begin(Input), 
+                    ::pdalboost::begin(Input), 
                     TrimEnd, 
                     IsSpace),
                 TrimEnd
@@ -340,7 +340,7 @@ namespace boost {
         inline SequenceT trim_copy( const SequenceT& Input, const std::locale& Loc=std::locale() )
         {
             return
-                ::boost::algorithm::trim_copy_if(
+                ::pdalboost::algorithm::trim_copy_if(
                     Input, 
                     is_space(Loc) );
         }
@@ -357,8 +357,8 @@ namespace boost {
         template<typename SequenceT, typename PredicateT>
         inline void trim_if(SequenceT& Input, PredicateT IsSpace)
         {
-            ::boost::algorithm::trim_right_if( Input, IsSpace );
-            ::boost::algorithm::trim_left_if( Input, IsSpace );
+            ::pdalboost::algorithm::trim_right_if( Input, IsSpace );
+            ::pdalboost::algorithm::trim_left_if( Input, IsSpace );
         }
 
         //! Trim
@@ -372,7 +372,7 @@ namespace boost {
         template<typename SequenceT>
         inline void trim(SequenceT& Input, const std::locale& Loc=std::locale())
         {
-            ::boost::algorithm::trim_if(
+            ::pdalboost::algorithm::trim_if(
                 Input, 
                 is_space( Loc ) );
         }
@@ -393,6 +393,6 @@ namespace boost {
     using algorithm::trim_copy;
     using algorithm::trim_copy_if;
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // BOOST_STRING_TRIM_HPP

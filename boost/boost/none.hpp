@@ -18,11 +18,11 @@
 // (bcc<=5.64 cannot include instance data in a precompiled header)
 //  -- * To be verified, now that there's no unnamed namespace
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 none_t const none = (static_cast<none_t>(0)) ;
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif
 

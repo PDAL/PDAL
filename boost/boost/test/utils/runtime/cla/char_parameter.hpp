@@ -22,7 +22,7 @@
 #include <boost/test/utils/runtime/cla/basic_parameter.hpp>
 #include <boost/test/utils/runtime/cla/id_policy.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -86,7 +86,7 @@ char_parameter( char_type name )
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #ifndef BOOST_RT_PARAM_OFFLINE
 

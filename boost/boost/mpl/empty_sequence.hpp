@@ -19,7 +19,7 @@
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/iterator_tags.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 struct empty_sequence
 {

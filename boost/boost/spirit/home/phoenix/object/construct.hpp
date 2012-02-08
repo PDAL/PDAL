@@ -10,7 +10,7 @@
 #include <boost/spirit/home/phoenix/core/compose.hpp>
 #include <boost/preprocessor/repetition/enum_params_with_a_default.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     namespace detail
     {

@@ -10,7 +10,7 @@
 #include <boost/parameter/aux_/tag.hpp>
 #include <boost/parameter/aux_/default.hpp>
 
-namespace boost { namespace parameter {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter {
 
 // Instances of unique specializations of keyword<...> serve to
 // associate arguments with parameter names.  For example:
@@ -122,8 +122,8 @@ keyword<Tag> const keyword<Tag>::instance = {};
           }                                                             \
       };                                                                \
     }                                                                   \
-    static ::boost::parameter::keyword<tag_namespace::name> const& name \
-       = ::boost::parameter::keyword<tag_namespace::name>::instance;
+    static ::pdalboost::parameter::keyword<tag_namespace::name> const& name \
+       = ::pdalboost::parameter::keyword<tag_namespace::name>::instance;
 
 #else
 
@@ -140,13 +140,13 @@ keyword<Tag> const keyword<Tag>::instance = {};
     }                                                               \
     namespace                                                       \
     {                                                               \
-       ::boost::parameter::keyword<tag_namespace::name> const& name \
-       = ::boost::parameter::keyword<tag_namespace::name>::instance;\
+       ::pdalboost::parameter::keyword<tag_namespace::name> const& name \
+       = ::pdalboost::parameter::keyword<tag_namespace::name>::instance;\
     }
 
 #endif
 
-}} // namespace boost::parameter
+}} // namespace pdalboost::parameter
 
 #endif // KEYWORD_050328_HPP
 

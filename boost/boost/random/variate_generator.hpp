@@ -19,7 +19,7 @@
 
 #include <boost/random/detail/disable_warnings.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 /// \cond hide_private_members
 
@@ -51,7 +51,7 @@ template<class Engine, class Distribution>
 class variate_generator
 {
 private:
-    typedef boost::random::detail::ptr_helper<Engine> helper_type;
+    typedef pdalboost::random::detail::ptr_helper<Engine> helper_type;
 public:
     typedef typename helper_type::value_type engine_value_type;
     typedef Engine engine_type;
@@ -115,7 +115,7 @@ private:
 
 using random::variate_generator;
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/random/detail/enable_warnings.hpp>
 

@@ -21,7 +21,7 @@
     of the algorithms.
 */
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
 
         //  is_equal functor  -----------------------------------------------//
@@ -193,7 +193,7 @@ namespace boost {
     using algorithm::is_not_greater;
     using algorithm::is_not_igreater;
 
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_COMPARE_HPP

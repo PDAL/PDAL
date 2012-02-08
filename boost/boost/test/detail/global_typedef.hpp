@@ -16,7 +16,7 @@
 #define BOOST_TEST_GLOBAL_TYPEDEF_HPP_021005GER
 
 #include <boost/test/utils/basic_cstring/basic_cstring.hpp>
-#define BOOST_TEST_L( s )         boost::unit_test::const_string( s, sizeof( s ) - 1 )
+#define BOOST_TEST_L( s )         pdalboost::unit_test::const_string( s, sizeof( s ) - 1 )
 #define BOOST_TEST_STRINGIZE( s ) BOOST_TEST_L( BOOST_STRINGIZE( s ) )
 #define BOOST_TEST_EMPTY_STRING   BOOST_TEST_L( "" )
 
@@ -24,7 +24,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -79,7 +79,7 @@ T static_constant<T>::value;
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

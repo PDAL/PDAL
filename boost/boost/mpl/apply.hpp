@@ -54,7 +54,7 @@
 #   include <boost/preprocessor/iterate.hpp>
 #   include <boost/preprocessor/cat.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 // local macros, #undef-ined at the end of the header
 #   define AUX778076_APPLY_PARAMS(param) \

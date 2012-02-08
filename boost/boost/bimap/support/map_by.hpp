@@ -24,7 +24,7 @@
 
 #ifdef BOOST_BIMAP_ONLY_DOXYGEN_WILL_PROCESS_THE_FOLLOWING_LINES
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace support {
 
@@ -55,7 +55,7 @@ BOOST_DEDUCED_TYPENAME result_of::map_by<Tag,Bimap>::type
 
 } // namespace support
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_ONLY_DOXYGEN_WILL_PROCESS_THE_FOLLOWING_LINES
 
@@ -63,7 +63,7 @@ BOOST_DEDUCED_TYPENAME result_of::map_by<Tag,Bimap>::type
 
 #ifndef BOOST_BIMAP_DOXIGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace support {
 
@@ -124,7 +124,7 @@ BOOST_BIMAP_SYMMETRIC_ACCESS_INTERFACE_BUILDER
 
 } // namespace support
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_DOXIGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 

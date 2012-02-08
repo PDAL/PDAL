@@ -24,7 +24,7 @@
 
 #   include <boost/mpl/int.hpp>
 
-namespace boost { namespace mpl { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { namespace aux {
 template< typename C_ > struct value_wknd
     : C_
 {
@@ -48,7 +48,7 @@ template<> struct value_wknd<int>
 #else
 #   define BOOST_MPL_AUX_VALUE_WKND(C) C
 #   define BOOST_MPL_AUX_MSVC_VALUE_WKND(C) \
-    ::boost::mpl::aux::value_wknd< C > \
+    ::pdalboost::mpl::aux::value_wknd< C > \
 /**/
 #endif
 
@@ -70,7 +70,7 @@ template<> struct value_wknd<int>
 #endif
 
 
-namespace boost { namespace mpl { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { namespace aux {
 
 template< typename T > struct value_type_wknd
 {

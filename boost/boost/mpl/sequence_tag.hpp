@@ -23,7 +23,7 @@
 #include <boost/mpl/aux_/yes_no.hpp>
 #include <boost/mpl/aux_/config/workaround.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 // agurt, 27/nov/02: have to use a simplistic 'sequence_tag' implementation
 // on MSVC to avoid dreadful "internal structure overflow" error
@@ -109,8 +109,8 @@ template<
     >
 struct sequence_tag
     : aux::sequence_tag_impl<
-          ::boost::mpl::aux::has_tag<Sequence>::value
-        , ::boost::mpl::aux::has_begin<Sequence>::value
+          ::pdalboost::mpl::aux::has_tag<Sequence>::value
+        , ::pdalboost::mpl::aux::has_begin<Sequence>::value
         >::template result2_<Sequence>
 {
 };

@@ -85,17 +85,17 @@ is used.
   namespace std{ using ::abs; using ::fabs; }
 #endif
 
-namespace boost{ 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
 
 //
-// This must not be located in any namespace under boost::math
+// This must not be located in any namespace under pdalboost::math
 // otherwise we can get into an infinite loop if isnan is
 // a #define for "isnan" !
 //
 namespace math_detail{
 
 template <class T>
-inline bool is_nan_helper(T t, const boost::true_type&)
+inline bool is_nan_helper(T t, const pdalboost::true_type&)
 {
 #ifdef isnan
    return isnan(t);
@@ -107,7 +107,7 @@ inline bool is_nan_helper(T t, const boost::true_type&)
 }
 
 template <class T>
-inline bool is_nan_helper(T, const boost::false_type&)
+inline bool is_nan_helper(T, const pdalboost::false_type&)
 {
    return false;
 }
@@ -133,13 +133,13 @@ inline int fpclassify_imp BOOST_NO_MACRO_EXPAND(T t, const generic_tag<true>&)
 
    // whenever possible check for Nan's first:
 #if defined(BOOST_HAS_FPCLASSIFY)  && !defined(BOOST_MATH_DISABLE_STD_FPCLASSIFY)
-   if(::boost::math_detail::is_nan_helper(t, ::boost::is_floating_point<T>()))
+   if(::pdalboost::math_detail::is_nan_helper(t, ::pdalboost::is_floating_point<T>()))
       return FP_NAN;
 #elif defined(isnan)
-   if(boost::math_detail::is_nan_helper(t, ::boost::is_floating_point<T>()))
+   if(pdalboost::math_detail::is_nan_helper(t, ::pdalboost::is_floating_point<T>()))
       return FP_NAN;
 #elif defined(_MSC_VER) || defined(__BORLANDC__)
-   if(::_isnan(boost::math::tools::real_cast<double>(t)))
+   if(::_isnan(pdalboost::math::tools::real_cast<double>(t)))
       return FP_NAN;
 #endif
    // std::fabs broken on a few systems especially for long long!!!!
@@ -238,7 +238,7 @@ int fpclassify_imp BOOST_NO_MACRO_EXPAND(T x, ieee_copy_leading_bits_tag)
 template <>
 inline int fpclassify_imp<long double> BOOST_NO_MACRO_EXPAND(long double t, const native_tag&)
 {
-   return boost::math::detail::fpclassify_imp(t, generic_tag<true>());
+   return pdalboost::math::detail::fpclassify_imp(t, generic_tag<true>());
 }
 #endif
 
@@ -300,7 +300,7 @@ namespace detail {
 template <>
 inline bool isfinite_impl<long double> BOOST_NO_MACRO_EXPAND(long double t, const native_tag&)
 {
-   return boost::math::detail::isfinite_impl(t, generic_tag<true>());
+   return pdalboost::math::detail::isfinite_impl(t, generic_tag<true>());
 }
 #endif
 
@@ -311,7 +311,7 @@ inline bool (isfinite)(T x)
 { //!< \brief return true if floating-point type t is finite.
    typedef typename detail::fp_traits<T>::type traits;
    typedef typename traits::method method;
-   typedef typename boost::is_floating_point<T>::type fp_tag;
+   typedef typename pdalboost::is_floating_point<T>::type fp_tag;
    return detail::isfinite_impl(x, method());
 }
 
@@ -359,7 +359,7 @@ namespace detail {
 template <>
 inline bool isnormal_impl<long double> BOOST_NO_MACRO_EXPAND(long double t, const native_tag&)
 {
-   return boost::math::detail::isnormal_impl(t, generic_tag<true>());
+   return pdalboost::math::detail::isnormal_impl(t, generic_tag<true>());
 }
 #endif
 
@@ -370,7 +370,7 @@ inline bool (isnormal)(T x)
 {
    typedef typename detail::fp_traits<T>::type traits;
    typedef typename traits::method method;
-   typedef typename boost::is_floating_point<T>::type fp_tag;
+   typedef typename pdalboost::is_floating_point<T>::type fp_tag;
    return detail::isnormal_impl(x, method());
 }
 
@@ -436,7 +436,7 @@ namespace detail {
 template <>
 inline bool isinf_impl<long double> BOOST_NO_MACRO_EXPAND(long double t, const native_tag&)
 {
-   return boost::math::detail::isinf_impl(t, generic_tag<true>());
+   return pdalboost::math::detail::isinf_impl(t, generic_tag<true>());
 }
 #endif
 
@@ -447,7 +447,7 @@ inline bool (isinf)(T x)
 {
    typedef typename detail::fp_traits<T>::type traits;
    typedef typename traits::method method;
-   typedef typename boost::is_floating_point<T>::type fp_tag;
+   typedef typename pdalboost::is_floating_point<T>::type fp_tag;
    return detail::isinf_impl(x, method());
 }
 
@@ -516,18 +516,18 @@ template<class T> bool (isnan)(T x)
 { //!< \brief return true if floating-point type t is NaN (Not A Number).
    typedef typename detail::fp_traits<T>::type traits;
    typedef typename traits::method method;
-   typedef typename boost::is_floating_point<T>::type fp_tag;
+   typedef typename pdalboost::is_floating_point<T>::type fp_tag;
    return detail::isnan_impl(x, method());
 }
 
 #ifdef isnan
-template <> inline bool isnan BOOST_NO_MACRO_EXPAND<float>(float t){ return ::boost::math_detail::is_nan_helper(t, boost::true_type()); }
-template <> inline bool isnan BOOST_NO_MACRO_EXPAND<double>(double t){ return ::boost::math_detail::is_nan_helper(t, boost::true_type()); }
-template <> inline bool isnan BOOST_NO_MACRO_EXPAND<long double>(long double t){ return ::boost::math_detail::is_nan_helper(t, boost::true_type()); }
+template <> inline bool isnan BOOST_NO_MACRO_EXPAND<float>(float t){ return ::pdalboost::math_detail::is_nan_helper(t, pdalboost::true_type()); }
+template <> inline bool isnan BOOST_NO_MACRO_EXPAND<double>(double t){ return ::pdalboost::math_detail::is_nan_helper(t, pdalboost::true_type()); }
+template <> inline bool isnan BOOST_NO_MACRO_EXPAND<long double>(long double t){ return ::pdalboost::math_detail::is_nan_helper(t, pdalboost::true_type()); }
 #endif
 
 } // namespace math
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_MATH_FPCLASSIFY_HPP
 

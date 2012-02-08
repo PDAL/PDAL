@@ -36,7 +36,7 @@
 #pragma warning(disable:4227) // qualifier applied to reference type ignored
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace tuples {
 
     // null_type denotes the end of a list built with "cons"
@@ -163,8 +163,8 @@ namespace tuples {
      typedef Tail tail_type;
 
     private:
-       typedef typename boost::add_reference<head_type>::type head_ref;
-       typedef typename boost::add_reference<tail_type>::type tail_ref;
+       typedef typename pdalboost::add_reference<head_type>::type head_ref;
+       typedef typename pdalboost::add_reference<tail_type>::type tail_ref;
        typedef typename detail::add_const_reference<head_type>::type head_cref;
        typedef typename detail::add_const_reference<tail_type>::type tail_cref;
     public:
@@ -844,12 +844,12 @@ void swap(tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>& lhs,
 inline void swap(null_type&, null_type&) {}
 template<class HH>
 inline void swap(cons<HH, null_type>& lhs, cons<HH, null_type>& rhs) {
-  ::boost::swap(lhs.head, rhs.head);
+  ::pdalboost::swap(lhs.head, rhs.head);
 }
 template<class HH, class TT>
 inline void swap(cons<HH, TT>& lhs, cons<HH, TT>& rhs) {
-  ::boost::swap(lhs.head, rhs.head);
-  ::boost::tuples::swap(lhs.tail, rhs.tail);
+  ::pdalboost::swap(lhs.head, rhs.head);
+  ::pdalboost::tuples::swap(lhs.tail, rhs.tail);
 }
 template <class T0, class T1, class T2, class T3, class T4,
           class T5, class T6, class T7, class T8, class T9>
@@ -857,9 +857,9 @@ inline void swap(tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>& lhs,
           tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>& rhs) {
   typedef tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> tuple_type;
   typedef typename tuple_type::inherited base;
-  ::boost::tuples::swap(static_cast<base&>(lhs), static_cast<base&>(rhs));
+  ::pdalboost::tuples::swap(static_cast<base&>(lhs), static_cast<base&>(rhs));
 }
 
 } // namespace tuples
-} // namespace boost
+} // namespace pdalboost
 #endif // BOOST_TUPLE_BASIC_NO_PARTIAL_SPEC_HPP

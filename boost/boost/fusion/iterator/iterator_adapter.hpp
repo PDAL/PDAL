@@ -11,7 +11,7 @@
 #include <boost/fusion/iterator/iterator_facade.hpp>
 #include <boost/type_traits/remove_const.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     template <typename Derived_, typename Iterator_,
         typename Category = typename Iterator_::category>

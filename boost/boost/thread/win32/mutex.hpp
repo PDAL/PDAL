@@ -12,15 +12,14 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
-        typedef ::boost::detail::basic_timed_mutex underlying_mutex;
+        typedef ::pdalboost::detail::basic_timed_mutex underlying_mutex;
     }
 
     class mutex:
-        public ::boost::detail::underlying_mutex
+        public ::pdalboost::detail::underlying_mutex
     {
     private:
         mutex(mutex const&);
@@ -42,7 +41,7 @@ namespace boost
     typedef mutex try_mutex;
 
     class timed_mutex:
-        public ::boost::detail::basic_timed_mutex
+        public ::pdalboost::detail::basic_timed_mutex
     {
     private:
         timed_mutex(timed_mutex const&);

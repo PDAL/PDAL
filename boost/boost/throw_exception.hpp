@@ -36,13 +36,12 @@
 #if !defined( BOOST_EXCEPTION_DISABLE )
 # include <boost/exception/exception.hpp>
 # include <boost/current_function.hpp>
-# define BOOST_THROW_EXCEPTION(x) ::boost::exception_detail::throw_exception_(x,BOOST_CURRENT_FUNCTION,__FILE__,__LINE__)
+# define BOOST_THROW_EXCEPTION(x) ::pdalboost::exception_detail::throw_exception_(x,BOOST_CURRENT_FUNCTION,__FILE__,__LINE__)
 #else
-# define BOOST_THROW_EXCEPTION(x) ::boost::throw_exception(x)
+# define BOOST_THROW_EXCEPTION(x) ::pdalboost::throw_exception(x)
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 #ifdef BOOST_NO_EXCEPTIONS
 
 void throw_exception( std::exception const & e ); // user defined
@@ -75,17 +74,17 @@ template<class E> BOOST_ATTRIBUTE_NORETURN inline void throw_exception( E const 
         void
         throw_exception_( E const & x, char const * current_function, char const * file, int line )
         {
-            boost::throw_exception(
+            pdalboost::throw_exception(
                 set_info(
                     set_info(
                         set_info(
-                            boost::enable_error_info(x),
+                            pdalboost::enable_error_info(x),
                             throw_function(current_function)),
                         throw_file(file)),
                     throw_line(line)));
         }
     }
 #endif
-} // namespace boost
+} // namespace pdalboost
 
 #endif // #ifndef BOOST_THROW_EXCEPTION_HPP_INCLUDED

@@ -7,7 +7,7 @@
 #if !defined(FUSION_BEGIN_IMPL_07202005_0849)
 #define FUSION_BEGIN_IMPL_07202005_0849
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct reverse_view_tag;
 

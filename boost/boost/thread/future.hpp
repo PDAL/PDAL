@@ -29,8 +29,7 @@
 #include <boost/next_prior.hpp>
 #include <vector>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     class future_uninitialized:
         public std::logic_error
     {
@@ -91,13 +90,13 @@ namespace boost
     {
         struct future_object_base
         {
-            boost::exception_ptr exception;
+            pdalboost::exception_ptr exception;
             bool done;
-            boost::mutex mutex;
-            boost::condition_variable waiters;
-            typedef std::list<boost::condition_variable_any*> waiter_list;
+            pdalboost::mutex mutex;
+            pdalboost::condition_variable waiters;
+            typedef std::list<pdalboost::condition_variable_any*> waiter_list;
             waiter_list external_waiters;
-            boost::function<void()> callback;
+            pdalboost::function<void()> callback;
 
             future_object_base():
                 done(false)
@@ -105,16 +104,16 @@ namespace boost
             virtual ~future_object_base()
             {}
 
-            waiter_list::iterator register_external_waiter(boost::condition_variable_any& cv)
+            waiter_list::iterator register_external_waiter(pdalboost::condition_variable_any& cv)
             {
-                boost::unique_lock<boost::mutex> lock(mutex);
+                pdalboost::unique_lock<pdalboost::mutex> lock(mutex);
                 do_callback(lock);
                 return external_waiters.insert(external_waiters.end(),&cv);
             }
             
             void remove_external_waiter(waiter_list::iterator it)
             {
-                boost::lock_guard<boost::mutex> lock(mutex);
+                pdalboost::lock_guard<pdalboost::mutex> lock(mutex);
                 external_waiters.erase(it);
             }
 
@@ -131,9 +130,9 @@ namespace boost
 
             struct relocker
             {
-                boost::unique_lock<boost::mutex>& lock;
+                pdalboost::unique_lock<pdalboost::mutex>& lock;
                 
-                relocker(boost::unique_lock<boost::mutex>& lock_):
+                relocker(pdalboost::unique_lock<pdalboost::mutex>& lock_):
                     lock(lock_)
                 {
                     lock.unlock();
@@ -146,11 +145,11 @@ namespace boost
                 relocker& operator=(relocker const&);
             };
 
-            void do_callback(boost::unique_lock<boost::mutex>& lock)
+            void do_callback(pdalboost::unique_lock<pdalboost::mutex>& lock)
             {
                 if(callback && !done)
                 {
-                    boost::function<void()> local_callback=callback;
+                    pdalboost::function<void()> local_callback=callback;
                     relocker relock(lock);
                     local_callback();
                 }
@@ -159,7 +158,7 @@ namespace boost
 
             void wait(bool rethrow=true)
             {
-                boost::unique_lock<boost::mutex> lock(mutex);
+                pdalboost::unique_lock<pdalboost::mutex> lock(mutex);
                 do_callback(lock);
                 while(!done)
                 {
@@ -167,13 +166,13 @@ namespace boost
                 }
                 if(rethrow && exception)
                 {
-                    boost::rethrow_exception(exception);
+                    pdalboost::rethrow_exception(exception);
                 }
             }
 
-            bool timed_wait_until(boost::system_time const& target_time)
+            bool timed_wait_until(pdalboost::system_time const& target_time)
             {
-                boost::unique_lock<boost::mutex> lock(mutex);
+                pdalboost::unique_lock<pdalboost::mutex> lock(mutex);
                 do_callback(lock);
                 while(!done)
                 {
@@ -186,32 +185,32 @@ namespace boost
                 return true;
             }
             
-            void mark_exceptional_finish_internal(boost::exception_ptr const& e)
+            void mark_exceptional_finish_internal(pdalboost::exception_ptr const& e)
             {
                 exception=e;
                 mark_finished_internal();
             }
             void mark_exceptional_finish()
             {
-                boost::lock_guard<boost::mutex> lock(mutex);
-                mark_exceptional_finish_internal(boost::current_exception());
+                pdalboost::lock_guard<pdalboost::mutex> lock(mutex);
+                mark_exceptional_finish_internal(pdalboost::current_exception());
             }
 
             bool has_value()
             {
-                boost::lock_guard<boost::mutex> lock(mutex);
+                pdalboost::lock_guard<pdalboost::mutex> lock(mutex);
                 return done && !exception;
             }
             bool has_exception()
             {
-                boost::lock_guard<boost::mutex> lock(mutex);
+                pdalboost::lock_guard<pdalboost::mutex> lock(mutex);
                 return done && exception;
             }
 
             template<typename F,typename U>
             void set_wait_callback(F f,U* u)
             {
-                callback=boost::bind(f,boost::ref(*u));
+                callback=pdalboost::bind(f,pdalboost::ref(*u));
             }
             
         private:
@@ -222,16 +221,16 @@ namespace boost
         template<typename T>
         struct future_traits
         {
-            typedef boost::scoped_ptr<T> storage_type;
+            typedef pdalboost::scoped_ptr<T> storage_type;
 #ifndef BOOST_NO_RVALUE_REFERENCES
             typedef T const& source_reference_type;
             struct dummy;
-            typedef typename boost::mpl::if_<boost::is_fundamental<T>,dummy&,T&&>::type rvalue_source_type;
-            typedef typename boost::mpl::if_<boost::is_fundamental<T>,T,T&&>::type move_dest_type;
+            typedef typename pdalboost::mpl::if_<pdalboost::is_fundamental<T>,dummy&,T&&>::type rvalue_source_type;
+            typedef typename pdalboost::mpl::if_<pdalboost::is_fundamental<T>,T,T&&>::type move_dest_type;
 #else
             typedef T& source_reference_type;
-            typedef typename boost::mpl::if_<boost::is_convertible<T&,boost::detail::thread_move_t<T> >,boost::detail::thread_move_t<T>,T const&>::type rvalue_source_type;
-            typedef typename boost::mpl::if_<boost::is_convertible<T&,boost::detail::thread_move_t<T> >,boost::detail::thread_move_t<T>,T>::type move_dest_type;
+            typedef typename pdalboost::mpl::if_<pdalboost::is_convertible<T&,pdalboost::detail::thread_move_t<T> >,pdalboost::detail::thread_move_t<T>,T const&>::type rvalue_source_type;
+            typedef typename pdalboost::mpl::if_<pdalboost::is_convertible<T&,pdalboost::detail::thread_move_t<T> >,pdalboost::detail::thread_move_t<T>,T>::type move_dest_type;
 #endif
 
             static void init(storage_type& storage,source_reference_type t)
@@ -316,12 +315,12 @@ namespace boost
 
             void mark_finished_with_result(source_reference_type result_)
             {
-                boost::lock_guard<boost::mutex> lock(mutex);
+                pdalboost::lock_guard<pdalboost::mutex> lock(mutex);
                 mark_finished_with_result_internal(result_);
             }
             void mark_finished_with_result(rvalue_source_type result_)
             {
-                boost::lock_guard<boost::mutex> lock(mutex);
+                pdalboost::lock_guard<pdalboost::mutex> lock(mutex);
                 mark_finished_with_result_internal(result_);
             }
 
@@ -333,7 +332,7 @@ namespace boost
 
             future_state::state get_state()
             {
-                boost::lock_guard<boost::mutex> guard(mutex);
+                pdalboost::lock_guard<pdalboost::mutex> guard(mutex);
                 if(!done)
                 {
                     return future_state::waiting;
@@ -363,7 +362,7 @@ namespace boost
 
             void mark_finished_with_result()
             {
-                boost::lock_guard<boost::mutex> lock(mutex);
+                pdalboost::lock_guard<pdalboost::mutex> lock(mutex);
                 mark_finished_with_result_internal();
             }
 
@@ -374,7 +373,7 @@ namespace boost
             
             future_state::state get_state()
             {
-                boost::lock_guard<boost::mutex> guard(mutex);
+                pdalboost::lock_guard<pdalboost::mutex> guard(mutex);
                 if(!done)
                 {
                     return future_state::waiting;
@@ -397,11 +396,11 @@ namespace boost
             
             struct registered_waiter
             {
-                boost::shared_ptr<detail::future_object_base> future;
+                pdalboost::shared_ptr<detail::future_object_base> future;
                 detail::future_object_base::waiter_list::iterator wait_iterator;
                 count_type index;
 
-                registered_waiter(boost::shared_ptr<detail::future_object_base> const& future_,
+                registered_waiter(pdalboost::shared_ptr<detail::future_object_base> const& future_,
                                   detail::future_object_base::waiter_list::iterator wait_iterator_,
                                   count_type index_):
                     future(future_),wait_iterator(wait_iterator_),index(index_)
@@ -412,20 +411,20 @@ namespace boost
             struct all_futures_lock
             {
                 count_type count;
-                boost::scoped_array<boost::unique_lock<boost::mutex> > locks;
+                pdalboost::scoped_array<pdalboost::unique_lock<pdalboost::mutex> > locks;
                 
                 all_futures_lock(std::vector<registered_waiter>& futures):
-                    count(futures.size()),locks(new boost::unique_lock<boost::mutex>[count])
+                    count(futures.size()),locks(new pdalboost::unique_lock<pdalboost::mutex>[count])
                 {
                     for(count_type i=0;i<count;++i)
                     {
-                        locks[i]=boost::unique_lock<boost::mutex>(futures[i].future->mutex);
+                        locks[i]=pdalboost::unique_lock<pdalboost::mutex>(futures[i].future->mutex);
                     }
                 }
                 
                 void lock()
                 {
-                    boost::lock(locks.get(),locks.get()+count);
+                    pdalboost::lock(locks.get(),locks.get()+count);
                 }
                 
                 void unlock()
@@ -437,7 +436,7 @@ namespace boost
                 }
             };
             
-            boost::condition_variable_any cv;
+            pdalboost::condition_variable_any cv;
             std::vector<registered_waiter> futures;
             count_type future_count;
             
@@ -509,7 +508,7 @@ namespace boost
     };
 
     template<typename Iterator>
-    typename boost::disable_if<is_future_type<Iterator>,void>::type wait_for_all(Iterator begin,Iterator end)
+    typename pdalboost::disable_if<is_future_type<Iterator>,void>::type wait_for_all(Iterator begin,Iterator end)
     {
         for(Iterator current=begin;current!=end;++current)
         {
@@ -518,7 +517,7 @@ namespace boost
     }
 
     template<typename F1,typename F2>
-    typename boost::enable_if<is_future_type<F1>,void>::type wait_for_all(F1& f1,F2& f2)
+    typename pdalboost::enable_if<is_future_type<F1>,void>::type wait_for_all(F1& f1,F2& f2)
     {
         f1.wait();
         f2.wait();
@@ -552,7 +551,7 @@ namespace boost
     }
 
     template<typename Iterator>
-    typename boost::disable_if<is_future_type<Iterator>,Iterator>::type wait_for_any(Iterator begin,Iterator end)
+    typename pdalboost::disable_if<is_future_type<Iterator>,Iterator>::type wait_for_any(Iterator begin,Iterator end)
     {
         if(begin==end)
             return end;
@@ -562,11 +561,11 @@ namespace boost
         {
             waiter.add(*current);
         }
-        return boost::next(begin,waiter.wait());
+        return pdalboost::next(begin,waiter.wait());
     }
 
     template<typename F1,typename F2>
-    typename boost::enable_if<is_future_type<F1>,unsigned>::type wait_for_any(F1& f1,F2& f2)
+    typename pdalboost::enable_if<is_future_type<F1>,unsigned>::type wait_for_any(F1& f1,F2& f2)
     {
         detail::future_waiter waiter;
         waiter.add(f1);
@@ -619,7 +618,7 @@ namespace boost
         unique_future(unique_future & rhs);// = delete;
         unique_future& operator=(unique_future& rhs);// = delete;
 
-        typedef boost::shared_ptr<detail::future_object<R> > future_ptr;
+        typedef pdalboost::shared_ptr<detail::future_object<R> > future_ptr;
         
         future_ptr future;
 
@@ -655,22 +654,22 @@ namespace boost
             return *this;
         }
 #else
-        unique_future(boost::detail::thread_move_t<unique_future> other):
+        unique_future(pdalboost::detail::thread_move_t<unique_future> other):
             future(other->future)
         {
             other->future.reset();
         }
 
-        unique_future& operator=(boost::detail::thread_move_t<unique_future> other)
+        unique_future& operator=(pdalboost::detail::thread_move_t<unique_future> other)
         {
             future=other->future;
             other->future.reset();
             return *this;
         }
 
-        operator boost::detail::thread_move_t<unique_future>()
+        operator pdalboost::detail::thread_move_t<unique_future>()
         {
-            return boost::detail::thread_move_t<unique_future>(*this);
+            return pdalboost::detail::thread_move_t<unique_future>(*this);
         }
 #endif
 
@@ -684,7 +683,7 @@ namespace boost
         {
             if(!future)
             {
-                boost::throw_exception(future_uninitialized());
+                pdalboost::throw_exception(future_uninitialized());
             }
 
             return future->get();
@@ -720,7 +719,7 @@ namespace boost
         {
             if(!future)
             {
-                boost::throw_exception(future_uninitialized());
+                pdalboost::throw_exception(future_uninitialized());
             }
             future->wait(false);
         }
@@ -728,14 +727,14 @@ namespace boost
         template<typename Duration>
         bool timed_wait(Duration const& rel_time) const
         {
-            return timed_wait_until(boost::get_system_time()+rel_time);
+            return timed_wait_until(pdalboost::get_system_time()+rel_time);
         }
         
-        bool timed_wait_until(boost::system_time const& abs_time) const
+        bool timed_wait_until(pdalboost::system_time const& abs_time) const
         {
             if(!future)
             {
-                boost::throw_exception(future_uninitialized());
+                pdalboost::throw_exception(future_uninitialized());
             }
             return future->timed_wait_until(abs_time);
         }
@@ -745,7 +744,7 @@ namespace boost
     template <typename R>
     class shared_future
     {
-        typedef boost::shared_ptr<detail::future_object<R> > future_ptr;
+        typedef pdalboost::shared_ptr<detail::future_object<R> > future_ptr;
         
         future_ptr future;
 
@@ -800,33 +799,33 @@ namespace boost
             return *this;
         }
 #else            
-        shared_future(boost::detail::thread_move_t<shared_future> other):
+        shared_future(pdalboost::detail::thread_move_t<shared_future> other):
             future(other->future)
         {
             other->future.reset();
         }
 //         shared_future(const unique_future<R> &) = delete;
-        shared_future(boost::detail::thread_move_t<unique_future<R> > other):
+        shared_future(pdalboost::detail::thread_move_t<unique_future<R> > other):
             future(other->future)
         {
             other->future.reset();
         }
-        shared_future& operator=(boost::detail::thread_move_t<shared_future> other)
+        shared_future& operator=(pdalboost::detail::thread_move_t<shared_future> other)
         {
             future.swap(other->future);
             other->future.reset();
             return *this;
         }
-        shared_future& operator=(boost::detail::thread_move_t<unique_future<R> > other)
+        shared_future& operator=(pdalboost::detail::thread_move_t<unique_future<R> > other)
         {
             future.swap(other->future);
             other->future.reset();
             return *this;
         }
 
-        operator boost::detail::thread_move_t<shared_future>()
+        operator pdalboost::detail::thread_move_t<shared_future>()
         {
-            return boost::detail::thread_move_t<shared_future>(*this);
+            return pdalboost::detail::thread_move_t<shared_future>(*this);
         }
 
 #endif
@@ -841,7 +840,7 @@ namespace boost
         {
             if(!future)
             {
-                boost::throw_exception(future_uninitialized());
+                pdalboost::throw_exception(future_uninitialized());
             }
 
             return future->get();
@@ -877,7 +876,7 @@ namespace boost
         {
             if(!future)
             {
-                boost::throw_exception(future_uninitialized());
+                pdalboost::throw_exception(future_uninitialized());
             }
             future->wait(false);
         }
@@ -885,14 +884,14 @@ namespace boost
         template<typename Duration>
         bool timed_wait(Duration const& rel_time) const
         {
-            return timed_wait_until(boost::get_system_time()+rel_time);
+            return timed_wait_until(pdalboost::get_system_time()+rel_time);
         }
         
-        bool timed_wait_until(boost::system_time const& abs_time) const
+        bool timed_wait_until(pdalboost::system_time const& abs_time) const
         {
             if(!future)
             {
-                boost::throw_exception(future_uninitialized());
+                pdalboost::throw_exception(future_uninitialized());
             }
             return future->timed_wait_until(abs_time);
         }
@@ -902,7 +901,7 @@ namespace boost
     template <typename R>
     class promise
     {
-        typedef boost::shared_ptr<detail::future_object<R> > future_ptr;
+        typedef pdalboost::shared_ptr<detail::future_object<R> > future_ptr;
         
         future_ptr future;
         bool future_obtained;
@@ -930,11 +929,11 @@ namespace boost
         {
             if(future)
             {
-                boost::lock_guard<boost::mutex> lock(future->mutex);
+                pdalboost::lock_guard<pdalboost::mutex> lock(future->mutex);
 
                 if(!future->done)
                 {
-                    future->mark_exceptional_finish_internal(boost::copy_exception(broken_promise()));
+                    future->mark_exceptional_finish_internal(pdalboost::copy_exception(broken_promise()));
                 }
             }
         }
@@ -956,13 +955,13 @@ namespace boost
             return *this;
         }
 #else
-        promise(boost::detail::thread_move_t<promise> rhs):
+        promise(pdalboost::detail::thread_move_t<promise> rhs):
             future(rhs->future),future_obtained(rhs->future_obtained)
         {
             rhs->future.reset();
             rhs->future_obtained=false;
         }
-        promise & operator=(boost::detail::thread_move_t<promise> rhs)
+        promise & operator=(pdalboost::detail::thread_move_t<promise> rhs)
         {
             future=rhs->future;
             future_obtained=rhs->future_obtained;
@@ -971,9 +970,9 @@ namespace boost
             return *this;
         }
 
-        operator boost::detail::thread_move_t<promise>()
+        operator pdalboost::detail::thread_move_t<promise>()
         {
-            return boost::detail::thread_move_t<promise>(*this);
+            return pdalboost::detail::thread_move_t<promise>(*this);
         }
 #endif   
         
@@ -989,7 +988,7 @@ namespace boost
             lazy_init();
             if(future_obtained)
             {
-                boost::throw_exception(future_already_retrieved());
+                pdalboost::throw_exception(future_already_retrieved());
             }
             future_obtained=true;
             return unique_future<R>(future);
@@ -998,10 +997,10 @@ namespace boost
         void set_value(typename detail::future_traits<R>::source_reference_type r)
         {
             lazy_init();
-            boost::lock_guard<boost::mutex> lock(future->mutex);
+            pdalboost::lock_guard<pdalboost::mutex> lock(future->mutex);
             if(future->done)
             {
-                boost::throw_exception(promise_already_satisfied());
+                pdalboost::throw_exception(promise_already_satisfied());
             }
             future->mark_finished_with_result_internal(r);
         }
@@ -1010,21 +1009,21 @@ namespace boost
         void set_value(typename detail::future_traits<R>::rvalue_source_type r)
         {
             lazy_init();
-            boost::lock_guard<boost::mutex> lock(future->mutex);
+            pdalboost::lock_guard<pdalboost::mutex> lock(future->mutex);
             if(future->done)
             {
-                boost::throw_exception(promise_already_satisfied());
+                pdalboost::throw_exception(promise_already_satisfied());
             }
             future->mark_finished_with_result_internal(static_cast<typename detail::future_traits<R>::rvalue_source_type>(r));
         }
 
-        void set_exception(boost::exception_ptr p)
+        void set_exception(pdalboost::exception_ptr p)
         {
             lazy_init();
-            boost::lock_guard<boost::mutex> lock(future->mutex);
+            pdalboost::lock_guard<pdalboost::mutex> lock(future->mutex);
             if(future->done)
             {
-                boost::throw_exception(promise_already_satisfied());
+                pdalboost::throw_exception(promise_already_satisfied());
             }
             future->mark_exceptional_finish_internal(p);
         }
@@ -1041,7 +1040,7 @@ namespace boost
     template <>
     class promise<void>
     {
-        typedef boost::shared_ptr<detail::future_object<void> > future_ptr;
+        typedef pdalboost::shared_ptr<detail::future_object<void> > future_ptr;
         
         future_ptr future;
         bool future_obtained;
@@ -1068,11 +1067,11 @@ namespace boost
         {
             if(future)
             {
-                boost::lock_guard<boost::mutex> lock(future->mutex);
+                pdalboost::lock_guard<pdalboost::mutex> lock(future->mutex);
 
                 if(!future->done)
                 {
-                    future->mark_exceptional_finish_internal(boost::copy_exception(broken_promise()));
+                    future->mark_exceptional_finish_internal(pdalboost::copy_exception(broken_promise()));
                 }
             }
         }
@@ -1094,13 +1093,13 @@ namespace boost
             return *this;
         }
 #else
-        promise(boost::detail::thread_move_t<promise> rhs):
+        promise(pdalboost::detail::thread_move_t<promise> rhs):
             future(rhs->future),future_obtained(rhs->future_obtained)
         {
             rhs->future.reset();
             rhs->future_obtained=false;
         }
-        promise & operator=(boost::detail::thread_move_t<promise> rhs)
+        promise & operator=(pdalboost::detail::thread_move_t<promise> rhs)
         {
             future=rhs->future;
             future_obtained=rhs->future_obtained;
@@ -1109,9 +1108,9 @@ namespace boost
             return *this;
         }
 
-        operator boost::detail::thread_move_t<promise>()
+        operator pdalboost::detail::thread_move_t<promise>()
         {
-            return boost::detail::thread_move_t<promise>(*this);
+            return pdalboost::detail::thread_move_t<promise>(*this);
         }
 #endif
         
@@ -1128,7 +1127,7 @@ namespace boost
             
             if(future_obtained)
             {
-                boost::throw_exception(future_already_retrieved());
+                pdalboost::throw_exception(future_already_retrieved());
             }
             future_obtained=true;
             return unique_future<void>(future);
@@ -1137,21 +1136,21 @@ namespace boost
         void set_value()
         {
             lazy_init();
-            boost::lock_guard<boost::mutex> lock(future->mutex);
+            pdalboost::lock_guard<pdalboost::mutex> lock(future->mutex);
             if(future->done)
             {
-                boost::throw_exception(promise_already_satisfied());
+                pdalboost::throw_exception(promise_already_satisfied());
             }
             future->mark_finished_with_result_internal();
         }
 
-        void set_exception(boost::exception_ptr p)
+        void set_exception(pdalboost::exception_ptr p)
         {
             lazy_init();
-            boost::lock_guard<boost::mutex> lock(future->mutex);
+            pdalboost::lock_guard<pdalboost::mutex> lock(future->mutex);
             if(future->done)
             {
-                boost::throw_exception(promise_already_satisfied());
+                pdalboost::throw_exception(promise_already_satisfied());
             }
             future->mark_exceptional_finish_internal(p);
         }
@@ -1180,10 +1179,10 @@ namespace boost
             void run()
             {
                 {
-                    boost::lock_guard<boost::mutex> lk(this->mutex);
+                    pdalboost::lock_guard<pdalboost::mutex> lk(this->mutex);
                     if(started)
                     {
-                        boost::throw_exception(task_already_started());
+                        pdalboost::throw_exception(task_already_started());
                     }
                     started=true;
                 }
@@ -1192,11 +1191,11 @@ namespace boost
 
             void owner_destroyed()
             {
-                boost::lock_guard<boost::mutex> lk(this->mutex);
+                pdalboost::lock_guard<pdalboost::mutex> lk(this->mutex);
                 if(!started)
                 {
                     started=true;
-                    this->mark_exceptional_finish_internal(boost::copy_exception(boost::broken_promise()));
+                    this->mark_exceptional_finish_internal(pdalboost::copy_exception(pdalboost::broken_promise()));
                 }
             }
             
@@ -1213,7 +1212,7 @@ namespace boost
             task_object(F const& f_):
                 f(f_)
             {}
-            task_object(boost::detail::thread_move_t<F> f_):
+            task_object(pdalboost::detail::thread_move_t<F> f_):
                 f(f_)
             {}
             
@@ -1238,7 +1237,7 @@ namespace boost
             task_object(F const& f_):
                 f(f_)
             {}
-            task_object(boost::detail::thread_move_t<F> f_):
+            task_object(pdalboost::detail::thread_move_t<F> f_):
                 f(f_)
             {}
             
@@ -1262,7 +1261,7 @@ namespace boost
     template<typename R>
     class packaged_task
     {
-        boost::shared_ptr<detail::task_base<R> > task;
+        pdalboost::shared_ptr<detail::task_base<R> > task;
         bool future_obtained;
 
         packaged_task(packaged_task&);// = delete;
@@ -1283,7 +1282,7 @@ namespace boost
         {}
         
         template <class F>
-        explicit packaged_task(boost::detail::thread_move_t<F> f):
+        explicit packaged_task(pdalboost::detail::thread_move_t<F> f):
             task(new detail::task_object<R,F>(f)),future_obtained(false)
         {}
 
@@ -1316,21 +1315,21 @@ namespace boost
             return *this;
         }
 #else
-        packaged_task(boost::detail::thread_move_t<packaged_task> other):
+        packaged_task(pdalboost::detail::thread_move_t<packaged_task> other):
             future_obtained(other->future_obtained)
         {
             task.swap(other->task);
             other->future_obtained=false;
         }
-        packaged_task& operator=(boost::detail::thread_move_t<packaged_task> other)
+        packaged_task& operator=(pdalboost::detail::thread_move_t<packaged_task> other)
         {
             packaged_task temp(other);
             swap(temp);
             return *this;
         }
-        operator boost::detail::thread_move_t<packaged_task>()
+        operator pdalboost::detail::thread_move_t<packaged_task>()
         {
-            return boost::detail::thread_move_t<packaged_task>(*this);
+            return pdalboost::detail::thread_move_t<packaged_task>(*this);
         }
 #endif
 
@@ -1345,7 +1344,7 @@ namespace boost
         {
             if(!task)
             {
-                boost::throw_exception(task_moved());
+                pdalboost::throw_exception(task_moved());
             }
             else if(!future_obtained)
             {
@@ -1354,7 +1353,7 @@ namespace boost
             }
             else
             {
-                boost::throw_exception(future_already_retrieved());
+                pdalboost::throw_exception(future_already_retrieved());
             }
         }
         
@@ -1364,7 +1363,7 @@ namespace boost
         {
             if(!task)
             {
-                boost::throw_exception(task_moved());
+                pdalboost::throw_exception(task_moved());
             }
             task->run();
         }

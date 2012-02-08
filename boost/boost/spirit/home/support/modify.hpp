@@ -18,7 +18,7 @@
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/spirit/home/support/unused.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     template <typename Domain, typename T, typename Enable = void>
     struct is_modifier_directive;
@@ -114,7 +114,7 @@ namespace boost { namespace spirit
     };
 }}
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     template <typename Domain, typename Enable>
     struct is_callable<spirit::modify<Domain, Enable> >

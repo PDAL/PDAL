@@ -17,8 +17,8 @@
 #define BOOST_WINDOWS_PATH
 #include "boost/filesystem/path.hpp"
 
-namespace pos = boost::posix;
-namespace win = boost::windows;
+namespace pos = pdalboost::posix;
+namespace win = pdalboost::windows;
 
 #include <iostream>
 #include <fstream>

@@ -16,7 +16,7 @@
 #include <boost/foreach.hpp>
 #include <boost/assert.hpp>
 
-namespace boost { namespace spirit { namespace qi { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi { namespace detail
 {
     // This file contains low level TST routines, not for
     // public consumption.
@@ -76,7 +76,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
             while (p && i != last)
             {
                 typename
-                    boost::detail::iterator_traits<Iterator>::value_type
+                    pdalboost::detail::iterator_traits<Iterator>::value_type
                 c = filter(*i); // filter only the input
 
                 if (c == p->id)
@@ -110,7 +110,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
             tst_node*& start
           , Iterator first
           , Iterator last
-          , typename boost::call_traits<T>::param_type val
+          , typename pdalboost::call_traits<T>::param_type val
           , Alloc* alloc)
         {
             if (first == last)
@@ -120,7 +120,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
             for(;;)
             {
                 typename
-                    boost::detail::iterator_traits<Iterator>::value_type
+                    pdalboost::detail::iterator_traits<Iterator>::value_type
                 c = *first;
 
                 if (*pp == 0)
@@ -156,7 +156,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
                 return;
 
             typename
-                boost::detail::iterator_traits<Iterator>::value_type
+                pdalboost::detail::iterator_traits<Iterator>::value_type
             c = *first;
 
             if (c == p->id)

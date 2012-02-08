@@ -10,7 +10,7 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/integral_c.hpp>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #if defined(BOOST_NO_DEPENDENT_TYPES_IN_TEMPLATE_VALUE_PARAMETERS) || defined(__BORLANDC__)
 template <class T, int val>

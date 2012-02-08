@@ -27,7 +27,7 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/or.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct void_;
     struct cons_tag;

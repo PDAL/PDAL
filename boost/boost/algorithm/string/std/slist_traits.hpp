@@ -16,7 +16,7 @@
 #include BOOST_SLIST_HEADER 
 #include <boost/algorithm/string/sequence_traits.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
 
 //  SGI's std::slist<> traits  -----------------------------------------------//
@@ -79,7 +79,7 @@ namespace boost {
 
 
     } // namespace algorithm
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_STD_LIST_TRAITS_HPP

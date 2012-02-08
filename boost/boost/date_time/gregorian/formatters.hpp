@@ -24,7 +24,7 @@
  * formatters_limited.hpp
  */
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace gregorian {
 
   // wrapper function for to_simple_(w)string(date)

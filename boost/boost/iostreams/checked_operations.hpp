@@ -26,7 +26,7 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp>  // MSVC.
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 namespace detail {
 
@@ -95,13 +95,13 @@ struct read_write_if_impl<input> {
 
     template<typename T>
     static bool put(T&, typename char_type_of<T>::type)
-    { boost::throw_exception(cant_write());
+    { pdalboost::throw_exception(cant_write());
       BOOST_IOSTREAMS_UNREACHABLE_RETURN(false) }
 
     template<typename T>
     static std::streamsize 
     write(T&, const typename char_type_of<T>::type*, std::streamsize)
-    { boost::throw_exception(cant_write());
+    { pdalboost::throw_exception(cant_write());
       BOOST_IOSTREAMS_UNREACHABLE_RETURN(0) }
 };
 
@@ -109,13 +109,13 @@ template<>
 struct read_write_if_impl<output> {
     template<typename T>
     static typename int_type_of<T>::type get(T&)
-    { boost::throw_exception(cant_read());
+    { pdalboost::throw_exception(cant_read());
       BOOST_IOSTREAMS_UNREACHABLE_RETURN(0) }
 
     template<typename T>
     static std::streamsize
     read(T&, typename char_type_of<T>::type*, std::streamsize)
-    { boost::throw_exception(cant_read());
+    { pdalboost::throw_exception(cant_read());
       BOOST_IOSTREAMS_UNREACHABLE_RETURN(0) }
 
     template<typename T>
@@ -145,7 +145,7 @@ struct seek_if_impl<any_tag> {
     template<typename T>
     static std::streampos 
     seek(T&, stream_offset, BOOST_IOS::seekdir, BOOST_IOS::openmode)
-    { boost::throw_exception(cant_seek());
+    { pdalboost::throw_exception(cant_seek());
       BOOST_IOSTREAMS_UNREACHABLE_RETURN(std::streampos()) }
 };
 

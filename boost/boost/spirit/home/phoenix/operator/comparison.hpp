@@ -15,7 +15,7 @@
 #include <boost/spirit/home/phoenix/operator/detail/binary_eval.hpp>
 #include <boost/spirit/home/phoenix/operator/detail/binary_compose.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     struct equal_to_eval;
     struct not_equal_to_eval;

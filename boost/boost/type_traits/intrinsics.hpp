@@ -53,11 +53,11 @@
 #   else
 #    include <type_traits.h>
 #   endif
-#   define BOOST_IS_POD(T) ::boost::is_same< typename ::__type_traits<T>::is_POD_type, ::__true_type>::value
-#   define BOOST_HAS_TRIVIAL_CONSTRUCTOR(T) ::boost::is_same< typename ::__type_traits<T>::has_trivial_default_constructor, ::__true_type>::value
-#   define BOOST_HAS_TRIVIAL_COPY(T) ::boost::is_same< typename ::__type_traits<T>::has_trivial_copy_constructor, ::__true_type>::value
-#   define BOOST_HAS_TRIVIAL_ASSIGN(T) ::boost::is_same< typename ::__type_traits<T>::has_trivial_assignment_operator, ::__true_type>::value
-#   define BOOST_HAS_TRIVIAL_DESTRUCTOR(T) ::boost::is_same< typename ::__type_traits<T>::has_trivial_destructor, ::__true_type>::value
+#   define BOOST_IS_POD(T) ::pdalboost::is_same< typename ::__type_traits<T>::is_POD_type, ::__true_type>::value
+#   define BOOST_HAS_TRIVIAL_CONSTRUCTOR(T) ::pdalboost::is_same< typename ::__type_traits<T>::has_trivial_default_constructor, ::__true_type>::value
+#   define BOOST_HAS_TRIVIAL_COPY(T) ::pdalboost::is_same< typename ::__type_traits<T>::has_trivial_copy_constructor, ::__true_type>::value
+#   define BOOST_HAS_TRIVIAL_ASSIGN(T) ::pdalboost::is_same< typename ::__type_traits<T>::has_trivial_assignment_operator, ::__true_type>::value
+#   define BOOST_HAS_TRIVIAL_DESTRUCTOR(T) ::pdalboost::is_same< typename ::__type_traits<T>::has_trivial_destructor, ::__true_type>::value
 
 #   ifdef __sgi
 #      define BOOST_HAS_TYPE_TRAITS_INTRINSICS
@@ -86,12 +86,12 @@
 #   define BOOST_IS_POD(T) (__is_pod(T) && __has_trivial_constructor(T))
 #   define BOOST_IS_EMPTY(T) __is_empty(T)
 #   define BOOST_HAS_TRIVIAL_CONSTRUCTOR(T) __has_trivial_constructor(T)
-#   define BOOST_HAS_TRIVIAL_COPY(T) (__has_trivial_copy(T)|| ( ::boost::is_pod<T>::value && !::boost::is_volatile<T>::value))
-#   define BOOST_HAS_TRIVIAL_ASSIGN(T) (__has_trivial_assign(T) || ( ::boost::is_pod<T>::value && ! ::boost::is_const<T>::value && !::boost::is_volatile<T>::value))
-#   define BOOST_HAS_TRIVIAL_DESTRUCTOR(T) (__has_trivial_destructor(T) || ::boost::is_pod<T>::value)
-#   define BOOST_HAS_NOTHROW_CONSTRUCTOR(T) (__has_nothrow_constructor(T) || ::boost::has_trivial_constructor<T>::value)
-#   define BOOST_HAS_NOTHROW_COPY(T) (__has_nothrow_copy(T) || ::boost::has_trivial_copy<T>::value)
-#   define BOOST_HAS_NOTHROW_ASSIGN(T) (__has_nothrow_assign(T) || ::boost::has_trivial_assign<T>::value)
+#   define BOOST_HAS_TRIVIAL_COPY(T) (__has_trivial_copy(T)|| ( ::pdalboost::is_pod<T>::value && !::pdalboost::is_volatile<T>::value))
+#   define BOOST_HAS_TRIVIAL_ASSIGN(T) (__has_trivial_assign(T) || ( ::pdalboost::is_pod<T>::value && ! ::pdalboost::is_const<T>::value && !::pdalboost::is_volatile<T>::value))
+#   define BOOST_HAS_TRIVIAL_DESTRUCTOR(T) (__has_trivial_destructor(T) || ::pdalboost::is_pod<T>::value)
+#   define BOOST_HAS_NOTHROW_CONSTRUCTOR(T) (__has_nothrow_constructor(T) || ::pdalboost::has_trivial_constructor<T>::value)
+#   define BOOST_HAS_NOTHROW_COPY(T) (__has_nothrow_copy(T) || ::pdalboost::has_trivial_copy<T>::value)
+#   define BOOST_HAS_NOTHROW_ASSIGN(T) (__has_nothrow_assign(T) || ::pdalboost::has_trivial_assign<T>::value)
 #   define BOOST_HAS_VIRTUAL_DESTRUCTOR(T) __has_virtual_destructor(T)
 
 #   define BOOST_IS_ABSTRACT(T) __is_abstract(T)
@@ -172,7 +172,7 @@
 #   endif
 #   if __has_feature(is_convertible_to)
 #     include <boost/type_traits/is_abstract.hpp>
-#     define BOOST_IS_CONVERTIBLE(T,U) (__is_convertible_to(T,U) && !::boost::is_abstract<U>::value)
+#     define BOOST_IS_CONVERTIBLE(T,U) (__is_convertible_to(T,U) && !::pdalboost::is_abstract<U>::value)
 #   endif
 #   if __has_feature(is_enum)
 #     define BOOST_IS_ENUM(T) __is_enum(T)
@@ -199,9 +199,9 @@
 #   define BOOST_IS_UNION(T) __is_union(T)
 #   define BOOST_IS_POD(T) __is_pod(T)
 #   define BOOST_IS_EMPTY(T) __is_empty(T)
-#   define BOOST_HAS_TRIVIAL_CONSTRUCTOR(T) ((__has_trivial_constructor(T) BOOST_INTEL_TT_OPTS) && ! ::boost::is_volatile<T>::value)
-#   define BOOST_HAS_TRIVIAL_COPY(T) ((__has_trivial_copy(T) BOOST_INTEL_TT_OPTS) && !is_reference<T>::value && ! ::boost::is_volatile<T>::value)
-#   define BOOST_HAS_TRIVIAL_ASSIGN(T) ((__has_trivial_assign(T) BOOST_INTEL_TT_OPTS) && ! ::boost::is_volatile<T>::value && ! ::boost::is_const<T>::value)
+#   define BOOST_HAS_TRIVIAL_CONSTRUCTOR(T) ((__has_trivial_constructor(T) BOOST_INTEL_TT_OPTS) && ! ::pdalboost::is_volatile<T>::value)
+#   define BOOST_HAS_TRIVIAL_COPY(T) ((__has_trivial_copy(T) BOOST_INTEL_TT_OPTS) && !is_reference<T>::value && ! ::pdalboost::is_volatile<T>::value)
+#   define BOOST_HAS_TRIVIAL_ASSIGN(T) ((__has_trivial_assign(T) BOOST_INTEL_TT_OPTS) && ! ::pdalboost::is_volatile<T>::value && ! ::pdalboost::is_const<T>::value)
 #   define BOOST_HAS_TRIVIAL_DESTRUCTOR(T) (__has_trivial_destructor(T) BOOST_INTEL_TT_OPTS)
 #   define BOOST_HAS_NOTHROW_CONSTRUCTOR(T) (__has_nothrow_constructor(T) BOOST_INTEL_TT_OPTS)
 #   define BOOST_HAS_NOTHROW_COPY(T) ((__has_nothrow_copy(T) BOOST_INTEL_TT_OPTS) && !is_volatile<T>::value && !is_reference<T>::value)

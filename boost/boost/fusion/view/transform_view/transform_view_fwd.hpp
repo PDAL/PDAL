@@ -7,7 +7,7 @@
 #if !defined(FUSION_TRANSFORM_VIEW_FORWARD_01052006_1839)
 #define FUSION_TRANSFORM_VIEW_FORWARD_01052006_1839
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct void_;
     struct transform_view_tag;

@@ -28,8 +28,7 @@
 #include <boost/type_traits/is_const.hpp>
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     template <class A, class B>
     std::size_t hash_value(std::pair<A, B> const&);
     template <class T, class A>
@@ -104,7 +103,7 @@ namespace boost
     template <class T>
     std::size_t hash_value(std::complex<T> const& v)
     {
-        boost::hash<T> hasher;
+        pdalboost::hash<T> hasher;
         std::size_t seed = hasher(v.imag());
         seed ^= hasher(v.real()) + (seed<<6) + (seed>>2);
         return seed;
@@ -127,7 +126,7 @@ namespace boost
             {
                 static std::size_t call(T const& v)
                 {
-                    using namespace boost;
+                    using namespace pdalboost;
                     return hash_value(v);
                 }
             };
@@ -146,14 +145,14 @@ namespace boost
 #endif
                 {
                     const int size = sizeof(v) / sizeof(*v);
-                    return boost::hash_range(v, v + size);
+                    return pdalboost::hash_range(v, v + size);
                 }
             };
         };
 
         template <class T>
         struct call_hash
-            : public call_hash_impl<boost::is_array<T>::value>
+            : public call_hash_impl<pdalboost::is_array<T>::value>
                 ::BOOST_NESTED_TEMPLATE inner<T>
         {
         };
@@ -161,7 +160,7 @@ namespace boost
 #endif // BOOST_NO_FUNCTION_TEMPLATE_ORDERING
 
     //
-    // boost::hash
+    // pdalboost::hash
     //
 
 
@@ -189,14 +188,14 @@ namespace boost
     {
         std::size_t operator()(const T* val) const
         {
-            return boost::hash_range(val, val+n);
+            return pdalboost::hash_range(val, val+n);
         }
     };
 #endif
 
 #else // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 
-    // On compilers without partial specialization, boost::hash<T>
+    // On compilers without partial specialization, pdalboost::hash<T>
     // has already been declared to deal with pointers, so just
     // need to supply the non-pointer version of hash_impl.
 
@@ -268,7 +267,7 @@ namespace boost
         
         template <class T>
         struct hash_impl_msvc2
-            : public hash_impl_msvc<boost::is_const<T>::value>
+            : public hash_impl_msvc<pdalboost::is_const<T>::value>
                     ::BOOST_NESTED_TEMPLATE inner<T> {};
         
         template <>

@@ -35,14 +35,14 @@
     #if !defined( BOOST_NO_INT64_T )    
         #define BOOST_NUMERIC_CONVERSION_BUILTIN_TYPES() \
                 (char)                                   \
-                (boost::int8_t)                          \
-                (boost::uint8_t)                         \
-                (boost::int16_t)                         \
-                (boost::uint16_t)                        \
-                (boost::int32_t)                         \
-                (boost::uint32_t)                        \
-                (boost::int64_t)                         \
-                (boost::uint64_t)                        \
+                (pdalboost::int8_t)                          \
+                (pdalboost::uint8_t)                         \
+                (pdalboost::int16_t)                         \
+                (pdalboost::uint16_t)                        \
+                (pdalboost::int32_t)                         \
+                (pdalboost::uint32_t)                        \
+                (pdalboost::int64_t)                         \
+                (pdalboost::uint64_t)                        \
                 (float)                                  \
                 (double)                                 \
                 (long double)                            \
@@ -50,24 +50,24 @@
     #else
         #define BOOST_NUMERIC_CONVERSION_BUILTIN_TYPES() \
                 (char)                                   \
-                (boost::int8_t)                          \
-                (boost::uint8_t)                         \
-                (boost::int16_t)                         \
-                (boost::uint16_t)                        \
-                (boost::int32_t)                         \
-                (boost::uint32_t)                        \
+                (pdalboost::int8_t)                          \
+                (pdalboost::uint8_t)                         \
+                (pdalboost::int16_t)                         \
+                (pdalboost::uint16_t)                        \
+                (pdalboost::int32_t)                         \
+                (pdalboost::uint32_t)                        \
                 (float)                                  \
                 (double)                                 \
                 (long double)                            \
         /***/
     #endif
 
-namespace boost { namespace numeric {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric {
 
     #define BOOST_PP_ITERATION_PARAMS_1 (3, (0, BOOST_PP_DEC(BOOST_PP_SEQ_SIZE(BOOST_NUMERIC_CONVERSION_BUILTIN_TYPES())), <boost/numeric/conversion/detail/numeric_cast_traits.hpp>))
     #include BOOST_PP_ITERATE()    
 
-}}//namespace boost::numeric;
+}}//namespace pdalboost::numeric;
 
     #if defined(__WAVE__) && defined(BOOST_NUMERIC_CONVERSION_CREATE_PREPROCESSED_FILES)
         #pragma wave option(output: null)

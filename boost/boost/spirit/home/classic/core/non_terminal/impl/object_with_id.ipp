@@ -21,7 +21,7 @@
 #include <boost/spirit/home/classic/namespace.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -37,7 +37,7 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
             object_with_id_base_supply() : max_id(object_id()) {}
 
 #ifdef BOOST_SPIRIT_THREADSAFE
-            boost::mutex        mutex;
+            pdalboost::mutex        mutex;
 #endif
             object_id           max_id;
             id_vector           free_ids;
@@ -60,11 +60,11 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
         private:
 #ifdef BOOST_SPIRIT_THREADSAFE
-            static boost::mutex &mutex_instance();
+            static pdalboost::mutex &mutex_instance();
             static void mutex_init();
 #endif
 
-            boost::shared_ptr<object_with_id_base_supply<IdT> > id_supply;
+            pdalboost::shared_ptr<object_with_id_base_supply<IdT> > id_supply;
         };
 
         //////////////////////////////////
@@ -99,7 +99,7 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
         object_with_id_base_supply<IdT>::acquire()
         {
 #ifdef BOOST_SPIRIT_THREADSAFE
-            boost::mutex::scoped_lock lock(mutex);
+            pdalboost::mutex::scoped_lock lock(mutex);
 #endif
             if (free_ids.size())
             {
@@ -121,7 +121,7 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
         object_with_id_base_supply<IdT>::release(IdT id)
         {
 #ifdef BOOST_SPIRIT_THREADSAFE
-            boost::mutex::scoped_lock lock(mutex);
+            pdalboost::mutex::scoped_lock lock(mutex);
 #endif
             if (max_id == id)
                 max_id--;
@@ -136,12 +136,12 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
         {
             {
 #ifdef BOOST_SPIRIT_THREADSAFE
-                static boost::once_flag been_here = BOOST_ONCE_INIT;
-                boost::call_once(been_here, mutex_init);
-                boost::mutex &mutex = mutex_instance();
-                boost::mutex::scoped_lock lock(mutex);
+                static pdalboost::once_flag been_here = BOOST_ONCE_INIT;
+                pdalboost::call_once(been_here, mutex_init);
+                pdalboost::mutex &mutex = mutex_instance();
+                pdalboost::mutex::scoped_lock lock(mutex);
 #endif
-                static boost::shared_ptr<object_with_id_base_supply<IdT> >
+                static pdalboost::shared_ptr<object_with_id_base_supply<IdT> >
                     static_supply;
 
                 if (!static_supply.get())
@@ -163,10 +163,10 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
         //////////////////////////////////
 #ifdef BOOST_SPIRIT_THREADSAFE
         template <typename TagT, typename IdT>
-        inline boost::mutex &
+        inline pdalboost::mutex &
         object_with_id_base<TagT, IdT>::mutex_instance()
         {
-            static boost::mutex mutex;
+            static pdalboost::mutex mutex;
             return mutex;
         }
 #endif
@@ -186,6 +186,6 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 ///////////////////////////////////////////////////////////////////////////////
 BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 
-}} // namespace boost::spirit
+}} // namespace pdalboost::spirit
 
 #endif

@@ -16,7 +16,7 @@
 #include <boost/proto/traits.hpp>
 #include <boost/proto/extends.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace utility
     {

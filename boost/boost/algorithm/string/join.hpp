@@ -25,7 +25,7 @@
     by providing a predicate.
 */
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
 
 //  join --------------------------------------------------------------//
@@ -52,8 +52,8 @@ namespace boost {
             typedef typename range_const_iterator<SequenceSequenceT>::type InputIteratorT;
 
             // Parse input
-            InputIteratorT itBegin=::boost::begin(Input);
-            InputIteratorT itEnd=::boost::end(Input);
+            InputIteratorT itBegin=::pdalboost::begin(Input);
+            InputIteratorT itEnd=::pdalboost::end(Input);
 
             // Construct container to hold the result
             ResultT Result;
@@ -61,16 +61,16 @@ namespace boost {
             // Append first element
             if(itBegin!=itEnd)
             {
-                detail::insert(Result, ::boost::end(Result), *itBegin);
+                detail::insert(Result, ::pdalboost::end(Result), *itBegin);
                 ++itBegin;
             }
 
             for(;itBegin!=itEnd; ++itBegin)
             {
                 // Add separator
-                detail::insert(Result, ::boost::end(Result), ::boost::as_literal(Separator));
+                detail::insert(Result, ::pdalboost::end(Result), ::pdalboost::as_literal(Separator));
                 // Add element
-                detail::insert(Result, ::boost::end(Result), *itBegin);
+                detail::insert(Result, ::pdalboost::end(Result), *itBegin);
             }
 
             return Result;
@@ -103,8 +103,8 @@ namespace boost {
             typedef typename range_const_iterator<SequenceSequenceT>::type InputIteratorT;
 
             // Parse input
-            InputIteratorT itBegin=::boost::begin(Input);
-            InputIteratorT itEnd=::boost::end(Input);
+            InputIteratorT itBegin=::pdalboost::begin(Input);
+            InputIteratorT itEnd=::pdalboost::end(Input);
 
             // Construct container to hold the result
             ResultT Result;
@@ -114,7 +114,7 @@ namespace boost {
             // Add this element
             if(itBegin!=itEnd)
             {
-                detail::insert(Result, ::boost::end(Result), *itBegin);
+                detail::insert(Result, ::pdalboost::end(Result), *itBegin);
                 ++itBegin;
             }
 
@@ -123,9 +123,9 @@ namespace boost {
                 if(Pred(*itBegin))
                 {
                     // Add separator
-                    detail::insert(Result, ::boost::end(Result), ::boost::as_literal(Separator));
+                    detail::insert(Result, ::pdalboost::end(Result), ::pdalboost::as_literal(Separator));
                     // Add element
-                    detail::insert(Result, ::boost::end(Result), *itBegin);
+                    detail::insert(Result, ::pdalboost::end(Result), *itBegin);
                 }
             }
 
@@ -138,7 +138,7 @@ namespace boost {
     using algorithm::join;
     using algorithm::join_if;
 
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_JOIN_HPP

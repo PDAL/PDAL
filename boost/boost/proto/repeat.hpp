@@ -21,7 +21,7 @@
 ////////////////////////////////////////////
 /// INTERNAL ONLY
 #define BOOST_PROTO_ref_a_aux(Z, N, DATA)\
-  boost::ref(BOOST_PP_CAT(proto_a, N))
+  pdalboost::ref(BOOST_PP_CAT(proto_a, N))
 
 /// \brief Generates a sequence like <tt>typename A0, typename A1, ...</tt>
 ///
@@ -58,7 +58,7 @@
 #define BOOST_PROTO_A_ref_a(N)\
   BOOST_PP_ENUM_BINARY_PARAMS(N, proto_A, &proto_a)
 
-/// \brief Generates a sequence like <tt>boost::ref(a0), boost::ref(a1), ...</tt>
+/// \brief Generates a sequence like <tt>pdalboost::ref(a0), pdalboost::ref(a1), ...</tt>
 ///
 #define BOOST_PROTO_ref_a(N)\
   BOOST_PP_ENUM(N, BOOST_PROTO_ref_a_aux, ~)
@@ -142,7 +142,7 @@ BOOST_PROTO_REPEAT_FROM_TO(1, BOOST_PROTO_MAX_ARITY, M0)
 ///         proto::tag::function
 ///     >(
 ///         construct_helper<T>()
-///       , boost::ref(a0)
+///       , pdalboost::ref(a0)
 ///     );
 /// }
 ///
@@ -159,8 +159,8 @@ BOOST_PROTO_REPEAT_FROM_TO(1, BOOST_PROTO_MAX_ARITY, M0)
 ///         proto::tag::function
 ///     >(
 ///         construct_helper<T>()
-///       , boost::ref(a0)
-///       , boost::ref(a1)
+///       , pdalboost::ref(a0)
+///       , pdalboost::ref(a1)
 ///     );
 /// }
 ///
@@ -253,7 +253,7 @@ construct(A_const_ref_a(N))                                       \
 ///         proto::tag::function
 ///     >(
 ///         construct_helper<T>()
-///       , boost::ref(a0)
+///       , pdalboost::ref(a0)
 ///     );
 /// }
 ///
@@ -270,8 +270,8 @@ construct(A_const_ref_a(N))                                       \
 ///         proto::tag::function
 ///     >(
 ///         construct_helper<T>()
-///       , boost::ref(a0)
-///       , boost::ref(a1)
+///       , pdalboost::ref(a0)
+///       , pdalboost::ref(a1)
 ///     );
 /// }
 ///

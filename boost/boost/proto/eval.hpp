@@ -12,7 +12,7 @@
 #include <boost/proto/proto_fwd.hpp> // BOOST_PROTO_CALLABLE
 #include <boost/type_traits/remove_reference.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
 
     namespace result_of

@@ -37,7 +37,7 @@
 #include <boost/bimap/views/list_map_view.hpp>
 #include <boost/bimap/views/list_set_view.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 
 
@@ -101,20 +101,20 @@ See also list_of_relation.
                                                                         **/
 
 template< class Type >
-struct list_of : public ::boost::bimaps::detail::set_type_of_tag
+struct list_of : public ::pdalboost::bimaps::detail::set_type_of_tag
 {
     /// User type, can be tagged
     typedef Type user_type;
 
     /// Type of the object that will be stored in the list
-    typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::tags::support::
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::tags::support::
         value_type_of<user_type>::type value_type;
 
 
     struct lazy_concept_checked
     {
         BOOST_CLASS_REQUIRE ( value_type,
-                              boost, AssignableConcept );
+                              pdalboost, AssignableConcept );
 
         typedef list_of type;
     };
@@ -160,7 +160,7 @@ struct bind_to
 See also list_of, is_set_type_of_relation.
                                                                 **/
 
-struct list_of_relation : public ::boost::bimaps::detail::set_type_of_relation_tag
+struct list_of_relation : public ::pdalboost::bimaps::detail::set_type_of_relation_tag
 {
     BOOST_BIMAP_GENERATE_RELATION_BINDER_0CP(
 
@@ -174,7 +174,7 @@ struct list_of_relation : public ::boost::bimaps::detail::set_type_of_relation_t
 
 
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_LIST_OF_HPP

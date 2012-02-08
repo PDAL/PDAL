@@ -16,9 +16,9 @@
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-//  typedef <unspecified> boost::detail::lightweight_mutex;
+//  typedef <unspecified> pdalboost::detail::lightweight_mutex;
 //
-//  boost::detail::lightweight_mutex is a header-only implementation of
+//  pdalboost::detail::lightweight_mutex is a header-only implementation of
 //  a subset of the Mutex concept requirements:
 //
 //  http://www.boost.org/doc/html/threads/concepts.html#threads.concepts.Mutex

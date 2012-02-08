@@ -20,7 +20,7 @@
 #include <boost/spirit/home/support/info.hpp>
 #include <stdexcept>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // Enablers
@@ -34,13 +34,13 @@ namespace boost { namespace spirit
       : mpl::true_ {};
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     template <typename Iterator>
     struct expectation_failure : std::runtime_error
     {
         expectation_failure(Iterator first, Iterator last, info const& what)
-          : std::runtime_error("boost::spirit::qi::expectation_failure")
+          : std::runtime_error("pdalboost::spirit::qi::expectation_failure")
           , first(first), last(last), what_(what)
         {}
         ~expectation_failure() throw() {}
@@ -85,7 +85,7 @@ namespace boost { namespace spirit { namespace qi
     {};
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Elements>

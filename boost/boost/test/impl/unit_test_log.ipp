@@ -31,13 +31,13 @@
 // Boost
 #include <boost/scoped_ptr.hpp>
 #include <boost/io/ios_state.hpp>
-typedef ::boost::io::ios_base_all_saver io_saver_type;
+typedef ::pdalboost::io::ios_base_all_saver io_saver_type;
 
 #include <boost/test/detail/suppress_warnings.hpp>
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -435,7 +435,7 @@ unit_test_log_formatter::log_entry_value( std::ostream& ostr, lazy_ostream const
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

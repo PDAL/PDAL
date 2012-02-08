@@ -10,7 +10,7 @@
  * Author:      Jonathan Turkanis
  * Contact:     turkanis at coderage dot com
  *
- * Defines the type boost::iostreams::detail::file_handle, representing an
+ * Defines the type pdalboost::iostreams::detail::file_handle, representing an
  * operating system file handle.
  */
 
@@ -19,7 +19,7 @@
 
 #include <boost/iostreams/detail/config/windows_posix.hpp>
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 #ifdef BOOST_IOSTREAMS_WINDOWS
     typedef void*  file_handle;  // A.k.a. HANDLE

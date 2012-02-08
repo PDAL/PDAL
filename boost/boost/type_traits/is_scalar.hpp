@@ -19,7 +19,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail {
 
@@ -27,11 +27,11 @@ template <typename T>
 struct is_scalar_impl
 { 
    BOOST_STATIC_CONSTANT(bool, value =
-      (::boost::type_traits::ice_or<
-         ::boost::is_arithmetic<T>::value,
-         ::boost::is_enum<T>::value,
-         ::boost::is_pointer<T>::value,
-         ::boost::is_member_pointer<T>::value
+      (::pdalboost::type_traits::ice_or<
+         ::pdalboost::is_arithmetic<T>::value,
+         ::pdalboost::is_enum<T>::value,
+         ::pdalboost::is_pointer<T>::value,
+         ::pdalboost::is_member_pointer<T>::value
       >::value));
 };
 
@@ -46,9 +46,9 @@ template <> struct is_scalar_impl<void const volatile>{ BOOST_STATIC_CONSTANT(bo
 
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_scalar,T,::boost::detail::is_scalar_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_scalar,T,::pdalboost::detail::is_scalar_impl<T>::value)
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

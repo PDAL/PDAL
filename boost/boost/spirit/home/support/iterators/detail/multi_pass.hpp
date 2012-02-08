@@ -15,7 +15,7 @@
 #include <algorithm> 
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace detail
 {
 #if defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
     ///////////////////////////////////////////////////////////////////////////
@@ -23,7 +23,7 @@ namespace boost { namespace spirit { namespace detail
     //  This is used mainly to improve conformance of compilers not supporting 
     //  PTS and thus relying on inheritance to recognize an iterator.
     //
-    //  We are using boost::iterator<> because it offers an automatic 
+    //  We are using pdalboost::iterator<> because it offers an automatic 
     //  workaround for broken std::iterator<> implementations.
     ///////////////////////////////////////////////////////////////////////////
     template <typename T, typename InputPolicy>
@@ -31,7 +31,7 @@ namespace boost { namespace spirit { namespace detail
     {
         typedef typename InputPolicy::BOOST_NESTED_TEMPLATE unique<T> input_type;
 
-        typedef boost::iterator <
+        typedef pdalboost::iterator <
             std::forward_iterator_tag
           , typename input_type::value_type
           , typename input_type::difference_type

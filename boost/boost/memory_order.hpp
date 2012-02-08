@@ -9,7 +9,7 @@
 
 //  boost/memory_order.hpp
 //
-//  Defines enum boost::memory_order per the C++0x working draft
+//  Defines enum pdalboost::memory_order per the C++0x working draft
 //
 //  Copyright (c) 2008, 2009 Peter Dimov
 //
@@ -18,8 +18,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //
 // Enum values are chosen so that code that needs to insert
@@ -48,6 +47,6 @@ enum memory_order
     memory_order_consume = 8
 };
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // #ifndef BOOST_MEMORY_ORDER_HPP_INCLUDED

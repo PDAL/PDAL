@@ -14,7 +14,7 @@
 #include <boost/type_traits/is_same.hpp>
 #include <boost/mpl/assert.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct iterator_facade_tag;
 

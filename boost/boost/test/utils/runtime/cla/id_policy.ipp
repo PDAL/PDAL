@@ -21,7 +21,7 @@
 #include <boost/test/utils/runtime/cla/id_policy.hpp>
 #include <boost/test/utils/runtime/cla/parameter.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -113,6 +113,6 @@ basic_naming_policy::matching( parameter const& p, argv_traverser& tr, bool ) co
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_CLA_ID_POLICY_IPP_062904GER

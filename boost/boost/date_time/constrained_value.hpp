@@ -16,7 +16,7 @@
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits/is_base_of.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //! Namespace containing constrained_value template and types
 namespace CV {
@@ -107,7 +107,7 @@ namespace CV {
     static rep_type max BOOST_PREVENT_MACRO_SUBSTITUTION () { return max_value; }
     static void on_error(rep_type, rep_type, violation_enum)
     {
-      boost::throw_exception(actual_exception_type());
+      pdalboost::throw_exception(actual_exception_type());
     }
   };
 

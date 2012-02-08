@@ -14,7 +14,7 @@
 #include <boost/phoenix/core/terminal.hpp>
 #include <boost/utility/result_of.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     ////////////////////////////////////////////////////////////////////////////
     //
@@ -54,8 +54,8 @@ namespace boost { namespace phoenix
 
         template <typename This, typename Actor, typename Context>
         struct result<This(Actor, Context)>
-            : boost::remove_const<
-				    typename boost::remove_reference<
+            : pdalboost::remove_const<
+				    typename pdalboost::remove_reference<
                     typename evaluator::impl<Actor, Context, int>::result_type
                 >::type
 				>
@@ -65,7 +65,7 @@ namespace boost { namespace phoenix
         typename result<custom_terminal(actor<Expr> const &, Context &)>::type
         operator()(actor<Expr> const & expr, Context & ctx) const
         {
-            return boost::phoenix::eval(expr, ctx);
+            return pdalboost::pdalboostphoenix::eval(expr, ctx);
         }
     };
 

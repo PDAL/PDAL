@@ -10,7 +10,7 @@
 #include <boost/fusion/iterator/value_of.hpp>
 #include <boost/fusion/iterator/prior.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct reverse_view_iterator_tag;
 

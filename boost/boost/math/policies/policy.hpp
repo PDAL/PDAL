@@ -28,7 +28,7 @@
 #include <stddef.h>
 #include <math.h>
 
-namespace boost{ namespace math{ 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace math{ 
 
 namespace tools{
 
@@ -97,7 +97,7 @@ namespace policies{
 #if !defined(__BORLANDC__) \
    && !(defined(__GNUC__) && (__GNUC__ == 3) && (__GNUC_MINOR__ <= 2))
 #define BOOST_MATH_META_INT(type, name, Default)\
-   template <type N = Default> struct name : public boost::mpl::int_<N>{};\
+   template <type N = Default> struct name : public pdalboost::mpl::int_<N>{};\
    namespace detail{\
    template <type N>\
    char test_is_valid_arg(const name<N>*);\
@@ -109,10 +109,10 @@ namespace policies{
       BOOST_STATIC_CONSTANT(bool, value = sizeof(test(static_cast<T*>(0))) == 1);\
    };\
    }\
-   template <class T> struct is_##name : public boost::mpl::bool_< ::boost::math::policies::detail::is_##name##_imp<T>::value>{};
+   template <class T> struct is_##name : public pdalboost::mpl::bool_< ::pdalboost::math::policies::detail::is_##name##_imp<T>::value>{};
 
 #define BOOST_MATH_META_BOOL(name, Default)\
-   template <bool N = Default> struct name : public boost::mpl::bool_<N>{};\
+   template <bool N = Default> struct name : public pdalboost::mpl::bool_<N>{};\
    namespace detail{\
    template <bool N>\
    char test_is_valid_arg(const name<N>*);\
@@ -124,10 +124,10 @@ namespace policies{
       BOOST_STATIC_CONSTANT(bool, value = sizeof(test(static_cast<T*>(0))) == 1);\
    };\
    }\
-   template <class T> struct is_##name : public boost::mpl::bool_< ::boost::math::policies::detail::is_##name##_imp<T>::value>{};
+   template <class T> struct is_##name : public pdalboost::mpl::bool_< ::pdalboost::math::policies::detail::is_##name##_imp<T>::value>{};
 #else
 #define BOOST_MATH_META_INT(Type, name, Default)\
-   template <Type N = Default> struct name : public boost::mpl::int_<N>{};\
+   template <Type N = Default> struct name : public pdalboost::mpl::int_<N>{};\
    namespace detail{\
    template <Type N>\
    char test_is_valid_arg(const name<N>*);\
@@ -140,16 +140,16 @@ namespace policies{
    template <class T> struct is_##name##_imp\
    {\
       static T inst;\
-      BOOST_STATIC_CONSTANT(bool, value = sizeof( ::boost::math::policies::detail::is_##name##_tester<T>::test(inst)) == 1);\
+      BOOST_STATIC_CONSTANT(bool, value = sizeof( ::pdalboost::math::policies::detail::is_##name##_tester<T>::test(inst)) == 1);\
    };\
    }\
-   template <class T> struct is_##name : public boost::mpl::bool_< ::boost::math::policies::detail::is_##name##_imp<T>::value>\
+   template <class T> struct is_##name : public pdalboost::mpl::bool_< ::pdalboost::math::policies::detail::is_##name##_imp<T>::value>\
    {\
       template <class U> struct apply{ typedef is_##name<U> type; };\
    };
 
 #define BOOST_MATH_META_BOOL(name, Default)\
-   template <bool N = Default> struct name : public boost::mpl::bool_<N>{};\
+   template <bool N = Default> struct name : public pdalboost::mpl::bool_<N>{};\
    namespace detail{\
    template <bool N>\
    char test_is_valid_arg(const name<N>*);\
@@ -162,10 +162,10 @@ namespace policies{
    template <class T> struct is_##name##_imp\
    {\
       static T inst;\
-      BOOST_STATIC_CONSTANT(bool, value = sizeof( ::boost::math::policies::detail::is_##name##_tester<T>::test(inst)) == 1);\
+      BOOST_STATIC_CONSTANT(bool, value = sizeof( ::pdalboost::math::policies::detail::is_##name##_tester<T>::test(inst)) == 1);\
    };\
    }\
-   template <class T> struct is_##name : public boost::mpl::bool_< ::boost::math::policies::detail::is_##name##_imp<T>::value>\
+   template <class T> struct is_##name : public pdalboost::mpl::bool_< ::pdalboost::math::policies::detail::is_##name##_imp<T>::value>\
    {\
       template <class U> struct apply{ typedef is_##name<U> type;  };\
    };
@@ -247,7 +247,7 @@ struct precision
 public:
 #ifdef __BORLANDC__
    typedef typename mpl::if_c<
-      (Digits2::value > ::boost::math::policies::detail::precision<Digits10,Digits2>::digits2_type::value),
+      (Digits2::value > ::pdalboost::math::policies::detail::precision<Digits10,Digits2>::digits2_type::value),
       Digits2, digits2_type>::type type;
 #else
    typedef typename mpl::if_c<
@@ -276,7 +276,7 @@ private:
 public:
    typedef typename select_result<
       DefaultType, iter,
-      ::boost::is_same<iter, end_type>::value>::type type;
+      ::pdalboost::is_same<iter, end_type>::value>::type type;
 };
 
 double test_is_valid_arg(...);
@@ -287,23 +287,23 @@ char test_is_default_arg(const default_policy*);
 template <class T>
 struct is_valid_policy_imp 
 {
-   BOOST_STATIC_CONSTANT(bool, value = sizeof(::boost::math::policies::detail::test_is_valid_arg(static_cast<T*>(0))) == 1);
+   BOOST_STATIC_CONSTANT(bool, value = sizeof(::pdalboost::math::policies::detail::test_is_valid_arg(static_cast<T*>(0))) == 1);
 };
 
 template <class T>
 struct is_default_policy_imp
 {
-   BOOST_STATIC_CONSTANT(bool, value = sizeof(::boost::math::policies::detail::test_is_default_arg(static_cast<T*>(0))) == 1);
+   BOOST_STATIC_CONSTANT(bool, value = sizeof(::pdalboost::math::policies::detail::test_is_default_arg(static_cast<T*>(0))) == 1);
 };
 
 template <class T> struct is_valid_policy 
 : public mpl::bool_< 
-   ::boost::math::policies::detail::is_valid_policy_imp<T>::value>
+   ::pdalboost::math::policies::detail::is_valid_policy_imp<T>::value>
 {};
 
 template <class T> struct is_default_policy 
 : public mpl::bool_< 
-   ::boost::math::policies::detail::is_default_policy_imp<T>::value>
+   ::pdalboost::math::policies::detail::is_default_policy_imp<T>::value>
 {
    template <class U>
    struct apply
@@ -384,19 +384,19 @@ private:
    //
    // Validate all our arguments:
    //
-   BOOST_STATIC_ASSERT(::boost::math::policies::detail::is_valid_policy<A1>::value);
-   BOOST_STATIC_ASSERT(::boost::math::policies::detail::is_valid_policy<A2>::value);
-   BOOST_STATIC_ASSERT(::boost::math::policies::detail::is_valid_policy<A3>::value);
-   BOOST_STATIC_ASSERT(::boost::math::policies::detail::is_valid_policy<A4>::value);
-   BOOST_STATIC_ASSERT(::boost::math::policies::detail::is_valid_policy<A5>::value);
-   BOOST_STATIC_ASSERT(::boost::math::policies::detail::is_valid_policy<A6>::value);
-   BOOST_STATIC_ASSERT(::boost::math::policies::detail::is_valid_policy<A7>::value);
-   BOOST_STATIC_ASSERT(::boost::math::policies::detail::is_valid_policy<A8>::value);
-   BOOST_STATIC_ASSERT(::boost::math::policies::detail::is_valid_policy<A9>::value);
-   BOOST_STATIC_ASSERT(::boost::math::policies::detail::is_valid_policy<A10>::value);
-   BOOST_STATIC_ASSERT(::boost::math::policies::detail::is_valid_policy<A11>::value);
-   BOOST_STATIC_ASSERT(::boost::math::policies::detail::is_valid_policy<A12>::value);
-   BOOST_STATIC_ASSERT(::boost::math::policies::detail::is_valid_policy<A13>::value);
+   BOOST_STATIC_ASSERT(::pdalboost::math::policies::detail::is_valid_policy<A1>::value);
+   BOOST_STATIC_ASSERT(::pdalboost::math::policies::detail::is_valid_policy<A2>::value);
+   BOOST_STATIC_ASSERT(::pdalboost::math::policies::detail::is_valid_policy<A3>::value);
+   BOOST_STATIC_ASSERT(::pdalboost::math::policies::detail::is_valid_policy<A4>::value);
+   BOOST_STATIC_ASSERT(::pdalboost::math::policies::detail::is_valid_policy<A5>::value);
+   BOOST_STATIC_ASSERT(::pdalboost::math::policies::detail::is_valid_policy<A6>::value);
+   BOOST_STATIC_ASSERT(::pdalboost::math::policies::detail::is_valid_policy<A7>::value);
+   BOOST_STATIC_ASSERT(::pdalboost::math::policies::detail::is_valid_policy<A8>::value);
+   BOOST_STATIC_ASSERT(::pdalboost::math::policies::detail::is_valid_policy<A9>::value);
+   BOOST_STATIC_ASSERT(::pdalboost::math::policies::detail::is_valid_policy<A10>::value);
+   BOOST_STATIC_ASSERT(::pdalboost::math::policies::detail::is_valid_policy<A11>::value);
+   BOOST_STATIC_ASSERT(::pdalboost::math::policies::detail::is_valid_policy<A12>::value);
+   BOOST_STATIC_ASSERT(::pdalboost::math::policies::detail::is_valid_policy<A13>::value);
    //
    // Typelist of the arguments:
    //
@@ -569,7 +569,7 @@ private:
    //
    // Pad out the list with defaults:
    //
-   typedef typename detail::append_N<reduced_list, default_policy, (14 - ::boost::mpl::size<reduced_list>::value)>::type result_type;
+   typedef typename detail::append_N<reduced_list, default_policy, (14 - ::pdalboost::mpl::size<reduced_list>::value)>::type result_type;
 public:
    typedef policy<
       typename mpl::at<result_type, mpl::int_<0> >::type,
@@ -823,7 +823,7 @@ inline int digits_imp(mpl::true_ const&)
 #else
    BOOST_ASSERT(::std::numeric_limits<T>::is_specialized);
 #endif
-   typedef typename boost::math::policies::precision<T, Policy>::type p_t;
+   typedef typename pdalboost::math::policies::precision<T, Policy>::type p_t;
    return p_t::value;
 }
 
@@ -872,7 +872,7 @@ struct series_factor_calc<T, Digits, mpl::true_, mpl::true_>
 {
    static T get()
    {
-      return boost::math::tools::epsilon<T>();
+      return pdalboost::math::tools::epsilon<T>();
    }
 };
 template <class T, class Digits>
@@ -880,7 +880,7 @@ struct series_factor_calc<T, Digits, mpl::true_, mpl::false_>
 {
    static T get()
    {
-      static const boost::uintmax_t v = static_cast<boost::uintmax_t>(1u) << (Digits::value - 1);
+      static const pdalboost::uintmax_t v = static_cast<pdalboost::uintmax_t>(1u) << (Digits::value - 1);
       return 1 / static_cast<T>(v);
    }
 };
@@ -889,7 +889,7 @@ struct series_factor_calc<T, Digits, mpl::false_, mpl::true_>
 {
    static T get()
    {
-      return boost::math::tools::epsilon<T>();
+      return pdalboost::math::tools::epsilon<T>();
    }
 };
 
@@ -903,8 +903,8 @@ inline T get_epsilon_imp(mpl::true_ const&)
    BOOST_ASSERT(::std::numeric_limits<T>::is_specialized);
    BOOST_ASSERT(::std::numeric_limits<T>::radix == 2);
 #endif
-   typedef typename boost::math::policies::precision<T, Policy>::type p_t;
-   typedef mpl::bool_<p_t::value <= std::numeric_limits<boost::uintmax_t>::digits> is_small_int;
+   typedef typename pdalboost::math::policies::precision<T, Policy>::type p_t;
+   typedef mpl::bool_<p_t::value <= std::numeric_limits<pdalboost::uintmax_t>::digits> is_small_int;
    typedef mpl::bool_<p_t::value >= std::numeric_limits<T>::digits> is_default_value;
    return series_factor_calc<T, p_t, is_small_int, is_default_value>::get();
 }
@@ -943,13 +943,13 @@ double test_is_policy(...);
 template <class P>
 struct is_policy_imp
 {
-   BOOST_STATIC_CONSTANT(bool, value = (sizeof(::boost::math::policies::detail::test_is_policy(static_cast<P*>(0))) == 1));
+   BOOST_STATIC_CONSTANT(bool, value = (sizeof(::pdalboost::math::policies::detail::test_is_policy(static_cast<P*>(0))) == 1));
 };
 
 }
 
 template <class P>
-struct is_policy : public mpl::bool_< ::boost::math::policies::detail::is_policy_imp<P>::value> {};
+struct is_policy : public mpl::bool_< ::pdalboost::math::policies::detail::is_policy_imp<P>::value> {};
 
 }}} // namespaces
 

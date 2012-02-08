@@ -10,7 +10,7 @@
 
 #include <boost/uuid/uuid.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace uuids {
 
 // generate a nil uuid
@@ -28,7 +28,7 @@ inline uuid nil_uuid() {
     return nil_generator()();
 }
 
-}} // namespace boost::uuids
+}} // namespace pdalboost::uuids
 
 #endif // BOOST_UUID_NIL_GENERATOR_HPP
 

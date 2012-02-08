@@ -30,7 +30,7 @@
 // !! can we eliminate these includes?
 #include <list>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -77,6 +77,6 @@ argument_value_usage( format_stream& fs,  int, bool* = 0 )
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_CLA_ARGUMENT_VALUE_USAGE_HPP_062604GER

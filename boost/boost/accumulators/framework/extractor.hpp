@@ -24,7 +24,7 @@
 #include <boost/accumulators/accumulators_fwd.hpp>
 #include <boost/accumulators/framework/parameters/accumulator.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 namespace detail
@@ -195,14 +195,14 @@ struct extractor
       , typename Arg1                                                                               \
         BOOST_PP_ENUM_TRAILING_PARAMS_Z(z, n, typename A)                                           \
     >                                                                                               \
-    typename boost::accumulators::detail::extractor_result<                                         \
+    typename pdalboost::accumulators::detail::extractor_result<                                         \
         Arg1                                                                                        \
       , BOOST_ACCUMULATORS_MAKE_FEATURE(Tag, Feature, ParamsSeq)                                    \
     >::type                                                                                         \
     Feature(Arg1 const &arg1 BOOST_PP_ENUM_TRAILING_BINARY_PARAMS_Z(z, n, A, const &a) )            \
     {                                                                                               \
         typedef BOOST_ACCUMULATORS_MAKE_FEATURE(Tag, Feature, ParamsSeq) feature_type;              \
-        return boost::accumulators::extractor<feature_type>()(                                      \
+        return pdalboost::accumulators::extractor<feature_type>()(                                      \
             arg1 BOOST_PP_ENUM_TRAILING_PARAMS_Z(z, n, a));                                         \
     }
 
@@ -224,6 +224,6 @@ struct extractor
       , (3, (Tag, Feature, ParamSeq))                                                               \
     )
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

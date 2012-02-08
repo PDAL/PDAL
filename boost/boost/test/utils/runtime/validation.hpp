@@ -29,7 +29,7 @@
 #include <stdexcept>
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -68,7 +68,7 @@ report_logic_error( format_stream& msg )
 //____________________________________________________________________________//
 
 #define BOOST_RT_PARAM_REPORT_LOGIC_ERROR( msg ) \
-    boost::BOOST_RT_PARAM_NAMESPACE::report_logic_error( format_stream().ref() << msg )
+    pdalboost::BOOST_RT_PARAM_NAMESPACE::report_logic_error( format_stream().ref() << msg )
 
 #define BOOST_RT_PARAM_VALIDATE_LOGIC( b, msg ) \
     if( b ) {} else BOOST_RT_PARAM_REPORT_LOGIC_ERROR( msg )
@@ -77,6 +77,6 @@ report_logic_error( format_stream& msg )
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_VALIDATION_HPP_062604GER

@@ -11,9 +11,9 @@
 #include <boost/mpl/identity.hpp>
 #include <boost/mpl/eval_if.hpp>
 
-namespace boost { template<class T> class reference_wrapper; }
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ template<class T> class reference_wrapper; }
 
-namespace boost { namespace parameter { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { namespace aux {
 
 //
 // reference_wrapper support -- because of the forwarding problem,
@@ -78,7 +78,7 @@ struct unwrap_cv_reference<T, mpl::true_>
 
 #else 
 // Produces the unwrapped type to hold a reference to in named<>
-// Can't use boost::unwrap_reference<> here because it
+// Can't use pdalboost::unwrap_reference<> here because it
 // doesn't handle the case where T = reference_wrapper<U> cv
 template <class T>
 struct unwrap_cv_reference
@@ -91,7 +91,7 @@ struct unwrap_cv_reference
 };
 #endif
 
-}}} // namespace boost::parameter::aux
+}}} // namespace pdalboost::parameter::aux
 
 #endif // UNWRAP_CV_REFERENCE_050328_HPP
 

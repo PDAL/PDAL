@@ -14,7 +14,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail{
 
@@ -23,14 +23,14 @@ struct has_nothrow_copy_imp{
 #ifdef BOOST_HAS_NOTHROW_COPY
    BOOST_STATIC_CONSTANT(bool, value = BOOST_HAS_NOTHROW_COPY(T));
 #else
-   BOOST_STATIC_CONSTANT(bool, value = ::boost::has_trivial_copy<T>::value);
+   BOOST_STATIC_CONSTANT(bool, value = ::pdalboost::has_trivial_copy<T>::value);
 #endif
 };
 
 }
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_nothrow_copy,T,::boost::detail::has_nothrow_copy_imp<T>::value)
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_nothrow_copy_constructor,T,::boost::detail::has_nothrow_copy_imp<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_nothrow_copy,T,::pdalboost::detail::has_nothrow_copy_imp<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_nothrow_copy_constructor,T,::pdalboost::detail::has_nothrow_copy_imp<T>::value)
 
 BOOST_TT_AUX_BOOL_TRAIT_SPEC1(has_nothrow_copy,void,false)
 #ifndef BOOST_NO_CV_VOID_SPECIALIZATIONS
@@ -46,7 +46,7 @@ BOOST_TT_AUX_BOOL_TRAIT_SPEC1(has_nothrow_copy_constructor,void const volatile,f
 BOOST_TT_AUX_BOOL_TRAIT_SPEC1(has_nothrow_copy_constructor,void volatile,false)
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

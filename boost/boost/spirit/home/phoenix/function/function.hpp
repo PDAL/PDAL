@@ -10,7 +10,7 @@
 #include <boost/spirit/home/phoenix/core/compose.hpp>
 #include <boost/spirit/home/phoenix/core/detail/function_eval.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename F>
     struct function

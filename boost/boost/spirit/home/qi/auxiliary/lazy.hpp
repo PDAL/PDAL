@@ -24,13 +24,13 @@
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/mpl/not.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // Enablers
     ///////////////////////////////////////////////////////////////////////////
     template <typename Eval>
-    struct use_terminal<qi::domain, phoenix::actor<Eval> >  // enables phoenix actors
+    struct use_terminal<qi::domain, pdalboostphoenix::actor<Eval> >  // enables phoenix actors
         : mpl::true_ {};
 
     // forward declaration
@@ -38,7 +38,7 @@ namespace boost { namespace spirit
     struct lazy_terminal;
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     using spirit::lazy;
     typedef modify<qi::domain> qi_modify;
@@ -88,12 +88,12 @@ namespace boost { namespace spirit { namespace qi
         struct attribute
         {
             typedef typename
-                boost::result_of<qi_modify(tag::lazy_eval, Modifiers)>::type
+                pdalboost::result_of<qi_modify(tag::lazy_eval, Modifiers)>::type
             modifier;
 
             typedef typename
                 remove_reference<
-                    typename boost::result_of<Function(unused_type, Context)>::type
+                    typename pdalboost::result_of<Function(unused_type, Context)>::type
                 >::type
             expr_type;
 
@@ -151,12 +151,12 @@ namespace boost { namespace spirit { namespace qi
         struct attribute
         {
             typedef typename
-                boost::result_of<qi_modify(tag::lazy_eval, Modifiers)>::type
+                pdalboost::result_of<qi_modify(tag::lazy_eval, Modifiers)>::type
             modifier;
 
             typedef typename
                 remove_reference<
-                    typename boost::result_of<Function(unused_type, Context)>::type
+                    typename pdalboost::result_of<Function(unused_type, Context)>::type
                 >::type
             directive_expr_type;
 
@@ -224,10 +224,10 @@ namespace boost { namespace spirit { namespace qi
     // Parser generators: make_xxx function (objects)
     ///////////////////////////////////////////////////////////////////////////
     template <typename Eval, typename Modifiers>
-    struct make_primitive<phoenix::actor<Eval>, Modifiers>
+    struct make_primitive<pdalboostphoenix::actor<Eval>, Modifiers>
     {
-        typedef lazy_parser<phoenix::actor<Eval>, Modifiers> result_type;
-        result_type operator()(phoenix::actor<Eval> const& f
+        typedef lazy_parser<pdalboostphoenix::actor<Eval>, Modifiers> result_type;
+        result_type operator()(pdalboostphoenix::actor<Eval> const& f
           , Modifiers const& modifiers) const
         {
             return result_type(f, modifiers);
@@ -259,7 +259,7 @@ namespace boost { namespace spirit { namespace qi
     };
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Actor, typename Modifiers, typename Attribute

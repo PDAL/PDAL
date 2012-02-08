@@ -35,7 +35,7 @@
 #include <boost/mpl/inherit_linearly.hpp>
 #include <boost/mpl/inherit.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace container_adaptor {
 namespace detail {
@@ -89,7 +89,7 @@ struct data_with_functor_bag :
 } // namespace detail
 } // namespace container_adaptor
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #if defined(BOOST_MSVC)
 #   pragma warning(pop)

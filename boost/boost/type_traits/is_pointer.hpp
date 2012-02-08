@@ -40,7 +40,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #if defined( __CODEGEARC__ )
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_pointer,T,__is_pointer(T))
@@ -69,19 +69,19 @@ struct is_pointer_impl
 {
 #if BOOST_WORKAROUND(BOOST_MSVC,<=1300)
     BOOST_STATIC_CONSTANT(bool, value =
-        (::boost::type_traits::ice_and<
-              ::boost::detail::is_pointer_helper<T>::value
-            , ::boost::type_traits::ice_not<
-                ::boost::is_member_pointer<T>::value
+        (::pdalboost::type_traits::ice_and<
+              ::pdalboost::detail::is_pointer_helper<T>::value
+            , ::pdalboost::type_traits::ice_not<
+                ::pdalboost::is_member_pointer<T>::value
                 >::value
             >::value)
         );
 #else
     BOOST_STATIC_CONSTANT(bool, value =
-        (::boost::type_traits::ice_and<
-        ::boost::detail::is_pointer_helper<typename remove_cv<T>::type>::value
-            , ::boost::type_traits::ice_not<
-                ::boost::is_member_pointer<T>::value
+        (::pdalboost::type_traits::ice_and<
+        ::pdalboost::detail::is_pointer_helper<typename remove_cv<T>::type>::value
+            , ::pdalboost::type_traits::ice_not<
+                ::pdalboost::is_member_pointer<T>::value
                 >::value
             >::value)
         );
@@ -90,7 +90,7 @@ struct is_pointer_impl
 
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_pointer,T,::boost::detail::is_pointer_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_pointer,T,::pdalboost::detail::is_pointer_impl<T>::value)
 
 #if defined(__BORLANDC__) && !defined(__COMO__) && (__BORLANDC__ < 0x600)
 BOOST_TT_AUX_BOOL_TRAIT_PARTIAL_SPEC1_1(typename T,is_pointer,T&,false)
@@ -113,7 +113,7 @@ no_type BOOST_TT_DECL is_pointer_tester(...);
 
 template <bool>
 struct is_pointer_select
-    : public ::boost::type_traits::false_result
+    : public ::pdalboost::type_traits::false_result
 {
 };
 
@@ -124,7 +124,7 @@ struct is_pointer_select<false>
     {
         static T& make_t();
         BOOST_STATIC_CONSTANT(bool, value =
-                (::boost::type_traits::ice_or<
+                (::pdalboost::type_traits::ice_or<
                     (1 == sizeof(is_pointer_tester(make_t()))),
                     (1 == sizeof(type_traits::is_function_ptr_tester(make_t())))
                 >::value));
@@ -134,9 +134,9 @@ struct is_pointer_select<false>
 template <typename T>
 struct is_pointer_impl
     : public is_pointer_select<
-          ::boost::type_traits::ice_or<
-              ::boost::is_reference<T>::value
-            , ::boost::is_array<T>::value
+          ::pdalboost::type_traits::ice_or<
+              ::pdalboost::is_reference<T>::value
+            , ::pdalboost::is_array<T>::value
             >::value
         >::template result_<T>
 {
@@ -151,11 +151,11 @@ BOOST_TT_AUX_BOOL_TRAIT_IMPL_SPEC1(is_pointer,void const volatile,false)
 
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_pointer,T,::boost::detail::is_pointer_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_pointer,T,::pdalboost::detail::is_pointer_impl<T>::value)
 
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

@@ -9,7 +9,7 @@
 // *Preprocessed* version of the main "template_arity.hpp" header
 // -- DO NOT modify by hand!
 
-namespace boost { namespace mpl { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl { namespace aux {
 
 template< bool >
 struct template_arity_impl
@@ -31,7 +31,7 @@ struct template_arity_impl<true>
 
 template< typename F >
 struct template_arity
-    : template_arity_impl< ::boost::mpl::aux::has_rebind<F>::value >
+    : template_arity_impl< ::pdalboost::mpl::aux::has_rebind<F>::value >
         ::template result_<F>
 {
 };

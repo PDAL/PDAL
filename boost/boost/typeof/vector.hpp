@@ -82,7 +82,7 @@
             typedef v_iter<V, mpl::int_<n + 1> > next;\
         };
 
-namespace boost { namespace type_of {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
 
     template<class V, class Increase_BOOST_TYPEOF_LIMIT_SIZE> struct v_iter; // not defined
 #     define  BOOST_PP_LOCAL_MACRO  BOOST_TYPEOF_spec_iter
@@ -107,12 +107,12 @@ namespace boost { namespace type_of {
         template<BOOST_PP_ENUM_PARAMS(n, class P) BOOST_PP_EXPR_IIF(BOOST_PP_NOT(n), class T = void)>\
         struct vector ## n\
         {\
-            typedef v_iter<vector ## n<BOOST_PP_ENUM_PARAMS(n,P)>, boost::mpl::int_<0> > begin;\
+            typedef v_iter<vector ## n<BOOST_PP_ENUM_PARAMS(n,P)>, pdalboost::mpl::int_<0> > begin;\
             BOOST_PP_REPEAT(n, BOOST_TYPEOF_typedef_item, ~)\
             BOOST_PP_REPEAT_FROM_TO(n, BOOST_TYPEOF_PP_NEXT_SIZE, BOOST_TYPEOF_typedef_fake_item, ~)\
         };
 
-namespace boost { namespace type_of {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
 
 #     define  BOOST_PP_LOCAL_MACRO  BOOST_TYPEOF_define_vector
 #     define  BOOST_PP_LOCAL_LIMITS \
@@ -129,14 +129,14 @@ namespace boost { namespace type_of {
 
 #     define BOOST_TYPEOF_spec_push_back(n)\
         template<BOOST_PP_ENUM_PARAMS(n, class P) BOOST_PP_COMMA_IF(n) class T>\
-        struct push_back<BOOST_PP_CAT(boost::type_of::vector, n)<BOOST_PP_ENUM_PARAMS(n, P)>, T>\
+        struct push_back<BOOST_PP_CAT(pdalboost::type_of::vector, n)<BOOST_PP_ENUM_PARAMS(n, P)>, T>\
         {\
-            typedef BOOST_PP_CAT(boost::type_of::vector, BOOST_PP_INC(n))<\
+            typedef BOOST_PP_CAT(pdalboost::type_of::vector, BOOST_PP_INC(n))<\
                 BOOST_PP_ENUM_PARAMS(n, P) BOOST_PP_COMMA_IF(n) T\
             > type;\
         };
 
-namespace boost { namespace type_of {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace type_of {
 
 #   if   BOOST_TYPEOF_LIMIT_SIZE < 50
     template<class V, class T> struct push_back {

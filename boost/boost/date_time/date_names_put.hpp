@@ -21,7 +21,7 @@
 #include <locale>
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace date_time {
 
     //! Output facet base class for gregorian dates.
@@ -172,7 +172,7 @@ namespace date_time {
       }
       void put_string(iter_type& oi, const charT* const s) const
       {
-        string_type s1(boost::lexical_cast<string_type>(s));
+        string_type s1(pdalboost::lexical_cast<string_type>(s));
         typename string_type::iterator si,end;
         for (si=s1.begin(), end=s1.end(); si!=end; si++, oi++) {
           *oi = *si;
@@ -313,7 +313,7 @@ namespace date_time {
       month_format_spec month_format_spec_;      
     };
 
-} } //namespace boost::date_time
+} } //namespace pdalboost::date_time
 
 #endif //BOOST_NO_STD_LOCALE
 

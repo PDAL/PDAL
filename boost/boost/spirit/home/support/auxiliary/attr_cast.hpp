@@ -14,7 +14,7 @@
 #include <boost/spirit/home/support/attributes.hpp>
 #include <boost/utility/enable_if.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // This one is the function that the user can call directly in order 

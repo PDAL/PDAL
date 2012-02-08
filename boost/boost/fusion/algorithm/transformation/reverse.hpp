@@ -9,7 +9,7 @@
 
 #include <boost/fusion/view/reverse_view/reverse_view.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     namespace result_of
     {

@@ -20,7 +20,7 @@
 
 #include <boost/serialization/pfto.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace archive {
 namespace detail {
@@ -44,7 +44,7 @@ namespace detail {
 } // namespace detail
 
 // use an "accessor class so that we can use: 
-// "friend class boost::serialization::access;" 
+// "friend class pdalboost::serialization::access;" 
 // in any serialized class to permit clean, safe access to private class members
 // by the serialization system
 
@@ -142,6 +142,6 @@ public:
 };
 
 } // namespace serialization
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_SERIALIZATION_ACCESS_HPP

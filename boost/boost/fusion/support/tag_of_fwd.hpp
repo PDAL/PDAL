@@ -8,7 +8,7 @@
 #if !defined(BOOST_FUSION_TAG_OF_FWD_31122005_1445)
 #define BOOST_FUSION_TAG_OF_FWD_31122005_1445
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     namespace traits
     {

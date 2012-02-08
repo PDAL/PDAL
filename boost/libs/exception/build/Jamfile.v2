@@ -10,5 +10,5 @@ project boost/exception
     : requirements <link>static
     ;
 
-lib boost_exception : clone_current_exception_non_intrusive.cpp ;
-boost-install boost_exception ;
+lib pdalboost_exception : clone_current_exception_non_intrusive.cpp ;
+boost-install pdalboost_exception ;

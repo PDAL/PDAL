@@ -21,7 +21,7 @@
 #include <boost/call_traits.hpp>
 #include <functional>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace container_adaptor {
 namespace detail {
@@ -93,7 +93,7 @@ struct unary_check_adaptor : std::unary_function<NewType,bool>
 } // namespace detail
 } // namespace container_adaptor
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_CONTAINER_ADAPTOR_DETAIL_COMPARISON_ADAPTOR_HPP

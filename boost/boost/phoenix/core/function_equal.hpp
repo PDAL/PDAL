@@ -15,12 +15,11 @@
 #include <boost/phoenix/core/terminal.hpp>
 #include <boost/proto/matches.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     template <typename> class weak_ptr;
 }
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename>
     struct actor;

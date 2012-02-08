@@ -9,7 +9,7 @@
 
 #include <boost/mpl/prior.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct single_view_iterator_tag;
 

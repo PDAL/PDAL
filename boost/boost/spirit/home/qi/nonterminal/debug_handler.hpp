@@ -21,7 +21,7 @@
 #include <boost/fusion/include/out.hpp>
 #include <iostream>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     template <
         typename Iterator, typename Context
@@ -62,7 +62,7 @@ namespace boost { namespace spirit { namespace qi
             catch (expectation_failure<Iterator> const& e)
             {
                 f(first, last, context, failed_parse, rule_name);
-                boost::throw_exception(e);
+                pdalboost::throw_exception(e);
             }
             return false;
         }

@@ -10,7 +10,7 @@
 #include <boost/mpl/size.hpp>
 #include <boost/fusion/sequence/intrinsic/size.hpp>
 
-namespace boost { namespace mpl
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl
 {
     template <typename Tag>
     struct size_impl;

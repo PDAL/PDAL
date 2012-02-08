@@ -18,8 +18,7 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     class thread;
     
     namespace detail
@@ -28,32 +27,32 @@ namespace boost
         struct thread_exit_callback_node;
         struct tss_data_node
         {
-            boost::shared_ptr<boost::detail::tss_cleanup_function> func;
+            pdalboost::shared_ptr<pdalboost::detail::tss_cleanup_function> func;
             void* value;
 
-            tss_data_node(boost::shared_ptr<boost::detail::tss_cleanup_function> func_,
+            tss_data_node(pdalboost::shared_ptr<pdalboost::detail::tss_cleanup_function> func_,
                           void* value_):
                 func(func_),value(value_)
             {}
         };
 
         struct thread_data_base;
-        typedef boost::shared_ptr<thread_data_base> thread_data_ptr;
+        typedef pdalboost::shared_ptr<thread_data_base> thread_data_ptr;
         
         struct BOOST_THREAD_DECL thread_data_base:
             enable_shared_from_this<thread_data_base>
         {
             thread_data_ptr self;
             pthread_t thread_handle;
-            boost::mutex data_mutex;
-            boost::condition_variable done_condition;
-            boost::mutex sleep_mutex;
-            boost::condition_variable sleep_condition;
+            pdalboost::mutex data_mutex;
+            pdalboost::condition_variable done_condition;
+            pdalboost::mutex sleep_mutex;
+            pdalboost::condition_variable sleep_condition;
             bool done;
             bool join_started;
             bool joined;
-            boost::detail::thread_exit_callback_node* thread_exit_callbacks;
-            std::map<void const*,boost::detail::tss_data_node> tss_data;
+            pdalboost::detail::thread_exit_callback_node* thread_exit_callbacks;
+            std::map<void const*,pdalboost::detail::tss_data_node> tss_data;
             bool interrupt_enabled;
             bool interrupt_requested;
             pthread_mutex_t* cond_mutex;

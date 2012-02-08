@@ -17,8 +17,7 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     class shared_mutex
     {
     private:
@@ -119,7 +118,7 @@ namespace boost
 
         void lock_shared()
         {
-            BOOST_VERIFY(timed_lock_shared(::boost::detail::get_system_time_sentinel()));
+            BOOST_VERIFY(timed_lock_shared(::pdalboost::detail::get_system_time_sentinel()));
         }
 
         template<typename TimeDuration>
@@ -128,7 +127,7 @@ namespace boost
             return timed_lock_shared(get_system_time()+relative_time);
         }
 
-        bool timed_lock_shared(boost::system_time const& wait_until)
+        bool timed_lock_shared(pdalboost::system_time const& wait_until)
         {
             for(;;)
             {
@@ -141,7 +140,7 @@ namespace boost
                         ++new_state.shared_waiting;
                         if(!new_state.shared_waiting)
                         {
-                            boost::throw_exception(boost::lock_error());
+                            pdalboost::throw_exception(pdalboost::lock_error());
                         }
                     }
                     else
@@ -149,7 +148,7 @@ namespace boost
                         ++new_state.shared_count;
                         if(!new_state.shared_count)
                         {
-                            boost::throw_exception(boost::lock_error());
+                            pdalboost::throw_exception(pdalboost::lock_error());
                         }
                     }
 
@@ -166,7 +165,7 @@ namespace boost
                     return true;
                 }
                     
-                unsigned long const res=detail::win32::WaitForSingleObject(semaphores[unlock_sem],::boost::detail::get_milliseconds_until(wait_until));
+                unsigned long const res=detail::win32::WaitForSingleObject(semaphores[unlock_sem],::pdalboost::detail::get_milliseconds_until(wait_until));
                 if(res==detail::win32::timeout)
                 {
                     for(;;)
@@ -255,7 +254,7 @@ namespace boost
 
         void lock()
         {
-            BOOST_VERIFY(timed_lock(::boost::detail::get_system_time_sentinel()));
+            BOOST_VERIFY(timed_lock(::pdalboost::detail::get_system_time_sentinel()));
         }
 
         template<typename TimeDuration>
@@ -290,7 +289,7 @@ namespace boost
         }
 
 
-        bool timed_lock(boost::system_time const& wait_until)
+        bool timed_lock(pdalboost::system_time const& wait_until)
         {
             for(;;)
             {
@@ -304,7 +303,7 @@ namespace boost
                         ++new_state.exclusive_waiting;
                         if(!new_state.exclusive_waiting)
                         {
-                            boost::throw_exception(boost::lock_error());
+                            pdalboost::throw_exception(pdalboost::lock_error());
                         }
                         
                         new_state.exclusive_waiting_blocked=true;
@@ -326,7 +325,7 @@ namespace boost
                 {
                     return true;
                 }
-                unsigned long const wait_res=detail::win32::WaitForMultipleObjects(2,semaphores,true,::boost::detail::get_milliseconds_until(wait_until));
+                unsigned long const wait_res=detail::win32::WaitForMultipleObjects(2,semaphores,true,::pdalboost::detail::get_milliseconds_until(wait_until));
                 if(wait_res==detail::win32::timeout)
                 {
                     for(;;)
@@ -401,7 +400,7 @@ namespace boost
                         ++new_state.shared_waiting;
                         if(!new_state.shared_waiting)
                         {
-                            boost::throw_exception(boost::lock_error());
+                            pdalboost::throw_exception(pdalboost::lock_error());
                         }
                     }
                     else
@@ -409,7 +408,7 @@ namespace boost
                         ++new_state.shared_count;
                         if(!new_state.shared_count)
                         {
-                            boost::throw_exception(boost::lock_error());
+                            pdalboost::throw_exception(pdalboost::lock_error());
                         }
                         new_state.upgrade=true;
                     }

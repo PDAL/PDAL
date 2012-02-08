@@ -14,7 +14,7 @@
 #include <boost/spirit/home/support/unused.hpp>
 #include <boost/optional.hpp>
 
-namespace boost { namespace spirit { namespace qi { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi { namespace detail
 {
     template <typename Iterator, typename Context, typename Skipper>
     struct pass_function
@@ -37,7 +37,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
         }
 
         template <typename Component, typename Attribute>
-        bool operator()(Component const& component, boost::optional<Attribute>& attr)
+        bool operator()(Component const& component, pdalboost::optional<Attribute>& attr)
         {
             // return true if the parser succeeds
             Attribute val;

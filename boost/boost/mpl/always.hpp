@@ -18,7 +18,7 @@
 #include <boost/mpl/aux_/na.hpp>
 #include <boost/mpl/aux_/arity_spec.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template< typename Value > struct always
 {

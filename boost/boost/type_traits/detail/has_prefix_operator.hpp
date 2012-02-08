@@ -37,7 +37,7 @@
 #   pragma warning ( disable : 4146 4804 4913 4244 )
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail {
 
 // This namespace ensures that argument-dependent name lookup does not mess things up.
@@ -84,9 +84,9 @@ template < typename Rhs >
 struct operator_returns_void {
    // overloads of function returns_void make the difference
    // yes_type and no_type have different size by construction
-   static ::boost::type_traits::yes_type returns_void(returns_void_t);
-   static ::boost::type_traits::no_type returns_void(int);
-   BOOST_STATIC_CONSTANT(bool, value = (sizeof(::boost::type_traits::yes_type)==sizeof(returns_void((BOOST_TT_TRAIT_OP make<Rhs>(),returns_void_t())))));
+   static ::pdalboost::type_traits::yes_type returns_void(returns_void_t);
+   static ::pdalboost::type_traits::no_type returns_void(int);
+   BOOST_STATIC_CONSTANT(bool, value = (sizeof(::pdalboost::type_traits::yes_type)==sizeof(returns_void((BOOST_TT_TRAIT_OP make<Rhs>(),returns_void_t())))));
 };
 
 
@@ -128,10 +128,10 @@ struct operator_returns_Ret < Rhs, Ret, true > {
 // condition: Ret!=void and Ret!=dont_care and the operator does not return void
 template < typename Rhs, typename Ret >
 struct operator_returns_Ret < Rhs, Ret, false > {
-   static ::boost::type_traits::yes_type is_convertible_to_Ret(Ret); // this version is preferred for types convertible to Ret
-   static ::boost::type_traits::no_type is_convertible_to_Ret(...); // this version is used otherwise
+   static ::pdalboost::type_traits::yes_type is_convertible_to_Ret(Ret); // this version is preferred for types convertible to Ret
+   static ::pdalboost::type_traits::no_type is_convertible_to_Ret(...); // this version is used otherwise
 
-   BOOST_STATIC_CONSTANT(bool, value = (sizeof(is_convertible_to_Ret(BOOST_TT_TRAIT_OP make<Rhs>()))==sizeof(::boost::type_traits::yes_type)));
+   BOOST_STATIC_CONSTANT(bool, value = (sizeof(is_convertible_to_Ret(BOOST_TT_TRAIT_OP make<Rhs>()))==sizeof(::pdalboost::type_traits::yes_type)));
 };
 
 
@@ -146,10 +146,10 @@ no_operator operator,(no_operator, has_operator);
 
 template < typename Rhs >
 struct operator_exists {
-   static ::boost::type_traits::yes_type check(has_operator); // this version is preferred when operator exists
-   static ::boost::type_traits::no_type check(no_operator); // this version is used otherwise
+   static ::pdalboost::type_traits::yes_type check(has_operator); // this version is preferred when operator exists
+   static ::pdalboost::type_traits::no_type check(no_operator); // this version is used otherwise
 
-   BOOST_STATIC_CONSTANT(bool, value = (sizeof(check(((BOOST_TT_TRAIT_OP make<Rhs>()),make<has_operator>())))==sizeof(::boost::type_traits::yes_type)));
+   BOOST_STATIC_CONSTANT(bool, value = (sizeof(check(((BOOST_TT_TRAIT_OP make<Rhs>()),make<has_operator>())))==sizeof(::pdalboost::type_traits::yes_type)));
 };
 
 
@@ -172,7 +172,7 @@ template < typename Rhs, typename Ret >
 struct trait_impl1 < Rhs, Ret, false > {
    BOOST_STATIC_CONSTANT(bool,
       value = (
-         ::boost::type_traits::ice_and<
+         ::pdalboost::type_traits::ice_and<
             operator_exists < Rhs >::value,
             operator_returns_Ret < Rhs, Ret, operator_returns_void < Rhs >::value >::value
          >::value
@@ -189,9 +189,9 @@ struct trait_impl1 < void, Ret, false > {
 // defines some typedef for convenience
 template < typename Rhs, typename Ret >
 struct trait_impl {
-   typedef typename ::boost::remove_reference<Rhs>::type Rhs_noref;
-   typedef typename ::boost::remove_cv<Rhs_noref>::type Rhs_nocv;
-   typedef typename ::boost::remove_cv< typename ::boost::remove_reference< typename ::boost::remove_pointer<Rhs_noref>::type >::type >::type Rhs_noptr;
+   typedef typename ::pdalboost::remove_reference<Rhs>::type Rhs_noref;
+   typedef typename ::pdalboost::remove_cv<Rhs_noref>::type Rhs_nocv;
+   typedef typename ::pdalboost::remove_cv< typename ::pdalboost::remove_reference< typename ::pdalboost::remove_pointer<Rhs_noref>::type >::type >::type Rhs_noptr;
    BOOST_STATIC_CONSTANT(bool, value = (trait_impl1 < Rhs_noref, Ret, BOOST_TT_FORBIDDEN_IF >::value));
 };
 
@@ -199,9 +199,9 @@ struct trait_impl {
 } // namespace detail
 
 // this is the accessible definition of the trait to end user
-BOOST_TT_AUX_BOOL_TRAIT_DEF2(BOOST_TT_TRAIT_NAME, Rhs, Ret=::boost::detail::BOOST_JOIN(BOOST_TT_TRAIT_NAME,_impl)::dont_care, (::boost::detail::BOOST_JOIN(BOOST_TT_TRAIT_NAME,_impl)::trait_impl < Rhs, Ret >::value))
+BOOST_TT_AUX_BOOL_TRAIT_DEF2(BOOST_TT_TRAIT_NAME, Rhs, Ret=::pdalboost::detail::BOOST_JOIN(BOOST_TT_TRAIT_NAME,_impl)::dont_care, (::pdalboost::detail::BOOST_JOIN(BOOST_TT_TRAIT_NAME,_impl)::trait_impl < Rhs, Ret >::value))
 
-} // namespace boost
+} // namespace pdalboost
 
 #if defined(BOOST_MSVC)
 #   pragma warning ( pop )

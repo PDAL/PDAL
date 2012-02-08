@@ -62,7 +62,7 @@
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail{
 
 #ifdef BOOST_IS_ABSTRACT
@@ -130,7 +130,7 @@ struct is_abstract_select<false>
 template <class T>
 struct is_abstract_imp
 {
-   typedef is_abstract_select< ::boost::is_class<T>::value> selector;
+   typedef is_abstract_select< ::pdalboost::is_class<T>::value> selector;
    typedef typename selector::template rebind<T> binder;
    typedef typename binder::type type;
 
@@ -141,12 +141,12 @@ struct is_abstract_imp
 }
 
 #ifndef BOOST_NO_IS_ABSTRACT
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_abstract,T,::boost::detail::is_abstract_imp<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_abstract,T,::pdalboost::detail::is_abstract_imp<T>::value)
 #else
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_abstract,T,::boost::detail::is_polymorphic_imp<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_abstract,T,::pdalboost::detail::is_polymorphic_imp<T>::value)
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

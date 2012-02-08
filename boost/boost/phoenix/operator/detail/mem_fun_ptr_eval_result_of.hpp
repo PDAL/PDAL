@@ -42,7 +42,7 @@
             )
 
             typedef
-                typename boost::result_of<
+                typename pdalboost::result_of<
                     child1(
                         BOOST_PP_ENUM_SHIFTED_PARAMS(
                             BOOST_PHOENIX_ITERATION

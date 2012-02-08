@@ -50,7 +50,7 @@ namespace std { using ::time; using ::srand; }
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -150,7 +150,7 @@ public:
         BOOST_TEST_FOREACH( test_observer*, to, m_observers )
             to->test_unit_start( tc );
 
-        boost::timer tc_timer;
+        pdalboost::timer tc_timer;
         test_unit_id bkup = m_curr_test_case;
         m_curr_test_case = tc.p_id;
         unit_test_monitor_t::error_level run_result = unit_test_monitor.execute_and_translate( tc );
@@ -261,7 +261,7 @@ init( init_unit_test_func init_func, int argc, char* argv[] )
     master_test_suite().argv = argv;
 
     try {
-        boost::execution_monitor em;
+        pdalboost::execution_monitor em;
 
         ut_detail::test_init_caller tic( init_func );
 
@@ -413,7 +413,7 @@ run( test_unit_id id, bool continue_test )
 
     if( call_start_finish ) {
         BOOST_TEST_FOREACH( test_observer*, to, s_frk_impl().m_observers ) {
-            boost::execution_monitor em;
+            pdalboost::execution_monitor em;
 
             try {
                 em.execute( ut_detail::test_start_caller( to, tcc.p_count ) );
@@ -494,7 +494,7 @@ test_unit_aborted( test_unit const& tu )
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

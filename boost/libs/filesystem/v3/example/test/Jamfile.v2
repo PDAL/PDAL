@@ -10,8 +10,8 @@
 
 project
     : requirements
-      <library>/boost/filesystem//boost_filesystem
-      <library>/boost/system//boost_system
+      <library>/boost/filesystem//pdalboost_filesystem
+      <library>/boost/system//pdalboost_system
       <toolset>msvc:<asynch-exceptions>on
     ;
     

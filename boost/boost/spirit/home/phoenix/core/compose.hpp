@@ -24,7 +24,7 @@
       , as_actor_base<BOOST_PP_CAT(T, n)>                                       \
     >::type
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
 
 ///////////////////////////////////////////////////////////////////////////////

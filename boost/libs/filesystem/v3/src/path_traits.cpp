@@ -32,9 +32,9 @@
 #include <cstring>  // for strlen
 #include <cwchar>   // for wcslen
 
-namespace pt = boost::filesystem3::path_traits;
-namespace fs = boost::filesystem3;
-namespace bs = boost::system;
+namespace pt = pdalboost::filesystem3::path_traits;
+namespace fs = pdalboost::filesystem3;
+namespace bs = pdalboost::system;
 
 //--------------------------------------------------------------------------------------//
 //                                  configuration                                       //
@@ -85,7 +85,7 @@ namespace {
     {
       //std::cout << " result is " << static_cast<int>(res) << std::endl;
       BOOST_FILESYSTEM_THROW(bs::system_error(res, fs::codecvt_error_category(),
-        "boost::filesystem::path codecvt to wstring"));
+        "pdalboost::filesystem::path codecvt to wstring"));
     }
     target.append(to, to_next); 
   }
@@ -119,7 +119,7 @@ namespace {
     {
       //std::cout << " result is " << static_cast<int>(res) << std::endl;
       BOOST_FILESYSTEM_THROW(bs::system_error(res, fs::codecvt_error_category(),
-        "boost::filesystem::path codecvt to string"));
+        "pdalboost::filesystem::path codecvt to string"));
     }
     target.append(to, to_next); 
   }
@@ -130,7 +130,7 @@ namespace {
 //                                   path_traits                                        //
 //--------------------------------------------------------------------------------------//
 
-namespace boost { namespace filesystem3 { namespace path_traits {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace filesystem3 { namespace path_traits {
 
 //--------------------------------------------------------------------------------------//
 //                          convert const char* to wstring                             //
@@ -156,7 +156,7 @@ namespace boost { namespace filesystem3 { namespace path_traits {
     //  dynamically allocate a buffer only if source is unusually large
     if (buf_size > default_codecvt_buf_size)
     {
-      boost::scoped_array< wchar_t > buf(new wchar_t [buf_size]);
+      pdalboost::scoped_array< wchar_t > buf(new wchar_t [buf_size]);
       convert_aux(from, from_end, buf.get(), buf.get()+buf_size, to, cvt);
     }
     else
@@ -195,7 +195,7 @@ namespace boost { namespace filesystem3 { namespace path_traits {
     //  dynamically allocate a buffer only if source is unusually large
     if (buf_size > default_codecvt_buf_size)
     {
-      boost::scoped_array< char > buf(new char [buf_size]);
+      pdalboost::scoped_array< char > buf(new char [buf_size]);
       convert_aux(from, from_end, buf.get(), buf.get()+buf_size, to, cvt);
     }
     else
@@ -204,6 +204,6 @@ namespace boost { namespace filesystem3 { namespace path_traits {
       convert_aux(from, from_end, buf, buf+default_codecvt_buf_size, to, cvt);
     }
   }
-}}} // namespace boost::filesystem3::path_traits
+}}} // namespace pdalboost::filesystem3::path_traits
 
 #endif  // no wide character support

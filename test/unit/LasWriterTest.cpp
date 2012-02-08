@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/lexical_cast.hpp>
-#include <pdal/external/boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <boost/concept_check.hpp>
 
 #include <pdal/FileUtils.hpp>
@@ -163,7 +163,7 @@ static void test_a_format(const std::string& refFile, boost::uint8_t majorVersio
         writer.setSystemIdentifier("libLAS");
         writer.setGeneratingSoftware("libLAS 1.2");
         
-		pdal::external::boost::uuids::uuid u = boost::lexical_cast<pdal::external::boost::uuids::uuid>("8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
+        boost::uuids::uuid u = boost::lexical_cast<boost::uuids::uuid>("8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
         writer.setProjectId(u);
 
         writer.write(numPoints);

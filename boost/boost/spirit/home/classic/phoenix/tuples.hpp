@@ -26,7 +26,7 @@
 #endif
 
 #if defined(__BORLANDC__) && (__BORLANDC__ <= 0x561)
-namespace phoenix { namespace borland_only
+namespace pdalboostphoenix { namespace borland_only
 {
     namespace ftors
     {
@@ -52,7 +52,7 @@ namespace phoenix { namespace borland_only
         template <typename T> struct do_ {};
     }
 
-}} // namespace phoenix::borland_only
+}} // namespace pdalboostphoenix::borland_only
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ namespace phoenix { namespace borland_only
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace phoenix {
+namespace pdalboostphoenix {
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -123,7 +123,7 @@ namespace phoenix {
 //                      tuple_index<N> _N;
 //
 //                  These indexes may be used by 'using' namespace
-//                  phoenix::tuple_index_names.
+//                  pdalboostphoenix::tuple_index_names.
 //
 //                  Access to out of bound indexes returns a nil_t value.
 //
@@ -163,8 +163,8 @@ namespace phoenix {
 //
 ///////////////////////////////////////////////////////////////////////////////
 struct nil_t {};
-using boost::remove_reference;
-using boost::call_traits;
+using pdalboost::remove_reference;
+using pdalboost::call_traits;
 
 //////////////////////////////////
 namespace impl {
@@ -1333,6 +1333,6 @@ struct tuple<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, nil_t>
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-}   //  namespace phoenix
+}   //  namespace pdalboostphoenix
 
 #endif

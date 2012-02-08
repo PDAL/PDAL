@@ -24,8 +24,7 @@
 #endif
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace hash_detail
     {
         inline void hash_float_combine(std::size_t& seed, std::size_t value)
@@ -36,8 +35,8 @@ namespace boost
         template <class T>
         inline std::size_t float_hash_impl2(T v)
         {
-            boost::hash_detail::call_frexp<T> frexp;
-            boost::hash_detail::call_ldexp<T> ldexp;
+            pdalboost::hash_detail::call_frexp<T> frexp;
+            pdalboost::hash_detail::call_ldexp<T> ldexp;
         
             int exp = 0;
 
@@ -58,7 +57,7 @@ namespace boost
             // ceiling(digits(T) * log2(radix(T))/ digits(size_t)) - 1;
             std::size_t const length
                 = (limits<T>::digits *
-                        boost::static_log2<limits<T>::radix>::value
+                        pdalboost::static_log2<limits<T>::radix>::value
                         + limits<std::size_t>::digits - 1)
                 / limits<std::size_t>::digits;
 

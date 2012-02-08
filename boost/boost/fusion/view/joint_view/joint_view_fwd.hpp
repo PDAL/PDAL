@@ -7,7 +7,7 @@
 #if !defined(BOOST_FUSION_JOINT_VIEW_FWD_HPP_INCLUDED)
 #define BOOST_FUSION_JOINT_VIEW_FWD_HPP_INCLUDED
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct joint_view_tag;
 

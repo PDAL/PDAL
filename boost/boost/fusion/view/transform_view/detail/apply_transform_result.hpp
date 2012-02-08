@@ -10,7 +10,7 @@
 
 #include <boost/utility/result_of.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct void_;
     
@@ -21,12 +21,12 @@ namespace boost { namespace fusion
         {
             template <typename T0, typename T1 = void_>
             struct apply
-                : boost::result_of<F(T0, T1)>
+                : pdalboost::result_of<F(T0, T1)>
             {};
 
             template <typename T0>
             struct apply<T0, void_>
-                : boost::result_of<F(T0)>
+                : pdalboost::result_of<F(T0)>
             {};
         };
     }

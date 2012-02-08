@@ -26,7 +26,7 @@
 // should be the last #include
 #include "boost/type_traits/detail/bool_trait_def.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //////////////////////////////////////////////////////////////////////////
 // class template static_visitor
@@ -43,7 +43,7 @@ namespace detail {
 
 } // namespace detail
 
-template <typename R = ::boost::detail::static_visitor_default_return>
+template <typename R = ::pdalboost::detail::static_visitor_default_return>
 class static_visitor
     : public detail::is_static_visitor_tag
 {
@@ -76,7 +76,7 @@ template <typename T>
 struct is_static_visitor_impl
 {
     BOOST_STATIC_CONSTANT(bool, value = 
-        (::boost::is_base_and_derived< 
+        (::pdalboost::is_base_and_derived< 
             detail::is_static_visitor_tag,
             T
         >::value));
@@ -87,10 +87,10 @@ struct is_static_visitor_impl
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(
       is_static_visitor
     , T
-    , (::boost::detail::is_static_visitor_impl<T>::value)
+    , (::pdalboost::detail::is_static_visitor_impl<T>::value)
     )
 
-} // namespace boost
+} // namespace pdalboost
 
 #include "boost/type_traits/detail/bool_trait_undef.hpp"
 

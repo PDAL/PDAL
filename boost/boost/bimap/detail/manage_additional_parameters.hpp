@@ -28,7 +28,7 @@
 
 #include <boost/bimap/detail/is_set_type_of.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 
 template< class Type >
@@ -42,12 +42,12 @@ namespace detail {
 /// \brief Metafunction to check if a given type is a data_hook specification.
 
 template< class Type >
-struct is_with_info : ::boost::mpl::false_ {};
+struct is_with_info : ::pdalboost::mpl::false_ {};
 
 template< class ValueType >
-struct is_with_info< with_info<ValueType> > : ::boost::mpl::true_ {};
+struct is_with_info< with_info<ValueType> > : ::pdalboost::mpl::true_ {};
 
-/** \struct boost::bimaps::detail::manage_additional_parameters
+/** \struct pdalboost::bimaps::detail::manage_additional_parameters
 \brief Utility class to extract the additional parameters from the template parameters.
 
 \code
@@ -84,7 +84,7 @@ struct manage_additional_parameters
     {
         typedef left_based set_type_of_relation;
         typedef std::allocator<void> allocator;
-        typedef ::boost::mpl::na additional_info;
+        typedef ::pdalboost::mpl::na additional_info;
     };
 
     // (2) manage_additional_parameters<Allocator,not_specified,not_specified>
@@ -97,7 +97,7 @@ struct manage_additional_parameters
     {
         typedef left_based set_type_of_relation;
         typedef AP1 allocator;
-        typedef ::boost::mpl::na additional_info;
+        typedef ::pdalboost::mpl::na additional_info;
     };
 
     // (3) manage_additional_parameters<
@@ -111,7 +111,7 @@ struct manage_additional_parameters
     {
         typedef AP1 set_type_of_relation;
         typedef std::allocator<void> allocator;
-        typedef ::boost::mpl::na additional_info;
+        typedef ::pdalboost::mpl::na additional_info;
     };
 
     // (4) manage_additional_parameters<
@@ -125,7 +125,7 @@ struct manage_additional_parameters
     {
         typedef AP1 set_type_of_relation;
         typedef AP2 allocator;
-        typedef ::boost::mpl::na additional_info;
+        typedef ::pdalboost::mpl::na additional_info;
     };
 
     // (5) manage_additional_parameters<InfoToHook,not_specified,not_specified>
@@ -187,11 +187,11 @@ struct manage_additional_parameters
 
     typedef BOOST_DEDUCED_TYPENAME mpl::if_
     <
-        ::boost::mpl::is_na<AP1>,
+        ::pdalboost::mpl::is_na<AP1>,
         case_NNN, // (1)
         BOOST_DEDUCED_TYPENAME mpl::if_
         <
-            ::boost::mpl::is_na<AP2>,
+            ::pdalboost::mpl::is_na<AP2>,
             BOOST_DEDUCED_TYPENAME mpl::if_
             <
                 is_set_type_of_relation<AP1>,
@@ -207,7 +207,7 @@ struct manage_additional_parameters
             >::type,
             BOOST_DEDUCED_TYPENAME mpl::if_
             <
-                ::boost::mpl::is_na<AP3>,
+                ::pdalboost::mpl::is_na<AP3>,
                 BOOST_DEDUCED_TYPENAME mpl::if_
                 <
                     is_with_info<AP1>,
@@ -236,7 +236,7 @@ struct manage_additional_parameters
 
 } // namespace detail
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_DETAIL_MANAGE_ADDITIONAL_PARAMETERS_HPP

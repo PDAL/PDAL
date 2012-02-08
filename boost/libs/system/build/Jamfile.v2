@@ -16,10 +16,10 @@ project boost/system
 
 SOURCES = error_code ;
 
-lib boost_system
+lib pdalboost_system
    : $(SOURCES).cpp
    : <link>shared:<define>BOOST_SYSTEM_DYN_LINK=1
      <link>static:<define>BOOST_SYSTEM_STATIC_LINK=1
    ;
 
-boost-install boost_system ;
+boost-install pdalboost_system ;

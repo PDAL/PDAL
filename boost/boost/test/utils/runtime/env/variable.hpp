@@ -30,7 +30,7 @@
 // Boost
 #include <boost/optional.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -66,7 +66,7 @@ public:
     }
 
     template<typename T>
-    void        value( boost::optional<T>& res ) const
+    void        value( pdalboost::optional<T>& res ) const
     {
         if( has_value() )
             res = arg_value<T>( *m_data->m_value );
@@ -107,7 +107,7 @@ public:
 #if BOOST_WORKAROUND(__MWERKS__, BOOST_TESTED_AT(0x3206)) || \
     BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x0593))
     template<typename T>
-    void        value( boost::optional<T>& res ) const      { variable_base::value( res ); }
+    void        value( pdalboost::optional<T>& res ) const      { variable_base::value( res ); }
 #else
     using       variable_base::value;
 #endif
@@ -181,7 +181,7 @@ operator!=( V const& v, variable<T> ev )
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 // ************************************************************************** //
 // ************************************************************************** //
@@ -193,7 +193,7 @@ operator!=( V const& v, variable<T> ev )
 // **************        runtime::environment::variable        ************** //
 // ************************************************************************** //
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -218,6 +218,6 @@ variable<T>::variable( cstring var_name, Modifiers const& m )
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_ENV_VARIABLE_HPP_062604GER

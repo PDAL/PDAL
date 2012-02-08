@@ -31,7 +31,7 @@
 
 #include <boost/random/detail/disable_warnings.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace random {
 namespace detail {
 
@@ -42,9 +42,9 @@ namespace detail {
 template<class T>
 struct seed_type
 {
-    typedef typename boost::mpl::if_<boost::is_integral<T>,
+    typedef typename pdalboost::mpl::if_<pdalboost::is_integral<T>,
         T,
-        boost::uint32_t
+        pdalboost::uint32_t
     >::type type;
 };
 
@@ -90,7 +90,7 @@ void generate_from_real(Engine& eng, Iter begin, Iter end)
     typedef typename Engine::result_type RealType;
     const int Bits = detail::generator_bits<Engine>::value();
     int remaining_bits = 0;
-    boost::uint_least32_t saved_bits = 0;
+    pdalboost::uint_least32_t saved_bits = 0;
     RealType multiplier = pow2<RealType>( Bits);
     RealType mult32 = RealType(4294967296.0); // 2^32
     while(true) {
@@ -99,16 +99,16 @@ void generate_from_real(Engine& eng, Iter begin, Iter end)
         // Make sure the compiler can optimize this out
         // if it isn't possible.
         if(Bits < 32 && available_bits < 32 - remaining_bits) {
-            saved_bits |= boost::uint_least32_t(val) << remaining_bits;
+            saved_bits |= pdalboost::uint_least32_t(val) << remaining_bits;
             remaining_bits += Bits;
         } else {
             // If Bits < 32, then remaining_bits != 0, since
             // if remaining_bits == 0, available_bits < 32 - 0,
             // and we won't get here to begin with.
             if(Bits < 32 || remaining_bits != 0) {
-                boost::uint_least32_t divisor =
-                    (boost::uint_least32_t(1) << (32 - remaining_bits));
-                boost::uint_least32_t extra_bits = boost::uint_least32_t(fmod(val, mult32)) & (divisor - 1);
+                pdalboost::uint_least32_t divisor =
+                    (pdalboost::uint_least32_t(1) << (32 - remaining_bits));
+                pdalboost::uint_least32_t extra_bits = pdalboost::uint_least32_t(fmod(val, mult32)) & (divisor - 1);
                 val = val / divisor;
                 *begin++ = saved_bits | (extra_bits << remaining_bits);
                 if(begin == end) return;
@@ -118,14 +118,14 @@ void generate_from_real(Engine& eng, Iter begin, Iter end)
             // If Bits < 32 we should never enter this loop
             if(Bits >= 32) {
                 for(; available_bits >= 32; available_bits -= 32) {
-                    boost::uint_least32_t word = boost::uint_least32_t(fmod(val, mult32));
+                    pdalboost::uint_least32_t word = pdalboost::uint_least32_t(fmod(val, mult32));
                     val /= mult32;
                     *begin++ = word;
                     if(begin == end) return;
                 }
             }
             remaining_bits = available_bits;
-            saved_bits = static_cast<boost::uint_least32_t>(val);
+            saved_bits = static_cast<pdalboost::uint_least32_t>(val);
         }
     }
 }
@@ -134,10 +134,10 @@ template<class Engine, class Iter>
 void generate_from_int(Engine& eng, Iter begin, Iter end)
 {
     typedef typename Engine::result_type IntType;
-    typedef typename boost::make_unsigned<IntType>::type unsigned_type;
+    typedef typename pdalboost::make_unsigned<IntType>::type unsigned_type;
     int remaining_bits = 0;
-    boost::uint_least32_t saved_bits = 0;
-    unsigned_type range = boost::random::detail::subtract<IntType>()((eng.max)(), (eng.min)());
+    pdalboost::uint_least32_t saved_bits = 0;
+    unsigned_type range = pdalboost::random::detail::subtract<IntType>()((eng.max)(), (eng.min)());
 
     int bits =
         (range == (std::numeric_limits<unsigned_type>::max)()) ?
@@ -159,16 +159,16 @@ void generate_from_int(Engine& eng, Iter begin, Iter end)
     while(true) {
         unsigned_type val;
         do {
-            val = boost::random::detail::subtract<IntType>()(eng(), (eng.min)());
+            val = pdalboost::random::detail::subtract<IntType>()(eng(), (eng.min)());
         } while(limit != range && val > limit);
         val &= mask;
         int available_bits = bits;
         if(available_bits == 32) {
-            *begin++ = static_cast<boost::uint_least32_t>(val) & 0xFFFFFFFFu;
+            *begin++ = static_cast<pdalboost::uint_least32_t>(val) & 0xFFFFFFFFu;
             if(begin == end) return;
         } else if(available_bits % 32 == 0) {
             for(int i = 0; i < available_bits / 32; ++i) {
-                boost::uint_least32_t word = boost::uint_least32_t(val) & 0xFFFFFFFFu;
+                pdalboost::uint_least32_t word = pdalboost::uint_least32_t(val) & 0xFFFFFFFFu;
                 int supress_warning = (bits >= 32);
                 BOOST_ASSERT(supress_warning == 1);
                 val >>= (32 * supress_warning);
@@ -176,11 +176,11 @@ void generate_from_int(Engine& eng, Iter begin, Iter end)
                 if(begin == end) return;
             }
         } else if(bits < 32 && available_bits < 32 - remaining_bits) {
-            saved_bits |= boost::uint_least32_t(val) << remaining_bits;
+            saved_bits |= pdalboost::uint_least32_t(val) << remaining_bits;
             remaining_bits += bits;
         } else {
             if(bits < 32 || remaining_bits != 0) {
-                boost::uint_least32_t extra_bits = boost::uint_least32_t(val) & ((boost::uint_least32_t(1) << (32 - remaining_bits)) - 1);
+                pdalboost::uint_least32_t extra_bits = pdalboost::uint_least32_t(val) & ((pdalboost::uint_least32_t(1) << (32 - remaining_bits)) - 1);
                 val >>= 32 - remaining_bits;
                 *begin++ = saved_bits | (extra_bits << remaining_bits);
                 if(begin == end) return;
@@ -189,7 +189,7 @@ void generate_from_int(Engine& eng, Iter begin, Iter end)
             }
             if(bits >= 32) {
                 for(; available_bits >= 32; available_bits -= 32) {
-                    boost::uint_least32_t word = boost::uint_least32_t(val) & 0xFFFFFFFFu;
+                    pdalboost::uint_least32_t word = pdalboost::uint_least32_t(val) & 0xFFFFFFFFu;
                     int supress_warning = (bits >= 32);
                     BOOST_ASSERT(supress_warning == 1);
                     val >>= (32 * supress_warning);
@@ -198,19 +198,19 @@ void generate_from_int(Engine& eng, Iter begin, Iter end)
                 }
             }
             remaining_bits = available_bits;
-            saved_bits = static_cast<boost::uint_least32_t>(val);
+            saved_bits = static_cast<pdalboost::uint_least32_t>(val);
         }
     }
 }
 
 template<class Engine, class Iter>
-void generate_impl(Engine& eng, Iter first, Iter last, boost::mpl::true_)
+void generate_impl(Engine& eng, Iter first, Iter last, pdalboost::mpl::true_)
 {
     return detail::generate_from_int(eng, first, last);
 }
 
 template<class Engine, class Iter>
-void generate_impl(Engine& eng, Iter first, Iter last, boost::mpl::false_)
+void generate_impl(Engine& eng, Iter first, Iter last, pdalboost::mpl::false_)
 {
     return detail::generate_from_real(eng, first, last);
 }
@@ -218,7 +218,7 @@ void generate_impl(Engine& eng, Iter first, Iter last, boost::mpl::false_)
 template<class Engine, class Iter>
 void generate(Engine& eng, Iter first, Iter last)
 {
-    return detail::generate_impl(eng, first, last, boost::is_integral<typename Engine::result_type>());
+    return detail::generate_impl(eng, first, last, pdalboost::is_integral<typename Engine::result_type>());
 }
 
 
@@ -226,12 +226,12 @@ void generate(Engine& eng, Iter first, Iter last)
 template<class IntType, IntType m, class SeedSeq>
 IntType seed_one_int(SeedSeq& seq)
 {
-    static const int log = ::boost::mpl::if_c<(m == 0),
-        ::boost::mpl::int_<(::std::numeric_limits<IntType>::digits)>,
-        ::boost::static_log2<m> >::type::value;
+    static const int log = ::pdalboost::mpl::if_c<(m == 0),
+        ::pdalboost::mpl::int_<(::std::numeric_limits<IntType>::digits)>,
+        ::pdalboost::static_log2<m> >::type::value;
     static const int k =
         (log + ((~(static_cast<IntType>(2) << (log - 1)) & m)? 32 : 31)) / 32;
-    ::boost::uint_least32_t array[log / 32 + 4];
+    ::pdalboost::uint_least32_t array[log / 32 + 4];
     seq.generate(&array[0], &array[0] + k + 3);
     IntType s = 0;
     for(int j = 0; j < k; ++j) {
@@ -245,9 +245,9 @@ IntType seed_one_int(SeedSeq& seq)
 template<class IntType, IntType m, class Iter>
 IntType get_one_int(Iter& first, Iter last)
 {
-    static const int log = ::boost::mpl::if_c<(m == 0),
-        ::boost::mpl::int_<(::std::numeric_limits<IntType>::digits)>,
-        ::boost::static_log2<m> >::type::value;
+    static const int log = ::pdalboost::mpl::if_c<(m == 0),
+        ::pdalboost::mpl::int_<(::std::numeric_limits<IntType>::digits)>,
+        ::pdalboost::static_log2<m> >::type::value;
     static const int k =
         (log + ((~(static_cast<IntType>(2) << (log - 1)) & m)? 32 : 31)) / 32;
     IntType s = 0;
@@ -266,26 +266,26 @@ IntType get_one_int(Iter& first, Iter last)
 template<int w, std::size_t n, class SeedSeq, class UIntType>
 void seed_array_int_impl(SeedSeq& seq, UIntType (&x)[n])
 {
-    boost::uint_least32_t storage[((w+31)/32) * n];
+    pdalboost::uint_least32_t storage[((w+31)/32) * n];
     seq.generate(&storage[0], &storage[0] + ((w+31)/32) * n);
     for(std::size_t j = 0; j < n; j++) {
         UIntType val = 0;
         for(std::size_t k = 0; k < (w+31)/32; ++k) {
             val += static_cast<UIntType>(storage[(w+31)/32*j + k]) << 32*k;
         }
-        x[j] = val & ::boost::low_bits_mask_t<w>::sig_bits;
+        x[j] = val & ::pdalboost::low_bits_mask_t<w>::sig_bits;
     }
 }
 
 template<int w, std::size_t n, class SeedSeq, class IntType>
-inline void seed_array_int_impl(SeedSeq& seq, IntType (&x)[n], boost::mpl::true_)
+inline void seed_array_int_impl(SeedSeq& seq, IntType (&x)[n], pdalboost::mpl::true_)
 {
-    typedef typename boost::make_unsigned<IntType>::type unsigned_array[n];
+    typedef typename pdalboost::make_unsigned<IntType>::type unsigned_array[n];
     seed_array_int_impl<w>(seq, reinterpret_cast<unsigned_array&>(x));
 }
 
 template<int w, std::size_t n, class SeedSeq, class IntType>
-inline void seed_array_int_impl(SeedSeq& seq, IntType (&x)[n], boost::mpl::false_)
+inline void seed_array_int_impl(SeedSeq& seq, IntType (&x)[n], pdalboost::mpl::false_)
 {
     seed_array_int_impl<w>(seq, x);
 }
@@ -293,7 +293,7 @@ inline void seed_array_int_impl(SeedSeq& seq, IntType (&x)[n], boost::mpl::false
 template<int w, std::size_t n, class SeedSeq, class IntType>
 inline void seed_array_int(SeedSeq& seq, IntType (&x)[n])
 {
-    seed_array_int_impl<w>(seq, x, boost::is_signed<IntType>());
+    seed_array_int_impl<w>(seq, x, pdalboost::is_signed<IntType>());
 }
 
 template<int w, std::size_t n, class Iter, class UIntType>
@@ -307,19 +307,19 @@ void fill_array_int_impl(Iter& first, Iter last, UIntType (&x)[n])
             }
             val += static_cast<UIntType>(*first++) << 32*k;
         }
-        x[j] = val & ::boost::low_bits_mask_t<w>::sig_bits;
+        x[j] = val & ::pdalboost::low_bits_mask_t<w>::sig_bits;
     }
 }
 
 template<int w, std::size_t n, class Iter, class IntType>
-inline void fill_array_int_impl(Iter& first, Iter last, IntType (&x)[n], boost::mpl::true_)
+inline void fill_array_int_impl(Iter& first, Iter last, IntType (&x)[n], pdalboost::mpl::true_)
 {
-    typedef typename boost::make_unsigned<IntType>::type unsigned_array[n];
+    typedef typename pdalboost::make_unsigned<IntType>::type unsigned_array[n];
     fill_array_int_impl<w>(first, last, reinterpret_cast<unsigned_array&>(x));
 }
 
 template<int w, std::size_t n, class Iter, class IntType>
-inline void fill_array_int_impl(Iter& first, Iter last, IntType (&x)[n], boost::mpl::false_)
+inline void fill_array_int_impl(Iter& first, Iter last, IntType (&x)[n], pdalboost::mpl::false_)
 {
     fill_array_int_impl<w>(first, last, x);
 }
@@ -327,13 +327,13 @@ inline void fill_array_int_impl(Iter& first, Iter last, IntType (&x)[n], boost::
 template<int w, std::size_t n, class Iter, class IntType>
 inline void fill_array_int(Iter& first, Iter last, IntType (&x)[n])
 {
-    fill_array_int_impl<w>(first, last, x, boost::is_signed<IntType>());
+    fill_array_int_impl<w>(first, last, x, pdalboost::is_signed<IntType>());
 }
 
 template<int w, std::size_t n, class RealType>
-void seed_array_real_impl(const boost::uint_least32_t* storage, RealType (&x)[n])
+void seed_array_real_impl(const pdalboost::uint_least32_t* storage, RealType (&x)[n])
 {
-    boost::uint_least32_t mask = ~((~boost::uint_least32_t(0)) << (w%32));
+    pdalboost::uint_least32_t mask = ~((~pdalboost::uint_least32_t(0)) << (w%32));
     RealType two32 = 4294967296.0;
     const RealType divisor = RealType(1)/detail::pow2<RealType>(w);
     unsigned int j;
@@ -357,7 +357,7 @@ template<int w, std::size_t n, class SeedSeq, class RealType>
 void seed_array_real(SeedSeq& seq, RealType (&x)[n])
 {
     using std::pow;
-    boost::uint_least32_t storage[((w+31)/32) * n];
+    pdalboost::uint_least32_t storage[((w+31)/32) * n];
     seq.generate(&storage[0], &storage[0] + ((w+31)/32) * n);
     seed_array_real_impl<w>(storage, x);
 }
@@ -365,7 +365,7 @@ void seed_array_real(SeedSeq& seq, RealType (&x)[n])
 template<int w, std::size_t n, class Iter, class RealType>
 void fill_array_real(Iter& first, Iter last, RealType (&x)[n])
 {
-    boost::uint_least32_t mask = ~((~boost::uint_least32_t(0)) << (w%32));
+    pdalboost::uint_least32_t mask = ~((~pdalboost::uint_least32_t(0)) << (w%32));
     RealType two32 = 4294967296.0;
     const RealType divisor = RealType(1)/detail::pow2<RealType>(w);
     unsigned int j;

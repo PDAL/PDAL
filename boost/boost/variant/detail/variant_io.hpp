@@ -20,7 +20,7 @@
 #include "boost/detail/templated_streams.hpp"
 #include "boost/variant/static_visitor.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 ///////////////////////////////////////////////////////////////////////////////
 // function template operator<<
@@ -43,7 +43,7 @@ namespace detail { namespace variant {
 
 template <typename OStream>
 class printer
-    : public boost::static_visitor<>
+    : public pdalboost::static_visitor<>
 {
 private: // representation
 
@@ -90,6 +90,6 @@ inline BOOST_TEMPLATED_STREAM(ostream, E,T)& operator<<(
     return out;
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_DETAIL_VARIANT_IO_HPP

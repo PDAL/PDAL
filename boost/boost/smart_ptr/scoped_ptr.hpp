@@ -19,8 +19,7 @@
 # include <memory>          // for std::auto_ptr
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 // Debug hooks
 
@@ -57,7 +56,7 @@ public:
     explicit scoped_ptr( T * p = 0 ): px( p ) // never throws
     {
 #if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
-        boost::sp_scalar_constructor_hook( px );
+        pdalboost::sp_scalar_constructor_hook( px );
 #endif
     }
 
@@ -66,7 +65,7 @@ public:
     explicit scoped_ptr( std::auto_ptr<T> p ): px( p.release() ) // never throws
     {
 #if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
-        boost::sp_scalar_constructor_hook( px );
+        pdalboost::sp_scalar_constructor_hook( px );
 #endif
     }
 
@@ -75,9 +74,9 @@ public:
     ~scoped_ptr() // never throws
     {
 #if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
-        boost::sp_scalar_destructor_hook( px );
+        pdalboost::sp_scalar_destructor_hook( px );
 #endif
-        boost::checked_delete( px );
+        pdalboost::checked_delete( px );
     }
 
     void reset(T * p = 0) // never throws
@@ -126,6 +125,6 @@ template<class T> inline T * get_pointer(scoped_ptr<T> const & p)
     return p.get();
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // #ifndef BOOST_SMART_PTR_SCOPED_PTR_HPP_INCLUDED

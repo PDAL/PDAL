@@ -13,7 +13,7 @@
 
 #include <boost/spirit/home/support/detail/scoped_enum_emulation.hpp>
 
-namespace boost { namespace spirit { namespace qi 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi 
 {
     ///////////////////////////////////////////////////////////////////////////
     BOOST_SCOPED_ENUM_START(skip_flag) 

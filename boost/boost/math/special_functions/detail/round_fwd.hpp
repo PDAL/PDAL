@@ -14,8 +14,7 @@
 #pragma once
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
    namespace math
    { 
 
@@ -33,9 +32,9 @@ namespace boost
    long ltrunc(const T& v);
 #ifdef BOOST_HAS_LONG_LONG
    template <class T, class Policy>
-   boost::long_long_type lltrunc(const T& v, const Policy& pol);
+   pdalboost::long_long_type lltrunc(const T& v, const Policy& pol);
    template <class T>
-   boost::long_long_type lltrunc(const T& v);
+   pdalboost::long_long_type lltrunc(const T& v);
 #endif
    template <class T, class Policy>
    T round(const T& v, const Policy& pol);
@@ -51,9 +50,9 @@ namespace boost
    long lround(const T& v);
 #ifdef BOOST_HAS_LONG_LONG
    template <class T, class Policy>
-   boost::long_long_type llround(const T& v, const Policy& pol);
+   pdalboost::long_long_type llround(const T& v, const Policy& pol);
    template <class T>
-   boost::long_long_type llround(const T& v);
+   pdalboost::long_long_type llround(const T& v);
 #endif
    template <class T, class Policy>
    T modf(const T& v, T* ipart, const Policy& pol);
@@ -69,9 +68,9 @@ namespace boost
    T modf(const T& v, long* ipart);
 #ifdef BOOST_HAS_LONG_LONG
    template <class T, class Policy>
-   T modf(const T& v, boost::long_long_type* ipart, const Policy& pol);
+   T modf(const T& v, pdalboost::long_long_type* ipart, const Policy& pol);
    template <class T>
-   T modf(const T& v, boost::long_long_type* ipart);
+   T modf(const T& v, pdalboost::long_long_type* ipart);
 #endif
 
    }

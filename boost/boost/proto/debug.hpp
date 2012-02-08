@@ -20,7 +20,7 @@
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/detail/sp_typeinfo.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace tagns_ { namespace tag
     {
@@ -248,7 +248,7 @@ namespace boost { namespace proto
     /// \param Expr The Proto expression to check againts <tt>Grammar</tt>
     /// \param Grammar The grammar used to validate Expr.
     #define BOOST_PROTO_ASSERT_MATCHES(Expr, Grammar)                                               \
-        (true ? (void)0 : boost::proto::assert_matches<Grammar>(Expr))
+        (true ? (void)0 : pdalboost::proto::assert_matches<Grammar>(Expr))
 
     /// \brief Assert at compile time that a particular expression
     ///        does not match the specified grammar.
@@ -257,7 +257,7 @@ namespace boost { namespace proto
     /// \param Expr The Proto expression to check againts <tt>Grammar</tt>
     /// \param Grammar The grammar used to validate Expr.
     #define BOOST_PROTO_ASSERT_MATCHES_NOT(Expr, Grammar)                                           \
-        (true ? (void)0 : boost::proto::assert_matches_not<Grammar>(Expr))
+        (true ? (void)0 : pdalboost::proto::assert_matches_not<Grammar>(Expr))
 
 }}
 

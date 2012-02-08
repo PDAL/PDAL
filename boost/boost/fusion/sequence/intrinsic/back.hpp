@@ -13,7 +13,7 @@
 #include <boost/fusion/iterator/deref.hpp>
 #include <boost/mpl/bool.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct fusion_sequence_tag;
 

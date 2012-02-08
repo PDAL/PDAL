@@ -22,9 +22,9 @@
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/utility/result_of.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
-    // phoenix::void_ is the same as fusion::void_
+    // pdalboostphoenix::void_ is the same as fusion::void_
     typedef fusion::void_ void_;
 
     namespace detail
@@ -177,17 +177,16 @@ namespace boost { namespace phoenix
     operator,(actor<BaseT0> const& a0, actor<BaseT1> const& a1);
 }}
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     template <typename Eval>
-    struct result_of<phoenix::actor<Eval>()>
+    struct result_of<pdalboostphoenix::actor<Eval>()>
     {
-        typedef typename phoenix::actor<Eval>::nullary_result type;
+        typedef typename pdalboostphoenix::actor<Eval>::nullary_result type;
     };
 
     template <typename Eval>
-    struct result_of<phoenix::actor<Eval> const()>
-        : result_of<phoenix::actor<Eval>()>
+    struct result_of<pdalboostphoenix::actor<Eval> const()>
+        : result_of<pdalboostphoenix::actor<Eval>()>
     {};
 }
 

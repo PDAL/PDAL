@@ -20,7 +20,7 @@
 #if BOOST_WORKAROUND(BOOST_MSVC,<1300)
 #include <boost/multi_index/detail/safe_mode.hpp>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -96,7 +96,7 @@ private:
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif /* workaround */
 

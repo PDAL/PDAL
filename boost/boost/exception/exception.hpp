@@ -12,9 +12,7 @@
 #pragma warning(push,1)
 #endif
 
-namespace
-boost
-    {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace
     exception_detail
         {
@@ -217,7 +215,7 @@ boost
             }
 
 #ifdef __HP_aCC
-        //On HP aCC, this protected copy constructor prevents throwing boost::exception.
+        //On HP aCC, this protected copy constructor prevents throwing pdalboost::exception.
         //On all other platforms, the same effect is achieved by the pure virtual destructor.
         exception( exception const & x ) throw():
             data_(x.data_),

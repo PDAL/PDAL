@@ -23,7 +23,7 @@
 #   include "boost/type_traits/is_base_and_derived.hpp"
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail { namespace variant {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ struct is_recursive_flag
 // (detail) metafunction enable_recursive
 //
 // Attempts recursive_variant_ tag substitution, wrapping with
-// boost::recursive_wrapper if substituion occurs w/ non-indirect result
+// pdalboost::recursive_wrapper if substituion occurs w/ non-indirect result
 // (i.e., not a reference or pointer) *and* NoWrapper is false_.
 //
 template <
@@ -111,6 +111,6 @@ template <
 struct quoted_enable_recursive;
 
 }} // namespace detail::variant
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_DETAIL_ENABLE_RECURSIVE_FWD_HPP

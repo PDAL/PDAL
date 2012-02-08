@@ -19,7 +19,7 @@
 #include <boost/accumulators/statistics_fwd.hpp>
 #include <boost/accumulators/statistics/count.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 namespace impl
@@ -30,7 +30,7 @@ namespace impl
     struct sum_impl
       : accumulator_base
     {
-        // for boost::result_of
+        // for pdalboost::result_of
         typedef Sample result_type;
 
         template<typename Args>
@@ -136,6 +136,6 @@ struct feature_of<tag::sum_of_variates<VariateType, VariateTag> >
 {
 };
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

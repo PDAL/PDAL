@@ -11,9 +11,9 @@
 // should be the last #include
 #include <boost/type_traits/detail/type_trait_def.hpp>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
-BOOST_TT_AUX_TYPE_TRAIT_DEF1(add_lvalue_reference,T,typename boost::add_reference<T>::type)
+BOOST_TT_AUX_TYPE_TRAIT_DEF1(add_lvalue_reference,T,typename pdalboost::add_reference<T>::type)
 
 #ifndef BOOST_NO_RVALUE_REFERENCES
 BOOST_TT_AUX_TYPE_TRAIT_PARTIAL_SPEC1_1(typename T,add_lvalue_reference,T&&,T&)

@@ -22,7 +22,7 @@
 // Boost.Runtime.Parameter
 #include <boost/test/utils/runtime/config.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -49,6 +49,6 @@ template <typename T> class variable;
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_ENV_FWD_HPP_062604GER

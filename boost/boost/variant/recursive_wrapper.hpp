@@ -16,7 +16,7 @@
 #include "boost/variant/recursive_wrapper_fwd.hpp"
 #include "boost/checked_delete.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //////////////////////////////////////////////////////////////////////////
 // class template recursive_wrapper
@@ -81,7 +81,7 @@ public: // queries
 template <typename T>
 recursive_wrapper<T>::~recursive_wrapper()
 {
-    boost::checked_delete(p_);
+    pdalboost::checked_delete(p_);
 }
 
 template <typename T>
@@ -118,6 +118,6 @@ inline void swap(recursive_wrapper<T>& lhs, recursive_wrapper<T>& rhs)
     lhs.swap(rhs);
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_RECURSIVE_WRAPPER_HPP

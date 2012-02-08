@@ -15,7 +15,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/mpl/or.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     template <typename Sequence>
     inline std::ostream&

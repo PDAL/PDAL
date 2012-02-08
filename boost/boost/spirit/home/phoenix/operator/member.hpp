@@ -33,11 +33,11 @@
 
 #include <memory>
 
-namespace boost { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
     template<typename T> class shared_ptr;
     template<typename T> class scoped_ptr;
 
-namespace phoenix {
+namespace pdalboostphoenix {
     namespace detail
     {
         template<typename T>

@@ -21,7 +21,7 @@
 // Boost.Test
 #include <boost/test/utils/named_params.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -64,6 +64,6 @@ nfp::keyword<struct assign_to_t>                        assign_to;
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_CLA_MODIFIER_HPP_062604GER

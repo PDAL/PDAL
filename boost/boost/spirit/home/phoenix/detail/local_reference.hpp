@@ -9,14 +9,14 @@
 
 #include <boost/utility/addressof.hpp>
 
-namespace boost { namespace phoenix { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix { namespace detail
 {
     template <typename T>
     struct local_reference
     { 
         typedef T type;
     
-        explicit local_reference(T& t): t_(boost::addressof(t)) {}
+        explicit local_reference(T& t): t_(pdalboost::addressof(t)) {}
         operator T& () const { return *t_; }
         local_reference& operator=(T const& x) { *t_ = x; return *this; }
         local_reference const& operator=(T const& x) const { *t_ = x; return *this; }

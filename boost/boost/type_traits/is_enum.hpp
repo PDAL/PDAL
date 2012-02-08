@@ -31,7 +31,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #ifndef BOOST_IS_ENUM
 #if !(defined(__BORLANDC__) && (__BORLANDC__ <= 0x551))
@@ -44,9 +44,9 @@ template <typename T>
 struct is_class_or_union
 {
    BOOST_STATIC_CONSTANT(bool, value =
-      (::boost::type_traits::ice_or<
-           ::boost::is_class<T>::value
-         , ::boost::is_union<T>::value
+      (::pdalboost::type_traits::ice_or<
+           ::pdalboost::is_class<T>::value
+         , ::pdalboost::is_union<T>::value
       >::value));
 };
 
@@ -58,18 +58,18 @@ struct is_class_or_union
 # if BOOST_WORKAROUND(BOOST_MSVC, < 1300) || BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x581))// we simply can't detect it this way.
     BOOST_STATIC_CONSTANT(bool, value = false);
 # else
-    template <class U> static ::boost::type_traits::yes_type is_class_or_union_tester(void(U::*)(void));
+    template <class U> static ::pdalboost::type_traits::yes_type is_class_or_union_tester(void(U::*)(void));
 
 #  if BOOST_WORKAROUND(BOOST_MSVC, == 1300)                 \
     || BOOST_WORKAROUND(__MWERKS__, <= 0x3000) // no SFINAE
-    static ::boost::type_traits::no_type is_class_or_union_tester(...);
+    static ::pdalboost::type_traits::no_type is_class_or_union_tester(...);
     BOOST_STATIC_CONSTANT(
-        bool, value = sizeof(is_class_or_union_tester(0)) == sizeof(::boost::type_traits::yes_type));
+        bool, value = sizeof(is_class_or_union_tester(0)) == sizeof(::pdalboost::type_traits::yes_type));
 #  else
     template <class U>
-    static ::boost::type_traits::no_type is_class_or_union_tester(...);
+    static ::pdalboost::type_traits::no_type is_class_or_union_tester(...);
     BOOST_STATIC_CONSTANT(
-        bool, value = sizeof(is_class_or_union_tester<T>(0)) == sizeof(::boost::type_traits::yes_type));
+        bool, value = sizeof(is_class_or_union_tester<T>(0)) == sizeof(::pdalboost::type_traits::yes_type));
 #  endif
 # endif
 };
@@ -95,14 +95,14 @@ template <>
 struct is_enum_helper<false>
 {
     template <typename T> struct type
-       : public ::boost::is_convertible<typename boost::add_reference<T>::type,::boost::detail::int_convertible>
+       : public ::pdalboost::is_convertible<typename pdalboost::add_reference<T>::type,::pdalboost::detail::int_convertible>
     {
     };
 };
 
 template <typename T> struct is_enum_impl
 {
-   //typedef ::boost::add_reference<T> ar_t;
+   //typedef ::pdalboost::add_reference<T> ar_t;
    //typedef typename ar_t::type r_type;
 
 #if defined(__GNUC__)
@@ -113,10 +113,10 @@ template <typename T> struct is_enum_impl
    // order to correctly deduce that noncopyable types are not enums
    // (dwa 2002/04/15)...
    BOOST_STATIC_CONSTANT(bool, selector =
-      (::boost::type_traits::ice_or<
-           ::boost::is_arithmetic<T>::value
-         , ::boost::is_reference<T>::value
-         , ::boost::is_function<T>::value
+      (::pdalboost::type_traits::ice_or<
+           ::pdalboost::is_arithmetic<T>::value
+         , ::pdalboost::is_reference<T>::value
+         , ::pdalboost::is_function<T>::value
          , is_class_or_union<T>::value
          , is_array<T>::value
       >::value));
@@ -124,10 +124,10 @@ template <typename T> struct is_enum_impl
    // ...however, not checking is_class_or_union on non-conforming
    // compilers prevents a dependency recursion.
    BOOST_STATIC_CONSTANT(bool, selector =
-      (::boost::type_traits::ice_or<
-           ::boost::is_arithmetic<T>::value
-         , ::boost::is_reference<T>::value
-         , ::boost::is_function<T>::value
+      (::pdalboost::type_traits::ice_or<
+           ::pdalboost::is_arithmetic<T>::value
+         , ::pdalboost::is_reference<T>::value
+         , ::pdalboost::is_function<T>::value
          , is_array<T>::value
       >::value));
 #endif // BOOST_TT_HAS_CONFORMING_IS_CLASS_IMPLEMENTATION
@@ -135,9 +135,9 @@ template <typename T> struct is_enum_impl
 #else // !defined(__GNUC__):
     
    BOOST_STATIC_CONSTANT(bool, selector =
-      (::boost::type_traits::ice_or<
-           ::boost::is_arithmetic<T>::value
-         , ::boost::is_reference<T>::value
+      (::pdalboost::type_traits::ice_or<
+           ::pdalboost::is_arithmetic<T>::value
+         , ::pdalboost::is_reference<T>::value
          , is_class_or_union<T>::value
          , is_array<T>::value
       >::value));
@@ -145,11 +145,11 @@ template <typename T> struct is_enum_impl
 #endif
 
 #if BOOST_WORKAROUND(__BORLANDC__, < 0x600)
-    typedef ::boost::detail::is_enum_helper<
-          ::boost::detail::is_enum_impl<T>::selector
+    typedef ::pdalboost::detail::is_enum_helper<
+          ::pdalboost::detail::is_enum_impl<T>::selector
         > se_t;
 #else
-    typedef ::boost::detail::is_enum_helper<selector> se_t;
+    typedef ::pdalboost::detail::is_enum_helper<selector> se_t;
 #endif
 
     typedef typename se_t::template type<T> helper;
@@ -166,7 +166,7 @@ BOOST_TT_AUX_BOOL_TRAIT_IMPL_SPEC1(is_enum,void const volatile,false)
 
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_enum,T,::boost::detail::is_enum_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_enum,T,::pdalboost::detail::is_enum_impl<T>::value)
 
 #else // __BORLANDC__
 //
@@ -182,7 +182,7 @@ BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_enum,T,BOOST_IS_ENUM(T))
 
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

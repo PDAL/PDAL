@@ -48,8 +48,7 @@ extern "C" void _mm_pause();
 # include <windows.h>
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -81,15 +80,14 @@ inline void yield( unsigned k )
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
 #elif defined( BOOST_HAS_PTHREADS )
 
 #include <sched.h>
 #include <time.h>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -126,12 +124,11 @@ inline void yield( unsigned k )
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
 #else
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -142,7 +139,7 @@ inline void yield( unsigned )
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif
 

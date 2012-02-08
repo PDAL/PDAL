@@ -15,8 +15,7 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     class condition_variable
     {
     private:
@@ -32,13 +31,13 @@ namespace boost
             int const res=pthread_mutex_init(&internal_mutex,NULL);
             if(res)
             {
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
             int const res2=pthread_cond_init(&cond,NULL);
             if(res2)
             {
                 BOOST_VERIFY(!pthread_mutex_destroy(&internal_mutex));
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
         }
         ~condition_variable()
@@ -56,7 +55,7 @@ namespace boost
         }
 
         inline bool timed_wait(unique_lock<mutex>& m,
-                               boost::system_time const& wait_until);
+                               pdalboost::system_time const& wait_until);
         bool timed_wait(unique_lock<mutex>& m,xtime const& wait_until)
         {
             return timed_wait(m,system_time(wait_until));
@@ -69,7 +68,7 @@ namespace boost
         }
 
         template<typename predicate_type>
-        bool timed_wait(unique_lock<mutex>& m,boost::system_time const& wait_until,predicate_type pred)
+        bool timed_wait(unique_lock<mutex>& m,pdalboost::system_time const& wait_until,predicate_type pred)
         {
             while (!pred())
             {

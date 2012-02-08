@@ -9,7 +9,7 @@
 // Preprocessed version of "boost/mpl/map.hpp" header
 // -- DO NOT modify by hand!
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<
       typename T0 = na, typename T1 = na, typename T2 = na, typename T3 = na

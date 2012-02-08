@@ -12,7 +12,7 @@
 
 #include <boost/fusion/iterator/basic_iterator.hpp>
 
-namespace boost { namespace fusion { namespace extension
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace extension
 {
     template<typename>
     struct begin_impl;

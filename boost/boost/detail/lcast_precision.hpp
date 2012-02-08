@@ -33,7 +33,7 @@
 #include <boost/static_assert.hpp>
 #endif
 
-namespace boost { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
 
 class lcast_abstract_stub {};
 
@@ -47,8 +47,8 @@ struct lcast_precision
 #ifdef BOOST_NO_IS_ABSTRACT
     typedef std::numeric_limits<T> limits; // No fix for SF:1358600.
 #else
-    typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_<
-        boost::is_abstract<T>
+    typedef BOOST_DEDUCED_TYPENAME pdalboost::mpl::if_<
+        pdalboost::is_abstract<T>
       , std::numeric_limits<lcast_abstract_stub>
       , std::numeric_limits<T>
       >::type limits;
@@ -69,7 +69,7 @@ struct lcast_precision
         );
 
     BOOST_STATIC_CONSTANT(std::streamsize, streamsize_max =
-            boost::integer_traits<std::streamsize>::const_max
+            pdalboost::integer_traits<std::streamsize>::const_max
         );
 
     BOOST_STATIC_CONSTANT(unsigned int, precision_dec = limits::digits10 + 1U);
@@ -105,8 +105,8 @@ inline std::streamsize lcast_get_precision(T* = 0)
 #ifdef BOOST_NO_IS_ABSTRACT
     typedef std::numeric_limits<T> limits; // No fix for SF:1358600.
 #else
-    typedef BOOST_DEDUCED_TYPENAME boost::mpl::if_<
-        boost::is_abstract<T>
+    typedef BOOST_DEDUCED_TYPENAME pdalboost::mpl::if_<
+        pdalboost::is_abstract<T>
       , std::numeric_limits<lcast_abstract_stub>
       , std::numeric_limits<T>
       >::type limits;
@@ -124,7 +124,7 @@ inline std::streamsize lcast_get_precision(T* = 0)
         bool const is_specialized_dec =
             limits::radix == 10 && limits::digits10 > 0;
         std::streamsize const streamsize_max =
-            (boost::integer_traits<std::streamsize>::max)();
+            (pdalboost::integer_traits<std::streamsize>::max)();
 
         if(is_specialized_bin)
         { // Floating-point types with

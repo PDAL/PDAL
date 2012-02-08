@@ -17,7 +17,7 @@
 
 #include <boost/spirit/home/classic/error_handling/exceptions_fwd.hpp>
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -104,7 +104,7 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
     inline void
     throw_(IteratorT where, ErrorDescrT descriptor)
     {
-         boost::throw_exception(
+         pdalboost::throw_exception(
             parser_error<ErrorDescrT, IteratorT>(where, descriptor));
     }
 

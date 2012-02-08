@@ -20,7 +20,7 @@
 #include <boost/mpl/begin_end.hpp>
 #include <boost/mpl/aux_/na_spec.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 namespace aux {
 struct joint_view_tag;

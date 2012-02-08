@@ -50,13 +50,13 @@
 namespace std { using ::time_t; }
 #endif
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
                     
 //------------------Definitions of constants----------------------------------//
 
 namespace gzip {
 
-using namespace boost::iostreams::zlib;
+using namespace pdalboost::iostreams::zlib;
 
     // Error codes used by gzip_error.
 
@@ -235,7 +235,7 @@ public:
         if (!(flags_ & f_header_done)) {
             std::streamsize amt = 
                 static_cast<std::streamsize>(header_.size() - offset_);
-            offset_ += boost::iostreams::write(snk, header_.data() + offset_, amt);
+            offset_ += pdalboost::iostreams::write(snk, header_.data() + offset_, amt);
             if (offset_ == header_.size())
                 flags_ |= f_header_done;
             else
@@ -271,15 +271,15 @@ private:
     std::streamsize read_string(char* s, std::streamsize n, std::string& str);
 
     template<typename Sink>
-    static void write_long(long n, Sink& next, boost::mpl::true_)
+    static void write_long(long n, Sink& next, pdalboost::mpl::true_)
     {
-        boost::iostreams::put(next, static_cast<char>(0xFF & n));
-        boost::iostreams::put(next, static_cast<char>(0xFF & (n >> 8)));
-        boost::iostreams::put(next, static_cast<char>(0xFF & (n >> 16)));
-        boost::iostreams::put(next, static_cast<char>(0xFF & (n >> 24)));
+        pdalboost::iostreams::put(next, static_cast<char>(0xFF & n));
+        pdalboost::iostreams::put(next, static_cast<char>(0xFF & (n >> 8)));
+        pdalboost::iostreams::put(next, static_cast<char>(0xFF & (n >> 16)));
+        pdalboost::iostreams::put(next, static_cast<char>(0xFF & (n >> 24)));
     }
     template<typename Sink>
-    static void write_long(long n, Sink& next, boost::mpl::false_)
+    static void write_long(long n, Sink& next, pdalboost::mpl::false_)
     {
     }
     template<typename Sink>
@@ -388,7 +388,7 @@ private:
     int          offset_; 
 };
 
-} // End namespace boost::iostreams::detail.
+} // End namespace pdalboost::iostreams::detail.
 
 //------------------Definition of basic_gzip_decompressor---------------------//
 
@@ -439,12 +439,12 @@ public:
                         state_ = s_footer;
                     }
                 } catch (const zlib_error& e) {
-                    boost::throw_exception(gzip_error(e));
+                    pdalboost::throw_exception(gzip_error(e));
                 }
             } else { // state_ == s_footer
                 if (footer_.done()) {
                     if (footer_.crc() != this->crc())
-                        boost::throw_exception(gzip_error(gzip::bad_crc));
+                        pdalboost::throw_exception(gzip_error(gzip::bad_crc));
 
                     base_type::close(snk, BOOST_IOS::out);
                     state_ = s_start;
@@ -470,9 +470,9 @@ public:
                 footer_.reset();
             }
             if (state_ == s_header) {
-                int c = boost::iostreams::get(peek);
+                int c = pdalboost::iostreams::get(peek);
                 if (traits_type::is_eof(c)) {
-                    boost::throw_exception(gzip_error(gzip::bad_header));
+                    pdalboost::throw_exception(gzip_error(gzip::bad_header));
                 } else if (traits_type::would_block(c)) {
                     break;
                 }
@@ -492,20 +492,20 @@ public:
                         state_ = s_footer;
                     }
                 } catch (const zlib_error& e) {
-                    boost::throw_exception(gzip_error(e));
+                    pdalboost::throw_exception(gzip_error(e));
                 }
             } else { // state_ == s_footer
-                int c = boost::iostreams::get(peek);
+                int c = pdalboost::iostreams::get(peek);
                 if (traits_type::is_eof(c)) {
-                    boost::throw_exception(gzip_error(gzip::bad_footer));
+                    pdalboost::throw_exception(gzip_error(gzip::bad_footer));
                 } else if (traits_type::would_block(c)) {
                     break;
                 }
                 footer_.process(c);
                 if (footer_.done()) {
                     if (footer_.crc() != this->crc())
-                        boost::throw_exception(gzip_error(gzip::bad_crc));
-                    int c = boost::iostreams::get(peek);
+                        pdalboost::throw_exception(gzip_error(gzip::bad_crc));
+                    int c = pdalboost::iostreams::get(peek);
                     if (traits_type::is_eof(c)) {
                         state_ = s_done;
                     } else {
@@ -535,18 +535,18 @@ public:
             base_type::close(src, m);
         } catch (const zlib_error& e) {
             state_ = s_start;
-            boost::throw_exception(gzip_error(e));
+            pdalboost::throw_exception(gzip_error(e));
         }
         if (m == BOOST_IOS::out) {
             if (state_ == s_start || state_ == s_header)
-                boost::throw_exception(gzip_error(gzip::bad_header));
+                pdalboost::throw_exception(gzip_error(gzip::bad_header));
             else if (state_ == s_body)
-                boost::throw_exception(gzip_error(gzip::bad_footer));
+                pdalboost::throw_exception(gzip_error(gzip::bad_footer));
             else if (state_ == s_footer) {
                 if (!footer_.done())
-                    boost::throw_exception(gzip_error(gzip::bad_footer));
+                    pdalboost::throw_exception(gzip_error(gzip::bad_footer));
                 else if(footer_.crc() != this->crc())
-                    boost::throw_exception(gzip_error(gzip::bad_crc));
+                    pdalboost::throw_exception(gzip_error(gzip::bad_crc));
             } else {
                 BOOST_ASSERT(!"Bad state");
             }
@@ -588,7 +588,7 @@ private:
 
             // Read characters from src_
             std::streamsize amt = 
-                boost::iostreams::read(src_, s + result, n - result);
+                pdalboost::iostreams::read(src_, s + result, n - result);
             return amt != -1 ? 
                 result + amt : 
                 result ? result : -1;
@@ -598,8 +598,8 @@ private:
             if (offset_) {
                 putback_[--offset_] = c;
             } else {
-                boost::throw_exception(
-                    boost::iostreams::detail::bad_putback());
+                pdalboost::throw_exception(
+                    pdalboost::iostreams::detail::bad_putback());
             }
             return true;
         }
@@ -701,7 +701,7 @@ gzip_params basic_gzip_compressor<Alloc>::normalize_params(gzip_params p)
 template<typename Alloc>
 void basic_gzip_compressor<Alloc>::prepare_footer()
 {
-    boost::iostreams::back_insert_device<std::string> out(footer_);
+    pdalboost::iostreams::back_insert_device<std::string> out(footer_);
     write_long(this->crc(), out);
     write_long(this->total_in(), out);
     flags_ |= f_body_done;

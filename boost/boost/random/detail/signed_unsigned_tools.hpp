@@ -15,7 +15,7 @@
 #include <boost/config.hpp>
 #include <boost/type_traits/make_unsigned.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace random {
 namespace detail {
 
@@ -83,7 +83,7 @@ struct add<T1, T2, /* signed */ true>
 
 } // namespace detail
 } // namespace random
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RANDOM_DETAIL_SIGNED_UNSIGNED_TOOLS
 

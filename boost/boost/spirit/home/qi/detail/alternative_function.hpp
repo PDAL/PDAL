@@ -18,7 +18,7 @@
 #include <boost/variant.hpp>
 #include <boost/mpl/bool.hpp>
 
-namespace boost { namespace spirit { namespace qi { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi { namespace detail
 {
     template <typename Variant, typename Expected>
     struct find_substitute

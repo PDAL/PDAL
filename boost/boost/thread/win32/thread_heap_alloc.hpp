@@ -13,8 +13,7 @@
 #if defined( BOOST_USE_WINDOWS_H )
 # include <windows.h>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         namespace win32
@@ -32,8 +31,7 @@ namespace boost
 # undef HeapAlloc
 # endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         namespace win32
@@ -52,8 +50,7 @@ namespace boost
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         inline BOOST_THREAD_DECL void* allocate_raw_heap_memory(unsigned size)
@@ -61,7 +58,7 @@ namespace boost
             void* const heap_memory=detail::win32::HeapAlloc(detail::win32::GetProcessHeap(),0,size);
             if(!heap_memory)
             {
-                boost::throw_exception(std::bad_alloc());
+                pdalboost::throw_exception(std::bad_alloc());
             }
             return heap_memory;
         }

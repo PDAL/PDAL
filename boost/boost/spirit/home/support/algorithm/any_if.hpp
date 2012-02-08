@@ -29,7 +29,7 @@
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/not.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     //  This is a special version for a binary fusion::any. The predicate

@@ -19,7 +19,7 @@
 // should be the last #include
 #include "boost/variant/detail/bool_trait_def.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail { namespace variant {
 
 // TRAIT: has_trivial_move
@@ -29,7 +29,7 @@ struct has_trivial_move_impl
 {
     BOOST_STATIC_CONSTANT(
         bool, value = (
-            ::boost::mpl::and_<
+            ::pdalboost::mpl::and_<
               has_trivial_copy<T>
             , has_trivial_assign<T>
             >::type::value
@@ -40,7 +40,7 @@ struct has_trivial_move_impl
 BOOST_VARIANT_TT_AUX_BOOL_TRAIT_DEF1(
       has_trivial_move
     , T
-    , (::boost::detail::variant::has_trivial_move_impl<T>::value)
+    , (::pdalboost::detail::variant::has_trivial_move_impl<T>::value)
     )
 
 
@@ -51,7 +51,7 @@ struct has_trivial_move_constructor_impl
 {
     BOOST_STATIC_CONSTANT(
         bool, value = (
-            ::boost::mpl::or_<
+            ::pdalboost::mpl::or_<
               has_trivial_move<T>
             , has_trivial_copy<T>
             >::type::value
@@ -62,7 +62,7 @@ struct has_trivial_move_constructor_impl
 BOOST_VARIANT_TT_AUX_BOOL_TRAIT_DEF1(
       has_trivial_move_constructor
     , T
-    , (::boost::detail::variant::has_trivial_move_constructor_impl<T>::value)
+    , (::pdalboost::detail::variant::has_trivial_move_constructor_impl<T>::value)
     )
 
 
@@ -73,7 +73,7 @@ struct has_trivial_move_assign_impl
 {
     BOOST_STATIC_CONSTANT(
         bool, value = (
-            ::boost::mpl::or_<
+            ::pdalboost::mpl::or_<
               has_trivial_move<T>
             , has_trivial_assign<T>
             >::type::value
@@ -84,16 +84,16 @@ struct has_trivial_move_assign_impl
 BOOST_VARIANT_TT_AUX_BOOL_TRAIT_DEF1(
       has_trivial_move_assign
     , T
-    , (::boost::detail::variant::has_trivial_move_assign_impl<T>::value)
+    , (::pdalboost::detail::variant::has_trivial_move_assign_impl<T>::value)
     )
 
 }} // namespace detail::variant
 
-BOOST_VARIANT_TT_AUX_TRAIT_SUFFIX(1,::boost::detail::variant::has_trivial_move)
-BOOST_VARIANT_TT_AUX_TRAIT_SUFFIX(1,::boost::detail::variant::has_trivial_move_constructor)
-BOOST_VARIANT_TT_AUX_TRAIT_SUFFIX(1,::boost::detail::variant::has_trivial_move_assign)
+BOOST_VARIANT_TT_AUX_TRAIT_SUFFIX(1,::pdalboost::detail::variant::has_trivial_move)
+BOOST_VARIANT_TT_AUX_TRAIT_SUFFIX(1,::pdalboost::detail::variant::has_trivial_move_constructor)
+BOOST_VARIANT_TT_AUX_TRAIT_SUFFIX(1,::pdalboost::detail::variant::has_trivial_move_assign)
 
-} // namespace boost
+} // namespace pdalboost
 
 #include "boost/variant/detail/bool_trait_undef.hpp"
 

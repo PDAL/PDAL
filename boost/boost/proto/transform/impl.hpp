@@ -12,7 +12,7 @@
 #include <boost/config.hpp>
 #include <boost/proto/proto_fwd.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
 #ifdef BOOST_NO_RVALUE_REFERENCES
 
@@ -26,45 +26,45 @@ namespace boost { namespace proto
     template<typename Sig>                                                                                      \
     struct result                                                                                               \
     {                                                                                                           \
-        typedef typename boost::proto::detail::apply_transform<Sig>::result_type type;                          \
+        typedef typename pdalboost::proto::detail::apply_transform<Sig>::result_type type;                          \
     };                                                                                                          \
                                                                                                                 \
     template<typename Expr>                                                                                     \
-    typename boost::proto::detail::apply_transform<transform_type(Expr &)>::result_type                         \
+    typename pdalboost::proto::detail::apply_transform<transform_type(Expr &)>::result_type                         \
     operator ()(Expr &e) const                                                                                  \
     {                                                                                                           \
         int i = 0;                                                                                              \
-        return boost::proto::detail::apply_transform<transform_type(Expr &)>()(e, i, i);                        \
+        return pdalboost::proto::detail::apply_transform<transform_type(Expr &)>()(e, i, i);                        \
     }                                                                                                           \
                                                                                                                 \
     template<typename Expr, typename State>                                                                     \
-    typename boost::proto::detail::apply_transform<transform_type(Expr &, State &)>::result_type                \
+    typename pdalboost::proto::detail::apply_transform<transform_type(Expr &, State &)>::result_type                \
     operator ()(Expr &e, State &s) const                                                                        \
     {                                                                                                           \
         int i = 0;                                                                                              \
-        return boost::proto::detail::apply_transform<transform_type(Expr &, State &)>()(e, s, i);               \
+        return pdalboost::proto::detail::apply_transform<transform_type(Expr &, State &)>()(e, s, i);               \
     }                                                                                                           \
                                                                                                                 \
     template<typename Expr, typename State>                                                                     \
-    typename boost::proto::detail::apply_transform<transform_type(Expr &, State const &)>::result_type          \
+    typename pdalboost::proto::detail::apply_transform<transform_type(Expr &, State const &)>::result_type          \
     operator ()(Expr &e, State const &s) const                                                                  \
     {                                                                                                           \
         int i = 0;                                                                                              \
-        return boost::proto::detail::apply_transform<transform_type(Expr &, State const &)>()(e, s, i);         \
+        return pdalboost::proto::detail::apply_transform<transform_type(Expr &, State const &)>()(e, s, i);         \
     }                                                                                                           \
                                                                                                                 \
     template<typename Expr, typename State, typename Data>                                                      \
-    typename boost::proto::detail::apply_transform<transform_type(Expr &, State &, Data &)>::result_type        \
+    typename pdalboost::proto::detail::apply_transform<transform_type(Expr &, State &, Data &)>::result_type        \
     operator ()(Expr &e, State &s, Data &d) const                                                               \
     {                                                                                                           \
-        return boost::proto::detail::apply_transform<transform_type(Expr &, State &, Data &)>()(e, s, d);       \
+        return pdalboost::proto::detail::apply_transform<transform_type(Expr &, State &, Data &)>()(e, s, d);       \
     }                                                                                                           \
                                                                                                                 \
     template<typename Expr, typename State, typename Data>                                                      \
-    typename boost::proto::detail::apply_transform<transform_type(Expr &, State const &, Data &)>::result_type  \
+    typename pdalboost::proto::detail::apply_transform<transform_type(Expr &, State const &, Data &)>::result_type  \
     operator ()(Expr &e, State const &s, Data &d) const                                                         \
     {                                                                                                           \
-        return boost::proto::detail::apply_transform<transform_type(Expr &, State const &, Data &)>()(e, s, d); \
+        return pdalboost::proto::detail::apply_transform<transform_type(Expr &, State const &, Data &)>()(e, s, d); \
     }                                                                                                           \
     /**/
 
@@ -80,30 +80,30 @@ namespace boost { namespace proto
     template<typename Sig>                                                                                      \
     struct result                                                                                               \
     {                                                                                                           \
-        typedef typename boost::proto::detail::apply_transform<Sig>::result_type type;                          \
+        typedef typename pdalboost::proto::detail::apply_transform<Sig>::result_type type;                          \
     };                                                                                                          \
                                                                                                                 \
     template<typename Expr>                                                                                     \
-    typename boost::proto::detail::apply_transform<transform_type(Expr const &)>::result_type                   \
+    typename pdalboost::proto::detail::apply_transform<transform_type(Expr const &)>::result_type                   \
     operator ()(Expr &&e) const                                                                                 \
     {                                                                                                           \
         int i = 0;                                                                                              \
-        return boost::proto::detail::apply_transform<transform_type(Expr const &)>()(e, i, i);                  \
+        return pdalboost::proto::detail::apply_transform<transform_type(Expr const &)>()(e, i, i);                  \
     }                                                                                                           \
                                                                                                                 \
     template<typename Expr, typename State>                                                                     \
-    typename boost::proto::detail::apply_transform<transform_type(Expr const &, State const &)>::result_type    \
+    typename pdalboost::proto::detail::apply_transform<transform_type(Expr const &, State const &)>::result_type    \
     operator ()(Expr &&e, State &&s) const                                                                      \
     {                                                                                                           \
         int i = 0;                                                                                              \
-        return boost::proto::detail::apply_transform<transform_type(Expr const &, State const &)>()(e, s, i);   \
+        return pdalboost::proto::detail::apply_transform<transform_type(Expr const &, State const &)>()(e, s, i);   \
     }                                                                                                           \
                                                                                                                 \
     template<typename Expr, typename State, typename Data>                                                      \
-    typename boost::proto::detail::apply_transform<transform_type(Expr const &, State const &, Data const &)>::result_type \
+    typename pdalboost::proto::detail::apply_transform<transform_type(Expr const &, State const &, Data const &)>::result_type \
     operator ()(Expr &&e, State &&s, Data &&d) const                                                            \
     {                                                                                                           \
-        return boost::proto::detail::apply_transform<transform_type(Expr const &, State const &, Data const &)>()(e, s, d); \
+        return pdalboost::proto::detail::apply_transform<transform_type(Expr const &, State const &, Data const &)>()(e, s, d); \
     }                                                                                                           \
     /**/
 
@@ -228,6 +228,6 @@ namespace boost { namespace proto
         typedef Data &data_param;
     };
 
-}} // namespace boost::proto
+}} // namespace pdalboost::proto
 
 #endif

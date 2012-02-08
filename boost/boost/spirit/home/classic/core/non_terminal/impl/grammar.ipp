@@ -26,7 +26,7 @@
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -107,7 +107,7 @@ struct grammar_definition
         { return helpers.rend(); }
 
 #ifdef BOOST_SPIRIT_THREADSAFE
-        boost::mutex & mutex()
+        pdalboost::mutex & mutex()
         { return m; }
 #endif
 
@@ -115,7 +115,7 @@ struct grammar_definition
 
         vector_t        helpers;
 #ifdef BOOST_SPIRIT_THREADSAFE
-        boost::mutex    m;
+        pdalboost::mutex    m;
 #endif
     };
 
@@ -147,8 +147,8 @@ struct grammar_definition
         typedef typename grammar_definition<DerivedT, ScannerT>::type definition_t;
 
         typedef grammar_helper<grammar_t, derived_t, scanner_t> helper_t;
-        typedef boost::shared_ptr<helper_t> helper_ptr_t;
-        typedef boost::weak_ptr<helper_t>   helper_weak_ptr_t;
+        typedef pdalboost::shared_ptr<helper_t> helper_ptr_t;
+        typedef pdalboost::weak_ptr<helper_t>   helper_weak_ptr_t;
 
         grammar_helper*
         this_() { return this; }
@@ -178,7 +178,7 @@ struct grammar_definition
                 result(new definition_t(target_grammar->derived()));
 
 #ifdef BOOST_SPIRIT_THREADSAFE
-            boost::mutex::scoped_lock lock(helpers.mutex());
+            pdalboost::mutex::scoped_lock lock(helpers.mutex());
 #endif
             helpers.push_back(this);
 
@@ -236,8 +236,8 @@ struct grammar_definition
         typedef typename helper_t::helper_weak_ptr_t             ptr_t;
 
 # ifdef BOOST_SPIRIT_THREADSAFE
-        boost::thread_specific_ptr<ptr_t> & tld_helper
-            = static_<boost::thread_specific_ptr<ptr_t>,
+        pdalboost::thread_specific_ptr<ptr_t> & tld_helper
+            = static_<pdalboost::thread_specific_ptr<ptr_t>,
                 get_definition_static_data_tag>(get_definition_static_data_tag());
 
         if (!tld_helper.get())
@@ -402,6 +402,6 @@ struct grammar_definition
 ///////////////////////////////////////////////////////////////////////////////
 BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 
-}} // namespace boost::spirit
+}} // namespace pdalboost::spirit
 
 #endif

@@ -25,7 +25,7 @@
 
 #include <boost/spirit/home/support/terminal_expression.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     template <typename Terminal, typename Args>
     struct terminal_ex
@@ -96,7 +96,7 @@ namespace boost { namespace spirit
             proto::terminal<
                 lazy_terminal<
                     typename F::terminal_type
-                  , typename phoenix::detail::expression::function_eval<F, A0>::type
+                  , typename pdalboostphoenix::detail::expression::function_eval<F, A0>::type
                   , 1 // arity
                 >
             >::type
@@ -108,7 +108,7 @@ namespace boost { namespace spirit
         {
             typedef typename result_type::proto_child0 child_type;
             return result_type::make(child_type(
-                phoenix::detail::expression::function_eval<F, A0>::make(f, _0)
+                pdalboostphoenix::detail::expression::function_eval<F, A0>::make(f, _0)
               , f.proto_base().child0
             ));
         }
@@ -121,7 +121,7 @@ namespace boost { namespace spirit
             proto::terminal<
                lazy_terminal<
                     typename F::terminal_type
-                  , typename phoenix::detail::expression::function_eval<F, A0, A1>::type
+                  , typename pdalboostphoenix::detail::expression::function_eval<F, A0, A1>::type
                   , 2 // arity
                 >
             >::type
@@ -133,7 +133,7 @@ namespace boost { namespace spirit
         {
             typedef typename result_type::proto_child0 child_type;
             return result_type::make(child_type(
-                phoenix::detail::expression::function_eval<F, A0, A1>::make(f, _0, _1)
+                pdalboostphoenix::detail::expression::function_eval<F, A0, A1>::make(f, _0, _1)
               , f.proto_base().child0
             ));
         }
@@ -146,7 +146,7 @@ namespace boost { namespace spirit
             proto::terminal<
                lazy_terminal<
                     typename F::terminal_type
-                  , typename phoenix::detail::expression::function_eval<F, A0, A1, A2>::type
+                  , typename pdalboostphoenix::detail::expression::function_eval<F, A0, A1, A2>::type
                   , 3 // arity
                 >
             >::type
@@ -158,7 +158,7 @@ namespace boost { namespace spirit
         {
             typedef typename result_type::proto_child0 child_type;
             return result_type::make(child_type(
-                phoenix::detail::expression::function_eval<F, A0, A1, A2>::make(f, _0, _1, _2)
+                pdalboostphoenix::detail::expression::function_eval<F, A0, A1, A2>::make(f, _0, _1, _2)
               , f.proto_base().child0
             ));
         }
@@ -189,16 +189,16 @@ namespace boost { namespace spirit
         >
         struct contains_actor
             : bool_<
-                  phoenix::is_actor<A0>::value
-               || phoenix::is_actor<A1>::value
-               || phoenix::is_actor<A2>::value
+                  pdalboostphoenix::is_actor<A0>::value
+               || pdalboostphoenix::is_actor<A1>::value
+               || pdalboostphoenix::is_actor<A2>::value
               >
         {};
 
         // to_lazy_arg: convert a terminal arg type to the type make_lazy needs
         template <typename A>
         struct to_lazy_arg
-          : phoenix::as_actor<A> // wrap A in a Phoenix actor if not already one
+          : pdalboostphoenix::as_actor<A> // wrap A in a Phoenix actor if not already one
         {};
 
         template <typename A>
@@ -416,8 +416,8 @@ namespace boost { namespace spirit
           , typename detail::contains_actor<A0>::is_true = 0) const
         {
             return make_lazy<this_type
-              , typename phoenix::as_actor<A0>::type>()(*this
-              , phoenix::as_actor<A0>::convert(_0));
+              , typename pdalboostphoenix::as_actor<A0>::type>()(*this
+              , pdalboostphoenix::as_actor<A0>::convert(_0));
         }
 
         template <typename A0, typename A1>
@@ -426,10 +426,10 @@ namespace boost { namespace spirit
           , typename detail::contains_actor<A0, A1>::is_true = 0) const
         {
             return make_lazy<this_type
-              , typename phoenix::as_actor<A0>::type
-              , typename phoenix::as_actor<A1>::type>()(*this
-              , phoenix::as_actor<A0>::convert(_0)
-              , phoenix::as_actor<A1>::convert(_1));
+              , typename pdalboostphoenix::as_actor<A0>::type
+              , typename pdalboostphoenix::as_actor<A1>::type>()(*this
+              , pdalboostphoenix::as_actor<A0>::convert(_0)
+              , pdalboostphoenix::as_actor<A1>::convert(_1));
         }
 
         template <typename A0, typename A1, typename A2>
@@ -438,12 +438,12 @@ namespace boost { namespace spirit
           , typename detail::contains_actor<A0, A1, A2>::is_true = 0) const
         {
             return make_lazy<this_type
-              , typename phoenix::as_actor<A0>::type
-              , typename phoenix::as_actor<A1>::type
-              , typename phoenix::as_actor<A2>::type>()(*this
-              , phoenix::as_actor<A0>::convert(_0)
-              , phoenix::as_actor<A1>::convert(_1)
-              , phoenix::as_actor<A2>::convert(_2));
+              , typename pdalboostphoenix::as_actor<A0>::type
+              , typename pdalboostphoenix::as_actor<A1>::type
+              , typename pdalboostphoenix::as_actor<A2>::type>()(*this
+              , pdalboostphoenix::as_actor<A0>::convert(_0)
+              , pdalboostphoenix::as_actor<A1>::convert(_1)
+              , pdalboostphoenix::as_actor<A2>::convert(_2));
         }
 
     private:
@@ -548,7 +548,7 @@ namespace boost { namespace spirit
 }}
 
 #ifdef BOOST_SPIRIT_USE_PHOENIX_V3
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename Tag>
     struct is_custom_terminal<Tag, typename Tag::is_spirit_tag>
@@ -570,7 +570,7 @@ namespace boost { namespace phoenix
 #endif
 
 // Define a spirit terminal. This macro may be placed in any namespace.
-// Common placeholders are placed in the main boost::spirit namespace
+// Common placeholders are placed in the main pdalboost::spirit namespace
 // (see common_terminals.hpp)
 
 #define BOOST_SPIRIT_TERMINAL_X(x, y) ((x, y)) BOOST_SPIRIT_TERMINAL_Y
@@ -582,7 +582,7 @@ namespace boost { namespace phoenix
 
 #define BOOST_SPIRIT_TERMINAL_NAME(name, type_name)                             \
     namespace tag { struct name { BOOST_SPIRIT_IS_TAG() }; }                    \
-    typedef boost::proto::terminal<tag::name>::type type_name;                  \
+    typedef pdalboost::proto::terminal<tag::name>::type type_name;                  \
     type_name const name = {{}};                                                \
     inline void BOOST_PP_CAT(silence_unused_warnings_, name)() { (void) name; } \
     /***/
@@ -591,7 +591,7 @@ namespace boost { namespace phoenix
 
 #define BOOST_SPIRIT_TERMINAL_NAME(name, type_name)                             \
     namespace tag { struct name { BOOST_SPIRIT_IS_TAG() }; }                    \
-    typedef boost::proto::terminal<tag::name>::type type_name;                  \
+    typedef pdalboost::proto::terminal<tag::name>::type type_name;                  \
     /***/
 
 #endif
@@ -613,14 +613,14 @@ namespace boost { namespace phoenix
     /***/
 
 // Define a spirit extended terminal. This macro may be placed in any namespace.
-// Common placeholders are placed in the main boost::spirit namespace
+// Common placeholders are placed in the main pdalboost::spirit namespace
 // (see common_terminals.hpp)
 
 #ifndef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
 
 #define BOOST_SPIRIT_TERMINAL_NAME_EX(name, type_name)                          \
     namespace tag { struct name { BOOST_SPIRIT_IS_TAG() }; }                    \
-    typedef boost::spirit::terminal<tag::name> type_name;                       \
+    typedef pdalboost::spirit::terminal<tag::name> type_name;                       \
     type_name const name = type_name();                                         \
     inline void BOOST_PP_CAT(silence_unused_warnings_, name)() { (void) name; } \
     /***/
@@ -629,7 +629,7 @@ namespace boost { namespace phoenix
 
 #define BOOST_SPIRIT_TERMINAL_NAME_EX(name, type_name)                          \
     namespace tag { struct name { BOOST_SPIRIT_IS_TAG() }; }                    \
-    typedef boost::spirit::terminal<tag::name> type_name;                       \
+    typedef pdalboost::spirit::terminal<tag::name> type_name;                       \
     /***/
 
 #endif

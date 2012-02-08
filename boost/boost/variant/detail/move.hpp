@@ -27,7 +27,7 @@
 #include "boost/mpl/if.hpp"
 #include "boost/type_traits/is_base_and_derived.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail { namespace variant {
 
 //////////////////////////////////////////////////////////////////////////
@@ -128,9 +128,9 @@ public: // metafunction result
 template <typename T>
 inline void move_swap(T& lhs, T& rhs)
 {
-    T tmp( boost::detail::variant::move(lhs) );
-    lhs = boost::detail::variant::move(rhs);
-    rhs = boost::detail::variant::move(tmp);
+    T tmp( pdalboost::detail::variant::move(lhs) );
+    lhs = pdalboost::detail::variant::move(rhs);
+    rhs = pdalboost::detail::variant::move(tmp);
 }
 
 #else// !workaround
@@ -140,9 +140,9 @@ namespace detail { namespace move_swap {
 template <typename T>
 inline void swap(T& lhs, T& rhs)
 {
-    T tmp( boost::detail::variant::move(lhs) );
-    lhs = boost::detail::variant::move(rhs);
-    rhs = boost::detail::variant::move(tmp);
+    T tmp( pdalboost::detail::variant::move(lhs) );
+    lhs = pdalboost::detail::variant::move(rhs);
+    rhs = pdalboost::detail::variant::move(tmp);
 }
 
 }} // namespace detail::move_swap
@@ -158,7 +158,7 @@ inline void move_swap(T& lhs, T& rhs)
 #endif // workaround
 
 }} // namespace detail::variant
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_DETAIL_MOVE_HPP
 

@@ -16,7 +16,7 @@
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct forward_traversal_tag;
     struct bidirectional_traversal_tag;
@@ -25,7 +25,7 @@ namespace boost { namespace fusion
     namespace detail
     {
         template<typename Tag1, typename Tag2,
-            bool Tag1Stricter = boost::is_convertible<Tag2,Tag1>::value>
+            bool Tag1Stricter = pdalboost::is_convertible<Tag2,Tag1>::value>
         struct stricter_traversal
         {
             typedef Tag1 type;

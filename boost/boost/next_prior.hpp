@@ -14,15 +14,15 @@
 
 #include <iterator>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //  Helper functions for classes like bidirectional iterators not supporting
 //  operator+ and operator-
 //
 //  Usage:
 //    const std::list<T>::iterator p = get_some_iterator();
-//    const std::list<T>::iterator prev = boost::prior(p);
-//    const std::list<T>::iterator next = boost::next(prev, 2);
+//    const std::list<T>::iterator prev = pdalboost::prior(p);
+//    const std::list<T>::iterator next = pdalboost::next(prev, 2);
 
 //  Contributed by Dave Abrahams
 
@@ -46,6 +46,6 @@ inline T prior(T x, Distance n)
     return x;
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // BOOST_NEXT_PRIOR_HPP_INCLUDED

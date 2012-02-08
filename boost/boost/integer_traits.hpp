@@ -39,7 +39,7 @@
 #pragma GCC system_header
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 template<class T>
 class integer_traits : public std::numeric_limits<T>
 {
@@ -170,53 +170,53 @@ class integer_traits<unsigned long>
 #if defined(ULLONG_MAX) && defined(BOOST_HAS_LONG_LONG)
 
 template<>
-class integer_traits< ::boost::long_long_type>
-  : public std::numeric_limits< ::boost::long_long_type>,
-    public detail::integer_traits_base< ::boost::long_long_type, LLONG_MIN, LLONG_MAX>
+class integer_traits< ::pdalboost::long_long_type>
+  : public std::numeric_limits< ::pdalboost::long_long_type>,
+    public detail::integer_traits_base< ::pdalboost::long_long_type, LLONG_MIN, LLONG_MAX>
 { };
 
 template<>
-class integer_traits< ::boost::ulong_long_type>
-  : public std::numeric_limits< ::boost::ulong_long_type>,
-    public detail::integer_traits_base< ::boost::ulong_long_type, 0, ULLONG_MAX>
+class integer_traits< ::pdalboost::ulong_long_type>
+  : public std::numeric_limits< ::pdalboost::ulong_long_type>,
+    public detail::integer_traits_base< ::pdalboost::ulong_long_type, 0, ULLONG_MAX>
 { };
 
 #elif defined(ULONG_LONG_MAX) && defined(BOOST_HAS_LONG_LONG)
 
 template<>
-class integer_traits< ::boost::long_long_type>  : public std::numeric_limits< ::boost::long_long_type>,    public detail::integer_traits_base< ::boost::long_long_type, LONG_LONG_MIN, LONG_LONG_MAX>{ };
+class integer_traits< ::pdalboost::long_long_type>  : public std::numeric_limits< ::pdalboost::long_long_type>,    public detail::integer_traits_base< ::pdalboost::long_long_type, LONG_LONG_MIN, LONG_LONG_MAX>{ };
 template<>
-class integer_traits< ::boost::ulong_long_type>
-  : public std::numeric_limits< ::boost::ulong_long_type>,
-    public detail::integer_traits_base< ::boost::ulong_long_type, 0, ULONG_LONG_MAX>
+class integer_traits< ::pdalboost::ulong_long_type>
+  : public std::numeric_limits< ::pdalboost::ulong_long_type>,
+    public detail::integer_traits_base< ::pdalboost::ulong_long_type, 0, ULONG_LONG_MAX>
 { };
 
 #elif defined(ULONGLONG_MAX) && defined(BOOST_HAS_LONG_LONG)
 
 template<>
-class integer_traits< ::boost::long_long_type>
-  : public std::numeric_limits< ::boost::long_long_type>,
-    public detail::integer_traits_base< ::boost::long_long_type, LONGLONG_MIN, LONGLONG_MAX>
+class integer_traits< ::pdalboost::long_long_type>
+  : public std::numeric_limits< ::pdalboost::long_long_type>,
+    public detail::integer_traits_base< ::pdalboost::long_long_type, LONGLONG_MIN, LONGLONG_MAX>
 { };
 
 template<>
-class integer_traits< ::boost::ulong_long_type>
-  : public std::numeric_limits< ::boost::ulong_long_type>,
-    public detail::integer_traits_base< ::boost::ulong_long_type, 0, ULONGLONG_MAX>
+class integer_traits< ::pdalboost::ulong_long_type>
+  : public std::numeric_limits< ::pdalboost::ulong_long_type>,
+    public detail::integer_traits_base< ::pdalboost::ulong_long_type, 0, ULONGLONG_MAX>
 { };
 
 #elif defined(_LLONG_MAX) && defined(_C2) && defined(BOOST_HAS_LONG_LONG)
 
 template<>
-class integer_traits< ::boost::long_long_type>
-  : public std::numeric_limits< ::boost::long_long_type>,
-    public detail::integer_traits_base< ::boost::long_long_type, -_LLONG_MAX - _C2, _LLONG_MAX>
+class integer_traits< ::pdalboost::long_long_type>
+  : public std::numeric_limits< ::pdalboost::long_long_type>,
+    public detail::integer_traits_base< ::pdalboost::long_long_type, -_LLONG_MAX - _C2, _LLONG_MAX>
 { };
 
 template<>
-class integer_traits< ::boost::ulong_long_type>
-  : public std::numeric_limits< ::boost::ulong_long_type>,
-    public detail::integer_traits_base< ::boost::ulong_long_type, 0, _ULLONG_MAX>
+class integer_traits< ::pdalboost::ulong_long_type>
+  : public std::numeric_limits< ::pdalboost::ulong_long_type>,
+    public detail::integer_traits_base< ::pdalboost::ulong_long_type, 0, _ULLONG_MAX>
 { };
 
 #elif defined(BOOST_HAS_LONG_LONG)
@@ -225,15 +225,15 @@ class integer_traits< ::boost::ulong_long_type>
 // we'll just have to work out the values for ourselves (assumes 2's compliment representation):
 //
 template<>
-class integer_traits< ::boost::long_long_type>
-  : public std::numeric_limits< ::boost::long_long_type>,
-    public detail::integer_traits_base< ::boost::long_long_type, (1LL << (sizeof(::boost::long_long_type) * CHAR_BIT - 1)), ~(1LL << (sizeof(::boost::long_long_type) * CHAR_BIT - 1))>
+class integer_traits< ::pdalboost::long_long_type>
+  : public std::numeric_limits< ::pdalboost::long_long_type>,
+    public detail::integer_traits_base< ::pdalboost::long_long_type, (1LL << (sizeof(::pdalboost::long_long_type) * CHAR_BIT - 1)), ~(1LL << (sizeof(::pdalboost::long_long_type) * CHAR_BIT - 1))>
 { };
 
 template<>
-class integer_traits< ::boost::ulong_long_type>
-  : public std::numeric_limits< ::boost::ulong_long_type>,
-    public detail::integer_traits_base< ::boost::ulong_long_type, 0, ~0uLL>
+class integer_traits< ::pdalboost::ulong_long_type>
+  : public std::numeric_limits< ::pdalboost::ulong_long_type>,
+    public detail::integer_traits_base< ::pdalboost::ulong_long_type, 0, ~0uLL>
 { };
 
 #elif defined(BOOST_HAS_MS_INT64)
@@ -253,7 +253,7 @@ class integer_traits< unsigned __int64>
 #endif
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif /* BOOST_INTEGER_TRAITS_HPP */
 

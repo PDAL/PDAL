@@ -37,7 +37,7 @@
     #pragma warning(disable: 4180) // warning C4180: qualifier applied to function type has no meaning; ignored
 #endif
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace detail
     {
@@ -60,7 +60,7 @@ namespace boost { namespace proto
           : mpl::true_
         {};
 
-        template<typename T BOOST_PROTO_TEMPLATE_ARITY_PARAM(long Arity = boost::proto::detail::template_arity<T>::value)>
+        template<typename T BOOST_PROTO_TEMPLATE_ARITY_PARAM(long Arity = pdalboost::proto::detail::template_arity<T>::value)>
         struct is_callable_
           : is_callable2_<T>
         {};

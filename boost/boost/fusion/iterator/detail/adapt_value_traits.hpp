@@ -9,7 +9,7 @@
 
 #include <boost/fusion/iterator/value_of.hpp>
 
-namespace boost { namespace fusion { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
 {
     struct adapt_value_traits
     {

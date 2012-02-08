@@ -13,7 +13,7 @@
 #define BOOST_TT_TRAIT_OP -
 #define BOOST_TT_FORBIDDEN_IF\
    /* pointer */\
-   ::boost::is_pointer< Rhs_noref >::value
+   ::pdalboost::is_pointer< Rhs_noref >::value
 
 
 #include <boost/type_traits/detail/has_prefix_operator.hpp>

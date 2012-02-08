@@ -10,7 +10,7 @@
 
 #include <iterator>
 
-namespace boost { namespace program_options {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
 
     namespace detail {
         template<class charT, class Iterator>

@@ -25,7 +25,7 @@
 #include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/min.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ namespace impl
         typedef typename numeric::functional::average<Sample, std::size_t>::result_type float_type;
         typedef std::vector<std::pair<float_type, float_type> > histogram_type;
         typedef std::vector<float_type> array_type;
-        // for boost::result_of
+        // for pdalboost::result_of
         typedef iterator_range<typename histogram_type::iterator> result_type;
 
         template<typename Args>
@@ -209,8 +209,8 @@ namespace tag
         #ifdef BOOST_ACCUMULATORS_DOXYGEN_INVOKED
         /// tag::density::cache_size named parameter
         /// tag::density::num_bins named parameter
-        static boost::parameter::keyword<density_cache_size> const cache_size;
-        static boost::parameter::keyword<density_num_bins> const num_bins;
+        static pdalboost::parameter::keyword<density_cache_size> const cache_size;
+        static pdalboost::parameter::keyword<density_num_bins> const num_bins;
         #endif
     };
 }
@@ -241,6 +241,6 @@ struct feature_of<tag::weighted_density>
 {
 };
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

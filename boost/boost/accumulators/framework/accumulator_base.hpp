@@ -16,7 +16,7 @@
 #include <boost/mpl/empty_sequence.hpp>
 #include <boost/accumulators/framework/accumulator_concept.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 namespace detail
@@ -60,6 +60,6 @@ struct accumulator_base
     }
 };
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

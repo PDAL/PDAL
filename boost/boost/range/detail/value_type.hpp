@@ -19,8 +19,7 @@
 // missing partial specialization  workaround.
 //////////////////////////////////////////////////////////////////////////////
 
-namespace boost 
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace range_detail 
     {        
         template< typename T >
@@ -42,7 +41,7 @@ namespace boost
             template< typename P >
             struct pts
             {
-                typedef BOOST_RANGE_DEDUCED_TYPENAME boost::iterator_value< BOOST_RANGE_DEDUCED_TYPENAME P::first_type >::type type;
+                typedef BOOST_RANGE_DEDUCED_TYPENAME pdalboost::iterator_value< BOOST_RANGE_DEDUCED_TYPENAME P::first_type >::type type;
             };
         };
 

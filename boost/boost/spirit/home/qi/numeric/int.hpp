@@ -22,7 +22,7 @@
 #include <boost/mpl/assert.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     namespace tag
     {
@@ -115,7 +115,7 @@ namespace boost { namespace spirit
     template <typename A0> // enables lit(n)
     struct use_terminal<qi::domain
         , terminal_ex<tag::lit, fusion::vector1<A0> >
-        , typename enable_if<is_same<A0, boost::long_long_type> >::type>
+        , typename enable_if<is_same<A0, pdalboost::long_long_type> >::type>
       : mpl::true_ {};
 
     template <typename A0> // enables long_long(n)
@@ -151,7 +151,7 @@ namespace boost { namespace spirit
     > : mpl::true_ {};
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
 #ifndef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
     using spirit::short_;
@@ -330,8 +330,8 @@ namespace boost { namespace spirit { namespace qi
     template <typename Modifiers, typename A0>
     struct make_primitive<
           terminal_ex<tag::lit, fusion::vector1<A0> >
-        , Modifiers, typename enable_if<is_same<A0, boost::long_long_type> >::type>
-      : make_literal_int<boost::long_long_type> {};
+        , Modifiers, typename enable_if<is_same<A0, pdalboost::long_long_type> >::type>
+      : make_literal_int<pdalboost::long_long_type> {};
 #endif
 
     ///////////////////////////////////////////////////////////////////////////
@@ -393,14 +393,14 @@ namespace boost { namespace spirit { namespace qi
     //[primitive_parsers_long_long_primitive
     template <typename Modifiers>
     struct make_primitive<tag::long_long, Modifiers>
-      : make_int<boost::long_long_type> {};
+      : make_int<pdalboost::long_long_type> {};
     //]
 
     template <typename Modifiers, typename A0>
     struct make_primitive<
         terminal_ex<tag::long_long
       , fusion::vector1<A0> > , Modifiers>
-      : make_direct_int<boost::long_long_type> {};
+      : make_direct_int<pdalboost::long_long_type> {};
 #endif
 }}}
 

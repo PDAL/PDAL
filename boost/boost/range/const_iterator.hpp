@@ -26,8 +26,7 @@
 #include <cstddef>
 #include <utility>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     //////////////////////////////////////////////////////////////////////////
     // default
     //////////////////////////////////////////////////////////////////////////
@@ -60,7 +59,7 @@ namespace boost
         typedef const T* type;
     };
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 

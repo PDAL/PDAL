@@ -8,7 +8,7 @@
 #include <boost/type_traits/msvc/typeof.hpp>
 #include <boost/type_traits/is_array.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail {
         template<bool IsArray>
         struct remove_extent_impl_typeof {
@@ -32,12 +32,12 @@ namespace boost {
 
     template<typename T>
     struct remove_extent {
-        typedef typename boost::detail::remove_extent_impl_typeof<
-            boost::is_array<T>::value                
+        typedef typename pdalboost::detail::remove_extent_impl_typeof<
+            pdalboost::is_array<T>::value                
         >::template inner<T,remove_extent<T> >::type type;
         BOOST_MPL_AUX_LAMBDA_SUPPORT(1,remove_extent,T)
     };
-} //namespace boost
+} //namespace pdalboost
 
 #endif //BOOST_TYPE_TRAITS_MSVC_REMOVE_BOUNDS_HOLT_2004_0827
 

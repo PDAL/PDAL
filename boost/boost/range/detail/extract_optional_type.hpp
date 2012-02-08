@@ -27,7 +27,7 @@
 
 #else
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace range_detail {
         template< typename T > struct exists { typedef void type; };
     }
@@ -42,7 +42,7 @@ namespace boost {
     {};                                                                        \
     template< typename C >                                                     \
     struct extract_ ## a_typedef< C                                            \
-    , BOOST_DEDUCED_TYPENAME boost::range_detail::exists< BOOST_DEDUCED_TYPENAME C::a_typedef >::type \
+    , BOOST_DEDUCED_TYPENAME pdalboost::range_detail::exists< BOOST_DEDUCED_TYPENAME C::a_typedef >::type \
     > {                                                                        \
         typedef BOOST_DEDUCED_TYPENAME C::a_typedef type;                      \
     };

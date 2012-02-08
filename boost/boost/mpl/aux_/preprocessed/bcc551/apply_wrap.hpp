@@ -9,7 +9,7 @@
 // Preprocessed version of "boost/mpl/apply_wrap.hpp" header
 // -- DO NOT modify by hand!
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<
       int N, typename F
@@ -117,7 +117,7 @@ template<
     >
 struct apply_wrap0
     : apply_wrap_impl0<
-          ::boost::mpl::aux::arity< F,0 >::value
+          ::pdalboost::mpl::aux::arity< F,0 >::value
         , F
        
         >::type
@@ -212,7 +212,7 @@ template<
     >
 struct apply_wrap1
     : apply_wrap_impl1<
-          ::boost::mpl::aux::arity< F,1 >::value
+          ::pdalboost::mpl::aux::arity< F,1 >::value
         , F
         , T1
         >::type
@@ -295,7 +295,7 @@ template<
     >
 struct apply_wrap2
     : apply_wrap_impl2<
-          ::boost::mpl::aux::arity< F,2 >::value
+          ::pdalboost::mpl::aux::arity< F,2 >::value
         , F
         , T1, T2
         >::type
@@ -361,7 +361,7 @@ template<
     >
 struct apply_wrap3
     : apply_wrap_impl3<
-          ::boost::mpl::aux::arity< F,3 >::value
+          ::pdalboost::mpl::aux::arity< F,3 >::value
         , F
         , T1, T2, T3
         >::type
@@ -410,7 +410,7 @@ template<
     >
 struct apply_wrap4
     : apply_wrap_impl4<
-          ::boost::mpl::aux::arity< F,4 >::value
+          ::pdalboost::mpl::aux::arity< F,4 >::value
         , F
         , T1, T2, T3, T4
         >::type
@@ -445,7 +445,7 @@ template<
     >
 struct apply_wrap5
     : apply_wrap_impl5<
-          ::boost::mpl::aux::arity< F,5 >::value
+          ::pdalboost::mpl::aux::arity< F,5 >::value
         , F
         , T1, T2, T3, T4, T5
         >::type

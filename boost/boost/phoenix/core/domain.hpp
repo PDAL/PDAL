@@ -11,7 +11,7 @@
 #include <boost/phoenix/core/limits.hpp>
 #include <boost/proto/domain.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     template <typename Expr>
     struct actor;

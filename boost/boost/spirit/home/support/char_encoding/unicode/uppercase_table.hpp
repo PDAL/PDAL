@@ -8,9 +8,9 @@
 ==============================================================================*/
 #include <boost/cstdint.hpp>
 
-namespace boost { namespace spirit { namespace ucd { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace ucd { namespace detail
 {
-    static const ::boost::uint8_t uppercase_stage1[] = {
+    static const ::pdalboost::uint8_t uppercase_stage1[] = {
 
       0,   1,   2,   3,   4,   5,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6, 
       6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   7,   8,   9, 
@@ -286,7 +286,7 @@ namespace boost { namespace spirit { namespace ucd { namespace detail
       6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6
     };
 
-    static const ::boost::uint32_t uppercase_stage2[] = {
+    static const ::pdalboost::uint32_t uppercase_stage2[] = {
 
     // block 0
          0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0, 
@@ -630,10 +630,10 @@ namespace boost { namespace spirit { namespace ucd { namespace detail
          0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0
     };
 
-    inline ::boost::uint32_t uppercase_lookup(::boost::uint32_t ch)
+    inline ::pdalboost::uint32_t uppercase_lookup(::pdalboost::uint32_t ch)
     {
-        ::boost::uint32_t block_offset = uppercase_stage1[ch / 256] * 256;
+        ::pdalboost::uint32_t block_offset = uppercase_stage1[ch / 256] * 256;
         return uppercase_stage2[block_offset + ch % 256];
     }
 
-}}}} // namespace boost::spirit::unicode::detail
+}}}} // namespace pdalboost::spirit::unicode::detail

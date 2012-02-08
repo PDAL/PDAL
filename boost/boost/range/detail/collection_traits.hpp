@@ -37,7 +37,7 @@
     array, null-terminated c-strings (and more) using the same interface.
 */
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
 
 //  collection_traits template class -----------------------------------------//
@@ -74,14 +74,14 @@ namespace boost {
         struct collection_traits
         {
         private:
-            typedef BOOST_STRING_TYPENAME ::boost::mpl::eval_if< 
-                    ::boost::algorithm::detail::is_pair<T>, 
+            typedef BOOST_STRING_TYPENAME ::pdalboost::mpl::eval_if< 
+                    ::pdalboost::algorithm::detail::is_pair<T>, 
                         detail::pair_container_traits_selector<T>,
-                        BOOST_STRING_TYPENAME ::boost::mpl::eval_if< 
-                        ::boost::is_array<T>, 
+                        BOOST_STRING_TYPENAME ::pdalboost::mpl::eval_if< 
+                        ::pdalboost::is_array<T>, 
                             detail::array_container_traits_selector<T>,
-                            BOOST_STRING_TYPENAME ::boost::mpl::eval_if<
-                            ::boost::is_pointer<T>,
+                            BOOST_STRING_TYPENAME ::pdalboost::mpl::eval_if<
+                            ::pdalboost::is_pointer<T>,
                                 detail::pointer_container_traits_selector<T>,
                                 detail::default_container_traits_selector<T>
                             >
@@ -261,6 +261,6 @@ namespace boost {
 #endif // BOOST_NO_FUNCTION_TEMPLATE_ORDERING
 
     } // namespace algorithm
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_STRING_COLLECTION_TRAITS_HPP

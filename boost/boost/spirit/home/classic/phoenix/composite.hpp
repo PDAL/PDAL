@@ -12,7 +12,7 @@
 #include <boost/spirit/home/classic/phoenix/actor.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace phoenix {
+namespace pdalboostphoenix {
 
 #if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)
 #pragma warning(push)
@@ -1426,6 +1426,6 @@ namespace impl {
 #pragma warning(pop)
 #endif
 
-}   //  namespace phoenix
+}   //  namespace pdalboostphoenix
 
 #endif

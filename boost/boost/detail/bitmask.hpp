@@ -20,19 +20,19 @@
 #define BOOST_BITMASK(Bitmask)                                            \
                                                                           \
   inline Bitmask operator| (Bitmask x , Bitmask y )                       \
-  { return static_cast<Bitmask>( static_cast<boost::int_least32_t>(x)     \
-      | static_cast<boost::int_least32_t>(y)); }                          \
+  { return static_cast<Bitmask>( static_cast<pdalboost::int_least32_t>(x)     \
+      | static_cast<pdalboost::int_least32_t>(y)); }                          \
                                                                           \
   inline Bitmask operator& (Bitmask x , Bitmask y )                       \
-  { return static_cast<Bitmask>( static_cast<boost::int_least32_t>(x)     \
-      & static_cast<boost::int_least32_t>(y)); }                          \
+  { return static_cast<Bitmask>( static_cast<pdalboost::int_least32_t>(x)     \
+      & static_cast<pdalboost::int_least32_t>(y)); }                          \
                                                                           \
   inline Bitmask operator^ (Bitmask x , Bitmask y )                       \
-  { return static_cast<Bitmask>( static_cast<boost::int_least32_t>(x)     \
-      ^ static_cast<boost::int_least32_t>(y)); }                          \
+  { return static_cast<Bitmask>( static_cast<pdalboost::int_least32_t>(x)     \
+      ^ static_cast<pdalboost::int_least32_t>(y)); }                          \
                                                                           \
   inline Bitmask operator~ (Bitmask x )                                   \
-  { return static_cast<Bitmask>(~static_cast<boost::int_least32_t>(x)); } \
+  { return static_cast<Bitmask>(~static_cast<pdalboost::int_least32_t>(x)); } \
                                                                           \
   inline Bitmask & operator&=(Bitmask & x , Bitmask y)                    \
   { x = x & y ; return x ; }                                              \

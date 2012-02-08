@@ -12,7 +12,7 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/accumulators/accumulators_fwd.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,6 @@ struct features
 {
 };
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

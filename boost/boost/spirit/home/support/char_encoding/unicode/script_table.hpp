@@ -8,9 +8,9 @@
 ==============================================================================*/
 #include <boost/cstdint.hpp>
 
-namespace boost { namespace spirit { namespace ucd { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace ucd { namespace detail
 {
-    static const ::boost::uint8_t script_stage1[] = {
+    static const ::pdalboost::uint8_t script_stage1[] = {
 
       0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15, 
      16,  17,  18,  19,  20,  20,  21,  22,  23,  24,  25,  26,  27,  28,   1,  29, 
@@ -286,7 +286,7 @@ namespace boost { namespace spirit { namespace ucd { namespace detail
      60,  60,  60,  60,  60,  60,  60,  60,  60,  60,  60,  60,  60,  60,  60,  60
     };
 
-    static const ::boost::uint8_t script_stage2[] = {
+    static const ::pdalboost::uint8_t script_stage2[] = {
 
     // block 0
      92,  92,  92,  92,  92,  92,  92,  92,  92,  92,  92,  92,  92,  92,  92,  92, 
@@ -2150,10 +2150,10 @@ namespace boost { namespace spirit { namespace ucd { namespace detail
       0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0
     };
 
-    inline ::boost::uint8_t script_lookup(::boost::uint32_t ch)
+    inline ::pdalboost::uint8_t script_lookup(::pdalboost::uint32_t ch)
     {
-        ::boost::uint32_t block_offset = script_stage1[ch / 256] * 256;
+        ::pdalboost::uint32_t block_offset = script_stage1[ch / 256] * 256;
         return script_stage2[block_offset + ch % 256];
     }
 
-}}}} // namespace boost::spirit::unicode::detail
+}}}} // namespace pdalboost::spirit::unicode::detail

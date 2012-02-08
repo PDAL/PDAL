@@ -27,7 +27,7 @@
 
 // STL
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -60,6 +60,6 @@ report_input_error( argv_traverser const& tr, format_stream& msg )
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_CLA_VALIDATION_IPP_070604GER

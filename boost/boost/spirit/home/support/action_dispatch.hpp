@@ -25,7 +25,7 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/home/support/attributes.hpp>
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     template <typename Component>
     struct action_dispatch
@@ -170,7 +170,7 @@ namespace boost { namespace spirit { namespace traits
         // wrap any non-fusion tuple into a fusion tuple (done by pass_attribute)
         // and pass through any fusion tuple.
         template <typename Eval, typename Attribute, typename Context>
-        bool operator()(phoenix::actor<Eval> const& f
+        bool operator()(pdalboostphoenix::actor<Eval> const& f
           , Attribute& attr, Context& context)
         {
             bool pass = true;

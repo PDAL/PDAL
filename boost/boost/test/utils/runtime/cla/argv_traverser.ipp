@@ -28,7 +28,7 @@
 namespace std { using ::memcpy; }
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -204,6 +204,6 @@ argv_traverser::handle_mismatch()
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_CLA_ARGV_TRAVERSER_IPP_070604GER

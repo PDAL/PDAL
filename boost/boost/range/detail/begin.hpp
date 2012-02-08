@@ -19,8 +19,7 @@
 # include <boost/range/value_type.hpp>
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
     namespace range_detail
     {

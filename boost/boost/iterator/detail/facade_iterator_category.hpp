@@ -31,9 +31,9 @@
 //
 
 // forward declaration
-namespace boost { struct use_default; }
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ struct use_default; }
 
-namespace boost { namespace detail  {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail  {
 
 struct input_output_iterator_tag
   : std::input_iterator_tag
@@ -60,7 +60,7 @@ struct iterator_writability_disabled
 # ifdef BOOST_ITERATOR_REF_CONSTNESS_KILLS_WRITABILITY // Adding Thomas' logic?
   : mpl::or_<
         is_const<Reference>
-      , boost::detail::indirect_traits::is_reference_to_const<Reference>
+      , pdalboost::detail::indirect_traits::is_reference_to_const<Reference>
       , is_const<ValueParam>
     >
 # else 
@@ -193,7 +193,7 @@ struct facade_iterator_category
 {
 };
 
-}} // namespace boost::detail
+}} // namespace pdalboost::detail
 
 # include <boost/iterator/detail/config_undef.hpp>
 

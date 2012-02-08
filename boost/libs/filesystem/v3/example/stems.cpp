@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  boost::filesystem::path p(argv[1]), name(p.filename());
+  pdalboost::filesystem::path p(argv[1]), name(p.filename());
 
   for(;;)
   {

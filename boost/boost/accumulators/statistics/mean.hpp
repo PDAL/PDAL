@@ -18,7 +18,7 @@
 #include <boost/accumulators/statistics/count.hpp>
 #include <boost/accumulators/statistics/sum.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 namespace impl
@@ -30,7 +30,7 @@ namespace impl
     struct mean_impl
       : accumulator_base
     {
-        // for boost::result_of
+        // for pdalboost::result_of
         typedef typename numeric::functional::average<Sample, std::size_t>::result_type result_type;
 
         mean_impl(dont_care) {}
@@ -47,7 +47,7 @@ namespace impl
     struct immediate_mean_impl
       : accumulator_base
     {
-        // for boost::result_of
+        // for pdalboost::result_of
         typedef typename numeric::functional::average<Sample, std::size_t>::result_type result_type;
 
         template<typename Args>
@@ -293,6 +293,6 @@ struct feature_of<tag::immediate_weighted_mean_of_variates<VariateType, VariateT
 //    }
 //};
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

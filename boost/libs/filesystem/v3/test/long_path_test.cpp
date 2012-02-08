@@ -17,7 +17,7 @@
 #include <iostream>
 #include <string>
 
-using namespace boost::filesystem;
+using namespace pdalboost::filesystem;
 
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/detail/lightweight_main.hpp>
@@ -57,5 +57,5 @@ int cpp_main(int, char*[])
 
   //remove_all(x_p);
 
-  return ::boost::report_errors();
+  return ::pdalboost::report_errors();
 }

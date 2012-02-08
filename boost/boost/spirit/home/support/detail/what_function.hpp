@@ -15,7 +15,7 @@
 #include <boost/spirit/home/support/info.hpp>
 #include <boost/detail/workaround.hpp>
 
-namespace boost { namespace spirit { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace detail
 {
     template <typename Context>
     struct what_function
@@ -32,7 +32,7 @@ namespace boost { namespace spirit { namespace detail
 #if BOOST_WORKAROUND(BOOST_MSVC, BOOST_TESTED_AT(1600))
             component; // suppresses warning: C4100: 'component' : unreferenced formal parameter
 #endif
-            boost::get<std::list<info> >(what.value).
+            pdalboost::get<std::list<info> >(what.value).
                 push_back(component.what(context));
         }
 

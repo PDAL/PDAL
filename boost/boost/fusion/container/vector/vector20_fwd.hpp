@@ -34,7 +34,7 @@
 #pragma wave option(preserve: 1)
 #endif
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     // expand vector11 to vector20
     #define BOOST_PP_FILENAME_1 <boost/fusion/container/vector/vector20_fwd.hpp>

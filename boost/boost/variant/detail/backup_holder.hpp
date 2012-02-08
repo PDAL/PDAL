@@ -15,7 +15,7 @@
 
 #include "boost/assert.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail { namespace variant {
 
 template <typename T>
@@ -89,6 +89,6 @@ void swap(backup_holder<T>& lhs, backup_holder<T>& rhs)
 }
 
 }} // namespace detail::variant
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_DETAIL_BACKUP_HOLDER_HPP

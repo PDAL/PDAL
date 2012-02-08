@@ -15,7 +15,7 @@
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-namespace boost { namespace spirit { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { 
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -25,13 +25,13 @@ namespace impl
     struct match_attr_traits
     {
         typedef typename
-            boost::optional<T>::reference_const_type
+            pdalboost::optional<T>::reference_const_type
         const_reference;
 
         //  case where src *IS* convertible to T (dest)
         template <typename T2>
         static void
-        convert(boost::optional<T>& dest, T2 const& src, mpl::true_)
+        convert(pdalboost::optional<T>& dest, T2 const& src, mpl::true_)
         { 
             dest.reset(src); 
         }
@@ -39,27 +39,27 @@ namespace impl
         //  case where src *IS NOT* convertible to T (dest)
         template <typename T2>
         static void
-        convert(boost::optional<T>& dest, T2 const& /*src*/, mpl::false_)
+        convert(pdalboost::optional<T>& dest, T2 const& /*src*/, mpl::false_)
         { 
             dest.reset(); 
         }
 
         static void
-        convert(boost::optional<T>& dest, nil_t/*src*/)
+        convert(pdalboost::optional<T>& dest, nil_t/*src*/)
         { 
             dest.reset(); 
         }
         
         template <typename T2>
         static void
-        convert(boost::optional<T>& dest, T2 const& src)
+        convert(pdalboost::optional<T>& dest, T2 const& src)
         { 
             convert(dest, src, is_convertible<T2, T>());
         }
 
         template <typename OtherMatchT>
         static void
-        copy(boost::optional<T>& dest, OtherMatchT const& src)
+        copy(pdalboost::optional<T>& dest, OtherMatchT const& src)
         {
             if (src.has_valid_attribute())
                 convert(dest, src.value());
@@ -67,7 +67,7 @@ namespace impl
 
         template <typename OtherMatchT>
         static void
-        assign(boost::optional<T>& dest, OtherMatchT const& src)
+        assign(pdalboost::optional<T>& dest, OtherMatchT const& src)
         {
             if (src.has_valid_attribute())
                 convert(dest, src.value());
@@ -78,7 +78,7 @@ namespace impl
         // T is not reference
         template <typename ValueT>
         static void
-        set_value(boost::optional<T>& dest, ValueT const& val, mpl::false_)
+        set_value(pdalboost::optional<T>& dest, ValueT const& val, mpl::false_)
         {
             dest.reset(val);
         }
@@ -86,7 +86,7 @@ namespace impl
         // T is a reference
         template <typename ValueT>
         static void
-        set_value(boost::optional<T>& dest, ValueT const& val, mpl::true_)
+        set_value(pdalboost::optional<T>& dest, ValueT const& val, mpl::true_)
         {
             dest.get() = val;
         }
@@ -96,7 +96,7 @@ namespace impl
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_END
 
-}} // namespace boost::spirit::impl
+}} // namespace pdalboost::spirit::impl
 
 #endif
 

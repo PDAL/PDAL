@@ -41,7 +41,7 @@
 #include <boost/fusion/include/begin.hpp>
 #include <boost/fusion/include/cons.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
     ///////////////////////////////////////////////////////////////////////////
     // as_feature
@@ -406,6 +406,6 @@ namespace boost { namespace accumulators
 
     } // namespace detail
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

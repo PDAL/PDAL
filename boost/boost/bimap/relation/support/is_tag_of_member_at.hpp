@@ -25,7 +25,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/bimap/relation/support/member_with_tag.hpp>
 
-/** \struct boost::bimaps::relation::support::is_tag_of_member_at_left
+/** \struct pdalboost::bimaps::relation::support::is_tag_of_member_at_left
 
 \brief Metafunction to test if a user tag is refering to the left member.
 
@@ -51,7 +51,7 @@ See also member_with_tag, member_at, is_tag_of_member_at_right.
                                                                              **/
 
 
-/** \struct boost::bimaps::relation::support::is_tag_of_member_at_right
+/** \struct pdalboost::bimaps::relation::support::is_tag_of_member_at_right
 
 \brief Metafunction to test if a user tag is refering to the left member.
 
@@ -79,7 +79,7 @@ See also member_with_tag, member_at, is_tag_of_member_at_left.
 
 #ifndef BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 namespace support {
@@ -94,7 +94,7 @@ template
     class Enable = void
 >
 struct is_tag_of_member_at_left :
-    ::boost::mpl::false_ {};
+    ::pdalboost::mpl::false_ {};
 
 template< class Tag, class Relation >
 struct is_tag_of_member_at_left
@@ -110,7 +110,7 @@ struct is_tag_of_member_at_left
 
     >::type
 > :
-    ::boost::mpl::true_ {};
+    ::pdalboost::mpl::true_ {};
 
 // Metafunction is_tag_of_member_at_right
 // Easiear metaprogramming
@@ -122,7 +122,7 @@ template
     class Enable = void
 >
 struct is_tag_of_member_at_right :
-    ::boost::mpl::false_ {};
+    ::pdalboost::mpl::false_ {};
 
 template< class Tag, class Relation >
 struct is_tag_of_member_at_right
@@ -138,7 +138,7 @@ struct is_tag_of_member_at_right
 
     >::type
 > :
-    ::boost::mpl::true_ {};
+    ::pdalboost::mpl::true_ {};
 
 
 // Metafunction is_tag_of_member_at_info
@@ -151,7 +151,7 @@ template
     class Enable = void
 >
 struct is_tag_of_member_at_info :
-    ::boost::mpl::false_ {};
+    ::pdalboost::mpl::false_ {};
 
 template< class Tag, class Relation >
 struct is_tag_of_member_at_info
@@ -167,12 +167,12 @@ struct is_tag_of_member_at_info
 
     >::type
 > :
-    ::boost::mpl::true_ {};
+    ::pdalboost::mpl::true_ {};
 
 } // namespace support
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 

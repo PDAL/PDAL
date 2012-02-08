@@ -11,7 +11,7 @@
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/bool.hpp>
 
-namespace boost { namespace serialization {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace serialization {
 
 /// the base class for serialization wrappers
 ///
@@ -32,10 +32,10 @@ struct wrapper_traits :
 
 template<class T>
 struct is_wrapper_impl :
-    boost::mpl::eval_if<
-      boost::is_base_and_derived<basic_traits,T>,
-      boost::mpl::true_,
-      boost::mpl::false_
+    pdalboost::mpl::eval_if<
+      pdalboost::is_base_and_derived<basic_traits,T>,
+      pdalboost::mpl::true_,
+      pdalboost::mpl::false_
     >::type
 {};
 
@@ -49,10 +49,10 @@ struct is_wrapper {
 
 // A macro to define that a class is a wrapper
 #define BOOST_CLASS_IS_WRAPPER(T)                       \
-namespace boost {                                       \
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{                                       \
 namespace serialization {                               \
 template<>                                              \
-struct is_wrapper_impl<const T> : boost::mpl::true_ {}; \
+struct is_wrapper_impl<const T> : pdalboost::mpl::true_ {}; \
 }                                                       \
 }                                                       \
 /**/

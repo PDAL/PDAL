@@ -13,7 +13,7 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/spirit/home/support/detail/scoped_enum_emulation.hpp>
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     // declare special functions allowing to integrate any multi_pass iterator
     // with expectation points

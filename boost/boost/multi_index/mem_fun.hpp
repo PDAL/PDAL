@@ -22,7 +22,7 @@
 #include <boost/type_traits/is_convertible.hpp>
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 template<class T> class reference_wrapper; /* fwd decl. */
 
@@ -190,23 +190,23 @@ struct mem_fun_explicit
 #if defined(BOOST_MSVC)&&(BOOST_MSVC<1300)
 
 #define BOOST_MULTI_INDEX_CONST_MEM_FUN(Class,Type,MemberFunName) \
-::boost::multi_index::const_mem_fun_explicit<\
+::pdalboost::multi_index::const_mem_fun_explicit<\
   Class,Type,Type (Class::*)()const,&Class::MemberFunName >
 #define BOOST_MULTI_INDEX_MEM_FUN(Class,Type,MemberFunName) \
-::boost::multi_index::mem_fun_explicit<\
+::pdalboost::multi_index::mem_fun_explicit<\
   Class,Type,Type (Class::*)(),&Class::MemberFunName >
 
 #else
 
 #define BOOST_MULTI_INDEX_CONST_MEM_FUN(Class,Type,MemberFunName) \
-::boost::multi_index::const_mem_fun< Class,Type,&Class::MemberFunName >
+::pdalboost::multi_index::const_mem_fun< Class,Type,&Class::MemberFunName >
 #define BOOST_MULTI_INDEX_MEM_FUN(Class,Type,MemberFunName) \
-::boost::multi_index::mem_fun< Class,Type,&Class::MemberFunName >
+::pdalboost::multi_index::mem_fun< Class,Type,&Class::MemberFunName >
 
 #endif
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

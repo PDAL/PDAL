@@ -10,7 +10,7 @@
 
 #include <boost/fusion/iterator/advance.hpp>
 
-namespace boost { namespace fusion 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion 
 {
     struct transform_view_iterator_tag;
     struct transform_view_iterator2_tag;
@@ -41,7 +41,7 @@ namespace boost { namespace fusion
                 static type
                 call(Iterator const& i)
                 {
-                    return type(boost::fusion::advance<Dist>(i.first), i.f);
+                    return type(pdalboost::fusion::advance<Dist>(i.first), i.f);
                 }
             };
         };
@@ -64,8 +64,8 @@ namespace boost { namespace fusion
                 call(Iterator const& i)
                 {
                     return type(
-                        boost::fusion::advance<Dist>(i.first1)
-                      , boost::fusion::advance<Dist>(i.first2), i.f);
+                        pdalboost::fusion::advance<Dist>(i.first1)
+                      , pdalboost::fusion::advance<Dist>(i.first2), i.f);
                 }
             };
         };

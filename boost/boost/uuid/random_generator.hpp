@@ -17,7 +17,7 @@
 #include <boost/shared_ptr.hpp>
 #include <limits>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace uuids {
 
 // generate a random-based uuid
@@ -90,7 +90,7 @@ public:
                 i = 0;
             }
 
-			// static_cast gets rid of warnings of converting unsigned long to boost::uint8_t
+			// static_cast gets rid of warnings of converting unsigned long to pdalboost::uint8_t
             *it = static_cast<uuid::value_type>((random_value >> (i*8)) & 0xFF);
         }
 
@@ -114,6 +114,6 @@ private:
 
 typedef basic_random_generator<mt19937> random_generator;
 
-}} // namespace boost::uuids
+}} // namespace pdalboost::uuids
 
 #endif //BOOST_UUID_RANDOM_GENERATOR_HPP

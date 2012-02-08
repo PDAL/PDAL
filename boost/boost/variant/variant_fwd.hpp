@@ -101,7 +101,7 @@
     BOOST_PP_ENUM_SHIFTED_PARAMS(BOOST_VARIANT_LIMIT_TYPES, param)
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail { namespace variant {
 
@@ -215,8 +215,8 @@ template < BOOST_VARIANT_AUX_DECLARE_PARAMS > class variant;
 ///////////////////////////////////////////////////////////////////////////////
 // metafunction make_recursive_variant
 //
-// Exposes a boost::variant with recursive_variant_ tags (below) substituted
-// with the variant itself (wrapped as needed with boost::recursive_wrapper).
+// Exposes a pdalboost::variant with recursive_variant_ tags (below) substituted
+// with the variant itself (wrapped as needed with pdalboost::recursive_wrapper).
 //
 template < BOOST_VARIANT_AUX_DECLARE_PARAMS > struct make_recursive_variant;
 
@@ -248,6 +248,6 @@ template <typename Types> struct make_variant_over;
 //
 template <typename Types> struct make_recursive_variant_over;
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_VARIANT_FWD_HPP

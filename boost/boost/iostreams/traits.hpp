@@ -45,7 +45,7 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp>
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 //----------Definitions of predicates for streams and stream buffers----------//
 
@@ -126,22 +126,22 @@ template<typename T, typename Tr>
 class linked_streambuf;
 
 BOOST_IOSTREAMS_BOOL_TRAIT_DEF( is_boost_stream,
-                                boost::iostreams::stream,
+                                pdalboost::iostreams::stream,
                                 3 )
 BOOST_IOSTREAMS_BOOL_TRAIT_DEF( is_boost_stream_buffer,
-                                boost::iostreams::stream_buffer,
+                                pdalboost::iostreams::stream_buffer,
                                 4 )
 BOOST_IOSTREAMS_BOOL_TRAIT_DEF( is_filtering_stream_impl,
-                                boost::iostreams::filtering_stream,
+                                pdalboost::iostreams::filtering_stream,
                                 5 )
 BOOST_IOSTREAMS_BOOL_TRAIT_DEF( is_filtering_wstream_impl,
-                                boost::iostreams::wfiltering_stream,
+                                pdalboost::iostreams::wfiltering_stream,
                                 5 )
 BOOST_IOSTREAMS_BOOL_TRAIT_DEF( is_filtering_streambuf_impl,
-                                boost::iostreams::filtering_streambuf,
+                                pdalboost::iostreams::filtering_streambuf,
                                 5 )
 BOOST_IOSTREAMS_BOOL_TRAIT_DEF( is_filtering_wstreambuf_impl,
-                                boost::iostreams::filtering_wstreambuf,
+                                pdalboost::iostreams::filtering_wstreambuf,
                                 5 )
 BOOST_IOSTREAMS_BOOL_TRAIT_DEF(is_linked, linked_streambuf, 2)
 

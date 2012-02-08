@@ -22,7 +22,7 @@
 #include <boost/mpl/if.hpp>
 #include <boost/ref.hpp>
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
                     
 //------------------Definition of wrap/unwrap traits--------------------------//
 
@@ -54,15 +54,15 @@ struct unwrap_ios
 
     template<typename T>
     inline typename wrapped_type<T>::type
-    wrap(T& t BOOST_IOSTREAMS_ENABLE_IF_STREAM(T)) { return boost::ref(t); }
+    wrap(T& t BOOST_IOSTREAMS_ENABLE_IF_STREAM(T)) { return pdalboost::ref(t); }
 #else // #ifndef BOOST_NO_SFINAE //-------------------------------------------//
     template<typename T>
     inline typename wrapped_type<T>::type // BCC 5.x needs namespace qualification.
-    wrap_impl(const T& t, mpl::true_) { return boost::ref(const_cast<T&>(t)); }
+    wrap_impl(const T& t, mpl::true_) { return pdalboost::ref(const_cast<T&>(t)); }
 
     template<typename T>
     inline typename wrapped_type<T>::type // BCC 5.x needs namespace qualification.
-    wrap_impl(T& t, mpl::true_) { return boost::ref(t); }
+    wrap_impl(T& t, mpl::true_) { return pdalboost::ref(t); }
 
     template<typename T>
     inline typename wrapped_type<T>::type 

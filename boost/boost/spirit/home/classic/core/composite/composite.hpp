@@ -13,7 +13,7 @@
 #include <boost/spirit/home/classic/namespace.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -58,8 +58,8 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
     public:
 
         typedef BaseT                                           base_t;
-        typedef typename boost::call_traits<S>::param_type      param_t;
-        typedef typename boost::call_traits<S>::const_reference return_t;
+        typedef typename pdalboost::call_traits<S>::param_type      param_t;
+        typedef typename pdalboost::call_traits<S>::const_reference return_t;
         typedef S                                               subject_t;
         typedef typename S::embed_t                             subject_embed_t;
 
@@ -115,10 +115,10 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
     public:
 
         typedef BaseT                                           base_t;
-        typedef typename boost::call_traits<A>::param_type      left_param_t;
-        typedef typename boost::call_traits<A>::const_reference left_return_t;
-        typedef typename boost::call_traits<B>::param_type      right_param_t;
-        typedef typename boost::call_traits<B>::const_reference right_return_t;
+        typedef typename pdalboost::call_traits<A>::param_type      left_param_t;
+        typedef typename pdalboost::call_traits<A>::const_reference left_return_t;
+        typedef typename pdalboost::call_traits<B>::param_type      right_param_t;
+        typedef typename pdalboost::call_traits<B>::const_reference right_return_t;
         typedef A                                               left_t;
         typedef typename A::embed_t                             left_embed_t;
         typedef B                                               right_t;
@@ -137,7 +137,7 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
     private:
 
-        boost::compressed_pair<left_embed_t, right_embed_t> subj;
+        pdalboost::compressed_pair<left_embed_t, right_embed_t> subj;
     };
 
 #if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)

@@ -27,7 +27,7 @@
 
 #include <boost/spirit/home/phoenix/operator/detail/mem_fun_ptr_return.hpp>
 
-namespace boost { namespace phoenix {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix {
 
     struct mem_fun_ptr_eval
     {

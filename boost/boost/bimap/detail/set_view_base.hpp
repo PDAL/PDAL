@@ -27,7 +27,7 @@
 #include <boost/bimap/relation/mutant_relation.hpp>
 #include <boost/bimap/container_adaptor/support/iterator_facade_converters.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace detail {
 
@@ -50,7 +50,7 @@ class set_view_key_to_base<MutantRelationStorage,MutantRelationStorage,KeyToBase
     public:
     const MutantRelationStorage & operator()( const non_mutable_storage & k ) const
     {
-        return ::boost::bimaps::relation::detail::mutate<MutantRelationStorage>(k);
+        return ::pdalboost::bimaps::relation::detail::mutate<MutantRelationStorage>(k);
     }
     const MutantRelationStorage & operator()( const MutantRelationStorage & k ) const
     {
@@ -64,38 +64,38 @@ class set_view_key_to_base<MutantRelationStorage,MutantRelationStorage,KeyToBase
 #define BOOST_BIMAP_SET_VIEW_CONTAINER_ADAPTOR(                               \
     CONTAINER_ADAPTOR, CORE_INDEX, OTHER_ITER, CONST_OTHER_ITER               \
 )                                                                             \
-::boost::bimaps::container_adaptor::CONTAINER_ADAPTOR                         \
+::pdalboost::bimaps::container_adaptor::CONTAINER_ADAPTOR                         \
 <                                                                             \
     CORE_INDEX,                                                               \
-    ::boost::bimaps::detail::                                                 \
+    ::pdalboost::bimaps::detail::                                                 \
               set_view_iterator<                                              \
                     BOOST_DEDUCED_TYPENAME CORE_INDEX::iterator         >,    \
-    ::boost::bimaps::detail::                                                 \
+    ::pdalboost::bimaps::detail::                                                 \
         const_set_view_iterator<                                              \
                     BOOST_DEDUCED_TYPENAME CORE_INDEX::const_iterator   >,    \
-    ::boost::bimaps::detail::                                                 \
+    ::pdalboost::bimaps::detail::                                                 \
               set_view_iterator<                                              \
                     BOOST_DEDUCED_TYPENAME CORE_INDEX::OTHER_ITER       >,    \
-    ::boost::bimaps::detail::                                                 \
+    ::pdalboost::bimaps::detail::                                                 \
         const_set_view_iterator<                                              \
                     BOOST_DEDUCED_TYPENAME CORE_INDEX::CONST_OTHER_ITER >,    \
-    ::boost::bimaps::container_adaptor::support::iterator_facade_to_base      \
+    ::pdalboost::bimaps::container_adaptor::support::iterator_facade_to_base      \
     <                                                                         \
-        ::boost::bimaps::detail::      set_view_iterator<                     \
+        ::pdalboost::bimaps::detail::      set_view_iterator<                     \
             BOOST_DEDUCED_TYPENAME CORE_INDEX::iterator>,                     \
-        ::boost::bimaps::detail::const_set_view_iterator<                     \
+        ::pdalboost::bimaps::detail::const_set_view_iterator<                     \
             BOOST_DEDUCED_TYPENAME CORE_INDEX::const_iterator>                \
                                                                               \
     >,                                                                        \
-    ::boost::mpl::na,                                                         \
-    ::boost::mpl::na,                                                         \
-    ::boost::bimaps::relation::detail::                                       \
+    ::pdalboost::mpl::na,                                                         \
+    ::pdalboost::mpl::na,                                                         \
+    ::pdalboost::bimaps::relation::detail::                                       \
         get_mutable_relation_functor<                                         \
             BOOST_DEDUCED_TYPENAME CORE_INDEX::value_type >,                  \
-    ::boost::bimaps::relation::support::                                      \
+    ::pdalboost::bimaps::relation::support::                                      \
         get_above_view_functor<                                               \
             BOOST_DEDUCED_TYPENAME CORE_INDEX::value_type >,                  \
-    ::boost::bimaps::detail::set_view_key_to_base<                            \
+    ::pdalboost::bimaps::detail::set_view_key_to_base<                            \
         BOOST_DEDUCED_TYPENAME CORE_INDEX::key_type,                          \
         BOOST_DEDUCED_TYPENAME CORE_INDEX::value_type,                        \
         BOOST_DEDUCED_TYPENAME CORE_INDEX::key_from_value                     \
@@ -108,35 +108,35 @@ class set_view_key_to_base<MutantRelationStorage,MutantRelationStorage,KeyToBase
 #define BOOST_BIMAP_SEQUENCED_SET_VIEW_CONTAINER_ADAPTOR(                     \
     CONTAINER_ADAPTOR, CORE_INDEX, OTHER_ITER, CONST_OTHER_ITER               \
 )                                                                             \
-::boost::bimaps::container_adaptor::CONTAINER_ADAPTOR                         \
+::pdalboost::bimaps::container_adaptor::CONTAINER_ADAPTOR                         \
 <                                                                             \
     CORE_INDEX,                                                               \
-    ::boost::bimaps::detail::                                                 \
+    ::pdalboost::bimaps::detail::                                                 \
               set_view_iterator<                                              \
                     BOOST_DEDUCED_TYPENAME CORE_INDEX::iterator         >,    \
-    ::boost::bimaps::detail::                                                 \
+    ::pdalboost::bimaps::detail::                                                 \
         const_set_view_iterator<                                              \
                     BOOST_DEDUCED_TYPENAME CORE_INDEX::const_iterator   >,    \
-    ::boost::bimaps::detail::                                                 \
+    ::pdalboost::bimaps::detail::                                                 \
               set_view_iterator<                                              \
                     BOOST_DEDUCED_TYPENAME CORE_INDEX::OTHER_ITER       >,    \
-    ::boost::bimaps::detail::                                                 \
+    ::pdalboost::bimaps::detail::                                                 \
         const_set_view_iterator<                                              \
                     BOOST_DEDUCED_TYPENAME CORE_INDEX::CONST_OTHER_ITER >,    \
-    ::boost::bimaps::container_adaptor::support::iterator_facade_to_base      \
+    ::pdalboost::bimaps::container_adaptor::support::iterator_facade_to_base      \
     <                                                                         \
-        ::boost::bimaps::detail::      set_view_iterator<                     \
+        ::pdalboost::bimaps::detail::      set_view_iterator<                     \
             BOOST_DEDUCED_TYPENAME CORE_INDEX::iterator>,                     \
-        ::boost::bimaps::detail::const_set_view_iterator<                     \
+        ::pdalboost::bimaps::detail::const_set_view_iterator<                     \
             BOOST_DEDUCED_TYPENAME CORE_INDEX::const_iterator>                \
                                                                               \
     >,                                                                        \
-    ::boost::mpl::na,                                                         \
-    ::boost::mpl::na,                                                         \
-    ::boost::bimaps::relation::detail::                                       \
+    ::pdalboost::mpl::na,                                                         \
+    ::pdalboost::mpl::na,                                                         \
+    ::pdalboost::bimaps::relation::detail::                                       \
         get_mutable_relation_functor<                                         \
             BOOST_DEDUCED_TYPENAME CORE_INDEX::value_type >,                  \
-    ::boost::bimaps::relation::support::                                      \
+    ::pdalboost::bimaps::relation::support::                                      \
         get_above_view_functor<                                               \
             BOOST_DEDUCED_TYPENAME CORE_INDEX::value_type >                   \
 >
@@ -146,14 +146,14 @@ class set_view_key_to_base<MutantRelationStorage,MutantRelationStorage,KeyToBase
 #if defined(BOOST_MSVC)
 /*===========================================================================*/
 #define BOOST_BIMAP_SET_VIEW_BASE_FRIEND(TYPE,INDEX_TYPE)                     \
-    typedef ::boost::bimaps::detail::set_view_base<                           \
+    typedef ::pdalboost::bimaps::detail::set_view_base<                           \
         TYPE< INDEX_TYPE >, INDEX_TYPE > template_class_friend;               \
     friend class template_class_friend;
 /*===========================================================================*/
 #else
 /*===========================================================================*/
 #define BOOST_BIMAP_SET_VIEW_BASE_FRIEND(TYPE,INDEX_TYPE)                     \
-    friend class ::boost::bimaps::detail::set_view_base<                      \
+    friend class ::pdalboost::bimaps::detail::set_view_base<                      \
         TYPE< INDEX_TYPE >, INDEX_TYPE >;
 /*===========================================================================*/
 #endif
@@ -164,12 +164,12 @@ class set_view_key_to_base<MutantRelationStorage,MutantRelationStorage,KeyToBase
 template< class Derived, class Index >
 class set_view_base
 {
-    typedef ::boost::bimaps::container_adaptor::support::
+    typedef ::pdalboost::bimaps::container_adaptor::support::
     iterator_facade_to_base
     <
-        ::boost::bimaps::detail::
+        ::pdalboost::bimaps::detail::
                   set_view_iterator<BOOST_DEDUCED_TYPENAME Index::      iterator>,
-        ::boost::bimaps::detail::
+        ::pdalboost::bimaps::detail::
             const_set_view_iterator<BOOST_DEDUCED_TYPENAME Index::const_iterator>
 
     > iterator_to_base_;
@@ -180,7 +180,7 @@ class set_view_base
 
     typedef BOOST_DEDUCED_TYPENAME Index::value_type                          value_type_;
 
-    typedef ::boost::bimaps::detail::
+    typedef ::pdalboost::bimaps::detail::
                     set_view_iterator<BOOST_DEDUCED_TYPENAME Index::iterator>   iterator_;
 
     public:
@@ -223,21 +223,21 @@ class set_view_base
 
             derived().template functor<iterator_to_base_>()(position),
 
-            ::boost::bimaps::detail::relation_modifier_adaptor
+            ::pdalboost::bimaps::detail::relation_modifier_adaptor
             <
                 Modifier,
                 BOOST_DEDUCED_TYPENAME Index::value_type,
-                BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::support::
+                BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::support::
                 data_extractor
                 <
-                    ::boost::bimaps::relation::member_at::left,
+                    ::pdalboost::bimaps::relation::member_at::left,
                     BOOST_DEDUCED_TYPENAME Index::value_type
 
                 >::type,
-                BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::support::
+                BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::support::
                 data_extractor
                 <
-                    ::boost::bimaps::relation::member_at::right,
+                    ::pdalboost::bimaps::relation::member_at::right,
                     BOOST_DEDUCED_TYPENAME Index::value_type
 
                 >::type
@@ -250,10 +250,10 @@ class set_view_base
     template< class Modifier >
     bool modify_left(iterator_ position, Modifier mod)
     {
-        typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::support::
+        typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::support::
         data_extractor
         <
-            BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::member_at::right,
+            BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::member_at::right,
             BOOST_DEDUCED_TYPENAME Index::value_type
 
         >::type left_data_extractor_;
@@ -263,9 +263,9 @@ class set_view_base
             derived().template functor<iterator_to_base_>()(position),
 
             // this may be replaced later by
-            // ::boost::bind( mod, ::boost::bind(data_extractor_(),_1) )
+            // ::pdalboost::bind( mod, ::pdalboost::bind(data_extractor_(),_1) )
 
-            ::boost::bimaps::detail::unary_modifier_adaptor
+            ::pdalboost::bimaps::detail::unary_modifier_adaptor
             <
                 Modifier,
                 BOOST_DEDUCED_TYPENAME Index::value_type,
@@ -278,10 +278,10 @@ class set_view_base
     template< class Modifier >
     bool modify_right(iterator_ position, Modifier mod)
     {
-        typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::support::
+        typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::support::
         data_extractor
         <
-            BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::member_at::right,
+            BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::member_at::right,
             BOOST_DEDUCED_TYPENAME Index::value_type
 
         >::type right_data_extractor_;
@@ -291,9 +291,9 @@ class set_view_base
             derived().template functor<iterator_to_base_>()(position),
 
             // this may be replaced later by
-            // ::boost::bind( mod, ::boost::bind(data_extractor_(),_1) )
+            // ::pdalboost::bind( mod, ::pdalboost::bind(data_extractor_(),_1) )
 
-            ::boost::bimaps::detail::unary_modifier_adaptor
+            ::pdalboost::bimaps::detail::unary_modifier_adaptor
             <
                 Modifier,
                 BOOST_DEDUCED_TYPENAME Index::value_type,
@@ -326,6 +326,6 @@ class set_view_base
 
 } // namespace detail
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_DETAIL_SET_VIEW_BASE_HPP

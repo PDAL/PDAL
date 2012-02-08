@@ -15,7 +15,7 @@
 
 #include <boost/multi_index/tag.hpp>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -86,6 +86,6 @@ struct random_access;
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

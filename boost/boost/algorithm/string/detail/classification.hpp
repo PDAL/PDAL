@@ -22,7 +22,7 @@
 #include <boost/algorithm/string/predicate_facade.hpp>
 #include <boost/type_traits/remove_const.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
         namespace detail {
 
@@ -69,7 +69,7 @@ namespace boost {
             {
             private:
                 // set cannot operate on const value-type
-                typedef typename ::boost::remove_const<CharT>::type set_value_type;
+                typedef typename ::pdalboost::remove_const<CharT>::type set_value_type;
 
             public:     
                 // Boost.ResultOf support
@@ -82,7 +82,7 @@ namespace boost {
                     // Prepare storage
                     m_Storage.m_dynSet=0;
 
-                    std::size_t Size=::boost::distance(Range);
+                    std::size_t Size=::pdalboost::distance(Range);
                     m_Size=Size;
                     set_value_type* Storage=0;
 
@@ -99,7 +99,7 @@ namespace boost {
                     }
 
                     // Use fixed storage
-                    ::std::copy(::boost::begin(Range), ::boost::end(Range), Storage);
+                    ::std::copy(::pdalboost::begin(Range), ::pdalboost::end(Range), Storage);
                     ::std::sort(Storage, Storage+m_Size);
                 }
 
@@ -347,7 +347,7 @@ namespace boost {
 
         } // namespace detail
     } // namespace algorithm
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_CLASSIFICATION_DETAIL_HPP

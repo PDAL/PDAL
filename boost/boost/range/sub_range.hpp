@@ -29,8 +29,7 @@
 #include <boost/type_traits/is_reference.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     
     template< class ForwardRange > 
     class sub_range : public iterator_range< BOOST_DEDUCED_TYPENAME range_iterator<ForwardRange>::type > 
@@ -49,8 +48,8 @@ namespace boost
         
     public: // for return value of front/back
         typedef BOOST_DEDUCED_TYPENAME 
-                boost::mpl::if_< boost::is_reference<reference>,
-                                 const BOOST_DEDUCED_TYPENAME boost::remove_reference<reference>::type&, 
+                pdalboost::mpl::if_< pdalboost::is_reference<reference>,
+                                 const BOOST_DEDUCED_TYPENAME pdalboost::remove_reference<reference>::type&, 
                                  reference >::type const_reference;
 
     public:
@@ -154,14 +153,14 @@ namespace boost
     inline bool operator==( const sub_range<ForwardRange>& l,
                             const sub_range<ForwardRange2>& r )
     {
-        return boost::equal( l, r );
+        return pdalboost::equal( l, r );
     }
 
     template< class ForwardRange, class ForwardRange2 >
     inline bool operator!=( const sub_range<ForwardRange>& l,
                             const sub_range<ForwardRange2>& r )
     {
-        return !boost::equal( l, r );
+        return !pdalboost::equal( l, r );
     }
 
     template< class ForwardRange, class ForwardRange2 >

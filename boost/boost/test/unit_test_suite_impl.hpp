@@ -41,7 +41,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -261,7 +261,7 @@ template<typename UserTestCase, typename InstanceType>
 inline test_case*
 make_test_case( void (UserTestCase::*           test_method )(),
                 const_string                    tc_name,
-                boost::shared_ptr<InstanceType> user_test_case )
+                pdalboost::shared_ptr<InstanceType> user_test_case )
 {
     return new test_case( ut_detail::normalize_test_case_name( tc_name ), 
                           ut_detail::user_tc_method_invoker<InstanceType,UserTestCase>( user_test_case, test_method ) );
@@ -354,7 +354,7 @@ private:
 template<typename TestCaseTemplate,typename TestType>
 class test_case_template_invoker {
 public:
-    void    operator()()    { TestCaseTemplate::run( (boost::type<TestType>*)0 ); }
+    void    operator()()    { TestCaseTemplate::run( (pdalboost::type<TestType>*)0 ); }
 };
 
 // ************************************************************************** //
@@ -375,7 +375,7 @@ struct generate_test_case_4_type {
         assign_op( full_name, m_test_case_name, 0 );
         full_name += '<';
         full_name += typeid(TestType).name();
-        if( boost::is_const<TestType>::value )
+        if( pdalboost::is_const<TestType>::value )
             full_name += " const";
         full_name += '>';
 
@@ -426,7 +426,7 @@ public:
 
 } // unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/test/detail/enable_warnings.hpp>
 

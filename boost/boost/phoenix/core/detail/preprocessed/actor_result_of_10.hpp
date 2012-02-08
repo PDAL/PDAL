@@ -15,10 +15,10 @@
         struct nullary_actor_result
         {
             typedef
-                typename boost::phoenix::evaluator::impl<
+                typename pdalboost::pdalboostphoenix::evaluator::impl<
                     Expr const&
                   , vector2<
-                        vector1<const ::boost::phoenix::actor<Expr> *> &
+                        vector1<const ::pdalboost::pdalboostphoenix::actor<Expr> *> &
                       , default_actions
                     > const &
                   , int
@@ -48,11 +48,11 @@
         struct actor<Expr, A0>
         {
             typedef
-                typename phoenix::evaluator::
+                typename pdalboostphoenix::evaluator::
                     impl<
                         Expr const&
                       , vector2<
-                            vector2<const ::boost::phoenix::actor<Expr> *, A0> &
+                            vector2<const ::pdalboost::pdalboostphoenix::actor<Expr> *, A0> &
                           , default_actions
                         > const &
                       , int
@@ -70,11 +70,11 @@
         struct actor<Expr, A0 , A1>
         {
             typedef
-                typename phoenix::evaluator::
+                typename pdalboostphoenix::evaluator::
                     impl<
                         Expr const&
                       , vector2<
-                            vector3<const ::boost::phoenix::actor<Expr> *, A0 , A1> &
+                            vector3<const ::pdalboost::pdalboostphoenix::actor<Expr> *, A0 , A1> &
                           , default_actions
                         > const &
                       , int
@@ -92,11 +92,11 @@
         struct actor<Expr, A0 , A1 , A2>
         {
             typedef
-                typename phoenix::evaluator::
+                typename pdalboostphoenix::evaluator::
                     impl<
                         Expr const&
                       , vector2<
-                            vector4<const ::boost::phoenix::actor<Expr> *, A0 , A1 , A2> &
+                            vector4<const ::pdalboost::pdalboostphoenix::actor<Expr> *, A0 , A1 , A2> &
                           , default_actions
                         > const &
                       , int
@@ -114,11 +114,11 @@
         struct actor<Expr, A0 , A1 , A2 , A3>
         {
             typedef
-                typename phoenix::evaluator::
+                typename pdalboostphoenix::evaluator::
                     impl<
                         Expr const&
                       , vector2<
-                            vector5<const ::boost::phoenix::actor<Expr> *, A0 , A1 , A2 , A3> &
+                            vector5<const ::pdalboost::pdalboostphoenix::actor<Expr> *, A0 , A1 , A2 , A3> &
                           , default_actions
                         > const &
                       , int
@@ -136,11 +136,11 @@
         struct actor<Expr, A0 , A1 , A2 , A3 , A4>
         {
             typedef
-                typename phoenix::evaluator::
+                typename pdalboostphoenix::evaluator::
                     impl<
                         Expr const&
                       , vector2<
-                            vector6<const ::boost::phoenix::actor<Expr> *, A0 , A1 , A2 , A3 , A4> &
+                            vector6<const ::pdalboost::pdalboostphoenix::actor<Expr> *, A0 , A1 , A2 , A3 , A4> &
                           , default_actions
                         > const &
                       , int
@@ -158,11 +158,11 @@
         struct actor<Expr, A0 , A1 , A2 , A3 , A4 , A5>
         {
             typedef
-                typename phoenix::evaluator::
+                typename pdalboostphoenix::evaluator::
                     impl<
                         Expr const&
                       , vector2<
-                            vector7<const ::boost::phoenix::actor<Expr> *, A0 , A1 , A2 , A3 , A4 , A5> &
+                            vector7<const ::pdalboost::pdalboostphoenix::actor<Expr> *, A0 , A1 , A2 , A3 , A4 , A5> &
                           , default_actions
                         > const &
                       , int
@@ -180,11 +180,11 @@
         struct actor<Expr, A0 , A1 , A2 , A3 , A4 , A5 , A6>
         {
             typedef
-                typename phoenix::evaluator::
+                typename pdalboostphoenix::evaluator::
                     impl<
                         Expr const&
                       , vector2<
-                            vector8<const ::boost::phoenix::actor<Expr> *, A0 , A1 , A2 , A3 , A4 , A5 , A6> &
+                            vector8<const ::pdalboost::pdalboostphoenix::actor<Expr> *, A0 , A1 , A2 , A3 , A4 , A5 , A6> &
                           , default_actions
                         > const &
                       , int
@@ -202,11 +202,11 @@
         struct actor<Expr, A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7>
         {
             typedef
-                typename phoenix::evaluator::
+                typename pdalboostphoenix::evaluator::
                     impl<
                         Expr const&
                       , vector2<
-                            vector9<const ::boost::phoenix::actor<Expr> *, A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7> &
+                            vector9<const ::pdalboost::pdalboostphoenix::actor<Expr> *, A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7> &
                           , default_actions
                         > const &
                       , int
@@ -224,11 +224,11 @@
         struct actor<Expr, A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8>
         {
             typedef
-                typename phoenix::evaluator::
+                typename pdalboostphoenix::evaluator::
                     impl<
                         Expr const&
                       , vector2<
-                            vector10<const ::boost::phoenix::actor<Expr> *, A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8> &
+                            vector10<const ::pdalboost::pdalboostphoenix::actor<Expr> *, A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8> &
                           , default_actions
                         > const &
                       , int
@@ -246,11 +246,11 @@
         struct actor<Expr, A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9>
         {
             typedef
-                typename phoenix::evaluator::
+                typename pdalboostphoenix::evaluator::
                     impl<
                         Expr const&
                       , vector2<
-                            vector11<const ::boost::phoenix::actor<Expr> *, A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9> &
+                            vector11<const ::pdalboost::pdalboostphoenix::actor<Expr> *, A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9> &
                           , default_actions
                         > const &
                       , int

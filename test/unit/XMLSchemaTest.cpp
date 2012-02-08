@@ -36,7 +36,7 @@
 #include <boost/cstdint.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include <pdal/external/boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <pdal/XMLSchema.hpp>
 

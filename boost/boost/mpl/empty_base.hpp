@@ -23,7 +23,7 @@
 // should be always the last #include directive
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 // empty base class, guaranteed to have no members; inheritance from
 // 'empty_base' through the 'inherit' metafunction is a no-op - see 
@@ -50,7 +50,7 @@ struct is_empty_base<empty_base>
 
 }}
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 BOOST_TT_AUX_BOOL_TRAIT_SPEC1(is_empty, mpl::empty_base, true)
 }
 

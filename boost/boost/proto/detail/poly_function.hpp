@@ -30,7 +30,7 @@
 # pragma warning(disable: 4181) // const applied to reference type
 #endif
 
-namespace boost { namespace proto { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto { namespace detail
 {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,21 +56,21 @@ namespace boost { namespace proto { namespace detail
     };
 
     template<typename T>
-    struct normalize_arg<boost::reference_wrapper<T> >
+    struct normalize_arg<pdalboost::reference_wrapper<T> >
     {
         typedef T &type;
         typedef T &reference;
     };
 
     template<typename T>
-    struct normalize_arg<boost::reference_wrapper<T> &>
+    struct normalize_arg<pdalboost::reference_wrapper<T> &>
     {
         typedef T &type;
         typedef T &reference;
     };
 
     template<typename T>
-    struct normalize_arg<boost::reference_wrapper<T> const &>
+    struct normalize_arg<pdalboost::reference_wrapper<T> const &>
     {
         typedef T &type;
         typedef T &reference;
@@ -209,7 +209,7 @@ namespace boost { namespace proto { namespace detail
 
     #include <boost/proto/detail/poly_function_traits.hpp>
 
-}}} // namespace boost::proto::detail
+}}} // namespace pdalboost::proto::detail
 
 #ifdef _MSC_VER
 # pragma warning(pop)

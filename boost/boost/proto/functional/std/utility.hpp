@@ -14,7 +14,7 @@
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/proto/proto_fwd.hpp>
 
-namespace boost { namespace proto { namespace functional
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto { namespace functional
 {
     /// \brief A PolymorphicFunctionObject type that invokes the
     /// \c std::make_pair() algorithm on its arguments.

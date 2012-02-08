@@ -27,7 +27,7 @@
 #include <boost/fusion/include/as_vector.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     ///////////////////////////////////////////////////////////////////////////
     // compatible STL containers
@@ -100,7 +100,7 @@ namespace boost { namespace spirit { namespace qi
     ///////////////////////////////////////////////////////////////////////////
     // optional
     template <typename T>
-    struct meta_create<boost::optional<T> >
+    struct meta_create<pdalboost::optional<T> >
     {
         typedef make_unary_proto_expr<
             T, proto::tag::negate, qi::domain
@@ -117,10 +117,10 @@ namespace boost { namespace spirit { namespace qi
     ///////////////////////////////////////////////////////////////////////////
     // alternatives
     template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
-    struct meta_create<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
+    struct meta_create<pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> >
     {
         typedef make_nary_proto_expr<
-            typename boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::types
+            typename pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>::types
           , proto::tag::bitwise_or, qi::domain
         > make_proto_expr;
 
@@ -212,13 +212,13 @@ namespace boost { namespace spirit { namespace qi
 
 #ifdef BOOST_HAS_LONG_LONG
     template <>
-    struct meta_create<boost::long_long_type>
+    struct meta_create<pdalboost::long_long_type>
     {
         typedef spirit::long_long_type type;
         static type call() { return type(); }
     };
     template <>
-    struct meta_create<boost::ulong_long_type>
+    struct meta_create<pdalboost::ulong_long_type>
     {
         typedef spirit::ulong_long_type type;
         static type call() { return type(); }
@@ -247,7 +247,7 @@ namespace boost { namespace spirit { namespace qi
 }}}
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     // main customization point for create_parser

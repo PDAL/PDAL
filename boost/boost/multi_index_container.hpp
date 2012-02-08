@@ -62,14 +62,14 @@
 #define BOOST_MULTI_INDEX_CHECK_INVARIANT
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
 template<typename Value,typename IndexSpecifierList,typename Allocator>
 class multi_index_container:
-  private ::boost::base_from_member<
-    typename boost::detail::allocator::rebind_to<
+  private ::pdalboost::base_from_member<
+    typename pdalboost::detail::allocator::rebind_to<
       Allocator,
       typename detail::multi_index_node_type<
         Value,IndexSpecifierList,Allocator>::type
@@ -77,7 +77,7 @@ class multi_index_container:
   BOOST_MULTI_INDEX_PRIVATE_IF_MEMBER_TEMPLATE_FRIENDS detail::header_holder<
     typename detail::prevent_eti<
       Allocator,
-      typename boost::detail::allocator::rebind_to<
+      typename pdalboost::detail::allocator::rebind_to<
         Allocator,
         typename detail::multi_index_node_type<
           Value,IndexSpecifierList,Allocator>::type
@@ -107,11 +107,11 @@ private:
   typedef typename detail::multi_index_base_type<
       Value,IndexSpecifierList,Allocator>::type   super;
   typedef typename
-  boost::detail::allocator::rebind_to<
+  pdalboost::detail::allocator::rebind_to<
       Allocator,
       typename super::node_type
   >::type                                         node_allocator;
-  typedef ::boost::base_from_member<
+  typedef ::pdalboost::base_from_member<
     node_allocator>                               bfm_allocator;
   typedef detail::header_holder<
     typename detail::prevent_eti<
@@ -623,7 +623,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
 #if !defined(BOOST_MULTI_INDEX_DISABLE_SERIALIZATION)
   /* serialization */
 
-  friend class boost::serialization::access;
+  friend class pdalboost::serialization::access;
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
@@ -811,7 +811,7 @@ struct index
 template<
   typename Tag,typename Value,typename IndexSpecifierList,typename Allocator
 >
-typename ::boost::multi_index::index<
+typename ::pdalboost::multi_index::index<
   multi_index_container<Value,IndexSpecifierList,Allocator>,Tag>::type&
 get(
   multi_index_container<Value,IndexSpecifierList,Allocator>& m
@@ -819,7 +819,7 @@ get(
 {
   typedef multi_index_container<
     Value,IndexSpecifierList,Allocator>         multi_index_type;
-  typedef typename ::boost::multi_index::index<
+  typedef typename ::pdalboost::multi_index::index<
     multi_index_container<
       Value,IndexSpecifierList,Allocator>,
     Tag
@@ -831,7 +831,7 @@ get(
 template<
   typename Tag,typename Value,typename IndexSpecifierList,typename Allocator
 >
-const typename ::boost::multi_index::index<
+const typename ::pdalboost::multi_index::index<
   multi_index_container<Value,IndexSpecifierList,Allocator>,Tag>::type&
 get(
   const multi_index_container<Value,IndexSpecifierList,Allocator>& m
@@ -839,7 +839,7 @@ get(
 {
   typedef multi_index_container<
     Value,IndexSpecifierList,Allocator>         multi_index_type;
-  typedef typename ::boost::multi_index::index<
+  typedef typename ::pdalboost::multi_index::index<
     multi_index_container<
       Value,IndexSpecifierList,Allocator>,
     Tag
@@ -945,14 +945,14 @@ project(
 template<typename MultiIndexContainer,typename Tag>
 struct index_iterator
 {
-  typedef typename ::boost::multi_index::index<
+  typedef typename ::pdalboost::multi_index::index<
     MultiIndexContainer,Tag>::type::iterator    type;
 };
 
 template<typename MultiIndexContainer,typename Tag>
 struct index_const_iterator
 {
-  typedef typename ::boost::multi_index::index<
+  typedef typename ::pdalboost::multi_index::index<
     MultiIndexContainer,Tag>::type::const_iterator type;
 };
 
@@ -968,7 +968,7 @@ project(
 {
   typedef multi_index_container<
     Value,IndexSpecifierList,Allocator>         multi_index_type;
-  typedef typename ::boost::multi_index::index<
+  typedef typename ::pdalboost::multi_index::index<
     multi_index_type,Tag>::type                 index;
 
 #if (!defined(BOOST_MSVC)||!(BOOST_MSVC<1310))&&  /* MSVC++ 6.0/7.0 fails */\
@@ -1004,7 +1004,7 @@ project(
 {
   typedef multi_index_container<
     Value,IndexSpecifierList,Allocator>         multi_index_type;
-  typedef typename ::boost::multi_index::index<
+  typedef typename ::pdalboost::multi_index::index<
     multi_index_type,Tag>::type                 index;
 
 #if (!defined(BOOST_MSVC)||!(BOOST_MSVC<1310))&&  /* MSVC++ 6.0/7.0 fails */\
@@ -1114,14 +1114,14 @@ void swap(
 #if !defined(BOOST_MULTI_INDEX_DISABLE_SERIALIZATION)&&\
     !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 /* class version = 1 : we now serialize the size through
- * boost::serialization::collection_size_type.
+ * pdalboost::serialization::collection_size_type.
  * class version = 2 : proper use of {save|load}_construct_data.
  */
 
 namespace serialization {
 template<typename Value,typename IndexSpecifierList,typename Allocator>
 struct version<
-  boost::multi_index_container<Value,IndexSpecifierList,Allocator>
+  pdalboost::multi_index_container<Value,IndexSpecifierList,Allocator>
 >
 {
   BOOST_STATIC_CONSTANT(int,value=2);
@@ -1129,14 +1129,14 @@ struct version<
 } /* namespace serialization */
 #endif
 
-/* Associated global functions are promoted to namespace boost, except
+/* Associated global functions are promoted to namespace pdalboost, except
  * comparison operators and swap, which are meant to be Koenig looked-up.
  */
 
 using multi_index::get;
 using multi_index::project;
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #undef BOOST_MULTI_INDEX_CHECK_INVARIANT
 

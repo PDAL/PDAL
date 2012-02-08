@@ -9,7 +9,7 @@
 
 #include <boost/type_traits/is_convertible.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct cons_tag;
 
@@ -28,7 +28,7 @@ namespace boost { namespace fusion
         {
             template <typename Sequence>
             struct apply
-                : boost::is_convertible<Sequence, nil>
+                : pdalboost::is_convertible<Sequence, nil>
             {};
         };
     }

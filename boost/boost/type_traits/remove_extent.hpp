@@ -22,7 +22,7 @@
 
 #if !BOOST_WORKAROUND(BOOST_MSVC,<=1300)
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 BOOST_TT_AUX_TYPE_TRAIT_DEF1(remove_extent,T,T)
 
@@ -39,7 +39,7 @@ BOOST_TT_AUX_TYPE_TRAIT_PARTIAL_SPEC1_1(typename T,remove_extent,T const volatil
 #endif
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif
 

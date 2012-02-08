@@ -18,8 +18,7 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
     class barrier
     {
@@ -28,12 +27,12 @@ namespace boost
             : m_threshold(count), m_count(count), m_generation(0)
         {
             if (count == 0)
-                boost::throw_exception(std::invalid_argument("count cannot be zero."));
+                pdalboost::throw_exception(std::invalid_argument("count cannot be zero."));
         }
     
         bool wait()
         {
-            boost::mutex::scoped_lock lock(m_mutex);
+            pdalboost::mutex::scoped_lock lock(m_mutex);
             unsigned int gen = m_generation;
         
             if (--m_count == 0)
@@ -57,7 +56,7 @@ namespace boost
         unsigned int m_generation;
     };
 
-}   // namespace boost
+}   // namespace pdalboost
 
 #include <boost/config/abi_suffix.hpp>
 

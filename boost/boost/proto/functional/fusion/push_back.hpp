@@ -15,7 +15,7 @@
 #include <boost/fusion/include/push_back.hpp>
 #include <boost/proto/proto_fwd.hpp>
 
-namespace boost { namespace proto { namespace functional
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto { namespace functional
 {
     /// \brief A PolymorphicFunctionObject type that invokes the
     /// \c fusion::push_back() algorithm on its argument.
@@ -32,8 +32,8 @@ namespace boost { namespace proto { namespace functional
         template<typename This, typename Seq, typename T>
         struct result<This(Seq, T)>
           : fusion::result_of::push_back<
-                typename boost::add_const<typename boost::remove_reference<Seq>::type>::type
-              , typename boost::remove_const<typename boost::remove_reference<T>::type>::type
+                typename pdalboost::add_const<typename pdalboost::remove_reference<Seq>::type>::type
+              , typename pdalboost::remove_const<typename pdalboost::remove_reference<T>::type>::type
             >
         {};
 

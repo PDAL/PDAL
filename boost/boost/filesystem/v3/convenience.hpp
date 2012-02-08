@@ -24,8 +24,7 @@
 
 #include <boost/config/abi_prefix.hpp> // must be the last #include
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem3
   {
 
@@ -52,12 +51,11 @@ namespace boost
 
 
   } // namespace filesystem3
-} // namespace boost
+} // namespace pdalboost
 
 //----------------------------------------------------------------------------//
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem
   {
 # ifndef BOOST_FILESYSTEM_NO_DEPRECATED

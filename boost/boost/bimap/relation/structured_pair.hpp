@@ -39,7 +39,7 @@
 
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 
@@ -69,9 +69,9 @@ class normal_storage :
 
     normal_storage() {}
 
-    normal_storage(BOOST_DEDUCED_TYPENAME ::boost::call_traits<
+    normal_storage(BOOST_DEDUCED_TYPENAME ::pdalboost::call_traits<
                         first_type >::param_type f,
-                   BOOST_DEDUCED_TYPENAME ::boost::call_traits<
+                   BOOST_DEDUCED_TYPENAME ::pdalboost::call_traits<
                         second_type>::param_type s)
 
         : first(f), second(s) {}
@@ -106,8 +106,8 @@ class mirror_storage :
 
     mirror_storage() {}
 
-    mirror_storage(BOOST_DEDUCED_TYPENAME ::boost::call_traits<first_type  >::param_type f,
-                   BOOST_DEDUCED_TYPENAME ::boost::call_traits<second_type >::param_type s)
+    mirror_storage(BOOST_DEDUCED_TYPENAME ::pdalboost::call_traits<first_type  >::param_type f,
+                   BOOST_DEDUCED_TYPENAME ::pdalboost::call_traits<second_type >::param_type s)
 
         : second(s), first(f)  {}
 
@@ -117,7 +117,7 @@ class mirror_storage :
     const BOOST_DEDUCED_TYPENAME base_::right_value_type & get_right()const { return first;  }
 };
 
-/** \struct boost::bimaps::relation::storage_finder
+/** \struct pdalboost::bimaps::relation::storage_finder
 \brief Obtain the a storage with the correct layout.
 
 \code
@@ -159,11 +159,11 @@ struct storage_finder<FirstType,SecondType,mirror_layout>
 
 template< class TA, class TB, class Info, class Layout >
 class pair_info_hook :
-    public ::boost::bimaps::relation::detail::storage_finder<TA,TB,Layout>::type
+    public ::pdalboost::bimaps::relation::detail::storage_finder<TA,TB,Layout>::type
 {
-    typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::detail::storage_finder<TA,TB,Layout>::type base_;
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::detail::storage_finder<TA,TB,Layout>::type base_;
 
-    typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::tags::support::
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::tags::support::
         default_tagged<Info,member_at::info>::type tagged_info_type;
 
     public:
@@ -176,13 +176,13 @@ class pair_info_hook :
 
     pair_info_hook() {}
 
-    pair_info_hook( BOOST_DEDUCED_TYPENAME ::boost::call_traits<
+    pair_info_hook( BOOST_DEDUCED_TYPENAME ::pdalboost::call_traits<
                         BOOST_DEDUCED_TYPENAME base_::first_type
                     >::param_type f,
-                    BOOST_DEDUCED_TYPENAME ::boost::call_traits<
+                    BOOST_DEDUCED_TYPENAME ::pdalboost::call_traits<
                         BOOST_DEDUCED_TYPENAME base_::second_type
                     >::param_type s,
-                    BOOST_DEDUCED_TYPENAME ::boost::call_traits<
+                    BOOST_DEDUCED_TYPENAME ::pdalboost::call_traits<
                         info_type
                     >::param_type i = info_type() )
         : base_(f,s), info(i) {}
@@ -207,23 +207,23 @@ class pair_info_hook :
 };
 
 template< class TA, class TB, class Layout>
-class pair_info_hook<TA,TB,::boost::mpl::na,Layout> :
-    public ::boost::bimaps::relation::detail::storage_finder<TA,TB,Layout>::type
+class pair_info_hook<TA,TB,::pdalboost::mpl::na,Layout> :
+    public ::pdalboost::bimaps::relation::detail::storage_finder<TA,TB,Layout>::type
 {
-    typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::detail::storage_finder<TA,TB,Layout>::type base_;
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::detail::storage_finder<TA,TB,Layout>::type base_;
 
     public:
-    typedef ::boost::mpl::na info_type;
+    typedef ::pdalboost::mpl::na info_type;
     typedef member_at::info info_tag;
 
     protected:
 
     pair_info_hook() {}
 
-    pair_info_hook( BOOST_DEDUCED_TYPENAME ::boost::call_traits<
+    pair_info_hook( BOOST_DEDUCED_TYPENAME ::pdalboost::call_traits<
                         BOOST_DEDUCED_TYPENAME base_::first_type
                     >::param_type f,
-                    BOOST_DEDUCED_TYPENAME ::boost::call_traits<
+                    BOOST_DEDUCED_TYPENAME ::pdalboost::call_traits<
                         BOOST_DEDUCED_TYPENAME base_::second_type
                     >::param_type s)
 
@@ -261,7 +261,7 @@ in the layout of the class.
 template< class FirstType, class SecondType, class Info, class Layout = normal_layout >
 class structured_pair :
 
-    public ::boost::bimaps::relation::detail::pair_info_hook
+    public ::pdalboost::bimaps::relation::detail::pair_info_hook
     <
         FirstType, SecondType,
         Info,
@@ -270,7 +270,7 @@ class structured_pair :
     >
 
 {
-    typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::detail::pair_info_hook
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::detail::pair_info_hook
     <
         FirstType, SecondType,
         Info,
@@ -280,11 +280,11 @@ class structured_pair :
 
     public:
 
-    typedef ::boost::mpl::vector3<
+    typedef ::pdalboost::mpl::vector3<
         structured_pair< FirstType, SecondType, Info, normal_layout >,
         structured_pair< FirstType, SecondType, Info, mirror_layout >,
-        BOOST_DEDUCED_TYPENAME ::boost::mpl::if_<
-            BOOST_DEDUCED_TYPENAME ::boost::is_same<Layout, normal_layout>::type,
+        BOOST_DEDUCED_TYPENAME ::pdalboost::mpl::if_<
+            BOOST_DEDUCED_TYPENAME ::pdalboost::is_same<Layout, normal_layout>::type,
             mutant_relation< FirstType, SecondType, Info, true >,
             mutant_relation< SecondType, FirstType, Info, true >
         >::type
@@ -293,17 +293,17 @@ class structured_pair :
 
     structured_pair() {}
 
-    structured_pair(BOOST_DEDUCED_TYPENAME boost::call_traits<
+    structured_pair(BOOST_DEDUCED_TYPENAME pdalboost::call_traits<
                         BOOST_DEDUCED_TYPENAME base_::first_type  >::param_type f,
-                    BOOST_DEDUCED_TYPENAME boost::call_traits<
+                    BOOST_DEDUCED_TYPENAME pdalboost::call_traits<
                         BOOST_DEDUCED_TYPENAME base_::second_type >::param_type s)
         : base_(f,s) {}
 
-    structured_pair(BOOST_DEDUCED_TYPENAME boost::call_traits<
+    structured_pair(BOOST_DEDUCED_TYPENAME pdalboost::call_traits<
                         BOOST_DEDUCED_TYPENAME base_::first_type  >::param_type f,
-                    BOOST_DEDUCED_TYPENAME boost::call_traits<
+                    BOOST_DEDUCED_TYPENAME pdalboost::call_traits<
                         BOOST_DEDUCED_TYPENAME base_::second_type >::param_type s,
-                    BOOST_DEDUCED_TYPENAME boost::call_traits<
+                    BOOST_DEDUCED_TYPENAME pdalboost::call_traits<
                         BOOST_DEDUCED_TYPENAME base_::info_type   >::param_type i)
         : base_(f,s,i) {}
 
@@ -335,19 +335,19 @@ class structured_pair :
     }
 
     template< class Tag >
-    const BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::support::
+    const BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::support::
         result_of::get<Tag,const structured_pair>::type
     get(BOOST_EXPLICIT_TEMPLATE_TYPE(Tag)) const
     {
-        return ::boost::bimaps::relation::support::get<Tag>(*this);
+        return ::pdalboost::bimaps::relation::support::get<Tag>(*this);
     }
 
     template< class Tag >
-    BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::support::
+    BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::support::
         result_of::get<Tag,structured_pair>::type
     get(BOOST_EXPLICIT_TEMPLATE_TYPE(Tag))
     {
-        return ::boost::bimaps::relation::support::get<Tag>(*this);
+        return ::pdalboost::bimaps::relation::support::get<Tag>(*this);
     }
 };
 
@@ -502,7 +502,7 @@ bool operator>=(const std::pair<F,S> & a,
 
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_RELATION_STRUCTURED_PAIR_HPP
 

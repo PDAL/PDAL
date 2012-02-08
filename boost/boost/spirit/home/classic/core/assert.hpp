@@ -26,7 +26,7 @@
 #elif defined (BOOST_SPIRIT_ASSERT_EXCEPTION)
     #define BOOST_SPIRIT_ASSERT_AUX(f, l, x) BOOST_SPIRIT_ASSERT_AUX2(f, l, x)
     #define BOOST_SPIRIT_ASSERT_AUX2(f, l, x)                                   \
-    do{ if (!(x)) boost::throw_exception(                                       \
+    do{ if (!(x)) pdalboost::throw_exception(                                       \
         BOOST_SPIRIT_ASSERT_EXCEPTION(f "(" #l "): " #x)); } while(0)
     #define BOOST_SPIRIT_ASSERT(x) BOOST_SPIRIT_ASSERT_AUX(__FILE__, __LINE__, x)
 #else

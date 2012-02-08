@@ -10,7 +10,7 @@
 #include <boost/mpl/at.hpp>
 #include <boost/fusion/sequence/intrinsic/value_at.hpp>
 
-namespace boost { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
 namespace fusion
 {
     struct fusion_sequence_tag;

@@ -20,7 +20,7 @@
 #include <boost/preprocessor/slot/slot.hpp>
 #include <boost/function_types/detail/encoding/def.hpp>
 
-namespace boost { namespace function_types {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace function_types {
 
 typedef detail::property_tag<BOOST_FT_non_variadic,BOOST_FT_variadic_mask> non_variadic;
 typedef detail::property_tag<BOOST_FT_variadic,BOOST_FT_variadic_mask>     variadic;
@@ -122,5 +122,5 @@ namespace detail {
 
 } // namespace detail
 
-} } // namespace ::boost::function_types
+} } // namespace ::pdalboost::function_types
 

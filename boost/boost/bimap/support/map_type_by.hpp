@@ -20,7 +20,7 @@
 
 #include <boost/bimap/relation/detail/metadata_access_builder.hpp>
 
-/** \struct boost::bimaps::support::map_type_by
+/** \struct pdalboost::bimaps::support::map_type_by
 
 \brief Metafunction to obtain the map view type of a bimap indexed by one of the sides.
 
@@ -41,7 +41,7 @@ See also member_at.
 \ingroup bimap_group
                                                                     **/
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace support {
 
@@ -58,7 +58,7 @@ BOOST_BIMAP_SYMMETRIC_METADATA_ACCESS_BUILDER
 
 } // namespace support
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_SUPPORT_MAP_TYPE_BY_HPP

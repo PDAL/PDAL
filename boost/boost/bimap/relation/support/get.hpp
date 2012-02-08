@@ -29,7 +29,7 @@
 #ifdef BOOST_BIMAP_ONLY_DOXYGEN_WILL_PROCESS_THE_FOLLOWING_LINES
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 namespace support {
@@ -46,7 +46,7 @@ BOOST_DEDUCED_TYPENAME result_of::get<Tag,SymmetricType>::type
 } // namespace support
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_ONLY_DOXYGEN_WILL_PROCESS_THE_FOLLOWING_LINES
 
@@ -54,7 +54,7 @@ BOOST_DEDUCED_TYPENAME result_of::get<Tag,SymmetricType>::type
 
 #ifndef BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 namespace support {
@@ -112,8 +112,8 @@ namespace detail {
 
 template< class SymmetricType >
 BOOST_DEDUCED_TYPENAME result_of::get<
-    ::boost::bimaps::relation::member_at::info, SymmetricType >::type
-get(::boost::bimaps::relation::member_at::info, SymmetricType & rel)
+    ::pdalboost::bimaps::relation::member_at::info, SymmetricType >::type
+get(::pdalboost::bimaps::relation::member_at::info, SymmetricType & rel)
 {
     return rel.info;
 }
@@ -132,7 +132,7 @@ BOOST_BIMAP_SYMMETRIC_ACCESS_INTERFACE_BUILDER
 } // namespace support
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 

@@ -14,7 +14,7 @@
 #include <boost/spirit/home/qi/nonterminal/rule.hpp>
 #include <boost/function.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     template <
         typename Iterator, typename Context

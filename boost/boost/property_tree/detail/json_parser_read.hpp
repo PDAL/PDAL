@@ -23,7 +23,7 @@
 #include <vector>
 #include <algorithm>
 
-namespace boost { namespace property_tree { namespace json_parser
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace json_parser
 {
 
     ///////////////////////////////////////////////////////////////////////
@@ -157,7 +157,7 @@ namespace boost { namespace property_tree { namespace json_parser
 
     template<class Ptree>
     struct json_grammar :
-        public boost::spirit::classic::grammar<json_grammar<Ptree> >
+        public pdalboost::spirit::classic::grammar<json_grammar<Ptree> >
     {
         
         typedef context<Ptree> Context;
@@ -169,19 +169,19 @@ namespace boost { namespace property_tree { namespace json_parser
         struct definition
         {
             
-            boost::spirit::classic::rule<Scanner>
+            pdalboost::spirit::classic::rule<Scanner>
                 root, object, member, array, item, value, string, number;
-            boost::spirit::classic::rule<
-                typename boost::spirit::classic::lexeme_scanner<Scanner>::type>
+            pdalboost::spirit::classic::rule<
+                typename pdalboost::spirit::classic::lexeme_scanner<Scanner>::type>
                 character, escape;
 
             definition(const json_grammar &self)
             {
 
-                using namespace boost::spirit::classic;
-                // There's a boost::assertion too, so another explicit using
+                using namespace pdalboost::spirit::classic;
+                // There's a pdalboost::assertion too, so another explicit using
                 // here:
-                using boost::spirit::classic::assertion;
+                using pdalboost::spirit::classic::assertion;
 
                 // Assertions
                 assertion<std::string> expect_root("expected object or array");
@@ -274,7 +274,7 @@ namespace boost { namespace property_tree { namespace json_parser
 
             }
 
-            const boost::spirit::classic::rule<Scanner> &start() const
+            const pdalboost::spirit::classic::rule<Scanner> &start() const
             {
                 return root;
             }
@@ -295,7 +295,7 @@ namespace boost { namespace property_tree { namespace json_parser
                             const std::string &filename)
     {
 
-        using namespace boost::spirit::classic;
+        using namespace pdalboost::spirit::classic;
         typedef typename Ptree::key_type::value_type Ch;
         typedef typename std::vector<Ch>::iterator It;
 

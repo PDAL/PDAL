@@ -9,7 +9,7 @@
 
 #include <boost/mpl/at.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct vector_tag;
 

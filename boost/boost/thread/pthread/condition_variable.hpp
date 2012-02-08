@@ -12,8 +12,7 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace this_thread
     {
         void BOOST_THREAD_DECL interruption_point();
@@ -57,11 +56,11 @@ namespace boost
         this_thread::interruption_point();
         if(res)
         {
-            boost::throw_exception(condition_error());
+            pdalboost::throw_exception(condition_error());
         }
     }
 
-    inline bool condition_variable::timed_wait(unique_lock<mutex>& m,boost::system_time const& wait_until)
+    inline bool condition_variable::timed_wait(unique_lock<mutex>& m,pdalboost::system_time const& wait_until)
     {
         thread_cv_detail::lock_on_exit<unique_lock<mutex> > guard;
         int cond_res;
@@ -78,20 +77,20 @@ namespace boost
         }
         if(cond_res)
         {
-            boost::throw_exception(condition_error());
+            pdalboost::throw_exception(condition_error());
         }
         return true;
     }
 
     inline void condition_variable::notify_one()
     {
-        boost::pthread::pthread_mutex_scoped_lock internal_lock(&internal_mutex);
+        pdalboost::pthread::pthread_mutex_scoped_lock internal_lock(&internal_mutex);
         BOOST_VERIFY(!pthread_cond_signal(&cond));
     }
         
     inline void condition_variable::notify_all()
     {
-        boost::pthread::pthread_mutex_scoped_lock internal_lock(&internal_mutex);
+        pdalboost::pthread::pthread_mutex_scoped_lock internal_lock(&internal_mutex);
         BOOST_VERIFY(!pthread_cond_broadcast(&cond));
     }
     
@@ -109,13 +108,13 @@ namespace boost
             int const res=pthread_mutex_init(&internal_mutex,NULL);
             if(res)
             {
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
             int const res2=pthread_cond_init(&cond,NULL);
             if(res2)
             {
                 BOOST_VERIFY(!pthread_mutex_destroy(&internal_mutex));
-                boost::throw_exception(thread_resource_error());
+                pdalboost::throw_exception(thread_resource_error());
             }
         }
         ~condition_variable_any()
@@ -137,7 +136,7 @@ namespace boost
             this_thread::interruption_point();
             if(res)
             {
-                boost::throw_exception(condition_error());
+                pdalboost::throw_exception(condition_error());
             }
         }
 
@@ -148,7 +147,7 @@ namespace boost
         }
         
         template<typename lock_type>
-        bool timed_wait(lock_type& m,boost::system_time const& wait_until)
+        bool timed_wait(lock_type& m,pdalboost::system_time const& wait_until)
         {
             struct timespec const timeout=detail::get_timespec(wait_until);
             int res=0;
@@ -165,7 +164,7 @@ namespace boost
             }
             if(res)
             {
-                boost::throw_exception(condition_error());
+                pdalboost::throw_exception(condition_error());
             }
             return true;
         }
@@ -182,7 +181,7 @@ namespace boost
         }
 
         template<typename lock_type,typename predicate_type>
-        bool timed_wait(lock_type& m,boost::system_time const& wait_until,predicate_type pred)
+        bool timed_wait(lock_type& m,pdalboost::system_time const& wait_until,predicate_type pred)
         {
             while (!pred())
             {
@@ -206,13 +205,13 @@ namespace boost
 
         void notify_one()
         {
-            boost::pthread::pthread_mutex_scoped_lock internal_lock(&internal_mutex);
+            pdalboost::pthread::pthread_mutex_scoped_lock internal_lock(&internal_mutex);
             BOOST_VERIFY(!pthread_cond_signal(&cond));
         }
         
         void notify_all()
         {
-            boost::pthread::pthread_mutex_scoped_lock internal_lock(&internal_mutex);
+            pdalboost::pthread::pthread_mutex_scoped_lock internal_lock(&internal_mutex);
             BOOST_VERIFY(!pthread_cond_broadcast(&cond));
         }
     };

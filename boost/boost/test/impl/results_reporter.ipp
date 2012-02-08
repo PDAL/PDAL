@@ -28,7 +28,7 @@
 // Boost
 #include <boost/scoped_ptr.hpp>
 #include <boost/io/ios_state.hpp>
-typedef ::boost::io::ios_base_all_saver io_saver_type;
+typedef ::pdalboost::io::ios_base_all_saver io_saver_type;
 
 // STL
 #include <iostream>
@@ -37,7 +37,7 @@ typedef ::boost::io::ios_base_all_saver io_saver_type;
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -193,7 +193,7 @@ make_report( report_level l, test_unit_id id )
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

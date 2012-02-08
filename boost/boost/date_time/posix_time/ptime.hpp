@@ -12,7 +12,7 @@
 #include "boost/date_time/posix_time/posix_time_system.hpp"
 #include "boost/date_time/time.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace posix_time {
  

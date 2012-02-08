@@ -14,7 +14,7 @@
 #include <boost/preprocessor/logical/or.hpp>
 #include <boost/utility/result_of.hpp>
 
-namespace boost { namespace phoenix
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix
 {
     /////////////////////////////////////////////////////////////////////////////
     // Functions
@@ -47,8 +47,8 @@ namespace boost { namespace phoenix
 }
 
     template<typename F>
-    struct result_of<phoenix::function<F>()>
-      : phoenix::detail::expression::function_eval<F>
+    struct result_of<pdalboostphoenix::function<F>()>
+      : pdalboostphoenix::detail::expression::function_eval<F>
     {};
 
 }

@@ -37,8 +37,7 @@
 
 #include <cstddef>          // std::size_t
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
 
@@ -66,16 +65,16 @@ public:
     explicit sp_counted_impl_p( X * px ): px_( px )
     {
 #if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
-        boost::sp_scalar_constructor_hook( px, sizeof(X), this );
+        pdalboost::sp_scalar_constructor_hook( px, sizeof(X), this );
 #endif
     }
 
     virtual void dispose() // nothrow
     {
 #if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
-        boost::sp_scalar_destructor_hook( px_, sizeof(X), this );
+        pdalboost::sp_scalar_destructor_hook( px_, sizeof(X), this );
 #endif
-        boost::checked_delete( px_ );
+        pdalboost::checked_delete( px_ );
     }
 
     virtual void * get_deleter( detail::sp_typeinfo const & )
@@ -234,6 +233,6 @@ public:
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // #ifndef BOOST_SMART_PTR_DETAIL_SP_COUNTED_IMPL_HPP_INCLUDED

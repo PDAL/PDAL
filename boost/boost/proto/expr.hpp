@@ -33,7 +33,7 @@
 # pragma warning(disable : 4610) // user defined constructor required
 #endif
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
 
     namespace detail

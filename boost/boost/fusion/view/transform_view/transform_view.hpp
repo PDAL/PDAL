@@ -26,7 +26,7 @@
 #include <boost/fusion/sequence/intrinsic/size.hpp>
 #include <boost/mpl/bool.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct void_;
     struct transform_view_tag;

@@ -20,7 +20,7 @@
 #include <boost/mpl/aux_/na_spec.hpp>
 #include <boost/mpl/aux_/lambda_support.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 // agurt, 13/sep/02: switched from inheritance to typedef; MSVC is more
 // happy this way (less ETI-related errors), and it doesn't affect 

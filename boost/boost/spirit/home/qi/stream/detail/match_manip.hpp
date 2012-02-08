@@ -20,7 +20,7 @@
 #include <string>
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace qi { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi { namespace detail
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Expr

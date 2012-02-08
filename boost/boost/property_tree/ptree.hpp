@@ -28,7 +28,7 @@
 #include <boost/optional.hpp>
 #include <utility>                  // for std::pair
 
-namespace boost { namespace property_tree
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
 {
 
     /**
@@ -156,7 +156,7 @@ namespace boost { namespace property_tree
         /** Equivalent to erase(begin()). */
         void pop_front();
 
-        /** Equivalent to erase(boost::prior(end())). */
+        /** Equivalent to erase(pdalboost::prior(end())). */
         void pop_back();
 
         /** Reverses the order of direct children in the property tree. */
@@ -270,10 +270,10 @@ namespace boost { namespace property_tree
         const self_type &get_child(const path_type &path,
                                    const self_type &default_value) const;
 
-        /** Get the child at the given path, or return boost::null. */
+        /** Get the child at the given path, or return pdalboost::null. */
         optional<self_type &> get_child_optional(const path_type &path);
 
-        /** Get the child at the given path, or return boost::null. */
+        /** Get the child at the given path, or return pdalboost::null. */
         optional<const self_type &>
           get_child_optional(const path_type &path) const;
 
@@ -302,7 +302,7 @@ namespace boost { namespace property_tree
          * @throw ptree_bad_data if the conversion fails.
          */
         template<class Type, class Translator>
-        typename boost::enable_if<detail::is_translator<Translator>, Type>::type
+        typename pdalboost::enable_if<detail::is_translator<Translator>, Type>::type
         get_value(Translator tr) const;
 
         /** Take the value of this node and attempt to translate it to a
@@ -321,7 +321,7 @@ namespace boost { namespace property_tree
 
         /** Make get_value do the right thing for string literals. */
         template <class Ch, class Translator>
-        typename boost::enable_if<
+        typename pdalboost::enable_if<
             detail::is_character<Ch>,
             std::basic_string<Ch>
         >::type
@@ -332,26 +332,26 @@ namespace boost { namespace property_tree
          * if this fails.
          */
         template<class Type>
-        typename boost::disable_if<detail::is_translator<Type>, Type>::type
+        typename pdalboost::disable_if<detail::is_translator<Type>, Type>::type
         get_value(const Type &default_value) const;
 
         /** Make get_value do the right thing for string literals. */
         template <class Ch>
-        typename boost::enable_if<
+        typename pdalboost::enable_if<
             detail::is_character<Ch>,
             std::basic_string<Ch>
         >::type
         get_value(const Ch *default_value) const;
 
         /** Take the value of this node and attempt to translate it to a
-         * @c Type object using the supplied translator. Return boost::null if
+         * @c Type object using the supplied translator. Return pdalboost::null if
          * this fails.
          */
         template<class Type, class Translator>
         optional<Type> get_value_optional(Translator tr) const;
 
         /** Take the value of this node and attempt to translate it to a
-         * @c Type object using the default translator. Return boost::null if
+         * @c Type object using the default translator. Return pdalboost::null if
          * this fails.
          */
         template<class Type>
@@ -373,7 +373,7 @@ namespace boost { namespace property_tree
 
         /** Shorthand for get_child(path).get_value(tr). */
         template<class Type, class Translator>
-        typename boost::enable_if<detail::is_translator<Translator>, Type>::type
+        typename pdalboost::enable_if<detail::is_translator<Translator>, Type>::type
         get(const path_type &path, Translator tr) const;
 
         /** Shorthand for get_child(path).get_value\<Type\>(). */
@@ -392,7 +392,7 @@ namespace boost { namespace property_tree
 
         /** Make get do the right thing for string literals. */
         template <class Ch, class Translator>
-        typename boost::enable_if<
+        typename pdalboost::enable_if<
             detail::is_character<Ch>,
             std::basic_string<Ch>
         >::type
@@ -404,12 +404,12 @@ namespace boost { namespace property_tree
          * value if the node doesn't exist or conversion fails.
          */
         template<class Type>
-        typename boost::disable_if<detail::is_translator<Type>, Type>::type
+        typename pdalboost::disable_if<detail::is_translator<Type>, Type>::type
         get(const path_type &path, const Type &default_value) const;
 
         /** Make get do the right thing for string literals. */
         template <class Ch>
-        typename boost::enable_if<
+        typename pdalboost::enable_if<
             detail::is_character<Ch>,
             std::basic_string<Ch>
         >::type
@@ -419,7 +419,7 @@ namespace boost { namespace property_tree
          * @code
          * if(optional\<self_type&\> node = get_child_optional(path))
          *   return node->get_value_optional(tr);
-         * return boost::null;
+         * return pdalboost::null;
          * @endcode
          * That is, return the value if it exists and can be converted, or nil.
         */
@@ -430,7 +430,7 @@ namespace boost { namespace property_tree
          * @code
          * if(optional\<const self_type&\> node = get_child_optional(path))
          *   return node->get_value_optional();
-         * return boost::null;
+         * return pdalboost::null;
          * @endcode
          * That is, return the value if it exists and can be converted, or nil.
         */

@@ -21,9 +21,9 @@
 #endif
 
 #include <boost/filesystem/convenience.hpp>
-namespace fs = boost::filesystem;
+namespace fs = pdalboost::filesystem;
 using fs::path;
-namespace sys = boost::system;
+namespace sys = pdalboost::system;
 
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/detail/lightweight_main.hpp>
@@ -91,9 +91,9 @@ int cpp_main( int, char*[] )
     BOOST_TEST( !!f );
   }
   BOOST_TEST( throws_fs_error(
-    boost::bind( BOOST_BND(fs::create_directories), is_a_file ) ) );
+    pdalboost::bind( BOOST_BND(fs::create_directories), is_a_file ) ) );
   BOOST_TEST( throws_fs_error(
-    boost::bind( BOOST_BND(fs::create_directories), is_a_file / "aa" ) ) );
+    pdalboost::bind( BOOST_BND(fs::create_directories), is_a_file / "aa" ) ) );
 
 // recursive_directory_iterator tests ----------------------------------------//
 
@@ -101,7 +101,7 @@ int cpp_main( int, char*[] )
   fs::recursive_directory_iterator it( "/no-such-path", ec );
   BOOST_TEST( ec );
   BOOST_TEST( throws_fs_error(
-    boost::bind( create_recursive_iterator, "/no-such-path" ) ) );
+    pdalboost::bind( create_recursive_iterator, "/no-such-path" ) ) );
 
   fs::remove( "xx/uu" );
 
@@ -172,5 +172,5 @@ int cpp_main( int, char*[] )
 
 
 
-  return ::boost::report_errors();
+  return ::pdalboost::report_errors();
 }

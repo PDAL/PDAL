@@ -23,7 +23,7 @@
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/repetition/repeat.hpp>
 
-namespace boost { namespace spirit { namespace qi { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi { namespace detail
 {
     // Helper meta-function allowing to evaluate weak substitutability and
     // negate the result if the predicate (Sequence) is not true
@@ -177,7 +177,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
     template <typename Container, typename ValueType, typename Attribute
       , typename Sequence>
     struct pass_through_container<
-                Container, ValueType, boost::optional<Attribute>, Sequence>
+                Container, ValueType, pdalboost::optional<Attribute>, Sequence>
       : pass_through_container_optional<
             Container, ValueType, Attribute, Sequence> 
     {};
@@ -188,7 +188,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
     template <typename Container, typename ValueType, typename Attribute
       , typename Sequence>
     struct pass_through_container<
-            Container, boost::optional<ValueType>, boost::optional<Attribute>
+            Container, pdalboost::optional<ValueType>, pdalboost::optional<Attribute>
           , Sequence>
       : mpl::not_<traits::is_weak_substitute<Attribute, ValueType> > 
     {};
@@ -206,14 +206,14 @@ namespace boost { namespace spirit { namespace qi { namespace detail
     // make sure unused variant parameters do not affect the outcome
     template <typename Container, typename ValueType, typename Sequence>
     struct pass_through_container<Container, ValueType
-          , boost::detail::variant::void_, Sequence>
+          , pdalboost::detail::variant::void_, Sequence>
       : mpl::false_
     {};
 
     template <typename Container, typename ValueType, typename Sequence
       , BOOST_VARIANT_ENUM_PARAMS(typename T)>
     struct pass_through_container<Container, ValueType
-          , boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Sequence>
+          , pdalboost::variant<BOOST_VARIANT_ENUM_PARAMS(T)>, Sequence>
       : mpl::bool_<BOOST_PP_REPEAT(BOOST_VARIANT_LIMIT_TYPES
           , BOOST_SPIRIT_PASS_THROUGH_CONTAINER, _) false>
     {};
@@ -222,7 +222,7 @@ namespace boost { namespace spirit { namespace qi { namespace detail
 }}}}
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     // forwarding customization point for domain qi::domain
@@ -235,7 +235,7 @@ namespace boost { namespace spirit { namespace traits
     {};
 }}}
 
-namespace boost { namespace spirit { namespace qi { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi { namespace detail
 {
     ///////////////////////////////////////////////////////////////////////////
     // This function handles the case where the attribute (Attr) given

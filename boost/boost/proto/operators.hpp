@@ -21,7 +21,7 @@
 #include <boost/proto/generate.hpp>
 #include <boost/proto/make_expr.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace detail
     {
@@ -32,8 +32,8 @@ namespace boost { namespace proto
 
         template<typename Domain, typename Grammar, typename Trait, typename Tag, typename Arg>
         struct enable_unary
-          : boost::lazy_enable_if_c<
-                boost::mpl::and_<
+          : pdalboost::lazy_enable_if_c<
+                pdalboost::mpl::and_<
                     Trait
                   , lazy_matches<result_of::make_expr<Tag, basic_default_domain, Arg>, Grammar>
                 >::value
@@ -43,7 +43,7 @@ namespace boost { namespace proto
 
         template<typename Domain, typename Trait, typename Tag, typename Arg>
         struct enable_unary<Domain, proto::_, Trait, Tag, Arg &>
-          : boost::lazy_enable_if_c<
+          : pdalboost::lazy_enable_if_c<
                 Trait::value
               , result_of::make_expr<Tag, Domain, Arg &>
             >
@@ -62,8 +62,8 @@ namespace boost { namespace proto
 
         template<typename Domain, typename Grammar, typename Trait, typename Tag, typename Left, typename Right>
         struct enable_binary
-          : boost::lazy_enable_if_c<
-                boost::mpl::and_<
+          : pdalboost::lazy_enable_if_c<
+                pdalboost::mpl::and_<
                     Trait
                   , lazy_matches<result_of::make_expr<Tag, basic_default_domain, Left, Right>, Grammar>
                 >::value
@@ -73,7 +73,7 @@ namespace boost { namespace proto
 
         template<typename Domain, typename Trait, typename Tag, typename Left, typename Right>
         struct enable_binary<Domain, proto::_, Trait, Tag, Left &, Right &>
-          : boost::lazy_enable_if_c<
+          : pdalboost::lazy_enable_if_c<
                 Trait::value
               , result_of::make_expr<Tag, Domain, Left &, Right &>
             >
@@ -100,7 +100,7 @@ namespace boost { namespace proto
 
 #define BOOST_PROTO_DEFINE_UNARY_OPERATOR(OP, TAG, TRAIT, DOMAIN, POST)                             \
     template<typename Arg>                                                                          \
-    typename boost::proto::detail::enable_unary<                                                    \
+    typename pdalboost::proto::detail::enable_unary<                                                    \
         DOMAIN                                                                                      \
       , DOMAIN::proto_grammar                                                                       \
       , BOOST_PROTO_APPLY_UNARY_(TRAIT, Arg)                                                        \
@@ -109,11 +109,11 @@ namespace boost { namespace proto
     >::type const                                                                                   \
     operator OP(Arg &arg BOOST_PROTO_UNARY_OP_IS_POSTFIX_ ## POST)                                  \
     {                                                                                               \
-        return boost::proto::detail::make_expr_<TAG, DOMAIN, Arg &>()(arg);                         \
+        return pdalboost::proto::detail::make_expr_<TAG, DOMAIN, Arg &>()(arg);                         \
     }                                                                                               \
                                                                                                     \
     template<typename Arg>                                                                          \
-    typename boost::proto::detail::enable_unary<                                                    \
+    typename pdalboost::proto::detail::enable_unary<                                                    \
         DOMAIN                                                                                      \
       , DOMAIN::proto_grammar                                                                       \
       , BOOST_PROTO_APPLY_UNARY_(TRAIT, Arg)                                                        \
@@ -122,13 +122,13 @@ namespace boost { namespace proto
     >::type const                                                                                   \
     operator OP(Arg const &arg BOOST_PROTO_UNARY_OP_IS_POSTFIX_ ## POST)                            \
     {                                                                                               \
-        return boost::proto::detail::make_expr_<TAG, DOMAIN, Arg const &>()(arg);                   \
+        return pdalboost::proto::detail::make_expr_<TAG, DOMAIN, Arg const &>()(arg);                   \
     }                                                                                               \
     /**/
 
 #define BOOST_PROTO_DEFINE_BINARY_OPERATOR(OP, TAG, TRAIT, DOMAIN)                                  \
     template<typename Left, typename Right>                                                         \
-    typename boost::proto::detail::enable_binary<                                                   \
+    typename pdalboost::proto::detail::enable_binary<                                                   \
         DOMAIN                                                                                      \
       , DOMAIN::proto_grammar                                                                       \
       , BOOST_PROTO_APPLY_BINARY_(TRAIT, Left, Right)                                               \
@@ -138,11 +138,11 @@ namespace boost { namespace proto
     >::type const                                                                                   \
     operator OP(Left &left, Right &right)                                                           \
     {                                                                                               \
-        return boost::proto::detail::make_expr_<TAG, DOMAIN, Left &, Right &>()(left, right);       \
+        return pdalboost::proto::detail::make_expr_<TAG, DOMAIN, Left &, Right &>()(left, right);       \
     }                                                                                               \
                                                                                                     \
     template<typename Left, typename Right>                                                         \
-    typename boost::proto::detail::enable_binary<                                                   \
+    typename pdalboost::proto::detail::enable_binary<                                                   \
         DOMAIN                                                                                      \
       , DOMAIN::proto_grammar                                                                       \
       , BOOST_PROTO_APPLY_BINARY_(TRAIT, Left, Right)                                               \
@@ -152,11 +152,11 @@ namespace boost { namespace proto
     >::type const                                                                                   \
     operator OP(Left &left, Right const &right)                                                     \
     {                                                                                               \
-        return boost::proto::detail::make_expr_<TAG, DOMAIN, Left &, Right const &>()(left, right); \
+        return pdalboost::proto::detail::make_expr_<TAG, DOMAIN, Left &, Right const &>()(left, right); \
     }                                                                                               \
                                                                                                     \
     template<typename Left, typename Right>                                                         \
-    typename boost::proto::detail::enable_binary<                                                   \
+    typename pdalboost::proto::detail::enable_binary<                                                   \
         DOMAIN                                                                                      \
       , DOMAIN::proto_grammar                                                                       \
       , BOOST_PROTO_APPLY_BINARY_(TRAIT, Left, Right)                                               \
@@ -166,11 +166,11 @@ namespace boost { namespace proto
     >::type const                                                                                   \
     operator OP(Left const &left, Right &right)                                                     \
     {                                                                                               \
-        return boost::proto::detail::make_expr_<TAG, DOMAIN, Left const &, Right &>()(left, right); \
+        return pdalboost::proto::detail::make_expr_<TAG, DOMAIN, Left const &, Right &>()(left, right); \
     }                                                                                               \
                                                                                                     \
     template<typename Left, typename Right>                                                         \
-    typename boost::proto::detail::enable_binary<                                                   \
+    typename pdalboost::proto::detail::enable_binary<                                                   \
         DOMAIN                                                                                      \
       , DOMAIN::proto_grammar                                                                       \
       , BOOST_PROTO_APPLY_BINARY_(TRAIT, Left, Right)                                               \
@@ -180,7 +180,7 @@ namespace boost { namespace proto
     >::type const                                                                                   \
     operator OP(Left const &left, Right const &right)                                               \
     {                                                                                               \
-        return boost::proto::detail::make_expr_<TAG, DOMAIN, Left const &, Right const &>()(left, right);\
+        return pdalboost::proto::detail::make_expr_<TAG, DOMAIN, Left const &, Right const &>()(left, right);\
     }                                                                                               \
     /**/
 
@@ -188,7 +188,7 @@ namespace boost { namespace proto
 
 #define BOOST_PROTO_DEFINE_UNARY_OPERATOR(OP, TAG, TRAIT, DOMAIN, POST)                             \
     template<typename Arg>                                                                          \
-    typename boost::proto::detail::enable_unary<                                                    \
+    typename pdalboost::proto::detail::enable_unary<                                                    \
         DOMAIN                                                                                      \
       , DOMAIN::proto_grammar                                                                       \
       , BOOST_PROTO_APPLY_UNARY_(TRAIT, Arg)                                                        \
@@ -197,13 +197,13 @@ namespace boost { namespace proto
     >::type const                                                                                   \
     operator OP(Arg &&arg BOOST_PROTO_UNARY_OP_IS_POSTFIX_ ## POST)                                 \
     {                                                                                               \
-        return boost::proto::detail::make_expr_<TAG, DOMAIN, Arg const &>()(arg);                   \
+        return pdalboost::proto::detail::make_expr_<TAG, DOMAIN, Arg const &>()(arg);                   \
     }                                                                                               \
     /**/
 
 #define BOOST_PROTO_DEFINE_BINARY_OPERATOR(OP, TAG, TRAIT, DOMAIN)                                  \
     template<typename Left, typename Right>                                                         \
-    typename boost::proto::detail::enable_binary<                                                   \
+    typename pdalboost::proto::detail::enable_binary<                                                   \
         DOMAIN                                                                                      \
       , DOMAIN::proto_grammar                                                                       \
       , BOOST_PROTO_APPLY_BINARY_(TRAIT, Left, Right)                                               \
@@ -213,53 +213,53 @@ namespace boost { namespace proto
     >::type const                                                                                   \
     operator OP(Left &&left, Right &&right)                                                         \
     {                                                                                               \
-        return boost::proto::detail::make_expr_<TAG, DOMAIN, Left const &, Right const &>()(left, right);\
+        return pdalboost::proto::detail::make_expr_<TAG, DOMAIN, Left const &, Right const &>()(left, right);\
     }                                                                                               \
     /**/
 
 #endif
 
 #define BOOST_PROTO_DEFINE_OPERATORS(TRAIT, DOMAIN)                                                 \
-    BOOST_PROTO_DEFINE_UNARY_OPERATOR(+, boost::proto::tag::unary_plus, TRAIT, DOMAIN, 0)           \
-    BOOST_PROTO_DEFINE_UNARY_OPERATOR(-, boost::proto::tag::negate, TRAIT, DOMAIN, 0)               \
-    BOOST_PROTO_DEFINE_UNARY_OPERATOR(*, boost::proto::tag::dereference, TRAIT, DOMAIN, 0)          \
-    BOOST_PROTO_DEFINE_UNARY_OPERATOR(~, boost::proto::tag::complement, TRAIT, DOMAIN, 0)           \
-    BOOST_PROTO_DEFINE_UNARY_OPERATOR(&, boost::proto::tag::address_of, TRAIT, DOMAIN, 0)           \
-    BOOST_PROTO_DEFINE_UNARY_OPERATOR(!, boost::proto::tag::logical_not, TRAIT, DOMAIN, 0)          \
-    BOOST_PROTO_DEFINE_UNARY_OPERATOR(++, boost::proto::tag::pre_inc, TRAIT, DOMAIN, 0)             \
-    BOOST_PROTO_DEFINE_UNARY_OPERATOR(--, boost::proto::tag::pre_dec, TRAIT, DOMAIN, 0)             \
-    BOOST_PROTO_DEFINE_UNARY_OPERATOR(++, boost::proto::tag::post_inc, TRAIT, DOMAIN, 1)            \
-    BOOST_PROTO_DEFINE_UNARY_OPERATOR(--, boost::proto::tag::post_dec, TRAIT, DOMAIN, 1)            \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(<<, boost::proto::tag::shift_left, TRAIT, DOMAIN)            \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(>>, boost::proto::tag::shift_right, TRAIT, DOMAIN)           \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(*, boost::proto::tag::multiplies, TRAIT, DOMAIN)             \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(/, boost::proto::tag::divides, TRAIT, DOMAIN)                \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(%, boost::proto::tag::modulus, TRAIT, DOMAIN)                \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(+, boost::proto::tag::plus, TRAIT, DOMAIN)                   \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(-, boost::proto::tag::minus, TRAIT, DOMAIN)                  \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(<, boost::proto::tag::less, TRAIT, DOMAIN)                   \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(>, boost::proto::tag::greater, TRAIT, DOMAIN)                \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(<=, boost::proto::tag::less_equal, TRAIT, DOMAIN)            \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(>=, boost::proto::tag::greater_equal, TRAIT, DOMAIN)         \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(==, boost::proto::tag::equal_to, TRAIT, DOMAIN)              \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(!=, boost::proto::tag::not_equal_to, TRAIT, DOMAIN)          \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(||, boost::proto::tag::logical_or, TRAIT, DOMAIN)            \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(&&, boost::proto::tag::logical_and, TRAIT, DOMAIN)           \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(&, boost::proto::tag::bitwise_and, TRAIT, DOMAIN)            \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(|, boost::proto::tag::bitwise_or, TRAIT, DOMAIN)             \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(^, boost::proto::tag::bitwise_xor, TRAIT, DOMAIN)            \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(BOOST_PP_COMMA(), boost::proto::tag::comma, TRAIT, DOMAIN)   \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(->*, boost::proto::tag::mem_ptr, TRAIT, DOMAIN)              \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(<<=, boost::proto::tag::shift_left_assign, TRAIT, DOMAIN)    \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(>>=, boost::proto::tag::shift_right_assign, TRAIT, DOMAIN)   \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(*=, boost::proto::tag::multiplies_assign, TRAIT, DOMAIN)     \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(/=, boost::proto::tag::divides_assign, TRAIT, DOMAIN)        \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(%=, boost::proto::tag::modulus_assign, TRAIT, DOMAIN)        \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(+=, boost::proto::tag::plus_assign, TRAIT, DOMAIN)           \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(-=, boost::proto::tag::minus_assign, TRAIT, DOMAIN)          \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(&=, boost::proto::tag::bitwise_and_assign, TRAIT, DOMAIN)    \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(|=, boost::proto::tag::bitwise_or_assign, TRAIT, DOMAIN)     \
-    BOOST_PROTO_DEFINE_BINARY_OPERATOR(^=, boost::proto::tag::bitwise_xor_assign, TRAIT, DOMAIN)    \
+    BOOST_PROTO_DEFINE_UNARY_OPERATOR(+, pdalboost::proto::tag::unary_plus, TRAIT, DOMAIN, 0)           \
+    BOOST_PROTO_DEFINE_UNARY_OPERATOR(-, pdalboost::proto::tag::negate, TRAIT, DOMAIN, 0)               \
+    BOOST_PROTO_DEFINE_UNARY_OPERATOR(*, pdalboost::proto::tag::dereference, TRAIT, DOMAIN, 0)          \
+    BOOST_PROTO_DEFINE_UNARY_OPERATOR(~, pdalboost::proto::tag::complement, TRAIT, DOMAIN, 0)           \
+    BOOST_PROTO_DEFINE_UNARY_OPERATOR(&, pdalboost::proto::tag::address_of, TRAIT, DOMAIN, 0)           \
+    BOOST_PROTO_DEFINE_UNARY_OPERATOR(!, pdalboost::proto::tag::logical_not, TRAIT, DOMAIN, 0)          \
+    BOOST_PROTO_DEFINE_UNARY_OPERATOR(++, pdalboost::proto::tag::pre_inc, TRAIT, DOMAIN, 0)             \
+    BOOST_PROTO_DEFINE_UNARY_OPERATOR(--, pdalboost::proto::tag::pre_dec, TRAIT, DOMAIN, 0)             \
+    BOOST_PROTO_DEFINE_UNARY_OPERATOR(++, pdalboost::proto::tag::post_inc, TRAIT, DOMAIN, 1)            \
+    BOOST_PROTO_DEFINE_UNARY_OPERATOR(--, pdalboost::proto::tag::post_dec, TRAIT, DOMAIN, 1)            \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(<<, pdalboost::proto::tag::shift_left, TRAIT, DOMAIN)            \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(>>, pdalboost::proto::tag::shift_right, TRAIT, DOMAIN)           \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(*, pdalboost::proto::tag::multiplies, TRAIT, DOMAIN)             \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(/, pdalboost::proto::tag::divides, TRAIT, DOMAIN)                \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(%, pdalboost::proto::tag::modulus, TRAIT, DOMAIN)                \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(+, pdalboost::proto::tag::plus, TRAIT, DOMAIN)                   \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(-, pdalboost::proto::tag::minus, TRAIT, DOMAIN)                  \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(<, pdalboost::proto::tag::less, TRAIT, DOMAIN)                   \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(>, pdalboost::proto::tag::greater, TRAIT, DOMAIN)                \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(<=, pdalboost::proto::tag::less_equal, TRAIT, DOMAIN)            \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(>=, pdalboost::proto::tag::greater_equal, TRAIT, DOMAIN)         \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(==, pdalboost::proto::tag::equal_to, TRAIT, DOMAIN)              \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(!=, pdalboost::proto::tag::not_equal_to, TRAIT, DOMAIN)          \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(||, pdalboost::proto::tag::logical_or, TRAIT, DOMAIN)            \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(&&, pdalboost::proto::tag::logical_and, TRAIT, DOMAIN)           \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(&, pdalboost::proto::tag::bitwise_and, TRAIT, DOMAIN)            \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(|, pdalboost::proto::tag::bitwise_or, TRAIT, DOMAIN)             \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(^, pdalboost::proto::tag::bitwise_xor, TRAIT, DOMAIN)            \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(BOOST_PP_COMMA(), pdalboost::proto::tag::comma, TRAIT, DOMAIN)   \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(->*, pdalboost::proto::tag::mem_ptr, TRAIT, DOMAIN)              \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(<<=, pdalboost::proto::tag::shift_left_assign, TRAIT, DOMAIN)    \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(>>=, pdalboost::proto::tag::shift_right_assign, TRAIT, DOMAIN)   \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(*=, pdalboost::proto::tag::multiplies_assign, TRAIT, DOMAIN)     \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(/=, pdalboost::proto::tag::divides_assign, TRAIT, DOMAIN)        \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(%=, pdalboost::proto::tag::modulus_assign, TRAIT, DOMAIN)        \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(+=, pdalboost::proto::tag::plus_assign, TRAIT, DOMAIN)           \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(-=, pdalboost::proto::tag::minus_assign, TRAIT, DOMAIN)          \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(&=, pdalboost::proto::tag::bitwise_and_assign, TRAIT, DOMAIN)    \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(|=, pdalboost::proto::tag::bitwise_or_assign, TRAIT, DOMAIN)     \
+    BOOST_PROTO_DEFINE_BINARY_OPERATOR(^=, pdalboost::proto::tag::bitwise_xor_assign, TRAIT, DOMAIN)    \
     /**/
 
     // Extensions are a superset of Proto expressions
@@ -274,7 +274,7 @@ namespace boost { namespace proto
     {};
 
     #define BOOST_PROTO_APPLY_UNARY_(TRAIT, ARG) TRAIT<ARG>
-    #define BOOST_PROTO_APPLY_BINARY_(TRAIT, LEFT, RIGHT) boost::mpl::or_<TRAIT<LEFT>, TRAIT<RIGHT> >
+    #define BOOST_PROTO_APPLY_BINARY_(TRAIT, LEFT, RIGHT) pdalboost::mpl::or_<TRAIT<LEFT>, TRAIT<RIGHT> >
 
     namespace exprns_
     {
@@ -314,19 +314,19 @@ namespace boost { namespace proto
 #ifdef BOOST_NO_RVALUE_REFERENCES
 
     #define BOOST_PROTO_APPLY_UNARY_(TRAIT, ARG)                                                    \
-        boost::mpl::and_<                                                                           \
+        pdalboost::mpl::and_<                                                                           \
             TRAIT<ARG>                                                                              \
-          , boost::mpl::not_<boost::proto::is_extension<ARG> >                                      \
+          , pdalboost::mpl::not_<pdalboost::proto::is_extension<ARG> >                                      \
         >                                                                                           \
         /**/
 
     #define BOOST_PROTO_APPLY_BINARY_(TRAIT, LEFT, RIGHT)                                           \
-        boost::mpl::and_<                                                                           \
-            boost::mpl::or_<TRAIT<LEFT>, TRAIT<RIGHT> >                                             \
-          , boost::mpl::not_<                                                                       \
-                boost::mpl::or_<                                                                    \
-                    boost::proto::is_extension<LEFT>                                                \
-                  , boost::proto::is_extension<RIGHT>                                               \
+        pdalboost::mpl::and_<                                                                           \
+            pdalboost::mpl::or_<TRAIT<LEFT>, TRAIT<RIGHT> >                                             \
+          , pdalboost::mpl::not_<                                                                       \
+                pdalboost::mpl::or_<                                                                    \
+                    pdalboost::proto::is_extension<LEFT>                                                \
+                  , pdalboost::proto::is_extension<RIGHT>                                               \
                 >                                                                                   \
             >                                                                                       \
         >                                                                                           \
@@ -335,19 +335,19 @@ namespace boost { namespace proto
 #else
 
     #define BOOST_PROTO_APPLY_UNARY_(TRAIT, ARG)                                                    \
-        boost::mpl::and_<                                                                           \
+        pdalboost::mpl::and_<                                                                           \
             TRAIT<BOOST_PROTO_UNCVREF(ARG) >                                                        \
-          , boost::mpl::not_<boost::proto::is_extension<ARG> >                                      \
+          , pdalboost::mpl::not_<pdalboost::proto::is_extension<ARG> >                                      \
         >                                                                                           \
         /**/
 
     #define BOOST_PROTO_APPLY_BINARY_(TRAIT, LEFT, RIGHT)                                           \
-        boost::mpl::and_<                                                                           \
-            boost::mpl::or_<TRAIT<BOOST_PROTO_UNCVREF(LEFT) >, TRAIT<BOOST_PROTO_UNCVREF(RIGHT) > > \
-          , boost::mpl::not_<                                                                       \
-                boost::mpl::or_<                                                                    \
-                    boost::proto::is_extension<LEFT>                                                \
-                  , boost::proto::is_extension<RIGHT>                                               \
+        pdalboost::mpl::and_<                                                                           \
+            pdalboost::mpl::or_<TRAIT<BOOST_PROTO_UNCVREF(LEFT) >, TRAIT<BOOST_PROTO_UNCVREF(RIGHT) > > \
+          , pdalboost::mpl::not_<                                                                       \
+                pdalboost::mpl::or_<                                                                    \
+                    pdalboost::proto::is_extension<LEFT>                                                \
+                  , pdalboost::proto::is_extension<RIGHT>                                               \
                 >                                                                                   \
             >                                                                                       \
         >                                                                                           \

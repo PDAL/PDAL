@@ -36,8 +36,7 @@
 
 #include <boost/config/abi_prefix.hpp> // must be the last #include
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace BOOST_FILESYSTEM2_NAMESPACE
   {
     template<class String, class Traits> class basic_path;
@@ -146,8 +145,8 @@ namespace boost
 
       // validate template arguments
 // TODO: get these working
-//      BOOST_STATIC_ASSERT( ::boost::is_same<String,typename Traits::internal_string_type>::value );
-//      BOOST_STATIC_ASSERT( ::boost::is_same<typename Traits::external_string_type,std::string>::value || ::boost::is_same<typename Traits::external_string_type,std::wstring>::value );
+//      BOOST_STATIC_ASSERT( ::pdalboost::is_same<String,typename Traits::internal_string_type>::value );
+//      BOOST_STATIC_ASSERT( ::pdalboost::is_same<typename Traits::external_string_type,std::string>::value || ::pdalboost::is_same<typename Traits::external_string_type,std::wstring>::value );
 
     public:
       // compiler generates copy constructor and copy assignment
@@ -263,30 +262,30 @@ namespace boost
       bool has_parent_path() const     { return !parent_path().empty(); }
 
       // iterators
-      class iterator : public boost::iterator_facade<
+      class iterator : public pdalboost::iterator_facade<
         iterator,
         string_type const,
-        boost::bidirectional_traversal_tag >
+        pdalboost::bidirectional_traversal_tag >
       {
       private:
-        friend class boost::iterator_core_access;
-        friend class boost::BOOST_FILESYSTEM2_NAMESPACE::basic_path<String, Traits>;
+        friend class pdalboost::iterator_core_access;
+        friend class pdalboost::BOOST_FILESYSTEM2_NAMESPACE::basic_path<String, Traits>;
 
         const string_type & dereference() const
           { return m_name; }
         bool equal( const iterator & rhs ) const
           { return m_path_ptr == rhs.m_path_ptr && m_pos == rhs.m_pos; }
 
-        friend class boost::BOOST_FILESYSTEM2_NAMESPACE::detail::iterator_helper<path_type>;
+        friend class pdalboost::BOOST_FILESYSTEM2_NAMESPACE::detail::iterator_helper<path_type>;
 
         void increment()
         { 
-          boost::BOOST_FILESYSTEM2_NAMESPACE::detail::iterator_helper<path_type>::do_increment(
+          pdalboost::BOOST_FILESYSTEM2_NAMESPACE::detail::iterator_helper<path_type>::do_increment(
             *this );
         }
         void decrement()
         { 
-          boost::BOOST_FILESYSTEM2_NAMESPACE::detail::iterator_helper<path_type>::do_decrement(
+          pdalboost::BOOST_FILESYSTEM2_NAMESPACE::detail::iterator_helper<path_type>::do_decrement(
             *this );
         }
 
@@ -327,7 +326,7 @@ namespace boost
       // Was qualified; como433beta8 reports:
       //    warning #427-D: qualified name is not allowed in member declaration 
       friend class iterator;
-      friend class boost::BOOST_FILESYSTEM2_NAMESPACE::detail::iterator_helper<path_type>;
+      friend class pdalboost::BOOST_FILESYSTEM2_NAMESPACE::detail::iterator_helper<path_type>;
 
       // Deprecated features ease transition for existing code. Don't use these
       // in new code.
@@ -405,7 +404,7 @@ namespace boost
                     const typename basic_path<String, Traits>::string_type::value_type * rhs )
     {
       typedef typename
-        boost::BOOST_FILESYSTEM2_NAMESPACE::basic_path<String, Traits> path_type;
+        pdalboost::BOOST_FILESYSTEM2_NAMESPACE::basic_path<String, Traits> path_type;
       const typename path_type::string_type::value_type * l (lhs.string().c_str());
       while ( (*l == *rhs
 #      ifdef BOOST_WINDOWS_PATH
@@ -720,7 +719,7 @@ namespace boost
         path_type                 m_path2; // may be empty()
         std::string               m_what;  // not built until needed
       };
-      boost::shared_ptr<m_imp> m_imp_ptr;
+      pdalboost::shared_ptr<m_imp> m_imp_ptr;
     };
 
     typedef basic_filesystem_error<path> filesystem_error;
@@ -766,7 +765,7 @@ namespace boost
       // return 0 if str itself is filename (or empty)
       {
         typedef typename
-          boost::BOOST_FILESYSTEM2_NAMESPACE::basic_path<String, Traits> path_type;
+          pdalboost::BOOST_FILESYSTEM2_NAMESPACE::basic_path<String, Traits> path_type;
 
         // case: "//"
         if ( end_pos == 2 
@@ -814,7 +813,7 @@ namespace boost
         element_size = 0;
         if ( src.empty() ) return;
 
-        typedef typename boost::BOOST_FILESYSTEM2_NAMESPACE::basic_path<String, Traits> path_type;
+        typedef typename pdalboost::BOOST_FILESYSTEM2_NAMESPACE::basic_path<String, Traits> path_type;
 
         typename String::size_type cur(0);
         
@@ -874,7 +873,7 @@ namespace boost
         typename String::size_type size )
       // return npos if no root_directory found
       {
-        typedef typename boost::BOOST_FILESYSTEM2_NAMESPACE::basic_path<String, Traits> path_type;
+        typedef typename pdalboost::BOOST_FILESYSTEM2_NAMESPACE::basic_path<String, Traits> path_type;
 
 #     ifdef BOOST_WINDOWS_PATH
         // case "c:/"
@@ -912,7 +911,7 @@ namespace boost
         typename String::size_type pos ) // pos is position of the slash
       {
         typedef typename
-          boost::BOOST_FILESYSTEM2_NAMESPACE::basic_path<String, Traits>
+          pdalboost::BOOST_FILESYSTEM2_NAMESPACE::basic_path<String, Traits>
             path_type;
 
         BOOST_ASSERT( !str.empty() && str[pos] == slash<path_type>::value
@@ -1521,12 +1520,11 @@ namespace boost
     }
 
   } // namespace BOOST_FILESYSTEM2_NAMESPACE
-} // namespace boost
+} // namespace pdalboost
 
 //----------------------------------------------------------------------------//
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem
   {
     using filesystem2::basic_path;

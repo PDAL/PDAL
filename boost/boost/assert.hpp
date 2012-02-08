@@ -36,15 +36,14 @@
 
 #include <boost/current_function.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   void assertion_failed(char const * expr,
                         char const * function, char const * file, long line); // user defined
-} // namespace boost
+} // namespace pdalboost
 
 #define BOOST_ASSERT(expr) ((expr) \
   ? ((void)0) \
-  : ::boost::assertion_failed(#expr, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__))
+  : ::pdalboost::assertion_failed(#expr, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__))
 
 #else
 # include <assert.h> // .h to support old libraries w/o <cassert> - effect is the same
@@ -65,15 +64,14 @@ namespace boost
 
   #include <boost/current_function.hpp>
 
-  namespace boost
-  {
+  namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     void assertion_failed_msg(char const * expr, char const * msg,
                               char const * function, char const * file, long line); // user defined
-  } // namespace boost
+  } // namespace pdalboost
 
   #define BOOST_ASSERT_MSG(expr, msg) ((expr) \
     ? ((void)0) \
-    : ::boost::assertion_failed_msg(#expr, msg, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__))
+    : ::pdalboost::assertion_failed_msg(#expr, msg, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__))
 
 #else
   #ifndef BOOST_ASSERT_HPP
@@ -88,8 +86,7 @@ namespace boost
     # define BOOST_ASSERT_MSG_OSTREAM std::cerr
     #endif
 
-    namespace boost
-    { 
+    namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ 
       namespace assertion 
       { 
         namespace detail
@@ -110,7 +107,7 @@ namespace boost
 
   #define BOOST_ASSERT_MSG(expr, msg) ((expr) \
     ? ((void)0) \
-    : ::boost::assertion::detail::assertion_failed_msg(#expr, msg, \
+    : ::pdalboost::assertion::detail::assertion_failed_msg(#expr, msg, \
           BOOST_CURRENT_FUNCTION, __FILE__, __LINE__))
 #endif
 

@@ -28,8 +28,7 @@
 // will be reinstated for any compilers that otherwise can support the rest of
 // the library after internationalization.
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem2
   {
     namespace detail
@@ -93,7 +92,7 @@ namespace boost
 
 #   ifndef BOOST_FILESYSTEM2_NARROW_ONLY
       template<class Path>
-      typename boost::enable_if<is_basic_path<Path>,
+      typename pdalboost::enable_if<is_basic_path<Path>,
         basic_filebuf<charT,traits> *>::type
       open( const Path & file_ph, std::ios_base::openmode mode );
 
@@ -122,18 +121,18 @@ namespace boost
 #   ifndef BOOST_FILESYSTEM2_NARROW_ONLY
       template<class Path>
       explicit basic_ifstream( const Path & file_ph,
-        typename boost::enable_if<is_basic_path<Path> >::type* dummy = 0 );
+        typename pdalboost::enable_if<is_basic_path<Path> >::type* dummy = 0 );
 
       template<class Path>
       basic_ifstream( const Path & file_ph, std::ios_base::openmode mode,
-        typename boost::enable_if<is_basic_path<Path> >::type* dummy = 0 );
+        typename pdalboost::enable_if<is_basic_path<Path> >::type* dummy = 0 );
 
       template<class Path>
-      typename boost::enable_if<is_basic_path<Path>, void>::type
+      typename pdalboost::enable_if<is_basic_path<Path>, void>::type
       open( const Path & file_ph );
 
       template<class Path>
-      typename boost::enable_if<is_basic_path<Path>, void>::type
+      typename pdalboost::enable_if<is_basic_path<Path>, void>::type
       open( const Path & file_ph, std::ios_base::openmode mode );
 
       explicit basic_ifstream( const wpath & file_ph );
@@ -167,21 +166,21 @@ namespace boost
 
       template<class Path>
       explicit basic_ofstream( const Path & file_ph,
-        typename boost::enable_if<is_basic_path<Path> >::type* dummy = 0 );
+        typename pdalboost::enable_if<is_basic_path<Path> >::type* dummy = 0 );
       explicit basic_ofstream( const wpath & file_ph );
 
       template<class Path>
       basic_ofstream( const Path & file_ph, std::ios_base::openmode mode,
-        typename boost::enable_if<is_basic_path<Path> >::type* dummy = 0 );
+        typename pdalboost::enable_if<is_basic_path<Path> >::type* dummy = 0 );
       basic_ofstream( const wpath & file_ph, std::ios_base::openmode mode );
 
       template<class Path>
-      typename boost::enable_if<is_basic_path<Path>, void>::type
+      typename pdalboost::enable_if<is_basic_path<Path>, void>::type
       open( const Path & file_ph );
       void open( const wpath & file_ph );
 
       template<class Path>
-      typename boost::enable_if<is_basic_path<Path>, void>::type
+      typename pdalboost::enable_if<is_basic_path<Path>, void>::type
       open( const Path & file_ph, std::ios_base::openmode mode );
       void open( const wpath & file_ph, std::ios_base::openmode mode );
 
@@ -212,21 +211,21 @@ namespace boost
 
       template<class Path>
       explicit basic_fstream( const Path & file_ph,
-        typename boost::enable_if<is_basic_path<Path> >::type* dummy = 0 );
+        typename pdalboost::enable_if<is_basic_path<Path> >::type* dummy = 0 );
       explicit basic_fstream( const wpath & file_ph );
 
       template<class Path>
       basic_fstream( const Path & file_ph, std::ios_base::openmode mode,
-        typename boost::enable_if<is_basic_path<Path> >::type* dummy = 0 );
+        typename pdalboost::enable_if<is_basic_path<Path> >::type* dummy = 0 );
       basic_fstream( const wpath & file_ph, std::ios_base::openmode mode );
 
       template<class Path>
-      typename boost::enable_if<is_basic_path<Path>, void>::type
+      typename pdalboost::enable_if<is_basic_path<Path>, void>::type
       open( const Path & file_ph );
       void open( const wpath & file_ph );
 
       template<class Path>
-      typename boost::enable_if<is_basic_path<Path>, void>::type
+      typename pdalboost::enable_if<is_basic_path<Path>, void>::type
       open( const Path & file_ph, std::ios_base::openmode mode );
       void open( const wpath & file_ph, std::ios_base::openmode mode );
 
@@ -260,7 +259,7 @@ namespace boost
 
     template <class charT, class traits>
     template<class Path>
-    typename boost::enable_if<is_basic_path<Path>,
+    typename pdalboost::enable_if<is_basic_path<Path>,
       basic_filebuf<charT,traits> *>::type
     basic_filebuf<charT,traits>::open( const Path & file_ph,
       std::ios_base::openmode mode )
@@ -282,7 +281,7 @@ namespace boost
 
     template <class charT, class traits> template<class Path>
     basic_ifstream<charT,traits>::basic_ifstream(const Path & file_ph,
-      typename boost::enable_if<is_basic_path<Path> >::type* )
+      typename pdalboost::enable_if<is_basic_path<Path> >::type* )
       : std::basic_ifstream<charT,traits>(
         detail::path_proxy( file_ph.external_file_string(),
           std::ios_base::in ).c_str(), std::ios_base::in ) {}
@@ -296,7 +295,7 @@ namespace boost
     template <class charT, class traits> template<class Path>
     basic_ifstream<charT,traits>::basic_ifstream( const Path & file_ph,
       std::ios_base::openmode mode,
-      typename boost::enable_if<is_basic_path<Path> >::type* )
+      typename pdalboost::enable_if<is_basic_path<Path> >::type* )
       : std::basic_ifstream<charT,traits>(
         detail::path_proxy( file_ph.external_file_string(),
           mode ).c_str(), mode ) {}
@@ -309,7 +308,7 @@ namespace boost
           mode ).c_str(), mode ) {}
 
     template <class charT, class traits> template<class Path>
-    typename boost::enable_if<is_basic_path<Path>, void>::type
+    typename pdalboost::enable_if<is_basic_path<Path>, void>::type
     basic_ifstream<charT,traits>::open( const Path & file_ph )
     {
       std::basic_ifstream<charT,traits>::open(
@@ -326,7 +325,7 @@ namespace boost
     }
     
     template <class charT, class traits> template<class Path>
-    typename boost::enable_if<is_basic_path<Path>, void>::type
+    typename pdalboost::enable_if<is_basic_path<Path>, void>::type
     basic_ifstream<charT,traits>::open( const Path & file_ph,
       std::ios_base::openmode mode )
     {
@@ -348,7 +347,7 @@ namespace boost
 
     template <class charT, class traits> template<class Path>
     basic_ofstream<charT,traits>::basic_ofstream(const Path & file_ph,
-      typename boost::enable_if<is_basic_path<Path> >::type* )
+      typename pdalboost::enable_if<is_basic_path<Path> >::type* )
       : std::basic_ofstream<charT,traits>(
         detail::path_proxy( file_ph.external_file_string(),
           std::ios_base::out ).c_str(), std::ios_base::out ) {}
@@ -362,7 +361,7 @@ namespace boost
     template <class charT, class traits> template<class Path>
     basic_ofstream<charT,traits>::basic_ofstream( const Path & file_ph,
       std::ios_base::openmode mode,
-      typename boost::enable_if<is_basic_path<Path> >::type* )
+      typename pdalboost::enable_if<is_basic_path<Path> >::type* )
       : std::basic_ofstream<charT,traits>(
         detail::path_proxy( file_ph.external_file_string(),
           mode ).c_str(), mode ) {}
@@ -375,7 +374,7 @@ namespace boost
           mode ).c_str(), mode ) {}
     
     template <class charT, class traits> template<class Path>
-    typename boost::enable_if<is_basic_path<Path>, void>::type
+    typename pdalboost::enable_if<is_basic_path<Path>, void>::type
     basic_ofstream<charT,traits>::open( const Path & file_ph )
     {
       std::basic_ofstream<charT,traits>::open(
@@ -392,7 +391,7 @@ namespace boost
     }
     
     template <class charT, class traits> template<class Path>
-    typename boost::enable_if<is_basic_path<Path>, void>::type
+    typename pdalboost::enable_if<is_basic_path<Path>, void>::type
     basic_ofstream<charT,traits>::open( const Path & file_ph,
       std::ios_base::openmode mode )
     {
@@ -414,7 +413,7 @@ namespace boost
 
     template <class charT, class traits> template<class Path>
     basic_fstream<charT,traits>::basic_fstream(const Path & file_ph,
-      typename boost::enable_if<is_basic_path<Path> >::type* )
+      typename pdalboost::enable_if<is_basic_path<Path> >::type* )
       : std::basic_fstream<charT,traits>(
         detail::path_proxy( file_ph.external_file_string(),
           std::ios_base::in|std::ios_base::out ).c_str(),
@@ -430,7 +429,7 @@ namespace boost
     template <class charT, class traits> template<class Path>
     basic_fstream<charT,traits>::basic_fstream( const Path & file_ph,
       std::ios_base::openmode mode,
-      typename boost::enable_if<is_basic_path<Path> >::type* )
+      typename pdalboost::enable_if<is_basic_path<Path> >::type* )
       : std::basic_fstream<charT,traits>(
         detail::path_proxy( file_ph.external_file_string(),
           mode ).c_str(), mode ) {}
@@ -443,7 +442,7 @@ namespace boost
           mode ).c_str(), mode ) {}
       
     template <class charT, class traits> template<class Path>
-    typename boost::enable_if<is_basic_path<Path>, void>::type
+    typename pdalboost::enable_if<is_basic_path<Path>, void>::type
     basic_fstream<charT,traits>::open( const Path & file_ph )
     {
       std::basic_fstream<charT,traits>::open(
@@ -462,7 +461,7 @@ namespace boost
     }
     
     template <class charT, class traits> template<class Path>
-    typename boost::enable_if<is_basic_path<Path>, void>::type
+    typename pdalboost::enable_if<is_basic_path<Path>, void>::type
     basic_fstream<charT,traits>::open( const Path & file_ph,
       std::ios_base::openmode mode )
     {
@@ -579,12 +578,11 @@ namespace boost
     }
 #   endif
   } // namespace filesystem2
-} // namespace boost
+} // namespace pdalboost
 
 //----------------------------------------------------------------------------//
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem
   {
 # ifndef BOOST_FILESYSTEM2_NARROW_ONLY

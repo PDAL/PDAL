@@ -31,8 +31,7 @@
 # pragma warning(push)
 # pragma warning(disable:4512)
 #endif 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 template <class T1, class T2>
 class compressed_pair;
@@ -122,7 +121,7 @@ namespace details
       second_reference       second()       {return second_;}
       second_const_reference second() const {return second_;}
 
-      void swap(::boost::compressed_pair<T1, T2>& y)
+      void swap(::pdalboost::compressed_pair<T1, T2>& y)
       {
          cp_swap(first_, y.first());
          cp_swap(second_, y.second());
@@ -136,7 +135,7 @@ namespace details
 
    template <class T1, class T2>
    class compressed_pair_imp<T1, T2, 1>
-      : protected ::boost::remove_cv<T1>::type
+      : protected ::pdalboost::remove_cv<T1>::type
    {
    public:
       typedef T1                                                 first_type;
@@ -165,7 +164,7 @@ namespace details
       second_reference       second()       {return second_;}
       second_const_reference second() const {return second_;}
 
-      void swap(::boost::compressed_pair<T1,T2>& y)
+      void swap(::pdalboost::compressed_pair<T1,T2>& y)
       {
          // no need to swap empty base class:
          cp_swap(second_, y.second());
@@ -178,7 +177,7 @@ namespace details
 
    template <class T1, class T2>
    class compressed_pair_imp<T1, T2, 2>
-      : protected ::boost::remove_cv<T2>::type
+      : protected ::pdalboost::remove_cv<T2>::type
    {
    public:
       typedef T1                                                 first_type;
@@ -207,7 +206,7 @@ namespace details
       second_reference       second()       {return *this;}
       second_const_reference second() const {return *this;}
 
-      void swap(::boost::compressed_pair<T1,T2>& y)
+      void swap(::pdalboost::compressed_pair<T1,T2>& y)
       {
          // no need to swap empty base class:
          cp_swap(first_, y.first());
@@ -221,8 +220,8 @@ namespace details
 
    template <class T1, class T2>
    class compressed_pair_imp<T1, T2, 3>
-      : protected ::boost::remove_cv<T1>::type,
-        protected ::boost::remove_cv<T2>::type
+      : protected ::pdalboost::remove_cv<T1>::type,
+        protected ::pdalboost::remove_cv<T2>::type
    {
    public:
       typedef T1                                                 first_type;
@@ -252,7 +251,7 @@ namespace details
       second_const_reference second() const {return *this;}
       //
       // no need to swap empty bases:
-      void swap(::boost::compressed_pair<T1,T2>&) {}
+      void swap(::pdalboost::compressed_pair<T1,T2>&) {}
    };
 
    // JM
@@ -264,7 +263,7 @@ namespace details
    //      different objects (albeit both empty).
    template <class T1, class T2>
    class compressed_pair_imp<T1, T2, 4>
-      : protected ::boost::remove_cv<T1>::type
+      : protected ::pdalboost::remove_cv<T1>::type
    {
    public:
       typedef T1                                                 first_type;
@@ -290,7 +289,7 @@ namespace details
       second_reference       second()       {return m_second;}
       second_const_reference second() const {return m_second;}
 
-      void swap(::boost::compressed_pair<T1,T2>&) {}
+      void swap(::pdalboost::compressed_pair<T1,T2>&) {}
    private:
       T2 m_second;
    };
@@ -324,7 +323,7 @@ namespace details
       second_reference       second()       {return second_;}
       second_const_reference second() const {return second_;}
 
-      void swap(::boost::compressed_pair<T1, T2>& y)
+      void swap(::pdalboost::compressed_pair<T1, T2>& y)
       {
          cp_swap(first_, y.first());
          cp_swap(second_, y.second());
@@ -338,22 +337,22 @@ namespace details
 
 template <class T1, class T2>
 class compressed_pair
-   : private ::boost::details::compressed_pair_imp<T1, T2,
-             ::boost::details::compressed_pair_switch<
+   : private ::pdalboost::details::compressed_pair_imp<T1, T2,
+             ::pdalboost::details::compressed_pair_switch<
                     T1,
                     T2,
-                    ::boost::is_same<typename remove_cv<T1>::type, typename remove_cv<T2>::type>::value,
-                    ::boost::is_empty<T1>::value,
-                    ::boost::is_empty<T2>::value>::value>
+                    ::pdalboost::is_same<typename remove_cv<T1>::type, typename remove_cv<T2>::type>::value,
+                    ::pdalboost::is_empty<T1>::value,
+                    ::pdalboost::is_empty<T2>::value>::value>
 {
 private:
    typedef details::compressed_pair_imp<T1, T2,
-             ::boost::details::compressed_pair_switch<
+             ::pdalboost::details::compressed_pair_switch<
                     T1,
                     T2,
-                    ::boost::is_same<typename remove_cv<T1>::type, typename remove_cv<T2>::type>::value,
-                    ::boost::is_empty<T1>::value,
-                    ::boost::is_empty<T2>::value>::value> base;
+                    ::pdalboost::is_same<typename remove_cv<T1>::type, typename remove_cv<T2>::type>::value,
+                    ::pdalboost::is_empty<T1>::value,
+                    ::pdalboost::is_empty<T2>::value>::value> base;
 public:
    typedef T1                                                 first_type;
    typedef T2                                                 second_type;
@@ -384,21 +383,21 @@ public:
 template <class T>
 class compressed_pair<T, T>
    : private details::compressed_pair_imp<T, T,
-             ::boost::details::compressed_pair_switch<
+             ::pdalboost::details::compressed_pair_switch<
                     T,
                     T,
-                    ::boost::is_same<typename remove_cv<T>::type, typename remove_cv<T>::type>::value,
-                    ::boost::is_empty<T>::value,
-                    ::boost::is_empty<T>::value>::value>
+                    ::pdalboost::is_same<typename remove_cv<T>::type, typename remove_cv<T>::type>::value,
+                    ::pdalboost::is_empty<T>::value,
+                    ::pdalboost::is_empty<T>::value>::value>
 {
 private:
    typedef details::compressed_pair_imp<T, T,
-             ::boost::details::compressed_pair_switch<
+             ::pdalboost::details::compressed_pair_switch<
                     T,
                     T,
-                    ::boost::is_same<typename remove_cv<T>::type, typename remove_cv<T>::type>::value,
-                    ::boost::is_empty<T>::value,
-                    ::boost::is_empty<T>::value>::value> base;
+                    ::pdalboost::is_same<typename remove_cv<T>::type, typename remove_cv<T>::type>::value,
+                    ::pdalboost::is_empty<T>::value,
+                    ::pdalboost::is_empty<T>::value>::value> base;
 public:
    typedef T                                                  first_type;
    typedef T                                                  second_type;
@@ -422,7 +421,7 @@ public:
    second_reference       second()       {return base::second();}
    second_const_reference second() const {return base::second();}
 
-   void swap(::boost::compressed_pair<T,T>& y) { base::swap(y); }
+   void swap(::pdalboost::compressed_pair<T,T>& y) { base::swap(y); }
 };
 
 template <class T1, class T2>

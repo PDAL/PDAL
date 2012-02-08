@@ -27,7 +27,7 @@
 #include <boost/fusion/include/for_each.hpp>
 #include <boost/mpl/identity.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     template <typename Derived, typename Elements>
     struct sequence_base // this class is shared by sequence and expect

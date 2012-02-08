@@ -25,7 +25,7 @@
 #include <boost/fusion/view/filter_view/detail/value_of_data_impl.hpp>
 #include <boost/fusion/view/filter_view/detail/key_of_impl.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct filter_view_iterator_tag;
     struct forward_traversal_tag;

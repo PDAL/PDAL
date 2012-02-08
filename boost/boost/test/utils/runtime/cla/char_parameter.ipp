@@ -20,7 +20,7 @@
 
 #include <boost/test/utils/runtime/cla/char_parameter.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -52,6 +52,6 @@ char_name_policy::conflict_with( identification_policy const& id ) const
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_CLA_CHAR_PARAMETER_IPP_062904GER

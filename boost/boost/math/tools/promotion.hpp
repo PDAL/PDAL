@@ -24,23 +24,22 @@
 
 // Boost type traits:
 #include <boost/math/tools/config.hpp>
-#include <boost/type_traits/is_floating_point.hpp> // for boost::is_floating_point;
-#include <boost/type_traits/is_integral.hpp> // for boost::is_integral
-#include <boost/type_traits/is_convertible.hpp> // for boost::is_convertible
-#include <boost/type_traits/is_same.hpp>// for boost::is_same
-#include <boost/type_traits/remove_cv.hpp>// for boost::remove_cv
+#include <boost/type_traits/is_floating_point.hpp> // for pdalboost::is_floating_point;
+#include <boost/type_traits/is_integral.hpp> // for pdalboost::is_integral
+#include <boost/type_traits/is_convertible.hpp> // for pdalboost::is_convertible
+#include <boost/type_traits/is_same.hpp>// for pdalboost::is_same
+#include <boost/type_traits/remove_cv.hpp>// for pdalboost::remove_cv
 // Boost Template meta programming:
-#include <boost/mpl/if.hpp> // for boost::mpl::if_c.
-#include <boost/mpl/and.hpp> // for boost::mpl::if_c.
-#include <boost/mpl/or.hpp> // for boost::mpl::if_c.
-#include <boost/mpl/not.hpp> // for boost::mpl::if_c.
+#include <boost/mpl/if.hpp> // for pdalboost::mpl::if_c.
+#include <boost/mpl/and.hpp> // for pdalboost::mpl::if_c.
+#include <boost/mpl/or.hpp> // for pdalboost::mpl::if_c.
+#include <boost/mpl/not.hpp> // for pdalboost::mpl::if_c.
 
 #ifdef BOOST_MATH_NO_LONG_DOUBLE_MATH_FUNCTIONS
 #include <boost/static_assert.hpp>
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace math
   {
     namespace tools
@@ -94,7 +93,7 @@ namespace boost
           >::type
           >::type,
           // else one or the other is a user-defined type:
-          typename mpl::if_< typename mpl::and_<mpl::not_<is_floating_point<T2P> >, ::boost::is_convertible<T1P, T2P> >, T2P, T1P>::type>::type type;
+          typename mpl::if_< typename mpl::and_<mpl::not_<is_floating_point<T2P> >, ::pdalboost::is_convertible<T1P, T2P> >, T2P, T1P>::type>::type type;
       }; // promote_arg2
       // These full specialisations reduce mpl::if_ usage and speed up
       // compilation:
@@ -138,13 +137,13 @@ namespace boost
          //
          // Guard against use of long double if it's not supported:
          //
-         BOOST_STATIC_ASSERT((0 == ::boost::is_same<type, long double>::value));
+         BOOST_STATIC_ASSERT((0 == ::pdalboost::is_same<type, long double>::value));
 #endif
       };
 
     } // namespace tools
   } // namespace math
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_MATH_PROMOTION_HPP
 

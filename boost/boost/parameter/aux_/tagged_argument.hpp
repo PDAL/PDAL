@@ -17,7 +17,7 @@
 # include <boost/type_traits/is_convertible.hpp>
 # include <boost/type_traits/is_reference.hpp>
 
-namespace boost { namespace parameter { namespace aux {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { namespace aux {
 
 struct empty_arg_list;
 struct arg_list_tag;
@@ -45,7 +45,7 @@ struct tagged_argument : tagged_argument_base
         struct apply
         {
           typedef typename mpl::eval_if<
-                boost::is_same<KW, key_type>
+                pdalboost::is_same<KW, key_type>
               , mpl::if_<Reference, reference, value_type>
               , mpl::identity<Default>
           >::type type;
@@ -182,7 +182,7 @@ struct is_tagged_argument
     >
 {};
 
-}}} // namespace boost::parameter::aux
+}}} // namespace pdalboost::parameter::aux
 
 #endif // BOOST_PARAMETER_TAGGED_ARGUMENT_050328_HPP
 

@@ -14,7 +14,7 @@
 #include <boost/mpl/has_xxx.hpp>
 #include <boost/spirit/home/qi/domain.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
 
     //[parser_base_parser
@@ -108,7 +108,7 @@ namespace boost { namespace spirit { namespace qi
     };
 }}}
 
-namespace boost { namespace spirit { namespace traits // classification
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits // classification
 {
     namespace detail
     {

@@ -10,13 +10,13 @@
 
 #include <cctype>
 
-namespace boost { namespace program_options {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace program_options {
 
     using namespace std;
 
     void 
     value_semantic_codecvt_helper<char>::
-    parse(boost::any& value_store, 
+    parse(pdalboost::any& value_store, 
           const std::vector<std::string>& new_tokens,
           bool utf8) const
     {
@@ -30,7 +30,7 @@ namespace boost { namespace program_options {
             }
             xparse(value_store, local_tokens);
 #else
-            boost::throw_exception(
+            pdalboost::throw_exception(
                 std::runtime_error("UTF-8 conversion not supported."));
 #endif
         } else {
@@ -42,7 +42,7 @@ namespace boost { namespace program_options {
 #ifndef BOOST_NO_STD_WSTRING
     void 
     value_semantic_codecvt_helper<wchar_t>::
-    parse(boost::any& value_store, 
+    parse(pdalboost::any& value_store, 
           const std::vector<std::string>& new_tokens,
           bool utf8) const
     {
@@ -92,14 +92,14 @@ namespace boost { namespace program_options {
 
 
     void 
-    untyped_value::xparse(boost::any& value_store,
+    untyped_value::xparse(pdalboost::any& value_store,
                           const std::vector<std::string>& new_tokens) const
     {
         if (!value_store.empty()) 
-            boost::throw_exception(
+            pdalboost::throw_exception(
                 multiple_occurrences());
         if (new_tokens.size() > 1)
-            boost::throw_exception(multiple_values());
+            pdalboost::throw_exception(multiple_values());
         value_store = new_tokens.empty() ? std::string("") : new_tokens.front();
     }
 
@@ -139,7 +139,7 @@ namespace boost { namespace program_options {
         else if (s == "off" || s == "no" || s == "0" || s == "false")
             v = any(false);
         else
-            boost::throw_exception(validation_error(validation_error::invalid_bool_value, s));
+            pdalboost::throw_exception(validation_error(validation_error::invalid_bool_value, s));
     }
 
     // This is blatant copy-paste. However, templating this will cause a problem,
@@ -161,7 +161,7 @@ namespace boost { namespace program_options {
         else if (s == L"off" || s == L"no" || s == L"0" || s == L"false")
             v = any(false);
         else
-            boost::throw_exception(validation_error(validation_error::invalid_bool_value));
+            pdalboost::throw_exception(validation_error(validation_error::invalid_bool_value));
     }
 #endif
     BOOST_PROGRAM_OPTIONS_DECL 
@@ -183,10 +183,10 @@ namespace boost { namespace program_options {
     namespace validators {
 
         BOOST_PROGRAM_OPTIONS_DECL 
-        void check_first_occurrence(const boost::any& value)
+        void check_first_occurrence(const pdalboost::any& value)
         {
             if (!value.empty())
-                boost::throw_exception(
+                pdalboost::throw_exception(
                     multiple_occurrences());
         }
     }

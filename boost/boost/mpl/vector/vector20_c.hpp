@@ -33,7 +33,7 @@
 #   include <boost/mpl/aux_/config/ctps.hpp>
 #   include <boost/preprocessor/iterate.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 #   define BOOST_PP_ITERATION_PARAMS_1 \
     (3,(11, 20, <boost/mpl/vector/aux_/numbered_c.hpp>))

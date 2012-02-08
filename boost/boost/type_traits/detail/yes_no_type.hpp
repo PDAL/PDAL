@@ -11,7 +11,7 @@
 #ifndef BOOST_TT_DETAIL_YES_NO_TYPE_HPP_INCLUDED
 #define BOOST_TT_DETAIL_YES_NO_TYPE_HPP_INCLUDED
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace type_traits {
 
 typedef char yes_type;
@@ -21,6 +21,6 @@ struct no_type
 };
 
 } // namespace type_traits
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_TT_DETAIL_YES_NO_TYPE_HPP_INCLUDED

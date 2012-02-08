@@ -19,7 +19,7 @@
 #include <boost/mpl/set/aux_/set0.hpp>
 #include <boost/mpl/set/aux_/tag.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<>
 struct clear_impl< aux::set_tag >

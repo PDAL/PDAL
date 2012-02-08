@@ -14,7 +14,7 @@
 #include <boost/preprocessor/repetition/enum_params.hpp>
 #include <boost/preprocessor/iteration/iterate.hpp>
 
-namespace boost { namespace phoenix {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix {
 namespace detail
 {
     template<typename MemFunPtr>

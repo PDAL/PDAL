@@ -16,7 +16,7 @@
 #include <boost/spirit/home/qi/detail/fail_function.hpp>
 #include <boost/spirit/home/qi/meta_compiler.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // Enablers
@@ -30,7 +30,7 @@ namespace boost { namespace spirit
       : mpl::true_ {};
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     template <typename Elements>
     struct sequence : sequence_base<sequence<Elements>, Elements>
@@ -78,7 +78,7 @@ namespace boost { namespace spirit { namespace qi
 //     {};
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Elements>

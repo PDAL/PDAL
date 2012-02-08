@@ -14,7 +14,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/type_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail {
 
@@ -63,9 +63,9 @@ struct add_pointer_impl
 
 } // namespace detail
 
-BOOST_TT_AUX_TYPE_TRAIT_DEF1(add_pointer,T,typename boost::detail::add_pointer_impl<T>::type)
+BOOST_TT_AUX_TYPE_TRAIT_DEF1(add_pointer,T,typename pdalboost::detail::add_pointer_impl<T>::type)
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/type_trait_undef.hpp>
 

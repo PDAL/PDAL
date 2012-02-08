@@ -24,7 +24,7 @@
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/bimap/relation/support/pair_by.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace detail {
 
@@ -39,7 +39,7 @@ struct map_view_iterator_base
     <
         map_view_iterator< Tag, Relation, CoreIterator >,
         CoreIterator,
-        BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::support::
+        BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::support::
             pair_type_by<Tag,Relation>::type
 
     > type;
@@ -73,7 +73,7 @@ struct map_view_iterator : public map_view_iterator_base<Tag,Relation,CoreIterat
 
     BOOST_DEDUCED_TYPENAME base_::reference dereference() const
     {
-        return ::boost::bimaps::relation::support::pair_by<Tag>(
+        return ::pdalboost::bimaps::relation::support::pair_by<Tag>(
             *const_cast<BOOST_DEDUCED_TYPENAME base_::base_type::value_type*>(
                 &(*this->base())
             )
@@ -90,19 +90,19 @@ struct map_view_iterator : public map_view_iterator_base<Tag,Relation,CoreIterat
 
     BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-    friend class ::boost::serialization::access;
+    friend class ::pdalboost::serialization::access;
 
     template< class Archive >
     void save(Archive & ar, const unsigned int version) const
     {
-        ar << ::boost::serialization::make_nvp("mi_iterator",this->base());
+        ar << ::pdalboost::serialization::make_nvp("mi_iterator",this->base());
     }
 
     template< class Archive >
     void load(Archive & ar, const unsigned int version)
     {
         CoreIterator iter;
-        ar >> ::boost::serialization::make_nvp("mi_iterator",iter);
+        ar >> ::pdalboost::serialization::make_nvp("mi_iterator",iter);
         this->base_reference() = iter;
     }
 
@@ -121,7 +121,7 @@ struct const_map_view_iterator_base
     <
         const_map_view_iterator< Tag, Relation, CoreIterator >,
         CoreIterator,
-        const BOOST_DEDUCED_TYPENAME ::boost::bimaps::relation::support::
+        const BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::relation::support::
              pair_type_by<Tag,Relation>::type
 
     > type;
@@ -158,7 +158,7 @@ struct const_map_view_iterator :
 
     BOOST_DEDUCED_TYPENAME base_::reference dereference() const
     {
-        return ::boost::bimaps::relation::support::pair_by<Tag>(*this->base());
+        return ::pdalboost::bimaps::relation::support::pair_by<Tag>(*this->base());
     }
 
     private:
@@ -171,19 +171,19 @@ struct const_map_view_iterator :
 
     BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-    friend class ::boost::serialization::access;
+    friend class ::pdalboost::serialization::access;
 
     template< class Archive >
     void save(Archive & ar, const unsigned int version) const
     {
-        ar << ::boost::serialization::make_nvp("mi_iterator",this->base());
+        ar << ::pdalboost::serialization::make_nvp("mi_iterator",this->base());
     }
 
     template< class Archive >
     void load(Archive & ar, const unsigned int version)
     {
         CoreIterator iter;
-        ar >> ::boost::serialization::make_nvp("mi_iterator",iter);
+        ar >> ::pdalboost::serialization::make_nvp("mi_iterator",iter);
         this->base_reference() = iter;
     }
 
@@ -193,7 +193,7 @@ struct const_map_view_iterator :
 
 } // namespace detail
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_DETAIL_MAP_VIEW_ITERATOR_HPP
 

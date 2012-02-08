@@ -26,7 +26,7 @@
 # endif
 
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //  timer  -------------------------------------------------------------------//
 
@@ -67,6 +67,6 @@ class timer
   std::clock_t _start_time;
 }; // timer
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif  // BOOST_TIMER_HPP

@@ -23,7 +23,7 @@
 
 using namespace std;
 
-namespace boost { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace detail {
 
     /* Internal function to actually perform conversion.
        The logic in from_8_bit and to_8_bit function is exactly
@@ -33,7 +33,7 @@ namespace boost { namespace detail {
 
        This functions takes a 'fun' argument, which should have the same 
        parameters and return type and the in/out methods. The actual converting
-       function will pass functional objects created with boost::bind.
+       function will pass functional objects created with pdalboost::bind.
        Experiments show that the performance loss is less than 10%.
     */
     template<class ToChar, class FromChar, class Fun>
@@ -57,13 +57,13 @@ namespace boost { namespace detail {
             ToChar buffer[32];
             
             ToChar* to_next = buffer;
-            // Need variable because boost::bind doesn't work with rvalues.
+            // Need variable because pdalboost::bind doesn't work with rvalues.
             ToChar* to_end = buffer + 32;
             std::codecvt_base::result r = 
                 fun(state, from, from_end, from, buffer, to_end, to_next);
             
             if (r == std::codecvt_base::error)
-                boost::throw_exception(
+                pdalboost::throw_exception(
                     std::logic_error("character conversion failed"));
             // 'partial' is not an error, it just means not all source
             // characters were converted. However, we need to check that at
@@ -71,7 +71,7 @@ namespace boost { namespace detail {
             // the source data is incomplete, and since we don't have extra
             // data to add to source, it's error.
             if (to_next == buffer)
-                boost::throw_exception(
+                pdalboost::throw_exception(
                     std::logic_error("character conversion failed"));
             
             // Add converted characters
@@ -82,7 +82,7 @@ namespace boost { namespace detail {
     }           
 }}
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #ifndef BOOST_NO_STD_WSTRING
     BOOST_PROGRAM_OPTIONS_DECL std::wstring 
@@ -91,7 +91,7 @@ namespace boost {
     {
         return detail::convert<wchar_t>(
             s,                 
-            boost::bind(&std::codecvt<wchar_t, char, mbstate_t>::in,
+            pdalboost::bind(&std::codecvt<wchar_t, char, mbstate_t>::in,
                         &cvt,
                         _1, _2, _3, _4, _5, _6, _7));
     }
@@ -102,14 +102,14 @@ namespace boost {
     {
         return detail::convert<char>(
             s,                 
-            boost::bind(&codecvt<wchar_t, char, mbstate_t>::out,
+            pdalboost::bind(&codecvt<wchar_t, char, mbstate_t>::out,
                         &cvt,
                         _1, _2, _3, _4, _5, _6, _7));
     }
 
 
     namespace {
-        boost::program_options::detail::utf8_codecvt_facet
+        pdalboost::program_options::detail::utf8_codecvt_facet
             utf8_facet;
     }
     

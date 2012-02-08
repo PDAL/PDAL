@@ -88,7 +88,7 @@ namespace std {
 #endif
 
 // The macro marks up places where compiler complains for missing return statement or
-// uninitialized variables after calling to boost::throw_exception.
+// uninitialized variables after calling to pdalboost::throw_exception.
 // BOOST_UNREACHABLE_RETURN doesn't work since even compilers that support
 // unreachable statements detection emit such warnings.
 #if defined(_MSC_VER)
@@ -144,7 +144,7 @@ namespace std {
 // Set the name of our library, this will get undef'ed by auto_link.hpp
 // once it's done with it:
 //
-#define BOOST_LIB_NAME boost_date_time
+#define BOOST_LIB_NAME pdalboost_date_time
 //
 // If we're importing code from a dll, then tell auto_link.hpp about it:
 //

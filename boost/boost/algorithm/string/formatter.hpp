@@ -29,7 +29,7 @@
     This header contains generator functions for the Formatters provided in this library.
 */
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
 
 // generic formatters  ---------------------------------------------------------------//
@@ -50,7 +50,7 @@ namespace boost {
         {
             return detail::const_formatF<
                 iterator_range<
-                    BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type> >(::boost::as_literal(Format));
+                    BOOST_STRING_TYPENAME range_const_iterator<RangeT>::type> >(::pdalboost::as_literal(Format));
         }
 
         //! Identity formatter
@@ -114,7 +114,7 @@ namespace boost {
     using algorithm::empty_formatter;
     using algorithm::dissect_formatter;
 
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_FORMATTER_HPP

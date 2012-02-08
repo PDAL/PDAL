@@ -9,11 +9,11 @@ SOURCES =
     convert winmain split
     ;
 
-lib boost_program_options
+lib pdalboost_program_options
     : $(SOURCES).cpp
     : <link>shared:<define>BOOST_PROGRAM_OPTIONS_DYN_LINK=1 # tell source we're building dll's
     :
     : <link>shared:<define>BOOST_PROGRAM_OPTIONS_DYN_LINK=1
     ;
 
-boost-install boost_program_options ;
+boost-install pdalboost_program_options ;

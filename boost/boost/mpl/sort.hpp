@@ -18,7 +18,7 @@
 #include <boost/mpl/aux_/sort_impl.hpp>
 #include <boost/mpl/aux_/inserter_algorithm.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 BOOST_MPL_AUX_INSERTER_ALGORITHM_DEF(3, sort)
 

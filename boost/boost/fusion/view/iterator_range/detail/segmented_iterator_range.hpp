@@ -30,7 +30,7 @@
 //  - The front of each range in the stack (besides the
 //    topmost) is the range above it
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     template <typename First, typename Last>
     struct iterator_range;
@@ -46,7 +46,7 @@ namespace boost { namespace fusion
     push_back(Sequence const& seq, T const& x);
 }}
 
-namespace boost { namespace fusion { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace detail
 {
     //auto make_segment_sequence_front(stack_begin)
     //{

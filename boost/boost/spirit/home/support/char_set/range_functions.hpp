@@ -13,7 +13,7 @@
 
 #include <boost/integer_traits.hpp>
 
-namespace boost { namespace spirit { namespace support { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace support { namespace detail
 {
     template <typename Range>
     inline bool

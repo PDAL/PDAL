@@ -23,7 +23,7 @@
 #include <boost/type_traits/is_convertible.hpp>
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 template<class T> class reference_wrapper; /* fwd decl. */
 
@@ -256,14 +256,14 @@ struct member_offset:
 
 #if defined(BOOST_NO_POINTER_TO_MEMBER_TEMPLATE_PARAMETERS)
 #define BOOST_MULTI_INDEX_MEMBER(Class,Type,MemberName) \
-::boost::multi_index::member_offset< Class,Type,offsetof(Class,MemberName) >
+::pdalboost::multi_index::member_offset< Class,Type,offsetof(Class,MemberName) >
 #else
 #define BOOST_MULTI_INDEX_MEMBER(Class,Type,MemberName) \
-::boost::multi_index::member< Class,Type,&Class::MemberName >
+::pdalboost::multi_index::member< Class,Type,&Class::MemberName >
 #endif
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

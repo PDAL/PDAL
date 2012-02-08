@@ -20,7 +20,7 @@
 #include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/quote.hpp>
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     namespace result_of
     {

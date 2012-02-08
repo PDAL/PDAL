@@ -25,7 +25,7 @@
 #include <string>
 #include <iterator>
 
-namespace boost { namespace property_tree
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree
 {
     namespace detail
     {

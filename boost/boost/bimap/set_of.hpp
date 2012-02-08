@@ -39,7 +39,7 @@
 #include <boost/bimap/views/map_view.hpp>
 #include <boost/bimap/views/set_view.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 
 /// \brief Set Type Specification
@@ -110,15 +110,15 @@ template
 <
     class KeyType,
     class KeyCompare = std::less< BOOST_DEDUCED_TYPENAME 
-        ::boost::bimaps::tags::support::value_type_of<KeyType>::type >
+        ::pdalboost::bimaps::tags::support::value_type_of<KeyType>::type >
 >
-struct set_of : public ::boost::bimaps::detail::set_type_of_tag
+struct set_of : public ::pdalboost::bimaps::detail::set_type_of_tag
 {
     /// User type, can be tagged
     typedef KeyType user_type;
 
     /// Type of the object that will be stored in the set
-    typedef BOOST_DEDUCED_TYPENAME ::boost::bimaps::tags::support::
+    typedef BOOST_DEDUCED_TYPENAME ::pdalboost::bimaps::tags::support::
         value_type_of<user_type>::type value_type;
 
     /// Functor that compare two keys
@@ -127,10 +127,10 @@ struct set_of : public ::boost::bimaps::detail::set_type_of_tag
     struct lazy_concept_checked
     {
         BOOST_CLASS_REQUIRE ( value_type,
-                              boost, AssignableConcept );
+                              pdalboost, AssignableConcept );
 
         BOOST_CLASS_REQUIRE4( key_compare, bool, value_type, value_type,
-                              boost, BinaryFunctionConcept );
+                              pdalboost, BinaryFunctionConcept );
 
         typedef set_of type;
     };
@@ -180,7 +180,7 @@ See also set_of, is_set_type_of_relation.
                                                                 **/
 
 template< class KeyCompare = std::less< _relation > >
-struct set_of_relation : public ::boost::bimaps::detail::set_type_of_relation_tag
+struct set_of_relation : public ::pdalboost::bimaps::detail::set_type_of_relation_tag
 {
     /// Functor that compare two keys
     typedef KeyCompare key_compare;
@@ -199,7 +199,7 @@ struct set_of_relation : public ::boost::bimaps::detail::set_type_of_relation_ta
 };
 
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_SET_OF_HPP

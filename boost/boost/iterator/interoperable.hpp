@@ -14,8 +14,7 @@
 
 # include <boost/iterator/detail/config_def.hpp> // must appear last
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
   //
   // Meta function that determines whether two
@@ -43,7 +42,7 @@ namespace boost
   { 
   };
 
-} // namespace boost
+} // namespace pdalboost
 
 # include <boost/iterator/detail/config_undef.hpp>
 

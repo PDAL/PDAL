@@ -39,9 +39,9 @@
 #else
 # define BOOST_PROTO_DECLTYPE_NESTED_TYPEDEF_TPL_(NESTED, EXPR)                                     \
     BOOST_TYPEOF_NESTED_TYPEDEF_TPL(BOOST_PP_CAT(nested_and_hidden_, NESTED), EXPR)                 \
-    static int const BOOST_PP_CAT(sz, NESTED) = sizeof(boost::proto::detail::check_reference(EXPR));\
+    static int const BOOST_PP_CAT(sz, NESTED) = sizeof(pdalboost::proto::detail::check_reference(EXPR));\
     struct NESTED                                                                                   \
-      : boost::mpl::if_c<                                                                           \
+      : pdalboost::mpl::if_c<                                                                           \
             1 == BOOST_PP_CAT(sz, NESTED)                                                           \
           , typename BOOST_PP_CAT(nested_and_hidden_, NESTED)::type &                               \
           , typename BOOST_PP_CAT(nested_and_hidden_, NESTED)::type                                 \
@@ -52,7 +52,7 @@
     typedef typename BOOST_PP_CAT(nested_, TYPE)::type TYPE;
 #endif
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace detail
     {
@@ -221,7 +221,7 @@ namespace boost { namespace proto
 
         namespace has_get_pointerns
         {
-            using boost::get_pointer;
+            using pdalboost::get_pointer;
             void *(&get_pointer(...))[2];
 
             ////////////////////////////////////////////////////////////////////////////////////////////
@@ -265,13 +265,13 @@ namespace boost { namespace proto
         template<typename U, typename V, typename T>
         U *proto_get_pointer(T &t, V *, U *)
         {
-            return boost::addressof(t);
+            return pdalboost::addressof(t);
         }
 
         template<typename U, typename V, typename T>
         U const *proto_get_pointer(T &t, V *, U const *)
         {
-            return boost::addressof(t);
+            return pdalboost::addressof(t);
         }
 
         template<typename U, typename V, typename T>
@@ -282,34 +282,34 @@ namespace boost { namespace proto
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         #define BOOST_PROTO_USE_GET_POINTER()                                                       \
-        using namespace boost::proto::detail::get_pointerns                                         \
+        using namespace pdalboost::proto::detail::get_pointerns                                         \
         /**/
 
         #define BOOST_PROTO_GET_POINTER(Type, Obj)                                                  \
-        boost::proto::detail::proto_get_pointer<Type>(                                              \
-            boost::proto::detail::lvalue(Obj)                                                       \
+        pdalboost::proto::detail::proto_get_pointer<Type>(                                              \
+            pdalboost::proto::detail::lvalue(Obj)                                                       \
           , (true ? 0 : get_pointer(Obj))                                                           \
-          , (true ? 0 : boost::addressof(boost::proto::detail::lvalue(Obj)))                        \
+          , (true ? 0 : pdalboost::addressof(pdalboost::proto::detail::lvalue(Obj)))                        \
         )                                                                                           \
         /**/
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         namespace get_pointerns
         {
-            using boost::get_pointer;
+            using pdalboost::get_pointer;
 
             template<typename T>
             typename disable_if_c<has_get_pointer<T>::value, T *>::type
             get_pointer(T &t)
             {
-                return boost::addressof(t);
+                return pdalboost::addressof(t);
             }
 
             template<typename T>
             typename disable_if_c<has_get_pointer<T>::value, T const *>::type
             get_pointer(T const &t)
             {
-                return boost::addressof(t);
+                return pdalboost::addressof(t);
             }
 
             char test_ptr_to_const(void *);
@@ -320,7 +320,7 @@ namespace boost { namespace proto
             template<typename U> char (&test_V_is_a_U(...))[2];
 
             ////////////////////////////////////////////////////////////////////////////////////////////
-            // result_of_ is a wrapper around boost::result_of that also handles "invocations" of
+            // result_of_ is a wrapper around pdalboost::result_of that also handles "invocations" of
             // member object pointers.
             template<typename T, typename Void = void>
             struct result_of_
@@ -426,7 +426,7 @@ namespace boost { namespace proto
         };
 
         ////////////////////////////////////////////////////////////////////////////////////////////
-        // normalize a function type for use with boost::result_of
+        // normalize a function type for use with pdalboost::result_of
         template<typename T, typename U = T>
         struct result_of_fixup
           : mpl::if_c<is_function<T>::value, T *, U>

@@ -17,7 +17,7 @@
 
 #include <cstddef>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace rtti {
 
@@ -52,13 +52,13 @@ type_id()
 
 //____________________________________________________________________________//
 
-#define BOOST_RTTI_SWITCH( type_id_ ) if( ::boost::rtti::id_t switch_by_id = type_id_ )
-#define BOOST_RTTI_CASE( type )       if( switch_by_id == ::boost::rtti::type_id<type>() )
+#define BOOST_RTTI_SWITCH( type_id_ ) if( ::pdalboost::rtti::id_t switch_by_id = type_id_ )
+#define BOOST_RTTI_CASE( type )       if( switch_by_id == ::pdalboost::rtti::type_id<type>() )
 
 //____________________________________________________________________________//
 
 } // namespace rtti
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_RTTI_HPP_062604GER

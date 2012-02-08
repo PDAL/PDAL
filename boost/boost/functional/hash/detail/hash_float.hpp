@@ -54,8 +54,7 @@
 
 #include <boost/config/no_tr1/cmath.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace hash_detail
     {
         template <class T>
@@ -82,8 +81,7 @@ namespace boost
 
 #else // !BOOST_HASH_USE_FPCLASSIFY
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace hash_detail
     {
         template <class T>

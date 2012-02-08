@@ -25,7 +25,7 @@
 
 #include <boost/bimap/detail/map_view_iterator.hpp>
 
-/** \struct boost::bimaps::support::iterator_type_by
+/** \struct pdalboost::bimaps::support::iterator_type_by
 
 \brief Metafunction to obtain the iterator type of the map view by one of the sides.
 
@@ -75,7 +75,7 @@ See also member_at.
 
 #ifndef BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace support {
 
@@ -118,7 +118,7 @@ BOOST_BIMAP_SYMMETRIC_STATIC_ACCESS_BUILDER
 template< class Tag, class BimapCore >
 struct reverse_iterator_type_by
 {
-    typedef ::boost::bimaps::detail::map_view_iterator
+    typedef ::pdalboost::bimaps::detail::map_view_iterator
     <
         Tag,
         BOOST_DEDUCED_TYPENAME BimapCore::relation,
@@ -147,7 +147,7 @@ template< class Tag, class BimapCore >
 struct const_reverse_iterator_type_by
 {
 
-    typedef ::boost::bimaps::detail::map_view_iterator
+    typedef ::pdalboost::bimaps::detail::map_view_iterator
     <
         Tag,
         BOOST_DEDUCED_TYPENAME BimapCore::relation,
@@ -178,7 +178,7 @@ template< class Tag, class BimapCore >
 struct local_iterator_type_by
 {
 
-    typedef ::boost::bimaps::detail::map_view_iterator
+    typedef ::pdalboost::bimaps::detail::map_view_iterator
     <
         Tag,
         BOOST_DEDUCED_TYPENAME BimapCore::relation,
@@ -208,7 +208,7 @@ template< class Tag, class BimapCore >
 struct const_local_iterator_type_by
 {
 
-    typedef ::boost::bimaps::detail::map_view_iterator
+    typedef ::pdalboost::bimaps::detail::map_view_iterator
     <
         Tag,
         BOOST_DEDUCED_TYPENAME BimapCore::relation,
@@ -220,7 +220,7 @@ struct const_local_iterator_type_by
 
 } // namespace support
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_DOXYGEN_WILL_NOT_PROCESS_THE_FOLLOWING_LINES
 

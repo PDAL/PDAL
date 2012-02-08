@@ -13,7 +13,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <iostream>
 
-namespace boost { namespace phoenix { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace pdalboostphoenix { namespace detail
 {
     typedef char(&no)[1];
     typedef char(&yes)[2];
@@ -31,7 +31,7 @@ namespace boost { namespace phoenix { namespace detail
     {
         static T x;
         BOOST_STATIC_CONSTANT(bool,
-            value = sizeof(detail::ostream_test(boost::addressof(x))) == sizeof(yes));
+            value = sizeof(detail::ostream_test(pdalboost::addressof(x))) == sizeof(yes));
     };
 
     template <typename T>
@@ -39,7 +39,7 @@ namespace boost { namespace phoenix { namespace detail
     {
         static T x;
         BOOST_STATIC_CONSTANT(bool,
-            value = sizeof(detail::istream_test(boost::addressof(x))) == sizeof(yes));
+            value = sizeof(detail::istream_test(pdalboost::addressof(x))) == sizeof(yes));
     };
 
     template <typename T0, typename T1>

@@ -6,7 +6,7 @@
 #ifndef BOOST_PARAMETER_VOID_050329_HPP
 #define BOOST_PARAMETER_VOID_050329_HPP
 
-namespace boost { namespace parameter { 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace parameter { 
 
 // A placemarker for "no argument passed."
 // MAINTAINER NOTE: Do not make this into a metafunction
@@ -23,7 +23,7 @@ namespace aux
 
 } // namespace aux
 
-}} // namespace boost::parameter
+}} // namespace pdalboost::parameter
 
 #endif // BOOST_PARAMETER_VOID_050329_HPP
 

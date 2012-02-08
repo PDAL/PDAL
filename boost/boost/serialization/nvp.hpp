@@ -35,7 +35,7 @@
 #include <boost/serialization/traits.hpp>
 #include <boost/serialization/wrapper.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace serialization {
 
 template<class T>
@@ -131,13 +131,13 @@ struct tracking_level<nvp< T > >
 #include <boost/preprocessor/stringize.hpp>
 
 #define BOOST_SERIALIZATION_NVP(name)                              \
-    boost::serialization::make_nvp(BOOST_PP_STRINGIZE(name), name)
+    pdalboost::serialization::make_nvp(BOOST_PP_STRINGIZE(name), name)
 /**/
 
 #define BOOST_SERIALIZATION_BASE_OBJECT_NVP(name)                  \
-    boost::serialization::make_nvp(                                \
+    pdalboost::serialization::make_nvp(                                \
         BOOST_PP_STRINGIZE(name),                                  \
-        boost::serialization::base_object<name >(*this)            \
+        pdalboost::serialization::base_object<name >(*this)            \
     )
 /**/
 

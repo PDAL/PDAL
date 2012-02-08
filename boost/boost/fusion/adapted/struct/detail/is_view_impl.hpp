@@ -10,7 +10,7 @@
 #ifndef BOOST_FUSION_ADAPTED_STRUCT_DETAIL_IS_VIEW_IMPL_HPP
 #define BOOST_FUSION_ADAPTED_STRUCT_DETAIL_IS_VIEW_IMPL_HPP
 
-namespace boost { namespace fusion { namespace extension
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion { namespace extension
 {
     template<typename>
     struct is_view_impl;

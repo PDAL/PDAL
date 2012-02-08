@@ -27,7 +27,7 @@
 #include <boost/fusion/include/at.hpp>
 #include <boost/fusion/include/vector.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     ///////////////////////////////////////////////////////////////////////////
     // Enablers
@@ -40,7 +40,7 @@ namespace boost { namespace spirit
     struct use_directive<qi::domain
       , terminal_ex<tag::skip                       // enables skip(s)[p]
         , fusion::vector1<T> >
-    > : boost::spirit::traits::matches<qi::domain, T> {};
+    > : pdalboost::spirit::traits::matches<qi::domain, T> {};
 
     template <>                                     // enables *lazy* skip(s)[p]
     struct use_lazy_directive<
@@ -50,7 +50,7 @@ namespace boost { namespace spirit
     > : mpl::true_ {};
 }}
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
 #ifndef BOOST_SPIRIT_NO_PREDEFINED_TERMINALS
     using spirit::skip;
@@ -162,7 +162,7 @@ namespace boost { namespace spirit { namespace qi
 
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Subject>

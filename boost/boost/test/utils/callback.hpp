@@ -28,7 +28,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -121,7 +121,7 @@ public:
 
 private:
     // Data members
-    boost::shared_ptr<ut_detail::callback0_impl<R> > m_impl;
+    pdalboost::shared_ptr<ut_detail::callback0_impl<R> > m_impl;
 };
 
 // ************************************************************************** //
@@ -179,7 +179,7 @@ public:
 
 private:
     // Data members
-    boost::shared_ptr<ut_detail::callback1_impl<R,T1> > m_impl;
+    pdalboost::shared_ptr<ut_detail::callback1_impl<R,T1> > m_impl;
 };
 
 // ************************************************************************** //
@@ -236,7 +236,7 @@ public:
 
 private:
     // Data members
-    boost::shared_ptr<ut_detail::callback2_impl<R,T1,T2> > m_impl;
+    pdalboost::shared_ptr<ut_detail::callback2_impl<R,T1,T2> > m_impl;
 };
 
 // ************************************************************************** //
@@ -294,12 +294,12 @@ public:
 
 private:
     // Data members
-    boost::shared_ptr<ut_detail::callback3_impl<R,T1,T2,T3> > m_impl;
+    pdalboost::shared_ptr<ut_detail::callback3_impl<R,T1,T2,T3> > m_impl;
 };
 
 } // namespace unit_test
 
-} // namespace boost
+} // namespace pdalboost
 
 #undef BOOST_CALLBACK_EXPLICIT_COPY_CONSTRUCTOR
 

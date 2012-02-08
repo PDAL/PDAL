@@ -13,8 +13,7 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace detail
     {
         struct thread_exit_callback_node;
@@ -29,8 +28,8 @@ namespace boost
             long count;
             detail::win32::handle_manager thread_handle;
             detail::win32::handle_manager interruption_handle;
-            boost::detail::thread_exit_callback_node* thread_exit_callbacks;
-            boost::detail::tss_data_node* tss_data;
+            pdalboost::detail::thread_exit_callback_node* thread_exit_callbacks;
+            pdalboost::detail::tss_data_node* tss_data;
             bool interruption_enabled;
             unsigned id;
 
@@ -67,14 +66,14 @@ namespace boost
             virtual void run()=0;
         };
 
-        typedef boost::intrusive_ptr<detail::thread_data_base> thread_data_ptr;
+        typedef pdalboost::intrusive_ptr<detail::thread_data_base> thread_data_ptr;
 
         struct timeout
         {
             unsigned long start;
             uintmax_t milliseconds;
             bool relative;
-            boost::system_time abs_time;
+            pdalboost::system_time abs_time;
 
             static unsigned long const max_non_infinite_wait=0xfffffffe;
 
@@ -82,10 +81,10 @@ namespace boost
                 start(win32::GetTickCount()),
                 milliseconds(milliseconds_),
                 relative(true),
-                abs_time(boost::get_system_time())
+                abs_time(pdalboost::get_system_time())
             {}
 
-            timeout(boost::system_time const& abs_time_):
+            timeout(pdalboost::system_time const& abs_time_):
                 start(win32::GetTickCount()),
                 milliseconds(0),
                 relative(false),

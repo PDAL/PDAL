@@ -7,7 +7,7 @@
 #if !defined(FUSION_ADVANCE_IMPL_09172005_1156)
 #define FUSION_ADVANCE_IMPL_09172005_1156
 
-namespace boost { namespace fusion
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion
 {
     struct vector_iterator_tag;
 

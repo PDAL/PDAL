@@ -31,7 +31,7 @@
 #include <boost/type_traits/make_unsigned.hpp>
 #include <boost/type_traits/is_integral.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace random {
 namespace detail {
     
@@ -46,7 +46,7 @@ namespace detail {
 template<class Engine, class T>
 T generate_uniform_int(
     Engine& eng, T min_value, T max_value,
-    boost::mpl::true_ /** is_integral<Engine::result_type> */)
+    pdalboost::mpl::true_ /** is_integral<Engine::result_type> */)
 {
     typedef T result_type;
     typedef typename make_unsigned<T>::type range_type;
@@ -164,7 +164,7 @@ T generate_uniform_int(
                 eng,
                 static_cast<range_type>(0),
                 static_cast<range_type>(range/mult),
-                boost::mpl::true_());
+                pdalboost::mpl::true_());
         if((std::numeric_limits<range_type>::max)() / mult < result_increment) {
           // The multiplcation would overflow.  Reject immediately.
           continue;
@@ -215,10 +215,10 @@ T generate_uniform_int(
 template<class Engine, class T>
 inline T generate_uniform_int(
     Engine& eng, T min_value, T max_value,
-    boost::mpl::false_ /** is_integral<Engine::result_type> */)
+    pdalboost::mpl::false_ /** is_integral<Engine::result_type> */)
 {
     uniform_int_float<Engine> wrapper(eng);
-    return generate_uniform_int(wrapper, min_value, max_value, boost::mpl::true_());
+    return generate_uniform_int(wrapper, min_value, max_value, pdalboost::mpl::true_());
 }
 
 template<class Engine, class T>
@@ -226,7 +226,7 @@ inline T generate_uniform_int(Engine& eng, T min_value, T max_value)
 {
     typedef typename Engine::result_type base_result;
     return generate_uniform_int(eng, min_value, max_value,
-        boost::is_integral<base_result>());
+        pdalboost::is_integral<base_result>());
 }
 
 }
@@ -395,6 +395,6 @@ private:
 };
 
 } // namespace random
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RANDOM_UNIFORM_INT_HPP

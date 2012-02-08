@@ -23,7 +23,7 @@
 #include <boost/type_traits/aligned_storage.hpp>
 #include <boost/type_traits/alignment_of.hpp>
 
-namespace boost { namespace iostreams { namespace detail {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams { namespace detail {
 
 // Taken from <boost/optional.hpp>.
 template<class T>
@@ -34,7 +34,7 @@ class aligned_storage
     {
         char data[ sizeof(T) ];
         BOOST_DEDUCED_TYPENAME type_with_alignment<
-          ::boost::alignment_of<T>::value >::type aligner_;
+          ::pdalboost::alignment_of<T>::value >::type aligner_;
     } dummy_ ;
 
   public:

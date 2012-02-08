@@ -32,7 +32,7 @@
 // Must come last.
 #include <boost/iostreams/detail/config/disable_warnings.hpp>
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 template<typename T>
 void close(T& t);
@@ -49,28 +49,28 @@ template<typename T>
 void close_all(T& t)
 { 
     try {
-        boost::iostreams::close(t, BOOST_IOS::in);
+        pdalboost::iostreams::close(t, BOOST_IOS::in);
     } catch (...) {
         try {
-            boost::iostreams::close(t, BOOST_IOS::out);
+            pdalboost::iostreams::close(t, BOOST_IOS::out);
         } catch (...) { }
         throw;
     }
-    boost::iostreams::close(t, BOOST_IOS::out);
+    pdalboost::iostreams::close(t, BOOST_IOS::out);
 }
 
 template<typename T, typename Sink>
 void close_all(T& t, Sink& snk)
 { 
     try {
-        boost::iostreams::close(t, snk, BOOST_IOS::in);
+        pdalboost::iostreams::close(t, snk, BOOST_IOS::in);
     } catch (...) {
         try {
-            boost::iostreams::close(t, snk, BOOST_IOS::out);
+            pdalboost::iostreams::close(t, snk, BOOST_IOS::out);
         } catch (...) { }
         throw;
     }
-    boost::iostreams::close(t, snk, BOOST_IOS::out);
+    pdalboost::iostreams::close(t, snk, BOOST_IOS::out);
 }
 
 } // End namespaces detail. 
@@ -81,7 +81,7 @@ void close_all(T& t, Sink& snk)
 # include <boost/iostreams/detail/vc6/close.hpp>
 #else // #if BOOST_WORKAROUND(BOOST_MSVC, < 1300) //--------------------------//
 
-namespace boost { namespace iostreams {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {
 
 namespace detail {
 

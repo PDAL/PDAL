@@ -72,7 +72,7 @@
 # include <boost/utility/enable_if.hpp>
 # include <boost/type_traits/is_const.hpp>
 # define BOOST_PROTO_DISABLE_IF_IS_CONST(T)\
-    , typename boost::disable_if_c<boost::is_const<T>::value, boost::proto::detail::undefined>::type * = 0
+    , typename pdalboost::disable_if_c<pdalboost::is_const<T>::value, pdalboost::proto::detail::undefined>::type * = 0
 #else
 # define BOOST_PROTO_DISABLE_IF_IS_CONST(T)
 #endif
@@ -81,7 +81,7 @@
 # include <boost/utility/enable_if.hpp>
 # include <boost/type_traits/is_function.hpp>
 # define BOOST_PROTO_DISABLE_IF_IS_FUNCTION(T)\
-    , typename boost::disable_if_c<boost::is_function<T>::value, boost::proto::detail::undefined>::type * = 0
+    , typename pdalboost::disable_if_c<pdalboost::is_function<T>::value, pdalboost::proto::detail::undefined>::type * = 0
 #else
 # define BOOST_PROTO_DISABLE_IF_IS_FUNCTION(T)
 #endif
@@ -93,16 +93,16 @@
 #endif
 
 #ifdef BOOST_PROTO_USE_NORMAL_RESULT_OF
-# define BOOST_PROTO_RESULT_OF boost::result_of
+# define BOOST_PROTO_RESULT_OF pdalboost::result_of
 #else
-# define BOOST_PROTO_RESULT_OF boost::tr1_result_of
+# define BOOST_PROTO_RESULT_OF pdalboost::tr1_result_of
 #endif
 
 #ifdef BOOST_MPL_CFG_EXTENDED_TEMPLATE_PARAMETERS_MATCHING
 # define BOOST_PROTO_EXTENDED_TEMPLATE_PARAMETERS_MATCHING 
 #endif
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace detail
     {
@@ -179,7 +179,7 @@ namespace boost { namespace proto
         /// INTERNAL ONLY
         ///
         #define BOOST_PROTO_UNCVREF(X)                                                              \
-            typename boost::proto::detail::uncvref<X>::type                                         \
+            typename pdalboost::proto::detail::uncvref<X>::type                                         \
             /**/
 
         struct _default;
@@ -803,6 +803,6 @@ namespace boost { namespace proto
 
     namespace exops = exprns_;
 
-}} // namespace boost::proto
+}} // namespace pdalboost::proto
 
 #endif

@@ -58,14 +58,14 @@
 # endif
 
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
   namespace detail
   {
     // Unrolled loops for loading and storing streams of bytes.
 
     template <typename T, std::size_t n_bytes,
-      bool sign=boost::is_signed<T>::value >
+      bool sign=pdalboost::is_signed<T>::value >
     struct unrolled_byte_loops
     {
       typedef unrolled_byte_loops<T, n_bytes - 1, sign> next;
@@ -417,12 +417,12 @@ namespace boost { namespace spirit
 # endif
 
   } // namespace endian
-}} // namespace boost::spirit
+}} // namespace pdalboost::spirit
 
-// import the namespace above into boost::endian
-namespace boost { namespace endian
+// import the namespace above into pdalboost::endian
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace endian
 {
-    using namespace boost::spirit::endian;
+    using namespace pdalboost::spirit::endian;
 }}
 
 #if defined(__BORLANDC__) || defined( __CODEGEARC__)

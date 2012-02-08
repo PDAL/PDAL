@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <locale>
 
-namespace boost { namespace property_tree { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace property_tree { namespace detail
 {
 
     template<class T>
@@ -38,17 +38,17 @@ namespace boost { namespace property_tree { namespace detail
     };
 
     template <typename Ch>
-    struct is_character : public boost::false_type {};
+    struct is_character : public pdalboost::false_type {};
     template <>
-    struct is_character<char> : public boost::true_type {};
+    struct is_character<char> : public pdalboost::true_type {};
     template <>
-    struct is_character<wchar_t> : public boost::true_type {};
+    struct is_character<wchar_t> : public pdalboost::true_type {};
 
 
     BOOST_MPL_HAS_XXX_TRAIT_DEF(internal_type)
     BOOST_MPL_HAS_XXX_TRAIT_DEF(external_type)
     template <typename T>
-    struct is_translator : public boost::mpl::and_<
+    struct is_translator : public pdalboost::mpl::and_<
         has_internal_type<T>, has_external_type<T> > {};
 
 

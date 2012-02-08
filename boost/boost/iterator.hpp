@@ -18,8 +18,7 @@
 #include <cstddef>           // std::ptrdiff_t
 #include <boost/config.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 # if defined(BOOST_NO_STD_ITERATOR) && !defined(BOOST_MSVC_STD_ITERATOR)
   template <class Category, class T,
     class Distance = std::ptrdiff_t,
@@ -52,8 +51,8 @@ namespace boost
 
   template <class Category, class T, class Distance = std::ptrdiff_t,
             class Pointer = T*, class Reference = T&>
-  struct iterator : boost::detail::iterator_base<Category, T, Distance, Pointer, Reference> {};
+  struct iterator : pdalboost::detail::iterator_base<Category, T, Distance, Pointer, Reference> {};
 # endif
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_ITERATOR_HPP

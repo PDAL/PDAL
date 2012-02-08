@@ -28,8 +28,8 @@
 #if !defined(__BORLANDC__) || __BORLANDC__ >= 0x590
     #define BOOST_STRONG_TYPEDEF(T, D)                              \
     struct D                                                        \
-        : boost::totally_ordered1< D                                \
-        , boost::totally_ordered2< D, T                             \
+        : pdalboost::totally_ordered1< D                                \
+        , pdalboost::totally_ordered2< D, T                             \
         > >                                                         \
     {                                                               \
         T t;                                                        \
@@ -46,8 +46,8 @@
 #else
     #define BOOST_STRONG_TYPEDEF(T, D)                              \
     struct D                                                        \
-        : boost::totally_ordered1< D                                \
-        , boost::totally_ordered2< D, T                             \
+        : pdalboost::totally_ordered1< D                                \
+        , pdalboost::totally_ordered2< D, T                             \
         > >                                                         \
     {                                                               \
         T t;                                                        \

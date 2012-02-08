@@ -31,14 +31,14 @@
 #include <boost/fusion/include/for_each.hpp>
 #include <boost/fusion/include/filter_view.hpp>
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 namespace detail
 {
     ///////////////////////////////////////////////////////////////////////////////
     // accumulator_visitor
-    //   wrap a boost::parameter argument pack in a Fusion extractor object
+    //   wrap a pdalboost::parameter argument pack in a Fusion extractor object
     template<typename Args>
     struct accumulator_visitor
     {
@@ -396,6 +396,6 @@ BOOST_PP_REPEAT(
   , _
 )
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
 #endif

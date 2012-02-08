@@ -26,8 +26,7 @@
 //  See http://www.boost.org/libs/bind/ref.html for documentation.
 //
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 template<class T> class reference_wrapper
 { 
@@ -40,7 +39,7 @@ public:
 
 #else
 
-    explicit reference_wrapper(T& t): t_(boost::addressof(t)) {}
+    explicit reference_wrapper(T& t): t_(pdalboost::addressof(t)) {}
 
 #endif
 
@@ -114,12 +113,11 @@ AUX_REFERENCE_WRAPPER_METAFUNCTIONS_DEF(reference_wrapper<T> const volatile)
 
 # else // no partial specialization
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -161,7 +159,7 @@ class is_reference_wrapper
              sizeof(detail::is_reference_wrapper_test(type<T>()))
             == sizeof(detail::yes_reference_wrapper_t)));
     
-    typedef ::boost::mpl::bool_<value> type;
+    typedef ::pdalboost::mpl::bool_<value> type;
 };
 
 template <typename T>
@@ -184,6 +182,6 @@ template<class T> inline T* get_pointer( reference_wrapper<T> const & r )
     return r.get_pointer();
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // #ifndef BOOST_REF_HPP_INCLUDED

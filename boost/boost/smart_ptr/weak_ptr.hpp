@@ -22,8 +22,7 @@
 # pragma warning(disable:4284) // odd return type for operator->
 #endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 template<class T> class weak_ptr
 {
@@ -79,7 +78,7 @@ public:
     template<class Y>
 #if !defined( BOOST_SP_NO_SP_CONVERTIBLE )
 
-    weak_ptr( weak_ptr<Y> const & r, typename boost::detail::sp_enable_if_convertible<Y,T>::type = boost::detail::sp_empty() )
+    weak_ptr( weak_ptr<Y> const & r, typename pdalboost::detail::sp_enable_if_convertible<Y,T>::type = pdalboost::detail::sp_empty() )
 
 #else
 
@@ -95,20 +94,20 @@ public:
     template<class Y>
 #if !defined( BOOST_SP_NO_SP_CONVERTIBLE )
 
-    weak_ptr( weak_ptr<Y> && r, typename boost::detail::sp_enable_if_convertible<Y,T>::type = boost::detail::sp_empty() )
+    weak_ptr( weak_ptr<Y> && r, typename pdalboost::detail::sp_enable_if_convertible<Y,T>::type = pdalboost::detail::sp_empty() )
 
 #else
 
     weak_ptr( weak_ptr<Y> && r )
 
 #endif
-    : px( r.lock().get() ), pn( static_cast< boost::detail::weak_count && >( r.pn ) ) // never throws
+    : px( r.lock().get() ), pn( static_cast< pdalboost::detail::weak_count && >( r.pn ) ) // never throws
     {
         r.px = 0;
     }
 
     // for better efficiency in the T == Y case
-    weak_ptr( weak_ptr && r ): px( r.px ), pn( static_cast< boost::detail::weak_count && >( r.pn ) ) // never throws
+    weak_ptr( weak_ptr && r ): px( r.px ), pn( static_cast< pdalboost::detail::weak_count && >( r.pn ) ) // never throws
     {
         r.px = 0;
     }
@@ -126,7 +125,7 @@ public:
     template<class Y>
 #if !defined( BOOST_SP_NO_SP_CONVERTIBLE )
 
-    weak_ptr( shared_ptr<Y> const & r, typename boost::detail::sp_enable_if_convertible<Y,T>::type = boost::detail::sp_empty() )
+    weak_ptr( shared_ptr<Y> const & r, typename pdalboost::detail::sp_enable_if_convertible<Y,T>::type = pdalboost::detail::sp_empty() )
 
 #else
 
@@ -170,7 +169,7 @@ public:
 
     shared_ptr<T> lock() const // never throws
     {
-        return shared_ptr<element_type>( *this, boost::detail::sp_nothrow_tag() );
+        return shared_ptr<element_type>( *this, pdalboost::detail::sp_nothrow_tag() );
     }
 
     long use_count() const // never throws
@@ -199,7 +198,7 @@ public:
         pn.swap(other.pn);
     }
 
-    void _internal_assign(T * px2, boost::detail::shared_count const & pn2)
+    void _internal_assign(T * px2, pdalboost::detail::shared_count const & pn2)
     {
         px = px2;
         pn = pn2;
@@ -223,7 +222,7 @@ private:
 #endif
 
     T * px;                       // contained pointer
-    boost::detail::weak_count pn; // reference counter
+    pdalboost::detail::weak_count pn; // reference counter
 
 };  // weak_ptr
 
@@ -237,7 +236,7 @@ template<class T> void swap(weak_ptr<T> & a, weak_ptr<T> & b)
     a.swap(b);
 }
 
-} // namespace boost
+} // namespace pdalboost
 
 #ifdef BOOST_MSVC
 # pragma warning(pop)

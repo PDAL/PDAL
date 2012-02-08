@@ -24,27 +24,27 @@
         {
             case DLL_PROCESS_ATTACH:
             {
-                boost::on_process_enter();
-                boost::on_thread_enter();
+                pdalboost::pdalbooston_process_enter();
+                pdalboost::pdalbooston_thread_enter();
                 break;
             }
 
             case DLL_THREAD_ATTACH:
             {
-                boost::on_thread_enter();
+                pdalboost::pdalbooston_thread_enter();
                 break;
             }
 
             case DLL_THREAD_DETACH:
             {
-                boost::on_thread_exit();
+                pdalboost::pdalbooston_thread_exit();
                 break;
             }
 
             case DLL_PROCESS_DETACH:
             {
-                boost::on_thread_exit();
-                boost::on_process_exit();
+                pdalboost::pdalbooston_thread_exit();
+                pdalboost::pdalbooston_process_exit();
                 break;
             }
         }
@@ -52,16 +52,15 @@
         return TRUE;
     }
 
-namespace boost
-{
-    void tss_cleanup_implemented()
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
+    void pdalboosttss_cleanup_implemented()
     {
         /*
         This function's sole purpose is to cause a link error in cases where
         automatic tss cleanup is not implemented by Boost.Threads as a
         reminder that user code is responsible for calling the necessary
         functions at the appropriate times (and for implementing an a
-        tss_cleanup_implemented() function to eliminate the linker's
+        pdalboosttss_cleanup_implemented() function to eliminate the linker's
         missing symbol error).
 
         If Boost.Threads later implements automatic tss cleanup in cases

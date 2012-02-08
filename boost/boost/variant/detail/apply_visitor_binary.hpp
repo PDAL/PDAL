@@ -25,7 +25,7 @@
 #include "boost/type_traits/is_const.hpp"
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //////////////////////////////////////////////////////////////////////////
 // function template apply_visitor(visitor, visitable1, visitable2)
@@ -104,7 +104,7 @@ public: // visitor interfaces
             , Value1
             > invoker(visitor_, value1);
 
-        return boost::apply_visitor(invoker, visitable2_);
+        return pdalboost::apply_visitor(invoker, visitable2_);
     }
 
 private:
@@ -143,11 +143,11 @@ apply_visitor(
     , Visitable1& visitable1, Visitable2& visitable2
     )
 {
-    ::boost::detail::variant::apply_visitor_binary_unwrap<
+    ::pdalboost::detail::variant::apply_visitor_binary_unwrap<
           Visitor, Visitable2
         > unwrapper(visitor, visitable2);
 
-    return boost::apply_visitor(unwrapper, visitable1);
+    return pdalboost::apply_visitor(unwrapper, visitable1);
 }
 
 #undef BOOST_VARIANT_AUX_APPLY_VISITOR_NON_CONST_RESULT_TYPE
@@ -168,15 +168,15 @@ apply_visitor(
     , Visitable1& visitable1, Visitable2& visitable2
     )
 {
-    ::boost::detail::variant::apply_visitor_binary_unwrap<
+    ::pdalboost::detail::variant::apply_visitor_binary_unwrap<
           const Visitor, Visitable2
         > unwrapper(visitor, visitable2);
 
-    return boost::apply_visitor(unwrapper, visitable1);
+    return pdalboost::apply_visitor(unwrapper, visitable1);
 }
 
 #endif // MSVC7 and below exclusion
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_DETAIL_APPLY_VISITOR_BINARY_HPP

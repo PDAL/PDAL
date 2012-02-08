@@ -18,7 +18,7 @@
 #include <boost/limits.hpp>
 #include <boost/pending/integer_log2.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace random {
 namespace detail {
 
@@ -58,7 +58,7 @@ template<class T>
 BOOST_RANDOM_DETAIL_CONSTEXPR int integer_log2(T t)
 {
     return integer_log2_impl<
-        ::boost::detail::max_pow2_less<
+        ::pdalboost::detail::max_pow2_less<
             ::std::numeric_limits<T>::digits, 4
         >::value
     >::apply(t, 0);
@@ -66,6 +66,6 @@ BOOST_RANDOM_DETAIL_CONSTEXPR int integer_log2(T t)
 
 } // namespace detail
 } // namespace random
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RANDOM_DETAIL_INTEGER_LOG2_HPP

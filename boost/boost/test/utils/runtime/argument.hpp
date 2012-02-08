@@ -27,7 +27,7 @@
 // STL
 #include <cassert>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -107,6 +107,6 @@ arg_value( argument& arg_ )
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_ARGUMENT_HPP_062604GER

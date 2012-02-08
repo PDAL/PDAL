@@ -22,8 +22,7 @@
 #include <boost/current_function.hpp>
 #include <functional>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -100,16 +99,15 @@ template<class T> struct sp_typeid_< T const volatile >: sp_typeid_< T >
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
-#define BOOST_SP_TYPEID(T) (boost::detail::sp_typeid_<T>::ti_)
+#define BOOST_SP_TYPEID(T) (pdalboost::detail::sp_typeid_<T>::ti_)
 
 #else
 
 #include <typeinfo>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail
 {
@@ -126,7 +124,7 @@ typedef std::type_info sp_typeinfo;
 
 } // namespace detail
 
-} // namespace boost
+} // namespace pdalboost
 
 #define BOOST_SP_TYPEID(T) typeid(T)
 

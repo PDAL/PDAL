@@ -31,7 +31,7 @@
 #include "boost/preprocessor/arithmetic/inc.hpp"
 #include "boost/preprocessor/iterate.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace detail { namespace variant {
 
 #if !defined(BOOST_VARIANT_DETAIL_NO_SUBSTITUTE)
@@ -145,7 +145,7 @@ struct substitute<
 #endif // !defined(BOOST_VARIANT_DETAIL_NO_SUBSTITUTE)
 
 }} // namespace detail::variant
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_DETAIL_SUBSTITUTE_HPP
 

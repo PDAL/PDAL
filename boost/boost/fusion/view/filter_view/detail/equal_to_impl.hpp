@@ -8,7 +8,7 @@
 #if !defined(BOOST_FUSION_EQUAL_TO_IMPL_02012005_2133)
 #define BOOST_FUSION_EQUAL_TO_IMPL_02012005_2133
 
-namespace boost { namespace fusion 
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace fusion 
 {
     struct filter_view_iterator_tag;
 

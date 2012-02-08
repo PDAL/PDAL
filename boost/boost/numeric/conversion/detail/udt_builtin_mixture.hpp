@@ -17,7 +17,7 @@
 
 #include "boost/mpl/integral_c.hpp"
 
-namespace boost { namespace numeric { namespace convdetail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric { namespace convdetail
 {
   // Integral Constants for 'UdtMixture'
   typedef mpl::integral_c<udt_builtin_mixture_enum, builtin_to_builtin> builtin2builtin_c ;
@@ -62,7 +62,7 @@ namespace boost { namespace numeric { namespace convdetail
         type ;
   } ;
 
-} } } // namespace boost::numeric::convdetail
+} } } // namespace pdalboost::numeric::convdetail
 
 #endif
 

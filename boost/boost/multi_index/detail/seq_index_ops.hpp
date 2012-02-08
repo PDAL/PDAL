@@ -21,7 +21,7 @@
 #include <boost/type_traits/alignment_of.hpp> 
 #include <cstddef>
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -195,6 +195,6 @@ void sequenced_index_sort(Node* header,Compare comp)
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 #endif

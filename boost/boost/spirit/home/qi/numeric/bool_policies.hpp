@@ -14,7 +14,7 @@
 #include <boost/spirit/home/qi/detail/string_parse.hpp>
 #include <boost/spirit/home/qi/detail/assign_to.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     ///////////////////////////////////////////////////////////////////////////
     //  Default boolean policies

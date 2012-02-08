@@ -57,7 +57,7 @@
 #   include <boost/preprocessor/inc.hpp>
 #   include <boost/preprocessor/cat.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 // local macros, #undef-ined at the end of the header
 #   define AUX778076_LAMBDA_PARAMS(i_, param) \

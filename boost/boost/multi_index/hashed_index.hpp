@@ -51,7 +51,7 @@
 #define BOOST_MULTI_INDEX_HASHED_INDEX_CHECK_INVARIANT
 #endif
 
-namespace boost{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace multi_index{
 
@@ -961,7 +961,7 @@ BOOST_MULTI_INDEX_PROTECTED_IF_MEMBER_TEMPLATE_FRIENDS:
     return super::invariant_();
   }
 
-  /* This forwarding function eases things for the boost::mem_fn construct
+  /* This forwarding function eases things for the pdalboost::mem_fn construct
    * in BOOST_MULTI_INDEX_HASHED_INDEX_CHECK_INVARIANT. Actually,
    * final_check_invariant is already an inherited member function of index.
    */
@@ -1240,7 +1240,7 @@ struct hashed_non_unique
 
 } /* namespace multi_index */
 
-} /* namespace boost */
+} /* namespace pdalboost */
 
 /* Boost.Foreach compatibility */
 
@@ -1248,10 +1248,10 @@ template<
   typename KeyFromValue,typename Hash,typename Pred,
   typename SuperMeta,typename TagList,typename Category
 >
-inline boost::mpl::true_* boost_foreach_is_noncopyable(
-  boost::multi_index::detail::hashed_index<
+inline pdalboost::mpl::true_* boost_foreach_is_noncopyable(
+  pdalboost::multi_index::detail::hashed_index<
     KeyFromValue,Hash,Pred,SuperMeta,TagList,Category>*&,
-  boost::foreach::tag)
+  pdalboost::foreach::tag)
 {
   return 0;
 }

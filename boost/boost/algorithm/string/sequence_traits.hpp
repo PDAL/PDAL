@@ -31,7 +31,7 @@
     header which contains specializations for all stl containers.
 */
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
 
 //  sequence traits  -----------------------------------------------//
@@ -41,7 +41,7 @@ namespace boost {
         //! Native replace tester
         /*!
             Declare an override of this tester function with return
-            type boost::string_algo::yes_type for a sequence with this property.
+            type pdalboost::string_algo::yes_type for a sequence with this property.
 
             \return yes_type if the container has basic_string like native replace
             method.
@@ -51,7 +51,7 @@ namespace boost {
         //! Stable iterators tester
         /*!
             Declare an override of this tester function with return
-            type boost::string_algo::yes_type for a sequence with this property.
+            type pdalboost::string_algo::yes_type for a sequence with this property.
 
             \return yes_type if the sequence's insert/replace/erase methods do not invalidate
             existing iterators.
@@ -61,7 +61,7 @@ namespace boost {
         //! const time insert tester
         /*!
             Declare an override of this tester function with return
-            type boost::string_algo::yes_type for a sequence with this property.
+            type pdalboost::string_algo::yes_type for a sequence with this property.
 
             \return yes_type if the sequence's insert method is working in constant time
         */
@@ -70,7 +70,7 @@ namespace boost {
         //! const time erase tester
         /*!
             Declare an override of this tester function with return
-            type boost::string_algo::yes_type for a sequence with this property.
+            type pdalboost::string_algo::yes_type for a sequence with this property.
 
             \return yes_type if the sequence's erase method is working in constant time
         */
@@ -187,7 +187,7 @@ namespace boost {
         };
 
     } // namespace algorithm
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_SEQUENCE_TRAITS_HPP

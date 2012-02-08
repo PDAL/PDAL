@@ -20,7 +20,7 @@
 #include <boost/preprocessor/repeat.hpp>
 #include <boost/preprocessor/cat.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     // qi's domain
     struct domain {};

@@ -24,7 +24,7 @@
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/bimap/relation/support/get_pair_functor.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace detail {
 
@@ -88,19 +88,19 @@ struct set_view_iterator : public set_view_iterator_base<CoreIterator>::type
 
     BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-    friend class ::boost::serialization::access;
+    friend class ::pdalboost::serialization::access;
 
     template< class Archive >
     void save(Archive & ar, const unsigned int version) const
     {
-        ar << ::boost::serialization::make_nvp("mi_iterator",this->base());
+        ar << ::pdalboost::serialization::make_nvp("mi_iterator",this->base());
     }
 
     template< class Archive >
     void load(Archive & ar, const unsigned int version)
     {
         CoreIterator iter;
-        ar >> ::boost::serialization::make_nvp("mi_iterator",iter);
+        ar >> ::pdalboost::serialization::make_nvp("mi_iterator",iter);
         this->base_reference() = iter;
     }
 
@@ -164,19 +164,19 @@ struct const_set_view_iterator : public const_set_view_iterator_base<CoreIterato
 
     BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-    friend class ::boost::serialization::access;
+    friend class ::pdalboost::serialization::access;
 
     template< class Archive >
     void save(Archive & ar, const unsigned int version) const
     {
-        ar << ::boost::serialization::make_nvp("mi_iterator",this->base());
+        ar << ::pdalboost::serialization::make_nvp("mi_iterator",this->base());
     }
 
     template< class Archive >
     void load(Archive & ar, const unsigned int version)
     {
         CoreIterator iter;
-        ar >> ::boost::serialization::make_nvp("mi_iterator",iter);
+        ar >> ::pdalboost::serialization::make_nvp("mi_iterator",iter);
         this->base_reference() = iter;
     }
 
@@ -186,7 +186,7 @@ struct const_set_view_iterator : public const_set_view_iterator_base<CoreIterato
 
 } // namespace detail
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_DETAIL_MAP_VIEW_ITERATOR_HPP
 

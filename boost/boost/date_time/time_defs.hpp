@@ -16,7 +16,7 @@
   reprsentations.
 */
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace date_time {
 
   //!Defines some nice types for handling time level resolutions

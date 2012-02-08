@@ -15,7 +15,7 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/spirit/home/support/has_semantic_action.hpp>
 
-namespace boost { namespace spirit { namespace qi { namespace detail
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi { namespace detail
 {
     // parser_binder for plain rules
     template <typename Parser, typename Auto>

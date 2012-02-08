@@ -21,8 +21,7 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
     class thread_interrupted
     {};
@@ -83,7 +82,7 @@ namespace boost
 
         virtual const char* what() const throw()
         {
-            return "boost::lock_error";
+            return "pdalboost::lock_error";
         }
     };
 
@@ -104,7 +103,7 @@ namespace boost
 
         virtual const char* what() const throw()
         {
-            return "boost::thread_resource_error";
+            return "pdalboost::thread_resource_error";
         }
     
     };
@@ -126,7 +125,7 @@ namespace boost
 
         virtual const char* what() const throw()
         {
-            return "boost::unsupported_thread_option";
+            return "pdalboost::unsupported_thread_option";
         }
     
     };
@@ -148,7 +147,7 @@ namespace boost
 
         virtual const char* what() const throw()
         {
-            return "boost::invalid_thread_argument";
+            return "pdalboost::invalid_thread_argument";
         }
     
     };
@@ -170,12 +169,12 @@ namespace boost
 
         virtual const char* what() const throw()
         {
-            return "boost::thread_permission_error";
+            return "pdalboost::thread_permission_error";
         }
     
     };
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/config/abi_suffix.hpp>
 

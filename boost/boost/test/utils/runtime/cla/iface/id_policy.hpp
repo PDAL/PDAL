@@ -24,7 +24,7 @@
 #include <boost/test/utils/class_properties.hpp>
 #include <boost/test/utils/rtti.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -68,6 +68,6 @@ protected:
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_CLA_IFACE_ID_POLICY_HPP_062604GER

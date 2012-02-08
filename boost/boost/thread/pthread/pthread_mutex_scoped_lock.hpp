@@ -11,8 +11,7 @@
 
 #include <boost/config/abi_prefix.hpp>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace pthread
     {
         class pthread_mutex_scoped_lock

@@ -43,7 +43,7 @@
 # include <boost/utility/enable_if.hpp>
 # include <boost/type_traits/is_const.hpp>
 # define BOOST_ACCUMULATORS_PROTO_DISABLE_IF_IS_CONST(T)\
-    , typename boost::disable_if<boost::is_const<T> >::type * = 0
+    , typename pdalboost::disable_if<pdalboost::is_const<T> >::type * = 0
 #else
 # define BOOST_ACCUMULATORS_PROTO_DISABLE_IF_IS_CONST(T)
 #endif
@@ -51,7 +51,7 @@
 #define BOOST_ACCUMULATORS_GCC_VERSION                                                              \
   (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 
-namespace boost { namespace accumulators
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace accumulators
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -186,12 +186,12 @@ namespace detail
     inline void ignore_variable(void const *) {}
 
   #define BOOST_ACCUMULATORS_IGNORE_GLOBAL(X)\
-    namespace detail { inline void BOOST_PP_CAT(ignore_, X)() { boost::accumulators::detail::ignore_variable(&X); } }
+    namespace detail { inline void BOOST_PP_CAT(ignore_, X)() { pdalboost::accumulators::detail::ignore_variable(&X); } }
 }
 
-}} // namespace boost::accumulators
+}} // namespace pdalboost::accumulators
 
-// For defining boost::parameter keywords that can be inherited from to
+// For defining pdalboost::parameter keywords that can be inherited from to
 // get a nested, class-scoped keyword with the requested alias
 #define BOOST_PARAMETER_NESTED_KEYWORD(tag_namespace, name, alias)                                  \
     namespace tag_namespace                                                                         \
@@ -203,17 +203,17 @@ namespace detail
             {                                                                                       \
                 return #name;                                                                       \
             }                                                                                       \
-            static ::boost::parameter::keyword<name ## _<Dummy> > &alias;                           \
+            static ::pdalboost::parameter::keyword<name ## _<Dummy> > &alias;                           \
         };                                                                                          \
         template<int Dummy>                                                                         \
-        ::boost::parameter::keyword<name ## _<Dummy> > &name ## _<Dummy>::alias =                   \
-        ::boost::parameter::keyword<name ## _<Dummy> >::get();                                      \
+        ::pdalboost::parameter::keyword<name ## _<Dummy> > &name ## _<Dummy>::alias =                   \
+        ::pdalboost::parameter::keyword<name ## _<Dummy> >::get();                                      \
         typedef name ## _ <> name;                                                                  \
     }                                                                                               \
     namespace                                                                                       \
     {                                                                                               \
-        ::boost::parameter::keyword<tag_namespace::name> &name =                                    \
-        ::boost::parameter::keyword<tag_namespace::name>::get();                                    \
+        ::pdalboost::parameter::keyword<tag_namespace::name> &name =                                    \
+        ::pdalboost::parameter::keyword<tag_namespace::name>::get();                                    \
     }
 
 #endif

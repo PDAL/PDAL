@@ -16,7 +16,7 @@
 
 #include <iosfwd> // stream types, char_traits.
 
-namespace boost { namespace iostreams {      
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace iostreams {      
 
 template<typename T>
 struct is_istream;

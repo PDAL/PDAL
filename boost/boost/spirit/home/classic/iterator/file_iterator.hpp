@@ -19,11 +19,11 @@
 //  if the file was opened correctly).
 //
 //  file_iterator implements the random access iterator interface by the means
-//  of boost::iterator_adaptor, that is inhering an object created with it.
+//  of pdalboost::iterator_adaptor, that is inhering an object created with it.
 //  iterator_adaptor gets a low-level file iterator implementation (with just
 //  a few member functions) and a policy (that basically describes to it how
 //  the low-level file iterator interface is). The advantage is that
-//  with boost::iterator_adaptor only 5 functions are needed to implement
+//  with pdalboost::iterator_adaptor only 5 functions are needed to implement
 //  a fully conformant random access iterator, instead of dozens of functions
 //  and operators.
 //
@@ -78,7 +78,7 @@ extern "C"
 #endif // BOOST_SPIRIT_FILEITERATOR_STD
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -99,7 +99,7 @@ namespace fileiter_impl {
     //
     //  file_iter_generator
     //
-    //  Template meta-function to invoke boost::iterator_adaptor
+    //  Template meta-function to invoke pdalboost::iterator_adaptor
     //  NOTE: This cannot be moved into the implementation file because of
     //  a bug of MSVC 7.0 and previous versions (base classes types are
     //  looked up at compilation time, not instantion types, and
@@ -119,12 +119,12 @@ namespace fileiter_impl {
         typedef BaseIteratorT adapted_t;
         typedef typename adapted_t::value_type value_type;
 
-        typedef boost::iterator_adaptor <
+        typedef pdalboost::iterator_adaptor <
             file_iterator<CharT, BaseIteratorT>,
             adapted_t,
             value_type const,
             std::random_access_iterator_tag,
-            boost::use_default,
+            pdalboost::use_default,
             std::ptrdiff_t
         > type;
     };
@@ -177,13 +177,13 @@ public:
     inline file_iterator& operator=(const base_t& iter);
     file_iterator make_end(void);
 
-    // operator bool. This borrows a trick from boost::shared_ptr to avoid
+    // operator bool. This borrows a trick from pdalboost::shared_ptr to avoid
     //   to interfere with arithmetic operations.
     bool operator_bool(void) const
     { return this->base(); }
 
 private:
-    friend class ::boost::iterator_core_access;
+    friend class ::pdalboost::iterator_core_access;
 
     typename base_t::reference dereference() const
     {

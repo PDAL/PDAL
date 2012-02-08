@@ -19,7 +19,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/fusion/include/at.hpp>
 
-namespace boost { namespace spirit
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit
 {
     template <typename T>
     struct use_terminal<qi::domain, T

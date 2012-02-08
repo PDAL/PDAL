@@ -32,8 +32,8 @@
 #include <cstring>
 #include <cassert>
 
-namespace fs = boost::filesystem;
-using boost::filesystem::path;
+namespace fs = pdalboost::filesystem;
+using pdalboost::filesystem::path;
 
 
 #include <boost/detail/lightweight_test.hpp>
@@ -53,7 +53,7 @@ namespace
   {
     if ( source.string()== expected ) return;
 
-    ++::boost::detail::test_errors();
+    ++::pdalboost::detail::test_errors();
 
     std::cout << '(' << line << ") source.string(): \"" << source.string()
               << "\" != expected: \"" << expected
@@ -65,7 +65,7 @@ namespace
   {
     if ( source.directory_string()== expected ) return;
 
-    ++::boost::detail::test_errors();
+    ++::pdalboost::detail::test_errors();
 
     std::cout << '(' << line << ") source.directory_string(): \""
               << source.directory_string()
@@ -78,7 +78,7 @@ namespace
   {
     if ( value == expected ) return;
 
-    ++::boost::detail::test_errors();
+    ++::pdalboost::detail::test_errors();
 
     std::cout << '(' << line << ") value: \"" << value
               << "\" != expected: \"" << expected
@@ -89,7 +89,7 @@ namespace
   void exception_tests()
   {
     const std::string str_1("string-1");
-    boost::system::error_code ec( 12345, boost::system::system_category());
+    pdalboost::system::error_code ec( 12345, pdalboost::system::system_category());
     try { BOOST_FILESYSTEM_THROW( fs::filesystem_error( str_1, ec ) ); }
     catch ( const fs::filesystem_error & ex )
     {
@@ -513,18 +513,18 @@ int cpp_main( int, char* [] )
 
   itr_ck = "foo";
   BOOST_TEST( *itr_ck.begin() == std::string( "foo" ) );
-  BOOST_TEST( boost::next( itr_ck.begin() ) == itr_ck.end() );
-  BOOST_TEST( *boost::prior( itr_ck.end() ) == std::string( "foo" ) );
-  BOOST_TEST( boost::prior( itr_ck.end() ) == itr_ck.begin() );
+  BOOST_TEST( pdalboost::next( itr_ck.begin() ) == itr_ck.end() );
+  BOOST_TEST( *pdalboost::prior( itr_ck.end() ) == std::string( "foo" ) );
+  BOOST_TEST( pdalboost::prior( itr_ck.end() ) == itr_ck.begin() );
 
   itr_ck = path( "/foo" );
   BOOST_TEST( *itr_ck.begin() == std::string( "/" ) );
-  BOOST_TEST( *boost::next( itr_ck.begin() ) == std::string( "foo" ) );
-  BOOST_TEST( boost::next(boost::next( itr_ck.begin() )) == itr_ck.end() );
-  BOOST_TEST( boost::next( itr_ck.begin() ) == boost::prior( itr_ck.end() ) );
-  BOOST_TEST( *boost::prior( itr_ck.end() ) == std::string( "foo" ) );
-  BOOST_TEST( *boost::prior(boost::prior( itr_ck.end() )) == std::string( "/" ) );
-  BOOST_TEST( boost::prior(boost::prior( itr_ck.end() )) == itr_ck.begin() );
+  BOOST_TEST( *pdalboost::next( itr_ck.begin() ) == std::string( "foo" ) );
+  BOOST_TEST( pdalboost::next(pdalboost::next( itr_ck.begin() )) == itr_ck.end() );
+  BOOST_TEST( pdalboost::next( itr_ck.begin() ) == pdalboost::prior( itr_ck.end() ) );
+  BOOST_TEST( *pdalboost::prior( itr_ck.end() ) == std::string( "foo" ) );
+  BOOST_TEST( *pdalboost::prior(pdalboost::prior( itr_ck.end() )) == std::string( "/" ) );
+  BOOST_TEST( pdalboost::prior(pdalboost::prior( itr_ck.end() )) == itr_ck.begin() );
 
   itr_ck = "/foo/bar";
   itr = itr_ck.begin();
@@ -1139,65 +1139,65 @@ int cpp_main( int, char* [] )
 
     itr_ck = path( "c:" );
     BOOST_TEST( *itr_ck.begin() == std::string( "c:" ) );
-    BOOST_TEST( boost::next( itr_ck.begin() ) == itr_ck.end() );
-    BOOST_TEST( boost::prior( itr_ck.end() ) == itr_ck.begin() );
-    BOOST_TEST( *boost::prior( itr_ck.end() ) == std::string( "c:" ) );
+    BOOST_TEST( pdalboost::next( itr_ck.begin() ) == itr_ck.end() );
+    BOOST_TEST( pdalboost::prior( itr_ck.end() ) == itr_ck.begin() );
+    BOOST_TEST( *pdalboost::prior( itr_ck.end() ) == std::string( "c:" ) );
 
     itr_ck = path( "c:/" );
     BOOST_TEST( *itr_ck.begin() == std::string( "c:" ) );
-    BOOST_TEST( *boost::next( itr_ck.begin() ) == std::string( "/" ) );
-    BOOST_TEST( boost::next( boost::next( itr_ck.begin() )) == itr_ck.end() );
-    BOOST_TEST( boost::prior( boost::prior( itr_ck.end() )) == itr_ck.begin() );
-    BOOST_TEST( *boost::prior( itr_ck.end() ) == std::string( "/" ) );
-    BOOST_TEST( *boost::prior( boost::prior( itr_ck.end() )) == std::string( "c:" ) );
+    BOOST_TEST( *pdalboost::next( itr_ck.begin() ) == std::string( "/" ) );
+    BOOST_TEST( pdalboost::next( pdalboost::next( itr_ck.begin() )) == itr_ck.end() );
+    BOOST_TEST( pdalboost::prior( pdalboost::prior( itr_ck.end() )) == itr_ck.begin() );
+    BOOST_TEST( *pdalboost::prior( itr_ck.end() ) == std::string( "/" ) );
+    BOOST_TEST( *pdalboost::prior( pdalboost::prior( itr_ck.end() )) == std::string( "c:" ) );
 
     itr_ck = path( "c:foo" );
     BOOST_TEST( *itr_ck.begin() == std::string( "c:" ) );
-    BOOST_TEST( *boost::next( itr_ck.begin() ) == std::string( "foo" ) );
-    BOOST_TEST( boost::next(boost::next( itr_ck.begin() )) == itr_ck.end() );
-    BOOST_TEST( boost::prior(boost::prior( itr_ck.end() )) == itr_ck.begin() );
-    BOOST_TEST( *boost::prior( itr_ck.end() ) == std::string( "foo" ) );
-    BOOST_TEST( *boost::prior(boost::prior( itr_ck.end() )) == std::string( "c:" ) );
+    BOOST_TEST( *pdalboost::next( itr_ck.begin() ) == std::string( "foo" ) );
+    BOOST_TEST( pdalboost::next(pdalboost::next( itr_ck.begin() )) == itr_ck.end() );
+    BOOST_TEST( pdalboost::prior(pdalboost::prior( itr_ck.end() )) == itr_ck.begin() );
+    BOOST_TEST( *pdalboost::prior( itr_ck.end() ) == std::string( "foo" ) );
+    BOOST_TEST( *pdalboost::prior(pdalboost::prior( itr_ck.end() )) == std::string( "c:" ) );
 
     itr_ck = path( "c:/foo" );
     BOOST_TEST( *itr_ck.begin() == std::string( "c:" ) );
-    BOOST_TEST( *boost::next( itr_ck.begin() ) == std::string( "/" ) );
-    BOOST_TEST( *boost::next( boost::next( itr_ck.begin() )) == std::string( "foo" ) );
-    BOOST_TEST( boost::next( boost::next( boost::next( itr_ck.begin() ))) == itr_ck.end() );
-    BOOST_TEST( boost::prior( boost::prior( boost::prior( itr_ck.end() ))) == itr_ck.begin() );
-    BOOST_TEST( *boost::prior( itr_ck.end() ) == std::string( "foo" ) );
-    BOOST_TEST( *boost::prior( boost::prior( itr_ck.end() )) == std::string( "/" ) );
-    BOOST_TEST( *boost::prior( boost::prior( boost::prior( itr_ck.end() ))) == std::string( "c:" ) );
+    BOOST_TEST( *pdalboost::next( itr_ck.begin() ) == std::string( "/" ) );
+    BOOST_TEST( *pdalboost::next( pdalboost::next( itr_ck.begin() )) == std::string( "foo" ) );
+    BOOST_TEST( pdalboost::next( pdalboost::next( pdalboost::next( itr_ck.begin() ))) == itr_ck.end() );
+    BOOST_TEST( pdalboost::prior( pdalboost::prior( pdalboost::prior( itr_ck.end() ))) == itr_ck.begin() );
+    BOOST_TEST( *pdalboost::prior( itr_ck.end() ) == std::string( "foo" ) );
+    BOOST_TEST( *pdalboost::prior( pdalboost::prior( itr_ck.end() )) == std::string( "/" ) );
+    BOOST_TEST( *pdalboost::prior( pdalboost::prior( pdalboost::prior( itr_ck.end() ))) == std::string( "c:" ) );
 
     itr_ck = path( "//net" );
     BOOST_TEST( *itr_ck.begin() == std::string( "//net" ) );
-    BOOST_TEST( boost::next( itr_ck.begin() ) == itr_ck.end() );
-    BOOST_TEST( boost::prior( itr_ck.end() ) == itr_ck.begin() );
-    BOOST_TEST( *boost::prior( itr_ck.end() ) == std::string( "//net" ) );
+    BOOST_TEST( pdalboost::next( itr_ck.begin() ) == itr_ck.end() );
+    BOOST_TEST( pdalboost::prior( itr_ck.end() ) == itr_ck.begin() );
+    BOOST_TEST( *pdalboost::prior( itr_ck.end() ) == std::string( "//net" ) );
 
     itr_ck = path( "//net/" );
     CHECK_EQUAL( *itr_ck.begin(), "//net" );
-    CHECK_EQUAL( *boost::next( itr_ck.begin() ), "/" );
-    BOOST_TEST( boost::next(boost::next( itr_ck.begin() )) == itr_ck.end() );
-    BOOST_TEST( boost::prior(boost::prior( itr_ck.end() )) == itr_ck.begin() );
-    CHECK_EQUAL( *boost::prior( itr_ck.end() ), "/" );
-    CHECK_EQUAL( *boost::prior(boost::prior( itr_ck.end() )), "//net" );
+    CHECK_EQUAL( *pdalboost::next( itr_ck.begin() ), "/" );
+    BOOST_TEST( pdalboost::next(pdalboost::next( itr_ck.begin() )) == itr_ck.end() );
+    BOOST_TEST( pdalboost::prior(pdalboost::prior( itr_ck.end() )) == itr_ck.begin() );
+    CHECK_EQUAL( *pdalboost::prior( itr_ck.end() ), "/" );
+    CHECK_EQUAL( *pdalboost::prior(pdalboost::prior( itr_ck.end() )), "//net" );
 
     itr_ck = path( "//net/foo" );
     BOOST_TEST( *itr_ck.begin() == std::string( "//net" ) );
-    BOOST_TEST( *boost::next( itr_ck.begin() ) == std::string( "/" ) );
-    BOOST_TEST( *boost::next(boost::next( itr_ck.begin() )) == std::string( "foo" ) );
-    BOOST_TEST( boost::next(boost::next(boost::next( itr_ck.begin() ))) == itr_ck.end() );
-    BOOST_TEST( boost::prior(boost::prior(boost::prior( itr_ck.end() ))) == itr_ck.begin() );
-    BOOST_TEST( *boost::prior( itr_ck.end() ) == std::string( "foo" ) );
-    BOOST_TEST( *boost::prior(boost::prior( itr_ck.end() )) == std::string( "/" ) );
-    BOOST_TEST( *boost::prior(boost::prior(boost::prior( itr_ck.end() ))) == std::string( "//net" ) );
+    BOOST_TEST( *pdalboost::next( itr_ck.begin() ) == std::string( "/" ) );
+    BOOST_TEST( *pdalboost::next(pdalboost::next( itr_ck.begin() )) == std::string( "foo" ) );
+    BOOST_TEST( pdalboost::next(pdalboost::next(pdalboost::next( itr_ck.begin() ))) == itr_ck.end() );
+    BOOST_TEST( pdalboost::prior(pdalboost::prior(pdalboost::prior( itr_ck.end() ))) == itr_ck.begin() );
+    BOOST_TEST( *pdalboost::prior( itr_ck.end() ) == std::string( "foo" ) );
+    BOOST_TEST( *pdalboost::prior(pdalboost::prior( itr_ck.end() )) == std::string( "/" ) );
+    BOOST_TEST( *pdalboost::prior(pdalboost::prior(pdalboost::prior( itr_ck.end() ))) == std::string( "//net" ) );
 
     itr_ck = path( "prn:" );
     BOOST_TEST( *itr_ck.begin() == std::string( "prn:" ) );
-    BOOST_TEST( boost::next( itr_ck.begin() ) == itr_ck.end() );
-    BOOST_TEST( boost::prior( itr_ck.end() ) == itr_ck.begin() );
-    BOOST_TEST( *boost::prior( itr_ck.end() ) == std::string( "prn:" ) );
+    BOOST_TEST( pdalboost::next( itr_ck.begin() ) == itr_ck.end() );
+    BOOST_TEST( pdalboost::prior( itr_ck.end() ) == itr_ck.begin() );
+    BOOST_TEST( *pdalboost::prior( itr_ck.end() ) == std::string( "prn:" ) );
   } // Windows
 
   else
@@ -1376,5 +1376,5 @@ int cpp_main( int, char* [] )
   std::cout << round_trip.string() << "..." << round_trip << " complete\n";
 # endif
 
-  return ::boost::report_errors();
+  return ::pdalboost::report_errors();
 }

@@ -24,8 +24,7 @@
 #  include <boost/range/detail/remove_extent.hpp>
 # endif
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace range_detail
     {
         template< typename T >
@@ -72,7 +71,7 @@ namespace boost
             template< typename T, std::size_t sz >
             static T* fun( T BOOST_RANGE_ARRAY_REF()[sz] )
             {
-                return boost::range_detail::array_end( boost_range_array );
+                return pdalboost::range_detail::array_end( boost_range_array );
             }
         #else
             template<typename T>

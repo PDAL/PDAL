@@ -23,7 +23,7 @@
 
 // backward compatibility header, deprecated
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 #if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 #   define AUX778076_OP_ARITY BOOST_MPL_LIMIT_METAFUNCTION_ARITY

@@ -56,7 +56,7 @@ namespace std
 }
 #endif
 
-namespace boost { namespace numeric
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace numeric
 {
     namespace functional
     {
@@ -92,7 +92,7 @@ namespace boost { namespace numeric
         {                                                                                       \
             BOOST_TYPEOF_NESTED_TYPEDEF_TPL(                                                    \
                 nested                                                                          \
-              , Op boost::numeric::functional::detail::lvalue_of<Arg>()                         \
+              , Op pdalboost::numeric::functional::detail::lvalue_of<Arg>()                         \
             )                                                                                   \
             typedef typename nested::type type;                                                 \
         };                                                                                      \
@@ -116,12 +116,12 @@ namespace boost { namespace numeric
     namespace op                                                                                \
     {                                                                                           \
         struct Name                                                                             \
-          : boost::detail::function1<functional::Name<_, functional::tag<_> > >                 \
+          : pdalboost::detail::function1<functional::Name<_, functional::tag<_> > >                 \
         {};                                                                                     \
     }                                                                                           \
     namespace                                                                                   \
     {                                                                                           \
-        op::Name const &Name = boost::detail::pod_singleton<op::Name>::instance;                \
+        op::Name const &Name = pdalboost::detail::pod_singleton<op::Name>::instance;                \
     }                                                                                           \
     /**/
 
@@ -157,14 +157,14 @@ namespace boost { namespace numeric
     namespace op                                                                                \
     {                                                                                           \
         struct Name                                                                             \
-          : boost::detail::function2<                                                           \
+          : pdalboost::detail::function2<                                                           \
                 functional::Name<_1, _2, functional::tag<_1>, functional::tag<_2> >             \
             >                                                                                   \
         {};                                                                                     \
     }                                                                                           \
     namespace                                                                                   \
     {                                                                                           \
-        op::Name const &Name = boost::detail::pod_singleton<op::Name>::instance;                \
+        op::Name const &Name = pdalboost::detail::pod_singleton<op::Name>::instance;                \
     }                                                                                           \
     /**/
 
@@ -173,8 +173,8 @@ namespace boost { namespace numeric
 #define BOOST_NUMERIC_FUNCTIONAL_DEDUCED(Left, Op, Right)                                       \
     BOOST_TYPEOF_NESTED_TYPEDEF_TPL(                                                            \
         nested                                                                                  \
-      , boost::numeric::functional::detail::lvalue_of<Left>() Op                                \
-        boost::numeric::functional::detail::lvalue_of<Right>()                                  \
+      , pdalboost::numeric::functional::detail::lvalue_of<Left>() Op                                \
+        pdalboost::numeric::functional::detail::lvalue_of<Right>()                                  \
     )                                                                                           \
     typedef typename nested::type type;                                                         \
     /**/
@@ -375,47 +375,47 @@ namespace boost { namespace numeric
     {
         template<typename To>
         struct promote
-          : boost::detail::function1<functional::promote<To, _, typename functional::tag<To>::type, functional::tag<_> > >
+          : pdalboost::detail::function1<functional::promote<To, _, typename functional::tag<To>::type, functional::tag<_> > >
         {};
 
         struct min_assign
-          : boost::detail::function2<functional::min_assign<_1, _2, functional::tag<_1>, functional::tag<_2> > >
+          : pdalboost::detail::function2<functional::min_assign<_1, _2, functional::tag<_1>, functional::tag<_2> > >
         {};
 
         struct max_assign
-          : boost::detail::function2<functional::max_assign<_1, _2, functional::tag<_1>, functional::tag<_2> > >
+          : pdalboost::detail::function2<functional::max_assign<_1, _2, functional::tag<_1>, functional::tag<_2> > >
         {};
 
         struct average
-          : boost::detail::function2<functional::average<_1, _2, functional::tag<_1>, functional::tag<_2> > >
+          : pdalboost::detail::function2<functional::average<_1, _2, functional::tag<_1>, functional::tag<_2> > >
         {};
 
         struct as_min
-          : boost::detail::function1<functional::as_min<_, functional::tag<_> > >
+          : pdalboost::detail::function1<functional::as_min<_, functional::tag<_> > >
         {};
 
         struct as_max
-          : boost::detail::function1<functional::as_max<_, functional::tag<_> > >
+          : pdalboost::detail::function1<functional::as_max<_, functional::tag<_> > >
         {};
 
         struct as_zero
-          : boost::detail::function1<functional::as_zero<_, functional::tag<_> > >
+          : pdalboost::detail::function1<functional::as_zero<_, functional::tag<_> > >
         {};
 
         struct as_one
-          : boost::detail::function1<functional::as_one<_, functional::tag<_> > >
+          : pdalboost::detail::function1<functional::as_one<_, functional::tag<_> > >
         {};
     }
 
     namespace
     {
-        op::min_assign const &min_assign = boost::detail::pod_singleton<op::min_assign>::instance;
-        op::max_assign const &max_assign = boost::detail::pod_singleton<op::max_assign>::instance;
-        op::average const &average = boost::detail::pod_singleton<op::average>::instance;
-        op::as_min const &as_min = boost::detail::pod_singleton<op::as_min>::instance;
-        op::as_max const &as_max = boost::detail::pod_singleton<op::as_max>::instance;
-        op::as_zero const &as_zero = boost::detail::pod_singleton<op::as_zero>::instance;
-        op::as_one const &as_one = boost::detail::pod_singleton<op::as_one>::instance;
+        op::min_assign const &min_assign = pdalboost::detail::pod_singleton<op::min_assign>::instance;
+        op::max_assign const &max_assign = pdalboost::detail::pod_singleton<op::max_assign>::instance;
+        op::average const &average = pdalboost::detail::pod_singleton<op::average>::instance;
+        op::as_min const &as_min = pdalboost::detail::pod_singleton<op::as_min>::instance;
+        op::as_max const &as_max = pdalboost::detail::pod_singleton<op::as_max>::instance;
+        op::as_zero const &as_zero = pdalboost::detail::pod_singleton<op::as_zero>::instance;
+        op::as_one const &as_one = pdalboost::detail::pod_singleton<op::as_one>::instance;
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -492,6 +492,6 @@ namespace boost { namespace numeric
       : mpl::if_<is_empty<T>, default_<T>, zero<T> >::type
     {};
 
-}} // namespace boost::numeric
+}} // namespace pdalboost::numeric
 
 #endif

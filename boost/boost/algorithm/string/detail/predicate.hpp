@@ -14,7 +14,7 @@
 #include <iterator>
 #include <boost/algorithm/string/find.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
     namespace algorithm {
         namespace detail {
 
@@ -63,7 +63,7 @@ namespace boost {
 
                 iterator_range<ForwardIterator1T> Result
                     =last_finder( 
-                        ::boost::make_iterator_range(SubBegin, SubEnd),
+                        ::pdalboost::make_iterator_range(SubBegin, SubEnd),
                         Comp)(Begin, End);
 
                 return !Result.empty() && Result.end()==End;
@@ -71,7 +71,7 @@ namespace boost {
 
         } // namespace detail
     } // namespace algorithm
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif  // BOOST_STRING_PREDICATE_DETAIL_HPP

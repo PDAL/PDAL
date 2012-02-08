@@ -25,7 +25,7 @@
 
 #include "boost/mpl/void.hpp"
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace detail {
 
@@ -128,7 +128,7 @@ struct make_reference_content< mpl::void_ >
 
 template <typename T>
 struct has_nothrow_copy<
-      ::boost::detail::reference_content< T& >
+      ::pdalboost::detail::reference_content< T& >
     >
     : mpl::true_
 {
@@ -136,6 +136,6 @@ struct has_nothrow_copy<
 
 #endif // !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_DETAIL_REFERENCE_CONTENT_HPP

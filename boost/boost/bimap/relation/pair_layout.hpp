@@ -18,7 +18,7 @@
 
 #include <boost/config.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 
@@ -34,7 +34,7 @@ struct mirror_layout {};
 
 //@}
 
-/** \struct boost::bimaps::relation::inverse_layout
+/** \struct pdalboost::bimaps::relation::inverse_layout
 \brief Metafunction to obtain the inverse of a layout.
 
 \code
@@ -66,7 +66,7 @@ struct inverse_layout< normal_layout >
 
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_BIMAP_RELATION_DETAIL_PAIR_LAYOUT_HPP
 

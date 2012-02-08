@@ -22,7 +22,7 @@
 #include <boost/mpl/aux_/na_spec.hpp>
 #include <boost/mpl/aux_/lambda_support.hpp>
 
-namespace boost { namespace mpl {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace mpl {
 
 template<
       typename BOOST_MPL_AUX_NA_PARAM(Sequence)
@@ -32,7 +32,7 @@ template<
 struct iter_fold
 {
     typedef typename aux::iter_fold_impl<
-          ::boost::mpl::O1_size<Sequence>::value
+          ::pdalboost::mpl::O1_size<Sequence>::value
         , typename begin<Sequence>::type
         , typename end<Sequence>::type
         , State

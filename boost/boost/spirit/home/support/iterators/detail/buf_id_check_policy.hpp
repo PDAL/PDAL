@@ -13,7 +13,7 @@
 #include <boost/throw_exception.hpp>
 #include <exception>    // for std::exception
 
-namespace boost { namespace spirit { namespace iterator_policies
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace iterator_policies
 {
     ///////////////////////////////////////////////////////////////////////////
     //  class illegal_backtracking
@@ -28,7 +28,7 @@ namespace boost { namespace spirit { namespace iterator_policies
 
         char const* what() const throw()
         { 
-            return "boost::spirit::multi_pass::illegal_backtracking"; 
+            return "pdalboost::spirit::multi_pass::illegal_backtracking"; 
         }
     };
 
@@ -51,7 +51,7 @@ namespace boost { namespace spirit { namespace iterator_policies
 
             void swap(unique& x)
             {
-                boost::swap(buf_id, x.buf_id);
+                pdalboost::swap(buf_id, x.buf_id);
             }
 
             // called to verify that everything is ok.
@@ -59,7 +59,7 @@ namespace boost { namespace spirit { namespace iterator_policies
             static void docheck(MultiPass const& mp) 
             {
                 if (mp.buf_id != mp.shared()->shared_buf_id)
-                    boost::throw_exception(illegal_backtracking());
+                    pdalboost::throw_exception(illegal_backtracking());
             }
 
             // called from multi_pass::clear_queue, so we can increment the count

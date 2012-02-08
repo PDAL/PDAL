@@ -18,7 +18,7 @@
 #include <boost/proto/args.hpp>
 #include <boost/proto/expr.hpp>
 
-namespace boost { namespace proto
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace proto
 {
     namespace detail
     {

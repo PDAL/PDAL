@@ -40,8 +40,7 @@
 #include <algorithm>
 #include <cstddef>
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #ifndef _STLP_NO_IOSTREAMS
 # ifndef BOOST_OLD_IOSTREAMS   
@@ -82,7 +81,7 @@ namespace boost
 # endif
 #endif // _STLP_NO_IOSTREAMS
 
-} // namespace boost
+} // namespace pdalboost
 
 #undef BOOST_OLD_IOSTREAMS
 

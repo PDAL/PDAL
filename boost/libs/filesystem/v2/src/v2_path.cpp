@@ -52,7 +52,7 @@ namespace
     // See http://developer.apple.com/mac/library/documentation/MacOSX/Conceptual/BPInternational/Articles/FileEncodings.html
     std::locale global_loc = std::locale();  // Mac OS doesn't support locale("")
     static std::locale lc(global_loc,
-        new boost::filesystem::detail::utf8_codecvt_facet);  
+        new pdalboost::filesystem::detail::utf8_codecvt_facet);  
 #endif
     return lc;
   }
@@ -70,8 +70,7 @@ namespace
   bool locked(false);
 } // unnamed namespace
 
-namespace boost
-{
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
   namespace filesystem2
   {
     bool wpath_traits::imbue( const std::locale & new_loc, const std::nothrow_t & )
@@ -88,7 +87,7 @@ namespace boost
     {
       if ( locked ) BOOST_FILESYSTEM_THROW(
         wfilesystem_error(
-          "boost::filesystem::wpath_traits::imbue() after lockdown",
+          "pdalboost::filesystem::wpath_traits::imbue() after lockdown",
           make_error_code( system::errc::not_supported ) ) );
       imbue( new_loc, std::nothrow );
     }
@@ -137,15 +136,15 @@ namespace boost
     {
       locked = true;
       std::size_t work_size( converter()->max_length() * (src.size()+1) );
-      boost::scoped_array<char> work( new char[ work_size ] );
+      pdalboost::scoped_array<char> work( new char[ work_size ] );
       std::mbstate_t state = std::mbstate_t();  // perhaps unneeded, but cuts bug reports
       const internal_string_type::value_type * from_next;
       external_string_type::value_type * to_next;
       if ( converter()->out( 
         state, src.c_str(), src.c_str()+src.size(), from_next, work.get(),
         work.get()+work_size, to_next ) != std::codecvt_base::ok )
-        BOOST_FILESYSTEM_THROW( boost::filesystem::wfilesystem_error(
-          "boost::filesystem::wpath::to_external conversion error",
+        BOOST_FILESYSTEM_THROW( pdalboost::filesystem::wfilesystem_error(
+          "pdalboost::filesystem::wpath::to_external conversion error",
           ph, system::error_code( system::errc::invalid_argument, system::system_category() ) ) );
       *to_next = '\0';
       return external_string_type( work.get() );
@@ -156,15 +155,15 @@ namespace boost
     {
       locked = true;
       std::size_t work_size( src.size()+1 );
-      boost::scoped_array<wchar_t> work( new wchar_t[ work_size ] );
+      pdalboost::scoped_array<wchar_t> work( new wchar_t[ work_size ] );
       std::mbstate_t state  = std::mbstate_t();  // perhaps unneeded, but cuts bug reports
       const external_string_type::value_type * from_next;
       internal_string_type::value_type * to_next;
       if ( converter()->in( 
         state, src.c_str(), src.c_str()+src.size(), from_next, work.get(),
         work.get()+work_size, to_next ) != std::codecvt_base::ok )
-        BOOST_FILESYSTEM_THROW( boost::filesystem::wfilesystem_error(
-          "boost::filesystem::wpath::to_internal conversion error",
+        BOOST_FILESYSTEM_THROW( pdalboost::filesystem::wfilesystem_error(
+          "pdalboost::filesystem::wpath::to_internal conversion error",
           system::error_code( system::errc::invalid_argument, system::system_category() ) ) );
       *to_next = L'\0';
       return internal_string_type( work.get() );
@@ -172,6 +171,6 @@ namespace boost
 # endif // BOOST_POSIX_API
 
   } // namespace filesystem2
-} // namespace boost
+} // namespace pdalboost
 
 #endif // ifndef BOOST_FILESYSTEM2_NARROW_ONLY

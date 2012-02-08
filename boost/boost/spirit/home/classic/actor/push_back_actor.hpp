@@ -12,7 +12,7 @@
 #include <boost/spirit/home/classic/actor/ref_value_actor.hpp>
 #include <boost/spirit/home/classic/actor/ref_const_ref_actor.hpp>
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 

@@ -17,7 +17,7 @@
 #include <boost/spirit/home/support/handles_container.hpp>
 #include <boost/spirit/home/qi/parser.hpp>
 
-namespace boost { namespace spirit { namespace qi
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace qi
 {
     ///////////////////////////////////////////////////////////////////////////
     // parameterized_nonterminal: parser representing the invocation of a
@@ -55,12 +55,12 @@ namespace boost { namespace spirit { namespace qi
             return ref.get().what(context);
         }
 
-        boost::reference_wrapper<Subject const> ref;
+        pdalboost::reference_wrapper<Subject const> ref;
         Params params;
     };
 }}}
 
-namespace boost { namespace spirit { namespace traits
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit { namespace traits
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Subject, typename Params, typename Attribute

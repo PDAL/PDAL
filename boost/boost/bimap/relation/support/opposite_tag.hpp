@@ -20,7 +20,7 @@
 
 #include <boost/bimap/relation/detail/metadata_access_builder.hpp>
 
-/** \struct boost::bimaps::relation::support::opposite_tag
+/** \struct pdalboost::bimaps::relation::support::opposite_tag
 
 \brief Metafunction to obtain the opposite tag in a relation.
 
@@ -37,7 +37,7 @@ struct opposite_tag
 \ingroup relation_group
                                                                     **/
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace bimaps {
 namespace relation {
 namespace support {
@@ -54,7 +54,7 @@ BOOST_BIMAP_SYMMETRIC_METADATA_ACCESS_BUILDER
 } // namespace support
 } // namespace relation
 } // namespace bimaps
-} // namespace boost
+} // namespace pdalboost
 
 
 #endif // BOOST_BIMAP_RELATION_SUPPORT_OPPOSITE_TAG_HPP

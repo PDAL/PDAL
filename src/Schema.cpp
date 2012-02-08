@@ -46,7 +46,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#include <pdal/external/boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 #include <boost/algorithm/string.hpp>
 
@@ -216,10 +216,10 @@ const Dimension& Schema::getDimension(std::string const& t, std::string const& n
         
         return *it;
     } else {
-        pdal::external::boost::uuids::uuid ps1;
+        boost::uuids::uuid ps1;
         try
         {
-            pdal::external::boost::uuids::string_generator gen;
+            boost::uuids::string_generator gen;
             ps1 = gen(t);
         } catch (std::runtime_error&)
         {

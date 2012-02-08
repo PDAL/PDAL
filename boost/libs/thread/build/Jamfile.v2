@@ -20,11 +20,11 @@
 #
 # The naming of the resulting libraries is mostly the same for the
 # variant native to the build platform, i.e.
-# boost_thread and the boost specific tagging.
+# pdalboost_thread and the boost specific tagging.
 # For the library variant that is not native on the build platform
 # an additional tag is applied:
-# boost_thread_pthread for the pthread variant on windows, and
-# boost_thread_win32 for the win32 variant (likely when built on cygwin).
+# pdalboost_thread_pthread for the pthread variant on windows, and
+# pdalboost_thread_win32 for the win32 variant (likely when built on cygwin).
 #
 # To request the pthread variant on windows, from boost root you would
 # say e.g:
@@ -197,7 +197,7 @@ alias thread_sources
 
 explicit thread_sources ;
 
-lib boost_thread
+lib pdalboost_thread
     : thread_sources
     : <conditional>@requirements
     :

@@ -21,7 +21,7 @@
 // Boost.Test
 #include <boost/test/utils/named_params.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace BOOST_RT_PARAM_NAMESPACE {
 
@@ -42,6 +42,6 @@ nfp::keyword<struct interpreter_t>               interpreter;
 
 } // namespace BOOST_RT_PARAM_NAMESPACE
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_RT_ENV_MODIFIER_HPP_062604GER

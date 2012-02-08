@@ -8,7 +8,7 @@
 # See library home page at http://www.boost.org/libs/filesystem
 
 project
-    : requirements <library>../build//boost_filesystem
+    : requirements <library>../build//pdalboost_filesystem
       <hardcode-dll-paths>true
     ;
     

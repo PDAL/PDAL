@@ -13,7 +13,7 @@
 
 #include "boost/date_time/gregorian/greg_month.hpp"
 #include "boost/date_time/special_defs.hpp"
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 namespace gregorian {
 
 
@@ -39,5 +39,5 @@ namespace gregorian {
                                            L"Wednesday", L"Thursday",
                                            L"Friday", L"Saturday"};
 #endif // BOOST_NO_STD_WSTRING
-} } // boost::gregorian
+} } // pdalboost::gregorian
 #endif // DATE_TIME_SRC_GREG_NAMES_HPP___

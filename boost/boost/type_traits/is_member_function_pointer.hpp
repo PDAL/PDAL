@@ -35,7 +35,7 @@
 // should be the last #include
 #include <boost/type_traits/detail/bool_trait_def.hpp>
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 #if defined( __CODEGEARC__ )
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_member_function_pointer,T,__is_member_function_pointer( T ))
@@ -44,7 +44,7 @@ BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_member_function_pointer,T,__is_member_function_p
 BOOST_TT_AUX_BOOL_TRAIT_DEF1(
       is_member_function_pointer
     , T
-    , ::boost::type_traits::is_mem_fun_pointer_impl<typename remove_cv<T>::type>::value
+    , ::pdalboost::type_traits::is_mem_fun_pointer_impl<typename remove_cv<T>::type>::value
     )
 
 #else
@@ -55,7 +55,7 @@ namespace detail {
 
 template <bool>
 struct is_mem_fun_pointer_select
-    : public ::boost::type_traits::false_result
+    : public ::pdalboost::type_traits::false_result
 {
 };
 
@@ -73,7 +73,7 @@ struct is_mem_fun_pointer_select<false>
 
         BOOST_STATIC_CONSTANT(
             bool, value = (
-                1 == sizeof(::boost::type_traits::is_mem_fun_pointer_tester(self_type::make_t))
+                1 == sizeof(::pdalboost::type_traits::is_mem_fun_pointer_tester(self_type::make_t))
             ));
 #if BOOST_WORKAROUND(BOOST_MSVC_FULL_VER, >= 140050000)
 #pragma warning(pop)
@@ -84,9 +84,9 @@ struct is_mem_fun_pointer_select<false>
 template <typename T>
 struct is_member_function_pointer_impl
     : public is_mem_fun_pointer_select<
-          ::boost::type_traits::ice_or<
-              ::boost::is_reference<T>::value
-            , ::boost::is_array<T>::value
+          ::pdalboost::type_traits::ice_or<
+              ::pdalboost::is_reference<T>::value
+            , ::pdalboost::is_array<T>::value
             >::value
         >::template result_<T>
 {
@@ -125,11 +125,11 @@ BOOST_TT_AUX_BOOL_TRAIT_IMPL_SPEC1(is_member_function_pointer,void const volatil
 
 } // namespace detail
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_member_function_pointer,T,::boost::detail::is_member_function_pointer_impl<T>::value)
+BOOST_TT_AUX_BOOL_TRAIT_DEF1(is_member_function_pointer,T,::pdalboost::detail::is_member_function_pointer_impl<T>::value)
 
 #endif // BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION
 
-} // namespace boost
+} // namespace pdalboost
 
 #include <boost/type_traits/detail/bool_trait_undef.hpp>
 

@@ -23,7 +23,7 @@
 #include "boost/type_traits/is_const.hpp"
 #endif
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 //////////////////////////////////////////////////////////////////////////
 // function template apply_visitor(visitor, visitable)
@@ -78,6 +78,6 @@ apply_visitor(const Visitor& visitor, Visitable& visitable)
 
 #endif // MSVC7 and below exclusion
 
-} // namespace boost
+} // namespace pdalboost
 
 #endif // BOOST_VARIANT_DETAIL_APPLY_VISITOR_UNARY_HPP

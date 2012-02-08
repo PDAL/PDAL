@@ -24,7 +24,7 @@
 
 //____________________________________________________________________________//
 
-namespace boost {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
 
 namespace unit_test {
 
@@ -33,7 +33,7 @@ namespace unit_test {
 // ************************************************************************** //
 
 template<typename Derived>
-class singleton : private boost::noncopyable {
+class singleton : private pdalboost::noncopyable {
 public:
     static Derived& instance() { static Derived the_inst; return the_inst; }    
 protected:
@@ -44,7 +44,7 @@ protected:
 } // namespace unit_test
 
 #define BOOST_TEST_SINGLETON_CONS( type )       \
-friend class boost::unit_test::singleton<type>; \
+friend class pdalboost::unit_test::singleton<type>; \
 type() {}                                       \
 /**/
 
@@ -65,7 +65,7 @@ namespace { BOOST_JOIN( inst, _t)& inst = BOOST_JOIN( inst, _t)::instance(); }
 
 #endif
 
-} // namespace boost
+} // namespace pdalboost
 
 //____________________________________________________________________________//
 

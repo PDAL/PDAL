@@ -21,7 +21,7 @@
 
 #include <boost/spirit/home/classic/namespace.hpp>
 
-namespace boost { namespace spirit {
+namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespace spirit {
 
 BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
 
@@ -36,11 +36,11 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
     //          (There's an alternate implementation that relaxes this
     //              requirement -- Joao Abecasis)
     //      T::T() MUST not throw!
-    //          this is a requirement of boost::call_once.
+    //          this is a requirement of pdalboost::call_once.
     //
     template <class T, class Tag>
     struct static_
-        : boost::noncopyable
+        : pdalboost::noncopyable
     {
     private:
 
@@ -64,12 +64,12 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
     public:
 
         typedef T value_type;
-        typedef typename boost::call_traits<T>::reference reference;
-        typedef typename boost::call_traits<T>::const_reference const_reference;
+        typedef typename pdalboost::call_traits<T>::reference reference;
+        typedef typename pdalboost::call_traits<T>::const_reference const_reference;
 
         static_(Tag = Tag())
         {
-            boost::call_once(&default_ctor::construct, constructed_);
+            pdalboost::call_once(&default_ctor::construct, constructed_);
         }
 
         operator reference()
@@ -93,15 +93,15 @@ BOOST_SPIRIT_CLASSIC_NAMESPACE_BEGIN
         }
 
     private:
-        typedef typename boost::add_pointer<value_type>::type pointer;
+        typedef typename pdalboost::add_pointer<value_type>::type pointer;
 
         static pointer get_address()
         {
             return static_cast<pointer>(data_.address());
         }
 
-        typedef boost::aligned_storage<sizeof(value_type),
-            boost::alignment_of<value_type>::value> storage_type;
+        typedef pdalboost::aligned_storage<sizeof(value_type),
+            pdalboost::alignment_of<value_type>::value> storage_type;
 
         static storage_type data_;
         static once_flag constructed_;
