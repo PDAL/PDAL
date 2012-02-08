@@ -1,4 +1,4 @@
-.. _docs_development:
+.. _development_docs:
 
 ====
 Docs

@@ -1,4 +1,4 @@
-.. _conventions:
+.. _development_conventions:
 
 ==================
 Coding Conventions

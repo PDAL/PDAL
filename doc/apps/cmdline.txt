@@ -1,7 +1,7 @@
-.. _apps:
+.. _apps_cmdline:
 
 =========================
-PDAL Project Notes: Apps
+Apps
 =========================
 
 PDAL will contain a number of command line applications that are built on

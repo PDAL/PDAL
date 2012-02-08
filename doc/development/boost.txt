@@ -1,4 +1,4 @@
-.. _boost:
+.. _development_boost:
 
 ===================
 PDAL's Use of Boost

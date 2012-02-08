@@ -36,5 +36,7 @@ http://pointcloud.org domain.
 .. _`LIDAR`: http://en.wikipedia.org/wiki/LIDAR
 .. _`U.S. Army Cold Regions Research and Engineering Laboratory` : http://www.crrel.usace.army.mil/
 .. _`Howard Butler`: http://hobu.biz
-.. _`Michael Gerlek`: http://flaxen.com
+.. _`Michael Gerlek`: http://www.flaxen.com
+
+
 

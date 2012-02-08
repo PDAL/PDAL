@@ -1,4 +1,4 @@
-.. _error_handling:
+.. _development_errorhandling:
 
 =========================
 Errors and Error Handling

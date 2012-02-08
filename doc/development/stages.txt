@@ -1,7 +1,7 @@
-.. _stages:
+.. _development_stages:
 
 ===========================
-PDAL Project Notes: Stages
+Stages
 ===========================
 
 As discussed in another Note, PDAL is designed to construct simple
