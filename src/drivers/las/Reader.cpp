@@ -555,27 +555,8 @@ void Reader::ExtractNITF()
         std::string msg("NITFDESAccess(%d) failed!");
         throw pdal_error(msg);
     }
-
     
-    std::string tempfile;
-	std::string tempdir = getOptions().getValueOrDefault<std::string>("temppath", "");
-	if (tempdir.size() > 0)
-	{
-		// if the user gave us a tempdir option, use that
-		
-		boost::filesystem::path temp(tempdir);
-		
-        boost::filesystem::path name = boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
-        
-        std::ostringstream oss;
-        boost::filesystem::path fullpath = temp/name;
-        oss << fullpath;
-        tempfile = oss.str();
-        
-        boost::algorithm::erase_all(tempfile, "\"");
-	} else {
-		tempfile = Utils::generate_tempfile();
-	}
+    std::string tempfile = Utils::generate_tempfile();
     log()->get(logDEBUG) << "Using " << tempfile << " for NITF->LAS filename" << std::endl;
     
     if (ExtractLASFromNITF(psDES, tempfile.c_str()))
