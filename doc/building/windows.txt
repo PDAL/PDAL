@@ -100,7 +100,7 @@ For example
 
 
     "libboost_filesystem-vc100-mt-gd-1_48.lib"
-                                    ^^  This is the <abi-tag>
+                                  ^^  This is the <abi-tag>
 
 <abi-tag> - This is a string of one or more characters. For us, the characters of interest are s, g, d.
 
@@ -111,7 +111,7 @@ For example
     
     d - indicates all debug symbols are available in the library, no inlining and optimization has been done while building the code.
     
-This is particularly important on Windows.  Unlike other platforms, CRT configuration (debug vs release and staticly linked vsshared), needs to match you PDAL configuration.
+This is particularly important on Windows.  Unlike other platforms, CRT configuration (debug vs release and statically linked vs shared dll), needs to match you PDAL configuration.
 
 After you get the Boost archive (source) from http://www.boost.org from the root of the boost distribution run "bootstrap.bat" and then "b2" with the appropriate options.
 
