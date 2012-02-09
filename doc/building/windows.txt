@@ -1,3 +1,5 @@
+
+
 .. _building_windows:
 
 ======================
@@ -6,16 +8,18 @@ Building Under Windows
 
 Most Users
 ----------
-If you just want to build PDAL so you can 
+If you just want to build PDAL so you can
+
 a. use the utilities or 
 b. investigate PDAL integration 
 c. test / fix / extend the library and 
+
 you are OK with doing all this with a 32 bit compiler, check the "Prerequisites" and follow the "Basic Build Steps" below. 
 
 
 Advanced Users
 --------------
-If your needs go beyond this, then use check the "Prerequisites" and use the "Advanced Build Steps" below as a guide to configuring the library.
+If your needs go beyond this, then check the "Prerequisites" and use the "Advanced Build Steps" below as a guide to configuring the library.
 
 
 Prerequisites
@@ -86,45 +90,52 @@ One option for all dependencies except Boost is OSGeo4W (free, win32 installer, 
 
 Boost Build Notes
 -----------------
-Options for Boost include BoostPro (free win32 installer, no x64) or the internal "BCP'ed" extract in PDAL.
+Options for Boost include might include BoostPro (free win32 installer, no x64) or the internal "BCP'ed" extract in PDAL.
+We say "might" because PDAL requires Boost version 1.48 or later and at this writing that's not supported by BoostPro.
 If you need to build Boost from source, the following notes will be helpful.
 
-Boost libraries include an "ABI" description as part of the name.  This is particularly important on Windows.
-Unlike other platforms, whether CRT is debug or release and whether it's staticly linked or shared, it all needs to match you PDAL configuration.
-For example::
+Boost libraries include an "ABI" description as part of the name.  
+For example
+::
 
-   "libboost_filesystem-vc100-mt-gd-1_48.lib"
-                                 ^^  This is the ABI description
+
+    "libboost_filesystem-vc100-mt-gd-1_48.lib"
+                                    ^^  This is the <abi-tag>
 
 <abi-tag> - This is a string of one or more characters. For us, the characters of interest are s, g, d.
-s - indicates that the library is statically linked to the C++ Standard Library and Runtime Library.
-g - indicates that the debug versions of the standard and runtime support libraries are linked against. On a typical Windows installation you will get a debug version of the runtime libraries to link against, but this need not be the case on Unix boxes.
-d - indicates all debug symbols are available in the library, no inlining and optimization has been done while building the code.
+
+
+    s - indicates that the library is statically linked to the C++ Standard Library and Runtime Library.
+     
+    g - indicates that the debug versions of the standard and runtime support libraries are linked against. On a typical Windows installation you will get a debug version of the runtime libraries to link against, but this need not be the case on Unix boxes.
+    
+    d - indicates all debug symbols are available in the library, no inlining and optimization has been done while building the code.
+    
+This is particularly important on Windows.  Unlike other platforms, CRT configuration (debug vs release and staticly linked vsshared), needs to match you PDAL configuration.
 
 After you get the Boost archive (source) from http://www.boost.org from the root of the boost distribution run "bootstrap.bat" and then "b2" with the appropriate options.
 
 Examples
 
-(for our default release configuration we use /MD, so you want the release shared CRT, like "libboost_filesystem-vc100-mt-1_48.lib" )::
+Our default release configuration uses /MD, so you want the release shared CRT, like "libboost_filesystem-vc100-mt-1_48.lib"::
 
    c:\utils\boost_1_48_0>.\bootstrap.bat
    c:\utils\boost_1_48_0>.\b2 variant=release link=static threading=multi runtime-link=shared stage
 
-(for our default debug configuration we use /MDd, so you want the debug shared CRT, like "libboost_filesystem-vc100-mt-gd-1_48.lib" ))::
+Our default debug configuration uses /MDd, so you want the debug shared CRT, like "libboost_filesystem-vc100-mt-gd-1_48.lib"::
 
    c:\utils\boost_1_48_0>.\bootstrap.bat
    c:\utils\boost_1_48_0>.\b2 variant=debug link=static threading=multi runtime-link=shared stage
 
-Finally, we've seen problems with b2.exe if the path includes some paths that are quoted ("c:\Program Files (x86)\doxygen\bin").
-you can unquote or remove them from the %PATH% while building Boost.
+Finally, we've seen problems with b2.exe if the path includes some paths that are quoted ("c:\\Program Files (x86)\\doxygen\\bin").  You can unquote or remove them from the %PATH% while building Boost.
 
 2.  Having staged the above libs, you  need to specify where they are by editing the appropriate lines in the "config.bat" file.
-Each dependency has a short section of the config.bat file. Check these are specified correctly.  For example:
-::
-:: LASZIP
-set LASZIP_ENABLED=ON
-set LASZIP_LIBRARY=%DEV_DIR%\laszip\bin\Debug\laszip.lib
-set LASZIP_INCLUDE_DIR=%DEV_DIR%\laszip\include
+Each dependency has a short section of the config.bat file. Check these are specified correctly.  For example::
+
+   :: LASZIP
+   set LASZIP_ENABLED=ON
+   set LASZIP_LIBRARY=%DEV_DIR%\laszip\bin\Debug\laszip.lib
+   set LASZIP_INCLUDE_DIR=%DEV_DIR%\laszip\include
 
 3.  While you're still in config.bat, configure the "Generator" for CMake. 
 :: 
@@ -137,12 +148,12 @@ set LASZIP_INCLUDE_DIR=%DEV_DIR%\laszip\include
    set BUILD_TYPE=Release 
    rem set BUILD_TYPE=Debug 
 
-3.  Run "config.bat" in the PDAL directory. This will create the VStudio solution file and .vcxproj files.
+4.  Run "config.bat" in the PDAL directory. This will create the VStudio solution file and .vcxproj files.
 ::
 
    c:\dev\PDAL> config.bat
 
-4.  Start Visual Studio and open PDAL.sln (or if you picked "NMake Makefiles", run NMake).
+5.Start Visual Studio and open PDAL.sln (or if you picked "NMake Makefiles", run NMake).
 
 Testing
 -------
