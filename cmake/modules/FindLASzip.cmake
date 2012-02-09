@@ -7,7 +7,7 @@
 # LASZIP_LIBRARIES   = full path to the library
 # LASZIP_INCLUDE_DIR = where to find the library headers also defined,
 #                       but not for general use are
-# LASZIP_LIBRARY     = where to find the PROJ.4 library.
+# LASZIP_LIBRARY     = where to find the laszip library.
 # LASZIP_VERSION     = version of library which was found, e.g. "1.2.5"
 #
 # Copyright (c) 2009 Mateusz Loskot <mateusz@loskot.net>

@@ -7,15 +7,15 @@ Building Under Windows
 Most Users
 ----------
 If you just want to build PDAL so you can 
-(a) use the utilities or 
-(b) investigate PDAL integration 
-(c) test / fix / extend the library and 
-you are OK with doing all this with a 32 bit compiler, check the "Prequisites" and follow the "Basic Build Steps" below. 
+a. use the utilities or 
+b. investigate PDAL integration 
+c. test / fix / extend the library and 
+you are OK with doing all this with a 32 bit compiler, check the "Prerequisites" and follow the "Basic Build Steps" below. 
 
 
 Advanced Users
 --------------
-If your needs go beyond this, then use check the "Prequisites" and use the "Advanced Build Steps" below as a guide to configuring the library.
+If your needs go beyond this, then use check the "Prerequisites" and use the "Advanced Build Steps" below as a guide to configuring the library.
 
 
 Prerequisites
@@ -25,7 +25,7 @@ Prerequisites
 - Ensure you have cmake.  We used version 2.8.4 from http://www.cmake.org
 
 The steps below assume that these tools are available from your command line.  For Git and CMake, that's just adding them to your %PATH%.  For VStudio, 
-you need to run "vsvars32.bat" ("Microsoft Visual Studio 10.0\Common7\Tools\vsvars32.bat")
+you need to run "vsvars32.bat" ("Microsoft Visual Studio 10.0\\Common7\\Tools\\vsvars32.bat")
 
 
 Basic Build Steps
@@ -57,18 +57,18 @@ We satisfy all dependencies using OSGeo4W and use the Boost subset that is inclu
 
    c:\dev> git clone https://github.com/PDAL/PDAL.git .
 
-3. *From the root of your PDAL tree*, run "config.bat". This will create the VStudio solution file and .vcxproj files.
+3. **From the root of your PDAL tree**, run "config.bat". This will create the VStudio solution file and .vcxproj files.
 ::
 
    c:\dev\PDAL> config.bat
 
 4.  Start Visual Studio and open PDAL.sln.
-5.  Note that you'll need to include the OSGeo4W directory in your %PATH% so that the dependent DLLs are available at run time.
+5.  Note that you'll need to include the %OSGeo4W%/bin directory in your %PATH% so that the dependent DLLs are available at run time.
 
 Advanced Build Steps
 --------------------
 1.  Aquire and stage the required dependent libraries.
-PDAL depends on the following external libraries.  You'll need to get them and build them (or, where possible, download prebuilt binary packages).
+PDAL depends on the following external libraries.  You'll need to get them and build them (or perhaps, download prebuilt binary packages).
 
 - Boost (get version 1.4.8 or better from http://boost.org) [ required ]
 - GDAL (get version 1.6 or later from http://gdal.org) [ optional ]
@@ -80,11 +80,21 @@ PDAL depends on the following external libraries.  You'll need to get them and b
 - libgeotiff (optional)
 
 Options for Boost include BoostPro (free win32 installer, no x64) or the internal "BCP'ed" extract in PDAL.
+
+If you need to build Boost from source, you'll want to have these notes on hand:
+::
+./bootstrap.bat
+./b2 variant=release link=static threading=multi runtime-link=static --prefix=d:\myboostlocation stage
+
 One option for all the other dependencies is OSGeo4W (free, win32 installer, no x4 -- see "Basic Build Steps" above).
 
 2.  Having staged the above libs, you  need to specify where they are by editing the appropriate lines in the "config.bat" file.
-    Each optional library has a switch (e.g. "-DWITH_LASZIP=ON"), and definitions for an include directory and a library directory
-    (e.g. LASZIP_INCLUDE_DIR and LASZIP_LIBRARY).  Check these are specified correctly.
+Each dependency has a short section of the config.bat file. Check these are specified correctly.  For example:
+::
+:: LASZIP
+set LASZIP_ENABLED=ON
+set LASZIP_LIBRARY=%DEV_DIR%\laszip\bin\Debug\laszip.lib
+set LASZIP_INCLUDE_DIR=%DEV_DIR%\laszip\include
 
 3.  While you're still in config.bat, configure the "Generator" for CMake. 
 :: 
@@ -115,9 +125,7 @@ Troubleshooting
 * libtiff.dll errors - double check that other versions of the lib are not on the path. For example, ArcGIS installs a version of libtiff that is not compatible.
 * "ERROR 4: Unable to open EPSG support file gcs.csv" or GDAL_DATA variable errors - Set GDAL_DATA system variable to ``C:\OSGeo4W\share\gdal``
 * PROJ errors - Set PROJ_LIB system variable to ``C:\OSGeo4W\share\proj``
-* if you need to re-run config.bat, you probably also need to delete your "CMakeCache.txt" first.
-
-
+* link failures due to _ITERATOR_DEBUG_LEVEL mismatches between (external) boost and PDAL.  Set _ITERATOR_DEBUG_LEVEL=0 as in Project Pages / Configuration Properties / C,C++ / Preprocessor / Preprocessor Definitions.
 To Build the SWIG Bindings
 --------------------------
 Follow the instructions in csharp/README.txt.  Be sure and follow the note
