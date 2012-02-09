@@ -185,7 +185,7 @@ if(WIN32)
 endif(WIN32)
 
 # BUG: are there other Boost components we're using?
-find_package(Boost 1.41 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random REQUIRED)
+find_package(Boost 1.48 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random REQUIRED)
 
 if(Boost_FOUND AND Boost_PROGRAM_OPTIONS_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})

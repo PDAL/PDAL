@@ -63,7 +63,11 @@ namespace stats
 
 
 typedef boost::iterator_range<std::vector<std::pair<double, double> >::iterator > histogram_type;
-typedef boost::accumulators::accumulator_set<double, boost::accumulators::features< boost::accumulators::droppable<boost::accumulators::tag::density> > > density_accumulator;
+#ifndef _MSC_VER  // See boost ticket 6535:  https://svn.boost.org/trac/boost/ticket/6535
+typedef boost::accumulators::accumulator_set<double, boost::accumulators::features< boost::accumulators::droppable<boost::accumulators::tag::density> > > density_accumulator ;
+#else
+typedef boost::accumulators::accumulator_set<double, boost::accumulators::features< boost::accumulators::tag::density > > density_accumulator ;
+#endif
 typedef boost::accumulators::accumulator_set<double, boost::accumulators::features<     boost::accumulators::droppable<boost::accumulators::tag::mean>, 
                                                                                         boost::accumulators::droppable<boost::accumulators::tag::max>, 
                                                                                         boost::accumulators::droppable<boost::accumulators::tag::min>,

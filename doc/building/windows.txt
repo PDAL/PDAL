@@ -7,10 +7,10 @@ Building Under Windows
 Most Users
 ----------
 If you just want to build PDAL so you can 
-| (a) use the utilities or 
-| (b) investigate PDAL integration 
-| (c) test / fix / extend the library and 
-you are OK with doing all this with a 32 bit compiler in Release mode only, check the "Prerequisites" and follow the "Basic Build Steps" below. 
+a. use the utilities or 
+b. investigate PDAL integration 
+c. test / fix / extend the library and 
+you are OK with doing all this with a 32 bit compiler, check the "Prerequisites" and follow the "Basic Build Steps" below. 
 
 
 Advanced Users
@@ -63,12 +63,12 @@ We satisfy all dependencies using OSGeo4W and use the Boost subset that is inclu
    c:\dev\PDAL> config.bat
 
 4.  Start Visual Studio and open PDAL.sln.
-5.  Note that you'll need to include the OSGeo4W directory in your %PATH% so that the dependent DLLs are available at run time.
+5.  Note that you'll need to include the %OSGeo4W%/bin directory in your %PATH% so that the dependent DLLs are available at run time.
 
 Advanced Build Steps
 --------------------
 1.  Aquire and stage the required dependent libraries.
-PDAL depends on the following external libraries.  You'll need to get them and build them (or, where possible, download prebuilt binary packages).
+PDAL depends on the following external libraries.  You'll need to get them and build them (or perhaps, download prebuilt binary packages).
 
 - Boost (get version 1.4.8 or better from http://boost.org) [ required ]
 - GDAL (get version 1.6 or later from http://gdal.org) [ optional ]
@@ -80,6 +80,12 @@ PDAL depends on the following external libraries.  You'll need to get them and b
 - libgeotiff (optional)
 
 Options for Boost include BoostPro (free win32 installer, no x64) or the internal "BCP'ed" extract in PDAL.
+
+If you need to build Boost from source, you'll want to have these notes on hand:
+::
+./bootstrap.bat
+./b2 variant=release link=static threading=multi runtime-link=static --prefix=d:\myboostlocation stage
+
 One option for all the other dependencies is OSGeo4W (free, win32 installer, no x4 -- see "Basic Build Steps" above).
 
 2.  Having staged the above libs, you  need to specify where they are by editing the appropriate lines in the "config.bat" file.
@@ -119,7 +125,7 @@ Troubleshooting
 * libtiff.dll errors - double check that other versions of the lib are not on the path. For example, ArcGIS installs a version of libtiff that is not compatible.
 * "ERROR 4: Unable to open EPSG support file gcs.csv" or GDAL_DATA variable errors - Set GDAL_DATA system variable to ``C:\OSGeo4W\share\gdal``
 * PROJ errors - Set PROJ_LIB system variable to ``C:\OSGeo4W\share\proj``
-
+* link failures due to _ITERATOR_DEBUG_LEVEL mismatches between (external) boost and PDAL.  Set _ITERATOR_DEBUG_LEVEL=0 as in Project Pages / Configuration Properties / C,C++ / Preprocessor / Preprocessor Definitions.
 To Build the SWIG Bindings
 --------------------------
 Follow the instructions in csharp/README.txt.  Be sure and follow the note
