@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # Run the tests in a clean PDAL repository
 # "clean" == git clean -fdx
 
