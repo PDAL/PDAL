@@ -61,7 +61,11 @@
 
 
 namespace qi = boost::spirit::qi;
+#ifdef PDAL_EMBED_BOOST
+namespace pho = boost::pdalboostphoenix;
+#else
 namespace pho = boost::phoenix;
+#endif
 namespace ascii = boost::spirit::ascii;
 
 

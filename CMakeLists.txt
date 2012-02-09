@@ -173,19 +173,17 @@ endif(APPLE)
 # settings for Boost dependencies
 #------------------------------------------------------------------------------
 
-if(NOT BOOST_ROOT)
-  
-  if (NOT BOOST_EMBED)
+if (NOT PDAL_EMBED_BOOST)
   find_package(Boost 1.48 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
-  endif()
+endif()
   
-  if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
 
-    # make these available for the user to set.
-    mark_as_advanced(CLEAR Boost_INCLUDE_DIR) 
-    mark_as_advanced(CLEAR Boost_LIBRARY_DIRS) 
-    link_directories(${Boost_LIBRARY_DIRS})
+  # make these available for the user to set.
+  mark_as_advanced(CLEAR Boost_INCLUDE_DIR) 
+  mark_as_advanced(CLEAR Boost_LIBRARY_DIRS) 
+  link_directories(${Boost_LIBRARY_DIRS})
 
   # Default to using static, multithreaded libraries for 
   # linking under MSVC.  This is because we show users how to 
@@ -198,14 +196,14 @@ if(NOT BOOST_ROOT)
     endif(MSVC)
   endif(WIN32)
   
-  else()
-    add_subdirectory(boost)
-    set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/boost)
-    find_package(Boost 1.48)
-    set(Boost_LIBRARIES ${PROJECT_SOURCE_DIR}/bin/libpdalboost.a)
-    include_directories(${Boost_INCLUDE_DIRS})
-  endif()
-endif(NOT BOOST_ROOT)
+else()
+  add_subdirectory(boost)
+  set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/boost)
+  find_package(Boost 1.48)
+  set(Boost_LIBRARIES ${PROJECT_SOURCE_DIR}/bin/libpdalboost.a)
+  include_directories(${Boost_INCLUDE_DIRS})
+endif(Boost_FOUND)
+
 #------------------------------------------------------------------------------
 # settings for GDAL & related dependencies
 #------------------------------------------------------------------------------
