@@ -201,7 +201,7 @@ else()
   find_package(Boost 1.48)
   FILE(GLOB Boost_LIBRARIES "${PROJECT_SOURCE_DIR}/boost/stage/lib/libpdalboost_*.a")
   include_directories(${Boost_INCLUDE_DIRS})
-  set(PDAL_EMBED_BOOST 1)
+  set(PDAL_EMBED_BOOST TRUE CACHE BOOL "use embedded boost")
 endif(Boost_FOUND)
 
 #------------------------------------------------------------------------------
