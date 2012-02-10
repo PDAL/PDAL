@@ -197,11 +197,11 @@ if(Boost_FOUND)
   endif(WIN32)
   
 else()
-  add_subdirectory(boost)
   set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/boost)
   find_package(Boost 1.48)
-  set(Boost_LIBRARIES ${PROJECT_SOURCE_DIR}/bin/libpdalboost.a)
+  FILE(GLOB Boost_LIBRARIES "${PROJECT_SOURCE_DIR}/boost/stage/lib/libpdalboost_*.a")
   include_directories(${Boost_INCLUDE_DIRS})
+  set(PDAL_EMBED_BOOST 1)
 endif(Boost_FOUND)
 
 #------------------------------------------------------------------------------
