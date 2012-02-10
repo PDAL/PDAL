@@ -1,0 +1,60 @@
+#~ Copyright 2008 Jonathan Biggar
+#~ Distributed under the Boost Software License, Version 1.0.
+#~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+
+ECHO -- Testing parameter passing... ;
+
+rule test_numeric_params
+{
+    assert $(1) : (==) : 1 ;
+    assert $(2) : (==) : 2 ;
+    assert $(3) : (==) : 3 ;
+    assert $(4) : (==) : 4 ;
+    assert $(5) : (==) : 5 ;
+    assert $(6) : (==) : 6 ;
+    assert $(7) : (==) : 7 ;
+    assert $(8) : (==) : 8 ;
+    assert $(9) : (==) : 9 ;
+    assert $(10) : (==) : 10 ;
+    assert $(11) : (==) : 11 ;
+    assert $(12) : (==) : 12 ;
+    assert $(13) : (==) : 13 ;
+    assert $(14) : (==) : 14 ;
+    assert $(15) : (==) : 15 ;
+    assert $(16) : (==) : 16 ;
+    assert $(17) : (==) : 17 ;
+    assert $(18) : (==) : 18 ;
+    assert $(19) : (==) : 19 ;
+}
+
+rule test_named_params ( p1 : p2 : p3 : p4 : p5 : p6 : p7 : p8 : p9 :
+                         p10 : p11 : p12 : p13 : p14 : p15 : p16 : p17 : p18 : p19 )
+
+
+{
+    assert $(p1) : (==) : 1 ;
+    assert $(p2) : (==) : 2 ;
+    assert $(p3) : (==) : 3 ;
+    assert $(p4) : (==) : 4 ;
+    assert $(p5) : (==) : 5 ;
+    assert $(p6) : (==) : 6 ;
+    assert $(p7) : (==) : 7 ;
+    assert $(p8) : (==) : 8 ;
+    assert $(p9) : (==) : 9 ;
+    assert $(p10) : (==) : 10 ;
+    assert $(p11) : (==) : 11 ;
+    assert $(p12) : (==) : 12 ;
+    assert $(p13) : (==) : 13 ;
+    assert $(p14) : (==) : 14 ;
+    assert $(p15) : (==) : 15 ;
+    assert $(p16) : (==) : 16 ;
+    assert $(p17) : (==) : 17 ;
+    assert $(p18) : (==) : 18 ;
+    assert $(p19) : (==) : 19 ;
+}
+
+test_numeric_params 1 : 2 : 3 : 4 : 5 : 6 : 7 : 8 : 9 :
+                    10 : 11 : 12 : 13 : 14 : 15 : 16 : 17 : 18 : 19 ;
+
+test_named_params 1 : 2 : 3 : 4 : 5 : 6 : 7 : 8 : 9 :
+                  10 : 11 : 12 : 13 : 14 : 15 : 16 : 17 : 18 : 19 ;
