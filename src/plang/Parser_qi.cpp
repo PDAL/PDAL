@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/pdal_internal.hpp>
 #include <pdal/plang/Parser.hpp>
 
 #include <pdal/plang/AstNode.hpp>
