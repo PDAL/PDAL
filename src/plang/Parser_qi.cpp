@@ -114,9 +114,11 @@ PlangParser::PlangParser() : PlangParser::base_type(program)
                | ("0x" >> qi::hex)              [ SET_1(AstConstant) ]
                | (strict_float >> 'f')          [ SET_1(AstConstant) ]
                | strict_double                  [ SET_1(AstConstant) ]
+#ifdef BOOST_HAS_LONG_LONG
                | (qi::ulong_long >> "ul")       [ SET_1(AstConstant) ]
                | (qi::ulong_long >> "lu")       [ SET_1(AstConstant) ]
                | (qi::long_long >> 'l')         [ SET_1(AstConstant) ]
+#endif
                | (qi::uint_ >> 'u')             [ SET_1(AstConstant) ]
                | qi::int_                       [ SET_1(AstConstant) ]
                | qi::lit("true")                [ SET_P(AstConstant, true) ]
