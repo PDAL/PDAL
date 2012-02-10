@@ -133,7 +133,7 @@ if(WIN32)
     #add_definitions("-DBOOST_TEST_DYN_LINK")
   endif()
 else()
-    if(Boost_PROGRAM_OPTIONS_LIBRARY MATCHES "\\.a$")
+	if(Boost_PROGRAM_OPTIONS_LIBRARY MATCHES "\\.a$" OR PDAL_EMBED_BOOST)
         # pass, we can compile static
     else()
         add_definitions("-DBOOST_TEST_DYN_LINK")
