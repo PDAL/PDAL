@@ -133,7 +133,10 @@ if(WIN32)
     #add_definitions("-DBOOST_TEST_DYN_LINK")
   endif()
 else()
-	if(Boost_PROGRAM_OPTIONS_LIBRARY MATCHES "\\.a$" OR PDAL_EMBED_BOOST)
+    # Our own static build of embedded boost does BOOST_TEST_DYN_LINK 
+    # when it is compiled, but regular static builds of Boost will 
+    # not do this. 
+    if(Boost_PROGRAM_OPTIONS_LIBRARY MATCHES "\\.a$" )
         # pass, we can compile static
     else()
         add_definitions("-DBOOST_TEST_DYN_LINK")
