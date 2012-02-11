@@ -4,7 +4,7 @@
 
 CMAKE_OPTS="-G \"Unix Makefiles\" -C test/BuildSetup.jenkins ."
 if [ "$1" == "PDAL-embed-boost" ]; then
-    CMAKE_OPTS="$CMAKE_OPTS -DPDAL_EMBED_BOOST:STRING=ON"
+    CMAKE_OPTS="$CMAKE_OPTS -DPDAL_EMBED_BOOST:BOOL=ON"
 fi
 export ORACLE_HOME="/u01/app/oracle/product/11.2.0/dbhome_1"
 export PATH="/var/lib/jenkins/local/bin:$PATH"
