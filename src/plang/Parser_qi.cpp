@@ -115,9 +115,21 @@ PlangParser::PlangParser() : PlangParser::base_type(program)
                | ("0x" >> qi::hex)              [ SET_1(AstConstant) ]
                | (strict_float >> 'f')          [ SET_1(AstConstant) ]
                | strict_double                  [ SET_1(AstConstant) ]
+#if notdef
+// This doesn't work on the jenkins build.  
+/* I'm getting an error of boost/variant/variant.hpp:1326:9: error: call of overloaded ‘initialize(void*, long long int&)’ is ambiguous and boost/variant/variant.hpp:1326:9: error: call of overloaded ‘initialize(void*, long long unsigned int&)’ is ambiguous yet BOOST_HAS_LONG_LONG is defined for my setup.  Pointers to settings/macros other than BOOST_HAS_LONG_LONG that I might look at would be greatly appreciated
+[10:49am] hobu: The note there says: "Compile error here indicates that the given type not is unambiguously convertible to one of the variant's types" but I'm not sure what that means...
+[10:50am] hobu: http://stackoverflow.com/questions/6571837/why-does-boostspiritqiparse-not-set-this-boostvariants-value seems pertinent, as this is a qi situation for me as well
+[10:54am] mdupont: hobu, cast it
+[10:54am] mdupont: you have the tsecond param is either int& or unsigned int ^
+[10:54am] mdupont: you have the tsecond param is either int& or unsigned int &
+[10:54am] VeXocide: http://www.boost.org/doc/libs/1_48_0/libs/spirit/doc/html/spirit/qi/reference/auxiliary/attr_cast.html
+[10:54am] mdupont: you can declare a variable of the right type before and pass that in
+*/
                | (qi::ulong_long >> "ul")       [ SET_1(AstConstant) ]
                | (qi::ulong_long >> "lu")       [ SET_1(AstConstant) ]
                | (qi::long_long >> 'l')         [ SET_1(AstConstant) ]
+#endif
                | (qi::uint_ >> 'u')             [ SET_1(AstConstant) ]
                | qi::int_                       [ SET_1(AstConstant) ]
                | qi::lit("true")                [ SET_P(AstConstant, true) ]
