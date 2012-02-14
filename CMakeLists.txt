@@ -226,7 +226,7 @@ endif(Boost_FOUND)
 set(WITH_GDAL FALSE CACHE BOOL "Choose if GDAL support should be built")
 
 if(WITH_GDAL)
-  find_package(GDAL 1.8.0)
+  find_package(GDAL 1.9.0)
   set(PDAL_HAVE_GDAL 1)
   include_directories(${GDAL_INCLUDE_DIR})
   mark_as_advanced(CLEAR GDAL_INCLUDE_DIR) 
