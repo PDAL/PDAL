@@ -147,7 +147,7 @@ else()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
     if (CMAKE_COMPILER_IS_GNUCXX)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -ansi ")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
     endif()
     
     set(PDAL_COMPILER_GCC 1)
@@ -176,8 +176,10 @@ endif(APPLE)
 if (NOT PDAL_EMBED_BOOST)
   find_package(Boost 1.48 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
 endif()
-  
+
+
 if(Boost_FOUND)
+  message(STATUS "We found boost anyway")
   include_directories(${Boost_INCLUDE_DIRS})
 
   # make these available for the user to set.
@@ -199,9 +201,21 @@ if(Boost_FOUND)
 else()
   set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/boost)
   find_package(Boost 1.48)
-  FILE(GLOB Boost_LIBRARIES "${PROJECT_SOURCE_DIR}/boost/stage/lib/libpdalboost_*.a")
-  include_directories(${Boost_INCLUDE_DIRS})
+
+  if (WIN32)
+      message(ERROR "Selection of libpdalboost static libraries not set yet!")
+  else()
+    # Some Cmake versions are borken here. See
+    # http://www.cmake.org/Bug/view.php?id=12258#c26851
+    set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem") 
+    set(PDALBOOST_LIB_NAME "pdalboost" CACHE STRING "use embedded boost")
+   # FILE(GLOB Boost_LIBRARIES "${PROJECT_SOURCE_DIR}/boost/stage/lib/libpdalboost_*.a")
+  endif()
+
+  include_directories(BEFORE SYSTEM ${Boost_INCLUDE_DIRS}/)
   set(PDAL_EMBED_BOOST TRUE CACHE BOOL "use embedded boost")
+  add_subdirectory(boost)
+  message(STATUS "Using embedded boost tree")
 endif(Boost_FOUND)
 
 #------------------------------------------------------------------------------
