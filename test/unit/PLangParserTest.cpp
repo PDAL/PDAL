@@ -200,10 +200,10 @@ BOOST_AUTO_TEST_CASE(PLangParserTest_test1)
     check_out1("float64 d; d = float64( 7 - 3 ) / float64(int8(8+3));", "d", ((7.0-3.0)/double(8+3)));  // 0.363636
     
     check_out1("int32 r; r = 1 + 2 + 3;", "r", 6);
-
+#if notdef // See Parser_qi
     check_out1("float64 d; d = float64(1) + float64(2u) + float64(3ul) + float64(4lu) + float64(5l) + 6.0 + float64(7.0f) + float64(0x88) + float64(0x0888l);",
                "d", (1.0 + 2.0 + 3.0 + 4.0 + 5.0 + 6.0 + 7.0 + (double)0x88 + (double)0x0888l));
-
+#endif
     check_out1("float64 d; d = 6.7 + 1.2 * float64( 7 - 3 ) / float64(int8(8+3));", 
               "d", (6.7 + 1.2 * 4.0 / 11.0));
 
