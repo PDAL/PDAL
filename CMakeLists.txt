@@ -179,7 +179,6 @@ endif()
 
 
 if(Boost_FOUND)
-  message(STATUS "We found boost anyway")
   include_directories(${Boost_INCLUDE_DIRS})
 
   # make these available for the user to set.
@@ -207,12 +206,13 @@ else()
   else()
     # Some Cmake versions are borken here. See
     # http://www.cmake.org/Bug/view.php?id=12258#c26851
-    set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem") 
+    #set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem") 
     set(PDALBOOST_LIB_NAME "pdalboost" CACHE STRING "use embedded boost")
-   # FILE(GLOB Boost_LIBRARIES "${PROJECT_SOURCE_DIR}/boost/stage/lib/libpdalboost_*.a")
+
   endif()
 
-  include_directories(BEFORE SYSTEM ${Boost_INCLUDE_DIRS}/)
+#  include_directories(BEFORE SYSTEM ${Boost_INCLUDE_DIRS}/)
+  include_directories(BEFORE ${Boost_INCLUDE_DIRS}/)
   set(PDAL_EMBED_BOOST TRUE CACHE BOOL "use embedded boost")
   add_subdirectory(boost)
   message(STATUS "Using embedded boost tree")
