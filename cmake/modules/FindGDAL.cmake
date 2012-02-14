@@ -14,7 +14,6 @@
 #
 ###############################################################################
 MESSAGE(STATUS "Searching for GDAL ${GDAL_FIND_VERSION}+ library")
-MESSAGE(STATUS "   NOTE: Required version is not checked - to be implemented")
 
 SET(GDAL_NAMES gdal)
 
@@ -119,11 +118,15 @@ ELSEIF(UNIX)
 
         STRING(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\1" GDAL_VERSION_MAJOR "${GDAL_VERSION}")
         STRING(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\2" GDAL_VERSION_MINOR "${GDAL_VERSION}")
-  
+        
+        set(GDAL_FOUND_VERSION "${GDAL_VERSION_MAJOR}.${GDAL_VERSION_MINOR}")
+        string(REPLACE "." ";" GDAL_FIND_VERSION_LIST ${GDAL_FIND_VERSION})
+        list(GET GDAL_FIND_VERSION_LIST 0 GDAL_FIND_VERSION_MAJOR)
+        list(GET GDAL_FIND_VERSION_LIST 1 GDAL_FIND_VERSION_MINOR)
+        
         # Check for GDAL version
-        # TODO: What version is requiredfor libLAS? --mloskot
-        IF(GDAL_VERSION_MAJOR LESS 1 OR GDAL_VERSION_MINOR LESS 6)
-            MESSAGE (FATAL_ERROR "GDAL version is too old (${GDAL_VERSION}). Use 1.6.0 or higher.")
+        IF(GDAL_FOUND_VERSION VERSION_LESS GDAL_FIND_VERSION)
+            MESSAGE (FATAL_ERROR "GDAL version is too old (${GDAL_VERSION}). Use ${GDAL_FIND_VERSION_MAJOR}.${GDAL_FIND_VERSION_MINOR}.0 or higher requested.")
         ENDIF()
 
         # Set INCLUDE_DIR to prefix+include
@@ -182,6 +185,3 @@ ENDIF()
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GDAL DEFAULT_MSG GDAL_LIBRARY GDAL_INCLUDE_DIR)
 
-# TODO: Do we want to mark these as advanced? --mloskot
-# http://www.cmake.org/cmake/help/cmake2.6docs.html#command:mark_as_advanced
-#MARK_AS_ADVANCED(SPATIALINDEX_LIBRARY SPATIALINDEX_INCLUDE_DIR)
