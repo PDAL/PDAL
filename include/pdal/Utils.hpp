@@ -158,33 +158,11 @@ public:
     static boost::uint32_t safeconvert64to32(boost::uint64_t x64);
 
     // Generates a random temporary filename
-    static std::string generate_filename()
-    {
-        boost::filesystem::path path = boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
-        
-        std::ostringstream oss;
-        boost::filesystem::path fullpath = path;
-        oss << fullpath;
-        std::string output(oss.str());
-        
-        boost::algorithm::erase_all(output, "\"");
-        return output;
-    }
+    static std::string generate_filename();
+    static std::string generate_tempfile();
 
-	static std::string generate_tempfile()
-    {
-        boost::filesystem::path path = boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
-        boost::filesystem::path tempdir = boost::filesystem::temp_directory_path();
-        
-        std::ostringstream oss;
-        boost::filesystem::path fullpath = tempdir/path;
-        oss << fullpath;
-        std::string output(oss.str());
-        
-        boost::algorithm::erase_all(output, "\"");
-        return output;
-    }
-
+    void* getDLLSymbol( std::string const& library, std::string const& name);
+    
 private:
     template<typename T>
     static inline char* as_buffer(T& data)
