@@ -212,7 +212,7 @@ else()
   endif()
 
 #  include_directories(BEFORE SYSTEM ${Boost_INCLUDE_DIRS}/)
-  include_directories(BEFORE ${Boost_INCLUDE_DIRS}/)
+  include_directories(${Boost_INCLUDE_DIRS}/)
   set(PDAL_EMBED_BOOST TRUE CACHE BOOL "use embedded boost")
   add_subdirectory(boost)
   message(STATUS "Using embedded boost tree")
