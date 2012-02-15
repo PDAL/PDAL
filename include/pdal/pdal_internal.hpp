@@ -49,6 +49,12 @@
 #include <boost/cstdint.hpp>
 #include <boost/version.hpp>
 
+// See http://stackoverflow.com/questions/1814548/boostsystem-category-defined-but-not-used
+#ifndef BOOST_SYSTEM_NO_DEPRECATED
+#define BOOST_SYSTEM_NO_DEPRECATED 1
+#endif
+
+
 #define PDAL_CURRENT_BOOST_MINOR_VERSION BOOST_VERSION/100%1000
 #ifdef __cplusplus
 #  define PDAL_C_START           extern "C" {
