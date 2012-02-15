@@ -147,6 +147,40 @@ boost::uint32_t Utils::safeconvert64to32(boost::uint64_t x64)
     return x32;
 }
 
+std::string Utils::generate_filename()
+{
+    boost::filesystem::path path = boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
+    
+    std::ostringstream oss;
+    boost::filesystem::path fullpath = path;
+    oss << fullpath;
+    std::string output(oss.str());
+    
+    boost::algorithm::erase_all(output, "\"");
+    return output;
+}
+
+std::string Utils::generate_tempfile()
+{
+    boost::filesystem::path path = boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
+    boost::filesystem::path tempdir = boost::filesystem::temp_directory_path();
+    
+    std::ostringstream oss;
+    boost::filesystem::path fullpath = tempdir/path;
+    oss << fullpath;
+    std::string output(oss.str());
+    
+    boost::algorithm::erase_all(output, "\"");
+    return output;
+}
+
+void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
+{
+    void* pLibrary = NULL;
+    void* pSymbol = NULL;
+    
+    return pSymbol;
+}
 
 
 } // namespace pdal

@@ -40,6 +40,30 @@
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
+
+// This is cheap hackery.  GDALUtils is the first file compiled, and 
+// we want to make sure we have the correct boost before we go and 
+// compile a bunch of junk.  boost::phoenix has a sub-namespace 
+// called boostphoenix that gets renamed pdalboostphoenix as part of the 
+// bcp extraction process.  If the user is using embedded boost, we can
+// know right away based on this sub-namespace.  All of the boost 
+// headers do boost=pdalboostphoenix; for a top namespace, however, so 
+// merely testing that is no good.  If someone has a better sub-namespace 
+// than the one out of phoenix which probably includes half of boost in the 
+// process, please switch this.
+#include <boost/spirit/include/phoenix_object.hpp>
+
+#ifdef PDAL_EMBED_BOOST
+// If this fails, it is because we've included a boost that is not 
+// the embedded one ahead of the one in our tree.  Maybe the user 
+// forgot to clean up the CMakeCache.txt or something, or it is 
+// legitimately the wrong one. 
+namespace pho = boost::pdalboostphoenix;
+#else
+namespace pho = boost::phoenix;
+#endif
+
+
 namespace pdal
 {
 namespace gdal
