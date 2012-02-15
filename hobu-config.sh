@@ -9,6 +9,7 @@ EMBED=ON
 cmake   -G "Unix Makefiles"  \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/Users/hobu \
+        -DPDAL_EMBED_BOOST=${EMBED} \
         -DWITH_GDAL=ON \
         -DWITH_ICONV=ON \
         -DWITH_ORACLE=ON \
