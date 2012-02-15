@@ -200,16 +200,19 @@ if(Boost_FOUND)
 else()
   set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/boost)
   find_package(Boost 1.48)
+  set(PDALBOOST_LIB_NAME "pdalboost" CACHE STRING "embedded boost name")
 
   if (WIN32)
-      message(ERROR "Selection of libpdalboost static libraries not set yet!")
+    set(Boost_LIBRARIES "${PDALBOOST_LIB_NAME}.lib")
+    link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
   else()
     # Some Cmake versions are borken here. See
     # http://www.cmake.org/Bug/view.php?id=12258#c26851
     #set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem") 
-    set(PDALBOOST_LIB_NAME "pdalboost" CACHE STRING "use embedded boost")
-
   endif()
+
+  # this prevents auto-linking pragmas from depending on wrong lib names
+  add_definitions(-DBOOST_ALL_NO_LIB)
 
 #  include_directories(BEFORE SYSTEM ${Boost_INCLUDE_DIRS}/)
   include_directories(BEFORE ${Boost_INCLUDE_DIRS}/)

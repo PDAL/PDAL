@@ -6,7 +6,6 @@
 
 include_directories(".")
 
-
 add_definitions(-DBOOST_TEST_DYN_LINK)
 
 set(PDALBOOST_SOURCES
@@ -25,11 +24,8 @@ set(PDALBOOST_SOURCES
     ./libs/filesystem/v3/src/unique_path.cpp
     ./libs/filesystem/v3/src/utf8_codecvt_facet.cpp
     ./libs/filesystem/v3/src/windows_file_codecvt.cpp
-    ./libs/iostreams/src/bzip2.cpp
     ./libs/iostreams/src/file_descriptor.cpp
-    ./libs/iostreams/src/gzip.cpp
     ./libs/iostreams/src/mapped_file.cpp
-    ./libs/iostreams/src/zlib.cpp
     ./libs/program_options/src/cmdline.cpp
     ./libs/program_options/src/config_file.cpp
     ./libs/program_options/src/convert.cpp
@@ -63,9 +59,17 @@ set(PDALBOOST_SOURCES
     ./libs/test/src/unit_test_suite.cpp
     ./libs/test/src/xml_log_formatter.cpp
     ./libs/test/src/xml_report_formatter.cpp
-    ./libs/thread/src/pthread/once.cpp
-    ./libs/thread/src/pthread/thread.cpp
 )
+if(WIN32)
+  list(APPEND 
+       ./libs/thread/src/win32/thread.cpp
+       ./libs/thread/src/win32/tss_dll.cpp
+       ./libs/thread/src/win32/tss_pe.cpp)
+else()
+  list(APPEND PDALBOOST_SOURCES
+       ./libs/thread/src/pthread/once.cpp
+       ./libs/thread/src/pthread/thread.cpp)
+endif(WIN32)
 
 add_library(${PDALBOOST_LIB_NAME} STATIC ${PDALBOOST_SOURCES})
 
