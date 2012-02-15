@@ -151,8 +151,6 @@ public:
     // if char found, eats it and returns true; otherwise, don't eat it and then return false
     static bool eatcharacter(std::istream& s, char x);
 
-    static std::string trim(const std::string& str);
-
     static boost::uint32_t getStreamPrecision(double scale);
     
     static boost::uint32_t safeconvert64to32(boost::uint64_t x64);

@@ -45,6 +45,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/optional.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 namespace pdal
 {
@@ -159,7 +160,7 @@ Option PipelineReader::parseElement_Option(const boost::property_tree::ptree& tr
 
     std::string name = attrs["name"];
     std::string value = tree.get_value<std::string>();
-    value = Utils::trim(value);
+    boost::algorithm::trim(value);
     Option option(name, value);
 
     using namespace boost::property_tree;
@@ -395,8 +396,7 @@ void PipelineReader::parse_attributes(map_t& attrs, const boost::property_tree::
     {
         std::string name = iter->first;
         std::string value = tree.get<std::string>(name);
-
-        value = Utils::trim(value);
+        boost::algorithm::trim(value);
 
         attrs[name] = value;
     }

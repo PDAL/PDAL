@@ -38,6 +38,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
+#include <boost/algorithm/string/trim.hpp>
 
 // gdal
 #ifdef PDAL_HAVE_GDAL
@@ -193,7 +194,7 @@ std::string SpatialReference::getProj4() const
     std::string tmp(proj4);
     CPLFree(proj4);
     
-    tmp = Utils::trim(tmp);
+    boost::algorithm::trim(tmp);
     return tmp;
 
 #else
