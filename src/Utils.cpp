@@ -41,6 +41,14 @@
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
+#if !defined(WIN32)
+#include <dlfcn.h>
+#define DLL_LOAD_UNIX
+#else
+#include <windows.h>
+#define DLL_LOAD_WINDOWS
+#endif
+
 namespace pdal
 {
 
@@ -176,9 +184,105 @@ std::string Utils::generate_tempfile()
 
 void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
 {
+    // Completely stolen from GDAL.
+    /******************************************************************************
+     * $Id: cplgetsymbol.cpp 16702 2009-04-01 20:42:49Z rouault $
+     *
+     * Project:  Common Portability Library
+     * Purpose:  Fetch a function pointer from a shared library / DLL.
+     * Author:   Frank Warmerdam, warmerdam@pobox.com
+     *
+     ******************************************************************************
+     * Copyright (c) 1999, Frank Warmerdam
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a
+     * copy of this software and associated documentation files (the "Software"),
+     * to deal in the Software without restriction, including without limitation
+     * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+     * and/or sell copies of the Software, and to permit persons to whom the
+     * Software is furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included
+     * in all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+     * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+     * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+     * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+     * DEALINGS IN THE SOFTWARE.
+     ****************************************************************************/
+    
     void* pLibrary = NULL;
     void* pSymbol = NULL;
+
+#ifdef DLL_LOAD_UNIX
+    pLibrary = dlopen(library.c_str(), RTLD_LAZY);
+    if( pLibrary == NULL )
+    {
+        std::ostringstream oss;
+        oss << "Unable to open '" << library <<"' with error " << dlerror(); 
+        throw pdal_error(oss.str());
+    }
     
+    pSymbol = dlsym( pLibrary, name.c_str() );
+#if (defined(__APPLE__) && defined(__MACH__))
+    /* On mach-o systems, C symbols have a leading underscore and depending
+     * on how dlcompat is configured it may or may not add the leading
+     * underscore.  So if dlsym() fails add an underscore and try again.
+     */
+    if( pSymbol == NULL )
+    {
+        std::ostringstream prefixed;
+        prefixed << "_" << name;
+        pSymbol = dlsym( pLibrary, prefixed.str().c_str() );
+    }
+#endif
+    
+    if (pSymbol == NULL)
+    {
+        std::ostringstream oss;
+        oss << "Opened library '" << library << "', but unable to open symbol "
+               "'" << name << "' with error" << dlerror();
+        throw pdal_error(oss.str());
+    }
+
+#endif
+
+#ifdef DLL_LOAD_WINDOWS
+
+    pLibrary = LoadLibrary(library.c_str());
+    if( pLibrary == NULL )
+    {
+        LPVOID      lpMsgBuf = NULL;
+        int         nLastError = GetLastError();
+        
+        FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER 
+                       | FORMAT_MESSAGE_FROM_SYSTEM
+                       | FORMAT_MESSAGE_IGNORE_INSERTS,
+                       NULL, nLastError,
+                       MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), 
+                       (LPTSTR) &lpMsgBuf, 0, NULL );
+        
+        std::ostringstream oss;
+        oss << "Can't load requested DLL '" << library << 
+               " with error code " << nLastError << 
+               " and message \"" <<  (const char *) lpMsgBuf <<"\"";
+        throw pdal_error(oss.str());
+    }
+
+    pSymbol = (void *) GetProcAddress( (HINSTANCE) pLibrary, name.c_str() );
+
+    if( pSymbol == NULL )
+    {
+        std::ostringstream oss;
+        oss << "Can't find requested entry point '" << name <<"'";
+        throw pdal_error(oss.str());
+    }
+
+
+#endif
     return pSymbol;
 }
 
