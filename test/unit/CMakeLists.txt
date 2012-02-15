@@ -138,12 +138,10 @@ else()
     # not do this. 
     if(Boost_PROGRAM_OPTIONS_LIBRARY MATCHES "\\.a$" )
         # pass, we can compile static
-        message(STATUS "Using system static boost for boost::unit_test")
+        message(STATUS "Static boost for boost::unit_test, not setting BOOST_TEST_DYN_LINK")
     else()
-        message(STATUS "Using embedded static boost for boost::unit_test")
-        if (PDAL_EMBED_BOOST)
-          add_definitions("-DBOOST_TEST_DYN_LINK")
-        endif()
+        message(STATUS "No non-embed static boost library found, setting BOOST_TEST_DYN_LINK")
+        add_definitions("-DBOOST_TEST_DYN_LINK")
     endif()
 endif()
 
