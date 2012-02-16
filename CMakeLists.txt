@@ -200,7 +200,9 @@ if(Boost_FOUND)
 else()
   set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/boost)
   find_package(Boost 1.48)
-  set(PDALBOOST_LIB_NAME "pdalboost" CACHE STRING "embedded boost name")
+
+  set(PDALBOOST_LIB_NAME "pdalboost" CACHE STRING "use embedded boost")
+  mark_as_advanced(FORCE PDALBOOST_LIB_NAME)
 
   if (WIN32)
     set(Boost_LIBRARIES "${PDALBOOST_LIB_NAME}.lib")
@@ -208,16 +210,15 @@ else()
   else()
     # Some Cmake versions are borken here. See
     # http://www.cmake.org/Bug/view.php?id=12258#c26851
-    #set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem") 
-    set(PDALBOOST_LIB_NAME "pdalboost" CACHE STRING "use embedded boost")
-    mark_as_advanced(FORCE PDALBOOST_LIB_NAME)
+    # set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem")
+    # include_directories(BEFORE SYSTEM ${Boost_INCLUDE_DIRS}/)
+    set(Boost_LIBRARIES "${PDALBOOST_LIB_NAME}")
   endif()
 
   # this prevents auto-linking pragmas from depending on wrong lib names
   add_definitions(-DBOOST_ALL_NO_LIB)
 
-#  include_directories(BEFORE SYSTEM ${Boost_INCLUDE_DIRS}/)
-  include_directories(${Boost_INCLUDE_DIRS}/)
+  include_directories( ${Boost_INCLUDE_DIRS}/)
   set(PDAL_EMBED_BOOST TRUE CACHE BOOL "use embedded boost")
   add_subdirectory(boost)
   message(STATUS "Using embedded boost tree")

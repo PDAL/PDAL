@@ -473,9 +473,20 @@ target_link_libraries(${APPS_CPP_DEPENDENCIES}
   ${LASZIP_LIBRARY}
   ${LIBXML2_LIBRARIES}
   ${P2G_LIBRARY})
-target_link_libraries(${APPS_CPP_DEPENDENCIES}
-  LINK_PRIVATE ${Boost_LIBRARIES})
 
+message(STATUS "boost libs: ${Boost_LIBRARIES}")
+
+if (WIN32)
+if (CMAKE_VERSION VERSION_GREATER 2.8.7)
+target_link_libraries(${APPS_CPP_DEPENDENCIES}
+                       LINK_PRIVATE general ${Boost_LIBRARIES})
+endif(CMAKE_VERSION)
+else()
+message(STATUS "i'm here")
+target_link_libraries(${APPS_CPP_DEPENDENCIES}
+                      ${Boost_LIBRARIES})
+
+endif(WIN32)
 
 set_target_properties(${PDAL_LIB_NAME}
   PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
