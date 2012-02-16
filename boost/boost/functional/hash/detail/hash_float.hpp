@@ -10,6 +10,8 @@
 # pragma once
 #endif
 
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+
 #include <boost/config.hpp>
 #include <boost/functional/hash/detail/float_functions.hpp>
 #include <boost/functional/hash/detail/limits.hpp>
