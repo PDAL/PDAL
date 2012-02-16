@@ -413,7 +413,6 @@ source_group("CMake Files" FILES CMakeLists.txt)
 
 source_group("Header Files" FILES ${PDAL_BASE_HPP})
 source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
-source_group("Header Files\\external\\boost\\uuid" FILES ${PDAL_EXTERNAL_BOOST_UUID_HPP})
 source_group("Header Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_HPP})
@@ -472,10 +471,10 @@ target_link_libraries(${APPS_CPP_DEPENDENCIES}
   ${GEOTIFF_LIBRARY}
   ${GDAL_LIBRARY}
   ${LASZIP_LIBRARY}
-  ${Boost_LIBRARIES}
   ${LIBXML2_LIBRARIES}
-  ${P2G_LIBRARY}
-  ${PDALBOOST_LIB_NAME})
+  ${P2G_LIBRARY})
+target_link_libraries(${APPS_CPP_DEPENDENCIES}
+  LINK_PRIVATE ${Boost_LIBRARIES})
 
 
 set_target_properties(${PDAL_LIB_NAME}

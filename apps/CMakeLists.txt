@@ -44,17 +44,17 @@ link_directories(${Boost_LIBRARY_DIRS})
 # Build pcinfo
 if(PCINFO)
     add_executable(${PCINFO} pcinfo.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PCINFO} ${PDAL_LIB_NAME} )
+    target_link_libraries(${PCINFO} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
 endif()
 
 if(PC2PC)
     add_executable(${PC2PC} pc2pc.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PC2PC} ${PDAL_LIB_NAME} )
+    target_link_libraries(${PC2PC} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
 endif()
 
 if(PCPIPELINE)
     add_executable(${PCPIPELINE} pcpipeline.cpp ${COMMON_APP_SOURCES})
-    target_link_libraries(${PCPIPELINE} ${PDAL_LIB_NAME} )
+    target_link_libraries(${PCPIPELINE} ${PDAL_LIB_NAME} ${Boost_LIBRARIES})
 endif()
 
 #------------------------------------------------------------------------------
