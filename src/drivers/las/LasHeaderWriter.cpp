@@ -70,12 +70,12 @@ void LasHeaderWriter::write()
     boost::uint32_t n4 = 0;
     
     // Seek to the beginning
-    m_ostream.seekp(0, ios::beg);
-    ios::pos_type begin = m_ostream.tellp();
+    // m_ostream.seekp(0, ios::beg);
+    // ios::pos_type begin = m_ostream.tellp();
 
     // Seek to the end
     m_ostream.seekp(0, ios::end);
-    ios::pos_type end = m_ostream.tellp();
+    // ios::pos_type end = m_ostream.tellp();
 
     // we initially have no VLRs
     assert(m_header.getVLRs().count() == 0);
