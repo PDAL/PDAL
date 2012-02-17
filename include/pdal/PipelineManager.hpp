@@ -63,7 +63,7 @@ public:
     MultiFilter* addMultiFilter(const std::string& type, const std::vector<Stage*>& prevStages, const Options&);
     Writer* addWriter(const std::string& type, Stage& prevStage, const Options&);
     
-    // returns true iff the pipeline endpoint is a writer
+    // returns true if the pipeline endpoint is a writer
     bool isWriterPipeline() const;
 
     // return the pipeline writer endpoint (or NULL, if not a writer pipeline)
