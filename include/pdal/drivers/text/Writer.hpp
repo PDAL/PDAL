@@ -37,9 +37,13 @@
 
 #include <pdal/Writer.hpp>
 #include <pdal/FileUtils.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+
+pdal::Writer* createTextWriter(pdal::Stage& prevStage, const pdal::Options& options);
+
 
 namespace pdal { namespace drivers { namespace text {
 
@@ -51,6 +55,12 @@ public:
         : pdal_error(msg)
     {}
 };
+
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_writer_text(void* factory);
+
+PDAL_C_END
 
 
 typedef boost::shared_ptr<std::ostream> FileStreamPtr;

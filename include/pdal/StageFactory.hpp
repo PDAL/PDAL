@@ -41,6 +41,7 @@
 #include <pdal/Filter.hpp>
 #include <pdal/MultiFilter.hpp>
 #include <pdal/Writer.hpp>
+#include <pdal/Utils.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -93,6 +94,8 @@ public:
     void registerFilter(const std::string& type, FilterCreator* f);
     void registerMultiFilter(const std::string& type, MultiFilterCreator* f);
     void registerWriter(const std::string& type, WriterCreator* f);
+    
+    void loadPlugins();
 
 private:
     // callers take ownership of returned stages

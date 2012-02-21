@@ -303,8 +303,8 @@ set (PDAL_DRIVERS_TEXT_CPP
   ${PDAL_TEXT_SRC}/Writer.cpp
 )
 
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_TEXT_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_TEXT_HPP} )
+#list (APPEND PDAL_CPP ${PDAL_DRIVERS_TEXT_CPP} )
+#list (APPEND PDAL_HPP ${PDAL_DRIVERS_TEXT_HPP} )
 
 #
 # filters
@@ -482,7 +482,6 @@ target_link_libraries(${APPS_CPP_DEPENDENCIES}
                        LINK_PRIVATE general ${Boost_LIBRARIES})
 endif(CMAKE_VERSION)
 else()
-message(STATUS "i'm here")
 target_link_libraries(${APPS_CPP_DEPENDENCIES}
                       ${Boost_LIBRARIES})
 
@@ -498,10 +497,18 @@ if (APPLE)
     INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 endif()
 
+set(PDAL_CSV_WRITER_NAME pdal_plugin_writer_text)
+set(PDAL_CSV_WRITER_SRC "./drivers/text/Writer.cpp")
+add_library(${PDAL_CSV_WRITER_NAME} SHARED ${PDAL_CSV_WRITER_SRC})
+target_link_libraries(${PDAL_CSV_WRITER_NAME}
+                      ${PDAL_LIB_NAME})
+set_target_properties(${PDAL_CSV_WRITER_NAME}
+  PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
+   
 ###############################################################################
 # Targets installation
 
-install(TARGETS ${PDAL_LIB_NAME} ${PDAL_C_LIB_NAME}
+install(TARGETS ${PDAL_LIB_NAME} ${PDAL_C_LIB_NAME} ${PDAL_CSV_WRITER_NAME}
   RUNTIME DESTINATION ${PDAL_BIN_DIR}
   LIBRARY DESTINATION ${PDAL_LIB_DIR}
   ARCHIVE DESTINATION ${PDAL_LIB_DIR})

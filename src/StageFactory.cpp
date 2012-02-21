@@ -59,8 +59,6 @@
 #include <pdal/drivers/p2g/Writer.hpp>
 #endif
 
-#include <pdal/drivers/text/Writer.hpp>
-
 #include <pdal/filters/ByteSwap.hpp>
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
@@ -81,6 +79,9 @@
 #include <pdal/filters/Mosaic.hpp>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/tokenizer.hpp>
 
 #include <sstream>
 
@@ -156,7 +157,7 @@ namespace pdal
     //
     MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
     MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
-    MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
+    // MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
 #ifdef PDAL_HAVE_ORACLE
     MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 #endif
@@ -172,7 +173,8 @@ StageFactory::StageFactory()
     registerKnownFilters();
     registerKnownMultiFilters();
     registerKnownWriters();
-
+    
+    loadPlugins();
     return;
 }
 
@@ -339,7 +341,7 @@ void StageFactory::registerKnownWriters()
 {
     REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
-    REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
+    // REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
 #ifdef PDAL_HAVE_ORACLE
     REGISTER_WRITER(OciWriter, pdal::drivers::oci::Writer);
 #endif
@@ -348,6 +350,112 @@ void StageFactory::registerKnownWriters()
     REGISTER_WRITER(P2GWriter, pdal::drivers::p2g::Writer);
 #endif
 
+}
+
+void StageFactory::loadPlugins()
+{
+    using namespace boost::filesystem;
+    
+    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+    
+    std::string driver_path("PDAL_DRIVER_PATH");
+    std::string pluginDir = Utils::getenv(driver_path);
+
+    // Only filenames that start with libpdal_plugin are candidates to be loaded 
+    // at runtime.  PDAL plugins are to be named in a specified form:
+    
+    // libpdal_plugin_{stagetype}_{name}
+    
+    // For example, libpdal_plugin_writer_text or libpdal_plugin_filter_color
+
+    
+    // If we don't have a driver path, we're not loading anything
+    // FIXME: support setting the plugin name directly from the 
+    // PipelineReader
+    
+    if (pluginDir.size() == 0) return;
+    
+    directory_iterator dir(pluginDir), it, end;
+    
+    std::map<path, path> pluginFilenames;
+    
+    // Collect candidate filenames in the above form. Prefer symlink files 
+    // over hard files if their basenames are the same.
+    for (it = dir; it != end; ++it)
+    {
+        path p = it->path();
+        
+        if (boost::algorithm::istarts_with(p.filename().string(), "libpdal_plugin"))
+        {
+            path extension = p.extension();
+            if (boost::algorithm::iends_with(extension.string(), "DLL") ||
+                boost::algorithm::iends_with(extension.string(), "DYLIB") ||
+                boost::algorithm::iends_with(extension.string(), "SO"))
+            {
+                std::string basename;
+
+                // Step through the stems until the extension of the stem 
+                // is empty. This is our basename.  For example, 
+                // libpdal_plugin_writer_text.0.dylib will basename down to 
+                // libpdal_plugin_writer_text and so will 
+                // libpdal_plugin_writer_text.dylib
+                // copy the path so we can modify in place
+                path t = p; 
+                for (; !t.extension().empty(); t = t.stem())
+                {
+                    if (t.stem().extension().empty())
+                    {
+                        basename = t.stem().string();
+                    }
+                }
+
+                if (pluginFilenames.find(basename) == pluginFilenames.end())
+                {
+                    // We haven't already loaded a plugin with this basename, 
+                    // load it.
+                    pluginFilenames.insert(std::pair<path, path>(basename, p));
+                } else
+                {
+                    // We already have a filename with the basename of this 
+                    // file.  If the basename of our current file is a symlink
+                    // we're going to replace what's in the map with ours because 
+                    // we are going to presume that a symlink'd file is more 
+                    // cannonical than a hard file of the same name.
+                    std::map<path, path>::iterator i = pluginFilenames.find(basename);
+                    if (it->symlink_status().type() == symlink_file)
+                    {
+                        // Take the symlink over a hard SO
+                        i->second = p;
+                    }
+                }
+            }
+        }
+    }
+    
+    std::map<std::string, std::string> registerMethods;
+    
+    for (std::map<path, path>::iterator t = pluginFilenames.begin();
+         t!= pluginFilenames.end(); t ++)
+    {
+        // Basenames must be in the following form: 
+        // libpdal_plugin_writer_text or libpdal_plugin_filter_color
+        // The last two tokens are the stage type and the stage name.  
+        path basename = t->first;
+        path filename = t->second;
+        
+        void* pRegister;
+        
+        std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
+
+        // std::cout << "Loading: " << methodName << " from dll "<< t->first << " with path: " << t->second <<std::endl;
+        
+        pRegister = Utils::getDLLSymbol(filename.string(), methodName);
+        if (pRegister != NULL)
+        {
+            ((void (*)(void*)) pRegister)(this);
+        }
+        
+    }
 }
 
 

@@ -34,9 +34,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/text/Writer.hpp>
 
+#include <pdal/PipelineReader.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/Utils.hpp>
 
 #include "Support.hpp"
 
@@ -46,29 +47,34 @@ BOOST_AUTO_TEST_SUITE(TextWriterTest)
 
 BOOST_AUTO_TEST_CASE(TextWriterTest_test_1)
 {
-
-    pdal::drivers::las::Reader reader(Support::datapath("autzen-point-format-3.las"));
     
-    pdal::Options options;
+    std::ostringstream oss;
+    std::string p = Support::binpath();
+    oss << "PDAL_DRIVER_PATH="<<p;
+    
+    // We need to keep a copy of this string alive for the duration.
+    std::string path = oss.str();
+    Utils::putenv(path.c_str() );
+    pdal::Option option("filename", Support::datapath("pipeline/pipeline_csv.xml"));
 
-    pdal::Option quote("quote_header", true, "");
-	
-	std::string output_file(Support::temppath("autzen-point-format-3.txt"));
-	pdal::Option filename("filename", output_file, "");
-	options.add(quote);
-	options.add(filename);
-	
-	pdal::drivers::text::Writer writer(reader, options);
-	writer.initialize();
-	writer.write(reader.getNumPoints());
+    pdal::PipelineManager manager;
 
+    pdal::PipelineReader reader(manager, false, 0);
+    reader.readPipeline(option.getValue<std::string>());
+
+    const boost::uint64_t np = manager.execute();
+    
+
+    BOOST_CHECK_EQUAL(np, 106u);
+
+    std::string output_file(Support::temppath("autzen-point-format-3.txt"));
 
     bool were_equal = Support::compare_text_files(output_file, Support::datapath("autzen-point-format-3.txt"));
     BOOST_CHECK(were_equal);
     if (were_equal)
         pdal::FileUtils::deleteFile(output_file);
-	else
-		std::cout << "comparison of " << Support::datapath("autzen-point-format-3.txt") << " and " << output_file << " failed.";
+    else
+        std::cout << "comparison of " << Support::datapath("autzen-point-format-3.txt") << " and " << output_file << " failed.";
 
 
     return;

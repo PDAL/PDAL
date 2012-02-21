@@ -40,6 +40,23 @@
 
 #include <boost/algorithm/string.hpp>
 
+
+PDAL_C_START
+
+PDAL_DLL void PDALRegister_writer_text(void* factory)
+{
+    pdal::StageFactory& f = *(pdal::StageFactory*) factory;
+    f.registerWriter(pdal::drivers::text::Writer::s_getName(), createTextWriter);
+}
+
+PDAL_C_END
+
+pdal::Writer* createTextWriter(pdal::Stage& prevStage, const pdal::Options& options)
+{
+    return new pdal::drivers::text::Writer(prevStage, options);
+}
+
+
 namespace pdal { namespace drivers { namespace text {
 
 
