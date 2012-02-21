@@ -142,6 +142,7 @@ public:
     }
 
     static char* getenv(const char* env);
+    static std::string getenv(std::string const& name);
     static int putenv(const char* env);
 
     // aid to operator>> parsers
@@ -159,7 +160,7 @@ public:
     static std::string generate_filename();
     static std::string generate_tempfile();
 
-    void* getDLLSymbol( std::string const& library, std::string const& name);
+    static void* getDLLSymbol( std::string const& library, std::string const& name);
     
 private:
     template<typename T>

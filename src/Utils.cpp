@@ -78,6 +78,14 @@ char* Utils::getenv(const char* env)
     return ::getenv(env);
 }
 
+std::string Utils::getenv(std::string const& name)
+{
+    char* value = ::getenv(name.c_str());
+    if(value != 0)
+        return std::string(value);
+    else
+        return std::string("");
+}
 
 int Utils::putenv(const char* env)
 {
