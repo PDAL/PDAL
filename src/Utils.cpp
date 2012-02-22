@@ -236,7 +236,7 @@ void* Utils::getDLLSymbol(std::string const& library, std::string const& name)
     {
         std::ostringstream oss;
         oss << "Opened library '" << library << "', but unable to open symbol "
-               "'" << name << "' with error" << dlerror();
+               "'" << name << "' with error " << dlerror();
         throw pdal_error(oss.str());
     }
 
