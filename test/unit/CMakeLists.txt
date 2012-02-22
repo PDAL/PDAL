@@ -16,6 +16,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     pcinfoTest.cpp
     pcpipelineTest.cpp
     BoundsTest.cpp
+    BPFTest.cpp
     ByteSwapFilterTest.cpp
     CacheFilterTest.cpp
     ChipperTest.cpp
