@@ -50,6 +50,7 @@
 
 #include <pdal/drivers/faux/Writer.hpp>
 #include <pdal/drivers/las/Writer.hpp>
+#include <pdal/drivers/text/Writer.hpp>
 
 #ifdef PDAL_HAVE_ORACLE
 #include <pdal/drivers/oci/Writer.hpp>
@@ -78,12 +79,16 @@
 
 #include <pdal/filters/Mosaic.hpp>
 
+#include <pdal/Utils.hpp>
+
+
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 
 #include <sstream>
+#include <stdio.h> // for funcptr
 
 namespace pdal
 {
@@ -157,7 +162,7 @@ namespace pdal
     //
     MAKE_WRITER_CREATOR(FauxWriter, pdal::drivers::faux::Writer)
     MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
-    // MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
+    MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
 #ifdef PDAL_HAVE_ORACLE
     MAKE_WRITER_CREATOR(OciWriter, pdal::drivers::oci::Writer)
 #endif
@@ -341,7 +346,7 @@ void StageFactory::registerKnownWriters()
 {
     REGISTER_WRITER(FauxWriter, pdal::drivers::faux::Writer);
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
-    // REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
+    REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
 #ifdef PDAL_HAVE_ORACLE
     REGISTER_WRITER(OciWriter, pdal::drivers::oci::Writer);
 #endif

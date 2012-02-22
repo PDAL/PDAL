@@ -56,12 +56,13 @@ public:
     {}
 };
 
+#ifdef USE_PDAL_PLUGIN_TEXT
 PDAL_C_START
 
 PDAL_DLL void PDALRegister_writer_text(void* factory);
 
 PDAL_C_END
-
+#endif
 
 typedef boost::shared_ptr<std::ostream> FileStreamPtr;
 

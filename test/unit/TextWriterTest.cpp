@@ -48,13 +48,16 @@ BOOST_AUTO_TEST_SUITE(TextWriterTest)
 BOOST_AUTO_TEST_CASE(TextWriterTest_test_1)
 {
     
-    std::ostringstream oss;
-    std::string p = Support::binpath();
-    oss << "PDAL_DRIVER_PATH="<<p;
+    // Only needed for testing using the text driver as a plugin, which 
+    // is not going to be enabled by default.
     
-    // We need to keep a copy of this string alive for the duration.
-    std::string path = oss.str();
-    Utils::putenv(path.c_str() );
+    // std::ostringstream oss;
+    // std::string p = Support::binpath();
+    // oss << "PDAL_DRIVER_PATH="<<p;
+    // 
+    // // We need to keep a copy of this string alive for the duration.
+    // std::string path = oss.str();
+    // Utils::putenv(path.c_str() );
     pdal::Option option("filename", Support::datapath("pipeline/pipeline_csv.xml"));
 
     pdal::PipelineManager manager;

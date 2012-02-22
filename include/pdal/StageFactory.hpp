@@ -41,7 +41,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/MultiFilter.hpp>
 #include <pdal/Writer.hpp>
-#include <pdal/Utils.hpp>
 
 #include <boost/shared_ptr.hpp>
 

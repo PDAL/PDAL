@@ -41,6 +41,7 @@
 #include <boost/algorithm/string.hpp>
 
 
+#ifdef USE_PDAL_PLUGIN_TEXT
 PDAL_C_START
 
 PDAL_DLL void PDALRegister_writer_text(void* factory)
@@ -55,6 +56,7 @@ pdal::Writer* createTextWriter(pdal::Stage& prevStage, const pdal::Options& opti
 {
     return new pdal::drivers::text::Writer(prevStage, options);
 }
+#endif
 
 
 namespace pdal { namespace drivers { namespace text {
