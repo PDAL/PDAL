@@ -435,9 +435,6 @@ boost::property_tree::ptree Reader::toPTree() const
 
 void Reader::addDefaultDimensions()
 {
-
-
-
     Dimension alpha("Alpha", dimension::UnsignedInteger, 1,  
                              "The alpha image channel value associated with this point" );
     alpha.setUUID("f3806ee6-e82e-45af-89bd-59b20cda8ffa");
