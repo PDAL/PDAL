@@ -38,6 +38,8 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Utils.hpp>
 #include <pdal/FileUtils.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/StageIterator.hpp>
 
 #include "Support.hpp"
 
@@ -61,19 +63,32 @@ BOOST_AUTO_TEST_CASE(BPFTest_test)
     if (drivers.size() == 0)
         return;
 
-    std::cout << "path: " << p << std::endl;
-    
-    pdal::Option option("filename", p);
-    std::cout << option << std::endl;
-    std::cout << option.getValue<std::string>() << std::endl;
     pdal::PipelineManager manager;
     
     
+    pdal::Option option("filename", p);
     
     pdal::PipelineReader reader(manager, false, 0);
     reader.readPipeline(option.getValue<std::string>());
     
-    
+    pdal::Stage* stage = manager.getStage();
+    BOOST_CHECK(stage != NULL);
+    BOOST_CHECK_EQUAL(stage->getNumPoints(), 556676u);
+    stage->initialize();
+
+    {
+        const pdal::Schema& schema = stage->getSchema();
+        std::cout << schema << std::endl;
+        pdal::PointBuffer data(schema, 2048);
+        pdal::StageSequentialIterator* iter = stage->createSequentialIterator();
+        boost::uint32_t np = iter->read(data);
+        BOOST_CHECK_EQUAL(np, 2048u);
+
+        delete iter;
+    }
+
+    // BOOST_CHECK_EQUAL(np, 106u);
+        
     return;
 }
 
