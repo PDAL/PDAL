@@ -141,6 +141,8 @@ Stage* PipelineManager::getStage() const
 
 boost::uint64_t PipelineManager::execute()
 {
+    if (!isWriterPipeline())
+        throw pdal_error("This pipeline does not have a writer, unable to execute");
     getWriter()->initialize();
     return getWriter()->write(0);
 }
