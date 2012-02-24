@@ -45,10 +45,10 @@
 #include <boost/uuid/string_generator.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/random/random_device.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
-
 #include <map>
+
+#include <time.h>
+#include <cstdlib>
 
 namespace pdal
 {
@@ -74,20 +74,16 @@ Dimension::Dimension(   std::string const& name,
     , m_namespace(std::string(""))
     
 {
+
     if (!m_name.size())
     {
-        // Generate a random name
+        // Generate a random name from the time
+        ::time_t seconds;
+        ::time(&seconds);
+        
         std::ostringstream oss;
-        std::string chars(
-            "abcdefghijklmnopqrstuvwxyz"
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            "1234567890");
-        boost::random::random_device rng;
-        boost::random::uniform_int_distribution<> index_dist(0, chars.size() - 1);
-        oss << "unnamed"
-        for(int i = 0; i < 8; ++i) {
-            oss << chars[index_dist(rng)];
-        }
+        srand(static_cast<unsigned int>(seconds));
+        oss << "unnamed" << rand();
         m_name = oss.str();
         
     }
