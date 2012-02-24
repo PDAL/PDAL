@@ -164,7 +164,9 @@ boost::property_tree::ptree PointBuffer::toPTree() const
             if (!Utils::compare_distance(scale, 0.0) ||
                 !Utils::compare_distance(offset, 0.0)
                 )
+            {
                 applyScaling = true;
+            }
 
             
             switch (dimension.getInterpretation())
@@ -270,10 +272,32 @@ boost::property_tree::ptree PointBuffer::toPTree() const
 
 
             case dimension::Float:
-                if (dimension.getByteSize() == 4)
-                    output += STRINGIFY(GETFIELDAS(float));
+                if (size == 4)
+                {
+                    if (!applyScaling)
+                        output += STRINGIFY(GETFIELDAS(float));
+                    else
+                    {
+                        float v = GETFIELDAS(float);
+                        double d = dimension.applyScaling<float>(v);
+                        output += STRINGIFY(d);
+                    }
+                }
+                else if (size == 8)
+                {
+                    if (!applyScaling)
+                        output += STRINGIFY(GETFIELDAS(double));
+                    else
+                    {
+                        double v = GETFIELDAS(double);
+                        double d = dimension.applyScaling<double>(v);
+                        output += STRINGIFY(d);
+                    }                    
+                }
                 else
+                {
                     output += STRINGIFY(GETFIELDAS(double));
+                }
                 break;
             
             default:
