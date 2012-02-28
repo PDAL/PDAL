@@ -173,52 +173,52 @@ boost::property_tree::ptree PointBuffer::toPTree() const
             {
                     
 #define GETFIELDAS(T) getField<T>(dimension, pointIndex)
-#define STRINGIFY(x) boost::lexical_cast<std::string>(x)
+#define STRINGIFY(T,x) boost::numeric_cast<T>(x)
                 // note we convert 8-bit fields to ints, so they aren't treated as chars
             case dimension::SignedInteger:
             case dimension::SignedByte:
                 if (size == 1)
                 {
                     if (!applyScaling)
-                        output += STRINGIFY(GETFIELDAS(boost::int8_t));
+                        output += STRINGIFY(boost::int8_t, GETFIELDAS(boost::int8_t));
                     else
                     {
                         boost::int8_t v = GETFIELDAS(boost::int8_t);
                         double d = dimension.applyScaling<boost::int8_t>(v);
-                        output += STRINGIFY(d);
+                        output += STRINGIFY(boost::int8_t, d);
                     }
                 }
                 if (size == 2)
                 {
                     if (!applyScaling)
-                        output += STRINGIFY(GETFIELDAS(boost::int16_t));
+                        output += STRINGIFY(boost::int16_t, GETFIELDAS(boost::int16_t));
                     else
                     {
                         boost::int16_t v = GETFIELDAS(boost::int16_t);
                         double d = dimension.applyScaling<boost::int16_t>(v);
-                        output += STRINGIFY(d);
+                        output += STRINGIFY(boost::int16_t, d);
                     }
                 }
                 if (size == 4)
                 {
                     if (!applyScaling)
-                        output += STRINGIFY(GETFIELDAS(boost::int32_t));
+                        output += STRINGIFY(boost::int32_t, GETFIELDAS(boost::int32_t));
                     else
                     {
                         boost::int32_t v = GETFIELDAS(boost::int32_t);
                         double d = dimension.applyScaling<boost::int32_t>(v);
-                        output += STRINGIFY(d);
+                        output += STRINGIFY(boost::int32_t, d);
                     }
                 }
                 if (size == 8)
                 {
                     if (!applyScaling)
-                        output += STRINGIFY(GETFIELDAS(boost::int64_t));
+                        output += STRINGIFY(int64_t, GETFIELDAS(boost::int64_t));
                     else
                     {
                         boost::int64_t v = GETFIELDAS(boost::int64_t);
                         double d = dimension.applyScaling<boost::int64_t>(v);
-                        output += STRINGIFY(d);
+                        output += STRINGIFY(boost::int64_t, d);
                     }
                 }
                 break;
@@ -227,45 +227,45 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                 if (size == 1)
                 {
                     if (!applyScaling)
-                        output += STRINGIFY(GETFIELDAS(boost::uint8_t));
+                        output += STRINGIFY(boost::uint8_t, GETFIELDAS(boost::uint8_t));
                     else
                     {
                         boost::uint8_t v = GETFIELDAS(boost::uint8_t);
                         double d = dimension.applyScaling<boost::uint8_t>(v);
-                        output += STRINGIFY(d);
+                        output += STRINGIFY(boost::uint8_t, d);
                     }
                 }
                 if (size == 2)
                 {
                     if (!applyScaling)
-                        output += STRINGIFY(GETFIELDAS(boost::uint16_t));
+                        output += STRINGIFY(boost::uint16_t, GETFIELDAS(boost::uint16_t));
                     else
                     {
                         boost::uint16_t v = GETFIELDAS(boost::uint16_t);
                         double d = dimension.applyScaling<boost::uint16_t>(v);
-                        output += STRINGIFY(d);
+                        output += STRINGIFY(boost::uint16_t, d);
                     }
                 }
                 if (size == 4)
                 {
                     if (!applyScaling)
-                        output += STRINGIFY(GETFIELDAS(boost::uint32_t));
+                        output += STRINGIFY(boost::uint32_t, GETFIELDAS(boost::uint32_t));
                     else
                     {
                         boost::uint32_t v = GETFIELDAS(boost::uint32_t);
                         double d = dimension.applyScaling<boost::uint32_t>(v);
-                        output += STRINGIFY(d);
+                        output += STRINGIFY(boost::uint32_t, d);
                     }
                 }
                 if (size == 8)
                 {
                     if (!applyScaling)
-                        output += STRINGIFY(GETFIELDAS(boost::uint64_t));
+                        output += STRINGIFY(boost::uint64_t, GETFIELDAS(boost::uint64_t));
                     else
                     {
                         boost::uint64_t v = GETFIELDAS(boost::uint64_t);
                         double d = dimension.applyScaling<boost::uint64_t>(v);
-                        output += STRINGIFY(d);
+                        output += STRINGIFY(boost::uint64_t, d);
                     }
                 }
                 break;
@@ -275,28 +275,28 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                 if (size == 4)
                 {
                     if (!applyScaling)
-                        output += STRINGIFY(GETFIELDAS(float));
+                        output += STRINGIFY(float, GETFIELDAS(float));
                     else
                     {
                         float v = GETFIELDAS(float);
                         double d = dimension.applyScaling<float>(v);
-                        output += STRINGIFY(d);
+                        output += STRINGIFY(float, d);
                     }
                 }
                 else if (size == 8)
                 {
                     if (!applyScaling)
-                        output += STRINGIFY(GETFIELDAS(double));
+                        output += STRINGIFY(double, GETFIELDAS(double));
                     else
                     {
                         double v = GETFIELDAS(double);
                         double d = dimension.applyScaling<double>(v);
-                        output += STRINGIFY(d);
+                        output += STRINGIFY(double, d);
                     }                    
                 }
                 else
                 {
-                    output += STRINGIFY(GETFIELDAS(double));
+                    output += STRINGIFY(double, GETFIELDAS(double));
                 }
                 break;
             
