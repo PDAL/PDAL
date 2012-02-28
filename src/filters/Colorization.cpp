@@ -105,21 +105,21 @@ const Options Colorization::getDefaultOptions() const
 
     pdal::Option red("dimension", "Red", "");
     pdal::Option b0("band",1, "");
-    pdal::Option s0("scale", 1.0, "scale factor for this dimension");
+    pdal::Option s0("scale", 1.0f, "scale factor for this dimension");
     pdal::Options redO;
     redO.add(b0); redO.add(s0);
     red.setOptions(redO);
     
     pdal::Option green("dimension", "Green", "");
     pdal::Option b1("band",2, "");
-    pdal::Option s1("scale", 1.0, "scale factor for this dimension");
+    pdal::Option s1("scale", 1.0f, "scale factor for this dimension");
     pdal::Options greenO;
     greenO.add(b1); greenO.add(s1);
     green.setOptions(greenO);
 
     pdal::Option blue("dimension", "Blue", "");
     pdal::Option b2("band",3, "");
-    pdal::Option s2("scale", 1.0, "scale factor for this dimension");
+    pdal::Option s2("scale", 1.0f, "scale factor for this dimension");
     pdal::Options blueO;
     blueO.add(b2); blueO.add(s2);
     blue.setOptions(blueO);
