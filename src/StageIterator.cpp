@@ -42,7 +42,7 @@
 namespace pdal
 {
 
-static boost::uint32_t s_defaultChunkSize = 1024;
+static boost::uint32_t s_defaultChunkSize = 65536;
 
 
 //---------------------------------------------------------------------------
