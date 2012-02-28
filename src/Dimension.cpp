@@ -141,7 +141,7 @@ bool Dimension::operator==(const Dimension& other) const
         m_flags == other.m_flags &&
         m_endian == other.m_endian &&
         m_byteSize == other.m_byteSize &&
-        m_description == other.m_description &&
+        boost::iequals(m_description, other.m_description) &&
         Utils::compare_approx(m_min, other.m_min, (std::numeric_limits<double>::min)()) &&
         Utils::compare_approx(m_max, other.m_max, (std::numeric_limits<double>::min)()) &&
         Utils::compare_approx(m_numericScale, other.m_numericScale, (std::numeric_limits<double>::min)()) &&
@@ -163,9 +163,6 @@ bool Dimension::operator!=(const Dimension& other) const
 {
   return !(*this==other);
 }
-
-
-
 
 
 std::string const& Dimension::getName() const
