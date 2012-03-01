@@ -445,7 +445,7 @@ void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widem
 }
 
 
-pdal::StageRandomIterator* Chipper::createRandomIterator(PointBuffer& buffer) const
+pdal::StageRandomIterator* Chipper::createRandomIterator(PointBuffer&) const
 {
     return 0;
 }
