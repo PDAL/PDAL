@@ -138,7 +138,7 @@ boost::uint32_t Utils::getStreamPrecision(double scale)
 
 boost::uint32_t Utils::safeconvert64to32(boost::uint64_t x64) 
 {
-    if (x64 > std::numeric_limits<boost::uint32_t>::max())
+    if (x64 > (std::numeric_limits<boost::uint32_t>::max)())
     {
         throw pdal_error("cannot support seek offsets greater than 32-bits");
     }
