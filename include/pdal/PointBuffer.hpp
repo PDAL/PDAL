@@ -39,6 +39,8 @@
 #include <boost/scoped_array.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/numeric/conversion/cast.hpp>
+#include <boost/type_traits.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Bounds.hpp>
@@ -67,7 +69,7 @@ public:
     // regardless of what the passed-in schema says -- this is because the field object
     // represents the state within the owning object, which in this case is a completely
     // empty buffer (similarly, all the points in the buffer are marked "invalid")
-    PointBuffer(const Schema&, boost::uint32_t capacity);
+    PointBuffer(const Schema&, boost::uint32_t capacity=65536);
     PointBuffer(const PointBuffer&); 
     PointBuffer& operator=(const PointBuffer&); 
 
@@ -95,7 +97,7 @@ public:
     template<class T> T getField(Dimension const& dim, std::size_t pointIndex) const;    
     template<class T> T getRawField(std::size_t pointIndex, std::size_t pointBytePosition) const;
     template<class T> void setField(Dimension const& dim, std::size_t pointIndex, T value);
-    
+    template<class T> T convertDimension(pdal::Dimension const& dim, void* bytes) const;
     template<typename Target, typename Source> static Target saturation_cast(Source const& src);
     // bulk copy all the fields from the given point into this object
     // NOTE: this is only legal if the src and dest schemas are exactly the same
@@ -226,39 +228,11 @@ inline void PointBuffer::setField(pdal::Dimension const& dim, std::size_t pointI
 
 }
 
-
-
 template <class T>
-inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointIndex) const
+inline T PointBuffer::convertDimension(pdal::Dimension const& dim, void* p) const
+
 {
-    if (dim.getPosition() == -1)
-    {
-        // this is a little harsh, but we'll keep it for now as we shake things out
-        throw buffer_error("This dimension has no identified position in a schema. Use the getRawField method to access an arbitrary byte position.");
-    }
-        
-    std::size_t offset = (pointIndex * m_schema.getByteSize()) + dim.getByteOffset();
-    
-    if (offset + sizeof(T) > m_byteSize * m_capacity)
-    {
-        std::ostringstream oss;
-        oss << "Offset for given dimension is off the end of the buffer!";
-        throw buffer_error(oss.str());
-    }
-    
-    assert(offset + sizeof(T) <= m_byteSize * m_capacity);
-    boost::uint8_t* p = m_data.get() + offset;
-    
-    // If the byte size of what was requested is the same as our dimension's 
-    // We're just going to give it back to you.  If not, we're going to try to do 
-    // some magic below to try to give you what you asked for.
-    if (sizeof(T) == dim.getByteSize())
-    {
-        // Winner, winner, chicken dinner. We're not going to try to 
-        // do anything magical. It's up to you to get the interpretation right.
-        return *(T*)(void*)p;
-    }
-    
+
     T output(0);
 
     float flt(0.0);
@@ -352,6 +326,57 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
     }
 
     return output;
+    
+}
+
+template <class T>
+inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointIndex) const
+{
+    if (dim.getPosition() == -1)
+    {
+        // this is a little harsh, but we'll keep it for now as we shake things out
+        throw buffer_error("This dimension has no identified position in a schema. Use the getRawField method to access an arbitrary byte position.");
+    }
+        
+    std::size_t offset = (pointIndex * m_schema.getByteSize()) + dim.getByteOffset();
+    
+    if (offset + sizeof(T) > m_byteSize * m_capacity)
+    {
+        std::ostringstream oss;
+        oss << "Offset for given dimension is off the end of the buffer!";
+        throw buffer_error(oss.str());
+    }
+    
+    assert(offset + sizeof(T) <= m_byteSize * m_capacity);
+    boost::uint8_t const* p = m_data.get() + offset;
+    
+    // The user could be asking for data from a floating point dimension 
+    // as an integer. In that case, simply returning a casted int from those 
+    // bytes is not the number we want. We don't want to test *every* dimension 
+    // combination either, as this code is definitely in the critical path. 
+    // For now, we'll only test if the getInterpretation == dimension::Float, 
+    // which shouldn't be the most common dimension-fetching scenario.
+    if (sizeof(T) == dim.getByteSize() )
+    {
+        if (dim.getInterpretation() == dimension::Float)
+        {
+            if (boost::iequals(typeid(T).name(), "i"))
+            {
+                if (dim.getByteSize() == 4)
+                {
+                    return boost::numeric_cast<int>(*( float const*)p);
+                    
+                }
+                else
+                    return boost::numeric_cast<int>(*( double const*)p);
+            }
+        }
+
+        return *(T const*)( void const*)p;
+    }
+    
+    return convertDimension<T>(dim, (void *)p);
+
     
 }
 
