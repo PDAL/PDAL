@@ -99,8 +99,8 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
         pdal::Option x_dim("x_dim", std::string("X"), "Dimension name to use for 'X' data");
         pdal::Option y_dim("y_dim", std::string("Y"), "Dimension name to use for 'Y' data");
         pdal::Option z_dim("z_dim", std::string("Z"), "Dimension name to use for 'Z' data");
-        pdal::Option x_scale("scale_x", 0.0000001, "Scale for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
-        pdal::Option y_scale("scale_y", 0.0000001, "Scale for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
+        pdal::Option x_scale("scale_x", 0.0000001f, "Scale for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
+        pdal::Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
     // pdal::Option z_scale("scale_z", 1.0, "Scale for output Z data in the case when 'Z' dimension data are to be scaled.  Defaults to '1.0'.  If not set, the Dimensions's scale will be used");
     // pdal::Option x_offset("offset_x", 0.0, "Offset for output X data in the case when 'X' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
     // pdal::Option y_offset("offset_y", 0.0, "Offset for output Y data in the case when 'Y' dimension data are to be scaled.  Defaults to '0.0'.  If not set, the Dimensions's scale will be used");
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_1)
         const pdal::Schema& schema = reprojectionFilter.getSchema();
         pdal::PointBuffer data(schema, 1);
 
-        pdal::StageSequentialIterator* iter = reprojectionFilter.createSequentialIterator();
+        pdal::StageSequentialIterator* iter = reprojectionFilter.createSequentialIterator(data);
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1);
         delete iter;

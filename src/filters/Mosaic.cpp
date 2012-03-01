@@ -95,17 +95,17 @@ const Options Mosaic::getDefaultOptions() const
 }
 
 
-pdal::StageSequentialIterator* Mosaic::createSequentialIterator() const
+pdal::StageSequentialIterator* Mosaic::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Mosaic(*this);
+    return new pdal::filters::iterators::sequential::Mosaic(*this, buffer);
 }
 
 
 namespace iterators { namespace sequential {
 
 
-Mosaic::Mosaic(const pdal::filters::Mosaic& filter)
-    : MultiFilterSequentialIterator(filter)
+Mosaic::Mosaic(const pdal::filters::Mosaic& filter, PointBuffer& buffer)
+    : MultiFilterSequentialIterator(filter, buffer)
 {
     return;
 }

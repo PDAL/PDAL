@@ -196,17 +196,17 @@ void Color::getColor_F64_U16(double value, boost::uint16_t& red, boost::uint16_t
 }
 
 
-pdal::StageSequentialIterator* Color::createSequentialIterator() const
+pdal::StageSequentialIterator* Color::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Color(*this);
+    return new pdal::filters::iterators::sequential::Color(*this, buffer);
 }
 
 
 namespace iterators { namespace sequential {
 
 
-Color::Color(const pdal::filters::Color& filter)
-    : pdal::FilterSequentialIterator(filter)
+Color::Color(const pdal::filters::Color& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
     , m_colorFilter(filter)
 {
     return;

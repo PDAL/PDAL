@@ -111,13 +111,13 @@ BOOST_AUTO_TEST_CASE(test_tsolid)
 
     BOOST_CHECK(reader.getDescription() == "TerraSolid Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "drivers.terrasolid.reader");
-    BOOST_CHECK_EQUAL(reader.getNumPoints(), 1000);
+    BOOST_CHECK_EQUAL(reader.getNumPoints(), 1000u);
 
     const Schema& schema = reader.getSchema();
 
     PointBuffer data(schema, 3);
     
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
     
     {
         boost::uint32_t numRead = iter->read(data);

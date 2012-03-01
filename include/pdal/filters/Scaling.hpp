@@ -85,8 +85,6 @@ public:
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
-    void processBuffer(const PointBuffer& srcData, PointBuffer& dstData) const;
-    
     std::vector<scaling::Scaler> const& getScalers() const { return m_scalers; }
 
 private:

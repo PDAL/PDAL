@@ -130,9 +130,9 @@ Reader::Mode Reader::getMode() const
 }
 
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::faux::iterators::sequential::Reader(*this);
+    return new pdal::drivers::faux::iterators::sequential::Reader(*this, buffer);
 }
 
 
@@ -241,8 +241,8 @@ namespace iterators { namespace sequential {
 
 
 
-Reader::Reader(const pdal::drivers::faux::Reader& reader)
-    : pdal::ReaderSequentialIterator(reader)
+Reader::Reader(const pdal::drivers::faux::Reader& reader, PointBuffer& buffer)
+    : pdal::ReaderSequentialIterator(reader, buffer)
     , m_reader(reader)
 {
     return;

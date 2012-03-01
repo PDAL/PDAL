@@ -95,9 +95,9 @@ bool Reader::supportsIterator (StageIteratorType t) const
 }
 
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return m_stage->createSequentialIterator();
+    return m_stage->createSequentialIterator(buffer);
 }
 
 

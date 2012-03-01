@@ -461,9 +461,9 @@ void Reader::addDefaultDimensions()
 
 }
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::oci::iterators::sequential::Reader(*this);
+    return new pdal::drivers::oci::iterators::sequential::Reader(*this, buffer);
 }
 
 
@@ -815,9 +815,9 @@ pdal::Bounds<double> IteratorBase::getBounds(Statement statement, BlockPtr block
 //
 //---------------------------------------------------------------------------
 
-Reader::Reader(const pdal::drivers::oci::Reader& reader)
+Reader::Reader(const pdal::drivers::oci::Reader& reader, PointBuffer& buffer)
     : IteratorBase(reader)
-    , pdal::StageSequentialIterator(reader)
+    , pdal::StageSequentialIterator(reader, buffer)
 {
     return;
 }

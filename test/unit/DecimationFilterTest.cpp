@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
 
     PointBuffer data(schema, 3);
 
-    StageSequentialIterator* iter = filter.createSequentialIterator();
+    StageSequentialIterator* iter = filter.createSequentialIterator(data);
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 3);
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test_options)
 
     PointBuffer data(schema, 3);
 
-    StageSequentialIterator* iter = filter.createSequentialIterator();
+    StageSequentialIterator* iter = filter.createSequentialIterator(data);
     boost::uint32_t numRead = iter->read(data);
 
     BOOST_CHECK(numRead == 3);

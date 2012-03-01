@@ -170,7 +170,7 @@ public:
         return false;
     }
     
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const;
     
     std::size_t getPointDataOffset() const { return m_offset; }
@@ -209,7 +209,7 @@ namespace sequential {
 class Reader : public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::qfit::Reader& reader);
+    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer);
     ~Reader();
 
 private:

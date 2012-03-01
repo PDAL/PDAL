@@ -174,7 +174,7 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const;
 
 private:
@@ -209,7 +209,7 @@ namespace iterators { namespace sequential {
 class PDAL_DLL Chipper : public pdal::FilterSequentialIterator
 {
 public:
-    Chipper(pdal::filters::Chipper const& filter);
+    Chipper(pdal::filters::Chipper const& filter, PointBuffer& buffer);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

@@ -154,7 +154,10 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
     UserCallback* callback = getUserCallback();
     do_callback(0.0, callback);
 
-    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator());
+    const Schema& schema = getPrevStage().getSchema();
+    PointBuffer buffer(schema, m_chunkSize);
+    
+    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(buffer));
     
     if (!iter) throw pdal_error("Unable to obtain iterator from previous stage!");
 
@@ -165,8 +168,7 @@ boost::uint64_t Writer::write(boost::uint64_t targetNumPointsToWrite)
 
     iter->readBegin();
 
-    const Schema& schema = getPrevStage().getSchema();
-    PointBuffer buffer(schema, m_chunkSize);
+
 
     //
     // The user has requested a specific number of points: proceed a 

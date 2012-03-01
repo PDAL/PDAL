@@ -76,13 +76,7 @@ bool Support::compare_stage_data(pdal::Stage const& a, pdal::Stage const& b)
     boost::uint32_t b_num_points = static_cast<boost::uint32_t>(b_num_points64);
     if (a_num_points != b_num_points) return false;
     
-    pdal::StageSequentialIterator* a_itr = a.createSequentialIterator();
-    pdal::StageSequentialIterator* b_itr = b.createSequentialIterator();
-    
-    if (!a_itr) throw pdal::pdal_error("unable to create sequential iterator for compare_stage_data for stage a");
-    if (!b_itr) throw pdal::pdal_error("unable to create sequential iterator for compare_stage_data for stage b");
-
-    
+  
     // if we don't have any sizes here, we'll just use a small default
     if (a_num_points == 0) a_num_points = 1024;
     if (b_num_points == 0) b_num_points = 1024;
@@ -90,6 +84,14 @@ bool Support::compare_stage_data(pdal::Stage const& a, pdal::Stage const& b)
     pdal::PointBuffer a_data(a_schema, a_num_points);
     pdal::PointBuffer b_data(b_schema, b_num_points);
 
+    pdal::StageSequentialIterator* a_itr = a.createSequentialIterator(a_data);
+    pdal::StageSequentialIterator* b_itr = b.createSequentialIterator(b_data);
+    
+    if (!a_itr) throw pdal::pdal_error("unable to create sequential iterator for compare_stage_data for stage a");
+    if (!b_itr) throw pdal::pdal_error("unable to create sequential iterator for compare_stage_data for stage b");
+
+  
+  
     {
         boost::uint32_t a_numRead = a_itr->read(a_data);
         boost::uint32_t b_numRead = b_itr->read(b_data);

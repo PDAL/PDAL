@@ -60,7 +60,7 @@ private:
 class PDAL_DLL ReaderSequentialIterator : public StageSequentialIterator
 {
 public:
-    ReaderSequentialIterator(const Reader& reader);
+    ReaderSequentialIterator(const Reader& reader, PointBuffer& buffer);
     virtual ~ReaderSequentialIterator();
 };
 

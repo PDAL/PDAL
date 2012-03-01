@@ -451,7 +451,7 @@ const Options Reader::getDefaultOptions() const
     Options options;
     Option filename("filename", "", "file to read from");
     Option flip_coordinates("flip_coordinates", true, "Flip coordinates from 0-360 to -180-180");
-    Option convert_z_units("scale_z", 1.0, "Z scale. Use 0.001 to go from mm to m");
+    Option convert_z_units("scale_z", 1.0f, "Z scale. Use 0.001 to go from mm to m");
     Option little_endian("little_endian", false, "Are data in little endian format?");
     options.add(filename);
     options.add(flip_coordinates);
@@ -688,9 +688,9 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     return numPoints;
 }
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::qfit::iterators::sequential::Reader(*this);
+    return new pdal::drivers::qfit::iterators::sequential::Reader(*this, buffer);
 }
 
 
@@ -809,8 +809,8 @@ namespace iterators {
 namespace sequential {
 
 
-Reader::Reader(const pdal::drivers::qfit::Reader& reader)
-    : pdal::ReaderSequentialIterator(reader)
+Reader::Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer)
+    : pdal::ReaderSequentialIterator(reader, buffer)
     , m_reader(reader)
     , m_istream(NULL)
 {

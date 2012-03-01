@@ -69,7 +69,7 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData, pdal::plang::Parser& parser) const;
@@ -90,7 +90,7 @@ namespace iterators { namespace sequential {
 class PDAL_DLL Predicate : public pdal::FilterSequentialIterator
 {
 public:
-    Predicate(const pdal::filters::Predicate& filter);
+    Predicate(const pdal::filters::Predicate& filter, PointBuffer& buffer);
     ~Predicate();
 
     void read();

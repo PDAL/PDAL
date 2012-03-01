@@ -135,17 +135,17 @@ boost::uint32_t ByteSwap::processBuffer(PointBuffer& dstData, const PointBuffer&
 }
 
 
-pdal::StageSequentialIterator* ByteSwap::createSequentialIterator() const
+pdal::StageSequentialIterator* ByteSwap::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::ByteSwap(*this);
+    return new pdal::filters::iterators::sequential::ByteSwap(*this, buffer);
 }
 
 namespace iterators { namespace sequential {
 
 
 
-ByteSwap::ByteSwap(const pdal::filters::ByteSwap& filter)
-    : pdal::FilterSequentialIterator(filter)
+ByteSwap::ByteSwap(const pdal::filters::ByteSwap& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
     , m_swapFilter(filter)
 {
     return;

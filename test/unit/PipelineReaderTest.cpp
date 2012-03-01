@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_test1)
     {
         const Schema& schema = stage->getSchema();
         PointBuffer data(schema, 2048);
-        StageSequentialIterator* iter = stage->createSequentialIterator();
+        StageSequentialIterator* iter = stage->createSequentialIterator(data);
         boost::uint32_t np = iter->read(data);
         BOOST_CHECK(np == 1065);
 
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(PipelineReaderTest_Reader)
     {
         const Schema& schema = reader.getSchema();
         PointBuffer data(schema, 2048);
-        StageSequentialIterator* iter = reader.createSequentialIterator();
+        StageSequentialIterator* iter = reader.createSequentialIterator(data);
         boost::uint32_t np = iter->read(data);
         BOOST_CHECK(np == 1065);
 

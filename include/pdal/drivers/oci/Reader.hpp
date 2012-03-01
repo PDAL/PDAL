@@ -70,7 +70,7 @@ public:
 
     boost::uint64_t getNumPoints() const { return 0; }
     
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     
     Connection getConnection () const { return m_connection;}
     Statement getStatement () const { return m_statement;}
@@ -169,7 +169,7 @@ private:
 class Reader : public IteratorBase, public pdal::StageSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::oci::Reader& reader);
+    Reader(const pdal::drivers::oci::Reader& reader, PointBuffer& buffer);
     ~Reader();
 
 private:

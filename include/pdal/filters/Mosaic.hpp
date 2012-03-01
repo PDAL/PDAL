@@ -66,7 +66,7 @@ public:
         return false;
     }
     
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
 private:
@@ -81,7 +81,7 @@ namespace iterators { namespace sequential {
 class PDAL_DLL Mosaic : public pdal::MultiFilterSequentialIterator
 {
 public:
-    Mosaic(const pdal::filters::Mosaic& filter);
+    Mosaic(const pdal::filters::Mosaic& filter, PointBuffer& buffer);
     ~Mosaic();
 
 private:

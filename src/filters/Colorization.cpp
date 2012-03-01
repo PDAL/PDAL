@@ -194,17 +194,17 @@ void Colorization::processBuffer(PointBuffer& data) const
 }
 
 
-pdal::StageSequentialIterator* Colorization::createSequentialIterator() const
+pdal::StageSequentialIterator* Colorization::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Colorization(*this);
+    return new pdal::filters::iterators::sequential::Colorization(*this, buffer);
 }
 
 
 namespace iterators { namespace sequential {
 
 
-Colorization::Colorization(const pdal::filters::Colorization& filter)
-    : pdal::FilterSequentialIterator(filter)
+Colorization::Colorization(const pdal::filters::Colorization& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
     , m_stage(filter)
 {
     return;

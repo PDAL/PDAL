@@ -412,9 +412,9 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     return numPoints;
 }
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::terrasolid::iterators::sequential::Reader(*this);
+    return new pdal::drivers::terrasolid::iterators::sequential::Reader(*this, buffer);
 }
 
 
@@ -526,8 +526,8 @@ namespace iterators {
 namespace sequential {
 
 
-Reader::Reader(const terrasolid::Reader& reader)
-    : pdal::ReaderSequentialIterator(reader)
+Reader::Reader(const terrasolid::Reader& reader, PointBuffer& buffer)
+    : pdal::ReaderSequentialIterator(reader, buffer)
     , m_reader(reader)
     , m_istream(NULL)
 {

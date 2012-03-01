@@ -160,7 +160,7 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const { return 0; } // BUG: add this
     pdal::StageBlockIterator* createBlockIterator() const { return 0; } // BUG: add this
 
@@ -195,7 +195,7 @@ typedef boost::shared_ptr<Dimension> DimensionPtr;
 class PDAL_DLL Stats : public pdal::FilterSequentialIterator
 {
 public:
-    Stats(const pdal::filters::Stats& filter);
+    Stats(const pdal::filters::Stats& filter, PointBuffer& buffer);
     boost::property_tree::ptree toPTree() const;
     stats::Summary const& getStats(Dimension const& dim) const;
     void reset();

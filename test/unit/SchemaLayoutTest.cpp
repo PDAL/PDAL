@@ -54,8 +54,8 @@ BOOST_AUTO_TEST_CASE(test_layout)
     s1.appendDimension(d2);
 
     schema::index_by_index const& dims = s1.getDimensions().get<schema::index>();
-    BOOST_CHECK_EQUAL(dims.size(), 2);
-    BOOST_CHECK_EQUAL(dims[0].getByteSize(), 4);
+    BOOST_CHECK_EQUAL(dims.size(), 2u);
+    BOOST_CHECK_EQUAL(dims[0].getByteSize(), 4u);
 
     boost::optional<Dimension const&> z = s1.getDimensionOptional("Z");
     BOOST_CHECK(!z);

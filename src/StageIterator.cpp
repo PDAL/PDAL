@@ -233,7 +233,7 @@ boost::uint64_t StageIterator::naiveSkipImpl(boost::uint64_t count)
 //
 //---------------------------------------------------------------------------
 
-StageSequentialIterator::StageSequentialIterator(const Stage& stage)
+StageSequentialIterator::StageSequentialIterator(const Stage& stage, PointBuffer& buffer)
     : StageIterator(stage)
 {
     return;

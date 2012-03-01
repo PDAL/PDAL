@@ -91,114 +91,9 @@ void Scaling::checkImpedance()
 }
 
 
-void Scaling::processBuffer(const PointBuffer& /*srcData*/, PointBuffer& /*dstData*/) const
-{
-    // const boost::uint32_t numPoints = srcData.getNumPoints();
-    // 
-    // const Schema& srcSchema = srcData.getSchema();
-    // 
-    // const Schema& dstSchema = dstData.getSchema();
-    // 
-    // // rather than think about "src/dst", we will think in terms of "doubles" and "ints"
-    // const Schema& schemaD = (m_isDescaling ? srcSchema : dstSchema);
-    // const Schema& schemaI = (m_isDescaling ? dstSchema : srcSchema);
-    // 
-    // assert(schemaD.hasDimension(DimensionId::X_f64));
-    // assert(schemaI.hasDimension(DimensionId::X_i32));
-    // 
-    // const int indexXd = schemaD.getDimensionIndex(DimensionId::X_f64);
-    // const int indexYd = schemaD.getDimensionIndex(DimensionId::Y_f64);
-    // const int indexZd = schemaD.getDimensionIndex(DimensionId::Z_f64);
-    // const int indexXi = schemaI.getDimensionIndex(DimensionId::X_i32);
-    // const int indexYi = schemaI.getDimensionIndex(DimensionId::Y_i32);
-    // const int indexZi = schemaI.getDimensionIndex(DimensionId::Z_i32);
-    // 
-    // const Dimension& dimXd = schemaD.getDimension(DimensionId::X_f64);
-    // const Dimension& dimYd = schemaD.getDimension(DimensionId::Y_f64);
-    // const Dimension& dimZd = schemaD.getDimension(DimensionId::Z_f64);
-    // const Dimension& dimXi = schemaI.getDimension(DimensionId::X_i32);
-    // const Dimension& dimYi = schemaI.getDimension(DimensionId::Y_i32);
-    // const Dimension& dimZi = schemaI.getDimension(DimensionId::Z_i32);
-    // 
-    // // For each dimension in the source layout, find its corresponding dimension 
-    // // in the destination layout, and put its byte offset in the map for it.  
-    // 
-    // schema::index_by_index const& dims = srcSchema.getDimensions().get<schema::index>();
-    // std::map<boost::uint32_t, boost::uint32_t> dimensions_lookup;
-    // boost::uint32_t dstFieldIndex = 0;
-    // boost::uint32_t i = 0;
-    // for (i=0; i<dims.size(); i++)
-    // {
-    //     Dimension const& dim = dims[i];
-    //     std::size_t src_offset = dim.getByteOffset();
-    //     dstFieldIndex = dstSchema.getDimensionIndex(dim);
-    //     dimensions_lookup[dstFieldIndex] = src_offset;
-    // }
-    // 
-    // for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
-    // {
-    // 
-    //     if (m_isDescaling)
-    //     {
-    //         // doubles --> ints  (removeScaling)
-    //         const double xd = srcData.getField<double>(pointIndex, indexXd);
-    //         const double yd = srcData.getField<double>(pointIndex, indexYd);
-    //         const double zd = srcData.getField<double>(pointIndex, indexZd);
-    // 
-    //         const boost::int32_t xi = dimXi.removeScaling<boost::int32_t>(xd);
-    //         const boost::int32_t yi = dimYi.removeScaling<boost::int32_t>(yd);
-    //         const boost::int32_t zi = dimZi.removeScaling<boost::int32_t>(zd);
-    // 
-    //         const boost::uint8_t* src_raw_data = srcData.getData(pointIndex);
-    // 
-    //         for (std::map<boost::uint32_t, boost::uint32_t>::const_iterator i = dimensions_lookup.begin();
-    //         i != dimensions_lookup.end(); ++i)
-    //         {
-    //             boost::uint32_t dstFieldIndex = i->first;
-    //             boost::uint32_t src_offset = i ->second;
-    //             dstData.setFieldData(pointIndex, dstFieldIndex, src_raw_data+src_offset);
-    //         }
-    // 
-    //         dstData.setField<boost::int32_t>(pointIndex, indexXi, xi);
-    //         dstData.setField<boost::int32_t>(pointIndex, indexYi, yi);
-    //         dstData.setField<boost::int32_t>(pointIndex, indexZi, zi);
-    // 
-    //     }
-    //     else
-    //     {
-    //         // ints --> doubles  (applyScaling)
-    //         const boost::int32_t xi = srcData.getField<boost::int32_t>(pointIndex, indexXi);
-    //         const boost::int32_t yi = srcData.getField<boost::int32_t>(pointIndex, indexYi);
-    //         const boost::int32_t zi = srcData.getField<boost::int32_t>(pointIndex, indexZi);    
-    // 
-    //         const double xd = dimXd.applyScaling(xi);
-    //         const double yd = dimYd.applyScaling(yi);
-    //         const double zd = dimZd.applyScaling(zi);
-    //         
-    //         const boost::uint8_t* src_raw_data = srcData.getData(pointIndex);
-    //         
-    //         for (std::map<boost::uint32_t, boost::uint32_t>::const_iterator i = dimensions_lookup.begin();
-    //         i != dimensions_lookup.end(); ++i)
-    //         {
-    //             boost::uint32_t dstFieldIndex = i->first;
-    //             boost::uint32_t src_offset = i ->second;
-    //             dstData.setFieldData(pointIndex, dstFieldIndex, src_raw_data+src_offset);
-    //         }
-    // 
-    //         dstData.setField<double>(pointIndex, indexXd, xd);
-    //         dstData.setField<double>(pointIndex, indexYd, yd);
-    //         dstData.setField<double>(pointIndex, indexZd, zd);
-    //     }
-    // 
-    //     dstData.setNumPoints(pointIndex+1);
-    // }
-
-    return;
-}
-
-
 pdal::StageSequentialIterator* Scaling::createSequentialIterator(PointBuffer& buffer) const
 {
+    log()->get(logDEBUG4) << "Scaling::createSequentialIterator" << std::endl;
     return new pdal::filters::iterators::sequential::Scaling(*this, buffer);
 }
 
@@ -214,7 +109,7 @@ namespace iterators { namespace sequential {
 
 
 Scaling::Scaling(const pdal::filters::Scaling& filter, PointBuffer& buffer)
-    : pdal::FilterSequentialIterator(filter)
+    : pdal::FilterSequentialIterator(filter, buffer)
     , m_scalingFilter(filter)
 {
     alterSchema(buffer);

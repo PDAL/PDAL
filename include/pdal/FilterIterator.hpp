@@ -46,7 +46,7 @@ class Filter;
 class PDAL_DLL FilterSequentialIterator : public StageSequentialIterator
 {
 public:
-    FilterSequentialIterator(const Filter&);
+    FilterSequentialIterator(const Filter&, PointBuffer& buffer);
     virtual ~FilterSequentialIterator();
 
 protected:

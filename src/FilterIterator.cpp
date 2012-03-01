@@ -39,12 +39,12 @@ namespace pdal
 {
 
 
-FilterSequentialIterator::FilterSequentialIterator(const Filter& filter)
-    : StageSequentialIterator(filter)
+FilterSequentialIterator::FilterSequentialIterator(const Filter& filter, PointBuffer& buffer)
+    : StageSequentialIterator(filter, buffer)
     , m_filter(filter)
     , m_prevIterator(NULL)
 {
-    m_prevIterator = m_filter.getPrevStage().createSequentialIterator();
+    m_prevIterator = m_filter.getPrevStage().createSequentialIterator(buffer);
 
     return;
 }

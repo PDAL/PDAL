@@ -113,9 +113,9 @@ const Options Reader::getDefaultOptions() const
     return options;
 }
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::mrsid::iterators::sequential::Reader(*this);
+    return new pdal::drivers::mrsid::iterators::sequential::Reader(*this, buffer);
 }
 
 int Reader::SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const
@@ -392,8 +392,8 @@ namespace iterators {
 namespace sequential {
 
 
-Reader::Reader(const pdal::drivers::mrsid::Reader& reader)
-    : pdal::ReaderSequentialIterator(reader)
+Reader::Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer)
+    : pdal::ReaderSequentialIterator(reader, buffer)
     , m_reader(reader)
 {
     return;

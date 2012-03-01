@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     pdal::Option filename("filename", Support::datapath("qfit/10-word.qi"), "Input filename for reader to use" );
     Option flip_coordinates("flip_coordinates", false, "Flip coordinates from 0-360 to -180-180");
-    Option scale_z("scale_z", 0.001, "Z scale from mm to m");
+    Option scale_z("scale_z", 0.001f, "Z scale from mm to m");
 
     options.add(scale_z);
     options.add(flip_coordinates);
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     PointBuffer data(schema, 3);
     
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
     
     {
         boost::uint32_t numRead = iter->read(data);
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(test_14_word)
 
     PointBuffer data(schema, 3);
     
-    pdal::StageSequentialIterator* iter = reader.createSequentialIterator();
+    pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
     
     {
         boost::uint32_t numRead = iter->read(data);

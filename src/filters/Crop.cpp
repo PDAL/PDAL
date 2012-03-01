@@ -153,17 +153,17 @@ boost::uint32_t Crop::processBuffer(PointBuffer& dstData, const PointBuffer& src
 }
 
 
-pdal::StageSequentialIterator* Crop::createSequentialIterator() const
+pdal::StageSequentialIterator* Crop::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Crop(*this);
+    return new pdal::filters::iterators::sequential::Crop(*this, buffer);
 }
 
 
 namespace iterators { namespace sequential {
 
 
-Crop::Crop(const pdal::filters::Crop& filter)
-    : pdal::FilterSequentialIterator(filter)
+Crop::Crop(const pdal::filters::Crop& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
     , m_cropFilter(filter)
 {
     return;

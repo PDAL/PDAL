@@ -88,16 +88,16 @@ BOOST_AUTO_TEST_CASE(test_swapping)
     BOOST_CHECK_EQUAL(filterdimZ->getEndianness(), pdal::Endian_Big);
     BOOST_CHECK_EQUAL(filterdimTime->getEndianness(), pdal::Endian_Big);
 
-    boost::scoped_ptr<StageSequentialIterator> unflipped_iter(reader.createSequentialIterator());
-    boost::scoped_ptr<StageSequentialIterator> flipped_iter(filter.createSequentialIterator());
 
     const Schema& schema = filter.getSchema();
     
     PointBuffer flipped(schema, buffer_size);
+    boost::scoped_ptr<StageSequentialIterator> flipped_iter(filter.createSequentialIterator(flipped));
     const boost::uint32_t fliped_read = flipped_iter->read(flipped);
     BOOST_CHECK_EQUAL(fliped_read, buffer_size);
 
     PointBuffer unflipped(schema, buffer_size);
+    boost::scoped_ptr<StageSequentialIterator> unflipped_iter(reader.createSequentialIterator(unflipped));
     const boost::uint32_t unfliped_read = unflipped_iter->read(unflipped);
     BOOST_CHECK_EQUAL(unfliped_read, buffer_size);
     

@@ -127,7 +127,7 @@ private:
 class PDAL_DLL StageSequentialIterator : public StageIterator
 {
 public:
-    StageSequentialIterator(const Stage& stage);
+    StageSequentialIterator(const Stage& stage, PointBuffer& buffer);
     virtual ~StageSequentialIterator();
 
     // advance N points ahead in the file

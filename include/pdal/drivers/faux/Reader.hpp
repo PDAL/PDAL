@@ -92,7 +92,7 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const;
 
     // this is called by the stage's iterator
@@ -118,7 +118,7 @@ namespace iterators { namespace sequential {
 class PDAL_DLL Reader : public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(pdal::drivers::faux::Reader const& reader);
+    Reader(pdal::drivers::faux::Reader const& reader, PointBuffer& buffer);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

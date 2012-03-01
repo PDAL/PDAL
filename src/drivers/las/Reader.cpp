@@ -179,9 +179,9 @@ bool Reader::isCompressed() const
 }
 
 
-pdal::StageSequentialIterator* Reader::createSequentialIterator() const
+pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::las::iterators::sequential::Reader(*this);
+    return new pdal::drivers::las::iterators::sequential::Reader(*this, buffer);
 }
 
 
@@ -648,9 +648,9 @@ void Base::read(PointBuffer& data)
 namespace sequential {
 
 
-Reader::Reader(pdal::drivers::las::Reader const& reader)
+Reader::Reader(pdal::drivers::las::Reader const& reader, PointBuffer& buffer)
     : Base(reader)
-    , pdal::ReaderSequentialIterator(reader)
+    , pdal::ReaderSequentialIterator(reader, buffer)
     , m_pointDimensions(NULL)
     , m_schema(0)
 {

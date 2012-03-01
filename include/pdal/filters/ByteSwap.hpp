@@ -68,7 +68,7 @@ public:
         return false;
     }
     
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
@@ -87,7 +87,7 @@ namespace iterators { namespace sequential {
 class PDAL_DLL ByteSwap : public pdal::FilterSequentialIterator
 {
 public:
-    ByteSwap(const pdal::filters::ByteSwap& filter);
+    ByteSwap(const pdal::filters::ByteSwap& filter, PointBuffer& buffer);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

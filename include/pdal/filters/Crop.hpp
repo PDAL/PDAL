@@ -66,7 +66,7 @@ public:
         return false;
     }
     
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
@@ -89,7 +89,7 @@ namespace iterators { namespace sequential {
 class PDAL_DLL Crop : public pdal::FilterSequentialIterator
 {
 public:
-    Crop(const pdal::filters::Crop& filter);
+    Crop(const pdal::filters::Crop& filter, PointBuffer& buffer);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

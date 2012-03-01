@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
 
         writer.write(0);
 
-        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 12);
+        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 12u);
         BOOST_CHECK_EQUAL(cb.getPercentComplete(), 100);
     }
 

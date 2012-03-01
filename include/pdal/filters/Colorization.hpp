@@ -80,7 +80,7 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     void processBuffer(PointBuffer& data) const;
@@ -114,7 +114,7 @@ namespace iterators { namespace sequential {
 class PDAL_DLL Colorization : public pdal::FilterSequentialIterator
 {
 public:
-    Colorization(const pdal::filters::Colorization& filter);
+    Colorization(const pdal::filters::Colorization& filter, PointBuffer& buffer);
 
 protected:
     virtual void readBufferBeginImpl(PointBuffer&);

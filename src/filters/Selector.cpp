@@ -65,7 +65,7 @@ void Selector::initialize()
 
 void Selector::checkImpedance()
 {
-    Options& options = getOptions();
+    // Options& options = getOptions();
 
 
     // 
@@ -199,9 +199,9 @@ void Selector::processBuffer(const PointBuffer& /*srcData*/, PointBuffer& /*dstD
 }
 
 
-pdal::StageSequentialIterator* Selector::createSequentialIterator() const
+pdal::StageSequentialIterator* Selector::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Selector(*this);
+    return new pdal::filters::iterators::sequential::Selector(*this, buffer);
 }
 
 
@@ -215,8 +215,8 @@ const Options Selector::getDefaultOptions() const
 namespace iterators { namespace sequential {
 
 
-Selector::Selector(const pdal::filters::Selector& filter)
-    : pdal::FilterSequentialIterator(filter)
+Selector::Selector(const pdal::filters::Selector& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
     , m_scalingFilter(filter)
 {
     return;
@@ -259,7 +259,7 @@ void Selector::alterSchema(PointBuffer& buffer)
 
 boost::uint32_t Selector::readBufferImpl(PointBuffer& buffer)
 {
-    const Schema& schema = buffer.getSchema();
+    // const Schema& schema = buffer.getSchema();
 
     const boost::uint32_t numRead = getPrevIterator().read(buffer);
     

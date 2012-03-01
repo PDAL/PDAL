@@ -44,11 +44,12 @@
 namespace pdal
 {
 class MultiFilter;
+class PointBuffer;
 
 class PDAL_DLL MultiFilterSequentialIterator : public StageSequentialIterator
 {
 public:
-    MultiFilterSequentialIterator(const MultiFilter&);
+    MultiFilterSequentialIterator(const MultiFilter&, PointBuffer& buffer);
     virtual ~MultiFilterSequentialIterator();
 
 protected:

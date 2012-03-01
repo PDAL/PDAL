@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
     const Schema& schema = filter.getSchema();
     PointBuffer data(schema, 1000);
     
-    boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator());
+    boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
     {
         boost::uint32_t numRead = iter->read(data);
         BOOST_CHECK(numRead == 1000);

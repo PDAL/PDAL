@@ -95,10 +95,10 @@ BOOST_AUTO_TEST_CASE(DimensionTest_ptree)
     std::string name = tree.get<std::string>("name");
     BOOST_CHECK_EQUAL(name, "X");
     
-    BOOST_CHECK_CLOSE(tree.get<double>("scale"), 1.0, 0.00001);
-    BOOST_CHECK_CLOSE(tree.get<double>("offset"), 0.0, 0.00001);
-    BOOST_CHECK_CLOSE(tree.get<double>("maximum"), 0.0, 0.00001);
-    BOOST_CHECK_CLOSE(tree.get<double>("minimum"), 0.0, 0.00001);
+    BOOST_CHECK_CLOSE(tree.get<double>("scale"), 1.0f, 0.00001);
+    BOOST_CHECK_CLOSE(tree.get<double>("offset"), 0.0f, 0.00001);
+    BOOST_CHECK_CLOSE(tree.get<double>("maximum"), 0.0f, 0.00001);
+    BOOST_CHECK_CLOSE(tree.get<double>("minimum"), 0.0f, 0.00001);
     
     BOOST_CHECK_EQUAL(tree.get<std::string>("namespace"), "");
 

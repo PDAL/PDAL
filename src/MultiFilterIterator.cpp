@@ -39,8 +39,8 @@ namespace pdal
 {
 
 
-MultiFilterSequentialIterator::MultiFilterSequentialIterator(const MultiFilter& filter)
-    : StageSequentialIterator(filter)
+MultiFilterSequentialIterator::MultiFilterSequentialIterator(const MultiFilter& filter, PointBuffer& buffer)
+    : StageSequentialIterator(filter, buffer)
     , m_filter(filter)
     , m_prevIterator(NULL)
     , m_iteratorIndex(0)
@@ -48,7 +48,7 @@ MultiFilterSequentialIterator::MultiFilterSequentialIterator(const MultiFilter& 
     for (size_t i=0; i<filter.getPrevStages().size(); ++i)
     {
         const Stage* stage = filter.getPrevStages()[i];
-        m_prevIterators.push_back(stage->createSequentialIterator());
+        m_prevIterators.push_back(stage->createSequentialIterator(buffer));
     }
 
     return;

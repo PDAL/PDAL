@@ -106,9 +106,9 @@ void Programmable::processBuffer(PointBuffer& data, pdal::plang::Parser& parser)
 }
 
 
-pdal::StageSequentialIterator* Programmable::createSequentialIterator() const
+pdal::StageSequentialIterator* Programmable::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Programmable(*this);
+    return new pdal::filters::iterators::sequential::Programmable(*this, buffer);
 }
 
 
@@ -118,8 +118,8 @@ pdal::StageSequentialIterator* Programmable::createSequentialIterator() const
 namespace iterators { namespace sequential {
 
 
-Programmable::Programmable(const pdal::filters::Programmable& filter)
-    : pdal::FilterSequentialIterator(filter)
+Programmable::Programmable(const pdal::filters::Programmable& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
     , m_programmableFilter(filter)
     , m_parser(NULL)
 {

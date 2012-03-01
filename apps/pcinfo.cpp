@@ -140,7 +140,7 @@ void PcInfo::dumpOnePoint(const Stage& stage) const
 
     PointBuffer data(schema, 1);
     
-    boost::scoped_ptr<StageSequentialIterator> iter(stage.createSequentialIterator());
+    boost::scoped_ptr<StageSequentialIterator> iter(stage.createSequentialIterator(data));
     iter->skip(m_pointNumber);
 
     const boost::uint32_t numRead = iter->read(data);
@@ -166,12 +166,13 @@ void PcInfo::dumpStats(pdal::filters::Stats& filter) const
 
     const Schema& schema = filter.getSchema();
 
-    boost::scoped_ptr<StageSequentialIterator> iter(filter.createSequentialIterator());
+    PointBuffer data(schema);
+
+    boost::scoped_ptr<StageSequentialIterator> iter(filter.createSequentialIterator(data));
 
     boost::uint64_t totRead = 0;
     while (!iter->atEnd())
     {
-        PointBuffer data(schema, iter->getChunkSize());
 
         const boost::uint32_t numRead = iter->read(data);
         totRead += numRead;

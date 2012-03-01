@@ -75,7 +75,7 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     void processBuffer(PointBuffer& data) const;
@@ -124,7 +124,7 @@ namespace iterators { namespace sequential {
 class PDAL_DLL InPlaceReprojection : public pdal::FilterSequentialIterator
 {
 public:
-    InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter);
+    InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter, PointBuffer& buffer);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

@@ -151,7 +151,7 @@ public:
     }
 
     
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const;
     
 
@@ -192,7 +192,7 @@ namespace sequential {
 class Reader : public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::terrasolid::Reader& reader);
+    Reader(const pdal::drivers::terrasolid::Reader& reader, PointBuffer& buffer);
     ~Reader();
 
 private:

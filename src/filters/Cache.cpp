@@ -163,9 +163,9 @@ void Cache::updateStats(boost::uint64_t numRead, boost::uint64_t numRequested) c
 }
 
 
-pdal::StageSequentialIterator* Cache::createSequentialIterator() const
+pdal::StageSequentialIterator* Cache::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Cache(*this);
+    return new pdal::filters::iterators::sequential::Cache(*this, buffer);
 }
 
 
@@ -178,8 +178,8 @@ pdal::StageRandomIterator* Cache::createRandomIterator() const
 namespace iterators { namespace sequential {
 
 
-Cache::Cache(const pdal::filters::Cache& filter)
-    : pdal::FilterSequentialIterator(filter)
+Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
     , m_filter(filter)
 {
     return;

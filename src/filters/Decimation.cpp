@@ -112,9 +112,9 @@ boost::uint32_t Decimation::processBuffer(PointBuffer& dstData, const PointBuffe
 }
 
 
-pdal::StageSequentialIterator* Decimation::createSequentialIterator() const
+pdal::StageSequentialIterator* Decimation::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Decimation(*this);
+    return new pdal::filters::iterators::sequential::Decimation(*this, buffer);
 }
 
 
@@ -122,8 +122,8 @@ pdal::StageSequentialIterator* Decimation::createSequentialIterator() const
 namespace iterators { namespace sequential {
 
 
-Decimation::Decimation(const pdal::filters::Decimation& filter)
-    : pdal::FilterSequentialIterator(filter)
+Decimation::Decimation(const pdal::filters::Decimation& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
     , m_filter(filter)
 {
     return;

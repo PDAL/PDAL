@@ -64,7 +64,7 @@ public:
         return false;
     }
     
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
 
     boost::uint32_t getStep() const;
@@ -85,7 +85,7 @@ namespace iterators { namespace sequential {
 class PDAL_DLL Decimation : public pdal::FilterSequentialIterator
 {
 public:
-    Decimation(const pdal::filters::Decimation& filter);
+    Decimation(const pdal::filters::Decimation& filter, PointBuffer& buffer);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);

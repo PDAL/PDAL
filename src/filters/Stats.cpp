@@ -125,15 +125,15 @@ const Options Stats::getDefaultOptions() const
     return options;
 }
 
-pdal::StageSequentialIterator* Stats::createSequentialIterator() const
+pdal::StageSequentialIterator* Stats::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Stats(*this);
+    return new pdal::filters::iterators::sequential::Stats(*this, buffer);
 }
 
 namespace iterators { namespace sequential {
 
-Stats::Stats(const pdal::filters::Stats& filter)
-    : pdal::FilterSequentialIterator(filter)
+Stats::Stats(const pdal::filters::Stats& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
     , m_statsFilter(filter)
 {
     return;

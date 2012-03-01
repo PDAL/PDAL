@@ -109,9 +109,9 @@ boost::uint32_t Predicate::processBuffer(PointBuffer& dstData, const PointBuffer
 }
 
 
-pdal::StageSequentialIterator* Predicate::createSequentialIterator() const
+pdal::StageSequentialIterator* Predicate::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Predicate(*this);
+    return new pdal::filters::iterators::sequential::Predicate(*this, buffer);
 }
 
 
@@ -120,8 +120,8 @@ pdal::StageSequentialIterator* Predicate::createSequentialIterator() const
 
 namespace iterators { namespace sequential {
 
-Predicate::Predicate(const pdal::filters::Predicate& filter)
-    : pdal::FilterSequentialIterator(filter)
+Predicate::Predicate(const pdal::filters::Predicate& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
     , m_predicateFilter(filter)
     , m_parser(NULL)
 {

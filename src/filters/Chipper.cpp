@@ -187,10 +187,11 @@ void Chipper::Load(RefList& xvec, RefList& yvec, RefList& spare )
 
     std::size_t num_points_loaded = 0;
     std::size_t num_points_to_load = count32;
-    
-    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator());
 
     PointBuffer buffer(schema, m_threshold);
+    
+    boost::scoped_ptr<StageSequentialIterator> iter(getPrevStage().createSequentialIterator(buffer));
+
 
     boost::uint32_t counter = 0;
     while (num_points_loaded < num_points_to_load)
@@ -449,9 +450,9 @@ pdal::StageRandomIterator* Chipper::createRandomIterator() const
     return 0;
 }
 
-pdal::StageSequentialIterator* Chipper::createSequentialIterator() const
+pdal::StageSequentialIterator* Chipper::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::Chipper(*this);
+    return new pdal::filters::iterators::sequential::Chipper(*this, buffer);
 }
 
 void Chipper::checkImpedance()
@@ -483,8 +484,8 @@ void Chipper::addDefaultDimensions()
 
 namespace iterators { namespace sequential {
 
-Chipper::Chipper(pdal::filters::Chipper const& filter)
-    : pdal::FilterSequentialIterator(filter)
+Chipper::Chipper(pdal::filters::Chipper const& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
     , m_chipper(filter)
     , m_currentBlockId(0)
     , m_currentPointCount(0)

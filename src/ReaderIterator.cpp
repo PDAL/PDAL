@@ -65,8 +65,8 @@ ReaderIterator::~ReaderIterator()
 //
 //---------------------------------------------------------------------------
 
-ReaderSequentialIterator::ReaderSequentialIterator(const Reader& reader)
-    : StageSequentialIterator(reader)
+ReaderSequentialIterator::ReaderSequentialIterator(const Reader& reader, PointBuffer& buffer)
+    : StageSequentialIterator(reader, buffer)
 {
     return;
 }

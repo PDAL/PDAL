@@ -50,7 +50,7 @@ class Iterator;
 class StageSequentialIterator;
 class StageRandomIterator;
 class StageBlockIterator;
-
+class PointBuffer;
 //
 // supported options:
 //   <uint32>id
@@ -79,7 +79,7 @@ public:
 
     virtual bool supportsIterator (StageIteratorType) const = 0;
 
-    virtual StageSequentialIterator* createSequentialIterator() const { return NULL; }
+    virtual StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const { return NULL; }
     virtual StageRandomIterator* createRandomIterator() const  { return NULL; }
     virtual StageBlockIterator* createBlockIterator() const  { return NULL; }
 

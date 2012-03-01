@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(BPFTest_test)
         const pdal::Schema& schema = stage->getSchema();
         std::cout << schema << std::endl;
         pdal::PointBuffer data(schema, 2048);
-        pdal::StageSequentialIterator* iter = stage->createSequentialIterator();
+        pdal::StageSequentialIterator* iter = stage->createSequentialIterator(data);
         boost::uint32_t np = iter->read(data);
         BOOST_CHECK_EQUAL(np, 2048u);
 

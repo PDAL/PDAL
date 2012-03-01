@@ -509,17 +509,17 @@ void InPlaceReprojection::processBuffer(PointBuffer& data) const
 }
 
 
-pdal::StageSequentialIterator* InPlaceReprojection::createSequentialIterator() const
+pdal::StageSequentialIterator* InPlaceReprojection::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::sequential::InPlaceReprojection(*this);
+    return new pdal::filters::iterators::sequential::InPlaceReprojection(*this, buffer);
 }
 
 
 namespace iterators { namespace sequential {
 
 
-InPlaceReprojection::InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter)
-    : pdal::FilterSequentialIterator(filter)
+InPlaceReprojection::InPlaceReprojection(const pdal::filters::InPlaceReprojection& filter, PointBuffer& buffer)
+    : pdal::FilterSequentialIterator(filter, buffer)
     , m_reprojectionFilter(filter)
 {
     return;

@@ -110,10 +110,10 @@ Options getOptions()
     Option out_srs("out_srs", "EPSG:4269","");
     options.add(out_srs);
 
-    Option scale_x("scale_x", 0.0000001, "");
+    Option scale_x("scale_x", 0.0000001f, "");
     options.add(scale_x);
     
-    Option scale_y("scale_y", 0.0000001, "");
+    Option scale_y("scale_y", 0.0000001f, "");
     options.add(scale_y);
     
     Option disable_cloud_trigger("disable_cloud_trigger", true, "");

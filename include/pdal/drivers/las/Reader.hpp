@@ -80,7 +80,7 @@ public:
         return false;
     }
 
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const;
 
     // this is called by the stage's iterator
@@ -162,7 +162,7 @@ namespace sequential {
 class Reader : public Base, public pdal::ReaderSequentialIterator
 {
 public:
-    Reader(const pdal::drivers::las::Reader& reader);
+    Reader(const pdal::drivers::las::Reader& reader, PointBuffer& buffer);
     ~Reader();
 
 protected:

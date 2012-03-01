@@ -56,7 +56,7 @@ public:
     virtual void addDefaultDimensions();
     
     bool supportsIterator (StageIteratorType t) const;
-    pdal::StageSequentialIterator* createSequentialIterator() const;
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator() const;
 
     // this is called by the stage's iterator
