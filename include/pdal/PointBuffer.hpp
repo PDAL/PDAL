@@ -350,6 +350,7 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
     assert(offset + sizeof(T) <= m_byteSize * m_capacity);
     boost::uint8_t const* p = m_data.get() + offset;
     
+#if 0
     // The user could be asking for data from a floating point dimension 
     // as an integer. In that case, simply returning a casted int from those 
     // bytes is not the number we want. We don't want to test *every* dimension 
@@ -374,7 +375,8 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
 
         return *(T const*)( void const*)p;
     }
-    
+#endif
+
     return convertDimension<T>(dim, (void *)p);
 
     
