@@ -90,7 +90,7 @@ public:
     // may be read (and atEnd() should be true).
     //
     // All stages have the notion of a current point number, even for stages
-    // that are not really "oredered", in that the index just starts at zero 
+    // that are not really "ordered", in that the index just starts at zero 
     // and increments by N every time another N points are read
     boost::uint64_t getIndex() const;
 
