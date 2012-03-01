@@ -64,4 +64,9 @@
 #  define PDAL_C_END
 #endif
 
+
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(disable: 4068)  // ignore unknown pragmas (due to boost's use of GCC pragmas)
+#endif
+
 #endif
