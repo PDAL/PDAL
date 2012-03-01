@@ -37,7 +37,7 @@ Basic Build Steps
 Most users can use this procedure to build PDAL on Windows.  
 We satisfy all dependencies using OSGeo4W and use the Boost subset that is included with the library.
 
-1.  Install OSGeo4W (http://trac.osgeo.org/osgeo4w/) using the "Advanced Install" option and include the following:  gdal-dev, laszip, libxml2, iconv.
+1.  Install OSGeo4W (http://download.osgeo.org/osgeo4w/osgeo4w-setup.exe) using the "Advanced Install" option and include the following:  gdal-dev, laszip, libxml2, iconv.
 
   .. figure::  media/OSGeo4WInstallAdvanced.png
 
@@ -45,7 +45,8 @@ We satisfy all dependencies using OSGeo4W and use the Boost subset that is inclu
    .. figure::  media/OSGeo4WInstallFromInternet.png
   Leave the "Root Directory" for the installation unchanged.  
    .. figure::  media/OSGeo4WInstallRootDirectory.png
-  Select "gdal-dev".  
+  You can leave the "Select Local Package Directory" and "Internet Connection Type" at the defaults.
+  Under the "libs" tree, select "gdal-dev" for installation.  (Yuo should probably use the latest version, e.g. 1.8pre-6.)
    .. figure::  media/OSGeo4WInstallGDALDev.png
   Select "laszip".  
    .. figure::  media/OSGeo4WInstallLASZip.png
@@ -53,8 +54,12 @@ We satisfy all dependencies using OSGeo4W and use the Boost subset that is inclu
    .. figure::  media/OSGeo4WInstallLibXML2.png
   Select "iconv".  
    .. figure::  media/OSGeo4WInstallIconv.png
+  Select "oci".  
+   .. figure::  media/OSGeo4WInstallOCI.png
 
-  There are some other required dependencies (libtiff, libgeotiff, oci) but they are installed by default.
+  There are some other required dependencies (e.g. libtiff, libgeotiff) but they are installed by default.
+  
+  Select Next to continue on to install the packages.
 
 2.  Get the source code for PDAL:
 ::
@@ -66,8 +71,15 @@ We satisfy all dependencies using OSGeo4W and use the Boost subset that is inclu
 
    c:\dev\PDAL> config.bat
 
-4.  Start Visual Studio and open PDAL.sln.
-5.  Note that you'll need to include the %OSGeo4W%/bin directory in your %PATH% so that the dependent DLLs are available at run time.
+Note that the config.bat file is set up to build PDAL in the "officially supported" configuration -- that is, with
+Oracle, and GDAL, and LASzip, and such.  If you followed the previous steps, you should be fine to use this default
+configuration.  You may modify this file if you need to (such as to use a local copy of GDAL or to use NMake instead
+of Visual StudiO); see the Advanced steps below for instructions.
+
+4.  Modify your system environment to include the %OSGeo4W%/bin directory in your %PATH% so that the dependent DLLs are available at run time.
+
+4.  Start Visual Studio and open PDAL.sln.  Build the solution (F6).
+
 
 Advanced Build Steps
 --------------------
