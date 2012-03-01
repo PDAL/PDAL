@@ -309,7 +309,8 @@ if(WITH_SWIG_CSHARP OR WITH_SWIG_PYTHON)
     endif()
 endif()
 
-# if you want to build with libxml2 AND you are not building with GDAL/OSGeo4W, you'll need to supply your own iconv library
+# iconv support - optional, default=OFF
+# GDAL and libxml2 require iconv.  The library is supplied by OSGeo4W.
 set(WITH_ICONV FALSE CACHE BOOL "Choose if IConv support should be built")
 if(WITH_ICONV)
     find_package(ICONV)
@@ -322,7 +323,7 @@ if(WITH_ICONV)
 endif()
 
 
-# libxml2 support - optional, default=ON
+# libxml2 support - optional, default=OFF
 set(WITH_LIBXML2 FALSE CACHE BOOL "Choose if libxml2 support should be built ")
 
 if(WITH_LIBXML2)
