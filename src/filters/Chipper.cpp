@@ -445,7 +445,7 @@ void Chipper::Emit(RefList& wide, boost::uint32_t widemin, boost::uint32_t widem
 }
 
 
-pdal::StageRandomIterator* Chipper::createRandomIterator() const
+pdal::StageRandomIterator* Chipper::createRandomIterator(PointBuffer& buffer) const
 {
     return 0;
 }
@@ -524,7 +524,7 @@ boost::uint32_t Chipper::readBufferImpl(PointBuffer& buffer)
     Dimension const& blockID = schema.getDimension("BlockID");
 
     // Don't create this every GetBuffer call
-    boost::scoped_ptr<StageRandomIterator> iter(m_chipper.getPrevStage().createRandomIterator());
+    boost::scoped_ptr<StageRandomIterator> iter(m_chipper.getPrevStage().createRandomIterator(buffer));
     m_random_iterator.swap(iter);
 
     block.GetBuffer(m_random_iterator, buffer, m_currentBlockId, pointID, blockID);

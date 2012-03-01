@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
 
     PointBuffer data(schema, 10);
 
-    StageRandomIterator* iter = reader.createRandomIterator();
+    StageRandomIterator* iter = reader.createRandomIterator(data);
 
     boost::uint32_t numRead = iter->read(data);
     BOOST_CHECK_EQUAL(numRead, 10u);
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
     }
 
     newPos = iter->seek(7);
-    BOOST_CHECK_EQUAL(newPos, 7);
+    BOOST_CHECK_EQUAL(newPos, 7u);
     numRead = iter->read(data);
     BOOST_CHECK_EQUAL(numRead, 10u);
 

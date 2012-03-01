@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
         Dimension const& dimY = schema.getDimension("Y");
         Dimension const& dimZ = schema.getDimension("Z");
         
-        boost::scoped_ptr<StageRandomIterator> iter(reader.createRandomIterator());
+        boost::scoped_ptr<StageRandomIterator> iter(reader.createRandomIterator(buffer));
         chipper.GetBlock(20).GetBuffer(iter, buffer, 70, dimPoint, dimBlock);
 
         // 

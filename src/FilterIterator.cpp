@@ -69,12 +69,12 @@ const StageSequentialIterator& FilterSequentialIterator::getPrevIterator() const
 
 
 
-FilterRandomIterator::FilterRandomIterator(const Filter& filter)
-    : StageRandomIterator(filter)
+FilterRandomIterator::FilterRandomIterator(const Filter& filter, PointBuffer& buffer)
+    : StageRandomIterator(filter, buffer)
     , m_filter(filter)
     , m_prevIterator(NULL)
 {
-    m_prevIterator = m_filter.getPrevStage().createRandomIterator();
+    m_prevIterator = m_filter.getPrevStage().createRandomIterator(buffer);
 
     return;
 }
@@ -97,33 +97,6 @@ const StageRandomIterator& FilterRandomIterator::getPrevIterator() const
     return *m_prevIterator;
 }
 
-FilterBlockIterator::FilterBlockIterator(const Filter& filter)
-    : StageBlockIterator(filter)
-    , m_filter(filter)
-    , m_prevIterator(NULL)
-{
-    m_prevIterator = m_filter.getPrevStage().createBlockIterator();
-
-    return;
-}
-
-
-FilterBlockIterator::~FilterBlockIterator()
-{
-    delete m_prevIterator;
-}
-
-
-StageBlockIterator& FilterBlockIterator::getPrevIterator()
-{
-    return *m_prevIterator;
-}
-
-
-const StageBlockIterator& FilterBlockIterator::getPrevIterator() const
-{
-    return *m_prevIterator;
-}
 
 
 } // namespace pdal

@@ -45,16 +45,16 @@ class Reader;
 class PointBuffer;
 
 
-class PDAL_DLL ReaderIterator : StageIterator
-{
-public:
-    ReaderIterator(const Reader& reader);
-    virtual ~ReaderIterator();
-
-private:
-    ReaderIterator& operator=(const ReaderIterator&); // not implemented
-    ReaderIterator(const ReaderIterator&); // not implemented
-};
+// class PDAL_DLL ReaderIterator : StageIterator
+// {
+// public:
+//     ReaderIterator(const Reader& reader);
+//     virtual ~ReaderIterator();
+// 
+// private:
+//     ReaderIterator& operator=(const ReaderIterator&); // not implemented
+//     ReaderIterator(const ReaderIterator&); // not implemented
+// };
 
 
 class PDAL_DLL ReaderSequentialIterator : public StageSequentialIterator
@@ -68,16 +68,11 @@ public:
 class PDAL_DLL ReaderRandomIterator : public StageRandomIterator
 {
 public:
-    ReaderRandomIterator(const Reader& reader);
+    ReaderRandomIterator(const Reader& reader, PointBuffer& buffer);
     virtual ~ReaderRandomIterator();
 };
 
-class PDAL_DLL ReaderBlockIterator : public StageBlockIterator
-{
-public:
-    ReaderBlockIterator(const Reader& reader);
-    virtual ~ReaderBlockIterator();
-};
+
 
 } // namespace pdal
 

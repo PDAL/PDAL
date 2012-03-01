@@ -81,7 +81,7 @@ public:
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator() const;
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(  PointBuffer& PointBuffer, 
@@ -184,7 +184,7 @@ namespace random {
 class Reader : public Base, public pdal::ReaderRandomIterator
 {
 public:
-    Reader(const pdal::drivers::las::Reader& reader);
+    Reader(const pdal::drivers::las::Reader& reader, PointBuffer& buffer);
     ~Reader();
 
 protected:

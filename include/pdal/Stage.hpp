@@ -80,8 +80,7 @@ public:
     virtual bool supportsIterator (StageIteratorType) const = 0;
 
     virtual StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const { return NULL; }
-    virtual StageRandomIterator* createRandomIterator() const  { return NULL; }
-    virtual StageBlockIterator* createBlockIterator() const  { return NULL; }
+    virtual StageRandomIterator* createRandomIterator( PointBuffer& buffer) const  { return NULL; }
 
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;

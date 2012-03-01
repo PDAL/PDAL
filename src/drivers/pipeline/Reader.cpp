@@ -101,9 +101,9 @@ pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buf
 }
 
 
-pdal::StageRandomIterator* Reader::createRandomIterator() const
+pdal::StageRandomIterator* Reader::createRandomIterator(PointBuffer& buffer) const
 {
-    return m_stage->createRandomIterator();
+    return m_stage->createRandomIterator(buffer);
 }
 
 void Reader::addDefaultDimensions()

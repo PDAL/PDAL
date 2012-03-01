@@ -169,9 +169,9 @@ pdal::StageSequentialIterator* Cache::createSequentialIterator(PointBuffer& buff
 }
 
 
-pdal::StageRandomIterator* Cache::createRandomIterator() const
+pdal::StageRandomIterator* Cache::createRandomIterator(PointBuffer& buffer) const
 {
-    return new pdal::filters::iterators::random::Cache(*this);
+    return new pdal::filters::iterators::random::Cache(*this, buffer);
 }
 
 
@@ -253,8 +253,8 @@ namespace iterators { namespace random {
 
 
 
-Cache::Cache(const pdal::filters::Cache& filter)
-    : pdal::FilterRandomIterator(filter)
+Cache::Cache(const pdal::filters::Cache& filter, PointBuffer& buffer)
+    : pdal::FilterRandomIterator(filter, buffer)
     , m_filter(filter)
 {
     return;

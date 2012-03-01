@@ -47,7 +47,7 @@ class PointBuffer;
 class PDAL_DLL StageIterator
 {
 public:
-    StageIterator(const Stage& stage);
+    StageIterator(const Stage& stage, PointBuffer& buffer);
     virtual ~StageIterator();
 
     const Stage& getStage() const;
@@ -114,10 +114,12 @@ protected:
 
 private:
     const Stage& m_stage;
+    PointBuffer& m_buffer;
     boost::uint32_t m_chunkSize;
 
     bool m_readBeginPerformed;
     bool m_readBufferBeginPerformed;
+
 
     StageIterator& operator=(const StageIterator&); // not implemented
     StageIterator(const StageIterator&); // not implemented
@@ -149,13 +151,14 @@ protected:
 
     virtual boost::uint64_t skipImpl(boost::uint64_t pointNum) = 0;
     virtual bool atEndImpl() const = 0;
+
 };
 
 
 class PDAL_DLL StageRandomIterator : public StageIterator
 {
 public:
-    StageRandomIterator(const Stage& stage);
+    StageRandomIterator(const Stage& stage, PointBuffer& buffer);
     virtual ~StageRandomIterator();
 
     // seek to point N (an absolute value)
@@ -173,17 +176,6 @@ protected:
     virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
 };
 
-class PDAL_DLL StageBlockIterator : public StageIterator
-{
-public:
-    StageBlockIterator(const Stage& stage);
-    virtual ~StageBlockIterator();
-
-protected:
-    // from StageIterator
-    virtual boost::uint64_t seekImpl(boost::uint64_t position) = 0;
-
-};
 
 } // namespace pdal
 

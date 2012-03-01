@@ -40,23 +40,23 @@ namespace pdal
 {
 
 
-//---------------------------------------------------------------------------
-//
-// ReaderIterator
-//
-//---------------------------------------------------------------------------
-
-ReaderIterator::ReaderIterator(const Reader& reader)
-    : StageIterator(reader)
-{
-    return;
-}
-
-
-ReaderIterator::~ReaderIterator()
-{
-    return;
-}
+// //---------------------------------------------------------------------------
+// //
+// // ReaderIterator
+// //
+// //---------------------------------------------------------------------------
+// 
+// ReaderIterator::ReaderIterator(const Reader& reader)
+//     : StageIterator(reader)
+// {
+//     return;
+// }
+// 
+// 
+// ReaderIterator::~ReaderIterator()
+// {
+//     return;
+// }
 
 
 //---------------------------------------------------------------------------
@@ -84,8 +84,8 @@ ReaderSequentialIterator::~ReaderSequentialIterator()
 //
 //---------------------------------------------------------------------------
 
-ReaderRandomIterator::ReaderRandomIterator(const Reader& reader)
-    : StageRandomIterator(reader)
+ReaderRandomIterator::ReaderRandomIterator(const Reader& reader, PointBuffer& buffer)
+    : StageRandomIterator(reader, buffer)
 {
     return;
 }
@@ -96,25 +96,6 @@ ReaderRandomIterator::~ReaderRandomIterator()
     return;
 }
 
-
-
-//---------------------------------------------------------------------------
-//
-// ReaderBlockIterator
-//
-//---------------------------------------------------------------------------
-
-ReaderBlockIterator::ReaderBlockIterator(const Reader& reader)
-    : StageBlockIterator(reader)
-{
-    return;
-}
-
-
-ReaderBlockIterator::~ReaderBlockIterator()
-{
-    return;
-}
 
 
 

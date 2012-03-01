@@ -171,7 +171,7 @@ public:
     }
     
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator() const;
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
     
     std::size_t getPointDataOffset() const { return m_offset; }
     boost::uint32_t getPointDataSize() const { return m_size; }
@@ -229,7 +229,7 @@ namespace random {
 class Reader : public pdal::ReaderRandomIterator
 {
 public:
-    Reader(const pdal::drivers::qfit::Reader& reader);
+    Reader(const pdal::drivers::qfit::Reader& reader, PointBuffer& buffer);
     ~Reader();
 
 private:

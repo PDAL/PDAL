@@ -67,7 +67,7 @@ public:
     }
     
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator() const { return NULL; }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const { return NULL; }
 
 private:
     Mosaic& operator=(const Mosaic&); // not implemented

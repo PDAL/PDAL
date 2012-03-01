@@ -418,9 +418,9 @@ pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buf
 }
 
 
-pdal::StageRandomIterator* Reader::createRandomIterator() const
+pdal::StageRandomIterator* Reader::createRandomIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::terrasolid::iterators::random::Reader(*this);
+    return new pdal::drivers::terrasolid::iterators::random::Reader(*this, buffer);
 }
 
 
@@ -569,8 +569,8 @@ namespace random {
 
 
 
-Reader::Reader(const terrasolid::Reader& reader)
-    : pdal::ReaderRandomIterator(reader)
+Reader::Reader(const terrasolid::Reader& reader, PointBuffer& buffer)
+    : pdal::ReaderRandomIterator(reader, buffer)
     , m_reader(reader)
     , m_istream(NULL)
 {

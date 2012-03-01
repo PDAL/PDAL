@@ -67,7 +67,7 @@ private:
 class PDAL_DLL FilterRandomIterator : public StageRandomIterator
 {
 public:
-    FilterRandomIterator(const Filter&);
+    FilterRandomIterator(const Filter&, PointBuffer& buffer);
     virtual ~FilterRandomIterator();
 
 protected:
@@ -83,24 +83,6 @@ private:
     StageRandomIterator* m_prevIterator;
 };
 
-class PDAL_DLL FilterBlockIterator : public StageBlockIterator
-{
-public:
-    FilterBlockIterator(const Filter&);
-    virtual ~FilterBlockIterator();
-
-protected:
-    // from StageRandomIterator
-    virtual boost::uint32_t readBufferImpl(PointBuffer&) = 0;
-    virtual boost::uint64_t seekImpl(boost::uint64_t pointNum) = 0;
-
-    StageBlockIterator& getPrevIterator();
-    const StageBlockIterator& getPrevIterator() const;
-
-private:
-    const Filter& m_filter;
-    StageBlockIterator* m_prevIterator;
-};
 
 } // namespace pdal
 

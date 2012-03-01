@@ -185,9 +185,9 @@ pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buf
 }
 
 
-pdal::StageRandomIterator* Reader::createRandomIterator() const
+pdal::StageRandomIterator* Reader::createRandomIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::las::iterators::random::Reader(*this);
+    return new pdal::drivers::las::iterators::random::Reader(*this, buffer);
 }
 
 
@@ -729,9 +729,9 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 
 namespace random {
     
-Reader::Reader(const pdal::drivers::las::Reader& reader)
+Reader::Reader(const pdal::drivers::las::Reader& reader, PointBuffer& buffer)
     : Base(reader)
-    , pdal::ReaderRandomIterator(reader)
+    , pdal::ReaderRandomIterator(reader, buffer)
     , m_pointDimensions(NULL)
     , m_schema(0)
 {

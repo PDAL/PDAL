@@ -100,7 +100,7 @@ public:
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator() const;
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
 private:
     // these are mutable to allow const-ness for updating stats
@@ -142,7 +142,7 @@ namespace iterators { namespace random {
 class PDAL_DLL Cache : public pdal::FilterRandomIterator
 {
 public:
-    Cache(const pdal::filters::Cache& filter);
+    Cache(const pdal::filters::Cache& filter, PointBuffer& buffer);
 
 private:
     boost::uint64_t seekImpl(boost::uint64_t);

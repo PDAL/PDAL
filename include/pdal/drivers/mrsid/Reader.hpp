@@ -117,7 +117,7 @@ namespace random {
 class Reader : public pdal::ReaderRandomIterator
 {
 public:
-    Reader(const pdal::drivers::mrsid::Reader& reader);
+    Reader(const pdal::drivers::mrsid::Reader& reader, PointBuffer& buffer);
 
 private:
     boost::uint64_t seekImpl(boost::uint64_t);
