@@ -173,19 +173,19 @@ boost::property_tree::ptree PointBuffer::toPTree() const
             {
                     
 #define GETFIELDAS(T) getField<T>(dimension, pointIndex)
-#define STRINGIFY(T,x) boost::numeric_cast<T>(x)
+#define STRINGIFY(T,x) boost::lexical_cast<std::string>(boost::numeric_cast<T>(x))
                 // note we convert 8-bit fields to ints, so they aren't treated as chars
             case dimension::SignedInteger:
             case dimension::SignedByte:
                 if (size == 1)
                 {
                     if (!applyScaling)
-                        output += STRINGIFY(boost::int8_t, GETFIELDAS(boost::int8_t));
+                        output += STRINGIFY(boost::int32_t, GETFIELDAS(boost::int8_t));
                     else
                     {
                         boost::int8_t v = GETFIELDAS(boost::int8_t);
                         double d = dimension.applyScaling<boost::int8_t>(v);
-                        output += STRINGIFY(boost::int8_t, d);
+                        output += STRINGIFY(boost::int32_t, d);
                     }
                 }
                 if (size == 2)
@@ -227,12 +227,12 @@ boost::property_tree::ptree PointBuffer::toPTree() const
                 if (size == 1)
                 {
                     if (!applyScaling)
-                        output += STRINGIFY(boost::uint8_t, GETFIELDAS(boost::uint8_t));
+                        output += STRINGIFY(boost::uint32_t, GETFIELDAS(boost::uint8_t));
                     else
                     {
                         boost::uint8_t v = GETFIELDAS(boost::uint8_t);
                         double d = dimension.applyScaling<boost::uint8_t>(v);
-                        output += STRINGIFY(boost::uint8_t, d);
+                        output += STRINGIFY(boost::uint32_t, d);
                     }
                 }
                 if (size == 2)
