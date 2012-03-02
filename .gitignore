@@ -57,6 +57,13 @@ csharp/pdal_swig_cpp/pdal_wrap.cpp
 doc/doxygen/html
 doc/doxygen/xml
 
+#
+# test stuff
+#
+test/temp/*.txt
+test/temp/*.las
+test/temp/*.laz
+
 
 Makefile
 doc/build
