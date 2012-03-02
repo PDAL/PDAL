@@ -90,13 +90,15 @@ public:
     // may be read (and atEnd() should be true).
     //
     // All stages have the notion of a current point number, even for stages
-    // that are not really "oredered", in that the index just starts at zero 
+    // that are not really "ordered", in that the index just starts at zero 
     // and increments by N every time another N points are read
     boost::uint64_t getIndex() const;
 
     // used to control intermediate buffering needed by some stages
     void setChunkSize(boost::uint32_t size);
     boost::uint32_t getChunkSize() const;
+    
+    PointBuffer& getBuffer() { return m_buffer; }
 
 protected:
     virtual void readBeginImpl() {}

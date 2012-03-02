@@ -39,26 +39,6 @@
 namespace pdal
 {
 
-
-// //---------------------------------------------------------------------------
-// //
-// // ReaderIterator
-// //
-// //---------------------------------------------------------------------------
-// 
-// ReaderIterator::ReaderIterator(const Reader& reader)
-//     : StageIterator(reader)
-// {
-//     return;
-// }
-// 
-// 
-// ReaderIterator::~ReaderIterator()
-// {
-//     return;
-// }
-
-
 //---------------------------------------------------------------------------
 //
 // ReaderSequentialIterator

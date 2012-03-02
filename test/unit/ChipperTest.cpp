@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
         Dimension const& dimZ = schema.getDimension("Z");
         
         boost::scoped_ptr<StageRandomIterator> iter(reader.createRandomIterator(buffer));
-        chipper.GetBlock(20).GetBuffer(iter, buffer, 70, dimPoint, dimBlock);
+        chipper.GetBlock(20).GetBuffer(iter, buffer, 20, dimPoint, dimBlock);
 
         // 
         // std::cout << buffer.getField<boost::int32_t>(0, 0) << std::endl;
@@ -116,19 +116,19 @@ BOOST_AUTO_TEST_CASE(test_construction)
         // std::cout << buffer.getField<boost::int32_t>(2, 2) << std::endl;
 
         // Check X's of first three points in block 20
-        BOOST_CHECK(buffer.getField<boost::int32_t>(dimX, 0) == 63763550);
-        BOOST_CHECK(buffer.getField<boost::int32_t>(dimX, 1) == 63765279);
-        BOOST_CHECK(buffer.getField<boost::int32_t>(dimX, 2) == 63771207);
+        BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimX, 0), 63763550);
+        BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimX, 1), 63765279);
+        BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimX, 2), 63771207);
         
         // Check Y's of first three points in block 20
-        BOOST_CHECK(buffer.getField<boost::int32_t>(dimY, 0) == 84992418);
-        BOOST_CHECK(buffer.getField<boost::int32_t>(dimY, 1) == 85005705);
-        BOOST_CHECK(buffer.getField<boost::int32_t>(dimY, 2) == 85005840);
+        BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimY, 0), 84992418);
+        BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimY, 1), 85005705);
+        BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimY, 2), 85005840);
         
         // Check Z's of first three points in block 20
-        BOOST_CHECK(buffer.getField<boost::int32_t>(dimZ, 0) == 42664);
-        BOOST_CHECK(buffer.getField<boost::int32_t>(dimZ, 1) == 43579);
-        BOOST_CHECK(buffer.getField<boost::int32_t>(dimZ, 2) == 42651);
+        BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimZ, 0), 42664);
+        BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimZ, 1), 43579);
+        BOOST_CHECK_EQUAL(buffer.getField<boost::int32_t>(dimZ, 2), 42651);
 
     }
 
