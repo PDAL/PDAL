@@ -162,7 +162,11 @@ BOOST_AUTO_TEST_CASE(pcinfo_test_dumps)
     command << cmd + " --output=" + stats_test + " --stats " + inputLas + " --seed 1234";
     stat = Support::run_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
+#if defined(PDAL_PLATFORM_WIN32) // && (PDAL_BUILD_TYPE=="Debug")
+    were_equal = Support::compare_text_files(stats_test, Support::datapath("apps/pcinfo_stats-win32.txt"));
+#else
     were_equal = Support::compare_text_files(stats_test, Support::datapath("apps/pcinfo_stats.txt"));
+#endif
     BOOST_CHECK(were_equal);
     if (were_equal)
         pdal::FileUtils::deleteFile(stats_test);
