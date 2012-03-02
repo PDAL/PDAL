@@ -745,10 +745,10 @@ Reader::~Reader()
     return;
 }
 
-void Reader::readBufferBeginImpl(PointBuffer& buffer)
+void Reader::readBeginImpl()
 {
     // We'll assume you're not changing the schema per-read call
-    Schema const& schema = buffer.getSchema();
+    Schema const& schema = getBuffer().getSchema();
     if (m_schema != &schema)
     {
         m_schema = &schema;

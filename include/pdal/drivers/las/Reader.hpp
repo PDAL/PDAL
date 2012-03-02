@@ -188,7 +188,7 @@ public:
     ~Reader();
 
 protected:
-    virtual void readBufferBeginImpl(PointBuffer&);
+    virtual void readBeginImpl();
 
 private:
     boost::uint64_t seekImpl(boost::uint64_t);
