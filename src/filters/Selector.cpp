@@ -222,7 +222,7 @@ Selector::Selector(const pdal::filters::Selector& filter, PointBuffer& buffer)
     return;
 }
 
-void Selector::alterSchema(PointBuffer& buffer)
+void Selector::alterSchema(PointBuffer& /*buffer*/)
 {
     // std::vector<scaling::Scaler> const& scalers = m_scalingFilter.getScalers();
     // 

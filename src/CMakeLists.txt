@@ -480,7 +480,7 @@ if (WIN32)
 if (CMAKE_VERSION VERSION_GREATER 2.8.7)
 target_link_libraries(${APPS_CPP_DEPENDENCIES}
                        LINK_PRIVATE general ${Boost_LIBRARIES})
-endif(CMAKE_VERSION)
+endif(CMAKE_VERSION VERSION_GREATER 2.8.7)
 else()
 target_link_libraries(${APPS_CPP_DEPENDENCIES}
                       ${Boost_LIBRARIES})

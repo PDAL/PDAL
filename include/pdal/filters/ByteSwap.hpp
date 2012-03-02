@@ -69,7 +69,7 @@ public:
     }
     
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const { return NULL; }
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
 
     // returns number of points accepted into the data buffer (which may be less than data.getNumPoints(),
     // if we're calling this routine multiple times with the same buffer

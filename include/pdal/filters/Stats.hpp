@@ -96,18 +96,18 @@ public:
     Summary(    boost::uint32_t num_bins=20,
                 boost::uint32_t sample_size=1000,
                 boost::uint32_t cache_size=1000,
-				boost::uint32_t seed=0)
+                boost::uint32_t seed=0)
     : m_histogram(  boost::accumulators::tag::density::num_bins = num_bins, 
                     boost::accumulators::tag::density::cache_size = cache_size)
     , m_sample_size(sample_size)
     , m_distribution(0, cache_size)
     {
-		if (seed != 0)
-		{
-			m_rng.seed(seed);
-			m_distribution.reset();
-		}
-		
+        if (seed != 0)
+        {
+            m_rng.seed(seed);
+            m_distribution.reset();
+        }
+        
         return;
     }
     
@@ -161,7 +161,7 @@ public:
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const { return 0; } // BUG: add this
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer& ) const { return 0; } // BUG: add this
 
     void processBuffer(PointBuffer& data) const;
 
@@ -208,8 +208,8 @@ private:
     bool atEndImpl() const;
 
     const pdal::filters::Stats& m_statsFilter;
-	
-	std::vector<DimensionPtr> m_dimensions;
+    
+    std::vector<DimensionPtr> m_dimensions;
 
     double getValue(PointBuffer& data, Dimension& dim, boost::uint32_t pointIndex);
 
