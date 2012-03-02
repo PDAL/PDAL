@@ -73,12 +73,12 @@ BOOST_AUTO_TEST_CASE(BPFTest_test)
     
     pdal::Stage* stage = manager.getStage();
     BOOST_CHECK(stage != NULL);
-    BOOST_CHECK_EQUAL(stage->getNumPoints(), 556676u);
     stage->initialize();
+    BOOST_CHECK_EQUAL(stage->getNumPoints(), 556676u);
 
     {
         const pdal::Schema& schema = stage->getSchema();
-        std::cout << schema << std::endl;
+        // std::cout << schema << std::endl;
         pdal::PointBuffer data(schema, 2048);
         pdal::StageSequentialIterator* iter = stage->createSequentialIterator(data);
         boost::uint32_t np = iter->read(data);
