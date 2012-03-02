@@ -463,26 +463,42 @@ endif()
 
 add_library(${PDAL_LIB_NAME} SHARED ${PDAL_SOURCES})
 
-target_link_libraries(${APPS_CPP_DEPENDENCIES}
-  ${PDAL_LIB_NAME}
-  ${TIFF_LIBRARY}
-  ${ORACLE_LIBRARY}
-  ${MRSID_LIBRARY}
-  ${GEOTIFF_LIBRARY}
-  ${GDAL_LIBRARY}
-  ${LASZIP_LIBRARY}
-  ${LIBXML2_LIBRARIES}
-  ${P2G_LIBRARY})
+if (WIN32)
+  target_link_libraries(${APPS_CPP_DEPENDENCIES} LINK_PUBLIC general
+    ${PDAL_LIB_NAME}
+    ${TIFF_LIBRARY}
+    ${ORACLE_LIBRARY}
+    ${MRSID_LIBRARY}
+    ${GEOTIFF_LIBRARY}
+    ${GDAL_LIBRARY}
+    ${LASZIP_LIBRARY}
+    ${LIBXML2_LIBRARIES}
+    ${P2G_LIBRARY})
+else()
+  target_link_libraries(${APPS_CPP_DEPENDENCIES}
+    ${PDAL_LIB_NAME}
+    ${TIFF_LIBRARY}
+    ${ORACLE_LIBRARY}
+    ${MRSID_LIBRARY}
+    ${GEOTIFF_LIBRARY}
+    ${GDAL_LIBRARY}
+    ${LASZIP_LIBRARY}
+    ${LIBXML2_LIBRARIES}
+    ${P2G_LIBRARY})
+endif()
 
-message(STATUS "boost libs: ${Boost_LIBRARIES}")
+message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
 
 if (WIN32)
-if (CMAKE_VERSION VERSION_GREATER 2.8.7)
-target_link_libraries(${APPS_CPP_DEPENDENCIES}
+	if (CMAKE_VERSION VERSION_GREATER 2.8.6)
+		target_link_libraries(${APPS_CPP_DEPENDENCIES}
                        LINK_PRIVATE general ${Boost_LIBRARIES})
-endif(CMAKE_VERSION VERSION_GREATER 2.8.7)
+	else()
+		target_link_libraries(${APPS_CPP_DEPENDENCIES}
+                        ${Boost_LIBRARIES})
+	endif()
 else()
-target_link_libraries(${APPS_CPP_DEPENDENCIES}
+	target_link_libraries(${APPS_CPP_DEPENDENCIES}
                       ${Boost_LIBRARIES})
 
 endif(WIN32)

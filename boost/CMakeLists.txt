@@ -6,7 +6,19 @@
 
 include_directories(".")
 
-add_definitions(-DBOOST_TEST_DYN_LINK)
+if(WIN32)
+    #add_definitions(-DBOOST_TEST_DYN_LINK)
+    #add_definitions(-DBOOST_TEST_NO_MAIN)
+	
+	# disable compiler warnings
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
+	
+else()
+    
+	add_definitions(-DBOOST_TEST_DYN_LINK)
+
+endif()
+
 
 set(PDALBOOST_SOURCES
     ./libs/date_time/src/gregorian/date_generators.cpp
