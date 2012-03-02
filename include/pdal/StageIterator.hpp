@@ -97,6 +97,8 @@ public:
     // used to control intermediate buffering needed by some stages
     void setChunkSize(boost::uint32_t size);
     boost::uint32_t getChunkSize() const;
+    
+    PointBuffer& getBuffer() { return m_buffer; }
 
 protected:
     virtual void readBeginImpl() {}
