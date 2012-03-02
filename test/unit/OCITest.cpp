@@ -210,7 +210,7 @@ bool WriteDefaultData()
     writer_writer.initialize();
     boost::uint64_t numPointsToRead = writer_reader.getNumPoints();
     
-    BOOST_CHECK_EQUAL(numPointsToRead, 1065);
+    BOOST_CHECK_EQUAL(numPointsToRead, 1065u);
     
     writer_writer.write(0);
     
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(read_basic_smaller_block_view)
     pdal::drivers::las::Writer writer(reader_reader, writerOpts);
     writer.initialize();
     boost::uint64_t numWritten = writer.write(0);
-    BOOST_CHECK_EQUAL(numWritten, 1065);
+    BOOST_CHECK_EQUAL(numWritten, 1065u);
     
     
 }
