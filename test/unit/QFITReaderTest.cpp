@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     pdal::Option filename("filename", Support::datapath("qfit/14-word.qi"), "Input filename for reader to use" );
     options.add(filename);
     Option flip_coordinates("flip_coordinates", false, "Flip coordinates from 0-360 to -180-180");
-    Option scale_z("scale_z", 0.001, "Z scale from mm to m");
+    Option scale_z("scale_z", 0.001f, "Z scale from mm to m");
 
     options.add(scale_z);
     options.add(flip_coordinates);
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(test_pipeline)
 
     const boost::uint64_t np = manager.execute();
 
-    BOOST_CHECK_EQUAL(np, 10314);
+    BOOST_CHECK_EQUAL(np, 10314u);
 
     return;
 }

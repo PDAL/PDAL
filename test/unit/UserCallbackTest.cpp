@@ -112,7 +112,8 @@ BOOST_AUTO_TEST_CASE(test1)
     {
         ok = worker.doWork();
         BOOST_CHECK(ok);
-        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 3*(i+1));
+        boost::uint32_t hb = 3*(i+1);
+        BOOST_CHECK_EQUAL(cb.getHeartbeats(), hb);
         BOOST_CHECK_CLOSE(cb.getPercentComplete(), (double)i, 0.001);
     }
 

@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
 
         writer.write(1000);
 
-        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 12);
+        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 12u);
         BOOST_CHECK_EQUAL(cb.getPercentComplete(), 100);
     }
 
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
 
         BOOST_CHECK_THROW(writer.write(1000), pipeline_interrupt);
 
-        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 7);
+        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 7u);
         BOOST_CHECK_EQUAL(cb.getPercentComplete(), 60);
     }
 
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(test_callbacks)
 
         BOOST_CHECK_THROW(writer.write(1000), pipeline_interrupt);
 
-        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 7);
+        BOOST_CHECK_EQUAL(cb.getHeartbeats(), 7u);
         BOOST_CHECK_EQUAL(cb.getPercentComplete(), 60);
     }
 
