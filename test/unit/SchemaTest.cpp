@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(SchemaTest_ptree)
 
     boost::algorithm::erase_all(out1, "\n");
     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    std::string ref = xml_header + "<dimension><name>X</name><namespace/><description/><bytesize>4</bytesize><endianness>little</endianness><minimum>0</minimum><maximum>0</maximum><scale>1</scale><offset>0</offset><isValid>false</isValid><uuid>ff7f0000-a896-c109-0000-000026d09d81</uuid></dimension><dimension><name>Y</name><namespace/><description/><bytesize>4</bytesize><endianness>little</endianness><minimum>0</minimum><maximum>0</maximum><scale>1</scale><offset>0</offset><isValid>false</isValid><uuid>ff7f0000-a896-c109-0000-000026d09d81</uuid></dimension>";
+    std::string ref = xml_header + "<dimension><name>X</name><namespace/><parent>00000000-0000-0000-0000-000000000000</parent><description/><bytesize>4</bytesize><endianness>little</endianness><minimum>0</minimum><maximum>0</maximum><scale>1</scale><offset>0</offset><isValid>false</isValid><uuid>ff7f0000-a896-c109-0000-000026d09d81</uuid></dimension><dimension><name>Y</name><namespace/><parent>00000000-0000-0000-0000-000000000000</parent><description/><bytesize>4</bytesize><endianness>little</endianness><minimum>0</minimum><maximum>0</maximum><scale>1</scale><offset>0</offset><isValid>false</isValid><uuid>ff7f0000-a896-c109-0000-000026d09d81</uuid></dimension>";
 
     boost::algorithm::erase_all(ref, "\n");
     BOOST_CHECK_EQUAL(ref, out1);

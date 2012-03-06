@@ -39,6 +39,8 @@
 #include <boost/algorithm/string/replace.hpp>
 
 #include <pdal/Dimension.hpp>
+#include <pdal/Schema.hpp>
+
 #include <boost/uuid/string_generator.hpp>
 
 using namespace pdal;
@@ -73,6 +75,41 @@ BOOST_AUTO_TEST_CASE(test_ctor)
     BOOST_CHECK(d4 != d1);
 
     
+}
+
+BOOST_AUTO_TEST_CASE(test_parents)
+{
+    Dimension parent("X", dimension::SignedInteger, 4);
+    parent.setNamespace("parent");
+    parent.createUUID();
+    
+    Dimension child("X", dimension::Float, 4);
+    child.setNamespace("child");
+    child.createUUID();
+    dimension::id const& p = parent.getUUID();
+    child.setParent(p);
+
+    Dimension child2("X", dimension::Float, 8);
+    child2.setNamespace("child2");
+    child2.createUUID();
+    child2.setParent(child.getUUID());
+
+    Dimension another("Y", dimension::SignedInteger, 4);
+    
+    Schema schema;
+    schema.appendDimension(child);
+    schema.appendDimension(parent);
+    schema.appendDimension(another);
+    schema.appendDimension(child2);
+    
+    BOOST_CHECK(child.getParent() == parent.getUUID());
+    
+    // The parent-child relationship will case getDimension
+    // to return the child dim with name 'X', not the 
+    // first-added parent dim
+    Dimension const& c2 = schema.getDimension("X");
+    
+    BOOST_CHECK(c2.getUUID() == child2.getUUID());
 }
 
 

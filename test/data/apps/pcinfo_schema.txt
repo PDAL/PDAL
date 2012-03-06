@@ -3,6 +3,7 @@
     {
         "name": "X",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "X coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.",
         "bytesize": "4",
         "endianness": "little",
@@ -17,6 +18,7 @@
     {
         "name": "Y",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "Y coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.",
         "bytesize": "4",
         "endianness": "little",
@@ -31,6 +33,7 @@
     {
         "name": "Z",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "x coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.",
         "bytesize": "4",
         "endianness": "little",
@@ -45,6 +48,7 @@
     {
         "name": "Intensity",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "The intensity value is the integer representation of the pulse return magnitude. This value is optional and system specific. However, it should always be included if available.",
         "bytesize": "2",
         "endianness": "little",
@@ -59,6 +63,7 @@
     {
         "name": "ReturnNumber",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "Return Number: The Return Number is the pulse return number for a given output pulse. A given output laser pulse can have many returns, and they must be marked in sequence of return. The first return will have a Return Number of one, the second a Return Number of two, and so on up to five returns.",
         "bytesize": "1",
         "endianness": "little",
@@ -73,6 +78,7 @@
     {
         "name": "NumberOfReturns",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "Number of Returns (for this emitted pulse): The Number of Returns is the total number of returns for a given pulse. For example, a laser data point may be return two (Return Number) within a total number of five returns.",
         "bytesize": "1",
         "endianness": "little",
@@ -87,6 +93,7 @@
     {
         "name": "ScanDirectionFlag",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "The Scan Direction Flag denotes the direction at which the scanner mirror was traveling at the time of the output pulse. A bit value of 1 is a positive scan direction, and a bit value of 0 is a negative scan direction (where positive scan direction is a scan moving from the left side of the in-track direction to the right side and negative the opposite).",
         "bytesize": "1",
         "endianness": "little",
@@ -101,6 +108,7 @@
     {
         "name": "EdgeOfFlightLine",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "The Edge of Flight Line data bit has a value of 1 only when the point is at the end of a scan. It is the last point on a given scan line before it changes direction.",
         "bytesize": "1",
         "endianness": "little",
@@ -115,6 +123,7 @@
     {
         "name": "Classification",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "Classification in LAS 1.0 was essentially user defined and optional. LAS 1.1 defines a standard set of ASPRS classifications. In addition, the field is now mandatory. If a point has never been classified, this byte must be set to zero. There are no user defined classes since both point format 0 and point format 1 supply 8 bits per point for user defined operations. Note that the format for classification is a bit encoded field with the lower five bits used for class and the three high bits used for flags.",
         "bytesize": "1",
         "endianness": "little",
@@ -129,6 +138,7 @@
     {
         "name": "ScanAngleRank",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "The Scan Angle Rank is a signed one-byte number with a valid range from -90 to +90. The Scan Angle Rank is the angle (rounded to the nearest integer in the absolute value sense) at which the laser point was output from the laser system including the roll of the aircraft. The scan angle is within 1 degree of accuracy from +90 to 90 degrees. The scan angle is an angle based on 0 degrees being nadir, and 90 degrees to the left side of the aircraft in the direction of flight.",
         "bytesize": "1",
         "endianness": "little",
@@ -143,6 +153,7 @@
     {
         "name": "UserData",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "This field may be used at the users discretion",
         "bytesize": "1",
         "endianness": "little",
@@ -157,6 +168,7 @@
     {
         "name": "PointSourceId",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "This value indicates the file from which this point originated. Valid values for this field are 1 to 65,535 inclusive with zero being used for a special case discussed below. The numerical value corresponds to the File Source ID from which this point originated. Zero is reserved as a convenience to system implementers. A Point Source ID of zero implies that this point originated in this file. This implies that processing software should set the Point Source ID equal to the File Source ID of the file containing this point at some time during processing. ",
         "bytesize": "2",
         "endianness": "little",
@@ -171,6 +183,7 @@
     {
         "name": "Time",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "The GPS Time is the double floating point time tag value at which the point was acquired. It is GPS Week Time if the Global Encoding low bit is clear and Adjusted Standard GPS Time if the Global Encoding low bit is set (see Global Encoding in the Public Header Block description).",
         "bytesize": "8",
         "endianness": "little",
@@ -185,6 +198,7 @@
     {
         "name": "Red",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "The red image channel value associated with this point",
         "bytesize": "2",
         "endianness": "little",
@@ -199,6 +213,7 @@
     {
         "name": "Green",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "The green image channel value associated with this point",
         "bytesize": "2",
         "endianness": "little",
@@ -213,6 +228,7 @@
     {
         "name": "Blue",
         "namespace": "drivers.las.reader",
+        "parent": "00000000-0000-0000-0000-000000000000",
         "description": "The blue image channel value associated with this point",
         "bytesize": "2",
         "endianness": "little",

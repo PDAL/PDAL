@@ -312,6 +312,14 @@ public:
     void setNamespace( std::string const& name) { m_namespace = name; }
     std::string const& getNamespace( ) const { return m_namespace; }
 
+    std::string getFQName( ) const { return m_namespace + "." + m_name; }
+    
+    void setParent( dimension::id const& id) { m_parentDimensionID = id; }
+    dimension::id const& getParent( ) const 
+    {
+        return m_parentDimensionID;
+    }
+    
 private:
     std::string m_name;
     boost::uint32_t m_flags;
@@ -327,6 +335,7 @@ private:
     dimension::Interpretation m_interpretation;
     dimension::id m_uuid;
     std::string m_namespace;
+    dimension::id m_parentDimensionID;
 };
 
 

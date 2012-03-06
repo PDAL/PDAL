@@ -72,6 +72,7 @@ Dimension::Dimension(   std::string const& name,
     , m_position(-1)    
     , m_interpretation(interpretation)
     , m_namespace(std::string(""))
+    , m_parentDimensionID(boost::uuids::nil_uuid())
     
 {
 
@@ -106,6 +107,7 @@ Dimension::Dimension(Dimension const& other)
     , m_interpretation(other.m_interpretation)
     , m_uuid(other.m_uuid)
     , m_namespace(other.m_namespace)
+    , m_parentDimensionID(other.m_parentDimensionID)
 {
     return;
 }
@@ -129,6 +131,7 @@ Dimension& Dimension::operator=(Dimension const& rhs)
         m_interpretation = rhs.m_interpretation;
         m_uuid = rhs.m_uuid;
         m_namespace = rhs.m_namespace;
+        m_parentDimensionID = rhs.m_parentDimensionID;
     }
 
     return *this;
@@ -149,7 +152,8 @@ bool Dimension::operator==(const Dimension& other) const
         m_byteOffset == other.m_byteOffset &&
         m_position == other.m_position &&
         m_interpretation == other.m_interpretation && 
-        m_uuid == other.m_uuid
+        m_uuid == other.m_uuid &&
+        m_parentDimensionID == other.m_parentDimensionID
         )
     {
         return true;
@@ -180,6 +184,7 @@ boost::property_tree::ptree Dimension::toPTree() const
     ptree dim;
     dim.put("name", getName());
     dim.put("namespace", getNamespace());
+    dim.put("parent", getParent());
     dim.put("description", getDescription());
     dim.put("bytesize", getByteSize());
     

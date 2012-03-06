@@ -42,6 +42,7 @@
 #include <pdal/Schema.hpp>
 
 #include <iostream>
+#include <map>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -195,12 +196,16 @@ const Dimension& Schema::getDimension(std::string const& t, std::string const& n
 {
     schema::index_by_name const& name_index = m_index.get<schema::name>();
     schema::index_by_name::const_iterator it = name_index.find(t);
+    
+    schema::index_by_name::size_type count = name_index.count(t);
 
     std::ostringstream oss;
     oss << "Dimension with name '" << t << "' not found, unable to Schema::getDimension";
 
     // FIXME: If there are two dimensions with the same name here, we're 
     // scrwed
+    
+    // std::cout << "finding dimension with name" << t << " and ns: " << ns << std::endl;
     if (it != name_index.end()) {
         
         if (ns.size())
@@ -212,8 +217,76 @@ const Dimension& Schema::getDimension(std::string const& t, std::string const& n
                 ++it;
             }
             
-        }
+        } 
         
+        if (count > 1) {
+
+            std::pair<schema::index_by_name::const_iterator, schema::index_by_name::const_iterator> ret = name_index.equal_range(t);
+            boost::uint32_t num_parents(0);
+            boost::uint32_t num_children(0);
+            std::map<dimension::id, dimension::id> relationships;
+            
+            // Test to make sure that the number of parent dimensions all with 
+            // the same name is equal to only 1. If there are multiple 
+            // dimensions with the same name, but no relationships defined, 
+            // we are in an error condition
+            for (schema::index_by_name::const_iterator  o = ret.first; o != ret.second; ++o)
+            {
+                // Put a map together that maps parents to children that 
+                // we are going to walk to find the very last child in the 
+                // graph.
+                std::pair<dimension::id, dimension::id> p( o->getParent(), o->getUUID());
+                relationships.insert(p);
+                
+                // The parent dimension should have a nil parent of its own.
+                // nil_uuid is the default parent of all dimensions as the y
+                // are created
+                if (o->getParent().is_nil()) 
+                {
+                    num_parents++;
+                }
+                else
+                {
+                    num_children++;
+                }
+                
+            }
+            
+            if (num_parents != 1)
+            {
+                std::ostringstream oss;
+                
+                oss << "Schema has multiple dimensions with name '" << t << "', but "
+                       "their parent/child relationships are not coherent. Multiple "
+                       "parents are present.";
+                
+                throw multiple_parent_dimensions(oss.str());
+            }
+            
+            dimension::id parent = boost::uuids::nil_uuid();
+            
+            // Starting at the parent (nil uuid), walk the child/parent graph down to the 
+            // end.  When we're done finding dimensions, what's left is the child 
+            // at the end of the graph.
+            std::map<dimension::id, dimension::id>::const_iterator p = relationships.find(parent);
+            dimension::id child;
+            while (p != relationships.end())
+            {
+                child = p->second;
+                p = relationships.find(p->second);
+            }
+            schema::index_by_uid::const_iterator pi = m_index.get<schema::uid>().find(child);
+            if (pi != m_index.get<schema::uid>().end())
+            {
+                return *pi;
+            } 
+            else 
+            {
+                std::ostringstream errmsg;
+                errmsg << "Unable to fetch subjugate dimension with id '" << child << "' in schema";
+                throw dimension_not_found(errmsg.str());
+            }
+        }
         return *it;
     } else {
         boost::uuids::uuid ps1;

@@ -154,6 +154,15 @@ public:
     {}
 };
 
+class multiple_parent_dimensions : public pdal_error
+{
+public:
+
+    multiple_parent_dimensions(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
 
 // use this for code still under development
 class not_yet_implemented : public pdal_error
