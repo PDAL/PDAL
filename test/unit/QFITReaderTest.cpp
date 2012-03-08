@@ -64,12 +64,12 @@ void Check_Point(const pdal::PointBuffer& data,
                        boost::int32_t tref)
 {
     const ::pdal::Schema& schema = data.getSchema();
-	
-	Dimension const& dimX = schema.getDimension("X");
-	Dimension const& dimY = schema.getDimension("Y");
-	Dimension const& dimZ = schema.getDimension("Z");
-	Dimension const& dimTime = schema.getDimension("Time");
-	
+    
+    Dimension const& dimX = schema.getDimension("X");
+    Dimension const& dimY = schema.getDimension("Y");
+    Dimension const& dimZ = schema.getDimension("Z");
+    Dimension const& dimTime = schema.getDimension("Time");
+    
     
     boost::int32_t x = data.getField<boost::int32_t>(dimX, index);
     boost::int32_t y = data.getField<boost::int32_t>(dimY, index);
@@ -174,9 +174,12 @@ BOOST_AUTO_TEST_CASE(test_pipeline)
     bool isWriter = reader.readPipeline(Support::datapath("qfit/pipeline.xml"));
     BOOST_CHECK_EQUAL(isWriter, true);
 
+    // this test doesn't work with the current OSGeo4W (it requires a newer PROJ)
+#ifndef PDAL_PLATFORM_WIN32
     const boost::uint64_t np = manager.execute();
 
     BOOST_CHECK_EQUAL(np, 10314u);
+#endif
 
     return;
 }
