@@ -136,22 +136,25 @@ inline void Scaling::scale( Dimension const& from_dimension,
 
     T output = static_cast<T>(out);
 
-    if (output >= (std::numeric_limits<T>::max)())
+    if (std::numeric_limits<T>::is_exact) // 
     {
-        std::ostringstream oss;
-        oss << "filter.Scaling: scale and/or offset combination causes " 
-               "re-scaled value to be greater than std::numeric_limits::max for dimension '" << to_dimension.getName() << "'";
-        
-    } 
-    else if (output <= (std::numeric_limits<T>::min)() )
-    {
-        std::ostringstream oss;
-        oss << "filter.Scaling: scale and/or offset combination causes " 
-               "re-scaled value to be less than std::numeric_limits::min for dimension '" << to_dimension.getName() << "'";
-        throw std::out_of_range(oss.str());
+        if (output > (std::numeric_limits<T>::max)())
+        {
+            std::ostringstream oss;
+            oss << "filter.Scaling: scale and/or offset combination causes " 
+                   "re-scaled value to be greater than std::numeric_limits::max for dimension '" << to_dimension.getName() << "'. " <<
+                   "value is: " << output << " and max() is: " << (std::numeric_limits<T>::max)();        
+        } 
+        else if (output < (std::numeric_limits<T>::min)() )
+        {
+            std::ostringstream oss;
+            oss << "filter.Scaling: scale and/or offset combination causes " 
+                   "re-scaled value to be less than std::numeric_limits::min for dimension '" << to_dimension.getName() << "'. " <<
+                   "value is: " << output << " and min() is: " << (std::numeric_limits<T>::min)();
+            throw std::out_of_range(oss.str());
 
+        }
     }
-    
     value = output;
     
     return ;
