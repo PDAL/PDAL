@@ -134,6 +134,11 @@ public:
         return m_byteSize;
     }
 
+    inline std::size_t size() const
+    {
+        return m_index.get<schema::name>().size();
+    }
+
     // returns a ptree reprsenting the Schema
     //
     // looks like this:
