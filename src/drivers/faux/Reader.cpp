@@ -146,9 +146,6 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
 {
     const Schema& schema = data.getSchema();
 
-    if (schema.getDimensions().size() != 4)
-        throw not_yet_implemented("need to add ability to read from arbitrary fields");
-
     // make up some data and put it into the buffer
 
     // how many are they asking for?
@@ -173,10 +170,10 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) 
     const double delY = (maxY - minY) / numDeltas;
     const double delZ = (maxZ - minZ) / numDeltas;
     
-    const Dimension& dimX = schema.getDimension("X");
-    const Dimension& dimY = schema.getDimension("Y");
-    const Dimension& dimZ = schema.getDimension("Z");
-    const Dimension& dimTime = schema.getDimension("Time");
+    const Dimension& dimX = schema.getDimension("X", getName());
+    const Dimension& dimY = schema.getDimension("Y", getName());
+    const Dimension& dimZ = schema.getDimension("Z", getName());
+    const Dimension& dimTime = schema.getDimension("Time", getName());
 
     boost::uint64_t time = index;
     
