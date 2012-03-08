@@ -74,7 +74,7 @@ We satisfy all dependencies using OSGeo4W and use the Boost subset that is inclu
 Note that the config.bat file is set up to build PDAL in the "officially supported" configuration -- that is, with
 Oracle, and GDAL, and LASzip, and such.  If you followed the previous steps, you should be fine to use this default
 configuration.  You may modify this file if you need to (such as to use a local copy of GDAL or to use NMake instead
-of Visual StudiO); see the Advanced steps below for instructions.
+of Visual Studio); see the Advanced steps below for instructions.
 
 4.  Verify your system environment variables are set properly:
 
