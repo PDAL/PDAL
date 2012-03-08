@@ -64,7 +64,7 @@ We satisfy all dependencies using OSGeo4W and use the Boost subset that is inclu
 2.  Get the source code for PDAL:
 ::
 
-   c:\dev> git clone https://github.com/PDAL/PDAL.git .
+   c:\dev> git clone https://github.com/PDAL/PDAL.git
 
 3. **From the root of your PDAL tree**, run "config.bat". This will create the VStudio solution file and .vcxproj files.
 ::
@@ -76,9 +76,17 @@ Oracle, and GDAL, and LASzip, and such.  If you followed the previous steps, you
 configuration.  You may modify this file if you need to (such as to use a local copy of GDAL or to use NMake instead
 of Visual StudiO); see the Advanced steps below for instructions.
 
-4.  Modify your system environment to include the %OSGeo4W%/bin directory in your %PATH% so that the dependent DLLs are available at run time.
+4.  Verify your system environment variables are set properly:
 
-4.  Start Visual Studio and open PDAL.sln.  Build the solution (F6).
+- PATH should include %OSGeo4W%\bin
+- GDAL_DATA should be set to %OSGeo4W%\share\epsg_csv
+- PROJ_LIB should be set to %OSGeo4W%\share\proj
+
+5.  Start Visual Studio and open PDAL.sln.  Build the solution (F6).
+
+6.  Set pdal_test as the startup project and run it (F5).  You should see a console window startup, print something like "Running 158 test
+cases..." (exect number may vary), and then after a short period print something like "*** No errors detected".  If you do get errors,
+that means either something is broken on the version of PDAL you checked out OR something is wrong with your installation.
 
 
 Advanced Build Steps
