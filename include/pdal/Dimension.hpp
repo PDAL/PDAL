@@ -224,7 +224,7 @@ public:
     /// \param v The value to scale with the Dimension's NumericOffset and NumericScale values
     /// \return \b v scaled by getNumericOffset() and getNumericScale() values.
     template<class T>
-    double applyScaling(T v) const
+    inline double applyScaling(T const& v) const
     {
         return static_cast<double>(v) * m_numericScale + m_numericOffset;
     }
@@ -233,25 +233,27 @@ public:
     /// \param v The value to descale with the Dimension's NumericScale and NumericOffset values
     /// \return a value that has been descaled by the Dimension's NumericOffset and NumericScale values
     template<class T>
-    T removeScaling(double v) const
+    inline T removeScaling(double const& v) const
     {
         T output = static_cast<T>(Utils::sround((v - m_numericOffset)/ m_numericScale));
         
         if (std::numeric_limits<T>::is_exact) // 
         {
-            if (output >= (std::numeric_limits<T>::max)())
+            if (output > (std::numeric_limits<T>::max)())
             {
                 std::ostringstream oss;
-                oss << "removeScaling: scale and/or offset combination causes " 
-                       "de-scaled value to be greater than std::numeric_limits::max for this data type";
-                throw std::out_of_range(oss.str());
+                oss << "filter.Scaling: scale and/or offset combination causes " 
+                       "re-scaled value to be greater than std::numeric_limits::max for dimension '" << getName() << "'. " <<
+                       "value is: " << output << " and max() is: " << (std::numeric_limits<T>::max)();        
             } 
-            else if (output <= (std::numeric_limits<T>::min)() )
+            else if (output < (std::numeric_limits<T>::min)() )
             {
                 std::ostringstream oss;
-                oss << "removeScaling: scale and/or offset combination causes " 
-                       "de-scaled value to be less than std::numeric_limits::min for this data type";
+                oss << "filter.Scaling: scale and/or offset combination causes " 
+                       "re-scaled value to be less than std::numeric_limits::min for dimension '" << getName() << "'. " <<
+                       "value is: " << output << " and min() is: " << (std::numeric_limits<T>::min)();
                 throw std::out_of_range(oss.str());
+
             }
         }
         return output;
