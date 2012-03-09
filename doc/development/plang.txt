@@ -1,12 +1,8 @@
+.. _development_plang:
+
 =================================
 PLang: a little language for PDAL
 =================================
-
-| Michael P. Gerlek
-| Flaxen Consulting
-| mpg@flaxen.com
-| 14 December 2011
-
 
 Overview
 --------
