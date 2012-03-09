@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(BPFTest_test)
     pdal::Stage* stage = manager.getStage();
     BOOST_CHECK(stage != NULL);
     stage->initialize();
-    BOOST_CHECK_EQUAL(stage->getNumPoints(), 556676u);
+    BOOST_CHECK_EQUAL(stage->getNumPoints(), 1838289u);
 
     {
         const pdal::Schema& schema = stage->getSchema();
