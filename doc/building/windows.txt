@@ -37,6 +37,23 @@ Basic Build Steps
 Most users can use this procedure to build PDAL on Windows.  
 We satisfy all dependencies using OSGeo4W and use the Boost subset that is included with the library.
 
+0.  If you plan to use LAZ support (compressed LAS), get the laszip source 
+code and build it (http://www.laszip.org). Add the directory with laszip.dll to
+your %PATH% (or copy the laszip.* files into the bin directory of PDAL itself).
+Make sure it appears in your PATH before OSGeo4W (as per step 4 below).
+
+While laszip is included in the OSGeo4W distribution below (see step 1), the 
+version there is compiled with Visual Studio 2008 and we have some suspicion 
+that it is incompatible with the version of PDAL you are about to build with 
+Visual Studio 2010.  Building the laszip library should be no more complicated than::
+
+    set G="Visual Studio 10"
+    set BUILD_TYPE=Debug
+    cmake -G %G% ^
+        -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
+        -DCMAKE_VERBOSE_MAKEFILE=OFF ^
+        .
+
 1.  Install OSGeo4W (http://download.osgeo.org/osgeo4w/osgeo4w-setup.exe) using the "Advanced Install" option and include the following:  gdal-dev, laszip, libxml2, iconv.
 
   .. figure::  media/OSGeo4WInstallAdvanced.png
@@ -48,7 +65,7 @@ We satisfy all dependencies using OSGeo4W and use the Boost subset that is inclu
   You can leave the "Select Local Package Directory" and "Internet Connection Type" at the defaults.
   Under the "libs" tree, select "gdal-dev" for installation.  (Yuo should probably use the latest version, e.g. 1.8pre-6.)
    .. figure::  media/OSGeo4WInstallGDALDev.png
-  Select "laszip".  
+  Select "laszip" (this is not required currently -- see step 0 above).
    .. figure::  media/OSGeo4WInstallLASZip.png
   Select "libxml2".  
    .. figure::  media/OSGeo4WInstallLibXML2.png
