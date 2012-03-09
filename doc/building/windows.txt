@@ -37,6 +37,23 @@ Basic Build Steps
 Most users can use this procedure to build PDAL on Windows.  
 We satisfy all dependencies using OSGeo4W and use the Boost subset that is included with the library.
 
+0.  If you plan to use LAZ support (compressed LAS), get the laszip source 
+code and build it (http://www.laszip.org). Add the directory with laszip.dll to
+your %PATH% (or copy the laszip.* files into the bin directory of PDAL itself).
+Make sure it appears in your PATH before OSGeo4W (as per step 4 below).
+
+While laszip is included in the OSGeo4W distribution below (see step 1), the 
+version there is compiled with Visual Studio 2008 and we have some suspicion 
+that it is incompatible with the version of PDAL you are about to build with 
+Visual Studio 2010.  Building the laszip library should be no more complicated than::
+
+    set G="Visual Studio 10"
+    set BUILD_TYPE=Debug
+    cmake -G %G% ^
+        -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
+        -DCMAKE_VERBOSE_MAKEFILE=OFF ^
+        .
+
 1.  Install OSGeo4W (http://download.osgeo.org/osgeo4w/osgeo4w-setup.exe) using the "Advanced Install" option and include the following:  gdal-dev, laszip, libxml2, iconv.
 
   .. figure::  media/OSGeo4WInstallAdvanced.png
@@ -48,7 +65,7 @@ We satisfy all dependencies using OSGeo4W and use the Boost subset that is inclu
   You can leave the "Select Local Package Directory" and "Internet Connection Type" at the defaults.
   Under the "libs" tree, select "gdal-dev" for installation.  (Yuo should probably use the latest version, e.g. 1.8pre-6.)
    .. figure::  media/OSGeo4WInstallGDALDev.png
-  Select "laszip".  
+  Select "laszip" (this is not required currently -- see step 0 above).
    .. figure::  media/OSGeo4WInstallLASZip.png
   Select "libxml2".  
    .. figure::  media/OSGeo4WInstallLibXML2.png
@@ -64,7 +81,7 @@ We satisfy all dependencies using OSGeo4W and use the Boost subset that is inclu
 2.  Get the source code for PDAL:
 ::
 
-   c:\dev> git clone https://github.com/PDAL/PDAL.git .
+   c:\dev> git clone https://github.com/PDAL/PDAL.git
 
 3. **From the root of your PDAL tree**, run "config.bat". This will create the VStudio solution file and .vcxproj files.
 ::
@@ -74,11 +91,19 @@ We satisfy all dependencies using OSGeo4W and use the Boost subset that is inclu
 Note that the config.bat file is set up to build PDAL in the "officially supported" configuration -- that is, with
 Oracle, and GDAL, and LASzip, and such.  If you followed the previous steps, you should be fine to use this default
 configuration.  You may modify this file if you need to (such as to use a local copy of GDAL or to use NMake instead
-of Visual StudiO); see the Advanced steps below for instructions.
+of Visual Studio); see the Advanced steps below for instructions.
 
-4.  Modify your system environment to include the %OSGeo4W%/bin directory in your %PATH% so that the dependent DLLs are available at run time.
+4.  Verify your system environment variables are set properly:
 
-4.  Start Visual Studio and open PDAL.sln.  Build the solution (F6).
+- PATH should include %OSGeo4W%\bin
+- GDAL_DATA should be set to %OSGeo4W%\share\epsg_csv
+- PROJ_LIB should be set to %OSGeo4W%\share\proj
+
+5.  Start Visual Studio and open PDAL.sln.  Build the solution (F6).
+
+6.  Set pdal_test as the startup project and run it (F5).  You should see a console window startup, print something like "Running 158 test
+cases..." (exect number may vary), and then after a short period print something like "*** No errors detected".  If you do get errors,
+that means either something is broken on the version of PDAL you checked out OR something is wrong with your installation.
 
 
 Advanced Build Steps
