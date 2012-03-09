@@ -36,6 +36,7 @@
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/drivers/pipeline/Reader.hpp>
+#include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/filters/Scaling.hpp>
 #include <pdal/StageIterator.hpp>
 #include <pdal/Schema.hpp>
@@ -43,6 +44,8 @@
 #include <pdal/Options.hpp>
 
 #include "Support.hpp"
+
+using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(ScalingFilterTest)
 
@@ -88,6 +91,97 @@ BOOST_AUTO_TEST_CASE(ScalingFilterTest_test_1)
     
     BOOST_CHECK_EQUAL(x, 63701224);
     BOOST_CHECK_EQUAL(y, 84902831);
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(ScalingFilterFloat_test)
+{
+
+    const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    Option opt1("bounds", bounds);
+    Option opt2("mode", "conSTanT");
+    Option opt3("num_points", 1000);
+    Option opt4("id", 90210);
+    Options opts;
+    opts.add(opt1);
+    opts.add(opt2);
+    opts.add(opt3);
+    opts.add(opt4);
+    
+    Option scalex("scale", 0.00001f, "fpscale");
+    Option offsetx("offset", 12345, "offset");
+    Option xdim("dimension", "X", "dimension to scale");
+    Option debug("debug", true, "");
+    Option verbose("verbose", 7, "");
+    // opts.add(debug);
+    // opts.add(verbose);
+    Options xs;
+    xs.add(scalex);
+    xs.add(offsetx);
+    xdim.setOptions(xs);
+    opts.add(xdim);
+
+    Option scaley("scale", 0.001f, "fpscale");
+    Option offsety("offset", 12345, "offset");
+    Option sizey("size", 4, "size");
+    Option typey("type", "SignedInteger", "tye");
+    Option ydim("dimension", "Y", "dimension to scale");
+    Options ys;
+    ys.add(scaley);
+    ys.add(offsety);
+    ys.add(sizey);
+    ys.add(typey);
+    ydim.setOptions(ys);
+    opts.add(ydim);
+
+    Option scalet("scale", 0.1f, "fpscale");
+    Option offsett("offset", 0, "offset");
+    Option sizet("size", 4, "size");
+    Option typet("type", "UnsignedInteger", "tye");
+    Option tdim("dimension", "Time", "dimension to scale");
+    Options ts;
+    ts.add(scalet);
+    ts.add(offsett);
+    ts.add(sizet);
+    ts.add(typet);
+    tdim.setOptions(ts);
+    opts.add(tdim);
+
+    pdal::drivers::faux::Reader reader(opts);
+    pdal::filters::Scaling scaling(reader, opts);
+    scaling.initialize();
+
+    const Schema& schema = scaling.getSchema();
+
+    PointBuffer data(schema, 750);
+ 
+    StageSequentialIterator* iter = scaling.createSequentialIterator(data);
+    boost::uint32_t numRead = iter->read(data);
+
+    BOOST_CHECK_EQUAL(numRead, 750u);
+
+    Schema const& buffer_schema = data.getSchema();
+    Dimension const& dimX = buffer_schema.getDimension("X");
+    Dimension const& dimY = buffer_schema.getDimension("Y");
+    Dimension const& dimZ = buffer_schema.getDimension("Z");
+    Dimension const& dimTime = buffer_schema.getDimension("Time");
+
+    for (boost::uint32_t i=0; i<2; i++)
+    {
+        boost::int32_t x = data.getField<int32_t>(dimX, i);
+        boost::int32_t y = data.getField<int32_t>(dimY, i);
+        double z = data.getField<double>(dimZ, i);
+        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
+
+        BOOST_CHECK_EQUAL(x, -1234400031);
+        BOOST_CHECK_EQUAL(y, -12342999);
+        BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
+        BOOST_CHECK_EQUAL(t, i*10); // because of scaling
+    }
+
+    delete iter;
 
     return;
 }
