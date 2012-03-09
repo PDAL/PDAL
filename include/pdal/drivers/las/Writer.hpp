@@ -88,6 +88,8 @@ public:
     virtual boost::property_tree::ptree toPTree() const;
 
 protected:
+    virtual void writeBufferBegin(PointBuffer const&);
+
     virtual void writeBegin(boost::uint64_t targetNumPointsToWrite);
     virtual boost::uint32_t writeBuffer(const PointBuffer&);
     virtual void writeEnd(boost::uint64_t actualNumPointsWritten);
@@ -103,7 +105,8 @@ private:
     boost::scoped_ptr<LASzipper> m_zipper;
     boost::scoped_ptr<ZipPoint> m_zipPoint;
 #endif
-
+    
+    bool m_headerInitialized;
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 };

@@ -55,6 +55,7 @@ namespace pdal { namespace drivers { namespace las {
 Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_streamManager(options.getOption("filename").getValue<std::string>())
+    , m_headerInitialized(false)
 {
 
     return;
@@ -65,6 +66,7 @@ Writer::Writer(Stage& prevStage, std::ostream* ostream)
     : pdal::Writer(prevStage, Options::none())
     , m_streamManager(ostream)
     , m_numPointsWritten(0)
+    , m_headerInitialized(false)
 {
     return;
 }
@@ -185,12 +187,13 @@ void Writer::setHeaderPadding(boost::uint32_t const& v)
     m_lasHeader.SetHeaderPadding(v);
 }
 
-void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
+void Writer::writeBufferBegin(PointBuffer const& data)
 {
-    // need to set properties of the header here, based on prev->getHeader() and on the user's preferences
+    if (m_headerInitialized) return;
+
     m_lasHeader.setBounds( getPrevStage().getBounds() );
 
-    const Schema& schema = getPrevStage().getSchema();
+    const Schema& schema = data.getSchema();
 
     const Dimension& dimX = schema.getDimension("X");
     const Dimension& dimY = schema.getDimension("Y");
@@ -202,11 +205,6 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
     std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
     std::cout.precision(8);
     
-    boost::uint32_t cnt = static_cast<boost::uint32_t>(targetNumPointsToWrite);
-    
-    log()->get(logDEBUG) << "Writing " << cnt << " points to the LAS file" << std::endl;
-    
-    m_lasHeader.SetPointRecordsCount(cnt);
 
     m_lasHeader.setSpatialReference(getSpatialReference());
 
@@ -245,8 +243,15 @@ void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
         throw pdal_error("LASzip compression is not enabled for this compressed file!");
 #endif
     }
+    m_headerInitialized = true;
 
     return;
+    
+}
+
+void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
+{
+
 }
 
 
@@ -258,6 +263,9 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
     //m_ostream.seekp(dataPos, std::ios::beg);
     //LasHeaderWriter lasHeaderWriter(m_lasHeader, m_ostream);
     //Utils::write_n(m_ostream, m_numPointsWritten, sizeof(m_numPointsWritten));
+
+    log()->get(logDEBUG) << "Wrote " << m_numPointsWritten << " points to the LAS file" << std::endl;
+
         
     m_streamManager.ostream().seekp(0);
     Support::rewriteHeader(m_streamManager.ostream(), m_summaryData);
