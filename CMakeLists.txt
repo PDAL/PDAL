@@ -414,6 +414,21 @@ if(WITH_FREEGLUT)
   endif()
 endif()
 
+
+# default is false for now
+set(WITH_PYTHON FALSE CACHE BOOL "Choose if Python support (for PLang filters) should be built")
+if(WITH_PYTHON)
+  find_package(PythonLibs)
+  if(PYTHONLIBS_FOUND)
+    set(CMAKE_REQUIRED_LIBRARIES ${PYTHON_LIBRARY})
+    include_directories(${PYTHON_INCLUDE_DIR})
+    add_definitions(-DHAVE_PYTHON=1)
+    set(PDAL_HAVE_PYTHON 1)
+    message(STATUS "Found Python: ${PYTHON_LIBRARY}")
+  endif()
+endif()
+
+
 #------------------------------------------------------------------------------
 # installation path settings
 #------------------------------------------------------------------------------

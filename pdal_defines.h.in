@@ -32,6 +32,7 @@
 #cmakedefine PDAL_HAVE_LIBGEOTIFF
 #cmakedefine PDAL_HAVE_MRSID
 #cmakedefine PDAL_HAVE_P2G
+#cmakedefine PDAL_HAVE_PYTHON
 #cmakedefine PDAL_EMBED_BOOST
 
 

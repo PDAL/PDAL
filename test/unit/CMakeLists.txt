@@ -63,6 +63,8 @@ SET(PDAL_UNITTEST_TEST_SRC
 set(PDAL_PLANG_TEST_SRC
     PLangParserTest.cpp
     PLangInternalTest.cpp
+    PythonParserTest.cpp
+    PythonInternalTest.cpp
     PredicateFilterTest.cpp
     ProgrammableFilterTest.cpp
 )
