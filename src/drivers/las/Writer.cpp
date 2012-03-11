@@ -249,7 +249,7 @@ void Writer::writeBufferBegin(PointBuffer const& data)
     
 }
 
-void Writer::writeBegin(boost::uint64_t targetNumPointsToWrite)
+void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 {
 
 }
