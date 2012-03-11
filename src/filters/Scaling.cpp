@@ -477,7 +477,7 @@ void Scaling::writeScaledData(  PointBuffer& buffer,
                 
                 if (to_dimension.getByteSize() == 1)
                 {
-                    boost::uint8_t i = to_dimension.removeScaling<boost::uint8_t>(i);
+                    boost::uint8_t i = to_dimension.removeScaling<boost::uint8_t>(d);
                     buffer.setField<boost::uint8_t>(to_dimension, pointIndex, i);
                 }
                 else if (to_dimension.getByteSize() == 2)
