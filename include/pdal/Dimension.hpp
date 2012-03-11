@@ -52,6 +52,11 @@
 
 #include <limits>
 
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(push)
+#  pragma warning(disable: 4127)  // conditional expression is constant
+#endif
+
 namespace pdal
 {
 
@@ -346,5 +351,11 @@ private:
 PDAL_DLL std::ostream& operator<<(std::ostream& os, pdal::Dimension const& d);
 
 } // namespace pdal
+
+
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(pop)
+#endif
+
 
 #endif // PDAL_DIMENSION_HPP_INCLUDED
