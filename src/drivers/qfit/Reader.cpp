@@ -181,62 +181,24 @@ Word #       Content
 
 namespace pdal { namespace drivers { namespace qfit {
 
-// PointIndexes::PointIndexes(const Schema& schema, QFIT_Format_Type format)
-// : dimX(schema.getDimension(DimensionId::X_i32))
-// {
-//     Time = schema.getDimensionIndex(DimensionId::Qfit_Time);
-//     X = schema.getDimensionIndex(DimensionId::X_i32);
-//     
-//     Y = schema.getDimensionIndex(DimensionId::Y_i32);
-//     Z = schema.getDimensionIndex(DimensionId::Z_i32);
-//     
-//     StartPulse = schema.getDimensionIndex(DimensionId::Qfit_StartPulse);
-//     ReflectedPulse = schema.getDimensionIndex(DimensionId::Qfit_ReflectedPulse);
-//     ScanAngleRank = schema.getDimensionIndex(DimensionId::Qfit_ScanAngleRank);
-//     Pitch = schema.getDimensionIndex(DimensionId::Qfit_Pitch);
-//     Roll = schema.getDimensionIndex(DimensionId::Qfit_Roll);
-// 
-//     if (format == QFIT_Format_14) 
-//     {
-//         PassiveSignal = schema.getDimensionIndex(DimensionId::Qfit_PassiveSignal);
-//         PassiveX = schema.getDimensionIndex(DimensionId::Qfit_PassiveX);
-//         PassiveY = schema.getDimensionIndex(DimensionId::Qfit_PassiveY);
-//         PassiveZ = schema.getDimensionIndex(DimensionId::Qfit_PassiveZ);
-//         GPSTime = schema.getDimensionIndex(DimensionId::Qfit_GpsTime);
-//         
-//     } else if (format == QFIT_Format_12)
-//     {
-//         PDOP = schema.getDimensionIndex(DimensionId::Qfit_PDOP);
-//         PulseWidth = schema.getDimensionIndex(DimensionId::Qfit_PulseWidth);
-//         GPSTime = schema.getDimensionIndex(DimensionId::Qfit_GpsTime);
-// 
-//     } else
-//     {
-//         GPSTime = schema.getDimensionIndex(DimensionId::Qfit_GpsTime);
-//     }
-//         
-//     return;
-// }
-
-
-PointDimensions::PointDimensions(const Schema& schema)
+PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 {
 
-    Time = &schema.getDimension("Time");
+    Time = &schema.getDimension("Time", ns);
 
-    X = &schema.getDimension("X");
-    Y = &schema.getDimension("Y");
-    Z = &schema.getDimension("Z");
+    X = &schema.getDimension("X", ns);
+    Y = &schema.getDimension("Y", ns);
+    Z = &schema.getDimension("Z", ns);
     
-    StartPulse = &schema.getDimension("StartPulse");
-    ReflectedPulse = &schema.getDimension("ReflectedPulse");
-    ScanAngleRank = &schema.getDimension("ScanAngleRank");
-    Pitch = &schema.getDimension("Pitch");
-    Roll = &schema.getDimension("Roll");
+    StartPulse = &schema.getDimension("StartPulse", ns);
+    ReflectedPulse = &schema.getDimension("ReflectedPulse", ns);
+    ScanAngleRank = &schema.getDimension("ScanAngleRank", ns);
+    Pitch = &schema.getDimension("Pitch", ns);
+    Roll = &schema.getDimension("Roll", ns);
     
     try
     {
-        GPSTime = &schema.getDimension("GPSTime");
+        GPSTime = &schema.getDimension("GPSTime", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -245,7 +207,7 @@ PointDimensions::PointDimensions(const Schema& schema)
     
     try
     {
-        PulseWidth = &schema.getDimension("PulseWidth");
+        PulseWidth = &schema.getDimension("PulseWidth", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -254,7 +216,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
     try
     {
-        PDOP = &schema.getDimension("PDOP");
+        PDOP = &schema.getDimension("PDOP", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -263,7 +225,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
     try
     {
-        PassiveSignal = &schema.getDimension("PassiveSignal");
+        PassiveSignal = &schema.getDimension("PassiveSignal", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -272,7 +234,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
     try
     {
-        PassiveY = &schema.getDimension("PassiveY");
+        PassiveY = &schema.getDimension("PassiveY", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -281,7 +243,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
     try
     {
-        PassiveX = &schema.getDimension("PassiveX");
+        PassiveX = &schema.getDimension("PassiveX", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -290,7 +252,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
     try
     {
-        PassiveZ = &schema.getDimension("PassiveZ");
+        PassiveZ = &schema.getDimension("PassiveZ", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -527,13 +489,13 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     const Schema& schema = data.getSchema();
     
     const int pointByteCount = getPointDataSize();
-    const PointDimensions dimensions(schema);
+    const PointDimensions dimensions(schema, getName());
     
-    Dimension const* dimX = &schema.getDimension("X");
+    Dimension const* dimX = &schema.getDimension("X", getName());
     Dimension const* dimPassiveX(0);
     try
     {   
-        dimPassiveX = &schema.getDimension("PassiveX");
+        dimPassiveX = &schema.getDimension("PassiveX", getName());
     } catch (pdal::dimension_not_found&)
     {
         dimPassiveX = 0;

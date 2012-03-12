@@ -100,7 +100,7 @@ public:
 class PointDimensions
 {
 public:
-    PointDimensions(const Schema& schema);
+    PointDimensions(const Schema& schema, std::string const& ns);
     
     pdal::Dimension const* Time;
     pdal::Dimension const* X;

@@ -121,7 +121,10 @@ pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buf
 int Reader::SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const
 {
     schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();            
-
+	
+	// FIXME: iterating through the dimensions here might return multiple 
+	// dimensions of the same name. This code should probably check to make 
+	// sure that dim.getNamespace() == 'drivers.mrsid.reader'
     pointInfo.init(dims.size());
     for (unsigned int idx=0; idx<dims.size(); idx++)
     {
