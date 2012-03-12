@@ -89,6 +89,7 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test2)
         "  X = ins['X']\n"
         "  Y = ins['Y']\n"
         "  Z = ins['Z']\n"
+        "  print X.size\n"
         "  X = X + 10.0\n"
         "  # Y: leave as-is, don't export back out\n"
         "  # Z: goofiness to make it a numpy array of a constant\n"

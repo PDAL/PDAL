@@ -316,7 +316,7 @@ bool PythonMethod::endChunk(PointBuffer& buffer)
         assert(PyArray_Check(xarr));
         PyArrayObject* arr = (PyArrayObject*)xarr;
 
-        int one=1;
+        int one=0;
         const int pyDataType = getPythonDataType(dim);
 
         if (pyDataType == PyArray_DOUBLE)
