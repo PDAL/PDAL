@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_SUITE(PLangInternalTest)
 
 
 BOOST_AUTO_TEST_CASE(PLangInternalTest_python)
-{return;
+{
     pdal::plang::PythonEnvironment env;
     env.startup();
 

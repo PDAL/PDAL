@@ -79,10 +79,20 @@ bool PythonEnvironment::startup()
     if (_import_array() < 0)
         die(20);
 
-    // load module "traceback" (for error handling) and module from file "Test.py"
+    // load module "traceback" (for error handling)
     m_mod1 = PyImport_ImportModule( "traceback" );
-    m_mod2 = PyImport_ImportModule( "Test" );
-    if(! (m_mod1 && m_mod2 )) die(6);
+    if (!m_mod1) die(6);
+
+    PyObject* compiled = Py_CompileString(
+        "def run_expression( expr, vars ):\n"
+        "  return eval( expr, {}, vars )\n"
+        "def run_script( expr, vars ):\n"
+        "  exec( expr, {}, vars );\n"
+        "  return locals()['vars']\n",
+        "Test",
+        Py_file_input);
+    m_mod2 = PyImport_ExecCodeModule("Test", compiled);
+    if (!m_mod2) die(6);
 
     // get dictionary of available items in the modules
     m_dict1 = PyModule_GetDict(m_mod1);
@@ -226,75 +236,132 @@ bool PythonMethod::setVariable_Float64Array(const std::string& name, double* dat
 
 bool PythonMethod::execute()
 {
-    PyObject *script,
-        *mat,
-        *vars, *args2, *rslt2, *rslt3;
+//        *vars, *args2, *rslt2, *rslt3;
 
     // define a python expression and a python script
-    script = PyString_FromString( 
+    PyObject* script = PyString_FromString( 
         "import numpy\n"
-        "print 'DURING'\n"
+        "print '===inside script==='\n"
         "value = 42.0\n"
-        "m[1,1]=987654321\n"
-        "mm[1,2]=123456789\n"
-        "print m[1,1]\n"
-        "print mm[1,2]\n"
+        "arr1 = arr1 * 2\n"
+        "print arr1[3]\n"
+        "print arr2[3]\n"
+        "print arr3[3]\n"
+        "print arr4[3]\n"
+        "print '==================='\n"
         "print value\n" );
     
 
 
-    // define a matrix using the classical C-format:
-    // pointer-to-pointer-to-numeric type, last dimension running fastest
-    //
-    // setup pointers
-    const int nrow = 3, ncol = 4, nelem = nrow*ncol;
-    double** m = new double*[nrow];
-    m[0] = new double[nelem];
-    m[1] = m[0] + ncol;
-    m[2] = m[1] + ncol;
+    const int nelem = 10;
+    struct Record
+    {
+        double x;
+        double y;
+        double z;
+        unsigned char t;
+    };
 
-    // fill in values
-    m[0][0] = 1.0; m[0][1] = 2.0; m[0][2] = 5.0; m[0][3] = 34;
-    m[1][0] = 5.0; m[1][1] = 1.0; m[1][2] = 8.0; m[1][3] = 64;
-    m[2][0] = 8.0; m[2][1] = 0.0; m[2][2] = 3.0; m[2][3] = 12;
-    int mdim[] = { nrow, ncol };
-    mat = PyArray_SimpleNewFromData( 2, mdim, PyArray_DOUBLE, m[0] );
+    Record* arr = new Record[nelem];
+
+    for (int i=0; i<nelem; i++)
+    {
+        arr[i].x = i*i;
+        arr[i].y = i*10;
+        arr[i].z = i*100;
+        arr[i].t = (i%17);
+    }
+
+    int mydims = { nelem };
+
+    int nd = 1;
+    npy_intp* dims = &mydims;
+    int stride = sizeof(Record);
+    npy_intp* strides = &stride;
+    int flags = 0;//NPY_BEHAVED; //NPY_CARRAY;
+    
+    char* data = (char*)arr;
+    PyObject* py_array1 = PyArray_New(&PyArray_Type, nd, dims, PyArray_DOUBLE, strides, data, 0, flags, NULL);
+    PyObject* py_array2 = PyArray_New(&PyArray_Type, nd, dims, PyArray_DOUBLE, strides, data+8, 0, flags, NULL);
+    PyObject* py_array3 = PyArray_New(&PyArray_Type, nd, dims, PyArray_DOUBLE, strides, data+16, 0, flags, NULL);
+    PyObject* py_array4 = PyArray_New(&PyArray_Type, nd, dims, PyArray_UBYTE, strides, data+24, 0, flags, NULL);
 
     printf("BEFORE\n");
-    printf("%f\n", m[1][2]);
+    printf("%f\n", arr[3].x);
+    printf("%f\n", arr[3].y);
+    printf("%f\n", arr[3].z);
+    printf("%d\n", (int)arr[3].t);
 
     // put variables into dictionary of local variables for python
-    vars = PyDict_New();
-    PyDict_SetItemString( vars, "m", mat );
-    PyDict_SetItemString( vars, "mm", mat );
+    PyObject* vars = PyDict_New();
+    PyDict_SetItemString( vars, "arr1", py_array1 );
+    PyDict_SetItemString( vars, "arr2", py_array2 );
+    PyDict_SetItemString( vars, "arr3", py_array3 );
+    PyDict_SetItemString( vars, "arr4", py_array4 );
 
     // create argument for "run_script"
     Py_INCREF(vars);
-    args2 = PyTuple_New(2);
+    PyObject* args2 = PyTuple_New(2);
     PyTuple_SetItem(args2, 0, script);
     PyTuple_SetItem(args2, 1, vars);
 
     // execute script
-    rslt2 = PyObject_CallObject(m_env.m_func2, args2);
+    PyObject* rslt2 = PyObject_CallObject(m_env.m_func2, args2);
     if( !rslt2 ) m_env.die(2);
 
-    rslt3 = PyDict_GetItemString( rslt2, "value" );
+    PyObject* rslt3 = PyDict_GetItemString( rslt2, "value" );
     if( !rslt3 ) m_env.die(1);
-    printf("===============\n");
+    printf("======value out=========\n");
     m_env.output_result( rslt3 );
-    printf("===============\n");
+    printf("========================\n");
     Py_XDECREF(rslt3);
+
+    PyObject* rslt4 = PyDict_GetItemString( rslt2, "arr1" );
+    if( !rslt4 ) m_env.die(1);
+    printf("========arr1 out=======\n");
+    m_env.output_result( rslt4 );
+    printf("=======================\n");
+
+    PyObject* rslt5 = PyDict_GetItemString( rslt2, "arr2" );
+    if( !rslt5 ) m_env.die(1);
+    printf("========arr2 out=======\n");
+    m_env.output_result( rslt5 );
+    printf("=======================\n");
+
+    PyObject* rslt6 = PyDict_GetItemString( rslt2, "arr3" );
+    if( !rslt6 ) m_env.die(1);
+    printf("========arr3 out=======\n");
+    m_env.output_result( rslt6 );
+    printf("=======================\n");
+
+    PyObject* rslt7 = PyDict_GetItemString( rslt2, "arr4" );
+    if( !rslt7 ) m_env.die(1);
+    //printf("========arr4 out=======\n");
+    //m_env.output_result( rslt7 );
+    //printf("=======================\n");
+
+    {
+        double* data = (double*)PyArray_DATA(rslt4);
+        printf("%f\n", data[3]);
+    }
+
+    Py_XDECREF(rslt4);
+    Py_XDECREF(rslt5);
 
     Py_XDECREF(rslt2);
 
     printf("AFTER\n");
-    printf("%f\n", m[1][1]);
-    printf("%f\n", m[1][2]);
+    printf("%f\n", arr[3].x);
+    printf("%f\n", arr[3].y);
+    printf("%f\n", arr[3].z);
+    printf("%d\n", (int)arr[3].t);
 
     Py_XDECREF(args2); // also decrements script and vars
-    Py_XDECREF(mat);
-    delete[] m[0];
-    delete[] m;
+    Py_XDECREF(py_array1);
+    Py_XDECREF(py_array2);
+    Py_XDECREF(py_array3);
+    Py_XDECREF(py_array4);
+    delete[] arr;
     Py_XDECREF(script);
 
     return true;
