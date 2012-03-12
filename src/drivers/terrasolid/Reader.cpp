@@ -42,20 +42,20 @@
 
 namespace pdal { namespace drivers { namespace terrasolid {
 
-PointDimensions::PointDimensions(const Schema& schema)
+PointDimensions::PointDimensions(const Schema& schema, std::string const& ns)
 {
 
-    X = &schema.getDimension("X");
-    Y = &schema.getDimension("Y");
-    Z = &schema.getDimension("Z");
+    X = &schema.getDimension("X", ns);
+    Y = &schema.getDimension("Y", ns);
+    Z = &schema.getDimension("Z", ns);
     
-    Classification = &schema.getDimension("Classification");
-    PointSourceId = &schema.getDimension("PointSourceId");
-    ReturnNumber = &schema.getDimension("ReturnNumber");
+    Classification = &schema.getDimension("Classification", ns);
+    PointSourceId = &schema.getDimension("PointSourceId", ns);
+    ReturnNumber = &schema.getDimension("ReturnNumber", ns);
     
     try
     {
-        Intensity = &schema.getDimension("Intensity");
+        Intensity = &schema.getDimension("Intensity", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -64,7 +64,7 @@ PointDimensions::PointDimensions(const Schema& schema)
     
     try
     {
-        Mark = &schema.getDimension("Mark");
+        Mark = &schema.getDimension("Mark", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -73,7 +73,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
     try
     {
-        Flag = &schema.getDimension("Flag");
+        Flag = &schema.getDimension("Flag", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -82,7 +82,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
     try
     {
-        Time = &schema.getDimension("Time");
+        Time = &schema.getDimension("Time", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -91,7 +91,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
     try
     {
-        Red = &schema.getDimension("Red");
+        Red = &schema.getDimension("Red", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -100,7 +100,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
     try
     {
-        Green = &schema.getDimension("Green");
+        Green = &schema.getDimension("Green", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -109,7 +109,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
     try
     {
-        Blue = &schema.getDimension("Blue");
+        Blue = &schema.getDimension("Blue", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -118,7 +118,7 @@ PointDimensions::PointDimensions(const Schema& schema)
 
     try
     {
-        Alpha = &schema.getDimension("Alpha");
+        Alpha = &schema.getDimension("Alpha", ns);
     }
     catch (pdal::dimension_not_found&)
     {
@@ -294,7 +294,7 @@ boost::uint32_t Reader::processBuffer(PointBuffer& data, std::istream& stream, b
     
     const int pointByteCount = getPointDataSize();
 
-    const PointDimensions dimensions(schema);
+    const PointDimensions dimensions(schema, getName());
     
     boost::uint8_t* buf = new boost::uint8_t[pointByteCount * numPoints];
     Utils::read_n(buf, stream, pointByteCount * numPoints);

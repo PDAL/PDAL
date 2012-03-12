@@ -88,36 +88,10 @@ public:
     {}
 };
 
-class PointIndexes
-{
-public:
-    PointIndexes(const Schema& schema, QFIT_Format_Type format);
-    int Time;
-    int X;
-    int Y;
-    int Z;
-    
-    int StartPulse;
-    int ReflectedPulse;
-    int ScanAngleRank;
-    int Pitch;
-    int Roll;
-    int PDOP;
-    int PulseWidth;
-    int GPSTime;
-    int PassiveSignal;
-    int PassiveX;
-    int PassiveY;
-    int PassiveZ;
-    pdal::Dimension dimX;
-    
-};
-
-
 class PointDimensions
 {
 public:
-    PointDimensions(const Schema& schema);
+    PointDimensions(const Schema& schema, std::string const& ns);
     
     pdal::Dimension const* Time;
     pdal::Dimension const* X;

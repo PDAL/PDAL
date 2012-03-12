@@ -50,28 +50,28 @@ void Support::registerFields(Stage& stage, Schema& schema, PointFormat format)
     schema.appendDimension(dimensions.getDimension("Y", stage.getName()));
     schema.appendDimension(dimensions.getDimension("Z", stage.getName()));
 
-    schema.appendDimension(dimensions.getDimension("Intensity"));
-    schema.appendDimension(dimensions.getDimension("ReturnNumber")); // 3 bits only
-    schema.appendDimension(dimensions.getDimension("NumberOfReturns")); // 3 bits only
-    schema.appendDimension(dimensions.getDimension("ScanDirectionFlag"));  // 1 bit only
-    schema.appendDimension(dimensions.getDimension("EdgeOfFlightLine")); // 1 bit only
+    schema.appendDimension(dimensions.getDimension("Intensity", stage.getName()));
+    schema.appendDimension(dimensions.getDimension("ReturnNumber", stage.getName())); // 3 bits only
+    schema.appendDimension(dimensions.getDimension("NumberOfReturns", stage.getName())); // 3 bits only
+    schema.appendDimension(dimensions.getDimension("ScanDirectionFlag", stage.getName()));  // 1 bit only
+    schema.appendDimension(dimensions.getDimension("EdgeOfFlightLine", stage.getName())); // 1 bit only
 
-    schema.appendDimension(dimensions.getDimension("Classification"));
-    schema.appendDimension(dimensions.getDimension("ScanAngleRank"));
+    schema.appendDimension(dimensions.getDimension("Classification", stage.getName()));
+    schema.appendDimension(dimensions.getDimension("ScanAngleRank", stage.getName()));
 
-    schema.appendDimension(dimensions.getDimension("UserData"));
-    schema.appendDimension(dimensions.getDimension("PointSourceId"));
+    schema.appendDimension(dimensions.getDimension("UserData", stage.getName()));
+    schema.appendDimension(dimensions.getDimension("PointSourceId", stage.getName()));
 
     if (hasTime(format))
     {
-        schema.appendDimension(dimensions.getDimension("Time"));
+        schema.appendDimension(dimensions.getDimension("Time", stage.getName()));
     }
 
     if (hasColor(format))
     {
-        schema.appendDimension(dimensions.getDimension("Red"));
-        schema.appendDimension(dimensions.getDimension("Green"));
-        schema.appendDimension(dimensions.getDimension("Blue"));
+        schema.appendDimension(dimensions.getDimension("Red", stage.getName()));
+        schema.appendDimension(dimensions.getDimension("Green", stage.getName()));
+        schema.appendDimension(dimensions.getDimension("Blue", stage.getName()));
     }
 
     // if (hasWave(format))
