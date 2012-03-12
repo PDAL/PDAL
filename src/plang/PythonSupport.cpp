@@ -84,6 +84,7 @@ bool PythonEnvironment::startup()
     if (!m_mod1) die(6);
 
     PyObject* compiled = Py_CompileString(
+        "import numpy\n"
         "def run_expression( expr, vars ):\n"
         "  return eval( expr, {}, vars )\n"
         "def run_script( expr, vars ):\n"
@@ -230,6 +231,62 @@ bool PythonMethod::compile()
 }
 
 
+inline
+static int getPythonDataType(const Dimension& dim)
+{
+    const int siz = dim.getByteSize();
+
+    switch (dim.getInterpretation())
+    {
+    case dimension::SignedByte:
+        switch (siz)
+        {
+        case 1:
+            return PyArray_BYTE;
+        }
+        break;
+    case dimension::UnsignedByte:
+        switch (siz)
+        {
+        case 1:
+            return PyArray_UBYTE;
+        }
+        break;
+    case dimension::Float:
+        switch (siz)
+        {
+        case 4:
+            return PyArray_FLOAT;
+        case 8:
+            return PyArray_DOUBLE;
+        }
+        break;
+    case dimension::SignedInteger:
+        switch (siz)
+        {
+        case 4:
+            return PyArray_INT;
+        case 8:
+            return PyArray_LONGLONG;
+        }
+        break;
+    case dimension::UnsignedInteger:
+        switch (siz)
+        {
+        case 4:
+            return PyArray_UINT;
+        case 8:
+            return PyArray_ULONGLONG;
+        }
+        break;
+    }
+
+    assert(0);
+
+    return -1;
+}
+
+
 bool PythonMethod::beginChunk(PointBuffer& buffer)
 {
     const Schema& schema = buffer.getSchema();
@@ -243,42 +300,22 @@ bool PythonMethod::beginChunk(PointBuffer& buffer)
     npy_intp* strides = &stride;
     int flags = NPY_CARRAY; // NPY_BEHAVED
 
-
-    schema::Map const& map = schema.getDimensions();
-
-    schema::index_by_index const& idx = map.get<schema::index>();
-
     m_pyInputArrays.clear();
     m_vars = PyDict_New();
 
+    schema::Map const& map = schema.getDimensions();
+    schema::index_by_index const& idx = map.get<schema::index>();
     for (schema::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
     {
         const Dimension& dim = *iter;
-
+        const std::string& name = dim.getName();
+        const int pyDataType = getPythonDataType(dim);
+        
         boost::uint8_t* data = buffer.getData(0) + dim.getByteOffset();
 
-        int type_code = 0;
-        if (dim.getInterpretation()==dimension::SignedByte && dim.getByteSize()==1)
-            type_code = PyArray_BYTE;
-        else if (dim.getInterpretation()==dimension::UnsignedByte && dim.getByteSize()==1)
-            type_code = PyArray_UBYTE;
-        else if (dim.getInterpretation()==dimension::Float && dim.getByteSize()==4)
-            type_code = PyArray_FLOAT;
-        else if (dim.getInterpretation()==dimension::Float && dim.getByteSize()==8)
-            type_code = PyArray_DOUBLE;
-        else if (dim.getInterpretation()==dimension::UnsignedInteger && dim.getByteSize()==4)
-            type_code = PyArray_UINT;
-        else if (dim.getInterpretation()==dimension::UnsignedInteger && dim.getByteSize()==8)
-            type_code = PyArray_ULONGLONG;
-        else
-            assert(0);
-
-        PyObject* py_arr1 = PyArray_New(&PyArray_Type, nd, dims, type_code, strides, data, 0, flags, NULL);
-
-        m_pyInputArrays.push_back(py_arr1);
-
-        const std::string& name = dim.getName();
-        PyDict_SetItemString(m_vars, name.c_str(), py_arr1);
+        PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType, strides, data, 0, flags, NULL);
+        m_pyInputArrays.push_back(pyArray);
+        PyDict_SetItemString(m_vars, name.c_str(), pyArray);
     }
 
     return true;
@@ -287,44 +324,29 @@ bool PythonMethod::beginChunk(PointBuffer& buffer)
 
 bool PythonMethod::endChunk(PointBuffer&)
 {
-    PyObject* rslt3 = PyDict_GetItemString( m_scriptResult, "value" );
-    if( !rslt3 ) m_env.die(1);
-    printf("======value out=========\n");
-    m_env.output_result( rslt3 );
-    printf("========================\n");
-    Py_XDECREF(rslt3);
+    PyObject* result = PyDict_GetItemString( m_scriptResult, "X_" );
+    if (!result) m_env.handle_error(0);
 
-    PyObject* rslt4 = PyDict_GetItemString( m_scriptResult, "arr1" );
-    if( !rslt4 ) m_env.die(1);
-    printf("========arr1 out=======\n");
-    m_env.output_result( rslt4 );
-    printf("=======================\n");
+    assert(PyArray_Check(result));
 
-    PyObject* rslt5 = PyDict_GetItemString( m_scriptResult, "arr2" );
-    if( !rslt5 ) m_env.die(1);
-    printf("========arr2 out=======\n");
-    m_env.output_result( rslt5 );
-    printf("=======================\n");
 
-    PyObject* rslt6 = PyDict_GetItemString( m_scriptResult, "arr3" );
-    if( !rslt6 ) m_env.die(1);
-    printf("========arr3 out=======\n");
-    m_env.output_result( rslt6 );
-    printf("=======================\n");
+        {{
+            PyArrayObject* obj = PyArray_GETCONTIGUOUS( (PyArrayObject*) result );
+            int ndims = obj->nd;
+            int* dims = obj->dimensions; // not copying data
+            double* data = (double*) obj->data; // not copying data
+            int k = 0;
 
-    PyObject* rslt7 = PyDict_GetItemString( m_scriptResult, "arr4" );
-    if( !rslt7 ) m_env.die(1);
-    //printf("========arr4 out=======\n");
-    //m_env.output_result( rslt7 );
-    //printf("=======================\n");
+            assert(ndims == 1);
 
-    {
-        double* data = (double*)PyArray_DATA(rslt4);
-        printf("%f\n", data[3]);
-    }
+            // output vector result
+            for (int j=0; j<dims[0]; j++)
+            {
+                printf( "element: %i value: %f\n", j, data[k++]);
+            }
+        }}
 
-    Py_XDECREF(rslt4);
-    Py_XDECREF(rslt5);
+    Py_XDECREF(result);
 
     Py_XDECREF(m_scriptResult);
 
@@ -337,7 +359,6 @@ bool PythonMethod::endChunk(PointBuffer&)
     }
     m_pyInputArrays.clear();
 
-
     Py_XDECREF(m_scriptSource);
 
     return true;
@@ -346,19 +367,36 @@ bool PythonMethod::endChunk(PointBuffer&)
 
 bool PythonMethod::execute()
 {
-    std::string script = "import numpy\n" + m_source;
+    PyObject* compiled = Py_CompileString(m_source.c_str(), "YowModule", Py_file_input);
+    PyObject* module = PyImport_ExecCodeModule("YowModule", compiled);
+    if (!module) m_env.die(6);
 
-    m_scriptSource = PyString_FromString(script.c_str());
-    
-    // create argument for "run_script"
+    PyObject* dict = PyModule_GetDict(module);
+
+    PyObject* func = PyDict_GetItemString(dict, "yow");
+    if (!func) m_env.die(5);
+    if (!PyCallable_Check(func)) m_env.die(4);
+  
     Py_INCREF(m_vars);
-    m_scriptArgs = PyTuple_New(2);
-    PyTuple_SetItem(m_scriptArgs, 0, m_scriptSource);
-    PyTuple_SetItem(m_scriptArgs, 1, m_vars);
+    m_scriptArgs = PyTuple_New(1);
+    PyTuple_SetItem(m_scriptArgs, 0, m_vars);
 
-    // execute script
-    m_scriptResult = PyObject_CallObject(m_env.m_func2, m_scriptArgs);
+    m_scriptResult = PyObject_CallObject(func, m_scriptArgs);
     if (!m_scriptResult) m_env.handle_error(0);
+
+
+
+    ////m_scriptSource = PyString_FromString(m_source.c_str());
+    ////
+    ////// create argument for "run_script"
+    ////Py_INCREF(m_vars);
+    ////m_scriptArgs = PyTuple_New(2);
+    ////PyTuple_SetItem(m_scriptArgs, 0, m_scriptSource);
+    ////PyTuple_SetItem(m_scriptArgs, 1, m_vars);
+
+    ////// execute script
+    ////m_scriptResult = PyObject_CallObject(m_env.m_func2, m_scriptArgs);
+    ////if (!m_scriptResult) m_env.handle_error(0);
     
     return true;
 }

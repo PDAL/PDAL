@@ -81,9 +81,22 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
 BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test2)
 {
     Bounds<double> bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
-    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
+    pdal::drivers::faux::Reader reader(bounds, 10, pdal::drivers::faux::Reader::Ramp);
 
-    const pdal::Option opt("program", "print X[0:4]\nX = X + 10.0\nY = Y + Z\nZ = 99.99\nprint X[0:4]\n");
+    const pdal::Option opt("program",
+        "def yow(a):\n"
+        "  X = a['X']\n"
+        "  Y = a['Y']\n"
+        "  Z = a['Z']\n"
+        "  T = a['Y']\n"
+        "  print a\n"
+        "  print X\n"
+        "  X = X + 10.0\n"
+        "  print a\n"
+        "  print X\n"
+        "  Y = Y + Z\n"
+        "  Z = 99.99\n"
+        );
     pdal::Options opts;
     opts.add(opt);
 
