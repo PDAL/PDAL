@@ -32,10 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/pdal_internal.hpp>
+#ifdef PDAL_HAVE_PYTHON
+
 #include <pdal/filters/Programmable.hpp>
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/plang/Parser.hpp>
 
 namespace pdal { namespace filters {
 
@@ -69,38 +71,14 @@ const Options Programmable::getDefaultOptions() const
 }
 
 
-void Programmable::processBuffer(PointBuffer& data, pdal::plang::Parser& parser) const
+void Programmable::processBuffer(PointBuffer& data, pdal::plang::PythonMethod& python) const
 {
-    const Schema& schema = data.getSchema();
-    boost::uint32_t numSrcPoints = data.getNumPoints();
+    python.beginChunk(data);
 
-    Dimension const& dimX = schema.getDimension("X");
-    Dimension const& dimY = schema.getDimension("Y");
-    Dimension const& dimZ = schema.getDimension("Z");
-
-    for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
-    {
-        const double x = data.getField<double>(dimX, srcIndex);
-        const double y = data.getField<double>(dimY, srcIndex);
-        const double z = data.getField<double>(dimZ, srcIndex);
-
-        parser.setVariable<double>("X", x);
-        parser.setVariable<double>("Y", y);
-        parser.setVariable<double>("Z", z);
-
-        bool ok = parser.evaluate();
-        assert(ok);
-
-        const double xx = parser.getVariable<double>("X");
-        const double yy = parser.getVariable<double>("Y");
-        const double zz = parser.getVariable<double>("Z");
-
-        data.setField<double>(dimX, srcIndex, xx);
-        data.setField<double>(dimY, srcIndex, yy);
-        data.setField<double>(dimZ, srcIndex, zz);
-
-        data.setNumPoints(srcIndex+1);
-    }
+    bool ok = python.execute();
+    assert(ok);
+    
+    python.endChunk(data);
 
     return;
 }
@@ -121,7 +99,8 @@ namespace iterators { namespace sequential {
 Programmable::Programmable(const pdal::filters::Programmable& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
     , m_programmableFilter(filter)
-    , m_parser(NULL)
+    , m_pythonEnv(NULL)
+    , m_pythonMethod(NULL)
 {
     return;
 }
@@ -129,7 +108,7 @@ Programmable::Programmable(const pdal::filters::Programmable& filter, PointBuffe
 
 Programmable::~Programmable()
 {
-    delete m_parser;
+    //delete m_parser;
 }
 
 
@@ -137,10 +116,10 @@ void Programmable::createParser()
 {
     const std::string program = m_programmableFilter.getProgram();
 
-    m_parser = new pdal::plang::Parser(program);
+    m_pythonEnv = new pdal::plang::PythonEnvironment();
+    m_pythonEnv->startup();
 
-    bool ok = m_parser->parse();
-    assert(ok);
+    m_pythonMethod = new pdal::plang::PythonMethod(*m_pythonEnv, program);
 
     return;
 }
@@ -148,14 +127,14 @@ void Programmable::createParser()
 
 boost::uint32_t Programmable::readBufferImpl(PointBuffer& data)
 {
-    if (!m_parser)
+    if (!m_pythonMethod)
     {
         createParser();
     }
 
     const boost::uint32_t numRead = getPrevIterator().read(data);
 
-    m_programmableFilter.processBuffer(data, *m_parser);
+    m_programmableFilter.processBuffer(data, *m_pythonMethod);
 
     return numRead;
 }
@@ -176,3 +155,5 @@ bool Programmable::atEndImpl() const
 } } // iterators::sequential
 
 } } // pdal::filters
+
+#endif

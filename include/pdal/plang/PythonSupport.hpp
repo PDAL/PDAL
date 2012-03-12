@@ -36,6 +36,9 @@
 #define PYTHONSUPPORT_H
 
 #include <pdal/pdal_internal.hpp>
+#ifdef PDAL_HAVE_PYTHON
+
+#include <pdal/pdal_internal.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include <boost/cstdint.hpp>
@@ -105,5 +108,6 @@ private:
 
 } } // namespaces
 
+#endif
 
 #endif

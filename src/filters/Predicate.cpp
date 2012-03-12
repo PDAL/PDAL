@@ -32,10 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/pdal_internal.hpp>
+#ifdef PDAL_HAVE_PYTHON
+
 #include <pdal/filters/Predicate.hpp>
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/plang/Parser.hpp>
 
 namespace pdal { namespace filters {
 
@@ -68,44 +70,45 @@ const Options Predicate::getDefaultOptions() const
 }
 
 
-boost::uint32_t Predicate::processBuffer(PointBuffer& dstData, const PointBuffer& srcData, pdal::plang::Parser& parser) const
+boost::uint32_t Predicate::processBuffer(const PointBuffer& data, pdal::plang::PythonMethod& parser) const
 {
-    const Schema& schema = dstData.getSchema();
-    boost::uint32_t numSrcPoints = srcData.getNumPoints();
-    boost::uint32_t dstIndex = dstData.getNumPoints();
-    boost::uint32_t numPointsAdded = 0;
+    //const Schema& schema = dstData.getSchema();
+    //boost::uint32_t numSrcPoints = srcData.getNumPoints();
+    //boost::uint32_t dstIndex = dstData.getNumPoints();
+    //boost::uint32_t numPointsAdded = 0;
 
-    Dimension const& dimX = schema.getDimension("X");
-    Dimension const& dimY = schema.getDimension("Y");
-    Dimension const& dimZ = schema.getDimension("Z");
-    Dimension const& dimTime = schema.getDimension("Time");
+    //Dimension const& dimX = schema.getDimension("X");
+    //Dimension const& dimY = schema.getDimension("Y");
+    //Dimension const& dimZ = schema.getDimension("Z");
+    //Dimension const& dimTime = schema.getDimension("Time");
 
-    for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
-    {
-        const double x = srcData.getField<double>(dimX, srcIndex);
-        const double y = srcData.getField<double>(dimY, srcIndex);
-        const double z = srcData.getField<double>(dimZ, srcIndex);
-        const boost::uint64_t t = srcData.getField<boost::uint64_t>(dimTime, srcIndex);
-        parser.setVariable("X", x);
-        parser.setVariable("Y", y);
-        parser.setVariable("Z", z);
-        parser.setVariable("Time", t);
-        bool ok = parser.evaluate();
-        assert(ok);
-        const bool predicate = parser.getVariable<bool>("result");
+    //for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
+    //{
+    //    const double x = srcData.getField<double>(dimX, srcIndex);
+    //    const double y = srcData.getField<double>(dimY, srcIndex);
+    //    const double z = srcData.getField<double>(dimZ, srcIndex);
+    //    const boost::uint64_t t = srcData.getField<boost::uint64_t>(dimTime, srcIndex);
+    //    parser.setVariable("X", x);
+    //    parser.setVariable("Y", y);
+    //    parser.setVariable("Z", z);
+    //    parser.setVariable("Time", t);
+    //    bool ok = parser.evaluate();
+    //    assert(ok);
+    //    const bool predicate = parser.getVariable<bool>("result");
 
-        if (predicate)
-        {
-            dstData.copyPointFast(dstIndex, srcIndex, srcData);
-            dstData.setNumPoints(dstIndex+1);
-            ++dstIndex;
-            ++numPointsAdded;
-        }
-    }
+    //    if (predicate)
+    //    {
+    //        dstData.copyPointFast(dstIndex, srcIndex, srcData);
+    //        dstData.setNumPoints(dstIndex+1);
+    //        ++dstIndex;
+    //        ++numPointsAdded;
+    //    }
+    //}
 
-    assert(dstIndex <= dstData.getCapacity());
+    //assert(dstIndex <= dstData.getCapacity());
 
-    return numPointsAdded;
+    //return numPointsAdded;
+    return 0;
 }
 
 
@@ -141,10 +144,10 @@ void Predicate::createParser()
 
     const std::string program = "float64 X; float64 Y; float64 Z; uint64 Time; bool result; result = " + expression + ";";
 
-    m_parser = new pdal::plang::Parser(program);
+    ////m_parser = new pdal::plang::Parser(program);
 
-    bool ok = m_parser->parse();
-    assert(ok);
+    ////bool ok = m_parser->parse();
+    ////assert(ok);
 
     return;
 }
@@ -152,41 +155,42 @@ void Predicate::createParser()
 
 boost::uint32_t Predicate::readBufferImpl(PointBuffer& dstData)
 {
-    if (!m_parser)
-    {
-        createParser();
-    }
+    ////if (!m_parser)
+    ////{
+    ////    createParser();
+    ////}
 
-    // the following code taken from the Crop filter
+    ////// the following code taken from the Crop filter
 
-    boost::uint32_t numPointsNeeded = dstData.getCapacity();
-    assert(dstData.getNumPoints() == 0);
+    ////boost::uint32_t numPointsNeeded = dstData.getCapacity();
+    ////assert(dstData.getNumPoints() == 0);
 
-    while (numPointsNeeded > 0)
-    {
-        if (getPrevIterator().atEnd()) break;
+    ////while (numPointsNeeded > 0)
+    ////{
+    ////    if (getPrevIterator().atEnd()) break;
 
-        // set up buffer to be filled by prev stage
-        PointBuffer srcData(dstData.getSchema(), numPointsNeeded);
+    ////    // set up buffer to be filled by prev stage
+    ////    PointBuffer srcData(dstData.getSchema(), numPointsNeeded);
 
-        // read from prev stage
-        const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
-        assert(numSrcPointsRead == srcData.getNumPoints());
-        assert(numSrcPointsRead <= numPointsNeeded);
+    ////    // read from prev stage
+    ////    const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
+    ////    assert(numSrcPointsRead == srcData.getNumPoints());
+    ////    assert(numSrcPointsRead <= numPointsNeeded);
 
-        // we got no data, and there is no more to get -- exit the loop
-        if (numSrcPointsRead == 0) break;
+    ////    // we got no data, and there is no more to get -- exit the loop
+    ////    if (numSrcPointsRead == 0) break;
 
-        // copy points from src (prev stage) into dst (our stage), 
-        // based on the CropFilter's rules (i.e. its bounds)
-        const boost::uint32_t numPointsProcessed = m_predicateFilter.processBuffer(dstData, srcData, *m_parser);
+    ////    // copy points from src (prev stage) into dst (our stage), 
+    ////    // based on the CropFilter's rules (i.e. its bounds)
+    ////    const boost::uint32_t numPointsProcessed = m_predicateFilter.processBuffer(dstData, srcData, *m_parser);
 
-        numPointsNeeded -= numPointsProcessed;
-    }
+    ////    numPointsNeeded -= numPointsProcessed;
+    ////}
 
-    const boost::uint32_t numPointsAchieved = dstData.getNumPoints();
+    ////const boost::uint32_t numPointsAchieved = dstData.getNumPoints();
 
-    return numPointsAchieved;
+    ////return numPointsAchieved;
+    return 0;
 }
 
 
@@ -205,3 +209,5 @@ bool Predicate::atEndImpl() const
 } } // iterators::sequential
 
 } } // pdal::filters
+
+#endif

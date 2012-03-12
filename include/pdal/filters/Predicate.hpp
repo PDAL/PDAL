@@ -35,19 +35,13 @@
 #ifndef INCLUDED_FILTERS_PREDICATEFILTER_HPP
 #define INCLUDED_FILTERS_PREDICATEFILTER_HPP
 
+#include <pdal/pdal_internal.hpp>
+#ifdef PDAL_HAVE_PYTHON
+
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
 
-
-namespace pdal
-{
-    class PointBuffer;
-
-    namespace plang
-    {
-        class Parser;
-    }
-}
+#include <pdal/plang/PythonSupport.hpp>
 
 
 namespace pdal { namespace filters {
@@ -72,7 +66,7 @@ public:
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
 
-    boost::uint32_t processBuffer(PointBuffer& dstData, const PointBuffer& srcData, pdal::plang::Parser& parser) const;
+    boost::uint32_t processBuffer(const PointBuffer& data, pdal::plang::PythonMethod&) const;
 
     const std::string& getExpression() const { return m_expression; }
 
@@ -103,7 +97,7 @@ private:
     void createParser();
 
     const pdal::filters::Predicate& m_predicateFilter;
-    pdal::plang::Parser* m_parser;
+    pdal::plang::PythonMethod* m_parser;
 };
 
 } } // iterators::sequential
@@ -111,5 +105,7 @@ private:
 
 
 } } // pdal::filteers
+
+#endif
 
 #endif

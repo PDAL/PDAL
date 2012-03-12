@@ -327,7 +327,6 @@ set(PDAL_FILTERS_HPP
   ${PDAL_FILTERS_HEADERS}/PointBufferCache.hpp
   ${PDAL_FILTERS_HEADERS}/Predicate.hpp
   ${PDAL_FILTERS_HEADERS}/Programmable.hpp
-  ${PDAL_FILTERS_HEADERS}/Programmable2.hpp
   ${PDAL_FILTERS_HEADERS}/Reprojection.hpp
   ${PDAL_FILTERS_HEADERS}/Scaling.hpp
   ${PDAL_FILTERS_HEADERS}/Selector.hpp
@@ -347,7 +346,6 @@ set (PDAL_FILTERS_CPP
   ${PDAL_FILTERS_SRC}/PointBufferCache.cpp
   ${PDAL_FILTERS_SRC}/Predicate.cpp
   ${PDAL_FILTERS_SRC}/Programmable.cpp  
-  ${PDAL_FILTERS_SRC}/Programmable2.cpp  
   ${PDAL_FILTERS_SRC}/Reprojection.cpp
   ${PDAL_FILTERS_SRC}/Scaling.cpp
   ${PDAL_FILTERS_SRC}/Selector.cpp
@@ -367,22 +365,11 @@ set(PDAL_PLANG_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_PLANG_PATH})
 set(PDAL_PLANG_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_PLANG_PATH})
 
 set(PDAL_PLANG_HPP
-  ${PDAL_PLANG_HEADERS}/AstNode.hpp
-  ${PDAL_PLANG_HEADERS}/AstUtils.hpp
-  ${PDAL_PLANG_HEADERS}/Parser.hpp
-  ${PDAL_PLANG_HEADERS}/Program.hpp
   ${PDAL_PLANG_HEADERS}/PythonSupport.hpp
-  ${PDAL_PLANG_HEADERS}/SymbolTable.hpp
 )
 
 set (PDAL_PLANG_CPP 
-  ${PDAL_PLANG_SRC}/AstNode.cpp
-  ${PDAL_PLANG_SRC}/AstUtils.cpp
-  ${PDAL_PLANG_SRC}/Parser.cpp
-  ${PDAL_PLANG_SRC}/Parser_qi.cpp
-  ${PDAL_PLANG_SRC}/Program.cpp
   ${PDAL_PLANG_SRC}/PythonSupport.cpp
-  ${PDAL_PLANG_SRC}/SymbolTable.cpp
 )
 
 list (APPEND PDAL_CPP ${PDAL_PLANG_CPP} )

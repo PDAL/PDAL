@@ -35,7 +35,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <pdal/filters/Programmable.hpp>
-#include <pdal/filters/Programmable2.hpp>
+#include <pdal/filters/Programmable.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
 
@@ -43,40 +43,6 @@ BOOST_AUTO_TEST_SUITE(ProgrammableFilterTest)
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
-{
-    Bounds<double> bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
-    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
-
-    const pdal::Option opt("program", "float64 X; float64 Y; float64 Z; X = X + 10.0; Y = Y + Z; Z = 99.99;");
-    pdal::Options opts;
-    opts.add(opt);
-
-    pdal::filters::Programmable filter(reader, opts);
-    BOOST_CHECK(filter.getDescription() == "Programmable Filter");
-    pdal::drivers::faux::Writer writer(filter, Options::none());
-    writer.initialize();
-
-    boost::uint64_t numWritten = writer.write(1000);
-
-    BOOST_CHECK(numWritten == 1000);
-
-    const double minX = writer.getMinX();
-    const double minY = writer.getMinY();
-    const double minZ = writer.getMinZ();
-    const double maxX = writer.getMaxX();
-    const double maxY = writer.getMaxY();
-    const double maxZ = writer.getMaxZ();
-
-    BOOST_CHECK(Utils::compare_approx<double>(minX, 10.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(minY, 0.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(minZ, 99.99, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxX, 11.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxY, 2.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 99.99, 0.01));
-
-    return;
-}
 
 BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test2)
 {
@@ -96,12 +62,13 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test2)
         "  Z = np.zeros(X.size) + 3.14\n"
         "  outs['X'] = X\n"
         "  outs['Z'] = Z\n"
+        "  return\n"
         );
     pdal::Options opts;
     opts.add(opt);
 
-    pdal::filters::Programmable2 filter(reader, opts);
-    BOOST_CHECK(filter.getDescription() == "Programmable2 Filter");
+    pdal::filters::Programmable filter(reader, opts);
+    BOOST_CHECK(filter.getDescription() == "Programmable Filter");
     pdal::drivers::faux::Writer writer(filter, Options::none());
     writer.initialize();
 
