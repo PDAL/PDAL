@@ -185,8 +185,10 @@ void PythonEnvironment::output_result( PyObject* rslt )
 }
 
 
-void PythonEnvironment::handle_error( PyObject* fe )
+void PythonEnvironment::handle_error(PyObject*)
 {
+    PyObject* fe = m_fexcp;
+
     // get exception info
     PyObject *type, *value, *traceback;
     PyErr_Fetch( &type, &value, &traceback );
@@ -228,66 +230,62 @@ bool PythonMethod::compile()
 }
 
 
-bool PythonMethod::beginChunk(PointBuffer*)
+bool PythonMethod::beginChunk(PointBuffer& buffer)
 {
+    const Schema& schema = buffer.getSchema();
 
-    const int nelem = 10;
-    struct Record
-    {
-        double x;
-        double y;
-        double z;
-        unsigned char t;
-    };
 
-    Record* arr = new Record[nelem];
-
-    for (int i=0; i<nelem; i++)
-    {
-        arr[i].x = i*i;
-        arr[i].y = i*10;
-        arr[i].z = i*100;
-        arr[i].t = (i%17);
-    }
-
+    const int nelem = buffer.getNumPoints();
     int mydims = { nelem };
-
     int nd = 1;
     npy_intp* dims = &mydims;
-    int stride = sizeof(Record);
+    int stride = schema.getByteSize();
     npy_intp* strides = &stride;
     int flags = NPY_CARRAY; // NPY_BEHAVED
-    
-    char* data = (char*)arr;
-    PyObject* py_arr1 = PyArray_New(&PyArray_Type, nd, dims, PyArray_DOUBLE, strides, data, 0, flags, NULL);
-    PyObject* py_arr2 = PyArray_New(&PyArray_Type, nd, dims, PyArray_DOUBLE, strides, data+8, 0, flags, NULL);
-    PyObject* py_arr3 = PyArray_New(&PyArray_Type, nd, dims, PyArray_DOUBLE, strides, data+16, 0, flags, NULL);
-    PyObject* py_arr4 = PyArray_New(&PyArray_Type, nd, dims, PyArray_UBYTE, strides, data+24, 0, flags, NULL);
+
+
+    schema::Map const& map = schema.getDimensions();
+
+    schema::index_by_index const& idx = map.get<schema::index>();
 
     m_pyInputArrays.clear();
-    m_pyInputArrays.push_back(py_arr1);
-    m_pyInputArrays.push_back(py_arr2);
-    m_pyInputArrays.push_back(py_arr3);
-    m_pyInputArrays.push_back(py_arr4);
-
-    printf("BEFORE\n");
-    printf("%f\n", arr[3].x);
-    printf("%f\n", arr[3].y);
-    printf("%f\n", arr[3].z);
-    printf("%d\n", (int)arr[3].t);
-
-    // put variables into dictionary of local variables for python
     m_vars = PyDict_New();
-    PyDict_SetItemString(m_vars, "arr1", py_arr1);
-    PyDict_SetItemString(m_vars, "arr2", py_arr2);
-    PyDict_SetItemString(m_vars, "arr3", py_arr3);
-    PyDict_SetItemString(m_vars, "arr4", py_arr4);
+
+    for (schema::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
+    {
+        const Dimension& dim = *iter;
+
+        boost::uint8_t* data = buffer.getData(0) + dim.getByteOffset();
+
+        int type_code = 0;
+        if (dim.getInterpretation()==dimension::SignedByte && dim.getByteSize()==1)
+            type_code = PyArray_BYTE;
+        else if (dim.getInterpretation()==dimension::UnsignedByte && dim.getByteSize()==1)
+            type_code = PyArray_UBYTE;
+        else if (dim.getInterpretation()==dimension::Float && dim.getByteSize()==4)
+            type_code = PyArray_FLOAT;
+        else if (dim.getInterpretation()==dimension::Float && dim.getByteSize()==8)
+            type_code = PyArray_DOUBLE;
+        else if (dim.getInterpretation()==dimension::UnsignedInteger && dim.getByteSize()==4)
+            type_code = PyArray_UINT;
+        else if (dim.getInterpretation()==dimension::UnsignedInteger && dim.getByteSize()==8)
+            type_code = PyArray_ULONGLONG;
+        else
+            assert(0);
+
+        PyObject* py_arr1 = PyArray_New(&PyArray_Type, nd, dims, type_code, strides, data, 0, flags, NULL);
+
+        m_pyInputArrays.push_back(py_arr1);
+
+        const std::string& name = dim.getName();
+        PyDict_SetItemString(m_vars, name.c_str(), py_arr1);
+    }
 
     return true;
 }
 
 
-bool PythonMethod::endChunk(PointBuffer*)
+bool PythonMethod::endChunk(PointBuffer&)
 {
     PyObject* rslt3 = PyDict_GetItemString( m_scriptResult, "value" );
     if( !rslt3 ) m_env.die(1);
@@ -348,17 +346,9 @@ bool PythonMethod::endChunk(PointBuffer*)
 
 bool PythonMethod::execute()
 {
-    m_scriptSource = PyString_FromString( 
-        "import numpy\n"
-        "print '===inside script==='\n"
-        "value = 42.0\n"
-        "arr1 = arr1 * 2\n"
-        "print arr1[3]\n"
-        "print arr2[3]\n"
-        "print arr3[3]\n"
-        "print arr4[3]\n"
-        "print '==================='\n"
-        "print value\n" );
+    std::string script = "import numpy\n" + m_source;
+
+    m_scriptSource = PyString_FromString(script.c_str());
     
     // create argument for "run_script"
     Py_INCREF(m_vars);
@@ -368,7 +358,7 @@ bool PythonMethod::execute()
 
     // execute script
     m_scriptResult = PyObject_CallObject(m_env.m_func2, m_scriptArgs);
-    if (!m_scriptResult) m_env.die(2);
+    if (!m_scriptResult) m_env.handle_error(0);
     
     return true;
 }

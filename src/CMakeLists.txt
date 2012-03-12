@@ -327,6 +327,7 @@ set(PDAL_FILTERS_HPP
   ${PDAL_FILTERS_HEADERS}/PointBufferCache.hpp
   ${PDAL_FILTERS_HEADERS}/Predicate.hpp
   ${PDAL_FILTERS_HEADERS}/Programmable.hpp
+  ${PDAL_FILTERS_HEADERS}/Programmable2.hpp
   ${PDAL_FILTERS_HEADERS}/Reprojection.hpp
   ${PDAL_FILTERS_HEADERS}/Scaling.hpp
   ${PDAL_FILTERS_HEADERS}/Selector.hpp
@@ -346,6 +347,7 @@ set (PDAL_FILTERS_CPP
   ${PDAL_FILTERS_SRC}/PointBufferCache.cpp
   ${PDAL_FILTERS_SRC}/Predicate.cpp
   ${PDAL_FILTERS_SRC}/Programmable.cpp  
+  ${PDAL_FILTERS_SRC}/Programmable2.cpp  
   ${PDAL_FILTERS_SRC}/Reprojection.cpp
   ${PDAL_FILTERS_SRC}/Scaling.cpp
   ${PDAL_FILTERS_SRC}/Selector.cpp

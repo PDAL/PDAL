@@ -32,82 +32,76 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PYTHONSUPPORT_H
-#define PYTHONSUPPORT_H
+#ifndef INCLUDED_FILTERS_PROGRAMMABLE2FILTER_HPP
+#define INCLUDED_FILTERS_PROGRAMMABLE2FILTER_HPP
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/PointBuffer.hpp>
-
-#include <boost/cstdint.hpp>
-#include <boost/variant.hpp>
-
-#include <vector>
-#include <iostream>
-
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(push)
-#  pragma warning(disable: 4127)  // conditional expression is constant
-#endif
-
-#include <Python.h>
-#include <../Lib/site-packages/numpy/core/include/numpy/arrayobject.h>
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(pop)
-#endif
-
-namespace pdal { namespace plang {
+#include <pdal/Filter.hpp>
+#include <pdal/FilterIterator.hpp>
+#include <pdal/plang/PythonSupport.hpp>
 
 
-class PDAL_DLL PythonEnvironment
+namespace pdal { namespace filters {
+
+class Programmable2FilterSequentialIterator;
+
+class PDAL_DLL Programmable2 : public Filter
 {
 public:
-    PythonEnvironment();
-    ~PythonEnvironment();
+    SET_STAGE_NAME("filters.programmable2", "Programmable2 Filter")
 
-    bool startup();
-    bool shutdown();
-    void die(int i);
-    void output_result( PyObject* rslt );
-    void handle_error( PyObject* fe );
+    Programmable2(Stage& prevStage, const Options&);
 
-    PyObject *m_func2;
+    virtual void initialize();
+    virtual const Options getDefaultOptions() const;
+
+    bool supportsIterator (StageIteratorType t) const
+    {   
+        if (t == StageIterator_Sequential ) return true;
+
+        return false;
+    }
+
+    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
+    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
+
+    void processBuffer(PointBuffer& data, pdal::plang::PythonMethod& python) const;
+
+    const std::string& getProgram() const { return m_program; }
 
 private:
-    PyObject* m_mod1;
-    PyObject* m_mod2;
-    PyObject* m_dict1;
-    PyObject* m_dict2;
-    PyObject *m_func1;
-    PyObject *m_fexcp;
+    std::string m_program;
+
+    Programmable2& operator=(const Programmable2&); // not implemented
+    Programmable2(const Programmable2&); // not implemented
 };
 
 
-class PDAL_DLL PythonMethod
+namespace iterators { namespace sequential {
+    
+
+class PDAL_DLL Programmable2 : public pdal::FilterSequentialIterator
 {
 public:
-    PythonMethod(PythonEnvironment& env, const std::string& source);
-    bool compile();
-
-    bool beginChunk(PointBuffer&);
-    bool endChunk(PointBuffer&);
-
-    bool execute();
+    Programmable2(const pdal::filters::Programmable2& filter, PointBuffer& buffer);
+    ~Programmable2();
 
 private:
-    PythonEnvironment& m_env;
-    std::string m_source;
+    boost::uint64_t skipImpl(boost::uint64_t);
+    boost::uint32_t readBufferImpl(PointBuffer&);
+    bool atEndImpl() const;
 
-    PyObject* m_scriptSource;
-    PyObject* m_vars;
-    PyObject* m_scriptArgs;
-    PyObject* m_scriptResult;
-    std::vector<PyObject*> m_pyInputArrays;
+    void createParser();
+    
+    const pdal::filters::Programmable2& m_programmableFilter;
 
-    PythonMethod& operator=(PythonMethod const& rhs); // nope
+    pdal::plang::PythonEnvironment* m_pythonEnv;
+    pdal::plang::PythonMethod* m_pythonMethod;
 };
 
+} } // iterators::sequential
 
-} } // namespaces
 
+
+} } // pdal::filteers
 
 #endif
