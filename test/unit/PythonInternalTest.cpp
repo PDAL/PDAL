@@ -49,7 +49,10 @@ BOOST_AUTO_TEST_CASE(PLangInternalTest_python)
     env.startup();
 
     pdal::plang::PythonMethod meth(env, "foo");
+    
+    meth.beginChunk(0);
     meth.execute();
+    meth.endChunk(0);
 
     env.shutdown();
 

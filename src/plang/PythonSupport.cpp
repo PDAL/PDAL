@@ -44,8 +44,8 @@
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
-#include "C:\Utils\Python27\include\Python.h"
-#include "C:\Utils\Python27\Lib\site-packages\numpy\core\include\numpy\arrayobject.h"
+#include <Python.h>
+#include <../Lib/site-packages/numpy/core/include/numpy/arrayobject.h>
 
 
 namespace pdal { namespace plang {
@@ -228,30 +228,8 @@ bool PythonMethod::compile()
 }
 
 
-bool PythonMethod::setVariable_Float64Array(const std::string& name, double* data)
+bool PythonMethod::beginChunk(PointBuffer*)
 {
-    return true;
-}
-
-
-bool PythonMethod::execute()
-{
-//        *vars, *args2, *rslt2, *rslt3;
-
-    // define a python expression and a python script
-    PyObject* script = PyString_FromString( 
-        "import numpy\n"
-        "print '===inside script==='\n"
-        "value = 42.0\n"
-        "arr1 = arr1 * 2\n"
-        "print arr1[3]\n"
-        "print arr2[3]\n"
-        "print arr3[3]\n"
-        "print arr4[3]\n"
-        "print '==================='\n"
-        "print value\n" );
-    
-
 
     const int nelem = 10;
     struct Record
@@ -278,13 +256,19 @@ bool PythonMethod::execute()
     npy_intp* dims = &mydims;
     int stride = sizeof(Record);
     npy_intp* strides = &stride;
-    int flags = 0;//NPY_BEHAVED; //NPY_CARRAY;
+    int flags = NPY_CARRAY; // NPY_BEHAVED
     
     char* data = (char*)arr;
-    PyObject* py_array1 = PyArray_New(&PyArray_Type, nd, dims, PyArray_DOUBLE, strides, data, 0, flags, NULL);
-    PyObject* py_array2 = PyArray_New(&PyArray_Type, nd, dims, PyArray_DOUBLE, strides, data+8, 0, flags, NULL);
-    PyObject* py_array3 = PyArray_New(&PyArray_Type, nd, dims, PyArray_DOUBLE, strides, data+16, 0, flags, NULL);
-    PyObject* py_array4 = PyArray_New(&PyArray_Type, nd, dims, PyArray_UBYTE, strides, data+24, 0, flags, NULL);
+    PyObject* py_arr1 = PyArray_New(&PyArray_Type, nd, dims, PyArray_DOUBLE, strides, data, 0, flags, NULL);
+    PyObject* py_arr2 = PyArray_New(&PyArray_Type, nd, dims, PyArray_DOUBLE, strides, data+8, 0, flags, NULL);
+    PyObject* py_arr3 = PyArray_New(&PyArray_Type, nd, dims, PyArray_DOUBLE, strides, data+16, 0, flags, NULL);
+    PyObject* py_arr4 = PyArray_New(&PyArray_Type, nd, dims, PyArray_UBYTE, strides, data+24, 0, flags, NULL);
+
+    m_pyInputArrays.clear();
+    m_pyInputArrays.push_back(py_arr1);
+    m_pyInputArrays.push_back(py_arr2);
+    m_pyInputArrays.push_back(py_arr3);
+    m_pyInputArrays.push_back(py_arr4);
 
     printf("BEFORE\n");
     printf("%f\n", arr[3].x);
@@ -293,48 +277,44 @@ bool PythonMethod::execute()
     printf("%d\n", (int)arr[3].t);
 
     // put variables into dictionary of local variables for python
-    PyObject* vars = PyDict_New();
-    PyDict_SetItemString( vars, "arr1", py_array1 );
-    PyDict_SetItemString( vars, "arr2", py_array2 );
-    PyDict_SetItemString( vars, "arr3", py_array3 );
-    PyDict_SetItemString( vars, "arr4", py_array4 );
+    m_vars = PyDict_New();
+    PyDict_SetItemString(m_vars, "arr1", py_arr1);
+    PyDict_SetItemString(m_vars, "arr2", py_arr2);
+    PyDict_SetItemString(m_vars, "arr3", py_arr3);
+    PyDict_SetItemString(m_vars, "arr4", py_arr4);
 
-    // create argument for "run_script"
-    Py_INCREF(vars);
-    PyObject* args2 = PyTuple_New(2);
-    PyTuple_SetItem(args2, 0, script);
-    PyTuple_SetItem(args2, 1, vars);
+    return true;
+}
 
-    // execute script
-    PyObject* rslt2 = PyObject_CallObject(m_env.m_func2, args2);
-    if( !rslt2 ) m_env.die(2);
 
-    PyObject* rslt3 = PyDict_GetItemString( rslt2, "value" );
+bool PythonMethod::endChunk(PointBuffer*)
+{
+    PyObject* rslt3 = PyDict_GetItemString( m_scriptResult, "value" );
     if( !rslt3 ) m_env.die(1);
     printf("======value out=========\n");
     m_env.output_result( rslt3 );
     printf("========================\n");
     Py_XDECREF(rslt3);
 
-    PyObject* rslt4 = PyDict_GetItemString( rslt2, "arr1" );
+    PyObject* rslt4 = PyDict_GetItemString( m_scriptResult, "arr1" );
     if( !rslt4 ) m_env.die(1);
     printf("========arr1 out=======\n");
     m_env.output_result( rslt4 );
     printf("=======================\n");
 
-    PyObject* rslt5 = PyDict_GetItemString( rslt2, "arr2" );
+    PyObject* rslt5 = PyDict_GetItemString( m_scriptResult, "arr2" );
     if( !rslt5 ) m_env.die(1);
     printf("========arr2 out=======\n");
     m_env.output_result( rslt5 );
     printf("=======================\n");
 
-    PyObject* rslt6 = PyDict_GetItemString( rslt2, "arr3" );
+    PyObject* rslt6 = PyDict_GetItemString( m_scriptResult, "arr3" );
     if( !rslt6 ) m_env.die(1);
     printf("========arr3 out=======\n");
     m_env.output_result( rslt6 );
     printf("=======================\n");
 
-    PyObject* rslt7 = PyDict_GetItemString( rslt2, "arr4" );
+    PyObject* rslt7 = PyDict_GetItemString( m_scriptResult, "arr4" );
     if( !rslt7 ) m_env.die(1);
     //printf("========arr4 out=======\n");
     //m_env.output_result( rslt7 );
@@ -348,22 +328,48 @@ bool PythonMethod::execute()
     Py_XDECREF(rslt4);
     Py_XDECREF(rslt5);
 
-    Py_XDECREF(rslt2);
+    Py_XDECREF(m_scriptResult);
 
-    printf("AFTER\n");
-    printf("%f\n", arr[3].x);
-    printf("%f\n", arr[3].y);
-    printf("%f\n", arr[3].z);
-    printf("%d\n", (int)arr[3].t);
+    Py_XDECREF(m_scriptArgs); // also decrements script and vars
 
-    Py_XDECREF(args2); // also decrements script and vars
-    Py_XDECREF(py_array1);
-    Py_XDECREF(py_array2);
-    Py_XDECREF(py_array3);
-    Py_XDECREF(py_array4);
-    delete[] arr;
-    Py_XDECREF(script);
+    for (unsigned int i=0; i<m_pyInputArrays.size(); i++)
+    {
+        PyObject* obj = m_pyInputArrays[i];
+        Py_XDECREF(obj);
+    }
+    m_pyInputArrays.clear();
 
+
+    Py_XDECREF(m_scriptSource);
+
+    return true;
+}
+
+
+bool PythonMethod::execute()
+{
+    m_scriptSource = PyString_FromString( 
+        "import numpy\n"
+        "print '===inside script==='\n"
+        "value = 42.0\n"
+        "arr1 = arr1 * 2\n"
+        "print arr1[3]\n"
+        "print arr2[3]\n"
+        "print arr3[3]\n"
+        "print arr4[3]\n"
+        "print '==================='\n"
+        "print value\n" );
+    
+    // create argument for "run_script"
+    Py_INCREF(m_vars);
+    m_scriptArgs = PyTuple_New(2);
+    PyTuple_SetItem(m_scriptArgs, 0, m_scriptSource);
+    PyTuple_SetItem(m_scriptArgs, 1, m_vars);
+
+    // execute script
+    m_scriptResult = PyObject_CallObject(m_env.m_func2, m_scriptArgs);
+    if (!m_scriptResult) m_env.die(2);
+    
     return true;
 }
 

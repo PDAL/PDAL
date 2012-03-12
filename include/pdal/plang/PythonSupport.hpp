@@ -36,6 +36,7 @@
 #define PYTHONSUPPORT_H
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/PointBuffer.hpp>
 
 #include <boost/cstdint.hpp>
 #include <boost/variant.hpp>
@@ -87,13 +88,20 @@ public:
     PythonMethod(PythonEnvironment& env, const std::string& source);
     bool compile();
 
-    bool setVariable_Float64Array(const std::string& name, double* data);
+    bool beginChunk(PointBuffer*);
+    bool endChunk(PointBuffer*);
 
     bool execute();
 
 private:
     PythonEnvironment& m_env;
     std::string m_source;
+
+    PyObject* m_scriptSource;
+    PyObject* m_vars;
+    PyObject* m_scriptArgs;
+    PyObject* m_scriptResult;
+    std::vector<PyObject*> m_pyInputArrays;
 
     PythonMethod& operator=(PythonMethod const& rhs); // nope
 };
