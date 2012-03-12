@@ -53,11 +53,7 @@ namespace pdal { namespace plang {
 
 PythonEnvironment::PythonEnvironment()
     : m_mod1(NULL)
-    , m_mod2(NULL)
     , m_dict1(NULL)
-    , m_dict2(NULL)
-    , m_func1(NULL)
-    , m_func2(NULL)
     , m_fexcp(NULL)
 {
     return;
@@ -83,29 +79,14 @@ bool PythonEnvironment::startup()
     m_mod1 = PyImport_ImportModule( "traceback" );
     if (!m_mod1) die(6);
 
-    PyObject* compiled = Py_CompileString(
-        "import numpy\n"
-        "def run_expression( expr, vars ):\n"
-        "  return eval( expr, {}, vars )\n"
-        "def run_script( expr, vars ):\n"
-        "  exec( expr, {}, vars );\n"
-        "  return locals()['vars']\n",
-        "Test",
-        Py_file_input);
-    m_mod2 = PyImport_ExecCodeModule("Test", compiled);
-    if (!m_mod2) die(6);
-
     // get dictionary of available items in the modules
     m_dict1 = PyModule_GetDict(m_mod1);
-    m_dict2 = PyModule_GetDict(m_mod2);
 
     // grab the functions we are interested in
     m_fexcp = PyDict_GetItemString(m_dict1, "format_exception");
-    m_func1 = PyDict_GetItemString(m_dict2, "run_expression");
-    m_func2 = PyDict_GetItemString(m_dict2, "run_script");
-    if(! ( m_func1 && m_func2 && m_fexcp )) die(5);
+    if (!m_fexcp) die(5);
 
-    if(! ( PyCallable_Check(m_func1) && PyCallable_Check(m_func2) && PyCallable_Check(m_fexcp)) ) die(4);
+    if (!PyCallable_Check(m_fexcp)) die(4);
 
     return true;
 }
@@ -113,13 +94,9 @@ bool PythonEnvironment::startup()
 
 bool PythonEnvironment::shutdown()
 {
-
-    Py_XDECREF(m_func1);
-    Py_XDECREF(m_func2);
     Py_XDECREF(m_fexcp);
 
     Py_XDECREF(m_mod1);
-    Py_XDECREF(m_mod2);
 
     Py_Finalize();
 
@@ -301,7 +278,8 @@ bool PythonMethod::beginChunk(PointBuffer& buffer)
     int flags = NPY_CARRAY; // NPY_BEHAVED
 
     m_pyInputArrays.clear();
-    m_vars = PyDict_New();
+    m_varsIn = PyDict_New();
+    m_varsOut = PyDict_New();
 
     schema::Map const& map = schema.getDimensions();
     schema::index_by_index const& idx = map.get<schema::index>();
@@ -315,38 +293,55 @@ bool PythonMethod::beginChunk(PointBuffer& buffer)
 
         PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType, strides, data, 0, flags, NULL);
         m_pyInputArrays.push_back(pyArray);
-        PyDict_SetItemString(m_vars, name.c_str(), pyArray);
+        PyDict_SetItemString(m_varsIn, name.c_str(), pyArray);
     }
 
     return true;
 }
 
 
-bool PythonMethod::endChunk(PointBuffer&)
+bool PythonMethod::endChunk(PointBuffer& buffer)
 {
-    PyObject* result = PyDict_GetItemString( m_scriptResult, "X_" );
-    if (!result) m_env.handle_error(0);
+    const Schema& schema = buffer.getSchema();
 
-    assert(PyArray_Check(result));
+    schema::Map const& map = schema.getDimensions();
+    schema::index_by_index const& idx = map.get<schema::index>();
+    for (schema::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
+    {
+        const Dimension& dim = *iter;
+        const std::string& name = dim.getName();
+        
+        PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
+        if (!xarr) continue;
+        assert(PyArray_Check(xarr));
+        PyArrayObject* arr = (PyArrayObject*)xarr;
 
+        int one=1;
+        const int pyDataType = getPythonDataType(dim);
 
-        {{
-            PyArrayObject* obj = PyArray_GETCONTIGUOUS( (PyArrayObject*) result );
-            int ndims = obj->nd;
-            int* dims = obj->dimensions; // not copying data
-            double* data = (double*) obj->data; // not copying data
-            int k = 0;
+        if (pyDataType == PyArray_DOUBLE)
+        {
+            double* data = (double*)PyArray_GetPtr(arr, &one);
 
-            assert(ndims == 1);
-
-            // output vector result
-            for (int j=0; j<dims[0]; j++)
+            const unsigned int cnt = buffer.getNumPoints();
+            for (unsigned int i=0; i<cnt; i++)
             {
-                printf( "element: %i value: %f\n", j, data[k++]);
+                buffer.setField<double>(dim, i, data[i]);
             }
-        }}
+        }
+        else if (pyDataType == PyArray_ULONGLONG)
+        {
+            boost::uint64_t* data = (boost::uint64_t*)PyArray_GetPtr(arr, &one);
 
-    Py_XDECREF(result);
+            const unsigned int cnt = buffer.getNumPoints();
+            for (unsigned int i=0; i<cnt; i++)
+            {
+                buffer.setField<boost::uint64_t>(dim, i, data[i]);
+            }
+        }
+        else
+            assert(0);
+    }
 
     Py_XDECREF(m_scriptResult);
 
@@ -359,8 +354,6 @@ bool PythonMethod::endChunk(PointBuffer&)
     }
     m_pyInputArrays.clear();
 
-    Py_XDECREF(m_scriptSource);
-
     return true;
 }
 
@@ -368,6 +361,7 @@ bool PythonMethod::endChunk(PointBuffer&)
 bool PythonMethod::execute()
 {
     PyObject* compiled = Py_CompileString(m_source.c_str(), "YowModule", Py_file_input);
+    if (!compiled) m_env.die(6);
     PyObject* module = PyImport_ExecCodeModule("YowModule", compiled);
     if (!module) m_env.die(6);
 
@@ -377,26 +371,14 @@ bool PythonMethod::execute()
     if (!func) m_env.die(5);
     if (!PyCallable_Check(func)) m_env.die(4);
   
-    Py_INCREF(m_vars);
-    m_scriptArgs = PyTuple_New(1);
-    PyTuple_SetItem(m_scriptArgs, 0, m_vars);
+    Py_INCREF(m_varsIn);
+    Py_INCREF(m_varsOut);
+    m_scriptArgs = PyTuple_New(2);
+    PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
+    PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
 
     m_scriptResult = PyObject_CallObject(func, m_scriptArgs);
     if (!m_scriptResult) m_env.handle_error(0);
-
-
-
-    ////m_scriptSource = PyString_FromString(m_source.c_str());
-    ////
-    ////// create argument for "run_script"
-    ////Py_INCREF(m_vars);
-    ////m_scriptArgs = PyTuple_New(2);
-    ////PyTuple_SetItem(m_scriptArgs, 0, m_scriptSource);
-    ////PyTuple_SetItem(m_scriptArgs, 1, m_vars);
-
-    ////// execute script
-    ////m_scriptResult = PyObject_CallObject(m_env.m_func2, m_scriptArgs);
-    ////if (!m_scriptResult) m_env.handle_error(0);
     
     return true;
 }

@@ -70,14 +70,9 @@ public:
     void output_result( PyObject* rslt );
     void handle_error( PyObject* fe );
 
-    PyObject *m_func2;
-
 private:
     PyObject* m_mod1;
-    PyObject* m_mod2;
     PyObject* m_dict1;
-    PyObject* m_dict2;
-    PyObject *m_func1;
     PyObject *m_fexcp;
 };
 
@@ -98,7 +93,8 @@ private:
     std::string m_source;
 
     PyObject* m_scriptSource;
-    PyObject* m_vars;
+    PyObject* m_varsIn;
+    PyObject* m_varsOut;
     PyObject* m_scriptArgs;
     PyObject* m_scriptResult;
     std::vector<PyObject*> m_pyInputArrays;

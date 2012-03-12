@@ -84,18 +84,17 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test2)
     pdal::drivers::faux::Reader reader(bounds, 10, pdal::drivers::faux::Reader::Ramp);
 
     const pdal::Option opt("program",
-        "def yow(a):\n"
-        "  X = a['X']\n"
-        "  Y = a['Y']\n"
-        "  Z = a['Z']\n"
-        "  T = a['Y']\n"
-        "  print a\n"
-        "  print X\n"
+        "import numpy as np\n"
+        "def yow(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  Y = ins['Y']\n"
+        "  Z = ins['Z']\n"
         "  X = X + 10.0\n"
-        "  print a\n"
-        "  print X\n"
-        "  Y = Y + Z\n"
-        "  Z = 99.99\n"
+        "  # Y: leave as-is, don't export back out\n"
+        "  # Z: goofiness to make it a numpy array of a constant\n"
+        "  Z = np.zeros(X.size) + 3.14\n"
+        "  outs['X'] = X\n"
+        "  outs['Z'] = Z\n"
         );
     pdal::Options opts;
     opts.add(opt);
@@ -105,23 +104,25 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test2)
     pdal::drivers::faux::Writer writer(filter, Options::none());
     writer.initialize();
 
-    boost::uint64_t numWritten = writer.write(1000);
+    boost::uint64_t numWritten = writer.write(10);
 
-    BOOST_CHECK(numWritten == 1000);
+    BOOST_CHECK(numWritten == 10);
 
     const double minX = writer.getMinX();
-    const double minY = writer.getMinY();
-    const double minZ = writer.getMinZ();
     const double maxX = writer.getMaxX();
+    const double minY = writer.getMinY();
     const double maxY = writer.getMaxY();
+    const double minZ = writer.getMinZ();
     const double maxZ = writer.getMaxZ();
 
-    BOOST_CHECK(Utils::compare_approx<double>(minX, 10.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(minY, 0.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(minZ, 99.99, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxX, 11.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxY, 2.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 99.99, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(minX, 10.0, 0.001));
+    BOOST_CHECK(Utils::compare_approx<double>(maxX, 11.0, 0.001));
+
+    BOOST_CHECK(Utils::compare_approx<double>(minY, 0.0, 0.001));
+    BOOST_CHECK(Utils::compare_approx<double>(maxY, 1.0, 0.001));
+
+    BOOST_CHECK(Utils::compare_approx<double>(minZ, 3.14, 0.001));
+    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 3.14, 0.001));
 
     return;
 }

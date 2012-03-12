@@ -72,41 +72,9 @@ void Programmable2::processBuffer(PointBuffer& data, pdal::plang::PythonMethod& 
 {
     python.beginChunk(data);
 
-    const Schema& schema = data.getSchema();
-    boost::uint32_t numSrcPoints = data.getNumPoints();
-
-    Dimension const& dimX = schema.getDimension("X");
-    Dimension const& dimY = schema.getDimension("Y");
-    Dimension const& dimZ = schema.getDimension("Z");
-
-    for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
-    {
-        const double x = data.getField<double>(dimX, srcIndex);
-        const double y = data.getField<double>(dimY, srcIndex);
-        const double z = data.getField<double>(dimZ, srcIndex);
-
-        //parser.setVariable<double>("X", x);
-        //parser.setVariable<double>("Y", y);
-        //parser.setVariable<double>("Z", z);
-
-        bool ok = python.execute();
-        assert(ok);
-
-        //const double xx = parser.getVariable<double>("X");
-        //const double yy = parser.getVariable<double>("Y");
-        //const double zz = parser.getVariable<double>("Z");
-
-        //data.setField<double>(dimX, srcIndex, xx);
-        //data.setField<double>(dimY, srcIndex, yy);
-        //data.setField<double>(dimZ, srcIndex, zz);
-
-        //data.setField<double>(dimX, srcIndex, x);
-        //data.setField<double>(dimY, srcIndex, y);
-        //data.setField<double>(dimZ, srcIndex, z);
-
-        //data.setNumPoints(srcIndex+1);
-    }
-
+    bool ok = python.execute();
+    assert(ok);
+    
     python.endChunk(data);
 
     return;
