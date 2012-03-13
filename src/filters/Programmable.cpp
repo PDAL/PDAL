@@ -71,7 +71,7 @@ const Options Programmable::getDefaultOptions() const
 }
 
 
-void Programmable::processBuffer(PointBuffer& data, pdal::plang::PythonMethod& python) const
+void Programmable::processBuffer(PointBuffer& data, pdal::plang::PythonPDALMethod& python) const
 {
     python.beginChunk(data);
 
@@ -119,7 +119,7 @@ void Programmable::createParser()
     m_pythonEnv = new pdal::plang::PythonEnvironment();
     m_pythonEnv->startup();
 
-    m_pythonMethod = new pdal::plang::PythonMethod(*m_pythonEnv, program);
+    m_pythonMethod = new pdal::plang::PythonPDALMethod(*m_pythonEnv, program);
 
     return;
 }

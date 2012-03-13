@@ -70,7 +70,7 @@ const Options Predicate::getDefaultOptions() const
 }
 
 
-boost::uint32_t Predicate::processBuffer(const PointBuffer& data, pdal::plang::PythonMethod& parser) const
+boost::uint32_t Predicate::processBuffer(const PointBuffer& data, pdal::plang::PythonPDALMethod& parser) const
 {
     //const Schema& schema = dstData.getSchema();
     //boost::uint32_t numSrcPoints = srcData.getNumPoints();

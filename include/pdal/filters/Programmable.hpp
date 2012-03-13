@@ -68,7 +68,7 @@ public:
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
 
-    void processBuffer(PointBuffer& data, pdal::plang::PythonMethod& python) const;
+    void processBuffer(PointBuffer& data, pdal::plang::PythonPDALMethod& python) const;
 
     const std::string& getProgram() const { return m_program; }
 
@@ -99,7 +99,7 @@ private:
     const pdal::filters::Programmable& m_programmableFilter;
 
     pdal::plang::PythonEnvironment* m_pythonEnv;
-    pdal::plang::PythonMethod* m_pythonMethod;
+    pdal::plang::PythonPDALMethod* m_pythonMethod;
 };
 
 } } // iterators::sequential

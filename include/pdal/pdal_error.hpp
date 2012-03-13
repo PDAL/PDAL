@@ -237,6 +237,14 @@ public:
     {}
 };
 
+class python_error : public std::runtime_error
+{
+public:
+    python_error(std::string const& msg)
+        : std::runtime_error(msg)
+    {}
+};
+
 } // namespace pdal
 
 #endif // PDAL_EXCEPTION_HPP_INCLUDED

@@ -52,9 +52,9 @@ namespace pdal { namespace plang {
 
 
 PythonEnvironment::PythonEnvironment()
-    : m_mod1(NULL)
-    , m_dict1(NULL)
-    , m_fexcp(NULL)
+    : m_tracebackModule(NULL)
+    , m_tracebackDictionary(NULL)
+    , m_tracebackFunction(NULL)
 {
     return;
 }
@@ -66,72 +66,73 @@ PythonEnvironment::~PythonEnvironment()
 }
 
 
-bool PythonEnvironment::startup()
+void PythonEnvironment::startup()
 {
-    // launch the python interpreter
     Py_Initialize();
 
     // this macro is defined be NumPy and must be included
     if (_import_array() < 0)
-        die(20);
+    {
+        throw python_error("unable to initialize NumPy");
+    }
 
-    // load module "traceback" (for error handling)
-    m_mod1 = PyImport_ImportModule( "traceback" );
-    if (!m_mod1) die(6);
+    // load traceback stuff we need for error handling
+    m_tracebackModule = PyImport_ImportModule( "traceback" );
+    if (!m_tracebackModule) 
+    {
+        throw python_error("unable to load traceback module");
+    }
 
-    // get dictionary of available items in the modules
-    m_dict1 = PyModule_GetDict(m_mod1);
+    m_tracebackDictionary = PyModule_GetDict(m_tracebackModule);
 
-    // grab the functions we are interested in
-    m_fexcp = PyDict_GetItemString(m_dict1, "format_exception");
-    if (!m_fexcp) die(5);
+    m_tracebackFunction = PyDict_GetItemString(m_tracebackDictionary, "format_exception");
+    if (!m_tracebackFunction)
+    {
+        throw python_error("unable to find traceback function");
+    }
 
-    if (!PyCallable_Check(m_fexcp)) die(4);
+    if (!PyCallable_Check(m_tracebackFunction)) 
+    {
+        throw python_error("invalid traceback function");
+    }
 
-    return true;
+    return;
 }
 
 
-bool PythonEnvironment::shutdown()
+void PythonEnvironment::shutdown()
 {
-    Py_XDECREF(m_fexcp);
+    Py_XDECREF(m_tracebackFunction);
 
-    Py_XDECREF(m_mod1);
+    Py_XDECREF(m_tracebackModule);
 
     Py_Finalize();
 
-    return true;
+    return;
 }
 
 
-void PythonEnvironment::die(int i)
+void PythonEnvironment::dumpObject(PyObject* obj)
 {
-    printf("error: %d\n", i);
-    abort();
-}
-
-
-void PythonEnvironment::output_result( PyObject* rslt )
-{
-    if( !rslt ) {
-        printf("output_result: argument must be a valid pointer\n");
-        return;
+    if (!obj)
+    {
+        throw python_error("unable dump null object");
     }
 
     // output scalar result
-    if( PyFloat_Check(rslt) ) {
-        printf( "result: %f\n", PyFloat_AsDouble(rslt) );
+    if (PyFloat_Check(obj)) 
+    {
+        printf("result: %f\n", PyFloat_AsDouble(obj));
         return;
     }
 
-    if( !PyArray_Check(rslt) ) {
-        die(10);
-    }
+    // we only support arrays for now
+    assert(PyArray_Check(obj));
 
-    PyArrayObject* obj = PyArray_GETCONTIGUOUS( (PyArrayObject*) rslt );
-    int ndims = obj->nd;
-    npy_intp* dims = obj->dimensions; // not copying data
-    double* data = (double*) obj->data; // not copying data
+    PyArrayObject* arr = PyArray_GETCONTIGUOUS((PyArrayObject*)obj);
+    int ndims = arr->nd;
+    npy_intp* dims = arr->dimensions; // not copying data
+    double* data = (double*) arr->data; // not copying data
     int i, j, k = 0;
 
     if( ndims == 1 ) 
@@ -163,38 +164,38 @@ void PythonEnvironment::output_result( PyObject* rslt )
 }
 
 
-void PythonEnvironment::handle_error(PyObject*)
+void PythonEnvironment::handleError()
 {
-    PyObject* fe = m_fexcp;
-
     // get exception info
     PyObject *type, *value, *traceback;
-    PyErr_Fetch( &type, &value, &traceback );
-    PyErr_NormalizeException( &type, &value, &traceback );
+    PyErr_Fetch(&type, &value, &traceback);
+    PyErr_NormalizeException(&type, &value, &traceback);
 
     // create a argument for "format exception"
     PyObject* args = PyTuple_New(3);
-    PyTuple_SetItem( args, 0, type );
-    PyTuple_SetItem( args, 1, value );
-    PyTuple_SetItem( args, 2, traceback );
+    PyTuple_SetItem(args, 0, type);
+    PyTuple_SetItem(args, 1, value);
+    PyTuple_SetItem(args, 2, traceback);
 
     // get a list of string describing what went wrong
-    PyObject* output = PyObject_CallObject( fe, args );
+    PyObject* output = PyObject_CallObject(m_tracebackFunction, args);
 
     // print error message
-    int i, n = PyList_Size( output );
-    for( i=0; i<n; i++ ) printf( "%s", PyString_AsString( PyList_GetItem( output, i ) ) );
+    int i, n = PyList_Size(output);
+    for (i=0; i<n; i++) printf("%s", PyString_AsString(PyList_GetItem(output, i)));
 
     // clean up
-    Py_XDECREF( args );
-    Py_XDECREF( output );
+    Py_XDECREF(args);
+    Py_XDECREF(output);
+
+    return;
 }
 
 
 // ==========================================================================
 
 
-PythonMethod::PythonMethod(PythonEnvironment& env, const std::string& source)
+PythonMethodX::PythonMethodX(PythonEnvironment& env, const std::string& source)
     : m_env(env)
     , m_source(source)
 {
@@ -202,18 +203,16 @@ PythonMethod::PythonMethod(PythonEnvironment& env, const std::string& source)
 }
 
 
-bool PythonMethod::compile()
+void PythonMethodX::compile()
 {
-    return true;
+    return;
 }
 
 
 inline
-static int getPythonDataType(const Dimension& dim)
+static int getPythonDataType(dimension::Interpretation datatype, boost::uint32_t siz)
 {
-    const int siz = dim.getByteSize();
-
-    switch (dim.getInterpretation())
+    switch (datatype)
     {
     case dimension::SignedByte:
         switch (siz)
@@ -264,7 +263,144 @@ static int getPythonDataType(const Dimension& dim)
 }
 
 
-bool PythonMethod::beginChunk(PointBuffer& buffer)
+void PythonMethodX::resetArguments()
+{
+    Py_XDECREF(m_varsIn);
+    Py_XDECREF(m_varsOut);
+
+    Py_XDECREF(m_scriptResult);
+
+    Py_XDECREF(m_scriptArgs); // also decrements script and vars
+
+    for (unsigned int i=0; i<m_pyInputArrays.size(); i++)
+    {
+        PyObject* obj = m_pyInputArrays[i];
+        Py_XDECREF(obj);
+    }
+    m_pyInputArrays.clear();
+
+    m_varsIn = PyDict_New();
+    m_varsOut = PyDict_New();
+    
+    return;
+}
+
+
+void PythonMethodX::insertArgument(const std::string& name, 
+                                   boost::uint8_t* data, 
+                                   boost::uint32_t data_len, 
+                                   boost::uint32_t data_stride,                                  
+                                   dimension::Interpretation dataType, 
+                                   boost::uint32_t numBytes)
+{
+    npy_intp mydims = data_len;
+    int nd = 1;
+    npy_intp* dims = &mydims;
+    npy_intp stride = data_stride;
+    npy_intp* strides = &stride;
+    int flags = NPY_CARRAY; // NPY_BEHAVED
+
+    const int pyDataType = getPythonDataType(dataType, numBytes);
+        
+    PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType, strides, data, 0, flags, NULL);
+    
+    m_pyInputArrays.push_back(pyArray);
+
+    PyDict_SetItemString(m_varsIn, name.c_str(), pyArray);
+    
+    return;
+}
+
+
+void PythonMethodX::extractResult(const std::string& name, 
+                                  boost::uint8_t* dst, 
+                                  boost::uint32_t data_len, 
+                                  boost::uint32_t data_stride,                                  
+                                  dimension::Interpretation dataType, 
+                                  boost::uint32_t numBytes)
+{      
+    PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
+    assert(xarr);
+    assert(PyArray_Check(xarr));
+    PyArrayObject* arr = (PyArrayObject*)xarr;
+
+    npy_intp one=0;
+    const int pyDataType = getPythonDataType(dataType, numBytes);
+    
+    boost::uint8_t* p = dst;
+
+    if (pyDataType == PyArray_DOUBLE)
+    {
+        double* src = (double*)PyArray_GetPtr(arr, &one);
+        for (unsigned int i=0; i<data_len; i++)
+        {
+            *(double*)p = src[i];
+            p += data_stride;
+        }
+    }
+    else if (pyDataType == PyArray_ULONGLONG)
+    {
+        boost::uint64_t* src = (boost::uint64_t*)PyArray_GetPtr(arr, &one);
+        for (unsigned int i=0; i<data_len; i++)
+        {
+            *(boost::uint64_t*)p = src[i];
+            p += data_stride;
+        }
+    }
+    else
+    {
+        assert(0);
+    }
+
+    return;
+}
+
+
+void PythonMethodX::execute()
+{
+    PyObject* compiled = Py_CompileString(m_source.c_str(), "YowModule", Py_file_input);
+    if (!compiled) m_env.handleError();
+
+    PyObject* module = PyImport_ExecCodeModule("YowModule", compiled);
+    if (!module) m_env.handleError();
+
+    PyObject* dict = PyModule_GetDict(module);
+
+    PyObject* func = PyDict_GetItemString(dict, "yow");
+    if (!func) m_env.handleError();
+    if (!PyCallable_Check(func)) m_env.handleError();
+  
+    Py_INCREF(m_varsIn);
+    Py_INCREF(m_varsOut);
+    m_scriptArgs = PyTuple_New(2);
+    PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
+    PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
+
+    m_scriptResult = PyObject_CallObject(func, m_scriptArgs);
+    if (!m_scriptResult) m_env.handleError();
+    
+    return;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+PythonPDALMethod::PythonPDALMethod(PythonEnvironment& env, const std::string& source)
+    : m_env(env)
+    , m_source(source)
+{
+    return;
+}
+
+
+bool PythonPDALMethod::compile()
+{
+    return true;
+}
+
+
+bool PythonPDALMethod::beginChunk(PointBuffer& buffer)
 {
     const Schema& schema = buffer.getSchema();
 
@@ -287,7 +423,7 @@ bool PythonMethod::beginChunk(PointBuffer& buffer)
     {
         const Dimension& dim = *iter;
         const std::string& name = dim.getName();
-        const int pyDataType = getPythonDataType(dim);
+        const int pyDataType = getPythonDataType(dim.getInterpretation(), dim.getByteSize());
         
         boost::uint8_t* data = buffer.getData(0) + dim.getByteOffset();
 
@@ -300,7 +436,7 @@ bool PythonMethod::beginChunk(PointBuffer& buffer)
 }
 
 
-bool PythonMethod::endChunk(PointBuffer& buffer)
+bool PythonPDALMethod::endChunk(PointBuffer& buffer)
 {
     const Schema& schema = buffer.getSchema();
 
@@ -317,7 +453,7 @@ bool PythonMethod::endChunk(PointBuffer& buffer)
         PyArrayObject* arr = (PyArrayObject*)xarr;
 
         npy_intp one=0;
-        const int pyDataType = getPythonDataType(dim);
+        const int pyDataType = getPythonDataType(dim.getInterpretation(), dim.getByteSize());
 
         if (pyDataType == PyArray_DOUBLE)
         {
@@ -358,18 +494,19 @@ bool PythonMethod::endChunk(PointBuffer& buffer)
 }
 
 
-bool PythonMethod::execute()
+bool PythonPDALMethod::execute()
 {
     PyObject* compiled = Py_CompileString(m_source.c_str(), "YowModule", Py_file_input);
-    if (!compiled) m_env.die(6);
+    if (!compiled) m_env.handleError();
+
     PyObject* module = PyImport_ExecCodeModule("YowModule", compiled);
-    if (!module) m_env.die(6);
+    if (!module) m_env.handleError();
 
     PyObject* dict = PyModule_GetDict(module);
 
     PyObject* func = PyDict_GetItemString(dict, "yow");
-    if (!func) m_env.die(5);
-    if (!PyCallable_Check(func)) m_env.die(4);
+    if (!func) m_env.handleError();
+    if (!PyCallable_Check(func)) m_env.handleError();
   
     Py_INCREF(m_varsIn);
     Py_INCREF(m_varsOut);
@@ -378,11 +515,10 @@ bool PythonMethod::execute()
     PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
 
     m_scriptResult = PyObject_CallObject(func, m_scriptArgs);
-    if (!m_scriptResult) m_env.handle_error(0);
+    if (!m_scriptResult) m_env.handleError();
     
     return true;
 }
-
 
 
 

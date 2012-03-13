@@ -63,23 +63,64 @@ public:
     PythonEnvironment();
     ~PythonEnvironment();
 
-    bool startup();
-    bool shutdown();
-    void die(int i);
-    void output_result( PyObject* rslt );
-    void handle_error( PyObject* fe );
+    void startup();
+    void shutdown();
+
+    void dumpObject(PyObject*);
+    void handleError();
 
 private:
-    PyObject* m_mod1;
-    PyObject* m_dict1;
-    PyObject *m_fexcp;
+    PyObject* m_tracebackModule;
+    PyObject* m_tracebackDictionary;
+    PyObject *m_tracebackFunction;
 };
 
 
-class PDAL_DLL PythonMethod
+class PDAL_DLL PythonMethodX
 {
 public:
-    PythonMethod(PythonEnvironment& env, const std::string& source);
+    PythonMethodX(PythonEnvironment& env, const std::string& source);
+    void compile();
+
+    void resetArguments();
+
+
+    // creates a Python variable pointing to a (one dimensional) C array
+    // adds the new variable to the arguments dictionary
+    void insertArgument(const std::string& name, 
+                        boost::uint8_t* data, 
+                        boost::uint32_t data_len, 
+                        boost::uint32_t data_stride,                                  
+                        dimension::Interpretation dataType, 
+                        boost::uint32_t numBytes);
+    void extractResult(const std::string& name, 
+                       boost::uint8_t* data, 
+                       boost::uint32_t data_len, 
+                       boost::uint32_t data_stride,                                  
+                       dimension::Interpretation dataType, 
+                       boost::uint32_t numBytes);
+
+    void execute();
+
+private:
+    PythonEnvironment& m_env;
+    std::string m_source;
+
+    PyObject* m_scriptSource;
+    PyObject* m_varsIn;
+    PyObject* m_varsOut;
+    PyObject* m_scriptArgs;
+    PyObject* m_scriptResult;
+    std::vector<PyObject*> m_pyInputArrays;
+
+    PythonMethodX& operator=(PythonMethodX const& rhs); // nope
+};
+
+
+class PDAL_DLL PythonPDALMethod
+{
+public:
+    PythonPDALMethod(PythonEnvironment& env, const std::string& source);
     bool compile();
 
     bool beginChunk(PointBuffer&);
@@ -98,7 +139,7 @@ private:
     PyObject* m_scriptResult;
     std::vector<PyObject*> m_pyInputArrays;
 
-    PythonMethod& operator=(PythonMethod const& rhs); // nope
+    PythonPDALMethod& operator=(PythonPDALMethod const& rhs); // nope
 };
 
 
