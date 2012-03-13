@@ -47,15 +47,11 @@
 #include <vector>
 #include <iostream>
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(push)
-#  pragma warning(disable: 4127)  // conditional expression is constant
-#endif
-
-#include <Python.h>
-#include <../Lib/site-packages/numpy/core/include/numpy/arrayobject.h>
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(pop)
+// forward declare PyObject so we don't need the python headers everywhere
+// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
+#ifndef PyObject_HEAD
+struct _object;
+typedef _object PyObject;
 #endif
 
 namespace pdal { namespace plang {
