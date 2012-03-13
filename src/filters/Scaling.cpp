@@ -187,7 +187,7 @@ void Scaling::alterSchema(PointBuffer& buffer)
             std::pair<dimension::id, dimension::id> p(from_dimension->getUUID(), to_dimension.getUUID());
             m_scalingFilter.log()->get(logDEBUG4) << "scale map size was " << m_scale_map.size() << std::endl;
             m_scale_map.insert(p);
-			m_scalingFilter.log()->get(logDEBUG3) << "scale map size is: " << m_scale_map.size() << std::endl;
+            m_scalingFilter.log()->get(logDEBUG3) << "scale map size is: " << m_scale_map.size() << std::endl;
             schema.appendDimension(to_dimension);
         }
     }

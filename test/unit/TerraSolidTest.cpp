@@ -63,10 +63,10 @@ void Check_Point(const pdal::PointBuffer& data,
 {
     const ::pdal::Schema& schema = data.getSchema();
 
-	pdal::Dimension const& dimX = schema.getDimension("X");
-	pdal::Dimension const& dimY = schema.getDimension("Y");
-	pdal::Dimension const& dimZ = schema.getDimension("Z");
-	pdal::Dimension const& dimTime = schema.getDimension("Time");
+    pdal::Dimension const& dimX = schema.getDimension("X");
+    pdal::Dimension const& dimY = schema.getDimension("Y");
+    pdal::Dimension const& dimZ = schema.getDimension("Z");
+    pdal::Dimension const& dimTime = schema.getDimension("Time");
     
     boost::int32_t x = data.getField<boost::int32_t>(dimX, index);
     boost::int32_t y = data.getField<boost::int32_t>(dimY, index);
@@ -99,12 +99,12 @@ BOOST_AUTO_TEST_CASE(test_tsolid)
     
     pdal::Option fname("filename", filename, "filename to read");
     pdal::Options options;
-	// pdal::Option debug("debug", true, "");
-	// pdal::Option verbose("verbose", 4);
-	// pdal::Option log("log", "tsolid.log");
-	// options.add(log);
-	// options.add(debug);
-	// options.add(verbose);
+    // pdal::Option debug("debug", true, "");
+    // pdal::Option verbose("verbose", 4);
+    // pdal::Option log("log", "tsolid.log");
+    // options.add(log);
+    // options.add(debug);
+    // options.add(verbose);
     options.add(fname);
     pdal::drivers::terrasolid::Reader reader(options);
     reader.initialize();

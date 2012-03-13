@@ -49,7 +49,7 @@
 
 namespace pdal {
     class Schema;
-	class Stage;
+    class Stage;
 }
 
 namespace pdal { namespace drivers { namespace las {

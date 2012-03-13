@@ -77,7 +77,7 @@ void Reader::initialize()
     setNumPoints(m_stage->getNumPoints());
     setPointCountType(m_stage->getPointCountType());
     setBounds(m_stage->getBounds());
-	setSpatialReference(m_stage->getSpatialReference());
+    setSpatialReference(m_stage->getSpatialReference());
 
     return;
 }
