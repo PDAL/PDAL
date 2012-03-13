@@ -358,19 +358,21 @@ pdal::SpatialReference Reader::fetchSpatialReference(Statement statement, sdo_pc
     // Fetch the WKT for the SRID to set the coordinate system of this stage
     int srid = statement->GetInteger(&(pc->pc_geometry.sdo_srid));
     
-    std::ostringstream select_wkt;
-    select_wkt
-        << "SELECT WKTEXT3D from MDSYS.CS_SRS WHERE SRID = " << srid;
+    // std::ostringstream select_wkt;
+    // select_wkt
+    //     << "SELECT WKTEXT3D from MDSYS.CS_SRS WHERE SRID = " << srid;
+    // 
+    // int wkt_length = 3999;
+    // char* wkt = (char*) malloc (sizeof(char*) * wkt_length);
+    // Statement get_wkt(m_connection->CreateStatement(select_wkt.str().c_str()));
+    // get_wkt->Define( wkt, wkt_length );    
+    // get_wkt->Execute();    
+    // std::string s_wkt(wkt);
+    // free(wkt);
 
-    int wkt_length = 3999;
-    char* wkt = (char*) malloc (sizeof(char*) * wkt_length);
-    Statement get_wkt(m_connection->CreateStatement(select_wkt.str().c_str()));
-    get_wkt->Define( wkt, wkt_length );    
-    get_wkt->Execute();    
-    std::string s_wkt(wkt);
-    free(wkt);
-    
-    return pdal::SpatialReference(s_wkt);
+    std::ostringstream oss;
+    oss <<"EPSG:" << srid;
+    return pdal::SpatialReference(oss.str());
 }
 
 pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity) const
