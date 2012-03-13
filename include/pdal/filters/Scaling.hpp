@@ -125,6 +125,12 @@ private:
     std::map<dimension::id, dimension::id> m_scale_map;
 };
 
+#ifdef PDAL_COMPILER_MSVC
+// when template T is know, std::numeric_limits<T>::is_exact is a constant...
+#  pragma warning(push)
+#  pragma warning(disable: 4127)  // conditional expression is constant
+#endif
+
 template <class T>
 inline void Scaling::scale( Dimension const& from_dimension,
                             Dimension const& to_dimension,
@@ -157,8 +163,12 @@ inline void Scaling::scale( Dimension const& from_dimension,
     }
     value = output;
     
-    return ;
+    return;
 }
+
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(pop)
+#endif
 
 } } // namespaces
 
