@@ -358,19 +358,21 @@ pdal::SpatialReference Reader::fetchSpatialReference(Statement statement, sdo_pc
     // Fetch the WKT for the SRID to set the coordinate system of this stage
     int srid = statement->GetInteger(&(pc->pc_geometry.sdo_srid));
     
-    std::ostringstream select_wkt;
-    select_wkt
-        << "SELECT WKTEXT3D from MDSYS.CS_SRS WHERE SRID = " << srid;
+    // std::ostringstream select_wkt;
+    // select_wkt
+    //     << "SELECT WKTEXT3D from MDSYS.CS_SRS WHERE SRID = " << srid;
+    // 
+    // int wkt_length = 3999;
+    // char* wkt = (char*) malloc (sizeof(char*) * wkt_length);
+    // Statement get_wkt(m_connection->CreateStatement(select_wkt.str().c_str()));
+    // get_wkt->Define( wkt, wkt_length );    
+    // get_wkt->Execute();    
+    // std::string s_wkt(wkt);
+    // free(wkt);
 
-    int wkt_length = 3999;
-    char* wkt = (char*) malloc (sizeof(char*) * wkt_length);
-    Statement get_wkt(m_connection->CreateStatement(select_wkt.str().c_str()));
-    get_wkt->Define( wkt, wkt_length );    
-    get_wkt->Execute();    
-    std::string s_wkt(wkt);
-    free(wkt);
-    
-    return pdal::SpatialReference(s_wkt);
+    std::ostringstream oss;
+    oss <<"EPSG:" << srid;
+    return pdal::SpatialReference(oss.str());
 }
 
 pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity) const
@@ -792,15 +794,18 @@ pdal::Bounds<double> IteratorBase::getBounds(Statement statement, BlockPtr block
 
     getReader().log()->get(logDEBUG3) << "IteratorBase::getBounds: bounds length " << bounds_length << std::endl;
 
-    for (boost::int32_t i = 0; i < bounds_length; i = i + 2)
-    {
-        double v;
-        statement->GetElement(&(block->blk_extent->sdo_ordinates), i, &v);
-        mins.add(v);
-        statement->GetElement(&(block->blk_extent->sdo_ordinates), i+1, &v);
-        maxs.add(v);
-    }
-    
+	double x(0.0);
+	double y(0.0);
+		
+    statement->GetElement(&(block->blk_extent->sdo_ordinates), 0, &x);
+    mins.add(x);
+    statement->GetElement(&(block->blk_extent->sdo_ordinates), 1, &y);
+    mins.add(y);
+    statement->GetElement(&(block->blk_extent->sdo_ordinates), 2, &x);
+    maxs.add(x);
+    statement->GetElement(&(block->blk_extent->sdo_ordinates), 3, &y);
+    maxs.add(y);
+
     pdal::Bounds<double> block_bounds(mins, maxs);
 
     getReader().log()->get(logDEBUG2) << "IteratorBase::getBounds: Fetched bounds of " << block_bounds << std::endl;

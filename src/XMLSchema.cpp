@@ -537,6 +537,7 @@ void Reader::Load()
         dimension::Interpretation interp = GetDimensionType(interpretation);
         
         Dimension d(name, interp, size, description);
+        d.createUUID();
         if (! Utils::compare_distance(scale, 0.0))
         {
             d.setNumericScale(scale);
