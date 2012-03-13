@@ -75,6 +75,8 @@ private:
     boost::uint64_t m_pointNumber;
     std::ostream* m_outputStream;
 	boost::uint32_t m_seed;
+    boost::uint32_t m_sample_size;
+
 };
 
 
@@ -124,6 +126,7 @@ void PcInfo::addSwitches()
         ("schema,s", po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true), "dump the schema")
         ("stage,r", po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true), "dump the stage info")
         ("seed", po::value<boost::uint32_t>(&m_seed)->default_value(0), "Seed value for random sample")
+        ("sample_size", po::value<boost::uint32_t>(&m_sample_size)->default_value(1000), "Sample size for random sample")
         ;
 	
     addSwitchSet(processing_options);
@@ -238,7 +241,11 @@ int PcInfo::execute()
 	{
 		Option seed_option("seed", m_seed, "seed value");
 		m_options.add(seed_option);
-	}    
+	}
+	
+    Option sample_size("sample_size", m_sample_size, "sample size for random sample");
+    m_options.add(sample_size);
+    
 	pdal::Options options = m_options + readerOptions;
 	
     pdal::filters::Stats* filter = new pdal::filters::Stats(*reader, options);

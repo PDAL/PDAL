@@ -135,11 +135,18 @@ public:
     void read(PointBuffer&);
 private:
     void initialize();
+    
 
 protected:
     const pdal::drivers::las::Reader& m_reader;
     std::istream* m_istream;
 
+    PointDimensions* m_pointDimensions;
+    Schema const* m_schema;
+
+    void setPointDimensions(PointBuffer& buffer);
+
+    
 public:
 
 #ifdef PDAL_HAVE_LASZIP
@@ -155,6 +162,8 @@ public:
 private:
     Base& operator=(Base const&); // not implemented
     Base(Base const&); // not implemented
+
+
 };
 
 namespace sequential {
@@ -172,8 +181,7 @@ private:
     boost::uint64_t skipImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-    PointDimensions* m_pointDimensions;
-    Schema const* m_schema;
+
 };
 
 
@@ -193,8 +201,7 @@ protected:
 private:
     boost::uint64_t seekImpl(boost::uint64_t);
     boost::uint32_t readBufferImpl(PointBuffer&);
-    PointDimensions* m_pointDimensions;
-    Schema const* m_schema;
+
 };
 
 

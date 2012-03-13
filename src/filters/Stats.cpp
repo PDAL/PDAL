@@ -115,7 +115,7 @@ const Options Stats::getDefaultOptions() const
     Options options;
     Option sample_size("sample_size", 1000, "Number of points to return for uniform random 'sample'");
     Option num_bins("num_bins", 20, "Number of bins to use for histogram");
-    Option stats_cache_size("stats_cache_size", 1000, "Number of points to use for histogram bin determination. Defaults to total number of points read if no option is specified.");
+    Option stats_cache_size("stats_cache_size", 100000, "Number of points to use for histogram bin determination. Defaults to total number of points read if no option is specified.");
     Option seed("seed", 0, "Seed to use for repeatable random sample. A seed value of 0 means no seed is used");
     
     options.add(sample_size);
