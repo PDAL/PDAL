@@ -44,8 +44,8 @@
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
-#include "C:\Utils\Python27\include\Python.h"
-#include "C:\Utils\Python27\Lib\site-packages\numpy\core\include\numpy\arrayobject.h"
+#include <Python.h>
+#include <../Lib/site-packages/numpy/core/include/numpy/arrayobject.h>
 
 
 namespace pdal { namespace plang {
@@ -53,11 +53,7 @@ namespace pdal { namespace plang {
 
 PythonEnvironment::PythonEnvironment()
     : m_mod1(NULL)
-    , m_mod2(NULL)
     , m_dict1(NULL)
-    , m_dict2(NULL)
-    , m_func1(NULL)
-    , m_func2(NULL)
     , m_fexcp(NULL)
 {
     return;
@@ -79,22 +75,18 @@ bool PythonEnvironment::startup()
     if (_import_array() < 0)
         die(20);
 
-    // load module "traceback" (for error handling) and module from file "Test.py"
+    // load module "traceback" (for error handling)
     m_mod1 = PyImport_ImportModule( "traceback" );
-    m_mod2 = PyImport_ImportModule( "Test" );
-    if(! (m_mod1 && m_mod2 )) die(6);
+    if (!m_mod1) die(6);
 
     // get dictionary of available items in the modules
     m_dict1 = PyModule_GetDict(m_mod1);
-    m_dict2 = PyModule_GetDict(m_mod2);
 
     // grab the functions we are interested in
     m_fexcp = PyDict_GetItemString(m_dict1, "format_exception");
-    m_func1 = PyDict_GetItemString(m_dict2, "run_expression");
-    m_func2 = PyDict_GetItemString(m_dict2, "run_script");
-    if(! ( m_func1 && m_func2 && m_fexcp )) die(5);
+    if (!m_fexcp) die(5);
 
-    if(! ( PyCallable_Check(m_func1) && PyCallable_Check(m_func2) && PyCallable_Check(m_fexcp)) ) die(4);
+    if (!PyCallable_Check(m_fexcp)) die(4);
 
     return true;
 }
@@ -102,13 +94,9 @@ bool PythonEnvironment::startup()
 
 bool PythonEnvironment::shutdown()
 {
-
-    Py_XDECREF(m_func1);
-    Py_XDECREF(m_func2);
     Py_XDECREF(m_fexcp);
 
     Py_XDECREF(m_mod1);
-    Py_XDECREF(m_mod2);
 
     Py_Finalize();
 
@@ -175,8 +163,10 @@ void PythonEnvironment::output_result( PyObject* rslt )
 }
 
 
-void PythonEnvironment::handle_error( PyObject* fe )
+void PythonEnvironment::handle_error(PyObject*)
 {
+    PyObject* fe = m_fexcp;
+
     // get exception info
     PyObject *type, *value, *traceback;
     PyErr_Fetch( &type, &value, &traceback );
@@ -218,85 +208,178 @@ bool PythonMethod::compile()
 }
 
 
-bool PythonMethod::setVariable_Float64Array(const std::string& name, double* data)
+inline
+static int getPythonDataType(const Dimension& dim)
 {
+    const int siz = dim.getByteSize();
+
+    switch (dim.getInterpretation())
+    {
+    case dimension::SignedByte:
+        switch (siz)
+        {
+        case 1:
+            return PyArray_BYTE;
+        }
+        break;
+    case dimension::UnsignedByte:
+        switch (siz)
+        {
+        case 1:
+            return PyArray_UBYTE;
+        }
+        break;
+    case dimension::Float:
+        switch (siz)
+        {
+        case 4:
+            return PyArray_FLOAT;
+        case 8:
+            return PyArray_DOUBLE;
+        }
+        break;
+    case dimension::SignedInteger:
+        switch (siz)
+        {
+        case 4:
+            return PyArray_INT;
+        case 8:
+            return PyArray_LONGLONG;
+        }
+        break;
+    case dimension::UnsignedInteger:
+        switch (siz)
+        {
+        case 4:
+            return PyArray_UINT;
+        case 8:
+            return PyArray_ULONGLONG;
+        }
+        break;
+    }
+
+    assert(0);
+
+    return -1;
+}
+
+
+bool PythonMethod::beginChunk(PointBuffer& buffer)
+{
+    const Schema& schema = buffer.getSchema();
+
+
+    const int nelem = buffer.getNumPoints();
+    int mydims = { nelem };
+    int nd = 1;
+    npy_intp* dims = &mydims;
+    int stride = schema.getByteSize();
+    npy_intp* strides = &stride;
+    int flags = NPY_CARRAY; // NPY_BEHAVED
+
+    m_pyInputArrays.clear();
+    m_varsIn = PyDict_New();
+    m_varsOut = PyDict_New();
+
+    schema::Map const& map = schema.getDimensions();
+    schema::index_by_index const& idx = map.get<schema::index>();
+    for (schema::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
+    {
+        const Dimension& dim = *iter;
+        const std::string& name = dim.getName();
+        const int pyDataType = getPythonDataType(dim);
+        
+        boost::uint8_t* data = buffer.getData(0) + dim.getByteOffset();
+
+        PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType, strides, data, 0, flags, NULL);
+        m_pyInputArrays.push_back(pyArray);
+        PyDict_SetItemString(m_varsIn, name.c_str(), pyArray);
+    }
+
+    return true;
+}
+
+
+bool PythonMethod::endChunk(PointBuffer& buffer)
+{
+    const Schema& schema = buffer.getSchema();
+
+    schema::Map const& map = schema.getDimensions();
+    schema::index_by_index const& idx = map.get<schema::index>();
+    for (schema::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
+    {
+        const Dimension& dim = *iter;
+        const std::string& name = dim.getName();
+        
+        PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
+        if (!xarr) continue;
+        assert(PyArray_Check(xarr));
+        PyArrayObject* arr = (PyArrayObject*)xarr;
+
+        int one=0;
+        const int pyDataType = getPythonDataType(dim);
+
+        if (pyDataType == PyArray_DOUBLE)
+        {
+            double* data = (double*)PyArray_GetPtr(arr, &one);
+
+            const unsigned int cnt = buffer.getNumPoints();
+            for (unsigned int i=0; i<cnt; i++)
+            {
+                buffer.setField<double>(dim, i, data[i]);
+            }
+        }
+        else if (pyDataType == PyArray_ULONGLONG)
+        {
+            boost::uint64_t* data = (boost::uint64_t*)PyArray_GetPtr(arr, &one);
+
+            const unsigned int cnt = buffer.getNumPoints();
+            for (unsigned int i=0; i<cnt; i++)
+            {
+                buffer.setField<boost::uint64_t>(dim, i, data[i]);
+            }
+        }
+        else
+            assert(0);
+    }
+
+    Py_XDECREF(m_scriptResult);
+
+    Py_XDECREF(m_scriptArgs); // also decrements script and vars
+
+    for (unsigned int i=0; i<m_pyInputArrays.size(); i++)
+    {
+        PyObject* obj = m_pyInputArrays[i];
+        Py_XDECREF(obj);
+    }
+    m_pyInputArrays.clear();
+
     return true;
 }
 
 
 bool PythonMethod::execute()
 {
-    PyObject *script,
-        *mat,
-        *vars, *args2, *rslt2, *rslt3;
+    PyObject* compiled = Py_CompileString(m_source.c_str(), "YowModule", Py_file_input);
+    if (!compiled) m_env.die(6);
+    PyObject* module = PyImport_ExecCodeModule("YowModule", compiled);
+    if (!module) m_env.die(6);
 
-    // define a python expression and a python script
-    script = PyString_FromString( 
-        "import numpy\n"
-        "print 'DURING'\n"
-        "value = 42.0\n"
-        "m[1,1]=987654321\n"
-        "mm[1,2]=123456789\n"
-        "print m[1,1]\n"
-        "print mm[1,2]\n"
-        "print value\n" );
+    PyObject* dict = PyModule_GetDict(module);
+
+    PyObject* func = PyDict_GetItemString(dict, "yow");
+    if (!func) m_env.die(5);
+    if (!PyCallable_Check(func)) m_env.die(4);
+  
+    Py_INCREF(m_varsIn);
+    Py_INCREF(m_varsOut);
+    m_scriptArgs = PyTuple_New(2);
+    PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
+    PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
+
+    m_scriptResult = PyObject_CallObject(func, m_scriptArgs);
+    if (!m_scriptResult) m_env.handle_error(0);
     
-
-
-    // define a matrix using the classical C-format:
-    // pointer-to-pointer-to-numeric type, last dimension running fastest
-    //
-    // setup pointers
-    const int nrow = 3, ncol = 4, nelem = nrow*ncol;
-    double** m = new double*[nrow];
-    m[0] = new double[nelem];
-    m[1] = m[0] + ncol;
-    m[2] = m[1] + ncol;
-
-    // fill in values
-    m[0][0] = 1.0; m[0][1] = 2.0; m[0][2] = 5.0; m[0][3] = 34;
-    m[1][0] = 5.0; m[1][1] = 1.0; m[1][2] = 8.0; m[1][3] = 64;
-    m[2][0] = 8.0; m[2][1] = 0.0; m[2][2] = 3.0; m[2][3] = 12;
-    int mdim[] = { nrow, ncol };
-    mat = PyArray_SimpleNewFromData( 2, mdim, PyArray_DOUBLE, m[0] );
-
-    printf("BEFORE\n");
-    printf("%f\n", m[1][2]);
-
-    // put variables into dictionary of local variables for python
-    vars = PyDict_New();
-    PyDict_SetItemString( vars, "m", mat );
-    PyDict_SetItemString( vars, "mm", mat );
-
-    // create argument for "run_script"
-    Py_INCREF(vars);
-    args2 = PyTuple_New(2);
-    PyTuple_SetItem(args2, 0, script);
-    PyTuple_SetItem(args2, 1, vars);
-
-    // execute script
-    rslt2 = PyObject_CallObject(m_env.m_func2, args2);
-    if( !rslt2 ) m_env.die(2);
-
-    rslt3 = PyDict_GetItemString( rslt2, "value" );
-    if( !rslt3 ) m_env.die(1);
-    printf("===============\n");
-    m_env.output_result( rslt3 );
-    printf("===============\n");
-    Py_XDECREF(rslt3);
-
-    Py_XDECREF(rslt2);
-
-    printf("AFTER\n");
-    printf("%f\n", m[1][1]);
-    printf("%f\n", m[1][2]);
-
-    Py_XDECREF(args2); // also decrements script and vars
-    Py_XDECREF(mat);
-    delete[] m[0];
-    delete[] m;
-    Py_XDECREF(script);
-
     return true;
 }
 

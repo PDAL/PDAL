@@ -365,22 +365,11 @@ set(PDAL_PLANG_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_PLANG_PATH})
 set(PDAL_PLANG_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_PLANG_PATH})
 
 set(PDAL_PLANG_HPP
-  ${PDAL_PLANG_HEADERS}/AstNode.hpp
-  ${PDAL_PLANG_HEADERS}/AstUtils.hpp
-  ${PDAL_PLANG_HEADERS}/Parser.hpp
-  ${PDAL_PLANG_HEADERS}/Program.hpp
   ${PDAL_PLANG_HEADERS}/PythonSupport.hpp
-  ${PDAL_PLANG_HEADERS}/SymbolTable.hpp
 )
 
 set (PDAL_PLANG_CPP 
-  ${PDAL_PLANG_SRC}/AstNode.cpp
-  ${PDAL_PLANG_SRC}/AstUtils.cpp
-  ${PDAL_PLANG_SRC}/Parser.cpp
-  ${PDAL_PLANG_SRC}/Parser_qi.cpp
-  ${PDAL_PLANG_SRC}/Program.cpp
   ${PDAL_PLANG_SRC}/PythonSupport.cpp
-  ${PDAL_PLANG_SRC}/SymbolTable.cpp
 )
 
 list (APPEND PDAL_CPP ${PDAL_PLANG_CPP} )

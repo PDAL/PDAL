@@ -36,6 +36,10 @@
 #define PYTHONSUPPORT_H
 
 #include <pdal/pdal_internal.hpp>
+#ifdef PDAL_HAVE_PYTHON
+
+#include <pdal/pdal_internal.hpp>
+#include <pdal/PointBuffer.hpp>
 
 #include <boost/cstdint.hpp>
 #include <boost/variant.hpp>
@@ -43,15 +47,11 @@
 #include <vector>
 #include <iostream>
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(push)
-#  pragma warning(disable: 4127)  // conditional expression is constant
-#endif
-
-#include <Python.h>
-#include <../Lib/site-packages/numpy/core/include/numpy/arrayobject.h>
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(pop)
+// forward declare PyObject so we don't need the python headers everywhere
+// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
+#ifndef PyObject_HEAD
+struct _object;
+typedef _object PyObject;
 #endif
 
 namespace pdal { namespace plang {
@@ -69,14 +69,9 @@ public:
     void output_result( PyObject* rslt );
     void handle_error( PyObject* fe );
 
-    PyObject *m_func2;
-
 private:
     PyObject* m_mod1;
-    PyObject* m_mod2;
     PyObject* m_dict1;
-    PyObject* m_dict2;
-    PyObject *m_func1;
     PyObject *m_fexcp;
 };
 
@@ -87,7 +82,8 @@ public:
     PythonMethod(PythonEnvironment& env, const std::string& source);
     bool compile();
 
-    bool setVariable_Float64Array(const std::string& name, double* data);
+    bool beginChunk(PointBuffer&);
+    bool endChunk(PointBuffer&);
 
     bool execute();
 
@@ -95,11 +91,19 @@ private:
     PythonEnvironment& m_env;
     std::string m_source;
 
+    PyObject* m_scriptSource;
+    PyObject* m_varsIn;
+    PyObject* m_varsOut;
+    PyObject* m_scriptArgs;
+    PyObject* m_scriptResult;
+    std::vector<PyObject*> m_pyInputArrays;
+
     PythonMethod& operator=(PythonMethod const& rhs); // nope
 };
 
 
 } } // namespaces
 
+#endif
 
 #endif

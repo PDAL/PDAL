@@ -178,17 +178,37 @@ void Scaling::alterSchema(PointBuffer& buffer)
             if (!found)
                 throw pdal_error("Scaling between types is not supported");
 
-            m_scalingFilter.log()->get(logDEBUG3) << "Rescaling dimension '" << from_dimension->getName() << 
-                                                     "' to scale: " << to_dimension.getNumericScale() << 
-                                                     " offset: " << to_dimension.getNumericOffset() << 
-                                                     " datatype: " << to_dimension.getInterpretation() << std::endl;
+            std::cout << "Rescaling dimension " << from_dimension->getName() 
+                                                << " [" << from_dimension->getInterpretation() << "/" << from_dimension->getByteSize() << "]"
+                                                << " to scale: " << to_dimension.getNumericScale()
+                                                << " offset: " << to_dimension.getNumericOffset()
+                                                << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
+                                                << std::endl;
             std::pair<dimension::id, dimension::id> p(from_dimension->getUUID(), to_dimension.getUUID());
+            std::cout << "map size was " << m_scale_map.size() << std::endl;
             m_scale_map.insert(p);
 			m_scalingFilter.log()->get(logDEBUG3) << "scale map size: " << m_scale_map.size() << std::endl;
             schema.appendDimension(to_dimension);
         }
     }
     
+
+    {{
+        std::map<dimension::id, dimension::id>::const_iterator d;
+        for (d = m_scale_map.begin(); d != m_scale_map.end(); ++d)
+        {
+            Dimension const& from_dimension = schema.getDimension(d->first);
+            Dimension const& to_dimension = schema.getDimension(d->second);
+            std::cout << "Map wants to do: " << from_dimension.getName() 
+                << " [" << from_dimension.getInterpretation() << "/" << from_dimension.getByteSize() << "]"
+                << " to scale: " << to_dimension.getNumericScale()
+                << " offset: " << to_dimension.getNumericOffset()
+                << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
+                << std::endl;
+        }
+    }}
+
+
     buffer = PointBuffer(schema, buffer.getCapacity());
 } 
 
@@ -242,15 +262,21 @@ boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
     return numRead;
 }
 
+
+#ifdef PDAL_COMPILER_MSVC
+// the writeScaledData function causes lots of conversion warnings which
+// are real but which we will ignore: blame the filter's user for casting badly
+#  pragma warning(push)
+#  pragma warning(disable: 4244)  // conversion from T1 to T2, possible loss of data
+#endif
+
 void Scaling::writeScaledData(  PointBuffer& buffer, 
                                 Dimension const& from_dimension, 
                                 Dimension const& to_dimension, 
                                 boost::uint32_t pointIndex)
 {
-    
     double dbl(0.0);
     float flt(0.0);
-
 
     if (from_dimension.getInterpretation() == dimension::Float)
     {
@@ -620,8 +646,12 @@ void Scaling::writeScaledData(  PointBuffer& buffer,
     }
 
     throw pdal_error("Dimension data type unable to be scaled because it is Undefined");
-
 }
+
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(pop)
+#endif
+
 
 boost::uint64_t Scaling::skipImpl(boost::uint64_t count)
 {
