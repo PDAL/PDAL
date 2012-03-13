@@ -178,7 +178,7 @@ void Scaling::alterSchema(PointBuffer& buffer)
             if (!found)
                 throw pdal_error("Scaling between types is not supported");
 
-            m_scalingFilter.log()->get(logDEBUG3) << "Rescaling dimension '" << from_dimension->getName() << 
+            std::cout << "Rescaling dimension '" << from_dimension->getName() << " with datatype " << from_dimension.getInterpretation() <<
                                                      "' to scale: " << to_dimension.getNumericScale() << 
                                                      " offset: " << to_dimension.getNumericOffset() << 
                                                      " datatype: " << to_dimension.getInterpretation() << std::endl;

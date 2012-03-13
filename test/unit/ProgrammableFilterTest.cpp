@@ -32,6 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/pdal_internal.hpp>
+#ifdef PDAL_HAVE_PYTHON
+
 #include <boost/test/unit_test.hpp>
 
 #include <pdal/filters/Programmable.hpp>
@@ -96,3 +99,4 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test2)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+#endif
