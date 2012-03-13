@@ -45,7 +45,7 @@
 #endif
 
 #include <Python.h>
-#include <../Lib/site-packages/numpy/core/include/numpy/arrayobject.h>
+#include <numpy/arrayobject.h>
 
 
 namespace pdal { namespace plang {
@@ -130,7 +130,7 @@ void PythonEnvironment::output_result( PyObject* rslt )
 
     PyArrayObject* obj = PyArray_GETCONTIGUOUS( (PyArrayObject*) rslt );
     int ndims = obj->nd;
-    int* dims = obj->dimensions; // not copying data
+    npy_intp* dims = obj->dimensions; // not copying data
     double* data = (double*) obj->data; // not copying data
     int i, j, k = 0;
 
@@ -270,10 +270,10 @@ bool PythonMethod::beginChunk(PointBuffer& buffer)
 
 
     const int nelem = buffer.getNumPoints();
-    int mydims = { nelem };
+    npy_intp mydims = { nelem };
     int nd = 1;
     npy_intp* dims = &mydims;
-    int stride = schema.getByteSize();
+    npy_intp stride = schema.getByteSize();
     npy_intp* strides = &stride;
     int flags = NPY_CARRAY; // NPY_BEHAVED
 
@@ -316,7 +316,7 @@ bool PythonMethod::endChunk(PointBuffer& buffer)
         assert(PyArray_Check(xarr));
         PyArrayObject* arr = (PyArrayObject*)xarr;
 
-        int one=0;
+        npy_intp one=0;
         const int pyDataType = getPythonDataType(dim);
 
         if (pyDataType == PyArray_DOUBLE)
