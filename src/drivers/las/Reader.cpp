@@ -574,6 +574,8 @@ namespace iterators {
 Base::Base(pdal::drivers::las::Reader const& reader)
     : m_reader(reader)
     , m_istream(NULL)
+    , m_pointDimensions(NULL)
+    , m_schema(0)
     , m_zipPoint(NULL)
     , m_unzipper(NULL)
 
@@ -601,6 +603,9 @@ Base::~Base()
     m_zipPoint.reset();
     m_unzipper.reset();
 #endif
+
+    if (m_pointDimensions) 
+        delete m_pointDimensions;
     
     FileUtils::closeFile(m_istream);
 }
@@ -645,28 +650,7 @@ void Base::read(PointBuffer& data)
 
 }
 
-namespace sequential {
-
-
-Reader::Reader(pdal::drivers::las::Reader const& reader, PointBuffer& buffer)
-    : Base(reader)
-    , pdal::ReaderSequentialIterator(reader, buffer)
-    , m_pointDimensions(NULL)
-    , m_schema(0)
-{
-    return;
-}
-
-
-Reader::~Reader()
-{
-    if (m_pointDimensions) 
-        delete m_pointDimensions;
-
-    return;
-}
-
-void Reader::readBufferBeginImpl(PointBuffer& buffer)
+void Base::setPointDimensions(PointBuffer& buffer)
 {
     // Cache dimension positions
     Schema const& schema = buffer.getSchema();
@@ -674,6 +658,27 @@ void Reader::readBufferBeginImpl(PointBuffer& buffer)
         delete m_pointDimensions;
     m_pointDimensions = new PointDimensions(schema, m_reader.getName());
 
+} 
+
+namespace sequential {
+
+
+Reader::Reader(pdal::drivers::las::Reader const& reader, PointBuffer& buffer)
+    : Base(reader)
+    , pdal::ReaderSequentialIterator(reader, buffer)
+{
+    return;
+}
+
+
+Reader::~Reader()
+{
+    return;
+}
+
+void Reader::readBufferBeginImpl(PointBuffer& buffer)
+{
+    setPointDimensions(buffer);
 } 
 
 
@@ -732,8 +737,6 @@ namespace random {
 Reader::Reader(const pdal::drivers::las::Reader& reader, PointBuffer& buffer)
     : Base(reader)
     , pdal::ReaderRandomIterator(reader, buffer)
-    , m_pointDimensions(NULL)
-    , m_schema(0)
 {
     return;
 }
@@ -741,22 +744,13 @@ Reader::Reader(const pdal::drivers::las::Reader& reader, PointBuffer& buffer)
 
 Reader::~Reader()
 {
-    if (m_pointDimensions) delete m_pointDimensions;
     return;
 }
 
 void Reader::readBeginImpl()
 {
     // We'll assume you're not changing the schema per-read call
-    Schema const& schema = getBuffer().getSchema();
-    if (m_schema != &schema)
-    {
-        m_schema = &schema;
-        if (m_pointDimensions)
-            delete m_pointDimensions;
-        m_pointDimensions = new PointDimensions(schema, m_reader.getName());
-    } 
-
+    setPointDimensions(getBuffer());
 } 
 
 boost::uint64_t Reader::seekImpl(boost::uint64_t count)
