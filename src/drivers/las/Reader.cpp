@@ -56,6 +56,11 @@
 #include "cpl_string.h"
 #endif
 
+#if defined(EQUAL) && defined(PDAL_PLATFORM_WIN32)
+#undef EQUAL
+#define EQUAL(a,b) (_stricmp(a,b)==0)
+#endif
+
 namespace pdal { namespace drivers { namespace las {
 
 
@@ -487,14 +492,14 @@ int ExtractLASFromNITF(NITFDES* psDES, const char* pszLASName)
 
     GByte* pabyBuffer;
 
-    pabyBuffer = (GByte*) VSIMalloc(psSegInfo->nSegmentSize);
+    pabyBuffer = (GByte*) VSIMalloc((size_t)psSegInfo->nSegmentSize);
     if (pabyBuffer == NULL)
     {
         throw pdal_error("Unable to allocate buffer large enough to extract NITF data!");
     }
 
     VSIFSeekL(psDES->psFile->fp, psSegInfo->nSegmentStart, SEEK_SET);
-    if (VSIFReadL(pabyBuffer, 1, psSegInfo->nSegmentSize, psDES->psFile->fp) != psSegInfo->nSegmentSize)
+    if (VSIFReadL(pabyBuffer, 1, (size_t)psSegInfo->nSegmentSize, psDES->psFile->fp) != psSegInfo->nSegmentSize)
     {
         VSIFree(pabyBuffer);
         throw pdal_error("Unable to allocate extract NITF data!");
@@ -508,7 +513,7 @@ int ExtractLASFromNITF(NITFDES* psDES, const char* pszLASName)
         throw pdal_error("Unable to open filename to write!");
     }
 
-    VSIFWriteL(pabyBuffer, 1, psSegInfo->nSegmentSize, fp);
+    VSIFWriteL(pabyBuffer, 1, (size_t)psSegInfo->nSegmentSize, fp);
     VSIFCloseL(fp);
     VSIFree(pabyBuffer);
 
