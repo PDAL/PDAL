@@ -50,23 +50,12 @@
 
 namespace pdal { namespace plang {
 
+static PythonEnvironment* s_environment;
 
 PythonEnvironment::PythonEnvironment()
     : m_tracebackModule(NULL)
     , m_tracebackDictionary(NULL)
     , m_tracebackFunction(NULL)
-{
-    return;
-}
-
-
-PythonEnvironment::~PythonEnvironment()
-{
-    return;
-}
-
-
-void PythonEnvironment::startup()
 {
     Py_Initialize();
 
@@ -100,13 +89,38 @@ void PythonEnvironment::startup()
 }
 
 
-void PythonEnvironment::shutdown()
+PythonEnvironment::~PythonEnvironment()
 {
     Py_XDECREF(m_tracebackFunction);
 
     Py_XDECREF(m_tracebackModule);
 
     Py_Finalize();
+
+    return;
+}
+
+
+void PythonEnvironment::startup()
+{
+    // not threadsafe!
+    if (!s_environment)
+    {
+        s_environment = new PythonEnvironment();
+    }
+
+    return;
+}
+
+
+void PythonEnvironment::shutdown()
+{
+    // not threadsafe!
+    if (s_environment)
+    {
+        delete s_environment;
+        s_environment = NULL;
+    }
 
     return;
 }
@@ -182,11 +196,14 @@ void PythonEnvironment::handleError()
 
     // print error message
     int i, n = PyList_Size(output);
-    for (i=0; i<n; i++) printf("%s", PyString_AsString(PyList_GetItem(output, i)));
+    std::string mssg = "";
+    for (i=0; i<n; i++) mssg += PyString_AsString(PyList_GetItem(output, i));
 
     // clean up
     Py_XDECREF(args);
     Py_XDECREF(output);
+
+    throw python_error(mssg);
 
     return;
 }
@@ -195,21 +212,52 @@ void PythonEnvironment::handleError()
 // ==========================================================================
 
 
-PythonMethodX::PythonMethodX(PythonEnvironment& env, const std::string& source)
-    : m_env(env)
+PythonMethodX::PythonMethodX(const std::string& source)
+    : m_env(*s_environment)
     , m_source(source)
+    , m_compile(NULL)
+    , m_module(NULL)
+    , m_dict(NULL)
+    , m_func(NULL)
     , m_scriptSource(NULL)
     , m_varsIn(NULL)
     , m_varsOut(NULL)
     , m_scriptArgs(NULL)
     , m_scriptResult(NULL)
 {
+    resetArguments();
+
     return;
 }
 
 
 void PythonMethodX::compile()
 {
+    m_compile = Py_CompileString(m_source.c_str(), "YowModule", Py_file_input);
+    if (PyErr_Occurred()) {
+        PyObject *errtype, *errvalue, *traceback;
+        PyErr_Fetch(&errtype, &errvalue, &traceback);
+        if(errvalue != NULL) {
+            PyObject *s = PyObject_Str(errvalue);
+            const char* mssg = PyString_AS_STRING(s);
+            Py_DECREF(s);
+            throw python_error(mssg);
+        }
+        Py_XDECREF(errvalue);
+        Py_XDECREF(errtype);
+        Py_XDECREF(traceback);
+    }
+
+    assert(m_compile);
+    m_module = PyImport_ExecCodeModule("YowModule", m_compile);
+    if (!m_module) m_env.handleError();
+
+    m_dict = PyModule_GetDict(m_module);
+
+    m_func = PyDict_GetItemString(m_dict, "yow");
+    if (!m_func) m_env.handleError();
+    if (!PyCallable_Check(m_func)) m_env.handleError();
+  
     return;
 }
 
@@ -371,25 +419,18 @@ void PythonMethodX::extractResult(const std::string& name,
 
 void PythonMethodX::execute()
 {
-    PyObject* compiled = Py_CompileString(m_source.c_str(), "YowModule", Py_file_input);
-    if (!compiled) m_env.handleError();
+    if (!m_compile)
+    {
+        throw python_error("no code has been compiled");
+    }
 
-    PyObject* module = PyImport_ExecCodeModule("YowModule", compiled);
-    if (!module) m_env.handleError();
-
-    PyObject* dict = PyModule_GetDict(module);
-
-    PyObject* func = PyDict_GetItemString(dict, "yow");
-    if (!func) m_env.handleError();
-    if (!PyCallable_Check(func)) m_env.handleError();
-  
     Py_INCREF(m_varsIn);
     Py_INCREF(m_varsOut);
     m_scriptArgs = PyTuple_New(2);
     PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
     PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
 
-    m_scriptResult = PyObject_CallObject(func, m_scriptArgs);
+    m_scriptResult = PyObject_CallObject(m_func, m_scriptArgs);
     if (!m_scriptResult) m_env.handleError();
     
     return;
@@ -399,8 +440,8 @@ void PythonMethodX::execute()
 //////////////////////////////////////////////////////////////////////////////////
 
 
-PythonPDALMethod::PythonPDALMethod(PythonEnvironment& env, const std::string& source)
-    : PythonMethodX(env, source)
+PythonPDALMethod::PythonPDALMethod(const std::string& source)
+    : PythonMethodX(source)
 {
     return;
 }

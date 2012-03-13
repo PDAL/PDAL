@@ -61,7 +61,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     )
 
 set(PDAL_PLANG_TEST_SRC
-    PythonInternalTest.cpp
+    PythonTest.cpp
     PredicateFilterTest.cpp
     ProgrammableFilterTest.cpp
 )

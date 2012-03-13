@@ -35,6 +35,18 @@
 #define BOOST_TEST_MODULE Main
 #include <boost/test/unit_test.hpp>
 
+#include <pdal/pdal_internal.hpp>
+
+#ifdef PDAL_HAVE_PYTHON
+#include <pdal/plang/PythonSupport.hpp>
+struct PythonConfig 
+{
+    PythonConfig()   { ::pdal::plang::PythonEnvironment::startup(); }
+    ~PythonConfig()  { ::pdal::plang::PythonEnvironment::shutdown(); }
+};
+BOOST_GLOBAL_FIXTURE( PythonConfig );
+#endif
+
 #include "TestConfig.hpp"
 
 BOOST_GLOBAL_FIXTURE(TestConfig)
@@ -65,4 +77,3 @@ BOOST_GLOBAL_FIXTURE(TestConfig)
 //     --detect_memory_leaks=X # X = 0|1  (default=1)
 //
 //     <path>                  # path to data (default=../test/data)
-

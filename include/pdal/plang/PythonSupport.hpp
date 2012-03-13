@@ -57,19 +57,20 @@ typedef _object PyObject;
 namespace pdal { namespace plang {
 
 
+// this is a singleton: only create it once, and keep it around forever
 class PDAL_DLL PythonEnvironment
 {
 public:
-    PythonEnvironment();
-    ~PythonEnvironment();
-
-    void startup();
-    void shutdown();
+    static void startup();
+    static void shutdown();
 
     void dumpObject(PyObject*);
     void handleError();
 
 private:
+    PythonEnvironment();
+    ~PythonEnvironment();
+
     PyObject* m_tracebackModule;
     PyObject* m_tracebackDictionary;
     PyObject *m_tracebackFunction;
@@ -79,7 +80,7 @@ private:
 class PDAL_DLL PythonMethodX
 {
 public:
-    PythonMethodX(PythonEnvironment& env, const std::string& source);
+    PythonMethodX(const std::string& source);
     void compile();
 
     void resetArguments();
@@ -108,6 +109,11 @@ private:
     PythonEnvironment& m_env;
     std::string m_source;
 
+    PyObject* m_compile;
+    PyObject* m_module;
+    PyObject* m_dict;
+    PyObject* m_func;
+
     PyObject* m_scriptSource;
     PyObject* m_varsIn;
     PyObject* m_varsOut;
@@ -122,7 +128,7 @@ private:
 class PDAL_DLL PythonPDALMethod : public PythonMethodX
 {
 public:
-    PythonPDALMethod(PythonEnvironment& env, const std::string& source);
+    PythonPDALMethod(const std::string& source);
 
     void beginChunk(PointBuffer&);
     void endChunk(PointBuffer&);

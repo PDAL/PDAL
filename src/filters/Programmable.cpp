@@ -117,10 +117,7 @@ void Programmable::createParser()
 {
     const std::string program = m_programmableFilter.getProgram();
 
-    m_pythonEnv = new pdal::plang::PythonEnvironment();
-    m_pythonEnv->startup();
-
-    m_pythonMethod = new pdal::plang::PythonPDALMethod(*m_pythonEnv, program);
+    m_pythonMethod = new pdal::plang::PythonPDALMethod(program);
 
     return;
 }
