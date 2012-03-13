@@ -70,10 +70,41 @@ const Options Predicate::getDefaultOptions() const
 }
 
 
-boost::uint32_t Predicate::processBuffer(const PointBuffer& data, pdal::plang::PythonPDALMethod& parser) const
+boost::uint32_t Predicate::processBuffer(PointBuffer& srcData, PointBuffer& dstData, pdal::plang::PythonPDALMethod& python) const
 {
-    //const Schema& schema = dstData.getSchema();
-    //boost::uint32_t numSrcPoints = srcData.getNumPoints();
+    python.resetArguments();
+
+    python.beginChunk(srcData);
+
+    python.execute();
+    
+    assert(python.hasOutputVariable("Result"));
+
+    boost::uint8_t* mask = new boost::uint8_t[srcData.getNumPoints()];
+    python.extractResult("Result", (boost::uint8_t*)mask, srcData.getNumPoints(), 1, pdal::dimension::UnsignedByte, 1);
+
+    boost::uint8_t* dst = dstData.getData(0);
+    boost::uint8_t* src = srcData.getData(0);
+
+    const Schema& schema = dstData.getSchema();
+    boost::uint32_t numBytes = schema.getByteSize();
+    assert(numBytes == srcData.getSchema().getByteSize());
+
+    boost::uint32_t numSrcPoints = srcData.getNumPoints();
+    boost::uint32_t count = 0;
+    for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
+    {
+        if (mask[srcIndex])
+        {
+            memcpy(src, dst, numBytes);
+            dst += numBytes;
+            ++count;
+        }
+        src += numBytes;
+    }
+
+    dstData.setNumPoints(count);
+
     //boost::uint32_t dstIndex = dstData.getNumPoints();
     //boost::uint32_t numPointsAdded = 0;
 
@@ -82,7 +113,6 @@ boost::uint32_t Predicate::processBuffer(const PointBuffer& data, pdal::plang::P
     //Dimension const& dimZ = schema.getDimension("Z");
     //Dimension const& dimTime = schema.getDimension("Time");
 
-    //for (boost::uint32_t srcIndex=0; srcIndex<numSrcPoints; srcIndex++)
     //{
     //    const double x = srcData.getField<double>(dimX, srcIndex);
     //    const double y = srcData.getField<double>(dimY, srcIndex);
@@ -126,7 +156,7 @@ namespace iterators { namespace sequential {
 Predicate::Predicate(const pdal::filters::Predicate& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
     , m_predicateFilter(filter)
-    , m_parser(NULL)
+    , m_pythonMethod(NULL)
 {
     return;
 }
@@ -134,20 +164,17 @@ Predicate::Predicate(const pdal::filters::Predicate& filter, PointBuffer& buffer
 
 Predicate::~Predicate()
 {
-    delete m_parser;
+    delete m_pythonMethod;
 }
 
 
 void Predicate::createParser()
 {
-    const std::string expression = m_predicateFilter.getExpression();
+    const std::string program = m_predicateFilter.getExpression();
 
-    const std::string program = "float64 X; float64 Y; float64 Z; uint64 Time; bool result; result = " + expression + ";";
+    m_pythonMethod = new pdal::plang::PythonPDALMethod(program);
 
-    ////m_parser = new pdal::plang::Parser(program);
-
-    ////bool ok = m_parser->parse();
-    ////assert(ok);
+    m_pythonMethod->compile();
 
     return;
 }
@@ -155,42 +182,18 @@ void Predicate::createParser()
 
 boost::uint32_t Predicate::readBufferImpl(PointBuffer& dstData)
 {
-    ////if (!m_parser)
-    ////{
-    ////    createParser();
-    ////}
+    if (!m_pythonMethod)
+    {
+        createParser();
+    }
+    
+    // read in a full block of points
+    PointBuffer srcData(dstData.getSchema(), (boost::uint32_t)dstData.getBufferByteCapacity());
 
-    ////// the following code taken from the Crop filter
+    // copy the valid points from the src block to the dst block
+    m_predicateFilter.processBuffer(srcData, dstData, *m_pythonMethod);
 
-    ////boost::uint32_t numPointsNeeded = dstData.getCapacity();
-    ////assert(dstData.getNumPoints() == 0);
-
-    ////while (numPointsNeeded > 0)
-    ////{
-    ////    if (getPrevIterator().atEnd()) break;
-
-    ////    // set up buffer to be filled by prev stage
-    ////    PointBuffer srcData(dstData.getSchema(), numPointsNeeded);
-
-    ////    // read from prev stage
-    ////    const boost::uint32_t numSrcPointsRead = getPrevIterator().read(srcData);
-    ////    assert(numSrcPointsRead == srcData.getNumPoints());
-    ////    assert(numSrcPointsRead <= numPointsNeeded);
-
-    ////    // we got no data, and there is no more to get -- exit the loop
-    ////    if (numSrcPointsRead == 0) break;
-
-    ////    // copy points from src (prev stage) into dst (our stage), 
-    ////    // based on the CropFilter's rules (i.e. its bounds)
-    ////    const boost::uint32_t numPointsProcessed = m_predicateFilter.processBuffer(dstData, srcData, *m_parser);
-
-    ////    numPointsNeeded -= numPointsProcessed;
-    ////}
-
-    ////const boost::uint32_t numPointsAchieved = dstData.getNumPoints();
-
-    ////return numPointsAchieved;
-    return 0;
+    return dstData.getNumPoints();
 }
 
 

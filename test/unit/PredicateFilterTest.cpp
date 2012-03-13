@@ -50,7 +50,17 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
     // keep all points where x less than 1.0
-    const pdal::Option opt("expression", "X < 1.0");
+    const pdal::Option opt("expression", 
+        // "X < 1.0"
+        "import numpy as np\n"
+        "def yow(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  Result = np.less(X, 1.0)\n"
+        "  print Result\n"
+        "  outs['Result'] = Result\n"
+        "  return True\n"
+        );
+
     pdal::Options opts;
     opts.add(opt);
 
@@ -88,7 +98,18 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
-    const pdal::Option opt("expression", "Y > 1.0");
+    const pdal::Option opt("expression", 
+        // "Y > 1.0"
+        "import numpy as np\n"
+        "import numpy as np\n"
+        "def yow(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  Result = np.greater(Y, 1.0)\n"
+        "  print Result\n"
+        "  outs['Result'] = Result\n"
+        "  return True\n"
+        );
+
     pdal::Options opts;
     opts.add(opt);
 

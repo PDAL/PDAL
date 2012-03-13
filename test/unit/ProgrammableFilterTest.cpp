@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_SUITE(ProgrammableFilterTest)
 using namespace pdal;
 
 
-BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test2)
+BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
 {
     Bounds<double> bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
     pdal::drivers::faux::Reader reader(bounds, 10, pdal::drivers::faux::Reader::Ramp);
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test2)
         "  outs['X'] = X\n"
         "  #print outs['X']\n"
         "  outs['Z'] = Z\n"
-        "  return\n"
+        "  return True\n"
         );
     pdal::Options opts;
     opts.add(opt);

@@ -103,7 +103,10 @@ public:
 
     bool hasOutputVariable(const std::string& name) const;
 
-    void execute();
+    // returns true iff the called python function returns true,
+    // as would be used for a predicate function
+    // (that is, the return value is NOT an error indicator)
+    bool execute();
 
 private:
     PythonEnvironment& m_env;

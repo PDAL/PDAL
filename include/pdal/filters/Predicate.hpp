@@ -66,7 +66,7 @@ public:
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
     pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
 
-    boost::uint32_t processBuffer(const PointBuffer& data, pdal::plang::PythonPDALMethod&) const;
+    boost::uint32_t processBuffer(PointBuffer& srcData, PointBuffer& dstData, pdal::plang::PythonPDALMethod&) const;
 
     const std::string& getExpression() const { return m_expression; }
 
@@ -97,7 +97,7 @@ private:
     void createParser();
 
     const pdal::filters::Predicate& m_predicateFilter;
-    pdal::plang::PythonPDALMethod* m_parser;
+    pdal::plang::PythonPDALMethod* m_pythonMethod;
 };
 
 } } // iterators::sequential

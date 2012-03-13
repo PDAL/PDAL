@@ -185,23 +185,41 @@ void PythonEnvironment::handleError()
     PyErr_Fetch(&type, &value, &traceback);
     PyErr_NormalizeException(&type, &value, &traceback);
 
-    // create a argument for "format exception"
-    PyObject* args = PyTuple_New(3);
-    PyTuple_SetItem(args, 0, type);
-    PyTuple_SetItem(args, 1, value);
-    PyTuple_SetItem(args, 2, traceback);
-
-    // get a list of string describing what went wrong
-    PyObject* output = PyObject_CallObject(m_tracebackFunction, args);
-
-    // print error message
-    int i, n = PyList_Size(output);
     std::string mssg = "";
-    for (i=0; i<n; i++) mssg += PyString_AsString(PyList_GetItem(output, i));
+    if (traceback)
+    {
+        // create an argument for "format exception"
+        PyObject* args = PyTuple_New(3);
+        PyTuple_SetItem(args, 0, type);
+        PyTuple_SetItem(args, 1, value);
+        PyTuple_SetItem(args, 2, traceback);
 
-    // clean up
-    Py_XDECREF(args);
-    Py_XDECREF(output);
+        // get a list of string describing what went wrong
+        PyObject* output = PyObject_CallObject(m_tracebackFunction, args);
+
+        // print error message
+        int i, n = PyList_Size(output);
+        for (i=0; i<n; i++) mssg += PyString_AsString(PyList_GetItem(output, i));
+
+        // clean up
+        Py_XDECREF(args);
+        Py_XDECREF(output);
+    }
+    else if (value != NULL)
+    {
+        PyObject *s = PyObject_Str(value);
+        const char* text = PyString_AS_STRING(s);
+        Py_DECREF(s);
+        mssg += text;
+    }
+    else
+    {
+        mssg = "unknown error";
+    }
+
+    Py_XDECREF(value);
+    Py_XDECREF(type);
+    Py_XDECREF(traceback);
 
     throw python_error(mssg);
 
@@ -234,19 +252,7 @@ PythonMethodX::PythonMethodX(const std::string& source)
 void PythonMethodX::compile()
 {
     m_compile = Py_CompileString(m_source.c_str(), "YowModule", Py_file_input);
-    if (PyErr_Occurred()) {
-        PyObject *errtype, *errvalue, *traceback;
-        PyErr_Fetch(&errtype, &errvalue, &traceback);
-        if(errvalue != NULL) {
-            PyObject *s = PyObject_Str(errvalue);
-            const char* mssg = PyString_AS_STRING(s);
-            Py_DECREF(s);
-            throw python_error(mssg);
-        }
-        Py_XDECREF(errvalue);
-        Py_XDECREF(errtype);
-        Py_XDECREF(traceback);
-    }
+    if (!m_compile) m_env.handleError();
 
     assert(m_compile);
     m_module = PyImport_ExecCodeModule("YowModule", m_compile);
@@ -399,6 +405,60 @@ void PythonMethodX::extractResult(const std::string& name,
             p += data_stride;
         }
     }
+    else if (pyDataType == PyArray_FLOAT)
+    {
+        float* src = (float*)PyArray_GetPtr(arr, &one);
+        for (unsigned int i=0; i<data_len; i++)
+        {
+            *(float*)p = src[i];
+            p += data_stride;
+        }
+    }
+    else if (pyDataType == PyArray_BYTE)
+    {
+        boost::int8_t* src = (boost::int8_t*)PyArray_GetPtr(arr, &one);
+        for (unsigned int i=0; i<data_len; i++)
+        {
+            *(boost::int8_t*)p = src[i];
+            p += data_stride;
+        }
+    }
+    else if (pyDataType == PyArray_UBYTE)
+    {
+        boost::uint8_t* src = (boost::uint8_t*)PyArray_GetPtr(arr, &one);
+        for (unsigned int i=0; i<data_len; i++)
+        {
+            *(boost::uint8_t*)p = src[i];
+            p += data_stride;
+        }
+    }
+    else if (pyDataType == PyArray_INT)
+    {
+        boost::int32_t* src = (boost::int32_t*)PyArray_GetPtr(arr, &one);
+        for (unsigned int i=0; i<data_len; i++)
+        {
+            *(boost::int32_t*)p = src[i];
+            p += data_stride;
+        }
+    }
+    else if (pyDataType == PyArray_UINT)
+    {
+        boost::uint32_t* src = (boost::uint32_t*)PyArray_GetPtr(arr, &one);
+        for (unsigned int i=0; i<data_len; i++)
+        {
+            *(boost::uint32_t*)p = src[i];
+            p += data_stride;
+        }
+    }
+    else if (pyDataType == PyArray_LONGLONG)
+    {
+        boost::int64_t* src = (boost::int64_t*)PyArray_GetPtr(arr, &one);
+        for (unsigned int i=0; i<data_len; i++)
+        {
+            *(boost::int64_t*)p = src[i];
+            p += data_stride;
+        }
+    }
     else if (pyDataType == PyArray_ULONGLONG)
     {
         boost::uint64_t* src = (boost::uint64_t*)PyArray_GetPtr(arr, &one);
@@ -417,7 +477,7 @@ void PythonMethodX::extractResult(const std::string& name,
 }
 
 
-void PythonMethodX::execute()
+bool PythonMethodX::execute()
 {
     if (!m_compile)
     {
@@ -432,8 +492,18 @@ void PythonMethodX::execute()
 
     m_scriptResult = PyObject_CallObject(m_func, m_scriptArgs);
     if (!m_scriptResult) m_env.handleError();
-    
-    return;
+
+    if (!PyBool_Check(m_scriptResult))
+    {
+        throw python_error("user function return value not a boolean type");
+    }
+    bool sts = false;
+    if (m_scriptResult == Py_True)
+    {
+        sts = true;
+    }
+
+    return sts;
 }
 
 

@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_basic)
         "import numpy as np\n"
         "def yow(ins,outs):\n"
         "  #print 'hi'\n"
-        "  return\n"
+        "  return True\n"
         ;
 
     pdal::plang::PythonMethodX meth(program);
@@ -63,13 +63,35 @@ BOOST_AUTO_TEST_CASE(PythonTest_basic)
 }
 
 
+//---------------------------------------------------------------------------
+//
+// ERROR tests
+//
+//---------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(PythonTest_compile_error)
+{
+    const char* program =
+        "import numpy as np\n"
+        "def yow(ins,outs):\n"
+        "return True\n"
+        ;
+
+    pdal::plang::PythonMethodX meth(program);
+
+    BOOST_REQUIRE_THROW(meth.compile(), pdal::python_error);
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_CASE(PythonTest_runtime_error)
 {
     const char* program =
         "import numpy as np\n"
         "def yow(ins,outs):\n"
         "  z['s'] = 9\n"
-        "  return\n"
+        "  return True\n"
         ;
 
     pdal::plang::PythonMethodX meth(program);
@@ -81,20 +103,83 @@ BOOST_AUTO_TEST_CASE(PythonTest_runtime_error)
 }
 
 
-BOOST_AUTO_TEST_CASE(PythonTest_compile_error)
+BOOST_AUTO_TEST_CASE(PythonTest_toofewinputs)
 {
     const char* program =
         "import numpy as np\n"
-        "def yow(ins,outs):\n"
-        "return\n"
+        "def yow(ins):\n"
+        "  #print 'foo'\n"
+        "  return True\n"
         ;
 
     pdal::plang::PythonMethodX meth(program);
-
-    BOOST_REQUIRE_THROW(meth.compile(), pdal::python_error);
-
+    meth.compile();
+    
+    BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
+    
     return;
 }
+
+
+BOOST_AUTO_TEST_CASE(PythonTest_toomanyinputs)
+{
+    const char* program =
+        "import numpy as np\n"
+        "def yow(ins,outs,mids):\n"
+        "  #print 'foo'\n"
+        "  return True\n"
+        ;
+
+    pdal::plang::PythonMethodX meth(program);
+    meth.compile();
+    
+    BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
+    
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(PythonTest_returnvoid)
+{
+    const char* program =
+        "import numpy as np\n"
+        "def yow(ins,outs,mids):\n"
+        "  #print 'foo'\n"
+        "  return\n"
+        ;
+
+    pdal::plang::PythonMethodX meth(program);
+    meth.compile();
+    
+    BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
+    
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(PythonTest_returnint)
+{
+    const char* program =
+        "import numpy as np\n"
+        "def yow(ins,outs,mids):\n"
+        "  #print 'foo'\n"
+        "  return 7\n"
+        ;
+
+    pdal::plang::PythonMethodX meth(program);
+    meth.compile();
+    
+    BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
+    
+    return;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// PARAM tests
+//
+//---------------------------------------------------------------------------
 
 
 BOOST_AUTO_TEST_CASE(PythonTest_ins)
@@ -107,7 +192,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_ins)
         "  #print ins['X']\n"
         "  X = ins['X']\n"
         "  #print X\n"
-        "  return\n"
+        "  return True\n"
         ;
 
     pdal::plang::PythonMethodX meth(program);
@@ -131,7 +216,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_outs)
         "  #print X\n"
         "  outs['X'] = X\n"
         "  #print outs['X']\n"
-        "  return\n"
+        "  return True\n"
         ;
 
     pdal::plang::PythonMethodX meth(program);
@@ -152,6 +237,101 @@ BOOST_AUTO_TEST_CASE(PythonTest_outs)
 
     return;
 }
+
+
+BOOST_AUTO_TEST_CASE(PythonTest_returntrue)
+{
+    const char* program =
+        "import numpy as np\n"
+        "def yow(ins,outs):\n"
+        "  return True\n"
+        ;
+
+    pdal::plang::PythonMethodX meth(program);
+    meth.compile();
+    
+    bool sts = meth.execute();
+    BOOST_CHECK(sts);
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(PythonTest_returnfalse)
+{
+    const char* program =
+        "import numpy as np\n"
+        "def yow(ins,outs):\n"
+        "  return False\n"
+        ;
+
+    pdal::plang::PythonMethodX meth(program);
+    meth.compile();
+    
+    bool sts = meth.execute();
+    BOOST_CHECK(!sts);
+
+    return;
+}
+
+
+//---------------------------------------------------------------------------
+//
+// MISC tests
+//
+//---------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(PythonTest_reentry)
+{
+    const char* program =
+        "import numpy as np\n"
+        "def yow(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  Y = X + 1.0\n"
+        "  #print Y\n"
+        "  outs['Y'] = Y\n"
+        "  return True\n"
+        ;
+
+    double indata1[5] = {0.0, 1.0, 2.0, 3.0, 4.0};
+    double outdata1[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+    double indata2[5] = {10.0, 20.0, 30.0, 40.0, 50.0};
+    double outdata2[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+
+    pdal::plang::PythonMethodX meth(program);
+    meth.compile();
+    
+    {
+        meth.insertArgument("X", (boost::uint8_t*)indata1, 5, 8, pdal::dimension::Float, 8);
+
+        meth.execute();
+
+        meth.extractResult("Y", (boost::uint8_t*)outdata1, 5, 8, pdal::dimension::Float, 8);
+
+        BOOST_CHECK(outdata1[0] == 1.0);
+        BOOST_CHECK(outdata1[1] == 2.0);
+        BOOST_CHECK(outdata1[2] == 3.0);
+        BOOST_CHECK(outdata1[3] == 4.0);
+        BOOST_CHECK(outdata1[4] == 5.0);
+    }
+
+    {
+        meth.insertArgument("X", (boost::uint8_t*)indata2, 5, 8, pdal::dimension::Float, 8);
+
+        meth.execute();
+
+        meth.extractResult("Y", (boost::uint8_t*)outdata2, 5, 8, pdal::dimension::Float, 8);
+
+        BOOST_CHECK(outdata2[0] == 11.0);
+        BOOST_CHECK(outdata2[1] == 21.0);
+        BOOST_CHECK(outdata2[2] == 31.0);
+        BOOST_CHECK(outdata2[3] == 41.0);
+        BOOST_CHECK(outdata2[4] == 51.0);
+    }
+
+    return;
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
 

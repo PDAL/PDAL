@@ -100,7 +100,6 @@ namespace iterators { namespace sequential {
 Programmable::Programmable(const pdal::filters::Programmable& filter, PointBuffer& buffer)
     : pdal::FilterSequentialIterator(filter, buffer)
     , m_programmableFilter(filter)
-    , m_pythonEnv(NULL)
     , m_pythonMethod(NULL)
 {
     return;
