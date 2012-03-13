@@ -262,15 +262,21 @@ boost::uint32_t Scaling::readBufferImpl(PointBuffer& buffer)
     return numRead;
 }
 
+
+#ifdef PDAL_COMPILER_MSVC
+// the writeScaledData function causes lots of conversion warnings which
+// are real but which we will ignore: blame the filter's user for casting badly
+#  pragma warning(push)
+#  pragma warning(disable: 4244)  // conversion from T1 to T2, possible loss of data
+#endif
+
 void Scaling::writeScaledData(  PointBuffer& buffer, 
                                 Dimension const& from_dimension, 
                                 Dimension const& to_dimension, 
                                 boost::uint32_t pointIndex)
 {
-    
     double dbl(0.0);
     float flt(0.0);
-
 
     if (from_dimension.getInterpretation() == dimension::Float)
     {
@@ -640,8 +646,12 @@ void Scaling::writeScaledData(  PointBuffer& buffer,
     }
 
     throw pdal_error("Dimension data type unable to be scaled because it is Undefined");
-
 }
+
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(pop)
+#endif
+
 
 boost::uint64_t Scaling::skipImpl(boost::uint64_t count)
 {
