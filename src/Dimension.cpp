@@ -71,6 +71,7 @@ Dimension::Dimension(   std::string const& name,
     , m_byteOffset(0)
     , m_position(-1)    
     , m_interpretation(interpretation)
+    , m_uuid(boost::uuids::nil_uuid())
     , m_namespace(std::string(""))
     , m_parentDimensionID(boost::uuids::nil_uuid())
     
