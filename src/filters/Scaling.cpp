@@ -178,16 +178,37 @@ void Scaling::alterSchema(PointBuffer& buffer)
             if (!found)
                 throw pdal_error("Scaling between types is not supported");
 
-            std::cout << "Rescaling dimension '" << from_dimension->getName() << " with datatype " << from_dimension->getInterpretation() <<
-                                                     "' to scale: " << to_dimension.getNumericScale() << 
-                                                     " offset: " << to_dimension.getNumericOffset() << 
-                                                     " datatype: " << to_dimension.getInterpretation() << std::endl;
+            std::cout << "Rescaling dimension " << from_dimension->getName() 
+                                                << " [" << from_dimension->getInterpretation() << "/" << from_dimension->getByteSize() << "]"
+                                                << " to scale: " << to_dimension.getNumericScale()
+                                                << " offset: " << to_dimension.getNumericOffset()
+                                                << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
+                                                << std::endl;
             std::pair<dimension::id, dimension::id> p(from_dimension->getUUID(), to_dimension.getUUID());
+            std::cout << "map size was " << m_scale_map.size() << std::endl;
             m_scale_map.insert(p);
+            std::cout << "map size is now " << m_scale_map.size() << std::endl;
             schema.appendDimension(to_dimension);
         }
     }
     
+
+    {{
+        std::map<dimension::id, dimension::id>::const_iterator d;
+        for (d = m_scale_map.begin(); d != m_scale_map.end(); ++d)
+        {
+            Dimension const& from_dimension = schema.getDimension(d->first);
+            Dimension const& to_dimension = schema.getDimension(d->second);
+            std::cout << "Map wants to do: " << from_dimension.getName() 
+                << " [" << from_dimension.getInterpretation() << "/" << from_dimension.getByteSize() << "]"
+                << " to scale: " << to_dimension.getNumericScale()
+                << " offset: " << to_dimension.getNumericOffset()
+                << " datatype: " << to_dimension.getInterpretation() << "/" << to_dimension.getByteSize()
+                << std::endl;
+        }
+    }}
+
+
     buffer = PointBuffer(schema, buffer.getCapacity());
 } 
 
