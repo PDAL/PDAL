@@ -109,7 +109,7 @@ Programmable::Programmable(const pdal::filters::Programmable& filter, PointBuffe
 
 Programmable::~Programmable()
 {
-    //delete m_parser;
+    delete m_pythonMethod;
 }
 
 
@@ -118,6 +118,8 @@ void Programmable::createParser()
     const std::string program = m_programmableFilter.getProgram();
 
     m_pythonMethod = new pdal::plang::PythonPDALMethod(program);
+
+    m_pythonMethod->compile();
 
     return;
 }
