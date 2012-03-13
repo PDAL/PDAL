@@ -386,7 +386,7 @@ int Schema::getDimensionIndex(const Dimension& dim) const
 
 const Dimension& Schema::getDimension(dimension::id const& t) const
 {
-	schema::index_by_uid::const_iterator it = m_index.get<schema::uid>().find(t);
+    schema::index_by_uid::const_iterator it = m_index.get<schema::uid>().find(t);
 
     if (it != m_index.get<schema::uid>().end())
     {

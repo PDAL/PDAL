@@ -137,7 +137,7 @@ public:
 
     /// Get project identifier.
     /// \return Global Unique Identifier as an instance of liblas::guid class.
-	boost::uuids::uuid GetProjectId() const;
+    boost::uuids::uuid GetProjectId() const;
 
     /// Set project identifier.
     void SetProjectId(boost::uuids::uuid const& v);

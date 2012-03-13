@@ -1800,7 +1800,7 @@ char* OWStatement::ReadCLob( OCILobLocator* phLocator )
 
     pszBuffer[nAmont] = '\0';
 
-	return pszBuffer;
+    return pszBuffer;
 }
 
 void OWStatement::BindName( const char* pszName, int* pnData )

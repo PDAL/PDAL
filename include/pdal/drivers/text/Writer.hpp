@@ -91,13 +91,13 @@ private:
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented
 
-	std::string getStringRepresentation( PointBuffer const& data, 
-	                                     Dimension const& d, 
-										 std::size_t pointIndex) const;
-	
-	void WriteHeader(pdal::Schema const& schema);
-	FileStreamPtr m_stream;
-	bool m_wrote_header;
+    std::string getStringRepresentation( PointBuffer const& data, 
+                                         Dimension const& d, 
+                                         std::size_t pointIndex) const;
+    
+    void WriteHeader(pdal::Schema const& schema);
+    FileStreamPtr m_stream;
+    bool m_wrote_header;
 };
 
 } } } // namespaces

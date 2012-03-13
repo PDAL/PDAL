@@ -302,7 +302,11 @@ void Stats::readBufferBeginImpl(PointBuffer& buffer)
         {
             if (numPoints != 0)
             {
-                stats_cache_size = numPoints;
+                if (numPoints > (std::numeric_limits<boost::uint32_t>::max)())
+                {
+                    throw std::out_of_range("too many points for the histogram cache");
+                }
+                stats_cache_size = static_cast<boost::uint32_t>(numPoints);
                 getStage().log()->get(logDEBUG2) << "Using point count, " << numPoints << ", for histogram cache size" << std::endl;
 
             }

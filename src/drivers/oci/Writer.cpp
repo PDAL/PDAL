@@ -829,8 +829,8 @@ oss << "declare\n"
    
     try 
     { 
-	Option& pc_id = getOptions().getOptionByRef("pc_id");
-	pc_id.setValue(m_pc_id);
+    Option& pc_id = getOptions().getOptionByRef("pc_id");
+    pc_id.setValue(m_pc_id);
     }
     catch (pdal::option_not_found&)
     {
