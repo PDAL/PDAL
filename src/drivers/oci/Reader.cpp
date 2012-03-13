@@ -372,7 +372,11 @@ pdal::SpatialReference Reader::fetchSpatialReference(Statement statement, sdo_pc
 
     std::ostringstream oss;
     oss <<"EPSG:" << srid;
-    return pdal::SpatialReference(oss.str());
+    
+    if (srid)
+        return pdal::SpatialReference(oss.str());
+    else
+        return pdal::SpatialReference();
 }
 
 pdal::Schema Reader::fetchSchema(Statement statement, sdo_pc* pc, boost::uint32_t& capacity) const
