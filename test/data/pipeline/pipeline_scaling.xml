@@ -14,7 +14,9 @@
                 <Option name="scale">0.1</Option>
                 <Option name="offset">2.0</Option>
             </Options>
-        </Option>        
+        </Option>
+        <!-- <Option name="debug">true</Option>
+        <Option name="verbose">7</Option>    -->  
         <Reader type="drivers.las.reader">
             <Option name="filename">
                 1.2-with-color.las
