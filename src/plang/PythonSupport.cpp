@@ -198,6 +198,11 @@ void PythonEnvironment::handleError()
 PythonMethodX::PythonMethodX(PythonEnvironment& env, const std::string& source)
     : m_env(env)
     , m_source(source)
+    , m_scriptSource(NULL)
+    , m_varsIn(NULL)
+    , m_varsOut(NULL)
+    , m_scriptArgs(NULL)
+    , m_scriptResult(NULL)
 {
     return;
 }
@@ -312,6 +317,14 @@ void PythonMethodX::insertArgument(const std::string& name,
 }
 
 
+bool PythonMethodX::hasOutputVariable(const std::string& name) const
+{
+   PyObject* obj = PyDict_GetItemString(m_varsOut, name.c_str());
+
+   return (obj!=NULL);
+}
+
+
 void PythonMethodX::extractResult(const std::string& name, 
                                   boost::uint8_t* dst, 
                                   boost::uint32_t data_len, 
@@ -387,35 +400,16 @@ void PythonMethodX::execute()
 
 
 PythonPDALMethod::PythonPDALMethod(PythonEnvironment& env, const std::string& source)
-    : m_env(env)
-    , m_source(source)
+    : PythonMethodX(env, source)
 {
     return;
 }
 
 
-bool PythonPDALMethod::compile()
-{
-    return true;
-}
 
-
-bool PythonPDALMethod::beginChunk(PointBuffer& buffer)
+void PythonPDALMethod::beginChunk(PointBuffer& buffer)
 {
     const Schema& schema = buffer.getSchema();
-
-
-    const int nelem = buffer.getNumPoints();
-    npy_intp mydims = { nelem };
-    int nd = 1;
-    npy_intp* dims = &mydims;
-    npy_intp stride = schema.getByteSize();
-    npy_intp* strides = &stride;
-    int flags = NPY_CARRAY; // NPY_BEHAVED
-
-    m_pyInputArrays.clear();
-    m_varsIn = PyDict_New();
-    m_varsOut = PyDict_New();
 
     schema::Map const& map = schema.getDimensions();
     schema::index_by_index const& idx = map.get<schema::index>();
@@ -423,20 +417,21 @@ bool PythonPDALMethod::beginChunk(PointBuffer& buffer)
     {
         const Dimension& dim = *iter;
         const std::string& name = dim.getName();
-        const int pyDataType = getPythonDataType(dim.getInterpretation(), dim.getByteSize());
-        
+
         boost::uint8_t* data = buffer.getData(0) + dim.getByteOffset();
 
-        PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType, strides, data, 0, flags, NULL);
-        m_pyInputArrays.push_back(pyArray);
-        PyDict_SetItemString(m_varsIn, name.c_str(), pyArray);
+        const boost::uint32_t numPoints = buffer.getNumPoints();
+        const boost::uint32_t stride = buffer.getSchema().getByteSize();
+        const dimension::Interpretation datatype = dim.getInterpretation();
+        const boost::uint32_t numBytes = dim.getByteSize();
+        this->insertArgument(name, data, numPoints, stride, datatype, numBytes);
     }
 
-    return true;
+    return;
 }
 
 
-bool PythonPDALMethod::endChunk(PointBuffer& buffer)
+void PythonPDALMethod::endChunk(PointBuffer& buffer)
 {
     const Schema& schema = buffer.getSchema();
 
@@ -447,77 +442,18 @@ bool PythonPDALMethod::endChunk(PointBuffer& buffer)
         const Dimension& dim = *iter;
         const std::string& name = dim.getName();
         
-        PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
-        if (!xarr) continue;
-        assert(PyArray_Check(xarr));
-        PyArrayObject* arr = (PyArrayObject*)xarr;
-
-        npy_intp one=0;
-        const int pyDataType = getPythonDataType(dim.getInterpretation(), dim.getByteSize());
-
-        if (pyDataType == PyArray_DOUBLE)
+        if (hasOutputVariable(name))
         {
-            double* data = (double*)PyArray_GetPtr(arr, &one);
-
-            const unsigned int cnt = buffer.getNumPoints();
-            for (unsigned int i=0; i<cnt; i++)
-            {
-                buffer.setField<double>(dim, i, data[i]);
-            }
+            boost::uint8_t* data = buffer.getData(0) + dim.getByteOffset();
+            const boost::uint32_t numPoints = buffer.getNumPoints();
+            const boost::uint32_t stride = buffer.getSchema().getByteSize();
+            const dimension::Interpretation datatype = dim.getInterpretation();
+            const boost::uint32_t numBytes = dim.getByteSize();
+            extractResult(name, data, numPoints, stride, datatype, numBytes);
         }
-        else if (pyDataType == PyArray_ULONGLONG)
-        {
-            boost::uint64_t* data = (boost::uint64_t*)PyArray_GetPtr(arr, &one);
-
-            const unsigned int cnt = buffer.getNumPoints();
-            for (unsigned int i=0; i<cnt; i++)
-            {
-                buffer.setField<boost::uint64_t>(dim, i, data[i]);
-            }
-        }
-        else
-            assert(0);
     }
 
-    Py_XDECREF(m_scriptResult);
-
-    Py_XDECREF(m_scriptArgs); // also decrements script and vars
-
-    for (unsigned int i=0; i<m_pyInputArrays.size(); i++)
-    {
-        PyObject* obj = m_pyInputArrays[i];
-        Py_XDECREF(obj);
-    }
-    m_pyInputArrays.clear();
-
-    return true;
-}
-
-
-bool PythonPDALMethod::execute()
-{
-    PyObject* compiled = Py_CompileString(m_source.c_str(), "YowModule", Py_file_input);
-    if (!compiled) m_env.handleError();
-
-    PyObject* module = PyImport_ExecCodeModule("YowModule", compiled);
-    if (!module) m_env.handleError();
-
-    PyObject* dict = PyModule_GetDict(module);
-
-    PyObject* func = PyDict_GetItemString(dict, "yow");
-    if (!func) m_env.handleError();
-    if (!PyCallable_Check(func)) m_env.handleError();
-  
-    Py_INCREF(m_varsIn);
-    Py_INCREF(m_varsOut);
-    m_scriptArgs = PyTuple_New(2);
-    PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
-    PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
-
-    m_scriptResult = PyObject_CallObject(func, m_scriptArgs);
-    if (!m_scriptResult) m_env.handleError();
-    
-    return true;
+    return;
 }
 
 

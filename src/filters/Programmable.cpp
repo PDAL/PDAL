@@ -73,10 +73,11 @@ const Options Programmable::getDefaultOptions() const
 
 void Programmable::processBuffer(PointBuffer& data, pdal::plang::PythonPDALMethod& python) const
 {
+    python.resetArguments();
+
     python.beginChunk(data);
 
-    bool ok = python.execute();
-    assert(ok);
+    python.execute();
     
     python.endChunk(data);
 

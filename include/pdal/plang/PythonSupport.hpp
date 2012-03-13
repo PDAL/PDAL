@@ -100,6 +100,8 @@ public:
                        dimension::Interpretation dataType, 
                        boost::uint32_t numBytes);
 
+    bool hasOutputVariable(const std::string& name) const;
+
     void execute();
 
 private:
@@ -117,28 +119,15 @@ private:
 };
 
 
-class PDAL_DLL PythonPDALMethod
+class PDAL_DLL PythonPDALMethod : public PythonMethodX
 {
 public:
     PythonPDALMethod(PythonEnvironment& env, const std::string& source);
-    bool compile();
 
-    bool beginChunk(PointBuffer&);
-    bool endChunk(PointBuffer&);
-
-    bool execute();
+    void beginChunk(PointBuffer&);
+    void endChunk(PointBuffer&);
 
 private:
-    PythonEnvironment& m_env;
-    std::string m_source;
-
-    PyObject* m_scriptSource;
-    PyObject* m_varsIn;
-    PyObject* m_varsOut;
-    PyObject* m_scriptArgs;
-    PyObject* m_scriptResult;
-    std::vector<PyObject*> m_pyInputArrays;
-
     PythonPDALMethod& operator=(PythonPDALMethod const& rhs); // nope
 };
 
