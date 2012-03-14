@@ -79,6 +79,8 @@ public:
 
     static int getPythonDataType(dimension::Interpretation datatype, boost::uint32_t siz);
 
+    static void numpy_init();
+
 private:
     Environment& m_env;
     std::string m_source;
