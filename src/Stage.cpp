@@ -146,7 +146,7 @@ void Stage::setSpatialReference(const SpatialReference& spatialReference)
 std::vector<Metadata> Stage::getMetadata() const
 {
     // the default behaviour is to have no records at all...
-    boost::ignore_unused_variable_warning(index);
+    /*boost::ignore_unused_variable_warning(index);*/
     throw pdal_error("no such metadata record");
     std::vector<Metadata> output;
     return output;
