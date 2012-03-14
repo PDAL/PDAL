@@ -33,6 +33,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     InPlaceReprojectionFilterTest.cpp
     LasReaderTest.cpp
     LasWriterTest.cpp
+    MetadataTest.cpp
     MosaicFilterTest.cpp
     OptionsTest.cpp
     PipelineManagerTest.cpp

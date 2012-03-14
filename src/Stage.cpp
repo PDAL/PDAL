@@ -143,28 +143,14 @@ void Stage::setSpatialReference(const SpatialReference& spatialReference)
     m_spatialReference = spatialReference;
 }
 
-
-int Stage::getMetadataRecordCount() const
-{
-    return 0;
-}
-
-
-const MetadataRecord& Stage::getMetadataRecord(int index) const
+std::vector<Metadata> Stage::getMetadata() const
 {
     // the default behaviour is to have no records at all...
     boost::ignore_unused_variable_warning(index);
     throw pdal_error("no such metadata record");
+    std::vector<Metadata> output;
+    return output;
 }
-
-
-MetadataRecord& Stage::getMetadataRecordRef(int index)
-{
-    // the default behaviour is to have no records at all...
-    boost::ignore_unused_variable_warning(index);
-    throw pdal_error("no such metadata record");
-}
-
 
 void Stage::setCoreProperties(const Stage& stage)
 {

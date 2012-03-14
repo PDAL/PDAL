@@ -91,9 +91,6 @@ public:
                                     ZipPoint* zipPoint,
                                     PointDimensions* dimensions) const;
 
-    int getMetadataRecordCount() const;
-    const MetadataRecord& getMetadataRecord(int index) const;
-
     PointFormat getPointFormat() const;
     boost::uint8_t getVersionMajor() const;
     boost::uint8_t getVersionMinor() const;
@@ -112,12 +109,9 @@ protected:
     const LasHeader& getLasHeader() const { return m_lasHeader; }
     LasHeader& getLasHeaderRef() { return m_lasHeader; }
 
-    MetadataRecord& getMetadataRecordRef(int index);
-
 private:
     std::string m_filename;
     LasHeader m_lasHeader;
-    std::vector<MetadataRecord> m_metadataRecords;
     void ExtractNITF();
 
     Reader& operator=(const Reader&); // not implemented

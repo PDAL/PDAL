@@ -32,69 +32,49 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <boost/test/unit_test.hpp>
+#include <sstream>
+#include <iostream>
+#include <string>
+
 #include <pdal/MetadataRecord.hpp>
 
-#include <sstream>
-#include <cstring>
+#include <boost/property_tree/xml_parser.hpp>
 
-namespace pdal
+
+BOOST_AUTO_TEST_SUITE(MetadataTest)
+
+
+BOOST_AUTO_TEST_CASE(test_construction)
 {
-
-
-Metadata::Metadata()
-    // :
-{
+    
+    pdal::Metadata m;
+    
+    boost::uint32_t u32(32u);
+    boost::int32_t i32(-32);
+    boost::uint64_t u64(64u);
+    boost::int64_t i64(-64);
+    boost::int8_t i8(-8);
+    boost::uint8_t u8(8);
+    boost::int16_t i16(-16);
+    boost::uint16_t u16(16);
+    
+    std::vector<boost::uint8_t> v;
+    for(int i=0; i < 100; i++) v.push_back(i);
+    
+    pdal::SpatialReference ref("EPSG:4326");
+    
+    pdal::Bounds<double> b(1.1,2.2,3.3,101.1,102.2,103.3);
+    
+    m.set<boost::uint32_t>(u32);
+    
+    BOOST_CHECK_EQUAL(m.get<boost::uint32_t>(), 32u);
+    BOOST_CHECK_THROW(m.get<boost::int32_t>(), boost::bad_get);
+    
     return;
 }
 
 
-Metadata::Metadata(const Metadata& other)
-    // :
-{
-    return;
-}
 
 
-Metadata::~Metadata()
-{
-
-}
-
-
-Metadata& Metadata::operator=(Metadata const& rhs)
-{
-    if (&rhs != this)
-    {
-    }
-    return *this;
-}
-
-
-bool Metadata::operator==(Metadata const& rhs) const
-{
-    return false;
-}
-
-
-std::vector<boost::uint8_t> const* Metadata::getBytes() const
-{
-    return &boost::get<std::vector<boost::uint8_t> >(m_variant);
-}
-
-
-std::size_t Metadata::getLength() const
-{
-    return boost::get<std::vector<boost::uint8_t> >(m_variant).size();
-}
-
-
-std::ostream& operator<<(std::ostream& ostr, const Metadata& metadata)
-{
-    ostr << "Metadata: ";
-    ostr << "  len=" << metadata.getLength();
-    ostr << std::endl;
-    return ostr;
-}
-
-
-} // namespace pdal
+BOOST_AUTO_TEST_SUITE_END()
