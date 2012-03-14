@@ -36,6 +36,7 @@
 #ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/plang/Script.hpp>
+#include <pdal/FileUtils.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127) // conditional expression is constant
@@ -65,11 +66,21 @@ Script::Script(const std::string& source, const std::string& module, const std::
 
 Script::Script(const Options& options)
 {
-    const std::string& source = options.getValueOrThrow<std::string>("source");
+    if (options.hasOption("source"))
+    {
+        const std::string& source = options.getValueOrThrow<std::string>("source");
+        m_source = copychars(source.c_str());
+    }
+    else 
+    {
+        const std::string& filename = options.getValueOrThrow<std::string>("filename");
+        std::string source = FileUtils::readFileIntoString(filename);
+        m_source = copychars(source.c_str());
+    }
+
     const std::string& module = options.getValueOrThrow<std::string>("module");
     const std::string& function = options.getValueOrThrow<std::string>("function");
 
-    m_source = copychars(source.c_str());
     m_module = copychars(module.c_str());
     m_function = copychars(function.c_str());
 
