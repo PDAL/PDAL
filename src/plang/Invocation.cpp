@@ -42,10 +42,14 @@
 #endif
 
 #include <Python.h>
+
+// This file can only be included once, otherwise we get wierd runtime errors,
+// even if we define NO_IMPORT and stuff, so we include it only here, and provide
+// a backdoor function numpy_init() which gets called from Environment::startup().
 #include <numpy/arrayobject.h>
 
-
 namespace pdal { namespace plang {
+
 
 void Invocation::numpy_init()
 {
@@ -118,7 +122,6 @@ void Invocation::resetArguments()
 }
 
 
-
 void Invocation::insertArgument(const std::string& name, 
                                    boost::uint8_t* data, 
                                    boost::uint32_t data_len, 
@@ -143,8 +146,6 @@ void Invocation::insertArgument(const std::string& name,
     
     return;
 }
-
-
 
 
 void Invocation::extractResult(const std::string& name, 
@@ -334,7 +335,6 @@ bool Invocation::execute()
 
     return sts;
 }
-
 
 
 } } //namespaces

@@ -43,13 +43,13 @@
 #endif
 
 #include <Python.h>
-//#include <numpy/arrayobject.h>
-
 
 namespace pdal { namespace plang {
 
+
 static Environment* s_environment;
 Environment* Environment::get() { return s_environment; }
+
 
 Environment::Environment()
     : m_tracebackModule(NULL)
@@ -121,58 +121,6 @@ void Environment::shutdown()
 }
 
 
-void Environment::dumpObject(PyObject* obj)
-{
-    //if (!obj)
-    //{
-    //    throw python_error("unable dump null object");
-    //}
-
-    //// output scalar result
-    //if (PyFloat_Check(obj)) 
-    //{
-    //    printf("result: %f\n", PyFloat_AsDouble(obj));
-    //    return;
-    //}
-
-    //// we only support arrays for now
-    //assert(PyArray_Check(obj));
-
-    //PyArrayObject* arr = PyArray_GETCONTIGUOUS((PyArrayObject*)obj);
-    //int ndims = arr->nd;
-    //npy_intp* dims = arr->dimensions; // not copying data
-    //double* data = (double*) arr->data; // not copying data
-    //int i, j, k = 0;
-
-    //if( ndims == 1 ) 
-    //{
-    //    // output vector result
-    //    for( i=0; i<dims[0]; i++ )
-    //        printf( "element: %i value: %f\n", i, data[k++] );
-    //    printf("\n");
-    //}
-    //else if( ndims == 2 ) 
-    //{
-    //    // output matrix result
-    //    for( i=0; i<dims[0]; i++ ) {
-    //        for( j=0; j<dims[1]; j++ )
-    //            printf( "%f ", data[k++] );
-    //        printf( "\n" );
-    //    }
-    //}
-    //else
-    //{
-    //    // output N-D result
-    //    for( i=0; i<ndims; i++ )
-    //        for( j=0; j<dims[i]; j++ )
-    //            printf( "dimension: %i element: %i value: %f\n", i, j, data[k++] );
-    //}
-
-    //// clean
-    //Py_XDECREF(obj);
-}
-
-
 void Environment::handleError()
 {
     // get exception info
@@ -220,10 +168,6 @@ void Environment::handleError()
 
     return;
 }
-
-
-
-
 
 
 } } //namespaces

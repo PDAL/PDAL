@@ -64,7 +64,6 @@ public:
     static void startup();
     static void shutdown();
 
-    void dumpObject(PyObject*);
     void handleError();
     
     static Environment* get();

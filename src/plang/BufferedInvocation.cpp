@@ -56,7 +56,6 @@ BufferedInvocation::BufferedInvocation(const std::string& source)
 }
 
 
-
 void BufferedInvocation::beginChunk(PointBuffer& buffer)
 {
     const Schema& schema = buffer.getSchema();
@@ -105,7 +104,6 @@ void BufferedInvocation::endChunk(PointBuffer& buffer)
 
     return;
 }
-
 
 
 } } //namespaces
