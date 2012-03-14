@@ -79,6 +79,21 @@ BOOST_AUTO_TEST_CASE(test_file_ops)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_readFileIntoString)
+{
+    const std::string filename = Support::datapath("text.txt");
+    BOOST_CHECK(FileUtils::fileExists(filename));
+
+    std::string source = FileUtils::readFileIntoString(filename);
+
+    const std::string ref = "Redistribution and use in source and binary forms, with or without modification...";
+
+    BOOST_CHECK(source == ref);
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_CASE(test_getcwd)
 {
 #if 0
