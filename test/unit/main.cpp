@@ -38,7 +38,7 @@
 #include <pdal/pdal_internal.hpp>
 
 #ifdef PDAL_HAVE_PYTHON
-#include <pdal/plang/PythonSupport.hpp>
+#include <pdal/plang/Environment.hpp>
 struct PythonConfig 
 {
     PythonConfig()   { ::pdal::plang::Environment::startup(); }

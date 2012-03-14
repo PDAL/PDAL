@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PYTHONSUPPORT_H
-#define PYTHONSUPPORT_H
+#ifndef PYTHONENVIRONMENT_H
+#define PYTHONENVIRONMENT_H
 
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON

@@ -35,7 +35,7 @@
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
-#include <pdal/plang/PythonSupport.hpp>
+#include <pdal/plang/Environment.hpp>
 #include <pdal/plang/Invocation.hpp>
 
 #include <string>
@@ -268,8 +268,58 @@ void Invocation::compile()
 }
 
 
-inline
-static int getPythonDataType(dimension::Interpretation datatype, boost::uint32_t siz)
+
+
+void Invocation::resetArguments()
+{
+    Py_XDECREF(m_varsIn);
+    Py_XDECREF(m_varsOut);
+
+    Py_XDECREF(m_scriptResult);
+
+    Py_XDECREF(m_scriptArgs); // also decrements script and vars
+
+    for (unsigned int i=0; i<m_pyInputArrays.size(); i++)
+    {
+        PyObject* obj = m_pyInputArrays[i];
+        Py_XDECREF(obj);
+    }
+    m_pyInputArrays.clear();
+
+    m_varsIn = PyDict_New();
+    m_varsOut = PyDict_New();
+    
+    return;
+}
+
+
+void Invocation::insertArgument(const std::string& name, 
+                                   boost::uint8_t* data, 
+                                   boost::uint32_t data_len, 
+                                   boost::uint32_t data_stride,                                  
+                                   dimension::Interpretation dataType, 
+                                   boost::uint32_t numBytes)
+{
+    npy_intp mydims = data_len;
+    int nd = 1;
+    npy_intp* dims = &mydims;
+    npy_intp stride = data_stride;
+    npy_intp* strides = &stride;
+    int flags = NPY_CARRAY; // NPY_BEHAVED
+
+    const int pyDataType = getPythonDataType(dataType, numBytes);
+        
+    PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType, strides, data, 0, flags, NULL);
+    
+    m_pyInputArrays.push_back(pyArray);
+
+    PyDict_SetItemString(m_varsIn, name.c_str(), pyArray);
+    
+    return;
+}
+
+
+int Invocation::getPythonDataType(dimension::Interpretation datatype, boost::uint32_t siz)
 {
     switch (datatype)
     {
@@ -322,61 +372,14 @@ static int getPythonDataType(dimension::Interpretation datatype, boost::uint32_t
 }
 
 
-void Invocation::resetArguments()
-{
-    Py_XDECREF(m_varsIn);
-    Py_XDECREF(m_varsOut);
-
-    Py_XDECREF(m_scriptResult);
-
-    Py_XDECREF(m_scriptArgs); // also decrements script and vars
-
-    for (unsigned int i=0; i<m_pyInputArrays.size(); i++)
-    {
-        PyObject* obj = m_pyInputArrays[i];
-        Py_XDECREF(obj);
-    }
-    m_pyInputArrays.clear();
-
-    m_varsIn = PyDict_New();
-    m_varsOut = PyDict_New();
-    
-    return;
-}
-
-
-void Invocation::insertArgument(const std::string& name, 
-                                   boost::uint8_t* data, 
-                                   boost::uint32_t data_len, 
-                                   boost::uint32_t data_stride,                                  
-                                   dimension::Interpretation dataType, 
-                                   boost::uint32_t numBytes)
-{
-    npy_intp mydims = data_len;
-    int nd = 1;
-    npy_intp* dims = &mydims;
-    npy_intp stride = data_stride;
-    npy_intp* strides = &stride;
-    int flags = NPY_CARRAY; // NPY_BEHAVED
-
-    const int pyDataType = getPythonDataType(dataType, numBytes);
-        
-    PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType, strides, data, 0, flags, NULL);
-    
-    m_pyInputArrays.push_back(pyArray);
-
-    PyDict_SetItemString(m_varsIn, name.c_str(), pyArray);
-    
-    return;
-}
-
-
 bool Invocation::hasOutputVariable(const std::string& name) const
 {
    PyObject* obj = PyDict_GetItemString(m_varsOut, name.c_str());
 
    return (obj!=NULL);
 }
+
+
 
 
 void Invocation::extractResult(const std::string& name, 
@@ -475,37 +478,6 @@ void Invocation::extractResult(const std::string& name,
 
     return;
 }
-
-
-bool Invocation::execute()
-{
-    if (!m_compile)
-    {
-        throw python_error("no code has been compiled");
-    }
-
-    Py_INCREF(m_varsIn);
-    Py_INCREF(m_varsOut);
-    m_scriptArgs = PyTuple_New(2);
-    PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
-    PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
-
-    m_scriptResult = PyObject_CallObject(m_func, m_scriptArgs);
-    if (!m_scriptResult) m_env.handleError();
-
-    if (!PyBool_Check(m_scriptResult))
-    {
-        throw python_error("user function return value not a boolean type");
-    }
-    bool sts = false;
-    if (m_scriptResult == Py_True)
-    {
-        sts = true;
-    }
-
-    return sts;
-}
-
 
 
 

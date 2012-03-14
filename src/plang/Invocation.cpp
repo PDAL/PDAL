@@ -51,6 +51,37 @@ namespace pdal { namespace plang {
 
 
 
+bool Invocation::execute()
+{
+    if (!m_compile)
+    {
+        throw python_error("no code has been compiled");
+    }
+
+    Py_INCREF(m_varsIn);
+    Py_INCREF(m_varsOut);
+    m_scriptArgs = PyTuple_New(2);
+    PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
+    PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
+
+    m_scriptResult = PyObject_CallObject(m_func, m_scriptArgs);
+    if (!m_scriptResult) m_env.handleError();
+
+    if (!PyBool_Check(m_scriptResult))
+    {
+        throw python_error("user function return value not a boolean type");
+    }
+    bool sts = false;
+    if (m_scriptResult == Py_True)
+    {
+        sts = true;
+    }
+
+    return sts;
+}
+
+
+
 } } //namespaces
 
 #endif

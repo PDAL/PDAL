@@ -365,11 +365,15 @@ set(PDAL_PLANG_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_PLANG_PATH})
 set(PDAL_PLANG_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_PLANG_PATH})
 
 set(PDAL_PLANG_HPP
-  ${PDAL_PLANG_HEADERS}/PythonSupport.hpp
+  ${PDAL_PLANG_HEADERS}/Environment.hpp
+  ${PDAL_PLANG_HEADERS}/Invocation.hpp
+  ${PDAL_PLANG_HEADERS}/BufferedInvocation.hpp
 )
 
 set (PDAL_PLANG_CPP 
-  ${PDAL_PLANG_SRC}/PythonSupport.cpp
+  ${PDAL_PLANG_SRC}/Environment.cpp
+  ${PDAL_PLANG_SRC}/Invocation.cpp
+  ${PDAL_PLANG_SRC}/BufferedInvocation.cpp
 )
 
 list (APPEND PDAL_CPP ${PDAL_PLANG_CPP} )

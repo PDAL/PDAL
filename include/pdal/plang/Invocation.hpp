@@ -40,7 +40,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/plang/PythonSupport.hpp>
+#include <pdal/plang/Environment.hpp>
 
 
 namespace pdal { namespace plang {
@@ -76,6 +76,8 @@ public:
     // as would be used for a predicate function
     // (that is, the return value is NOT an error indicator)
     bool execute();
+
+    static int getPythonDataType(dimension::Interpretation datatype, boost::uint32_t siz);
 
 private:
     Environment& m_env;
