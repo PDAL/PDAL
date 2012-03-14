@@ -65,6 +65,9 @@ public:
     static bool fileExists(const std::string& filename);
     static boost::uintmax_t fileSize(const std::string& filename);
 
+    // reads a file into a text string for you
+    static std::string readFileIntoString(const std::string& filename);
+
     // return current working dir
     // the result will always have a trailing '/'
     static std::string getcwd();
