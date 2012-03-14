@@ -98,7 +98,11 @@ void Invocation::compile()
     m_dictionary = PyModule_GetDict(m_module);
 
     m_function = PyDict_GetItemString(m_dictionary, m_script.function());
-    if (!m_function) m_env.handleError();
+    if (!m_function)
+    {
+        throw python_error("unable to find target function in module");
+    }
+
     if (!PyCallable_Check(m_function)) m_env.handleError();
   
     return;
@@ -308,6 +312,10 @@ int Invocation::getPythonDataType(dimension::Interpretation datatype, boost::uin
     case dimension::SignedInteger:
         switch (siz)
         {
+        case 1:
+            return PyArray_BYTE;
+        case 2:
+            return PyArray_SHORT;
         case 4:
             return PyArray_INT;
         case 8:
@@ -317,6 +325,10 @@ int Invocation::getPythonDataType(dimension::Interpretation datatype, boost::uin
     case dimension::UnsignedInteger:
         switch (siz)
         {
+        case 1:
+            return PyArray_UBYTE;
+        case 2:
+            return PyArray_USHORT;
         case 4:
             return PyArray_UINT;
         case 8:

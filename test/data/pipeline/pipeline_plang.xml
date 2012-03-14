@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+        <Filter type="filters.predicate">
+            <Option name="filename">test1.py</Option>
+            <Option name="module">anything</Option>
+            <Option name="function">fff</Option>
+            <Reader type="drivers.las.reader">
+                <Option name="filename">
+                    1.2-with-color.las
+                </Option>
+            </Reader>
+        </Filter>
+</Pipeline>

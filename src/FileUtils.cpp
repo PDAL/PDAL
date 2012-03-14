@@ -133,6 +133,16 @@ boost::uintmax_t FileUtils::fileSize(const std::string& file)
 }
 
 
+std::string FileUtils::readFileIntoString(const std::string& filename)
+{
+    std::istream* stream = FileUtils::openFile(filename, false);
+    assert(stream);
+    std::string str((std::istreambuf_iterator<char>(*stream)), std::istreambuf_iterator<char>());
+    FileUtils::closeFile(stream);
+    return str;
+}
+
+
 std::string FileUtils::addTrailingSlash(const std::string& path)
 {
     std::string ret = path;

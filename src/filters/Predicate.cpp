@@ -93,10 +93,10 @@ boost::uint32_t Predicate::processBuffer(PointBuffer& srcData, PointBuffer& dstD
 
     python.execute();
     
-    assert(python.hasOutputVariable("Result"));
+    assert(python.hasOutputVariable("Mask"));
 
     boost::uint8_t* mask = new boost::uint8_t[srcData.getNumPoints()];
-    python.extractResult("Result", (boost::uint8_t*)mask, srcData.getNumPoints(), 1, pdal::dimension::UnsignedByte, 1);
+    python.extractResult("Mask", (boost::uint8_t*)mask, srcData.getNumPoints(), 1, pdal::dimension::UnsignedByte, 1);
 
     boost::uint8_t* dst = dstData.getData(0);
     boost::uint8_t* src = srcData.getData(0);
