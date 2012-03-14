@@ -48,8 +48,6 @@ class PDAL_DLL ReaderBase: public pdal::Reader
 public:
     ReaderBase(const Options& options) : Reader(options) {}
 
-    virtual int getMetadataRecordCount() const = 0;
-    virtual const MetadataRecord& getMetadataRecord(int index) const = 0;
     virtual void addDefaultDimensions() = 0;
     
     virtual PointFormat getPointFormat() const = 0;

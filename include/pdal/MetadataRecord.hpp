@@ -36,36 +36,81 @@
 #define INCLUDED_METADATARECORD_HPP
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/Bounds.hpp>
+#include <pdal/SpatialReference.hpp>
+
+
 
 #include <boost/shared_array.hpp>
+#include <boost/variant.hpp>
+#include <vector>
 
 namespace pdal
 {
 
-class PDAL_DLL MetadataRecord
+
+namespace metadata {
+
+    enum Type
+    {
+        SignedInteger,
+        UnsignedInteger,
+        Float,
+        String,
+        ByteArray,
+        Bounds,
+        SpatialReference
+        
+    };
+
+} // metadata
+
+
+typedef boost::variant< 
+                        float,
+                        double,
+                        boost::int8_t,
+                        boost::uint8_t,
+                        boost::int16_t,
+                        boost::uint16_t,
+                        boost::int32_t,
+                        boost::uint32_t,
+                        boost::int64_t,
+                        boost::uint64_t,
+                        std::string, 
+                        std::vector<boost::uint8_t>, 
+                        pdal::SpatialReference, 
+                        pdal::Bounds<double> > Variant;
+
+class PDAL_DLL Metadata 
 {
 public:
     // makes a local copy of the buffer, which is a shared ptr among by all copes of the metadata record
-    MetadataRecord(const boost::uint8_t* bytes, std::size_t len);
+    Metadata();
 
-    MetadataRecord(const MetadataRecord&);
+    Metadata(const Metadata&);
 
-    virtual ~MetadataRecord();
+    ~Metadata();
+    
+    template <class T> inline void set(T const& v) { m_variant = v; } 
+    template <class T> T get() { return boost::get<T>(m_variant); }
+    Metadata& operator=(Metadata const& rhs);
 
-    MetadataRecord& operator=(MetadataRecord const& rhs);
+    bool operator==(Metadata const& rhs) const;
 
-    bool operator==(MetadataRecord const& rhs) const;
-
-    const boost::shared_array<boost::uint8_t> getBytes() const;
+    std::vector<boost::uint8_t> const*  getBytes() const;
     std::size_t getLength() const;
 
 private:
-    boost::shared_array<boost::uint8_t> m_bytes;
-    std::size_t m_length;
+    Variant m_variant;
+    std::string m_name;
+    std::string m_namespace;
+    
 };
 
 
-std::ostream& operator<<(std::ostream& ostr, const MetadataRecord& srs);
+std::ostream& operator<<(std::ostream& ostr, const Metadata& srs);
 
 
 } // namespace pdal

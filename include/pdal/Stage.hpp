@@ -73,10 +73,9 @@ public:
     PointCountType getPointCountType() const;
     const Bounds<double>& getBounds() const;
     const SpatialReference& getSpatialReference() const;
-    
-    virtual int getMetadataRecordCount() const;
-    virtual const MetadataRecord& getMetadataRecord(int index) const;
 
+    virtual std::vector<Metadata> getMetadata() const;    
+    
     virtual bool supportsIterator (StageIteratorType) const = 0;
 
     virtual StageSequentialIterator* createSequentialIterator(PointBuffer&) const { return NULL; }
@@ -95,7 +94,6 @@ protected:
     void setSpatialReference(SpatialReference const&);
     void addDefaultDimension(Dimension const&, std::string const&);
     virtual void addDefaultDimensions();
-    virtual MetadataRecord& getMetadataRecordRef(int index);
 
     // convenience function, for doing a "copy ctor" on all the core props
     // (used by the Filter stage, for example)

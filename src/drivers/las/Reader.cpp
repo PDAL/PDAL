@@ -130,24 +130,6 @@ const std::string& Reader::getFileName() const
 }
 
 
-int Reader::getMetadataRecordCount() const
-{
-    return m_metadataRecords.size();
-}
-
-
-const MetadataRecord& Reader::getMetadataRecord(int index) const
-{
-    return m_metadataRecords[index];
-}
-
-
-MetadataRecord& Reader::getMetadataRecordRef(int index)
-{
-    return m_metadataRecords[index];
-}
-
-
 PointFormat Reader::getPointFormat() const
 {
     return m_lasHeader.getPointFormat();
