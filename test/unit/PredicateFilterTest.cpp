@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_SUITE(PredicateFilterTest)
 using namespace pdal;
 
 BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
-{return;
+{
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
@@ -56,7 +56,8 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
         "def yow(ins,outs):\n"
         "  X = ins['X']\n"
         "  Result = np.less(X, 1.0)\n"
-        "  print Result\n"
+        "  #print X\n"
+        "  #print Result\n"
         "  outs['Result'] = Result\n"
         "  return True\n"
         );
@@ -92,7 +93,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
 
 
 BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
-{return;
+{
     // same as above, but with 'Y >' instead of 'X <'
 
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
@@ -103,9 +104,9 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
         "import numpy as np\n"
         "import numpy as np\n"
         "def yow(ins,outs):\n"
-        "  X = ins['X']\n"
+        "  Y = ins['Y']\n"
         "  Result = np.greater(Y, 1.0)\n"
-        "  print Result\n"
+        "  #print Result\n"
         "  outs['Result'] = Result\n"
         "  return True\n"
         );

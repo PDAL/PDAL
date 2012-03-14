@@ -96,7 +96,7 @@ boost::uint32_t Predicate::processBuffer(PointBuffer& srcData, PointBuffer& dstD
     {
         if (mask[srcIndex])
         {
-            memcpy(src, dst, numBytes);
+            memcpy(dst, src, numBytes);
             dst += numBytes;
             ++count;
         }
@@ -105,40 +105,9 @@ boost::uint32_t Predicate::processBuffer(PointBuffer& srcData, PointBuffer& dstD
 
     dstData.setNumPoints(count);
 
-    //boost::uint32_t dstIndex = dstData.getNumPoints();
-    //boost::uint32_t numPointsAdded = 0;
+    delete[] mask;
 
-    //Dimension const& dimX = schema.getDimension("X");
-    //Dimension const& dimY = schema.getDimension("Y");
-    //Dimension const& dimZ = schema.getDimension("Z");
-    //Dimension const& dimTime = schema.getDimension("Time");
-
-    //{
-    //    const double x = srcData.getField<double>(dimX, srcIndex);
-    //    const double y = srcData.getField<double>(dimY, srcIndex);
-    //    const double z = srcData.getField<double>(dimZ, srcIndex);
-    //    const boost::uint64_t t = srcData.getField<boost::uint64_t>(dimTime, srcIndex);
-    //    parser.setVariable("X", x);
-    //    parser.setVariable("Y", y);
-    //    parser.setVariable("Z", z);
-    //    parser.setVariable("Time", t);
-    //    bool ok = parser.evaluate();
-    //    assert(ok);
-    //    const bool predicate = parser.getVariable<bool>("result");
-
-    //    if (predicate)
-    //    {
-    //        dstData.copyPointFast(dstIndex, srcIndex, srcData);
-    //        dstData.setNumPoints(dstIndex+1);
-    //        ++dstIndex;
-    //        ++numPointsAdded;
-    //    }
-    //}
-
-    //assert(dstIndex <= dstData.getCapacity());
-
-    //return numPointsAdded;
-    return 0;
+    return count;
 }
 
 
@@ -190,8 +159,12 @@ boost::uint32_t Predicate::readBufferImpl(PointBuffer& dstData)
     // read in a full block of points
     PointBuffer srcData(dstData.getSchema(), (boost::uint32_t)dstData.getBufferByteCapacity());
 
-    // copy the valid points from the src block to the dst block
-    m_predicateFilter.processBuffer(srcData, dstData, *m_pythonMethod);
+    const boost::uint32_t numRead = getPrevIterator().read(srcData);
+    if (numRead > 0)
+    {
+        // copy the valid points from the src block to the dst block
+        m_predicateFilter.processBuffer(srcData, dstData, *m_pythonMethod);
+    }
 
     return dstData.getNumPoints();
 }
