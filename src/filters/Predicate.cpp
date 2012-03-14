@@ -44,18 +44,25 @@ namespace pdal { namespace filters {
 
 Predicate::Predicate(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
+    , m_script(NULL)
 {
     return;
 }
+
+
+Predicate::~Predicate()
+{
+    delete m_script;
+}
+
 
 void Predicate::initialize()
 {
     Filter::initialize();
     
-    m_expression = getOptions().getValueOrDefault<std::string>("expression", "") ;
-    log()->get(logDEBUG)  << "expression " << m_expression << std::endl;
+    m_script = new pdal::plang::Script(getOptions());
 
-    assert(m_expression != "");
+    log()->get(logDEBUG)  << "script " << *m_script << std::endl;
 
     return;
 }
@@ -64,8 +71,16 @@ void Predicate::initialize()
 const Options Predicate::getDefaultOptions() const
 {
     Options options;
-    Option expression("expression", "");
-    options.add(expression);
+
+    Option script("script", "");
+    options.add(script);
+
+    Option module("module", "");
+    options.add(module);
+
+    Option function("function", "");
+    options.add(function);
+
     return options;
 }
 
@@ -139,9 +154,9 @@ Predicate::~Predicate()
 
 void Predicate::createParser()
 {
-    const std::string program = m_predicateFilter.getExpression();
+    const pdal::plang::Script& script = m_predicateFilter.getScript();
 
-    m_pythonMethod = new pdal::plang::BufferedInvocation(program);
+    m_pythonMethod = new pdal::plang::BufferedInvocation(script);
 
     m_pythonMethod->compile();
 

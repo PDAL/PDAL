@@ -42,15 +42,11 @@
 #  pragma warning(disable: 4505)  // unreferenced local function has been removed
 #endif
 
-//#include <Python.h>
-//#include <numpy/arrayobject.h>
-
-
 namespace pdal { namespace plang {
 
 
-BufferedInvocation::BufferedInvocation(const std::string& source)
-    : Invocation(source)
+BufferedInvocation::BufferedInvocation(const Script& script)
+    : Invocation(script)
 {
     return;
 }

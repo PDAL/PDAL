@@ -50,10 +50,10 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
     // keep all points where x less than 1.0
-    const pdal::Option opt("expression", 
+    const pdal::Option source("source", 
         // "X < 1.0"
         "import numpy as np\n"
-        "def yow(ins,outs):\n"
+        "def yow1(ins,outs):\n"
         "  X = ins['X']\n"
         "  Result = np.less(X, 1.0)\n"
         "  #print X\n"
@@ -61,9 +61,12 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
         "  outs['Result'] = Result\n"
         "  return True\n"
         );
-
+    const pdal::Option module("module", "MyModule1");
+    const pdal::Option function("function", "yow1");
     pdal::Options opts;
-    opts.add(opt);
+    opts.add(source);
+    opts.add(module);
+    opts.add(function);
 
     pdal::filters::Predicate filter(reader, opts);
     BOOST_CHECK(filter.getDescription() == "Predicate Filter");
@@ -99,20 +102,22 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
     Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
 
-    const pdal::Option opt("expression", 
+    const pdal::Option source("source", 
         // "Y > 1.0"
         "import numpy as np\n"
-        "import numpy as np\n"
-        "def yow(ins,outs):\n"
+        "def yow2(ins,outs):\n"
         "  Y = ins['Y']\n"
         "  Result = np.greater(Y, 1.0)\n"
         "  #print Result\n"
         "  outs['Result'] = Result\n"
         "  return True\n"
         );
-
+    const pdal::Option module("module", "MyModule1");
+    const pdal::Option function("function", "yow2");
     pdal::Options opts;
-    opts.add(opt);
+    opts.add(source);
+    opts.add(module);
+    opts.add(function);
 
     pdal::filters::Predicate filter(reader, opts);
     BOOST_CHECK(filter.getDescription() == "Predicate Filter");

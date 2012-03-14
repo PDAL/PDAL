@@ -46,14 +46,15 @@ BOOST_AUTO_TEST_CASE(PythonTest_basic)
 {
     //pdal::plang::PythonEnvironment::startup();
 
-    const char* program =
+    const char* source =
         "import numpy as np\n"
         "def yow(ins,outs):\n"
         "  #print 'hi'\n"
         "  return True\n"
         ;
+    pdal::plang::Script script(source, "MyTest", "yow");
 
-    pdal::plang::Invocation meth(program);
+    pdal::plang::Invocation meth(script);
     meth.compile();
     meth.execute();
 
@@ -71,13 +72,14 @@ BOOST_AUTO_TEST_CASE(PythonTest_basic)
 
 BOOST_AUTO_TEST_CASE(PythonTest_compile_error)
 {
-    const char* program =
+    const char* source =
         "import numpy as np\n"
         "def yow(ins,outs):\n"
         "return True\n"
         ;
+    pdal::plang::Script script(source, "MyTest", "yow");
 
-    pdal::plang::Invocation meth(program);
+    pdal::plang::Invocation meth(script);
 
     BOOST_REQUIRE_THROW(meth.compile(), pdal::python_error);
 
@@ -87,14 +89,15 @@ BOOST_AUTO_TEST_CASE(PythonTest_compile_error)
 
 BOOST_AUTO_TEST_CASE(PythonTest_runtime_error)
 {
-    const char* program =
+    const char* source =
         "import numpy as np\n"
         "def yow(ins,outs):\n"
         "  z['s'] = 9\n"
         "  return True\n"
         ;
+    pdal::plang::Script script(source, "MyTest", "yow");
 
-    pdal::plang::Invocation meth(program);
+    pdal::plang::Invocation meth(script);
     meth.compile();
     
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -105,14 +108,15 @@ BOOST_AUTO_TEST_CASE(PythonTest_runtime_error)
 
 BOOST_AUTO_TEST_CASE(PythonTest_toofewinputs)
 {
-    const char* program =
+    const char* source =
         "import numpy as np\n"
         "def yow(ins):\n"
         "  #print 'foo'\n"
         "  return True\n"
         ;
+    pdal::plang::Script script(source, "MyTest", "yow");
 
-    pdal::plang::Invocation meth(program);
+    pdal::plang::Invocation meth(script);
     meth.compile();
     
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -123,14 +127,15 @@ BOOST_AUTO_TEST_CASE(PythonTest_toofewinputs)
 
 BOOST_AUTO_TEST_CASE(PythonTest_toomanyinputs)
 {
-    const char* program =
+    const char* source =
         "import numpy as np\n"
         "def yow(ins,outs,mids):\n"
         "  #print 'foo'\n"
         "  return True\n"
         ;
+    pdal::plang::Script script(source, "MyTest", "yow");
 
-    pdal::plang::Invocation meth(program);
+    pdal::plang::Invocation meth(script);
     meth.compile();
     
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -141,14 +146,15 @@ BOOST_AUTO_TEST_CASE(PythonTest_toomanyinputs)
 
 BOOST_AUTO_TEST_CASE(PythonTest_returnvoid)
 {
-    const char* program =
+    const char* source =
         "import numpy as np\n"
         "def yow(ins,outs,mids):\n"
         "  #print 'foo'\n"
         "  return\n"
         ;
+    pdal::plang::Script script(source, "MyTest", "yow");
 
-    pdal::plang::Invocation meth(program);
+    pdal::plang::Invocation meth(script);
     meth.compile();
     
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -159,14 +165,15 @@ BOOST_AUTO_TEST_CASE(PythonTest_returnvoid)
 
 BOOST_AUTO_TEST_CASE(PythonTest_returnint)
 {
-    const char* program =
+    const char* source =
         "import numpy as np\n"
         "def yow(ins,outs,mids):\n"
         "  #print 'foo'\n"
         "  return 7\n"
         ;
+    pdal::plang::Script script(source, "MyTest", "yow");
 
-    pdal::plang::Invocation meth(program);
+    pdal::plang::Invocation meth(script);
     meth.compile();
     
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -186,7 +193,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_ins)
 {
     double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
 
-    const char* program =
+    const char* source =
         "import numpy as np\n"
         "def yow(ins,outs):\n"
         "  #print ins['X']\n"
@@ -194,8 +201,9 @@ BOOST_AUTO_TEST_CASE(PythonTest_ins)
         "  #print X\n"
         "  return True\n"
         ;
+    pdal::plang::Script script(source, "MyTest", "yow");
 
-    pdal::plang::Invocation meth(program);
+    pdal::plang::Invocation meth(script);
     meth.compile();
     
     meth.insertArgument("X", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
@@ -208,7 +216,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_ins)
 
 BOOST_AUTO_TEST_CASE(PythonTest_outs)
 {
-    const char* program =
+    const char* source =
         "import numpy as np\n"
         "def yow(ins,outs):\n"
         "  #print outs['X']\n"
@@ -218,8 +226,9 @@ BOOST_AUTO_TEST_CASE(PythonTest_outs)
         "  #print outs['X']\n"
         "  return True\n"
         ;
+    pdal::plang::Script script(source, "MyTest", "yow");
 
-    pdal::plang::Invocation meth(program);
+    pdal::plang::Invocation meth(script);
     meth.compile();
     
     meth.execute();
@@ -241,13 +250,14 @@ BOOST_AUTO_TEST_CASE(PythonTest_outs)
 
 BOOST_AUTO_TEST_CASE(PythonTest_returntrue)
 {
-    const char* program =
+    const char* source =
         "import numpy as np\n"
         "def yow(ins,outs):\n"
         "  return True\n"
         ;
+    pdal::plang::Script script(source, "MyTest", "yow");
 
-    pdal::plang::Invocation meth(program);
+    pdal::plang::Invocation meth(script);
     meth.compile();
     
     bool sts = meth.execute();
@@ -259,13 +269,14 @@ BOOST_AUTO_TEST_CASE(PythonTest_returntrue)
 
 BOOST_AUTO_TEST_CASE(PythonTest_returnfalse)
 {
-    const char* program =
+    const char* source =
         "import numpy as np\n"
         "def yow(ins,outs):\n"
         "  return False\n"
         ;
+    pdal::plang::Script script(source, "MyTest", "yow");
 
-    pdal::plang::Invocation meth(program);
+    pdal::plang::Invocation meth(script);
     meth.compile();
     
     bool sts = meth.execute();
@@ -283,7 +294,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_returnfalse)
 
 BOOST_AUTO_TEST_CASE(PythonTest_reentry)
 {
-    const char* program =
+    const char* source =
         "import numpy as np\n"
         "def yow(ins,outs):\n"
         "  X = ins['X']\n"
@@ -292,13 +303,14 @@ BOOST_AUTO_TEST_CASE(PythonTest_reentry)
         "  outs['Y'] = Y\n"
         "  return True\n"
         ;
+    pdal::plang::Script script(source, "MyTest", "yow");
 
     double indata1[5] = {0.0, 1.0, 2.0, 3.0, 4.0};
     double outdata1[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
     double indata2[5] = {10.0, 20.0, 30.0, 40.0, 50.0};
     double outdata2[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 
-    pdal::plang::Invocation meth(program);
+    pdal::plang::Invocation meth(script);
     meth.compile();
     
     {

@@ -52,6 +52,7 @@ public:
     SET_STAGE_NAME("filters.predicate", "Predicate Filter")
 
     Predicate(Stage& prevStage, const Options&);
+    ~Predicate();
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -68,10 +69,10 @@ public:
 
     boost::uint32_t processBuffer(PointBuffer& srcData, PointBuffer& dstData, pdal::plang::BufferedInvocation&) const;
 
-    const std::string& getExpression() const { return m_expression; }
+    const pdal::plang::Script& getScript() const { return *m_script; }
 
 private:
-    std::string m_expression;
+    pdal::plang::Script* m_script;
 
     Predicate& operator=(const Predicate&); // not implemented
     Predicate(const Predicate&); // not implemented

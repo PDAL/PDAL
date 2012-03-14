@@ -38,7 +38,6 @@
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
-
 #include <pdal/Filter.hpp>
 #include <pdal/FilterIterator.hpp>
 #include <pdal/plang/BufferedInvocation.hpp>
@@ -54,6 +53,7 @@ public:
     SET_STAGE_NAME("filters.programmable", "Programmable Filter")
 
     Programmable(Stage& prevStage, const Options&);
+    ~Programmable();
 
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
@@ -70,10 +70,10 @@ public:
 
     void processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation& python) const;
 
-    const std::string& getProgram() const { return m_program; }
+    const pdal::plang::Script& getScript() const { return *m_script; }
 
 private:
-    std::string m_program;
+    pdal::plang::Script* m_script;
 
     Programmable& operator=(const Programmable&); // not implemented
     Programmable(const Programmable&); // not implemented

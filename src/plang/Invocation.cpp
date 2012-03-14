@@ -61,14 +61,13 @@ void Invocation::numpy_init()
 }
 
 
-Invocation::Invocation(const std::string& source)
-    : m_env(*Environment::get())
-    , m_source(source)
-    , m_compile(NULL)
+Invocation::Invocation(const Script& script)
+    : m_script(script)
+    , m_env(*Environment::get())
+    , m_bytecode(NULL)
     , m_module(NULL)
-    , m_dict(NULL)
-    , m_func(NULL)
-    , m_scriptSource(NULL)
+    , m_dictionary(NULL)
+    , m_function(NULL)
     , m_varsIn(NULL)
     , m_varsOut(NULL)
     , m_scriptArgs(NULL)
@@ -80,26 +79,33 @@ Invocation::Invocation(const std::string& source)
 }
 
 
+Invocation::~Invocation()
+{
+    cleanup();
+    return;
+}
+
+
 void Invocation::compile()
 {
-    m_compile = Py_CompileString(m_source.c_str(), "YowModule", Py_file_input);
-    if (!m_compile) m_env.handleError();
+    m_bytecode = Py_CompileString(m_script.source(), m_script.module(), Py_file_input);
+    if (!m_bytecode) m_env.handleError();
 
-    assert(m_compile);
-    m_module = PyImport_ExecCodeModule("YowModule", m_compile);
+    assert(m_bytecode);
+    m_module = PyImport_ExecCodeModule(m_script.module(), m_bytecode);
     if (!m_module) m_env.handleError();
 
-    m_dict = PyModule_GetDict(m_module);
+    m_dictionary = PyModule_GetDict(m_module);
 
-    m_func = PyDict_GetItemString(m_dict, "yow");
-    if (!m_func) m_env.handleError();
-    if (!PyCallable_Check(m_func)) m_env.handleError();
+    m_function = PyDict_GetItemString(m_dictionary, m_script.function());
+    if (!m_function) m_env.handleError();
+    if (!PyCallable_Check(m_function)) m_env.handleError();
   
     return;
 }
 
 
-void Invocation::resetArguments()
+void Invocation::cleanup()
 {
     Py_XDECREF(m_varsIn);
     Py_XDECREF(m_varsOut);
@@ -114,6 +120,14 @@ void Invocation::resetArguments()
         Py_XDECREF(obj);
     }
     m_pyInputArrays.clear();
+
+    return;
+}
+
+
+void Invocation::resetArguments()
+{
+    cleanup();
 
     m_varsIn = PyDict_New();
     m_varsOut = PyDict_New();
@@ -198,6 +212,24 @@ void Invocation::extractResult(const std::string& name,
         for (unsigned int i=0; i<data_len; i++)
         {
             *(boost::uint8_t*)p = src[i];
+            p += data_stride;
+        }
+    }
+    else if (pyDataType == PyArray_SHORT)
+    {
+        boost::int16_t* src = (boost::int16_t*)PyArray_GetPtr(arr, &one);
+        for (unsigned int i=0; i<data_len; i++)
+        {
+            *(boost::int16_t*)p = src[i];
+            p += data_stride;
+        }
+    }
+    else if (pyDataType == PyArray_USHORT)
+    {
+        boost::uint16_t* src = (boost::uint16_t*)PyArray_GetPtr(arr, &one);
+        for (unsigned int i=0; i<data_len; i++)
+        {
+            *(boost::uint16_t*)p = src[i];
             p += data_stride;
         }
     }
@@ -309,7 +341,7 @@ bool Invocation::hasOutputVariable(const std::string& name) const
 
 bool Invocation::execute()
 {
-    if (!m_compile)
+    if (!m_bytecode)
     {
         throw python_error("no code has been compiled");
     }
@@ -320,7 +352,7 @@ bool Invocation::execute()
     PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
     PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
 
-    m_scriptResult = PyObject_CallObject(m_func, m_scriptArgs);
+    m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
     if (!m_scriptResult) m_env.handleError();
 
     if (!PyBool_Check(m_scriptResult))

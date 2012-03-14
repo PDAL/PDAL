@@ -44,19 +44,25 @@ namespace pdal { namespace filters {
 
 Programmable::Programmable(Stage& prevStage, const Options& options)
     : pdal::Filter(prevStage, options)
-    , m_program("")
+    , m_script(NULL)
 {
     return;
 }
+
+
+Programmable::~Programmable()
+{
+    delete m_script;
+}
+
 
 void Programmable::initialize()
 {
     Filter::initialize();
     
-    m_program = getOptions().getValueOrDefault<std::string>("program", "") ;
-    log()->get(logDEBUG)  << "program " << m_program << std::endl;
+    m_script = new pdal::plang::Script(getOptions());
 
-    assert(m_program != "");
+    log()->get(logDEBUG)  << "script " << *m_script << std::endl;
 
     return;
 }
@@ -65,9 +71,18 @@ void Programmable::initialize()
 const Options Programmable::getDefaultOptions() const
 {
     Options options;
-    Option program("program", "");
-    options.add(program);
+
+    Option script("script", "");
+    options.add(script);
+
+    Option module("module", "");
+    options.add(module);
+
+    Option function("function", "");
+    options.add(function);
+
     return options;
+
 }
 
 
@@ -114,9 +129,9 @@ Programmable::~Programmable()
 
 void Programmable::createParser()
 {
-    const std::string program = m_programmableFilter.getProgram();
+    const pdal::plang::Script& script = m_programmableFilter.getScript();
 
-    m_pythonMethod = new pdal::plang::BufferedInvocation(program);
+    m_pythonMethod = new pdal::plang::BufferedInvocation(script);
 
     m_pythonMethod->compile();
 

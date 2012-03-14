@@ -32,29 +32,42 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PYTHONBUFFEREDINVOCATION_H
-#define PYTHONBUFFEREDINVOCATION_H
+#ifndef PYTHONSCRIPT_H
+#define PYTHONSCRIPT_H
 
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
-#include <pdal/plang/Invocation.hpp>
+#include <pdal/Options.hpp>
+
 
 namespace pdal { namespace plang {
 
 
-
-class PDAL_DLL BufferedInvocation : public Invocation
+class PDAL_DLL Script
 {
 public:
-    BufferedInvocation(const Script& script);
+    Script(const std::string& sourceCode, const std::string& moduleName, const std::string& functionName);
+    Script(const Options&);
+    Script(const Script&);
+    ~Script();
 
-    void beginChunk(PointBuffer&);
-    void endChunk(PointBuffer&);
+    // the Py functions want char* or const char* things, not std::string things
+    const char* source() const { return m_source; }
+    const char* module() const { return m_module; }
+    char* module() { return m_module; }
+    const char* function() const { return m_function; }
 
 private:
-    BufferedInvocation& operator=(BufferedInvocation const& rhs); // nope
+    char* m_source;
+    char* m_module;
+    char* m_function;
+
+    Script& operator=(Script const& rhs); // nope
 };
+
+PDAL_DLL std::ostream& operator<<(std::ostream& os, Script const& d);
+
 
 
 } } // namespaces

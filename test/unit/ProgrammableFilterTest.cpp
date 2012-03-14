@@ -52,9 +52,9 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
     Bounds<double> bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
     pdal::drivers::faux::Reader reader(bounds, 10, pdal::drivers::faux::Reader::Ramp);
 
-    const pdal::Option opt("program",
+    const pdal::Option source("source",
         "import numpy as np\n"
-        "def yow(ins,outs):\n"
+        "def myfunc(ins,outs):\n"
         "  X = ins['X']\n"
         "  Y = ins['Y']\n"
         "  Z = ins['Z']\n"
@@ -68,8 +68,12 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
         "  outs['Z'] = Z\n"
         "  return True\n"
         );
+    const pdal::Option module("module", "MyModule");
+    const pdal::Option function("function", "myfunc");
     pdal::Options opts;
-    opts.add(opt);
+    opts.add(source);
+    opts.add(module);
+    opts.add(function);
 
     pdal::filters::Programmable filter(reader, opts);
     BOOST_CHECK(filter.getDescription() == "Programmable Filter");

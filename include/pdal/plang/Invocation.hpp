@@ -40,8 +40,9 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/Options.hpp>
 #include <pdal/plang/Environment.hpp>
-
+#include <pdal/plang/Script.hpp>
 
 namespace pdal { namespace plang {
 
@@ -49,7 +50,9 @@ namespace pdal { namespace plang {
 class PDAL_DLL Invocation
 {
 public:
-    Invocation(const std::string& source);
+    Invocation(const Script&);
+    ~Invocation();
+
     void compile();
 
     void resetArguments();
@@ -82,15 +85,16 @@ public:
     static void numpy_init();
 
 private:
+    void cleanup();
+
+    Script m_script;
     Environment& m_env;
-    std::string m_source;
 
-    PyObject* m_compile;
+    PyObject* m_bytecode;
     PyObject* m_module;
-    PyObject* m_dict;
-    PyObject* m_func;
+    PyObject* m_dictionary;
+    PyObject* m_function;
 
-    PyObject* m_scriptSource;
     PyObject* m_varsIn;
     PyObject* m_varsOut;
     PyObject* m_scriptArgs;
@@ -99,8 +103,6 @@ private:
 
     Invocation& operator=(Invocation const& rhs); // nope
 };
-
-
 
 
 } } // namespaces
