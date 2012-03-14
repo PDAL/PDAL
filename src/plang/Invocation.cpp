@@ -174,8 +174,15 @@ void Invocation::extractResult(const std::string& name,
                                   boost::uint32_t numBytes)
 {      
     PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
-    assert(xarr);
-    assert(PyArray_Check(xarr));
+    if (!xarr)
+    {
+        throw python_error("plang output variable '" + name + "' not found");
+    }
+    if (!PyArray_Check(xarr))
+    {
+        throw python_error("plang output variable  '" + name + "' is not a numpy array");
+    }
+
     PyArrayObject* arr = (PyArrayObject*)xarr;
 
     npy_intp one=0;
@@ -276,6 +283,23 @@ void Invocation::extractResult(const std::string& name,
     else
     {
         assert(0);
+    }
+
+    return;
+}
+
+
+void Invocation::getOutputNames(std::vector<std::string>& names)
+{
+    names.clear();
+    
+    PyObject *key, *value;
+    Py_ssize_t pos = 0;
+
+    while (PyDict_Next(m_varsOut, &pos, &key, &value)) 
+    {
+        char* p = PyString_AsString(key);
+        names.push_back(p);
     }
 
     return;

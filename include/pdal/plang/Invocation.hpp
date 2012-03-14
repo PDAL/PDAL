@@ -80,6 +80,13 @@ public:
     // (that is, the return value is NOT an error indicator)
     bool execute();
 
+    // after a call to execute, this function will return you a list of
+    // the names in the 'outs' dictionary (this is used by the BufferedInvocation
+    // class to find the returned data -- faster to examine what's already
+    // in there than it is to iterate over all the possible names from
+    // the schema)
+    void getOutputNames(std::vector<std::string>& names);
+
     static int getPythonDataType(dimension::Interpretation datatype, boost::uint32_t siz);
 
     static void numpy_init();

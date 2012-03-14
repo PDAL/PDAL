@@ -40,9 +40,9 @@
 #include <pdal/plang/Invocation.hpp>
 
 
-BOOST_AUTO_TEST_SUITE(PythonTest)
+BOOST_AUTO_TEST_SUITE(PLangTest)
 
-BOOST_AUTO_TEST_CASE(PythonTest_basic)
+BOOST_AUTO_TEST_CASE(PLangTest_basic)
 {
     //pdal::plang::PythonEnvironment::startup();
 
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_basic)
 //
 //---------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(PythonTest_compile_error)
+BOOST_AUTO_TEST_CASE(PLangTest_compile_error)
 {
     const char* source =
         "import numpy as np\n"
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_compile_error)
 }
 
 
-BOOST_AUTO_TEST_CASE(PythonTest_runtime_error)
+BOOST_AUTO_TEST_CASE(PLangTest_runtime_error)
 {
     const char* source =
         "import numpy as np\n"
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_runtime_error)
 }
 
 
-BOOST_AUTO_TEST_CASE(PythonTest_toofewinputs)
+BOOST_AUTO_TEST_CASE(PLangTest_toofewinputs)
 {
     const char* source =
         "import numpy as np\n"
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_toofewinputs)
 }
 
 
-BOOST_AUTO_TEST_CASE(PythonTest_toomanyinputs)
+BOOST_AUTO_TEST_CASE(PLangTest_toomanyinputs)
 {
     const char* source =
         "import numpy as np\n"
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_toomanyinputs)
 }
 
 
-BOOST_AUTO_TEST_CASE(PythonTest_returnvoid)
+BOOST_AUTO_TEST_CASE(PLangTest_returnvoid)
 {
     const char* source =
         "import numpy as np\n"
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_returnvoid)
 }
 
 
-BOOST_AUTO_TEST_CASE(PythonTest_returnint)
+BOOST_AUTO_TEST_CASE(PLangTest_returnint)
 {
     const char* source =
         "import numpy as np\n"
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_returnint)
 //---------------------------------------------------------------------------
 
 
-BOOST_AUTO_TEST_CASE(PythonTest_ins)
+BOOST_AUTO_TEST_CASE(PLangTest_ins)
 {
     double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
 
@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_ins)
 }
 
 
-BOOST_AUTO_TEST_CASE(PythonTest_outs)
+BOOST_AUTO_TEST_CASE(PLangTest_outs)
 {
     const char* source =
         "import numpy as np\n"
@@ -248,7 +248,82 @@ BOOST_AUTO_TEST_CASE(PythonTest_outs)
 }
 
 
-BOOST_AUTO_TEST_CASE(PythonTest_returntrue)
+BOOST_AUTO_TEST_CASE(PLangTest_aliases)
+{
+    double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
+
+    const char* source =
+        "import numpy as np\n"
+        "def yow(ins,outs):\n"
+        "  \n"
+        "  #print ins['X']\n"
+        "  #print ins['prefix.X']\n"
+        "  \n"
+        "  X = ins['X']\n"
+        "  prefixX = ins['prefix.X']\n"
+        "  \n"
+        "  #print X\n"
+        "  #print prefixX\n"
+        "  \n"
+        "  Y = X + prefixX\n"
+        "  prefixY = Y\n"
+        "  \n"
+        "  #print Y\n"
+        "  #print prefixY\n"
+        "  \n"
+        "  outs['Y'] = Y\n"
+        "  outs['prefix.Y'] = prefixY\n"
+        "  \n"
+        "  #print outs['Y']\n"
+        "  #print outs['prefix.Y']\n"
+        "  return True\n"
+        ;
+    pdal::plang::Script script(source, "MyTest", "yow");
+
+    pdal::plang::Invocation meth(script);
+    meth.compile();
+
+    {
+        meth.insertArgument("X", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
+        meth.insertArgument("prefix.X", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
+    }
+
+    meth.execute();
+
+    {
+        BOOST_CHECK(meth.hasOutputVariable("Y"));
+        BOOST_CHECK(meth.hasOutputVariable("prefix.Y"));
+
+        double data[5];
+
+        meth.extractResult("Y", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
+        BOOST_CHECK(data[0] == 2.0);
+        BOOST_CHECK(data[1] == 4.0);
+        BOOST_CHECK(data[2] == 6.0);
+        BOOST_CHECK(data[3] == 8.0);
+        BOOST_CHECK(data[4] == 10.0);
+
+        meth.extractResult("prefix.Y", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
+        BOOST_CHECK(data[0] == 2.0);
+        BOOST_CHECK(data[1] == 4.0);
+        BOOST_CHECK(data[2] == 6.0);
+        BOOST_CHECK(data[3] == 8.0);
+        BOOST_CHECK(data[4] == 10.0);
+    }
+
+    {
+        std::vector<std::string> names;
+        meth.getOutputNames(names);
+        BOOST_CHECK(names.size() == 2);
+        BOOST_CHECK(names[0] == "Y");
+        BOOST_CHECK(names[1] == "prefix.Y");
+    }
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(PLangTest_returntrue)
 {
     const char* source =
         "import numpy as np\n"
@@ -267,7 +342,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_returntrue)
 }
 
 
-BOOST_AUTO_TEST_CASE(PythonTest_returnfalse)
+BOOST_AUTO_TEST_CASE(PLangTest_returnfalse)
 {
     const char* source =
         "import numpy as np\n"
@@ -292,7 +367,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_returnfalse)
 //
 //---------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(PythonTest_reentry)
+BOOST_AUTO_TEST_CASE(PLangTest_reentry)
 {
     const char* source =
         "import numpy as np\n"

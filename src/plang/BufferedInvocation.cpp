@@ -78,23 +78,37 @@ void BufferedInvocation::beginChunk(PointBuffer& buffer)
 
 void BufferedInvocation::endChunk(PointBuffer& buffer)
 {
+    // for each entry in the script's outs dictionary,
+    // look up that entry's name in the schema and then
+    // copy the data into the right dimension spot in the
+    // buffer
+
+    std::vector<std::string> names;
+    getOutputNames(names);
+
     const Schema& schema = buffer.getSchema();
 
-    schema::Map const& map = schema.getDimensions();
-    schema::index_by_index const& idx = map.get<schema::index>();
-    for (schema::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
+    for (unsigned int i=0; i<names.size(); i++)
     {
-        const Dimension& dim = *iter;
-        const std::string& name = dim.getName();
-        
-        if (hasOutputVariable(name))
+        schema::Map map = schema.getDimensions();
+        schema::index_by_name& name_index = map.get<schema::name>();
+        schema::index_by_name::const_iterator it = name_index.find(names[i]);
+        if (it != name_index.end()) 
         {
-            boost::uint8_t* data = buffer.getData(0) + dim.getByteOffset();
-            const boost::uint32_t numPoints = buffer.getNumPoints();
-            const boost::uint32_t stride = buffer.getSchema().getByteSize();
-            const dimension::Interpretation datatype = dim.getInterpretation();
-            const boost::uint32_t numBytes = dim.getByteSize();
-            extractResult(name, data, numPoints, stride, datatype, numBytes);
+            const Dimension& dim = *it;
+            const std::string& name = dim.getName();
+
+            assert(name == names[i]);
+            assert(hasOutputVariable(name));
+
+            {
+                boost::uint8_t* data = buffer.getData(0) + dim.getByteOffset();
+                const boost::uint32_t numPoints = buffer.getNumPoints();
+                const boost::uint32_t stride = buffer.getSchema().getByteSize();
+                const dimension::Interpretation datatype = dim.getInterpretation();
+                const boost::uint32_t numBytes = dim.getByteSize();
+                extractResult(name, data, numPoints, stride, datatype, numBytes);
+            }
         }
     }
 
