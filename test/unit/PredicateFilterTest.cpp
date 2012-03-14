@@ -55,10 +55,10 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
         "import numpy as np\n"
         "def yow1(ins,outs):\n"
         "  X = ins['X']\n"
-        "  Result = np.less(X, 1.0)\n"
+        "  Mask = np.less(X, 1.0)\n"
         "  #print X\n"
-        "  #print Result\n"
-        "  outs['Result'] = Result\n"
+        "  #print Mask\n"
+        "  outs['Mask'] = Mask\n"
         "  return True\n"
         );
     const pdal::Option module("module", "MyModule1");
@@ -107,9 +107,9 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
         "import numpy as np\n"
         "def yow2(ins,outs):\n"
         "  Y = ins['Y']\n"
-        "  Result = np.greater(Y, 1.0)\n"
-        "  #print Result\n"
-        "  outs['Result'] = Result\n"
+        "  Mask = np.greater(Y, 1.0)\n"
+        "  #print Mask\n"
+        "  outs['Mask'] = Mask\n"
         "  return True\n"
         );
     const pdal::Option module("module", "MyModule1");
