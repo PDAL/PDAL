@@ -44,7 +44,7 @@ struct PythonConfig
     PythonConfig()   { ::pdal::plang::Environment::startup(); }
     ~PythonConfig()  { ::pdal::plang::Environment::shutdown(); }
 };
-BOOST_GLOBAL_FIXTURE( PythonConfig );
+BOOST_GLOBAL_FIXTURE( PythonConfig )
 #endif
 
 #include "TestConfig.hpp"
