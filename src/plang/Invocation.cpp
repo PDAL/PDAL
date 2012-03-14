@@ -32,82 +32,25 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_PROGRAMMABLEFILTER_HPP
-#define INCLUDED_FILTERS_PROGRAMMABLEFILTER_HPP
-
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
+#include <pdal/plang/Invocation.hpp>
 
-#include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
-#include <pdal/plang/BufferedInvocation.hpp>
-
-
-namespace pdal { namespace filters {
-
-class ProgrammableFilterSequentialIterator;
-
-class PDAL_DLL Programmable : public Filter
-{
-public:
-    SET_STAGE_NAME("filters.programmable", "Programmable Filter")
-
-    Programmable(Stage& prevStage, const Options&);
-
-    virtual void initialize();
-    virtual const Options getDefaultOptions() const;
-
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
-
-        return false;
-    }
-
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
-
-    void processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation& python) const;
-
-    const std::string& getProgram() const { return m_program; }
-
-private:
-    std::string m_program;
-
-    Programmable& operator=(const Programmable&); // not implemented
-    Programmable(const Programmable&); // not implemented
-};
-
-
-namespace iterators { namespace sequential {
-    
-
-class PDAL_DLL Programmable : public pdal::FilterSequentialIterator
-{
-public:
-    Programmable(const pdal::filters::Programmable& filter, PointBuffer& buffer);
-    ~Programmable();
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    void createParser();
-    
-    const pdal::filters::Programmable& m_programmableFilter;
-
-    pdal::plang::Environment* m_pythonEnv;
-    pdal::plang::BufferedInvocation* m_pythonMethod;
-};
-
-} } // iterators::sequential
-
-
-
-} } // pdal::filteers
-
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(disable: 4127) // conditional expression is constant
+#  pragma warning(disable: 4505) // unreferenced local function has been removed
 #endif
+
+#include <Python.h>
+#include <numpy/arrayobject.h>
+
+
+namespace pdal { namespace plang {
+
+
+
+
+} } //namespaces
 
 #endif

@@ -41,8 +41,8 @@
 #include <pdal/plang/PythonSupport.hpp>
 struct PythonConfig 
 {
-    PythonConfig()   { ::pdal::plang::PythonEnvironment::startup(); }
-    ~PythonConfig()  { ::pdal::plang::PythonEnvironment::shutdown(); }
+    PythonConfig()   { ::pdal::plang::Environment::startup(); }
+    ~PythonConfig()  { ::pdal::plang::Environment::shutdown(); }
 };
 BOOST_GLOBAL_FIXTURE( PythonConfig );
 #endif

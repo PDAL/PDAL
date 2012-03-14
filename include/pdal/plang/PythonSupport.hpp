@@ -58,7 +58,7 @@ namespace pdal { namespace plang {
 
 
 // this is a singleton: only create it once, and keep it around forever
-class PDAL_DLL PythonEnvironment
+class PDAL_DLL Environment
 {
 public:
     static void startup();
@@ -66,10 +66,12 @@ public:
 
     void dumpObject(PyObject*);
     void handleError();
+    
+    static Environment* get();
 
 private:
-    PythonEnvironment();
-    ~PythonEnvironment();
+    Environment();
+    ~Environment();
 
     PyObject* m_tracebackModule;
     PyObject* m_tracebackDictionary;
@@ -77,68 +79,9 @@ private:
 };
 
 
-class PDAL_DLL PythonMethodX
-{
-public:
-    PythonMethodX(const std::string& source);
-    void compile();
-
-    void resetArguments();
 
 
-    // creates a Python variable pointing to a (one dimensional) C array
-    // adds the new variable to the arguments dictionary
-    void insertArgument(const std::string& name, 
-                        boost::uint8_t* data, 
-                        boost::uint32_t data_len, 
-                        boost::uint32_t data_stride,                                  
-                        dimension::Interpretation dataType, 
-                        boost::uint32_t numBytes);
-    void extractResult(const std::string& name, 
-                       boost::uint8_t* data, 
-                       boost::uint32_t data_len, 
-                       boost::uint32_t data_stride,                                  
-                       dimension::Interpretation dataType, 
-                       boost::uint32_t numBytes);
 
-    bool hasOutputVariable(const std::string& name) const;
-
-    // returns true iff the called python function returns true,
-    // as would be used for a predicate function
-    // (that is, the return value is NOT an error indicator)
-    bool execute();
-
-private:
-    PythonEnvironment& m_env;
-    std::string m_source;
-
-    PyObject* m_compile;
-    PyObject* m_module;
-    PyObject* m_dict;
-    PyObject* m_func;
-
-    PyObject* m_scriptSource;
-    PyObject* m_varsIn;
-    PyObject* m_varsOut;
-    PyObject* m_scriptArgs;
-    PyObject* m_scriptResult;
-    std::vector<PyObject*> m_pyInputArrays;
-
-    PythonMethodX& operator=(PythonMethodX const& rhs); // nope
-};
-
-
-class PDAL_DLL PythonPDALMethod : public PythonMethodX
-{
-public:
-    PythonPDALMethod(const std::string& source);
-
-    void beginChunk(PointBuffer&);
-    void endChunk(PointBuffer&);
-
-private:
-    PythonPDALMethod& operator=(PythonPDALMethod const& rhs); // nope
-};
 
 
 } } // namespaces

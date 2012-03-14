@@ -70,7 +70,7 @@ const Options Predicate::getDefaultOptions() const
 }
 
 
-boost::uint32_t Predicate::processBuffer(PointBuffer& srcData, PointBuffer& dstData, pdal::plang::PythonPDALMethod& python) const
+boost::uint32_t Predicate::processBuffer(PointBuffer& srcData, PointBuffer& dstData, pdal::plang::BufferedInvocation& python) const
 {
     python.resetArguments();
 
@@ -141,7 +141,7 @@ void Predicate::createParser()
 {
     const std::string program = m_predicateFilter.getExpression();
 
-    m_pythonMethod = new pdal::plang::PythonPDALMethod(program);
+    m_pythonMethod = new pdal::plang::BufferedInvocation(program);
 
     m_pythonMethod->compile();
 

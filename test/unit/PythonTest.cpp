@@ -37,7 +37,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <pdal/plang/PythonSupport.hpp>
+#include <pdal/plang/Invocation.hpp>
 
 
 BOOST_AUTO_TEST_SUITE(PythonTest)
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_basic)
         "  return True\n"
         ;
 
-    pdal::plang::PythonMethodX meth(program);
+    pdal::plang::Invocation meth(program);
     meth.compile();
     meth.execute();
 
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_compile_error)
         "return True\n"
         ;
 
-    pdal::plang::PythonMethodX meth(program);
+    pdal::plang::Invocation meth(program);
 
     BOOST_REQUIRE_THROW(meth.compile(), pdal::python_error);
 
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_runtime_error)
         "  return True\n"
         ;
 
-    pdal::plang::PythonMethodX meth(program);
+    pdal::plang::Invocation meth(program);
     meth.compile();
     
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_toofewinputs)
         "  return True\n"
         ;
 
-    pdal::plang::PythonMethodX meth(program);
+    pdal::plang::Invocation meth(program);
     meth.compile();
     
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_toomanyinputs)
         "  return True\n"
         ;
 
-    pdal::plang::PythonMethodX meth(program);
+    pdal::plang::Invocation meth(program);
     meth.compile();
     
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_returnvoid)
         "  return\n"
         ;
 
-    pdal::plang::PythonMethodX meth(program);
+    pdal::plang::Invocation meth(program);
     meth.compile();
     
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_returnint)
         "  return 7\n"
         ;
 
-    pdal::plang::PythonMethodX meth(program);
+    pdal::plang::Invocation meth(program);
     meth.compile();
     
     BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_ins)
         "  return True\n"
         ;
 
-    pdal::plang::PythonMethodX meth(program);
+    pdal::plang::Invocation meth(program);
     meth.compile();
     
     meth.insertArgument("X", (boost::uint8_t*)data, 5, 8, pdal::dimension::Float, 8);
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_outs)
         "  return True\n"
         ;
 
-    pdal::plang::PythonMethodX meth(program);
+    pdal::plang::Invocation meth(program);
     meth.compile();
     
     meth.execute();
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_returntrue)
         "  return True\n"
         ;
 
-    pdal::plang::PythonMethodX meth(program);
+    pdal::plang::Invocation meth(program);
     meth.compile();
     
     bool sts = meth.execute();
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_returnfalse)
         "  return False\n"
         ;
 
-    pdal::plang::PythonMethodX meth(program);
+    pdal::plang::Invocation meth(program);
     meth.compile();
     
     bool sts = meth.execute();
@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_CASE(PythonTest_reentry)
     double indata2[5] = {10.0, 20.0, 30.0, 40.0, 50.0};
     double outdata2[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 
-    pdal::plang::PythonMethodX meth(program);
+    pdal::plang::Invocation meth(program);
     meth.compile();
     
     {

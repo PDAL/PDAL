@@ -71,7 +71,7 @@ const Options Programmable::getDefaultOptions() const
 }
 
 
-void Programmable::processBuffer(PointBuffer& data, pdal::plang::PythonPDALMethod& python) const
+void Programmable::processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation& python) const
 {
     python.resetArguments();
 
@@ -116,7 +116,7 @@ void Programmable::createParser()
 {
     const std::string program = m_programmableFilter.getProgram();
 
-    m_pythonMethod = new pdal::plang::PythonPDALMethod(program);
+    m_pythonMethod = new pdal::plang::BufferedInvocation(program);
 
     m_pythonMethod->compile();
 

@@ -32,81 +32,74 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILTERS_PROGRAMMABLEFILTER_HPP
-#define INCLUDED_FILTERS_PROGRAMMABLEFILTER_HPP
+#ifndef PYTHONINVOCATION_H
+#define PYTHONINVOCATION_H
 
 #include <pdal/pdal_internal.hpp>
 #ifdef PDAL_HAVE_PYTHON
 
+#include <pdal/pdal_internal.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/plang/PythonSupport.hpp>
 
-#include <pdal/Filter.hpp>
-#include <pdal/FilterIterator.hpp>
-#include <pdal/plang/BufferedInvocation.hpp>
+
+namespace pdal { namespace plang {
 
 
-namespace pdal { namespace filters {
-
-class ProgrammableFilterSequentialIterator;
-
-class PDAL_DLL Programmable : public Filter
+class PDAL_DLL Invocation
 {
 public:
-    SET_STAGE_NAME("filters.programmable", "Programmable Filter")
+    Invocation(const std::string& source);
+    void compile();
 
-    Programmable(Stage& prevStage, const Options&);
+    void resetArguments();
 
-    virtual void initialize();
-    virtual const Options getDefaultOptions() const;
 
-    bool supportsIterator (StageIteratorType t) const
-    {   
-        if (t == StageIterator_Sequential ) return true;
+    // creates a Python variable pointing to a (one dimensional) C array
+    // adds the new variable to the arguments dictionary
+    void insertArgument(const std::string& name, 
+                        boost::uint8_t* data, 
+                        boost::uint32_t data_len, 
+                        boost::uint32_t data_stride,                                  
+                        dimension::Interpretation dataType, 
+                        boost::uint32_t numBytes);
+    void extractResult(const std::string& name, 
+                       boost::uint8_t* data, 
+                       boost::uint32_t data_len, 
+                       boost::uint32_t data_stride,                                  
+                       dimension::Interpretation dataType, 
+                       boost::uint32_t numBytes);
 
-        return false;
-    }
+    bool hasOutputVariable(const std::string& name) const;
 
-    pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer&) const { return NULL; }
-
-    void processBuffer(PointBuffer& data, pdal::plang::BufferedInvocation& python) const;
-
-    const std::string& getProgram() const { return m_program; }
+    // returns true iff the called python function returns true,
+    // as would be used for a predicate function
+    // (that is, the return value is NOT an error indicator)
+    bool execute();
 
 private:
-    std::string m_program;
+    Environment& m_env;
+    std::string m_source;
 
-    Programmable& operator=(const Programmable&); // not implemented
-    Programmable(const Programmable&); // not implemented
+    PyObject* m_compile;
+    PyObject* m_module;
+    PyObject* m_dict;
+    PyObject* m_func;
+
+    PyObject* m_scriptSource;
+    PyObject* m_varsIn;
+    PyObject* m_varsOut;
+    PyObject* m_scriptArgs;
+    PyObject* m_scriptResult;
+    std::vector<PyObject*> m_pyInputArrays;
+
+    Invocation& operator=(Invocation const& rhs); // nope
 };
 
 
-namespace iterators { namespace sequential {
-    
-
-class PDAL_DLL Programmable : public pdal::FilterSequentialIterator
-{
-public:
-    Programmable(const pdal::filters::Programmable& filter, PointBuffer& buffer);
-    ~Programmable();
-
-private:
-    boost::uint64_t skipImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-
-    void createParser();
-    
-    const pdal::filters::Programmable& m_programmableFilter;
-
-    pdal::plang::Environment* m_pythonEnv;
-    pdal::plang::BufferedInvocation* m_pythonMethod;
-};
-
-} } // iterators::sequential
 
 
-
-} } // pdal::filteers
+} } // namespaces
 
 #endif
 

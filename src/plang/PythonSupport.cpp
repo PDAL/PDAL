@@ -36,6 +36,7 @@
 #ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/plang/PythonSupport.hpp>
+#include <pdal/plang/Invocation.hpp>
 
 #include <string>
 #include <iostream>
@@ -50,9 +51,10 @@
 
 namespace pdal { namespace plang {
 
-static PythonEnvironment* s_environment;
+static Environment* s_environment;
+Environment* Environment::get() { return s_environment; }
 
-PythonEnvironment::PythonEnvironment()
+Environment::Environment()
     : m_tracebackModule(NULL)
     , m_tracebackDictionary(NULL)
     , m_tracebackFunction(NULL)
@@ -89,7 +91,7 @@ PythonEnvironment::PythonEnvironment()
 }
 
 
-PythonEnvironment::~PythonEnvironment()
+Environment::~Environment()
 {
     Py_XDECREF(m_tracebackFunction);
 
@@ -101,19 +103,19 @@ PythonEnvironment::~PythonEnvironment()
 }
 
 
-void PythonEnvironment::startup()
+void Environment::startup()
 {
     // not threadsafe!
     if (!s_environment)
     {
-        s_environment = new PythonEnvironment();
+        s_environment = new Environment();
     }
 
     return;
 }
 
 
-void PythonEnvironment::shutdown()
+void Environment::shutdown()
 {
     // not threadsafe!
     if (s_environment)
@@ -126,7 +128,7 @@ void PythonEnvironment::shutdown()
 }
 
 
-void PythonEnvironment::dumpObject(PyObject* obj)
+void Environment::dumpObject(PyObject* obj)
 {
     if (!obj)
     {
@@ -178,7 +180,7 @@ void PythonEnvironment::dumpObject(PyObject* obj)
 }
 
 
-void PythonEnvironment::handleError()
+void Environment::handleError()
 {
     // get exception info
     PyObject *type, *value, *traceback;
@@ -227,11 +229,9 @@ void PythonEnvironment::handleError()
 }
 
 
-// ==========================================================================
 
-
-PythonMethodX::PythonMethodX(const std::string& source)
-    : m_env(*s_environment)
+Invocation::Invocation(const std::string& source)
+    : m_env(*Environment::get())
     , m_source(source)
     , m_compile(NULL)
     , m_module(NULL)
@@ -249,7 +249,7 @@ PythonMethodX::PythonMethodX(const std::string& source)
 }
 
 
-void PythonMethodX::compile()
+void Invocation::compile()
 {
     m_compile = Py_CompileString(m_source.c_str(), "YowModule", Py_file_input);
     if (!m_compile) m_env.handleError();
@@ -322,7 +322,7 @@ static int getPythonDataType(dimension::Interpretation datatype, boost::uint32_t
 }
 
 
-void PythonMethodX::resetArguments()
+void Invocation::resetArguments()
 {
     Py_XDECREF(m_varsIn);
     Py_XDECREF(m_varsOut);
@@ -345,7 +345,7 @@ void PythonMethodX::resetArguments()
 }
 
 
-void PythonMethodX::insertArgument(const std::string& name, 
+void Invocation::insertArgument(const std::string& name, 
                                    boost::uint8_t* data, 
                                    boost::uint32_t data_len, 
                                    boost::uint32_t data_stride,                                  
@@ -371,7 +371,7 @@ void PythonMethodX::insertArgument(const std::string& name,
 }
 
 
-bool PythonMethodX::hasOutputVariable(const std::string& name) const
+bool Invocation::hasOutputVariable(const std::string& name) const
 {
    PyObject* obj = PyDict_GetItemString(m_varsOut, name.c_str());
 
@@ -379,7 +379,7 @@ bool PythonMethodX::hasOutputVariable(const std::string& name) const
 }
 
 
-void PythonMethodX::extractResult(const std::string& name, 
+void Invocation::extractResult(const std::string& name, 
                                   boost::uint8_t* dst, 
                                   boost::uint32_t data_len, 
                                   boost::uint32_t data_stride,                                  
@@ -477,7 +477,7 @@ void PythonMethodX::extractResult(const std::string& name,
 }
 
 
-bool PythonMethodX::execute()
+bool Invocation::execute()
 {
     if (!m_compile)
     {
@@ -506,66 +506,6 @@ bool PythonMethodX::execute()
     return sts;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////
-
-
-PythonPDALMethod::PythonPDALMethod(const std::string& source)
-    : PythonMethodX(source)
-{
-    return;
-}
-
-
-
-void PythonPDALMethod::beginChunk(PointBuffer& buffer)
-{
-    const Schema& schema = buffer.getSchema();
-
-    schema::Map const& map = schema.getDimensions();
-    schema::index_by_index const& idx = map.get<schema::index>();
-    for (schema::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
-    {
-        const Dimension& dim = *iter;
-        const std::string& name = dim.getName();
-
-        boost::uint8_t* data = buffer.getData(0) + dim.getByteOffset();
-
-        const boost::uint32_t numPoints = buffer.getNumPoints();
-        const boost::uint32_t stride = buffer.getSchema().getByteSize();
-        const dimension::Interpretation datatype = dim.getInterpretation();
-        const boost::uint32_t numBytes = dim.getByteSize();
-        this->insertArgument(name, data, numPoints, stride, datatype, numBytes);
-    }
-
-    return;
-}
-
-
-void PythonPDALMethod::endChunk(PointBuffer& buffer)
-{
-    const Schema& schema = buffer.getSchema();
-
-    schema::Map const& map = schema.getDimensions();
-    schema::index_by_index const& idx = map.get<schema::index>();
-    for (schema::index_by_index::const_iterator iter = idx.begin(); iter != idx.end(); ++iter)
-    {
-        const Dimension& dim = *iter;
-        const std::string& name = dim.getName();
-        
-        if (hasOutputVariable(name))
-        {
-            boost::uint8_t* data = buffer.getData(0) + dim.getByteOffset();
-            const boost::uint32_t numPoints = buffer.getNumPoints();
-            const boost::uint32_t stride = buffer.getSchema().getByteSize();
-            const dimension::Interpretation datatype = dim.getInterpretation();
-            const boost::uint32_t numBytes = dim.getByteSize();
-            extractResult(name, data, numPoints, stride, datatype, numBytes);
-        }
-    }
-
-    return;
-}
 
 
 
