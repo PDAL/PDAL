@@ -160,7 +160,13 @@ BOOST_AUTO_TEST_CASE(test_field_read_write)
 BOOST_AUTO_TEST_CASE(test_base64)
 {
     std::vector<boost::uint8_t> data;
-    for(int i=0;i<100;i++) data.push_back(i);
+    for(int i=0;i<2;i++) data.push_back((boost::uint8_t)i);
+
+    boost::uint32_t begin_size(0);
+    for (std::vector<boost::uint8_t>::size_type i = 0; i < data.size(); ++i)
+    {
+        begin_size = begin_size + data[i];
+    }
     
     std::string encoded = Utils::base64_encode(data);
     std::vector<boost::uint8_t> decoded = Utils::base64_decode(encoded);
@@ -170,8 +176,9 @@ BOOST_AUTO_TEST_CASE(test_base64)
     {
         size = size + decoded[i];
     }
-    
-    BOOST_CHECK_EQUAL(size, 5042u);
+
+    BOOST_CHECK_EQUAL(decoded.size(), data.size());
+    BOOST_CHECK_EQUAL(size, begin_size);
     
     
     return;

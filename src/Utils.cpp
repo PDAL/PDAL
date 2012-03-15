@@ -318,7 +318,7 @@ std::string Utils::base64_encode(std::vector<boost::uint8_t> const& bytes)
 
     */
     
-    unsigned char const* bytes_to_encode = &bytes.front();
+    unsigned char const* bytes_to_encode = &(bytes.front());
     
     unsigned int in_len = bytes.size(); 
     
@@ -367,6 +367,11 @@ std::string Utils::base64_encode(std::vector<boost::uint8_t> const& bytes)
 
 }
 
+static inline bool is_base64(unsigned char c) {
+  return (isalnum(c) || (c == '+') || (c == '/'));
+}
+
+
 std::vector<boost::uint8_t> Utils::base64_decode(std::string const& encoded_string) 
 {
     const std::string base64_chars = 
@@ -374,17 +379,19 @@ std::vector<boost::uint8_t> Utils::base64_decode(std::string const& encoded_stri
                  "abcdefghijklmnopqrstuvwxyz"
                  "0123456789+/";
     
-  int in_len = encoded_string.size();
+  std::string::size_type in_len = encoded_string.size();
   int i = 0;
   int j = 0;
   int in_ = 0;
   unsigned char char_array_4[4], char_array_3[3];
   std::vector<boost::uint8_t> ret;
 
-  while (in_len-- && 
-        ( encoded_string[in_] != '=') && 
-        (isalnum(encoded_string[in_]) || (encoded_string[in_] == '+') || (encoded_string[in_] == '/'))
-        )  
+  // while (in_len-- && 
+  //       ( encoded_string[in_] != '=') && 
+  //       ( isalnum(encoded_string[in_]) || (encoded_string[in_] == '+') || (encoded_string[in_] == '/'))
+  //       )  
+
+while (in_len-- && ( encoded_string[in_] != '=') && is_base64(encoded_string[in_]))  
   {
     char_array_4[i++] = encoded_string[in_]; in_++;
     if (i ==4) {
@@ -412,7 +419,7 @@ std::vector<boost::uint8_t> Utils::base64_decode(std::string const& encoded_stri
     char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
     char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
 
-    for (j = 0; (j < i - 1); j++) ret.push_back( char_array_3[i]);
+    for (j = 0; (j < i - 1); j++) ret.push_back( char_array_3[j]);
   }
 
   return ret;
