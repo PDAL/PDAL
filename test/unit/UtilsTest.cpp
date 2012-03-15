@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(test_base64)
         size = size + decoded[i];
     }
     
-    BOOST_CHECK_EQUAL(size, 4950u);
+    BOOST_CHECK_EQUAL(size, 5042u);
     
     
     return;
