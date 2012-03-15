@@ -46,6 +46,7 @@
 #include <limits>
 #include <cstring>
 #include <sstream>
+#include <vector>
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/erase.hpp>
@@ -161,7 +162,9 @@ public:
     static std::string generate_tempfile();
 
     static void* getDLLSymbol( std::string const& library, std::string const& name);
-    
+    static std::string base64_encode(std::vector<boost::uint8_t> const& bytes);
+    static std::vector<boost::uint8_t> base64_decode(std::string const& input);
+
 private:
     template<typename T>
     static inline char* as_buffer(T& data)

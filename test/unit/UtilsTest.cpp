@@ -39,6 +39,8 @@
 
 #include <pdal/Range.hpp>
 
+#include <vector>
+
 using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(UtilsTest)
@@ -153,6 +155,28 @@ BOOST_AUTO_TEST_CASE(test_field_read_write)
     
     return;
 }
+
+
+BOOST_AUTO_TEST_CASE(test_base64)
+{
+    std::vector<boost::uint8_t> data;
+    for(int i=0;i<100;i++) data.push_back(i);
+    
+    std::string encoded = Utils::base64_encode(data);
+    std::vector<boost::uint8_t> decoded = Utils::base64_decode(encoded);
+    
+    boost::uint32_t size(0);
+    for (std::vector<boost::uint8_t>::size_type i = 0; i < decoded.size(); ++i)
+    {
+        size = size + decoded[i];
+    }
+    
+    BOOST_CHECK_EQUAL(size, 4950u);
+    
+    
+    return;
+}
+
 
 
 BOOST_AUTO_TEST_SUITE_END()
