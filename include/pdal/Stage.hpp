@@ -41,7 +41,7 @@
 #include <pdal/Schema.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/MetadataRecord.hpp>
+#include <pdal/Metadata.hpp>
 
 namespace pdal
 {

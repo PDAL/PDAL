@@ -32,7 +32,7 @@ set(PDAL_BASE_HPP
   ${PDAL_HEADERS_DIR}/FilterIterator.hpp
   ${PDAL_HEADERS_DIR}/GDALUtils.hpp
   ${PDAL_HEADERS_DIR}/Log.hpp
-  ${PDAL_HEADERS_DIR}/MetadataRecord.hpp
+  ${PDAL_HEADERS_DIR}/Metadata.hpp
   ${PDAL_HEADERS_DIR}/MultiFilter.hpp
   ${PDAL_HEADERS_DIR}/MultiFilterIterator.hpp
   ${PDAL_HEADERS_DIR}/Options.hpp
@@ -68,7 +68,7 @@ set(PDAL_BASE_CPP
   Filter.cpp
   FilterIterator.cpp
   Log.cpp
-  MetadataRecord.cpp
+  Metadata.cpp
   MultiFilter.cpp
   MultiFilterIterator.cpp
   Options.cpp

@@ -32,87 +32,80 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_METADATARECORD_HPP
-#define INCLUDED_METADATARECORD_HPP
+#include <pdal/Metadata.hpp>
+#include <pdal/Utils.hpp>
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/Options.hpp>
-#include <pdal/Bounds.hpp>
-#include <pdal/SpatialReference.hpp>
+#include <sstream>
+#include <cstring>
 
-
-
-#include <boost/shared_array.hpp>
-#include <boost/variant.hpp>
-#include <vector>
+#include <sstream>
+#include <string>
 
 namespace pdal
 {
 
 
-namespace metadata {
-
-    enum Type
-    {
-        SignedInteger,
-        UnsignedInteger,
-        Float,
-        String,
-        ByteArray,
-        Bounds,
-        SpatialReference
-        
-    };
-
-} // metadata
 
 
-typedef boost::variant< 
-                        float,
-                        double,
-                        boost::int8_t,
-                        boost::uint8_t,
-                        boost::int16_t,
-                        boost::uint16_t,
-                        boost::int32_t,
-                        boost::uint32_t,
-                        boost::int64_t,
-                        boost::uint64_t,
-                        std::string, 
-                        std::vector<boost::uint8_t>, 
-                        pdal::SpatialReference, 
-                        pdal::Bounds<double> > Variant;
 
-class PDAL_DLL Metadata 
+Metadata::Metadata( std::string const& name, 
+                    std::string const& ns,
+                    pdal::metadata::Type t) 
+    : m_name(name)
+    , m_namespace(ns) 
+    , m_type(t)
 {
-public:
-    // makes a local copy of the buffer, which is a shared ptr among by all copes of the metadata record
-    Metadata();
-
-    Metadata(const Metadata&);
-
-    ~Metadata();
-    
-    template <class T> inline void set(T const& v) { m_variant = v; } 
-    template <class T> T get() { return boost::get<T>(m_variant); }
-    Metadata& operator=(Metadata const& rhs);
-
-    bool operator==(Metadata const& rhs) const;
-
-    std::vector<boost::uint8_t> const*  getBytes() const;
-    std::size_t getLength() const;
-
-private:
-    Variant m_variant;
-    std::string m_name;
-    std::string m_namespace;
-    
-};
+    return;
+}
 
 
-std::ostream& operator<<(std::ostream& ostr, const Metadata& srs);
+Metadata::Metadata(const Metadata& other)
+    // :
+{
+    return;
+}
+
+
+Metadata::~Metadata()
+{
+
+}
+
+
+Metadata& Metadata::operator=(Metadata const& rhs)
+{
+    if (&rhs != this)
+    {
+    }
+    return *this;
+}
+
+
+bool Metadata::operator==(Metadata const& rhs) const
+{
+    return false;
+}
+
+std::ostream& operator<<(std::ostream& ostr, const Metadata& metadata)
+{
+    ostr << metadata.getVariant() << std::endl;
+    return ostr;
+}
 
 
 } // namespace pdal
 
-#endif
+
+namespace std
+{
+
+    std::ostream& operator<<(std::ostream& ostr, const pdal::metadata::ByteArray& data)
+    {
+        
+        std::string output = pdal::Utils::base64_encode(data.get());
+        
+        ostr << output;
+        return ostr;
+    }
+    
+}

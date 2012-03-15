@@ -37,7 +37,7 @@
 #include <iostream>
 #include <string>
 
-#include <pdal/MetadataRecord.hpp>
+#include <pdal/Metadata.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_SUITE(MetadataTest)
 BOOST_AUTO_TEST_CASE(test_construction)
 {
     
-    pdal::Metadata m;
+    pdal::Metadata m("test", "testNS", pdal::metadata::SignedInteger);
     
     boost::uint32_t u32(32u);
     boost::int32_t i32(-32);
@@ -62,6 +62,8 @@ BOOST_AUTO_TEST_CASE(test_construction)
     std::vector<boost::uint8_t> v;
     for(int i=0; i < 100; i++) v.push_back(i);
     
+    pdal::metadata::ByteArray bytes(v);
+    
     pdal::SpatialReference ref("EPSG:4326");
     
     pdal::Bounds<double> b(1.1,2.2,3.3,101.1,102.2,103.3);
@@ -70,6 +72,12 @@ BOOST_AUTO_TEST_CASE(test_construction)
     
     BOOST_CHECK_EQUAL(m.get<boost::uint32_t>(), 32u);
     BOOST_CHECK_THROW(m.get<boost::int32_t>(), boost::bad_get);
+
+    BOOST_CHECK_EQUAL(m.cast<boost::int32_t>(), 32);    
+    m.set<pdal::metadata::ByteArray>(bytes);
+    
+    std::string base64("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiYw==");
+    BOOST_CHECK_EQUAL( boost::lexical_cast<std::string>(m.get<pdal::metadata::ByteArray>()), base64);
     
     return;
 }
