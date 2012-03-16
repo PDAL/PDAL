@@ -49,11 +49,10 @@ namespace pdal
 
 
 Metadata::Metadata( std::string const& name, 
-                    std::string const& ns,
-                    pdal::metadata::Type t) 
+                    std::string const& ns) 
     : m_name(name)
     , m_namespace(ns) 
-    , m_type(t)
+    , m_type(metadata::String)
 {
     return;
 }

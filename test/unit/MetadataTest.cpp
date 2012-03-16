@@ -48,7 +48,10 @@ BOOST_AUTO_TEST_SUITE(MetadataTest)
 BOOST_AUTO_TEST_CASE(test_construction)
 {
     
-    pdal::Metadata m("test", "testNS", pdal::metadata::SignedInteger);
+    pdal::Metadata m("test", "testNS");
+    
+    BOOST_CHECK_EQUAL(m.getName(), "test");
+    BOOST_CHECK_EQUAL(m.getNamespace(), "testNS");
     
     boost::uint32_t u32(32u);
     boost::int32_t i32(-32);
@@ -63,9 +66,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
     for(int i=0; i < 100; i++) v.push_back(i);
     
     pdal::metadata::ByteArray bytes(v);
-    
-    pdal::SpatialReference ref("EPSG:4326");
-    
+        
     pdal::Bounds<double> b(1.1,2.2,3.3,101.1,102.2,103.3);
     
     m.setValue<boost::uint32_t>(u32);
@@ -80,14 +81,67 @@ BOOST_AUTO_TEST_CASE(test_construction)
     BOOST_CHECK_EQUAL(m.getAttribute("another_id"), "another_value");
     
     BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32u);
+    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
+    
     BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
 
     BOOST_CHECK_EQUAL(m.cast<boost::int32_t>(), 32); 
     m.setValue<pdal::metadata::ByteArray>(bytes);
+    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::Bytes);
     
     std::string base64("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiYw==");
     BOOST_CHECK_EQUAL( boost::lexical_cast<std::string>(m.getValue<pdal::metadata::ByteArray>()), base64);
     BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
+    
+    pdal::SpatialReference ref("EPSG:4326");
+    m.setValue<pdal::SpatialReference>(ref);    
+    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SpatialReference);
+    
+    pdal::SpatialReference ref2 = m.getValue<pdal::SpatialReference>();
+    // std::string ref_text("GEOGCS[\"WGS 84\","
+    //     DATUM[\"WGS_1984\","
+    //         SPHEROID[\"WGS 84\",6378137,298.257223563,
+    //             AUTHORITY[\"EPSG\",\"7030\"]],
+    //         AUTHORITY[\"EPSG\",\"6326\"]],
+    //     PRIMEM[\"Greenwich\",0,
+    //         AUTHORITY[\"EPSG\",\"8901\"]],
+    //     UNIT[\"degree\",0.0174532925199433,
+    //         AUTHORITY[\"EPSG\",\"9122\"]],
+    //     AUTHORITY[\"EPSG\",\"4326\"]]");
+
+    // std::cout << boost::lexical_cast<std::string>(m.getValue<pdal::SpatialReference>());
+    m.setValue<boost::int8_t>(i8);
+    BOOST_CHECK_EQUAL(m.getValue<boost::int8_t>(), -8);
+    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SignedInteger);
+
+    m.setValue<boost::int16_t>(i16);
+    BOOST_CHECK_EQUAL(m.getValue<boost::int16_t>(), -16);
+    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SignedInteger);
+    
+    m.setValue<boost::int32_t>(i32);
+    BOOST_CHECK_EQUAL(m.getValue<boost::int32_t>(), -32);
+    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SignedInteger);
+
+    m.setValue<boost::int64_t>(i64);
+    BOOST_CHECK_EQUAL(m.getValue<boost::int64_t>(), -64);
+    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SignedInteger);
+
+    m.setValue<boost::uint16_t>(u16);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint16_t>(), 16);
+    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
+    
+    m.setValue<boost::uint32_t>(u32);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32);
+    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
+
+    m.setValue<boost::uint64_t>(u64);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint64_t>(), 64);
+    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
+
+    m.setValue<boost::uint8_t>(u8);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint8_t>(), 8);
+    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedByte);
+
     
     return;
 }

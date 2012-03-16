@@ -78,7 +78,7 @@ namespace metadata {
         UnsignedInteger,
         Pointer,
         Float,
-        Undefined,
+        Double,
         String,
         Bytes,
         Bounds,
@@ -114,14 +114,16 @@ class PDAL_DLL Metadata
 public:
 
     Metadata(   std::string const& name, 
-                std::string const& ns,
-                pdal::metadata::Type t);
+                std::string const& ns);
 
     Metadata(const Metadata&);
 
     ~Metadata();
     
-    template <class T> inline void setValue(T const& v) { m_variant = v; } 
+    inline metadata::Type getType() const { return m_type; }
+    inline void setType(metadata::Type t) { m_type = t; }
+    
+    template <class T> inline void setValue(T const& v); 
     template <class T> inline T getValue() { return boost::get<T>(m_variant); }
 
     template <class T> inline T cast() { return boost::lexical_cast<T>(m_variant); }    
@@ -153,6 +155,127 @@ private:
 
 std::ostream& operator<<(std::ostream& ostr, const Metadata& srs);
 
+
+
+template <class T>
+inline void Metadata::setValue(T const& v)
+{
+
+    m_variant = v;
+    
+    try 
+    {
+        boost::get<std::string>(m_variant);
+        m_type = metadata::String;
+        return;
+    } catch (boost::bad_get)
+    {}
+
+    try 
+    {
+        boost::get<pdal::metadata::ByteArray>(m_variant);
+        m_type = metadata::Bytes;
+        return;
+    } catch (boost::bad_get)
+    {}
+
+    try 
+    {
+        boost::get<float>(m_variant);
+        m_type = metadata::Float;
+        return;
+    } catch (boost::bad_get)
+    {}
+    
+    try 
+    {
+        boost::get<double>(m_variant);
+        m_type = metadata::Double;
+        return;
+    } catch (boost::bad_get)
+    {}
+
+    try 
+    {
+        boost::get<pdal::SpatialReference>(m_variant);
+        m_type = metadata::SpatialReference;
+        return;
+    } catch (boost::bad_get)
+    {}
+    
+    try 
+    {
+        boost::get<pdal::Bounds<double> >(m_variant);
+        m_type = metadata::Bounds;
+        return;
+    } catch (boost::bad_get)
+    {}
+    try 
+    {
+        boost::get<boost::uint8_t>(m_variant);
+        m_type = metadata::UnsignedByte;
+        return;
+    } catch (boost::bad_get)
+    {}
+
+    try 
+    {
+        boost::get<boost::uint16_t>(m_variant);
+        m_type = metadata::UnsignedInteger;
+        return;
+    } catch (boost::bad_get)
+    {}
+
+    try 
+    {
+        boost::get<boost::uint32_t>(m_variant);
+        m_type = metadata::UnsignedInteger;
+        return;
+    } catch (boost::bad_get)
+    {}
+    
+    try 
+    {
+        boost::get<boost::uint64_t>(m_variant);
+        m_type = metadata::UnsignedInteger;
+        return;
+    } catch (boost::bad_get)
+    {}
+
+    try 
+    {
+        boost::get<boost::int8_t>(m_variant);
+        m_type = metadata::SignedInteger;
+        return;
+    } catch (boost::bad_get)
+    {}
+    
+    try 
+    {
+        boost::get<boost::int16_t>(m_variant);
+        m_type = metadata::SignedInteger;
+        return;
+    } catch (boost::bad_get)
+    {}
+    
+    try 
+    {
+        boost::get<boost::int32_t>(m_variant);
+        m_type = metadata::SignedInteger;
+        return;
+    } catch (boost::bad_get)
+    {}
+
+    try 
+    {
+        boost::get<boost::int64_t>(m_variant);
+        m_type = metadata::SignedInteger;
+        return;
+    } catch (boost::bad_get)
+    {}
+    
+    
+}
 
 } // namespace pdal
 
