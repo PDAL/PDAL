@@ -51,24 +51,27 @@ namespace pdal
 {
 
 
+
+
+
+class PDAL_DLL ByteArray 
+{
+public:
+
+    ByteArray(std::vector<boost::uint8_t> const& data) : m_bytes(data) {}
+    
+    inline void set(std::vector<boost::uint8_t> const& input) { m_bytes = input; }
+    inline std::vector<boost::uint8_t> const& get() const { return m_bytes; }
+
+private:
+    
+    std::vector<boost::uint8_t> m_bytes;
+};
+
+
 namespace metadata {
     
     typedef std::map<std::string, std::string> MetadataAttributeM;
-
-    class PDAL_DLL ByteArray 
-    {
-    public:
-
-        ByteArray(std::vector<boost::uint8_t> const& data) : m_bytes(data) {}
-        
-        inline void set(std::vector<boost::uint8_t> const& input) { m_bytes = input; }
-        inline std::vector<boost::uint8_t> const& get() const { return m_bytes; }
-
-    private:
-        
-        std::vector<boost::uint8_t> m_bytes;
-    };
-
 
     enum Type
     {
@@ -99,16 +102,12 @@ namespace metadata {
                             boost::int64_t,
                             boost::uint64_t,
                             std::string, 
-                            pdal::metadata::ByteArray, 
+                            pdal::ByteArray, 
                             pdal::SpatialReference, 
                             pdal::Bounds<double> > Variant;
 
 
 } // metadata
-
-
-
-
 class PDAL_DLL Metadata 
 {
 public:
@@ -173,7 +172,7 @@ inline void Metadata::setValue(T const& v)
 
     try 
     {
-        boost::get<pdal::metadata::ByteArray>(m_variant);
+        boost::get<pdal::ByteArray>(m_variant);
         m_type = metadata::Bytes;
         return;
     } catch (boost::bad_get)
@@ -281,7 +280,7 @@ inline void Metadata::setValue(T const& v)
 
 namespace std
 {
-std::ostream& operator<<(std::ostream& ostr, const pdal::metadata::ByteArray& output);
+std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& output);
 }
 
 #endif

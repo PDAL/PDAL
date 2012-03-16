@@ -126,7 +126,7 @@ std::ostream& operator<<(std::ostream& ostr, const Metadata& metadata)
 namespace std
 {
 
-    std::ostream& operator<<(std::ostream& ostr, const pdal::metadata::ByteArray& data)
+    std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& data)
     {
         
         std::string output = pdal::Utils::base64_encode(data.get());

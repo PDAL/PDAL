@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
     std::vector<boost::uint8_t> v;
     for(int i=0; i < 100; i++) v.push_back(i);
     
-    pdal::metadata::ByteArray bytes(v);
+    pdal::ByteArray bytes(v);
         
     pdal::Bounds<double> b(1.1,2.2,3.3,101.1,102.2,103.3);
     
@@ -86,11 +86,11 @@ BOOST_AUTO_TEST_CASE(test_construction)
     BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
 
     BOOST_CHECK_EQUAL(m.cast<boost::int32_t>(), 32); 
-    m.setValue<pdal::metadata::ByteArray>(bytes);
+    m.setValue<pdal::ByteArray>(bytes);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::Bytes);
     
     std::string base64("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiYw==");
-    BOOST_CHECK_EQUAL( boost::lexical_cast<std::string>(m.getValue<pdal::metadata::ByteArray>()), base64);
+    BOOST_CHECK_EQUAL( boost::lexical_cast<std::string>(m.getValue<pdal::ByteArray>()), base64);
     BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
     
     pdal::SpatialReference ref("EPSG:4326");
