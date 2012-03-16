@@ -151,14 +151,14 @@ private:
 };
 
 
-std::ostream& operator<<(std::ostream& ostr, const Metadata& srs);
+extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Metadata& srs);
 
 
 } // namespace pdal
 
 namespace std
 {
-std::ostream& operator<<(std::ostream& ostr, const pdal::metadata::ByteArray& output);
+extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const pdal::metadata::ByteArray& output);
 }
 
 #endif
