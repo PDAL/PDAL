@@ -152,7 +152,7 @@ private:
 };
 
 
-std::ostream& operator<<(std::ostream& ostr, const Metadata& srs);
+extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Metadata& srs);
 
 
 
@@ -280,7 +280,7 @@ inline void Metadata::setValue(T const& v)
 
 namespace std
 {
-std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& output);
+extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& output);
 }
 
 #endif
