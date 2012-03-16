@@ -71,6 +71,34 @@ Metadata::~Metadata()
 
 }
 
+std::vector<std::string> Metadata::getAttributeNames() const
+{
+    std::vector<std::string> output;
+    metadata::MetadataAttributeM::const_iterator i = m_attributes.begin();
+    while (i != m_attributes.end())
+    {
+        output.push_back(i->first);
+        ++i;
+    }
+    
+    return output;
+}
+
+
+void Metadata::addAttribute(std::string const& name, std::string const value)
+{
+    std::pair<std::string, std::string> p(name, value);
+    m_attributes.insert(p);
+}
+
+std::string Metadata::getAttribute(std::string const& name) const
+{
+    metadata::MetadataAttributeM::const_iterator p = m_attributes.find(name);
+    if (p != m_attributes.end())
+        return p->second;
+    else
+        return std::string("");
+}
 
 Metadata& Metadata::operator=(Metadata const& rhs)
 {

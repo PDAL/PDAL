@@ -68,16 +68,26 @@ BOOST_AUTO_TEST_CASE(test_construction)
     
     pdal::Bounds<double> b(1.1,2.2,3.3,101.1,102.2,103.3);
     
-    m.set<boost::uint32_t>(u32);
+    m.setValue<boost::uint32_t>(u32);
     
-    BOOST_CHECK_EQUAL(m.get<boost::uint32_t>(), 32u);
-    BOOST_CHECK_THROW(m.get<boost::int32_t>(), boost::bad_get);
+    m.addAttribute("some_id", "some_value");
+    m.addAttribute("another_id", "another_value");
+    
+    std::vector<std::string> names = m.getAttributeNames();
+    BOOST_CHECK_EQUAL(names.size(), 2);
+    
+    BOOST_CHECK_EQUAL(m.getAttribute("some_id"), "some_value");
+    BOOST_CHECK_EQUAL(m.getAttribute("another_id"), "another_value");
+    
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32u);
+    BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
 
-    BOOST_CHECK_EQUAL(m.cast<boost::int32_t>(), 32);    
-    m.set<pdal::metadata::ByteArray>(bytes);
+    BOOST_CHECK_EQUAL(m.cast<boost::int32_t>(), 32); 
+    m.setValue<pdal::metadata::ByteArray>(bytes);
     
     std::string base64("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiYw==");
-    BOOST_CHECK_EQUAL( boost::lexical_cast<std::string>(m.get<pdal::metadata::ByteArray>()), base64);
+    BOOST_CHECK_EQUAL( boost::lexical_cast<std::string>(m.getValue<pdal::metadata::ByteArray>()), base64);
+    BOOST_CHECK_THROW(m.getValue<boost::int32_t>(), boost::bad_get);
     
     return;
 }

@@ -121,8 +121,8 @@ public:
 
     ~Metadata();
     
-    template <class T> inline void set(T const& v) { m_variant = v; } 
-    template <class T> inline T get() { return boost::get<T>(m_variant); }
+    template <class T> inline void setValue(T const& v) { m_variant = v; } 
+    template <class T> inline T getValue() { return boost::get<T>(m_variant); }
 
     template <class T> inline T cast() { return boost::lexical_cast<T>(m_variant); }    
     Metadata& operator=(Metadata const& rhs);
@@ -137,6 +137,10 @@ public:
     std::string const& getNamespace() const { return m_namespace; }
     void setNamespace(std::string const& ns) { m_namespace = ns; }
     
+    std::vector<std::string> getAttributeNames() const;
+    void addAttribute(std::string const& name, std::string const value);
+    std::string getAttribute(std::string const& name) const;    
+
 private:
     metadata::Variant m_variant;
     std::string m_name;
