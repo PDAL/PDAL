@@ -1,8 +1,0 @@
-.. _development_capi:
-
-=======
-C API
-=======
-
-
-[tbd]
