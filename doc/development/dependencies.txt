@@ -1,0 +1,99 @@
+.. _dependencies:
+
+==============================================================================
+Dependencies
+==============================================================================
+
+:Author: Howard Butler
+:Contact: hobu.inc at gmail.com
+:Date: 3/19/2012
+
+PDAL explicitly stands on the shoulders of giants that have come before it. 
+Specifically, PDAL depends on a number of libraries to do its work including: 
+
+* Boost_
+* GDAL_
+* Proj.4_
+* GeoTIFF_
+* libxml2_
+
+Boost
+------------------------------------------------------------------------------
+
+PDAL attempts to constrain its code-love for Boost and not always try to 
+use the latest and the greatest, but instinct is hard to control. Specifically, 
+PDAL takes advantage of a number of late-version features in boost::accumulators 
+for statistics filtering, and as of this writing, it should be assumed that the 
+minimum version required for Boost is 1.48.  Other versions less than that 
+may work with some minor modifications or ``#ifdef``'ing, but the PDAL 
+developers currently track rather late versions of Boost.
+
+To that end, PDAL embeds a custom version of Boost_ in the ./boost directory 
+of the source tree.  It can be activated with the ``-DPDAL_BOOST_EMBED=ON`` 
+CMake_ environment variable. Expect that the embedded Boost_ version is the 
+active version used by the developers, and in nearly all situations you can 
+just use the embedded Boost solution for your own builds.
+
+.. note::
+    
+    PDAL_BOOST_EMBED also causes the Boost_ build in ./boost to be namespaced 
+    and aliased as ``pdalboost::`` rather than merely ``boost::``. The advantage 
+    here is you can mix in PDAL-based code using an embedded Boost_ version 
+    with code from your own Boost build. This isn't something that is actively 
+    tested, however, and there may be leakage across the PDAL API of Boost 
+    data types in this scenario. If you find something, please let us know.
+
+Boost Packages Used
+..............................................................................
+
+An unexhaustive list includes:
+
+* Unittest
+* Accumulators
+* Filesystem
+* Program Options
+* Property Tree
+* Random
+* IO Streams
+* System
+* cstdint
+* String Algorithms
+* Endian
+* UUID
+
+
+GDAL
+------------------------------------------------------------------------------
+
+PDAL uses GDAL for spatial reference system description manipulation and image 
+reading and writing supporting for the NITF driver. In conjunction with GeoTIFF_, 
+GDAL is used to convert GeoTIFF keys and OGC WKT SRS description strings into 
+formats required by specific drivers. While PDAL can be built without GDAL 
+support, if you want SRS manipulation and description ability, you must have 
+GDAL (and GeoTIFF_) linked in at compile time.
+
+GeoTIFF
+------------------------------------------------------------------------------
+
+PDAL uses GeoTIFF in conjunction with GDAL for GeoTIFF key support in the 
+LAS driver.  
+
+Proj.4
+------------------------------------------------------------------------------
+
+Proj.4_ is the projection engine that PDAL uses for the :ref:`reprojection filter<reprojection>`.
+
+libxml2
+------------------------------------------------------------------------------
+
+libxml2_ is used to serialize PDAL :cpp:class:`pdal::Schema` to- and fro- to raw XML.
+
+
+
+.. _Boost: http://www.boost.org
+.. _GDAL: http://www.gdal.org
+.. _Proj.4: http://trac.osgeo.org/proj
+.. _GeoTIFF: http://trac.osgeo.org/geotiff
+.. _libxml2: http://xmlsoft.org
+.. _CMake: http://www.cmake.org
+
