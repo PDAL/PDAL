@@ -90,8 +90,12 @@ public:
 
     void read();
 
+    boost::uint64_t getNumPointsProcessed() const { return m_numPointsProcessed; }
+    boost::uint64_t getNumPointsPassed() const { return m_numPointsPassed; }
+
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
+    void readBeginImpl();
     boost::uint32_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
 
@@ -99,6 +103,9 @@ private:
 
     const pdal::filters::Predicate& m_predicateFilter;
     pdal::plang::BufferedInvocation* m_pythonMethod;
+
+    boost::uint64_t m_numPointsProcessed;
+    boost::uint64_t m_numPointsPassed;
 };
 
 } } // iterators::sequential

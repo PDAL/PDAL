@@ -40,6 +40,8 @@
 #include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/drivers/faux/Writer.hpp>
 
+#include <boost/scoped_ptr.hpp>
+
 BOOST_AUTO_TEST_SUITE(PredicateFilterTest)
 
 using namespace pdal;
@@ -145,6 +147,128 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
     return;
 }
 
+
+BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
+{
+    // can we make a pipeline with TWO python filters in it?
+
+    Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
+    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
+
+    // keep all points where x less than 1.0
+    const pdal::Option source1("source", 
+        // "X < 1.0"
+        "import numpy as np\n"
+        "def yow1(ins,outs):\n"
+        "  X = ins['X']\n"
+        "  Mask = np.less(X, 1.0)\n"
+        "  #print X\n"
+        "  #print Mask\n"
+        "  outs['Mask'] = Mask\n"
+        "  return True\n"
+        );
+    const pdal::Option module1("module", "MyModule1");
+    const pdal::Option function1("function", "yow1");
+    pdal::Options opts1;
+    opts1.add(source1);
+    opts1.add(module1);
+    opts1.add(function1);
+
+    pdal::filters::Predicate filter1(reader, opts1);
+
+    // keep all points where y greater than 0.5
+    const pdal::Option source2("source", 
+        // "Y > 0.5"
+        "import numpy as np\n"
+        "def yow2(ins,outs):\n"
+        "  Y = ins['Y']\n"
+        "  Mask = np.greater(Y, 0.5)\n"
+        "  #print X\n"
+        "  #print Mask\n"
+        "  outs['Mask'] = Mask\n"
+        "  return True\n"
+        );
+    const pdal::Option module2("module", "MyModule2");
+    const pdal::Option function2("function", "yow2");
+    pdal::Options opts2;
+    opts2.add(source2);
+    opts2.add(module2);
+    opts2.add(function2);
+
+    pdal::filters::Predicate filter2(filter1, opts2);
+
+    pdal::drivers::faux::Writer writer(filter2, Options::none());
+    writer.initialize();
+
+    boost::uint64_t numWritten = writer.write(1000);
+
+    BOOST_CHECK(numWritten == 250);
+
+    const double minX = writer.getMinX();
+    const double minY = writer.getMinY();
+    const double minZ = writer.getMinZ();
+    const double maxX = writer.getMaxX();
+    const double maxY = writer.getMaxY();
+    const double maxZ = writer.getMaxZ();
+
+    BOOST_CHECK(Utils::compare_approx<double>(minX, 0.5, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(minY, 0.5, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(minZ, 0.5, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(maxX, 1.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(maxY, 1.0, 0.01));
+    BOOST_CHECK(Utils::compare_approx<double>(maxZ, 1.0, 0.01));
+
+    return;
+}
+
+
+BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
+{
+    // test the point counters in the Predicate's iterator
+
+    Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
+    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
+
+    const pdal::Option source("source", 
+        // "Y > 0.5"
+        "import numpy as np\n"
+        "def yow2(ins,outs):\n"
+        "  Y = ins['Y']\n"
+        "  Mask = np.greater(Y, 0.5)\n"
+        "  #print Mask\n"
+        "  outs['Mask'] = Mask\n"
+        "  return True\n"
+        );
+    const pdal::Option module("module", "MyModule1");
+    const pdal::Option function("function", "yow2");
+    pdal::Options opts;
+    opts.add(source);
+    opts.add(module);
+    opts.add(function);
+
+    pdal::filters::Predicate filter(reader, opts);
+    
+    filter.initialize();
+
+    const Schema& schema = filter.getSchema();
+    PointBuffer data(schema, 1000);
+    
+    boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
+    {
+        boost::uint32_t numRead = iter->read(data);
+        BOOST_CHECK(numRead == 750);
+    }
+    
+    pdal::filters::iterators::sequential::Predicate* iterator = static_cast<pdal::filters::iterators::sequential::Predicate*>(iter.get());
+
+    const boost::uint64_t processed = iterator->getNumPointsProcessed();
+    const boost::uint64_t passed = iterator->getNumPointsPassed();
+
+    BOOST_CHECK(processed == 1000);
+    BOOST_CHECK(passed == 750);
+
+    return;
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 #endif

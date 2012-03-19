@@ -141,6 +141,8 @@ Predicate::Predicate(const pdal::filters::Predicate& filter, PointBuffer& buffer
     : pdal::FilterSequentialIterator(filter, buffer)
     , m_predicateFilter(filter)
     , m_pythonMethod(NULL)
+    , m_numPointsProcessed(0)
+    , m_numPointsPassed(0)
 {
     return;
 }
@@ -164,13 +166,21 @@ void Predicate::createParser()
 }
 
 
-boost::uint32_t Predicate::readBufferImpl(PointBuffer& dstData)
+void Predicate::readBeginImpl()
 {
     if (!m_pythonMethod)
     {
         createParser();
     }
     
+    m_numPointsProcessed = m_numPointsPassed = 0;
+
+    return;
+}
+
+
+boost::uint32_t Predicate::readBufferImpl(PointBuffer& dstData)
+{
     // read in a full block of points
     PointBuffer srcData(dstData.getSchema(), (boost::uint32_t)dstData.getBufferByteCapacity());
 
@@ -180,6 +190,9 @@ boost::uint32_t Predicate::readBufferImpl(PointBuffer& dstData)
         // copy the valid points from the src block to the dst block
         m_predicateFilter.processBuffer(srcData, dstData, *m_pythonMethod);
     }
+
+    m_numPointsProcessed = srcData.getNumPoints();
+    m_numPointsPassed = dstData.getNumPoints();
 
     return dstData.getNumPoints();
 }
