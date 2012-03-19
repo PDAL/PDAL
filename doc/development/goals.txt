@@ -22,8 +22,8 @@ Project Goals
    reader), a filter (such as a point thinner), or data sink (such as a
    file writer).
 
-5. The PDAL library will be in C++, but will also include a C API and will
-   have SWIG bindings for languages like Python and C#. PDAL will support 
-   multiple platforms, specifically Windows, Linux, and Mac.
+5. The PDAL library will be in C++, but will have SWIG bindings for languages
+   like Python and C#. PDAL will support multiple platforms, specifically
+   Windows, Linux, and Mac.
 
 6. PDAL is open source and is released under a BSD license.

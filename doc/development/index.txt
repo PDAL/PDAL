@@ -20,10 +20,9 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
+   dependencies
    bindings
-   boost
    building
-   capi
    conventions
    coreclasses
    docs
