@@ -22,7 +22,7 @@ Boost
 ------------------------------------------------------------------------------
 
 PDAL attempts to constrain its code-love for Boost and not always try to 
-use the latest and the greatest, but instinct is hard to control. Specifically, 
+use the latest and the greatest, but the instinct is hard to control. Specifically, 
 PDAL takes advantage of a number of late-version features in boost::accumulators 
 for statistics filtering, and as of this writing, it should be assumed that the 
 minimum version required for Boost is 1.48.  Other versions less than that 

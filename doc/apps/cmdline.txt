@@ -1,8 +1,8 @@
-.. _apps_cmdline:
+.. _apps:
 
-=========================
+******************************************************************************
 Apps
-=========================
+******************************************************************************
 
 PDAL will contain a number of command line applications that are built on
 top of the PDAL libraries.  This Note lists those apps.
@@ -11,7 +11,7 @@ This should be fleshed out to list the (major) options for each of the apps.
 
 
 App Commonality
-===============
+------------------------------------------------------------------------------
 
 The following notes apply to all apps:
 
@@ -26,15 +26,21 @@ The following notes apply to all apps:
 * describe common switches: --version, --help, --verbose
 
 pc2pc
-=====
+------------------------------------------------------------------------------
 
 Converts from one file format to another, optionally with some (relatively
 simple) filtering or processing.
 
 
+.. _pdal_test:
+
+pdal_test
+------------------------------------------------------------------------------
+
+some text
 
 pcinfo
-======
+------------------------------------------------------------------------------
 
 Dumps information about a point cloud file, such as:
 
@@ -56,7 +62,7 @@ XML or similar, where it makes sense to do so.
 
 
 pcpipeline
-==========
+------------------------------------------------------------------------------
 
 [tbd]
 
@@ -71,29 +77,3 @@ should work under Unix too.
 
 
 
-pcindex
-=======
-
-(future)
-
-Creates a serialized spatial index for a point cloud. First pass at this 
-is to repurpose liblas::Index which supports serialization.
-
-
-
-pcmerge
-=======
-
-(future -- likely to be part of pc2pc)
-
-Merges multiple files together.  (This is also known as mosacking.)
-
-
-
-pctile
-======
-
-(future -- likely to be part of pc2pc)
-
-Chops one file up into multiple files.  This could be the liblas::Chipper, 
-leaf nodes of an index like an R-tree, or a simple quadtree build.

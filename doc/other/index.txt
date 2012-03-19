@@ -10,7 +10,6 @@ Other PDAL documentation
    
    community
    faq
-   download
    features
    
 

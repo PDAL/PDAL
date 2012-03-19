@@ -1,7 +1,0 @@
-.. _building_linux:
-
-=====================
-Bulding under Linux
-=====================
-
-to be written

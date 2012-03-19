@@ -1,7 +1,0 @@
-.. _building_mac:
-
-=====================
-Bulding under Mac
-=====================
-
-to be written
