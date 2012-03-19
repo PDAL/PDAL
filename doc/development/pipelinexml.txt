@@ -38,14 +38,14 @@ output.laz::
             <Option name="compression">true</Option>
             <Filter type="filters.crop">
                 <Option name="bounds">([0,1000000],[0,1000000],[0,1000000])</Option>
-				<MultiFilter type="filters.mosaic">
-					<Reader type="drivers.las.reader">
-						<Option name="filename">input1.las</Option>
-					</Reader>
-					<Reader type="drivers.las.reader">
-						<Option name="filename">input1.las</Option>
-					</Reader>
-				</MultiFilter>
+                <MultiFilter type="filters.mosaic">
+                  <Reader type="drivers.las.reader">
+                    <Option name="filename">input1.las</Option>
+                  </Reader>
+                  <Reader type="drivers.las.reader">
+                    <Option name="filename">input1.las</Option>
+                  </Reader>
+                </MultiFilter>
             </Filter>
         </Writer>
     </Pipeline>
@@ -67,11 +67,11 @@ Syntax Specification
             * <Writer> element, for writer pipelines
 
             * <Reader> or <Filter> or <MultiFilter> element, for reader pipelines
-	
-	* attributes:
-	
-		* the "version" attribute must appear exactly once; the value of this
-		  attribute shall be the string "1.0"
+  
+  * attributes:
+  
+    * the "version" attribute must appear exactly once; the value of this
+      attribute shall be the string "1.0"
 
 * <Writer>
 
@@ -82,12 +82,12 @@ Syntax Specification
         * zero or more <Option> elements
 
         * exactly one <Reader> or <Filter> or <MultiFilter> element
-		
-	* attributes:
-	
-		* the "type" attribute must appear exactly once; the value of this
-		  attribute shall be the string corresponding to the name of
-		  the Writer stage type, e.g. "drivers.las.writer"
+    
+  * attributes:
+  
+    * the "type" attribute must appear exactly once; the value of this
+      attribute shall be the string corresponding to the name of
+      the Writer stage type, e.g. "drivers.las.writer"
 
 * <Reader>
 
@@ -97,11 +97,11 @@ Syntax Specification
 
         * zero or more <Option> elements
 
-	* attributes:
-	
-		* the "type" attribute must appear exactly once; the value of this
-		  attribute shall be the string corresponding to the name of
-		  the Reader stage type, e.g. "drivers.las.reader"
+  * attributes:
+  
+    * the "type" attribute must appear exactly once; the value of this
+      attribute shall be the string corresponding to the name of
+      the Reader stage type, e.g. "drivers.las.reader"
 
 * <Filter>
 
@@ -113,11 +113,11 @@ Syntax Specification
 
         * exactly one <Reader> or <Filter> or <MultiFilter> element
 
-	* attributes:
-	
-		* the "type" attribute must appear exactly once; the value of this
-		  attribute shall be the string corresponding to the name of
-		  the filter stage type, e.g. "filters.crop"
+  * attributes:
+  
+    * the "type" attribute must appear exactly once; the value of this
+      attribute shall be the string corresponding to the name of
+      the filter stage type, e.g. "filters.crop"
 
 * <MultiFilter>
 
@@ -129,11 +129,11 @@ Syntax Specification
 
         * one or more <Reader> or <Filter> or <MultiFilter> elements
 
-	* attributes:
-	
-		* the "type" attribute must appear exactly once; the value of this
-		  attribute shall be the string corresponding to the name of
-		  the MultiFilter stage type, e.g. "filter.mosaic"
+  * attributes:
+  
+    * the "type" attribute must appear exactly once; the value of this
+      attribute shall be the string corresponding to the name of
+      the MultiFilter stage type, e.g. "filter.mosaic"
 
 * <Option>
 
@@ -142,22 +142,22 @@ Syntax Specification
     * may only be a child of a <Reader>, <Writer>, <Filter>, or <MultiFilter> element
 
     * attributes:
-	
+  
         * the "name" attribute must appear exactly once; the value of this
           attribute shall be the name of the option, e.g. "filename"
  
     * no child elements
-	
+  
     * content:
 
         * the content of the element shall be the string representing the
-		  value of the option, e.g. "input.las"
+      value of the option, e.g. "input.las"
 
 
 Notes
 =====
 
-* In the implementation, ptrees are used to read and write the pipelines.
+* In the implementation, boost::property_tree are used to read and write the pipelines.
   This means less parsing hassle for us, but also means we can't produce
   decent error messages (esp. since we don't have line numbers).
 
@@ -165,6 +165,6 @@ Notes
   although we don't do that today.  (There is an XSD file in the schemas
   directory.)
 
-* tbd: describe rule for interpetting file paths as relative to the
+* tbd: describe rule for interpreting file paths as relative to the
   xml file
   
