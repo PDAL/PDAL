@@ -21,7 +21,6 @@ Contents:
    :maxdepth: 2
    
    bindings
-   building
    conventions
    coreclasses
    docs
