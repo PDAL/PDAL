@@ -16,6 +16,7 @@ Specifically, PDAL depends on a number of libraries to do its work including:
 * Proj.4_
 * GeoTIFF_
 * libxml2_
+* Oracle Call Interface (OCI_)
 
 Boost
 ------------------------------------------------------------------------------
@@ -33,6 +34,8 @@ of the source tree.  It can be activated with the ``-DPDAL_BOOST_EMBED=ON``
 CMake_ environment variable. Expect that the embedded Boost_ version is the 
 active version used by the developers, and in nearly all situations you can 
 just use the embedded Boost solution for your own builds.
+
+* Boost 1.48+ is required.
 
 .. note::
     
@@ -72,23 +75,79 @@ formats required by specific drivers. While PDAL can be built without GDAL
 support, if you want SRS manipulation and description ability, you must have 
 GDAL (and GeoTIFF_) linked in at compile time.
 
+Obtain `GDAL`_ via whatever method is convenient.  Linux platforms such as 
+`Debian`_ have `DebianGIS`_, Mac OS X has the `KyngChaos`_ software frameworks, 
+and Windows has the `OSGeo4W`_ platform.  
+
+* GDAL 1.9+ is required.
+
+.. warning::
+    If you are using `OSGeo4W`_ as your provider of GDAL, you must make sure 
+    to use the GDAL 1.9 package.
+
 GeoTIFF
 ------------------------------------------------------------------------------
 
 PDAL uses GeoTIFF in conjunction with GDAL for GeoTIFF key support in the 
-LAS driver.  
+LAS driver.  Obtain `libgeotiff`_ from the same place you got `GDAL`_.
+
+* libgeotiff 1.3.0+ is required
+
+.. note::
+    `GDAL` surreptitiously embeds a copy of `libgeotiff`_ in its library build 
+    but there is no way for you to know this.  In addition to embedding 
+    libgeotiff, it also strips away the library symbols that PDAL needs, 
+    meaning that PDAL can't simply link against `GDAL`_.  If you are 
+    building both of these libraries yourself, make sure you build GDAL 
+    using the "External libgeotiff" option, which will prevent the 
+    insanity that can ensue on some platforms.  `OSGeo4W`_ users, including 
+    those using that platform to link and build PDAL themselves, do 
+    not need to worry about this issue.
 
 Proj.4
 ------------------------------------------------------------------------------
 
 Proj.4_ is the projection engine that PDAL uses for the :ref:`reprojection filter<reprojection>`.
 
+* Proj.4 4.9.0+ is required.
+
 libxml2
 ------------------------------------------------------------------------------
 
 libxml2_ is used to serialize PDAL :cpp:class:`pdal::Schema` to- and fro- to raw XML.
 
+* libxml 2.7.0+ is required. Older versions may also work but are untested.
 
+`OCI`_
+------------------------------------------------------------------------------
+
+Obtain the `Oracle Instant Client`_ and install in a location on your system.
+Be sure to install both the "Basic" and the "SDK" modules. Set your
+``ORACLE_HOME`` environment variable system- or user-wide to point to this
+location so the CMake configuration can find your install.
+
+.. warning::
+    `OCI`_'s libraries are inconsistently named.  You may need to create 
+    symbolic links for some library names in order for the `CMake`_ to find 
+    them::
+        
+        cd $ORACLE_HOME
+        ln -s libocci.so.11.1 libocci.so
+        ln -s libclntsh.so.11.1 libclntsh.so
+        ln -s libociei.so.11.1 libociei.so
+
+* OCI 10g+ is required.
+
+.. note::
+    MSVC should only require the oci.lib and oci.dll library and dlls.
+
+.. _`Oracle Instant Client`: http://www.oracle.com/technology/tech/oci/instantclient/index.html
+.. _`OCI`: http://www.oracle.com/technology/tech/oci/index.html
+.. _`Oracle Point Cloud`: http://download.oracle.com/docs/cd/B28359_01/appdev.111/b28400/sdo_pc_pkg_ref.htm
+.. _`DebianGIS`: http://wiki.debian.org/DebianGis
+.. _`Debian`: http://www.debian.org
+.. _`KyngChaos`: http://www.kyngchaos.com/software/unixport
+.. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w/
 
 .. _Boost: http://www.boost.org
 .. _GDAL: http://www.gdal.org
