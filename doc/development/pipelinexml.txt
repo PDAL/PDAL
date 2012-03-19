@@ -151,7 +151,7 @@ Syntax Specification
     * content:
 
         * the content of the element shall be the string representing the
-      value of the option, e.g. "input.las"
+          value of the option, e.g. "input.las"
 
 
 Notes

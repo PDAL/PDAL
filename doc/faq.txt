@@ -1,7 +1,10 @@
-.. _other_features:
+.. _faq:
 
 ******************************************************************************
-Features
+FAQ
 ******************************************************************************
 
-tbd
+* How do you pronounce PDAL?
+
+  The proper spelling of the project name is PDAL, in uppercase. It is
+  pronounced to rhyme with "GDAL".

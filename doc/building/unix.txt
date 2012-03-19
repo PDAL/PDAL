@@ -87,9 +87,9 @@ configured.
 .. _make_install:
 
 Run ``make install`` and test your installation with a :ref:`pdal_test` command
-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
-``make install`` will install the :ref:`utilities <apps_index>` in the location
+``make install`` will install the :ref:`utilities <apps>` in the location
 that was specified for 'CMAKE_INSTALL_PREFIX'.  Once installed, ensure that 
 you can run pcinfo.
 
@@ -136,7 +136,7 @@ CCMake and cmake-gui
     
     The following was just swiped from the libLAS compilation document 
     and it has not been updated for PDAL. The basics should be the same, however. 
-    Please ask on the :ref:`mailing list<community` if you run into any issues.
+    Please ask on the :ref:`mailing list<community>` if you run into any issues.
     
 While `CMake`_ can be run from the command-line, and this is the preferred
 way for many individuals, it can be much easier to run CMake from a GUI.
@@ -171,7 +171,7 @@ software.  The main pieces that will be installed are:
 * PDAL headers (typically in a location ./include/pdal/...)
 * PDAL C++ (PDAL.a or PDAL.so) library
 * PDAL C (PDAL_c.a or PDAL_c.so) library
-* :ref:`Utility <utilities>` programs
+* :ref:`Utility <apps>` programs
 
 ::
 

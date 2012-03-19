@@ -13,7 +13,9 @@ Contents:
    download
    building/index
    tutorial/index
-   apps/index
+   apps
+   community
+   faq
    development/index
    other/index
    api/index

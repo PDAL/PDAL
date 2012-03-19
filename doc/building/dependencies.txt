@@ -89,12 +89,12 @@ GeoTIFF
 ------------------------------------------------------------------------------
 
 PDAL uses GeoTIFF in conjunction with GDAL for GeoTIFF key support in the 
-LAS driver.  Obtain `libgeotiff`_ from the same place you got `GDAL`_.
+LAS driver.  Obtain `GeoTIFF`_ from the same place you got `GDAL`_.
 
 * libgeotiff 1.3.0+ is required
 
 .. note::
-    `GDAL` surreptitiously embeds a copy of `libgeotiff`_ in its library build 
+    `GDAL` surreptitiously embeds a copy of `GeoTIFF`_ in its library build 
     but there is no way for you to know this.  In addition to embedding 
     libgeotiff, it also strips away the library symbols that PDAL needs, 
     meaning that PDAL can't simply link against `GDAL`_.  If you are 
