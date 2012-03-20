@@ -30,6 +30,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     FauxReaderTest.cpp
     FauxWriterTest.cpp
     FileUtilsTest.cpp
+    GDALUtilsTest.cpp
     InPlaceReprojectionFilterTest.cpp
     LasReaderTest.cpp
     LasWriterTest.cpp

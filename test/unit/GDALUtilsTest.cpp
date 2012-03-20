@@ -32,84 +32,62 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_GDALUTILS_HPP
-#define INCLUDED_GDALUTILS_HPP
+#include <boost/test/unit_test.hpp>
 
-#include <pdal/pdal_internal.hpp>
+#include <pdal/GDALUtils.hpp>
+#include <pdal/FileUtils.hpp>
+#include "Support.hpp"
 
-#include <pdal/Log.hpp>
+BOOST_AUTO_TEST_SUITE(GDALUtilsTest)
 
-#include <sstream>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-
-#ifdef PDAL_HAVE_GDAL
-#include <cpl_port.h>
-#include "gdal.h"
-// #include "gdal_priv.h"
-#include <cpl_vsi.h>
-#endif
-
-namespace pdal
+BOOST_AUTO_TEST_CASE(GDALUtilsTest_1)
 {
-namespace gdal {
+    const int FILESIZE = 10000;  // size of file to use
+    const int NUMREPS = 10000; // number of points to check
 
+    const std::string tempfile = Support::datapath("vsilfile_test.dat");
 
-class PDAL_DLL Debug
-{
-public:
+    pdal::FileUtils::deleteFile(tempfile);
 
-    Debug(bool isDebug, pdal::LogPtr log);
-    ~Debug();
+    srand(17);
 
-    static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
+    // compute the "true" values, and store into test file
+    boost::uint8_t truth[FILESIZE];
     {
-#if GDAL_VERSION_MAJOR == 1 && GDAL_VERSION_MINOR >= 9
-        static_cast<Debug*>(CPLGetErrorHandlerUserData())->m_gdal_callback(code, num, msg);
-#else
-        if (code == CE_Failure || code == CE_Fatal) {
-            std::ostringstream oss;
-            oss <<"GDAL Failure number=" << num << ": " << msg;
-            throw gdal_error(oss.str());
-        } else if (code == CE_Debug) {
-            std::clog << " (no log control stdlog) GDAL debug: " << msg << std::endl;
-        } else {
-            return;
+        FILE* fp = fopen(tempfile.c_str(), "wb");
+        for (int i=0; i<FILESIZE; i++)
+        {
+            truth[i] = rand() % 256;
+            fwrite(&truth[i], 1, 1, fp);\
         }
-#endif
+        fclose(fp);
     }
-    
-    void log(::CPLErr code, int num, char const* msg);
-    void error(::CPLErr code, int num, char const* msg);
+
+    // open the test file
+    VSILFILE* fp = VSIFOpenL/*fopen*/(tempfile.c_str(), "rb");
+    boost::iostreams::stream<pdal::gdal::VSILFileBuffer> i(fp);
+
+    for (int reps=0; reps<NUMREPS; reps++)
+    {
+        // seek to a random spot and read a point
+        int pos = rand()%FILESIZE;
+        i.seekg(pos, std::iostream::beg);
+
+        boost::uint8_t c;
+        i.read((char*)&c, 1);
+
+        // did we get the correct value?
+        BOOST_CHECK(c == truth[pos]);
+    }
+
+    i.close();
+    VSIFCloseL/*fclose*/(fp);
+
+    pdal::FileUtils::deleteFile(tempfile);
+
+    return;
+}
 
 
-private:
-    boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
-    bool m_isDebug;
-    pdal::LogPtr m_log;
-};
-
-
-#ifdef PDAL_HAVE_GDAL
-class PDAL_DLL VSILFileBuffer
-{
-public:
-    typedef boost::iostreams::seekable_device_tag category;
-    typedef char char_type;
-
-    VSILFileBuffer(VSILFILE* fp);
-
-    std::streamsize read(char* s, std::streamsize n);
-    std::streamsize write(const char* s, std::streamsize n);
-    std::streampos seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way);
-
-private:
-    VSILFILE* m_fp;
-};
-#endif
-
-
-}} // namespace pdal::gdal
-
-#endif
+BOOST_AUTO_TEST_SUITE_END()
