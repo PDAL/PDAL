@@ -13,3 +13,4 @@ C++ API
    log
    metadata
    pointbuffer
+   schema

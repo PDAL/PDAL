@@ -128,11 +128,8 @@ bool Schema::operator!=(const Schema& other) const
 
 void Schema::appendDimension(const Dimension& dim)
 {
-    // m_dimensions.push_back(dim);
-    // std::pair<DimensionId::Id, std::size_t> p(dim.getId(), m_dimensions.size()-1);
-    // m_dimensions_map.insert(p);
-
-    // Add/reset the dimension ptr on the dimensions map
+    // Copy the Dimension because we're going to overwrite/set some of 
+    // its attributes
     Dimension d(dim);
     
     schema::index_by_position& position_index = m_index.get<schema::position>();
@@ -159,7 +156,7 @@ void Schema::appendDimension(const Dimension& dim)
     d.setPosition(m_index.size());
 
     std::pair<schema::index_by_position::iterator, bool> q = position_index.insert(d);
-    if (! q.second) 
+    if (!q.second) 
     {
         std::ostringstream oss;
         oss << "Could not insert into schema index because of " << q.first->getName();
@@ -367,21 +364,6 @@ bool Schema::setDimension(Dimension const& dim)
     }
 
     return true;
-}
-
-
-int Schema::getDimensionIndex(const Dimension& dim) const
-{
-    schema::index_by_name::const_iterator it = m_index.get<schema::name>().find(dim.getName());
-
-    if (it != m_index.get<schema::name>().end())
-    {
-        return it->getPosition();
-    }    
-    
-    std::ostringstream oss;
-    oss << "getDimensionIndex: dimension not found with name " << dim.getName();
-    throw dimension_not_found(oss.str());
 }
 
 const Dimension& Schema::getDimension(dimension::id const& t) const

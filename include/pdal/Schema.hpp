@@ -98,64 +98,135 @@ typedef boost::uint32_t size_type;
 
 }
 
-/// Schema definition
+/// A pdal::Schema is a composition of pdal::Dimension instances that form 
+/// a point cloud. 
 class PDAL_DLL Schema
 {
 public:
-    Schema();
-    Schema(std::vector<Dimension> const& dimensions);
-    Schema(Schema const& other);
 
+/// @name Constructors
+    /// An empty constructor with no Dimension instances
+    Schema();
+    
+    /// construct an instanct given the order and dimensions in the dimensions vector
+    /// @param dimensions the list of dimensions (and their order) to use to construct the Schema
+    Schema(std::vector<Dimension> const& dimensions);
+    
+    /// Copy constructor
+    Schema(Schema const& other);
+    
+    /// Assignment constructor
     Schema& operator=(Schema const& rhs);
 
+/// @name Equality
+    /// Equality
     bool operator==(const Schema& other) const;
+    /// Inequality
     bool operator!=(const Schema& other) const;
 
+/// @name Dimension manipulation
+    /// adds (copies) a Dimension instance to the Schema
+    /// @param dim a Dimension that is copied and added to the end of the Schema
     void appendDimension(Dimension const& dim);
     
-    schema::Map const& getDimensions() const { return m_index; }
-    
-    const Dimension& getDimension(std::string const& name, std::string const& ns="") const;
-    const Dimension& getDimension(dimension::id const& id) const;
-    const Dimension& getDimension(std::size_t index) const;
+    /*! overwrites an existing Dimension with the same name as dim
+        \param dim the Dimension instance that contains the name and namespace 
+        to overwrite in the Schema.
+        \verbatim embed:rst 
+        .. note::
+                
+            If no namespace is given, the *first* dimension with a matching 
+            :cpp:func:`pdal::Dimension::getName()` will be overwritten. To be 
+            sure, have set the namespace of the pdal::Dimension using
+            :cpp:func:`pdal::Dimension::setNamespace()` beforehand.
 
+        \endverbatim
+    */    
+    bool setDimension(Dimension const& dim);
+    
+    /// @return the boost::multi_index map that contains the Dimension instances
+    inline schema::Map const& getDimensions() const { return m_index; }
+
+/// @name Dimension access
+    /// @return a const& to a Dimension with the given name and namespace. If 
+    /// no matching dimension is found, pdal::dimension_not_found is thrown.
+    /// @param name name to use when searching
+    /// @param ns namespace to use when searching. If none is given, the first 
+    /// matching Dimension instance with name \b name is returned.
+    const Dimension& getDimension(std::string const& name, std::string const& ns="") const;
+    
+    /// @return a const& to a Dimension with the given dimension::id. If 
+    /// no matching dimension is found, pdal::dimension_not_found is thrown.
+    /// @param id id to use when searching
+    const Dimension& getDimension(dimension::id const& id) const;
+    
+    /// @return a const& to Dimension with the given index. If the 
+    /// index is out of range, pdal::dimension_not_found is thrown.
+    /// @param index position index to return.
+    const Dimension& getDimension(std::size_t index) const;
+    
+    /// @return a boost::optional-wrapped const& to a Dimension with the given name 
+    /// and namespace. If no matching dimension is found, the optional will be empty.
+    /// @param name name to use when searching
+    /// @param ns namespace to use when searching. If none is given, the first 
+    /// matching Dimension instance with name \b name is returned.
     boost::optional<Dimension const&> getDimensionOptional(std::string const& name, std::string const& ns="") const;
+
+    /// @return a boost::optional-wrapped const& to a Dimension with the given dimension::id.
+    /// If no matching dimension is found, the optional will be empty.
+    /// @param id id to use when searching
     boost::optional<Dimension const&> getDimensionOptional(dimension::id const& id) const;
+    
+    /// @return a boost::optional-wrapped const& to a Dimension with the given
+    /// index. If the index is out of range, the optional will be empty.
+    /// @param index position index to return.
     boost::optional<Dimension const&> getDimensionOptional(std::size_t index) const;
 
-    bool setDimension(Dimension const& );
-    
-    int getDimensionIndex(const Dimension& dim) const;
-
-
-    /// Fetch total byte size -- sum of all dimensions
+    /// @return the total cumulative byte size of all dimensions
     inline schema::size_type const& getByteSize() const
     {
         return m_byteSize;
     }
 
+    /// @return the number of dimensions in this Schema instance
     inline std::size_t size() const
     {
         return m_index.get<schema::name>().size();
     }
 
-    // returns a ptree reprsenting the Schema
-    //
-    // looks like this:
-    //    dimension:
-    //        [Dimension ptree]
-    //    dimension:
-    //        [Dimension ptree]
-    //    ...
-    //
-    boost::property_tree::ptree toPTree() const;
-   
-    void dump() const;
+/// @name Summary and serialization
+    /// @return  a boost::property_tree representing the Schema
+    /*! 
+        \verbatim embed:rst 
+        ::
 
+            lo:
+               dimension:
+                   [Dimension ptree]
+               dimension:
+                   [Dimension ptree]
+
+        \endverbatim
+    */
+    boost::property_tree::ptree toPTree() const;
+    
+    /// dumps a string representation of the Schema instance to std::cout
+    void dump() const;
+    
+    /// Deserialize a Schema instance from the given xml and validate against the 
+    /// given xsd
+    /// @param xml xml data to ingest
+    /// @param xsd xsd document to use for validation
     static Schema from_xml(std::string const& xml, std::string const& xsd);
+    
+    /// Deserialize a Schema instance from the given xml
+    /// @param xml xml data to ingest
     static Schema from_xml(std::string const& xml);
+    
+    /// @return serialized Schema instance as xml
     static std::string to_xml(Schema const& schema);
 
+/// @name Private Attributes
 private:
     
     schema::size_type m_byteSize;
