@@ -128,4 +128,63 @@ Debug::~Debug()
 
 }
 
+
+//----------------------------------------------------------------------------
+
+#ifdef PDAL_HAVE_GDAL
+VSILFileBuffer::VSILFileBuffer(VSILFILE* fp)
+    : m_fp(fp)
+{
+    return;
+}
+
+
+std::streamsize VSILFileBuffer::read(char* s, std::streamsize n)
+{
+    // Read up to n characters from the underlying data source
+    // into the buffer s, returning the number of characters
+    // read; return -1 to indicate EOF
+    size_t result = VSIFReadL/*fread*/(s, 1, (size_t)n, m_fp);
+    if (result == 0)
+        return -1;
+    return result;
+}
+
+
+std::streamsize VSILFileBuffer::write(const char* s, std::streamsize n)
+{
+    // Write up to n characters from the buffer
+    // s to the output sequence, returning the 
+    // number of characters written
+    size_t result = VSIFWriteL/*fwrite*/(s, 1, (size_t)n, m_fp);
+    if (result != n)
+        return -1;
+    return result;
+}
+
+
+std::streampos VSILFileBuffer::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way) 
+{
+    // Advances the read/write head by off characters, 
+    // returning the new position, where the offset is 
+    // calculated from:
+    //  - the start of the sequence if way == ios_base::beg
+    //  - the current position if way == ios_base::cur
+    //  - the end of the sequence if way == ios_base::end
+
+    int myway = 0;
+    if (way == std::ios_base::beg) myway = SEEK_SET;
+    else if (way == std::ios_base::cur) myway = SEEK_CUR;
+    else if (way == std::ios_base::end) myway = SEEK_END;
+
+    long myoff = (long)off;
+    int result = VSIFSeekL/*fseek*/(m_fp, myoff, myway);
+    if (result != 0)
+    {
+        return -1;
+    }
+    return VSIFTellL/*ftell*/(m_fp);
+}
+#endif
+
 }} // namespace pdal::gdal
