@@ -126,6 +126,10 @@ BOOST_AUTO_TEST_CASE(test_construction)
     BOOST_CHECK_EQUAL(m.getValue<boost::int64_t>(), -64);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SignedInteger);
 
+    m.setValue<boost::uint8_t>(u8);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint8_t>(), 8);
+    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
+
     m.setValue<boost::uint16_t>(u16);
     BOOST_CHECK_EQUAL(m.getValue<boost::uint16_t>(), 16);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
@@ -138,11 +142,6 @@ BOOST_AUTO_TEST_CASE(test_construction)
     BOOST_CHECK_EQUAL(m.getValue<boost::uint64_t>(), 64);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
 
-    m.setValue<boost::uint8_t>(u8);
-    BOOST_CHECK_EQUAL(m.getValue<boost::uint8_t>(), 8);
-    BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedByte);
-
-    
     return;
 }
 

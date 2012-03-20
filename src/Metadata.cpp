@@ -44,10 +44,6 @@
 namespace pdal
 {
 
-
-
-
-
 Metadata::Metadata( std::string const& name, 
                     std::string const& ns) 
     : m_name(name)
@@ -59,16 +55,14 @@ Metadata::Metadata( std::string const& name,
 
 
 Metadata::Metadata(const Metadata& other)
-    // :
+    : m_variant(other.m_variant)
+    , m_name(other.m_name)
+    , m_namespace(other.m_namespace)
+    , m_type(other.m_type)
 {
     return;
 }
 
-
-Metadata::~Metadata()
-{
-
-}
 
 std::vector<std::string> Metadata::getAttributeNames() const
 {
@@ -97,20 +91,6 @@ std::string Metadata::getAttribute(std::string const& name) const
         return p->second;
     else
         return std::string("");
-}
-
-Metadata& Metadata::operator=(Metadata const& rhs)
-{
-    if (&rhs != this)
-    {
-    }
-    return *this;
-}
-
-
-bool Metadata::operator==(Metadata const& rhs) const
-{
-    return false;
 }
 
 std::ostream& operator<<(std::ostream& ostr, const Metadata& metadata)

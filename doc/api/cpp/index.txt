@@ -11,3 +11,4 @@ C++ API
    dimension
    bounds
    log
+   metadata

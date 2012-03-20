@@ -1,0 +1,18 @@
+.. _cpp-pdal-metadata:
+
+******************************************************************************
+pdal::Metadata
+******************************************************************************
+
+
+
+.. doxygenclass:: pdal::Metadata
+   :members:
+
+.. doxygenenum:: pdal::metadata::Type
+
+.. doxygenclass:: pdal::ByteArray
+   :members:
+   
+.. doxygentypedef:: pdal::metadata::Variant
+

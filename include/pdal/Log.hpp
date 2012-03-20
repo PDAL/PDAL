@@ -103,7 +103,11 @@ public:
     /// Sets the floating point precision
     void floatPrecision(int level);
     
+    /// Clears the floating point precision settings of the streams
     void clearFloat();
+
+/** @name private attributes
+*/ 
     
 protected:
     std::ostream* m_log;

@@ -21,9 +21,9 @@ projects (as well as many others).  This functionality allows the PDAL project
 to avoid maintaining these build options by hand and target a single configuration
 and build platform.
 
-This tutorial will describe how to build PDAL using CMake on both a 
-Unix platform.  
-
+This tutorial will describe how to build PDAL using CMake on a 
+Unix platform.  PDAL is known to compile on Linux 2.6's of various flavors and 
+OSX Snow Leopard and Lion with XCode 4.2.
 
 :ref:`dependencies` contains more information about specific library version
 requirements and notes about building or acquiring them.

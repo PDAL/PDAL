@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2012, Howard Butler hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_METADATARECORD_HPP
-#define INCLUDED_METADATARECORD_HPP
+#ifndef INCLUDED_METADATA_HPP
+#define INCLUDED_METADATA_HPP
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Options.hpp>
@@ -41,33 +41,41 @@
 #include <pdal/SpatialReference.hpp>
 
 
-
 #include <boost/shared_array.hpp>
 #include <boost/variant.hpp>
+
 #include <vector>
 #include <map>
 
 namespace pdal
 {
 
-
-
-
-
+/// ByteArray simply wrapps a std::vector<boost::uint8_t> such that it can then 
+/// be dumped to an ostream in a base64 encoding. For now, it makes a copy of the data 
+/// it is given, and should not be used for slinging big data around.
 class PDAL_DLL ByteArray 
 {
 public:
 
+/** @name Constructors
+*/  
+    /// Constructs a ByteArray instance with the given array of data.
     ByteArray(std::vector<boost::uint8_t> const& data) : m_bytes(data) {}
-    
+
+/** @name Data manipulation
+*/     
+    /// resets the array 
     inline void set(std::vector<boost::uint8_t> const& input) { m_bytes = input; }
+    
+    /// fetches a reference to the array
     inline std::vector<boost::uint8_t> const& get() const { return m_bytes; }
 
+/** @name private attributes
+*/     
 private:
     
     std::vector<boost::uint8_t> m_bytes;
 };
-
 
 namespace metadata {
     
@@ -75,18 +83,22 @@ namespace metadata {
 
     enum Type
     {
-        SignedByte,
-        UnsignedByte,
-        SignedInteger,
-        UnsignedInteger,
-        Pointer,
-        Float,
-        Double,
+        /// equivalent to int32_t
+        SignedInteger, 
+        /// equivalent to uint32_t
+        UnsignedInteger, 
+        /// equivalent to float
+        Float, 
+        /// equivalent to double
+        Double, 
+        /// equivalent to std::string
         String,
-        Bytes,
-        Bounds,
-        SpatialReference
-        
+        /// raw binary data in the form std::vector<boost::uint8_t>
+        Bytes, 
+        /// A pdal::Bounds instance
+        Bounds, 
+        /// A pdal::SpatialReference instance
+        SpatialReference 
     };
 
 
@@ -105,43 +117,99 @@ namespace metadata {
                             pdal::ByteArray, 
                             pdal::SpatialReference, 
                             pdal::Bounds<double> > Variant;
-
-
 } // metadata
+
+
+/// Metadata is a container for metadata entries that pdal::Stage and pdal::PointBuffer
+/// carry around as part of their internal operations. Bits of information might 
+/// come from a pdal::Reader that opens a file, or a pdal::Filter that processes 
+/// as an intermediate stage, and pdal::Metadata is what is used to hold and 
+/// pass those metadata around.  pdal::Metadata values must be of type pdal::metadata::Variant 
+/// and it is required that they are serializeable to std::string.
+
+/// pdal::Metadata instances also carry with them a map of key/value pairs 
+/// called attributes that are metadata about the metadata entry. For example, 
+/// a LAS VLR might have a name of "classification", a pdal::ByteArray for its data, 
+/// and a set of attributes that are "userid":"4321" and "vlrid":"1234". These 
+/// other metadata may be useful given the context, and any auxiliary data 
+/// about the metadata entry should be provided via attributes. It is up to you 
+/// to determine where the line of attribute and new metadata entry exists. 
 class PDAL_DLL Metadata 
 {
 public:
 
+/** @name Constructors
+*/  
+    /// Base constructor
+    /// @param name entry name to use for this metadata entry
+    /// @param ns namespace to use for this metadata entry
     Metadata(   std::string const& name, 
                 std::string const& ns);
 
+    /// Copy constructor
     Metadata(const Metadata&);
 
-    ~Metadata();
-    
+/** @name entry type
+*/  
+    /// returns the pdal::metadata::Type for the metadata entry
     inline metadata::Type getType() const { return m_type; }
+    
+    /// sets the pdal::metadata::Type for the metadata entry
+    /// @param t pdal::metadata::Type value for the entry
     inline void setType(metadata::Type t) { m_type = t; }
-    
+
+/** @name entry value
+*/  
+    /// sets the pdal::metadata::Variant value for the entry
+    /// @param v value of type pdal::metadata::Variant to set for the entry
     template <class T> inline void setValue(T const& v); 
+    
+    /// gets the metadata entry value as type T.  Throws boost::bad_cast if 
+    /// unable to do so.  Use pdal::metdata::Type to determine which type T to 
+    /// request of the metadata entry. Alternatively, use pdal::Metdata::cast() 
+    /// to attempt to explicitly cast the metadata entry to your own type 
+    /// via boost::lexical_cast
     template <class T> inline T getValue() { return boost::get<T>(m_variant); }
-
+    
+    /// explicitly casts the metadata entry to your type T via boost::lexical_cast
     template <class T> inline T cast() { return boost::lexical_cast<T>(m_variant); }    
-    Metadata& operator=(Metadata const& rhs);
 
-    bool operator==(Metadata const& rhs) const;
+    /// returns the pdal::metadata::Variant instance 
+    metadata::Variant const& getVariant() const { return m_variant; }
 
-    metadata::Variant const getVariant() const { return m_variant; }
-    
+/** @name entry name
+*/  
+    /// returns the name for the metadata entry
     std::string const& getName() const { return m_name; }
-    void setName(std::string const& name) { m_name = name; }
     
+    /// resets the name for the metadata entry
+    /// @param name value to use for new name
+    void setName(std::string const& name) { m_name = name; }
+
+/** @name entry namespace
+*/
+    /// returns the namespace for the metadata entry
     std::string const& getNamespace() const { return m_namespace; }
+
+    /// resets the namespace for the metadata entry
+    /// @param ns value to use for new namespace
     void setNamespace(std::string const& ns) { m_namespace = ns; }
     
+/** @name entry attributes
+*/
+    /// returns the list of attribute keys for the metadata entry
     std::vector<std::string> getAttributeNames() const;
+    
+    /// adds a new metadata key/value pair to the metadata entry
+    /// @param name to use for the attribute pair
+    /// @param value to use for the attribute pair
     void addAttribute(std::string const& name, std::string const value);
+    
+    /// returns the attribute value for a given attribute key
     std::string getAttribute(std::string const& name) const;    
 
+/** @name private attributes
+*/
 private:
     metadata::Variant m_variant;
     std::string m_name;
@@ -209,14 +277,15 @@ inline void Metadata::setValue(T const& v)
         return;
     } catch (boost::bad_get)
     {}
+
     try 
     {
         boost::get<boost::uint8_t>(m_variant);
-        m_type = metadata::UnsignedByte;
+        m_type = metadata::UnsignedInteger;
         return;
     } catch (boost::bad_get)
     {}
-
+        
     try 
     {
         boost::get<boost::uint16_t>(m_variant);
@@ -280,6 +349,8 @@ inline void Metadata::setValue(T const& v)
 
 namespace std
 {
+
+///
 extern PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const pdal::ByteArray& output);
 }
 
