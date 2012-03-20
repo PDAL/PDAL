@@ -90,4 +90,56 @@ BOOST_AUTO_TEST_CASE(GDALUtilsTest_1)
 }
 
 
+BOOST_AUTO_TEST_CASE(GDALUtilsTest_2)
+{
+    const int FILESIZE = 10000;  // size of file to use
+
+    const std::string tempfile_a = Support::datapath("vsilfile_test_a.dat");
+    const std::string tempfile_b = Support::datapath("vsilfile_test_b.dat");
+
+    pdal::FileUtils::deleteFile(tempfile_a);
+    pdal::FileUtils::deleteFile(tempfile_b);
+
+    // compute the "true" values, and store into test file
+    boost::uint8_t truth[FILESIZE];
+    {
+        FILE* fp_a = fopen(tempfile_a.c_str(), "wb");
+        VSILFILE* fp_b = VSIFOpenL(tempfile_b.c_str(), "wb");
+        for (int i=0; i<FILESIZE; i++)
+        {
+            truth[i] = rand() % 256;
+            fwrite(&truth[i], 1, 1, fp_a);
+            VSIFWriteL(&truth[i], 1, 1, fp_b);
+        }
+
+        fseek(fp_a, 40, SEEK_SET);
+        VSIFSeekL(fp_b, 40, SEEK_SET);
+
+        fwrite(truth, 1, 34, fp_a);
+        VSIFWriteL(truth, 1, 34, fp_b);
+        
+        fseek(fp_a, 342, SEEK_END);
+        VSIFSeekL(fp_b, 342, SEEK_END);
+
+        fwrite(truth, 1, 12, fp_a);
+        VSIFWriteL(truth, 1, 12, fp_b);
+
+        long pos_a = (long)ftell(fp_a);
+        long pos_b = (long)VSIFTellL(fp_b);
+        BOOST_CHECK(pos_a = pos_b);
+
+        fclose(fp_a);
+        VSIFCloseL(fp_b);
+    }
+
+    const bool ok = Support::compare_files(tempfile_a, tempfile_b);
+    BOOST_CHECK(ok);
+
+    pdal::FileUtils::deleteFile(tempfile_a);
+    pdal::FileUtils::deleteFile(tempfile_b);
+
+    return;
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
