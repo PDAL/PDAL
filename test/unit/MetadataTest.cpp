@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
     boost::uint16_t u16(16);
     
     std::vector<boost::uint8_t> v;
-    for(int i=0; i < 100; i++) v.push_back(i);
+    for(boost::uint8_t i=0; i < 100; i++) v.push_back(i);
     
     pdal::ByteArray bytes(v);
         
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
     m.addAttribute("another_id", "another_value");
     
     std::vector<std::string> names = m.getAttributeNames();
-    BOOST_CHECK_EQUAL(names.size(), 2);
+    BOOST_CHECK_EQUAL(names.size(), 2u);
     
     BOOST_CHECK_EQUAL(m.getAttribute("some_id"), "some_value");
     BOOST_CHECK_EQUAL(m.getAttribute("another_id"), "another_value");
@@ -127,19 +127,19 @@ BOOST_AUTO_TEST_CASE(test_construction)
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::SignedInteger);
 
     m.setValue<boost::uint8_t>(u8);
-    BOOST_CHECK_EQUAL(m.getValue<boost::uint8_t>(), 8);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint8_t>(), 8u);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
 
     m.setValue<boost::uint16_t>(u16);
-    BOOST_CHECK_EQUAL(m.getValue<boost::uint16_t>(), 16);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint16_t>(), 16u);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
     
     m.setValue<boost::uint32_t>(u32);
-    BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint32_t>(), 32u);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
 
     m.setValue<boost::uint64_t>(u64);
-    BOOST_CHECK_EQUAL(m.getValue<boost::uint64_t>(), 64);
+    BOOST_CHECK_EQUAL(m.getValue<boost::uint64_t>(), 64u);
     BOOST_CHECK_EQUAL(m.getType(), pdal::metadata::UnsignedInteger);
 
     return;
