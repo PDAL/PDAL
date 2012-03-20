@@ -115,12 +115,6 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
         {
         }
 
-        droppable_accumulator_base(droppable_accumulator_base const &that)
-          : Accumulator(*static_cast<Accumulator const *>(&that))
-          , ref_count_(that.ref_count_)
-        {
-        }
-
         template<typename Args>
         void operator ()(Args const &args)
         {
@@ -166,11 +160,6 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{ namespac
         template<typename Args>
         droppable_accumulator(Args const &args)
           : droppable_accumulator::base(args)
-        {
-        }
-
-        droppable_accumulator(droppable_accumulator const &that)
-          : droppable_accumulator::base(*static_cast<droppable_accumulator::base const *>(&that))
         {
         }
     };
