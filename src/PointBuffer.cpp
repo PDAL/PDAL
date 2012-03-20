@@ -88,11 +88,6 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
     return *this;
 }
 
-PointBuffer::~PointBuffer()
-{
-}
-
-
 const Bounds<double>& PointBuffer::getSpatialBounds() const
 {
     return m_bounds;
@@ -105,24 +100,16 @@ void PointBuffer::setSpatialBounds(const Bounds<double>& bounds)
 }
 
 
-void PointBuffer::setData(boost::uint8_t* data, std::size_t index)
+void PointBuffer::setData(boost::uint8_t* data, std::size_t pointIndex)
 {
-    memcpy(m_data.get() + m_byteSize * index, data, m_byteSize);
+    memcpy(m_data.get() + m_byteSize * pointIndex, data, m_byteSize);
 }
 
-void PointBuffer::setAllData(boost::uint8_t* data, boost::uint32_t byteCount)
+void PointBuffer::setDataStride(boost::uint8_t* data, 
+                                std::size_t pointIndex, 
+                                boost::uint32_t byteCount)
 {
-    memcpy(m_data.get(), data, byteCount);
-}
-
-void PointBuffer::setDataStride(boost::uint8_t* data, std::size_t index, boost::uint32_t byteCount)
-{
-    memcpy(m_data.get() + m_byteSize * index, data, byteCount);
-}
-
-boost::uint32_t PointBuffer::getNumPoints() const
-{
-    return m_numPoints;
+    memcpy(m_data.get() + m_byteSize * pointIndex, data, byteCount);
 }
 
 

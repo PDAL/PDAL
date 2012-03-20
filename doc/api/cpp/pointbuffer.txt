@@ -1,15 +1,11 @@
-.. _cppapi:
+.. _cpp-pdal-pointbuffer:
 
 ******************************************************************************
-C++ API
+pdal::PointBuffer
 ******************************************************************************
 
 
-.. toctree::
-   :maxdepth: 2
-   
-   dimension
-   bounds
-   log
-   metadata
-   pointbuffer
+
+.. doxygenclass:: pdal::PointBuffer
+   :members:
+
