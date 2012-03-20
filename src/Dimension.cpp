@@ -169,16 +169,6 @@ bool Dimension::operator!=(const Dimension& other) const
   return !(*this==other);
 }
 
-
-std::string const& Dimension::getName() const
-{
-    return m_name;
-}
-
-
-
-
-
 boost::property_tree::ptree Dimension::toPTree() const
 {
     using boost::property_tree::ptree;
