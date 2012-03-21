@@ -271,7 +271,95 @@ Metadata const& PointBuffer::getMetadata(std::string const& t, std::string const
 
 }
 
+Metadata const& PointBuffer::getMetadata(std::size_t t) const
+{
+    pointbuffer::index_by_index const& idx = m_metadata.get<pointbuffer::index>();
+    
+    if (t >= idx.size())
+        throw dimension_not_found("Index position is not valid");
+    
+    return idx.at(t);
+}
 
+boost::optional<Metadata const&> PointBuffer::getMetadataOptional(std::size_t t) const
+{
+    try
+    {
+        Metadata const& m = getMetadata(t);
+        return boost::optional<Metadata const&>(m);
+    } catch (pdal::dimension_not_found&)
+    {
+        return boost::optional<Metadata const&>();
+    }
+}
+
+Metadata const& PointBuffer::getMetadata(metadata::id const& t) const
+{
+    pointbuffer::index_by_uid::const_iterator it = m_metadata.get<pointbuffer::uid>().find(t);
+
+    if (it != m_metadata.get<pointbuffer::uid>().end())
+    {
+        return *it;
+    }    
+    
+    std::ostringstream oss;
+    oss << "getMetadata: metadata entry not found with uuid '" << boost::lexical_cast<std::string>(t) << "'";
+    throw metadata_not_found(oss.str());
+
+}
+
+boost::optional<Metadata const&> PointBuffer::getMetadataOptional(metadata::id const& t) const
+{
+    try
+    {
+        Metadata const& m = getMetadata(t);
+        return boost::optional<Metadata const&>(m);
+    } catch (pdal::metadata_not_found&)
+    {
+        return boost::optional<Metadata const&>();
+    }
+}
+
+
+boost::optional<Metadata const&> PointBuffer::getMetadataOptional(std::string const& t, std::string const& ns) const
+{
+
+    try
+    {
+        Metadata const& m = getMetadata(t, ns);
+        return boost::optional<Metadata const&>(m);
+    } catch (pdal::metadata_not_found&)
+    {
+        return boost::optional<Metadata const&>();
+    }
+
+}
+
+bool PointBuffer::setMetadata(Metadata const& m)
+{
+    pointbuffer::index_by_name& name_index = m_metadata.get<pointbuffer::name>();
+    pointbuffer::index_by_name::iterator it = name_index.find(m.getName());
+    
+    // FIXME: If there are two metadata with the same name here, we're 
+    // screwed if they both have the same namespace too
+    if (it != name_index.end()) {
+        while (it != name_index.end())
+        {
+            if (boost::equals(m.getNamespace(), it->getNamespace()))
+            {
+                name_index.replace(it, m);
+                return true;
+            }
+            ++it;
+        }
+    } else {
+        std::ostringstream oss;
+        oss << "Metadata with name '" << m.getName() << "' not found, unable to PointBuffer::setMetadata";
+        throw metadata_not_found(oss.str());
+    }
+
+    return true;
+}
 
 boost::property_tree::ptree PointBuffer::toPTree() const
 {
