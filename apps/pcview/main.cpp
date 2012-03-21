@@ -43,7 +43,6 @@
 #include <pdal/filters/Decimation.hpp>
 #include <pdal/filters/Color.hpp>
 #include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/liblas/Reader.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Schema.hpp>
@@ -124,7 +123,7 @@ static void readFakeFile(Controller& controller)
     
 boost::uint32_t maxPoints = 1000 * 1000;
 boost::uint32_t factor = 100; //(boost::uint32_t)reader->getNumPoints() / maxPoints;
-bool useColor = true;
+bool useColor = false;
 
 
 class ThreadArgs
@@ -161,35 +160,24 @@ static void givePointsToEngine(ThreadArgs* threadArgs)
 
     const pdal::Schema& schema = stage.getSchema();
 
-    pdal::StageSequentialIterator* iter = stage.createSequentialIterator();
     pdal::PointBuffer buffer(schema, numPoints);
+    pdal::StageSequentialIterator* iter = stage.createSequentialIterator(buffer);
     iter->skip(startPoint);
     const boost::uint32_t numRead = iter->read(buffer);
 
     float* points = new float[numRead * 3];
     boost::uint16_t *colors = NULL;
-    if (useColor)
-    {
-        colors = new boost::uint16_t[numRead * 3];
-    }
 
-    const int offsetX = schema.getDimensionIndex(pdal::DimensionId::X_i32);
-    const int offsetY = schema.getDimensionIndex(pdal::DimensionId::Y_i32);
-    const int offsetZ = schema.getDimensionIndex(pdal::DimensionId::Z_i32);
-    const int offsetR = schema.getDimensionIndex(pdal::DimensionId::Red_u16);
-    const int offsetG = schema.getDimensionIndex(pdal::DimensionId::Green_u16);
-    const int offsetB = schema.getDimensionIndex(pdal::DimensionId::Blue_u16);
-
-    const pdal::Dimension& xDim = schema.getDimension(pdal::DimensionId::X_i32);
-    const pdal::Dimension& yDim = schema.getDimension(pdal::DimensionId::Y_i32);
-    const pdal::Dimension& zDim = schema.getDimension(pdal::DimensionId::Z_i32);
+    const pdal::Dimension& xDim = schema.getDimension("X");
+    const pdal::Dimension& yDim = schema.getDimension("Y");
+    const pdal::Dimension& zDim = schema.getDimension("Z");
 
     int cnt=0;
     for (boost::uint32_t i=0; i<numRead; i++)
     {
-        const boost::int32_t xraw = buffer.getField<boost::int32_t>(i, offsetX);
-        const boost::int32_t yraw = buffer.getField<boost::int32_t>(i, offsetY);
-        const boost::int32_t zraw = buffer.getField<boost::int32_t>(i, offsetZ);
+        const boost::int32_t xraw = buffer.getField<boost::int32_t>(xDim, i);
+        const boost::int32_t yraw = buffer.getField<boost::int32_t>(yDim, i);
+        const boost::int32_t zraw = buffer.getField<boost::int32_t>(zDim, i);
         
         const double x = xDim.applyScaling(xraw);
         const double y = yDim.applyScaling(yraw);
@@ -198,17 +186,6 @@ static void givePointsToEngine(ThreadArgs* threadArgs)
         points[cnt] = (float)x;
         points[cnt+1] = (float)y;
         points[cnt+2] = (float)z;
-
-        if (useColor)
-        {
-            const boost::int16_t r16 = buffer.getField<boost::int16_t>(i, offsetR);
-            const boost::int16_t g16 = buffer.getField<boost::int16_t>(i, offsetG);
-            const boost::int16_t b16 = buffer.getField<boost::int16_t>(i, offsetB);
-
-            colors[cnt] = r16;
-            colors[cnt+1] = g16;
-            colors[cnt+2] = b16;
-        }
 
         cnt += 3;
     }
@@ -233,20 +210,18 @@ static void readFileSimple(Controller& controller, const string& file)
     
     pdal::Stage* decimator = new pdal::filters::Decimation(*reader, factor);
 
-    pdal::Stage* colorizer = new pdal::filters::Color(*decimator);
+    decimator->initialize();
 
-    colorizer->initialize();
-
-    const boost::uint32_t numPoints = (boost::uint32_t)colorizer->getNumPoints();
+    const boost::uint32_t numPoints = (boost::uint32_t)decimator->getNumPoints();
 
 #if 1
-    ThreadArgs t1arg(controller, *colorizer, 0, numPoints);
+    ThreadArgs t1arg(controller, *decimator, 0, numPoints);
     givePointsToEngine(&t1arg);
     const boost::uint32_t numRead1 = t1arg.m_numRead;
     cout << "moved " << numRead1 << " points into buffer1 done\n";
 #else
-    ThreadArgs t1arg(controller, *colorizer, 0, numPoints/2);
-    ThreadArgs t2arg(controller, *colorizer, numPoints/2, numPoints/2);
+    ThreadArgs t1arg(controller, *decimator, 0, numPoints/2);
+    ThreadArgs t2arg(controller, *decimator, numPoints/2, numPoints/2);
     boost::thread t1(givePointsToEngine, &t1arg);
     boost::thread t2(givePointsToEngine, &t2arg);
 
@@ -263,11 +238,10 @@ static void readFileSimple(Controller& controller, const string& file)
     cout << "done reading points\n";
     cout << "  elapsed time: " << timer.elapsed() << " seconds" << std::endl;
     
-    const pdal::Bounds<double>& bounds = colorizer->getBounds();
+    const pdal::Bounds<double>& bounds = decimator->getBounds();
     controller.setBounds((float)bounds.getMinimum(0), (float)bounds.getMinimum(1), (float)bounds.getMinimum(2), 
                          (float)bounds.getMaximum(0), (float)bounds.getMaximum(1), (float)bounds.getMaximum(2));
 
-    delete colorizer;
     delete decimator;
     delete reader;
 
@@ -295,9 +269,6 @@ int main(int argc, char** argv)
     Engine engine(controller);
 
     engine.initialize(argc, argv);
-
-    //delete[] g_points;
-    //delete[] g_colors;
 
     return 0;
 }
