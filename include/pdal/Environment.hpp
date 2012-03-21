@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,49 +32,46 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PDAL_PLANG_ENVIRONMENT_H
-#define PDAL_PLANG_ENVIRONMENT_H
+#ifndef PDAL_ENVIRONMENT_H
+#define PDAL_ENVIRONMENT_H
 
 #include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/PointBuffer.hpp>
+namespace pdal {
 
-#include <boost/cstdint.hpp>
-#include <boost/variant.hpp>
-
-#include <vector>
-#include <iostream>
-
-// forward declare PyObject so we don't need the python headers everywhere
-// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
-#ifndef PyObject_HEAD
-struct _object;
-typedef _object PyObject;
-#endif
-
-namespace pdal { namespace plang {
-
+namespace plang {
+    class Environment;
+}
 
 // this is a singleton: only create it once, and keep it around forever
 class PDAL_DLL Environment
 {
 public:
+    static void startup();
+    static void shutdown();
+
+    // return the singleton Environment object
+    static Environment* get();
+
+#ifdef PDAL_HAVE_PYTHON
+    // get the plang (python) environment
+    plang::Environment* getPLangEnvironment() { return m_plangEnvironment; }
+#endif
+
+private:
+    // ctor and dtor are only called via startup()/shutdown()
     Environment();
     ~Environment();
 
-    void handleError();
-    
-private:
-    PyObject* m_tracebackModule;
-    PyObject* m_tracebackDictionary;
-    PyObject *m_tracebackFunction;
+#ifdef PDAL_HAVE_PYTHON
+    plang::Environment* m_plangEnvironment;
+#endif
+
+    Environment(const Environment&); // nope
+    Environment& operator=(const Environment&); // nope
 };
 
 
-} } // namespaces
-
-#endif
+} // namespaces
 
 #endif

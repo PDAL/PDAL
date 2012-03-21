@@ -32,49 +32,26 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PDAL_PLANG_ENVIRONMENT_H
-#define PDAL_PLANG_ENVIRONMENT_H
+#include <boost/test/unit_test.hpp>
 
-#include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
+#include <pdal/Environment.hpp>
+#include "Support.hpp"
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/PointBuffer.hpp>
-
-#include <boost/cstdint.hpp>
-#include <boost/variant.hpp>
-
-#include <vector>
-#include <iostream>
-
-// forward declare PyObject so we don't need the python headers everywhere
-// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
-#ifndef PyObject_HEAD
-struct _object;
-typedef _object PyObject;
-#endif
-
-namespace pdal { namespace plang {
+BOOST_AUTO_TEST_SUITE(EnvironmentTest)
 
 
-// this is a singleton: only create it once, and keep it around forever
-class PDAL_DLL Environment
+BOOST_AUTO_TEST_CASE(EnvironmentTest_1)
 {
-public:
-    Environment();
-    ~Environment();
+    ::pdal::Environment* pdal_env = ::pdal::Environment::get();
+    BOOST_CHECK(pdal_env != NULL);
 
-    void handleError();
-    
-private:
-    PyObject* m_tracebackModule;
-    PyObject* m_tracebackDictionary;
-    PyObject *m_tracebackFunction;
-};
-
-
-} } // namespaces
-
+#ifdef PDAL_HAVE_PYTHON
+    ::pdal::plang::Environment* plang_env = pdal_env->getPLangEnvironment();
+    BOOST_CHECK(plang_env != NULL);
 #endif
 
-#endif
+    return;
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()

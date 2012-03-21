@@ -32,49 +32,59 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PDAL_PLANG_ENVIRONMENT_H
-#define PDAL_PLANG_ENVIRONMENT_H
+#include <pdal/Environment.hpp>
+#include <pdal/plang/Environment.hpp>
 
-#include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
+#include <pdal/plang/Environment.hpp>
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/PointBuffer.hpp>
-
-#include <boost/cstdint.hpp>
-#include <boost/variant.hpp>
-
-#include <vector>
-#include <iostream>
-
-// forward declare PyObject so we don't need the python headers everywhere
-// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
-#ifndef PyObject_HEAD
-struct _object;
-typedef _object PyObject;
-#endif
-
-namespace pdal { namespace plang {
+namespace pdal {
 
 
-// this is a singleton: only create it once, and keep it around forever
-class PDAL_DLL Environment
+// this is (or, should be) our one and only static
+static Environment* s_environment;
+Environment* Environment::get() { return s_environment; }
+
+
+void Environment::startup()
 {
-public:
-    Environment();
-    ~Environment();
+    // not threadsafe yet!
+    if (!s_environment)
+    {
+        s_environment = new Environment();
+    }
 
-    void handleError();
-    
-private:
-    PyObject* m_tracebackModule;
-    PyObject* m_tracebackDictionary;
-    PyObject *m_tracebackFunction;
-};
+    return;
+}
 
 
-} } // namespaces
+void Environment::shutdown()
+{
+    // not threadsafe yet!
+    if (s_environment)
+    {
+        delete s_environment;
+        s_environment = NULL;
+    }
 
-#endif
+    return;
+}
 
-#endif
+
+Environment::Environment()
+{
+    m_plangEnvironment = new pdal::plang::Environment();
+
+    return;
+}
+
+
+Environment::~Environment()
+{
+    delete m_plangEnvironment;
+    m_plangEnvironment = NULL;
+
+    return;
+}
+
+
+} //namespaces

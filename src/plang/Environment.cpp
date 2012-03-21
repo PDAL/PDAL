@@ -47,10 +47,6 @@
 namespace pdal { namespace plang {
 
 
-static Environment* s_environment;
-Environment* Environment::get() { return s_environment; }
-
-
 Environment::Environment()
     : m_tracebackModule(NULL)
     , m_tracebackDictionary(NULL)
@@ -91,31 +87,6 @@ Environment::~Environment()
     Py_XDECREF(m_tracebackModule);
 
     Py_Finalize();
-
-    return;
-}
-
-
-void Environment::startup()
-{
-    // not threadsafe!
-    if (!s_environment)
-    {
-        s_environment = new Environment();
-    }
-
-    return;
-}
-
-
-void Environment::shutdown()
-{
-    // not threadsafe!
-    if (s_environment)
-    {
-        delete s_environment;
-        s_environment = NULL;
-    }
 
     return;
 }

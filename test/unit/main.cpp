@@ -37,15 +37,15 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#ifdef PDAL_HAVE_PYTHON
-#include <pdal/plang/Environment.hpp>
-struct PythonConfig 
+
+#include <pdal/Environment.hpp>
+struct PDALConfig 
 {
-    PythonConfig()   { ::pdal::plang::Environment::startup(); }
-    ~PythonConfig()  { ::pdal::plang::Environment::shutdown(); }
+    PDALConfig()   { ::pdal::Environment::startup(); }
+    ~PDALConfig()  { ::pdal::Environment::shutdown(); }
 };
-BOOST_GLOBAL_FIXTURE( PythonConfig )
-#endif
+BOOST_GLOBAL_FIXTURE( PDALConfig )
+
 
 #include "TestConfig.hpp"
 

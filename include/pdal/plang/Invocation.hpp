@@ -95,7 +95,7 @@ private:
     void cleanup();
 
     Script m_script;
-    Environment& m_env;
+    ::pdal::plang::Environment& m_environment;
 
     PyObject* m_bytecode;
     PyObject* m_module;

@@ -33,6 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/Environment.hpp>
+
 #ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/plang/Invocation.hpp>
@@ -63,7 +65,7 @@ void Invocation::numpy_init()
 
 Invocation::Invocation(const Script& script)
     : m_script(script)
-    , m_env(*Environment::get())
+    , m_environment(*pdal::Environment::get()->getPLangEnvironment())
     , m_bytecode(NULL)
     , m_module(NULL)
     , m_dictionary(NULL)
@@ -89,11 +91,11 @@ Invocation::~Invocation()
 void Invocation::compile()
 {
     m_bytecode = Py_CompileString(m_script.source(), m_script.module(), Py_file_input);
-    if (!m_bytecode) m_env.handleError();
+    if (!m_bytecode) m_environment.handleError();
 
     assert(m_bytecode);
     m_module = PyImport_ExecCodeModule(m_script.module(), m_bytecode);
-    if (!m_module) m_env.handleError();
+    if (!m_module) m_environment.handleError();
 
     m_dictionary = PyModule_GetDict(m_module);
 
@@ -103,7 +105,7 @@ void Invocation::compile()
         throw python_error("unable to find target function in module");
     }
 
-    if (!PyCallable_Check(m_function)) m_env.handleError();
+    if (!PyCallable_Check(m_function)) m_environment.handleError();
   
     return;
 }
@@ -389,7 +391,7 @@ bool Invocation::execute()
     PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
 
     m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
-    if (!m_scriptResult) m_env.handleError();
+    if (!m_scriptResult) m_environment.handleError();
 
     if (!PyBool_Check(m_scriptResult))
     {

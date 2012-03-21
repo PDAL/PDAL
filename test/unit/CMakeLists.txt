@@ -27,6 +27,7 @@ SET(PDAL_UNITTEST_TEST_SRC
     DecimationFilterTest.cpp
     DimensionLayoutTest.cpp
     DimensionTest.cpp
+    EnvironmentTest.cpp
     FauxReaderTest.cpp
     FauxWriterTest.cpp
     FileUtilsTest.cpp
