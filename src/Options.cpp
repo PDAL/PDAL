@@ -62,7 +62,9 @@ Option::Option(const boost::property_tree::ptree& tree)
     m_name = tree.get<std::string>("Name");
     m_value = tree.get<std::string>("Value");
     m_description = tree.count("Description") ? tree.get<std::string>("Description") : "";
-    ptree const& options = tree.get_child("Options", empty_ptree());
+
+    boost::property_tree::ptree opts;
+    ptree const& options = tree.get_child("Options", opts);
     if (options.size())
         m_options = OptionsPtr(new Options(options));
     return;

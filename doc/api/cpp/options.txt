@@ -1,18 +1,9 @@
-.. _cppapi:
+.. _cpp-pdal-options:
 
 ******************************************************************************
-C++ API
+pdal::Options
 ******************************************************************************
 
+.. doxygenclass:: pdal::Options
+   :members:
 
-.. toctree::
-   :maxdepth: 2
-   
-   dimension
-   bounds
-   log
-   metadata
-   option
-   options
-   pointbuffer
-   schema

@@ -89,72 +89,104 @@ namespace dimension {
     
 } // dimension
 
-/// A Dimension consists of a name and a datatype.
-///
-/// When a dimension is added to a Schema, it also gets two more properties: the position (index)
+
+/// A pdal::Dimension is the description of a single data field in a pdal::Schema.
+/// A pdal::Dimension is composed of a name, interpretation, and a size.
+/// When a dimension is added to a pdal::Schema, it also gets two more properties: the position (index)
 /// of this dimension in the schema's list of dimensions, and the byte offset where the dimension
 /// is stored in the PointBuffer's raw bytes
 class PDAL_DLL Dimension
 {
 public:
 
-/// \name Constructors
+/** @name Constructors
+*/ 
+    /// Base constructor for pdal::Dimension
+    /// @param name the name to use for the dimension. 
+    /// Typically "X" or "Y" or "Interesting Scanner Attribute"
+    /// @param interpretation the pdal::dimension::Interpretation to use for the 
+    /// dimension.
+    /// @param sizeInBytes the size of the pdal::Dimension in bytes. No 
+    /// less-than-a-byte dimensions are allowed.
+    /// @param description a string description of the dimension.
     Dimension(  std::string const& name, 
                 dimension::Interpretation interpretation,
                 dimension::size_type sizeInBytes,
                 std::string description=std::string(""));
+                
+    /// Copy constructor
     Dimension(Dimension const& other);
-
+    
+    /// Assignment constructor
     Dimension& operator=(Dimension const& rhs);
 
-/// \name Equality
+/** @name Equality and Comparisons
+*/ 
+    /// Equality
     bool operator==(const Dimension& other) const;
+    /// Inequality
     bool operator!=(const Dimension& other) const;
-
+    
+    /// Less than. Determined by getPosition() for sorting.
     inline bool operator < (Dimension const& dim) const 
     {
         return m_position < dim.m_position;
     }
+    
+    /// Greater than. Determined by getPosition for sorting.
     inline bool operator > (Dimension const& dim) const 
     {
         return m_position > dim.m_position;
     }
 
-/// \name Data Access
-    std::string const& getName() const;
-
-    // DimensionId::Id getId() const
-    // {
-    //     return m_id;
-    // }
+/** @name Attributes
+*/ 
+    /// @return the name of this dimension as given at construction time
+    inline std::string const& getName() const { return m_name; }
     
+    /// @return the interpretation of this dimension at construction time
     inline dimension::Interpretation getInterpretation() const { return m_interpretation; }
-
+    
+    /// @return dimension attribute flags (isValid, isRead, isWritten, isIgnored, etc) 
+    /// composition of pdal::dimension::Flags
     boost::uint32_t getFlags() const { return m_flags; }
+    
+    /// sets the dimension attribute flags (isValid, isRead, etc) of pdal::dimension::Flags
+    /// @param flags composited pdal::dimension::Flags 
     void setFlags(boost::uint32_t flags) { m_flags = flags; }
-
+    
+    /// @return is the dimension valid?
     bool isValid() const { return (m_flags != dimension::Invalid); }
+    
+    /// @return should we read this dimension?
     bool isRead() const { return (m_flags & dimension::IsRead) == dimension::IsRead; }
+    
+    /// @return should we write this dimension?
     bool isWritten() const { return (m_flags & dimension::IsWritten) == dimension::IsWritten; }
+
+    /// @return is this dimension ignored?
     bool isIgnored() const { return (m_flags & dimension::IsIgnored) == dimension::IsIgnored; }
     
-
-    /// \return Number of bytes required to serialize this dimension 
-    dimension::size_type getByteSize() const
+    /// @return Number of bytes required to serialize this dimension 
+    inline dimension::size_type getByteSize() const
     {
        return m_byteSize;
     }
-
+    
+    /// @return a string description of the dimension
     inline std::string getDescription() const
     {
         return m_description;
     }
+    /// sets the string description for the dimension. Overrides whatever was 
+    /// given in the constructor.
+    /// @param v string to use to set value
     inline void setDescription(std::string const& v)
     {
         m_description = v;
     }
 
-    /// The minimum value of this dimension as a double
+    /// @return the minimum value of this dimension as a double
     inline double getMinimum() const
     {
         return m_min;
@@ -174,11 +206,12 @@ public:
         m_min = min;
     }
 
-    /// The maximum value of this dimension as a double.
+    /// @return the maximum value of this dimension as a double.
     inline double getMaximum() const
     {
         return m_max;
     }
+    
     /*! Sets the maximum value of this dimension as a double.
         \param max The maximum value for this dimension
         \verbatim embed:rst 
@@ -193,41 +226,145 @@ public:
         m_max = max;
     }
 
-    /// Gets the numerical scale value for this dimension. If the dimension 
-    /// is not finite, the default value is \b 1.0
-    /// \return The scaling value for this dimension as a double. It is used in combination 
-    /// with the numerical offset value for finite precision dimensions.
+    /// @return the numerical scale value for this dimension as a double. The 
+    /// default value is \b 1.0
     inline double getNumericScale() const
     {
         return m_numericScale;
     }
-    /// Sets the numerical scale value for this dimension. If you set a value 
-    /// other that \b 0.0, isFinitePrecision for the dimension will also now 
-    /// be true.
+    /// Sets the numerical scale value for this dimension.
     inline void setNumericScale(double v)
     {
         m_numericScale = v;
     }
 
-    /// Gets the numerical offset value for this dimension. If the dimension 
-    /// is not finite, the default value is \b 0.0
-    /// \return The numerical offset value for this dimension.  It is used in combination 
-    /// with the numerical scale value for finite precision dimensions
+    /// @return the numerical offset value for this dimension. The default value is \b 0.0.
     inline double getNumericOffset() const
     {
         return m_numericOffset;
     }
-    /// Sets the numerical offset value for this dimension. If you set a value 
-    /// other that \b 0.0, isFinitePrecision for the dimension will also now 
-    /// be true.
+    /// Sets the numerical offset value for this dimension.
     inline void setNumericOffset(double v)
     {
         m_numericOffset = v;
     }
 
+    /// Gets the endianness of this intance (defaults to little)
+    inline EndianType getEndianness() const
+    {
+        return m_endian;
+    }
+    
+    /// Sets the endianness of this Dimension
+    /// \param v EndianType value to set for the dimension
+    inline void setEndianness(EndianType v)
+    {
+        m_endian = v;
+    }
+
+    /// @return the byte offset of the pdal::Dimension instance within the 
+    /// context of a pdal::Schema. pdal::Schema will set this value when 
+    /// adding the pdal::Dimension to itself so as to not require calculating 
+    /// it for every lookup.
+    inline std::size_t getByteOffset() const
+    {
+        return m_byteOffset;
+    }
+
+    /// sets the byte offset of the pdal::Dimension
+    /// @param v the value to set
+    inline void setByteOffset(std::size_t v)
+    {
+        m_byteOffset = v;
+    }
+
+    /// @return the position of the pdal::Dimension within a pdal::Schema. 
+    /// If the instance is not in a pdal::Schema instance, this value is 
+    /// initialized to -1. 
+    inline dimension::size_type getPosition() const
+    {
+        return m_position;
+    }
+    
+    /// Sets the position of the pdal::Dimension instance within a pdal::Schema
+    inline void setPosition(dimension::size_type v)
+    {
+        m_position = v;
+    }
+
+/// @name Summary and serialization
+    /// @return a boost::property_tree::ptree representation 
+    /// of the pdal::Dimension instance
+    boost::property_tree::ptree toPTree() const;
+
+    /// Outputs a string representation of the Dimension instance to std::cout
+    void dump() const;
+    
+    std::string getInterpretationName() const;
+
+/// @name Identification
+
+    /// @return the pdal::dimension::id for the pdal::Dimension instance. 
+    /// This value is the nil UUID by default.
+    inline dimension::id const& getUUID() const { return m_uuid; }
+    
+    /// sets the dimension::id from a string representation of the UUID.
+    /// @param id
+    void setUUID( std::string const& id);
+    
+    /// sets the dimension::id from an existing dimension::id (copied)
+    inline void setUUID( dimension::id const& id) { m_uuid = id; }
+    
+    /// creates and sets the dimension::id for the instance
+    void createUUID();
+    
+    /// denotes the parent relationship of this instance to another 
+    /// with a given dimension::id
+    /// @param id the dimension::id of the parent dimension to this instance
+    inline void setParent( dimension::id const& id)
+    { 
+        m_parentDimensionID = id;
+    }
+    
+    /// @return the dimension::id of the parent dimension to this one.
+    inline dimension::id const& getParent( ) const
+    {
+        return m_parentDimensionID;
+    }
+
+/// @name Namespaces
+    /// sets the namespace for this instance
+    /// @param name value to set. Typically this is a pdal::Stage::getName()
+    inline void setNamespace( std::string const& name )
+    { 
+        m_namespace = name; 
+    }
+    
+    /// @return the namespace for this instance
+    inline std::string const& getNamespace( ) const
+    { 
+        return m_namespace; 
+    }
+
+    /// @return the fully qualified (namespace.name) name for this instance.
+    inline std::string getFQName( ) const
+    { 
+        return m_namespace + "." + m_name;
+    }
+    
+
+
+/** @name Data Scaling
+*/ 
     /// Applies the scale and offset values from the dimension to a the given value
-    /// \param v The value to scale with the Dimension's NumericOffset and NumericScale values
-    /// \return \b v scaled by getNumericOffset() and getNumericScale() values.
+    /// @param v The value of type T to scale.
+    /// @return v scaled by getNumericOffset() and getNumericScale() values.
+    /*!    \verbatim embed:rst 
+        .. note::
+            
+            The value ``v`` is casted to a double before math is applied.
+        \endverbatim
+    */
     template<class T>
     inline double applyScaling(T const& v) const
     {
@@ -235,8 +372,15 @@ public:
     }
 
     /// Removes the scale and offset values from an imprecise double value
-    /// \param v The value to descale with the Dimension's NumericScale and NumericOffset values
-    /// \return a value that has been descaled by the Dimension's NumericOffset and NumericScale values
+    /// @param v The value to descale
+    /// @return a value that has been descaled by the Dimension's getNumericOffset and getNumericScale values
+    /*!    \verbatim embed:rst 
+        .. warning::
+            
+            If the value will overflow the datatype ``T`` that is given, 
+            an std::out_of_range exception will be thrown.
+        \endverbatim
+    */
     template<class T>
     inline T removeScaling(double const& v) const
     {
@@ -264,71 +408,7 @@ public:
         return output;
     }
 
-    /// Gets the endianness of this Dimension (defaults to little)
-    inline EndianType getEndianness() const
-    {
-        return m_endian;
-    }
-    /// Sets the endianness of this Dimension
-    /// \param v EndianType value to set for the dimension
-    inline void setEndianness(EndianType v)
-    {
-        m_endian = v;
-    }
-
-    /// The byte location to start reading/writing
-    /// point data from in a composited schema.  liblas::Schema
-    /// will set these values for you when liblas::Dimension are
-    /// added to the liblas::Schema.
-    inline std::size_t getByteOffset() const
-    {
-        return m_byteOffset;
-    }
-
-    inline void setByteOffset(std::size_t v)
-    {
-        m_byteOffset = v;
-    }
-
-    /// The index position of the index.  In a standard ePointFormat0
-    /// data record, the X dimension would have a position of 0, while
-    /// the Y dimension would have a position of 1, for example.
-    inline dimension::size_type getPosition() const
-    {
-        return m_position;
-    }
-
-    inline void setPosition(dimension::size_type v)
-    {
-        m_position = v;
-    }
-
-/// \name Summary and serialization
-    /// Outputs a string-based boost::property_tree::ptree representation 
-    /// of the Dimension instance
-    boost::property_tree::ptree toPTree() const;
-
-    /// Outputs a string representation of the Dimension instance to std::cout
-    void dump() const;
-    
-    std::string getInterpretationName() const;
-
-    dimension::id const& getUUID() const { return m_uuid; }
-    void setUUID( std::string const& id);
-    void setUUID( dimension::id& id) { m_uuid = id; }
-    void createUUID();
-
-    void setNamespace( std::string const& name) { m_namespace = name; }
-    std::string const& getNamespace( ) const { return m_namespace; }
-
-    std::string getFQName( ) const { return m_namespace + "." + m_name; }
-    
-    void setParent( dimension::id const& id) { m_parentDimensionID = id; }
-    dimension::id const& getParent( ) const 
-    {
-        return m_parentDimensionID;
-    }
-    
+/// @name Private Attributes
 private:
     std::string m_name;
     boost::uint32_t m_flags;

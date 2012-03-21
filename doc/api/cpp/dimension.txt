@@ -7,3 +7,5 @@ pdal::Dimension
 
 .. doxygenclass:: pdal::Dimension
    :members:
+
+.. doxygentypedef:: pdal::dimension::id
