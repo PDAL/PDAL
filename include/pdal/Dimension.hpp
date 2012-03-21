@@ -293,7 +293,7 @@ public:
     }
 
 /// @name Summary and serialization
-    /// returns a boost::property_tree::ptree representation 
+    /// @return a boost::property_tree::ptree representation 
     /// of the pdal::Dimension instance
     boost::property_tree::ptree toPTree() const;
 
