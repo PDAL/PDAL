@@ -227,6 +227,23 @@ public:
     /// returns the attribute value for a given attribute key
     std::string getAttribute(std::string const& name) const;    
 
+/** @name Parent/child relationships
+*/
+    /// denotes the parent relationship of this instance to another 
+    /// with a given metadata::id
+    /// @param id the metadata::id of the parent dimension to this instance
+    inline void setParent( metadata::id const& id)
+    { 
+        m_parentDimensionID = id;
+    }
+    
+    /// @return the metadata::id of the parent Metadata entry to this one.
+    inline metadata::id const& getParent( ) const
+    {
+        return m_parentDimensionID;
+    }
+
+
 /** @name private attributes
 */
 private:
@@ -236,6 +253,7 @@ private:
     metadata::Type m_type;
     metadata::MetadataAttributeM m_attributes;
     metadata::id m_uuid;
+    metadata::id m_parentDimensionID;
     
 };
 

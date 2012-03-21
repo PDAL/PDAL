@@ -41,6 +41,11 @@
 #include <sstream>
 #include <string>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 namespace pdal
 {
 
@@ -49,6 +54,8 @@ Metadata::Metadata( std::string const& name,
     : m_name(name)
     , m_namespace(ns) 
     , m_type(metadata::String)
+    , m_uuid(boost::uuids::nil_uuid())
+    , m_parentDimensionID(boost::uuids::nil_uuid())
 {
     return;
 }
@@ -59,6 +66,8 @@ Metadata::Metadata(const Metadata& other)
     , m_name(other.m_name)
     , m_namespace(other.m_namespace)
     , m_type(other.m_type)
+    , m_uuid(other.m_uuid)
+    , m_parentDimensionID(other.m_parentDimensionID)
 {
     return;
 }
