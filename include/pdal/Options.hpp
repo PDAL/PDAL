@@ -54,12 +54,6 @@ class Option;
 typedef std::multimap<std::string, Option> map_t;
 typedef boost::shared_ptr<Options> OptionsPtr;
 
-inline const boost::property_tree::ptree &empty_ptree()
-{
-    static boost::property_tree::ptree pt;
-    return pt;
-}
-
 // An Option is just a record with three fields: name, value, and description.
 //
 // The value is stored as a string, and we rely on boost::lexical_cast to do the
