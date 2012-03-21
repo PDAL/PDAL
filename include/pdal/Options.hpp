@@ -55,26 +55,6 @@ typedef std::multimap<std::string, Option> map_t;
 typedef boost::shared_ptr<Options> OptionsPtr;
 
 
-// The value is stored as a string, and we rely on boost::lexical_cast to do the
-// serialization magic for us.  This means that an object you insert as an option
-// value must satisfay the requirements for being lexically-castable:
-//    - copy ctor
-//    - operator=
-//    - operator>>
-//    - operator<<
-//
-// Also, you should avoid using int8/uint8 types, as these tend to get confused
-// with chars.
-//
-// Dumped as XML, it looks like this:
-//     <?xml...>
-//     <Name>myname</Name>
-//     <Value>17</Value>
-//     <Description>my descr</Description>
-// although of course that's not valid XML, since it has no single root element.
-
-
-
 /*! 
     \verbatim embed:rst 
      An Option is just a record with three fields: name, value, and description.
@@ -85,6 +65,21 @@ typedef boost::shared_ptr<Options> OptionsPtr;
         - operator=
         - operator>>
         - operator<<
+
+     Dumped as XML, it looks like this although of course that's not valid
+     XML, since it has no single root element.
+     
+     ::
+     
+         <?xml...>
+         <Name>myname</Name>
+         <Value>17</Value>
+         <Description>my descr</Description>
+     
+     .. warning::
+            
+            you should avoid using int8/uint8 types, as these tend to get confused
+            with chars.
     \endverbatim
 */ 
 
@@ -281,23 +276,27 @@ template<> void Option::setValue(const bool& value);
 template<> void Option::setValue(const std::string& value);
 #endif
 
-// An Options object is just a map of names to Option objects.
-//
-// Dumped as XML, an Options object with two Option objects looks like this:
+/*! 
+    \verbatim embed:rst 
+     An Options object is just a map of names to Option objects.
 
-
-//     <?xml...>
-//     <Option>
-//       <Name>myname</name>
-//       <Value>17</value>
-//       <Description>my descr</description>
-//     </Option>
-//     <Option>
-//       <Name>myname2</name>
-//       <Value>13</value>
-//       <Description>my descr2</description>
-//     </Option>
-// although of course that's not valid XML, since it has no single root element.
+     Dumped as XML, an Options object with two Option objects looks like this:
+     
+     ::
+     
+        <?xml...>
+        <Option>
+          <Name>myname</name>
+          <Value>17</value>
+          <Description>my descr</description>
+        </Option>
+        <Option>
+          <Name>myname2</name>
+          <Value>13</value>
+          <Description>my descr2</description>
+        </Option>
+    \endverbatim
+*/ 
 class PDAL_DLL Options
 {
 public:
