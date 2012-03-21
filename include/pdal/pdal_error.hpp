@@ -163,6 +163,32 @@ public:
     {}
 };
 
+class metadata_not_found : public pdal_error
+{
+public:
+
+    metadata_not_found(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
+class metadata_error : public pdal_error
+{
+public:
+
+    metadata_error(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
+
+class multiple_parent_metadata : public pdal_error
+{
+public:
+
+    multiple_parent_metadata(std::string const& msg)
+        : pdal_error(msg)
+    {}
+};
 
 // use this for code still under development
 class not_yet_implemented : public pdal_error
