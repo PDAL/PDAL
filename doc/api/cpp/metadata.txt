@@ -9,6 +9,8 @@ pdal::Metadata
 .. doxygenclass:: pdal::Metadata
    :members:
 
+.. doxygentypedef:: pdal::metadata::id
+
 .. doxygenenum:: pdal::metadata::Type
 
 .. doxygenclass:: pdal::ByteArray

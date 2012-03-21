@@ -43,6 +43,8 @@
 
 #include <boost/shared_array.hpp>
 #include <boost/variant.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 
 #include <vector>
 #include <map>
@@ -80,7 +82,8 @@ private:
 namespace metadata {
     
     typedef std::map<std::string, std::string> MetadataAttributeM;
-
+    typedef boost::uuids::uuid id;
+    
     enum Type
     {
         /// equivalent to int32_t
@@ -175,25 +178,41 @@ public:
     template <class T> inline T cast() { return boost::lexical_cast<T>(m_variant); }    
 
     /// returns the pdal::metadata::Variant instance 
-    metadata::Variant const& getVariant() const { return m_variant; }
+    inline metadata::Variant const& getVariant() const { return m_variant; }
 
 /** @name entry name
 */  
     /// returns the name for the metadata entry
-    std::string const& getName() const { return m_name; }
+    inline std::string const& getName() const { return m_name; }
     
     /// resets the name for the metadata entry
     /// @param name value to use for new name
-    void setName(std::string const& name) { m_name = name; }
+    inline void setName(std::string const& name) { m_name = name; }
 
+/** @name entry name
+*/  
+    /// returns the name for the metadata entry
+    inline metadata::id const& getUUID() const { return m_uuid; }
+    
+    /// resets the id for the metadata entry
+    /// @param v value to use for new id
+    inline void setUUID(metadata::id const& v) { m_uuid = v; }
+
+    /// resets the id for the metadata entry
+    /// @param v value to use for new id
+    void setUUID(std::string const& v);
+
+    /// creates a random metadata::id for the entry
+    void createUUID();
+    
 /** @name entry namespace
 */
     /// returns the namespace for the metadata entry
-    std::string const& getNamespace() const { return m_namespace; }
+    inline std::string const& getNamespace() const { return m_namespace; }
 
     /// resets the namespace for the metadata entry
     /// @param ns value to use for new namespace
-    void setNamespace(std::string const& ns) { m_namespace = ns; }
+    inline void setNamespace(std::string const& ns) { m_namespace = ns; }
     
 /** @name entry attributes
 */
@@ -208,6 +227,23 @@ public:
     /// returns the attribute value for a given attribute key
     std::string getAttribute(std::string const& name) const;    
 
+/** @name Parent/child relationships
+*/
+    /// denotes the parent relationship of this instance to another 
+    /// with a given metadata::id
+    /// @param id the metadata::id of the parent dimension to this instance
+    inline void setParent( metadata::id const& id)
+    { 
+        m_parentDimensionID = id;
+    }
+    
+    /// @return the metadata::id of the parent Metadata entry to this one.
+    inline metadata::id const& getParent( ) const
+    {
+        return m_parentDimensionID;
+    }
+
+
 /** @name private attributes
 */
 private:
@@ -216,6 +252,8 @@ private:
     std::string m_namespace;
     metadata::Type m_type;
     metadata::MetadataAttributeM m_attributes;
+    metadata::id m_uuid;
+    metadata::id m_parentDimensionID;
     
 };
 

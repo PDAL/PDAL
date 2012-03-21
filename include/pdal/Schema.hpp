@@ -64,8 +64,8 @@
 #include <boost/multi_index/sequenced_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/random_access_index.hpp>
-
 #include <boost/functional/hash.hpp>
+
 namespace pdal
 {
 

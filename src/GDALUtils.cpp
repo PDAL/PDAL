@@ -157,7 +157,7 @@ std::streamsize VSILFileBuffer::write(const char* s, std::streamsize n)
     // s to the output sequence, returning the 
     // number of characters written
     size_t result = VSIFWriteL/*fwrite*/(s, 1, (size_t)n, m_fp);
-    if (result != n)
+    if (static_cast<std::streamsize>(result) != n)
         return -1;
     return result;
 }

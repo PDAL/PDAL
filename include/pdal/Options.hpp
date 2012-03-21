@@ -51,9 +51,10 @@ namespace pdal
 class Options;
 class Option;
 
+namespace options {
 typedef std::multimap<std::string, Option> map_t;
 typedef boost::shared_ptr<Options> OptionsPtr;
-
+}
 
 /*! 
     \verbatim embed:rst 
@@ -254,7 +255,7 @@ private:
     std::string m_name;
     std::string m_value;
     std::string m_description; // optional field
-    OptionsPtr m_options; // any other Option instances this field may contain
+    options::OptionsPtr m_options; // any other Option instances this field may contain
 };
 
 
@@ -322,7 +323,7 @@ public:
 
         if (&rhs != this)
         {
-            map_t::const_iterator i;
+            options::map_t::const_iterator i;
             for (i = rhs.m_options.begin(); i != rhs.m_options.end(); ++i)
             {
                 m_options.insert(std::pair<std::string, Option>(i->first, i->second));
@@ -417,7 +418,7 @@ public:
 
     std::vector<Option> getOptions(std::string const& name) const;
 private:
-    map_t m_options;
+    options::map_t m_options;
 };
 
 
