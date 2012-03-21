@@ -1,6 +1,6 @@
 Unless otherwise indicated, all files in the PDAL distribution are
 
-  Copyright (c) 2011, Howard Butler (hobu.inc@gmail.com)
+  Copyright (c) 2012, Howard Butler (hobu.inc@gmail.com)
 
 and are released under the terms of the BSD open source license.
 
@@ -10,7 +10,7 @@ This file contains the license terms of all files within PDAL.
 Overall PDAL license (BSD)
 ===========================
 
- Copyright (c) 2011, Howard Butler (hobu.inc@gmail.com)
+ Copyright (c) 2012, Howard Butler (hobu.inc@gmail.com)
  
  All rights reserved.
   
@@ -24,7 +24,7 @@ Overall PDAL license (BSD)
        notice, this list of conditions and the following disclaimer in 
        the documentation and/or other materials provided 
        with the distribution.
-     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the 
+     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the 
        names of its contributors may be used to endorse or promote 
        products derived from this software without specific prior 
        written permission.
