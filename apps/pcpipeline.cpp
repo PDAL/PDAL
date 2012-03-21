@@ -58,7 +58,7 @@ private:
     void validateSwitches();
 
     std::string m_inputFile;
-	std::string m_pipelineFile;
+    std::string m_pipelineFile;
 };
 
 
