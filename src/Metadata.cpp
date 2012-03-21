@@ -93,6 +93,17 @@ std::string Metadata::getAttribute(std::string const& name) const
         return std::string("");
 }
 
+void Metadata::setUUID(std::string const& id)
+{
+    boost::uuids::string_generator gen;
+    m_uuid = gen(id);
+}
+
+void Metadata::createUUID()
+{
+    m_uuid = boost::uuids::random_generator()();
+}
+
 std::ostream& operator<<(std::ostream& ostr, const Metadata& metadata)
 {
     ostr << metadata.getVariant() << std::endl;
