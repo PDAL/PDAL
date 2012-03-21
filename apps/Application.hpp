@@ -110,6 +110,11 @@ private:
     void outputVersion();
     void addBasicSwitchSet();
 
+    int do_switches();
+    int do_startup();
+    int do_execution();
+    int do_shutdown();
+
     bool m_isDebug;
     boost::uint32_t m_verboseLevel;
     bool m_showHelp;

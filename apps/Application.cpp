@@ -37,6 +37,7 @@
 #include <boost/timer.hpp>
 
 #include <pdal/pdal_config.hpp>
+#include <pdal/Environment.hpp>
 
 #include "Application.hpp"
 
@@ -59,11 +60,8 @@ Application::Application(int argc, char* argv[], const std::string& appName)
 }
 
 
-// this just wraps ALL the code in total catch block
-int Application::run()
+int Application::do_switches()
 {
-    int status = 1;
-
     try
     {
         // add -h, -v, etc
@@ -79,51 +77,125 @@ int Application::run()
     {
         const std::string s("Caught exception handling switches: ");
         printError(s + e.what());
-        status = 1;
+        return 1;
     }
     catch (...)
     {
         printError("Caught unknown exception handling switches");
-        status = 1;
+        return 1;
     }
 
+    return 0;
+}
+
+
+int Application::do_startup()
+{
+    try
+    {
+        pdal::Environment::startup();
+    }
+    catch (std::exception const& e)
+    {
+        const std::string s("Caught exception initializing PDAL: ");
+        printError(s + e.what());
+        return 1;
+    }
+    catch (...)
+    {
+        printError("Caught unknown exception initializing PDAL");
+        return 1;
+    }
+
+    return 0;
+}
+
+
+int Application::do_execution()
+{
     if (m_hardCoreDebug)
     {
-        status = innerRun();        
+        int status = innerRun();
+        return status;
     }
-    else 
+
+    int status = 1;
+
+    try
     {
-        
-        try
-        {
-            status = innerRun();
-        }
-        catch (pdal::pdal_error const& e)
-        {
-            const std::string s("Caught PDAL exception: ");
-            printError(s + e.what());
-            status = 1;
-        }
-        catch (std::exception const& e)
-        {
-            const std::string s("Caught exception: ");
-            printError(s + e.what());
-            status = 1;
-        }
-        catch (...)
-        {
-            printError("Caught unknown exception");
-            status = 1;
-        }
+        status = innerRun();
     }
+    catch (pdal::pdal_error const& e)
+    {
+        const std::string s("Caught PDAL exception: ");
+        printError(s + e.what());
+        return 1;
+    }
+    catch (std::exception const& e)
+    {
+        const std::string s("Caught exception: ");
+        printError(s + e.what());
+        return 1;
+    }
+    catch (...)
+    {
+        printError("Caught unknown exception");
+        return 1;
+    }
+
     return status;
+}
+
+
+int Application::do_shutdown()
+{
+    try
+    {
+        pdal::Environment::shutdown();
+    }
+    catch (std::exception const& e)
+    {
+        const std::string s("Caught exception shutting down PDAL: ");
+        printError(s + e.what());
+        return 1;
+    }
+    catch (...)
+    {
+        printError("Caught unknown exception shutting down PDAL");
+        return 1;
+    }
+
+    return 0;
+}
+
+
+// this just wraps ALL the code in total catch block
+int Application::run()
+{
+    int switches_status = do_switches();
+    if (switches_status)
+        return switches_status;
+
+    int startup_status = do_startup();
+    if (startup_status)
+        return startup_status;
+
+    int execution_status = do_execution();
+
+    // note we will try to shutdown cleanly even if we got an error condition
+    // in the execution phase
+
+    int shutdown_status = do_shutdown();
+
+    if (execution_status)
+        return execution_status;
+
+    return shutdown_status;
 }
 
 
 int Application::innerRun()
 {
-
-
     // handle the well-known options
     if (m_showVersion) 
     {
