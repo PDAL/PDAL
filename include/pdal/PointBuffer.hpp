@@ -47,6 +47,7 @@
 #include <pdal/Schema.hpp>
 #include <pdal/Metadata.hpp>
 
+#include <boost/optional.hpp>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
@@ -63,7 +64,6 @@ namespace pdal
 namespace pointbuffer {
 
     struct name{};
-    struct position{};
     struct index{};
     struct uid{};
 
@@ -78,6 +78,9 @@ namespace pointbuffer {
           >
     > MetadataMap;
 
+    typedef MetadataMap::index<name>::type index_by_name;
+    typedef MetadataMap::index<index>::type index_by_index;
+    typedef MetadataMap::index<uid>::type index_by_uid;
 
 }
 
@@ -291,6 +294,23 @@ public:
     /// @param byteCount number of bytes to overwrite at given position
     void setDataStride(boost::uint8_t* data, std::size_t pointIndex, boost::uint32_t byteCount);
 
+/** @name Metadata
+*/
+    /// add a Metadata entry to the PointBuffer's metadata map
+    void addMetadata(pdal::Metadata const& entry);
+    
+    /// @return a const& to a Metadata entry with the given name and/or namespace
+    /// If none is found, pdal::metadata_not_found is thrown.
+    /// @param name name to use when searching
+    /// @param ns to use when searching for metadata entry
+    Metadata const& getMetadata(std::string const& name, std::string const& ns) const;
+    
+    /// @return a const& to Metadata entry with given metadata::id. 
+    /// If none is found, pdal::metadata_not_found is thrown.
+    /// @param v metadata::id to search for.
+    Metadata const& getMetadata(metadata::id const& v) const;
+    
+    
 
 /** @name Serialization
 */ 
@@ -328,7 +348,9 @@ private:
     // We cache m_schema.getByteSize() here because it would end up 
     // being dereferenced for every point read otherwise.
     schema::size_type m_byteSize;
-
+    
+    pointbuffer::MetadataMap m_metadata;
+    
     template<class T> T convertDimension(pdal::Dimension const& dim, void* bytes) const;    
     template<typename Target, typename Source> static Target saturation_cast(Source const& src);
 

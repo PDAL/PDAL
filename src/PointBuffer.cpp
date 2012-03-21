@@ -36,6 +36,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <boost/uuid/uuid_io.hpp>
+
 
 namespace pdal
 {
@@ -60,6 +62,7 @@ PointBuffer::PointBuffer(PointBuffer const& other)
     , m_capacity(other.m_capacity)
     , m_bounds(other.m_bounds)
     , m_byteSize(other.m_byteSize)
+    , m_metadata(other.m_metadata)
 {
     if (other.m_data)
     {
@@ -79,7 +82,7 @@ PointBuffer& PointBuffer::operator=(PointBuffer const& rhs)
         boost::scoped_array<boost::uint8_t> data( new boost::uint8_t[ m_schema.getByteSize()*m_capacity ] );
         m_data.swap(data);
         m_byteSize = rhs.m_byteSize;
-        
+        m_metadata = rhs.m_metadata;
         if (rhs.m_data.get())
             memcpy(m_data.get(), rhs.m_data.get(), m_byteSize*m_capacity);
         
@@ -119,6 +122,155 @@ void PointBuffer::getData(boost::uint8_t** data, std::size_t* array_size) const
     *data = (boost::uint8_t*) malloc (*array_size);
     memcpy(*data, m_data.get(), *array_size);
 }
+
+
+void PointBuffer::addMetadata(Metadata const& m)
+{
+    pointbuffer::index_by_name& index = m_metadata.get<pointbuffer::name>();
+
+    std::pair<pointbuffer::index_by_name::iterator, bool> q = index.insert(m);
+    if (!q.second) 
+    {
+        std::ostringstream oss;
+        oss << "Could not insert into schema index because of " << q.first->getName();
+        throw metadata_error(oss.str());
+    }
+
+    return;
+}
+
+
+Metadata const& PointBuffer::getMetadata(std::string const& t, std::string const& ns) const
+{
+    pointbuffer::index_by_name const& name_index = m_metadata.get<pointbuffer::name>();
+    pointbuffer::index_by_name::const_iterator it = name_index.find(t);
+    
+    pointbuffer::index_by_name::size_type count = name_index.count(t);
+
+    std::ostringstream oss;
+    oss << "Metadata with name '" << t << "' not found, unable to PointBuffer::getMetadata";
+
+    if (it != name_index.end()) {
+        
+        if (ns.size())
+        {
+            while (it != name_index.end())
+            {
+                if (boost::equals(ns, it->getNamespace()))
+                    return *it;
+                ++it;
+            }
+            
+        } 
+        
+        if (count > 1) {
+
+            std::pair<pointbuffer::index_by_name::const_iterator, pointbuffer::index_by_name::const_iterator> ret = name_index.equal_range(t);
+            boost::uint32_t num_parents(0);
+            boost::uint32_t num_children(0);
+            std::map<metadata::id, metadata::id> relationships;
+            
+            // Test to make sure that the number of parent dimensions all with 
+            // the same name is equal to only 1. If there are multiple 
+            // dimensions with the same name, but no relationships defined, 
+            // we are in an error condition
+            for (pointbuffer::index_by_name::const_iterator  o = ret.first; o != ret.second; ++o)
+            {
+                // Put a map together that maps parents to children that 
+                // we are going to walk to find the very last child in the 
+                // graph.
+                std::pair<metadata::id, metadata::id> p( o->getParent(), o->getUUID());
+                relationships.insert(p);
+                
+                // The parent dimension should have a nil parent of its own.
+                // nil_uuid is the default parent of all dimensions as the y
+                // are created
+                if (o->getParent().is_nil()) 
+                {
+                    num_parents++;
+                }
+                else
+                {
+                    num_children++;
+                }
+                
+            }
+            
+            if (num_parents != 1)
+            {
+                std::ostringstream oss;
+                
+                oss << "PointBuffer has multiple dimensions with name '" << t << "', but "
+                       "their parent/child relationships are not coherent. Multiple "
+                       "parents are present.";
+                
+                throw multiple_parent_metadata(oss.str());
+            }
+            
+            metadata::id parent = boost::uuids::nil_uuid();
+            
+            // Starting at the parent (nil uuid), walk the child/parent graph down to the 
+            // end.  When we're done finding dimensions, what's left is the child 
+            // at the end of the graph.
+            std::map<metadata::id, metadata::id>::const_iterator p = relationships.find(parent);
+            pdal::metadata::id child;
+            while (p != relationships.end())
+            {
+                child = p->second;
+                p = relationships.find(p->second);
+            }
+            pointbuffer::index_by_uid::const_iterator pi = m_metadata.get<pointbuffer::uid>().find(child);
+            if (pi != m_metadata.get<pointbuffer::uid>().end())
+            {
+                return *pi;
+            } 
+            else 
+            {
+                std::ostringstream errmsg;
+                errmsg << "Unable to fetch subjugate metadata entry with id '" << child << "' in PointBuffer";
+                throw metadata_not_found(errmsg.str());
+            }
+        }
+        return *it;
+    } else {
+        boost::uuids::uuid ps1;
+        try
+        {
+            boost::uuids::string_generator gen;
+            ps1 = gen(t);
+        } catch (std::runtime_error&)
+        {
+            // invalid string for uuid
+            throw metadata_not_found(oss.str());
+        }
+
+        pointbuffer::index_by_uid::const_iterator i = m_metadata.get<pointbuffer::uid>().find(ps1);
+
+        if (i != m_metadata.get<pointbuffer::uid>().end())
+        {
+            if (ns.size())
+            {
+                while (i != m_metadata.get<pointbuffer::uid>().end())
+                {
+                    if (boost::equals(ns, i->getNamespace()))
+                        return *i;
+                    ++i;
+                }
+            
+            }
+            
+            return *i;
+        } else 
+        {
+            oss.str("");
+            oss << "Metadata with name '" << t << "' not found, unable to PointBuffer::getMetadata";
+            throw metadata_not_found(oss.str());
+        }
+
+    }
+
+}
+
 
 
 boost::property_tree::ptree PointBuffer::toPTree() const
