@@ -66,7 +66,7 @@ Option::Option(const boost::property_tree::ptree& tree)
     boost::property_tree::ptree opts;
     ptree const& options = tree.get_child("Options", opts);
     if (options.size())
-        m_options = OptionsPtr(new Options(options));
+        m_options = options::OptionsPtr(new Options(options));
     return;
 }
 
@@ -97,7 +97,7 @@ boost::optional<Options const&> Option::getOptions() const
 
 void Option::setOptions(Options const& options) 
 {
-    OptionsPtr p = OptionsPtr(new Options(options));
+    options::OptionsPtr p = options::OptionsPtr(new Options(options));
     m_options = p;
 }
 
@@ -179,7 +179,7 @@ void Options::add(const Option& option)
 
 Option& Options::getOptionByRef(const std::string& name)
 {
-    map_t::iterator iter = m_options.find(name);
+    options::map_t::iterator iter = m_options.find(name);
     if (iter == m_options.end())
     {
         std::ostringstream oss;
@@ -193,7 +193,7 @@ Option& Options::getOptionByRef(const std::string& name)
 
 const Option& Options::getOption(const std::string& name) const
 {
-    map_t::const_iterator iter = m_options.find(name);
+    options::map_t::const_iterator iter = m_options.find(name);
     if (iter == m_options.end())
     {
         std::ostringstream oss;
@@ -249,7 +249,7 @@ boost::property_tree::ptree Options::toPTree() const
 {
     boost::property_tree::ptree tree;
 
-    for (map_t::const_iterator citer = m_options.begin(); citer != m_options.end(); ++citer)
+    for (options::map_t::const_iterator citer = m_options.begin(); citer != m_options.end(); ++citer)
     {
         const Option& option = citer->second;
         boost::property_tree::ptree subtree = option.toPTree();
