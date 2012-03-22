@@ -93,7 +93,10 @@ boost::uint32_t Predicate::processBuffer(PointBuffer& srcData, PointBuffer& dstD
 
     python.execute();
     
-    assert(python.hasOutputVariable("Mask"));
+    if (!python.hasOutputVariable("Mask"))
+    {
+        throw python_error("Mask variable not set in predicate filter function");
+    }
 
     boost::uint8_t* mask = new boost::uint8_t[srcData.getNumPoints()];
     python.extractResult("Mask", (boost::uint8_t*)mask, srcData.getNumPoints(), 1, pdal::dimension::UnsignedByte, 1);

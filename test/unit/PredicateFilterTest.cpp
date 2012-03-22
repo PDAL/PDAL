@@ -270,5 +270,43 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
     return;
 }
 
+BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
+{
+    // test error handling if missing Mask
+
+    Bounds<double> bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
+    pdal::drivers::faux::Reader reader(bounds, 1000, pdal::drivers::faux::Reader::Ramp);
+
+    const pdal::Option source("source", 
+        // "Y > 0.5"
+        "import numpy as np\n"
+        "def yow2(ins,outs):\n"
+        "  Y = ins['Y']\n"
+        "  Mask = np.greater(Y, 0.5)\n"
+        "  #print Mask\n"
+        "  outs['xxxMaskxxx'] = Mask # delierbately rong\n"
+        "  return True\n"
+        );
+    const pdal::Option module("module", "MyModule1");
+    const pdal::Option function("function", "yow2");
+    pdal::Options opts;
+    opts.add(source);
+    opts.add(module);
+    opts.add(function);
+
+    pdal::filters::Predicate filter(reader, opts);
+    
+    filter.initialize();
+
+    const Schema& schema = filter.getSchema();
+    PointBuffer data(schema, 1000);
+    
+    boost::scoped_ptr<pdal::StageSequentialIterator> iter(filter.createSequentialIterator(data));
+
+    BOOST_REQUIRE_THROW(iter->read(data), pdal::python_error);
+    
+    return;
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 #endif
