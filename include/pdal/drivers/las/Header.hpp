@@ -315,6 +315,8 @@ public:
 
     void SetHeaderPadding(boost::uint32_t v);
     boost::uint32_t GetHeaderPadding() const;
+
+    inline std::string const& getCompressionInfo() const { return m_compressionInfo; }
     
     
 private:
@@ -368,7 +370,8 @@ private:
     VLRList m_vlrList;
 
     SpatialReference m_spatialReference;
-
+    std::string m_compressionInfo;
+    
     LasHeader& operator=(const LasHeader&); // nope
     LasHeader(const LasHeader&); // nope
 };
