@@ -315,6 +315,14 @@ public:
     /// @param index position index to return.
     Metadata const& getMetadata(std::size_t index) const;
 
+    /// @return the number of Metadata entries in the map
+    inline pointbuffer::MetadataMap::size_type getMetadataCount() const { return m_metadata.get<pointbuffer::index>().size(); }
+
+    /// @return a MetadataMap copy to use for setting the Metadata on another 
+    /// PointBuffer with setMetadata()
+    /// @param index position index to return.
+    inline pointbuffer::MetadataMap const& getMetadata() const { return m_metadata; }
+
     /// @return a boost::optional-wrapped const& to a Metadata with the given name 
     /// and namespace. If no matching metadata entry is found, the optional will be empty.
     /// @param name name to use when searching
@@ -347,6 +355,9 @@ public:
     */    
     bool setMetadata(Metadata const& m);
     
+    /// sets the MetadataMap for the PointBuffer
+    /// @param v MetadataMap instance to use (typically from another PointBuffer)
+    void setMetadata(pointbuffer::MetadataMap const& v) { m_metadata = v; }
     
 
 /** @name Serialization
