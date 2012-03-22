@@ -105,8 +105,9 @@ public:
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
-protected:
     const LasHeader& getLasHeader() const { return m_lasHeader; }
+
+protected:
     LasHeader& getLasHeaderRef() { return m_lasHeader; }
 
 private:
@@ -130,6 +131,7 @@ public:
 private:
     void initialize();
     
+    
 
 protected:
     const pdal::drivers::las::Reader& m_reader;
@@ -139,7 +141,7 @@ protected:
     Schema const* m_schema;
 
     void setPointDimensions(PointBuffer& buffer);
-
+    inline pdal::drivers::las::Reader const& getReader() { return m_reader;} 
     
 public:
 
@@ -170,6 +172,8 @@ public:
 
 protected:
     virtual void readBufferBeginImpl(PointBuffer&);
+    virtual void readBufferEndImpl(PointBuffer&);
+
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
