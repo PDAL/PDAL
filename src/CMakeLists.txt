@@ -308,6 +308,28 @@ set (PDAL_DRIVERS_TEXT_CPP
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_TEXT_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_TEXT_HPP} )
 
+
+#
+# drivers/nitf
+#
+set(PDAL_NITF_PATH drivers/nitf)
+set(PDAL_NITF_HEADERS ${PDAL_HEADERS_DIR}/${PDAL_NITF_PATH})
+set(PDAL_NITF_SRC ${PROJECT_SOURCE_DIR}/src/${PDAL_NITF_PATH})
+
+set(PDAL_DRIVERS_NITF_HPP
+  ${PDAL_NITF_HEADERS}/Reader.hpp
+  ${PDAL_NITF_HEADERS}/Writer.hpp
+)
+
+set (PDAL_DRIVERS_NITF_CPP 
+  ${PDAL_NITF_SRC}/Reader.cpp
+  ${PDAL_NITF_SRC}/Writer.cpp
+)
+
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_NITF_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_NITF_HPP} )
+
+
 #
 # filters
 #
@@ -413,6 +435,7 @@ source_group("Header Files" FILES ${PDAL_BASE_HPP})
 source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
 source_group("Header Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
+source_group("Header Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_HPP})
 source_group("Header Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_HPP})
 source_group("Header Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
@@ -424,6 +447,7 @@ source_group("Source Files" FILES ${PDAL_BASE_CPP})
 source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
 source_group("Source Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_CPP})
 source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
+source_group("Source Files\\drivers\\nitf" FILES ${PDAL_DRIVERS_NITF_CPP})
 source_group("Source Files\\drivers\\oci" FILES ${PDAL_DRIVERS_OCI_CPP})
 source_group("Source Files\\drivers\\pipeline" FILES ${PDAL_DRIVERS_PIPELINE_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})

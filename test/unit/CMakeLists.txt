@@ -37,6 +37,8 @@ SET(PDAL_UNITTEST_TEST_SRC
     LasWriterTest.cpp
     MetadataTest.cpp
     MosaicFilterTest.cpp
+    NitfReaderTest.cpp
+    NitfWriterTest.cpp
     OptionsTest.cpp
     PipelineManagerTest.cpp
     PipelineReaderTest.cpp
