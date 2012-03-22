@@ -45,6 +45,7 @@
 #include <boost/variant.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include <vector>
 #include <map>
@@ -101,7 +102,9 @@ namespace metadata {
         /// A pdal::Bounds instance
         Bounds, 
         /// A pdal::SpatialReference instance
-        SpatialReference 
+        SpatialReference,
+        /// A boost::uuids::uuid instance
+        UUID
     };
 
 
@@ -116,6 +119,7 @@ namespace metadata {
                             boost::uint32_t,
                             boost::int64_t,
                             boost::uint64_t,
+                            boost::uuids::uuid,
                             std::string, 
                             pdal::ByteArray, 
                             pdal::SpatialReference, 
@@ -380,6 +384,13 @@ inline void Metadata::setValue(T const& v)
     } catch (boost::bad_get)
     {}
     
+    try 
+    {
+        boost::get<boost::uuids::uuid>(m_variant);
+        m_type = metadata::UUID;
+        return;
+    } catch (boost::bad_get)
+    {}
     
 }
 
