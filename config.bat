@@ -71,10 +71,14 @@ set PDAL_SWIG_ENABLED=ON
 set PDAL_SWIG_BOOST_HOME=%BOOST_DIR%
 
 :: OpenGL support, for pcview
-set FREEGLUT_LIBRARY=d:\dev\freeglut-2.6.0-3.mp\lib\freeglut.lib
-set FREEGLUT_INCLUDE_DIR=d:\dev\freeglut-2.6.0-3.mp\include
 set FREEGLUT_ENABLED=OFF
-if %USERNAME% == mpg set FREEGLUT_ENABLED=ON
+:: special config for mpg
+if %USERDOMAIN% == T5500 set FREEGLUT_LIBRARY=d:\dev\freeglut-2.6.0-3.mp\lib\freeglut.lib
+if %USERDOMAIN% == T5500 set FREEGLUT_INCLUDE_DIR=d:\dev\freeglut-2.6.0-3.mp\include
+if %USERDOMAIN% == T5500 set FREEGLUT_ENABLED=ON
+if %USERDOMAIN% == PDC set FREEGLUT_LIBRARY=c:\dev\freeglut-2.6.0-3.mp\lib\freeglut.lib
+if %USERDOMAIN% == PDC set FREEGLUT_INCLUDE_DIR=c:\dev\freeglut-2.6.0-3.mp\include
+if %USERDOMAIN% == PDC set FREEGLUT_ENABLED=ON
 
 rem if EXIST CMakeCache.txt del CMakeCache.txt
 cmake -G %GENERATOR% ^
@@ -87,6 +91,8 @@ cmake -G %GENERATOR% ^
     -DWITH_ICONV=%ICONV_ENABLED% ^
 	-DWITH_PYTHON=%PYTHON_ENABLED% ^
 	-DWITH_FREEGLUT=%FREEGLUT_ENABLED% ^
+	-DFREEGLUT_LIBRARY=%FREEGLUT_LIBRARY% ^
+    -DFREEGLUT_INCLUDE_DIR=%FREEGLUT_INCLUDE_DIR% ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
     %PDAL_DIR%
