@@ -303,7 +303,7 @@ public:
     /// If none is found, pdal::metadata_not_found is thrown.
     /// @param name name to use when searching
     /// @param ns to use when searching for metadata entry
-    Metadata const& getMetadata(std::string const& name, std::string const& ns) const;
+    Metadata const& getMetadata(std::string const& name, std::string const& ns="") const;
     
     /// @return a const& to Metadata entry with given metadata::id. 
     /// If none is found, pdal::metadata_not_found is thrown.
