@@ -94,13 +94,14 @@ Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mod
 void Reader::addDefaultDimensions()
 {
     Dimension x("X", dimension::Float, 8);
-    x.createUUID();
+    x.setUUID("9b6a21e7-6ace-45a9-8c66-d9031d07576a");
     Dimension y("Y", dimension::Float, 8);
-    y.createUUID();
+    y.setUUID("2f820b5d-9ad4-46e9-8be8-3cc15c8f9778");
     Dimension z("Z", dimension::Float, 8);
-    z.createUUID();
+    z.setUUID("0de362b2-a039-42f2-9287-85964394a22e");
     Dimension t("Time", dimension::UnsignedInteger, 8);
-    t.createUUID();
+    t.setUUID("9b705441-3de6-4b16-b706-ebae22bedeb5");
+
     addDefaultDimension(x, getName());
     addDefaultDimension(y, getName());
     addDefaultDimension(z, getName());
