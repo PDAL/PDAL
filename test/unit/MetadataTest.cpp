@@ -199,8 +199,12 @@ BOOST_AUTO_TEST_CASE(test_metadata_copy)
     pdal::Dimension d("X", pdal::dimension::UnsignedInteger, 1);
     pdal::PointBuffer b(s);
     
-    pdal::PointBuffer b2(s);
+    b.addMetadata(m1);
+    b.addMetadata(m1prime);
+    b.addMetadata(m2);
     
+    pdal::PointBuffer b2(s);
+
     b2.setMetadata(b.getMetadata());
 
     pdal::Metadata m11 = b2.getMetadata("m1", "parent");
