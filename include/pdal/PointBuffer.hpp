@@ -298,6 +298,14 @@ public:
 */
     /// add a Metadata entry to the PointBuffer's metadata map
     void addMetadata(pdal::Metadata const& entry);
+
+    /*! add a new value T metadata for the given Metadata key and namespace. 
+        \param name Metadata entry key to use
+        \param ns namespace to use for Metadata entry.
+        \param value the T value to set.
+    */   
+    template<class T> void addMetadata(std::string const& name, T value, std::string const& ns="");
+
     
     /// @return a const& to a Metadata entry with the given name and/or namespace
     /// If none is found, pdal::metadata_not_found is thrown.
@@ -354,6 +362,14 @@ public:
         \endverbatim
     */    
     bool setMetadata(Metadata const& m);
+
+    /*! reset the value T metadata for the given Metadata key and namespace. 
+        \param name Metadata entry key to use
+        \param ns namespace to use for Metadata entry.
+        \param value the T value to set.
+    */   
+    template<class T> void setMetadata(std::string const& name, T value, std::string const& ns="");
+
     
     /// sets the MetadataMap for the PointBuffer
     /// @param v MetadataMap instance to use (typically from another PointBuffer)
@@ -598,6 +614,23 @@ inline T PointBuffer::getField(pdal::Dimension const& dim, std::size_t pointInde
     
 }
 
+template <class T>
+inline void PointBuffer::addMetadata(std::string const& name, T value, std::string const& ns)
+{
+    Metadata m(name, ns);
+    m.setValue<T>(value);
+    addMetadata(m);
+    return;
+}
+
+template <class T>
+inline void PointBuffer::setMetadata(std::string const& name, T value, std::string const& ns)
+{
+    Metadata m(name, ns);
+    m.setValue<T>(value);
+    setMetadata(m);
+    return;
+}
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);
 
