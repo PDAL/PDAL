@@ -317,6 +317,7 @@ public:
     boost::uint32_t GetHeaderPadding() const;
 
     inline std::string const& getCompressionInfo() const { return m_compressionInfo; }
+    inline void setCompressionInfo(std::string const& info) { m_compressionInfo = info; }
     
     
 private:

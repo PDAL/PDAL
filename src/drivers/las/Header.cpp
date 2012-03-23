@@ -419,6 +419,7 @@ void LasHeader::initialize()
 
     m_isCompressed = false;
     m_headerPadding = 0;
+    m_compressionInfo = std::string("");
 }
 
 

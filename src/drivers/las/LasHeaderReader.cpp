@@ -273,6 +273,29 @@ void LasHeaderReader::read(Stage& stage, Schema& schema)
         readAllVLRs();
     }
 
+#ifdef PDAL_HAVE_LASZIP
+    
+    if (m_header.Compressed())
+    {
+        ZipPoint zp(m_header.getPointFormat(), m_header.getVLRs().getAll());
+        LASzip* laszip = zp.GetZipper();
+        std::ostringstream zip_version;
+        zip_version <<"LASzip Version " 
+                    << (int)laszip->version_major << "." 
+                    << (int)laszip->version_minor << "r"
+                    << (int)laszip->version_revision << " c" 
+                    << (int)laszip->compressor;
+        if (laszip->compressor == LASZIP_COMPRESSOR_CHUNKED) 
+            zip_version << " "<< (int)laszip->chunk_size << ":";
+        else
+            zip_version << ":";
+        for (int i = 0; i < (int)laszip->num_items; i++) 
+            zip_version <<" "<< laszip->items[i].get_name()<<" "<<  (int)laszip->items[i].version;
+    
+        m_header.setCompressionInfo(zip_version.str());
+    }
+#endif
+
     // If we're eof, we need to reset the state
     if (m_istream.eof())
     {

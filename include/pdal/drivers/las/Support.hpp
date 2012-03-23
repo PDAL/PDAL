@@ -43,9 +43,9 @@
 #include <iostream>
 
 #ifdef PDAL_HAVE_LASZIP
-class LASzip;
-class LASunzipper;
-class LASzipper;
+#include <laszip/laszip.hpp>
+#include <laszip/lasunzipper.hpp>
+#include <laszip/laszipper.hpp>
 
 #else
 typedef struct LASzipH *LASzip;

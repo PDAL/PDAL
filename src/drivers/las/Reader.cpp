@@ -673,110 +673,110 @@ void Reader::readBufferEndImpl(PointBuffer& buffer)
     
     LasHeader const& header = getReader().getLasHeader();
 
-    Metadata compressed("compressed", getReader().getName());
-    compressed.setValue<bool>(header.Compressed());
-    buffer.addMetadata(compressed);
+    buffer.addMetadata<bool>(   "compressed", 
+                                header.Compressed(), 
+                                getReader().getName());
+    buffer.addMetadata<boost::uint32_t>("dataformatid", 
+                                        static_cast<boost::uint32_t>(header.getPointFormat()), 
+                                        getReader().getName());
+    buffer.addMetadata<boost::uint32_t>("version_major", 
+                                        static_cast<boost::uint32_t>(header.GetVersionMajor()), 
+                                        getReader().getName());
+    buffer.addMetadata<boost::uint32_t>("version_minor", 
+                                        static_cast<boost::uint32_t>(header.GetVersionMinor()), 
+                                        getReader().getName());
+    buffer.addMetadata<boost::uint32_t>("filesource_id", 
+                                        static_cast<boost::uint32_t>(header.GetFileSourceId()), 
+                                        getReader().getName());
+    buffer.addMetadata<boost::uint32_t>("reserved", 
+                                        static_cast<boost::uint32_t>(header.GetReserved()), 
+                                        getReader().getName());
+    buffer.addMetadata<boost::uuids::uuid>( "project_id", 
+                                            header.GetProjectId(), 
+                                            getReader().getName());
+    buffer.addMetadata<std::string>("system_id", 
+                                    header.GetSystemId(), 
+                                    getReader().getName());
+    buffer.addMetadata<std::string>("software_id", 
+                                    header.GetSoftwareId(), 
+                                    getReader().getName());
+    buffer.addMetadata<boost::uint32_t>("creation_doy", 
+                                        static_cast<boost::uint32_t>(header.GetCreationDOY()), 
+                                        getReader().getName());
+    buffer.addMetadata<boost::uint32_t>("creation_year", 
+                                        static_cast<boost::uint32_t>(header.GetCreationYear()), 
+                                        getReader().getName());
+    buffer.addMetadata<boost::uint32_t>("header_size", 
+                                        static_cast<boost::uint32_t>(header.GetHeaderSize()), 
+                                        getReader().getName());
+    buffer.addMetadata<boost::uint32_t>("dataoffset", 
+                                        static_cast<boost::uint32_t>(header.GetDataOffset()), 
+                                        getReader().getName());
+    buffer.addMetadata<double>( "scale_x", 
+                                header.GetScaleX(), 
+                                getReader().getName());
+    buffer.addMetadata<double>( "scale_y", 
+                                header.GetScaleY(),
+                                getReader().getName());
+    buffer.addMetadata<double>( "scale_z", 
+                                header.GetScaleZ(),
+                                getReader().getName());
+    buffer.addMetadata<double>( "offset_x", 
+                                header.GetOffsetX(),
+                                getReader().getName());
+    buffer.addMetadata<double>( "offset_y", 
+                                header.GetOffsetY(),
+                                getReader().getName());
+    buffer.addMetadata<double>( "offset_z", 
+                                header.GetOffsetZ(),
+                                getReader().getName());
+    buffer.addMetadata<double>( "minx", 
+                                header.GetMinX(),
+                                getReader().getName());
+    buffer.addMetadata<double>( "miny", 
+                                header.GetMinY(),
+                                getReader().getName());
+    buffer.addMetadata<double>( "minz", 
+                                header.GetMinZ(),
+                                getReader().getName());
+    buffer.addMetadata<double>( "maxx", 
+                                header.GetMaxX(),
+                                getReader().getName());
+    buffer.addMetadata<double>( "maxy", 
+                                header.GetMaxY(),
+                                getReader().getName());
+    buffer.addMetadata<double>( "maxz", 
+                                header.GetMaxZ(),
+                                getReader().getName());
+    buffer.addMetadata<boost::uint32_t>("count", 
+                                        header.GetPointRecordsCount(),
+                                        getReader().getName());
 
-    Metadata dataformatid("dataformatid", getReader().getName());
-    dataformatid.setValue<boost::uint32_t>(static_cast<boost::uint32_t>(header.getPointFormat()));
-    buffer.addMetadata(dataformatid);
-    
-    Metadata version_major("version_major", getReader().getName());
-    version_major.setValue<boost::uint32_t>(static_cast<boost::uint32_t>(header.GetVersionMajor()));
-    buffer.addMetadata(version_major);
-    
-    Metadata version_minor("version_minor", getReader().getName());
-    version_minor.setValue<boost::uint32_t>(static_cast<boost::uint32_t>(header.GetVersionMinor()));
-    buffer.addMetadata(version_minor);
 
-    Metadata filesource_id("filesource_id", getReader().getName());
-    filesource_id.setValue<boost::uint32_t>(static_cast<boost::uint32_t>(header.GetFileSourceId()));
-    buffer.addMetadata(filesource_id);
+    std::vector<VariableLengthRecord> const& vlrs = header.getVLRs().getAll();
+    for (std::vector<VariableLengthRecord>::size_type t = 0;
+         t < vlrs.size();
+         ++t)
+    {
+        VariableLengthRecord const& v = vlrs[t];
+        
+        std::vector<boost::uint8_t> raw_bytes;
+        for (std::size_t i = 0 ; i < v.getLength(); ++i)
+        {
+            raw_bytes.push_back(v.getBytes()[i]);
+        }
+        pdal::ByteArray bytearray(raw_bytes);
+        
+        std::ostringstream name;
+        name << "vlr_" << t;
+        pdal::Metadata entry(name.str(), getReader().getName());
+        entry.setValue<pdal::ByteArray>(bytearray);
+        entry.addAttribute("reserved", boost::lexical_cast<std::string>(v.getReserved()));
+        entry.addAttribute("user_id", v.getUserId());
+        entry.addAttribute("record_id", boost::lexical_cast<std::string>(v.getRecordId()));
+        entry.addAttribute("description", v.getDescription());
 
-    Metadata reserved("reserved", getReader().getName());
-    reserved.setValue<boost::uint32_t>(static_cast<boost::uint32_t>(header.GetReserved()));
-    buffer.addMetadata(reserved);
-    
-    Metadata project_id("project_id", getReader().getName());
-    project_id.setValue<boost::uuids::uuid>(header.GetProjectId());
-    buffer.addMetadata(project_id);
-    
-    Metadata system_id("system_id", getReader().getName());
-    system_id.setValue<std::string>(header.GetSystemId());
-    buffer.addMetadata(system_id);
-    
-    Metadata software_id("software_id", getReader().getName());
-    software_id.setValue<std::string>(header.GetSoftwareId());
-    buffer.addMetadata(software_id);
-    
-    Metadata creation_doy("creation_doy", getReader().getName());
-    creation_doy.setValue<boost::uint32_t>(static_cast<boost::uint32_t>(header.GetCreationDOY()));
-    buffer.addMetadata(creation_doy);
-    
-    Metadata creation_year("creation_year", getReader().getName());
-    creation_year.setValue<boost::uint32_t>(static_cast<boost::uint32_t>(header.GetCreationYear()));
-    buffer.addMetadata(creation_year);
-    
-    Metadata header_size("header_size", getReader().getName());
-    header_size.setValue<boost::uint32_t>(static_cast<boost::uint32_t>(header.GetHeaderSize()));
-    buffer.addMetadata(header_size);
-    
-    Metadata dataoffset("dataoffset", getReader().getName());
-    dataoffset.setValue<boost::uint32_t>(static_cast<boost::uint32_t>(header.GetDataOffset()));
-    buffer.addMetadata(dataoffset);
-    
-    Metadata scale_x("scale_x", getReader().getName());
-    scale_x.setValue<double>(header.GetScaleX());
-    buffer.addMetadata(scale_x);
-    
-    Metadata scale_y("scale_y", getReader().getName());
-    scale_y.setValue<double>(header.GetScaleY());
-    buffer.addMetadata(scale_y);
-    
-    Metadata scale_z("scale_z", getReader().getName());
-    scale_z.setValue<double>(header.GetScaleZ());
-    buffer.addMetadata(scale_z);
-    
-    Metadata offset_x("offset_x", getReader().getName());
-    offset_x.setValue<double>(header.GetOffsetX());
-    buffer.addMetadata(offset_x);
-    
-    Metadata offset_y("offset_y", getReader().getName());
-    offset_y.setValue<double>(header.GetOffsetY());
-    buffer.addMetadata(offset_y);
-    
-    Metadata offset_z("offset_z", getReader().getName());
-    offset_z.setValue<double>(header.GetOffsetZ());
-    buffer.addMetadata(offset_z);
-    
-    Metadata minx("minx", getReader().getName());
-    minx.setValue<double>(header.GetMinX());
-    buffer.addMetadata(minx);
-    
-    Metadata miny("miny", getReader().getName());
-    miny.setValue<double>(header.GetMinY());
-    buffer.addMetadata(miny);
-    
-    Metadata minz("minz", getReader().getName());
-    minz.setValue<double>(header.GetMinZ());
-    buffer.addMetadata(minz);
-    
-    Metadata maxx("maxx", getReader().getName());
-    maxx.setValue<double>(header.GetMaxX());
-    buffer.addMetadata(maxx);
-    
-    Metadata maxy("maxy", getReader().getName());
-    maxy.setValue<double>(header.GetMaxY());
-    buffer.addMetadata(maxy);
-    
-    Metadata maxz("maxz", getReader().getName());
-    maxz.setValue<double>(header.GetMaxZ());
-    buffer.addMetadata(maxz);
-    
-    Metadata count("count", getReader().getName());
-    count.setValue<boost::uint32_t>(header.GetPointRecordsCount());
-    buffer.addMetadata(count);
-
+    }
 }
 
 boost::uint64_t Reader::skipImpl(boost::uint64_t count)
