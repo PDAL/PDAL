@@ -114,9 +114,8 @@ private:
 
 } } // iterators::sequential
 
-#endif
-
 } } } // namespaces
 
+#endif
 
 #endif
