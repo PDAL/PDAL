@@ -41,12 +41,6 @@
 namespace pdal { namespace drivers { namespace nitf {
 
 
-//
-// The FauxWriter doesn't actually write to disk -- instead, it just
-// record some summary stats about the data it is given.
-//
-// This writer knows only about three dimensions: X,Y,Z (as doubles).
-//
 class PDAL_DLL Writer : public pdal::Writer
 {
 public:
@@ -57,31 +51,10 @@ public:
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
 
-    // retrieve the summary info
-    double getMinX() const { return m_minimumX; }
-    double getMinY() const { return m_minimumY; }
-    double getMinZ() const { return m_minimumZ; }
-    double getMaxX() const { return m_maximumX; }
-    double getMaxY() const { return m_maximumY; }
-    double getMaxZ() const { return m_maximumZ; }
-    double getAvgX() const { return m_averageX; }
-    double getAvgY() const { return m_averageY; }
-    double getAvgZ() const { return m_averageZ; }
-
     // for dumping
     virtual boost::property_tree::ptree toPTree() const;
 
 private:
-    double m_minimumX;
-    double m_minimumY;
-    double m_minimumZ;
-    double m_maximumX;
-    double m_maximumY;
-    double m_maximumZ;
-    double m_averageX;
-    double m_averageY;
-    double m_averageZ;
-
     void writeBegin(boost::uint64_t targetNumPointsToWrite);
     boost::uint32_t writeBuffer(const PointBuffer&);
     void writeEnd(boost::uint64_t actualNumPointsWritten);
