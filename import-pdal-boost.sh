@@ -23,8 +23,7 @@
 #              | sort -u`
 #    3. Run bcp.
 #        $ cd $BOOST_ROOT
-#        $ ./bcp --namespace=pdalboost --namespace-alias \
-#              $BOOST_HEADERS $PDAL_ROOT/boost
+#        $ ../boost/boost_1_48_0/dist/bin/bcp --namespace=pdalboost --namespace-alias $BOOST_HEADERS build boost --boost=/home/oracle/boost/boost_1_48_0/
 #    4. Stage.
 #        $ cd $PDAL_ROOT
 #        $ git add boost
@@ -32,19 +31,28 @@
 #    5. Fix files (bcp misses a couple of namespace issues)
 #        $ vim boost/boost/property_tree/detail/xml_parser_read_rapidxml.hpp \
 #            # "namespace rapidxml" -> "namespace pdalboostrapidxml"
+#    5.25 ./bootstrap.sh
+#    5.5 ./b2 stage variant=release link=static threading=multi cflags="-fPIC" cxxflags="-fPIC" linkflags="-fPIC" define=DBOOST_TEST_DYN_LINK=1
+#    5.75 ./b2 stage variant=release link=static threading=multi cflags="-fPIC" cxxflags="-fPIC" linkflags="-fPIC" define=DBOOST_ALL_DYN_LINK=1
 #    6. Test it.
 #        $ cmake -DPDAL_EMBED_BOOST=ON .
 #    7. Check it in.
 #        $ git commit
 #
-echo "see comments for instructions"
-exit 1
+#@echo "see comments for instructions"
+#exit 1
 
-export BCPDIR=/Users/kmckelvey/Source/boost_1_48_0
-export TARGET=/Users/kmckelvey/Source/boost-header-diff-test
+export BOOST_HOME=/Users/hobu/dev/svn/boost
+export TARGET=./boost
 export BOOST_HEADERS=`find src include test apps \( -name '*.[cChH]' -o -name '*.[cChH][pPxX][pPxX]' -o -name '*.[cChH][cChH]' \) -exec grep 'include.*boost' {} \; | grep '^#' | sed -e 's/.*boost/boost/' -e 's/>.*//' | sort -u`
-
 export BOOST_HEADERS="$BOOST_HEADERS boost/parameter/aux_/overloads.hpp"
-mkdir -p $TARGET
-cd $BCPDIR
-./bcp --namespace=pdalboost --namespace-alias $BOOST_HEADERS $TARGET
+
+rm -rf boost/*
+echo $BOOST_HEADERS
+$BOOST_HOME/dist/bin/bcp --namespace=$NAMESPACE \
+                         --namespace-alias \
+                         $BOOST_HEADERS \
+                         build \
+                         boost \
+                         --boost=$BOOST_HOME
+git checkout boost/CMakeLists.txt
