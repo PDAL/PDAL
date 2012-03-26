@@ -6,6 +6,8 @@
 #if !defined(BOOST_FUNCTIONAL_HASH_DETAIL_HASH_FLOAT_HEADER)
 #define BOOST_FUNCTIONAL_HASH_DETAIL_HASH_FLOAT_HEADER
 
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 # pragma once
 #endif
