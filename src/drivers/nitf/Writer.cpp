@@ -50,6 +50,8 @@ Writer::Writer(Stage& prevStage, const Options& options)
 void Writer::initialize()
 {
     pdal::Writer::initialize();
+
+    throw pdal::not_yet_implemented("NITF writer not yet implemented");
 }
 
 
@@ -63,66 +65,19 @@ const Options Writer::getDefaultOptions() const
 
 void Writer::writeBegin(boost::uint64_t /*targetNumPointsToWrite*/)
 {
-    m_minimumX = m_minimumY = m_minimumZ = std::numeric_limits<double>::max();
-    m_maximumX = m_maximumY = m_maximumZ = std::numeric_limits<double>::min();
-    m_averageX = m_averageY = m_averageZ = 0;
-
     return;
 }
 
 
-void Writer::writeEnd(boost::uint64_t actualNumPointsWritten)
+void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 {
-    m_averageX /= (double)actualNumPointsWritten;
-    m_averageY /= (double)actualNumPointsWritten;
-    m_averageZ /= (double)actualNumPointsWritten;
-
-    //cout << "FauxWriter::writeEnd()" << endl;
-    //cout << "  wrote " << actualNumPointsWritten << " points" << endl;
-
-    //cout << "  min X: " << m_minimumX << endl;
-    //cout << "  min Y: " << m_minimumY << endl;
-    //cout << "  min Z: " << m_minimumZ << endl;
-    //cout << "  max X: " << m_maximumX << endl;
-    //cout << "  max Y: " << m_maximumY << endl;
-    //cout << "  max Z: " << m_maximumZ << endl;
-    //
-    //cout << endl;
-
     return;
 }
 
 
-boost::uint32_t Writer::writeBuffer(const PointBuffer& PointBuffer)
+boost::uint32_t Writer::writeBuffer(const PointBuffer& /*/PointBuffer*/)
 {
-    const boost::uint32_t numPoints = PointBuffer.getNumPoints();
-
-    const Schema& schema = PointBuffer.getSchema();
-
-    Dimension const& dimX = schema.getDimension("X");
-    Dimension const& dimY = schema.getDimension("Y");
-    Dimension const& dimZ = schema.getDimension("Z");
-
-    for (boost::uint32_t pointIndex=0; pointIndex<numPoints; pointIndex++)
-    {
-
-        double x = PointBuffer.getField<double>(dimX, pointIndex);
-        double y = PointBuffer.getField<double>(dimY, pointIndex);
-        double z = PointBuffer.getField<double>(dimZ, pointIndex);
-
-        m_minimumX = std::min(m_minimumX, x);
-        m_minimumY = std::min(m_minimumY, y);
-        m_minimumZ = std::min(m_minimumZ, z);
-        m_maximumX = std::max(m_maximumX, x);
-        m_maximumY = std::max(m_maximumY, y);
-        m_maximumZ = std::max(m_maximumZ, z);
-
-        m_averageX += x;
-        m_averageY += y;
-        m_averageZ += z;
-    }
-
-    return numPoints;
+    return 0;
 }
 
 
