@@ -20,11 +20,6 @@ struct default_
     {}
 
     Value& value;
-
-#if defined(BOOST_MSVC) /* mpg */
-       // not implemented
-      default_& operator=(const default_&);
-#endif
 };
 
 //
