@@ -38,6 +38,8 @@
 #include <pdal/FileUtils.hpp>
 #include "Support.hpp"
 
+#include <boost/iostreams/restrict.hpp>
+
 BOOST_AUTO_TEST_SUITE(GDALUtilsTest)
 
 
