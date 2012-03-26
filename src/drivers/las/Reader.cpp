@@ -695,10 +695,10 @@ void Reader::readBufferEndImpl(PointBuffer& buffer)
                                             header.GetProjectId(), 
                                             getReader().getName());
     buffer.addMetadata<std::string>("system_id", 
-                                    header.GetSystemId(), 
+                                    header.GetSystemId(true), 
                                     getReader().getName());
     buffer.addMetadata<std::string>("software_id", 
-                                    header.GetSoftwareId(), 
+                                    header.GetSoftwareId(true), 
                                     getReader().getName());
     buffer.addMetadata<boost::uint32_t>("creation_doy", 
                                         static_cast<boost::uint32_t>(header.GetCreationDOY()), 
