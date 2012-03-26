@@ -64,7 +64,12 @@ test/temp/*.txt
 test/temp/*.las
 test/temp/*.laz
 
+#
+# OS X stuff
+#
+.DS_Store
 
+build
 Makefile
 doc/build
 bin/
