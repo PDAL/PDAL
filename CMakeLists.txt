@@ -204,7 +204,10 @@ if(Boost_FOUND)
   
 else()
   set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/boost)
-  find_package(Boost 1.48)
+
+  # find_package would normally set the following variables
+  set(Boost_FOUND TRUE)
+  set(Boost_INCLUDE_DIRS ${BOOST_ROOT})
 
   set(PDALBOOST_LIB_NAME "pdalboost" CACHE STRING "use embedded boost")
   mark_as_advanced(FORCE PDALBOOST_LIB_NAME)
