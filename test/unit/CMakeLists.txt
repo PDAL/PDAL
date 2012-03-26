@@ -31,14 +31,11 @@ SET(PDAL_UNITTEST_TEST_SRC
     FauxReaderTest.cpp
     FauxWriterTest.cpp
     FileUtilsTest.cpp
-    GDALUtilsTest.cpp
     InPlaceReprojectionFilterTest.cpp
     LasReaderTest.cpp
     LasWriterTest.cpp
     MetadataTest.cpp
     MosaicFilterTest.cpp
-    NitfReaderTest.cpp
-    NitfWriterTest.cpp
     OptionsTest.cpp
     PipelineManagerTest.cpp
     PipelineReaderTest.cpp
@@ -95,6 +92,18 @@ if (WITH_ORACLE)
     
 endif (WITH_ORACLE)
 
+if (WITH_GDAL)
+    set(PDAL_GDAL_TEST_CPP
+        GDALUtilsTest.cpp
+        NitfReaderTest.cpp
+        NitfWriterTest.cpp
+        )
+
+    FOREACH(file ${PDAL_GDAL_TEST_CPP})
+            SET(PDAL_UNITTEST_TEST_SRC "${PDAL_UNITTEST_TEST_SRC};${file}" CACHE INTERNAL "source files for test")
+    ENDFOREACH(file)
+    
+endif (WITH_GDAL)
 
 set(PDAL_UNITTEST_SOURCES "")
 FOREACH(file ${PDAL_UNITTEST_TEST_SRC})
