@@ -21,7 +21,8 @@ set PDAL_DIR=.
 set OSGEO4W_DIR=C:\OSGeo4W
 
 :: Where is boost installed?
-rem set BOOST_DIR=c:\utils\boost_1_48_0
+rem set PDAL_EMBED_BOOST=OFF
+rem set BOOST_DIR=c:\utils\boost_1_49_0
 set BOOST_DIR=%PDAL_DIR%\boost
 
 :: GDAL
