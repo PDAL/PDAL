@@ -133,6 +133,14 @@ libxml2, iconv.
    broken on the version of PDAL you checked out OR something is wrong with your 
    installation.
 
+7. PYTHON/PLANG NOTE: If you build WITH_PLANG=ON in Debug mode, the system will
+   try to link against "python27d.lib". You need to change .../Python27/include/pyconfig.h
+   as follows:
+   
+    - change the line #pragma comment(lib,"python27d.lib") to refer to python27.lib instead
+	- comment out the line "#define Py_DEBUG"
+
+
 
 Advanced Build Steps
 ------------------------------------------------------------------------------
