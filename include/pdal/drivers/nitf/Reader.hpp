@@ -35,55 +35,40 @@
 #ifndef INCLUDED_DRIVERS_NITF_READER_HPP
 #define INCLUDED_DRIVERS_NITF_READER_HPP
 
+#include <pdal/pdal_internal.hpp>
+#ifdef PDAL_HAVE_GDAL
+
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
-#include <pdal/Bounds.hpp>
 
 namespace pdal
 {
     class PointBuffer;
+
+    namespace drivers
+    {
+        namespace las
+        {
+            class Reader;
+        }
+    }
 }
 
 namespace pdal { namespace drivers { namespace nitf {
 
 
-// The FauxReader doesn't read from disk, but instead just makes up data for its
-// points.  The reader is constructed with a given bounding box and a given 
-// number of points.
-//
-// This reader knows about 4 fields (Dimensions):
-//    X,Y,Z - floats
-//    Time  - uint64
-//
-// It supports a few modes: 
-//   - "random" generates points that are randomly distributed within the given bounding box
-//   - "constant" generates its points to always be at the minimum of the bounding box
-//   - "ramp" generates its points as a linear ramp from the minimum of the bbox to the maximum
-// In all these modes, however, the Time field is always set to the point number.
-//
 class PDAL_DLL Reader : public pdal::Reader
 {
-public:
-    enum Mode
-    {
-        Constant,
-        Random,
-        Ramp
-    };
-
 public:
     SET_STAGE_NAME("drivers.nitf.reader", "NITF Reader")
 
     Reader(const Options& options);
-    Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode);
-    Reader(const Bounds<double>&, boost::uint64_t numPoints, Mode mode, const std::vector<Dimension>& dimensions);
+    ~Reader();
     
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
     virtual void addDefaultDimensions();
-    
-    Mode getMode() const;
-    
+ 
     bool supportsIterator (StageIteratorType t) const
     {   
         if (t == StageIterator_Sequential ) return true;
@@ -93,7 +78,6 @@ public:
     }
 
     pdal::StageSequentialIterator* createSequentialIterator(PointBuffer& buffer) const;
-    pdal::StageRandomIterator* createRandomIterator(PointBuffer& buffer) const;
 
     // this is called by the stage's iterator
     boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;
@@ -102,10 +86,9 @@ public:
     virtual boost::property_tree::ptree toPTree() const;
 
 private:
-    Bounds<double> m_bounds;
-    boost::uint64_t m_numPoints;
-    Mode m_mode;
-    std::vector<Dimension> m_dimensions;
+    std::string m_nitfFilename;
+    std::string m_lasFilename; // temp file
+    pdal::drivers::las::Reader* m_lasReader;
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
@@ -126,25 +109,12 @@ private:
     bool atEndImpl() const;
 
     pdal::drivers::nitf::Reader const& m_reader;
+    pdal::ReaderSequentialIterator* m_lasIter;
 };
 
 } } // iterators::sequential
 
-namespace iterators { namespace random {
-    
-class PDAL_DLL Reader : public pdal::ReaderRandomIterator
-{
-public:
-    Reader(pdal::drivers::nitf::Reader const& reader, PointBuffer& buffer);
-
-private:
-    boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
-
-    pdal::drivers::nitf::Reader const& m_reader;
-};
-
-} } // iterators::random
+#endif
 
 } } } // namespaces
 

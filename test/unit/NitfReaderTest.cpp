@@ -39,6 +39,8 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/nitf/Reader.hpp>
+#include <pdal/drivers/las/Reader.hpp>
+#include "Support.hpp"
 
 #include <iostream>
 
@@ -51,387 +53,76 @@ using namespace pdal;
 
 BOOST_AUTO_TEST_SUITE(NitfReaderTest)
 
-BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
+BOOST_AUTO_TEST_CASE(test_one)
 {
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    pdal::drivers::nitf::Reader reader(bounds, 1000, pdal::drivers::nitf::Reader::Constant);
-    reader.initialize();
+    //
+    // read NITF
+    //
+    pdal::Option nitf_opt("filename", Support::datapath("nitf/autzen-utm10.ntf"));
+    pdal::Options nitf_opts;
+    nitf_opts.add(nitf_opt);
 
-    BOOST_CHECK_EQUAL(reader.getDescription(), "NITF Reader");
+    pdal::drivers::nitf::Reader nitf_reader(nitf_opts);
+    nitf_reader.initialize();
 
-    const Schema& schema = reader.getSchema();
+    BOOST_CHECK_EQUAL(nitf_reader.getDescription(), "NITF Reader");
 
-    PointBuffer data(schema, 750);
+    const Schema& nitf_schema = nitf_reader.getSchema();
+
+    PointBuffer nitf_data(nitf_schema, 750);
  
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
+    StageSequentialIterator* nitf_iter = nitf_reader.createSequentialIterator(nitf_data);
+    const boost::uint32_t nitf_numRead = nitf_iter->read(nitf_data);
 
-    BOOST_CHECK_EQUAL(numRead, 750u);
-    
-    Schema const& buffer_schema = data.getSchema();
-    Dimension const& dimX = buffer_schema.getDimension("X");
-    Dimension const& dimY = buffer_schema.getDimension("Y");
-    Dimension const& dimZ = buffer_schema.getDimension("Z");
-    Dimension const& dimTime = buffer_schema.getDimension("Time");
-    
-    for (boost::uint32_t i=0; i<numRead; i++)
-    {
-        double x = data.getField<double>(dimX, i);
-        double y = data.getField<double>(dimY, i);
-        double z = data.getField<double>(dimZ, i);
-        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
+    //
+    // read LAS
+    //
+    pdal::Option las_opt("filename", Support::datapath("nitf/autzen-utm10.las"));
+    pdal::Options las_opts;
+    las_opts.add(las_opt);
 
-        BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
-        BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
-        BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
-        BOOST_CHECK_EQUAL(t, i);
-    }
+    pdal::drivers::las::Reader las_reader(las_opts);
+    las_reader.initialize();
+    const Schema& las_schema = las_reader.getSchema();
 
-    delete iter;
-
-    return;
-}
-
-
-BOOST_AUTO_TEST_CASE(FauxReaderTest_test_options)
-{
-    const Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    Option opt1("bounds", bounds);
-    Option opt2("mode", "conSTanT");
-    Option opt3("num_points", 1000);
-    Option opt4("id", 90210);
-    Options opts;
-    opts.add(opt1);
-    opts.add(opt2);
-    opts.add(opt3);
-    opts.add(opt4);
-    pdal::drivers::nitf::Reader reader(opts);
-    reader.initialize();
-
-    BOOST_CHECK_EQUAL(reader.getDescription(), "NITF Reader");
-    BOOST_CHECK_EQUAL(reader.getId(), 90210u);
-
-    const Schema& schema = reader.getSchema();
-
-    PointBuffer data(schema, 750);
+    PointBuffer las_data(las_schema, 750);
  
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
-
-    BOOST_CHECK_EQUAL(numRead, 750u);
-
-    Schema const& buffer_schema = data.getSchema();
-    Dimension const& dimX = buffer_schema.getDimension("X");
-    Dimension const& dimY = buffer_schema.getDimension("Y");
-    Dimension const& dimZ = buffer_schema.getDimension("Z");
-    Dimension const& dimTime = buffer_schema.getDimension("Time");
-
-    for (boost::uint32_t i=0; i<numRead; i++)
-    {
-        double x = data.getField<double>(dimX, i);
-        double y = data.getField<double>(dimY, i);
-        double z = data.getField<double>(dimZ, i);
-        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
-
-        BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
-        BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
-        BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
-        BOOST_CHECK_EQUAL(t, i);
-    }
-
-    delete iter;
-
-    return;
-}
-
-
-BOOST_AUTO_TEST_CASE(test_constant_mode_random_iter)
-{
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    pdal::drivers::nitf::Reader reader(bounds, 1000, pdal::drivers::nitf::Reader::Constant);
-    reader.initialize();
-
-    BOOST_CHECK_EQUAL(reader.getDescription(), "NITF Reader");
-
-    const Schema& schema = reader.getSchema();
-
-    PointBuffer data(schema, 10);
-
-    StageRandomIterator* iter = reader.createRandomIterator(data);
-
-    boost::uint32_t numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 10u);
-
-    Schema const& buffer_schema = data.getSchema();
-    Dimension const& dimX = buffer_schema.getDimension("X");
-    Dimension const& dimY = buffer_schema.getDimension("Y");
-    Dimension const& dimZ = buffer_schema.getDimension("Z");
-    Dimension const& dimTime = buffer_schema.getDimension("Time");
-
-
-    {
-        for (boost::uint32_t i=0; i<numRead; i++)
-        {
-            double x = data.getField<double>(dimX, i);
-            double y = data.getField<double>(dimY, i);
-            double z = data.getField<double>(dimZ, i);
-            boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
-
-            BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
-            BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
-            BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
-            BOOST_CHECK_EQUAL(t, i);
-        }
-    }
-
-    numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 10u);
-
-    {
-        for (boost::uint32_t i=0; i<numRead; i++)
-        {
-            double x = data.getField<double>(dimX, i);
-            double y = data.getField<double>(dimY, i);
-            double z = data.getField<double>(dimZ, i);
-            boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
-
-
-            BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
-            BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
-            BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
-            BOOST_CHECK_EQUAL(t, i+10);
-        }
-    }
-
-    boost::uint64_t newPos = iter->seek(99);
-    BOOST_CHECK_EQUAL(newPos, 99u);
-    numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 10u);
-
-    {
-        for (boost::uint32_t i=0; i<numRead; i++)
-        {
-            double x = data.getField<double>(dimX, i);
-            double y = data.getField<double>(dimY, i);
-            double z = data.getField<double>(dimZ, i);
-            boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
-
-            BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
-            BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
-            BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
-            BOOST_CHECK_EQUAL(t, i+99);
-
-        }
-    }
-
-    newPos = iter->seek(7);
-    BOOST_CHECK_EQUAL(newPos, 7u);
-    numRead = iter->read(data);
-    BOOST_CHECK_EQUAL(numRead, 10u);
-
-    {
-        for (boost::uint32_t i=0; i<numRead; i++)
-        {
-            double x = data.getField<double>(dimX, i);
-            double y = data.getField<double>(dimY, i);
-            double z = data.getField<double>(dimZ, i);
-            boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
-
-
-            BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
-            BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
-            BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
-            BOOST_CHECK_EQUAL(t, i+7);
-
-        }
-    }
-
-    delete iter;
-
-    return;
-}
-
-
-BOOST_AUTO_TEST_CASE(test_random_mode)
-{
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    pdal::drivers::nitf::Reader reader(bounds, 1000, pdal::drivers::nitf::Reader::Random);
-    reader.initialize();
-
-    const Schema& schema = reader.getSchema();
-
-    PointBuffer data(schema, 750);
-
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
-
-    BOOST_CHECK_EQUAL(numRead, 750u);
-
-    Schema const& buffer_schema = data.getSchema();
-    Dimension const& dimX = buffer_schema.getDimension("X");
-    Dimension const& dimY = buffer_schema.getDimension("Y");
-    Dimension const& dimZ = buffer_schema.getDimension("Z");
-    Dimension const& dimTime = buffer_schema.getDimension("Time");
-
-
-    for (boost::uint32_t i=0; i<numRead; i++)
-    {
-        double x = data.getField<double>(dimX, i);
-        double y = data.getField<double>(dimY, i);
-        double z = data.getField<double>(dimZ, i);
-        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
-            
-        BOOST_CHECK_GE(x, 1.0);
-        BOOST_CHECK_LE(x, 101.0);
-        
-        BOOST_CHECK_GE(y, 2.0);
-        BOOST_CHECK_LE(y, 102.0);
-        
-        BOOST_CHECK_GE(z, 3.0);
-        BOOST_CHECK_LE(z, 103.0);
-        
-        BOOST_CHECK_EQUAL(t, i);
-        // BOOST_CHECK(x >= 1.0 && x <= 101.0);
-        // BOOST_CHECK(y >= 2.0 && y <= 102.0);
-        // BOOST_CHECK(z >= 3.0 && z <= 103.0);
-        // BOOST_CHECK(t == i);
-    }
-
-    delete iter;
-
-    return;
-}
-
-BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
-{
-    Bounds<double> bounds(0,0,0,4,4,4);
-    pdal::drivers::nitf::Reader reader(bounds, 2, pdal::drivers::nitf::Reader::Ramp);
-    reader.initialize();
-
-    const Schema& schema = reader.getSchema();
-
-    PointBuffer data(schema, 2);
-
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
-
-    BOOST_CHECK_EQUAL(numRead, 2u);
-
-    Schema const& buffer_schema = data.getSchema();
-    Dimension const& dimX = buffer_schema.getDimension("X");
-    Dimension const& dimY = buffer_schema.getDimension("Y");
-    Dimension const& dimZ = buffer_schema.getDimension("Z");
-    Dimension const& dimTime = buffer_schema.getDimension("Time");
-
-    const double x0 = data.getField<double>(dimX, 0);
-    const double y0 = data.getField<double>(dimY, 0);
-    const double z0 = data.getField<double>(dimZ, 0);
-    const boost::uint64_t t0 = data.getField<boost::uint64_t>(dimTime, 0);
-
-    const double x1 = data.getField<double>(dimX, 1);
-    const double y1 = data.getField<double>(dimY, 1);
-    const double z1 = data.getField<double>(dimZ, 1);
-    const boost::uint64_t t1 = data.getField<boost::uint64_t>(dimTime, 1);
-
-    BOOST_CHECK_CLOSE(x0, 0.0, 0.00001);
-    BOOST_CHECK_CLOSE(y0, 0.0, 0.00001);
-    BOOST_CHECK_CLOSE(z0, 0.0, 0.00001);
-    BOOST_CHECK_EQUAL(t0, 0u);
-
-    BOOST_CHECK_CLOSE(x1, 4.0, 0.00001);
-    BOOST_CHECK_CLOSE(y1, 4.0, 0.00001);
-    BOOST_CHECK_CLOSE(z1, 4.0, 0.00001);
-    BOOST_CHECK_EQUAL(t1, 1u);
-
-
-    delete iter;
-
-    return;
-}
-
-
-BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
-{
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
-    pdal::drivers::nitf::Reader reader(bounds, 750, pdal::drivers::nitf::Reader::Ramp);
-    reader.initialize();
-
-    const Schema& schema = reader.getSchema();
-
-    PointBuffer data(schema, 750);
-
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    boost::uint32_t numRead = iter->read(data);
-
-    BOOST_CHECK_EQUAL(numRead,750u);
-
-    Schema const& buffer_schema = data.getSchema();
-    Dimension const& dimX = buffer_schema.getDimension("X");
-    Dimension const& dimY = buffer_schema.getDimension("Y");
-    Dimension const& dimZ = buffer_schema.getDimension("Z");
-    Dimension const& dimTime = buffer_schema.getDimension("Time");
-
-    double delX = (101.0 - 1.0) / (750.0 - 1.0);
-    double delY = (152.0 - 2.0) / (750.0 - 1.0);
-    double delZ = (203.0 - 3.0) / (750.0 - 1.0);
-
-    for (boost::uint32_t i=0; i<numRead; i++)
-    {
-        double x = data.getField<double>(dimX, i);
-        double y = data.getField<double>(dimY, i);
-        double z = data.getField<double>(dimZ, i);
-        boost::uint64_t t = data.getField<boost::uint64_t>(dimTime, i);
-
-        BOOST_CHECK_CLOSE(x, 1.0 + delX*i, 0.00001);
-        BOOST_CHECK_CLOSE(y, 2.0 + delY*i, 0.00001);
-        BOOST_CHECK_CLOSE(z, 3.0 + delZ*i, 0.00001);
-        BOOST_CHECK_EQUAL(t, i);
-
-    }
-
-    delete iter;
-
-    return;
-}
-
-
-BOOST_AUTO_TEST_CASE(test_custom_fields)
-{
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-
-    Dimension dimY("Red", dimension::UnsignedInteger, 1);//DimensionId::Red_u8);
-    Dimension dimX("Blue", dimension::UnsignedInteger, 1);//::Blue_u8);
-    std::vector<Dimension> dims;
-    dims.push_back(dimY);
-    dims.push_back(dimX);
-
-    pdal::drivers::nitf::Reader reader(bounds, 1000, pdal::drivers::nitf::Reader::Random, dims);
-    reader.initialize();
-
-    const Schema& schema = reader.getSchema();
-    BOOST_CHECK_EQUAL(schema.getDimensions().size(), 2u);
-    // BOOST_CHECK_EQUAL(schema.getDimensions()[0].getId(), DimensionId::Red_u8);
-    // BOOST_CHECK_EQUAL(schema.getDimensions()[1].getId(), DimensionId::Blue_u8);
-
-    return;
-}
-
-
-
-BOOST_AUTO_TEST_CASE(test_iterator_checks)
-{
-    Bounds<double> bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
-    pdal::drivers::nitf::Reader reader(bounds, 750, pdal::drivers::nitf::Reader::Ramp);
-    reader.initialize();
+    StageSequentialIterator* las_iter = las_reader.createSequentialIterator(las_data);
+    const boost::uint32_t las_numRead = las_iter->read(las_data);
+
+    //
+    // compare the two buffers
+    //
+    BOOST_CHECK_EQUAL(las_numRead, nitf_numRead);
+
+    Dimension const& nitf_dimX = nitf_schema.getDimension("X");
+    Dimension const& nitf_dimY = nitf_schema.getDimension("Y");
+    Dimension const& nitf_dimZ = nitf_schema.getDimension("Z");
     
-    const Schema& schema = reader.getSchema();
+    Dimension const& las_dimX = las_schema.getDimension("X");
+    Dimension const& las_dimY = las_schema.getDimension("Y");
+    Dimension const& las_dimZ = las_schema.getDimension("Z");
 
-    PointBuffer data(schema, 750);
-    
-    BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Sequential), true);
-    BOOST_CHECK_EQUAL(reader.supportsIterator(StageIterator_Random) , true);
+    for (boost::uint32_t i=0; i<las_numRead; i++)
+    {
+        const double nitf_x = nitf_data.getField<double>(nitf_dimX, i);
+        const double nitf_y = nitf_data.getField<double>(nitf_dimY, i);
+        const double nitf_z = nitf_data.getField<double>(nitf_dimZ, i);
+
+        const double las_x = las_data.getField<double>(las_dimX, i);
+        const double las_y = las_data.getField<double>(las_dimY, i);
+        const double las_z = las_data.getField<double>(las_dimZ, i);
+
+        BOOST_CHECK_CLOSE(nitf_x, las_x, 0.00001);
+        BOOST_CHECK_CLOSE(nitf_y, las_y, 0.00001);
+        BOOST_CHECK_CLOSE(nitf_z, las_z, 0.00001);
+    }
+
+    delete nitf_iter;
+    delete las_iter;
 
     return;
 }
+
 
 BOOST_AUTO_TEST_SUITE_END()

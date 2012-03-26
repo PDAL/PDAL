@@ -33,92 +33,161 @@
 ****************************************************************************/
 
 #include <pdal/drivers/nitf/Reader.hpp>
+#ifdef PDAL_HAVE_GDAL
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/drivers/las/Reader.hpp>
 
-#include <boost/algorithm/string.hpp>
+#include "../las/nitflib.h"
+
+// gdal
+#include "gdal.h"
+#include "cpl_vsi.h"
+#include "cpl_conv.h"
+#include "cpl_string.h"
 
 
 namespace pdal { namespace drivers { namespace nitf {
 
-
-static Reader::Mode string2mode(const std::string& str)
+static int extractLASFromNITF(NITFDES* psDES, const char* pszLASName)
 {
-    if (boost::iequals(str, "constant")) return Reader::Constant;
-    if (boost::iequals(str, "random")) return Reader::Random;
-    if (boost::iequals(str, "ramp")) return Reader::Ramp;
-    throw pdal_error("invalid Mode option: " + str);
+    NITFSegmentInfo* psSegInfo;
+
+    if ( CSLFetchNameValue(psDES->papszMetadata, "NITF_DESID") == NULL )
+        return FALSE;
+
+    psSegInfo = psDES->psFile->pasSegmentInfo + psDES->iSegment;
+
+    GByte* pabyBuffer;
+
+    pabyBuffer = (GByte*) VSIMalloc((size_t)psSegInfo->nSegmentSize);
+    if (pabyBuffer == NULL)
+    {
+        throw pdal_error("Unable to allocate buffer large enough to extract NITF data!");
+    }
+
+    VSIFSeekL(psDES->psFile->fp, psSegInfo->nSegmentStart, SEEK_SET);
+    if (VSIFReadL(pabyBuffer, 1, (size_t)psSegInfo->nSegmentSize, psDES->psFile->fp) != psSegInfo->nSegmentSize)
+    {
+        VSIFree(pabyBuffer);
+        throw pdal_error("Unable to allocate extract NITF data!");
+    }
+
+    VSILFILE* fp = NULL;
+    fp = VSIFOpenL(pszLASName, "wb");
+    if (fp == NULL)
+    {
+        VSIFree(pabyBuffer);
+        throw pdal_error("Unable to open filename to write!");
+    }
+
+    VSIFWriteL(pabyBuffer, 1, (size_t)psSegInfo->nSegmentSize, fp);
+    VSIFCloseL(fp);
+    VSIFree(pabyBuffer);
+
+    return TRUE;
 }
+
+
+static void extractNITF(const std::string& nitf_filename, std::string& las_filename) 
+{
+    NITFFile    *psFile;
+    psFile = NITFOpen( nitf_filename.c_str(), FALSE );
+    if (psFile == NULL)
+    {
+        throw pdal_error("unable to open NITF file");
+        //log()->get(logDEBUG) << "Unable to open " << getOptions().getValueOrThrow<std::string>("filename") << " for NITF access" << std::endl;
+    }
+    
+    int iSegment(0);
+    NITFSegmentInfo *psSegInfo = NULL;
+    for(iSegment = 0;  iSegment < psFile->nSegmentCount; iSegment++ )
+    {
+        psSegInfo = psFile->pasSegmentInfo + iSegment;
+        if( EQUAL(psSegInfo->szSegmentType,"DE")) 
+        {
+            break;
+        }
+    }    
+    
+    if (!psSegInfo)
+    {
+        throw pdal_error("Unable to get LAS DE segment from NITF file!");
+    }
+
+    //log()->get(logDEBUG) << "NITF Segment DataStart: " << psSegInfo->nSegmentStart 
+    //                     << " DataSize: " << psSegInfo->nSegmentSize << std::endl;
+
+    NITFDES *psDES = NULL;
+    psDES = NITFDESAccess( psFile, iSegment );
+    if( psDES == NULL )
+    {
+        std::string msg("NITFDESAccess(%d) failed!");
+        throw pdal_error(msg);
+    }
+    
+    std::string tempfile = Utils::generate_tempfile();
+    //log()->get(logDEBUG) << "Using " << tempfile << " for NITF->LAS filename" << std::endl;
+    
+    if (extractLASFromNITF(psDES, tempfile.c_str()))
+    {
+        las_filename = std::string(tempfile);
+    }
+
+    return;
+}
+
+
+// ==========================================================================
 
 
 Reader::Reader(const Options& options)
     : pdal::Reader(options)
-    , m_bounds(options.getValueOrThrow<Bounds<double> >("bounds"))
-    , m_numPoints(options.getValueOrThrow<boost::uint64_t>("num_points"))
-    , m_mode(string2mode(options.getValueOrThrow<std::string>("mode")))
+    , m_nitfFilename(options.getValueOrThrow<std::string>("filename"))
+    , m_lasFilename("")
+    , m_lasReader(NULL)
 {
     addDefaultDimensions();
     return;
 }
 
 
-Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mode)
-    : pdal::Reader(Options::none())
-    , m_bounds(bounds)
-    , m_numPoints(numPoints)
-    , m_mode(mode)
+Reader::~Reader()
 {
-    addDefaultDimensions();
-    return;
+    delete m_lasReader;
 }
 
-Reader::Reader(const Bounds<double>& bounds, boost::uint64_t numPoints, Mode mode, const std::vector<Dimension>& dimensions)
-    : pdal::Reader( Options::none())
-    , m_bounds(bounds)
-    , m_numPoints(numPoints)
-    , m_mode(mode)
-{
-    if (dimensions.size() == 0)
-    {
-        throw; // BUG
-    }
-
-    for (boost::uint32_t i=0; i < dimensions.size(); i++)
-    {
-        const Dimension& dim = dimensions[i];
-        addDefaultDimension(dim, getName());
-    }
-    return;
-}
 
 void Reader::addDefaultDimensions()
 {
-    Dimension x("X", dimension::Float, 8);
-    x.setUUID("9b6a21e7-6ace-45a9-8c66-d9031d07576a");
-    Dimension y("Y", dimension::Float, 8);
-    y.setUUID("2f820b5d-9ad4-46e9-8be8-3cc15c8f9778");
-    Dimension z("Z", dimension::Float, 8);
-    z.setUUID("0de362b2-a039-42f2-9287-85964394a22e");
-    Dimension t("Time", dimension::UnsignedInteger, 8);
-    t.setUUID("9b705441-3de6-4b16-b706-ebae22bedeb5");
+    //Dimension x("X", dimension::Float, 8);
+    //x.setUUID("9b6a21e7-6ace-45a9-8c66-d9031d07576a");
+    //Dimension y("Y", dimension::Float, 8);
+    //y.setUUID("2f820b5d-9ad4-46e9-8be8-3cc15c8f9778");
+    //Dimension z("Z", dimension::Float, 8);
+    //z.setUUID("0de362b2-a039-42f2-9287-85964394a22e");
+    //Dimension t("Time", dimension::UnsignedInteger, 8);
+    //t.setUUID("9b705441-3de6-4b16-b706-ebae22bedeb5");
 
-    addDefaultDimension(x, getName());
-    addDefaultDimension(y, getName());
-    addDefaultDimension(z, getName());
-    addDefaultDimension(t, getName());
+    //addDefaultDimension(x, getName());
+    //addDefaultDimension(y, getName());
+    //addDefaultDimension(z, getName());
+    //addDefaultDimension(t, getName());
 }
+
 
 void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    Schema& schema = getSchemaRef();
-    schema = Schema(getDefaultDimensions());
-    
-    setNumPoints(m_numPoints);
-    setPointCountType(PointCount_Fixed);
+    extractNITF(m_nitfFilename, m_lasFilename);
 
-    setBounds(m_bounds);
+    m_lasReader = new pdal::drivers::las::Reader(m_lasFilename);
+    m_lasReader->initialize();
+
+    setCoreProperties(*m_lasReader);
+
+    return;
 }
 
 
@@ -129,104 +198,16 @@ const Options Reader::getDefaultOptions() const
 }
 
 
-Reader::Mode Reader::getMode() const
-{
-    return m_mode;
-}
-
-
 pdal::StageSequentialIterator* Reader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::nitf::iterators::sequential::Reader(*this, buffer);
-}
-
-
-pdal::StageRandomIterator* Reader::createRandomIterator(PointBuffer& buffer) const
-{
-    return new pdal::drivers::nitf::iterators::random::Reader(*this, buffer);
+    pdal::StageSequentialIterator* lasIter = m_lasReader->createSequentialIterator(buffer);
+    return lasIter;
 }
 
 
 boost::uint32_t Reader::processBuffer(PointBuffer& data, boost::uint64_t index) const
 {
-    const Schema& schema = data.getSchema();
-
-    // make up some data and put it into the buffer
-
-    // how many are they asking for?
-    boost::uint64_t numPointsWanted = data.getCapacity();
-
-    // we can only give them as many as we have left
-    boost::uint64_t numPointsAvailable = getNumPoints() - index;
-    if (numPointsAvailable < numPointsWanted)
-        numPointsWanted = numPointsAvailable;
-
-    const Bounds<double>& bounds = getBounds(); 
-    const std::vector< Range<double> >& dims = bounds.dimensions();
-    const double minX = dims[0].getMinimum();
-    const double maxX = dims[0].getMaximum();
-    const double minY = dims[1].getMinimum();
-    const double maxY = dims[1].getMaximum();
-    const double minZ = dims[2].getMinimum();
-    const double maxZ = dims[2].getMaximum();
-    
-    const double numDeltas = (double)getNumPoints() - 1.0;
-    const double delX = (maxX - minX) / numDeltas;
-    const double delY = (maxY - minY) / numDeltas;
-    const double delZ = (maxZ - minZ) / numDeltas;
-    
-    const Dimension& dimX = schema.getDimension("X", getName());
-    const Dimension& dimY = schema.getDimension("Y", getName());
-    const Dimension& dimZ = schema.getDimension("Z", getName());
-    const Dimension& dimTime = schema.getDimension("Time", getName());
-
-    boost::uint64_t time = index;
-    
-    const Reader::Mode mode = getMode();
-
-    boost::uint32_t cnt = 0;
-    data.setNumPoints(0);
-
-    for (boost::uint32_t pointIndex=0; pointIndex<numPointsWanted; pointIndex++)
-    {
-        double x;
-        double y;
-        double z;
-        switch (mode)
-        {
-        case Reader::Random:
-            x = Utils::random(minX, maxX);
-            y = Utils::random(minY, maxY);
-            z = Utils::random(minZ, maxZ);
-            break;
-        case Reader::Constant:
-            x = minX;
-            y = minY;
-            z = minZ;
-            break;
-        case Reader::Ramp:
-            x = minX + delX * pointIndex;
-            y = minY + delY * pointIndex;
-            z = minZ + delZ * pointIndex;
-            break;
-        default:
-            throw pdal_error("invalid mode in FauxReader");
-            break;
-        }
-
-        data.setField<double>(dimX, pointIndex, x);
-        data.setField<double>(dimY, pointIndex, y);
-        data.setField<double>(dimZ, pointIndex, z);
-        data.setField<boost::uint64_t>(dimTime, pointIndex, time);
-
-        ++time;
-        
-        ++cnt;
-        data.setNumPoints(cnt);
-        assert(cnt <= data.getCapacity());
-    }
-    
-    return cnt;
+    return 0;
 }
 
 
@@ -239,8 +220,11 @@ boost::property_tree::ptree Reader::toPTree() const
     return tree;
 }
 
-namespace iterators { namespace sequential {
 
+
+// == Iterators =============================================================
+
+namespace iterators { namespace sequential {
 
 
 Reader::Reader(const pdal::drivers::nitf::Reader& reader, PointBuffer& buffer)
@@ -253,49 +237,25 @@ Reader::Reader(const pdal::drivers::nitf::Reader& reader, PointBuffer& buffer)
 
 boost::uint64_t Reader::skipImpl(boost::uint64_t count)
 {
-     return count;
+     return 0;
 }
 
 
 bool Reader::atEndImpl() const
 {
-    const boost::uint64_t numPoints = getStage().getNumPoints();
-    const boost::uint64_t currPoint = getIndex();
-
-    return currPoint >= numPoints;
+     return false;
 }
 
 
 boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
-    return m_reader.processBuffer(data, getIndex());
+    return 0;
 }
 
 
 } } // iterators::sequential
 
-namespace iterators { namespace random {
-
-Reader::Reader(const pdal::drivers::nitf::Reader& reader, PointBuffer& buffer)
-    : pdal::ReaderRandomIterator(reader, buffer)
-    , m_reader(reader)
-{
-    return;
-}
-
-
-boost::uint64_t Reader::seekImpl(boost::uint64_t count)
-{
-     return count;
-}
-
-
-boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
-{
-    return m_reader.processBuffer(data, getIndex());
-}
-
-} } // iterators::random
 
 
 } } } // namespaces
+#endif
