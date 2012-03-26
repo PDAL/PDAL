@@ -63,7 +63,34 @@ public:
 /** @name Constructors
 */  
     /// Constructs a ByteArray instance with the given array of data.
-    ByteArray(std::vector<boost::uint8_t> const& data) : m_bytes(data) {}
+    ByteArray(std::vector<boost::uint8_t> const& data) 
+        : m_bytes(data)
+    {
+        return;
+    }
+
+    /// Copy constructor
+    ByteArray(const ByteArray& rhs)
+        : m_bytes(rhs.m_bytes)
+    {
+        return;
+    }
+
+    /// Destructor
+    ~ByteArray()
+    {
+        return;
+    }
+
+    /// Assignment operator
+    ByteArray& operator=(ByteArray const& rhs)
+    {
+        if (&rhs != this)
+        {
+            m_bytes = rhs.m_bytes;
+        }
+        return *this;
+    }
 
 /** @name Data manipulation
 */     
@@ -155,6 +182,11 @@ public:
 
     /// Copy constructor
     Metadata(const Metadata&);
+
+    ~Metadata()
+    {
+        return;
+    }
 
 /** @name entry type
 */  
