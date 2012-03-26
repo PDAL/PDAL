@@ -72,7 +72,9 @@ void Environment::shutdown()
 
 Environment::Environment()
 {
+#ifdef PDAL_HAVE_PYTHON
     m_plangEnvironment = new pdal::plang::Environment();
+#endif
 
     return;
 }
@@ -80,8 +82,10 @@ Environment::Environment()
 
 Environment::~Environment()
 {
+#ifdef PDAL_HAVE_PYTHON
     delete m_plangEnvironment;
     m_plangEnvironment = NULL;
+#endif
 
     return;
 }
