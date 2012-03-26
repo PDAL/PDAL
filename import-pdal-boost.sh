@@ -42,10 +42,11 @@
 #@echo "see comments for instructions"
 #exit 1
 
-export BOOST_HOME=/Users/hobu/dev/svn/boost
+export BOOST_HOME=/home/oracle/boost/boost_1_48_0/
 export TARGET=./boost
 export BOOST_HEADERS=`find src include test apps \( -name '*.[cChH]' -o -name '*.[cChH][pPxX][pPxX]' -o -name '*.[cChH][cChH]' \) -exec grep 'include.*boost' {} \; | grep '^#' | sed -e 's/.*boost/boost/' -e 's/>.*//' | sort -u`
 export BOOST_HEADERS="$BOOST_HEADERS boost/parameter/aux_/overloads.hpp"
+export NAMESPACE=pdalboost
 
 rm -rf boost/*
 echo $BOOST_HEADERS

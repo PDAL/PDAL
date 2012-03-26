@@ -343,11 +343,7 @@ namespace pdalboost{} namespace boost = pdalboost; namespace pdalboost{
       // in class without a constructor [-Wuninitialized])
       UnaryFunction();
 #endif
-#if defined(BOOST_MSVC) /* mpg */
-       // not implemented
-      UnaryFunction();
-      UnaryFunction& operator=(const UnaryFunction&);
-#endif
+
       Func f;
       Arg arg;
   };
