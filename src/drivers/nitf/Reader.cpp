@@ -38,7 +38,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 
-#include "../las/nitflib.h"
+#include "nitflib.h"
 
 // gdal
 #include "gdal.h"

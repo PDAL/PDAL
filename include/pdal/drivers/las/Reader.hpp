@@ -113,7 +113,6 @@ protected:
 private:
     std::string m_filename;
     LasHeader m_lasHeader;
-    void ExtractNITF();
 
     Reader& operator=(const Reader&); // not implemented
     Reader(const Reader&); // not implemented
