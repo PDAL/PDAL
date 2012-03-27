@@ -38,6 +38,8 @@
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
 
+#include <pdal/StreamManager.hpp>
+
 #include <pdal/drivers/las/Support.hpp>
 
 #include <pdal/drivers/las/Header.hpp>
@@ -64,13 +66,15 @@ public:
     SET_STAGE_NAME("drivers.las.reader", "Las Reader")
 
     Reader(const Options&);
-    Reader(const std::string& filename);
+    Reader(const std::string&);
+    Reader(StreamFactory* factory);
+    ~Reader();
     
     virtual void initialize();
     virtual const Options getDefaultOptions() const;
     virtual void addDefaultDimensions();
 
-    const std::string& getFileName() const;
+    StreamFactory& getStreamFactory() const;
 
     bool supportsIterator (StageIteratorType t) const
     {   
@@ -111,7 +115,9 @@ protected:
     LasHeader& getLasHeaderRef() { return m_lasHeader; }
 
 private:
-    std::string m_filename;
+    StreamFactory* m_streamFactory;
+    bool m_ownsStreamFactory;
+
     LasHeader m_lasHeader;
 
     Reader& operator=(const Reader&); // not implemented
@@ -127,14 +133,13 @@ public:
     Base(pdal::drivers::las::Reader const& reader);
     ~Base();
     void read(PointBuffer&);
+
 private:
     void initialize();
     
-    
-
 protected:
     const pdal::drivers::las::Reader& m_reader;
-    std::istream* m_istream;
+    std::istream& m_istream;
 
     PointDimensions* m_pointDimensions;
     Schema const* m_schema;

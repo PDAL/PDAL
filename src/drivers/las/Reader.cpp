@@ -65,7 +65,8 @@ namespace pdal { namespace drivers { namespace las {
 
 Reader::Reader(const Options& options)
     : ReaderBase(options)
-    , m_filename(options.getValueOrThrow<std::string>("filename"))
+    , m_streamFactory(new FilenameStreamFactory(options.getValueOrThrow<std::string>("filename")))
+    , m_ownsStreamFactory(true)
 {
     addDefaultDimensions();
     return;
@@ -74,9 +75,31 @@ Reader::Reader(const Options& options)
 
 Reader::Reader(const std::string& filename)
     : ReaderBase(Options::none())
-    , m_filename(filename)
+    , m_streamFactory(new FilenameStreamFactory(filename))
+    , m_ownsStreamFactory(true)
 {
     addDefaultDimensions();
+    return;
+}
+
+
+Reader::Reader(StreamFactory* factory)
+    : ReaderBase(Options::none())
+    , m_streamFactory(factory)
+    , m_ownsStreamFactory(false)
+{
+    addDefaultDimensions();
+    return;
+}
+
+
+Reader::~Reader()
+{
+    if (m_ownsStreamFactory && m_streamFactory!=NULL)
+    {
+        delete m_streamFactory;
+    }
+
     return;
 }
 
@@ -85,9 +108,9 @@ void Reader::initialize()
 {
     pdal::Reader::initialize();
 
-    std::istream* stream = FileUtils::openFile(m_filename);
+    std::istream& stream = m_streamFactory->allocate();
 
-    LasHeaderReader lasHeaderReader(m_lasHeader, *stream);
+    LasHeaderReader lasHeaderReader(m_lasHeader, stream);
     lasHeaderReader.read( *this, getSchemaRef() );
 
     this->setBounds(m_lasHeader.getBounds());
@@ -102,7 +125,7 @@ void Reader::initialize()
         setSpatialReference(srs);
     }
 
-    FileUtils::closeFile(stream);
+    m_streamFactory->deallocate(stream);
 
     return;
 }
@@ -116,9 +139,9 @@ const Options Reader::getDefaultOptions() const
 }
 
 
-const std::string& Reader::getFileName() const
+StreamFactory& Reader::getStreamFactory() const
 {
-    return m_filename;
+    return *m_streamFactory;
 }
 
 
@@ -459,16 +482,13 @@ namespace iterators {
 
 Base::Base(pdal::drivers::las::Reader const& reader)
     : m_reader(reader)
-    , m_istream(NULL)
+    , m_istream(m_reader.getStreamFactory().allocate())
     , m_pointDimensions(NULL)
     , m_schema(0)
     , m_zipPoint(NULL)
     , m_unzipper(NULL)
-
 {
-    
-    m_istream = FileUtils::openFile(m_reader.getFileName());
-    m_istream->seekg(m_reader.getPointDataOffset());
+    m_istream.seekg(m_reader.getPointDataOffset());
 
     if (m_reader.isCompressed())
     {
@@ -493,7 +513,7 @@ Base::~Base()
     if (m_pointDimensions) 
         delete m_pointDimensions;
     
-    FileUtils::closeFile(m_istream);
+    m_reader.getStreamFactory().deallocate(m_istream);
 }
 
 
@@ -513,11 +533,11 @@ void Base::initialize()
         m_unzipper.swap(z);
 
         bool stat(false);
-        m_istream->seekg(m_reader.getPointDataOffset(), std::ios::beg);
-        stat = m_unzipper->open(*m_istream, m_zipPoint->GetZipper());
+        m_istream.seekg(m_reader.getPointDataOffset(), std::ios::beg);
+        stat = m_unzipper->open(m_istream, m_zipPoint->GetZipper());
 
         // Martin moves the stream on us 
-        m_zipReadStartPosition = m_istream->tellg();
+        m_zipReadStartPosition = m_istream.tellg();
         if (!stat)
         {
             std::ostringstream oss;
@@ -689,11 +709,11 @@ boost::uint64_t Reader::skipImpl(boost::uint64_t count)
     else
     {
         boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
-        m_istream->seekg(delta * count, std::ios::cur);
+        m_istream.seekg(delta * count, std::ios::cur);
     }
 #else
         boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
-        m_istream->seekg(delta * count, std::ios::cur);
+        m_istream.seekg(delta * count, std::ios::cur);
 #endif
     return count;
 }
@@ -709,14 +729,14 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
 #ifdef PDAL_HAVE_LASZIP
     return m_reader.processBuffer(  data, 
-                                    *m_istream, 
+                                    m_istream, 
                                     getStage().getNumPoints()-this->getIndex(), 
                                     m_unzipper.get(), 
                                     m_zipPoint.get(),
                                     m_pointDimensions);
 #else
     return m_reader.processBuffer(  data, 
-                                    *m_istream, 
+                                    m_istream, 
                                     getStage().getNumPoints()-this->getIndex(), 
                                     NULL, 
                                     NULL,
@@ -760,12 +780,12 @@ boost::uint64_t Reader::seekImpl(boost::uint64_t count)
     else
     {
         boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
-        m_istream->seekg(m_reader.getPointDataOffset() + delta * count);
+        m_istream.seekg(m_reader.getPointDataOffset() + delta * count);
     }
 #else
 
     boost::uint64_t delta = Support::getPointDataSize(m_reader.getPointFormat());
-    m_istream->seekg(m_reader.getPointDataOffset() + delta * count);
+    m_istream.seekg(m_reader.getPointDataOffset() + delta * count);
 
 #endif
 
@@ -777,14 +797,14 @@ boost::uint32_t Reader::readBufferImpl(PointBuffer& data)
 {
 #ifdef PDAL_HAVE_LASZIP
     return m_reader.processBuffer(  data, 
-                                    *m_istream, 
+                                    m_istream, 
                                     getStage().getNumPoints()-this->getIndex(), 
                                     m_unzipper.get(), 
                                     m_zipPoint.get(),
                                     m_pointDimensions);
 #else
     return m_reader.processBuffer(  data, 
-                                    *m_istream, 
+                                    m_istream, 
                                     getStage().getNumPoints()-this->getIndex(), 
                                     NULL, 
                                     NULL,

@@ -253,7 +253,11 @@ void Reader::initialize()
 
     extractNITF(m_nitfFilename, m_lasFilename);
 
-    m_lasReader = new pdal::drivers::las::Reader(m_lasFilename);
+    Options opts;
+    Option opt("filename",m_lasFilename);
+    opts.add(opt);
+
+    m_lasReader = new pdal::drivers::las::Reader(opts);
     m_lasReader->initialize();
 
     setCoreProperties(*m_lasReader);

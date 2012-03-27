@@ -47,6 +47,7 @@ class PDAL_DLL ReaderBase: public pdal::Reader
 {
 public:
     ReaderBase(const Options& options) : Reader(options) {}
+    virtual ~ReaderBase() {}
 
     virtual void addDefaultDimensions() = 0;
     
