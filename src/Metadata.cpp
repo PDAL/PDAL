@@ -121,6 +121,258 @@ std::ostream& operator<<(std::ostream& ostr, const Metadata& metadata)
 }
 
 
+
+void Metadatas::addMetadata(Metadata const& m)
+{
+    metadata::index_by_name& index = m_metadata.get<metadata::name>();
+
+    std::pair<metadata::index_by_name::iterator, bool> q = index.insert(m);
+    if (!q.second) 
+    {
+        std::ostringstream oss;
+        oss << "Could not insert into schema index because of " << q.first->getName();
+        throw metadata_error(oss.str());
+    }
+
+    return;
+}
+
+
+Metadata const& Metadatas::getMetadata(std::string const& t, std::string const& ns) const
+{
+    metadata::index_by_name const& name_index = m_metadata.get<metadata::name>();
+    metadata::index_by_name::const_iterator it = name_index.find(t);
+    
+    metadata::index_by_name::size_type count = name_index.count(t);
+
+    std::ostringstream oss;
+    oss << "Metadata with name '" << t << "' not found, unable to Metadatas::getMetadata";
+
+    if (it != name_index.end()) {
+        
+        if (ns.size())
+        {
+            while (it != name_index.end())
+            {
+                if (boost::equals(ns, it->getNamespace()))
+                    return *it;
+                ++it;
+            }
+            
+        } 
+        
+        if (count > 1) {
+
+            std::pair<metadata::index_by_name::const_iterator, metadata::index_by_name::const_iterator> ret = name_index.equal_range(t);
+            boost::uint32_t num_parents(0);
+            boost::uint32_t num_children(0);
+            std::map<metadata::id, metadata::id> relationships;
+            
+            // Test to make sure that the number of parent dimensions all with 
+            // the same name is equal to only 1. If there are multiple 
+            // dimensions with the same name, but no relationships defined, 
+            // we are in an error condition
+            for (metadata::index_by_name::const_iterator  o = ret.first; o != ret.second; ++o)
+            {
+                // Put a map together that maps parents to children that 
+                // we are going to walk to find the very last child in the 
+                // graph.
+                std::pair<metadata::id, metadata::id> p( o->getParent(), o->getUUID());
+                relationships.insert(p);
+                
+                // The parent dimension should have a nil parent of its own.
+                // nil_uuid is the default parent of all dimensions as the y
+                // are created
+                if (o->getParent().is_nil()) 
+                {
+                    num_parents++;
+                }
+                else
+                {
+                    num_children++;
+                }
+                
+            }
+            
+            if (num_parents != 1)
+            {
+                std::ostringstream oss;
+                
+                oss << "PointBuffer has multiple dimensions with name '" << t << "', but "
+                       "their parent/child relationships are not coherent. Multiple "
+                       "parents are present.";
+                
+                throw multiple_parent_metadata(oss.str());
+            }
+            
+            metadata::id parent = boost::uuids::nil_uuid();
+            
+            // Starting at the parent (nil uuid), walk the child/parent graph down to the 
+            // end.  When we're done finding dimensions, what's left is the child 
+            // at the end of the graph.
+            std::map<metadata::id, metadata::id>::const_iterator p = relationships.find(parent);
+            pdal::metadata::id child;
+            while (p != relationships.end())
+            {
+                child = p->second;
+                p = relationships.find(p->second);
+            }
+            metadata::index_by_uid::const_iterator pi = m_metadata.get<metadata::uid>().find(child);
+            if (pi != m_metadata.get<metadata::uid>().end())
+            {
+                return *pi;
+            } 
+            else 
+            {
+                std::ostringstream errmsg;
+                errmsg << "Unable to fetch subjugate metadata entry with id '" << child << "' in PointBuffer";
+                throw metadata_not_found(errmsg.str());
+            }
+        }
+        return *it;
+    } else {
+        boost::uuids::uuid ps1;
+        try
+        {
+            boost::uuids::string_generator gen;
+            ps1 = gen(t);
+        } catch (std::runtime_error&)
+        {
+            // invalid string for uuid
+            throw metadata_not_found(oss.str());
+        }
+
+        metadata::index_by_uid::const_iterator i = m_metadata.get<metadata::uid>().find(ps1);
+
+        if (i != m_metadata.get<metadata::uid>().end())
+        {
+            if (ns.size())
+            {
+                while (i != m_metadata.get<metadata::uid>().end())
+                {
+                    if (boost::equals(ns, i->getNamespace()))
+                        return *i;
+                    ++i;
+                }
+            
+            }
+            
+            return *i;
+        } else 
+        {
+            oss.str("");
+            oss << "Metadata with name '" << t << "' not found, unable to Metadatas::getMetadata";
+            throw metadata_not_found(oss.str());
+        }
+
+    }
+
+}
+
+Metadata const& Metadatas::getMetadata(std::size_t t) const
+{
+    metadata::index_by_index const& idx = m_metadata.get<metadata::index>();
+    
+    if (t >= idx.size())
+        throw dimension_not_found("Index position is not valid");
+    
+    return idx.at(t);
+}
+
+boost::optional<Metadata const&> Metadatas::getMetadataOptional(std::size_t t) const
+{
+    try
+    {
+        Metadata const& m = getMetadata(t);
+        return boost::optional<Metadata const&>(m);
+    } catch (pdal::dimension_not_found&)
+    {
+        return boost::optional<Metadata const&>();
+    }
+}
+
+Metadata const& Metadatas::getMetadata(metadata::id const& t) const
+{
+    metadata::index_by_uid::const_iterator it = m_metadata.get<metadata::uid>().find(t);
+
+    if (it != m_metadata.get<metadata::uid>().end())
+    {
+        return *it;
+    }    
+    
+    std::ostringstream oss;
+    oss << "getMetadata: metadata entry not found with uuid '" << boost::lexical_cast<std::string>(t) << "'";
+    throw metadata_not_found(oss.str());
+
+}
+
+boost::optional<Metadata const&> Metadatas::getMetadataOptional(metadata::id const& t) const
+{
+    try
+    {
+        Metadata const& m = getMetadata(t);
+        return boost::optional<Metadata const&>(m);
+    } catch (pdal::metadata_not_found&)
+    {
+        return boost::optional<Metadata const&>();
+    }
+}
+
+
+boost::optional<Metadata const&> Metadatas::getMetadataOptional(std::string const& t, std::string const& ns) const
+{
+
+    try
+    {
+        Metadata const& m = getMetadata(t, ns);
+        return boost::optional<Metadata const&>(m);
+    } catch (pdal::metadata_not_found&)
+    {
+        return boost::optional<Metadata const&>();
+    }
+
+}
+
+bool Metadatas::setMetadata(Metadata const& m)
+{
+    metadata::index_by_name& name_index = m_metadata.get<metadata::name>();
+    metadata::index_by_name::iterator it = name_index.find(m.getName());
+    
+    // FIXME: If there are two metadata with the same name here, we're 
+    // screwed if they both have the same namespace too
+    if (it != name_index.end()) {
+        while (it != name_index.end())
+        {
+            if (boost::equals(m.getNamespace(), it->getNamespace()))
+            {
+                name_index.replace(it, m);
+                return true;
+            }
+            ++it;
+        }
+    } else {
+        std::ostringstream oss;
+        oss << "Metadata with name '" << m.getName() << "' not found, unable to Metadatas::setMetadata";
+        throw metadata_not_found(oss.str());
+    }
+
+    return true;
+}
+
+Metadatas::Metadatas(Metadatas const& other) 
+    : m_metadata(other.m_metadata)
+{
+}
+
+Metadatas& Metadatas::operator=(Metadatas const& rhs)
+{
+    if (&rhs != this)
+    {
+        m_metadata = rhs.m_metadata;
+    }
+    return *this;
+}
+
 } // namespace pdal
 
 
